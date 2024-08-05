@@ -26,21 +26,21 @@
 
 
 // out-going packets that require an ENCODE translation:
-// Begin RoF2 Encodes
+// Begin TDS Encodes
 
 E(OP_SendMembershipDetails)
 E(OP_TraderShop)
 E(OP_TraderDelItem)
 
 // incoming packets that require a DECODE translation:
-// Begin RoF2 Decodes
+// Begin TDS Decodes
 
 D(OP_TraderShop)
 
-// End RoF2 Encodes/Decodes
+// End TDS Encodes/Decodes
 
 // These require Encodes/Decodes for RoF, so they do for RoF2 as well
-// Begin RoF Encodes
+// Begin TDS Encodes
 E(OP_Action)
 E(OP_AdventureMerchantSell)
 E(OP_AltCurrency)
@@ -50,10 +50,12 @@ E(OP_ApplyPoison)
 E(OP_AugmentInfo)
 E(OP_Barter)
 E(OP_BazaarSearch)
+E(OP_BecomeTrader)
 E(OP_BeginCast)
 E(OP_BlockedBuffs)
 E(OP_Buff)
 E(OP_BuffCreate)
+E(OP_BuyerItems)
 E(OP_CancelTrade)
 E(OP_CastSpell)
 E(OP_ChannelMessage)
@@ -87,9 +89,11 @@ E(OP_GroupFollow)
 E(OP_GroupFollow2)
 E(OP_GroupInvite)
 E(OP_GroupUpdate)
+E(OP_GuildBank)
 E(OP_GuildMemberList)
 E(OP_GuildMemberUpdate)
 E(OP_GuildsList)
+E(OP_GuildTributeDonateItem)
 E(OP_HPUpdate)
 E(OP_Illusion)
 E(OP_InspectBuffs)
@@ -126,7 +130,6 @@ E(OP_SendZonepoints)
 E(OP_SetGuildRank)
 E(OP_ShopPlayerBuy)
 E(OP_ShopPlayerSell)
-E(OP_ShopRequest)
 E(OP_SkillUpdate)
 E(OP_SomeItemPacketMaybe)
 E(OP_SpawnAppearance)
@@ -150,7 +153,8 @@ E(OP_ZoneEntry)
 E(OP_ZonePlayerToBind)
 E(OP_ZoneServerInfo)
 E(OP_ZoneSpawns)
-// Begin RoF Decodes
+E(OP_CrystalCountUpdate)
+// Begin TDS Decodes
 D(OP_AdventureMerchantSell)
 D(OP_AltCurrencySell)
 D(OP_AltCurrencySellSelection)
@@ -158,10 +162,13 @@ D(OP_Animation)
 D(OP_ApplyPoison)
 D(OP_AugmentInfo)
 D(OP_AugmentItem)
+D(OP_Barter)
 D(OP_BazaarSearch)
 D(OP_BlockedBuffs)
+D(OP_BookButton)
 D(OP_Buff)
 D(OP_BuffRemoveRequest)
+D(OP_BuyerItems)
 D(OP_CastSpell)
 D(OP_ChannelMessage)
 D(OP_CharacterCreate)
@@ -188,9 +195,11 @@ D(OP_GroupFollow)
 D(OP_GroupFollow2)
 D(OP_GroupInvite)
 D(OP_GroupInvite2)
+D(OP_GuildBank)
 D(OP_GuildDemote)
 D(OP_GuildRemove)
 D(OP_GuildStatus)
+D(OP_GuildTributeDonateItem)
 D(OP_InspectRequest)
 D(OP_ItemLinkClick)
 D(OP_ItemVerifyRequest)
@@ -207,7 +216,7 @@ D(OP_Save)
 D(OP_SetServerFilter)
 D(OP_ShopPlayerBuy)
 D(OP_ShopPlayerSell)
-D(OP_ShopRequest)
+D(OP_ShopSendParcel)
 D(OP_Trader)
 D(OP_TraderBuy)
 D(OP_TradeSkillCombine)
@@ -216,7 +225,7 @@ D(OP_VetClaimRequest)
 D(OP_WhoAllRequest)
 D(OP_ZoneChange)
 D(OP_ZoneEntry)
-// End RoF Encodes/Decodes
+// End TDS Encodes/Decodes
 
 #undef E
 #undef D

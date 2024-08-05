@@ -50,23 +50,31 @@ namespace TDS
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance* inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
+	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance *inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
 
 	// server to client inventory location converters
-	static inline structs::ItemSlotStruct ServerToTDSSlot(uint32 serverSlot, ItemPacketType PacketType = ItemPacketInvalid);
-	static inline structs::MainInvItemSlotStruct ServerToTDSMainInvSlot(uint32 serverSlot);
-	static inline uint32 ServerToTDSCorpseSlot(uint32 serverCorpseSlot);
+	static inline structs::InventorySlot_Struct ServerToTDSSlot(uint32 server_slot);
+	static inline structs::InventorySlot_Struct ServerToTDSCorpseSlot(uint32 server_corpse_slot);
+	static inline uint32 ServerToTDSCorpseMainSlot(uint32 server_corpse_slot);
+	static inline structs::TypelessInventorySlot_Struct ServerToTDSTypelessSlot(uint32 server_slot, int16 server_type);
 
 	// client to server inventory location converters
-	static inline uint32 TDSToServerSlot(structs::ItemSlotStruct tdsSlot, ItemPacketType PacketType = ItemPacketInvalid);
-	static inline uint32 TDSToServerMainInvSlot(structs::MainInvItemSlotStruct tdsSlot);
-	static inline uint32 TDSToServerCorpseSlot(uint32 tdsCorpseSlot);
+	static inline uint32 TDSToServerSlot(structs::InventorySlot_Struct tds_slot);
+	static inline uint32 TDSToServerCorpseSlot(structs::InventorySlot_Struct tds_slot);
+	static inline uint32 TDSToServerCorpseMainSlot(uint32 tds_corpse_slot);
+	static inline uint32 TDSToServerTypelessSlot(structs::TypelessInventorySlot_Struct tds_slot, int16 tds_type);
 
-	// server to client text link converter
-	static inline void ServerToTDSTextLink(std::string& tdsTextLink, const std::string& serverTextLink);
+	// server to client say link converter
+	static inline void ServerToTDSSayLink(std::string &tds_saylink, const std::string &server_saylink);
 
-	// client to server text link converter
-	static inline void TDSToServerTextLink(std::string& serverTextLink, const std::string& tdsTextLink);
+	// client to server say link converter
+	static inline void TDSToServerSayLink(std::string &server_saylink, const std::string &tds_saylink);
+
+	static inline spells::CastingSlot ServerToTDSCastingSlot(EQ::spells::CastingSlot slot);
+	static inline EQ::spells::CastingSlot TDSToServerCastingSlot(spells::CastingSlot slot);
+
+	static inline int ServerToTDSBuffSlot(int index);
+	static inline int TDSToServerBuffSlot(int index);
 
 	void Register(EQStreamIdentifier &into)
 	{
@@ -149,7 +157,7 @@ namespace TDS
 // ENCODE methods
 
 
-	// RoF2 Specific Encodes Begin
+	// TDS Specific Encodes Begin
 	ENCODE(OP_SendMembershipDetails)
 	{
 		ENCODE_LENGTH_EXACT(Membership_Details_Struct);
@@ -210,7 +218,7 @@ namespace TDS
 		FINISH_ENCODE();
 	}
 
-	// RoF2 Specific Encodes End
+	// TDS Specific Encodes End
 
 
 	ENCODE(OP_Action)
@@ -250,7 +258,7 @@ namespace TDS
 
 		eq->unknown000 = 1;
 		OUT(npcid);
-		eq->slot = ServerToTDSMainInvSlot(emu->slot);
+		eq->inventory_slot = ServerToTDSTypelessSlot(emu->slot, EQ::invtype::typePossessions);
 		OUT(charges);
 		OUT(sell_price);
 
@@ -303,7 +311,7 @@ namespace TDS
 		SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		OUT(merchant_entity_id);
-		eq->slot_id = ServerToTDSMainInvSlot(emu->slot_id);
+		eq->inventory_slot = ServerToTDSTypelessSlot(emu->slot_id, EQ::invtype::typePossessions);
 		OUT(charges);
 		OUT(cost);
 
@@ -327,7 +335,7 @@ namespace TDS
 		ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
 		SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-		eq->inventorySlot = ServerToTDSMainInvSlot(emu->inventorySlot);
+		eq->inventorySlot = ServerToTDSTypelessSlot(emu->inventorySlot, EQ::invtype::typePossessions);
 		OUT(success);
 
 		FINISH_ENCODE();
@@ -350,38 +358,88 @@ namespace TDS
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
-		char *Buffer = (char *)in->pBuffer;
+		char *buffer = (char *) in->pBuffer;
+		uint32              sub_action = VARSTRUCT_DECODE_TYPE(uint32, buffer);
 
-		uint32 SubAction = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
+		switch (sub_action) {
+			case Barter_BuyerAppearance: {
+				auto emu = (BuyerInspectRequest_Struct *) in->pBuffer;
 
-		if (SubAction != Barter_BuyerAppearance)
-		{
-			dest->FastQueuePacket(&in, ack_req);
+				auto outapp = new EQApplicationPacket(OP_Barter, sizeof(structs::Buyer_SetAppearance_Struct));
+				auto eq     = (structs::Buyer_SetAppearance_Struct *) outapp->pBuffer;
 
-			return;
+				eq->action    = structs::TDSBuyerActions::BuyerAppearance;
+				eq->entity_id = emu->buyer_id;
+				eq->enabled   = emu->approval;
+
+				dest->FastQueuePacket(&outapp);
+				safe_delete(in);
+
+				break;
+			}
+			case Barter_BuyerItemRemove: {
+				auto emu = (BuyerRemoveItem_Struct *) in->pBuffer;
+
+				auto outapp = new EQApplicationPacket(OP_BuyerItems, sizeof(structs::BuyerRemoveItem_Struct));
+				auto eq     = (structs::BuyerRemoveItem_Struct *) outapp->pBuffer;
+
+				eq->action  = structs::TDSBuyerActions::BuyerModifyBuyLine;
+				eq->slot_id = emu->buy_slot_id;
+				eq->toggle  = 0;
+
+				dest->FastQueuePacket(&outapp);
+				safe_delete(in);
+
+				break;
+			}
+			case Barter_BuyerInspectBegin: {
+				*(uint32 *) in->pBuffer = structs::TDSBuyerActions::BuyerInspectBegin;
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			case Barter_BuyerInspectEnd: {
+				*(uint32 *) in->pBuffer = structs::TDSBuyerActions::BuyerInspectEnd;
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			case Barter_SellerBrowsing: {
+				*(uint32 *) in->pBuffer = structs::TDSBuyerActions::BuyerBrowsingBuyLine;
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			case Barter_BuyerSearchResults: {
+				BuyerItemSearchResults_Struct bisr{};
+				auto                          emu = (BuyerGeneric_Struct *) in->pBuffer;
+				EQ::Util::MemoryStreamReader  ss(
+					reinterpret_cast<char *>(emu->payload),
+					in->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive    ar(ss);
+				ar(bisr);
+
+				LogTradingDetail("Sending item search results <green>[{}]", bisr.result_count);
+
+				uint32 packet_size = bisr.result_count * sizeof(structs::BuyerItemSearchResultEntry_Struct) + 8;
+				auto   outapp      = std::make_unique<EQApplicationPacket>(OP_Barter, packet_size);
+				auto   eq          = (char *) outapp->pBuffer;
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::TDSBuyerActions::BuyerSearchResults);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bisr.result_count);
+				for (auto const &i: bisr.results) {
+					strn0cpy(eq, i.item_name, 64);
+					eq += 64;
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_id);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_icon);
+					VARSTRUCT_SKIP_TYPE(uint32, eq);
+				}
+				dest->QueuePacket(outapp.get());
+				break;
+			}
+			default: {
+				LogTradingDetail("Unhandled action <red>[{}]", sub_action);
+				dest->FastQueuePacket(&in);
+			}
 		}
-
-		unsigned char *__emu_buffer = in->pBuffer;
-
-		in->size = 80;
-
-		in->pBuffer = new unsigned char[in->size];
-
-		char *OutBuffer = (char *)in->pBuffer;
-
-		char Name[64];
-
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, SubAction);
-		uint32 EntityID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, EntityID);
-		uint8 Toggle = VARSTRUCT_DECODE_TYPE(uint8, Buffer);
-		VARSTRUCT_DECODE_STRING(Name, Buffer);
-		VARSTRUCT_ENCODE_STRING(OutBuffer, Name);
-		OutBuffer = (char *)in->pBuffer + 72;
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, Toggle);
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_BazaarSearch)
@@ -389,51 +447,182 @@ namespace TDS
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
-		char *Buffer = (char *)in->pBuffer;
+		uint32 action = *(uint32 *) in->pBuffer;
 
-		uint8 SubAction = VARSTRUCT_DECODE_TYPE(uint8, Buffer);
+		switch (action) {
+			case BazaarSearch: {
+				LogTrading("(TDS) BazaarSearch action <green>[{}]", action);
+				std::vector<BazaarSearchResultsFromDB_Struct> results{};
+				auto                                          bsms = (BazaarSearchMessaging_Struct *) in->pBuffer;
+				EQ::Util::MemoryStreamReader                  ss(
+					reinterpret_cast<char *>(bsms->payload),
+					in->size - sizeof(BazaarSearchMessaging_Struct)
+				);
+				cereal::BinaryInputArchive                    ar(ss);
+				ar(results);
 
-		if (SubAction != BazaarSearchResults)
-		{
-			dest->FastQueuePacket(&in, ack_req);
-			return;
+				auto name_size = 0;
+				for (auto const &i: results) {
+					name_size += i.item_name.length() + 1;
+				}
+
+				auto p_size = 41 * results.size() + name_size + 14;
+				auto buffer = std::make_unique<char[]>(p_size);
+				auto bufptr = buffer.get();
+
+				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, 0);
+				VARSTRUCT_ENCODE_TYPE(uint16, bufptr, results[0].trader_zone_id);
+				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, results[0].trader_id);
+				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, results.size());
+
+				for (auto i: results) {
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.trader_id);                          //trader ID
+					VARSTRUCT_ENCODE_STRING(bufptr, i.serial_number_RoF.c_str());                //serial
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.cost);                               //cost
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.stackable ? i.charges : i.count);    //quantity
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.item_id);                            //ID
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.icon_id);                            //icon
+					VARSTRUCT_ENCODE_STRING(bufptr, i.item_name.c_str());                        //name
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.item_stat);                          //itemstat
+				}
+
+				safe_delete(in->pBuffer);
+				in->size    = p_size;
+				in->pBuffer = (uchar *) buffer.get();
+				dest->QueuePacket(in);
+
+				break;
+			}
+			case BazaarInspect: {
+				LogTrading("(TDS) BazaarInspect action <green>[{}]", action);
+				dest->FastQueuePacket(&in, ack_req);
+				break;
+			}
+			case WelcomeMessage: {
+				auto buffer = std::make_unique<char[]>(sizeof(structs::BazaarWelcome_Struct));
+				auto emu    = (BazaarWelcome_Struct *) in->pBuffer;
+				auto eq     = (structs::BazaarWelcome_Struct *) buffer.get();
+
+				eq->action         = structs::TDSBazaarTraderBuyerActions::WelcomeMessage;
+				eq->num_of_traders = emu->traders;
+				eq->num_of_items   = emu->items;
+
+				safe_delete(in->pBuffer);
+				in->SetOpcode(OP_TraderShop);
+				in->size    = sizeof(structs::BazaarWelcome_Struct);
+				in->pBuffer = (uchar *) buffer.get();
+
+				LogTrading("(TDS) WelcomeMessage action <green>[{}]", action);
+				dest->QueuePacket(in);
+
+				break;
+			}
+			case DeliveryCostUpdate: {
+				auto data = (BazaarDeliveryCost_Struct *) in->pBuffer;
+				LogTrading("(TDS) Delivery costs updated: vouchers <green>[{}] parcel percentage <green>[{}]",
+						   data->voucher_delivery_cost,
+						   data->parcel_deliver_cost
+				);
+				data->action = 0;
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			default: {
+				LogTrading("(TDS) Unhandled action <red>[{}]", action);
+				dest->FastQueuePacket(&in, ack_req);
+			}
 		}
+	}
 
-		unsigned char *__emu_buffer = in->pBuffer;
+	ENCODE(OP_BecomeTrader)
+	{
+		EQApplicationPacket *inapp = *p;
+		*p = nullptr;
 
-		BazaarSearchResults_Struct *emu = (BazaarSearchResults_Struct *)__emu_buffer;
+		unsigned char *__emu_buffer = inapp->pBuffer;
+		auto          in            = (BecomeTrader_Struct *) __emu_buffer;
 
-		int EntryCount = in->size / sizeof(BazaarSearchResults_Struct);
+		switch (in->action) {
+			case TraderOff: {
+				auto emu = (BecomeTrader_Struct *) __emu_buffer;
 
-		if (EntryCount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0)
-		{
-			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
-			delete in;
-			return;
+				auto outapp = new EQApplicationPacket(OP_BecomeTrader, sizeof(structs::BecomeTrader_Struct));
+				auto eq     = (structs::BecomeTrader_Struct *) outapp->pBuffer;
+
+				eq->action    = TraderOff;
+				eq->entity_id = emu->entity_id;
+
+				LogTrading(
+					"(TDS) TraderOff action <green>[{}] for entity_id <green>[{}]",
+					eq->action,
+					eq->entity_id
+				);
+				dest->FastQueuePacket(&outapp);
+				break;
+			}
+			case TraderOn: {
+				auto emu = (BecomeTrader_Struct *) __emu_buffer;
+
+				auto outapp = new EQApplicationPacket(OP_BecomeTrader, sizeof(structs::BecomeTrader_Struct));
+				auto eq     = (structs::BecomeTrader_Struct *) outapp->pBuffer;
+
+				eq->action    = TraderOn;
+				eq->entity_id = emu->entity_id;
+
+				LogTrading(
+					"(TDS) TraderOn action <green>[{}] for entity_id <green>[{}]",
+					eq->action,
+					eq->entity_id
+				);
+				dest->FastQueuePacket(&outapp);
+				break;
+			}
+			case AddTraderToBazaarWindow: {
+				auto emu    = (BecomeTrader_Struct *) __emu_buffer;
+				auto outapp = new EQApplicationPacket(OP_TraderShop, sizeof(BecomeTrader_Struct));
+				auto eq     = (BecomeTrader_Struct *) outapp->pBuffer;
+
+				eq->action    = emu->action;
+				eq->entity_id = emu->entity_id;
+				eq->trader_id = emu->trader_id;
+				eq->zone_id   = emu->zone_id;
+				strn0cpy(eq->trader_name, emu->trader_name, sizeof(eq->trader_name));
+
+				LogTrading(
+					"(TDS) AddTraderToBazaarWindow action <green>[{}] trader_id <green>[{}] entity_id <green>[{}] zone_id <green>[{}]",
+					eq->action,
+					eq->trader_id,
+					eq->entity_id,
+					eq->zone_id
+				);
+				dest->FastQueuePacket(&outapp);
+				break;
+			}
+			case RemoveTraderFromBazaarWindow: {
+				auto emu    = (BecomeTrader_Struct *) __emu_buffer;
+				auto outapp = new EQApplicationPacket(OP_TraderShop, sizeof(structs::BazaarWindowRemoveTrader_Struct));
+				auto eq     = (structs::BazaarWindowRemoveTrader_Struct *) outapp->pBuffer;
+
+				eq->action    = emu->action;
+				eq->trader_id = emu->trader_id;
+
+				LogTrading(
+					"(TDS) RemoveTraderFromBazaarWindow action <green>[{}] for entity_id <green>[{}]",
+					eq->action,
+					eq->trader_id
+				);
+				dest->FastQueuePacket(&outapp);
+				break;
+			}
+			default: {
+				LogTrading(
+					"(TDS) Unhandled action <red>[{}]",
+					in->action
+				);
+				dest->QueuePacket(inapp);
+			}
 		}
-
-		in->size = EntryCount * sizeof(structs::BazaarSearchResults_Struct);
-		in->pBuffer = new unsigned char[in->size];
-
-		memset(in->pBuffer, 0, in->size);
-
-		structs::BazaarSearchResults_Struct *eq = (structs::BazaarSearchResults_Struct *)in->pBuffer;
-
-		for (int i = 0; i < EntryCount; ++i, ++emu, ++eq)
-		{
-			OUT(Beginning.Action);
-			OUT(SellerID);
-			memcpy(eq->SellerName, emu->SellerName, sizeof(eq->SellerName));
-			OUT(NumItems);
-			OUT(ItemID);
-			OUT(SerialNumber);
-			memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
-			OUT(Cost);
-			OUT(ItemStat);
-		}
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_BeginCast)
@@ -546,11 +735,248 @@ namespace TDS
 			__packet->WriteUInt32(emu->entries[i].spell_id);
 			__packet->WriteUInt32(emu->entries[i].tics_remaining);
 			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
-			__packet->WriteString("");
+			__packet->WriteString(emu->entries[i].caster);
 		}
 		__packet->WriteUInt8(emu->type); // Unknown
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_BuyerItems)
+	{
+		EQApplicationPacket *inapp = *p;
+		*p = nullptr;
+
+		auto action = *(uint32 *) inapp->pBuffer;
+
+		switch (action) {
+			case Barter_BuyerItemUpdate: {
+				BuyerLineItems_Struct        bl{};
+				auto                         emu = (BuyerGeneric_Struct *) inapp->pBuffer;
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(emu->payload),
+					inapp->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(bl);
+
+				//packet size
+				auto            packet_size = bl.item_name.length() + 1 + 34;
+				for (auto const &b: bl.trade_items) {
+					packet_size += b.item_name.length() + 1;
+					packet_size += 12;
+				}
+
+				auto outapp         = std::make_unique<EQApplicationPacket>(OP_BuyerItems, packet_size);
+				char *eq            = (char *) outapp->pBuffer;
+				auto no_trade_items = bl.trade_items.size();
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::TDSBuyerActions::BuyerModifyBuyLine);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.slot);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, bl.enabled ? 1 : 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.item_id);
+				VARSTRUCT_ENCODE_STRING(eq, bl.item_name.c_str());
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.item_icon);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.item_quantity);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, bl.item_toggle ? 1 : 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.item_cost);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, no_trade_items);
+
+				for (int i = 0; i < no_trade_items; i++) {
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.trade_items[i].item_id);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.trade_items[i].item_quantity);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.trade_items[i].item_icon);
+					VARSTRUCT_ENCODE_STRING(eq, bl.trade_items[i].item_name.c_str());
+				}
+				dest->QueuePacket(outapp.get());
+				safe_delete(inapp);
+				break;
+			}
+			case Barter_BuyerInspectBegin: {
+				auto emu = (BuyerGeneric_Struct *) inapp->pBuffer;
+
+				BuyerLineItems_Struct        bli{};
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(emu->payload),
+					inapp->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(bli);
+
+				//packet size
+				auto            packet_size = bli.item_name.length() + 1 + 34;
+				for (auto const &b: bli.trade_items) {
+					packet_size += b.item_name.length() + 1;
+					packet_size += 12;
+				}
+
+				auto packet         = std::make_unique<EQApplicationPacket>(OP_BuyerItems, packet_size);
+				char *eq            = (char *) packet->pBuffer;
+				auto no_trade_items = bli.trade_items.size();
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::TDSBuyerActions::BuyerSendBuyLine);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.slot);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.slot);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, bli.enabled ? 1 : 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.item_id);
+				VARSTRUCT_ENCODE_STRING(eq, bli.item_name.c_str());
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.item_icon);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.item_quantity);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, bli.item_toggle ? 1 : 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.item_cost);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, no_trade_items);
+
+				for (auto const &i: bli.trade_items) {
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_id);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_quantity);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_icon);
+					VARSTRUCT_ENCODE_STRING(eq, i.item_name.c_str());
+				}
+				dest->QueuePacket(packet.get());
+				safe_delete(inapp);
+
+				break;
+			}
+			case Barter_BuyerSearch: {
+				BuyerLineSearch_Struct       bls{};
+				auto                         emu = (BuyerGeneric_Struct *) inapp->pBuffer;
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(emu->payload),
+					inapp->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(bls);
+				LogTrading("(TDS) Barter_BuyerSearch action <green>[{}]", emu->action);
+
+				//Calculate size of packet
+				auto p_size = 0;
+				p_size += 5 * sizeof(uint32) + 1 * sizeof(uint8);
+				p_size += bls.search_string.length() + 1;
+				for (auto const &b: bls.buy_line) {
+					p_size += 6 * sizeof(uint32) + 2 * sizeof(uint8);
+					p_size += strlen(b.item_name) + 1;
+					p_size += b.buyer_name.length() + 1;
+					for (auto const &d: b.trade_items) {
+						if (d.item_id != 0) {
+							p_size += d.item_name.length() + 1;
+							p_size += 3 * sizeof(uint32);
+						}
+					}
+					p_size += 3 * sizeof(uint32);
+				}
+
+				BuyerBuyLines_Struct bl{};
+				auto outapp = std::make_unique<EQApplicationPacket>(OP_BuyerItems, p_size);
+				auto eq     = (char *) outapp->pBuffer;
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 1);
+				VARSTRUCT_ENCODE_STRING(eq, bls.search_string.c_str());
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bls.transaction_id);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, 1);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bls.no_items);
+				for (auto const &b: bls.buy_line) {
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.slot);
+					VARSTRUCT_ENCODE_TYPE(uint8, eq, 1);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.item_id);
+					VARSTRUCT_ENCODE_STRING(eq, b.item_name);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.item_icon);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.item_quantity);
+					VARSTRUCT_ENCODE_TYPE(uint8, eq, 1);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.item_cost);
+					auto no_sub_items = b.trade_items.size();
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, no_sub_items);
+					for (auto const &i: b.trade_items) {
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_id);
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_quantity);
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_icon);
+						VARSTRUCT_ENCODE_STRING(eq, i.item_name.c_str());
+					}
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.buyer_entity_id);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.buyer_id);
+					VARSTRUCT_ENCODE_TYPE(uint16, eq, b.buyer_zone_id);
+					VARSTRUCT_ENCODE_TYPE(uint16, eq, b.buyer_zone_instance_id);
+					VARSTRUCT_ENCODE_STRING(eq, b.buyer_name.c_str());
+				}
+				dest->QueuePacket(outapp.get());
+				break;
+			}
+			case Barter_RemoveFromMerchantWindow: {
+				auto emu = (BuyerRemoveItemFromMerchantWindow_Struct *) inapp->pBuffer;
+
+				emu->action = structs::TDSBuyerActions::BuyerSendBuyLine;
+				dest->FastQueuePacket(&inapp);
+				break;
+			}
+			case Barter_BuyerTransactionComplete:
+			case Barter_SellerTransactionComplete: {
+				BuyerLineSellItem_Struct     blsi{};
+				auto                         emu = (BuyerGeneric_Struct *) inapp->pBuffer;
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(emu->payload),
+					inapp->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(blsi);
+
+				//packet size
+				auto            packet_size = strlen(blsi.item_name) * 2 + 2 + 48 + 30 + blsi.seller_name.length() + 1 +
+											  blsi.buyer_name.length() + 1;
+				for (auto const &b: blsi.trade_items) {
+					packet_size += b.item_name.length() + 1;
+					packet_size += 12;
+				}
+
+				auto outapp = std::make_unique<EQApplicationPacket>(OP_BuyerItems, packet_size);
+				auto eq     = (char *) outapp->pBuffer;
+
+				switch (action) {
+					case Barter_BuyerTransactionComplete: {
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::TDSBuyerActions::BuyerBuyItem);
+						break;
+					}
+					case Barter_SellerTransactionComplete: {
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::TDSBuyerActions::BuyerSellItem);
+						break;
+					}
+				}
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.sub_action);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.error_code);
+				eq += 16;
+				VARSTRUCT_ENCODE_STRING(eq, blsi.buyer_name.c_str());
+				VARSTRUCT_ENCODE_STRING(eq, blsi.item_name);
+				VARSTRUCT_ENCODE_STRING(eq, blsi.seller_name.c_str());
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0xFFFFFFFF);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0xFFFFFFFF);
+				eq += 1;
+				VARSTRUCT_ENCODE_STRING(eq, blsi.item_name);
+				eq += 9;
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.item_cost);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.trade_items.size());
+
+				for (auto const &i: blsi.trade_items) {
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_quantity);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+					VARSTRUCT_ENCODE_STRING(eq, i.item_name.c_str());
+				}
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0xFFFFFF);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.seller_quantity);
+
+				dest->QueuePacket(outapp.get());
+				break;
+			}
+			default: {
+				dest->FastQueuePacket(&inapp);
+			}
+		}
 	}
 
 	ENCODE(OP_CancelTrade)
@@ -575,7 +1001,7 @@ namespace TDS
 			OUT(slot);
 
 		OUT(spell_id);
-		eq->inventoryslot = ServerToTDSSlot(emu->inventoryslot);
+		eq->inventory_slot = ServerToTDSSlot(emu->inventoryslot);
 		//OUT(inventoryslot);
 		OUT(target_id);
 
@@ -593,7 +1019,7 @@ namespace TDS
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToTDSTextLink(new_message, old_message);
+		ServerToTDSSayLink(new_message, old_message);
 
 		//in->size = strlen(emu->sender) + 1 + strlen(emu->targetname) + 1 + strlen(emu->message) + 1 + 36;
 		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 39;
@@ -640,26 +1066,23 @@ namespace TDS
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
 
-		int ItemCount = in->size / sizeof(EQ::InternalSerializedItem_Struct);
-
-		if (!ItemCount || (in->size % sizeof(EQ::InternalSerializedItem_Struct)) != 0) {
-
+		int item_count = in->size / sizeof(EQ::InternalSerializedItem_Struct);
+		if (!item_count || (in->size % sizeof(EQ::InternalSerializedItem_Struct)) != 0) {
 			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
 				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQ::InternalSerializedItem_Struct));
 
 			delete in;
-
 			return;
 		}
 
-		EQ::InternalSerializedItem_Struct *eq = (EQ::InternalSerializedItem_Struct *)in->pBuffer;
+		EQ::InternalSerializedItem_Struct* eq = (EQ::InternalSerializedItem_Struct*)in->pBuffer;
 
 		EQ::OutBuffer ob;
 		EQ::OutBuffer::pos_type last_pos = ob.tellp();
 
-		ob.write((const char*)&ItemCount, sizeof(uint32));
+		ob.write((const char*)&item_count, sizeof(uint32));
 
-		for (int r = 0; r < ItemCount; ++r, ++eq) {
+		for (int r = 0; r < item_count; ++r, ++eq) {
 
 			uint32 Length = 0;
 
@@ -759,7 +1182,7 @@ namespace TDS
 
 	ENCODE(OP_DeleteCharge)
 	{
-		Log(Logs::Moderate, Logs::Netcode, "TDS::ENCODE(OP_DeleteCharge)");
+		Log(Logs::Detail, Logs::Netcode, "TDS::ENCODE(OP_DeleteCharge)");
 
 		ENCODE_FORWARD(OP_MoveItem);
 	}
@@ -859,13 +1282,13 @@ namespace TDS
 
 	ENCODE(OP_DzExpeditionInfo)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionInfo_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionInfo_Struct, structs::ExpeditionInfo_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneInfo_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneInfo_Struct, structs::DynamicZoneInfo_Struct);
 
 		OUT(client_id);
 		OUT(assigned);
 		OUT(max_players);
-		strn0cpy(eq->expedition_name, emu->expedition_name, sizeof(eq->expedition_name));
+		strn0cpy(eq->dz_name, emu->dz_name, sizeof(eq->dz_name));
 		strn0cpy(eq->leader_name, emu->leader_name, sizeof(eq->leader_name));
 
 		FINISH_ENCODE();
@@ -911,8 +1334,8 @@ namespace TDS
 
 	ENCODE(OP_DzSetLeaderName)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionSetLeaderName_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionSetLeaderName_Struct, structs::ExpeditionSetLeaderName_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneLeaderName_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneLeaderName_Struct, structs::DynamicZoneLeaderName_Struct);
 
 		OUT(client_id);
 		strn0cpy(eq->leader_name, emu->leader_name, sizeof(eq->leader_name));
@@ -922,7 +1345,7 @@ namespace TDS
 
 	ENCODE(OP_DzMemberList)
 	{
-		SETUP_VAR_ENCODE(ExpeditionMemberList_Struct);
+		SETUP_VAR_ENCODE(DynamicZoneMemberList_Struct);
 
 		SerializeBuffer buf;
 		buf.WriteUInt32(emu->client_id);
@@ -930,7 +1353,7 @@ namespace TDS
 		for (uint32 i = 0; i < emu->member_count; ++i)
 		{
 			buf.WriteString(emu->members[i].name);
-			buf.WriteUInt8(emu->members[i].expedition_status);
+			buf.WriteUInt8(emu->members[i].online_status);
 		}
 
 		__packet->size = buf.size();
@@ -942,8 +1365,8 @@ namespace TDS
 
 	ENCODE(OP_DzMemberListName)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionMemberListName_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionMemberListName_Struct, structs::ExpeditionMemberListName_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneMemberListName_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneMemberListName_Struct, structs::DynamicZoneMemberListName_Struct);
 
 		OUT(client_id);
 		OUT(add_name);
@@ -954,7 +1377,7 @@ namespace TDS
 
 	ENCODE(OP_DzMemberListStatus)
 	{
-		auto emu = reinterpret_cast<ExpeditionMemberList_Struct*>((*p)->pBuffer);
+		auto emu = reinterpret_cast<DynamicZoneMemberList_Struct*>((*p)->pBuffer);
 		if (emu->member_count == 1)
 		{
 			ENCODE_FORWARD(OP_DzMemberList);
@@ -972,7 +1395,7 @@ namespace TDS
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToTDSTextLink(new_message, old_message);
+		ServerToTDSSayLink(new_message, old_message);
 
 		//if (new_message.length() > 512) // length restricted in packet building function due vari-length name size (no nullterm)
 		//	new_message = new_message.substr(0, 512);
@@ -1024,7 +1447,7 @@ namespace TDS
 
 		for (int i = 0; i < 9; ++i) {
 			if (old_message_array[i].length() == 0) { break; }
-			ServerToTDSTextLink(new_message_array[i], old_message_array[i]);
+			ServerToTDSSayLink(new_message_array[i], old_message_array[i]);
 			new_message_size += new_message_array[i].length() + 1;
 		}
 
@@ -1100,8 +1523,8 @@ namespace TDS
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->drop_id);	// Some unique id
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Same for all objects in the zone
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->heading);
-		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0);	// Normally 0, but seen (float)255.0 as well
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->solidtype);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0);	// Normally 0, but seen (float)255.0 as well (tilt_x?)
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->solid_type);	// Unknown (uint16?) (tilt_y?)
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->size != 0 && (float)emu->size < 5000.f ? (float)((float)emu->size / 100.0f) : 1.f );	// This appears to be the size field. Hackish logic because some PEQ DB items were corrupt.
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->y);
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->x);
@@ -1168,7 +1591,7 @@ namespace TDS
 		{
 			if ((gjs->action == groupActDisband) || !strcmp(gjs->yourname, gjs->membername))
 			{
-				//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+				//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Group Leave, yourname = %s, member_name = %s", gjs->yourname, gjs->member_name);
 
 				auto outapp =
 				    new EQApplicationPacket(OP_GroupDisbandYou, sizeof(structs::GroupGeneric_Struct));
@@ -1187,7 +1610,7 @@ namespace TDS
 				return;
 			}
 			//if(gjs->action == groupActLeave)
-			//	Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+			//	Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Group Leave, yourname = %s, member_name = %s", gjs->yourname, gjs->member_name);
 
 			auto outapp =
 			    new EQApplicationPacket(OP_GroupDisbandOther, sizeof(structs::GroupGeneric_Struct));
@@ -1217,7 +1640,7 @@ namespace TDS
 
 			for (int i = 0; i < 5; ++i)
 			{
-				//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Membername[%i] is %s", i,  gu2->membername[i]);
+				//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Membername[%i] is %s", i,  gu2->member_name[i]);
 				if (gu2->membername[i][0] != '\0')
 				{
 					PacketLength += (22 + strlen(gu2->membername[i]) + 1);
@@ -1287,7 +1710,7 @@ namespace TDS
 			return;
 
 		}
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Generic GroupUpdate, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Generic GroupUpdate, yourname = %s, member_name = %s", gjs->yourname, gjs->member_name);
 		ENCODE_LENGTH_EXACT(GroupJoin_Struct);
 		SETUP_DIRECT_ENCODE(GroupJoin_Struct, structs::GroupJoin_Struct);
 
@@ -1306,7 +1729,7 @@ namespace TDS
 
 		dest->FastQueuePacket(&outapp);
 	}
-/* TODO: Check this
+
 	ENCODE(OP_GuildBank)
 	{
 		auto in = *p;
@@ -1354,7 +1777,7 @@ namespace TDS
 		delete in;
 		dest->FastQueuePacket(&outapp);
 	}
-*/
+
 	ENCODE(OP_GuildMemberList)
 	{
 		//consume the packet
@@ -1423,15 +1846,7 @@ namespace TDS
 				PutFieldN(level);
 				PutFieldN(banker);
 				PutFieldN(class_);
-
-				/* Translate older ranks to new values */
-				switch (emu_e->rank) {
-				case 0: { e->rank = htonl(5); break; }  // GUILD_MEMBER	0
-				case 1: { e->rank = htonl(3); break; }  // GUILD_OFFICER 1
-				case 2: { e->rank = htonl(1); break; }  // GUILD_LEADER	2
-				default: { e->rank = htonl(emu_e->rank); break; } // GUILD_NONE
-				}
-
+				PutFieldN(rank);
 				PutFieldN(time_last_on);
 				PutFieldN(tribute_enable);
 				e->unknown01 = 0;
@@ -1461,8 +1876,10 @@ namespace TDS
 
 		OUT(GuildID);
 		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		OUT(ZoneID);
-		OUT(InstanceID);
+		//OUT(ZoneID);
+		//OUT(InstanceID);
+		eq->InstanceID = emu->InstanceID;
+		eq->ZoneID = emu->ZoneID;
 		OUT(LastSeen);
 		eq->Unknown76 = 0;
 
@@ -1474,56 +1891,56 @@ namespace TDS
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
-		uint32 NumberOfGuilds = in->size / 64;
-		uint32 PacketSize = 68;	// 64 x 0x00 + a uint32 that I am guessing is the highest guild ID in use.
+		GuildsListMessaging_Struct   glms{};
+		EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+		cereal::BinaryInputArchive   ar(ss);
+		ar(glms);
 
-		unsigned char *__emu_buffer = in->pBuffer;
+		auto packet_size = 64 + 4 + glms.guild_detail.size() * 4 + glms.string_length;
+		auto buffer      = new uchar[packet_size];
+		auto buf_pos     = buffer;
 
-		char *InBuffer = (char *)__emu_buffer;
+		memset(buf_pos, 0, 64);
+		buf_pos += 64;
 
-		uint32 HighestGuildID = 0;
+		VARSTRUCT_ENCODE_TYPE(uint32, buf_pos, glms.no_of_guilds);
 
-		for (unsigned int i = 0; i < NumberOfGuilds; ++i)
-		{
-			if (InBuffer[0])
-			{
-				PacketSize += (5 + strlen(InBuffer));
-				HighestGuildID = i - 1;
+		for (auto const &g: glms.guild_detail) {
+			if (g.guild_id < RoF2::constants::MAX_GUILD_ID) {
+				VARSTRUCT_ENCODE_TYPE(uint32, buf_pos, g.guild_id);
+				strn0cpy((char *) buf_pos, g.guild_name.c_str(), g.guild_name.length() + 1);
+				buf_pos += g.guild_name.length() + 1;
 			}
-			InBuffer += 64;
 		}
 
-		PacketSize++;	// Appears to be an extra 0x00 at the very end.
+		auto outapp     = new EQApplicationPacket(OP_GuildsList);
+		outapp->size    = packet_size;
+		outapp->pBuffer = buffer;
 
-		in->size = PacketSize;
-		in->pBuffer = new unsigned char[in->size];
+		dest->FastQueuePacket(&outapp);
+	}
 
-		InBuffer = (char *)__emu_buffer;
+	ENCODE(OP_GuildTributeDonateItem)
+	{
+		SETUP_DIRECT_ENCODE(GuildTributeDonateItemReply_Struct, structs::GuildTributeDonateItemReply_Struct);
 
-		char *OutBuffer = (char *)in->pBuffer;
+		Log(Logs::Detail, Logs::Netcode, "TDS::ENCODE(OP_GuildTributeDonateItem)");
 
-		// Init the first 64 bytes to zero, as per live.
-		//
-		memset(OutBuffer, 0, 64);
+		OUT(type);
+		OUT(sub_index);
+		OUT(aug_index);
+		OUT(quantity);
+		OUT(unknown10);
+		OUT(unknown20);
+		OUT(favor);
 
-		OutBuffer += 64;
+		structs::InventorySlot_Struct iss;
+		iss = ServerToTDSSlot(emu->slot);
 
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, HighestGuildID);
+		eq->slot = iss.Slot;
+		eq->sub_index = iss.SubIndex;
 
-		for (unsigned int i = 0; i < NumberOfGuilds; ++i)
-		{
-			if (InBuffer[0])
-			{
-				VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, i - 1);
-				VARSTRUCT_ENCODE_STRING(OutBuffer, InBuffer);
-			}
-			InBuffer += 64;
-		}
-
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0x00);
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
+		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_HPUpdate)
@@ -1668,7 +2085,7 @@ namespace TDS
 		ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
 		SETUP_DIRECT_ENCODE(ItemVerifyReply_Struct, structs::ItemVerifyReply_Struct);
 
-		eq->slot = ServerToTDSSlot(emu->slot);
+		eq->inventory_slot = ServerToTDSSlot(emu->slot);
 		OUT(spell);
 		OUT(target);
 
@@ -1723,11 +2140,11 @@ namespace TDS
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "TDS::ENCODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "TDS::ENCODE(OP_LootItem)");
 
 		OUT(lootee);
 		OUT(looter);
-		eq->slot_id = ServerToTDSCorpseSlot(emu->slot_id);
+		eq->slot_id = ServerToTDSCorpseMainSlot(emu->slot_id);
 		OUT(auto_loot);
 
 		FINISH_ENCODE();
@@ -1894,7 +2311,7 @@ namespace TDS
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "TDS::ENCODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "TDS::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToTDSSlot(emu->from_slot);
 		eq->to_slot = ServerToTDSSlot(emu->to_slot);
@@ -1950,7 +2367,7 @@ namespace TDS
 		OUT_str(zone_short_name2);
 		OUT(zone_id);
 		OUT(zone_instance);
-		OUT(SuspendBuffs);
+		OUT(suspend_buffs);
 
 		eq->FogDensity = emu->fog_density;
 
@@ -2141,14 +2558,14 @@ namespace TDS
 		__packet->WriteUInt8(1);		// 1 indicates all buffs on the pet (0 to add or remove a single buff)
 		__packet->WriteUInt16(emu->buffcount);
 
-		for (uint16 i = 0; i < BUFF_COUNT; ++i)
+		for (uint16 i = 0; i < PET_BUFF_COUNT; ++i)
 		{
 			if (emu->spellid[i])
 			{
 				__packet->WriteUInt32(i);
 				__packet->WriteUInt32(emu->spellid[i]);
 				__packet->WriteUInt32(emu->ticsremaining[i]);
-				__packet->WriteUInt32(0); // Unknown
+				__packet->WriteUInt32(0); // Unknown (num_hits?)
 				__packet->WriteString("");
 			}
 		}
@@ -2188,7 +2605,7 @@ namespace TDS
 		FieldEnum = 5;
 		outapp->WriteUInt32(FieldEnum);			// Bind count
 		for (int r = 0; r < FieldEnum; r++) {
-			outapp->WriteUInt32(emu->binds[r].zoneId);
+			outapp->WriteUInt32(emu->binds[r].zone_id);
 			outapp->WriteFloat(emu->binds[r].x);
 			outapp->WriteFloat(emu->binds[r].y);
 			outapp->WriteFloat(emu->binds[r].z);
@@ -2908,7 +3325,10 @@ namespace TDS
 		else
 			eq->window = emu->window;
 		OUT(type);
-		OUT(invslot);
+		eq->invslot = ServerToTDSTypelessSlot(emu->invslot, invtype::typePossessions);
+		OUT(target_id);
+		OUT(can_cast);
+		OUT(can_scribe);
 		strn0cpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
 
 		FINISH_ENCODE();
@@ -2922,12 +3342,12 @@ namespace TDS
 		OUT(object_type);
 		OUT(some_id);
 		eq->container_slot = ServerToTDSSlot(emu->unknown1);
-		structs::ItemSlotStruct TDSSlot;
-		TDSSlot.SlotType = 8;	// Observed
+		structs::InventorySlot_Struct TDSSlot;
+		TDSSlot.Type = 8;	// Observed
 		TDSSlot.Unknown02 = 0;
-		TDSSlot.MainSlot = 0xffff;
-		TDSSlot.SubSlot = 0xffff;
-		TDSSlot.AugSlot = 0xffff;
+		TDSSlot.Slot= 0xffff;
+		TDSSlot.SubIndex = 0xffff;
+		TDSSlot.AugIndex = 0xffff;
 		TDSSlot.Unknown01 = 0;
 		eq->unknown_slot = TDSSlot;
 		OUT(recipe_id);
@@ -3001,12 +3421,12 @@ namespace TDS
 		EQApplicationPacket *inapp = *p;
 		*p = nullptr;
 		AARankInfo_Struct *emu = (AARankInfo_Struct*)inapp->pBuffer;
-		
+
 		// the structs::SendAA_Struct includes enough space for 1 prereq which is the min even if it has no prereqs
 		auto prereq_size = emu->total_prereqs > 1 ? (emu->total_prereqs - 1) * 8 : 0;
 		auto outapp = new EQApplicationPacket(OP_SendAATable, sizeof(structs::SendAA_Struct) + emu->total_effects * sizeof(structs::AA_Ability) + prereq_size);
 		inapp->SetReadPosition(sizeof(AARankInfo_Struct)+emu->total_effects * sizeof(AARankEffect_Struct));
-		
+
 
 		std::vector<int32> skill;
 		std::vector<int32> points;
@@ -3038,7 +3458,7 @@ namespace TDS
 			outapp->WriteUInt32(0);
 			outapp->WriteUInt32(1);
 			outapp->WriteUInt32(0);
- 		}
+		}
 
 		outapp->WriteSInt32(emu->type);
 		outapp->WriteSInt32(emu->spell);
@@ -3069,7 +3489,7 @@ namespace TDS
 			outapp->WriteUInt32(inapp->ReadUInt32()); // base2
 			outapp->WriteUInt32(inapp->ReadUInt32()); // slot
  		}
-			
+
 		dest->FastQueuePacket(&outapp);
 		delete inapp;
 	}
@@ -3094,7 +3514,7 @@ namespace TDS
 
 		size_t names_length = 0;
 		size_t character_count = 0;
-		for (; character_count < emu->CharCount && character_count < consts::CHARACTER_CREATION_LIMIT; ++character_count) {
+		for (; character_count < emu->CharCount && character_count < constants::CHARACTER_CREATION_LIMIT; ++character_count) {
 			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
 			names_length += strlen(emu_cse->Name);
 			emu_ptr += sizeof(CharacterSelectEntry_Struct);
@@ -3202,19 +3622,12 @@ namespace TDS
 		ENCODE_LENGTH_EXACT(GuildSetRank_Struct);
 		SETUP_DIRECT_ENCODE(GuildSetRank_Struct, structs::GuildSetRank_Struct);
 
-		eq->GuildID = emu->Unknown00;
+		eq->guild_id= emu->Unknown00;
+		eq->rank = emu->rank;
 
-		/* Translate older ranks to new values */
-		switch (emu->Rank) {
-		case 0: { eq->Rank = 5; break; }  // GUILD_MEMBER	0
-		case 1: { eq->Rank = 3; break; }  // GUILD_OFFICER	1
-		case 2: { eq->Rank = 1; break; }  // GUILD_LEADER	2
-		default: { eq->Rank = emu->Rank; break; }
-		}
-
-		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		OUT(Banker);
-		eq->Unknown76 = 1;
+		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
+		OUT(banker);
+		eq->unknown76 = 1;
 
 		FINISH_ENCODE();
 	}
@@ -3239,25 +3652,10 @@ namespace TDS
 		SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 
 		OUT(npcid);
-		eq->itemslot = ServerToTDSMainInvSlot(emu->itemslot);
+		eq->inventory_slot = ServerToTDSTypelessSlot(emu->itemslot, EQ::invtype::typePossessions);
 		//OUT(itemslot);
 		OUT(quantity);
 		OUT(price);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_ShopRequest)
-	{
-		ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
-		SETUP_DIRECT_ENCODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
-
-		OUT(npcid);
-		OUT(playerid);
-		OUT(command);
-		OUT(rate);
-		eq->unknown01 = 3;	// Not sure what these values do yet, but list won't display without them
-		eq->unknown02 = 2592000;
 
 		FINISH_ENCODE();
 	}
@@ -3316,13 +3714,13 @@ namespace TDS
 
 		SpawnAppearance_Struct *sas = (SpawnAppearance_Struct *)emu_buffer;
 
-		if (sas->type != AT_Size)
+		if (sas->type != AppearanceType::Size)
 		{
 			dest->FastQueuePacket(&in, ack_req);
 			return;
 		}
 
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
+		auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
 
 		ChangeSize_Struct *css = (ChangeSize_Struct *)outapp->pBuffer;
 
@@ -3380,7 +3778,7 @@ namespace TDS
 		std::string old_message = &emu->message[strlen(emu->sayer)];
 		std::string new_message;
 
-		ServerToTDSTextLink(new_message, old_message);
+		ServerToTDSSayLink(new_message, old_message);
 
 		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
 		in->size = strlen(emu->sayer) + new_message.length() + 25;
@@ -3454,7 +3852,7 @@ namespace TDS
 
 		std::string old_message = InBuffer; // start 'Reward' as string
 		std::string new_message;
-		ServerToTDSTextLink(new_message, old_message);
+		ServerToTDSSayLink(new_message, old_message);
 
 		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
 			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
@@ -3672,54 +4070,146 @@ namespace TDS
 
 	ENCODE(OP_Trader)
 	{
-		if ((*p)->size == sizeof(ClickTrader_Struct))
-		{
-			ENCODE_LENGTH_EXACT(ClickTrader_Struct);
-			SETUP_DIRECT_ENCODE(ClickTrader_Struct, structs::ClickTrader_Struct);
+		uint32 action = *(uint32 *) (*p)->pBuffer;
 
-			eq->Code = emu->Code;
-			// Live actually has 200 items now, but 80 is the most our internal struct supports
-			for (uint32 i = 0; i < 200; i++)
-			{
-				eq->items[i].Unknown18 = 0;
-				if (i < 80) {
-					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", emu->SerialNumber[i]);
-					eq->ItemCost[i] = emu->ItemCost[i];
-				}
-				else {
-					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", 0);
-					eq->ItemCost[i] = 0;
-				}
+		switch (action) {
+			case TraderOn: {
+				ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
+				SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+
+				eq->action = structs::TDSBazaarTraderBuyerActions::BeginTraderMode;
+				OUT(entity_id);
+
+				LogTrading("(TDS) TraderOn action <green>[{}] entity_id <green>[{}]", action, eq->entity_id);
+				FINISH_ENCODE();
+				break;
 			}
+			case TraderOff: {
+				ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
+				SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
 
-			FINISH_ENCODE();
-		}
-		else if ((*p)->size == sizeof(Trader_ShowItems_Struct))
-		{
-			ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
-			SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				eq->action = structs::TDSBazaarTraderBuyerActions::EndTraderMode;
+				OUT(entity_id);
 
-			eq->Code = emu->Code;
-			//strncpy(eq->SerialNumber, "0000000000000000", sizeof(eq->SerialNumber));
-			//snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", 0);
-			eq->TraderID = emu->TraderID;
-			//eq->Stacksize = 0;
-			//eq->Price = 0;
+				LogTrading("(TDS) TraderOff action <green>[{}] entity_id <green>[{}]", action, eq->entity_id);
+				FINISH_ENCODE();
+				break;
+			}
+			case ListTraderItems: {
+				ENCODE_LENGTH_EXACT(Trader_Struct);
+				SETUP_DIRECT_ENCODE(Trader_Struct, structs::ClickTrader_Struct);
+				LogTrading("(TDS)  action <green>[{}]", action);
 
-			FINISH_ENCODE();
-		}
-		else if ((*p)->size == sizeof(TraderStatus_Struct))
-		{
-			ENCODE_LENGTH_EXACT(TraderStatus_Struct);
-			SETUP_DIRECT_ENCODE(TraderStatus_Struct, structs::TraderStatus_Struct);
+				eq->action = structs::TDSBazaarTraderBuyerActions::ListTraderItems;
+				std::transform(
+					std::begin(emu->items),
+					std::end(emu->items),
+					std::begin(eq->items),
+					[&](const uint32 x) {
+						return x;
+					}
+				);
+				std::copy_n(
+					std::begin(emu->item_cost),
+					EQ::invtype::BAZAAR_SIZE,
+					std::begin(eq->item_cost)
+				);
 
-			eq->Code = emu->Code;
+				FINISH_ENCODE();
+				break;
+			}
+			case TraderAck2: {
+				LogTrading("(TDS) TraderAck2 action");
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
 
-			FINISH_ENCODE();
-		}
-		else if ((*p)->size == sizeof(TraderBuy_Struct))
-		{
-			ENCODE_FORWARD(OP_TraderBuy);
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			case PriceUpdate: {
+				SETUP_DIRECT_ENCODE(TraderPriceUpdate_Struct, structs::TraderPriceUpdate_Struct);
+				switch (emu->SubAction) {
+					case BazaarPriceChange_AddItem: {
+						auto outapp = std::make_unique<EQApplicationPacket>(
+							OP_Trader,
+							sizeof(structs::TraderStatus_Struct)
+						);
+
+						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
+						data->action     = emu->Action;
+						data->sub_action = BazaarPriceChange_AddItem;
+						LogTrading(
+							"(TDS) PriceUpdate action <green>[{}] AddItem subaction <yellow>[{}]",
+							data->action,
+							data->sub_action
+						);
+
+						dest->QueuePacket(outapp.get());
+						break;
+					}
+					case BazaarPriceChange_RemoveItem: {
+						auto outapp = std::make_unique<EQApplicationPacket>(
+							OP_Trader,
+							sizeof(structs::TraderStatus_Struct)
+						);
+
+						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
+						data->action     = emu->Action;
+						data->sub_action = BazaarPriceChange_RemoveItem;
+						LogTrading(
+							"(TDS) PriceUpdate action <green>[{}] RemoveItem subaction <yellow>[{}]",
+							data->action,
+							data->sub_action
+						);
+
+						dest->QueuePacket(outapp.get());
+						break;
+					}
+					case BazaarPriceChange_UpdatePrice: {
+						auto outapp = std::make_unique<EQApplicationPacket>(
+							OP_Trader,
+							sizeof(structs::TraderStatus_Struct)
+						);
+
+						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
+						data->action     = emu->Action;
+						data->sub_action = BazaarPriceChange_UpdatePrice;
+						LogTrading(
+							"(TDS) PriceUpdate action <green>[{}] UpdatePrice subaction <yellow>[{}]",
+							data->action,
+							data->sub_action
+						);
+
+						dest->QueuePacket(outapp.get());
+						break;
+					}
+				}
+
+				FINISH_ENCODE();
+				break;
+			}
+			case BuyTraderItem: {
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
+
+				auto eq = (structs::TraderBuy_Struct *) in->pBuffer;
+				LogTrading(
+					"(TDS) BuyTraderItem action <green>[{}] item_id <green>[{}] item_sn <green>[{}] buyer <green>[{}]",
+					action,
+					eq->item_id,
+					eq->serial_number,
+					eq->buyer_name
+				);
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			default: {
+				LogTrading("(TDS) action <red>[{}]", action);
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
+
+				dest->FastQueuePacket(&in);
+			}
 		}
 	}
 
@@ -3727,14 +4217,26 @@ namespace TDS
 	{
 		ENCODE_LENGTH_EXACT(TraderBuy_Struct);
 		SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
-
-		OUT(Action);
-		OUT(Price);
-		OUT(TraderID);
-		memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
-		OUT(ItemID);
-		OUT(Quantity);
-		OUT(AlreadySold);
+		LogTrading(
+			"(TDS) item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+			emu->item_id,
+			emu->price,
+			emu->quantity,
+			emu->trader_id
+		);
+		__packet->SetOpcode(OP_TraderShop);
+		OUT(action);
+		OUT(method);
+		OUT(sub_action);
+		OUT(trader_id);
+		OUT(item_id);
+		OUT(price);
+		OUT(already_sold);
+		OUT(quantity);
+		OUT_str(buyer_name);
+		OUT_str(seller_name);
+		OUT_str(item_name);
+		OUT_str(serial_number);
 
 		FINISH_ENCODE();
 	}
@@ -3743,71 +4245,74 @@ namespace TDS
 	{
 		ENCODE_LENGTH_EXACT(TraderDelItem_Struct);
 		SETUP_DIRECT_ENCODE(TraderDelItem_Struct, structs::TraderDelItem_Struct);
+		LogTrading(
+			"(TDS) trader_id <green>[{}] item_id <green>[{}]",
+			emu->trader_id,
+			emu->item_id
+		);
 
-		OUT(TraderID);
-		snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", emu->ItemID);
-		LogTrading("ENCODE(OP_TraderDelItem): TraderID [{}], SerialNumber: [{}]", emu->TraderID, emu->ItemID);
+		eq->TraderID = emu->trader_id;
+		auto serial  = fmt::format("{:016}\n", emu->item_id);
+		strn0cpy(eq->SerialNumber, serial.c_str(), sizeof(eq->SerialNumber));
+		LogTrading("(TDS) TraderID <green>[{}], SerialNumber: <green>[{}]", emu->trader_id, emu->item_id);
 
 		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_TraderShop)
 	{
-		uint32 psize = (*p)->size;
-		if (psize == sizeof(TraderClick_Struct))
-		{
-			ENCODE_LENGTH_EXACT(TraderClick_Struct);
-			SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+		auto action = *(uint32 *) (*p)->pBuffer;
 
-			eq->Code = 28; // Seen on Live
-			OUT(TraderID);
-			OUT(Approval);
+		switch (action) {
+			case ClickTrader: {
+				ENCODE_LENGTH_EXACT(TraderClick_Struct);
+				SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+				LogTrading(
+					"(TDS) ClickTrader action <green>[{}] trader_id <green>[{}]",
+					action,
+					emu->TraderID
+				);
 
-			FINISH_ENCODE();
-		}
-		else if (psize == sizeof(BazaarWelcome_Struct))
-		{
-			ENCODE_LENGTH_EXACT(BazaarWelcome_Struct);
-			SETUP_DIRECT_ENCODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+				eq->action      = structs::TDSBazaarTraderBuyerActions::ClickTrader; // Seen on Live 28
+				eq->trader_id   = emu->TraderID;
+				eq->unknown_008 = emu->Approval;
 
-			eq->Code = emu->Beginning.Action;
-			eq->EntityID = emu->Unknown012;
-			OUT(Traders);
-			OUT(Items);
-			eq->Traders2 = emu->Traders;
-			eq->Items2 = emu->Items;
+				FINISH_ENCODE();
+				break;
+			}
+			case structs::TDSBazaarTraderBuyerActions::BuyTraderItem: {
+				ENCODE_LENGTH_EXACT(structs::TraderBuy_Struct);
+				SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				LogTrading(
+					"(TDS) item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+					eq->item_id,
+					eq->price,
+					eq->quantity,
+					eq->trader_id
+				);
 
-			LogTrading("ENCODE(OP_TraderShop): BazaarWelcome_Struct Code [{}], Traders [{}], Items [{}]",
-				eq->Code, eq->Traders, eq->Items);
+				OUT(action);
+				OUT(method);
+				OUT(trader_id);
+				OUT(item_id);
+				OUT(price);
+				OUT(already_sold);
+				OUT(quantity);
+				OUT_str(buyer_name);
+				OUT_str(seller_name);
+				OUT_str(item_name);
+				OUT_str(serial_number);
 
-			FINISH_ENCODE();
-		}
-		else if (psize == sizeof(TraderBuy_Struct))
-		{
-			ENCODE_LENGTH_EXACT(TraderBuy_Struct);
-			SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				FINISH_ENCODE();
+				break;
+			}
+			default: {
+				LogTrading("(TDS) Unhandled action <red>[{}]", action);
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
 
-			OUT(Action);
-			OUT(TraderID);
-
-			//memcpy(eq->BuyerName, emu->BuyerName, sizeof(eq->BuyerName));
-			//memcpy(eq->SellerName, emu->SellerName, sizeof(eq->SellerName));
-
-			memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
-			OUT(ItemID);
-			OUT(AlreadySold);
-			OUT(Price);
-			OUT(Quantity);
-			snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", emu->ItemID);
-
-			LogTrading("ENCODE(OP_TraderShop): Buy Action [{}], Price [{}], Trader [{}], ItemID [{}], Quantity [{}], ItemName, [{}]",
-				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, emu->ItemName);
-
-			FINISH_ENCODE();
-		}
-		else
-		{
-			LogTrading("ENCODE(OP_TraderShop): Encode Size Unknown ([{}])", psize);
+				dest->FastQueuePacket(&in);
+			}
 		}
 	}
 
@@ -3839,7 +4344,7 @@ namespace TDS
 		ENCODE_LENGTH_EXACT(TributeItem_Struct);
 		SETUP_DIRECT_ENCODE(TributeItem_Struct, structs::TributeItem_Struct);
 
-		eq->slot = ServerToTDSSlot(emu->slot);
+		eq->inventory_slot = ServerToTDSSlot(emu->slot);
 		OUT(quantity);
 		OUT(tribute_master_id);
 		OUT(tribute_points);
@@ -4090,7 +4595,8 @@ namespace TDS
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
-			bool ShowName = 1;
+
+			bool ShowName = emu->show_name;
 			if (emu->bodytype >= 66)
 			{
 				emu->race = 127;
@@ -4100,7 +4606,9 @@ namespace TDS
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
+			if (!((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
+					(emu->race == Race::VahShir) || (emu->race == Race::Froglok2) || (emu->race == Race::Drakkin))
+				)
 			{
 				PacketSize += 60;
 
@@ -4132,20 +4640,20 @@ namespace TDS
 
 			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;
 
-			Bitfields->gender = emu->gender;
-			Bitfields->ispet = emu->is_pet;
-			Bitfields->afk = emu->afk;
-			Bitfields->anon = emu->anon;
-			Bitfields->gm = emu->gm;
-			Bitfields->sneak = 0;
-			Bitfields->lfg = emu->lfg;
-			Bitfields->invis = emu->invis;
-			Bitfields->linkdead = 0;
-			Bitfields->showhelm = emu->showhelm;
-			Bitfields->trader = 0;
-			Bitfields->targetable = 1;
+			Bitfields->gender                 = emu->gender;
+			Bitfields->ispet                  = emu->is_pet;
+			Bitfields->afk                    = emu->afk;
+			Bitfields->anon                   = emu->anon;
+			Bitfields->gm                     = emu->gm;
+			Bitfields->sneak                  = 0;
+			Bitfields->lfg                    = emu->lfg;
+			Bitfields->invis                  = emu->invis;
+			Bitfields->linkdead               = 0;
+			Bitfields->showhelm               = emu->showhelm;
+			Bitfields->trader                 = emu->trader ? 1 : 0;
+			Bitfields->targetable             = 1;
 			Bitfields->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
-			Bitfields->showname = ShowName;
+			Bitfields->showname               = ShowName;
 
 			// Not currently found
 			// Bitfields->statue = 0;
@@ -4205,12 +4713,13 @@ namespace TDS
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildID);
 
 				/* Translate older ranks to new values */
-				switch (emu->guildrank) {
-				case 0: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 5);  break; }  // GUILD_MEMBER	0
-				case 1: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 3);  break; }  // GUILD_OFFICER	1
-				case 2: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);  break; }  // GUILD_LEADER	2
-				default: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank); break; }  //
-				}
+				//switch (emu->guildrank) {
+				//case 0: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 5);  break; }  // GUILD_MEMBER	0
+				//case 1: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 3);  break; }  // GUILD_OFFICER	1
+				//case 2: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);  break; }  // GUILD_LEADER	2
+				//default: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank); break; }  //
+				//}
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank);
 			}
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->class_);
@@ -4225,9 +4734,9 @@ namespace TDS
 
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
 
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle ??
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC ? 0 : 1); // unknown - Must be 1 for guild name to be shown abover players head.
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->guild_show);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // TempPet
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
 
@@ -4246,8 +4755,10 @@ namespace TDS
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown18
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown19
 
-			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
-			{			
+			if ((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
+					(emu->race == Race::VahShir) || (emu->race == Race::Froglok2) || (emu->race == Race::Drakkin)
+				)
+			{
 				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
 				{
 					{
@@ -4312,12 +4823,16 @@ namespace TDS
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->suffix);
 			}
 
+			// skipping two ints
+			// unknown, maybe some sort of spawn ID
+			// SplineID -- no idea
 			Buffer += 8;
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->IsMercenary);
-			VARSTRUCT_ENCODE_STRING(Buffer, "0000000000000000");
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff);
+			VARSTRUCT_ENCODE_STRING(Buffer, "0000000000000000"); // RealEstateItemGuid
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // RealEstateID
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // RealEstateItemID
 			// 37 zero bytes follow
+			// PhysicsEffects follow here ... unsure what they are but it's a count followed by a struct like {spellid, casterid, effectid, baseeffect}
 			Buffer += 37; // was 29
 			if (Buffer != (BufferStart + PacketSize))
 			{
@@ -4331,6 +4846,19 @@ namespace TDS
 		delete in;
 	}
 
+	ENCODE(OP_CrystalCountUpdate)
+	{
+		ENCODE_LENGTH_EXACT(CrystalCountUpdate_Struct);
+		SETUP_DIRECT_ENCODE(CrystalCountUpdate_Struct, structs::CrystalCountUpdate_Struct);
+
+		OUT(CurrentRadiantCrystals);
+		OUT(CareerRadiantCrystals);
+		OUT(CurrentEbonCrystals);
+		OUT(CareerEbonCrystals);
+
+		FINISH_ENCODE();
+	}
+
 // DECODE methods
 
 	DECODE(OP_AdventureMerchantSell)
@@ -4339,7 +4867,7 @@ namespace TDS
 		SETUP_DIRECT_DECODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
 
 		IN(npcid);
-		emu->slot = TDSToServerMainInvSlot(eq->slot);
+		emu->slot = TDSToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 		IN(charges);
 		IN(sell_price);
 
@@ -4352,7 +4880,7 @@ namespace TDS
 		SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = TDSToServerMainInvSlot(eq->slot_id);
+		emu->slot_id = TDSToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 		IN(charges);
 		IN(cost);
 
@@ -4365,7 +4893,7 @@ namespace TDS
 		SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = TDSToServerMainInvSlot(eq->slot_id);
+		emu->slot_id = TDSToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4387,7 +4915,7 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
 		SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-		emu->inventorySlot = TDSToServerMainInvSlot(eq->inventorySlot);
+		emu->inventorySlot = TDSToServerTypelessSlot(eq->inventorySlot, invtype::typePossessions);
 		IN(success);
 
 		FINISH_DIRECT_DECODE();
@@ -4419,11 +4947,72 @@ namespace TDS
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_Barter)
+	{
+		auto action = *(uint32 *) __packet->pBuffer;
+
+		switch (action) {
+			case structs::TDSBuyerActions::BuyerRemoveItem: {
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_BuyerItemRemove;
+				LogTradingDetail("(TDS) Buyer Remove Item");
+
+				break;
+			}
+			case structs::TDSBuyerActions::BuyerInspectBegin: {
+				LogTradingDetail("(TDS) Buyer Inspect Begin Item");
+
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_BuyerInspectBegin;
+
+				break;
+			}
+			case structs::TDSBuyerActions::BuyerInspectEnd: {
+				LogTradingDetail("(TDS) Buyer Inspect End Item ");
+
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_BuyerInspectEnd;
+
+				break;
+			}
+			case structs::TDSBuyerActions::BuyerWelcomeMessage: {
+				LogTradingDetail("(TDS) Buyer Welcome Message Update");
+				SETUP_DIRECT_DECODE(BuyerWelcomeMessageUpdate_Struct, structs::BuyerWelcomeMessageUpdate_Struct);
+
+				emu->action = Barter_WelcomeMessageUpdate;
+				strn0cpy(emu->welcome_message, eq->welcome_message, sizeof(emu->welcome_message));
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TDSBuyerActions::BuyerItemInspect: {
+				SETUP_DIRECT_DECODE(BarterItemSearchLinkRequest_Struct, structs::BarterItemSearchLinkRequest_Struct);
+				LogTradingDetail("(TDS) Seller ID <green>[{}] Inspecting Item <green>[{}] from Buyer ID <green>[{}] ",
+								 eq->seller_id,
+								 eq->item_id,
+								 eq->buyer_id
+				);
+
+				emu->action      = Barter_BarterItemInspect;
+				emu->item_id     = eq->item_id;
+				emu->searcher_id = eq->seller_id;
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			default: {
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				LogTradingDetail("(TDS) Pass thru OP_Barter packet action <red>[{}]", emu->action);
+			}
+		}
+	}
+
 	DECODE(OP_BazaarSearch)
 	{
 		char *Buffer = (char *)__packet->pBuffer;
 
 		uint8 SubAction = VARSTRUCT_DECODE_TYPE(uint8, Buffer);
+		LogTrading("(TDS) action <green>[{}]", SubAction);
 
 		if ((SubAction != BazaarInspectItem) || (__packet->size != sizeof(structs::NewBazaarInspect_Struct)))
 			return;
@@ -4433,6 +5022,7 @@ namespace TDS
 		IN(Beginning.Action);
 		memcpy(emu->Name, eq->Name, sizeof(emu->Name));
 		IN(SerialNumber);
+		LogTrading("(TDS) action <green>[{}] serial_number <green>[{}]", eq->Beginning.Action, eq->SerialNumber);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4453,18 +5043,29 @@ namespace TDS
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_BookButton)
+	{
+		DECODE_LENGTH_EXACT(structs::BookButton_Struct);
+		SETUP_DIRECT_DECODE(BookButton_Struct, structs::BookButton_Struct);
+
+		emu->invslot = static_cast<int16_t>(TDSToServerTypelessSlot(eq->slot, invtype::typePossessions));
+		IN(target_id);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_Buff)
 	{
-		DECODE_LENGTH_EXACT(structs::SpellBuffFade_Struct_Live);
-		SETUP_DIRECT_DECODE(structs::SpellBuffFade_Struct_Live, structs::SpellBuffFade_Struct_Live);
+		DECODE_LENGTH_EXACT(structs::SpellBuffPacket_Struct);
+		SETUP_DIRECT_DECODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
 
 		IN(entityid);
-		//IN(slot);
-		IN(level);
-		IN(effect);
-		IN(spellid);
-		IN(duration);
-		IN(slotid);
+		IN(buff.effect_type);
+		IN(buff.level);
+		IN(buff.unknown003);
+		IN(buff.spellid);
+		IN(buff.duration);
+		emu->slotid = TDSToServerBuffSlot(eq->slotid);
 		IN(bufffade);
 
 		FINISH_DIRECT_DECODE();
@@ -4477,11 +5078,152 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::BuffRemoveRequest_Struct);
 		SETUP_DIRECT_DECODE(BuffRemoveRequest_Struct, structs::BuffRemoveRequest_Struct);
 
-		emu->SlotID = (eq->SlotID < 42) ? eq->SlotID : (eq->SlotID - 17);
+		emu->SlotID = TDSToServerBuffSlot(eq->SlotID);
 
 		IN(EntityID);
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_BuyerItems)
+	{
+		auto action = *(uint32 *) __packet->pBuffer;
+
+		switch (action) {
+			case structs::TDSBuyerActions::BuyerModifyBuyLine:
+			case structs::TDSBuyerActions::BuyerBuyLine: {
+				BuyerBuyLines_Struct buyer_buy_lines{};
+				auto                 buffer = (char *) __packet->pBuffer;
+
+				buyer_buy_lines.action = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+
+				buyer_buy_lines.no_items = 1;
+				if (action == structs::TDSBuyerActions::BuyerBuyLine) {
+					buyer_buy_lines.no_items = VARSTRUCT_DECODE_TYPE(uint16, buffer);
+				}
+
+				buyer_buy_lines.buy_lines.reserve(buyer_buy_lines.no_items);
+				for (int i = 0; i < buyer_buy_lines.no_items; i++) {
+					BuyerLineItems_Struct b{};
+					b.slot           = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					b.enabled        = VARSTRUCT_DECODE_TYPE(uint8, buffer);
+					b.item_id        = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					b.item_name      = std::string(buffer, strlen(buffer));
+					buffer          += strlen(buffer) + 1;
+					b.item_icon      = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					b.item_quantity  = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					b.item_toggle    = VARSTRUCT_DECODE_TYPE(uint8, buffer);
+					b.item_cost      = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					auto trade_items = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					buyer_buy_lines.buy_lines.push_back(b);
+
+					if (trade_items > 0) {
+						buyer_buy_lines.buy_lines[i].trade_items.reserve(trade_items);
+						for (int x = 0; x < trade_items; x++) {
+							BuyerLineTradeItems_Struct blti{};
+							blti.item_id       = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+							blti.item_quantity = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+							blti.item_icon     = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+							blti.item_name     = std::string(buffer, strlen(buffer));
+							buffer            += strlen(buffer) + 1;
+							buyer_buy_lines.buy_lines[i].trade_items.push_back(blti);
+						}
+					}
+					buffer += 13;
+				}
+
+				buffer = nullptr;
+				std::stringstream           ss{};
+				cereal::BinaryOutputArchive ar(ss);
+				{
+					ar(buyer_buy_lines);
+				}
+
+				auto new_size   = sizeof(BuyerGeneric_Struct) + ss.str().length();
+				auto new_packet = new unsigned char[new_size];
+				__packet->size    = new_size;
+				__packet->pBuffer = new_packet;
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_BuyerItemUpdate;
+
+				if (action == structs::TDSBuyerActions::BuyerBuyLine) {
+					emu->action = Barter_BuyerItemStart;
+				}
+
+				memcpy(emu->payload, ss.str().data(), ss.str().length());
+				__packet->SetOpcode(OP_Barter);
+
+				break;
+			}
+			case structs::TDSBuyerActions::BuyerSellItem: {
+				BuyerLineSellItem_Struct sell_item{};
+
+				char *buffer = (char *) __packet->pBuffer;
+
+				sell_item.action          = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.purchase_method = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				buffer += 4;
+				sell_item.buyer_entity_id = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.buyer_id        = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				buffer += 11;
+				sell_item.slot    = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.enabled = VARSTRUCT_DECODE_TYPE(uint8, buffer);
+				sell_item.item_id = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				VARSTRUCT_DECODE_STRING(sell_item.item_name, buffer);
+				sell_item.item_icon      = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.item_quantity  = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.item_toggle    = VARSTRUCT_DECODE_TYPE(uint8, buffer);
+				sell_item.item_cost      = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.no_trade_items = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+
+				if (sell_item.no_trade_items > 0) {
+					sell_item.trade_items.reserve(sell_item.no_trade_items);
+					for (int x = 0; x < sell_item.no_trade_items; x++) {
+						BuyerLineTradeItems_Struct blti{};
+						blti.item_id       = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+						blti.item_quantity = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+						blti.item_icon     = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+						blti.item_name     = std::string(buffer, strlen(buffer));
+						buffer            += strlen(buffer) + 1;
+						sell_item.trade_items.push_back(blti);
+					}
+				}
+
+				if (sell_item.purchase_method) {
+					sell_item.buyer_entity_id = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					sell_item.buyer_id        = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					sell_item.zone_id         = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					sell_item.buyer_name      = std::string(buffer, strlen(buffer));
+					buffer                   += sell_item.buyer_name.length() + 1;
+				}
+				else {
+					buffer += 13;
+				}
+
+				sell_item.seller_quantity = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+
+				buffer += 4;
+
+				buffer = nullptr;
+				std::stringstream           ss{};
+				cereal::BinaryOutputArchive ar(ss);
+				{
+					ar(sell_item);
+				}
+
+				auto new_size   = sizeof(BuyerGeneric_Struct) + ss.str().length();
+				auto new_packet = new unsigned char[new_size];
+				__packet->size    = new_size;
+				__packet->pBuffer = new_packet;
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_SellItem;
+
+				memcpy(emu->payload, ss.str().data(), ss.str().length());
+				__packet->SetOpcode(OP_Barter);
+
+				break;
+			}
+		}
 	}
 
 	DECODE(OP_CastSpell)
@@ -4489,13 +5231,10 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
 		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		if (eq->slot == 13)
-			emu->slot = 10;
-		else
-			IN(slot);
+		emu->slot = static_cast<uint32>(TDSToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot)));
 
 		IN(spell_id);
-		emu->inventoryslot = TDSToServerSlot(eq->inventoryslot);
+		emu->inventoryslot = TDSToServerSlot(eq->inventory_slot);
 		//IN(inventoryslot);
 		IN(target_id);
 		IN(y_pos);
@@ -4528,10 +5267,7 @@ namespace TDS
 
 		std::string old_message = InBuffer;
 		std::string new_message;
-		TDSToServerTextLink(new_message, old_message);
-
-		if (new_message[0] == '.')
-			new_message.replace(0, 1, "#");
+		TDSToServerSayLink(new_message, old_message);
 
 		//__packet->size = sizeof(ChannelMessage_Struct)+strlen(InBuffer) + 1;
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
@@ -4625,7 +5361,7 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::Consume_Struct);
 		SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
 
-		emu->slot = TDSToServerSlot(eq->slot);
+		emu->slot = TDSToServerSlot(eq->inventory_slot);
 		IN(auto_consumed);
 		IN(type);
 
@@ -4642,7 +5378,7 @@ namespace TDS
 		IN(type);
 		IN(spellid);
 		IN(damage);
-		//IN(meleepush_xy);
+		IN(hit_heading);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4743,7 +5479,7 @@ namespace TDS
 
 		std::string old_message = (char *)&__eq_buffer[4]; // unknown01 offset
 		std::string new_message;
-		TDSToServerTextLink(new_message, old_message);
+		TDSToServerSayLink(new_message, old_message);
 
 		__packet->size = sizeof(Emote_Struct);
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -4893,6 +5629,92 @@ namespace TDS
 		DECODE_FORWARD(OP_GroupInvite);
 	}
 
+	DECODE(OP_GuildBank)
+	{
+		// all actions are 1 off due to the removal of one of enums
+		switch (__packet->ReadUInt32()) {
+		case 2: {// GuildBankPromote
+			DECODE_LENGTH_EXACT(structs::GuildBankPromote_Struct);
+			SETUP_DIRECT_DECODE(GuildBankPromote_Struct, structs::GuildBankPromote_Struct);
+			emu->Action = 3;
+			IN(Unknown04);
+			IN(Slot);
+			IN(Slot2);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 3: { // GuildBankViewItem
+			DECODE_LENGTH_EXACT(structs::GuildBankViewItem_Struct);
+			SETUP_DIRECT_DECODE(GuildBankViewItem_Struct, structs::GuildBankViewItem_Struct);
+			emu->Action = 4;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Area);
+			IN(Unknown12);
+			IN(Unknown16);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 4: { // GuildBankDeposit
+			__packet->WriteUInt32(5);
+			return;
+		}
+		case 5: { // GuildBankPermissions
+			DECODE_LENGTH_EXACT(structs::GuildBankPermissions_Struct);
+			SETUP_DIRECT_DECODE(GuildBankPermissions_Struct, structs::GuildBankPermissions_Struct);
+			emu->Action = 6;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Unknown10);
+			IN(ItemID);
+			IN(Permissions);
+			strn0cpy(emu->MemberName, eq->MemberName, 64);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 6: { // GuildBankWithdraw
+			DECODE_LENGTH_EXACT(structs::GuildBankWithdrawItem_Struct);
+			SETUP_DIRECT_DECODE(GuildBankWithdrawItem_Struct, structs::GuildBankWithdrawItem_Struct);
+			emu->Action = 7;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Area);
+			IN(Unknown12);
+			IN(Quantity);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 7: { // GuildBankSplitStacks
+			DECODE_LENGTH_EXACT(structs::GuildBankWithdrawItem_Struct);
+			SETUP_DIRECT_DECODE(GuildBankWithdrawItem_Struct, structs::GuildBankWithdrawItem_Struct);
+			emu->Action = 8;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Area);
+			IN(Unknown12);
+			IN(Quantity);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 8: { // GuildBankMergeStacks
+			DECODE_LENGTH_EXACT(structs::GuildBankWithdrawItem_Struct);
+			SETUP_DIRECT_DECODE(GuildBankWithdrawItem_Struct, structs::GuildBankWithdrawItem_Struct);
+			emu->Action = 9;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Area);
+			IN(Unknown12);
+			IN(Quantity);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		default:
+			LogNetcode("Unhandled OP_GuildBank action");
+			__packet->SetOpcode(OP_Unknown); /* invalidate the packet */
+			return;
+		}
+	}
+
 	DECODE(OP_GuildDemote)
 	{
 		DECODE_LENGTH_EXACT(structs::GuildDemoteStruct);
@@ -4900,7 +5722,7 @@ namespace TDS
 
 		strn0cpy(emu->target, eq->target, sizeof(emu->target));
 		strn0cpy(emu->name, eq->name, sizeof(emu->name));
-		// IN(rank);
+		IN(rank);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4924,6 +5746,38 @@ namespace TDS
 		SETUP_DIRECT_DECODE(GuildStatus_Struct, structs::GuildStatus_Struct);
 
 		memcpy(emu->Name, eq->Name, sizeof(emu->Name));
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_GuildTributeDonateItem)
+	{
+		DECODE_LENGTH_EXACT(structs::GuildTributeDonateItemRequest_Struct);
+		SETUP_DIRECT_DECODE(GuildTributeDonateItemRequest_Struct, structs::GuildTributeDonateItemRequest_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "TDS::DECODE(OP_GuildTributeDonateItem)");
+
+		IN(type);
+		IN(slot);
+		IN(sub_index);
+		IN(aug_index);
+		IN(unknown10);
+		IN(quantity);
+		IN(tribute_master_id);
+		IN(unknown20);
+		IN(guild_id);
+		IN(unknown28);
+		IN(unknown32);
+
+		structs::InventorySlot_Struct iss;
+		iss.Slot = eq->slot;
+		iss.SubIndex = eq->sub_index;
+		iss.AugIndex = eq->aug_index;
+		iss.Type = eq->type;
+		iss.Unknown01 = 0;
+		iss.Unknown02 = 0;
+
+		emu->slot = TDSToServerSlot(iss);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4992,7 +5846,7 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::ItemVerifyRequest_Struct);
 		SETUP_DIRECT_DECODE(ItemVerifyRequest_Struct, structs::ItemVerifyRequest_Struct);
 
-		emu->slot = TDSToServerSlot(eq->slot);
+		emu->slot = TDSToServerSlot(eq->inventory_slot);
 		IN(target);
 
 		FINISH_DIRECT_DECODE();
@@ -5019,11 +5873,11 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "TDS::DECODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "TDS::DECODE(OP_LootItem)");
 
 		IN(lootee);
 		IN(looter);
-		emu->slot_id = TDSToServerCorpseSlot(eq->slot_id);
+		emu->slot_id = TDSToServerCorpseMainSlot(eq->slot_id);
 		IN(auto_loot);
 
 		FINISH_DIRECT_DECODE();
@@ -5034,13 +5888,13 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "TDS::DECODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "TDS::DECODE(OP_MoveItem)");
 		
 		emu->from_slot = TDSToServerSlot(eq->from_slot);
 		emu->to_slot = TDSToServerSlot(eq->to_slot);
 		IN(number_in_stack);
 		
-		//LogNetcode("[RoF2] MoveItem Slot from [{}] to [{}], Number [{}]", emu->from_slot, emu->to_slot, emu->number_in_stack);
+		//LogNetcode("[TDS] MoveItem Slot from [{}] to [{}], Number [{}]", emu->from_slot, emu->to_slot, emu->number_in_stack);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -5060,37 +5914,47 @@ namespace TDS
 	{
 		DECODE_LENGTH_ATLEAST(structs::RaidGeneral_Struct);
 
-		// This is a switch on the RaidGeneral action
-		switch (*(uint32 *)__packet->pBuffer) {
-			case 35: { // raidMOTD
-				// we don't have a nice macro for this
-				structs::RaidMOTD_Struct *__eq_buffer = (structs::RaidMOTD_Struct *)__packet->pBuffer;
-				__eq_buffer->motd[1023] = '\0';
-				size_t motd_size = strlen(__eq_buffer->motd) + 1;
-				__packet->size = sizeof(RaidMOTD_Struct) + motd_size;
-				__packet->pBuffer = new unsigned char[__packet->size];
-				RaidMOTD_Struct *emu = (RaidMOTD_Struct *)__packet->pBuffer;
-				structs::RaidMOTD_Struct *eq = (structs::RaidMOTD_Struct *)__eq_buffer;
-				strn0cpy(emu->general.player_name, eq->general.player_name, 64);
-				strn0cpy(emu->motd, eq->motd, motd_size);
-				IN(general.action);
-				IN(general.parameter);
-				FINISH_DIRECT_DECODE();
-				break;
-			 }
-			case 36: { // raidPlayerNote unhandled
-				break;
-			}
-			default: {
-				DECODE_LENGTH_EXACT(structs::RaidGeneral_Struct);
-				SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
-				strn0cpy(emu->leader_name, eq->leader_name, 64);
-				strn0cpy(emu->player_name, eq->player_name, 64);
-				IN(action);
-				IN(parameter);
-				FINISH_DIRECT_DECODE();
-				break;
-			}
+		RaidGeneral_Struct* rgs = (RaidGeneral_Struct*)__packet->pBuffer;
+
+		switch (rgs->action)
+		{
+		case raidSetMotd:
+		{
+			SETUP_VAR_DECODE(RaidMOTD_Struct, structs::RaidMOTD_Struct, motd);
+
+			IN(general.action);
+			IN(general.parameter);
+			IN_str(general.leader_name);
+			IN_str(general.player_name);
+			IN_str(motd);
+
+			FINISH_VAR_DECODE();
+			break;
+		}
+		case raidSetNote:
+		{
+			SETUP_VAR_DECODE(RaidNote_Struct, structs::RaidNote_Struct, note);
+
+			IN(general.action);
+			IN(general.parameter);
+			IN_str(general.leader_name);
+			IN_str(general.player_name);
+			IN_str(note);
+
+			FINISH_VAR_DECODE();
+			break;
+		}
+		default:
+		{
+			SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
+			IN(action);
+			IN(parameter);
+			IN_str(leader_name);
+			IN_str(player_name);
+
+			FINISH_DIRECT_DECODE();
+			break;
+		}
 		}
 	}
 
@@ -5100,7 +5964,8 @@ namespace TDS
 		SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 
 		IN(type);
-		IN(invslot);
+		emu->invslot = static_cast<int16_t>(TDSToServerTypelessSlot(eq->invslot, invtype::typePossessions));
+		IN(target_id);
 		emu->window = (uint8)eq->window;
 		strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
 
@@ -5186,7 +6051,7 @@ namespace TDS
 		SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 
 		IN(npcid);
-		emu->itemslot = TDSToServerMainInvSlot(eq->itemslot);
+		emu->itemslot = TDSToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 		//IN(itemslot);
 		IN(quantity);
 		IN(price);
@@ -5194,55 +6059,78 @@ namespace TDS
 		FINISH_DIRECT_DECODE();
 	}
 
-	DECODE(OP_ShopRequest)
+	DECODE(OP_ShopSendParcel)
 	{
-		DECODE_LENGTH_EXACT(structs::Merchant_Click_Struct);
-		SETUP_DIRECT_DECODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
+		DECODE_LENGTH_EXACT(structs::Parcel_Struct);
+		SETUP_DIRECT_DECODE(Parcel_Struct, structs::Parcel_Struct);
 
-		IN(npcid);
-		IN(playerid);
-		IN(command);
-		IN(rate);
+		IN(npc_id);
+		IN(quantity);
+		IN(money_flag);
+		emu->item_slot = TDSToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
+		strn0cpy(emu->send_to, eq->send_to, sizeof(emu->send_to));
+		strn0cpy(emu->note, eq->note, sizeof(emu->note));
 
 		FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_Trader)
 	{
-		uint32 psize = __packet->size;
-		if (psize == sizeof(structs::ClickTrader_Struct))
-		{
-			DECODE_LENGTH_EXACT(structs::ClickTrader_Struct);
-			SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::ClickTrader_Struct);
+		auto action = *(uint32 *)__packet->pBuffer;
 
-			emu->Code = eq->Code;
-			// Live actually has 200 items now, but 80 is the most our internal struct supports
-			for (uint32 i = 0; i < 80; i++)
-			{
-				emu->SerialNumber[i] = 0;	// eq->SerialNumber[i];
-				emu->ItemCost[i] = eq->ItemCost[i];
+		switch (action) {
+			case structs::TDSBazaarTraderBuyerActions::BeginTraderMode: {
+				DECODE_LENGTH_EXACT(structs::BeginTrader_Struct);
+				SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::BeginTrader_Struct);
+				LogTrading("(TDS) BeginTraderMode action <green>[{}]", action);
+
+				emu->action = TraderOn;
+				std::copy_n(eq->item_cost, TDS::invtype::BAZAAR_SIZE, emu->item_cost);
+				std::transform(
+					std::begin(eq->items),
+					std::end(eq->items),
+					std::begin(emu->serial_number),
+					[&](const structs::TraderItemSerial_Struct x) {
+						return Strings::ToUnsignedBigInt(x.SerialNumber,0);
+					}
+				);
+
+				FINISH_DIRECT_DECODE();
+				break;
 			}
+			case structs::TDSBazaarTraderBuyerActions::EndTraderMode: {
+				DECODE_LENGTH_EXACT(structs::Trader_ShowItems_Struct);
+				SETUP_DIRECT_DECODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				LogTrading("(TDS) EndTraderMode action <green>[{}]", action);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == sizeof(structs::Trader_ShowItems_Struct))
-		{
-			DECODE_LENGTH_EXACT(structs::Trader_ShowItems_Struct);
-			SETUP_DIRECT_DECODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				emu->action    = TraderOff;
+				emu->entity_id = eq->entity_id;
 
-			emu->Code = eq->Code;
-			emu->TraderID = eq->TraderID;
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TDSBazaarTraderBuyerActions::ListTraderItems: {
+				LogTrading("(TDS) ListTraderItems action <green>[{}]", action);
+				break;
+			}
+			case structs::TDSBazaarTraderBuyerActions::PriceUpdate: {
+				DECODE_LENGTH_EXACT(structs::TraderPriceUpdate_Struct);
+				SETUP_DIRECT_DECODE(TraderPriceUpdate_Struct, structs::TraderPriceUpdate_Struct);
+				LogTrading("(TDS) PriceUpdate action <green>[{}]", action);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == sizeof(structs::TraderStatus_Struct))
-		{
-			DECODE_LENGTH_EXACT(structs::TraderStatus_Struct);
-			SETUP_DIRECT_DECODE(TraderStatus_Struct, structs::TraderStatus_Struct);
+				emu->Action       = PriceUpdate;
+				emu->SerialNumber = Strings::ToUnsignedBigInt(eq->serial_number, 0);
+				if (emu->SerialNumber == 0) {
+					LogTrading("(TDS) Price change with invalid serial number <red>[{}]", eq->serial_number);
+				}
+				emu->NewPrice = eq->new_price;
 
-			emu->Code = eq->Code;	// 11 = Start Trader, 2 = End Trader, 22 = ? - Guessing
-
-			FINISH_DIRECT_DECODE();
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			default: {
+				LogTrading("(TDS) Unhandled action <red>[{}]", action);
+			}
 		}
 	}
 
@@ -5250,73 +6138,136 @@ namespace TDS
 	{
 		DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
 		SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+		LogTrading(
+			"(TDS) item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+			eq->item_id,
+			eq->price,
+			eq->quantity,
+			eq->trader_id
+		);
 
-		IN(Action);
-		IN(Price);
-		IN(TraderID);
-		memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
-		IN(ItemID);
-		IN(Quantity);
+		IN(action);
+		IN(price);
+		IN(trader_id);
+		memcpy(emu->item_name, eq->item_name, sizeof(emu->item_name));
+		IN(item_id);
+		IN(quantity);
 
 		FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_TraderShop)
 	{
-		uint32 psize = __packet->size;
-		if (psize == sizeof(structs::TraderClick_Struct))
-		{
-			DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
-			SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
+		uint32 action = *(uint32 *)__packet->pBuffer;
 
-			IN(Code);
-			IN(TraderID);
-			IN(Approval);
-			LogTrading("DECODE(OP_TraderShop): TraderClick_Struct Code [{}], TraderID [{}], Approval [{}]",
-				eq->Code, eq->TraderID, eq->Approval);
+		switch (action) {
+			case structs::TDSBazaarTraderBuyerActions::BazaarSearch: {
+				DECODE_LENGTH_EXACT(structs::BazaarSearch_Struct);
+				SETUP_DIRECT_DECODE(BazaarSearchCriteria_Struct, structs::BazaarSearch_Struct);
+				LogTrading(
+					"(TDS) BazaarSearch action <green>[{}]",
+					action
+				);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == sizeof(structs::BazaarWelcome_Struct))
-		{
-			// Don't think this size gets used in RoF+ - Leaving for now...
-			DECODE_LENGTH_EXACT(structs::BazaarWelcome_Struct);
-			SETUP_DIRECT_DECODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+				__packet->SetOpcode(OP_BazaarSearch);
+				emu->action = BazaarSearch;
+				emu->type   = eq->type == UINT32_MAX ? UINT8_MAX : eq->type;
+				IN(item_stat);
+				IN(max_cost);
+				IN(min_cost);
+				IN(max_level);
+				IN(min_level);
+				IN(race);
+				IN(slot);
+				IN(trader_id);
+				IN(_class);
+				IN(prestige);
+				IN(search_scope);
+				IN(max_results);
+				IN(augment);
+				IN_str(item_name);
 
-			emu->Beginning.Action = eq->Code;
-			IN(Traders);
-			IN(Items);
-			LogTrading("DECODE(OP_TraderShop): BazaarWelcome_Struct Code [{}], Traders [{}], Items [{}]",
-				eq->Code, eq->Traders, eq->Items);
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TDSBazaarTraderBuyerActions::ClickTrader: {
+				DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
+				SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == sizeof(structs::TraderBuy_Struct))
-		{
+				emu->Code     = ClickTrader;
+				emu->TraderID = eq->trader_id;
+				emu->Unknown008 = eq->unknown_008;
+				LogTrading("(TDS) ClickTrader action <green>[{}], trader_id <green>[{}], approval <green>[{}]",
+						   eq->action,
+						   eq->trader_id,
+						   eq->unknown_008
+				);
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TDSBazaarTraderBuyerActions::BazaarInspect: {
+				DECODE_LENGTH_EXACT(structs::BazaarInspect_Struct);
+				SETUP_DIRECT_DECODE(BazaarInspect_Struct, structs::BazaarInspect_Struct);
 
-			DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
-			SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				__packet->SetOpcode(OP_BazaarSearch);
+				IN(item_id);
+				IN(trader_id);
+				emu->action        = BazaarInspect;
+				emu->serial_number = Strings::ToUnsignedInt(eq->serial_number, 0);
+				if (emu->serial_number == 0) {
+					LogTrading(
+						"(TDS) trader_id = <green>[{}] requested a BazaarInspect with an invalid serial number of <red>[{}]",
+						eq->trader_id,
+						eq->serial_number
+					);
+					FINISH_DIRECT_DECODE();
+					return;
+				}
 
-			IN(Action);
-			IN(Price);
-			IN(TraderID);
-			memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
-			IN(ItemID);
-			IN(Quantity);
-			LogTrading("DECODE(OP_TraderShop): TraderBuy_Struct (Unknowns) Unknown004 [{}], Unknown008 [{}], Unknown012 [{}], Unknown076 [{}], Unknown276 [{}]",
-				eq->Unknown004, eq->Unknown008, eq->Unknown012, eq->Unknown076, eq->Unknown276);
-			LogTrading("DECODE(OP_TraderShop): TraderBuy_Struct Buy Action [{}], Price [{}], Trader [{}], ItemID [{}], Quantity [{}], ItemName, [{}]",
-				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, eq->ItemName);
+				LogTrading("(TDS) BazaarInspect action <green>[{}] item_id <green>[{}] serial_number <green>[{}]",
+						   action,
+						   eq->item_id,
+						   eq->serial_number
+				);
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TDSBazaarTraderBuyerActions::WelcomeMessage: {
+				__packet->SetOpcode(OP_BazaarSearch);
+				LogTrading("(TDS) WelcomeMessage action <green>[{}]", action);
+				break;
+			}
+			case structs::TDSBazaarTraderBuyerActions::BuyTraderItem: {
+				DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
+				SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				LogTrading(
+					"(TDS) item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+					eq->item_id,
+					eq->price,
+					eq->quantity,
+					eq->trader_id
+				);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == 4)
-		{
-			LogTrading("DECODE(OP_TraderShop): Forwarding packet as-is with size 4");
-		}
-		else
-		{
-			LogTrading("DECODE(OP_TraderShop): Decode Size Unknown ([{}])", psize);
+				__packet->SetOpcode(OP_TraderBuy);
+				IN(action);
+				IN(method);
+				IN(trader_id);
+				IN(item_id);
+				IN(price);
+				IN(already_sold);
+				IN(quantity);
+				IN_str(buyer_name);
+				IN_str(seller_name);
+				IN_str(item_name);
+				IN_str(serial_number);
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			default: {
+				LogTrading("(TDS) Unhandled action <red>[{}]", action);
+			}
+			return;
 		}
 	}
 
@@ -5325,11 +6276,7 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
 		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
-		int16 slot_id = TDSToServerSlot(eq->container_slot);
-		if (slot_id == 4000) {
-			slot_id = 1000; // legacy::SLOT_TRADESKILL;	// 1000
-		}
-		emu->container_slot = slot_id;
+		emu->container_slot = TDSToServerSlot(eq->container_slot);
 		emu->guildtribute_slot = TDSToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
@@ -5340,7 +6287,7 @@ namespace TDS
 		DECODE_LENGTH_EXACT(structs::TributeItem_Struct);
 		SETUP_DIRECT_DECODE(TributeItem_Struct, structs::TributeItem_Struct);
 
-		emu->slot = TDSToServerSlot(eq->slot);
+		emu->slot = TDSToServerSlot(eq->inventory_slot);
 		IN(quantity);
 		IN(tribute_master_id);
 		IN(tribute_points);
@@ -5416,128 +6363,120 @@ namespace TDS
 		return NextItemInstSerialNumber;
 	}
 
-	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance* inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type)
+	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance *inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type)
 	{
-		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		uint8 null_term = 0;
-		bool stackable = inst->IsStackable();
-		uint32 merchant_slot = inst->GetMerchantSlot();
-		uint32 charges = inst->GetCharges();
-		if (!stackable && charges > 254)
-			charges = 0xFFFFFFFF;
-
-		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
 		const EQ::ItemData *item = inst->GetUnscaledItem();
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Serialize called for: %s", item->Name);
 
 		TDS::structs::ItemSerializationHeader hdr;
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
+		strn0cpy(hdr.unknown000, fmt::format("{:016}\0", inst->GetSerialNumber()).c_str(),sizeof(hdr.unknown000));
 
-		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
-
-		hdr.stacksize = stackable ? charges : 1;
+		hdr.stacksize =
+			item->ID == PARCEL_MONEY_ITEM_ID ? inst->GetPrice() : (inst->IsStackable() ? ((inst->GetCharges() > 1000)
+				? 0xFFFFFFFF : inst->GetCharges()) : 1);
 		hdr.unknown004 = 0;
 
-		structs::ItemSlotStruct slot_id = ServerToTDSSlot(slot_id_in, packet_type);
+		structs::InventorySlot_Struct slot_id{};
+		switch (packet_type) {
+		case ItemPacketLoot:
+			slot_id = ServerToTDSCorpseSlot(slot_id_in);
+			break;
+		default:
+			slot_id = ServerToTDSSlot(slot_id_in);
+			break;
+		}
 
-		hdr.slot_type = (merchant_slot == 0) ? slot_id.SlotType : 9; // 9 is merchant 20 is reclaim items?
-		hdr.main_slot = (merchant_slot == 0) ? slot_id.MainSlot : merchant_slot;
-		hdr.sub_slot = (merchant_slot == 0) ? slot_id.SubSlot : 0xffff;
-		hdr.aug_slot = (merchant_slot == 0) ? slot_id.AugSlot : 0xffff;
-		hdr.price = inst->GetPrice();
-		hdr.merchant_slot = (merchant_slot == 0) ? 1 : inst->GetMerchantCount();
-		hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
-		hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
-		hdr.unknown028 = 0;
+		hdr.slot_type      = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
+		hdr.main_slot      = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
+		hdr.sub_slot       = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
+		hdr.aug_slot       = (inst->GetMerchantSlot() ? 0xffff : slot_id.AugIndex);
+		hdr.price          = inst->GetPrice();
+		hdr.merchant_slot  = ((inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1));
+		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
+		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
+		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
 		hdr.last_cast_time = inst->GetRecastTimestamp();
-		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
-		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
-		hdr.unknown044 = 0;
-		hdr.unknown048 = 0;
-		hdr.unknown052 = 0;
-		hdr.isEvolving = item->EvolvingLevel > 0 ? 1 : 0;
-		ss.write((const char*)&hdr, sizeof(TDS::structs::ItemSerializationHeader));
+		hdr.charges        = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254)
+			? 0xFFFFFFFF
+			: inst->GetCharges()));
+		hdr.inst_nodrop    = (inst->IsAttuned() ? 1 : 0);
+		hdr.unknown044     = 0;
+		hdr.unknown048     = 0;
+		hdr.unknown052     = 0;
+		hdr.isEvolving     = item->EvolvingItem;
 
-		if (item->EvolvingLevel > 0) {
+		ob.write((const char*)&hdr, sizeof(TDS::structs::ItemSerializationHeader));
+
+		if (item->EvolvingItem > 0) {
 			TDS::structs::EvolvingItem evotop;
+
 			evotop.unknown001 = 0;
 			evotop.unknown002 = 0;
 			evotop.unknown003 = 0;
 			evotop.unknown004 = 0;
 			evotop.evoLevel = item->EvolvingLevel;
-			evotop.progress = 95.512;
+			evotop.progress = 0;
 			evotop.Activated = 1;
-			evotop.evomaxlevel = 7;
-			ss.write((const char*)&evotop, sizeof(TDS::structs::EvolvingItem));
-		}
-		//ORNAMENT IDFILE / ICON
-		uint32 ornaIcon = 0;
-		uint32 heroModel = 0;
+			evotop.evomaxlevel = item->EvolvingMax;
 
-		if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon())
-		{
-			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
-			//Mainhand
-			ss.write(tmp, strlen(tmp));
-			ss.write((const char*)&null_term, sizeof(uint8));
-			//Offhand
-			ss.write(tmp, strlen(tmp));
-			ss.write((const char*)&null_term, sizeof(uint8));
-			ornaIcon = inst->GetOrnamentationIcon();
-			heroModel = inst->GetOrnamentHeroModel(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id_in));
+			ob.write((const char*)&evotop, sizeof(TDS::structs::EvolvingItem));
 		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8)); // no main hand Ornamentation
-			ss.write((const char*)&null_term, sizeof(uint8)); // no off hand Ornamentation
+
+		/**
+		 * Ornamentation
+		 */
+		uint32 ornamentation_icon         = (inst->GetOrnamentationIcon() ? inst->GetOrnamentationIcon() : 0);
+		uint32 hero_model                 = 0;
+
+		if (inst->GetOrnamentationIDFile()) {
+			hero_model = inst->GetOrnamentHeroModel(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id_in));
+
+			char tmp[30];
+			memset(tmp, 0x0, 30);
+			sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
+
+			//Mainhand
+			ob.write(tmp, strlen(tmp));
+			ob.write("\0", 1);
+
+			//Offhand
+			ob.write(tmp, strlen(tmp));
+			ob.write("\0", 1);
+		}
+		else {
+			ob.write("\0", 1); // no main hand Ornamentation
+			ob.write("\0", 1); // no off hand Ornamentation
 		}
 
 		TDS::structs::ItemSerializationHeaderFinish hdrf;
-		hdrf.ornamentIcon = ornaIcon;
+
+		hdrf.ornamentIcon = ornamentation_icon;
 		hdrf.unknowna1 = 0xffffffff;
-		hdrf.ornamentHeroModel = heroModel;
+		hdrf.ornamentHeroModel = hero_model;
 		hdrf.unknown063 = 0;
 		hdrf.Copied = 0;
 		hdrf.unknowna4 = 0xffffffff;
 		hdrf.unknowna5 = 0;
 		hdrf.ItemClass = item->ItemClass;
 
-		ss.write((const char*)&hdrf, sizeof(TDS::structs::ItemSerializationHeaderFinish));
+		ob.write((const char*)&hdrf, sizeof(TDS::structs::ItemSerializationHeaderFinish));
 
-		if (strlen(item->Name) > 0)
-		{
-			ss.write(item->Name, strlen(item->Name));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
+		if (strlen(item->Name) > 0) {
+			ob.write(item->Name, strlen(item->Name));
+			ob.write("\0", 1);
 		}
 
 		if (strlen(item->Lore) > 0)
-		{
-			ss.write(item->Lore, strlen(item->Lore));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write(item->Lore, strlen(item->Lore));
+		ob.write("\0", 1);
 
 		if (strlen(item->IDFile) > 0)
-		{
-			ss.write(item->IDFile, strlen(item->IDFile));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write(item->IDFile, strlen(item->IDFile));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&null_term, sizeof(uint8));
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody struct is %i bytes", sizeof(TDS::structs::ItemBodyStruct));
+		ob.write("\0", 1);
+
 		TDS::structs::ItemBodyStruct ibs;
 		memset(&ibs, 0, sizeof(TDS::structs::ItemBodyStruct));
 
@@ -5579,7 +6518,7 @@ namespace TDS
 		ibs.Races = item->Races;
 		ibs.Deity = item->Deity;
 		ibs.SkillModValue = item->SkillModValue;
-		ibs.SkillModMax = 0xffffffff;
+		ibs.SkillModMax = item->SkillModMax;
 		ibs.SkillModType = (int8)(item->SkillModType);
 		ibs.SkillModExtra = 0;
 		ibs.BaneDmgRace = item->BaneDmgRace;
@@ -5588,12 +6527,8 @@ namespace TDS
 		ibs.BaneDmgAmt = item->BaneDmgAmt;
 		ibs.Magic = item->Magic;
 		ibs.CastTime_ = item->CastTime_;
-		ibs.ReqLevel = item->ReqLevel;
-		if (item->ReqLevel > 100)
-			ibs.ReqLevel = 100;
-		ibs.RecLevel = item->RecLevel;
-		if (item->RecLevel > 100)
-			ibs.RecLevel = 100;
+		ibs.ReqLevel = ((item->ReqLevel > 100) ? 100 : item->ReqLevel);
+		ibs.RecLevel = ((item->RecLevel > 100) ? 100 : item->RecLevel);
 		ibs.RecSkill = item->RecSkill;
 		ibs.BardType = item->BardType;
 		ibs.BardValue = item->BardValue;
@@ -5631,20 +6566,13 @@ namespace TDS
 		ibs.FactionAmt4 = item->FactionAmt4;
 		ibs.FactionMod4 = item->FactionMod4;
 
-		ss.write((const char*)&ibs, sizeof(TDS::structs::ItemBodyStruct));
+		ob.write((const char*)&ibs, sizeof(TDS::structs::ItemBodyStruct));
 
 		//charm text
 		if (strlen(item->CharmFile) > 0)
-		{
-			ss.write((const char*)item->CharmFile, strlen(item->CharmFile));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write((const char*)item->CharmFile, strlen(item->CharmFile));
+		ob.write("\0", 1);
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody secondary struct is %i bytes", sizeof(TDS::structs::ItemSecondaryBodyStruct));
 		TDS::structs::ItemSecondaryBodyStruct isbs;
 		memset(&isbs, 0, sizeof(TDS::structs::ItemSecondaryBodyStruct));
 
@@ -5652,11 +6580,10 @@ namespace TDS
 		isbs.augrestrict2 = -1;
 		isbs.augrestrict = item->AugRestrict;
 
-		for (int x = invaug::SOCKET_BEGIN; x < invaug::SOCKET_END; ++x)
-		{
-			isbs.augslots[x].type = item->AugSlotType[x];
-			isbs.augslots[x].visible = item->AugSlotVisible[x];
-			isbs.augslots[x].unknown = item->AugSlotUnk2[x];
+		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
+			isbs.augslots[index].type = item->AugSlotType[index];
+			isbs.augslots[index].visible = item->AugSlotVisible[index];
+			isbs.augslots[index].unknown = item->AugSlotUnk2[index];
 		}
 
 		isbs.ldonpoint_type = item->PointType;
@@ -5673,19 +6600,12 @@ namespace TDS
 		isbs.book = item->Book;
 		isbs.booktype = item->BookType;
 
-		ss.write((const char*)&isbs, sizeof(TDS::structs::ItemSecondaryBodyStruct));
+		ob.write((const char*)&isbs, sizeof(TDS::structs::ItemSecondaryBodyStruct));
 
 		if (strlen(item->Filename) > 0)
-		{
-			ss.write((const char*)item->Filename, strlen(item->Filename));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write((const char*)item->Filename, strlen(item->Filename));
+		ob.write("\0", 1);
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody tertiary struct is %i bytes", sizeof(TDS::structs::ItemTertiaryBodyStruct));
 		TDS::structs::ItemTertiaryBodyStruct itbs;
 		memset(&itbs, 0, sizeof(TDS::structs::ItemTertiaryBodyStruct));
 
@@ -5706,10 +6626,17 @@ namespace TDS
 		itbs.unknown5 = 0;
 
 		itbs.potion_belt_enabled = item->PotionBelt;
-		itbs.potion_belt_slots = item->PotionBeltSlots;
-		itbs.stacksize = stackable ? item->StackSize : 0;
-		itbs.no_transfer = item->NoTransfer;
-		itbs.expendablearrow = item->ExpendableArrow;
+		itbs.potion_belt_slots   = item->PotionBeltSlots;
+		itbs.stacksize           =
+			item->ID == PARCEL_MONEY_ITEM_ID ? 0x7FFFFFFF : ((inst->IsStackable() ? item->StackSize : 0));
+		itbs.no_transfer         = item->NoTransfer;
+		itbs.expendablearrow     = item->ExpendableArrow;
+
+		// Done to hack older clients to label expendable fishing poles as such
+		// July 28th, 2018 patch
+		if (item->ItemType == EQ::item::ItemTypeFishingPole && item->SubType == 0) {
+			itbs.expendablearrow = 1;
+		}
 
 		itbs.unknown8 = 0;
 		itbs.unknown9 = 0;
@@ -5719,12 +6646,11 @@ namespace TDS
 		itbs.unknown13 = 0;
 		itbs.unknown14 = 0;
 
-		ss.write((const char*)&itbs, sizeof(TDS::structs::ItemTertiaryBodyStruct));
+		ob.write((const char*)&itbs, sizeof(TDS::structs::ItemTertiaryBodyStruct));
 
 		// Effect Structures Broken down to allow variable length strings for effect names
 		int32 effect_unknown = 0;
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody Click effect struct is %i bytes", sizeof(TDS::structs::ClickEffectStruct));
 		TDS::structs::ClickEffectStruct ices;
 		memset(&ices, 0, sizeof(TDS::structs::ClickEffectStruct));
 
@@ -5737,21 +6663,14 @@ namespace TDS
 		ices.recast = item->RecastDelay;
 		ices.recast_type = item->RecastType;
 
-		ss.write((const char*)&ices, sizeof(TDS::structs::ClickEffectStruct));
+		ob.write((const char*)&ices, sizeof(TDS::structs::ClickEffectStruct));
 
 		if (strlen(item->ClickName) > 0)
-		{
-			ss.write((const char*)item->ClickName, strlen(item->ClickName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write((const char*)item->ClickName, strlen(item->ClickName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody proc effect struct is %i bytes", sizeof(TDS::structs::ProcEffectStruct));
 		TDS::structs::ProcEffectStruct ipes;
 		memset(&ipes, 0, sizeof(TDS::structs::ProcEffectStruct));
 
@@ -5761,21 +6680,14 @@ namespace TDS
 		ipes.level = item->Proc.Level;
 		ipes.procrate = item->ProcRate;
 
-		ss.write((const char*)&ipes, sizeof(TDS::structs::ProcEffectStruct));
+		ob.write((const char*)&ipes, sizeof(TDS::structs::ProcEffectStruct));
 
 		if (strlen(item->ProcName) > 0)
-		{
-			ss.write((const char*)item->ProcName, strlen(item->ProcName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write((const char*)item->ProcName, strlen(item->ProcName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody worn effect struct is %i bytes", sizeof(TDS::structs::WornEffectStruct));
 		TDS::structs::WornEffectStruct iwes;
 		memset(&iwes, 0, sizeof(TDS::structs::WornEffectStruct));
 
@@ -5784,19 +6696,13 @@ namespace TDS
 		iwes.type = item->Worn.Type;
 		iwes.level = item->Worn.Level;
 
-		ss.write((const char*)&iwes, sizeof(TDS::structs::WornEffectStruct));
+		ob.write((const char*)&iwes, sizeof(TDS::structs::WornEffectStruct));
 
 		if (strlen(item->WornName) > 0)
-		{
-			ss.write((const char*)item->WornName, strlen(item->WornName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write((const char*)item->WornName, strlen(item->WornName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		TDS::structs::WornEffectStruct ifes;
 		memset(&ifes, 0, sizeof(TDS::structs::WornEffectStruct));
@@ -5806,19 +6712,13 @@ namespace TDS
 		ifes.type = item->Focus.Type;
 		ifes.level = item->Focus.Level;
 
-		ss.write((const char*)&ifes, sizeof(TDS::structs::WornEffectStruct));
+		ob.write((const char*)&ifes, sizeof(TDS::structs::WornEffectStruct));
 
 		if (strlen(item->FocusName) > 0)
-		{
-			ss.write((const char*)item->FocusName, strlen(item->FocusName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write((const char*)item->FocusName, strlen(item->FocusName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		TDS::structs::WornEffectStruct ises;
 		memset(&ises, 0, sizeof(TDS::structs::WornEffectStruct));
@@ -5828,19 +6728,13 @@ namespace TDS
 		ises.type = item->Scroll.Type;
 		ises.level = item->Scroll.Level;
 
-		ss.write((const char*)&ises, sizeof(TDS::structs::WornEffectStruct));
+		ob.write((const char*)&ises, sizeof(TDS::structs::WornEffectStruct));
 
 		if (strlen(item->ScrollName) > 0)
-		{
-			ss.write((const char*)item->ScrollName, strlen(item->ScrollName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
+			ob.write((const char*)item->ScrollName, strlen(item->ScrollName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		// Bard Effect?
 		TDS::structs::WornEffectStruct ibes;
@@ -5852,21 +6746,20 @@ namespace TDS
 		ibes.level = item->Bard.Level;
 		//ibes.unknown6 = 0xffffffff;
 
-		ss.write((const char*)&ibes, sizeof(TDS::structs::WornEffectStruct));
+		ob.write((const char*)&ibes, sizeof(TDS::structs::WornEffectStruct));
 
 		/*
 		if(strlen(item->BardName) > 0)
 		{
-		ss.write((const char*)item->BardName, strlen(item->BardName));
-		ss.write((const char*)&null_term, sizeof(uint8));
+		ob.write((const char*)item->BardName, strlen(item->BardName));
+		ob.write((const char*)&null_term, sizeof(uint8));
 		}
 		else */
-		ss.write((const char*)&null_term, sizeof(uint8));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 		// End of Effects
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody Quaternary effect struct is %i bytes", sizeof(TDS::structs::ItemQuaternaryBodyStruct));
 		TDS::structs::ItemQuaternaryBodyStruct iqbs;
 		memset(&iqbs, 0, sizeof(TDS::structs::ItemQuaternaryBodyStruct));
 
@@ -5892,408 +6785,500 @@ namespace TDS
 		iqbs.HeroicSVCorrup = item->HeroicSVCorrup;
 		iqbs.HealAmt = item->HealAmt;
 		iqbs.SpellDmg = item->SpellDmg;
-		iqbs.clairvoyance = item->Clairvoyance;
+		iqbs.Clairvoyance = item->Clairvoyance;
+		iqbs.SubType = item->SubType;
 
 		//unknown18;	//Power Source Capacity or evolve filename?
 		//evolve_string; // Some String, but being evolution related is just a guess
 
 		iqbs.Heirloom = 0;
 		iqbs.Placeable = 0;
-
 		iqbs.unknown28 = -1;
 		iqbs.unknown30 = -1;
-
 		iqbs.NoZone = 0;
 		iqbs.NoGround = 0;
 		iqbs.unknown37a = 0;	// (guessed position) New to RoF2
 		iqbs.unknown38 = 0;
-
 		iqbs.unknown39 = 1;
 
-		iqbs.subitem_count = 0;
+		ob.write((const char*)&iqbs, sizeof(TDS::structs::ItemQuaternaryBodyStruct));
 
-		ss.write((const char*)&iqbs, sizeof(TDS::structs::ItemQuaternaryBodyStruct));
-		EQ::OutBuffer::pos_type count_pos = ss.tellp();
+		EQ::OutBuffer::pos_type count_pos = ob.tellp();
+		uint32 subitem_count = 0;
 
-		EQ::OutBuffer SubSerializations;
-		//char *SubSerializations[10]; // <watch>
+		ob.write((const char*)&subitem_count, sizeof(uint32));
 
-		uint32 SubLengths[10];
+		// moved outside of loop since it is not modified within that scope
+		int16 SubSlotNumber = EQ::invbag::SLOT_INVALID;
 
-		for (int x = EQ::invslot::SLOT_BEGIN; x < EQ::invbag::SLOT_COUNT; ++x) {
+		if (slot_id_in <= EQ::invslot::GENERAL_END && slot_id_in >= EQ::invslot::GENERAL_BEGIN)
+			SubSlotNumber = EQ::invbag::GENERAL_BAGS_BEGIN + ((slot_id_in - EQ::invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+		else if (slot_id_in == EQ::invslot::slotCursor)
+			SubSlotNumber = EQ::invbag::CURSOR_BAG_BEGIN;
+		else if (slot_id_in <= EQ::invslot::BANK_END && slot_id_in >= EQ::invslot::BANK_BEGIN)
+			SubSlotNumber = EQ::invbag::BANK_BAGS_BEGIN + ((slot_id_in - EQ::invslot::BANK_BEGIN) * EQ::invbag::SLOT_COUNT);
+		else if (slot_id_in <= EQ::invslot::SHARED_BANK_END && slot_id_in >= EQ::invslot::SHARED_BANK_BEGIN)
+			SubSlotNumber = EQ::invbag::SHARED_BANK_BAGS_BEGIN + ((slot_id_in - EQ::invslot::SHARED_BANK_BEGIN) * EQ::invbag::SLOT_COUNT);
+		else
+			SubSlotNumber = slot_id_in; // not sure if this is the best way to handle this..leaving for now
 
-			//SubSerializations[x] = nullptr;
+		if (SubSlotNumber != EQ::invbag::SLOT_INVALID) {
+			for (uint32 index = EQ::invbag::SLOT_BEGIN; index <= EQ::invbag::SLOT_END; ++index) {
+				EQ::ItemInstance* sub = inst->GetItem(index);
+				if (!sub)
+					continue;
 
-			const EQ::ItemInstance* subitem = ((const EQ::ItemInstance*)inst)->GetItem(x);
+				ob.write((const char*)&index, sizeof(uint32));
 
-			if (subitem) {
-
-				int SubSlotNumber;
-
-				iqbs.subitem_count++;
-
-				if (slot_id_in >= EQ::invslot::GENERAL_BEGIN && slot_id_in <= EQ::invslot::GENERAL_END) // (< 30) - no cursor?
-					//SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
-					SubSlotNumber = (((slot_id_in + 3) * EQ::invslot::GENERAL_COUNT) + x + 1);
-				else if (slot_id_in >= EQ::invslot::BANK_BEGIN && slot_id_in <= EQ::invslot::BANK_END)
-					//SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
-					SubSlotNumber = (((slot_id_in - EQ::invslot::BANK_BEGIN) * EQ::invbag::SLOT_COUNT) + EQ::invslot::BANK_BEGIN + x);
-				else if (slot_id_in >= EQ::invslot::SHARED_BANK_BEGIN && slot_id_in <= EQ::invslot::SHARED_BANK_END)
-					//SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
-					SubSlotNumber = (((slot_id_in - EQ::invslot::SHARED_BANK_BEGIN) * EQ::invbag::SLOT_COUNT) + EQ::invslot::SHARED_BANK_BEGIN + x);
-				else
-					SubSlotNumber = slot_id_in; // ???????
-
-				/*
-				// TEST CODE: <watch>
-				SubSlotNumber = Inventory::CalcSlotID(slot_id_in, x);
-				*/
-
-				SerializeItem(SubSerializations, subitem, SubSlotNumber, depth + 1, packet_type);
-				//SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1, packet_type);
+				SerializeItem(ob, sub, SubSlotNumber, (depth + 1), packet_type);
+				++subitem_count;
 			}
+
+			if (subitem_count)
+				ob.overwrite(count_pos, (const char*)&subitem_count, sizeof(uint32));
 		}
-
-		ss.write((const char*)&iqbs, sizeof(TDS::structs::ItemQuaternaryBodyStruct));
-
-		for (int x = EQ::invslot::SLOT_BEGIN; x < EQ::invbag::SLOT_COUNT; ++x) {
-
-			if (SubSerializations) {
-
-				ss.write((const char*)&x, sizeof(uint32));
-
-				//ss.write(SubSerializations, SubLengths[x]);
-
-				delete[] &SubSerializations;
-			}
-		}
-
-		/*
-		char* item_serial = new char[ss.tellp()];
-		memset(item_serial, 0, ss.tellp());
-		memcpy(item_serial, ss.str().c_str(), ss.tellp());
-
-		*length = ss.tellp();
-		*/
 	}
 
-	static inline structs::ItemSlotStruct ServerToTDSSlot(uint32 serverSlot, ItemPacketType PacketType)
+	static inline structs::InventorySlot_Struct ServerToTDSSlot(uint32 server_slot)
 	{
-		structs::ItemSlotStruct TDSSlot;
-		TDSSlot.SlotType = INVALID_INDEX;
+		structs::InventorySlot_Struct TDSSlot;
+		TDSSlot.Type = invtype::TYPE_INVALID;
 		TDSSlot.Unknown02 = INULL;
-		TDSSlot.MainSlot = INVALID_INDEX;
-		TDSSlot.SubSlot = INVALID_INDEX;
-		TDSSlot.AugSlot = INVALID_INDEX;
+		TDSSlot.Slot = invslot::SLOT_INVALID;
+		TDSSlot.SubIndex = invbag::SLOT_INVALID;
+		TDSSlot.AugIndex = invaug::SOCKET_INVALID;
 		TDSSlot.Unknown01 = INULL;
 
-		uint32 TempSlot = 0;
+		uint32 TempSlot = EQ::invslot::SLOT_INVALID;
 
-		if (serverSlot < 56 || serverSlot == MainPowerSource) { // Main Inventory and Cursor
-			if (PacketType == ItemPacketLoot)
-			{
-				TDSSlot.SlotType = maps::MapCorpse;
-				TDSSlot.MainSlot = serverSlot - EQ::invslot::CORPSE_BEGIN;
-			}
-			else
-			{
-				TDSSlot.SlotType = maps::MapPossessions;
-				TDSSlot.MainSlot = serverSlot;
-			}
-
-			if (serverSlot == MainPowerSource)
-				TDSSlot.MainSlot = slots::MainPowerSource;
-
-			else if (serverSlot >= MainCursor && PacketType != ItemPacketLoot) // Cursor and Extended Corpse Inventory
-				TDSSlot.MainSlot += 3;
-
-			else if (serverSlot >= MainAmmo) // (> 20)
-				TDSSlot.MainSlot += 1;
+		if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
+			TDSSlot.Type = invtype::typePossessions;
+			TDSSlot.Slot = server_slot;
 		}
 
-		/*else if (ServerSlot < 51) { // Cursor Buffer
-		TDSSlot.SlotType = maps::MapLimbo;
-		TDSSlot.MainSlot = ServerSlot - 31;
-		}*/
+		else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+			TempSlot = server_slot - EQ::invbag::GENERAL_BAGS_BEGIN;
 
-		else if (serverSlot >= EQ::invbag::GENERAL_BAGS_BEGIN && serverSlot <= EQ::invbag::CURSOR_BAG_END) { // (> 250 && < 341) (251-360)
-			TDSSlot.SlotType = maps::MapPossessions;
-			TempSlot = serverSlot - 1;
-			TDSSlot.MainSlot = int(TempSlot / EQ::invbag::SLOT_COUNT) - 2;
-			TDSSlot.SubSlot = TempSlot - ((TDSSlot.MainSlot + 2) * EQ::invbag::SLOT_COUNT);
-
-			if (TDSSlot.MainSlot >= slots::MainGeneral9) // (> 30)
-				TDSSlot.MainSlot = slots::MainCursor;
+			TDSSlot.Type = invtype::typePossessions;
+			TDSSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
+			TDSSlot.SubIndex = TempSlot - ((TDSSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
 		}
 
-		else if (serverSlot >= EQ::invslot::TRIBUTE_BEGIN && serverSlot <= EQ::invslot::TRIBUTE_END) { // Tribute
-			TDSSlot.SlotType = maps::MapTribute;
-			TDSSlot.MainSlot = serverSlot - EQ::invslot::TRIBUTE_BEGIN;
+		else if (server_slot <= EQ::invslot::TRIBUTE_END && server_slot >= EQ::invslot::TRIBUTE_BEGIN) {
+			TDSSlot.Type = invtype::typeTribute;
+			TDSSlot.Slot = server_slot - EQ::invslot::TRIBUTE_BEGIN;
 		}
 
-		else if (serverSlot >= EQ::invslot::BANK_BEGIN && serverSlot <= EQ::invslot::BANK_END) {
-			TDSSlot.SlotType = maps::MapBank;
-			TempSlot = serverSlot - EQ::invslot::BANK_BEGIN;
-			TDSSlot.MainSlot = TempSlot;
-
-			if (TempSlot > 30) { // (> 30)
-				TDSSlot.MainSlot = int(TempSlot / EQ::invbag::SLOT_COUNT) - 3;
-				TDSSlot.SubSlot = TempSlot - ((TDSSlot.MainSlot + 3) * EQ::invbag::SLOT_COUNT);
-			}
+		else if (server_slot <= EQ::invslot::GUILD_TRIBUTE_END && server_slot >= EQ::invslot::GUILD_TRIBUTE_BEGIN) {
+			TDSSlot.Type = invtype::typeGuildTribute;
+			TDSSlot.Slot = server_slot - EQ::invslot::GUILD_TRIBUTE_BEGIN;
 		}
 
-		else if (serverSlot >= EQ::invslot::SHARED_BANK_BEGIN && serverSlot <= EQ::invslot::SHARED_BANK_END) {
-			TDSSlot.SlotType = maps::MapSharedBank;
-			TempSlot = serverSlot - EQ::invslot::SHARED_BANK_BEGIN;
-			TDSSlot.MainSlot = TempSlot;
-
-			if (TempSlot > 30) { // (> 30)
-				TDSSlot.MainSlot = int(TempSlot / EQ::invbag::SLOT_COUNT) - 3;
-				TDSSlot.SubSlot = TempSlot - ((TDSSlot.MainSlot + 3) * EQ::invbag::SLOT_COUNT);
-			}
+		else if (server_slot == EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			TDSSlot.Type = invtype::typeWorld;
 		}
 
-		else if (serverSlot >= EQ::invslot::TRADE_BEGIN && serverSlot <= EQ::invslot::TRADE_END) {
-			TDSSlot.SlotType = maps::MapTrade;
-			TempSlot = serverSlot - EQ::invslot::TRADE_BEGIN;
-			TDSSlot.MainSlot = TempSlot;
-
-			if (TempSlot > 30) {
-				TDSSlot.MainSlot = int(TempSlot / EQ::invbag::SLOT_COUNT) - 3;
-				TDSSlot.SubSlot = TempSlot - ((TDSSlot.MainSlot + 3) * EQ::invbag::SLOT_COUNT);
-			}
-
-			/*
-			// OLD CODE:
-			if (TempSlot > 99) {
-			if (TempSlot > 100)
-			TDSSlot.MainSlot = int((TempSlot - 100) / 10);
-
-			else
-			TDSSlot.MainSlot = 0;
-
-			TDSSlot.SubSlot = TempSlot - (100 + TDSSlot.MainSlot);
-			}
-			*/
+		else if (server_slot <= EQ::invslot::BANK_END && server_slot >= EQ::invslot::BANK_BEGIN) {
+			TDSSlot.Type = invtype::typeBank;
+			TDSSlot.Slot = server_slot - EQ::invslot::BANK_BEGIN;
 		}
 
-		else if (serverSlot >= EQ::invslot::WORLD_BEGIN && serverSlot <= EQ::invslot::WORLD_END) {
-			TDSSlot.SlotType = maps::MapWorld;
-			TempSlot = serverSlot - EQ::invslot::WORLD_BEGIN;
-			TDSSlot.MainSlot = TempSlot;
+		else if (server_slot <= EQ::invbag::BANK_BAGS_END && server_slot >= EQ::invbag::BANK_BAGS_BEGIN) {
+			TempSlot = server_slot - EQ::invbag::BANK_BAGS_BEGIN;
+
+			TDSSlot.Type = invtype::typeBank;
+			TDSSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			TDSSlot.SubIndex = TempSlot - (TDSSlot.Slot * EQ::invbag::SLOT_COUNT);
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to TDS Slot: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i",
-			serverSlot, TDSSlot.SlotType, TDSSlot.Unknown02, TDSSlot.MainSlot, TDSSlot.SubSlot, TDSSlot.AugSlot, TDSSlot.Unknown01);
-		return TDSSlot;
-	}
-
-	static inline structs::MainInvItemSlotStruct ServerToTDSMainInvSlot(uint32 serverSlot)
-	{
-		structs::MainInvItemSlotStruct TDSSlot;
-		TDSSlot.MainSlot = INVALID_INDEX;
-		TDSSlot.SubSlot = INVALID_INDEX;
-		TDSSlot.AugSlot = INVALID_INDEX;
-		TDSSlot.Unknown01 = INULL;
-
-		uint32 TempSlot = 0;
-
-		if (serverSlot < 56 || serverSlot == MainPowerSource) { // (< 52)
-			TDSSlot.MainSlot = serverSlot;
-
-			if (serverSlot == MainPowerSource)
-				TDSSlot.MainSlot = slots::MainPowerSource;
-
-			else if (serverSlot >= MainCursor) // Cursor and Extended Corpse Inventory
-				TDSSlot.MainSlot += 3;
-
-			else if (serverSlot >= MainAmmo) // Ammo and Personl Inventory
-				TDSSlot.MainSlot += 1;
-
-			/*else if (ServerSlot >= MainCursor) { // Cursor
-			TDSSlot.MainSlot = slots::MainCursor;
-
-			if (ServerSlot > 30)
-			TDSSlot.SubSlot = (ServerSlot + 3) - 33;
-			}*/
+		else if (server_slot <= EQ::invslot::SHARED_BANK_END && server_slot >= EQ::invslot::SHARED_BANK_BEGIN) {
+			TDSSlot.Type = invtype::typeSharedBank;
+			TDSSlot.Slot = server_slot - EQ::invslot::SHARED_BANK_BEGIN;
 		}
 
-		else if (serverSlot >= EQ::invbag::GENERAL_BAGS_BEGIN && serverSlot <= EQ::invbag::CURSOR_BAG_END) {
-			TempSlot = serverSlot - 1;
-			TDSSlot.MainSlot = int(TempSlot / EQ::invbag::SLOT_COUNT) - 2;
-			TDSSlot.SubSlot = TempSlot - ((TDSSlot.MainSlot + 2) * EQ::invbag::SLOT_COUNT);
+		else if (server_slot <= EQ::invbag::SHARED_BANK_BAGS_END && server_slot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) {
+			TempSlot = server_slot - EQ::invbag::SHARED_BANK_BAGS_BEGIN;
+
+			TDSSlot.Type = invtype::typeSharedBank;
+			TDSSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			TDSSlot.SubIndex = TempSlot - (TDSSlot.Slot * EQ::invbag::SLOT_COUNT);
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to TDS Slot: Main %i, Sub %i, Aug %i, Unk %i)",
-			serverSlot, TDSSlot.MainSlot, TDSSlot.SubSlot, TDSSlot.AugSlot, TDSSlot.Unknown01);
+		else if (server_slot <= EQ::invslot::TRADE_END && server_slot >= EQ::invslot::TRADE_BEGIN) {
+			TDSSlot.Type = invtype::typeTrade;
+			TDSSlot.Slot = server_slot - EQ::invslot::TRADE_BEGIN;
+		}
+
+		else if (server_slot <= EQ::invbag::TRADE_BAGS_END && server_slot >= EQ::invbag::TRADE_BAGS_BEGIN) {
+			TempSlot = server_slot - EQ::invbag::TRADE_BAGS_BEGIN;
+
+			TDSSlot.Type = invtype::typeTrade;
+			TDSSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			TDSSlot.SubIndex = TempSlot - (TDSSlot.Slot * EQ::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQ::invslot::WORLD_END && server_slot >= EQ::invslot::WORLD_BEGIN) {
+			TDSSlot.Type = invtype::typeWorld;
+			TDSSlot.Slot = server_slot - EQ::invslot::WORLD_BEGIN;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to TDS Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i)",
+			server_slot, TDSSlot.Type, TDSSlot.Slot, TDSSlot.SubIndex, TDSSlot.AugIndex, TDSSlot.Unknown02, TDSSlot.Unknown01);
 
 		return TDSSlot;
 	}
 
-	static inline uint32 ServerToTDSCorpseSlot(uint32 serverCorpseSlot)
+	static inline structs::InventorySlot_Struct ServerToTDSCorpseSlot(uint32 server_corpse_slot)
 	{
-		return (serverCorpseSlot - EQ::invslot::CORPSE_BEGIN + 1);
+		structs::InventorySlot_Struct TDSSlot;
+		TDSSlot.Type = invtype::TYPE_INVALID;
+		TDSSlot.Unknown02 = INULL;
+		TDSSlot.Slot = ServerToTDSCorpseMainSlot(server_corpse_slot);
+		TDSSlot.SubIndex = invbag::SLOT_INVALID;
+		TDSSlot.AugIndex = invaug::SOCKET_INVALID;
+		TDSSlot.Unknown01 = INULL;
+
+		if (TDSSlot.Slot != invslot::SLOT_INVALID)
+			TDSSlot.Type = invtype::typeCorpse;
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to TDS Corpse Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i)",
+			server_corpse_slot, TDSSlot.Type, TDSSlot.Slot, TDSSlot.SubIndex, TDSSlot.AugIndex, TDSSlot.Unknown02, TDSSlot.Unknown01);
+
+		return TDSSlot;
 	}
 
-	static inline uint32 TDSToServerSlot(structs::ItemSlotStruct tdsSlot, ItemPacketType PacketType)
+	static inline uint32 ServerToTDSCorpseMainSlot(uint32 server_corpse_slot)
 	{
-		uint32 ServerSlot = INVALID_INDEX;
-		uint32 TempSlot = 0;
+		uint32 TDSSlot = invslot::SLOT_INVALID;
 
-		if (tdsSlot.SlotType == maps::MapPossessions && tdsSlot.MainSlot < 57) { // Worn/Personal Inventory and Cursor (< 51)
-			if (tdsSlot.MainSlot == slots::MainPowerSource)
-				TempSlot = MainPowerSource;
-
-			else if (tdsSlot.MainSlot >= slots::MainCursor) // Cursor and Extended Corpse Inventory
-				TempSlot = tdsSlot.MainSlot - 3;
-
-			/*else if (tdsSlot.MainSlot == slots::MainGeneral9 || tdsSlot.MainSlot == slots::MainGeneral10) { // 9th and 10th RoF2 inventory/corpse slots
-			// Need to figure out what to do when we get these
-
-			// The slot range of 0 - client_max is cross-utilized between player inventory and corpse inventory.
-			// In the case of RoF2, player inventory is addressed as 0 - 33 and corpse inventory is addressed as 23 - 56.
-			// We 'could' assign the two new inventory slots as 9997 and 9998, and then work around their bag
-			// slot assignments, but doing so may disrupt our ability to utilize the corpse looting range properly.
-
-			// For now, it's probably best to leave as-is and let this work itself out in the inventory rework.
-			}*/
-
-			else if (tdsSlot.MainSlot >= slots::MainAmmo) // Ammo and Main Inventory
-				TempSlot = tdsSlot.MainSlot - 1;
-
-			else // Worn Slots
-				TempSlot = tdsSlot.MainSlot;
-
-			if (tdsSlot.SubSlot >= EQ::invbag::GENERAL_BAGS_BEGIN) // Bag Slots
-				TempSlot = ((TempSlot + 3) * EQ::invbag::SLOT_COUNT) + tdsSlot.SubSlot + 1;
-
-			ServerSlot = TempSlot;
+		if (server_corpse_slot <= EQ::invslot::CORPSE_END && server_corpse_slot >= EQ::invslot::CORPSE_BEGIN) {
+			TDSSlot = server_corpse_slot;
 		}
 
-		else if (tdsSlot.SlotType == maps::MapBank) {
-			TempSlot = EQ::invslot::BANK_BEGIN;
+		LogNetcode("Convert Server Corpse Slot [{}] to TDS Corpse Main Slot [{}]", server_corpse_slot, TDSSlot);
 
-			if (tdsSlot.SubSlot >= EQ::invbag::BANK_BAGS_BEGIN)
-				TempSlot += ((tdsSlot.MainSlot + 3) * EQ::invbag::SLOT_COUNT) + tdsSlot.SubSlot + 1;
+		return TDSSlot;
+	}
 
-			else
-				TempSlot += tdsSlot.MainSlot;
+	static inline structs::TypelessInventorySlot_Struct ServerToTDSTypelessSlot(uint32 server_slot, int16 server_type)
+	{
+		structs::TypelessInventorySlot_Struct TDSSlot;
+		TDSSlot.Slot = invslot::SLOT_INVALID;
+		TDSSlot.SubIndex = invbag::SLOT_INVALID;
+		TDSSlot.AugIndex = invaug::SOCKET_INVALID;
+		TDSSlot.Unknown01 = INULL;
 
-			ServerSlot = TempSlot;
+		uint32 TempSlot = EQ::invslot::SLOT_INVALID;
+
+		if (server_type == EQ::invtype::typePossessions) {
+			if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
+				TDSSlot.Slot = server_slot;
+			}
+
+			else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+				TempSlot = server_slot - EQ::invbag::GENERAL_BAGS_BEGIN;
+
+				TDSSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
+				TDSSlot.SubIndex = TempSlot - ((TDSSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+			}
 		}
 
-		else if (tdsSlot.SlotType == maps::MapSharedBank) {
-			TempSlot = EQ::invslot::SHARED_BANK_BEGIN;
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to TDS Typeless Slot [%i, %i, %i] (implied type: %i, unk1: %i)",
+			server_slot, TDSSlot.Slot, TDSSlot.SubIndex, TDSSlot.AugIndex, server_type, TDSSlot.Unknown01);
 
-			if (tdsSlot.SubSlot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN)
-				TempSlot += ((tdsSlot.MainSlot + 3) * EQ::invbag::SLOT_COUNT) + tdsSlot.SubSlot + 1;
+		return TDSSlot;
+	}
 
-			else
-				TempSlot += tdsSlot.MainSlot;
+	static inline uint32 TDSToServerSlot(structs::InventorySlot_Struct tds_slot)
+	{
+		if (tds_slot.AugIndex < invaug::SOCKET_INVALID || tds_slot.AugIndex >= invaug::SOCKET_COUNT) {
+			Log(Logs::Detail, Logs::Netcode, "Convert TDS Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i) to Server Slot %i",
+				tds_slot.Type, tds_slot.Slot, tds_slot.SubIndex, tds_slot.AugIndex, tds_slot.Unknown02, tds_slot.Unknown01, EQ::invslot::SLOT_INVALID);
 
-			ServerSlot = TempSlot;
+			return EQ::invslot::SLOT_INVALID;
 		}
 
-		else if (tdsSlot.SlotType == maps::MapTrade) {
-			TempSlot = EQ::invslot::TRADE_BEGIN;
+		uint32 server_slot = EQ::invslot::SLOT_INVALID;
+		uint32 temp_slot = invslot::SLOT_INVALID;
 
-			if (tdsSlot.SubSlot >= EQ::invbag::TRADE_BAGS_BEGIN)
-				TempSlot += ((tdsSlot.MainSlot + 3) * EQ::invbag::SLOT_COUNT) + tdsSlot.SubSlot + 1;
-			// OLD CODE:
-			//TempSlot += 100 + (tdsSlot.MainSlot * EmuConstants::ITEM_CONTAINER_SIZE) + tdsSlot.SubSlot;
+		switch (tds_slot.Type) {
+		case invtype::typePossessions: {
+			if (tds_slot.Slot >= invslot::POSSESSIONS_BEGIN && tds_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (tds_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = tds_slot.Slot;
+				}
 
-			else
-				TempSlot += tdsSlot.MainSlot;
+				else if (tds_slot.SubIndex >= invbag::SLOT_BEGIN && tds_slot.SubIndex <= invbag::SLOT_END) {
+					if (tds_slot.Slot < invslot::GENERAL_BEGIN)
+						return EQ::invslot::SLOT_INVALID;
 
-			ServerSlot = TempSlot;
+					temp_slot = (tds_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::GENERAL_BAGS_BEGIN + temp_slot + tds_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeBank: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::BANK_SIZE) {
+				if (tds_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::BANK_BEGIN + tds_slot.Slot;
+				}
+
+				else if (tds_slot.SubIndex >= invbag::SLOT_BEGIN && tds_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = tds_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::BANK_BAGS_BEGIN + temp_slot + tds_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeSharedBank: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (tds_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::SHARED_BANK_BEGIN + tds_slot.Slot;
+				}
+
+				else if (tds_slot.SubIndex >= invbag::SLOT_BEGIN && tds_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = tds_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + temp_slot + tds_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeTrade: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::TRADE_SIZE) {
+				if (tds_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::TRADE_BEGIN + tds_slot.Slot;
+				}
+
+				else if (tds_slot.SubIndex >= invbag::SLOT_BEGIN && tds_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = tds_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::TRADE_BAGS_BEGIN + temp_slot + tds_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeWorld: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::WORLD_SIZE) {
+				server_slot = EQ::invslot::WORLD_BEGIN + tds_slot.Slot;
+			}
+
+			else if (tds_slot.Slot == invslot::SLOT_INVALID) {
+				server_slot = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+			}
+
+			break;
+		}
+		case invtype::typeLimbo: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::LIMBO_SIZE) {
+				server_slot = EQ::invslot::slotCursor;
+			}
+
+			break;
+		}
+		case invtype::typeTribute: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::TRIBUTE_SIZE) {
+				server_slot = EQ::invslot::TRIBUTE_BEGIN + tds_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeGuildTribute: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				server_slot = EQ::invslot::GUILD_TRIBUTE_BEGIN + tds_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeCorpse: {
+			if (tds_slot.Slot >= invslot::CORPSE_BEGIN && tds_slot.Slot <= invslot::CORPSE_END) {
+				server_slot = tds_slot.Slot;
+			}
+
+			break;
+		}
+		default: {
+
+			break;
+		}
 		}
 
-		else if (tdsSlot.SlotType == maps::MapWorld) {
-			TempSlot = EQ::invslot::WORLD_BEGIN;
+		Log(Logs::Detail, Logs::Netcode, "Convert TDS Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i) to Server Slot %i",
+			tds_slot.Type, tds_slot.Slot, tds_slot.SubIndex, tds_slot.AugIndex, tds_slot.Unknown02, tds_slot.Unknown01, server_slot);
 
-			if (tdsSlot.MainSlot >= EQ::invslot::WORLD_BEGIN)
-				TempSlot += tdsSlot.MainSlot;
+		return server_slot;
+	}
 
-			ServerSlot = TempSlot;
+	static inline uint32 TDSToServerCorpseSlot(structs::InventorySlot_Struct tds_corpse_slot)
+	{
+		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
+
+		if (tds_corpse_slot.Type != invtype::typeCorpse || tds_corpse_slot.SubIndex != invbag::SLOT_INVALID || tds_corpse_slot.AugIndex != invaug::SOCKET_INVALID) {
+			ServerSlot = EQ::invslot::SLOT_INVALID;
 		}
 
-		/*else if (tdsSlot.SlotType == maps::MapLimbo) { // Cursor Buffer
-		TempSlot = 31;
-
-		if (tdsSlot.MainSlot >= 0)
-		TempSlot += tdsSlot.MainSlot;
-
-		ServerSlot = TempSlot;
-		}*/
-
-		else if (tdsSlot.SlotType == maps::MapGuildTribute) {
-			ServerSlot = INVALID_INDEX;
+		else {
+			ServerSlot = TDSToServerCorpseMainSlot(tds_corpse_slot.Slot);
 		}
 
-		else if (tdsSlot.SlotType == maps::MapCorpse) {
-			ServerSlot = tdsSlot.MainSlot + EQ::invslot::CORPSE_BEGIN;
-		}
-
-		Log(Logs::Detail, Logs::Netcode, "Convert TDS Slot: Type: %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i",
-			tdsSlot.SlotType, tdsSlot.Unknown02, tdsSlot.MainSlot, tdsSlot.SubSlot, tdsSlot.AugSlot, tdsSlot.Unknown01, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert TDS Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i) to Server Slot %i",
+			tds_corpse_slot.Type, tds_corpse_slot.Slot, tds_corpse_slot.SubIndex, tds_corpse_slot.AugIndex, tds_corpse_slot.Unknown02, tds_corpse_slot.Unknown01, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 TDSToServerMainInvSlot(structs::MainInvItemSlotStruct tdsSlot)
+	static inline uint32 TDSToServerCorpseMainSlot(uint32 tds_corpse_slot)
 	{
-		uint32 ServerSlot = INVALID_INDEX;
-		uint32 TempSlot = 0;
+		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 
-		if (tdsSlot.MainSlot < 57) { // Worn/Personal Inventory and Cursor (< 33)
-			if (tdsSlot.MainSlot == slots::MainPowerSource)
-				TempSlot = MainPowerSource;
-
-			else if (tdsSlot.MainSlot >= slots::MainCursor) // Cursor and Extended Corpse Inventory
-				TempSlot = tdsSlot.MainSlot - 3;
-
-			/*else if (tdsSlot.MainSlot == slots::MainGeneral9 || tdsSlot.MainSlot == slots::MainGeneral10) { // 9th and 10th RoF2 inventory slots
-			// Need to figure out what to do when we get these
-
-			// Same as above
-			}*/
-
-			else if (tdsSlot.MainSlot >= slots::MainAmmo) // Main Inventory and Ammo Slots
-				TempSlot = tdsSlot.MainSlot - 1;
-
-			else
-				TempSlot = tdsSlot.MainSlot;
-
-			if (tdsSlot.SubSlot >= EQ::invbag::GENERAL_BAGS_BEGIN) // Bag Slots
-				TempSlot = ((TempSlot + 3) * EQ::invbag::SLOT_COUNT) + tdsSlot.SubSlot + 1;
-
-			ServerSlot = TempSlot;
+		if (tds_corpse_slot <= invslot::CORPSE_END && tds_corpse_slot >= invslot::CORPSE_BEGIN) {
+			ServerSlot = tds_corpse_slot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert TDS Slot: Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i",
-			tdsSlot.MainSlot, tdsSlot.SubSlot, tdsSlot.AugSlot, tdsSlot.Unknown01, ServerSlot);
+		LogNetcode("Convert TDS Corpse Main Slot [{}] to Server Corpse Slot [{}]", tds_corpse_slot, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 TDSToServerCorpseSlot(uint32 tdsCorpseSlot)
+	static inline uint32 TDSToServerTypelessSlot(structs::TypelessInventorySlot_Struct tds_slot, int16 tds_type)
 	{
-		return (tdsCorpseSlot + EQ::invslot::CORPSE_BEGIN - 1);
+		if (tds_slot.AugIndex < invaug::SOCKET_INVALID || tds_slot.AugIndex >= invaug::SOCKET_COUNT) {
+			Log(Logs::Detail, Logs::Netcode, "Convert TDS Typeless Slot [%i, %i, %i] (implied type: %i, unk1: %i) to Server Slot %i",
+				tds_slot.Slot, tds_slot.SubIndex, tds_slot.AugIndex, tds_type, tds_slot.Unknown01, EQ::invslot::SLOT_INVALID);
+
+			return EQ::invslot::SLOT_INVALID;
+		}
+
+		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
+		uint32 TempSlot = invslot::SLOT_INVALID;
+
+		switch (tds_type) {
+		case invtype::typePossessions: {
+			if (tds_slot.Slot >= invslot::POSSESSIONS_BEGIN && tds_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (tds_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = tds_slot.Slot;
+				}
+
+				else if (tds_slot.SubIndex >= invbag::SLOT_BEGIN && tds_slot.SubIndex <= invbag::SLOT_END) {
+					if (tds_slot.Slot < invslot::GENERAL_BEGIN)
+						return EQ::invslot::SLOT_INVALID;
+
+					TempSlot = (tds_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::GENERAL_BAGS_BEGIN + TempSlot + tds_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeBank: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::BANK_SIZE) {
+				if (tds_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::BANK_BEGIN + tds_slot.Slot;
+				}
+
+				else if (tds_slot.SubIndex >= invbag::SLOT_BEGIN && tds_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = tds_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::BANK_BAGS_BEGIN + TempSlot + tds_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeSharedBank: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (tds_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::SHARED_BANK_BEGIN + tds_slot.Slot;
+				}
+
+				else if (tds_slot.SubIndex >= invbag::SLOT_BEGIN && tds_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = tds_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + TempSlot + tds_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeTrade: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::TRADE_SIZE) {
+				if (tds_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::TRADE_BEGIN + tds_slot.Slot;
+				}
+
+				else if (tds_slot.SubIndex >= invbag::SLOT_BEGIN && tds_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = tds_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::TRADE_BAGS_BEGIN + TempSlot + tds_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeWorld: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::WORLD_SIZE) {
+				ServerSlot = EQ::invslot::WORLD_BEGIN + tds_slot.Slot;
+			}
+
+			else if (tds_slot.Slot == invslot::SLOT_INVALID) {
+				ServerSlot = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+			}
+
+			break;
+		}
+		case invtype::typeLimbo: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::LIMBO_SIZE) {
+				ServerSlot = EQ::invslot::slotCursor;
+			}
+
+			break;
+		}
+		case invtype::typeTribute: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::TRIBUTE_SIZE) {
+				ServerSlot = EQ::invslot::TRIBUTE_BEGIN + tds_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeGuildTribute: {
+			if (tds_slot.Slot >= invslot::SLOT_BEGIN && tds_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				ServerSlot = EQ::invslot::GUILD_TRIBUTE_BEGIN + tds_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeCorpse: {
+			if (tds_slot.Slot >= invslot::CORPSE_BEGIN && tds_slot.Slot <= invslot::CORPSE_END) {
+				ServerSlot = tds_slot.Slot;
+			}
+
+			break;
+		}
+		default: {
+
+			break;
+		}
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert TDS Typeless Slot [%i, %i, %i] (implied type: %i, unk1: %i) to Server Slot %i",
+			tds_slot.Slot, tds_slot.SubIndex, tds_slot.AugIndex, tds_type, tds_slot.Unknown01, ServerSlot);
+
+		return ServerSlot;
 	}
 
-	static inline void ServerToTDSTextLink(std::string& tdsTextLink, const std::string& serverTextLink)
+	static inline void ServerToTDSSayLink(std::string &tds_saylink, const std::string &server_saylink)
 	{
-		if ((constants::SAY_LINK_BODY_SIZE == EQ::constants::SAY_LINK_BODY_SIZE) || (serverTextLink.find('\x12') == std::string::npos)) {
-			tdsTextLink = serverTextLink;
+		if ((constants::SAY_LINK_BODY_SIZE == EQ::constants::SAY_LINK_BODY_SIZE) || (server_saylink.find('\x12') == std::string::npos)) {
+			tds_saylink = server_saylink;
 			return;
 		}
 
-		auto segments = SplitString(serverTextLink, '\x12');
+		auto segments = Strings::Split(server_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= EQ::constants::SAY_LINK_BODY_SIZE) {
-					tdsTextLink.append(segments[segment_iter]);
+					tds_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -6303,29 +7288,29 @@ namespace TDS
 				// TDS:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// Diff:
 
-				tdsTextLink.push_back('\x12');
-				tdsTextLink.append(segments[segment_iter]);
-				tdsTextLink.push_back('\x12');
+				tds_saylink.push_back('\x12');
+				tds_saylink.append(segments[segment_iter]);
+				tds_saylink.push_back('\x12');
 			}
 			else {
-				tdsTextLink.append(segments[segment_iter]);
+				tds_saylink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void TDSToServerTextLink(std::string& serverTextLink, const std::string& tdsTextLink)
+	static inline void TDSToServerSayLink(std::string &server_saylink, const std::string &tds_saylink)
 	{
-		if ((EQ::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (tdsTextLink.find('\x12') == std::string::npos)) {
-			serverTextLink = tdsTextLink;
+		if ((EQ::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (tds_saylink.find('\x12') == std::string::npos)) {
+			server_saylink = tds_saylink;
 			return;
 		}
 
-		auto segments = SplitString(tdsTextLink, '\x12');
+		auto segments = Strings::Split(tds_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= constants::SAY_LINK_BODY_SIZE) {
-					serverTextLink.append(segments[segment_iter]);
+					server_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -6335,14 +7320,119 @@ namespace TDS
 				// TDS:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// Diff:
 
-				serverTextLink.push_back('\x12');
-				serverTextLink.append(segments[segment_iter]);
-				serverTextLink.push_back('\x12');
+				server_saylink.push_back('\x12');
+				server_saylink.append(segments[segment_iter]);
+				server_saylink.push_back('\x12');
 			}
 			else {
-				serverTextLink.append(segments[segment_iter]);
+				server_saylink.append(segments[segment_iter]);
 			}
 		}
+	}
+
+	static inline spells::CastingSlot ServerToTDSCastingSlot(EQ::spells::CastingSlot slot)
+	{
+		switch (slot) {
+		case EQ::spells::CastingSlot::Gem1:
+			return spells::CastingSlot::Gem1;
+		case EQ::spells::CastingSlot::Gem2:
+			return spells::CastingSlot::Gem2;
+		case EQ::spells::CastingSlot::Gem3:
+			return spells::CastingSlot::Gem3;
+		case EQ::spells::CastingSlot::Gem4:
+			return spells::CastingSlot::Gem4;
+		case EQ::spells::CastingSlot::Gem5:
+			return spells::CastingSlot::Gem5;
+		case EQ::spells::CastingSlot::Gem6:
+			return spells::CastingSlot::Gem6;
+		case EQ::spells::CastingSlot::Gem7:
+			return spells::CastingSlot::Gem7;
+		case EQ::spells::CastingSlot::Gem8:
+			return spells::CastingSlot::Gem8;
+		case EQ::spells::CastingSlot::Gem9:
+			return spells::CastingSlot::Gem9;
+		case EQ::spells::CastingSlot::Gem10:
+			return spells::CastingSlot::Gem10;
+		case EQ::spells::CastingSlot::Gem11:
+			return spells::CastingSlot::Gem11;
+		case EQ::spells::CastingSlot::Gem12:
+			return spells::CastingSlot::Gem12;
+		case EQ::spells::CastingSlot::Item:
+		case EQ::spells::CastingSlot::PotionBelt:
+			return spells::CastingSlot::Item;
+		case EQ::spells::CastingSlot::Discipline:
+			return spells::CastingSlot::Discipline;
+		case EQ::spells::CastingSlot::AltAbility:
+			return spells::CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return spells::CastingSlot::Discipline;
+		}
+	}
+
+	static inline EQ::spells::CastingSlot TDSToServerCastingSlot(spells::CastingSlot slot)
+	{
+		switch (slot) {
+		case spells::CastingSlot::Gem1:
+			return EQ::spells::CastingSlot::Gem1;
+		case spells::CastingSlot::Gem2:
+			return EQ::spells::CastingSlot::Gem2;
+		case spells::CastingSlot::Gem3:
+			return EQ::spells::CastingSlot::Gem3;
+		case spells::CastingSlot::Gem4:
+			return EQ::spells::CastingSlot::Gem4;
+		case spells::CastingSlot::Gem5:
+			return EQ::spells::CastingSlot::Gem5;
+		case spells::CastingSlot::Gem6:
+			return EQ::spells::CastingSlot::Gem6;
+		case spells::CastingSlot::Gem7:
+			return EQ::spells::CastingSlot::Gem7;
+		case spells::CastingSlot::Gem8:
+			return EQ::spells::CastingSlot::Gem8;
+		case spells::CastingSlot::Gem9:
+			return EQ::spells::CastingSlot::Gem9;
+		case spells::CastingSlot::Gem10:
+			return EQ::spells::CastingSlot::Gem10;
+		case spells::CastingSlot::Gem11:
+			return EQ::spells::CastingSlot::Gem11;
+		case spells::CastingSlot::Gem12:
+			return EQ::spells::CastingSlot::Gem12;
+		case spells::CastingSlot::Discipline:
+			return EQ::spells::CastingSlot::Discipline;
+		case spells::CastingSlot::Item:
+			return EQ::spells::CastingSlot::Item;
+		case spells::CastingSlot::AltAbility:
+			return EQ::spells::CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return EQ::spells::CastingSlot::Discipline;
+		}
+	}
+
+	// these should be optimized out for RoF2 since they should all boil down to return index :P
+	// but lets leave it here for future proofing
+	static inline int ServerToTDSBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= EQ::spells::LONG_BUFFS + EQ::spells::SHORT_BUFFS)
+			return index - EQ::spells::LONG_BUFFS - EQ::spells::SHORT_BUFFS +
+			       spells::LONG_BUFFS + spells::SHORT_BUFFS;
+		// we're a song
+		if (index >= EQ::spells::LONG_BUFFS)
+			return index - EQ::spells::LONG_BUFFS + spells::LONG_BUFFS;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
+	}
+
+	static inline int TDSToServerBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= spells::LONG_BUFFS + spells::SHORT_BUFFS)
+			return index - spells::LONG_BUFFS - spells::SHORT_BUFFS + EQ::spells::LONG_BUFFS +
+			       EQ::spells::SHORT_BUFFS;
+		// we're a song
+		if (index >= spells::LONG_BUFFS)
+			return index - spells::LONG_BUFFS + EQ::spells::LONG_BUFFS;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
 	}
 }
 // end namespace TDS
