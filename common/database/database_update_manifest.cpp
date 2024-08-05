@@ -5744,6 +5744,8 @@ ADD PRIMARY KEY (`spell_id`) USING BTREE;
 		.sql         = R"(
 ALTER TABLE `inventory`
 	ADD COLUMN `guid` BIGINT UNSIGNED NULL DEFAULT '0' AFTER `ornament_hero_model`;
+ALTER TABLE `inventory_snapshots`
+	ADD COLUMN `guid` BIGINT UNSIGNED NULL DEFAULT '0' AFTER `ornament_hero_model`;
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
