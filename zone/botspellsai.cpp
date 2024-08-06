@@ -3324,18 +3324,19 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 		if (!bse.empty()) {
 			for (const auto& e : bse) {
 				DBbotspells_entries_Struct entry;
-				entry.spellid = e.spellid;
-				entry.type = e.type;
-				entry.minlevel = e.minlevel;
-				entry.maxlevel = e.maxlevel;
-				entry.manacost = e.manacost;
-				entry.recast_delay = e.recast_delay;
-				entry.priority = e.priority;
-				entry.min_hp = e.min_hp;
-				entry.max_hp = e.max_hp;
-				entry.resist_adjust = e.resist_adjust;
-				entry.bucket_name = e.bucket_name;
-				entry.bucket_value = e.bucket_value;
+
+				entry.spellid           = e.spell_id;
+				entry.type              = e.type;
+				entry.minlevel          = e.minlevel;
+				entry.maxlevel          = e.maxlevel;
+				entry.manacost          = e.manacost;
+				entry.recast_delay      = e.recast_delay;
+				entry.priority          = e.priority;
+				entry.min_hp            = e.min_hp;
+				entry.max_hp            = e.max_hp;
+				entry.resist_adjust     = e.resist_adjust;
+				entry.bucket_name       = e.bucket_name;
+				entry.bucket_value      = e.bucket_value;
 				entry.bucket_comparison = e.bucket_comparison;
 
 				// some spell types don't make much since to be priority 0, so fix that
@@ -3345,8 +3346,8 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 
 				if (e.resist_adjust) {
 					entry.resist_adjust = e.resist_adjust;
-				} else if (IsValidSpell(e.spellid)) {
-					entry.resist_adjust = spells[e.spellid].resist_difficulty;
+				} else if (IsValidSpell(e.spell_id)) {
+					entry.resist_adjust = spells[e.spell_id].resist_difficulty;
 				}
 
 				spell_set.entries.push_back(entry);

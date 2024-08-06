@@ -21,7 +21,7 @@ public:
 	struct BotSpellsEntries {
 		uint32_t    id;
 		int32_t     npc_spells_id;
-		int16_t     spellid;
+		uint16_t    spell_id;
 		uint32_t    type;
 		uint8_t     minlevel;
 		uint8_t     maxlevel;
@@ -46,7 +46,7 @@ public:
 		return {
 			"id",
 			"npc_spells_id",
-			"spellid",
+			"spell_id",
 			"type",
 			"minlevel",
 			"maxlevel",
@@ -67,7 +67,7 @@ public:
 		return {
 			"id",
 			"npc_spells_id",
-			"spellid",
+			"spell_id",
 			"type",
 			"minlevel",
 			"maxlevel",
@@ -122,7 +122,7 @@ public:
 
 		e.id                = 0;
 		e.npc_spells_id     = 0;
-		e.spellid           = 0;
+		e.spell_id          = 0;
 		e.type              = 0;
 		e.minlevel          = 0;
 		e.maxlevel          = 255;
@@ -173,7 +173,7 @@ public:
 
 			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.npc_spells_id     = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
-			e.spellid           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.spell_id          = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.type              = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.minlevel          = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.maxlevel          = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 255;
@@ -220,7 +220,7 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[1] + " = " + std::to_string(e.npc_spells_id));
-		v.push_back(columns[2] + " = " + std::to_string(e.spellid));
+		v.push_back(columns[2] + " = " + std::to_string(e.spell_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.type));
 		v.push_back(columns[4] + " = " + std::to_string(e.minlevel));
 		v.push_back(columns[5] + " = " + std::to_string(e.maxlevel));
@@ -256,7 +256,7 @@ public:
 
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.npc_spells_id));
-		v.push_back(std::to_string(e.spellid));
+		v.push_back(std::to_string(e.spell_id));
 		v.push_back(std::to_string(e.type));
 		v.push_back(std::to_string(e.minlevel));
 		v.push_back(std::to_string(e.maxlevel));
@@ -300,7 +300,7 @@ public:
 
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.npc_spells_id));
-			v.push_back(std::to_string(e.spellid));
+			v.push_back(std::to_string(e.spell_id));
 			v.push_back(std::to_string(e.type));
 			v.push_back(std::to_string(e.minlevel));
 			v.push_back(std::to_string(e.maxlevel));
@@ -348,7 +348,7 @@ public:
 
 			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.npc_spells_id     = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
-			e.spellid           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.spell_id          = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.type              = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.minlevel          = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.maxlevel          = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 255;
@@ -387,7 +387,7 @@ public:
 
 			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.npc_spells_id     = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
-			e.spellid           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.spell_id          = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.type              = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.minlevel          = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.maxlevel          = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 255;
@@ -476,7 +476,7 @@ public:
 
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.npc_spells_id));
-		v.push_back(std::to_string(e.spellid));
+		v.push_back(std::to_string(e.spell_id));
 		v.push_back(std::to_string(e.type));
 		v.push_back(std::to_string(e.minlevel));
 		v.push_back(std::to_string(e.maxlevel));
@@ -513,7 +513,7 @@ public:
 
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.npc_spells_id));
-			v.push_back(std::to_string(e.spellid));
+			v.push_back(std::to_string(e.spell_id));
 			v.push_back(std::to_string(e.type));
 			v.push_back(std::to_string(e.minlevel));
 			v.push_back(std::to_string(e.maxlevel));
