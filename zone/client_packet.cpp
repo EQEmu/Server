@@ -11303,7 +11303,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 					zone->AddAggroMob();
 					// classic acts like qattack
-					int hate = 1;
+					int hate = 1000;
 					if (pet->IsEngaged()) {
 						auto top = pet->GetHateMost();
 						if (top && top != target)
@@ -11325,7 +11325,80 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		}
 
-		for (auto& pet : GetAllPets()) {
+		if (RuleB(Custom, EnableMultipet)) {
+			std::vector<NPC*> petlist = GetAllPets();
+			uint32 last = Strings::ToUnsignedInt(GetEntityVariable("LastPetCommandedIndex"), 0);
+
+
+			NPC* pet = nullptr;
+
+			if (!petlist.empty()) {
+				uint32 next = (last + 1) % petlist.size();
+				pet 		= petlist[next];
+
+				SetEntityVariable("LastPetCommandedIndex", std::to_string(next));
+
+				if (pet) {
+					if (target->IsMezzed()) {
+						MessageString(Chat::NPCQuestSay, CANNOT_WAKE, pet->GetCleanName(), target->GetCleanName());
+						break;
+					}
+					if (pet->IsFeared()) {
+						break; //prevent pet from attacking stuff while feared
+					}
+					if (!pet->IsAttackAllowed(target)) {
+						pet->SayString(this, NOT_LEGAL_TARGET);
+						break;
+					}
+
+					// default range is 200, takes Z into account
+					// really they do something weird where they're added to the aggro list then remove them
+					// and will attack if they come in range -- too lazy, lets remove exploits for now
+					if (DistanceSquared(pet->GetPosition(), target->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
+						// they say they're attacking then remove on live ... so they don't really say anything in this case ...
+						break;
+					}
+
+					if ((pet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || pet->GetPetType() != petAnimation) {
+						if (target != this && DistanceSquared(pet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+							pet->SetFeigned(false);
+							if (pet->IsPetStop()) {
+								pet->SetPetStop(false);
+								SetPetCommandState(PET_BUTTON_STOP, 0);
+							}
+							if (pet->IsPetRegroup()) {
+								pet->SetPetRegroup(false);
+								SetPetCommandState(PET_BUTTON_REGROUP, 0);
+							}
+
+							// fix GUI sit button to be unpressed and stop sitting regen
+							SetPetCommandState(PET_BUTTON_SIT, 0);
+							if (pet->GetPetOrder() == SPO_Sit || pet->GetPetOrder() == SPO_FeignDeath) {
+								pet->SetPetOrder(pet->GetPreviousPetOrder());
+								pet->SetAppearance(eaStanding);
+							}
+
+							zone->AddAggroMob();
+							// classic acts like qattack
+							int hate = 1000;
+							if (pet->IsEngaged()) {
+								auto top = pet->GetHateMost();
+								if (top && top != target)
+									hate += pet->GetHateAmount(top) - pet->GetHateAmount(target) + 100; // should be enough to cause target change
+							}
+							pet->AddToHateList(target, hate, 0, true, false, false, SPELL_UNKNOWN, true);
+							MessageString(Chat::PetResponse, PET_ATTACKING, pet->GetCleanName(), target->GetCleanName());
+						}
+					}
+				}
+			}
+
+		} else {
+			auto pet = GetPet();
+			if (!pet) {
+				break;
+			}
+
 			if (target->IsMezzed()) {
 				MessageString(Chat::NPCQuestSay, CANNOT_WAKE, pet->GetCleanName(), target->GetCleanName());
 				break;
@@ -11371,6 +11444,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				}
 			}
 		}
+
 		break;
 	}
 	case PET_BACKOFF: {

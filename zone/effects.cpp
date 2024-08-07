@@ -44,6 +44,17 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 		return value;
 	}
 
+	EQ::spells::CastingSlot cast_slot = static_cast<EQ::spells::CastingSlot>(Strings::ToUnsignedInt(GetEntityVariable(fmt::format("SpellGemHint_%d", spell_id)), static_cast<uint32>(EQ::spells::CastingSlot::MaxGems)));
+	if (cast_slot >= EQ::spells::CastingSlot::Gem1 && cast_slot <= EQ::spells::CastingSlot::Gem12) {
+		float scalar = 1.0f;
+		if (IsBeneficialSpell(spell_id)) {
+			scalar += GetHeroicWIS() / 1000.0f;
+		} else {
+			scalar += GetHeroicINT() / 1000.0f;
+		}
+		value *= scalar;
+	}
+
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
 
@@ -420,6 +431,17 @@ int64 Mob::GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_s
 int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool from_buff_tic) {
 	if (target == nullptr && IsBot()) {
 		target = this;
+	}
+
+	EQ::spells::CastingSlot cast_slot = static_cast<EQ::spells::CastingSlot>(Strings::ToUnsignedInt(GetEntityVariable(fmt::format("SpellGemHint_%d", spell_id)), static_cast<uint32>(EQ::spells::CastingSlot::MaxGems)));
+	if (cast_slot >= EQ::spells::CastingSlot::Gem1 && cast_slot <= EQ::spells::CastingSlot::Gem12) {
+		float scalar = 1.0f;
+		if (IsBeneficialSpell(spell_id)) {
+			scalar += GetHeroicWIS() / 1000.0f;
+		} else {
+			scalar += GetHeroicINT() / 1000.0f;
+		}
+		value *= scalar;
 	}
 
 	if (IsNPC()) {
