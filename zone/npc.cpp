@@ -620,7 +620,7 @@ bool NPC::Process()
 					}
 				}
 			} else if (GetSwarmInfo()->permanent && !GetTarget()) {
-				if (owner->GetPet() && owner->GetPet()->GetTarget()) {
+				if (owner->GetPet() && owner->GetPet()->GetTarget() && DistanceSquared(GetPosition(), owner->GetPet()->GetTarget()->GetPosition()) <= RuleR(Aggro, PetAttackRange)) {
 					auto target = owner->GetPet()->GetTarget();
 					AddToHateList(target, 100, 0, true, false, false, SPELL_UNKNOWN, true);
 					SetTarget(target);
@@ -630,14 +630,49 @@ bool NPC::Process()
 		}
 	}
 
-	if ((IsPet() && GetOwner()->IsClient()) || (entity_list.GetClientByID(GetSwarmOwner()))) {
-		auto owner = GetOwner();
+	if (!GetTarget() && (IsPet() && GetOwner()->IsClient()) || (entity_list.GetClientByID(GetSwarmOwner()) && GetSwarmInfo()->permanent)) {
+		auto owner = GetOwner()->CastToClient();
 		if (!owner) {
 			owner = entity_list.GetClientByID(GetSwarmOwner());
 		}
 
-		if (owner && owner->HasPet() && owner->GetPet()->GetPetOrder() == eStandingPetOrder::SPO_Guard) {
+		if (owner && owner->HasPet() && owner->GetPet()->GetPetOrder() == eStandingPetOrder::SPO_Guard && !(owner->GetPet()->IsHeld() || owner->GetPet()->IsGHeld())) {
+			std::vector<NPC*> npc_vector;
+			for (const auto& npc_entity : entity_list.GetNPCList()) {
+				bool match = false;
+				for (const auto& pet_entity : owner->GetAllPets()) {
+					if (pet_entity->GetTarget() == npc_entity.second) {
+						match = true;
+						break;
+					}
+				}
+				if (!match && DistanceSquared(GetPosition(), npc_entity.second->GetPosition()) <= (RuleR(Aggro, PetAttackRange) / 4)) {
+					npc_vector.push_back(npc_entity.second);
+				}
+			}
 
+			std::random_device rd;
+			std::mt19937 g(rd());
+			std::shuffle(npc_vector.begin(), npc_vector.end(), g);
+
+			for (const auto target : npc_vector) {
+				if (!GetTarget() && target->IsOnHatelist(owner) && !IsOnHatelist(target)) {
+					AddToHateList(target, 100, 0, true, false, false, SPELL_UNKNOWN, true);
+					SetTarget(target);
+					MessageString(Chat::PetResponse, PET_ATTACKING, GetCleanName(), target->GetCleanName());
+				}
+			}
+
+			if (!GetTarget()) {
+				for (const auto pet : owner->GetAllPets()) {
+					auto target = pet->GetTarget();
+					if (target) {
+						AddToHateList(target, 100, 0, true, false, false, SPELL_UNKNOWN, true);
+						SetTarget(target);
+						MessageString(Chat::PetResponse, PET_ATTACKING, GetCleanName(), target->GetCleanName());
+					}
+				}
+			}
 		}
 	}
 

@@ -1425,7 +1425,7 @@ void Mob::AI_Process() {
 
 		}
 		else if (AI_movement_timer->Check() && !IsRooted()) {
-			if (IsPet()) {
+			if (IsPet() || (CastToNPC()->GetSwarmInfo() && CastToNPC()->GetSwarmInfo()->permanent)) {
 				// we're a pet, do as we're told
 				switch (pStandingPetOrder) {
 					case SPO_Follow: {
@@ -1434,25 +1434,47 @@ void Mob::AI_Process() {
 							break;
 						}
 
+						auto this_npc = CastToNPC();
+
 						glm::vec4 owner_position = owner->GetPosition();
-						float owner_heading 	 = owner->GetHeading();
+						float owner_heading = owner->GetHeading();
 
 						// Convert heading to radians
 						float heading_radians = (owner_heading / 512.0f) * 2.0f * M_PI;
 
-						// Adjust heading by adding 1 radian
-						float adjusted_heading = heading_radians + (M_PI/2) + RuleR(Custom, PetPlacementAdjustment);
+						auto pets = owner->CastToClient()->GetAllPets();
 
-						if (adjusted_heading >= 2.0f * M_PI) {
-							adjusted_heading -= 2.0f * M_PI;
+						auto it = std::find(pets.begin(), pets.end(), this_npc);
+
+						// Define the total number of slots including the fixed pet at +1 radian
+						int total_slots = std::max(3, static_cast<int>(pets.size()));
+
+						// Calculate the slot index to use
+						int index = 0;
+						if (it != pets.end()) {
+							index = std::distance(pets.begin(), it);
+							if (index == 1 && pets.size() == 2)
+							{
+								index = 2;
+							}
+						}
+
+						// Calculate the offset for the slot, ensuring we skip the fixed position at +1 radian
+						float base_offset = heading_radians + (M_PI/2) + RuleR(Custom, PetPlacementAdjustment); // Fixed pet position at +1 radian
+						float slot_increment = (2.0f * M_PI) / total_slots;
+						float offset = base_offset + (index * slot_increment);
+
+						// Ensure the offset does not exceed 2π
+						if (offset >= 2.0f * M_PI) {
+							offset -= 2.0f * M_PI;
 						}
 
 						// Calculate new x, y positions offset by 5 units
-						float offset_distance = 5.0f;
+						float offset_distance = std::max(5.0f, static_cast<float>(total_slots));
 
 						glm::vec4 target_position;
-						target_position.x = owner_position.x + offset_distance * sin(adjusted_heading);
-						target_position.y = owner_position.y + offset_distance * cos(adjusted_heading);
+						target_position.x = owner_position.x + offset_distance * sin(offset);
+						target_position.y = owner_position.y + offset_distance * cos(offset);
 						target_position.z = owner_position.z;
 						target_position.w = owner_position.w;
 
@@ -1461,6 +1483,7 @@ void Mob::AI_Process() {
 
 						if (xy_distance >= 0.1 || z_distance > 100) {
 							bool running = false;
+
 							/**
 							 * Distance: >= 35 (Run if far away)
 							 */
@@ -1471,7 +1494,6 @@ void Mob::AI_Process() {
 							/**
 							 * Distance: >= 450 (Snap to owner)
 							 */
-
 							if (xy_distance >= 202500 || z_distance > 100) {
 								Teleport(target_position);
 							} else {
