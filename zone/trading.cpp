@@ -842,61 +842,24 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					}
 
 				} else {
-					if (GetGM() ||
-						(!restrict_quest_items_to_quest_npc || (is_quest_npc && item->IsQuestItem()) || !item->IsQuestItem()) && // If rule is enabled, return any quest items given to non-quest NPCs
-						(((item->NoDrop != 0 && !inst->IsAttuned()) || is_pet_and_can_have_nodrop_items) &&
-						((!item->IsQuestItem() || is_pet_and_can_have_quest_items || !is_pet)))) {
+					if (is_pet || (tradingWith->CastToNPC()->GetSwarmInfo()->permanent && entity_list.GetClientByID(tradingWith->CastToNPC()->GetSwarmOwner()))) {
 						// pets need to look inside bags and try to equip items found there
 						if (item->IsClassBag() && item->BagSlots > 0) {
 							for (int16 bslot = EQ::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
 								const EQ::ItemInstance *baginst = inst->GetItem(bslot);
 								if (baginst) {
 									const EQ::ItemData *bagitem = baginst->GetItem();
-									if (bagitem && (GetGM() ||
-										(!restrict_quest_items_to_quest_npc ||
-										(is_quest_npc && bagitem->IsQuestItem()) || !bagitem->IsQuestItem()) &&
-										// If rule is enabled, return any quest items given to non-quest NPCs (inside bags)
-										(bagitem->NoDrop != 0 && !baginst->IsAttuned()) &&
-										((is_pet && (!bagitem->IsQuestItem() || pets_can_take_quest_items) ||
-										!is_pet)))) {
-
-									if (GetGM()) {
-										const std::string& item_link = database.CreateItemLink(bagitem->ID);
-										Message(
-											Chat::White,
-											fmt::format(
-												"Your GM flag allows you to give {} to {}.",
-												item_link,
-												GetTargetDescription(tradingWith)
-											).c_str()
-										);
-									}
-
-										auto loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
-										loot_drop_entry.equip_item = 1;
-										loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
-										if (tradingWith->IsPet() && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
-											if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
-												tradingWith->CastToNPC()->AddLootDropFixed(
-													bagitem,
-													loot_drop_entry,
-													true
-												);
-											}
+									auto loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
+									loot_drop_entry.equip_item = 1;
+									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
+									if (tradingWith->IsPet() && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
+										if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
+											tradingWith->CastToNPC()->AddLootDropFixed(
+												bagitem,
+												loot_drop_entry,
+												true
+											);
 										}
-										// Return quest items being traded to non-quest NPC when the rule is true
-									} else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && bagitem->IsQuestItem())) {
-										tradingWith->SayString(TRADE_BACK, GetCleanName());
-										PushItemOnCursor(*baginst, true);
-										Message(Chat::Red, "You can only trade quest items to quest NPCs.");
-										// Return quest items being traded to player pet when not allowed
-									} else if (is_pet && bagitem->IsQuestItem() && !pets_can_take_quest_items) {
-										tradingWith->SayString(TRADE_BACK, GetCleanName());
-										PushItemOnCursor(*baginst, true);
-										Message(Chat::Red, "You cannot trade quest items with your pet.");
-									} else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
-										tradingWith->SayString(TRADE_BACK, GetCleanName());
-										PushItemOnCursor(*baginst, true);
 									}
 								}
 							}
@@ -926,24 +889,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 								}
 							}
 						}
-					}
-
-					// Return quest items being traded to non-quest NPC when the rule is true
-					else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && item->IsQuestItem())) {
-						tradingWith->SayString(TRADE_BACK, GetCleanName());
-						PushItemOnCursor(*inst, true);
-						Message(Chat::Red, "You can only trade quest items to quest NPCs.");
-					}
-					// Return quest items being traded to player pet when not allowed
-					else if (is_pet && item->IsQuestItem()) {
-						tradingWith->SayString(TRADE_BACK, GetCleanName());
-						PushItemOnCursor(*inst, true);
-						Message(Chat::Red, "You cannot trade quest items with your pet.");
-					}
-					// Return NO DROP and Attuned items being handed into a non-quest NPC if the rule is true
-					else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
-						tradingWith->SayString(TRADE_BACK, GetCleanName());
-						PushItemOnCursor(*inst, true);
 					}
 				}
 			}
@@ -2457,7 +2402,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app)
 			ss.str("");
 			ss.clear();
 		}
-		
+
 		return;
 	}
 }
