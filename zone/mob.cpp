@@ -4956,6 +4956,7 @@ bool Mob::HateSummon() {
 			float summoned_zoff = target->GetZOffset();
 			auto new_pos = m_Position;
 			new_pos.z -= (summoner_zoff - summoned_zoff);
+			new_pos.z = GetFixedZ(new_pos);
 			float angle = new_pos.w - target->GetHeading();
 			new_pos.w = target->GetHeading();
 
