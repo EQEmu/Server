@@ -842,7 +842,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					}
 
 				} else {
-					if (is_pet || (tradingWith->CastToNPC()->GetSwarmInfo()->permanent && entity_list.GetClientByID(tradingWith->CastToNPC()->GetSwarmOwner()))) {
+					if (is_pet || (tradingWith->CastToNPC()->GetSwarmInfo() && tradingWith->CastToNPC()->GetSwarmInfo()->permanent)) {
+						LogDebug("Pet Trade Event [{}]", tradingWith->GetOwner()->GetCleanName());
+						// Set this here because pet bag needs to care avout other sense of 'pet'
+						const bool multi_pet = is_pet || (RuleB(Custom, EnableMultipet) && (tradingWith->CastToNPC()->GetSwarmInfo() && tradingWith->CastToNPC()->GetSwarmInfo()->permanent));
 						// pets need to look inside bags and try to equip items found there
 						if (item->IsClassBag() && item->BagSlots > 0) {
 							for (int16 bslot = EQ::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
@@ -852,7 +855,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 									auto loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
 									loot_drop_entry.equip_item = 1;
 									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
-									if (tradingWith->IsPet() && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
+									if (multi_pet && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
 										if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
 											tradingWith->CastToNPC()->AddLootDropFixed(
 												bagitem,
@@ -865,7 +868,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							}
 						}
 
-						if (tradingWith->IsPet() && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
+						if (multi_pet && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
 							auto new_loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
 							new_loot_drop_entry.equip_item = 1;
 							new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
