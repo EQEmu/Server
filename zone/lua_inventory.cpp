@@ -66,17 +66,17 @@ Lua_ItemInst Lua_Inventory::PopItem(int slot_id) {
 
 int Lua_Inventory::HasItem(int item_id) {
 	Lua_Safe_Call_Int();
-	return self->HasItem(item_id);
+	return self->HasItemFuzzy(item_id);
 }
 
 int Lua_Inventory::HasItem(int item_id, int quantity) {
 	Lua_Safe_Call_Int();
-	return self->HasItem(item_id, quantity);
+	return self->HasItemFuzzy(item_id, quantity);
 }
 
 int Lua_Inventory::HasItem(int item_id, int quantity, int where) {
 	Lua_Safe_Call_Int();
-	return self->HasItem(item_id, quantity, where);
+	return self->HasItemFuzzy(item_id, quantity, where);
 }
 
 bool Lua_Inventory::HasSpaceForItem(Lua_Item item, int quantity) {

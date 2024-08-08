@@ -80,17 +80,17 @@ int Perl_Inventory_GetSlotID(EQ::InventoryProfile* self, int16_t slot_id, uint8_
 
 int Perl_Inventory_HasItem(EQ::InventoryProfile* self, uint32_t item_id)
 {
-	return self->HasItem(item_id);
+	return self->HasItemFuzzy(item_id);
 }
 
 int Perl_Inventory_HasItem(EQ::InventoryProfile* self, uint32_t item_id, uint8_t quantity)
 {
-	return self->HasItem(item_id, quantity);
+	return self->HasItemFuzzy(item_id, quantity);
 }
 
 int Perl_Inventory_HasItem(EQ::InventoryProfile* self, uint32_t item_id, uint8_t quantity, uint8_t where_to_look)
 {
-	return self->HasItem(item_id, quantity, where_to_look);
+	return self->HasItemFuzzy(item_id, quantity, where_to_look);
 }
 
 int Perl_Inventory_HasItemByLoreGroup(EQ::InventoryProfile* self, uint32_t loregroup)

@@ -167,6 +167,7 @@ namespace EQ
 		// Check whether item exists in inventory
 		// where argument specifies OR'd list of invWhere constants to look
 		int16 HasItem(uint32 item_id, uint8 quantity = 0, uint8 where = 0xFF);
+		int16 HasItemFuzzy(uint32 item_id, uint8 quantity = 0, uint8 where = 0xFF);
 
 		// Check whether item exists in inventory
 		// where argument specifies OR'd list of invWhere constants to look
@@ -232,6 +233,8 @@ namespace EQ
 		// Checks an inventory bucket for a particular item
 		int16 _HasItem(std::map<int16, ItemInstance*>& bucket, uint32 item_id, uint8 quantity);
 		int16 _HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity);
+		int16 _HasItemFuzzy(std::map<int16, ItemInstance*>& bucket, uint32 item_id, uint8 quantity);
+		int16 _HasItemFuzzy(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity);
 		int16 _HasItemByUse(std::map<int16, ItemInstance*>& bucket, uint8 use, uint8 quantity);
 		int16 _HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity);
 		int16 _HasItemByLoreGroup(std::map<int16, ItemInstance*>& bucket, uint32 loregroup);
