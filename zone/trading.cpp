@@ -811,7 +811,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				}
 
 				const EQ::ItemData* item = inst->GetItem();
-				const bool is_pet = _CLIENTPET(tradingWith) && tradingWith->GetPetType()<=petOther;
+				const bool is_pet = _CLIENTPET(tradingWith) && tradingWith->GetPetType()<=petCharmed;
 				const bool is_quest_npc = tradingWith->CastToNPC()->IsQuestNPC();
 				const bool restrict_quest_items_to_quest_npc = RuleB(NPC, ReturnQuestItemsFromNonQuestNPCs);
 				const bool pets_can_take_quest_items = RuleB(Pets, CanTakeQuestItems);
