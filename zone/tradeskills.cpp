@@ -479,7 +479,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 	else if (spec.tradeskill == EQ::skills::SkillMakePoison) {
-		if (user_pp.class_ != Class::Rogue) {
+		if (!user->HasClass(Class::Rogue)) {
 			user->Message(Chat::Red, "Only rogues can mix poisons.");
 			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 			user->QueuePacket(outapp);
