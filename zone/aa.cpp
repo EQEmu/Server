@@ -1197,6 +1197,10 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		aai->classes = ability->classes;
 	}
 
+	if(!CanUseAlternateAdvancementRank(rank)) {
+		return;
+	}
+
 	aai->id = rank->id;
 	aai->upper_hotkey_sid = rank->upper_hotkey_sid;
 	aai->lower_hotkey_sid = rank->lower_hotkey_sid;
@@ -1235,18 +1239,6 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		}
 	}
 
-	if (RuleB(Custom, MulticlassingEnabled)) {
-		if (aai->id == 1071 || aai->id == 4764 || aai->id == 7553 || aai->id == 7681) {
-			aai->cost = 0;
-			aai->level_req = 0;
-			aai->classes = 0xFFFFFFF;
-		}
-	}
-
-	if(!CanUseAlternateAdvancementRank(rank)) {
-		return;
-	}
-
 	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
 	for(auto &effect : rank->effects) {
 		outapp->WriteSInt32(effect.effect_id);
@@ -1282,12 +1274,6 @@ void Client::SendAlternateAdvancementPoints() {
 	for(auto &aa : zone->aa_abilities) {
 		uint32 charges = 0;
 		auto ranks = GetAA(aa.second->first_rank_id, &charges);
-
-		if (RuleB(Custom, MulticlassingEnabled) && aa.second->id == 347) {
-			aa.second->classes = INT32_MAX;
-			GrantAlternateAdvancementAbility(aaMnemonicRetention, 4, true);
-		}
-
 		if(ranks) {
 			AA::Rank *rank = aa.second->GetRankByPointsSpent(ranks);
 			if(rank) {
@@ -1946,10 +1932,6 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 
 	if (!a) {
 		return false;
-	}
-
-	if (rank->id == 1071 || rank->id == 4764 || rank->id == 7553 || rank->id == 7681) {
-		return true;
 	}
 
 	// Lie to the client about who can use this AA rank if we are multiclassing
