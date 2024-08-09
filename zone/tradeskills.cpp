@@ -400,7 +400,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			user->QueuePacket(outapp);
 			safe_delete(outapp);
 			return;
-		}		
+		}
 	}
 
 	DBTradeskillRecipe_Struct spec;
@@ -454,7 +454,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
 	if (spec.tradeskill == EQ::skills::SkillAlchemy) {
-		if (user_pp.class_ != Class::Shaman) {
+		if (!user->HasClass(Class::Shaman)) {
 			user->Message(Chat::Red, "This tradeskill can only be performed by a shaman.");
 			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 			user->QueuePacket(outapp);
@@ -470,7 +470,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 	else if (spec.tradeskill == EQ::skills::SkillTinkering) {
-		if (user_pp.race != GNOME) {
+		if (user_pp.race != GNOME || RuleB(Custom, MulticlassingEnabled)) {
 			user->Message(Chat::Red, "Only gnomes can tinker.");
 			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 			user->QueuePacket(outapp);
@@ -1115,7 +1115,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		LogTradeskills("Tradeskill success");
 
 		itr = spec->onsuccess.begin();
-		
+
 		while(itr != spec->onsuccess.end() && !spec->quest) {
 
 			auto item_id = GetMaxItemUpgrade(itr->first);
