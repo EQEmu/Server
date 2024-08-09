@@ -1274,12 +1274,6 @@ void Client::SendAlternateAdvancementPoints() {
 	for(auto &aa : zone->aa_abilities) {
 		uint32 charges = 0;
 		auto ranks = GetAA(aa.second->first_rank_id, &charges);
-
-		if (RuleB(Custom, MulticlassingEnabled) && aa.second->id == 347) {
-			aa.second->classes = INT32_MAX;
-			GrantAlternateAdvancementAbility(aaMnemonicRetention, 4, true);
-		}
-
 		if(ranks) {
 			AA::Rank *rank = aa.second->GetRankByPointsSpent(ranks);
 			if(rank) {
@@ -1942,6 +1936,10 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 
 	// Lie to the client about who can use this AA rank if we are multiclassing
 	if (RuleB(Custom, MulticlassingEnabled)) {
+		if (rank->id == 1071 || rank->id == 4764 || rank->id == 7553 || rank->id == 7681) {
+			return true;
+		}
+
 		if (!(IsClient() && ((a->classes >> 1) & this->CastToClient()->GetClassesBits()))) {
 			return false;
 		}

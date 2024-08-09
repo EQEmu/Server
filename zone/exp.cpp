@@ -498,81 +498,138 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 	add_exp = GetEXP() + add_exp;
 }
 
+bool Client::ConsumeItemOnCursor() {
+	auto cursor_item = m_inv.GetItem(EQ::invslot::slotCursor);
+	auto power_item  = m_inv.GetItem(EQ::invslot::slotPowerSource);
+
+	if (!cursor_item || !power_item || (power_item->GetID() % 1000000) != (cursor_item->GetID() % 1000000)) {
+		Message(Chat::SpellFailure, "You cannot consume that item, is it not similar to the item which you ar etrying to channel strength into.");
+		return false;
+	}
+
+	if ((cursor_item->GetID() > power_item->GetID()) || cursor_item->GetID() >= 2000000 || power_item->GetID() >= 2000000) {
+		Message(Chat::SpellFailure, "You cannot consume that item, as it is stronger than the item which you are trying to channel strength into.");
+		return false;
+	}
+
+	auto upgrade_item = cursor_item->GetUpgrade(database);
+	if (!upgrade_item) {
+		Message(Chat::Yellow, "Consume item failed. No upgrade possible.");
+		return false;
+	} else {
+
+		int upgrade_item_tier = upgrade_item->GetID() / 1000000;
+		int cursor_item_tier  = cursor_item->GetID() / 1000000;
+		int power_item_tier   = power_item->GetID() / 1000000;
+
+		if (power_item_tier == 0) {
+			if (cursor_item_tier == 0) {
+				AddPowersourceExp((power_item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale)) / 4.0f);
+				Message(Chat::Spells, "You consume the power of the item.");
+			} else {
+				Message(Chat::SpellFailure, "Consume item failed. You found a bug! [{}], [{}]", upgrade_item->GetID(), cursor_item->GetID());
+				return false;
+			}
+		}
+
+		else if (power_item_tier == 1) {
+			if (cursor_item_tier == 0) {
+				AddPowersourceExp((power_item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale)) / 16.0f);
+				Message(Chat::Spells, "You consume the power of the item.");
+
+			} else if (cursor_item_tier == 1) {
+				AddPowersourceExp((power_item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale)) / 4.0f);
+				Message(Chat::Spells, "You consume the power of the item.");
+
+			} else {
+				Message(Chat::SpellFailure, "Consume item failed. You found a bug! [{}], [{}]", upgrade_item->GetID(), cursor_item->GetID());
+				return false;
+			}
+		}
+
+		DeleteItemInInventory(EQ::invslot::slotCursor, 0, true, true);
+		SendItemPacket(EQ::invslot::slotCursor, GetInv().GetItem(EQ::invslot::slotCursor), ItemPacketType::ItemPacketTrade);
+		return true;
+	}
+}
+
+bool Client::AddPowersourceExp(uint64 exp_to_add) {
+	EQ::ItemInstance* item = m_inv.GetItem(EQ::invslot::slotPowerSource);
+	if (!item || !exp_to_add) {
+		return false;
+	}
+
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+
+	uint64 tar_item_exp = item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
+	uint64 cur_item_exp = Strings::ToUnsignedBigInt(item->GetCustomData("Exp"), 0);
+
+	if (cur_item_exp + exp_to_add < tar_item_exp) {
+		cur_item_exp = cur_item_exp + exp_to_add;
+		item->SetCustomData("Exp", fmt::to_string(cur_item_exp));
+		database.UpdateInventorySlot(CharacterID(), item, EQ::invslot::slotPowerSource);
+
+		linker.SetItemInst(item);
+		Message(Chat::Experience, "Your [%s] has gained experience! (%.3f%%)", linker.GenerateLink().c_str(), ((static_cast<double>(cur_item_exp) / static_cast<double>(tar_item_exp)) * 100));
+		return true;
+	} else {
+		EQ::ItemInstance* new_item = item->GetUpgrade(database);
+		if (!new_item) {
+			Message(Chat::Experience, "Your [%s] is fully upgraded and cannot accumulate any additional experience.", linker.GenerateLink().c_str());
+			return false;
+		} else {
+			linker.SetItemInst(item);
+			auto old_item_link = linker.GenerateLink().c_str();
+			if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(new_item->GetItem()->ID)) {
+				DiscoverItem(new_item->GetItem()->ID);
+			}
+			for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+				const EQ::ItemInstance *aug_i = item->GetAugment(r);
+				if (!aug_i) // no aug, try next slot!
+						continue;
+
+				new_item->PutAugment(r, *item->RemoveAugment(r));
+			}
+
+			item = m_inv.PopItem(EQ::invslot::slotPowerSource);
+			if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {
+				SendSound();
+
+				EQ::SayLinkEngine linker2;
+				linker2.SetLinkType(EQ::saylink::SayLinkItemInst);
+				linker2.SetItemInst(new_item);
+				auto new_item_link = linker2.GenerateLink().c_str();
+
+				Message(Chat::Experience, "Your [%s] has gained experience! It has successfully upgraded into a [%s]!", old_item_link, new_item_link);
+			} else {
+				if (item) {
+					PutItemInInventory(EQ::invslot::slotPowerSource, *item, true);
+					Message(Chat::Red, "ERROR: Unable to upgrade item from power source, attempting to recover old item.");
+					return false;
+				}
+			}
+
+			if (new_item->GetID() >= 2000000) {
+				new_item->SetAttuned(true);
+				PushItemOnCursor(*new_item, true);
+				DeleteItemInInventory(EQ::invslot::slotPowerSource, 0, true, true);
+			}
+
+			safe_delete(item);
+			SendItemPacket(EQ::invslot::slotPowerSource, GetInv().GetItem(EQ::invslot::slotPowerSource), ItemPacketType::ItemPacketTrade);
+			return true;
+		}
+	}
+}
+
 void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, bool resexp) {
 	if (!IsEXPEnabled()) {
 		return;
 	}
 
-	LogDebug("Raw in_add_exp: [{}]", in_add_exp);
-
-	if (RuleB(Custom, PowerSourceItemUpgrade)) {
-		EQ::ItemInstance* old_item = m_inv.GetItem(EQ::invslot::slotPowerSource);
-
-		if (old_item) {
-			EQ::ItemInstance* new_item = old_item->GetUpgrade(database);
-			EQ::SayLinkEngine linker;
-
-			uint64 tar_item_exp   = old_item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
-			uint64 cur_item_exp   = in_add_exp + Strings::ToUnsignedBigInt(old_item->GetCustomData("Exp"));
-
-			double percentage = (static_cast<double>(cur_item_exp) / static_cast<double>(tar_item_exp)) * 100;
-
-			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-
-			if (!new_item) {
-				linker.SetItemInst(old_item);
-				Message(Chat::Experience, "Your [%s] is fully upgraded and cannot accumulate any additional experience.", linker.GenerateLink().c_str());
-				return;
-			}
-
-			linker.SetItemInst(old_item);
-			Message(Chat::Experience, "Your [%s] has gained experience! (%.3f%%)", linker.GenerateLink().c_str(), percentage);
-
-			if (cur_item_exp <= tar_item_exp) {
-				old_item->SetCustomData("Exp", fmt::to_string(cur_item_exp));
-				database.UpdateInventorySlot(CharacterID(), old_item, EQ::invslot::slotPowerSource);
-			} else if (new_item) {
-				if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(new_item->GetItem()->ID)) {
-					DiscoverItem(new_item->GetItem()->ID);
-				}
-
-				for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
-					const EQ::ItemInstance *aug_i = old_item->GetAugment(r);
-					if (!aug_i) // no aug, try next slot!
-							continue;
-
-					new_item->PutAugment(r, *old_item->RemoveAugment(r));
-				}
-
-				old_item = m_inv.PopItem(EQ::invslot::slotPowerSource);
-
-				if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {
-					linker.SetItemInst(old_item);
-					auto upgrade_item_lnk = linker.GenerateLink().c_str();
-
-					linker.SetItemInst(new_item);
-					auto  new_item_lnk = linker.GenerateLink().c_str();
-
-					Message(Chat::Experience, "Your [%s] has upgraded into [%s]!", upgrade_item_lnk, new_item_lnk);
-					SendSound();
-				} else {
-					if (old_item) {
-						PutItemInInventory(EQ::invslot::slotPowerSource, *old_item, true);
-						Message(Chat::Red, "ERROR: Unable to upgrade item from power source, attempting to recover old item.");
-					}
-				}
-
-				if (new_item->GetID() >= 2000000) {
-					new_item->SetAttuned(true);
-					PushItemOnCursor(*new_item, true);
-					DeleteItemInInventory(EQ::invslot::slotPowerSource, 0, true, true);
-				}
-
-				safe_delete(old_item);
-				SendItemPacket(EQ::invslot::slotPowerSource, GetInv().GetItem(EQ::invslot::slotPowerSource), ItemPacketType::ItemPacketTrade);
-			}
-			return;
-		}
+	if (RuleB(Custom, PowerSourceItemUpgrade) && AddPowersourceExp(in_add_exp)) {
+		return;
 	}
 
 	EVENT_ITEM_ScriptStopReturn();

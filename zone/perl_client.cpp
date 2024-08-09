@@ -1388,6 +1388,11 @@ void Perl_Client_IncrementAA(Client* self, uint32 aa_skill_id) // @categories Al
 	self->IncrementAlternateAdvancementRank(aa_skill_id);
 }
 
+bool Perl_Client_ConsumeItemOnCursor(Client* self)
+{
+	return self->ConsumeItemOnCursor();
+}
+
 bool Perl_Client_GrantAlternateAdvancementAbility(Client* self, int aa_id, int points) // @categories Alternative Advancement
 {
 	return self->GrantAlternateAdvancementAbility(aa_id, points);
@@ -3579,6 +3584,7 @@ void perl_register_client()
 	package.add("GrantAllAAPoints", (void(*)(Client*, uint8))&Perl_Client_GrantAllAAPoints);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int))&Perl_Client_GrantAlternateAdvancementAbility);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int, bool))&Perl_Client_GrantAlternateAdvancementAbility);
+	package.add("ConsumeItemOnCursor", (bool(*)(Client *))&Perl_Client_ConsumeItemOnCursor);
 	package.add("GuildID", &Perl_Client_GuildID);
 	package.add("GuildRank", &Perl_Client_GuildRank);
 	package.add("HasAugmentEquippedByID", &Perl_Client_HasAugmentEquippedByID);

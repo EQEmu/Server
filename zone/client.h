@@ -725,6 +725,8 @@ public:
 	void SetEbonCrystals(uint32 value);
 	void SendCrystalCounts();
 
+	bool AddPowersourceExp(uint64 exp_to_add);
+	bool ConsumeItemOnCursor();
 	uint64 GetExperienceForKill(Mob *against);
 	void AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	uint64 CalcEXP(uint8 conlevel = 0xFF, bool ignore_mods = false);
