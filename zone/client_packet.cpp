@@ -1185,6 +1185,9 @@ void Client::Handle_Connect_OP_TGB(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app)
 {
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		GrantAlternateAdvancementAbility(aaMnemonicRetention, 4, false);
+	}
 	SendAlternateAdvancementPoints();
 }
 
