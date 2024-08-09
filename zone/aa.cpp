@@ -1282,12 +1282,6 @@ void Client::SendAlternateAdvancementPoints() {
 	for(auto &aa : zone->aa_abilities) {
 		uint32 charges = 0;
 		auto ranks = GetAA(aa.second->first_rank_id, &charges);
-
-		if (RuleB(Custom, MulticlassingEnabled) && aa.second->id == 347) {
-			aa.second->classes = INT32_MAX;
-			GrantAlternateAdvancementAbility(aaMnemonicRetention, 4, true);
-		}
-
 		if(ranks) {
 			AA::Rank *rank = aa.second->GetRankByPointsSpent(ranks);
 			if(rank) {
