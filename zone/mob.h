@@ -307,7 +307,7 @@ public:
 	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals;
 	uint8 see_invis, innate_see_invis, see_invis_undead; //TODO: do we need a see_invis_animal ?
 
-	bool sneaking, hidden, improved_hidden;
+	bool sneaking, hidden, improved_hidden, fake_hidden;
 	bool see_hide, see_improved_hide;
 
 	/**

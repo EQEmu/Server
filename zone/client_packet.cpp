@@ -5037,9 +5037,12 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 
 		/* Break Hide if moving without sneaking and set rewind timer if moved */
-		if ((hidden || improved_hidden) && !sneaking) {
+		if ((hidden || improved_hidden || fake_hidden) && (!sneaking || !HasClass(Class::Rogue))) {
+			LogDebug("Serverside breaking hide!!!");
 			hidden = false;
 			improved_hidden = false;
+			fake_hidden = false;
+			CancelSneakHide();
 			if (!invisible) {
 				auto outapp =
 						new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -5047,8 +5050,12 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 				sa_out->spawn_id = GetID();
 				sa_out->type = 0x03;
 				sa_out->parameter = 0;
-				entity_list.QueueClients(this, outapp, true);
+				entity_list.QueueClients(this, outapp, false);
 				safe_delete(outapp);
+			}
+
+			if (RuleB(Custom, MulticlassingEnabled)) {
+				MessageString(Chat::Skills, 12682); //You have moved and are no longer hidden!!
 			}
 		}
 		rewind_timer.Start(30000, true);
@@ -9008,6 +9015,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	// newer client respond to OP_CancelSneakHide with OP_Hide with a size of 4 and 0 data
 	if (app->size == 4) {
 		auto data = app->ReadUInt32(0);
+		CancelSneakHide();
 		if (data)
 			LogDebug("Got OP_Hide with unexpected data [{}]", data);
 		return;
@@ -9048,6 +9056,10 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		else
 			hidden = true;
 		tmHidden = Timer::GetCurrentTime();
+		LogDebugDetail("Hide Succeeded.");
+	} else {
+		LogDebugDetail("Hide Failed.");
+		fake_hidden = true;
 	}
 	if (HasClass(Class::Rogue)) {
 		auto outapp = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
@@ -15009,6 +15021,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 
 	if (!was && random < hidechance) {
 		sneaking = true;
+		LogDebugDetail("Sneak Succeeded");
 	}
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
@@ -15018,16 +15031,11 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	if (HasClass(Class::Rogue)) {
-		outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
-		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color = 0x010E;
 		if (sneaking) {
-			msg->string_id = 347;
+			MessageString(Chat::Skills, SNEAK_SUCCESS);
+		} else {
+			MessageString(Chat::Skills, SNEAK_FAIL);
 		}
-		else {
-			msg->string_id = 348;
-		}
-		FastQueuePacket(&outapp);
 	}
 	return;
 }
@@ -15061,6 +15069,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 		hidden = false;
 		improved_hidden = false;
+		fake_hidden = false;
 		entity_list.QueueClients(this, app, true);
 		return;
 	}

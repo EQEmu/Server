@@ -1301,6 +1301,7 @@ void Client::BreakInvis()
 		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
 		hidden = false;
 		improved_hidden = false;
+		fake_hidden = false;
 	}
 }
 

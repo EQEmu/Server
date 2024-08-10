@@ -8119,6 +8119,7 @@ void Mob::CancelSneakHide()
 	if (hidden || improved_hidden) {
 		hidden = false;
 		improved_hidden = false;
+		fake_hidden = false;
 		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
 		sa_out->spawn_id = GetID();

@@ -9202,25 +9202,27 @@ void Client::InitInnates()
 			break;
 	}
 
-	switch (class_) {
-		case Class::Druid:
-			m_pp.InnateSkills[InnateHarmony] = InnateEnabled;
-			break;
-		case Class::Bard:
-			m_pp.InnateSkills[InnateReveal] = InnateEnabled;
-			break;
-		case Class::Rogue:
-			m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
-			m_pp.InnateSkills[InnateReveal]   = InnateEnabled;
-			break;
-		case Class::Ranger:
-			m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
-			break;
-		case Class::Monk:
-			m_pp.InnateSkills[InnateSurprise]  = InnateEnabled;
-			m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
-		default:
-			break;
+	// Refactor for multiclass
+	if (HasClass(Class::Druid)) {
+		m_pp.InnateSkills[InnateHarmony] = InnateEnabled;
+	}
+
+	if (HasClass(Class::Bard)) {
+		m_pp.InnateSkills[InnateReveal] = InnateEnabled;
+	}
+
+	if (HasClass(Class::Rogue)) {
+		m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
+		m_pp.InnateSkills[InnateReveal]   = InnateEnabled;
+	}
+
+	if (HasClass(Class::Ranger)) {
+		m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
+	}
+
+	if (HasClass(Class::Monk)) {
+		m_pp.InnateSkills[InnateSurprise]  = InnateEnabled;
+		m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
 	}
 }
 

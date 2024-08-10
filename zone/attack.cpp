@@ -6916,6 +6916,7 @@ void Mob::CommonBreakInvisibleFromCombat()
 
 	hidden = false;
 	improved_hidden = false;
+	fake_hidden = false;
 }
 
 /* Dev quotes:
