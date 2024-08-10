@@ -3412,6 +3412,90 @@ bool Lua_Client::AreTasksCompleted(luabind::object task_ids)
 	return self->AreTasksCompleted(v);
 }
 
+void Lua_Client::AreaAttack(float distance)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance);
+}
+
+void Lua_Client::AreaAttack(float distance, int16 slot_id)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance, slot_id);
+}
+
+void Lua_Client::AreaAttack(float distance, int16 slot_id, int count)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance, slot_id, count);
+}
+
+void Lua_Client::AreaAttack(float distance, int16 slot_id, int count, bool is_from_spell)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance, slot_id, count, is_from_spell);
+}
+
+void Lua_Client::AreaAttack(float distance, int16 slot_id, int count, bool is_from_spell, int attack_rounds)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance, slot_id, count, is_from_spell, attack_rounds);
+}
+
+void Lua_Client::AreaSpell(Lua_Mob center, uint16 spell_id)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AESpell(self, center, spell_id);
+}
+
+void Lua_Client::AreaSpell(Lua_Mob center, uint16 spell_id, bool affect_caster)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AESpell(self, center, spell_id, affect_caster);
+}
+
+void Lua_Client::AreaSpell(Lua_Mob center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AESpell(self, center, spell_id, affect_caster, resist_adjust);
+}
+
+void Lua_Client::AreaSpell(Lua_Mob center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int max_targets)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AESpell(self, center, spell_id, affect_caster, resist_adjust, &max_targets);
+}
+
+void Lua_Client::AreaTaunt()
+{
+	Lua_Safe_Call_Void();
+	entity_list.AETaunt(self);
+}
+
+void Lua_Client::AreaTaunt(float range)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AETaunt(self, range);
+}
+
+void Lua_Client::AreaTaunt(float range, int bonus_hate)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AETaunt(self, range, bonus_hate);
+}
+
+void Lua_Client::MassGroupBuff(Lua_Mob center, uint16 spell_id)
+{
+	Lua_Safe_Call_Void();
+	entity_list.MassGroupBuff(self, center, spell_id);
+}
+
+void Lua_Client::MassGroupBuff(Lua_Mob center, uint16 spell_id, bool affect_caster)
+{
+	Lua_Safe_Call_Void();
+	entity_list.MassGroupBuff(self, center, spell_id, affect_caster);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3459,6 +3543,18 @@ luabind::scope lua_register_client() {
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,int,bool,bool))&Lua_Client::ApplySpellRaid)
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,int,bool,bool,bool))&Lua_Client::ApplySpellRaid)
 	.def("AreTasksCompleted", (bool(Lua_Client::*)(luabind::object))&Lua_Client::AreTasksCompleted)
+	.def("AreaAttack", (void(Lua_Client::*)(float))&Lua_Client::AreaAttack)
+	.def("AreaAttack", (void(Lua_Client::*)(float, int16))&Lua_Client::AreaAttack)
+	.def("AreaAttack", (void(Lua_Client::*)(float, int16, int))&Lua_Client::AreaAttack)
+	.def("AreaAttack", (void(Lua_Client::*)(float, int16, int, bool))&Lua_Client::AreaAttack)
+	.def("AreaAttack", (void(Lua_Client::*)(float, int16, int, bool, int))&Lua_Client::AreaAttack)
+	.def("AreaSpell", (void(Lua_Client::*)(Lua_Mob, uint16))&Lua_Client::AreaSpell)
+	.def("AreaSpell", (void(Lua_Client::*)(Lua_Mob, uint16, bool))&Lua_Client::AreaSpell)
+	.def("AreaSpell", (void(Lua_Client::*)(Lua_Mob, uint16, bool, int16))&Lua_Client::AreaSpell)
+	.def("AreaSpell", (void(Lua_Client::*)(Lua_Mob, uint16, bool, int16, int))&Lua_Client::AreaSpell)
+	.def("AreaTaunt", (void(Lua_Client::*)(void))&Lua_Client::AreaTaunt)
+	.def("AreaTaunt", (void(Lua_Client::*)(float))&Lua_Client::AreaTaunt)
+	.def("AreaTaunt", (void(Lua_Client::*)(float, int))&Lua_Client::AreaTaunt)
 	.def("AssignTask", (void(Lua_Client::*)(int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AssignTask)
@@ -3730,6 +3826,8 @@ luabind::scope lua_register_client() {
 	.def("Marquee", (void(Lua_Client::*)(uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("Marquee", (void(Lua_Client::*)(uint32, std::string, uint32))&Lua_Client::SendMarqueeMessage)
 	.def("Marquee", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
+	.def("MassGroupBuff", (void(Lua_Client::*)(Lua_Mob, uint16))&Lua_Client::MassGroupBuff)
+	.def("MassGroupBuff", (void(Lua_Client::*)(Lua_Mob, uint16, bool))&Lua_Client::MassGroupBuff)
 	.def("MaxSkill", (int(Lua_Client::*)(int))&Lua_Client::MaxSkill)
 	.def("MaxSkills", (void(Lua_Client::*)(void))&Lua_Client::MaxSkills)
 	.def("MemSpell", (void(Lua_Client::*)(int,int))&Lua_Client::MemSpell)

@@ -3187,6 +3187,76 @@ bool Perl_Client_AreTasksCompleted(Client* self, perl::array task_ids)
 	return self->AreTasksCompleted(v);
 }
 
+void Perl_Client_AreaAttack(Client* self, float distance)
+{
+	entity_list.AEAttack(self, distance);
+}
+
+void Perl_Client_AreaAttack(Client* self, float distance, int16 slot_id)
+{
+	entity_list.AEAttack(self, distance, slot_id);
+}
+
+void Perl_Client_AreaAttack(Client* self, float distance, int16 slot_id, int count)
+{
+	entity_list.AEAttack(self, distance, slot_id, count);
+}
+
+void Perl_Client_AreaAttack(Client* self, float distance, int16 slot_id, int count, bool is_from_spell)
+{
+	entity_list.AEAttack(self, distance, slot_id, count, is_from_spell);
+}
+
+void Perl_Client_AreaAttack(Client* self, float distance, int16 slot_id, int count, bool is_from_spell, int attack_rounds)
+{
+	entity_list.AEAttack(self, distance, slot_id, count, is_from_spell, attack_rounds);
+}
+
+void Perl_Client_AreaSpell(Client* self, Mob* center, uint16 spell_id)
+{
+	entity_list.AESpell(self, center, spell_id, true, 0, nullptr, true);
+}
+
+void Perl_Client_AreaSpell(Client* self, Mob* center, uint16 spell_id, bool affect_caster)
+{
+	entity_list.AESpell(self, center, spell_id, affect_caster, 0, nullptr, true);
+}
+
+void Perl_Client_AreaSpell(Client* self, Mob* center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
+{
+	entity_list.AESpell(self, center, spell_id, affect_caster, resist_adjust, nullptr, true);
+}
+
+void Perl_Client_AreaSpell(Client* self, Mob* center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int max_targets)
+{
+	entity_list.AESpell(self, center, spell_id, affect_caster, resist_adjust, &max_targets, true);
+}
+
+void Perl_Client_AreaTaunt(Client* self)
+{
+	entity_list.AETaunt(self);
+}
+
+void Perl_Client_AreaTaunt(Client* self, float range)
+{
+	entity_list.AETaunt(self, range);
+}
+
+void Perl_Client_AreaTaunt(Client* self, float range, int bonus_hate)
+{
+	entity_list.AETaunt(self, range, bonus_hate);
+}
+
+void Perl_Client_MassGroupBuff(Client* self, Mob* center, uint16 spell_id)
+{
+	entity_list.MassGroupBuff(self, center, spell_id);
+}
+
+void Perl_Client_MassGroupBuff(Client* self, Mob* center, uint16 spell_id, bool affect_caster)
+{
+	entity_list.MassGroupBuff(self, center, spell_id, affect_caster);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3237,6 +3307,18 @@ void perl_register_client()
 	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool, bool, bool))&Perl_Client_ApplySpellRaid);
 	package.add("AreTasksCompleted", (bool(*)(Client*, perl::array))&Perl_Client_AreTasksCompleted);
+	package.add("AreaAttack", (void(*)(Client*, float))&Perl_Client_AreaAttack);
+	package.add("AreaAttack", (void(*)(Client*, float, int16))&Perl_Client_AreaAttack);
+	package.add("AreaAttack", (void(*)(Client*, float, int16, int))&Perl_Client_AreaAttack);
+	package.add("AreaAttack", (void(*)(Client*, float, int16, int, bool))&Perl_Client_AreaAttack);
+	package.add("AreaAttack", (void(*)(Client*, float, int16, int, bool, int))&Perl_Client_AreaAttack);
+	package.add("AreaSpell", (void(*)(Client*, Mob*, uint16))&Perl_Client_AreaSpell);
+	package.add("AreaSpell", (void(*)(Client*, Mob*, uint16, bool))&Perl_Client_AreaSpell);
+	package.add("AreaSpell", (void(*)(Client*, Mob*, uint16, bool, int16))&Perl_Client_AreaSpell);
+	package.add("AreaSpell", (void(*)(Client*, Mob*, uint16, bool, int16, int))&Perl_Client_AreaSpell);
+	package.add("AreaTaunt", (void(*)(Client*))&Perl_Client_AreaTaunt);
+	package.add("AreaTaunt", (void(*)(Client*, float))&Perl_Client_AreaTaunt);
+	package.add("AreaTaunt", (void(*)(Client*, float, int))&Perl_Client_AreaTaunt);
 	package.add("AssignTask", (void(*)(Client*, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int, bool))&Perl_Client_AssignTask);
@@ -3504,6 +3586,8 @@ void perl_register_client()
 	package.add("Marquee", (void(*)(Client*, uint32, std::string))&Perl_Client_SendMarqueeMessage);
 	package.add("Marquee", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
 	package.add("Marquee", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("MassGroupBuff", (void(*)(Client*, Mob*, uint16))&Perl_Client_MassGroupBuff);
+	package.add("MassGroupBuff", (void(*)(Client*, Mob*, uint16, bool))&Perl_Client_MassGroupBuff);
 	package.add("MaxSkill", (int(*)(Client*, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16, uint16))&Perl_Client_MaxSkill);

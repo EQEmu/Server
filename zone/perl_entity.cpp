@@ -669,11 +669,93 @@ perl::array Perl_EntityList_GetSpawnList(EntityList* self) {
 	return ret;
 }
 
+void Perl_EntityList_AreaAttack(EntityList* self, Mob* attacker, float distance)
+{
+	self->AEAttack(attacker, distance);
+}
+
+void Perl_EntityList_AreaAttack(EntityList* self, Mob* attacker, float distance, int16 slot_id)
+{
+	self->AEAttack(attacker, distance, slot_id);
+}
+
+void Perl_EntityList_AreaAttack(EntityList* self, Mob* attacker, float distance, int16 slot_id, int count)
+{
+	self->AEAttack(attacker, distance, slot_id, count);
+}
+
+void Perl_EntityList_AreaAttack(EntityList* self, Mob* attacker, float distance, int16 slot_id, int count, bool is_from_spell)
+{
+	self->AEAttack(attacker, distance, slot_id, count, is_from_spell);
+}
+
+void Perl_EntityList_AreaAttack(EntityList* self, Mob* attacker, float distance, int16 slot_id, int count, bool is_from_spell, int attack_rounds)
+{
+	self->AEAttack(attacker, distance, slot_id, count, is_from_spell, attack_rounds);
+}
+
+void Perl_EntityList_AreaSpell(EntityList* self, Mob* caster, Mob* center, uint16 spell_id)
+{
+	self->AESpell(caster, center, spell_id);
+}
+
+void Perl_EntityList_AreaSpell(EntityList* self, Mob* caster, Mob* center, uint16 spell_id, bool affect_caster)
+{
+	self->AESpell(caster, center, spell_id, affect_caster);
+}
+
+void Perl_EntityList_AreaSpell(EntityList* self, Mob* caster, Mob* center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
+{
+	self->AESpell(caster, center, spell_id, affect_caster, resist_adjust);
+}
+
+void Perl_EntityList_AreaSpell(EntityList* self, Mob* caster, Mob* center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int max_targets)
+{
+	self->AESpell(caster, center, spell_id, affect_caster, resist_adjust, &max_targets);
+}
+
+void Perl_EntityList_AreaTaunt(EntityList* self, Client* caster)
+{
+	self->AETaunt(caster);
+}
+
+void Perl_EntityList_AreaTaunt(EntityList* self, Client* caster, float range)
+{
+	self->AETaunt(caster, range);
+}
+
+void Perl_EntityList_AreaTaunt(EntityList* self, Client* caster, float range, int bonus_hate)
+{
+	self->AETaunt(caster, range, bonus_hate);
+}
+
+void Perl_EntityList_MassGroupBuff(EntityList* self, Mob* caster, Mob* center, uint16 spell_id)
+{
+	self->MassGroupBuff(caster, center, spell_id);
+}
+
+void Perl_EntityList_MassGroupBuff(EntityList* self, Mob* caster, Mob* center, uint16 spell_id, bool affect_caster)
+{
+	self->MassGroupBuff(caster, center, spell_id, affect_caster);
+}
+
 void perl_register_entitylist()
 {
 	perl::interpreter perl(PERL_GET_THX);
 
 	auto package = perl.new_class<EntityList>("EntityList");
+	package.add("AreaAttack", (void(*)(EntityList*, Mob*, float))&Perl_EntityList_AreaAttack);
+	package.add("AreaAttack", (void(*)(EntityList*, Mob*, float, int16))&Perl_EntityList_AreaAttack);
+	package.add("AreaAttack", (void(*)(EntityList*, Mob*, float, int16, int))&Perl_EntityList_AreaAttack);
+	package.add("AreaAttack", (void(*)(EntityList*, Mob*, float, int16, int, bool))&Perl_EntityList_AreaAttack);
+	package.add("AreaAttack", (void(*)(EntityList*, Mob*, float, int16, int, bool, int))&Perl_EntityList_AreaAttack);
+	package.add("AreaSpell", (void(*)(EntityList*, Mob*, Mob*, uint16))&Perl_EntityList_AreaSpell);
+	package.add("AreaSpell", (void(*)(EntityList*, Mob*, Mob*, uint16, bool))&Perl_EntityList_AreaSpell);
+	package.add("AreaSpell", (void(*)(EntityList*, Mob*, Mob*, uint16, bool, int16))&Perl_EntityList_AreaSpell);
+	package.add("AreaSpell", (void(*)(EntityList*, Mob*, Mob*, uint16, bool, int16, int))&Perl_EntityList_AreaSpell);
+	package.add("AreaTaunt", (void(*)(EntityList*, Client*))&Perl_EntityList_AreaTaunt);
+	package.add("AreaTaunt", (void(*)(EntityList*, Client*, float))&Perl_EntityList_AreaTaunt);
+	package.add("AreaTaunt", (void(*)(EntityList*, Client*, float, int))&Perl_EntityList_AreaTaunt);
 	package.add("CanAddHateForMob", &Perl_EntityList_CanAddHateForMob);
 	package.add("Clear", &Perl_EntityList_Clear);
 	package.add("ClearClientPetitionQueue", &Perl_EntityList_ClearClientPetitionQueue);
@@ -747,6 +829,8 @@ void perl_register_entitylist()
 	package.add("Marquee", (void(*)(EntityList*, uint32, std::string))&Perl_EntityList_Marquee);
 	package.add("Marquee", (void(*)(EntityList*, uint32, std::string, uint32))&Perl_EntityList_Marquee);
 	package.add("Marquee", (void(*)(EntityList*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_EntityList_Marquee);
+	package.add("MassGroupBuff", (void(*)(EntityList*, Mob*, Mob*, uint16))&Perl_EntityList_MassGroupBuff);
+	package.add("MassGroupBuff", (void(*)(EntityList*, Mob*, Mob*, uint16, bool))&Perl_EntityList_MassGroupBuff);
 	package.add("Message", &Perl_EntityList_Message);
 	package.add("MessageClose", &Perl_EntityList_MessageClose);
 	package.add("MessageGroup", &Perl_EntityList_MessageGroup);
