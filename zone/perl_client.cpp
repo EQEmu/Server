@@ -1162,19 +1162,17 @@ void Perl_Client_AddCrystals(Client* self, uint32 radiant_count, uint32 ebon_cou
 	if (ebon_count != 0) {
 		if (ebon_count > 0) {
 			self->AddEbonCrystals(ebon_count);
-			return;
+		} else {
+			self->RemoveEbonCrystals(ebon_count);
 		}
-
-		self->RemoveEbonCrystals(ebon_count);
 	}
 
 	if (radiant_count != 0) {
 		if (radiant_count > 0) {
 			self->AddRadiantCrystals(radiant_count);
-			return;
+		} else {
+			self->RemoveRadiantCrystals(radiant_count);
 		}
-
-		self->RemoveRadiantCrystals(radiant_count);
 	}
 }
 

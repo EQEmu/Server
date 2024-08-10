@@ -1214,25 +1214,23 @@ void Lua_Client::AddPVPPoints(uint32 points) {
 	self->AddPVPPoints(points);
 }
 
-void Lua_Client::AddCrystals(uint32 radiant, uint32 ebon) {
+void Lua_Client::AddCrystals(uint32 radiant_count, uint32 ebon_count) {
 	Lua_Safe_Call_Void();
 
-	if (ebon != 0) {
-		if (ebon > 0) {
-			self->AddEbonCrystals(ebon);
-			return;
+	if (ebon_count != 0) {
+		if (ebon_count > 0) {
+			self->AddEbonCrystals(ebon_count);
+		} else {
+			self->RemoveEbonCrystals(ebon_count);
 		}
-
-		self->RemoveEbonCrystals(ebon);
 	}
 
-	if (radiant != 0) {
-		if (radiant > 0) {
-			self->AddRadiantCrystals(radiant);
-			return;
+	if (radiant_count != 0) {
+		if (radiant_count > 0) {
+			self->AddRadiantCrystals(radiant_count);
+		} else {
+			self->RemoveRadiantCrystals(radiant_count);
 		}
-
-		self->RemoveRadiantCrystals(radiant);
 	}
 }
 
