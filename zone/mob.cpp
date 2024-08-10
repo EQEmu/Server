@@ -278,6 +278,7 @@ Mob::Mob(
 	invisible_animals    = 0;
 	sneaking             = false;
 	hidden               = false;
+	fake_hidden			 = false;
 	improved_hidden      = false;
 	invulnerable         = false;
 	qglobal              = 0;

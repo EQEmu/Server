@@ -15023,20 +15023,23 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		sneaking = true;
 		LogDebugDetail("Sneak Succeeded");
 	}
-	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa_out->spawn_id = GetID();
-	sa_out->type = 0x0F;
-	sa_out->parameter = sneaking;
-	QueuePacket(outapp);
-	safe_delete(outapp);
+
 	if (HasClass(Class::Rogue)) {
 		if (sneaking) {
 			MessageString(Chat::Skills, SNEAK_SUCCESS);
 		} else {
 			MessageString(Chat::Skills, SNEAK_FAIL);
 		}
+	} else {
+		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+		sa_out->spawn_id = GetID();
+		sa_out->type = 0x0F;
+		sa_out->parameter = sneaking;
+		QueuePacket(outapp);
+		safe_delete(outapp);
 	}
+
 	return;
 }
 
