@@ -3247,16 +3247,6 @@ void Perl_Client_AreaTaunt(Client* self, float range, int bonus_hate)
 	entity_list.AETaunt(self, range, bonus_hate);
 }
 
-void Perl_Client_MassGroupBuff(Client* self, Mob* center, uint16 spell_id)
-{
-	entity_list.MassGroupBuff(self, center, spell_id);
-}
-
-void Perl_Client_MassGroupBuff(Client* self, Mob* center, uint16 spell_id, bool affect_caster)
-{
-	entity_list.MassGroupBuff(self, center, spell_id, affect_caster);
-}
-
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3586,8 +3576,6 @@ void perl_register_client()
 	package.add("Marquee", (void(*)(Client*, uint32, std::string))&Perl_Client_SendMarqueeMessage);
 	package.add("Marquee", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
 	package.add("Marquee", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
-	package.add("MassGroupBuff", (void(*)(Client*, Mob*, uint16))&Perl_Client_MassGroupBuff);
-	package.add("MassGroupBuff", (void(*)(Client*, Mob*, uint16, bool))&Perl_Client_MassGroupBuff);
 	package.add("MaxSkill", (int(*)(Client*, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16, uint16))&Perl_Client_MaxSkill);

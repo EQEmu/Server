@@ -3484,18 +3484,6 @@ void Lua_Client::AreaTaunt(float range, int bonus_hate)
 	entity_list.AETaunt(self, range, bonus_hate);
 }
 
-void Lua_Client::MassGroupBuff(Lua_Mob center, uint16 spell_id)
-{
-	Lua_Safe_Call_Void();
-	entity_list.MassGroupBuff(self, center, spell_id);
-}
-
-void Lua_Client::MassGroupBuff(Lua_Mob center, uint16 spell_id, bool affect_caster)
-{
-	Lua_Safe_Call_Void();
-	entity_list.MassGroupBuff(self, center, spell_id, affect_caster);
-}
-
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3826,8 +3814,6 @@ luabind::scope lua_register_client() {
 	.def("Marquee", (void(Lua_Client::*)(uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("Marquee", (void(Lua_Client::*)(uint32, std::string, uint32))&Lua_Client::SendMarqueeMessage)
 	.def("Marquee", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
-	.def("MassGroupBuff", (void(Lua_Client::*)(Lua_Mob, uint16))&Lua_Client::MassGroupBuff)
-	.def("MassGroupBuff", (void(Lua_Client::*)(Lua_Mob, uint16, bool))&Lua_Client::MassGroupBuff)
 	.def("MaxSkill", (int(Lua_Client::*)(int))&Lua_Client::MaxSkill)
 	.def("MaxSkills", (void(Lua_Client::*)(void))&Lua_Client::MaxSkills)
 	.def("MemSpell", (void(Lua_Client::*)(int,int))&Lua_Client::MemSpell)
