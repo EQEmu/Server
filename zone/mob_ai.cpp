@@ -2931,25 +2931,6 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 	return nullptr;
 }
 
-uint32 ZoneDatabase::GetMaxNPCSpellsID() {
-
-	std::string query = "SELECT max(id) from npc_spells";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return 0;
-	}
-
-    if (results.RowCount() != 1)
-        return 0;
-
-    auto row = results.begin();
-
-    if (!row[0])
-        return 0;
-
-    return Strings::ToInt(row[0]);
-}
-
 DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEffectsID)
 {
 	if (iDBSpellsEffectsID == 0)
