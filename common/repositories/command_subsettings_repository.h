@@ -85,7 +85,6 @@ public:
 			{.parent_command = "set", .sub_command = "endurance", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setendurance"},
 			{.parent_command = "set", .sub_command = "endurance_full", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "endurance"},
 			{.parent_command = "set", .sub_command = "exp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setxp|setexp"},
-			{.parent_command = "set", .sub_command = "faction", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setfaction"},
 			{.parent_command = "set", .sub_command = "flymode", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "flymode"},
 			{.parent_command = "set", .sub_command = "freeze", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "freeze|unfreeze"},
 			{.parent_command = "set", .sub_command = "gender", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "gender"},
