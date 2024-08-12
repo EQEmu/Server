@@ -220,7 +220,7 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 			}
 
 		} else {
-			equipment_material = item->Material;
+			equipment_material = (IsClient() && HasClass(Class::Monk) && item->Material == 1) ? 4 : item->Material;
 		}
 	}
 

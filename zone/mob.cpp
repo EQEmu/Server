@@ -1346,7 +1346,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.race		= (use_model) ? use_model : race;
 	ns->spawn.runspeed	= runspeed;
 	ns->spawn.walkspeed	= walkspeed;
-	ns->spawn.class_	= HasClass(Class::Monk) ? Class::Monk : class_;
+	ns->spawn.class_	= (HasClass(Class::Monk) && (race == Race::Human || race == Race::Iksar)) ? Class::Monk : class_;
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
 	ns->spawn.PlayerState	= GetPlayerState();
