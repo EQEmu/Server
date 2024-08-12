@@ -46,6 +46,12 @@ enum : int {	//values for pTimerType
 	pTimerLinkedSpellReuseEnd = 48,
 	pTimerClearXTarget = 50,
 
+	pTimerBackstab = 51,
+	pTimerFrenzy = 52,
+	pTimerKick = 54,
+	pTimerBashSlam = 55,
+	pTimerStrike = 56,
+
 	pTimerShieldAbility = 86,
 
 	pTimerLayHands = 87,		//these IDs are used by client too

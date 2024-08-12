@@ -542,7 +542,9 @@ bool Client::Process() {
 			{
 				ItemTimerCheck();
 			}
+		}
 
+		if (fast_tic_timer.Check()) {
 			SendEdgeStatBulkUpdate();
 		}
 	}

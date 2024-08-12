@@ -1371,6 +1371,11 @@ enum eStatEntry
 	eStatEndurRegen,
 	eStatATK,
 	eStatHaste,
+	eStatKickTimer,
+	eStatBashTimer,
+	eStatBackstabTimer,
+	eStatFrenzyTimer,
+	eStatStrikeTimer,
 	eStatDummyValue,
 	eStatMax
 };

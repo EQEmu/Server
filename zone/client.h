@@ -1940,6 +1940,9 @@ private:
 	void OPGMSummon(const EQApplicationPacket *app);
 	void OPCombatAbility(const CombatAbility_Struct *ca_atk);
 
+	// Custom ServerAuthStats Skill refactor
+	pTimerType GetCombatTimer(uint32 skill);
+
 	// Bandolier Methods
 	void CreateBandolier(const EQApplicationPacket *app);
 	void RemoveBandolier(const EQApplicationPacket *app);
@@ -2122,6 +2125,7 @@ private:
 	Timer client_scan_npc_aggro_timer;
 	Timer client_zone_wide_full_position_update_timer;
 	Timer tribute_timer;
+	Timer fast_tic_timer;
 
 	Timer proximity_timer;
 	Timer TaskPeriodic_Timer;

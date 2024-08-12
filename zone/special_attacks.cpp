@@ -321,11 +321,39 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	}
 }
 
+pTimerType Client::GetCombatTimer(uint32 skill) {
+	if (RuleB(Custom, ServerAuthStats) && RuleB(Custom, MulticlassingEnabled)) {
+		switch (skill) {
+			case EQ::skills::SkillKick:
+			case EQ::skills::SkillRoundKick:
+			case EQ::skills::SkillFlyingKick:
+				return pTimerKick;
+			case EQ::skills::SkillBash:
+				return pTimerBashSlam;
+			case EQ::skills::SkillBackstab:
+				return pTimerBackstab;
+			case EQ::skills::SkillFrenzy:
+				return pTimerFrenzy;
+			case EQ::skills::SkillTigerClaw:
+			case EQ::skills::SkillEagleStrike:
+			case EQ::skills::SkillDragonPunch:
+				return pTimerStrike;
+			default:
+				return pTimerCombatAbility;
+		}
+	} else {
+		if (ClientVersion() >= EQ::versions::ClientVersion::RoF2 && skill == EQ::skills::SkillTigerClaw) {
+			return pTimerCombatAbility2;
+		} else {
+			return pTimerCombatAbility;
+		}
+	}
+}
+
 // We should probably refactor this to take the struct not the packet
 void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 {
-	LogDebug("Entering OPCombatAbility!?");
-
+	SendEdgeStatBulkUpdate();
 	if (!GetTarget()) {
 		return;
 	}
@@ -342,12 +370,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		return;
 	}
 
-	pTimerType timer = pTimerCombatAbility;
-	// RoF2+ Tiger Claw is unlinked from other monk skills, if they ever do that for other classes there will need
-	// to be more checks here
-	if (ClientVersion() >= EQ::versions::ClientVersion::RoF2 && ca_atk->m_skill == EQ::skills::SkillTigerClaw) {
-		timer = pTimerCombatAbility2;
-	}
+	pTimerType timer = GetCombatTimer(ca_atk->m_skill);
 
 	bool bypass_skill_check = false;
 
@@ -413,14 +436,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	}
 
 	int reuse_time     = 0;
-	int haste          = GetHaste();
-	int haste_modifier = 0;
-
-	if (haste >= 0) {
-		haste_modifier = (10000 / (100 + haste)); //+100% haste = 2x as many attacks
-	} else {
-		haste_modifier = (100 - haste); //-100% haste = 1/2 as many attacks
-	}
+	int haste_modifier = GetHaste();
 
 	int64 damage          = 0;
 	int16 skill_reduction = GetSkillReuseTime(ca_atk->m_skill);
@@ -496,24 +512,27 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		reuse_time = FrenzyReuseTime - 1 - skill_reduction;
 		reuse_time = (reuse_time * haste_modifier) / 100;
 
+		LogDebug("Frenzy Reuse Time: [{}] [{}] [{}]", reuse_time, skill_reduction, haste_modifier);
+
 		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
 			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
-			int weapon_ratio = weapon_damage / GetWeaponSpeedbyHand(EQ::invslot::slotPrimary);
-			max_dmg = max_dmg + weapon_damage + (weapon_damage * weapon_ratio);
+			max_dmg = max_dmg + weapon_damage;
 		}
 
-		int animType = anim1HWeapon;
-		switch (primary_in_use->GetItemType()) {
-			case EQ::item::ItemType2HSlash:
-			case EQ::item::ItemType2HBlunt:
-				animType = anim2HSlashing;
-				break;
-			case EQ::item::ItemType2HPiercing:
-				animType = anim2HWeapon;
-				break;
-			case EQ::item::ItemType1HPiercing:
-				animType = anim1HPiercing;
-				break;
+		int animType = animRoundKick;
+		if (primary_in_use) {
+			switch (primary_in_use->GetItemType()) {
+				case EQ::item::ItemType2HSlash:
+				case EQ::item::ItemType2HBlunt:
+					animType = anim2HSlashing;
+					break;
+				case EQ::item::ItemType2HPiercing:
+					animType = anim2HWeapon;
+					break;
+				case EQ::item::ItemType1HPiercing:
+					animType = anim1HPiercing;
+					break;
+			}
 		}
 		DoAnim(animType, 0, false);
 
@@ -653,13 +672,16 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		reuse_time = 9 - skill_reduction;
 	}
 
-	reuse_time = (reuse_time * haste_modifier) / 100;
+	//reuse_time = (reuse_time * haste_modifier) / 100;
 
 	reuse_time = EQ::Clamp(reuse_time, 0, reuse_time);
 
 	if (reuse_time) {
 		p_timers.Start(timer, reuse_time);
+
+		LogDebug("Starting Timer: [{}] [{}] [{}] [{}]", timer, GetCombatTimer(ca_atk->m_skill), reuse_time, p_timers.GetRemainingTime(timer));
 	}
+	SendEdgeStatBulkUpdate();
 }
 
 //returns the reuse time in sec for the special attack used.
@@ -2062,7 +2084,9 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		return;
 	}
 
-	if(!IsRiposte && (!p_timers.Expired(&database, pTimerCombatAbility, false))) {
+	pTimerType timer = GetCombatTimer(skill);
+
+	if(!IsRiposte && (!p_timers.Expired(&database, timer, false))) {
 		return;
 	}
 
@@ -2137,7 +2161,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 			DoSpecialAttackDamage(ca_target, EQ::skills::SkillBash, dmg, 0, -1, ReuseTime);
 
 			if(ReuseTime > 0 && !IsRiposte) {
-				p_timers.Start(pTimerCombatAbility, ReuseTime);
+				p_timers.Start(timer, ReuseTime);
 			}
 		}
 		return;
@@ -2166,7 +2190,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		}
 
 		if(ReuseTime > 0 && !IsRiposte) {
-			p_timers.Start(pTimerCombatAbility, ReuseTime);
+			p_timers.Start(timer, ReuseTime);
 		}
 		return;
 	}
@@ -2231,7 +2255,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 
 	ReuseTime = ReuseTime / HasteMod;
 	if(ReuseTime > 0 && !IsRiposte){
-		p_timers.Start(pTimerCombatAbility, ReuseTime);
+		p_timers.Start(timer, ReuseTime);
 	}
 }
 

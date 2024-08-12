@@ -185,7 +185,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   position_update_timer(10000),
   consent_throttle_timer(2000),
   tmSitting(0),
-  parcel_timer(RuleI(Parcel, ParcelDeliveryDelay))
+  parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
+  fast_tic_timer(100)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);

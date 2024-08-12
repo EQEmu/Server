@@ -3424,93 +3424,61 @@ int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
 	switch (eLabel)
 	{
 		case eStatMaxHP:
-		{
 			CalcMaxHP();
 			return GetMaxHP();
-		}
 		case eStatMaxMana:
-		{
 			CalcMaxMana();
 			return GetMaxMana();
-		}
 		case eStatMaxEndur:
-		{
 			CalcMaxEndurance();
 			return GetMaxEndurance();
-		}
 		case eStatCurHP:
-		{
 			return GetHP();
-		}
 		case eStatCurMana:
-		{
 			return GetMana();
-		}
 		case eStatCurEndur:
-		{
 			return GetEndurance();
-		}
 		case eStatClassesBitmask:
-		{
 			return GetClassesBits();
-		}
 		case eStatMitigation:
-		{
 			CalcAC();
 			return GetMitigationAC();
-		}
 		case eStatEvasion:
-		{
 			return GetTotalDefense();
-		}
 		case eStatSTR:
-		{
 			return GetSTR();
-		}
 		case eStatSTA:
-		{
 			return GetSTA();
-		}
 		case eStatAGI:
-		{
 			return GetAGI();
-		}
 		case eStatDEX:
-		{
 			return GetDEX();
-		}
 		case eStatINT:
-		{
 			return GetINT();
-		}
 		case eStatWIS:
-		{
 			return GetWIS();
-		}
 		case eStatCHA:
-		{
 			return GetCHA();
-		}
 		case eStatHPRegen:
-		{
 			return GetHPRegen();
-		}
 		case eStatManaRegen:
-		{
 			return GetManaRegen();
-		}
 		case eStatEndurRegen:
-		{
 			return GetEnduranceRegen();
-		}
 		case eStatHaste:
-		{
 			return GetHaste();
-		}
 		case eStatATK:
-		{
 			return GetTotalATK();
-		}
+		case eStatKickTimer:
+			return p_timers.GetRemainingTime(pTimerKick);
+		case eStatBashTimer:
+			return p_timers.GetRemainingTime(pTimerBashSlam);
+		case eStatStrikeTimer:
+			return p_timers.GetRemainingTime(pTimerStrike);
+		case eStatBackstabTimer:
+			return p_timers.GetRemainingTime(pTimerBackstab);
+		case eStatFrenzyTimer:
+			return p_timers.GetRemainingTime(pTimerFrenzy);
 		default:
 		{
 			return 0;
