@@ -828,8 +828,8 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 
 	const auto class_bit = static_cast<uint32>(1 << (GetClass() - 1));
 
-	if (!(item->Classes & class_bit)) {
-		Message(Chat::Red, "Your class cannot learn from this scroll.");
+	if (!(item->Classes & GetClassesBits())) {
+		Message(Chat::Red, "You have nothing to learn from this scroll.");
 		SummonItem(item_id);
 		return false;
 	}
@@ -841,14 +841,37 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 	}
 
 	const auto& spell = spells[spell_id];
-	const auto level_to_use = spell.classes[GetClass() - 1];
-	if (level_to_use == 255) {
-		Message(Chat::Red, "Your class cannot learn from this scroll.");
+	bool allowed = false;
+	bool too_low = false;
+	int level_to_use = 255; // Initialize to maximum to find the minimum level requirement
+
+	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+		if (HasClass(i)) {  // Check if the player has access to this class
+			int class_level = spell.classes[i - 1]; // Get the level requirement for this class
+
+			if (class_level > 0) {  // If the spell can be used by this class
+				allowed = true;
+
+				if (class_level < level_to_use) {
+					level_to_use = class_level;  // Update to the lowest required level
+				}
+
+				if (class_level > GetLevel()) {
+					too_low = true;  // The player is too low level for this class
+				}
+			}
+		}
+	}
+
+	// Check if the spell can be used by any class
+	if (!allowed) {
+		Message(Chat::Red, "You have nothing to learn from this scroll.");
 		SummonItem(item_id);
 		return false;
 	}
 
-	if (level_to_use > GetLevel()) {
+	// Check if the player's level is too low for any of the classes
+	if (too_low && level_to_use > GetLevel()) {
 		Message(Chat::Red, fmt::format("You must be at least level {} to learn this spell.", level_to_use).c_str());
 		SummonItem(item_id);
 		return false;

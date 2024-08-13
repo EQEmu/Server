@@ -131,19 +131,19 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 
 		// Send UNKNOWN CLASS for multiclassing
 		if (RuleB(Custom, MulticlassingEnabled)) {
-			
+
 			std::string queryinner = StringFormat("SELECT `value` FROM `data_buckets` WHERE `key` = 'GestaltClasses' AND `character_id` = %d", character_id);
 			auto resultsinner = database.QueryDatabase(queryinner);
 			bool found = false;
 
 			for (auto& row = resultsinner.begin(); row != resultsinner.end(); ++row) {
-				if (row[0]) { 
+				if (row[0]) {
 					pp.classes = static_cast<uint32>(Strings::ToInt(row[0]));
 					found = true;
 					break;
 				}
 			}
-			
+
 			if (!found) {
 				p_character_select_entry_struct->Class = (uint8) Strings::ToUnsignedInt(row[4]); // Fallback to default class if not found
 			} else 	if ((pp.classes & GetPlayerClassBit(Class::Monk)) && ((uint32)Strings::ToUnsignedInt(row[3]) == Race::Human || (uint32)Strings::ToUnsignedInt(row[3]) == Race::Iksar)) {
@@ -164,6 +164,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 				} else {
 					p_character_select_entry_struct->Class = 0xFFFF; // Fallback if no classes were found in bitmask
 				}
+				p_character_select_entry_struct->Deity = pp.classes > 0 ? pp.classes : GetPlayerClassBit(p_character_select_entry_struct->Class);
 			}
 
 		} else {
@@ -192,7 +193,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		p_character_select_entry_struct->Unknown19 = 0xFF;
 		p_character_select_entry_struct->DrakkinTattoo = (uint32) Strings::ToInt(row[17]);
 		p_character_select_entry_struct->DrakkinDetails = (uint32) Strings::ToInt(row[18]);
-		p_character_select_entry_struct->Deity = (uint32) Strings::ToInt(row[6]);
+		//p_character_select_entry_struct->Deity = (uint32) Strings::ToInt(row[6]);
 		p_character_select_entry_struct->PrimaryIDFile = 0;                            // Processed Below
 		p_character_select_entry_struct->SecondaryIDFile = 0;                        // Processed Below
 		p_character_select_entry_struct->HairColor = (uint8) Strings::ToInt(row[9]);
@@ -209,7 +210,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		p_character_select_entry_struct->LastLogin = (uint32) Strings::ToInt(row[7]);            // RoF2 value: 1212696584
 		p_character_select_entry_struct->Unknown2 = 0;
 
-				
+
 
 		if (RuleB(World, EnableReturnHomeButton)) {
 			int now = time(nullptr);

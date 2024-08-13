@@ -1923,7 +1923,7 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 
 		case Race::DragonSkeleton:
 			npc->race = Race::Dracolich;
-			npc->size = 100;
+			npc->size = npc->size * 10;
 			break;
 
 		case Race::Coldain:
