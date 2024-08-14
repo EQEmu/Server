@@ -1663,7 +1663,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			}
 
 			if (item.Click.Effect > 0 && item.CastTime == 0 && item.CastTime_ == 0 && item.RecastDelay == 0) {
-				item.RecastDelay = 30;
+				item.RecastDelay = 5;
 				item.RecastType = -1;
 			}
 		}
