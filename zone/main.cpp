@@ -112,6 +112,7 @@ DatabaseUpdate        database_update;
 SkillCaps             skill_caps;
 
 const SPDat_Spell_Struct* spells;
+std::unordered_set<uint16> suspendable_aa;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
 double frame_time = 0.0;
@@ -471,7 +472,7 @@ int main(int argc, char **argv)
 			parse->EventItem(EVENT_ITEM_GENERATE, nullptr, inst, nullptr, std::string{}, 0, &args);
 		}
 	});
-	
+
 	//now we have our parser, load the quests
 	LogInfo("Loading quests");
 	parse->ReloadQuests();

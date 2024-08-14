@@ -20,6 +20,7 @@
 
 #include "classes.h"
 #include "skills.h"
+#include <unordered_set>
 
 #define SPELL_UNKNOWN 0xFFFF
 #define POISON_PROC 0xFFFE

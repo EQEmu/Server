@@ -47,6 +47,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 extern WorldServer worldserver;
 extern QueryServ* QServ;
+extern std::unordered_set<uint16> suspendable_aa;
 
 Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
 
@@ -1250,6 +1251,18 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	for(auto &prereq : rank->prereqs) {
 		outapp->WriteSInt32(prereq.first);
 		outapp->WriteSInt32(prereq.second);
+	}
+
+	// Make a guess as to if an AA should be suspended or not
+	if (RuleB(Custom, SuspendGroupBuffs) && IsValidSpell(aai->spell)) {
+		auto spell = spells[aai->spell];
+		auto duration = CalcBuffDuration_formula(GetLevel(), spell.buff_duration_formula, spell.buff_duration) * 6;
+		if (duration >= aai->spell_refresh) {
+			suspendable_aa.insert(aai->spell);
+			LogDebug("Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
+		} else {
+			LogDebugDetail("NOT Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
+		}
 	}
 
 	QueuePacket(outapp);

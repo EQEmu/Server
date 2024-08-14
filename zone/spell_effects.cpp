@@ -44,7 +44,7 @@
 extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
-
+extern std::unordered_set<uint16> suspendable_aa;
 
 // the spell can still fail here, if the buff can't stack
 // in this case false will be returned, true otherwise
@@ -4025,6 +4025,8 @@ void Mob::BuffProcess()
 										if (caster->GetInv().IsClickEffectEquipped(spellid)) {
 											suspended = true;
 										} else if (caster->FindSpellBookSlotBySpellID(spellid) >= 0 && !spells[spellid].short_buff_box && !IsBardSong(spellid)) {
+											suspended = true;
+										} else if (suspendable_aa.find(spellid) != suspendable_aa.end()) {
 											suspended = true;
 										}
 									}
