@@ -630,6 +630,42 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		return;
 	}
 
+	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
+	if (spec.tradeskill == EQ::skills::SkillAlchemy) {
+		if (!user->HasClass(Class::Shaman)) {
+			user->Message(Chat::Red, "This tradeskill can only be performed by a shaman.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			return;
+		}
+		else if (user->GetLevel() < MIN_LEVEL_ALCHEMY) {
+			user->Message(Chat::Red, "You cannot perform alchemy until you reach level %i.", MIN_LEVEL_ALCHEMY);
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			return;
+		}
+	}
+	else if (spec.tradeskill == EQ::skills::SkillTinkering) {
+		if (user->GetRace() != GNOME && !RuleB(Custom, MulticlassingEnabled)) {
+			user->Message(Chat::Red, "Only gnomes can tinker.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			return;
+		}
+	}
+	else if (spec.tradeskill == EQ::skills::SkillMakePoison) {
+		if (!user->HasClass(Class::Rogue)) {
+			user->Message(Chat::Red, "Only rogues can mix poisons.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			return;
+		}
+	}
+
     //pull the list of components
 	const auto query = fmt::format("SELECT item_id, componentcount "
                                     "FROM tradeskill_recipe_entries "
@@ -982,6 +1018,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// Implementing AAs
 	// Success modifiers based on recipes
 	// Skillup modifiers based on the rarity of the ingredients
+
+
 
 	// Some tradeskills are more eqal then others. ;-)
 	// If you want to customize the stage1 success rate do it here.

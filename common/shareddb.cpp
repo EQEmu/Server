@@ -1661,6 +1661,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			if (modifiedName[0] != '\0') {
 				strn0cpy(item.Name, modifiedName, sizeof(item.Name));
 			}
+
+			if (item.Click.Effect > 0 && item.CastTime == 0 && item.CastTime_ == 0 && item.RecastDelay == 0) {
+				item.RecastDelay = 30;
+				item.RecastType = -1;
+			}
 		}
 
 		// Bard Instrument that isn't a weapon which fits in primary/secondary
