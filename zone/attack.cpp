@@ -5330,8 +5330,12 @@ void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon
 		return;
 	uint16 skillinuse = 28;
 	int ourlevel = GetLevel();
-	float ProcBonus = static_cast<float>(aabonuses.ProcChanceSPA +
-		spellbonuses.ProcChanceSPA + itembonuses.ProcChanceSPA);
+	float ProcBonus = static_cast<float>(aabonuses.ProcChanceSPA + spellbonuses.ProcChanceSPA + itembonuses.ProcChanceSPA);
+
+	if (RuleB(Custom, ExcludeTempPetsFromProcChanceSPA) && IsValidSpell(weapon->Proc.Effect) && IsEffectInSpell(weapon->Proc.Effect, SE_TemporaryPets)) {
+		ProcBonus = 0.0;
+	}
+
 	ProcBonus += static_cast<float>(itembonuses.ProcChance) / 10.0f; // Combat Effects
 	float ProcChance = GetProcChances(ProcBonus, hand);
 

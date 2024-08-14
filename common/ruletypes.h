@@ -1072,6 +1072,7 @@ RULE_BOOL(Custom,   MultipleTwoHandedProcs,					false, "Allow two-handed weapons
 RULE_INT(Custom,   	DevastatingFrenzyRateModifier, 			0, "Subtract this value from the chance for Devastating Frenzy to trigger")
 RULE_REAL(Custom,   DevastatingFrenzyDamageMultiplier, 		1.0, "Apply this multiplier for each 20% missing hp from target whenever Devastating Frenzy triggers")
 RULE_BOOL(Custom,   FrenzyScaleOnWeapon, 					true, "Add weapon damage to frenzy, and delay to frenzy reuse")
+RULE_BOOL(Custom,   ExcludeTempPetsFromProcChanceSPA,       false, "Enable this rule to prevent SE_ProcChance from affecting procs that spawn temporary pets")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
