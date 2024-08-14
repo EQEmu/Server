@@ -765,13 +765,6 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
-	if (
-		RuleB(World, EnableIPExemptions) ||
-		RuleI(World, MaxClientsPerIP) > 0
-	) {
-		client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
-	}
-
 	auto ew = (EnterWorld_Struct *) app->pBuffer;
 	strn0cpy(char_name, ew->name, sizeof(char_name));
 
@@ -817,6 +810,15 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			char_name
 		);
 		instance_id = r.instance.id;
+	}
+
+	if (
+		RuleB(World, EnableIPExemptions) ||
+		RuleI(World, MaxClientsPerIP) > 0
+	) {
+		if (zone_id != Zones::BAZAAR) {
+			client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
+		}
 	}
 
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
