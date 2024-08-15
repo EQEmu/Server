@@ -289,6 +289,26 @@ bool Client::Process() {
 			entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 		}
 
+        if (RuleB(Custom, BlockBankItemsOnZone) && Connected()) {
+			uint32 banker_max_dist = 0;
+			if(sent_inventory <= EQ::invslot::SHARED_BANK_END && entity_list.GetClosestBanker(this, banker_max_dist) && banker_max_dist <= USE_NPC_RANGE2) {
+            const EQ::ItemInstance* inst = nullptr;
+
+            // Jump the gaps
+            if (sent_inventory < EQ::invslot::BANK_BEGIN) {
+                sent_inventory = EQ::invslot::BANK_BEGIN;
+            } else if (sent_inventory > EQ::invslot::BANK_END && sent_inventory < EQ::invslot::SHARED_BANK_BEGIN) {
+                sent_inventory = EQ::invslot::SHARED_BANK_BEGIN;
+            } else {
+                sent_inventory++;
+            }
+
+            inst = m_inv[sent_inventory];
+            if (inst) {
+                SendItemPacket(sent_inventory, inst, ItemPacketType::ItemPacketTrade);
+            }
+        }
+
 		bool may_use_attacks = false;
 		/*
 			Things which prevent us from attacking:
@@ -780,39 +800,41 @@ void Client::BulkSendInventoryItems()
 		last_pos = ob.tellp();
 	}
 
-	// Bank items
-	for (int16 slot_id = EQ::invslot::BANK_BEGIN; slot_id <= EQ::invslot::BANK_END; slot_id++) {
-		const EQ::ItemInstance* inst = m_inv[slot_id];
-		if (!inst)
-			continue;
+    if (!RuleB(Inventory, LazyLoadBank)) {
+        // Bank items
+        for (int16 slot_id = EQ::invslot::BANK_BEGIN; slot_id <= EQ::invslot::BANK_END; slot_id++) {
+            const EQ::ItemInstance* inst = m_inv[slot_id];
+            if (!inst)
+                continue;
 
-		inst->Serialize(ob, slot_id);
+            inst->Serialize(ob, slot_id);
 
-		if (ob.tellp() == last_pos)
-			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+            if (ob.tellp() == last_pos)
+                LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 
-		last_pos = ob.tellp();
-	}
+            last_pos = ob.tellp();
+        }
 
-	// SharedBank items
-	for (int16 slot_id = EQ::invslot::SHARED_BANK_BEGIN; slot_id <= EQ::invslot::SHARED_BANK_END; slot_id++) {
-		const EQ::ItemInstance* inst = m_inv[slot_id];
-		if (!inst)
-			continue;
+        // SharedBank items
+        for (int16 slot_id = EQ::invslot::SHARED_BANK_BEGIN; slot_id <= EQ::invslot::SHARED_BANK_END; slot_id++) {
+            const EQ::ItemInstance* inst = m_inv[slot_id];
+            if (!inst)
+                continue;
 
-		inst->Serialize(ob, slot_id);
+            inst->Serialize(ob, slot_id);
 
-		if (ob.tellp() == last_pos)
-			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+            if (ob.tellp() == last_pos)
+                LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 
-		last_pos = ob.tellp();
-	}
+            last_pos = ob.tellp();
+        }
+    }
 
-	auto outapp = new EQApplicationPacket(OP_CharInventory);
-	outapp->size = ob.size();
-	outapp->pBuffer = ob.detach();
-	QueuePacket(outapp);
-	safe_delete(outapp);
+    auto outapp = new EQApplicationPacket(OP_CharInventory);
+    outapp->size = ob.size();
+    outapp->pBuffer = ob.detach();
+    QueuePacket(outapp);
+    safe_delete(outapp);
 }
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
