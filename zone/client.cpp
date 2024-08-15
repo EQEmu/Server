@@ -12368,14 +12368,13 @@ bool Client::IsValidPetBag(int item_id) {
 
 // It might make more sense to do invidual syncs at some point in the future, but this is fast enough
 void Client::DoPetBagResync() {
-	DoPetBagFlush();
 	if (RuleB(Custom, EnablePetBags)) {
 		auto pet_bag = GetActivePetBag();
 		auto pet_bag_slot = GetActivePetBagSlot();
 		Mob* pet 	 = GetPet();
 
 		if (pet && pet_bag) {
-
+			DoPetBagFlush();
 			NPC* pet_npc = pet->CastToNPC();
 
 			int bag_top = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, 0);
@@ -12410,7 +12409,6 @@ void Client::DoPetBagResync() {
 void Client::DoPetBagFlush() {
 	if (RuleB(Custom, EnablePetBags)) {
 		Mob* pet 	 = GetPet();
-
 		if (pet) {
 			// Clear existing pet inventory
 			NPC* pet_npc = pet->CastToNPC();
