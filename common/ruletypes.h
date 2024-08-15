@@ -909,6 +909,7 @@ RULE_BOOL(Inventory, AllowAnyWeaponTransformation, false, "Weapons can use any w
 RULE_BOOL(Inventory, TransformSummonedBags, false, "Transforms summoned bags into disenchanted ones instead of deleting")
 RULE_BOOL(Inventory, AllowMultipleOfSameAugment, false, "Allows multiple of the same augment to be placed in an item via #augmentitem or MQ2, set to true to allow")
 RULE_INT(Inventory, AlternateAugmentationSealer, 53, "Allows RoF+ clients to augment items from a special container type")
+RULE_BOOL(Inventory, LazyLoadBank, false, "Don't load bank during zoning, only when in proximinity to a banker. May increase zone speed and stability")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)
