@@ -289,24 +289,25 @@ bool Client::Process() {
 			entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 		}
 
-        if (RuleB(Custom, BlockBankItemsOnZone) && Connected()) {
+        if (RuleB(Inventory, LazyLoadBank) && Connected()) {
 			uint32 banker_max_dist = 0;
 			if(sent_inventory <= EQ::invslot::SHARED_BANK_END && entity_list.GetClosestBanker(this, banker_max_dist) && banker_max_dist <= USE_NPC_RANGE2) {
-            const EQ::ItemInstance* inst = nullptr;
+				const EQ::ItemInstance* inst = nullptr;
 
-            // Jump the gaps
-            if (sent_inventory < EQ::invslot::BANK_BEGIN) {
-                sent_inventory = EQ::invslot::BANK_BEGIN;
-            } else if (sent_inventory > EQ::invslot::BANK_END && sent_inventory < EQ::invslot::SHARED_BANK_BEGIN) {
-                sent_inventory = EQ::invslot::SHARED_BANK_BEGIN;
-            } else {
-                sent_inventory++;
-            }
+				// Jump the gaps
+				if (sent_inventory < EQ::invslot::BANK_BEGIN) {
+					sent_inventory = EQ::invslot::BANK_BEGIN;
+				} else if (sent_inventory > EQ::invslot::BANK_END && sent_inventory < EQ::invslot::SHARED_BANK_BEGIN) {
+					sent_inventory = EQ::invslot::SHARED_BANK_BEGIN;
+				} else {
+					sent_inventory++;
+				}
 
-            inst = m_inv[sent_inventory];
-            if (inst) {
-                SendItemPacket(sent_inventory, inst, ItemPacketType::ItemPacketTrade);
-            }
+				inst = m_inv[sent_inventory];
+				if (inst) {
+					SendItemPacket(sent_inventory, inst, ItemPacketType::ItemPacketTrade);
+				}
+			}
         }
 
 		bool may_use_attacks = false;
