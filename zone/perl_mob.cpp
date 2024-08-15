@@ -2562,6 +2562,14 @@ bool Perl_Mob_HasOwner(Mob* self) // @categories Pet
 
 bool Perl_Mob_IsPet(Mob* self) // @categories Pet
 {
+	if (self->IsPet()) {
+		return true;
+	}
+
+	if (self->IsNPC() && self->CastToNPC()->GetSwarmInfo() && self->CastToNPC()->GetSwarmInfo()->permanent) {
+		return true;
+	}
+
 	return self->IsPet();
 }
 

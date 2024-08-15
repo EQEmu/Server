@@ -323,6 +323,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			case 629:
 			case 633:
 			case 1672:
+			case 1676:
 			case 5480:
 			case 10708:
 				tmp_lastname = fmt::format("{}'s Water Elemental", GetCleanName());

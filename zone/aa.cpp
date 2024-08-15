@@ -396,8 +396,25 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 		if (RuleB(Custom, EnableMultipet) && !GetEntityVariable("MultiPetSpell").empty()) {
 			swarm_pet_npc->GetSwarmInfo()->permanent = true;
+			swarm_pet_npc->SetPetSpellID(spell_id);
 		} else {
 			swarm_pet_npc->GetSwarmInfo()->permanent = false;
+			swarm_pet_npc->SetPetSpellID(spell_id);
+		}
+
+		// Beastlord Pets
+		if (record.petnaming == 2) {
+			uint16 race_id = GetBaseRace();
+
+			auto d = content_db.GetBeastlordPetData(race_id);
+
+			swarm_pet_npc->race        = d.race_id;
+			swarm_pet_npc->texture     = d.texture;
+			swarm_pet_npc->helmtexture = d.helm_texture;
+			swarm_pet_npc->gender      = d.gender;
+			swarm_pet_npc->luclinface  = d.face;
+
+			swarm_pet_npc->size *= d.size_modifier;
 		}
 
 		entity_list.AddNPC(swarm_pet_npc, true, true);

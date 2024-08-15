@@ -973,6 +973,7 @@ void Client::CompleteConnect()
 
 	RecordStats();
 	AutoGrantAAPoints();
+	SendAlternateAdvancementTable();
 
 	if (RuleB(Custom, ServerAuthStats)) {
 		SendEdgeStatBulkUpdate();
