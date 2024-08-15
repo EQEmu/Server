@@ -628,8 +628,8 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 		return;
 	}
 
-	if (RuleB(Custom, PowerSourceItemUpgrade) && AddPowersourceExp(in_add_exp)) {
-		return;
+	if (RuleB(Custom, PowerSourceItemUpgrade) && AddPowersourceExp(in_add_exp * 0.75)) {
+		in_add_exp *= 0.25;
 	}
 
 	EVENT_ITEM_ScriptStopReturn();
