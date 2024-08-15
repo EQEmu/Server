@@ -209,9 +209,22 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		"Marshmallow", "Cuddles", "Pumpkin", "Ruffles", "Tater", "Sprinkles", "Chewy", "Puffball",
 		"Cupcake", "Fudge", "Chester", "Cosmo", "Clover", "Dobby", "Squeaky", "Nibbler", "Tater Tot",
 		"Dumpling", "Wombat", "BoBo", "Churro", "Scooby", "Pudding", "Ducky", "Peaches", "Rascal",
-		"Smidge", "Bean", "Scruffy", "Gus", "Rugrat", "Hobbit"
+		"Smidge", "Bean", "Scruffy", "Gus", "Rugrat", "Hobbit", "Beary_McBearface", "Paddington",
+		"Bearlock Holmes", "Bearon von Growl", "Bearcules", "Winnie the Boo", "Grizzly Adams",
+		"Bear Grylls", "Bearfoot", "Bearth Vader", "Bearin' Square", "Paw Bear",
+		"Bearzooka", "Bear Hugz", "Bearister", "Gummy Bearson", "Bearalicious",
+		"Robin Hoodbear", "Bearthoven", "Sir Growls-a-Lot", "Bearington",
+		"Honeybear Hound", "Bearminator", "Bear Necessities", "Grizz Lee",
+		"Polar Oppawsite", "Growlbert Einstein", "Bearoness", "Bearrific",
+		"Bearcat", "Bearly Legal", "Unbearlievable", "Teddy Ruxbin", "Bear Hugger",
+		"Bearoness von Snuggles", "Bearbie Doll", "Clawdia Pawlsen", "Grizzelda",
+		"Fuzz Lightyear", "Pawdrey Hepbear", "Furrari", "Bearbados Slim", "Bearlin",
+		"Furrnando", "Growlberto", "Bearloaf", "Bearianna Grande", "Bearon the Red",
+		"Clawrence of Arabia", "Paddingpaw", "Pawtrick Swayze", "Bearami Brown",
+		"Grizzabella", "Bearlentine", "Bearthday Boy", "Paw McCartney", "Clawdette",
+		"Bearon Brando", "Beartholomew", "Bear Hugington", "Fluff Daddy", "Chewbearca",
+		"Growldemort", "Bearicane", "Bearlosaurus Rex", "Bear-lenium Falcon", "Bearborator"
 	};
-
 		switch (spell_id) {
 			// Enchanter Pets
 			case 285:
