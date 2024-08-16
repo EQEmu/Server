@@ -112,7 +112,6 @@ DatabaseUpdate        database_update;
 SkillCaps             skill_caps;
 
 const SPDat_Spell_Struct* spells;
-std::unordered_set<uint16> suspendable_aa;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
 double frame_time = 0.0;

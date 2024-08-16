@@ -47,7 +47,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 extern WorldServer worldserver;
 extern QueryServ* QServ;
-extern std::unordered_set<uint16> suspendable_aa;
+
 
 Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
 
@@ -1217,6 +1217,11 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 
 	// Lie to the client about who can use this AA rank if we are multiclassing
 	if (RuleB(Custom, MulticlassingEnabled)) {
+		if (ability->id == 358) {
+			// Skip loading fury of magic.
+			safe_delete(outapp);
+			return;
+		}
 		if ((ability->classes >> 1) & GetClassesBits() || (ability->classes & (1 << GetClass()))) {
 			aai->classes = 0xFFFFFFF;
 		} else {
@@ -1224,6 +1229,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		}
 	} else {
 		if(!(ability->classes & (1 << GetClass()))) {
+			safe_delete(outapp);
 			return;
 		}
 		aai->classes = ability->classes;
@@ -1273,6 +1279,13 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 
 	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
 	for(auto &effect : rank->effects) {
+		if (RuleB(Custom, MulticlassingEnabled)) {
+			if (rank->id == 12706 || rank->id == 12707 || rank->id == 12708 || rank->id == 13813) { // Fists of steel
+				if (effect.effect_id = SE_LimitToSkill && effect.base_value == 0) {
+					continue; // Skip allowing 1HB on THJ for this effect.
+				}
+			}
+		}
 		outapp->WriteSInt32(effect.effect_id);
 		outapp->WriteSInt32(effect.base_value);
 		outapp->WriteSInt32(effect.limit_value);
@@ -1290,7 +1303,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		auto duration = CalcBuffDuration_formula(GetLevel(), spell.buff_duration_formula, spell.buff_duration) * 6;
 		if (duration >= aai->spell_refresh) {
 			suspendable_aa.insert(aai->spell);
-			LogDebug("Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
+			LogDebugDetail("Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
 		} else {
 			LogDebugDetail("NOT Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
 		}

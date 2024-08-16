@@ -1891,6 +1891,8 @@ protected:
 	bool destructibleobject;
 
 	std::unordered_map<uint32, std::pair<uint32, uint32>> aa_ranks;
+	std::unordered_set<uint16> suspendable_aa;
+
 	Timer aa_timers[aaTimerMax];
 
 	bool is_horse;
