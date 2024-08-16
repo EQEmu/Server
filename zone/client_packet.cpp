@@ -15025,11 +15025,21 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		LogDebugDetail("Sneak Succeeded");
 	}
 
-	if (HasClass(Class::Rogue)) {
-		if (sneaking) {
-			MessageString(Chat::Skills, SNEAK_SUCCESS);
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		if (HasClass(Class::Rogue)) {
+			if (sneaking) {
+				MessageString(Chat::Skills, SNEAK_SUCCESS);
+			} else {
+				MessageString(Chat::Skills, SNEAK_FAIL);
+			}
 		} else {
-			MessageString(Chat::Skills, SNEAK_FAIL);
+			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+			SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+			sa_out->spawn_id = GetID();
+			sa_out->type = 0x0F;
+			sa_out->parameter = sneaking;
+			QueuePacket(outapp);
+			safe_delete(outapp);
 		}
 	} else {
 		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -15039,6 +15049,18 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		sa_out->parameter = sneaking;
 		QueuePacket(outapp);
 		safe_delete(outapp);
+		if (GetClass() == Class::Rogue) {
+			outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
+			SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
+			msg->color = 0x010E;
+			if (sneaking) {
+				msg->string_id = SNEAK_SUCCESS;
+			}
+			else {
+				msg->string_id = SNEAK_FAIL;
+			}
+			FastQueuePacket(&outapp);
+		}
 	}
 
 	return;
