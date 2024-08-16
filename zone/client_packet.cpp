@@ -778,7 +778,6 @@ void Client::CompleteConnect()
 	else
 		TaskPeriodic_Timer.Disable();
 
-	SendEdgeStatBulkUpdate();
 	conn_state = ClientConnectFinished;
 
 	if (zone)
@@ -1035,7 +1034,6 @@ void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket *app)
 {
-	SendEdgeStatBulkUpdate();
 	conn_state = ClientReadyReceived;
 	if (!Spawned())
 		SendZoneInPackets();
@@ -1053,7 +1051,6 @@ void Client::Handle_Connect_OP_ClientUpdate(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 {
-	SendEdgeStatBulkUpdate();
 	conn_state = ClientSpawnRequested;
 
 	auto outapp = new EQApplicationPacket;
@@ -1096,7 +1093,6 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 {
-	SendEdgeStatBulkUpdate();
 	conn_state = NewZoneRequested;
 
 	EQApplicationPacket* outapp = nullptr;
@@ -1235,7 +1231,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (strlen(cze->char_name) > 63)
 		return;
 
-	SendEdgeStatBulkUpdate();
 	conn_state = ReceivedZoneEntry;
 
 	SetClientVersion(Connection()->ClientVersion());
@@ -1882,7 +1877,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	SetAttackTimer();
-	SendEdgeStatBulkUpdate();
+
 	conn_state = ZoneInfoSent;
 	zoneinpacket_timer.Start();
 	return;
