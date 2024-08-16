@@ -1389,9 +1389,9 @@ int Client::GetDynamicAATimer(int aa_id) {
         // Check if the bucket has a value before attempting conversion
         if (!bucketValue.empty()) {
             int value = std::stoi(bucketValue); // Convert string value to integer
-			// LogDebug("Got TimerID: [{}]", value);
+			LogDebug("Got TimerID: [{}]", value);
             if (value == aa_id) {
-				// LogDebug("Returning TimerID: [{}] - [{}]", i, value);
+				LogDebug("Returning TimerID: [{}] - [{}]", i, value);
                 return i; // Return the timer ID associated with aa_id
             }
         }
@@ -1680,6 +1680,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 	//check cooldown
 	if (!p_timers.Expired(&database, spell_type + pTimerAAStart, false)) {
+		LogDebug("Got Timer Expired: [{}]", spell_type + pTimerAAStart);
 		uint32 aaremain = p_timers.GetRemainingTime(spell_type + pTimerAAStart);
 		uint32 aaremain_hr = aaremain / (60 * 60);
 		uint32 aaremain_min = (aaremain / 60) % 60;
@@ -1735,7 +1736,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 		auto effective_cast_time = RuleB(Custom, MulticlassingEnabled) ? 0 : spells[rank->spell].cast_time;
 
-		if (RuleB(Custom, MulticlassingEnabled) || (HasClass(Class::Bard) && IsCasting() && spells[rank->spell].cast_time == 0)) {
+		if (!RuleB(Custom, MulticlassingEnabled) && (HasClass(Class::Bard) && IsCasting() && spells[rank->spell].cast_time == 0)) {
 			if (!DoCastingChecksOnCaster(rank->spell, EQ::spells::CastingSlot::AltAbility)) {
 				return;
 			}
