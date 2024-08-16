@@ -60,6 +60,12 @@ public:
 	void SetPosition(const glm::vec4 &position);
 	void SetSize(uint16 size);
 	void ToggleState(Mob *sender);
+	inline std::string GetDestinationZoneName() { return m_destination_zone_name; }
+	inline int GetDestinationInstanceID() { return m_destination_instance_id; }
+	inline float GetDestinationX() { return m_destination.x; }
+	inline float GetDestinationY() { return m_destination.y; }
+	inline float GetDestinationZ() { return m_destination.z; }
+	inline float GetDestinationHeading() { return m_destination.w; }
 
 	float GetX();
 	float GetY();
