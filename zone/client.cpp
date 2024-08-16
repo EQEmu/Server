@@ -12427,9 +12427,9 @@ std::vector<NPC*> Client::GetSwarmPets(bool permanent_only) {
         NPC* mob = ent.second;
 
         // Check if the NPC is a swarm pet owned by this client
-        if (mob->GetSwarmOwner() == GetID()) {
+        if (mob && mob->GetSwarmOwner() == GetID()) {
             // If only permanent swarm pets are requested, skip non-permanent ones
-            if (permanent_only && !mob->GetSwarmInfo()->permanent) {
+            if (mob->GetSwarmInfo() && permanent_only && !mob->GetSwarmInfo()->permanent) {
                 continue;
             }
             // Add the swarm pet to the return vector
