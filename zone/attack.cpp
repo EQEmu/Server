@@ -4331,10 +4331,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			has_player_taken_event
 		);
 
-		if (!has_taken_event) {
-			SetHP(int64(GetHP() - damage));
-		}
-
 		std::vector<std::any> args;
 		int64 damage_override = 0;
 
