@@ -1233,6 +1233,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	conn_state = ReceivedZoneEntry;
 
+	SendEdgeStatBulkUpdate();
+
 	SetClientVersion(Connection()->ClientVersion());
 	m_ClientVersionBit = EQ::versions::ConvertClientVersionToClientVersionBit(Connection()->ClientVersion());
 
