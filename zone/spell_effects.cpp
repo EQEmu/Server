@@ -1319,11 +1319,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				break;
 			}
+			case SE_Familiar:
+			{
+				break;
+			}
 
 			case SE_SummonBSTPet:
 			case SE_NecPet:
 			case SE_SummonPet:
-			case SE_Familiar:
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Summon %s: %s", (effect==SE_Familiar)?"Familiar":"Pet", spell.teleport_zone);
