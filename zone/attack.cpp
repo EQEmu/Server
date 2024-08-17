@@ -1898,6 +1898,11 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 
 	Mob* m_pet = GetPet();
 	SetPet(0);
+
+	for (auto pet : GetAllPets()) {
+		pet->Depop();
+	}
+
 	SetHorseId(0);
 	ShieldAbilityClearVariables();
 	dead = true;
