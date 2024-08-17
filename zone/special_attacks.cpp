@@ -436,7 +436,14 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	}
 
 	int reuse_time     = 0;
-	int haste_modifier = GetHaste();
+	int haste          = GetHaste();
+	int haste_modifier = 0;
+
+	if (haste >= 0) {
+		haste_modifier = (10000 / (100 + haste)); //+100% haste = 2x as many attacks
+	} else {
+		haste_modifier = (100 - haste); //-100% haste = 1/2 as many attacks
+	}
 
 	int64 damage          = 0;
 	int16 skill_reduction = GetSkillReuseTime(ca_atk->m_skill);
@@ -511,8 +518,6 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 		reuse_time = FrenzyReuseTime - 1 - skill_reduction;
 		reuse_time = (reuse_time * haste_modifier) / 100;
-
-		LogDebug("Frenzy Reuse Time: [{}] [{}] [{}]", reuse_time, skill_reduction, haste_modifier);
 
 		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
 			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
@@ -672,14 +677,12 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		reuse_time = 9 - skill_reduction;
 	}
 
-	//reuse_time = (reuse_time * haste_modifier) / 100;
+	reuse_time = (reuse_time * haste_modifier) / 100;
 
 	reuse_time = EQ::Clamp(reuse_time, 0, reuse_time);
 
 	if (reuse_time) {
 		p_timers.Start(timer, reuse_time);
-
-		LogDebug("Starting Timer: [{}] [{}] [{}] [{}]", timer, GetCombatTimer(ca_atk->m_skill), reuse_time, p_timers.GetRemainingTime(timer));
 	}
 	SendEdgeStatBulkUpdate();
 }
