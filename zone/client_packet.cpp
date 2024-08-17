@@ -1322,6 +1322,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (RuleB(Character, SharedBankPlat) && !IsSeasonal())
 		m_pp.platinum_shared = database.GetSharedPlatinum(AccountID());
 
+	SendEdgeStatBulkUpdate();
+
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
 	// set to full support in case they're a gm with items in disabled expansion slots...but, have their gm flag off...
 	// item loss will occur when they use the 'empty' slots, if this is not done
@@ -1385,7 +1387,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (gminvul) { invulnerable = true; }
 	if (flymode > 0) { SendAppearancePacket(AppearanceType::FlyMode, flymode); }
 	/* Set Con State for Reporting */
-	SendEdgeStatBulkUpdate();
+
 	conn_state = PlayerProfileLoaded;
 
 	m_pp.zone_id = zone->GetZoneID();
