@@ -1341,11 +1341,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						MessageString(Chat::SpellFailure, ONLY_ONE_PET);
 						break;
 					} else {
+						LogDebug("Check 1");
 						MakePet(spell_id, spell.teleport_zone);
 						// TODO: we need to sync the states for these clients ...
 						// Will fix buttons for now
 						Mob *pet=GetPet();
 						if (IsClient() && pet) {
+							LogDebug("Check 2");
 							auto c = CastToClient();
 							if (c->ClientVersionBit() & EQ::versions::maskUFAndLater) {
 								c->SetPetCommandState(PET_BUTTON_SIT, 0);
@@ -1362,13 +1364,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								c->SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
 							}
 						}
+						LogDebug("Check 3");
 					}
 				} else {
 					// First we need to inventory all of the permanent pets that we have spawned
 					// and check if we have a class match already.
 					bool class_match 	= false;
 					int  pet_class 		= GetPetOriginClass(spell_id);
-
+					LogDebug("Check 3");
 					LogDebug("Pet List Size: [{}]", CastToClient()->GetAllPets().size());
 					for (const auto pet : CastToClient()->GetAllPets()) {
 						LogDebug("Check Class: [{}], pet_class: [{}], spell_id [{}], size [{}]", GetPetOriginClass(pet->GetPetSpellID()), pet_class, spell_id,  CastToClient()->GetAllPets().size());
@@ -1413,7 +1416,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						// TODO: we need to sync the states for these clients ...
 						// Will fix buttons for now
 						Mob *pet=GetPet();
+						LogDebug("Check 4");
 						if (IsClient() && pet) {
+							LogDebug("Check 5");
 							auto c = CastToClient();
 							if (c->ClientVersionBit() & EQ::versions::maskUFAndLater) {
 								c->SetPetCommandState(PET_BUTTON_SIT, 0);
@@ -1433,7 +1438,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					} else {
 						// Permanent Swarm Pet hack
 						char pet_name[64];
-
+						LogDebug("Check 5");
 						GetRandPetName(pet_name);
 						SetEntityVariable("MultiPetSpell", "true");
 						TemporaryPets(spell_id, nullptr, pet_name);
