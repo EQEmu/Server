@@ -282,7 +282,8 @@ const uint64 EQ::ItemData::CalculateGearScore() const {
 	gear_score += 25  * (Regen + ManaRegen + EnduranceRegen + DSMitigation + Clairvoyance + DamageShield);
 
 	if (Click.Effect > 0) {
-		gear_score += gear_score * 0.5f;
+		gear_score += gear_score * 2.0f;
+		gear_score = std::min(gear_score, 10000000);
 	}
 
 	if (Focus.Effect > 0) {
