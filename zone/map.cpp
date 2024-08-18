@@ -337,6 +337,7 @@ bool Map::Load(const std::string &filename)
 			return loaded_map_file;
 		}
 		else {
+			LogError("Failed to Load Map File: [{}]", filename);
 			fclose(map_file);
 			return false;
 		}
