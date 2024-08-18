@@ -291,7 +291,7 @@ bool Map::Load(std::string filename, bool force_mmf_overwrite)
 bool Map::Load(const std::string &filename)
 {
 #endif /*USE_MAP_MMFS*/
-
+	LogInfo("Loading Map with Filename: [{}]", filename);
 	FILE *map_file = fopen(filename.c_str(), "rb");
 	if (map_file) {
 		uint32 version;
