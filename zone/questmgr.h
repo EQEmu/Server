@@ -226,6 +226,7 @@ public:
 	void failtask(int taskid);
 	int tasktimeleft(int taskid);
 	int istaskcompleted(int taskid);
+	int aretaskscompleted(const std::vector<int>& task_ids);
 	int enabledtaskcount(int taskset);
 	int firsttaskinset(int taskset);
 	int lasttaskinset(int taskset);

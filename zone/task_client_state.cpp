@@ -1599,6 +1599,23 @@ int ClientTaskState::IsTaskCompleted(int task_id)
 	return 0;
 }
 
+int ClientTaskState::AreTasksCompleted(const std::vector<int>& task_ids)
+{
+	if (!(RuleB(TaskSystem, RecordCompletedTasks))) {
+		return -1;
+	}
+
+	int tasks_completed = 1;
+
+	for (const auto& task_id : task_ids) {
+		if (!IsTaskCompleted(task_id)) {
+			tasks_completed = 0;
+		}
+	}
+
+	return tasks_completed;
+}
+
 bool ClientTaskState::TaskOutOfTime(TaskType task_type, int index)
 {
 	// Returns true if the Task in the specified slot has a time limit that has been exceeded.

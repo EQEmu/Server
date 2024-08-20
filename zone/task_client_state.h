@@ -46,6 +46,7 @@ public:
 	void FailTask(Client *client, int task_id);
 	int TaskTimeLeft(int task_id);
 	int IsTaskCompleted(int task_id);
+	int AreTasksCompleted(const std::vector<int>& task_ids);
 	bool IsTaskActive(int task_id);
 	bool IsTaskActivityActive(int task_id, int activity_id);
 	ActivityState GetTaskActivityState(TaskType task_type, int index, int activity_id);

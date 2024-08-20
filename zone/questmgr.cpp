@@ -3260,6 +3260,16 @@ int QuestManager::istaskcompleted(int taskid) {
 	return -1;
 }
 
+int QuestManager::aretaskscompleted(const std::vector<int>& task_ids) {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator) {
+		return initiator->AreTasksCompleted(task_ids);
+	}
+
+	return -1;
+}
+
 int QuestManager::activetasksinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 

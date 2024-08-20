@@ -577,6 +577,7 @@ public:
 	void CampAllBots(uint8 class_id);
 	bool RemoveAAPoints(uint32 points);
 	bool RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount);
+	int AreTasksCompleted(luabind::object task_ids);
 
 	void DialogueWindow(std::string markdown);
 
