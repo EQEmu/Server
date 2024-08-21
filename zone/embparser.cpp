@@ -2064,9 +2064,14 @@ void PerlembParser::ExportEventVariables(
 				Corpse* corpse = std::any_cast<Corpse*>(extra_pointers->at(0));
 				if (corpse) {
 					ExportVar(package_name.c_str(), "killed_corpse_id", corpse->GetID());
+					ExportVar(package_name.c_str(), "killed_x", corpse->GetX());
+					ExportVar(package_name.c_str(), "killed_y", corpse->GetY());
+					ExportVar(package_name.c_str(), "killed_z", corpse->GetZ());
+					ExportVar(package_name.c_str(), "killed_h", corpse->GetHeading());
 				}
 			}
 
+			// EVENT_DEATH_ZONE only
 			if (extra_pointers && extra_pointers->size() >= 2) {
 				NPC* killed = std::any_cast<NPC*>(extra_pointers->at(1));
 				if (killed) {
@@ -2076,10 +2081,6 @@ void PerlembParser::ExportEventVariables(
 						killed->IsBot() ? killed->CastToBot()->GetBotID() : 0
 					);
 					ExportVar(package_name.c_str(), "killed_npc_id", killed->IsNPC() ? killed->GetNPCTypeID() : 0);
-					ExportVar(package_name.c_str(), "killed_x", killed->GetX());
-					ExportVar(package_name.c_str(), "killed_y", killed->GetY());
-					ExportVar(package_name.c_str(), "killed_z", killed->GetZ());
-					ExportVar(package_name.c_str(), "killed_h", killed->GetHeading());
 				}
 			}
 			break;
