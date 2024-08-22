@@ -16897,9 +16897,14 @@ void Client::Handle_OP_RaidClearNPCMarks(const EQApplicationPacket* app)
 
 void Client::RecordStats()
 {
+	const uint32 character_id = CharacterID();
+	if (!character_id) {
+		return;
+	}
+
 	auto r = CharacterStatsRecordRepository::FindOne(
 		database,
-		CharacterID()
+		character_id
 	);
 
 	r.status                   = Admin();
@@ -16977,8 +16982,8 @@ void Client::RecordStats()
 	if (r.character_id > 0) {
 		CharacterStatsRecordRepository::UpdateOne(database, r);
 	} else {
-		r.character_id = CharacterID();
-		r.created_at = std::time(nullptr);
+		r.character_id = character_id;
+		r.created_at   = std::time(nullptr);
 		CharacterStatsRecordRepository::InsertOne(database, r);
 	}
 }
