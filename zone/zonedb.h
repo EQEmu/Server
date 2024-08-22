@@ -561,9 +561,6 @@ public:
 	bool		GetPoweredPetEntry(const std::string& pet_type, int16 pet_power, PetRecord* r);
 	bool		GetBasePetItems(int32 equipmentset, uint32 *items);
 	BeastlordPetData::PetStruct GetBeastlordPetData(uint16 race_id);
-	void		AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);
-	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* item_list, uint8 droplimit, uint8 mindrop);
-	uint32		GetMaxNPCSpellsID();
 	uint32		GetMaxNPCSpellsEffectsID();
 	bool GetAuraEntry(uint16 spell_id, AuraRecord &record);
 	void LoadGlobalLoot();
