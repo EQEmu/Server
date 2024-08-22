@@ -1578,42 +1578,35 @@ int ClientTaskState::TaskTimeLeft(int task_id)
 	return -1;
 }
 
-int ClientTaskState::IsTaskCompleted(int task_id)
+bool ClientTaskState::IsTaskCompleted(int task_id)
 {
-
-	// Returns:	-1 if RecordCompletedTasks is not true
-	//		+1 if the task has been completed
-	//		0 if the task has not been completed
-
-	if (!(RuleB(TaskSystem, RecordCompletedTasks))) {
-		return -1;
+	if (!RuleB(TaskSystem, RecordCompletedTasks)) {
+		return false;
 	}
 
-	for (auto &completed_task : m_completed_tasks) {
-		LogTasks("Comparing completed task [{}] with [{}]", completed_task.task_id, task_id);
-		if (completed_task.task_id == task_id) {
-			return 1;
+	for (const auto& e : m_completed_tasks) {
+		LogTasks("Comparing completed task [{}] with [{}]", e.task_id, task_id);
+		if (e.task_id == task_id) {
+			return true;
 		}
 	}
 
-	return 0;
+	return false;
 }
 
-int ClientTaskState::AreTasksCompleted(const std::vector<int>& task_ids)
+bool ClientTaskState::AreTasksCompleted(const std::vector<int>& task_ids)
 {
-	if (!(RuleB(TaskSystem, RecordCompletedTasks))) {
-		return -1;
+	if (!RuleB(TaskSystem, RecordCompletedTasks)) {
+		return false;
 	}
 
-	int tasks_completed = 1;
-
-	for (const auto& task_id : task_ids) {
-		if (!IsTaskCompleted(task_id)) {
-			tasks_completed = 0;
+	for (const auto& e : task_ids) {
+		if (!IsTaskCompleted(e)) {
+			return false;
 		}
 	}
 
-	return tasks_completed;
+	return true;
 }
 
 bool ClientTaskState::TaskOutOfTime(TaskType task_type, int index)

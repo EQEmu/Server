@@ -1276,7 +1276,7 @@ int Perl__tasktimeleft(int task_id)
 	return quest_manager.tasktimeleft(task_id);
 }
 
-int Perl__istaskcompleted(int task_id)
+bool Perl__istaskcompleted(int task_id)
 {
 	return quest_manager.istaskcompleted(task_id);
 }
@@ -5967,7 +5967,7 @@ bool Perl__send_parcel(perl::reference table_ref)
 	return out;
 }
 
-int Perl__aretaskscompleted(perl::array task_ids)
+bool Perl__aretaskscompleted(perl::array task_ids)
 {
 	std::vector<int> v;
 

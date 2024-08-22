@@ -3251,23 +3251,26 @@ int QuestManager::activespeakactivity(int taskid) {
 	return 0;
 }
 
-int QuestManager::istaskcompleted(int taskid) {
+bool QuestManager::istaskcompleted(int task_id)
+{
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator)
-		return initiator->IsTaskCompleted(taskid);
+	if (initiator && RuleB(TaskSystem, EnableTaskSystem)) {
+		return initiator->IsTaskCompleted(task_id);
+	}
 
-	return -1;
+	return false;
 }
 
-int QuestManager::aretaskscompleted(const std::vector<int>& task_ids) {
+bool QuestManager::aretaskscompleted(const std::vector<int>& task_ids)
+{
 	QuestManagerCurrentQuestVars();
 
-	if (RuleB(TaskSystem, EnableTaskSystem) && initiator) {
+	if (initiator && RuleB(TaskSystem, EnableTaskSystem)) {
 		return initiator->AreTasksCompleted(task_ids);
 	}
 
-	return -1;
+	return false;
 }
 
 int QuestManager::activetasksinset(int taskset) {

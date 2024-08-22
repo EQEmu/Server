@@ -1409,9 +1409,9 @@ void Lua_Client::FailTask(int task) {
 	self->FailTask(task);
 }
 
-bool Lua_Client::IsTaskCompleted(int task) {
+bool Lua_Client::IsTaskCompleted(int task_id) {
 	Lua_Safe_Call_Bool();
-	return self->IsTaskCompleted(task) != 0;
+	return self->IsTaskCompleted(task_id);
 }
 
 bool Lua_Client::IsTaskActive(int task) {
@@ -3379,12 +3379,12 @@ uint8 Lua_Client::GetSkillTrainLevel(int skill_id)
 	return self->GetSkillTrainLevel(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass());
 }
 
-int Lua_Client::AreTasksCompleted(luabind::object task_ids)
+bool Lua_Client::AreTasksCompleted(luabind::object task_ids)
 {
 	Lua_Safe_Call_Int();
 
 	if (luabind::type(task_ids) != LUA_TTABLE) {
-		return 0;
+		return false;
 	}
 
 	std::vector<int> v;
@@ -3406,7 +3406,7 @@ int Lua_Client::AreTasksCompleted(luabind::object task_ids)
 	}
 
 	if (v.empty()) {
-		return 0;
+		return false;
 	}
 
 	return self->AreTasksCompleted(v);
@@ -3458,7 +3458,7 @@ luabind::scope lua_register_client() {
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,int,bool))&Lua_Client::ApplySpellRaid)
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,int,bool,bool))&Lua_Client::ApplySpellRaid)
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,int,bool,bool,bool))&Lua_Client::ApplySpellRaid)
-	.def("AreTasksCompleted", (int(Lua_Client::*)(luabind::object))&Lua_Client::AreTasksCompleted)
+	.def("AreTasksCompleted", (bool(Lua_Client::*)(luabind::object))&Lua_Client::AreTasksCompleted)
 	.def("AssignTask", (void(Lua_Client::*)(int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AssignTask)
