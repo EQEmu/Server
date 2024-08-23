@@ -3176,6 +3176,17 @@ uint8 Perl_Client_GetSkillTrainLevel(Client* self, int skill_id)
 	return self->GetSkillTrainLevel(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass());
 }
 
+bool Perl_Client_AreTasksCompleted(Client* self, perl::array task_ids)
+{
+	std::vector<int> v;
+
+	for (const auto& e : task_ids) {
+		v.push_back(static_cast<int>(e));
+	}
+
+	return self->AreTasksCompleted(v);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3225,6 +3236,7 @@ void perl_register_client()
 	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool))&Perl_Client_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool, bool, bool))&Perl_Client_ApplySpellRaid);
+	package.add("AreTasksCompleted", (bool(*)(Client*, perl::array))&Perl_Client_AreTasksCompleted);
 	package.add("AssignTask", (void(*)(Client*, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int, bool))&Perl_Client_AssignTask);

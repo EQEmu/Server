@@ -360,7 +360,7 @@ public:
 	void AssignTask(int task_id, int npc_id);
 	void AssignTask(int task_id, int npc_id, bool enforce_level_requirement);
 	void FailTask(int task);
-	bool IsTaskCompleted(int task);
+	bool IsTaskCompleted(int task_id);
 	bool IsTaskActive(int task);
 	bool IsTaskActivityActive(int task, int activity);
 	void LockSharedTask(bool lock);
@@ -577,6 +577,7 @@ public:
 	void CampAllBots(uint8 class_id);
 	bool RemoveAAPoints(uint32 points);
 	bool RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount);
+	bool AreTasksCompleted(luabind::object task_ids);
 
 	void DialogueWindow(std::string markdown);
 

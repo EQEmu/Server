@@ -1276,7 +1276,7 @@ int Perl__tasktimeleft(int task_id)
 	return quest_manager.tasktimeleft(task_id);
 }
 
-int Perl__istaskcompleted(int task_id)
+bool Perl__istaskcompleted(int task_id)
 {
 	return quest_manager.istaskcompleted(task_id);
 }
@@ -5967,6 +5967,17 @@ bool Perl__send_parcel(perl::reference table_ref)
 	return out;
 }
 
+bool Perl__aretaskscompleted(perl::array task_ids)
+{
+	std::vector<int> v;
+
+	for (const auto& e : task_ids) {
+		v.emplace_back(static_cast<int>(e));
+	}
+
+	return quest_manager.aretaskscompleted(v);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6290,6 +6301,7 @@ void perl_register_quest()
 	package.add("addloot", (void(*)(int, int))&Perl__addloot);
 	package.add("addloot", (void(*)(int, int, bool))&Perl__addloot);
 	package.add("addskill", &Perl__addskill);
+	package.add("aretaskscompleted", &Perl__aretaskscompleted);
 	package.add("assigntask", (void(*)(int))&Perl__assigntask);
 	package.add("assigntask", (void(*)(int, bool))&Perl__assigntask);
 	package.add("attack", &Perl__attack);
