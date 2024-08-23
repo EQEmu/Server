@@ -179,6 +179,96 @@ void Perl_Doors_SetDisableTimer(Doors* self, bool disable_timer)
 	self->SetDisableTimer(disable_timer);
 }
 
+uint8 Perl_Doors_GetTriggerDoorID(Doors* self)
+{
+	return self->GetTriggerDoorID();
+}
+
+uint8 Perl_Doors_GetTriggerType(Doors* self)
+{
+	return self->GetTriggerType();
+}
+
+bool Perl_Doors_IsLDoNDoor(Doors* self)
+{
+	return self->IsLDoNDoor();
+}
+
+uint32 Perl_Doors_GetClientVersionMask(Doors* self)
+{
+	return self->GetClientVersionMask();
+}
+
+int Perl_Doors_GetDoorParam(Doors* self)
+{
+	return self->GetDoorParam();
+}
+
+bool Perl_Doors_HasDestinationZone(Doors* self)
+{
+	return self->HasDestinationZone();
+}
+
+bool Perl_Doors_IsDestinationZoneSame(Doors* self)
+{
+	return self->IsDestinationZoneSame();
+}
+
+bool Perl_Doors_IsDoorBlacklisted(Doors* self)
+{
+	return self->IsDoorBlacklisted();
+}
+
+std::string Perl_Doors_GetDestinationZoneName(Doors* self)
+{
+	return self->GetDestinationZoneName();
+}
+
+int Perl_Doors_GetDestinationInstanceID(Doors* self)
+{
+	return self->GetDestinationInstanceID();
+}
+
+float Perl_Doors_GetDestinationX(Doors* self)
+{
+	return self->GetDestinationX();
+}
+
+float Perl_Doors_GetDestinationY(Doors* self)
+{
+	return self->GetDestinationY();
+}
+
+float Perl_Doors_GetDestinationZ(Doors* self)
+{
+	return self->GetDestinationZ();
+}
+
+float Perl_Doors_GetDestinationHeading(Doors* self)
+{
+	return self->GetDestinationHeading();
+}
+
+int Perl_Doors_GetDzSwitchID(Doors* self)
+{
+	return self->GetDzSwitchID();
+}
+
+int Perl_Doors_GetInvertState(Doors* self)
+{
+	return self->GetInvertState();
+}
+
+void Perl_Doors_SetInvertState(Doors* self, int invert_state)
+{
+	self->SetInvertState(invert_state);
+}
+
+uint32 Perl_Doors_GetGuildID(Doors* self)
+{
+	return self->GetGuildID();
+}
+
 void perl_register_doors()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -189,24 +279,42 @@ void perl_register_doors()
 	package.add("ForceClose", (void(*)(Doors*, Mob*, bool))&Perl_Doors_ForceClose);
 	package.add("ForceOpen", (void(*)(Doors*, Mob*))&Perl_Doors_ForceOpen);
 	package.add("ForceOpen", (void(*)(Doors*, Mob*, bool))&Perl_Doors_ForceOpen);
+	package.add("GetClientVersionMask", &Perl_Doors_GetClientVersionMask);
+	package.add("GetDestinationHeading", &Perl_Doors_GetDestinationHeading);
+	package.add("GetDestinationInstanceID", &Perl_Doors_GetDestinationInstanceID);
+	package.add("GetDestinationX", &Perl_Doors_GetDestinationX);
+	package.add("GetDestinationY", &Perl_Doors_GetDestinationY);
+	package.add("GetDestinationZ", &Perl_Doors_GetDestinationZ);
+	package.add("GetDestinationZoneName", &Perl_Doors_GetDestinationZoneName);
 	package.add("GetDisableTimer", &Perl_Doors_GetDisableTimer);
 	package.add("GetDoorDBID", &Perl_Doors_GetDoorDBID);
 	package.add("GetDoorID", &Perl_Doors_GetDoorID);
+	package.add("GetDoorParam", &Perl_Doors_GetDoorParam);
+	package.add("GetDzSwitchID", &Perl_Doors_GetDzSwitchID);
+	package.add("GetGuildID", &Perl_Doors_GetGuildID);
 	package.add("GetHeading", &Perl_Doors_GetHeading);
 	package.add("GetID", &Perl_Doors_GetID);
 	package.add("GetIncline", &Perl_Doors_GetIncline);
+	package.add("GetInvertState", &Perl_Doors_GetInvertState);
 	package.add("GetKeyItem", &Perl_Doors_GetKeyItem);
 	package.add("GetLockPick", &Perl_Doors_GetLockPick);
 	package.add("GetModelName", &Perl_Doors_GetModelName);
 	package.add("GetNoKeyring", &Perl_Doors_GetNoKeyring);
 	package.add("GetOpenType", &Perl_Doors_GetOpenType);
 	package.add("GetSize", &Perl_Doors_GetSize);
+	package.add("GetTriggerDoorID", &Perl_Doors_GetTriggerDoorID);
+	package.add("GetTriggerType", &Perl_Doors_GetTriggerType);
 	package.add("GetX", &Perl_Doors_GetX);
 	package.add("GetY", &Perl_Doors_GetY);
 	package.add("GetZ", &Perl_Doors_GetZ);
+	package.add("HasDestinationZone", &Perl_Doors_HasDestinationZone);
+	package.add("IsDestinationZoneSame", &Perl_Doors_IsDestinationZoneSame);
+	package.add("IsDoorBlacklisted", &Perl_Doors_IsDoorBlacklisted);
+	package.add("IsLDoNDoor", &Perl_Doors_IsLDoNDoor);
 	package.add("SetDisableTimer", &Perl_Doors_SetDisableTimer);
 	package.add("SetHeading", &Perl_Doors_SetHeading);
 	package.add("SetIncline", &Perl_Doors_SetIncline);
+	package.add("SetInvertState", &Perl_Doors_SetInvertState);
 	package.add("SetKeyItem", &Perl_Doors_SetKeyItem);
 	package.add("SetLocation", &Perl_Doors_SetLocation);
 	package.add("SetLockPick", &Perl_Doors_SetLockPick);

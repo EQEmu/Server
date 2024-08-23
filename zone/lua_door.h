@@ -63,6 +63,24 @@ public:
 	void ForceClose(Lua_Mob sender);
 	void ForceClose(Lua_Mob sender, bool alt_mode);
 	uint32 GetID();
+	uint8 GetTriggerDoorID();
+	uint8 GetTriggerType();
+	bool IsLDoNDoor();
+	uint32 GetClientVersionMask();
+	int GetDoorParam();
+	bool HasDestinationZone();
+	bool IsDestinationZoneSame();
+	bool IsDoorBlacklisted();
+	std::string GetDestinationZoneName();
+	int GetDestinationInstanceID();
+	float GetDestinationX();
+	float GetDestinationY();
+	float GetDestinationZ();
+	float GetDestinationHeading();
+	int GetDzSwitchID();
+	int GetInvertState();
+	void SetInvertState(int invert_state);
+	uint32 GetGuildID();
 };
 
 #endif
