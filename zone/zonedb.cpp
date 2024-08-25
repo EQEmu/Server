@@ -3796,7 +3796,7 @@ void ZoneDatabase::LoadBuffs(Client *client)
 			buffs[e.slot_id].client   = false;
 		}
 
-		strn0cpy(buffs[e.slot_id].caster_name, e.caster_name.c_str(), e.caster_name.length());
+		strn0cpy(buffs[e.slot_id].caster_name, e.caster_name.c_str(), 64);
 
 		buffs[e.slot_id].ticsremaining     = e.ticsremaining;
 		buffs[e.slot_id].counters          = e.counters;

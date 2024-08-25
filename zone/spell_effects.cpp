@@ -1334,6 +1334,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			{
 				if(petids.size() >= RuleI(Custom, AbsolutePetLimit) || !IsPetAllowed(spell_id))
 				{
+					LogDebug("Failed to Cast Pet: [{}]", petids.size(),  IsPetAllowed(spell_id));
 					return false;
 				}
 				else
