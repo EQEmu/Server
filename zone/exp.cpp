@@ -597,25 +597,25 @@ bool Client::ConsumeItemOnCursor() {
 #include <random> // For generating random numbers
 
 uint64 Client::AddPowersourceExp(uint64 exp_to_add, int conlevel) {
+	EQ::SayLinkEngine linker;
+
     EQ::ItemInstance* item = m_inv.GetItem(EQ::invslot::slotPowerSource);
     if (!item || !exp_to_add) {
         return 0;
     }
 
-    EQ::SayLinkEngine linker;
-    linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-    linker.SetItemInst(item);
-    EQ::ItemInstance* new_item = item->GetUpgrade(database);
+	EQ::ItemInstance* new_item = item->GetUpgrade(database);
     if (!new_item) {
         Message(Chat::Experience, "Your [%s] is fully upgraded and cannot accumulate any additional experience.", linker.GenerateLink().c_str());
         return 0;
     }
 
-    int tar_tier = (item->GetID() % 1000000) + 1;
+    linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+    linker.SetItemInst(item);
+
     uint64 tar_item_exp = item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
     uint64 cur_item_exp = Strings::ToUnsignedBigInt(item->GetCustomData("Exp"), 0);
 
-    // Cap calculation based on conlevel and tar_tier
     int cap = 0;
     switch (conlevel) {
         case ConsiderColor::Red:
@@ -641,22 +641,16 @@ uint64 Client::AddPowersourceExp(uint64 exp_to_add, int conlevel) {
     }
 
     if (cap > 0) {
-        // Adjust the cap based on the tier
-        if (tar_tier == 1) {
-            cap = cap;
-        } else if (tar_tier == 2) {
-            cap = static_cast<int>(cap * 0.1); // 1/10th for tier 2
+		int tier = item->GetID() / 1000000;
+        if (tier > 1) {
+            cap = static_cast<int>(cap * 0.1);
         }
 
         // Calculate the cap as a percentage of target item experience
         uint64 max_exp_to_add = tar_item_exp * cap / 100;
-        uint64 min_exp_to_add = tar_item_exp / tar_tier <= 1 ? 100 : 1000; // Minimum is 1/10th of the maximum
+        uint64 min_exp_to_add = tar_item_exp / tier > 1 ? 1000 : 100;
 
-        // Generate a random variance factor between 0.9 and 1.1 (±10%)
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<> dis(0.9, 1.1);
-        double variance_factor = dis(gen);
+        double variance_factor = zone->random.Real(0.8, 1.2);
 
         // Apply variance to the clamp values
         max_exp_to_add = static_cast<uint64>(max_exp_to_add * variance_factor);

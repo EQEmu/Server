@@ -278,8 +278,10 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	npc->UpdateEquipmentLight();
 
 	// finally, override size if one was provided
-	if (in_size > 0.0f)
+	if (in_size > 0.0f) {
 		npc->size = in_size;
+		LogDebug("Size was overwritten to: [{}]", in_size);
+	}
 
 	npc->SetOwnerID(GetID());
 	entity_list.AddNPC(npc, true, true);
@@ -642,19 +644,25 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
 		case 285: case 681: case 295: case 682: case 683: case 684: case 685: case 686:
 		case 687: case 688: case 689: case 670: case 1723: case 3034: case 5505: case 10586:
 			tmp_lastname = fmt::format("{}'s Animation", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? spells[spell_id].name : static_name;
+			tmp_name 	 = (static_name == nullptr) ? spells[spell_id].name : static_name;
 			break;
 		// Beastlord Pets
 		case 2612: case 2633: case 2614: case 2616: case 2618: case 2621: case 2623:
 		case 2626: case 2627: case 2631: case 3457: case 3461: case 5531: case 5538:
 		case 10379:
-			tmp_lastname = fmt::format("{}'s Warder", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? getRandomWarderName() : static_name;
+			tmp_lastname 	= fmt::format("{}'s Warder", owner->GetCleanName());
+			tmp_name 	 	= (static_name == nullptr) ? getRandomWarderName() : static_name;
+			// Resizing
+			switch(owner->GetRace()) {
+				case HUMAN:
+					size *= 1.00;
+				};
 			break;
 		// Shaman Pets
 		case 164: case 577: case 165: case 166: case 1574: case 3377: case 5389: case 9983:
-			tmp_lastname = fmt::format("{}'s Spirit", owner->GetCleanName());
+			tmp_lastname 	= fmt::format("{}'s Spirit", owner->GetCleanName());
 			tmp_name 		= (static_name == nullptr) ? getRandomSpiritName() : static_name;
+			size			= size * 0.50;
 			break;
 		// Necromancer Skeletons
 		case 338: case 491: case 351: case 362: case 492: case 440: case 493: case 441:
@@ -696,8 +704,9 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
 			break;
 		// Druid
 		case 1475:
-			tmp_lastname = fmt::format("{}'s Tiny Bear", owner->GetCleanName());
+			tmp_lastname 	= fmt::format("{}'s Tiny Bear", owner->GetCleanName());
 			tmp_name 	 	= (static_name == nullptr) ? getRandomBearName() : static_name;
+			size			= size * 0.50;
 			break;
 		// Cleric
 		case 1721: case 5256: case 11750: case 11751: case 11752:
