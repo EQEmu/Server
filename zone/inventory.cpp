@@ -2443,8 +2443,11 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					linker.SetItemInst(dst_inst);
 					Message(Chat::Experience, "You begin to focus your experience on improving your [%s].", linker.GenerateLink().c_str());
 
-					uint64 tar_item_exp   = dst_inst->GetItem()->CalculateGearScore();
-					LogDebug("GEAR SCORE: [{}]", tar_item_exp);
+					EQ::ItemInstance* new_item = dst_inst->GetUpgrade(content_db);
+					if (new_item) {
+						uint64 tar_item_exp   = new_item->GetItem()->CalculateGearScore();
+						LogDebug("GEAR SCORE: [{}]", tar_item_exp);
+					}
 				}
 			}
 		}
@@ -2494,8 +2497,11 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					linker.SetItemInst(src_inst);
 					Message(Chat::Experience, "You begin to focus your experience on improving your [%s].", linker.GenerateLink().c_str());
 
-					uint64 tar_item_exp   = src_inst->GetItem()->CalculateGearScore();
-					LogDebug("GEAR SCORE: [{}]", tar_item_exp);
+					EQ::ItemInstance* new_item = src_inst->GetUpgrade(content_db);
+					if (new_item) {
+						uint64 tar_item_exp   = new_item->GetItem()->CalculateGearScore();
+						LogDebug("GEAR SCORE: [{}]", tar_item_exp);
+					}
 				}
 			}
 		}
@@ -2546,7 +2552,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if (IsPetBagActive()) {
 				DoPetBagResync();
 			} else {
-				DoPetBagFlush();
+				//DoPetBagFlush();
 			}
 		}
 

@@ -5,9 +5,18 @@
 #include "../strings.h"
 #include "base/base_account_ip_repository.h"
 
-class AccountIpRepository: public BaseAccountIpRepository {
+class AccountIpRepository : public BaseAccountIpRepository {
 public:
+    // Custom method to get all accounts associated with a given IP
+    std::vector<AccountIp> GetAccountsByIP(Database& db, const std::string& ip) {
+        return GetWhere(db, fmt::format("ip = '{}'", ip));
+    }
 
+    // Custom method to get all IPs associated with a given account
+    std::vector<AccountIp> GetIPsByAccount(Database& db, int32_t accountId) {
+        return GetWhere(db, fmt::format("accid = {}", accountId));
+    }
+};
     /**
      * This file was auto generated and can be modified and extended upon
      *
@@ -45,6 +54,6 @@ public:
 
 	// Custom extended repository methods here
 
-};
+
 
 #endif //EQEMU_ACCOUNT_IP_REPOSITORY_H

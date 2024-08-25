@@ -336,6 +336,18 @@ bool Client::Process() {
 
 		Mob *auto_attack_target = GetTarget();
 
+		if (GetPet()) {
+			if (!GetPetByID(focused_pet_id)) {
+				//LogDebug("No Valid Focused Pet, auto-assigning");
+				ValidatePetList(); // Make sure 0th petid is valid
+				focused_pet_id = petids[0];
+				auto focused_pet = GetPetByID(focused_pet_id);
+				if (focused_pet) {
+					ConfigurePetWindow(focused_pet);
+				}
+			}
+		}
+
 		if (AutoFireEnabled() && may_use_attacks) {
 			if (GetTarget() == this) {
 				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
@@ -542,10 +554,46 @@ bool Client::Process() {
 			{
 				ItemTimerCheck();
 			}
+
+			if (RuleB(Custom, ServerAuthStats) && InZone() && !CAuthorized) {
+				if (CUnauth_tics >= 11) {
+					zone->SendDiscordMessage("admin", fmt::format("Kicking [{}]. Unauthorized Client.", GetCleanName()));
+					Kick("Custom client required. Visit heroesjourneyeq.com for more information.");
+				}
+
+				if (CUnauth_tics > 1) { // Allow a two-tick grace period.
+					Message(Chat::Shout, "You are not using the Heroes' Journey client or it is out of date. You will be disconnected in {} seconds.", (11 - CUnauth_tics) * 6);
+				}
+				CUnauth_tics++;
+			}
 		}
 
 		if (fast_tic_timer.Check()) {
 			SendEdgeStatBulkUpdate();
+			ValidatePetList();
+			if (GetPet()) {
+				if (focused_pet_id && entity_list.GetNPCByID(focused_pet_id)) {
+					auto focused_pet = entity_list.GetNPCByID(focused_pet_id);
+					focused_pet->SendPetBuffsToClient();
+
+					if (GetTarget() && GetTarget()->GetID() == focused_pet_id) {
+						focused_pet->SendBuffsToClient(this);
+					}
+				}
+
+				for(int i = 0; i < petids.size(); i++) {
+					auto pet = entity_list.GetMob(petids[i]);
+					if (pet && !IsXTarget(pet)) {
+
+						char Name[65];
+
+						Client *c = entity_list.GetClientByName(Name);
+						XTargets[19-i].ID = pet->GetID();
+						XTargets[19-i].Type = CurrentTargetNPC;
+						SendXTargetPacket(19-i, pet);
+					}
+				}
+			}
 		}
 	}
 

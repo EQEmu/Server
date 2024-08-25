@@ -49,7 +49,7 @@ extern WorldServer worldserver;
 extern QueryServ* QServ;
 
 
-Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
+void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
 
 	//It might not be a bad idea to put these into the database, eventually..
 
@@ -57,10 +57,11 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	// do nothing if it's a corpse
 	if (targ != nullptr && targ->IsCorpse())
-		return nullptr;
+		return;
 
 	// yep, even these need pet power!
 	int act_power = 0;
+
 	if (IsOfClientBot()) {
 		act_power = GetFocusEffect(focusPetPower, spell_id);
 		if (IsClient()) {
@@ -68,16 +69,12 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 	}
 
-	if (!GetEntityVariable("OverridePetPower").empty()) {
-		act_power = Strings::ToInt(GetEntityVariable("OverridePetPower"));
-	}
-
 	PetRecord record;
 	if (!content_db.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
 		LogError("Unknown swarm pet spell id: {}, check pets table", spell_id);
 		Message(Chat::Red, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
-		return nullptr;
+		return;
 	}
 
 	SwarmPet_Struct pet;
@@ -93,10 +90,6 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 	}
 
-	if (!GetEntityVariable("MultiPetSpell").empty()) {
-		pet.count = 1;
-	}
-
 	pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000;
 
 	pet.npc_id = record.npc_type;
@@ -108,249 +101,14 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		//log write
 		LogError("Unknown npc type for swarm pet spell id: [{}]", spell_id);
 		Message(0, "Unable to find pet!");
-		return nullptr;
+		return;
 	}
 
 	if (name_override != nullptr) {
 		//we have to make a custom NPC type for this name change
 		made_npc = new NPCType;
 		memcpy(made_npc, npc_type, sizeof(NPCType));
-
-		std::string tmp_lastname;
-		std::string tmp_name;
-
-		std::vector<std::string> bearNames = {
-			"Yogi", "Boo", "Pip", "Nugget", "Snick", "Pebble", "Fizz", "Munch", "Squirt", "Binky",
-			"Tiny Grizzle", "Snugglepaws", "Honey Nibbles", "Bearly There", "Cuddlycub", "Fuzzlet",
-			"Pint-Sized Paws", "Mini Growl", "Buttonbear", "Teacup Teddie",
-			"Coco", "Bubba", "Milo", "Teddy", "Biscuit", "Frodo", "Gizmo", "Fluffy", "Mochi", "Waffles",
-			"Bamboo", "Chomp", "Sprout", "Rolo", "Munchkin", "Pudding", "Pipsqueak", "Fuzzball", "Nibbles",
-			"Pickles", "Popcorn", "Ziggy", "Sparky", "Scooter", "Whiskers", "Snickers", "Wiggles",
-			"Bubbles", "Chubby", "Choco", "Snickerdoodle", "Cupcake", "Tootsie", "Doodle", "Muffin",
-			"Peanut", "Buttons", "Truffles", "Brownie", "Gingersnap", "Poppy", "Puff", "Smores",
-			"Marshmallow", "Cuddles", "Pumpkin", "Ruffles", "Tater", "Sprinkles", "Chewy", "Puffball",
-			"Cupcake", "Fudge", "Chester", "Cosmo", "Clover", "Dobby", "Squeaky", "Nibbler", "Tater Tot",
-			"Dumpling", "Wombat", "BoBo", "Churro", "Scooby", "Pudding", "Ducky", "Peaches", "Rascal",
-			"Smidge", "Bean", "Scruffy", "Gus", "Rugrat", "Hobbit", "Beary_McBearface", "Paddington",
-			"Bearlock Holmes", "Bearon von Growl", "Bearcules", "Winnie the Boo", "Grizzly Adams",
-			"Bear Grylls", "Bearfoot", "Bearth Vader", "Bearin' Square", "Paw Bear",
-			"Bearzooka", "Bear Hugz", "Bearister", "Gummy Bearson", "Bearalicious",
-			"Robin Hoodbear", "Bearthoven", "Sir Growls-a-Lot", "Bearington",
-			"Honeybear Hound", "Bearminator", "Bear Necessities", "Grizz Lee",
-			"Polar Oppawsite", "Growlbert Einstein", "Bearoness", "Bearrific",
-			"Bearcat", "Bearly Legal", "Unbearlievable", "Teddy Ruxbin", "Bear Hugger",
-			"Bearoness von Snuggles", "Bearbie Doll", "Clawdia Pawlsen", "Grizzelda",
-			"Fuzz Lightyear", "Pawdrey Hepbear", "Furrari", "Bearbados Slim", "Bearlin",
-			"Furrnando", "Growlberto", "Bearloaf", "Bearianna Grande", "Bearon the Red",
-			"Clawrence of Arabia", "Paddingpaw", "Pawtrick Swayze", "Bearami Brown",
-			"Grizzabella", "Bearlentine", "Bearthday Boy", "Paw McCartney", "Clawdette",
-			"Bearon Brando", "Beartholomew", "Bear Hugington", "Fluff Daddy", "Chewbearca",
-			"Growldemort", "Bearicane", "Bearlosaurus Rex", "Bear-lenium Falcon", "Bearborator"
-		};
-
-		switch (spell_id) {
-			// Enchanter Pets
-			case 285:
-			case 681:
-			case 295:
-			case 682:
-			case 683:
-			case 684:
-			case 685:
-			case 686:
-			case 687:
-			case 688:
-			case 689:
-			case 670:
-			case 1723:
-			case 3034:
-			case 5505:
-			case 10586:
-				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}'s Animation", GetCleanName());
-				break;
-			//Beastlord Pets
-			case 2612:
-			case 2633:
-			case 2614:
-			case 2616:
-			case 2618:
-			case 2621:
-			case 2623:
-			case 2626:
-			case 2627:
-			case 2631:
-			case 3457:
-			case 3461:
-			case 5531:
-			case 5538:
-			case 10379:
-				tmp_name 	 = fmt::format("{}`s Warder", GetCleanName());
-				tmp_lastname = fmt::format("{}'s Warder", GetCleanName());
-				break;
-			// Shaman Pets
-			case 164:
-			case 577:
-			case 165:
-			case 166:
-			case 1574:
-			case 3377:
-			case 5389:
-			case 9983:
-				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}'s Spirit", GetCleanName());
-				break;
-			// Necromancer Skeletons...
-			case 338:
-			case 491:
-			case 351:
-			case 362:
-			case 492:
-			case 440:
-			case 493:
-			case 441:
-			case 494:
-			case 442:
-			case 495:
-			case 443:
-			case 1621:
-			case 1622:
-				tmp_lastname = fmt::format("{}'s Skeleton", GetCleanName());
-				break;
-			// Necromancer Spectres
-			case 1623:
-			case 3304:
-			case 3310:
-			case 3314:
-			case 5431:
-			case 5438:
-			case 10506:
-			case 10561:
-				tmp_lastname = fmt::format("{}'s Spectre", GetCleanName());
-				break;
-			// Magician
-			case 3317:
-			case 317:
-			case 400:
-			case 404:
-			case 396:
-			case 499:
-			case 572:
-			case 576:
-			case 623:
-			case 627:
-			case 631:
-			case 635:
-			case 1674:
-			case 1678:
-			case 10695:
-				tmp_lastname = fmt::format("{}'s Air Elemental", GetCleanName());
-				break;
-			case 3320:
-			case 315:
-			case 398:
-			case 402:
-			case 336:
-			case 497:
-			case 570:
-			case 574:
-			case 621:
-			case 625:
-			case 629:
-			case 633:
-			case 1672:
-			case 5480:
-			case 10708:
-				tmp_lastname = fmt::format("{}'s Water Elemental", GetCleanName());
-				break;
-			case 3322:
-			case 316:
-			case 399:
-			case 403:
-			case 395:
-			case 498:
-			case 571:
-			case 575:
-			case 622:
-			case 626:
-			case 630:
-			case 634:
-			case 1673:
-			case 1677:
-			case 5485:
-			case 10719:
-				tmp_lastname = fmt::format("{}'s Fire Elemental", GetCleanName());
-				break;
-			case 3324:
-			case 58:
-			case 397:
-			case 401:
-			case 335:
-			case 496:
-			case 569:
-			case 573:
-			case 620:
-			case 624:
-			case 628:
-			case 632:
-			case 1671:
-			case 1675:
-			case 5495:
-			case 10753:
-				tmp_lastname = fmt::format("{}'s Earth Elemental", GetCleanName());
-				break;
-			case 1936:
-				tmp_lastname = fmt::format("{}'s Elemental Avatar", GetCleanName());
-				break;
-			case 1400:
-			case 1402:
-			case 1404:
-			case 4888:
-			case 10769:
-				tmp_lastname = fmt::format("{}'s Summoned Monster", GetCleanName());
-				break;
-			// Druid
-			case 1475:
-				strn0cpy(made_npc->name, bearNames[zone->random.Roll0(bearNames.size()-1)].c_str(), sizeof(made_npc->name));
-				tmp_lastname = fmt::format("{}'s Tiny Bear", GetCleanName());
-				break;
-			// Cleric
-			case 1721:
-			case 5256:
-			case 11750:
-			case 11751:
-			case 11752:
-				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}'s Holy Hammer", GetCleanName());
-				break;
-			// Wizard
-			case 1722:
-			case 5460:
-			case 10840:
-				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}'s Animated Sword", GetCleanName());
-				break;
-			default:
-				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}'s Pet", GetCleanName());
-		}
-
-		strcpy(made_npc->name, tmp_name.empty() ? name_override : tmp_name.c_str());
-		strcpy(made_npc->lastname, tmp_lastname.c_str());
-
-		// Replace spaces with underscores
-		for (char* p = made_npc->name; *p; ++p) {
-			if (*p == ' ') {
-				*p = '_';
-			}
-		}
-
-		for (char* p = made_npc->name; *p; ++p) {
-			if (*p == '\'') {
-				*p = '`';
-			}
-		}
-
+		strcpy(made_npc->name, name_override);
 		npc_type = made_npc;
 	}
 
@@ -404,35 +162,6 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		//removing this prevents the pet from attacking
 		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
 
-		//we allocated a new NPC type object, give the NPC ownership of that memory
-		if (npc_dup != nullptr)
-			swarm_pet_npc->GiveNPCTypeData(npc_dup);
-
-		if (RuleB(Custom, EnableMultipet) && !GetEntityVariable("MultiPetSpell").empty()) {
-			swarm_pet_npc->GetSwarmInfo()->permanent = true;
-			swarm_pet_npc->SetPetSpellID(spell_id);
-		} else {
-			swarm_pet_npc->GetSwarmInfo()->permanent = false;
-			swarm_pet_npc->SetPetSpellID(spell_id);
-		}
-
-		// Beastlord Pets
-		if (record.petnaming == 2) {
-			uint16 race_id = GetBaseRace();
-
-			auto d = content_db.GetBeastlordPetData(race_id);
-
-			swarm_pet_npc->race        = d.race_id;
-			swarm_pet_npc->texture     = d.texture;
-			swarm_pet_npc->helmtexture = d.helm_texture;
-			swarm_pet_npc->gender      = d.gender;
-			swarm_pet_npc->luclinface  = d.face;
-
-			swarm_pet_npc->size *= d.size_modifier;
-		}
-
-		entity_list.AddNPC(swarm_pet_npc, true, true);
-
 		//give the pets somebody to "love"
 		if (targ != nullptr) {
 			swarm_pet_npc->AddToHateList(targ, 1000, 1000);
@@ -446,16 +175,11 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			}
 		}
 
-		if (RuleB(Custom, EnableMultipet) && !GetEntityVariable("MultiPetSpell").empty()) {
-			swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
-			swarm_pet_npc->SetPetPower(act_power);
-			swarm_pet_npc->SetPetSpellID(spell_id);
+		//we allocated a new NPC type object, give the NPC ownership of that memory
+		if (npc_dup != nullptr)
+			swarm_pet_npc->GiveNPCTypeData(npc_dup);
 
-			if (!GetEntityVariable("OverridePetSize").empty()) {
-				swarm_pet_npc->size = Strings::ToFloat(GetEntityVariable("OverridePetSize"), swarm_pet_npc->size);
-			}
-		}
-
+		entity_list.AddNPC(swarm_pet_npc, true, true);
 		summon_count--;
 	}
 
@@ -469,14 +193,7 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	// The other pointers we make are handled elsewhere.
 	delete made_npc;
-
-	if (!GetEntityVariable("MultiPetSpell").empty()) {
-		return swarm_pet_npc;
-	} else {
-		return nullptr;
-	}
 }
-
 void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {
 
 	SwarmPet_Struct pet;
@@ -1279,13 +996,6 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 
 	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
 	for(auto &effect : rank->effects) {
-		if (RuleB(Custom, MulticlassingEnabled)) {
-			if (rank->id == 12706 || rank->id == 12707 || rank->id == 12708 || rank->id == 13813) { // Fists of steel
-				if (effect.effect_id = SE_LimitToSkill && effect.base_value == 0) {
-					continue; // Skip allowing 1HB on THJ for this effect.
-				}
-			}
-		}
 		outapp->WriteSInt32(effect.effect_id);
 		outapp->WriteSInt32(effect.base_value);
 		outapp->WriteSInt32(effect.limit_value);
@@ -1306,6 +1016,43 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 			LogDebugDetail("Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
 		} else {
 			LogDebugDetail("NOT Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
+		}
+	}
+
+	// More THJ-specific mutates.
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		/*  Mangle Glyphs
+			585	Glyph of Dragon Scales
+			586	Glyph of Indeterminable Reward
+			587	Glyph of Arcane Secrets
+			588	Glyph of Draconic Potential
+			589	Glyph of Destruction
+			5000	Glyph of Courage
+			5002	Glyph of Stored Life
+			5003	Glyph of Frantic Infusion
+			5004	Glyph of Angry Thoughts
+			7016	Glyph of the Master
+			7017	Glyph of Lost Secrets
+			7018	Glyph of Genari Might
+			7019	Glyph of the Cataclysm
+		*/
+		if (ability->id == 585  ||
+			ability->id == 586  ||
+			ability->id == 587  ||
+			ability->id == 588  ||
+			ability->id == 589  ||
+			ability->id == 5000 ||
+			ability->id == 5002 ||
+			ability->id == 5003 ||
+			ability->id == 5004 ||
+			ability->id == 7016 ||
+			ability->id == 7017 ||
+			ability->id == 7018 ||
+			ability->id == 7019)
+		{
+			aai->grant_only = 1;
+			aai->cost = 0;
+			aai->total_cost = 0;
 		}
 	}
 
@@ -1389,9 +1136,9 @@ int Client::GetDynamicAATimer(int aa_id) {
         // Check if the bucket has a value before attempting conversion
         if (!bucketValue.empty()) {
             int value = std::stoi(bucketValue); // Convert string value to integer
-			LogDebug("Got TimerID: [{}]", value);
+			LogDebugDetail("Got TimerID: [{}]", value);
             if (value == aa_id) {
-				LogDebug("Returning TimerID: [{}] - [{}]", i, value);
+				LogDebugDetail("Returning TimerID: [{}] - [{}]", i, value);
                 return i; // Return the timer ID associated with aa_id
             }
         }

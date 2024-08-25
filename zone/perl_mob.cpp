@@ -1091,7 +1091,7 @@ void Perl_Mob_SetRunAnimSpeed(Mob* self, int8 speed) // @categories Stats and At
 
 void Perl_Mob_SetPetID(Mob* self, uint16 new_pet_id) // @categories Pet
 {
-	self->SetPetID(new_pet_id);
+	//self->SetPetID(new_pet_id);
 }
 
 Mob* Perl_Mob_GetPet(Mob* self) // @categories Script Utility, Pet
@@ -2566,10 +2566,6 @@ bool Perl_Mob_IsPet(Mob* self) // @categories Pet
 		return true;
 	}
 
-	if (self->IsNPC() && self->CastToNPC()->GetSwarmInfo() && self->CastToNPC()->GetSwarmInfo()->permanent) {
-		return true;
-	}
-
 	return self->IsPet();
 }
 
@@ -2580,7 +2576,7 @@ bool Perl_Mob_HasPet(Mob* self)  // @categories Pet
 
 void Perl_Mob_RemovePet(Mob* self) // @categories Pet
 {
-	self->SetPet(nullptr);
+	self->RemoveAllPets();
 }
 
 void Perl_Mob_SetPet(Mob* self, Mob* new_pet) // @categories Pet

@@ -822,164 +822,18 @@ uint8 GetSpellLevel(uint16 spell_id, uint8 class_id)
 	return spells[spell_id].classes[class_id - 1];
 }
 
-// Returns the ID of the first class which has access to this spell
-uint8 GetPetOriginClass(uint16 spell_id) {
-	switch (spell_id) {
-		case 285:
-		case 681:
-		case 295:
-		case 682:
-		case 683:
-		case 684:
-		case 685:
-		case 686:
-		case 687:
-		case 688:
-		case 689:
-		case 670:
-		case 1723:
-		case 3034:
-		case 5505:
-		case 10586:
-			return Class::Enchanter;
-		case 2612:
-		case 2633:
-		case 2614:
-		case 2616:
-		case 2618:
-		case 2621:
-		case 2623:
-		case 2626:
-		case 2627:
-		case 2631:
-		case 3457:
-		case 3461:
-		case 5531:
-		case 5538:
-		case 10379:
-			return Class::Beastlord;
-		case 164:
-		case 577:
-		case 165:
-		case 166:
-		case 1574:
-		case 3377:
-		case 5389:
-		case 9983:
-			return Class::Shaman;
-		case 338:
-		case 491:
-		case 351:
-		case 362:
-		case 492:
-		case 440:
-		case 493:
-		case 441:
-		case 494:
-		case 442:
-		case 495:
-		case 443:
-		case 1621:
-		case 1622:
-		case 1623:
-		case 3304:
-		case 3310:
-		case 3314:
-		case 5431:
-		case 5438:
-		case 10506:
-		case 10561:
-			return Class::Necromancer;
-		case 3317:
-		case 317:
-		case 400:
-		case 404:
-		case 396:
-		case 499:
-		case 572:
-		case 576:
-		case 623:
-		case 627:
-		case 631:
-		case 635:
-		case 1674:
-		case 1678:
-		case 10695:
-		case 3320:
-		case 315:
-		case 398:
-		case 402:
-		case 336:
-		case 497:
-		case 570:
-		case 574:
-		case 621:
-		case 625:
-		case 629:
-		case 633:
-		case 1672:
-		case 5480:
-		case 10708:
-		case 3322:
-		case 316:
-		case 399:
-		case 403:
-		case 395:
-		case 498:
-		case 571:
-		case 575:
-		case 622:
-		case 626:
-		case 630:
-		case 634:
-		case 1673:
-		case 1677:
-		case 5485:
-		case 10719:
-		case 3324:
-		case 58:
-		case 397:
-		case 401:
-		case 335:
-		case 496:
-		case 569:
-		case 573:
-		case 620:
-		case 624:
-		case 628:
-		case 632:
-		case 1671:
-		case 1675:
-		case 5495:
-		case 10753:
-		case 1936:
-		case 1400:
-		case 1402:
-		case 1404:
-		case 4888:
-		case 10769:
-			return Class::Magician;
-		case 1475:
-			return Class::Druid;
-		case 1721:
-		case 5256:
-		case 11750:
-		case 11751:
-		case 11752:
-			return Class::Cleric;
-		case 1722:
-		case 5460:
-		case 10840:
-			return Class::Wizard;
-	}
 
-	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
-		if (GetSpellLevel(spell_id, i) < UINT8_MAX) {
-			return i;
-		}
-	}
+std::map<uint8, uint8> GetSpellClasses(uint16 spell_id) {
+    std::map<uint8, uint8> class_map;
 
-	return Class::None;
+    for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+        uint8 spell_level = GetSpellLevel(spell_id, i);
+        if (spell_level < UINT8_MAX) {
+            class_map[i] = spell_level;
+        }
+    }
+
+    return class_map;
 }
 
 // this will find the first occurrence of effect. this is handy

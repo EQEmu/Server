@@ -941,7 +941,7 @@ public:
 	virtual void UnStun();
 	inline void Silence(bool newval) { silenced = newval; }
 	inline void Amnesia(bool newval) { amnesiad = newval; }
-	Mob* TemporaryPets(uint16 spell_id, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme=true, bool sticktarg=false, uint16 *controlled_pet_id = nullptr);
+	void TemporaryPets(uint16 spell_id, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme=true, bool sticktarg=false, uint16 *controlled_pet_id = nullptr);
 	void TypesTemporaryPets(uint32 typesid, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme=true, bool sticktarg=false);
 	void WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint32 duration);
 	void Spin();
@@ -1065,13 +1065,26 @@ public:
 
 	EQ::LightSourceProfile* GetLightProfile() { return &m_Light; }
 
-	Mob* GetPet();
-	void SetPet(Mob* newpet);
+    uint16 GetPetID(uint8 idx = 0) const;            // Get the ID of the pet at the given index (default is index 0)
+    Mob* GetPet(uint8 idx = 0);                      // Get the Mob instance of the pet at the given index (default is index 0)
+	std::vector<Mob*> GetAllPets();  			 // Returns a vector of all Mob* pets associated with this Mob
+	bool RemovePetByIndex(uint8 idx = 0);            // Remove the pet at the given index (default is index 0)
+    bool RemovePet(Mob* pet);                        // Remove the pet corresponding to the given Mob pointer
+    bool RemovePet(uint16 pet_id);                   // Remove the pet corresponding to the given pet ID
+    void RemoveAllPets();                            // Remove all pets associated with this Mob
+    bool HasPet(uint8 idx = 0) const;                // Check if there is a valid pet at the given index (default is index 0)
+    bool AddPet(Mob* newpet);                        // Add a new pet to the pet list by Mob object
+    bool AddPet(uint16 pet_id);                      // Add a new pet to the pet list by pet ID
+    bool SetPet(Mob* newpet, uint8 idx = 0);         // Set a pet into the given index location using a Mob object (default is index 0)
+    bool SetPet(uint16 pet_id, uint8 idx = 0);       // Set a pet into the given index location using a pet ID (default is index 0)
+	void ValidatePetList();
+	Mob* GetPetByID(uint16 id);
+	void ConfigurePetWindow(Mob* focused_pet);
+	bool IsPetAllowed(uint16 spell_id);
+
 	virtual Mob* GetOwner();
 	virtual Mob* GetOwnerOrSelf();
 	Mob* GetUltimateOwner();
-	void SetPetID(uint16 NewPetID);
-	inline uint16 GetPetID() const { return petid; }
 	inline PetType GetPetType() const { return type_of_pet; }
 	void SetPetType(PetType p) { type_of_pet = p; }
 	inline int16 GetPetPower() const { return (petpower < 0) ? 0 : petpower; }
@@ -1086,7 +1099,6 @@ public:
 	inline uint16 GetOwnerID() const { return ownerid; }
 	inline virtual bool HasOwner() { if (!GetOwnerID()){ return false; } return entity_list.GetMob(GetOwnerID()) != 0; }
 	inline virtual bool IsPet() { return HasOwner() && !IsMerc(); }
-	bool HasPet() const;
 	virtual bool IsCharmedPet() { return IsPet() && IsCharmed(); }
 	inline bool HasTempPetsActive() const { return(hasTempPet); }
 	inline void SetTempPetsActive(bool i) { hasTempPet = i; }
@@ -1567,9 +1579,10 @@ protected:
 	StatBonuses itembonuses;
 	StatBonuses spellbonuses;
 	StatBonuses aabonuses;
-	uint16 petid;
+	std::vector<uint16> petids;
+	uint16 focused_pet_id;
 	uint16 ownerid;
-	PetType type_of_pet;
+	PetType type_of_pet; // This refers to what type of pet 'this' is
 	int16 petpower;
 	uint32 follow_id;
 	uint32 follow_dist;

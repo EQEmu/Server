@@ -128,19 +128,19 @@ enum {	//reuse times
 	FishingReuseTime = 11,
 	ForagingReuseTime = 50,
 	MendReuseTime = 360,
-	BashReuseTime = 5,
-	BackstabReuseTime = 9,
-	KickReuseTime = 5,
+	BashReuseTime = 8,
+	BackstabReuseTime = 10,
+	KickReuseTime = 8,
 	TailRakeReuseTime = 6,
-	EagleStrikeReuseTime = 5,
-	RoundKickReuseTime = 9,
+	EagleStrikeReuseTime = 6,
+	RoundKickReuseTime = 8,
 	TigerClawReuseTime = 6,
-	FlyingKickReuseTime = 7,
+	FlyingKickReuseTime = 8,
 	SenseTrapsReuseTime = 9,
 	DisarmTrapsReuseTime = 9,
 	HarmTouchReuseTime = 4300,
 	LayOnHandsReuseTime = 4300,
-	FrenzyReuseTime = 10
+	FrenzyReuseTime = 15
 };
 
 enum {	//timer settings, all in milliseconds

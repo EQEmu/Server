@@ -291,7 +291,7 @@ public:
 	void	TryDepopTargetLockedPets(Mob* current_target);
 	void	PetOnSpawn(NewSpawn_Struct* ns);
 
-	void    NamePetOnSpellID(uint16 spell_id);
+	void    NamePetOnSpellID(uint16 spell_id, const char* static_name = nullptr);
 
 	void	SignalNPC(int _signal_id);
 	void	SendPayload(int payload_id, std::string payload_value = std::string());

@@ -1292,28 +1292,8 @@ bool BotDatabase::LoadPetStats(const uint32 bot_id, std::string& pet_name, uint3
 
 bool BotDatabase::SavePetStats(const uint32 bot_id, const std::string& pet_name, const uint32 pet_mana, const uint32 pet_hp, const uint32 pet_spell_id)
 {
-	if (!bot_id || pet_name.empty() || !pet_spell_id || pet_spell_id > SPDAT_RECORDS) {
-		return false;
-	}
-
-	if (
-		!DeletePetItems(bot_id) ||
-		!DeletePetBuffs(bot_id) ||
-		!DeletePetStats(bot_id)
-	) {
-		return false;
-	}
-
-	return BotPetsRepository::InsertOne(
-		database,
-		BotPetsRepository::BotPets{
-			.spell_id = pet_spell_id,
-			.bot_id = bot_id,
-			.name = pet_name,
-			.mana = static_cast<int32_t>(pet_mana),
-			.hp = static_cast<int32_t>(pet_hp)
-		}
-	).pets_index;
+	// NUKED BY CATAPULTAM;
+	return false;
 }
 
 bool BotDatabase::DeletePetStats(const uint32 bot_id)

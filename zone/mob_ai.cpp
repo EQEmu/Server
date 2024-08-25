@@ -1425,7 +1425,7 @@ void Mob::AI_Process() {
 
 		}
 		else if (AI_movement_timer->Check() && !IsRooted()) {
-			if (IsPet() || (CastToNPC()->GetSwarmInfo() && CastToNPC()->GetSwarmInfo()->permanent)) {
+			if (IsPet()) {
 				// we're a pet, do as we're told
 				switch (pStandingPetOrder) {
 					case SPO_Follow: {
@@ -1442,9 +1442,9 @@ void Mob::AI_Process() {
 						// Convert heading to radians
 						float heading_radians = (owner_heading / 512.0f) * 2.0f * M_PI;
 
-						auto pets = owner->CastToClient()->GetAllPets();
+						auto pets = owner->petids;
 
-						auto it = std::find(pets.begin(), pets.end(), this_npc);
+						auto it = std::find(pets.begin(), pets.end(), GetID());
 
 						// Define the total number of slots including the fixed pet at +1 radian
 						int total_slots = std::max(3, static_cast<int>(pets.size()));
@@ -1528,83 +1528,6 @@ void Mob::AI_Process() {
 				}
 				if (IsPetRegroup()) {
 					return;
-				}
-			}
-			else if (IsNPC() && CastToNPC()->GetSwarmInfo() && CastToNPC()->GetSwarmInfo()->permanent) {
-				auto this_npc = CastToNPC();
-				auto owner = this_npc->GetOwner();
-
-				if (owner && owner->IsClient()) {
-					glm::vec4 owner_position = owner->GetPosition();
-					float owner_heading = owner->GetHeading();
-
-					// Convert heading to radians
-					float heading_radians = (owner_heading / 512.0f) * 2.0f * M_PI;
-
-					auto pets = owner->CastToClient()->GetAllPets();
-
-					auto it = std::find(pets.begin(), pets.end(), this_npc);
-
-					// Define the total number of slots including the fixed pet at +1 radian
-					int total_slots = std::max(3, static_cast<int>(pets.size()));
-
-					// Calculate the slot index to use
-					int index = 0;
-					if (it != pets.end()) {
-						index = std::distance(pets.begin(), it);
-						if (index == 1 && pets.size() == 2)
-						{
-							index = 2;
-						}
-					}
-
-					// Calculate the offset for the slot, ensuring we skip the fixed position at +1 radian
-					float base_offset = heading_radians + (M_PI/2) + RuleR(Custom, PetPlacementAdjustment); // Fixed pet position at +1 radian
-					float slot_increment = (2.0f * M_PI) / total_slots;
-					float offset = base_offset + (index * slot_increment);
-
-					// Ensure the offset does not exceed 2π
-					if (offset >= 2.0f * M_PI) {
-						offset -= 2.0f * M_PI;
-					}
-
-					// Calculate new x, y positions offset by 5 units
-					float offset_distance = std::max(5.0f, static_cast<float>(total_slots));
-
-					glm::vec4 target_position;
-					target_position.x = owner_position.x + offset_distance * sin(offset);
-					target_position.y = owner_position.y + offset_distance * cos(offset);
-					target_position.z = owner_position.z;
-					target_position.w = owner_position.w;
-
-					float xy_distance = DistanceSquared(GetPosition(), target_position);
-					float z_distance = owner_position.z - GetPosition().z;
-
-					if (xy_distance >= 0.1 || z_distance > 100) {
-						bool running = false;
-
-						/**
-						 * Distance: >= 35 (Run if far away)
-						 */
-						if (xy_distance >= 1225) {
-							running = true;
-						}
-
-						/**
-						 * Distance: >= 450 (Snap to owner)
-						 */
-						if (xy_distance >= 202500 || z_distance > 100) {
-							Teleport(target_position);
-						} else {
-							if (running) {
-								RunToPrecise(target_position.x, target_position.y, target_position.z);
-							} else {
-								WalkToPrecise(target_position.x, target_position.y, target_position.z);
-							}
-						}
-					} else {
-						StopNavigation();
-					}
 				}
 			}
 			/* Entity has been assigned another entity to follow */

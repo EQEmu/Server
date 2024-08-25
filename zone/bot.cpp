@@ -1535,29 +1535,8 @@ bool Bot::SavePet()
 
 bool Bot::DeletePet()
 {
-	auto bot_owner = GetBotOwner();
-	if (!bot_owner)
-		return false;
-
-	if (!database.botdb.DeletePetItems(GetBotID())) {
-		return false;
-	}
-	if (!database.botdb.DeletePetBuffs(GetBotID())) {
-		return false;
-	}
-	if (!database.botdb.DeletePetStats(GetBotID())) {
-		return false;
-	}
-
-	if (!GetPet() || !GetPet()->IsNPC())
-		return true;
-
-	NPC* pet_inst = GetPet()->CastToNPC();
-	pet_inst->SetOwnerID(0);
-
-	SetPet(nullptr);
-
-	return true;
+	return false;
+	// NUKED BY CATAPULTAM
 }
 
 bool Bot::Process()

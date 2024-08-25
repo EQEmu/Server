@@ -689,7 +689,7 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	if (owner_id) {
 		auto owner = entity_list.GetMob(owner_id);
 		if (owner) {
-			owner->SetPetID(npc->GetID());
+			owner->AddPet(npc);
 		}
 	}
 

@@ -385,7 +385,6 @@ Mob::Mob(
 	memset(&aabonuses, 0, sizeof(StatBonuses));
 	spellbonuses.AggroRange  = -1;
 	spellbonuses.AssistRange = -1;
-	SetPetID(0);
 	SetOwnerID(0);
 	SetPetType(petNone); // default to not a pet
 	SetPetPower(0);
@@ -534,7 +533,7 @@ Mob::~Mob()
 			GetPet()->BuffFadeByEffect(SE_Charm);
 		}
 		else {
-			SetPet(0);
+			RemoveAllPets();
 		}
 	}
 
@@ -4544,7 +4543,7 @@ void Mob::ChangeSize(float in_size = 0, bool unrestricted)
 	size = std::clamp(in_size, 1.0f, 255.0f);
 
 	if (!unrestricted) {
-		if (IsClient() || petid != 0) {
+		if (IsClient()) {
 			size = std::clamp(in_size, 3.0f, 15.0f);
 		}
 	}
@@ -4565,7 +4564,7 @@ Mob* Mob::GetOwnerOrSelf()
 		return this;
 	}
 
-	if (m->GetPetID() == GetID()) {
+	if (m) {
 		return m;
 	}
 
@@ -4573,7 +4572,7 @@ Mob* Mob::GetOwnerOrSelf()
 		return CastToNPC()->GetSwarmInfo()->GetOwner();
 	}
 
-	SetOwnerID(0);
+	//SetOwnerID(0);
 	return this;
 }
 
@@ -4584,11 +4583,15 @@ Mob* Mob::GetOwner() {
 		return m;
 	}
 
+	if (m) {
+		return m;
+	}
+
 	if(IsNPC() && CastToNPC()->GetSwarmInfo()){
 		return CastToNPC()->GetSwarmInfo()->GetOwner();
 	}
 
-	SetOwnerID(0);
+	//SetOwnerID(0);
 	return 0;
 }
 
@@ -4613,6 +4616,8 @@ void Mob::SetOwnerID(uint16 new_owner_id) {
 	}
 
 	ownerid = new_owner_id;
+
+	LogDebug("Setting OwnerID to [{}]:[{}]", ownerid, new_owner_id);
 
 	// if we're setting the owner ID to 0 and they're not either charmed or not-a-pet then
 	// they're a normal pet and should be despawned
@@ -8266,7 +8271,7 @@ void Mob::SetFeigned(bool in_feigned) {
 	if (in_feigned)	{
 		if (IsClient()) {
 			if (RuleB(Character, FeignKillsPet)){
-				SetPet(0);
+				RemoveAllPets();
 			}
 			CastToClient()->SetHorseId(0);
 		}

@@ -846,6 +846,24 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		limit_value = e.limit_value;
 		slot = e.slot;
 
+		// THJ Custom Bullshit - Mutate Fist of Steel
+		if (rank.id == 12706 || rank.id == 12707) {
+			if ((e.effect_id == SE_LimitToSkill && e.base_value == 0) || (e.effect_id == SE_SkillDamageAmount && e.limit_value == 0) ) {
+				continue;
+			}
+
+			/* Version Cata Likes
+			// Remove the ability to proc off of anything but H2H
+			if ((e.effect_id == SE_LimitToSkill && e.base_value == EQ::skills::Skill1HBlunt) && e.effect_id == SE_SkillDamageAmount && e.limit_value == EQ::skills::Skill1HBlunt) {
+				continue;
+			}
+			// Hack the damage bonus to apply to all skills
+			if (e.effect_id == SE_SkillDamageAmount && e.limit_value == EQ::skills::SkillHandtoHand) {
+				limit_value = -1;
+			}
+			*/
+		}
+
 		// we default to 0 (SE_CurrentHP) for the effect, so if there aren't any base1/2 values, we'll just skip it
 		if (effect == 0 && base_value == 0 && limit_value == 0)
 			continue;
@@ -1386,6 +1404,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_SkillDamageAmount: {
+			base_value = static_cast<int>(base_value * (GetLevel() / 70.0f));
 			// Bad data or unsupported new skill
 			if (limit_value > EQ::skills::HIGHEST_SKILL)
 				break;

@@ -21,6 +21,7 @@
 #include "item_data.h"
 #include "classes.h"
 #include "races.h"
+#include <unordered_map>
 //#include "deity.h"
 
 
@@ -260,46 +261,113 @@ const char* EQ::ItemData::GetActualCharmFile() const {
 }
 
 const uint64 EQ::ItemData::CalculateGearScore() const {
-	int gear_score = 5;
+    uint64 gearScore = 0;
 
-	// Basic Stats
-	gear_score += 5   * AStr + ASta + ADex + AAgi + AInt + AWis + ACha;
-	gear_score += 2   * MR + FR + CR + DR + PR;
-	gear_score += 2   * HP + Mana + Endur;
-	gear_score += 10  * Attack + SpellDmg + HealAmt;
-	gear_score += 10  * AC;
-	gear_score += 10  * Haste;
+    auto romanToInt = [](const char* str) -> int {
+		if (!str) {
+			return 0;
+		}
+        std::unordered_map<char, int> romanMap = {
+            {'I', 1}, {'V', 5}, {'X', 10}, {'L', 50},
+            {'C', 100}, {'D', 500}, {'M', 1000}
+        };
 
-	gear_score *= 		(Damage / (Delay+1) + 1);
+        int result = 0;
+        int prevValue = 0;
+        bool validSequence = false;
 
-	// Heroic Stats
-	gear_score += 10  * (HeroicStr + HeroicSta + HeroicDex + HeroicAgi + HeroicInt + HeroicWis + HeroicCha);
-	gear_score += 5   * (HeroicMR + HeroicFR + HeroicCR + HeroicDR + HeroicPR);
+        // Iterate through the string
+        while (*str) {
+            // Look for a Roman numeral sequence starting after a whitespace
+            if (isspace(*str)) {
+                str++; // Move past the whitespace
 
-	// Mod2 Stats
-	gear_score += 100 * (Shielding + SpellShield + Avoidance + CombatEffects);
-	gear_score += 50  * (Accuracy + StunResist + StrikeThrough + DotShielding);
-	gear_score += 25  * (Regen + ManaRegen + EnduranceRegen + DSMitigation + Clairvoyance + DamageShield);
+                // Check if the next characters form a valid Roman numeral sequence
+                while (*str && romanMap.find(*str) != romanMap.end()) {
+                    validSequence = true;
+                    int currentValue = romanMap[*str];
+
+                    // If the current value is greater than the previous, subtract twice the previous (to correct the addition)
+                    if (currentValue > prevValue) {
+                        result += currentValue - 2 * prevValue;
+                    } else {
+                        result += currentValue;
+                    }
+
+                    prevValue = currentValue;
+                    str++;
+                }
+
+                // Ensure the sequence ends properly (i.e., it must be followed by whitespace or end of string)
+                if (validSequence && (*str == '\0' || isspace(*str))) {
+                    return result;
+                } else {
+                    // Reset if sequence was invalid (either not a numeral or not properly terminated)
+                    result = 0;
+                    prevValue = 0;
+                    validSequence = false;
+                }
+            } else {
+                str++;
+            }
+        }
+
+        return 0; // Return 0 if no valid Roman numeral sequence is found
+    };
+
+    // Weight 1 stats
+    gearScore += (MR + FR + CR + DR + PR + HP + Mana + Endur) * 1;
+
+    // Weight 5 stats
+    gearScore += (AStr + ADex + AAgi + AInt + AWis + ACha + AC + DotShielding + Haste + DamageShield) * 5;
+
+    // Weight 7 stats
+    gearScore += (ASta + HeroicMR + HeroicFR + HeroicCR + HeroicPR + HeroicDR) * 7;
+
+    // Weight 10 stats
+    gearScore += (std::max(ProcRate - 100, 0)) * 10; // Ensure ProcRate - 100 doesn't go negative
+    gearScore += (StrikeThrough + Avoidance + Accuracy + Attack + HeroicStr + HeroicSta + HeroicAgi + HeroicInt + HeroicWis + HeroicCha) * 10;
+
+    // Weight 50 stats
+    gearScore += (HealAmt + StunResist + CombatEffects) * 50;
+
+    // Weight 100 stats
+    gearScore += (ManaRegen + EnduranceRegen + Regen + SpellDmg + Shielding + SpellShield) * 100;
+
+    // Weight 1000000 stats
+    if (Delay != 0) {
+        gearScore += (Damage / Delay) * 1000000;
+    }
 
 	if (Click.Effect > 0) {
-		gear_score += gear_score * 2.0f;
-		gear_score = std::min(gear_score, 10000000);
+		gearScore += 500000;
 	}
 
 	if (Focus.Effect > 0) {
-		gear_score += gear_score * 0.5f;
+		int roman = romanToInt(FocusName);
+
+		if (roman > 0) {
+			gearScore += 250000 * roman;
+		} else {
+			gearScore += 1250000;
+		}
 	}
 
 	if (Proc.Effect > 0) {
-		gear_score += gear_score * 0.5f;
+		gearScore += 500000;
 	}
 
 	if (Worn.Effect > 0) {
-		gear_score += gear_score * 0.5f;
+		int roman = romanToInt(WornName);
+
+		if (roman > 0) {
+			gearScore += 250000 * roman;
+		} else {
+			gearScore += 1250000;
+		}
 	}
 
-	// Tier Modifier
-	gear_score *= ((int)(OriginalID / 1000000) + 1) * 4;
+	gearScore = std::max(gearScore, static_cast<uint64>(50000));
 
-	return static_cast<uint64>(std::pow(gear_score, 2));
+    return gearScore;
 }

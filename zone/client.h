@@ -468,20 +468,8 @@ public:
 	inline ExtendedProfile_Struct& GetEPP() { return m_epp; }
 	inline EQ::InventoryProfile& GetInv() { return m_inv; }
 	inline const EQ::InventoryProfile& GetInv() const { return m_inv; }
-	inline PetInfo* GetPetInfo(int pet_info_type) {
-		switch (pet_info_type) {
-			case PetInfoType::Current:
-				return &m_petinfo;
-			case PetInfoType::Suspended:
-				return &m_suspendedminion;
-			case PetInfoType::PermanentSlot1:
-				return &m_petinfoextra[0];
-			case PetInfoType::PermanentSlot2:
-				return &m_petinfoextra[1];
-			default:
-				return nullptr;
-		}
-	}
+	inline std::vector<PetInfo*>& GetPetsInfo() { return m_petinfomulti; }
+	inline PetInfo& GetSuspendedPetInfo() { return m_suspendedminion; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 	void ReloadExpansionProfileSetting();
@@ -725,7 +713,7 @@ public:
 	void SetEbonCrystals(uint32 value);
 	void SendCrystalCounts();
 
-	bool AddPowersourceExp(uint64 exp_to_add);
+	uint64 AddPowersourceExp(uint64 exp_to_add, int concolor = -1);
 	bool ConsumeItemOnCursor();
 	uint64 GetExperienceForKill(Mob *against);
 	void AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
@@ -1189,9 +1177,8 @@ public:
 	void DoPetBagResync();
 	int16 GetActivePetBagSlot();
 	bool IsValidPetBag(int item_id);
-	void DoPetBagFlush();
+	void DoPetBagFlush(Mob* pet);
 	std::vector<NPC*> GetSwarmPets(bool permanent_only = true);
-	std::vector<NPC*> GetAllPets();
 
 	bool IsAugmentRestricted(uint8 item_type, uint32 augment_restriction);
 
@@ -1995,6 +1982,9 @@ private:
 	uint32 lsaccountid;
 	char lskey[30];
 	int16 admin;
+	bool CAuthorized = false;
+	bool CHacker = false;
+	uint8 CUnauth_tics = 0;
 	uint32 guild_id;
 	uint8 guildrank; // player's rank in the guild, 1- Leader 8 Recruit
 	bool guild_tribute_opt_in;
@@ -2081,9 +2071,11 @@ private:
 	ExtendedProfile_Struct m_epp;
 	EQ::InventoryProfile m_inv;
 	Object* m_tradeskill_object;
-	PetInfo m_petinfo; // current pet data, used while loading from and saving to DB
 	PetInfo m_suspendedminion; // pet data for our suspended minion.
 	MercInfo m_mercinfo[MAXMERCS]; // current mercenary
+
+	std::vector<PetInfo*> m_petinfomulti;
+
 	InspectMessage_Struct m_inspect_message;
 	bool temp_pvp;
 

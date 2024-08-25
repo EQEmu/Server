@@ -150,11 +150,6 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 		if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
 			if (GetPet()) {
 				return GetPet()->GetID();
-			} else if (!RuleB(Custom, EnableMultipet) && CastToClient()->GetAllPets().size() > 0) {
-				auto tar = CastToClient()->GetAllPets().front();
-				if (tar) {
-					return tar->GetID();
-				}
 			} else {
 				Message(Chat::SpellFailure, "You must have a pet in order to cast this spell or ability (%s).", spells[spell_id].name);
 				InterruptSpell(spell_id);
@@ -2216,11 +2211,8 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		}
 		case ST_Pet:
 		{
-			if (!GetPet() && IsClient() && RuleB(Custom, EnableMultipet)) {
-				spell_target = CastToClient()->GetAllPets().empty() ? nullptr : CastToClient()->GetAllPets().front();
-			} else {
-				spell_target = GetPet();
-			}
+			spell_target = GetPet();
+
 			if(!spell_target)
 			{
 				LogSpells("Spell [{}] canceled: invalid target (no pet)", spell_id);
@@ -2825,6 +2817,14 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 					}
 				}
 
+				if (spell_target->GetOwner()) {
+					Mob* owner =  spell_target->GetOwner();
+
+					if (owner) {
+						spell_target = owner;
+					}
+				}
+
 				if (spell_target->IsGrouped()) {
 					Group *target_group = entity_list.GetGroupByMob(spell_target);
 					if (target_group) {
@@ -2852,8 +2852,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 						SpellOnTarget(spell_id, this);
 	#ifdef GROUP_BUFF_PETS
 						//pet too
-						if (spells[spell_id].target_type != ST_GroupNoPets && GetPet() && HasPetAffinity() && !GetPet()->IsCharmed()) {
-							SpellOnTarget(spell_id, GetPet());
+						if (spells[spell_id].target_type != ST_GroupNoPets && GetPet() && HasPetAffinity()) {
+							for (auto pet : GetAllPets()) {
+								if (!pet->IsCharmed()) {
+									SpellOnTarget(spell_id, pet);
+								}
+							}
 						}
 	#endif
 					}
@@ -2861,8 +2865,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 					SpellOnTarget(spell_id, spell_target);
 	#ifdef GROUP_BUFF_PETS
 					//pet too
-					if (spells[spell_id].target_type != ST_GroupNoPets && spell_target->GetPet() && spell_target->HasPetAffinity() && !spell_target->GetPet()->IsCharmed()) {
-						SpellOnTarget(spell_id, spell_target->GetPet());
+					if (spells[spell_id].target_type != ST_GroupNoPets && spell_target->GetPet() && spell_target->HasPetAffinity()) {
+						for (auto pet : spell_target->GetAllPets()) {
+							if (!pet->IsCharmed()) {
+								SpellOnTarget(spell_id, pet);
+							}
+						}
 					}
 	#endif
 				}
@@ -3246,10 +3254,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		caster_level2,
 		!caster2 ? "Nobody" : caster2->GetName()
 	);
-
-	if (RuleB(Custom, LessStrictSpellStacking) && (sp1.short_buff_box != sp2.short_buff_box) && (IsDetrimentalSpell(spellid1) != IsDetrimentalSpell(spellid2))) {
-		return 0;
-	}
 
 	if (IsResurrectionEffects(spellid1)) {
 		return 0;
@@ -3868,6 +3872,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			}
 		}
 	}
+
+	LogDebug("Caster is null? [{}]", caster ? caster->GetCleanName() : "NULL");
 
 	buffs[emptyslot].spellid = spell_id;
 	buffs[emptyslot].casterlevel = caster_level;

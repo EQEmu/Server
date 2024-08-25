@@ -732,40 +732,32 @@ bool Client::Save(uint8 iCommitNow) {
 
 	m_pp.lastlogin = time(nullptr);
 
-	if (GetPet() && GetPet()->CastToNPC()->GetPetSpellID() && !dead) {
-		NPC *pet = GetPet()->CastToNPC();
-		m_petinfo.SpellID = pet->CastToNPC()->GetPetSpellID();
-		m_petinfo.HP = pet->GetHP();
-		m_petinfo.Mana = pet->GetMana();
-		pet->GetPetState(m_petinfo.Buffs, m_petinfo.Items, m_petinfo.Name);
-		m_petinfo.petpower = pet->GetPetPower();
-		m_petinfo.size = pet->GetSize();
-		m_petinfo.taunting = pet->CastToNPC()->IsTaunting();
-	} else {
-		memset(&m_petinfo, 0, sizeof(struct PetInfo));
+	ValidatePetList(); // make sure pet list is compacted correctly
+
+   	for (auto& pet_info : m_petinfomulti) {
+		if (pet_info) {
+			memset(pet_info, 0, sizeof(PetInfo)); // Dereference the pointer correctly
+		}
 	}
 
-	if (RuleB(Custom, EnableMultipet)) {
-		auto swarm_pets = GetSwarmPets(true);
-		int num_pets = std::min(static_cast<int>(swarm_pets.size()), MAXPETS);
+	auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
+	m_petinfomulti.resize(pets.size()); // Resize m_petinfomulti to match the number of pets
 
-		for (int i = 0; i < num_pets; ++i) {
-			auto& pet_info = m_petinfoextra[i];
-			auto& perm_pet = swarm_pets[i];
-
-			pet_info.SpellID 	= perm_pet->GetPetSpellID();
-			pet_info.HP      	= perm_pet->GetHP();
-			pet_info.Mana 	 	= perm_pet->GetMana();
-			pet_info.petpower 	= perm_pet->GetPetPower();
-			pet_info.size 		= perm_pet->GetSize();
-			pet_info.taunting	= perm_pet->IsTaunting();
-
-			perm_pet->GetPetState(pet_info.Buffs, pet_info.Items, pet_info.Name);
-		}
-
-		// Zero out remaining pet slots
-		for (int i = num_pets; i < MAXPETS; ++i) {
-			memset(&m_petinfoextra[i], 0, sizeof(struct PetInfo));
+	if (!dead) {
+		for (size_t i = 0; i < pets.size(); ++i) {
+			NPC *pet = pets[i]->CastToNPC();
+			if (pet && pet->GetPetSpellID()) {
+				if (!m_petinfomulti[i]) {
+					m_petinfomulti[i] = new PetInfo(); // Ensure memory is allocated
+				}
+				m_petinfomulti[i]->SpellID = pet->GetPetSpellID();
+				m_petinfomulti[i]->HP = pet->GetHP();
+				m_petinfomulti[i]->Mana = pet->GetMana();
+				pet->GetPetState(m_petinfomulti[i]->Buffs, m_petinfomulti[i]->Items, m_petinfomulti[i]->Name);
+				m_petinfomulti[i]->petpower = pet->GetPetPower();
+				m_petinfomulti[i]->size = pet->GetSize();
+				m_petinfomulti[i]->taunting = pet->IsTaunting();
+			}
 		}
 	}
 
@@ -2870,15 +2862,9 @@ bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const
 		skill_id = EQ::skills::Skill2HPiercing;
 	}
 
-	unsigned int classes_bits = GetClassesBits();
-
-	for (int i = 0; i < sizeof(classes_bits) * 8; ++i) {
-		if (classes_bits & (1 << i)) {
-			int classID = i + 1;
-
-			if (skill_caps.GetSkillCap(classID, skill_id, RuleI(Character, MaxLevel)).cap > 0) {
-				return true;
-			}
+	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+		if (HasClass(i) && skill_caps.GetSkillCap(i, skill_id, RuleI(Character, MaxLevel)).cap > 0) {
+			return true;
 		}
 	}
 
@@ -2895,21 +2881,15 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint16 class_id, uint8 l
 		skill_id = EQ::skills::Skill2HPiercing;
 	}
 
-	unsigned int classes_bits = GetClassesBits();
 	uint16 maxSkill = 0;
-
-	for (int i = 0; i < sizeof(classes_bits) * 8; ++i) {
-		if (classes_bits & (1 << i)) {
-			uint16 classID = i + 1;
-
-			auto skillCap = skill_caps.GetSkillCap(classID, skill_id, level);
-
-			if (skillCap.cap > maxSkill) {
-				maxSkill = skillCap.cap;
+	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+		if (HasClass(i)) {
+			uint16 test = skill_caps.GetSkillCap(i, skill_id, level).cap;
+			if (test > maxSkill) {
+				maxSkill = test;
 			}
 		}
 	}
-
 	return maxSkill;
 }
 
@@ -5914,128 +5894,89 @@ void Client::UpdateLDoNWinLoss(uint32 theme_id, bool win, bool remove) {
 
 void Client::SuspendMinion(int value)
 {
-	/*
-		SPA 151 Allows an extra pet to be saved and resummoned later.
-		Casting with a pet but without a suspended pet will suspend the pet
-		Casting without a pet and with a suspended pet will unsuspend the pet
-		effect value 0 = save pet with no buffs or equipment
-		effect value 1 = save pet with buffs and equipment
-		effect value 2 = unknown
-		Note: SPA 308 allows for suspended pets to be resummoned after zoning.
-	*/
+	ValidatePetList();
+	auto pet_mob = GetPetByID(focused_pet_id);
+	NPC* CurrentPet = nullptr;
+	if (pet_mob) {
+		CurrentPet = pet_mob->CastToNPC();
+	}
 
-	NPC *CurrentPet = GetPet()->CastToNPC();
+	if (CurrentPet && CurrentPet->IsCharmed()) {
+		MessageString(Chat::SpellFailure, ONLY_SUMMONED_PETS);
+		return;
+	}
 
-	if(!CurrentPet)
-	{
-		if(m_suspendedminion.SpellID > 0)
-		{
-			if (m_suspendedminion.SpellID >= SPDAT_RECORDS) {
-				Message(Chat::Red, "Invalid suspended minion spell id (%u).", m_suspendedminion.SpellID);
-				memset(&m_suspendedminion, 0, sizeof(PetInfo));
-				return;
-			}
+	auto store_minion = [&]() {
+		m_suspendedminion.SpellID 	= CurrentPet->GetPetSpellID();
+		m_suspendedminion.HP 	  	= CurrentPet->GetHP();
+		m_suspendedminion.Mana    	= CurrentPet->GetMana();
+		m_suspendedminion.petpower 	= CurrentPet->GetPetPower();
+		m_suspendedminion.size 		= CurrentPet->GetSize();
 
-			MakePoweredPet(m_suspendedminion.SpellID, spells[m_suspendedminion.SpellID].teleport_zone,
-				m_suspendedminion.petpower, m_suspendedminion.Name, m_suspendedminion.size);
+		if (value >= 1) {
+			CurrentPet->GetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items, m_suspendedminion.Name);
+		} else {
+			strn0cpy(m_suspendedminion.Name, CurrentPet->GetName(), sizeof(m_suspendedminion.Name));
+		}
 
-			CurrentPet = GetPet()->CastToNPC();
+		RemovePet(CurrentPet);
+		CurrentPet->Depop(false);
 
-			if(!CurrentPet)
-			{
-				Message(Chat::Red, "Failed to recall suspended minion.");
-				return;
-			}
+		MessageString(Chat::Magenta, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
+	};
 
-			if(value >= 1)
-			{
-				CurrentPet->SetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items);
+	auto deploy_minion = [&]() {
+		MakePoweredPet(m_suspendedminion.SpellID, spells[m_suspendedminion.SpellID].teleport_zone,
+			m_suspendedminion.petpower, m_suspendedminion.Name, m_suspendedminion.size);
+		ValidatePetList();
+		auto pet_mob = GetPet(petids.size() - 1);
+		if (pet_mob) {
+			CurrentPet = pet_mob->CastToNPC();
+		}
 
-				CurrentPet->SendPetBuffsToClient();
-			}
+		if (CurrentPet) {
+			CurrentPet->SetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items);
+			CurrentPet->SendPetBuffsToClient();
 			CurrentPet->CalcBonuses();
-
 			CurrentPet->SetHP(m_suspendedminion.HP);
-
 			CurrentPet->SetMana(m_suspendedminion.Mana);
-
 			CurrentPet->SetTaunting(m_suspendedminion.taunting);
 
 			MessageString(Chat::Magenta, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
 
-			memset(&m_suspendedminion, 0, sizeof(struct PetInfo));
-			// TODO: These pet command states need to be synced ...
-			// Will just fix them for now
-			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-				SetPetCommandState(PET_BUTTON_SIT, 0);
-				SetPetCommandState(PET_BUTTON_STOP, 0);
-				SetPetCommandState(PET_BUTTON_REGROUP, 0);
-				SetPetCommandState(PET_BUTTON_FOLLOW, 1);
-				SetPetCommandState(PET_BUTTON_GUARD, 0);
-				// Taunt saved on client side for logging on with pet
-				// In our db for when we zone.
-				SetPetCommandState(PET_BUTTON_HOLD, 0);
-				SetPetCommandState(PET_BUTTON_GHOLD, 0);
-				SetPetCommandState(PET_BUTTON_FOCUS, 0);
-				SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
-			}
-
-			DoPetBagResync();
+			memset(&m_suspendedminion, 0, sizeof(PetInfo));
 		}
-		else
-			return;
+	};
 
+	bool valid_stored_pet	= m_suspendedminion.SpellID > 0;
+	bool total_pet_limit 	= GetAllPets().size() < RuleI(Custom, AbsolutePetLimit);
+	bool pet_slot_allowed 	= IsPetAllowed(m_suspendedminion.SpellID);
+
+	bool valid_pet_to_store = CurrentPet && CurrentPet->GetPetSpellID();
+	bool pet_not_engaged 	= CurrentPet && !CurrentPet->IsEngaged();
+
+	if (valid_stored_pet) {
+		if (!total_pet_limit) {
+			Message(Chat::SpellFailure, "You cannot control any additional pets.");
+			return;
+		}
+		if (!pet_slot_allowed) {
+			Message(Chat::SpellFailure, "You already have a pet of that class.");
+			return;
+		}
+
+		deploy_minion();
+		return;
 	}
-	else
-	{
-		uint16 SpellID = CurrentPet->GetPetSpellID();
 
-		if(SpellID)
-		{
-			if(m_suspendedminion.SpellID > 0)
-			{
-				MessageString(Chat::Red,ONLY_ONE_PET);
-
-				return;
-			}
-			else if(CurrentPet->IsEngaged())
-			{
-				MessageString(Chat::Red,SUSPEND_MINION_FIGHTING);
-
-				return;
-			}
-			else if(entity_list.Fighting(CurrentPet))
-			{
-				MessageString(Chat::Blue,SUSPEND_MINION_HAS_AGGRO);
-			}
-			else
-			{
-				m_suspendedminion.SpellID = SpellID;
-
-				m_suspendedminion.HP = CurrentPet->GetHP();;
-
-				m_suspendedminion.Mana = CurrentPet->GetMana();
-				m_suspendedminion.petpower = CurrentPet->GetPetPower();
-				m_suspendedminion.size = CurrentPet->GetSize();
-
-				if(value >= 1)
-					CurrentPet->GetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items, m_suspendedminion.Name);
-				else
-					strn0cpy(m_suspendedminion.Name, CurrentPet->GetName(), 64); // Name stays even at rank 1
-
-				MessageString(Chat::Magenta, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
-
-				CurrentPet->Depop(false);
-
-				SetPetID(0);
-			}
-		}
-		else
-		{
-			MessageString(Chat::Red, ONLY_SUMMONED_PETS);
-
+	if (valid_pet_to_store) {
+		if (!pet_not_engaged) {
+			MessageString(Chat::SpellFailure, SUSPEND_MINION_FIGHTING);
 			return;
 		}
+
+		store_minion();
+		return;
 	}
 }
 
@@ -6440,43 +6381,7 @@ void Client::AdventureFinish(bool win, int theme, int points)
 
 void Client::CheckLDoNHail(NPC* n)
 {
-	if (!zone->adv_data || !n || n->GetOwnerID()) {
-		return;
-	}
-
-	auto* ds = (ServerZoneAdventureDataReply_Struct*) zone->adv_data;
-	if (ds->type != Adventure_Rescue || ds->data_id != n->GetNPCTypeID()) {
-		return;
-	}
-
-	if (entity_list.CheckNPCsClose(n)) {
-		n->Say(
-			"You're here to save me? I couldn't possibly risk leaving yet. There are "
-			"far too many of those horrid things out there waiting to recapture me! Please get "
-			"rid of some more of those vermin and then we can try to leave."
-		);
-		return;
-	}
-
-	auto pet = GetPet();
-	if (pet) {
-		if (pet->GetPetType() == petCharmed) {
-			pet->BuffFadeByEffect(SE_Charm);
-		} else if (pet->GetPetType() == petNPCFollow) {
-			pet->SetOwnerID(0);
-		} else {
-			pet->Depop();
-		}
-	}
-
-	SetPet(n);
-	n->SetOwnerID(GetID());
-	n->Say(
-		"Wonderful! Someone to set me free! I feared for my life for so long, "
-		"never knowing when they might choose to end my life. Now that you're here though "
-		"I can rest easy. Please help me find my way out of here as soon as you can "
-		"I'll stay close behind you!"
-	);
+	// NUKED BY CATAPULTAM
 }
 
 void Client::CheckEmoteHail(NPC* n, const char* message)
@@ -7236,7 +7141,7 @@ void Client::SendXTargetPacket(uint32 Slot, Mob *m)
 		}
 		else
 		{
-			outapp->WriteUInt8(0);
+			outapp->WriteUInt8(XTargets[Slot].Type);
 		}
 	}
 	outapp->WriteUInt32(XTargets[Slot].ID);
@@ -12371,44 +12276,44 @@ void Client::DoPetBagResync() {
 	if (RuleB(Custom, EnablePetBags)) {
 		auto pet_bag = GetActivePetBag();
 		auto pet_bag_slot = GetActivePetBagSlot();
-		Mob* pet 	 = GetPet();
 
-		if (pet && pet_bag) {
-			DoPetBagFlush();
-			NPC* pet_npc = pet->CastToNPC();
+		for (auto pet : GetAllPets()) {
+			if (pet && pet_bag && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), Class::Magician) < UINT8_MAX) {
+				DoPetBagFlush(pet);
+				NPC* pet_npc = pet->CastToNPC();
 
-			int bag_top = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, 0);
-			int bag_bot = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, pet_bag->GetItem()->BagSlots);
+				int bag_top = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, 0);
+				int bag_bot = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, pet_bag->GetItem()->BagSlots);
 
-			for (int slot_id = bag_top; slot_id < bag_bot; slot_id++) {
-				auto item_inst = GetInv().GetItem(slot_id);
-				if (item_inst) {
-					auto aug0 = item_inst->GetAugment(0);
-					auto aug1 = item_inst->GetAugment(1);
-					auto aug2 = item_inst->GetAugment(2);
-					auto aug3 = item_inst->GetAugment(3);
-					auto aug4 = item_inst->GetAugment(4);
-					auto aug5 = item_inst->GetAugment(5);
+				for (int slot_id = bag_top; slot_id < bag_bot; slot_id++) {
+					auto item_inst = GetInv().GetItem(slot_id);
+					if (item_inst) {
+						auto aug0 = item_inst->GetAugment(0);
+						auto aug1 = item_inst->GetAugment(1);
+						auto aug2 = item_inst->GetAugment(2);
+						auto aug3 = item_inst->GetAugment(3);
+						auto aug4 = item_inst->GetAugment(4);
+						auto aug5 = item_inst->GetAugment(5);
 
-					pet_npc->AddItemFixed(item_inst->GetID(), 1,	true,
-										  aug0 != nullptr ? aug0->GetID() : 0,
-										  aug1 != nullptr ? aug1->GetID() : 0,
-										  aug2 != nullptr ? aug2->GetID() : 0,
-										  aug3 != nullptr ? aug3->GetID() : 0,
-										  aug4 != nullptr ? aug4->GetID() : 0,
-										  aug5 != nullptr ? aug5->GetID() : 0);
+						pet_npc->AddItemFixed(item_inst->GetID(), 1,	true,
+											aug0 != nullptr ? aug0->GetID() : 0,
+											aug1 != nullptr ? aug1->GetID() : 0,
+											aug2 != nullptr ? aug2->GetID() : 0,
+											aug3 != nullptr ? aug3->GetID() : 0,
+											aug4 != nullptr ? aug4->GetID() : 0,
+											aug5 != nullptr ? aug5->GetID() : 0);
+					}
 				}
-			}
 
-			pet->SendWearChange(EQ::textures::weaponPrimary);
-			pet->SendWearChange(EQ::textures::weaponSecondary);
+				pet->SendWearChange(EQ::textures::weaponPrimary);
+				pet->SendWearChange(EQ::textures::weaponSecondary);
+			}
 		}
 	}
 }
 
-void Client::DoPetBagFlush() {
+void Client::DoPetBagFlush(Mob * pet) {
 	if (RuleB(Custom, EnablePetBags)) {
-		Mob* pet 	 = GetPet();
 		if (pet) {
 			// Clear existing pet inventory
 			NPC* pet_npc = pet->CastToNPC();
@@ -12417,58 +12322,6 @@ void Client::DoPetBagFlush() {
 			}
 		}
 	}
-}
-
-std::vector<NPC*> Client::GetSwarmPets(bool permanent_only) {
-    std::vector<NPC*> return_vec;
-
-    // Iterate through the NPC list
-    for (const auto& ent : entity_list.GetNPCList()) {
-        NPC* mob = ent.second;
-
-        // Check if the NPC is a swarm pet owned by this client
-        if (mob && mob->GetSwarmOwner() == GetID()) {
-            // If only permanent swarm pets are requested, skip non-permanent ones
-            if (mob->GetSwarmInfo() && permanent_only && !mob->GetSwarmInfo()->permanent) {
-                continue;
-            }
-            // Add the swarm pet to the return vector
-            return_vec.push_back(mob);
-        }
-    }
-
-    return return_vec;
-}
-
-std::vector<NPC*> Client::GetAllPets() {
-    std::vector<NPC*> pet_list;
-
-    // Check if the client has a main pet and add it to the list
-    if (GetPet()) {
-        pet_list.push_back(GetPet()->CastToNPC());
-    }
-
-    // If multipet rule is enabled, get swarm pets and add them to the list
-    if (RuleB(Custom, EnableMultipet)) {
-        std::vector<NPC*> swarm_pets = GetSwarmPets(true);
-
-        // Debugging: Check the contents of the swarm_pets vector
-        LogDebugDetail("Swarm Pets Count: {}", swarm_pets.size());
-        for (const auto& pet : swarm_pets) {
-            LogDebugDetail("Swarm Pet ID: {}", pet->GetID());
-        }
-
-        // Add swarm pets to the pet_list
-        pet_list.insert(pet_list.end(), swarm_pets.begin(), swarm_pets.end());
-    }
-
-    // Debugging: Check the contents of the pet_list vector
-    LogDebugDetail("Total Pets Count: {}", pet_list.size());
-    for (const auto& pet : pet_list) {
-        LogDebugDetail("Pet ID: {}", pet->GetID());
-    }
-
-    return pet_list;
 }
 
 void Client::UseAugmentContainer(int container_slot)

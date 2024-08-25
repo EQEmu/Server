@@ -486,6 +486,47 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 
 	//Enforce Percent XP Cap per kill, if rule is enabled
 	int kill_percent_xp_cap = RuleI(Character, ExperiencePercentCapPerKill);
+
+	if (RuleB(Character, FloatingExperiencePercentCapPerKill)) {
+		int level = GetLevel();
+
+		// Calculate the level scaling factor
+		float level_scaling = RuleR(Character, FloatingExperienceMaxScaleFactor) -
+							(RuleR(Character, FloatingExperienceMaxScaleFactor) - 1.0f) *
+							((float)level - 1.0f) /
+							(RuleI(Character, FloatingExperienceScaleTerminalLevel) - 1.0f);
+
+		int cap = 0;
+
+		switch (conlevel) {
+			case ConsiderColor::Red:
+				cap = static_cast<int>(RuleI(Character, FloatingExperiencePercentCapPerRedKill) * level_scaling);
+				break;
+			case ConsiderColor::Yellow:
+				cap = static_cast<int>(RuleI(Character, FloatingExperiencePercentCapPerYellowKill) * level_scaling);
+				break;
+			case ConsiderColor::White:
+				cap = static_cast<int>(RuleI(Character, FloatingExperiencePercentCapPerWhiteKill) * level_scaling);
+				break;
+			case ConsiderColor::DarkBlue:
+				cap = static_cast<int>(RuleI(Character, FloatingExperiencePercentCapPerBlueKill) * level_scaling);
+				break;
+			case ConsiderColor::LightBlue:
+				cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerLightBlueKill) * level_scaling);
+				break;
+			case ConsiderColor::Green:
+				cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerGreenKill) * level_scaling);
+				break;
+			default:
+				break;
+		}
+
+		// Override kill_percent_xp_cap if a valid cap was calculated
+		if (cap > 0) {
+			kill_percent_xp_cap = std::min(kill_percent_xp_cap, cap);
+		}
+	}
+
 	if (kill_percent_xp_cap >= 0) {
 		auto experience_for_level = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()));
 		float exp_percent = (float)((float)add_exp / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()))) * (float)100; //EXP needed for level
@@ -503,12 +544,12 @@ bool Client::ConsumeItemOnCursor() {
 	auto power_item  = m_inv.GetItem(EQ::invslot::slotPowerSource);
 
 	if (!cursor_item || !power_item || (power_item->GetID() % 1000000) != (cursor_item->GetID() % 1000000)) {
-		Message(Chat::SpellFailure, "You cannot consume that item, is it not similar to the item which you ar etrying to channel strength into.");
+		Message(Chat::SpellFailure, "You cannot consume that item. You do not have a similar item equipped in your Power Source.");
 		return false;
 	}
 
 	if ((cursor_item->GetID() > power_item->GetID()) || cursor_item->GetID() >= 2000000 || power_item->GetID() >= 2000000) {
-		Message(Chat::SpellFailure, "You cannot consume that item, as it is stronger than the item which you are trying to channel strength into.");
+		Message(Chat::SpellFailure, "ou cannot consume that item. You do not have a similar item equipped in your Power Source.");
 		return false;
 	}
 
@@ -553,74 +594,138 @@ bool Client::ConsumeItemOnCursor() {
 	}
 }
 
-bool Client::AddPowersourceExp(uint64 exp_to_add) {
-	EQ::ItemInstance* item = m_inv.GetItem(EQ::invslot::slotPowerSource);
-	if (!item || !exp_to_add) {
-		return false;
-	}
+#include <random> // For generating random numbers
 
-	EQ::SayLinkEngine linker;
-	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+uint64 Client::AddPowersourceExp(uint64 exp_to_add, int conlevel) {
+    EQ::ItemInstance* item = m_inv.GetItem(EQ::invslot::slotPowerSource);
+    if (!item || !exp_to_add) {
+        return 0;
+    }
 
-	uint64 tar_item_exp = item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
-	uint64 cur_item_exp = Strings::ToUnsignedBigInt(item->GetCustomData("Exp"), 0);
+    EQ::SayLinkEngine linker;
+    linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+    linker.SetItemInst(item);
+    EQ::ItemInstance* new_item = item->GetUpgrade(database);
+    if (!new_item) {
+        Message(Chat::Experience, "Your [%s] is fully upgraded and cannot accumulate any additional experience.", linker.GenerateLink().c_str());
+        return 0;
+    }
 
-	if (cur_item_exp + exp_to_add < tar_item_exp) {
-		cur_item_exp = cur_item_exp + exp_to_add;
-		item->SetCustomData("Exp", fmt::to_string(cur_item_exp));
-		database.UpdateInventorySlot(CharacterID(), item, EQ::invslot::slotPowerSource);
+    int tar_tier = (item->GetID() % 1000000) + 1;
+    uint64 tar_item_exp = item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
+    uint64 cur_item_exp = Strings::ToUnsignedBigInt(item->GetCustomData("Exp"), 0);
 
-		linker.SetItemInst(item);
-		Message(Chat::Experience, "Your [%s] has gained experience! (%.3f%%)", linker.GenerateLink().c_str(), ((static_cast<double>(cur_item_exp) / static_cast<double>(tar_item_exp)) * 100));
-		return true;
-	} else {
-		EQ::ItemInstance* new_item = item->GetUpgrade(database);
-		if (!new_item) {
-			Message(Chat::Experience, "Your [%s] is fully upgraded and cannot accumulate any additional experience.", linker.GenerateLink().c_str());
-			return false;
-		} else {
-			linker.SetItemInst(item);
-			auto old_item_link = linker.GenerateLink().c_str();
-			if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(new_item->GetItem()->ID)) {
-				DiscoverItem(new_item->GetItem()->ID);
-			}
-			for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
-				const EQ::ItemInstance *aug_i = item->GetAugment(r);
-				if (!aug_i) // no aug, try next slot!
-						continue;
+    // Cap calculation based on conlevel and tar_tier
+    int cap = 0;
+    switch (conlevel) {
+        case ConsiderColor::Red:
+            cap = static_cast<int>(RuleI(Character, FloatingExperiencePercentCapPerRedKill));
+            break;
+        case ConsiderColor::Yellow:
+            cap = static_cast<int>(RuleI(Character, FloatingExperiencePercentCapPerYellowKill));
+            break;
+        case ConsiderColor::White:
+            cap = static_cast<int>(RuleI(Character, FloatingExperiencePercentCapPerWhiteKill));
+            break;
+        case ConsiderColor::DarkBlue:
+            cap = static_cast<int>(RuleI(Character, FloatingExperiencePercentCapPerBlueKill));
+            break;
+        case ConsiderColor::LightBlue:
+            cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerLightBlueKill));
+            break;
+        case ConsiderColor::Green:
+            cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerGreenKill));
+            break;
+        default:
+            break;
+    }
 
-				new_item->PutAugment(r, *item->RemoveAugment(r));
-			}
+    if (cap > 0) {
+        // Adjust the cap based on the tier
+        if (tar_tier == 1) {
+            cap = cap;
+        } else if (tar_tier == 2) {
+            cap = static_cast<int>(cap * 0.1); // 1/10th for tier 2
+        }
 
-			item = m_inv.PopItem(EQ::invslot::slotPowerSource);
-			if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {
-				SendSound();
+        // Calculate the cap as a percentage of target item experience
+        uint64 max_exp_to_add = tar_item_exp * cap / 100;
+        uint64 min_exp_to_add = tar_item_exp / tar_tier <= 1 ? 100 : 1000; // Minimum is 1/10th of the maximum
 
-				EQ::SayLinkEngine linker2;
-				linker2.SetLinkType(EQ::saylink::SayLinkItemInst);
-				linker2.SetItemInst(new_item);
-				auto new_item_link = linker2.GenerateLink().c_str();
+        // Generate a random variance factor between 0.9 and 1.1 (±10%)
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(0.9, 1.1);
+        double variance_factor = dis(gen);
 
-				Message(Chat::Experience, "Your [%s] has gained experience! It has successfully upgraded into a [%s]!", old_item_link, new_item_link);
-			} else {
-				if (item) {
-					PutItemInInventory(EQ::invslot::slotPowerSource, *item, true);
-					Message(Chat::Red, "ERROR: Unable to upgrade item from power source, attempting to recover old item.");
-					return false;
-				}
-			}
+        // Apply variance to the clamp values
+        max_exp_to_add = static_cast<uint64>(max_exp_to_add * variance_factor);
+        min_exp_to_add = static_cast<uint64>(min_exp_to_add * variance_factor);
 
-			if (new_item->GetID() >= 2000000) {
-				new_item->SetAttuned(true);
-				PushItemOnCursor(*new_item, true);
-				DeleteItemInInventory(EQ::invslot::slotPowerSource, 0, true, true);
-			}
+        // Clamp the exp_to_add to the calculated range
+        if (exp_to_add > max_exp_to_add) {
+            exp_to_add = max_exp_to_add;
+        } else if (exp_to_add < min_exp_to_add) {
+            exp_to_add = min_exp_to_add;
+        }
+    }
 
-			safe_delete(item);
-			SendItemPacket(EQ::invslot::slotPowerSource, GetInv().GetItem(EQ::invslot::slotPowerSource), ItemPacketType::ItemPacketTrade);
-			return true;
-		}
-	}
+    if (cur_item_exp + exp_to_add < tar_item_exp) {
+        cur_item_exp += exp_to_add;
+        item->SetCustomData("Exp", fmt::to_string(cur_item_exp));
+        database.UpdateInventorySlot(CharacterID(), item, EQ::invslot::slotPowerSource);
+        Message(Chat::Experience, "Your [%s] has gained experience! (%.3f%%)", linker.GenerateLink().c_str(), ((static_cast<double>(cur_item_exp) / static_cast<double>(tar_item_exp)) * 100));
+        return exp_to_add;
+    } else {
+        uint64 exp_added_to_upgrade = tar_item_exp - cur_item_exp;
+        auto old_item_link = linker.GenerateLink().c_str();
+
+        if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(new_item->GetItem()->ID)) {
+            DiscoverItem(new_item->GetItem()->ID);
+        }
+        for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+            const EQ::ItemInstance *aug_i = item->GetAugment(r);
+            if (!aug_i) // no aug, try next slot!
+                continue;
+
+            new_item->PutAugment(r, *item->RemoveAugment(r));
+        }
+
+        if (item->IsCharged()) {
+            new_item->SetCharges(item->GetCharges());
+        } else {
+            new_item->SetCharges(-1);
+        }
+
+        item = m_inv.PopItem(EQ::invslot::slotPowerSource);
+        if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {
+            SendSound();
+
+            EQ::SayLinkEngine linker2;
+            linker2.SetLinkType(EQ::saylink::SayLinkItemInst);
+            linker2.SetItemInst(new_item);
+            auto new_item_link = linker2.GenerateLink().c_str();
+
+            Message(Chat::Experience, "Your [%s] has gained experience! It has successfully upgraded into a [%s]!", old_item_link, new_item_link);
+        } else {
+            if (item) {
+                PutItemInInventory(EQ::invslot::slotPowerSource, *item, true);
+                Message(Chat::Red, "ERROR: Unable to upgrade item from power source, attempting to recover old item.");
+                return 0;
+            }
+        }
+
+        if (new_item->GetID() >= 2000000) {
+            new_item->SetAttuned(true);
+            PushItemOnCursor(*new_item, true);
+            DeleteItemInInventory(EQ::invslot::slotPowerSource, 0, true, true);
+        }
+
+        safe_delete(item);
+        SendItemPacket(EQ::invslot::slotPowerSource, GetInv().GetItem(EQ::invslot::slotPowerSource), ItemPacketType::ItemPacketTrade);
+
+        return exp_added_to_upgrade;
+    }
 }
 
 void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, bool resexp) {
@@ -628,9 +733,11 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 		return;
 	}
 
-	if (RuleB(Custom, PowerSourceItemUpgrade) && AddPowersourceExp(in_add_exp * 0.75)) {
+	if (RuleB(Custom, PowerSourceItemUpgrade) && AddPowersourceExp(in_add_exp * 0.75, conlevel)) {
 		in_add_exp *= 0.25;
 	}
+
+	LogDebug("Conleve: [{}]", conlevel);
 
 	EVENT_ITEM_ScriptStopReturn();
 

@@ -2152,6 +2152,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 
 void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 {
+	/*
 	for (uint32 i = 0; i <= EQ::skills::HIGHEST_SKILL; ++i) {
 		if (pp->skills[i] == 0) {
 			// Skip specialized, tradeskills (fishing excluded), Alcohol Tolerance, and Bind Wound
@@ -2168,6 +2169,7 @@ void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 		pp->skills[EQ::skills::Skill1HPiercing] = pp->skills[EQ::skills::Skill2HPiercing];
 		pp->skills[EQ::skills::Skill2HPiercing] = 0;
 	}
+	*/
 }
 
 void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )

@@ -156,7 +156,7 @@ bool TitleManager::IsClientEligibleForTitle(Client *client, TitleEntry title)
 		return false;
 	}
 
-	if (title.class_id >= Class::None && client->HasClass(title.class_id)) {
+	if (title.class_id >= Class::None && !client->HasClass(title.class_id)) {
 		return false;
 	}
 

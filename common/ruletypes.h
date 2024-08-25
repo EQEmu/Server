@@ -228,6 +228,15 @@ RULE_BOOL(Character, GroupInvitesRequireTarget, false, "Enable to require player
 RULE_BOOL(Character, PlayerTradingLoreFeedback, true, "If enabled, during a player to player trade, if lore items exist, it will output which items.")
 RULE_INT(Character, MendAlwaysSucceedValue, 199, "Value at which mend will always succeed its skill check. Default: 199")
 RULE_BOOL(Character, SneakAlwaysSucceedOver100, false, "When sneak skill is over 100, always succeed sneak/hide. Default: false")
+RULE_BOOL(Character, FloatingExperiencePercentCapPerKill, false, "Enable floating experience percent cap per kill.")
+RULE_REAL(Character, FloatingExperienceMaxScaleFactor, 4.0, "Maximum scaling factor for experience cap adjustments, applied at level 1.")
+RULE_INT(Character, FloatingExperienceScaleTerminalLevel, 46, "Level at which the scaling factor reaches 1.0.")
+RULE_INT(Character, FloatingExperiencePercentCapPerRedKill, 7, "Experience percent cap for red con mobs.")
+RULE_INT(Character, FloatingExperiencePercentCapPerYellowKill, 5, "Experience percent cap for yellow con mobs.")
+RULE_INT(Character, FloatingExperiencePercentCapPerWhiteKill, 3, "Experience percent cap for white con mobs.")
+RULE_INT(Character, FloatingExperiencePercentCapPerBlueKill, 2, "Experience percent cap for blue con mobs.")
+RULE_REAL(Character, FloatingExperiencePercentCapPerLightBlueKill, 0.25, "Experience percent cap for light blue con mobs.")
+RULE_REAL(Character, FloatingExperiencePercentCapPerGreenKill, 0.1, "Experience percent cap for green con mobs.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -1051,7 +1060,7 @@ RULE_BOOL(Custom, 	UseTHJItemMutations, 					true, 	"Rename items according to T
 RULE_BOOL(Custom, 	ClearRestingDetrimentalEffectsEnabled, 	true, 	"Remove detrimental spell effects from self and pets when OOC regen engages")
 RULE_REAL(Custom, 	ItemExtraSpellAmtMaximumPercentage, 	0.0, 	"Adjust the maximum effectiveness of Spell Damage and Heal Amount. 0.0 to Disable, 1.0 to allow adding up to the base effect value, 2.0 to allow double effect value, etc.")
 RULE_BOOL(Custom, 	UseTHJRaceMutations, 					false, 	"Enable to load New-Style Models for THJ")
-RULE_BOOL(Custom,   EnableMultipet, 						false, 	"Additional pets past the first are summoned as swarm pets")
+RULE_INT(Custom,    AbsolutePetLimit, 						1, 	    "Maximum number of permanent pets that a player can control.")
 RULE_REAL(Custom,	PetPlacementAdjustment,					-0.6,  	"Adjust pet formation positioning")
 
 // Item Upgrades

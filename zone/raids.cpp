@@ -671,8 +671,12 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 		if (m.member == caster) {
 			caster->SpellOnTarget(spellid, caster);
 #ifdef GROUP_BUFF_PETS
-			if (spells[spellid].target_type != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed()) {
-				caster->SpellOnTarget(spellid, caster->GetPet());
+			if (spells[spellid].target_type != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity()) {
+				for (auto pet : caster->GetAllPets()) {
+					if (!pet->IsCharmed()) {
+						caster->SpellOnTarget(spellid, pet);
+					}
+				}
 			}
 #endif
 		}
@@ -682,9 +686,12 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 				caster->SpellOnTarget(spellid, m.member);
 
 #ifdef GROUP_BUFF_PETS
-				if (spells[spellid].target_type != ST_GroupNoPets && m.member->GetPet() && m.member->HasPetAffinity() &&
-					!m.member->GetPet()->IsCharmed()) {
-					caster->SpellOnTarget(spellid, m.member->GetPet());
+				if (spells[spellid].target_type != ST_GroupNoPets && m.member->GetPet() && m.member->HasPetAffinity()) {
+					for (auto pet : m.member->GetAllPets()) {
+						if (!pet->IsCharmed()) {
+							caster->SpellOnTarget(spellid, pet);
+						}
+					}
 				}
 #endif
 			}
@@ -2628,7 +2635,7 @@ void Raid::RaidClearNPCMarks(Client* c)
 		Strings::EqualFold(main_marker_pcs[MAIN_MARKER_3_SLOT], c->GetCleanName())) {
 		for (int i = 0; i < MAX_MARKED_NPCS; i++) {
 			if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID()
-				&& marked_npcs[i].instance_id == c->GetInstanceID()) 
+				&& marked_npcs[i].instance_id == c->GetInstanceID())
 			{
 				auto npc_name = entity_list.GetNPCByID(marked_npcs[i].entity_id)->GetCleanName();
 				RaidMessageString(nullptr, Chat::Cyan, RAID_NO_LONGER_MARKED, npc_name);
@@ -2953,7 +2960,7 @@ void Raid::SendMarkTargets(Client* c)
 	}
 
 	for (int i = 0; i < MAX_MARKED_NPCS; i++) {
-		if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID() 
+		if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID()
 			&& marked_npcs[i].instance_id == c->GetInstanceID()) {
 			auto marked_mob = entity_list.GetMob(marked_npcs[i].entity_id);
 			if (marked_mob) {
@@ -2970,7 +2977,7 @@ void Raid::SendMarkTargets(Client* c)
 	UpdateXtargetMarkedNPC();
 }
 
-void Raid::EmptyRaidMembers() 
+void Raid::EmptyRaidMembers()
 {
 	for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
 		members[i].group_number    = RAID_GROUPLESS;

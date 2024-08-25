@@ -1897,11 +1897,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	InterruptSpell();
 
 	Mob* m_pet = GetPet();
-	SetPet(0);
-
-	for (auto pet : GetAllPets()) {
-		pet->Depop();
-	}
+	RemoveAllPets();
 
 	SetHorseId(0);
 	ShieldAbilityClearVariables();
@@ -2576,7 +2572,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	ShieldAbilityClearVariables();
 
 	SetHP(0);
-	SetPet(0);
+	RemoveAllPets();
+
+	if (ownerid) {
+		GetOwner()->RemovePet(this);
+	}
 
 	if (GetSwarmOwner()) {
 		Mob* owner = entity_list.GetMobID(GetSwarmOwner());
@@ -3495,6 +3495,11 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		entity_list.AddTempPetsToHateList(this, other, bFrenzy);
 	}
 
+	// Multipet
+	for (auto pet : GetAllPets()) {
+		pet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+	}
+
 	if (!wasengaged) {
 		if (IsNPC() && other->IsClient() && other->CastToClient()) {
 			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_AGGRO)) {
@@ -4352,38 +4357,39 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		// pets that have GHold will never automatically add NPCs
 		// pets that have Hold and no Focus will add NPCs if they're engaged
 		// pets that have Hold and Focus will not add NPCs
-		if (
-			Mob* pet = GetPet();
-			pet &&
-			!pet->IsFamiliar() &&
-			!pet->GetSpecialAbility(SpecialAbility::AggroImmunity) &&
-			!pet->IsEngaged() &&
-			attacker &&
-			!(attacker->IsBot() && pet->GetSpecialAbility(SpecialAbility::BotAggroImmunity)) &&
-			!(attacker->IsClient() && pet->GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) &&
-			!(attacker->IsNPC() && pet->GetSpecialAbility(SpecialAbility::NPCAggroImmunity)) &&
-			attacker != this &&
-			!attacker->IsCorpse() &&
-			!pet->IsGHeld() &&
-			!attacker->IsTrap() &&
-			!pet->IsHeld()
-		) {
-			LogAggro("Sending pet [{}] into battle due to attack", pet->GetName());
-			if (IsClient() && !pet->IsPetStop()) {
-				// if pet was sitting his new mode is previous setting of
-				// follow or guard after the battle (live verified)
-				if (pet->GetPetOrder() == SPO_Sit) {
-					pet->SetPetOrder(pet->GetPreviousPetOrder());
+		for (auto pet : GetAllPets()) {
+			if (
+				pet &&
+				!pet->IsFamiliar() &&
+				!pet->GetSpecialAbility(SpecialAbility::AggroImmunity) &&
+				!pet->IsEngaged() &&
+				attacker &&
+				!(attacker->IsBot() && pet->GetSpecialAbility(SpecialAbility::BotAggroImmunity)) &&
+				!(attacker->IsClient() && pet->GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) &&
+				!(attacker->IsNPC() && pet->GetSpecialAbility(SpecialAbility::NPCAggroImmunity)) &&
+				attacker != this &&
+				!attacker->IsCorpse() &&
+				!pet->IsGHeld() &&
+				!attacker->IsTrap() &&
+				!pet->IsHeld()
+			) {
+				LogAggro("Sending pet [{}] into battle due to attack", pet->GetName());
+				if (IsClient() && !pet->IsPetStop()) {
+					// if pet was sitting his new mode is previous setting of
+					// follow or guard after the battle (live verified)
+					if (pet->GetPetOrder() == SPO_Sit) {
+						pet->SetPetOrder(pet->GetPreviousPetOrder());
+					}
+
+					// fix GUI sit button to be unpressed and stop sitting regen
+					CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					pet->SetAppearance(eaStanding);
 				}
 
-				// fix GUI sit button to be unpressed and stop sitting regen
-				CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
-				pet->SetAppearance(eaStanding);
+				pet->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
+				pet->SetTarget(attacker);
+				MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
 			}
-
-			pet->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
-			pet->SetTarget(attacker);
-			MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
 		}
 
 		if (GetTempPetCount()) {
@@ -5469,7 +5475,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		}
 
 		// Not ranged
-		if (!rangedattk) {
+		if (!rangedattk || RuleB(Custom, MulticlassingEnabled)) {
 			// Perma procs (Not used for AA, they are handled below)
 			if (IsValidSpell(PermaProcs[i].spellID)) {
 				if (zone->random.Roll(PermaProcs[i].chance)) { // TODO: Do these get spell bonus?
@@ -5537,7 +5543,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			uint32 aa_proc_reuse_timer = 0;
 			int proc_type = 0; //used to deterimne which timer array is used.
 
-			if (!rangedattk) {
+			if (!rangedattk || RuleB(Custom, MulticlassingEnabled)) {
 
 				aa_rank_id = aabonuses.SpellProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID];
 				aa_spell_id = aabonuses.SpellProc[i + SBIndex::COMBAT_PROC_SPELL_ID];

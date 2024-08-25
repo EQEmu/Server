@@ -360,7 +360,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 	// make sure were actually able to use such an attack. (Bards can throw while casting. ~Kayen confirmed on live 1/22)
 	if (
-		(spellend_timer.Enabled() && GetClass() != Class::Bard && !RuleB(Custom,MulticlassingEnabled)) ||
+		(spellend_timer.Enabled() && !HasClass(Class::Bard) && !RuleB(Custom,MulticlassingEnabled)) ||
 		IsFeared() ||
 		IsStunned() ||
 		IsMezzed() ||
@@ -439,6 +439,10 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	int haste          = GetHaste();
 	int haste_modifier = 0;
 
+	auto calc_reuse = [](int reuse_time, int haste) -> int {
+		return (reuse_time * 100) / haste;
+	};
+
 	if (haste >= 0) {
 		haste_modifier = (10000 / (100 + haste)); //+100% haste = 2x as many attacks
 	} else {
@@ -468,8 +472,12 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 				hate_override = damage = GetBaseSkillDamage(EQ::skills::SkillBash, GetTarget());
 			}
 
-			reuse_time = BashReuseTime - 1 - skill_reduction;
-			reuse_time = (reuse_time * haste_modifier) / 100;
+			if (RuleB(Custom, MulticlassingEnabled)) {
+				reuse_time = calc_reuse(BashReuseTime - skill_reduction, haste);
+			} else {
+				reuse_time = BashReuseTime - 1 - skill_reduction;
+			}
+
 			DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillBash, damage, 0, hate_override, reuse_time);
 
 			if (reuse_time) {
@@ -516,8 +524,11 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			max_dmg = DMG_INVULNERABLE;
 		}
 
-		reuse_time = FrenzyReuseTime - 1 - skill_reduction;
-		reuse_time = (reuse_time * haste_modifier) / 100;
+		if (RuleB(Custom, MulticlassingEnabled)) {
+			reuse_time = calc_reuse(FrenzyReuseTime - skill_reduction, haste);
+		} else {
+			reuse_time = ((FrenzyReuseTime - 1 - skill_reduction) * haste_modifier) / 100;
+		}
 
 		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
 			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
@@ -588,7 +599,12 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 				hate_override = damage = GetBaseSkillDamage(EQ::skills::SkillKick, GetTarget());
 			}
 
-			reuse_time = KickReuseTime - 1 - skill_reduction;
+			if (RuleB(Custom, MulticlassingEnabled)) {
+				reuse_time = calc_reuse(KickReuseTime - skill_reduction, haste);
+			} else {
+				reuse_time = (KickReuseTime - 1 - skill_reduction);
+			}
+
 			DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillKick, damage, 0, hate_override, reuse_time);
 
 			found_skill = true;
@@ -602,7 +618,11 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		 ca_atk->m_skill == EQ::skills::SkillTigerClaw ||
 		 ca_atk->m_skill == EQ::skills::SkillRoundKick)) {
 
-		reuse_time = MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction;
+		if (RuleB(Custom, MulticlassingEnabled)) {
+			reuse_time = calc_reuse(MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - skill_reduction, haste);
+		} else {
+			reuse_time = ((MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction) * haste_modifier) / 100;
+		}
 
 		// Live AA - Technique of Master Wu
 		int wu_chance = (
@@ -668,7 +688,12 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		ca_atk->m_skill == EQ::skills::SkillBackstab &&
 		((HasClass(Class::Rogue)))
 	) {
-		reuse_time = BackstabReuseTime - 1 - skill_reduction;
+		if (RuleB(Custom, MulticlassingEnabled)) {
+			reuse_time = calc_reuse(BackstabReuseTime - skill_reduction, haste);
+		} else {
+			reuse_time = ((BackstabReuseTime - 1 - skill_reduction) * haste_modifier) / 100;
+		}
+
 		TryBackstab(GetTarget(), reuse_time);
 		found_skill = true;
 	}
@@ -677,7 +702,9 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		reuse_time = 9 - skill_reduction;
 	}
 
-	reuse_time = (reuse_time * haste_modifier) / 100;
+	if (!RuleB(Custom, MulticlassingEnabled)) {
+		reuse_time = (reuse_time * haste_modifier) / 100;
+	}
 
 	reuse_time = EQ::Clamp(reuse_time, 0, reuse_time);
 

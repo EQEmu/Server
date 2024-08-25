@@ -582,14 +582,11 @@ int64 Client::CalcBaseMana() {
 	int classes_bits = GetClassesBits();
 	int64 highest_base_mana = 0;
 
-	for (const auto& class_bitmask : player_class_bitmasks) {
-		uint8 class_id = class_bitmask.first;
-		uint16 class_bit = class_bitmask.second;
-		if ((classes_bits & class_bit) != 0) {
-			LogSpells("Checking Class ID [{}], bit [{}]", class_id, class_bit);
-			int64 class_base_mana = _CalcBaseMana(class_id);
-			if (class_base_mana > highest_base_mana) {
-				highest_base_mana = class_base_mana;
+	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+		if (HasClass(i)) {
+			int64 test = _CalcBaseMana(i);
+			if (test > highest_base_mana) {
+				highest_base_mana = test;
 			}
 		}
 	}

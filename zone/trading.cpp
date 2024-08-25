@@ -821,7 +821,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 				EQ::ItemInstance* pet_bag = nullptr;
 				if (RuleB(Custom, EnablePetBags) && is_pet) {
-					pet_bag = tradingWith->GetOwner()->CastToClient()->GetActivePetBag();
+					auto trade_owner = tradingWith->GetOwner()->CastToClient();
+					auto trade_pet0  = trade_owner->GetPet(0);
+					if (trade_pet0->GetID () == tradingWith->GetID()) {
+						pet_bag = tradingWith->GetOwner()->CastToClient()->GetActivePetBag();
+					}
 				}
 				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
 				if (RuleB(Custom, EnablePetBags) && is_pet && pet_bag) {
@@ -836,16 +840,14 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					auto pet_bag_link = linker.GenerateLink();
 
 					if (tradingWith->GetOwner()->GetID() == GetID()) {
-						Message(Chat::Yellow, "You must either use your [%s] to manage your pet's inventory, or put it inside of another bag to disable it.", pet_bag_link.c_str());
+						Message(Chat::Yellow, "You must either use your [%s] to manage this pet's inventory, or put it inside of another bag to disable it.", pet_bag_link.c_str());
 					} else {
 						Message(Chat::Yellow, "This pet cannot accept trades due to being managed with a [%s]", pet_bag_link.c_str());
 					}
 
 				} else {
-					if (is_pet || (tradingWith->CastToNPC()->GetSwarmInfo() && tradingWith->CastToNPC()->GetSwarmInfo()->permanent)) {
+					if (is_pet) {
 						LogDebug("Pet Trade Event [{}]", tradingWith->GetOwner()->GetCleanName());
-						// Set this here because pet bag needs to care avout other sense of 'pet'
-						const bool multi_pet = is_pet || (RuleB(Custom, EnableMultipet) && (tradingWith->CastToNPC()->GetSwarmInfo() && tradingWith->CastToNPC()->GetSwarmInfo()->permanent));
 						// pets need to look inside bags and try to equip items found there
 						if (item->IsClassBag() && item->BagSlots > 0) {
 							for (int16 bslot = EQ::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
@@ -855,8 +857,9 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 									auto loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
 									loot_drop_entry.equip_item = 1;
 									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
-									if (multi_pet && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
-										if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
+									if (tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
+										bool no_drop = bagitem->NoDrop == 0 && tradingWith->GetOwner()->GetID() == GetID();
+										if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal() && !no_drop) {
 											tradingWith->CastToNPC()->AddLootDropFixed(
 												bagitem,
 												loot_drop_entry,
@@ -868,29 +871,35 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							}
 						}
 
-						if (multi_pet && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
-							auto new_loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
-							new_loot_drop_entry.equip_item = 1;
-							new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
+						auto new_loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
+						new_loot_drop_entry.equip_item = 1;
+						new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
+						bool no_drop = item->NoDrop == 0 && tradingWith->GetOwner()->GetID() != GetID();
 
-							if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
-								tradingWith->CastToNPC()->AddLootDropFixed(
-									item,
-									new_loot_drop_entry,
-									true
-								);
+						if (no_drop) {
+							PushItemOnCursor(*inst, true);
+							Message(Chat::Red, "You may not equip pets that you do not own with No-Drop items.");
+							return;
+						}
 
-								if (RuleB(Custom, StripCharmItems) && tradingWith->IsCharmed()) {
-									PushItemOnCursor(*inst, true);
-									Message(Chat::Yellow, "The magic of your charm spell returns your items to you.");
-								}
-
-							} else {
-								PushItemOnCursor(*inst, true);
-								if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
-									Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");
-								}
+						if (IsSeasonal() != tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
+							PushItemOnCursor(*inst, true);
+							if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
+								Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");
 							}
+							return;
+						}
+
+						tradingWith->CastToNPC()->AddLootDropFixed(
+							item,
+							new_loot_drop_entry,
+							true
+						);
+
+
+						if (RuleB(Custom, StripCharmItems) && tradingWith->IsCharmed()) {
+							PushItemOnCursor(*inst, true);
+							Message(Chat::Yellow, "The magic of your charm spell returns your items to you.");
 						}
 					}
 				}
