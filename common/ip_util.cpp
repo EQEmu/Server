@@ -88,35 +88,33 @@ bool IpUtil::IsIpInPrivateRfc1918(const std::string &ip)
 std::string IpUtil::GetLocalIPAddress()
 {
 	char               my_ip_address[16];
-	unsigned int       my_port;
 	struct sockaddr_in server_address{};
 	struct sockaddr_in my_address{};
 	int                sockfd;
 
-	// Connect to server
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	// Create a UDP socket
+	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		return "";
 	}
 
-	// Set server_addr
+	// Set server_addr (dummy address)
 	memset(&server_address, 0, sizeof(server_address));
 	server_address.sin_family      = AF_INET;
-	server_address.sin_addr.s_addr = inet_addr("172.217.160.99");
-	server_address.sin_port        = htons(80);
+	server_address.sin_addr.s_addr = inet_addr("8.8.8.8");  // Google DNS
+	server_address.sin_port        = htons(53);  // DNS port
 
-	// Connect to server
-	if (connect(sockfd, (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
-		close(sockfd);
-		return "";
-	}
+	// Perform a dummy connection to the server (UDP)
+	connect(sockfd, (struct sockaddr *) &server_address, sizeof(server_address));
 
-	// Get my ip address and port
+	// Get my IP address
 	memset(&my_address, 0, sizeof(my_address));
 	socklen_t len = sizeof(my_address);
 	getsockname(sockfd, (struct sockaddr *) &my_address, &len);
 	inet_ntop(AF_INET, &my_address.sin_addr, my_ip_address, sizeof(my_ip_address));
-	my_port = ntohs(my_address.sin_port);
 
+	LogInfo("Local IP Address: {}", my_ip_address);
+
+	close(sockfd);
 	return fmt::format("{}", my_ip_address);
 }
 
