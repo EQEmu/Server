@@ -97,6 +97,17 @@ std::string IpUtil::GetLocalIPAddress()
 		return "";
 	}
 
+	// Set the socket timeout
+	struct timeval timeout;
+	timeout.tv_sec  = 1;  // 1 second timeout
+	timeout.tv_usec = 0;
+
+	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||
+		setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
+		close(sockfd);
+		return "";
+	}
+
 	// Set server_addr (dummy address)
 	memset(&server_address, 0, sizeof(server_address));
 	server_address.sin_family      = AF_INET;
