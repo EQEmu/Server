@@ -99,7 +99,7 @@ std::string IpUtil::GetLocalIPAddress()
 
 	// Set the socket timeout
 	struct timeval timeout;
-	timeout.tv_sec  = 1;  // 1 second timeout
+	timeout.tv_sec  = 3;  // 3 second timeout
 	timeout.tv_usec = 0;
 
 	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||
