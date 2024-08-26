@@ -624,6 +624,12 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 
 		exp_value *= zone->random.Real(0.5, 1.5);
 
+		// Reduce for Groups!
+		if (GetGroup()) {
+			exp_value /= GetGroup()->GroupCount();
+		}
+
+
 		return exp_value;
 	};
 
