@@ -112,8 +112,6 @@ std::string IpUtil::GetLocalIPAddress()
 	getsockname(sockfd, (struct sockaddr *) &my_address, &len);
 	inet_ntop(AF_INET, &my_address.sin_addr, my_ip_address, sizeof(my_ip_address));
 
-	LogInfo("Local IP Address: {}", my_ip_address);
-
 	close(sockfd);
 	return fmt::format("{}", my_ip_address);
 }
