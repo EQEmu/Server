@@ -334,11 +334,9 @@ const uint64 EQ::ItemData::CalculateGearScore() const {
     // Weight 100 stats
     gearScore += (ManaRegen + EnduranceRegen + Regen + SpellDmg + Shielding + SpellShield) * 100;
 
-    // Weight 1000000 stats
     if (Delay != 0) {
-        gearScore += (Damage / Delay) * 1000000;
-    }
-
+		gearScore += std::pow(10000.0, static_cast<double>(Damage) / Delay);
+	}
 	if (Click.Effect > 0) {
 		gearScore += 500000;
 	}
@@ -369,5 +367,5 @@ const uint64 EQ::ItemData::CalculateGearScore() const {
 
 	gearScore = std::max(gearScore, static_cast<uint64>(50000));
 
-    return gearScore;
+    return static_cast<uint64>(gearScore * RuleR(Custom, PowerSourceItemUpgradeRateScale));
 }

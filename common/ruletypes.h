@@ -230,7 +230,7 @@ RULE_INT(Character, MendAlwaysSucceedValue, 199, "Value at which mend will alway
 RULE_BOOL(Character, SneakAlwaysSucceedOver100, false, "When sneak skill is over 100, always succeed sneak/hide. Default: false")
 RULE_BOOL(Character, FloatingExperiencePercentCapPerKill, false, "Enable floating experience percent cap per kill.")
 RULE_REAL(Character, FloatingExperienceMaxScaleFactor, 4.0, "Maximum scaling factor for experience cap adjustments, applied at level 1.")
-RULE_REAL(Character, FloatingExperienceScaleTerminalLevel, 46, "Level at which the scaling factor reaches 1.0.")
+RULE_INT(Character, FloatingExperienceScaleTerminalLevel, 46, "Level at which the scaling factor reaches 1.0.")
 RULE_REAL(Character, FloatingExperiencePercentCapPerRedKill, 7, "Experience percent cap for red con mobs.")
 RULE_REAL(Character, FloatingExperiencePercentCapPerYellowKill, 5, "Experience percent cap for yellow con mobs.")
 RULE_REAL(Character, FloatingExperiencePercentCapPerWhiteKill, 3, "Experience percent cap for white con mobs.")

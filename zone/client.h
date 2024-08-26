@@ -713,7 +713,8 @@ public:
 	void SetEbonCrystals(uint32 value);
 	void SendCrystalCounts();
 
-	uint64 AddPowersourceExp(uint64 exp_to_add, int concolor = -1);
+	bool AddItemExperience(EQ::ItemInstance* item, int conlevel);
+
 	bool ConsumeItemOnCursor();
 	uint64 GetExperienceForKill(Mob *against);
 	void AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
