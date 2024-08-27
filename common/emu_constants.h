@@ -751,4 +751,9 @@ static std::map<uint32, std::string> stance_names = {
 	{ Stance::AEBurn,     "AE Burn" }
 };
 
+namespace PCNPCOnlyFlagType {
+	constexpr int PC  = 1;
+	constexpr int NPC = 2;
+}
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

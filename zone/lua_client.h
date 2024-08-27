@@ -505,6 +505,9 @@ public:
 	void DescribeSpecialAbilities(Lua_NPC n);
 	void ResetLeadershipAA();
 	uint8 GetSkillTrainLevel(int skill_id);
+	void AreaTaunt();
+	void AreaTaunt(float range);
+	void AreaTaunt(float range, int bonus_hate);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

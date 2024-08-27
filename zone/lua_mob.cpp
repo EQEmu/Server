@@ -3380,6 +3380,72 @@ int Lua_Mob::GetExtraHaste()
 	return self->GetExtraHaste();
 }
 
+void Lua_Mob::AreaAttack(float distance)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance);
+}
+
+void Lua_Mob::AreaAttack(float distance, int16 slot_id)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance, slot_id);
+}
+
+void Lua_Mob::AreaAttack(float distance, int16 slot_id, int count)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance, slot_id, count);
+}
+
+void Lua_Mob::AreaAttack(float distance, int16 slot_id, int count, bool is_from_spell)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance, slot_id, count, is_from_spell);
+}
+
+void Lua_Mob::AreaAttack(float distance, int16 slot_id, int count, bool is_from_spell, int attack_rounds)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AEAttack(self, distance, slot_id, count, is_from_spell, attack_rounds);
+}
+
+void Lua_Mob::AreaSpell(Lua_Mob center, uint16 spell_id)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AESpell(self, center, spell_id);
+}
+
+void Lua_Mob::AreaSpell(Lua_Mob center, uint16 spell_id, bool affect_caster)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AESpell(self, center, spell_id, affect_caster);
+}
+
+void Lua_Mob::AreaSpell(Lua_Mob center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AESpell(self, center, spell_id, affect_caster, resist_adjust);
+}
+
+void Lua_Mob::AreaSpell(Lua_Mob center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int max_targets)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AESpell(self, center, spell_id, affect_caster, resist_adjust, &max_targets);
+}
+
+void Lua_Mob::MassGroupBuff(Lua_Mob center, uint16 spell_id)
+{
+	Lua_Safe_Call_Void();
+	entity_list.MassGroupBuff(self, center, spell_id);
+}
+
+void Lua_Mob::MassGroupBuff(Lua_Mob center, uint16 spell_id, bool affect_caster)
+{
+	Lua_Safe_Call_Void();
+	entity_list.MassGroupBuff(self, center, spell_id, affect_caster);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3393,6 +3459,15 @@ luabind::scope lua_register_mob() {
 	.def("ApplySpellBuff", (void(Lua_Mob::*)(int))&Lua_Mob::ApplySpellBuff)
 	.def("ApplySpellBuff", (void(Lua_Mob::*)(int,int))&Lua_Mob::ApplySpellBuff)
 	.def("ApplySpellBuff", (void(Lua_Mob::*)(int,int,int))&Lua_Mob::ApplySpellBuff)
+	.def("AreaAttack", (void(Lua_Mob::*)(float))&Lua_Mob::AreaAttack)
+	.def("AreaAttack", (void(Lua_Mob::*)(float, int16))&Lua_Mob::AreaAttack)
+	.def("AreaAttack", (void(Lua_Mob::*)(float, int16, int))&Lua_Mob::AreaAttack)
+	.def("AreaAttack", (void(Lua_Mob::*)(float, int16, int, bool))&Lua_Mob::AreaAttack)
+	.def("AreaAttack", (void(Lua_Mob::*)(float, int16, int, bool, int))&Lua_Mob::AreaAttack)
+	.def("AreaSpell", (void(Lua_Mob::*)(Lua_Mob, uint16))&Lua_Mob::AreaSpell)
+	.def("AreaSpell", (void(Lua_Mob::*)(Lua_Mob, uint16, bool))&Lua_Mob::AreaSpell)
+	.def("AreaSpell", (void(Lua_Mob::*)(Lua_Mob, uint16, bool, int16))&Lua_Mob::AreaSpell)
+	.def("AreaSpell", (void(Lua_Mob::*)(Lua_Mob, uint16, bool, int16, int))&Lua_Mob::AreaSpell)
 	.def("Attack", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::Attack)
 	.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::Attack)
 	.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool))&Lua_Mob::Attack)
@@ -3808,6 +3883,8 @@ luabind::scope lua_register_mob() {
 	.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
 	.def("IsWisdomCasterClass", &Lua_Mob::IsWisdomCasterClass)
 	.def("Kill", (void(Lua_Mob::*)(void))&Lua_Mob::Kill)
+	.def("MassGroupBuff", (void(Lua_Mob::*)(Lua_Mob, uint16))&Lua_Mob::MassGroupBuff)
+	.def("MassGroupBuff", (void(Lua_Mob::*)(Lua_Mob, uint16, bool))&Lua_Mob::MassGroupBuff)
 	.def("Mesmerize", (void(Lua_Mob::*)(void))&Lua_Mob::Mesmerize)
 	.def("Message", &Lua_Mob::Message)
 	.def("MessageString", &Lua_Mob::MessageString)

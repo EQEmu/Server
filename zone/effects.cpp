@@ -1028,24 +1028,15 @@ void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)
 	}
 }
 
-/**
- * @param taunter
- * @param range
- * @param bonus_hate
- */
-void EntityList::AETaunt(Client *taunter, float range, int32 bonus_hate)
+void EntityList::AETaunt(Client* taunter, float range, int bonus_hate)
 {
-
-	/**
-	 * Live AE taunt range - Hardcoded.
-	 */
 	if (range == 0) {
 		range = 40;
 	}
 
 	float range_squared = range * range;
 
-	for (auto &it : entity_list.GetCloseMobList(taunter, range)) {
+	for (auto& it: entity_list.GetCloseMobList(taunter, range)) {
 		Mob *them = it.second;
 		if (!them) {
 			continue;
@@ -1060,9 +1051,11 @@ void EntityList::AETaunt(Client *taunter, float range, int32 bonus_hate)
 			z_difference *= -1;
 		}
 
-		if (z_difference < 10
-			&& taunter->IsAttackAllowed(them)
-			&& DistanceSquaredNoZ(taunter->GetPosition(), them->GetPosition()) <= range_squared) {
+		if (
+			z_difference < 10 &&
+			taunter->IsAttackAllowed(them) &&
+			DistanceSquaredNoZ(taunter->GetPosition(), them->GetPosition()) <= range_squared
+		) {
 			if (taunter->CheckLosFN(them)) {
 				taunter->Taunt(them->CastToNPC(), true, 0, true, bonus_hate);
 			}
@@ -1070,38 +1063,31 @@ void EntityList::AETaunt(Client *taunter, float range, int32 bonus_hate)
 	}
 }
 
-/**
- * Causes caster to hit every mob within dist range of center with spell_id
- *
- * @param caster_mob
- * @param center_mob
- * @param spell_id
- * @param affect_caster
- * @param resist_adjust
- * @param max_targets
- */
 void EntityList::AESpell(
-	Mob *caster_mob,
-	Mob *center_mob,
+	Mob* caster_mob,
+	Mob* center_mob,
 	uint16 spell_id,
 	bool affect_caster,
 	int16 resist_adjust,
-	int *max_targets
+	int* max_targets,
+	bool is_scripted
 )
 {
-	const auto &cast_target_position =
-				   spells[spell_id].target_type == ST_Ring ?
-					   caster_mob->GetTargetRingLocation() :
-					   static_cast<glm::vec3>(center_mob->GetPosition());
+	const auto& cast_target_position = (
+		(!is_scripted && spells[spell_id].target_type == ST_Ring) ?
+		caster_mob->GetTargetRingLocation() :
+		static_cast<glm::vec3>(center_mob->GetPosition())
+	);
 
-	Mob       *current_mob         = nullptr;
+	Mob* current_mob = nullptr;
+
 	bool      is_detrimental_spell = IsDetrimentalSpell(spell_id);
 	bool      is_npc               = caster_mob->IsNPC();
 	float     distance             = caster_mob->GetAOERange(spell_id);
 	float     distance_squared     = distance * distance;
-	float     min_range2           = spells[spell_id].min_range * spells[spell_id].min_range;
-	glm::vec2 min                  = {cast_target_position.x - distance, cast_target_position.y - distance};
-	glm::vec2 max                  = {cast_target_position.x + distance, cast_target_position.y + distance};
+	float     min_range_squared    = spells[spell_id].min_range * spells[spell_id].min_range;
+	glm::vec2 min                  = { cast_target_position.x - distance, cast_target_position.y - distance };
+	glm::vec2 max                  = { cast_target_position.x + distance, cast_target_position.y + distance };
 
 	/**
 	 * If using Old Rain Targets - there is no max target limitation
@@ -1110,17 +1096,18 @@ void EntityList::AESpell(
 		max_targets = nullptr;
 	}
 
-	/**
-	 * Max AOE targets
-	 */
 	int max_targets_allowed = RuleI(Range, AOEMaxTargets); // unlimited
 	if (max_targets) { // rains pass this in since they need to preserve the count through waves
 		max_targets_allowed = *max_targets;
-	}
-	else if (spells[spell_id].aoe_max_targets) {
+	} else if (spells[spell_id].aoe_max_targets) {
 		max_targets_allowed = spells[spell_id].aoe_max_targets;
-	}
-	else if (IsTargetableAESpell(spell_id) && is_detrimental_spell && !is_npc && !IsEffectInSpell(spell_id, SE_Lull) && !IsEffectInSpell(spell_id, SE_Mez)) {
+	} else if (
+		IsTargetableAESpell(spell_id) &&
+		is_detrimental_spell &&
+		!is_npc &&
+		!IsEffectInSpell(spell_id, SE_Lull) &&
+		!IsEffectInSpell(spell_id, SE_Mez)
+	) {
 		max_targets_allowed = 4;
 	}
 
@@ -1133,7 +1120,7 @@ void EntityList::AESpell(
 		distance
 	);
 
-	for (auto &it : entity_list.GetCloseMobList(caster_mob, distance)) {
+	for (auto& it: entity_list.GetCloseMobList(caster_mob, distance)) {
 		current_mob = it.second;
 		if (!current_mob) {
 			continue;
@@ -1161,16 +1148,11 @@ void EntityList::AESpell(
 			continue;
 		}
 
-		/**
-		 * Check PC / NPC
-		 * 1 = PC
-		 * 2 = NPC
-		 */
-		if (spells[spell_id].pcnpc_only_flag == 1 && !current_mob->IsOfClientBotMerc()) {
+		if (spells[spell_id].pcnpc_only_flag == PCNPCOnlyFlagType::PC && !current_mob->IsOfClientBotMerc()) {
 			continue;
 		}
 
-		if (spells[spell_id].pcnpc_only_flag == 2 && current_mob->IsOfClientBotMerc()) {
+		if (spells[spell_id].pcnpc_only_flag == PCNPCOnlyFlagType::NPC && current_mob->IsOfClientBotMerc()) {
 			continue;
 		}
 
@@ -1184,41 +1166,40 @@ void EntityList::AESpell(
 			continue;
 		}
 
-		if (distance_to_target < min_range2) {
+		if (distance_to_target < min_range_squared) {
 			continue;
 		}
 
-		if (is_npc && current_mob->IsNPC() &&
-			spells[spell_id].target_type != ST_AreaNPCOnly) {    //check npc->npc casting
-			FACTION_VALUE faction_value = current_mob->GetReverseFactionCon(caster_mob);
+		if (
+			is_npc &&
+			current_mob->IsNPC() &&
+			spells[spell_id].target_type != ST_AreaNPCOnly
+		) {
+			const auto faction_value = current_mob->GetReverseFactionCon(caster_mob);
 			if (is_detrimental_spell) {
-				//affect mobs that are on our hate list, or
-				//which have bad faction with us
 				if (
 					!(caster_mob->CheckAggro(current_mob) ||
-					  faction_value == FACTION_THREATENINGLY ||
-					  faction_value == FACTION_SCOWLS)) {
+					faction_value == FACTION_THREATENINGLY ||
+					faction_value == FACTION_SCOWLS)
+				) {
 					continue;
 				}
-			}
-			else {
-				//only affect mobs we would assist.
+			} else {
 				if (!(faction_value <= FACTION_AMIABLY)) {
 					continue;
 				}
 			}
 		}
 
-		/**
-		 * Finally, make sure they are within range
-		 */
 		if (is_detrimental_spell) {
 			if (!caster_mob->IsAttackAllowed(current_mob, true)) {
 				continue;
 			}
+
 			if (center_mob && !spells[spell_id].npc_no_los && !center_mob->CheckLosFN(current_mob)) {
 				continue;
 			}
+
 			if (!center_mob && !spells[spell_id].npc_no_los && !caster_mob->CheckLosFN(
 				caster_mob->GetTargetRingX(),
 				caster_mob->GetTargetRingY(),
@@ -1226,9 +1207,7 @@ void EntityList::AESpell(
 				current_mob->GetSize())) {
 				continue;
 			}
-		}
-		else {
-
+		} else {
 			/**
 			 * Check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			 * This does not check faction for beneficial AE buffs... only agro and attackable.
@@ -1238,6 +1217,7 @@ void EntityList::AESpell(
 			if (caster_mob->IsAttackAllowed(current_mob, true)) {
 				continue;
 			}
+
 			if (caster_mob->CheckAggro(current_mob)) {
 				continue;
 			}
@@ -1264,40 +1244,29 @@ void EntityList::AESpell(
 	}
 }
 
-/**
- * @param caster
- * @param center
- * @param spell_id
- * @param affect_caster
- */
 void EntityList::MassGroupBuff(
-	Mob *caster,
-	Mob *center,
+	Mob* caster,
+	Mob* center,
 	uint16 spell_id,
-	bool affect_caster)
+	bool affect_caster
+)
 {
-	Mob   *current_mob         = nullptr;
+	Mob*  current_mob          = nullptr;
 	float distance             = caster->GetAOERange(spell_id);
 	float distance_squared     = distance * distance;
 	bool  is_detrimental_spell = IsDetrimentalSpell(spell_id);
 
-	for (auto &it : entity_list.GetCloseMobList(caster, distance)) {
+	for (auto& it: entity_list.GetCloseMobList(caster, distance)) {
 		current_mob = it.second;
 		if (!current_mob) {
 			continue;
 		}
 
-		/**
-		 * Skip center
-		 */
-		if (current_mob == center) {
+		if (current_mob == center) { // Skip Center
 			continue;
 		}
 
-		/**
-		 * Skip self
-		 */
-		if (current_mob == caster && !affect_caster) {
+		if (current_mob == caster && !affect_caster) { // Skip Caster
 			continue;
 		}
 
@@ -1305,17 +1274,13 @@ void EntityList::MassGroupBuff(
 			continue;
 		}
 
-		/**
-		 * Pets
-		 */
 		if (current_mob->IsNPC()) {
-			Mob *owner = current_mob->GetOwner();
+			Mob* owner = current_mob->GetOwner();
 			if (owner) {
 				if (!owner->IsOfClientBot()) {
 					continue;
 				}
-			}
-			else {
+			} else {
 				continue;
 			}
 		}
@@ -1328,55 +1293,48 @@ void EntityList::MassGroupBuff(
 	}
 }
 
-/**
- * Rampage - Normal and Duration rampages
- * NPCs handle it differently in Mob::Rampage
- *
- * @param attacker
- * @param distance
- * @param Hand
- * @param count
- * @param is_from_spell
- */
 void EntityList::AEAttack(
-	Mob *attacker,
+	Mob* attacker,
 	float distance,
-	int Hand,
-	int count,
+	int16 slot_id,
+	int hit_count,
 	bool is_from_spell,
-	int attack_rounds)
+	int attack_rounds
+)
 {
-	Mob   *current_mob     = nullptr;
+	Mob*  current_mob      = nullptr;
 	float distance_squared = distance * distance;
-	int   hit_count        = 0;
+	int   current_hits     = 0;
 
-	for (auto &it : entity_list.GetCloseMobList(attacker, distance)) {
+	for (auto& it: entity_list.GetCloseMobList(attacker, distance)) {
 		current_mob = it.second;
 		if (!current_mob) {
 			continue;
 		}
 
-		if (current_mob->IsNPC()
-			&& current_mob != attacker //this is not needed unless NPCs can use this
-			&& (attacker->IsAttackAllowed(current_mob))
-			&& !current_mob->IsHorse() /* dont attack mounts */
-			&& (DistanceSquared(current_mob->GetPosition(), attacker->GetPosition()) <= distance_squared)
-			) {
-
+		if (
+			current_mob->IsNPC() &&
+			current_mob != attacker &&
+			attacker->IsAttackAllowed(current_mob) &&
+			!current_mob->IsHorse() &&
+			DistanceSquared(current_mob->GetPosition(), attacker->GetPosition()) <= distance_squared
+		) {
 			for (int i = 0; i < attack_rounds; i++) {
-				if (!attacker->IsClient() || attacker->GetClass() == Class::Monk || attacker->GetClass() == Class::Ranger) {
-					attacker->Attack(current_mob, Hand, false, false, is_from_spell);
+				if (
+					!attacker->IsClient() ||
+					attacker->GetClass() == Class::Monk ||
+					attacker->GetClass() == Class::Ranger
+				) {
+					attacker->Attack(current_mob, slot_id, false, false, is_from_spell);
 				} else {
-					attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
+					attacker->CastToClient()->DoAttackRounds(current_mob, slot_id, is_from_spell);
 				}
 			}
 
-			hit_count++;
-			if (count != 0 && hit_count >= count) {
+			current_hits++;
+			if (hit_count != 0 && current_hits >= hit_count) {
 				return;
 			}
 		}
 	}
 }
-
-

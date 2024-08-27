@@ -3488,6 +3488,61 @@ std::string Perl_Mob_GetConsiderColor(Mob* self, uint8 other_level)
 	return EQ::constants::GetConsiderColorName(self->GetLevelCon(other_level));
 }
 
+void Perl_Mob_AreaAttack(Mob* self, float distance)
+{
+	entity_list.AEAttack(self, distance);
+}
+
+void Perl_Mob_AreaAttack(Mob* self, float distance, int16 slot_id)
+{
+	entity_list.AEAttack(self, distance, slot_id);
+}
+
+void Perl_Mob_AreaAttack(Mob* self, float distance, int16 slot_id, int count)
+{
+	entity_list.AEAttack(self, distance, slot_id, count);
+}
+
+void Perl_Mob_AreaAttack(Mob* self, float distance, int16 slot_id, int count, bool is_from_spell)
+{
+	entity_list.AEAttack(self, distance, slot_id, count, is_from_spell);
+}
+
+void Perl_Mob_AreaAttack(Mob* self, float distance, int16 slot_id, int count, bool is_from_spell, int attack_rounds)
+{
+	entity_list.AEAttack(self, distance, slot_id, count, is_from_spell, attack_rounds);
+}
+
+void Perl_Mob_AreaSpell(Mob* self, Mob* center, uint16 spell_id)
+{
+	entity_list.AESpell(self, center, spell_id, true, 0, nullptr, true);
+}
+
+void Perl_Mob_AreaSpell(Mob* self, Mob* center, uint16 spell_id, bool affect_caster)
+{
+	entity_list.AESpell(self, center, spell_id, affect_caster, 0, nullptr, true);
+}
+
+void Perl_Mob_AreaSpell(Mob* self, Mob* center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
+{
+	entity_list.AESpell(self, center, spell_id, affect_caster, resist_adjust, nullptr, true);
+}
+
+void Perl_Mob_AreaSpell(Mob* self, Mob* center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int max_targets)
+{
+	entity_list.AESpell(self, center, spell_id, affect_caster, resist_adjust, &max_targets, true);
+}
+
+void Perl_Mob_MassGroupBuff(Mob* self, Mob* center, uint16 spell_id)
+{
+	entity_list.MassGroupBuff(self, center, spell_id);
+}
+
+void Perl_Mob_MassGroupBuff(Mob* self, Mob* center, uint16 spell_id, bool affect_caster)
+{
+	entity_list.MassGroupBuff(self, center, spell_id, affect_caster);
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3504,6 +3559,15 @@ void perl_register_mob()
 	package.add("ApplySpellBuff", (void(*)(Mob*, int))&Perl_Mob_ApplySpellBuff);
 	package.add("ApplySpellBuff", (void(*)(Mob*, int, int))&Perl_Mob_ApplySpellBuff);
 	package.add("ApplySpellBuff", (void(*)(Mob*, int, int, int))&Perl_Mob_ApplySpellBuff);
+	package.add("AreaAttack", (void(*)(Mob*, float))&Perl_Mob_AreaAttack);
+	package.add("AreaAttack", (void(*)(Mob*, float, int16))&Perl_Mob_AreaAttack);
+	package.add("AreaAttack", (void(*)(Mob*, float, int16, int))&Perl_Mob_AreaAttack);
+	package.add("AreaAttack", (void(*)(Mob*, float, int16, int, bool))&Perl_Mob_AreaAttack);
+	package.add("AreaAttack", (void(*)(Mob*, float, int16, int, bool, int))&Perl_Mob_AreaAttack);
+	package.add("AreaSpell", (void(*)(Mob*, Mob*, uint16))&Perl_Mob_AreaSpell);
+	package.add("AreaSpell", (void(*)(Mob*, Mob*, uint16, bool))&Perl_Mob_AreaSpell);
+	package.add("AreaSpell", (void(*)(Mob*, Mob*, uint16, bool, int16))&Perl_Mob_AreaSpell);
+	package.add("AreaSpell", (void(*)(Mob*, Mob*, uint16, bool, int16, int))&Perl_Mob_AreaSpell);
 	package.add("Attack", (bool(*)(Mob*, Mob*))&Perl_Mob_Attack);
 	package.add("Attack", (bool(*)(Mob*, Mob*, int))&Perl_Mob_Attack);
 	package.add("Attack", (bool(*)(Mob*, Mob*, int, bool))&Perl_Mob_Attack);
@@ -3928,6 +3992,8 @@ void perl_register_mob()
 	package.add("MakeTempPet", (void(*)(Mob*, uint16, const char*, uint32))&Perl_Mob_MakeTempPet);
 	package.add("MakeTempPet", (void(*)(Mob*, uint16, const char*, uint32, Mob*))&Perl_Mob_MakeTempPet);
 	package.add("MakeTempPet", (void(*)(Mob*, uint16, const char*, uint32, Mob*, bool))&Perl_Mob_MakeTempPet);
+	package.add("MassGroupBuff", (void(*)(Mob*, Mob*, uint16))&Perl_Mob_MassGroupBuff);
+	package.add("MassGroupBuff", (void(*)(Mob*, Mob*, uint16, bool))&Perl_Mob_MassGroupBuff);
 	package.add("Mesmerize", &Perl_Mob_Mesmerize);
 	package.add("Message", &Perl_Mob_Message);
 	package.add("Message_StringID", (void(*)(Mob*, uint32, uint32))&Perl_Mob_Message_StringID);

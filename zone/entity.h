@@ -436,23 +436,24 @@ public:
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 
 	void AEAttack(
-		Mob *attacker,
+		Mob* attacker,
 		float distance,
-		int Hand = EQ::invslot::slotPrimary,
-		int count = 0,
+		int16 slot_id = EQ::invslot::slotPrimary,
+		int hit_count = 0,
 		bool is_from_spell = false,
 		int attack_rounds = 1
 	);
-	void AETaunt(Client *caster, float range = 0, int32 bonus_hate = 0);
+	void AETaunt(Client* caster, float range = 0, int bonus_hate = 0);
 	void AESpell(
-		Mob *caster,
-		Mob *center,
+		Mob* caster,
+		Mob* center,
 		uint16 spell_id,
 		bool affect_caster = true,
 		int16 resist_adjust = 0,
-		int *max_targets = nullptr
+		int* max_targets = nullptr,
+		bool is_scripted = false
 	);
-	void MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
+	void MassGroupBuff(Mob* caster, Mob* center, uint16 spell_id, bool affect_caster = true);
 
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);
