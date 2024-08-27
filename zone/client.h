@@ -2056,6 +2056,10 @@ private:
 	Timer task_request_timer;
 	Timer pick_lock_timer;
 	Timer parcel_timer;	//Used to limit the number of parcels to one every 30 seconds (default).  Changable via rule.
+	Timer lazy_load_bank_check_timer;
+
+	bool m_lazy_load_bank            = false;
+	int  m_lazy_load_sent_bank_slots = 0;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
@@ -2174,7 +2178,6 @@ private:
 	glm::vec3 m_quest_compass;
 	bool m_has_quest_compass = false;
 	std::vector<uint32_t> m_dynamic_zone_ids;
-
 
 public:
 	enum BotOwnerOption : size_t {
