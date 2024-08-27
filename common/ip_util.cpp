@@ -81,38 +81,56 @@ bool IpUtil::IsIpInPrivateRfc1918(const std::string &ip)
 	);
 }
 
-/**
- * Gets local address - pings google to inspect what interface was used locally
- * @return
- */
+
+#ifdef _WIN32
+#include <winsock2.h>
+    #include <ws2tcpip.h>
+    #pragma comment(lib, "Ws2_32.lib")
+#else
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <fcntl.h>
+#endif
+
+#include <iostream>
+#include <string>
+#include <cstring>
+
 std::string IpUtil::GetLocalIPAddress()
 {
-	char               my_ip_address[16];
+#ifdef _WIN32
+	WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        return "";
+    }
+#endif
+
+	char my_ip_address[INET_ADDRSTRLEN];
 	struct sockaddr_in server_address{};
 	struct sockaddr_in my_address{};
-	int                sockfd;
+	int sockfd;
 
 	// Create a UDP socket
-	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+#ifdef _WIN32
+	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd == INVALID_SOCKET) {
+        WSACleanup();
+        return "";
+    }
+#else
+	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sockfd < 0) {
 		return "";
 	}
-
-	// Set the socket timeout
-	struct timeval timeout;
-	timeout.tv_sec  = 3;  // 3 second timeout
-	timeout.tv_usec = 0;
-
-	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||
-		setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
-		close(sockfd);
-		return "";
-	}
+#endif
 
 	// Set server_addr (dummy address)
 	memset(&server_address, 0, sizeof(server_address));
-	server_address.sin_family      = AF_INET;
+	server_address.sin_family = AF_INET;
 	server_address.sin_addr.s_addr = inet_addr("8.8.8.8");  // Google DNS
-	server_address.sin_port        = htons(53);  // DNS port
+	server_address.sin_port = htons(53);  // DNS port
 
 	// Perform a dummy connection to the server (UDP)
 	connect(sockfd, (struct sockaddr *) &server_address, sizeof(server_address));
@@ -123,9 +141,18 @@ std::string IpUtil::GetLocalIPAddress()
 	getsockname(sockfd, (struct sockaddr *) &my_address, &len);
 	inet_ntop(AF_INET, &my_address.sin_addr, my_ip_address, sizeof(my_ip_address));
 
+#ifdef _WIN32
+	closesocket(sockfd);
+    WSACleanup();
+#else
 	close(sockfd);
-	return fmt::format("{}", my_ip_address);
+#endif
+
+	LogInfo("Local IP Address [{}]", my_ip_address);
+
+	return std::string(my_ip_address);
 }
+
 
 /**
  * Gets public address
