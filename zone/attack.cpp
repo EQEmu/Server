@@ -4287,8 +4287,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//final damage has been determined.
 		int old_hp_ratio = (int)GetHPRatio();
 
-		SetHP(int64(GetHP() - damage));
-
 		const auto has_bot_given_event = parse->BotHasQuestSub(EVENT_DAMAGE_GIVEN);
 
 		const auto has_bot_taken_event = parse->BotHasQuestSub(EVENT_DAMAGE_TAKEN);
@@ -4334,30 +4332,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		);
 
 		std::vector<std::any> args;
-
-		if (has_taken_event) {
-			const auto export_string = fmt::format(
-				"{} {} {} {} {} {} {} {} {}",
-				attacker ? attacker->GetID() : 0,
-				damage,
-				spell_id,
-				static_cast<int>(skill_used),
-				FromDamageShield ? 1 : 0,
-				avoidable ? 1 : 0,
-				buffslot,
-				iBuffTic ? 1 : 0,
-				static_cast<int>(special)
-			);
-
-			if (IsBot() && has_bot_taken_event) {
-				parse->EventBot(EVENT_DAMAGE_TAKEN, CastToBot(), attacker ? attacker : nullptr, export_string, 0);
-			} else if (IsClient() && has_player_taken_event) {
-				args.push_back(attacker ? attacker : nullptr);
-				parse->EventPlayer(EVENT_DAMAGE_TAKEN, CastToClient(), export_string, 0, &args);
-			} else if (IsNPC() && has_npc_taken_event) {
-				parse->EventNPC(EVENT_DAMAGE_TAKEN, CastToNPC(), attacker ? attacker : nullptr, export_string, 0);
-			}
-		}
+		int64 damage_override = 0;
 
 		if (has_given_event && attacker) {
 			const auto export_string = fmt::format(
@@ -4382,6 +4357,38 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				parse->EventNPC(EVENT_DAMAGE_GIVEN, attacker->CastToNPC(), this, export_string, 0);
 			}
 		}
+
+		if (has_taken_event) {
+			const auto export_string = fmt::format(
+				"{} {} {} {} {} {} {} {} {}",
+				attacker ? attacker->GetID() : 0,
+				damage,
+				spell_id,
+				static_cast<int>(skill_used),
+				FromDamageShield ? 1 : 0,
+				avoidable ? 1 : 0,
+				buffslot,
+				iBuffTic ? 1 : 0,
+				static_cast<int>(special)
+			);
+
+			if (IsBot() && has_bot_taken_event) {
+				damage_override = parse->EventBot(EVENT_DAMAGE_TAKEN, CastToBot(), attacker ? attacker : nullptr, export_string, 0);
+			} else if (IsClient() && has_player_taken_event) {
+				args.push_back(attacker ? attacker : nullptr);
+				damage_override = parse->EventPlayer(EVENT_DAMAGE_TAKEN, CastToClient(), export_string, 0, &args);
+			} else if (IsNPC() && has_npc_taken_event) {
+				damage_override = parse->EventNPC(EVENT_DAMAGE_TAKEN, CastToNPC(), attacker ? attacker : nullptr, export_string, 0);
+			}
+		}
+
+		if (damage_override > 0) {
+			damage = damage_override;
+		} else if (damage_override < 0) {
+			damage = 0;
+		}
+
+		SetHP(int64(GetHP() - damage));
 
 		if (HasDied()) {
 			bool IsSaved = false;
