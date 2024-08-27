@@ -8616,7 +8616,7 @@ bool Mob::IsCloseToBanker()
 {
 	for (auto &e: entity_list.GetCloseMobList(this)) {
 		auto mob = e.second;
-		if (mob->IsNPC() && mob->GetClass() == Class::Banker) {
+		if (mob && mob->IsNPC() && mob->GetClass() == Class::Banker) {
 			return true;
 		}
 	}
