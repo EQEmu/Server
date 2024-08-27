@@ -1084,6 +1084,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			put_slot_id = inv->PushCursor(*inst);
 		}
 		else if (slot_id >= 3111 && slot_id <= 3179) {
+		}
+		else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
 			LogError(
 				"Warning: Defunct location for item in inventory: charid={}, item_id={}, slot_id={} .. pushing to cursor...",
@@ -1100,10 +1102,19 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		row.guid = inst->GetSerialNumber();
 		queue.push_back(row);
 
+		row.guid = inst->GetSerialNumber();
+		queue.push_back(row);
+
 		safe_delete(inst);
 
 		// Save ptr to item in inventory
 		if (put_slot_id == INVALID_INDEX) {
+			LogError(
+				"Warning: Invalid slot_id for item in inventory: charid=[{}], item_id=[{}], slot_id=[{}]",
+				char_id,
+				item_id,
+				slot_id
+			);
 			LogError(
 				"Warning: Invalid slot_id for item in inventory: charid=[{}], item_id=[{}], slot_id=[{}]",
 				char_id,
@@ -1117,12 +1128,21 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		const std::string &char_name = GetCharName(char_id);
 		LogError(
 			"ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
+		const std::string &char_name = GetCharName(char_id);
+		LogError(
+			"ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 			char_name,
 			char_id,
 			EQ::versions::MobVersionName(inv->InventoryVersion()),
 			(inv->GMInventory() ? "true" : "false")
 		);
 	}
+
+	if (!queue.empty()) {
+		InventoryRepository::ReplaceMany(*this, queue);
+	}
+
+	EQ::ItemInstance::ClearGUIDMap();
 
 	if (!queue.empty()) {
 		InventoryRepository::ReplaceMany(*this, queue);
