@@ -872,7 +872,7 @@ int ClientTaskState::IncrementDoneCount(
 		int msg_count = (
 			(
 				RuleB(TaskSystem, OneMessagePerUpdate) ||
-				activity_type == TaskActivityType::GiveCash\
+				activity_type == TaskActivityType::GiveCash
 			) ?
 			1 :
 			count
