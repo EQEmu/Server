@@ -186,6 +186,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   consent_throttle_timer(2000),
   tmSitting(0),
   parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
+  lazy_load_bank_check_timer(1000),
   fast_tic_timer(250),
   lazy_load_bank_check_timer(1000)
 {
