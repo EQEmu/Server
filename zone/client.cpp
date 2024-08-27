@@ -392,7 +392,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	SetBotPrecombat(false);
 
 	AI_Init();
-
 }
 
 Client::~Client() {

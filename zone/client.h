@@ -2177,7 +2177,7 @@ private:
 	glm::vec3 m_quest_compass;
 	bool m_has_quest_compass = false;
 	std::vector<uint32_t> m_dynamic_zone_ids;
-	int sent_inventory;
+	int sent_inventory = 0;
 
 public:
 	enum BotOwnerOption : size_t {
