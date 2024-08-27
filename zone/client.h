@@ -2058,9 +2058,8 @@ private:
 	Timer parcel_timer;	//Used to limit the number of parcels to one every 30 seconds (default).  Changable via rule.
 	Timer lazy_load_bank_check_timer;
 
-	bool m_lazy_load_bank       = false;
-	int  m_lazy_load_sent_slots = 0;
-
+	bool m_lazy_load_bank            = false;
+	int  m_lazy_load_sent_bank_slots = 0;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;

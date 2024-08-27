@@ -292,29 +292,30 @@ bool Client::Process() {
 		if (RuleB(Inventory, LazyLoadBank)) {
 			// poll once a second to see if we are close to a banker and we haven't loaded the bank yet
 			if (!m_lazy_load_bank && lazy_load_bank_check_timer.Check()) {
-				if (m_lazy_load_sent_slots <= EQ::invslot::SHARED_BANK_END && IsCloseToBanker()) {
+				if (m_lazy_load_sent_bank_slots <= EQ::invslot::SHARED_BANK_END && IsCloseToBanker()) {
 					m_lazy_load_bank = true;
 					lazy_load_bank_check_timer.Disable();
 				}
 			}
 
-			if (m_lazy_load_bank && m_lazy_load_sent_slots <= EQ::invslot::SHARED_BANK_END) {
+			if (m_lazy_load_bank && m_lazy_load_sent_bank_slots <= EQ::invslot::SHARED_BANK_END) {
 				const EQ::ItemInstance *inst = nullptr;
 
 				// Jump the gaps
-				if (m_lazy_load_sent_slots < EQ::invslot::BANK_BEGIN) {
-					m_lazy_load_sent_slots = EQ::invslot::BANK_BEGIN;
+				if (m_lazy_load_sent_bank_slots < EQ::invslot::BANK_BEGIN) {
+					m_lazy_load_sent_bank_slots = EQ::invslot::BANK_BEGIN;
 				}
-				else if (m_lazy_load_sent_slots > EQ::invslot::BANK_END && m_lazy_load_sent_slots < EQ::invslot::SHARED_BANK_BEGIN) {
-					m_lazy_load_sent_slots = EQ::invslot::SHARED_BANK_BEGIN;
+				else if (m_lazy_load_sent_bank_slots > EQ::invslot::BANK_END &&
+						 m_lazy_load_sent_bank_slots < EQ::invslot::SHARED_BANK_BEGIN) {
+					m_lazy_load_sent_bank_slots = EQ::invslot::SHARED_BANK_BEGIN;
 				}
 				else {
-					m_lazy_load_sent_slots++;
+					m_lazy_load_sent_bank_slots++;
 				}
 
-				inst = m_inv[m_lazy_load_sent_slots];
+				inst = m_inv[m_lazy_load_sent_bank_slots];
 				if (inst) {
-					SendItemPacket(m_lazy_load_sent_slots, inst, ItemPacketType::ItemPacketTrade);
+					SendItemPacket(m_lazy_load_sent_bank_slots, inst, ItemPacketType::ItemPacketTrade);
 				}
 			}
 		}
