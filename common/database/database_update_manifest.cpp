@@ -5734,6 +5734,19 @@ ADD COLUMN `bucket_comparison` tinyint UNSIGNED NOT NULL DEFAULT 0 AFTER `bucket
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`spell_id`) USING BTREE;
 )"
+	},
+	ManifestEntry{
+		.version     = 9283,
+		.description = "2024_08_05_fix_client_hotbar",
+		.check       = "SHOW COLUMNS FROM `inventory` LIKE 'guid'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `inventory`
+	ADD COLUMN `guid` BIGINT UNSIGNED NULL DEFAULT '0' AFTER `ornament_hero_model`;
+ALTER TABLE `inventory_snapshots`
+	ADD COLUMN `guid` BIGINT UNSIGNED NULL DEFAULT '0' AFTER `ornament_hero_model`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
