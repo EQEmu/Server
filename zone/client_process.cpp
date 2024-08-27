@@ -289,17 +289,26 @@ bool Client::Process() {
 			entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 		}
 
-        if (RuleB(Inventory, LazyLoadBank) && Connected()) {
-			uint32 banker_max_dist = 0;
-			if(sent_inventory <= EQ::invslot::SHARED_BANK_END && entity_list.GetClosestBanker(this, banker_max_dist) && banker_max_dist <= USE_NPC_RANGE2) {
-				const EQ::ItemInstance* inst = nullptr;
+		if (RuleB(Inventory, LazyLoadBank)) {
+			// poll once a second to see if we are close to a banker and we haven't loaded the bank yet
+			if (!m_lazy_load_bank && lazy_load_bank_check_timer.Check()) {
+				if (sent_inventory <= EQ::invslot::SHARED_BANK_END && IsCloseToBanker()) {
+					m_lazy_load_bank = true;
+					lazy_load_bank_check_timer.Disable();
+				}
+			}
+
+			if (m_lazy_load_bank && sent_inventory <= EQ::invslot::SHARED_BANK_END) {
+				const EQ::ItemInstance *inst = nullptr;
 
 				// Jump the gaps
 				if (sent_inventory < EQ::invslot::BANK_BEGIN) {
 					sent_inventory = EQ::invslot::BANK_BEGIN;
-				} else if (sent_inventory > EQ::invslot::BANK_END && sent_inventory < EQ::invslot::SHARED_BANK_BEGIN) {
+				}
+				else if (sent_inventory > EQ::invslot::BANK_END && sent_inventory < EQ::invslot::SHARED_BANK_BEGIN) {
 					sent_inventory = EQ::invslot::SHARED_BANK_BEGIN;
-				} else {
+				}
+				else {
 					sent_inventory++;
 				}
 
@@ -308,7 +317,7 @@ bool Client::Process() {
 					SendItemPacket(sent_inventory, inst, ItemPacketType::ItemPacketTrade);
 				}
 			}
-        }
+		}
 
 		bool may_use_attacks = false;
 		/*
