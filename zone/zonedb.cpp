@@ -684,10 +684,6 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 		return false;
 	}
 
-	for (int slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) {
-		pp->disciplines.values[slot_id] = 0;
-	}
-
 	for (const auto& e : l) {
 		if (IsValidSpell(e.disc_id) && e.slot_id < MAX_PP_DISCIPLINES) {
 			pp->disciplines.values[e.slot_id] = e.disc_id;

@@ -1346,6 +1346,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.ldon_losses_tak = as.failure.tak;
 	}
 
+	for (int slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) {
+		m_pp.disciplines.values[slot_id] = 0;
+	}
+
 	/* Set item material tint */
 	for (int i = EQ::textures::textureBegin; i <= EQ::textures::LastTexture; i++)
 	{
