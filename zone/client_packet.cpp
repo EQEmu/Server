@@ -11270,7 +11270,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	Mob *target = entity_list.GetMob(pet->target);
 
 	auto foc_pet = GetPetByID(focused_pet_id)->CastToNPC();
-	LogDebug("Taunting:[{}], Held:[{}], GHeld:[{}], Focus:[{}]", foc_pet->IsTaunting(), foc_pet->IsHeld(), foc_pet->IsGHeld(), foc_pet->IsFocused());
 
 	if (!mypet || pet->command == PET_LEADER) {
 		if (pet->command == PET_LEADER) {

@@ -536,7 +536,42 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 }
 
 bool Client::ConsumeItemOnCursor() {
-	return false;
+	auto pow_item = m_inv.GetItem(EQ::invslot::slotPowerSource);
+	auto cur_item = m_inv.GetCursorItem();
+	if (!pow_item) {
+		Message(Chat::SpellFailure, "You must place an item in your Power Source slot in order to consume a similar item.");
+		return false;
+	}
+
+	if (!cur_item || cur_item->GetID() % 1000000 != pow_item->GetID() % 1000000 || cur_item->GetID() > pow_item->GetID() || cur_item->GetID() >= 2000000) {
+		Message(Chat::SpellFailure, "You can only Consume items similar which are similar, but lesser, to what is equipped in your Power Source slot.");
+		return false;
+	}
+
+	auto GetItemTier = [](EQ::ItemData* item) -> int {
+		if (item->ID <= 1000000) { return 0; }
+		else if (item->ID <= 2000000) { return 1; }
+		else if (item->ID <= 3000000) { return 2; }
+		else return 0;
+	};
+
+	int pow_item_tier = GetItemTier(pow_item->GetItem());
+	int cur_item_tier = GetItemTier(cur_item->GetItem());
+
+	float item_experience = Strings::ToFloat(pow_item->GetCustomData("Exp"), 0.0f);
+	if (cur_item_tier == pow_item_tier) {
+		item_experience = 25.0f + item_experience;
+	} else {
+		item_experience = 6.25f + item_experience;
+	}
+
+	pow_item->SetCustomData("Exp", fmt::to_string(item_experience));
+	database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
+	DeleteItemInInventory(EQ::invslot::slotCursor, 1, true, true);
+
+	AddItemExperience(pow_item, ConsiderColor::White);
+
+	return true;
 }
 
 bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
@@ -553,18 +588,38 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		}
 	};
 
-	EQ::ItemInstance* upgrade_item = item->GetUpgrade(database);
-	if (!upgrade_item) {
-		EQ::SayLinkEngine linker;
-		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-		linker.SetItemInst(item);
-		Message(Chat::Experience, "Your [%s] is fully upgraded and cannot accumulate any additional experience.", linker.GenerateLink().c_str());
+	auto GetItemStatValue = [](EQ::ItemData* item) -> float {
+		if (item) {
+			float return_value = 0.0f;
 
-		EjectItem(EQ::invslot::slotPowerSource);
-		return false;
-	}
+			if (item->HP >= 0) 	return_value  += item->HP 	/ 10.0f;
+			if (item->Mana >= 0) return_value += item->Mana / 10.0f;
 
-	auto GetExpValue = [&](int conlevel, int tier) -> float {
+			if (item->AStr >= 0) return_value += item->AStr;
+			if (item->ASta >= 0) return_value += item->ASta;
+			if (item->ADex >= 0) return_value += item->ADex;
+			if (item->AAgi >= 0) return_value += item->AAgi;
+			if (item->AInt >= 0) return_value += item->AInt;
+			if (item->AWis >= 0) return_value += item->AWis;
+
+			if (item->MR >= 0) 	return_value += item->MR;
+			if (item->FR >= 0) 	return_value += item->FR;
+			if (item->CR >= 0) 	return_value += item->CR;
+			if (item->DR >= 0) 	return_value += item->DR;
+			if (item->PR >= 0) 	return_value += item->PR;
+
+			return std::max(25.0f, return_value);
+		} else {
+			return 100.0f;
+		}
+	};
+
+	/*
+		This calculates the direct % value of a kill, modified by the per-kill caps and item tier.
+		calibration is that am even-con kill at or above FloatingExperienceScaleTerminalLevel is
+		worth ~1% progress on a tier 0 item, and 0.1% progress for a tier1 item.
+	*/
+	auto GetBaseExpValueForKill = [&](int conlevel, int tier) -> float {
 		float exp_value 		= 0.0f;
 		float max_scale 		= RuleR(Custom, FloatingExperienceMaxScaleFactor);
 		int   terminal_level 	= RuleI(Custom, FloatingExperienceScaleTerminalLevel);
@@ -578,6 +633,8 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		level_scaling *= 0.33;
 
 		switch (conlevel) {
+			case 0xFA:
+				return 0.0f;
 			case ConsiderColor::Red:
 				exp_value = (RuleR(Character, FloatingExperiencePercentCapPerRedKill) * level_scaling);
 				break;
@@ -600,28 +657,13 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 				break;
 		}
 
-		auto get_level_scalar = [tier](int level) -> float {
-			if (level >= 1 && level <= 20) {
-				return 2.0f * tier + (1.0f * (level - 1.0f) / 19.0f) * tier;
-			} else if (level > 20 && level <= 40) {
-				return 3.0f * tier + (2.0f * (level - 20.0f) / 20.0f) * tier;
-			} else if (level > 40 && level <= 51) {
-				return 5.0f * tier + (2.0f * (level - 40.0f) / 11.0f) * tier;
-			} else if (level > 51 && level <= 60) {
-				return 7.0f * tier + (1.0f * (level - 51.0f) / 9.0f) * tier;
-			} else if (level > 60 && level <= 65) {
-				return 8.0f * tier + (1.0f * (level - 60.0f) / 5.0f) * tier;
-			} else if (level > 65 && level <= 70) {
-				return 9.0f * tier + (1.0f * (level - 65.0f) / 5.0f) * tier;
-			} else {
-				return 10.0f * tier;
-			}
-		};
+		float norm_val = GetItemStatValue(m_inv.GetItem(EQ::invslot::slotPowerSource)->GetItem());
 
 		if (tier) {
-			exp_value /= get_level_scalar(GetLevel());
+			exp_value /= 10;
 		}
 
+		// Add a little bit of randomization
 		exp_value *= zone->random.Real(0.5, 1.5);
 
 		// Reduce for Groups!
@@ -629,13 +671,23 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			exp_value /= GetGroup()->GroupCount();
 		}
 
-
 		return exp_value;
 	};
 
+	EQ::ItemInstance* upgrade_item = item->GetUpgrade(database);
+	if (!upgrade_item) {
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(item);
+		Message(Chat::Experience, "Your [%s] is fully upgraded.", linker.GenerateLink().c_str());
+
+		EjectItem(EQ::invslot::slotPowerSource);
+		return false;
+	}
+
 	int   item_tier 		  = item->GetID() / 1000000;
 	float cur_item_experience = Strings::ToFloat(item->GetCustomData("Exp"), 0);
-	float new_item_experience = GetExpValue(conlevel, item_tier);
+	float new_item_experience = GetBaseExpValueForKill(conlevel, item_tier);
 	float new_percentage 	  = std::min(100.0f, cur_item_experience + new_item_experience);
 
 	EQ::SayLinkEngine linker;
@@ -644,19 +696,18 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 
 	LogDebug("Raw Values: [{}] [{}] [{}]", cur_item_experience, new_item_experience, new_percentage);
 
-	float fuzz_message = zone->random.Real(0.9, 1.1);
-	if (new_percentage <= (20.0f * fuzz_message)) {
-		Message(Chat::Experience, "Your [%s] absorbs a portion of your experience, emitting a faint shimmer.", linker.GenerateLink().c_str());
-	} else if (new_percentage <= (40.0f * fuzz_message)) {
-		Message(Chat::Experience, "Your [%s] absorbs a portion of your experience, glowing with a soft light.", linker.GenerateLink().c_str());
-	} else if (new_percentage <= (60.0f * fuzz_message)) {
-		Message(Chat::Experience, "Your [%s] absorbs a portion of your experience, glowing brightly.", linker.GenerateLink().c_str());
-	} else if (new_percentage <= (80.0f * fuzz_message)) {
-		Message(Chat::Experience, "Your [%s] absorbs a portion of your experience, glowing intensely.", linker.GenerateLink().c_str());
-	} else if (new_percentage <= (95.0f * fuzz_message)) {
-		Message(Chat::Experience, "Your [%s] absorbs a portion of your experience, shining brilliantly.", linker.GenerateLink().c_str());
+	if (new_percentage <= (20.0f)) {
+		Message(Chat::Experience, "Your [%s] absorbs energy, emitting a faint shimmer.", linker.GenerateLink().c_str());
+	} else if (new_percentage <= (40.0f)) {
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing with a soft light.", linker.GenerateLink().c_str());
+	} else if (new_percentage <= (60.0f)) {
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing brightly.", linker.GenerateLink().c_str());
+	} else if (new_percentage <= (80.0f)) {
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing intensely.", linker.GenerateLink().c_str());
+	} else if (new_percentage <= (95.0f)) {
+		Message(Chat::Experience, "Your [%s] absorbs energy, shining brilliantly.", linker.GenerateLink().c_str());
 	} else {
-		Message(Chat::Experience, "Your [%s] absorbs a portion of your experience, radiating with immense power.", linker.GenerateLink().c_str());
+		Message(Chat::Experience, "Your [%s] absorbs energy, radiating with immense power.", linker.GenerateLink().c_str());
 	}
 
 	item->SetCustomData("Exp", fmt::to_string(new_percentage));
@@ -691,7 +742,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			linker.SetItemInst(upgrade_item);
 			auto upgrade_item_link = linker.GenerateLink().c_str();
 
-			Message(Chat::Experience, "Your [%s] has been upgraded into a [%s] through accumulated experience!", item_link, upgrade_item_link);
+			Message(Chat::Experience, "Your [%s] has been upgraded into a [%s]!", item_link, upgrade_item_link);
 		} else {
 			if (item) {
 				PutItemInInventory(EQ::invslot::slotPowerSource, *item, true);
@@ -712,13 +763,12 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
 		}
 
+		database.UpdateInventorySlot(CharacterID(), final_item, EQ::invslot::slotPowerSource);
+		SendItemPacket(EQ::invslot::slotPowerSource, final_item, ItemPacketType::ItemPacketTrade);
+
 		if (final_item->GetID() > 2000000) {
 			EjectItem(EQ::invslot::slotPowerSource);
 		}
-
-		database.UpdateInventorySlot(CharacterID(), final_item, EQ::invslot::slotPowerSource);
-
-		SendItemPacket(EQ::invslot::slotPowerSource, final_item, ItemPacketType::ItemPacketTrade);
 	}
 
 	return true;
