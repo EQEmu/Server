@@ -548,6 +548,11 @@ bool Client::ConsumeItemOnCursor() {
 		return false;
 	}
 
+	if (cur_item->IsAttuned()) {
+		Message(Chat::SpellFailure, "You may not consume items which have already absorbed energy in this way.");
+		return false;
+	}
+
 	auto GetItemTier = [](EQ::ItemData* item) -> int {
 		if (item->ID <= 1000000) { return 0; }
 		else if (item->ID <= 2000000) { return 1; }

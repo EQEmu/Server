@@ -1676,6 +1676,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				item.ID % 1000000 == 29365) { // Hammer of Damnation
 				item.NoDrop = !item.NoDrop;
 			}
+			if (item.ID > 2000000 && item.NoRent) {
+				item.Attuneable = !item.Attuneable;
+			}
+
 		}
 
 		// Bard Instrument that isn't a weapon which fits in primary/secondary
