@@ -68,6 +68,7 @@ EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 
 	if (item) {
 		m_item = new ItemData(*item);
+		m_evolveInfo = new EvolveInfo();
 	}
 
 	m_charges = charges;
@@ -1954,8 +1955,14 @@ void EQ::ItemInstance::ClearGUIDMap()
 //
 // class EvolveInfo
 //
-EvolveInfo::EvolveInfo() {
-	// nothing here yet
+EvolveInfo::EvolveInfo()
+{
+	type            = 0;
+	sub_type        = 0;
+	current_amount  = 0;
+	required_amount = 0;
+	activated       = false;
+	progression     = 0;
 }
 
 EvolveInfo::EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10) {

@@ -312,6 +312,9 @@ namespace EQ
 		static void AddGUIDToMap(uint64 existing_serial_number);
 		static void ClearGUIDMap();
 
+		// evolving items stuff
+		EvolveInfo* GetEvolvingInfo() const { return m_evolveInfo;}
+
 	protected:
 		//////////////////////////
 		// Protected Members
@@ -354,13 +357,29 @@ namespace EQ
 }
 
 class EvolveInfo {
+	struct evolve_details {
+		uint32 type;
+		uint32 sub_type;
+		uint64 current_amount;
+		uint64 required_amount;
+		bool   activated;
+		double progression;
+	};
+
 public:
 	friend class EQ::ItemInstance;
 	//temporary
-	uint16				LvlKills[9];
-	uint32				FirstItem;
-	uint8				MaxLvl;
-	bool				AllKills;
+	uint16 LvlKills[9]{};
+	uint32 FirstItem{0};
+	uint8  MaxLvl{0};
+	bool   AllKills{false};
+
+	uint32 type;
+	uint32 sub_type;
+	uint64 current_amount;
+	uint64 required_amount;
+	bool   activated;
+	double progression;
 
 	EvolveInfo();
 	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);

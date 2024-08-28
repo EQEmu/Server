@@ -52,13 +52,14 @@
 #include "../common/repositories/zone_repository.h"
 
 #include "../common/repositories/trader_repository.h"
-
+#include "../common/repositories/character_evolving_items_repository.h"
 
 #include <ctime>
 #include <iostream>
 #include <fmt/format.h>
 
 extern Zone* zone;
+extern std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> items_evolving_details_cache;
 
 ZoneDatabase database;
 ZoneDatabase content_db;
@@ -4267,4 +4268,37 @@ void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
 			.exp_modifier = m.exp_modifier
 		}
 	);
+}
+
+void ZoneDatabase::LoadEvolvingItems()
+{
+	auto results = ItemsEvolvingDetailsRepository::All(*this);
+
+	if (results.empty()) { return; }
+
+	std::ranges::transform(results.begin(), results.end(),
+	               std::inserter(items_evolving_details_cache, items_evolving_details_cache.end()),
+	               [](const ItemsEvolvingDetailsRepository::ItemsEvolvingDetails& x) {
+		               return std::make_pair(x.item_id, x);
+	               }
+		);
+}
+
+void ZoneDatabase::LoadCharacterEvolvingItems(Client *c)
+{
+	if (!c) {
+		return;
+	}
+
+	auto const& results = CharacterEvolvingItemsRepository::GetWhere(*this, fmt::format("`char_id` = '{}'", c->CharacterID()));
+	if (results.empty()) {
+		return;
+	}
+
+	std::ranges::transform(results.begin(), results.end(),
+				   std::inserter(c->m_evolving_items, c->m_evolving_items.end()),
+				   [](const CharacterEvolvingItemsRepository::CharacterEvolvingItems& x) {
+					   return std::make_pair(x.item_id, x);
+				   }
+		);
 }

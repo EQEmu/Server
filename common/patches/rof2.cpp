@@ -6429,6 +6429,12 @@ namespace RoF2
 			evotop.Activated = 1;
 			evotop.evomaxlevel = item->EvolvingMax;
 
+			auto t = inst->GetEvolvingInfo();
+			if (t && t->required_amount > 0) {
+				evotop.progress = static_cast<double>(t->current_amount) / static_cast<double>(t->required_amount) * 100;
+				evotop.Activated = t->activated;
+			}
+
 			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));
 		}
 

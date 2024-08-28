@@ -79,7 +79,7 @@ extern WorldServer worldserver;
 extern PetitionList petition_list;
 extern EntityList entity_list;
 typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
-
+extern std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> items_evolving_details_cache;
 
 //Use a map for connecting opcodes since it dosent get used a lot and is sparse
 std::map<uint32, ClientPacketProc> ConnectingOpcodes;
@@ -1309,7 +1309,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	// set to full support in case they're a gm with items in disabled expansion slots...but, have their gm flag off...
 	// item loss will occur when they use the 'empty' slots, if this is not done
 	m_inv.SetGMInventory(true);
-	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
+	database.LoadCharacterEvolvingItems(this);
+	loaditems = database.GetInventory(cid, &m_inv, &items_evolving_details_cache, &m_evolving_items); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
 	database.LoadCharacterMaterialColor(cid, &m_pp); /* Load Character Material */

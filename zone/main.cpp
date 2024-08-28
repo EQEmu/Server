@@ -116,6 +116,9 @@ int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
 double frame_time = 0.0;
 
+// loads the items_evolving_details table into memory as a cached reference
+std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> items_evolving_details_cache{};
+
 void Shutdown();
 void UpdateWindowTitle(char *iNewTitle);
 void CatchSignal(int sig_num);
@@ -386,6 +389,7 @@ int main(int argc, char **argv)
 	content_db.LoadFactionData();
 	title_manager.LoadTitles();
 	content_db.LoadTributes();
+	database.LoadEvolvingItems();
 
 	database.GetDecayTimes(npcCorpseDecayTimes);
 

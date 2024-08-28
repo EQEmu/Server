@@ -72,6 +72,7 @@ namespace EQ
 #include "../common/repositories/trader_repository.h"
 #include "../common/guild_base.h"
 #include "../common/repositories/buyer_buy_lines_repository.h"
+#include "../common/repositories/character_evolving_items_repository.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -1975,7 +1976,10 @@ private:
 
 	uint16 m_door_tool_entity_id;
 	uint16 m_object_tool_entity_id;
+
+
 public:
+	std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems> m_evolving_items{};
 	uint16 GetDoorToolEntityId() const;
 	void SetDoorToolEntityId(uint16 door_tool_entity_id);
 	uint16 GetObjectToolEntityId() const;

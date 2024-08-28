@@ -13,6 +13,7 @@
 #include "../common/repositories/doors_repository.h"
 #include "../common/races.h"
 #include "../common/repositories/npc_faction_entries_repository.h"
+#include "../common/repositories/items_evolving_details_repository.h"
 
 #include "bot_database.h"
 
@@ -653,6 +654,11 @@ public:
 
 	static void SaveCharacterBinds(Client *c);
 	static void SaveCharacterTribute(Client* c);
+
+	// Evolving Items
+	void LoadEvolvingItems();
+	void LoadCharacterEvolvingItems(Client *c);
+
 protected:
 	void ZDBInitVars();
 

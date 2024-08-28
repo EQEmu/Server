@@ -647,7 +647,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 }
 
 // Overloaded: Retrieve character inventory based on character id (zone entry)
-bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
+bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>* items_evolving_details_cache, std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>* m_evolving_items)
 {
 	if (!char_id || !inv)
 		return false;
@@ -782,6 +782,22 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 				if (aug[i]) {
 					inst->PutAugment(this, i, aug[i]);
 				}
+			}
+		}
+		if (item->EvolvingItem) {
+			EvolveInfo *                                             item_evolve_info = nullptr;
+			ItemsEvolvingDetailsRepository::ItemsEvolvingDetails     evolve_items{};
+			CharacterEvolvingItemsRepository::CharacterEvolvingItems client_evolving_items_info{};
+
+			if (items_evolving_details_cache->contains(item_id) && m_evolving_items->contains(item_id)) {
+				item_evolve_info                  = inst->GetEvolvingInfo();
+				evolve_items                      = items_evolving_details_cache->at(item_id);
+				client_evolving_items_info        = m_evolving_items->at(item_id);
+				item_evolve_info->activated       = client_evolving_items_info.activated;
+				item_evolve_info->type            = client_evolving_items_info.type;
+				item_evolve_info->sub_type        = client_evolving_items_info.subtype;
+				item_evolve_info->current_amount  = client_evolving_items_info.current_amount;
+				item_evolve_info->required_amount = evolve_items.required_amount;
 			}
 		}
 

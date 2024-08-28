@@ -47,6 +47,7 @@
 #include "../common/repositories/lootdrop_entries_repository.h"
 #include "../common/repositories/base_data_repository.h"
 #include "../common/repositories/skill_caps_repository.h"
+#include "../common/repositories/character_evolving_items_repository.h"
 
 struct EXPModifier
 {
