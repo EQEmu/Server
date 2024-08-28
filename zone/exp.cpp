@@ -785,9 +785,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	if (RuleB(Custom, PowerSourceItemUpgrade) && m_inv.GetItem(EQ::invslot::slotPowerSource) && exp_source == ExpSource::Kill && conlevel != 0xFF) {
-		if (AddItemExperience(m_inv.GetItem(EQ::invslot::slotPowerSource), conlevel)) {
-			in_add_exp *= 0.10;
-		}
+		AddItemExperience(m_inv.GetItem(EQ::invslot::slotPowerSource), conlevel);
 	}
 
 	EVENT_ITEM_ScriptStopReturn();
