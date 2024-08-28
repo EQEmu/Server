@@ -543,8 +543,8 @@ bool Client::ConsumeItemOnCursor() {
 		return false;
 	}
 
-	if (!cur_item || cur_item->GetID() % 1000000 != pow_item->GetID() % 1000000 || cur_item->GetID() > pow_item->GetID() || cur_item->GetID() >= 2000000) {
-		Message(Chat::SpellFailure, "You can only Consume items similar which are similar, but lesser, to what is equipped in your Power Source slot.");
+	if (!cur_item || cur_item->GetID() % 1000000 != pow_item->GetID() % 1000000 || cur_item->GetID() >= 2000000) {
+		Message(Chat::SpellFailure, "You can only Consume items similar which are similar, to what is equipped in your Power Source slot.");
 		return false;
 	}
 
@@ -564,17 +564,44 @@ bool Client::ConsumeItemOnCursor() {
 	int cur_item_tier = GetItemTier(cur_item->GetItem());
 
 	float item_experience = Strings::ToFloat(pow_item->GetCustomData("Exp"), 0.0f);
-	if (cur_item_tier == pow_item_tier) {
-		item_experience = 33.33f + item_experience;
+	float added_experience = 0.0f;
+
+	if (cur_item_tier > pow_item_tier) {
+		// If the cursor item is of a higher tier, set progress to 100%
+		added_experience = 100.0f;
+	} else if (cur_item_tier == pow_item_tier) {
+		// Same tier as before, add 33.33% progress
+		added_experience = 33.33f;
 	} else {
-		item_experience = 6.65f + item_experience;
+		// Lower tier, add 6.65% progress
+		added_experience = 6.65f;
 	}
 
-	pow_item->SetCustomData("Exp", fmt::to_string(item_experience));
-	database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
-	DeleteItemInInventory(EQ::invslot::slotCursor, 1, true, true);
+	float new_experience = item_experience + added_experience;
+	float experience_overflow = 0.0f;
 
-	AddItemExperience(pow_item, ConsiderColor::White);
+	// If new experience exceeds 100%, calculate overflow
+	if (new_experience > 100.0f) {
+		experience_overflow = new_experience - 100.0f;
+		new_experience = 100.0f; // Cap experience at 100%
+	}
+
+	// Apply the new experience to the power source
+	pow_item->SetCustomData("Exp", fmt::to_string(new_experience));
+	database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
+
+	// Call AddItemExperience with capped experience
+	AddItemExperience(pow_item, ConsiderColor::Green);
+
+	// Apply the overflow experience if there is any
+	if (experience_overflow > 0.0f) {
+		item_experience = experience_overflow;
+		pow_item->SetCustomData("Exp", fmt::to_string(item_experience));
+		database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
+	}
+
+	// Delete the item from the cursor
+	DeleteItemInInventory(EQ::invslot::slotCursor, 1, true, true);
 
 	return true;
 }
