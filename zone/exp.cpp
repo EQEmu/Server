@@ -565,9 +565,9 @@ bool Client::ConsumeItemOnCursor() {
 
 	float item_experience = Strings::ToFloat(pow_item->GetCustomData("Exp"), 0.0f);
 	if (cur_item_tier == pow_item_tier) {
-		item_experience = 25.0f + item_experience;
+		item_experience = 33.33f + item_experience;
 	} else {
-		item_experience = 6.25f + item_experience;
+		item_experience = 6.65f + item_experience;
 	}
 
 	pow_item->SetCustomData("Exp", fmt::to_string(item_experience));
