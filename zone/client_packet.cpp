@@ -11613,12 +11613,16 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 						MessageString(Chat::PetResponse, PET_DO_TAUNT);
 						pet->CastToNPC()->SetTaunting(true);
 
-						SetPetCommandState(PET_BUTTON_TAUNT, 1);
+						if (pet->GetID() == focused_pet_id) {
+							SetPetCommandState(PET_BUTTON_TAUNT, 1);
+						}
 					} else {
 						MessageString(Chat::PetResponse, PET_NO_TAUNT);
 						pet->CastToNPC()->SetTaunting(false);
 
-						SetPetCommandState(PET_BUTTON_TAUNT, 0);
+						if (pet->GetID() == focused_pet_id) {
+							SetPetCommandState(PET_BUTTON_TAUNT, 0);
+						}
 					}
 				}
 			};

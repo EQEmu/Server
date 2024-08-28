@@ -3822,10 +3822,6 @@ void NPC::HandleRoambox()
 void NPC::SetTaunting(bool is_taunting) {
 	taunting = is_taunting;
 
-	if (IsPet() && IsPetOwnerClient()) {
-		GetOwner()->CastToClient()->SetPetCommandState(PET_BUTTON_TAUNT, is_taunting);
-	}
-
 	if (IsPet() || GetSwarmInfo()) {
 		if (RuleB(Custom, TauntTogglesPetTanking)) {
 			SetSpecialAbility(SpecialAbility::AllowedToTank, is_taunting ? 1 : 0);
