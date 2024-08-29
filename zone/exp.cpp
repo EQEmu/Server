@@ -595,9 +595,12 @@ bool Client::ConsumeItemOnCursor() {
 
 	// Apply the overflow experience if there is any
 	if (experience_overflow > 0.0f) {
-		item_experience = experience_overflow;
-		pow_item->SetCustomData("Exp", fmt::to_string(item_experience));
-		database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
+		pow_item = m_inv.GetItem(EQ::invslot::slotCursor);
+		if (pow_item) {
+			item_experience = experience_overflow;
+			pow_item->SetCustomData("Exp", fmt::to_string(item_experience));
+			database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
+		}
 	}
 
 	// Delete the item from the cursor
