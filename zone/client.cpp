@@ -13113,7 +13113,8 @@ void Client::SetAAEXPPercentage(uint8 percentage)
 
 	if (before_percentage > 0 && percentage == 0) {
 		MessageString(Chat::White, AA_OFF);
-	} else if (before_percentage == 0 && percentage > 0) {
+	}
+	else if (before_percentage == 0 && percentage > 0) {
 		MessageString(Chat::White, AA_ON);
 	}
 
@@ -13121,4 +13122,9 @@ void Client::SetAAEXPPercentage(uint8 percentage)
 
 	SendAlternateAdvancementStats();
 	SendAlternateAdvancementTable();
+}
+
+std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>* Client::GetEvolvingItems()
+{
+	return &m_evolving_items;
 }

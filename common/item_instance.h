@@ -357,15 +357,6 @@ namespace EQ
 }
 
 class EvolveInfo {
-	struct evolve_details {
-		uint32 type;
-		uint32 sub_type;
-		uint64 current_amount;
-		uint64 required_amount;
-		bool   activated;
-		double progression;
-	};
-
 public:
 	friend class EQ::ItemInstance;
 	//temporary
@@ -380,6 +371,7 @@ public:
 	uint64 required_amount;
 	bool   activated;
 	double progression;
+	uint64 unique_id;
 
 	EvolveInfo();
 	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);

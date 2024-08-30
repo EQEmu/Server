@@ -6460,6 +6460,14 @@ struct PickZone_Struct {
 	int32 selection_id;
 };
 
+struct Evolve_Item_Toggle_Struct {
+	uint32 action;
+	uint32 unknown_004;
+	uint64 unique_id;
+	uint32 percentage;
+	uint32 activated;
+};
+
 // Restore structure packing to default
 #pragma pack()
 

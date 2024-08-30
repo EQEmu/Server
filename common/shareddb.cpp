@@ -19,6 +19,7 @@
 #include <iostream>
 #include <cstring>
 #include <fmt/format.h>
+#include <random>
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 	#include <algorithm>
@@ -789,6 +790,36 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 			ItemsEvolvingDetailsRepository::ItemsEvolvingDetails     evolve_items{};
 			CharacterEvolvingItemsRepository::CharacterEvolvingItems client_evolving_items_info{};
 
+			//std::vector<CharacterEvolvingItemsRepository::CharacterEvolvingItems> queue{};
+
+			if (items_evolving_details_cache->contains(item_id) && !m_evolving_items->contains(item_id)) {
+				client_evolving_items_info.activated      = false;
+				client_evolving_items_info.item_id        = item_id;
+				client_evolving_items_info.current_amount = 0;
+				client_evolving_items_info.id             = 0;
+				client_evolving_items_info.char_id        = char_id;
+				client_evolving_items_info.type           = items_evolving_details_cache->at(item_id).type;
+				client_evolving_items_info.subtype        = items_evolving_details_cache->at(item_id).sub_type;
+				client_evolving_items_info.progression    = items_evolving_details_cache->at(item_id).required_amount > 0
+					? static_cast<double>(client_evolving_items_info.current_amount)
+					/ static_cast<double>(items_evolving_details_cache->at(item_id).required_amount) * 100
+					: 0;
+
+				std::mt19937_64 unique_generator (time(nullptr));
+				client_evolving_items_info.unique_id = unique_generator();
+
+				CharacterEvolvingItemsRepository::ReplaceOne(*this, client_evolving_items_info);
+				m_evolving_items->emplace(item_id, client_evolving_items_info);
+			}
+
+			// if (!queue.empty()) {
+			// 	CharacterEvolvingItemsRepository::ReplaceMany(*this, queue);
+			// 	std::ranges::transform(queue.begin(), queue.end(), std::inserter(*m_evolving_items, m_evolving_items->end()),
+			// 		[&](const CharacterEvolvingItemsRepository::CharacterEvolvingItems &x) {
+			// 			return std::make_pair(x.item_id, x);
+			// 		});
+			// }
+
 			if (items_evolving_details_cache->contains(item_id) && m_evolving_items->contains(item_id)) {
 				item_evolve_info                  = inst->GetEvolvingInfo();
 				evolve_items                      = items_evolving_details_cache->at(item_id);
@@ -798,6 +829,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 				item_evolve_info->sub_type        = client_evolving_items_info.subtype;
 				item_evolve_info->current_amount  = client_evolving_items_info.current_amount;
 				item_evolve_info->required_amount = evolve_items.required_amount;
+				item_evolve_info->unique_id       = client_evolving_items_info.unique_id;
+				item_evolve_info->progression     = client_evolving_items_info.progression;
 			}
 		}
 

@@ -5428,6 +5428,14 @@ struct Parcel_Struct
 };
 	}; /*structs*/
 
+struct Evolve_Item_Toggle_Struct {
+	uint32 action;
+	uint32 unknown_004;
+	uint64 unique_id;
+	uint32 percentage;
+	uint32 activated;
+};
+
 }; /*RoF2*/
 
 #endif /*COMMON_ROF2_STRUCTS_H*/

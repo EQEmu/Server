@@ -6405,6 +6405,12 @@ namespace RoF2
 		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
 		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
 		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
+		if (item->EvolvingItem) {
+			auto t = inst->GetEvolvingInfo();
+			hdr.instance_id    = t->unique_id & 0xFFFFFFFF; //lower dword
+			hdr.parcel_item_id = t->unique_id >> 32;        //upper dword
+		}
+
 		hdr.last_cast_time = inst->GetRecastTimestamp();
 		hdr.charges        = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254)
 			? 0xFFFFFFFF
@@ -6420,19 +6426,18 @@ namespace RoF2
 		if (item->EvolvingItem > 0) {
 			RoF2::structs::EvolvingItem evotop;
 
-			evotop.unknown001 = 0;
-			evotop.unknown002 = 0;
-			evotop.unknown003 = 0;
-			evotop.unknown004 = 0;
+			evotop.unknown001 = 5;
+			evotop.unknown002 = 6;
+			evotop.unknown003 = 7;
+			evotop.unknown004 = 8;
 			evotop.evoLevel = item->EvolvingLevel;
 			evotop.progress = 0;
 			evotop.Activated = 1;
 			evotop.evomaxlevel = item->EvolvingMax;
 
-			auto t = inst->GetEvolvingInfo();
-			if (t && t->required_amount > 0) {
-				evotop.progress = static_cast<double>(t->current_amount) / static_cast<double>(t->required_amount) * 100;
-				evotop.Activated = t->activated;
+			if (inst->GetEvolvingInfo()) {
+				evotop.progress  = inst->GetEvolvingInfo()->progression;
+				evotop.Activated = inst->GetEvolvingInfo()->activated;
 			}
 
 			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));

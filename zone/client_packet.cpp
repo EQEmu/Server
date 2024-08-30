@@ -208,6 +208,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Emote] = &Client::Handle_OP_Emote;
 	ConnectedOpcodes[OP_EndLootRequest] = &Client::Handle_OP_EndLootRequest;
 	ConnectedOpcodes[OP_EnvDamage] = &Client::Handle_OP_EnvDamage;
+	ConnectedOpcodes[OP_EvolveItem] = &Client::Handle_OP_EvolveItem;
 	ConnectedOpcodes[OP_FaceChange] = &Client::Handle_OP_FaceChange;
 	ConnectedOpcodes[OP_FeignDeath] = &Client::Handle_OP_FeignDeath;
 	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
@@ -17165,4 +17166,45 @@ void Client::Handle_OP_ShopRetrieveParcel(const EQApplicationPacket *app)
 
     auto parcel_in = (ParcelRetrieve_Struct *)app->pBuffer;
     DoParcelRetrieve(*parcel_in);
+}
+
+void Client::Handle_OP_EvolveItem(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(Evolve_Item_Toggle_Struct)) {
+		LogError("Received Handle_OP_EvolveItem packet. Expected size {}, received size {}.",
+		         sizeof(Evolve_Item_Toggle_Struct), app->size);
+		return;
+	}
+
+	auto in      = reinterpret_cast<Evolve_Item_Toggle_Struct *>(app->pBuffer);
+	auto results = CharacterEvolvingItemsRepository::GetWhere(
+		database, fmt::format("`char_id` = '{}' AND `unique_id` = '{}' LIMIT 1;", CharacterID(), in->unique_id)
+		);
+
+	if (results.empty()) {
+		return;
+	}
+
+	auto item      = results.front();
+	item.activated = in->activated;
+
+	// update client in memory status
+	auto client_evolving_items = GetEvolvingItems();
+	if (client_evolving_items->contains(item.item_id)) {
+		client_evolving_items->at(item.item_id).activated = in->activated;
+	}
+
+	// update db
+	CharacterEvolvingItemsRepository::ReplaceOne(database, item);
+
+	// send update to client
+	auto out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(Evolve_Item_Toggle_Struct));
+	auto data = reinterpret_cast<Evolve_Item_Toggle_Struct *>(out->pBuffer);
+
+	data->action     = in->action;
+	data->unique_id  = item.unique_id;
+	data->percentage = item.progression;
+	data->activated  = item.activated;
+
+	QueuePacket(out.get());
 }

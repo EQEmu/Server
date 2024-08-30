@@ -53,6 +53,7 @@
 
 #include "../common/repositories/trader_repository.h"
 #include "../common/repositories/character_evolving_items_repository.h"
+#include "../common/repositories/inventory_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -4272,7 +4273,7 @@ void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
 
 void ZoneDatabase::LoadEvolvingItems()
 {
-	auto results = ItemsEvolvingDetailsRepository::All(*this);
+	auto const& results = ItemsEvolvingDetailsRepository::All(*this);
 
 	if (results.empty()) { return; }
 
@@ -4296,9 +4297,28 @@ void ZoneDatabase::LoadCharacterEvolvingItems(Client *c)
 	}
 
 	std::ranges::transform(results.begin(), results.end(),
-				   std::inserter(c->m_evolving_items, c->m_evolving_items.end()),
+				   std::inserter(*c->GetEvolvingItems(), c->GetEvolvingItems()->end()),
 				   [](const CharacterEvolvingItemsRepository::CharacterEvolvingItems& x) {
 					   return std::make_pair(x.item_id, x);
 				   }
 		);
+
+	auto const& inv = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}'", c->CharacterID()));
+
+	std::vector<uint32> items{};
+
+	for (auto i : inv) {
+		auto item = GetItem(i.itemid);
+		if (item->EvolvingItem) {
+			items.push_back(i.itemid);
+		}
+	}
+
+	std::vector<CharacterEvolvingItemsRepository::CharacterEvolvingItems> queue{};
+	for (auto const& i : items) {
+		auto item = CharacterEvolvingItemsRepository::NewEntity();
+		item.item_id = i;
+		queue.push_back(item);
+
+	}
 }
