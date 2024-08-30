@@ -229,6 +229,7 @@ RULE_BOOL(Character, GroupInvitesRequireTarget, false, "Enable to require player
 RULE_BOOL(Character, PlayerTradingLoreFeedback, true, "If enabled, during a player to player trade, if lore items exist, it will output which items.")
 RULE_INT(Character, MendAlwaysSucceedValue, 199, "Value at which mend will always succeed its skill check. Default: 199")
 RULE_BOOL(Character, SneakAlwaysSucceedOver100, false, "When sneak skill is over 100, always succeed sneak/hide. Default: false")
+RULE_INT(Character, BandolierSwapDelay, 0, "Bandolier swap delay in milliseconds, default is 0")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
