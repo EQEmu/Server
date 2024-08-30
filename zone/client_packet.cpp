@@ -934,7 +934,7 @@ void Client::CompleteConnect()
 	}
 
 	database.LoadAuras(this); // this ends up spawning them so probably safer to load this later (here)
-	database.LoadCharacterDisciplines(CharacterID(), &m_pp);
+	database.LoadCharacterDisciplines(this);
 
 	entity_list.RefreshClientXTargets(this);
 
@@ -1344,10 +1344,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.ldon_losses_mmc = as.failure.mmc;
 		m_pp.ldon_losses_ruj = as.failure.ruj;
 		m_pp.ldon_losses_tak = as.failure.tak;
-	}
-
-	for (int slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) {
-		m_pp.disciplines.values[slot_id] = 0;
 	}
 
 	/* Set item material tint */
