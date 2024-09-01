@@ -24,9 +24,11 @@ public:
 		uint32_t item_id;
 		uint64_t unique_id;
 		uint8_t  activated;
+		uint8_t  equiped;
 		uint32_t type;
 		uint32_t subtype;
-		uint32_t current_amount;
+		uint64_t current_amount;
+		uint64_t required_amount;
 		uint32_t progression;
 	};
 
@@ -43,9 +45,11 @@ public:
 			"item_id",
 			"unique_id",
 			"activated",
+			"equiped",
 			"type",
 			"subtype",
 			"current_amount",
+			"required_amount",
 			"progression",
 		};
 	}
@@ -58,9 +62,11 @@ public:
 			"item_id",
 			"unique_id",
 			"activated",
+			"equiped",
 			"type",
 			"subtype",
 			"current_amount",
+			"required_amount",
 			"progression",
 		};
 	}
@@ -102,15 +108,17 @@ public:
 	{
 		CharacterEvolvingItems e{};
 
-		e.id             = 0;
-		e.char_id        = 0;
-		e.item_id        = 0;
-		e.unique_id      = 0;
-		e.activated      = 0;
-		e.type           = 0;
-		e.subtype        = 0;
-		e.current_amount = 0;
-		e.progression    = 0;
+		e.id              = 0;
+		e.char_id         = 0;
+		e.item_id         = 0;
+		e.unique_id       = 0;
+		e.activated       = 0;
+		e.equiped         = 0;
+		e.type            = 0;
+		e.subtype         = 0;
+		e.current_amount  = 0;
+		e.required_amount = 0;
+		e.progression     = 0;
 
 		return e;
 	}
@@ -147,15 +155,17 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterEvolvingItems e{};
 
-			e.id             = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.unique_id      = row[3] ? strtoull(row[3], nullptr, 10) : 0;
-			e.activated      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.type           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.subtype        = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.current_amount = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.progression    = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.id              = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.char_id         = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.unique_id       = row[3] ? strtoull(row[3], nullptr, 10) : 0;
+			e.activated       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.equiped         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.type            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.subtype         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.current_amount  = row[8] ? strtoull(row[8], nullptr, 10) : 0;
+			e.required_amount = row[9] ? strtoull(row[9], nullptr, 10) : 0;
+			e.progression     = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -193,10 +203,12 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.unique_id));
 		v.push_back(columns[4] + " = " + std::to_string(e.activated));
-		v.push_back(columns[5] + " = " + std::to_string(e.type));
-		v.push_back(columns[6] + " = " + std::to_string(e.subtype));
-		v.push_back(columns[7] + " = " + std::to_string(e.current_amount));
-		v.push_back(columns[8] + " = " + std::to_string(e.progression));
+		v.push_back(columns[5] + " = " + std::to_string(e.equiped));
+		v.push_back(columns[6] + " = " + std::to_string(e.type));
+		v.push_back(columns[7] + " = " + std::to_string(e.subtype));
+		v.push_back(columns[8] + " = " + std::to_string(e.current_amount));
+		v.push_back(columns[9] + " = " + std::to_string(e.required_amount));
+		v.push_back(columns[10] + " = " + std::to_string(e.progression));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -223,9 +235,11 @@ public:
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.unique_id));
 		v.push_back(std::to_string(e.activated));
+		v.push_back(std::to_string(e.equiped));
 		v.push_back(std::to_string(e.type));
 		v.push_back(std::to_string(e.subtype));
 		v.push_back(std::to_string(e.current_amount));
+		v.push_back(std::to_string(e.required_amount));
 		v.push_back(std::to_string(e.progression));
 
 		auto results = db.QueryDatabase(
@@ -261,9 +275,11 @@ public:
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.unique_id));
 			v.push_back(std::to_string(e.activated));
+			v.push_back(std::to_string(e.equiped));
 			v.push_back(std::to_string(e.type));
 			v.push_back(std::to_string(e.subtype));
 			v.push_back(std::to_string(e.current_amount));
+			v.push_back(std::to_string(e.required_amount));
 			v.push_back(std::to_string(e.progression));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -298,15 +314,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterEvolvingItems e{};
 
-			e.id             = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.unique_id      = row[3] ? strtoull(row[3], nullptr, 10) : 0;
-			e.activated      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.type           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.subtype        = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.current_amount = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.progression    = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.id              = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.char_id         = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.unique_id       = row[3] ? strtoull(row[3], nullptr, 10) : 0;
+			e.activated       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.equiped         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.type            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.subtype         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.current_amount  = row[8] ? strtoull(row[8], nullptr, 10) : 0;
+			e.required_amount = row[9] ? strtoull(row[9], nullptr, 10) : 0;
+			e.progression     = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -331,15 +349,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterEvolvingItems e{};
 
-			e.id             = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.unique_id      = row[3] ? strtoull(row[3], nullptr, 10) : 0;
-			e.activated      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.type           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.subtype        = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.current_amount = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.progression    = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.id              = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.char_id         = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.unique_id       = row[3] ? strtoull(row[3], nullptr, 10) : 0;
+			e.activated       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.equiped         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.type            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.subtype         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.current_amount  = row[8] ? strtoull(row[8], nullptr, 10) : 0;
+			e.required_amount = row[9] ? strtoull(row[9], nullptr, 10) : 0;
+			e.progression     = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -419,9 +439,11 @@ public:
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.unique_id));
 		v.push_back(std::to_string(e.activated));
+		v.push_back(std::to_string(e.equiped));
 		v.push_back(std::to_string(e.type));
 		v.push_back(std::to_string(e.subtype));
 		v.push_back(std::to_string(e.current_amount));
+		v.push_back(std::to_string(e.required_amount));
 		v.push_back(std::to_string(e.progression));
 
 		auto results = db.QueryDatabase(
@@ -450,9 +472,11 @@ public:
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.unique_id));
 			v.push_back(std::to_string(e.activated));
+			v.push_back(std::to_string(e.equiped));
 			v.push_back(std::to_string(e.type));
 			v.push_back(std::to_string(e.subtype));
 			v.push_back(std::to_string(e.current_amount));
+			v.push_back(std::to_string(e.required_amount));
 			v.push_back(std::to_string(e.progression));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");

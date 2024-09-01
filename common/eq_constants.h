@@ -1114,4 +1114,25 @@ enum ExpSource
 namespace DoorType {
 	constexpr uint32 BuyerStall = 155;
 }
+
+namespace EvolvingItems {
+	namespace Actions {
+		constexpr int8 UPDATE_ITEMS           = 0;
+		constexpr int8 OPEN_TRANSFER_WINDOW   = 1;
+		constexpr int8 UPDATE_TRANSFER_WINDOW = 2;
+	}
+	namespace Types {
+		constexpr int8 AMOUNT_OF_EXP   = 1;
+		constexpr int8 NUMBER_OF_KILLS = 2;
+	}
+
+	namespace SubTypes {
+		constexpr int8 ALL_EXP           = 0;
+		constexpr int8 SOLO_EXP          = 1;
+		constexpr int8 GROUP_EXP         = 2;
+		constexpr int8 RAID_EXP          = 3;
+		constexpr int8 SPECIFIC_MOB_TYPE = 4;
+	}
+}
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

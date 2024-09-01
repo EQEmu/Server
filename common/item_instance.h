@@ -34,6 +34,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/bodytypes.h"
 #include "../common/deity.h"
 #include "../common/memory_buffer.h"
+#include "../common/repositories/character_evolving_items_repository.h"
 
 #include <map>
 
@@ -372,10 +373,12 @@ public:
 	bool   activated;
 	double progression;
 	uint64 unique_id;
+	bool   equiped;
 
 	EvolveInfo();
 	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);
 	~EvolveInfo();
+	uint32 CalcEvolvingProgression() const;
 };
 
 #endif /*COMMON_ITEM_INSTANCE_H*/

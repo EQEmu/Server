@@ -711,13 +711,13 @@ public:
 	void SendCrystalCounts();
 
 	uint64 GetExperienceForKill(Mob *against);
-	void AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
+	void AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false, NPC* npc = nullptr);
 	uint64 CalcEXP(uint8 conlevel = 0xFF, bool ignore_mods = false);
 	void CalculateNormalizedAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
 	void CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
 	void CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel);
 	void CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, uint8 conlevel, bool resexp);
-	void SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool resexp = false);
+	void SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool resexp = false, NPC* npc = nullptr);
 	void AddLevelBasedExp(ExpSource exp_source, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false);
 	void SetLeadershipEXP(uint64 group_exp, uint64 raid_exp);
 	void AddLeadershipEXP(uint64 group_exp, uint64 raid_exp);
@@ -1819,6 +1819,10 @@ public:
 	uint32 GetEXPForLevel(uint16 check_level);
 
 	std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>* GetEvolvingItems();
+	void ProcessEvolvingItem(uint64 exp, Mob* mob);
+	void SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::CharacterEvolvingItems item);
+	void DoEvolveItemToggle(const EQApplicationPacket* app);
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);

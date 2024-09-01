@@ -244,6 +244,7 @@ public:
 	std::unordered_map<uint32, DynamicZoneTemplatesRepository::DynamicZoneTemplates> dz_template_cache;
 
 	std::unordered_map<uint32, EXPModifier> exp_modifiers;
+	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> evolve_test{};
 
 	time_t weather_timer;
 	Timer  spawn2_timer;

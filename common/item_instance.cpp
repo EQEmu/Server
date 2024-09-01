@@ -1963,6 +1963,7 @@ EvolveInfo::EvolveInfo()
 	required_amount = 0;
 	activated       = false;
 	progression     = 0;
+	unique_id       = 0;
 }
 
 EvolveInfo::EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10) {
@@ -1983,3 +1984,12 @@ EvolveInfo::EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32
 EvolveInfo::~EvolveInfo() {
 
 }
+
+uint32 EvolveInfo::CalcEvolvingProgression() const
+{
+	return required_amount > 0
+		       ? static_cast<double>(current_amount)
+		         / static_cast<double>(required_amount) * 100
+		       : 0;
+}
+
