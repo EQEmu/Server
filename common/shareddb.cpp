@@ -44,6 +44,8 @@
 #include "repositories/faction_association_repository.h"
 #include "repositories/starting_items_repository.h"
 #include "path_manager.h"
+//#include "../world/client.h"
+#include "../zone/client.h"
 #include "repositories/loottable_repository.h"
 #include "repositories/character_item_recast_repository.h"
 #include "repositories/character_corpses_repository.h"
@@ -648,12 +650,16 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 
 	return true;
 }
-
 // Overloaded: Retrieve character inventory based on character id (zone entry)
-bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>* items_evolving_details_cache, std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>* m_evolving_items)
+//bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
+bool SharedDatabase::GetInventory(Client *c)
 {
-	if (!char_id || !inv)
+	if (!c) {
 		return false;
+	}
+
+	uint32                char_id = c->CharacterID();
+	EQ::InventoryProfile &inv     = c->GetInv();
 
 	// Retrieve character inventory
 	auto results = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}' ORDER BY `slotid`;", char_id));
@@ -670,8 +676,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 
 	const auto timestamps = GetItemRecastTimestamps(char_id);
 	auto cv_conflict      = false;
-	const auto pmask      = inv->GetLookup()->PossessionsBitmask;
-	const auto bank_size  = inv->GetLookup()->InventoryTypeSize.Bank;
+	const auto pmask      = inv.GetLookup()->PossessionsBitmask;
+	const auto bank_size  = inv.GetLookup()->InventoryTypeSize.Bank;
 
 	std::vector<InventoryRepository::Inventory> queue{};
 	for (auto &row: results) {
@@ -788,33 +794,33 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 			}
 		}
 		if (item->EvolvingItem) {
-			EvolveInfo *                                             item_evolve_info = nullptr;
-			CharacterEvolvingItemsRepository::CharacterEvolvingItems client_evolving_items_info{};
+			CharacterEvolvingItemsRepository::CharacterEvolvingItems client_evolving_item{};
+			auto &client_evolving_items = c->GetEvolvingItems();
 
 			if (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END) {
-				client_evolving_items_info.equiped = 1;
-				m_evolving_items->at(item_id).equiped = 1;
+				client_evolving_item.equiped = 1;
+				if (client_evolving_items.contains(item_id)) {
+					client_evolving_items.at(item_id).equiped = 1;
+				}
 			}
 
-			if (items_evolving_details_cache->contains(item_id) && !m_evolving_items->contains(item_id)) {
-				client_evolving_items_info.activated       = false;
-				client_evolving_items_info.item_id         = item_id;
-				client_evolving_items_info.current_amount  = 0;
-				client_evolving_items_info.id              = 0;
-				client_evolving_items_info.char_id         = char_id;
-				client_evolving_items_info.progression     = 0;
+			if (evolving_items_manager.GetEvolvingItemsCache().contains(item_id) && !client_evolving_items.contains(item_id)) {
+				client_evolving_item.activated       = false;
+				client_evolving_item.item_id         = item_id;
+				client_evolving_item.current_amount  = 0;
+				client_evolving_item.id              = 0;
+				client_evolving_item.char_id         = char_id;
+				client_evolving_item.progression     = 0;
 
-				//std::mt19937_64 unique_generator (time(nullptr));
-				auto e = CharacterEvolvingItemsRepository::InsertOne(*this, client_evolving_items_info);
-				client_evolving_items_info.id              = e.id;
-				m_evolving_items->emplace(item_id, client_evolving_items_info);
+				auto e = CharacterEvolvingItemsRepository::InsertOne(*this, client_evolving_item);
+				client_evolving_item.id              = e.id;
+				client_evolving_items.emplace(item_id, client_evolving_item);
 			}
 
-			if (evolving_items_manager.GetEvolvingItemsCache().contains(item_id) && m_evolving_items->contains(item_id)) {
+			if (evolving_items_manager.GetEvolvingItemsCache().contains(item_id) && client_evolving_items.contains(item_id)) {
 				auto& [id, char_id, evolve_item_id, activated, equiped, current_amount, progression] =
-					m_evolving_items->at(item_id);
+					client_evolving_items.at(item_id);
 
-				progression = evolving_items_manager.CalculateProgression(current_amount, item_id);
 				inst->SetEvolveActivated(activated);
 				inst->SetEvolveEquiped(equiped);
 				inst->SetEvolveProgression(progression);
@@ -824,7 +830,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 
 		int16 put_slot_id;
 		if (slot_id >= 8000 && slot_id <= 8999) {
-			put_slot_id = inv->PushCursor(*inst);
+			put_slot_id = inv.PushCursor(*inst);
 		}
 		else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
@@ -834,10 +840,10 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 				item_id,
 				slot_id
 			);
-			put_slot_id = inv->PushCursor(*inst);
+			put_slot_id = inv.PushCursor(*inst);
 		}
 		else {
-			put_slot_id = inv->PutItem(slot_id, *inst);
+			put_slot_id = inv.PutItem(slot_id, *inst);
 		}
 
 		row.guid = inst->GetSerialNumber();
@@ -862,8 +868,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 			"ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 			char_name,
 			char_id,
-			EQ::versions::MobVersionName(inv->InventoryVersion()),
-			(inv->GMInventory() ? "true" : "false")
+			EQ::versions::MobVersionName(inv.InventoryVersion()),
+			(inv.GMInventory() ? "true" : "false")
 		);
 	}
 
@@ -874,7 +880,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 	EQ::ItemInstance::ClearGUIDMap();
 
 	// Retrieve shared inventory
-	return GetSharedBank(char_id, inv, true);
+	return GetSharedBank(char_id, &inv, true);
 }
 
 // Overloaded: Retrieve character inventory based on account_id and character name (char select)

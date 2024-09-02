@@ -61,7 +61,6 @@
 #include <fmt/format.h>
 
 extern Zone* zone;
-extern std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> items_evolving_details_cache;
 
 ZoneDatabase database;
 ZoneDatabase content_db;
