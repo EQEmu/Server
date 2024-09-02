@@ -25,6 +25,7 @@
 #include "rulesys.h"
 #include "shareddb.h"
 #include "strings.h"
+#include "evolving.h"
 
 //#include "../common/light_source.h"
 
@@ -1985,11 +1986,22 @@ EvolveInfo::~EvolveInfo() {
 
 }
 
-uint32 EvolveInfo::CalcEvolvingProgression() const
-{
-	return required_amount > 0
-		       ? static_cast<double>(current_amount)
-		         / static_cast<double>(required_amount) * 100
-		       : 0;
-}
+// uint32 EvolveInfo::CalcEvolvingProgression() const
+// {
+// 	return required_amount > 0
+// 		       ? static_cast<double>(current_amount)
+// 		         / static_cast<double>(required_amount) * 100
+// 		       : 0;
+// }
 
+double EvolveInfo::CalcEvolvingProgression(const uint32 item_id) const
+{
+	if (!evolving_items_manager.GetEvolvingItemsCache().contains(item_id)) {
+		return 0;
+	}
+
+	return evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount > 0
+			   ? std::round(static_cast<double>(current_amount)
+				 / static_cast<double>(evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount) * 100)
+			   : 0;
+}

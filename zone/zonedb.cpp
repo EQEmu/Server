@@ -11,6 +11,7 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "aura.h"
+#include "evolving.h"
 #include "../common/repositories/blocked_spells_repository.h"
 #include "../common/repositories/character_tribute_repository.h"
 #include "../common/repositories/character_data_repository.h"
@@ -4271,61 +4272,17 @@ void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
 	);
 }
 
-void ZoneDatabase::LoadEvolvingItems()
-{
-	auto const& results = ItemsEvolvingDetailsRepository::All(*this);
-
-	if (results.empty()) { return; }
-
-	std::ranges::transform(results.begin(), results.end(),
-	               std::inserter(items_evolving_details_cache, items_evolving_details_cache.end()),
-	               [](const ItemsEvolvingDetailsRepository::ItemsEvolvingDetails& x) {
-		               return std::make_pair(x.item_id, x);
-	               }
-		);
-
-//	std::ranges::transform(results.begin(), results.end(),
-//				   std::inserter(zone->evolve_test, zone->evolve_test.end()),
-//				   [](const ItemsEvolvingDetailsRepository::ItemsEvolvingDetails& x) {
-//					   return std::make_pair(x.item_id, x);
-//				   }
-//		);
-}
-
 void ZoneDatabase::LoadCharacterEvolvingItems(Client *c)
 {
-	if (!c) {
-		return;
-	}
-
 	auto const& results = CharacterEvolvingItemsRepository::GetWhere(*this, fmt::format("`char_id` = '{}'", c->CharacterID()));
 	if (results.empty()) {
 		return;
 	}
 
 	std::ranges::transform(results.begin(), results.end(),
-				   std::inserter(*c->GetEvolvingItems(), c->GetEvolvingItems()->end()),
+				   std::inserter(c->GetEvolvingItems(), c->GetEvolvingItems().end()),
 				   [](const CharacterEvolvingItemsRepository::CharacterEvolvingItems& x) {
 					   return std::make_pair(x.item_id, x);
 				   }
 		);
-
-	auto const& inv = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}'", c->CharacterID()));
-
-	std::vector<uint32> items{};
-
-	for (auto i : inv) {
-		auto item = GetItem(i.itemid);
-		if (item->EvolvingItem) {
-			items.push_back(i.itemid);
-		}
-	}
-
-	std::vector<CharacterEvolvingItemsRepository::CharacterEvolvingItems> queue{};
-	for (auto const& i : items) {
-		auto item = CharacterEvolvingItemsRepository::NewEntity();
-		item.item_id = i;
-		queue.push_back(item);
-
-	}
 }

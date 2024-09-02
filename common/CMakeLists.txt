@@ -39,6 +39,7 @@ SET(common_sources
     event_sub.cpp
     events/player_event_logs.cpp
     events/player_event_discord_formatter.cpp
+    evolving.cpp
     expedition_lockout_timer.cpp
     extprofile.cpp
     discord/discord_manager.cpp
@@ -559,6 +560,7 @@ SET(common_headers
     events/player_event_discord_formatter.h
     events/player_events.h
     event_sub.h
+    evolving.h
     expedition_lockout_timer.h
     extprofile.h
     faction.h

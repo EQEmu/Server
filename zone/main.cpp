@@ -52,6 +52,7 @@
 #include "task_manager.h"
 #include "quest_parser_collection.h"
 #include "embparser.h"
+#include "../common/evolving.h"
 #include "lua_parser.h"
 #include "questmgr.h"
 #include "npc_scale_manager.h"
@@ -110,6 +111,7 @@ PathManager           path;
 PlayerEventLogs       player_event_logs;
 DatabaseUpdate        database_update;
 SkillCaps             skill_caps;
+EvolvingItemsManager  evolving_items_manager;
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
@@ -389,7 +391,12 @@ int main(int argc, char **argv)
 	content_db.LoadFactionData();
 	title_manager.LoadTitles();
 	content_db.LoadTributes();
-	database.LoadEvolvingItems();
+
+	// Load evolving item data
+	evolving_items_manager.SetDatabase(&database);
+	evolving_items_manager.SetContentDatabase(&content_db);
+	evolving_items_manager.LoadEvolvingItems();
+	//database.LoadEvolvingItems();
 
 	database.GetDecayTimes(npcCorpseDecayTimes);
 

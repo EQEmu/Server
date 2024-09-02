@@ -1818,10 +1818,12 @@ public:
 
 	uint32 GetEXPForLevel(uint16 check_level);
 
-	std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>* GetEvolvingItems();
+	// Evolving Item Info
+	std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>& GetEvolvingItems() { return m_evolving_items; };
 	void ProcessEvolvingItem(uint64 exp, Mob* mob);
 	void SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::CharacterEvolvingItems item);
 	void DoEvolveItemToggle(const EQApplicationPacket* app);
+	void LoadCharacterEvolvingItems();
 
 protected:
 	friend class Mob;

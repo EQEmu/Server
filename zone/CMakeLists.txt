@@ -34,6 +34,7 @@ SET(zone_sources
     embperl.cpp
     encounter.cpp
     entity.cpp
+    evolving.cpp
     exp.cpp
     expedition.cpp
     expedition_database.cpp
@@ -292,9 +293,7 @@ SET(zone_headers
     zonedump.h
     zone_cli.h
     zone_reload.h
-    zone_cli.cpp
-    evolving.cpp
-    gm_commands/evolving_items.cpp)
+    zone_cli.cpp)
 
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 

@@ -16,23 +16,14 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/global_define.h"
-#include "../common/features.h"
-#include "../common/rulesys.h"
-#include "../common/strings.h"
+#include "../common/evolving.h"
 
-#include "client.h"
-#include "mob.h"
-#include "string_ids.h"
-#include "../common/data_verification.h"
+#include "../common/global_define.h"
+#include "../common/rulesys.h"
+
 #include "../common/eq_constants.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_evolving_items_repository.h"
-
-std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>* Client::GetEvolvingItems()
-{
-	return &m_evolving_items;
-}
 
 void Client::DoEvolveItemToggle(const EQApplicationPacket* app)
 {
@@ -50,8 +41,8 @@ void Client::DoEvolveItemToggle(const EQApplicationPacket* app)
 
 	// update client in memory status
 	auto client_evolving_items = GetEvolvingItems();
-	if (client_evolving_items->contains(item.item_id)) {
-		client_evolving_items->at(item.item_id).activated = in->activated;
+	if (client_evolving_items.contains(item.item_id)) {
+		client_evolving_items.at(item.item_id).activated = in->activated;
 	}
 
 	// update db
@@ -76,33 +67,39 @@ void Client::SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::C
 
 void Client::ProcessEvolvingItem(uint64 exp, Mob* mob)
 {
-	for (auto& [key, value] : *GetEvolvingItems()) {
+	for (auto& [key, value] : GetEvolvingItems()) {
 		if (value.equiped) {
-			switch (value.type) {
+			if (!evolving_items_manager.GetEvolvingItemsCache().contains(value.item_id)) {
+				return;
+			}
+
+			auto type     = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id).type;
+			auto sub_type = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id).sub_type;
+			switch (type) {
 				case EvolvingItems::Types::AMOUNT_OF_EXP: {
 					std::unique_ptr<EQ::ItemInstance> const inst(database.CreateItem(value.item_id));
 					if (!inst) {
 						return;
 					}
 
-					if (value.subtype == EvolvingItems::SubTypes::ALL_EXP ||
-						(value.subtype == EvolvingItems::SubTypes::GROUP_EXP && IsGrouped())
+					if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
+						(sub_type == EvolvingItems::SubTypes::GROUP_EXP && IsGrouped())
 					) {
 						value.current_amount += exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100;
 					}
-					else if (value.subtype == EvolvingItems::SubTypes::ALL_EXP ||
-						(value.subtype == EvolvingItems::SubTypes::RAID_EXP && IsRaidGrouped())
+					else if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
+						(sub_type == EvolvingItems::SubTypes::RAID_EXP && IsRaidGrouped())
 					) {
 						value.current_amount += exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100;
 					}
-					else if(value.subtype == EvolvingItems::SubTypes::ALL_EXP ||
-						value.subtype == EvolvingItems::SubTypes::SOLO_EXP
+					else if(sub_type == EvolvingItems::SubTypes::ALL_EXP ||
+						sub_type == EvolvingItems::SubTypes::SOLO_EXP
 					) {
 						value.current_amount += exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100;;
 					}
 
-
-					value.progression                       = inst->GetEvolvingInfo()->CalcEvolvingProgression();
+//					value.progression                       = inst->GetEvolvingInfo()->CalcEvolvingProgression(value.item_id);
+					value.progression                       = evolving_items_manager.CalculateProgression(value.current_amount, value.item_id);
 					inst->GetEvolvingInfo()->current_amount = value.current_amount;
 					inst->GetEvolvingInfo()->progression    = value.progression;
 
@@ -111,7 +108,7 @@ void Client::ProcessEvolvingItem(uint64 exp, Mob* mob)
 
 					LogInfo(
 						"ProcessEvolvingItem: - Type 1 Amount of EXP - SubType ({}) for item {}  Assigned {} of exp to {}",
-						value.subtype,
+						sub_type,
 						inst->GetItem()->Name,
 						exp * 0.001,
 						GetName()
@@ -124,9 +121,10 @@ void Client::ProcessEvolvingItem(uint64 exp, Mob* mob)
 						return;
 					}
 
-					if (mob && mob->GetRace() == value.subtype) {
+					if (mob && mob->GetRace() == sub_type) {
 						value.current_amount += 1;
-						value.progression                       = inst->GetEvolvingInfo()->CalcEvolvingProgression();
+//						value.progression                       = inst->GetEvolvingInfo()->CalcEvolvingProgression(value.item_id);
+						value.progression                       = evolving_items_manager.CalculateProgression(value.current_amount, value.item_id);
 						inst->GetEvolvingInfo()->current_amount = value.current_amount;
 						inst->GetEvolvingInfo()->progression    = value.progression;
 
@@ -135,7 +133,7 @@ void Client::ProcessEvolvingItem(uint64 exp, Mob* mob)
 
 						LogInfo(
 							"ProcessEvolvingItem: - Type 2 Number of Kills - SubType ({}) for item {}  Increased count by 1 for {}",
-							value.subtype,
+							sub_type,
 							inst->GetItem()->Name,
 							GetName()
 							);

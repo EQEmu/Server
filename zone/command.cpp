@@ -827,6 +827,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/entityvariable.cpp"
 #include "gm_commands/exptoggle.cpp"
 #include "gm_commands/faction.cpp"
+#include "gm_commands/evolving_items.cpp"
 #include "gm_commands/feature.cpp"
 #include "gm_commands/find.cpp"
 #include "gm_commands/fish.cpp"

@@ -38,6 +38,7 @@
 #include "strings.h"
 #include "eqemu_config.h"
 #include "data_verification.h"
+#include "evolving.h"
 #include "repositories/criteria/content_filter_criteria.h"
 #include "repositories/account_repository.h"
 #include "repositories/faction_association_repository.h"
@@ -49,6 +50,7 @@
 #include "repositories/skill_caps_repository.h"
 #include "repositories/inventory_repository.h"
 #include "repositories/books_repository.h"
+#include "../zone/evolving.h"
 
 namespace ItemField
 {
@@ -787,7 +789,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 		}
 		if (item->EvolvingItem) {
 			EvolveInfo *                                             item_evolve_info = nullptr;
-			ItemsEvolvingDetailsRepository::ItemsEvolvingDetails     evolve_items{};
 			CharacterEvolvingItemsRepository::CharacterEvolvingItems client_evolving_items_info{};
 
 			if (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END) {
@@ -801,10 +802,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 				client_evolving_items_info.current_amount  = 0;
 				client_evolving_items_info.id              = 0;
 				client_evolving_items_info.char_id         = char_id;
-				client_evolving_items_info.type            = items_evolving_details_cache->at(item_id).type;
-				client_evolving_items_info.subtype         = items_evolving_details_cache->at(item_id).sub_type;
-				client_evolving_items_info.required_amount = items_evolving_details_cache->at(item_id).required_amount;
-				client_evolving_items_info.progression     = item_evolve_info->CalcEvolvingProgression();
+				client_evolving_items_info.progression     = item_evolve_info->CalcEvolvingProgression(item_id);
 
 				std::mt19937_64 unique_generator (time(nullptr));
 				client_evolving_items_info.unique_id = unique_generator();
@@ -813,16 +811,14 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 				m_evolving_items->emplace(item_id, client_evolving_items_info);
 			}
 
-			if (items_evolving_details_cache->contains(item_id) && m_evolving_items->contains(item_id)) {
-				item_evolve_info                  = inst->GetEvolvingInfo();
-				client_evolving_items_info        = m_evolving_items->at(item_id);
-				item_evolve_info->activated       = client_evolving_items_info.activated;
-				item_evolve_info->type            = client_evolving_items_info.type;
-				item_evolve_info->sub_type        = client_evolving_items_info.subtype;
-				item_evolve_info->current_amount  = client_evolving_items_info.current_amount;
-				item_evolve_info->required_amount = client_evolving_items_info.required_amount;
-				item_evolve_info->unique_id       = client_evolving_items_info.unique_id;
-				item_evolve_info->progression     = item_evolve_info->CalcEvolvingProgression();
+			if (evolving_items_manager.GetEvolvingItemsCache().contains(item_id) && m_evolving_items->contains(item_id)) {
+				item_evolve_info                       = inst->GetEvolvingInfo();
+				client_evolving_items_info             = m_evolving_items->at(item_id);
+				item_evolve_info->activated            = client_evolving_items_info.activated;
+				item_evolve_info->current_amount       = client_evolving_items_info.current_amount;
+				item_evolve_info->unique_id            = client_evolving_items_info.unique_id;
+				item_evolve_info->progression          = evolving_items_manager.CalculateProgression(item_evolve_info->current_amount, item_id);
+				client_evolving_items_info.progression = item_evolve_info->progression;
 			}
 		}
 

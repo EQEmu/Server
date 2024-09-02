@@ -378,7 +378,7 @@ public:
 	EvolveInfo();
 	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);
 	~EvolveInfo();
-	uint32 CalcEvolvingProgression() const;
+	double CalcEvolvingProgression(const uint32 item_id) const;
 };
 
 #endif /*COMMON_ITEM_INSTANCE_H*/

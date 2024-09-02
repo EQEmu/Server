@@ -656,7 +656,6 @@ public:
 	static void SaveCharacterTribute(Client* c);
 
 	// Evolving Items
-	void LoadEvolvingItems();
 	void LoadCharacterEvolvingItems(Client *c);
 
 protected:
