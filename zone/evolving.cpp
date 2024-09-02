@@ -58,7 +58,7 @@ void Client::SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::C
 	auto data = reinterpret_cast<Evolve_Item_Toggle_Struct *>(out->pBuffer);
 
 	data->action     = action;
-	data->unique_id  = item.unique_id;
+	data->unique_id  = item.id;
 	data->percentage = item.progression;
 	data->activated  = item.activated;
 
@@ -98,10 +98,8 @@ void Client::ProcessEvolvingItem(uint64 exp, Mob* mob)
 						value.current_amount += exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100;;
 					}
 
-//					value.progression                       = inst->GetEvolvingInfo()->CalcEvolvingProgression(value.item_id);
-					value.progression                       = evolving_items_manager.CalculateProgression(value.current_amount, value.item_id);
-					inst->GetEvolvingInfo()->current_amount = value.current_amount;
-					inst->GetEvolvingInfo()->progression    = value.progression;
+					value.progression = evolving_items_manager.CalculateProgression(value.current_amount, value.item_id);
+					inst->SetEvolveProgression(value.progression);
 
 					CharacterEvolvingItemsRepository::ReplaceOne(database, value);
 					SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, value);
@@ -125,8 +123,7 @@ void Client::ProcessEvolvingItem(uint64 exp, Mob* mob)
 						value.current_amount += 1;
 //						value.progression                       = inst->GetEvolvingInfo()->CalcEvolvingProgression(value.item_id);
 						value.progression                       = evolving_items_manager.CalculateProgression(value.current_amount, value.item_id);
-						inst->GetEvolvingInfo()->current_amount = value.current_amount;
-						inst->GetEvolvingInfo()->progression    = value.progression;
+						inst->SetEvolveProgression(value.progression);
 
 						CharacterEvolvingItemsRepository::ReplaceOne(database, value);
 						SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, value);

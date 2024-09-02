@@ -69,7 +69,6 @@ EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 
 	if (item) {
 		m_item = new ItemData(*item);
-		m_evolveInfo = new EvolveInfo();
 	}
 
 	m_charges = charges;
@@ -156,12 +155,7 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 		m_scaledItem = nullptr;
 	}
 
-	if (copy.m_evolveInfo) {
-		m_evolveInfo = new EvolveInfo(*copy.m_evolveInfo);
-	} else {
-		m_evolveInfo = nullptr;
-	}
-
+	m_evolving_details    = copy.m_evolving_details;
 	m_scaling             = copy.m_scaling;
 	m_ornamenticon        = copy.m_ornamenticon;
 	m_ornamentidfile      = copy.m_ornamentidfile;
@@ -176,7 +170,6 @@ EQ::ItemInstance::~ItemInstance()
 	Clear();
 	safe_delete(m_item);
 	safe_delete(m_scaledItem);
-	safe_delete(m_evolveInfo);
 }
 
 // Query item type
@@ -1032,27 +1025,28 @@ void EQ::ItemInstance::ScaleItem() {
 	m_scaledItem->CharmFileID = 0;	// this stops the client from trying to scale the item itself.
 }
 
-bool EQ::ItemInstance::EvolveOnAllKills() const {
-	return (m_evolveInfo && m_evolveInfo->AllKills);
+// bool EQ::ItemInstance::EvolveOnAllKills() const {
+// 	return (m_evolveInfo && m_evolveInfo->AllKills);
+// }
+//
+ int8 EQ::ItemInstance::GetMaxEvolveLvl() const {
+// 	if (m_evolveInfo)
+// 		return m_evolveInfo->MaxLvl;
+// 	else
+ 		return 0;
 }
-
-int8 EQ::ItemInstance::GetMaxEvolveLvl() const {
-	if (m_evolveInfo)
-		return m_evolveInfo->MaxLvl;
-	else
-		return 0;
-}
-
+//
 uint32 EQ::ItemInstance::GetKillsNeeded(uint8 currentlevel) {
-	uint32 kills = -1;	// default to -1 (max uint32 value) because this value is usually divided by, so we don't want to ever return zero.
-	if (m_evolveInfo)
-		if (currentlevel != m_evolveInfo->MaxLvl)
-			kills = m_evolveInfo->LvlKills[currentlevel - 1];
-
-	if (kills == 0)
-		kills = -1;
-
-	return kills;
+// 	uint32 kills = -1;	// default to -1 (max uint32 value) because this value is usually divided by, so we don't want to ever return zero.
+// 	if (m_evolveInfo)
+// 		if (currentlevel != m_evolveInfo->MaxLvl)
+// 			kills = m_evolveInfo->LvlKills[currentlevel - 1];
+//
+// 	if (kills == 0)
+// 		kills = -1;
+//
+// 	return kills;
+	return 0;
 }
 
 void EQ::ItemInstance::SetTimer(std::string name, uint32 time) {
@@ -1958,13 +1952,7 @@ void EQ::ItemInstance::ClearGUIDMap()
 //
 EvolveInfo::EvolveInfo()
 {
-	type            = 0;
-	sub_type        = 0;
-	current_amount  = 0;
-	required_amount = 0;
-	activated       = false;
-	progression     = 0;
-	unique_id       = 0;
+
 }
 
 EvolveInfo::EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10) {
@@ -1986,22 +1974,3 @@ EvolveInfo::~EvolveInfo() {
 
 }
 
-// uint32 EvolveInfo::CalcEvolvingProgression() const
-// {
-// 	return required_amount > 0
-// 		       ? static_cast<double>(current_amount)
-// 		         / static_cast<double>(required_amount) * 100
-// 		       : 0;
-// }
-
-double EvolveInfo::CalcEvolvingProgression(const uint32 item_id) const
-{
-	if (!evolving_items_manager.GetEvolvingItemsCache().contains(item_id)) {
-		return 0;
-	}
-
-	return evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount > 0
-			   ? std::round(static_cast<double>(current_amount)
-				 / static_cast<double>(evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount) * 100)
-			   : 0;
-}

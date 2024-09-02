@@ -206,13 +206,11 @@ namespace EQ
 		bool IsDroppable(bool recurse = true) const;
 
 		bool IsScaling() const				{ return m_scaling; }
-		bool IsEvolving() const				{ return (m_evolveLvl >= 1); }
 		uint32 GetExp() const				{ return m_exp; }
 		void SetExp(uint32 exp)				{ m_exp = exp; }
 		void AddExp(uint32 exp)				{ m_exp += exp; }
 		bool IsActivated()					{ return m_activated; }
 		void SetActivated(bool activated)	{ m_activated = activated; }
-		int8 GetEvolveLvl() const			{ return m_evolveLvl; }
 		void SetScaling(bool v)				{ m_scaling = v; }
 		uint32 GetOrnamentationIcon() const							{ return m_ornamenticon; }
 		void SetOrnamentIcon(uint32 ornament_icon)					{ m_ornamenticon = ornament_icon; }
@@ -227,8 +225,6 @@ namespace EQ
 
 		void Initialize(SharedDatabase *db = nullptr);
 		void ScaleItem();
-		bool EvolveOnAllKills() const;
-		int8 GetMaxEvolveLvl() const;
 		uint32 GetKillsNeeded(uint8 currentlevel);
 
 		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
@@ -314,7 +310,27 @@ namespace EQ
 		static void ClearGUIDMap();
 
 		// evolving items stuff
-		EvolveInfo* GetEvolvingInfo() const { return m_evolveInfo;}
+		bool        EvolveOnAllKills() const;
+		int8        GetMaxEvolveLvl() const;
+
+		int8   GetEvolveLvl() const { return m_evolveLvl; }
+		bool   IsEvolving() const { return m_evolveLvl >= 1; }
+		bool   GetEvolveActivated() const { return m_evolving_details.activated; }
+		void   SetEvolveActivated(const bool in) { m_evolving_details.activated = in; }
+		bool   GetEvolveEquiped() const { return m_evolving_details.equiped; }
+		void   SetEvolveEquiped(const bool in) { m_evolving_details.equiped = in; }
+		double GetEvolveProgression() const { return m_evolving_details.progression; }
+		void   SetEvolveProgression(const double in) { m_evolving_details.progression = in; }
+		uint64 GetEvolveUniqueID() const { return m_evolving_details.unique_id; }
+		void   SetEvolveUniqueID(const uint64 in) { m_evolving_details.unique_id = in; }
+		int8   GetEvolveLevel() const { return m_evolveLvl; }
+
+		struct evolving_details {
+			uint64 unique_id;
+			double progression;
+			bool   activated;
+			bool   equiped;
+		};
 
 	protected:
 		//////////////////////////
@@ -327,28 +343,28 @@ namespace EQ
 
 		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
 
-		ItemInstTypes		m_use_type {ItemInstNormal};	// Usage type for item
-		const ItemData*		m_item {nullptr};		// Ptr to item data
-		int16				m_charges {0};	// # of charges for chargeable items
-		uint32				m_price {0};	// Bazaar /trader price
-		uint32				m_color {0};
-		uint32				m_merchantslot {0};
-		int16				m_currentslot {0};
-		bool				m_attuned {false};
-		int32				m_merchantcount {1}; //number avaliable on the merchant, -1=unlimited
-		int32				m_SerialNumber {0};	// Unique identifier for this instance of an item. Needed for Bazaar.
-		uint32				m_exp {0};
-		int8				m_evolveLvl {0};
-		bool				m_activated {false};
-		ItemData*			m_scaledItem {nullptr};
-		::EvolveInfo*		m_evolveInfo {nullptr};
-		bool				m_scaling {false};
-		uint32				m_ornamenticon {0};
-		uint32				m_ornamentidfile {0};
-		uint32				m_new_id_file {0};
-		uint32				m_ornament_hero_model {0};
-		uint32				m_recast_timestamp {0};
-		int                 m_task_delivered_count {0};
+		ItemInstTypes    m_use_type{ItemInstNormal};// Usage type for item
+		const ItemData * m_item{nullptr};           // Ptr to item data
+		int16            m_charges{0};              // # of charges for chargeable items
+		uint32           m_price{0};                // Bazaar /trader price
+		uint32           m_color{0};
+		uint32           m_merchantslot{0};
+		int16            m_currentslot{0};
+		bool             m_attuned{false};
+		int32            m_merchantcount{1};//number avaliable on the merchant, -1=unlimited
+		int32            m_SerialNumber{0}; // Unique identifier for this instance of an item. Needed for Bazaar.
+		uint32           m_exp{0};
+		int8             m_evolveLvl{0};
+		bool             m_activated{false};
+		ItemData *       m_scaledItem{nullptr};
+		bool             m_scaling{false};
+		uint32           m_ornamenticon{0};
+		uint32           m_ornamentidfile{0};
+		uint32           m_new_id_file{0};
+		uint32           m_ornament_hero_model{0};
+		uint32           m_recast_timestamp{0};
+		int              m_task_delivered_count{0};
+		evolving_details m_evolving_details{};
 
 		// Items inside of this item (augs or contents) {};
 		std::map<uint8, ItemInstance*>		m_contents {}; // Zero-based index: min=0, max=9
@@ -366,19 +382,10 @@ public:
 	uint8  MaxLvl{0};
 	bool   AllKills{false};
 
-	uint32 type;
-	uint32 sub_type;
-	uint64 current_amount;
-	uint64 required_amount;
-	bool   activated;
-	double progression;
-	uint64 unique_id;
-	bool   equiped;
 
 	EvolveInfo();
 	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);
 	~EvolveInfo();
-	double CalcEvolvingProgression(const uint32 item_id) const;
 };
 
 #endif /*COMMON_ITEM_INSTANCE_H*/

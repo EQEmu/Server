@@ -802,23 +802,23 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv, std
 				client_evolving_items_info.current_amount  = 0;
 				client_evolving_items_info.id              = 0;
 				client_evolving_items_info.char_id         = char_id;
-				client_evolving_items_info.progression     = item_evolve_info->CalcEvolvingProgression(item_id);
+				client_evolving_items_info.progression     = 0;
 
-				std::mt19937_64 unique_generator (time(nullptr));
-				client_evolving_items_info.unique_id = unique_generator();
-
-				CharacterEvolvingItemsRepository::ReplaceOne(*this, client_evolving_items_info);
+				//std::mt19937_64 unique_generator (time(nullptr));
+				auto e = CharacterEvolvingItemsRepository::InsertOne(*this, client_evolving_items_info);
+				client_evolving_items_info.id              = e.id;
 				m_evolving_items->emplace(item_id, client_evolving_items_info);
 			}
 
 			if (evolving_items_manager.GetEvolvingItemsCache().contains(item_id) && m_evolving_items->contains(item_id)) {
-				item_evolve_info                       = inst->GetEvolvingInfo();
-				client_evolving_items_info             = m_evolving_items->at(item_id);
-				item_evolve_info->activated            = client_evolving_items_info.activated;
-				item_evolve_info->current_amount       = client_evolving_items_info.current_amount;
-				item_evolve_info->unique_id            = client_evolving_items_info.unique_id;
-				item_evolve_info->progression          = evolving_items_manager.CalculateProgression(item_evolve_info->current_amount, item_id);
-				client_evolving_items_info.progression = item_evolve_info->progression;
+				auto& [id, char_id, evolve_item_id, activated, equiped, current_amount, progression] =
+					m_evolving_items->at(item_id);
+
+				progression = evolving_items_manager.CalculateProgression(current_amount, item_id);
+				inst->SetEvolveActivated(activated);
+				inst->SetEvolveEquiped(equiped);
+				inst->SetEvolveProgression(progression);
+				inst->SetEvolveUniqueID(id);
 			}
 		}
 

@@ -60,7 +60,7 @@ double EvolvingItemsManager::CalculateProgression(const uint64 current_amount, c
 	}
 
 	return evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount > 0
-			   ? std::round(static_cast<double>(current_amount)
-				 / static_cast<double>(evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount) * 100)
+			   ? static_cast<double>(current_amount)
+				 / static_cast<double>(evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount) * 100
 			   : 0;
 }
