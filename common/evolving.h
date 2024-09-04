@@ -18,6 +18,7 @@ Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 #ifndef EVOLVING_H
 #define EVOLVING_H
 
+#include "item_instance.h"
 #include "repositories/items_evolving_details_repository.h"
 
 class EvolvingItemsManager
@@ -29,6 +30,7 @@ public:
 
 	void LoadEvolvingItems() const;
 	double CalculateProgression(uint64 current_amount, uint32 item_id);
+	const EQ::ItemInstance* DoLootChecks(Client *c, uint16 slot_id, const EQ::ItemInstance& inst) const;
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return evolving_items_cache; }
 
 private:

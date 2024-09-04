@@ -17,9 +17,12 @@
 */
 
 #include "evolving.h"
+
+#include "item_instance.h"
 #include "rulesys.h"
 #include "events/player_event_logs.h"
 #include "repositories/character_evolving_items_repository.h"
+#include "../zone/client.h"
 
 EvolvingItemsManager::EvolvingItemsManager()
 {
@@ -63,4 +66,46 @@ double EvolvingItemsManager::CalculateProgression(const uint64 current_amount, c
 			   ? static_cast<double>(current_amount)
 				 / static_cast<double>(evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount) * 100
 			   : 0;
+}
+
+const EQ::ItemInstance* EvolvingItemsManager::DoLootChecks(Client *c, uint16 slot_id, const EQ::ItemInstance& inst) const
+{
+	auto inst_clone = inst.Clone();
+	inst_clone->SetEvolveEquiped(false);
+	if (inst_clone->IsEvolvingItem() && slot_id <= EQ::invslot::EQUIPMENT_END && slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
+		inst_clone->SetEvolveEquiped(true);
+		c->GetInv().PutItem(slot_id, *inst_clone);
+		if (c->GetEvolvingItems().contains(inst_clone->GetID())) {
+			c->GetEvolvingItems().at(inst_clone->GetID()).equiped = true;
+			CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst_clone->GetID()));
+		}
+		else {
+			auto e           = CharacterEvolvingItemsRepository::NewEntity();
+			e.char_id        = c->CharacterID();
+			e.equiped        = true;
+			e.item_id        = inst_clone->GetID();
+
+			auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
+			e.id = result.id;
+			c->GetEvolvingItems().emplace(inst_clone->GetID(), e);
+		}
+	} else {
+		c->GetInv().PutItem(slot_id, *inst_clone);
+		if (c->GetEvolvingItems().contains(inst_clone->GetID())) {
+			c->GetEvolvingItems().at(inst_clone->GetID()).equiped = false;
+			CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst_clone->GetID()));
+		}
+		else {
+			auto e           = CharacterEvolvingItemsRepository::NewEntity();
+			e.char_id        = c->CharacterID();
+			e.equiped        = false;
+			e.item_id        = inst_clone->GetID();
+
+			auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
+			e.id = result.id;
+			c->GetEvolvingItems().emplace(inst_clone->GetID(), e);
+		}
+	}
+
+	return inst_clone;
 }

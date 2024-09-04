@@ -27,22 +27,18 @@
 
 void Client::DoEvolveItemToggle(const EQApplicationPacket* app)
 {
-	auto in      = reinterpret_cast<Evolve_Item_Toggle_Struct *>(app->pBuffer);
-	auto results = CharacterEvolvingItemsRepository::GetWhere(
-		database, fmt::format("`char_id` = '{}' AND `unique_id` = '{}' LIMIT 1;", CharacterID(), in->unique_id)
-		);
+	auto in   = reinterpret_cast<EvolveItemToggle_Struct *>(app->pBuffer);
+	auto item = CharacterEvolvingItemsRepository::FindOne(database, in->unique_id);
 
-	if (results.empty()) {
+	if (!item.id) {
 		return;
 	}
 
-	auto item      = results.front();
 	item.activated = in->activated;
 
 	// update client in memory status
-	auto client_evolving_items = GetEvolvingItems();
-	if (client_evolving_items.contains(item.item_id)) {
-		client_evolving_items.at(item.item_id).activated = in->activated;
+	if (GetEvolvingItems().contains(item.item_id)) {
+		GetEvolvingItems().at(item.item_id).activated = in->activated;
 	}
 
 	// update db
@@ -54,8 +50,8 @@ void Client::DoEvolveItemToggle(const EQApplicationPacket* app)
 
 void Client::SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::CharacterEvolvingItems item)
 {
-	auto out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(Evolve_Item_Toggle_Struct));
-	auto data = reinterpret_cast<Evolve_Item_Toggle_Struct *>(out->pBuffer);
+	auto out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
+	auto data = reinterpret_cast<EvolveItemToggle_Struct *>(out->pBuffer);
 
 	data->action     = action;
 	data->unique_id  = item.id;

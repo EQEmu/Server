@@ -821,10 +821,13 @@ bool SharedDatabase::GetInventory(Client *c)
 				auto& [id, char_id, evolve_item_id, activated, equiped, current_amount, progression] =
 					client_evolving_items.at(item_id);
 
+				inst->SetEvolveUniqueID(id);
+				inst->SetEvolveCharID(char_id);
+				inst->SetEvolveItemID(evolve_item_id);
 				inst->SetEvolveActivated(activated);
 				inst->SetEvolveEquiped(equiped);
+				inst->SetEvolveCurrentAmount(current_amount);
 				inst->SetEvolveProgression(progression);
-				inst->SetEvolveUniqueID(id);
 			}
 		}
 

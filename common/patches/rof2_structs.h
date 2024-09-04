@@ -5428,7 +5428,7 @@ struct Parcel_Struct
 };
 	}; /*structs*/
 
-struct Evolve_Item_Toggle_Struct {
+struct EvolveItemToggle_Struct {
 	uint32 action;
 	uint32 unknown_004;
 	uint64 unique_id;

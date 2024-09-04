@@ -145,6 +145,7 @@ public:
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
+			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 
 			return e;
 		}
@@ -178,7 +179,6 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[0] + " = " + std::to_string(e.id));
 		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.activated));
@@ -288,6 +288,7 @@ public:
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
+			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -318,6 +319,7 @@ public:
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
+			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}

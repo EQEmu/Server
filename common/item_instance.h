@@ -313,24 +313,25 @@ namespace EQ
 		bool        EvolveOnAllKills() const;
 		int8        GetMaxEvolveLvl() const;
 
-		int8   GetEvolveLvl() const { return m_evolveLvl; }
-		bool   IsEvolving() const { return m_evolveLvl >= 1; }
-		bool   GetEvolveActivated() const { return m_evolving_details.activated; }
-		void   SetEvolveActivated(const bool in) { m_evolving_details.activated = in; }
-		bool   GetEvolveEquiped() const { return m_evolving_details.equiped; }
-		void   SetEvolveEquiped(const bool in) { m_evolving_details.equiped = in; }
-		double GetEvolveProgression() const { return m_evolving_details.progression; }
-		void   SetEvolveProgression(const double in) { m_evolving_details.progression = in; }
-		uint64 GetEvolveUniqueID() const { return m_evolving_details.unique_id; }
-		void   SetEvolveUniqueID(const uint64 in) { m_evolving_details.unique_id = in; }
-		int8   GetEvolveLevel() const { return m_evolveLvl; }
+		CharacterEvolvingItemsRepository::CharacterEvolvingItems &GetEvolvingDetails() { return m_evolving_details; }
 
-		struct evolving_details {
-			uint64 unique_id;
-			double progression;
-			bool   activated;
-			bool   equiped;
-		};
+		int8             GetEvolveLvl() const { return m_evolveLvl; }
+		bool             IsEvolving() const { return m_evolveLvl >= 1; }
+		bool             GetEvolveActivated() const { return m_evolving_details.activated; }
+		void             SetEvolveActivated(const bool in) { m_evolving_details.activated = in; }
+		bool             GetEvolveEquiped() const { return m_evolving_details.equiped; }
+		void             SetEvolveEquiped(const bool in) { m_evolving_details.equiped = in; }
+		double           GetEvolveProgression() const { return m_evolving_details.progression; }
+		void             SetEvolveProgression(const double in) { m_evolving_details.progression = in; }
+		uint64           GetEvolveUniqueID() const { return m_evolving_details.id; }
+		void             SetEvolveUniqueID(const uint64 in) { m_evolving_details.id = in; }
+		uint32           GetEvolveCharID() const { return m_evolving_details.char_id; }
+		void             SetEvolveCharID(const uint32 in) { m_evolving_details.char_id = in; }
+		uint32           GetEvolveItemID() const { return m_evolving_details.item_id; }
+		void             SetEvolveItemID(const uint32 in) { m_evolving_details.item_id = in; }
+		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
+		void             SetEvolveCurrentAmount(const uint64 in) { m_evolving_details.current_amount = in; }
+		bool             IsEvolvingItem() const { return GetItem()->EvolvingItem > 0; }
 
 	protected:
 		//////////////////////////
@@ -364,7 +365,7 @@ namespace EQ
 		uint32           m_ornament_hero_model{0};
 		uint32           m_recast_timestamp{0};
 		int              m_task_delivered_count{0};
-		evolving_details m_evolving_details{};
+		CharacterEvolvingItemsRepository::CharacterEvolvingItems  m_evolving_details{};
 
 		// Items inside of this item (augs or contents) {};
 		std::map<uint8, ItemInstance*>		m_contents {}; // Zero-based index: min=0, max=9

@@ -25,6 +25,7 @@
 #include "zonedb.h"
 #include "../common/events/player_event_logs.h"
 #include "bot.h"
+#include "../common/evolving.h"
 #include "../common/repositories/character_corpse_items_repository.h"
 
 extern WorldServer worldserver;
@@ -1163,25 +1164,30 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 	if (slot_id == EQ::invslot::slotCursor) { // don't trust macros before conditional statements...
 		return PushItemOnCursor(inst, client_update);
 	}
-	else {
-		m_inv.PutItem(slot_id, inst);
+
+	if (!inst) {
+		return false;
 	}
+
+	auto inst_clone = evolving_items_manager.DoLootChecks(this, slot_id, inst);
 
 	if (client_update)
 	{
-		SendItemPacket(slot_id, &inst, ((slot_id == EQ::invslot::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
+		SendItemPacket(slot_id, inst_clone, ((slot_id == EQ::invslot::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
 		//SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id));
 	}
+
+	CalcBonuses();
 
 	if (slot_id == EQ::invslot::slotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		return database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
-		return database.SaveInventory(CharacterID(), &inst, slot_id);
+		return database.SaveInventory(CharacterID(), inst_clone, slot_id);
 	}
 
-	CalcBonuses();
+	CalcBonuses(); // this never fires??
 	// a lot of wasted checks and calls coded above...
 }
 
@@ -1191,24 +1197,26 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 
 	bool cursor_empty = m_inv.CursorEmpty();
 
+	auto inst_clone = evolving_items_manager.DoLootChecks(this, slot_id, inst);
+
 	if (slot_id == EQ::invslot::slotCursor) {
-		m_inv.PushCursor(inst);
+		m_inv.PushCursor(*inst_clone);
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
-		m_inv.PutItem(slot_id, inst);
-		database.SaveInventory(CharacterID(), &inst, slot_id);
+		m_inv.PutItem(slot_id, *inst_clone);
+		database.SaveInventory(CharacterID(), inst_clone, slot_id);
 	}
 
 	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
 	if (slot_id == EQ::invslot::slotCursor && !cursor_empty) {
 		// RoF+ currently has a specialized cursor handler
 		if (ClientVersion() < EQ::versions::ClientVersion::RoF)
-			SendItemPacket(slot_id, &inst, ItemPacketLimbo);
+			SendItemPacket(slot_id, inst_clone, ItemPacketLimbo);
 	}
 	else {
-		SendLootItemInPacket(&inst, slot_id);
+		SendLootItemInPacket(inst_clone, slot_id);
 	}
 
 	if (bag_item_data) {
@@ -1236,7 +1244,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 			// (This assumes that the data passed is correctly associated..no safety checks are implemented)
 			if (slot_id == EQ::invslot::slotCursor && !cursor_empty) {
 				LogInventory("Putting bag loot item [{}] ([{}]) into slot [{}] (non-empty cursor override)",
-					inst.GetItem()->Name, inst.GetItem()->ID, EQ::invslot::slotCursor);
+					inst_clone->GetItem()->Name, inst_clone->GetItem()->ID, EQ::invslot::slotCursor);
 
 				PutLootInInventory(EQ::invslot::slotCursor, *bagitem);
 			}
@@ -1244,7 +1252,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 				auto bag_slot = EQ::InventoryProfile::CalcSlotId(slot_id, index);
 
 				LogInventory("Putting bag loot item [{}] ([{}]) into slot [{}] (bag slot [{}])",
-					inst.GetItem()->Name, inst.GetItem()->ID, bag_slot, index);
+					inst_clone->GetItem()->Name, inst_clone->GetItem()->ID, bag_slot, index);
 
 				PutLootInInventory(bag_slot, *bagitem);
 			}

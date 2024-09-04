@@ -344,6 +344,8 @@ bool EQ::InventoryProfile::SwapItem(
 			fail_state = swapNotAllowed;
 			return false;
 		}
+
+		source_item_instance->SetEvolveEquiped(false);
 		if ((destination_slot >= invslot::EQUIPMENT_BEGIN && destination_slot <= invslot::EQUIPMENT_END)) {
 			auto source_item = source_item_instance->GetItem();
 			if (!source_item) {
@@ -362,6 +364,9 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapLevel;
 				return false;
 			}
+			if (source_item_instance->IsEvolvingItem() > 0) {
+				source_item_instance->SetEvolveEquiped(true);
+			}
 		}
 	}
 
@@ -370,6 +375,8 @@ bool EQ::InventoryProfile::SwapItem(
 			fail_state = swapNotAllowed;
 			return false;
 		}
+
+		destination_item_instance->SetEvolveEquiped(false);
 		if ((source_slot >= invslot::EQUIPMENT_BEGIN && source_slot <= invslot::EQUIPMENT_END)) {
 			auto destination_item = destination_item_instance->GetItem();
 			if (!destination_item) {
@@ -387,6 +394,9 @@ bool EQ::InventoryProfile::SwapItem(
 			if (level && destination_item->ReqLevel && level < destination_item->ReqLevel) {
 				fail_state = swapLevel;
 				return false;
+			}
+			if (destination_item_instance->IsEvolvingItem()) {
+				destination_item_instance->SetEvolveEquiped(true);
 			}
 		}
 	}
@@ -1402,6 +1412,8 @@ int16 EQ::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 	int16 result = INVALID_INDEX;
 	int16 parentSlot = INVALID_INDEX;
 
+	inst->SetEvolveEquiped(false);
+
 	if (slot_id == invslot::slotCursor) {
 		// Replace current item on cursor, if exists
 		m_cursor.pop(); // no memory delete, clients of this function know what they are doing
@@ -1410,6 +1422,9 @@ int16 EQ::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 	}
 	else if (slot_id >= invslot::EQUIPMENT_BEGIN && slot_id <= invslot::EQUIPMENT_END) {
 		if ((((uint64)1 << slot_id) & m_lookup->PossessionsBitmask) != 0) {
+			if (inst->IsEvolvingItem()) {
+				inst->SetEvolveEquiped(true);
+			}
 			m_worn[slot_id] = inst;
 			result = slot_id;
 		}

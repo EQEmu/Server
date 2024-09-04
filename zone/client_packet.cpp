@@ -10749,7 +10749,13 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 			InterrogateInventory(this, true, false, true, error);
 	}
 
-	return;
+	if (GetInv().GetItem(mi->to_slot)) {
+		CharacterEvolvingItemsRepository::UpdateOne(database, GetInv().GetItem(mi->to_slot)->GetEvolvingDetails());
+	}
+
+	if (GetInv().GetItem(mi->from_slot)) {
+		CharacterEvolvingItemsRepository::UpdateOne(database, GetInv().GetItem(mi->from_slot)->GetEvolvingDetails());
+	}
 }
 
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
@@ -17169,9 +17175,9 @@ void Client::Handle_OP_ShopRetrieveParcel(const EQApplicationPacket *app)
 
 void Client::Handle_OP_EvolveItem(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(Evolve_Item_Toggle_Struct)) {
+	if (app->size != sizeof(EvolveItemToggle_Struct)) {
 		LogError("Received Handle_OP_EvolveItem packet. Expected size {}, received size {}.",
-		         sizeof(Evolve_Item_Toggle_Struct), app->size);
+		         sizeof(EvolveItemToggle_Struct), app->size);
 		return;
 	}
 
