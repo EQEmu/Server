@@ -991,155 +991,79 @@ int64 Mob::GetSpellHPBonuses() {
 	return spell_hp;
 }
 
+bool Mob::IsAnyCasterClass(uint8 class_id) const
+{
+    uint16 classes_bitmask = 0;
+
+    // Determine which bitmask to use
+    if (class_id == Class::None) {
+        classes_bitmask = GetClassesBits();
+    } else {
+        classes_bitmask = GetPlayerClassBit(class_id);
+    }
+
+    // Check for any caster class using HasClass with the appropriate bitmask
+    return HasClass(Class::Cleric, classes_bitmask) ||
+           HasClass(Class::Paladin, classes_bitmask) ||
+           HasClass(Class::Druid, classes_bitmask) ||
+           HasClass(Class::Shaman, classes_bitmask) ||
+           HasClass(Class::Necromancer, classes_bitmask) ||
+           HasClass(Class::Wizard, classes_bitmask) ||
+           HasClass(Class::Enchanter, classes_bitmask) ||
+           HasClass(Class::Magician, classes_bitmask) ||
+           HasClass(Class::ShadowKnight, classes_bitmask) ||
+           HasClass(Class::Bard, classes_bitmask) ||
+           HasClass(Class::Ranger, classes_bitmask) ||
+           HasClass(Class::Beastlord, classes_bitmask);
+}
+
 bool Mob::IsIntelligenceCasterClass(uint8 class_id) const
 {
-	if (IsClient()) {
-		int classes_bits = CastToClient()->GetClassesBits();
-		std::vector<uint16> classes = {
-			Class::ShadowKnight,
-			Class::Bard,
-			Class::Necromancer,
-			Class::Wizard,
-			Class::Magician,
-			Class::Enchanter,
-		};
-		for (const auto& classid : classes) {
-			if (classes_bits & (1 << (classid - 1))) {
-				return true;
-			}
-		}
-	} else {
-		switch (GetClass()) {
-			case Class::ShadowKnight:
-			case Class::Bard:
-			case Class::Necromancer:
-			case Class::Wizard:
-			case Class::Magician:
-			case Class::Enchanter:
-			case Class::ShadowKnightGM:
-			case Class::BardGM:
-			case Class::NecromancerGM:
-			case Class::WizardGM:
-			case Class::MagicianGM:
-			case Class::EnchanterGM:
-				return true;
-		}
-    }
-	return false;
+    uint32 bitmask = (class_id == Class::None) ? GetClassesBits() : GetPlayerClassBit(class_id);
+
+    return HasClass(Class::ShadowKnight, bitmask) ||
+           HasClass(Class::Bard, bitmask) ||
+           HasClass(Class::Necromancer, bitmask) ||
+           HasClass(Class::Wizard, bitmask) ||
+           HasClass(Class::Magician, bitmask) ||
+           HasClass(Class::Enchanter, bitmask);
 }
 
 bool Mob::IsWisdomCasterClass(uint8 class_id) const
 {
-	if (IsClient()) {
-		int classes_bits = CastToClient()->GetClassesBits();
-		std::vector<uint16> classes = {
-			Class::Cleric,
-			Class::Paladin,
-			Class::Ranger,
-			Class::Druid,
-			Class::Shaman,
-			Class::Beastlord,
-		};
-		for (const auto& class_id : classes) {
-			if (classes_bits & (1 << (class_id - 1))) {
-				return true;
-			}
-		}
-	} else {
-        switch (GetClass()) {
-			case Class::Cleric:
-			case Class::Paladin:
-			case Class::Ranger:
-			case Class::Druid:
-			case Class::Shaman:
-			case Class::Beastlord:
-			case Class::ClericGM:
-			case Class::PaladinGM:
-			case Class::RangerGM:
-			case Class::DruidGM:
-			case Class::ShamanGM:
-			case Class::BeastlordGM:
-				return true;
-		}
-    }
-	return false;
+    uint32 bitmask = (class_id == Class::None) ? GetClassesBits() : GetPlayerClassBit(class_id);
+
+    return HasClass(Class::Cleric, bitmask) ||
+           HasClass(Class::Paladin, bitmask) ||
+           HasClass(Class::Ranger, bitmask) ||
+           HasClass(Class::Druid, bitmask) ||
+           HasClass(Class::Shaman, bitmask) ||
+           HasClass(Class::Beastlord, bitmask);
 }
 
 bool Mob::IsPureMeleeClass(uint8 class_id) const
 {
-	if (IsClient()) {
-		int classes_bits = CastToClient()->GetClassesBits();
-		std::vector<uint16> classes = {
-			Class::Warrior,
-			Class::Monk,
-			Class::Rogue,
-			Class::Berserker,
-		};
-		for (const auto& classid : classes) {
-			if (classes_bits & (1 << (classid - 1))) {
-				return true;
-			}
-		}
-	} else {
-        switch (GetClass()) {
-			case Class::Warrior:
-			case Class::Monk:
-			case Class::Rogue:
-			case Class::Berserker:
-			case Class::WarriorGM:
-			case Class::MonkGM:
-			case Class::RogueGM:
-			case Class::BerserkerGM:
-				return true;
-        }
-    }
-	return false;
+    uint32 bitmask = (class_id == Class::None) ? GetClassesBits() : GetPlayerClassBit(class_id);
+
+    return HasClass(Class::Warrior, bitmask) ||
+           HasClass(Class::Monk, bitmask) ||
+           HasClass(Class::Rogue, bitmask) ||
+           HasClass(Class::Berserker, bitmask);
 }
 
 bool Mob::IsWarriorClass(uint8 class_id) const
 {
-	if (IsClient()) {
-		int classes_bits = CastToClient()->GetClassesBits();
-		std::vector<uint16> classes = {
-			Class::Warrior,
-			Class::Paladin,
-			Class::Ranger,
-			Class::ShadowKnight,
-			Class::Monk,
-			Class::Bard,
-			Class::Rogue,
-			Class::Beastlord,
-			Class::Berserker,
-		};
-		for (const auto& classid : classes) {
-			if (classes_bits & (1 << (classid - 1))) {
-				return true;
-			}
-		}
-	} else {
-        switch (GetClass()) {
-			case Class::Warrior:
-			case Class::Paladin:
-			case Class::Ranger:
-			case Class::ShadowKnight:
-			case Class::Monk:
-			case Class::Bard:
-			case Class::Rogue:
-			case Class::Beastlord:
-			case Class::Berserker:
-			case Class::WarriorGM:
-			case Class::PaladinGM:
-			case Class::RangerGM:
-			case Class::ShadowKnightGM:
-			case Class::MonkGM:
-			case Class::BardGM:
-			case Class::RogueGM:
-			case Class::BeastlordGM:
-			case Class::BerserkerGM:
-				return true;
-        }
-    }
-	return false;
+    uint32 bitmask = (class_id == Class::None) ? GetClassesBits() : GetPlayerClassBit(class_id);
+
+    return HasClass(Class::Warrior, bitmask) ||
+           HasClass(Class::Paladin, bitmask) ||
+           HasClass(Class::Ranger, bitmask) ||
+           HasClass(Class::ShadowKnight, bitmask) ||
+           HasClass(Class::Monk, bitmask) ||
+           HasClass(Class::Bard, bitmask) ||
+           HasClass(Class::Rogue, bitmask) ||
+           HasClass(Class::Beastlord, bitmask) ||
+           HasClass(Class::Berserker, bitmask);
 }
 
 uint8 Mob::GetArchetype() const
@@ -4762,15 +4686,21 @@ uint32 Mob::GetClassesBits() const
 	}
 }
 
-bool Mob::HasClass(uint8 player_class) const {
-	if (player_class >= Class::Warrior && player_class <= Class::Berserker) {
-		if (GetPlayerClassBit(player_class) & GetClassesBits()) {
-			return true;
-		}
-	}
+bool Mob::HasClass(uint8 player_class, uint32 bitmask) const {
+    // Default case
+    if (bitmask == 0) {
+        bitmask = GetClassesBits();
+    }
 
-	return false;
+    if (player_class >= Class::Warrior && player_class <= Class::Berserker) {
+        if (GetPlayerClassBit(player_class) & bitmask) {
+            return true;
+        }
+    }
+
+    return false;
 }
+
 
 bool Mob::CanThisClassParry(void) const
 {

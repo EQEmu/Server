@@ -853,6 +853,7 @@ public:
 	bool IsIntelligenceCasterClass(uint8 class_id = 0) const;
 	bool IsPureMeleeClass(uint8 class_id = 0) const;
 	bool IsWisdomCasterClass(uint8 class_id = 0) const;
+	bool IsAnyCasterClass(uint8 class_id = 0) const;
 	uint8 GetArchetype() const;
 	const std::string GetArchetypeName();
 	void SetZone(uint32 zone_id, uint32 instance_id);
@@ -1336,7 +1337,7 @@ public:
 	Trade* trade;
 
 	uint32 GetClassesBits() const;
-	bool HasClass(uint8 player_class) const;
+	bool HasClass(uint8 player_class, uint32 bitmask = 0) const;
 
 	bool ShieldAbility(uint32 target_id, int shielder_max_distance = 15, int shield_duration = 12000, int shield_target_mitigation = 50, int shielder_mitigation = 75, bool use_aa = false, bool can_shield_npc = true);
 	void DoShieldDamageOnShielder(Mob *shield_target, int64 hit_damage_done, EQ::skills::SkillType skillInUse);
