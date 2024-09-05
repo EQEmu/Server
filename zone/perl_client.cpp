@@ -1249,27 +1249,23 @@ void Perl_Client_AddPVPPoints(Client* self, uint32 points) // @categories Curren
 
 void Perl_Client_AddCrystals(Client* self, uint32 radiant_count, uint32 ebon_count) // @categories Currency and Points
 {
-	if (ebon_count != 0) {
-		if (ebon_count > 0) {
-			self->AddEbonCrystals(ebon_count);
-		} else {
-			self->RemoveEbonCrystals(ebon_count);
-		}
-		} else {
-			self->RemoveEbonCrystals(ebon_count);
-		}
-	}
+    // Handling Ebon Crystals
+    if (ebon_count != 0) {
+        if (ebon_count > 0) {
+            self->AddEbonCrystals(ebon_count);
+        } else {
+            self->RemoveEbonCrystals(-ebon_count);  // Removing should use positive value
+        }
+    }
 
-	if (radiant_count != 0) {
-		if (radiant_count > 0) {
-			self->AddRadiantCrystals(radiant_count);
-		} else {
-			self->RemoveRadiantCrystals(radiant_count);
-		}
-		} else {
-			self->RemoveRadiantCrystals(radiant_count);
-		}
-	}
+    // Handling Radiant Crystals
+    if (radiant_count != 0) {
+        if (radiant_count > 0) {
+            self->AddRadiantCrystals(radiant_count);
+        } else {
+            self->RemoveRadiantCrystals(-radiant_count);  // Removing should use positive value
+        }
+    }
 }
 
 void Perl_Client_SetEbonCrystals(Client* self, uint32 value)

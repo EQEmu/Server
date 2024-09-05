@@ -1320,36 +1320,19 @@ void Lua_Client::AddPVPPoints(uint32 points) {
 }
 
 void Lua_Client::AddCrystals(uint32 radiant_count, uint32 ebon_count) {
-void Lua_Client::AddCrystals(uint32 radiant_count, uint32 ebon_count) {
-	Lua_Safe_Call_Void();
+    Lua_Safe_Call_Void();
 
-	if (ebon_count != 0) {
-		if (ebon_count > 0) {
-			self->AddEbonCrystals(ebon_count);
-		} else {
-			self->RemoveEbonCrystals(ebon_count);
-		}
-	if (ebon_count != 0) {
-		if (ebon_count > 0) {
-			self->AddEbonCrystals(ebon_count);
-		} else {
-			self->RemoveEbonCrystals(ebon_count);
-		}
-	}
+    if (ebon_count > 0) {
+        self->AddEbonCrystals(ebon_count);
+    } else if (ebon_count < 0) {
+        self->RemoveEbonCrystals(-ebon_count);  // Remove needs positive value
+    }
 
-	if (radiant_count != 0) {
-		if (radiant_count > 0) {
-			self->AddRadiantCrystals(radiant_count);
-		} else {
-			self->RemoveRadiantCrystals(radiant_count);
-		}
-	if (radiant_count != 0) {
-		if (radiant_count > 0) {
-			self->AddRadiantCrystals(radiant_count);
-		} else {
-			self->RemoveRadiantCrystals(radiant_count);
-		}
-	}
+    if (radiant_count > 0) {
+        self->AddRadiantCrystals(radiant_count);
+    } else if (radiant_count < 0) {
+        self->RemoveRadiantCrystals(-radiant_count);  // Remove needs positive value
+    }
 }
 
 void Lua_Client::SetEbonCrystals(uint32 value) {
