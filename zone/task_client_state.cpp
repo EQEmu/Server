@@ -869,7 +869,12 @@ int ClientTaskState::IncrementDoneCount(
 	if (task_data->type != TaskType::Shared) {
 		// live messages for each increment of non-shared tasks
 		auto activity_type = task_data->activity_information[activity_id].activity_type;
-		int msg_count = activity_type == TaskActivityType::GiveCash ? 1 : count;
+		int msg_count = 1;
+
+		if (activity_type != TaskActivityType::GiveCash) {
+			msg_count = std::min(count, RuleI(TaskSystem, MaxUpdateMessages));
+		}
+
 		for (int i = 0; i < msg_count; ++i) {
 			client->MessageString(Chat::DefaultText, TASK_UPDATED, task_data->title.c_str());
 		}

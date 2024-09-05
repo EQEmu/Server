@@ -1320,6 +1320,7 @@ void Lua_Client::AddPVPPoints(uint32 points) {
 }
 
 void Lua_Client::AddCrystals(uint32 radiant_count, uint32 ebon_count) {
+void Lua_Client::AddCrystals(uint32 radiant_count, uint32 ebon_count) {
 	Lua_Safe_Call_Void();
 
 	if (ebon_count != 0) {
@@ -1328,8 +1329,20 @@ void Lua_Client::AddCrystals(uint32 radiant_count, uint32 ebon_count) {
 		} else {
 			self->RemoveEbonCrystals(ebon_count);
 		}
+	if (ebon_count != 0) {
+		if (ebon_count > 0) {
+			self->AddEbonCrystals(ebon_count);
+		} else {
+			self->RemoveEbonCrystals(ebon_count);
+		}
 	}
 
+	if (radiant_count != 0) {
+		if (radiant_count > 0) {
+			self->AddRadiantCrystals(radiant_count);
+		} else {
+			self->RemoveRadiantCrystals(radiant_count);
+		}
 	if (radiant_count != 0) {
 		if (radiant_count > 0) {
 			self->AddRadiantCrystals(radiant_count);
@@ -3517,6 +3530,24 @@ bool Lua_Client::AreTasksCompleted(luabind::object task_ids)
 	return self->AreTasksCompleted(v);
 }
 
+void Lua_Client::AreaTaunt()
+{
+	Lua_Safe_Call_Void();
+	entity_list.AETaunt(self);
+}
+
+void Lua_Client::AreaTaunt(float range)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AETaunt(self, range);
+}
+
+void Lua_Client::AreaTaunt(float range, int bonus_hate)
+{
+	Lua_Safe_Call_Void();
+	entity_list.AETaunt(self, range, bonus_hate);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3564,6 +3595,9 @@ luabind::scope lua_register_client() {
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,int,bool,bool))&Lua_Client::ApplySpellRaid)
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,int,bool,bool,bool))&Lua_Client::ApplySpellRaid)
 	.def("AreTasksCompleted", (bool(Lua_Client::*)(luabind::object))&Lua_Client::AreTasksCompleted)
+	.def("AreaTaunt", (void(Lua_Client::*)(void))&Lua_Client::AreaTaunt)
+	.def("AreaTaunt", (void(Lua_Client::*)(float))&Lua_Client::AreaTaunt)
+	.def("AreaTaunt", (void(Lua_Client::*)(float, int))&Lua_Client::AreaTaunt)
 	.def("AssignTask", (void(Lua_Client::*)(int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AssignTask)

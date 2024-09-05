@@ -1255,11 +1255,17 @@ void Perl_Client_AddCrystals(Client* self, uint32 radiant_count, uint32 ebon_cou
 		} else {
 			self->RemoveEbonCrystals(ebon_count);
 		}
+		} else {
+			self->RemoveEbonCrystals(ebon_count);
+		}
 	}
 
 	if (radiant_count != 0) {
 		if (radiant_count > 0) {
 			self->AddRadiantCrystals(radiant_count);
+		} else {
+			self->RemoveRadiantCrystals(radiant_count);
+		}
 		} else {
 			self->RemoveRadiantCrystals(radiant_count);
 		}
@@ -3321,6 +3327,21 @@ bool Perl_Client_AreTasksCompleted(Client* self, perl::array task_ids)
 	return self->AreTasksCompleted(v);
 }
 
+void Perl_Client_AreaTaunt(Client* self)
+{
+	entity_list.AETaunt(self);
+}
+
+void Perl_Client_AreaTaunt(Client* self, float range)
+{
+	entity_list.AETaunt(self, range);
+}
+
+void Perl_Client_AreaTaunt(Client* self, float range, int bonus_hate)
+{
+	entity_list.AETaunt(self, range, bonus_hate);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3371,6 +3392,9 @@ void perl_register_client()
 	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool, bool, bool))&Perl_Client_ApplySpellRaid);
 	package.add("AreTasksCompleted", (bool(*)(Client*, perl::array))&Perl_Client_AreTasksCompleted);
+	package.add("AreaTaunt", (void(*)(Client*))&Perl_Client_AreaTaunt);
+	package.add("AreaTaunt", (void(*)(Client*, float))&Perl_Client_AreaTaunt);
+	package.add("AreaTaunt", (void(*)(Client*, float, int))&Perl_Client_AreaTaunt);
 	package.add("AssignTask", (void(*)(Client*, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int, bool))&Perl_Client_AssignTask);

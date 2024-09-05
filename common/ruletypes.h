@@ -732,6 +732,7 @@ RULE_BOOL(TaskSystem, ExpRewardsIgnoreLevelBasedEXPMods, false, "Rewarding Level
 RULE_INT(TaskSystem, SharedTasksWorldProcessRate, 6000, "Timer interval (milliseconds) that shared tasks are processed in world")
 RULE_INT(TaskSystem, SharedTasksTerminateTimerMS, 120000, "Delay (milliseconds) until a shared task is terminated if requirements are no longer met after member removal (default: 2 minutes)")
 RULE_BOOL(TaskSystem, UpdateOneElementPerTask, true, "If true (live-like) task updates only increment the first matching activity. If false all matching elements will be incremented.")
+RULE_INT(TaskSystem, MaxUpdateMessages, 50, "Maximum update messages for non-GiveCash activity types in IncrementDoneCount")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Range)
@@ -928,6 +929,7 @@ RULE_BOOL(Inventory, AllowAnyWeaponTransformation, false, "Weapons can use any w
 RULE_BOOL(Inventory, TransformSummonedBags, false, "Transforms summoned bags into disenchanted ones instead of deleting")
 RULE_BOOL(Inventory, AllowMultipleOfSameAugment, false, "Allows multiple of the same augment to be placed in an item via #augmentitem or MQ2, set to true to allow")
 RULE_INT(Inventory, AlternateAugmentationSealer, 53, "Allows RoF+ clients to augment items from a special container type")
+RULE_BOOL(Inventory, LazyLoadBank, true, "Don't load bank during zoning, only when in proximinity to a banker. May increase zone speed and stability")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)

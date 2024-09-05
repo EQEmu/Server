@@ -8748,3 +8748,15 @@ void Mob::SetExtraHaste(int haste, bool need_to_save)
 		}
 	}
 }
+
+bool Mob::IsCloseToBanker()
+{
+	for (auto &e: entity_list.GetCloseMobList(this)) {
+		auto mob = e.second;
+		if (mob && mob->IsNPC() && mob->GetClass() == Class::Banker) {
+			return true;
+		}
+	}
+
+	return false;
+}

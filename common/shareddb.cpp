@@ -1083,8 +1083,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		if (slot_id > (EQ::invbag::TRADE_BAGS_END)) {
 			put_slot_id = inv->PushCursor(*inst);
 		}
-
-		/* COMMENTING THIS OUT FOR NOW.. THIS IS CAUSING ISSUES
 		else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
 			LogError(
@@ -1094,7 +1092,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 				slot_id
 			);
 			put_slot_id = inv->PushCursor(*inst);
-		}*/
+		}
 		else {
 			put_slot_id = inv->PutItem(slot_id, *inst);
 		}

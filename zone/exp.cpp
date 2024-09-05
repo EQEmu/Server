@@ -923,6 +923,7 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 		return; // Must be invalid class/race
 	}
 
+
 	uint32 i = 0;
 	uint32 membercount = 0;
 	if(GetGroup()) {
