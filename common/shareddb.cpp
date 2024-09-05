@@ -1083,8 +1083,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		if (slot_id > (EQ::invbag::TRADE_BAGS_END)) {
 			put_slot_id = inv->PushCursor(*inst);
 		}
-		else if (slot_id >= 3111 && slot_id <= 3179) {
-		}
+
 		else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
 			LogError(
@@ -1125,9 +1124,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 	}
 
 	if (cv_conflict) {
-		const std::string &char_name = GetCharName(char_id);
-		LogError(
-			"ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 		const std::string &char_name = GetCharName(char_id);
 		LogError(
 			"ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
