@@ -1969,7 +1969,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		type_of_pet != petTargetLock &&
 		DistanceSquared(GetPosition(), target->GetPosition()) <= (RuleI(Pets, PetTauntRange) * RuleI(Pets, PetTauntRange))
 	) {
-		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
+		SayString(GetOwner(), Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), true);
 		for (const auto & ent : entity_list.GetNPCList()) {
 			auto mob = ent.second;

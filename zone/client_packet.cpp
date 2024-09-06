@@ -11614,14 +11614,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			auto handleTaunt = [&](Mob* pet, bool enable_taunt) {
 				if ((pet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || pet->GetPetType() != petAnimation) {
 					if (enable_taunt) {
-						MessageString(Chat::PetResponse, PET_DO_TAUNT);
+						pet->SayString(this, Chat::PetResponse, PET_DO_TAUNT);
 						pet->CastToNPC()->SetTaunting(true);
 
 						if (pet->GetID() == focused_pet_id) {
 							SetPetCommandState(PET_BUTTON_TAUNT, 1);
 						}
 					} else {
-						MessageString(Chat::PetResponse, PET_NO_TAUNT);
+						pet->SayString(this, Chat::PetResponse, PET_NO_TAUNT);
 						pet->CastToNPC()->SetTaunting(false);
 
 						if (pet->GetID() == focused_pet_id) {
