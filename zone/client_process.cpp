@@ -2181,19 +2181,16 @@ void Client::CalcRestState()
 	// The client must have been out of combat for RuleI(Character, RestRegenTimeToActivate) seconds,
 	// must be sitting down, and must not have any detrimental spells affecting them.
 	if(!RuleB(Character, RestRegenEnabled)) {
-		LogDebug("Exiting because Rest Regen is not enabled");
 		return;
 	}
 
 	ooc_regen = false;
 
 	if(AggroCount || !(IsSitting() || CanMedOnHorse())) {
-		LogDebug("Exiting because aggro or sitting");
 		return;
 	}
 
 	if(!rest_timer.Check(false)) {
-		LogDebug("Exiting because timer is not expired");
 		return;
 	}
 
@@ -2209,29 +2206,16 @@ void Client::CalcRestState()
 						return;
 			}
 		}
-	} else {
-		LogDebug("Skipped Buff Checks due to rule");
 	}
 
 	ooc_regen = true;
-
-	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
-		auto outapp = new EQApplicationPacket(OP_RestState, 5);
-		char *Buffer = (char *)outapp->pBuffer;
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x00);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-
-	LogDebug("ooc_regen is true now lol");
 }
 
 void Mob::ClearRestingDetrimentalEffects()
 {
 	if (RuleB(Custom, ClearRestingDetrimentalEffectsEnabled)) {
 		const auto source_mob = GetOwnerOrSelf();
-		if (source_mob->IsClient() && source_mob->CastToClient()->CanFastRegen()) {
+		if (source_mob->IsClient() && source_mob->ooc_regen) {
 			const uint32 buff_count = GetMaxTotalSlots();
 			for (unsigned int j = 0; j < buff_count; j++) {
 				const uint16 buff_id = buffs[j].spellid;
