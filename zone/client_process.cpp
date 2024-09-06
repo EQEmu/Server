@@ -2180,20 +2180,22 @@ void Client::CalcRestState()
 	// This method calculates rest state HP and mana regeneration.
 	// The client must have been out of combat for RuleI(Character, RestRegenTimeToActivate) seconds,
 	// must be sitting down, and must not have any detrimental spells affecting them.
-	if(!RuleB(Character, RestRegenEnabled))
+	if(!RuleB(Character, RestRegenEnabled)) {
+		LogDebug("Exiting because Rest Regen is not enabled");
 		return;
-
-	if (!rest_timer.Enabled()) {
-		rest_timer.Start(1);
 	}
 
 	ooc_regen = false;
 
-	if(AggroCount || !(IsSitting() || CanMedOnHorse()))
+	if(AggroCount || !(IsSitting() || CanMedOnHorse())) {
+		LogDebug("Exiting because aggro or sitting");
 		return;
+	}
 
-	if(!rest_timer.Check(false))
+	if(!rest_timer.Check(false)) {
+		LogDebug("Exiting because timer is not expired");
 		return;
+	}
 
 	// so we don't have aggro, our timer has expired, we do not want this to cause issues
 	m_pp.RestTimer = 0;
@@ -2207,9 +2209,13 @@ void Client::CalcRestState()
 						return;
 			}
 		}
+	} else {
+		LogDebug("Skipped Buff Checks due to rule");
 	}
 
 	ooc_regen = true;
+
+	LogDebug("ooc_regen is true now lol");
 }
 
 void Mob::ClearRestingDetrimentalEffects()
