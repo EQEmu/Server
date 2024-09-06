@@ -2198,12 +2198,14 @@ void Client::CalcRestState()
 	// so we don't have aggro, our timer has expired, we do not want this to cause issues
 	m_pp.RestTimer = 0;
 
-	uint32 buff_count = GetMaxTotalSlots();
-	for (unsigned int j = 0; j < buff_count; j++) {
-		if(IsValidSpell(buffs[j].spellid)) {
-			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if(!IsRestAllowedSpell(buffs[j].spellid) && !RuleB(Custom, ClearRestingDetrimentalEffectsEnabled))
-					return;
+	if (!RuleB(Custom, ClearRestingDetrimentalEffectsEnabled)) {
+		uint32 buff_count = GetMaxTotalSlots();
+		for (unsigned int j = 0; j < buff_count; j++) {
+			if(IsValidSpell(buffs[j].spellid)) {
+				if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
+					if(!IsRestAllowedSpell(buffs[j].spellid))
+						return;
+			}
 		}
 	}
 
