@@ -2219,7 +2219,7 @@ void Client::CalcRestState()
 		auto outapp = new EQApplicationPacket(OP_RestState, 5);
 		char *Buffer = (char *)outapp->pBuffer;
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x00);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, new_timer);
+		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
