@@ -1384,7 +1384,6 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	if(!spellid)
 		return;
 
-	LogDebug("Tracing: [{}], [{}]", bardsong, IsBardSong(casting_spell_id));
 	if (bardsong || IsBardSong(casting_spell_id)) {
 		ZeroBardPulseVars();
 	}

@@ -2183,6 +2183,10 @@ void Client::CalcRestState()
 	if(!RuleB(Character, RestRegenEnabled))
 		return;
 
+	if (!rest_timer.Enabled()) {
+		rest_timer.Start(1);
+	}
+
 	ooc_regen = false;
 
 	if(AggroCount || !(IsSitting() || CanMedOnHorse()))
