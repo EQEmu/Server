@@ -2215,6 +2215,15 @@ void Client::CalcRestState()
 
 	ooc_regen = true;
 
+	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
+		auto outapp = new EQApplicationPacket(OP_RestState, 5);
+		char *Buffer = (char *)outapp->pBuffer;
+		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x00);
+		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, new_timer);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+
 	LogDebug("ooc_regen is true now lol");
 }
 

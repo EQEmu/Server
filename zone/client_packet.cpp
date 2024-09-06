@@ -1042,7 +1042,6 @@ void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket *app)
 		SendZoneInPackets();
 	CompleteConnect();
 	SendHPUpdate();
-	UpdateRestTimer(1);
 }
 
 void Client::Handle_Connect_OP_ClientUpdate(const EQApplicationPacket *app)
