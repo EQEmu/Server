@@ -1092,7 +1092,13 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 	}
 	// end QS code
 
+	auto item_id   = m_inv.GetItem(slot_id)->GetID();
 	bool isDeleted = m_inv.DeleteItem(slot_id, quantity);
+	if (item_id && isDeleted && GetEvolvingItems().contains(item_id)) {
+		CharacterEvolvingItemsRepository::DeleteOne(database, GetEvolvingItems().at(item_id).id);
+		GetEvolvingItems().erase(item_id);
+	}
+
 
 	const EQ::ItemInstance* inst = nullptr;
 	if (slot_id == EQ::invslot::slotCursor) {
@@ -1169,11 +1175,12 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 		return false;
 	}
 
-	auto inst_clone = evolving_items_manager.DoLootChecks(this, slot_id, inst);
+	auto inst_clone = evolving_items_manager.DoEquipedChecks(this, slot_id, inst);
+	m_inv.PutItem(slot_id, inst_clone);
 
 	if (client_update)
 	{
-		SendItemPacket(slot_id, inst_clone, ((slot_id == EQ::invslot::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
+		SendItemPacket(slot_id, &inst_clone, ((slot_id == EQ::invslot::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
 		//SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id));
 	}
 
@@ -1184,10 +1191,10 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 		return database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
-		return database.SaveInventory(CharacterID(), inst_clone, slot_id);
+		return database.SaveInventory(CharacterID(), &inst_clone, slot_id);
 	}
 
-	CalcBonuses(); // this never fires??
+	CalcBonuses(); // this never fires??  moved to above 2024-09-04
 	// a lot of wasted checks and calls coded above...
 }
 
@@ -1197,26 +1204,27 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 
 	bool cursor_empty = m_inv.CursorEmpty();
 
-	auto inst_clone = evolving_items_manager.DoLootChecks(this, slot_id, inst);
+	auto inst_clone = evolving_items_manager.DoEquipedChecks(this, slot_id, inst);
+	m_inv.PutItem(slot_id, inst_clone);
 
 	if (slot_id == EQ::invslot::slotCursor) {
-		m_inv.PushCursor(*inst_clone);
+		m_inv.PushCursor(inst_clone);
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
-		m_inv.PutItem(slot_id, *inst_clone);
-		database.SaveInventory(CharacterID(), inst_clone, slot_id);
+		m_inv.PutItem(slot_id, inst_clone);
+		database.SaveInventory(CharacterID(), &inst_clone, slot_id);
 	}
 
 	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
 	if (slot_id == EQ::invslot::slotCursor && !cursor_empty) {
 		// RoF+ currently has a specialized cursor handler
 		if (ClientVersion() < EQ::versions::ClientVersion::RoF)
-			SendItemPacket(slot_id, inst_clone, ItemPacketLimbo);
+			SendItemPacket(slot_id, &inst_clone, ItemPacketLimbo);
 	}
 	else {
-		SendLootItemInPacket(inst_clone, slot_id);
+		SendLootItemInPacket(&inst_clone, slot_id);
 	}
 
 	if (bag_item_data) {
@@ -1244,7 +1252,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 			// (This assumes that the data passed is correctly associated..no safety checks are implemented)
 			if (slot_id == EQ::invslot::slotCursor && !cursor_empty) {
 				LogInventory("Putting bag loot item [{}] ([{}]) into slot [{}] (non-empty cursor override)",
-					inst_clone->GetItem()->Name, inst_clone->GetItem()->ID, EQ::invslot::slotCursor);
+					inst_clone.GetItem()->Name, inst_clone.GetItem()->ID, EQ::invslot::slotCursor);
 
 				PutLootInInventory(EQ::invslot::slotCursor, *bagitem);
 			}
@@ -1252,7 +1260,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 				auto bag_slot = EQ::InventoryProfile::CalcSlotId(slot_id, index);
 
 				LogInventory("Putting bag loot item [{}] ([{}]) into slot [{}] (bag slot [{}])",
-					inst_clone->GetItem()->Name, inst_clone->GetItem()->ID, bag_slot, index);
+					inst_clone.GetItem()->Name, inst_clone.GetItem()->ID, bag_slot, index);
 
 				PutLootInInventory(bag_slot, *bagitem);
 			}

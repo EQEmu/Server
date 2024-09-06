@@ -36,6 +36,9 @@ void Client::DoEvolveItemToggle(const EQApplicationPacket* app)
 
 	item.activated = in->activated;
 
+	auto inst = GetInv().GetItem(GetInv().HasItem(item.item_id));
+	inst->SetEvolveActivated(item.activated ? true : false);
+
 	// update client in memory status
 	if (GetEvolvingItems().contains(item.item_id)) {
 		GetEvolvingItems().at(item.item_id).activated = in->activated;
