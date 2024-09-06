@@ -934,7 +934,8 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 
 	// Lie to the client about who can use this AA rank if we are multiclassing
 	if (RuleB(Custom, MulticlassingEnabled)) {
-		if (ability->id == 358) {
+		// Fury of Magic (Hybrid), Thief's Intutition
+		if (ability->id == 358 || ability->id == 568 || ability->id == 569) {
 			// Skip loading fury of magic.
 			safe_delete(outapp);
 			return;
