@@ -1673,7 +1673,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 				if (IsSeasonal()) {
 					Message(Chat::Red, "WARNING: Seasonal Characters may not access the Shared Bank. Any deposited platinum visible here is a visual glitch only.");
 
-					AddPlatinum(amount_to_take, true);
+					AddPlatinum(amount_to_add, true);
 					m_pp.platinum_shared = 0;
 					m_pp.platinum_cursor = 0;
 				} else {
