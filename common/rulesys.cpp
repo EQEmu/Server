@@ -189,6 +189,8 @@ void RuleManager::ResetRules(bool reload) {
 		m_RuleRealValues[ Real__##rule_name ] = default_value;
 	#define RULE_BOOL(category_name, rule_name, default_value, notes) \
 		m_RuleBoolValues[ Bool__##rule_name ] = default_value;
+	#define RULE_STRING(category_name, rule_name, default_value, notes) \
+		m_RuleStringValues[ String__##rule_name ] = default_value;
 	#include "ruletypes.h"
 
 	// restore these rules to their pre-reset values
