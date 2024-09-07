@@ -1171,16 +1171,12 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 		return PushItemOnCursor(inst, client_update);
 	}
 
-	if (!inst) {
-		return false;
-	}
-
-	auto inst_clone = evolving_items_manager.DoEquipedChecks(this, slot_id, inst);
-	m_inv.PutItem(slot_id, inst_clone);
+	evolving_items_manager.DoLootChecks(this, slot_id, inst);
+	m_inv.PutItem(slot_id, inst);
 
 	if (client_update)
 	{
-		SendItemPacket(slot_id, &inst_clone, ((slot_id == EQ::invslot::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
+		SendItemPacket(slot_id, &inst, ((slot_id == EQ::invslot::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
 		//SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id));
 	}
 
@@ -1190,11 +1186,10 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		return database.SaveCursor(CharacterID(), s, e);
 	}
-	else {
-		return database.SaveInventory(CharacterID(), &inst_clone, slot_id);
-	}
 
-	CalcBonuses(); // this never fires??  moved to above 2024-09-04
+	return database.SaveInventory(CharacterID(), &inst, slot_id);
+
+	//CalcBonuses(); // this never fires??
 	// a lot of wasted checks and calls coded above...
 }
 
@@ -1204,27 +1199,26 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 
 	bool cursor_empty = m_inv.CursorEmpty();
 
-	auto inst_clone = evolving_items_manager.DoEquipedChecks(this, slot_id, inst);
-	m_inv.PutItem(slot_id, inst_clone);
+	evolving_items_manager.DoLootChecks(this, slot_id, inst);
 
 	if (slot_id == EQ::invslot::slotCursor) {
-		m_inv.PushCursor(inst_clone);
+		m_inv.PushCursor(inst);
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
-		m_inv.PutItem(slot_id, inst_clone);
-		database.SaveInventory(CharacterID(), &inst_clone, slot_id);
+		m_inv.PutItem(slot_id, inst);
+		database.SaveInventory(CharacterID(), &inst, slot_id);
 	}
 
 	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
 	if (slot_id == EQ::invslot::slotCursor && !cursor_empty) {
 		// RoF+ currently has a specialized cursor handler
 		if (ClientVersion() < EQ::versions::ClientVersion::RoF)
-			SendItemPacket(slot_id, &inst_clone, ItemPacketLimbo);
+			SendItemPacket(slot_id, &inst, ItemPacketLimbo);
 	}
 	else {
-		SendLootItemInPacket(&inst_clone, slot_id);
+		SendLootItemInPacket(&inst, slot_id);
 	}
 
 	if (bag_item_data) {
@@ -1252,7 +1246,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 			// (This assumes that the data passed is correctly associated..no safety checks are implemented)
 			if (slot_id == EQ::invslot::slotCursor && !cursor_empty) {
 				LogInventory("Putting bag loot item [{}] ([{}]) into slot [{}] (non-empty cursor override)",
-					inst_clone.GetItem()->Name, inst_clone.GetItem()->ID, EQ::invslot::slotCursor);
+					inst.GetItem()->Name, inst.GetItem()->ID, EQ::invslot::slotCursor);
 
 				PutLootInInventory(EQ::invslot::slotCursor, *bagitem);
 			}
@@ -1260,7 +1254,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 				auto bag_slot = EQ::InventoryProfile::CalcSlotId(slot_id, index);
 
 				LogInventory("Putting bag loot item [{}] ([{}]) into slot [{}] (bag slot [{}])",
-					inst_clone.GetItem()->Name, inst_clone.GetItem()->ID, bag_slot, index);
+					inst.GetItem()->Name, inst.GetItem()->ID, bag_slot, index);
 
 				PutLootInInventory(bag_slot, *bagitem);
 			}

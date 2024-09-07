@@ -68,70 +68,39 @@ double EvolvingItemsManager::CalculateProgression(const uint64 current_amount, c
 			   : 0;
 }
 
-const EQ::ItemInstance& EvolvingItemsManager::DoEquipedChecks(Client *c, uint16 slot_id, const EQ::ItemInstance& inst) const
+void EvolvingItemsManager::DoLootChecks(Client *c, uint16 slot_id, const EQ::ItemInstance& inst) const
 {
-	bool equiped = false;
-	auto inst_clone = inst.Clone();
+	static_cast<EQ::ItemInstance>(inst).SetEvolveEquiped(false);
+	if (inst.IsEvolvingItem() && slot_id <= EQ::invslot::EQUIPMENT_END && slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
+		static_cast<EQ::ItemInstance>(inst).SetEvolveEquiped(true);
+		if (c->GetEvolvingItems().contains(inst.GetID())) {
+			c->GetEvolvingItems().at(inst.GetID()).equiped = true;
+			CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst.GetID()));
+		}
+		else {
+			auto e           = CharacterEvolvingItemsRepository::NewEntity();
+			e.char_id        = c->CharacterID();
+			e.equiped        = true;
+			e.item_id        = inst.GetID();
 
-	if (inst_clone->IsEvolvingItem() && slot_id <= EQ::invslot::EQUIPMENT_END && slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
-		equiped = true;
+			auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
+			e.id = result.id;
+			c->GetEvolvingItems().emplace(inst.GetID(), e);
+		}
+	} else {
+		if (c->GetEvolvingItems().contains(inst.GetID())) {
+			c->GetEvolvingItems().at(inst.GetID()).equiped = false;
+			CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst.GetID()));
+		}
+		else {
+			auto e           = CharacterEvolvingItemsRepository::NewEntity();
+			e.char_id        = c->CharacterID();
+			e.equiped        = false;
+			e.item_id        = inst.GetID();
+
+			auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
+			e.id = result.id;
+			c->GetEvolvingItems().emplace(inst.GetID(), e);
+		}
 	}
-
-	inst_clone->SetEvolveEquiped(equiped);
-	if (c->GetEvolvingItems().contains(inst_clone->GetID())) {
-		c->GetEvolvingItems().at(inst_clone->GetID()).equiped = equiped;
-		CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst_clone->GetID()));
-		return *inst_clone;
-	}
-
-	auto e    = CharacterEvolvingItemsRepository::NewEntity();
-	e.char_id = c->CharacterID();
-	e.equiped = true;
-	e.item_id = inst_clone->GetID();
-
-	auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
-	e.id        = result.id;
-	c->GetEvolvingItems().emplace(inst_clone->GetID(), e);
-	return *inst_clone;
-
-
-
-	// auto inst_clone = inst.Clone();
-	// inst_clone->SetEvolveEquiped(false);
-	// if (inst_clone->IsEvolvingItem() && slot_id <= EQ::invslot::EQUIPMENT_END && slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
-	// 	inst_clone->SetEvolveEquiped(true);
-	// 	c->GetInv().PutItem(slot_id, *inst_clone);
-	// 	if (c->GetEvolvingItems().contains(inst_clone->GetID())) {
-	// 		c->GetEvolvingItems().at(inst_clone->GetID()).equiped = true;
-	// 		CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst_clone->GetID()));
-	// 	}
-	// 	else {
-	// 		auto e           = CharacterEvolvingItemsRepository::NewEntity();
-	// 		e.char_id        = c->CharacterID();
-	// 		e.equiped        = true;
-	// 		e.item_id        = inst_clone->GetID();
-	//
-	// 		auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
-	// 		e.id = result.id;
-	// 		c->GetEvolvingItems().emplace(inst_clone->GetID(), e);
-	// 	}
-	// } else {
-	// 	c->GetInv().PutItem(slot_id, *inst_clone);
-	// 	if (c->GetEvolvingItems().contains(inst_clone->GetID())) {
-	// 		c->GetEvolvingItems().at(inst_clone->GetID()).equiped = false;
-	// 		CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst_clone->GetID()));
-	// 	}
-	// 	else {
-	// 		auto e           = CharacterEvolvingItemsRepository::NewEntity();
-	// 		e.char_id        = c->CharacterID();
-	// 		e.equiped        = false;
-	// 		e.item_id        = inst_clone->GetID();
-	//
-	// 		auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
-	// 		e.id = result.id;
-	// 		c->GetEvolvingItems().emplace(inst_clone->GetID(), e);
-	// 	}
-	// }
-	//
-	// return inst_clone;
 }
