@@ -316,20 +316,20 @@ namespace EQ
 		int8             GetEvolveLvl() const { return GetItem()->EvolvingLevel; }
 		bool             IsEvolving() const { return GetItem()->EvolvingItem; }
 		bool             GetEvolveActivated() const { return m_evolving_details.activated; }
-		void             SetEvolveActivated(const bool in) { m_evolving_details.activated = in; }
 		bool             GetEvolveEquiped() const { return m_evolving_details.equiped; }
-		void             SetEvolveEquiped(const bool in) { m_evolving_details.equiped = in; }
 		double           GetEvolveProgression() const { return m_evolving_details.progression; }
-		void             SetEvolveProgression(const double in) { m_evolving_details.progression = in; }
 		uint64           GetEvolveUniqueID() const { return m_evolving_details.id; }
-		void             SetEvolveUniqueID(const uint64 in) { m_evolving_details.id = in; }
 		uint32           GetEvolveCharID() const { return m_evolving_details.char_id; }
-		void             SetEvolveCharID(const uint32 in) { m_evolving_details.char_id = in; }
 		uint32           GetEvolveItemID() const { return m_evolving_details.item_id; }
-		void             SetEvolveItemID(const uint32 in) { m_evolving_details.item_id = in; }
 		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
-		void             SetEvolveCurrentAmount(const uint64 in) { m_evolving_details.current_amount = in; }
-		void             SetEvolveAddToCurrentAmount(const uint64 in) { m_evolving_details.current_amount += in; }
+		void             SetEvolveEquiped(const bool in) const { m_evolving_details.equiped = in; }
+		void             SetEvolveActivated(const bool in) const { m_evolving_details.activated = in; }
+		void             SetEvolveProgression(const double in) const { m_evolving_details.progression = in; }
+		void             SetEvolveUniqueID(const uint64 in) const { m_evolving_details.id = in; }
+		void             SetEvolveCharID(const uint32 in) const { m_evolving_details.char_id = in; }
+		void             SetEvolveItemID(const uint32 in) const { m_evolving_details.item_id = in; }
+		void             SetEvolveCurrentAmount(const uint64 in) const { m_evolving_details.current_amount = in; }
+		void             SetEvolveAddToCurrentAmount(const uint64 in) const { m_evolving_details.current_amount += in; }
 
 	protected:
 		//////////////////////////
@@ -362,7 +362,7 @@ namespace EQ
 		uint32           m_ornament_hero_model{0};
 		uint32           m_recast_timestamp{0};
 		int              m_task_delivered_count{0};
-		CharacterEvolvingItemsRepository::CharacterEvolvingItems  m_evolving_details{};
+		mutable CharacterEvolvingItemsRepository::CharacterEvolvingItems  m_evolving_details{};
 
 		// Items inside of this item (augs or contents) {};
 		std::map<uint8, ItemInstance*>		m_contents {}; // Zero-based index: min=0, max=9
