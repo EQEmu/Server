@@ -1396,9 +1396,9 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		message = IsBardSong(spellid) ? SONG_ENDS_ABRUPTLY : INTERRUPT_SPELL;
 
 	// clients need some packets
-	if (IsClient() && message != SONG_ENDS)
+	if (IsClient())
 	{
-		if (!RuleB(Custom, MulticlassingEnabled)) {
+		if (message != SONG_ENDS) {
 			// the interrupt message
 			outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
 			InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
