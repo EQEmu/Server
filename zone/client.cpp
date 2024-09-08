@@ -12718,10 +12718,12 @@ void Client::SendTopLevelInventory()
 		{ EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END }
 	};
 
+	const auto& inv = GetInv();
+
 	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
 	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			inst = GetInv().GetItem(slot_id);
+			inst = inv.GetItem(slot_id);
 			if (inst) {
 				SendItemPacket(slot_id, inst, ItemPacketType::ItemPacketTrade);
 			}

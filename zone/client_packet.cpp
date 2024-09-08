@@ -3663,7 +3663,7 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 					Chat::White,
 					fmt::format(
 						"You may only modify your bandolier once every {}.",
-						Strings::MillisecondsToTime(RuleI(Character, BandolierSwapDelay))
+						Strings::ToLower(Strings::MillisecondsToTime(RuleI(Character, BandolierSwapDelay)))
 					).c_str()
 				);
 				SendTopLevelInventory();
