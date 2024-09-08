@@ -3431,6 +3431,11 @@ void Client::SetBandolier(const EQApplicationPacket *app)
 			}
 		}
 	}
+
+	if (RuleI(Character, BandolierSwapDelay) > 0) {
+		bandolier_throttle_timer.Start(RuleI(Character, BandolierSwapDelay));
+	}
+
 	// finally, recalculate any stat bonuses from the item change
 	CalcBonuses();
 }

@@ -3642,29 +3642,39 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 {
 	// Although there are three different structs for OP_Bandolier, they are all the same size.
-	//
 	if (app->size != sizeof(BandolierCreate_Struct)) {
 		LogDebug("Size mismatch in OP_Bandolier expected [{}] got [{}]", sizeof(BandolierCreate_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
 
-	BandolierCreate_Struct *bs = (BandolierCreate_Struct*)app->pBuffer;
+	auto bs = (BandolierCreate_Struct*) app->pBuffer;
 
-	switch (bs->Action)
-	{
-	case bandolierCreate:
-		CreateBandolier(app);
-		break;
-	case bandolierRemove:
-		RemoveBandolier(app);
-		break;
-	case bandolierSet:
-		SetBandolier(app);
-		break;
-	default:
-		LogDebug("Unknown Bandolier action [{}]", bs->Action);
-		break;
+	switch (bs->Action) {
+		case bandolierCreate:
+			CreateBandolier(app);
+			break;
+		case bandolierRemove:
+			RemoveBandolier(app);
+			break;
+		case bandolierSet:
+			if (bandolier_throttle_timer.GetDuration() && !bandolier_throttle_timer.Check()) {
+				Message(
+					Chat::White,
+					fmt::format(
+						"You may only modify your bandolier once every {}.",
+						Strings::ToLower(Strings::MillisecondsToTime(RuleI(Character, BandolierSwapDelay)))
+					).c_str()
+				);
+				SendTopLevelInventory();
+				break;
+			}
+
+			SetBandolier(app);
+			break;
+		default:
+			LogDebug("Unknown Bandolier action [{}]", bs->Action);
+			break;
 	}
 }
 

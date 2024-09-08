@@ -186,7 +186,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   consent_throttle_timer(2000),
   tmSitting(0),
   parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
-  lazy_load_bank_check_timer(1000)
+  lazy_load_bank_check_timer(1000),
+  bandolier_throttle_timer(0)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);
@@ -12705,4 +12706,27 @@ bool Client::TakeMoneyFromPPWithOverFlow(uint64 copper, bool update_client)
 	SaveCurrency();
 	RecalcWeight();
 	return true;
+}
+
+void Client::SendTopLevelInventory()
+{
+	EQ::ItemInstance* inst = nullptr;
+
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN,     EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END }
+	};
+
+	const auto& inv = GetInv();
+
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			inst = inv.GetItem(slot_id);
+			if (inst) {
+				SendItemPacket(slot_id, inst, ItemPacketType::ItemPacketTrade);
+			}
+		}
+	}
 }
