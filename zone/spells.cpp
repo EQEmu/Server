@@ -274,6 +274,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	uint32 timer, uint32 timer_duration, int16 *resist_adjust,
 	uint32 aa_id)
 {
+	LogDebug("Trace 1");
 	LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]",
 		(IsValidSpell(spell_id)) ? spells[spell_id].name : "UNKNOWN SPELL", spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, (item_slot == 0xFFFFFFFF) ? 999 : item_slot);
 
@@ -492,6 +493,8 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	LogSpells("Casting [{}] Started at ({},{},{})", spell_id, m_SpellLocation.x, m_SpellLocation.y, m_SpellLocation.z);
 
 	// Replace missing cast messages for 'Bards'
+	// No longer needed
+	/*
 	if (RuleB(Custom, MulticlassingEnabled) && IsClient() && !IsBardSong(spell_id)) {
 		FilteredMessageString(this, Chat::Spells, (IsBardSong(spell_id) ? FilterBardSongs : FilterPCSpells), 12205, spells[spell_id].name);
 		entity_list.FilteredMessageCloseString(this,
@@ -503,6 +506,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 											   0,
 											   GetCleanName());
 	}
+	*/
 
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
