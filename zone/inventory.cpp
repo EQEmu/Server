@@ -1092,13 +1092,11 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 	}
 	// end QS code
 
-	auto item_id   = m_inv.GetItem(slot_id)->GetID();
-	bool isDeleted = m_inv.DeleteItem(slot_id, quantity);
-	if (item_id && isDeleted && GetEvolvingItems().contains(item_id)) {
-		CharacterEvolvingItemsRepository::DeleteOne(database, GetEvolvingItems().at(item_id).id);
-		GetEvolvingItems().erase(item_id);
+	uint64 evolve_id = m_inv[slot_id]->GetEvolveUniqueID();
+	bool   isDeleted = m_inv.DeleteItem(slot_id, quantity);
+	if (isDeleted && evolve_id) {
+		CharacterEvolvingItemsRepository::Delete(database, evolve_id);
 	}
-
 
 	const EQ::ItemInstance* inst = nullptr;
 	if (slot_id == EQ::invslot::slotCursor) {
@@ -1171,7 +1169,7 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 		return PushItemOnCursor(inst, client_update);
 	}
 
-	evolving_items_manager.DoLootChecks(this, slot_id, inst);
+	evolving_items_manager.DoLootChecks(CharacterID(), slot_id, inst);
 	m_inv.PutItem(slot_id, inst);
 
 	if (client_update)
@@ -1199,7 +1197,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 
 	bool cursor_empty = m_inv.CursorEmpty();
 
-	evolving_items_manager.DoLootChecks(this, slot_id, inst);
+	evolving_items_manager.DoLootChecks(CharacterID(), slot_id, inst);
 
 	if (slot_id == EQ::invslot::slotCursor) {
 		m_inv.PushCursor(inst);

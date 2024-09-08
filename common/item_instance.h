@@ -209,8 +209,6 @@ namespace EQ
 		uint32 GetExp() const				{ return m_exp; }
 		void SetExp(uint32 exp)				{ m_exp = exp; }
 		void AddExp(uint32 exp)				{ m_exp += exp; }
-		bool IsActivated()					{ return m_activated; }
-		void SetActivated(bool activated)	{ m_activated = activated; }
 		void SetScaling(bool v)				{ m_scaling = v; }
 		uint32 GetOrnamentationIcon() const							{ return m_ornamenticon; }
 		void SetOrnamentIcon(uint32 ornament_icon)					{ m_ornamenticon = ornament_icon; }
@@ -315,8 +313,8 @@ namespace EQ
 
 		CharacterEvolvingItemsRepository::CharacterEvolvingItems &GetEvolvingDetails() { return m_evolving_details; }
 
-		int8             GetEvolveLvl() const { return m_evolveLvl; }
-		bool             IsEvolving() const { return m_evolveLvl >= 1; }
+		int8             GetEvolveLvl() const { return GetItem()->EvolvingLevel; }
+		bool             IsEvolving() const { return GetItem()->EvolvingItem; }
 		bool             GetEvolveActivated() const { return m_evolving_details.activated; }
 		void             SetEvolveActivated(const bool in) { m_evolving_details.activated = in; }
 		bool             GetEvolveEquiped() const { return m_evolving_details.equiped; }
@@ -331,7 +329,7 @@ namespace EQ
 		void             SetEvolveItemID(const uint32 in) { m_evolving_details.item_id = in; }
 		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
 		void             SetEvolveCurrentAmount(const uint64 in) { m_evolving_details.current_amount = in; }
-		bool             IsEvolvingItem() const { return GetItem()->EvolvingItem > 0; }
+		void             SetEvolveAddToCurrentAmount(const uint64 in) { m_evolving_details.current_amount += in; }
 
 	protected:
 		//////////////////////////
@@ -356,7 +354,6 @@ namespace EQ
 		int32            m_SerialNumber{0}; // Unique identifier for this instance of an item. Needed for Bazaar.
 		uint32           m_exp{0};
 		int8             m_evolveLvl{0};
-		bool             m_activated{false};
 		ItemData *       m_scaledItem{nullptr};
 		bool             m_scaling{false};
 		uint32           m_ornamenticon{0};

@@ -22,7 +22,6 @@
 #include "rulesys.h"
 #include "events/player_event_logs.h"
 #include "repositories/character_evolving_items_repository.h"
-#include "../zone/client.h"
 
 EvolvingItemsManager::EvolvingItemsManager()
 {
@@ -68,39 +67,33 @@ double EvolvingItemsManager::CalculateProgression(const uint64 current_amount, c
 			   : 0;
 }
 
-void EvolvingItemsManager::DoLootChecks(Client *c, uint16 slot_id, const EQ::ItemInstance& inst) const
+void EvolvingItemsManager::DoLootChecks(uint32 char_id, uint16 slot_id, const EQ::ItemInstance& inst)
 {
-	static_cast<EQ::ItemInstance>(inst).SetEvolveEquiped(false);
-	if (inst.IsEvolvingItem() && slot_id <= EQ::invslot::EQUIPMENT_END && slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
-		static_cast<EQ::ItemInstance>(inst).SetEvolveEquiped(true);
-		if (c->GetEvolvingItems().contains(inst.GetID())) {
-			c->GetEvolvingItems().at(inst.GetID()).equiped = true;
-			CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst.GetID()));
-		}
-		else {
-			auto e           = CharacterEvolvingItemsRepository::NewEntity();
-			e.char_id        = c->CharacterID();
-			e.equiped        = true;
-			e.item_id        = inst.GetID();
-
-			auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
-			e.id = result.id;
-			c->GetEvolvingItems().emplace(inst.GetID(), e);
-		}
-	} else {
-		if (c->GetEvolvingItems().contains(inst.GetID())) {
-			c->GetEvolvingItems().at(inst.GetID()).equiped = false;
-			CharacterEvolvingItemsRepository::ReplaceOne(*m_db, c->GetEvolvingItems().at(inst.GetID()));
-		}
-		else {
-			auto e           = CharacterEvolvingItemsRepository::NewEntity();
-			e.char_id        = c->CharacterID();
-			e.equiped        = false;
-			e.item_id        = inst.GetID();
-
-			auto result = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
-			e.id = result.id;
-			c->GetEvolvingItems().emplace(inst.GetID(), e);
-		}
+	const_cast<EQ::ItemInstance&>(inst).SetEvolveEquiped(false);
+	if (inst.IsEvolving() && slot_id <= EQ::invslot::EQUIPMENT_END && slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
+		const_cast<EQ::ItemInstance&>(inst).SetEvolveEquiped(true);
 	}
+
+	if (!inst.IsEvolving()) {
+		return;
+	}
+
+	if (!inst.GetEvolveUniqueID()) {
+		auto e = CharacterEvolvingItemsRepository::NewEntity();
+
+		e.char_id = char_id;
+		e.item_id = inst.GetID();
+		e.equiped = inst.GetEvolveEquiped();
+
+		auto r = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
+		e.id = r.id;
+
+		const_cast<EQ::ItemInstance&>(inst).SetEvolveUniqueID(e.id);
+		const_cast<EQ::ItemInstance&>(inst).SetEvolveCharID(e.char_id);
+		const_cast<EQ::ItemInstance&>(inst).SetEvolveItemID(e.item_id);
+
+		return;
+	}
+
+	CharacterEvolvingItemsRepository::SetEquiped(*m_db, inst.GetEvolveUniqueID(), inst.GetEvolveEquiped());
 }

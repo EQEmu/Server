@@ -5,6 +5,8 @@
 #include "../strings.h"
 #include "base/base_character_evolving_items_repository.h"
 
+#include <boost/tuple/tuple_comparison.hpp>
+
 class CharacterEvolvingItemsRepository: public BaseCharacterEvolvingItemsRepository {
 public:
 
@@ -45,6 +47,42 @@ public:
 
 	// Custom extended repository methods here
 
+    static CharacterEvolvingItems SetCurrentAmountAndProgression(Database &db, const uint64 id, const uint64 amount, const double progression)
+    {
+	    auto e           = FindOne(db, id);
+    	if (e.id == 0) {
+    		return NewEntity();
+    	}
+
+	    e.current_amount = amount;
+	    e.progression    = progression;
+    	UpdateOne(db, e);
+	    return e;
+    }
+
+	static CharacterEvolvingItems SetEquiped(Database &db, const uint64 id, const bool equiped)
+    {
+    	auto e           = FindOne(db, id);
+    	if (e.id == 0) {
+    		return NewEntity();
+    	}
+
+    	e.equiped = equiped;
+    	UpdateOne(db, e);
+    	return e;
+    }
+
+	static CharacterEvolvingItems Delete(Database &db, const uint64 id)
+    {
+    	auto e           = FindOne(db, id);
+    	if (e.id == 0) {
+    		return NewEntity();
+    	}
+
+    	e.deleted_at = time(nullptr);
+    	UpdateOne(db, e);
+    	return e;
+    }
 };
 
 #endif //EQEMU_CHARACTER_EVOLVING_ITEMS_REPOSITORY_H

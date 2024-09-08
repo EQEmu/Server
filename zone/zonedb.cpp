@@ -4270,18 +4270,3 @@ void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
 		}
 	);
 }
-
-void ZoneDatabase::LoadCharacterEvolvingItems(Client *c)
-{
-	auto const& results = CharacterEvolvingItemsRepository::GetWhere(*this, fmt::format("`char_id` = '{}'", c->CharacterID()));
-	if (results.empty()) {
-		return;
-	}
-
-	std::ranges::transform(results.begin(), results.end(),
-				   std::inserter(c->GetEvolvingItems(), c->GetEvolvingItems().end()),
-				   [](const CharacterEvolvingItemsRepository::CharacterEvolvingItems& x) {
-					   return std::make_pair(x.item_id, x);
-				   }
-		);
-}

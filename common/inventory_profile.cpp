@@ -364,7 +364,7 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapLevel;
 				return false;
 			}
-			if (source_item_instance->IsEvolvingItem() > 0) {
+			if (source_item_instance->IsEvolving() > 0) {
 				source_item_instance->SetEvolveEquiped(true);
 			}
 		}
@@ -395,7 +395,7 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapLevel;
 				return false;
 			}
-			if (destination_item_instance->IsEvolvingItem()) {
+			if (destination_item_instance->IsEvolving()) {
 				destination_item_instance->SetEvolveEquiped(true);
 			}
 		}
@@ -1422,7 +1422,7 @@ int16 EQ::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 	}
 	else if (slot_id >= invslot::EQUIPMENT_BEGIN && slot_id <= invslot::EQUIPMENT_END) {
 		if ((((uint64)1 << slot_id) & m_lookup->PossessionsBitmask) != 0) {
-			if (inst->IsEvolvingItem()) {
+			if (inst->IsEvolving()) {
 				inst->SetEvolveEquiped(true);
 			}
 			m_worn[slot_id] = inst;

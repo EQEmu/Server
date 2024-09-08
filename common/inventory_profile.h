@@ -211,6 +211,9 @@ namespace EQ
 		void SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, bool value);
 		std::string GetCustomItemData(int16 slot_id, const std::string& identifier);
 		static const int GetItemStatValue(uint32 item_id, const std::string& identifier);
+
+		std::map<int16, ItemInstance*>& GetWorn() { return m_worn; }
+		std::map<int16, ItemInstance*>& GetPersonal() { return m_inv; }
 	protected:
 		///////////////////////////////
 		// Protected Methods

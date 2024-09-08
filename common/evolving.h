@@ -30,7 +30,7 @@ public:
 
 	void LoadEvolvingItems() const;
 	double CalculateProgression(uint64 current_amount, uint32 item_id);
-	void DoLootChecks(Client *c, uint16 slot_id, const EQ::ItemInstance& inst) const;
+	void DoLootChecks(uint32 char_id, uint16 slot_id, const EQ::ItemInstance& inst);
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return evolving_items_cache; }
 
 private:

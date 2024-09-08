@@ -1819,11 +1819,9 @@ public:
 	uint32 GetEXPForLevel(uint16 check_level);
 
 	// Evolving Item Info
-	std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>& GetEvolvingItems() { return m_evolving_items; };
-	void ProcessEvolvingItem(uint64 exp, Mob* mob);
+	void ProcessEvolvingItem(const uint64 exp, const Mob* mob);
 	void SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::CharacterEvolvingItems item);
 	void DoEvolveItemToggle(const EQApplicationPacket* app);
-	void LoadCharacterEvolvingItems();
 
 protected:
 	friend class Mob;
@@ -1974,8 +1972,6 @@ private:
 	std::map<uint32, CharacterParcelsRepository::CharacterParcels> m_parcels{};
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
-
-	std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems> m_evolving_items{};
 
 	int32 environment_damage_modifier;
 	bool invulnerable_environment_damage;

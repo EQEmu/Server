@@ -40,28 +40,28 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 			c->Message(Chat::White, "Usage: #evolve test");
 		}
 		else {
-			for (auto const& [key, value] : t->GetEvolvingItems()) {
-				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id);
-				c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Evolving Items", ":", value.item_id).c_str());
-				c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Activated", ":", value.activated ? "Yes" : "No").c_str());
-				c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Current Amount", ":", value.current_amount).c_str());
-				c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Required Amount", ":", item.required_amount).c_str());
-				c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Progression %", ":", value.progression).c_str());
-				c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Type", ":", item.type).c_str());
-				c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "SubType", ":", item.sub_type).c_str());
-				c->Message(Chat::Green, fmt::format("Evolving Item Details").c_str());
-				c->Message(Chat::Green, fmt::format("ID:{: >6} A:{} T:{} ST:{} C:{} R:{} P:{}`%",
-				                                    value.item_id,
-				                                    value.activated ? "Y" : "N",
-				                                    item.type,
-				                                    item.sub_type,
-				                                    value.current_amount,
-				                                    item.required_amount,
-				                                    value.progression).c_str()
-				);
-
-
-			}
+			// for (auto const& [key, value] : t->GetEvolvingItems()) {
+			// 	auto item = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id);
+			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Evolving Items", ":", value.item_id).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Activated", ":", value.activated ? "Yes" : "No").c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Current Amount", ":", value.current_amount).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Required Amount", ":", item.required_amount).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Progression %", ":", value.progression).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Type", ":", item.type).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "SubType", ":", item.sub_type).c_str());
+			// 	c->Message(Chat::Green, fmt::format("Evolving Item Details").c_str());
+			// 	c->Message(Chat::Green, fmt::format("ID:{: >6} A:{} T:{} ST:{} C:{} R:{} P:{}`%",
+			// 	                                    value.item_id,
+			// 	                                    value.activated ? "Y" : "N",
+			// 	                                    item.type,
+			// 	                                    item.sub_type,
+			// 	                                    value.current_amount,
+			// 	                                    item.required_amount,
+			// 	                                    value.progression).c_str()
+			// 	);
+			//
+			//
+			// }
 		}
 	}
 	else if (is_target) {
@@ -69,28 +69,67 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 			c->Message(Chat::White, "Usage: #evolve target");
 		}
 		else {
-			for (auto const& [key, value] : t->GetEvolvingItems()) {
-				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id);
-				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Evolving Items", ":", value.item_id).c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Activated", ":", value.activated ? "Yes" : "No").c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Equiped", ":", value.equiped ? "Yes" : "No").c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Current Amount", ":", value.current_amount).c_str());
+			c->Message(Chat::Red, "Worn Items");
+			for (auto const& [key, value] : t->GetInv().GetWorn()) {
+				if (!value->IsEvolving()) {
+					continue;
+				}
+
+				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value->GetID());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Evolving Items", ":", value->GetID()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Unique ID", ":", value->GetEvolveUniqueID()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Activated", ":", value->GetEvolveActivated() ? "Yes" : "No").c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Equiped", ":", value->GetEvolveEquiped() ? "Yes" : "No").c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Current Amount", ":", value->GetEvolveCurrentAmount()).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Required Amount", ":", item.required_amount).c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{:.{}f}", "Progression %", ":", value.progression, 2).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:.{}f}", "Progression %", ":", value->GetEvolveProgression(), 2).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Type", ":", item.type).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "SubType", ":", item.sub_type).c_str());
-				c->Message(Chat::Green, fmt::format("Evolving Item Details:ID:{: >6} A:{} E:{} T:{} ST:{} C:{} R:{} P:{:.{}f}",
-													value.item_id,
-													value.activated ? "Y" : "N",
-													value.equiped ? "Y" : "N",
+				c->Message(Chat::Green, fmt::format("Evolving Item Details:ID:{: >6} UID:{: >6} A:{} E:{} T:{} ST:{} C:{} R:{} P:{:.{}f}",
+													value->GetID(),
+													value->GetEvolveUniqueID(),
+													value->GetEvolveActivated() ? "Y" : "N",
+													value->GetEvolveEquiped() ? "Y" : "N",
 													item.type,
 													item.sub_type,
-													value.current_amount,
+													value->GetEvolveCurrentAmount(),
 													item.required_amount,
-													value.progression,
+													value->GetEvolveProgression(),
 													2).c_str()
 				);
 			}
+
+			c->Message(Chat::Red, "Personal Items");
+			for (auto const& [key, value] : t->GetInv().GetPersonal()) {
+				if (!value->IsEvolving()) {
+					continue;
+				}
+
+				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value->GetID());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Evolving Items", ":", value->GetID()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Unique ID", ":", value->GetEvolveUniqueID()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Activated", ":", value->GetEvolveActivated() ? "Yes" : "No").c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Equiped", ":", value->GetEvolveEquiped() ? "Yes" : "No").c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Current Amount", ":", value->GetEvolveCurrentAmount()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Required Amount", ":", item.required_amount).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:.{}f}", "Progression %", ":", value->GetEvolveProgression(), 2).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Type", ":", item.type).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "SubType", ":", item.sub_type).c_str());
+				c->Message(Chat::Green, fmt::format("Evolving Item Details:ID:{: >6} UID:{: >6} A:{} E:{} T:{} ST:{} C:{} R:{} P:{:.{}f}",
+													value->GetID(),
+													value->GetEvolveUniqueID(),
+													value->GetEvolveActivated() ? "Y" : "N",
+													value->GetEvolveEquiped() ? "Y" : "N",
+													item.type,
+													item.sub_type,
+													value->GetEvolveCurrentAmount(),
+													item.required_amount,
+													value->GetEvolveProgression(),
+													2).c_str()
+				);
+			}
+
+
 		}
 	}
 	else if (is_client) {
@@ -98,28 +137,28 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 			c->Message(Chat::White, "Usage: #evolve client");
 		}
 		else {
-			for (auto const& [key, value] : c->GetEvolvingItems()) {
-				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id);
-				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Evolving Items", ":", value.item_id).c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Activated", ":", value.activated ? "Yes" : "No").c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Equiped", ":", value.equiped ? "Yes" : "No").c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Current Amount", ":", value.current_amount).c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Required Amount", ":", item.required_amount).c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{:.{}f}", "Progression %", ":", value.progression, 2).c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Type", ":", item.type).c_str());
-				c->Message(Chat::Yellow, fmt::format("{}{}{}", "SubType", ":", item.sub_type).c_str());
-				c->Message(Chat::Green, fmt::format("Evolving Item Details:ID:{: >6} A:{} E:{} T:{} ST:{} C:{} R:{} P:{:.{}f}",
-													value.item_id,
-													value.activated ? "Y" : "N",
-													value.equiped ? "Y" : "N",
-													item.type,
-													item.sub_type,
-													value.current_amount,
-													item.required_amount,
-													value.progression,
-													2).c_str()
-				);
-			}
+			// for (auto const& [key, value] : c->GetEvolvingItems()) {
+			// 	auto item = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id);
+			// 	c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Evolving Items", ":", value.item_id).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{}{}{}", "Activated", ":", value.activated ? "Yes" : "No").c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{}{}{}", "Equiped", ":", value.equiped ? "Yes" : "No").c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Current Amount", ":", value.current_amount).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Required Amount", ":", item.required_amount).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{}{}{:.{}f}", "Progression %", ":", value.progression, 2).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{}{}{}", "Type", ":", item.type).c_str());
+			// 	c->Message(Chat::Yellow, fmt::format("{}{}{}", "SubType", ":", item.sub_type).c_str());
+			// 	c->Message(Chat::Green, fmt::format("Evolving Item Details:ID:{: >6} A:{} E:{} T:{} ST:{} C:{} R:{} P:{:.{}f}",
+			// 										value.item_id,
+			// 										value.activated ? "Y" : "N",
+			// 										value.equiped ? "Y" : "N",
+			// 										item.type,
+			// 										item.sub_type,
+			// 										value.current_amount,
+			// 										item.required_amount,
+			// 										value.progression,
+			// 										2).c_str()
+			// 	);
+			// }
 		}
 	}
 	else if (is_item) {

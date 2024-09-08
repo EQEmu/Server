@@ -655,9 +655,6 @@ public:
 	static void SaveCharacterBinds(Client *c);
 	static void SaveCharacterTribute(Client* c);
 
-	// Evolving Items
-	void LoadCharacterEvolvingItems(Client *c);
-
 protected:
 	void ZDBInitVars();
 

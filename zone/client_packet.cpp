@@ -1309,7 +1309,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	// set to full support in case they're a gm with items in disabled expansion slots...but, have their gm flag off...
 	// item loss will occur when they use the 'empty' slots, if this is not done
 	m_inv.SetGMInventory(true);
-	database.LoadCharacterEvolvingItems(this);
 	loaditems = database.GetInventory(this); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */

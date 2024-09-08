@@ -39,11 +39,6 @@ void Client::DoEvolveItemToggle(const EQApplicationPacket* app)
 	auto inst = GetInv().GetItem(GetInv().HasItem(item.item_id));
 	inst->SetEvolveActivated(item.activated ? true : false);
 
-	// update client in memory status
-	if (GetEvolvingItems().contains(item.item_id)) {
-		GetEvolvingItems().at(item.item_id).activated = in->activated;
-	}
-
 	// update db
 	CharacterEvolvingItemsRepository::ReplaceOne(database, item);
 
@@ -64,83 +59,76 @@ void Client::SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::C
 	QueuePacket(out.get());
 }
 
-void Client::ProcessEvolvingItem(uint64 exp, Mob* mob)
+void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 {
-	for (auto& [key, value] : GetEvolvingItems()) {
-		if (value.equiped) {
-			if (!evolving_items_manager.GetEvolvingItemsCache().contains(value.item_id)) {
-				return;
+	for (auto const &[key, inst]: GetInv().GetWorn()) {
+		if (!inst->IsEvolving() || !inst->GetEvolveActivated()) {
+			continue;
+		}
+
+		auto type     = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).type;
+		auto sub_type = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).sub_type;
+		switch (type) {
+			case EvolvingItems::Types::AMOUNT_OF_EXP: {
+				if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
+				    (sub_type == EvolvingItems::SubTypes::GROUP_EXP && IsGrouped())
+				) {
+					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100);
+				}
+				else if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
+				         (sub_type == EvolvingItems::SubTypes::RAID_EXP && IsRaidGrouped())
+				) {
+					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100);
+				}
+				else if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
+				         sub_type == EvolvingItems::SubTypes::SOLO_EXP
+				) {
+					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100);
+				}
+
+				inst->SetEvolveProgression(
+					evolving_items_manager.CalculateProgression(inst->GetEvolveCurrentAmount(), inst->GetID()));
+
+				auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression());
+				if (!e.id) {
+					break;
+				}
+
+				SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, e);
+
+				LogInfo(
+					"ProcessEvolvingItem: - Type 1 Amount of EXP - SubType ({}) for item {}  Assigned {} of exp to {}",
+					sub_type,
+					inst->GetItem()->Name,
+					exp * 0.001,
+					GetName()
+					);
+				break;
 			}
+			case EvolvingItems::Types::NUMBER_OF_KILLS: {
+				if (mob && mob->GetRace() == sub_type) {
+					inst->SetEvolveAddToCurrentAmount(1);
+					inst->SetEvolveProgression(
+						evolving_items_manager.CalculateProgression(inst->GetEvolveCurrentAmount(), inst->GetID()));
 
-			auto type     = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id).type;
-			auto sub_type = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id).sub_type;
-			switch (type) {
-				case EvolvingItems::Types::AMOUNT_OF_EXP: {
-					std::unique_ptr<EQ::ItemInstance> const inst(database.CreateItem(value.item_id));
-					if (!inst) {
-						return;
+					auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression());
+					if (!e.id) {
+						break;
 					}
 
-					if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
-						(sub_type == EvolvingItems::SubTypes::GROUP_EXP && IsGrouped())
-					) {
-						value.current_amount += exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100;
-					}
-					else if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
-						(sub_type == EvolvingItems::SubTypes::RAID_EXP && IsRaidGrouped())
-					) {
-						value.current_amount += exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100;
-					}
-					else if(sub_type == EvolvingItems::SubTypes::ALL_EXP ||
-						sub_type == EvolvingItems::SubTypes::SOLO_EXP
-					) {
-						value.current_amount += exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100;;
-					}
-
-					value.progression = evolving_items_manager.CalculateProgression(value.current_amount, value.item_id);
-					inst->SetEvolveProgression(value.progression);
-
-					CharacterEvolvingItemsRepository::ReplaceOne(database, value);
-					SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, value);
+					SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, e);
 
 					LogInfo(
-						"ProcessEvolvingItem: - Type 1 Amount of EXP - SubType ({}) for item {}  Assigned {} of exp to {}",
+						"ProcessEvolvingItem: - Type 2 Number of Kills - SubType ({}) for item {}  Increased count by 1 for {}",
 						sub_type,
 						inst->GetItem()->Name,
-						exp * 0.001,
 						GetName()
-					);
-					break;
+						);
 				}
-				case EvolvingItems::Types::NUMBER_OF_KILLS: {
-					std::unique_ptr<EQ::ItemInstance> const inst(database.CreateItem(value.item_id));
-					if (!inst) {
-						return;
-					}
 
-					if (mob && mob->GetRace() == sub_type) {
-						value.current_amount += 1;
-//						value.progression                       = inst->GetEvolvingInfo()->CalcEvolvingProgression(value.item_id);
-						value.progression                       = evolving_items_manager.CalculateProgression(value.current_amount, value.item_id);
-						inst->SetEvolveProgression(value.progression);
-
-						CharacterEvolvingItemsRepository::ReplaceOne(database, value);
-						SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, value);
-
-						LogInfo(
-							"ProcessEvolvingItem: - Type 2 Number of Kills - SubType ({}) for item {}  Increased count by 1 for {}",
-							sub_type,
-							inst->GetItem()->Name,
-							GetName()
-							);
-					}
-
-					break;
-				}
-				default: {
-
-				}
+				break;
 			}
+			default: {}
 		}
 	}
 }

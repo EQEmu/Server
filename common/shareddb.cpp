@@ -662,7 +662,9 @@ bool SharedDatabase::GetInventory(Client *c)
 	EQ::InventoryProfile &inv     = c->GetInv();
 
 	// Retrieve character inventory
-	auto results = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}' ORDER BY `slotid`;", char_id));
+	auto results   = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}' ORDER BY `slotid`;", char_id));
+	auto e_results = CharacterEvolvingItemsRepository::GetWhere(*this, fmt::format("`char_id` = '{}' AND `deleted_at` IS NULL;", char_id));
+
 	if (results.empty()) {
 		LogError("Error loading inventory for char_id {} from the database.", char_id);
 		return false;
@@ -794,40 +796,43 @@ bool SharedDatabase::GetInventory(Client *c)
 			}
 		}
 		if (item->EvolvingItem) {
-			CharacterEvolvingItemsRepository::CharacterEvolvingItems client_evolving_item{};
-			auto &client_evolving_items = c->GetEvolvingItems();
-
 			if (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END) {
-				client_evolving_item.equiped = 1;
-				if (client_evolving_items.contains(item_id)) {
-					client_evolving_items.at(item_id).equiped = 1;
-				}
+				inst->SetEvolveEquiped(true);
 			}
 
-			if (evolving_items_manager.GetEvolvingItemsCache().contains(item_id) && !client_evolving_items.contains(item_id)) {
-				client_evolving_item.activated       = false;
-				client_evolving_item.item_id         = item_id;
-				client_evolving_item.current_amount  = 0;
-				client_evolving_item.id              = 0;
-				client_evolving_item.char_id         = char_id;
-				client_evolving_item.progression     = 0;
+			auto t = std::ranges::find_if(e_results.cbegin(), e_results.cend(),
+			                              [&](const CharacterEvolvingItemsRepository::CharacterEvolvingItems &x) {
+				                              return x.item_id == item_id;
+			                              }
+			);
 
-				auto e = CharacterEvolvingItemsRepository::InsertOne(*this, client_evolving_item);
-				client_evolving_item.id              = e.id;
-				client_evolving_items.emplace(item_id, client_evolving_item);
+			if (t == std::end(e_results)) {
+				auto e = CharacterEvolvingItemsRepository::NewEntity();
+
+				e.char_id = char_id;
+				e.item_id = item_id;
+				e.equiped = inst->GetEvolveEquiped();
+
+				auto r = CharacterEvolvingItemsRepository::InsertOne(*this, e);
+				e.id = r.id;
+				e_results.push_back(e);
+
+				inst->SetEvolveUniqueID(e.id);
+				inst->SetEvolveCharID(e.char_id);
+				inst->SetEvolveItemID(e.item_id);
+				inst->SetEvolveActivated(e.activated);
+				inst->SetEvolveEquiped(e.equiped);
+				inst->SetEvolveCurrentAmount(e.current_amount);
+				inst->SetEvolveProgression(e.progression);
 			}
-
-			if (evolving_items_manager.GetEvolvingItemsCache().contains(item_id) && client_evolving_items.contains(item_id)) {
-				auto& [id, char_id, evolve_item_id, activated, equiped, current_amount, progression] =
-					client_evolving_items.at(item_id);
-
-				inst->SetEvolveUniqueID(id);
-				inst->SetEvolveCharID(char_id);
-				inst->SetEvolveItemID(evolve_item_id);
-				inst->SetEvolveActivated(activated);
-				inst->SetEvolveEquiped(equiped);
-				inst->SetEvolveCurrentAmount(current_amount);
-				inst->SetEvolveProgression(progression);
+			else {
+				inst->SetEvolveUniqueID(t->id);
+				inst->SetEvolveCharID(t->char_id);
+				inst->SetEvolveItemID(t->item_id);
+				inst->SetEvolveActivated(t->activated);
+				inst->SetEvolveEquiped(t->equiped);
+				inst->SetEvolveCurrentAmount(t->current_amount);
+				inst->SetEvolveProgression(t->progression);
 			}
 		}
 
