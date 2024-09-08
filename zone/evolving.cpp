@@ -132,3 +132,15 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 		}
 	}
 }
+
+void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app)
+{
+	auto in = reinterpret_cast<EvolveItemToggle_Struct*>(app->pBuffer);
+
+	const uint32 item_id = static_cast<uint32>(in->unique_id & 0xFFFFFFFF);
+	std::unique_ptr<EQ::ItemInstance> const inst(database.CreateItem(item_id));
+
+	if (inst) {
+		SendItemPacket(0, inst.get(), ItemPacketViewLink);
+	}
+}

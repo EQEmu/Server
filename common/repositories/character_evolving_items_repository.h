@@ -56,6 +56,7 @@ public:
 
 	    e.current_amount = amount;
 	    e.progression    = progression;
+	    e.deleted_at     = 0;
     	UpdateOne(db, e);
 	    return e;
     }
@@ -67,12 +68,13 @@ public:
     		return NewEntity();
     	}
 
-    	e.equiped = equiped;
+	    e.equiped    = equiped;
+	    e.deleted_at = 0;
     	UpdateOne(db, e);
     	return e;
     }
 
-	static CharacterEvolvingItems Delete(Database &db, const uint64 id)
+	static CharacterEvolvingItems SoftDelete(Database &db, const uint64 id)
     {
     	auto e           = FindOne(db, id);
     	if (e.id == 0) {
@@ -82,6 +84,18 @@ public:
     	e.deleted_at = time(nullptr);
     	UpdateOne(db, e);
     	return e;
+    }
+
+	static bool UpdateCharID(Database &db, const uint64 id, const uint32 to_char_id)
+    {
+    	auto e           = FindOne(db, id);
+    	if (e.id == 0) {
+    		return false;
+    	}
+
+	    e.char_id    = to_char_id;
+	    e.deleted_at = 0;
+    	return UpdateOne(db, e);
     }
 };
 

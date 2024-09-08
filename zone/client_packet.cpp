@@ -17180,5 +17180,20 @@ void Client::Handle_OP_EvolveItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	DoEvolveItemToggle(app);
+	auto in = reinterpret_cast<EvolveItemToggle_Struct*>(app->pBuffer);
+
+	switch(in->action) {
+		case EvolvingItems::Actions::UPDATE_ITEMS: {
+			DoEvolveItemToggle(app);
+			break;
+		}
+		case EvolvingItems::Actions::FINAL_RESULT: {
+			DoEvolveItemDisplayFinalResult(app);
+			break;
+		}
+		default: {
+
+		}
+	}
+
 }

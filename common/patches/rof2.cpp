@@ -6425,10 +6425,11 @@ namespace RoF2
 		if (item->EvolvingItem > 0) {
 			RoF2::structs::EvolvingItem evotop;
 
-			evotop.unknown001 = 5;
-			evotop.unknown002 = 6;
-			evotop.unknown003 = 7;
-			evotop.unknown004 = 8;
+			// 0x00 01 4E 6E
+			evotop.unknown001 = 110;
+			evotop.unknown002 = 78;
+			evotop.unknown003 = 1;
+			evotop.unknown004 = 0;
 			evotop.evoLevel = item->EvolvingLevel;
 			evotop.progress = inst->GetEvolveProgression();
 			evotop.Activated = inst->GetEvolveActivated();

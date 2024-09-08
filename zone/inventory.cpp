@@ -1094,8 +1094,8 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 
 	uint64 evolve_id = m_inv[slot_id]->GetEvolveUniqueID();
 	bool   isDeleted = m_inv.DeleteItem(slot_id, quantity);
-	if (isDeleted && evolve_id) {
-		CharacterEvolvingItemsRepository::Delete(database, evolve_id);
+	if (isDeleted && evolve_id && (slot_id > EQ::invslot::TRADE_END || slot_id < EQ::invslot::TRADE_BEGIN)) {
+		CharacterEvolvingItemsRepository::SoftDelete(database, evolve_id);
 	}
 
 	const EQ::ItemInstance* inst = nullptr;
@@ -1148,6 +1148,8 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 bool Client::PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update)
 {
 	LogInventory("Putting item [{}] ([{}]) on the cursor", inst.GetItem()->Name, inst.GetItem()->ID);
+
+	evolving_items_manager.DoLootChecks(CharacterID(), EQ::invslot::slotCursor, inst);
 	m_inv.PushCursor(inst);
 
 	if (client_update) {

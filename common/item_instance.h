@@ -330,6 +330,7 @@ namespace EQ
 		void             SetEvolveItemID(const uint32 in) const { m_evolving_details.item_id = in; }
 		void             SetEvolveCurrentAmount(const uint64 in) const { m_evolving_details.current_amount = in; }
 		void             SetEvolveAddToCurrentAmount(const uint64 in) const { m_evolving_details.current_amount += in; }
+		bool             TransferOwnership(Database& db, const uint32 to_char_id) const;
 
 	protected:
 		//////////////////////////

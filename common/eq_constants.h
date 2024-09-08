@@ -1120,7 +1120,9 @@ namespace EvolvingItems {
 		constexpr int8 UPDATE_ITEMS           = 0;
 		constexpr int8 OPEN_TRANSFER_WINDOW   = 1;
 		constexpr int8 UPDATE_TRANSFER_WINDOW = 2;
+		constexpr int8 FINAL_RESULT           = 4;
 	}
+
 	namespace Types {
 		constexpr int8 AMOUNT_OF_EXP   = 1;
 		constexpr int8 NUMBER_OF_KILLS = 2;
