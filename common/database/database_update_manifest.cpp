@@ -4947,7 +4947,7 @@ UPDATE `aa_ability` SET `auto_grant_enabled` = 1 WHERE `grant_only` = 0 AND `cha
 		.version = 9237,
 		.description = "2023_10_15_import_13th_floor.sql",
 		.check = "SHOW COLUMNS FROM `items` LIKE 'bardeffect';",
-		.condition = "contains",
+		.condition = "missing",
 		.match = "mediumint",
 		.sql = R"(
 ALTER TABLE `items`
