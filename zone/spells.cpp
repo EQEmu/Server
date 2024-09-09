@@ -3243,6 +3243,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	const SPDat_Spell_Struct &sp1 = spells[spellid1];
 	const SPDat_Spell_Struct &sp2 = spells[spellid2];
 
+
 	int i, effect1, effect2, sp1_value, sp2_value;
 	int blocked_effect, blocked_below_value, blocked_slot;
 	int overwrite_effect, overwrite_below_value, overwrite_slot;
@@ -3297,13 +3298,24 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	/*
 	One of these is a bard song and one isn't and they're both beneficial so they should stack.
 	*/
-	if(IsBardSong(spellid1) != IsBardSong(spellid2))
+	if (IsBardSong(spellid1) != IsBardSong(spellid2))
 	{
 		if(!IsDetrimentalSpell(spellid1) && !IsDetrimentalSpell(spellid2))
 		{
 			LogSpells("[{}] and [{}] are beneficial, and one is a bard song, no action needs to be taken", sp1.name, sp2.name);
 			return (0);
 		}
+	}
+
+	if (RuleB(Custom, LessStrictSpellStacking) && IsShortDurationBuff(spellid1) != IsShortDurationBuff(spellid2))
+	{
+		LogSpells("[{}] and [{}] have dissimilar shortbuffness, no action taken", sp1.name, sp2.name);
+		return (0);
+	}
+
+	if (RuleB(Custom, ClearRestingDetrimentalEffectsEnabled) && IsDetrimentalSpell(spellid1) != IsDetrimentalSpell(spellid2)) {
+		LogSpells("[{}] and [{}] have dissimilar detrimentalness, no action taken", sp1.name, sp2.name);
+		return (0);
 	}
 
 	bool effect_match = true; // Figure out if we're identical in effects on all slots.
@@ -3789,7 +3801,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				);
 
 				// If this is the first buff it would override, use its slot
-				if (!will_overwrite && !IsDisciplineBuff(spell_id)) {
+				if (!will_overwrite && !IsDisciplineBuff(spell_id) && (IsShortDurationBuff(spell_id) == IsShortDurationBuff(curbuf.spellid))) {
 					emptyslot = buffslot;
 				}
 

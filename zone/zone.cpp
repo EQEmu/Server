@@ -944,8 +944,11 @@ void Zone::LoadZoneDoors()
 {
 	auto door_entries = content_db.LoadDoors(GetShortName(), GetInstanceVersion());
 	if (door_entries.empty()) {
-		LogInfo("No doors loaded");
-		return;
+		door_entries = content_db.LoadDoors(GetShortName(), 0);
+		if (door_entries.empty()) {
+			LogInfo("No doors loaded");
+			return;
+		}
 	}
 
 	for (const auto &entry : door_entries) {

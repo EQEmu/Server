@@ -3418,11 +3418,9 @@ int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
 	switch (eLabel)
 	{
 		case eStatMaxHP:
-			CalcMaxHP();
-			return GetMaxHP();
+			return CalcMaxHP();
 		case eStatMaxMana:
-			CalcMaxMana();
-			return GetMaxMana();
+			return CalcMaxMana();
 		case eStatMaxEndur:
 			CalcMaxEndurance();
 			return GetMaxEndurance();
@@ -3454,7 +3452,7 @@ int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
 		case eStatCHA:
 			return GetCHA();
 		case eStatHPRegen:
-			return GetHPRegen();
+			return CalcHPRegen(true);
 		case eStatManaRegen:
 			return GetManaRegen();
 		case eStatEndurRegen:

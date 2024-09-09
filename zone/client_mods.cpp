@@ -574,7 +574,7 @@ int64 Client::CalcMaxMana()
 		}
 	}
 
-	LogSpells("for [{}] returning [{}]", GetName(), max_mana);
+	LogSpellsDetail("for [{}] returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 

@@ -1271,7 +1271,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.walkspeed	= walkspeed;
 
 	if (RuleB(Custom, MulticlassingEnabled)) {
-		ns->spawn.class_	= (HasClass(Class::Monk) && (race == Race::Human || race == Race::Iksar)) ? Class::Monk : Class::None;
+		ns->spawn.class_ = (HasClass(Class::Monk) && (race == Race::Human || race == Race::Iksar)) ? Class::Monk : Class::None;
 	} else {
 		ns->spawn.class_ = class_;
 	}

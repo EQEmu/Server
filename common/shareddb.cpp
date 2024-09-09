@@ -1084,6 +1084,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			put_slot_id = inv->PushCursor(*inst);
 		}
 
+		/*
 		else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
 			LogError(
@@ -1094,6 +1095,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			);
 			put_slot_id = inv->PushCursor(*inst);
 		}
+		*/
+
 		else {
 			put_slot_id = inv->PutItem(slot_id, *inst);
 		}
