@@ -3825,7 +3825,7 @@ void NPC::SetTaunting(bool is_taunting) {
 	if (IsPet() || GetSwarmInfo()) {
 		if (RuleB(Custom, TauntTogglesPetTanking)) {
 			SetSpecialAbility(SpecialAbility::AllowedToTank, is_taunting ? 1 : 0);
-			SetSpecialAbility(SpecialAbility::AggroImmunity, is_taunting ? 0 : 1);
+			SetSpecialAbility(SpecialAbility::NPCAggroImmunity, is_taunting ? 0 : 1);
 		}
 	}
 }
