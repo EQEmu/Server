@@ -78,6 +78,7 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value->GetID());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Evolving Items", ":", value->GetID()).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Unique ID", ":", value->GetEvolveUniqueID()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Final Item ID", ":", value->GetEvolveFinalItemID()).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Activated", ":", value->GetEvolveActivated() ? "Yes" : "No").c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Equiped", ":", value->GetEvolveEquiped() ? "Yes" : "No").c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Current Amount", ":", value->GetEvolveCurrentAmount()).c_str());
@@ -108,6 +109,7 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value->GetID());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Evolving Items", ":", value->GetID()).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Unique ID", ":", value->GetEvolveUniqueID()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Final Item ID", ":", value->GetEvolveFinalItemID()).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Activated", ":", value->GetEvolveActivated() ? "Yes" : "No").c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Equiped", ":", value->GetEvolveEquiped() ? "Yes" : "No").c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Current Amount", ":", value->GetEvolveCurrentAmount()).c_str());

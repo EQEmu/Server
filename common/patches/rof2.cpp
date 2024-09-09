@@ -6423,19 +6423,20 @@ namespace RoF2
 		ob.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
 		if (item->EvolvingItem > 0) {
-			RoF2::structs::EvolvingItem evotop;
+			RoF2::structs::EvolvingItem_Struct evotop;
 
 			// 0x00 01 4E 6E
-			evotop.unknown001 = 110;
-			evotop.unknown002 = 78;
-			evotop.unknown003 = 1;
-			evotop.unknown004 = 0;
-			evotop.evoLevel = item->EvolvingLevel;
-			evotop.progress = inst->GetEvolveProgression();
-			evotop.Activated = inst->GetEvolveActivated();
-			evotop.evomaxlevel = item->EvolvingMax;
+			// evotop.unknown001 = 110;
+			// evotop.unknown002 = 78;
+			// evotop.unknown003 = 1;
+			// evotop.unknown004 = 0;
+			evotop.final_item_id    = inst->GetEvolveFinalItemID();
+			evotop.evolve_level     = item->EvolvingLevel;
+			evotop.progress         = inst->GetEvolveProgression();
+			evotop.activated        = inst->GetEvolveActivated();
+			evotop.evolve_max_level = item->EvolvingMax;
 
-			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));
+			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem_Struct));
 		}
 
 		/**

@@ -812,6 +812,7 @@ bool SharedDatabase::GetInventory(Client *c)
 				e.char_id = char_id;
 				e.item_id = item_id;
 				e.equiped = inst->GetEvolveEquiped();
+				e.final_item_id = evolving_items_manager.GetFinalItemID(*inst);
 
 				auto r = CharacterEvolvingItemsRepository::InsertOne(*this, e);
 				e.id = r.id;
@@ -824,6 +825,7 @@ bool SharedDatabase::GetInventory(Client *c)
 				inst->SetEvolveEquiped(e.equiped);
 				inst->SetEvolveCurrentAmount(e.current_amount);
 				inst->SetEvolveProgression(e.progression);
+				inst->SetEvolveFinalItemID(e.final_item_id);
 			}
 			else {
 				inst->SetEvolveUniqueID(t->id);
@@ -833,6 +835,7 @@ bool SharedDatabase::GetInventory(Client *c)
 				inst->SetEvolveEquiped(t->equiped);
 				inst->SetEvolveCurrentAmount(t->current_amount);
 				inst->SetEvolveProgression(t->progression);
+				inst->SetEvolveFinalItemID(t->final_item_id);
 			}
 		}
 

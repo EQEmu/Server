@@ -393,7 +393,6 @@ int main(int argc, char **argv)
 	evolving_items_manager.SetDatabase(&database);
 	evolving_items_manager.SetContentDatabase(&content_db);
 	evolving_items_manager.LoadEvolvingItems();
-	//database.LoadEvolvingItems();
 
 	database.GetDecayTimes(npcCorpseDecayTimes);
 

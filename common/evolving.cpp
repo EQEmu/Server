@@ -81,9 +81,10 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 	if (!inst.GetEvolveUniqueID()) {
 		auto e = CharacterEvolvingItemsRepository::NewEntity();
 
-		e.char_id = char_id;
-		e.item_id = inst.GetID();
-		e.equiped = inst.GetEvolveEquiped();
+		e.char_id       = char_id;
+		e.item_id       = inst.GetID();
+		e.equiped       = inst.GetEvolveEquiped();
+		e.final_item_id = evolving_items_manager.GetFinalItemID(inst);
 
 		auto r = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
 		e.id = r.id;
@@ -91,9 +92,37 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 		inst.SetEvolveUniqueID(e.id);
 		inst.SetEvolveCharID(e.char_id);
 		inst.SetEvolveItemID(e.item_id);
+		inst.SetEvolveFinalItemID(e.final_item_id);
 
 		return;
 	}
 
 	CharacterEvolvingItemsRepository::SetEquiped(*m_db, inst.GetEvolveUniqueID(), inst.GetEvolveEquiped());
+}
+
+uint32 EvolvingItemsManager::GetFinalItemID(const EQ::ItemInstance& inst) const
+{
+	const auto start_iterator = std::ranges::find_if(
+		evolving_items_manager.GetEvolvingItemsCache().cbegin(),
+		evolving_items_manager.GetEvolvingItemsCache().cend(),
+		[&](const std::pair<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> &a) {
+			return a.second.item_evo_id == inst.GetEvolveLoreID();
+		}
+		);
+
+	const auto final_id = std::ranges::max_element(
+		start_iterator,
+		evolving_items_manager.GetEvolvingItemsCache().cend(),
+		[&](const std::pair<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> &a,
+		    const std::pair<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> &b) {
+			return a.second.item_evo_id == b.second.item_evo_id &&
+			       a.second.item_evolve_level < b.second.item_evolve_level;
+		}
+		);
+
+	if (final_id == std::end(evolving_items_manager.GetEvolvingItemsCache())) {
+		return 0;
+	}
+
+	return final_id->first;
 }

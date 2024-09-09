@@ -4746,16 +4746,17 @@ struct ItemSerializationHeader
     uint8          isEvolving;
 };
 
-struct EvolvingItem {
-	uint8 unknown001;
-	uint8 unknown002;
-	uint8 unknown003;
-	uint8 unknown004;
-	int32 evoLevel;
+struct EvolvingItem_Struct {
+	//	uint8 unknown001;
+	//	uint8 unknown002;
+	//	uint8 unknown003;
+	//	uint8 unknown004;
+	uint32 final_item_id;
+	int32  evolve_level;
 	double progress;
-	uint8 Activated;
-	int32 evomaxlevel;
-	uint8 unknown005[4];
+	uint8  activated;
+	int32  evolve_max_level;
+	uint8  unknown005[4];
 };
 
 struct ItemSerializationHeaderFinish

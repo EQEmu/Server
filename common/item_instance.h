@@ -321,7 +321,9 @@ namespace EQ
 		uint64           GetEvolveUniqueID() const { return m_evolving_details.id; }
 		uint32           GetEvolveCharID() const { return m_evolving_details.char_id; }
 		uint32           GetEvolveItemID() const { return m_evolving_details.item_id; }
+		uint32           GetEvolveLoreID() const { return GetItem()->EvolvingID; }
 		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
+		uint32           GetEvolveFinalItemID() const { return m_evolving_details.final_item_id; }
 		void             SetEvolveEquiped(const bool in) const { m_evolving_details.equiped = in; }
 		void             SetEvolveActivated(const bool in) const { m_evolving_details.activated = in; }
 		void             SetEvolveProgression(const double in) const { m_evolving_details.progression = in; }
@@ -330,6 +332,7 @@ namespace EQ
 		void             SetEvolveItemID(const uint32 in) const { m_evolving_details.item_id = in; }
 		void             SetEvolveCurrentAmount(const uint64 in) const { m_evolving_details.current_amount = in; }
 		void             SetEvolveAddToCurrentAmount(const uint64 in) const { m_evolving_details.current_amount += in; }
+		void             SetEvolveFinalItemID(const uint32 in) const { m_evolving_details.final_item_id = in; }
 		bool             TransferOwnership(Database& db, const uint32 to_char_id) const;
 
 	protected:

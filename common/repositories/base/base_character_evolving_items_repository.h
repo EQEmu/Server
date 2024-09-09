@@ -26,6 +26,7 @@ public:
 		uint8_t  equiped;
 		uint64_t current_amount;
 		double   progression;
+		uint32_t final_item_id;
 		time_t   deleted_at;
 	};
 
@@ -44,6 +45,7 @@ public:
 			"equiped",
 			"current_amount",
 			"progression",
+			"final_item_id",
 			"deleted_at",
 		};
 	}
@@ -58,6 +60,7 @@ public:
 			"equiped",
 			"current_amount",
 			"progression",
+			"final_item_id",
 			"UNIX_TIMESTAMP(deleted_at)",
 		};
 	}
@@ -106,6 +109,7 @@ public:
 		e.equiped        = 0;
 		e.current_amount = 0;
 		e.progression    = 0;
+		e.final_item_id  = 0;
 		e.deleted_at     = 0;
 
 		return e;
@@ -150,7 +154,8 @@ public:
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
-			e.deleted_at     = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
+			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.deleted_at     = strtoll(row[8] ? row[8] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -190,7 +195,8 @@ public:
 		v.push_back(columns[4] + " = " + std::to_string(e.equiped));
 		v.push_back(columns[5] + " = " + std::to_string(e.current_amount));
 		v.push_back(columns[6] + " = " + std::to_string(e.progression));
-		v.push_back(columns[7] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back(columns[7] + " = " + std::to_string(e.final_item_id));
+		v.push_back(columns[8] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -219,6 +225,7 @@ public:
 		v.push_back(std::to_string(e.equiped));
 		v.push_back(std::to_string(e.current_amount));
 		v.push_back(std::to_string(e.progression));
+		v.push_back(std::to_string(e.final_item_id));
 		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -256,6 +263,7 @@ public:
 			v.push_back(std::to_string(e.equiped));
 			v.push_back(std::to_string(e.current_amount));
 			v.push_back(std::to_string(e.progression));
+			v.push_back(std::to_string(e.final_item_id));
 			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -297,7 +305,8 @@ public:
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
-			e.deleted_at     = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
+			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.deleted_at     = strtoll(row[8] ? row[8] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -329,7 +338,8 @@ public:
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
-			e.deleted_at     = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
+			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.deleted_at     = strtoll(row[8] ? row[8] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -411,6 +421,7 @@ public:
 		v.push_back(std::to_string(e.equiped));
 		v.push_back(std::to_string(e.current_amount));
 		v.push_back(std::to_string(e.progression));
+		v.push_back(std::to_string(e.final_item_id));
 		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -441,6 +452,7 @@ public:
 			v.push_back(std::to_string(e.equiped));
 			v.push_back(std::to_string(e.current_amount));
 			v.push_back(std::to_string(e.progression));
+			v.push_back(std::to_string(e.final_item_id));
 			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
