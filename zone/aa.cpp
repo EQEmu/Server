@@ -934,12 +934,19 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 
 	// Lie to the client about who can use this AA rank if we are multiclassing
 	if (RuleB(Custom, MulticlassingEnabled)) {
-		// Fury of Magic (Hybrid), Thief's Intutition
-		if (ability->id == 358 || ability->id == 568 || ability->id == 569) {
-			// Skip loading fury of magic.
+		// Selectively disable certain AA on THJ
+		// Fury of Magic and Destructive Fury for hybrids
+		if ((ability->id == 358 || ability->id == 398 || ability->id == 23) && (!(GetClassesBits() & (2 | 32 | 512 | 1024 | 2048 | 4096 | 8192)))) {
 			safe_delete(outapp);
 			return;
 		}
+
+		// Disable useless AA: Thief's Intutition, Adv Trap Negotiation, Trap Circumvention
+		if (ability->id == 568 || ability->id == 569 || ability->id == 121 || ability->id == 292) {
+			safe_delete(outapp);
+			return;
+		}
+
 		if ((ability->classes >> 1) & GetClassesBits() || (ability->classes & (1 << GetClass()))) {
 			aai->classes = 0xFFFFFFF;
 		} else {
