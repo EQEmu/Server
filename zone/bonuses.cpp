@@ -847,7 +847,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		slot = e.slot;
 
 		// THJ Custom Bullshit - Mutate Fist of Steel
-		if (rank.id == 12706 || rank.id == 12707) {
+		if (RuleB(Custom, MulticlassingEnabled) && (rank.id == 12706 || rank.id == 12707)) {
 			if ((e.effect_id == SE_LimitToSkill && e.base_value == 0) || (e.effect_id == SE_SkillDamageAmount && e.limit_value == 0) ) {
 				continue;
 			}
