@@ -110,6 +110,10 @@ uint32 EvolvingItemsManager::GetFinalItemID(const EQ::ItemInstance& inst) const
 		}
 		);
 
+	if (start_iterator == std::end(evolving_items_manager.GetEvolvingItemsCache())) {
+		return 0;
+	}
+
 	const auto final_id = std::ranges::max_element(
 		start_iterator,
 		evolving_items_manager.GetEvolvingItemsCache().cend(),
@@ -120,9 +124,25 @@ uint32 EvolvingItemsManager::GetFinalItemID(const EQ::ItemInstance& inst) const
 		}
 		);
 
-	if (final_id == std::end(evolving_items_manager.GetEvolvingItemsCache())) {
+	return final_id->first;
+}
+
+uint32 EvolvingItemsManager::GetNextEvolveItemID(const EQ::ItemInstance& inst) const
+{
+	int8 current_level = inst.GetEvolveLvl();
+
+	const auto iterator = std::ranges::find_if(
+		evolving_items_manager.GetEvolvingItemsCache().cbegin(),
+		evolving_items_manager.GetEvolvingItemsCache().cend(),
+		[&](const std::pair<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> &a) {
+			return a.second.item_evo_id == inst.GetEvolveLoreID() &&
+			       a.second.item_evolve_level == current_level + 1;
+		}
+		);
+
+	if (iterator == std::end(evolving_items_manager.GetEvolvingItemsCache())) {
 		return 0;
 	}
 
-	return final_id->first;
+	return iterator->first;
 }

@@ -61,13 +61,16 @@ void Client::SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::C
 
 void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 {
-	for (auto const &[key, inst]: GetInv().GetWorn()) {
+	std::vector<EQ::ItemInstance*> queue{};
+
+	for (auto &[key, inst]: GetInv().GetWorn()) {
 		if (!inst->IsEvolving() || !inst->GetEvolveActivated()) {
 			continue;
 		}
 
 		auto type     = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).type;
 		auto sub_type = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).sub_type;
+
 		switch (type) {
 			case EvolvingItems::Types::AMOUNT_OF_EXP: {
 				if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
@@ -103,6 +106,11 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					exp * 0.001,
 					GetName()
 					);
+
+				if (inst->GetEvolveProgression() >= 100) {
+					queue.push_back(inst);
+				}
+
 				break;
 			}
 			case EvolvingItems::Types::NUMBER_OF_KILLS: {
@@ -126,9 +134,19 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 						);
 				}
 
+				if (inst->GetEvolveProgression() >= 100) {
+					queue.push_back(inst);
+				}
+
 				break;
 			}
 			default: {}
+		}
+	}
+
+	if (!queue.empty()) {
+		for (auto const& i:queue) {
+			DoEvolveCheckProgression(*i);
 		}
 	}
 }
@@ -140,7 +158,30 @@ void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app)
 	const uint32 item_id = static_cast<uint32>(in->unique_id & 0xFFFFFFFF);
 	std::unique_ptr<EQ::ItemInstance> const inst(database.CreateItem(item_id));
 
+	inst->SetEvolveProgression(100);
+
 	if (inst) {
 		SendItemPacket(0, inst.get(), ItemPacketViewLink);
 	}
+}
+
+bool Client::DoEvolveCheckProgression(const EQ::ItemInstance &inst)
+{
+	if (inst.GetEvolveProgression() < 100 || inst.GetEvolveLvl() == inst.GetMaxEvolveLvl()) {
+		return false;
+	}
+
+	const auto new_item_id = evolving_items_manager.GetNextEvolveItemID(inst);
+	if (!new_item_id) {
+		return false;
+	}
+
+	std::unique_ptr<EQ::ItemInstance> const new_inst(database.CreateItem(new_item_id));
+
+	RemoveItemBySerialNumber(inst.GetSerialNumber());
+	PushItemOnCursor(*new_inst, true);
+
+	Message(Chat::Yellow, fmt::format("Your {} has evolved to level {}/{}", inst.GetItem()->Name, inst.GetEvolveLvl(), inst.GetMaxEvolveLvl()).c_str());
+//	MessageString(Chat::Yellow, ITEM_EVOLVED, inst.GetItem()->Name);
+	return true;
 }
