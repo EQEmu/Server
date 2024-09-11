@@ -308,13 +308,13 @@ namespace EQ
 		static void ClearGUIDMap();
 
 		// evolving items stuff
-		bool        EvolveOnAllKills() const;
-		int8        GetMaxEvolveLvl() const;
+//		bool        EvolveOnAllKills() const;
 
 		CharacterEvolvingItemsRepository::CharacterEvolvingItems &GetEvolvingDetails() { return m_evolving_details; }
 
 		int8             GetEvolveLvl() const { return GetItem()->EvolvingLevel; }
 		bool             IsEvolving() const { return GetItem()->EvolvingItem; }
+		int8             GetMaxEvolveLvl() const { return GetItem()->EvolvingMax; }
 		bool             GetEvolveActivated() const { return m_evolving_details.activated; }
 		bool             GetEvolveEquiped() const { return m_evolving_details.equiped; }
 		double           GetEvolveProgression() const { return m_evolving_details.progression; }

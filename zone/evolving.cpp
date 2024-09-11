@@ -181,7 +181,16 @@ bool Client::DoEvolveCheckProgression(const EQ::ItemInstance &inst)
 	RemoveItemBySerialNumber(inst.GetSerialNumber());
 	PushItemOnCursor(*new_inst, true);
 
-	Message(Chat::Yellow, fmt::format("Your {} has evolved to level {}/{}", inst.GetItem()->Name, inst.GetEvolveLvl(), inst.GetMaxEvolveLvl()).c_str());
-//	MessageString(Chat::Yellow, ITEM_EVOLVED, inst.GetItem()->Name);
+	MessageString(Chat::Yellow, EVOLVE_ITEM_EVOLVED, inst.GetItem()->Name);
 	return true;
+}
+
+void Client::SendEvolveXPTransferWindow()
+{
+	auto out = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
+	auto data = reinterpret_cast<EvolveItemToggle_Struct*>(out->pBuffer);
+
+	data->action = 1;
+
+	QueuePacket(out.get());
 }

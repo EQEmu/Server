@@ -1028,12 +1028,12 @@ void EQ::ItemInstance::ScaleItem() {
 // 	return (m_evolveInfo && m_evolveInfo->AllKills);
 // }
 //
- int8 EQ::ItemInstance::GetMaxEvolveLvl() const {
+// int8 EQ::ItemInstance::GetMaxEvolveLvl() const {
 // 	if (m_evolveInfo)
 // 		return m_evolveInfo->MaxLvl;
 // 	else
- 		return 0;
-}
+//  		return 0;
+// }
 //
 uint32 EQ::ItemInstance::GetKillsNeeded(uint8 currentlevel) {
 // 	uint32 kills = -1;	// default to -1 (max uint32 value) because this value is usually divided by, so we don't want to ever return zero.
