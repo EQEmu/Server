@@ -286,6 +286,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	memset(&m_epp, 0, sizeof(m_epp));
 	PendingTranslocate = false;
 	PendingSacrifice = false;
+	SacrificeCaster = 0;
 	controlling_boat_id = 0;
 	controlled_mob_id = 0;
 	qGlobals = nullptr;
@@ -3971,7 +3972,7 @@ void Client::SetEndurance(int32 newEnd)
 	CheckManaEndUpdate();
 }
 
-void Client::SacrificeConfirm(Client *caster)
+void Client::SacrificeConfirm(Mob *caster)
 {
 	auto outapp = new EQApplicationPacket(OP_Sacrifice, sizeof(Sacrifice_Struct));
 	Sacrifice_Struct *ss = (Sacrifice_Struct *)outapp->pBuffer;
@@ -3998,14 +3999,14 @@ void Client::SacrificeConfirm(Client *caster)
 	ss->Confirm = 0;
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	// We store the Caster's name, because when the packet comes back, it only has the victim's entityID in it,
+	// We store the Caster's id, because when the packet comes back, it only has the victim's entityID in it,
 	// not the caster.
-	SacrificeCaster += caster->GetName();
+	SacrificeCaster = caster->GetID();
 	PendingSacrifice = true;
 }
 
 //Essentially a special case death function
-void Client::Sacrifice(Client *caster)
+void Client::Sacrifice(Mob *caster)
 {
 	if (GetLevel() >= RuleI(Spells, SacrificeMinLevel) && GetLevel() <= RuleI(Spells, SacrificeMaxLevel)) {
 		int exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
@@ -4053,8 +4054,11 @@ void Client::Sacrifice(Client *caster)
 			}
 			Save();
 			GoToDeath();
-			if (caster) // I guess it's possible?
-				caster->SummonItem(RuleI(Spells, SacrificeItemID));
+			if (caster && caster->IsClient()) {
+				caster->CastToClient()->SummonItem(RuleI(Spells, SacrificeItemID));
+			} else if (caster && caster->IsNPC()) {
+				caster->CastToNPC()->AddItem(RuleI(Spells, SacrificeItemID), 1, false);
+			}
 		}
 	} else {
 		caster->MessageString(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.

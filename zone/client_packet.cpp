@@ -13681,11 +13681,11 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app)
 	}
 
 	if (ss->Confirm) {
-		Client *Caster = entity_list.GetClientByName(SacrificeCaster.c_str());
+		Mob *Caster = entity_list.GetMob(SacrificeCaster);
 		if (Caster) Sacrifice(Caster);
 	}
 	PendingSacrifice = false;
-	SacrificeCaster.clear();
+	SacrificeCaster = 0;
 }
 
 void Client::Handle_OP_SafeFallSuccess(const EQApplicationPacket *app)	// bit of a misnomer, sent whenever safe fall is used (success of fail)
