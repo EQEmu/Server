@@ -2202,10 +2202,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Sacrifice");
 #endif
-				if(!caster || !IsClient() || !caster->IsClient()){
+				if(!caster || !IsClient() ){
 					break;
 				}
-				CastToClient()->SacrificeConfirm(caster->CastToClient());
+				CastToClient()->SacrificeConfirm(caster);
 				break;
 			}
 

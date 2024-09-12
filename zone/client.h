@@ -762,8 +762,8 @@ public:
 	void GetRaidAAs(RaidLeadershipAA_Struct *into) const;
 	void ClearGroupAAs();
 	void UpdateGroupAAs(int32 points, uint32 type);
-	void SacrificeConfirm(Client* caster);
-	void Sacrifice(Client* caster);
+	void SacrificeConfirm(Mob* caster);
+	void Sacrifice(Mob* caster);
 	void GoToDeath();
 	inline const int32 GetInstanceID() const { return zone->GetInstanceID(); }
 	void SetZoning(bool in) { bZoning = in; }
@@ -1245,7 +1245,7 @@ public:
 	bool PendingTranslocate;
 	time_t TranslocateTime;
 	bool PendingSacrifice;
-	std::string SacrificeCaster;
+	uint16 sacrifice_caster_id;
 	PendingTranslocate_Struct PendingTranslocateData;
 	void SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
