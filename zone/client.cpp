@@ -286,7 +286,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	memset(&m_epp, 0, sizeof(m_epp));
 	PendingTranslocate = false;
 	PendingSacrifice = false;
-	SacrificeCaster = 0;
+	sacrifice_caster_id = 0;
 	controlling_boat_id = 0;
 	controlled_mob_id = 0;
 	qGlobals = nullptr;
@@ -4001,7 +4001,7 @@ void Client::SacrificeConfirm(Mob *caster)
 	safe_delete(outapp);
 	// We store the Caster's id, because when the packet comes back, it only has the victim's entityID in it,
 	// not the caster.
-	SacrificeCaster = caster->GetID();
+	sacrifice_caster_id = caster->GetID();
 	PendingSacrifice = true;
 }
 

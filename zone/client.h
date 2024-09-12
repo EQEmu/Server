@@ -1245,7 +1245,7 @@ public:
 	bool PendingTranslocate;
 	time_t TranslocateTime;
 	bool PendingSacrifice;
-	uint16 SacrificeCaster;
+	uint16 sacrifice_caster_id;
 	PendingTranslocate_Struct PendingTranslocateData;
 	void SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
