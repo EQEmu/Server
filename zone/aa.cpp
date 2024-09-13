@@ -981,6 +981,10 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->prev_id = rank->prev_id;
 	aai->grant_only = ability->grant_only;
 
+	if (RuleB(Custom, MulticlassingEnabled) && ability->id == 17786) {
+		aai->grant_only = 0;
+	}
+
 	if((rank->next && !CanUseAlternateAdvancementRank(rank->next)) || ability->charges > 0) {
 		aai->next_id = -1;
 	} else {
