@@ -1465,7 +1465,7 @@ struct PlayerPositionUpdateServer_Struct
 
 struct AuthResponse_Struct {
 	char authHash[256];
-	bool unk;
+	int  unk;
 };
 
 /*

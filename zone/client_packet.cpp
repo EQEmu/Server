@@ -980,7 +980,6 @@ void Client::CompleteConnect()
 
 	if (RuleB(Custom, ServerAuthStats)) {
 		SendEdgeStatBulkUpdate();
-		database.LoadCharacterDisciplines(character_id, &m_pp); /* Load Character Disciplines */
 		SendDisciplineUpdate();
 	}
 
@@ -4919,10 +4918,10 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 			CHacker = true;
 			LogError("HACKER DETECTED [{}]!", GetCleanName());
 
-			std::string message = fmt::format("HACK DETECTED: Character: {} [Account: {}, IP: {}] has been detected using MQ2. (Hook Detection)\n",
+			std::string message = fmt::format("HACK DETECTED: Character: {} [Account: {}, IP: {}] has been detected using MQ2. (Hook Detection: {})\n",
 											  GetCleanName(),
 											  AccountName(),
-											  GetIPString());
+											  GetIPString(), buf->unk);
 
 			zone->SendDiscordMessage("admin", message);
 		}
