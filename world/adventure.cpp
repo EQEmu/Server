@@ -287,6 +287,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 		auto character_id = database.GetCharacterID(*iter);
 
 		if (character_id == 0) {
+			++iter;
 			continue;
 		}
 
