@@ -842,7 +842,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	// Are we also doing linear AA acceleration?
 	if (RuleB(AA, ModernAAScalingEnabled) && aaexp > 0)
 	{
-		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetAAPoints() + GetSpentAA(), aaexp);
+		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetSpentAA() + GetAAPoints(), aaexp);
 	}
 
 	// Check for AA XP Cap

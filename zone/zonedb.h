@@ -436,7 +436,7 @@ public:
 	bool LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
-	bool LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp);
+	bool LoadCharacterDisciplines(Client* c);
 	bool LoadCharacterFactionValues(uint32 character_id, faction_map & val_list);
 	bool LoadCharacterLanguages(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp);

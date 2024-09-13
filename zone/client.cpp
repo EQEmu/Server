@@ -187,7 +187,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   tmSitting(0),
   parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
   lazy_load_bank_check_timer(1000),
-  fast_tic_timer(250)
+  fast_tic_timer(250),
+  bandolier_throttle_timer(0)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);
@@ -286,6 +287,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	memset(&m_epp, 0, sizeof(m_epp));
 	PendingTranslocate = false;
 	PendingSacrifice = false;
+	sacrifice_caster_id = 0;
 	controlling_boat_id = 0;
 	controlled_mob_id = 0;
 	qGlobals = nullptr;
@@ -4065,7 +4067,7 @@ void Client::SetEndurance(int32 newEnd)
 	CheckManaEndUpdate();
 }
 
-void Client::SacrificeConfirm(Client *caster)
+void Client::SacrificeConfirm(Mob *caster)
 {
 	auto outapp = new EQApplicationPacket(OP_Sacrifice, sizeof(Sacrifice_Struct));
 	Sacrifice_Struct *ss = (Sacrifice_Struct *)outapp->pBuffer;
@@ -4092,14 +4094,14 @@ void Client::SacrificeConfirm(Client *caster)
 	ss->Confirm = 0;
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	// We store the Caster's name, because when the packet comes back, it only has the victim's entityID in it,
+	// We store the Caster's id, because when the packet comes back, it only has the victim's entityID in it,
 	// not the caster.
-	SacrificeCaster += caster->GetName();
+	sacrifice_caster_id = caster->GetID();
 	PendingSacrifice = true;
 }
 
 //Essentially a special case death function
-void Client::Sacrifice(Client *caster)
+void Client::Sacrifice(Mob *caster)
 {
 	if (GetLevel() >= RuleI(Spells, SacrificeMinLevel) && GetLevel() <= RuleI(Spells, SacrificeMaxLevel)) {
 		int exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
@@ -4147,8 +4149,11 @@ void Client::Sacrifice(Client *caster)
 			}
 			Save();
 			GoToDeath();
-			if (caster) // I guess it's possible?
-				caster->SummonItem(RuleI(Spells, SacrificeItemID));
+			if (caster && caster->IsClient()) {
+				caster->CastToClient()->SummonItem(RuleI(Spells, SacrificeItemID));
+			} else if (caster && caster->IsNPC()) {
+				caster->CastToNPC()->AddItem(RuleI(Spells, SacrificeItemID), 1, false);
+			}
 		}
 	} else {
 		caster->MessageString(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
@@ -12956,4 +12961,27 @@ bool Client::TakeMoneyFromPPWithOverFlow(uint64 copper, bool update_client)
 	SaveCurrency();
 	RecalcWeight();
 	return true;
+}
+
+void Client::SendTopLevelInventory()
+{
+	EQ::ItemInstance* inst = nullptr;
+
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN,     EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END }
+	};
+
+	const auto& inv = GetInv();
+
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			inst = inv.GetItem(slot_id);
+			if (inst) {
+				SendItemPacket(slot_id, inst, ItemPacketType::ItemPacketTrade);
+			}
+		}
+	}
 }

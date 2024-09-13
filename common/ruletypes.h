@@ -238,6 +238,7 @@ RULE_REAL(Character, FloatingExperiencePercentCapPerWhiteKill, 3, "Experience pe
 RULE_REAL(Character, FloatingExperiencePercentCapPerBlueKill, 2, "Experience percent cap for blue con mobs.")
 RULE_REAL(Character, FloatingExperiencePercentCapPerLightBlueKill, 0.25, "Experience percent cap for light blue con mobs.")
 RULE_REAL(Character, FloatingExperiencePercentCapPerGreenKill, 0.1, "Experience percent cap for green con mobs.")
+RULE_INT(Character, BandolierSwapDelay, 0, "Bandolier swap delay in milliseconds, default is 0")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
