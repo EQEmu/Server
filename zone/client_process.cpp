@@ -553,6 +553,7 @@ bool Client::Process() {
 			CalcATK();
 			CalcMaxEndurance();
 			CalcRestState();
+			ClearRestingDetrimentalEffects();
 			DoHPRegen();
 			DoManaRegen();
 			DoEnduranceRegen();
@@ -2208,8 +2209,6 @@ void Client::CalcRestState()
 	}
 
 	ooc_regen = true;
-
-	ClearRestingDetrimentalEffects();
 }
 
 void Mob::ClearRestingDetrimentalEffects()
