@@ -258,6 +258,28 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 		}
 	}
 
+	if (skill == EQ::skills::SkillKick || skill == EQ::skills::SkillRoundKick || skill == EQ::skills::SkillFlyingKick) {
+		if (IsClient()) {
+			EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(EQ::invslot::slotFeet);
+			if (item) {
+				int val = item->GetItem()->AC;
+
+				my_hit.damage_done += val;
+			}
+		}
+	}
+
+	if (skill == EQ::skills::SkillTigerClaw || skill == EQ::skills::SkillDragonPunch || skill == EQ::skills::SkillEagleStrike) {
+		if (IsClient()) {
+			EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(EQ::invslot::slotHands);
+			if (item) {
+				int val = item->GetItem()->AC;
+
+				my_hit.damage_done += val;
+			}
+		}
+	}
+
 	my_hit.offense = offense(my_hit.skill);
 	my_hit.tohit = GetTotalToHit(my_hit.skill, 0);
 
@@ -308,6 +330,19 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 
 	if (HasDied()) {
 		return;
+	}
+
+	// Force Monk attacks to be H2H for the purpose of skillprocs
+	if (RuleB(Custom, MonkSkillAttacksAreH2HForProcs)) {
+		if (skill == EQ::skills::SkillFlyingKick ||
+			skill == EQ::skills::SkillRoundKick ||
+			skill == EQ::skills::SkillDragonPunch ||
+			skill == EQ::skills::SkillEagleStrike ||
+			skill == EQ::skills::SkillTailRake ||
+			skill == EQ::skills::SkillTigerClaw) {
+
+			skill = EQ::skills::SkillHandtoHand;
+			}
 	}
 
 	TryCastOnSkillUse(who, skill);
@@ -809,8 +844,8 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 	bool bIsBehind = false;
 	bool bCanFrontalBS = false;
 
-	//make sure we have a proper weapon if we are a client.
-	if(IsClient()) {
+	//make sure we have a proper weapon if we are a client, unless multiclassing is enabled and we have some class other than rogue
+	if(IsClient() && !RuleB(Custom, MulticlassingEnabled)) {
 		const EQ::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
 		if (!wpn || (wpn->GetItem()->ItemType != EQ::item::ItemType1HPiercing)){
 			MessageString(Chat::Red, BACKSTAB_WEAPON);
@@ -881,17 +916,24 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 		return;
 
 	int64 hate = 0;
+	int base_damage = 0;
 
 	// make sure we can hit (bane, magical, etc)
 	if (IsClient()) {
 		const EQ::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
 		if (!GetWeaponDamage(other, wpn))
 			return;
+
+		base_damage = GetBaseSkillDamage(EQ::skills::SkillBackstab, other);
+
+		if (!wpn || (wpn->GetItem()->ItemType != EQ::item::ItemType1HPiercing)) {
+			Message(Chat::Skills, "Your backstab is less effective due to your unconventional weapon");
+			base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier);
+		}
 	} else if (!GetWeaponDamage(other, (const EQ::ItemData*)nullptr)){
 		return;
 	}
 
-	int base_damage = GetBaseSkillDamage(EQ::skills::SkillBackstab, other);
 	hate = base_damage;
 
 	DoSpecialAttackDamage(other, EQ::skills::SkillBackstab, base_damage, 0, hate, ReuseTime);
