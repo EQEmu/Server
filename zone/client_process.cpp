@@ -2211,19 +2211,18 @@ void Client::CalcRestState()
 	ooc_regen = true;
 }
 
-void Mob::ClearRestingDetrimentalEffects()
+void Client::ClearRestingDetrimentalEffects()
 {
 	if (RuleB(Custom, ClearRestingDetrimentalEffectsEnabled)) {
 		const auto source_mob = GetOwnerOrSelf();
-		if (source_mob->IsClient() && source_mob->ooc_regen) {
+		if (!AggroCount) {
 			const uint32 buff_count = GetMaxTotalSlots();
 			for (unsigned int j = 0; j < buff_count; j++) {
 				const uint16 buff_id = buffs[j].spellid;
 				if(
 					IsValidSpell(buff_id) &&
 					IsDetrimentalSpell(buff_id) &&
-					(buffs[j].ticsremaining > 0) &&
-					(!IsCharmSpell(buff_id) || !IsResistDebuffSpell(buff_id) || IsClient())
+					(buffs[j].ticsremaining > 0)
 				) {
 					BuffFadeBySlot(j);
 				}

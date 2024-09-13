@@ -2102,6 +2102,8 @@ private:
 
 	void SendTopLevelInventory();
 
+	void ClearRestingDetrimentalEffects();
+
 	glm::vec4 m_ZoneSummonLocation;
 	uint16 zonesummon_id;
 	uint8 zonesummon_ignorerestrictions;

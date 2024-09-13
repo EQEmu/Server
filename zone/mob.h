@@ -511,8 +511,6 @@ public:
 	int GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier);
 	int GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier);
 
-	void ClearRestingDetrimentalEffects();
-
 	uint32 GetApocItemUpgrade(uint32 item_id);
 	uint32 GetMaxItemUpgrade(uint32 item_id);
 
