@@ -1852,6 +1852,9 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 	}
 
 	// You cannot purchase grant only AAs they can only be assigned
+	if (a->id == 17786) {
+		check_grant = false; // such a hack lol
+	}
 	if (check_grant && a->grant_only) {
 		return false;
 	}
