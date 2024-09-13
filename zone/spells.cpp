@@ -258,7 +258,6 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // functions related to begin/finish casting, fizzling etc
-
 //
 // only CastSpell and DoCastSpell should be setting casting_spell_id.
 // basically casting_spell_id is only set when casting a triggered spell from
@@ -492,8 +491,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	LogSpells("Casting [{}] Started at ({},{},{})", spell_id, m_SpellLocation.x, m_SpellLocation.y, m_SpellLocation.z);
 
 	// Replace missing cast messages for 'Bards'
-	// No longer needed
-	/*
 	if (RuleB(Custom, MulticlassingEnabled) && IsClient() && !IsBardSong(spell_id)) {
 		FilteredMessageString(this, Chat::Spells, (IsBardSong(spell_id) ? FilterBardSongs : FilterPCSpells), 12205, spells[spell_id].name);
 		entity_list.FilteredMessageCloseString(this,
@@ -505,7 +502,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 											   0,
 											   GetCleanName());
 	}
-	*/
 
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
@@ -1842,6 +1838,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if (IsBot() && slot == CastingSlot::Item && inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
 		DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, inventory_slot);
+	}
+
+	if (RuleB(Custom, MulticlassingEnabled) && IsClient() && !IsBardSong(spell_id)) {
+		DoAnim(spells[spell_id].casting_animation);
 	}
 
 	// Clean up target hints just in case.

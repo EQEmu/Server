@@ -1269,13 +1269,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.race		= (use_model) ? use_model : race;
 	ns->spawn.runspeed	= runspeed;
 	ns->spawn.walkspeed	= walkspeed;
-
-	if (RuleB(Custom, MulticlassingEnabled) && IsClient()) {
-		ns->spawn.class_ = (HasClass(Class::Monk) && (race == Race::Human || race == Race::Iksar)) ? Class::Monk : Class::None;
-	} else {
-		ns->spawn.class_ = class_;
-	}
-
+	ns->spawn.class_ 	= class_;
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
 	ns->spawn.PlayerState	= GetPlayerState();
