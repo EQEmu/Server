@@ -643,7 +643,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			if (item->DR >= 0) 	return_value += item->DR;
 			if (item->PR >= 0) 	return_value += item->PR;
 
-			return std::max(25.0f, return_value);
+			return std::max(10.0f, return_value);
 		} else {
 			return 100.0f;
 		}

@@ -1495,6 +1495,8 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 		auto effective_cast_time = RuleB(Custom, MulticlassingEnabled) ? 0 : spells[rank->spell].cast_time;
 
+		target_id = GetSpellImpliedTargetID(rank->spell, target_id);
+
 		if (RuleB(Custom, MulticlassingEnabled) || (HasClass(Class::Bard) && IsCasting() && spells[rank->spell].cast_time == 0)) {
 			if (!DoCastingChecksOnCaster(rank->spell, EQ::spells::CastingSlot::AltAbility)) {
 				return;
