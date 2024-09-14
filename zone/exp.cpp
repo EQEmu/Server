@@ -618,8 +618,8 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	auto EjectItem = [&](int16 slot_id) {
 		const EQ::ItemInstance* pop_item = m_inv.PopItem(slot_id);
 		if (pop_item) {
-			PushItemOnCursor(*pop_item, true);
 			DeleteItemInInventory(slot_id, 1, true, true);
+			PushItemOnCursor(*pop_item, true);
 		}
 	};
 
@@ -778,12 +778,6 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			auto upgrade_item_link = linker.GenerateLink().c_str();
 
 			Message(Chat::Experience, "Your [%s] has been upgraded into a [%s]!", item_link, upgrade_item_link);
-		} else {
-			if (item) {
-				PutItemInInventory(EQ::invslot::slotPowerSource, *item, true);
-				Message(Chat::Red, "ERROR: Unable to upgrade item from power source, attempting to recover old item.");
-				return false;
-			}
 		}
 
 		safe_delete(item);
@@ -798,12 +792,12 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
 		}
 
-		database.UpdateInventorySlot(CharacterID(), final_item, EQ::invslot::slotPowerSource);
-		SendItemPacket(EQ::invslot::slotPowerSource, final_item, ItemPacketType::ItemPacketTrade);
-
 		if (final_item->GetID() > 2000000) {
 			EjectItem(EQ::invslot::slotPowerSource);
 		}
+
+		database.UpdateInventorySlot(CharacterID(), final_item, EQ::invslot::slotPowerSource);
+		SendItemPacket(EQ::invslot::slotPowerSource, final_item, ItemPacketType::ItemPacketTrade);
 	}
 
 	return true;
