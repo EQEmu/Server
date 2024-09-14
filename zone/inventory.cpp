@@ -3451,14 +3451,24 @@ int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
 			return GetWIS();
 		case eStatCHA:
 			return GetCHA();
+		case eStatMR:
+			return GetMR();
+		case eStatFR:
+			return GetFR();
+		case eStatCR:
+			return GetCR();
+		case eStatPR:
+			return GetPR();
+		case eStatDR:
+			return GetDR();
 		case eStatHPRegen:
 			return CalcHPRegen(true);
 		case eStatManaRegen:
-			return GetManaRegen();
+			return CalcManaRegen(true);
 		case eStatEndurRegen:
-			return GetEnduranceRegen();
+			return CalcEnduranceRegen(true);
 		case eStatHaste:
-			return GetHaste();
+			return CalcHaste();
 		case eStatATK:
 			return GetTotalATK();
 		case eStatKickTimer:
