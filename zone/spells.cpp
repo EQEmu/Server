@@ -5462,20 +5462,22 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		return 0;
 	}
 
-	if(GetSpecialAbility(SpecialAbility::CastingFromRangeImmunity))
-	{
-		if(!caster->CombatRange(this))
+	if (!spells[spell_id].no_resist && !resist_type == RESIST_NONE) {
+		if(GetSpecialAbility(SpecialAbility::CastingFromRangeImmunity))
 		{
-			caster->Message(Chat::SpellFailure, "Your spell is ineffective! This opponent will resist all spells cast from outside of melee range.");
+			if(!caster->CombatRange(this))
+			{
+				caster->Message(Chat::SpellFailure, "Your spell is ineffective! This opponent will resist all spells cast from outside of melee range.");
+				return(0);
+			}
+		}
+
+		if(GetSpecialAbility(SpecialAbility::MagicImmunity))
+		{
+			LogSpells("We are immune to magic, so we fully resist the spell [{}]", spell_id);
+			caster->Message(Chat::SpellFailure, "Your spell is ineffective! This opponent will resist all spells.");
 			return(0);
 		}
-	}
-
-	if(GetSpecialAbility(SpecialAbility::MagicImmunity))
-	{
-		LogSpells("We are immune to magic, so we fully resist the spell [{}]", spell_id);
-		caster->Message(Chat::SpellFailure, "Your spell is ineffective! This opponent will resist all spells.");
-		return(0);
 	}
 
 	//Get resist modifier and adjust it based on focus 2 resist about eq to 1% resist chance
