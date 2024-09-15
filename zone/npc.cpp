@@ -604,7 +604,7 @@ bool NPC::Process()
 					std::vector<NPC*> eligible_npcs;
 					for (const auto& npc_entity : entity_list.GetNPCList()) {
 						NPC* npc = npc_entity.second;
-						if (npc->IsOnHatelist(owner) && !IsOnHatelist(npc) && DistanceSquared(GetPosition(), npc->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
+						if (npc->IsOnHatelist(owner) && !IsOnHatelist(npc) && DistanceSquared(GetPosition(), npc->GetPosition()) <= RuleR(Aggro, PetAttackRange)) {
 							AddToHateList(npc, 1, 1);
 						}
 					}
