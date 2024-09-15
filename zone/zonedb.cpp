@@ -3947,7 +3947,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
         );
 
         for (int slot_id = 0; slot_id < max_slots; ++slot_id) {
-            if (!IsValidSpell(p->Buffs[slot_id].spellid)) {
+            if (!IsValidSpell(p->Buffs[slot_id].spellid) || IsShortDurationBuff(p->Buffs[slot_id].spellid)) {
                 continue;
             }
 
