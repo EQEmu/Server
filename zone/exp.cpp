@@ -590,21 +590,11 @@ bool Client::ConsumeItemOnCursor() {
 	pow_item->SetCustomData("Exp", fmt::to_string(new_experience));
 	database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
 
-	// Call AddItemExperience with capped experience
-	AddItemExperience(pow_item, ConsiderColor::Green);
-
-	// Apply the overflow experience if there is any
-	if (experience_overflow > 0.0f) {
-		pow_item = m_inv.GetItem(EQ::invslot::slotCursor);
-		if (pow_item) {
-			item_experience = experience_overflow;
-			pow_item->SetCustomData("Exp", fmt::to_string(item_experience));
-			database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
-		}
-	}
-
 	// Delete the item from the cursor
 	DeleteItemInInventory(EQ::invslot::slotCursor, 1, true, true);
+
+	// Call AddItemExperience with capped experience
+	AddItemExperience(pow_item, ConsiderColor::Green);
 
 	return true;
 }
@@ -691,6 +681,8 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			default:
 				break;
 		}
+
+		exp_value *= (GetLevel() >= GetClientMaxLevel() ? 1.0f : 10.0f - ((GetLevel() - 1) * 9.0f / (GetClientMaxLevel() - 1)));
 
 		float norm_val = GetItemStatValue(m_inv.GetItem(EQ::invslot::slotPowerSource)->GetItem());
 
@@ -792,12 +784,12 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
 		}
 
+		database.UpdateInventorySlot(CharacterID(), final_item, EQ::invslot::slotPowerSource);
+
 		if (final_item->GetID() > 2000000) {
 			EjectItem(EQ::invslot::slotPowerSource);
 		}
 
-		database.UpdateInventorySlot(CharacterID(), final_item, EQ::invslot::slotPowerSource);
-		SendItemPacket(EQ::invslot::slotPowerSource, final_item, ItemPacketType::ItemPacketTrade);
 	}
 
 	return true;
