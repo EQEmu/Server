@@ -1088,6 +1088,7 @@ RULE_INT(Custom,   	DevastatingFrenzyRateModifier, 			0, "Subtract this value fr
 RULE_REAL(Custom,   DevastatingFrenzyDamageMultiplier, 		1.0, "Apply this multiplier for each 20% missing hp from target whenever Devastating Frenzy triggers")
 RULE_BOOL(Custom,   FrenzyScaleOnWeapon, 					true, "Add weapon damage to frenzy, and delay to frenzy reuse")
 RULE_BOOL(Custom,   ExcludeTempPetsFromProcChanceSPA,       false, "Enable this rule to prevent SE_ProcChance from affecting procs that spawn temporary pets")
+RULE_BOOL(Custom, 	AttuneItemOnClick,						false, "Forcibly items  on click")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")

@@ -1337,7 +1337,7 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 	if (client_update)
 	{
 		SendItemPacket(slot_id, &inst, ((slot_id == EQ::invslot::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
-		//SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id));
+		SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id));
 	}
 
 	if (slot_id == EQ::invslot::slotCursor) {

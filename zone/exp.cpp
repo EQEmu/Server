@@ -606,10 +606,10 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
     }
 
 	auto EjectItem = [&](int16 slot_id) {
-		const EQ::ItemInstance* pop_item = m_inv.PopItem(slot_id);
+		const EQ::ItemInstance* pop_item = m_inv.GetItem(slot_id);
 		if (pop_item) {
-			DeleteItemInInventory(slot_id, 1, true, true);
 			PushItemOnCursor(*pop_item, true);
+			DeleteItemInInventory(EQ::invslot::slotPowerSource, 1, true, true);
 		}
 	};
 
@@ -782,6 +782,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			final_item->SetAttuned(true);
 			linker.SetItemInst(final_item);
 			Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
+			SendItemPacket(EQ::invslot::slotPowerSource, final_item, ItemPacketTrade);
 		}
 
 		database.UpdateInventorySlot(CharacterID(), final_item, EQ::invslot::slotPowerSource);
@@ -789,7 +790,6 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		if (final_item->GetID() > 2000000) {
 			EjectItem(EQ::invslot::slotPowerSource);
 		}
-
 	}
 
 	return true;

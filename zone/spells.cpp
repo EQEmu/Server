@@ -7608,6 +7608,24 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
 	EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 	int bitmask = (CastToClient()->GetClassesBits());
+
+	auto AttuneThisClick = [&](uint32 inventory_slot) {
+		if (RuleB(Custom, AttuneItemOnClick) && !itm->IsAttuned()) {
+			if (itm->GetItem()->Classes & bitmask) {
+				itm->SetAttuned(true);
+
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+				linker.SetItemInst(itm);
+
+				Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
+
+				database.UpdateInventorySlot(CastToClient()->CharacterID(), itm, inventory_slot);
+				CastToClient()->SendItemPacket(inventory_slot, itm, ItemPacketTrade);
+			}
+		}
+	};
+
 	if (itm && itm->GetItem()->Classes != 65535) {
 		if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && !(itm->GetItem()->Classes & bitmask)) {
 			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
@@ -7650,6 +7668,11 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 		}
 	}
 	if (itm && (itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && inventory_slot > EQ::invslot::EQUIPMENT_END) {
+
+		if (itm->GetItem()->Classes & bitmask) {
+			AttuneThisClick(inventory_slot);
+		}
+
 		if (!(itm->GetItem()->Classes & bitmask && itm->IsAttuned())) {
 			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
 				std::string message = fmt::format(
@@ -7661,11 +7684,13 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 				RecordPlayerEventLogWithClient(CastToClient(), PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 			}
 			else {
-				MessageString(Chat::Red, MUST_EQUIP_ITEM);
+				//MessageString(Chat::Red, MUST_EQUIP_ITEM);
+				Message(Chat::Red, "You cannot use this item unless it is either equipped or attuned.");
 			}
-			return(false);
 		}
 	}
+
+	AttuneThisClick(inventory_slot);
 
 	return true;
 }
