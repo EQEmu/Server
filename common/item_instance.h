@@ -227,6 +227,7 @@ namespace EQ
 
 		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
 		void Serialize(OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
+		void SerializeEvolveItem(EQ::OutBuffer& ob);
 
 		inline int32 GetSerialNumber() const { return m_SerialNumber; }
 		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
@@ -324,6 +325,7 @@ namespace EQ
 		uint32           GetEvolveLoreID() const { return GetItem()->EvolvingID; }
 		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
 		uint32           GetEvolveFinalItemID() const { return m_evolving_details.final_item_id; }
+		uint32           GetAugmentEvolveUniqueID(uint8 augment_index) const;
 		void             SetEvolveEquiped(const bool in) const { m_evolving_details.equiped = in; }
 		void             SetEvolveActivated(const bool in) const { m_evolving_details.activated = in; }
 		void             SetEvolveProgression(const double in) const { m_evolving_details.progression = in; }

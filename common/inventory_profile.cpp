@@ -1823,3 +1823,156 @@ int16 EQ::InventoryProfile::FindFirstFreeSlotThatFitsItem(const EQ::ItemData *it
 	}
 	return 0;
 }
+
+//This function has the same flaw as noted above
+//Helper functions for evolving items
+int16 EQ::InventoryProfile::HasEvolvingItem(uint64 evolve_unique_id, uint8 quantity, uint8 where)
+{
+	int16 slot_id = INVALID_INDEX;
+
+	//Altered by Father Nitwit to support a specification of
+	//where to search, with a default value to maintain compatibility
+
+	// Check each inventory bucket
+	if (where & invWhereWorn) {
+		slot_id = _HasEvolvingItem(m_worn, evolve_unique_id, quantity);
+		if (slot_id != INVALID_INDEX)
+			return slot_id;
+	}
+
+	if (where & invWherePersonal) {
+		slot_id = _HasEvolvingItem(m_inv, evolve_unique_id, quantity);
+		if (slot_id != INVALID_INDEX)
+			return slot_id;
+	}
+
+	if (where & invWhereBank) {
+		slot_id = _HasEvolvingItem(m_bank, evolve_unique_id, quantity);
+		if (slot_id != INVALID_INDEX)
+			return slot_id;
+	}
+
+	if (where & invWhereSharedBank) {
+		slot_id = _HasEvolvingItem(m_shbank, evolve_unique_id, quantity);
+		if (slot_id != INVALID_INDEX)
+			return slot_id;
+	}
+
+	if (where & invWhereTrading) {
+		slot_id = _HasEvolvingItem(m_trade, evolve_unique_id, quantity);
+		if (slot_id != INVALID_INDEX)
+			return slot_id;
+	}
+
+	// Behavioral change - Limbo is no longer checked due to improper handling of return value
+	if (where & invWhereCursor) {
+		// Check cursor queue
+		slot_id = _HasEvolvingItem(m_cursor, evolve_unique_id, quantity);
+		if (slot_id != INVALID_INDEX)
+			return slot_id;
+	}
+
+	return slot_id;
+}
+
+// Internal Method: Checks an inventory bucket for a particular evolving item unique id
+int16 EQ::InventoryProfile::_HasEvolvingItem(std::map<int16, ItemInstance*>& bucket, uint64 evolve_unique_id, uint8 quantity)
+{
+	uint32 quantity_found = 0;
+
+	for (auto iter = bucket.begin(); iter != bucket.end(); ++iter) {
+		if (iter->first <= EQ::invslot::POSSESSIONS_END && iter->first >= EQ::invslot::POSSESSIONS_BEGIN) {
+			if ((((uint64)1 << iter->first) & m_lookup->PossessionsBitmask) == 0)
+				continue;
+		}
+		else if (iter->first <= EQ::invslot::BANK_END && iter->first >= EQ::invslot::BANK_BEGIN) {
+			if (iter->first - EQ::invslot::BANK_BEGIN >= m_lookup->InventoryTypeSize.Bank)
+				continue;
+		}
+
+		auto inst = iter->second;
+		if (inst == nullptr) { continue; }
+
+		if (inst->GetEvolveUniqueID() == evolve_unique_id) {
+			quantity_found += (inst->GetCharges() <= 0) ? 1 : inst->GetCharges();
+			if (quantity_found >= quantity)
+				return iter->first;
+		}
+
+		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
+			if (inst->GetAugmentEvolveUniqueID(index) == evolve_unique_id && quantity <= 1)
+				return invslot::SLOT_AUGMENT_GENERIC_RETURN;
+		}
+
+		if (!inst->IsClassBag()) { continue; }
+
+		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
+			auto bag_inst = bag_iter->second;
+			if (bag_inst == nullptr) { continue; }
+
+			if (bag_inst->GetEvolveUniqueID() == evolve_unique_id) {
+				quantity_found += (bag_inst->GetCharges() <= 0) ? 1 : bag_inst->GetCharges();
+				if (quantity_found >= quantity)
+					return CalcSlotId(iter->first, bag_iter->first);
+			}
+
+			for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
+				if (bag_inst->GetAugmentEvolveUniqueID(index) == evolve_unique_id && quantity <= 1)
+					return invslot::SLOT_AUGMENT_GENERIC_RETURN;
+			}
+		}
+	}
+
+	return INVALID_INDEX;
+}
+
+// Internal Method: Checks an inventory queue type bucket for a particular item
+int16 EQ::InventoryProfile::_HasEvolvingItem(ItemInstQueue& iqueue, uint64 evolve_unique_id, uint8 quantity)
+{
+	// The downfall of this (these) queue procedure is that callers presume that when an item is
+	// found, it is presented as being available on the cursor. In cases of a parity check, this
+	// is sufficient. However, in cases where referential criteria is considered, this can lead
+	// to unintended results. Funtionality should be observed when referencing the return value
+	// of this query
+
+	uint32 quantity_found = 0;
+
+	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
+		auto inst = *iter;
+		if (inst == nullptr) { continue; }
+
+		if (inst->GetEvolveUniqueID() == evolve_unique_id) {
+			quantity_found += (inst->GetCharges() <= 0) ? 1 : inst->GetCharges();
+			if (quantity_found >= quantity)
+				return invslot::slotCursor;
+		}
+
+		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
+			if (inst->GetAugmentEvolveUniqueID(index) == evolve_unique_id && quantity <= 1)
+				return invslot::SLOT_AUGMENT_GENERIC_RETURN;
+		}
+
+		if (!inst->IsClassBag()) { continue; }
+
+		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
+			auto bag_inst = bag_iter->second;
+			if (bag_inst == nullptr) { continue; }
+
+			if (bag_inst->GetEvolveUniqueID() == evolve_unique_id) {
+				quantity_found += (bag_inst->GetCharges() <= 0) ? 1 : bag_inst->GetCharges();
+				if (quantity_found >= quantity)
+					return CalcSlotId(invslot::slotCursor, bag_iter->first);
+			}
+
+			for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
+				if (bag_inst->GetAugmentEvolveUniqueID(index) == evolve_unique_id && quantity <= 1)
+					return invslot::SLOT_AUGMENT_GENERIC_RETURN;
+			}
+		}
+
+		// We only check the visible cursor due to lack of queue processing ability (client allows duplicate in limbo)
+		break;
+	}
+
+	return INVALID_INDEX;
+}

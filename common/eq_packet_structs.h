@@ -6468,6 +6468,23 @@ struct EvolveItemToggle_Struct {
 	uint32 activated;
 };
 
+struct EvolveXPWindowReceive_Struct {
+	uint32 action;
+	uint32 unknown_004;
+	uint64 item1_unique_id;
+	uint64 item2_unique_id;
+};
+
+struct EvolveXPWindowSend_Struct {
+	/*000*/	uint32 action;
+	/*004*/	uint64 item1_unique_id;
+	/*012*/	uint64 item2_unique_id;
+	/*020*/	uint32 compatibility;
+	/*024*/	uint32 max_transfer_level;
+	/*028*/	uint8  unknown_028;
+	/*029*/ uint8  unknown_029;
+	/*030*/ char   serialize_data[];
+};
 // Restore structure packing to default
 #pragma pack()
 

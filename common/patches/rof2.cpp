@@ -1350,6 +1350,82 @@ namespace RoF2
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
+//	ENCODE(OP_EvolveItem)
+//	{
+		// EQApplicationPacket* in = *p;
+		// *p = nullptr;
+  //
+		// //store away the emu struct
+		// uchar             *__emu_buffer = in->pBuffer;
+		// ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *) __emu_buffer;
+  //
+		// switch(old_item_pkt->PacketType)
+		// {
+		// 	case ItemPacketParcel: {
+		// 		ParcelMessaging_Struct       pms{};
+		// 		EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+		// 		cereal::BinaryInputArchive   ar(ss);
+		// 		ar(pms);
+  //
+		// 		uint32 player_name_length = pms.player_name.length();
+		// 		uint32 note_length        = pms.note.length();
+  //
+		// 		auto *int_struct = (EQ::InternalSerializedItem_Struct *) pms.serialized_item.data();
+  //
+		// 		EQ::OutBuffer           ob;
+		// 		EQ::OutBuffer::pos_type last_pos = ob.tellp();
+		// 		ob.write(reinterpret_cast<const char *>(&pms.packet_type), 4);
+  //
+		// 		SerializeItem(ob, (const EQ::ItemInstance *) int_struct->inst, pms.slot_id, 0, ItemPacketParcel);
+  //
+		// 		if (ob.tellp() == last_pos) {
+		// 			LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", pms.slot_id);
+		// 			safe_delete_array(__emu_buffer);
+		// 			safe_delete(in);
+		// 			return;
+		// 		}
+  //
+		// 		ob.write((const char *) &pms.sent_time, 4);
+		// 		ob.write((const char *) &player_name_length, 4);
+		// 		ob.write(pms.player_name.c_str(), pms.player_name.length());
+		// 		ob.write((const char *) &note_length, 4);
+		// 		ob.write(pms.note.c_str(), pms.note.length());
+  //
+		// 		in->size    = ob.size();
+		// 		in->pBuffer = ob.detach();
+  //
+		// 		safe_delete_array(__emu_buffer);
+		// 		dest->FastQueuePacket(&in, ack_req);
+  //
+		// 		break;
+		// 	}
+  //           default: {
+  //               EQ::InternalSerializedItem_Struct *int_struct = (EQ::InternalSerializedItem_Struct *)(&__emu_buffer[4]);
+  //
+  //               EQ::OutBuffer           ob;
+  //               EQ::OutBuffer::pos_type last_pos = ob.tellp();
+  //
+  //               ob.write((const char *)__emu_buffer, 4);
+  //
+  //               SerializeItem(ob, (const EQ::ItemInstance *)int_struct->inst, int_struct->slot_id, 0,
+  //                             old_item_pkt->PacketType);
+  //               if (ob.tellp() == last_pos) {
+  //                   LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]",
+  //                              int_struct->slot_id);
+		// 			safe_delete_array(__emu_buffer);
+		// 			safe_delete(in);
+  //                   return;
+  //               }
+  //
+  //               in->size    = ob.size();
+  //               in->pBuffer = ob.detach();
+  //
+  //               safe_delete_array(__emu_buffer);
+  //               dest->FastQueuePacket(&in, ack_req);
+  //           }
+  //       }
+//	}
+
 	ENCODE(OP_ExpansionInfo)
 	{
 		ENCODE_LENGTH_EXACT(ExpansionInfo_Struct);

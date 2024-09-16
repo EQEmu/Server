@@ -1824,6 +1824,8 @@ public:
 	void DoEvolveItemToggle(const EQApplicationPacket* app);
 	void DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app);
 	bool DoEvolveCheckProgression(const EQ::ItemInstance &inst);
+	void SendEvolveXPWindowDetails(const EQApplicationPacket* app);
+	void DoEvolveTransferXP(const EQApplicationPacket* app);
 	void SendEvolveXPTransferWindow();
 
 protected:

@@ -194,3 +194,52 @@ void Client::SendEvolveXPTransferWindow()
 
 	QueuePacket(out.get());
 }
+
+void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
+{
+	auto in = reinterpret_cast<EvolveXPWindowReceive_Struct*>(app->pBuffer);
+
+	const auto item_1_slot = GetInv().HasEvolvingItem(in->item1_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
+	const auto item_2_slot = GetInv().HasEvolvingItem(in->item2_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
+
+	if (item_1_slot == INVALID_INDEX || item_2_slot == INVALID_INDEX) {
+		return;
+	}
+
+	const auto item_1 = GetInv().GetItem(item_1_slot);
+	const auto item_2 = GetInv().GetItem(item_2_slot);
+
+	if (!item_1 && !item_2) {
+		return;
+	}
+
+	EQ::OutBuffer ob;
+	EQ::OutBuffer::pos_type last_pos = ob.tellp();
+
+	std::stringstream ss{};
+
+	item_1->SerializeEvolveItem(ob);
+	item_2->SerializeEvolveItem(ob);
+
+	auto out = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveXPWindowSend_Struct) + ob.size());
+	auto data = reinterpret_cast<EvolveXPWindowSend_Struct*>(out->pBuffer);
+
+	data->action             = 2;
+	data->compatibility      = 11;
+	data->max_transfer_level = 3;
+
+	data->item1_unique_id = item_1->GetEvolveUniqueID();
+	data->item2_unique_id = item_2->GetEvolveUniqueID();
+
+	data->unknown_028 = 1;
+	data->unknown_029 = 1;
+
+	memcpy(data->serialize_data, ob.str().data(), ob.size());
+
+	QueuePacket(out.get());
+}
+
+void Client::DoEvolveTransferXP(const EQApplicationPacket* app)
+{
+
+}

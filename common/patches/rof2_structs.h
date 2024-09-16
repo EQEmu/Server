@@ -4747,10 +4747,6 @@ struct ItemSerializationHeader
 };
 
 struct EvolvingItem_Struct {
-	//	uint8 unknown001;
-	//	uint8 unknown002;
-	//	uint8 unknown003;
-	//	uint8 unknown004;
 	uint32 final_item_id;
 	int32  evolve_level;
 	double progress;
@@ -5435,6 +5431,13 @@ struct EvolveItemToggle_Struct {
 	uint64 unique_id;
 	uint32 percentage;
 	uint32 activated;
+};
+
+struct EvolveXPWindowReceive_Struct {
+	uint32 action;
+	uint32 unknown_004;
+	uint64 item1_unique_id;
+	uint64 item2_unique_id;
 };
 
 }; /*RoF2*/

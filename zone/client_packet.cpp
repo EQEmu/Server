@@ -17191,6 +17191,14 @@ void Client::Handle_OP_EvolveItem(const EQApplicationPacket *app)
 			DoEvolveItemDisplayFinalResult(app);
 			break;
 		}
+		case EvolvingItems::Actions::TRANSFER_XP: {
+			DoEvolveTransferXP(app);
+			break;
+		}
+		case EvolvingItems::Actions::XP_TRANSFER_WINDOW: {
+			//SendEvolveXPTransferWindow();
+			SendEvolveXPWindowDetails(app);
+		}
 		default: {
 
 		}

@@ -36,32 +36,13 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 	}
 
 	if (is_test) {
-		if (arguments > 1) {
+		if (arguments > 3) {
 			c->Message(Chat::White, "Usage: #evolve test");
 		}
 		else {
-			// for (auto const& [key, value] : t->GetEvolvingItems()) {
-			// 	auto item = evolving_items_manager.GetEvolvingItemsCache().at(value.item_id);
-			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Evolving Items", ":", value.item_id).c_str());
-			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Activated", ":", value.activated ? "Yes" : "No").c_str());
-			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Current Amount", ":", value.current_amount).c_str());
-			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Required Amount", ":", item.required_amount).c_str());
-			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Progression %", ":", value.progression).c_str());
-			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "Type", ":", item.type).c_str());
-			// 	c->Message(Chat::Yellow, fmt::format("{: <16}{: <1}{}", "SubType", ":", item.sub_type).c_str());
-			// 	c->Message(Chat::Green, fmt::format("Evolving Item Details").c_str());
-			// 	c->Message(Chat::Green, fmt::format("ID:{: >6} A:{} T:{} ST:{} C:{} R:{} P:{}`%",
-			// 	                                    value.item_id,
-			// 	                                    value.activated ? "Y" : "N",
-			// 	                                    item.type,
-			// 	                                    item.sub_type,
-			// 	                                    value.current_amount,
-			// 	                                    item.required_amount,
-			// 	                                    value.progression).c_str()
-			// 	);
-			//
-			//
-			// }
+			auto item_id_1 = Strings::ToUnsignedInt(sep->arg[2]);
+			auto item_id_2 = Strings::ToUnsignedInt(sep->arg[3]);
+			//c->SendEvolveXPWindowDetails(item_id_1, item_id_2);
 		}
 	}
 	else if (is_target) {
