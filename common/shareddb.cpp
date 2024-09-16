@@ -1684,6 +1684,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				item.RecastType = -1;
 			}
 
+			if (item.ID > 2000000 && item.NoRent) {
+				item.Attuneable = 0;
+			}
+
 			if (item.ID % 1000000 == 5798  || // Hammer of Souls
 			    item.ID % 1000000 == 5800  || // Hammer of Judgment
 				item.ID % 1000000 == 6307  || // Hammer of Wrath
@@ -1692,11 +1696,8 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				item.ID % 1000000 == 15996 || // Hammer of Divinity
 				item.ID % 1000000 == 29365) { // Hammer of Damnation
 				item.NoDrop = !item.NoDrop;
+				item.Attuneable = 0;
 			}
-			if (item.ID > 2000000 && item.NoRent) {
-				item.Attuneable = !item.Attuneable;
-			}
-
 		}
 
 		// Bard Instrument that isn't a weapon which fits in primary/secondary
