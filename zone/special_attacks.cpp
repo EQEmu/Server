@@ -2005,7 +2005,6 @@ void NPC::DoClassAttacks(Mob *target) {
 		IsTaunting() &&
 		HasOwner() &&
 		target->IsNPC() &&
-		target->GetBodyType() != BodyType::Undead &&
 		taunt_time &&
 		type_of_pet &&
 		type_of_pet != petTargetLock &&
