@@ -1679,7 +1679,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				strn0cpy(item.Name, modifiedName, sizeof(item.Name));
 			}
 
-			if (item.Click.Effect > 0 && item.CastTime == 0 && item.CastTime_ == 0 && item.RecastDelay == 0) {
+			if (item.Click.Effect == 524 && item.CastTime == 0 && item.CastTime_ == 0 && item.RecastDelay == 0) {
 				item.RecastDelay = 5;
 				item.RecastType = -1;
 			}
@@ -2254,6 +2254,10 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].min_range = Strings::ToFloat(row[231]);
 		sp[tempid].no_remove = Strings::ToBool(row[232]);
 		sp[tempid].damage_shield_type = 0;
+
+		if (RuleB(Custom, UseTHJItemMutations)) {
+			sp[tempid].timer_id = -1;
+		}
 	}
 
 	LoadDamageShieldTypes(sp, max_spells);
