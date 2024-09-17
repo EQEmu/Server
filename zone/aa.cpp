@@ -936,7 +936,11 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	if (RuleB(Custom, MulticlassingEnabled)) {
 		// Selectively disable certain AA on THJ
 		// Fury of Magic and Destructive Fury for hybrids
-		if ((ability->id == 358 || ability->id == 398 || ability->id == 23) && (!(GetClassesBits() & (2 | 32 | 512 | 1024 | 2048 | 4096 | 8192)))) {
+		if (ability->id == 358) {
+			safe_delete(outapp);
+			return;
+		}
+		if ((ability->id == 398 || ability->id == 23) && (!(GetClassesBits() & (2 | 32 | 512 | 1024 | 2048 | 4096 | 8192)))) {
 			safe_delete(outapp);
 			return;
 		}
