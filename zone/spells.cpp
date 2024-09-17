@@ -3242,7 +3242,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	const SPDat_Spell_Struct &sp1 = spells[spellid1];
 	const SPDat_Spell_Struct &sp2 = spells[spellid2];
 
-
 	int i, effect1, effect2, sp1_value, sp2_value;
 	int blocked_effect, blocked_below_value, blocked_slot;
 	int overwrite_effect, overwrite_below_value, overwrite_slot;
@@ -3261,6 +3260,18 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 	if (IsResurrectionEffects(spellid1)) {
 		return 0;
+	}
+
+	if (RuleB(Custom, BypassProcStackConflicts)) {
+		if (IsEffectInSpell(spellid1, SE_WeaponProc) && IsEffectInSpell(spellid2, SE_WeaponProc) && spellid1 != spellid2) {
+			return 0;
+		}
+	}
+
+	if (RuleB(Custom, BypassDSStackConflicts)) {
+		if (IsEffectInSpell(spellid1, SE_DamageShield) && IsEffectInSpell(spellid2, SE_DamageShield) && spellid1 != spellid2) {
+			return 0;
+		}
 	}
 
 	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SE_CompleteHeal)) {

@@ -606,10 +606,11 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
     }
 
 	auto EjectItem = [&](int16 slot_id) {
-		const EQ::ItemInstance* pop_item = m_inv.GetItem(slot_id);
+		const EQ::ItemInstance* pop_item = m_inv.PopItem(slot_id);
 		if (pop_item) {
+			database.SaveInventory(CharacterID(), NULL, slot_id);
+			DeleteItemInInventory(slot_id, 0, true, true);
 			PushItemOnCursor(*pop_item, true);
-			DeleteItemInInventory(EQ::invslot::slotPowerSource, 1, true, true);
 		}
 	};
 
