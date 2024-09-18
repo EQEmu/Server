@@ -76,6 +76,13 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 	chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
 	chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
+	if (GetEntityVariable("ProcHint") == "true") {
+		chance += itembonuses.CriticalProcChance + spellbonuses.CriticalProcChance + aabonuses.CriticalProcChance;
+		LogDebug("This was a Proc, crit chance [{}]", chance);
+	} else {
+		LogDebug("This was not a Proc, crit chance [{}]", chance);
+	}
+
 	//Crtical Hit Calculation pathway
 	if (chance > 0 || (IsOfClientBot() && (HasClass(Class::Wizard)) && GetLevel() >= RuleI(Spells, WizCritLevel))) {
 		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.

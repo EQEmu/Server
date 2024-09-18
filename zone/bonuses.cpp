@@ -1386,7 +1386,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_CriticalSpellChance: {
-			newbon->CriticalSpellChance += base_value;
+			if (rank.base_ability->id == 210) { // Ingenuity
+				newbon->CriticalProcChance += base_value;
+			} else {
+				newbon->CriticalSpellChance += base_value;
+			}
 
 			if (limit_value > newbon->SpellCritDmgIncNoStack) //take the highest critdmg limit
 				newbon->SpellCritDmgIncNoStack = limit_value;

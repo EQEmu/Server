@@ -938,6 +938,10 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		} else {
 			aai->classes = ability->classes;
 		}
+
+		if (ability->id == 215 && GetClassesBits() & 16412) {
+			aai->classes = 0xFFFFFFF;
+		}
 	} else {
 		if(!(ability->classes & (1 << GetClass()))) {
 			safe_delete(outapp);
@@ -1020,6 +1024,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 			case 569: // Thief's Intuition
 			case 121: // Adv. Trap Negotiation
 			case 292: // Trap Circumvention
+			case 358: // Fury of Magic (Hybrids)
 				safe_delete(outapp); // dump this AA
 				return;
 			case 585: // Glyphs
@@ -1735,6 +1740,11 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 	// Lie to the client about who can use this AA rank if we are multiclassing
 	if (RuleB(Custom, MulticlassingEnabled)) {
 		if (rank->id == 1071 || rank->id == 4764 || rank->id == 7553 || rank->id == 7681) {
+			return true;
+		}
+
+		// Fury of Magic for the Hybrids
+		if (a->id == 215 && GetClassesBits() & 16412 && rank->id <= 772) {
 			return true;
 		}
 

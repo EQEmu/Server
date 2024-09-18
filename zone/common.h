@@ -360,6 +360,7 @@ struct StatBonuses {
 	int32	MeleeMitigationEffect;				//i = Spell Effect Melee Mitigation
 	int32	CriticalHitChance[EQ::skills::HIGHEST_SKILL + 2];	//i
 	int32	CriticalSpellChance;				//i
+	int32   CriticalProcChance;
 	int32	SpellCritDmgIncrease;				//i
 	int32	SpellCritDmgIncNoStack;				// increase
 	int32	DotCritDmgIncrease;					//i

@@ -5404,6 +5404,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		twin_proc = true;
 	}
 
+	SetEntityVariable("ProcHint", "true");
 	if (
 		IsBeneficialSpell(spell_id) &&
 		(
@@ -5465,6 +5466,8 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 			);
 		}
 	}
+
+	DeleteEntityVariable("ProcHint");
 }
 
 uint32 Mob::GetZoneID() const {
