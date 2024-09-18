@@ -931,26 +931,8 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	auto outapp = new EQApplicationPacket(OP_SendAATable, size);
 	AARankInfo_Struct *aai = (AARankInfo_Struct*)outapp->pBuffer;
 
-
 	// Lie to the client about who can use this AA rank if we are multiclassing
 	if (RuleB(Custom, MulticlassingEnabled)) {
-		// Selectively disable certain AA on THJ
-		// Fury of Magic and Destructive Fury for hybrids
-		if (ability->id == 358) {
-			safe_delete(outapp);
-			return;
-		}
-		if ((ability->id == 398 || ability->id == 23) && (!(GetClassesBits() & (2 | 32 | 512 | 1024 | 2048 | 4096 | 8192)))) {
-			safe_delete(outapp);
-			return;
-		}
-
-		// Disable useless AA: Thief's Intutition, Adv Trap Negotiation, Trap Circumvention
-		if (ability->id == 568 || ability->id == 569 || ability->id == 121 || ability->id == 292) {
-			safe_delete(outapp);
-			return;
-		}
-
 		if ((ability->classes >> 1) & GetClassesBits() || (ability->classes & (1 << GetClass()))) {
 			aai->classes = 0xFFFFFFF;
 		} else {
@@ -985,15 +967,12 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->prev_id = rank->prev_id;
 	aai->grant_only = ability->grant_only;
 
-	if (RuleB(Custom, MulticlassingEnabled) && ability->id == 17786) {
-		aai->grant_only = 0;
-	}
-
 	if((rank->next && !CanUseAlternateAdvancementRank(rank->next)) || ability->charges > 0) {
 		aai->next_id = -1;
 	} else {
 		aai->next_id = rank->next_id;
 	}
+
 	aai->total_cost = rank->total_cost;
 	aai->expansion = rank->expansion;
 	aai->category = ability->category;
@@ -1035,40 +1014,35 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		}
 	}
 
-	// More THJ-specific mutates.
 	if (RuleB(Custom, MulticlassingEnabled)) {
-		/*  Mangle Glyphs
-			585	Glyph of Dragon Scales
-			586	Glyph of Indeterminable Reward
-			587	Glyph of Arcane Secrets
-			588	Glyph of Draconic Potential
-			589	Glyph of Destruction
-			5000	Glyph of Courage
-			5002	Glyph of Stored Life
-			5003	Glyph of Frantic Infusion
-			5004	Glyph of Angry Thoughts
-			7016	Glyph of the Master
-			7017	Glyph of Lost Secrets
-			7018	Glyph of Genari Might
-			7019	Glyph of the Cataclysm
-		*/
-		if (ability->id == 585  ||
-			ability->id == 586  ||
-			ability->id == 587  ||
-			ability->id == 588  ||
-			ability->id == 589  ||
-			ability->id == 5000 ||
-			ability->id == 5002 ||
-			ability->id == 5003 ||
-			ability->id == 5004 ||
-			ability->id == 7016 ||
-			ability->id == 7017 ||
-			ability->id == 7018 ||
-			ability->id == 7019)
-		{
-			aai->grant_only = 1;
-			aai->cost = 0;
-			aai->total_cost = 0;
+		switch (ability->id) {
+			case 568: // Thief's Intuition
+			case 569: // Thief's Intuition
+			case 121: // Adv. Trap Negotiation
+			case 292: // Trap Circumvention
+				safe_delete(outapp); // dump this AA
+				return;
+			case 585: // Glyphs
+			case 586:
+			case 587:
+			case 588:
+			case 589:
+			case 5000:
+			case 5002:
+			case 5003:
+			case 5004:
+			case 7016:
+			case 7017:
+			case 7018:
+			case 7019:
+				aai->grant_only = 1;
+				aai->cost = 0;
+				aai->total_cost = 0;
+				break;
+			case 17786: // Situational Awareness
+				aai->grant_only = 0; // Make these AA available
+			default:
+				// No Operation
 		}
 	}
 
