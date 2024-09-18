@@ -1041,9 +1041,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 				break;
 			case 17786: // Situational Awareness
 				aai->grant_only = 0; // Make these AA available
-			default:
-				// No Operation
-		}
+		};
 	}
 
 	QueuePacket(outapp);

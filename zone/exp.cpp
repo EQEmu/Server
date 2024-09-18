@@ -591,7 +591,7 @@ bool Client::ConsumeItemOnCursor() {
 	database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
 
 	// Delete the item from the cursor
-	DeleteItemInInventory(EQ::invslot::slotCursor, 1, true, true);
+	DeleteItemInInventory(EQ::invslot::slotCursor, 0, true, true);
 
 	// Call AddItemExperience with capped experience
 	AddItemExperience(pow_item, ConsiderColor::Green);
