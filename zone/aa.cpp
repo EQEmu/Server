@@ -1025,6 +1025,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 			case 121: // Adv. Trap Negotiation
 			case 292: // Trap Circumvention
 			case 358: // Fury of Magic (Hybrids)
+			case 1218: // Extended Ingenuity for Bards
 				safe_delete(outapp); // dump this AA
 				return;
 			case 585: // Glyphs
