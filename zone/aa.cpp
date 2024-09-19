@@ -1048,6 +1048,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 				break;
 			case 17786: // Situational Awareness
 				aai->grant_only = 0; // Make these AA available
+				aai->spell_type = 99;
 		};
 	}
 
@@ -1996,7 +1997,11 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(
 				a->classes = 15906 << 1;
 			}
 
-			if (a->id == 494 || a->id == 144) { // Duplicate Silent Casting & Innate Enlightenment
+			if (a->id == 153) {
+				a->classes = 550 << 1;
+			}
+
+			if (a->id == 494 || a->id == 144 || a->id == 285) { // Duplicate Silent Casting & Innate Enlightenment
 				a->classes = 0;
 			}
 		}

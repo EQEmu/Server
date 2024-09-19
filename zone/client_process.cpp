@@ -586,8 +586,8 @@ bool Client::Process() {
 				ItemTimerCheck();
 			}
 
-			if (RuleB(Custom, ServerAuthStats) && InZone() && !CAuthorized) {
-				if (GetZoneID() != Zones::BAZAAR && (CUnauth_tics > 1)) {
+			if (RuleB(Custom, ServerAuthStats) && InZone() && !CAuthorized && CUnauth_tics > 1) {
+				if (GetZoneID() != Zones::BAZAAR) {
 					if (CUnauth_tics >= 11) {
 						zone->SendDiscordMessage("admin", fmt::format("Kicking [{}]. Unauthorized Client.", GetCleanName()));
 						Kick("Custom client required. Visit heroesjourneyeq.com for more information.");
