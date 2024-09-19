@@ -2001,7 +2001,11 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(
 				a->classes = 550 << 1;
 			}
 
-			if (a->id == 494 || a->id == 144 || a->id == 285) { // Duplicate Silent Casting & Innate Enlightenment
+			if (a->id == 271) {
+				a->classes = 320 << 1;
+			}
+
+			if (a->id == 494 || a->id == 144 || a->id == 285 || a->id == 9301) { // Duplicate Silent Casting & Innate Enlightenment
 				a->classes = 0;
 			}
 		}
