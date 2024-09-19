@@ -171,7 +171,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 			// until we get a better inv system for NPCs they get nerfed!
 			if (IsClient()) {
 				auto *inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
-				if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQ::item::ItemType1HPiercing) {
+				if (inst && inst->GetItem()) {
 					base = inst->GetItemBackstabDamage(true);
 					if (!inst->GetItemBackstabDamage()) {
 						base += inst->GetItemWeaponDamage(true);
