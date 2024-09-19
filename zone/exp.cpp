@@ -590,13 +590,13 @@ bool Client::ConsumeItemOnCursor() {
 	pow_item->SetCustomData("Exp", fmt::to_string(new_experience));
 	database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
 
-	// Delete the item from the cursor
-	DeleteItemInInventory(EQ::invslot::slotCursor, 0, true, true);
+	if (AddItemExperience(pow_item, ConsiderColor::Green)) {
+		// Delete the item from the cursor
+		DeleteItemInInventory(EQ::invslot::slotCursor, 0, true, true);
+		return true;
+	}
 
-	// Call AddItemExperience with capped experience
-	AddItemExperience(pow_item, ConsiderColor::Green);
-
-	return true;
+	return false;
 }
 
 bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
