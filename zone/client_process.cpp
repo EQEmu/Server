@@ -2218,23 +2218,40 @@ void Client::CalcRestState()
 
 void Client::ClearRestingDetrimentalEffects()
 {
+	if (AggroCount || !rest_timer.Check(false)) {
+		return;
+	}
 	if (RuleB(Custom, ClearRestingDetrimentalEffectsEnabled)) {
-		const auto source_mob = GetOwnerOrSelf();
-		if (!AggroCount) {
-			const uint32 buff_count = GetMaxTotalSlots();
-			for (unsigned int j = 0; j < buff_count; j++) {
-				const uint16 buff_id = buffs[j].spellid;
-				if(
+		const uint32 buff_count = GetMaxTotalSlots();
+		for (unsigned int j = 0; j < buff_count; j++) {
+			const uint16 buff_id = buffs[j].spellid;
+			if (
+				IsValidSpell(buff_id) &&
+				IsDetrimentalSpell(buff_id) &&
+				(buffs[j].ticsremaining > 0)
+			) {
+				BuffFadeBySlot(j);
+			}
+		}
+
+		for (auto pet : GetAllPets()) {
+			const uint32 pet_buff_count = pet->GetMaxTotalSlots();  // Rename to avoid shadowing
+			const auto pet_buffs = pet->GetBuffs(); // Get pet's buffs once outside the loop
+			for (unsigned int j = 0; j < pet_buff_count; j++) {
+				const uint16 buff_id = pet_buffs[j].spellid;
+				if (
 					IsValidSpell(buff_id) &&
 					IsDetrimentalSpell(buff_id) &&
-					(buffs[j].ticsremaining > 0)
+					(pet_buffs[j].ticsremaining > 0) &&
+					strcmp(pet_buffs[j].caster_name, GetCleanName()) != 0  // Skip owner-cast spells
 				) {
-					BuffFadeBySlot(j);
+					pet->BuffFadeBySlot(j);  // Fade the buff if all conditions are met
 				}
 			}
 		}
 	}
 }
+
 
 void Client::DoTracking()
 {
