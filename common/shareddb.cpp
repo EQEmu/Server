@@ -2256,7 +2256,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].no_remove = Strings::ToBool(row[232]);
 		sp[tempid].damage_shield_type = 0;
 
-		if (RuleB(Custom, UseTHJItemMutations)) {
+		if (RuleB(Custom, UseTHJItemMutations) && !sp[tempid].is_discipline) {
 			sp[tempid].timer_id = -1;
 		}
 	}
