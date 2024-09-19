@@ -2258,6 +2258,10 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 		if (RuleB(Custom, UseTHJItemMutations) && !sp[tempid].is_discipline) {
 			sp[tempid].timer_id = -1;
+
+			if (sp[tempid].target_type == ST_GroupClientAndPet) {
+				sp[tempid].target_type = ST_Target;
+			}
 		}
 	}
 

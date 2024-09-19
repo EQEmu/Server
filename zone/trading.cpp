@@ -822,13 +822,12 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				EQ::ItemInstance* pet_bag = nullptr;
 				if (RuleB(Custom, EnablePetBags) && is_pet) {
 					auto trade_owner = tradingWith->GetOwner()->CastToClient();
-					auto trade_pet0  = trade_owner->GetPet(0);
-					if (trade_pet0->GetID () == tradingWith->GetID()) {
-						pet_bag = tradingWith->GetOwner()->CastToClient()->GetActivePetBag();
-					}
+					pet_bag = tradingWith->GetOwner()->CastToClient()->GetActivePetBag();
 				}
 				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
-				if (RuleB(Custom, EnablePetBags) && is_pet && pet_bag) {
+				LogDebug("Test: [{}], spellID [{}]", GetSpellLevel(tradingWith->CastToNPC()->GetPetSpellID(), Class::Magician), tradingWith->CastToNPC()->GetPetSpellID());
+				LogDebug("[{}] [{}] [{}] [{}]", RuleB(Custom, EnablePetBags) , is_pet , pet_bag != nullptr , (GetSpellLevel(tradingWith->CastToNPC()->GetPetSpellID(), Class::Magician) < UINT8_MAX));
+				if (RuleB(Custom, EnablePetBags) && is_pet && pet_bag && (GetSpellLevel(tradingWith->CastToNPC()->GetPetSpellID(), Class::Magician) < UINT8_MAX)) {
 					tradingWith->SayString(TRADE_BACK, GetCleanName());
 					PushItemOnCursor(*inst, true);
 

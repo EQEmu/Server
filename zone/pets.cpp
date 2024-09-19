@@ -397,7 +397,6 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         for (int i = 0; i < 10; i++) {
             std::string bucket_name = fmt::format("bear_name_{}", i);
             std::string ret_name = owner->GetBucket(bucket_name);
-            LogDebug("Got Name: {}", ret_name);
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -442,7 +441,6 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         for (int i = 1; i < 10; ++i) {
             std::string bucket_name = fmt::format("skeleton_name_{}", i);
             std::string ret_name = owner->GetBucket(bucket_name);
-            LogDebug("Got Name: {}", ret_name);
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -497,7 +495,6 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         for (int i = 1; i <= 10; ++i) {
             std::string bucket_name = fmt::format("warder_name_{}", i);
             std::string ret_name = owner->GetBucket(bucket_name);
-            LogDebug("Got Name: {}", ret_name);
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -546,7 +543,6 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         for (int i = 1; i <= 10; ++i) {
             std::string bucket_name = fmt::format("spirit_name_{}", i);
             std::string ret_name = owner->GetBucket(bucket_name);
-            LogDebug("Got Name: {}", ret_name);
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -611,7 +607,6 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         for (int i = 1; i <= 100; ++i) {
             std::string bucket_name = fmt::format("spectre_name_{}", i);
             std::string ret_name = owner->GetBucket(bucket_name);
-            LogDebug("Got Name: {}", ret_name);
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -922,7 +917,6 @@ bool Mob::IsPetAllowed(uint16 incoming_spell) {
 
         auto pet_buffs = pet->GetBuffs();
         for (int i = 0; i < pet->GetMaxTotalSlots(); i++) {
-			LogDebug("Examining Pet Buff [{}]", pet_buffs[i].spellid);
             if (IsCharmSpell(pet_buffs[i].spellid)) {
                 origin_spell = pet_buffs[i].spellid;
 				LogDebug("Found Charm Spell: [{}]", origin_spell);
