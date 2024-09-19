@@ -1026,6 +1026,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 			case 292: // Trap Circumvention
 			case 358: // Fury of Magic (Hybrids)
 			case 1218: // Extended Ingenuity for Bards
+			case 494: // Extra version of Silent Casting
 				safe_delete(outapp); // dump this AA
 				return;
 			case 585: // Glyphs
@@ -1988,6 +1989,17 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(
 		a->auto_grant_enabled = e.auto_grant_enabled;
 		a->first_rank_id      = e.first_rank_id;
 		a->first              = nullptr;
+
+		// Mangle some of this here to change root usability. Maybe need to refactor in future to all use this method?
+		if (RuleB(Custom, MulticlassingEnabled)) {
+			if (a->id == 500 || a->id == 316) { // Silent Casting
+				a->classes = 15906 << 1;
+			}
+
+			if (a->id == 494 || a->id == 144) { // Duplicate Silent Casting & Innate Enlightenment
+				a->classes = 0;
+			}
+		}
 
 		abilities[a->id] = std::unique_ptr<AA::Ability>(a);
 	}
