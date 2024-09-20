@@ -1,4 +1,14 @@
-## [22.56.1] 9/13/2024
+## [22.56.2] 9/20/2024
+
+### Fixes
+
+* Fix Issue with Database::ReserveName ([#4477](https://github.com/EQEmu/Server/pull/4477)) @Kinglykrab 2024-09-20
+
+### Quest API
+
+* Add GrantAllAAPoints() Overload To Perl/Lua ([#4474](https://github.com/EQEmu/Server/pull/4474)) @Kinglykrab 2024-09-20
+
+## [22.56.1] 9/20/2024
 
 ### Fixes
 
