@@ -506,6 +506,7 @@ public:
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 	void GrantAllAAPoints();
 	void GrantAllAAPoints(uint8 unlock_level);
+	void GrantAllAAPoints(uint8 unlock_level, bool skip_grant_only);
 	void AddEbonCrystals(uint32 amount);
 	void AddRadiantCrystals(uint32 amount);
 	void RemoveEbonCrystals(uint32 amount);

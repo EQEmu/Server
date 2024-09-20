@@ -3317,6 +3317,12 @@ void Lua_Client::GrantAllAAPoints(uint8 unlock_level)
 	self->GrantAllAAPoints(unlock_level);
 }
 
+void Lua_Client::GrantAllAAPoints(uint8 unlock_level, bool skip_grant_only)
+{
+	Lua_Safe_Call_Void();
+	self->GrantAllAAPoints(unlock_level, skip_grant_only);
+}
+
 void Lua_Client::AddEbonCrystals(uint32 amount)
 {
 	Lua_Safe_Call_Void();
@@ -3803,6 +3809,7 @@ luabind::scope lua_register_client() {
 	.def("GoFish", (void(Lua_Client::*)(void))&Lua_Client::GoFish)
 	.def("GrantAllAAPoints", (void(Lua_Client::*)(void))&Lua_Client::GrantAllAAPoints)
 	.def("GrantAllAAPoints", (void(Lua_Client::*)(uint8))&Lua_Client::GrantAllAAPoints)
+	.def("GrantAllAAPoints", (void(Lua_Client::*)(uint8,bool))&Lua_Client::GrantAllAAPoints)
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
 	.def("GuildID", (uint32(Lua_Client::*)(void))&Lua_Client::GuildID)

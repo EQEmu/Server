@@ -3159,6 +3159,11 @@ void Perl_Client_GrantAllAAPoints(Client* self, uint8 unlock_level)
 	self->GrantAllAAPoints(unlock_level);
 }
 
+void Perl_Client_GrantAllAAPoints(Client* self, uint8 unlock_level, bool skip_grant_only)
+{
+	self->GrantAllAAPoints(unlock_level, skip_grant_only);
+}
+
 void Perl_Client_AddEbonCrystals(Client* self, uint32 amount)
 {
 	self->AddEbonCrystals(amount);
@@ -3612,6 +3617,7 @@ void perl_register_client()
 	package.add("GoFish", &Perl_Client_GoFish);
 	package.add("GrantAllAAPoints", (void(*)(Client*))&Perl_Client_GrantAllAAPoints);
 	package.add("GrantAllAAPoints", (void(*)(Client*, uint8))&Perl_Client_GrantAllAAPoints);
+	package.add("GrantAllAAPoints", (void(*)(Client*, uint8, bool))&Perl_Client_GrantAllAAPoints);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int))&Perl_Client_GrantAlternateAdvancementAbility);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int, bool))&Perl_Client_GrantAlternateAdvancementAbility);
 	package.add("ConsumeItemOnCursor", (bool(*)(Client *))&Perl_Client_ConsumeItemOnCursor);

@@ -2368,13 +2368,17 @@ void Client::AutoGrantAAPoints() {
 	SendAlternateAdvancementStats();
 }
 
-void Client::GrantAllAAPoints(uint8 unlock_level)
+void Client::GrantAllAAPoints(uint8 unlock_level, bool skip_grant_only)
 {
 	//iterate through every AA
 	for (auto& aa : zone->aa_abilities) {
 		AA::Ability* ability = aa.second.get();
 
 		if (ability->charges > 0) {
+			continue;
+		}
+
+		if (ability->grant_only && skip_grant_only) {
 			continue;
 		}
 
