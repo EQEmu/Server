@@ -25,7 +25,7 @@
 
 // Build variables
 // these get injected during the build pipeline
-#define CURRENT_VERSION "22.56.1-dev" // always append -dev to the current version for custom-builds
+#define CURRENT_VERSION "22.56.2-dev" // always append -dev to the current version for custom-builds
 #define LOGIN_VERSION "0.8.0"
 #define COMPILE_DATE    __DATE__
 #define COMPILE_TIME    __TIME__
