@@ -1895,6 +1895,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	// #2: figure out things that affect the player dying and mark them dead
 
 	InterruptSpell();
+	ZeroBardPulseVars();
 
 	Mob* m_pet = GetPet();
 	RemoveAllPets();

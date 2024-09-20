@@ -586,19 +586,21 @@ bool Client::Process() {
 				ItemTimerCheck();
 			}
 
-			if (RuleB(Custom, ServerAuthStats) && InZone() && !CAuthorized && CUnauth_tics > 1) {
-				if (GetZoneID() != Zones::BAZAAR) {
-					if (CUnauth_tics >= 11) {
-						zone->SendDiscordMessage("admin", fmt::format("Kicking [{}]. Unauthorized Client.", GetCleanName()));
-						Kick("Custom client required. Visit heroesjourneyeq.com for more information.");
-					}
+			if (RuleB(Custom, ServerAuthStats) && InZone() && !CAuthorized) {
+				if (CUnauth_tics > 1) {
+					if (GetZoneID() != Zones::BAZAAR) {
+						if (CUnauth_tics >= 11) {
+							zone->SendDiscordMessage("admin", fmt::format("Kicking [{}]. Unauthorized Client.", GetCleanName()));
+							Kick("Custom client required. Visit heroesjourneyeq.com for more information.");
+						}
 
-					if (CUnauth_tics > 1) { // Allow a two-tick grace period.
-						Message(Chat::Shout, "You are not using the Heroes' Journey client or it is out of date. Visit HeroesJourneyEQ.com for more information. You will be disconnected in {} seconds.", (11 - CUnauth_tics) * 6);
-					}
-				} else {
-					if (CUnauth_tics % 2 == 0) {
-						Message(Chat::Shout, "You are not using the Heroes' Journey client or it is out of date. Visit HeroesJourneyEQ.com for more information. You will be disconnected if you leave the Bazaar");
+						if (CUnauth_tics > 1) { // Allow a two-tick grace period.
+							Message(Chat::Shout, "You are not using the Heroes' Journey client or it is out of date. Visit HeroesJourneyEQ.com for more information. You will be disconnected in {} seconds.", (11 - CUnauth_tics) * 6);
+						}
+					} else {
+						if (CUnauth_tics % 2 == 0) {
+							Message(Chat::Shout, "You are not using the Heroes' Journey client or it is out of date. Visit HeroesJourneyEQ.com for more information. You will be disconnected if you leave the Bazaar");
+						}
 					}
 				}
 				CUnauth_tics++;
