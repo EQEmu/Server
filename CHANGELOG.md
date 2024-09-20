@@ -1,3 +1,10 @@
+## [22.56.1] 9/13/2024
+
+### Fixes
+
+* Fix Untrained Disciplines in Client::SaveDisciplines() ([#4472](https://github.com/EQEmu/Server/pull/4472)) @Kinglykrab 2024-09-13
+* Fix Infinite Loop in Adventure::Finished() ([#4473](https://github.com/EQEmu/Server/pull/4473)) @oddx2k 2024-09-13
+
 ## [22.56.0] 9/12/2024
 
 ### Code

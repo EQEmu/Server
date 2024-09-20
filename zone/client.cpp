@@ -11263,7 +11263,9 @@ void Client::SaveDisciplines()
 {
 	std::vector<CharacterDisciplinesRepository::CharacterDisciplines> v;
 
-	for (int slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) {
+	std::vector<std::string> delete_slots;
+
+	for (uint16 slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) {
 		if (IsValidSpell(m_pp.disciplines.values[slot_id])) {
 			auto e = CharacterDisciplinesRepository::NewEntity();
 
@@ -11272,7 +11274,19 @@ void Client::SaveDisciplines()
 			e.disc_id = m_pp.disciplines.values[slot_id];
 
 			v.emplace_back(e);
+		} else {
+			delete_slots.emplace_back(std::to_string(slot_id));
 		}
+	}
+
+	if (!delete_slots.empty()) {
+		CharacterDisciplinesRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`slot_id` IN ({})",
+				Strings::Join(delete_slots, ", ")
+			)
+		);
 	}
 
 	if (!v.empty()) {
