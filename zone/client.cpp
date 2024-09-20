@@ -12933,6 +12933,12 @@ bool Client::RemoveExtraClass(int class_id) {
 		}
 	}
 
+	for (int i = EQ::skills::Skill1HBlunt; i < EQ::skills::SkillCount; i++) {
+		if (!CanHaveSkill(i)) {
+			SetSkill(i, 0);
+		}
+	}
+
 	ClearDynamicAATimers();
 
 	auto pets = GetAllPets();
