@@ -285,16 +285,31 @@ bool Database::SetAccountStatus(const std::string& account_name, int16 status)
 
 bool Database::ReserveName(uint32 account_id, const std::string& name)
 {
-	const auto& l = CharacterDataRepository::GetWhere(
-		*this,
-		fmt::format(
-			"`name` = '{}'",
-			Strings::Escape(name)
-		)
+	const std::string& where_filter = fmt::format(
+		"`name` = '{}'",
+		Strings::Escape(name)
 	);
 
-	if (!l.empty()) {
-		LogInfo("Account: [{}] tried to request name: [{}], but it is already taken", account_id, name);
+	if (RuleB(Bots, Enabled)) {
+		const auto& b = BotDataRepository::GetWhere(*this, where_filter);
+
+		if (!b.empty()) {
+			LogInfo("Account [{}] requested name [{}] but name is already taken by a bot", account_id, name);
+			return false;
+		}
+	}
+
+	const auto& c = CharacterDataRepository::GetWhere(*this, where_filter);
+
+	if (!c.empty()) {
+		LogInfo("Account [{}] requested name [{}] but name is already taken by a character", account_id, name);
+		return false;
+	}
+
+	const auto& n = NpcTypesRepository::GetWhere(*this, where_filter);
+
+	if (!n.empty()) {
+		LogInfo("Account [{}] requested name [{}] but name is already taken by an NPC", account_id, name);
 		return false;
 	}
 
