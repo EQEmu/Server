@@ -3260,15 +3260,28 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		return 0;
 	}
 
-	if (RuleB(Custom, BypassProcStackConflicts)) {
-		if (IsEffectInSpell(spellid1, SE_WeaponProc) && IsEffectInSpell(spellid2, SE_WeaponProc) && spellid1 != spellid2) {
-			return 0;
-		}
-	}
+	if (RuleB(Custom, BypassProcStackConflicts) || RuleB(Custom, BypassDSStackConflicts)) {
+		auto checkClassOverlap = [&](int spellid1, int spellid2) -> bool {
+			for (int i = 0; i < Class::PLAYER_CLASS_COUNT; ++i) {
+				if ((spells[spellid1].classes[i] > 0 && spells[spellid1].classes[i] < 255) &&
+					(spells[spellid2].classes[i] > 0 && spells[spellid2].classes[i] < 255)) {
+					LogDebug("Class Overlap Found ID [{}]", i);
+					return true; // Exit early if overlap is found
+				}
+			}
+			return false; // No overlap found
+		};
 
-	if (RuleB(Custom, BypassDSStackConflicts)) {
-		if (IsEffectInSpell(spellid1, SE_DamageShield) && IsEffectInSpell(spellid2, SE_DamageShield) && spellid1 != spellid2) {
-			return 0;
+		if (RuleB(Custom, BypassProcStackConflicts) && IsEffectInSpell(spellid1, SE_WeaponProc) && IsEffectInSpell(spellid2, SE_WeaponProc) && spellid1 != spellid2) {
+			if (!checkClassOverlap(spellid1, spellid2)) {
+				return 0;
+			}
+		}
+
+		if (RuleB(Custom, BypassDSStackConflicts) && IsEffectInSpell(spellid1, SE_DamageShield) && IsEffectInSpell(spellid2, SE_DamageShield) && spellid1 != spellid2) {
+			if (!checkClassOverlap(spellid1, spellid2)) {
+				return 0;
+			}
 		}
 	}
 
