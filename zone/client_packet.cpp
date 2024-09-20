@@ -979,7 +979,7 @@ void Client::CompleteConnect()
 	SendAlternateAdvancementTable();
 
 	if (RuleB(Custom, ServerAuthStats)) {
-		SendEdgeStatBulkUpdate();
+		SendBulkStatsUpdate();
 		SendDisciplineUpdate();
 	}
 
@@ -1036,7 +1036,7 @@ void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket *app)
 {
-	SendEdgeStatBulkUpdate();
+	SendBulkStatsUpdate();
 	conn_state = ClientReadyReceived;
 	if (!Spawned())
 		SendZoneInPackets();
@@ -1054,7 +1054,7 @@ void Client::Handle_Connect_OP_ClientUpdate(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 {
-	SendEdgeStatBulkUpdate();
+	SendBulkStatsUpdate();
 	conn_state = ClientSpawnRequested;
 
 	auto outapp = new EQApplicationPacket;
@@ -1097,7 +1097,7 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 {
-	SendEdgeStatBulkUpdate();
+	SendBulkStatsUpdate();
 	conn_state = NewZoneRequested;
 
 	EQApplicationPacket* outapp = nullptr;
@@ -1236,7 +1236,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (strlen(cze->char_name) > 63)
 		return;
 
-	SendEdgeStatBulkUpdate();
+	SendBulkStatsUpdate();
 	conn_state = ReceivedZoneEntry;
 
 	SetClientVersion(Connection()->ClientVersion());
@@ -1323,7 +1323,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (RuleB(Character, SharedBankPlat) && !IsSeasonal())
 		m_pp.platinum_shared = database.GetSharedPlatinum(AccountID());
 
-	SendEdgeStatBulkUpdate();
+	SendBulkStatsUpdate();
 
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
 	// set to full support in case they're a gm with items in disabled expansion slots...but, have their gm flag off...

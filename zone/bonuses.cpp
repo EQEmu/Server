@@ -144,7 +144,6 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 	SetDualWeaponsEquipped(false);
 
 	int16 i;
-
 	for (i = EQ::invslot::BONUS_BEGIN; i <= EQ::invslot::BONUS_SKILL_END; i++) {
 		const auto* inst = GetInv().GetItem(i);
 

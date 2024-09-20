@@ -1343,44 +1343,71 @@ struct CombatDamage_Struct
 /* 23 */	uint32 special; // 2 = Rampage, 1 = Wild Rampage
 };
 
-enum eStatEntry
+enum StatEntry
 {
-	eStatClassesBitmask = 1,
-	eStatCurHP,
-	eStatCurMana,
-	eStatCurEndur,
-	eStatMaxHP,
-	eStatMaxMana,
-	eStatMaxEndur,
-	eStatMitigation,
-	eStatEvasion,
-	eStatSTR,
-	eStatSTA,
-	eStatDEX,
-	eStatAGI,
-	eStatINT,
-	eStatWIS,
-	eStatCHA,
-	eStatMR,
-	eStatFR,
-	eStatCR,
-	eStatDR,
-	eStatPR,
-	eStatHPRegen,
-	eStatManaRegen,
-	eStatEndurRegen,
-	eStatATK,
-	eStatHaste,
-	eStatKickTimer,
-	eStatBashTimer,
-	eStatBackstabTimer,
-	eStatFrenzyTimer,
-	eStatStrikeTimer,
-	eStatDummyValue,
-	eStatMax
+	statClassesBitmask = 1,
+	statCurHP,
+	statCurMana,
+	statCurEndur,
+	statMaxHP,
+	statMaxMana,
+	statMaxEndur,
+	statMitigation,
+	statEvasion,
+	statSTR,
+	statSTA,
+	statDEX,
+	statAGI,
+	statINT,
+	statWIS,
+	statCHA,
+	statMR,
+	statFR,
+	statCR,
+	statDR,
+	statPR,
+	statHPRegen,
+	statManaRegen,
+	statEndurRegen,
+	statATK,
+	statHaste,
+	statKickTimer,
+	statBashTimer,
+	statBackstabTimer,
+	statFrenzyTimer,
+	statStrikeTimer,
+	statHeroicSTR,
+	statHeroicSTA,
+	statHeroicDEX,
+	statHeroicAGI,
+	statHeroicINT,
+	statHeroicWIS,
+	statHeroicCHA,
+	statHeroicMR,
+	statHeroicFR,
+	statHeroicCR,
+	statHeroicDR,
+	statHeroicPR,
+	statAC,
+	statSpellDmg,
+	statHealAmt,
+	statCombatEffects,
+	statSpellShield,
+	statShielding,
+	statDamageShield,
+	statDoTShield,
+	statDSMitigation,
+	statAvoidance,
+	statAccuracy,
+	statStunResist,
+	statStrikethrough,
+	statClairvoyance,
+	statShieldAC,
+	statDummyValue,
+	statMax
 };
 
-struct EdgeStatEntry_Struct {
+struct StatEntry_Struct {
 	uint32_t statKey;
 	uint64_t statValue;
 };
@@ -1391,10 +1418,10 @@ struct SimpleChecksum_Struct {
 	uint8_t  data[3];
 };
 
-struct EdgeStat_Struct
+struct Stat_Struct
 {
 	uint32_t count;
-	EdgeStatEntry_Struct entries[0];
+	StatEntry_Struct entries[0];
 };
 
 /*

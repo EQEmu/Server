@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -203,8 +203,8 @@ namespace RoF2
 		const int16 GENERAL_COUNT = (GENERAL_END - GENERAL_BEGIN) + 1;
 
 		const int16 BONUS_BEGIN = invslot::slotCharm;
-		const int16 BONUS_STAT_END = invslot::slotPowerSource;
-		const int16 BONUS_SKILL_END = invslot::slotAmmo;
+		const int16 BONUS_STAT_END = invslot::slotWaist;
+		const int16 BONUS_SKILL_END = invslot::slotWaist;
 
 		const int16 CORPSE_BEGIN = invslot::slotGeneral1;
 		const int16 CORPSE_END = invslot::slotGeneral1 + invslot::slotCursor;
@@ -225,18 +225,18 @@ namespace RoF2
 		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::RoF2; }
 
 		const int16 SLOT_INVALID = IINVALID;
-		const int16 SLOT_BEGIN = INULL;		
+		const int16 SLOT_BEGIN = INULL;
 		const int16 SLOT_COUNT = 200; // there is where you change bag size
-		const int16 SLOT_END = SLOT_COUNT - 1; 
+		const int16 SLOT_END = SLOT_COUNT - 1;
 
 		/* if you change slot count you will have to modify the locations below to fit the larger dimensions of bags */
 		/* only used values since calculations are being done in emu_constants */
 
-		// These are NOT actually used; slot boundries are being calculated in emu_constants. 
+		// These are NOT actually used; slot boundries are being calculated in emu_constants.
 		// If you change bag slot maximum you will blow up existing inventories
 		const int16 GENERAL_BAGS_BEGIN = 251;
 
-		const int16 CURSOR_BAG_BEGIN = 351; 
+		const int16 CURSOR_BAG_BEGIN = 351;
 
 		const int16 BANK_BAGS_BEGIN = 2031;
 
@@ -331,7 +331,7 @@ namespace RoF2
 
 	namespace spells {
 		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::RoF2; }
-		
+
 		enum class CastingSlot : uint32 {
 			Gem1 = 0,
 			Gem2 = 1,
@@ -354,7 +354,7 @@ namespace RoF2
 		const int SPELL_ID_MAX = 45000;
 		const int SPELLBOOK_SIZE = 720;
 		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
-		
+
 		const int LONG_BUFFS = 42;
 		const int SHORT_BUFFS = 20;
 		const int DISC_BUFFS = 1;

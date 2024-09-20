@@ -1196,11 +1196,11 @@ public:
 	uint16 GetTraderID() { return trader_id; }
 	void SetTraderID(uint16 id) { trader_id = id; }
 
-	void SendEdgeStatBulkUpdate();
-	void SendEdgeHPStats();
-	void SendEdgeManaStats();
-	void SendEdgeEnduranceStats();
-	int64_t GetStatValueEdgeType(eStatEntry eLabel);
+	void SendBulkStatsUpdate();
+	void SendHPStats();
+	void SendManaStats();
+	void SendEnduranceStats();
+	int64_t GetStatEntryValue(StatEntry eLabel);
 
 	eqFilterMode GetFilter(eqFilterType filter_id) const { return ClientFilters[filter_id]; }
 	void SetFilter(eqFilterType filter_id, eqFilterMode filter_mode) { ClientFilters[filter_id] = filter_mode; }

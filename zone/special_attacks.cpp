@@ -388,7 +388,7 @@ pTimerType Client::GetCombatTimer(uint32 skill) {
 // We should probably refactor this to take the struct not the packet
 void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 {
-	SendEdgeStatBulkUpdate();
+	SendBulkStatsUpdate();
 	if (!GetTarget()) {
 		return;
 	}
@@ -746,7 +746,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	if (reuse_time) {
 		p_timers.Start(timer, reuse_time);
 	}
-	SendEdgeStatBulkUpdate();
+	SendBulkStatsUpdate();
 }
 
 //returns the reuse time in sec for the special attack used.

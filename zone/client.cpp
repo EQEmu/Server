@@ -2172,7 +2172,7 @@ void Client::SendManaUpdate()
 	QueuePacket(mana_app);
 	safe_delete(mana_app);
 	if (RuleB(Custom, ServerAuthStats)) {
-		CastToClient()->SendEdgeManaStats();
+		CastToClient()->SendManaStats();
 	}
 }
 
@@ -2187,7 +2187,7 @@ void Client::SendEnduranceUpdate()
 	QueuePacket(end_app);
 	safe_delete(end_app);
 	if (RuleB(Custom, ServerAuthStats)) {
-		CastToClient()->SendEdgeEnduranceStats();
+		CastToClient()->SendEnduranceStats();
 	}
 }
 
@@ -12802,7 +12802,7 @@ bool Client::AddExtraClass(int class_id) {
 			SetBucket("GestaltClasses", std::to_string(classes_bits | n_class_bit));
 			m_pp.classes = classes_bits | n_class_bit;
 			CalcBonuses();
-			SendEdgeStatBulkUpdate();
+			SendBulkStatsUpdate();
 			SendAlternateAdvancementTable();
 		}
 

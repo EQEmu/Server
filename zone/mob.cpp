@@ -1515,7 +1515,7 @@ void Mob::SendHPUpdate(bool force_update_all)
 			ResetHPUpdateTimer();
 
 			if (RuleB(Custom, ServerAuthStats)) {
-				CastToClient()->SendEdgeHPStats();
+				CastToClient()->SendHPStats();
 			}
 
 			// Used to check if HP has changed to update self next round

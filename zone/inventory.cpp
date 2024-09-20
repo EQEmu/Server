@@ -2528,7 +2528,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	CalcBonuses();
 
 	if (RuleB(Custom, ServerAuthStats)) {
-		SendEdgeStatBulkUpdate();
+		SendBulkStatsUpdate();
 	}
 
 	ApplyWeaponsStance();
@@ -3413,162 +3413,213 @@ uint32 Client::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 	return 0;
 }
 
-int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
+int64_t Client::GetStatEntryValue(StatEntry label)
 {
-	switch (eLabel)
+	switch (label)
 	{
-		case eStatMaxHP:
+		case statMaxHP:
 			return CalcMaxHP();
-		case eStatMaxMana:
+		case statMaxMana:
 			return CalcMaxMana();
-		case eStatMaxEndur:
+		case statMaxEndur:
 			CalcMaxEndurance();
 			return GetMaxEndurance();
-		case eStatCurHP:
+		case statCurHP:
 			return GetHP();
-		case eStatCurMana:
+		case statCurMana:
 			return GetMana();
-		case eStatCurEndur:
+		case statCurEndur:
 			return GetEndurance();
-		case eStatClassesBitmask:
+		case statClassesBitmask:
 			return GetClassesBits();
-		case eStatMitigation:
+		case statMitigation:
 			CalcAC();
 			return GetMitigationAC();
-		case eStatEvasion:
+		case statEvasion:
 			return GetTotalDefense();
-		case eStatSTR:
+		case statSTR:
 			return GetSTR();
-		case eStatSTA:
+		case statSTA:
 			return GetSTA();
-		case eStatAGI:
+		case statAGI:
 			return GetAGI();
-		case eStatDEX:
+		case statDEX:
 			return GetDEX();
-		case eStatINT:
+		case statINT:
 			return GetINT();
-		case eStatWIS:
+		case statWIS:
 			return GetWIS();
-		case eStatCHA:
+		case statCHA:
 			return GetCHA();
-		case eStatMR:
+		case statMR:
 			return GetMR();
-		case eStatFR:
+		case statFR:
 			return GetFR();
-		case eStatCR:
+		case statCR:
 			return GetCR();
-		case eStatPR:
+		case statPR:
 			return GetPR();
-		case eStatDR:
+		case statDR:
 			return GetDR();
-		case eStatHPRegen:
+		case statHPRegen:
 			return CalcHPRegen(true);
-		case eStatManaRegen:
+		case statManaRegen:
 			return CalcManaRegen(true);
-		case eStatEndurRegen:
+		case statEndurRegen:
 			return CalcEnduranceRegen(true);
-		case eStatHaste:
+		case statHaste:
 			return CalcHaste();
-		case eStatATK:
+		case statATK:
 			return GetTotalATK();
-		case eStatKickTimer:
+		case statKickTimer:
 			return p_timers.GetRemainingTime(pTimerKick);
-		case eStatBashTimer:
+		case statBashTimer:
 			return p_timers.GetRemainingTime(pTimerBashSlam);
-		case eStatStrikeTimer:
+		case statStrikeTimer:
 			return p_timers.GetRemainingTime(pTimerStrike);
-		case eStatBackstabTimer:
+		case statBackstabTimer:
 			return p_timers.GetRemainingTime(pTimerBackstab);
-		case eStatFrenzyTimer:
+		case statFrenzyTimer:
 			return p_timers.GetRemainingTime(pTimerFrenzy);
+		case statHeroicSTR:
+			return GetHeroicSTR();
+		case statHeroicSTA:
+			return GetHeroicSTA();
+		case statHeroicDEX:
+			return GetHeroicDEX();
+		case statHeroicAGI:
+			return GetHeroicAGI();
+		case statHeroicINT:
+			return GetHeroicINT();
+		case statHeroicWIS:
+			return GetHeroicWIS();
+		case statHeroicCHA:
+			return GetHeroicCHA();
+		case statHeroicMR:
+			return GetHeroicMR();
+		case statHeroicFR:
+			return GetHeroicFR();
+		case statHeroicCR:
+			return GetHeroicCR();
+		case statHeroicDR:
+			return GetHeroicDR();
+		case statHeroicPR:
+			return GetHeroicPR();
+		case statAC:
+			CalcAC();
+			return GetAC();
+		case statSpellDmg:
+			return itembonuses.SpellDmg;
+		case statHealAmt:
+			return itembonuses.HealAmt;
+		case statCombatEffects:
+			return GetCombatEffects();
+		case statSpellShield:
+			return GetSpellShield();
+		case statShielding:
+			return GetShielding();
+		case statDamageShield:
+			return itembonuses.DamageShield;
+		case statDoTShield:
+			return GetDoTShield();
+		case statDSMitigation:
+			return GetDSMit();
+		case statAvoidance:
+			return GetAvoidance();
+		case statAccuracy:
+			return GetAccuracy();
+		case statStunResist:
+			return GetStunResist();
+		case statStrikethrough:
+			return GetStrikeThrough();
+		case statClairvoyance:
+			return GetClair();
+
 		default:
-		{
 			return 0;
-		}
 	}
-	return 0;
 }
 
-void Client::SendEdgeStatBulkUpdate()
+void Client::SendBulkStatsUpdate()
 {
 	if (RuleB(Custom, ServerAuthStats)) {
 		EmuOpcode opcode = OP_Unknown;
 		EQApplicationPacket* outapp = nullptr;
-		EdgeStat_Struct* itempacket = nullptr;
+		Stat_Struct* itempacket = nullptr;
 
 		// Construct packet
-		opcode = OP_EdgeStats;
-		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * ((int)(eStatEntry::eStatMax) - 1)));
-		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
-		itempacket->count = (int)(eStatMax) - 1;
-		for(int i = 0; i < eStatEntry::eStatMax - 1; i++)
+		opcode = OP_ServerAuthStats;
+		outapp = new EQApplicationPacket(OP_ServerAuthStats, 4 + (sizeof(StatEntry_Struct) * ((int)(StatEntry::statMax) - 1)));
+		itempacket = (Stat_Struct*)outapp->pBuffer;
+		itempacket->count = (int)(StatEntry::statMax) - 1;
+		for(int i = 0; i < StatEntry::statMax - 1; i++)
 		{
-			itempacket->entries[i].statKey = (eStatEntry)i;
-			itempacket->entries[i].statValue = GetStatValueEdgeType((eStatEntry)i);
+			itempacket->entries[i].statKey = (StatEntry)i;
+			itempacket->entries[i].statValue = GetStatEntryValue((StatEntry)i);
 		}
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
 }
 
-void Client::SendEdgeHPStats()
+void Client::SendHPStats()
 {
 	if (RuleB(Custom, ServerAuthStats)) {
 		EmuOpcode opcode = OP_Unknown;
 		EQApplicationPacket* outapp = nullptr;
-		EdgeStat_Struct* itempacket = nullptr;
+		Stat_Struct* itempacket = nullptr;
 
 		// Construct packet
-		opcode = OP_EdgeStats;
-		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
-		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+		opcode = OP_ServerAuthStats;
+		outapp = new EQApplicationPacket(OP_ServerAuthStats, 4 + (sizeof(StatEntry_Struct) * 2));
+		itempacket = (Stat_Struct*)outapp->pBuffer;
 		itempacket->count = 2;
-		itempacket->entries[0].statKey = eStatCurHP;
-		itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurHP);
-		itempacket->entries[1].statKey = eStatMaxHP;
-		itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxHP);
+		itempacket->entries[0].statKey = StatEntry::statCurHP;
+		itempacket->entries[0].statValue = GetStatEntryValue(StatEntry::statCurHP);
+		itempacket->entries[1].statKey = StatEntry::statMaxHP;
+		itempacket->entries[1].statValue = GetStatEntryValue(StatEntry::statMaxHP);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
 }
 
-void Client::SendEdgeManaStats()
+void Client::SendManaStats()
 {
 	if (RuleB(Custom, ServerAuthStats)) {
 		EmuOpcode opcode = OP_Unknown;
 		EQApplicationPacket* outapp = nullptr;
-		EdgeStat_Struct* itempacket = nullptr;
+		Stat_Struct* itempacket = nullptr;
 
 		// Construct packet
-		opcode = OP_EdgeStats;
-		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
-		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+		opcode = OP_ServerAuthStats;
+		outapp = new EQApplicationPacket(OP_ServerAuthStats, 4 + (sizeof(StatEntry_Struct) * 2));
+		itempacket = (Stat_Struct*)outapp->pBuffer;
 		itempacket->count = 2;
-		itempacket->entries[0].statKey = eStatCurMana;
-		itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurMana);
-		itempacket->entries[1].statKey = eStatMaxMana;
-		itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxMana);
+		itempacket->entries[0].statKey = StatEntry::statCurMana;
+		itempacket->entries[0].statValue = GetStatEntryValue(StatEntry::statCurMana);
+		itempacket->entries[1].statKey = StatEntry::statMaxMana;
+		itempacket->entries[1].statValue = GetStatEntryValue(StatEntry::statMaxMana);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
 }
 
-void Client::SendEdgeEnduranceStats()
+void Client::SendEnduranceStats()
 {
 	if (RuleB(Custom, ServerAuthStats)) {
 		EmuOpcode opcode = OP_Unknown;
 		EQApplicationPacket* outapp = nullptr;
-		EdgeStat_Struct* itempacket = nullptr;
+		Stat_Struct* itempacket = nullptr;
 
 		// Construct packet
-		opcode = OP_EdgeStats;
-		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
-		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+		opcode = OP_ServerAuthStats;
+		outapp = new EQApplicationPacket(OP_ServerAuthStats, 4 + (sizeof(StatEntry_Struct) * 2));
+		itempacket = (Stat_Struct*)outapp->pBuffer;
 		itempacket->count = 2;
-		itempacket->entries[0].statKey = eStatCurEndur;
-		itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurEndur);
-		itempacket->entries[1].statKey = eStatMaxEndur;
-		itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxEndur);
+		itempacket->entries[0].statKey = StatEntry::statCurEndur;
+		itempacket->entries[0].statValue = GetStatEntryValue(StatEntry::statCurEndur);
+		itempacket->entries[1].statKey = StatEntry::statMaxEndur;
+		itempacket->entries[1].statValue = GetStatEntryValue(StatEntry::statMaxEndur);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
