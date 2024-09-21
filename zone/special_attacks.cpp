@@ -511,6 +511,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 				reuse_time = calc_reuse(BashReuseTime - skill_reduction, haste);
 			} else {
 				reuse_time = BashReuseTime - 1 - skill_reduction;
+				reuse_time = (reuse_time * haste_modifier) / 100;
 			}
 
 			DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillBash, damage, 0, hate_override, reuse_time);
