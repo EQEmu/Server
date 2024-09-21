@@ -7712,8 +7712,6 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 		}
 	}
 
-	AttuneThisClick(inventory_slot);
-
 	return true;
 }
 
