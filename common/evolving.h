@@ -18,8 +18,12 @@ Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 #ifndef EVOLVING_H
 #define EVOLVING_H
 
-#include "item_instance.h"
+#include "shareddb.h"
 #include "repositories/items_evolving_details_repository.h"
+
+namespace EQ {
+	class ItemInstance;
+}
 
 class EvolvingItemsManager
 {
@@ -33,7 +37,13 @@ public:
 	void DoLootChecks(uint32 char_id, uint16 slot_id, const EQ::ItemInstance &inst) const;
 	uint32 GetFinalItemID(const EQ::ItemInstance &inst) const;
 	uint32 GetNextEvolveItemID(const EQ::ItemInstance &inst) const;
+	uint64 GetTotalEarnedXP(const EQ::ItemInstance &inst);
+	ItemsEvolvingDetailsRepository::ItemsEvolvingDetails GetEvolveItemDetails(uint64 id);
+	EvolveTransfer_Struct DetermineTransferResults(SharedDatabase &db, const EQ::ItemInstance& inst_from, const EQ::ItemInstance& inst_to);
+	EvolveTransfer2_Struct GetNextItemByXP(const EQ::ItemInstance &inst_in, uint64 in_xp);
+
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return evolving_items_cache; }
+	std::vector<ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> GetEvolveIDItems(uint32 evolve_id);
 
 private:
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> evolving_items_cache;

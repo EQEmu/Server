@@ -17195,7 +17195,7 @@ void Client::Handle_OP_EvolveItem(const EQApplicationPacket *app)
 			DoEvolveTransferXP(app);
 			break;
 		}
-		case EvolvingItems::Actions::XP_TRANSFER_WINDOW: {
+		case EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS: {
 			//SendEvolveXPTransferWindow();
 			SendEvolveXPWindowDetails(app);
 		}

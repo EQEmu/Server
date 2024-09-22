@@ -1350,81 +1350,58 @@ namespace RoF2
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
-//	ENCODE(OP_EvolveItem)
-//	{
-		// EQApplicationPacket* in = *p;
-		// *p = nullptr;
-  //
-		// //store away the emu struct
-		// uchar             *__emu_buffer = in->pBuffer;
-		// ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *) __emu_buffer;
-  //
-		// switch(old_item_pkt->PacketType)
-		// {
-		// 	case ItemPacketParcel: {
-		// 		ParcelMessaging_Struct       pms{};
-		// 		EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
-		// 		cereal::BinaryInputArchive   ar(ss);
-		// 		ar(pms);
-  //
-		// 		uint32 player_name_length = pms.player_name.length();
-		// 		uint32 note_length        = pms.note.length();
-  //
-		// 		auto *int_struct = (EQ::InternalSerializedItem_Struct *) pms.serialized_item.data();
-  //
-		// 		EQ::OutBuffer           ob;
-		// 		EQ::OutBuffer::pos_type last_pos = ob.tellp();
-		// 		ob.write(reinterpret_cast<const char *>(&pms.packet_type), 4);
-  //
-		// 		SerializeItem(ob, (const EQ::ItemInstance *) int_struct->inst, pms.slot_id, 0, ItemPacketParcel);
-  //
-		// 		if (ob.tellp() == last_pos) {
-		// 			LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", pms.slot_id);
-		// 			safe_delete_array(__emu_buffer);
-		// 			safe_delete(in);
-		// 			return;
-		// 		}
-  //
-		// 		ob.write((const char *) &pms.sent_time, 4);
-		// 		ob.write((const char *) &player_name_length, 4);
-		// 		ob.write(pms.player_name.c_str(), pms.player_name.length());
-		// 		ob.write((const char *) &note_length, 4);
-		// 		ob.write(pms.note.c_str(), pms.note.length());
-  //
-		// 		in->size    = ob.size();
-		// 		in->pBuffer = ob.detach();
-  //
-		// 		safe_delete_array(__emu_buffer);
-		// 		dest->FastQueuePacket(&in, ack_req);
-  //
-		// 		break;
-		// 	}
-  //           default: {
-  //               EQ::InternalSerializedItem_Struct *int_struct = (EQ::InternalSerializedItem_Struct *)(&__emu_buffer[4]);
-  //
-  //               EQ::OutBuffer           ob;
-  //               EQ::OutBuffer::pos_type last_pos = ob.tellp();
-  //
-  //               ob.write((const char *)__emu_buffer, 4);
-  //
-  //               SerializeItem(ob, (const EQ::ItemInstance *)int_struct->inst, int_struct->slot_id, 0,
-  //                             old_item_pkt->PacketType);
-  //               if (ob.tellp() == last_pos) {
-  //                   LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]",
-  //                              int_struct->slot_id);
-		// 			safe_delete_array(__emu_buffer);
-		// 			safe_delete(in);
-  //                   return;
-  //               }
-  //
-  //               in->size    = ob.size();
-  //               in->pBuffer = ob.detach();
-  //
-  //               safe_delete_array(__emu_buffer);
-  //               dest->FastQueuePacket(&in, ack_req);
-  //           }
-  //       }
-//	}
+	ENCODE(OP_EvolveItem)
+	{
+		 EQApplicationPacket* in = *p;
+		 *p = nullptr;
+
+		auto action = *reinterpret_cast<uint32*>(in->pBuffer);
+
+		switch(action) {
+			case EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS: {
+				auto emu = reinterpret_cast<EvolveItemMessaging_Struct*>(in->pBuffer);
+
+				EvolveXPWindowSend_Struct e{};
+				EQ::Util::MemoryStreamReader ss(emu->serialized_data, in->size - sizeof(emu->action));
+				cereal::BinaryInputArchive   ar(ss);
+				ar(e);
+
+				auto item_1 = static_cast<const EQ::ItemInstance *>(reinterpret_cast<EQ::InternalSerializedItem_Struct
+					*>(e.serialize_item_1.data())->inst);
+				auto item_2 = static_cast<const EQ::ItemInstance *>(reinterpret_cast<EQ::InternalSerializedItem_Struct
+					*>(e.serialize_item_2.data())->inst);
+
+				EQ::OutBuffer ob;
+
+				SerializeItem(ob, item_1, 0, 0, ItemPacketMerchant);
+				SerializeItem(ob, item_2, 0, 0, ItemPacketMerchant);
+
+				auto out = std::make_unique<EQApplicationPacket>(OP_EvolveItem,
+					sizeof(EvolveXPWindowSendDetails_Struct) + ob.size()
+				);
+				auto data = reinterpret_cast<EvolveXPWindowSendDetails_Struct*>(out->pBuffer);
+
+				data->action             = e.action;
+				data->compatibility      = e.compatibility;
+				data->max_transfer_level = e.max_transfer_level;
+
+				data->item1_unique_id = e.item1_unique_id;
+				data->item2_unique_id = e.item2_unique_id;
+
+				data->unknown_028 = e.unknown_028;
+				data->unknown_029 = e.unknown_029;
+
+				memcpy(data->serialize_data, ob.str().data(), ob.size());
+				dest->QueuePacket(out.get());
+				safe_delete(in);
+				break;
+			}
+			default: {
+				dest->FastQueuePacket(&in);
+				break;
+			}
+		}
+	}
 
 	ENCODE(OP_ExpansionInfo)
 	{

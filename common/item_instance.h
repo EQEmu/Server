@@ -23,6 +23,7 @@
 
 #ifndef COMMON_ITEM_INSTANCE_H
 #define COMMON_ITEM_INSTANCE_H
+#include "evolving.h"
 
 
 class ItemParse;			// Parses item packets
@@ -225,7 +226,15 @@ namespace EQ
 		void ScaleItem();
 		uint32 GetKillsNeeded(uint8 currentlevel);
 
-		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
+		std::string Serialize(int16 slot_id) const
+		{
+			InternalSerializedItem_Struct s;
+			s.slot_id = slot_id;
+			s.inst = (const void*)this;
+			std::string ser;
+			ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct));
+			return ser;
+		}
 		void Serialize(OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
 		void SerializeEvolveItem(EQ::OutBuffer& ob);
 
@@ -329,6 +338,10 @@ namespace EQ
 		void             SetEvolveEquiped(const bool in) const { m_evolving_details.equiped = in; }
 		void             SetEvolveActivated(const bool in) const { m_evolving_details.activated = in; }
 		void             SetEvolveProgression(const double in) const { m_evolving_details.progression = in; }
+		void             SetEvolveProgression2() const
+		{
+			m_evolving_details.progression = evolving_items_manager.CalculateProgression(GetEvolveCurrentAmount(), GetID());
+		}
 		void             SetEvolveUniqueID(const uint64 in) const { m_evolving_details.id = in; }
 		void             SetEvolveCharID(const uint32 in) const { m_evolving_details.char_id = in; }
 		void             SetEvolveItemID(const uint32 in) const { m_evolving_details.item_id = in; }

@@ -1117,11 +1117,11 @@ namespace DoorType {
 
 namespace EvolvingItems {
 	namespace Actions {
-		constexpr int8 UPDATE_ITEMS         = 0;
-		constexpr int8 OPEN_TRANSFER_WINDOW = 1;
-		constexpr int8 XP_TRANSFER_WINDOW   = 2;
-		constexpr int8 TRANSFER_XP          = 3;
-		constexpr int8 FINAL_RESULT         = 4;
+		constexpr int8 UPDATE_ITEMS            = 0;
+		constexpr int8 TRANSFER_WINDOW_OPEN    = 1;
+		constexpr int8 TRANSFER_WINDOW_DETAILS = 2;
+		constexpr int8 TRANSFER_XP             = 3;
+		constexpr int8 FINAL_RESULT            = 4;
 	}
 
 	namespace Types {

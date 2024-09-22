@@ -89,8 +89,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100);
 				}
 
-				inst->SetEvolveProgression(
-					evolving_items_manager.CalculateProgression(inst->GetEvolveCurrentAmount(), inst->GetID()));
+				inst->SetEvolveProgression2();
 
 				auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression());
 				if (!e.id) {
@@ -116,8 +115,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			case EvolvingItems::Types::NUMBER_OF_KILLS: {
 				if (mob && mob->GetRace() == sub_type) {
 					inst->SetEvolveAddToCurrentAmount(1);
-					inst->SetEvolveProgression(
-						evolving_items_manager.CalculateProgression(inst->GetEvolveCurrentAmount(), inst->GetID()));
+					inst->SetEvolveProgression2();
 
 					auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression());
 					if (!e.id) {
@@ -206,40 +204,94 @@ void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 		return;
 	}
 
-	const auto item_1 = GetInv().GetItem(item_1_slot);
-	const auto item_2 = GetInv().GetItem(item_2_slot);
+	auto inst_from = GetInv().GetItem(item_1_slot);
+	auto inst_to = GetInv().GetItem(item_2_slot);
 
-	if (!item_1 && !item_2) {
+	if (!inst_from || !inst_to) {
 		return;
 	}
 
-	EQ::OutBuffer ob;
-	EQ::OutBuffer::pos_type last_pos = ob.tellp();
+	auto results = evolving_items_manager.DetermineTransferResults(database, *inst_from, *inst_to);
 
-	std::stringstream ss{};
+	if (!results.inst_1 || !results.inst_2) {
+		return;
+	}
 
-	item_1->SerializeEvolveItem(ob);
-	item_2->SerializeEvolveItem(ob);
+	std::stringstream           ss;
+	cereal::BinaryOutputArchive ar(ss);
 
-	auto out = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveXPWindowSend_Struct) + ob.size());
-	auto data = reinterpret_cast<EvolveXPWindowSend_Struct*>(out->pBuffer);
+	EvolveXPWindowSend_Struct e{};
+	e.action             = EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS;
+	e.compatibility      = results.compatibility;
+	e.item1_unique_id    = inst_from->GetEvolveUniqueID();
+	e.item2_unique_id    = inst_to->GetEvolveUniqueID();
+	e.max_transfer_level = results.max_transfer_level;
+	e.unknown_028        = 1;
+	e.unknown_029        = 1;
+	e.serialize_item_1   = results.inst_1->Serialize(0);
+	e.serialize_item_2   = results.inst_2->Serialize(0);
 
-	data->action             = 2;
-	data->compatibility      = 11;
-	data->max_transfer_level = 3;
+	{
+		ar(e);
+	}
 
-	data->item1_unique_id = item_1->GetEvolveUniqueID();
-	data->item2_unique_id = item_2->GetEvolveUniqueID();
+	uint32 packet_size = sizeof(EvolveItemMessaging_Struct) + ss.str().length();
 
-	data->unknown_028 = 1;
-	data->unknown_029 = 1;
+	std::unique_ptr<EQApplicationPacket> out(new EQApplicationPacket(OP_EvolveItem, packet_size));
+	auto data    = reinterpret_cast<EvolveItemMessaging_Struct *>(out->pBuffer);
 
-	memcpy(data->serialize_data, ob.str().data(), ob.size());
+	data->action = EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS;
+	memcpy(data->serialized_data, ss.str().data(), ss.str().length());
 
 	QueuePacket(out.get());
+
+	ss.str("");
+	ss.clear();
+	safe_delete(results.inst_1);
+	safe_delete(results.inst_2);
 }
 
 void Client::DoEvolveTransferXP(const EQApplicationPacket* app)
 {
+	auto in = reinterpret_cast<EvolveXPWindowReceive_Struct*>(app->pBuffer);
 
+	const auto item_1_slot = GetInv().HasEvolvingItem(in->item1_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
+	const auto item_2_slot = GetInv().HasEvolvingItem(in->item2_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
+
+	if (item_1_slot == INVALID_INDEX || item_2_slot == INVALID_INDEX) {
+		return;
+	}
+
+	auto inst_from = GetInv().GetItem(item_1_slot);
+	auto inst_to = GetInv().GetItem(item_2_slot);
+
+	if (!inst_from || !inst_to) {
+		return;
+	}
+
+	auto results = evolving_items_manager.DetermineTransferResults(database, *inst_from, *inst_to);
+
+	if (!results.inst_1 || !results.inst_2) {
+		return;
+	}
+
+	if (inst_from->GetID() == results.inst_1->GetID()) {
+		inst_from->SetEvolveCurrentAmount(results.inst_1->GetEvolveCurrentAmount());
+		inst_from->SetEvolveProgression2();
+		SendItemPacket(inst_to->GetCurrentSlot(), inst_from, ItemPacketCharInventory);
+		safe_delete(results.inst_1);
+	} else {
+		RemoveItemBySerialNumber(inst_from->GetSerialNumber());
+		PushItemOnCursor(*results.inst_1, true);
+	}
+
+	if (inst_to->GetID() == results.inst_2->GetID()) {
+		inst_to->SetEvolveCurrentAmount(results.inst_2->GetEvolveCurrentAmount());
+		inst_to->SetEvolveProgression2();
+		SendItemPacket(inst_to->GetCurrentSlot(), inst_to, ItemPacketCharInventory);
+		safe_delete(results.inst_2);
+	} else {
+		RemoveItemBySerialNumber(inst_to->GetSerialNumber());
+		PushItemOnCursor(*results.inst_2, true);
+	}
 }
