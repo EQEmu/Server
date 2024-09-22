@@ -188,7 +188,7 @@ uint64 EvolvingItemsManager::GetTotalEarnedXP(const EQ::ItemInstance &inst)
 	auto evolve_id_item_cache = GetEvolveIDItems(inst.GetEvolveLoreID());
 	auto current_level        = inst.GetEvolveLvl();
 
-	for (auto const& i:evolve_id_item_cache) {
+	for (auto const &i: evolve_id_item_cache) {
 		if (i.item_evolve_level < current_level) {
 			xp += i.required_amount;
 		}
@@ -197,14 +197,14 @@ uint64 EvolvingItemsManager::GetTotalEarnedXP(const EQ::ItemInstance &inst)
 	return xp;
 }
 
-EvolveTransfer2_Struct EvolvingItemsManager::GetNextItemByXP(const EQ::ItemInstance &inst_in, uint64 in_xp)
+EvolveTransfer2_Struct EvolvingItemsManager::GetNextItemByXP(const EQ::ItemInstance &inst_in, const int64 in_xp)
 {
 	EvolveTransfer2_Struct ets{};
-	auto evolve_items = GetEvolveIDItems(inst_in.GetEvolveLoreID());
+	const auto evolve_items   = GetEvolveIDItems(inst_in.GetEvolveLoreID());
 	uint32 max_transfer_level = 0;
+	int64 xp                  = in_xp;
 
-	int64 xp = static_cast<int64>(in_xp);
-	for (auto const& e : evolve_items) {
+	for (auto const &e: evolve_items) {
 		if (e.item_evolve_level < inst_in.GetEvolveLvl()) {
 			continue;
 		}
@@ -213,9 +213,10 @@ EvolveTransfer2_Struct EvolvingItemsManager::GetNextItemByXP(const EQ::ItemInsta
 		if (e.item_evolve_level == inst_in.GetEvolveLvl()) {
 			have = inst_in.GetEvolveCurrentAmount();
 		}
-		auto required = e.required_amount;
-		int64 need    = required - have;
-		int64 balance = xp - need;
+
+		const auto required = e.required_amount;
+		const int64 need    = required - have;
+		const int64 balance = xp - need;
 
 		if (balance <= 0) {
 			ets.new_current_amount  = have + xp;
@@ -237,57 +238,48 @@ EvolveTransfer2_Struct EvolvingItemsManager::GetNextItemByXP(const EQ::ItemInsta
 	return ets;
 }
 
-EvolveTransfer_Struct EvolvingItemsManager::DetermineTransferResults(SharedDatabase &db, const EQ::ItemInstance& inst_from, const EQ::ItemInstance& inst_to)
+EvolveTransfer_Struct EvolvingItemsManager::DetermineTransferResults(const EQ::ItemInstance& inst_from, const EQ::ItemInstance& inst_to)
 {
 	EvolveTransfer_Struct ets{};
-	// EQ::ItemInstance *inst_from_new = nullptr;
-	// EQ::ItemInstance *inst_to_new   = nullptr;
-
-	uint32 compatibility = 0;
-	uint32 max_transfer_level = 0;
 
 	auto evolving_details_inst_from = evolving_items_manager.GetEvolveItemDetails(inst_from.GetID());
 	auto evolving_details_inst_to   = evolving_items_manager.GetEvolveItemDetails(inst_to.GetID());
+
 	if (!evolving_details_inst_from.id || !evolving_details_inst_to.id) {
 		return ets;
 	}
 
 	if (evolving_details_inst_from.type == evolving_details_inst_to.type) {
-		uint64 xp = 0;
+		uint32 compatibility = 0;
+		uint64 xp            = 0;
 		if (evolving_details_inst_from.sub_type == evolving_details_inst_to.sub_type) {
 			compatibility = 100;
 		}
 		else {
-			compatibility = 50;
+			compatibility = 30;
 		}
 
 		xp           = evolving_items_manager.GetTotalEarnedXP(inst_from) * compatibility / 100;
 		auto results = evolving_items_manager.GetNextItemByXP(inst_to, xp);
 
-		ets.item_from_id             = inst_from.GetID();
+		ets.item_from_id             = evolving_items_manager.GetFirstItemInLoreGroup(inst_from.GetEvolveLoreID());
 		ets.item_from_current_amount = results.from_current_amount;
 		ets.item_to_id               = results.new_item_id;
 		ets.item_to_current_amount   = results.new_current_amount;
 		ets.compatibility            = compatibility;
 		ets.max_transfer_level       = results.max_transfer_level;
-
-		// if (new_item.item_id == inst_to.GetID()) {
-		// 	ets.item_from_id             = inst_from.GetID();
-		// 	ets.item_from_current_amount = 0;
-		// 	ets.item_to_id               = new_item.item_id;
-		// 	ets.item_to_current_amount   = new_item.current_amount;
-		// }
-		// else {
-		// 	inst_to_new        = db.CreateItem(new_item.item_id);
-		// 	inst_from_new      = inst_from.Clone();
-		// }
-
-		// max_transfer_level = inst_from_new->GetEvolveLvl() - inst_from.GetEvolveLvl();
-		// inst_to_new->SetEvolveAddToCurrentAmount(new_item.current_amount);
-		// inst_to_new->SetEvolveProgression2();
-		// inst_from_new->SetEvolveCurrentAmount(0);
-		// inst_from_new->SetEvolveProgression2();
 	}
 
 	return ets;
+}
+
+uint32 EvolvingItemsManager::GetFirstItemInLoreGroup(const uint32 lore_id)
+{
+	for (auto const &[key, value]: GetEvolvingItemsCache()) {
+		if (value.item_evo_id == lore_id && value.item_evolve_level == 1) {
+			return key;
+		}
+	}
+
+	return 0;
 }

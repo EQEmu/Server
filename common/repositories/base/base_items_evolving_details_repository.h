@@ -25,7 +25,7 @@ public:
 		uint32_t item_id;
 		uint32_t type;
 		uint32_t sub_type;
-		uint64_t required_amount;
+		int64_t  required_amount;
 	};
 
 	static std::string PrimaryKey()
@@ -145,7 +145,7 @@ public:
 			e.item_id           = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.type              = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.sub_type          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.required_amount   = row[6] ? strtoull(row[6], nullptr, 10) : 0;
+			e.required_amount   = row[6] ? strtoll(row[6], nullptr, 10) : 0;
 
 			return e;
 		}
@@ -288,7 +288,7 @@ public:
 			e.item_id           = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.type              = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.sub_type          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.required_amount   = row[6] ? strtoull(row[6], nullptr, 10) : 0;
+			e.required_amount   = row[6] ? strtoll(row[6], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -319,7 +319,7 @@ public:
 			e.item_id           = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.type              = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.sub_type          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.required_amount   = row[6] ? strtoull(row[6], nullptr, 10) : 0;
+			e.required_amount   = row[6] ? strtoll(row[6], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
 		}

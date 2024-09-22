@@ -24,7 +24,7 @@ public:
 		uint32_t item_id;
 		uint8_t  activated;
 		uint8_t  equiped;
-		uint64_t current_amount;
+		int64_t  current_amount;
 		double   progression;
 		uint32_t final_item_id;
 		time_t   deleted_at;
@@ -152,7 +152,7 @@ public:
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
+			e.current_amount = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.deleted_at     = strtoll(row[8] ? row[8] : "-1", nullptr, 10);
@@ -303,7 +303,7 @@ public:
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
+			e.current_amount = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.deleted_at     = strtoll(row[8] ? row[8] : "-1", nullptr, 10);
@@ -336,7 +336,7 @@ public:
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.current_amount = row[5] ? strtoull(row[5], nullptr, 10) : 0;
+			e.current_amount = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.deleted_at     = strtoll(row[8] ? row[8] : "-1", nullptr, 10);

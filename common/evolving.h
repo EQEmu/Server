@@ -37,10 +37,11 @@ public:
 	void DoLootChecks(uint32 char_id, uint16 slot_id, const EQ::ItemInstance &inst) const;
 	uint32 GetFinalItemID(const EQ::ItemInstance &inst) const;
 	uint32 GetNextEvolveItemID(const EQ::ItemInstance &inst) const;
+	uint32 GetFirstItemInLoreGroup(const uint32 lore_id);
 	uint64 GetTotalEarnedXP(const EQ::ItemInstance &inst);
 	ItemsEvolvingDetailsRepository::ItemsEvolvingDetails GetEvolveItemDetails(uint64 id);
-	EvolveTransfer_Struct DetermineTransferResults(SharedDatabase &db, const EQ::ItemInstance& inst_from, const EQ::ItemInstance& inst_to);
-	EvolveTransfer2_Struct GetNextItemByXP(const EQ::ItemInstance &inst_in, uint64 in_xp);
+	EvolveTransfer_Struct DetermineTransferResults(const EQ::ItemInstance& inst_from, const EQ::ItemInstance& inst_to);
+	EvolveTransfer2_Struct GetNextItemByXP(const EQ::ItemInstance &inst_in, int64 in_xp);
 
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return evolving_items_cache; }
 	std::vector<ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> GetEvolveIDItems(uint32 evolve_id);
