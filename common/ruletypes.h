@@ -1042,6 +1042,7 @@ RULE_CATEGORY(EvolvingItems)
 RULE_REAL(EvolvingItems, PercentOfSoloExperience, 0.1, "Percentage of solo experience allocated to evolving items that require experience.")
 RULE_REAL(EvolvingItems, PercentOfGroupExperience, 0.1, "Percentage of group experience allocated to evolving items that require experience.")
 RULE_REAL(EvolvingItems, PercentOfRaidExperience, 0.1, "Percentage of solo experience allocated to evolving items that require experience.")
+RULE_INT(EvolvingItems, DelayUponEquipping, 30000, "Delay in ms before an evolving item will earn rewards after equipping.  Default is 30000ms or 30s.")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

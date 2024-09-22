@@ -241,8 +241,9 @@ namespace EQ
 		inline int32 GetSerialNumber() const { return m_SerialNumber; }
 		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
 
-		std::map<std::string, ::Timer>& GetTimers() { return m_timers; }
+		std::map<std::string, ::Timer>& GetTimers() const { return m_timers; }
 		void SetTimer(std::string name, uint32 time);
+		void SetTimer(std::string name, uint32 time) const;
 		void StopTimer(std::string name);
 		void ClearTimers();
 
@@ -335,7 +336,7 @@ namespace EQ
 		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
 		uint32           GetEvolveFinalItemID() const { return m_evolving_details.final_item_id; }
 		uint32           GetAugmentEvolveUniqueID(uint8 augment_index) const;
-		void             SetEvolveEquiped(const bool in) const { m_evolving_details.equiped = in; }
+		void             SetEvolveEquiped(const bool in) const;
 		void             SetEvolveActivated(const bool in) const { m_evolving_details.activated = in; }
 		void             SetEvolveProgression(const double in) const { m_evolving_details.progression = in; }
 		void             SetEvolveUniqueID(const uint64 in) const { m_evolving_details.id = in; }
@@ -384,9 +385,9 @@ namespace EQ
 		mutable CharacterEvolvingItemsRepository::CharacterEvolvingItems  m_evolving_details{};
 
 		// Items inside of this item (augs or contents) {};
-		std::map<uint8, ItemInstance*>		m_contents {}; // Zero-based index: min=0, max=9
-		std::map<std::string, std::string>	m_custom_data {};
-		std::map<std::string, ::Timer>		m_timers {};
+		std::map<uint8, ItemInstance*>         m_contents {}; // Zero-based index: min=0, max=9
+		std::map<std::string, std::string>     m_custom_data {};
+		mutable std::map<std::string, ::Timer> m_timers {};
 	};
 }
 

@@ -66,6 +66,10 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			continue;
 		}
 
+		if (inst->GetTimers().contains("evolve") && !inst->GetTimers().at("evolve").Check()) {
+			continue;
+		}
+
 		auto type     = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).type;
 		auto sub_type = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).sub_type;
 

@@ -67,6 +67,8 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 				c->Message(Chat::Yellow, fmt::format("{}{}{:.{}f}", "Progression %", ":", value->GetEvolveProgression(), 2).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Type", ":", item.type).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "SubType", ":", item.sub_type).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Timer", ":", value->GetTimers().at("evolve").Enabled()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Timer Remaining", ":", value->GetTimers().at("evolve").GetRemainingTime()).c_str());
 				c->Message(Chat::Green, fmt::format("Evolving Item Details:ID:{: >6} UID:{: >6} A:{} E:{} T:{} ST:{} C:{} R:{} P:{:.{}f}",
 													value->GetID(),
 													value->GetEvolveUniqueID(),
@@ -98,6 +100,8 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 				c->Message(Chat::Yellow, fmt::format("{}{}{:.{}f}", "Progression %", ":", value->GetEvolveProgression(), 2).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Type", ":", item.type).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "SubType", ":", item.sub_type).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Timer", ":", value->GetTimers().at("evolve").Enabled()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Timer Remaining", ":", value->GetTimers().at("evolve").GetRemainingTime()).c_str());
 				c->Message(Chat::Green, fmt::format("Evolving Item Details:ID:{: >6} UID:{: >6} A:{} E:{} T:{} ST:{} C:{} R:{} P:{:.{}f}",
 													value->GetID(),
 													value->GetEvolveUniqueID(),
@@ -158,6 +162,8 @@ void command_evolvingitems(Client* c, const Seperator* sep)
 				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Equiped", ":", item->GetEvolveEquiped() ? "Yes" : "No").c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Unique ID", ":", item->GetEvolveUniqueID()).c_str());
 				c->Message(Chat::Yellow, fmt::format("{}{}{:.{}f}", "Progression %", ":", item->GetEvolveProgression(), 2).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Timer", ":", item->GetTimers().at("evolve").Enabled()).c_str());
+				c->Message(Chat::Yellow, fmt::format("{}{}{}", "Timer Remaining", ":", item->GetTimers().at("evolve").GetRemainingTime()).c_str());
 			}
 			else {
 				c->Message(Chat::Red, fmt::format("Item {} could not be found in your inventory.", item_id).c_str());

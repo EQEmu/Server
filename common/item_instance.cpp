@@ -79,6 +79,10 @@ EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 		m_color = m_item->Color;
 	}
 
+	if (IsEvolving()) {
+		SetTimer("evolve", RuleI(EvolvingItems, DelayUponEquipping));
+	}
+
 	m_SerialNumber  = GetNextItemInstSerialNumber();
 }
 
@@ -96,6 +100,10 @@ EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges
 		m_color = m_item->Color;
 	} else {
 		m_color = 0;
+	}
+
+	if (IsEvolving()) {
+		SetTimer("evolve", RuleI(EvolvingItems, DelayUponEquipping));
 	}
 
 	m_SerialNumber  = GetNextItemInstSerialNumber();
@@ -2451,6 +2459,33 @@ void EQ::ItemInstance::SerializeEvolveItem(EQ::OutBuffer& ob)
 				ob.overwrite(count_pos, (const char*)&subitem_count, sizeof(uint32));
 		}
 	}
+
+void EQ::ItemInstance::SetTimer(std::string name, uint32 time) const{
+	Timer t(time);
+	t.Start(time, false);
+	m_timers[name] = t;
+}
+
+void EQ::ItemInstance::SetEvolveEquiped(const bool in) const
+{
+	if (!IsEvolving()) {
+		return;
+	}
+
+	m_evolving_details.equiped = in;
+	if (in && !GetTimers().contains("evolve")) {
+		SetTimer("evolve", RuleI(EvolvingItems, DelayUponEquipping));
+		return;
+	}
+
+	if (in) {
+		GetTimers().at("evolve").SetTimer(RuleI(EvolvingItems, DelayUponEquipping));
+		return;
+	}
+
+	GetTimers().at("evolve").Disable();
+}
+
 //
 // class EvolveInfo
 //
