@@ -1820,7 +1820,7 @@ public:
 
 	// Evolving Item Info
 	void ProcessEvolvingItem(const uint64 exp, const Mob* mob);
-	void SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::CharacterEvolvingItems item);
+	void SendEvolvingPacket(int8 action, const CharacterEvolvingItemsRepository::CharacterEvolvingItems &item);
 	void DoEvolveItemToggle(const EQApplicationPacket* app);
 	void DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app);
 	bool DoEvolveCheckProgression(const EQ::ItemInstance &inst);

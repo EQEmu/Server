@@ -320,7 +320,7 @@ namespace EQ
 		// evolving items stuff
 //		bool        EvolveOnAllKills() const;
 
-		CharacterEvolvingItemsRepository::CharacterEvolvingItems &GetEvolvingDetails() { return m_evolving_details; }
+		CharacterEvolvingItemsRepository::CharacterEvolvingItems &GetEvolvingDetails() const { return m_evolving_details; }
 
 		int8             GetEvolveLvl() const { return GetItem()->EvolvingLevel; }
 		bool             IsEvolving() const { return GetItem()->EvolvingItem; }
@@ -338,10 +338,6 @@ namespace EQ
 		void             SetEvolveEquiped(const bool in) const { m_evolving_details.equiped = in; }
 		void             SetEvolveActivated(const bool in) const { m_evolving_details.activated = in; }
 		void             SetEvolveProgression(const double in) const { m_evolving_details.progression = in; }
-		void             SetEvolveProgression2() const
-		{
-			m_evolving_details.progression = evolving_items_manager.CalculateProgression(GetEvolveCurrentAmount(), GetID());
-		}
 		void             SetEvolveUniqueID(const uint64 in) const { m_evolving_details.id = in; }
 		void             SetEvolveCharID(const uint32 in) const { m_evolving_details.char_id = in; }
 		void             SetEvolveItemID(const uint32 in) const { m_evolving_details.item_id = in; }
@@ -349,6 +345,10 @@ namespace EQ
 		void             SetEvolveAddToCurrentAmount(const uint64 in) const { m_evolving_details.current_amount += in; }
 		void             SetEvolveFinalItemID(const uint32 in) const { m_evolving_details.final_item_id = in; }
 		bool             TransferOwnership(Database& db, const uint32 to_char_id) const;
+		void             CalculateEvolveProgression() const
+		{
+			m_evolving_details.progression = evolving_items_manager.CalculateProgression(GetEvolveCurrentAmount(), GetID());
+		}
 
 	protected:
 		//////////////////////////

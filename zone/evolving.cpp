@@ -25,10 +25,10 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_evolving_items_repository.h"
 
-void Client::DoEvolveItemToggle(const EQApplicationPacket* app)
+void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 {
-	auto in   = reinterpret_cast<EvolveItemToggle_Struct *>(app->pBuffer);
-	auto item = CharacterEvolvingItemsRepository::FindOne(database, in->unique_id);
+	const auto in = reinterpret_cast<EvolveItemToggle_Struct *>(app->pBuffer);
+	auto item     = CharacterEvolvingItemsRepository::FindOne(database, in->unique_id);
 
 	if (!item.id) {
 		return;
@@ -36,20 +36,18 @@ void Client::DoEvolveItemToggle(const EQApplicationPacket* app)
 
 	item.activated = in->activated;
 
-	auto inst = GetInv().GetItem(GetInv().HasItem(item.item_id));
+	const auto inst = GetInv().GetItem(GetInv().HasItem(item.item_id));
 	inst->SetEvolveActivated(item.activated ? true : false);
 
-	// update db
 	CharacterEvolvingItemsRepository::ReplaceOne(database, item);
 
-	// send update to client
 	SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, item);
 }
 
-void Client::SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::CharacterEvolvingItems item)
+void Client::SendEvolvingPacket(const int8 action, const CharacterEvolvingItemsRepository::CharacterEvolvingItems &item)
 {
-	auto out  = std::make_unique<EQApplicationPacket>(EmuOpcode::OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
-	auto data = reinterpret_cast<EvolveItemToggle_Struct *>(out->pBuffer);
+	auto out        = std::make_unique<EQApplicationPacket>(EmuOpcode::OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
+	const auto data = reinterpret_cast<EvolveItemToggle_Struct *>(out->pBuffer);
 
 	data->action     = action;
 	data->unique_id  = item.id;
@@ -61,7 +59,7 @@ void Client::SendEvolvingPacket(int8 action, CharacterEvolvingItemsRepository::C
 
 void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 {
-	std::vector<EQ::ItemInstance*> queue{};
+	std::vector<const EQ::ItemInstance *> queue{};
 
 	for (auto &[key, inst]: GetInv().GetWorn()) {
 		if (!inst->IsEvolving() || !inst->GetEvolveActivated()) {
@@ -89,9 +87,14 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100);
 				}
 
-				inst->SetEvolveProgression2();
+				inst->CalculateEvolveProgression();
 
-				auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression());
+				auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(
+					database,
+					inst->GetEvolveUniqueID(),
+					inst->GetEvolveCurrentAmount(),
+					inst->GetEvolveProgression()
+				);
 				if (!e.id) {
 					break;
 				}
@@ -104,7 +107,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					inst->GetItem()->Name,
 					exp * 0.001,
 					GetName()
-					);
+				);
 
 				if (inst->GetEvolveProgression() >= 100) {
 					queue.push_back(inst);
@@ -115,9 +118,14 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			case EvolvingItems::Types::NUMBER_OF_KILLS: {
 				if (mob && mob->GetRace() == sub_type) {
 					inst->SetEvolveAddToCurrentAmount(1);
-					inst->SetEvolveProgression2();
+					inst->CalculateEvolveProgression();
 
-					auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression());
+					auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(
+						database,
+						inst->GetEvolveUniqueID(),
+						inst->GetEvolveCurrentAmount(),
+						inst->GetEvolveProgression()
+					);
 					if (!e.id) {
 						break;
 					}
@@ -129,7 +137,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 						sub_type,
 						inst->GetItem()->Name,
 						GetName()
-						);
+					);
 				}
 
 				if (inst->GetEvolveProgression() >= 100) {
@@ -138,12 +146,13 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 
 				break;
 			}
-			default: {}
+			default: {
+			}
 		}
 	}
 
 	if (!queue.empty()) {
-		for (auto const& i:queue) {
+		for (auto const &i: queue) {
 			DoEvolveCheckProgression(*i);
 		}
 	}
@@ -224,9 +233,9 @@ void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 	}
 
 	inst_from_new->SetEvolveCurrentAmount(results.item_from_current_amount);
-	inst_from_new->SetEvolveProgression2();
+	inst_from_new->CalculateEvolveProgression();
 	inst_to_new->SetEvolveCurrentAmount(results.item_to_current_amount);
-	inst_to_new->SetEvolveProgression2();
+	inst_to_new->CalculateEvolveProgression();
 
 	std::stringstream           ss;
 	cereal::BinaryOutputArchive ar(ss);
@@ -292,9 +301,9 @@ void Client::DoEvolveTransferXP(const EQApplicationPacket* app)
 	}
 
 	inst_from_new->SetEvolveCurrentAmount(results.item_from_current_amount);
-	inst_from_new->SetEvolveProgression2();
+	inst_from_new->CalculateEvolveProgression();
 	inst_to_new->SetEvolveCurrentAmount(results.item_to_current_amount);
-	inst_to_new->SetEvolveProgression2();
+	inst_to_new->CalculateEvolveProgression();
 
 	RemoveItemBySerialNumber(inst_from->GetSerialNumber());
 	PushItemOnCursor(*inst_from_new, true);
