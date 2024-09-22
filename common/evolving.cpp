@@ -201,46 +201,37 @@ EvolveTransfer2_Struct EvolvingItemsManager::GetNextItemByXP(const EQ::ItemInsta
 {
 	EvolveTransfer2_Struct ets{};
 	auto evolve_items = GetEvolveIDItems(inst_in.GetEvolveLoreID());
-	int64 free_xp     = static_cast<int64>(in_xp);
 	uint32 max_transfer_level = 0;
 
-	for (auto const& e:evolve_items) {
+	int64 xp = static_cast<int64>(in_xp);
+	for (auto const& e : evolve_items) {
 		if (e.item_evolve_level < inst_in.GetEvolveLvl()) {
 			continue;
 		}
 
+		int64 have = 0;
 		if (e.item_evolve_level == inst_in.GetEvolveLvl()) {
-			if (e.required_amount - inst_in.GetEvolveCurrentAmount() <= in_xp) {
-				ets.item_id = e.item_id;
-				ets.current_amount = e.required_amount;
-				max_transfer_level = 0;
-				free_xp -= e.required_amount - inst_in.GetEvolveCurrentAmount();
-			} else {
-				ets.item_id = e.item_id;
-				ets.current_amount = inst_in.GetEvolveCurrentAmount() + in_xp;
-				max_transfer_level = 0;
-				free_xp = 0;
-				return ets;
-			}
+			have = inst_in.GetEvolveCurrentAmount();
 		}
-		else {
-			if (e.required_amount - inst_in.GetEvolveCurrentAmount() <= in_xp) {
-				ets.item_id = e.item_id;
-				ets.current_amount += e.required_amount;
-				max_transfer_level += 1;
-				free_xp -= e.required_amount - inst_in.GetEvolveCurrentAmount();
-			} else {
-				ets.item_id = e.item_id;
-				ets.current_amount += inst_in.GetEvolveCurrentAmount() + in_xp;
-				max_transfer_level += 1;
-				free_xp = 0;
-				return ets;
-			}
-		}
+		auto required = e.required_amount;
+		int64 need    = required - have;
+		int64 balance = xp - need;
 
-		if (free_xp <= 0) {
+		if (balance <= 0) {
+			ets.new_current_amount  = have + xp;
+			ets.new_item_id         = e.item_id;
+			ets.from_current_amount = 0;
+			ets.max_transfer_level  = max_transfer_level;
 			return ets;
 		}
+
+		xp = balance;
+		max_transfer_level += 1;
+
+		ets.new_current_amount  = required;
+		ets.new_item_id         = e.item_id;
+		ets.from_current_amount = balance - required;
+		ets.max_transfer_level  = max_transfer_level;
 	}
 
 	return ets;
@@ -252,7 +243,7 @@ EvolveTransfer_Struct EvolvingItemsManager::DetermineTransferResults(SharedDatab
 	// EQ::ItemInstance *inst_from_new = nullptr;
 	// EQ::ItemInstance *inst_to_new   = nullptr;
 
-	uint32 compatibility = 20;
+	uint32 compatibility = 0;
 	uint32 max_transfer_level = 0;
 
 	auto evolving_details_inst_from = evolving_items_manager.GetEvolveItemDetails(inst_from.GetID());
@@ -270,14 +261,15 @@ EvolveTransfer_Struct EvolvingItemsManager::DetermineTransferResults(SharedDatab
 			compatibility = 50;
 		}
 
-		xp                  = evolving_items_manager.GetTotalEarnedXP(inst_from) * compatibility / 100;
-		auto new_item = evolving_items_manager.GetNextItemByXP(inst_to, xp);
+		xp           = evolving_items_manager.GetTotalEarnedXP(inst_from) * compatibility / 100;
+		auto results = evolving_items_manager.GetNextItemByXP(inst_to, xp);
 
-		ets.item_from_id = new_item.item_id
-		ets.inst_1             = inst_from_new;
-		ets.inst_2             = inst_to_new;
-		ets.compatibility      = compatibility;
-		ets.max_transfer_level = max_transfer_level;
+		ets.item_from_id             = inst_from.GetID();
+		ets.item_from_current_amount = results.from_current_amount;
+		ets.item_to_id               = results.new_item_id;
+		ets.item_to_current_amount   = results.new_current_amount;
+		ets.compatibility            = compatibility;
+		ets.max_transfer_level       = results.max_transfer_level;
 
 		// if (new_item.item_id == inst_to.GetID()) {
 		// 	ets.item_from_id             = inst_from.GetID();

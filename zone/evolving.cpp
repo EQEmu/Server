@@ -213,9 +213,20 @@ void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 
 	auto results = evolving_items_manager.DetermineTransferResults(database, *inst_from, *inst_to);
 
-	if (!results.inst_1 || !results.inst_2) {
+	if (!results.item_from_id || !results.item_to_id) {
 		return;
 	}
+
+	std::unique_ptr<EQ::ItemInstance> inst_from_new (database.CreateItem(results.item_from_id));
+	std::unique_ptr<EQ::ItemInstance> inst_to_new (database.CreateItem(results.item_to_id));
+	if (!inst_from_new || !inst_to_new) {
+		return;
+	}
+
+	inst_from_new->SetEvolveCurrentAmount(results.item_from_current_amount);
+	inst_from_new->SetEvolveProgression2();
+	inst_to_new->SetEvolveCurrentAmount(results.item_to_current_amount);
+	inst_to_new->SetEvolveProgression2();
 
 	std::stringstream           ss;
 	cereal::BinaryOutputArchive ar(ss);
@@ -228,8 +239,8 @@ void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 	e.max_transfer_level = results.max_transfer_level;
 	e.unknown_028        = 1;
 	e.unknown_029        = 1;
-	e.serialize_item_1   = results.inst_1->Serialize(0);
-	e.serialize_item_2   = results.inst_2->Serialize(0);
+	e.serialize_item_1   = inst_from_new->Serialize(0);
+	e.serialize_item_2   = inst_to_new->Serialize(0);
 
 	{
 		ar(e);
@@ -247,8 +258,6 @@ void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 
 	ss.str("");
 	ss.clear();
-	safe_delete(results.inst_1);
-	safe_delete(results.inst_2);
 }
 
 void Client::DoEvolveTransferXP(const EQApplicationPacket* app)
@@ -271,27 +280,23 @@ void Client::DoEvolveTransferXP(const EQApplicationPacket* app)
 
 	auto results = evolving_items_manager.DetermineTransferResults(database, *inst_from, *inst_to);
 
-	if (!results.inst_1 || !results.inst_2) {
+	if (!results.item_from_id || !results.item_to_id) {
 		return;
 	}
 
-	if (inst_from->GetID() == results.inst_1->GetID()) {
-		inst_from->SetEvolveCurrentAmount(results.inst_1->GetEvolveCurrentAmount());
-		inst_from->SetEvolveProgression2();
-		SendItemPacket(inst_to->GetCurrentSlot(), inst_from, ItemPacketCharInventory);
-		safe_delete(results.inst_1);
-	} else {
-		RemoveItemBySerialNumber(inst_from->GetSerialNumber());
-		PushItemOnCursor(*results.inst_1, true);
+	const EQ::ItemInstance *inst_from_new = database.CreateItem(results.item_from_id);
+	const EQ::ItemInstance *inst_to_new = database.CreateItem(results.item_to_id);
+	if (!inst_from_new || !inst_to_new) {
+		return;
 	}
 
-	if (inst_to->GetID() == results.inst_2->GetID()) {
-		inst_to->SetEvolveCurrentAmount(results.inst_2->GetEvolveCurrentAmount());
-		inst_to->SetEvolveProgression2();
-		SendItemPacket(inst_to->GetCurrentSlot(), inst_to, ItemPacketCharInventory);
-		safe_delete(results.inst_2);
-	} else {
-		RemoveItemBySerialNumber(inst_to->GetSerialNumber());
-		PushItemOnCursor(*results.inst_2, true);
-	}
+	inst_from_new->SetEvolveCurrentAmount(results.item_from_current_amount);
+	inst_from_new->SetEvolveProgression2();
+	inst_to_new->SetEvolveCurrentAmount(results.item_to_current_amount);
+	inst_to_new->SetEvolveProgression2();
+
+	RemoveItemBySerialNumber(inst_from->GetSerialNumber());
+	PushItemOnCursor(*inst_from_new, true);
+	RemoveItemBySerialNumber(inst_to->GetSerialNumber());
+	PushItemOnCursor(*inst_to_new, true);
 }

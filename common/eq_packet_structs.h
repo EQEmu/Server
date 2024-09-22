@@ -6518,8 +6518,10 @@ struct EvolveTransfer_Struct {
 };
 
 struct EvolveTransfer2_Struct {
-	uint32 item_id;
-	uint64 current_amount;
+	uint32 new_item_id;
+	uint64 new_current_amount;
+	uint64 from_current_amount;
+	uint32 max_transfer_level;
 };
 // Restore structure packing to default
 #pragma pack()
