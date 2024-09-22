@@ -1325,9 +1325,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 			case SE_Familiar:
-				if (RuleB(Custom, MulticlassingEnabled)) {
-					break;
-				}
 			case SE_SummonBSTPet:
 			case SE_NecPet:
 			case SE_SummonPet:

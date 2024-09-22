@@ -537,11 +537,11 @@ NPC::~NPC()
 	UninitializeBuffSlots();
 }
 
-void NPC::SetTarget(Mob* mob) {
+void NPC::SetTarget(Mob* mob, bool skip_lock_despawn) {
 	if(mob == GetTarget())		//dont bother if they are allready our target
 		return;
 
-	if (GetPetTargetLockID()) {
+	if (GetPetTargetLockID() && !skip_lock_despawn) {
 		TryDepopTargetLockedPets(mob);
 	}
 

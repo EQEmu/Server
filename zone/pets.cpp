@@ -710,9 +710,17 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
 			break;
 		// Wizard
 		case 1722: case 5460: case 10840:
-			tmp_lastname = fmt::format("{}'s Animated Sword", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? fmt::format("{}`s Animated Sword", owner->GetCleanName()) : static_name;
+			tmp_lastname 	= fmt::format("{}'s Animated Sword", owner->GetCleanName());
+			tmp_name 		= (static_name == nullptr) ? fmt::format("{}`s {}", owner->GetCleanName(), spells[spell_id].name) : static_name;
 			break;
+		// Clockworks
+		case 16601: case 16995:
+			tmp_lastname = fmt::format("{}'s Clockwork Servant", owner->GetCleanName());
+			if (spell_id = 16995) {
+				tmp_name = (static_name == nullptr) ? fmt::format("{}`s Resupply Agent", owner->GetCleanName()) : static_name;
+			} else {
+				tmp_name = (static_name == nullptr) ? fmt::format("{}`s Clockwork Banker", owner->GetCleanName()) : static_name;
+			}
 	}
 
 	if (tmp_lastname.size() < sizeof(lastname)) {
@@ -875,6 +883,12 @@ void Mob::ConfigurePetWindow(Mob* selected_pet) {
 
 		if (pet_npc->GetPetOrder() == SPO_Sit) { pet_npc->SetEntityVariable("IgnoreNextSitCommand", "true"); }
 		this_client->SetPetCommandState(PET_BUTTON_SIT, pet_npc->GetPetOrder() == SPO_Sit);
+
+		if (pet_npc->GetTarget()) {
+			auto tar_temp = pet_npc->GetTarget();
+			pet_npc->SetTarget(nullptr, true);
+			pet_npc->SetTarget(tar_temp, true);
+		}
 
 		safe_delete(outapp);
 		safe_delete(outapp2);
@@ -1177,6 +1191,8 @@ bool Mob::AddPet(uint16 pet_id) {
     for (auto id : petids) {
         LogDebug("  - Pet ID: [{}]", id);
     }
+
+	ConfigurePetWindow(focused_pet_id ? entity_list.GetNPCByID(focused_pet_id) : GetPet(0));
 
     return true;  // Return true to indicate the pet was successfully added
 }

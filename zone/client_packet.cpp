@@ -15509,9 +15509,6 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket *app)
 				nt->SendBuffsToClient(this);
 			}
 
-
-
-
 			if (nt->IsPet() && nt->GetOwnerID() == GetID() && nt->GetID() != focused_pet_id) {
 				ConfigurePetWindow(nt);
 				SendTargetCommand(ct->new_target);
