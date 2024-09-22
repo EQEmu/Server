@@ -1772,7 +1772,7 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
         case Race::GiantBat:
             npc->race = Race::Bat2;
             npc->gender = Gender::Neuter;
-            npc->size *= level_size_scale;
+            npc->size *= .25;
             break;
 
         case Race::GiantSpider:
