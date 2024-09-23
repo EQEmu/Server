@@ -4935,7 +4935,7 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 											  AccountName(),
 											  GetIPString(),
 											  hrs,
-											  buf->uk);
+											  buf->unk);
 
 			zone->SendDiscordMessage("admin", message);
 		}
