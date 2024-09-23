@@ -4918,10 +4918,24 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 			CHacker = true;
 			LogError("HACKER DETECTED [{}]!", GetCleanName());
 
-			std::string message = fmt::format("HACK DETECTED: Character: {} [Account: {}, IP: {}] has been detected using MQ2. (Hook Detection: {})\n",
+			std::string hrs;
+			switch (buf->unk) {
+				case 4:
+					hrs = "MQ2 Heartbeat";
+					break;
+				case 1:
+					hrs = "MQ2 Heartbeat Preload";
+					break;
+				default:
+					hrs = "Unknown";
+			}
+
+			std::string message = fmt::format("HACK DETECTED: Character: {} [Account: {}, IP: {}] has been detected using MQ2. (Hook Detection: {} [{}])\n",
 											  GetCleanName(),
 											  AccountName(),
-											  GetIPString(), buf->unk);
+											  GetIPString(),
+											  hrs,
+											  buf->uk);
 
 			zone->SendDiscordMessage("admin", message);
 		}
