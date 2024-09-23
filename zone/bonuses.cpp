@@ -1918,38 +1918,33 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_ExtraAttackChance:
 		{
-			/*if (newbon->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] < base_value) {
+			//Stack extra hits, take highest chance
+			if (newbon->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] < base_value) {
 				newbon->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE]   = base_value;
-				newbon->ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
-			}*/
-			//Made chance stackable, num attacks not stackable. Consider logic change for this in Client::DoAttackRounds
-			newbon->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE]   += base_value;
-			newbon->ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
+			}
+			newbon->ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
 			break;
 		}
 
 		case SE_AddExtraAttackPct_1h_Primary:
 		{
-			/*if (newbon->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] < base_value) {
+			//No AAs?
+			//Stack extra hits, take highest chance
+			if (newbon->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] < base_value) {
 				newbon->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE]   = base_value;
-				newbon->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
-			}*/
-			//Made chance stackable, num attacks not stackable. Consider logic change for this in Client::DoAttackRounds
-			newbon->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE]   += base_value;
-			newbon->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
+			}
+			newbon->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
 			break;
 		}
 
 		case SE_AddExtraAttackPct_1h_Secondary:
 		{
 			//No AAs?
-			/*if (newbon->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] < base_value) {
+			//Stack extra hits, take highest chance
+			if (newbon->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] < base_value) {
 				newbon->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE]   = base_value;
-				newbon->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
-			}*/
-			//Made chance stackable, num attacks not stackable. Consider logic change for this in Client::DoAttackRounds
-			newbon->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE]   += base_value;
-			newbon->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
+			}
+			newbon->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
 			break;
 		}
 
@@ -2892,42 +2887,62 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ExtraAttackChance:
 			{
+				//Changing this to work like the AAs - hits stack but chance takes highest
+				if (new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
+					new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] = effect_value;
+				}
+				new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
+				/*
 				if (AdditiveWornBonus) {
 					new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] += effect_value;
-					new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
+					new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
 				}
-				if (new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
+				else if (new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
 					new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE]   = effect_value;
-					new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
+					new_bonus->ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
 				}
+				*/
 				break;
 			}
 
 			case SE_AddExtraAttackPct_1h_Primary:
 			{
-				if (AdditiveWornBonus) {
+				//Changing this to work like the AAs - hits stack but chance takes highest
+				if (new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
+					new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE]   = effect_value;
+				}
+				new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
+				/*if (AdditiveWornBonus) {
 					new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] += effect_value;
-					new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
+					new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
 				}
 
-				if (new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
+				else if (new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
 					new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE]   = effect_value;
 					new_bonus->ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
 				}
+				*/
 				break;
 			}
 
 			case SE_AddExtraAttackPct_1h_Secondary:
 			{
+				//Changing this to work like the AAs - hits stack but chance takes highest
+				if (new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
+					new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE]   = effect_value;
+				}
+				new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
+				/*
 				if (AdditiveWornBonus) {
 					new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] += effect_value;
-					new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
+					new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] += limit_value ? limit_value : 1;
 				}
 
-				if (new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
+				else if (new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
 					new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE]   = effect_value;
 					new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = limit_value ? limit_value : 1;
 				}
+				*/
 				break;
 			}
 

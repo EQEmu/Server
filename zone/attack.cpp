@@ -4141,34 +4141,19 @@ bool Client::CheckDoubleAttack()
 
 	bonus_double_attack = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
 
-	if ((HasClass(Class::Paladin) || HasClass(Class::ShadowKnight)) && (!HasTwoHanderEquipped())) {
-		LogCombatDetail("Knight class without a 2 hand weapon equipped. Negating Knight's Advantage");
-		auto da_negate = 0;
-		auto ka_rank = GetAAByAAID(188);  // Knight's Advantage
-		switch (ka_rank) {
-			case 561:
-				da_negate = 3;
+
+	//Negate Speed of the Knight if not 2Hing
+	if ((HasClass(Class::Paladin) || HasClass(Class::ShadowKnight)) && !HasTwoHanderEquipped()) {
+		LogCombatDetail("Knight class without a 2 hand weapon equipped. Negating Speed of the Knight");
+		auto sotk_rank = zone->GetAlternateAdvancementAbility(203)->GetMaxLevel(this); //Speed of the Knight
+		const uint16 sotk_rank_base1_map[16][2] = {{602,2},{603,5},{604,8},{1533,11},{1534,14},{1535,17},{4758,27},{4759,28},{4760,29},{5580,30},{5581,31},{5582,32},{10685,34},{10686,39},{10687,45},{13610,47}};
+		for(uint8 i=0; i<16; i++) {
+			if(sotk_rank_base1_map[i][0] == sotk_rank) {
+				bonus_double_attack -= sotk_rank_base1_map[i][2];
 				break;
-			case 562:
-				da_negate = 6;
-				break;
-			case 563:
-				da_negate = 9;
-				break;
-			case 1624:
-				da_negate = 20;
-				break;
-			case 1625:
-				da_negate = 22;
-				break;
-			case 1626:
-				da_negate = 24;
-				break;
-			default:
-				da_negate = 0;
-				break;
-		}
-	}
+			}
+		}	
+	}		
 
 	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
 	if (skill) {
@@ -7138,20 +7123,26 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 				if (HasTwoHanderEquipped()) {
 					auto extraattackchance = aabonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] + spellbonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] +
 											 itembonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE];
-					if (extraattackchance && zone->random.Roll(extraattackchance)) {
+					if(extraattackchance) {
 						auto extraattackamt = std::max({aabonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS], spellbonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS], itembonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] });
 						for (int i = 0; i < extraattackamt; i++) {
-							Attack(target, hand, false, false, IsFromSpell);
+							//Roll chance of extra hit per possible extra hit
+							if (zone->random.Roll(extraattackchance)) {
+								Attack(target, hand, false, false, IsFromSpell);
+							}
 						}
 					}
 				}
 				else {
 					auto extraattackchance_primary = aabonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] + spellbonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] +
 													 itembonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE];
-					if (extraattackchance_primary && zone->random.Roll(extraattackchance_primary)) {
+					if(extraattackchance_primary) {
 						auto extraattackamt_primary = std::max({aabonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS], spellbonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS], itembonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] });
 						for (int i = 0; i < extraattackamt_primary; i++) {
-							Attack(target, hand, false, false, IsFromSpell);
+							//Roll chance of extra hit per possible extra hit
+							if (zone->random.Roll(extraattackchance_primary)) {
+								Attack(target, hand, false, false, IsFromSpell);
+							}
 						}
 					}
 				}
