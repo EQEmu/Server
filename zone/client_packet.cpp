@@ -3334,12 +3334,16 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							}
 						}
 
-						if (new_aug->GetItem()->Attuneable) {
-							new_aug->SetAttuned(true);
-						}
-
 						tobe_auged->PutAugment(in_augment->augment_index, *new_aug);
 						tobe_auged->UpdateOrnamentationInfo();
+
+						if (new_aug->GetItem()->Attuneable) {
+							if (!RuleB(Custom, AttuneOnExp)) {
+								new_aug->SetAttuned(true);
+							} else {
+								SendItemPacket(item_slot, tobe_auged, ItemPacketTrade);
+							}
+						}
 
 						aug = tobe_auged->GetAugment(in_augment->augment_index);
 						if (aug) {

@@ -1039,7 +1039,9 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 
 		if (instnodrop || (inst->GetItem()->Attuneable && slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <=
 		                   EQ::invslot::EQUIPMENT_END)) {
-			inst->SetAttuned(true);
+			if (!RuleB(Custom, AttuneOnExp) || instnodrop) {
+				inst->SetAttuned(true);
+			}
 		}
 
 		if (color > 0) {
@@ -1682,10 +1684,6 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			if (item.Click.Effect == 524 && item.CastTime == 0 && item.CastTime_ == 0 && item.RecastDelay == 0) {
 				item.RecastDelay = 5;
 				item.RecastType = -1;
-			}
-
-			if (item.ID > 2000000 && item.NoRent) {
-				item.Attuneable = 0;
 			}
 
 			if (item.ID % 1000000 == 5798  || // Hammer of Souls

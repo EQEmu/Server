@@ -805,6 +805,36 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 		AddItemExperience(m_inv.GetItem(EQ::invslot::slotPowerSource), conlevel);
 	}
 
+	if (RuleB(Custom, AttuneOnExp)) {
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+
+		for (int slot = EQ::invslot::EQUIPMENT_BEGIN; slot < EQ::invslot::EQUIPMENT_END; slot++) {
+			auto item_inst = m_inv.GetItem(slot);
+			if (item_inst) {
+				if (item_inst->GetItem()->Attuneable && !item_inst->IsAttuned()) {
+					item_inst->SetAttuned(true);
+					linker.SetItemInst(item_inst);
+					Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
+					SendItemPacket(slot, item_inst, ItemPacketTrade);
+				}
+
+				for (int aug_slot = EQ::invaug::SOCKET_BEGIN; aug_slot <= EQ::invaug::SOCKET_END; aug_slot++) {
+					auto augment_inst = item_inst->GetAugment(aug_slot);
+					if (augment_inst) {
+						if (augment_inst->GetItem()->Attuneable && !augment_inst->IsAttuned()) {
+							augment_inst->SetAttuned(true);
+							linker.SetItemInst(augment_inst);
+							Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
+							SendItemPacket(slot, augment_inst, ItemPacketTrade);
+							SendItemPacket(slot, item_inst, ItemPacketTrade); // not sure which one of these is actually needed
+						}
+					}
+				}
+			}
+		}
+	}
+
 	EVENT_ITEM_ScriptStopReturn();
 
 	uint64 exp = 0;
