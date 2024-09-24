@@ -11117,7 +11117,8 @@ void Client::SaveDisciplines()
 		CharacterDisciplinesRepository::DeleteWhere(
 			database,
 			fmt::format(
-				"`slot_id` IN ({})",
+				"`id` = {} AND `slot_id` IN ({})",
+				CharacterID(),
 				Strings::Join(delete_slots, ", ")
 			)
 		);
