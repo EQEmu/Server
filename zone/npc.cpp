@@ -537,11 +537,11 @@ NPC::~NPC()
 	UninitializeBuffSlots();
 }
 
-void NPC::SetTarget(Mob* mob, bool skip_lock_despawn) {
+void NPC::SetTarget(Mob* mob) {
 	if(mob == GetTarget())		//dont bother if they are allready our target
 		return;
 
-	if (GetPetTargetLockID() && !skip_lock_despawn) {
+	if (GetPetTargetLockID()) {
 		TryDepopTargetLockedPets(mob);
 	}
 
@@ -563,7 +563,7 @@ void NPC::SetTarget(Mob* mob, bool skip_lock_despawn) {
 			owner = nullptr;
 	}
 
-	if (owner) {
+	if (owner && owner->focused_pet_id == GetID()) {
 		auto client = owner->CastToClient();
 		if (client->ClientVersionBit() & EQ::versions::maskUFAndLater) {
 			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));

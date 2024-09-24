@@ -369,7 +369,6 @@ bool Client::Process() {
 
 		if (GetPet()) {
 			if (!GetPetByID(focused_pet_id)) {
-				//LogDebug("No Valid Focused Pet, auto-assigning");
 				ValidatePetList(); // Make sure 0th petid is valid
 				focused_pet_id = petids[0];
 				auto focused_pet = GetPetByID(focused_pet_id);

@@ -163,7 +163,7 @@ public:
 
 	void LevelScale();
 
-	virtual void SetTarget(Mob* mob, bool skip_lock_despawn = false);
+	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { if (skill_num <= EQ::skills::HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
 
 	virtual void CalcBonuses();

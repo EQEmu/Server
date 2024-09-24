@@ -884,14 +884,17 @@ void Mob::ConfigurePetWindow(Mob* selected_pet) {
 		if (pet_npc->GetPetOrder() == SPO_Sit) { pet_npc->SetEntityVariable("IgnoreNextSitCommand", "true"); }
 		this_client->SetPetCommandState(PET_BUTTON_SIT, pet_npc->GetPetOrder() == SPO_Sit);
 
-		if (pet_npc->GetTarget()) {
-			auto tar_temp = pet_npc->GetTarget();
-			pet_npc->SetTarget(nullptr, true);
-			pet_npc->SetTarget(tar_temp, true);
-		}
-
 		safe_delete(outapp);
 		safe_delete(outapp2);
+
+		auto pet_target = GetTarget();
+		if (pet_target) {
+			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
+			auto ct = (ClientTarget_Struct *)app->pBuffer;
+			ct->new_target = pet_npc->GetTarget() ? pet_npc->GetTarget()->GetID() : 0;
+			this_client->FastQueuePacket(&app);
+			safe_delete(app);
+		}
 	}
 }
 
@@ -1120,6 +1123,10 @@ bool Mob::RemovePet(uint16 pet_id) {
 			if (IsClient()) {
 				CastToClient()->DoPetBagResync();
 			}
+
+			if (pet_id == focused_pet_id) {
+				focused_pet_id = 0;
+			}
             return true;             // Return true to indicate successful removal
         }
     }
@@ -1192,7 +1199,8 @@ bool Mob::AddPet(uint16 pet_id) {
         LogDebug("  - Pet ID: [{}]", id);
     }
 
-	ConfigurePetWindow(focused_pet_id ? entity_list.GetNPCByID(focused_pet_id) : GetPet(0));
+	focused_pet_id = pet_id;
+	ConfigurePetWindow(newpet);
 
     return true;  // Return true to indicate the pet was successfully added
 }
