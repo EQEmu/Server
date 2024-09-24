@@ -1,3 +1,9 @@
+## [22.56.3] 9/23/2024
+
+### Fixes
+
+* Fix issue with Client::SaveDisciplines() not specifying character ID ([#4481](https://github.com/EQEmu/Server/pull/4477)) @Kinglykrab 2024-09-23
+
 ## [22.56.2] 9/20/2024
 
 ### Fixes
