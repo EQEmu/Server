@@ -3371,6 +3371,9 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	}
 
 	if (other->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
+		if (other->HasOwner()) {
+			AddToHateList(other->GetOwner(), hate, damage, iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
+		}
 		return;
 	}
 
@@ -4152,8 +4155,8 @@ bool Client::CheckDoubleAttack()
 				bonus_double_attack -= sotk_rank_base1_map[i][2];
 				break;
 			}
-		}	
-	}		
+		}
+	}
 
 	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
 	if (skill) {

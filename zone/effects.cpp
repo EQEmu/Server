@@ -1280,18 +1280,22 @@ void EntityList::AESpell(
 			current_mob->IsNPC() &&
 			spells[spell_id].target_type != ST_AreaNPCOnly
 		) {
-			const auto faction_value = current_mob->GetReverseFactionCon(caster_mob);
-			if (is_detrimental_spell) {
-				if (
-					!(caster_mob->CheckAggro(current_mob) ||
-					faction_value == FACTION_THREATENINGLY ||
-					faction_value == FACTION_SCOWLS)
-				) {
-					continue;
-				}
+			if (caster_mob->GetOwner() && caster_mob->GetOwner()->IsClient() && !(current_mob->GetOwner() && current_mob->GetOwner()->IsClient())) {
+				// no operation;
 			} else {
-				if (!(faction_value <= FACTION_AMIABLY)) {
-					continue;
+				const auto faction_value = current_mob->GetReverseFactionCon(caster_mob);
+				if (is_detrimental_spell) {
+					if (
+						!(caster_mob->CheckAggro(current_mob) ||
+						faction_value == FACTION_THREATENINGLY ||
+						faction_value == FACTION_SCOWLS)
+					) {
+						continue;
+					}
+				} else {
+					if (!(faction_value <= FACTION_AMIABLY)) {
+						continue;
+					}
 				}
 			}
 		}
