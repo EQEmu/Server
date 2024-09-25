@@ -4397,7 +4397,7 @@ bool ZoneDatabase::GetFactionIDsForNPC(
 
 	const auto& npcf = zone->GetNPCFaction(npc_faction_id);
 	if (!npcf) {
-		LogError("No NPC faction entry for [{}]", npc_faction_id);
+		LogErrorDetail("No NPC faction entry for [{}]", npc_faction_id);
 		return false;
 	}
 
