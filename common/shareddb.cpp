@@ -1037,11 +1037,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		inst->SetOrnamentationIDFile(ornament_idfile);
 		inst->SetOrnamentHeroModel(item->HerosForgeModel);
 
-		if (instnodrop || (inst->GetItem()->Attuneable && slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <=
-		                   EQ::invslot::EQUIPMENT_END)) {
-			if (!RuleB(Custom, AttuneOnExp) || instnodrop) {
-				inst->SetAttuned(true);
-			}
+		if (instnodrop || (!RuleB(Custom, AttuneOnExp) && (inst->GetItem()->Attuneable && slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END))) {
+			inst->SetAttuned(true);
 		}
 
 		if (color > 0) {

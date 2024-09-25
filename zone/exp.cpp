@@ -831,6 +831,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 						}
 					}
 				}
+				database.SaveInventory(character_id, item_inst, slot);
 			}
 		}
 	}
