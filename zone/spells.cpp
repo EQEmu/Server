@@ -3262,14 +3262,32 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 	if ((RuleB(Custom, BypassProcStackConflicts) || RuleB(Custom, BypassDSStackConflicts) || RuleB(Custom, BypassMulticlassStackConflict))) {
 		auto checkClassOverlap = [&](int spellid1, int spellid2) -> bool {
+			// Automatically reject if the spell IDs are the same
+			if (spellid1 == spellid2) {
+				return true;
+			}
+
+			bool allClassesAre255 = true;
+
 			for (int i = 0; i < Class::PLAYER_CLASS_COUNT; ++i) {
-				if ((spells[spellid1].classes[i] > 0 && spells[spellid1].classes[i] < 255) &&
-					(spells[spellid2].classes[i] > 0 && spells[spellid2].classes[i] < 255)) {
+				bool spell1Usable = (spells[spellid1].classes[i] > 0 && spells[spellid1].classes[i] < 255);
+				bool spell2Usable = (spells[spellid2].classes[i] > 0 && spells[spellid2].classes[i] < 255);
+
+				// Detect overlap if both spells can be used by the same class
+				if (spell1Usable && spell2Usable) {
 					return true; // Exit early if overlap is found
 				}
+
+				// Check if both spells have 255 for this class index
+				if (spells[spellid1].classes[i] != 255 || spells[spellid2].classes[i] != 255) {
+					allClassesAre255 = false; // If any class isn't 255, flag it
+				}
 			}
-			return false; // No overlap found
+
+			// Return true if all class indices for both spells are 255
+			return allClassesAre255;
 		};
+
 
 		auto isSameCaster = [&](Mob* caster1, Mob* caster2) {
             return (caster1 && caster2 && caster1->GetID() == caster2->GetID()) ||
