@@ -1695,7 +1695,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			}
 		}
 
-		if (RuleB(Custom, AttuneOnExp) && item.ItemType = EQ::item::ItemTypeAugmentation) {
+		if (RuleB(Custom, AttuneOnExp) && item.ItemType == EQ::item::ItemTypeAugmentation) {
 			item.Attuneable = 0;
 		}
 
