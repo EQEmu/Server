@@ -817,21 +817,8 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 					linker.SetItemInst(item_inst);
 					Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
 					SendItemPacket(slot, item_inst, ItemPacketTrade);
+					database.SaveInventory(character_id, item_inst, slot);
 				}
-
-				for (int aug_slot = EQ::invaug::SOCKET_BEGIN; aug_slot <= EQ::invaug::SOCKET_END; aug_slot++) {
-					auto augment_inst = item_inst->GetAugment(aug_slot);
-					if (augment_inst) {
-						if (augment_inst->GetItem()->Attuneable && !augment_inst->IsAttuned()) {
-							augment_inst->SetAttuned(true);
-							linker.SetItemInst(augment_inst);
-							Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
-							SendItemPacket(slot, augment_inst, ItemPacketTrade);
-							SendItemPacket(slot, item_inst, ItemPacketTrade); // not sure which one of these is actually needed
-						}
-					}
-				}
-				database.SaveInventory(character_id, item_inst, slot);
 			}
 		}
 	}
