@@ -2775,6 +2775,9 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		if(zone->random.Real(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
+			if (RuleB(Custom, MulticlassingEnabled)) {
+				Message(Chat::Skills, "You have become better at %s! (%d/%d)", EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skillid)).c_str(), GetSkill(skillid), maxskill);
+			}
 
 			if (player_event_logs.IsEventEnabled(PlayerEvent::SKILL_UP)) {
 				auto e = PlayerEvent::SkillUpEvent{
@@ -3008,8 +3011,84 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 
 	Result += spellbonuses.RaiseSkillCap[skillid] + itembonuses.RaiseSkillCap[skillid] + aabonuses.RaiseSkillCap[skillid];
 
-	if (skillid == EQ::skills::SkillType::SkillForage)
+	if (skillid == EQ::skills::SkillType::SkillForage) {
+		LogDebug("Added GrantForage to Result: [{}]", Result);
 		Result += aabonuses.GrantForage;
+	}
+
+	switch (GetBaseRace()) {
+		case BARBARIAN:
+		case DWARF:
+		case ERUDITE:
+		case HALF_ELF:
+		case HIGH_ELF:
+		case HUMAN:
+		case OGRE:
+		case TROLL:
+		case DRAKKIN:
+			break;
+		case DARK_ELF:
+			{
+				if (skillid == EQ::skills::SkillHide) {
+					Result += 50;
+				}
+				break;
+			}
+		case FROGLOK:
+			{
+				if (skillid == EQ::skills::SkillSwimming) {
+					Result += 125;
+				}
+				break;
+			}
+		case GNOME:
+			{
+				if (skillid == EQ::skills::SkillTinkering) {
+					Result += 100;
+				}
+				break;
+			}
+		case HALFLING:
+			{
+				if (skillid == EQ::skills::SkillHide) {
+					Result += 50;
+				}
+				if (skillid == EQ::skills::SkillSneak) {
+					Result += 50;
+				}
+				break;
+			}
+		case IKSAR:
+			{
+				if (skillid == EQ::skills::SkillForage) {
+					Result += 50;
+				}
+				if (skillid == EQ::skills::SkillSwimming) {
+					Result += 100;
+				}
+				break;
+			}
+		case WOOD_ELF:
+			{
+				if (skillid == EQ::skills::SkillForage) {
+					Result += 50;
+				}
+				if (skillid == EQ::skills::SkillSneak) {
+					Result += 50;
+				}
+				break;
+			}
+		case VAHSHIR:
+			{
+				if (skillid == EQ::skills::SkillSafeFall) {
+					Result += 50;
+				}
+				if (skillid == EQ::skills::SkillSneak) {
+					Result += 50;
+				}
+				break;
+			}
+	}
 
 	return Result;
 }
