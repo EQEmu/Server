@@ -1218,8 +1218,11 @@ void Mob::AI_Process() {
 						owner = GetOwner();
 
 						if (owner) {
-							int16 flurry_chance = owner->aabonuses.PetFlurry +
-												  owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
+							int16 flurry_chance = owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
+
+							if (RuleB(Custom, ApplyPetAAToSwarm)) {
+								flurry_chance += owner->aabonuses.PetFlurry;
+							}
 
 							if (flurry_chance && zone->random.Roll(flurry_chance))
 								Flurry(nullptr);
@@ -1229,7 +1232,16 @@ void Mob::AI_Process() {
 
 					//SE_PC_Pet_Rampage SPA 464 on pet, chance modifier
 					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
-						int chance = spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
+						Mob *owner = nullptr;
+						owner = GetOwner();
+
+						int chance = spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
+						chance += owner->spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + owner->itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
+						if (RuleB(Custom, ApplyPetAAToSwarm)) {
+							chance += aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
+							chance += owner->aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
+						}
+
 						if (chance && zone->random.Roll(chance)) {
 							Rampage(nullptr);
 						}

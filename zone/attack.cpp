@@ -5626,8 +5626,11 @@ void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 	if (!owner)
 		return;
 
-	int CritPetChance =
-		owner->aabonuses.PetCriticalHit + owner->itembonuses.PetCriticalHit + owner->spellbonuses.PetCriticalHit;
+	int CritPetChance =	owner->itembonuses.PetCriticalHit + owner->spellbonuses.PetCriticalHit;
+
+	if (RuleB(Custom, ApplyPetAAToSwarm)) {
+		CritPetChance += owner->aabonuses.PetCriticalHit;
+	}
 
 	if (CritPetChance || critChance)
 		// For pets use PetCriticalHit for base chance, pets do not innately critical with without it
