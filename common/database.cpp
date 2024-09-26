@@ -1866,7 +1866,7 @@ bool Database::CopyCharacter(
 
 	const int64 new_character_id = (CharacterDataRepository::GetMaxId(*this) + 1);
 
-	std::vector<std::string> tables_to_zero_id = { "keyring", "data_buckets" };
+	std::vector<std::string> tables_to_zero_id = { "keyring", "data_buckets", "character_instance_safereturns" };
 
 	TransactionBegin();
 
