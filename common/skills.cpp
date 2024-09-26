@@ -249,7 +249,6 @@ const std::vector<EQ::skills::SkillType>& EQ::skills::GetExtraDamageSkills()
 		EQ::skills::SkillFlyingKick,
 		EQ::skills::SkillKick,
 		EQ::skills::SkillRoundKick,
-		EQ::skills::SkillRoundKick,
 		EQ::skills::SkillTigerClaw,
 		EQ::skills::SkillFrenzy
 	};
