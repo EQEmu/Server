@@ -3372,7 +3372,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 
 	if (other->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
 		if (other->HasOwner()) {
-			AddToHateList(other->GetOwner(), hate, damage, iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
+			AddToHateList(other->GetOwner(), std::round(hate / 3), std::round(damage / 3), iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
 		}
 		return;
 	}
