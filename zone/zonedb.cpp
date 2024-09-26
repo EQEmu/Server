@@ -1672,6 +1672,17 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 }
 
 NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
+	auto caseInsensitiveFind = [](const std::string& haystack, const std::string& needle) {
+        std::string haystackLower = haystack;
+        std::string needleLower = needle;
+
+        // Convert both strings to lowercase
+        std::transform(haystackLower.begin(), haystackLower.end(), haystackLower.begin(), ::tolower);
+        std::transform(needleLower.begin(), needleLower.end(), needleLower.begin(), ::tolower);
+
+        return haystackLower.find(needleLower) != std::string::npos;
+    };
+
 	float level_size_scale = 1.0f + (npc->level / 50.0f);
     switch (npc->race) {
 		case Race::Human:
@@ -1785,6 +1796,9 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
             npc->race = Race::Wolf2;
             npc->gender = Gender::Neuter;
             npc->size *= level_size_scale;
+			if (!caseInsensitiveFind(npc->name, "Scaled") || !caseInsensitiveFind(npc->name, "Chokidai")) {
+				npc->race = Race::Chokidai;
+			}
             break;
 
 		case Race::Bear:
@@ -2062,6 +2076,10 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			npc->race = Race::Fiend;
 			break;
 
+		case Race::Sarnak:
+			npc->race = Race::Sarnak2;
+			break;
+
 		case Race::ForestGiant:
 			npc->race = Race::ForestGiant2;
 			npc->helmtexture = npc->texture;
@@ -2134,6 +2152,7 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 
 		case Race::IksarSpirit:
 			npc->race = Race::IksarGhost;
+			npc->gender = Gender::Neuter;
 			break;
 
 		case Race::Kerran:
