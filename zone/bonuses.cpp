@@ -1818,8 +1818,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			// I'd rather not do this here, but whatever, probably fine
 			if (IsClient()) {
 				auto client = CastToClient();
-				if (client->GetRawSkill(EQ::skills::SkillType::SkillForage) == 0)
+				if (client->GetRawSkill(EQ::skills::SkillType::SkillForage) == 0) {
 					client->SetSkill(EQ::skills::SkillType::SkillForage, 1);
+				} else {
+					new_bonus->RaiseSkillCap[EQ::skills::SkillForage] += 50;
+				}
 			}
 			break;
 
