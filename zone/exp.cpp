@@ -598,7 +598,7 @@ bool Client::ConsumeItemOnCursor() {
 	if (AddItemExperience(pow_item, ConsiderColor::Green)) {
 		return true;
 	} else {
-		PushItemOnCursor(save_item, true);
+		PushItemOnCursor(*save_item, true);
 	}
 
 	return false;
