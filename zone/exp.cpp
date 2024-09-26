@@ -590,10 +590,15 @@ bool Client::ConsumeItemOnCursor() {
 	pow_item->SetCustomData("Exp", fmt::to_string(new_experience));
 	database.UpdateInventorySlot(CharacterID(), pow_item, EQ::invslot::slotPowerSource);
 
+	auto save_item = m_inv.GetItem(EQ::invslot::slotCursor);
+
+	// Delete the item from the cursor
+	DeleteItemInInventory(EQ::invslot::slotCursor, 0, true, true);
+
 	if (AddItemExperience(pow_item, ConsiderColor::Green)) {
-		// Delete the item from the cursor
-		DeleteItemInInventory(EQ::invslot::slotCursor, 0, true, true);
 		return true;
+	} else {
+		PushItemOnCursor(save_item, true);
 	}
 
 	return false;
