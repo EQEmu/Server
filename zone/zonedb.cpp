@@ -1969,10 +1969,6 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			npc->race = Race::Mammoth2;
 			break;
 
-		case Race::ManEatingPlant:
-			npc->race = Race::VineMaw;
-			break;
-
 		case Race::Pegasus:
 			npc->race = Race::Pegasus2;
 			break;
