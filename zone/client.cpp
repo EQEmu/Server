@@ -4600,26 +4600,26 @@ std::string Client::GetDiscoverer(uint32 item_id) {
 }
 
 void Client::DiscoverItem(uint32 item_id) {
-	if (item_id < 3000000) {
-		auto e = DiscoveredItemsRepository::NewEntity();
 
-		e.account_status = GetSeason();
-		e.char_name = GetCleanName();
-		e.discovered_date = std::time(nullptr);
-		e.item_id = item_id;
-		auto d = DiscoveredItemsRepository::InsertOne(database, e);
+	auto e = DiscoveredItemsRepository::NewEntity();
 
-		if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
-			const auto* item = database.GetItem(item_id);
+	e.account_status = GetSeason();
+	e.char_name = GetCleanName();
+	e.discovered_date = std::time(nullptr);
+	e.item_id = item_id;
+	auto d = DiscoveredItemsRepository::InsertOne(database, e);
 
-			auto e = PlayerEvent::DiscoverItemEvent{
-				.item_id = item_id,
-				.item_name = item->Name,
-			};
-			RecordPlayerEventLog(PlayerEvent::DISCOVER_ITEM, e);
+	if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
+		const auto* item = database.GetItem(item_id);
 
-		}
+		auto e = PlayerEvent::DiscoverItemEvent{
+			.item_id = item_id,
+			.item_name = item->Name,
+		};
+		RecordPlayerEventLog(PlayerEvent::DISCOVER_ITEM, e);
+
 	}
+
 
 	if (parse->PlayerHasQuestSub(EVENT_DISCOVER_ITEM)) {
 		auto* item = database.CreateItem(item_id);

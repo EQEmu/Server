@@ -781,6 +781,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 	return true;
 }
 
+/*
 void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 	// Restore original item stats before building modified item
 	if (inst->GetOriginalID() != inst->GetID()) {
@@ -937,6 +938,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 		}
 	}
 }
+*/
 
 // Overloaded: Retrieve character inventory based on character id (zone entry)
 bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
