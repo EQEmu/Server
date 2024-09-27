@@ -1796,7 +1796,7 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
             npc->race = Race::Wolf2;
             npc->gender = Gender::Neuter;
             npc->size *= level_size_scale;
-			if (!caseInsensitiveFind(npc->name, "Scaled") || !caseInsensitiveFind(npc->name, "Chokidai")) {
+			if (caseInsensitiveFind(npc->name, "Scaled") || caseInsensitiveFind(npc->name, "Chokidai")) {
 				npc->race = Race::Chokidai;
 			}
             break;
