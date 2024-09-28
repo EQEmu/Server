@@ -12786,10 +12786,10 @@ const uint16 scan_npc_aggro_timer_moving = RuleI(Aggro, ClientAggroCheckMovingIn
 void Client::CheckClientToNpcAggroTimer()
 {
 	LogAggroDetail(
-	"ClientUpdate [{}] {}moving, scan timer [{}]",
-	GetCleanName(),
-	IsMoving() ? "" : "NOT ",
-	m_client_npc_aggro_scan_timer.GetRemainingTime()
+		"ClientUpdate [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		IsMoving() ? "" : "NOT ",
+		m_client_npc_aggro_scan_timer.GetRemainingTime()
 	);
 
 	if (IsMoving()) {
