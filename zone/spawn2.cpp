@@ -150,8 +150,9 @@ uint32 Spawn2::despawnTimer(uint32 despawn_timer)
 bool Spawn2::Process() {
 	IsDespawned = false;
 
-	if (!Enabled())
+	if (!Enabled()) {
 		return true;
+	}
 
 	//grab our spawn group
 	SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
@@ -230,6 +231,8 @@ bool Spawn2::Process() {
 				timer.Start(5000);    //try again in five seconds.
 				return (true);
 			}
+		} else {
+			LogDebug("Spawn [{}] has not triggered", spawn2_id);
 		}
 
 		bool ignore_despawn = false;
@@ -443,6 +446,12 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	timeval tv{};
 	gettimeofday(&tv, nullptr);
 
+	auto no_respawn = false;
+	if (RuleI(Custom, StaticInstanceVersion) == version) {
+		version = RuleI(Custom, StaticInstanceTemplateVersion);
+		no_respawn = true;
+	}
+
 	/* Bulk Load NPC Types Data into the cache */
 	content_db.LoadNPCTypesData(0, true);
 
@@ -480,6 +489,10 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 	std::vector<uint32> spawn2_ids;
 	for (auto &s: spawns) {
+		if (no_respawn) {
+			s.respawntime = 604800000; // arbitrary large number
+			s.variance = 0;
+		}
 		spawn2_ids.push_back(s.id);
 	}
 

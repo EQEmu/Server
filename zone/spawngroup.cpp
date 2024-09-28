@@ -165,6 +165,10 @@ void SpawnGroupList::ClearSpawnGroups()
 
 bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnGroupList *spawn_group_list)
 {
+	if (RuleI(Custom, StaticInstanceVersion) == version) {
+		version = RuleI(Custom, StaticInstanceTemplateVersion);
+	}
+
 	std::string query = fmt::format(
 		SQL(
 			SELECT
