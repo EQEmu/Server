@@ -1794,9 +1794,6 @@ public:
 
 	uint32 trapid; //ID of trap player has triggered. This is cleared when the player leaves the trap's radius, or it despawns.
 
-	void SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update);
-	glm::vec4 &GetLastPositionBeforeBulkUpdate();
-
 	Raid *p_raid_instance;
 
 	void ShowDevToolsMenu();
@@ -2034,7 +2031,7 @@ private:
 	Timer endupkeep_timer;
 	Timer autosave_timer;
 	Timer client_scan_npc_aggro_timer;
-	Timer client_zone_wide_full_position_update_timer;
+	Timer m_client_zone_wide_full_position_update_timer;
 	Timer tribute_timer;
 
 	Timer proximity_timer;
@@ -2051,8 +2048,7 @@ private:
 	Timer afk_toggle_timer;
 	Timer helm_toggle_timer;
 	Timer aggro_meter_timer;
-	Timer mob_close_scan_timer;
-	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
+	Timer m_position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
 	Timer dynamiczone_removal_timer;
 	Timer task_request_timer;
@@ -2065,7 +2061,7 @@ private:
 	int  m_lazy_load_sent_bank_slots = 0;
 
 	glm::vec3 m_Proximity;
-	glm::vec4 last_position_before_bulk_update;
+	glm::vec4 m_last_position_before_bulk_update;
 
 	void BulkSendInventoryItems();
 
@@ -2230,6 +2226,7 @@ private:
 public:
 	const std::string &GetMailKeyFull() const;
 	const std::string &GetMailKey() const;
+	void CheckSendBulkClientPositionUpdate();
 };
 
 #endif

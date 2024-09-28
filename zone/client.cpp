@@ -145,49 +145,48 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	0, // in_heroic_strikethrough
 	false // in_keeps_sold_items
 ),
-  hpupdate_timer(2000),
-  camp_timer(29000),
-  process_timer(100),
-  consume_food_timer(CONSUMPTION_TIMER),
-  zoneinpacket_timer(1000),
-  linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
-  dead_timer(2000),
-  global_channel_timer(1000),
-  fishing_timer(8000),
-  endupkeep_timer(1000),
-  autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
-  client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
-  client_zone_wide_full_position_update_timer(5 * 60 * 1000),
-  tribute_timer(Tribute_duration),
-  proximity_timer(ClientProximity_interval),
-  TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
-  charm_update_timer(6000),
-  rest_timer(1),
-  pick_lock_timer(1000),
-  charm_class_attacks_timer(3000),
-  charm_cast_timer(3500),
-  qglobal_purge_timer(30000),
-  TrackingTimer(2000),
-  RespawnFromHoverTimer(0),
-  merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
-  ItemQuestTimer(500),
-  anon_toggle_timer(250),
-  afk_toggle_timer(250),
-  helm_toggle_timer(250),
-  aggro_meter_timer(AGGRO_METER_UPDATE_MS),
-  m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
-	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f,-2.0f),
-  m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
-  m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
-  last_region_type(RegionTypeUnsupported),
-  m_dirtyautohaters(false),
-  mob_close_scan_timer(6000),
-  position_update_timer(10000),
-  consent_throttle_timer(2000),
-  tmSitting(0),
-  parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
-  lazy_load_bank_check_timer(1000),
-  bandolier_throttle_timer(0)
+	hpupdate_timer(2000),
+	camp_timer(29000),
+	process_timer(100),
+	consume_food_timer(CONSUMPTION_TIMER),
+	zoneinpacket_timer(1000),
+	linkdead_timer(RuleI(Zone, ClientLinkdeadMS)),
+	dead_timer(2000),
+	global_channel_timer(1000),
+	fishing_timer(8000),
+	endupkeep_timer(1000),
+	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
+	client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
+	m_client_zone_wide_full_position_update_timer(5 * 60 * 1000),
+	tribute_timer(Tribute_duration),
+	proximity_timer(ClientProximity_interval),
+	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
+	charm_update_timer(6000),
+	rest_timer(1),
+	pick_lock_timer(1000),
+	charm_class_attacks_timer(3000),
+	charm_cast_timer(3500),
+	qglobal_purge_timer(30000),
+	TrackingTimer(2000),
+	RespawnFromHoverTimer(0),
+	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
+	ItemQuestTimer(500),
+	anon_toggle_timer(250),
+	afk_toggle_timer(250),
+	helm_toggle_timer(250),
+	aggro_meter_timer(AGGRO_METER_UPDATE_MS),
+	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
+	m_ZoneSummonLocation(-2.0f, -2.0f, -2.0f, -2.0f),
+	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
+	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
+	last_region_type(RegionTypeUnsupported),
+	m_dirtyautohaters(false),
+	m_position_update_timer(10000),
+	consent_throttle_timer(2000),
+	tmSitting(0),
+	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
+	lazy_load_bank_check_timer(1000),
+	bandolier_throttle_timer(0)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);
@@ -446,7 +445,7 @@ Client::~Client() {
 		m_tradeskill_object = nullptr;
 	}
 
-	close_mobs.clear();
+	m_close_mobs.clear();
 
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());
@@ -9251,19 +9250,6 @@ bool Client::GotoPlayerRaid(const std::string& player_name)
 	}
 
 	return true;
-}
-
-glm::vec4 &Client::GetLastPositionBeforeBulkUpdate()
-{
-	return last_position_before_bulk_update;
-}
-
-/**
- * @param in_last_position_before_bulk_update
- */
-void Client::SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update)
-{
-	Client::last_position_before_bulk_update = in_last_position_before_bulk_update;
 }
 
 void Client::SendToGuildHall()

@@ -557,6 +557,7 @@ public:
 
 	bool CanPathTo(float x, float y, float z);
 
+	void DoNpcToNpcAggroScan();
 protected:
 
 	void HandleRoambox();

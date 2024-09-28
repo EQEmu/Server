@@ -128,8 +128,8 @@ Mob::Mob(
 	attack_anim_timer(500),
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
-	mob_close_scan_timer(6000),
-	mob_check_moving_timer(1000),
+	m_scan_close_mobs_timer(6000),
+	m_mob_check_moving_timer(1000),
 	bot_attack_flag_timer(10000)
 {
 	mMovementManager = &MobMovementManager::Get();
@@ -517,7 +517,7 @@ Mob::Mob(
 
 	m_manual_follow = false;
 
-	mob_close_scan_timer.Trigger();
+	m_scan_close_mobs_timer.Trigger();
 
 	SetCanOpenDoors(true);
 
@@ -570,7 +570,7 @@ Mob::~Mob()
 	entity_list.RemoveMobFromCloseLists(this);
 	entity_list.RemoveAuraFromMobs(this);
 
-	close_mobs.clear();
+	m_close_mobs.clear();
 
 	LeaveHealRotationTargetPool();
 }
@@ -8647,4 +8647,44 @@ bool Mob::HasBotAttackFlag(Mob* tar) {
 	}
 
 	return false;
+}
+
+const uint16 scan_close_mobs_timer_moving = 6000; // 6 seconds
+const uint16 scan_close_mobs_timer_idle   = 60000; // 60 seconds
+
+void Mob::CheckScanCloseMobsMovingTimer()
+{
+	LogAIScanCloseDetail(
+		"Mob [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		IsMoving() ? "" : "NOT ",
+		m_scan_close_mobs_timer.GetRemainingTime()
+	);
+
+	// If the moving timer triggers, lets see if we are moving or idle to restart the appropriate
+	// dynamic timer
+	if (m_mob_check_moving_timer.Check()) {
+		// If the mob is still moving, restart the moving timer
+		if (moving) {
+			if (m_scan_close_mobs_timer.GetRemainingTime() > scan_close_mobs_timer_moving) {
+				LogAIScanCloseDetail("Mob [{}] Restarting with moving timer", GetCleanName());
+				m_scan_close_mobs_timer.Disable();
+				m_scan_close_mobs_timer.Start(scan_close_mobs_timer_moving);
+				m_scan_close_mobs_timer.Trigger();
+			}
+		}
+		// If the mob is not moving, restart the idle timer
+		else if (m_scan_close_mobs_timer.GetDuration() == scan_close_mobs_timer_moving) {
+			LogAIScanCloseDetail("Mob [{}] Restarting with idle timer", GetCleanName());
+			m_scan_close_mobs_timer.Disable();
+			m_scan_close_mobs_timer.Start(scan_close_mobs_timer_idle);
+		}
+	}
+}
+
+void Mob::ScanCloseMobProcess()
+{
+	if (m_scan_close_mobs_timer.Check()) {
+		entity_list.ScanCloseMobs(this);
+	}
 }

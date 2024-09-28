@@ -2973,8 +2973,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
 
-		// entity_list.RemoveMobFromCloseLists(this);
-		close_mobs.clear();
+		m_close_mobs.clear();
 		SetID(0);
 		ApplyIllusionToCorpse(illusion_spell_id, corpse);
 

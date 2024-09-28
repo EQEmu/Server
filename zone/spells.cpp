@@ -7514,3 +7514,4 @@ bool Mob::CheckWaterLoS(Mob* m)
 		zone->watermap->InLiquid(m->GetPosition())
 	);
 }
+
