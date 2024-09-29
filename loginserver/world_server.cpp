@@ -1004,7 +1004,8 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_lo
 	}
 	if (version == cv_larion) {
 		auto server_id = GetServerId();
-		out.WriteUInt32(server_id);
+		//if this is 0, the client will not show the server in the list
+		out.WriteUInt32(1);
 		out.WriteUInt32(server_id);
 	}
 	else {
