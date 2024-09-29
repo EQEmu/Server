@@ -6176,9 +6176,7 @@ int32 Mob::GetPositionalDmgTakenAmt(Mob *attacker)
 
 void Mob::SetBottomRampageList()
 {
-	auto &mob_list = entity_list.GetCloseMobList(this);
-
-	for (auto &e : mob_list) {
+	for (auto &e : GetCloseMobList()) {
 		auto mob = e.second;
 		if (!mob) {
 			continue;
@@ -6203,9 +6201,7 @@ void Mob::SetBottomRampageList()
 
 void Mob::SetTopRampageList()
 {
-	auto &mob_list = entity_list.GetCloseMobList(this);
-
-	for (auto &e : mob_list) {
+	for (auto &e : GetCloseMobList()) {
 		auto mob = e.second;
 		if (!mob) {
 			continue;
@@ -8619,7 +8615,7 @@ void Mob::SetExtraHaste(int haste, bool need_to_save)
 
 bool Mob::IsCloseToBanker()
 {
-	for (auto &e: entity_list.GetCloseMobList(this)) {
+	for (auto &e: GetCloseMobList()) {
 		auto mob = e.second;
 		if (mob && mob->IsNPC() && mob->GetClass() == Class::Banker) {
 			return true;
@@ -8687,4 +8683,9 @@ void Mob::ScanCloseMobProcess()
 	if (m_scan_close_mobs_timer.Check()) {
 		entity_list.ScanCloseMobs(this);
 	}
+}
+
+std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
+{
+	return entity_list.GetCloseMobList(this, distance);
 }

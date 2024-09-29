@@ -4002,7 +4002,7 @@ void NPC::DescribeSpecialAbilities(Client* c)
 
 void NPC::DoNpcToNpcAggroScan()
 {
-	for (auto &close_mob : entity_list.GetCloseMobList(this, GetAggroRange())) {
+	for (auto &close_mob : GetCloseMobList(GetAggroRange())) {
 		Mob *mob = close_mob.second;
 		if (!mob) {
 			continue;

@@ -12811,7 +12811,7 @@ void Client::ClientToNpcAggroProcess()
 {
 	if (zone->CanDoCombat() && !GetFeigned() && m_client_npc_aggro_scan_timer.Check()) {
 		int npc_scan_count = 0;
-		for (auto &close_mob: entity_list.GetCloseMobList(this)) {
+		for (auto &close_mob: GetCloseMobList()) {
 			Mob *mob = close_mob.second;
 			if (!mob) {
 				continue;
