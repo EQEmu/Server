@@ -1379,7 +1379,7 @@ uint32 GetPlayerRaceValue(uint16 race_id) {
 	}
 }
 
-uint32 GetPlayerRaceBit(uint16 race_id) {
+uint16 GetPlayerRaceBit(uint16 race_id) {
 	switch (race_id) {
 		case HUMAN:
 			return PLAYER_RACE_HUMAN_BIT;

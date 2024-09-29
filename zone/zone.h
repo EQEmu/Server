@@ -125,6 +125,7 @@ public:
 	bool CanCastOutdoor() const { return (can_castoutdoor); } //qadar
 	bool CanDoCombat() const { return (can_combat); }
 	bool CanLevitate() const { return (can_levitate); } // Magoth78
+	bool IsWaterZone(float z);
 	bool Depop(bool StartSpawnTimer = false);
 	bool did_adventure_actions;
 	bool GetAuth(
@@ -334,7 +335,7 @@ public:
 	bool IsQuestHotReloadQueued() const;
 	void SetQuestHotReloadQueued(bool in_quest_hot_reload_queued);
 
-	bool CompareDataBucket(uint8 bucket_comparison, const std::string& bucket_value, const std::string& player_value);
+	bool CompareDataBucket(uint8 comparison_type, const std::string& bucket, const std::string& value);
 
 	WaterMap *watermap;
 	ZonePoint *GetClosestZonePoint(const glm::vec3 &location, uint32 to, Client *client, float max_distance = 40000.0f);

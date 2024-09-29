@@ -59,7 +59,7 @@ EQ::Net::WebsocketLoginStatus CheckLogin(
 
 	ret.account_name = database.GetAccountName(static_cast<uint32>(ret.account_id));
 	ret.logged_in    = true;
-	ret.status       = database.CheckStatus(ret.account_id);
+	ret.status       = database.GetAccountStatus(ret.account_id);
 	return ret;
 }
 
@@ -651,7 +651,6 @@ Json::Value ApiGetClientListDetail(EQ::Net::WebsocketServerConnection *connectio
 		row["base_wis"]                                = client->GetBaseWIS();
 		row["become_npc_level"]                        = client->GetBecomeNPCLevel();
 		row["boat_id"]                                 = client->GetBoatID();
-		row["buyer_welcome_message"]                   = client->GetBuyerWelcomeMessage();
 		row["calc_atk"]                                = client->CalcATK();
 		row["calc_base_mana"]                          = client->CalcBaseMana();
 		row["calc_current_weight"]                     = client->CalcCurrentWeight();

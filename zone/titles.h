@@ -57,6 +57,7 @@ public:
 	void CreateNewPlayerTitle(Client *client, std::string title);
 	void CreateNewPlayerSuffix(Client *client, std::string suffix);
 	bool HasTitle(Client* client, uint32 title_id);
+	inline const std::vector<TitleEntry>& GetTitles() { return titles; }
 
 protected:
 	std::vector<TitleEntry> titles;

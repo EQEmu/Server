@@ -37,6 +37,7 @@ void SendGuildSubCommands(Client *c);
 void SendShowInventorySubCommands(Client *c);
 void SendFixMobSubCommands(Client *c);
 void SendDataBucketsSubCommands(Client *c);
+void SendParcelsSubCommands(Client *c);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);
@@ -86,6 +87,7 @@ void command_find(Client *c, const Seperator *sep);
 void command_fish(Client* c, const Seperator* sep);
 void command_fixmob(Client *c, const Seperator *sep);
 void command_flagedit(Client *c, const Seperator *sep);
+void command_fleeinfo(Client *c, const Seperator *sep);
 void command_forage(Client* c, const Seperator* sep);
 void command_gearup(Client *c, const Seperator *sep);
 void command_giveitem(Client *c, const Seperator *sep);
@@ -135,6 +137,7 @@ void command_nukebuffs(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
 void command_object(Client *c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
+void command_parcels(Client *c, const Seperator *sep);
 void command_path(Client *c, const Seperator *sep);
 void command_peqzone(Client *c, const Seperator *sep);
 void command_petitems(Client *c, const Seperator *sep);

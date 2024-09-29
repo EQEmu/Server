@@ -60,7 +60,7 @@ struct EQ::Net::ConsoleLoginStatus CheckLogin(const std::string &username, const
 	const std::string& account_name = database.GetAccountName(ret.account_id);
 
 	ret.account_name = account_name;
-	ret.status       = database.CheckStatus(ret.account_id);
+	ret.status       = database.GetAccountStatus(ret.account_id);
 	return ret;
 }
 
@@ -918,6 +918,8 @@ void ConsoleReloadWorld(
 	safe_delete(pack);
 }
 
+auto debounce_reload = std::chrono::system_clock::now();
+
 /**
  * @param connection
  * @param command
@@ -933,6 +935,14 @@ void ConsoleReloadZoneQuests(
 		connection->SendLine("[zone_short_name] required as argument");
 		return;
 	}
+
+	// if now is within 1 second, return
+	if (std::chrono::system_clock::now() - debounce_reload < std::chrono::seconds(1)) {
+		debounce_reload = std::chrono::system_clock::now();
+		return;
+	}
+
+	debounce_reload = std::chrono::system_clock::now();
 
 	std::string zone_short_name = args[0];
 

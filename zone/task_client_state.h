@@ -45,7 +45,8 @@ public:
 	void AcceptNewTask(Client *client, int task_id, int npc_type_id, time_t accept_time, bool enforce_level_requirement = false);
 	void FailTask(Client *client, int task_id);
 	int TaskTimeLeft(int task_id);
-	int IsTaskCompleted(int task_id);
+	bool IsTaskCompleted(int task_id);
+	bool AreTasksCompleted(const std::vector<int>& task_ids);
 	bool IsTaskActive(int task_id);
 	bool IsTaskActivityActive(int task_id, int activity_id);
 	ActivityState GetTaskActivityState(TaskType task_type, int index, int activity_id);

@@ -118,6 +118,8 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	mana_regen = CalcManaRegen();
 	end_regen = CalcEnduranceRegen();
 
+	SetExtraHaste(database.botdb.GetBotExtraHasteByID(GetBotID()), false);
+
 	strcpy(name, GetCleanName());
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
 }
@@ -202,7 +204,7 @@ Bot::Bot(
 		);
 	}
 
-	SetTaunting((GetClass() == Class::Warrior || GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight) && (GetBotStance() == EQ::constants::stanceAggressive));
+	SetTaunting((GetClass() == Class::Warrior || GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight) && (GetBotStance() == Stance::Aggressive));
 	SetPauseAI(false);
 
 	m_auto_defend_timer.Disable();
@@ -445,6 +447,8 @@ Bot::Bot(
 	}
 
 	cur_end = max_end;
+
+	SetExtraHaste(database.botdb.GetBotExtraHasteByID(GetBotID()), false);
 }
 
 Bot::~Bot() {
@@ -648,7 +652,7 @@ NPCType *Bot::FillNPCTypeStruct(
 	n->race = botRace;
 	n->class_ = botClass;
 	n->bodytype = 1;
-	n->deity = EQ::deity::DeityAgnostic;
+	n->deity = Deity::Agnostic1;
 	n->level = botLevel;
 	n->npc_spells_id = botSpellsID;
 	n->AC = ac;
@@ -708,7 +712,7 @@ NPCType *Bot::CreateDefaultNPCTypeStructForBot(
 	n->race = botRace;
 	n->class_ = botClass;
 	n->bodytype = 1;
-	n->deity = EQ::deity::DeityAgnostic;
+	n->deity = Deity::Agnostic1;
 	n->level = botLevel;
 	n->AC = 12;
 	n->ATK = 75;
@@ -1895,8 +1899,8 @@ void Bot::AI_Process()
 #define NOT_GUARDING (!GetGuardFlag())
 #define HOLDING (GetHoldFlag())
 #define NOT_HOLDING (!GetHoldFlag())
-#define PASSIVE (GetBotStance() == EQ::constants::stancePassive)
-#define NOT_PASSIVE (GetBotStance() != EQ::constants::stancePassive)
+#define PASSIVE (GetBotStance() == Stance::Passive)
+#define NOT_PASSIVE (GetBotStance() != Stance::Passive)
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 
@@ -2414,14 +2418,14 @@ bool Bot::TryPrimaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* p_item) {
 			}
 
 			if (GetAppearance() == eaDead) { return false; }
-			if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
+			if (GetSpecialAbility(SpecialAbility::TripleAttack) && CheckBotDoubleAttack(true)) {
 
 				Attack(tar, EQ::invslot::slotPrimary, true);
 			}
 
 			if (GetAppearance() == eaDead) { return false; }
 			// quad attack, does this belong here??
-			if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
+			if (GetSpecialAbility(SpecialAbility::QuadrupleAttack) && CheckBotDoubleAttack(true)) {
 				Attack(tar, EQ::invslot::slotPrimary, true);
 			}
 		}
@@ -4341,7 +4345,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	}
 }
 
-bool Bot::Death(Mob *killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by)
+bool Bot::Death(Mob *killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by, bool is_buff_tic)
 {
 	if (!NPC::Death(killer_mob, damage, spell_id, attack_skill)) {
 		return false;
@@ -5477,13 +5481,13 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 		if (!Result) {
 			if (caster->IsBot()) {
 				if (spells[spell_id].target_type == ST_Undead) {
-					if ((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Undead) && (GetBodyType() != BT_Vampire)) {
+					if ((GetBodyType() != BodyType::SummonedUndead) && (GetBodyType() != BodyType::Undead) && (GetBodyType() != BodyType::Vampire)) {
 						LogSpellsDetail("Bot's target is not an undead");
 						return true;
 					}
 				}
 				if (spells[spell_id].target_type == ST_Summoned) {
-					if ((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Summoned) && (GetBodyType() != BT_Summoned2) && (GetBodyType() != BT_Summoned3)) {
+					if ((GetBodyType() != BodyType::SummonedUndead) && (GetBodyType() != BodyType::Summoned) && (GetBodyType() != BodyType::Summoned2) && (GetBodyType() != BodyType::Summoned3)) {
 						LogSpellsDetail("Bot's target is not a summoned creature");
 						return true;
 					}
@@ -5631,7 +5635,7 @@ int32 Bot::GenerateBaseManaPoints()
 
 void Bot::GenerateSpecialAttacks() {
 	if (((GetClass() == Class::Monk) || (GetClass() == Class::Warrior) || (GetClass() == Class::Ranger) || (GetClass() == Class::Berserker))	&& (GetLevel() >= 60))
-		SetSpecialAbility(SPECATK_TRIPLE, 1);
+		SetSpecialAbility(SpecialAbility::TripleAttack, 1);
 }
 
 bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
@@ -6235,11 +6239,10 @@ int64 Bot::CalcMaxHP() {
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
 	bot_hp += itembonuses.heroic_max_hp;
-	nd += aabonuses.MaxHP;
+	nd += aabonuses.PercentMaxHPChange + spellbonuses.PercentMaxHPChange + itembonuses.PercentMaxHPChange;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
-	bot_hp += (spellbonuses.HP + aabonuses.HP);
+	bot_hp += (spellbonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange + itembonuses.FlatMaxHPChange);
 	bot_hp += GroupLeadershipAAHealthEnhancement();
-	bot_hp += (bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 	max_hp = bot_hp;
 	if (current_hp > max_hp)
 		current_hp = max_hp;
@@ -6909,16 +6912,16 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		if ((botCasterClass == Class::Paladin || botCasterClass == Class::Beastlord || botCasterClass == Class::Ranger) && (caster->HasGroup() || caster->IsRaidGrouped())) {
 			float hpRatioToHeal = 25.0f;
 			switch(caster->GetBotStance()) {
-			case EQ::constants::stanceReactive:
-			case EQ::constants::stanceBalanced:
+			case Stance::Reactive:
+			case Stance::Balanced:
 				hpRatioToHeal = 50.0f;
 				break;
-			case EQ::constants::stanceBurn:
-			case EQ::constants::stanceBurnAE:
+			case Stance::Burn:
+			case Stance::AEBurn:
 				hpRatioToHeal = 20.0f;
 				break;
-			case EQ::constants::stanceAggressive:
-			case EQ::constants::stanceEfficient:
+			case Stance::Aggressive:
+			case Stance::Efficient:
 			default:
 				hpRatioToHeal = 25.0f;
 				break;
@@ -7367,23 +7370,23 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 
 					LastCon = CurrentCon;
 					switch(CurrentCon) {
-						case CON_GREEN: {
+						case ConsiderColor::Green: {
 							WindowText += "<c \"#00FF00\">";
 							break;
 						}
-						case CON_LIGHTBLUE: {
+						case ConsiderColor::LightBlue: {
 							WindowText += "<c \"#8080FF\">";
 							break;
 						}
-						case CON_BLUE: {
+						case ConsiderColor::DarkBlue: {
 							WindowText += "<c \"#2020FF\">";
 							break;
 						}
-						case CON_YELLOW: {
+						case ConsiderColor::Yellow: {
 							WindowText += "<c \"#FFFF00\">";
 							break;
 						}
-						case CON_RED: {
+						case ConsiderColor::Red: {
 							WindowText += "<c \"#FF0000\">";
 							break;
 						}
@@ -7652,11 +7655,7 @@ bool Bot::HasOrMayGetAggro() {
 }
 
 void Bot::SetDefaultBotStance() {
-	EQ::constants::StanceType defaultStance = EQ::constants::stanceBalanced;
-	if (GetClass() == Class::Warrior)
-		defaultStance = EQ::constants::stanceAggressive;
-
-	_botStance = defaultStance;
+	_botStance = GetClass() == Class::Warrior ? Stance::Aggressive : Stance::Balanced;
 }
 
 void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
@@ -9230,4 +9229,4 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 
 }
 
-uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND] = { 0 };

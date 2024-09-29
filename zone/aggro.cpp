@@ -221,8 +221,8 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 	if (RuleB(Aggro, UseLevelAggro)) {
 		if (
 			GetLevel() < RuleI(Aggro, MinAggroLevel) &&
-			mob->GetLevelCon(GetLevel()) == CON_GRAY &&
-			GetBodyType() != BT_Undead &&
+			mob->GetLevelCon(GetLevel()) == ConsiderColor::Gray &&
+			GetBodyType() != BodyType::Undead &&
 			!AlwaysAggro()
 		) {
 			to_who->Message(
@@ -237,7 +237,7 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 	} else {
 		if (
 			GetINT() > RuleI(Aggro, IntAggroThreshold) &&
-			mob->GetLevelCon(GetLevel()) == CON_GRAY &&
+			mob->GetLevelCon(GetLevel()) == ConsiderColor::Gray &&
 			!AlwaysAggro()
 		) {
 			to_who->Message(
@@ -412,13 +412,13 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		(
 			!RuleB(Aggro, AggroPlayerPets) ||
 			pet_owner->CastToClient()->GetGM() ||
-			mob->GetSpecialAbility(IMMUNE_AGGRO)
+			mob->GetSpecialAbility(SpecialAbility::AggroImmunity)
 		)
 	) {
 		return false;
 	}
 
-	if (IsNPC() && mob->IsNPC() && mob->GetSpecialAbility(IMMUNE_AGGRO_NPC)) {
+	if (IsNPC() && mob->IsNPC() && mob->GetSpecialAbility(SpecialAbility::NPCAggroImmunity)) {
 		return false;
 	}
 
@@ -453,7 +453,25 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	}
 
 	// Don't aggro new clients if we are already engaged unless PROX_AGGRO is set
-	if (IsEngaged() && (!GetSpecialAbility(PROX_AGGRO) || (GetSpecialAbility(PROX_AGGRO) && !CombatRange(mob)))) {
+	// Frustrated mobs (all rooted up with no one to kill)
+	// will engage without PROX_AGGRO ability if someone new is close now.
+
+	const bool is_frustrated = IsRooted() && !CombatRange(target);
+
+	if (
+		!is_frustrated &&
+		IsEngaged() &&
+		(
+			(
+				!GetSpecialAbility(SpecialAbility::ProximityAggro) &&
+				GetBodyType() != BodyType::Undead
+			) ||
+			(
+				GetSpecialAbility(SpecialAbility::ProximityAggro) &&
+				!CombatRange(mob)
+			)
+		)
+	) {
 		LogAggro(
 			"[{}] is in combat, and does not have prox_aggro, or does and is out of combat range with [{}]",
 			GetName(),
@@ -496,13 +514,13 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		RuleB(Aggro, UseLevelAggro) &&
 		(
 			GetLevel() >= RuleI(Aggro, MinAggroLevel) ||
-			GetBodyType() == BT_Undead ||
+			GetBodyType() == BodyType::Undead ||
 			AlwaysAggro() ||
 			(
 				mob->IsClient() &&
 				mob->CastToClient()->IsSitting()
 			) ||
-			mob->GetLevelCon(GetLevel()) != CON_GRAY
+			mob->GetLevelCon(GetLevel()) != ConsiderColor::Gray
 		) &&
 		(
 			faction_value == FACTION_SCOWLS ||
@@ -524,14 +542,14 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	} else {
 		if (
 			(
-				(RuleB(Aggro, UndeadAlwaysAggro) && GetBodyType() == BT_Undead) ||
+				(RuleB(Aggro, UndeadAlwaysAggro) && GetBodyType() == BodyType::Undead) ||
 				(GetINT() <= RuleI(Aggro, IntAggroThreshold)) ||
 				AlwaysAggro() ||
 				(
 					mob->IsClient() &&
 					mob->CastToClient()->IsSitting()
 				) ||
-				mob->GetLevelCon(GetLevel()) != CON_GRAY
+				mob->GetLevelCon(GetLevel()) != ConsiderColor::Gray
 			) &&
 			(
 				faction_value == FACTION_SCOWLS	||
@@ -564,6 +582,76 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	return false;
 }
 
+int EntityList::FleeAllyCount(Mob* attacker, Mob* skipped)
+{
+	// Return a list of how many NPCs of the same faction or race are within aggro range of the given exclude Mob.
+	if (!attacker) {
+		return 0;
+	}
+
+	int count = 0;
+
+	for (const auto& e : npc_list) {
+		NPC* n = e.second;
+		if (!n || n == skipped) {
+			continue;
+		}
+
+		float       aggro_range  = n->GetAggroRange();
+		const float assist_range = n->GetAssistRange();
+
+		if (assist_range > aggro_range) {
+			aggro_range = assist_range;
+		}
+
+		// Square it because we will be using DistNoRoot
+		aggro_range *= aggro_range;
+
+		if (DistanceSquared(n->GetPosition(), skipped->GetPosition()) > aggro_range) {
+			continue;
+		}
+
+		const auto& excluded = Strings::Split(RuleS(Aggro, ExcludedFleeAllyFactionIDs));
+
+		const auto& f = std::find_if(
+			excluded.begin(),
+			excluded.end(),
+			[&](std::string x) {
+				return Strings::ToUnsignedInt(x) == skipped->GetPrimaryFaction();
+			}
+		);
+
+		const bool is_excluded = f != excluded.end();
+
+		// If exclude doesn't have a faction, check for buddies based on race.
+		// Also exclude common factions such as noob monsters, indifferent, kos, kos animal
+		if (!is_excluded) {
+			if (n->GetPrimaryFaction() != skipped->GetPrimaryFaction()) {
+				continue;
+			}
+		} else {
+			if (n->GetBaseRace() != skipped->GetBaseRace() || n->IsCharmedPet()) {
+				continue;
+			}
+		}
+
+		LogFleeDetail(
+		"[{}] on faction [{}] with aggro_range [{}] is at [{}], [{}], [{}] and will count as an ally for [{}]",
+		n->GetName(),
+		n->GetPrimaryFaction(),
+		aggro_range,
+		n->GetX(),
+		n->GetY(),
+		n->GetZ(),
+		skipped->GetName()
+		);
+
+		++count;
+	}
+
+	return count;
+}
+
 int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 {
 	// Return a list of how many non-feared, non-mezzed, non-green mobs, within aggro range, hate *attacker
@@ -586,7 +674,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 			continue;
 		}
 
-		if (!inc_gray_con && attacker->GetLevelCon(mob->GetLevel()) == CON_GRAY) {
+		if (!inc_gray_con && attacker->GetLevelCon(mob->GetLevel()) == ConsiderColor::Gray) {
 			continue;
 		}
 
@@ -634,19 +722,19 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return true;
 	}
 
-	if (target->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
+	if (target->GetSpecialAbility(SpecialAbility::HarmFromClientImmunity)) {
 		return false;
 	}
 
-	if (IsBot() && target->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
+	if (IsBot() && target->GetSpecialAbility(SpecialAbility::BotDamageImmunity)) {
 		return false;
 	}
 
-	if (IsClient() && target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT)) {
+	if (IsClient() && target->GetSpecialAbility(SpecialAbility::ClientDamageImmunity)) {
 		return false;
 	}
 
-	if (IsNPC() && target->GetSpecialAbility(IMMUNE_DAMAGE_NPC)) {
+	if (IsNPC() && target->GetSpecialAbility(SpecialAbility::NPCDamageImmunity)) {
 		return false;
 	}
 
@@ -671,9 +759,9 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		target_owner = nullptr;
 
 	//cannot hurt untargetable mobs
-	bodyType bt = target->GetBodyType();
+	uint8 bt = target->GetBodyType();
 
-	if(bt == BT_NoTarget || bt == BT_NoTarget2) {
+	if(bt == BodyType::NoTarget || bt == BodyType::NoTarget2) {
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
 			if (target->IsNPC()) {
 				if (!target->CastToNPC()->GetSwarmOwner()) {
@@ -1053,13 +1141,13 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 	float _zDist = m_Position.z - other->GetZ();
 	_zDist *= _zDist;
 
-	if (GetSpecialAbility(NPC_CHASE_DISTANCE)) {
+	if (GetSpecialAbility(SpecialAbility::NPCChaseDistance)) {
 
 		bool DoLoSCheck = true;
-		float max_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 0));
-		float min_distance = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 1));
+		float max_dist = static_cast<float>(GetSpecialAbilityParam(SpecialAbility::NPCChaseDistance, 0));
+		float min_distance = static_cast<float>(GetSpecialAbilityParam(SpecialAbility::NPCChaseDistance, 1));
 
-		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2)) {
+		if (GetSpecialAbilityParam(SpecialAbility::NPCChaseDistance, 2)) {
 			DoLoSCheck = false; //Ignore line of sight check
 		}
 

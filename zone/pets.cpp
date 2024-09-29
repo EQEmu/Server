@@ -306,7 +306,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		if (activiate_pet){
 			npc->AddToHateList(m_target, 1);
 			npc->SetPetTargetLockID(m_target->GetID());
-			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+			npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
 		}
 		else {
 			npc->CastSpell(SPELL_UNSUMMON_SELF, npc->GetID()); //Live like behavior, damages self for 20K
@@ -383,7 +383,7 @@ bool ZoneDatabase::GetPetEntry(const std::string& pet_type, PetRecord *p)
 bool ZoneDatabase::GetPoweredPetEntry(const std::string& pet_type, int16 pet_power, PetRecord* r)
 {
 	const auto& l = PetsRepository::GetWhere(
-		*this,
+		content_db,
 		fmt::format(
 			"`type` = '{}' AND `petpower` <= {} ORDER BY `petpower` DESC LIMIT 1",
 			pet_type,
@@ -395,7 +395,7 @@ bool ZoneDatabase::GetPoweredPetEntry(const std::string& pet_type, int16 pet_pow
 		return false;
 	}
 
-	auto e = l.front();
+	auto &e = l.front();
 
 	r->npc_type     = e.npcID;
 	r->temporary    = e.temp;

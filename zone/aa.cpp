@@ -167,7 +167,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
 				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
-				swarm_pet_npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
 			}
 			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
@@ -272,7 +272,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
 				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
-				swarm_pet_npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
 			}
 			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
@@ -401,7 +401,7 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *tar, uint32 d
 		made_npc->npc_spells_id = 7;
 		break;
 	case Class::Paladin:
-		//SPECATK_TRIPLE
+		//SpecialAbility::TripleAttack
 		strcpy(made_npc->special_abilities, "6,1");
 		made_npc->current_hp = made_npc->current_hp * 150 / 100;
 		made_npc->max_hp = made_npc->max_hp * 150 / 100;
@@ -518,7 +518,7 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *tar, uint32 d
 
 void Client::ResetAA()
 {
-	SendClearAA();
+	SendClearPlayerAA();
 	RefundAA();
 
 	memset(&m_pp.aa_array[0], 0, sizeof(AA_Array) * MAX_PP_AA_ARRAY);
@@ -540,6 +540,13 @@ void Client::ResetAA()
 		++slot_id;
 	}
 
+	database.DeleteCharacterAAs(CharacterID());
+}
+
+void Client::ResetLeadershipAA()
+{
+	SendClearLeadershipAA();
+
 	for (int slot_id = 0; slot_id < _maxLeaderAA; ++slot_id) {
 		m_pp.leader_abilities.ranks[slot_id] = 0;
 	}
@@ -549,14 +556,7 @@ void Client::ResetAA()
 	m_pp.group_leadership_exp    = 0;
 	m_pp.raid_leadership_exp     = 0;
 
-	database.DeleteCharacterAAs(CharacterID());
 	database.DeleteCharacterLeadershipAbilities(CharacterID());
-}
-
-void Client::SendClearAA()
-{
-	SendClearLeadershipAA();
-	SendClearPlayerAA();
 }
 
 void Client::SendClearPlayerAA()
@@ -2178,19 +2178,24 @@ void Client::AutoGrantAAPoints() {
 		}
 	}
 
-	SendClearAA();
+	SendClearLeadershipAA();
+	SendClearPlayerAA();
 	SendAlternateAdvancementTable();
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
 }
 
-void Client::GrantAllAAPoints(uint8 unlock_level)
+void Client::GrantAllAAPoints(uint8 unlock_level, bool skip_grant_only)
 {
 	//iterate through every AA
 	for (auto& aa : zone->aa_abilities) {
 		AA::Ability* ability = aa.second.get();
 
 		if (ability->charges > 0) {
+			continue;
+		}
+
+		if (ability->grant_only && skip_grant_only) {
 			continue;
 		}
 
@@ -2211,7 +2216,8 @@ void Client::GrantAllAAPoints(uint8 unlock_level)
 	}
 
 	SaveAA();
-	SendClearAA();
+	SendClearLeadershipAA();
+	SendClearPlayerAA();
 	SendAlternateAdvancementTable();
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();

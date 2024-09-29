@@ -419,7 +419,7 @@ void ClientTaskState::RecordCompletedTask(uint32_t character_id, const TaskInfor
 			[&](const CompletedTaskInformation& completed) { return completed.task_id == client_task.task_id; }
 		), m_completed_tasks.end());
 
-		size_t erased = m_completed_tasks.size() - before;
+		size_t erased = before - m_completed_tasks.size();
 
 		LogTasksDetail("KeepOneRecord erased [{}] elements", erased);
 
@@ -869,7 +869,12 @@ int ClientTaskState::IncrementDoneCount(
 	if (task_data->type != TaskType::Shared) {
 		// live messages for each increment of non-shared tasks
 		auto activity_type = task_data->activity_information[activity_id].activity_type;
-		int msg_count = activity_type == TaskActivityType::GiveCash ? 1 : count;
+		int msg_count = 1;
+
+		if (activity_type != TaskActivityType::GiveCash) {
+			msg_count = std::min(count, RuleI(TaskSystem, MaxUpdateMessages));
+		}
+
 		for (int i = 0; i < msg_count; ++i) {
 			client->MessageString(Chat::DefaultText, TASK_UPDATED, task_data->title.c_str());
 		}
@@ -1091,14 +1096,14 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 
 	auto experience_reward = ti->experience_reward;
 	if (experience_reward > 0) {
-		c->AddEXP(experience_reward);
+		c->AddEXP(ExpSource::Task, experience_reward);
 	} else if (experience_reward < 0) {
 		uint32 pos_reward = experience_reward * -1;
 		// Minimal Level Based Exp reward Setting is 101 (1% exp at level 1)
 		if (pos_reward > 100 && pos_reward < 25700) {
 			uint8 max_level   = pos_reward / 100;
 			uint8 exp_percent = pos_reward - (max_level * 100);
-			c->AddLevelBasedExp(exp_percent, max_level, RuleB(TaskSystem, ExpRewardsIgnoreLevelBasedEXPMods));
+			c->AddLevelBasedExp(ExpSource::Task, exp_percent, max_level, RuleB(TaskSystem, ExpRewardsIgnoreLevelBasedEXPMods));
 		}
 	}
 
@@ -1578,25 +1583,35 @@ int ClientTaskState::TaskTimeLeft(int task_id)
 	return -1;
 }
 
-int ClientTaskState::IsTaskCompleted(int task_id)
+bool ClientTaskState::IsTaskCompleted(int task_id)
 {
-
-	// Returns:	-1 if RecordCompletedTasks is not true
-	//		+1 if the task has been completed
-	//		0 if the task has not been completed
-
-	if (!(RuleB(TaskSystem, RecordCompletedTasks))) {
-		return -1;
+	if (!RuleB(TaskSystem, RecordCompletedTasks)) {
+		return false;
 	}
 
-	for (auto &completed_task : m_completed_tasks) {
-		LogTasks("Comparing completed task [{}] with [{}]", completed_task.task_id, task_id);
-		if (completed_task.task_id == task_id) {
-			return 1;
+	for (const auto& e : m_completed_tasks) {
+		LogTasks("Comparing completed task [{}] with [{}]", e.task_id, task_id);
+		if (e.task_id == task_id) {
+			return true;
 		}
 	}
 
-	return 0;
+	return false;
+}
+
+bool ClientTaskState::AreTasksCompleted(const std::vector<int>& task_ids)
+{
+	if (!RuleB(TaskSystem, RecordCompletedTasks)) {
+		return false;
+	}
+
+	for (const auto& e : task_ids) {
+		if (!IsTaskCompleted(e)) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool ClientTaskState::TaskOutOfTime(TaskType task_type, int index)

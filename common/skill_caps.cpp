@@ -1,4 +1,14 @@
 #include "skill_caps.h"
+#include "timer.h"
+
+// cache the skill cap max level in the database
+std::map<uint8_t, int32_t> skill_max_level = {};
+
+uint8 skill_cap_max_level = (
+	RuleI(Character, SkillCapMaxLevel) > 0 ?
+		RuleI(Character, SkillCapMaxLevel) :
+		RuleI(Character, MaxLevel)
+);
 
 SkillCaps *SkillCaps::SetContentDatabase(Database *db)
 {
@@ -7,26 +17,38 @@ SkillCaps *SkillCaps::SetContentDatabase(Database *db)
 	return this;
 }
 
+int32_t SkillCaps::GetSkillCapMaxLevel(uint8 class_id, EQ::skills::SkillType skill_id)
+{
+	// pull the max value defined in the database if it exists
+	auto it = skill_max_level.find((class_id * 1000000) + skill_id);
+	if (it != skill_max_level.end()) {
+		return it->second;
+	}
+
+	return skill_cap_max_level;
+}
+
 SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
 {
-	if (!IsPlayerClass(class_id)) {
+	if (!IsPlayerClass(class_id) || static_cast<uint32>(skill_id) > EQ::skills::HIGHEST_SKILL + 1) {
 		return SkillCapsRepository::NewEntity();
 	}
 
-	for (const auto &e: m_skill_caps) {
-		if (
-			e.class_id == class_id &&
-			e.level == level &&
-			static_cast<EQ::skills::SkillType>(e.skill_id) == skill_id
-			) {
-			return e;
-		}
+	const uint8 max_level = GetSkillCapMaxLevel(class_id, skill_id);
+	if (level > max_level) {
+		level = max_level;
+	}
+
+	const uint64_t key = (class_id * 1000000) + (level * 1000) + static_cast<uint32>(skill_id);
+	auto           pos = m_skill_caps.find(key);
+	if (pos != m_skill_caps.end()) {
+		return pos->second;
 	}
 
 	return SkillCapsRepository::NewEntity();
 }
 
-uint8 SkillCaps::GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
+uint8 SkillCaps::GetSkillTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
 {
 	if (
 		!IsPlayerClass(class_id) ||
@@ -36,23 +58,12 @@ uint8 SkillCaps::GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, u
 		return 0;
 	}
 
-	const uint8 skill_cap_max_level = (
-		RuleI(Character, SkillCapMaxLevel) > 0 ?
-			RuleI(Character, SkillCapMaxLevel) :
-			RuleI(Character, MaxLevel)
-	);
-
-	const uint8 max_level = level > skill_cap_max_level ? level : skill_cap_max_level;
-
-	for (const auto &e: m_skill_caps) {
-		for (uint8 current_level = 1; current_level <= max_level; current_level++) {
-			if (
-				e.class_id == class_id &&
-				static_cast<EQ::skills::SkillType>(e.skill_id) == skill_id &&
-				e.level == current_level
-				) {
-				return current_level;
-			}
+	const uint8    max_level = level > skill_cap_max_level ? level : skill_cap_max_level;
+	const uint64_t key       = (class_id * 1000000) + (level * 1000) + static_cast<uint32>(skill_id);
+	for (uint8 current_level = 1; current_level <= max_level; current_level++) {
+		auto pos = m_skill_caps.find(key);
+		if (pos != m_skill_caps.end()) {
+			return current_level;
 		}
 	}
 
@@ -63,7 +74,7 @@ void SkillCaps::LoadSkillCaps()
 {
 	const auto &l = SkillCapsRepository::All(*m_content_database);
 
-	m_skill_caps.reserve(l.size());
+	m_skill_caps.clear();
 
 	for (const auto &e: l) {
 		if (
@@ -74,7 +85,25 @@ void SkillCaps::LoadSkillCaps()
 			continue;
 		}
 
-		m_skill_caps.emplace_back(e);
+		const uint64_t key = (e.class_id * 1000000) + (e.level * 1000) + e.skill_id;
+		m_skill_caps[key] = e;
+
+		const int max_level_key = (e.class_id * 1000000) + e.skill_id;
+		auto      it            = skill_max_level.find(max_level_key);
+		if (it != skill_max_level.end()) {
+			// Key found, update the value if the new level is higher
+			if (e.level > it->second) {
+				it->second = e.level;
+			}
+			// we never want to exceed the defined rule skill cap max level
+			if (it->second > skill_cap_max_level) {
+				it->second = skill_cap_max_level;
+			}
+		}
+		else {
+			// Key not found, insert the new key-value pair
+			skill_max_level[max_level_key] = e.level;
+		}
 	}
 
 	LogInfo(

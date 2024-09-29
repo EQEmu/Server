@@ -31,6 +31,13 @@ IF (EQEMU_BUILD_STATIC)
 	ENDIF ()
 ENDIF (EQEMU_BUILD_STATIC)
 
+
+# Requires libgoogle-perftools-dev google-perftools packages for linux (debian)
+IF(EQEMU_ADD_PROFILER)
+	SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-as-needed,-lprofiler,--as-needed")
+ENDIF(EQEMU_ADD_PROFILER)
+
+
 IF(MSVC)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 	ADD_DEFINITIONS(-DNOMINMAX)

@@ -101,6 +101,7 @@ SET(zone_sources
     npc_scale_manager.cpp
     object.cpp
     oriented_bounding_box.cpp
+    parcels.cpp
     pathfinder_interface.cpp
     pathfinder_nav_mesh.cpp
     pathfinder_null.cpp

@@ -276,7 +276,7 @@ bool EQ::InventoryProfile::SwapItem(
 	SwapItemFailState &fail_state,
 	uint16 race_id,
 	uint8 class_id,
-	uint16 deity_id,
+	uint32 deity_id,
 	uint8 level
 ) {
 	fail_state = swapInvalid;
@@ -354,7 +354,7 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && source_item->Deity && !(deity::GetDeityBitmask((deity::DeityType)deity_id) & source_item->Deity)) {
+			if (deity_id && source_item->Deity && !(Deity::GetBitmask(deity_id) & source_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
 			}
@@ -380,7 +380,7 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && destination_item->Deity && !(deity::GetDeityBitmask((deity::DeityType)deity_id) & destination_item->Deity)) {
+			if (deity_id && destination_item->Deity && !(Deity::GetBitmask(deity_id) & destination_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
 			}
@@ -1742,4 +1742,69 @@ std::vector<uint32> EQ::InventoryProfile::GetAugmentIDsBySlotID(int16 slot_id)
 	}
 
 	return augments;
+}
+
+std::vector<int16> EQ::InventoryProfile::FindAllFreeSlotsThatFitItem(const EQ::ItemData *item_data)
+{
+	std::vector<int16> free_slots{};
+	for (int16         i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
+		if ((((uint64) 1 << i) & GetLookup()->PossessionsBitmask) == 0) {
+			continue;
+		}
+
+		EQ::ItemInstance *inv_item = GetItem(i);
+
+		if (!inv_item) {
+			// Found available slot in personal inventory
+			free_slots.push_back(i);
+		}
+
+		if (inv_item->IsClassBag() &&
+			EQ::InventoryProfile::CanItemFitInContainer(item_data, inv_item->GetItem())) {
+
+			int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(i, EQ::invbag::SLOT_BEGIN);
+			uint8 bag_size     = inv_item->GetItem()->BagSlots;
+
+			for (uint8 bag_slot = EQ::invbag::SLOT_BEGIN; bag_slot < bag_size; bag_slot++) {
+				auto bag_item = GetItem(base_slot_id + bag_slot);
+				if (!bag_item) {
+					// Found available slot within bag
+					free_slots.push_back(i);
+				}
+			}
+		}
+	}
+	return free_slots;
+}
+
+int16 EQ::InventoryProfile::FindFirstFreeSlotThatFitsItem(const EQ::ItemData *item_data)
+{
+	for (int16         i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
+		if ((((uint64) 1 << i) & GetLookup()->PossessionsBitmask) == 0) {
+			continue;
+		}
+
+		EQ::ItemInstance *inv_item = GetItem(i);
+
+		if (!inv_item) {
+			// Found available slot in personal inventory
+			return i;
+		}
+
+		if (inv_item->IsClassBag() &&
+			EQ::InventoryProfile::CanItemFitInContainer(item_data, inv_item->GetItem())) {
+
+			int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(i, EQ::invbag::SLOT_BEGIN);
+			uint8 bag_size     = inv_item->GetItem()->BagSlots;
+
+			for (uint8 bag_slot = EQ::invbag::SLOT_BEGIN; bag_slot < bag_size; bag_slot++) {
+				auto bag_item = GetItem(base_slot_id + bag_slot);
+				if (!bag_item) {
+					// Found available slot within bag
+					return base_slot_id + bag_slot;
+				}
+			}
+		}
+	}
+	return 0;
 }

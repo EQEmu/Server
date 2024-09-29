@@ -110,7 +110,7 @@ public:
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
-	void changedeity(int deity_id);
+	void changedeity(uint32 deity_id);
 	void exp(int amt);
 	void level(int newlevel);
 	void traindisc(uint32 discipline_tome_item_id);
@@ -121,7 +121,7 @@ public:
 	std::string getldonthemename(uint32 theme_id);
 	std::string getfactionname(int faction_id);
 	std::string getlanguagename(uint8 language_id);
-	std::string getbodytypename(uint32 bodytype_id);
+	std::string getbodytypename(uint8 body_type_id);
 	std::string getconsiderlevelname(uint8 consider_level);
 	void safemove();
 	void rain(int weather);
@@ -225,7 +225,8 @@ public:
 	void assigntask(int taskid, bool enforce_level_requirement = false);
 	void failtask(int taskid);
 	int tasktimeleft(int taskid);
-	int istaskcompleted(int taskid);
+	bool istaskcompleted(int task_id);
+	bool aretaskscompleted(const std::vector<int>& task_ids);
 	int enabledtaskcount(int taskset);
 	int firsttaskinset(int taskset);
 	int lasttaskinset(int taskset);
@@ -284,6 +285,7 @@ public:
 	void MovePCInstance(int zone_id, int instance_id, const glm::vec4& position);
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
+	std::string varlink(EQ::ItemInstance* inst);
 	std::string varlink(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false);
 	std::string getcharnamebyid(uint32 char_id);
 	uint32 getcharidbyname(const char* name);
@@ -353,6 +355,8 @@ public:
 	void SendChannelMessage(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
 	void SendChannelMessage(Client* from, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
 	void SendChannelMessage(Client* from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
+	std::string GetAutoLoginCharacterNameByAccountID(uint32 account_id);
+	bool SetAutoLoginCharacterNameByAccountID(uint32 account_id, const std::string& character_name);
 
 	Bot *GetBot() const;
 	Client *GetInitiator() const;

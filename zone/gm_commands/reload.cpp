@@ -29,6 +29,7 @@ void command_reload(Client *c, const Seperator *sep)
 	bool is_loot                 = !strcasecmp(sep->arg[1], "loot");
 	bool is_merchants            = !strcasecmp(sep->arg[1], "merchants");
 	bool is_npc_emotes           = !strcasecmp(sep->arg[1], "npc_emotes");
+	bool is_npc_spells           = !strcasecmp(sep->arg[1], "npc_spells");
 	bool is_objects              = !strcasecmp(sep->arg[1], "objects");
 	bool is_opcodes              = !strcasecmp(sep->arg[1], "opcodes") || is_opcodes_reload_alias;
 	bool is_perl_export          = !strcasecmp(sep->arg[1], "perl_export");
@@ -62,6 +63,7 @@ void command_reload(Client *c, const Seperator *sep)
 		!is_loot &&
 		!is_merchants &&
 		!is_npc_emotes &&
+		!is_npc_spells &&
 		!is_objects &&
 		!is_opcodes &&
 		!is_perl_export &&
@@ -137,6 +139,9 @@ void command_reload(Client *c, const Seperator *sep)
 	} else if (is_npc_emotes) {
 		c->Message(Chat::White, "Attempting to reload NPC Emotes globally.");
 		pack = new ServerPacket(ServerOP_ReloadNPCEmotes, 0);
+	} else if (is_npc_spells) {
+		c->Message(Chat::White, "Attempting to reload NPC Spells globally.");
+		pack = new ServerPacket(ServerOP_ReloadNPCSpells, 0);
 	} else if (is_objects) {
 		c->Message(Chat::White, "Attempting to reload Objects globally.");
 		pack = new ServerPacket(ServerOP_ReloadObjects, 0);

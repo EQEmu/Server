@@ -389,18 +389,17 @@ public:
 	/* Traders  */
 	void	SaveTraderItem(uint32 char_id,uint32 itemid,uint32 uniqueid, int32 charges,uint32 itemcost,uint8 slot);
 	void	UpdateTraderItemCharges(int char_id, uint32 ItemInstID, int32 charges);
-	void	UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charges, uint32 NewPrice);
+	void	UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 charges, uint32 new_price);
 	void	DeleteTraderItem(uint32 char_id);
 	void	DeleteTraderItem(uint32 char_id,uint16 slot_id);
 
-	EQ::ItemInstance* LoadSingleTraderItem(uint32 char_id, int uniqueid);
+	std::unique_ptr<EQ::ItemInstance> LoadSingleTraderItem(uint32 char_id, int serial_number);
 	Trader_Struct* LoadTraderItem(uint32 char_id);
 	TraderCharges_Struct* LoadTraderItemWithCharges(uint32 char_id);
 
 	/* Buyer/Barter  */
 	void AddBuyLine(uint32 CharID, uint32 BuySlot, uint32 ItemID, const char *ItemName, uint32 Quantity, uint32 Price);
 	void RemoveBuyLine(uint32 CharID, uint32 BuySlot);
-	void DeleteBuyLines(uint32 CharID);
 	void UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity);
 
 
@@ -437,7 +436,7 @@ public:
 	bool LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterData(uint32 character_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
-	bool LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp);
+	bool LoadCharacterDisciplines(Client* c);
 	bool LoadCharacterFactionValues(uint32 character_id, faction_map & val_list);
 	bool LoadCharacterLanguages(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp);
@@ -552,7 +551,7 @@ public:
 	uint32		NPCSpawnDB(uint8 command, const std::string& zone, uint32 instance_version, Client *c, NPC* n = 0, uint32 extra = 0); // 0 = Create 1 = Add; 2 = Update; 3 = Remove; 4 = Delete
 	uint32		CreateNewNPCCommand(const std::string& zone, uint32 instance_version, Client* c, NPC* n, uint32 extra);
 	uint32		AddNewNPCSpawnGroupCommand(const std::string& zone, uint32 instance_version, Client* c, NPC* n, uint32 in_respawn_time);
-	uint32		DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Client* c, NPC* n);
+	uint32		DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Client* c, NPC* n, uint32 remove_spawngroup_id);
 	uint32		DeleteSpawnRemoveFromNPCTypeTable(const std::string& zone, uint32 instance_version, Client* c, NPC* n);
 	uint32		AddSpawnFromSpawnGroup(const std::string& zone, uint32 instance_version, Client* c, NPC* n, uint32 spawngroup_id);
 	uint32		AddNPCTypes(const std::string& zone, uint32 instance_version, Client* c, NPC* n, uint32 spawngroup_id);
@@ -562,14 +561,11 @@ public:
 	bool		GetPoweredPetEntry(const std::string& pet_type, int16 pet_power, PetRecord* r);
 	bool		GetBasePetItems(int32 equipmentset, uint32 *items);
 	BeastlordPetData::PetStruct GetBeastlordPetData(uint16 race_id);
-	void		AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);
-	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* item_list, uint8 droplimit, uint8 mindrop);
-	uint32		GetMaxNPCSpellsID();
 	uint32		GetMaxNPCSpellsEffectsID();
 	bool GetAuraEntry(uint16 spell_id, AuraRecord &record);
 	void LoadGlobalLoot();
 
-	DBnpcspells_Struct*				GetNPCSpells(uint32 iDBSpellsID);
+	DBnpcspells_Struct*				GetNPCSpells(uint32 npc_spells_id);
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);

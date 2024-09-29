@@ -60,7 +60,7 @@
 	eq_struct *eq = (eq_struct *) __packet->pBuffer; \
 
 #define ALLOC_LEN_ENCODE(len) \
-	__packet->pBuffer = new unsigned char[len]; \
+	__packet->pBuffer = new unsigned char[len] {}; \
 	__packet->size = len; \
 	memset(__packet->pBuffer, 0, len); \
 
@@ -124,7 +124,7 @@
 #define SETUP_DIRECT_DECODE(emu_struct, eq_struct) \
 	unsigned char *__eq_buffer = __packet->pBuffer; \
 	__packet->size = sizeof(emu_struct); \
-	__packet->pBuffer = new unsigned char[__packet->size]; \
+	__packet->pBuffer = new unsigned char[__packet->size] {}; \
 	emu_struct *emu = (emu_struct *) __packet->pBuffer; \
 	eq_struct *eq = (eq_struct *) __eq_buffer;
 
@@ -133,7 +133,7 @@
 	eq_struct* in = (eq_struct*)__packet->pBuffer; \
 	auto size = strlen(in->var_field); \
 	__packet->size = sizeof(emu_struct) + size + 1; \
-	__packet->pBuffer = new unsigned char[__packet->size]; \
+	__packet->pBuffer = new unsigned char[__packet->size] {}; \
 	emu_struct *emu = (emu_struct *) __packet->pBuffer; \
 	eq_struct *eq = (eq_struct *) __eq_buffer;
 

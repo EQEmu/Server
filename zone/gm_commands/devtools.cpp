@@ -3,11 +3,19 @@
 
 void command_devtools(Client *c, const Seperator *sep)
 {
-	bool is_disable = !strcasecmp(sep->arg[1], "disable");
-	bool is_enable = !strcasecmp(sep->arg[1], "enable");
+	const uint16 arguments = sep->argnum;
+	if (arguments != 2) {
+		c->ShowDevToolsMenu();
+		return;
+	}
 
-	if (is_disable || is_enable) {
-		c->SetDevToolsEnabled(is_enable);
+	const std::string& type = sep->arg[1];
+	const bool toggle = Strings::ToBool(sep->arg[2]);
+
+	if (Strings::EqualFold(type, "menu")) {
+		c->SetDevToolsEnabled(toggle);
+	} else if (Strings::EqualFold(type, "window")) {
+		c->SetDisplayMobInfoWindow(toggle);
 	}
 
 	c->ShowDevToolsMenu();

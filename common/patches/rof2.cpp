@@ -356,41 +356,91 @@ namespace RoF2
 
 	ENCODE(OP_Barter)
 	{
-		EQApplicationPacket *in = *p;
+		EQApplicationPacket *in        = *p;
 		*p = nullptr;
 
-		char *Buffer = (char *)in->pBuffer;
+		char *buffer = (char *) in->pBuffer;
+		uint32              sub_action = VARSTRUCT_DECODE_TYPE(uint32, buffer);
 
-		uint32 SubAction = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
+		switch (sub_action) {
+			case Barter_BuyerAppearance: {
+				auto emu = (BuyerInspectRequest_Struct *) in->pBuffer;
 
-		if (SubAction != Barter_BuyerAppearance)
-		{
-			dest->FastQueuePacket(&in, ack_req);
+				auto outapp = new EQApplicationPacket(OP_Barter, sizeof(structs::Buyer_SetAppearance_Struct));
+				auto eq     = (structs::Buyer_SetAppearance_Struct *) outapp->pBuffer;
 
-			return;
+				eq->action    = structs::RoF2BuyerActions::BuyerAppearance;
+				eq->entity_id = emu->buyer_id;
+				eq->enabled   = emu->approval;
+
+				dest->FastQueuePacket(&outapp);
+				safe_delete(in);
+
+				break;
+			}
+			case Barter_BuyerItemRemove: {
+				auto emu = (BuyerRemoveItem_Struct *) in->pBuffer;
+
+				auto outapp = new EQApplicationPacket(OP_BuyerItems, sizeof(structs::BuyerRemoveItem_Struct));
+				auto eq     = (structs::BuyerRemoveItem_Struct *) outapp->pBuffer;
+
+				eq->action  = structs::RoF2BuyerActions::BuyerModifyBuyLine;
+				eq->slot_id = emu->buy_slot_id;
+				eq->toggle  = 0;
+
+				dest->FastQueuePacket(&outapp);
+				safe_delete(in);
+
+				break;
+			}
+			case Barter_BuyerInspectBegin: {
+				*(uint32 *) in->pBuffer = structs::RoF2BuyerActions::BuyerInspectBegin;
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			case Barter_BuyerInspectEnd: {
+				*(uint32 *) in->pBuffer = structs::RoF2BuyerActions::BuyerInspectEnd;
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			case Barter_SellerBrowsing: {
+				*(uint32 *) in->pBuffer = structs::RoF2BuyerActions::BuyerBrowsingBuyLine;
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			case Barter_BuyerSearchResults: {
+				BuyerItemSearchResults_Struct bisr{};
+				auto                          emu = (BuyerGeneric_Struct *) in->pBuffer;
+				EQ::Util::MemoryStreamReader  ss(
+					reinterpret_cast<char *>(emu->payload),
+					in->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive    ar(ss);
+				ar(bisr);
+
+				LogTradingDetail("Sending item search results <green>[{}]", bisr.result_count);
+
+				uint32 packet_size = bisr.result_count * sizeof(structs::BuyerItemSearchResultEntry_Struct) + 8;
+				auto   outapp      = std::make_unique<EQApplicationPacket>(OP_Barter, packet_size);
+				auto   eq          = (char *) outapp->pBuffer;
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::RoF2BuyerActions::BuyerSearchResults);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bisr.result_count);
+				for (auto const &i: bisr.results) {
+					strn0cpy(eq, i.item_name, 64);
+					eq += 64;
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_id);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_icon);
+					VARSTRUCT_SKIP_TYPE(uint32, eq);
+				}
+				dest->QueuePacket(outapp.get());
+				break;
+			}
+			default: {
+				LogTradingDetail("Unhandled action <red>[{}]", sub_action);
+				dest->FastQueuePacket(&in);
+			}
 		}
-
-		unsigned char *__emu_buffer = in->pBuffer;
-
-		in->size = 80;
-
-		in->pBuffer = new unsigned char[in->size];
-
-		char *OutBuffer = (char *)in->pBuffer;
-
-		char Name[64];
-
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, SubAction);
-		uint32 EntityID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, EntityID);
-		uint8 Toggle = VARSTRUCT_DECODE_TYPE(uint8, Buffer);
-		VARSTRUCT_DECODE_STRING(Name, Buffer);
-		VARSTRUCT_ENCODE_STRING(OutBuffer, Name);
-		OutBuffer = (char *)in->pBuffer + 72;
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, Toggle);
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_BazaarSearch)
@@ -398,51 +448,182 @@ namespace RoF2
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
-		char *Buffer = (char *)in->pBuffer;
+		uint32 action = *(uint32 *) in->pBuffer;
 
-		uint8 SubAction = VARSTRUCT_DECODE_TYPE(uint8, Buffer);
+		switch (action) {
+			case BazaarSearch: {
+				LogTrading("(RoF2) BazaarSearch action <green>[{}]", action);
+				std::vector<BazaarSearchResultsFromDB_Struct> results{};
+				auto                                          bsms = (BazaarSearchMessaging_Struct *) in->pBuffer;
+				EQ::Util::MemoryStreamReader                  ss(
+					reinterpret_cast<char *>(bsms->payload),
+					in->size - sizeof(BazaarSearchMessaging_Struct)
+				);
+				cereal::BinaryInputArchive                    ar(ss);
+				ar(results);
 
-		if (SubAction != BazaarSearchResults)
-		{
-			dest->FastQueuePacket(&in, ack_req);
-			return;
+				auto name_size = 0;
+				for (auto const &i: results) {
+					name_size += i.item_name.length() + 1;
+				}
+
+				auto p_size = 41 * results.size() + name_size + 14;
+				auto buffer = std::make_unique<char[]>(p_size);
+				auto bufptr = buffer.get();
+
+				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, 0);
+				VARSTRUCT_ENCODE_TYPE(uint16, bufptr, results[0].trader_zone_id);
+				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, results[0].trader_id);
+				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, results.size());
+
+				for (auto i: results) {
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.trader_id);                          //trader ID
+					VARSTRUCT_ENCODE_STRING(bufptr, i.serial_number_RoF.c_str());                //serial
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.cost);                               //cost
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.stackable ? i.charges : i.count);    //quantity
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.item_id);                            //ID
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.icon_id);                            //icon
+					VARSTRUCT_ENCODE_STRING(bufptr, i.item_name.c_str());                        //name
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.item_stat);                          //itemstat
+				}
+
+				safe_delete(in->pBuffer);
+				in->size    = p_size;
+				in->pBuffer = (uchar *) buffer.get();
+				dest->QueuePacket(in);
+
+				break;
+			}
+			case BazaarInspect: {
+				LogTrading("(RoF2) BazaarInspect action <green>[{}]", action);
+				dest->FastQueuePacket(&in, ack_req);
+				break;
+			}
+			case WelcomeMessage: {
+				auto buffer = std::make_unique<char[]>(sizeof(structs::BazaarWelcome_Struct));
+				auto emu    = (BazaarWelcome_Struct *) in->pBuffer;
+				auto eq     = (structs::BazaarWelcome_Struct *) buffer.get();
+
+				eq->action         = structs::RoF2BazaarTraderBuyerActions::WelcomeMessage;
+				eq->num_of_traders = emu->traders;
+				eq->num_of_items   = emu->items;
+
+				safe_delete(in->pBuffer);
+				in->SetOpcode(OP_TraderShop);
+				in->size    = sizeof(structs::BazaarWelcome_Struct);
+				in->pBuffer = (uchar *) buffer.get();
+
+				LogTrading("(RoF2) WelcomeMessage action <green>[{}]", action);
+				dest->QueuePacket(in);
+
+				break;
+			}
+			case DeliveryCostUpdate: {
+				auto data = (BazaarDeliveryCost_Struct *) in->pBuffer;
+				LogTrading("(RoF2) Delivery costs updated: vouchers <green>[{}] parcel percentage <green>[{}]",
+						   data->voucher_delivery_cost,
+						   data->parcel_deliver_cost
+				);
+				data->action = 0;
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			default: {
+				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
+				dest->FastQueuePacket(&in, ack_req);
+			}
 		}
+	}
 
-		unsigned char *__emu_buffer = in->pBuffer;
+	ENCODE(OP_BecomeTrader)
+	{
+		EQApplicationPacket *inapp = *p;
+		*p = nullptr;
 
-		BazaarSearchResults_Struct *emu = (BazaarSearchResults_Struct *)__emu_buffer;
+		unsigned char *__emu_buffer = inapp->pBuffer;
+		auto          in            = (BecomeTrader_Struct *) __emu_buffer;
 
-		int EntryCount = in->size / sizeof(BazaarSearchResults_Struct);
+		switch (in->action) {
+			case TraderOff: {
+				auto emu = (BecomeTrader_Struct *) __emu_buffer;
 
-		if (EntryCount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0)
-		{
-			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
-			delete in;
-			return;
+				auto outapp = new EQApplicationPacket(OP_BecomeTrader, sizeof(structs::BecomeTrader_Struct));
+				auto eq     = (structs::BecomeTrader_Struct *) outapp->pBuffer;
+
+				eq->action    = TraderOff;
+				eq->entity_id = emu->entity_id;
+
+				LogTrading(
+					"(RoF2) TraderOff action <green>[{}] for entity_id <green>[{}]",
+					eq->action,
+					eq->entity_id
+				);
+				dest->FastQueuePacket(&outapp);
+				break;
+			}
+			case TraderOn: {
+				auto emu = (BecomeTrader_Struct *) __emu_buffer;
+
+				auto outapp = new EQApplicationPacket(OP_BecomeTrader, sizeof(structs::BecomeTrader_Struct));
+				auto eq     = (structs::BecomeTrader_Struct *) outapp->pBuffer;
+
+				eq->action    = TraderOn;
+				eq->entity_id = emu->entity_id;
+
+				LogTrading(
+					"(RoF2) TraderOn action <green>[{}] for entity_id <green>[{}]",
+					eq->action,
+					eq->entity_id
+				);
+				dest->FastQueuePacket(&outapp);
+				break;
+			}
+			case AddTraderToBazaarWindow: {
+				auto emu    = (BecomeTrader_Struct *) __emu_buffer;
+				auto outapp = new EQApplicationPacket(OP_TraderShop, sizeof(BecomeTrader_Struct));
+				auto eq     = (BecomeTrader_Struct *) outapp->pBuffer;
+
+				eq->action    = emu->action;
+				eq->entity_id = emu->entity_id;
+				eq->trader_id = emu->trader_id;
+				eq->zone_id   = emu->zone_id;
+				strn0cpy(eq->trader_name, emu->trader_name, sizeof(eq->trader_name));
+
+				LogTrading(
+					"(RoF2) AddTraderToBazaarWindow action <green>[{}] trader_id <green>[{}] entity_id <green>[{}] zone_id <green>[{}]",
+					eq->action,
+					eq->trader_id,
+					eq->entity_id,
+					eq->zone_id
+				);
+				dest->FastQueuePacket(&outapp);
+				break;
+			}
+			case RemoveTraderFromBazaarWindow: {
+				auto emu    = (BecomeTrader_Struct *) __emu_buffer;
+				auto outapp = new EQApplicationPacket(OP_TraderShop, sizeof(structs::BazaarWindowRemoveTrader_Struct));
+				auto eq     = (structs::BazaarWindowRemoveTrader_Struct *) outapp->pBuffer;
+
+				eq->action    = emu->action;
+				eq->trader_id = emu->trader_id;
+
+				LogTrading(
+					"(RoF2) RemoveTraderFromBazaarWindow action <green>[{}] for entity_id <green>[{}]",
+					eq->action,
+					eq->trader_id
+				);
+				dest->FastQueuePacket(&outapp);
+				break;
+			}
+			default: {
+				LogTrading(
+					"(RoF2) Unhandled action <red>[{}]",
+					in->action
+				);
+				dest->QueuePacket(inapp);
+			}
 		}
-
-		in->size = EntryCount * sizeof(structs::BazaarSearchResults_Struct);
-		in->pBuffer = new unsigned char[in->size];
-
-		memset(in->pBuffer, 0, in->size);
-
-		structs::BazaarSearchResults_Struct *eq = (structs::BazaarSearchResults_Struct *)in->pBuffer;
-
-		for (int i = 0; i < EntryCount; ++i, ++emu, ++eq)
-		{
-			OUT(Beginning.Action);
-			OUT(SellerID);
-			memcpy(eq->SellerName, emu->SellerName, sizeof(eq->SellerName));
-			OUT(NumItems);
-			OUT(ItemID);
-			OUT(SerialNumber);
-			memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
-			OUT(Cost);
-			OUT(ItemStat);
-		}
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_BeginCast)
@@ -549,6 +730,243 @@ namespace RoF2
 		__packet->WriteUInt8(emu->type); // Unknown
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_BuyerItems)
+	{
+		EQApplicationPacket *inapp = *p;
+		*p = nullptr;
+
+		auto action = *(uint32 *) inapp->pBuffer;
+
+		switch (action) {
+			case Barter_BuyerItemUpdate: {
+				BuyerLineItems_Struct        bl{};
+				auto                         emu = (BuyerGeneric_Struct *) inapp->pBuffer;
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(emu->payload),
+					inapp->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(bl);
+
+				//packet size
+				auto            packet_size = bl.item_name.length() + 1 + 34;
+				for (auto const &b: bl.trade_items) {
+					packet_size += b.item_name.length() + 1;
+					packet_size += 12;
+				}
+
+				auto outapp         = std::make_unique<EQApplicationPacket>(OP_BuyerItems, packet_size);
+				char *eq            = (char *) outapp->pBuffer;
+				auto no_trade_items = bl.trade_items.size();
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::RoF2BuyerActions::BuyerModifyBuyLine);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.slot);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, bl.enabled ? 1 : 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.item_id);
+				VARSTRUCT_ENCODE_STRING(eq, bl.item_name.c_str());
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.item_icon);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.item_quantity);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, bl.item_toggle ? 1 : 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.item_cost);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, no_trade_items);
+
+				for (int i = 0; i < no_trade_items; i++) {
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.trade_items[i].item_id);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.trade_items[i].item_quantity);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, bl.trade_items[i].item_icon);
+					VARSTRUCT_ENCODE_STRING(eq, bl.trade_items[i].item_name.c_str());
+				}
+				dest->QueuePacket(outapp.get());
+				safe_delete(inapp);
+				break;
+			}
+			case Barter_BuyerInspectBegin: {
+				auto emu = (BuyerGeneric_Struct *) inapp->pBuffer;
+
+				BuyerLineItems_Struct        bli{};
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(emu->payload),
+					inapp->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(bli);
+
+				//packet size
+				auto            packet_size = bli.item_name.length() + 1 + 34;
+				for (auto const &b: bli.trade_items) {
+					packet_size += b.item_name.length() + 1;
+					packet_size += 12;
+				}
+
+				auto packet         = std::make_unique<EQApplicationPacket>(OP_BuyerItems, packet_size);
+				char *eq            = (char *) packet->pBuffer;
+				auto no_trade_items = bli.trade_items.size();
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::RoF2BuyerActions::BuyerSendBuyLine);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.slot);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.slot);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, bli.enabled ? 1 : 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.item_id);
+				VARSTRUCT_ENCODE_STRING(eq, bli.item_name.c_str());
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.item_icon);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.item_quantity);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, bli.item_toggle ? 1 : 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bli.item_cost);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, no_trade_items);
+
+				for (auto const &i: bli.trade_items) {
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_id);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_quantity);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_icon);
+					VARSTRUCT_ENCODE_STRING(eq, i.item_name.c_str());
+				}
+				dest->QueuePacket(packet.get());
+				safe_delete(inapp);
+
+				break;
+			}
+			case Barter_BuyerSearch: {
+				BuyerLineSearch_Struct       bls{};
+				auto                         emu = (BuyerGeneric_Struct *) inapp->pBuffer;
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(emu->payload),
+					inapp->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(bls);
+				LogTrading("(RoF2) Barter_BuyerSearch action <green>[{}]", emu->action);
+
+				//Calculate size of packet
+				auto p_size = 0;
+				p_size += 5 * sizeof(uint32) + 1 * sizeof(uint8);
+				p_size += bls.search_string.length() + 1;
+				for (auto const &b: bls.buy_line) {
+					p_size += 6 * sizeof(uint32) + 2 * sizeof(uint8);
+					p_size += strlen(b.item_name) + 1;
+					p_size += b.buyer_name.length() + 1;
+					for (auto const &d: b.trade_items) {
+						if (d.item_id != 0) {
+							p_size += d.item_name.length() + 1;
+							p_size += 3 * sizeof(uint32);
+						}
+					}
+					p_size += 3 * sizeof(uint32);
+				}
+
+				BuyerBuyLines_Struct bl{};
+				auto outapp = std::make_unique<EQApplicationPacket>(OP_BuyerItems, p_size);
+				auto eq     = (char *) outapp->pBuffer;
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 1);
+				VARSTRUCT_ENCODE_STRING(eq, bls.search_string.c_str());
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bls.transaction_id);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint8, eq, 1);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, bls.no_items);
+				for (auto const &b: bls.buy_line) {
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.slot);
+					VARSTRUCT_ENCODE_TYPE(uint8, eq, 1);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.item_id);
+					VARSTRUCT_ENCODE_STRING(eq, b.item_name);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.item_icon);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.item_quantity);
+					VARSTRUCT_ENCODE_TYPE(uint8, eq, 1);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.item_cost);
+					auto no_sub_items = b.trade_items.size();
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, no_sub_items);
+					for (auto const &i: b.trade_items) {
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_id);
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_quantity);
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_icon);
+						VARSTRUCT_ENCODE_STRING(eq, i.item_name.c_str());
+					}
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.buyer_entity_id);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.buyer_id);
+					VARSTRUCT_ENCODE_TYPE(uint16, eq, b.buyer_zone_id);
+					VARSTRUCT_ENCODE_TYPE(uint16, eq, b.buyer_zone_instance_id);
+					VARSTRUCT_ENCODE_STRING(eq, b.buyer_name.c_str());
+				}
+				dest->QueuePacket(outapp.get());
+				break;
+			}
+			case Barter_RemoveFromMerchantWindow: {
+				auto emu = (BuyerRemoveItemFromMerchantWindow_Struct *) inapp->pBuffer;
+
+				emu->action = structs::RoF2BuyerActions::BuyerSendBuyLine;
+				dest->FastQueuePacket(&inapp);
+				break;
+			}
+			case Barter_BuyerTransactionComplete:
+			case Barter_SellerTransactionComplete: {
+				BuyerLineSellItem_Struct     blsi{};
+				auto                         emu = (BuyerGeneric_Struct *) inapp->pBuffer;
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(emu->payload),
+					inapp->size - sizeof(BuyerGeneric_Struct)
+				);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(blsi);
+
+				//packet size
+				auto            packet_size = strlen(blsi.item_name) * 2 + 2 + 48 + 30 + blsi.seller_name.length() + 1 +
+											  blsi.buyer_name.length() + 1;
+				for (auto const &b: blsi.trade_items) {
+					packet_size += b.item_name.length() + 1;
+					packet_size += 12;
+				}
+
+				auto outapp = std::make_unique<EQApplicationPacket>(OP_BuyerItems, packet_size);
+				auto eq     = (char *) outapp->pBuffer;
+
+				switch (action) {
+					case Barter_BuyerTransactionComplete: {
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::RoF2BuyerActions::BuyerBuyItem);
+						break;
+					}
+					case Barter_SellerTransactionComplete: {
+						VARSTRUCT_ENCODE_TYPE(uint32, eq, structs::RoF2BuyerActions::BuyerSellItem);
+						break;
+					}
+				}
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.sub_action);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.error_code);
+				eq += 16;
+				VARSTRUCT_ENCODE_STRING(eq, blsi.buyer_name.c_str());
+				VARSTRUCT_ENCODE_STRING(eq, blsi.item_name);
+				VARSTRUCT_ENCODE_STRING(eq, blsi.seller_name.c_str());
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0xFFFFFFFF);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0xFFFFFFFF);
+				eq += 1;
+				VARSTRUCT_ENCODE_STRING(eq, blsi.item_name);
+				eq += 9;
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.item_cost);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.trade_items.size());
+
+				for (auto const &i: blsi.trade_items) {
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, i.item_quantity);
+					VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+					VARSTRUCT_ENCODE_STRING(eq, i.item_name.c_str());
+				}
+
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0xFFFFFF);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, eq, blsi.seller_quantity);
+
+				dest->QueuePacket(outapp.get());
+				break;
+			}
+			default: {
+				dest->FastQueuePacket(&inapp);
+			}
+		}
 	}
 
 	ENCODE(OP_CancelTrade)
@@ -1401,58 +1819,35 @@ namespace RoF2
 	ENCODE(OP_GuildsList)
 	{
 		EQApplicationPacket *in = *p;
-		*p = nullptr;
+		*p                      = nullptr;
 
-		uint32 NumberOfGuilds = in->size / 64;
-		uint32 PacketSize = 68;	// 64 x 0x00 + a uint32 that I am guessing is the highest guild ID in use.
+		GuildsListMessaging_Struct   glms{};
+		EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+		cereal::BinaryInputArchive   ar(ss);
+		ar(glms);
 
-		unsigned char *__emu_buffer = in->pBuffer;
+		auto packet_size = 64 + 4 + glms.guild_detail.size() * 4 + glms.string_length;
+		auto buffer      = new uchar[packet_size];
+		auto buf_pos     = buffer;
 
-		char *InBuffer = (char *)__emu_buffer;
+		memset(buf_pos, 0, 64);
+		buf_pos += 64;
 
-		uint32 HighestGuildID = 0;
+		VARSTRUCT_ENCODE_TYPE(uint32, buf_pos, glms.no_of_guilds);
 
-		for (unsigned int i = 0; i < NumberOfGuilds; ++i)
-		{
-			if (InBuffer[0])
-			{
-				PacketSize += (5 + strlen(InBuffer));
-				HighestGuildID += 1;
+		for (auto const &g: glms.guild_detail) {
+			if (g.guild_id < RoF2::constants::MAX_GUILD_ID) {
+				VARSTRUCT_ENCODE_TYPE(uint32, buf_pos, g.guild_id);
+				strn0cpy((char *) buf_pos, g.guild_name.c_str(), g.guild_name.length() + 1);
+				buf_pos += g.guild_name.length() + 1;
 			}
-			InBuffer += 64;
 		}
 
-		PacketSize++;	// Appears to be an extra 0x00 at the very end.
+		auto outapp     = new EQApplicationPacket(OP_GuildsList);
+		outapp->size    = packet_size;
+		outapp->pBuffer = buffer;
 
-		in->size = PacketSize;
-		in->pBuffer = new unsigned char[in->size];
-
-		InBuffer = (char *)__emu_buffer;
-
-		char *OutBuffer = (char *)in->pBuffer;
-
-		// Init the first 64 bytes to zero, as per live.
-		//
-		memset(OutBuffer, 0, 64);
-
-		OutBuffer += 64;
-
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, HighestGuildID);
-
-		for (unsigned int i = 0; i < NumberOfGuilds; ++i)
-		{
-			if (InBuffer[0])
-			{
-				VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, i - 1);
-				VARSTRUCT_ENCODE_STRING(OutBuffer, InBuffer);
-			}
-			InBuffer += 64;
-		}
-
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0x00);
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
+		dest->FastQueuePacket(&outapp);
 	}
 
 	ENCODE(OP_GuildTributeDonateItem)
@@ -1579,30 +1974,75 @@ namespace RoF2
 		*p = nullptr;
 
 		//store away the emu struct
-		uchar* __emu_buffer = in->pBuffer;
+		uchar             *__emu_buffer = in->pBuffer;
+		ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *) __emu_buffer;
 
-		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
-		EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
+		switch(old_item_pkt->PacketType)
+		{
+			case ItemPacketParcel: {
+				ParcelMessaging_Struct       pms{};
+				EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(pms);
 
-		EQ::OutBuffer ob;
-		EQ::OutBuffer::pos_type last_pos = ob.tellp();
+				uint32 player_name_length = pms.player_name.length();
+				uint32 note_length        = pms.note.length();
 
-		ob.write((const char*)__emu_buffer, 4);
+				auto *int_struct = (EQ::InternalSerializedItem_Struct *) pms.serialized_item.data();
 
-		SerializeItem(ob, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
-		if (ob.tellp() == last_pos) {
-			LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", int_struct->slot_id);
-			delete in;
-			return;
-		}
+				EQ::OutBuffer           ob;
+				EQ::OutBuffer::pos_type last_pos = ob.tellp();
+				ob.write(reinterpret_cast<const char *>(&pms.packet_type), 4);
 
-		in->size = ob.size();
-		in->pBuffer = ob.detach();
+				SerializeItem(ob, (const EQ::ItemInstance *) int_struct->inst, pms.slot_id, 0, ItemPacketParcel);
 
-		delete[] __emu_buffer;
+				if (ob.tellp() == last_pos) {
+					LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", pms.slot_id);
+					safe_delete_array(__emu_buffer);
+					safe_delete(in);
+					return;
+				}
 
-		dest->FastQueuePacket(&in, ack_req);
-	}
+				ob.write((const char *) &pms.sent_time, 4);
+				ob.write((const char *) &player_name_length, 4);
+				ob.write(pms.player_name.c_str(), pms.player_name.length());
+				ob.write((const char *) &note_length, 4);
+				ob.write(pms.note.c_str(), pms.note.length());
+
+				in->size    = ob.size();
+				in->pBuffer = ob.detach();
+
+				safe_delete_array(__emu_buffer);
+				dest->FastQueuePacket(&in, ack_req);
+
+				break;
+			}
+            default: {
+                EQ::InternalSerializedItem_Struct *int_struct = (EQ::InternalSerializedItem_Struct *)(&__emu_buffer[4]);
+
+                EQ::OutBuffer           ob;
+                EQ::OutBuffer::pos_type last_pos = ob.tellp();
+
+                ob.write((const char *)__emu_buffer, 4);
+
+                SerializeItem(ob, (const EQ::ItemInstance *)int_struct->inst, int_struct->slot_id, 0,
+                              old_item_pkt->PacketType);
+                if (ob.tellp() == last_pos) {
+                    LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]",
+                               int_struct->slot_id);
+					safe_delete_array(__emu_buffer);
+					safe_delete(in);
+                    return;
+                }
+
+                in->size    = ob.size();
+                in->pBuffer = ob.detach();
+
+                safe_delete_array(__emu_buffer);
+                dest->FastQueuePacket(&in, ack_req);
+            }
+        }
+    }
 
 	ENCODE(OP_ItemVerifyReply)
 	{
@@ -2569,7 +3009,7 @@ namespace RoF2
 			outapp->WriteUInt8(0);				// Unknown
 		}
 
-		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(emu->char_id);		// character_id
 
 		outapp->WriteUInt8(emu->leadAAActive);
 
@@ -3163,21 +3603,6 @@ namespace RoF2
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_ShopRequest)
-	{
-		ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
-		SETUP_DIRECT_ENCODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
-
-		OUT(npcid);
-		OUT(playerid);
-		OUT(command);
-		OUT(rate);
-		eq->unknown01 = 3;	// Not sure what these values do yet, but list won't display without them
-		eq->unknown02 = 2592000;
-
-		FINISH_ENCODE();
-	}
-
 	ENCODE(OP_SkillUpdate)
 	{
 		ENCODE_LENGTH_EXACT(SkillUpdate_Struct);
@@ -3579,54 +4004,146 @@ namespace RoF2
 
 	ENCODE(OP_Trader)
 	{
-		if ((*p)->size == sizeof(ClickTrader_Struct))
-		{
-			ENCODE_LENGTH_EXACT(ClickTrader_Struct);
-			SETUP_DIRECT_ENCODE(ClickTrader_Struct, structs::ClickTrader_Struct);
+		uint32 action = *(uint32 *) (*p)->pBuffer;
 
-			eq->Code = emu->Code;
-			// Live actually has 200 items now, but 80 is the most our internal struct supports
-			for (uint32 i = 0; i < 200; i++)
-			{
-				eq->items[i].Unknown18 = 0;
-				if (i < 80) {
-					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016" PRId64, emu->SerialNumber[i]);
-					eq->ItemCost[i] = emu->ItemCost[i];
-				}
-				else {
-					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", 0);
-					eq->ItemCost[i] = 0;
-				}
+		switch (action) {
+			case TraderOn: {
+				ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
+				SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+
+				eq->action = structs::RoF2BazaarTraderBuyerActions::BeginTraderMode;
+				OUT(entity_id);
+
+				LogTrading("(RoF2) TraderOn action <green>[{}] entity_id <green>[{}]", action, eq->entity_id);
+				FINISH_ENCODE();
+				break;
 			}
+			case TraderOff: {
+				ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
+				SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
 
-			FINISH_ENCODE();
-		}
-		else if ((*p)->size == sizeof(Trader_ShowItems_Struct))
-		{
-			ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
-			SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				eq->action = structs::RoF2BazaarTraderBuyerActions::EndTraderMode;
+				OUT(entity_id);
 
-			eq->Code = emu->Code;
-			//strncpy(eq->SerialNumber, "0000000000000000", sizeof(eq->SerialNumber));
-			//snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", 0);
-			eq->TraderID = emu->TraderID;
-			//eq->Stacksize = 0;
-			//eq->Price = 0;
+				LogTrading("(RoF2) TraderOff action <green>[{}] entity_id <green>[{}]", action, eq->entity_id);
+				FINISH_ENCODE();
+				break;
+			}
+			case ListTraderItems: {
+				ENCODE_LENGTH_EXACT(Trader_Struct);
+				SETUP_DIRECT_ENCODE(Trader_Struct, structs::ClickTrader_Struct);
+				LogTrading("(RoF2)  action <green>[{}]", action);
 
-			FINISH_ENCODE();
-		}
-		else if ((*p)->size == sizeof(TraderStatus_Struct))
-		{
-			ENCODE_LENGTH_EXACT(TraderStatus_Struct);
-			SETUP_DIRECT_ENCODE(TraderStatus_Struct, structs::TraderStatus_Struct);
+				eq->action = structs::RoF2BazaarTraderBuyerActions::ListTraderItems;
+				std::transform(
+					std::begin(emu->items),
+					std::end(emu->items),
+					std::begin(eq->items),
+					[&](const uint32 x) {
+						return x;
+					}
+				);
+				std::copy_n(
+					std::begin(emu->item_cost),
+					EQ::invtype::BAZAAR_SIZE,
+					std::begin(eq->item_cost)
+				);
 
-			eq->Code = emu->Code;
+				FINISH_ENCODE();
+				break;
+			}
+			case TraderAck2: {
+				LogTrading("(RoF2) TraderAck2 action");
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
 
-			FINISH_ENCODE();
-		}
-		else if ((*p)->size == sizeof(TraderBuy_Struct))
-		{
-			ENCODE_FORWARD(OP_TraderBuy);
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			case PriceUpdate: {
+				SETUP_DIRECT_ENCODE(TraderPriceUpdate_Struct, structs::TraderPriceUpdate_Struct);
+				switch (emu->SubAction) {
+					case BazaarPriceChange_AddItem: {
+						auto outapp = std::make_unique<EQApplicationPacket>(
+							OP_Trader,
+							sizeof(structs::TraderStatus_Struct)
+						);
+
+						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
+						data->action     = emu->Action;
+						data->sub_action = BazaarPriceChange_AddItem;
+						LogTrading(
+							"(RoF2) PriceUpdate action <green>[{}] AddItem subaction <yellow>[{}]",
+							data->action,
+							data->sub_action
+						);
+
+						dest->QueuePacket(outapp.get());
+						break;
+					}
+					case BazaarPriceChange_RemoveItem: {
+						auto outapp = std::make_unique<EQApplicationPacket>(
+							OP_Trader,
+							sizeof(structs::TraderStatus_Struct)
+						);
+
+						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
+						data->action     = emu->Action;
+						data->sub_action = BazaarPriceChange_RemoveItem;
+						LogTrading(
+							"(RoF2) PriceUpdate action <green>[{}] RemoveItem subaction <yellow>[{}]",
+							data->action,
+							data->sub_action
+						);
+
+						dest->QueuePacket(outapp.get());
+						break;
+					}
+					case BazaarPriceChange_UpdatePrice: {
+						auto outapp = std::make_unique<EQApplicationPacket>(
+							OP_Trader,
+							sizeof(structs::TraderStatus_Struct)
+						);
+
+						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
+						data->action     = emu->Action;
+						data->sub_action = BazaarPriceChange_UpdatePrice;
+						LogTrading(
+							"(RoF2) PriceUpdate action <green>[{}] UpdatePrice subaction <yellow>[{}]",
+							data->action,
+							data->sub_action
+						);
+
+						dest->QueuePacket(outapp.get());
+						break;
+					}
+				}
+
+				FINISH_ENCODE();
+				break;
+			}
+			case BuyTraderItem: {
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
+
+				auto eq = (structs::TraderBuy_Struct *) in->pBuffer;
+				LogTrading(
+					"(RoF2) BuyTraderItem action <green>[{}] item_id <green>[{}] item_sn <green>[{}] buyer <green>[{}]",
+					action,
+					eq->item_id,
+					eq->serial_number,
+					eq->buyer_name
+				);
+				dest->FastQueuePacket(&in);
+				break;
+			}
+			default: {
+				LogTrading("(RoF2) action <red>[{}]", action);
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
+
+				dest->FastQueuePacket(&in);
+			}
 		}
 	}
 
@@ -3634,14 +4151,26 @@ namespace RoF2
 	{
 		ENCODE_LENGTH_EXACT(TraderBuy_Struct);
 		SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
-
-		OUT(Action);
-		OUT(Price);
-		OUT(TraderID);
-		memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
-		OUT(ItemID);
-		OUT(Quantity);
-		OUT(AlreadySold);
+		LogTrading(
+			"(RoF2) item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+			emu->item_id,
+			emu->price,
+			emu->quantity,
+			emu->trader_id
+		);
+		__packet->SetOpcode(OP_TraderShop);
+		OUT(action);
+		OUT(method);
+		OUT(sub_action);
+		OUT(trader_id);
+		OUT(item_id);
+		OUT(price);
+		OUT(already_sold);
+		OUT(quantity);
+		OUT_str(buyer_name);
+		OUT_str(seller_name);
+		OUT_str(item_name);
+		OUT_str(serial_number);
 
 		FINISH_ENCODE();
 	}
@@ -3650,71 +4179,74 @@ namespace RoF2
 	{
 		ENCODE_LENGTH_EXACT(TraderDelItem_Struct);
 		SETUP_DIRECT_ENCODE(TraderDelItem_Struct, structs::TraderDelItem_Struct);
+		LogTrading(
+			"(RoF2) trader_id <green>[{}] item_id <green>[{}]",
+			emu->trader_id,
+			emu->item_id
+		);
 
-		OUT(TraderID);
-		snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", emu->ItemID);
-		LogTrading("ENCODE(OP_TraderDelItem): TraderID [{}], SerialNumber: [{}]", emu->TraderID, emu->ItemID);
+		eq->TraderID = emu->trader_id;
+		auto serial  = fmt::format("{:016}\n", emu->item_id);
+		strn0cpy(eq->SerialNumber, serial.c_str(), sizeof(eq->SerialNumber));
+		LogTrading("(RoF2) TraderID <green>[{}], SerialNumber: <green>[{}]", emu->trader_id, emu->item_id);
 
 		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_TraderShop)
 	{
-		uint32 psize = (*p)->size;
-		if (psize == sizeof(TraderClick_Struct))
-		{
-			ENCODE_LENGTH_EXACT(TraderClick_Struct);
-			SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+		auto action = *(uint32 *) (*p)->pBuffer;
 
-			eq->Code = 28; // Seen on Live
-			OUT(TraderID);
-			OUT(Approval);
+		switch (action) {
+			case ClickTrader: {
+				ENCODE_LENGTH_EXACT(TraderClick_Struct);
+				SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+				LogTrading(
+					"(RoF2) ClickTrader action <green>[{}] trader_id <green>[{}]",
+					action,
+					emu->TraderID
+				);
 
-			FINISH_ENCODE();
-		}
-		else if (psize == sizeof(BazaarWelcome_Struct))
-		{
-			ENCODE_LENGTH_EXACT(BazaarWelcome_Struct);
-			SETUP_DIRECT_ENCODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+				eq->action      = structs::RoF2BazaarTraderBuyerActions::ClickTrader; // Seen on Live
+				eq->trader_id   = emu->TraderID;
+				eq->unknown_008 = emu->Approval;
 
-			eq->Code = emu->Beginning.Action;
-			eq->EntityID = emu->Unknown012;
-			OUT(Traders);
-			OUT(Items);
-			eq->Traders2 = emu->Traders;
-			eq->Items2 = emu->Items;
+				FINISH_ENCODE();
+				break;
+			}
+			case structs::RoF2BazaarTraderBuyerActions::BuyTraderItem: {
+				ENCODE_LENGTH_EXACT(structs::TraderBuy_Struct);
+				SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				LogTrading(
+					"(RoF2) item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+					eq->item_id,
+					eq->price,
+					eq->quantity,
+					eq->trader_id
+				);
 
-			LogTrading("ENCODE(OP_TraderShop): BazaarWelcome_Struct Code [{}], Traders [{}], Items [{}]",
-				eq->Code, eq->Traders, eq->Items);
+				OUT(action);
+				OUT(method);
+				OUT(trader_id);
+				OUT(item_id);
+				OUT(price);
+				OUT(already_sold);
+				OUT(quantity);
+				OUT_str(buyer_name);
+				OUT_str(seller_name);
+				OUT_str(item_name);
+				OUT_str(serial_number);
 
-			FINISH_ENCODE();
-		}
-		else if (psize == sizeof(TraderBuy_Struct))
-		{
-			ENCODE_LENGTH_EXACT(TraderBuy_Struct);
-			SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				FINISH_ENCODE();
+				break;
+			}
+			default: {
+				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
 
-			OUT(Action);
-			OUT(TraderID);
-
-			//memcpy(eq->BuyerName, emu->BuyerName, sizeof(eq->BuyerName));
-			//memcpy(eq->SellerName, emu->SellerName, sizeof(eq->SellerName));
-
-			memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
-			OUT(ItemID);
-			OUT(AlreadySold);
-			OUT(Price);
-			OUT(Quantity);
-			snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", emu->ItemID);
-
-			LogTrading("ENCODE(OP_TraderShop): Buy Action [{}], Price [{}], Trader [{}], ItemID [{}], Quantity [{}], ItemName, [{}]",
-				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, emu->ItemName);
-
-			FINISH_ENCODE();
-		}
-		else
-		{
-			LogTrading("ENCODE(OP_TraderShop): Encode Size Unknown ([{}])", psize);
+				dest->FastQueuePacket(&in);
+			}
 		}
 	}
 
@@ -4060,20 +4592,20 @@ namespace RoF2
 
 			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;
 
-			Bitfields->gender = emu->gender;
-			Bitfields->ispet = emu->is_pet;
-			Bitfields->afk = emu->afk;
-			Bitfields->anon = emu->anon;
-			Bitfields->gm = emu->gm;
-			Bitfields->sneak = 0;
-			Bitfields->lfg = emu->lfg;
-			Bitfields->invis = emu->invis;
-			Bitfields->linkdead = 0;
-			Bitfields->showhelm = emu->showhelm;
-			Bitfields->trader = 0;
-			Bitfields->targetable = 1;
+			Bitfields->gender                 = emu->gender;
+			Bitfields->ispet                  = emu->is_pet;
+			Bitfields->afk                    = emu->afk;
+			Bitfields->anon                   = emu->anon;
+			Bitfields->gm                     = emu->gm;
+			Bitfields->sneak                  = 0;
+			Bitfields->lfg                    = emu->lfg;
+			Bitfields->invis                  = emu->invis;
+			Bitfields->linkdead               = 0;
+			Bitfields->showhelm               = emu->showhelm;
+			Bitfields->trader                 = emu->trader ? 1 : 0;
+			Bitfields->targetable             = 1;
 			Bitfields->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
-			Bitfields->showname = ShowName;
+			Bitfields->showname               = ShowName;
 
 			if (emu->DestructibleObject)
 			{
@@ -4102,6 +4634,9 @@ namespace RoF2
 			}
 			if (emu->DestructibleObject) {
 				OtherData = OtherData | 0xe1;	// Live has 0xe1 for OtherData
+			}
+			if (emu->buyer) {
+				OtherData = OtherData | 0x01;
 			}
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, OtherData);
@@ -4214,7 +4749,7 @@ namespace RoF2
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->guild_show); 
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->guild_show);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // TempPet
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
@@ -4419,11 +4954,72 @@ namespace RoF2
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_Barter)
+	{
+		auto action = *(uint32 *) __packet->pBuffer;
+
+		switch (action) {
+			case structs::RoF2BuyerActions::BuyerRemoveItem: {
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_BuyerItemRemove;
+				LogTradingDetail("(RoF2) Buyer Remove Item");
+
+				break;
+			}
+			case structs::RoF2BuyerActions::BuyerInspectBegin: {
+				LogTradingDetail("(RoF2) Buyer Inspect Begin Item");
+
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_BuyerInspectBegin;
+
+				break;
+			}
+			case structs::RoF2BuyerActions::BuyerInspectEnd: {
+				LogTradingDetail("(RoF2) Buyer Inspect End Item ");
+
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_BuyerInspectEnd;
+
+				break;
+			}
+			case structs::RoF2BuyerActions::BuyerWelcomeMessage: {
+				LogTradingDetail("(RoF2) Buyer Welcome Message Update");
+				SETUP_DIRECT_DECODE(BuyerWelcomeMessageUpdate_Struct, structs::BuyerWelcomeMessageUpdate_Struct);
+
+				emu->action = Barter_WelcomeMessageUpdate;
+				strn0cpy(emu->welcome_message, eq->welcome_message, sizeof(emu->welcome_message));
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::RoF2BuyerActions::BuyerItemInspect: {
+				SETUP_DIRECT_DECODE(BarterItemSearchLinkRequest_Struct, structs::BarterItemSearchLinkRequest_Struct);
+				LogTradingDetail("(RoF2) Seller ID <green>[{}] Inspecting Item <green>[{}] from Buyer ID <green>[{}] ",
+								 eq->seller_id,
+								 eq->item_id,
+								 eq->buyer_id
+				);
+
+				emu->action      = Barter_BarterItemInspect;
+				emu->item_id     = eq->item_id;
+				emu->searcher_id = eq->seller_id;
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			default: {
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				LogTradingDetail("(RoF2) Pass thru OP_Barter packet action <red>[{}]", emu->action);
+			}
+		}
+	}
+
 	DECODE(OP_BazaarSearch)
 	{
 		char *Buffer = (char *)__packet->pBuffer;
 
 		uint8 SubAction = VARSTRUCT_DECODE_TYPE(uint8, Buffer);
+		LogTrading("(RoF2) action <green>[{}]", SubAction);
 
 		if ((SubAction != BazaarInspectItem) || (__packet->size != sizeof(structs::NewBazaarInspect_Struct)))
 			return;
@@ -4433,6 +5029,7 @@ namespace RoF2
 		IN(Beginning.Action);
 		memcpy(emu->Name, eq->Name, sizeof(emu->Name));
 		IN(SerialNumber);
+		LogTrading("(RoF2) action <green>[{}] serial_number <green>[{}]", eq->Beginning.Action, eq->SerialNumber);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4493,6 +5090,147 @@ namespace RoF2
 		IN(EntityID);
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_BuyerItems)
+	{
+		auto action = *(uint32 *) __packet->pBuffer;
+
+		switch (action) {
+			case structs::RoF2BuyerActions::BuyerModifyBuyLine:
+			case structs::RoF2BuyerActions::BuyerBuyLine: {
+				BuyerBuyLines_Struct buyer_buy_lines{};
+				auto                 buffer = (char *) __packet->pBuffer;
+
+				buyer_buy_lines.action = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+
+				buyer_buy_lines.no_items = 1;
+				if (action == structs::RoF2BuyerActions::BuyerBuyLine) {
+					buyer_buy_lines.no_items = VARSTRUCT_DECODE_TYPE(uint16, buffer);
+				}
+
+				buyer_buy_lines.buy_lines.reserve(buyer_buy_lines.no_items);
+				for (int i = 0; i < buyer_buy_lines.no_items; i++) {
+					BuyerLineItems_Struct b{};
+					b.slot           = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					b.enabled        = VARSTRUCT_DECODE_TYPE(uint8, buffer);
+					b.item_id        = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					b.item_name      = std::string(buffer, strlen(buffer));
+					buffer          += strlen(buffer) + 1;
+					b.item_icon      = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					b.item_quantity  = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					b.item_toggle    = VARSTRUCT_DECODE_TYPE(uint8, buffer);
+					b.item_cost      = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					auto trade_items = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					buyer_buy_lines.buy_lines.push_back(b);
+
+					if (trade_items > 0) {
+						buyer_buy_lines.buy_lines[i].trade_items.reserve(trade_items);
+						for (int x = 0; x < trade_items; x++) {
+							BuyerLineTradeItems_Struct blti{};
+							blti.item_id       = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+							blti.item_quantity = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+							blti.item_icon     = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+							blti.item_name     = std::string(buffer, strlen(buffer));
+							buffer            += strlen(buffer) + 1;
+							buyer_buy_lines.buy_lines[i].trade_items.push_back(blti);
+						}
+					}
+					buffer += 13;
+				}
+
+				buffer = nullptr;
+				std::stringstream           ss{};
+				cereal::BinaryOutputArchive ar(ss);
+				{
+					ar(buyer_buy_lines);
+				}
+
+				auto new_size   = sizeof(BuyerGeneric_Struct) + ss.str().length();
+				auto new_packet = new unsigned char[new_size];
+				__packet->size    = new_size;
+				__packet->pBuffer = new_packet;
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_BuyerItemUpdate;
+
+				if (action == structs::RoF2BuyerActions::BuyerBuyLine) {
+					emu->action = Barter_BuyerItemStart;
+				}
+
+				memcpy(emu->payload, ss.str().data(), ss.str().length());
+				__packet->SetOpcode(OP_Barter);
+
+				break;
+			}
+			case structs::RoF2BuyerActions::BuyerSellItem: {
+				BuyerLineSellItem_Struct sell_item{};
+
+				char *buffer = (char *) __packet->pBuffer;
+
+				sell_item.action          = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.purchase_method = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				buffer += 4;
+				sell_item.buyer_entity_id = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.buyer_id        = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				buffer += 11;
+				sell_item.slot    = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.enabled = VARSTRUCT_DECODE_TYPE(uint8, buffer);
+				sell_item.item_id = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				VARSTRUCT_DECODE_STRING(sell_item.item_name, buffer);
+				sell_item.item_icon      = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.item_quantity  = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.item_toggle    = VARSTRUCT_DECODE_TYPE(uint8, buffer);
+				sell_item.item_cost      = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+				sell_item.no_trade_items = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+
+				if (sell_item.no_trade_items > 0) {
+					sell_item.trade_items.reserve(sell_item.no_trade_items);
+					for (int x = 0; x < sell_item.no_trade_items; x++) {
+						BuyerLineTradeItems_Struct blti{};
+						blti.item_id       = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+						blti.item_quantity = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+						blti.item_icon     = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+						blti.item_name     = std::string(buffer, strlen(buffer));
+						buffer            += strlen(buffer) + 1;
+						sell_item.trade_items.push_back(blti);
+					}
+				}
+
+				if (sell_item.purchase_method) {
+					sell_item.buyer_entity_id = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					sell_item.buyer_id        = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					sell_item.zone_id         = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+					sell_item.buyer_name      = std::string(buffer, strlen(buffer));
+					buffer                   += sell_item.buyer_name.length() + 1;
+				}
+				else {
+					buffer += 13;
+				}
+
+				sell_item.seller_quantity = VARSTRUCT_DECODE_TYPE(uint32, buffer);
+
+				buffer += 4;
+
+				buffer = nullptr;
+				std::stringstream           ss{};
+				cereal::BinaryOutputArchive ar(ss);
+				{
+					ar(sell_item);
+				}
+
+				auto new_size   = sizeof(BuyerGeneric_Struct) + ss.str().length();
+				auto new_packet = new unsigned char[new_size];
+				__packet->size    = new_size;
+				__packet->pBuffer = new_packet;
+				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
+				emu->action = Barter_SellItem;
+
+				memcpy(emu->payload, ss.str().data(), ss.str().length());
+				__packet->SetOpcode(OP_Barter);
+
+				break;
+			}
+		}
 	}
 
 	DECODE(OP_CastSpell)
@@ -5307,55 +6045,78 @@ namespace RoF2
 		FINISH_DIRECT_DECODE();
 	}
 
-	DECODE(OP_ShopRequest)
+	DECODE(OP_ShopSendParcel)
 	{
-		DECODE_LENGTH_EXACT(structs::Merchant_Click_Struct);
-		SETUP_DIRECT_DECODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
+		DECODE_LENGTH_EXACT(structs::Parcel_Struct);
+		SETUP_DIRECT_DECODE(Parcel_Struct, structs::Parcel_Struct);
 
-		IN(npcid);
-		IN(playerid);
-		IN(command);
-		IN(rate);
+		IN(npc_id);
+		IN(quantity);
+		IN(money_flag);
+		emu->item_slot = RoF2ToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
+		strn0cpy(emu->send_to, eq->send_to, sizeof(emu->send_to));
+		strn0cpy(emu->note, eq->note, sizeof(emu->note));
 
 		FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_Trader)
 	{
-		uint32 psize = __packet->size;
-		if (psize == sizeof(structs::ClickTrader_Struct))
-		{
-			DECODE_LENGTH_EXACT(structs::ClickTrader_Struct);
-			SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::ClickTrader_Struct);
+		auto action = *(uint32 *)__packet->pBuffer;
 
-			emu->Code = eq->Code;
-			// Live actually has 200 items now, but 80 is the most our internal struct supports
-			for (uint32 i = 0; i < 80; i++)
-			{
-				emu->SerialNumber[i] = 0;	// eq->SerialNumber[i];
-				emu->ItemCost[i] = eq->ItemCost[i];
+		switch (action) {
+			case structs::RoF2BazaarTraderBuyerActions::BeginTraderMode: {
+				DECODE_LENGTH_EXACT(structs::BeginTrader_Struct);
+				SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::BeginTrader_Struct);
+				LogTrading("(RoF2) BeginTraderMode action <green>[{}]", action);
+
+				emu->action = TraderOn;
+				std::copy_n(eq->item_cost, RoF2::invtype::BAZAAR_SIZE, emu->item_cost);
+				std::transform(
+					std::begin(eq->items),
+					std::end(eq->items),
+					std::begin(emu->serial_number),
+					[&](const structs::TraderItemSerial_Struct x) {
+						return Strings::ToUnsignedBigInt(x.serial_number,0);
+					}
+				);
+
+				FINISH_DIRECT_DECODE();
+				break;
 			}
+			case structs::RoF2BazaarTraderBuyerActions::EndTraderMode: {
+				DECODE_LENGTH_EXACT(structs::Trader_ShowItems_Struct);
+				SETUP_DIRECT_DECODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				LogTrading("(RoF2) EndTraderMode action <green>[{}]", action);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == sizeof(structs::Trader_ShowItems_Struct))
-		{
-			DECODE_LENGTH_EXACT(structs::Trader_ShowItems_Struct);
-			SETUP_DIRECT_DECODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				emu->action    = TraderOff;
+				emu->entity_id = eq->entity_id;
 
-			emu->Code = eq->Code;
-			emu->TraderID = eq->TraderID;
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::RoF2BazaarTraderBuyerActions::ListTraderItems: {
+				LogTrading("(RoF2) ListTraderItems action <green>[{}]", action);
+				break;
+			}
+			case structs::RoF2BazaarTraderBuyerActions::PriceUpdate: {
+				DECODE_LENGTH_EXACT(structs::TraderPriceUpdate_Struct);
+				SETUP_DIRECT_DECODE(TraderPriceUpdate_Struct, structs::TraderPriceUpdate_Struct);
+				LogTrading("(RoF2) PriceUpdate action <green>[{}]", action);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == sizeof(structs::TraderStatus_Struct))
-		{
-			DECODE_LENGTH_EXACT(structs::TraderStatus_Struct);
-			SETUP_DIRECT_DECODE(TraderStatus_Struct, structs::TraderStatus_Struct);
+				emu->Action       = PriceUpdate;
+				emu->SerialNumber = Strings::ToUnsignedBigInt(eq->serial_number, 0);
+				if (emu->SerialNumber == 0) {
+					LogTrading("(RoF2) Price change with invalid serial number <red>[{}]", eq->serial_number);
+				}
+				emu->NewPrice = eq->new_price;
 
-			emu->Code = eq->Code;	// 11 = Start Trader, 2 = End Trader, 22 = ? - Guessing
-
-			FINISH_DIRECT_DECODE();
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			default: {
+				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
+			}
 		}
 	}
 
@@ -5363,73 +6124,136 @@ namespace RoF2
 	{
 		DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
 		SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+		LogTrading(
+			"(RoF2) item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+			eq->item_id,
+			eq->price,
+			eq->quantity,
+			eq->trader_id
+		);
 
-		IN(Action);
-		IN(Price);
-		IN(TraderID);
-		memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
-		IN(ItemID);
-		IN(Quantity);
+		IN(action);
+		IN(price);
+		IN(trader_id);
+		memcpy(emu->item_name, eq->item_name, sizeof(emu->item_name));
+		IN(item_id);
+		IN(quantity);
 
 		FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_TraderShop)
 	{
-		uint32 psize = __packet->size;
-		if (psize == sizeof(structs::TraderClick_Struct))
-		{
-			DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
-			SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
+		uint32 action = *(uint32 *)__packet->pBuffer;
 
-			IN(Code);
-			IN(TraderID);
-			IN(Approval);
-			LogTrading("DECODE(OP_TraderShop): TraderClick_Struct Code [{}], TraderID [{}], Approval [{}]",
-				eq->Code, eq->TraderID, eq->Approval);
+		switch (action) {
+			case structs::RoF2BazaarTraderBuyerActions::BazaarSearch: {
+				DECODE_LENGTH_EXACT(structs::BazaarSearch_Struct);
+				SETUP_DIRECT_DECODE(BazaarSearchCriteria_Struct, structs::BazaarSearch_Struct);
+				LogTrading(
+					"(RoF2) BazaarSearch action <green>[{}]",
+					action
+				);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == sizeof(structs::BazaarWelcome_Struct))
-		{
-			// Don't think this size gets used in RoF+ - Leaving for now...
-			DECODE_LENGTH_EXACT(structs::BazaarWelcome_Struct);
-			SETUP_DIRECT_DECODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+				__packet->SetOpcode(OP_BazaarSearch);
+				emu->action = BazaarSearch;
+				emu->type   = eq->type == UINT32_MAX ? UINT8_MAX : eq->type;
+				IN(item_stat);
+				IN(max_cost);
+				IN(min_cost);
+				IN(max_level);
+				IN(min_level);
+				IN(race);
+				IN(slot);
+				IN(trader_id);
+				IN(_class);
+				IN(prestige);
+				IN(search_scope);
+				IN(max_results);
+				IN(augment);
+				IN_str(item_name);
 
-			emu->Beginning.Action = eq->Code;
-			IN(Traders);
-			IN(Items);
-			LogTrading("DECODE(OP_TraderShop): BazaarWelcome_Struct Code [{}], Traders [{}], Items [{}]",
-				eq->Code, eq->Traders, eq->Items);
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::RoF2BazaarTraderBuyerActions::ClickTrader: {
+				DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
+				SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == sizeof(structs::TraderBuy_Struct))
-		{
+				emu->Code     = ClickTrader;
+				emu->TraderID = eq->trader_id;
+				emu->Approval = eq->unknown_008;
+				LogTrading("(RoF2) ClickTrader action <green>[{}], trader_id <green>[{}], approval <green>[{}]",
+						   eq->action,
+						   eq->trader_id,
+						   eq->unknown_008
+				);
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::RoF2BazaarTraderBuyerActions::BazaarInspect: {
+				DECODE_LENGTH_EXACT(structs::BazaarInspect_Struct);
+				SETUP_DIRECT_DECODE(BazaarInspect_Struct, structs::BazaarInspect_Struct);
 
-			DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
-			SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				__packet->SetOpcode(OP_BazaarSearch);
+				IN(item_id);
+				IN(trader_id);
+				emu->action        = BazaarInspect;
+				emu->serial_number = Strings::ToUnsignedInt(eq->serial_number, 0);
+				if (emu->serial_number == 0) {
+					LogTrading(
+						"(RoF2) trader_id = <green>[{}] requested a BazaarInspect with an invalid serial number of <red>[{}]",
+						eq->trader_id,
+						eq->serial_number
+					);
+					FINISH_DIRECT_DECODE();
+					return;
+				}
 
-			IN(Action);
-			IN(Price);
-			IN(TraderID);
-			memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
-			IN(ItemID);
-			IN(Quantity);
-			LogTrading("DECODE(OP_TraderShop): TraderBuy_Struct (Unknowns) Unknown004 [{}], Unknown008 [{}], Unknown012 [{}], Unknown076 [{}], Unknown276 [{}]",
-				eq->Unknown004, eq->Unknown008, eq->Unknown012, eq->Unknown076, eq->Unknown276);
-			LogTrading("DECODE(OP_TraderShop): TraderBuy_Struct Buy Action [{}], Price [{}], Trader [{}], ItemID [{}], Quantity [{}], ItemName, [{}]",
-				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, eq->ItemName);
+				LogTrading("(RoF2) BazaarInspect action <green>[{}] item_id <green>[{}] serial_number <green>[{}]",
+						   action,
+						   eq->item_id,
+						   eq->serial_number
+				);
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::RoF2BazaarTraderBuyerActions::WelcomeMessage: {
+				__packet->SetOpcode(OP_BazaarSearch);
+				LogTrading("(RoF2) WelcomeMessage action <green>[{}]", action);
+				break;
+			}
+			case structs::RoF2BazaarTraderBuyerActions::BuyTraderItem: {
+				DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
+				SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				LogTrading(
+					"(RoF2) item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+					eq->item_id,
+					eq->price,
+					eq->quantity,
+					eq->trader_id
+				);
 
-			FINISH_DIRECT_DECODE();
-		}
-		else if (psize == 4)
-		{
-			LogTrading("DECODE(OP_TraderShop): Forwarding packet as-is with size 4");
-		}
-		else
-		{
-			LogTrading("DECODE(OP_TraderShop): Decode Size Unknown ([{}])", psize);
+				__packet->SetOpcode(OP_TraderBuy);
+				IN(action);
+				IN(method);
+				IN(trader_id);
+				IN(item_id);
+				IN(price);
+				IN(already_sold);
+				IN(quantity);
+				IN_str(buyer_name);
+				IN_str(seller_name);
+				IN_str(item_name);
+				IN_str(serial_number);
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			default: {
+				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
+			}
+			return;
 		}
 	}
 
@@ -5532,13 +6356,14 @@ namespace RoF2
 		RoF2::structs::ItemSerializationHeader hdr;
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
+		strn0cpy(hdr.unknown000, fmt::format("{:016}\0", inst->GetSerialNumber()).c_str(),sizeof(hdr.unknown000));
 
-		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
-
-		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
+		hdr.stacksize =
+			item->ID == PARCEL_MONEY_ITEM_ID ? inst->GetPrice() : (inst->IsStackable() ? ((inst->GetCharges() > 1000)
+				? 0xFFFFFFFF : inst->GetCharges()) : 1);
 		hdr.unknown004 = 0;
 
-		structs::InventorySlot_Struct slot_id;
+		structs::InventorySlot_Struct slot_id{};
 		switch (packet_type) {
 		case ItemPacketLoot:
 			slot_id = ServerToRoF2CorpseSlot(slot_id_in);
@@ -5548,22 +6373,24 @@ namespace RoF2
 			break;
 		}
 
-		hdr.slot_type = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
-		hdr.main_slot = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
-		hdr.sub_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
-		hdr.aug_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.AugIndex);
-		hdr.price = inst->GetPrice();
-		hdr.merchant_slot = (inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1);
-		hdr.scaled_value = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
-		hdr.instance_id = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
-		hdr.unknown028 = 0;
+		hdr.slot_type      = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
+		hdr.main_slot      = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
+		hdr.sub_slot       = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
+		hdr.aug_slot       = (inst->GetMerchantSlot() ? 0xffff : slot_id.AugIndex);
+		hdr.price          = inst->GetPrice();
+		hdr.merchant_slot  = ((inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1));
+		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
+		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
+		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
 		hdr.last_cast_time = inst->GetRecastTimestamp();
-		hdr.charges = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254) ? 0xFFFFFFFF : inst->GetCharges()));
-		hdr.inst_nodrop = (inst->IsAttuned() ? 1 : 0);
-		hdr.unknown044 = 0;
-		hdr.unknown048 = 0;
-		hdr.unknown052 = 0;
-		hdr.isEvolving = item->EvolvingItem;
+		hdr.charges        = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254)
+			? 0xFFFFFFFF
+			: inst->GetCharges()));
+		hdr.inst_nodrop    = (inst->IsAttuned() ? 1 : 0);
+		hdr.unknown044     = 0;
+		hdr.unknown048     = 0;
+		hdr.unknown052     = 0;
+		hdr.isEvolving     = item->EvolvingItem;
 
 		ob.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
@@ -5621,9 +6448,10 @@ namespace RoF2
 
 		ob.write((const char*)&hdrf, sizeof(RoF2::structs::ItemSerializationHeaderFinish));
 
-		if (strlen(item->Name) > 0)
+		if (strlen(item->Name) > 0) {
 			ob.write(item->Name, strlen(item->Name));
-		ob.write("\0", 1);
+			ob.write("\0", 1);
+		}
 
 		if (strlen(item->Lore) > 0)
 			ob.write(item->Lore, strlen(item->Lore));
@@ -5784,10 +6612,11 @@ namespace RoF2
 		itbs.unknown5 = 0;
 
 		itbs.potion_belt_enabled = item->PotionBelt;
-		itbs.potion_belt_slots = item->PotionBeltSlots;
-		itbs.stacksize = (inst->IsStackable() ? item->StackSize : 0);
-		itbs.no_transfer = item->NoTransfer;
-		itbs.expendablearrow = item->ExpendableArrow;
+		itbs.potion_belt_slots   = item->PotionBeltSlots;
+		itbs.stacksize           =
+			item->ID == PARCEL_MONEY_ITEM_ID ? 0x7FFFFFFF : ((inst->IsStackable() ? item->StackSize : 0));
+		itbs.no_transfer         = item->NoTransfer;
+		itbs.expendablearrow     = item->ExpendableArrow;
 
 		// Done to hack older clients to label expendable fishing poles as such
 		// July 28th, 2018 patch

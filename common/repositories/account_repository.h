@@ -89,6 +89,24 @@ public:
 
 		return results.Success();
 	}
+
+	static std::string GetAutoLoginCharacterNameByAccountID(Database& db, const uint32 account_id)
+	{
+		return AccountRepository::FindOne(db, account_id).auto_login_charname;
+	}
+
+	static bool SetAutoLoginCharacterNameByAccountID(Database& db, const uint32 account_id, const std::string& character_name)
+	{
+		auto e = AccountRepository::FindOne(db, account_id);
+
+		if (!e.id) {
+			return false;
+		}
+
+		e.auto_login_charname = character_name;
+
+		return AccountRepository::UpdateOne(db, e);
+	}
 };
 
 #endif //EQEMU_ACCOUNT_REPOSITORY_H

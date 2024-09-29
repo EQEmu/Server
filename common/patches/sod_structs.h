@@ -1845,12 +1845,16 @@ struct TimeOfDay_Struct {
 };
 
 // Darvik: shopkeeper structs
-struct Merchant_Click_Struct {
-/*000*/ uint32	npcid;			// Merchant NPC's entity id
-/*004*/ uint32	playerid;
-/*008*/ uint32	command;		//1=open, 0=cancel/close
-/*012*/ float	rate;			//cost multiplier, dosent work anymore
+struct MerchantClick_Struct
+{
+    /*000*/ uint32 npc_id;       // Merchant NPC's entity id
+    /*004*/ uint32 player_id;
+    /*008*/ uint32 command;     // 1=open, 0=cancel/close
+    /*012*/ float  rate;        // cost multiplier, dosent work anymore
+    /*016*/ int32  tab_display; // bitmask b000 none, b001 Purchase/Sell, b010 Recover, b100 Parcels
+    /*020*/ int32  unknown020;  // Seen 2592000 from Server or -1 from Client
 };
+
 /*
 Unknowns:
 0 is e7 from 01 to // MAYBE SLOT IN PURCHASE
@@ -2875,19 +2879,20 @@ struct Trader_ShowItems_Struct{
 };
 
 struct TraderBuy_Struct {
-/*000*/ uint32   Action;
-/*004*/	uint32	Unknown004;
-/*008*/ uint32   Price;
-/*012*/	uint32	Unknown008;	// Probably high order bits of a 64 bit price.
-/*016*/ uint32   TraderID;
-/*020*/ char    ItemName[64];
-/*084*/ uint32   Unknown076;
-/*088*/ uint32   ItemID;
-/*092*/ uint32   AlreadySold;
-/*096*/ uint32   Quantity;
-/*100*/ uint32   Unknown092;
+/*000*/ uint32  action;
+/*004*/	uint32	unknown_004;
+/*008*/ uint32  price;
+/*012*/	uint32	unknown_008;	// Probably high order bits of a 64 bit price.
+/*016*/ uint32  trader_id;
+/*020*/ char    item_name[64];
+/*084*/ uint32  unknown_076;
+/*088*/ uint32  item_id;
+/*092*/ uint32  already_sold;
+/*096*/ uint32  quantity;
+/*100*/ uint32  unknown_092;
 /*104*/
 };
+
 
 struct TraderItemUpdate_Struct{
 	uint32 unknown0;

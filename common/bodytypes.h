@@ -18,52 +18,96 @@
 #ifndef BODYTYPES_H
 #define BODYTYPES_H
 
-typedef enum {
-	BT_Humanoid			= 1,
-	BT_Lycanthrope		= 2,
-	BT_Undead			= 3,
-	BT_Giant			= 4,
-	BT_Construct		= 5,
-	BT_Extraplanar		= 6,
-	BT_Magical			= 7,	//this name might be a bit off,
-	BT_SummonedUndead	= 8,
-	BT_RaidGiant		= 9,    //Velious era Raid Giant
-	BT_RaidColdain      = 10,   //Velious era Raid Coldain
-	BT_NoTarget			= 11,	//no name, can't target this bodytype
-	BT_Vampire			= 12,
-	BT_Atenha_Ra		= 13,
-	BT_Greater_Akheva	= 14,
-	BT_Khati_Sha		= 15,
-	BT_Seru				= 16,	
-	BT_Grieg_Veneficus  = 17,
-	BT_Draz_Nurakk      = 18,
-	BT_Zek				= 19,	//"creatures from the Plane of War."
-	BT_Luggald			= 20,
-	BT_Animal			= 21,
-	BT_Insect			= 22,
-	BT_Monster			= 23,
-	BT_Summoned			= 24,	//Elemental?
-	BT_Plant			= 25,
-	BT_Dragon			= 26,
-	BT_Summoned2		= 27,
-	BT_Summoned3		= 28,
-	BT_Dragon2          = 29,   //database data indicates this is a dragon type (kunark and DoN?)
-	BT_VeliousDragon	= 30,	//might not be a tight set
-	BT_Familiar			= 31,
-	BT_Dragon3			= 32,
-	BT_Boxes			= 33,
-	BT_Muramite			= 34,	//tribal dudes
-	//					...
-	BT_NoTarget2		= 60,
-	//					...
-	BT_SwarmPet			= 63,	//Looks like weapon proc related temp pets and few misc pets, should not be used for checking swarm pets in general.
-	BT_MonsterSummon	= 64,
-	                   // 65,   trap or effect related?
-	BT_InvisMan			= 66,	//no name, seen on 'InvisMan', can be /targeted
-	BT_Special			= 67
-} bodyType;
-/* bodytypes above 64 make the mob not show up */
+#include "types.h"
+#include <map>
+#include <string>
 
-constexpr int format_as(bodyType type) { return static_cast<int>(type); }
+// body types above 64 make the mob invisible
+namespace BodyType {
+	constexpr uint8 Humanoid       = 1;
+	constexpr uint8 Lycanthrope    = 2;
+	constexpr uint8 Undead         = 3;
+	constexpr uint8 Giant          = 4;
+	constexpr uint8 Construct      = 5;
+	constexpr uint8 Extraplanar    = 6;
+	constexpr uint8 Magical        = 7;     // this name might be a bit off,
+	constexpr uint8 SummonedUndead = 8;
+	constexpr uint8 RaidGiant      = 9;     // Velious era Raid Giant
+	constexpr uint8 RaidColdain    = 10;    // Velious era Raid Coldain
+	constexpr uint8 NoTarget       = 11;    // no name, can't target this bodytype
+	constexpr uint8 Vampire        = 12;
+	constexpr uint8 AtenHaRa       = 13;
+	constexpr uint8 GreaterAkheva  = 14;
+	constexpr uint8 KhatiSha       = 15;
+	constexpr uint8 Seru           = 16;
+	constexpr uint8 GriegVeneficus = 17;
+	constexpr uint8 DrazNurakk     = 18;
+	constexpr uint8 Zek            = 19;    //"creatures from the Plane of War."
+	constexpr uint8 Luggald        = 20;
+	constexpr uint8 Animal         = 21;
+	constexpr uint8 Insect         = 22;
+	constexpr uint8 Monster        = 23;
+	constexpr uint8 Summoned       = 24;    // Elemental?
+	constexpr uint8 Plant          = 25;
+	constexpr uint8 Dragon         = 26;
+	constexpr uint8 Summoned2      = 27;
+	constexpr uint8 Summoned3      = 28;
+	constexpr uint8 Dragon2        = 29;    // database data indicates this is a dragon type (Kunark and DoN?)
+	constexpr uint8 VeliousDragon  = 30;    // might not be a tight set
+	constexpr uint8 Familiar       = 31;
+	constexpr uint8 Dragon3        = 32;
+	constexpr uint8 Boxes          = 33;
+	constexpr uint8 Muramite       = 34;    // tribal dudes
+	constexpr uint8 NoTarget2      = 60;
+	constexpr uint8 SwarmPet       = 63;    // Looks like weapon proc related temp pets and few misc pets, should not be used for checking swarm pets in general.
+	constexpr uint8 MonsterSummon  = 64;
+	constexpr uint8 InvisibleMan   = 66;    // no name, seen on 'InvisMan', can be /targeted
+	constexpr uint8 Special        = 67;
+
+	std::string GetName(uint8 body_type_id);
+	bool IsValid(uint8 body_type_id);
+}
+
+static std::map<uint8, std::string> body_type_names = {
+	{ BodyType::Humanoid,       "Humanoid" },
+	{ BodyType::Lycanthrope,    "Lycanthrope" },
+	{ BodyType::Undead,         "Undead" },
+	{ BodyType::Giant,          "Giant" },
+	{ BodyType::Construct,      "Construct" },
+	{ BodyType::Extraplanar,    "Extraplanar" },
+	{ BodyType::Magical,        "Magical" },
+	{ BodyType::SummonedUndead, "Summoned Undead" },
+	{ BodyType::RaidGiant,      "Raid Giant" },
+	{ BodyType::RaidColdain,    "Raid Coldain" },
+	{ BodyType::NoTarget,       "Untargetable" },
+	{ BodyType::Vampire,        "Vampire" },
+	{ BodyType::AtenHaRa,       "Aten Ha Ra" },
+	{ BodyType::GreaterAkheva,  "Greater Akheva" },
+	{ BodyType::KhatiSha,       "Khati Sha" },
+	{ BodyType::Seru,           "Seru" },
+	{ BodyType::GriegVeneficus, "Grieg Veneficus" },
+	{ BodyType::DrazNurakk,     "Draz Nurakk" },
+	{ BodyType::Zek,            "Zek" },
+	{ BodyType::Luggald,        "Luggald" },
+	{ BodyType::Animal,         "Animal" },
+	{ BodyType::Insect,         "Insect" },
+	{ BodyType::Monster,        "Monster" },
+	{ BodyType::Summoned,       "Summoned" },
+	{ BodyType::Plant,          "Plant" },
+	{ BodyType::Dragon,         "Dragon" },
+	{ BodyType::Summoned2,      "Summoned 2" },
+	{ BodyType::Summoned3,      "Summoned 3" },
+	{ BodyType::Dragon2,        "Dragon 2" },
+	{ BodyType::VeliousDragon,  "Velious Dragon" },
+	{ BodyType::Familiar,       "Familiar" },
+	{ BodyType::Dragon3,        "Dragon 3" },
+	{ BodyType::Boxes,          "Boxes" },
+	{ BodyType::Muramite,       "Muramite" },
+	{ BodyType::NoTarget2,      "Untargetable 2" },
+	{ BodyType::SwarmPet,       "Swarm Pet" },
+	{ BodyType::MonsterSummon,  "Monster Summon" },
+	{ BodyType::InvisibleMan,   "Invisible Man" },
+	{ BodyType::Special,        "Special" },
+};
 
 #endif

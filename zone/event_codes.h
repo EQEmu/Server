@@ -143,6 +143,7 @@ typedef enum {
 	EVENT_ENTITY_VARIABLE_SET,
 	EVENT_ENTITY_VARIABLE_UPDATE,
 	EVENT_AA_LOSS,
+	EVENT_SPELL_BLOCKED,
 
 	// Add new events before these or Lua crashes
 	EVENT_SPELL_EFFECT_BOT,

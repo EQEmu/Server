@@ -50,6 +50,7 @@ public:
 		float       buffer;
 		uint32_t    client_version_mask;
 		int16_t     is_ldon_door;
+		int16_t     close_timer_ms;
 		int32_t     dz_switch_id;
 		int8_t      min_expansion;
 		int8_t      max_expansion;
@@ -96,6 +97,7 @@ public:
 			"buffer",
 			"client_version_mask",
 			"is_ldon_door",
+			"close_timer_ms",
 			"dz_switch_id",
 			"min_expansion",
 			"max_expansion",
@@ -138,6 +140,7 @@ public:
 			"buffer",
 			"client_version_mask",
 			"is_ldon_door",
+			"close_timer_ms",
 			"dz_switch_id",
 			"min_expansion",
 			"max_expansion",
@@ -214,6 +217,7 @@ public:
 		e.buffer                 = 0;
 		e.client_version_mask    = 4294967295;
 		e.is_ldon_door           = 0;
+		e.close_timer_ms         = 5000;
 		e.dz_switch_id           = 0;
 		e.min_expansion          = -1;
 		e.max_expansion          = -1;
@@ -286,11 +290,12 @@ public:
 			e.buffer                 = row[28] ? strtof(row[28], nullptr) : 0;
 			e.client_version_mask    = row[29] ? static_cast<uint32_t>(strtoul(row[29], nullptr, 10)) : 4294967295;
 			e.is_ldon_door           = row[30] ? static_cast<int16_t>(atoi(row[30])) : 0;
-			e.dz_switch_id           = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
-			e.min_expansion          = row[32] ? static_cast<int8_t>(atoi(row[32])) : -1;
-			e.max_expansion          = row[33] ? static_cast<int8_t>(atoi(row[33])) : -1;
-			e.content_flags          = row[34] ? row[34] : "";
-			e.content_flags_disabled = row[35] ? row[35] : "";
+			e.close_timer_ms         = row[31] ? static_cast<int16_t>(atoi(row[31])) : 5000;
+			e.dz_switch_id           = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.min_expansion          = row[33] ? static_cast<int8_t>(atoi(row[33])) : -1;
+			e.max_expansion          = row[34] ? static_cast<int8_t>(atoi(row[34])) : -1;
+			e.content_flags          = row[35] ? row[35] : "";
+			e.content_flags_disabled = row[36] ? row[36] : "";
 
 			return e;
 		}
@@ -354,11 +359,12 @@ public:
 		v.push_back(columns[28] + " = " + std::to_string(e.buffer));
 		v.push_back(columns[29] + " = " + std::to_string(e.client_version_mask));
 		v.push_back(columns[30] + " = " + std::to_string(e.is_ldon_door));
-		v.push_back(columns[31] + " = " + std::to_string(e.dz_switch_id));
-		v.push_back(columns[32] + " = " + std::to_string(e.min_expansion));
-		v.push_back(columns[33] + " = " + std::to_string(e.max_expansion));
-		v.push_back(columns[34] + " = '" + Strings::Escape(e.content_flags) + "'");
-		v.push_back(columns[35] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[31] + " = " + std::to_string(e.close_timer_ms));
+		v.push_back(columns[32] + " = " + std::to_string(e.dz_switch_id));
+		v.push_back(columns[33] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[34] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[35] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[36] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -411,6 +417,7 @@ public:
 		v.push_back(std::to_string(e.buffer));
 		v.push_back(std::to_string(e.client_version_mask));
 		v.push_back(std::to_string(e.is_ldon_door));
+		v.push_back(std::to_string(e.close_timer_ms));
 		v.push_back(std::to_string(e.dz_switch_id));
 		v.push_back(std::to_string(e.min_expansion));
 		v.push_back(std::to_string(e.max_expansion));
@@ -476,6 +483,7 @@ public:
 			v.push_back(std::to_string(e.buffer));
 			v.push_back(std::to_string(e.client_version_mask));
 			v.push_back(std::to_string(e.is_ldon_door));
+			v.push_back(std::to_string(e.close_timer_ms));
 			v.push_back(std::to_string(e.dz_switch_id));
 			v.push_back(std::to_string(e.min_expansion));
 			v.push_back(std::to_string(e.max_expansion));
@@ -545,11 +553,12 @@ public:
 			e.buffer                 = row[28] ? strtof(row[28], nullptr) : 0;
 			e.client_version_mask    = row[29] ? static_cast<uint32_t>(strtoul(row[29], nullptr, 10)) : 4294967295;
 			e.is_ldon_door           = row[30] ? static_cast<int16_t>(atoi(row[30])) : 0;
-			e.dz_switch_id           = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
-			e.min_expansion          = row[32] ? static_cast<int8_t>(atoi(row[32])) : -1;
-			e.max_expansion          = row[33] ? static_cast<int8_t>(atoi(row[33])) : -1;
-			e.content_flags          = row[34] ? row[34] : "";
-			e.content_flags_disabled = row[35] ? row[35] : "";
+			e.close_timer_ms         = row[31] ? static_cast<int16_t>(atoi(row[31])) : 5000;
+			e.dz_switch_id           = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.min_expansion          = row[33] ? static_cast<int8_t>(atoi(row[33])) : -1;
+			e.max_expansion          = row[34] ? static_cast<int8_t>(atoi(row[34])) : -1;
+			e.content_flags          = row[35] ? row[35] : "";
+			e.content_flags_disabled = row[36] ? row[36] : "";
 
 			all_entries.push_back(e);
 		}
@@ -605,11 +614,12 @@ public:
 			e.buffer                 = row[28] ? strtof(row[28], nullptr) : 0;
 			e.client_version_mask    = row[29] ? static_cast<uint32_t>(strtoul(row[29], nullptr, 10)) : 4294967295;
 			e.is_ldon_door           = row[30] ? static_cast<int16_t>(atoi(row[30])) : 0;
-			e.dz_switch_id           = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
-			e.min_expansion          = row[32] ? static_cast<int8_t>(atoi(row[32])) : -1;
-			e.max_expansion          = row[33] ? static_cast<int8_t>(atoi(row[33])) : -1;
-			e.content_flags          = row[34] ? row[34] : "";
-			e.content_flags_disabled = row[35] ? row[35] : "";
+			e.close_timer_ms         = row[31] ? static_cast<int16_t>(atoi(row[31])) : 5000;
+			e.dz_switch_id           = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.min_expansion          = row[33] ? static_cast<int8_t>(atoi(row[33])) : -1;
+			e.max_expansion          = row[34] ? static_cast<int8_t>(atoi(row[34])) : -1;
+			e.content_flags          = row[35] ? row[35] : "";
+			e.content_flags_disabled = row[36] ? row[36] : "";
 
 			all_entries.push_back(e);
 		}
@@ -715,6 +725,7 @@ public:
 		v.push_back(std::to_string(e.buffer));
 		v.push_back(std::to_string(e.client_version_mask));
 		v.push_back(std::to_string(e.is_ldon_door));
+		v.push_back(std::to_string(e.close_timer_ms));
 		v.push_back(std::to_string(e.dz_switch_id));
 		v.push_back(std::to_string(e.min_expansion));
 		v.push_back(std::to_string(e.max_expansion));
@@ -773,6 +784,7 @@ public:
 			v.push_back(std::to_string(e.buffer));
 			v.push_back(std::to_string(e.client_version_mask));
 			v.push_back(std::to_string(e.is_ldon_door));
+			v.push_back(std::to_string(e.close_timer_ms));
 			v.push_back(std::to_string(e.dz_switch_id));
 			v.push_back(std::to_string(e.min_expansion));
 			v.push_back(std::to_string(e.max_expansion));

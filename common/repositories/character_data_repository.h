@@ -64,6 +64,22 @@ public:
 
 		return Strings::ToUnsignedInt(row[0]);
 	}
+
+	static CharacterData FindByName(
+		Database& db,
+		const std::string& character_name
+	)
+	{
+		auto l = CharacterDataRepository::GetWhere(
+			db,
+			fmt::format(
+				"`name` = '{}' LIMIT 1",
+				Strings::Escape(character_name)
+			)
+		);
+
+		return l.empty() ? CharacterDataRepository::NewEntity() : l.front();
+	}
 };
 
 #endif //EQEMU_CHARACTER_DATA_REPOSITORY_H

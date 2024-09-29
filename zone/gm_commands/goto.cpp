@@ -2,63 +2,90 @@
 
 void command_goto(Client *c, const Seperator *sep)
 {
-	std::string arg1 = sep->arg[1];
-	std::string arg4 = sep->arg[4];
+	const uint16 arguments = sep->argnum;
 
-	bool goto_via_target_no_args = sep->arg[1][0] == '\0' && c->GetTarget();
-	bool goto_via_player_name    = !sep->IsNumber(1) && !arg1.empty();
-	bool goto_via_x_y_z          = sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3);
+	const bool goto_player   = arguments > 0 && !sep->IsNumber(1);
+	const bool goto_position = sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3);
+	const bool goto_target   = !arguments && c->GetTarget();
 
-	if (goto_via_target_no_args) {
-		c->MovePC(
-			zone->GetZoneID(),
-			zone->GetInstanceID(),
-			c->GetTarget()->GetX(),
-			c->GetTarget()->GetY(),
-			c->GetTarget()->GetZ(),
-			c->GetTarget()->GetHeading()
-		);
+	if (!goto_player && !goto_position && !goto_target) {
+		c->Message(Chat::White, "Usage: #goto [x y z] [h]");
+		c->Message(Chat::White, "Usage: #goto [player_name]");
+		c->Message(Chat::White, "Usage: #goto (Target required)");
+		return;
 	}
-	else if (goto_via_player_name) {
 
-		/**
-		 * Find them in zone first
-		 */
-		const char  *player_name       = sep->arg[1];
-		std::string player_name_string = sep->arg[1];
-		Client      *client            = entity_list.GetClientByName(player_name);
-		if (client) {
+	if (goto_player) {
+		const std::string& name = sep->arg[1];
+		Client* t = entity_list.GetClientByName(name.c_str());
+		if (t) {
 			c->MovePC(
 				zone->GetZoneID(),
 				zone->GetInstanceID(),
-				client->GetX(),
-				client->GetY(),
-				client->GetZ(),
-				client->GetHeading()
+				t->GetX(),
+				t->GetY(),
+				t->GetZ(),
+				t->GetHeading()
 			);
 
-			c->Message(Chat::Yellow, "Goto player '%s' same zone", player_name_string.c_str());
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Going to player {} in the same zone.",
+					name
+				).c_str()
+			);
+		} else if (c->GotoPlayer(name)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Going to player {} in a different zone.",
+					name
+				).c_str()
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Player {} could not be found.",
+					name
+				).c_str()
+			);
 		}
-		else if (c->GotoPlayer(player_name_string)) {
-			c->Message(Chat::Yellow, "Goto player '%s' different zone", player_name_string.c_str());
-		}
-		else {
-			c->Message(Chat::Yellow, "Player '%s' not found", player_name_string.c_str());
-		}
-	}
-	else if (goto_via_x_y_z) {
-		c->MovePC(
-			zone->GetZoneID(),
-			zone->GetInstanceID(),
+	} else if (goto_position) {
+		const glm::vec4& position = glm::vec4(
 			Strings::ToFloat(sep->arg[1]),
 			Strings::ToFloat(sep->arg[2]),
 			Strings::ToFloat(sep->arg[3]),
-			(!arg4.empty() ? Strings::ToFloat(sep->arg[4]) : c->GetHeading())
+			sep->arg[4] && Strings::IsFloat(sep->arg[4]) ? Strings::ToFloat(sep->arg[1]) : c->GetHeading()
 		);
-	}
-	else {
-		c->Message(Chat::White, "Usage: #goto [x y z] [h]");
-		c->Message(Chat::White, "Usage: #goto [player_name]");
+		c->MovePC(
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			position.x,
+			position.y,
+			position.z,
+			position.w
+		);
+	} else if (goto_target) {
+		Mob* t = c->GetTarget();
+
+		c->MovePC(
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			t->GetX(),
+			t->GetY(),
+			t->GetZ(),
+			t->GetHeading()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Going to {} in the same zone.",
+				c->GetTargetDescription(t)
+			).c_str()
+		);
 	}
 }
 

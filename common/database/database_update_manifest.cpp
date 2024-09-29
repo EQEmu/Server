@@ -4947,7 +4947,7 @@ UPDATE `aa_ability` SET `auto_grant_enabled` = 1 WHERE `grant_only` = 0 AND `cha
 		.version = 9237,
 		.description = "2023_10_15_import_13th_floor.sql",
 		.check = "SHOW COLUMNS FROM `items` LIKE 'bardeffect';",
-		.condition = "contains",
+		.condition = "missing",
 		.match = "mediumint",
 		.sql = R"(
 ALTER TABLE `items`
@@ -5467,6 +5467,285 @@ ADD COLUMN `id` int(3) UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE,
 ADD INDEX `level_skill_cap`(`skill_id`, `class_id`, `level`, `cap`);
+)",
+		.content_schema_update = true,
+	},
+	ManifestEntry{
+		.version = 9269,
+		.description = "2024_03_27_account_auto_login_charname.sql",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'auto_login_charname'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `account`
+ADD COLUMN `auto_login_charname` varchar(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `charname`;
+)"
+	},
+	ManifestEntry{
+		.version = 9270,
+		.description = "2024_04_31_content_flagging_lootdrop_entries.sql",
+		.check = "SHOW COLUMNS FROM `lootdrop_entries` LIKE 'content_flags'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `lootdrop_entries` ADD `min_expansion` tinyint(4) NOT NULL DEFAULT -1;
+ALTER TABLE `lootdrop_entries` ADD `max_expansion` tinyint(4) NOT NULL DEFAULT -1;
+ALTER TABLE `lootdrop_entries` ADD `content_flags` varchar(100) NULL;
+ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9271,
+		.description = "2024_03_10_parcel_implementation.sql",
+		.check = "SHOW TABLES LIKE 'character_parcels'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(CREATE TABLE `character_parcels` (
+				`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`char_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`slot_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`quantity` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`from_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`note` VARCHAR(1024) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`sent_date` DATETIME NULL DEFAULT NULL,
+				PRIMARY KEY (`id`) USING BTREE,
+				UNIQUE INDEX `data_constraint` (`slot_id`, `char_id`) USING BTREE
+				)
+				COLLATE='latin1_swedish_ci'
+				ENGINE=InnoDB
+				AUTO_INCREMENT=1;
+		)"
+	},
+	ManifestEntry{
+		.version     = 9272,
+		.description = "2024_04_23_add_parcel_support_for_augmented_items.sql",
+		.check       = "SHOW COLUMNS FROM `character_parcels` LIKE 'aug_slot_1'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `character_parcels`
+	ADD COLUMN `aug_slot_1` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `item_id`,
+	ADD COLUMN `aug_slot_2` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_1`,
+	ADD COLUMN `aug_slot_3` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_2`,
+	ADD COLUMN `aug_slot_4` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_3`,
+	ADD COLUMN `aug_slot_5` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_4`,
+	ADD COLUMN `aug_slot_6` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`;
+)"
+	},
+	ManifestEntry{
+		.version = 9273,
+		.description = "2024_04_24_door_close_timer.sql",
+		.check = "SHOW COLUMNS FROM `doors` LIKE 'close_timer_ms'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `doors`
+ADD COLUMN `close_timer_ms` smallint(8) UNSIGNED NOT NULL DEFAULT 5000 AFTER `is_ldon_door`;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9274,
+		.description = "2024_05_02_parcel_npc_content.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'is_parcel_merchant'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_types`
+ADD COLUMN `is_parcel_merchant` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `keeps_sold_items`;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9275,
+		.description = "2024_04_28_character_extra_haste.sql",
+		.check = "SHOW COLUMNS FROM `character_data` LIKE 'extra_haste'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_data`
+ADD COLUMN `extra_haste` int(11) NOT NULL DEFAULT 0 AFTER `wis`;
+)"
+	},
+	ManifestEntry{
+		.version = 9276,
+		.description = "2024_05_12_fix_guild_bank_dup_issue.sql",
+		.check = "SHOW COLUMNS FROM `guild_bank` WHERE FIELD = 'qty' AND Type LIKE '%unsigned';",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `guild_bank`
+	CHANGE COLUMN `qty` `qty` INT(10) NOT NULL DEFAULT '0' AFTER `itemid`;
+)"
+	},
+	ManifestEntry{
+		.version = 9277,
+		.description = "2024_05_09_parcel_enable_containers.sql",
+		.check = "SHOW TABLES LIKE 'character_parcels_containers'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `character_parcels_containers` (
+	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`parcels_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`slot_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_1` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_2` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_3` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_4` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_5` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_6` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`quantity` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `fk_character_parcels_id` (`parcels_id`) USING BTREE,
+	CONSTRAINT `fk_character_parcels_id` FOREIGN KEY (`parcels_id`) REFERENCES `character_parcels` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+)"
+	},
+	ManifestEntry{
+		.version = 9278,
+		.description = "2024_05_06_npc_greed.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'greed'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_types`
+ADD COLUMN `greed` tinyint(8) UNSIGNED NOT NULL DEFAULT 0 AFTER `merchant_id`;
+ )",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9279,
+		.description = "2024_05_13_content_flagging_npc_spells_entries.sql",
+		.check = "SHOW COLUMNS FROM `npc_spells_entries` LIKE 'content_flags'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_spells_entries` ADD `min_expansion` tinyint(4) NOT NULL DEFAULT -1;
+ALTER TABLE `npc_spells_entries` ADD `max_expansion` tinyint(4) NOT NULL DEFAULT -1;
+ALTER TABLE `npc_spells_entries` ADD `content_flags` varchar(100) NULL;
+ALTER TABLE `npc_spells_entries` ADD `content_flags_disabled` varchar(100) NULL;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version     = 9280,
+		.description = "2024_05_11_update_trader_support.sql",
+		.check       = "SHOW COLUMNS FROM `trader` LIKE 'aug_slot_1'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `trader`
+	ADD COLUMN `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+	CHANGE COLUMN `char_id` `char_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`,
+	CHANGE COLUMN `item_id` `item_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `char_id`,
+	ADD COLUMN `aug_slot_1` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `item_id`,
+	ADD COLUMN `aug_slot_2` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_1`,
+	ADD COLUMN `aug_slot_3` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_2`,
+	ADD COLUMN `aug_slot_4` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_3`,
+	ADD COLUMN `aug_slot_5` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_4`,
+	ADD COLUMN `aug_slot_6` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`,
+	CHANGE COLUMN `serialnumber` `item_sn` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_6`,
+	CHANGE COLUMN `charges` `item_charges` INT(11) NOT NULL DEFAULT '0' AFTER `item_sn`,
+	ADD COLUMN `char_entity_id` INT(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `slot_id`,
+	ADD COLUMN `char_zone_id` INT(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `char_entity_id`,
+	ADD COLUMN `active_transaction` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `char_zone_id`,
+	DROP PRIMARY KEY,
+	ADD PRIMARY KEY (`id`),
+	ADD INDEX `charid_slotid` (`char_id`, `slot_id`);
+)"
+	},
+	ManifestEntry{
+		.version     = 9281,
+		.description = "2024_06_24_update_buyer_support.sql",
+		.check       = "SHOW COLUMNS FROM `buyer` LIKE 'id'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `buyer`
+	ADD COLUMN `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+	CHANGE COLUMN `charid` `char_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`,
+	ADD COLUMN `char_entity_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `char_id`,
+	ADD COLUMN `char_name` VARCHAR(64) NULL DEFAULT NULL AFTER `char_entity_id`,
+	ADD COLUMN `char_zone_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `char_name`,
+	ADD COLUMN `char_zone_instance_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `char_zone_id`,
+	ADD COLUMN `transaction_date` DATETIME NULL DEFAULT NULL AFTER `char_zone_instance_id`,
+	ADD COLUMN `welcome_message` VARCHAR(256) NULL DEFAULT NULL AFTER `transaction_date`,
+	DROP COLUMN `buyslot`,
+	DROP COLUMN `itemid`,
+	DROP COLUMN `itemname`,
+	DROP COLUMN `quantity`,
+	DROP COLUMN `price`,
+	DROP PRIMARY KEY,
+	ADD PRIMARY KEY (`id`) USING BTREE,
+	ADD INDEX `charid` (`char_id`);
+
+CREATE TABLE `buyer_buy_lines` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`buyer_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+	`char_id` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`buy_slot_id` INT(11) NOT NULL DEFAULT '0',
+	`item_id` INT(11) NOT NULL DEFAULT '0',
+	`item_qty` INT(11) NOT NULL DEFAULT '0',
+	`item_price` INT(11) NOT NULL DEFAULT '0',
+	`item_icon` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`item_name` VARCHAR(64) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `buyerid_charid_buyslotid` (`buyer_id`, `char_id`, `buy_slot_id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1;
+
+CREATE TABLE `buyer_trade_items` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`buyer_buy_lines_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+	`item_id` INT(11) NOT NULL DEFAULT '0',
+	`item_qty` INT(11) NOT NULL DEFAULT '0',
+	`item_icon` INT(11) NOT NULL DEFAULT '0',
+	`item_name` VARCHAR(64) NOT NULL DEFAULT '0' COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `buyerbuylinesid` (`buyer_buy_lines_id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1;
+)"
+	},
+	ManifestEntry{
+		.version = 9282,
+		.description = "2024_08_02_spell_buckets_comparison.sql",
+		.check = "SHOW COLUMNS FROM `spell_buckets` LIKE 'bucket_comparison'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `spell_buckets`
+CHANGE COLUMN `spellid` `spell_id` int UNSIGNED NOT NULL FIRST,
+CHANGE COLUMN `key` `bucket_name` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `spell_id`,
+CHANGE COLUMN `value` `bucket_value` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `bucket_name`,
+ADD COLUMN `bucket_comparison` tinyint UNSIGNED NOT NULL DEFAULT 0 AFTER `bucket_value`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`spell_id`) USING BTREE;
+)"
+	},
+	ManifestEntry{
+		.version     = 9283,
+		.description = "2024_08_05_fix_client_hotbar",
+		.check       = "SHOW COLUMNS FROM `inventory` LIKE 'guid'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `inventory`
+	ADD COLUMN `guid` BIGINT UNSIGNED NULL DEFAULT '0' AFTER `ornament_hero_model`;
+ALTER TABLE `inventory_snapshots`
+	ADD COLUMN `guid` BIGINT UNSIGNED NULL DEFAULT '0' AFTER `ornament_hero_model`;
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry

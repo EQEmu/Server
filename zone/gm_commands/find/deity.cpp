@@ -3,46 +3,45 @@
 void FindDeity(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
-		const auto  deity_id   = static_cast<EQ::deity::DeityType>(Strings::ToInt(sep->arg[2]));
-		const auto& deity_name = EQ::deity::GetDeityName(deity_id);
-		if (!deity_name.empty()) {
-			const auto deity_bit = EQ::deity::GetDeityBitmask(deity_id);
-
+		const uint32 deity_id = Strings::ToUnsignedInt(sep->arg[2]);
+		const std::string& deity_name = Deity::GetName(deity_id);
+		if (Strings::EqualFold(deity_name, "UNKNOWN DEITY")) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Deity {} | {} ({})",
-					deity_id,
-					deity_name,
-					Strings::Commify(deity_bit)
+					"Deity ID {} does not exist.",
+					deity_id
 				).c_str()
 			);
-
 			return;
 		}
+
+		const uint32 deity_bitmask = Deity::GetBitmask(deity_id);
 
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Deity ID {} was not found.",
-				deity_id
+				"Deity {} | {} ({})",
+				deity_id,
+				deity_name,
+				Strings::Commify(deity_bitmask)
 			).c_str()
 		);
 
 		return;
 	}
 
-	const auto& search_criteria = Strings::ToLower(sep->argplus[2]);
+	const std::string& search_criteria = Strings::ToLower(sep->argplus[2]);
 
-	auto found_count = 0;
+	uint32 found_count = 0;
 
-	for (const auto& d : EQ::deity::GetDeityMap()) {
-		const auto& deity_name_lower = Strings::ToLower(d.second);
+	for (const auto& d : deity_names) {
+		const std::string& deity_name_lower = Strings::ToLower(d.second);
 		if (!Strings::Contains(deity_name_lower, search_criteria)) {
 			continue;
 		}
 
-		const auto deity_bit = EQ::deity::GetDeityBitmask(d.first);
+		const uint32 deity_bitmask = Deity::GetBitmask(d.first);
 
 		c->Message(
 			Chat::White,
@@ -50,7 +49,7 @@ void FindDeity(Client *c, const Seperator *sep)
 				"Deity {} | {} ({})",
 				d.first,
 				d.second,
-				Strings::Commify(deity_bit)
+				Strings::Commify(deity_bitmask)
 			).c_str()
 		);
 

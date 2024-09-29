@@ -138,7 +138,7 @@ void ClientListEntry::SetOnline(CLE_Status iOnline)
 		"Online status [{}] ({}) status [{}] ({})",
 		AccountName(),
 		AccountID(),
-		CLEStatusString[CLE_Status::Online],
+		CLEStatusString[iOnline],
 		static_cast<int>(iOnline)
 	);
 

@@ -25,15 +25,6 @@ namespace Archetype {
 	constexpr uint8 Melee  = 3;
 };
 
-#define CON_GREEN		2
-#define CON_LIGHTBLUE	18
-#define CON_BLUE		4
-#define CON_WHITE		10
-#define CON_WHITE_TITANIUM		20
-#define CON_YELLOW		15
-#define CON_RED			13
-#define CON_GRAY		6
-
 #define DMG_BLOCKED		-1
 #define DMG_PARRIED		-2
 #define DMG_RIPOSTED		-3
@@ -287,7 +278,6 @@ struct StatBonuses {
 	int32	AC;
 	int64	HP;
 	int64	HPRegen;
-	int64	MaxHP;
 	int64	ManaRegen;
 	int64	EnduranceRegen;
 	int64	Mana;
@@ -346,6 +336,7 @@ struct StatBonuses {
 	int32	hastetype2;
 	int32	hastetype3;
 	int32	inhibitmelee;
+	int32	increase_archery;
 	float	AggroRange;							// when calculate just replace original value with this
 	float	AssistRange;
 	int32	skillmod[EQ::skills::HIGHEST_SKILL + 1];
@@ -413,7 +404,7 @@ struct StatBonuses {
 	int32	MeleeLifetap;						//i
 	int32	Vampirism;							//i
 	int32	HealRate;							// Spell effect that influences effectiveness of heals
-	int32	MaxHPChange;						// Spell Effect
+	int64	PercentMaxHPChange;					// base: Max HP change by percentage value from spell effect/item worn effect/aa
 	int16	SkillDmgTaken[EQ::skills::HIGHEST_SKILL + 2];		// All Skills + -1
 	int32	HealAmt;							// Item Effect
 	int32	SpellDmg;							// Item Effect
@@ -445,7 +436,8 @@ struct StatBonuses {
 	int32	SongRange;							// increases range of beneficial bard songs
 	uint32	HPToManaConvert;					// Uses HP to cast spells at specific conversion
 	int32	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
-	int16	FocusEffectsWorn[HIGHEST_FOCUS+1];	// Optional to allow focus effects to be applied additively from worn slot
+	int16	FocusEffectsWorn[HIGHEST_FOCUS+1];	// Optional to allow focus effects to be applied additively from worn slot, limits do not apply
+	int32	FocusEffectsWornWithLimits[HIGHEST_FOCUS + 1];// Optional to allow focus effects to be applied additively from worn slot, limits apply
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
 	int32	SkillDamageAmount2[EQ::skills::HIGHEST_SKILL + 2];	// Adds skill specific damage
 	uint32	NegateAttacks[3];					// 0 = bool HasEffect 1 = Buff Slot 2 = Max damage absorbed per hit
@@ -511,6 +503,10 @@ struct StatBonuses {
 	uint8	invisibility;						// invisibility level
 	uint8	invisibility_verse_undead;			// IVU level
 	uint8	invisibility_verse_animal;			// IVA level
+	int32	ShieldTargetSpa[2];                 // [0] base = % mitigation amount, [1] buff slot
+	uint32  ReduceSkill[EQ::skills::HIGHEST_SKILL + 2]; //reduce value of a skill by percentage
+	int64	FlatMaxHPChange;					// base: Max HP change by a flat amount value from spell effect/item worn effect/aa
+
 
 	// AAs
 	int32	TrapCircumvention;					// reduce chance to trigger a trap.
@@ -637,8 +633,8 @@ namespace SBIndex {
 	constexpr uint16 SKILLATK_PROC_SPELL_ID                 = 0; // SPA 288
 	constexpr uint16 SKILLATK_PROC_CHANCE                   = 1; // SPA 288
 	constexpr uint16 SKILLATK_PROC_SKILL                    = 2; // SPA 288
-	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 0; // SPA 219
-	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 1; // SPA 219
+	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 0; // SPA 219
+	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 1; // SPA 219
 	constexpr uint16 DOUBLE_RIPOSTE_CHANCE                  = 0; // SPA 223
 	constexpr uint16 DOUBLE_RIPOSTE_SKILL_ATK_CHANCE        = 1; // SPA 223
 	constexpr uint16 DOUBLE_RIPOSTE_SKILL                   = 2; // SPA 223
@@ -656,6 +652,8 @@ namespace SBIndex {
 	constexpr uint16 COMBAT_PROC_SPELL_ID                   = 1; // SPA
 	constexpr uint16 COMBAT_PROC_RATE_MOD                   = 2; // SPA
 	constexpr uint16 COMBAT_PROC_REUSE_TIMER                = 3; // SPA
+	constexpr uint16 SHIELD_TARGET_MITIGATION_PERCENT       = 0; // SPA 463
+	constexpr uint16 SHIELD_TARGET_BUFFSLOT                 = 1; // SPA 463
 };
 
 

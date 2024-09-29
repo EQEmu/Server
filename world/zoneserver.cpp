@@ -1410,6 +1410,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadLevelEXPMods:
 		case ServerOP_ReloadMerchants:
 		case ServerOP_ReloadNPCEmotes:
+		case ServerOP_ReloadNPCSpells:
 		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
 		case ServerOP_ReloadStaticZoneData:
@@ -1423,6 +1424,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadLoot:
 		case ServerOP_RezzPlayerAccept:
 		case ServerOP_SpawnStatusChange:
+		case ServerOP_TraderMessaging:
 		case ServerOP_UpdateSpawn:
 		case ServerOP_WWDialogueWindow:
 		case ServerOP_WWLDoNUpdate:
@@ -1729,6 +1731,61 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				safe_delete(sp)
 			}
 			break;
+		}
+		case ServerOP_ParcelDelivery: {
+			auto in = (Parcel_Struct *) pack->pBuffer;
+			if (strlen(in->send_to) == 0) {
+				LogError(
+					"ServerOP_ParcelDelivery pack received with invalid character name of [{}]",
+					in->send_to);
+				return;
+			}
+
+			zoneserver_list.SendPacketToBootedZones(pack);
+			break;
+		}
+		case ServerOP_BazaarPurchase: {
+			auto in = (BazaarPurchaseMessaging_Struct *)pack->pBuffer;
+			if (in->trader_buy_struct.trader_id <= 0) {
+				LogTrading(
+					"World Message <red>[{}] received with invalid trader_id <red>[{}]",
+					"ServerOP_BazaarPurchase",
+					in->trader_buy_struct.trader_id
+				);
+				return;
+			}
+
+			zoneserver_list.SendPacket(Zones::BAZAAR, pack);
+			break;
+		}
+		case ServerOP_BuyerMessaging: {
+			auto in = (BuyerMessaging_Struct *)pack->pBuffer;
+			switch (in->action) {
+				case Barter_AddToBarterWindow:
+				case Barter_RemoveFromBarterWindow: {
+					if (in->buyer_id <= 0) {
+						LogTrading("World Message <red>[{}] received with invalid buyer_id <red>[{}]",
+								   "ServerOP_BecomeBuyer",
+								   in->buyer_id
+						);
+						return;
+					}
+
+					zoneserver_list.SendPacketToBootedZones(pack);
+					break;
+				}
+				case Barter_SellItem: {
+					zoneserver_list.SendPacket(Zones::BAZAAR, pack);
+					break;
+				}
+				case Barter_FailedTransaction:
+				case Barter_BuyerTransactionComplete: {
+					zoneserver_list.SendPacket(in->zone_id, pack);
+					break;
+				}
+				default:
+					return;
+			}
 		}
 		default: {
 			LogInfo("Unknown ServerOPcode from zone {:#04x}, size [{}]", pack->opcode, pack->size);

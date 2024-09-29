@@ -123,6 +123,10 @@ bool Client::HasTaskRequestCooldownTimer()
 		task_request_timer.Disable();
 	}
 
+	if (GetGM()) {
+		Message(Chat::White, "Your GM flag prevents you from having a task request cooldown.");
+	}
+
 	return (!GetGM() && task_request_timer.Enabled());
 }
 

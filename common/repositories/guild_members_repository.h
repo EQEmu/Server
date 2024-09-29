@@ -190,6 +190,17 @@ public:
 
 		return UpdateOne(db, m);
 	}
+
+	static void ClearOnlineStatus(Database &db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `online` = 0 "
+				"WHERE `online` = 1;",
+				TableName()
+			)
+		);
+	}
 };
 
 #endif //EQEMU_GUILD_MEMBERS_REPOSITORY_H

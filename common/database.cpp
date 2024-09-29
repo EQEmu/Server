@@ -35,6 +35,7 @@
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_languages_repository.h"
 #include "../common/repositories/character_leadership_abilities_repository.h"
+#include "../common/repositories/character_parcels_repository.h"
 #include "../common/repositories/character_skills_repository.h"
 #include "../common/repositories/data_buckets_repository.h"
 #include "../common/repositories/group_id_repository.h"
@@ -49,6 +50,7 @@
 #include "../common/repositories/raid_members_repository.h"
 #include "../common/repositories/reports_repository.h"
 #include "../common/repositories/variables_repository.h"
+#include "../common/events/player_event_logs.h"
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -64,6 +66,7 @@
 #endif
 
 #include "database.h"
+#include "data_verification.h"
 #include "eq_packet_structs.h"
 #include "extprofile.h"
 #include "strings.h"
@@ -74,6 +77,9 @@
 #include "repositories/zone_repository.h"
 #include "zone_store.h"
 #include "repositories/merchantlist_temp_repository.h"
+#include "repositories/bot_data_repository.h"
+#include "repositories/trader_repository.h"
+#include "repositories/buyer_repository.h"
 
 extern Client client;
 
@@ -139,7 +145,7 @@ uint32 Database::CheckLogin(
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	if (status) {
 		*status = e.status;
@@ -203,9 +209,19 @@ void Database::LoginIP(uint32 account_id, const std::string& login_ip)
 	QueryDatabase(query);
 }
 
-int16 Database::CheckStatus(uint32 account_id)
+int16 Database::GetAccountStatus(uint32 account_id)
 {
-	return AccountRepository::GetAccountStatus(*this, account_id);
+	auto e = AccountRepository::FindOne(*this, account_id);
+
+	if (e.suspendeduntil > 0 && e.suspendeduntil < std::time(nullptr)) {
+		e.status         = 0;
+		e.suspendeduntil = 0;
+		e.suspend_reason = "";
+
+		AccountRepository::UpdateOne(*this, e);
+	}
+
+	return e.status;
 }
 
 uint32 Database::CreateAccount(
@@ -260,7 +276,7 @@ bool Database::SetAccountStatus(const std::string& account_name, int16 status)
 		return false;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	e.status = status;
 
@@ -269,16 +285,31 @@ bool Database::SetAccountStatus(const std::string& account_name, int16 status)
 
 bool Database::ReserveName(uint32 account_id, const std::string& name)
 {
-	const auto& l = CharacterDataRepository::GetWhere(
-		*this,
-		fmt::format(
-			"`name` = '{}'",
-			Strings::Escape(name)
-		)
+	const std::string& where_filter = fmt::format(
+		"`name` = '{}'",
+		Strings::Escape(name)
 	);
 
-	if (!l.empty()) {
-		LogInfo("Account: [{}] tried to request name: [{}], but it is already taken", account_id, name);
+	if (RuleB(Bots, Enabled)) {
+		const auto& b = BotDataRepository::GetWhere(*this, where_filter);
+
+		if (!b.empty()) {
+			LogInfo("Account [{}] requested name [{}] but name is already taken by a bot", account_id, name);
+			return false;
+		}
+	}
+
+	const auto& c = CharacterDataRepository::GetWhere(*this, where_filter);
+
+	if (!c.empty()) {
+		LogInfo("Account [{}] requested name [{}] but name is already taken by a character", account_id, name);
+		return false;
+	}
+
+	const auto& n = NpcTypesRepository::GetWhere(*this, where_filter);
+
+	if (!n.empty()) {
+		LogInfo("Account [{}] requested name [{}] but name is already taken by an NPC", account_id, name);
 		return false;
 	}
 
@@ -293,13 +324,15 @@ bool Database::ReserveName(uint32 account_id, const std::string& name)
 		return false;
 	}
 
-	const int guild_id = RuleI(Character, DefaultGuild);
+	const uint32 guild_id   = RuleI(Character, DefaultGuild);
+	const uint8  guild_rank = EQ::Clamp(RuleI(Character, DefaultGuildRank), 0, 8);
 	if (guild_id != 0) {
 		if (e.id) {
 			auto g = GuildMembersRepository::NewEntity();
 
 			g.char_id  = e.id;
 			g.guild_id = guild_id;
+			g.rank_    = guild_rank;
 
 			GuildMembersRepository::InsertOne(*this, g);
 		}
@@ -327,7 +360,7 @@ bool Database::DeleteCharacter(const std::string& name)
 		return false;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	if (!e.id) {
 		return false;
@@ -565,7 +598,7 @@ uint32 Database::GetCharacterID(const std::string& name)
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	return e.id;
 }
@@ -584,7 +617,7 @@ uint32 Database::GetAccountIDByChar(const std::string& name, uint32* character_i
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	if (character_id) {
 		*character_id = e.id;
@@ -619,7 +652,7 @@ uint32 Database::GetAccountIDByName(const std::string& account_name, const std::
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	if (status) {
 		*status = e.status;
@@ -632,7 +665,7 @@ uint32 Database::GetAccountIDByName(const std::string& account_name, const std::
 	return e.id;
 }
 
-const std::string& Database::GetAccountName(uint32 account_id, uint32* lsaccount_id)
+const std::string Database::GetAccountName(uint32 account_id, uint32* lsaccount_id)
 {
 	const auto& e = AccountRepository::FindOne(*this, account_id);
 
@@ -647,28 +680,28 @@ const std::string& Database::GetAccountName(uint32 account_id, uint32* lsaccount
 	return e.name;
 }
 
-const std::string& Database::GetCharName(uint32 character_id)
+const std::string Database::GetCharName(uint32 character_id)
 {
 	const auto& e = CharacterDataRepository::FindOne(*this, character_id);
 
 	return e.id ? e.name : std::string();
 }
 
-const std::string& Database::GetCharNameByID(uint32 character_id)
+const std::string Database::GetCharNameByID(uint32 character_id)
 {
 	const auto& e = CharacterDataRepository::FindOne(*this, character_id);
 
 	return e.id ? e.name : std::string();
 }
 
-const std::string& Database::GetNPCNameByID(uint32 npc_id)
+const std::string Database::GetNPCNameByID(uint32 npc_id)
 {
 	const auto& e = NpcTypesRepository::FindOne(*this, npc_id);
 
 	return e.id ? e.name : std::string();
 }
 
-const std::string& Database::GetCleanNPCNameByID(uint32 npc_id)
+const std::string Database::GetCleanNPCNameByID(uint32 npc_id)
 {
 	const auto& e = NpcTypesRepository::FindOne(*this, npc_id);
 
@@ -738,7 +771,7 @@ bool Database::SetVariable(const std::string& name, const std::string& value)
 	auto l = VariablesRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`name` = '{}'",
+			"`varname` = '{}'",
 			Strings::Escape(name)
 		)
 	);
@@ -747,7 +780,7 @@ bool Database::SetVariable(const std::string& name, const std::string& value)
 		return false;
 	}
 
-	auto variable = l.front();
+	auto& variable = l.front();
 
 	variable.value = value;
 
@@ -874,7 +907,7 @@ uint32 Database::GetAccountIDFromLSID(
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	if (in_account_name) {
 		strcpy(in_account_name, e.name.c_str());
@@ -908,22 +941,38 @@ bool Database::UpdateName(const std::string& old_name, const std::string& new_na
 		return false;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	e.name = new_name;
 
 	return CharacterDataRepository::UpdateOne(*this, e);
 }
 
-bool Database::CheckUsedName(const std::string& name)
+bool Database::IsNameUsed(const std::string& name)
 {
-	return !CharacterDataRepository::GetWhere(
+	if (RuleB(Bots, Enabled)) {
+		const auto& bot_data = BotDataRepository::GetWhere(
+			*this,
+			fmt::format(
+				"`name` = '{}'",
+				Strings::Escape(name)
+			)
+		);
+
+		if (!bot_data.empty()) {
+			return true;
+		}
+	}
+
+	const auto& character_data = CharacterDataRepository::GetWhere(
 		*this,
 		fmt::format(
 			"`name` = '{}'",
 			Strings::Escape(name)
 		)
-	).empty();
+	);
+
+	return !character_data.empty();
 }
 
 uint32 Database::GetServerType()
@@ -934,7 +983,7 @@ uint32 Database::GetServerType()
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	return Strings::ToUnsignedInt(e.value);
 }
@@ -964,7 +1013,7 @@ bool Database::MoveCharacterToZone(const std::string& name, uint32 zone_id)
 		return false;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	e.zone_id = zone_id;
 
@@ -986,7 +1035,7 @@ bool Database::UpdateLiveChar(const std::string& name, uint32 account_id)
 	return AccountRepository::UpdateOne(*this, e);
 }
 
-const std::string& Database::GetLiveChar(uint32 account_id)
+const std::string Database::GetLiveChar(uint32 account_id)
 {
 	auto e = AccountRepository::FindOne(*this, account_id);
 
@@ -1080,7 +1129,7 @@ uint32 Database::GetGroupID(const std::string& name)
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	return e.group_id;
 }
@@ -1099,7 +1148,7 @@ std::string Database::GetGroupLeaderForLogin(const std::string& character_name)
 		return std::string();
 	}
 
-	auto group = g.front();
+	auto& group = g.front();
 
 	const uint32 group_id = group.group_id;
 
@@ -1108,29 +1157,27 @@ std::string Database::GetGroupLeaderForLogin(const std::string& character_name)
 	return e.gid ? e.leadername : std::string();
 }
 
-void Database::SetGroupLeaderName(uint32 group_id, const std::string& name)
+void Database::SetGroupLeaderName(uint32 group_id, const std::string &name)
 {
-	auto e = GroupLeadersRepository::FindOne(*this, group_id);
+    auto e       = GroupLeadersRepository::FindOne(*this, group_id);
 
-	e.leadername = name;
+    e.leadername = name;
 
-	const int updated_leader = GroupLeadersRepository::UpdateOne(*this, e);
+    if (e.gid) {
+        GroupLeadersRepository::UpdateOne(*this, e);
+        return;
+    }
 
-	if (!updated_leader) {
-		return;
-	}
+    e.gid            = group_id;
+    e.marknpc        = std::string();
+    e.leadershipaa   = std::string();
+    e.maintank       = std::string();
+    e.assist         = std::string();
+    e.puller         = std::string();
+    e.mentoree       = std::string();
+    e.mentor_percent = 0;
 
-	e.gid            = group_id;
-	e.leadername     = name;
-	e.marknpc        = std::string();
-	e.leadershipaa   = std::string();
-	e.maintank       = std::string();
-	e.assist         = std::string();
-	e.puller         = std::string();
-	e.mentoree       = std::string();
-	e.mentor_percent = 0;
-
-	GroupLeadersRepository::UpdateOne(*this, e);
+    GroupLeadersRepository::ReplaceOne(*this, e);
 }
 
 std::string Database::GetGroupLeaderName(uint32 group_id)
@@ -1146,7 +1193,7 @@ std::string Database::GetGroupLeaderName(uint32 group_id)
 		return std::string();
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	return row[0];
 }
@@ -1163,7 +1210,7 @@ char* Database::GetGroupLeadershipInfo(
 	GroupLeadershipAA_Struct* GLAA
 )
 {
-	const auto& e = GroupLeadersRepository::FindOne(*this, group_id);
+	auto e = GroupLeadersRepository::FindOne(*this, group_id);
 
 	if (!e.gid) {
 		if (leaderbuf) {
@@ -1224,9 +1271,9 @@ char* Database::GetGroupLeadershipInfo(
 	if (mentor_percent) {
 		*mentor_percent = e.mentor_percent;
 	}
-
-	if (GLAA && e.leadershipaa.length() == sizeof(GroupLeadershipAA_Struct)) {
-		memcpy(GLAA, e.leadershipaa.c_str(), sizeof(GroupLeadershipAA_Struct));
+	if(GLAA && e.leadershipaa.length() == sizeof(GroupLeadershipAA_Struct)) {
+		Decode(e.leadershipaa);
+		memcpy(GLAA, e.leadershipaa.data(), sizeof(GroupLeadershipAA_Struct));
 	}
 
 	return leaderbuf;
@@ -1330,12 +1377,12 @@ uint32 Database::GetRaidID(const std::string& name)
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	return e.raidid;
 }
 
-const std::string& Database::GetRaidLeaderName(uint32 raid_id)
+const std::string Database::GetRaidLeaderName(uint32 raid_id)
 {
 	const auto& l = RaidMembersRepository::GetWhere(
 		*this,
@@ -1350,7 +1397,7 @@ const std::string& Database::GetRaidLeaderName(uint32 raid_id)
 		return "UNKNOWN";
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	return e.name;
 }
@@ -1407,7 +1454,7 @@ void Database::GetGroupLeadershipInfo(
 		return;
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	if (maintank) {
 		strcpy(maintank, row[0]);
@@ -1479,7 +1526,7 @@ void Database::GetRaidLeadershipInfo(
 		return;
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	if (maintank) {
 		strcpy(maintank, row[0]);
@@ -1601,16 +1648,29 @@ uint32 Database::GetGuildIDByCharID(uint32 character_id)
 
 uint32 Database::GetGroupIDByCharID(uint32 character_id)
 {
-	const auto& e = GroupIdRepository::FindOne(*this, character_id);
+	const auto& e = GroupIdRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`character_id` = {}",
+			character_id
+		)
+	);
 
-	return e.character_id ? e.group_id : 0;
+	return e.size() == 1 ? e.front().group_id : 0;
 }
 
 uint32 Database::GetRaidIDByCharID(uint32 character_id)
 {
-	const auto& e = RaidMembersRepository::FindOne(*this, character_id);
 
-	return e.charid ? e.raidid : 0;
+	const auto& e = RaidMembersRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`charid` = {}",
+			character_id
+		)
+	);
+
+	return e.size() == 1 ? e.front().raidid : 0;
 }
 
 int64 Database::CountInvSnapshots()
@@ -1653,7 +1713,7 @@ struct TimeOfDay_Struct Database::LoadTime(time_t& realtime)
 		return t;
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	uint8  hour      = Strings::ToUnsignedInt(row[1]);
 	time_t realtime_ = Strings::ToBigInt(row[5]);
@@ -1705,14 +1765,14 @@ int Database::GetIPExemption(const std::string& account_ip)
 		return RuleI(World, MaxClientsPerIP);
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	return e.exemption_amount;
 }
 
 void Database::SetIPExemption(const std::string& account_ip, int exemption_amount)
 {
-	const auto& l = IpExemptionsRepository::GetWhere(
+	auto l = IpExemptionsRepository::GetWhere(
 		*this,
 		fmt::format(
 			"`exemption_ip` = '{}'",
@@ -1731,7 +1791,7 @@ void Database::SetIPExemption(const std::string& account_ip, int exemption_amoun
 		return;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	e.exemption_amount = exemption_amount;
 
@@ -1753,7 +1813,7 @@ int Database::GetInstanceID(uint32 character_id, uint32 zone_id)
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	return e.id;
 }
@@ -1777,7 +1837,7 @@ bool Database::CopyCharacter(
 		return false;
 	}
 
-	auto character = characters.front();
+	auto& character = characters.front();
 
 	const uint32 source_character_id = character.id;
 
@@ -1794,13 +1854,13 @@ bool Database::CopyCharacter(
 		return false;
 	}
 
-	auto account = accounts.front();
+	auto& account = accounts.front();
 
 	const int destination_account_id = account.id;
 
 	const int64 new_character_id = (CharacterDataRepository::GetMaxId(*this) + 1);
 
-	std::vector<std::string> tables_to_zero_id = { "keyring", "data_buckets" };
+	std::vector<std::string> tables_to_zero_id = { "keyring", "data_buckets", "character_instance_safereturns" };
 
 	TransactionBegin();
 
@@ -2012,4 +2072,78 @@ void Database::SourceSqlFromUrl(const std::string& url)
 	} catch (std::invalid_argument iae) {
 		LogError("URI parser error [{}]", iae.what());
 	}
+}
+
+void Database::Encode(std::string &in)
+{
+	for(int i = 0; i < in.length(); i++) {
+		in.at(i) += char('0');
+	}
+};
+
+void Database::Decode(std::string &in)
+{
+	for(int i = 0; i < in.length(); i++) {
+		in.at(i) -= char('0');
+	}
+};
+
+void Database::PurgeCharacterParcels()
+{
+	auto filter  = fmt::format("sent_date < (NOW() - INTERVAL {} DAY)", RuleI(Parcel, ParcelPruneDelay));
+	auto results = CharacterParcelsRepository::GetWhere(*this, filter);
+	auto prune   = CharacterParcelsRepository::DeleteWhere(*this, filter);
+
+	PlayerEvent::ParcelDelete                  pd{};
+	PlayerEventLogsRepository::PlayerEventLogs pel{};
+	pel.event_type_id   = PlayerEvent::PARCEL_DELETE;
+	pel.event_type_name = PlayerEvent::EventName[pel.event_type_id];
+	std::stringstream ss;
+	for (auto const   &r: results) {
+		pd.from_name  = r.from_name;
+		pd.item_id    = r.item_id;
+		pd.aug_slot_1 = r.aug_slot_1;
+		pd.aug_slot_2 = r.aug_slot_2;
+		pd.aug_slot_3 = r.aug_slot_3;
+		pd.aug_slot_4 = r.aug_slot_4;
+		pd.aug_slot_5 = r.aug_slot_5;
+		pd.aug_slot_6 = r.aug_slot_6;
+		pd.note       = r.note;
+		pd.quantity   = r.quantity;
+		pd.sent_date  = r.sent_date;
+		pd.char_id    = r.char_id;
+		{
+			cereal::JSONOutputArchiveSingleLine ar(ss);
+			pd.serialize(ar);
+		}
+
+		pel.event_data = ss.str();
+		pel.created_at = std::time(nullptr);
+
+		player_event_logs.AddToQueue(pel);
+
+		ss.str("");
+		ss.clear();
+	}
+
+	LogInfo(
+		"Purged <yellow>[{}] parcels that were over <yellow>[{}] days old.",
+		results.size(),
+		RuleI(Parcel, ParcelPruneDelay)
+	);
+}
+
+void Database::ClearGuildOnlineStatus()
+{
+	GuildMembersRepository::ClearOnlineStatus(*this);
+}
+
+void Database::ClearTraderDetails()
+{
+	TraderRepository::Truncate(*this);
+}
+
+void Database::ClearBuyerDetails()
+{
+	BuyerRepository::DeleteBuyer(*this, 0);
 }

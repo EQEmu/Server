@@ -43,7 +43,7 @@
 #define ServerOP_OnlineGuildMembersResponse	0x0016
 #define ServerOP_LFGuildUpdate		0x0017
 
-#define ServerOP_FlagUpdate			0x0018	// GM Flag updated for character, refresh the memory cache
+#define ServerOP_FlagUpdate			0x0018	// GM flag updated for character, refresh the memory cache
 #define ServerOP_GMGoto				0x0019
 #define ServerOP_MultiLineMsg		0x001A
 #define ServerOP_Lock				0x001B	// For #lock/#unlock inside server
@@ -113,6 +113,9 @@
 #define ServerOP_GuildSendGuildList				  0x007E
 #define ServerOP_GuildMembersList                 0x007F
 
+#define ServerOP_ParcelDelivery                   0x0090
+#define ServerOP_ParcelPrune                      0x0091
+
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
 #define	ServerOP_RaidDisband		0x0102 //in use
@@ -134,6 +137,10 @@
 #define ServerOP_GroupCancelInvite	0x0112
 #define ServerOP_RaidMOTD			0x0113
 #define ServerOP_RaidNote           0x0114
+
+#define ServerOP_TraderMessaging    0x0120
+#define ServerOP_BazaarPurchase     0x0121
+#define ServerOP_BuyerMessaging     0x0122
 
 #define ServerOP_InstanceUpdateTime			0x014F
 #define ServerOP_AdventureRequest			0x0150
@@ -274,6 +281,7 @@
 #define ServerOP_ReloadLoot 0x4127
 #define ServerOP_ReloadBaseData 0x4128
 #define ServerOP_ReloadSkillCaps 0x4129
+#define ServerOP_ReloadNPCSpells 0x4130
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
@@ -1932,6 +1940,27 @@ struct ServerOP_GuildMessage_Struct {
 	char   note[256]{0};
     char   channel[2048]{0};
     char   url[2048]{0};
+};
+
+struct TraderMessaging_Struct {
+	uint32 action;
+	uint32 zone_id;
+	uint32 trader_id;
+	uint32 entity_id;
+	char   trader_name[64];
+};
+
+struct BazaarPurchaseMessaging_Struct {
+	TraderBuy_Struct trader_buy_struct;
+	uint32           item_aug_1;
+	uint32           item_aug_2;
+	uint32           item_aug_3;
+	uint32           item_aug_4;
+	uint32           item_aug_5;
+	uint32           item_aug_6;
+	uint32           buyer_id;
+	uint32           item_quantity_available;
+	uint32           id;
 };
 
 #pragma pack()
