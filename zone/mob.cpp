@@ -5017,7 +5017,7 @@ void Mob::Say(const char *format, ...)
 	int16 distance = 200;
 
 	if (RuleB(Chat, QuestDialogueUsesDialogueWindow)) {
-		for (auto &e : entity_list.GetCloseMobList(talker, (distance * distance))) {
+		for (auto &e : talker->GetCloseMobList(distance * distance))) {
 			Mob *mob = e.second;
 			if (!mob) {
 				continue;

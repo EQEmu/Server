@@ -1739,7 +1739,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			(HasOwner() && GetOwner()->IsClient() && other->IsClient())
 		)
 	) {
-		for (auto const& [id, mob] : entity_list.GetCloseMobList(other)) {
+		for (auto const& [id, mob] : other->GetCloseMobList()) {
 			if (!mob) {
 				continue;
 			}
@@ -2319,8 +2319,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//Guard Assist Code
 	if (RuleB(Character, PVPEnableGuardFactionAssist)) {
 		if (IsClient() && other->IsClient() || (HasOwner() && GetOwner()->IsClient() && other->IsClient())) {
-			auto& mob_list = entity_list.GetCloseMobList(other);
-			for (auto& e : mob_list) {
+			for (auto& e : other->GetCloseMobList()) {
 				auto mob = e.second;
 				if (!mob) {
 					continue;

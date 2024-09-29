@@ -3307,7 +3307,7 @@ bool NPC::AICheckCloseBeneficialSpells(
 	/**
 	 * Check through close range mobs
 	 */
-	for (auto & close_mob : entity_list.GetCloseMobList(caster, cast_range)) {
+	for (auto & close_mob : caster->GetCloseMobList(cast_range)) {
 		Mob *mob = close_mob.second;
 		if (!mob) {
 			continue;
@@ -3386,8 +3386,8 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 		GetID()
 	);
 
-	for (auto &close_mob : entity_list.GetCloseMobList(sender)) {
-		Mob   *mob     = close_mob.second;
+	for (auto &close_mob: sender->GetCloseMobList()) {
+		Mob *mob = close_mob.second;
 		if (!mob) {
 			continue;
 		}
