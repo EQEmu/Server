@@ -139,6 +139,13 @@ public:
 	unsigned int GetPlaySequence() const { return m_play_sequence_id; }
 
 	/**
+	 * Gets the client version
+	 *
+	 * @return
+	 */
+	LSClientVersion GetClientVersion() const { return m_client_version; }
+
+	/**
 	 * Gets the connection for this client
 	 *
 	 * @return

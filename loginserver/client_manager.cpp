@@ -93,10 +93,10 @@ ClientManager::ClientManager()
 
 	EQStreamManagerInterfaceOptions larion_opts(larion_port, false, false);
 
-	larion_stream = new EQ::Net::EQStreamManager(titanium_opts);
+	larion_stream = new EQ::Net::EQStreamManager(larion_opts);
 	larion_ops = new RegularOpcodeManager;
 
-	std::string opcodes_path = fmt::format(
+	opcodes_path = fmt::format(
 		"{}/{}",
 		path.GetServerPath(),
 		server.config.GetVariableString(
