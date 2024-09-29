@@ -35,6 +35,11 @@ void bot_command_attack(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if (!c->HasBotAttackFlag(target_mob)) {
+		target_mob->SetBotAttackFlag(c->CharacterID());
+		target_mob->bot_attack_flag_timer.Start(10000);
+	}
+
 	size_t attacker_count = 0;
 	Bot *first_attacker = nullptr;
 	sbl.remove(nullptr);

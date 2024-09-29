@@ -799,6 +799,11 @@ bool NPC::Process()
 		}
 	}
 
+	if (bot_attack_flag_timer.Check()) {
+		bot_attack_flag_timer.Disable();
+		ClearBotAttackFlags();
+	}
+
 	AI_Process();
 
 	return true;
