@@ -2957,7 +2957,7 @@ void Bot::SetOwnerTarget(Client* bot_owner) {
 	if (NOT_HOLDING && NOT_PASSIVE) {
 
 		auto attack_target = bot_owner->GetTarget();
-		if (attack_target) {
+		if (attack_target && HasBotAttackFlag(attack_target)) {
 
 			InterruptSpell();
 			WipeHateList();
