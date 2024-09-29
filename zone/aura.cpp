@@ -634,9 +634,7 @@ void Aura::ProcessTotem(Mob *owner)
 
 void Aura::ProcessEnterTrap(Mob *owner)
 {
-	auto &mob_list = GetCloseMobList(distance);
-
-	for (auto &e : mob_list) {
+	for (auto &e : GetCloseMobList(distance)) {
 		auto mob = e.second;
 		if (!mob) {
 			continue;
@@ -656,9 +654,7 @@ void Aura::ProcessEnterTrap(Mob *owner)
 
 void Aura::ProcessExitTrap(Mob *owner)
 {
-	auto &mob_list = GetCloseMobList(distance);
-
-	for (auto &e : mob_list) {
+	for (auto &e : GetCloseMobList(distance)) {
 		auto mob = e.second;
 		if (!mob) {
 			continue;
@@ -689,8 +685,7 @@ void Aura::ProcessExitTrap(Mob *owner)
 // and hard to reason about
 void Aura::ProcessSpawns()
 {
-	const auto &clients = GetCloseMobList(distance);
-	for (auto  &e : clients) {
+	for (auto &e: GetCloseMobList(distance)) {
 		if (!e.second) {
 			continue;
 		}
