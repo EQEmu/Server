@@ -4439,7 +4439,7 @@ void EntityList::QuestJournalledSayClose(
 	buf.WriteInt32(0);
 
 	if (RuleB(Chat, QuestDialogueUsesDialogueWindow)) {
-		for (auto &e : sender->GetCloseMobList(dist * dist))) {
+		for (auto &e : sender->GetCloseMobList(dist * dist)) {
 			Mob *mob = e.second;
 			if (!mob) {
 				continue;
