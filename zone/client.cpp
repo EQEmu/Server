@@ -7802,10 +7802,10 @@ void Client::SetFactionLevel(
 		content_db.GetFactionData(&faction_modifiers, class_id, race_id, deity_id, e.faction_id);
 
 		if (is_quest) {
-			if (e.npc_value > 0) {
-				e.npc_value = -std::abs(e.npc_value);
-			} else if (e.npc_value < 0) {
-				e.npc_value = std::abs(e.npc_value);
+			if (e.value > 0) {
+				e.value = -std::abs(e.value);
+			} else if (e.value < 0) {
+				e.value = std::abs(e.value);
 			}
 		}
 
