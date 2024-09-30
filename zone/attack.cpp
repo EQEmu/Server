@@ -1728,7 +1728,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			(HasOwner() && GetOwner()->IsClient() && other->IsClient())
 		)
 	) {
-		for (auto const& [id, mob] : entity_list.GetCloseMobList(other)) {
+		for (auto const& [id, mob] : other->GetCloseMobList()) {
 			if (!mob) {
 				continue;
 			}
@@ -2317,8 +2317,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//Guard Assist Code
 	if (RuleB(Character, PVPEnableGuardFactionAssist)) {
 		if (IsClient() && other->IsClient() || (HasOwner() && GetOwner()->IsClient() && other->IsClient())) {
-			auto& mob_list = entity_list.GetCloseMobList(other);
-			for (auto& e : mob_list) {
+			for (auto& e : other->GetCloseMobList()) {
 				auto mob = e.second;
 				if (!mob) {
 					continue;
@@ -3101,8 +3100,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
 
-		// entity_list.RemoveMobFromCloseLists(this);
-		close_mobs.clear();
+		m_close_mobs.clear();
 		SetID(0);
 		ApplyIllusionToCorpse(illusion_spell_id, corpse);
 

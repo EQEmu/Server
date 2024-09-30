@@ -145,50 +145,49 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	0, // in_heroic_strikethrough
 	false // in_keeps_sold_items
 ),
-  hpupdate_timer(2000),
-  camp_timer(29000),
-  process_timer(100),
-  consume_food_timer(CONSUMPTION_TIMER),
-  zoneinpacket_timer(1000),
-  linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
-  dead_timer(2000),
-  global_channel_timer(1000),
-  fishing_timer(8000),
-  endupkeep_timer(1000),
-  autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
-  client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
-  client_zone_wide_full_position_update_timer(5 * 60 * 1000),
-  tribute_timer(Tribute_duration),
-  proximity_timer(ClientProximity_interval),
-  TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
-  charm_update_timer(6000),
-  rest_timer(1),
-  pick_lock_timer(1000),
-  charm_class_attacks_timer(3000),
-  charm_cast_timer(3500),
-  qglobal_purge_timer(30000),
-  TrackingTimer(2000),
-  RespawnFromHoverTimer(0),
-  merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
-  ItemQuestTimer(500),
-  anon_toggle_timer(250),
-  afk_toggle_timer(250),
-  helm_toggle_timer(250),
-  aggro_meter_timer(AGGRO_METER_UPDATE_MS),
-  m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
-	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f,-2.0f),
-  m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
-  m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
-  last_region_type(RegionTypeUnsupported),
-  m_dirtyautohaters(false),
-  mob_close_scan_timer(6000),
-  position_update_timer(10000),
-  consent_throttle_timer(2000),
-  tmSitting(0),
-  parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
-  lazy_load_bank_check_timer(1000),
-  fast_tic_timer(250),
-  bandolier_throttle_timer(0)
+	hpupdate_timer(2000),
+	camp_timer(29000),
+	process_timer(100),
+	consume_food_timer(CONSUMPTION_TIMER),
+	zoneinpacket_timer(1000),
+	linkdead_timer(RuleI(Zone, ClientLinkdeadMS)),
+	dead_timer(2000),
+	global_channel_timer(1000),
+	fishing_timer(8000),
+	endupkeep_timer(1000),
+	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
+	m_client_npc_aggro_scan_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
+	m_client_zone_wide_full_position_update_timer(5 * 60 * 1000),
+	tribute_timer(Tribute_duration),
+	proximity_timer(ClientProximity_interval),
+	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
+	charm_update_timer(6000),
+	rest_timer(1),
+	pick_lock_timer(1000),
+	charm_class_attacks_timer(3000),
+	charm_cast_timer(3500),
+	qglobal_purge_timer(30000),
+	TrackingTimer(2000),
+	RespawnFromHoverTimer(0),
+	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
+	ItemQuestTimer(500),
+	anon_toggle_timer(250),
+	afk_toggle_timer(250),
+	helm_toggle_timer(250),
+	aggro_meter_timer(AGGRO_METER_UPDATE_MS),
+	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
+	m_ZoneSummonLocation(-2.0f, -2.0f, -2.0f, -2.0f),
+	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
+	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
+	last_region_type(RegionTypeUnsupported),
+	m_dirtyautohaters(false),
+	m_position_update_timer(10000),
+	consent_throttle_timer(2000),
+	tmSitting(0),
+	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
+	lazy_load_bank_check_timer(1000),
+    fast_tic_timer(250),
+	bandolier_throttle_timer(0)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);
@@ -447,7 +446,7 @@ Client::~Client() {
 		m_tradeskill_object = nullptr;
 	}
 
-	close_mobs.clear();
+	m_close_mobs.clear();
 
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());
@@ -9393,19 +9392,6 @@ bool Client::GotoPlayerRaid(const std::string& player_name)
 	return true;
 }
 
-glm::vec4 &Client::GetLastPositionBeforeBulkUpdate()
-{
-	return last_position_before_bulk_update;
-}
-
-/**
- * @param in_last_position_before_bulk_update
- */
-void Client::SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update)
-{
-	Client::last_position_before_bulk_update = in_last_position_before_bulk_update;
-}
-
 void Client::SendToGuildHall()
 {
 	std::string zone_short_name = "guildhall";
@@ -13068,5 +13054,100 @@ void Client::SendTopLevelInventory()
 				SendItemPacket(slot_id, inst, ItemPacketType::ItemPacketTrade);
 			}
 		}
+	}
+}
+
+// On a normal basis we limit mob movement updates based on distance
+// This ensures we send a periodic full zone update to a client that has started moving after 5 or so minutes
+//
+// For very large zones we will also force a full update based on distance
+//
+// We ignore a small distance around us so that we don't interrupt already pathing deltas as those npcs will appear
+// to full stop when they are actually still pathing
+void Client::CheckSendBulkClientPositionUpdate()
+{
+	float distance_moved                      = DistanceNoZ(m_last_position_before_bulk_update, GetPosition());
+	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetNpcPositionUpdateDistance();
+	bool  is_ready_to_update                  = (
+		m_client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
+	);
+
+	if (IsMoving() && is_ready_to_update) {
+		LogDebug("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
+
+		auto &mob_movement_manager = MobMovementManager::Get();
+		auto &mob_list             = entity_list.GetMobList();
+
+		for (auto &it : mob_list) {
+			Mob *entity = it.second;
+			if (!entity->IsNPC()) {
+				continue;
+			}
+
+			int animation_speed = 0;
+			if (entity->IsMoving()) {
+				if (entity->IsRunning()) {
+					animation_speed = (entity->IsFeared() ? entity->GetFearSpeed() : entity->GetRunspeed());
+				}
+				else {
+					animation_speed = entity->GetWalkspeed();
+				}
+			}
+
+			mob_movement_manager.SendCommandToClients(entity, 0.0, 0.0, 0.0, 0.0, animation_speed, ClientRangeAny, this);
+		}
+
+		m_last_position_before_bulk_update = GetPosition();
+	}
+}
+
+const uint16 scan_npc_aggro_timer_idle   = RuleI(Aggro, ClientAggroCheckIdleInterval);
+const uint16 scan_npc_aggro_timer_moving = RuleI(Aggro, ClientAggroCheckMovingInterval);
+
+void Client::CheckClientToNpcAggroTimer()
+{
+	LogAggroDetail(
+		"ClientUpdate [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		IsMoving() ? "" : "NOT ",
+		m_client_npc_aggro_scan_timer.GetRemainingTime()
+	);
+
+	if (IsMoving()) {
+		if (m_client_npc_aggro_scan_timer.GetRemainingTime() > scan_npc_aggro_timer_moving) {
+			LogAggroDetail("Client [{}] Restarting with moving timer", GetCleanName());
+			m_client_npc_aggro_scan_timer.Disable();
+			m_client_npc_aggro_scan_timer.Start(scan_npc_aggro_timer_moving);
+			m_client_npc_aggro_scan_timer.Trigger();
+		}
+	}
+	else if (m_client_npc_aggro_scan_timer.GetDuration() == scan_npc_aggro_timer_moving) {
+		LogAggroDetail("Client [{}] Restarting with idle timer", GetCleanName());
+		m_client_npc_aggro_scan_timer.Disable();
+		m_client_npc_aggro_scan_timer.Start(scan_npc_aggro_timer_idle);
+	}
+}
+
+void Client::ClientToNpcAggroProcess()
+{
+	if (zone->CanDoCombat() && !GetFeigned() && m_client_npc_aggro_scan_timer.Check()) {
+		int npc_scan_count = 0;
+		for (auto &close_mob: GetCloseMobList()) {
+			Mob *mob = close_mob.second;
+			if (!mob) {
+				continue;
+			}
+
+			if (mob->IsClient()) {
+				continue;
+			}
+
+			if (mob->CheckWillAggro(this) && !mob->CheckAggro(this)) {
+				mob->AddToHateList(this, 25);
+			}
+
+			npc_scan_count++;
+		}
+		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
 	}
 }

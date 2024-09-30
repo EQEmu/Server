@@ -2566,8 +2566,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	//Guard Assist Code
 	if (RuleB(Character, PVPEnableGuardFactionAssist) && spell_target && IsDetrimentalSpell(spell_id) && spell_target != this) {
 		if (IsClient() && spell_target->IsClient()|| (HasOwner() && GetOwner()->IsClient() && spell_target->IsClient())) {
-			auto& mob_list = entity_list.GetCloseMobList(spell_target);
-			for (auto& e : mob_list) {
+			for (auto& e : spell_target->GetCloseMobList()) {
 				auto mob = e.second;
 				if (!mob) {
 					continue;

@@ -648,28 +648,8 @@ bool NPC::Process()
 		}
 	}
 
-	if (mob_close_scan_timer.Check()) {
-		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
-	}
-
-	const uint16 npc_mob_close_scan_timer_moving = 6000;
-	const uint16 npc_mob_close_scan_timer_idle   = 60000;
-
-	if (mob_check_moving_timer.Check()) {
-		if (moving) {
-			if (mob_close_scan_timer.GetRemainingTime() > npc_mob_close_scan_timer_moving) {
-				LogAIScanCloseDetail("NPC [{}] Restarting with moving timer", GetCleanName());
-				mob_close_scan_timer.Disable();
-				mob_close_scan_timer.Start(npc_mob_close_scan_timer_moving);
-				mob_close_scan_timer.Trigger();
-			}
-		}
-		else if (mob_close_scan_timer.GetDuration() == npc_mob_close_scan_timer_moving) {
-			LogAIScanCloseDetail("NPC [{}] Restarting with idle timer", GetCleanName());
-			mob_close_scan_timer.Disable();
-			mob_close_scan_timer.Start(npc_mob_close_scan_timer_idle);
-		}
-	}
+	ScanCloseMobProcess();
+	CheckScanCloseMobsMovingTimer();
 
 	if (hp_regen_per_second > 0 && hp_regen_per_second_timer.Check()) {
 		if (GetHP() < GetMaxHP()) {
@@ -3374,7 +3354,7 @@ bool NPC::AICheckCloseBeneficialSpells(
 	/**
 	 * Check through close range mobs
 	 */
-	for (auto & close_mob : entity_list.GetCloseMobList(caster, cast_range)) {
+	for (auto & close_mob : caster->GetCloseMobList(cast_range)) {
 		Mob *mob = close_mob.second;
 		if (!mob) {
 			continue;
@@ -3453,8 +3433,8 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 		GetID()
 	);
 
-	for (auto &close_mob : entity_list.GetCloseMobList(sender)) {
-		Mob   *mob     = close_mob.second;
+	for (auto &close_mob: sender->GetCloseMobList()) {
+		Mob *mob = close_mob.second;
 		if (!mob) {
 			continue;
 		}
@@ -4071,4 +4051,28 @@ void NPC::DescribeSpecialAbilities(Client* c)
 	for (const auto& e : messages) {
 		c->Message(Chat::White, e.c_str());
 	}
+}
+
+void NPC::DoNpcToNpcAggroScan()
+{
+	for (auto &close_mob : GetCloseMobList(GetAggroRange())) {
+		Mob *mob = close_mob.second;
+		if (!mob) {
+			continue;
+		}
+
+		if (!mob->IsNPC()) {
+			continue;
+		}
+
+		if (CheckWillAggro(mob)) {
+			AddToHateList(mob);
+		}
+	}
+
+	AI_scan_area_timer->Disable();
+	AI_scan_area_timer->Start(
+		RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax)),
+		false
+	);
 }

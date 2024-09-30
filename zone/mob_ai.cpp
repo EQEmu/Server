@@ -1412,29 +1412,8 @@ void Mob::AI_Process() {
 				StopNavigation();
 			}
 		}
-		else if (zone->CanDoCombat() && CastToNPC()->GetNPCAggro() && AI_scan_area_timer->Check()) {
-
-			/**
-			 * NPC to NPC aggro (npc_aggro flag set)
-			 */
-			for (auto &close_mob : close_mobs) {
-				Mob *mob = close_mob.second;
-
-				if (mob->IsClient()) {
-					continue;
-				}
-
-				if (CheckWillAggro(mob)) {
-					AddToHateList(mob);
-				}
-			}
-
-			AI_scan_area_timer->Disable();
-			AI_scan_area_timer->Start(
-				RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax)),
-				false
-			);
-
+		else if (zone->CanDoCombat() && IsNPC() && CastToNPC()->GetNPCAggro() && AI_scan_area_timer->Check()) {
+			CastToNPC()->DoNpcToNpcAggroScan();
 		}
 		else if (AI_movement_timer->Check() && !IsRooted()) {
 			if (IsPet()) {

@@ -1138,7 +1138,7 @@ void EntityList::AETaunt(Client* taunter, float range, int bonus_hate)
 
 	float range_squared = range * range;
 
-	for (auto& it: entity_list.GetCloseMobList(taunter, range)) {
+	for (auto& it: taunter->GetCloseMobList(range)) {
 		Mob *them = it.second;
 		if (!them) {
 			continue;
@@ -1227,7 +1227,7 @@ void EntityList::AESpell(
 		distance
 	);
 
-	for (auto& it: entity_list.GetCloseMobList(caster_mob, distance)) {
+	for (auto& it: caster_mob->GetCloseMobList(distance)) {
 		current_mob = it.second;
 		if (!current_mob) {
 			continue;
@@ -1367,7 +1367,7 @@ void EntityList::MassGroupBuff(
 	float distance_squared     = distance * distance;
 	bool  is_detrimental_spell = IsDetrimentalSpell(spell_id);
 
-	for (auto& it: entity_list.GetCloseMobList(caster, distance)) {
+	for (auto& it: caster->GetCloseMobList(distance)) {
 		current_mob = it.second;
 		if (!current_mob) {
 			continue;
@@ -1417,7 +1417,7 @@ void EntityList::AEAttack(
 	float distance_squared = distance * distance;
 	int   current_hits     = 0;
 
-	for (auto& it: entity_list.GetCloseMobList(attacker, distance)) {
+	for (auto& it: attacker->GetCloseMobList(distance)) {
 		current_mob = it.second;
 		if (!current_mob) {
 			continue;

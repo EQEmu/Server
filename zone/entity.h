@@ -568,11 +568,7 @@ public:
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
-	void ScanCloseMobs(
-		std::unordered_map<uint16, Mob *> &close_mobs,
-		Mob *scanning_mob,
-		bool add_self_to_other_lists = false
-	);
+	void ScanCloseMobs(Mob *scanning_mob);
 
 	void GetTrapInfo(Client* c);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);

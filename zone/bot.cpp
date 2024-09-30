@@ -1557,17 +1557,7 @@ bool Bot::Process()
 		return false;
 	}
 
-	if (mob_close_scan_timer.Check()) {
-		LogAIScanCloseDetail(
-			"is_moving [{}] bot [{}] timer [{}]",
-			moving ? "true" : "false",
-			GetCleanName(),
-			mob_close_scan_timer.GetDuration()
-		);
-
-		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
-	}
-
+	ScanCloseMobProcess();
 	SpellProcess();
 
 	if (tic_timer.Check()) {

@@ -140,7 +140,7 @@ bool Client::Process() {
 		}
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
-		if (!IsMoving() && position_update_timer.Check()) {
+		if (!IsMoving() && m_position_update_timer.Check()) {
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		}
 
@@ -300,13 +300,7 @@ bool Client::Process() {
 			}
 		}
 
-		/**
-		 * Scan close range mobs
-		 * Used in aggro checks
-		 */
-		if (mob_close_scan_timer.Check()) {
-			entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
-		}
+		ScanCloseMobProcess();
 
 		if (RuleB(Inventory, LazyLoadBank)) {
 			// poll once a second to see if we are close to a banker and we haven't loaded the bank yet
@@ -694,30 +688,7 @@ bool Client::Process() {
 		}
 	}
 
-	//At this point, we are still connected, everything important has taken
-	//place, now check to see if anybody wants to aggro us.
-	// only if client is not feigned
-	if (zone->CanDoCombat() && ret && !GetFeigned() && client_scan_npc_aggro_timer.Check()) {
-		int npc_scan_count = 0;
-		for (auto & close_mob : close_mobs) {
-			Mob *mob = close_mob.second;
-
-			if (!mob) {
-				continue;
-			}
-
-			if (mob->IsClient()) {
-				continue;
-			}
-
-			if (mob->CheckWillAggro(this) && !mob->CheckAggro(this)) {
-				mob->AddToHateList(this, 25);
-			}
-
-			npc_scan_count++;
-		}
-		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
-	}
+	ClientToNpcAggroProcess();
 
 	if (client_state != CLIENT_LINKDEAD && (client_state == CLIENT_ERROR || client_state == DISCONNECTED || client_state == CLIENT_KICKED || !eqs->CheckState(ESTABLISHED)))
 	{

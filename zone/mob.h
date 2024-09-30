@@ -201,9 +201,9 @@ public:
 
 	void DisplayInfo(Mob *mob);
 
-	std::unordered_map<uint16, Mob *> close_mobs;
-	Timer                             mob_close_scan_timer;
-	Timer                             mob_check_moving_timer;
+	std::unordered_map<uint16, Mob *> m_close_mobs;
+	Timer                             m_scan_close_mobs_timer;
+	Timer                             m_mob_check_moving_timer;
 
 	// Bot attack flag
 	Timer bot_attack_flag_timer;
@@ -1513,6 +1513,10 @@ public:
 	DataBucketKey GetScopedBucketKeys();
 
 	bool IsCloseToBanker();
+
+	void ScanCloseMobProcess();
+	std::unordered_map<uint16, Mob *> &GetCloseMobList(float distance = 0.0f);
+	void CheckScanCloseMobsMovingTimer();
 
 
 	uint16 focused_pet_id;
