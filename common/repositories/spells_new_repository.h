@@ -63,11 +63,12 @@ public:
 			std::string item;
 			std::vector<std::string> columns;
 
+			// Split the line by '^' and push to the columns vector
 			while (std::getline(ss, item, '^')) {
 				columns.push_back(item);
 			}
 
-
+			// Check if columns[98] is 14 or 38, and set to 6 if so
 			if (columns[98] == "14" || columns[98] == "38") {
 				columns[98] = "6";
 			}
@@ -86,6 +87,7 @@ public:
 
 		return lines;
 	}
+
 };
 
 #endif //EQEMU_SPELLS_NEW_REPOSITORY_H

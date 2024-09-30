@@ -1403,6 +1403,7 @@ enum StatEntry
 	statStrikethrough,
 	statClairvoyance,
 	statShieldAC,
+	statDisciplineTimer25,
 	statDummyValue,
 	statMax
 };

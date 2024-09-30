@@ -3423,6 +3423,8 @@ uint32 Client::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 
 int64_t Client::GetStatEntryValue(StatEntry label)
 {
+	pTimerType timer;
+
 	switch (label)
 	{
 		case statMaxHP:
@@ -3542,7 +3544,10 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			return GetStrikeThrough();
 		case statClairvoyance:
 			return GetClair();
-
+		case statDisciplineTimer25:
+			timer = pTimerDisciplineReuseStart + 25;
+			LogDebug("Encoding disctimer 25: [{}]", p_timers.GetRemainingTime(timer));
+			return p_timers.GetRemainingTime(timer);
 		default:
 			return 0;
 	}

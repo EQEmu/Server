@@ -701,7 +701,12 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 
 		// Reduce for Groups!
 		if (GetGroup()) {
-			exp_value /= GetGroup()->GroupCount();
+			exp_value /= std::max(1,(GetGroup()->GroupCount() - 1));
+		}
+
+		// Eliminate for Raids
+		if (GetRaid() && GetRaid()->RaidCount() > 1) {
+			exp_value = 0;
 		}
 
 		return exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
