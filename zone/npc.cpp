@@ -4008,7 +4008,7 @@ void NPC::DoNpcToNpcAggroScan()
 			continue;
 		}
 
-		if (mob->IsClient()) {
+		if (!mob->IsNPC()) {
 			continue;
 		}
 
