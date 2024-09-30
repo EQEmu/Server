@@ -72,7 +72,7 @@ Mob *Aura::GetOwner()
 // not 100% sure how this one should work and PVP affects ...
 void Aura::ProcessOnAllFriendlies(Mob *owner)
 {
-	auto          &mob_list = entity_list.GetCloseMobList(this, distance);
+	auto          &mob_list = GetCloseMobList(distance);
 	std::set<int> delayed_remove;
 	bool          is_buff   = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 
@@ -127,7 +127,7 @@ void Aura::ProcessOnAllFriendlies(Mob *owner)
 
 void Aura::ProcessOnAllGroupMembers(Mob *owner)
 {
-	auto          &mob_list = entity_list.GetCloseMobList(this, distance);
+	auto          &mob_list = GetCloseMobList(distance);
 	std::set<int> delayed_remove;
 	bool          is_buff   = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 
@@ -369,7 +369,7 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 
 void Aura::ProcessOnGroupMembersPets(Mob *owner)
 {
-	auto          &mob_list    = entity_list.GetCloseMobList(this,distance);
+	auto          &mob_list    = GetCloseMobList(distance);
 	std::set<int> delayed_remove;
 	bool          is_buff      = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 	// This type can either live on the pet (level 55/70 MAG aura) or on the pet owner (level 85 MAG aura)
@@ -576,7 +576,7 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 
 void Aura::ProcessTotem(Mob *owner)
 {
-	auto          &mob_list = entity_list.GetCloseMobList(this, distance);
+	auto          &mob_list = GetCloseMobList(distance);
 	std::set<int> delayed_remove;
 	bool          is_buff   = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 
@@ -634,9 +634,7 @@ void Aura::ProcessTotem(Mob *owner)
 
 void Aura::ProcessEnterTrap(Mob *owner)
 {
-	auto &mob_list = entity_list.GetCloseMobList(this, distance);
-
-	for (auto &e : mob_list) {
+	for (auto &e : GetCloseMobList(distance)) {
 		auto mob = e.second;
 		if (!mob) {
 			continue;
@@ -656,9 +654,7 @@ void Aura::ProcessEnterTrap(Mob *owner)
 
 void Aura::ProcessExitTrap(Mob *owner)
 {
-	auto &mob_list = entity_list.GetCloseMobList(this, distance);
-
-	for (auto &e : mob_list) {
+	for (auto &e : GetCloseMobList(distance)) {
 		auto mob = e.second;
 		if (!mob) {
 			continue;
@@ -689,8 +685,7 @@ void Aura::ProcessExitTrap(Mob *owner)
 // and hard to reason about
 void Aura::ProcessSpawns()
 {
-	const auto &clients = entity_list.GetCloseMobList(this, distance);
-	for (auto  &e : clients) {
+	for (auto &e: GetCloseMobList(distance)) {
 		if (!e.second) {
 			continue;
 		}
