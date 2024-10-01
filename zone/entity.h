@@ -560,7 +560,7 @@ public:
 
 	std::unordered_map<uint16, Mob *> &GetCloseMobList(Mob *mob, float distance = 0.0f);
 
-	std::vector<NPC*> GetNPCsByNPCIDs(std::vector<uint32> npc_ids);
+	std::vector<NPC*> GetFilteredNPCList(std::vector<uint32> npc_ids, bool is_exclude = false);
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 

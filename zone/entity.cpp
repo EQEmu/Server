@@ -5938,15 +5938,17 @@ void EntityList::DamageArea(
 	}
 }
 
-std::vector<NPC*> EntityList::GetNPCsByNPCIDs(std::vector<uint32> npc_ids)
+std::vector<NPC*> EntityList::GetFilteredNPCList(std::vector<uint32> npc_ids, bool is_exclude)
 {
 	std::vector<NPC*> v;
 
 	for (const auto& e : GetNPCList()) {
-		if (
-			e.second &&
-			std::find(npc_ids.begin(), npc_ids.end(), e.second->GetNPCTypeID()) != npc_ids.end()
-		) {
+		const auto& n = std::find(npc_ids.begin(), npc_ids.end(), e.second->GetNPCTypeID());
+		if (e.second) {
+			if (is_exclude && n != npc_ids.end()) {
+				continue;
+			}
+
 			v.emplace_back(e.second);
 		}
 	}

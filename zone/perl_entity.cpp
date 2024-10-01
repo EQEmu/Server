@@ -739,7 +739,7 @@ void Perl_EntityList_MassGroupBuff(EntityList* self, Mob* caster, Mob* center, u
 	self->MassGroupBuff(caster, center, spell_id, affect_caster);
 }
 
-perl::array Perl_EntityList_GetNPCsByNPCIDs(EntityList* self, perl::array npc_ids)
+perl::array Perl_EntityList_GetNPCsByExcludedIDs(EntityList* self, perl::array npc_ids)
 {
 	std::vector<uint32> ids;
 
@@ -747,7 +747,26 @@ perl::array Perl_EntityList_GetNPCsByNPCIDs(EntityList* self, perl::array npc_id
 		ids.emplace_back(npc_ids[i]);
 	}
 
-	const auto& l = self->GetNPCsByNPCIDs(ids);
+	const auto& l = self->GetFilteredNPCList(ids, true);
+
+	perl::array npcs;
+
+	for (const auto& e : l) {
+		npcs.push_back(e);
+	}
+
+	return npcs;
+}
+
+perl::array Perl_EntityList_GetNPCsByIDs(EntityList* self, perl::array npc_ids)
+{
+	std::vector<uint32> ids;
+
+	for (int i = 0; i < npc_ids.size(); i++) {
+		ids.emplace_back(npc_ids[i]);
+	}
+
+	const auto& l = self->GetFilteredNPCList(ids);
 
 	perl::array npcs;
 
@@ -823,7 +842,8 @@ void perl_register_entitylist()
 	package.add("GetNPCByNPCTypeID", &Perl_EntityList_GetNPCByNPCTypeID);
 	package.add("GetNPCBySpawnID", &Perl_EntityList_GetNPCBySpawnID);
 	package.add("GetNPCList", &Perl_EntityList_GetNPCList);
-	package.add("GetNPCsByNPCIDs", &Perl_EntityList_GetNPCsByNPCIDs);
+	package.add("GetNPCsByExcludedIDs", &Perl_EntityList_GetNPCsByExcludedIDs);
+	package.add("GetNPCsByIDs", &Perl_EntityList_GetNPCsByIDs);
 	package.add("GetObjectByDBID", &Perl_EntityList_GetObjectByDBID);
 	package.add("GetObjectByID", &Perl_EntityList_GetObjectByID);
 	package.add("GetObjectList", &Perl_EntityList_GetObjectList);

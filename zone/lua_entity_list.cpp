@@ -764,7 +764,7 @@ void Lua_EntityList::MassGroupBuff(Lua_Mob caster, Lua_Mob center, uint16 spell_
 	self->MassGroupBuff(caster, center, spell_id, affect_caster);
 }
 
-Lua_NPC_List Lua_EntityList::GetNPCsByNPCIDs(luabind::adl::object table)
+Lua_NPC_List Lua_EntityList::GetNPCsByExcludedIDs(luabind::adl::object table)
 {
 	Lua_Safe_Call_Class(Lua_NPC_List);
 	Lua_NPC_List ret;
@@ -784,7 +784,37 @@ Lua_NPC_List Lua_EntityList::GetNPCsByNPCIDs(luabind::adl::object table)
 			index++;
 		}
 
-		const auto& l = self->GetNPCsByNPCIDs(ids);
+		const auto& l = self->GetFilteredNPCList(ids, true);
+
+		for (const auto& e : l) {
+			ret.entries.emplace_back(Lua_NPC(e));
+		}
+	}
+
+	return ret;
+}
+
+Lua_NPC_List Lua_EntityList::GetNPCsByIDs(luabind::adl::object table)
+{
+	Lua_Safe_Call_Class(Lua_NPC_List);
+	Lua_NPC_List ret;
+
+	if (luabind::type(table) != LUA_TTABLE) {
+		return ret;
+	}
+
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+
+		std::vector<uint32> ids;
+
+		int index = 1;
+		while (luabind::type(table[index]) != LUA_TNIL) {
+			ids.emplace_back(luabind::object_cast<uint32>(table[index]));
+			index++;
+		}
+
+		const auto& l = self->GetFilteredNPCList(ids);
 
 		for (const auto& e : l) {
 			ret.entries.emplace_back(Lua_NPC(e));
@@ -859,7 +889,8 @@ luabind::scope lua_register_entity_list() {
 	.def("GetNPCByNPCTypeID", (Lua_NPC(Lua_EntityList::*)(int))&Lua_EntityList::GetNPCByNPCTypeID)
 	.def("GetNPCBySpawnID", (Lua_NPC(Lua_EntityList::*)(int))&Lua_EntityList::GetNPCBySpawnID)
 	.def("GetNPCList", (Lua_NPC_List(Lua_EntityList::*)(void))&Lua_EntityList::GetNPCList)
-	.def("GetNPCsByNPCIDs", (Lua_NPC_List(Lua_EntityList::*)(luabind::adl::object))&Lua_EntityList::GetNPCsByNPCIDs)
+	.def("GetNPCsByExcludedIDs", (Lua_NPC_List(Lua_EntityList::*)(luabind::adl::object))&Lua_EntityList::GetNPCsByExcludedIDs)
+	.def("GetNPCsByIDs", (Lua_NPC_List(Lua_EntityList::*)(luabind::adl::object))&Lua_EntityList::GetNPCsByIDs)
 	.def("GetObjectByDBID", (Lua_Object(Lua_EntityList::*)(uint32))&Lua_EntityList::GetObjectByDBID)
 	.def("GetObjectByID", (Lua_Object(Lua_EntityList::*)(int))&Lua_EntityList::GetObjectByID)
 	.def("GetObjectList", (Lua_Object_List(Lua_EntityList::*)(void))&Lua_EntityList::GetObjectList)
