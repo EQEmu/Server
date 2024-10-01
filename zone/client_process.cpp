@@ -589,8 +589,11 @@ bool Client::Process() {
 				if (CUnauth_tics > 1) {
 					if (GetZoneID() != Zones::BAZAAR) {
 						if (CUnauth_tics >= 11) {
-							zone->SendDiscordMessage("admin", fmt::format("Kicking [{}]. Unauthorized Client.", GetCleanName()));
-							Kick("Custom client required. Visit heroesjourneyeq.com for more information.");
+							//zone->SendDiscordMessage("admin", fmt::format("Kicking [{}]. Unauthorized Client.", GetCleanName()));
+							//Kick("Custom client required. Visit heroesjourneyeq.com for more information.");
+
+							zone->SendDiscordMessage("admin", fmt::format("Moving [{}] to Bazaar. Unauthorized Client.", GetCleanName()));
+							MoveZone('bazaar');
 							return;
 						}
 
