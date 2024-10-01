@@ -593,7 +593,7 @@ bool Client::Process() {
 							//Kick("Custom client required. Visit heroesjourneyeq.com for more information.");
 
 							zone->SendDiscordMessage("admin", fmt::format("Moving [{}] to Bazaar. Unauthorized Client.", GetCleanName()));
-							MoveZone('bazaar');
+							MoveZone("bazaar");
 							return;
 						}
 
