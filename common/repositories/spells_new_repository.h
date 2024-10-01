@@ -103,8 +103,6 @@ public:
 			)
 		);
 
-		int disc_index = -1;
-
 		for (auto row : results) {
 			std::string line = row[0];
 			std::stringstream ss(line);
@@ -123,21 +121,25 @@ public:
 
 			// Adjust disc timers (Why are discs -1 here)
 			if (columns[168] == "-1") {
-				// Check if at least one of the classes columns (104-119) is <= 70
-				bool has_valid_class = false;
+				// Check how many of the class columns (104-119) are <= 70
+				int valid_class_count = 0;
+				int valid_class_id = -1;
+
 				for (int i = 104; i <= 119; ++i) {
 					if (std::stoi(columns[i]) <= 70) {
-						has_valid_class = true;
-						break;
+						valid_class_count++;
+						if (valid_class_count == 1) {
+							valid_class_id = i - 104; // Adjust the index to reflect the class ID
+						}
 					}
 				}
 
-				// Update disc_index only if at least one class column is valid
-				if (has_valid_class) {
-					disc_index++;
-					LogDebug("Found a discipline name [{}], updating [{}] to [{}]", columns[1], columns[167], disc_index);
-					columns[167] = std::to_string(disc_index);
+				// If exactly one valid class, update the timer_id with offset (valid_class_id + 1)
+				if (valid_class_count == 1 && valid_class_id != -1) {
+					LogDebug("Found a discipline name [{}], updating [{}] to [{}]", columns[1], columns[167], std::to_string(Strings::ToInt(columns[167]) + (20 * (valid_class_id + 1))));
+					columns[167] = std::to_string(Strings::ToInt(columns[167]) + (20 * (valid_class_id + 1)));
 				}
+				// If more than one valid class, leave timer_id unchanged
 			}
 
 			// Reconstruct the line

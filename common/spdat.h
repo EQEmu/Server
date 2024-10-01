@@ -1420,7 +1420,7 @@ struct SPDat_Spell_Struct
 /* 164 */	//int resist_cap; // for most spells this appears to mimic ResistDiff -- RESIST_CAP
 /* 165 */	bool ldon_trap; //Flag found on all LDON trap / chest related spells. -- AFFECT_INANIMATE
 /* 166 */	int endurance_cost; // -- STAMINA_COST
-/* 167 */	int8 timer_id; // bad name, used for all spells -- TIMER_INDEX
+/* 167 */	int16 timer_id; // bad name, used for all spells -- TIMER_INDEX
 /* 168 */	bool is_discipline; //Will goto the combat window when cast -- IS_SKILL
 /* 169 - 172*/ //These are zero for ALL spells, also removed from live -- ATTACK_OPENING, DEFENSE_OPENING, SKILL_OPENING, NPC_ERROR_OPENING
 /* 173 */	int hate_added; // -- SPELL_HATE_GIVEN

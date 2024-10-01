@@ -2101,7 +2101,6 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     }
 
 	int counter = 0;
-	int disc_timer = -1;
 
     for (auto& row = results.begin(); row != results.end(); ++row) {
 	    const int tempid = Strings::ToInt(row[0]);
@@ -2266,19 +2265,28 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 					sp[tempid].target_type = ST_Target;
 				}
 			} else {
-				bool found_class = false;
+				int eligible_class_count = 0;
+				int eligible_class_id = -1;
+
+				// Loop through the classes to check if they are in the relevant level range
 				for (int classid = 0; classid < 16; classid++) {
 					if (sp[tempid].classes[classid] <= 70) {
-						found_class = true;
-						break;
+						eligible_class_count++;
+						eligible_class_id = classid;  // Store the class id in case there is only one
 					}
 				}
-				if (found_class) {
-					disc_timer++;
-					sp[tempid].timer_id = disc_timer;
+
+				// If only one class is eligible
+				if (eligible_class_count == 1 && eligible_class_id != -1) {
+					LogInfo("Adjusting spellID [{}] name [{}] from timer [{}] to timer [{}]", tempid, sp[tempid].name, sp[tempid].timer_id, (20 * (eligible_class_id+1)) + sp[tempid].timer_id);
+					sp[tempid].timer_id += (20 * (eligible_class_id+1));
+					if (tempid == 6754) {
+						LogInfo("Confirming Rage Volley ID: [{}]", sp[tempid].timer_id);
+					}
 				}
 			}
 		}
+
 	}
 
 	LoadDamageShieldTypes(sp, max_spells);
