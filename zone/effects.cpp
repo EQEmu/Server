@@ -1019,6 +1019,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.timer_id;
 	if(!p_timers.Expired(&database, DiscTimer, false)) { // lets not set the reuse timer in case CastSpell fails (or we would have to turn off the timer, but CastSpell will set it as well)
 		uint32 remaining_time = p_timers.GetRemainingTime(DiscTimer);
+		LogDebug("Timer ID [{}] not expired.", spell.timer_id);
 		Message(
 			Chat::White,
 			fmt::format(

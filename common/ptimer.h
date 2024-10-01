@@ -22,53 +22,59 @@
 #include <map>
 #include <vector>
 
-enum : int {	//values for pTimerType
-	pTimerNegativeItemReuse = -1, // these grow down basically, we will have item ID * -1 for the timer ID
-	pTimerStartAdventureTimer = 1,
-	pTimerSurnameChange = 2,
-	pTimerFeignDeath = 3,
-	pTimerSneak = 4,
-	pTimerHide = 5,
-	pTimerTaunt = 6,
-	pTimerInstillDoubt = 7,
-	pTimerFishing = 8,
-	pTimerForaging = 9,
-	pTimerMend = 10,
-	pTimerTracking = 11,
-	pTimerSenseTraps = 12,
-	pTimerDisarmTraps = 13,
-	pTimerDisciplineReuseStart = 300,
-	pTimerDisciplineReuseEnd = 400, // client actually has 20 ids, but still no disc go that high even on live
-	pTimerCombatAbility = 25,
-	pTimerCombatAbility2 = 26, // RoF2+ Tiger Claw is unlinked from other monk skills, generic in case other classes ever need it
-	pTimerBeggingPickPocket = 27,
-	pTimerLinkedSpellReuseStart = 28,
-	pTimerLinkedSpellReuseEnd = 48,
-	pTimerClearXTarget = 50,
+enum : int {    //values for pTimerType
+    pTimerNegativeItemReuse = -1, // these grow down basically, we will have item ID * -1 for the timer ID
 
-	pTimerBackstab = 51,
-	pTimerFrenzy = 52,
-	pTimerKick = 54,
-	pTimerBashSlam = 55,
-	pTimerStrike = 56,
+    pTimerStartAdventureTimer = 1,
+    pTimerSurnameChange = 2,
+    pTimerFeignDeath = 3,
+    pTimerSneak = 4,
+    pTimerHide = 5,
+    pTimerTaunt = 6,
+    pTimerInstillDoubt = 7,
+    pTimerFishing = 8,
+    pTimerForaging = 9,
+    pTimerMend = 10,
+    pTimerTracking = 11,
+    pTimerSenseTraps = 12,
+    pTimerDisarmTraps = 13,
 
-	pTimerShieldAbility = 86,
+    pTimerCombatAbility = 25,
+    pTimerCombatAbility2 = 26, // RoF2+ Tiger Claw is unlinked from other monk skills, generic in case other classes ever need it
+    pTimerBeggingPickPocket = 27,
+    pTimerLinkedSpellReuseStart = 28,
+    pTimerLinkedSpellReuseEnd = 48,
+    pTimerClearXTarget = 50,
 
-	pTimerLayHands = 87,		//these IDs are used by client too
-	pTimerHarmTouch = 89,		//so dont change them
+    pTimerBackstab = 51,
+    pTimerFrenzy = 52,
+    pTimerKick = 54,
+    pTimerBashSlam = 55,
+    pTimerStrike = 56,
 
-	pTimerItemStart = 100,
-	pTimerItemEnd = 200, //I don't think any items would use one this high but hey, incase.
-	pTimerPeqzoneReuse = 900,
-	pTimerMercReuse = 901,
-	pTimerMercSuspend = 902,
-	pTimerAAStart = 1000,		//AA re-use timers
-	pTimerAAEnd = 2999,
-	pTimerAAEffectStart = 3001,	//AA effect timers
-	pTimerAAEffectEnd	= 4999,
+    pTimerShieldAbility = 86,
 
-	pTimerSpellStart = 5000		//Do not put any timer IDs above this one
-								//if needed, increase its starting ID
+    pTimerLayHands = 87,        //these IDs are used by client too
+    pTimerHarmTouch = 89,       //so dont change them
+
+    pTimerItemStart = 100,
+    pTimerItemEnd = 200,        //I don't think any items would use one this high but hey, in case.
+
+    pTimerDisciplineReuseStart = 500,
+    pTimerDisciplineReuseEnd = 899, // client actually has 20 ids, but still no disc go that high even on live
+
+    pTimerPeqzoneReuse = 900,
+    pTimerMercReuse = 901,
+    pTimerMercSuspend = 902,
+
+    pTimerAAStart = 1000,       //AA re-use timers
+    pTimerAAEnd = 2999,
+
+    pTimerAAEffectStart = 3001, //AA effect timers
+    pTimerAAEffectEnd = 4999,
+
+    pTimerSpellStart = 5000     //Do not put any timer IDs above this one
+                                //if needed, increase its starting ID
 };
 
 class Database;

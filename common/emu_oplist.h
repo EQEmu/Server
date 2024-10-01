@@ -618,4 +618,6 @@ N(OP_ResetAA),
 N(OP_UnderWorld),
 N(OP_ServerAuthStats),
 N(OP_CAuth),
+N(OP_SkillTimers),
+N(OP_CustomDiscTimer),
 // mail and chat opcodes located in ../mail_oplist.h

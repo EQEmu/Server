@@ -606,7 +606,6 @@ bool Client::Process() {
 		}
 
 		if (fast_tic_timer.Check()) {
-			SendBulkStatsUpdate();
 			ValidatePetList();
 			if (GetPet()) {
 				if (focused_pet_id && entity_list.GetNPCByID(focused_pet_id)) {

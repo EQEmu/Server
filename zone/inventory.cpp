@@ -3481,16 +3481,6 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			return CalcHaste();
 		case statATK:
 			return GetTotalATK();
-		case statKickTimer:
-			return p_timers.GetRemainingTime(pTimerKick);
-		case statBashTimer:
-			return p_timers.GetRemainingTime(pTimerBashSlam);
-		case statStrikeTimer:
-			return p_timers.GetRemainingTime(pTimerStrike);
-		case statBackstabTimer:
-			return p_timers.GetRemainingTime(pTimerBackstab);
-		case statFrenzyTimer:
-			return p_timers.GetRemainingTime(pTimerFrenzy);
 		case statHeroicSTR:
 			return GetHeroicSTR();
 		case statHeroicSTA:
@@ -3546,7 +3536,6 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			return GetClair();
 		case statDisciplineTimer25:
 			timer = pTimerDisciplineReuseStart + 25;
-			LogDebug("Encoding disctimer 25: [{}]", p_timers.GetRemainingTime(timer));
 			return p_timers.GetRemainingTime(timer);
 		default:
 			return 0;

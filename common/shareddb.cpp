@@ -2101,6 +2101,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     }
 
 	int counter = 0;
+	int disc_timer = -1;
 
     for (auto& row = results.begin(); row != results.end(); ++row) {
 	    const int tempid = Strings::ToInt(row[0]);
@@ -2257,11 +2258,25 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].no_remove = Strings::ToBool(row[232]);
 		sp[tempid].damage_shield_type = 0;
 
-		if (RuleB(Custom, UseTHJItemMutations) && !sp[tempid].is_discipline) {
-			sp[tempid].timer_id = -1;
+		if (RuleB(Custom, UseTHJItemMutations)) {
+			if (!sp[tempid].is_discipline) {
+				sp[tempid].timer_id = -1;
 
-			if (sp[tempid].target_type == ST_GroupClientAndPet) {
-				sp[tempid].target_type = ST_Target;
+				if (sp[tempid].target_type == ST_GroupClientAndPet) {
+					sp[tempid].target_type = ST_Target;
+				}
+			} else {
+				bool found_class = false;
+				for (int classid = 0; classid < 16; classid++) {
+					if (sp[tempid].classes[classid] <= 70) {
+						found_class = true;
+						break;
+					}
+				}
+				if (found_class) {
+					disc_timer++;
+					sp[tempid].timer_id = disc_timer;
+				}
 			}
 		}
 	}

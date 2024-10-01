@@ -1931,6 +1931,8 @@ private:
 	void OPGMTrainSkill(const EQApplicationPacket *app);
 	void OPGMSummon(const EQApplicationPacket *app);
 	void OPCombatAbility(const CombatAbility_Struct *ca_atk);
+	void SendCombatAbilityTimers();
+
 
 	// Custom ServerAuthStats Skill refactor
 	pTimerType GetCombatTimer(uint32 skill);

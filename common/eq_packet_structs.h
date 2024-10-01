@@ -730,7 +730,7 @@ typedef struct
 } PVPStatsEntry_Struct;
 
 static const uint32 MAX_PP_DISCIPLINES = 100;
-static const uint32 MAX_DISCIPLINE_TIMERS = 20;
+static const uint32 MAX_DISCIPLINE_TIMERS = 399;
 
 struct Disciplines_Struct {
 	uint32 values[MAX_PP_DISCIPLINES];
@@ -1371,11 +1371,6 @@ enum StatEntry
 	statEndurRegen,
 	statATK,
 	statHaste,
-	statKickTimer,
-	statBashTimer,
-	statBackstabTimer,
-	statFrenzyTimer,
-	statStrikeTimer,
 	statHeroicSTR,
 	statHeroicSTA,
 	statHeroicDEX,
@@ -1418,11 +1413,22 @@ struct SimpleChecksum_Struct {
 	uint64_t checksum;
 	uint8_t  data[3];
 };
-
 struct Stat_Struct
 {
 	uint32_t count;
 	StatEntry_Struct entries[0];
+};
+struct SkillTimers_Struct {
+	unsigned int backstab;
+	unsigned int bash;
+	unsigned int kick;
+	unsigned int strike;
+	unsigned int frenzy;
+};
+
+struct CustomDiscTimers_Struct {
+	unsigned int timer_id;
+	unsigned int timer_value;
 };
 
 /*

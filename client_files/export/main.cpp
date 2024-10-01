@@ -142,7 +142,12 @@ void ExportSpells(SharedDatabase* db)
 		return;
 	}
 
-	const auto& lines = SpellsNewRepository::GetSpellFileLines(*db);
+	std::vector<std::string> lines;
+	if (!RuleB(Custom, MulticlassingEnabled)) {
+		lines = SpellsNewRepository::GetSpellFileLines(*db);
+	} else {
+		lines = SpellsNewRepository::GetSpellFileLinesMulticlass(*db);
+	}
 
 	const std::string& file_string = Strings::Implode("\n", lines);
 

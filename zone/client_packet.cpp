@@ -4925,7 +4925,6 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 		CAuthorized = (decryptedValue == (GetClassesBits() * GetID()));
 		if (!CHacker && buf->unk && CAuthorized) {
 			CHacker = true;
-			LogError("HACKER DETECTED [{}]!", GetCleanName());
 
 			std::string hrs;
 			switch (buf->unk) {
@@ -4939,14 +4938,20 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 					hrs = "Unknown";
 			}
 
+			bool kick = zone->random.Roll(25);
+
 			std::string message = fmt::format("HACK DETECTED: Character: {} [Account: {}, IP: {}] has been detected using MQ2. (Hook Detection: {} [{}])\n",
 											  GetCleanName(),
 											  AccountName(),
 											  GetIPString(),
 											  hrs,
 											  buf->unk);
-
 			zone->SendDiscordMessage("admin", message);
+
+			if (kick) {
+				message = fmt::format("Disconnecting [{}]", GetCleanName());
+				LinkDead();
+			}
 		}
 	}
 }

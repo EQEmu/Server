@@ -68,10 +68,12 @@ public:
 				columns.push_back(item);
 			}
 
-			// Check if columns[98] is 14 or 38, and set to 6 if so
+			// Fix Pet 'Targets'
 			if (columns[98] == "14" || columns[98] == "38") {
 				columns[98] = "6";
 			}
+
+			//
 
 			// Reconstruct the line
 			std::string modified_line;
@@ -88,6 +90,70 @@ public:
 		return lines;
 	}
 
+	static std::vector<std::string> GetSpellFileLinesMulticlass(Database& db)
+	{
+		std::vector<std::string> lines;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT CONCAT_WS('^', {}) FROM {} ORDER BY {} ASC",
+				ColumnsRaw(),
+				TableName(),
+				PrimaryKey()
+			)
+		);
+
+		int disc_index = -1;
+
+		for (auto row : results) {
+			std::string line = row[0];
+			std::stringstream ss(line);
+			std::string item;
+			std::vector<std::string> columns;
+
+			// Split the line by '^' and push to the columns vector
+			while (std::getline(ss, item, '^')) {
+				columns.push_back(item);
+			}
+
+			// Fix Pet 'Targets'
+			if (columns[98] == "14" || columns[98] == "38") {
+				columns[98] = "6";
+			}
+
+			// Adjust disc timers (Why are discs -1 here)
+			if (columns[168] == "-1") {
+				// Check if at least one of the classes columns (104-119) is <= 70
+				bool has_valid_class = false;
+				for (int i = 104; i <= 119; ++i) {
+					if (std::stoi(columns[i]) <= 70) {
+						has_valid_class = true;
+						break;
+					}
+				}
+
+				// Update disc_index only if at least one class column is valid
+				if (has_valid_class) {
+					disc_index++;
+					LogDebug("Found a discipline name [{}], updating [{}] to [{}]", columns[1], columns[167], disc_index);
+					columns[167] = std::to_string(disc_index);
+				}
+			}
+
+			// Reconstruct the line
+			std::string modified_line;
+			for (size_t i = 0; i < columns.size(); ++i) {
+				if (i > 0) {
+					modified_line += '^';
+				}
+				modified_line += columns[i];
+			}
+
+			lines.emplace_back(modified_line);
+		}
+
+		return lines;
+	}
 };
 
 #endif //EQEMU_SPELLS_NEW_REPOSITORY_H

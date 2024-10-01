@@ -387,10 +387,28 @@ pTimerType Client::GetCombatTimer(uint32 skill) {
 	}
 }
 
+void Client::SendCombatAbilityTimers() {
+	time_t current_time = time(nullptr);
+	EQApplicationPacket* outapp = nullptr;
+	SkillTimers_Struct* timers = nullptr;
+
+	// Construct packet
+	outapp = new EQApplicationPacket(OP_SkillTimers, 4 + (sizeof(SkillTimers_Struct)));
+	timers = (SkillTimers_Struct*)outapp->pBuffer;
+
+	timers->backstab = p_timers.Enabled(pTimerBackstab) ? p_timers.GetRemainingTime(pTimerBackstab) : 0;
+	timers->bash = p_timers.Enabled(pTimerBashSlam) ? p_timers.GetRemainingTime(pTimerBashSlam) : 0;
+	timers->frenzy = p_timers.Enabled(pTimerFrenzy) ? p_timers.GetRemainingTime(pTimerFrenzy) : 0;
+	timers->kick = p_timers.Enabled(pTimerKick) ? p_timers.GetRemainingTime(pTimerKick) : 0;
+	timers->strike = p_timers.Enabled(pTimerStrike) ? p_timers.GetRemainingTime(pTimerStrike) : 0;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
 // We should probably refactor this to take the struct not the packet
 void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 {
-	SendBulkStatsUpdate();
 	if (!GetTarget()) {
 		return;
 	}
@@ -520,6 +538,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 			if (reuse_time) {
 				p_timers.Start(timer, reuse_time);
+				SendCombatAbilityTimers();
 			}
 		}
 
@@ -573,7 +592,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			max_dmg = max_dmg + weapon_damage;
 		}
 
-		int animType = animRoundKick;
+		int animType = (GetRace() == Race::Iksar || GetRace() == Race::Human) ? animRoundKick : animHand2Hand;
 		if (primary_in_use) {
 			switch (primary_in_use->GetItemType()) {
 				case EQ::item::ItemType2HSlash:
@@ -586,6 +605,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 				case EQ::item::ItemType1HPiercing:
 					animType = anim1HPiercing;
 					break;
+				case EQ::item::ItemType1HSlash:
+					animType = anim1HWeapon;
 			}
 		}
 		DoAnim(animType, 0, false);
@@ -600,6 +621,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 		if (reuse_time) {
 			p_timers.Start(timer, reuse_time);
+			SendCombatAbilityTimers();
 		}
 
 		return;
@@ -749,7 +771,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	if (reuse_time) {
 		p_timers.Start(timer, reuse_time);
 	}
-	SendBulkStatsUpdate();
+	SendCombatAbilityTimers();
 }
 
 //returns the reuse time in sec for the special attack used.
