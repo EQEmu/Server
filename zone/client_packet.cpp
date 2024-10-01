@@ -4973,6 +4973,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	}
 
 	PlayerPositionUpdateClient_Struct *ppu = (PlayerPositionUpdateClient_Struct *) app->pBuffer;
+	SendBulkStatsUpdate();
 
 	/* Non PC handling like boats and eye of zomm */
 	if (ppu->spawn_id && ppu->spawn_id != GetID()) {
