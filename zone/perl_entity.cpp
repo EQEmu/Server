@@ -739,6 +739,25 @@ void Perl_EntityList_MassGroupBuff(EntityList* self, Mob* caster, Mob* center, u
 	self->MassGroupBuff(caster, center, spell_id, affect_caster);
 }
 
+perl::array Perl_EntityList_GetNPCsByNPCIDs(EntityList* self, perl::array npc_ids)
+{
+	std::vector<uint32> ids;
+
+	for (int i = 0; i < npc_ids.size(); i++) {
+		ids.emplace_back(npc_ids[i]);
+	}
+
+	const auto& l = self->GetNPCsByNPCIDs(ids);
+
+	perl::array npcs;
+
+	for (const auto& e : l) {
+		npcs.push_back(e);
+	}
+
+	return npcs;
+}
+
 void perl_register_entitylist()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -804,6 +823,7 @@ void perl_register_entitylist()
 	package.add("GetNPCByNPCTypeID", &Perl_EntityList_GetNPCByNPCTypeID);
 	package.add("GetNPCBySpawnID", &Perl_EntityList_GetNPCBySpawnID);
 	package.add("GetNPCList", &Perl_EntityList_GetNPCList);
+	package.add("GetNPCsByNPCIDs", &Perl_EntityList_GetNPCsByNPCIDs);
 	package.add("GetObjectByDBID", &Perl_EntityList_GetObjectByDBID);
 	package.add("GetObjectByID", &Perl_EntityList_GetObjectByID);
 	package.add("GetObjectList", &Perl_EntityList_GetObjectList);
