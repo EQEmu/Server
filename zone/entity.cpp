@@ -5944,8 +5944,13 @@ std::vector<NPC*> EntityList::GetFilteredNPCList(std::vector<uint32> npc_ids, bo
 
 	for (const auto& e : GetNPCList()) {
 		const auto& n = std::find(npc_ids.begin(), npc_ids.end(), e.second->GetNPCTypeID());
+		const bool is_found = n != npc_ids.end();
 		if (e.second) {
-			if (is_exclude && n != npc_ids.end()) {
+			if (is_exclude && is_found) {
+				continue;
+			}
+
+			if (!is_exclude && !is_found) {
 				continue;
 			}
 
