@@ -252,6 +252,7 @@ class Database;
 
 constexpr uint16 MAX_DISCORD_WEBHOOK_ID = 300;
 
+
 class EQEmuLogSys {
 public:
 	EQEmuLogSys();

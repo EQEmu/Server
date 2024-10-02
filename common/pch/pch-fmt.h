@@ -3,6 +3,7 @@
 
 // fmt
 #include <fmt/format.h>
+#include <fmt/core.h>
 #include <cereal/archives/json.hpp>
 
 #endif
