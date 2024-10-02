@@ -808,7 +808,7 @@ IF (EQEMU_BUILD_PCH)
     TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/pch-utilities.h)
     TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/pch-types.h)
     TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/pch-fmt.h)
-    TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/pch-repositories.h)
+#    TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/pch-repositories.h)
 ENDIF ()
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

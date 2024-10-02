@@ -295,7 +295,7 @@ IF (EQEMU_BUILD_PCH)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch-utilities.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch-types.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch-fmt.h)
-    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch-repositories.h)
+#    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch-repositories.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE pch/pch.h)
 ENDIF()
 
