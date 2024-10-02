@@ -78,8 +78,12 @@ ADD_EXECUTABLE(world ${world_sources} ${world_headers})
 
 INSTALL(TARGETS world RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-IF (WIN32 AND EQEMU_BUILD_PCH)
-    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch.h)
+IF (EQEMU_BUILD_PCH)
+    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch-emu-common.h)
+    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch-containers.h)
+    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch-utilities.h)
+    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch-types.h)
+    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch-fmt.h)
 ENDIF ()
 
 ADD_DEFINITIONS(-DWORLD)
