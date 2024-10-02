@@ -160,7 +160,11 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		swarm_pet_npc->StartSwarmTimer(pet_duration * 1000);
 
 		//removing this prevents the pet from attacking
-		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
+		if (HasOwner()) {
+			swarm_pet_npc->GetSwarmInfo()->owner_id = GetOwnerID();
+		} else {
+			swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
+		}
 
 		//give the pets somebody to "love"
 		if (targ != nullptr) {

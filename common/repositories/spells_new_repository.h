@@ -139,7 +139,6 @@ public:
 					LogDebug("Found a discipline name [{}], updating [{}] to [{}]", columns[1], columns[167], std::to_string(Strings::ToInt(columns[167]) + (20 * (valid_class_id + 1))));
 					columns[167] = std::to_string(Strings::ToInt(columns[167]) + (20 * (valid_class_id + 1)));
 				}
-				// If more than one valid class, leave timer_id unchanged
 			}
 
 			// Reconstruct the line

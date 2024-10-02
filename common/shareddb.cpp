@@ -2280,9 +2280,6 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 				if (eligible_class_count == 1 && eligible_class_id != -1) {
 					LogInfo("Adjusting spellID [{}] name [{}] from timer [{}] to timer [{}]", tempid, sp[tempid].name, sp[tempid].timer_id, (20 * (eligible_class_id+1)) + sp[tempid].timer_id);
 					sp[tempid].timer_id += (20 * (eligible_class_id+1));
-					if (tempid == 6754) {
-						LogInfo("Confirming Rage Volley ID: [{}]", sp[tempid].timer_id);
-					}
 				}
 			}
 		}
