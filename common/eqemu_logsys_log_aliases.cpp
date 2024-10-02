@@ -18,8 +18,8 @@
  *
 */
 
-#ifndef EQEMU_EQEMU_LOGSYS_LOG_ALIASES_H
-#define EQEMU_EQEMU_LOGSYS_LOG_ALIASES_H
+#ifndef EQEMU_EQEMU_LOGSYS_LOG_ALIASES_CPP
+#define EQEMU_EQEMU_LOGSYS_LOG_ALIASES_CPP
 
 #define LogAA(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::AA))\
@@ -855,4 +855,4 @@
 } while (0)
 
 
-#endif //EQEMU_EQEMU_LOGSYS_LOG_ALIASES_H
+#endif //EQEMU_EQEMU_LOGSYS_LOG_ALIASES_CPP

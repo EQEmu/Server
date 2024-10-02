@@ -295,7 +295,7 @@ IF (EQEMU_BUILD_PCH)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch-utilities.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch-types.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch-fmt.h)
-    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/types.h ../common/eqemu_logsys.h ../common/eqemu_logsys_log_aliases.h ../common/features.h ../common/global_define.h)
+    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/types.h ../common/eqemu_logsys.h ../common/eqemu_logsys_log_aliases.cpp ../common/features.h ../common/global_define.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE pch/pch.h)
 ENDIF()
 

@@ -246,7 +246,7 @@ namespace Logs {
 	};
 }
 
-#include "eqemu_logsys_log_aliases.h"
+#include "eqemu_logsys_log_aliases.cpp"
 
 class Database;
 

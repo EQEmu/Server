@@ -21,7 +21,6 @@
 #include "bodytypes.h"
 #include "data_verification.h"
 #include "eqemu_logsys.h"
-#include "eqemu_logsys_log_aliases.h"
 #include "rulesys.h"
 
 int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {

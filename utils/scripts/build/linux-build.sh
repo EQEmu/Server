@@ -12,6 +12,7 @@ perl utils/scripts/build/tag-version.pl
 mkdir -p build && cd build && \
   cmake -DEQEMU_BUILD_TESTS=ON \
       -DEQEMU_BUILD_STATIC=ON \
+      -DEQEMU_BUILD_PCH=ON \
       -DEQEMU_BUILD_LOGIN=ON \
       -DEQEMU_BUILD_LUA=ON \
       -DEQEMU_BUILD_PERL=ON \
