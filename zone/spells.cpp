@@ -4933,7 +4933,7 @@ bool Mob::SpellOnTarget(
 		spelltar->CastToClient()->SendBulkStatsUpdate();
 	}
 
-	if (IsClient() && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) && reflect_effectiveness >=0) {
+	if (IsClient() && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) && reflect_effectiveness >= 0) {
 		if (IsSummonPetSpell(spell_id) || IsGroupSpell(spell_id)) {
 			return true;
 		}
@@ -4941,6 +4941,7 @@ bool Mob::SpellOnTarget(
 		for (const auto& pet : CastToClient()->GetAllPets()) {
 			if (pet->GetID() != spelltar->GetID()) {
 				SetEntityVariable("SympProcTargetOverride", std::to_string(pet->GetID()));
+				LogDebug("Adding Extra Pet Target: [{}]", pet->GetCleanName());
 				LogDebug("Setting Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
 				SpellOnTarget(spell_id, pet, -1, true, resist_adjust, true, level_override);
 				TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
