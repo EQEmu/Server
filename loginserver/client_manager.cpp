@@ -88,6 +88,46 @@ ClientManager::ClientManager()
 			clients.push_back(c);
 		}
 	);
+
+	int larion_port = server.config.GetVariableInt("client_configuration", "larion_port", 15900);
+
+	EQStreamManagerInterfaceOptions larion_opts(larion_port, false, false);
+
+	larion_stream = new EQ::Net::EQStreamManager(larion_opts);
+	larion_ops = new RegularOpcodeManager;
+
+	opcodes_path = fmt::format(
+		"{}/{}",
+		path.GetServerPath(),
+		server.config.GetVariableString(
+			"client_configuration",
+			"larion_opcodes",
+			"login_opcodes.conf"
+		)
+	);
+
+	if (!larion_ops->LoadOpcodes(opcodes_path.c_str())) {
+		LogError(
+			"ClientManager fatal error: couldn't load opcodes for Larion file [{0}]",
+			server.config.GetVariableString("client_configuration", "larion_opcodes", "login_opcodes.conf")
+		);
+
+		run_server = false;
+	}
+
+	larion_stream->OnNewConnection(
+		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
+			LogInfo(
+				"New Larion client connection from [{0}:{1}]",
+				long2ip(stream->GetRemoteIP()),
+				stream->GetRemotePort()
+			);
+
+			stream->SetOpcodeManager(&larion_ops);
+			Client* c = new Client(stream, cv_larion);
+			clients.push_back(c);
+		}
+	);
 }
 
 ClientManager::~ClientManager()

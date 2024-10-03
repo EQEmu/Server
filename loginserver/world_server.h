@@ -7,6 +7,7 @@
 #include "../common/packet_dump.h"
 #include "database.h"
 #include "../common/event/timer.h"
+#include "login_types.h"
 #include <string>
 #include <memory>
 
@@ -149,7 +150,7 @@ public:
 	bool HandleNewLoginserverRegisteredOnly(Database::DbWorldRegistration &world_registration);
 	bool HandleNewLoginserverInfoUnregisteredAllowed(Database::DbWorldRegistration &world_registration);
 
-	void SerializeForClientServerList(class SerializeBuffer& out, bool use_local_ip) const;
+	void SerializeForClientServerList(class SerializeBuffer& out, bool use_local_ip, LSClientVersion version) const;
 
 private:
 

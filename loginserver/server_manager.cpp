@@ -137,7 +137,7 @@ std::unique_ptr<EQApplicationPacket> ServerManager::CreateServerListPacket(Clien
 			use_local_ip ? "Local" : "Remote"
 		);
 
-		world_server->SerializeForClientServerList(buf, use_local_ip);
+		world_server->SerializeForClientServerList(buf, use_local_ip, client->GetClientVersion());
 	}
 
 	return std::make_unique<EQApplicationPacket>(OP_ServerListResponse, buf);
