@@ -2,15 +2,10 @@
 
 void command_mystats(Client *c, const Seperator *sep)
 {
-	Mob* t = c;
-	if (c->GetTarget()) {
-		t = c->GetTarget();
-	}
 
-	if (
-		(t->GetOwner() && t == t->GetOwner() && t->GetOwner()->GetID() == GetID())
-	) {
-		t->ShowStats(c);
+	for (Mob* pet : c->GetAllPets()) {
+		c->Message(Chat::White, "----- Displaying Stats & Inventory for [%s] -----", pet->GetCleanName());
+		pet->ShowStats(c);
 
 		// Ugly hack to look at pet equipment
 
@@ -24,7 +19,7 @@ void command_mystats(Client *c, const Seperator *sep)
 			EQ::SayLinkEngine linker;
 			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 
-			inst_main = t->GetInvPublic().GetItem(i);
+			inst_main = pet->GetInvPublic().GetItem(i);
 
 			if (inst_main) {
 				item_data  = inst_main->GetItem();
@@ -45,11 +40,9 @@ void command_mystats(Client *c, const Seperator *sep)
 					Chat::White, padded_string.c_str()
 				);
 			}
-
 		}
-
-		return;
 	}
 
+	c->Message(Chat::White, "----- Displaying Stats & Inventory for [%s] -----", c->GetCleanName());
 	c->ShowStats(c);
 }
