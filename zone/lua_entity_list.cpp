@@ -784,7 +784,7 @@ Lua_NPC_List Lua_EntityList::GetNPCsByExcludedIDs(luabind::adl::object table)
 			index++;
 		}
 
-		const auto& l = self->GetFilteredNPCList(ids, true);
+		const auto& l = self->GetExcludedNPCsByIDs(ids);
 
 		for (const auto& e : l) {
 			ret.entries.emplace_back(Lua_NPC(e));
@@ -814,7 +814,7 @@ Lua_NPC_List Lua_EntityList::GetNPCsByIDs(luabind::adl::object table)
 			index++;
 		}
 
-		const auto& l = self->GetFilteredNPCList(ids);
+		const auto& l = self->GetNPCsByIDs(ids);
 
 		for (const auto& e : l) {
 			ret.entries.emplace_back(Lua_NPC(e));

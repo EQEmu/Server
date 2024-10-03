@@ -747,7 +747,7 @@ perl::array Perl_EntityList_GetNPCsByExcludedIDs(EntityList* self, perl::array n
 		ids.emplace_back(npc_ids[i]);
 	}
 
-	const auto& l = self->GetFilteredNPCList(ids, true);
+	const auto& l = self->GetExcludedNPCsByIDs(ids);
 
 	perl::array npcs;
 
@@ -766,7 +766,7 @@ perl::array Perl_EntityList_GetNPCsByIDs(EntityList* self, perl::array npc_ids)
 		ids.emplace_back(npc_ids[i]);
 	}
 
-	const auto& l = self->GetFilteredNPCList(ids);
+	const auto& l = self->GetNPCsByIDs(ids);
 
 	perl::array npcs;
 
