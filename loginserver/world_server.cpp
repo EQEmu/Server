@@ -977,7 +977,7 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	return false;
 }
 
-void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_local_ip) const
+void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_local_ip, LSClientVersion version) const
 {
 	// see LoginClientServerData_Struct
 	if (use_local_ip) {
@@ -987,19 +987,31 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_lo
 		out.WriteString(GetRemoteIP());
 	}
 
-	switch (GetServerListID()) {
-		case LS::ServerType::Legends:
-			out.WriteInt32(LS::ServerTypeFlags::Legends);
-			break;
-		case LS::ServerType::Preferred:
-			out.WriteInt32(LS::ServerTypeFlags::Preferred);
-			break;
-		default:
-			out.WriteInt32(LS::ServerTypeFlags::Standard);
-			break;
+	if (version == cv_larion) {
+		out.WriteUInt32(9000);
 	}
 
-	out.WriteUInt32(GetServerId());
+	switch (GetServerListID()) {
+	case LS::ServerType::Legends:
+		out.WriteInt32(LS::ServerTypeFlags::Legends);
+		break;
+	case LS::ServerType::Preferred:
+		out.WriteInt32(LS::ServerTypeFlags::Preferred);
+		break;
+	default:
+		out.WriteInt32(LS::ServerTypeFlags::Standard);
+		break;
+	}
+	if (version == cv_larion) {
+		auto server_id = GetServerId();
+		//if this is 0, the client will not show the server in the list
+		out.WriteUInt32(1);
+		out.WriteUInt32(server_id);
+	}
+	else {
+		out.WriteUInt32(GetServerId());
+	}
+
 	out.WriteString(GetServerLongName());
 	out.WriteString("us"); // country code
 	out.WriteString("en"); // language code
