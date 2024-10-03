@@ -1215,7 +1215,7 @@ void EntityList::AESpell(
 		!IsEffectInSpell(spell_id, SE_Lull) &&
 		!IsEffectInSpell(spell_id, SE_Mez)
 	) {
-		max_targets_allowed = 4;
+		max_targets_allowed = RuleI(Spells, TargetedAOEMaxTargets);
 	}
 
 	int   target_hit_counter = 0;

@@ -486,7 +486,6 @@ RULE_BOOL(Spells, OldRainTargets, false, "Use old incorrectly implemented maximu
 RULE_REAL(Spells, CallOfTheHeroAggroClearDist, 250.0, "Distance at which CoTH will wipe aggro. To disable and always enable aggro wipe on any distance of CoTH, set to 0.")
 RULE_BOOL(Spells, NPCSpellPush, false, "Enable spell push on NPCs")
 RULE_BOOL(Spells, July242002PetResists, true, "Enable Pets using PCs resist change from July 24 2002")
-RULE_INT(Spells, AOEMaxTargets, 0, "Max number of targets a Targeted AOE spell can cast on. Set to 0 for no limit.")
 RULE_BOOL(Spells, CazicTouchTargetsPetOwner, true, "If True, causes Cazic Touch to swap targets from pet to pet owner if a pet is tanking.")
 RULE_BOOL(Spells, PreventFactionWarOnCharmBreak, false, "Enable spell interupts and dot removal on charm break to prevent faction wars.")
 RULE_BOOL(Spells, AllowDoubleInvis, true, "Allows you to cast invisibility spells on a player that is already invisible, live like behavior.")
@@ -529,6 +528,7 @@ RULE_BOOL(Spells, UseClassicSpellFocus, false, "Enabling will tell the server to
 RULE_BOOL(Spells, ManaTapsOnAnyClass, false, "Enabling this will allow you to cast mana taps on any class, this will bypass ManaTapsRequireNPCMana rule.")
 RULE_INT(Spells, HealAmountMessageFilterThreshold, 100, "Lifetaps below this threshold will not have a message sent to the client (Heal will still process) 0 to Disable.")
 RULE_BOOL(Spells, SnareOverridesSpeedBonuses, false, "Enabling will allow snares to override any speed bonuses the entity may have. Default: False")
+RULE_INT(Spells, TargetedAOEMaxTargets, 4, "Max number of targets a Targeted AOE spell can cast on. Set to 0 for no limit.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
