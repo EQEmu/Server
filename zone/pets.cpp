@@ -693,6 +693,7 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
 			break;
 		case 1936:
 			tmp_lastname = fmt::format("{}'s Elemental Avatar", owner->GetCleanName());
+			tmp_name 	 = (static_name == nullptr)? handleElementalNaming("air_elemental") : static_name;
 			break;
 		case 1400: case 1402: case 1404: case 4888: case 10769:
 			tmp_lastname = fmt::format("{}'s Summoned Monster", owner->GetCleanName());
