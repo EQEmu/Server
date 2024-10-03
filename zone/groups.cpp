@@ -2125,15 +2125,20 @@ void Group::UnDelegateMarkNPC(const char *OldNPCMarkerName)
 
 void Group::SaveGroupLeaderAA()
 {
-    // Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
-    // This is done so that group members not in the same zone as the Leader still have access to this information.
+	const uint32 group_id = GetID();
 
-    std::string aa((char *) &LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
-    auto        results = GroupLeadersRepository::UpdateLeadershipAA(database, aa, GetID());
+	if (!group_id) {
+		return;
+	}
 
-	if (!results) {
-        LogError("Unable to store GroupLeadershipAA for group_id: [{}]", GetID());
-    }
+	// Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
+	// This is done so that group members not in the same zone as the Leader still have access to this information.
+
+	std::string aa((char*) &LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
+
+	if (!GroupLeadersRepository::UpdateLeadershipAA(database, aa, group_id)) {
+		LogError("Unable to store GroupLeadershipAA for group_id: [{}]", group_id);
+	}
 }
 
 void Group::UnMarkNPC(uint16 ID)
