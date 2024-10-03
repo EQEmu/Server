@@ -4929,6 +4929,10 @@ bool Mob::SpellOnTarget(
 
 	LogSpells("Cast of [{}] by [{}] on [{}] complete successfully", spell_id, GetName(), spelltar->GetName());
 
+	if (spelltar->IsClient()) {
+		spelltar->CastToClient()->SendBulkStatsUpdate();
+	}
+
 	if (IsClient() && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) && reflect_effectiveness >=0) {
 		if (IsSummonPetSpell(spell_id) || IsGroupSpell(spell_id)) {
 			return true;

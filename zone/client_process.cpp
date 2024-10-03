@@ -557,6 +557,7 @@ bool Client::Process() {
 			DoManaRegen();
 			DoEnduranceRegen();
 			BuffProcess();
+			SendBulkStatsUpdate();
 
 			if (GetTarget()) {
 				GetTarget()->SendBuffsToClient(this);

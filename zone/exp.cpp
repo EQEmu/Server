@@ -753,10 +753,6 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	if (new_percentage >= 100.0f) {
 		auto item_link = linker.GenerateLink().c_str();
 
-		if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(upgrade_item->GetID())) {
-			DiscoverItem(upgrade_item->GetID());
-		}
-
 		// Build new item
 		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
 			const EQ::ItemInstance *aug_i = item->GetAugment(r);
@@ -812,7 +808,9 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	if (RuleB(Custom, PowerSourceItemUpgrade) && m_inv.GetItem(EQ::invslot::slotPowerSource) && exp_source == ExpSource::Kill && conlevel != 0xFF) {
-		AddItemExperience(m_inv.GetItem(EQ::invslot::slotPowerSource), conlevel);
+		if (!(GetRaid() && GetRaid()->RaidCount())) {
+			AddItemExperience(m_inv.GetItem(EQ::invslot::slotPowerSource), conlevel);
+		}
 	}
 
 	if (RuleB(Custom, AttuneOnExp)) {

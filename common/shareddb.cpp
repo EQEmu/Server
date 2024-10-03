@@ -1707,7 +1707,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		}
 
 		if (RuleB(Custom, PowerSourceItemUpgrade)) {
-			if (item.Slots > 0 && item.Classes > 0 && item.ID < 2000000) {
+			if (item.Slots > 0 && item.Classes > 0 && item.ID < 2000000 && !item.Stackable) {
 				item.Slots |= 2097152;
 			}
 		}
