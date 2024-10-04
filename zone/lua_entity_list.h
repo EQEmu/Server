@@ -156,7 +156,8 @@ public:
 	void AreaTaunt(Lua_Client caster, float range, int bonus_hate);
 	void MassGroupBuff(Lua_Mob caster, Lua_Mob center, uint16 spell_id);
 	void MassGroupBuff(Lua_Mob caster, Lua_Mob center, uint16 spell_id, bool affect_caster);
-
+	Lua_NPC_List GetNPCsByIDs(luabind::adl::object npc_ids);
+	Lua_NPC_List GetNPCsByExcludedIDs(luabind::adl::object npc_ids);
 };
 
 #endif
