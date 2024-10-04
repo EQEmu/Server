@@ -857,7 +857,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} [bot_name]",
+				"Usage: {} [bot_name] [optional: silent]",
 				sep->arg[0]
 			).c_str()
 		);
@@ -1045,9 +1045,17 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 		message_index = VALIDATECLASSID(my_bot->GetClass());
 	}
 
-	if (c->GetBotOption(Client::booSpawnMessageSay)) {
+	std::string silent_confirm = sep->arg[2];
+	bool silentTell = false;
+
+	if (!silent_confirm.compare("silent")) {
+		silentTell = true;
+	}
+
+	if (!silentTell && c->GetBotOption(Client::booSpawnMessageSay)) {
 		Bot::BotGroupSay(my_bot, bot_spawn_message[message_index].c_str());
-	} else if (c->GetBotOption(Client::booSpawnMessageTell)) {
+	}
+	else if (!silentTell && c->GetBotOption(Client::booSpawnMessageTell)) {
 		my_bot->OwnerMessage(bot_spawn_message[message_index]);
 	}
 }
