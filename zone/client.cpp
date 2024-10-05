@@ -2328,82 +2328,66 @@ void Client::SetGM(bool toggle) {
 	UpdateWho();
 }
 
-void Client::ReadBook(BookRequest_Struct *book) {
-    int16 book_language = 0;
-    char *txtfile = book->txtfile;
-    std::string txtfileString = txtfile;
-    uint32 itemID = 0; // itemID from custom data rider
-    std::string bookString; // Store the original charmfileID
+void Client::ReadBook(BookRequest_Struct* book)
+{
+	const std::string& text_file = book->txtfile;
 
-    // Check if # exists in the txtfile.
-    size_t hashPosition = txtfileString.find('#');
-    if (hashPosition != std::string::npos) {
-        try {
-            itemID = static_cast<uint32>(std::stoul(txtfileString.substr(0, hashPosition)));
-            bookString = txtfileString.substr(hashPosition + 1);
-        } catch (const std::exception& e) {
-            // Failed to convert to uint, capture everything after the #
-            bookString = txtfileString.substr(hashPosition + 1);
-        }
-    } else {
-        // No # found, try to interpret as uint first.
-        try {
-            itemID = static_cast<uint32>(std::stoul(txtfileString));
-        } catch (const std::exception& e) {
-            // Failed to convert to uint, treat the entire txtfile as a string.
-            bookString = txtfileString;
-        }
-    }
-
-    std::string booktxt2;
-
-	if (!bookString.empty()) {
-		booktxt2 = content_db.GetBook(bookString.c_str(), &book_language);
+	if (text_file.empty()) {
+		return;
 	}
 
-	if (RuleB(Custom, UseDynamicItemDiscoveryTags) && book->type == 2) {
-		if (itemID > 999999) {
-			auto discover_charname = GetDiscoverer(itemID);
+	auto b = content_db.GetBook(text_file);
 
-			if (!discover_charname.empty()) {
-				// Append the discovery information to booktxt2
-				booktxt2 += "<br>Discovered by: " + discover_charname;
-			}
-		} else {
-			const auto* item_data = database.GetItem(itemID);
-			if (item_data) {
-				std::string item_name = item_data->Name;
-				if (item_name.find("Fine Steel") == 0) {
-					booktxt2 += "<br>Discovered by: Enchanted Loom";
-				}
-			}
-		}
-	}
+	if (!b.text.empty()) {
+		auto outapp = new EQApplicationPacket(OP_ReadBook, b.text.size() + sizeof(BookText_Struct));
 
-	if (booktxt2[0] != '\0') {
-		auto outapp = new EQApplicationPacket(OP_ReadBook, booktxt2.length() + sizeof(BookText_Struct));
+		auto t = (BookText_Struct*) outapp->pBuffer;
 
-		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
-		out->window = book->window;
-		out->type = book->type;
-		out->invslot = book->invslot;
-		out->target_id = book->target_id;
-		out->can_cast = 0; // todo: implement
-		out->can_scribe = false;
+		t->window     = book->window;
+		t->type       = book->type;
+		t->invslot    = book->invslot;
+		t->target_id  = book->target_id;
+		t->can_cast   = 0; // todo: implement
+		t->can_scribe = false;
 
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && book->invslot <= EQ::invbag::GENERAL_BAGS_END)
-		{
+		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && book->invslot <= EQ::invbag::GENERAL_BAGS_END) {
 			const EQ::ItemInstance* inst = m_inv[book->invslot];
-			if (inst && inst->GetItem())
-			{
-				auto recipe = TradeskillRecipeRepository::GetWhere(content_db,
-					fmt::format("learned_by_item_id = {} LIMIT 1", inst->GetItem()->ID));
-				out->type = inst->GetItem()->Book;
-				out->can_scribe = !recipe.empty();
+			if (inst && inst->GetItem()) {
+				auto recipe = TradeskillRecipeRepository::GetWhere(
+					content_db,
+					fmt::format(
+						"learned_by_item_id = {} LIMIT 1",
+						inst->GetItem()->ID
+					)
+				);
+
+				t->type       = inst->GetItem()->Book;
+				t->can_scribe = !recipe.empty();
 			}
 		}
 
-		memcpy(out->booktext, booktxt2.c_str(), booktxt2.length());
+		memcpy(t->booktext, b.text.c_str(), b.text.size());
+
+		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[b.language] < Language::MaxValue) {
+				GarbleMessage(t->booktext, (Language::MaxValue - m_pp.languages[b.language]));
+			}
+		}
+
+		// Send only books and scrolls to this event
+		if (parse->PlayerHasQuestSub(EVENT_READ_ITEM) && t->type != BookType::ItemInfo) {
+			std::vector<std::any> args = {
+				b.text,
+				t->can_cast,
+				t->can_scribe,
+				t->invslot,
+				t->target_id,
+				t->type
+			};
+
+			parse->EventPlayer(EVENT_READ_ITEM, this, book->txtfile, 0, &args);
+		}
+
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
@@ -11082,23 +11066,24 @@ void Client::SetIPExemption(int exemption_amount)
 
 void Client::ReadBookByName(std::string book_name, uint8 book_type)
 {
-	int16 book_language = 0;
-	std::string book_text = content_db.GetBook(book_name.c_str(), &book_language);
-	int length = book_text.length();
+	auto b = content_db.GetBook(book_name);
 
-	if (book_text[0] != '\0') {
-		LogDebug("Client::ReadBookByName() Book Name: [{}] Text: [{}]", book_name, book_text.c_str());
-		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
-		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
-		out->window = 0xFF;
-		out->type = book_type;
-		out->invslot = 0;
+	if (!b.text.empty()) {
+		LogDebug("Client::ReadBookByName() Book Name: [{}] Text: [{}]", book_name, b.text);
 
-		memcpy(out->booktext, book_text.c_str(), length);
+		auto outapp = new EQApplicationPacket(OP_ReadBook, b.text.size() + sizeof(BookText_Struct));
 
-		if (EQ::ValueWithin(book_language, Language::CommonTongue, Language::Unknown27)) {
-			if (m_pp.languages[book_language] < Language::MaxValue) {
-				GarbleMessage(out->booktext, (Language::MaxValue - m_pp.languages[book_language]));
+		auto o = (BookText_Struct *) outapp->pBuffer;
+
+		o->window  = std::numeric_limits<uint8>::max();
+		o->type    = book_type;
+		o->invslot = 0;
+
+		memcpy(o->booktext, b.text.c_str(), b.text.size());
+
+		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[b.language] < Language::MaxValue) {
+				GarbleMessage(o->booktext, (Language::MaxValue - m_pp.languages[b.language]));
 			}
 		}
 
