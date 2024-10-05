@@ -2405,15 +2405,6 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		}
 
 		memcpy(out->booktext, booktxt2.c_str(), booktxt2.length());
-
-		if (EQ::ValueWithin(book_language, Language::CommonTongue, Language::Unknown27)) {
-			LogDebug("book_language: [{}], skill: [{}], [{}]", book_language, m_pp.languages[book_language], booktxt2);
-			if (m_pp.languages[book_language] < Language::MaxValue) {
-				LogDebug("[{}] < [{}] fucking how?", m_pp.languages[book_language], Language::MaxValue);
-				//GarbleMessage(out->booktext, (Language::MaxValue - m_pp.languages[book_language]));
-			}
-		}
-
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}

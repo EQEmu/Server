@@ -805,6 +805,15 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			auto upgrade_item_link = linker.GenerateLink().c_str();
 
 			Message(Chat::Experience, "Your [%s] has been upgraded into a [%s]!", item_link, upgrade_item_link);
+
+			if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
+				const auto& export_string = fmt::format(
+					"{} {}",
+					upgrade_item->IsStackable() ? upgrade_item->GetCharges() : 1,
+					EQ::invslot::slotPowerSource
+				);
+				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, upgrade_item->GetItem()->ID);
+			}
 		}
 
 		safe_delete(item);
