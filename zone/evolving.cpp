@@ -20,10 +20,15 @@
 
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
-
 #include "../common/eq_constants.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_evolving_items_repository.h"
+
+#include "client.h"
+#include "worldserver.h"
+#include "string_ids.h"
+
+extern WorldServer worldserver;
 
 void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 {
