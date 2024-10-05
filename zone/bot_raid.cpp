@@ -312,10 +312,12 @@ void Client::SpawnRaidBotsOnConnect(Raid* raid) {
 	for (const auto& m: r_members) {
 		if (strlen(m.member_name) != 0) {
 
-			for (const auto& b: bots_list) {
+			for (const auto& b : bots_list) {
 				if (strcmp(m.member_name, b.bot_name) == 0) {
 					std::string buffer = "^spawn ";
 					buffer.append(m.member_name);
+					std::string silent = " silent";
+					buffer.append(silent);
 					bot_command_real_dispatch(this, buffer.c_str());
 					auto bot = entity_list.GetBotByBotName(m.member_name);
 
