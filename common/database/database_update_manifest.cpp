@@ -5805,6 +5805,31 @@ ALTER TABLE `zone`
 ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_idle`;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version     = 9289,
+		.description = "2024_10_05_evolving_items",
+		.check       = "SHOW TABLES LIKE 'character_evolving_items'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+CREATE TABLE `character_evolving_items` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`char_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`item_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`activated` TINYINT(1) UNSIGNED NULL DEFAULT '0',
+	`equiped` TINYINT(3) UNSIGNED NULL DEFAULT '0',
+	`current_amount` BIGINT(20) NULL DEFAULT '0',
+	`progression` DOUBLE(22,0) NULL DEFAULT '0',
+	`final_item_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`deleted_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
