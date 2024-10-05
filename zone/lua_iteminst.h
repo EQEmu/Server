@@ -77,7 +77,6 @@ public:
 	void SetExp(uint32 exp);
 	void AddExp(uint32 exp);
 	int8 GetMaxEvolveLvl();
-	uint32 GetKillsNeeded(uint8 current_level);
 	Lua_ItemInst Clone();
 	void SetTimer(std::string name, uint32 time);
 	void StopTimer(std::string name);

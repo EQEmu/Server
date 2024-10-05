@@ -1352,18 +1352,18 @@ namespace RoF2
 
 	ENCODE(OP_EvolveItem)
 	{
-		 EQApplicationPacket* in = *p;
-		 *p = nullptr;
+		EQApplicationPacket *in = *p;
+		*p                      = nullptr;
 
-		auto action = *reinterpret_cast<uint32*>(in->pBuffer);
+		auto action = *reinterpret_cast<uint32 *>(in->pBuffer);
 
-		switch(action) {
+		switch (action) {
 			case EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS: {
-				auto emu = reinterpret_cast<EvolveItemMessaging_Struct*>(in->pBuffer);
+				auto emu = reinterpret_cast<EvolveItemMessaging_Struct *>(in->pBuffer);
 
 				EvolveXPWindowSend_Struct e{};
 				EQ::Util::MemoryStreamReader ss(emu->serialized_data, in->size - sizeof(emu->action));
-				cereal::BinaryInputArchive   ar(ss);
+				cereal::BinaryInputArchive ar(ss);
 				ar(e);
 
 				auto item_1 = static_cast<const EQ::ItemInstance *>(reinterpret_cast<EQ::InternalSerializedItem_Struct
@@ -1376,20 +1376,19 @@ namespace RoF2
 				SerializeItem(ob, item_1, 0, 0, ItemPacketMerchant);
 				SerializeItem(ob, item_2, 0, 0, ItemPacketMerchant);
 
-				auto out = std::make_unique<EQApplicationPacket>(OP_EvolveItem,
+				auto out = std::make_unique<EQApplicationPacket>(
+					OP_EvolveItem,
 					sizeof(EvolveXPWindowSendDetails_Struct) + ob.size()
 				);
-				auto data = reinterpret_cast<EvolveXPWindowSendDetails_Struct*>(out->pBuffer);
+				auto data = reinterpret_cast<EvolveXPWindowSendDetails_Struct *>(out->pBuffer);
 
 				data->action             = e.action;
 				data->compatibility      = e.compatibility;
 				data->max_transfer_level = e.max_transfer_level;
-
-				data->item1_unique_id = e.item1_unique_id;
-				data->item2_unique_id = e.item2_unique_id;
-
-				data->unknown_028 = e.unknown_028;
-				data->unknown_029 = e.unknown_029;
+				data->item1_unique_id    = e.item1_unique_id;
+				data->item2_unique_id    = e.item2_unique_id;
+				data->unknown_028        = e.unknown_028;
+				data->unknown_029        = e.unknown_029;
 
 				memcpy(data->serialize_data, ob.str().data(), ob.size());
 				dest->QueuePacket(out.get());
@@ -6478,11 +6477,6 @@ namespace RoF2
 		if (item->EvolvingItem > 0) {
 			RoF2::structs::EvolvingItem_Struct evotop;
 
-			// 0x00 01 4E 6E
-			// evotop.unknown001 = 110;
-			// evotop.unknown002 = 78;
-			// evotop.unknown003 = 1;
-			// evotop.unknown004 = 0;
 			evotop.final_item_id    = inst->GetEvolveFinalItemID();
 			evotop.evolve_level     = item->EvolvingLevel;
 			evotop.progress         = inst->GetEvolveProgression();

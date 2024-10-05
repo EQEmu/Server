@@ -42,9 +42,10 @@ public:
 	uint64 GetTotalEarnedXP(const EQ::ItemInstance &inst);
 	static double CalculateProgression(uint64 current_amount, uint32 item_id);
 	static void LoadPlayerEvent(const EQ::ItemInstance &inst, PlayerEvent::EvolveItem &e);
+
 	ItemsEvolvingDetailsRepository::ItemsEvolvingDetails GetEvolveItemDetails(uint64 id);
 	EvolveTransfer_Struct DetermineTransferResults(const EQ::ItemInstance& inst_from, const EQ::ItemInstance& inst_to);
-	EvolveTransfer2_Struct GetNextItemByXP(const EQ::ItemInstance &inst_in, int64 in_xp);
+	EvolveGetNextItem_Struct GetNextItemByXP(const EQ::ItemInstance &inst_in, int64 in_xp);
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return evolving_items_cache; }
 	std::vector<ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> GetEvolveIDItems(uint32 evolve_id);
 

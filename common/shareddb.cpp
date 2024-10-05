@@ -19,7 +19,6 @@
 #include <iostream>
 #include <cstring>
 #include <fmt/format.h>
-#include <random>
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 	#include <algorithm>
@@ -44,7 +43,6 @@
 #include "repositories/faction_association_repository.h"
 #include "repositories/starting_items_repository.h"
 #include "path_manager.h"
-//#include "../world/client.h"
 #include "../zone/client.h"
 #include "repositories/loottable_repository.h"
 #include "repositories/character_item_recast_repository.h"
@@ -795,27 +793,30 @@ bool SharedDatabase::GetInventory(Client *c)
 				}
 			}
 		}
+
 		if (item->EvolvingItem) {
 			if (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END) {
 				inst->SetEvolveEquiped(true);
 			}
 
-			auto t = std::ranges::find_if(e_results.cbegin(), e_results.cend(),
-			                              [&](const CharacterEvolvingItemsRepository::CharacterEvolvingItems &x) {
-				                              return x.item_id == item_id;
-			                              }
+			auto t = std::ranges::find_if(
+				e_results.cbegin(),
+				e_results.cend(),
+				[&](const CharacterEvolvingItemsRepository::CharacterEvolvingItems &x) {
+					return x.item_id == item_id;
+				}
 			);
 
 			if (t == std::end(e_results)) {
 				auto e = CharacterEvolvingItemsRepository::NewEntity();
 
-				e.char_id = char_id;
-				e.item_id = item_id;
-				e.equiped = inst->GetEvolveEquiped();
+				e.char_id       = char_id;
+				e.item_id       = item_id;
+				e.equiped       = inst->GetEvolveEquiped();
 				e.final_item_id = evolving_items_manager.GetFinalItemID(*inst);
 
 				auto r = CharacterEvolvingItemsRepository::InsertOne(*this, e);
-				e.id = r.id;
+				e.id   = r.id;
 				e_results.push_back(e);
 
 				inst->SetEvolveUniqueID(e.id);

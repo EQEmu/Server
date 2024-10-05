@@ -6517,7 +6517,7 @@ struct EvolveTransfer_Struct {
 	uint32 max_transfer_level;
 };
 
-struct EvolveTransfer2_Struct {
+struct EvolveGetNextItem_Struct {
 	uint32 new_item_id;
 	uint64 new_current_amount;
 	uint64 from_current_amount;

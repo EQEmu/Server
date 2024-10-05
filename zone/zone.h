@@ -47,7 +47,6 @@
 #include "../common/repositories/lootdrop_entries_repository.h"
 #include "../common/repositories/base_data_repository.h"
 #include "../common/repositories/skill_caps_repository.h"
-#include "../common/repositories/character_evolving_items_repository.h"
 
 struct EXPModifier
 {
@@ -244,7 +243,6 @@ public:
 	std::unordered_map<uint32, DynamicZoneTemplatesRepository::DynamicZoneTemplates> dz_template_cache;
 
 	std::unordered_map<uint32, EXPModifier> exp_modifiers;
-	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> evolve_test{};
 
 	time_t weather_timer;
 	Timer  spawn2_timer;

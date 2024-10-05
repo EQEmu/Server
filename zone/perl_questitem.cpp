@@ -152,11 +152,6 @@ uint32 Perl_QuestItem_GetItemScriptID(EQ::ItemInstance* self)
 	return self->GetItemScriptID();
 }
 
-uint32 Perl_QuestItem_GetKillsNeeded(EQ::ItemInstance* self, uint8 current_level)
-{
-	return self->GetKillsNeeded(current_level);
-}
-
 int8 Perl_QuestItem_GetMaxEvolveLevel(EQ::ItemInstance* self)
 {
 	return self->GetMaxEvolveLvl();
@@ -324,7 +319,6 @@ void perl_register_questitem()
 	package.add("GetItemID", &Perl_QuestItem_GetItemID);
 	package.add("GetItemLink", &Perl_QuestItem_GetItemLink);
 	package.add("GetItemScriptID", &Perl_QuestItem_GetItemScriptID);
-	package.add("GetKillsNeeded", &Perl_QuestItem_GetKillsNeeded);
 	package.add("GetMaxEvolveLevel", &Perl_QuestItem_GetMaxEvolveLevel);
 	package.add("GetName", &Perl_QuestItem_GetName);
 	package.add("GetPrice", &Perl_QuestItem_GetPrice);

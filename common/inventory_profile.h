@@ -215,8 +215,6 @@ namespace EQ
 		std::map<int16, ItemInstance*>& GetWorn() { return m_worn; }
 		std::map<int16, ItemInstance*>& GetPersonal() { return m_inv; }
 		int16 HasEvolvingItem(uint64 evolve_unique_id, uint8 quantity, uint8 where);
-		int16 _HasEvolvingItem(std::map<int16, ItemInstance*>& bucket, uint64 evolve_unique_id, uint8 quantity);
-		int16 _HasEvolvingItem(ItemInstQueue& iqueue, uint64 evolve_unique_id, uint8 quantity);
 
 	protected:
 		///////////////////////////////
@@ -240,6 +238,8 @@ namespace EQ
 		int16 _HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity);
 		int16 _HasItemByLoreGroup(std::map<int16, ItemInstance*>& bucket, uint32 loregroup);
 		int16 _HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup);
+		int16 _HasEvolvingItem(std::map<int16, ItemInstance*>& bucket, uint64 evolve_unique_id, uint8 quantity);
+		int16 _HasEvolvingItem(ItemInstQueue& iqueue, uint64 evolve_unique_id, uint8 quantity);
 
 
 		// Player inventory

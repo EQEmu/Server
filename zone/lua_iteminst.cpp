@@ -255,11 +255,6 @@ int8 Lua_ItemInst::GetMaxEvolveLvl() {
 	return self->GetMaxEvolveLvl();
 }
 
-uint32 Lua_ItemInst::GetKillsNeeded(uint8 current_level) {
-	Lua_Safe_Call_Int();
-	return self->GetKillsNeeded(current_level);
-}
-
 Lua_ItemInst Lua_ItemInst::Clone() {
 	Lua_Safe_Call_Class(Lua_ItemInst);
 	return Lua_ItemInst(self->Clone(), true);
@@ -376,7 +371,6 @@ luabind::scope lua_register_iteminst() {
 	.def("GetItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItemID)
 	.def("GetItemLink", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItemLink)
 	.def("GetItemScriptID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItemScriptID)
-	.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded)
 	.def("GetMaxEvolveLvl", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetMaxEvolveLvl)
 	.def("GetName", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetName)
 	.def("GetPrice", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetPrice)

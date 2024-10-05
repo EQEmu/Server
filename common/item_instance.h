@@ -224,19 +224,9 @@ namespace EQ
 
 		void Initialize(SharedDatabase *db = nullptr);
 		void ScaleItem();
-		uint32 GetKillsNeeded(uint8 currentlevel);
 
-		std::string Serialize(int16 slot_id) const
-		{
-			InternalSerializedItem_Struct s;
-			s.slot_id = slot_id;
-			s.inst = (const void*)this;
-			std::string ser;
-			ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct));
-			return ser;
-		}
+		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
 		void Serialize(OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
-		void SerializeEvolveItem(EQ::OutBuffer& ob);
 
 		inline int32 GetSerialNumber() const { return m_SerialNumber; }
 		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
@@ -319,12 +309,10 @@ namespace EQ
 		static void ClearGUIDMap();
 
 		// evolving items stuff
-//		bool        EvolveOnAllKills() const;
-
 		CharacterEvolvingItemsRepository::CharacterEvolvingItems &GetEvolvingDetails() const { return m_evolving_details; }
 
 		int8             GetEvolveLvl() const { if (GetItem()) { return GetItem()->EvolvingLevel; } return false; }
-		bool             IsEvolving() const	{ if (GetItem()) { return GetItem()->EvolvingItem; } return false; }
+		bool             IsEvolving() const { if (GetItem()) { return GetItem()->EvolvingItem; } return false; }
 		int8             GetMaxEvolveLvl() const { if (GetItem()) { return GetItem()->EvolvingMax; } return false; }
 		bool             GetEvolveActivated() const { return m_evolving_details.activated; }
 		bool             GetEvolveEquiped() const { return m_evolving_details.equiped; }
@@ -346,10 +334,7 @@ namespace EQ
 		void             SetEvolveAddToCurrentAmount(const uint64 in) const { m_evolving_details.current_amount += in; }
 		void             SetEvolveFinalItemID(const uint32 in) const { m_evolving_details.final_item_id = in; }
 		bool             TransferOwnership(Database& db, const uint32 to_char_id) const;
-		void             CalculateEvolveProgression() const
-		{
-			m_evolving_details.progression = evolving_items_manager.CalculateProgression(GetEvolveCurrentAmount(), GetID());
-		}
+		void             CalculateEvolveProgression() const { m_evolving_details.progression = evolving_items_manager.CalculateProgression(GetEvolveCurrentAmount(), GetID()); }
 
 	protected:
 		//////////////////////////
@@ -390,20 +375,4 @@ namespace EQ
 		mutable std::map<std::string, ::Timer> m_timers {};
 	};
 }
-
-class EvolveInfo {
-public:
-	friend class EQ::ItemInstance;
-	//temporary
-	uint16 LvlKills[9]{};
-	uint32 FirstItem{0};
-	uint8  MaxLvl{0};
-	bool   AllKills{false};
-
-
-	EvolveInfo();
-	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);
-	~EvolveInfo();
-};
-
 #endif /*COMMON_ITEM_INSTANCE_H*/

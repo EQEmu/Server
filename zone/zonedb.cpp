@@ -11,7 +11,6 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "aura.h"
-#include "evolving.h"
 #include "../common/repositories/blocked_spells_repository.h"
 #include "../common/repositories/character_tribute_repository.h"
 #include "../common/repositories/character_data_repository.h"
@@ -54,7 +53,6 @@
 
 #include "../common/repositories/trader_repository.h"
 #include "../common/repositories/character_evolving_items_repository.h"
-#include "../common/repositories/inventory_repository.h"
 
 #include <ctime>
 #include <iostream>
