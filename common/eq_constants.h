@@ -1125,16 +1125,17 @@ namespace EvolvingItems {
 	}
 
 	namespace Types {
-		constexpr int8 AMOUNT_OF_EXP   = 1;
-		constexpr int8 NUMBER_OF_KILLS = 2;
+		constexpr int8 AMOUNT_OF_EXP     = 1;
+		constexpr int8 NUMBER_OF_KILLS   = 2;
+		constexpr int8 SPECIFIC_MOB_RACE = 3;
+		constexpr int8 SPECIFIC_ZONE_ID  = 4;
 	}
 
 	namespace SubTypes {
-		constexpr int8 ALL_EXP           = 0;
-		constexpr int8 SOLO_EXP          = 1;
-		constexpr int8 GROUP_EXP         = 2;
-		constexpr int8 RAID_EXP          = 3;
-		constexpr int8 SPECIFIC_MOB_TYPE = 4;
+		constexpr int8 ALL_EXP   = 0;
+		constexpr int8 SOLO_EXP  = 1;
+		constexpr int8 GROUP_EXP = 2;
+		constexpr int8 RAID_EXP  = 3;
 	}
 }
 

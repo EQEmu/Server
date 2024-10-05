@@ -323,16 +323,16 @@ namespace EQ
 
 		CharacterEvolvingItemsRepository::CharacterEvolvingItems &GetEvolvingDetails() const { return m_evolving_details; }
 
-		int8             GetEvolveLvl() const { return GetItem()->EvolvingLevel; }
-		bool             IsEvolving() const { return GetItem()->EvolvingItem; }
-		int8             GetMaxEvolveLvl() const { return GetItem()->EvolvingMax; }
+		int8             GetEvolveLvl() const { if (GetItem()) { return GetItem()->EvolvingLevel; } return false; }
+		bool             IsEvolving() const	{ if (GetItem()) { return GetItem()->EvolvingItem; } return false; }
+		int8             GetMaxEvolveLvl() const { if (GetItem()) { return GetItem()->EvolvingMax; } return false; }
 		bool             GetEvolveActivated() const { return m_evolving_details.activated; }
 		bool             GetEvolveEquiped() const { return m_evolving_details.equiped; }
 		double           GetEvolveProgression() const { return m_evolving_details.progression; }
 		uint64           GetEvolveUniqueID() const { return m_evolving_details.id; }
 		uint32           GetEvolveCharID() const { return m_evolving_details.char_id; }
 		uint32           GetEvolveItemID() const { return m_evolving_details.item_id; }
-		uint32           GetEvolveLoreID() const { return GetItem()->EvolvingID; }
+		uint32           GetEvolveLoreID() const { if (GetItem()) { return GetItem()->EvolvingID; } return false; }
 		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
 		uint32           GetEvolveFinalItemID() const { return m_evolving_details.final_item_id; }
 		uint32           GetAugmentEvolveUniqueID(uint8 augment_index) const;

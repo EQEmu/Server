@@ -19,6 +19,7 @@ Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 #define EVOLVING_H
 
 #include "shareddb.h"
+#include "events/player_events.h"
 #include "repositories/items_evolving_details_repository.h"
 
 namespace EQ {
@@ -33,16 +34,17 @@ public:
 	void SetContentDatabase(Database *db);
 
 	void LoadEvolvingItems() const;
-	static double CalculateProgression(uint64 current_amount, uint32 item_id);
 	void DoLootChecks(uint32 char_id, uint16 slot_id, const EQ::ItemInstance &inst) const;
 	uint32 GetFinalItemID(const EQ::ItemInstance &inst) const;
 	uint32 GetNextEvolveItemID(const EQ::ItemInstance &inst) const;
-	uint32 GetFirstItemInLoreGroup(const uint32 lore_id);
+	uint32 GetFirstItemInLoreGroup(uint32 lore_id);
+	uint32 GetFirstItemInLoreGroupByItemID(uint32 item_id);
 	uint64 GetTotalEarnedXP(const EQ::ItemInstance &inst);
+	static double CalculateProgression(uint64 current_amount, uint32 item_id);
+	static void LoadPlayerEvent(const EQ::ItemInstance &inst, PlayerEvent::EvolveItem &e);
 	ItemsEvolvingDetailsRepository::ItemsEvolvingDetails GetEvolveItemDetails(uint64 id);
 	EvolveTransfer_Struct DetermineTransferResults(const EQ::ItemInstance& inst_from, const EQ::ItemInstance& inst_to);
 	EvolveTransfer2_Struct GetNextItemByXP(const EQ::ItemInstance &inst_in, int64 in_xp);
-
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return evolving_items_cache; }
 	std::vector<ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> GetEvolveIDItems(uint32 evolve_id);
 

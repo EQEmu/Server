@@ -1827,6 +1827,7 @@ public:
 	void SendEvolveXPWindowDetails(const EQApplicationPacket* app);
 	void DoEvolveTransferXP(const EQApplicationPacket* app);
 	void SendEvolveXPTransferWindow();
+	void SendEvolveTransferResults(const EQ::ItemInstance &inst_from, const EQ::ItemInstance &inst_to, const EQ::ItemInstance &inst_from_new, const EQ::ItemInstance &inst_to_new, const uint32 compatibility, const uint32 max_transfer_level);
 
 protected:
 	friend class Mob;

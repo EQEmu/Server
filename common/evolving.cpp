@@ -148,10 +148,10 @@ uint32 EvolvingItemsManager::GetNextEvolveItemID(const EQ::ItemInstance& inst) c
 	return iterator->first;
 }
 
-ItemsEvolvingDetailsRepository::ItemsEvolvingDetails EvolvingItemsManager::GetEvolveItemDetails(const uint64 id)
+ItemsEvolvingDetailsRepository::ItemsEvolvingDetails EvolvingItemsManager::GetEvolveItemDetails(const uint64 unique_id)
 {
-	if (GetEvolvingItemsCache().contains(id)) {
-		return GetEvolvingItemsCache().at(id);
+	if (GetEvolvingItemsCache().contains(unique_id)) {
+		return GetEvolvingItemsCache().at(unique_id);
 	}
 
 	return ItemsEvolvingDetailsRepository::NewEntity();
@@ -282,4 +282,28 @@ uint32 EvolvingItemsManager::GetFirstItemInLoreGroup(const uint32 lore_id)
 	}
 
 	return 0;
+}
+
+uint32 EvolvingItemsManager::GetFirstItemInLoreGroupByItemID(const uint32 item_id)
+{
+	for (auto const &[key, value]: GetEvolvingItemsCache()) {
+		if (value.item_id == item_id) {
+			for (auto const &[key2, value2]: GetEvolvingItemsCache()) {
+				if (value2.item_evo_id == value.item_evo_id && value2.item_evolve_level == 1) {
+					return key;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+void EvolvingItemsManager::LoadPlayerEvent(const EQ::ItemInstance &inst, PlayerEvent::EvolveItem &e)
+{
+	e.item_id     = inst.GetID();
+	e.item_name   = inst.GetItem() ? inst.GetItem()->Name : std::string();
+	e.level       = inst.GetEvolveLvl();
+	e.progression = inst.GetEvolveProgression();
+	e.unique_id   = inst.GetEvolveUniqueID();
 }
