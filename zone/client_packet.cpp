@@ -13046,14 +13046,14 @@ void Client::Handle_OP_ReadBook(const EQApplicationPacket *app)
 		LogError("Wrong size: OP_ReadBook, size=[{}], expected [{}]", app->size, sizeof(BookRequest_Struct));
 		return;
 	}
-	BookRequest_Struct* book = (BookRequest_Struct*)app->pBuffer;
-	ReadBook(book);
-	if (ClientVersion() >= EQ::versions::ClientVersion::SoF)
-	{
-		EQApplicationPacket EndOfBook(OP_FinishWindow, 0);
-		QueuePacket(&EndOfBook);
+
+	auto b = (BookRequest_Struct*) app->pBuffer;
+	ReadBook(b);
+
+	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
+		EQApplicationPacket end_of_book(OP_FinishWindow, 0);
+		QueuePacket(&end_of_book);
 	}
-	return;
 }
 
 void Client::Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app)

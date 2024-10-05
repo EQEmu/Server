@@ -855,6 +855,15 @@ void handle_player_spell_blocked(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_read_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,

@@ -184,7 +184,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_entity_variable_set",
 	"event_entity_variable_update",
 	"event_aa_loss",
-	"event_spell_blocked"
+	"event_spell_blocked",
+	"event_read_item"
 };
 
 extern Zone *zone;
@@ -348,6 +349,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE]     = handle_player_entity_variable;
 	PlayerArgumentDispatch[EVENT_AA_LOSS]                    = handle_player_aa_loss;
 	PlayerArgumentDispatch[EVENT_SPELL_BLOCKED]              = handle_player_spell_blocked;
+	PlayerArgumentDispatch[EVENT_READ_ITEM]                  = handle_player_read_item;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

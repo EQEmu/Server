@@ -1745,6 +1745,41 @@ void handle_player_spell_blocked(
 	lua_setfield(L, -2, "cast_spell");
 }
 
+void handle_player_read_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "text_file");
+
+	if (extra_pointers) {
+		if (extra_pointers->size() == 6) {
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+			lua_setfield(L, -2, "book_text");
+
+			lua_pushboolean(L, std::any_cast<int8>(extra_pointers->at(1)));
+			lua_setfield(L, -2, "can_cast");
+
+			lua_pushboolean(L, std::any_cast<int8>(extra_pointers->at(2)));
+			lua_setfield(L, -2, "can_scribe");
+
+			lua_pushinteger(L, std::any_cast<int16>(extra_pointers->at(3)));
+			lua_setfield(L, -2, "slot_id");
+
+			lua_pushinteger(L, std::any_cast<int>(extra_pointers->at(4)));
+			lua_setfield(L, -2, "target_id");
+
+			lua_pushinteger(L, std::any_cast<uint8>(extra_pointers->at(5)));
+			lua_setfield(L, -2, "type");
+		}
+	}
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
