@@ -2932,6 +2932,7 @@ bool NPC::CanTalk()
 		case Race::Ogre:
 		case Race::Halfling:
 		case Race::Gnome:
+		case Race::Werewolf:
 		case Race::Brownie:
 		case Race::Centaur:
 		case Race::Giant:
@@ -2991,6 +2992,7 @@ bool NPC::CanTalk()
 		case Race::Tribunal:
 		case Race::Bertoxxulous:
 		case Race::Bristlebane:
+		case Race::Ratman:
 		case Race::Coldain:
 		case Race::VeliousDragon:
 		case Race::Siren:
@@ -3092,10 +3094,73 @@ bool NPC::CanTalk()
 		case Race::Minotaur2:
 		case Race::CrystalShard:
 		case Race::Goblin2:
+		case Race::Giant2:
 		case Race::Orc2:
+		case Race::Werewolf3:
 		case Race::Shiliskin:
 		case Race::Minotaur3:
 		case Race::Fairy2:
+		case Race::Bolvirk:
+		case Race::Elddar:
+		case Race::ForestGiant2:
+		case Race::BoneGolem2:
+		case Race::Scrykin:
+		case Race::Treant3:
+		case Race::Vampire4:
+		case Race::AyonaeRo:
+		case Race::SullonZek:
+		case Race::Bixie2:
+		case Race::Centaur2:
+		case Race::Drakkin:
+		case Race::Giant3:
+		case Race::Gnoll2:
+		case Race::GiantShade:
+		case Race::Harpy2:
+		case Race::Satyr:
+		case Race::Dynleth:
+		case Race::Kedge:
+		case Race::Kerran2:
+		case Race::Shissar2:
+		case Race::Siren2:
+		case Race::Sphinx2:
+		case Race::Human2:
+		case Race::Brownie2:
+		case Race::Exoskeleton:
+		case Race::Minotaur4:
+		case Race::Scarecrow2:
+		case Race::Wereorc:
+		case Race::ElvenGhost:
+		case Race::HumanGhost:
+		case Race::Burynai2:
+		case Race::Dracolich:
+		case Race::IksarGhost:
+		case Race::Mephit:
+		case Race::Sarnak2:
+		case Race::Gnoll3:
+		case Race::GodOfDiscord:
+		case Race::Ogre2:
+		case Race::Giant4:
+		case Race::Apexus:
+		case Race::Bellikos:
+		case Race::BrellsFirstCreation:
+		case Race::Brell:
+		case Race::Coldain2:
+		case Race::Coldain3:
+		case Race::Telmira:
+		case Race::MorellThule:
+		case Race::Amygdalan:
+		case Race::Sandman:
+		case Race::RoyalGuard:
+		case Race::CazicThule2:
+		case Race::Erudite2:
+		case Race::Alaran:
+		case Race::AlaranGhost:
+		case Race::Ratman2:
+		case Race::Akheva:
+		case Race::Luclin:
+		case Race::Luclin2:
+		case Race::Luclin3:
+		case Race::Luclin4:
 			return true;
 		default:
 			return false;
