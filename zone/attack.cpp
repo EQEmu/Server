@@ -4728,7 +4728,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				// main stun failed -- extra interrupt roll
 				// these spells are excluded
 				// 90% chance >< -- stun immune won't reach this branch though :(
-				if (IsCasting() && !EQ::ValueWithin(casting_spell_id, 859, 1023)) {
+				if (!IsClient() && IsCasting() && !EQ::ValueWithin(casting_spell_id, 859, 1023)) {
 					if (zone->random.Int(0, 9) > 1) {
 						InterruptSpell();
 					}
