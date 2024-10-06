@@ -2311,6 +2311,7 @@ void Client::ReadBook(BookRequest_Struct* book)
 
 	if (!b.text.empty()) {
 		auto outapp = new EQApplicationPacket(OP_ReadBook, b.text.size() + sizeof(BookText_Struct));
+		const auto inst = m_inv[book->invslot];
 
 		auto t = (BookText_Struct*) outapp->pBuffer;
 
@@ -2322,7 +2323,6 @@ void Client::ReadBook(BookRequest_Struct* book)
 		t->can_scribe = false;
 
 		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && book->invslot <= EQ::invbag::GENERAL_BAGS_END) {
-			const EQ::ItemInstance* inst = m_inv[book->invslot];
 			if (inst && inst->GetItem()) {
 				auto recipe = TradeskillRecipeRepository::GetWhere(
 					content_db,
@@ -2356,7 +2356,7 @@ void Client::ReadBook(BookRequest_Struct* book)
 				t->type
 			};
 
-			parse->EventPlayer(EVENT_READ_ITEM, this, book->txtfile, 0, &args);
+			parse->EventPlayer(EVENT_READ_ITEM, this, book->txtfile, inst ? inst->GetID() : 0, &args);
 		}
 
 		QueuePacket(outapp);
