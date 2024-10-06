@@ -4068,7 +4068,8 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == Race::Human2 ||
 		in_race == Race::ElvenGhost ||
 		in_race == Race::HumanGhost ||
-		in_race == Race::Coldain2
+		in_race == Race::Coldain2 ||
+		in_race == Race::Akheva
 	) {
 		if (in_gender >= Gender::Neuter) { // Male default for PC Races
 			return Gender::Male;
