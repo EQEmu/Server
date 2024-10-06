@@ -2917,8 +2917,6 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 
 bool NPC::CanTalk()
 {
-	//Races that should be able to talk. (Races up to Titanium)
-
 	switch (GetRace()) {
 		case Race::Human:
 		case Race::Barbarian:
