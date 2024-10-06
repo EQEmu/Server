@@ -2489,7 +2489,8 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-		case EVENT_READ_ITEM: {
+		case EVENT_READ_ITEM: {;
+			ExportVar(package_name.c_str(), "item_id", extra_data);
 			ExportVar(package_name.c_str(), "text_file", data);
 
 			if (extra_pointers && extra_pointers->size() == 6) {
