@@ -292,14 +292,14 @@ std::string Perl_QuestItem_GetItemLink(EQ::ItemInstance* self)
 	return linker.GenerateLink();
 }
 
-int8 Perl_QuestItem_GetEvolveLevel(EQ::ItemInstance* self)
+void Perl_QuestItem_AddEvolveAmount(EQ::ItemInstance* self, uint64 amount)
 {
-	return self->GetEvolveLvl();
+	self->SetEvolveAddToCurrentAmount(amount);
 }
 
-bool Perl_QuestItem_IsEvolving(EQ::ItemInstance* self)
+uint32 Perl_QuestItem_GetAugmentEvolveUniqueID(EQ::ItemInstance* self, uint8 slot_id)
 {
-	return self->IsEvolving();
+	return self->GetAugmentEvolveUniqueID(slot_id);
 }
 
 bool Perl_QuestItem_GetEvolveActivated(EQ::ItemInstance* self)
@@ -307,9 +307,39 @@ bool Perl_QuestItem_GetEvolveActivated(EQ::ItemInstance* self)
 	return self->GetEvolveActivated();
 }
 
+uint64 Perl_QuestItem_GetEvolveAmount(EQ::ItemInstance* self)
+{
+	return self->GetEvolveCurrentAmount();
+}
+
+uint32 Perl_QuestItem_GetEvolveCharacterID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveCharID();
+}
+
 bool Perl_QuestItem_GetEvolveEquipped(EQ::ItemInstance* self)
 {
 	return self->GetEvolveEquipped();
+}
+
+uint32 Perl_QuestItem_GetEvolveItemID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveItemID();
+}
+
+uint32 Perl_QuestItem_GetEvolveFinalItemID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveFinalItemID();
+}
+
+int8 Perl_QuestItem_GetEvolveLevel(EQ::ItemInstance* self)
+{
+	return self->GetEvolveLvl();
+}
+
+uint32 Perl_QuestItem_GetEvolveLoreID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveLoreID();
 }
 
 double Perl_QuestItem_GetEvolveProgression(EQ::ItemInstance* self)
@@ -322,34 +352,9 @@ uint64 Perl_QuestItem_GetEvolveUniqueID(EQ::ItemInstance* self)
 	return self->GetEvolveUniqueID();
 }
 
-uint32 Perl_QuestItem_GetEvolveCharacterID(EQ::ItemInstance* self)
+bool Perl_QuestItem_IsEvolving(EQ::ItemInstance* self)
 {
-	return self->GetEvolveCharID();
-}
-
-uint32 Perl_QuestItem_GetEvolveItemID(EQ::ItemInstance* self)
-{
-	return self->GetEvolveItemID();
-}
-
-uint32 Perl_QuestItem_GetEvolveLoreID(EQ::ItemInstance* self)
-{
-	return self->GetEvolveLoreID();
-}
-
-uint64 Perl_QuestItem_GetEvolveCurrentAmount(EQ::ItemInstance* self)
-{
-	return self->GetEvolveCurrentAmount();
-}
-
-uint32 Perl_QuestItem_GetEvolveFinalItemID(EQ::ItemInstance* self)
-{
-	return self->GetEvolveFinalItemID();
-}
-
-uint32 Perl_QuestItem_GetAugmentEvolveUniqueID(EQ::ItemInstance* self, uint8 slot_id)
-{
-	return self->GetAugmentEvolveUniqueID(slot_id);
+	return self->IsEvolving();
 }
 
 void Perl_QuestItem_SetEvolveProgression(EQ::ItemInstance* self, float amount)
@@ -360,11 +365,6 @@ void Perl_QuestItem_SetEvolveProgression(EQ::ItemInstance* self, float amount)
 void Perl_QuestItem_SetEvolveAmount(EQ::ItemInstance* self, uint64 amount)
 {
 	self->SetEvolveCurrentAmount(amount);
-}
-
-void Perl_QuestItem_AddEvolveAmount(EQ::ItemInstance* self, uint64 amount)
-{
-	self->SetEvolveAddToCurrentAmount(amount);
 }
 
 
@@ -390,8 +390,8 @@ void perl_register_questitem()
 	package.add("GetCustomData", &Perl_QuestItem_GetCustomData);
 	package.add("GetCustomDataString", &Perl_QuestItem_GetCustomDataString);
 	package.add("GetEvolveActivated", &Perl_QuestItem_GetEvolveActivated);
+	package.add("GetEvolveAmount", &Perl_QuestItem_GetEvolveAmount);
 	package.add("GetEvolveCharacterID", &Perl_QuestItem_GetEvolveCharacterID);
-	package.add("GetEvolveCurrentAmount", &Perl_QuestItem_GetEvolveCurrentAmount);
 	package.add("GetEvolveEquipped", &Perl_QuestItem_GetEvolveEquipped);
 	package.add("GetEvolveFinalItemID", &Perl_QuestItem_GetEvolveFinalItemID);
 	package.add("GetEvolveItemID", &Perl_QuestItem_GetEvolveItemID);
