@@ -72,9 +72,9 @@ double EvolvingItemsManager::CalculateProgression(const uint64 current_amount, c
 
 void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_id, const EQ::ItemInstance &inst) const
 {
-	inst.SetEvolveEquiped(false);
+	inst.SetEvolveEquipped(false);
 	if (inst.IsEvolving() && slot_id <= EQ::invslot::EQUIPMENT_END && slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
-		inst.SetEvolveEquiped(true);
+		inst.SetEvolveEquipped(true);
 	}
 
 	if (!inst.IsEvolving()) {
@@ -86,7 +86,7 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 
 		e.char_id       = char_id;
 		e.item_id       = inst.GetID();
-		e.equiped       = inst.GetEvolveEquiped();
+		e.equipped      = inst.GetEvolveEquipped();
 		e.final_item_id = evolving_items_manager.GetFinalItemID(inst);
 
 		auto r = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
@@ -100,7 +100,7 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 		return;
 	}
 
-	CharacterEvolvingItemsRepository::SetEquiped(*m_db, inst.GetEvolveUniqueID(), inst.GetEvolveEquiped());
+	CharacterEvolvingItemsRepository::SetEquipped(*m_db, inst.GetEvolveUniqueID(), inst.GetEvolveEquipped());
 }
 
 uint32 EvolvingItemsManager::GetFinalItemID(const EQ::ItemInstance &inst) const

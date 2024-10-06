@@ -5818,7 +5818,7 @@ CREATE TABLE `character_evolving_items` (
 	`char_id` INT(10) UNSIGNED NULL DEFAULT '0',
 	`item_id` INT(10) UNSIGNED NULL DEFAULT '0',
 	`activated` TINYINT(1) UNSIGNED NULL DEFAULT '0',
-	`equiped` TINYINT(3) UNSIGNED NULL DEFAULT '0',
+	`equipped` TINYINT(3) UNSIGNED NULL DEFAULT '0',
 	`current_amount` BIGINT(20) NULL DEFAULT '0',
 	`progression` DOUBLE(22,0) NULL DEFAULT '0',
 	`final_item_id` INT(10) UNSIGNED NULL DEFAULT '0',

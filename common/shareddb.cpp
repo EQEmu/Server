@@ -796,7 +796,7 @@ bool SharedDatabase::GetInventory(Client *c)
 
 		if (item->EvolvingItem) {
 			if (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END) {
-				inst->SetEvolveEquiped(true);
+				inst->SetEvolveEquipped(true);
 			}
 
 			auto t = std::ranges::find_if(
@@ -812,7 +812,7 @@ bool SharedDatabase::GetInventory(Client *c)
 
 				e.char_id       = char_id;
 				e.item_id       = item_id;
-				e.equiped       = inst->GetEvolveEquiped();
+				e.equipped      = inst->GetEvolveEquipped();
 				e.final_item_id = evolving_items_manager.GetFinalItemID(*inst);
 
 				auto r = CharacterEvolvingItemsRepository::InsertOne(*this, e);
@@ -823,7 +823,7 @@ bool SharedDatabase::GetInventory(Client *c)
 				inst->SetEvolveCharID(e.char_id);
 				inst->SetEvolveItemID(e.item_id);
 				inst->SetEvolveActivated(e.activated);
-				inst->SetEvolveEquiped(e.equiped);
+				inst->SetEvolveEquipped(e.equipped);
 				inst->SetEvolveCurrentAmount(e.current_amount);
 				inst->CalculateEvolveProgression();
 				inst->SetEvolveFinalItemID(e.final_item_id);
@@ -833,7 +833,7 @@ bool SharedDatabase::GetInventory(Client *c)
 				inst->SetEvolveCharID(t->char_id);
 				inst->SetEvolveItemID(t->item_id);
 				inst->SetEvolveActivated(t->activated);
-				inst->SetEvolveEquiped(t->equiped);
+				inst->SetEvolveEquipped(t->equipped);
 				inst->SetEvolveCurrentAmount(t->current_amount);
 				inst->CalculateEvolveProgression();
 				inst->SetEvolveFinalItemID(t->final_item_id);

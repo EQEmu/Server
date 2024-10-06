@@ -53,7 +53,7 @@ void command_evolvingitems(Client *c, const Seperator *sep)
 				);
 				c->Message(
 					Chat::Yellow,
-					fmt::format("{}{}{}", "Equiped", ":", value->GetEvolveEquiped() ? "Yes" : "No").c_str()
+					fmt::format("{}{}{}", "Equiped", ":", value->GetEvolveEquipped() ? "Yes" : "No").c_str()
 				);
 				c->Message(
 					Chat::Yellow,
@@ -106,7 +106,7 @@ void command_evolvingitems(Client *c, const Seperator *sep)
 				);
 				c->Message(
 					Chat::Yellow,
-					fmt::format("{}{}{}", "Equiped", ":", value->GetEvolveEquiped() ? "Yes" : "No").c_str()
+					fmt::format("{}{}{}", "Equiped", ":", value->GetEvolveEquipped() ? "Yes" : "No").c_str()
 				);
 				c->Message(
 					Chat::Yellow,
@@ -154,7 +154,7 @@ void command_evolvingitems(Client *c, const Seperator *sep)
 				);
 				c->Message(
 					Chat::Yellow,
-					fmt::format("{}{}{}", "Equiped", ":", item->GetEvolveEquiped() ? "Yes" : "No").c_str()
+					fmt::format("{}{}{}", "Equiped", ":", item->GetEvolveEquipped() ? "Yes" : "No").c_str()
 				);
 				c->Message(Chat::Yellow, fmt::format("{}{}{:0d}", "Unique ID", ":", item->GetEvolveUniqueID()).c_str());
 				c->Message(

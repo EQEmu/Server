@@ -1962,13 +1962,13 @@ void EQ::ItemInstance::SetTimer(std::string name, uint32 time) const{
 	m_timers[name] = t;
 }
 
-void EQ::ItemInstance::SetEvolveEquiped(const bool in) const
+void EQ::ItemInstance::SetEvolveEquipped(const bool in) const
 {
 	if (!IsEvolving()) {
 		return;
 	}
 
-	m_evolving_details.equiped = in;
+	m_evolving_details.equipped = in;
 	if (in && !GetTimers().contains("evolve")) {
 		SetTimer("evolve", RuleI(EvolvingItems, DelayUponEquipping));
 		return;

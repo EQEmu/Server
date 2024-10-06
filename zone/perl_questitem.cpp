@@ -292,12 +292,88 @@ std::string Perl_QuestItem_GetItemLink(EQ::ItemInstance* self)
 	return linker.GenerateLink();
 }
 
+int8 Perl_QuestItem_GetEvolveLevel(EQ::ItemInstance* self)
+{
+	return self->GetEvolveLvl();
+}
+
+bool Perl_QuestItem_IsEvolving(EQ::ItemInstance* self)
+{
+	return self->IsEvolving();
+}
+
+bool Perl_QuestItem_GetEvolveActivated(EQ::ItemInstance* self)
+{
+	return self->GetEvolveActivated();
+}
+
+bool Perl_QuestItem_GetEvolveEquipped(EQ::ItemInstance* self)
+{
+	return self->GetEvolveEquipped();
+}
+
+double Perl_QuestItem_GetEvolveProgression(EQ::ItemInstance* self)
+{
+	return self->GetEvolveProgression();
+}
+
+uint64 Perl_QuestItem_GetEvolveUniqueID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveUniqueID();
+}
+
+uint32 Perl_QuestItem_GetEvolveCharacterID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveCharID();
+}
+
+uint32 Perl_QuestItem_GetEvolveItemID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveItemID();
+}
+
+uint32 Perl_QuestItem_GetEvolveLoreID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveLoreID();
+}
+
+uint64 Perl_QuestItem_GetEvolveCurrentAmount(EQ::ItemInstance* self)
+{
+	return self->GetEvolveCurrentAmount();
+}
+
+uint32 Perl_QuestItem_GetEvolveFinalItemID(EQ::ItemInstance* self)
+{
+	return self->GetEvolveFinalItemID();
+}
+
+uint32 Perl_QuestItem_GetAugmentEvolveUniqueID(EQ::ItemInstance* self, uint8 slot_id)
+{
+	return self->GetAugmentEvolveUniqueID(slot_id);
+}
+
+void Perl_QuestItem_SetEvolveProgression(EQ::ItemInstance* self, float amount)
+{
+	self->SetEvolveProgression(amount);
+}
+
+void Perl_QuestItem_SetEvolveAmount(EQ::ItemInstance* self, uint64 amount)
+{
+	self->SetEvolveCurrentAmount(amount);
+}
+
+void Perl_QuestItem_AddEvolveAmount(EQ::ItemInstance* self, uint64 amount)
+{
+	self->SetEvolveAddToCurrentAmount(amount);
+}
+
 
 void perl_register_questitem()
 {
 	perl::interpreter perl(PERL_GET_THX);
 
 	auto package = perl.new_class<EQ::ItemInstance>("QuestItem");
+	package.add("AddEvolveAmount", &Perl_QuestItem_AddEvolveAmount);
 	package.add("AddEXP", &Perl_QuestItem_AddEXP);
 	package.add("ClearTimers", &Perl_QuestItem_ClearTimers);
 	package.add("Clone", &Perl_QuestItem_Clone);
@@ -305,6 +381,7 @@ void perl_register_questitem()
 	package.add("CountAugmentByID", &Perl_QuestItem_CountAugmentByID);
 	package.add("DeleteCustomData", &Perl_QuestItem_DeleteCustomData);
 	package.add("GetAugment", &Perl_QuestItem_GetAugment);
+	package.add("GetAugmentEvolveUniqueID", &Perl_QuestItem_GetAugmentEvolveUniqueID);
 	package.add("GetAugmentIDs", &Perl_QuestItem_GetAugmentIDs);
 	package.add("GetAugmentItemID", &Perl_QuestItem_GetAugmentItemID);
 	package.add("GetAugmentType", &Perl_QuestItem_GetAugmentType);
@@ -312,6 +389,16 @@ void perl_register_questitem()
 	package.add("GetColor", &Perl_QuestItem_GetColor);
 	package.add("GetCustomData", &Perl_QuestItem_GetCustomData);
 	package.add("GetCustomDataString", &Perl_QuestItem_GetCustomDataString);
+	package.add("GetEvolveActivated", &Perl_QuestItem_GetEvolveActivated);
+	package.add("GetEvolveCharacterID", &Perl_QuestItem_GetEvolveCharacterID);
+	package.add("GetEvolveCurrentAmount", &Perl_QuestItem_GetEvolveCurrentAmount);
+	package.add("GetEvolveEquipped", &Perl_QuestItem_GetEvolveEquipped);
+	package.add("GetEvolveFinalItemID", &Perl_QuestItem_GetEvolveFinalItemID);
+	package.add("GetEvolveItemID", &Perl_QuestItem_GetEvolveItemID);
+	package.add("GetEvolveLevel", &Perl_QuestItem_GetEvolveLevel);
+	package.add("GetEvolveLoreID", &Perl_QuestItem_GetEvolveLoreID);
+	package.add("GetEvolveProgression", &Perl_QuestItem_GetEvolveProgression);
+	package.add("GetEvolveUniqueID", &Perl_QuestItem_GetEvolveUniqueID);
 	package.add("GetEXP", &Perl_QuestItem_GetEXP);
 	package.add("GetID", &Perl_QuestItem_GetID);
 	package.add("GetItem", (EQ::ItemData*(*)(EQ::ItemInstance*))&Perl_QuestItem_GetItem);
@@ -331,6 +418,7 @@ void perl_register_questitem()
 	package.add("IsAugmented", &Perl_QuestItem_IsAugmented);
 	package.add("IsEquipable", (bool(*)(EQ::ItemInstance*, int16))&Perl_QuestItem_IsEquipable);
 	package.add("IsEquipable", (bool(*)(EQ::ItemInstance*, uint16, uint16))&Perl_QuestItem_IsEquipable);
+	package.add("IsEvolving", &Perl_QuestItem_IsEvolving);
 	package.add("IsExpendable", &Perl_QuestItem_IsExpendable);
 	package.add("IsInstanceNoDrop", &Perl_QuestItem_IsInstanceNoDrop);
 	package.add("IsStackable", &Perl_QuestItem_IsStackable);
@@ -346,6 +434,8 @@ void perl_register_questitem()
 	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, float))&Perl_QuestItem_SetCustomData);
 	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, int))&Perl_QuestItem_SetCustomData);
 	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, std::string))&Perl_QuestItem_SetCustomData);
+	package.add("SetEvolveAmount", &Perl_QuestItem_SetEvolveAmount);
+	package.add("SetEvolveProgression", &Perl_QuestItem_SetEvolveProgression);
 	package.add("SetEXP", &Perl_QuestItem_SetEXP);
 	package.add("SetInstanceNoDrop", &Perl_QuestItem_SetInstanceNoDrop);
 	package.add("SetPrice", &Perl_QuestItem_SetPrice);

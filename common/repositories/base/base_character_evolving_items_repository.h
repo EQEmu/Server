@@ -23,7 +23,7 @@ public:
 		uint32_t char_id;
 		uint32_t item_id;
 		uint8_t  activated;
-		uint8_t  equiped;
+		uint8_t  equipped;
 		int64_t  current_amount;
 		double   progression;
 		uint32_t final_item_id;
@@ -42,7 +42,7 @@ public:
 			"char_id",
 			"item_id",
 			"activated",
-			"equiped",
+			"equipped",
 			"current_amount",
 			"progression",
 			"final_item_id",
@@ -57,7 +57,7 @@ public:
 			"char_id",
 			"item_id",
 			"activated",
-			"equiped",
+			"equipped",
 			"current_amount",
 			"progression",
 			"final_item_id",
@@ -106,7 +106,7 @@ public:
 		e.char_id        = 0;
 		e.item_id        = 0;
 		e.activated      = 0;
-		e.equiped        = 0;
+		e.equipped       = 0;
 		e.current_amount = 0;
 		e.progression    = 0;
 		e.final_item_id  = 0;
@@ -151,7 +151,7 @@ public:
 			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.equipped       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
@@ -192,7 +192,7 @@ public:
 		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.activated));
-		v.push_back(columns[4] + " = " + std::to_string(e.equiped));
+		v.push_back(columns[4] + " = " + std::to_string(e.equipped));
 		v.push_back(columns[5] + " = " + std::to_string(e.current_amount));
 		v.push_back(columns[6] + " = " + std::to_string(e.progression));
 		v.push_back(columns[7] + " = " + std::to_string(e.final_item_id));
@@ -222,7 +222,7 @@ public:
 		v.push_back(std::to_string(e.char_id));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.activated));
-		v.push_back(std::to_string(e.equiped));
+		v.push_back(std::to_string(e.equipped));
 		v.push_back(std::to_string(e.current_amount));
 		v.push_back(std::to_string(e.progression));
 		v.push_back(std::to_string(e.final_item_id));
@@ -260,7 +260,7 @@ public:
 			v.push_back(std::to_string(e.char_id));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.activated));
-			v.push_back(std::to_string(e.equiped));
+			v.push_back(std::to_string(e.equipped));
 			v.push_back(std::to_string(e.current_amount));
 			v.push_back(std::to_string(e.progression));
 			v.push_back(std::to_string(e.final_item_id));
@@ -302,7 +302,7 @@ public:
 			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.equipped       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
@@ -335,7 +335,7 @@ public:
 			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.equiped        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.equipped       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.current_amount = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.progression    = row[6] ? strtod(row[6], nullptr) : 0;
 			e.final_item_id  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
@@ -418,7 +418,7 @@ public:
 		v.push_back(std::to_string(e.char_id));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.activated));
-		v.push_back(std::to_string(e.equiped));
+		v.push_back(std::to_string(e.equipped));
 		v.push_back(std::to_string(e.current_amount));
 		v.push_back(std::to_string(e.progression));
 		v.push_back(std::to_string(e.final_item_id));
@@ -449,7 +449,7 @@ public:
 			v.push_back(std::to_string(e.char_id));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.activated));
-			v.push_back(std::to_string(e.equiped));
+			v.push_back(std::to_string(e.equipped));
 			v.push_back(std::to_string(e.current_amount));
 			v.push_back(std::to_string(e.progression));
 			v.push_back(std::to_string(e.final_item_id));
