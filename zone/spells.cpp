@@ -2543,7 +2543,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		if (IsBeneficialSpell(spell_id)) {
 			spell_target = this;
 		} else {
-			Message(Chat::SpellFailure, "Invalid spellcasting state reached, please report this as a bug.");
 			return false;
 		}
 	}
