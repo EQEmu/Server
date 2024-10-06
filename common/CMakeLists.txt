@@ -40,7 +40,6 @@ SET(common_sources
     events/player_event_logs.cpp
     events/player_event_discord_formatter.cpp
     expedition_lockout_timer.cpp
-    extprofile.cpp
     discord/discord_manager.cpp
     faction.cpp
     file.cpp
@@ -555,7 +554,6 @@ SET(common_headers
     events/player_events.h
     event_sub.h
     expedition_lockout_timer.h
-    extprofile.h
     faction.h
     file.h
     features.h

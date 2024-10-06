@@ -68,7 +68,6 @@
 #include "database.h"
 #include "data_verification.h"
 #include "eq_packet_structs.h"
-#include "extprofile.h"
 #include "strings.h"
 #include "database_schema.h"
 #include "http/httplib.h"

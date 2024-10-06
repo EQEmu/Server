@@ -46,7 +46,6 @@ namespace EQ
 #include "../common/eq_stream_intf.h"
 #include "../common/eq_packet.h"
 #include "../common/linked_list.h"
-#include "../common/extprofile.h"
 #include "../common/races.h"
 #include "../common/seperator.h"
 #include "../common/inventory_profile.h"

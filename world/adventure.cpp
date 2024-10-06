@@ -1,7 +1,6 @@
 #include <glm/vec4.hpp>
 #include "../common/global_define.h"
 #include "../common/servertalk.h"
-#include "../common/extprofile.h"
 #include "../common/rulesys.h"
 #include "../common/misc_functions.h"
 #include "../common/strings.h"

@@ -29,7 +29,6 @@
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/skills.h"
-#include "../common/extprofile.h"
 #include "../common/strings.h"
 #include "../common/emu_versions.h"
 #include "../common/random.h"

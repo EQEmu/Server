@@ -1,6 +1,5 @@
 
 #include "../common/eqemu_logsys.h"
-#include "../common/extprofile.h"
 #include "../common/rulesys.h"
 #include "../common/strings.h"
 
