@@ -2311,7 +2311,7 @@ void Client::ReadBook(BookRequest_Struct* book)
 
 	if (!b.text.empty()) {
 		auto outapp = new EQApplicationPacket(OP_ReadBook, b.text.size() + sizeof(BookText_Struct));
-		const auto inst = m_inv[book->invslot];
+		auto inst = const_cast<EQ::ItemInstance*>(m_inv[book->invslot]);
 
 		auto t = (BookText_Struct*) outapp->pBuffer;
 
@@ -2353,7 +2353,8 @@ void Client::ReadBook(BookRequest_Struct* book)
 				t->can_scribe,
 				t->invslot,
 				t->target_id,
-				t->type
+				t->type,
+				inst
 			};
 
 			parse->EventPlayer(EVENT_READ_ITEM, this, book->txtfile, inst ? inst->GetID() : 0, &args);

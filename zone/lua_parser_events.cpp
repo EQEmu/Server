@@ -1761,7 +1761,7 @@ void handle_player_read_item(
 	lua_setfield(L, -2, "item_id");
 
 	if (extra_pointers) {
-		if (extra_pointers->size() == 6) {
+		if (extra_pointers->size() == 7) {
 			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
 			lua_setfield(L, -2, "book_text");
 
@@ -1779,6 +1779,11 @@ void handle_player_read_item(
 
 			lua_pushinteger(L, std::any_cast<uint8>(extra_pointers->at(5)));
 			lua_setfield(L, -2, "type");
+
+			Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(6)));
+			luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+			l_item_o.push(L);
+			lua_setfield(L, -2, "item");
 		}
 	}
 }
