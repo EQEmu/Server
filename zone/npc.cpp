@@ -2917,31 +2917,252 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 
 bool NPC::CanTalk()
 {
-	//Races that should be able to talk. (Races up to Titanium)
-
-	uint16 TalkRace[473] =
-	{1,2,3,4,5,6,7,8,9,10,11,12,0,0,15,16,0,18,19,20,0,0,23,0,25,0,0,0,0,0,0,
-	32,0,0,0,0,0,0,39,40,0,0,0,44,0,0,0,0,49,0,51,0,53,54,55,56,57,58,0,0,0,
-	62,0,64,65,66,67,0,0,70,71,0,0,0,0,0,77,78,79,0,81,82,0,0,0,86,0,0,0,90,
-	0,92,93,94,95,0,0,98,99,0,101,0,103,0,0,0,0,0,0,110,111,112,0,0,0,0,0,0,
-	0,0,0,0,123,0,0,126,0,128,0,130,131,0,0,0,0,136,137,0,139,140,0,0,0,144,
-	0,0,0,0,0,150,151,152,153,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,183,184,0,0,187,188,189,0,0,0,0,0,195,196,0,198,0,0,0,202,0,
-	0,205,0,0,208,0,0,0,0,0,0,0,0,217,0,219,0,0,0,0,0,0,226,0,0,229,230,0,0,
-	0,0,235,236,0,238,239,240,241,242,243,244,0,246,247,0,0,0,251,0,0,254,255,
-	256,257,0,0,0,0,0,0,0,0,266,267,0,0,270,271,0,0,0,0,0,277,278,0,0,0,0,283,
-	284,0,286,0,288,289,290,0,0,0,0,295,296,297,298,299,300,0,0,0,304,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,0,320,0,322,323,324,325,0,0,0,0,330,331,332,333,334,335,
-	336,337,338,339,340,341,342,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,359,360,361,362,
-	0,364,365,366,0,368,369,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,385,386,0,0,0,0,0,392,
-	393,394,395,396,397,398,0,400,402,0,0,0,0,406,0,408,0,0,411,0,413,0,0,0,417,
-	0,0,420,0,0,0,0,425,0,0,0,0,0,0,0,433,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,458,0,0,0,0,0,0,0,0,467,0,0,470,0,0,473};
-
-	if (TalkRace[GetRace() - 1] > 0)
-		return true;
-
-	return false;
+	switch (GetRace()) {
+		case Race::Human:
+		case Race::Barbarian:
+		case Race::Erudite:
+		case Race::WoodElf:
+		case Race::HighElf:
+		case Race::DarkElf:
+		case Race::HalfElf:
+		case Race::Dwarf:
+		case Race::Troll:
+		case Race::Ogre:
+		case Race::Halfling:
+		case Race::Gnome:
+		case Race::Werewolf:
+		case Race::Brownie:
+		case Race::Centaur:
+		case Race::Giant:
+		case Race::Trakanon:
+		case Race::VenrilSathir:
+		case Race::Kerran:
+		case Race::Fairy:
+		case Race::Ghost:
+		case Race::Gnoll:
+		case Race::Goblin:
+		case Race::FreeportGuard:
+		case Race::LavaDragon:
+		case Race::LizardMan:
+		case Race::Minotaur:
+		case Race::Orc:
+		case Race::HumanBeggar:
+		case Race::Pixie:
+		case Race::Drachnid:
+		case Race::SolusekRo:
+		case Race::Tunare:
+		case Race::Treant:
+		case Race::Vampire:
+		case Race::StatueOfRallosZek:
+		case Race::HighpassCitizen:
+		case Race::Zombie:
+		case Race::QeynosCitizen:
+		case Race::NeriakCitizen:
+		case Race::EruditeCitizen:
+		case Race::Bixie:
+		case Race::RivervaleCitizen:
+		case Race::Scarecrow:
+		case Race::Sphinx:
+		case Race::HalasCitizen:
+		case Race::GrobbCitizen:
+		case Race::OggokCitizen:
+		case Race::KaladimCitizen:
+		case Race::CazicThule:
+		case Race::ElfVampire:
+		case Race::Denizen:
+		case Race::Efreeti:
+		case Race::PhinigelAutropos:
+		case Race::Mermaid:
+		case Race::Harpy:
+		case Race::Fayguard:
+		case Race::Innoruuk:
+		case Race::Djinn:
+		case Race::InvisibleMan:
+		case Race::Iksar:
+		case Race::VahShir:
+		case Race::Sarnak:
+		case Race::Xalgoz:
+		case Race::Yeti:
+		case Race::IksarCitizen:
+		case Race::ForestGiant:
+		case Race::Burynai:
+		case Race::Erollisi:
+		case Race::Tribunal:
+		case Race::Bertoxxulous:
+		case Race::Bristlebane:
+		case Race::Ratman:
+		case Race::Coldain:
+		case Race::VeliousDragon:
+		case Race::Siren:
+		case Race::FrostGiant:
+		case Race::StormGiant:
+		case Race::BlackAndWhiteDragon:
+		case Race::GhostDragon:
+		case Race::PrismaticDragon:
+		case Race::Grimling:
+		case Race::KhatiSha:
+		case Race::Vampire2:
+		case Race::Shissar:
+		case Race::VampireVolatalis:
+		case Race::Shadel:
+		case Race::Netherbian:
+		case Race::Akhevan:
+		case Race::Wretch:
+		case Race::LordInquisitorSeru:
+		case Race::VahShirKing:
+		case Race::VahShirGuard:
+		case Race::TeleportMan:
+		case Race::Werewolf2:
+		case Race::Nymph:
+		case Race::Dryad:
+		case Race::Treant2:
+		case Race::TarewMarr:
+		case Race::SolusekRo2:
+		case Race::GuardOfJustice:
+		case Race::SolusekRoGuard:
+		case Race::BertoxxulousNew:
+		case Race::TribunalNew:
+		case Race::TerrisThule:
+		case Race::KnightOfPestilence:
+		case Race::Lepertoloth:
+		case Race::Pusling:
+		case Race::WaterMephit:
+		case Race::NightmareGoblin:
+		case Race::Karana:
+		case Race::Saryrn:
+		case Race::FenninRo:
+		case Race::SoulDevourer:
+		case Race::NewRallosZek:
+		case Race::VallonZek:
+		case Race::TallonZek:
+		case Race::AirMephit:
+		case Race::EarthMephit:
+		case Race::FireMephit:
+		case Race::NightmareMephit:
+		case Race::Zebuxoruk:
+		case Race::MithanielMarr:
+		case Race::UndeadKnight:
+		case Race::Rathe:
+		case Race::Xegony:
+		case Race::Fiend:
+		case Race::Quarm:
+		case Race::Efreeti2:
+		case Race::Valorian2:
+		case Race::AnimatedArmor:
+		case Race::UndeadFootman:
+		case Race::RallosOgre:
+		case Race::Froglok2:
+		case Race::TrollCrewMember:
+		case Race::PirateDeckhand:
+		case Race::BrokenSkullPirate:
+		case Race::PirateGhost:
+		case Race::OneArmedPirate:
+		case Race::SpiritmasterNadox:
+		case Race::BrokenSkullTaskmaster:
+		case Race::GnomePirate:
+		case Race::DarkElfPirate:
+		case Race::OgrePirate:
+		case Race::HumanPirate:
+		case Race::EruditePirate:
+		case Race::UndeadVampire:
+		case Race::Vampire3:
+		case Race::RujarkianOrc:
+		case Race::BoneGolem:
+		case Race::SandElf:
+		case Race::MasterVampire:
+		case Race::MasterOrc:
+		case Race::Mummy:
+		case Race::NewGoblin:
+		case Race::Nihil:
+		case Race::Trusik:
+		case Race::Ukun:
+		case Race::Ixt:
+		case Race::Ikaav:
+		case Race::Aneuk:
+		case Race::Kyv:
+		case Race::Noc:
+		case Race::Ratuk:
+		case Race::Huvul:
+		case Race::Mastruq:
+		case Race::MataMuram:
+		case Race::Succubus:
+		case Race::Pyrilen:
+		case Race::Dragorn:
+		case Race::Gelidran:
+		case Race::Minotaur2:
+		case Race::CrystalShard:
+		case Race::Goblin2:
+		case Race::Giant2:
+		case Race::Orc2:
+		case Race::Werewolf3:
+		case Race::Shiliskin:
+		case Race::Minotaur3:
+		case Race::Fairy2:
+		case Race::Bolvirk:
+		case Race::Elddar:
+		case Race::ForestGiant2:
+		case Race::BoneGolem2:
+		case Race::Scrykin:
+		case Race::Treant3:
+		case Race::Vampire4:
+		case Race::AyonaeRo:
+		case Race::SullonZek:
+		case Race::Bixie2:
+		case Race::Centaur2:
+		case Race::Drakkin:
+		case Race::Giant3:
+		case Race::Gnoll2:
+		case Race::GiantShade:
+		case Race::Harpy2:
+		case Race::Satyr:
+		case Race::Dynleth:
+		case Race::Kedge:
+		case Race::Kerran2:
+		case Race::Shissar2:
+		case Race::Siren2:
+		case Race::Sphinx2:
+		case Race::Human2:
+		case Race::Brownie2:
+		case Race::Exoskeleton:
+		case Race::Minotaur4:
+		case Race::Scarecrow2:
+		case Race::Wereorc:
+		case Race::ElvenGhost:
+		case Race::HumanGhost:
+		case Race::Burynai2:
+		case Race::Dracolich:
+		case Race::IksarGhost:
+		case Race::Mephit:
+		case Race::Sarnak2:
+		case Race::Gnoll3:
+		case Race::GodOfDiscord:
+		case Race::Ogre2:
+		case Race::Giant4:
+		case Race::Apexus:
+		case Race::Bellikos:
+		case Race::BrellsFirstCreation:
+		case Race::Brell:
+		case Race::Coldain2:
+		case Race::Coldain3:
+		case Race::Telmira:
+		case Race::MorellThule:
+		case Race::Amygdalan:
+		case Race::Sandman:
+		case Race::RoyalGuard:
+		case Race::CazicThule2:
+		case Race::Erudite2:
+		case Race::Alaran:
+		case Race::AlaranGhost:
+		case Race::Ratman2:
+		case Race::Akheva:
+		case Race::Luclin:
+		case Race::Luclin2:
+		case Race::Luclin3:
+		case Race::Luclin4:
+			return true;
+		default:
+			return false;
+	}
 }
 
 //this is called with 'this' as the mob being looked at, and
