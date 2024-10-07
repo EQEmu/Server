@@ -1203,7 +1203,7 @@ void EntityList::AESpell(
 		return;
 	}
 
-	int max_targets_allowed = 4;
+	int max_targets_allowed = RuleI(Spells, TargetedAOEMaxTargets);;
 	if (max_targets) { // rains pass this in since they need to preserve the count through waves
 		max_targets_allowed = *max_targets;
 	} else if (spells[spell_id].aoe_max_targets) {
