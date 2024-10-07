@@ -236,10 +236,10 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		);
 
 		auto val = parse->EventPlayer(EVENT_ZONE, this, export_string, 0);
-		if (val != 0) {			
+		if (val != 0) {
 			if (val > 0) {
 				target_zone_id = val;
-				
+
 			} else {
 				SendZoneCancel(zc);
 				return;
@@ -869,7 +869,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			Entity* entity = entity_list.GetID(entity_id_being_looted);
 			if (entity == 0)
 			{
-				LogError("OP_EndLootRequest: Corpse with id of {} not found for {}.", entity_id_being_looted, GetCleanName());
+				LogErrorDetail("OP_EndLootRequest: Corpse with id of {} not found for {}.", entity_id_being_looted, GetCleanName());
 				if (ClientVersion() >= EQ::versions::ClientVersion::SoD)
 					Corpse::SendEndLootErrorPacket(this);
 				else
@@ -877,7 +877,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			}
 			else if (!entity->IsCorpse())
 			{
-				LogError("OP_EndLootRequest: Entity with id of {} was not corpse for {}.", entity_id_being_looted, GetCleanName());
+				LogErrorDetail("OP_EndLootRequest: Entity with id of {} was not corpse for {}.", entity_id_being_looted, GetCleanName());
 				Corpse::SendLootReqErrorPacket(this);
 			}
 			else
