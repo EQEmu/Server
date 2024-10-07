@@ -136,8 +136,16 @@ public:
 
 				// If exactly one valid class, update the timer_id with offset (valid_class_id + 1)
 				if (valid_class_count == 1 && valid_class_id != -1) {
-					LogDebug("Found a discipline name [{}], updating [{}] to [{}]", columns[1], columns[167], std::to_string(Strings::ToInt(columns[167]) + (20 * (valid_class_id + 1))));
+					//LogDebug("Found a discipline name [{}], updating [{}] to [{}]", columns[1], columns[167], std::to_string(Strings::ToInt(columns[167]) + (20 * (valid_class_id + 1))));
 					columns[167] = std::to_string(Strings::ToInt(columns[167]) + (20 * (valid_class_id + 1)));
+				}
+			} else {
+				// Not a disc
+				if (Strings::ToInt(columns[20]) < 0 && columns[86] == "0" && Strings::ToInt(columns[17]) == 0) { // it is a nuke
+					if (Strings::ToInt(columns[13]) > 3000) { // cast time > 3 sec
+						columns[15] = fmt::to_string(Strings::ToInt(columns[15]) + (Strings::ToInt(columns[13]) - 3000)).c_str();
+						columns[13] = "3000";
+					}
 				}
 			}
 

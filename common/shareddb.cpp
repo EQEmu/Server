@@ -2256,13 +2256,21 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].no_remove = Strings::ToBool(row[232]);
 		sp[tempid].damage_shield_type = 0;
 
-		if (RuleB(Custom, UseTHJItemMutations)) {
+		if (RuleB(Custom, MulticlassingEnabled)) {
 			if (!sp[tempid].is_discipline) {
 				sp[tempid].timer_id = -1;
 
 				if (sp[tempid].target_type == ST_GroupClientAndPet) {
 					sp[tempid].target_type = ST_Target;
 				}
+
+				if (sp[tempid].cast_time > 3000) {
+					if (sp[tempid].effect_id[0] == 0 && sp[tempid].buff_duration == 0 && sp[tempid].base_value[0] < 0) {
+						sp[tempid].recast_time += (sp[tempid].cast_time - 3000);
+						sp[tempid].cast_time = 3000;
+					}
+				}
+
 			} else {
 				int eligible_class_count = 0;
 				int eligible_class_id = -1;
@@ -2277,12 +2285,10 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 				// If only one class is eligible
 				if (eligible_class_count == 1 && eligible_class_id != -1) {
-					LogInfo("Adjusting spellID [{}] name [{}] from timer [{}] to timer [{}]", tempid, sp[tempid].name, sp[tempid].timer_id, (20 * (eligible_class_id+1)) + sp[tempid].timer_id);
 					sp[tempid].timer_id += (20 * (eligible_class_id+1));
 				}
 			}
 		}
-
 	}
 
 	LoadDamageShieldTypes(sp, max_spells);

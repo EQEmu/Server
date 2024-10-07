@@ -5778,6 +5778,7 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				}
 
 				spell_level = GetSpellLevelForCaster(spell_id);
+				LogDebug("Got spell_level [{}] for spell [{}] cast by [{}]", spell_level, spells[spell_id].name, GetName());
 
 				lvldiff     = spell_level - focus_spell.base_value[i];
 				// every level over cap reduces the effect by focus_spell.base2[i] percent unless from a clicky
