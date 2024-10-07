@@ -11,12 +11,6 @@
 #include "lua_iteminst.h"
 #include "lua_mob.h"
 
-void Lua_Merc::AddItem(uint8 slot_id, uint32 item_id)
-{
-	Lua_Safe_Call_Void();
-	self->AddItem(slot_id, item_id);
-}
-
 uint32 Lua_Merc::GetCostFormula()
 {
 	Lua_Safe_Call_Int();
@@ -200,7 +194,6 @@ bool Lua_Merc::UseDiscipline(uint16 spell_id, uint16 target_id)
 luabind::scope lua_register_merc() {
 	return luabind::class_<Lua_Merc, Lua_Mob>("Merc")
 	.def(luabind::constructor<>())
-	.def("AddItem", &Lua_Merc::AddItem)
 	.def("GetCostFormula", &Lua_Merc::GetCostFormula)
 	.def("GetGroup", &Lua_Merc::GetGroup)
 	.def("GetHatedCount", &Lua_Merc::GetHatedCount)

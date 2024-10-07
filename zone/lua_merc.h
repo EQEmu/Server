@@ -28,7 +28,6 @@ public:
 		return reinterpret_cast<Merc*>(GetLuaPtrData());
 	}
 
-	void AddItem(uint8 slot_id, uint32 item_id);
 	uint32 GetCostFormula();
 	Lua_Group GetGroup();
 	int GetHatedCount();

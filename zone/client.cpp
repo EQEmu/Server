@@ -1243,51 +1243,52 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			entity_list.ProcessProximitySay(message, this, language);
 		}
 
-		if (GetTarget() && GetTarget()->IsBot() && !IsInvisible(GetTarget())) {
-			if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
-				if (GetTarget()->IsEngaged()) {
+		Mob* t = GetTarget();
+
+		if (
+			t &&
+			!IsInvisible(t) &&
+			DistanceNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)
+		) {
+			const bool is_engaged = t->IsEngaged();
+
+			if (t->IsBot()) {
+				if (is_engaged) {
 					if (parse->BotHasQuestSub(EVENT_AGGRO_SAY)) {
-						parse->EventBot(EVENT_AGGRO_SAY, GetTarget()->CastToBot(), this, message, language);
+						parse->EventBot(EVENT_AGGRO_SAY, t->CastToBot(), this, message, language);
 					}
 				} else {
 					if (parse->BotHasQuestSub(EVENT_SAY)) {
-						parse->EventBot(EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
+						parse->EventBot(EVENT_SAY, t->CastToBot(), this, message, language);
 					}
 				}
-			}
-		} else if (GetTarget() && GetTarget()->IsMerc() && !IsInvisible(GetTarget())) {
-			if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
-				if (GetTarget()->IsEngaged()) {
+			} else if (t->IsMerc()) {
+				if (is_engaged) {
 					if (parse->MercHasQuestSub(EVENT_AGGRO_SAY)) {
-						parse->EventMerc(EVENT_AGGRO_SAY, GetTarget()->CastToMerc(), this, message, language);
+						parse->EventMerc(EVENT_AGGRO_SAY, t->CastToMerc(), this, message, language);
 					}
 				} else {
 					if (parse->MercHasQuestSub(EVENT_SAY)) {
-						parse->EventMerc(EVENT_SAY, GetTarget()->CastToMerc(), this, message, language);
+						parse->EventMerc(EVENT_SAY, t->CastToMerc(), this, message, language);
 					}
 				}
-			}
-		} else if (GetTarget() && GetTarget()->IsNPC() && !IsInvisible(GetTarget())) {
-			auto* t = GetTarget()->CastToNPC();
-			if (!t->IsEngaged()) {
-				CheckLDoNHail(t);
-				CheckEmoteHail(t, message);
+			} else if (t->IsNPC()) {
+				if (!is_engaged) {
+					CheckLDoNHail(t->CastToNPC());
+					CheckEmoteHail(t->CastToNPC(), message);
 
-				if (DistanceNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)) {
-					if (parse->HasQuestSub(t->GetNPCTypeID(), EVENT_SAY)) {
-						parse->EventNPC(EVENT_SAY, t, this, message, language);
+					if (parse->HasQuestSub(t->CastToNPC()->GetNPCTypeID(), EVENT_SAY)) {
+						parse->EventNPC(EVENT_SAY, t->CastToNPC(), this, message, language);
 					}
 
 					if (RuleB(TaskSystem, EnableTaskSystem)) {
-						if (UpdateTasksOnSpeakWith(t)) {
-							t->DoQuestPause(this);
+						if (UpdateTasksOnSpeakWith(t->CastToNPC())) {
+							t->CastToNPC()->DoQuestPause(this);
 						}
 					}
-				}
-			} else {
-				if (parse->HasQuestSub(t->GetNPCTypeID(), EVENT_AGGRO_SAY)) {
-					if (DistanceSquaredNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)) {
-						parse->EventNPC(EVENT_AGGRO_SAY, t, this, message, language);
+				} else {
+					if (parse->HasQuestSub(t->CastToNPC()->GetNPCTypeID(), EVENT_AGGRO_SAY)) {
+						parse->EventNPC(EVENT_AGGRO_SAY, t->CastToNPC(), this, message, language);
 					}
 				}
 			}

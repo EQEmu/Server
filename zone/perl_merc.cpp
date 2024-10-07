@@ -3,10 +3,6 @@
 #include "../common/global_define.h"
 #include "embperl.h"
 #include "merc.h"
-void Perl_Merc_AddItem(Merc* self, uint8 slot_id, uint32 item_id)
-{
-	self->AddItem(slot_id, item_id);
-}
 
 uint32 Perl_Merc_GetCostFormula(Merc* self)
 {
@@ -164,7 +160,6 @@ void perl_register_merc()
 
 	auto package = state.new_class<Merc>("Merc");
 	package.add_base_class("NPC");
-	package.add("AddItem", &Perl_Merc_AddItem);
 	package.add("GetCostFormula", &Perl_Merc_GetCostFormula);
 	package.add("GetGroup", &Perl_Merc_GetGroup);
 	package.add("GetHatedCount", &Perl_Merc_GetHatedCount);
