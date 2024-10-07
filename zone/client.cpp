@@ -2337,7 +2337,7 @@ void Client::ReadBook(BookRequest_Struct* book)
 
 	auto decomposed_string = Strings::Split(text_file, "#");
 	int  item_id = Strings::ToInt(decomposed_string[0], -1);
-	auto b = content_db.GetBook(decomposed_string[1]);
+	auto b = content_db.GetBook(decomposed_string.size >= 2 ? decomposed_string[1] : "");
 
 	if (book->type == BookType::ItemInfo && RuleB(Custom, UseDynamicItemDiscoveryTags)) {
 		auto item_data = database.GetItem(item_id);
