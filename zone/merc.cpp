@@ -5,6 +5,7 @@
 #include "entity.h"
 #include "groups.h"
 #include "mob.h"
+#include "quest_parser_collection.h"
 
 #include "zone.h"
 #include "string_ids.h"
@@ -4078,11 +4079,17 @@ bool Merc::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillT
 
 	Save();
 
-	//no corpse, no exp if we're a merc.
-	//We'll suspend instead, since that's what live does.
-	//Not actually sure live supports 'depopping' merc corpses.
-	//if(entity_list.GetCorpseByID(GetID()))
-	//      entity_list.GetCorpseByID(GetID())->Depop();
+	if (parse->MercHasQuestSub(EVENT_DEATH_COMPLETE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {}",
+			killer_mob ? killer_mob->GetID() : 0,
+			damage,
+			spell,
+			static_cast<int>(attack_skill)
+		);
+
+		parse->EventMerc(EVENT_DEATH_COMPLETE, this, killer_mob, export_string, 0);
+	}
 
 	// If client is in zone, suspend merc, else depop it.
 	if (!Suspend()) {
@@ -4671,7 +4678,6 @@ bool Merc::Spawn(Client *owner) {
 
 	//UpdateMercAppearance();
 
-
 	return true;
 }
 
@@ -5189,9 +5195,6 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 	merc->SetStance(GetMercInfo().Stance);
 
 	Log(Logs::General, Logs::Mercenaries, "SpawnMerc Success for %s.", GetName());
-
-	return;
-
 }
 
 bool Merc::Suspend() {
@@ -5913,4 +5916,20 @@ uint32 Merc::CalcUpkeepCost(uint32 templateID , uint8 level, uint8 currency_type
 	}
 
 	return cost;
+}
+
+void Merc::Signal(int signal_id)
+{
+	if (parse->MercHasQuestSub(EVENT_SIGNAL)) {
+		parse->EventMerc(EVENT_SIGNAL, this, nullptr, std::to_string(signal_id), 0);
+	}
+}
+
+void Merc::SendPayload(int payload_id, std::string payload_value)
+{
+	if (parse->MercHasQuestSub(EVENT_PAYLOAD)) {
+		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
+
+		parse->EventMerc(EVENT_PAYLOAD, this, nullptr, export_string, 0);
+	}
 }

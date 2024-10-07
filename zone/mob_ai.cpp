@@ -1755,7 +1755,15 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 
 	SetAppearance(eaStanding);
 
-	if (IsNPC()) {
+	if (IsBot()) {
+		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
+			parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
+		}
+	} else if (IsMerc()) {
+		if (parse->MercHasQuestSub(EVENT_COMBAT)) {
+			parse->EventMerc(EVENT_COMBAT, CastToMerc(), attacker, "1", 0);
+		}
+	} else if (IsNPC()) {
 		CastToNPC()->AIautocastspell_timer->Start(300, false);
 
 		if (yell_for_help) {
@@ -1793,12 +1801,6 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			}
 		}
 	}
-
-	if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
-			parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
-		}
-	}
 }
 
 // Note: Hate list may not be actually clear until after this function call completes
@@ -1819,7 +1821,15 @@ void Mob::AI_Event_NoLongerEngaged() {
 	StopNavigation();
 	ClearRampage();
 
-	if (IsNPC()) {
+	if (IsBot()) {
+		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
+			parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+		}
+	} else if (IsMerc()) {
+		if (parse->MercHasQuestSub(EVENT_COMBAT)) {
+			parse->EventMerc(EVENT_COMBAT, CastToMerc(), nullptr, "0", 0);
+		}
+	} else if (IsNPC()) {
 		SetPrimaryAggro(false);
 		SetAssistAggro(false);
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
@@ -1836,10 +1846,6 @@ void Mob::AI_Event_NoLongerEngaged() {
 				m_combat_record.Stop();
 				CastToNPC()->SetCombatEvent(false);
 			}
-		}
-	} else if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
-			parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
 		}
 	}
 }

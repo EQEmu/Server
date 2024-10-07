@@ -5516,7 +5516,8 @@ void Mob::SetTarget(Mob *mob)
 	const auto has_target_change_event = (
 		parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE) ||
 		parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE) ||
-		parse->BotHasQuestSub(EVENT_TARGET_CHANGE)
+		parse->BotHasQuestSub(EVENT_TARGET_CHANGE) ||
+		parse->MercHasQuestSub(EVENT_TARGET_CHANGE)
 	);
 
 	if (IsClient() && CastToClient()->admin > AccountStatus::GMMgmt) {
@@ -5528,9 +5529,9 @@ void Mob::SetTarget(Mob *mob)
 
 		args.emplace_back(mob);
 
-		if (IsNPC()) {
-			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE)) {
-				parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0, &args);
+		if (IsBot()) {
+			if (parse->BotHasQuestSub(EVENT_TARGET_CHANGE)) {
+				parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0, &args);
 			}
 		} else if (IsClient()) {
 			if (parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE)) {
@@ -5538,9 +5539,13 @@ void Mob::SetTarget(Mob *mob)
 			}
 
 			CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
-		} else if (IsBot()) {
-			if (parse->BotHasQuestSub(EVENT_TARGET_CHANGE)) {
-				parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0, &args);
+		} else if (IsMerc()) {
+			if (parse->MercHasQuestSub(EVENT_TARGET_CHANGE)) {
+				parse->EventMerc(EVENT_TARGET_CHANGE, CastToMerc(), mob, "", 0, &args);
+			}
+		} else if (IsNPC()) {
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE)) {
+				parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0, &args);
 			}
 		}
 	}
@@ -5719,6 +5724,7 @@ bool Mob::ClearEntityVariables()
 	if (
 		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
 		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsMerc() && parse->MercHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
 		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
 	) {
 		for (const auto& e : m_EntityVariables) {
@@ -5728,6 +5734,8 @@ bool Mob::ClearEntityVariables()
 				parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
 			} else if (IsClient()) {
 				parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
+			} else if (IsMerc()) {
+				parse->EventMerc(EVENT_ENTITY_VARIABLE_DELETE, CastToMerc(), nullptr, "", 0, &args);
 			} else if (IsNPC()) {
 				parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
 			}
@@ -5754,6 +5762,7 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 	if (
 		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
 		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsMerc() && parse->MercHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
 		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
 	) {
 		std::vector<std::any> args = { v->first, v->second };
@@ -5762,6 +5771,8 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 			parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
 		} else if (IsClient()) {
 			parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
+		} else if (IsMerc()) {
+			parse->EventMerc(EVENT_ENTITY_VARIABLE_DELETE, CastToMerc(), nullptr, "", 0, &args);
 		} else if (IsNPC()) {
 			parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
 		}
@@ -5822,6 +5833,7 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 	if (
 		(IsBot() && parse->BotHasQuestSub(event_id)) ||
 		(IsClient() && parse->PlayerHasQuestSub(event_id)) ||
+		(IsMerc() && parse->MercHasQuestSub(event_id)) ||
 		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), event_id))
 	) {
 		std::vector<std::any> args;
@@ -5836,6 +5848,8 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 			parse->EventBot(event_id, CastToBot(), nullptr, "", 0, &args);
 		} else if (IsClient()) {
 			parse->EventPlayer(event_id, CastToClient(), "", 0, &args);
+		} else if (IsMerc()) {
+			parse->EventMerc(event_id, CastToMerc(), nullptr, "", 0, &args);
 		} else if (IsNPC()) {
 			parse->EventNPC(event_id, CastToNPC(), nullptr, "", 0, &args);
 		}

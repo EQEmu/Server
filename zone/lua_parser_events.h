@@ -8,6 +8,7 @@ typedef void(*ItemArgumentHandler)(QuestInterface*, lua_State*, Client*, EQ::Ite
 typedef void(*SpellArgumentHandler)(QuestInterface*, lua_State*, Mob*, Client*, uint32, std::string, uint32, std::vector<std::any>*);
 typedef void(*EncounterArgumentHandler)(QuestInterface*, lua_State*, Encounter* encounter, std::string, uint32, std::vector<std::any>*);
 typedef void(*BotArgumentHandler)(QuestInterface*, lua_State*, Bot*, Mob*, std::string, uint32, std::vector<std::any>*);
+typedef void(*MercArgumentHandler)(QuestInterface*, lua_State*, Merc*, Mob*, std::string, uint32, std::vector<std::any>*);
 
 // NPC
 void handle_npc_event_say(
@@ -1253,6 +1254,187 @@ void handle_bot_spell_blocked(
 	QuestInterface *parse,
 	lua_State* L,
 	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+// Merc
+void handle_merc_null(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_cast(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_combat(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_damage(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_death(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_entity_variable(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_payload(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_popup_response(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_say(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_signal(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_slay(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_spell_blocked(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_target_change(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_target_change(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_timer(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_merc_use_skill(
+	QuestInterface *parse,
+	lua_State* L,
+	Merc* merc,
 	Mob* init,
 	std::string data,
 	uint32 extra_data,

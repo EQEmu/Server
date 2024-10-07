@@ -32,6 +32,7 @@
 #include "lua_inventory.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
+#include "lua_merc.h"
 #include "lua_mob.h"
 #include "lua_npc.h"
 #include "lua_object.h"
@@ -215,6 +216,7 @@ LuaParser::LuaParser() {
 		SpellArgumentDispatch[i]     = handle_spell_null;
 		EncounterArgumentDispatch[i] = handle_encounter_null;
 		BotArgumentDispatch[i]       = handle_bot_null;
+		MercArgumentDispatch[i]      = handle_merc_null;
 	}
 
 	NPCArgumentDispatch[EVENT_SAY]                    = handle_npc_event_say;
@@ -403,6 +405,31 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_bot_spell_blocked;
+
+	MercArgumentDispatch[EVENT_CAST]                   = handle_merc_cast;
+	MercArgumentDispatch[EVENT_CAST_BEGIN]             = handle_merc_cast;
+	MercArgumentDispatch[EVENT_CAST_ON]                = handle_merc_cast;
+	MercArgumentDispatch[EVENT_COMBAT]                 = handle_merc_combat;
+	MercArgumentDispatch[EVENT_DAMAGE_GIVEN]           = handle_merc_damage;
+	MercArgumentDispatch[EVENT_DAMAGE_TAKEN]           = handle_merc_damage;
+	MercArgumentDispatch[EVENT_DEATH]                  = handle_merc_death;
+	MercArgumentDispatch[EVENT_DEATH_COMPLETE]         = handle_merc_death;
+	MercArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE] = handle_merc_entity_variable;
+	MercArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_merc_entity_variable;
+	MercArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_merc_entity_variable;
+	MercArgumentDispatch[EVENT_PAYLOAD]                = handle_merc_payload;
+	MercArgumentDispatch[EVENT_POPUP_RESPONSE]         = handle_merc_popup_response;
+	MercArgumentDispatch[EVENT_SAY]                    = handle_merc_say;
+	MercArgumentDispatch[EVENT_SIGNAL]                 = handle_merc_signal;
+	MercArgumentDispatch[EVENT_SLAY]                   = handle_merc_slay;
+	MercArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_merc_spell_blocked;
+	MercArgumentDispatch[EVENT_TARGET_CHANGE]          = handle_merc_target_change;
+	MercArgumentDispatch[EVENT_TIMER]                  = handle_merc_timer;
+	MercArgumentDispatch[EVENT_TIMER_PAUSE]            = handle_merc_timer_pause_resume_start;
+	MercArgumentDispatch[EVENT_TIMER_RESUME]           = handle_merc_timer_pause_resume_start;
+	MercArgumentDispatch[EVENT_TIMER_START]            = handle_merc_timer_pause_resume_start;
+	MercArgumentDispatch[EVENT_TIMER_STOP]             = handle_merc_timer_stop;
+	MercArgumentDispatch[EVENT_USE_SKILL]              = handle_merc_use_skill;
 #endif
 
 	L = nullptr;
@@ -1277,6 +1304,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_npc(),
 			lua_register_client(),
 			lua_register_bot(),
+			lua_register_merc(),
 			lua_register_inventory(),
 			lua_register_inventory_where(),
 			lua_register_iteminst(),
@@ -1832,4 +1860,191 @@ void LuaParser::LoadBotScript(std::string filename) {
 
 void LuaParser::LoadGlobalBotScript(std::string filename) {
 	LoadScript(filename, "global_bot");
+}
+
+int LuaParser::EventMerc(
+	QuestEventID evt,
+	Merc *merc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return 0;
+	}
+
+	if (!merc) {
+		return 0;
+	}
+
+	if (!MercHasQuestSub(evt)) {
+		return 0;
+	}
+
+	return _EventMerc("merc", evt, merc, init, data, extra_data, extra_pointers);
+}
+
+int LuaParser::EventGlobalMerc(
+	QuestEventID evt,
+	Merc *merc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return 0;
+	}
+
+	if (!merc) {
+		return 0;
+	}
+
+	if (!GlobalMercHasQuestSub(evt)) {
+		return 0;
+	}
+
+	return _EventMerc("global_merc", evt, merc, init, data, extra_data, extra_pointers);
+}
+
+int LuaParser::_EventMerc(
+	std::string package_name,
+	QuestEventID evt,
+	Merc *merc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers,
+	luabind::adl::object *l_func
+) {
+	const char *sub_name = LuaEvents[evt];
+	int start = lua_gettop(L);
+
+	try {
+		int npop = 2;
+		PushErrorHandler(L);
+		if(l_func != nullptr) {
+			l_func->push(L);
+		} else {
+			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+			lua_getfield(L, -1, sub_name);
+			npop = 3;
+		}
+
+		lua_createtable(L, 0, 0);
+		//push self
+		Lua_Merc l_merc(merc);
+		luabind::adl::object l_merc_o = luabind::adl::object(L, l_merc);
+		l_merc_o.push(L);
+		lua_setfield(L, -2, "self");
+
+		auto arg_function = MercArgumentDispatch[evt];
+		arg_function(this, L, merc, init, data, extra_data, extra_pointers);
+		auto* c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
+
+		quest_manager.StartQuest(merc, c);
+		if(lua_pcall(L, 1, 1, start + 1)) {
+			std::string error = lua_tostring(L, -1);
+			AddError(error);
+			quest_manager.EndQuest();
+			lua_pop(L, npop);
+			return 0;
+		}
+		quest_manager.EndQuest();
+
+		if(lua_isnumber(L, -1)) {
+			int ret = static_cast<int>(lua_tointeger(L, -1));
+			lua_pop(L, npop);
+			return ret;
+		}
+
+		lua_pop(L, npop);
+	} catch(std::exception &ex) {
+		AddError(
+			fmt::format(
+				"Lua Exception | [{}] for Merc [{}] in [{}]: {}",
+				sub_name,
+				merc->GetID(),
+				package_name,
+				ex.what()
+			)
+		);
+
+		//Restore our stack to the best of our ability
+		int end = lua_gettop(L);
+		int n = end - start;
+		if(n > 0) {
+			lua_pop(L, n);
+		}
+	}
+
+	return 0;
+}
+
+int LuaParser::DispatchEventMerc(
+	QuestEventID evt,
+	Merc *merc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return 0;
+	}
+
+	std::string package_name = "merc";
+
+	auto iter = lua_encounter_events_registered.find(package_name);
+	if (iter == lua_encounter_events_registered.end()) {
+		return 0;
+	}
+
+	int ret = 0;
+	auto riter = iter->second.begin();
+	while (riter != iter->second.end()) {
+		if (riter->event_id == evt) {
+			package_name = fmt::format("encounter_{}", riter->encounter_name);
+			int i = _EventMerc(package_name, evt, merc, init, data, extra_data, extra_pointers, &riter->lua_reference);
+			if (i != 0) {
+				ret = i;
+			}
+		}
+
+		++riter;
+	}
+
+	return ret;
+}
+
+bool LuaParser::MercHasQuestSub(QuestEventID evt) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return false;
+	}
+
+	const char *subname = LuaEvents[evt];
+	return HasFunction(subname, "merc");
+}
+
+bool LuaParser::GlobalMercHasQuestSub(QuestEventID evt) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return false;
+	}
+
+	const char *subname = LuaEvents[evt];
+	return HasFunction(subname, "global_merc");
+}
+
+void LuaParser::LoadMercScript(std::string filename) {
+	LoadScript(filename, "merc");
+}
+
+void LuaParser::LoadGlobalMercScript(std::string filename) {
+	LoadScript(filename, "global_merc");
 }

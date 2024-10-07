@@ -8,6 +8,7 @@ class EntityList;
 class Lua_Mob;
 class Lua_Client;
 class Lua_Bot;
+class Lua_Merc;
 class Lua_NPC;
 class Lua_Door;
 class Lua_Corpse;

@@ -833,15 +833,7 @@ void NPC::Depop(bool start_spawn_timer) {
 		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emoteid);
 	}
 
-	if (IsNPC()) {
-		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DESPAWN)) {
-			parse->EventNPC(EVENT_DESPAWN, this, nullptr, "", 0);
-		}
-
-		if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
-			DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
-		}
-	} else if (IsBot()) {
+	if (IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_DESPAWN)) {
 			parse->EventBot(EVENT_DESPAWN, CastToBot(), nullptr, "", 0);
 		}
@@ -849,9 +841,25 @@ void NPC::Depop(bool start_spawn_timer) {
 		if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
 			DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
 		}
+	} else if (IsMerc()) {
+		if (parse->MercHasQuestSub(EVENT_DESPAWN)) {
+			parse->EventMerc(EVENT_DESPAWN, CastToMerc(), nullptr, "", 0);
+		}
+
+		if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
+			DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
+		}
+	} else if (IsNPC()) {
+		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DESPAWN)) {
+			parse->EventNPC(EVENT_DESPAWN, this, nullptr, "", 0);
+		}
+
+		if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
+			DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
+		}
 	}
 
-	p_depop = true;
+		p_depop = true;
 	if (respawn2) {
 		if (start_spawn_timer) {
 			respawn2->DeathReset();

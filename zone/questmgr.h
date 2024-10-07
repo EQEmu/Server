@@ -360,6 +360,7 @@ public:
 
 	Bot *GetBot() const;
 	Client *GetInitiator() const;
+	Merc* GetMerc() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
 	EQ::InventoryProfile* GetInventory() const;

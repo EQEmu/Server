@@ -254,7 +254,20 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
-	if (IsClient()) {
+	if (IsBot()) {
+		if (parse->BotHasQuestSub(EVENT_CAST_BEGIN)) {
+			Mob* spell_target = entity_list.GetMobID(target_id);
+			std::vector<std::any> args = { spell_target };
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id),
+				target_id
+			);
+			parse->EventBot(EVENT_CAST_BEGIN, CastToBot(), nullptr, export_string, 0, &args);
+		}
+	} else if (IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST_BEGIN)) {
 			Mob* spell_target = entity_list.GetMobID(target_id);
 			std::vector<std::any> args = { spell_target };
@@ -275,6 +288,19 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				return false;
 			}
 		}
+	} else if (IsMerc()) {
+		if (parse->MercHasQuestSub(EVENT_CAST_BEGIN)) {
+			Mob* spell_target = entity_list.GetMobID(target_id);
+			std::vector<std::any> args = { spell_target };
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id),
+				target_id
+			);
+			parse->EventMerc(EVENT_CAST_BEGIN, CastToMerc(), nullptr, export_string, 0, &args);
+		}
 	} else if (IsNPC()) {
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_CAST_BEGIN)) {
 			Mob* spell_target = entity_list.GetMobID(target_id);
@@ -287,19 +313,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				target_id
 			);
 			parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, export_string, 0, &args);
-		}
-	} else if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_CAST_BEGIN)) {
-			Mob* spell_target = entity_list.GetMobID(target_id);
-			std::vector<std::any> args = { spell_target };
-			const auto& export_string = fmt::format(
-				"{} {} {} {}",
-				spell_id,
-				GetID(),
-				GetCasterLevel(spell_id),
-				target_id
-			);
-			parse->EventBot(EVENT_CAST_BEGIN, CastToBot(), nullptr, export_string, 0, &args);
 		}
 	}
 
@@ -1823,7 +1836,19 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// at this point the spell has successfully been cast
 	//
 
-	if (IsClient()) {
+	if (IsBot()) {
+		if (parse->BotHasQuestSub(EVENT_CAST)) {
+			std::vector<std::any> args = { spell_target };
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id),
+				target_id
+			);
+			parse->EventBot(EVENT_CAST, CastToBot(), nullptr, export_string, 0, &args);
+		}
+	} else if (IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST)) {
 			std::vector<std::any> args = { spell_target };
 			const auto& export_string = fmt::format(
@@ -1834,6 +1859,18 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				target_id
 			);
 			parse->EventPlayer(EVENT_CAST, CastToClient(), export_string, 0, &args);
+		}
+	} else if (IsMerc()) {
+		if (parse->MercHasQuestSub(EVENT_CAST)) {
+			std::vector<std::any> args = { spell_target };
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id),
+				target_id
+			);
+			parse->EventMerc(EVENT_CAST, CastToMerc(), nullptr, export_string, 0, &args);
 		}
 	} else if (IsNPC()) {
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_CAST)) {
@@ -1846,18 +1883,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				target_id
 			);
 			parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, export_string, 0, &args);
-		}
-	} else if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_CAST)) {
-			std::vector<std::any> args = { spell_target };
-			const auto& export_string = fmt::format(
-				"{} {} {} {}",
-				spell_id,
-				GetID(),
-				GetCasterLevel(spell_id),
-				target_id
-			);
-			parse->EventBot(EVENT_CAST, CastToBot(), nullptr, export_string, 0, &args);
 		}
 	}
 
@@ -3622,12 +3647,14 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 					const bool caster_has_block_event = (
 						(caster->IsBot() && parse->BotHasQuestSub(EVENT_SPELL_BLOCKED)) ||
 						(caster->IsClient() && parse->PlayerHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(caster->IsMerc() && parse->MercHasQuestSub(EVENT_SPELL_BLOCKED)) ||
 						(caster->IsNPC() && parse->HasQuestSub(caster->GetNPCTypeID(), EVENT_SPELL_BLOCKED))
 					);
 
 					const bool cast_on_has_block_event = (
 						(IsBot() && parse->BotHasQuestSub(EVENT_SPELL_BLOCKED)) ||
 						(IsClient() && parse->PlayerHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(IsMerc() && parse->MercHasQuestSub(EVENT_SPELL_BLOCKED)) ||
 						(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_SPELL_BLOCKED))
 					);
 
@@ -3643,6 +3670,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 								parse->EventBot(EVENT_SPELL_BLOCKED, caster->CastToBot(), this, export_string, 0);
 							} else if (caster->IsClient()) {
 								parse->EventPlayer(EVENT_SPELL_BLOCKED, caster->CastToClient(), export_string, 0);
+							} else if (caster->IsMerc()) {
+								parse->EventMerc(EVENT_SPELL_BLOCKED, caster->CastToMerc(), this, export_string, 0);
 							} else if (caster->IsNPC()) {
 								parse->EventNPC(EVENT_SPELL_BLOCKED, caster->CastToNPC(), this, export_string, 0);
 							}
@@ -3653,6 +3682,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 								parse->EventBot(EVENT_SPELL_BLOCKED, CastToBot(), caster, export_string, 0);
 							} else if (IsClient()) {
 								parse->EventPlayer(EVENT_SPELL_BLOCKED, CastToClient(), export_string, 0);
+							} else if (IsMerc()) {
+								parse->EventMerc(EVENT_SPELL_BLOCKED, CastToMerc(), caster, export_string, 0);
 							} else if (IsNPC()) {
 								parse->EventNPC(EVENT_SPELL_BLOCKED, CastToNPC(), caster, export_string, 0);
 							}
@@ -4030,8 +4061,8 @@ bool Mob::SpellOnTarget(
 		(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells) /* EQ Filter Type: (8 or 9) */
 	);
 
-	if (spelltar->IsNPC()) {
-		if (parse->HasQuestSub(spelltar->GetNPCTypeID(), EVENT_CAST_ON)) {
+	if (spelltar->IsBot()) {
+		if (parse->BotHasQuestSub(EVENT_CAST_ON)) {
 			std::vector<std::any> args = { spelltar };
 			const auto& export_string = fmt::format(
 				"{} {} {} {}",
@@ -4040,9 +4071,9 @@ bool Mob::SpellOnTarget(
 				caster_level,
 				target_id
 			);
-			parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0, &args);
+			parse->EventBot(EVENT_CAST_ON, spelltar->CastToBot(), this, export_string, 0, &args);
 		}
-	} else if (spelltar->IsClient()) {
+	}  else if (spelltar->IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST_ON)) {
 			std::vector<std::any> args = { spelltar };
 			const auto& export_string = fmt::format(
@@ -4054,8 +4085,8 @@ bool Mob::SpellOnTarget(
 			);
 			parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), export_string, 0, &args);
 		}
-	} else if (spelltar->IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_CAST_ON)) {
+	} else if (spelltar->IsMerc()) {
+		if (parse->MercHasQuestSub(EVENT_CAST_ON)) {
 			std::vector<std::any> args = { spelltar };
 			const auto& export_string = fmt::format(
 				"{} {} {} {}",
@@ -4064,7 +4095,19 @@ bool Mob::SpellOnTarget(
 				caster_level,
 				target_id
 			);
-			parse->EventBot(EVENT_CAST_ON, spelltar->CastToBot(), this, export_string, 0, &args);
+			parse->EventMerc(EVENT_CAST_ON, spelltar->CastToMerc(), this, export_string, 0, &args);
+		}
+	} else if (spelltar->IsNPC()) {
+		if (parse->HasQuestSub(spelltar->GetNPCTypeID(), EVENT_CAST_ON)) {
+			std::vector<std::any> args = { spelltar };
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				spell_id,
+				GetID(),
+				caster_level,
+				target_id
+			);
+			parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0, &args);
 		}
 	}
 

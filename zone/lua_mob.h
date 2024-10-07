@@ -10,6 +10,7 @@ class Lua_Item;
 class Lua_ItemInst;
 class Lua_StatBonuses;
 class Lua_Bot;
+class Lua_Merc;
 class Lua_NPC;
 class Lua_Client;
 struct Lua_Mob_List;

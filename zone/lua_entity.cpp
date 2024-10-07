@@ -12,6 +12,7 @@
 #include "lua_door.h"
 
 #include "lua_bot.h"
+#include "lua_merc.h"
 
 bool Lua_Entity::IsClient() {
 	Lua_Safe_Call_Bool();
@@ -140,6 +141,12 @@ Lua_Bot Lua_Entity::CastToBot() {
 	return Lua_Bot(b);
 }
 
+Lua_Merc Lua_Entity::CastToMerc() {
+	void *d = GetLuaPtrData();
+	Merc *m = reinterpret_cast<Merc*>(d);
+	return Lua_Merc(m);
+}
+
 luabind::scope lua_register_entity() {
 	return luabind::class_<Lua_Entity>("Entity")
 	.def(luabind::constructor<>())
@@ -149,6 +156,7 @@ luabind::scope lua_register_entity() {
 	.def("CastToClient", &Lua_Entity::CastToClient)
 	.def("CastToCorpse", &Lua_Entity::CastToCorpse)
 	.def("CastToDoor", &Lua_Entity::CastToDoor)
+	.def("CastToMerc", &Lua_Entity::CastToMerc)
 	.def("CastToMob", &Lua_Entity::CastToMob)
 	.def("CastToNPC", &Lua_Entity::CastToNPC)
 	.def("CastToObject", &Lua_Entity::CastToObject)

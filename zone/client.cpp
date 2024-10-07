@@ -1243,11 +1243,31 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			entity_list.ProcessProximitySay(message, this, language);
 		}
 
-		if (
-			GetTarget() &&
-			GetTarget()->IsNPC() &&
-			!IsInvisible(GetTarget())
-		) {
+		if (GetTarget() && GetTarget()->IsBot() && !IsInvisible(GetTarget())) {
+			if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
+				if (GetTarget()->IsEngaged()) {
+					if (parse->BotHasQuestSub(EVENT_AGGRO_SAY)) {
+						parse->EventBot(EVENT_AGGRO_SAY, GetTarget()->CastToBot(), this, message, language);
+					}
+				} else {
+					if (parse->BotHasQuestSub(EVENT_SAY)) {
+						parse->EventBot(EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
+					}
+				}
+			}
+		} else if (GetTarget() && GetTarget()->IsMerc() && !IsInvisible(GetTarget())) {
+			if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
+				if (GetTarget()->IsEngaged()) {
+					if (parse->MercHasQuestSub(EVENT_AGGRO_SAY)) {
+						parse->EventMerc(EVENT_AGGRO_SAY, GetTarget()->CastToMerc(), this, message, language);
+					}
+				} else {
+					if (parse->MercHasQuestSub(EVENT_SAY)) {
+						parse->EventMerc(EVENT_SAY, GetTarget()->CastToMerc(), this, message, language);
+					}
+				}
+			}
+		} else if (GetTarget() && GetTarget()->IsNPC() && !IsInvisible(GetTarget())) {
 			auto* t = GetTarget()->CastToNPC();
 			if (!t->IsEngaged()) {
 				CheckLDoNHail(t);
@@ -1268,20 +1288,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				if (parse->HasQuestSub(t->GetNPCTypeID(), EVENT_AGGRO_SAY)) {
 					if (DistanceSquaredNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)) {
 						parse->EventNPC(EVENT_AGGRO_SAY, t, this, message, language);
-					}
-				}
-			}
-
-		}
-		else if (GetTarget() && GetTarget()->IsBot() && !IsInvisible(GetTarget())) {
-			if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
-				if (GetTarget()->IsEngaged()) {
-					if (parse->BotHasQuestSub(EVENT_AGGRO_SAY)) {
-						parse->EventBot(EVENT_AGGRO_SAY, GetTarget()->CastToBot(), this, message, language);
-					}
-				} else {
-					if (parse->BotHasQuestSub(EVENT_SAY)) {
-						parse->EventBot(EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
 					}
 				}
 			}
