@@ -249,6 +249,11 @@ void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app)
 	const auto in = reinterpret_cast<EvolveItemToggle_Struct*>(app->pBuffer);
 
 	const uint32 item_id = static_cast<uint32>(in->unique_id & 0xFFFFFFFF);
+	if (item_id == 0) {
+		LogEvolveItem("Error - Item ID of final evolve item is blank.");
+		return;
+	}
+
 	std::unique_ptr<EQ::ItemInstance> const inst(database.CreateItem(item_id));
 
 	LogEvolveItemDetail("Character ID <green>[{}] requested to view final evolve item id <yellow>[{}] for evolve item id <yellow>[{}]",
