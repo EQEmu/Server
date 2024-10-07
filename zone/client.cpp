@@ -2331,12 +2331,36 @@ void Client::SetGM(bool toggle) {
 void Client::ReadBook(BookRequest_Struct* book)
 {
 	const std::string& text_file = book->txtfile;
-
 	if (text_file.empty()) {
 		return;
 	}
 
-	auto b = content_db.GetBook(text_file);
+	auto decomposed_string = Strings::Split(text_file, "#");
+	int  item_id = Strings::ToInt(decomposed_string[0], -1);
+	auto b = content_db.GetBook(decomposed_string[1]);
+
+	if (book->type == BookType::ItemInfo && RuleB(Custom, UseDynamicItemDiscoveryTags)) {
+		auto item_data = database.GetItem(item_id);
+		std::string item_name = item_data->Name;
+		std::string item_text = b.text;
+		auto discovered_by = GetDiscoverer(item_id);
+
+
+		if (item_id > 999999 && !discovered_by.empty()) {
+			if (!item_text.empty()) {
+				item_text += "<br>";
+			}
+			item_text += fmt::format("Discovered By: {}<br>", discovered_by);
+		}
+
+		if (item_id < 999999 && item_name.find("Fine Steel") == 0) {
+			item_text += fmt::format("Discovered By: {}<br>", "Enchanted Loom");
+		}
+
+		b.text = item_text.c_str();
+
+		LogDebug("Slot: {}", book->invslot);
+	}
 
 	if (!b.text.empty()) {
 		auto outapp = new EQApplicationPacket(OP_ReadBook, b.text.size() + sizeof(BookText_Struct));

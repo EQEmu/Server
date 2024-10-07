@@ -1662,7 +1662,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.ScriptFileID = Strings::ToUnsignedInt(row[ItemField::scriptfileid]);
 
 		if (RuleB(Custom, UseDynamicItemDiscoveryTags)) {
-			snprintf(item.CharmFile, sizeof(item.CharmFile), "%d#%s", item.ID, row[ItemField::charmfile]);
+			strn0cpy(item.CharmFile, fmt::format("{}#{}", item.ID, row[ItemField::charmfile]).c_str(), sizeof(item.CharmFile));
 		}
 
 		// THJ Custom Stuff

@@ -2892,7 +2892,7 @@ struct BookRequest_Struct {
 	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
 	int16 invslot;  // Only used in Sof and later clients;
 	int32 target_id;
-	char txtfile[20];
+	char txtfile[32];
 };
 
 // used by Scribe and CastSpell book buttons

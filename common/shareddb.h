@@ -180,11 +180,6 @@ public:
 		uint32 ornament_hero_model = 0
 	);
 	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0);
-	ItemInstanceGenerateCallback generate_cb;
-	void SetItemInstanceGenerateCallback(ItemInstanceGenerateCallback cb) {
-		generate_cb = cb;
-	};
-	void RunGenerateCallback(EQ::ItemInstance* inst);
 
 	void GetItemsCount(int32 &item_count, uint32 &max_id);
 	void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);

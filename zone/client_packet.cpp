@@ -13404,6 +13404,7 @@ void Client::Handle_OP_ReadBook(const EQApplicationPacket *app)
 	}
 
 	auto b = (BookRequest_Struct*) app->pBuffer;
+
 	ReadBook(b);
 
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
