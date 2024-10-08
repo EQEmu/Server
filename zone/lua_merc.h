@@ -1,4 +1,3 @@
-\
 #ifndef EQEMU_LUA_MERC_H
 #define EQEMU_LUA_MERC_H
 #ifdef LUA_EQEMU
@@ -60,5 +59,5 @@ public:
 	bool UseDiscipline(uint16 spell_id, uint16 target_id);
 };
 
-#endif
-#endif
+#endif // LUA_EQEMU
+#endif // EQEMU_LUA_MERC_H
