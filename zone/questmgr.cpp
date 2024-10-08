@@ -570,13 +570,6 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 		return;
 	}
 
-	const bool has_start_event = (
-		(owner->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_START)) ||
-		(owner->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_START)) ||
-		(owner->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_START)) ||
-		(owner->IsNPC() && parse->HasQuestSub(owner->GetNPCTypeID(), EVENT_TIMER_START))
-	);
-
 	if (questitem) {
 		questitem->SetTimer(timer_name, milliseconds);
 
@@ -598,23 +591,17 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 			if (e.mob && e.mob == owner && e.name == timer_name) {
 				e.Timer_.Start(milliseconds, false);
 
-				if (has_start_event) {
-					const std::string& export_string = fmt::format(
-						"{} {}",
-						e.name,
-						milliseconds
-					);
-
-					if (owner->IsClient()) {
-						parse->EventPlayer(EVENT_TIMER_START, owner->CastToClient(), export_string, 0);
-					} else if (owner->IsBot()) {
-						parse->EventBot(EVENT_TIMER_START, owner->CastToBot(), nullptr, export_string, 0);
-					} else if (owner->IsMerc()) {
-						parse->EventMerc(EVENT_TIMER_START, owner->CastToMerc(), nullptr, export_string, 0);
-					} else if (owner->IsNPC()) {
-						parse->EventNPC(EVENT_TIMER_START, owner->CastToNPC(), nullptr, export_string, 0);
+				parse->EventPlayerNpcBotMerc(
+					EVENT_TIMER_START,
+					owner,
+					[&]() {
+						return fmt::format(
+							"{} {}",
+							timer_name,
+							milliseconds
+						);
 					}
-				}
+				);
 
 				return;
 			}
@@ -623,23 +610,17 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 
 	QTimerList.emplace_back(QuestTimer(milliseconds, owner, timer_name));
 
-	if (has_start_event) {
-		const std::string& export_string = fmt::format(
-			"{} {}",
-			timer_name,
-			milliseconds
-		);
-
-		if (owner->IsClient()) {
-			parse->EventPlayer(EVENT_TIMER_START, owner->CastToClient(), export_string, 0);
-		} else if (owner->IsBot()) {
-			parse->EventBot(EVENT_TIMER_START, owner->CastToBot(), nullptr, export_string, 0);
-		} else if (owner->IsMerc()) {
-			parse->EventMerc(EVENT_TIMER_START, owner->CastToMerc(), nullptr, export_string, 0);
-		} else if (owner->IsNPC()) {
-			parse->EventNPC(EVENT_TIMER_START, owner->CastToNPC(), nullptr, export_string, 0);
+	parse->EventPlayerNpcBotMerc(
+		EVENT_TIMER_START,
+		owner,
+		[&]() {
+			return fmt::format(
+				"{} {}",
+				timer_name,
+				milliseconds
+			);
 		}
-	}
+	);
 }
 
 void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds, EQ::ItemInstance* inst)
