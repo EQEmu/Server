@@ -623,6 +623,10 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		if (item) {
 			float return_value = 0.0f;
 
+			if (item->ID % 1000000 == 150000) {
+				return 5.0f;
+			}
+
 			if (item->HP >= 0) 	return_value  += item->HP 	/ 10.0f;
 			if (item->Mana >= 0) return_value += item->Mana / 10.0f;
 
@@ -673,7 +677,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 				exp_value = RuleR(Character, FloatingExperiencePercentCapPerYellowKill);
 				break;
 			case ConsiderColor::White:
-				exp_value = RuleR(Character, FloatingExperiencePercentCapPerWhiteKill);
+				exp_value = RuleR(Character,  FloatingExperiencePercentCapPerWhiteKill);
 				break;
 			case ConsiderColor::DarkBlue:
 				exp_value = RuleR(Character, FloatingExperiencePercentCapPerBlueKill);
