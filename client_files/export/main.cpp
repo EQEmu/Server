@@ -46,7 +46,7 @@ PlayerEventLogs     player_event_logs;
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);
 void ExportBaseData(SharedDatabase *db);
-void ExportDBStrings(SharedDatabase *db);
+void ExportDBStrings(SharedDatabase *db, SharedDatabase *content_db);
 
 int main(int argc, char **argv)
 {
@@ -120,14 +120,14 @@ int main(int argc, char **argv)
 		ExportBaseData(&content_db);
 		return 0;
 	} else if (Strings::EqualFold(export_type, "dbstr") || Strings::EqualFold(export_type, "dbstring")) {
-		ExportDBStrings(&database);
+		ExportDBStrings(&database, &content_db);
 		return 0;
 	}
 
 	ExportSpells(&content_db);
 	ExportSkillCaps(&content_db);
 	ExportBaseData(&content_db);
-	ExportDBStrings(&database);
+	ExportDBStrings(&database, &content_db);
 
 	LogSys.CloseFileLogs();
 
@@ -193,6 +193,7 @@ void ExportBaseData(SharedDatabase *db)
 
 	const auto& lines = BaseDataRepository::GetBaseDataFileLines(*db);
 
+
 	const std::string& file_string = Strings::Implode("\n", lines);
 
 	file << file_string;
@@ -202,7 +203,7 @@ void ExportBaseData(SharedDatabase *db)
 	LogInfo("Exported [{}] Base Data Entr{}", lines.size(), lines.size() != 1 ? "ies" : "y");
 }
 
-void ExportDBStrings(SharedDatabase *db)
+void ExportDBStrings(SharedDatabase *db, SharedDatabase *content_db)
 {
 	std::ofstream file(fmt::format("{}/export/dbstr_us.txt", path.GetServerPath()));
 	if (!file || !file.is_open()) {
@@ -210,7 +211,13 @@ void ExportDBStrings(SharedDatabase *db)
 		return;
 	}
 
-	const auto& lines = DbStrRepository::GetDBStrFileLines(*db);
+	std::vector<std::string> lines;
+	if (!RuleB(Custom, MulticlassingEnabled)) {
+		lines = DbStrRepository::GetDBStrFileLines(*db);
+	} else {
+		lines = DbStrRepository::GetDBStrFileLinesMulticlass(*db, *content_db);
+	}
+
 
 	const std::string& file_string = Strings::Implode("\n", lines);
 
