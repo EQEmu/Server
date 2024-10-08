@@ -2528,58 +2528,22 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	Mob* owner_or_self = killer_mob ? killer_mob->GetOwnerOrSelf() : nullptr;
 
-	if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_DEATH)) {
-			const auto& export_string = fmt::format(
-				"{} {} {} {}",
-				killer_mob ? killer_mob->GetID() : 0,
-				damage,
-				spell,
-				static_cast<int>(attack_skill)
-			);
-			if (parse->EventBot(EVENT_DEATH, CastToBot(), owner_or_self, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
+	auto exports = [&]() {
+		return fmt::format(
+			"{} {} {} {}",
+			killer_mob ? killer_mob->GetID() : 0,
+			damage,
+			spell,
+			static_cast<int>(attack_skill)
+		);
+	};
 
-				return false;
-			}
+	if (parse->EventNpcBotMerc(EVENT_DEATH, this, owner_or_self, exports) != 0) {
+		if (GetHP() < 0) {
+			SetHP(0);
 		}
-	} else if (IsMerc()) {
-		if (parse->MercHasQuestSub(EVENT_DEATH)) {
-			const auto& export_string = fmt::format(
-				"{} {} {} {}",
-				killer_mob ? killer_mob->GetID() : 0,
-				damage,
-				spell,
-				static_cast<int>(attack_skill)
-			);
-			if (parse->EventMerc(EVENT_DEATH, CastToMerc(), owner_or_self, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
 
-				return false;
-			}
-		}
-	} else if (IsNPC()) {
-		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DEATH)) {
-			const auto& export_string = fmt::format(
-				"{} {} {} {}",
-				killer_mob ? killer_mob->GetID() : 0,
-				damage,
-				spell,
-				static_cast<int>(attack_skill)
-			);
-
-			if (parse->EventNPC(EVENT_DEATH, this, owner_or_self, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
-
-				return false;
-			}
-		}
+		return false;
 	}
 
 	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {

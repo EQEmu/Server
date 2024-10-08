@@ -136,6 +136,26 @@ public:
 		std::vector<std::any> *extra_pointers = nullptr
 	);
 
+	template <typename T1, typename T2>
+	int EventNpcBotMerc(
+		QuestEventID event_id,
+		T1* e,
+		T2* init,
+		std::function<std::string()> lazy_data,
+		uint32 extra_data = 0,
+		std::vector<std::any> *extra_pointers = nullptr
+	) {
+		if (e->IsBot() && BotHasQuestSub(event_id)) {
+			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data);
+		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
+			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data);
+		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
+			return EventNPC(event_id, e->CastToBot(), init, lazy_data(), extra_data);
+		}
+
+		return false; // No quest subscription found
+	}
+
 	void GetErrors(std::list<std::string> &quest_errors);
 
 	/*
