@@ -464,8 +464,14 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
 				ThrowingAttack(GetTarget(), true);
 			}
-			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack())) {
+			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack()) {
 				ThrowingAttack(GetTarget(), true);
+			}
+			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack()) {
+				CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
+			}
+			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack()) {
+				CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
 			}
 			return;
 		}
@@ -477,8 +483,14 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
 				RangedAttack(GetTarget(), true);
 			}
-			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack())) {
+			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack()) {
 				RangedAttack(GetTarget(), true);
+			}
+			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack()) {
+				CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
+			}
+			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack()) {
+				CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
 			}
 			return;
 		}
