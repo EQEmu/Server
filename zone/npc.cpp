@@ -859,7 +859,7 @@ void NPC::Depop(bool start_spawn_timer) {
 		}
 	}
 
-		p_depop = true;
+	p_depop = true;
 	if (respawn2) {
 		if (start_spawn_timer) {
 			respawn2->DeathReset();

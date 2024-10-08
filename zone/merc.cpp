@@ -4079,18 +4079,6 @@ bool Merc::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillT
 
 	Save();
 
-	if (parse->MercHasQuestSub(EVENT_DEATH_COMPLETE)) {
-		const auto& export_string = fmt::format(
-			"{} {} {} {}",
-			killer_mob ? killer_mob->GetID() : 0,
-			damage,
-			spell,
-			static_cast<int>(attack_skill)
-		);
-
-		parse->EventMerc(EVENT_DEATH_COMPLETE, this, killer_mob, export_string, 0);
-	}
-
 	// If client is in zone, suspend merc, else depop it.
 	if (!Suspend()) {
 		Depop();

@@ -2087,15 +2087,22 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "healing_received", sep.arg[8]);
 			}
 
-			if (extra_pointers && extra_pointers->size() >= 1) {
-				Corpse* corpse = std::any_cast<Corpse*>(extra_pointers->at(0));
-				if (corpse) {
-					ExportVar(package_name.c_str(), "killed_corpse_id", corpse->GetID());
-					ExportVar(package_name.c_str(), "killed_x", corpse->GetX());
-					ExportVar(package_name.c_str(), "killed_y", corpse->GetY());
-					ExportVar(package_name.c_str(), "killed_z", corpse->GetZ());
-					ExportVar(package_name.c_str(), "killed_h", corpse->GetHeading());
+			if (!npc_mob->IsMerc()) {
+				if (extra_pointers && extra_pointers->size() >= 1) {
+					Corpse* corpse = std::any_cast<Corpse*>(extra_pointers->at(0));
+					if (corpse) {
+						ExportVar(package_name.c_str(), "killed_corpse_id", corpse->GetID());
+						ExportVar(package_name.c_str(), "killed_x", corpse->GetX());
+						ExportVar(package_name.c_str(), "killed_y", corpse->GetY());
+						ExportVar(package_name.c_str(), "killed_z", corpse->GetZ());
+						ExportVar(package_name.c_str(), "killed_h", corpse->GetHeading());
+					}
 				}
+			} else {
+				ExportVar(package_name.c_str(), "killed_x", npc_mob->GetX());
+				ExportVar(package_name.c_str(), "killed_y", npc_mob->GetY());
+				ExportVar(package_name.c_str(), "killed_z", npc_mob->GetZ());
+				ExportVar(package_name.c_str(), "killed_h", npc_mob->GetHeading());
 			}
 
 			// EVENT_DEATH_ZONE only
