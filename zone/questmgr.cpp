@@ -90,23 +90,9 @@ void QuestManager::Process() {
 	while (cur != end) {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
 			if (cur->mob) {
-				if (cur->mob->IsBot()) {
-					if (parse->BotHasQuestSub(EVENT_TIMER)) {
-						parse->EventBot(EVENT_TIMER, cur->mob->CastToBot(), nullptr, cur->name, 0);
-					}
-				} else if (cur->mob->IsClient()) {
-					if (parse->PlayerHasQuestSub(EVENT_TIMER)) {
-						parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
-					}
-				} else if (cur->mob->IsMerc()) {
-					if (parse->MercHasQuestSub(EVENT_TIMER)) {
-						parse->EventMerc(EVENT_TIMER, cur->mob->CastToMerc(), nullptr, cur->name, 0);
-					}
-				} else if (cur->mob->IsNPC()) {
-					if (parse->HasQuestSub(cur->mob->GetNPCTypeID(), EVENT_TIMER)) {
-						parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
-					}
-				} else if (cur->mob->IsEncounter()) {
+				parse->EventPlayerNpcBotMerc(EVENT_TIMER, cur->mob, [&]() { return cur->name; }, 0);
+
+				if (cur->mob->IsEncounter()) {
 					parse->EventEncounter(
 						EVENT_TIMER,
 						cur->mob->CastToEncounter()->GetEncounterName(),
