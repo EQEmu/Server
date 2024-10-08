@@ -255,7 +255,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			<< " | ";
 	}
 
-	std::unordered_map<std::string, std::string> key_value_map = {};
+	std::map<std::string, std::string> key_value_map = {};
 	std::string                                  msg           = message;
 	if (Strings::Contains(msg, "[") && Strings::Contains(msg, "]") && Strings::Contains(msg, "|")) {
 		for (auto &e: Strings::Split(msg, "[")) {

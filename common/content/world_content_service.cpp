@@ -177,7 +177,7 @@ void WorldContentService::ReloadContentFlags()
 		set_content_flags.push_back(f);
 
 		LogInfo(
-			"Loaded content flag [{}] [{}]",
+			"Loaded content flag [flag|{}] [status|{}]",
 			f.flag_name,
 			(f.enabled ? "enabled" : "disabled")
 		);
