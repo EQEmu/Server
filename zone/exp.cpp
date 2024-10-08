@@ -658,42 +658,30 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	*/
 	auto GetBaseExpValueForKill = [&](int conlevel, int tier, EQ::ItemInstance* upgrade_item) -> float {
 		float exp_value 		= 0.0f;
-		float max_scale 		= 10.0;
-		int   terminal_level 	= RuleI(Custom, FloatingExperienceScaleTerminalLevel);
 		float norm_val 			= 10.0f + GetItemStatValue(upgrade_item->GetItem());
 
-		float level_scaling = 1.0f;
-		if (GetLevel() < terminal_level) {
-			level_scaling = max_scale - ((max_scale - 1.0f) * (GetLevel() - 1.0f) / (terminal_level - 1.0f));
-		}
-
 		switch (conlevel) {
-			case 0xFA:
-				return 0.0f;
-			case ConsiderColor::Red:
-				exp_value = RuleR(Character, FloatingExperiencePercentCapPerRedKill);
-				break;
-			case ConsiderColor::Yellow:
-				exp_value = RuleR(Character, FloatingExperiencePercentCapPerYellowKill);
-				break;
-			case ConsiderColor::White:
-				exp_value = RuleR(Character,  FloatingExperiencePercentCapPerWhiteKill);
-				break;
-			case ConsiderColor::DarkBlue:
-				exp_value = RuleR(Character, FloatingExperiencePercentCapPerBlueKill);
+			case ConsiderColor::Green:
+				exp_value = 0.05;
 				break;
 			case ConsiderColor::LightBlue:
-				exp_value = RuleR(Character, FloatingExperiencePercentCapPerLightBlueKill);
+				exp_value = 0.10;
 				break;
-			case ConsiderColor::Green:
-				exp_value = RuleR(Character, FloatingExperiencePercentCapPerGreenKill);
+			case ConsiderColor::DarkBlue:
+				exp_value = 0.50;
 				break;
-			default:
+			case ConsiderColor::White:
+				exp_value = 0.75;
+				break;
+			case ConsiderColor::Yellow:
+				exp_value = 1.00;
+				break;
+			case ConsiderColor::Red:
+				exp_value = 1.50;
 				break;
 		}
 
-		exp_value = exp_value * level_scaling * (static_cast<int>(upgrade_item->GetID() / 1000000));
-
+		norm_val  = norm_val  * (tier);
 		exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
 		exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
 
