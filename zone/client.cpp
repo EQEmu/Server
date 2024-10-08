@@ -1252,43 +1252,21 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		) {
 			const bool is_engaged = t->IsEngaged();
 
-			if (t->IsBot()) {
-				if (is_engaged) {
-					if (parse->BotHasQuestSub(EVENT_AGGRO_SAY)) {
-						parse->EventBot(EVENT_AGGRO_SAY, t->CastToBot(), this, message, language);
-					}
-				} else {
-					if (parse->BotHasQuestSub(EVENT_SAY)) {
-						parse->EventBot(EVENT_SAY, t->CastToBot(), this, message, language);
-					}
-				}
-			} else if (t->IsMerc()) {
-				if (is_engaged) {
-					if (parse->MercHasQuestSub(EVENT_AGGRO_SAY)) {
-						parse->EventMerc(EVENT_AGGRO_SAY, t->CastToMerc(), this, message, language);
-					}
-				} else {
-					if (parse->MercHasQuestSub(EVENT_SAY)) {
-						parse->EventMerc(EVENT_SAY, t->CastToMerc(), this, message, language);
-					}
-				}
-			} else if (t->IsNPC()) {
+			if (is_engaged) {
+				parse->EventNpcBotMerc(EVENT_AGGRO_SAY, t, this, [&]() { return message; }, language);
+			} else {
+				parse->EventNpcBotMerc(EVENT_SAY, t, this, [&]() { return message; }, language);
+			}
+
+			if (t->IsNPC()) {
 				if (!is_engaged) {
 					CheckLDoNHail(t->CastToNPC());
 					CheckEmoteHail(t->CastToNPC(), message);
-
-					if (parse->HasQuestSub(t->CastToNPC()->GetNPCTypeID(), EVENT_SAY)) {
-						parse->EventNPC(EVENT_SAY, t->CastToNPC(), this, message, language);
-					}
 
 					if (RuleB(TaskSystem, EnableTaskSystem)) {
 						if (UpdateTasksOnSpeakWith(t->CastToNPC())) {
 							t->CastToNPC()->DoQuestPause(this);
 						}
-					}
-				} else {
-					if (parse->HasQuestSub(t->CastToNPC()->GetNPCTypeID(), EVENT_AGGRO_SAY)) {
-						parse->EventNPC(EVENT_AGGRO_SAY, t->CastToNPC(), this, message, language);
 					}
 				}
 			}
