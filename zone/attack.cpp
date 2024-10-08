@@ -3176,7 +3176,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			killer_mob ? killer_mob->GetID() : 0,
 			damage,
 			spell,
-			static_cast<int>(attack_skill)
+			static_cast<int>(attack_skill),
+			entity_id,
+			m_combat_record.GetStartTime(),
+			m_combat_record.GetEndTime(),
+			m_combat_record.GetDamageReceived(),
+			m_combat_record.GetHealingReceived()
 		);
 
 		parse->EventMerc(EVENT_DEATH_COMPLETE, CastToMerc(), killer_mob, export_string, 0);
