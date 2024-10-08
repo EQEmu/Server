@@ -609,6 +609,7 @@ public:
 	void BuffFadeDetrimental();
 	void BuffFadeDetrimentalByCaster(Lua_Mob caster);
 	void BuffFadeNonPersistDeath();
+	void BuffFadeSongs();
 };
 
 #endif

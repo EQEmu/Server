@@ -3470,6 +3470,12 @@ void Lua_Mob::BuffFadeNonPersistDeath()
 	self->BuffFadeNonPersistDeath();
 }
 
+void Lua_Mob::BuffFadeSongs()
+{
+	Lua_Safe_Call_Void();
+	self->BuffFadeSongs();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3516,6 +3522,7 @@ luabind::scope lua_register_mob() {
 	.def("BuffFadeDetrimental", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeDetrimental)
 	.def("BuffFadeDetrimentalByCaster", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::BuffFadeDetrimentalByCaster)
 	.def("BuffFadeNonPersistDeath", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeNonPersistDeath)
+	.def("BuffFadeSongs", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeSongs)
 	.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
 	.def("CalculateDistance", (float(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CalculateDistance)
 	.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)

@@ -3563,6 +3563,11 @@ void Perl_Mob_BuffFadeNonPersistDeath(Mob* self)
 	self->BuffFadeNonPersistDeath();
 }
 
+void Perl_Mob_BuffFadeSongs(Mob* self)
+{
+	self->BuffFadeSongs();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3607,6 +3612,7 @@ void perl_register_mob()
 	package.add("BuffFadeDetrimental", &Perl_Mob_BuffFadeDetrimental);
 	package.add("BuffFadeDetrimentalByCaster", &Perl_Mob_BuffFadeDetrimentalByCaster);
 	package.add("BuffFadeNonPersistDeath", &Perl_Mob_BuffFadeNonPersistDeath);
+	package.add("BuffFadeSongs", &Perl_Mob_BuffFadeSongs);
 	package.add("CalculateDistance", (float(*)(Mob*, float, float, float))&Perl_Mob_CalculateDistance);
 	package.add("CalculateDistance", (float(*)(Mob*, Mob*))&Perl_Mob_CalculateDistance);
 	package.add("CalculateHeadingToTarget", &Perl_Mob_CalculateHeadingToTarget);
