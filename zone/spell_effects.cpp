@@ -6997,7 +6997,9 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 			default:
 				break;
 			}
-			MessageString(Chat::FocusEffect, string_id, UsedItem->Name);
+			if (!from_buff_tic) {
+				MessageString(Chat::FocusEffect, string_id, UsedItem->Name);
+			}
 		}
 	}
 

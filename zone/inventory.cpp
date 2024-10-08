@@ -3538,7 +3538,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[0];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3546,7 +3546,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[1];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3554,7 +3554,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[2];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3562,7 +3562,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[3];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3570,7 +3570,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[4];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3578,7 +3578,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[5];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3586,7 +3586,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[6];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3594,7 +3594,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[7];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3602,7 +3602,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[8];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3610,7 +3610,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[9];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3618,7 +3618,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[10];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
@@ -3626,7 +3626,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			int spellId = m_pp.mem_spells[11];
 			int castTime = 0;
 			if (IsValidSpell(spellId)) {
-				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time);
+				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}

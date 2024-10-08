@@ -709,7 +709,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			exp_value = 0;
 		}
 
-		return exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
+		return exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 3);
 	};
 
 	EQ::ItemInstance* upgrade_item = item->GetUpgrade(database);

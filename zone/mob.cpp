@@ -5292,11 +5292,11 @@ uint32 Mob::GetLevelHP(uint8 tlevel)
 	return multiplier;
 }
 
-int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
+int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime, bool skip_display_message)
 {
-	int32 cast_reducer = GetFocusEffect(focusSpellHaste, spell_id);
-	int32 cast_reducer_amt = GetFocusEffect(focusFcCastTimeAmt, spell_id);
-	int32 cast_reducer_no_limit = GetFocusEffect(focusFcCastTimeMod2, spell_id);
+	int32 cast_reducer = GetFocusEffect(focusSpellHaste, spell_id, this, skip_display_message);
+	int32 cast_reducer_amt = GetFocusEffect(focusFcCastTimeAmt, spell_id, this,  skip_display_message);
+	int32 cast_reducer_no_limit = GetFocusEffect(focusFcCastTimeMod2, spell_id, this, skip_display_message);
 
 	if (!RuleB(Custom, MulticlassingEnabled)) {
 		if (level > 50 && casttime >= 3000 && !spells[spell_id].good_effect &&
