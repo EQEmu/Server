@@ -537,23 +537,17 @@ void QuestManager::settimer(const std::string& timer_name, uint32 seconds, Mob* 
 			if (e.mob && e.mob == mob && e.name == timer_name) {
 				e.Timer_.Start(seconds * 1000, false);
 
-				if (has_start_event) {
-					const std::string& export_string = fmt::format(
-						"{} {}",
-						timer_name,
-						seconds * 1000
-					);
-
-					if (mob->IsClient()) {
-						parse->EventPlayer(EVENT_TIMER_START, mob->CastToClient(), export_string, 0);
-					} else if (mob->IsBot()) {
-						parse->EventBot(EVENT_TIMER_START, mob->CastToBot(), nullptr, export_string, 0);
-					} else if (mob->IsMerc()) {
-						parse->EventMerc(EVENT_TIMER_START, mob->CastToMerc(), nullptr, export_string, 0);
-					} else if (mob->IsNPC()) {
-						parse->EventNPC(EVENT_TIMER_START, mob->CastToNPC(), nullptr, export_string, 0);
+				parse->EventPlayerNpcBotMerc(
+					EVENT_TIMER_START,
+					mob,
+					[&]() {
+						return fmt::format(
+							"{} {}",
+							timer_name,
+							seconds * 1000
+						);
 					}
-				}
+				);
 
 				return;
 			}
@@ -562,23 +556,17 @@ void QuestManager::settimer(const std::string& timer_name, uint32 seconds, Mob* 
 
 	QTimerList.emplace_back(QuestTimer(seconds * 1000, mob, timer_name));
 
-	if (has_start_event) {
-		const std::string& export_string = fmt::format(
-			"{} {}",
-			timer_name,
-			seconds * 1000
-		);
-
-		if (mob->IsClient()) {
-			parse->EventPlayer(EVENT_TIMER_START, mob->CastToClient(), export_string, 0);
-		} else if (mob->IsBot()) {
-			parse->EventBot(EVENT_TIMER_START, mob->CastToBot(), nullptr, export_string, 0);
-		} else if (mob->IsMerc()) {
-			parse->EventMerc(EVENT_TIMER_START, mob->CastToMerc(), nullptr, export_string, 0);
-		} else if (mob->IsNPC()) {
-			parse->EventNPC(EVENT_TIMER_START, mob->CastToNPC(), nullptr, export_string, 0);
+	parse->EventPlayerNpcBotMerc(
+		EVENT_TIMER_START,
+		mob,
+		[&]() {
+			return fmt::format(
+				"{} {}",
+				timer_name,
+				seconds * 1000
+			);
 		}
-	}
+	);
 }
 
 void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds)
