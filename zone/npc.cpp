@@ -833,7 +833,7 @@ void NPC::Depop(bool start_spawn_timer) {
 		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emoteid);
 	}
 
-	parse->EventNpcBotMerc(EVENT_DESPAWN, this);
+	parse->EventNPCBotMerc(EVENT_DESPAWN, this);
 
 	p_depop = true;
 	if (respawn2) {

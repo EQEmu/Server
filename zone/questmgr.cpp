@@ -90,7 +90,7 @@ void QuestManager::Process() {
 	while (cur != end) {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
 			if (cur->mob) {
-				parse->EventPlayerNpcBotMerc(EVENT_TIMER, cur->mob, [&]() { return cur->name; }, 0);
+				parse->EventPlayerNPCBotMerc(EVENT_TIMER, cur->mob, [&]() { return cur->name; }, 0);
 
 				if (cur->mob->IsEncounter()) {
 					parse->EventEncounter(
@@ -530,7 +530,7 @@ void QuestManager::settimer(const std::string& timer_name, uint32 seconds, Mob* 
 			if (e.mob && e.mob == mob && e.name == timer_name) {
 				e.Timer_.Start(seconds * 1000, false);
 
-				parse->EventPlayerNpcBotMerc(
+				parse->EventPlayerNPCBotMerc(
 					EVENT_TIMER_START,
 					mob,
 					[&]() {
@@ -549,7 +549,7 @@ void QuestManager::settimer(const std::string& timer_name, uint32 seconds, Mob* 
 
 	QTimerList.emplace_back(QuestTimer(seconds * 1000, mob, timer_name));
 
-	parse->EventPlayerNpcBotMerc(
+	parse->EventPlayerNPCBotMerc(
 		EVENT_TIMER_START,
 		mob,
 		[&]() {
@@ -591,7 +591,7 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 			if (e.mob && e.mob == owner && e.name == timer_name) {
 				e.Timer_.Start(milliseconds, false);
 
-				parse->EventPlayerNpcBotMerc(
+				parse->EventPlayerNPCBotMerc(
 					EVENT_TIMER_START,
 					owner,
 					[&]() {
@@ -610,7 +610,7 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 
 	QTimerList.emplace_back(QuestTimer(milliseconds, owner, timer_name));
 
-	parse->EventPlayerNpcBotMerc(
+	parse->EventPlayerNPCBotMerc(
 		EVENT_TIMER_START,
 		owner,
 		[&]() {
@@ -636,35 +636,22 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 		return;
 	}
 
-	const bool has_start_event = (
-		(m->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_START)) ||
-		(m->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_START)) ||
-		(m->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_START)) ||
-		(m->IsNPC() && parse->HasQuestSub(m->GetNPCTypeID(), EVENT_TIMER_START))
-	);
-
 	if (!QTimerList.empty()) {
 		for (auto& e : QTimerList) {
 			if (e.mob && e.mob == m && e.name == timer_name) {
 				e.Timer_.Start(milliseconds, false);
 
-				if (has_start_event) {
-					const std::string& export_string = fmt::format(
-						"{} {}",
-						timer_name,
-						milliseconds
-					);
-
-					if (m->IsClient()) {
-						parse->EventPlayer(EVENT_TIMER_START, m->CastToClient(), export_string, 0);
-					} else if (m->IsBot()) {
-						parse->EventBot(EVENT_TIMER_START, m->CastToBot(), nullptr, export_string, 0);
-					} else if (m->IsMerc()) {
-						parse->EventMerc(EVENT_TIMER_START, m->CastToMerc(), nullptr, export_string, 0);
-					} else if (m->IsNPC()) {
-						parse->EventNPC(EVENT_TIMER_START, m->CastToNPC(), nullptr, export_string, 0);
+				parse->EventPlayerNPCBotMerc(
+					EVENT_TIMER_START,
+					m,
+					[&]() {
+						return fmt::format(
+							"{} {}",
+							timer_name,
+							milliseconds
+						);
 					}
-				}
+				);
 
 				return;
 			}
@@ -673,23 +660,17 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 
 	QTimerList.emplace_back(QuestTimer(milliseconds, m, timer_name));
 
-	if (has_start_event) {
-		const std::string& export_string = fmt::format(
-			"{} {}",
-			timer_name,
-			milliseconds
-		);
-
-		if (m->IsClient()) {
-			parse->EventPlayer(EVENT_TIMER_START, m->CastToClient(), export_string, 0);
-		} else if (m->IsBot()) {
-			parse->EventBot(EVENT_TIMER_START, m->CastToBot(), nullptr, export_string, 0);
-		} else if (m->IsMerc()) {
-			parse->EventMerc(EVENT_TIMER_START, m->CastToMerc(), nullptr, export_string, 0);
-		} else if (m->IsNPC()) {
-			parse->EventNPC(EVENT_TIMER_START, m->CastToNPC(), nullptr, export_string, 0);
+	parse->EventPlayerNPCBotMerc(
+		EVENT_TIMER_START,
+		m,
+		[&]() {
+			return fmt::format(
+				"{} {}",
+				timer_name,
+				milliseconds
+			);
 		}
-	}
+	);
 }
 
 void QuestManager::stoptimer(const std::string& timer_name)
@@ -714,26 +695,15 @@ void QuestManager::stoptimer(const std::string& timer_name)
 		return;
 	}
 
-	const bool has_stop_event = (
-		(owner->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_STOP)) ||
-		(owner->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_STOP)) ||
-		(owner->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_STOP)) ||
-		(owner->IsNPC() && parse->HasQuestSub(owner->GetNPCTypeID(), EVENT_TIMER_STOP))
-	);
-
 	for (auto e = QTimerList.begin(); e != QTimerList.end(); ++e) {
 		if (e->mob && e->mob == owner && e->name == timer_name) {
-			if (has_stop_event) {
-				if (owner->IsClient()) {
-					parse->EventPlayer(EVENT_TIMER_STOP, owner->CastToClient(), timer_name, 0);
-				} else if (owner->IsBot()) {
-					parse->EventBot(EVENT_TIMER_STOP, owner->CastToBot(), nullptr, timer_name, 0);
-				} else if (owner->IsMerc()) {
-					parse->EventMerc(EVENT_TIMER_STOP, owner->CastToMerc(), nullptr, timer_name, 0);
-				} else if (owner->IsNPC()) {
-					parse->EventNPC(EVENT_TIMER_STOP, owner->CastToNPC(), nullptr, timer_name, 0);
+			parse->EventPlayerNPCBotMerc(
+				EVENT_TIMER_STOP,
+				owner,
+				[&]() {
+					return timer_name;
 				}
-			}
+			);
 
 			QTimerList.erase(e);
 			break;
@@ -758,26 +728,15 @@ void QuestManager::stoptimer(const std::string& timer_name, Mob* m)
 		return;
 	}
 
-	const bool has_stop_event = (
-		(m->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_STOP)) ||
-		(m->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_STOP)) ||
-		(m->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_STOP)) ||
-		(m->IsNPC() && parse->HasQuestSub(m->GetNPCTypeID(), EVENT_TIMER_STOP))
-	);
-
 	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
 		if (e->mob && e->mob == m) {
-			if (has_stop_event) {
-				if (m->IsClient()) {
-					parse->EventPlayer(EVENT_TIMER_STOP, m->CastToClient(), e->name, 0);
-				} else if (m->IsBot()) {
-					parse->EventBot(EVENT_TIMER_STOP, m->CastToBot(), nullptr, e->name, 0);
-				} else if (m->IsMerc()) {
-					parse->EventMerc(EVENT_TIMER_STOP, m->CastToMerc(), nullptr, e->name, 0);
-				} else if (m->IsNPC()) {
-					parse->EventNPC(EVENT_TIMER_STOP, m->CastToNPC(), nullptr, e->name, 0);
+			parse->EventPlayerNPCBotMerc(
+				EVENT_TIMER_STOP,
+				m,
+				[&]() {
+					return timer_name;
 				}
-			}
+			);
 
 			QTimerList.erase(e);
 			break;
@@ -816,26 +775,15 @@ void QuestManager::stopalltimers()
 		return;
 	}
 
-	const bool has_stop_event = (
-		(owner->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_STOP)) ||
-		(owner->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_STOP)) ||
-		(owner->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_STOP)) ||
-		(owner->IsNPC() && parse->HasQuestSub(owner->GetNPCTypeID(), EVENT_TIMER_STOP))
-	);
-
 	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
 		if (e->mob && e->mob == owner) {
-			if (has_stop_event) {
-				if (owner->IsClient()) {
-					parse->EventPlayer(EVENT_TIMER_STOP, owner->CastToClient(), e->name, 0);
-				} else if (owner->IsBot()) {
-					parse->EventBot(EVENT_TIMER_STOP, owner->CastToBot(), nullptr, e->name, 0);
-				} else if (owner->IsMerc()) {
-					parse->EventMerc(EVENT_TIMER_STOP, owner->CastToMerc(), nullptr, e->name, 0);
-				} else if (owner->IsNPC()) {
-					parse->EventNPC(EVENT_TIMER_STOP, owner->CastToNPC(), nullptr, e->name, 0);
+			parse->EventPlayerNPCBotMerc(
+				EVENT_TIMER_STOP,
+				owner,
+				[&]() {
+					return e->name;
 				}
-			}
+			);
 
 			e = QTimerList.erase(e);
 		} else {
@@ -875,26 +823,15 @@ void QuestManager::stopalltimers(Mob* m)
 		return;
 	}
 
-	const bool has_stop_event = (
-		(m->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_STOP)) ||
-		(m->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_STOP)) ||
-		(m->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_STOP)) ||
-		(m->IsNPC() && parse->HasQuestSub(m->GetNPCTypeID(), EVENT_TIMER_STOP))
-	);
-
 	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
 		if (e->mob && e->mob == m) {
-			if (has_stop_event) {
-				if (m->IsClient()) {
-					parse->EventPlayer(EVENT_TIMER_STOP, m->CastToClient(), e->name, 0);
-				} else if (m->IsBot()) {
-					parse->EventBot(EVENT_TIMER_STOP, m->CastToBot(), nullptr, e->name, 0);
-				} else if (m->IsMerc()) {
-					parse->EventMerc(EVENT_TIMER_STOP, m->CastToMerc(), nullptr, e->name, 0);
-				} else if (m->IsNPC()) {
-					parse->EventNPC(EVENT_TIMER_STOP, m->CastToNPC(), nullptr, e->name, 0);
+			parse->EventPlayerNPCBotMerc(
+				EVENT_TIMER_STOP,
+				m,
+				[&]() {
+					return e->name;
 				}
-			}
+			);
 
 			e = QTimerList.erase(e);
 		} else {
@@ -930,13 +867,6 @@ void QuestManager::pausetimer(const std::string& timer_name, Mob* m)
 
 	uint32 milliseconds = 0;
 
-	const bool has_pause_event = (
-		(mob->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_PAUSE)) ||
-		(mob->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_PAUSE)) ||
-		(mob->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_PAUSE)) ||
-		(mob->IsNPC() && parse->HasQuestSub(mob->GetNPCTypeID(), EVENT_TIMER_PAUSE))
-	);
-
 	if (!QTimerList.empty()) {
 		for (auto e = QTimerList.begin(); e != QTimerList.end(); ++e) {
 			if (e->mob && e->mob == mob && e->name == timer_name) {
@@ -955,23 +885,17 @@ void QuestManager::pausetimer(const std::string& timer_name, Mob* m)
 		}
 	);
 
-	if (has_pause_event) {
-		const std::string& export_string = fmt::format(
-			"{} {}",
-			timer_name,
-			milliseconds
-		);
-
-		if (mob->IsClient()) {
-			parse->EventPlayer(EVENT_TIMER_PAUSE, mob->CastToClient(), export_string, 0);
-		} else if (mob->IsBot()) {
-			parse->EventBot(EVENT_TIMER_PAUSE, mob->CastToBot(), nullptr, export_string, 0);
-		} else if (mob->IsMerc()) {
-			parse->EventMerc(EVENT_TIMER_PAUSE, mob->CastToMerc(), nullptr, export_string, 0);
-		} else if (mob->IsNPC()) {
-			parse->EventNPC(EVENT_TIMER_PAUSE, mob->CastToNPC(), nullptr, export_string, 0);
+	parse->EventPlayerNPCBotMerc(
+		EVENT_TIMER_PAUSE,
+		mob,
+		[&]() {
+			return fmt::format(
+				"{} {}",
+				timer_name,
+				milliseconds
+			);
 		}
-	}
+	);
 
 	LogQuests("Pausing timer [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
 }
@@ -1009,13 +933,6 @@ void QuestManager::resumetimer(const std::string& timer_name, Mob* m)
 		return;
 	}
 
-	const bool has_resume_event = (
-		(mob->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_RESUME)) ||
-		(mob->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_RESUME)) ||
-		(mob->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_RESUME)) ||
-		(mob->IsNPC() && parse->HasQuestSub(mob->GetNPCTypeID(), EVENT_TIMER_RESUME))
-	);
-
 	if (!QTimerList.empty()) {
 		for (auto e : QTimerList) {
 			if (e.mob && e.mob == mob && e.name == timer_name) {
@@ -1028,23 +945,18 @@ void QuestManager::resumetimer(const std::string& timer_name, Mob* m)
 					milliseconds
 				);
 
-				if (has_resume_event) {
-					const std::string& export_string = fmt::format(
-						"{} {}",
-						timer_name,
-						milliseconds
-					);
-
-					if (mob->IsClient()) {
-						parse->EventPlayer(EVENT_TIMER_RESUME, mob->CastToClient(), export_string, 0);
-					} else if (mob->IsBot()) {
-						parse->EventBot(EVENT_TIMER_RESUME, mob->CastToBot(), nullptr, export_string, 0);
-					} else if (mob->IsMerc()) {
-						parse->EventMerc(EVENT_TIMER_RESUME, mob->CastToMerc(), nullptr, export_string, 0);
-					} else if (mob->IsNPC()) {
-						parse->EventNPC(EVENT_TIMER_RESUME, mob->CastToNPC(), nullptr, export_string, 0);
+				parse->EventPlayerNPCBotMerc(
+					EVENT_TIMER_RESUME,
+					mob,
+					[&]() {
+						return fmt::format(
+							"{} {}",
+							timer_name,
+							milliseconds
+						);
 					}
-				}
+				);
+
 				return;
 			}
 		}
@@ -1052,23 +964,17 @@ void QuestManager::resumetimer(const std::string& timer_name, Mob* m)
 
 	QTimerList.emplace_back(QuestTimer(milliseconds, m, timer_name));
 
-	if (has_resume_event) {
-		const std::string& export_string = fmt::format(
-			"{} {}",
-			timer_name,
-			milliseconds
-		);
-
-		if (mob->IsClient()) {
-			parse->EventPlayer(EVENT_TIMER_RESUME, mob->CastToClient(), export_string, 0);
-		} else if (mob->IsBot()) {
-			parse->EventBot(EVENT_TIMER_RESUME, mob->CastToBot(), nullptr, export_string, 0);
-		} else if (mob->IsMerc()) {
-			parse->EventMerc(EVENT_TIMER_RESUME, mob->CastToMerc(), nullptr, export_string, 0);
-		} else if (mob->IsNPC()) {
-			parse->EventNPC(EVENT_TIMER_RESUME, mob->CastToNPC(), nullptr, export_string, 0);
+	parse->EventPlayerNPCBotMerc(
+		EVENT_TIMER_RESUME,
+		mob,
+		[&]() {
+			return fmt::format(
+				"{} {}",
+				timer_name,
+				milliseconds
+			);
 		}
-	}
+	);
 
 	LogQuests(
 		"Creating a new timer and resuming [{}] for [{}] with [{}] ms remaining",

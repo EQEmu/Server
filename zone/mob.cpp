@@ -5513,42 +5513,13 @@ void Mob::SetTarget(Mob *mob)
 	target = mob;
 	entity_list.UpdateHoTT(this);
 
-	const auto has_target_change_event = (
-		parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE) ||
-		parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE) ||
-		parse->BotHasQuestSub(EVENT_TARGET_CHANGE) ||
-		parse->MercHasQuestSub(EVENT_TARGET_CHANGE)
-	);
-
 	if (IsClient() && CastToClient()->admin > AccountStatus::GMMgmt) {
 		DisplayInfo(mob);
 	}
 
-	if (has_target_change_event) {
-		std::vector<std::any> args;
+	std::vector<std::any> args = { mob };
 
-		args.emplace_back(mob);
-
-		if (IsBot()) {
-			if (parse->BotHasQuestSub(EVENT_TARGET_CHANGE)) {
-				parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0, &args);
-			}
-		} else if (IsClient()) {
-			if (parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE)) {
-				parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0, &args);
-			}
-
-			CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
-		} else if (IsMerc()) {
-			if (parse->MercHasQuestSub(EVENT_TARGET_CHANGE)) {
-				parse->EventMerc(EVENT_TARGET_CHANGE, CastToMerc(), mob, "", 0, &args);
-			}
-		} else if (IsNPC()) {
-			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE)) {
-				parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0, &args);
-			}
-		}
-	}
+	parse->EventPlayerNPCBotMerc(EVENT_TARGET_CHANGE, this, mob, [&]() { return ""; }, 0, &args);
 
 	if (IsPet() && GetOwner() && GetOwner()->IsClient()) {
 		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);
@@ -5721,25 +5692,10 @@ bool Mob::ClearEntityVariables()
 		return false;
 	}
 
-	if (
-		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
-		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
-		(IsMerc() && parse->MercHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
-		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
-	) {
-		for (const auto& e : m_EntityVariables) {
-			std::vector<std::any> args = { e.first, e.second };
+	for (const auto& e : m_EntityVariables) {
+		std::vector<std::any> args = { e.first, e.second };
 
-			if (IsBot()) {
-				parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
-			} else if (IsClient()) {
-				parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
-			} else if (IsMerc()) {
-				parse->EventMerc(EVENT_ENTITY_VARIABLE_DELETE, CastToMerc(), nullptr, "", 0, &args);
-			} else if (IsNPC()) {
-				parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
-			}
-		}
+		parse->EventPlayerNPCBotMerc(EVENT_ENTITY_VARIABLE_DELETE, this, [&]() { return ""; }, 0, &args);
 	}
 
 	m_EntityVariables.clear();
@@ -5757,24 +5713,8 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 		return false;
 	}
 
-	if (
-		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
-		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
-		(IsMerc() && parse->MercHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
-		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
-	) {
-		std::vector<std::any> args = { v->first, v->second };
-
-		if (IsBot()) {
-			parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
-		} else if (IsClient()) {
-			parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
-		} else if (IsMerc()) {
-			parse->EventMerc(EVENT_ENTITY_VARIABLE_DELETE, CastToMerc(), nullptr, "", 0, &args);
-		} else if (IsNPC()) {
-			parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
-		}
-	}
+	std::vector<std::any> args = { v->first, v->second };
+	parse->EventPlayerNPCBotMerc(EVENT_ENTITY_VARIABLE_DELETE, this, [&](){ return ""; }, 0, &args);
 
 	m_EntityVariables.erase(v);
 
@@ -5824,35 +5764,16 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 		return;
 	}
 
-	const QuestEventID event_id = (
-		!EntityVariableExists(variable_name) ?
-		EVENT_ENTITY_VARIABLE_SET :
-		EVENT_ENTITY_VARIABLE_UPDATE
-	);
+	std::vector<std::any> args;
 
-	if (
-		(IsBot() && parse->BotHasQuestSub(event_id)) ||
-		(IsClient() && parse->PlayerHasQuestSub(event_id)) ||
-		(IsMerc() && parse->MercHasQuestSub(event_id)) ||
-		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), event_id))
-	) {
-		std::vector<std::any> args;
+	if (!EntityVariableExists(variable_name)) {
+		args = { variable_name, variable_value };
 
-		if (event_id != EVENT_ENTITY_VARIABLE_UPDATE) {
-			args = { variable_name, variable_value };
-		} else {
-			args = { variable_name, GetEntityVariable(variable_name), variable_value };
-		}
+		parse->EventPlayerNPCBotMerc(EVENT_ENTITY_VARIABLE_SET, this, [&]() { return ""; }, 0, &args);
+	} else {
+		args = { variable_name, GetEntityVariable(variable_name), variable_value };
 
-		if (IsBot()) {
-			parse->EventBot(event_id, CastToBot(), nullptr, "", 0, &args);
-		} else if (IsClient()) {
-			parse->EventPlayer(event_id, CastToClient(), "", 0, &args);
-		} else if (IsMerc()) {
-			parse->EventMerc(event_id, CastToMerc(), nullptr, "", 0, &args);
-		} else if (IsNPC()) {
-			parse->EventNPC(event_id, CastToNPC(), nullptr, "", 0, &args);
-		}
+		parse->EventPlayerNPCBotMerc(EVENT_ENTITY_VARIABLE_UPDATE, this, [&]() { return ""; }, 0, &args);
 	}
 
 	m_EntityVariables[variable_name] = variable_value;
