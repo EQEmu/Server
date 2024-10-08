@@ -359,7 +359,7 @@ public:
 	// gmsay
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
-	EQEmuLogSys *SetGMSayHandler(const std::function<void(uint16 log_type, const char *func, const std::string &)>& f)
+	EQEmuLogSys *SetGMSayHandler(const std::function<void(uint16 log_type, const char *func, const std::string &)> &f)
 	{
 		m_on_log_gmsay_hook = f;
 		return this;
@@ -385,7 +385,7 @@ public:
 	EQEmuLogSys *SetDatabase(Database *db);
 
 	[[nodiscard]] const std::string &GetLogPath() const;
-	EQEmuLogSys * SetLogPath(const std::string &log_path);
+	EQEmuLogSys *SetLogPath(const std::string &log_path);
 
 	void DisableMySQLErrorLogs();
 	void EnableMySQLErrorLogs();

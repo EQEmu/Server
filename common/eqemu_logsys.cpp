@@ -233,24 +233,17 @@ void EQEmuLogSys::ProcessConsoleMessage(
 
 	(!is_error ? std::cout : std::cerr)
 		<< ""
-		<< rang::fgB::black
-		<< rang::style::bold
-		<< fmt::format("{:>6}", GetPlatformName().substr(0, 6))
-		<< rang::style::reset
 		<< rang::fgB::gray
-		<< " | "
+		<< rang::style::bold
+		<< fmt::format("{}", GetPlatformName().substr(0, 6))
+		<< " › "
 		<< ((is_error || is_warning) ? rang::fgB::red : rang::fgB::gray)
-		<< rang::style::bold
-		<< fmt::format("{:^10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
-		<< rang::style::reset
-		<< rang::fgB::gray
-		<< " | "
-		<< rang::fgB::gray
-		<< rang::style::bold
+		<< fmt::format("{}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
+		<< " › "
 		<< fmt::format("{}", func)
 		<< rang::style::reset
 		<< rang::fgB::gray
-		<< " ";
+		<< " › ";
 
 	if (RuleB(Logging, PrintFileFunctionAndLine)) {
 		(!is_error ? std::cout : std::cerr)
@@ -262,8 +255,30 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			<< " | ";
 	}
 
+	std::unordered_map<std::string, std::string> key_value_map = {};
+	std::string                                  msg           = message;
+	if (Strings::Contains(msg, "[") && Strings::Contains(msg, "]") && Strings::Contains(msg, "|")) {
+		for (auto &e: Strings::Split(msg, "[")) {
+			const auto &r = Strings::Split(e, "]");
+			const auto &contents = r[0];
+			if (Strings::Contains(contents, "|")) {
+				auto s = Strings::Split(contents, "|");
+				if (s.size() == 2) {
+					std::string key   = s[0];
+					std::string value = s[1];
+					key_value_map[key] = value;
+
+					// remove it from original string
+					msg = Strings::Replace(msg, fmt::format("[{}|{}]", key, value), "");
+				}
+			}
+		}
+
+		msg = Strings::Trim(msg);
+	}
+
 	if (log_category == Logs::LogCategory::MySQLQuery) {
-		auto s = Strings::Split(message, "--");
+		auto s = Strings::Split(msg, "--");
 		if (s.size() > 1) {
 			std::string query = Strings::Trim(s[0]);
 			std::string meta  = Strings::Trim(s[1]);
@@ -285,19 +300,12 @@ void EQEmuLogSys::ProcessConsoleMessage(
 					  rang::style::reset;
 		}
 	}
-	else if (Strings::Contains(message, "[")) {
-		for (auto &e: Strings::Split(message, " ")) {
+	else if (Strings::Contains(msg, "[")) {
+		for (auto &e: Strings::Split(msg, " ")) {
 			if (Strings::Contains(e, "[") && Strings::Contains(e, "]")) {
 				e = Strings::Replace(e, "[", "");
 				e = Strings::Replace(e, "]", "");
 
-				bool is_upper = false;
-
-				for (int i = 0; i < strlen(e.c_str()); i++) {
-					if (isupper(e[i])) {
-						is_upper = true;
-					}
-				}
 
 				// color matching in []
 				// ex: [<red>variable] would produce [variable] with red inside brackets
@@ -353,22 +361,15 @@ void EQEmuLogSys::ProcessConsoleMessage(
 
 				// if we don't match a color in either the string matching or
 				// the color tag matching, we default to yellow inside brackets
-				// if uppercase, does not get colored
 				if (!match_color) {
-					if (!is_upper) {
-						(!is_error ? std::cout : std::cerr)
-							<< rang::fgB::gray
-							<< "["
-							<< rang::style::bold
-							<< rang::fgB::yellow
-							<< e
-							<< rang::style::reset
-							<< rang::fgB::gray
-							<< "] ";
-					}
-					else {
-						(!is_error ? std::cout : std::cerr) << rang::fgB::gray << "[" << e << "] ";
-					}
+					(!is_error ? std::cout : std::cerr)
+						<< rang::fgB::gray
+						<< "["
+						<< rang::fgB::green
+						<< e
+						<< rang::style::reset
+						<< rang::fgB::gray
+						<< "] ";
 				}
 			}
 			else {
@@ -382,8 +383,17 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	else {
 		(!is_error ? std::cout : std::cerr)
 			<< (is_error ? rang::fgB::red : rang::fgB::gray)
-			<< message
-			<< " ";
+			<< msg;
+	}
+
+	for (const auto &[key, value]: key_value_map) {
+		(!is_error ? std::cout : std::cerr)
+			<< rang::fgB::black
+			<< " > "
+			<< key
+			<< " "
+			<< rang::fgB::green
+			<< value;
 	}
 
 	if (!origination_info.zone_short_name.empty()) {
@@ -391,7 +401,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			<<
 			rang::fgB::black
 			<<
-			"-- "
+			" -- "
 			<<
 			fmt::format(
 				"[{}] ({}) inst_id [{}]",
@@ -403,7 +413,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 
 	(!is_error ? std::cout : std::cerr) << rang::style::reset << std::endl;
 
-	m_on_log_console_hook(log_category, message);
+	m_on_log_console_hook(log_category, msg);
 }
 
 /**
