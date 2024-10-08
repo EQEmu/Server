@@ -274,6 +274,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			}
 		}
 
+		msg = Strings::Replace(msg, "  ", " ");
 		msg = Strings::Trim(msg);
 	}
 
@@ -561,7 +562,7 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 			return;
 		}
 
-		LogInfo("Starting File Log [{}/zone/{}_{}.log]", GetLogPath(), m_platform_file_name.c_str(), getpid());
+		LogInfo("Starting File Log [GetLogPath|{}/zone/{}_{}.log]", GetLogPath(), m_platform_file_name.c_str(), getpid());
 
 		// Make directory if not exists
 		EQEmuLogSys::MakeDirectory(fmt::format("{}/zone", GetLogPath()));
@@ -579,7 +580,7 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 			return;
 		}
 
-		LogInfo("Starting File Log [{}/{}_{}.log]", GetLogPath(), m_platform_file_name.c_str(), getpid());
+		LogInfo("Starting File Log [GetLogPath|{}/{}_{}.log]", GetLogPath(), m_platform_file_name.c_str(), getpid());
 
 		// Open file pointer
 		process_log.open(
@@ -697,14 +698,14 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 		return this;
 	}
 
-	LogInfo("Loaded [{}] log categories", categories.size());
+	LogInfo("Loaded [categories.size|{}] log categories", categories.size());
 
 	auto webhooks = DiscordWebhooksRepository::GetWhere(*m_database, fmt::format("id < {}", MAX_DISCORD_WEBHOOK_ID));
 	if (!webhooks.empty()) {
 		for (auto &w: webhooks) {
 			m_discord_webhooks[w.id] = {w.id, w.webhook_name, w.webhook_url};
 		}
-		LogInfo("Loaded [{}] Discord webhooks", webhooks.size());
+		LogInfo("Loaded [webhooks.size|{}] Discord webhooks", webhooks.size());
 	}
 
 	// force override this setting
