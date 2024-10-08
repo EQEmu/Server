@@ -4292,7 +4292,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			&args
 		);
 
-		parse->EventPlayerNPCBotMerc(
+		damage_override = parse->EventPlayerNPCBotMerc(
 			EVENT_DAMAGE_TAKEN,
 			attacker,
 			this,
