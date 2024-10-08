@@ -1023,47 +1023,22 @@ int PerlembParser::SendCommands(
 #ifdef EMBPERL_XS_CLASSES
 		dTHX;
 		{
-			std::string cl   = fmt::format("${}::client", prefix);
-			std::string np   = fmt::format("${}::npc", prefix);
-			std::string qi   = fmt::format("${}::questitem", prefix);
-			std::string sp   = fmt::format("${}::spell", prefix);
-			std::string enl  = fmt::format("${}::entity_list", prefix);
-			std::string bot  = fmt::format("${}::bot", prefix);
-			std::string merc = fmt::format("${}::merc", prefix);
+			const std::vector<std::string>& suffixes = {
+				"bot",
+				"client",
+				"entity_list",
+				"merc",
+				"npc",
+				"questitem",
+				"spell"
+			};
 
-			if (clear_vars_.find(cl) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", cl);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(np) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", np);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(qi) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", qi);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(sp) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", sp);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(enl) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", enl);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(bot) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", bot);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(merc) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", merc);
-				perl->eval(e.c_str());
+			for (const auto& suffix : suffixes) {
+				const std::string& key = fmt::format("${}::{}", prefix, suffix);
+				if (clear_vars_.find(suffix) != clear_vars_.end()) {
+					auto e = fmt::format("{} = undef;", key);
+					perl->eval(e.c_str());
+				}
 			}
 		}
 
@@ -1122,25 +1097,25 @@ int PerlembParser::SendCommands(
 #endif
 
 		//now call the requested sub
-		ret_value = perl->dosub(std::string(prefix).append("::").append(event_id).c_str());
+		const std::string& sub_key = fmt::format("{}::{}", prefix, event_id);
+		ret_value = perl->dosub(sub_key.c_str());
 
 #ifdef EMBPERL_XS_CLASSES
 		{
-			std::string cl   = fmt::format("${}::client", prefix);
-			std::string np   = fmt::format("${}::npc", prefix);
-			std::string qi   = fmt::format("${}::questitem", prefix);
-			std::string sp   = fmt::format("${}::spell", prefix);
-			std::string enl  = fmt::format("${}::entity_list", prefix);
-			std::string bot  = fmt::format("${}::bot", prefix);
-			std::string merc = fmt::format("${}::merc", prefix);
+			const std::vector<std::string>& suffixes = {
+				"bot",
+				"client",
+				"entity_list",
+				"merc",
+				"npc",
+				"questitem",
+				"spell"
+			};
 
-			clear_vars_[cl]   = 1;
-			clear_vars_[np]   = 1;
-			clear_vars_[qi]   = 1;
-			clear_vars_[sp]   = 1;
-			clear_vars_[enl]  = 1;
-			clear_vars_[bot]  = 1;
-			clear_vars_[merc] = 1;
+			for (const auto& suffix : suffixes) {
+				const std::string& key = fmt::format("${}::{}", prefix, suffix);
+				clear_vars_[key] = 1;
+			}
 		}
 #endif
 
@@ -2132,7 +2107,8 @@ void PerlembParser::ExportEventVariables(
 						"killed_bot_id",
 						killed->IsBot() ? killed->CastToBot()->GetBotID() : 0
 					);
-					ExportVar(package_name.c_str(), "killed_npc_id", killed->IsNPC() ? killed->GetNPCTypeID() : 0);
+					ExportVar(package_name.c_str(), "killed_merc_id", killed->IsMerc() ? killed->CastToMerc()->GetMercenaryID() : 0);
+					ExportVar(package_name.c_str(), "killed_npc_id", !killed->IsMerc() && killed->IsNPC() ? killed->GetNPCTypeID() : 0);
 				}
 			}
 			break;
@@ -2408,6 +2384,7 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_DESPAWN: {
 			ExportVar(package_name.c_str(), "despawned_entity_id", npc_mob->GetID());
 			ExportVar(package_name.c_str(), "despawned_bot_id", npc_mob->IsBot() ? npc_mob->CastToBot()->GetBotID() : 0);
+			ExportVar(package_name.c_str(), "despawned_merc_id", npc_mob->IsMerc() ? npc_mob->CastToMerc()->GetMercenaryID() : 0);
 			ExportVar(package_name.c_str(), "despawned_npc_id", npc_mob->IsNPC() ? npc_mob->GetNPCTypeID() : 0);
 			break;
 		}
