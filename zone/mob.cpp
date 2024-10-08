@@ -5757,8 +5757,6 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 		return false;
 	}
 
-	m_EntityVariables.erase(v);
-
 	if (
 		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
 		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
@@ -5777,6 +5775,8 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 			parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
 		}
 	}
+
+	m_EntityVariables.erase(v);
 
 	return true;
 }
