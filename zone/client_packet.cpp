@@ -10499,6 +10499,7 @@ void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 {
 	cheat_manager.CheckMemTimer();
 	OPMemorizeSpell(app);
+	SendBulkStatsUpdate();
 	return;
 }
 
