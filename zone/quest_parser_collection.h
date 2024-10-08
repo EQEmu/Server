@@ -231,7 +231,7 @@ public:
 		Mob* init,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
-		std::function<std::vector<std::any*>()> = []() { return { }; }
+		std::vector<std::any>* extra_pointers = nullptr
 	)
 	{
 		if (e->IsBot() && BotHasQuestSub(event_id)) {
