@@ -196,6 +196,7 @@ struct RespawnOption
 	float heading;
 };
 
+
 // do not ask what all these mean because I have no idea!
 // named from the client's CEverQuest::GetInnateDesc, they're missing some
 enum eInnateSkill {

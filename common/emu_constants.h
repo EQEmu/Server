@@ -756,4 +756,10 @@ namespace PCNPCOnlyFlagType {
 	constexpr int NPC = 2;
 }
 
+namespace BookType {
+	constexpr uint8 Scroll   = 0;
+	constexpr uint8 Book     = 1;
+	constexpr uint8 ItemInfo = 2;
+}
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

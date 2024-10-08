@@ -2299,50 +2299,65 @@ void Client::SetGM(bool toggle) {
 	UpdateWho();
 }
 
-void Client::ReadBook(BookRequest_Struct *book) {
-	int16 book_language=0;
-	char *txtfile = book->txtfile;
+void Client::ReadBook(BookRequest_Struct* book)
+{
+	const std::string& text_file = book->txtfile;
 
-	if(txtfile[0] == '0' && txtfile[1] == '\0') {
-		//invalid book... coming up on non-book items.
+	if (text_file.empty()) {
 		return;
 	}
 
-	std::string booktxt2 = content_db.GetBook(txtfile, &book_language);
-	int length = booktxt2.length();
+	auto b = content_db.GetBook(text_file);
 
-	if (booktxt2[0] != '\0') {
-#if EQDEBUG >= 6
-		LogInfo("Client::ReadBook() textfile:[{}] Text:[{}]", txtfile, booktxt2.c_str());
-#endif
-		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
+	if (!b.text.empty()) {
+		auto outapp = new EQApplicationPacket(OP_ReadBook, b.text.size() + sizeof(BookText_Struct));
+		auto inst = const_cast<EQ::ItemInstance*>(m_inv[book->invslot]);
 
-		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
-		out->window = book->window;
-		out->type = book->type;
-		out->invslot = book->invslot;
-		out->target_id = book->target_id;
-		out->can_cast = 0; // todo: implement
-		out->can_scribe = false;
+		auto t = (BookText_Struct*) outapp->pBuffer;
 
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && book->invslot <= EQ::invbag::GENERAL_BAGS_END)
-		{
-			const EQ::ItemInstance* inst = m_inv[book->invslot];
-			if (inst && inst->GetItem())
-			{
-				auto recipe = TradeskillRecipeRepository::GetWhere(content_db,
-					fmt::format("learned_by_item_id = {} LIMIT 1", inst->GetItem()->ID));
-				out->type = inst->GetItem()->Book;
-				out->can_scribe = !recipe.empty();
+		t->window     = book->window;
+		t->type       = book->type;
+		t->invslot    = book->invslot;
+		t->target_id  = book->target_id;
+		t->can_cast   = 0; // todo: implement
+		t->can_scribe = false;
+
+		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && book->invslot <= EQ::invbag::GENERAL_BAGS_END) {
+			if (inst && inst->GetItem()) {
+				auto recipe = TradeskillRecipeRepository::GetWhere(
+					content_db,
+					fmt::format(
+						"learned_by_item_id = {} LIMIT 1",
+						inst->GetItem()->ID
+					)
+				);
+
+				t->type       = inst->GetItem()->Book;
+				t->can_scribe = !recipe.empty();
 			}
 		}
 
-		memcpy(out->booktext, booktxt2.c_str(), length);
+		memcpy(t->booktext, b.text.c_str(), b.text.size());
 
-		if (EQ::ValueWithin(book_language, Language::CommonTongue, Language::Unknown27)) {
-			if (m_pp.languages[book_language] < Language::MaxValue) {
-				GarbleMessage(out->booktext, (Language::MaxValue - m_pp.languages[book_language]));
+		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[b.language] < Language::MaxValue) {
+				GarbleMessage(t->booktext, (Language::MaxValue - m_pp.languages[b.language]));
 			}
+		}
+
+		// Send only books and scrolls to this event
+		if (parse->PlayerHasQuestSub(EVENT_READ_ITEM) && t->type != BookType::ItemInfo) {
+			std::vector<std::any> args = {
+				b.text,
+				t->can_cast,
+				t->can_scribe,
+				t->invslot,
+				t->target_id,
+				t->type,
+				inst
+			};
+
+			parse->EventPlayer(EVENT_READ_ITEM, this, book->txtfile, inst ? inst->GetID() : 0, &args);
 		}
 
 		QueuePacket(outapp);
@@ -10916,23 +10931,24 @@ void Client::SetIPExemption(int exemption_amount)
 
 void Client::ReadBookByName(std::string book_name, uint8 book_type)
 {
-	int16 book_language = 0;
-	std::string book_text = content_db.GetBook(book_name.c_str(), &book_language);
-	int length = book_text.length();
+	auto b = content_db.GetBook(book_name);
 
-	if (book_text[0] != '\0') {
-		LogDebug("Client::ReadBookByName() Book Name: [{}] Text: [{}]", book_name, book_text.c_str());
-		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
-		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
-		out->window = 0xFF;
-		out->type = book_type;
-		out->invslot = 0;
+	if (!b.text.empty()) {
+		LogDebug("Book Name: [{}] Text: [{}]", book_name, b.text);
 
-		memcpy(out->booktext, book_text.c_str(), length);
+		auto outapp = new EQApplicationPacket(OP_ReadBook, b.text.size() + sizeof(BookText_Struct));
 
-		if (EQ::ValueWithin(book_language, Language::CommonTongue, Language::Unknown27)) {
-			if (m_pp.languages[book_language] < Language::MaxValue) {
-				GarbleMessage(out->booktext, (Language::MaxValue - m_pp.languages[book_language]));
+		auto o = (BookText_Struct *) outapp->pBuffer;
+
+		o->window  = std::numeric_limits<uint8>::max();
+		o->type    = book_type;
+		o->invslot = 0;
+
+		memcpy(o->booktext, b.text.c_str(), b.text.size());
+
+		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[b.language] < Language::MaxValue) {
+				GarbleMessage(o->booktext, (Language::MaxValue - m_pp.languages[b.language]));
 			}
 		}
 

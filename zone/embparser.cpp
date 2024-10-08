@@ -203,6 +203,7 @@ const char* QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_ENTITY_VARIABLE_UPDATE",
 	"EVENT_AA_LOSS",
 	"EVENT_SPELL_BLOCKED",
+	"EVENT_READ_ITEM",
 
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
@@ -2483,6 +2484,28 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "variable_name", std::any_cast<std::string>(extra_pointers->at(0)).c_str());
 				ExportVar(package_name.c_str(), "old_value", std::any_cast<std::string>(extra_pointers->at(1)).c_str());
 				ExportVar(package_name.c_str(), "new_value", std::any_cast<std::string>(extra_pointers->at(2)).c_str());
+			}
+
+			break;
+		}
+
+		case EVENT_READ_ITEM: {;
+			ExportVar(package_name.c_str(), "item_id", extra_data);
+			ExportVar(package_name.c_str(), "text_file", data);
+
+			if (extra_pointers && extra_pointers->size() == 7) {
+				ExportVar(package_name.c_str(), "book_text", std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+				ExportVar(package_name.c_str(), "can_cast", std::any_cast<int8>(extra_pointers->at(1)));
+				ExportVar(package_name.c_str(), "can_scribe", std::any_cast<int8>(extra_pointers->at(2)));
+				ExportVar(package_name.c_str(), "slot_id", std::any_cast<int16>(extra_pointers->at(3)));
+				ExportVar(package_name.c_str(), "target_id", std::any_cast<int>(extra_pointers->at(4)));
+				ExportVar(package_name.c_str(), "type", std::any_cast<uint8>(extra_pointers->at(5)));
+				ExportVar(
+					package_name.c_str(),
+					"item",
+					"QuestItem",
+					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(6))
+				);
 			}
 
 			break;
