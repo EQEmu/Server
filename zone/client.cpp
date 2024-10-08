@@ -10934,7 +10934,7 @@ void Client::ReadBookByName(std::string book_name, uint8 book_type)
 	auto b = content_db.GetBook(book_name);
 
 	if (!b.text.empty()) {
-		LogDebug("Client::ReadBookByName() Book Name: [{}] Text: [{}]", book_name, b.text);
+		LogDebug("Book Name: [{}] Text: [{}]", book_name, b.text);
 
 		auto outapp = new EQApplicationPacket(OP_ReadBook, b.text.size() + sizeof(BookText_Struct));
 
