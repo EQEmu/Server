@@ -525,13 +525,6 @@ void QuestManager::settimer(const std::string& timer_name, uint32 seconds, Mob* 
 		return;
 	}
 
-	const bool has_start_event = (
-		(mob->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_START)) ||
-		(mob->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_START)) ||
-		(mob->IsMerc() && parse->MercHasQuestSub(EVENT_TIMER_START)) ||
-		(mob->IsNPC() && parse->HasQuestSub(mob->GetNPCTypeID(), EVENT_TIMER_START))
-	);
-
 	if (!QTimerList.empty()) {
 		for (auto& e : QTimerList) {
 			if (e.mob && e.mob == mob && e.name == timer_name) {
