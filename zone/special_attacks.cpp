@@ -461,21 +461,25 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		if (ca_atk->m_skill == EQ::skills::SkillThrowing) {
 			SetAttackTimer();
 			ThrowingAttack(GetTarget());
-
-			if (CheckDoubleRangedAttack()) {
+			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
 				ThrowingAttack(GetTarget(), true);
 			}
-
+			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack())) {
+				ThrowingAttack(GetTarget(), true);
+			}
 			return;
 		}
 
 		// ranged attack (archery)
 		if (ca_atk->m_skill == EQ::skills::SkillArchery) {
 			SetAttackTimer();
-			if (RangedAttack(GetTarget()) && CheckDoubleRangedAttack()) {
+			RangedAttack(GetTarget());
+			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
 				RangedAttack(GetTarget(), true);
 			}
-
+			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack())) {
+				RangedAttack(GetTarget(), true);
+			}
 			return;
 		}
 	}
