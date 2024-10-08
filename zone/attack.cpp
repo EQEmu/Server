@@ -1553,7 +1553,6 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 		parse->EventBotMerc(
 			EVENT_USE_SKILL,
 			this,
-			nullptr,
 			[&]() {
 				return fmt::format(
 					"{} {}",

@@ -136,14 +136,14 @@ public:
 		std::vector<std::any> *extra_pointers = nullptr
 	);
 
-	template <typename T1>
 	int EventBotMerc(
 		QuestEventID event_id,
-		T1* e,
+		Mob* e,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	) {
+	)
+	{
 		if (e->IsBot() && BotHasQuestSub(event_id)) {
 			return EventBot(event_id, e->CastToBot(), nullptr, lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
@@ -153,32 +153,15 @@ public:
 		return false;  // No quest subscription found
 	}
 
-	template <typename T1, typename T2>
-	int EventBotMerc(
-		QuestEventID event_id,
-		T1* e,
-		T2* init,
-		std::function<std::string()> lazy_data = []() { return ""; },
-		uint32 extra_data = 0,
-		std::vector<std::any> *extra_pointers = nullptr
-	) {
-		if (e->IsBot() && BotHasQuestSub(event_id)) {
-			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false; // No quest subscription found
-	}
-
 	int EventBotMerc(
 		QuestEventID event_id,
 		Mob* e,
 		Mob* init,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
-		std::vector<std::any> *extra_pointers = nullptr
-	) {
+		std::vector<std::any>* extra_pointers = nullptr
+	)
+	{
 		if (e->IsBot() && BotHasQuestSub(event_id)) {
 			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
@@ -188,14 +171,14 @@ public:
 		return false; // No quest subscription found
 	}
 
-	template <typename T1>
 	int EventNPCMerc(
 		QuestEventID event_id,
-		T1* e,
+		Mob* e,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	) {
+	)
+	{
 		if (e->IsMerc() && MercHasQuestSub(event_id)) {
 			return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
@@ -205,32 +188,15 @@ public:
 		return false;  // No quest subscription found
 	}
 
-	template <typename T1, typename T2>
-	int EventNPCMerc(
-		QuestEventID event_id,
-		T1* e,
-		T2* init,
-		std::function<std::string()> lazy_data = []() { return ""; },
-		uint32 extra_data = 0,
-		std::vector<std::any> *extra_pointers = nullptr
-	) {
-		if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
-			return EventNPC(event_id, e->CastToNPC(), init, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false; // No quest subscription found
-	}
-
 	int EventNPCMerc(
 		QuestEventID event_id,
 		Mob* e,
 		Mob* init,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
-		std::vector<std::any> *extra_pointers = nullptr
-	) {
+		std::vector<std::any>* extra_pointers = nullptr
+	)
+	{
 		if (e->IsMerc() && MercHasQuestSub(event_id)) {
 			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
@@ -240,14 +206,14 @@ public:
 		return false; // No quest subscription found
 	}
 
-	template <typename T1>
 	int EventNPCBotMerc(
 		QuestEventID event_id,
-		T1* e,
+		Mob* e,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	) {
+	)
+	{
 		if (e->IsBot() && BotHasQuestSub(event_id)) {
 			return EventBot(event_id, e->CastToBot(), nullptr, lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
@@ -259,15 +225,15 @@ public:
 		return false;  // No quest subscription found
 	}
 
-	template <typename T1, typename T2>
 	int EventNPCBotMerc(
 		QuestEventID event_id,
-		T1* e,
-		T2* init,
+		Mob* e,
+		Mob* init,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
-		std::vector<std::any> *extra_pointers = nullptr
-	) {
+		std::function<std::vector<std::any*>()> = []() { return { }; }
+	)
+	{
 		if (e->IsBot() && BotHasQuestSub(event_id)) {
 			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
@@ -279,14 +245,14 @@ public:
 		return false; // No quest subscription found
 	}
 
-	template <typename T1>
 	int EventPlayerNPCBotMerc(
 		QuestEventID event_id,
-		T1* e,
+		Mob* e,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	) {
+	)
+	{
 		if (e->IsClient() && PlayerHasQuestSub(event_id)) {
 			return EventPlayer(event_id, e->CastToClient(), lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsBot() && BotHasQuestSub(event_id)) {
@@ -306,32 +272,11 @@ public:
 		Mob* init,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
-		std::vector<std::any> *extra_pointers = nullptr
-	) {
+		std::vector<std::any>* extra_pointers = nullptr
+	)
+	{
 		if (e->IsClient() && PlayerHasQuestSub(event_id)) {
 			return EventPlayer(event_id, e->CastToClient(), lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsBot() && BotHasQuestSub(event_id)) {
-			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
-			return EventNPC(event_id, e->CastToNPC(), init, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false; // No quest subscription found
-	}
-
-	template <typename T1, typename T2>
-	int EventPlayerNPCBotMerc(
-		QuestEventID event_id,
-		T1* e,
-		T2* init,
-		std::function<std::string()> lazy_data = []() { return ""; },
-		uint32 extra_data = 0,
-		std::vector<std::any> *extra_pointers = nullptr
-	) {
-		if (e->IsClient() && PlayerHasQuestSub(event_id)) {
-			return EventPlayer(event_id, e->CastToClient(), init, lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsBot() && BotHasQuestSub(event_id)) {
 			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
 		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
