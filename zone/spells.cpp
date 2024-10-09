@@ -1634,13 +1634,13 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			{
 				d_x = std::abs(std::abs(GetX()) - std::abs(GetSpellX()));
 				d_y = std::abs(std::abs(GetY()) - std::abs(GetSpellY()));
-				if(d_x < 5 && d_y < 5)
+				if(d_x < 25 && d_y < 25)
 				{
 					//avoid the square root...
 					distance_moved = d_x * d_x + d_y * d_y;
 					// if you moved 1 unit, that's 25% off your chance to regain.
 					// if you moved 2, you lose 100% off your chance
-					distancemod = distance_moved * 25;
+					distancemod = (distance_moved / 4) * 25;
 					channelchance -= distancemod;
 				}
 				else

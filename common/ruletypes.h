@@ -1097,6 +1097,7 @@ RULE_BOOL(Custom, 	ApplyPetAAToSwarm, 						true, "Apply 'Pet AAs' to Swarm Pets
 RULE_INT(Custom, 	StaticInstanceVersion,					UINT8_MAX, "Instances with the version will load as StaticInstanceTemplateVersion and have respawns disabled")
 RULE_INT(Custom, 	StaticInstanceTemplateVersion,			0, "Template version for non-respawning instances")
 RULE_BOOL(Custom, 	DoubleAttackSkillRanged, 				false, "Use Double & Triple Attack skills for ranged attacks")
+RULE_BOOL(Custom, 	TemporaryStunImmunity, 					true, "Clients become immune to Stun for a duration after being stunned")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")

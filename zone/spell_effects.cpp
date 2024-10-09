@@ -744,9 +744,17 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_Stun:
 			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Stun: %d msec", effect_value);
-#endif
+				if (RuleB(Custom, TemporaryStunImmunity) && IsClient()) {
+					if (stun_immune_timer.Check(false) || !stun_immune_timer.Enabled()) {
+						stun_immune_timer.Start(effect_value * 4);
+						LogCombat("Setting Stun-Immune for [{}] seconds", effect_value * 4 / 1000);
+					} else {
+						MessageString(Chat::Stun, SHAKE_OFF_STUN);
+						LogCombat("Stun Resisted. We are temporarily immune.");
+						break;
+					}
+				}
+
 				//Typically we check for immunities else where but since stun immunities are different and only
 				//Block the stun part and not the whole spell, we do it here, also do the message here so we wont get the message on a resist
 				int max_level = spell.max_value[i];
@@ -787,112 +795,116 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_Charm:
 			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Charm: %+i (up to lvl %d)", effect_value, spell.max_value[i]);
-#endif
+				if (!IsClient()) {
+					if (!caster) {    // can't be someone's pet unless we know who that someone is
+						break;
+					}
 
-				if (!caster) {    // can't be someone's pet unless we know who that someone is
+					if (caster->IsClient() && !caster->IsPetAllowed(spell_id)) {
+						Message(Chat::SpellFailure, "You may not charm an additional creature with this spell.");
+						break;
+					}
+
+					if (IsNPC()) {
+						CastToNPC()->SaveGuardSpotCharm();
+					}
+					InterruptSpell();
+					//entity_list.RemoveDebuffs(this);
+					entity_list.RemoveFromHateLists(this);
+					WipeHateList();
+
+					Mob *my_pet = GetPet();
+					if(my_pet)
+					{
+						my_pet->Kill();
+					}
+
+					caster->AddPet(this);
+					SetOwnerID(caster->GetID());
+					SetPetOrder(SPO_Follow);
+					SetAppearance(eaStanding);
+					// Client has saved previous pet sit/stand - make all new pets
+					// stand and follow on charm.
+					if (caster->IsClient()) {
+						Client *cpet = caster->CastToClient();
+						cpet->SetPetCommandState(PET_BUTTON_SIT,0);
+						cpet->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
+						cpet->SetPetCommandState(PET_BUTTON_GUARD, 0);
+						cpet->SetPetCommandState(PET_BUTTON_STOP, 0);
+					}
+
+					SetPetType(petCharmed);
+
+					// This was done in AddBuff, but we were not a pet yet, so
+					// the target windows didn't get updated.
+					EQApplicationPacket *outapp = MakeBuffsPacket();
+					entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQ::versions::maskSoDAndLater);
+					safe_delete(outapp);
+
+					if(caster->IsClient()){
+						auto app = new EQApplicationPacket(OP_Charm, sizeof(Charm_Struct));
+						Charm_Struct *ps = (Charm_Struct*)app->pBuffer;
+						ps->owner_id = caster->GetID();
+						ps->pet_id = GetID();
+						ps->command = 1;
+						entity_list.QueueClients(this, app);
+						safe_delete(app);
+						SendPetBuffsToClient();
+						SendAppearancePacket(AppearanceType::Pet, caster->GetID(), true, true);
+					}
+
+					if (IsClient())
+					{
+						CastToClient()->AI_Start();
+					} else if(IsNPC()) {
+						CastToNPC()->SetPetSpellID(0);	//not a pet spell.
+						CastToNPC()->ModifyStatsOnCharm(false);
+					}
+
+
+					// Custom charm inventory handling
+					if (RuleB(Custom, StripCharmItems) && IsNPC() && GetOwner()->IsClient()) {
+						auto inventory = CastToNPC()->GetLootList();
+						std::vector<std::string> inventory_strings;
+
+						for (int item_id : inventory) {
+							inventory_strings.push_back(std::to_string(item_id));
+						}
+
+						auto serialized_inventory = Strings::Join(inventory_strings, ",");
+
+						CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
+
+						LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+					}
+
+					bool bBreak = false;
+
+					// define spells with fixed duration
+					// charm spells with -1 in field 209 are all of fixed duration, so lets use that instead of spell_ids
+					if (spells[spell_id].no_resist) {
+						bBreak = true;
+					}
+
+					if (buffslot > -1) {
+						if (!bBreak) {
+							int resistMod = static_cast<int>(partial) + (GetCHA() / 25);
+							resistMod = resistMod > 100 ? 100 : resistMod;
+							buffs[buffslot].ticsremaining = resistMod * buffs[buffslot].ticsremaining / 100;
+						}
+
+						if (IsOfClientBot() && buffs[buffslot].ticsremaining > RuleI(Character, MaxCharmDurationForPlayerCharacter)) {
+							buffs[buffslot].ticsremaining = RuleI(Character, MaxCharmDurationForPlayerCharacter);
+						}
+					}
+
 					break;
 				}
+			}
 
-				if (caster->IsClient() && !caster->IsPetAllowed(spell_id)) {
-					Message(Chat::SpellFailure, "You may not charm an additional creature with this spell.");
-					break;
-				}
-
-				if (IsNPC()) {
-					CastToNPC()->SaveGuardSpotCharm();
-				}
-				InterruptSpell();
-				//entity_list.RemoveDebuffs(this);
-				entity_list.RemoveFromHateLists(this);
-				WipeHateList();
-
-				Mob *my_pet = GetPet();
-				if(my_pet)
-				{
-					my_pet->Kill();
-				}
-
-				caster->AddPet(this);
-				SetOwnerID(caster->GetID());
-				SetPetOrder(SPO_Follow);
-				SetAppearance(eaStanding);
-				// Client has saved previous pet sit/stand - make all new pets
-				// stand and follow on charm.
-				if (caster->IsClient()) {
-					Client *cpet = caster->CastToClient();
-					cpet->SetPetCommandState(PET_BUTTON_SIT,0);
-					cpet->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
-					cpet->SetPetCommandState(PET_BUTTON_GUARD, 0);
-					cpet->SetPetCommandState(PET_BUTTON_STOP, 0);
-				}
-
-				SetPetType(petCharmed);
-
-				// This was done in AddBuff, but we were not a pet yet, so
-				// the target windows didn't get updated.
-				EQApplicationPacket *outapp = MakeBuffsPacket();
-				entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQ::versions::maskSoDAndLater);
-				safe_delete(outapp);
-
-				if(caster->IsClient()){
-					auto app = new EQApplicationPacket(OP_Charm, sizeof(Charm_Struct));
-					Charm_Struct *ps = (Charm_Struct*)app->pBuffer;
-					ps->owner_id = caster->GetID();
-					ps->pet_id = GetID();
-					ps->command = 1;
-					entity_list.QueueClients(this, app);
-					safe_delete(app);
-					SendPetBuffsToClient();
-					SendAppearancePacket(AppearanceType::Pet, caster->GetID(), true, true);
-				}
-
-				if (IsClient())
-				{
-					CastToClient()->AI_Start();
-				} else if(IsNPC()) {
-					CastToNPC()->SetPetSpellID(0);	//not a pet spell.
-					CastToNPC()->ModifyStatsOnCharm(false);
-				}
-
-
-				// Custom charm inventory handling
-				if (RuleB(Custom, StripCharmItems) && IsNPC() && GetOwner()->IsClient()) {
-					auto inventory = CastToNPC()->GetLootList();
-					std::vector<std::string> inventory_strings;
-
-					for (int item_id : inventory) {
-						inventory_strings.push_back(std::to_string(item_id));
-					}
-
-					auto serialized_inventory = Strings::Join(inventory_strings, ",");
-
-					CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
-
-					LogDebug("Serialized Inventory: [{}]", serialized_inventory);
-				}
-
-				bool bBreak = false;
-
-				// define spells with fixed duration
-				// charm spells with -1 in field 209 are all of fixed duration, so lets use that instead of spell_ids
-				if (spells[spell_id].no_resist) {
-					bBreak = true;
-				}
-
-				if (buffslot > -1) {
-					if (!bBreak) {
-						int resistMod = static_cast<int>(partial) + (GetCHA() / 25);
-						resistMod = resistMod > 100 ? 100 : resistMod;
-						buffs[buffslot].ticsremaining = resistMod * buffs[buffslot].ticsremaining / 100;
-					}
-
-					if (IsOfClientBot() && buffs[buffslot].ticsremaining > RuleI(Character, MaxCharmDurationForPlayerCharacter)) {
-						buffs[buffslot].ticsremaining = RuleI(Character, MaxCharmDurationForPlayerCharacter);
-					}
-				}
-
+			case SE_Mez:
+			{
+				Mesmerize();
 				break;
 			}
 
@@ -942,15 +954,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_Fear:
 			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Fear: %+i", effect_value);
-#endif
 				if (IsOfClientBot() && buffslot > -1) {
 					if (buffs[buffslot].ticsremaining > RuleI(Character, MaxFearDurationForPlayerCharacter)) {
 						buffs[buffslot].ticsremaining = RuleI(Character, MaxFearDurationForPlayerCharacter);
 					}
 				}
-
 
 				if (RuleB(Combat, EnableFearPathing)) {
 					if (IsClient())
@@ -1225,15 +1233,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 				}
-				break;
-			}
-
-			case SE_Mez:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Mesmerize");
-#endif
-				Mesmerize();
 				break;
 			}
 
@@ -5778,7 +5777,6 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				}
 
 				spell_level = GetSpellLevelForCaster(spell_id);
-				LogDebug("Got spell_level [{}] for spell [{}] cast by [{}]", spell_level, spells[spell_id].name, GetName());
 
 				lvldiff     = spell_level - focus_spell.base_value[i];
 				// every level over cap reduces the effect by focus_spell.base2[i] percent unless from a clicky

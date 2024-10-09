@@ -1708,6 +1708,8 @@ protected:
 	Timer mana_timer;
 	int32 dw_same_delay;
 
+	Timer stun_immune_timer;
+
 	Timer focusproclimit_timer[MAX_FOCUS_PROC_LIMIT_TIMERS];	//SPA 511
 	int32 focusproclimit_spellid[MAX_FOCUS_PROC_LIMIT_TIMERS];	//SPA 511
 
