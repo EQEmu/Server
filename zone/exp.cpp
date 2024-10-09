@@ -627,7 +627,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 				return 5.0f;
 			}
 
-			if (item->HP >= 0) 	return_value  += item->HP 	/ 10.0f;
+			if (item->HP   >= 0) return_value  += item->HP 	/ 10.0f;
 			if (item->Mana >= 0) return_value += item->Mana / 10.0f;
 
 			if (item->AStr >= 0) return_value += item->AStr;
@@ -643,49 +643,64 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			if (item->DR >= 0) 	return_value += item->DR;
 			if (item->PR >= 0) 	return_value += item->PR;
 
+			return_value += 2 * item->HeroicStr;
+			return_value += 2 * item->HeroicSta;
+			return_value += 2 * item->HeroicAgi;
+			return_value += 2 * item->HeroicDex;
+			return_value += 2 * item->HeroicWis;
+			return_value += 2 * item->HeroicInt;
+			return_value += 2 * item->HeroicCha;
+
+			return_value += 2 * item->HeroicMR;
+			return_value += 2 * item->HeroicFR;
+			return_value += 2 * item->HeroicCR;
+			return_value += 2 * item->HeroicDR;
+			return_value += 2 * item->HeroicPR;
+
+			return_value += 2 * item->HealAmt;
+			return_value += 2 * item->SpellDmg;
+
 			if (item->Click.Effect > 0) return_value += 25;
 			if (item->Worn.Effect > 0)  return_value += 25;
 			if (item->Focus.Effect > 0) return_value += 25;
 
-			return std::max(0.0f, (return_value));
+			return std::max(1.0f, (return_value));
 		}
 	};
 
-	/*
-		This calculates the direct % value of a kill, modified by the per-kill caps and item tier.
-		calibration is that am even-con kill at or above FloatingExperienceScaleTerminalLevel is
-		worth ~1% progress on a tier 0 item, and 0.1% progress for a tier1 item.
-	*/
 	auto GetBaseExpValueForKill = [&](int conlevel, int tier, EQ::ItemInstance* upgrade_item) -> float {
-		float exp_value 		= 0.0f;
-		float norm_val 			= 10.0f + GetItemStatValue(upgrade_item->GetItem());
+		float exp_value = 0.0f;
+		float norm_val = GetItemStatValue(upgrade_item->GetItem());
 
 		switch (conlevel) {
 			case ConsiderColor::Green:
-				exp_value = 0.05;
+				exp_value = 1.0f;
 				break;
 			case ConsiderColor::LightBlue:
-				exp_value = 0.10;
+				exp_value = 5.0f;
 				break;
 			case ConsiderColor::DarkBlue:
-				exp_value = 0.50;
+				exp_value = 7.5f;
 				break;
 			case ConsiderColor::White:
-				exp_value = 0.75;
+				exp_value = 10.0f;
 				break;
 			case ConsiderColor::Yellow:
-				exp_value = 1.00;
+				exp_value = 15.0f;
 				break;
 			case ConsiderColor::Red:
-				exp_value = 1.50;
+				exp_value = 25.0f;
 				break;
 		}
 
-		norm_val  = norm_val  * (tier);
+		exp_value = exp_value / (norm_val * 0.75f);
+
 		exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
 		exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
 
-		return exp_value / norm_val;
+		LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
+
+		return exp_value;
 	};
 
 	EQ::ItemInstance* upgrade_item = item->GetUpgrade(database);
@@ -701,7 +716,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 
 	int   item_tier 		  = item->GetID() / 1000000;
 	float cur_item_experience = Strings::ToFloat(item->GetCustomData("Exp"), 0);
-	float new_item_experience = GetBaseExpValueForKill(conlevel, item_tier, upgrade_item);
+	float new_item_experience = GetBaseExpValueForKill(conlevel, static_cast<int>(upgrade_item->GetID() / 1000000), upgrade_item);
 	float new_percentage 	  = std::min(100.0f, cur_item_experience + new_item_experience);
 
 	EQ::SayLinkEngine linker;
