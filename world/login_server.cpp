@@ -315,6 +315,13 @@ void LoginServer::ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p)
 		error,
 		reason
 	);
+
+	if (m_legacy_client) {
+		m_legacy_client.release();
+	}
+	else if (m_client) {
+		m_client.release();
+	}
 }
 
 void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
@@ -598,6 +605,11 @@ bool LoginServer::Connect()
 
 void LoginServer::SendInfo()
 {
+	if (m_client == nullptr && m_legacy_client == nullptr) {
+		LogDebug("No client to send info to loginserver");
+		return;
+	}
+
 	const WorldConfig *Config = WorldConfig::get();
 
 	auto pack = new ServerPacket;
@@ -643,6 +655,11 @@ void LoginServer::SendInfo()
 
 void LoginServer::SendStatus()
 {
+	if (m_client == nullptr && m_legacy_client == nullptr) {
+		LogDebug("No client to send status to loginserver");
+		return;
+	}
+
 	auto pack = new ServerPacket;
 	pack->opcode  = ServerOP_LSStatus;
 	pack->size    = sizeof(ServerLSStatus_Struct);
@@ -671,20 +688,21 @@ void LoginServer::SendStatus()
  */
 void LoginServer::SendPacket(ServerPacket *pack)
 {
-	if (m_is_legacy) {
-		if (m_legacy_client) {
-			m_legacy_client->SendPacket(pack);
-		}
+	if (m_legacy_client) {
+		m_legacy_client->SendPacket(pack);
 	}
-	else {
-		if (m_client) {
-			m_client->SendPacket(pack);
-		}
+	else if (m_client) {
+		m_client->SendPacket(pack);
 	}
 }
 
 void LoginServer::SendAccountUpdate(ServerPacket *pack)
 {
+	if (m_client == nullptr && m_legacy_client == nullptr) {
+		LogDebug("No client to send account update to loginserver");
+		return;
+	}
+
 	auto *ls_account_update = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
 	if (CanUpdate()) {
 		LogInfo(
