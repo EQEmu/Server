@@ -170,6 +170,11 @@ bool Lua_Client::AddExtraClass(int class_id) {
 	return self->AddExtraClass(class_id);
 }
 
+bool Lua_Client::RemoveExtraClass(int class_id) {
+	Lua_Safe_Call_Bool();
+	return self->RemoveExtraClass(class_id);
+}
+
 uint32 Lua_Client::GetDeityBitmask() {
 	Lua_Safe_Call_Int();
 	return Deity::GetBitmask(GetDeity());
@@ -3714,6 +3719,7 @@ luabind::scope lua_register_client() {
 	.def("HasClassID", (bool(Lua_Client::*)(int))&Lua_Client::HasClassID)
 	.def("GetClassesBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetClassesBitmask)
 	.def("AddExtraClass", (bool(Lua_Client::*)(int))&Lua_Client::AddExtraClass)
+	.def("RemoveExtraClass", (bool(Lua_Client::*)(int))&Lua_Client::RemoveExtraClass)
 	.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
 	.def("GetClientVersion", (int(Lua_Client::*)(void))&Lua_Client::GetClientVersion)
 	.def("GetClientVersionBit", (uint32(Lua_Client::*)(void))&Lua_Client::GetClientVersionBit)

@@ -2133,6 +2133,11 @@ bool Perl_Client_AddExtraClass(Client* self, int class_id)
 	return self->AddExtraClass(class_id);
 }
 
+bool Perl_Client_RemoveExtraClass(Client* self, int class_id)
+{
+	return self->RemoveExtraClass(class_id);
+}
+
 uint32_t Perl_Client_GetDeityBitmask(Client* self)
 {
 	return Deity::GetBitmask(self->GetDeity());
@@ -3515,6 +3520,7 @@ void perl_register_client()
 	package.add("HasClass", (bool(*)(Client*, std::string))&Perl_Client_HasClass);
 	package.add("GetClassesBitmask", &Perl_Client_GetClassesBitmask);
 	package.add("AddExtraClass", (bool(*)(Client*, int))&Perl_Client_AddExtraClass);
+	package.add("RemoveExtraClass", (bool(*)(Client*, int))&Perl_Client_RemoveExtraClass);
 	package.add("GetClientMaxLevel", &Perl_Client_GetClientMaxLevel);
 	package.add("GetClientVersion", &Perl_Client_GetClientVersion);
 	package.add("GetClientVersionBit", &Perl_Client_GetClientVersionBit);

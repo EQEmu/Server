@@ -61,6 +61,7 @@ public:
 	bool HasClassID(int class_id);
 	int GetClassesBitmask();
 	bool AddExtraClass(int class_id);
+	bool RemoveExtraClass(int class_id);
 	uint32 GetDeityBitmask();
 	uint16 GetRaceBitmask();
 	int GetBaseFace();

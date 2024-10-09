@@ -12891,6 +12891,56 @@ bool Client::AddExtraClass(int class_id) {
 	return false;
 }
 
+bool Client::RemoveExtraClass(int class_id) {
+	if (!(RuleB(Custom, MulticlassingEnabled) && class_id >= Class::Warrior && class_id <= Class::Berserker)) {
+		LogDebug("Invalid usage of RemoveExtraClass");
+		return false;
+	}
+
+	if (!(GetClassesBits() & GetPlayerClassBit(class_id))) {
+		LogDebug("Attempted to removed class_id [{}] from player [{}], but they don't have that class to remove", class_id, GetCleanName());
+		return false;
+	}
+
+	m_pp.classes = m_pp.classes & ~GetPlayerClassBit(class_id);
+
+	for (int skill_id = EQ::skills::Skill1HBlunt; skill_id < EQ::skills::SkillCount; skill_id++) {
+		if (!CanHaveSkill(static_cast<EQ::skills::SkillType>(skill_id))) {
+			SetSkill(static_cast<EQ::skills::SkillType>(skill_id), 0);
+		}
+	}
+
+	auto scribed_spells = GetScribedSpells();
+	for (auto spell_id : scribed_spells) {
+		if (IsValidSpell(spell_id) && GetSpellLevelForCaster(spell_id) > GetLevel()) {
+			UnscribeSpellBySpellID(spell_id, true);
+		}
+	}
+
+	auto scribed_disc = GetLearnedDisciplines();
+	for (auto disc_id : scribed_disc) {
+		if (IsValidSpell(disc_id) && GetSpellLevelForCaster(disc_id) > GetLevel()) {
+			UntrainDiscBySpellID(disc_id, true);
+		}
+	}
+
+	// Might need to manually remove AA here. This might just work elegantly where the AA go 'inactive' and come back if you get this class back.
+
+	SetBucket("GestaltClasses", std::to_string(m_pp.classes));
+	CalcBonuses();
+	SendBulkStatsUpdate();
+
+	ServerPacket *pack = new ServerPacket(ServerOP_ReloadAAData, 0);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+
+	SendAlternateAdvancementTable();
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+
+	return true;
+}
+
 uint16 Client::GetSkill(EQ::skills::SkillType skill_id) const
 {
 	if (skill_id <= EQ::skills::HIGHEST_SKILL) {

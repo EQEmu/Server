@@ -528,6 +528,7 @@ public:
 
 	uint32 GetClassesBits() const;
 	bool   AddExtraClass(int class_id);
+	bool   RemoveExtraClass(int class_id);
 
 	// guild pool regen shit. Sends a SpawnAppearance with a value that regens to value * 0.001
 	void EnableAreaHPRegen(int value);
