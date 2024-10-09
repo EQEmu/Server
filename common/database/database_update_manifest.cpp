@@ -5747,6 +5747,18 @@ ALTER TABLE `inventory`
 ALTER TABLE `inventory_snapshots`
 	ADD COLUMN `guid` BIGINT UNSIGNED NULL DEFAULT '0' AFTER `ornament_hero_model`;
 )"
+	},
+	ManifestEntry{
+		.version = 9284,
+		.description = "2024_10_08_character_exp_modifiers_default.sql",
+		.check = "SHOW CREATE TABLE `character_exp_modifiers`",
+		.condition = "contains",
+		.match = "`exp_modifier` float NOT NULL,",
+		.sql = R"(
+ALTER TABLE `character_exp_modifiers`
+MODIFY COLUMN `aa_modifier` float NOT NULL DEFAULT 1.0 AFTER `instance_version`,
+MODIFY COLUMN `exp_modifier` float NOT NULL DEFAULT 1.0 AFTER `aa_modifier`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
