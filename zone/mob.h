@@ -1163,7 +1163,7 @@ public:
 	inline bool IsSilenced() const { return silenced; }
 	inline bool IsAmnesiad() const { return amnesiad; }
 
-	int64 ReduceDamage(int64 damage);
+	int64 ReduceDamage(int64 damage, bool from_damage_shield = false);
 	int64 AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
 	int64 ReduceAllDamage(int64 damage);
 

@@ -3804,7 +3804,7 @@ int Mob::GetHandToHandDelay(void)
 	return 35;
 }
 
-int64 Mob::ReduceDamage(int64 damage)
+int64 Mob::ReduceDamage(int64 damage, bool from_damage_shield)
 {
 	if (damage <= 0)
 		return damage;
@@ -3815,7 +3815,7 @@ int64 Mob::ReduceDamage(int64 damage)
 	if (spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_EXISTS]) {
 		slot = spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_BUFFSLOT];
 		if (slot >= 0) {
-			if (--buffs[slot].hit_number == 0 && !IsBardSong(buffs[slot].spellid)) {
+			if ((from_damage_shield || --buffs[slot].hit_number == 0) && !IsBardSong(buffs[slot].spellid)) {
 
 				if (!TryFadeEffect(slot))
 					BuffFadeBySlot(slot, true);
@@ -4389,7 +4389,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				CommonBreakInvisible();
 			}
 
-			damage = ReduceDamage(damage);
+			damage = ReduceDamage(damage, FromDamageShield); // second argument is hackish check for being from a DS
 			LogCombat("Melee Damage reduced to [{}]", damage);
 			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
