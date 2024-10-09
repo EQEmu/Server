@@ -636,7 +636,7 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
 
 	switch (spell_id) {
 		// Enchanter Pets
-		case 285: case 681: case 295: case 682: case 683: case 684: case 685: case 686:
+		case 285: case 681: case 295: case 680: case 682: case 683: case 684: case 685: case 686:
 		case 687: case 688: case 689: case 670: case 1723: case 3034: case 5505: case 10586:
 			tmp_lastname = fmt::format("{}'s Animation", owner->GetCleanName());
 			tmp_name 	 = (static_name == nullptr) ? spells[spell_id].name : static_name;
