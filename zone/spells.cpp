@@ -4984,6 +4984,23 @@ void Mob::BuffFadeByEffect(int effect_id, int slot_to_skip)
 	}
 }
 
+void Mob::BuffFadeSongs() {
+	bool recalc_bonus = false;
+	int  buff_count   = GetMaxTotalSlots();
+
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		const uint16 current_spell_id = buffs[buff_slot].spellid;
+		if (IsBardSong(current_spell_id)) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
 bool Mob::IsAffectedByBuffByGlobalGroup(GlobalGroup group)
 {
 	int buff_count = GetMaxTotalSlots();

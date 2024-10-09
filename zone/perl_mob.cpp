@@ -3543,6 +3543,31 @@ void Perl_Mob_MassGroupBuff(Mob* self, Mob* center, uint16 spell_id, bool affect
 	entity_list.MassGroupBuff(self, center, spell_id, affect_caster);
 }
 
+void Perl_Mob_BuffFadeBeneficial(Mob* self)
+{
+	self->BuffFadeBeneficial();
+}
+
+void Perl_Mob_BuffFadeDetrimental(Mob* self)
+{
+	self->BuffFadeDetrimental();
+}
+
+void Perl_Mob_BuffFadeDetrimentalByCaster(Mob* self, Mob* caster)
+{
+	self->BuffFadeDetrimentalByCaster(caster);
+}
+
+void Perl_Mob_BuffFadeNonPersistDeath(Mob* self)
+{
+	self->BuffFadeNonPersistDeath();
+}
+
+void Perl_Mob_BuffFadeSongs(Mob* self)
+{
+	self->BuffFadeSongs();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3578,11 +3603,16 @@ void perl_register_mob()
 	package.add("BuffCount", (uint32(*)(Mob*, bool))&Perl_Mob_BuffCount);
 	package.add("BuffCount", (uint32(*)(Mob*, bool, bool))&Perl_Mob_BuffCount);
 	package.add("BuffFadeAll", &Perl_Mob_BuffFadeAll);
+	package.add("BuffFadeBeneficial", &Perl_Mob_BuffFadeBeneficial);
 	package.add("BuffFadeByEffect", (void(*)(Mob*, int))&Perl_Mob_BuffFadeByEffect);
 	package.add("BuffFadeByEffect", (void(*)(Mob*, int, int))&Perl_Mob_BuffFadeByEffect);
 	package.add("BuffFadeBySlot", (void(*)(Mob*, int))&Perl_Mob_BuffFadeBySlot);
 	package.add("BuffFadeBySlot", (void(*)(Mob*, int, bool))&Perl_Mob_BuffFadeBySlot);
 	package.add("BuffFadeBySpellID", &Perl_Mob_BuffFadeBySpellID);
+	package.add("BuffFadeDetrimental", &Perl_Mob_BuffFadeDetrimental);
+	package.add("BuffFadeDetrimentalByCaster", &Perl_Mob_BuffFadeDetrimentalByCaster);
+	package.add("BuffFadeNonPersistDeath", &Perl_Mob_BuffFadeNonPersistDeath);
+	package.add("BuffFadeSongs", &Perl_Mob_BuffFadeSongs);
 	package.add("CalculateDistance", (float(*)(Mob*, float, float, float))&Perl_Mob_CalculateDistance);
 	package.add("CalculateDistance", (float(*)(Mob*, Mob*))&Perl_Mob_CalculateDistance);
 	package.add("CalculateHeadingToTarget", &Perl_Mob_CalculateHeadingToTarget);

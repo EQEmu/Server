@@ -605,6 +605,11 @@ public:
 	void AreaSpell(Lua_Mob center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int max_targets);
 	void MassGroupBuff(Lua_Mob center, uint16 spell_id);
 	void MassGroupBuff(Lua_Mob center, uint16 spell_id, bool affect_caster);
+	void BuffFadeBeneficial();
+	void BuffFadeDetrimental();
+	void BuffFadeDetrimentalByCaster(Lua_Mob caster);
+	void BuffFadeNonPersistDeath();
+	void BuffFadeSongs();
 };
 
 #endif

@@ -3446,6 +3446,36 @@ void Lua_Mob::MassGroupBuff(Lua_Mob center, uint16 spell_id, bool affect_caster)
 	entity_list.MassGroupBuff(self, center, spell_id, affect_caster);
 }
 
+void Lua_Mob::BuffFadeBeneficial()
+{
+	Lua_Safe_Call_Void();
+	self->BuffFadeBeneficial();
+}
+
+void Lua_Mob::BuffFadeDetrimental()
+{
+	Lua_Safe_Call_Void();
+	self->BuffFadeDetrimental();
+}
+
+void Lua_Mob::BuffFadeDetrimentalByCaster(Lua_Mob caster)
+{
+	Lua_Safe_Call_Void();
+	self->BuffFadeDetrimentalByCaster(caster);
+}
+
+void Lua_Mob::BuffFadeNonPersistDeath()
+{
+	Lua_Safe_Call_Void();
+	self->BuffFadeNonPersistDeath();
+}
+
+void Lua_Mob::BuffFadeSongs()
+{
+	Lua_Safe_Call_Void();
+	self->BuffFadeSongs();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3483,11 +3513,16 @@ luabind::scope lua_register_mob() {
 	.def("BuffCount", (uint32(Lua_Mob::*)(bool))&Lua_Mob::BuffCount)
 	.def("BuffCount", (uint32(Lua_Mob::*)(bool,bool))&Lua_Mob::BuffCount)
 	.def("BuffFadeAll", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeAll)
+	.def("BuffFadeBeneficial", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeBeneficial)
 	.def("BuffFadeByEffect", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeByEffect)
 	.def("BuffFadeByEffect", (void(Lua_Mob::*)(int,int))&Lua_Mob::BuffFadeByEffect)
 	.def("BuffFadeBySlot", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySlot)
 	.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
 	.def("BuffFadeBySpellID", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySpellID)
+	.def("BuffFadeDetrimental", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeDetrimental)
+	.def("BuffFadeDetrimentalByCaster", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::BuffFadeDetrimentalByCaster)
+	.def("BuffFadeNonPersistDeath", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeNonPersistDeath)
+	.def("BuffFadeSongs", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeSongs)
 	.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
 	.def("CalculateDistance", (float(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CalculateDistance)
 	.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
