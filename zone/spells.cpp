@@ -2712,48 +2712,43 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 					break;
 			}
 
-			if(spell_target == nullptr) {
-				LogSpells("Spell [{}]: Targeted spell, but we have no target", spell_id);
-				return(false);
-			}
-			if (isproc) {
-				SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, true, level_override);
+			if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
+				for (const auto& pet : CastToClient()->GetAllPets()) {
+					SetEntityVariable("SympProcTargetOverride", std::to_string(pet->GetID()));
+					LogDebug("Adding Extra Pet Target: [{}]", pet->GetCleanName());
+					LogDebug("Setting Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
+					SpellOnTarget(spell_id, pet, -1, true, resist_adjust, true, level_override);
+					TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+					DeleteEntityVariable("SympProcTargetOverride");
+				}
 			} else {
-
-				if (spells[spell_id].target_type == ST_TargetOptional){
-					if (!TrySpellProjectile(spell_target, spell_id))
-						return false;
+				if(spell_target == nullptr) {
+					LogSpells("Spell [{}]: Targeted spell, but we have no target", spell_id);
+					return(false);
 				}
 
-				else if(!SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, false, level_override)) {
-					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
-						return false;
+				if (isproc) {
+					SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, true, level_override);
+				} else {
+					if (spells[spell_id].target_type == ST_TargetOptional){
+						if (!TrySpellProjectile(spell_target, spell_id))
+							return false;
 					}
-				}
-				/*
-				else {
-					if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
-						if (spell_target == GetPet()) {
-							for (const auto& ent : entity_list.GetNPCList()) {
-								NPC* mob = ent.second;
-								if (mob->GetSwarmOwner() == GetID()) {
-									SpellOnTarget(spell_id, mob, 0, true, resist_adjust, false, level_override);
-								}
-							}
+
+					else if(!SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, false, level_override)) {
+						if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
+							return false;
 						}
 					}
 				}
-				*/
-			}
 
-			if(IsIllusionSpell(spell_id)
-			&& IsClient()
-			&& (HasProjectIllusion())){
-				LogAA("Effect Project Illusion for [{}] on spell id: [{}] was ON", GetName(), spell_id);
-				SetProjectIllusion(false);
-			}
-			else{
-				LogAA("Effect Project Illusion for [{}] on spell id: [{}] was OFF", GetName(), spell_id);
+				if (IsIllusionSpell(spell_id) && IsClient() && (HasProjectIllusion())) {
+					LogAA("Effect Project Illusion for [{}] on spell id: [{}] was ON", GetName(), spell_id);
+					SetProjectIllusion(false);
+				}
+				else{
+					LogAA("Effect Project Illusion for [{}] on spell id: [{}] was OFF", GetName(), spell_id);
+				}
 			}
 			break;
 		}
@@ -4929,23 +4924,6 @@ bool Mob::SpellOnTarget(
 
 	if (spelltar->IsClient()) {
 		spelltar->CastToClient()->SendBulkStatsUpdate();
-	}
-
-	if (IsClient() && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) && reflect_effectiveness >= 0) {
-		if (IsSummonPetSpell(spell_id) || IsGroupSpell(spell_id)) {
-			return true;
-		}
-
-		for (const auto& pet : CastToClient()->GetAllPets()) {
-			if (pet->GetID() != spelltar->GetID()) {
-				SetEntityVariable("SympProcTargetOverride", std::to_string(pet->GetID()));
-				LogDebug("Adding Extra Pet Target: [{}]", pet->GetCleanName());
-				LogDebug("Setting Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
-				SpellOnTarget(spell_id, pet, -1, true, resist_adjust, true, level_override);
-				TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
-				DeleteEntityVariable("SympProcTargetOverride");
-			}
-		}
 	}
 
 	return true;
