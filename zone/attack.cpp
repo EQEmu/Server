@@ -3815,10 +3815,12 @@ int64 Mob::ReduceDamage(int64 damage, bool from_damage_shield)
 	if (spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_EXISTS]) {
 		slot = spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_BUFFSLOT];
 		if (slot >= 0) {
-			if ((from_damage_shield || --buffs[slot].hit_number == 0) && !IsBardSong(buffs[slot].spellid)) {
+			if (!from_damage_shield) {
+				if (--buffs[slot].hit_number == 0 && !IsBardSong(buffs[slot].spellid)) {
 
-				if (!TryFadeEffect(slot))
-					BuffFadeBySlot(slot, true);
+					if (!TryFadeEffect(slot))
+						BuffFadeBySlot(slot, true);
+				}
 			}
 
 			if (spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] && (damage > spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT]))
