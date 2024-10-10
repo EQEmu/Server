@@ -1548,3 +1548,155 @@ void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings*
 
 	LogInfo("Loaded [{}] Perl Event Export Settings", l.size());
 }
+
+int QuestParserCollection::EventBotMerc(
+	QuestEventID event_id,
+	Mob* e,
+	std::function<std::string()> lazy_data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (e->IsBot() && BotHasQuestSub(event_id)) {
+		return EventBot(event_id, e->CastToBot(), nullptr, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
+		return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
+	}
+
+	return false;  // No quest subscription found
+}
+
+int QuestParserCollection::EventBotMerc(
+	QuestEventID event_id,
+	Mob* e,
+	Mob* init,
+	std::function<std::string()> lazy_data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (e->IsBot() && BotHasQuestSub(event_id)) {
+		return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
+		return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
+	}
+
+	return false; // No quest subscription found
+}
+
+int QuestParserCollection::EventNPCMerc(
+	QuestEventID event_id,
+	Mob* e,
+	std::function<std::string()> lazy_data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (e->IsMerc() && MercHasQuestSub(event_id)) {
+		return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
+		return EventNPC(event_id, e->CastToNPC(), nullptr, lazy_data(), extra_data, extra_pointers);
+	}
+
+	return false;  // No quest subscription found
+}
+
+int QuestParserCollection::EventNPCMerc(
+	QuestEventID event_id,
+	Mob* e,
+	Mob* init,
+	std::function<std::string()> lazy_data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (e->IsMerc() && MercHasQuestSub(event_id)) {
+		return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
+		return EventNPC(event_id, e->CastToNPC(), init, lazy_data(), extra_data, extra_pointers);
+	}
+
+	return false; // No quest subscription found
+}
+
+int QuestParserCollection::EventNPCBotMerc(
+	QuestEventID event_id,
+	Mob* e,
+	std::function<std::string()> lazy_data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (e->IsBot() && BotHasQuestSub(event_id)) {
+		return EventBot(event_id, e->CastToBot(), nullptr, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
+		return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
+		return EventNPC(event_id, e->CastToNPC(), nullptr, lazy_data(), extra_data, extra_pointers);
+	}
+
+	return false;  // No quest subscription found
+}
+
+int QuestParserCollection::EventNPCBotMerc(
+	QuestEventID event_id,
+	Mob* e,
+	Mob* init,
+	std::function<std::string()> lazy_data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (e->IsBot() && BotHasQuestSub(event_id)) {
+		return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
+		return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
+		return EventNPC(event_id, e->CastToNPC(), init, lazy_data(), extra_data, extra_pointers);
+	}
+
+	return false; // No quest subscription found
+}
+
+int QuestParserCollection::EventMob(
+	QuestEventID event_id,
+	Mob* e,
+	std::function<std::string()> lazy_data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (e->IsClient() && PlayerHasQuestSub(event_id)) {
+		return EventPlayer(event_id, e->CastToClient(), lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsBot() && BotHasQuestSub(event_id)) {
+		return EventBot(event_id, e->CastToBot(), nullptr, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
+		return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
+		return EventNPC(event_id, e->CastToNPC(), nullptr, lazy_data(), extra_data, extra_pointers);
+	}
+
+	return false;  // No quest subscription found
+}
+
+int QuestParserCollection::EventMob(
+	QuestEventID event_id,
+	Mob* e,
+	Mob* init,
+	std::function<std::string()> lazy_data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (e->IsClient() && PlayerHasQuestSub(event_id)) {
+		return EventPlayer(event_id, e->CastToClient(), lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsBot() && BotHasQuestSub(event_id)) {
+		return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
+		return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
+	} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
+		return EventNPC(event_id, e->CastToNPC(), init, lazy_data(), extra_data, extra_pointers);
+	}
+
+	return false; // No quest subscription found
+}

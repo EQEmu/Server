@@ -256,7 +256,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	Mob* spell_target = entity_list.GetMobID(target_id);
 	std::vector<std::any> args = { spell_target };
-	int return_value = parse->EventPlayerNPCBotMerc(
+	int return_value = parse->EventMob(
 		EVENT_CAST_BEGIN,
 		this,
 		[&]() {
@@ -272,16 +272,14 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		&args
 	);
 
-	if (IsClient()) {
-		if (return_value != 0) {
-			if (IsDiscipline(spell_id)) {
-				CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, 0);
-			} else {
-				CastToClient()->SendSpellBarEnable(spell_id);
-			}
-
-			return false;
+	if (IsClient() && return_value != 0) {
+		if (IsDiscipline(spell_id)) {
+			CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, 0);
+		} else {
+			CastToClient()->SendSpellBarEnable(spell_id);
 		}
+
+		return false;
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
@@ -1802,7 +1800,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	std::vector<std::any> args = { spell_target };
 
-	parse->EventPlayerNPCBotMerc(
+	parse->EventMob(
 		EVENT_CAST,
 		this,
 		[&]() {
@@ -3576,30 +3574,17 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 						);
 					}
 
-					parse->EventPlayerNPCBotMerc(
-						EVENT_SPELL_BLOCKED,
-						caster,
-						this,
-						[&]() {
-							return fmt::format(
-								"{} {}",
-								curbuf.spellid,
-								spell_id
-							);
-						}
-					);
+					std::function<std::string()> f = [&]() {
+						return fmt::format(
+							"{} {}",
+							curbuf.spellid,
+							spell_id
+						);
+					};
 
-					parse->EventPlayerNPCBotMerc(
-						EVENT_SPELL_BLOCKED,
-						this,
-						[&]() {
-							return fmt::format(
-								"{} {}",
-								curbuf.spellid,
-								spell_id
-							);
-						}
-					);
+					parse->EventMob(EVENT_SPELL_BLOCKED, caster, this, f);
+
+					parse->EventMob(EVENT_SPELL_BLOCKED, this, caster, f);
 				}
 
 				return -1;
@@ -3974,7 +3959,7 @@ bool Mob::SpellOnTarget(
 
 	std::vector<std::any> args = { spelltar };
 
-	parse->EventPlayerNPCBotMerc(
+	parse->EventMob(
 		EVENT_CAST_ON,
 		spelltar,
 		this,

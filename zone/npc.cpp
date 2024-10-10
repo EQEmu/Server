@@ -835,6 +835,10 @@ void NPC::Depop(bool start_spawn_timer) {
 
 	parse->EventNPCBotMerc(EVENT_DESPAWN, this);
 
+	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
+		DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
+	}
+
 	p_depop = true;
 	if (respawn2) {
 		if (start_spawn_timer) {

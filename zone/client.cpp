@@ -1258,15 +1258,13 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				parse->EventNPCBotMerc(EVENT_SAY, t, this, [&]() { return message; }, language);
 			}
 
-			if (t->IsNPC()) {
-				if (!is_engaged) {
-					CheckLDoNHail(t->CastToNPC());
-					CheckEmoteHail(t->CastToNPC(), message);
+			if (t->IsNPC() && !is_engaged) {
+				CheckLDoNHail(t->CastToNPC());
+				CheckEmoteHail(t->CastToNPC(), message);
 
-					if (RuleB(TaskSystem, EnableTaskSystem)) {
-						if (UpdateTasksOnSpeakWith(t->CastToNPC())) {
-							t->CastToNPC()->DoQuestPause(this);
-						}
+				if (RuleB(TaskSystem, EnableTaskSystem)) {
+					if (UpdateTasksOnSpeakWith(t->CastToNPC())) {
+						t->CastToNPC()->DoQuestPause(this);
 					}
 				}
 			}

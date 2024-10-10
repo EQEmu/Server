@@ -142,16 +142,7 @@ public:
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	)
-	{
-		if (e->IsBot() && BotHasQuestSub(event_id)) {
-			return EventBot(event_id, e->CastToBot(), nullptr, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false;  // No quest subscription found
-	}
+	);
 
 	int EventBotMerc(
 		QuestEventID event_id,
@@ -160,16 +151,7 @@ public:
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	)
-	{
-		if (e->IsBot() && BotHasQuestSub(event_id)) {
-			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false; // No quest subscription found
-	}
+	);
 
 	int EventNPCMerc(
 		QuestEventID event_id,
@@ -177,16 +159,7 @@ public:
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	)
-	{
-		if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
-			return EventNPC(event_id, e->CastToNPC(), nullptr, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false;  // No quest subscription found
-	}
+	);
 
 	int EventNPCMerc(
 		QuestEventID event_id,
@@ -195,16 +168,7 @@ public:
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	)
-	{
-		if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
-			return EventNPC(event_id, e->CastToNPC(), init, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false; // No quest subscription found
-	}
+	);
 
 	int EventNPCBotMerc(
 		QuestEventID event_id,
@@ -212,18 +176,7 @@ public:
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	)
-	{
-		if (e->IsBot() && BotHasQuestSub(event_id)) {
-			return EventBot(event_id, e->CastToBot(), nullptr, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
-			return EventNPC(event_id, e->CastToNPC(), nullptr, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false;  // No quest subscription found
-	}
+	);
 
 	int EventNPCBotMerc(
 		QuestEventID event_id,
@@ -232,61 +185,24 @@ public:
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	)
-	{
-		if (e->IsBot() && BotHasQuestSub(event_id)) {
-			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
-			return EventNPC(event_id, e->CastToNPC(), init, lazy_data(), extra_data, extra_pointers);
-		}
+	);
 
-		return false; // No quest subscription found
-	}
-
-	int EventPlayerNPCBotMerc(
+	int EventMob(
 		QuestEventID event_id,
 		Mob* e,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	)
-	{
-		if (e->IsClient() && PlayerHasQuestSub(event_id)) {
-			return EventPlayer(event_id, e->CastToClient(), lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsBot() && BotHasQuestSub(event_id)) {
-			return EventBot(event_id, e->CastToBot(), nullptr, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), nullptr, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
-			return EventNPC(event_id, e->CastToNPC(), nullptr, lazy_data(), extra_data, extra_pointers);
-		}
+	);
 
-		return false;  // No quest subscription found
-	}
-
-	int EventPlayerNPCBotMerc(
+	int EventMob(
 		QuestEventID event_id,
 		Mob* e,
 		Mob* init,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
-	)
-	{
-		if (e->IsClient() && PlayerHasQuestSub(event_id)) {
-			return EventPlayer(event_id, e->CastToClient(), lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsBot() && BotHasQuestSub(event_id)) {
-			return EventBot(event_id, e->CastToBot(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsMerc() && MercHasQuestSub(event_id)) {
-			return EventMerc(event_id, e->CastToMerc(), init, lazy_data(), extra_data, extra_pointers);
-		} else if (e->IsNPC() && HasQuestSub(e->GetNPCTypeID(), event_id)) {
-			return EventNPC(event_id, e->CastToNPC(), init, lazy_data(), extra_data, extra_pointers);
-		}
-
-		return false; // No quest subscription found
-	}
+	);
 
 	void GetErrors(std::list<std::string> &quest_errors);
 

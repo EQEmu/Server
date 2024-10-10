@@ -3075,11 +3075,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-	std::vector<std::any> args;
-
-	if (!IsMerc() && IsNPC()) {
-		args = { corpse };
-	}
+	std::vector<std::any> args = { corpse };
 
 	parse->EventNPCMerc(
 		EVENT_DEATH_COMPLETE,
@@ -4261,44 +4257,47 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//final damage has been determined.
 		int old_hp_ratio = (int)GetHPRatio();
 
-		std::vector<std::any> args;
 
-		if (IsClient()) {
-			args = { attacker ? attacker : nullptr };
-		}
+		std::vector<std::any> args;
 
 		int64 damage_override = 0;
 
-		parse->EventPlayerNPCBotMerc(
-			EVENT_DAMAGE_GIVEN,
-			attacker,
-			this,
-			[&]() {
-				return fmt::format(
-					"{} {} {} {} {} {} {} {} {}",
-					GetID(),
-					damage,
-					spell_id,
-					static_cast<int>(skill_used),
-					FromDamageShield ? 1 : 0,
-					avoidable ? 1 : 0,
-					buffslot,
-					iBuffTic ? 1 : 0,
-					static_cast<int>(special)
-				);
-			},
-			0,
-			&args
-		);
+		if (attacker) {
+			args = { this };
 
-		damage_override = parse->EventPlayerNPCBotMerc(
+			parse->EventMob(
+				EVENT_DAMAGE_GIVEN,
+				attacker,
+				this,
+				[&]() {
+					return fmt::format(
+						"{} {} {} {} {} {} {} {} {}",
+						GetID(),
+						damage,
+						spell_id,
+						static_cast<int>(skill_used),
+						FromDamageShield ? 1 : 0,
+						avoidable ? 1 : 0,
+						buffslot,
+						iBuffTic ? 1 : 0,
+						static_cast<int>(special)
+					);
+				},
+				0,
+				&args
+			);
+		}
+
+		args = { attacker };
+
+		damage_override = parse->EventMob(
 			EVENT_DAMAGE_TAKEN,
-			attacker,
 			this,
+			attacker,
 			[&]() {
 				return fmt::format(
 					"{} {} {} {} {} {} {} {} {}",
-					GetID(),
+					attacker->GetID(),
 					damage,
 					spell_id,
 					static_cast<int>(skill_used),

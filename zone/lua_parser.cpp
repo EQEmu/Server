@@ -216,7 +216,6 @@ LuaParser::LuaParser() {
 		SpellArgumentDispatch[i]     = handle_spell_null;
 		EncounterArgumentDispatch[i] = handle_encounter_null;
 		BotArgumentDispatch[i]       = handle_bot_null;
-		MercArgumentDispatch[i]      = handle_merc_null;
 	}
 
 	NPCArgumentDispatch[EVENT_SAY]                    = handle_npc_event_say;
@@ -405,31 +404,6 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_bot_spell_blocked;
-
-	MercArgumentDispatch[EVENT_CAST]                   = handle_merc_cast;
-	MercArgumentDispatch[EVENT_CAST_BEGIN]             = handle_merc_cast;
-	MercArgumentDispatch[EVENT_CAST_ON]                = handle_merc_cast;
-	MercArgumentDispatch[EVENT_COMBAT]                 = handle_merc_combat;
-	MercArgumentDispatch[EVENT_DAMAGE_GIVEN]           = handle_merc_damage;
-	MercArgumentDispatch[EVENT_DAMAGE_TAKEN]           = handle_merc_damage;
-	MercArgumentDispatch[EVENT_DEATH]                  = handle_merc_death;
-	MercArgumentDispatch[EVENT_DEATH_COMPLETE]         = handle_merc_death;
-	MercArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE] = handle_merc_entity_variable;
-	MercArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_merc_entity_variable;
-	MercArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_merc_entity_variable;
-	MercArgumentDispatch[EVENT_PAYLOAD]                = handle_merc_payload;
-	MercArgumentDispatch[EVENT_POPUP_RESPONSE]         = handle_merc_popup_response;
-	MercArgumentDispatch[EVENT_SAY]                    = handle_merc_say;
-	MercArgumentDispatch[EVENT_SIGNAL]                 = handle_merc_signal;
-	MercArgumentDispatch[EVENT_SLAY]                   = handle_merc_slay;
-	MercArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_merc_spell_blocked;
-	MercArgumentDispatch[EVENT_TARGET_CHANGE]          = handle_merc_target_change;
-	MercArgumentDispatch[EVENT_TIMER]                  = handle_merc_timer;
-	MercArgumentDispatch[EVENT_TIMER_PAUSE]            = handle_merc_timer_pause_resume_start;
-	MercArgumentDispatch[EVENT_TIMER_RESUME]           = handle_merc_timer_pause_resume_start;
-	MercArgumentDispatch[EVENT_TIMER_START]            = handle_merc_timer_pause_resume_start;
-	MercArgumentDispatch[EVENT_TIMER_STOP]             = handle_merc_timer_stop;
-	MercArgumentDispatch[EVENT_USE_SKILL]              = handle_merc_use_skill;
 #endif
 
 	L = nullptr;
@@ -1941,7 +1915,7 @@ int LuaParser::_EventMerc(
 		l_merc_o.push(L);
 		lua_setfield(L, -2, "self");
 
-		auto arg_function = MercArgumentDispatch[evt];
+		auto arg_function = NPCArgumentDispatch[evt];
 		arg_function(this, L, merc, init, data, extra_data, extra_pointers);
 		auto* c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 

@@ -1055,23 +1055,21 @@ int PerlembParser::SendCommands(
 			sv_setsv(client, _empty_sv);
 		}
 
-		if (!other->IsClient()) {
-			if (other->IsBot()) {
-				Bot* b = quest_manager.GetBot();
-				buf = fmt::format("{}::bot", prefix);
-				SV* bot = get_sv(buf.c_str(), true);
-				sv_setref_pv(bot, "Bot", b);
-			} else if (other->IsMerc()) {
-				Merc* m = quest_manager.GetMerc();
-				buf = fmt::format("{}::merc", prefix);
-				SV* merc = get_sv(buf.c_str(), true);
-				sv_setref_pv(merc, "Merc", m);
-			} else if (other->IsNPC()) {
-				NPC* n = quest_manager.GetNPC();
-				buf = fmt::format("{}::npc", prefix);
-				SV* npc = get_sv(buf.c_str(), true);
-				sv_setref_pv(npc, "NPC", n);
-			}
+		if (other->IsBot()) {
+			Bot* b = quest_manager.GetBot();
+			buf = fmt::format("{}::bot", prefix);
+			SV* bot = get_sv(buf.c_str(), true);
+			sv_setref_pv(bot, "Bot", b);
+		} else if (other->IsMerc()) {
+			Merc* m = quest_manager.GetMerc();
+			buf = fmt::format("{}::merc", prefix);
+			SV* merc = get_sv(buf.c_str(), true);
+			sv_setref_pv(merc, "Merc", m);
+		} else if (other->IsNPC()) {
+			NPC* n = quest_manager.GetNPC();
+			buf = fmt::format("{}::npc", prefix);
+			SV* npc = get_sv(buf.c_str(), true);
+			sv_setref_pv(npc, "NPC", n);
 		}
 
 		//only export QuestItem if it's an inst quest
@@ -2098,11 +2096,6 @@ void PerlembParser::ExportEventVariables(
 						ExportVar(package_name.c_str(), "killed_h", corpse->GetHeading());
 					}
 				}
-			} else {
-				ExportVar(package_name.c_str(), "killed_x", npc_mob->GetX());
-				ExportVar(package_name.c_str(), "killed_y", npc_mob->GetY());
-				ExportVar(package_name.c_str(), "killed_z", npc_mob->GetZ());
-				ExportVar(package_name.c_str(), "killed_h", npc_mob->GetHeading());
 			}
 
 			// EVENT_DEATH_ZONE only

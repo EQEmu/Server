@@ -323,7 +323,6 @@ private:
 	SpellArgumentHandler SpellArgumentDispatch[_LargestEventID];
 	EncounterArgumentHandler EncounterArgumentDispatch[_LargestEventID];
 	BotArgumentHandler BotArgumentDispatch[_LargestEventID];
-	MercArgumentHandler MercArgumentDispatch[_LargestEventID];
 };
 
 #endif
