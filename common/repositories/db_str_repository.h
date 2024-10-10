@@ -106,7 +106,7 @@ public:
 					fmt::format(
 						"SELECT aa_ability.classes FROM aa_ability "
 						"JOIN aa_ranks ON aa_ability.first_rank_id = aa_ranks.id "
-						"WHERE aa_ranks.desc_sid = {}",
+						"WHERE aa_ranks.desc_sid = {} and aa_ranks.level_req <= 70",
 						columns[0] // The title_sid from columns[0]
 					)
 				);
