@@ -12910,6 +12910,13 @@ bool Client::RemoveExtraClass(int class_id) {
 		}
 	}
 
+	auto memorized_spells = GetMemmedSpells();
+	for (auto memmed_id : memorized_spells) {
+		if (IsValidSpell(memmed_id) && GetSpellLevelForCaster(memmed_id) > GetLevel()) {
+			UnmemSpellBySpellID(memmed_id);
+		}
+	}
+
 	auto scribed_spells = GetScribedSpells();
 	for (auto spell_id : scribed_spells) {
 		if (IsValidSpell(spell_id) && GetSpellLevelForCaster(spell_id) > GetLevel()) {
