@@ -31,12 +31,14 @@ Map::~Map() {
 }
 
 float Map::FindBestZ(glm::vec3 &start, glm::vec3 *result) const {
-	if (!imp)
+	if (!imp) {
 		return BEST_Z_INVALID;
+	}
 
 	glm::vec3 tmp;
-	if(!result)
+	if (!result) {
 		result = &tmp;
+	}
 
 	start.z += RuleI(Map, FindBestZHeightAdjust);
 	glm::vec3 from(start.x, start.y, start.z);
@@ -45,16 +47,22 @@ float Map::FindBestZ(glm::vec3 &start, glm::vec3 *result) const {
 	bool hit = false;
 
 	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
-	if(hit) {
+	if (hit && zone->newzone_data.underworld != 0.0f && result->z < zone->newzone_data.underworld) {
+		hit = false;
+	}
+
+	if (hit) {
 		return result->z;
 	}
 
 	// Find nearest Z above us
-
 	to.z = -BEST_Z_INVALID;
 	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
-	if (hit)
-	{
+	if (zone->newzone_data.max_z != 0.0f && result->z > zone->newzone_data.max_z) {
+		hit = false;
+	}
+
+	if (hit) {
 		return result->z;
 	}
 
