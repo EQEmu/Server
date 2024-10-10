@@ -940,7 +940,13 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	/*
 		Requires target to be in same group or same raid in order to apply invisible.
 	*/
-	if (check_on_casting && (spells[spell_id].target_type != ST_Self && GetTarget() != this) && RuleB(Spells, InvisRequiresGroup) && IsInvisibleSpell(spell_id)) {
+	if (
+		check_on_casting &&
+		spells[spell_id].target_type != ST_Self &&
+		GetTarget() != this &&
+		RuleB(Spells, InvisRequiresGroup) &&
+		IsInvisibleSpell(spell_id)
+	) {
 		if (IsClient() && spell_target && spell_target->IsClient()) {
 			if (spell_target && spell_target->GetID() != GetID()) {
 				bool cast_failed = true;
