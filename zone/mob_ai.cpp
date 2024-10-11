@@ -1461,7 +1461,7 @@ void Mob::AI_Process() {
 						}
 
 						// Calculate new x, y positions offset by 5 units
-						float offset_distance = std::max(5.0f, static_cast<float>(total_slots));
+						float offset_distance = std::max(RuleR(Custom, PetPlacementDistance), static_cast<float>(total_slots));
 
 						glm::vec4 target_position;
 						target_position.x = owner_position.x + offset_distance * sin(offset);

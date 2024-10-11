@@ -1066,6 +1066,7 @@ RULE_REAL(Custom, 	ItemExtraSpellAmtMaximumPercentage, 	0.0, 	"Adjust the maximu
 RULE_BOOL(Custom, 	UseTHJRaceMutations, 					false, 	"Enable to load New-Style Models for THJ")
 RULE_INT(Custom,    AbsolutePetLimit, 						1, 	    "Maximum number of permanent pets that a player can control.")
 RULE_REAL(Custom,	PetPlacementAdjustment,					-0.6,  	"Adjust pet formation positioning")
+RULE_REAL(Custom,	PetPlacementDistance ,					7.0,  	"Adjust pet formation positioning")
 RULE_REAL(Custom, 	NonDaggerBackstabMultiplier, 			0.75, 	"Multiple Backstabs conducted with not-1hp by this amount")
 RULE_BOOL(Custom, 	MonkSkillAttacksAreH2HForProcs, 		true, 	"Read the name")
 RULE_BOOL(Custom,   AttuneOnExp,							false,  "Trigger attuneable items on gaining exp instead of on equip")
