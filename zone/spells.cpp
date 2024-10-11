@@ -2964,7 +2964,6 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
 	if (
-		caster == target &&
 		(
 			target->aabonuses.IllusionPersistence ||
 			target->spellbonuses.IllusionPersistence ||
