@@ -583,6 +583,12 @@ bool Client::Process() {
 			BuffProcess();
 			SendBulkStatsUpdate();
 
+
+			// If there are spellcasting bugs, look here first
+			if (!IsCasting()) {
+				SendSpellBarEnable(SPELL_UNKNOWN);
+			}
+
 			if (GetTarget()) {
 				GetTarget()->SendBuffsToClient(this);
 			}

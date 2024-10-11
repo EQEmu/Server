@@ -132,12 +132,7 @@ void Mob::SpellProcess()
 
 		CastedSpellFinished(casting_spell_id, casting_spell_targetid, casting_spell_slot,
 			casting_spell_mana, casting_spell_inventory_slot, casting_spell_resist_adjust);
-
-		if (IsClient() && !IsBardSong(casting_spell_id)) {
-			CastToClient()->SendSpellBarEnable(casting_spell_id);
-		}
 	}
-
 }
 
 void NPC::SpellProcess()
