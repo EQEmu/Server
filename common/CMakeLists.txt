@@ -95,6 +95,7 @@ SET(common_sources
     platform.cpp
     json/json.hpp
     json/jsoncpp.cpp
+    zone_copy.cpp
     zone_store.cpp
     net/console_server.cpp
     net/console_server_connection.cpp
@@ -627,6 +628,7 @@ SET(common_headers
     unix.h
     useperl.h
     version.h
+    zone_copy.h
     zone_store.h
     event/event_loop.h
     event/task.h

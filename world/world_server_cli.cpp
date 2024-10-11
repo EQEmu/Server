@@ -27,6 +27,7 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 	function_map["database:schema"]             = &WorldserverCLI::DatabaseGetSchema;
 	function_map["database:dump"]               = &WorldserverCLI::DatabaseDump;
 	function_map["database:updates"]            = &WorldserverCLI::DatabaseUpdates;
+	function_map["zone:copy"]                   = &WorldserverCLI::ZoneCopyCmd;
 	function_map["test:test"]                   = &WorldserverCLI::TestCommand;
 	function_map["test:colors"]                 = &WorldserverCLI::TestColors;
 	function_map["test:expansion"]              = &WorldserverCLI::ExpansionTestCommand;
@@ -56,3 +57,4 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 #include "cli/test_repository_2.cpp"
 #include "cli/test_string_benchmark.cpp"
 #include "cli/version.cpp"
+#include "cli/zone_copy.cpp"
