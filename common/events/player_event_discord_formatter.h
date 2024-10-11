@@ -160,6 +160,10 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::HandinEvent &e
 	);
+	static std::string FormatNPCTradeEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::NPCTradeEvent &e
+	);
 	static std::string FormatSkillUpEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::SkillUpEvent &e

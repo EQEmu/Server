@@ -15467,6 +15467,10 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 		QueuePacket(outapp);
 		safe_delete(outapp);
 		if (with->IsNPC()) {
+			LogError("In with->IsNPC()");
+			NPCTradeEventLog(trade, with->CastToNPC());
+			LogError("Passed NPCTradeEventLog(trade, with->CastToNPC())");
+
 			// Audit trade to database for player trade stream
 			if (RuleB(QueryServ, PlayerLogHandins)) {
 				QSPlayerLogHandin_Struct event_entry;

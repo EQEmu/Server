@@ -62,6 +62,7 @@ namespace PlayerEvent {
 		PARCEL_RETRIEVE,
 		PARCEL_DELETE,
 		BARTER_TRANSACTION,
+		NPC_TRADE,
 		MAX // dont remove
 	};
 
@@ -124,7 +125,8 @@ namespace PlayerEvent {
 		"Parcel Item Sent",
 		"Parcel Item Retrieved",
 		"Parcel Prune Routine",
-		"Barter Transaction"
+		"Barter Transaction",
+		"NPC Trade"
 	};
 
 	// Generic struct used by all events
@@ -334,6 +336,27 @@ namespace PlayerEvent {
 				CEREAL_NVP(character_2_give_money),
 				CEREAL_NVP(character_1_give_items),
 				CEREAL_NVP(character_2_give_items)
+			);
+		}
+	};
+
+	struct NPCTradeEvent {
+		uint32                      npc_id;
+		std::string                 npc_name;
+		std::string                 npc_clean_name;
+		Money                       money;
+		std::vector<TradeItemEntry> items;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive& ar)
+		{
+			ar(
+				CEREAL_NVP(npc_id),
+				CEREAL_NVP(npc_name),
+				CEREAL_NVP(npc_clean_name),
+				CEREAL_NVP(money),
+				CEREAL_NVP(items)
 			);
 		}
 	};

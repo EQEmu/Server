@@ -847,6 +847,88 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 	return ss.str();
 }
 
+std::string PlayerEventDiscordFormatter::FormatNPCTradeEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::NPCTradeEvent &e
+)
+{
+	std::string items_info;
+
+	if (!e.items.empty()) {
+		for (const auto& i : e.items) {
+			items_info += fmt::format(
+				"{} ({}){} Augments: 1. {} ({}) | 2. {} ({}) | 3. {} ({}) | 4. {} ({}) | 5. {} ({}) | 6. {} ({})\n",
+				i.item_name,
+				i.item_id,
+				i.charges > 1 ? fmt::format(" Charges: {}", i.charges) : "",
+				i.aug_1_item_name,
+				i.aug_1_item_id,
+				i.aug_2_item_name,
+				i.aug_2_item_id,
+				i.aug_3_item_name,
+				i.aug_3_item_id,
+				i.aug_4_item_name,
+				i.aug_4_item_id,
+				i.aug_5_item_name,
+				i.aug_5_item_id,
+				i.aug_6_item_name,
+				i.aug_6_item_id
+			);
+		}
+	}
+
+	std::string money_info;
+
+	if (e.money.platinum) {
+		money_info += fmt::format(
+			":moneybag: {} Platinum\n",
+			Strings::Commify(std::to_string(e.money.platinum))
+		);
+	}
+
+	if (e.money.gold) {
+		money_info += fmt::format(
+			":moneybag: {} Gold\n",
+			Strings::Commify(std::to_string(e.money.gold))
+		);
+	}
+
+	if (e.money.silver) {
+		money_info += fmt::format(
+			":moneybag: {} Silver\n",
+			Strings::Commify(std::to_string(e.money.silver))
+		);
+	}
+
+	if (e.money.copper) {
+		money_info += fmt::format(
+			":moneybag: {} Copper",
+			Strings::Commify(std::to_string(e.money.copper))
+		);
+	}
+
+	std::vector<DiscordField> f = {};
+
+	if (!items_info.empty()) {
+		BuildDiscordField(&f, "Items", items_info);
+	}
+
+	if (!money_info.empty()) {
+		BuildDiscordField(&f, "Money", money_info);
+	}
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	auto root = BuildDiscordWebhook(c, embeds);
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchiveSingleLine ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
 std::string PlayerEventDiscordFormatter::FormatDiscoverItemEvent(
 	const PlayerEvent::PlayerEventContainer &c,
 	const PlayerEvent::DiscoverItemEvent &e
