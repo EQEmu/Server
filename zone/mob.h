@@ -1164,7 +1164,7 @@ public:
 	inline bool IsAmnesiad() const { return amnesiad; }
 
 	int64 ReduceDamage(int64 damage, bool from_damage_shield = false);
-	int64 AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
+	int64 AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker, bool from_damage_shield = false);
 	int64 ReduceAllDamage(int64 damage);
 
 	void DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int base_damage, int min_damage = 0, int32 hate_override = -1, int ReuseTime = 10);

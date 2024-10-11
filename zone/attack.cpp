@@ -2462,7 +2462,6 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
 	if (spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
-
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if (attacked_timer.Check())
 	{
@@ -3894,7 +3893,7 @@ int64 Mob::ReduceDamage(int64 damage, bool from_damage_shield)
 	return(damage);
 }
 
-int64 Mob::AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker)
+int64 Mob::AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker, bool from_damage_shield)
 {
 	if (damage <= 0)
 		return damage;
@@ -3906,10 +3905,12 @@ int64 Mob::AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTi
 	if (!iBuffTic && spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_EXISTS]) {
 		slot = spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_BUFFSLOT];
 		if (slot >= 0) {
-			if (--buffs[slot].hit_number == 0) {
+			if (!from_damage_shield) {
+				if (--buffs[slot].hit_number == 0) {
 
-				if (!TryFadeEffect(slot) && !IsBardSong(buffs[slot].spellid))
-					BuffFadeBySlot(slot, true);
+					if (!TryFadeEffect(slot) && !IsBardSong(buffs[slot].spellid))
+						BuffFadeBySlot(slot, true);
+				}
 			}
 
 			if (spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] && (damage > spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT]))
@@ -4392,7 +4393,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			}
 
 			damage = ReduceDamage(damage, FromDamageShield); // second argument is hackish check for being from a DS
-			LogCombat("Melee Damage reduced to [{}]", damage);
 			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
 
@@ -4400,7 +4400,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 		else {
 			int64 origdmg = damage;
-			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
+			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker, FromDamageShield);
 			if (
 				origdmg != damage &&
 				attacker &&
