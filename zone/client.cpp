@@ -12910,22 +12910,29 @@ bool Client::RemoveExtraClass(int class_id) {
 
 	auto memorized_spells = GetMemmedSpells();
 	for (auto memmed_id : memorized_spells) {
-		if (IsValidSpell(memmed_id) && GetSpellLevelForCaster(memmed_id) > GetLevel()) {
+		if (IsValidSpell(memmed_id) && GetSpellLevel(memmed_id, class_id) != UINT8_MAX) {
 			UnmemSpellBySpellID(memmed_id);
 		}
 	}
 
 	auto scribed_spells = GetScribedSpells();
 	for (auto spell_id : scribed_spells) {
-		if (IsValidSpell(spell_id) && GetSpellLevelForCaster(spell_id) > GetLevel()) {
+		if (IsValidSpell(spell_id) && GetSpellLevel(spell_id, class_id) != UINT8_MAX) {
 			UnscribeSpellBySpellID(spell_id, true);
 		}
 	}
 
 	auto scribed_disc = GetLearnedDisciplines();
 	for (auto disc_id : scribed_disc) {
-		if (IsValidSpell(disc_id) && GetSpellLevelForCaster(disc_id) > GetLevel()) {
+		if (IsValidSpell(disc_id) && GetSpellLevel(disc_id, class_id) != UINT8_MAX) {
 			UntrainDiscBySpellID(disc_id, true);
+		}
+	}
+
+	auto pets = GetAllPets();
+	for (auto pet : pets) {
+		if (pet->IsNPC() && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), class_id) != UINT8_MAX) {
+			RemovePet(pet->GetID());
 		}
 	}
 
