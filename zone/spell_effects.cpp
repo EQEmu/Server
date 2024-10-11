@@ -1781,7 +1781,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Model Size: %d%%", effect_value);
 #endif
-				if (!IsClient() || !(GetOwner() && GetOwner()->IsClient())) {
+				if (!IsClient() && !(GetOwner() && GetOwner()->IsClient())) {
 					break; // not dealing with this
 				}
 
