@@ -1883,10 +1883,6 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			npc->race = Race::Amygdalan;
 			break;
 
-		case Race::FroglokGhoul:
-			npc->race = Race::UndeadFroglok;
-			break;
-
 		case Race::Alligator:
 			npc->race = Race::Crocodile;
 			npc->size *= .5;
@@ -1904,6 +1900,12 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 				}
 			}
 			break;
+
+		case Race::FroglokGhoul:
+			if (npc->texture != 0) {
+				npc->race = Race::UndeadFroglok;
+				break;
+			} // fall through
 
 		case Race::Froglok:
 			npc->race = Race::Froglok2;
