@@ -3207,6 +3207,11 @@ void Perl_Client_AreaTaunt(Client* self, float range, int bonus_hate)
 	entity_list.AETaunt(self, range, bonus_hate);
 }
 
+Merc* Perl_Client_GetMerc(Client* self)
+{
+	return self->GetMerc();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3438,6 +3443,7 @@ void perl_register_client()
 	package.add("GetLearnedDisciplines", &Perl_Client_GetLearnedDisciplines);
 	package.add("GetLockoutExpeditionUUID", &Perl_Client_GetLockoutExpeditionUUID);
 	package.add("GetMaxEndurance", &Perl_Client_GetMaxEndurance);
+	package.add("GetMerc", &Perl_Client_GetMerc);
 	package.add("GetMemmedSpells", &Perl_Client_GetMemmedSpells);
 	package.add("GetModCharacterFactionLevel", &Perl_Client_GetModCharacterFactionLevel);
 	package.add("GetMoney", &Perl_Client_GetMoney);

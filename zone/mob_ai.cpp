@@ -1755,6 +1755,8 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 
 	SetAppearance(eaStanding);
 
+	parse->EventBotMerc(EVENT_COMBAT, this, attacker, [&] { return "1"; });
+
 	if (IsNPC()) {
 		CastToNPC()->AIautocastspell_timer->Start(300, false);
 
@@ -1793,12 +1795,6 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			}
 		}
 	}
-
-	if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
-			parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
-		}
-	}
 }
 
 // Note: Hate list may not be actually clear until after this function call completes
@@ -1819,27 +1815,19 @@ void Mob::AI_Event_NoLongerEngaged() {
 	StopNavigation();
 	ClearRampage();
 
+	parse->EventBotMercNPC(EVENT_COMBAT, this, nullptr, [&]() { return "0"; });
+
 	if (IsNPC()) {
 		SetPrimaryAggro(false);
 		SetAssistAggro(false);
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
-			if (entity_list.GetNPCByID(GetID())) {
-				if (parse->HasQuestSub(GetNPCTypeID(), EVENT_COMBAT)) {
-					parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
-				}
-
-				const uint32 emote_id = CastToNPC()->GetEmoteID();
-				if (emote_id) {
-					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emote_id);
-				}
-
-				m_combat_record.Stop();
-				CastToNPC()->SetCombatEvent(false);
+			const uint32 emote_id = CastToNPC()->GetEmoteID();
+			if (emote_id) {
+				CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emote_id);
 			}
-		}
-	} else if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
-			parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+
+			m_combat_record.Stop();
+			CastToNPC()->SetCombatEvent(false);
 		}
 	}
 }

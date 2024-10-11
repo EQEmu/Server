@@ -1550,17 +1550,18 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			hit.damage_done = 0;
 		}
 
-		if (IsBot()) {
-			if (parse->BotHasQuestSub(EVENT_USE_SKILL)) {
-				const auto& export_string = fmt::format(
+		parse->EventBotMerc(
+			EVENT_USE_SKILL,
+			this,
+			nullptr,
+			[&]() {
+				return fmt::format(
 					"{} {}",
 					hit.skill,
 					GetSkill(hit.skill)
 				);
-
-				parse->EventBot(EVENT_USE_SKILL, CastToBot(), nullptr, export_string, 0);
 			}
-		}
+		);
 	}
 }
 
@@ -1922,22 +1923,14 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	}
 
 	if (killer_mob) {
-		if (killer_mob->IsNPC()) {
-			if (parse->HasQuestSub(killer_mob->GetNPCTypeID(), EVENT_SLAY)) {
-				parse->EventNPC(EVENT_SLAY, killer_mob->CastToNPC(), this, "", 0);
-			}
+		parse->EventBotMercNPC(EVENT_SLAY, killer_mob, this);
 
+		if (killer_mob->IsNPC()) {
 			killed_by = KilledByTypes::Killed_NPC;
 
 			auto emote_id = killer_mob->GetEmoteID();
 			if (emote_id) {
 				killer_mob->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledPC, emoteid, this);
-			}
-
-			killer_mob->TrySpellOnKill(killed_level, spell);
-		} else if (killer_mob->IsBot()) {
-			if (parse->BotHasQuestSub(EVENT_SLAY)) {
-				parse->EventBot(EVENT_SLAY, killer_mob->CastToBot(), this, "", 0);
 			}
 
 			killer_mob->TrySpellOnKill(killed_level, spell);
@@ -2458,14 +2451,10 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 		spell_id = SPELL_UNKNOWN;
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
-	if (attacked_timer.Check())
-	{
-		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_ATTACK)) {
-			LogCombat("Triggering EVENT_ATTACK due to attack by [{}]", other ? other->GetName() : "nullptr");
-
-			parse->EventNPC(EVENT_ATTACK, this, other, "", 0);
-		}
+	if (attacked_timer.Check()) {
+		parse->EventMercNPC(EVENT_ATTACK, this, other);
 	}
+
 	attacked_timer.Start(CombatEventTimer_expire);
 
 	if (!IsEngaged())
@@ -2506,41 +2495,22 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	Mob* owner_or_self = killer_mob ? killer_mob->GetOwnerOrSelf() : nullptr;
 
-	if (IsNPC()) {
-		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DEATH)) {
-			const auto& export_string = fmt::format(
-				"{} {} {} {}",
-				killer_mob ? killer_mob->GetID() : 0,
-				damage,
-				spell,
-				static_cast<int>(attack_skill)
-			);
+	auto exports = [&]() {
+		return fmt::format(
+			"{} {} {} {}",
+			killer_mob ? killer_mob->GetID() : 0,
+			damage,
+			spell,
+			static_cast<int>(attack_skill)
+		);
+	};
 
-			if (parse->EventNPC(EVENT_DEATH, this, owner_or_self, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
-
-				return false;
-			}
+	if (parse->EventBotMercNPC(EVENT_DEATH, this, owner_or_self, exports) != 0) {
+		if (GetHP() < 0) {
+			SetHP(0);
 		}
-	} else if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_DEATH)) {
-			const auto& export_string = fmt::format(
-				"{} {} {} {}",
-				killer_mob ? killer_mob->GetID() : 0,
-				damage,
-				spell,
-				static_cast<int>(attack_skill)
-			);
-			if (parse->EventBot(EVENT_DEATH, CastToBot(), owner_or_self, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
 
-				return false;
-			}
-		}
+		return false;
 	}
 
 	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
@@ -3077,10 +3047,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-	if (killer_mob && killer_mob->IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_NPC_SLAY)) {
-			parse->EventBot(EVENT_NPC_SLAY, killer_mob->CastToBot(), this, "", 0);
-		}
+	if (killer_mob) {
+		parse->EventBotMerc(EVENT_NPC_SLAY, killer_mob, this);
 
 		killer_mob->TrySpellOnKill(killed_level, spell);
 	}
@@ -3108,24 +3076,29 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-	if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DEATH_COMPLETE)) {
-		const auto& export_string = fmt::format(
-			"{} {} {} {} {} {} {} {} {}",
-			killer_mob ? killer_mob->GetID() : 0,
-			damage,
-			spell,
-			static_cast<int>(attack_skill),
-			entity_id,
-			m_combat_record.GetStartTime(),
-			m_combat_record.GetEndTime(),
-			m_combat_record.GetDamageReceived(),
-			m_combat_record.GetHealingReceived()
-		);
+	std::vector<std::any> args = { corpse };
 
-		std::vector<std::any> args = { corpse };
-
-		parse->EventNPC(EVENT_DEATH_COMPLETE, this, owner_or_self, export_string, 0, &args);
-	}
+	parse->EventMercNPC(
+		EVENT_DEATH_COMPLETE,
+		this,
+		owner_or_self,
+		[&]() {
+			return fmt::format(
+				"{} {} {} {} {} {} {} {} {}",
+				killer_mob ? killer_mob->GetID() : 0,
+				damage,
+				spell,
+				static_cast<int>(attack_skill),
+				entity_id,
+				m_combat_record.GetStartTime(),
+				m_combat_record.GetEndTime(),
+				m_combat_record.GetDamageReceived(),
+				m_combat_record.GetHealingReceived()
+			);
+		},
+		0,
+		&args
+	);
 
 	// Zone controller process EVENT_DEATH_ZONE (Death events)
 	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DEATH_ZONE)) {
@@ -4285,100 +4258,60 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//final damage has been determined.
 		int old_hp_ratio = (int)GetHPRatio();
 
-		const auto has_bot_given_event = parse->BotHasQuestSub(EVENT_DAMAGE_GIVEN);
-
-		const auto has_bot_taken_event = parse->BotHasQuestSub(EVENT_DAMAGE_TAKEN);
-
-		const auto has_npc_given_event = (
-			(
-				IsNPC() &&
-				parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_GIVEN)
-			) ||
-			(
-				attacker &&
-				attacker->IsNPC() &&
-				parse->HasQuestSub(attacker->CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_GIVEN)
-			)
-		);
-
-		const auto has_npc_taken_event = (
-			(
-				IsNPC() &&
-				parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_TAKEN)
-			) ||
-			(
-				attacker &&
-				attacker->IsNPC() &&
-				parse->HasQuestSub(attacker->CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_TAKEN)
-			)
-		);
-
-		const auto has_player_given_event = parse->PlayerHasQuestSub(EVENT_DAMAGE_GIVEN);
-
-		const auto has_player_taken_event = parse->PlayerHasQuestSub(EVENT_DAMAGE_TAKEN);
-
-		const auto has_given_event = (
-			has_bot_given_event ||
-			has_npc_given_event ||
-			has_player_given_event
-		);
-
-		const auto has_taken_event = (
-			has_bot_taken_event ||
-			has_npc_taken_event ||
-			has_player_taken_event
-		);
 
 		std::vector<std::any> args;
+
 		int64 damage_override = 0;
 
-		if (has_given_event && attacker) {
-			const auto export_string = fmt::format(
-				"{} {} {} {} {} {} {} {} {}",
-				GetID(),
-				damage,
-				spell_id,
-				static_cast<int>(skill_used),
-				FromDamageShield ? 1 : 0,
-				avoidable ? 1 : 0,
-				buffslot,
-				iBuffTic ? 1 : 0,
-				static_cast<int>(special)
-			);
+		if (attacker) {
+			args = { this };
 
-			if (attacker->IsBot() && has_bot_given_event) {
-				parse->EventBot(EVENT_DAMAGE_GIVEN, attacker->CastToBot(), this, export_string, 0);
-			} else if (attacker->IsClient() && has_player_given_event) {
-				args.push_back(this);
-				parse->EventPlayer(EVENT_DAMAGE_GIVEN, attacker->CastToClient(), export_string, 0, &args);
-			} else if (attacker->IsNPC() && has_npc_given_event) {
-				parse->EventNPC(EVENT_DAMAGE_GIVEN, attacker->CastToNPC(), this, export_string, 0);
-			}
+			parse->EventMob(
+				EVENT_DAMAGE_GIVEN,
+				attacker,
+				this,
+				[&]() {
+					return fmt::format(
+						"{} {} {} {} {} {} {} {} {}",
+						GetID(),
+						damage,
+						spell_id,
+						static_cast<int>(skill_used),
+						FromDamageShield ? 1 : 0,
+						avoidable ? 1 : 0,
+						buffslot,
+						iBuffTic ? 1 : 0,
+						static_cast<int>(special)
+					);
+				},
+				0,
+				&args
+			);
 		}
 
-		if (has_taken_event) {
-			const auto export_string = fmt::format(
-				"{} {} {} {} {} {} {} {} {}",
-				attacker ? attacker->GetID() : 0,
-				damage,
-				spell_id,
-				static_cast<int>(skill_used),
-				FromDamageShield ? 1 : 0,
-				avoidable ? 1 : 0,
-				buffslot,
-				iBuffTic ? 1 : 0,
-				static_cast<int>(special)
-			);
+		args = { attacker };
 
-			if (IsBot() && has_bot_taken_event) {
-				damage_override = parse->EventBot(EVENT_DAMAGE_TAKEN, CastToBot(), attacker ? attacker : nullptr, export_string, 0);
-			} else if (IsClient() && has_player_taken_event) {
-				args.push_back(attacker ? attacker : nullptr);
-				damage_override = parse->EventPlayer(EVENT_DAMAGE_TAKEN, CastToClient(), export_string, 0, &args);
-			} else if (IsNPC() && has_npc_taken_event) {
-				damage_override = parse->EventNPC(EVENT_DAMAGE_TAKEN, CastToNPC(), attacker ? attacker : nullptr, export_string, 0);
-			}
-		}
+		damage_override = parse->EventMob(
+			EVENT_DAMAGE_TAKEN,
+			this,
+			attacker,
+			[&]() {
+				return fmt::format(
+					"{} {} {} {} {} {} {} {} {}",
+					attacker ? attacker->GetID() : 0,
+					damage,
+					spell_id,
+					static_cast<int>(skill_used),
+					FromDamageShield ? 1 : 0,
+					avoidable ? 1 : 0,
+					buffslot,
+					iBuffTic ? 1 : 0,
+					static_cast<int>(special)
+				);
+			},
+			0,
+			&args
+		);
 
 		if (damage_override > 0) {
 			damage = damage_override;

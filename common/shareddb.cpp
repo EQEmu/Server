@@ -47,6 +47,7 @@
 #include "repositories/character_corpses_repository.h"
 #include "repositories/skill_caps_repository.h"
 #include "repositories/inventory_repository.h"
+#include "repositories/books_repository.h"
 
 namespace ItemField
 {
@@ -1391,30 +1392,28 @@ const EQ::ItemData* SharedDatabase::IterateItems(uint32* id) const
 	return nullptr;
 }
 
-std::string SharedDatabase::GetBook(const char *txtfile, int16 *language)
+Book_Struct SharedDatabase::GetBook(const std::string& text_file)
 {
-	char txtfile2[20];
-	std::string txtout;
-	strcpy(txtfile2, txtfile);
+	const auto& l = BooksRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`name` = '{}'",
+			Strings::Escape(text_file)
+		)
+	);
 
-	const std::string query = StringFormat("SELECT txtfile, language FROM books WHERE name = '%s'", txtfile2);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		txtout.assign(" ",1);
-		return txtout;
+	Book_Struct b;
+
+	if (l.empty()) {
+		return b;
 	}
 
-    if (results.RowCount() == 0) {
-        LogError("No book to send, ({})", txtfile);
-        txtout.assign(" ",1);
-        return txtout;
-    }
+	const auto& e = l.front();
 
-    auto& row = results.begin();
-    txtout.assign(row[0],strlen(row[0]));
-    *language = static_cast<int16>(Strings::ToInt(row[1]));
+	b.language = e.language;
+	b.text     = e.txtfile;
 
-    return txtout;
+	return b;
 }
 
 // Create appropriate EQ::ItemInstance class

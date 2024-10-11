@@ -447,6 +447,7 @@ public:
 	void BuffFadeBySlot(int slot, bool iRecalcBonuses = true);
 	void BuffFadeDetrimentalByCaster(Mob *caster);
 	void BuffFadeBySitModifier();
+	void BuffFadeSongs();
 	void BuffDetachCaster(Mob *caster);
 	bool IsAffectedByBuffByGlobalGroup(GlobalGroup group);
 	void BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration);

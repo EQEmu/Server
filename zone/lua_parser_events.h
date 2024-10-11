@@ -8,6 +8,7 @@ typedef void(*ItemArgumentHandler)(QuestInterface*, lua_State*, Client*, EQ::Ite
 typedef void(*SpellArgumentHandler)(QuestInterface*, lua_State*, Mob*, Client*, uint32, std::string, uint32, std::vector<std::any>*);
 typedef void(*EncounterArgumentHandler)(QuestInterface*, lua_State*, Encounter* encounter, std::string, uint32, std::vector<std::any>*);
 typedef void(*BotArgumentHandler)(QuestInterface*, lua_State*, Bot*, Mob*, std::string, uint32, std::vector<std::any>*);
+typedef void(*MercArgumentHandler)(QuestInterface*, lua_State*, Merc*, Mob*, std::string, uint32, std::vector<std::any>*);
 
 // NPC
 void handle_npc_event_say(
@@ -847,6 +848,15 @@ void handle_player_aa_loss(
 );
 
 void handle_player_spell_blocked(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_player_read_item(
 	QuestInterface *parse,
 	lua_State* L,
 	Client* client,
