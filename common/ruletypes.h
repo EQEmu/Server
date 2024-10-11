@@ -516,7 +516,7 @@ RULE_INT(Spells, HealAmountMessageFilterThreshold, 100, "Lifetaps below this thr
 RULE_BOOL(Spells, SnareOverridesSpeedBonuses, false, "Enabling will allow snares to override any speed bonuses the entity may have. Default: False")
 RULE_INT(Spells, TargetedAOEMaxTargets, 4, "Max number of targets a Targeted AOE spell can cast on. Set to 0 for no limit.")
 RULE_INT(Spells, PointBlankAOEMaxTargets, 0, "Max number of targets a Point-Blank AOE spell can cast on. Set to 0 for no limit.")
-RULE_INT(Spells, DefaultAOEMaxTargets, 0, "Max number of targets that an AOE spell which does not meet other descriptions can cast on. Set to 0 for no limit.")
+RULE_INT(Spells, DefaultAOEMaxTargets, 4, "Max number of targets that an AOE spell which does not meet other descriptions can cast on. Set to 0 for no limit.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

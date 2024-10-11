@@ -1117,8 +1117,6 @@ void EntityList::AESpell(
 		max_targets_allowed = RuleI(Spells, PointBlankAOEMaxTargets);
 	}
 
-	RuleI(Spells, PointBlankAOEMaxTargets)
-
 	int   target_hit_counter = 0;
 	float distance_to_target = 0;
 
