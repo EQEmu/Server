@@ -833,7 +833,7 @@ void NPC::Depop(bool start_spawn_timer) {
 		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emoteid);
 	}
 
-	parse->EventNPCBotMerc(EVENT_DESPAWN, this);
+	parse->EventBotMercNPC(EVENT_DESPAWN, this, nullptr);
 
 	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
 		DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);

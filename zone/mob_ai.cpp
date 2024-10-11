@@ -1815,7 +1815,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 	StopNavigation();
 	ClearRampage();
 
-	parse->EventNPCBotMerc(EVENT_COMBAT, this, [&]() { return "0"; });
+	parse->EventBotMercNPC(EVENT_COMBAT, this, nullptr, [&]() { return "0"; });
 
 	if (IsNPC()) {
 		SetPrimaryAggro(false);

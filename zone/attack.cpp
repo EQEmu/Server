@@ -1553,6 +1553,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 		parse->EventBotMerc(
 			EVENT_USE_SKILL,
 			this,
+			nullptr,
 			[&]() {
 				return fmt::format(
 					"{} {}",
@@ -1922,7 +1923,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	}
 
 	if (killer_mob) {
-		parse->EventNPCBotMerc(EVENT_SLAY, killer_mob, this);
+		parse->EventBotMercNPC(EVENT_SLAY, killer_mob, this);
 
 		if (killer_mob->IsNPC()) {
 			killed_by = KilledByTypes::Killed_NPC;
@@ -2451,7 +2452,7 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if (attacked_timer.Check()) {
-		parse->EventNPCMerc(EVENT_ATTACK, this, other);
+		parse->EventMercNPC(EVENT_ATTACK, this, other);
 	}
 
 	attacked_timer.Start(CombatEventTimer_expire);
@@ -2504,7 +2505,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		);
 	};
 
-	if (parse->EventNPCBotMerc(EVENT_DEATH, this, owner_or_self, exports) != 0) {
+	if (parse->EventBotMercNPC(EVENT_DEATH, this, owner_or_self, exports) != 0) {
 		if (GetHP() < 0) {
 			SetHP(0);
 		}
@@ -3077,7 +3078,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	std::vector<std::any> args = { corpse };
 
-	parse->EventNPCMerc(
+	parse->EventMercNPC(
 		EVENT_DEATH_COMPLETE,
 		this,
 		owner_or_self,
@@ -4297,7 +4298,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			[&]() {
 				return fmt::format(
 					"{} {} {} {} {} {} {} {} {}",
-					attacker->GetID(),
+					attacker ? attacker->GetID() : 0,
 					damage,
 					spell_id,
 					static_cast<int>(skill_used),

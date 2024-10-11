@@ -259,6 +259,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	int return_value = parse->EventMob(
 		EVENT_CAST_BEGIN,
 		this,
+		nullptr,
 		[&]() {
 			return fmt::format(
 				"{} {} {} {}",
@@ -1803,6 +1804,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	parse->EventMob(
 		EVENT_CAST,
 		this,
+		nullptr,
 		[&]() {
 			return fmt::format(
 				"{} {} {} {}",
@@ -3584,7 +3586,9 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 					parse->EventMob(EVENT_SPELL_BLOCKED, caster, this, f);
 
-					parse->EventMob(EVENT_SPELL_BLOCKED, this, caster, f);
+					if (caster != this) {
+						parse->EventMob(EVENT_SPELL_BLOCKED, this, caster, f);
+					}
 				}
 
 				return -1;

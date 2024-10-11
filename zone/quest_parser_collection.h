@@ -139,12 +139,13 @@ public:
 	int EventBotMerc(
 		QuestEventID event_id,
 		Mob* e,
+		Mob* init,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr
 	);
 
-	int EventBotMerc(
+	int EventMercNPC(
 		QuestEventID event_id,
 		Mob* e,
 		Mob* init,
@@ -153,43 +154,10 @@ public:
 		std::vector<std::any>* extra_pointers = nullptr
 	);
 
-	int EventNPCMerc(
-		QuestEventID event_id,
-		Mob* e,
-		std::function<std::string()> lazy_data = []() { return ""; },
-		uint32 extra_data = 0,
-		std::vector<std::any>* extra_pointers = nullptr
-	);
-
-	int EventNPCMerc(
+	int EventBotMercNPC(
 		QuestEventID event_id,
 		Mob* e,
 		Mob* init,
-		std::function<std::string()> lazy_data = []() { return ""; },
-		uint32 extra_data = 0,
-		std::vector<std::any>* extra_pointers = nullptr
-	);
-
-	int EventNPCBotMerc(
-		QuestEventID event_id,
-		Mob* e,
-		std::function<std::string()> lazy_data = []() { return ""; },
-		uint32 extra_data = 0,
-		std::vector<std::any>* extra_pointers = nullptr
-	);
-
-	int EventNPCBotMerc(
-		QuestEventID event_id,
-		Mob* e,
-		Mob* init,
-		std::function<std::string()> lazy_data = []() { return ""; },
-		uint32 extra_data = 0,
-		std::vector<std::any>* extra_pointers = nullptr
-	);
-
-	int EventMob(
-		QuestEventID event_id,
-		Mob* e,
 		std::function<std::string()> lazy_data = []() { return ""; },
 		uint32 extra_data = 0,
 		std::vector<std::any>* extra_pointers = nullptr

@@ -1253,9 +1253,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			const bool is_engaged = t->IsEngaged();
 
 			if (is_engaged) {
-				parse->EventNPCBotMerc(EVENT_AGGRO_SAY, t, this, [&]() { return message; }, language);
+				parse->EventBotMercNPC(EVENT_AGGRO_SAY, t, this, [&]() { return message; }, language);
 			} else {
-				parse->EventNPCBotMerc(EVENT_SAY, t, this, [&]() { return message; }, language);
+				parse->EventBotMercNPC(EVENT_SAY, t, this, [&]() { return message; }, language);
 			}
 
 			if (t->IsNPC() && !is_engaged) {

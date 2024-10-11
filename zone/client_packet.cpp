@@ -11984,7 +11984,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 
 	auto t = GetTarget();
 	if (t) {
-		parse->EventNPCBotMerc(EVENT_POPUP_RESPONSE, t, this, [&]() { return std::to_string(popup_response->popupid); });
+		parse->EventBotMercNPC(EVENT_POPUP_RESPONSE, t, this, [&]() { return std::to_string(popup_response->popupid); });
 	}
 }
 

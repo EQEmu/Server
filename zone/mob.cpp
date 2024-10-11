@@ -5695,7 +5695,7 @@ bool Mob::ClearEntityVariables()
 	for (const auto& e : m_EntityVariables) {
 		std::vector<std::any> args = { e.first, e.second };
 
-		parse->EventMob(EVENT_ENTITY_VARIABLE_DELETE, this, [&]() { return ""; }, 0, &args);
+		parse->EventMob(EVENT_ENTITY_VARIABLE_DELETE, this, nullptr, [&]() { return ""; }, 0, &args);
 	}
 
 	m_EntityVariables.clear();
@@ -5714,7 +5714,7 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 	}
 
 	std::vector<std::any> args = { v->first, v->second };
-	parse->EventMob(EVENT_ENTITY_VARIABLE_DELETE, this, [&]() { return ""; }, 0, &args);
+	parse->EventMob(EVENT_ENTITY_VARIABLE_DELETE, this, nullptr, [&]() { return ""; }, 0, &args);
 
 	m_EntityVariables.erase(v);
 
@@ -5769,11 +5769,11 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 	if (!EntityVariableExists(variable_name)) {
 		args = { variable_name, variable_value };
 
-		parse->EventMob(EVENT_ENTITY_VARIABLE_SET, this, [&]() { return ""; }, 0, &args);
+		parse->EventMob(EVENT_ENTITY_VARIABLE_SET, this, nullptr, [&]() { return ""; }, 0, &args);
 	} else {
 		args = { variable_name, GetEntityVariable(variable_name), variable_value };
 
-		parse->EventMob(EVENT_ENTITY_VARIABLE_UPDATE, this, [&]() { return ""; }, 0, &args);
+		parse->EventMob(EVENT_ENTITY_VARIABLE_UPDATE, this, nullptr, [&]() { return ""; }, 0, &args);
 	}
 
 	m_EntityVariables[variable_name] = variable_value;
