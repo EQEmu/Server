@@ -153,8 +153,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 				return GetPet()->GetID();
 			} else {
 				Message(Chat::SpellFailure, "You must have a pet in order to cast this spell or ability (%s).", spells[spell_id].name);
-				InterruptSpell(spell_id);
-				return target_id;
+				return 0;
 			}
 		}
 
@@ -193,8 +192,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 				target_id = GetPet()->GetTarget()->GetID();
 			} else {
 				Message(Chat::SpellFailure, "You may not cast this type of spell or ability on yourself (%s).", spells[spell_id].name);
-				InterruptSpell();
-				return target_id;
+				return 0;
 			}
 		}
 
