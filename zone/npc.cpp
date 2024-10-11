@@ -833,22 +833,10 @@ void NPC::Depop(bool start_spawn_timer) {
 		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emoteid);
 	}
 
-	if (IsNPC()) {
-		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DESPAWN)) {
-			parse->EventNPC(EVENT_DESPAWN, this, nullptr, "", 0);
-		}
+	parse->EventBotMercNPC(EVENT_DESPAWN, this, nullptr);
 
-		if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
-			DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
-		}
-	} else if (IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_DESPAWN)) {
-			parse->EventBot(EVENT_DESPAWN, CastToBot(), nullptr, "", 0);
-		}
-
-		if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
-			DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
-		}
+	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DESPAWN_ZONE)) {
+		DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
 	}
 
 	p_depop = true;

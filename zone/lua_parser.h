@@ -109,6 +109,22 @@ public:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
+	virtual int EventMerc(
+		QuestEventID evt,
+		Merc* merc,
+		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+	virtual int EventGlobalMerc(
+		QuestEventID evt,
+		Merc* merc,
+		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
 
 	virtual bool HasQuestSub(uint32 npc_id, QuestEventID evt);
 	virtual bool HasGlobalQuestSub(QuestEventID evt);
@@ -120,6 +136,8 @@ public:
 	virtual bool HasEncounterSub(const std::string& package_name, QuestEventID evt);
 	virtual bool BotHasQuestSub(QuestEventID evt);
 	virtual bool GlobalBotHasQuestSub(QuestEventID evt);
+	virtual bool MercHasQuestSub(QuestEventID evt);
+	virtual bool GlobalMercHasQuestSub(QuestEventID evt);
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
@@ -130,6 +148,8 @@ public:
 	virtual void LoadEncounterScript(std::string filename, std::string encounter_name);
 	virtual void LoadBotScript(std::string filename);
 	virtual void LoadGlobalBotScript(std::string filename);
+	virtual void LoadMercScript(std::string filename);
+	virtual void LoadGlobalMercScript(std::string filename);
 
 	virtual void AddVar(std::string name, std::string val);
 	virtual std::string GetVar(std::string name);
@@ -178,6 +198,14 @@ public:
 		std::string data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
+	);
+	virtual int DispatchEventMerc(
+		QuestEventID evt,
+		Merc* merc,
+		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
 	);
 
 	static LuaParser* Instance() {
@@ -268,6 +296,16 @@ private:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers,
 		luabind::adl::object *l_func = nullptr
+	);
+	int _EventMerc(
+		std::string package_name,
+		QuestEventID evt,
+		Merc* merc,
+		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers,
+		luabind::adl::object* l_func = nullptr
 	);
 
 	void LoadScript(std::string filename, std::string package_name);

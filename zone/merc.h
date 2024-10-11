@@ -146,6 +146,9 @@ public:
 	bool IsMedding() { return _medding; };
 	bool IsSuspended() { return _suspended; };
 
+	void Signal(int signal_id);
+	void SendPayload(int payload_id, std::string payload_value);
+
 	static uint32 CalcPurchaseCost( uint32 templateID , uint8 level, uint8 currency_type = 0);
 	static uint32 CalcUpkeepCost( uint32 templateID , uint8 level, uint8 currency_type = 0);
 

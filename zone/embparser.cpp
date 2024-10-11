@@ -57,6 +57,7 @@ void perl_register_expedition();
 void perl_register_expedition_lock_messages();
 void perl_register_bot();
 void perl_register_buff();
+void perl_register_merc();
 #endif // EMBPERL_XS_CLASSES
 #endif // EMBPERL_XS
 
@@ -217,6 +218,8 @@ PerlembParser::PerlembParser() : perl(nullptr)
 	global_player_quest_status_ = questUnloaded;
 	bot_quest_status_           = questUnloaded;
 	global_bot_quest_status_    = questUnloaded;
+	merc_quest_status_          = questUnloaded;
+	global_merc_quest_status_   = questUnloaded;
 }
 
 PerlembParser::~PerlembParser()
@@ -258,6 +261,8 @@ void PerlembParser::ReloadQuests()
 	global_player_quest_status_ = questUnloaded;
 	bot_quest_status_           = questUnloaded;
 	global_bot_quest_status_    = questUnloaded;
+	merc_quest_status_          = questUnloaded;
+	global_merc_quest_status_   = questUnloaded;
 
 	item_quest_status_.clear();
 	spell_quest_status_.clear();
@@ -285,6 +290,8 @@ int PerlembParser::EventCommon(
 	bool is_global_npc_quest    = false;
 	bool is_bot_quest           = false;
 	bool is_global_bot_quest    = false;
+	bool is_merc_quest          = false;
+	bool is_global_merc_quest   = false;
 	bool is_item_quest          = false;
 	bool is_spell_quest         = false;
 
@@ -295,6 +302,8 @@ int PerlembParser::EventCommon(
 		is_global_player_quest,
 		is_bot_quest,
 		is_global_bot_quest,
+		is_merc_quest,
+		is_global_merc_quest,
 		is_global_npc_quest,
 		is_item_quest,
 		is_spell_quest,
@@ -310,6 +319,8 @@ int PerlembParser::EventCommon(
 		is_global_player_quest,
 		is_bot_quest,
 		is_global_bot_quest,
+		is_merc_quest,
+		is_global_merc_quest,
 		is_global_npc_quest,
 		is_item_quest,
 		is_spell_quest,
@@ -339,6 +350,8 @@ int PerlembParser::EventCommon(
 			is_global_player_quest,
 			is_bot_quest,
 			is_global_bot_quest,
+			is_merc_quest,
+			is_global_merc_quest,
 			is_global_npc_quest,
 			is_item_quest,
 			is_spell_quest,
@@ -356,6 +369,8 @@ int PerlembParser::EventCommon(
 			is_global_player_quest,
 			is_bot_quest,
 			is_global_bot_quest,
+			is_merc_quest,
+			is_global_merc_quest,
 			is_global_npc_quest,
 			is_item_quest,
 			is_spell_quest,
@@ -382,7 +397,7 @@ int PerlembParser::EventCommon(
 
 	if (is_player_quest || is_global_player_quest) {
 		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, nullptr);
-	} else if (is_bot_quest || is_global_bot_quest) {
+	} else if (is_bot_quest || is_global_bot_quest || is_merc_quest || is_global_merc_quest) {
 		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, nullptr);
 	} else if (is_item_quest) {
 		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, inst, nullptr);
@@ -1009,41 +1024,22 @@ int PerlembParser::SendCommands(
 #ifdef EMBPERL_XS_CLASSES
 		dTHX;
 		{
-			std::string cl  = fmt::format("${}::client", prefix);
-			std::string np  = fmt::format("${}::npc", prefix);
-			std::string qi  = fmt::format("${}::questitem", prefix);
-			std::string sp  = fmt::format("${}::spell", prefix);
-			std::string enl = fmt::format("${}::entity_list", prefix);
-			std::string bot = fmt::format("${}::bot", prefix);
+			const std::vector<std::string>& suffixes = {
+				"bot",
+				"client",
+				"entity_list",
+				"merc",
+				"npc",
+				"questitem",
+				"spell"
+			};
 
-			if (clear_vars_.find(cl) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", cl);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(np) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", np);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(qi) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", qi);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(sp) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", sp);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(enl) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", enl);
-				perl->eval(e.c_str());
-			}
-
-			if (clear_vars_.find(bot) != clear_vars_.end()) {
-				auto e = fmt::format("{} = undef;", bot);
-				perl->eval(e.c_str());
+			for (const auto& suffix : suffixes) {
+				const std::string& key = fmt::format("${}::{}", prefix, suffix);
+				if (clear_vars_.find(suffix) != clear_vars_.end()) {
+					auto e = fmt::format("{} = undef;", key);
+					perl->eval(e.c_str());
+				}
 			}
 		}
 
@@ -1060,19 +1056,21 @@ int PerlembParser::SendCommands(
 			sv_setsv(client, _empty_sv);
 		}
 
-		//only export NPC if it's a npc quest
-		if (!other->IsClient() && other->IsNPC()) {
-			NPC* n = quest_manager.GetNPC();
-			buf = fmt::format("{}::npc", prefix);
-			SV* npc = get_sv(buf.c_str(), true);
-			sv_setref_pv(npc, "NPC", n);
-		}
-
-		if (!other->IsClient() && other->IsBot()) {
+		if (other->IsBot()) {
 			Bot* b = quest_manager.GetBot();
 			buf = fmt::format("{}::bot", prefix);
 			SV* bot = get_sv(buf.c_str(), true);
 			sv_setref_pv(bot, "Bot", b);
+		} else if (other->IsMerc()) {
+			Merc* m = quest_manager.GetMerc();
+			buf = fmt::format("{}::merc", prefix);
+			SV* merc = get_sv(buf.c_str(), true);
+			sv_setref_pv(merc, "Merc", m);
+		} else if (other->IsNPC()) {
+			NPC* n = quest_manager.GetNPC();
+			buf = fmt::format("{}::npc", prefix);
+			SV* npc = get_sv(buf.c_str(), true);
+			sv_setref_pv(npc, "NPC", n);
 		}
 
 		//only export QuestItem if it's an inst quest
@@ -1098,23 +1096,25 @@ int PerlembParser::SendCommands(
 #endif
 
 		//now call the requested sub
-		ret_value = perl->dosub(std::string(prefix).append("::").append(event_id).c_str());
+		const std::string& sub_key = fmt::format("{}::{}", prefix, event_id);
+		ret_value = perl->dosub(sub_key.c_str());
 
 #ifdef EMBPERL_XS_CLASSES
 		{
-			std::string cl  = fmt::format("${}::client", prefix);
-			std::string np  = fmt::format("${}::npc", prefix);
-			std::string qi  = fmt::format("${}::questitem", prefix);
-			std::string sp  = fmt::format("${}::spell", prefix);
-			std::string enl = fmt::format("${}::entity_list", prefix);
-			std::string bot = fmt::format("${}::bot", prefix);
+			const std::vector<std::string>& suffixes = {
+				"bot",
+				"client",
+				"entity_list",
+				"merc",
+				"npc",
+				"questitem",
+				"spell"
+			};
 
-			clear_vars_[cl]  = 1;
-			clear_vars_[np]  = 1;
-			clear_vars_[qi]  = 1;
-			clear_vars_[sp]  = 1;
-			clear_vars_[enl] = 1;
-			clear_vars_[bot] = 1;
+			for (const auto& suffix : suffixes) {
+				const std::string& key = fmt::format("${}::{}", prefix, suffix);
+				clear_vars_[key] = 1;
+			}
 		}
 #endif
 
@@ -1184,6 +1184,7 @@ void PerlembParser::MapFunctions()
 	perl_register_expedition_lock_messages();
 	perl_register_bot();
 	perl_register_buff();
+	perl_register_merc();
 #endif // EMBPERL_XS_CLASSES
 }
 
@@ -1192,6 +1193,8 @@ void PerlembParser::GetQuestTypes(
 	bool& is_global_player_quest,
 	bool& is_bot_quest,
 	bool& is_global_bot_quest,
+	bool& is_merc_quest,
+	bool& is_global_merc_quest,
 	bool& is_global_npc_quest,
 	bool& is_item_quest,
 	bool& is_spell_quest,
@@ -1219,10 +1222,14 @@ void PerlembParser::GetQuestTypes(
 				if (is_global) {
 					if (npc_mob->IsBot()) {
 						is_global_bot_quest = true;
+					} else if (npc_mob->IsMerc()) {
+						is_global_merc_quest = true;
 					}
 				} else {
 					if (npc_mob->IsBot()) {
 						is_bot_quest = true;
+					} else if (npc_mob->IsMerc()) {
+						is_merc_quest = true;
 					}
 				}
 			} else {
@@ -1251,6 +1258,8 @@ void PerlembParser::GetQuestPackageName(
 	bool& is_global_player_quest,
 	bool& is_bot_quest,
 	bool& is_global_bot_quest,
+	bool& is_merc_quest,
+	bool& is_global_merc_quest,
 	bool& is_global_npc_quest,
 	bool& is_item_quest,
 	bool& is_spell_quest,
@@ -1268,6 +1277,8 @@ void PerlembParser::GetQuestPackageName(
 		!is_global_player_quest &&
 		!is_bot_quest &&
 		!is_global_bot_quest &&
+		!is_merc_quest &&
+		!is_global_merc_quest &&
 		!is_item_quest &&
 		!is_spell_quest
 	) {
@@ -1291,6 +1302,10 @@ void PerlembParser::GetQuestPackageName(
 		package_name = "qst_bot";
 	} else if (is_global_bot_quest) {
 		package_name = "qst_global_bot";
+	} else if (is_merc_quest) {
+		package_name = "qst_merc";
+	} else if (is_global_merc_quest) {
+		package_name = "qst_global_merc";
 	} else {
 		package_name = fmt::format("qst_spell_{}", object_id);
 	}
@@ -1316,6 +1331,8 @@ void PerlembParser::ExportQGlobals(
 	bool is_global_player_quest,
 	bool is_bot_quest,
 	bool is_global_bot_quest,
+	bool is_merc_quest,
+	bool is_global_merc_quest,
 	bool is_global_npc_quest,
 	bool is_item_quest,
 	bool is_spell_quest,
@@ -1331,6 +1348,8 @@ void PerlembParser::ExportQGlobals(
 		!is_global_player_quest &&
 		!is_bot_quest &&
 		!is_global_bot_quest &&
+		!is_merc_quest &&
+		!is_global_merc_quest &&
 		!is_item_quest &&
 		!is_spell_quest
 	) {
@@ -1466,6 +1485,8 @@ void PerlembParser::ExportMobVariables(
 	bool is_global_player_quest,
 	bool is_bot_quest,
 	bool is_global_bot_quest,
+	bool is_merc_quest,
+	bool is_global_merc_quest,
 	bool is_global_npc_quest,
 	bool is_item_quest,
 	bool is_spell_quest,
@@ -1491,6 +1512,8 @@ void PerlembParser::ExportMobVariables(
 		!is_global_player_quest &&
 		!is_bot_quest &&
 		!is_global_bot_quest &&
+		!is_merc_quest &&
+		!is_global_merc_quest &&
 		!is_item_quest
 	) {
 		if (mob && mob->IsClient() && npc_mob && npc_mob->IsNPC()) {
@@ -1521,6 +1544,8 @@ void PerlembParser::ExportMobVariables(
 		!is_global_player_quest &&
 		!is_bot_quest &&
 		!is_global_bot_quest &&
+		!is_merc_quest &&
+		!is_global_merc_quest &&
 		!is_item_quest &&
 		!is_spell_quest
 	) {
@@ -2081,7 +2106,8 @@ void PerlembParser::ExportEventVariables(
 						"killed_bot_id",
 						killed->IsBot() ? killed->CastToBot()->GetBotID() : 0
 					);
-					ExportVar(package_name.c_str(), "killed_npc_id", killed->IsNPC() ? killed->GetNPCTypeID() : 0);
+					ExportVar(package_name.c_str(), "killed_merc_id", killed->IsMerc() ? killed->CastToMerc()->GetMercenaryID() : 0);
+					ExportVar(package_name.c_str(), "killed_npc_id", !killed->IsMerc() && killed->IsNPC() ? killed->GetNPCTypeID() : 0);
 				}
 			}
 			break;
@@ -2357,6 +2383,7 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_DESPAWN: {
 			ExportVar(package_name.c_str(), "despawned_entity_id", npc_mob->GetID());
 			ExportVar(package_name.c_str(), "despawned_bot_id", npc_mob->IsBot() ? npc_mob->CastToBot()->GetBotID() : 0);
+			ExportVar(package_name.c_str(), "despawned_merc_id", npc_mob->IsMerc() ? npc_mob->CastToMerc()->GetMercenaryID() : 0);
 			ExportVar(package_name.c_str(), "despawned_npc_id", npc_mob->IsNPC() ? npc_mob->GetNPCTypeID() : 0);
 			break;
 		}
@@ -2628,6 +2655,126 @@ int PerlembParser::EventGlobalBot(
 		0,
 		data.c_str(),
 		bot,
+		nullptr,
+		nullptr,
+		mob,
+		extra_data,
+		true,
+		extra_pointers
+	);
+}
+
+void PerlembParser::LoadMercScript(std::string filename)
+{
+	if (!perl || merc_quest_status_ != questUnloaded) {
+		return;
+	}
+
+	try {
+		perl->eval_file("qst_merc", filename.c_str());
+	} catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Merc Quest File [{}] Error [{}]",
+				filename,
+				e
+			)
+		);
+
+		merc_quest_status_ = questFailedToLoad;
+		return;
+	}
+
+	merc_quest_status_ = questLoaded;
+}
+
+void PerlembParser::LoadGlobalMercScript(std::string filename)
+{
+	if (!perl || global_merc_quest_status_ != questUnloaded) {
+		return;
+	}
+
+	try {
+		perl->eval_file("qst_global_merc", filename.c_str());
+	} catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Global Merc Quest File [{}] Error [{}]",
+				filename,
+				e
+			)
+		);
+
+		global_merc_quest_status_ = questFailedToLoad;
+		return;
+	}
+
+	global_merc_quest_status_ = questLoaded;
+}
+
+bool PerlembParser::MercHasQuestSub(QuestEventID event_id)
+{
+	if (
+		!perl ||
+		merc_quest_status_ != questLoaded ||
+		event_id >= _LargestEventID
+	) {
+		return false;
+	}
+
+	return perl->SubExists("qst_merc", QuestEventSubroutines[event_id]);
+}
+
+bool PerlembParser::GlobalMercHasQuestSub(QuestEventID event_id)
+{
+	if (
+		!perl ||
+		global_merc_quest_status_ != questLoaded ||
+		event_id >= _LargestEventID
+		) {
+		return false;
+	}
+
+	return (perl->SubExists("qst_global_merc", QuestEventSubroutines[event_id]));
+}
+
+int PerlembParser::EventMerc(
+	QuestEventID event_id,
+	Merc* merc,
+	Mob* mob,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	return EventCommon(
+		event_id,
+		0,
+		data.c_str(),
+		merc,
+		nullptr,
+		nullptr,
+		mob,
+		extra_data,
+		false,
+		extra_pointers
+	);
+}
+
+int PerlembParser::EventGlobalMerc(
+	QuestEventID event_id,
+	Merc* merc,
+	Mob* mob,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	return EventCommon(
+		event_id,
+		0,
+		data.c_str(),
+		merc,
 		nullptr,
 		nullptr,
 		mob,

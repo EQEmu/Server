@@ -11984,15 +11984,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 
 	auto t = GetTarget();
 	if (t) {
-		if (t->IsNPC()) {
-			if (parse->HasQuestSub(t->GetNPCTypeID(), EVENT_POPUP_RESPONSE)) {
-				parse->EventNPC(EVENT_POPUP_RESPONSE, t->CastToNPC(), this, std::to_string(popup_response->popupid), 0);
-			}
-		} else if (t->IsBot()) {
-			if (parse->BotHasQuestSub(EVENT_POPUP_RESPONSE)) {
-				parse->EventBot(EVENT_POPUP_RESPONSE, t->CastToBot(), this, std::to_string(popup_response->popupid), 0);
-			}
-		}
+		parse->EventBotMercNPC(EVENT_POPUP_RESPONSE, t, this, [&]() { return std::to_string(popup_response->popupid); });
 	}
 }
 
