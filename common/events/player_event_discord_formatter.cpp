@@ -857,23 +857,59 @@ std::string PlayerEventDiscordFormatter::FormatNPCTradeEvent(
 	if (!e.items.empty()) {
 		for (const auto& i : e.items) {
 			items_info += fmt::format(
-				"{} ({}){} Augments: 1. {} ({}) | 2. {} ({}) | 3. {} ({}) | 4. {} ({}) | 5. {} ({}) | 6. {} ({})\n",
+				"{} ({}){}\n",
 				i.item_name,
 				i.item_id,
-				i.charges > 1 ? fmt::format(" Charges: {}", i.charges) : "",
-				i.aug_1_item_name,
-				i.aug_1_item_id,
-				i.aug_2_item_name,
-				i.aug_2_item_id,
-				i.aug_3_item_name,
-				i.aug_3_item_id,
-				i.aug_4_item_name,
-				i.aug_4_item_id,
-				i.aug_5_item_name,
-				i.aug_5_item_id,
-				i.aug_6_item_name,
-				i.aug_6_item_id
+				i.charges > 1 ? fmt::format(" Charges: {}", i.charges) : ""
 			);
+
+			if (i.aug_1_item_id) {
+				items_info += fmt::format(
+					"Augment One | {} ({})",
+					i.aug_1_item_name,
+					i.aug_1_item_id
+				);
+			}
+
+			if (i.aug_2_item_id) {
+				items_info += fmt::format(
+					"Augment Two | {} ({})",
+					i.aug_2_item_name,
+					i.aug_2_item_id
+				);
+			}
+
+			if (i.aug_3_item_id) {
+				items_info += fmt::format(
+					"Augment Three | {} ({})",
+					i.aug_3_item_name,
+					i.aug_3_item_id
+				);
+			}
+
+			if (i.aug_4_item_id) {
+				items_info += fmt::format(
+					"Augment Four | {} ({})",
+					i.aug_4_item_name,
+					i.aug_4_item_id
+				);
+			}
+
+			if (i.aug_5_item_id) {
+				items_info += fmt::format(
+					"Augment Five | {} ({})",
+					i.aug_5_item_name,
+					i.aug_5_item_id
+				);
+			}
+
+			if (i.aug_6_item_id) {
+				items_info += fmt::format(
+					"Augment Six | {} ({})",
+					i.aug_6_item_name,
+					i.aug_6_item_id
+				);
+			}
 		}
 	}
 
