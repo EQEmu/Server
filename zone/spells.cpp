@@ -2044,13 +2044,24 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	SpellTargetType targetType = spells[spell_id].target_type;
 	uint8 mob_body = spell_target ? spell_target->GetBodyType() : BodyType::Humanoid;
 
+	const bool grouped_target = spell_target->IsClient() && (IsGrouped() && GetGroup()->IsGroupMember(spell_target));
+	const bool raid_group_target = spell_target->IsClient() && (IsRaidGrouped() && GetRaid()->IsRaidMember(spell_target->CastToClient()));
+	bool is_my_pet = false;
+	for (auto pet : GetAllPets()) {
+		if (spell_target && pet->GetID() == spell_target->GetID()) {
+			is_my_pet = true;
+			break;
+		}
+	}
+
 	if(IsIllusionSpell(spell_id)
-		&& spell_target != nullptr // null ptr crash safeguard
-		&& (!spell_target->IsNPC() || spell_target->IsPet()) // still self only if NPC targetted
+		&& spell_target != nullptr
+		&& (!spell_target->IsNPC() || spell_target->IsPet())
 		&& IsClient()
-		&& (HasProjectIllusion())){
+		&& (spell_target->GetID() == GetID() || grouped_target || raid_group_target || is_my_pet)
+		&& (HasProjectIllusion())) {
 			LogAA("Project Illusion overwrote target caster: [{}] spell id: [{}] was ON", GetName(), spell_id);
-			targetType = ST_Target;
+			targetType = ST_GroupClientAndPet;
 	}
 
 	// NPC innate procs override the target type to single target.
