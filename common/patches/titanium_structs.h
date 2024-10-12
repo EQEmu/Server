@@ -879,7 +879,14 @@ struct PlayerProfile_Struct
 /*12564*/ PotionBelt_Struct  potionbelt; // potion belt
 /*12852*/ uint8 unknown12852[8];
 /*12860*/ uint32 available_slots;
-/*12864*/ uint8 unknown12864[76];
+/*12864*/ uint8 unknown12864[12];
+/*12876*/ uint32 cold_resist;
+/*12880*/ uint32 fire_resist;
+/*12884*/ uint32 magic_resist;
+/*12888*/ uint32 disease_resist;
+/*12892*/ uint32 poison_resist;
+/*12896*/ uint32 physical_resist;
+/*12900*/ uint8 unknown12900[40];
 /*12940*/ char      name[64];           // Name of player
 /*13004*/ char      last_name[32];       // Last name of player
 /*13036*/ uint32   guild_id;            // guildid
