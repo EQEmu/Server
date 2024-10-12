@@ -509,12 +509,12 @@ public:
 		e.aa_points_old           = 0;
 		e.e_last_invsnapshot      = 0;
 		e.deleted_at              = 0;
-		e.cold_resist             = 25;
-		e.fire_resist             = 25;
-		e.magic_resist            = 25;
-		e.disease_resist          = 15;
-		e.poison_resist           = 15;
-		e.corruption_resist       = 15;
+		e.cold_resist             = 0;
+		e.fire_resist             = 0;
+		e.magic_resist            = 0;
+		e.disease_resist          = 0;
+		e.poison_resist           = 0;
+		e.corruption_resist       = 0;
 
 		return e;
 	}
@@ -655,12 +655,12 @@ public:
 			e.aa_points_old           = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.e_last_invsnapshot      = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
 			e.deleted_at              = strtoll(row[103] ? row[103] : "-1", nullptr, 10);
-			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 25;
-			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 25;
-			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 25;
-			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 15;
-			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 15;
-			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 15;
+			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 0;
+			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 0;
+			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 0;
+			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 0;
+			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 0;
+			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -1210,12 +1210,12 @@ public:
 			e.aa_points_old           = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.e_last_invsnapshot      = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
 			e.deleted_at              = strtoll(row[103] ? row[103] : "-1", nullptr, 10);
-			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 25;
-			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 25;
-			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 25;
-			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 15;
-			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 15;
-			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 15;
+			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 0;
+			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 0;
+			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 0;
+			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 0;
+			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 0;
+			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1344,12 +1344,12 @@ public:
 			e.aa_points_old           = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.e_last_invsnapshot      = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
 			e.deleted_at              = strtoll(row[103] ? row[103] : "-1", nullptr, 10);
-			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 25;
-			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 25;
-			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 25;
-			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 15;
-			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 15;
-			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 15;
+			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 0;
+			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 0;
+			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 0;
+			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 0;
+			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 0;
+			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
