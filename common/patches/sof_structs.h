@@ -944,7 +944,16 @@ struct PlayerProfile_Struct //23576 Octets
 /*14700*/ PotionBelt_Struct  potionbelt;	// [360] potion belt 72 extra octets by adding 1 more belt slot
 /*15060*/ uint8 unknown12852[8];
 /*15068*/ uint32 available_slots;
-/*15072*/ uint8 unknown12864[80];		//#### uint8 uint8 unknown12864[76]; in Titanium ####[80]
+/*15072*/ uint8 unknown12864[12];		//#### uint8 uint8 unknown12864[76]; in Titanium ####[80]
+/*15084*/ uint32 cold_resist;
+/*15088*/ uint32 fire_resist;
+/*15092*/ uint32 magic_resist;
+/*15096*/ uint32 disease_resist;
+/*15100*/ uint32 poison_resist;
+/*15104*/ uint32 physical_resist;
+/*15108*/ uint32 corruption_resist;
+/*15112*/ uint8 unknown15112[40];
+
 //END SUB-STRUCT used for shrouding.
 /*15120*/ char    name[64];				// Name of player
 /*15184*/ char    last_name[32];		// Last name of player
