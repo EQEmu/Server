@@ -430,17 +430,6 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatNPCHandinEvent(e, n);
 			break;
 		}
-		case PlayerEvent::NPC_TRADE: {
-			PlayerEvent::NPCTradeEvent n{};
-			std::stringstream          ss;
-			{
-				ss << e.player_event_log.event_data;
-				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
-			}
-			payload = PlayerEventDiscordFormatter::FormatNPCTradeEvent(e, n);
-			break;
-		}
 		case PlayerEvent::SAY: {
 			PlayerEvent::SayEvent n{};
 			std::stringstream     ss;
@@ -718,7 +707,6 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::PARCEL_RETRIEVE].event_enabled           = 1;
 	m_settings[PlayerEvent::PARCEL_DELETE].event_enabled             = 1;
 	m_settings[PlayerEvent::BARTER_TRANSACTION].event_enabled        = 1;
-	m_settings[PlayerEvent::NPC_TRADE].event_enabled                 = 1;
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;

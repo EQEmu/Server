@@ -12316,13 +12316,181 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
 }
 
-void Client::NPCTradeEventLog(Trade* t, NPC* n)
+void Client::NPCHandinEventLog(Trade* t, NPC* n)
 {
 	Client* c = t->GetOwner()->CastToClient();
 
+	std::vector<PlayerEvent::HandinEntry> hi = {};
+	std::vector<PlayerEvent::HandinEntry> ri = {};
+	PlayerEvent::HandinMoney              hm{};
+	PlayerEvent::HandinMoney              rm{};
+
+	if (
+		c->EntityVariableExists("HANDIN_ITEMS") &&
+		c->EntityVariableExists("HANDIN_MONEY") &&
+		c->EntityVariableExists("RETURN_ITEMS") &&
+		c->EntityVariableExists("RETURN_MONEY")
+	) {
+		const std::string& handin_items = c->GetEntityVariable("HANDIN_ITEMS");
+		const std::string& return_items = c->GetEntityVariable("RETURN_ITEMS");
+		const std::string& handin_money = c->GetEntityVariable("HANDIN_MONEY");
+		const std::string& return_money = c->GetEntityVariable("RETURN_MONEY");
+
+		// Handin Items
+		if (!handin_items.empty()) {
+			if (Strings::Contains(handin_items, ",")) {
+				const auto handin_data = Strings::Split(handin_items, ",");
+				for (const auto& h : handin_data) {
+					const auto item_data = Strings::Split(h, "|");
+					if (
+						item_data.size() == 3 &&
+						Strings::IsNumber(item_data[0]) &&
+						Strings::IsNumber(item_data[1]) &&
+						Strings::IsNumber(item_data[2])
+					) {
+						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+						if (item_id != 0) {
+							const auto* item = database.GetItem(item_id);
+
+							if (item) {
+								hi.emplace_back(
+									PlayerEvent::HandinEntry{
+										.item_id = item_id,
+										.item_name = item->Name,
+										.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+										.attuned = Strings::ToInt(item_data[2]) ? true : false
+									}
+								);
+							}
+						}
+					}
+				}
+			} else if (Strings::Contains(handin_items, "|")) {
+				const auto item_data = Strings::Split(handin_items, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+				) {
+					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+					const auto*  item    = database.GetItem(item_id);
+
+					if (item) {
+						hi.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+
+		// Handin Money
+		if (!handin_money.empty()) {
+			const auto hms = Strings::Split(handin_money, "|");
+
+			hm.copper   = Strings::ToUnsignedInt(hms[0]);
+			hm.silver   = Strings::ToUnsignedInt(hms[1]);
+			hm.gold     = Strings::ToUnsignedInt(hms[2]);
+			hm.platinum = Strings::ToUnsignedInt(hms[3]);
+		}
+
+		// Return Items
+		if (!return_items.empty()) {
+			if (Strings::Contains(return_items, ",")) {
+				const auto return_data = Strings::Split(return_items, ",");
+				for (const auto& r : return_data) {
+					const auto item_data = Strings::Split(r, "|");
+					if (
+						item_data.size() == 3 &&
+						Strings::IsNumber(item_data[0]) &&
+						Strings::IsNumber(item_data[1]) &&
+						Strings::IsNumber(item_data[2])
+					) {
+						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+						const auto*  item    = database.GetItem(item_id);
+
+						if (item) {
+							ri.emplace_back(
+								PlayerEvent::HandinEntry{
+									.item_id = item_id,
+									.item_name = item->Name,
+									.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+									.attuned = Strings::ToInt(item_data[2]) ? true : false
+								}
+							);
+						}
+					}
+				}
+			} else if (Strings::Contains(return_items, "|")) {
+				const auto item_data = Strings::Split(return_items, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+				) {
+					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+					const auto*  item    = database.GetItem(item_id);
+
+					if (item) {
+						ri.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+
+		// Return Money
+		if (!return_money.empty()) {
+			const auto rms = Strings::Split(return_money, "|");
+			rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
+			rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
+			rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
+			rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
+		}
+
+		c->DeleteEntityVariable("HANDIN_ITEMS");
+		c->DeleteEntityVariable("HANDIN_MONEY");
+		c->DeleteEntityVariable("RETURN_ITEMS");
+		c->DeleteEntityVariable("RETURN_MONEY");
+
+		const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
+
+		const bool event_has_data_to_record = (
+			!hi.empty() || handed_in_money
+		);
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+			auto e = PlayerEvent::HandinEvent{
+				.npc_id = n->GetNPCTypeID(),
+				.npc_name = n->GetCleanName(),
+				.handin_items = hi,
+				.handin_money = hm,
+				.return_items = ri,
+				.return_money = rm
+			};
+
+			RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
+		}
+
+		return;
+	}
+
 	uint8 item_count = 0;
 
-	auto money = PlayerEvent::Money{
+	auto handin_money = PlayerEvent::Money{
 		.platinum = t->pp,
 		.gold = t->gp,
 		.silver = t->sp,
@@ -12339,33 +12507,18 @@ void Client::NPCTradeEventLog(Trade* t, NPC* n)
 
 	LogError("item_count [{}]", item_count);
 
-	std::vector<PlayerEvent::TradeItemEntry> items = {};
-
-	items.reserve(item_count);
+	hi.reserve(item_count);
 
 	if (item_count > 0) {
 		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
 			const EQ::ItemInstance* inst = c->GetInv().GetItem(i);
 			if (inst) {
-				items.emplace_back(
-					PlayerEvent::TradeItemEntry{
-						.slot = i,
+				hi.emplace_back(
+					PlayerEvent::HandinEntry{
 						.item_id = inst->GetItem()->ID,
 						.item_name = inst->GetItem()->Name,
 						.charges = static_cast<uint16>(inst->GetCharges()),
-						.aug_1_item_id = inst->GetAugmentItemID(0),
-						.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
-						.aug_2_item_id = inst->GetAugmentItemID(1),
-						.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
-						.aug_3_item_id = inst->GetAugmentItemID(2),
-						.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
-						.aug_4_item_id = inst->GetAugmentItemID(3),
-						.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
-						.aug_5_item_id = inst->GetAugmentItemID(4),
-						.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
-						.aug_6_item_id = inst->GetAugmentItemID(5),
-						.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
-						.in_bag = false,
+						.attuned = inst->IsAttuned()
 					}
 				);
 
@@ -12373,25 +12526,12 @@ void Client::NPCTradeEventLog(Trade* t, NPC* n)
 					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
 						inst = c->GetInv().GetItem(i, j);
 						if (inst) {
-							items.emplace_back(
-								PlayerEvent::TradeItemEntry{
-									.slot = j,
+							hi.emplace_back(
+								PlayerEvent::HandinEntry{
 									.item_id = inst->GetItem()->ID,
 									.item_name = inst->GetItem()->Name,
 									.charges = static_cast<uint16>(inst->GetCharges()),
-									.aug_1_item_id = inst->GetAugmentItemID(0),
-									.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
-									.aug_2_item_id = inst->GetAugmentItemID(1),
-									.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
-									.aug_3_item_id = inst->GetAugmentItemID(2),
-									.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
-									.aug_4_item_id = inst->GetAugmentItemID(3),
-									.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
-									.aug_5_item_id = inst->GetAugmentItemID(4),
-									.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
-									.aug_6_item_id = inst->GetAugmentItemID(5),
-									.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
-									.in_bag = true,
+									.attuned = inst->IsAttuned()
 								}
 							);
 						}
@@ -12401,20 +12541,21 @@ void Client::NPCTradeEventLog(Trade* t, NPC* n)
 		}
 	}
 
-	bool handed_in_money = money.platinum > 0 || money.gold > 0 || money.silver > 0 || money.copper > 0;
+	const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
 
-	bool event_has_data_to_record = !items.empty() || handed_in_money;
+	const bool event_has_data_to_record = !hi.empty() || handed_in_money;
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_TRADE) && event_has_data_to_record) {
-		auto e = PlayerEvent::NPCTradeEvent{
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+		auto e = PlayerEvent::HandinEvent{
 			.npc_id = n->GetNPCTypeID(),
-			.npc_name = n->GetName(),
-			.npc_clean_name = n->GetCleanName(),
-			.money = money,
-			.items = items
+			.npc_name = n->GetCleanName(),
+			.handin_items = hi,
+			.handin_money = hm,
+			.return_items = ri,
+			.return_money = rm
 		};
 
-		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_TRADE, e);
+		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
 	}
 }
 
