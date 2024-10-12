@@ -153,12 +153,12 @@ public:
 		e.alloc_int   = 0;
 		e.alloc_wis   = 0;
 		e.alloc_cha   = 0;
-		e.base_cr     = 25;
-		e.base_fr     = 25;
-		e.base_mr     = 25;
-		e.base_dr     = 15;
-		e.base_pr     = 15;
-		e.base_corrup = 15;
+		e.base_cr     = 0;
+		e.base_fr     = 0;
+		e.base_mr     = 0;
+		e.base_dr     = 0;
+		e.base_pr     = 0;
+		e.base_corrup = 0;
 
 		return e;
 	}
@@ -210,12 +210,12 @@ public:
 			e.alloc_int   = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.alloc_wis   = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.alloc_cha   = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 25;
-			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 25;
-			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 25;
-			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 15;
-			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 15;
-			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 15;
+			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -410,12 +410,12 @@ public:
 			e.alloc_int   = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.alloc_wis   = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.alloc_cha   = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 25;
-			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 25;
-			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 25;
-			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 15;
-			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 15;
-			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 15;
+			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -455,12 +455,12 @@ public:
 			e.alloc_int   = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.alloc_wis   = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.alloc_cha   = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 25;
-			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 25;
-			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 25;
-			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 15;
-			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 15;
-			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 15;
+			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
