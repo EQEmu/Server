@@ -34,6 +34,12 @@ public:
 		uint32_t alloc_int;
 		uint32_t alloc_wis;
 		uint32_t alloc_cha;
+		uint32_t base_cr;
+		uint32_t base_fr;
+		uint32_t base_mr;
+		uint32_t base_dr;
+		uint32_t base_pr;
+		uint32_t base_corrup;
 	};
 
 	static std::string PrimaryKey()
@@ -59,6 +65,12 @@ public:
 			"alloc_int",
 			"alloc_wis",
 			"alloc_cha",
+			"base_cr",
+			"base_fr",
+			"base_mr",
+			"base_dr",
+			"base_pr",
+			"base_corrup",
 		};
 	}
 
@@ -80,6 +92,12 @@ public:
 			"alloc_int",
 			"alloc_wis",
 			"alloc_cha",
+			"base_cr",
+			"base_fr",
+			"base_mr",
+			"base_dr",
+			"base_pr",
+			"base_corrup",
 		};
 	}
 
@@ -120,21 +138,27 @@ public:
 	{
 		CharCreatePointAllocations e{};
 
-		e.id        = 0;
-		e.base_str  = 0;
-		e.base_sta  = 0;
-		e.base_dex  = 0;
-		e.base_agi  = 0;
-		e.base_int  = 0;
-		e.base_wis  = 0;
-		e.base_cha  = 0;
-		e.alloc_str = 0;
-		e.alloc_sta = 0;
-		e.alloc_dex = 0;
-		e.alloc_agi = 0;
-		e.alloc_int = 0;
-		e.alloc_wis = 0;
-		e.alloc_cha = 0;
+		e.id          = 0;
+		e.base_str    = 0;
+		e.base_sta    = 0;
+		e.base_dex    = 0;
+		e.base_agi    = 0;
+		e.base_int    = 0;
+		e.base_wis    = 0;
+		e.base_cha    = 0;
+		e.alloc_str   = 0;
+		e.alloc_sta   = 0;
+		e.alloc_dex   = 0;
+		e.alloc_agi   = 0;
+		e.alloc_int   = 0;
+		e.alloc_wis   = 0;
+		e.alloc_cha   = 0;
+		e.base_cr     = 25;
+		e.base_fr     = 25;
+		e.base_mr     = 25;
+		e.base_dr     = 15;
+		e.base_pr     = 15;
+		e.base_corrup = 15;
 
 		return e;
 	}
@@ -171,21 +195,27 @@ public:
 		if (results.RowCount() == 1) {
 			CharCreatePointAllocations e{};
 
-			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex    = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi   = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int   = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis   = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha   = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 25;
+			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 25;
+			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 25;
+			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 15;
+			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 15;
+			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 15;
 
 			return e;
 		}
@@ -234,6 +264,12 @@ public:
 		v.push_back(columns[12] + " = " + std::to_string(e.alloc_int));
 		v.push_back(columns[13] + " = " + std::to_string(e.alloc_wis));
 		v.push_back(columns[14] + " = " + std::to_string(e.alloc_cha));
+		v.push_back(columns[15] + " = " + std::to_string(e.base_cr));
+		v.push_back(columns[16] + " = " + std::to_string(e.base_fr));
+		v.push_back(columns[17] + " = " + std::to_string(e.base_mr));
+		v.push_back(columns[18] + " = " + std::to_string(e.base_dr));
+		v.push_back(columns[19] + " = " + std::to_string(e.base_pr));
+		v.push_back(columns[20] + " = " + std::to_string(e.base_corrup));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -270,6 +306,12 @@ public:
 		v.push_back(std::to_string(e.alloc_int));
 		v.push_back(std::to_string(e.alloc_wis));
 		v.push_back(std::to_string(e.alloc_cha));
+		v.push_back(std::to_string(e.base_cr));
+		v.push_back(std::to_string(e.base_fr));
+		v.push_back(std::to_string(e.base_mr));
+		v.push_back(std::to_string(e.base_dr));
+		v.push_back(std::to_string(e.base_pr));
+		v.push_back(std::to_string(e.base_corrup));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -314,6 +356,12 @@ public:
 			v.push_back(std::to_string(e.alloc_int));
 			v.push_back(std::to_string(e.alloc_wis));
 			v.push_back(std::to_string(e.alloc_cha));
+			v.push_back(std::to_string(e.base_cr));
+			v.push_back(std::to_string(e.base_fr));
+			v.push_back(std::to_string(e.base_mr));
+			v.push_back(std::to_string(e.base_dr));
+			v.push_back(std::to_string(e.base_pr));
+			v.push_back(std::to_string(e.base_corrup));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -347,21 +395,27 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharCreatePointAllocations e{};
 
-			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex    = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi   = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int   = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis   = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha   = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 25;
+			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 25;
+			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 25;
+			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 15;
+			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 15;
+			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 15;
 
 			all_entries.push_back(e);
 		}
@@ -386,21 +440,27 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharCreatePointAllocations e{};
 
-			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex    = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi   = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int   = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis   = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha   = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.base_cr     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 25;
+			e.base_fr     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 25;
+			e.base_mr     = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 25;
+			e.base_dr     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 15;
+			e.base_pr     = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 15;
+			e.base_corrup = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 15;
 
 			all_entries.push_back(e);
 		}
@@ -490,6 +550,12 @@ public:
 		v.push_back(std::to_string(e.alloc_int));
 		v.push_back(std::to_string(e.alloc_wis));
 		v.push_back(std::to_string(e.alloc_cha));
+		v.push_back(std::to_string(e.base_cr));
+		v.push_back(std::to_string(e.base_fr));
+		v.push_back(std::to_string(e.base_mr));
+		v.push_back(std::to_string(e.base_dr));
+		v.push_back(std::to_string(e.base_pr));
+		v.push_back(std::to_string(e.base_corrup));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -527,6 +593,12 @@ public:
 			v.push_back(std::to_string(e.alloc_int));
 			v.push_back(std::to_string(e.alloc_wis));
 			v.push_back(std::to_string(e.alloc_cha));
+			v.push_back(std::to_string(e.base_cr));
+			v.push_back(std::to_string(e.base_fr));
+			v.push_back(std::to_string(e.base_mr));
+			v.push_back(std::to_string(e.base_dr));
+			v.push_back(std::to_string(e.base_pr));
+			v.push_back(std::to_string(e.base_corrup));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

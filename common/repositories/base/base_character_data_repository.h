@@ -123,6 +123,12 @@ public:
 		uint32_t    aa_points_old;
 		uint32_t    e_last_invsnapshot;
 		time_t      deleted_at;
+		uint32_t    cold_resist;
+		uint32_t    fire_resist;
+		uint32_t    magic_resist;
+		uint32_t    disease_resist;
+		uint32_t    poison_resist;
+		uint32_t    corruption_resist;
 	};
 
 	static std::string PrimaryKey()
@@ -237,6 +243,12 @@ public:
 			"aa_points_old",
 			"e_last_invsnapshot",
 			"deleted_at",
+			"cold_resist",
+			"fire_resist",
+			"magic_resist",
+			"disease_resist",
+			"poison_resist",
+			"corruption_resist",
 		};
 	}
 
@@ -347,6 +359,12 @@ public:
 			"aa_points_old",
 			"e_last_invsnapshot",
 			"UNIX_TIMESTAMP(deleted_at)",
+			"cold_resist",
+			"fire_resist",
+			"magic_resist",
+			"disease_resist",
+			"poison_resist",
+			"corruption_resist",
 		};
 	}
 
@@ -491,6 +509,12 @@ public:
 		e.aa_points_old           = 0;
 		e.e_last_invsnapshot      = 0;
 		e.deleted_at              = 0;
+		e.cold_resist             = 25;
+		e.fire_resist             = 25;
+		e.magic_resist            = 25;
+		e.disease_resist          = 15;
+		e.poison_resist           = 15;
+		e.corruption_resist       = 15;
 
 		return e;
 	}
@@ -631,6 +655,12 @@ public:
 			e.aa_points_old           = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.e_last_invsnapshot      = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
 			e.deleted_at              = strtoll(row[103] ? row[103] : "-1", nullptr, 10);
+			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 25;
+			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 25;
+			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 25;
+			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 15;
+			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 15;
+			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 15;
 
 			return e;
 		}
@@ -767,6 +797,12 @@ public:
 		v.push_back(columns[101] + " = " + std::to_string(e.aa_points_old));
 		v.push_back(columns[102] + " = " + std::to_string(e.e_last_invsnapshot));
 		v.push_back(columns[103] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back(columns[104] + " = " + std::to_string(e.cold_resist));
+		v.push_back(columns[105] + " = " + std::to_string(e.fire_resist));
+		v.push_back(columns[106] + " = " + std::to_string(e.magic_resist));
+		v.push_back(columns[107] + " = " + std::to_string(e.disease_resist));
+		v.push_back(columns[108] + " = " + std::to_string(e.poison_resist));
+		v.push_back(columns[109] + " = " + std::to_string(e.corruption_resist));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -892,6 +928,12 @@ public:
 		v.push_back(std::to_string(e.aa_points_old));
 		v.push_back(std::to_string(e.e_last_invsnapshot));
 		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back(std::to_string(e.cold_resist));
+		v.push_back(std::to_string(e.fire_resist));
+		v.push_back(std::to_string(e.magic_resist));
+		v.push_back(std::to_string(e.disease_resist));
+		v.push_back(std::to_string(e.poison_resist));
+		v.push_back(std::to_string(e.corruption_resist));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1025,6 +1067,12 @@ public:
 			v.push_back(std::to_string(e.aa_points_old));
 			v.push_back(std::to_string(e.e_last_invsnapshot));
 			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+			v.push_back(std::to_string(e.cold_resist));
+			v.push_back(std::to_string(e.fire_resist));
+			v.push_back(std::to_string(e.magic_resist));
+			v.push_back(std::to_string(e.disease_resist));
+			v.push_back(std::to_string(e.poison_resist));
+			v.push_back(std::to_string(e.corruption_resist));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1162,6 +1210,12 @@ public:
 			e.aa_points_old           = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.e_last_invsnapshot      = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
 			e.deleted_at              = strtoll(row[103] ? row[103] : "-1", nullptr, 10);
+			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 25;
+			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 25;
+			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 25;
+			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 15;
+			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 15;
+			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 15;
 
 			all_entries.push_back(e);
 		}
@@ -1290,6 +1344,12 @@ public:
 			e.aa_points_old           = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.e_last_invsnapshot      = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
 			e.deleted_at              = strtoll(row[103] ? row[103] : "-1", nullptr, 10);
+			e.cold_resist             = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 25;
+			e.fire_resist             = row[105] ? static_cast<uint32_t>(strtoul(row[105], nullptr, 10)) : 25;
+			e.magic_resist            = row[106] ? static_cast<uint32_t>(strtoul(row[106], nullptr, 10)) : 25;
+			e.disease_resist          = row[107] ? static_cast<uint32_t>(strtoul(row[107], nullptr, 10)) : 15;
+			e.poison_resist           = row[108] ? static_cast<uint32_t>(strtoul(row[108], nullptr, 10)) : 15;
+			e.corruption_resist       = row[109] ? static_cast<uint32_t>(strtoul(row[109], nullptr, 10)) : 15;
 
 			all_entries.push_back(e);
 		}
@@ -1468,6 +1528,12 @@ public:
 		v.push_back(std::to_string(e.aa_points_old));
 		v.push_back(std::to_string(e.e_last_invsnapshot));
 		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back(std::to_string(e.cold_resist));
+		v.push_back(std::to_string(e.fire_resist));
+		v.push_back(std::to_string(e.magic_resist));
+		v.push_back(std::to_string(e.disease_resist));
+		v.push_back(std::to_string(e.poison_resist));
+		v.push_back(std::to_string(e.corruption_resist));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1594,6 +1660,12 @@ public:
 			v.push_back(std::to_string(e.aa_points_old));
 			v.push_back(std::to_string(e.e_last_invsnapshot));
 			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+			v.push_back(std::to_string(e.cold_resist));
+			v.push_back(std::to_string(e.fire_resist));
+			v.push_back(std::to_string(e.magic_resist));
+			v.push_back(std::to_string(e.disease_resist));
+			v.push_back(std::to_string(e.poison_resist));
+			v.push_back(std::to_string(e.corruption_resist));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

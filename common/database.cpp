@@ -514,6 +514,12 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	c.raid_auto_consent       = pp->raidAutoconsent;
 	c.guild_auto_consent      = pp->guildAutoconsent;
 	c.RestTimer               = pp->RestTimer;
+	c.cold_resist             = pp->cold_resist;
+	c.fire_resist             = pp->fire_resist;
+	c.magic_resist            = pp->magic_resist;
+	c.disease_resist          = pp->disease_resist;
+	c.poison_resist           = pp->poison_resist;
+	c.corruption_resist       = pp->corruption_resist;
 
 	CharacterDataRepository::ReplaceOne(*this, c);
 
