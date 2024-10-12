@@ -25,14 +25,15 @@
 #include <cstdlib>
 #include <vector>
 #include "sof_char_create_data.h"
+#include "race_combos.h"
 #include "../common/repositories/character_instance_safereturns_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/zone_store.h"
 
 WorldDatabase database;
 WorldDatabase content_db;
-extern std::vector<RaceClassAllocation> character_create_allocations;
-extern std::vector<RaceClassCombos> character_create_race_class_combos;
+extern std::vector<CharCreatePointAllocation> character_create_allocations;
+extern std::vector<CharCreateCombination> character_create_race_class_combos;
 
 
 /**
@@ -807,7 +808,7 @@ bool WorldDatabase::LoadCharacterCreateAllocations()
         return false;
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        RaceClassAllocation allocate;
+		CharCreatePointAllocation allocate;
 		allocate.Index = Strings::ToInt(row[0]);
 		allocate.BaseStats[0] = Strings::ToInt(row[1]);
 		allocate.BaseStats[3] = Strings::ToInt(row[2]);
@@ -823,6 +824,12 @@ bool WorldDatabase::LoadCharacterCreateAllocations()
 		allocate.DefaultPointAllocation[4] = Strings::ToInt(row[12]);
 		allocate.DefaultPointAllocation[5] = Strings::ToInt(row[13]);
 		allocate.DefaultPointAllocation[6] = Strings::ToInt(row[14]);
+		allocate.BaseResists[0] = Strings::ToInt(row[15]);
+		allocate.BaseResists[1] = Strings::ToInt(row[16]);
+		allocate.BaseResists[2] = Strings::ToInt(row[17]);
+		allocate.BaseResists[3] = Strings::ToInt(row[18]);
+		allocate.BaseResists[4] = Strings::ToInt(row[19]);
+		allocate.BaseResists[5] = Strings::ToInt(row[20]);
 
 		character_create_allocations.push_back(allocate);
     }
@@ -840,7 +847,7 @@ bool WorldDatabase::LoadCharacterCreateCombos()
         return false;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		RaceClassCombos combo;
+		CharCreateCombination combo;
 		combo.AllocationIndex = Strings::ToInt(row[0]);
 		combo.Race = Strings::ToInt(row[1]);
 		combo.Class = Strings::ToInt(row[2]);

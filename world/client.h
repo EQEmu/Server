@@ -122,7 +122,4 @@ private:
 	void RecordPossibleHack(const std::string& message);
 };
 
-bool CheckCharCreateInfoSoF(CharCreate_Struct *cc);
-bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc);
-
 #endif

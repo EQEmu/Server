@@ -47,6 +47,7 @@
 #include "clientlist.h"
 #include "wguild_mgr.h"
 #include "sof_char_create_data.h"
+#include "race_combos.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/account_repository.h"
 #include "../common/repositories/player_event_logs_repository.h"
@@ -85,8 +86,8 @@
 	#include <unistd.h>
 #endif
 
-std::vector<RaceClassAllocation> character_create_allocations;
-std::vector<RaceClassCombos> character_create_race_class_combos;
+std::vector<CharCreatePointAllocation> character_create_allocations;
+std::vector<CharCreateCombination> character_create_race_class_combos;
 
 extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
@@ -1642,6 +1643,346 @@ void Client::SendApproveWorld()
 	safe_delete(outapp);
 }
 
+// returns true if the request is ok, false if there's an error
+bool CheckCharCreateInfoSoF(CharCreate_Struct* cc)
+{
+	if (!cc)
+		return false;
+
+	LogInfo("Validating char creation info");
+
+	CharCreateCombination class_combo;
+	bool found = false;
+	int combos = character_create_race_class_combos.size();
+	for (int i = 0; i < combos; ++i) {
+		if (character_create_race_class_combos[i].Class == cc->class_ &&
+			character_create_race_class_combos[i].Race == cc->race &&
+			character_create_race_class_combos[i].Deity == cc->deity &&
+			character_create_race_class_combos[i].Zone == cc->start_zone) {
+			class_combo = character_create_race_class_combos[i];
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		LogInfo("Could not find class/race/deity/start_zone combination");
+		return false;
+	}
+
+	uint32 allocs = character_create_allocations.size();
+	CharCreatePointAllocation allocation = { 0 };
+	found = false;
+	for (int i = 0; i < allocs; ++i) {
+		if (character_create_allocations[i].Index == class_combo.AllocationIndex) {
+			allocation = character_create_allocations[i];
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		LogInfo("Could not find starting stats for selected character combo, cannot verify stats");
+		return false;
+	}
+
+	uint32 max_stats = allocation.DefaultPointAllocation[0] +
+		allocation.DefaultPointAllocation[1] +
+		allocation.DefaultPointAllocation[2] +
+		allocation.DefaultPointAllocation[3] +
+		allocation.DefaultPointAllocation[4] +
+		allocation.DefaultPointAllocation[5] +
+		allocation.DefaultPointAllocation[6];
+
+	if (cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
+		LogInfo("Strength out of range");
+		return false;
+	}
+
+	if (cc->DEX > allocation.BaseStats[1] + max_stats || cc->DEX < allocation.BaseStats[1]) {
+		LogInfo("Dexterity out of range");
+		return false;
+	}
+
+	if (cc->AGI > allocation.BaseStats[2] + max_stats || cc->AGI < allocation.BaseStats[2]) {
+		LogInfo("Agility out of range");
+		return false;
+	}
+
+	if (cc->STA > allocation.BaseStats[3] + max_stats || cc->STA < allocation.BaseStats[3]) {
+		LogInfo("Stamina out of range");
+		return false;
+	}
+
+	if (cc->INT > allocation.BaseStats[4] + max_stats || cc->INT < allocation.BaseStats[4]) {
+		LogInfo("Intelligence out of range");
+		return false;
+	}
+
+	if (cc->WIS > allocation.BaseStats[5] + max_stats || cc->WIS < allocation.BaseStats[5]) {
+		LogInfo("Wisdom out of range");
+		return false;
+	}
+
+	if (cc->CHA > allocation.BaseStats[6] + max_stats || cc->CHA < allocation.BaseStats[6]) {
+		LogInfo("Charisma out of range");
+		return false;
+	}
+
+	uint32 current_stats = 0;
+	current_stats += cc->STR - allocation.BaseStats[0];
+	current_stats += cc->DEX - allocation.BaseStats[1];
+	current_stats += cc->AGI - allocation.BaseStats[2];
+	current_stats += cc->STA - allocation.BaseStats[3];
+	current_stats += cc->INT - allocation.BaseStats[4];
+	current_stats += cc->WIS - allocation.BaseStats[5];
+	current_stats += cc->CHA - allocation.BaseStats[6];
+	if (current_stats > max_stats) {
+		LogInfo("Current Stats > Maximum Stats");
+		return false;
+	}
+
+	return true;
+}
+
+bool CheckCharCreateInfoTitanium(CharCreate_Struct* cc)
+{
+	uint32 bSTR, bSTA, bAGI, bDEX, bWIS, bINT, bCHA, bTOTAL, cTOTAL, stat_points; //these are all uint32 in CharCreate_Struct, so we'll make them uint32 here to make the compiler shut up
+	int classtemp, racetemp;
+	int Charerrors = 0;
+
+
+	// if this is increased you'll have to add a column to the classrace
+	// table below
+#define _TABLE_RACES 16
+
+	static const int BaseRace[_TABLE_RACES][7] =
+	{            /* STR  STA  AGI  DEX  WIS  INT  CHR */
+	{ /*Human*/      75,  75,  75,  75,  75,  75,  75},
+	{ /*Barbarian*/ 103,  95,  82,  70,  70,  60,  55},
+	{ /*Erudite*/    60,  70,  70,  70,  83, 107,  70},
+	{ /*Wood Elf*/   65,  65,  95,  80,  80,  75,  75},
+	{ /*High Elf*/   55,  65,  85,  70,  95,  92,  80},
+	{ /*Dark Elf*/   60,  65,  90,  75,  83,  99,  60},
+	{ /*Half Elf*/   70,  70,  90,  85,  60,  75,  75},
+	{ /*Dwarf*/      90,  90,  70,  90,  83,  60,  45},
+	{ /*Troll*/     108, 109,  83,  75,  60,  52,  40},
+	{ /*Ogre*/      130, 122,  70,  70,  67,  60,  37},
+	{ /*Halfling*/   70,  75,  95,  90,  80,  67,  50},
+	{ /*Gnome*/      60,  70,  85,  85,  67,  98,  60},
+	{ /*Iksar*/      70,  70,  90,  85,  80,  75,  55},
+	{ /*Vah Shir*/   90,  75,  90,  70,  70,  65,  65},
+	{ /*Froglok*/    70,  80, 100, 100,  75,  75,  50},
+	{ /*Drakkin*/    70,  80,  85,  75,  80,  85,  75}
+	};
+
+	static const int BaseClass[Class::PLAYER_CLASS_COUNT][8] =
+	{              /* STR  STA  AGI  DEX  WIS  INT  CHR  ADD*/
+	{ /*Warrior*/      10,  10,   5,   0,   0,   0,   0,  25},
+	{ /*Cleric*/        5,   5,   0,   0,  10,   0,   0,  30},
+	{ /*Paladin*/      10,   5,   0,   0,   5,   0,  10,  20},
+	{ /*Ranger*/        5,  10,  10,   0,   5,   0,   0,  20},
+	{ /*ShadowKnight*/ 10,   5,   0,   0,   0,   10,  5,  20},
+	{ /*Druid*/         0,  10,   0,   0,  10,   0,   0,  30},
+	{ /*Monk*/          5,   5,  10,  10,   0,   0,   0,  20},
+	{ /*Bard*/          5,   0,   0,  10,   0,   0,  10,  25},
+	{ /*Rouge*/         0,   0,  10,  10,   0,   0,   0,  30},
+	{ /*Shaman*/        0,   5,   0,   0,  10,   0,   5,  30},
+	{ /*Necromancer*/   0,   0,   0,  10,   0,  10,   0,  30},
+	{ /*Wizard*/        0,  10,   0,   0,   0,  10,   0,  30},
+	{ /*Magician*/      0,  10,   0,   0,   0,  10,   0,  30},
+	{ /*Enchanter*/     0,   0,   0,   0,   0,  10,  10,  30},
+	{ /*Beastlord*/     0,  10,   5,   0,  10,   0,   5,  20},
+	{ /*Berserker*/    10,   5,   0,  10,   0,   0,   0,  25}
+	};
+
+	static const bool ClassRaceLookupTable[Class::PLAYER_CLASS_COUNT][_TABLE_RACES] =
+	{                   /*Human  Barbarian Erudite Woodelf Highelf Darkelf Halfelf Dwarf  Troll  Ogre   Halfling Gnome  Iksar  Vahshir Froglok Drakkin*/
+	{ /*Warrior*/         true,  true,     false,  true,   false,  true,   true,   true,  true,  true,  true,    true,  true,  true,   true,   true},
+	{ /*Cleric*/          true,  false,    true,   false,  true,   true,   true,   true,  false, false, true,    true,  false, false,  true,   true},
+	{ /*Paladin*/         true,  false,    true,   false,  true,   false,  true,   true,  false, false, true,    true,  false, false,  true,   true},
+	{ /*Ranger*/          true,  false,    false,  true,   false,  false,  true,   false, false, false, true,    false, false, false,  false,  true},
+	{ /*ShadowKnight*/    true,  false,    true,   false,  false,  true,   false,  false, true,  true,  false,   true,  true,  false,  true,   true},
+	{ /*Druid*/           true,  false,    false,  true,   false,  false,  true,   false, false, false, true,    false, false, false,  false,  true},
+	{ /*Monk*/            true,  false,    false,  false,  false,  false,  false,  false, false, false, false,   false, true,  false,  false,  true},
+	{ /*Bard*/            true,  false,    false,  true,   false,  false,  true,   false, false, false, false,   false, false, true,   false,  true},
+	{ /*Rogue*/           true,  true,     false,  true,   false,  true,   true,   true,  false, false, true,    true,  false, true,   true,   true},
+	{ /*Shaman*/          false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   true,   false},
+	{ /*Necromancer*/     true,  false,    true,   false,  false,  true,   false,  false, false, false, false,   true,  true,  false,  true,   true},
+	{ /*Wizard*/          true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  true,   true},
+	{ /*Magician*/        true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
+	{ /*Enchanter*/       true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
+	{ /*Beastlord*/       false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   false,  false},
+	{ /*Berserker*/       false, true,     false,  false,  false,  false,  false,  true,  true,  true,  false,   false, false, true,   false,  false}
+	};
+
+	if (!cc)
+		return false;
+
+	LogInfo("Validating char creation info");
+
+	classtemp = cc->class_ - 1;
+	racetemp = cc->race - 1;
+	// these have non sequential race numbers so they need to be mapped
+	if (cc->race == FROGLOK) racetemp = 14;
+	if (cc->race == VAHSHIR) racetemp = 13;
+	if (cc->race == IKSAR) racetemp = 12;
+	if (cc->race == DRAKKIN) racetemp = 15;
+
+	// if out of range looking it up in the table would crash stuff
+	// so we return from these
+	if (classtemp >= Class::PLAYER_CLASS_COUNT) {
+		LogInfo(" class is out of range");
+		return false;
+	}
+	if (racetemp >= _TABLE_RACES) {
+		LogInfo(" race is out of range");
+		return false;
+	}
+
+	if (!ClassRaceLookupTable[classtemp][racetemp]) { //Lookup table better than a bunch of ifs?
+		LogInfo(" invalid race/class combination");
+		// we return from this one, since if it's an invalid combination our table
+		// doesn't have meaningful values for the stats
+		return false;
+	}
+
+	// add up the base values for this class/race
+	// this is what they start with, and they have stat_points more
+	// that can distributed
+	bSTR = BaseClass[classtemp][0] + BaseRace[racetemp][0];
+	bSTA = BaseClass[classtemp][1] + BaseRace[racetemp][1];
+	bAGI = BaseClass[classtemp][2] + BaseRace[racetemp][2];
+	bDEX = BaseClass[classtemp][3] + BaseRace[racetemp][3];
+	bWIS = BaseClass[classtemp][4] + BaseRace[racetemp][4];
+	bINT = BaseClass[classtemp][5] + BaseRace[racetemp][5];
+	bCHA = BaseClass[classtemp][6] + BaseRace[racetemp][6];
+	stat_points = BaseClass[classtemp][7];
+	bTOTAL = bSTR + bSTA + bAGI + bDEX + bWIS + bINT + bCHA;
+	cTOTAL = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
+
+	// the first check makes sure the total is exactly what was expected.
+	// this will catch all the stat cheating, but there's still the issue
+	// of reducing CHA or INT or something, to use for STR, so we check
+	// that none are lower than the base or higher than base + stat_points
+	// NOTE: these could just be else if, but i want to see all the stats
+	// that are messed up not just the first hit
+
+	if (bTOTAL + stat_points != cTOTAL) {
+		LogInfo(" stat points total doesn't match expected value: expecting [{}] got [{}]", bTOTAL + stat_points, cTOTAL);
+		Charerrors++;
+	}
+
+	if (cc->STR > bSTR + stat_points || cc->STR < bSTR) {
+		LogInfo(" stat STR is out of range");
+		Charerrors++;
+	}
+	if (cc->STA > bSTA + stat_points || cc->STA < bSTA) {
+		LogInfo(" stat STA is out of range");
+		Charerrors++;
+	}
+	if (cc->AGI > bAGI + stat_points || cc->AGI < bAGI) {
+		LogInfo(" stat AGI is out of range");
+		Charerrors++;
+	}
+	if (cc->DEX > bDEX + stat_points || cc->DEX < bDEX) {
+		LogInfo(" stat DEX is out of range");
+		Charerrors++;
+	}
+	if (cc->WIS > bWIS + stat_points || cc->WIS < bWIS) {
+		LogInfo(" stat WIS is out of range");
+		Charerrors++;
+	}
+	if (cc->INT > bINT + stat_points || cc->INT < bINT) {
+		LogInfo(" stat INT is out of range");
+		Charerrors++;
+	}
+	if (cc->CHA > bCHA + stat_points || cc->CHA < bCHA) {
+		LogInfo(" stat CHA is out of range");
+		Charerrors++;
+	}
+
+	/*TODO: Check for deity/class/race.. it'd be nice, but probably of any real use to hack(faction, deity based items are all I can think of)
+	I am NOT writing those tables - kathgar*/
+
+	LogInfo("Found [{}] errors in character creation request", Charerrors);
+
+	return Charerrors == 0;
+}
+
+//TODO: these hard coded values should be settable somewhere somehow.
+void GetResistsForCharacterCreate(CharCreate_Struct* cc, 
+	bool sofAndLater,
+	uint32 &cold_resist, 
+	uint32& fire_resist, 
+	uint32& magic_resist, 
+	uint32& disease_resist, 
+	uint32& poison_resist, 
+	uint32& corruption_resist) 
+{
+	if (!sofAndLater) {
+		cold_resist = 25;
+		fire_resist = 25;
+		magic_resist = 25;
+		disease_resist = 15;
+		poison_resist = 15;
+		corruption_resist = 15;
+		return;
+	}
+
+	CharCreateCombination class_combo;
+	bool found = false;
+	int combos = character_create_race_class_combos.size();
+	for (int i = 0; i < combos; ++i) {
+		if (character_create_race_class_combos[i].Class == cc->class_ &&
+			character_create_race_class_combos[i].Race == cc->race &&
+			character_create_race_class_combos[i].Deity == cc->deity &&
+			character_create_race_class_combos[i].Zone == cc->start_zone) {
+			class_combo = character_create_race_class_combos[i];
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		cold_resist = 25;
+		fire_resist = 25;
+		magic_resist = 25;
+		disease_resist = 15;
+		poison_resist = 15;
+		corruption_resist = 15;
+		return;
+	}
+	
+	CharCreatePointAllocation allocation;
+	found = false;
+	combos = character_create_allocations.size();
+	for (int i = 0; i < combos; ++i) {
+		if (character_create_allocations[i].Index == class_combo.AllocationIndex) {
+			allocation = character_create_allocations[i];
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		cold_resist = 25;
+		fire_resist = 25;
+		magic_resist = 25;
+		disease_resist = 15;
+		poison_resist = 15;
+		corruption_resist = 15;
+		return;
+	}
+
+	cold_resist = allocation.BaseResists[0];
+	fire_resist = allocation.BaseResists[1];
+	magic_resist = allocation.BaseResists[2];
+	disease_resist = allocation.BaseResists[3];
+	poison_resist = allocation.BaseResists[4];
+	corruption_resist = allocation.BaseResists[5];
+}
+
 bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 {
 	PlayerProfile_Struct pp;
@@ -1744,6 +2085,15 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.cur_hp           = 1000;
 	pp.hunger_level     = 6000;
 	pp.thirst_level     = 6000;
+
+	GetResistsForCharacterCreate(cc, 
+		m_ClientVersionBit & EQ::versions::maskSoFAndLater, 
+		pp.cold_resist, 
+		pp.fire_resist, 
+		pp.magic_resist, 
+		pp.disease_resist, 
+		pp.poison_resist, 
+		pp.corruption_resist);
 
 	/* Set default skills for everybody */
 	pp.skills[EQ::skills::SkillSwimming]     = RuleI(Skills, SwimmingStartValue);
@@ -1863,273 +2213,6 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	LogInfo("Character creation {} for [{}]", success ? "succeeded" : "failed", pp.name);
 	return success;
-}
-
-// returns true if the request is ok, false if there's an error
-bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
-{
-	if (!cc)
-		return false;
-
-	LogInfo("Validating char creation info");
-
-	RaceClassCombos class_combo;
-	bool found = false;
-	int combos = character_create_race_class_combos.size();
-	for (int i = 0; i < combos; ++i) {
-		if (character_create_race_class_combos[i].Class == cc->class_ &&
-				character_create_race_class_combos[i].Race == cc->race &&
-				character_create_race_class_combos[i].Deity == cc->deity &&
-				character_create_race_class_combos[i].Zone == cc->start_zone) {
-			class_combo = character_create_race_class_combos[i];
-			found = true;
-			break;
-		}
-	}
-
-	if (!found) {
-		LogInfo("Could not find class/race/deity/start_zone combination");
-		return false;
-	}
-
-	uint32 allocs = character_create_allocations.size();
-	RaceClassAllocation allocation = {0};
-	found = false;
-	for (int i = 0; i < allocs; ++i) {
-		if (character_create_allocations[i].Index == class_combo.AllocationIndex) {
-			allocation = character_create_allocations[i];
-			found = true;
-			break;
-		}
-	}
-
-	if (!found) {
-		LogInfo("Could not find starting stats for selected character combo, cannot verify stats");
-		return false;
-	}
-
-	uint32 max_stats = allocation.DefaultPointAllocation[0] +
-		allocation.DefaultPointAllocation[1] +
-		allocation.DefaultPointAllocation[2] +
-		allocation.DefaultPointAllocation[3] +
-		allocation.DefaultPointAllocation[4] +
-		allocation.DefaultPointAllocation[5] +
-		allocation.DefaultPointAllocation[6];
-
-	if (cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
-		LogInfo("Strength out of range");
-		return false;
-	}
-
-	if (cc->DEX > allocation.BaseStats[1] + max_stats || cc->DEX < allocation.BaseStats[1]) {
-		LogInfo("Dexterity out of range");
-		return false;
-	}
-
-	if (cc->AGI > allocation.BaseStats[2] + max_stats || cc->AGI < allocation.BaseStats[2]) {
-		LogInfo("Agility out of range");
-		return false;
-	}
-
-	if (cc->STA > allocation.BaseStats[3] + max_stats || cc->STA < allocation.BaseStats[3]) {
-		LogInfo("Stamina out of range");
-		return false;
-	}
-
-	if (cc->INT > allocation.BaseStats[4] + max_stats || cc->INT < allocation.BaseStats[4]) {
-		LogInfo("Intelligence out of range");
-		return false;
-	}
-
-	if (cc->WIS > allocation.BaseStats[5] + max_stats || cc->WIS < allocation.BaseStats[5]) {
-		LogInfo("Wisdom out of range");
-		return false;
-	}
-
-	if (cc->CHA > allocation.BaseStats[6] + max_stats || cc->CHA < allocation.BaseStats[6]) {
-		LogInfo("Charisma out of range");
-		return false;
-	}
-
-	uint32 current_stats = 0;
-	current_stats += cc->STR - allocation.BaseStats[0];
-	current_stats += cc->DEX - allocation.BaseStats[1];
-	current_stats += cc->AGI - allocation.BaseStats[2];
-	current_stats += cc->STA - allocation.BaseStats[3];
-	current_stats += cc->INT - allocation.BaseStats[4];
-	current_stats += cc->WIS - allocation.BaseStats[5];
-	current_stats += cc->CHA - allocation.BaseStats[6];
-	if (current_stats > max_stats) {
-		LogInfo("Current Stats > Maximum Stats");
-		return false;
-	}
-
-	return true;
-}
-
-bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
-{
-	uint32 bSTR, bSTA, bAGI, bDEX, bWIS, bINT, bCHA, bTOTAL, cTOTAL, stat_points; //these are all uint32 in CharCreate_Struct, so we'll make them uint32 here to make the compiler shut up
-	int classtemp, racetemp;
-	int Charerrors = 0;
-
-
-// if this is increased you'll have to add a column to the classrace
-// table below
-#define _TABLE_RACES 16
-
-	static const int BaseRace[_TABLE_RACES][7] =
-	{            /* STR  STA  AGI  DEX  WIS  INT  CHR */
-	{ /*Human*/      75,  75,  75,  75,  75,  75,  75},
-	{ /*Barbarian*/ 103,  95,  82,  70,  70,  60,  55},
-	{ /*Erudite*/    60,  70,  70,  70,  83, 107,  70},
-	{ /*Wood Elf*/   65,  65,  95,  80,  80,  75,  75},
-	{ /*High Elf*/   55,  65,  85,  70,  95,  92,  80},
-	{ /*Dark Elf*/   60,  65,  90,  75,  83,  99,  60},
-	{ /*Half Elf*/   70,  70,  90,  85,  60,  75,  75},
-	{ /*Dwarf*/      90,  90,  70,  90,  83,  60,  45},
-	{ /*Troll*/     108, 109,  83,  75,  60,  52,  40},
-	{ /*Ogre*/      130, 122,  70,  70,  67,  60,  37},
-	{ /*Halfling*/   70,  75,  95,  90,  80,  67,  50},
-	{ /*Gnome*/      60,  70,  85,  85,  67,  98,  60},
-	{ /*Iksar*/      70,  70,  90,  85,  80,  75,  55},
-	{ /*Vah Shir*/   90,  75,  90,  70,  70,  65,  65},
-	{ /*Froglok*/    70,  80, 100, 100,  75,  75,  50},
-	{ /*Drakkin*/    70,  80,  85,  75,  80,  85,  75}
-	};
-
-	static const int BaseClass[Class::PLAYER_CLASS_COUNT][8] =
-	{              /* STR  STA  AGI  DEX  WIS  INT  CHR  ADD*/
-	{ /*Warrior*/      10,  10,   5,   0,   0,   0,   0,  25},
-	{ /*Cleric*/        5,   5,   0,   0,  10,   0,   0,  30},
-	{ /*Paladin*/      10,   5,   0,   0,   5,   0,  10,  20},
-	{ /*Ranger*/        5,  10,  10,   0,   5,   0,   0,  20},
-	{ /*ShadowKnight*/ 10,   5,   0,   0,   0,   10,  5,  20},
-	{ /*Druid*/         0,  10,   0,   0,  10,   0,   0,  30},
-	{ /*Monk*/          5,   5,  10,  10,   0,   0,   0,  20},
-	{ /*Bard*/          5,   0,   0,  10,   0,   0,  10,  25},
-	{ /*Rouge*/         0,   0,  10,  10,   0,   0,   0,  30},
-	{ /*Shaman*/        0,   5,   0,   0,  10,   0,   5,  30},
-	{ /*Necromancer*/   0,   0,   0,  10,   0,  10,   0,  30},
-	{ /*Wizard*/        0,  10,   0,   0,   0,  10,   0,  30},
-	{ /*Magician*/      0,  10,   0,   0,   0,  10,   0,  30},
-	{ /*Enchanter*/     0,   0,   0,   0,   0,  10,  10,  30},
-	{ /*Beastlord*/     0,  10,   5,   0,  10,   0,   5,  20},
-	{ /*Berserker*/    10,   5,   0,  10,   0,   0,   0,  25}
-	};
-
-	static const bool ClassRaceLookupTable[Class::PLAYER_CLASS_COUNT][_TABLE_RACES]=
-	{                   /*Human  Barbarian Erudite Woodelf Highelf Darkelf Halfelf Dwarf  Troll  Ogre   Halfling Gnome  Iksar  Vahshir Froglok Drakkin*/
-	{ /*Warrior*/         true,  true,     false,  true,   false,  true,   true,   true,  true,  true,  true,    true,  true,  true,   true,   true},
-	{ /*Cleric*/          true,  false,    true,   false,  true,   true,   true,   true,  false, false, true,    true,  false, false,  true,   true},
-	{ /*Paladin*/         true,  false,    true,   false,  true,   false,  true,   true,  false, false, true,    true,  false, false,  true,   true},
-	{ /*Ranger*/          true,  false,    false,  true,   false,  false,  true,   false, false, false, true,    false, false, false,  false,  true},
-	{ /*ShadowKnight*/    true,  false,    true,   false,  false,  true,   false,  false, true,  true,  false,   true,  true,  false,  true,   true},
-	{ /*Druid*/           true,  false,    false,  true,   false,  false,  true,   false, false, false, true,    false, false, false,  false,  true},
-	{ /*Monk*/            true,  false,    false,  false,  false,  false,  false,  false, false, false, false,   false, true,  false,  false,  true},
-	{ /*Bard*/            true,  false,    false,  true,   false,  false,  true,   false, false, false, false,   false, false, true,   false,  true},
-	{ /*Rogue*/           true,  true,     false,  true,   false,  true,   true,   true,  false, false, true,    true,  false, true,   true,   true},
-	{ /*Shaman*/          false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   true,   false},
-	{ /*Necromancer*/     true,  false,    true,   false,  false,  true,   false,  false, false, false, false,   true,  true,  false,  true,   true},
-	{ /*Wizard*/          true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  true,   true},
-	{ /*Magician*/        true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
-	{ /*Enchanter*/       true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
-	{ /*Beastlord*/       false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   false,  false},
-	{ /*Berserker*/       false, true,     false,  false,  false,  false,  false,  true,  true,  true,  false,   false, false, true,   false,  false}
-	};
-
-	if (!cc)
-		return false;
-
-	LogInfo("Validating char creation info");
-
-	classtemp = cc->class_ - 1;
-	racetemp = cc->race - 1;
-	// these have non sequential race numbers so they need to be mapped
-	if (cc->race == FROGLOK) racetemp = 14;
-	if (cc->race == VAHSHIR) racetemp = 13;
-	if (cc->race == IKSAR) racetemp = 12;
-	if (cc->race == DRAKKIN) racetemp = 15;
-
-	// if out of range looking it up in the table would crash stuff
-	// so we return from these
-	if (classtemp >= Class::PLAYER_CLASS_COUNT) {
-		LogInfo(" class is out of range");
-		return false;
-	}
-	if (racetemp >= _TABLE_RACES) {
-		LogInfo(" race is out of range");
-		return false;
-	}
-
-	if (!ClassRaceLookupTable[classtemp][racetemp]) { //Lookup table better than a bunch of ifs?
-		LogInfo(" invalid race/class combination");
-		// we return from this one, since if it's an invalid combination our table
-		// doesn't have meaningful values for the stats
-		return false;
-	}
-
-	// add up the base values for this class/race
-	// this is what they start with, and they have stat_points more
-	// that can distributed
-	bSTR = BaseClass[classtemp][0] + BaseRace[racetemp][0];
-	bSTA = BaseClass[classtemp][1] + BaseRace[racetemp][1];
-	bAGI = BaseClass[classtemp][2] + BaseRace[racetemp][2];
-	bDEX = BaseClass[classtemp][3] + BaseRace[racetemp][3];
-	bWIS = BaseClass[classtemp][4] + BaseRace[racetemp][4];
-	bINT = BaseClass[classtemp][5] + BaseRace[racetemp][5];
-	bCHA = BaseClass[classtemp][6] + BaseRace[racetemp][6];
-	stat_points = BaseClass[classtemp][7];
-	bTOTAL = bSTR + bSTA + bAGI + bDEX + bWIS + bINT + bCHA;
-	cTOTAL = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
-
-	// the first check makes sure the total is exactly what was expected.
-	// this will catch all the stat cheating, but there's still the issue
-	// of reducing CHA or INT or something, to use for STR, so we check
-	// that none are lower than the base or higher than base + stat_points
-	// NOTE: these could just be else if, but i want to see all the stats
-	// that are messed up not just the first hit
-
-	if (bTOTAL + stat_points != cTOTAL) {
-		LogInfo(" stat points total doesn't match expected value: expecting [{}] got [{}]", bTOTAL + stat_points, cTOTAL);
-		Charerrors++;
-	}
-
-	if (cc->STR > bSTR + stat_points || cc->STR < bSTR) {
-		LogInfo(" stat STR is out of range");
-		Charerrors++;
-	}
-	if (cc->STA > bSTA + stat_points || cc->STA < bSTA) {
-		LogInfo(" stat STA is out of range");
-		Charerrors++;
-	}
-	if (cc->AGI > bAGI + stat_points || cc->AGI < bAGI) {
-		LogInfo(" stat AGI is out of range");
-		Charerrors++;
-	}
-	if (cc->DEX > bDEX + stat_points || cc->DEX < bDEX) {
-		LogInfo(" stat DEX is out of range");
-		Charerrors++;
-	}
-	if (cc->WIS > bWIS + stat_points || cc->WIS < bWIS) {
-		LogInfo(" stat WIS is out of range");
-		Charerrors++;
-	}
-	if (cc->INT > bINT + stat_points || cc->INT < bINT) {
-		LogInfo(" stat INT is out of range");
-		Charerrors++;
-	}
-	if (cc->CHA > bCHA + stat_points || cc->CHA < bCHA) {
-		LogInfo(" stat CHA is out of range");
-		Charerrors++;
-	}
-
-	/*TODO: Check for deity/class/race.. it'd be nice, but probably of any real use to hack(faction, deity based items are all I can think of)
-	I am NOT writing those tables - kathgar*/
-
-	LogInfo("Found [{}] errors in character creation request", Charerrors);
-
-	return Charerrors == 0;
 }
 
 void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
