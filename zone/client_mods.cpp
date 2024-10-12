@@ -1025,7 +1025,7 @@ int32	Client::CalcMR()
 
 int32	Client::CalcFR()
 {
-	MR = m_pp.fire_resist;
+	FR = m_pp.fire_resist;
 	int c = GetClass();
 	if (c == Class::Ranger) {
 		FR += 4;
@@ -1053,7 +1053,7 @@ int32	Client::CalcFR()
 
 int32	Client::CalcDR()
 {
-	MR = m_pp.disease_resist;
+	DR = m_pp.disease_resist;
 	int c = GetClass();
 	// the monk one is part of base resist
 	if (c == Class::Monk) {
@@ -1087,7 +1087,7 @@ int32	Client::CalcDR()
 
 int32	Client::CalcPR()
 {
-	MR = m_pp.poison_resist;
+	PR = m_pp.poison_resist;
 	int c = GetClass();
 	// this monk bonus is part of the base
 	if (c == Class::Monk) {
@@ -1121,7 +1121,7 @@ int32	Client::CalcPR()
 
 int32	Client::CalcCR()
 {
-	MR = m_pp.cold_resist;
+	CR = m_pp.cold_resist;
 	int c = GetClass();
 	if (c == Class::Ranger || c == Class::Beastlord) {
 		CR += 4;
