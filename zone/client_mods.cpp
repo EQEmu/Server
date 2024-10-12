@@ -1009,65 +1009,7 @@ int Client::CalcHaste()
 //in Mob::ResistSpell
 int32	Client::CalcMR()
 {
-	//racial bases
-	switch (GetBaseRace()) {
-		case HUMAN:
-			MR = 25;
-			break;
-		case BARBARIAN:
-			MR = 25;
-			break;
-		case ERUDITE:
-			MR = 30;
-			break;
-		case WOOD_ELF:
-			MR = 25;
-			break;
-		case HIGH_ELF:
-			MR = 25;
-			break;
-		case DARK_ELF:
-			MR = 25;
-			break;
-		case HALF_ELF:
-			MR = 25;
-			break;
-		case DWARF:
-			MR = 30;
-			break;
-		case TROLL:
-			MR = 25;
-			break;
-		case OGRE:
-			MR = 25;
-			break;
-		case HALFLING:
-			MR = 25;
-			break;
-		case GNOME:
-			MR = 25;
-			break;
-		case IKSAR:
-			MR = 25;
-			break;
-		case VAHSHIR:
-			MR = 25;
-			break;
-		case FROGLOK:
-			MR = 30;
-			break;
-		case DRAKKIN:
-		{
-			MR = 25;
-			if (GetDrakkinHeritage() == 2)
-				MR += 10;
-			else if (GetDrakkinHeritage() == 5)
-				MR += 2;
-			break;
-		}
-		default:
-			MR = 20;
-	}
+	MR = m_pp.magic_resist;
 	MR += itembonuses.MR + spellbonuses.MR + aabonuses.MR;
 	if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
 		MR += GetLevel() / 2;
@@ -1083,65 +1025,7 @@ int32	Client::CalcMR()
 
 int32	Client::CalcFR()
 {
-	//racial bases
-	switch (GetBaseRace()) {
-		case HUMAN:
-			FR = 25;
-			break;
-		case BARBARIAN:
-			FR = 25;
-			break;
-		case ERUDITE:
-			FR = 25;
-			break;
-		case WOOD_ELF:
-			FR = 25;
-			break;
-		case HIGH_ELF:
-			FR = 25;
-			break;
-		case DARK_ELF:
-			FR = 25;
-			break;
-		case HALF_ELF:
-			FR = 25;
-			break;
-		case DWARF:
-			FR = 25;
-			break;
-		case TROLL:
-			FR = 5;
-			break;
-		case OGRE:
-			FR = 25;
-			break;
-		case HALFLING:
-			FR = 25;
-			break;
-		case GNOME:
-			FR = 25;
-			break;
-		case IKSAR:
-			FR = 30;
-			break;
-		case VAHSHIR:
-			FR = 25;
-			break;
-		case FROGLOK:
-			FR = 25;
-			break;
-		case DRAKKIN:
-		{
-			FR = 25;
-			if (GetDrakkinHeritage() == 0)
-				FR += 10;
-			else if (GetDrakkinHeritage() == 5)
-				FR += 2;
-			break;
-		}
-		default:
-			FR = 20;
-	}
+	MR = m_pp.fire_resist;
 	int c = GetClass();
 	if (c == Class::Ranger) {
 		FR += 4;
@@ -1169,65 +1053,7 @@ int32	Client::CalcFR()
 
 int32	Client::CalcDR()
 {
-	//racial bases
-	switch (GetBaseRace()) {
-		case HUMAN:
-			DR = 15;
-			break;
-		case BARBARIAN:
-			DR = 15;
-			break;
-		case ERUDITE:
-			DR = 10;
-			break;
-		case WOOD_ELF:
-			DR = 15;
-			break;
-		case HIGH_ELF:
-			DR = 15;
-			break;
-		case DARK_ELF:
-			DR = 15;
-			break;
-		case HALF_ELF:
-			DR = 15;
-			break;
-		case DWARF:
-			DR = 15;
-			break;
-		case TROLL:
-			DR = 15;
-			break;
-		case OGRE:
-			DR = 15;
-			break;
-		case HALFLING:
-			DR = 20;
-			break;
-		case GNOME:
-			DR = 15;
-			break;
-		case IKSAR:
-			DR = 15;
-			break;
-		case VAHSHIR:
-			DR = 15;
-			break;
-		case FROGLOK:
-			DR = 15;
-			break;
-		case DRAKKIN:
-		{
-			DR = 15;
-			if (GetDrakkinHeritage() == 1)
-				DR += 10;
-			else if (GetDrakkinHeritage() == 5)
-				DR += 2;
-			break;
-		}
-		default:
-			DR = 15;
-	}
+	MR = m_pp.disease_resist;
 	int c = GetClass();
 	// the monk one is part of base resist
 	if (c == Class::Monk) {
@@ -1261,65 +1087,7 @@ int32	Client::CalcDR()
 
 int32	Client::CalcPR()
 {
-	//racial bases
-	switch (GetBaseRace()) {
-		case HUMAN:
-			PR = 15;
-			break;
-		case BARBARIAN:
-			PR = 15;
-			break;
-		case ERUDITE:
-			PR = 15;
-			break;
-		case WOOD_ELF:
-			PR = 15;
-			break;
-		case HIGH_ELF:
-			PR = 15;
-			break;
-		case DARK_ELF:
-			PR = 15;
-			break;
-		case HALF_ELF:
-			PR = 15;
-			break;
-		case DWARF:
-			PR = 20;
-			break;
-		case TROLL:
-			PR = 15;
-			break;
-		case OGRE:
-			PR = 15;
-			break;
-		case HALFLING:
-			PR = 20;
-			break;
-		case GNOME:
-			PR = 15;
-			break;
-		case IKSAR:
-			PR = 15;
-			break;
-		case VAHSHIR:
-			PR = 15;
-			break;
-		case FROGLOK:
-			PR = 30;
-			break;
-		case DRAKKIN:
-		{
-			PR = 15;
-			if (GetDrakkinHeritage() == 3)
-				PR += 10;
-			else if (GetDrakkinHeritage() == 5)
-				PR += 2;
-			break;
-		}
-		default:
-			PR = 15;
-	}
+	MR = m_pp.poison_resist;
 	int c = GetClass();
 	// this monk bonus is part of the base
 	if (c == Class::Monk) {
@@ -1353,65 +1121,7 @@ int32	Client::CalcPR()
 
 int32	Client::CalcCR()
 {
-	//racial bases
-	switch (GetBaseRace()) {
-		case HUMAN:
-			CR = 25;
-			break;
-		case BARBARIAN:
-			CR = 35;
-			break;
-		case ERUDITE:
-			CR = 25;
-			break;
-		case WOOD_ELF:
-			CR = 25;
-			break;
-		case HIGH_ELF:
-			CR = 25;
-			break;
-		case DARK_ELF:
-			CR = 25;
-			break;
-		case HALF_ELF:
-			CR = 25;
-			break;
-		case DWARF:
-			CR = 25;
-			break;
-		case TROLL:
-			CR = 25;
-			break;
-		case OGRE:
-			CR = 25;
-			break;
-		case HALFLING:
-			CR = 25;
-			break;
-		case GNOME:
-			CR = 25;
-			break;
-		case IKSAR:
-			CR = 15;
-			break;
-		case VAHSHIR:
-			CR = 25;
-			break;
-		case FROGLOK:
-			CR = 25;
-			break;
-		case DRAKKIN:
-		{
-			CR = 25;
-			if (GetDrakkinHeritage() == 4)
-				CR += 10;
-			else if (GetDrakkinHeritage() == 5)
-				CR += 2;
-			break;
-		}
-		default:
-			CR = 25;
-	}
+	MR = m_pp.cold_resist;
 	int c = GetClass();
 	if (c == Class::Ranger || c == Class::Beastlord) {
 		CR += 4;

@@ -561,6 +561,12 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 	m_epp->expended_aa           = e.e_expended_aa_spent;
 	m_epp->last_invsnapshot_time = e.e_last_invsnapshot;
 	m_epp->next_invsnapshot_time = m_epp->last_invsnapshot_time + (RuleI(Character, InvSnapshotMinIntervalM) * 60);
+	pp->cold_resist              = e.cold_resist;
+	pp->fire_resist              = e.fire_resist;
+	pp->magic_resist             = e.magic_resist;
+	pp->disease_resist           = e.disease_resist;
+	pp->poison_resist            = e.poison_resist;
+	pp->corruption_resist        = e.corruption_resist;
 
 	return true;
 }
@@ -1158,6 +1164,12 @@ bool ZoneDatabase::SaveCharacterData(
 	e.e_expended_aa_spent     = m_epp->expended_aa;
 	e.e_last_invsnapshot      = m_epp->last_invsnapshot_time;
 	e.mailkey                 = c->GetMailKeyFull();
+	e.cold_resist             = pp->cold_resist;
+	e.fire_resist             = pp->fire_resist;
+	e.magic_resist            = pp->magic_resist;
+	e.disease_resist          = pp->disease_resist;
+	e.poison_resist           = pp->poison_resist;
+	e.corruption_resist       = pp->corruption_resist;
 
 	const int replaced = CharacterDataRepository::ReplaceOne(database, e);
 

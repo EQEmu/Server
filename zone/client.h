@@ -597,7 +597,7 @@ public:
 	inline uint8 GetBaseINT() const { return m_pp.INT; }
 	inline uint8 GetBaseAGI() const { return m_pp.AGI; }
 	inline uint8 GetBaseWIS() const { return m_pp.WIS; }
-	inline uint8 GetBaseCorrup() const { return 15; } // Same for all
+	inline uint8 GetBaseCorrup() const { return m_pp.corruption_resist; }
 	inline uint8 GetBasePhR() const { return 0; } // Guessing at 0 as base
 
 	inline virtual int32 GetHeroicSTR() const { return itembonuses.HeroicSTR; }

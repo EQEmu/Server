@@ -1911,6 +1911,8 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct* cc)
 }
 
 //TODO: these hard coded values should be settable somewhere somehow.
+//Also they're not 100% accurate so if I don't make them settable somehow 
+//we need to go back and match them to the logic that was ripped out of zone
 void GetResistsForCharacterCreate(CharCreate_Struct* cc, 
 	bool sofAndLater,
 	uint32 &cold_resist, 
