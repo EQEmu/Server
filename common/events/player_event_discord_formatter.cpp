@@ -789,50 +789,36 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 		);
 	}
 
+	std::string npc_info = fmt::format(
+		"{} ({})\n",
+		e.npc_name,
+		e.npc_id
+	);
+
+	npc_info += fmt::format(
+		"Is Quest Handin: {}",
+		e.is_quest_handin ? "Yes" : "No"
+	);
+
 	std::vector<DiscordField> f = {};
 
+
+	BuildDiscordField(&f, "NPC", npc_info);
+
 	if (!handin_items_info.empty()) {
-		BuildDiscordField(
-			&f,
-			"Handin Items",
-			fmt::format(
-				"{}",
-				handin_items_info
-			)
-		);
+		BuildDiscordField(&f, "Handin Items", handin_items_info);
 	}
 
 	if (!handin_money_info.empty()) {
-		BuildDiscordField(
-			&f,
-			"Handin Money",
-			fmt::format(
-				"{}",
-				handin_money_info
-			)
-		);
+		BuildDiscordField(&f, "Handin Money", handin_money_info);
 	}
 
 	if (!return_items_info.empty()) {
-		BuildDiscordField(
-			&f,
-			"Return Items",
-			fmt::format(
-				"{}",
-				return_items_info
-			)
-		);
+		BuildDiscordField(&f, "Return Items", return_items_info);
 	}
 
 	if (!return_money_info.empty()) {
-		BuildDiscordField(
-			&f,
-			"Return Money",
-			fmt::format(
-				"{}",
-				return_money_info
-			)
-		);
+		BuildDiscordField(&f, "Return Money", return_money_info);
 	}
 
 	std::vector<DiscordEmbed> embeds = {};

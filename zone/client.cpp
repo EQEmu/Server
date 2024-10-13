@@ -12316,6 +12316,248 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
 }
 
+void Client::NPCHandinEventLog(Trade* t, NPC* n)
+{
+	Client* c = t->GetOwner()->CastToClient();
+
+	std::vector<PlayerEvent::HandinEntry> hi = {};
+	std::vector<PlayerEvent::HandinEntry> ri = {};
+	PlayerEvent::HandinMoney              hm{};
+	PlayerEvent::HandinMoney              rm{};
+
+	if (
+		c->EntityVariableExists("HANDIN_ITEMS") &&
+		c->EntityVariableExists("HANDIN_MONEY") &&
+		c->EntityVariableExists("RETURN_ITEMS") &&
+		c->EntityVariableExists("RETURN_MONEY")
+	) {
+		const std::string& handin_items = c->GetEntityVariable("HANDIN_ITEMS");
+		const std::string& return_items = c->GetEntityVariable("RETURN_ITEMS");
+		const std::string& handin_money = c->GetEntityVariable("HANDIN_MONEY");
+		const std::string& return_money = c->GetEntityVariable("RETURN_MONEY");
+
+		// Handin Items
+		if (!handin_items.empty()) {
+			if (Strings::Contains(handin_items, ",")) {
+				const auto handin_data = Strings::Split(handin_items, ",");
+				for (const auto& h : handin_data) {
+					const auto item_data = Strings::Split(h, "|");
+					if (
+						item_data.size() == 3 &&
+						Strings::IsNumber(item_data[0]) &&
+						Strings::IsNumber(item_data[1]) &&
+						Strings::IsNumber(item_data[2])
+					) {
+						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+						if (item_id != 0) {
+							const auto* item = database.GetItem(item_id);
+
+							if (item) {
+								hi.emplace_back(
+									PlayerEvent::HandinEntry{
+										.item_id = item_id,
+										.item_name = item->Name,
+										.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+										.attuned = Strings::ToInt(item_data[2]) ? true : false
+									}
+								);
+							}
+						}
+					}
+				}
+			} else if (Strings::Contains(handin_items, "|")) {
+				const auto item_data = Strings::Split(handin_items, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+				) {
+					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+					const auto*  item    = database.GetItem(item_id);
+
+					if (item) {
+						hi.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+
+		// Handin Money
+		if (!handin_money.empty()) {
+			const auto hms = Strings::Split(handin_money, "|");
+
+			hm.copper   = Strings::ToUnsignedInt(hms[0]);
+			hm.silver   = Strings::ToUnsignedInt(hms[1]);
+			hm.gold     = Strings::ToUnsignedInt(hms[2]);
+			hm.platinum = Strings::ToUnsignedInt(hms[3]);
+		}
+
+		// Return Items
+		if (!return_items.empty()) {
+			if (Strings::Contains(return_items, ",")) {
+				const auto return_data = Strings::Split(return_items, ",");
+				for (const auto& r : return_data) {
+					const auto item_data = Strings::Split(r, "|");
+					if (
+						item_data.size() == 3 &&
+						Strings::IsNumber(item_data[0]) &&
+						Strings::IsNumber(item_data[1]) &&
+						Strings::IsNumber(item_data[2])
+					) {
+						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+						const auto*  item    = database.GetItem(item_id);
+
+						if (item) {
+							ri.emplace_back(
+								PlayerEvent::HandinEntry{
+									.item_id = item_id,
+									.item_name = item->Name,
+									.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+									.attuned = Strings::ToInt(item_data[2]) ? true : false
+								}
+							);
+						}
+					}
+				}
+			} else if (Strings::Contains(return_items, "|")) {
+				const auto item_data = Strings::Split(return_items, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+				) {
+					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+					const auto*  item    = database.GetItem(item_id);
+
+					if (item) {
+						ri.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+
+		// Return Money
+		if (!return_money.empty()) {
+			const auto rms = Strings::Split(return_money, "|");
+			rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
+			rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
+			rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
+			rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
+		}
+
+		c->DeleteEntityVariable("HANDIN_ITEMS");
+		c->DeleteEntityVariable("HANDIN_MONEY");
+		c->DeleteEntityVariable("RETURN_ITEMS");
+		c->DeleteEntityVariable("RETURN_MONEY");
+
+		const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
+
+		const bool event_has_data_to_record = (
+			!hi.empty() || handed_in_money
+		);
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+			auto e = PlayerEvent::HandinEvent{
+				.npc_id = n->GetNPCTypeID(),
+				.npc_name = n->GetCleanName(),
+				.handin_items = hi,
+				.handin_money = hm,
+				.return_items = ri,
+				.return_money = rm,
+				.is_quest_handin = true
+			};
+
+			RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
+		}
+
+		return;
+	}
+
+	uint8 item_count = 0;
+
+	hm.platinum = t->pp;
+	hm.gold     = t->gp;
+	hm.silver   = t->sp;
+	hm.copper   = t->cp;
+
+	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
+		if (c->GetInv().GetItem(i)) {
+			item_count++;
+		}
+	}
+
+	hi.reserve(item_count);
+
+	if (item_count > 0) {
+		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
+			const EQ::ItemInstance* inst = c->GetInv().GetItem(i);
+			if (inst) {
+				hi.emplace_back(
+					PlayerEvent::HandinEntry{
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name,
+						.charges = static_cast<uint16>(inst->GetCharges()),
+						.attuned = inst->IsAttuned()
+					}
+				);
+
+				if (inst->IsClassBag()) {
+					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
+						inst = c->GetInv().GetItem(i, j);
+						if (inst) {
+							hi.emplace_back(
+								PlayerEvent::HandinEntry{
+									.item_id = inst->GetItem()->ID,
+									.item_name = inst->GetItem()->Name,
+									.charges = static_cast<uint16>(inst->GetCharges()),
+									.attuned = inst->IsAttuned()
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
+
+	ri = hi;
+	rm = hm;
+
+	const bool event_has_data_to_record = !hi.empty() || handed_in_money;
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+		auto e = PlayerEvent::HandinEvent{
+			.npc_id = n->GetNPCTypeID(),
+			.npc_name = n->GetCleanName(),
+			.handin_items = hi,
+			.handin_money = hm,
+			.return_items = ri,
+			.return_money = rm,
+			.is_quest_handin = false
+		};
+
+		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
+	}
+}
+
 void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
 {
 	std::string spell_string;
