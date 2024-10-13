@@ -3212,6 +3212,16 @@ Merc* Perl_Client_GetMerc(Client* self)
 	return self->GetMerc();
 }
 
+void Perl_Client_PushItemOnCursor(Client* self, EQ::ItemInstance* inst)
+{
+	self->PushItemOnCursor(inst);
+}
+
+void Perl_Client_PushItemOnCursor(Client* self, EQ::ItemInstance* inst, bool send_update)
+{
+	self->PushItemOnCursor(inst, send_update);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3579,6 +3589,8 @@ void perl_register_client()
 	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32, uint32, uint32, const char*))&Perl_Client_Popup2);
 	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32, uint32, uint32, const char*, const char*))&Perl_Client_Popup2);
 	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32, uint32, uint32, const char*, const char*, uint32))&Perl_Client_Popup2);
+	package.add("PushItemOnCursor", (void(*)(Client*, EQ::ItemInstance*))&Perl_Client_PushItemOnCursor);
+	package.add("PushItemOnCursor", (void(*)(Client*, EQ::ItemInstance*, bool))&Perl_Client_PushItemOnCursor);
 	package.add("QuestReward", (void(*)(Client*, Mob*))&Perl_Client_QuestReward);
 	package.add("QuestReward", (void(*)(Client*, Mob*, uint32))&Perl_Client_QuestReward);
 	package.add("QuestReward", (void(*)(Client*, Mob*, uint32, uint32))&Perl_Client_QuestReward);

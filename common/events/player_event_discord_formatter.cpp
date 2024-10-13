@@ -789,10 +789,15 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 		);
 	}
 
-	const std::string& npc_info = fmt::format(
-		"{} ({})",
+	std::string npc_info = fmt::format(
+		"{} ({})\n",
 		e.npc_name,
 		e.npc_id
+	);
+
+	npc_info += fmt::format(
+		"Is Quest Handin: {}",
+		e.is_quest_handin ? "Yes" : "No"
 	);
 
 	std::vector<DiscordField> f = {};

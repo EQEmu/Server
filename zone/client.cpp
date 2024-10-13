@@ -12479,7 +12479,8 @@ void Client::NPCHandinEventLog(Trade* t, NPC* n)
 				.handin_items = hi,
 				.handin_money = hm,
 				.return_items = ri,
-				.return_money = rm
+				.return_money = rm,
+				.is_quest_handin = true
 			};
 
 			RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
@@ -12537,6 +12538,9 @@ void Client::NPCHandinEventLog(Trade* t, NPC* n)
 
 	const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
 
+	ri = hi;
+	rm = hm;
+
 	const bool event_has_data_to_record = !hi.empty() || handed_in_money;
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
@@ -12546,7 +12550,8 @@ void Client::NPCHandinEventLog(Trade* t, NPC* n)
 			.handin_items = hi,
 			.handin_money = hm,
 			.return_items = ri,
-			.return_money = rm
+			.return_money = rm,
+			.is_quest_handin = false
 		};
 
 		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);

@@ -860,10 +860,12 @@ namespace PlayerEvent {
 
 	class HandinEntry {
 	public:
-		uint32      item_id;
-		std::string item_name;
-		uint16      charges;
-		bool        attuned;
+		uint32                   item_id;
+		std::string              item_name;
+		std::vector<uint32>      augment_ids;
+		std::vector<std::string> augment_names;
+		uint16                   charges;
+		bool                     attuned;
 
 		// cereal
 		template<class Archive>
@@ -872,6 +874,8 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
+				CEREAL_NVP(augment_ids),
+				CEREAL_NVP(augment_names),
 				CEREAL_NVP(charges),
 				CEREAL_NVP(attuned)
 			);
@@ -905,6 +909,7 @@ namespace PlayerEvent {
 		HandinMoney              handin_money;
 		std::vector<HandinEntry> return_items;
 		HandinMoney              return_money;
+		bool                     is_quest_handin;
 
 		// cereal
 		template<class Archive>
@@ -916,7 +921,8 @@ namespace PlayerEvent {
 				CEREAL_NVP(handin_items),
 				CEREAL_NVP(handin_money),
 				CEREAL_NVP(return_items),
-				CEREAL_NVP(return_money)
+				CEREAL_NVP(return_money),
+				CEREAL_NVP(is_quest_handin)
 			);
 		}
 	};
