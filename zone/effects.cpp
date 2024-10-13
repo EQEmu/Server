@@ -1096,7 +1096,7 @@ void EntityList::AESpell(
 		max_targets = nullptr;
 	}
 
-	int max_targets_allowed = 4;
+	int max_targets_allowed = RuleI(Spells, DefaultAOEMaxTargets);;
 	if (max_targets) { // rains pass this in since they need to preserve the count through waves
 		max_targets_allowed = *max_targets;
 	} else if (spells[spell_id].aoe_max_targets) {
@@ -1109,6 +1109,12 @@ void EntityList::AESpell(
 		!IsEffectInSpell(spell_id, SE_Mez)
 	) {
 		max_targets_allowed = RuleI(Spells, TargetedAOEMaxTargets);
+	} else if (
+		IsPBAENukeSpell(spell_id) &&
+		IsDetrimentalSpell &&
+		!is_npc
+	) {
+		max_targets_allowed = RuleI(Spells, PointBlankAOEMaxTargets);
 	}
 
 	int   target_hit_counter = 0;

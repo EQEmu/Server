@@ -834,13 +834,13 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										);
 									}
 
-									auto loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
-									loot_drop_entry.equip_item = 1;
-									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
+									auto lde = LootdropEntriesRepository::NewNpcEntity();
+									lde.equip_item   = 1;
+									lde.item_charges = static_cast<int8>(baginst->GetCharges());
 
 									tradingWith->CastToNPC()->AddLootDrop(
 										bagitem,
-										loot_drop_entry,
+										lde,
 										true
 									);
 									// Return quest items being traded to non-quest NPC when the rule is true
@@ -859,17 +859,17 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 								}
 							}
 						}
+					} else {
+						auto lde = LootdropEntriesRepository::NewNpcEntity();
+						lde.equip_item   = 1;
+						lde.item_charges = static_cast<int8>(inst->GetCharges());
+
+						tradingWith->CastToNPC()->AddLootDrop(
+							item,
+							lde,
+							true
+						);
 					}
-
-					auto new_loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
-					new_loot_drop_entry.equip_item = 1;
-					new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
-
-					tradingWith->CastToNPC()->AddLootDrop(
-						item,
-						new_loot_drop_entry,
-						true
-					);
 				}
 				// Return quest items being traded to non-quest NPC when the rule is true
 				else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && item->IsQuestItem())) {

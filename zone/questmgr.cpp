@@ -90,8 +90,6 @@ void QuestManager::Process() {
 	while (cur != end) {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
 			if (cur->mob) {
-				parse->EventMob(EVENT_TIMER, cur->mob, nullptr, [&]() { return cur->name; }, 0);
-
 				if (cur->mob->IsEncounter()) {
 					parse->EventEncounter(
 						EVENT_TIMER,
@@ -100,6 +98,8 @@ void QuestManager::Process() {
 						0,
 						nullptr
 					);
+				} else {
+					parse->EventMob(EVENT_TIMER, cur->mob, nullptr, [&]() { return cur->name; }, 0);
 				}
 
 				//we MUST reset our iterator since the quest could have removed/added any
