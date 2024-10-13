@@ -56,6 +56,13 @@ steps:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
       - .\utils\scripts\build\windows-build.ps1
+    volumes:
+      - name: cache
+        path: submodules
+
+volumes:
+  - name: cache
+    temp: {}
 
 ---
 
