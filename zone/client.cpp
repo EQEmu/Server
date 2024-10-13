@@ -12490,22 +12490,16 @@ void Client::NPCHandinEventLog(Trade* t, NPC* n)
 
 	uint8 item_count = 0;
 
-	auto handin_money = PlayerEvent::Money{
-		.platinum = t->pp,
-		.gold = t->gp,
-		.silver = t->sp,
-		.copper = t->cp,
-	};
-
-	LogError("money | platinum [{}] gold [{}] silver [{}] copper [{}]", t->pp, t->gp, t->sp, t->cp);
+	hm.platinum = t->pp;
+	hm.gold     = t->gp;
+	hm.silver   = t->sp;
+	hm.copper   = t->cp;
 
 	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
 		if (c->GetInv().GetItem(i)) {
 			item_count++;
 		}
 	}
-
-	LogError("item_count [{}]", item_count);
 
 	hi.reserve(item_count);
 
