@@ -2,6 +2,8 @@ $cwd = Get-Location
 
 Set-Location -Path "$cwd"
 
+dir submodules
+
 git submodule init
 git submodule update
 

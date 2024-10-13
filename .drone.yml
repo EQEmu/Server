@@ -58,7 +58,7 @@ steps:
       - .\utils\scripts\build\windows-build.ps1
     volumes:
       - name: cache
-        path: submodules
+        path: ./submodules
 
 volumes:
   - name: cache
