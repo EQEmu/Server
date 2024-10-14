@@ -12859,9 +12859,9 @@ bool Client::CheckHandin(
 	};
 
 	std::vector<PlayerEvent::HandinEntry> handin_items;
-	PlayerEvent::HandinMoney              handin_money;
+	PlayerEvent::HandinMoney              handin_money{ };
 	std::vector<PlayerEvent::HandinEntry> return_items;
-	PlayerEvent::HandinMoney              return_money;
+	PlayerEvent::HandinMoney              return_money{ };
 
 	auto h = Handin{};
 
