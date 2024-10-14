@@ -1738,7 +1738,7 @@ public:
 		std::map<std::string, uint32> required,
 		std::vector<const EQ::ItemInstance*> items
 	);
-	bool ReturnHandinItems();
+	void ReturnHandinItems();
 
 	void ItemTimerCheck();
 	void TryItemTimer(int slot);
