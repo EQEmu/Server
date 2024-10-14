@@ -562,6 +562,9 @@ public:
 
 	bool CanPetTakeItem(const EQ::ItemInstance *inst);
 
+	bool IsMultiQuest() { return m_is_multiquest_npc; }
+	void SetMultiQuest(bool b) { m_is_multiquest_npc = b; }
+
 protected:
 
 	void HandleRoambox();
@@ -703,6 +706,7 @@ protected:
 	bool raid_target;
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
+	bool m_is_multiquest_npc;
 
 private:
 	uint32              m_loottable_id;
