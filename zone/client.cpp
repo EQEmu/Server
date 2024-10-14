@@ -13083,34 +13083,73 @@ bool Client::CheckHandin(
 	std::vector<const EQ::ItemInstance*> items
 )
 {
-	bool success = true;
+	// loop through handin
+	for (const auto& [key, value] : handin) {
+		LogTradingDetail("Handin key [{}] value [{}]", key, value);
 
-	if (handin.size() != required.size()) {
-		success = false;
-	}
+		// items
+		if (Strings::IsNumber(key)) {
+			if (required.find(key) == required.end()) {
+				LogTradingDetail("Handin (item) key [{}] value [{}] (not required)", key, value);
+			} else {
+				if (value < required[key]) {
+					LogTradingDetail("Handin (item) key [{}] value [{}] (not enough) required [{}]", key, value, required[key]);
+				} else {
+					LogTradingDetail("Handin (item) key [{}] value [{}] (success)", key, value);
+					// add item to npc list
+				}
+			}
+		} else if (!key.empty()) {
+			std::vector<std::string> moneys = {
+				"platinum",
+				"gold",
+				"silver",
+				"copper"
+			};
 
-	if (success) {
-		for (int i = 0; i < handin.size(); i++) {
-			if (handin[std::to_string(i)] != required[std::to_string(i)]) {
-				success = false;
-				break;
+			for (const auto& money : moneys) {
+				if (key == money) {
+					if (required.find(key) == required.end()) {
+						LogTradingDetail("Handin (money) key [{}] value [{}] (not required)", key, value);
+					} else {
+						if (value < required[key]) {
+							LogTradingDetail("Handin (money) key [{}] value [{}] (not enough) required [{}]", key, value, required[key]);
+						} else {
+							LogTradingDetail("Handin (money) key [{}] value [{}] (success)", key, value);
+							// add money to npc list
+						}
+					}
+				}
 			}
 		}
 	}
 
-	if (!success) {
-		for (int i = 0; i < items.size(); i++) {
-			if (const EQ::ItemInstance* item = items[i]) {
-				n->Say(
-					fmt::format(
-						"I have no need for this {}, you can have it back.",
-						GetCleanName()
-					).c_str()
-				);
-				PushItemOnCursor(*item, true);
-			}
-		}
+	for (const auto& [key, value] : required) {
+		LogTradingDetail("Required key [{}] value [{}]", key, value);
 	}
 
-	return success;
+//	if (success) {
+//		for (int i = 0; i < handin.size(); i++) {
+//			if (handin[std::to_string(i)] != required[std::to_string(i)]) {
+//				success = false;
+//				break;
+//			}
+//		}
+//	}
+
+//	if (!success) {
+//		for (int i = 0; i < items.size(); i++) {
+//			if (const EQ::ItemInstance* item = items[i]) {
+//				n->Say(
+//					fmt::format(
+//						"I have no need for this {}, you can have it back.",
+//						GetCleanName()
+//					).c_str()
+//				);
+//				PushItemOnCursor(*item, true);
+//			}
+//		}
+//	}
+
+	return true;
 }
