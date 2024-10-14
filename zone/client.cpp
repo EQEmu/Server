@@ -12841,7 +12841,7 @@ bool Client::CheckHandin(
 	std::vector<const EQ::ItemInstance *> items
 )
 {
-	m_handin = Handin{};
+	auto h = Handin{};
 
 	// loop through handin
 	for (const auto &[key, value]: handin) {
@@ -12854,7 +12854,7 @@ bool Client::CheckHandin(
 				continue;
 			}
 
-			m_handin.items.emplace_back(HandinEntry{.item_id = key, .count = value});
+			h.items.emplace_back(HandinEntry{.item_id = key, .count = value});
 		}
 		else if (!key.empty()) {
 			std::vector<std::string> moneys = {
@@ -12867,22 +12867,22 @@ bool Client::CheckHandin(
 			// money
 			if (std::find(moneys.begin(), moneys.end(), key) != moneys.end()) {
 				if (key == "platinum") {
-					m_handin.money.platinum = value;
+					h.money.platinum = value;
 				}
 				else if (key == "gold") {
-					m_handin.money.gold = value;
+					h.money.gold = value;
 				}
 				else if (key == "silver") {
-					m_handin.money.silver = value;
+					h.money.silver = value;
 				}
 				else if (key == "copper") {
-					m_handin.money.copper = value;
+					h.money.copper = value;
 				}
 			}
 		}
 	}
 
-	m_required = Handin{};
+	auto r = Handin{};
 	for (const auto &[key, value]: required) {
 		LogTradingDetail("Required key [{}] value [{}]", key, value);
 
@@ -12893,7 +12893,7 @@ bool Client::CheckHandin(
 				continue;
 			}
 
-			m_required.items.emplace_back(HandinEntry{.item_id = key, .count = value});
+			r.items.emplace_back(HandinEntry{.item_id = key, .count = value});
 		}
 		else if (!key.empty()) {
 			std::vector<std::string> moneys = {
@@ -12906,16 +12906,16 @@ bool Client::CheckHandin(
 			// money
 			if (std::find(moneys.begin(), moneys.end(), key) != moneys.end()) {
 				if (key == "platinum") {
-					m_required.money.platinum = value;
+					r.money.platinum = value;
 				}
 				else if (key == "gold") {
-					m_required.money.gold = value;
+					r.money.gold = value;
 				}
 				else if (key == "silver") {
-					m_required.money.silver = value;
+					r.money.silver = value;
 				}
 				else if (key == "copper") {
-					m_required.money.copper = value;
+					r.money.copper = value;
 				}
 			}
 		}
@@ -12923,10 +12923,10 @@ bool Client::CheckHandin(
 
 	// compare hand-in to required, the item_id can be in any slot
 	bool success = true;
-	if (m_handin.items.size() == m_required.items.size() && !m_handin.items.empty() && !m_required.items.empty()) {
-		for (const auto &h_item: m_handin.items) {
+	if (h.items.size() == r.items.size() && !h.items.empty() && !r.items.empty()) {
+		for (const auto &h_item: h.items) {
 			bool found = false;
-			for (const auto &r_item: m_required.items) {
+			for (const auto &r_item: r.items) {
 				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
 					found = true;
 					break;
@@ -12945,126 +12945,187 @@ bool Client::CheckHandin(
 
 	// compare hand-in money to required
 	if (success) {
-		if (m_handin.money.platinum != m_required.money.platinum ||
-			m_handin.money.gold != m_required.money.gold ||
-			m_handin.money.silver != m_required.money.silver ||
-			m_handin.money.copper != m_required.money.copper) {
+		if (h.money.platinum != r.money.platinum ||
+			h.money.gold != r.money.gold ||
+			h.money.silver != r.money.silver ||
+			h.money.copper != r.money.copper) {
 			success = false;
 		}
 	}
 
-	m_handin_success = success;
-	m_handin_npc     = n;
-	m_handin_items   = items;
+	// in-case we trigger CheckHandin multiple times, only set these once
+	if (!m_handin_started) {
+		m_handin_started  = true;
+		m_handin_npc      = n;
+		m_return_items    = items;
+		m_handed_in_items = items;
+		m_return_money    = h.money;
+		m_handed_in_money = h.money;
+	}
 
-//	const bool handed_in_money = (
-//		handin_money.platinum > 0 ||
-//		handin_money.gold > 0 ||
-//		handin_money.silver > 0 ||
-//		handin_money.copper > 0
-//	);
-//	const bool event_has_data_to_record = !handin_items.empty() || handed_in_money;
-//
-//	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
-//		auto e = PlayerEvent::HandinEvent{
-//			.npc_id = n->GetNPCTypeID(),
-//			.npc_name = n->GetCleanName(),
-//			.handin_items = handin_items,
-//			.handin_money = handin_money,
-//			.return_items = return_items,
-//			.return_money = return_money,
-//			.is_quest_handin = parse->HasQuestSub(n->GetNPCTypeID(), EVENT_TRADE)
-//		};
-//
-//		RecordPlayerEventLogWithClient(this, PlayerEvent::NPC_HANDIN, e);
-//	}
+	if (success) {
+		// remove items in m_handin from m_return_items
+		for (const auto &h_item: h.items) {
+			for (const auto &r_item: r.items) {
+				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
+					m_return_items.erase(
+						std::remove_if(
+							m_return_items.begin(),
+							m_return_items.end(),
+							[&](const EQ::ItemInstance *i) {
+								bool removed = i->GetItem()->ID == Strings::ToUnsignedInt(h_item.item_id)
+									&& i->GetCharges() == h_item.count;
+
+								if (removed) {
+									LogTradingDetail("Handin success, removing item [{}] from m_return_items", i->GetItem()->Name);
+								}
+
+								return removed;
+							}
+						),
+						m_return_items.end()
+					);
+				}
+			}
+		}
+
+		// subtract m_handin money from m_return_money
+		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
+			LogTradingDetail("Handin success, removing money p [{}] g [{}] s [{}] c [{}]", h.money.platinum, h.money.gold, h.money.silver, h.money.copper);
+			m_return_money.platinum -= h.money.platinum;
+			m_return_money.gold -= h.money.gold;
+			m_return_money.silver -= h.money.silver;
+			m_return_money.copper -= h.money.copper;
+		}
+	}
 
 	return success;
 }
 
 void Client::ReturnHandinItems()
 {
-
 	// player event
 	std::vector<PlayerEvent::HandinEntry> handin_items;
 	PlayerEvent::HandinMoney              handin_money{};
 	std::vector<PlayerEvent::HandinEntry> return_items;
 	PlayerEvent::HandinMoney              return_money{};
+	for (auto i : m_handed_in_items) {
+		if (i && i->GetItem()) {
+			handin_items.emplace_back(
+				PlayerEvent::HandinEntry{
+					.item_id = i->GetID(),
+					.item_name = i->GetItem()->Name,
+					.augment_ids = i->GetAugmentIDs(),
+					.augment_names = i->GetAugmentNames(),
+					.charges = static_cast<uint16>(i->GetCharges())
+				}
+			);
+		}
+	}
 
-//	for (auto i : items) {
-//		if (i && i->GetItem()) {
-//			handin_items.emplace_back(
-//				PlayerEvent::HandinEntry{
-//					.item_id = i->GetID(),
-//					.item_name = i->GetItem()->Name,
-//					.augment_ids = i->GetAugmentIDs(),
-//					.augment_names = i->GetAugmentNames(),
-//					.charges = static_cast<uint16>(i->GetCharges())
-//				}
-//			);
-//		}
-//	}
+	// check if any money was handed in
+	if (m_handed_in_money.platinum > 0 ||
+		m_handed_in_money.gold > 0 ||
+		m_handed_in_money.silver > 0 ||
+		m_handed_in_money.copper > 0
+		) {
+		handin_money.copper   = m_handed_in_money.copper;
+		handin_money.silver   = m_handed_in_money.silver;
+		handin_money.gold     = m_handed_in_money.gold;
+		handin_money.platinum = m_handed_in_money.platinum;
+	}
 
 	bool handed_back = false;
-	if (!m_handin_success) {
-		for (auto i: m_handin_items) {
-			if (i && i->GetItem()) {
-//				return_items.emplace_back(
-//					PlayerEvent::HandinEntry{
-//						.item_id = i->GetID(),
-//						.item_name = i->GetItem()->Name,
-//						.augment_ids = i->GetAugmentIDs(),
-//						.augment_names = i->GetAugmentNames(),
-//						.charges = static_cast<uint16>(i->GetCharges())
-//					}
-//				);
-
-				PushItemOnCursor(*i, true);
-				LogTradingDetail("Handin failed, returning item [{}]", i->GetItem()->Name);
-				handed_back = true;
-			}
-		}
-
-		// check if any money was handed in
-		if (m_handin.money.platinum > 0 || m_handin.money.gold > 0 || m_handin.money.silver > 0 ||
-			m_handin.money.copper > 0) {
-//			return_money.copper   = h.money.copper;
-//			return_money.silver   = h.money.silver;
-//			return_money.gold     = h.money.gold;
-//			return_money.platinum = h.money.platinum;
-
-			AddMoneyToPP(
-				m_handin.money.copper,
-				m_handin.money.silver,
-				m_handin.money.gold,
-				m_handin.money.platinum,
-				true
+	for (auto i: m_return_items) {
+		if (i && i->GetItem()) {
+			return_items.emplace_back(
+				PlayerEvent::HandinEntry{
+					.item_id = i->GetID(),
+					.item_name = i->GetItem()->Name,
+					.augment_ids = i->GetAugmentIDs(),
+					.augment_names = i->GetAugmentNames(),
+					.charges = static_cast<uint16>(i->GetCharges())
+				}
 			);
+
+			PushItemOnCursor(*i, true);
+			LogTradingDetail("Handin failed, returning item [{}]", i->GetItem()->Name);
 			handed_back = true;
-			LogTradingDetail(
-				"Handin failed, returning money p [{}] g [{}] s [{}] c [{}]",
-				m_handin.money.platinum,
-				m_handin.money.gold,
-				m_handin.money.silver,
-				m_handin.money.copper
-			);
-
-			// player event
-			handin_money.copper = m_handin.money.copper;
-			handin_money.silver = m_handin.money.silver;
-			handin_money.gold = m_handin.money.gold;
-			handin_money.platinum = m_handin.money.platinum;
 		}
-
-		m_processed_handin_return = handed_back;
 	}
 
-	if (handed_back && m_handin_npc) {
-		m_handin_npc->Say(
-			fmt::format(
-				"I have no need for this {}, you can have it back.",
-				GetCleanName()
-			).c_str()
+	// check if any money was handed in
+	if (m_return_money.platinum > 0 ||
+		m_return_money.gold > 0 ||
+		m_return_money.silver > 0 ||
+		m_return_money.copper > 0
+		) {
+		AddMoneyToPP(
+			m_return_money.copper,
+			m_return_money.silver,
+			m_return_money.gold,
+			m_return_money.platinum,
+			true
 		);
+		handed_back = true;
+		LogTradingDetail(
+			"Handin failed, returning money p [{}] g [{}] s [{}] c [{}]",
+			m_return_money.platinum,
+			m_return_money.gold,
+			m_return_money.silver,
+			m_return_money.copper
+		);
+
+		// player event
+		return_money.copper   = m_return_money.copper;
+		return_money.silver   = m_return_money.silver;
+		return_money.gold     = m_return_money.gold;
+		return_money.platinum = m_return_money.platinum;
 	}
+
+	m_processed_handin_return = handed_back;
+
+	if (handed_back) {
+		if (m_handin_npc) {
+			m_handin_npc->Say(
+				fmt::format(
+					"I have no need for this {}, you can have it back.",
+					GetCleanName()
+				).c_str()
+			);
+		}
+	}
+
+	const bool handed_in_money = (
+		handin_money.platinum > 0 ||
+		handin_money.gold > 0 ||
+		handin_money.silver > 0 ||
+		handin_money.copper > 0
+	);
+	const bool event_has_data_to_record = !handin_items.empty() || handed_in_money;
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+		auto e = PlayerEvent::HandinEvent{
+			.npc_id = m_handin_npc->GetNPCTypeID(),
+			.npc_name = m_handin_npc->GetCleanName(),
+			.handin_items = handin_items,
+			.handin_money = handin_money,
+			.return_items = return_items,
+			.return_money = return_money,
+			.is_quest_handin = parse->HasQuestSub(m_handin_npc->GetNPCTypeID(), EVENT_TRADE)
+		};
+
+		RecordPlayerEventLogWithClient(this, PlayerEvent::NPC_HANDIN, e);
+	}
+}
+
+void Client::ResetHandin()
+{
+	m_handin_npc = nullptr;
+	m_handed_in_items.clear();
+	m_return_items.clear();
+	m_return_money            = {};
+	m_processed_handin_return = false;
+	m_handin_started          = false;
+	m_handed_in_money         = {};
 }

@@ -877,8 +877,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			LogTradingDetail("ReturnHandinItems() called for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
 
-		// reset the handin
-		m_processed_handin_return = false;
+		ResetHandin();
 
 		for (auto &inst: insts) {
 			if (inst) {
