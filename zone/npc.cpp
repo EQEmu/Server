@@ -4264,3 +4264,22 @@ bool NPC::FacesTarget()
 	return std::find(v.begin(), v.end(), std::to_string(GetBaseRace())) == v.end();
 }
 
+bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
+{
+	if (!inst) {
+		return false;
+	}
+
+	if (!IsPetOwnerClient()) {
+		return false;
+	}
+
+	const bool can_take_nodrop   = RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0;
+	const bool can_pet_take_item = !inst->GetItem()->IsQuestItem() && can_take_nodrop && !inst->IsAttuned();
+
+	if (!can_pet_take_item) {
+		return false;
+	}
+
+	return true;
+}

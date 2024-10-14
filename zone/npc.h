@@ -559,6 +559,9 @@ public:
 	bool CanPathTo(float x, float y, float z);
 
 	void DoNpcToNpcAggroScan();
+
+	bool CanPetTakeItem(const EQ::ItemInstance *inst);
+
 protected:
 
 	void HandleRoambox();
