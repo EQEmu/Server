@@ -3511,6 +3511,12 @@ bool Lua_Client::LuaCheckHandin(
 	return self->CheckHandin(n, handin_map, required_map, items);
 }
 
+void Lua_Client::ReturnHandinItems()
+{
+	Lua_Safe_Call_Void();
+	self->ReturnHandinItems();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3917,6 +3923,7 @@ luabind::scope lua_register_client() {
 	.def("ResetItemCooldown", (void(Lua_Client::*)(uint32))&Lua_Client::ResetItemCooldown)
 	.def("ResetLeadershipAA", (void(Lua_Client::*)(void))&Lua_Client::ResetLeadershipAA)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
+	.def("ReturnHandinItems", (void(Lua_Client::*)(void))&Lua_Client::ReturnHandinItems)
 	.def("RewardFaction", (void(Lua_Client::*)(int,int))&Lua_Client::RewardFaction)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)
 	.def("Save", (void(Lua_Client::*)(void))&Lua_Client::Save)
