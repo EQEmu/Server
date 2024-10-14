@@ -1739,6 +1739,7 @@ public:
 		std::vector<const EQ::ItemInstance*> items
 	);
 	void ReturnHandinItems();
+	void ResetHandin();
 
 	void ItemTimerCheck();
 	void TryItemTimer(int slot);
@@ -1818,6 +1819,7 @@ public:
 
 	uint32 GetEXPForLevel(uint16 check_level);
 
+	// NPC Handin
 	struct HandinEntry {
 		std::string item_id;
 		uint32 count;
@@ -1835,11 +1837,15 @@ public:
 		HandinMoney money;
 	};
 
-	Handin m_handin = {};
-	Handin m_required = {};
-	bool m_handin_success = false;
-	NPC* m_handin_npc = nullptr;
-	std::vector<const EQ::ItemInstance*> m_handin_items = {};
+	bool                                  m_handin_started          = false;
+	NPC                                   *m_handin_npc             = nullptr;
+	bool                                  m_processed_handin_return = false;
+	std::vector<const EQ::ItemInstance *> m_return_items            = {};
+	HandinMoney                           m_return_money            = {};
+
+	// player event log usage only
+	std::vector<const EQ::ItemInstance *> m_handed_in_items = {};
+	HandinMoney                           m_handed_in_money = {};
 
 protected:
 	friend class Mob;
@@ -2263,8 +2269,6 @@ private:
 	// full and partial mail key cache
 	std::string m_mail_key_full;
 	std::string m_mail_key;
-
-	bool m_processed_handin_return = false;
 
 public:
 	const std::string &GetMailKeyFull() const;
