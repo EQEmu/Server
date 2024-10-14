@@ -3472,6 +3472,9 @@ bool ZoneDatabase::LoadFactionData()
 	}
 
     auto& fmr_row = faction_max_results.begin();
+	if (fmr_row[0] == nullptr) {
+		return false;
+	}
 
 	max_faction = Strings::ToUnsignedInt(fmr_row[0]);
 	faction_array = new Faction *[max_faction + 1];
