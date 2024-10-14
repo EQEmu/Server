@@ -837,6 +837,18 @@ void Lua_NPC::DescribeSpecialAbilities(Lua_Client c)
 	self->DescribeSpecialAbilities(c);
 }
 
+bool Lua_NPC::IsMultiQuest()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsMultiQuest();
+}
+
+void Lua_NPC::SetMultiQuest(bool b)
+{
+	Lua_Safe_Call_Void();
+	self->SetMultiQuest(b);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -930,6 +942,7 @@ luabind::scope lua_register_npc() {
 	.def("IsAnimal", (bool(Lua_NPC::*)(void))&Lua_NPC::IsAnimal)
 	.def("IsGuarding", (bool(Lua_NPC::*)(void))&Lua_NPC::IsGuarding)
 	.def("IsLDoNLocked", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNLocked)
+	.def("IsMultiQuest", (bool(Lua_NPC::*)(void))&Lua_NPC::IsMultiQuest)
 	.def("IsLDoNTrapped", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNTrapped)
 	.def("IsLDoNTrapDetected", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNTrapDetected)
 	.def("IsOnHatelist", (bool(Lua_NPC::*)(Lua_Mob))&Lua_NPC::IsOnHatelist)
@@ -969,6 +982,7 @@ luabind::scope lua_register_npc() {
 	.def("SetGold", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetGold)
 	.def("SetGrid", (void(Lua_NPC::*)(int))&Lua_NPC::SetGrid)
 	.def("SetKeepsSoldItems", (void(Lua_NPC::*)(bool))&Lua_NPC::SetKeepsSoldItems)
+	.def("SetMultiQuest", (void(Lua_NPC::*)(bool))&Lua_NPC::SetMultiQuest)
 	.def("SetLDoNLocked", (void(Lua_NPC::*)(bool))&Lua_NPC::SetLDoNLocked)
 	.def("SetLDoNLockedSkill", (void(Lua_NPC::*)(uint16))&Lua_NPC::SetLDoNLockedSkill)
 	.def("SetLDoNTrapped", (void(Lua_NPC::*)(bool))&Lua_NPC::SetLDoNTrapped)
