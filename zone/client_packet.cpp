@@ -17226,3 +17226,13 @@ void Client::Handle_OP_ShopRetrieveParcel(const EQApplicationPacket *app)
     auto parcel_in = (ParcelRetrieve_Struct *)app->pBuffer;
     DoParcelRetrieve(*parcel_in);
 }
+
+bool Client::HasProcessedHandin() const
+{
+	return m_processed_handin;
+}
+
+void Client::SetProcessedHandin(bool processed)
+{
+	m_processed_handin = processed;
+}

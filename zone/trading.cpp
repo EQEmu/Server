@@ -857,18 +857,28 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			tradingWith->FaceTarget(this);
 		}
 
+		std::vector<std::any> item_list(items.begin(), items.end());
+		for (EQ::ItemInstance *inst: items) {
+			if (!inst || !inst->GetItem()) {
+				continue;
+			}
+			item_list.emplace_back(inst);
+		}
+
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
-			std::vector<std::any> item_list(items.begin(), items.end());
 			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 			LogTradingDetail("EVENT_TRADE triggered for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
-		else {
-			std::vector<const EQ::ItemInstance *> item_list;
+
+		// it's possible we have a quest NPC that doesn't have an EVENT_TRADE subroutine
+		// we can't double fire the CheckHandin() event, so we need to check if it's already been processed
+		if (!HasProcessedHandin()) {
+			std::vector<const EQ::ItemInstance *> remaining_item_list;
 			for (EQ::ItemInstance *inst: items) {
 				if (!inst || !inst->GetItem()) {
 					continue;
 				}
-				item_list.push_back(inst);
+				remaining_item_list.push_back(inst);
 			}
 			std::map<std::string, uint32> handin = {
 				{"copper",   trade->cp},
@@ -876,9 +886,12 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				{"gold",     trade->gp},
 				{"platinum", trade->pp}
 			};
-			CheckHandin(tradingWith->CastToNPC(), handin, {}, item_list);
+			CheckHandin(tradingWith->CastToNPC(), handin, {}, remaining_item_list);
 			LogTradingDetail("CheckHandin() called for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
+
+		// reset the handin
+		SetProcessedHandin(false);
 
 		for (auto &inst: insts) {
 			if (inst) {

@@ -13227,5 +13227,7 @@ bool Client::CheckHandin(
 		);
 	}
 
+	m_processed_handin = true;
+
 	return success;
 }
