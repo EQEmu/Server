@@ -588,6 +588,7 @@ public:
 		luabind::adl::object required_table,
 		luabind::adl::object items_table
 	);
+	void ReturnHandinItems();
 
 	void DialogueWindow(std::string markdown);
 
