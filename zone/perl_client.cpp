@@ -3212,6 +3212,45 @@ Merc* Perl_Client_GetMerc(Client* self)
 	return self->GetMerc();
 }
 
+bool Perl_Client_CheckHandin(
+	Client* self,
+	NPC* n,
+	perl::reference handin_ref,
+	perl::reference required_ref,
+	perl::array items_ref
+)
+{
+	perl::hash handin   = handin_ref;
+	perl::hash required = required_ref;
+
+	std::map<std::string, uint32>        handin_map;
+	std::map<std::string, uint32>        required_map;
+	std::vector<const EQ::ItemInstance*> items;
+
+	bool success = true;
+
+	for (auto e : handin) {
+		const uint32 item_id    = Strings::ToUnsignedInt(e.first);
+		const uint32 item_count = static_cast<uint32>(handin.at(e.first));
+
+		handin_map[std::to_string(item_id)] = item_count;
+	}
+
+	for (auto e : required) {
+		const uint32 item_id    = Strings::ToUnsignedInt(e.first);
+		const uint32 item_count = static_cast<uint32>(handin.at(e.first));
+
+		required_map[std::to_string(item_id)] = item_count;
+	}
+
+	for (auto e : items_ref) {
+		const EQ::ItemInstance* i = static_cast<EQ::ItemInstance*>(e);
+		items.emplace_back(i);
+	}
+
+	return self->CheckHandin(n, handin_map, required_map, items);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3284,6 +3323,7 @@ void perl_register_client()
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
 	package.add("CharacterID", &Perl_Client_CharacterID);
+	package.add("CheckHandin", &Perl_Client_CheckHandin);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckSpecializeIncrease", &Perl_Client_CheckSpecializeIncrease);
