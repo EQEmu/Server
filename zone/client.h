@@ -1818,8 +1818,28 @@ public:
 
 	uint32 GetEXPForLevel(uint16 check_level);
 
-	bool HasProcessedHandin() const;
-	void SetProcessedHandin(bool processed);
+	struct HandinEntry {
+		std::string item_id;
+		uint32 count;
+	};
+
+	struct HandinMoney {
+		uint32 platinum;
+		uint32 gold;
+		uint32 silver;
+		uint32 copper;
+	};
+
+	struct Handin {
+		std::vector<HandinEntry> items;
+		HandinMoney money;
+	};
+
+	Handin m_handin = {};
+	Handin m_required = {};
+	bool m_handin_success = false;
+	NPC* m_handin_npc = nullptr;
+	std::vector<const EQ::ItemInstance*> m_handin_items = {};
 
 protected:
 	friend class Mob;
@@ -2244,7 +2264,7 @@ private:
 	std::string m_mail_key_full;
 	std::string m_mail_key;
 
-	bool m_processed_handin = false;
+	bool m_processed_handin_return = false;
 
 public:
 	const std::string &GetMailKeyFull() const;
