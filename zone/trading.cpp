@@ -870,8 +870,9 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			LogTradingDetail("EVENT_TRADE triggered for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
 
+		// this is a catch-all return for items that weren't consumed by the EVENT_TRADE subroutine
 		// it's possible we have a quest NPC that doesn't have an EVENT_TRADE subroutine
-		// we can't double fire the CheckHandin() event, so we need to check if it's already been processed
+		// we can't double fire the CheckHandin() event, so we need to check if it's already been processed from EVENT_TRADE
 		if (!HasProcessedHandin()) {
 			std::vector<const EQ::ItemInstance *> remaining_item_list;
 			for (EQ::ItemInstance *inst: items) {
