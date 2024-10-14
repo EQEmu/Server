@@ -3276,6 +3276,11 @@ bool Perl_Client_CheckHandin(
 	return self->CheckHandin(n, handin_map, required_map, items);
 }
 
+void Perl_Client_ReturnHandinItems(Client* self)
+{
+	self->ReturnHandinItems();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3679,6 +3684,7 @@ void perl_register_client()
 	package.add("ResetItemCooldown", &Perl_Client_ResetItemCooldown);
 	package.add("ResetLeadershipAA", &Perl_Client_ResetLeadershipAA);
 	package.add("ResetTrade", &Perl_Client_ResetTrade);
+	package.add("ReturnHandinItems", &Perl_Client_ReturnHandinItems);
 	package.add("Save", &Perl_Client_Save);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int))&Perl_Client_ScribeSpell);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int, bool))&Perl_Client_ScribeSpell);
