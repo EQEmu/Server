@@ -1816,6 +1816,10 @@ public:
 	void RecordKilledNPCEvent(NPC *n);
 
 	uint32 GetEXPForLevel(uint16 check_level);
+
+	bool HasProcessedHandin() const;
+	void SetProcessedHandin(bool processed);
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
@@ -2239,6 +2243,9 @@ private:
 	// full and partial mail key cache
 	std::string m_mail_key_full;
 	std::string m_mail_key;
+
+	bool m_processed_handin = false;
+
 public:
 	const std::string &GetMailKeyFull() const;
 	const std::string &GetMailKey() const;
