@@ -582,7 +582,7 @@ public:
 	bool RemoveAAPoints(uint32 points);
 	bool RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount);
 	bool AreTasksCompleted(luabind::object task_ids);
-	bool CheckHandin(
+	bool LuaCheckHandin(
 		Lua_NPC n,
 		luabind::adl::object handin_table,
 		luabind::adl::object required_table,
