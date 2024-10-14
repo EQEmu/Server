@@ -13075,3 +13075,42 @@ void Client::ClientToNpcAggroProcess()
 		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
 	}
 }
+
+bool Client::CheckHandin(
+	NPC* n,
+	std::map<std::string, uint32> handin,
+	std::map<std::string, uint32> required,
+	std::vector<const EQ::ItemInstance*> items
+)
+{
+	bool success = true;
+
+	if (handin.size() != required.size()) {
+		success = false;
+	}
+
+	if (success) {
+		for (int i = 0; i < handin.size(); i++) {
+			if (handin[std::to_string(i)] != required[std::to_string(i)]) {
+				success = false;
+				break;
+			}
+		}
+	}
+
+	if (!success) {
+		for (int i = 0; i < items.size(); i++) {
+			if (const EQ::ItemInstance* item = items[i]) {
+				n->Say(
+					fmt::format(
+						"I have no need for this {}, you can have it back.",
+						GetCleanName()
+					).c_str()
+				);
+				PushItemOnCursor(*item, true);
+			}
+		}
+	}
+
+	return success;
+}

@@ -1732,6 +1732,13 @@ public:
 	void DuplicateLoreMessage(uint32 ItemID);
 	void GarbleMessage(char *, uint8);
 
+	bool CheckHandin(
+		NPC* n,
+		std::map<std::string, uint32> handin,
+		std::map<std::string, uint32> required,
+		std::vector<const EQ::ItemInstance*> items
+	);
+
 	void ItemTimerCheck();
 	void TryItemTimer(int slot);
 	void SendItemScale(EQ::ItemInstance *inst);
