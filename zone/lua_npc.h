@@ -186,6 +186,8 @@ public:
 	void SetNPCAggro(bool in_npc_aggro);
 	uint32 GetNPCSpellsEffectsID();
 	void DescribeSpecialAbilities(Lua_Client c);
+	bool IsMultiQuest();
+	void SetMultiQuest(bool b);
 };
 
 #endif
