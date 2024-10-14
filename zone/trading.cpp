@@ -668,7 +668,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 	}
 	else if(tradingWith->IsNPC()) {
-		NPCHandinEventLog(trade, tradingWith->CastToNPC());
 
 		QSPlayerLogHandin_Struct* qs_audit = nullptr;
 		bool qs_log = false;
