@@ -3227,25 +3227,50 @@ bool Perl_Client_CheckHandin(
 	std::map<std::string, uint32>        required_map;
 	std::vector<const EQ::ItemInstance*> items;
 
-	bool success = true;
+	for (auto e: handin) {
+		if (!e.first) {
+			continue;
+		}
 
-	for (auto e : handin) {
-		const uint32 item_id    = Strings::ToUnsignedInt(e.first);
-		const uint32 item_count = static_cast<uint32>(handin.at(e.first));
+		if (Strings::EqualFold(e.first, "0")) {
+			continue;
+		}
 
-		handin_map[std::to_string(item_id)] = item_count;
+		LogTradingDetail("Handin key [{}] value [{}]", e.first, handin.at(e.first).c_str());
+
+		const uint32 count = static_cast<uint32>(handin.at(e.first));
+		handin_map[e.first] = count;
 	}
 
-	for (auto e : required) {
-		const uint32 item_id    = Strings::ToUnsignedInt(e.first);
-		const uint32 item_count = static_cast<uint32>(handin.at(e.first));
+	for (auto e: required) {
+		if (!e.first) {
+			continue;
+		}
 
-		required_map[std::to_string(item_id)] = item_count;
+		if (Strings::EqualFold(e.first, "0")) {
+			continue;
+		}
+
+		LogTradingDetail("Required key [{}] value [{}]", e.first, required.at(e.first).c_str());
+
+		const uint32 count = static_cast<uint32>(required.at(e.first));
+		required_map[e.first] = count;
 	}
 
 	for (auto e : items_ref) {
 		const EQ::ItemInstance* i = static_cast<EQ::ItemInstance*>(e);
+		if (!i) {
+			continue;
+		}
+
 		items.emplace_back(i);
+
+		LogTradingDetail(
+			"Item instance [{}] ({}) UUID ({}) added to handin list",
+			i->GetItem()->Name,
+			i->GetItem()->ID,
+			i->GetSerialNumber()
+		);
 	}
 
 	return self->CheckHandin(n, handin_map, required_map, items);
