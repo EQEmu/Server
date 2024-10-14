@@ -57,6 +57,8 @@ public:
 
 	inline std::list<EQ::ItemInstance*>::const_iterator cbegin() { return m_list.cbegin(); }
 	inline std::list<EQ::ItemInstance*>::const_iterator cend() { return m_list.cend(); }
+	inline std::list<EQ::ItemInstance*>::iterator begin() { return m_list.begin(); }
+	inline std::list<EQ::ItemInstance*>::iterator end() { return m_list.end(); }
 
 	inline int size() { return static_cast<int>(m_list.size()); } // TODO: change to size_t
 	inline bool empty() { return m_list.empty(); }
