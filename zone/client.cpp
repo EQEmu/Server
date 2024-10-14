@@ -13174,7 +13174,7 @@ bool Client::CheckHandin(
 
 	// compare hand-in to required, the item_id can be in any slot
 	bool success = true;
-	if (h.items.size() == r.items.size()) {
+	if (h.items.size() == r.items.size() && !h.items.empty() && !r.items.empty()) {
 		for (const auto& h_item : h.items) {
 			bool found = false;
 			for (const auto& r_item : r.items) {
@@ -13200,26 +13200,31 @@ bool Client::CheckHandin(
 		}
 	}
 
+	bool handed_back = false;
 	if (!success) {
 		for (auto i : items) {
 			if (i) {
 				PushItemOnCursor(*i, true);
 				LogTradingDetail("Handin failed, returning item [{}]", i->GetItem()->Name);
+				handed_back = true;
 			}
 		}
 
+		// check if any money was handed in
+		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
+			AddMoneyToPP(h.money.copper, h.money.silver, h.money.gold, h.money.platinum, true);
+			handed_back = true;
+			LogTradingDetail("Handin failed, returning money p [{}] g [{}] s [{}] c [{}]", h.money.platinum, h.money.gold, h.money.silver, h.money.copper);
+		}
+	}
+
+	if (handed_back) {
 		n->Say(
 			fmt::format(
 				"I have no need for this {}, you can have it back.",
 				GetCleanName()
 			).c_str()
 		);
-
-		// check if any money was handed in
-		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
-			AddMoneyToPP(h.money.copper, h.money.silver, h.money.gold, h.money.platinum, true);
-			LogTradingDetail("Handin failed, returning money p [{}] g [{}] s [{}] c [{}]", h.money.platinum, h.money.gold, h.money.silver, h.money.copper);
-		}
 	}
 
 	return success;
