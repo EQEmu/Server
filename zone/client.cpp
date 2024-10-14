@@ -13083,22 +13083,37 @@ bool Client::CheckHandin(
 	std::vector<const EQ::ItemInstance*> items
 )
 {
+	struct HandinEntry {
+		std::string item_id;
+		uint32 count;
+	};
+
+	struct HandinMoney {
+		uint32 platinum;
+		uint32 gold;
+		uint32 silver;
+		uint32 copper;
+	};
+
+	struct Handin {
+		std::vector<HandinEntry> items;
+		HandinMoney money;
+	};
+
+	auto h = Handin{};
+
 	// loop through handin
 	for (const auto& [key, value] : handin) {
 		LogTradingDetail("Handin key [{}] value [{}]", key, value);
 
 		// items
 		if (Strings::IsNumber(key)) {
-			if (required.find(key) == required.end()) {
-				LogTradingDetail("Handin (item) key [{}] value [{}] (not required)", key, value);
-			} else {
-				if (value < required[key]) {
-					LogTradingDetail("Handin (item) key [{}] value [{}] (not enough) required [{}]", key, value, required[key]);
-				} else {
-					LogTradingDetail("Handin (item) key [{}] value [{}] (success)", key, value);
-					// add item to npc list
-				}
+			const EQ::ItemData* item = database.GetItem(Strings::ToUnsignedInt(key));
+			if (!item) {
+				continue;
 			}
+
+			h.items.emplace_back(HandinEntry{.item_id = key, .count = value});
 		} else if (!key.empty()) {
 			std::vector<std::string> moneys = {
 				"platinum",
@@ -13107,49 +13122,105 @@ bool Client::CheckHandin(
 				"copper"
 			};
 
-			for (const auto& money : moneys) {
-				if (key == money) {
-					if (required.find(key) == required.end()) {
-						LogTradingDetail("Handin (money) key [{}] value [{}] (not required)", key, value);
-					} else {
-						if (value < required[key]) {
-							LogTradingDetail("Handin (money) key [{}] value [{}] (not enough) required [{}]", key, value, required[key]);
-						} else {
-							LogTradingDetail("Handin (money) key [{}] value [{}] (success)", key, value);
-							// add money to npc list
-						}
-					}
+			// money
+			if (std::find(moneys.begin(), moneys.end(), key) != moneys.end()) {
+				if (key == "platinum") {
+					h.money.platinum = value;
+				} else if (key == "gold") {
+					h.money.gold = value;
+				} else if (key == "silver") {
+					h.money.silver = value;
+				} else if (key == "copper") {
+					h.money.copper = value;
 				}
 			}
 		}
 	}
 
+	auto r = Handin{};
 	for (const auto& [key, value] : required) {
 		LogTradingDetail("Required key [{}] value [{}]", key, value);
+
+		// items
+		if (Strings::IsNumber(key)) {
+			const EQ::ItemData* item = database.GetItem(Strings::ToUnsignedInt(key));
+			if (!item) {
+				continue;
+			}
+
+			r.items.emplace_back(HandinEntry{.item_id = key, .count = value});
+		} else if (!key.empty()) {
+			std::vector<std::string> moneys = {
+				"platinum",
+				"gold",
+				"silver",
+				"copper"
+			};
+
+			// money
+			if (std::find(moneys.begin(), moneys.end(), key) != moneys.end()) {
+				if (key == "platinum") {
+					r.money.platinum = value;
+				} else if (key == "gold") {
+					r.money.gold = value;
+				} else if (key == "silver") {
+					r.money.silver = value;
+				} else if (key == "copper") {
+					r.money.copper = value;
+				}
+			}
+		}
 	}
 
-//	if (success) {
-//		for (int i = 0; i < handin.size(); i++) {
-//			if (handin[std::to_string(i)] != required[std::to_string(i)]) {
-//				success = false;
-//				break;
-//			}
-//		}
-//	}
+	// compare hand-in to required, the item_id can be in any slot
+	bool success = true;
+	if (h.items.size() == r.items.size()) {
+		for (const auto& h_item : h.items) {
+			bool found = false;
+			for (const auto& r_item : r.items) {
+				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
+					found = true;
+					break;
+				}
+			}
 
-//	if (!success) {
-//		for (int i = 0; i < items.size(); i++) {
-//			if (const EQ::ItemInstance* item = items[i]) {
-//				n->Say(
-//					fmt::format(
-//						"I have no need for this {}, you can have it back.",
-//						GetCleanName()
-//					).c_str()
-//				);
-//				PushItemOnCursor(*item, true);
-//			}
-//		}
-//	}
+			if (!found) {
+				success = false;
+				break;
+			}
+		}
+	} else {
+		success = false;
+	}
 
-	return true;
+	// compare hand-in money to required
+	if (success) {
+		if (h.money.platinum != r.money.platinum || h.money.gold != r.money.gold || h.money.silver != r.money.silver || h.money.copper != r.money.copper) {
+			success = false;
+		}
+	}
+
+	if (!success) {
+		for (auto i : items) {
+			if (i) {
+				PushItemOnCursor(*i, true);
+				LogTradingDetail("Handin failed, returning item [{}]", i->GetItem()->Name);
+			}
+		}
+
+		n->Say(
+			fmt::format(
+				"I have no need for this {}, you can have it back.",
+				GetCleanName()
+			).c_str()
+		);
+
+		// check if any money was handed in
+		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
+			AddMoneyToPP(h.money.copper, h.money.silver, h.money.gold, h.money.platinum, true);
+			LogTradingDetail("Handin failed, returning money p [{}] g [{}] s [{}] c [{}]", h.money.platinum, h.money.gold, h.money.silver, h.money.copper);
+		}
+	}
+
+	return success;
 }
