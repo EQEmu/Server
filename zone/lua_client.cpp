@@ -3458,23 +3458,30 @@ bool Lua_Client::CheckHandin(
 	std::vector<const EQ::ItemInstance*> items;
 
 	for (luabind::iterator i(handin_table), end; i != end; i++) {
-		uint32 key = luabind::object_cast<uint32>(i.key());
-		handin_map[std::to_string(key)] = luabind::object_cast<uint32>(handin_table[i.key()]);
-		LogError("handin_map | key [{}]", key);
+		std::string key = luabind::object_cast<std::string>(i.key());
+		handin_map[key] = luabind::object_cast<uint32>(handin_table[i.key()]);
+		LogTradingDetail("Handin key [{}] value [{}]", key, handin_map[key]);
 	}
 
 	for (luabind::iterator i(required_table), end; i != end; i++) {
-		uint32 key = luabind::object_cast<uint32>(i.key());
-		required_map[std::to_string(key)] = luabind::object_cast<uint32>(required_table[i.key()]);
-		LogError("required_map | key [{}]", key);
+		std::string key = luabind::object_cast<std::string>(i.key());
+		required_map[key] = luabind::object_cast<uint32>(required_table[i.key()]);
+		LogTradingDetail("Required key [{}] value [{}]", key, handin_map[key]);
 	}
 
 	for (luabind::iterator i(items_table), end; i != end; i++) {
 		auto item = luabind::object_cast<Lua_ItemInst>(items_table[i.key()]);
 
-		items.emplace_back(item);
 		if (item && item.GetItem()) {
 			LogError("items | id [{}] name [{}]", item.GetID(), item.GetName());
+
+			LogTradingDetail(
+				"Item instance [{}] ({}) added to handin list",
+				item.GetName(),
+				item.GetID()
+			);
+
+			items.emplace_back(item);
 		}
 	}
 
