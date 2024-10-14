@@ -13049,3 +13049,7 @@ bool Client::CheckHandin(
 
 	return success;
 }
+
+void Client::ReturnHandinItems() {
+	// implement
+}
