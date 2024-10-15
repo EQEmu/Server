@@ -12836,15 +12836,15 @@ void Client::ClientToNpcAggroProcess()
 
 bool Client::CheckHandin(
 	NPC *n,
-	std::map<std::string, uint32> handin,
-	std::map<std::string, uint32> required,
+	std::map<std::string, uint16> handin,
+	std::map<std::string, uint16> required,
 	std::vector<const EQ::ItemInstance *> items
 )
 {
 	auto h = Handin{};
 	auto r = Handin{};
 
-	std::vector<std::pair<const std::map<std::string, uint32>&, Handin&>> datasets = {};
+	std::vector<std::pair<const std::map<std::string, uint16>&, Handin&>> datasets = {};
 
 	// if we've already started the hand-in process, we don't want to re-process the hand-in data
 	// we continue to use the originally set hand-in bucket and decrement from it with each successive hand-in

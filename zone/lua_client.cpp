@@ -3453,8 +3453,8 @@ bool Lua_Client::LuaCheckHandin(
 		return false;
 	}
 
-	std::map<std::string, uint32>             handin_map;
-	std::map<std::string, uint32>             required_map;
+	std::map<std::string, uint16>             handin_map;
+	std::map<std::string, uint16>             required_map;
 	std::vector<const EQ::ItemInstance*> items;
 
 	for (luabind::iterator i(handin_table), end; i != end; i++) {

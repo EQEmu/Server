@@ -877,7 +877,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		if (!m_has_processed_handin_return) {
 			if (!m_handin_started) {
 				LogTradingDetail("EVENT_TRADE did not process handin, calling ReturnHandinItems() for NPC [{}]", tradingWith->GetNPCTypeID());
-				std::map<std::string, uint32> handin = {
+				std::map<std::string, uint16> handin = {
 					{"copper",   trade->cp},
 					{"silver",   trade->sp},
 					{"gold",     trade->gp},
