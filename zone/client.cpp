@@ -12897,10 +12897,14 @@ bool Client::CheckHandin(
 
 	// pull hand-in items from the item instances
 	for (const auto &i: items) {
+		if (!i) {
+			continue;
+		}
+
 		h.items.emplace_back(
 			HandinEntry{
 				.item_id = std::to_string(i->GetItem()->ID),
-				.count = i->GetCharges(),
+				.count = static_cast<uint32>(i->GetCharges()),
 				.item = i
 			}
 		);
