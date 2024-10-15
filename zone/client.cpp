@@ -12855,11 +12855,10 @@ bool Client::CheckHandin(
 	}
 	datasets.emplace_back(required, r);
 
-	const std::string set_hand_in = "Hand-in";
+	const std::string set_hand_in  = "Hand-in";
 	const std::string set_required = "Required";
 	for (const auto &[data_map, current_handin]: datasets) {
 		std::string current_dataset = &current_handin == &h ? set_hand_in : set_required;
-		int         index           = 0;
 		for (const auto &[key, value]: data_map) {
 			LogTradingDetail("Processing [{}] key [{}] value [{}]", current_dataset, key, value);
 
@@ -12867,26 +12866,16 @@ bool Client::CheckHandin(
 			if (Strings::IsNumber(key)) {
 				const EQ::ItemData *exists = database.GetItem(Strings::ToUnsignedInt(key));
 				if (!exists) {
-					index++;
 					continue;
 				}
 
-				// we only care about the item instance for the hand-in bucket, not the required bucket
-				auto item = items[index];
-				if (!item && current_dataset == set_hand_in) {
-					LogTradingDetail(
-						"[{}] item [{}] instance, not found - this is a big problem",
-						current_dataset,
-						key
-					);
-					index++;
-					continue;
+				// only handle required here, for hand-in we'll pull from the item instances for accuracy
+				if (current_dataset == set_required) {
+					current_handin.items.emplace_back(HandinEntry{.item_id = key, .count = value});
 				}
-
-				current_handin.items.emplace_back(HandinEntry{.item_id = key, .count = value, .item = item});
 			}
 			else if (!key.empty()) { // Handle money
-				std::vector <std::string> moneys = {"platinum", "gold", "silver", "copper"};
+				std::vector<std::string> moneys = {"platinum", "gold", "silver", "copper"};
 
 				if (std::find(moneys.begin(), moneys.end(), key) != moneys.end()) {
 					if (key == "platinum") {
@@ -12903,8 +12892,18 @@ bool Client::CheckHandin(
 					}
 				}
 			}
-			index++;
 		}
+	}
+
+	// pull hand-in items from the item instances
+	for (const auto &i: items) {
+		h.items.emplace_back(
+			HandinEntry{
+				.item_id = std::to_string(i->GetItem()->ID),
+				.count = i->GetCharges(),
+				.item = i
+			}
+		);
 	}
 
 	// compare hand-in to required, the item_id can be in any slot
@@ -12949,15 +12948,15 @@ bool Client::CheckHandin(
 		m_hand_in.npc = n;
 	}
 
-	if (met_requirement) {
-		// print current hand-in bucket
-		LogTradingDetail("---");
-		LogTradingDetail("Hand-in success | Printing current hand-in bucket");
-		LogTradingDetail("Items [{}] money p [{}] g [{}] s [{}] c [{}]", h.items.size(), h.money.platinum, h.money.gold, h.money.silver, h.money.copper);
-		for (const auto &i: h.items) {
-			LogTradingDetail("Hand-in success, item [{}] ({}) count [{}]", i.item->GetItem()->Name, i.item_id, i.count);
-		}
+	// print current hand-in bucket
+	LogTradingDetail("---");
+	LogTradingDetail("Hand-in | Printing current hand-in bucket");
+	LogTradingDetail("--- Items [{}] money p [{}] g [{}] s [{}] c [{}]", h.items.size(), h.money.platinum, h.money.gold, h.money.silver, h.money.copper);
+	for (const auto &i: h.items) {
+		LogTradingDetail("--- Hand-in | item [{}] ({}) count [{}]", i.item->GetItem()->Name, i.item_id, i.count);
+	}
 
+	if (met_requirement) {
 		// remove items in h from m_handin.items
 		for (const auto &h_item: h.items) {
 			for (const auto &r_item: r.items) {
@@ -13003,6 +13002,13 @@ bool Client::CheckHandin(
 			m_hand_in.money.copper -= h.money.copper;
 		}
 	}
+
+	LogTradingDetail(
+		"CheckHandin [{}] met_requirement [{}] npc [{}]",
+		GetCleanName(),
+		met_requirement,
+		n->GetCleanName()
+	);
 
 	return met_requirement;
 }
