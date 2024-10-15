@@ -883,7 +883,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					{"gold",     trade->gp},
 					{"platinum", trade->pp}
 				};
-
+				std::vector<const EQ::ItemInstance *> list(items.begin(), items.end());
 				for (EQ::ItemInstance *inst: items) {
 					if (!inst || !inst->GetItem()) {
 						continue;
@@ -891,13 +891,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 					std::string item_id = fmt::format("{}", inst->GetItem()->ID);
 					handin[item_id] += inst->GetCharges();
-				}
-
-				std::vector<const EQ::ItemInstance *> list(items.begin(), items.end());
-				for (EQ::ItemInstance *inst: items) {
-					if (!inst || !inst->GetItem()) {
-						continue;
-					}
 					item_list.emplace_back(inst);
 				}
 
