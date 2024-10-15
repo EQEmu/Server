@@ -714,22 +714,32 @@ void UpdateWindowTitle(char *iNewTitle)
 
 bool CheckForCompatibleQuestPlugins()
 {
-	std::vector<std::string> files = {
-		"quests/plugins/check_handin.pl",
-		"lua_modules/items.lua",
-	};
+	const std::vector<std::string>& directories = { "lua_modules", "plugins" };
 
-	bool found = true;
-	for (const auto &file : files) {
-		auto f = path.GetServerPath() + "/" + file;
-		if (File::Exists(f)) {
-			auto r = File::GetContents(std::filesystem::path{f}.string());
-			if (!Strings::Contains(r.contents, "CheckHandin")) {
-				found = false; 
-				break;
+	bool lua_found  = true;
+	bool perl_found = true;
+
+	for (const auto& directory : directories) {
+		for (const auto& file : fs::directory_iterator(path.GetServerPath() + "/" + directory)) {
+			if (file.is_regular_file()) {
+				auto f = path.GetServerPath() + "/" + file.path().string();
+				if (File::Exists(f)) {
+					auto r = File::GetContents(std::filesystem::path{ f }.string());
+					if (!Strings::Contains(r.contents, "CheckHandin")) {
+						if (Strings::EqualFold(directory, "lua_modules")) {
+							lua_found = false;
+							LogError("Failed to find CheckHandin in lua_modules");
+						} else if (Strings::EqualFold(directory, "plugins")) {
+							perl_found = false;
+							LogError("Failed to find CheckHandin in plugins");
+						}
+
+						break;
+					}
+				}
 			}
 		}
 	}
 
-	return found;
+	return lua_found && perl_found;
 }
