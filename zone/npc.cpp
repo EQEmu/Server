@@ -226,6 +226,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	ATK                  = npc_type_data->ATK;
 	heroic_strikethrough = npc_type_data->heroic_strikethrough;
 	keeps_sold_items     = npc_type_data->keeps_sold_items;
+	multiquest_enabled   = npc_type_data->multiquest_enabled;
 
 	// used for when switch back to charm
 	default_ac               = npc_type_data->AC;
