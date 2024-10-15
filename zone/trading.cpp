@@ -872,7 +872,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		// this is a catch-all return for items that weren't consumed by the EVENT_TRADE subroutine
 		// it's possible we have a quest NPC that doesn't have an EVENT_TRADE subroutine
 		// we can't double fire the ReturnHandinItems() event, so we need to check if it's already been processed from EVENT_TRADE
-		if (!m_processed_handin_return) {
+		if (!m_has_processed_handin_return) {
 			ReturnHandinItems();
 			LogTradingDetail("ReturnHandinItems() called for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
