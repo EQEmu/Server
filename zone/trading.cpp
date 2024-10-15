@@ -873,6 +873,29 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		// it's possible we have a quest NPC that doesn't have an EVENT_TRADE subroutine
 		// we can't double fire the ReturnHandinItems() event, so we need to check if it's already been processed from EVENT_TRADE
 		if (!m_has_processed_handin_return) {
+			if (!m_handin_started) {
+				LogTradingDetail("EVENT_TRADE did not process handin, calling ReturnHandinItems() for NPC [{}]", tradingWith->GetNPCTypeID());
+				std::map<std::string, uint32> handin;
+				for (EQ::ItemInstance *inst: items) {
+					if (!inst || !inst->GetItem()) {
+						continue;
+					}
+
+					std::string item_id = fmt::format("{}", inst->GetItem()->ID);
+					handin[item_id] += inst->GetCharges();
+				}
+
+				std::vector<const EQ::ItemInstance *> list(items.begin(), items.end());
+				for (EQ::ItemInstance *inst: items) {
+					if (!inst || !inst->GetItem()) {
+						continue;
+					}
+					item_list.emplace_back(inst);
+				}
+
+				CheckHandin(tradingWith->CastToNPC(), handin, {}, list);
+			}
+
 			ReturnHandinItems();
 			LogTradingDetail("ReturnHandinItems() called for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
