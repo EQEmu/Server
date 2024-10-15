@@ -122,6 +122,7 @@ void CatchSignal(int sig_num);
 
 extern void MapOpcodes();
 
+bool CheckForCompatibleQuestPlugins();
 int main(int argc, char **argv)
 {
 	RegisterExecutablePlatform(ExePlatformZone);
@@ -364,6 +365,11 @@ int main(int argc, char **argv)
 
 	if (zone_store.GetZones().empty()) {
 		LogError("Failed to load zones data, check your schema for possible errors");
+		return 1;
+	}
+
+	if (!CheckForCompatibleQuestPlugins()) {
+		LogError("Incompatible quest plugins detected, please update your plugins to the latest version");
 		return 1;
 	}
 
@@ -704,4 +710,26 @@ void UpdateWindowTitle(char *iNewTitle)
 	}
 	SetConsoleTitle(tmp);
 #endif
+}
+
+bool CheckForCompatibleQuestPlugins()
+{
+	std::vector<std::string> files = {
+		"quests/plugins/check_handin.pl",
+		"lua_modules/items.lua",
+	};
+
+	bool found = true;
+	for (const auto &file : files) {
+		auto f = path.GetServerPath() + "/" + file;
+		if (File::Exists(f)) {
+			auto r = File::GetContents(std::filesystem::path{f}.string());
+			if (!Strings::Contains(r.contents, "CheckHandin")) {
+				found = false; 
+				break;
+			}
+		}
+	}
+
+	return found;
 }
