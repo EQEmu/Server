@@ -4275,7 +4275,10 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 	}
 
 	const bool can_take_nodrop   = RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0;
-	const bool can_pet_take_item = !inst->GetItem()->IsQuestItem() && can_take_nodrop && !inst->IsAttuned();
+	const bool can_pet_take_item = !inst->GetItem()->IsQuestItem()
+		&& can_take_nodrop
+		&& inst->GetItem()->IsPetUsable()
+		&& !inst->IsAttuned();
 
 	if (!can_pet_take_item) {
 		return false;
