@@ -3223,8 +3223,8 @@ bool Perl_Client_CheckHandin(
 	perl::hash handin   = handin_ref;
 	perl::hash required = required_ref;
 
-	std::map<std::string, uint32>        handin_map;
-	std::map<std::string, uint32>        required_map;
+	std::map<std::string, uint16>        handin_map;
+	std::map<std::string, uint16>        required_map;
 	std::vector<const EQ::ItemInstance*> items;
 
 	for (auto e: handin) {
