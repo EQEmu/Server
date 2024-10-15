@@ -12842,44 +12842,46 @@ bool Client::CheckHandin(
 )
 {
 	auto h = Handin{};
+	if (!m_handin_started) {
+		for (const auto &[key, value]: handin) {
+			LogTradingDetail("Handin key [{}] value [{}]", key, value);
 
-	// loop through handin
-	for (const auto &[key, value]: handin) {
-		LogTradingDetail("Handin key [{}] value [{}]", key, value);
+			// items
+			if (Strings::IsNumber(key)) {
+				const EQ::ItemData *item = database.GetItem(Strings::ToUnsignedInt(key));
+				if (!item) {
+					continue;
+				}
 
-		// items
-		if (Strings::IsNumber(key)) {
-			const EQ::ItemData *item = database.GetItem(Strings::ToUnsignedInt(key));
-			if (!item) {
-				continue;
+				h.items.emplace_back(HandinEntry{.item_id = key, .count = value});
 			}
+			else if (!key.empty()) {
+				std::vector<std::string> moneys = {
+					"platinum",
+					"gold",
+					"silver",
+					"copper"
+				};
 
-			h.items.emplace_back(HandinEntry{.item_id = key, .count = value});
-		}
-		else if (!key.empty()) {
-			std::vector<std::string> moneys = {
-				"platinum",
-				"gold",
-				"silver",
-				"copper"
-			};
-
-			// money
-			if (std::find(moneys.begin(), moneys.end(), key) != moneys.end()) {
-				if (key == "platinum") {
-					h.money.platinum = value;
-				}
-				else if (key == "gold") {
-					h.money.gold = value;
-				}
-				else if (key == "silver") {
-					h.money.silver = value;
-				}
-				else if (key == "copper") {
-					h.money.copper = value;
+				// money
+				if (std::find(moneys.begin(), moneys.end(), key) != moneys.end()) {
+					if (key == "platinum") {
+						h.money.platinum = value;
+					}
+					else if (key == "gold") {
+						h.money.gold = value;
+					}
+					else if (key == "silver") {
+						h.money.silver = value;
+					}
+					else if (key == "copper") {
+						h.money.copper = value;
+					}
 				}
 			}
 		}
+	} else {
+		h = m_handin;
 	}
 
 	auto r = Handin{};
@@ -12961,10 +12963,11 @@ bool Client::CheckHandin(
 		m_handed_in_items = items;
 		m_return_money    = h.money;
 		m_handed_in_money = h.money;
+		m_handin          = h;
 	}
 
 	if (success) {
-		// remove items in m_handin from m_return_items
+		// remove items in h from m_return_items
 		for (const auto &h_item: h.items) {
 			for (const auto &r_item: r.items) {
 				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
@@ -12973,11 +12976,22 @@ bool Client::CheckHandin(
 							m_return_items.begin(),
 							m_return_items.end(),
 							[&](const EQ::ItemInstance *i) {
+								int charges = i->GetCharges() > 0 ? i->GetCharges() : 1;
 								bool removed = i->GetItem()->ID == Strings::ToUnsignedInt(h_item.item_id)
-									&& i->GetCharges() == h_item.count;
+									&& charges == h_item.count;
+
+								LogTradingDetail(
+									"Handin success (debug), removing item [{}] count [{}] from m_return_items",
+									i->GetItem()->Name,
+									i->GetCharges()
+								);
 
 								if (removed) {
-									LogTradingDetail("Handin success, removing item [{}] from m_return_items", i->GetItem()->Name);
+									LogTradingDetail(
+										"Handin success, removing item [{}] count [{}] from m_return_items",
+										i->GetItem()->Name,
+										i->GetCharges()
+									);
 								}
 
 								return removed;
@@ -12985,9 +12999,31 @@ bool Client::CheckHandin(
 						),
 						m_return_items.end()
 					);
+
+					m_handin.items.erase(
+						std::remove_if(
+							m_handin.items.begin(),
+							m_handin.items.end(),
+							[&](const HandinEntry &i) {
+								bool removed = i.item_id == h_item.item_id && i.count == h_item.count;
+
+								if (removed) {
+									LogTradingDetail(
+										"Handin success, removing item [{}] count [{}] from m_handin.items",
+										i.item_id,
+										i.count
+									);
+								}
+
+								return removed;
+							}
+						),
+						m_handin.items.end()
+					);
 				}
 			}
 		}
+
 
 		// subtract m_handin money from m_return_money
 		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
@@ -13128,4 +13164,5 @@ void Client::ResetHandin()
 	m_processed_handin_return = false;
 	m_handin_started          = false;
 	m_handed_in_money         = {};
+	m_handin                  = {};
 }

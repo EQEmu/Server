@@ -1842,6 +1842,7 @@ public:
 	bool                                  m_processed_handin_return = false;
 	std::vector<const EQ::ItemInstance *> m_return_items            = {};
 	HandinMoney                           m_return_money            = {};
+	Handin                                m_handin                  = {};
 
 	// player event log usage only
 	std::vector<const EQ::ItemInstance *> m_handed_in_items = {};
