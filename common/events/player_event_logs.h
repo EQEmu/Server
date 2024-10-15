@@ -1,14 +1,16 @@
 #ifndef EQEMU_PLAYER_EVENT_LOGS_H
 #define EQEMU_PLAYER_EVENT_LOGS_H
 
-#include "../repositories/player_event_log_settings_repository.h"
-#include "player_events.h"
-#include "../servertalk.h"
-#include "../repositories/player_event_logs_repository.h"
-#include "../timer.h"
-#include "../json/json_archive_single_line.h"
 #include <cereal/archives/json.hpp>
 #include <mutex>
+#include "../json/json_archive_single_line.h"
+#include "../repositories/player_event_log_settings_repository.h"
+#include "../repositories/player_event_logs_repository.h"
+#include "../servertalk.h"
+#include "../timer.h"
+#include "player_events.h"
+
+#include "../repositories/player_event_loot_items_repository.h"
 
 class PlayerEventLogs {
 public:
@@ -21,7 +23,7 @@ public:
 	void Process();
 
 	// batch queue
-	void AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs &logs);
+	void AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &logs);
 
 	// main event record generic function
 	// can ingest any struct event types
@@ -68,6 +70,7 @@ private:
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
 	static std::unique_ptr<ServerPacket>
 	BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e);
+	std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems> m_record_loot_items{};
 
 	// timers
 	Timer m_process_batch_events_timer; // events processing timer

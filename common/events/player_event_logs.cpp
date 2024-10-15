@@ -1,8 +1,12 @@
-#include <cereal/archives/json.hpp>
 #include "player_event_logs.h"
-#include "player_event_discord_formatter.h"
+#include <cereal/archives/json.hpp>
+
+#include <random>
+
 #include "../platform.h"
+#include "../repositories/player_event_loot_items_repository.h"
 #include "../rulesys.h"
+#include "player_event_discord_formatter.h"
 
 const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 hour
 
@@ -125,6 +129,12 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	// flush many
 	PlayerEventLogsRepository::InsertMany(*m_database, m_record_batch_queue);
+
+	// flush detailed tables
+	if (!m_record_loot_items.empty()) {
+		PlayerEventLootItemsRepository::InsertMany(*m_database, m_record_loot_items);
+	}
+
 	LogPlayerEventsDetail(
 		"Processing batch player event log queue of [{}] took [{}]",
 		m_record_batch_queue.size(),
@@ -132,14 +142,46 @@ void PlayerEventLogs::ProcessBatchQueue()
 	);
 
 	// empty
-	m_record_batch_queue = {};
+	m_record_batch_queue.clear();
+	m_record_loot_items.clear();
+
 	m_batch_queue_lock.unlock();
 }
 
 // adds a player event to the queue
-void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs &log)
+void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log)
 {
 	m_batch_queue_lock.lock();
+	std::mt19937_64 generator(time(nullptr));
+	uint64 details_id = 0;
+
+	switch (log.event_type_id) {
+		case PlayerEvent::EventType::LOOT_ITEM: {
+			details_id = generator();
+			PlayerEvent::LootItemEvent e{};
+			{
+				std::stringstream ss;
+				ss << log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				e.serialize(ar);
+			}
+
+			auto pelir						   = PlayerEventLootItemsRepository::NewEntity();
+			pelir.charges					   = e.charges;
+			pelir.corpse_name				   = e.corpse_name;
+			pelir.item_id					   = e.item_id;
+			pelir.item_name					   = e.item_name;
+			pelir.npc_id					   = e.npc_id;
+			pelir.player_event_logs_details_id = details_id;
+			log.details_id					   = details_id;
+
+			m_record_loot_items.push_back(pelir);
+			break;
+		}
+		default: {
+		}
+	}
+
 	m_record_batch_queue.emplace_back(log);
 	m_batch_queue_lock.unlock();
 }
