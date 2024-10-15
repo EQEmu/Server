@@ -1734,8 +1734,8 @@ public:
 
 	bool CheckHandin(
 		NPC* n,
-		std::map<std::string, uint32> handin,
-		std::map<std::string, uint32> required,
+		std::map<std::string, uint16> handin,
+		std::map<std::string, uint16> required,
 		std::vector<const EQ::ItemInstance*> items
 	);
 	void ReturnHandinItems();
