@@ -1822,7 +1822,7 @@ public:
 	// NPC Handin
 	struct HandinEntry {
 		std::string            item_id = "0";
-		uint32                 count   = 0;
+		uint16                 count   = 0;
 		const EQ::ItemInstance *item   = nullptr;
 	};
 

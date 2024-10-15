@@ -12896,18 +12896,20 @@ bool Client::CheckHandin(
 	}
 
 	// pull hand-in items from the item instances
-	for (const auto &i: items) {
-		if (!i) {
-			continue;
-		}
-
-		h.items.emplace_back(
-			HandinEntry{
-				.item_id = std::to_string(i->GetItem()->ID),
-				.count = static_cast<uint32>(i->GetCharges()),
-				.item = i
+	if (!m_handin_started) {
+		for (const auto &i: items) {
+			if (!i) {
+				continue;
 			}
-		);
+
+			h.items.emplace_back(
+				HandinEntry{
+					.item_id = std::to_string(i->GetItem()->ID),
+					.count = std::max(static_cast<uint16>(i->GetCharges()), static_cast<uint16>(1)),
+					.item = i
+				}
+			);
+		}
 	}
 
 	// compare hand-in to required, the item_id can be in any slot
@@ -13032,7 +13034,7 @@ void Client::ReturnHandinItems()
 					.item_name = i.item->GetItem()->Name,
 					.augment_ids = i.item->GetAugmentIDs(),
 					.augment_names = i.item->GetAugmentNames(),
-					.charges = static_cast<uint16>(i.item->GetCharges())
+					.charges = std::max(static_cast<uint16>(i.item->GetCharges()), static_cast<uint16>(1))
 				}
 			);
 		}
@@ -13059,7 +13061,7 @@ void Client::ReturnHandinItems()
 					.item_name = i.item->GetItem()->Name,
 					.augment_ids = i.item->GetAugmentIDs(),
 					.augment_names = i.item->GetAugmentNames(),
-					.charges = static_cast<uint16>(i.item->GetCharges())
+					.charges = std::max(static_cast<uint16>(i.item->GetCharges()), static_cast<uint16>(1))
 				}
 			);
 
