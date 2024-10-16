@@ -4,9 +4,10 @@
 #include <random>
 
 #include "../platform.h"
-#include "../repositories/player_event_loot_items_repository.h"
 #include "../rulesys.h"
 #include "player_event_discord_formatter.h"
+#include "../repositories/player_event_loot_items_repository.h"
+#include "../repositories/player_event_merchant_sell_repository.h"
 
 const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 hour
 
@@ -147,8 +148,27 @@ void PlayerEventLogs::ProcessBatchQueue()
 	PlayerEventLogsRepository::InsertMany(*m_database, m_record_batch_queue);
 
 	// flush detailed tables
-	if (!m_record_loot_items.empty()) {
-		PlayerEventLootItemsRepository::InsertMany(*m_database, m_record_loot_items);
+	std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems> queue_14{};
+	std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell> queue_16{};
+
+	if (!m_record_details_queue.empty()) {
+		for (auto const &[key, value]: m_record_details_queue) {
+			switch (key) {
+				case PlayerEvent::EventType::LOOT_ITEM: {
+					queue_14.push_back(std::any_cast<PlayerEventLootItemsRepository::PlayerEventLootItems>(value));
+					break;
+				}
+				case PlayerEvent::EventType::MERCHANT_SELL: {
+					queue_16.push_back(std::any_cast<PlayerEventMerchantSellRepository::PlayerEventMerchantSell>(value));
+					break;
+				}
+				default: {
+				}
+			}
+		}
+
+		if (!queue_14.empty()) { PlayerEventLootItemsRepository::InsertMany(*m_database, queue_14); }
+		if (!queue_16.empty()) { PlayerEventMerchantSellRepository::InsertMany(*m_database, queue_16); }
 	}
 
 	LogPlayerEventsDetail(
@@ -159,7 +179,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	// empty
 	m_record_batch_queue.clear();
-	m_record_loot_items.clear();
+	m_record_details_queue.clear();
 
 	m_batch_queue_lock.unlock();
 }
@@ -172,6 +192,10 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 	switch (log.event_type_id) {
 		case PlayerEvent::EventType::LOOT_ITEM: {
 			RecordDetailEvent<PlayerEvent::LootItemEvent, PlayerEventLootItemsRepository::PlayerEventLootItems>(log);
+			break;
+		}
+		case PlayerEvent::EventType::MERCHANT_SELL: {
+			RecordDetailEvent<PlayerEvent::MerchantSellEvent, PlayerEventMerchantSellRepository::PlayerEventMerchantSell>(log);
 			break;
 		}
 		default: {

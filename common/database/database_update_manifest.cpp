@@ -5844,7 +5844,35 @@ ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
 )"
+	},
+	ManifestEntry{
+		.version = 9287,
+		.description = "2024_10_08_remove_qs_logging.sql",
+		.check = "SHOW TABLES LIKE 'player_event_merchant_sell'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+UPDATE `player_event_log_settings` SET `detail_logs` = 1, `detail_table_name` = 'player_event_merchant_sell' WHERE `id` = 16;
+
+CREATE TABLE `player_event_merchant_sell` (
+	`id` BIGINT UNSIGNED NULL AUTO_INCREMENT,
+	`npc_id` INT UNSIGNED NULL DEFAULT '0',
+	`merchant_name` VARCHAR(64) NULL DEFAULT NULL,
+	`merchant_type` INT UNSIGNED NULL DEFAULT '0',
+	`item_id` INT UNSIGNED NULL DEFAULT '0',
+	`item_name` VARCHAR(64) NULL DEFAULT NULL,
+	`charges` INT NULL DEFAULT '0',
+	`cost` INT UNSIGNED NULL DEFAULT '0',
+	`alternate_currency_id` INT UNSIGNED NULL DEFAULT '0',
+	`player_money_balance` BIGINT UNSIGNED NULL DEFAULT '0',
+	`player_currency_balance` BIGINT UNSIGNED NULL DEFAULT '0',
+	PRIMARY KEY (`id`)
+)
+COLLATE='latin1_swedish_ci'
+;
+)"
 	}
+
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

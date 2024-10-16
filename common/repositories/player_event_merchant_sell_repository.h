@@ -1,11 +1,11 @@
-#ifndef EQEMU_PLAYER_EVENT_LOOT_ITEMS_REPOSITORY_H
-#define EQEMU_PLAYER_EVENT_LOOT_ITEMS_REPOSITORY_H
+#ifndef EQEMU_PLAYER_EVENT_MERCHANT_SELL_REPOSITORY_H
+#define EQEMU_PLAYER_EVENT_MERCHANT_SELL_REPOSITORY_H
 
 #include "../database.h"
 #include "../strings.h"
-#include "base/base_player_event_loot_items_repository.h"
+#include "base/base_player_event_merchant_sell_repository.h"
 
-class PlayerEventLootItemsRepository: public BasePlayerEventLootItemsRepository {
+class PlayerEventMerchantSellRepository: public BasePlayerEventMerchantSellRepository {
 public:
 
     /**
@@ -32,16 +32,19 @@ public:
      *
      * Example custom methods in a repository
      *
-     * PlayerEventLootItemsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * PlayerEventLootItemsRepository::GetWhereNeverExpires()
-     * PlayerEventLootItemsRepository::GetWhereXAndY()
-     * PlayerEventLootItemsRepository::DeleteWhereXAndY()
+     * PlayerEventMerchantSellRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * PlayerEventMerchantSellRepository::GetWhereNeverExpires()
+     * PlayerEventMerchantSellRepository::GetWhereXAndY()
+     * PlayerEventMerchantSellRepository::DeleteWhereXAndY()
      *
      * Most of the above could be covered by base methods, but if you as a developer
      * find yourself re-using logic for other parts of the code, its best to just make a
      * method that can be re-used easily elsewhere especially if it can use a base repository
      * method and encapsulate filters there
      */
+
+	// Custom extended repository methods here
+
 };
 
-#endif //EQEMU_PLAYER_EVENT_LOOT_ITEMS_REPOSITORY_H
+#endif //EQEMU_PLAYER_EVENT_MERCHANT_SELL_REPOSITORY_H
