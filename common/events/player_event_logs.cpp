@@ -191,11 +191,64 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 
 	switch (log.event_type_id) {
 		case PlayerEvent::EventType::LOOT_ITEM: {
-			RecordDetailEvent<PlayerEvent::LootItemEvent, PlayerEventLootItemsRepository::PlayerEventLootItems>(log);
+			//RecordDetailEvent<PlayerEvent::LootItemEvent, PlayerEventLootItemsRepository::PlayerEventLootItems>(log);
+			PlayerEvent::LootItemEvent in{};
+			PlayerEventLootItemsRepository::PlayerEventLootItems out{};
+
+			{
+				std::stringstream ss;
+				ss << log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				in.serialize(ar);
+			}
+
+			//out = in;
+			out.charges     = in.charges;
+			out.corpse_name = in.corpse_name;
+			out.item_id     = in.item_id;
+			out.item_name   = in.item_name;
+			out.npc_id      = in.npc_id;
+
+			log.player_event_x_id =
+				GetDetailTableIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					? GetDetailTableIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					: 0;
+			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
+
+			m_record_details_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
 			break;
 		}
 		case PlayerEvent::EventType::MERCHANT_SELL: {
-			RecordDetailEvent<PlayerEvent::MerchantSellEvent, PlayerEventMerchantSellRepository::PlayerEventMerchantSell>(log);
+			//RecordDetailEvent<PlayerEvent::MerchantSellEvent, PlayerEventMerchantSellRepository::PlayerEventMerchantSell>(log);
+			PlayerEvent::MerchantSellEvent in{};
+			PlayerEventMerchantSellRepository::PlayerEventMerchantSell out{};
+
+			{
+				std::stringstream ss;
+				ss << log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				in.serialize(ar);
+			}
+
+			//out = in;
+			out.npc_id                  = in.npc_id;
+			out.merchant_name           = in.merchant_name;
+			out.merchant_type           = in.merchant_type;
+			out.item_id                 = in.item_id;
+			out.item_name               = in.item_name;
+			out.charges                 = in.charges;
+			out.cost                    = in.cost;
+			out.alternate_currency_id   = in.alternate_currency_id;
+			out.player_money_balance    = in.player_money_balance;
+			out.player_currency_balance = in.player_currency_balance;
+
+			log.player_event_x_id =
+				GetDetailTableIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					? GetDetailTableIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					: 0;
+			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
+
+			m_record_details_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
 			break;
 		}
 		default: {
