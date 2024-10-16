@@ -361,6 +361,8 @@ namespace DatabaseSchema {
 			"spawn2_disabled",
 			"player_event_log_settings",
 			"player_event_logs",
+			"player_event_loot_items",
+			"player_event_merchant_sell",
 			"shared_task_activity_state",
 			"shared_task_dynamic_zones",
 			"shared_task_members",

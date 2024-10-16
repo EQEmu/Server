@@ -5,6 +5,7 @@
 #include "../events/player_events.h"
 #include "../strings.h"
 #include "base/base_player_event_log_settings_repository.h"
+#include "base/base_player_event_loot_items_repository.h"
 
 class PlayerEventLogSettingsRepository: public BasePlayerEventLogSettingsRepository {
 public:
@@ -53,5 +54,4 @@ public:
 		return results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) + 1 : 0;
 	}
 };
-
 #endif //EQEMU_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H

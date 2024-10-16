@@ -77,7 +77,7 @@ public:
 				: 0;
 		IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
 
-		m_record_loot_items.push_back(out);
+		m_record_details_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
 	}
 
 	[[nodiscard]] const PlayerEventLogSettingsRepository::PlayerEventLogSettings *GetSettings() const;
@@ -96,8 +96,7 @@ private:
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
 	static std::unique_ptr<ServerPacket>
 	BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e);
-	std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems> m_record_loot_items{};
-	std::vector<std::any> m_record_testing{};
+	std::map<PlayerEvent::EventType, std::any> m_record_details_queue{};
 
 	// timers
 	Timer m_process_batch_events_timer; // events processing timer
