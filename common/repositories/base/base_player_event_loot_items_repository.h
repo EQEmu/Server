@@ -20,12 +20,22 @@ class BasePlayerEventLootItemsRepository {
 public:
 	struct PlayerEventLootItems {
 		uint64_t    id;
-		uint64_t    player_event_logs_details_id;
 		uint32_t    item_id;
 		std::string item_name;
 		int32_t     charges;
 		uint32_t    npc_id;
 		std::string corpse_name;
+
+		PlayerEventLootItems &operator=(const PlayerEvent::LootItemEvent &in)
+		{
+			charges     = in.charges;
+			corpse_name = in.corpse_name;
+			item_id     = in.item_id;
+			item_name   = in.item_name;
+			npc_id      = in.npc_id;
+
+			return *this;
+		}
 	};
 
 	static std::string PrimaryKey()
@@ -37,7 +47,6 @@ public:
 	{
 		return {
 			"id",
-			"player_event_logs_details_id",
 			"item_id",
 			"item_name",
 			"charges",
@@ -50,7 +59,6 @@ public:
 	{
 		return {
 			"id",
-			"player_event_logs_details_id",
 			"item_id",
 			"item_name",
 			"charges",
@@ -96,13 +104,12 @@ public:
 	{
 		PlayerEventLootItems e{};
 
-		e.id                           = 0;
-		e.player_event_logs_details_id = 0;
-		e.item_id                      = 0;
-		e.item_name                    = "";
-		e.charges                      = 0;
-		e.npc_id                       = 0;
-		e.corpse_name                  = "";
+		e.id          = 0;
+		e.item_id     = 0;
+		e.item_name   = "";
+		e.charges     = 0;
+		e.npc_id      = 0;
+		e.corpse_name = "";
 
 		return e;
 	}
@@ -139,13 +146,12 @@ public:
 		if (results.RowCount() == 1) {
 			PlayerEventLootItems e{};
 
-			e.id                           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.player_event_logs_details_id = row[1] ? strtoull(row[1], nullptr, 10) : 0;
-			e.item_id                      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.item_name                    = row[3] ? row[3] : "";
-			e.charges                      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.npc_id                       = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.corpse_name                  = row[6] ? row[6] : "";
+			e.id          = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.item_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_name   = row[2] ? row[2] : "";
+			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.corpse_name = row[5] ? row[5] : "";
 
 			return e;
 		}
@@ -179,12 +185,11 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[1] + " = " + std::to_string(e.player_event_logs_details_id));
-		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
-		v.push_back(columns[3] + " = '" + Strings::Escape(e.item_name) + "'");
-		v.push_back(columns[4] + " = " + std::to_string(e.charges));
-		v.push_back(columns[5] + " = " + std::to_string(e.npc_id));
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.corpse_name) + "'");
+		v.push_back(columns[1] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.item_name) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.charges));
+		v.push_back(columns[4] + " = " + std::to_string(e.npc_id));
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.corpse_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -207,7 +212,6 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back(std::to_string(e.player_event_logs_details_id));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back("'" + Strings::Escape(e.item_name) + "'");
 		v.push_back(std::to_string(e.charges));
@@ -243,7 +247,6 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.player_event_logs_details_id));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back("'" + Strings::Escape(e.item_name) + "'");
 			v.push_back(std::to_string(e.charges));
@@ -282,13 +285,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLootItems e{};
 
-			e.id                           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.player_event_logs_details_id = row[1] ? strtoull(row[1], nullptr, 10) : 0;
-			e.item_id                      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.item_name                    = row[3] ? row[3] : "";
-			e.charges                      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.npc_id                       = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.corpse_name                  = row[6] ? row[6] : "";
+			e.id          = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.item_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_name   = row[2] ? row[2] : "";
+			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.corpse_name = row[5] ? row[5] : "";
 
 			all_entries.push_back(e);
 		}
@@ -313,13 +315,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLootItems e{};
 
-			e.id                           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.player_event_logs_details_id = row[1] ? strtoull(row[1], nullptr, 10) : 0;
-			e.item_id                      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.item_name                    = row[3] ? row[3] : "";
-			e.charges                      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.npc_id                       = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.corpse_name                  = row[6] ? row[6] : "";
+			e.id          = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.item_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_name   = row[2] ? row[2] : "";
+			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.corpse_name = row[5] ? row[5] : "";
 
 			all_entries.push_back(e);
 		}
@@ -395,7 +396,6 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back(std::to_string(e.player_event_logs_details_id));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back("'" + Strings::Escape(e.item_name) + "'");
 		v.push_back(std::to_string(e.charges));
@@ -424,7 +424,6 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.player_event_logs_details_id));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back("'" + Strings::Escape(e.item_name) + "'");
 			v.push_back(std::to_string(e.charges));

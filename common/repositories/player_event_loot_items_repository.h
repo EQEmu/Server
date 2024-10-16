@@ -2,6 +2,7 @@
 #define EQEMU_PLAYER_EVENT_LOOT_ITEMS_REPOSITORY_H
 
 #include "../database.h"
+#include "../events/player_events.h"
 #include "../strings.h"
 #include "base/base_player_event_loot_items_repository.h"
 
@@ -42,9 +43,6 @@ public:
      * method that can be re-used easily elsewhere especially if it can use a base repository
      * method and encapsulate filters there
      */
-
-	// Custom extended repository methods here
-
 };
 
 #endif //EQEMU_PLAYER_EVENT_LOOT_ITEMS_REPOSITORY_H
