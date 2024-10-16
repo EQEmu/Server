@@ -5805,6 +5805,45 @@ ALTER TABLE `zone`
 ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_idle`;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9289,
+		.description = "2024_10_08_add_detail_player_event_logging.sql",
+		.check       = "SHOW COLUMNS FROM `player_event_log_settings` LIKE 'detail_logs'",
+		.condition   = "empty",
+		.match       = "",
+		.sql = R"(
+ALTER TABLE `player_event_log_settings`
+	ADD COLUMN `detail_logs` BIGINT(20) NOT NULL DEFAULT '0' AFTER `discord_webhook_id`,
+	ADD COLUMN `detail_table_name` VARCHAR(50) NULL DEFAULT NULL AFTER `detail_logs`;
+
+ALTER TABLE `player_event_logs`
+	ADD COLUMN `player_event_x_id` BIGINT(20) NOT NULL DEFAULT '0' AFTER `event_data`;
+)"
+	},
+	ManifestEntry{
+		.version = 9290,
+		.description = "2024_10_08_remove_qs_logging.sql",
+		.check = "SHOW TABLES LIKE 'player_event_loot_items'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+UPDATE `player_event_log_settings` SET `detail_logs` = 1, `detail_table_name` = 'player_event_loot_items' WHERE `id` = 14;
+
+CREATE TABLE `player_event_loot_items` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`item_id` INT(10) UNSIGNED NULL DEFAULT NULL,
+	`item_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`charges` INT(11) NULL DEFAULT NULL,
+	`npc_id` INT(10) UNSIGNED NULL DEFAULT NULL,
+	`corpse_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

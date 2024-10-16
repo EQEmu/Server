@@ -25,6 +25,8 @@ void PlayerEventLogs::Init()
 		m_settings[i].event_enabled      = 1;
 		m_settings[i].retention_days     = 0;
 		m_settings[i].discord_webhook_id = 0;
+		m_settings[i].detail_logs        = 0;
+		m_settings[i].detail_table_name  = "";
 	}
 
 	SetSettingsDefaults();
@@ -64,17 +66,31 @@ void PlayerEventLogs::Init()
 		if (is_missing_in_database && is_implemented && !is_deprecated) {
 			LogInfo("[New] PlayerEvent [{}] ({})", PlayerEvent::EventName[i], i);
 
-			auto c = PlayerEventLogSettingsRepository::NewEntity();
-			c.id             = i;
-			c.event_name     = PlayerEvent::EventName[i];
-			c.event_enabled  = m_settings[i].event_enabled;
-			c.retention_days = m_settings[i].retention_days;
+			auto c              = PlayerEventLogSettingsRepository::NewEntity();
+			c.id                = i;
+			c.event_name        = PlayerEvent::EventName[i];
+			c.event_enabled     = m_settings[i].event_enabled;
+			c.retention_days    = m_settings[i].retention_days;
+			c.detail_logs       = false;
+			c.detail_table_name = "";
 			settings_to_insert.emplace_back(c);
 		}
 	}
 
 	if (!settings_to_insert.empty()) {
 		PlayerEventLogSettingsRepository::ReplaceMany(*m_database, settings_to_insert);
+	}
+
+	s = PlayerEventLogSettingsRepository::All(*m_database);
+	for (auto &e: s) {
+		if (e.id >= PlayerEvent::MAX) {
+			continue;
+		}
+
+		if (e.detail_logs) {
+			auto last_id = PlayerEventLogSettingsRepository::GetNextIdForTable(*m_database, e.detail_table_name);
+			GetDetailTableIDCache().emplace(static_cast<PlayerEvent::EventType>(e.id), last_id);
+		}
 	}
 
 	bool processing_in_world = !RuleB(Logging, PlayerEventsQSProcess) && IsWorld();
@@ -152,30 +168,10 @@ void PlayerEventLogs::ProcessBatchQueue()
 void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log)
 {
 	m_batch_queue_lock.lock();
-	std::mt19937_64 generator(time(nullptr));
-	uint64 details_id = 0;
 
 	switch (log.event_type_id) {
 		case PlayerEvent::EventType::LOOT_ITEM: {
-			details_id = generator();
-			PlayerEvent::LootItemEvent e{};
-			{
-				std::stringstream ss;
-				ss << log.event_data;
-				cereal::JSONInputArchive ar(ss);
-				e.serialize(ar);
-			}
-
-			auto pelir						   = PlayerEventLootItemsRepository::NewEntity();
-			pelir.charges					   = e.charges;
-			pelir.corpse_name				   = e.corpse_name;
-			pelir.item_id					   = e.item_id;
-			pelir.item_name					   = e.item_name;
-			pelir.npc_id					   = e.npc_id;
-			pelir.player_event_logs_details_id = details_id;
-			log.details_id					   = details_id;
-
-			m_record_loot_items.push_back(pelir);
+			RecordDetailEvent<PlayerEvent::LootItemEvent, PlayerEventLootItemsRepository::PlayerEventLootItems>(log);
 			break;
 		}
 		default: {

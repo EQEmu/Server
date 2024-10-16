@@ -1,24 +1,26 @@
 #ifndef EQEMU_PLAYER_EVENT_LOGS_H
 #define EQEMU_PLAYER_EVENT_LOGS_H
 
+#include <any>
 #include <cereal/archives/json.hpp>
 #include <mutex>
+#include <random>
 #include "../json/json_archive_single_line.h"
 #include "../repositories/player_event_log_settings_repository.h"
 #include "../repositories/player_event_logs_repository.h"
 #include "../servertalk.h"
 #include "../timer.h"
-#include "player_events.h"
-
 #include "../repositories/player_event_loot_items_repository.h"
 
 class PlayerEventLogs {
 public:
 	void Init();
 	void ReloadSettings();
+	void IncrementDetailTableIDCache(PlayerEvent::EventType event_type) { m_last_id_cache_detail_tables[event_type]++; }
 	PlayerEventLogs *SetDatabase(Database *db);
 	bool ValidateDatabaseConnection();
 	bool IsEventEnabled(PlayerEvent::EventType event);
+	std::map<PlayerEvent::EventType, uint64>& GetDetailTableIDCache() { return m_last_id_cache_detail_tables; }
 
 	void Process();
 
@@ -56,14 +58,38 @@ public:
 		return BuildPlayerEventPacket(c);
 	}
 
+	template<typename I, typename O> void RecordDetailEvent(PlayerEventLogsRepository::PlayerEventLogs &log)
+	{
+		I in{};
+		O out{};
+
+		{
+			std::stringstream ss;
+			ss << log.event_data;
+			cereal::JSONInputArchive ar(ss);
+			in.serialize(ar);
+		}
+
+		out = in;
+		log.player_event_x_id =
+			GetDetailTableIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
+				? GetDetailTableIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
+				: 0;
+		IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
+
+		m_record_loot_items.push_back(out);
+	}
+
 	[[nodiscard]] const PlayerEventLogSettingsRepository::PlayerEventLogSettings *GetSettings() const;
 	bool IsEventDiscordEnabled(int32_t event_type_id);
 	std::string GetDiscordWebhookUrlFromEventType(int32_t event_type_id);
 
 	static std::string GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e);
+
 private:
 	Database                                                 *m_database; // reference to database
 	PlayerEventLogSettingsRepository::PlayerEventLogSettings m_settings[PlayerEvent::EventType::MAX]{};
+	std::map<PlayerEvent::EventType, uint64> m_last_id_cache_detail_tables{};
 
 	// batch queue is used to record events in batch
 	std::vector<PlayerEventLogsRepository::PlayerEventLogs> m_record_batch_queue{};
@@ -71,6 +97,7 @@ private:
 	static std::unique_ptr<ServerPacket>
 	BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e);
 	std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems> m_record_loot_items{};
+	std::vector<std::any> m_record_testing{};
 
 	// timers
 	Timer m_process_batch_events_timer; // events processing timer

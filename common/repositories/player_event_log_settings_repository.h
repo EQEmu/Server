@@ -2,6 +2,7 @@
 #define EQEMU_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H
 
 #include "../database.h"
+#include "../events/player_events.h"
 #include "../strings.h"
 #include "base/base_player_event_log_settings_repository.h"
 
@@ -45,6 +46,12 @@ public:
 
 	// Custom extended repository methods here
 
+	static uint64 GetNextIdForTable(Database& db, std::string& table_name)
+	{
+		auto results = db.QueryDatabase(fmt::format("SELECT COALESCE(MAX(id), 0) FROM {}", table_name));
+
+		return results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) + 1 : 0;
+	}
 };
 
 #endif //EQEMU_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H

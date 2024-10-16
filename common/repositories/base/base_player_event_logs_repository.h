@@ -31,7 +31,7 @@ public:
 		int32_t     event_type_id;
 		std::string event_type_name;
 		std::string event_data;
-		uint64_t    details_id;
+		uint64_t    player_event_x_id;
 		time_t      created_at;
 
 		// cereal
@@ -51,7 +51,7 @@ public:
 				CEREAL_NVP(event_type_id),
 				CEREAL_NVP(event_type_name),
 				CEREAL_NVP(event_data),
-				CEREAL_NVP(details_id),
+				CEREAL_NVP(player_event_x_id),
 				CEREAL_NVP(created_at)
 			);
 		}
@@ -77,7 +77,7 @@ public:
 			"event_type_id",
 			"event_type_name",
 			"event_data",
-			"details_id",
+			"player_event_x_id",
 			"created_at",
 		};
 	}
@@ -97,7 +97,7 @@ public:
 			"event_type_id",
 			"event_type_name",
 			"event_data",
-			"details_id",
+			"player_event_x_id",
 			"UNIX_TIMESTAMP(created_at)",
 		};
 	}
@@ -139,20 +139,20 @@ public:
 	{
 		PlayerEventLogs e{};
 
-		e.id              = 0;
-		e.account_id      = 0;
-		e.character_id    = 0;
-		e.zone_id         = 0;
-		e.instance_id     = 0;
-		e.x               = 0;
-		e.y               = 0;
-		e.z               = 0;
-		e.heading         = 0;
-		e.event_type_id   = 0;
-		e.event_type_name = "";
-		e.event_data      = "";
-		e.details_id      = 0;
-		e.created_at      = 0;
+		e.id                = 0;
+		e.account_id        = 0;
+		e.character_id      = 0;
+		e.zone_id           = 0;
+		e.instance_id       = 0;
+		e.x                 = 0;
+		e.y                 = 0;
+		e.z                 = 0;
+		e.heading           = 0;
+		e.event_type_id     = 0;
+		e.event_type_name   = "";
+		e.event_data        = "";
+		e.player_event_x_id = 0;
+		e.created_at        = 0;
 
 		return e;
 	}
@@ -189,20 +189,20 @@ public:
 		if (results.RowCount() == 1) {
 			PlayerEventLogs e{};
 
-			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
-			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
-			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
-			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
-			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
-			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
-			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
-			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
-			e.event_type_name = row[10] ? row[10] : "";
-			e.event_data      = row[11] ? row[11] : "";
-			e.details_id      = row[12] ? strtoull(row[12], nullptr, 10) : 0;
-			e.created_at      = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
+			e.id                = row[0] ? strtoll(row[0], nullptr, 10) : 0;
+			e.account_id        = row[1] ? strtoll(row[1], nullptr, 10) : 0;
+			e.character_id      = row[2] ? strtoll(row[2], nullptr, 10) : 0;
+			e.zone_id           = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id       = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.x                 = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y                 = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z                 = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading           = row[8] ? strtof(row[8], nullptr) : 0;
+			e.event_type_id     = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.event_type_name   = row[10] ? row[10] : "";
+			e.event_data        = row[11] ? row[11] : "";
+			e.player_event_x_id = row[12] ? strtoull(row[12], nullptr, 10) : 0;
+			e.created_at        = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -247,7 +247,7 @@ public:
 		v.push_back(columns[9] + " = " + std::to_string(e.event_type_id));
 		v.push_back(columns[10] + " = '" + Strings::Escape(e.event_type_name) + "'");
 		v.push_back(columns[11] + " = '" + Strings::Escape(e.event_data) + "'");
-		v.push_back(columns[12] + " = " + std::to_string(e.details_id));
+		v.push_back(columns[12] + " = " + std::to_string(e.player_event_x_id));
 		v.push_back(columns[13] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -282,7 +282,7 @@ public:
 		v.push_back(std::to_string(e.event_type_id));
 		v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 		v.push_back("'" + Strings::Escape(e.event_data) + "'");
-		v.push_back(std::to_string(e.details_id));
+		v.push_back(std::to_string(e.player_event_x_id));
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -325,7 +325,7 @@ public:
 			v.push_back(std::to_string(e.event_type_id));
 			v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 			v.push_back("'" + Strings::Escape(e.event_data) + "'");
-			v.push_back(std::to_string(e.details_id));
+			v.push_back(std::to_string(e.player_event_x_id));
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -360,20 +360,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLogs e{};
 
-			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
-			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
-			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
-			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
-			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
-			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
-			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
-			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
-			e.event_type_name = row[10] ? row[10] : "";
-			e.event_data      = row[11] ? row[11] : "";
-			e.details_id      = row[12] ? strtoull(row[12], nullptr, 10) : 0;
-			e.created_at      = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
+			e.id                = row[0] ? strtoll(row[0], nullptr, 10) : 0;
+			e.account_id        = row[1] ? strtoll(row[1], nullptr, 10) : 0;
+			e.character_id      = row[2] ? strtoll(row[2], nullptr, 10) : 0;
+			e.zone_id           = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id       = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.x                 = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y                 = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z                 = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading           = row[8] ? strtof(row[8], nullptr) : 0;
+			e.event_type_id     = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.event_type_name   = row[10] ? row[10] : "";
+			e.event_data        = row[11] ? row[11] : "";
+			e.player_event_x_id = row[12] ? strtoull(row[12], nullptr, 10) : 0;
+			e.created_at        = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -398,20 +398,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLogs e{};
 
-			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
-			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
-			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
-			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
-			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
-			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
-			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
-			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
-			e.event_type_name = row[10] ? row[10] : "";
-			e.event_data      = row[11] ? row[11] : "";
-			e.details_id      = row[12] ? strtoull(row[12], nullptr, 10) : 0;
-			e.created_at      = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
+			e.id                = row[0] ? strtoll(row[0], nullptr, 10) : 0;
+			e.account_id        = row[1] ? strtoll(row[1], nullptr, 10) : 0;
+			e.character_id      = row[2] ? strtoll(row[2], nullptr, 10) : 0;
+			e.zone_id           = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id       = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.x                 = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y                 = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z                 = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading           = row[8] ? strtof(row[8], nullptr) : 0;
+			e.event_type_id     = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.event_type_name   = row[10] ? row[10] : "";
+			e.event_data        = row[11] ? row[11] : "";
+			e.player_event_x_id = row[12] ? strtoull(row[12], nullptr, 10) : 0;
+			e.created_at        = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -498,7 +498,7 @@ public:
 		v.push_back(std::to_string(e.event_type_id));
 		v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 		v.push_back("'" + Strings::Escape(e.event_data) + "'");
-		v.push_back(std::to_string(e.details_id));
+		v.push_back(std::to_string(e.player_event_x_id));
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -534,7 +534,7 @@ public:
 			v.push_back(std::to_string(e.event_type_id));
 			v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 			v.push_back("'" + Strings::Escape(e.event_data) + "'");
-			v.push_back(std::to_string(e.details_id));
+			v.push_back(std::to_string(e.player_event_x_id));
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
