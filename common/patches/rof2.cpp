@@ -1341,6 +1341,58 @@ namespace RoF2
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
+	ENCODE(OP_EvolveItem)
+	{
+		EQApplicationPacket *in = *p;
+		*p                      = nullptr;
+
+		auto action = *reinterpret_cast<uint32 *>(in->pBuffer);
+
+		switch (action) {
+			case EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS: {
+				auto emu = reinterpret_cast<EvolveItemMessaging_Struct *>(in->pBuffer);
+
+				EvolveXPWindowSend_Struct e{};
+				EQ::Util::MemoryStreamReader ss(emu->serialized_data, in->size - sizeof(emu->action));
+				cereal::BinaryInputArchive ar(ss);
+				ar(e);
+
+				auto item_1 = static_cast<const EQ::ItemInstance *>(reinterpret_cast<EQ::InternalSerializedItem_Struct
+					*>(e.serialize_item_1.data())->inst);
+				auto item_2 = static_cast<const EQ::ItemInstance *>(reinterpret_cast<EQ::InternalSerializedItem_Struct
+					*>(e.serialize_item_2.data())->inst);
+
+				EQ::OutBuffer ob;
+
+				SerializeItem(ob, item_1, 0, 0, ItemPacketMerchant);
+				SerializeItem(ob, item_2, 0, 0, ItemPacketMerchant);
+
+				auto out = std::make_unique<EQApplicationPacket>(
+					OP_EvolveItem,
+					sizeof(EvolveXPWindowSendDetails_Struct) + ob.size()
+				);
+				auto data = reinterpret_cast<EvolveXPWindowSendDetails_Struct *>(out->pBuffer);
+
+				data->action             = e.action;
+				data->compatibility      = e.compatibility;
+				data->max_transfer_level = e.max_transfer_level;
+				data->item1_unique_id    = e.item1_unique_id;
+				data->item2_unique_id    = e.item2_unique_id;
+				data->unknown_028        = e.unknown_028;
+				data->unknown_029        = e.unknown_029;
+
+				memcpy(data->serialize_data, ob.str().data(), ob.size());
+				dest->QueuePacket(out.get());
+				safe_delete(in);
+				break;
+			}
+			default: {
+				dest->FastQueuePacket(&in);
+				break;
+			}
+		}
+	}
+
 	ENCODE(OP_ExpansionInfo)
 	{
 		ENCODE_LENGTH_EXACT(ExpansionInfo_Struct);
@@ -6382,6 +6434,11 @@ namespace RoF2
 		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
 		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
 		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
+		if (item->EvolvingItem) {
+			hdr.instance_id    = inst->GetEvolveUniqueID() & 0xFFFFFFFF; //lower dword
+			hdr.parcel_item_id = inst->GetEvolveUniqueID() >> 32;        //upper dword
+		}
+
 		hdr.last_cast_time = inst->GetRecastTimestamp();
 		hdr.charges        = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254)
 			? 0xFFFFFFFF
@@ -6395,18 +6452,15 @@ namespace RoF2
 		ob.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
 		if (item->EvolvingItem > 0) {
-			RoF2::structs::EvolvingItem evotop;
+			RoF2::structs::EvolvingItem_Struct evotop;
 
-			evotop.unknown001 = 0;
-			evotop.unknown002 = 0;
-			evotop.unknown003 = 0;
-			evotop.unknown004 = 0;
-			evotop.evoLevel = item->EvolvingLevel;
-			evotop.progress = 0;
-			evotop.Activated = 1;
-			evotop.evomaxlevel = item->EvolvingMax;
+			evotop.final_item_id    = inst->GetEvolveFinalItemID();
+			evotop.evolve_level     = item->EvolvingLevel;
+			evotop.progress         = inst->GetEvolveProgression();
+			evotop.activated        = inst->GetEvolveActivated();
+			evotop.evolve_max_level = item->EvolvingMax;
 
-			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));
+			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem_Struct));
 		}
 
 		/**

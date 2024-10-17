@@ -5759,6 +5759,31 @@ ALTER TABLE `character_exp_modifiers`
 MODIFY COLUMN `aa_modifier` float NOT NULL DEFAULT 1.0 AFTER `instance_version`,
 MODIFY COLUMN `exp_modifier` float NOT NULL DEFAULT 1.0 AFTER `aa_modifier`;
 )"
+	},
+	ManifestEntry{
+		.version     = 9285,
+		.description = "2024_10_05_evolving_items",
+		.check       = "SHOW TABLES LIKE 'character_evolving_items'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+CREATE TABLE `character_evolving_items` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`char_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`item_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`activated` TINYINT(1) UNSIGNED NULL DEFAULT '0',
+	`equipped` TINYINT(3) UNSIGNED NULL DEFAULT '0',
+	`current_amount` BIGINT(20) NULL DEFAULT '0',
+	`progression` DOUBLE(22,0) NULL DEFAULT '0',
+	`final_item_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`deleted_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

@@ -72,6 +72,7 @@ namespace EQ
 #include "../common/repositories/trader_repository.h"
 #include "../common/guild_base.h"
 #include "../common/repositories/buyer_buy_lines_repository.h"
+#include "../common/repositories/character_evolving_items_repository.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -707,13 +708,13 @@ public:
 	void SendCrystalCounts();
 
 	uint64 GetExperienceForKill(Mob *against);
-	void AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
+	void AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false, NPC* npc = nullptr);
 	uint64 CalcEXP(uint8 conlevel = 0xFF, bool ignore_mods = false);
 	void CalculateNormalizedAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
 	void CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
 	void CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel);
 	void CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, uint8 conlevel, bool resexp);
-	void SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool resexp = false);
+	void SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool resexp = false, NPC* npc = nullptr);
 	void AddLevelBasedExp(ExpSource exp_source, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false);
 	void SetLeadershipEXP(uint64 group_exp, uint64 raid_exp);
 	void AddLeadershipEXP(uint64 group_exp, uint64 raid_exp);
@@ -1809,6 +1810,18 @@ public:
 	void RecordKilledNPCEvent(NPC *n);
 
 	uint32 GetEXPForLevel(uint16 check_level);
+
+	// Evolving Item Info
+	void ProcessEvolvingItem(const uint64 exp, const Mob* mob);
+	void SendEvolvingPacket(int8 action, const CharacterEvolvingItemsRepository::CharacterEvolvingItems &item);
+	void DoEvolveItemToggle(const EQApplicationPacket* app);
+	void DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app);
+	bool DoEvolveCheckProgression(const EQ::ItemInstance &inst);
+	void SendEvolveXPWindowDetails(const EQApplicationPacket* app);
+	void DoEvolveTransferXP(const EQApplicationPacket* app);
+	void SendEvolveXPTransferWindow();
+	void SendEvolveTransferResults(const EQ::ItemInstance &inst_from, const EQ::ItemInstance &inst_to, const EQ::ItemInstance &inst_from_new, const EQ::ItemInstance &inst_to_new, const uint32 compatibility, const uint32 max_transfer_level);
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
@@ -1967,6 +1980,8 @@ private:
 
 	uint16 m_door_tool_entity_id;
 	uint16 m_object_tool_entity_id;
+
+
 public:
 	uint16 GetDoorToolEntityId() const;
 	void SetDoorToolEntityId(uint16 door_tool_entity_id);
