@@ -8677,14 +8677,16 @@ int Client::GetAccountAge() {
 
 void Client::CheckRegionTypeChanges()
 {
-	if (!zone->HasWaterMap())
+	if (!zone->HasWaterMap()) {
 		return;
+	}
 
 	auto new_region = zone->watermap->ReturnRegionType(glm::vec3(m_Position));
 
 	// still same region, do nothing
-	if (last_region_type == new_region)
+	if (last_region_type == new_region) {
 		return;
+	}
 
 	// If we got out of water clear any water aggro for water only npcs
 	if (last_region_type == RegionTypeWater) {
@@ -8695,13 +8697,15 @@ void Client::CheckRegionTypeChanges()
 	last_region_type = new_region;
 
 	// PVP is the only state we need to keep track of, so we can just return now for PVP servers
-	if (RuleI(World, PVPSettings) > 0)
+	if (RuleI(World, PVPSettings) > 0) {
 		return;
+	}
 
-	if (last_region_type == RegionTypePVP)
+	if (last_region_type == RegionTypePVP && RuleB(World, EnablePVPRegions)) {
 		temp_pvp = true;
-	else if (temp_pvp)
+	} else if (temp_pvp) {
 		temp_pvp = false;
+	}
 }
 
 void Client::ProcessAggroMeter()
