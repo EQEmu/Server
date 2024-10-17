@@ -558,6 +558,12 @@ public:
 	bool CanPathTo(float x, float y, float z);
 
 	void DoNpcToNpcAggroScan();
+
+	bool CanPetTakeItem(const EQ::ItemInstance *inst);
+
+	bool IsMultiQuest() { return multiquest_enabled; }
+	void SetMultiQuest(bool b) { multiquest_enabled = b; }
+
 protected:
 
 	void HandleRoambox();
@@ -699,6 +705,7 @@ protected:
 	bool raid_target;
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
+	bool multiquest_enabled;
 
 private:
 	uint32              m_loottable_id;

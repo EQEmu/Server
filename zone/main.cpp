@@ -122,6 +122,7 @@ void CatchSignal(int sig_num);
 
 extern void MapOpcodes();
 
+bool CheckForCompatibleQuestPlugins();
 int main(int argc, char **argv)
 {
 	RegisterExecutablePlatform(ExePlatformZone);
@@ -364,6 +365,11 @@ int main(int argc, char **argv)
 
 	if (zone_store.GetZones().empty()) {
 		LogError("Failed to load zones data, check your schema for possible errors");
+		return 1;
+	}
+
+	if (!CheckForCompatibleQuestPlugins()) {
+		LogError("Incompatible quest plugins detected, please update your plugins to the latest version");
 		return 1;
 	}
 
@@ -704,4 +710,36 @@ void UpdateWindowTitle(char *iNewTitle)
 	}
 	SetConsoleTitle(tmp);
 #endif
+}
+
+bool CheckForCompatibleQuestPlugins()
+{
+	const std::vector<std::string>& directories = { "lua_modules", "plugins" };
+
+	bool lua_found  = true;
+	bool perl_found = true;
+
+	for (const auto& directory : directories) {
+		for (const auto& file : fs::directory_iterator(path.GetServerPath() + "/" + directory)) {
+			if (file.is_regular_file()) {
+				auto f = path.GetServerPath() + "/" + file.path().string();
+				if (File::Exists(f)) {
+					auto r = File::GetContents(std::filesystem::path{ f }.string());
+					if (!Strings::Contains(r.contents, "CheckHandin")) {
+						if (Strings::EqualFold(directory, "lua_modules")) {
+							lua_found = false;
+							LogError("Failed to find CheckHandin in lua_modules");
+						} else if (Strings::EqualFold(directory, "plugins")) {
+							perl_found = false;
+							LogError("Failed to find CheckHandin in plugins");
+						}
+
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return lua_found && perl_found;
 }

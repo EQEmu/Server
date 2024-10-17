@@ -796,6 +796,16 @@ void Perl_NPC_DescribeSpecialAbilities(NPC* self, Client* c)
 	self->DescribeSpecialAbilities(c);
 }
 
+bool Perl_NPC_IsMultiQuest(NPC* self)
+{
+	return self->IsMultiQuest();
+}
+
+void Perl_NPC_SetMultiQuest(NPC* self, bool b)
+{
+	self->SetMultiQuest(b);
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -892,7 +902,8 @@ void perl_register_npc()
 	package.add("IsGuarding", &Perl_NPC_IsGuarding);
 	package.add("IsLDoNLocked", &Perl_NPC_IsLDoNLocked);
 	package.add("IsLDoNTrapped", &Perl_NPC_IsLDoNTrapped);
-	package.add("IsLDoNTrapDetected", &Perl_NPC_IsLDoNTrapDetected);;
+	package.add("IsLDoNTrapDetected", &Perl_NPC_IsLDoNTrapDetected);
+	package.add("IsMultiQuest", &Perl_NPC_IsMultiQuest);
 	package.add("IsOnHatelist", &Perl_NPC_IsOnHatelist);
 	package.add("IsRaidTarget", &Perl_NPC_IsRaidTarget);
 	package.add("IsRareSpawn", &Perl_NPC_IsRareSpawn);
@@ -935,6 +946,7 @@ void perl_register_npc()
 	package.add("SetLDoNTrapDetected", &Perl_NPC_SetLDoNTrapDetected);
 	package.add("SetLDoNTrapSpellID", &Perl_NPC_SetLDoNTrapSpellID);
 	package.add("SetLDoNTrapType", &Perl_NPC_SetLDoNTrapType);
+	package.add("SetMultiQuest", &Perl_NPC_SetMultiQuest);
 	package.add("SetNPCAggro", &Perl_NPC_SetNPCAggro);
 	package.add("SetGold", &Perl_NPC_SetGold);
 	package.add("SetGrid", &Perl_NPC_SetGrid);

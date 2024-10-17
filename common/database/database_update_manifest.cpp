@@ -5759,6 +5759,17 @@ ALTER TABLE `character_exp_modifiers`
 MODIFY COLUMN `aa_modifier` float NOT NULL DEFAULT 1.0 AFTER `instance_version`,
 MODIFY COLUMN `exp_modifier` float NOT NULL DEFAULT 1.0 AFTER `aa_modifier`;
 )"
+	},
+	ManifestEntry{
+		.version = 9285,
+		.description = "2024_10_15_npc_types_multiquest_enabled.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'multiquest_enabled'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_types`
+ADD COLUMN `multiquest_enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `is_parcel_merchant`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
