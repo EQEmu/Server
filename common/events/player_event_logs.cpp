@@ -151,8 +151,8 @@ void PlayerEventLogs::ProcessBatchQueue()
 	std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems> queue_14{};
 	std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell> queue_16{};
 
-	if (!m_record_details_queue.empty()) {
-		for (auto const &[key, value]: m_record_details_queue) {
+	if (!m_record_etl_queue.empty()) {
+		for (auto const &[key, value]: m_record_etl_queue) {
 			switch (key) {
 				case PlayerEvent::EventType::LOOT_ITEM: {
 					queue_14.push_back(std::any_cast<PlayerEventLootItemsRepository::PlayerEventLootItems>(value));
@@ -179,7 +179,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	// empty
 	m_record_batch_queue.clear();
-	m_record_details_queue.clear();
+	m_record_etl_queue.clear();
 
 	m_batch_queue_lock.unlock();
 }
@@ -191,7 +191,6 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 
 	switch (log.event_type_id) {
 		case PlayerEvent::EventType::LOOT_ITEM: {
-			//RecordDetailEvent<PlayerEvent::LootItemEvent, PlayerEventLootItemsRepository::PlayerEventLootItems>(log);
 			PlayerEvent::LootItemEvent in{};
 			PlayerEventLootItemsRepository::PlayerEventLootItems out{};
 
@@ -202,7 +201,6 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 				in.serialize(ar);
 			}
 
-			//out = in;
 			out.charges     = in.charges;
 			out.corpse_name = in.corpse_name;
 			out.item_id     = in.item_id;
@@ -215,11 +213,10 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 					: 0;
 			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
 
-			m_record_details_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
+			m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
 			break;
 		}
 		case PlayerEvent::EventType::MERCHANT_SELL: {
-			//RecordDetailEvent<PlayerEvent::MerchantSellEvent, PlayerEventMerchantSellRepository::PlayerEventMerchantSell>(log);
 			PlayerEvent::MerchantSellEvent in{};
 			PlayerEventMerchantSellRepository::PlayerEventMerchantSell out{};
 
@@ -230,7 +227,6 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 				in.serialize(ar);
 			}
 
-			//out = in;
 			out.npc_id                  = in.npc_id;
 			out.merchant_name           = in.merchant_name;
 			out.merchant_type           = in.merchant_type;
@@ -248,7 +244,7 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 					: 0;
 			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
 
-			m_record_details_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
+			m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
 			break;
 		}
 		default: {

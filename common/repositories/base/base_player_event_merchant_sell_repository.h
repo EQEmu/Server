@@ -30,22 +30,6 @@ public:
 		uint32_t    alternate_currency_id;
 		uint64_t    player_money_balance;
 		uint64_t    player_currency_balance;
-
-		PlayerEventMerchantSell &operator=(const PlayerEvent::MerchantSellEvent &in)
-		{
-			npc_id                  = in.npc_id;
-			merchant_name           = in.merchant_name;
-			merchant_type           = in.merchant_type;
-			item_id                 = in.item_id;
-			item_name               = in.item_name;
-			charges                 = in.charges;
-			cost                    = in.cost;
-			alternate_currency_id   = in.alternate_currency_id;
-			player_money_balance    = in.player_money_balance;
-			player_currency_balance = in.player_currency_balance;
-
-			return *this;
-		}
 	};
 
 	static std::string PrimaryKey()
