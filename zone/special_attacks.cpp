@@ -969,7 +969,16 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 		if (!wpn || (wpn->GetItem()->ItemType != EQ::item::ItemType1HPiercing)) {
 			Message(Chat::Skills, "Your backstab is less effective due to your unconventional weapon");
-			base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier);
+
+			switch (wpn->GetItem()->ItemType) {
+				case EQ::item::ItemType2HBlunt:
+				case EQ::item::ItemType2HBlunt:
+				case EQ::item::ItemType2HSlash:
+					base_damage += base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier1H);
+				default:
+					base_damage += base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier2H);
+			}
+
 		}
 	} else if (!GetWeaponDamage(other, (const EQ::ItemData*)nullptr)){
 		return;
