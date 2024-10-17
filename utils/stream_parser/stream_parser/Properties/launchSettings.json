@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "stream_parser": {
+      "commandName": "Project",
+      "commandLineArgs": "--input input/test.pcap --csv --text --decrypt",
+      "workingDirectory": "E:\\Projects\\stream_parser\\stream_parser\\bin\\Debug\\net5.0"
+    }
+  }
+}
