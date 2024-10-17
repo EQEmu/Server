@@ -25,17 +25,6 @@ public:
 		int32_t     charges;
 		uint32_t    npc_id;
 		std::string corpse_name;
-
-		PlayerEventLootItems &operator=(const PlayerEvent::LootItemEvent &in)
-		{
-			charges     = in.charges;
-			corpse_name = in.corpse_name;
-			item_id     = in.item_id;
-			item_name   = in.item_name;
-			npc_id      = in.npc_id;
-
-			return *this;
-		}
 	};
 
 	static std::string PrimaryKey()

@@ -58,28 +58,6 @@ public:
 		return BuildPlayerEventPacket(c);
 	}
 
-	template<typename I, typename O> void RecordDetailEvent(PlayerEventLogsRepository::PlayerEventLogs &log)
-	{
-		I in{};
-		O out{};
-
-		{
-			std::stringstream ss;
-			ss << log.event_data;
-			cereal::JSONInputArchive ar(ss);
-			in.serialize(ar);
-		}
-
-		out = in;
-		log.player_event_x_id =
-			GetDetailTableIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
-				? GetDetailTableIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
-				: 0;
-		IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
-
-		m_record_details_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
-	}
-
 	[[nodiscard]] const PlayerEventLogSettingsRepository::PlayerEventLogSettings *GetSettings() const;
 	bool IsEventDiscordEnabled(int32_t event_type_id);
 	std::string GetDiscordWebhookUrlFromEventType(int32_t event_type_id);
@@ -96,7 +74,7 @@ private:
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
 	static std::unique_ptr<ServerPacket>
 	BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e);
-	std::map<PlayerEvent::EventType, std::any> m_record_details_queue{};
+	std::map<PlayerEvent::EventType, std::any> m_record_etl_queue{};
 
 	// timers
 	Timer m_process_batch_events_timer; // events processing timer
