@@ -1070,7 +1070,7 @@ RULE_INT(Custom,    AbsolutePetLimit, 						1, 	    "Maximum number of permanent
 RULE_REAL(Custom,	PetPlacementAdjustment,					-0.6,  	"Adjust pet formation positioning")
 RULE_REAL(Custom,	PetPlacementDistance ,					7.0,  	"Adjust pet formation positioning")
 RULE_REAL(Custom, 	NonDaggerBackstabMultiplier1H, 			0.75, 	"Multiple Backstabs conducted with not-1hp by this amount")
-RULE_REAL(Custom, 	NonDaggerBackstabMultiplier2H			0.50, 	"Multiple Backstabs conducted with not-1hp 2h weapon by this amount")
+RULE_REAL(Custom, 	NonDaggerBackstabMultiplier2H,			0.50, 	"Multiple Backstabs conducted with not-1hp 2h weapon by this amount")
 RULE_BOOL(Custom, 	MonkSkillAttacksAreH2HForProcs, 		true, 	"Read the name")
 RULE_BOOL(Custom,   AttuneOnExp,							false,  "Trigger attuneable items on gaining exp instead of on equip")
 
