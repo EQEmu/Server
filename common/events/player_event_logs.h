@@ -16,11 +16,12 @@ class PlayerEventLogs {
 public:
 	void Init();
 	void ReloadSettings();
+	void LoadETLIDs();
 	void IncrementDetailTableIDCache(PlayerEvent::EventType event_type) { m_last_id_cache_detail_tables[event_type]++; }
 	PlayerEventLogs *SetDatabase(Database *db);
 	bool ValidateDatabaseConnection();
 	bool IsEventEnabled(PlayerEvent::EventType event);
-	std::map<PlayerEvent::EventType, uint64>& GetDetailTableIDCache() { return m_last_id_cache_detail_tables; }
+	std::map<PlayerEvent::EventType, uint64>& GetETLIDCache() { return m_last_id_cache_detail_tables; }
 
 	void Process();
 

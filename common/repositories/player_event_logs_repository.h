@@ -44,7 +44,17 @@ public:
      */
 
 	// Custom extended repository methods here
+	static uint32 DeleteETLRecords(Database &db, std::string &table_name, const std::vector<std::string> &etl_ids)
+	{
+		auto const query = fmt::format("DELETE FROM {} WHERE `id` IN({})", table_name, Strings::Implode(", ", etl_ids));
+		auto const results = db.QueryDatabase(query);
 
+		if (!results.Success()) {
+			return 0;
+		}
+
+		return results.RowsAffected();
+	}
 };
 
 #endif //EQEMU_PLAYER_EVENT_LOGS_REPOSITORY_H

@@ -26,8 +26,8 @@ void PlayerEventLogs::Init()
 		m_settings[i].event_enabled      = 1;
 		m_settings[i].retention_days     = 0;
 		m_settings[i].discord_webhook_id = 0;
-		m_settings[i].detail_logs        = 0;
-		m_settings[i].detail_table_name  = "";
+		m_settings[i].etl_logging        = 0;
+		m_settings[i].etl_table_name     = "";
 	}
 
 	SetSettingsDefaults();
@@ -67,13 +67,13 @@ void PlayerEventLogs::Init()
 		if (is_missing_in_database && is_implemented && !is_deprecated) {
 			LogInfo("[New] PlayerEvent [{}] ({})", PlayerEvent::EventName[i], i);
 
-			auto c              = PlayerEventLogSettingsRepository::NewEntity();
-			c.id                = i;
-			c.event_name        = PlayerEvent::EventName[i];
-			c.event_enabled     = m_settings[i].event_enabled;
-			c.retention_days    = m_settings[i].retention_days;
-			c.detail_logs       = false;
-			c.detail_table_name = "";
+			auto c           = PlayerEventLogSettingsRepository::NewEntity();
+			c.id             = i;
+			c.event_name     = PlayerEvent::EventName[i];
+			c.event_enabled  = m_settings[i].event_enabled;
+			c.retention_days = m_settings[i].retention_days;
+			c.etl_logging    = false;
+			c.etl_table_name = "";
 			settings_to_insert.emplace_back(c);
 		}
 	}
@@ -82,17 +82,7 @@ void PlayerEventLogs::Init()
 		PlayerEventLogSettingsRepository::ReplaceMany(*m_database, settings_to_insert);
 	}
 
-	s = PlayerEventLogSettingsRepository::All(*m_database);
-	for (auto &e: s) {
-		if (e.id >= PlayerEvent::MAX) {
-			continue;
-		}
-
-		if (e.detail_logs) {
-			auto last_id = PlayerEventLogSettingsRepository::GetNextIdForTable(*m_database, e.detail_table_name);
-			GetDetailTableIDCache().emplace(static_cast<PlayerEvent::EventType>(e.id), last_id);
-		}
-	}
+	LoadETLIDs();
 
 	bool processing_in_world = !RuleB(Logging, PlayerEventsQSProcess) && IsWorld();
 	bool processing_in_qs    = RuleB(Logging, PlayerEventsQSProcess) && IsQueryServ();
@@ -207,9 +197,9 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 			out.item_name   = in.item_name;
 			out.npc_id      = in.npc_id;
 
-			log.player_event_x_id =
-				GetDetailTableIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					? GetDetailTableIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
+			log.etl_table_id =
+				GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
 					: 0;
 			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
 
@@ -238,9 +228,9 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 			out.player_money_balance    = in.player_money_balance;
 			out.player_currency_balance = in.player_currency_balance;
 
-			log.player_event_x_id =
-				GetDetailTableIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					? GetDetailTableIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
+			log.etl_table_id =
+				GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
 					: 0;
 			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
 
@@ -728,6 +718,32 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
+			if (m_settings[i].etl_logging) {
+				auto results = PlayerEventLogsRepository::GetWhere(
+					*m_database,
+					fmt::format(
+						"event_type_id = {} AND created_at < (NOW() - INTERVAL {} DAY)",
+						i,
+						m_settings[i].retention_days)
+					);
+				if (!results.empty()) {
+					std::vector<std::string> etl_ids{};
+					for (auto const &r: results) {
+						etl_ids.push_back(std::to_string(r.etl_table_id));
+					}
+
+					auto deleted_count = PlayerEventLogsRepository::DeleteETLRecords(*m_database, m_settings[i].etl_table_name, etl_ids);
+					LogInfo(
+						"Truncated [{}] events of type [{}] ({}) older than [{}] days from etl table {}",
+						deleted_count,
+						PlayerEvent::EventName[i],
+						i,
+						m_settings[i].retention_days,
+						m_settings[i].etl_table_name
+					);
+				}
+			}
+
 			int deleted_count = PlayerEventLogsRepository::DeleteWhere(
 				*m_database,
 				fmt::format(
@@ -736,6 +752,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 					m_settings[i].retention_days
 				)
 			);
+
+			LoadETLIDs();
 
 			if (deleted_count > 0) {
 				LogInfo(
@@ -822,5 +840,22 @@ void PlayerEventLogs::SetSettingsDefaults()
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;
+	}
+}
+
+void PlayerEventLogs::LoadETLIDs()
+{
+	GetETLIDCache().clear();
+
+	auto results = PlayerEventLogSettingsRepository::All(*m_database);
+	for (auto &e: results) {
+		if (e.id >= PlayerEvent::MAX) {
+			continue;
+		}
+
+		if (e.etl_logging) {
+			auto last_id = PlayerEventLogSettingsRepository::GetNextIdForTable(*m_database, e.etl_table_name);
+			GetETLIDCache().emplace(static_cast<PlayerEvent::EventType>(e.id), last_id);
+		}
 	}
 }
