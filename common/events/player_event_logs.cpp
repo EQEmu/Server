@@ -753,8 +753,6 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 				)
 			);
 
-			LoadETLIDs();
-
 			if (deleted_count > 0) {
 				LogInfo(
 					"Truncated [{}] events of type [{}] ({}) older than [{}] days",
@@ -766,6 +764,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 			}
 		}
 	}
+
+	LoadETLIDs();
 }
 
 void PlayerEventLogs::ReloadSettings()
