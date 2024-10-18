@@ -2039,8 +2039,8 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	SpellTargetType targetType = spells[spell_id].target_type;
 	uint8 mob_body = spell_target ? spell_target->GetBodyType() : BodyType::Humanoid;
 
-	const bool grouped_target = spell_target->IsClient() && (IsGrouped() && GetGroup()->IsGroupMember(spell_target));
-	const bool raid_group_target = spell_target->IsClient() && (IsRaidGrouped() && GetRaid()->IsRaidMember(spell_target->CastToClient()));
+	const bool grouped_target = spell_target && spell_target->IsClient() && (IsGrouped() && GetGroup()->IsGroupMember(spell_target));
+	const bool raid_group_target = spell_target && spell_target->IsClient() && (IsRaidGrouped() && GetRaid()->IsRaidMember(spell_target->CastToClient()));
 	bool is_my_pet = false;
 	for (auto pet : GetAllPets()) {
 		if (spell_target && pet->GetID() == spell_target->GetID()) {
