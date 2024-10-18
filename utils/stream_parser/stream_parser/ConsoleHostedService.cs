@@ -71,14 +71,9 @@ namespace StreamParser
 
                        foreach(var c in _connections)
                        {
-                           if(o.Dump)
+                           if(o.Text)
                            {
                                DumpConnectionToTextFile(c.Value, o.Output, o.Decrypt, o.DecompressOpcodes);
-                           }
-
-                           if(o.Csv)
-                           {
-                               DumpConnectionToCsvFile(c.Value, o.Output, o.Decrypt);
                            }
                        }
 
@@ -304,70 +299,6 @@ namespace StreamParser
             {
                 _logger.LogError(ex, "Error inflating data");
                 return null;
-            }
-        }
-
-        private class CsvRow
-        {
-            public int Index { get; set; }
-            public string Direction { get; set; }
-            public string Opcode { get; set; }
-            public int Size { get; set; }
-            public string Data { get; set; }
-        }
-
-        private void DumpConnectionToCsvFile(ParsedConnection c, string output, bool decrypt)
-        {
-            try
-            {
-                var path = output + string.Format("{0}-{1}.csv", c.ConnectionType.ToString().ToLower(), c.ConnectedTime.ToString("yyyyMMddHHmmssfff"));
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
-
-                var rows = new List<CsvRow>();
-                var i = 0;
-                foreach (var p in c.Packets)
-                {
-                    var row = new CsvRow();
-                    row.Index = i++;
-                    ReadOnlySpan<byte> data = p.Data;
-                    row.Direction = p.Direction == Direction.ClientToServer ? "0" : "1";
-
-                    switch (c.ConnectionType)
-                    {
-                        case ConnectionType.Chat:
-                            {
-                                row.Opcode = data[0].ToString();
-                                var gp = new GamePacket(data.Slice(1));
-                                row.Size = data.Length - 1;
-                                row.Data = gp.ToModelString(512, false);
-                            }
-                            break;
-                        default:
-                            {
-
-                                row.Opcode = BitConverter.ToUInt16(data.Slice(0, 2)).ToString();
-                                var gp = new GamePacket(data.Slice(2));
-                                row.Size = data.Length - 2;
-                                row.Data = gp.ToModelString(512, false);
-                            }
-                            break;
-                    }
-
-                    rows.Add(row);
-                }
-
-                using (var writer = new StreamWriter(path))
-                using (var csv = new CsvHelper.CsvWriter(writer, CultureInfo.InvariantCulture))
-                {
-                    csv.WriteRecords(rows);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error dumping connection {0} to csv file", c.ConnectedTime.ToString("s"));
             }
         }
 

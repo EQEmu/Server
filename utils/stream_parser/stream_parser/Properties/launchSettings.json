@@ -2,7 +2,7 @@
   "profiles": {
     "stream_parser": {
       "commandName": "Project",
-      "commandLineArgs": "--input input/cap_login_to_zone_10_16_2024.pcap --output output_test/ --text --decrypt --decompress 16742 168 30346",
+      "commandLineArgs": "--input input/cap_login_to_zone_10_16_2024.pcap --output output_test/ --binary --decrypt --decompress 16742 168 30346",
       "workingDirectory": "E:\\Projects\\stream_parser\\stream_parser\\bin\\Debug\\net6.0\\"
     }
   }

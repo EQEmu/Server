@@ -12,10 +12,10 @@ namespace StreamParser
         public string Output { get; set; }
 
         [Option("text", Default = true, HelpText = "Dump connections to text files.")]
-        public bool Dump { get; set; }
+        public bool Text { get; set; }
 
-        [Option("csv", Default = false, HelpText = "Dump connections to csv files appropriate for building ML models.")]
-        public bool Csv { get; set; }
+        [Option("binary", Default = false, HelpText = "Dump connections to binary files.")]
+        public bool Binary { get; set; }
 
         [Option("decrypt", Default = false, HelpText = "Decrypt the \"Encrypted\" packets.")]
         public bool Decrypt { get; set; }
