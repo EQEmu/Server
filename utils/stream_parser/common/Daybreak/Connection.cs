@@ -261,6 +261,7 @@ namespace StreamParser.Common.Daybreak
 
                                 var subpacket = data.Slice(current, subpacket_length);
                                 ProcessDecodedPacket(srcAddr, srcPort, packetTime, subpacket);
+                                current += subpacket_length;
                             }
                         }
                         break;

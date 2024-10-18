@@ -32,7 +32,7 @@ namespace StreamParser.Common.Daybreak
         public const byte Ack2 = 22;
         public const byte Ack3 = 23;
         public const byte Ack4 = 22;
-        public const byte AppCombined = 23;
+        public const byte AppCombined = 25;
         public const byte OutboundPing = 28;
         public const byte OutOfSession = 29;
     }
