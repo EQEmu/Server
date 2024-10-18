@@ -974,9 +974,9 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 				case EQ::item::ItemType2HBlunt:
 				case EQ::item::ItemType2HBlunt:
 				case EQ::item::ItemType2HSlash:
-					base_damage += base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier1H);
+					base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier1H);
 				default:
-					base_damage += base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier2H);
+					base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier2H);
 			}
 
 		}
