@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using CommandLine;
 
 namespace StreamParser
@@ -23,5 +19,8 @@ namespace StreamParser
 
         [Option("decrypt", Default = false, HelpText = "Decrypt the \"Encrypted\" packets.")]
         public bool Decrypt { get; set; }
+
+        [Option("decompress", Default = false, HelpText = "Which opcodes to attempt to decompress")]
+        public IEnumerable<int> DecompressOpcodes { get; set; }
     }
 }

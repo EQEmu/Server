@@ -13,6 +13,7 @@ using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
+using Ionic.Zlib;
 
 namespace StreamParser
 {
@@ -72,7 +73,7 @@ namespace StreamParser
                        {
                            if(o.Dump)
                            {
-                               DumpConnectionToTextFile(c.Value, o.Output, o.Decrypt);
+                               DumpConnectionToTextFile(c.Value, o.Output, o.Decrypt, o.DecompressOpcodes);
                            }
 
                            if(o.Csv)
@@ -153,7 +154,7 @@ namespace StreamParser
             });
         }
 
-        private void DumpConnectionToTextFile(ParsedConnection c, string output, bool decrypt)
+        private void DumpConnectionToTextFile(ParsedConnection c, string output, bool decrypt, IEnumerable<int> decompressOpcodes)
         {
             try
             {
@@ -213,12 +214,58 @@ namespace StreamParser
                             break;
                         default:
                             {
+                                bool reported_decompressed = false;
                                 int opcode = BitConverter.ToUInt16(data.Slice(0, 2));
-                                File.AppendAllText(path,
-                                    string.Format("{0} [Opcode: 0x{1}, Size: {2}] ({3})\n", dir, opcode.ToString("X4"), data.Length - 2, p.Time.ToString("s")));
+                                foreach (var decompressOpcode in decompressOpcodes)
+                                {
+                                    if (opcode == decompressOpcode && data.Length > 12)
+                                    {
+                                        if (data[10] == 0x78 && data[11] == 0xDA)
+                                        {
+                                            var totalLen = BitConverter.ToInt32(data.Slice(6, 4));
+                                            if (totalLen > 0)
+                                            {
+                                                var decompressed = Inflate(data.Slice(10));
+                                                if(decompressed != null)
+                                                {
+                                                    var decompressed_gp = new GamePacket(decompressed);
+                                                    File.AppendAllText(path,
+                                                        string.Format("{0} [Opcode: 0x{1}, Size (decompressed): {2}] ({3})\n", dir, opcode.ToString("X4"), totalLen, p.Time.ToString("s")));
 
-                                var gp = new GamePacket(data.Slice(2));
-                                File.AppendAllText(path, string.Format("{0}\n", gp.ToString()));
+                                                    File.AppendAllText(path, string.Format("{0}\n", decompressed_gp.ToString()));
+                                                    reported_decompressed = true;
+                                                    break;
+                                                }
+                                            }
+                                        } 
+                                        else if (data[6] == 0x78 && data[7] == 0xDA)
+                                        {
+                                            var totalLen = BitConverter.ToInt32(data.Slice(2, 4));
+                                            if (totalLen > 0)
+                                            {
+                                                var decompressed = Inflate(data.Slice(6));
+                                                if (decompressed != null)
+                                                {
+                                                    File.AppendAllText(path,
+                                                        string.Format("{0} [Opcode: 0x{1}, Size (decompressed): {2}] ({3})\n", dir, opcode.ToString("X4"), totalLen, p.Time.ToString("s")));
+
+                                                    var decompressed_gp = new GamePacket(decompressed);
+                                                    File.AppendAllText(path, string.Format("{0}\n", decompressed_gp.ToString()));
+                                                    reported_decompressed = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (!reported_decompressed)
+                                {
+                                    File.AppendAllText(path,
+                                        string.Format("{0} [Opcode: 0x{1}, Size: {2}] ({3})\n", dir, opcode.ToString("X4"), data.Length - 2, p.Time.ToString("s")));
+                                    var gp = new GamePacket(data.Slice(2));
+                                    File.AppendAllText(path, string.Format("{0}\n", gp.ToString()));
+                                }
                             }
                             break;
                     }
@@ -227,6 +274,36 @@ namespace StreamParser
             catch(Exception ex)
             {
                 _logger.LogError(ex, "Error dumping connection {0} to txt file", c.ConnectedTime.ToString("s"));
+            }
+        }
+
+        private byte[] Inflate(ReadOnlySpan<byte> data)
+        {
+            try
+            {
+                using (var out_stream = new MemoryStream())
+                using (var in_stream = new MemoryStream(data.ToArray()))
+                {
+                    const int bufferLen = 4096;
+                    var buffer = new byte[bufferLen];
+                    using (var zs = new ZlibStream(in_stream, CompressionMode.Decompress))
+                    {
+                        int r = 0;
+                        do
+                        {
+                            r = zs.Read(buffer, 0, bufferLen);
+                            out_stream.Write(buffer, 0, r);
+                        } while (r == bufferLen);
+                    }
+
+                    var ret = out_stream.ToArray();
+                    return ret;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error inflating data");
+                return null;
             }
         }
 
