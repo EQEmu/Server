@@ -969,7 +969,6 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 		if (!wpn || (wpn->GetItem()->ItemType != EQ::item::ItemType1HPiercing)) {
 			Message(Chat::Skills, "Your backstab is less effective due to your unconventional weapon");
-
 			if (wpn) {
 				switch (static_cast<EQ::item::ItemType>(wpn->GetItem()->ItemType)) {
 					case EQ::item::ItemType2HBlunt:
