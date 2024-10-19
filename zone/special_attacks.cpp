@@ -981,7 +981,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 						base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier1H);
 				}
 			} else {
-				base_damage *= GetHandToHandDamage() * RuleR(Custom, NonDaggerBackstabMultiplier1H);
+				base_damage *= RuleR(Custom, NonDaggerBackstabMultiplier1H);
 			}
 		}
 	} else if (!GetWeaponDamage(other, (const EQ::ItemData*)nullptr)){
