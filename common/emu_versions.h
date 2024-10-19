@@ -36,7 +36,8 @@ namespace EQ
 			SoD,		// Build: 'Dec 19 2008 15:22:49'
 			UF,			// Build: 'Jun  8 2010 16:44:32'
 			RoF,		// Build: 'Dec 10 2012 17:35:44'
-			RoF2		// Build: 'May 10 2013 23:30:08'
+			RoF2,		// Build: 'May 10 2013 23:30:08'
+			Larion
 		};
 
 		enum ClientVersionBitmask : uint32 {

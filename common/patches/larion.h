@@ -11,41 +11,45 @@
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "../global_define.h"
-#include "patches.h"
+#ifndef COMMON_LARION_H
+#define COMMON_LARION_H
 
-#include "titanium.h"
-#include "uf.h"
-#include "sof.h"
-#include "sod.h"
-#include "rof.h"
-#include "rof2.h"
-#include "larion.h"
+#include "../struct_strategy.h"
 
-void RegisterAllPatches(EQStreamIdentifier &into)
+class EQStreamIdentifier;
+
+namespace Larion
 {
-	Titanium::Register(into);
-	SoF::Register(into);
-	SoD::Register(into);
-	UF::Register(into);
-	RoF::Register(into);
-	RoF2::Register(into);
-	Larion::Register(into);
-}
 
-void ReloadAllPatches()
-{
-	Titanium::Reload();
-	SoF::Reload();
-	SoD::Reload();
-	UF::Reload();
-	RoF::Reload();
-	RoF2::Reload();
-	Larion::Reload();
-}
+	//these are the only public member of this namespace.
+	extern void Register(EQStreamIdentifier& into);
+	extern void Reload();
+
+
+
+	//you should not directly access anything below..
+	//I just dont feel like making a seperate header for it.
+
+	class Strategy : public StructStrategy {
+	public:
+		Strategy();
+
+	protected:
+
+		virtual std::string Describe() const;
+		virtual const EQ::versions::ClientVersion ClientVersion() const;
+
+		//magic macro to declare our opcode processors
+#include "ss_declare.h"
+#include "larion_ops.h"
+	};
+
+}; /*Larion*/
+
+#endif /*COMMON_LARION_H*/
