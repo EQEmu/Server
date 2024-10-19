@@ -20,7 +20,7 @@ namespace StreamParser
         [Option("decrypt", Default = false, HelpText = "Decrypt the \"Encrypted\" packets.")]
         public bool Decrypt { get; set; }
 
-        [Option("decompress", Default = false, HelpText = "Which opcodes to attempt to decompress")]
+        [Option("decompress", Default = null, HelpText = "Which opcodes to attempt to decompress")]
         public IEnumerable<int> DecompressOpcodes { get; set; }
     }
 }
