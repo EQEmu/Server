@@ -13991,8 +13991,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			sizeof(Merchant_Sell_Struct), app->size);
 		return;
 	}
-	RDTSC_Timer t1;
-	t1.start();
+
 	Merchant_Sell_Struct* mp = (Merchant_Sell_Struct*)app->pBuffer;
 #if EQDEBUG >= 5
 	LogDebug("[{}], purchase item", GetName());
@@ -14193,8 +14192,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			SendItemPacket(mp->itemslot, inst, ItemPacketMerchant);
 		}
 	}
-	safe_delete(inst);
-	safe_delete(outapp);
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
 		auto e = PlayerEvent::MerchantPurchaseEvent{
@@ -14281,23 +14278,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		parse->EventPlayer(EVENT_MERCHANT_BUY, this, export_string, 0);
 	}
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
-		auto e = PlayerEvent::MerchantPurchaseEvent{
-			.npc_id = tmp->GetNPCTypeID(),
-			.merchant_name = tmp->GetCleanName(),
-			.merchant_type = tmp->CastToNPC()->MerchantType,
-			.item_id = item->ID,
-			.item_name = item->Name,
-			.charges = static_cast<int16>(mpo->quantity),
-			.cost = mpo->price,
-			.alternate_currency_id = 0,
-			.player_money_balance = GetCarriedMoney(),
-			.player_currency_balance = 0,
-		};
-		RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
-	}
-
-
 	if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(item_id)) {
 		if (!GetGM()) {
 			DiscoverItem(item_id);
@@ -14313,9 +14293,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		}
 	}
 
-	t1.stop();
-	std::cout << "At 1: " << t1.getDuration() << std::endl;
-	return;
+	safe_delete(inst);
+	safe_delete(outapp);
 }
 void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 {
