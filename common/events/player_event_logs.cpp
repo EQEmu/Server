@@ -14,6 +14,7 @@ const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 
 // general initialization routine
 void PlayerEventLogs::Init()
 {
+
 	m_process_batch_events_timer.SetTimer(RuleI(Logging, BatchPlayerEventProcessIntervalSeconds) * 1000);
 	m_process_retention_truncation_timer.SetTimer(PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL);
 
@@ -26,8 +27,7 @@ void PlayerEventLogs::Init()
 		m_settings[i].event_enabled      = 1;
 		m_settings[i].retention_days     = 0;
 		m_settings[i].discord_webhook_id = 0;
-		m_settings[i].etl_logging        = 0;
-		m_settings[i].etl_table_name     = "";
+		m_settings[i].has_etl            = 0;
 	}
 
 	SetSettingsDefaults();
@@ -72,8 +72,7 @@ void PlayerEventLogs::Init()
 			c.event_name     = PlayerEvent::EventName[i];
 			c.event_enabled  = m_settings[i].event_enabled;
 			c.retention_days = m_settings[i].retention_days;
-			c.etl_logging    = false;
-			c.etl_table_name = "";
+			c.has_etl        = false;
 			settings_to_insert.emplace_back(c);
 		}
 	}
@@ -138,39 +137,29 @@ void PlayerEventLogs::ProcessBatchQueue()
 	PlayerEventLogsRepository::InsertMany(*m_database, m_record_batch_queue);
 
 	// flush detailed tables
-	std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems> queue_14{};
-	std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell> queue_16{};
-
 	if (!m_record_etl_queue.empty()) {
 		for (auto const &[key, value]: m_record_etl_queue) {
-			switch (key) {
-				case PlayerEvent::EventType::LOOT_ITEM: {
-					queue_14.push_back(std::any_cast<PlayerEventLootItemsRepository::PlayerEventLootItems>(value));
-					break;
-				}
-				case PlayerEvent::EventType::MERCHANT_SELL: {
-					queue_16.push_back(std::any_cast<PlayerEventMerchantSellRepository::PlayerEventMerchantSell>(value));
-					break;
-				}
-				default: {
-				}
+			m_etl_data[key].etl_queue.push_back(value);
+		}
+
+		for (auto &[key, value]:m_etl_data) {
+			if (!value.etl_queue.empty()) {
+				value.etl_load_func_ptr(*m_database, value.etl_queue);
+				value.etl_queue.clear();
 			}
 		}
 
-		if (!queue_14.empty()) { PlayerEventLootItemsRepository::InsertMany(*m_database, queue_14); }
-		if (!queue_16.empty()) { PlayerEventMerchantSellRepository::InsertMany(*m_database, queue_16); }
+		LogPlayerEventsDetail(
+			"Processing batch player event log queue of [{}] took [{}]",
+			m_record_batch_queue.size(),
+			benchmark.elapsed()
+		);
+
+		// empty
+		m_record_batch_queue.clear();
+		m_record_etl_queue.clear();
+
 	}
-
-	LogPlayerEventsDetail(
-		"Processing batch player event log queue of [{}] took [{}]",
-		m_record_batch_queue.size(),
-		benchmark.elapsed()
-	);
-
-	// empty
-	m_record_batch_queue.clear();
-	m_record_etl_queue.clear();
-
 	m_batch_queue_lock.unlock();
 }
 
@@ -718,7 +707,7 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
-			if (m_settings[i].etl_logging) {
+			if (m_settings[i].has_etl) {
 				auto results = PlayerEventLogsRepository::GetWhere(
 					*m_database,
 					fmt::format(
@@ -732,14 +721,14 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 						etl_ids.push_back(std::to_string(r.etl_table_id));
 					}
 
-					auto deleted_count = PlayerEventLogsRepository::DeleteETLRecords(*m_database, m_settings[i].etl_table_name, etl_ids);
+					auto deleted_count = PlayerEventLogsRepository::DeleteETLRecords(*m_database, m_etl_data[static_cast<PlayerEvent::EventType>(i)].etl_table_name, etl_ids);
 					LogInfo(
 						"Truncated [{}] events of type [{}] ({}) older than [{}] days from etl table {}",
 						deleted_count,
 						PlayerEvent::EventName[i],
 						i,
 						m_settings[i].retention_days,
-						m_settings[i].etl_table_name
+						m_etl_data[static_cast<PlayerEvent::EventType>(i)].etl_table_name
 					);
 				}
 			}
@@ -853,8 +842,17 @@ void PlayerEventLogs::LoadETLIDs()
 			continue;
 		}
 
-		if (e.etl_logging) {
-			auto last_id = PlayerEventLogSettingsRepository::GetNextIdForTable(*m_database, e.etl_table_name);
+		if (e.has_etl) {
+			if (!m_etl_data.contains(static_cast<PlayerEvent::EventType>(e.id))) {
+				LogError(
+					"Error retrieving Event Type [{}].  Database mismatch.  Check 'has_etl' field in "
+					"player_event_log_settings",
+					e.id);
+				return;
+			}
+
+			auto etl_table_name = m_etl_data.at(static_cast<PlayerEvent::EventType>(e.id)).etl_table_name;
+			auto last_id        = PlayerEventLogSettingsRepository::GetNextIdForTable(*m_database, etl_table_name);
 			GetETLIDCache().emplace(static_cast<PlayerEvent::EventType>(e.id), last_id);
 		}
 	}
