@@ -12864,34 +12864,18 @@ bool Client::CheckHandin(
 
 			// Handle items
 			if (Strings::IsNumber(key)) {
-				const EQ::ItemData *exists = database.GetItem(Strings::ToUnsignedInt(key));
-				if (!exists) {
-					continue;
-				}
-
-				// only handle required here, for hand-in we'll pull from the item instances for accuracy
-				if (current_dataset == set_required) {
+				if (const auto *exists = database.GetItem(Strings::ToUnsignedInt(key));
+					exists && current_dataset == set_required) {
 					current_handin.items.emplace_back(HandinEntry{.item_id = key, .count = value});
 				}
+				continue;
 			}
-			else if (!key.empty()) { // Handle money
-				std::vector<std::string> moneys = {"platinum", "gold", "silver", "copper"};
 
-				if (std::find(moneys.begin(), moneys.end(), key) != moneys.end()) {
-					if (key == "platinum") {
-						current_handin.money.platinum = value;
-					}
-					else if (key == "gold") {
-						current_handin.money.gold = value;
-					}
-					else if (key == "silver") {
-						current_handin.money.silver = value;
-					}
-					else if (key == "copper") {
-						current_handin.money.copper = value;
-					}
-				}
-			}
+			// Handle money and any other key-value pairs
+			if (key == "platinum") { current_handin.money.platinum = value; }
+			else if (key == "gold") { current_handin.money.gold = value; }
+			else if (key == "silver") { current_handin.money.silver = value; }
+			else if (key == "copper") { current_handin.money.copper = value; }
 		}
 	}
 
@@ -12948,7 +12932,7 @@ bool Client::CheckHandin(
 	if (!m_handin_started) {
 		m_handin_started  = true;
 		m_hand_in         = h;
-		// save original items for later
+		// save original items for logging
 		m_hand_in.original_items = m_hand_in.items;
 		m_hand_in.original_money = m_hand_in.money;
 		m_hand_in.npc = n;
@@ -12963,45 +12947,61 @@ bool Client::CheckHandin(
 	}
 
 	if (met_requirement) {
-		// remove items in h from m_handin.items
-		for (const auto &h_item: h.items) {
-			for (const auto &r_item: r.items) {
-				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
-					m_hand_in.items.erase(
-						std::remove_if(
-							m_hand_in.items.begin(),
-							m_hand_in.items.end(),
-							[&](const HandinEntry &i) {
-								bool removed = i.item_id == h_item.item_id && i.count == h_item.count;
+		for (const auto &h_item : h.items) {
+			auto it = std::find_if(r.items.begin(), r.items.end(), [&](const auto &r_item) {
+				return h_item.item_id == r_item.item_id && h_item.count == r_item.count;
+			});
 
-								if (removed) {
-									LogTradingDetail(
-										"Hand-in success, removing item [{}] count [{}] from m_handin.items",
-										i.item_id,
-										i.count
-									);
-								}
-
-								return removed;
+			if (it != r.items.end()) {
+				m_hand_in.items.erase(
+					std::remove_if(
+						m_hand_in.items.begin(),
+						m_hand_in.items.end(),
+						[&](const HandinEntry &i) {
+							bool removed = i.item_id == h_item.item_id && i.count == h_item.count;
+							if (removed) {
+								LogTradingDetail(
+									"Hand-in success, removing item [{}] count [{}] from m_handin.items",
+									i.item_id, i.count
+								);
 							}
-						),
-						m_hand_in.items.end()
-					);
-				}
+							return removed;
+						}
+					),
+					m_hand_in.items.end()
+				);
 			}
 		}
 
 		// print remainder hand-in bucket
 		LogTradingDetail("---");
 		LogTradingDetail("Hand-in | Remainder of hand-in bucket");
-		LogTradingDetail("Items [{}] money p [{}] g [{}] s [{}] c [{}]", m_hand_in.items.size(), m_hand_in.money.platinum, m_hand_in.money.gold, m_hand_in.money.silver, m_hand_in.money.copper);
+		LogTradingDetail(
+			"Items [{}] money p [{}] g [{}] s [{}] c [{}]",
+			m_hand_in.items.size(),
+			m_hand_in.money.platinum,
+			m_hand_in.money.gold,
+			m_hand_in.money.silver,
+			m_hand_in.money.copper
+		);
 		for (const auto &i: m_hand_in.items) {
-			LogTradingDetail("Hand-in success, item [{}] ({}) count [{}]", i.item->GetItem()->Name, i.item_id, i.count);
+			LogTradingDetail(
+				"Hand-in success, item [{}] ({}) count [{}]",
+				i.item->GetItem()->Name,
+				i.item_id,
+				i.count
+			);
 		}
 
 		// decrement successful hand-in money from current hand-in bucket
 		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
-			LogTradingDetail("Hand-in success, removing money p [{}] g [{}] s [{}] c [{}]", h.money.platinum, h.money.gold, h.money.silver, h.money.copper);
+			LogTradingDetail(
+				"Hand-in success, removing money p [{}] g [{}] s [{}] c [{}]",
+				h.money.platinum,
+				h.money.gold,
+				h.money.silver,
+				h.money.copper
+			);
 			m_hand_in.money.platinum -= h.money.platinum;
 			m_hand_in.money.gold -= h.money.gold;
 			m_hand_in.money.silver -= h.money.silver;
@@ -13026,7 +13026,7 @@ void Client::ReturnHandinItems()
 	PlayerEvent::HandinMoney              handin_money{};
 	std::vector<PlayerEvent::HandinEntry> return_items;
 	PlayerEvent::HandinMoney              return_money{};
-	for (auto i : m_hand_in.original_items) {
+	for (const auto& i : m_hand_in.original_items) {
 		if (i.item && i.item->GetItem()) {
 			handin_items.emplace_back(
 				PlayerEvent::HandinEntry{
@@ -13053,7 +13053,7 @@ void Client::ReturnHandinItems()
 	}
 
 	bool return_handin = false;
-	for (auto i: m_hand_in.items) {
+	for (const auto& i: m_hand_in.items) {
 		if (i.item && i.item->GetItem()) {
 			return_items.emplace_back(
 				PlayerEvent::HandinEntry{
