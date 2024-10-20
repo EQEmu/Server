@@ -6435,6 +6435,69 @@ struct BuylineItemDetails_Struct {
 	uint32      item_quantity;
 };
 
+struct EvolveItemToggle_Struct {
+	uint32 action;
+	uint32 unknown_004;
+	uint64 unique_id;
+	uint32 percentage;
+	uint32 activated;
+};
+
+struct EvolveXPWindowReceive_Struct {
+	uint32 action;
+	uint32 unknown_004;
+	uint64 item1_unique_id;
+	uint64 item2_unique_id;
+};
+
+struct EvolveItemMessaging_Struct {
+	uint32 action;
+	char   serialized_data[];
+};
+
+struct EvolveXPWindowSend_Struct {
+	/*000*/	uint32 action;
+	/*004*/	uint64 item1_unique_id;
+	/*012*/	uint64 item2_unique_id;
+	/*020*/	uint32 compatibility;
+	/*024*/	uint32 max_transfer_level;
+	/*028*/	uint8  unknown_028;
+	/*029*/ uint8  unknown_029;
+	/*030*/ std::string   serialize_item_1;
+	/*034*/ std::string   serialize_item_2;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(
+			CEREAL_NVP(action),
+			CEREAL_NVP(item1_unique_id),
+			CEREAL_NVP(item2_unique_id),
+			CEREAL_NVP(compatibility),
+			CEREAL_NVP(max_transfer_level),
+			CEREAL_NVP(unknown_028),
+			CEREAL_NVP(unknown_029),
+			CEREAL_NVP(serialize_item_1),
+			CEREAL_NVP(serialize_item_2)
+		);
+	}
+};
+
+struct EvolveTransfer_Struct {
+	uint32 item_from_id;
+	uint32 item_from_current_amount;
+	uint32 item_to_id;
+	uint32 item_to_current_amount;
+	uint32 compatibility;
+	uint32 max_transfer_level;
+};
+
+struct EvolveGetNextItem_Struct {
+	uint32 new_item_id;
+	uint64 new_current_amount;
+	uint64 from_current_amount;
+	uint32 max_transfer_level;
+};
 // Restore structure packing to default
 #pragma pack()
 

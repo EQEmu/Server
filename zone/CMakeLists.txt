@@ -34,6 +34,7 @@ SET(zone_sources
     embperl.cpp
     encounter.cpp
     entity.cpp
+    evolving.cpp
     exp.cpp
     expedition.cpp
     expedition_database.cpp

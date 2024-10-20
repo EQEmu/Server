@@ -52,7 +52,7 @@
 #include "../common/repositories/zone_repository.h"
 
 #include "../common/repositories/trader_repository.h"
-
+#include "../common/repositories/character_evolving_items_repository.h"
 
 #include <ctime>
 #include <iostream>

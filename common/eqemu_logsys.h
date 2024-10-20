@@ -142,6 +142,7 @@ namespace Logs {
 		EqTime,
 		Corpses,
 		XTargets,
+		EvolveItem,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -242,7 +243,8 @@ namespace Logs {
 		"Zoning",
 		"EqTime",
 		"Corpses",
-		"XTargets"
+		"XTargets",
+		"EvolveItem"
 	};
 }
 
