@@ -8,11 +8,13 @@
 #include "../json/json_archive_single_line.h"
 #include "../repositories/player_event_log_settings_repository.h"
 #include "../repositories/player_event_logs_repository.h"
+#include "../repositories/player_event_loot_items_repository.h"
+#include "../repositories/player_event_merchant_purchase_repository.h"
+#include "../repositories/player_event_merchant_sell_repository.h"
+#include "../repositories/player_event_npc_handin_entries_repository.h"
+#include "../repositories/player_event_npc_handin_repository.h"
 #include "../servertalk.h"
 #include "../timer.h"
-#include "../repositories/player_event_loot_items_repository.h"
-#include "../repositories/player_event_merchant_sell_repository.h"
-#include "../repositories/player_event_merchant_purchase_repository.h"
 
 class PlayerEventLogs {
 public:
@@ -90,40 +92,13 @@ private:
 	void SetSettingsDefaults();
 
 public:
-	struct EtlInfo_Struct {
-		std::string                                                   etl_table_name;
-		std::vector<std::any>                                         etl_queue;
-		std::function<int(Database &, const std::vector<std::any> &)> etl_load_func_ptr;
+	struct EtlQueues_Struct {
+		std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems>               queue_14;
+		std::vector<PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase> queue_15;
+		std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell>         queue_16;
+		std::vector<PlayerEventNpcHandinRepository::PlayerEventNpcHandin>               queue_22;
+		std::vector<PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries> queue_22_entries;
 	};
-
-	std::map<PlayerEvent::EventType, EtlInfo_Struct> m_etl_data = {
-		{
-			PlayerEvent::LOOT_ITEM,
-			{
-			  .etl_table_name    = "player_event_loot_items",
-			  .etl_queue         = {},
-			  .etl_load_func_ptr = { &PlayerEventLootItemsRepository::InsertManyFromStdAny },
-			}
-		},
-		{
-			PlayerEvent::MERCHANT_SELL,
-			{
-			  .etl_table_name    = "player_event_merchant_sell",
-			  .etl_queue         = {},
-			  .etl_load_func_ptr = { &PlayerEventMerchantSellRepository::InsertManyFromStdAny },
-			}
-		},
-		{
-			PlayerEvent::MERCHANT_PURCHASE,
-			{
-				.etl_table_name    = "player_event_merchant_purchase",
-				.etl_queue         = {},
-				.etl_load_func_ptr = { &PlayerEventMerchantPurchaseRepository::InsertManyFromStdAny },
-			  }
-		}
-
-	};
-
 };
 
 extern PlayerEventLogs player_event_logs;
