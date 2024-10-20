@@ -9,6 +9,8 @@
 #include "../repositories/player_event_loot_items_repository.h"
 #include "../repositories/player_event_merchant_sell_repository.h"
 #include "../repositories/player_event_merchant_purchase_repository.h"
+#include "../repositories/player_event_npc_handin_repository.h"
+#include "../repositories/player_event_npc_handin_entries_repository.h"
 
 const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 hour
 
@@ -155,12 +157,11 @@ void PlayerEventLogs::ProcessBatchQueue()
 			m_record_batch_queue.size(),
 			benchmark.elapsed()
 		);
-
-		// empty
-		m_record_batch_queue.clear();
-		m_record_etl_queue.clear();
-
 	}
+
+	// empty
+	m_record_batch_queue.clear();
+	m_record_etl_queue.clear();
 	m_batch_queue_lock.unlock();
 }
 
@@ -237,6 +238,51 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 				cereal::JSONInputArchive ar(ss);
 				in.serialize(ar);
 			}
+
+			out.npc_id                  = in.npc_id;
+			out.merchant_name           = in.merchant_name;
+			out.merchant_type           = in.merchant_type;
+			out.item_id                 = in.item_id;
+			out.item_name               = in.item_name;
+			out.charges                 = in.charges;
+			out.cost                    = in.cost;
+			out.alternate_currency_id   = in.alternate_currency_id;
+			out.player_money_balance    = in.player_money_balance;
+			out.player_currency_balance = in.player_currency_balance;
+
+			log.etl_table_id =
+				GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					: 0;
+			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
+
+			m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
+			break;
+		}
+		case PlayerEvent::EventType::NPC_HANDIN: {
+			PlayerEvent::HandinEvent in{};
+			PlayerEventNpcHandinRepository::PlayerEventNpcHandin out{};
+			PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries out_entries{};
+
+			{
+				std::stringstream ss;
+				ss << log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				in.serialize(ar);
+			}
+
+			out.npc_id                  = in.npc_id;
+			out.npc_name                = in.npc_name;
+			out.handin_copper           = in.handin_money.copper;
+			out.handin_silver           = in.handin_money.silver;
+			out.handin_gold             = in.handin_money.gold;
+			out.handin_platinum         = in.handin_money.platinum;
+			out.return_copper           = in.return_money.copper;
+			out.return_silver           = in.return_money.silver;
+			out.return_gold             = in.return_money.gold;
+			out.return_platinum         = in.return_money.platinum;
+			out.is_quest_handin         = in.is_quest_handin;
+
 
 			out.npc_id                  = in.npc_id;
 			out.merchant_name           = in.merchant_name;
