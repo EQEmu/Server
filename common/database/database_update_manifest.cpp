@@ -5862,6 +5862,25 @@ CREATE TABLE `player_event_merchant_sell` (
 )
 COLLATE='latin1_swedish_ci'
 AUTO_INCREMENT=1;
+
+UPDATE `player_event_log_settings` SET `has_etl` = 1, `etl_table_name` = 'player_event_merchant_purchase' WHERE `id` = 15;
+
+CREATE TABLE `player_event_merchant_purchase` (
+	`id` BIGINT UNSIGNED NULL AUTO_INCREMENT,
+	`npc_id` INT UNSIGNED NULL DEFAULT '0',
+	`merchant_name` VARCHAR(64) NULL DEFAULT NULL,
+	`merchant_type` INT UNSIGNED NULL DEFAULT '0',
+	`item_id` INT UNSIGNED NULL DEFAULT '0',
+	`item_name` VARCHAR(64) NULL DEFAULT NULL,
+	`charges` INT NULL DEFAULT '0',
+	`cost` INT UNSIGNED NULL DEFAULT '0',
+	`alternate_currency_id` INT UNSIGNED NULL DEFAULT '0',
+	`player_money_balance` BIGINT UNSIGNED NULL DEFAULT '0',
+	`player_currency_balance` BIGINT UNSIGNED NULL DEFAULT '0',
+	PRIMARY KEY (`id`)
+)
+COLLATE='latin1_swedish_ci'
+AUTO_INCREMENT=1;
 )"
 	}
 

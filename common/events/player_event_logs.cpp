@@ -8,6 +8,7 @@
 #include "player_event_discord_formatter.h"
 #include "../repositories/player_event_loot_items_repository.h"
 #include "../repositories/player_event_merchant_sell_repository.h"
+#include "../repositories/player_event_merchant_purchase_repository.h"
 
 const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 hour
 
@@ -198,6 +199,37 @@ void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log
 		case PlayerEvent::EventType::MERCHANT_SELL: {
 			PlayerEvent::MerchantSellEvent in{};
 			PlayerEventMerchantSellRepository::PlayerEventMerchantSell out{};
+
+			{
+				std::stringstream ss;
+				ss << log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				in.serialize(ar);
+			}
+
+			out.npc_id                  = in.npc_id;
+			out.merchant_name           = in.merchant_name;
+			out.merchant_type           = in.merchant_type;
+			out.item_id                 = in.item_id;
+			out.item_name               = in.item_name;
+			out.charges                 = in.charges;
+			out.cost                    = in.cost;
+			out.alternate_currency_id   = in.alternate_currency_id;
+			out.player_money_balance    = in.player_money_balance;
+			out.player_currency_balance = in.player_currency_balance;
+
+			log.etl_table_id =
+				GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
+					: 0;
+			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
+
+			m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
+			break;
+		}
+		case PlayerEvent::EventType::MERCHANT_PURCHASE: {
+			PlayerEvent::MerchantPurchaseEvent in{};
+			PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase out{};
 
 			{
 				std::stringstream ss;
