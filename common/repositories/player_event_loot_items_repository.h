@@ -42,31 +42,6 @@ public:
 	 * method that can be re-used easily elsewhere especially if it can use a base repository
 	 * method and encapsulate filters there
 	 */
-	static int InsertManyFromStdAny(Database &db, const std::vector<std::any> &entries)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &r: entries) {
-			auto                     e = std::any_cast<PlayerEventLootItems>(r);
-			std::vector<std::string> v;
-
-			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.item_id));
-			v.push_back("'" + Strings::Escape(e.item_name) + "'");
-			v.push_back(std::to_string(e.charges));
-			v.push_back(std::to_string(e.npc_id));
-			v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
-
-			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
-		}
-
-		std::vector<std::string> v;
-
-		auto results =
-			db.QueryDatabase(fmt::format("{} VALUES {}", BaseInsert(), Strings::Implode(",", insert_chunks)));
-
-		return results.Success() ? results.RowsAffected() : 0;
-	}
 };
 
 #endif //EQEMU_PLAYER_EVENT_LOOT_ITEMS_REPOSITORY_H

@@ -44,37 +44,6 @@ public:
      */
 
 	// Custom extended repository methods here
-	static int InsertManyFromStdAny(Database &db, const std::vector<std::any> &entries)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &r: entries) {
-			auto                     e = std::any_cast<PlayerEventMerchantSell>(r);
-			std::vector<std::string> v;
-
-			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.npc_id));
-			v.push_back("'" + Strings::Escape(e.merchant_name) + "'");
-			v.push_back(std::to_string(e.merchant_type));
-			v.push_back(std::to_string(e.item_id));
-			v.push_back("'" + Strings::Escape(e.item_name) + "'");
-			v.push_back(std::to_string(e.charges));
-			v.push_back(std::to_string(e.cost));
-			v.push_back(std::to_string(e.alternate_currency_id));
-			v.push_back(std::to_string(e.player_money_balance));
-			v.push_back(std::to_string(e.player_currency_balance));
-
-			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
-		}
-
-		std::vector<std::string> v;
-
-		auto results =
-			db.QueryDatabase(fmt::format("{} VALUES {}", BaseInsert(), Strings::Implode(",", insert_chunks))
-		);
-
-		return results.Success() ? results.RowsAffected() : 0;
-	}
 };
 
 #endif //EQEMU_PLAYER_EVENT_MERCHANT_SELL_REPOSITORY_H
