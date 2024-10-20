@@ -848,7 +848,7 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 	LogPlayerEvents("Running truncation");
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
-		if (m_settings[i].retention_days > 0) {
+		if (m_settings[i].retention_days >= 0) {
 			if (m_settings[i].has_etl) {
 				auto results = PlayerEventLogsRepository::GetWhere(
 					*m_database,
