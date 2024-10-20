@@ -285,6 +285,7 @@ SET(repositories
     repositories/base/base_player_event_log_settings_repository.h
     repositories/base/base_player_event_logs_repository.h
     repositories/base/base_player_event_loot_items_repository.h
+    repositories/base/base_player_event_merchant_purchase_repository.h
     repositories/base/base_player_event_merchant_sell_repository.h
     repositories/base/base_quest_globals_repository.h
     repositories/base/base_raid_details_repository.h
@@ -472,6 +473,7 @@ SET(repositories
     repositories/player_event_log_settings_repository.h
     repositories/player_event_logs_repository.h
     repositories/player_event_loot_items_repository.h
+    repositories/player_event_merchant_purchase_repository.h
     repositories/player_event_merchant_sell_repository.h
     repositories/quest_globals_repository.h
     repositories/raid_details_repository.h

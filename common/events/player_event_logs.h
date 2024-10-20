@@ -12,6 +12,7 @@
 #include "../timer.h"
 #include "../repositories/player_event_loot_items_repository.h"
 #include "../repositories/player_event_merchant_sell_repository.h"
+#include "../repositories/player_event_merchant_purchase_repository.h"
 
 class PlayerEventLogs {
 public:
@@ -99,19 +100,28 @@ public:
 		{
 			PlayerEvent::LOOT_ITEM,
 			{
-				.etl_table_name    = "player_event_loot_items",
-				.etl_queue         = {},
-				.etl_load_func_ptr = {&PlayerEventLootItemsRepository::InsertManyFromStdAny},
+			  .etl_table_name    = "player_event_loot_items",
+			  .etl_queue         = {},
+			  .etl_load_func_ptr = { &PlayerEventLootItemsRepository::InsertManyFromStdAny },
 			}
 		},
 		{
 			PlayerEvent::MERCHANT_SELL,
 			{
-				.etl_table_name    = "player_event_merchant_sell",
-				.etl_queue         = {},
-				.etl_load_func_ptr = { &PlayerEventMerchantSellRepository::InsertManyFromStdAny },
+			  .etl_table_name    = "player_event_merchant_sell",
+			  .etl_queue         = {},
+			  .etl_load_func_ptr = { &PlayerEventMerchantSellRepository::InsertManyFromStdAny },
 			}
+		},
+		{
+			PlayerEvent::MERCHANT_PURCHASE,
+			{
+				.etl_table_name    = "player_event_merchant_purchase",
+				.etl_queue         = {},
+				.etl_load_func_ptr = { &PlayerEventMerchantPurchaseRepository::InsertManyFromStdAny },
+			  }
 		}
+
 	};
 
 };
