@@ -5809,13 +5809,12 @@ ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_
 	ManifestEntry{
 		.version = 9289,
 		.description = "2024_10_08_add_detail_player_event_logging.sql",
-		.check       = "SHOW COLUMNS FROM `player_event_log_settings` LIKE 'etl_logging'",
+		.check       = "SHOW COLUMNS FROM `player_event_log_settings` LIKE 'has_etl'",
 		.condition   = "empty",
 		.match       = "",
 		.sql = R"(
 ALTER TABLE `player_event_log_settings`
-	ADD COLUMN `etl_logging` BIGINT(20) NOT NULL DEFAULT '0' AFTER `discord_webhook_id`,
-	ADD COLUMN `etl_table_name` VARCHAR(50) NULL DEFAULT NULL AFTER `etl_logging`;
+	ADD COLUMN `has_etl` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `discord_webhook_id`;
 
 ALTER TABLE `player_event_logs`
 	ADD COLUMN `etl_table_id` BIGINT(20) NOT NULL DEFAULT '0' AFTER `event_data`;
@@ -5831,7 +5830,7 @@ UPDATE `player_event_log_settings` SET `etl_logging` = 1, `etl_table_name` = 'pl
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-UPDATE `player_event_log_settings` SET `detail_logs` = 1, `detail_table_name` = 'player_event_loot_items' WHERE `id` = 14;
+UPDATE `player_event_log_settings` SET `has_etl` = 1, `etl_table_name` = 'player_event_loot_items' WHERE `id` = 14;
 
 CREATE TABLE `player_event_loot_items` (
 	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -5845,7 +5844,7 @@ CREATE TABLE `player_event_loot_items` (
 COLLATE='latin1_swedish_ci'
 AUTO_INCREMENT=1;
 
-UPDATE `player_event_log_settings` SET `etl_logging` = 1, `etl_table_name` = 'player_event_merchant_sell' WHERE `id` = 16;
+UPDATE `player_event_log_settings` SET `has_etl` = 1, `etl_table_name` = 'player_event_merchant_sell' WHERE `id` = 16;
 
 CREATE TABLE `player_event_merchant_sell` (
 	`id` BIGINT UNSIGNED NULL AUTO_INCREMENT,

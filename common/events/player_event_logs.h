@@ -11,6 +11,7 @@
 #include "../servertalk.h"
 #include "../timer.h"
 #include "../repositories/player_event_loot_items_repository.h"
+#include "../repositories/player_event_merchant_sell_repository.h"
 
 class PlayerEventLogs {
 public:
@@ -86,6 +87,33 @@ private:
 	void ProcessBatchQueue();
 	void ProcessRetentionTruncation();
 	void SetSettingsDefaults();
+
+public:
+	struct EtlInfo_Struct {
+		std::string                                                   etl_table_name;
+		std::vector<std::any>                                         etl_queue;
+		std::function<int(Database &, const std::vector<std::any> &)> etl_load_func_ptr;
+	};
+
+	std::map<PlayerEvent::EventType, EtlInfo_Struct> m_etl_data = {
+		{
+			PlayerEvent::LOOT_ITEM,
+			{
+				.etl_table_name    = "player_event_loot_items",
+				.etl_queue         = {},
+				.etl_load_func_ptr = {&PlayerEventLootItemsRepository::InsertManyFromStdAny},
+			}
+		},
+		{
+			PlayerEvent::MERCHANT_SELL,
+			{
+				.etl_table_name    = "player_event_merchant_sell",
+				.etl_queue         = {},
+				.etl_load_func_ptr = { &PlayerEventMerchantSellRepository::InsertManyFromStdAny },
+			}
+		}
+	};
+
 };
 
 extern PlayerEventLogs player_event_logs;

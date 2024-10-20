@@ -24,8 +24,7 @@ public:
 		int8_t      event_enabled;
 		int32_t     retention_days;
 		int32_t     discord_webhook_id;
-		int64_t     etl_logging;
-		std::string etl_table_name;
+		uint8_t     has_etl;
 	};
 
 	static std::string PrimaryKey()
@@ -41,8 +40,7 @@ public:
 			"event_enabled",
 			"retention_days",
 			"discord_webhook_id",
-			"etl_logging",
-			"etl_table_name",
+			"has_etl",
 		};
 	}
 
@@ -54,8 +52,7 @@ public:
 			"event_enabled",
 			"retention_days",
 			"discord_webhook_id",
-			"etl_logging",
-			"etl_table_name",
+			"has_etl",
 		};
 	}
 
@@ -101,8 +98,7 @@ public:
 		e.event_enabled      = 0;
 		e.retention_days     = 0;
 		e.discord_webhook_id = 0;
-		e.etl_logging        = 0;
-		e.etl_table_name     = "";
+		e.has_etl            = 0;
 
 		return e;
 	}
@@ -144,8 +140,7 @@ public:
 			e.event_enabled      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.retention_days     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.discord_webhook_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.etl_logging        = row[5] ? strtoll(row[5], nullptr, 10) : 0;
-			e.etl_table_name     = row[6] ? row[6] : "";
+			e.has_etl            = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -184,8 +179,7 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.event_enabled));
 		v.push_back(columns[3] + " = " + std::to_string(e.retention_days));
 		v.push_back(columns[4] + " = " + std::to_string(e.discord_webhook_id));
-		v.push_back(columns[5] + " = " + std::to_string(e.etl_logging));
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.etl_table_name) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.has_etl));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -212,8 +206,7 @@ public:
 		v.push_back(std::to_string(e.event_enabled));
 		v.push_back(std::to_string(e.retention_days));
 		v.push_back(std::to_string(e.discord_webhook_id));
-		v.push_back(std::to_string(e.etl_logging));
-		v.push_back("'" + Strings::Escape(e.etl_table_name) + "'");
+		v.push_back(std::to_string(e.has_etl));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -248,8 +241,7 @@ public:
 			v.push_back(std::to_string(e.event_enabled));
 			v.push_back(std::to_string(e.retention_days));
 			v.push_back(std::to_string(e.discord_webhook_id));
-			v.push_back(std::to_string(e.etl_logging));
-			v.push_back("'" + Strings::Escape(e.etl_table_name) + "'");
+			v.push_back(std::to_string(e.has_etl));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -288,8 +280,7 @@ public:
 			e.event_enabled      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.retention_days     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.discord_webhook_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.etl_logging        = row[5] ? strtoll(row[5], nullptr, 10) : 0;
-			e.etl_table_name     = row[6] ? row[6] : "";
+			e.has_etl            = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -319,8 +310,7 @@ public:
 			e.event_enabled      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.retention_days     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.discord_webhook_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.etl_logging        = row[5] ? strtoll(row[5], nullptr, 10) : 0;
-			e.etl_table_name     = row[6] ? row[6] : "";
+			e.has_etl            = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -400,8 +390,7 @@ public:
 		v.push_back(std::to_string(e.event_enabled));
 		v.push_back(std::to_string(e.retention_days));
 		v.push_back(std::to_string(e.discord_webhook_id));
-		v.push_back(std::to_string(e.etl_logging));
-		v.push_back("'" + Strings::Escape(e.etl_table_name) + "'");
+		v.push_back(std::to_string(e.has_etl));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -429,8 +418,7 @@ public:
 			v.push_back(std::to_string(e.event_enabled));
 			v.push_back(std::to_string(e.retention_days));
 			v.push_back(std::to_string(e.discord_webhook_id));
-			v.push_back(std::to_string(e.etl_logging));
-			v.push_back("'" + Strings::Escape(e.etl_table_name) + "'");
+			v.push_back(std::to_string(e.has_etl));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
