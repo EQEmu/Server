@@ -136,27 +136,230 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	BenchTimer benchmark;
 
+	EtlQueues_Struct etl_queues{};
+	auto out_entries_next_id = PlayerEventNpcHandinEntriesRepository::GetMaxId(*m_database) + 1;
+
+	for (auto &r:m_record_batch_queue) {
+		switch (r.event_type_id) {
+			case PlayerEvent::EventType::LOOT_ITEM: {
+				PlayerEvent::LootItemEvent in{};
+				PlayerEventLootItemsRepository::PlayerEventLootItems out{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.charges     = in.charges;
+				out.corpse_name = in.corpse_name;
+				out.item_id     = in.item_id;
+				out.item_name   = in.item_name;
+				out.npc_id      = in.npc_id;
+
+				r.etl_table_id =
+					GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(r.event_type_id))
+						? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(r.event_type_id))
+						: 0;
+				IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(r.event_type_id));
+
+				etl_queues.queue_14.push_back(out);
+				m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(r.event_type_id), out);
+				break;
+			}
+			case PlayerEvent::EventType::MERCHANT_SELL: {
+				PlayerEvent::MerchantSellEvent in{};
+				PlayerEventMerchantSellRepository::PlayerEventMerchantSell out{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.npc_id                  = in.npc_id;
+				out.merchant_name           = in.merchant_name;
+				out.merchant_type           = in.merchant_type;
+				out.item_id                 = in.item_id;
+				out.item_name               = in.item_name;
+				out.charges                 = in.charges;
+				out.cost                    = in.cost;
+				out.alternate_currency_id   = in.alternate_currency_id;
+				out.player_money_balance    = in.player_money_balance;
+				out.player_currency_balance = in.player_currency_balance;
+
+				r.etl_table_id =
+					GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(r.event_type_id))
+						? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(r.event_type_id))
+						: 0;
+				IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(r.event_type_id));
+
+				etl_queues.queue_16.push_back(out);
+				m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(r.event_type_id), out);
+				break;
+			}
+			case PlayerEvent::EventType::MERCHANT_PURCHASE: {
+				PlayerEvent::MerchantPurchaseEvent in{};
+				PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase out{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.npc_id                  = in.npc_id;
+				out.merchant_name           = in.merchant_name;
+				out.merchant_type           = in.merchant_type;
+				out.item_id                 = in.item_id;
+				out.item_name               = in.item_name;
+				out.charges                 = in.charges;
+				out.cost                    = in.cost;
+				out.alternate_currency_id   = in.alternate_currency_id;
+				out.player_money_balance    = in.player_money_balance;
+				out.player_currency_balance = in.player_currency_balance;
+
+				r.etl_table_id =
+					GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(r.event_type_id))
+						? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(r.event_type_id))
+						: 0;
+				IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(r.event_type_id));
+
+				m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(r.event_type_id), out);
+				etl_queues.queue_15.push_back(out);
+				break;
+			}
+			case PlayerEvent::EventType::NPC_HANDIN: {
+				PlayerEvent::HandinEvent in{};
+				PlayerEventNpcHandinRepository::PlayerEventNpcHandin out{};
+				PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries out_entries{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.npc_id                  = in.npc_id;
+				out.npc_name                = in.npc_name;
+				out.handin_copper           = in.handin_money.copper;
+				out.handin_silver           = in.handin_money.silver;
+				out.handin_gold             = in.handin_money.gold;
+				out.handin_platinum         = in.handin_money.platinum;
+				out.return_copper           = in.return_money.copper;
+				out.return_silver           = in.return_money.silver;
+				out.return_gold             = in.return_money.gold;
+				out.return_platinum         = in.return_money.platinum;
+				out.is_quest_handin         = in.is_quest_handin;
+
+				r.etl_table_id =
+					GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(r.event_type_id))
+						? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(r.event_type_id))
+						: 0;
+				IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(r.event_type_id));
+
+				if (!in.handin_items.empty()) {
+					for (auto const &i: in.handin_items) {
+						out_entries.charges                    = i.charges;
+						out_entries.evolve_amount              = 0;
+						out_entries.evolve_level               = 0;
+						out_entries.item_id                    = i.item_id;
+						out_entries.player_event_npc_handin_id = r.etl_table_id;
+						out_entries.type                       = 1;
+
+						if (!i.augment_ids.empty()) {
+							uint32 augments[6]{};
+							for (int x = 0; x < i.augment_ids.size(); x++) {
+								augments[x] = i.augment_ids[x];
+							}
+							out_entries.augment_1_id = augments[0];
+							out_entries.augment_2_id = augments[1];
+							out_entries.augment_3_id = augments[2];
+							out_entries.augment_4_id = augments[3];
+							out_entries.augment_5_id = augments[4];
+							out_entries.augment_6_id = augments[5];
+						}
+					etl_queues.queue_22_entries.push_back(out_entries);
+					}
+				}
+
+				if (!in.return_items.empty()) {
+					for (auto const &i: in.handin_items) {
+						out_entries.charges                    = i.charges;
+						out_entries.evolve_amount              = 0;
+						out_entries.evolve_level               = 0;
+						out_entries.item_id                    = i.item_id;
+						out_entries.player_event_npc_handin_id = r.etl_table_id;
+						out_entries.type                       = 2;
+						if (!i.augment_ids.empty()) {
+							uint32 augments[6]{};
+							for (int x = 0; x < i.augment_ids.size(); x++) {
+								augments[x] = i.augment_ids[x];
+							}
+							out_entries.augment_1_id = augments[0];
+							out_entries.augment_2_id = augments[1];
+							out_entries.augment_3_id = augments[2];
+							out_entries.augment_4_id = augments[3];
+							out_entries.augment_5_id = augments[4];
+							out_entries.augment_6_id = augments[5];
+						}
+						etl_queues.queue_22_entries.push_back(out_entries);
+					}
+				}
+
+				m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(r.event_type_id), out);
+				etl_queues.queue_22.push_back(out);
+				break;
+			}
+			default: {
+			}
+		}
+	}
+
 	// flush many
 	PlayerEventLogsRepository::InsertMany(*m_database, m_record_batch_queue);
 
 	// flush detailed tables
 	if (!m_record_etl_queue.empty()) {
 		for (auto const &[key, value]: m_record_etl_queue) {
-			m_etl_data[key].etl_queue.push_back(value);
-		}
+			switch (key) {
+				case PlayerEvent::LOOT_ITEM: {
+					PlayerEventLootItemsRepository::InsertMany(*m_database, etl_queues.queue_14);
+					etl_queues.queue_14.clear();
+					break;
+				}
+				case PlayerEvent::MERCHANT_SELL: {
+					PlayerEventMerchantSellRepository::InsertMany(*m_database, etl_queues.queue_16);
+					etl_queues.queue_16.clear();
+					break;
+				}
+				case PlayerEvent::MERCHANT_PURCHASE: {
+					PlayerEventMerchantPurchaseRepository::InsertMany(*m_database, etl_queues.queue_15);
+					etl_queues.queue_15.clear();
+					break;
+				}
+				case PlayerEvent::NPC_HANDIN: {
+					PlayerEventNpcHandinRepository::InsertMany(*m_database, etl_queues.queue_22);
+					PlayerEventNpcHandinEntriesRepository::InsertMany(*m_database, etl_queues.queue_22_entries);
+					etl_queues.queue_22.clear();
+					etl_queues.queue_22_entries.clear();
+					break;
+				}
+				default: {
 
-		for (auto &[key, value]:m_etl_data) {
-			if (!value.etl_queue.empty()) {
-				value.etl_load_func_ptr(*m_database, value.etl_queue);
-				value.etl_queue.clear();
+				}
 			}
-		}
 
-		LogPlayerEventsDetail(
-			"Processing batch player event log queue of [{}] took [{}]",
-			m_record_batch_queue.size(),
-			benchmark.elapsed()
-		);
+			LogPlayerEventsDetail(
+				"Processing batch player event log queue of [{}] took [{}]",
+				m_record_batch_queue.size(),
+				benchmark.elapsed()
+			);
+		}
 	}
 
 	// empty
@@ -169,145 +372,6 @@ void PlayerEventLogs::ProcessBatchQueue()
 void PlayerEventLogs::AddToQueue(PlayerEventLogsRepository::PlayerEventLogs &log)
 {
 	m_batch_queue_lock.lock();
-
-	switch (log.event_type_id) {
-		case PlayerEvent::EventType::LOOT_ITEM: {
-			PlayerEvent::LootItemEvent in{};
-			PlayerEventLootItemsRepository::PlayerEventLootItems out{};
-
-			{
-				std::stringstream ss;
-				ss << log.event_data;
-				cereal::JSONInputArchive ar(ss);
-				in.serialize(ar);
-			}
-
-			out.charges     = in.charges;
-			out.corpse_name = in.corpse_name;
-			out.item_id     = in.item_id;
-			out.item_name   = in.item_name;
-			out.npc_id      = in.npc_id;
-
-			log.etl_table_id =
-				GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					: 0;
-			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
-
-			m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
-			break;
-		}
-		case PlayerEvent::EventType::MERCHANT_SELL: {
-			PlayerEvent::MerchantSellEvent in{};
-			PlayerEventMerchantSellRepository::PlayerEventMerchantSell out{};
-
-			{
-				std::stringstream ss;
-				ss << log.event_data;
-				cereal::JSONInputArchive ar(ss);
-				in.serialize(ar);
-			}
-
-			out.npc_id                  = in.npc_id;
-			out.merchant_name           = in.merchant_name;
-			out.merchant_type           = in.merchant_type;
-			out.item_id                 = in.item_id;
-			out.item_name               = in.item_name;
-			out.charges                 = in.charges;
-			out.cost                    = in.cost;
-			out.alternate_currency_id   = in.alternate_currency_id;
-			out.player_money_balance    = in.player_money_balance;
-			out.player_currency_balance = in.player_currency_balance;
-
-			log.etl_table_id =
-				GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					: 0;
-			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
-
-			m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
-			break;
-		}
-		case PlayerEvent::EventType::MERCHANT_PURCHASE: {
-			PlayerEvent::MerchantPurchaseEvent in{};
-			PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase out{};
-
-			{
-				std::stringstream ss;
-				ss << log.event_data;
-				cereal::JSONInputArchive ar(ss);
-				in.serialize(ar);
-			}
-
-			out.npc_id                  = in.npc_id;
-			out.merchant_name           = in.merchant_name;
-			out.merchant_type           = in.merchant_type;
-			out.item_id                 = in.item_id;
-			out.item_name               = in.item_name;
-			out.charges                 = in.charges;
-			out.cost                    = in.cost;
-			out.alternate_currency_id   = in.alternate_currency_id;
-			out.player_money_balance    = in.player_money_balance;
-			out.player_currency_balance = in.player_currency_balance;
-
-			log.etl_table_id =
-				GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					: 0;
-			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
-
-			m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
-			break;
-		}
-		case PlayerEvent::EventType::NPC_HANDIN: {
-			PlayerEvent::HandinEvent in{};
-			PlayerEventNpcHandinRepository::PlayerEventNpcHandin out{};
-			PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries out_entries{};
-
-			{
-				std::stringstream ss;
-				ss << log.event_data;
-				cereal::JSONInputArchive ar(ss);
-				in.serialize(ar);
-			}
-
-			out.npc_id                  = in.npc_id;
-			out.npc_name                = in.npc_name;
-			out.handin_copper           = in.handin_money.copper;
-			out.handin_silver           = in.handin_money.silver;
-			out.handin_gold             = in.handin_money.gold;
-			out.handin_platinum         = in.handin_money.platinum;
-			out.return_copper           = in.return_money.copper;
-			out.return_silver           = in.return_money.silver;
-			out.return_gold             = in.return_money.gold;
-			out.return_platinum         = in.return_money.platinum;
-			out.is_quest_handin         = in.is_quest_handin;
-
-
-			out.npc_id                  = in.npc_id;
-			out.merchant_name           = in.merchant_name;
-			out.merchant_type           = in.merchant_type;
-			out.item_id                 = in.item_id;
-			out.item_name               = in.item_name;
-			out.charges                 = in.charges;
-			out.cost                    = in.cost;
-			out.alternate_currency_id   = in.alternate_currency_id;
-			out.player_money_balance    = in.player_money_balance;
-			out.player_currency_balance = in.player_currency_balance;
-
-			log.etl_table_id =
-				GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(log.event_type_id))
-					: 0;
-			IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(log.event_type_id));
-
-			m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(log.event_type_id), out);
-			break;
-		}
-		default: {
-		}
-	}
-
 	m_record_batch_queue.emplace_back(log);
 	m_batch_queue_lock.unlock();
 }
@@ -799,14 +863,46 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 						etl_ids.push_back(std::to_string(r.etl_table_id));
 					}
 
-					auto deleted_count = PlayerEventLogsRepository::DeleteETLRecords(*m_database, m_etl_data[static_cast<PlayerEvent::EventType>(i)].etl_table_name, etl_ids);
+					uint32 deleted_count = 0;
+					switch (m_settings[i].id) {
+						case PlayerEvent::LOOT_ITEM: {
+							deleted_count = PlayerEventLootItemsRepository::DeleteWhere(
+								*m_database, fmt::format("`id` IN({})", Strings::Implode(", ", etl_ids))
+							);
+							break;
+						}
+						case PlayerEvent::MERCHANT_SELL: {
+							deleted_count = PlayerEventMerchantSellRepository::DeleteWhere(
+								*m_database, fmt::format("`id` IN({})", Strings::Implode(", ", etl_ids))
+							);
+							break;
+						}
+						case PlayerEvent::MERCHANT_PURCHASE: {
+							deleted_count = PlayerEventMerchantPurchaseRepository::DeleteWhere(
+								*m_database, fmt::format("`id` IN({})", Strings::Implode(", ", etl_ids))
+							);
+							break;
+						}
+						case PlayerEvent::NPC_HANDIN: {
+							deleted_count = PlayerEventNpcHandinRepository::DeleteWhere(
+								*m_database, fmt::format("`id` IN({})", Strings::Implode(", ", etl_ids))
+							);
+							deleted_count += PlayerEventNpcHandinEntriesRepository::DeleteWhere(
+								*m_database, fmt::format("`player_event_npc_handin_id` IN({})", Strings::Implode(", ", etl_ids))
+							);
+							break;
+						}
+						default: {
+
+						}
+					}
+
 					LogInfo(
-						"Truncated [{}] events of type [{}] ({}) older than [{}] days from etl table {}",
+						"Truncated [{}] events of type [{}] ({}) older than [{}] days from etl table",
 						deleted_count,
 						PlayerEvent::EventName[i],
 						i,
-						m_settings[i].retention_days,
-						m_etl_data[static_cast<PlayerEvent::EventType>(i)].etl_table_name
+						m_settings[i].retention_days
 					);
 				}
 			}
@@ -914,24 +1010,8 @@ void PlayerEventLogs::LoadETLIDs()
 {
 	GetETLIDCache().clear();
 
-	auto results = PlayerEventLogSettingsRepository::All(*m_database);
-	for (auto &e: results) {
-		if (e.id >= PlayerEvent::MAX) {
-			continue;
-		}
-
-		if (e.has_etl) {
-			if (!m_etl_data.contains(static_cast<PlayerEvent::EventType>(e.id))) {
-				LogError(
-					"Error retrieving Event Type [{}].  Database mismatch.  Check 'has_etl' field in "
-					"player_event_log_settings",
-					e.id);
-				return;
-			}
-
-			auto etl_table_name = m_etl_data.at(static_cast<PlayerEvent::EventType>(e.id)).etl_table_name;
-			auto last_id        = PlayerEventLogSettingsRepository::GetNextIdForTable(*m_database, etl_table_name);
-			GetETLIDCache().emplace(static_cast<PlayerEvent::EventType>(e.id), last_id);
-		}
-	}
+	GetETLIDCache().emplace(PlayerEvent::LOOT_ITEM, PlayerEventLootItemsRepository::GetMaxId(*m_database) + 1);
+	GetETLIDCache().emplace(PlayerEvent::MERCHANT_SELL, PlayerEventMerchantSellRepository::GetMaxId(*m_database) + 1);
+	GetETLIDCache().emplace(PlayerEvent::MERCHANT_PURCHASE, PlayerEventMerchantPurchaseRepository::GetMaxId(*m_database) + 1);
+	GetETLIDCache().emplace(PlayerEvent::NPC_HANDIN, PlayerEventNpcHandinRepository::GetMaxId(*m_database) + 1);
 }
