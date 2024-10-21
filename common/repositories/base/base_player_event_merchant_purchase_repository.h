@@ -30,6 +30,7 @@ public:
 		uint32_t    alternate_currency_id;
 		uint64_t    player_money_balance;
 		uint64_t    player_currency_balance;
+		time_t      created_at;
 	};
 
 	static std::string PrimaryKey()
@@ -51,6 +52,7 @@ public:
 			"alternate_currency_id",
 			"player_money_balance",
 			"player_currency_balance",
+			"created_at",
 		};
 	}
 
@@ -68,6 +70,7 @@ public:
 			"alternate_currency_id",
 			"player_money_balance",
 			"player_currency_balance",
+			"UNIX_TIMESTAMP(created_at)",
 		};
 	}
 
@@ -119,6 +122,7 @@ public:
 		e.alternate_currency_id   = 0;
 		e.player_money_balance    = 0;
 		e.player_currency_balance = 0;
+		e.created_at              = 0;
 
 		return e;
 	}
@@ -166,6 +170,7 @@ public:
 			e.alternate_currency_id   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.player_money_balance    = row[9] ? strtoull(row[9], nullptr, 10) : 0;
 			e.player_currency_balance = row[10] ? strtoull(row[10], nullptr, 10) : 0;
+			e.created_at              = strtoll(row[11] ? row[11] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -209,6 +214,7 @@ public:
 		v.push_back(columns[8] + " = " + std::to_string(e.alternate_currency_id));
 		v.push_back(columns[9] + " = " + std::to_string(e.player_money_balance));
 		v.push_back(columns[10] + " = " + std::to_string(e.player_currency_balance));
+		v.push_back(columns[11] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -241,6 +247,7 @@ public:
 		v.push_back(std::to_string(e.alternate_currency_id));
 		v.push_back(std::to_string(e.player_money_balance));
 		v.push_back(std::to_string(e.player_currency_balance));
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -281,6 +288,7 @@ public:
 			v.push_back(std::to_string(e.alternate_currency_id));
 			v.push_back(std::to_string(e.player_money_balance));
 			v.push_back(std::to_string(e.player_currency_balance));
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -325,6 +333,7 @@ public:
 			e.alternate_currency_id   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.player_money_balance    = row[9] ? strtoull(row[9], nullptr, 10) : 0;
 			e.player_currency_balance = row[10] ? strtoull(row[10], nullptr, 10) : 0;
+			e.created_at              = strtoll(row[11] ? row[11] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -360,6 +369,7 @@ public:
 			e.alternate_currency_id   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.player_money_balance    = row[9] ? strtoull(row[9], nullptr, 10) : 0;
 			e.player_currency_balance = row[10] ? strtoull(row[10], nullptr, 10) : 0;
+			e.created_at              = strtoll(row[11] ? row[11] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -445,6 +455,7 @@ public:
 		v.push_back(std::to_string(e.alternate_currency_id));
 		v.push_back(std::to_string(e.player_money_balance));
 		v.push_back(std::to_string(e.player_currency_balance));
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -478,6 +489,7 @@ public:
 			v.push_back(std::to_string(e.alternate_currency_id));
 			v.push_back(std::to_string(e.player_money_balance));
 			v.push_back(std::to_string(e.player_currency_balance));
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

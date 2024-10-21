@@ -4,8 +4,10 @@
 #include <any>
 #include <cereal/archives/json.hpp>
 #include <mutex>
-#include <random>
 #include "../json/json_archive_single_line.h"
+#include "../servertalk.h"
+#include "../timer.h"
+
 #include "../repositories/player_event_log_settings_repository.h"
 #include "../repositories/player_event_logs_repository.h"
 #include "../repositories/player_event_loot_items_repository.h"
@@ -13,19 +15,15 @@
 #include "../repositories/player_event_merchant_sell_repository.h"
 #include "../repositories/player_event_npc_handin_entries_repository.h"
 #include "../repositories/player_event_npc_handin_repository.h"
-#include "../servertalk.h"
-#include "../timer.h"
 
 class PlayerEventLogs {
 public:
 	void Init();
 	void ReloadSettings();
 	void LoadETLIDs();
-	void IncrementDetailTableIDCache(PlayerEvent::EventType event_type) { m_last_id_cache_detail_tables[event_type]++; }
 	PlayerEventLogs *SetDatabase(Database *db);
 	bool ValidateDatabaseConnection();
 	bool IsEventEnabled(PlayerEvent::EventType event);
-	std::map<PlayerEvent::EventType, uint64>& GetETLIDCache() { return m_last_id_cache_detail_tables; }
 
 	void Process();
 
@@ -69,17 +67,32 @@ public:
 
 	static std::string GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e);
 
+	struct EtlQueues {
+		std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems>               queue_loot_items;
+		std::vector<PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase> queue_merchant_purchase;
+		std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell>         queue_merchant_sell;
+		std::vector<PlayerEventNpcHandinRepository::PlayerEventNpcHandin>               queue_npc_handin;
+		std::vector<PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries> queue_npc_handin_entries;
+	};
+
 private:
+	struct EtlInfo {
+		bool        etl_enabled;
+		std::string etl_table_name;
+		int64       etl_next_id;
+	};
+
 	Database                                                 *m_database; // reference to database
 	PlayerEventLogSettingsRepository::PlayerEventLogSettings m_settings[PlayerEvent::EventType::MAX]{};
-	std::map<PlayerEvent::EventType, uint64> m_last_id_cache_detail_tables{};
 
 	// batch queue is used to record events in batch
 	std::vector<PlayerEventLogsRepository::PlayerEventLogs> m_record_batch_queue{};
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
 	static std::unique_ptr<ServerPacket>
 	BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e);
+
 	std::map<PlayerEvent::EventType, std::any> m_record_etl_queue{};
+	std::map<PlayerEvent::EventType, EtlInfo>  m_etl_info{};
 
 	// timers
 	Timer m_process_batch_events_timer; // events processing timer
@@ -90,15 +103,6 @@ private:
 	void ProcessBatchQueue();
 	void ProcessRetentionTruncation();
 	void SetSettingsDefaults();
-
-public:
-	struct EtlQueues_Struct {
-		std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems>               queue_14;
-		std::vector<PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase> queue_15;
-		std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell>         queue_16;
-		std::vector<PlayerEventNpcHandinRepository::PlayerEventNpcHandin>               queue_22;
-		std::vector<PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries> queue_22_entries;
-	};
 };
 
 extern PlayerEventLogs player_event_logs;

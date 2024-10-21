@@ -25,6 +25,7 @@ public:
 		int32_t     charges;
 		uint32_t    npc_id;
 		std::string corpse_name;
+		time_t      created_at;
 	};
 
 	static std::string PrimaryKey()
@@ -41,6 +42,7 @@ public:
 			"charges",
 			"npc_id",
 			"corpse_name",
+			"created_at",
 		};
 	}
 
@@ -53,6 +55,7 @@ public:
 			"charges",
 			"npc_id",
 			"corpse_name",
+			"UNIX_TIMESTAMP(created_at)",
 		};
 	}
 
@@ -99,6 +102,7 @@ public:
 		e.charges     = 0;
 		e.npc_id      = 0;
 		e.corpse_name = "";
+		e.created_at  = 0;
 
 		return e;
 	}
@@ -141,6 +145,7 @@ public:
 			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.corpse_name = row[5] ? row[5] : "";
+			e.created_at  = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -179,6 +184,7 @@ public:
 		v.push_back(columns[3] + " = " + std::to_string(e.charges));
 		v.push_back(columns[4] + " = " + std::to_string(e.npc_id));
 		v.push_back(columns[5] + " = '" + Strings::Escape(e.corpse_name) + "'");
+		v.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -206,6 +212,7 @@ public:
 		v.push_back(std::to_string(e.charges));
 		v.push_back(std::to_string(e.npc_id));
 		v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -241,6 +248,7 @@ public:
 			v.push_back(std::to_string(e.charges));
 			v.push_back(std::to_string(e.npc_id));
 			v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -280,6 +288,7 @@ public:
 			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.corpse_name = row[5] ? row[5] : "";
+			e.created_at  = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -310,6 +319,7 @@ public:
 			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.corpse_name = row[5] ? row[5] : "";
+			e.created_at  = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -390,6 +400,7 @@ public:
 		v.push_back(std::to_string(e.charges));
 		v.push_back(std::to_string(e.npc_id));
 		v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -418,6 +429,7 @@ public:
 			v.push_back(std::to_string(e.charges));
 			v.push_back(std::to_string(e.npc_id));
 			v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

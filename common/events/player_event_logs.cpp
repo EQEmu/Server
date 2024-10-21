@@ -1,8 +1,6 @@
 #include "player_event_logs.h"
 #include <cereal/archives/json.hpp>
 
-#include <random>
-
 #include "../platform.h"
 #include "../rulesys.h"
 #include "player_event_discord_formatter.h"
@@ -30,7 +28,7 @@ void PlayerEventLogs::Init()
 		m_settings[i].event_enabled      = 1;
 		m_settings[i].retention_days     = 0;
 		m_settings[i].discord_webhook_id = 0;
-		m_settings[i].has_etl            = 0;
+		m_settings[i].etl_enabled        = false;
 	}
 
 	SetSettingsDefaults();
@@ -75,7 +73,7 @@ void PlayerEventLogs::Init()
 			c.event_name     = PlayerEvent::EventName[i];
 			c.event_enabled  = m_settings[i].event_enabled;
 			c.retention_days = m_settings[i].retention_days;
-			c.has_etl        = false;
+			c.etl_enabled    = false;
 			settings_to_insert.emplace_back(c);
 		}
 	}
@@ -136,8 +134,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	BenchTimer benchmark;
 
-	EtlQueues_Struct etl_queues{};
-	auto out_entries_next_id = PlayerEventNpcHandinEntriesRepository::GetMaxId(*m_database) + 1;
+	EtlQueues etl_queues{};
 
 	for (auto &r:m_record_batch_queue) {
 		switch (r.event_type_id) {
@@ -157,15 +154,15 @@ void PlayerEventLogs::ProcessBatchQueue()
 				out.item_id     = in.item_id;
 				out.item_name   = in.item_name;
 				out.npc_id      = in.npc_id;
+				out.created_at  = r.created_at;
 
-				r.etl_table_id =
-					GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(r.event_type_id))
-						? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(r.event_type_id))
-						: 0;
-				IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(r.event_type_id));
+				if (m_etl_info.contains(PlayerEvent::EventType::LOOT_ITEM)) {
+					r.etl_table_id = m_etl_info.at(PlayerEvent::EventType::LOOT_ITEM).etl_next_id;
+					m_etl_info.at(PlayerEvent::EventType::LOOT_ITEM).etl_next_id++;
+				}
 
-				etl_queues.queue_14.push_back(out);
-				m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(r.event_type_id), out);
+				etl_queues.queue_loot_items.push_back(out);
+				m_record_etl_queue.emplace(PlayerEvent::EventType::LOOT_ITEM, out);
 				break;
 			}
 			case PlayerEvent::EventType::MERCHANT_SELL: {
@@ -189,15 +186,15 @@ void PlayerEventLogs::ProcessBatchQueue()
 				out.alternate_currency_id   = in.alternate_currency_id;
 				out.player_money_balance    = in.player_money_balance;
 				out.player_currency_balance = in.player_currency_balance;
+				out.created_at              = r.created_at;
 
-				r.etl_table_id =
-					GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(r.event_type_id))
-						? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(r.event_type_id))
-						: 0;
-				IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(r.event_type_id));
+				if (m_etl_info.contains(PlayerEvent::EventType::MERCHANT_SELL)) {
+					r.etl_table_id = m_etl_info.at(PlayerEvent::EventType::MERCHANT_SELL).etl_next_id;
+					m_etl_info.at(PlayerEvent::EventType::MERCHANT_SELL).etl_next_id++;
+				}
 
-				etl_queues.queue_16.push_back(out);
-				m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(r.event_type_id), out);
+				etl_queues.queue_merchant_sell.push_back(out);
+				m_record_etl_queue.emplace(PlayerEvent::EventType::MERCHANT_SELL, out);
 				break;
 			}
 			case PlayerEvent::EventType::MERCHANT_PURCHASE: {
@@ -221,15 +218,15 @@ void PlayerEventLogs::ProcessBatchQueue()
 				out.alternate_currency_id   = in.alternate_currency_id;
 				out.player_money_balance    = in.player_money_balance;
 				out.player_currency_balance = in.player_currency_balance;
+				out.created_at              = r.created_at;
 
-				r.etl_table_id =
-					GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(r.event_type_id))
-						? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(r.event_type_id))
-						: 0;
-				IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(r.event_type_id));
+				if (m_etl_info.contains(PlayerEvent::EventType::MERCHANT_PURCHASE)) {
+					r.etl_table_id = m_etl_info.at(PlayerEvent::EventType::MERCHANT_PURCHASE).etl_next_id;
+					m_etl_info.at(PlayerEvent::EventType::MERCHANT_PURCHASE).etl_next_id++;
+				}
 
-				m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(r.event_type_id), out);
-				etl_queues.queue_15.push_back(out);
+				etl_queues.queue_merchant_purchase.push_back(out);
+				m_record_etl_queue.emplace(PlayerEvent::EventType::MERCHANT_PURCHASE, out);
 				break;
 			}
 			case PlayerEvent::EventType::NPC_HANDIN: {
@@ -244,23 +241,23 @@ void PlayerEventLogs::ProcessBatchQueue()
 					in.serialize(ar);
 				}
 
-				out.npc_id                  = in.npc_id;
-				out.npc_name                = in.npc_name;
-				out.handin_copper           = in.handin_money.copper;
-				out.handin_silver           = in.handin_money.silver;
-				out.handin_gold             = in.handin_money.gold;
-				out.handin_platinum         = in.handin_money.platinum;
-				out.return_copper           = in.return_money.copper;
-				out.return_silver           = in.return_money.silver;
-				out.return_gold             = in.return_money.gold;
-				out.return_platinum         = in.return_money.platinum;
-				out.is_quest_handin         = in.is_quest_handin;
+				out.npc_id          = in.npc_id;
+				out.npc_name        = in.npc_name;
+				out.handin_copper   = in.handin_money.copper;
+				out.handin_silver   = in.handin_money.silver;
+				out.handin_gold     = in.handin_money.gold;
+				out.handin_platinum = in.handin_money.platinum;
+				out.return_copper   = in.return_money.copper;
+				out.return_silver   = in.return_money.silver;
+				out.return_gold     = in.return_money.gold;
+				out.return_platinum = in.return_money.platinum;
+				out.is_quest_handin = in.is_quest_handin;
+				out.created_at      = r.created_at;
 
-				r.etl_table_id =
-					GetETLIDCache().contains(static_cast<PlayerEvent::EventType>(r.event_type_id))
-						? GetETLIDCache().at(static_cast<PlayerEvent::EventType>(r.event_type_id))
-						: 0;
-				IncrementDetailTableIDCache(static_cast<PlayerEvent::EventType>(r.event_type_id));
+				if (m_etl_info.contains(PlayerEvent::EventType::NPC_HANDIN)) {
+					r.etl_table_id = m_etl_info.at(PlayerEvent::EventType::NPC_HANDIN).etl_next_id;
+					m_etl_info.at(PlayerEvent::EventType::NPC_HANDIN).etl_next_id++;
+				}
 
 				if (!in.handin_items.empty()) {
 					for (auto const &i: in.handin_items) {
@@ -270,6 +267,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 						out_entries.item_id                    = i.item_id;
 						out_entries.player_event_npc_handin_id = r.etl_table_id;
 						out_entries.type                       = 1;
+						out.created_at                         = r.created_at;
 
 						if (!i.augment_ids.empty()) {
 							uint32 augments[6]{};
@@ -283,7 +281,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 							out_entries.augment_5_id = augments[4];
 							out_entries.augment_6_id = augments[5];
 						}
-					etl_queues.queue_22_entries.push_back(out_entries);
+					etl_queues.queue_npc_handin_entries.push_back(out_entries);
 					}
 				}
 
@@ -295,6 +293,8 @@ void PlayerEventLogs::ProcessBatchQueue()
 						out_entries.item_id                    = i.item_id;
 						out_entries.player_event_npc_handin_id = r.etl_table_id;
 						out_entries.type                       = 2;
+						out.created_at                         = r.created_at;
+
 						if (!i.augment_ids.empty()) {
 							uint32 augments[6]{};
 							for (int x = 0; x < i.augment_ids.size(); x++) {
@@ -307,12 +307,12 @@ void PlayerEventLogs::ProcessBatchQueue()
 							out_entries.augment_5_id = augments[4];
 							out_entries.augment_6_id = augments[5];
 						}
-						etl_queues.queue_22_entries.push_back(out_entries);
+						etl_queues.queue_npc_handin_entries.push_back(out_entries);
 					}
 				}
 
-				m_record_etl_queue.emplace(static_cast<PlayerEvent::EventType>(r.event_type_id), out);
-				etl_queues.queue_22.push_back(out);
+				m_record_etl_queue.emplace(PlayerEvent::EventType::NPC_HANDIN, out);
+				etl_queues.queue_npc_handin.push_back(out);
 				break;
 			}
 			default: {
@@ -328,29 +328,29 @@ void PlayerEventLogs::ProcessBatchQueue()
 		for (auto const &[key, value]: m_record_etl_queue) {
 			switch (key) {
 				case PlayerEvent::LOOT_ITEM: {
-					PlayerEventLootItemsRepository::InsertMany(*m_database, etl_queues.queue_14);
-					etl_queues.queue_14.clear();
+					PlayerEventLootItemsRepository::InsertMany(*m_database, etl_queues.queue_loot_items);
+					etl_queues.queue_loot_items.clear();
 					break;
 				}
 				case PlayerEvent::MERCHANT_SELL: {
-					PlayerEventMerchantSellRepository::InsertMany(*m_database, etl_queues.queue_16);
-					etl_queues.queue_16.clear();
+					PlayerEventMerchantSellRepository::InsertMany(*m_database, etl_queues.queue_merchant_sell);
+					etl_queues.queue_merchant_sell.clear();
 					break;
 				}
 				case PlayerEvent::MERCHANT_PURCHASE: {
-					PlayerEventMerchantPurchaseRepository::InsertMany(*m_database, etl_queues.queue_15);
-					etl_queues.queue_15.clear();
+					PlayerEventMerchantPurchaseRepository::InsertMany(*m_database, etl_queues.queue_merchant_purchase);
+					etl_queues.queue_merchant_purchase.clear();
 					break;
 				}
 				case PlayerEvent::NPC_HANDIN: {
-					PlayerEventNpcHandinRepository::InsertMany(*m_database, etl_queues.queue_22);
-					PlayerEventNpcHandinEntriesRepository::InsertMany(*m_database, etl_queues.queue_22_entries);
-					etl_queues.queue_22.clear();
-					etl_queues.queue_22_entries.clear();
+					PlayerEventNpcHandinRepository::InsertMany(*m_database, etl_queues.queue_npc_handin);
+					PlayerEventNpcHandinEntriesRepository::InsertMany(*m_database, etl_queues.queue_npc_handin_entries);
+					etl_queues.queue_npc_handin.clear();
+					etl_queues.queue_npc_handin_entries.clear();
 					break;
 				}
 				default: {
-
+					LogError("Non-Implemented ETL event type <red>[{}] ", static_cast<uint32>(key));
 				}
 			}
 
@@ -849,63 +849,59 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days >= 0) {
-			if (m_settings[i].has_etl) {
-				auto results = PlayerEventLogsRepository::GetWhere(
-					*m_database,
-					fmt::format(
-						"event_type_id = {} AND created_at < (NOW() - INTERVAL {} DAY)",
-						i,
-						m_settings[i].retention_days)
-					);
-				if (!results.empty()) {
-					std::vector<std::string> etl_ids{};
-					for (auto const &r: results) {
-						etl_ids.push_back(std::to_string(r.etl_table_id));
+			if (m_settings[i].etl_enabled) {
+				uint32 deleted_count;
+				switch (m_settings[i].id) {
+					case PlayerEvent::LOOT_ITEM: {
+						deleted_count = PlayerEventLootItemsRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
 					}
-
-					uint32 deleted_count = 0;
-					switch (m_settings[i].id) {
-						case PlayerEvent::LOOT_ITEM: {
-							deleted_count = PlayerEventLootItemsRepository::DeleteWhere(
-								*m_database, fmt::format("`id` IN({})", Strings::Implode(", ", etl_ids))
-							);
-							break;
-						}
-						case PlayerEvent::MERCHANT_SELL: {
-							deleted_count = PlayerEventMerchantSellRepository::DeleteWhere(
-								*m_database, fmt::format("`id` IN({})", Strings::Implode(", ", etl_ids))
-							);
-							break;
-						}
-						case PlayerEvent::MERCHANT_PURCHASE: {
-							deleted_count = PlayerEventMerchantPurchaseRepository::DeleteWhere(
-								*m_database, fmt::format("`id` IN({})", Strings::Implode(", ", etl_ids))
-							);
-							break;
-						}
-						case PlayerEvent::NPC_HANDIN: {
-							deleted_count = PlayerEventNpcHandinRepository::DeleteWhere(
-								*m_database, fmt::format("`id` IN({})", Strings::Implode(", ", etl_ids))
-							);
-							deleted_count += PlayerEventNpcHandinEntriesRepository::DeleteWhere(
-								*m_database, fmt::format("`player_event_npc_handin_id` IN({})", Strings::Implode(", ", etl_ids))
-							);
-							break;
-						}
-						default: {
-
-						}
+					case PlayerEvent::MERCHANT_SELL: {
+						deleted_count = PlayerEventMerchantSellRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
 					}
-
-					LogInfo(
-						"Truncated [{}] events of type [{}] ({}) older than [{}] days from etl table",
-						deleted_count,
-						PlayerEvent::EventName[i],
-						i,
-						m_settings[i].retention_days
-					);
+					case PlayerEvent::MERCHANT_PURCHASE: {
+						deleted_count = PlayerEventMerchantPurchaseRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
+					}
+					case PlayerEvent::NPC_HANDIN: {
+						deleted_count = PlayerEventNpcHandinRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						deleted_count += PlayerEventNpcHandinEntriesRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
+					}
+					default: {
+						LogError("NonImplemented ETL Event Type <red>[{}] ", static_cast<uint32>(m_settings[i].id));
+					}
 				}
+
+				LogInfo(
+					"Truncated [{}] events of type [{}] ({}) older than [{}] days from etl table",
+					deleted_count,
+					PlayerEvent::EventName[i],
+					i,
+					m_settings[i].retention_days);
 			}
+
 
 			int deleted_count = PlayerEventLogsRepository::DeleteWhere(
 				*m_database,
@@ -1008,10 +1004,39 @@ void PlayerEventLogs::SetSettingsDefaults()
 
 void PlayerEventLogs::LoadETLIDs()
 {
-	GetETLIDCache().clear();
-
-	GetETLIDCache().emplace(PlayerEvent::LOOT_ITEM, PlayerEventLootItemsRepository::GetMaxId(*m_database) + 1);
-	GetETLIDCache().emplace(PlayerEvent::MERCHANT_SELL, PlayerEventMerchantSellRepository::GetMaxId(*m_database) + 1);
-	GetETLIDCache().emplace(PlayerEvent::MERCHANT_PURCHASE, PlayerEventMerchantPurchaseRepository::GetMaxId(*m_database) + 1);
-	GetETLIDCache().emplace(PlayerEvent::NPC_HANDIN, PlayerEventNpcHandinRepository::GetMaxId(*m_database) + 1);
+	m_etl_info.clear();
+	m_etl_info = {
+		{
+			PlayerEvent::LOOT_ITEM,
+			{
+				.etl_enabled = true,
+				.etl_table_name = "player_event_loot_items",
+				.etl_next_id = PlayerEventLootItemsRepository::GetMaxId(*m_database) + 1
+			}
+		},
+		{
+			PlayerEvent::MERCHANT_SELL,
+			{
+				.etl_enabled = true,
+				.etl_table_name = "player_event_merchant_sell",
+				.etl_next_id = BasePlayerEventMerchantSellRepository::GetMaxId(*m_database) + 1
+			}
+		},
+		{
+			PlayerEvent::MERCHANT_PURCHASE,
+			{
+				.etl_enabled = true,
+				.etl_table_name = "player_event_merchant_purchase",
+				.etl_next_id = PlayerEventMerchantPurchaseRepository::GetMaxId(*m_database) + 1
+			}
+		},
+		{
+			PlayerEvent::NPC_HANDIN,
+			{
+				.etl_enabled = true,
+				.etl_table_name = "player_event_npc_handin",
+				.etl_next_id = PlayerEventNpcHandinRepository::GetMaxId(*m_database) + 1
+			}
+		},
+	};
 }
