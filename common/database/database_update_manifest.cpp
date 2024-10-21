@@ -5809,81 +5809,243 @@ ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_
 	ManifestEntry{
 		.version = 9289,
 		.description = "2024_10_08_add_detail_player_event_logging.sql",
-		.check       = "SHOW COLUMNS FROM `player_event_log_settings` LIKE 'has_etl'",
+		.check       = "SHOW COLUMNS FROM `player_event_log_settings` LIKE 'etl_enabled'",
 		.condition   = "empty",
 		.match       = "",
 		.sql = R"(
 ALTER TABLE `player_event_log_settings`
-	ADD COLUMN `has_etl` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `discord_webhook_id`;
-
+	ADD COLUMN `etl_enabled` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `discord_webhook_id`;
 ALTER TABLE `player_event_logs`
 	ADD COLUMN `etl_table_id` BIGINT(20) NOT NULL DEFAULT '0' AFTER `event_data`;
-
-UPDATE `player_event_log_settings` SET `etl_logging` = 1, `etl_table_name` = 'player_event_loot_items' WHERE `id` = 14;
-	ADD COLUMN `player_event_x_id` BIGINT(20) NOT NULL DEFAULT '0' AFTER `event_data`;
-)"
-	},
-	ManifestEntry{
-		.version = 9290,
-		.description = "2024_10_08_remove_qs_logging.sql",
-		.check = "SHOW TABLES LIKE 'player_event_loot_items'",
-		.condition = "empty",
-		.match = "",
-		.sql = R"(
-UPDATE `player_event_log_settings` SET `has_etl` = 1, `etl_table_name` = 'player_event_loot_items' WHERE `id` = 14;
-
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 14;
 CREATE TABLE `player_event_loot_items` (
 	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`item_id` INT(10) UNSIGNED NULL DEFAULT NULL,
 	`item_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	`charges` INT(11) NULL DEFAULT NULL,
+	`augment_1_id` INT UNSIGNED NULL DEFAULT '0',
+	`augment_2_id` INT UNSIGNED NULL DEFAULT '0'`,
+	`augment_3_id` INT UNSIGNED NULL DEFAULT '0',
+	`augment_4_id` INT UNSIGNED NULL DEFAULT '0',
+	`augment_5_id` INT UNSIGNED NULL DEFAULT '0',
+	`augment_6_id` INT UNSIGNED NULL DEFAULT '0',
 	`npc_id` INT(10) UNSIGNED NULL DEFAULT NULL,
 	`corpse_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	PRIMARY KEY (`id`) USING BTREE
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `item_id_npc_id` (`item_id`, `npc_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
 AUTO_INCREMENT=1;
-
-UPDATE `player_event_log_settings` SET `has_etl` = 1, `etl_table_name` = 'player_event_merchant_sell' WHERE `id` = 16;
-
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 16;
 CREATE TABLE `player_event_merchant_sell` (
-	`id` BIGINT UNSIGNED NULL AUTO_INCREMENT,
-	`npc_id` INT UNSIGNED NULL DEFAULT '0',
-	`merchant_name` VARCHAR(64) NULL DEFAULT NULL,
-	`merchant_type` INT UNSIGNED NULL DEFAULT '0',
-	`item_id` INT UNSIGNED NULL DEFAULT '0',
-	`item_name` VARCHAR(64) NULL DEFAULT NULL,
-	`charges` INT NULL DEFAULT '0',
-	`cost` INT UNSIGNED NULL DEFAULT '0',
-	`alternate_currency_id` INT UNSIGNED NULL DEFAULT '0',
-	`player_money_balance` BIGINT UNSIGNED NULL DEFAULT '0',
-	`player_currency_balance` BIGINT UNSIGNED NULL DEFAULT '0',
-	PRIMARY KEY (`id`)
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`npc_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`merchant_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`merchant_type` INT(10) UNSIGNED NULL DEFAULT '0',
+	`item_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`item_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`charges` INT(11) NULL DEFAULT '0',
+	`cost` INT(10) UNSIGNED NULL DEFAULT '0',
+	`alternate_currency_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`player_money_balance` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`player_currency_balance` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `item_id_npc_id` (`item_id`, `npc_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
 AUTO_INCREMENT=1;
-
-UPDATE `player_event_log_settings` SET `has_etl` = 1, `etl_table_name` = 'player_event_merchant_purchase' WHERE `id` = 15;
-
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 15;
 CREATE TABLE `player_event_merchant_purchase` (
-	`id` BIGINT UNSIGNED NULL AUTO_INCREMENT,
-	`npc_id` INT UNSIGNED NULL DEFAULT '0',
-	`merchant_name` VARCHAR(64) NULL DEFAULT NULL,
-	`merchant_type` INT UNSIGNED NULL DEFAULT '0',
-	`item_id` INT UNSIGNED NULL DEFAULT '0',
-	`item_name` VARCHAR(64) NULL DEFAULT NULL,
-	`charges` INT NULL DEFAULT '0',
-	`cost` INT UNSIGNED NULL DEFAULT '0',
-	`alternate_currency_id` INT UNSIGNED NULL DEFAULT '0',
-	`player_money_balance` BIGINT UNSIGNED NULL DEFAULT '0',
-	`player_currency_balance` BIGINT UNSIGNED NULL DEFAULT '0',
-	PRIMARY KEY (`id`)
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`npc_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`merchant_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`merchant_type` INT(10) UNSIGNED NULL DEFAULT '0',
+	`item_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`item_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`charges` INT(11) NULL DEFAULT '0',
+	`cost` INT(10) UNSIGNED NULL DEFAULT '0',
+	`alternate_currency_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`player_money_balance` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`player_currency_balance` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `item_id_npc_id` (`item_id`, `npc_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
 AUTO_INCREMENT=1;
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 22;
+CREATE TABLE `player_event_npc_handin` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`npc_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`npc_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`handin_copper` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`handin_silver` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`handin_gold` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`handin_platinum` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`return_copper` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`return_silver` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`return_gold` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`return_platinum` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`is_quest_handin` TINYINT(3) UNSIGNED NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `npc_id_is_quest_handin` (`npc_id`, `is_quest_handin`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1;
+CREATE TABLE `player_event_npc_handin_entries` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`player_event_npc_handin_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+	`type` INT(10) UNSIGNED NULL DEFAULT NULL,
+	`item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`charges` INT(11) NOT NULL DEFAULT '0',
+	`evolve_level` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`evolve_amount` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+	`augment_1_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`augment_2_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`augment_3_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`augment_4_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`augment_5_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`augment_6_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `type_item_id` (`type`, `item_id`) USING BTREE,
+	INDEX `player_event_npc_handin_id` (`player_event_npc_handin_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1;
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 27;
+CREATE TABLE `player_event_trade` (
+	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`char1_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`char2_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`char1_copper` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`char1_silver` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`char1_gold` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`char1_platinum` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`char2_copper` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`char2_silver` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`char2_gold` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`char2_platinum` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `char1_id_char2_id` (`char1_id`, `char2_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1;
+CREATE TABLE `player_event_trade_entries` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`player_event_trade_id` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`char_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`slot` SMALLINT(6) NULL DEFAULT '0',
+	`item_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`charges` SMALLINT(6) NULL DEFAULT '0',
+	`augment_1_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`augment_2_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`augment_3_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`augment_4_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`augment_5_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`augment_6_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`in_bag` TINYINT(4) NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `player_event_trade_id` (`player_event_trade_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1;
+UPDATE `player_event_log_settings` SET `etl_enabled` = 0 WHERE `id` = 54;
+CREATE TABLE `player_event_speech` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`to_char_id` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`from_char_id` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`guild_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`type` INT(10) UNSIGNED NULL DEFAULT '0',
+	`min_status` INT(10) UNSIGNED NULL DEFAULT '0',
+	`message` LONGTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `to_char_id_from_char_id` (`to_char_id`, `from_char_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1;
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 44;
+CREATE TABLE `player_event_killed_npc` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`npc_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`npc_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`combat_time_seconds` INT(10) UNSIGNED NULL DEFAULT '0',
+	`total_damage_per_second_taken` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`total_heal_per_second_taken` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `npc_id` (`npc_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 45;
+CREATE TABLE `player_event_killed_named_npc` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`npc_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`npc_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`combat_time_seconds` INT(10) UNSIGNED NULL DEFAULT '0',
+	`total_damage_per_second_taken` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`total_heal_per_second_taken` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `npc_id` (`npc_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 46;
+CREATE TABLE `player_event_killed_raid_npc` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`npc_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`npc_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`combat_time_seconds` INT(10) UNSIGNED NULL DEFAULT '0',
+	`total_damage_per_second_taken` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`total_heal_per_second_taken` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `npc_id` (`npc_id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+UPDATE `player_event_log_settings` SET `etl_enabled` = 1 WHERE `id` = 4;
+CREATE TABLE `player_event_aa_purchase` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`aa_ability_id` INT(11) NULL DEFAULT '0',
+	`cost` INT(11) NULL DEFAULT '0',
+	`previous_id` INT(11) NULL DEFAULT '0',
+	`next_id` INT(11) NULL DEFAULT '0',
+	`created_at` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `created_at` (`created_at`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
 )"
-	}
-
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
@@ -5895,7 +6057,7 @@ AUTO_INCREMENT=1;
 //
 //)"
 
-	// Used for testing
+		// Used for testing
 //	ManifestEntry{
 //		.version = 9229,
 //		.description = "new_database_check_test",
@@ -5922,7 +6084,7 @@ AUTO_INCREMENT=1;
 //)",
 //	}
 
-};
+	};
 
 // see struct definitions for what each field does
 // struct ManifestEntry {
