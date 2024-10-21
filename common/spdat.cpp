@@ -2469,5 +2469,15 @@ bool IsDisciplineTome(const EQ::ItemData* item)
 		return false;
 	}
 
+	const auto &spell = spells[spell_id];
+	if (
+		spell.classes[Class::Wizard - 1] != 255 &&
+		spell.classes[Class::Enchanter - 1] != 255 &&
+		spell.classes[Class::Magician - 1] != 255 &&
+		spell.classes[Class::Necromancer - 1] != 255
+		) {
+		return false;
+	}
+
 	return true;
 }
