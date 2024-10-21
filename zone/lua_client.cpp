@@ -3471,7 +3471,7 @@ bool Lua_Client::LuaCheckHandin(
 
 		if (!key.empty()) {
 			handin_map[key] = luabind::object_cast<uint32>(handin_table[i.key()]);
-			LogTradingDetail("Handin key [{}] value [{}]", key, handin_map[key]);
+			LogNpcHandinDetail("Handin key [{}] value [{}]", key, handin_map[key]);
 		}
 	}
 
@@ -3489,7 +3489,7 @@ bool Lua_Client::LuaCheckHandin(
 
 		if (!key.empty()) {
 			required_map[key] = luabind::object_cast<uint32>(required_table[i.key()]);
-			LogTradingDetail("Required key [{}] value [{}]", key, required_map[key]);
+			LogNpcHandinDetail("Required key [{}] value [{}]", key, required_map[key]);
 		}
 	}
 
@@ -3497,7 +3497,7 @@ bool Lua_Client::LuaCheckHandin(
 		auto item = luabind::object_cast<Lua_ItemInst>(items_table[i.key()]);
 
 		if (item && item.GetItem()) {
-			LogTradingDetail(
+			LogNpcHandinDetail(
 				"Item instance [{}] ({}) UUID ({}) added to handin list",
 				item.GetName(),
 				item.GetID(),

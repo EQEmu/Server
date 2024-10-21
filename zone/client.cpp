@@ -12860,7 +12860,7 @@ bool Client::CheckHandin(
 	for (const auto &[data_map, current_handin]: datasets) {
 		std::string current_dataset = &current_handin == &h ? set_hand_in : set_required;
 		for (const auto &[key, value]: data_map) {
-			LogTradingDetail("Processing [{}] key [{}] value [{}]", current_dataset, key, value);
+			LogNpcHandinDetail("Processing [{}] key [{}] value [{}]", current_dataset, key, value);
 
 			// Handle items
 			if (Strings::IsNumber(key)) {
@@ -12939,14 +12939,70 @@ bool Client::CheckHandin(
 	}
 
 	// print current hand-in bucket
-	LogTradingDetail("---");
-	LogTradingDetail("Hand-in | Printing current hand-in bucket");
-	LogTradingDetail("--- Items [{}] money p [{}] g [{}] s [{}] c [{}]", h.items.size(), h.money.platinum, h.money.gold, h.money.silver, h.money.copper);
+	LogNpcHandin(
+		" > Before processing hand-in | client [{}] met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
+		GetCleanName(),
+		met_requirement,
+		h.items.size(),
+		h.money.platinum,
+		h.money.gold,
+		h.money.silver,
+		h.money.copper
+	);
+	std::vector<std::string> log_entries = {};
+	int item_count = 1;
 	for (const auto &i: h.items) {
-		LogTradingDetail("--- Hand-in | item [{}] ({}) count [{}]", i.item->GetItem()->Name, i.item_id, i.count);
+		log_entries.emplace_back(
+			fmt::format(
+				"item{} [{}] ({}) count [{}]",
+				item_count,
+				i.item->GetItem()->Name,
+				i.item_id,
+				i.count
+			)
+		);
+		item_count++;
 	}
 
+	LogNpcHandin(
+		" >> Handed Items | Item(s) ({}) {} platinum [{}] gold [{}] silver [{}] copper [{}]",
+		h.items.size(),
+		Strings::Join(log_entries, ", "),
+		h.money.platinum,
+		h.money.gold,
+		h.money.silver,
+		h.money.copper
+	);
+
+	log_entries.clear();
+	item_count = 1;
+	for (const auto &i: r.items) {
+		auto item = database.GetItem(Strings::ToUnsignedInt(i.item_id));
+
+		log_entries.emplace_back(
+			fmt::format(
+				"item{} [{}] ({}) count [{}]",
+				item_count,
+				item ? item->Name : "Unknown",
+				i.item_id,
+				i.count
+			)
+		);
+		item_count++;
+	}
+
+	LogNpcHandin(
+		" >> Required Items | Item(s) ({}) {} platinum [{}] gold [{}] silver [{}] copper [{}]",
+		r.items.size(),
+		Strings::Join(log_entries, ", "),
+		r.money.platinum,
+		r.money.gold,
+		r.money.silver,
+		r.money.copper
+	);
+
 	if (met_requirement) {
+		log_entries = {};
 		for (const auto &h_item : h.items) {
 			auto it = std::find_if(r.items.begin(), r.items.end(), [&](const auto &r_item) {
 				return h_item.item_id == r_item.item_id && h_item.count == r_item.count;
@@ -12960,9 +13016,13 @@ bool Client::CheckHandin(
 						[&](const HandinEntry &i) {
 							bool removed = i.item_id == h_item.item_id && i.count == h_item.count;
 							if (removed) {
-								LogTradingDetail(
-									"Hand-in success, removing item [{}] count [{}] from m_handin.items",
-									i.item_id, i.count
+								log_entries.emplace_back(
+									fmt::format(
+										" >>> Hand-in success | Removing from hand-in bucket | item [{}] ({}) count [{}]",
+										i.item->GetItem()->Name,
+										i.item_id,
+										i.count
+									)
 								);
 							}
 							return removed;
@@ -12973,11 +13033,17 @@ bool Client::CheckHandin(
 			}
 		}
 
-		// print remainder hand-in bucket
-		LogTradingDetail("---");
-		LogTradingDetail("Hand-in | Remainder of hand-in bucket");
-		LogTradingDetail(
-			"Items [{}] money p [{}] g [{}] s [{}] c [{}]",
+		// log successful hand-in items
+		if (!log_entries.empty()) {
+			for (const auto& log : log_entries) {
+				LogNpcHandin("{}", log);
+			}
+		}
+
+		LogNpcHandin(
+			" > End of hand-in | client [{}] met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
+			GetCleanName(),
+			met_requirement,
 			m_hand_in.items.size(),
 			m_hand_in.money.platinum,
 			m_hand_in.money.gold,
@@ -12985,7 +13051,7 @@ bool Client::CheckHandin(
 			m_hand_in.money.copper
 		);
 		for (const auto &i: m_hand_in.items) {
-			LogTradingDetail(
+			LogNpcHandin(
 				"Hand-in success, item [{}] ({}) count [{}]",
 				i.item->GetItem()->Name,
 				i.item_id,
@@ -12995,7 +13061,7 @@ bool Client::CheckHandin(
 
 		// decrement successful hand-in money from current hand-in bucket
 		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
-			LogTradingDetail(
+			LogNpcHandin(
 				"Hand-in success, removing money p [{}] g [{}] s [{}] c [{}]",
 				h.money.platinum,
 				h.money.gold,
@@ -13008,13 +13074,6 @@ bool Client::CheckHandin(
 			m_hand_in.money.copper -= h.money.copper;
 		}
 	}
-
-	LogTradingDetail(
-		"CheckHandin [{}] met_requirement [{}] npc [{}]",
-		GetCleanName(),
-		met_requirement,
-		n->GetCleanName()
-	);
 
 	return met_requirement;
 }
@@ -13066,7 +13125,7 @@ void Client::ReturnHandinItems()
 			);
 
 			PushItemOnCursor(*i.item, true);
-			LogTradingDetail("Hand-in failed, returning item [{}]", i.item->GetItem()->Name);
+			LogNpcHandin("Hand-in failed, returning item [{}]", i.item->GetItem()->Name);
 			return_handin = true;
 		}
 	}
@@ -13085,7 +13144,7 @@ void Client::ReturnHandinItems()
 			true
 		);
 		return_handin = true;
-		LogTradingDetail(
+		LogNpcHandin(
 			"Hand-in failed, returning money p [{}] g [{}] s [{}] c [{}]",
 			m_hand_in.money.platinum,
 			m_hand_in.money.gold,
