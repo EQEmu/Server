@@ -125,5 +125,10 @@ namespace Larion
 #include "ss_define.h"
 
 	// ENCODE methods
+	ENCODE(OP_LogServer) {
+
+	}
+
 	// DECODE methods
+	
 } /*Larion*/
