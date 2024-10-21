@@ -3236,7 +3236,7 @@ bool Perl_Client_CheckHandin(
 			continue;
 		}
 
-		LogTradingDetail("Handin key [{}] value [{}]", e.first, handin.at(e.first).c_str());
+		LogNpcHandinDetail("Handin key [{}] value [{}]", e.first, handin.at(e.first).c_str());
 
 		const uint32 count = static_cast<uint32>(handin.at(e.first));
 		handin_map[e.first] = count;
@@ -3251,7 +3251,7 @@ bool Perl_Client_CheckHandin(
 			continue;
 		}
 
-		LogTradingDetail("Required key [{}] value [{}]", e.first, required.at(e.first).c_str());
+		LogNpcHandinDetail("Required key [{}] value [{}]", e.first, required.at(e.first).c_str());
 
 		const uint32 count = static_cast<uint32>(required.at(e.first));
 		required_map[e.first] = count;
@@ -3265,7 +3265,7 @@ bool Perl_Client_CheckHandin(
 
 		items.emplace_back(i);
 
-		LogTradingDetail(
+		LogNpcHandinDetail(
 			"Item instance [{}] ({}) UUID ({}) added to handin list",
 			i->GetItem()->Name,
 			i->GetItem()->ID,
