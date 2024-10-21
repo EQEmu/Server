@@ -12320,248 +12320,6 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
 }
 
-void Client::NPCHandinEventLog(Trade* t, NPC* n)
-{
-	Client* c = t->GetOwner()->CastToClient();
-
-	std::vector<PlayerEvent::HandinEntry> hi = {};
-	std::vector<PlayerEvent::HandinEntry> ri = {};
-	PlayerEvent::HandinMoney              hm{};
-	PlayerEvent::HandinMoney              rm{};
-
-	if (
-		c->EntityVariableExists("HANDIN_ITEMS") &&
-		c->EntityVariableExists("HANDIN_MONEY") &&
-		c->EntityVariableExists("RETURN_ITEMS") &&
-		c->EntityVariableExists("RETURN_MONEY")
-	) {
-		const std::string& handin_items = c->GetEntityVariable("HANDIN_ITEMS");
-		const std::string& return_items = c->GetEntityVariable("RETURN_ITEMS");
-		const std::string& handin_money = c->GetEntityVariable("HANDIN_MONEY");
-		const std::string& return_money = c->GetEntityVariable("RETURN_MONEY");
-
-		// Handin Items
-		if (!handin_items.empty()) {
-			if (Strings::Contains(handin_items, ",")) {
-				const auto handin_data = Strings::Split(handin_items, ",");
-				for (const auto& h : handin_data) {
-					const auto item_data = Strings::Split(h, "|");
-					if (
-						item_data.size() == 3 &&
-						Strings::IsNumber(item_data[0]) &&
-						Strings::IsNumber(item_data[1]) &&
-						Strings::IsNumber(item_data[2])
-					) {
-						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
-						if (item_id != 0) {
-							const auto* item = database.GetItem(item_id);
-
-							if (item) {
-								hi.emplace_back(
-									PlayerEvent::HandinEntry{
-										.item_id = item_id,
-										.item_name = item->Name,
-										.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
-										.attuned = Strings::ToInt(item_data[2]) ? true : false
-									}
-								);
-							}
-						}
-					}
-				}
-			} else if (Strings::Contains(handin_items, "|")) {
-				const auto item_data = Strings::Split(handin_items, "|");
-				if (
-					item_data.size() == 3 &&
-					Strings::IsNumber(item_data[0]) &&
-					Strings::IsNumber(item_data[1]) &&
-					Strings::IsNumber(item_data[2])
-				) {
-					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
-					const auto*  item    = database.GetItem(item_id);
-
-					if (item) {
-						hi.emplace_back(
-							PlayerEvent::HandinEntry{
-								.item_id = item_id,
-								.item_name = item->Name,
-								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
-								.attuned = Strings::ToInt(item_data[2]) ? true : false
-							}
-						);
-					}
-				}
-			}
-		}
-
-		// Handin Money
-		if (!handin_money.empty()) {
-			const auto hms = Strings::Split(handin_money, "|");
-
-			hm.copper   = Strings::ToUnsignedInt(hms[0]);
-			hm.silver   = Strings::ToUnsignedInt(hms[1]);
-			hm.gold     = Strings::ToUnsignedInt(hms[2]);
-			hm.platinum = Strings::ToUnsignedInt(hms[3]);
-		}
-
-		// Return Items
-		if (!return_items.empty()) {
-			if (Strings::Contains(return_items, ",")) {
-				const auto return_data = Strings::Split(return_items, ",");
-				for (const auto& r : return_data) {
-					const auto item_data = Strings::Split(r, "|");
-					if (
-						item_data.size() == 3 &&
-						Strings::IsNumber(item_data[0]) &&
-						Strings::IsNumber(item_data[1]) &&
-						Strings::IsNumber(item_data[2])
-					) {
-						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
-						const auto*  item    = database.GetItem(item_id);
-
-						if (item) {
-							ri.emplace_back(
-								PlayerEvent::HandinEntry{
-									.item_id = item_id,
-									.item_name = item->Name,
-									.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
-									.attuned = Strings::ToInt(item_data[2]) ? true : false
-								}
-							);
-						}
-					}
-				}
-			} else if (Strings::Contains(return_items, "|")) {
-				const auto item_data = Strings::Split(return_items, "|");
-				if (
-					item_data.size() == 3 &&
-					Strings::IsNumber(item_data[0]) &&
-					Strings::IsNumber(item_data[1]) &&
-					Strings::IsNumber(item_data[2])
-				) {
-					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
-					const auto*  item    = database.GetItem(item_id);
-
-					if (item) {
-						ri.emplace_back(
-							PlayerEvent::HandinEntry{
-								.item_id = item_id,
-								.item_name = item->Name,
-								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
-								.attuned = Strings::ToInt(item_data[2]) ? true : false
-							}
-						);
-					}
-				}
-			}
-		}
-
-		// Return Money
-		if (!return_money.empty()) {
-			const auto rms = Strings::Split(return_money, "|");
-			rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
-			rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
-			rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
-			rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
-		}
-
-		c->DeleteEntityVariable("HANDIN_ITEMS");
-		c->DeleteEntityVariable("HANDIN_MONEY");
-		c->DeleteEntityVariable("RETURN_ITEMS");
-		c->DeleteEntityVariable("RETURN_MONEY");
-
-		const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
-
-		const bool event_has_data_to_record = (
-			!hi.empty() || handed_in_money
-		);
-
-		if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
-			auto e = PlayerEvent::HandinEvent{
-				.npc_id = n->GetNPCTypeID(),
-				.npc_name = n->GetCleanName(),
-				.handin_items = hi,
-				.handin_money = hm,
-				.return_items = ri,
-				.return_money = rm,
-				.is_quest_handin = true
-			};
-
-			RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
-		}
-
-		return;
-	}
-
-	uint8 item_count = 0;
-
-	hm.platinum = t->pp;
-	hm.gold     = t->gp;
-	hm.silver   = t->sp;
-	hm.copper   = t->cp;
-
-	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
-		if (c->GetInv().GetItem(i)) {
-			item_count++;
-		}
-	}
-
-	hi.reserve(item_count);
-
-	if (item_count > 0) {
-		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
-			const EQ::ItemInstance* inst = c->GetInv().GetItem(i);
-			if (inst) {
-				hi.emplace_back(
-					PlayerEvent::HandinEntry{
-						.item_id = inst->GetItem()->ID,
-						.item_name = inst->GetItem()->Name,
-						.charges = static_cast<uint16>(inst->GetCharges()),
-						.attuned = inst->IsAttuned()
-					}
-				);
-
-				if (inst->IsClassBag()) {
-					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
-						inst = c->GetInv().GetItem(i, j);
-						if (inst) {
-							hi.emplace_back(
-								PlayerEvent::HandinEntry{
-									.item_id = inst->GetItem()->ID,
-									.item_name = inst->GetItem()->Name,
-									.charges = static_cast<uint16>(inst->GetCharges()),
-									.attuned = inst->IsAttuned()
-								}
-							);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
-
-	ri = hi;
-	rm = hm;
-
-	const bool event_has_data_to_record = !hi.empty() || handed_in_money;
-
-	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
-		auto e = PlayerEvent::HandinEvent{
-			.npc_id = n->GetNPCTypeID(),
-			.npc_name = n->GetCleanName(),
-			.handin_items = hi,
-			.handin_money = hm,
-			.return_items = ri,
-			.return_money = rm,
-			.is_quest_handin = false
-		};
-
-		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
-	}
-}
-
 void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
 {
 	std::string spell_string;
@@ -13074,4 +12832,415 @@ void Client::ClientToNpcAggroProcess()
 		}
 		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
 	}
+}
+
+bool Client::CheckHandin(
+	NPC *n,
+	std::map<std::string, uint16> handin,
+	std::map<std::string, uint16> required,
+	std::vector<const EQ::ItemInstance *> items
+)
+{
+	auto h = Handin{};
+	auto r = Handin{};
+
+	std::vector<std::pair<const std::map<std::string, uint16>&, Handin&>> datasets = {};
+
+	// if we've already started the hand-in process, we don't want to re-process the hand-in data
+	// we continue to use the originally set hand-in bucket and decrement from it with each successive hand-in
+	if (m_handin_started) {
+		h = m_hand_in;
+	} else {
+		datasets.emplace_back(handin, h);
+	}
+	datasets.emplace_back(required, r);
+
+	const std::string set_hand_in  = "Hand-in";
+	const std::string set_required = "Required";
+	for (const auto &[data_map, current_handin]: datasets) {
+		std::string current_dataset = &current_handin == &h ? set_hand_in : set_required;
+		for (const auto &[key, value]: data_map) {
+			LogNpcHandinDetail("Processing [{}] key [{}] value [{}]", current_dataset, key, value);
+
+			// Handle items
+			if (Strings::IsNumber(key)) {
+				if (const auto *exists = database.GetItem(Strings::ToUnsignedInt(key));
+					exists && current_dataset == set_required) {
+					current_handin.items.emplace_back(HandinEntry{.item_id = key, .count = value});
+				}
+				continue;
+			}
+
+			// Handle money and any other key-value pairs
+			if (key == "platinum") { current_handin.money.platinum = value; }
+			else if (key == "gold") { current_handin.money.gold = value; }
+			else if (key == "silver") { current_handin.money.silver = value; }
+			else if (key == "copper") { current_handin.money.copper = value; }
+		}
+	}
+
+	// pull hand-in items from the item instances
+	if (!m_handin_started) {
+		for (const auto &i: items) {
+			if (!i) {
+				continue;
+			}
+
+			h.items.emplace_back(
+				HandinEntry{
+					.item_id = std::to_string(i->GetItem()->ID),
+					.count = std::max(static_cast<uint16>(i->GetCharges()), static_cast<uint16>(1)),
+					.item = i
+				}
+			);
+		}
+	}
+
+	// compare hand-in to required, the item_id can be in any slot
+	bool met_requirement = true;
+	if (h.items.size() == r.items.size() && !h.items.empty() && !r.items.empty()) {
+		for (const auto &h_item: h.items) {
+			bool found = false;
+			for (const auto &r_item: r.items) {
+				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				met_requirement = false;
+				break;
+			}
+		}
+	}
+	else {
+		met_requirement = false;
+	}
+
+	// compare hand-in money to required
+	if (met_requirement) {
+		if (h.money.platinum != r.money.platinum ||
+			h.money.gold != r.money.gold ||
+			h.money.silver != r.money.silver ||
+			h.money.copper != r.money.copper) {
+			met_requirement = false;
+		}
+	}
+
+	if (n->IsMultiQuest()) {
+		//
+	}
+
+	// in-case we trigger CheckHand-in multiple times, only set these once
+	if (!m_handin_started) {
+		m_handin_started  = true;
+		m_hand_in         = h;
+		// save original items for logging
+		m_hand_in.original_items = m_hand_in.items;
+		m_hand_in.original_money = m_hand_in.money;
+		m_hand_in.npc = n;
+	}
+
+	// check if npc is guildmaster
+	if (n->IsGuildmaster()) {
+		for (const auto &h_item: m_hand_in.items) {
+			if (!h_item.item) {
+				continue;
+			}
+
+			if (!IsDisciplineTome(h_item.item->GetItem())) {
+				continue;
+			}
+
+			if (n->IsGuildmasterForClient(this)) {
+				TrainDiscipline(h_item.item->GetID());
+				m_hand_in.items.erase(
+					std::remove_if(
+						m_hand_in.items.begin(),
+						m_hand_in.items.end(),
+						[&](const HandinEntry &i) {
+							bool removed = i.item_id == h_item.item_id;
+							if (removed) {
+								LogNpcHandin(
+									"Hand-in success, removing discipline tome [{}] from hand-in bucket",
+									i.item_id
+								);
+							}
+							return removed;
+						}
+					),
+					m_hand_in.items.end()
+				);
+			} else {
+				n->Say("You are not a member of my guild. I will not train you!");
+				met_requirement = false;
+				break;
+			}
+		}
+	}
+
+	// print current hand-in bucket
+	LogNpcHandin(
+		" > Before processing hand-in | client [{}] met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
+		GetCleanName(),
+		met_requirement,
+		h.items.size(),
+		h.money.platinum,
+		h.money.gold,
+		h.money.silver,
+		h.money.copper
+	);
+	std::vector<std::string> log_entries = {};
+	int item_count = 1;
+	for (const auto &i: h.items) {
+		log_entries.emplace_back(
+			fmt::format(
+				"item{} [{}] ({}) count [{}]",
+				item_count,
+				i.item->GetItem()->Name,
+				i.item_id,
+				i.count
+			)
+		);
+		item_count++;
+	}
+
+	LogNpcHandin(
+		" >> Handed Items | Item(s) ({}) {} platinum [{}] gold [{}] silver [{}] copper [{}]",
+		h.items.size(),
+		Strings::Join(log_entries, ", "),
+		h.money.platinum,
+		h.money.gold,
+		h.money.silver,
+		h.money.copper
+	);
+
+	log_entries.clear();
+	item_count = 1;
+	for (const auto &i: r.items) {
+		auto item = database.GetItem(Strings::ToUnsignedInt(i.item_id));
+
+		log_entries.emplace_back(
+			fmt::format(
+				"item{} [{}] ({}) count [{}]",
+				item_count,
+				item ? item->Name : "Unknown",
+				i.item_id,
+				i.count
+			)
+		);
+		item_count++;
+	}
+
+	LogNpcHandin(
+		" >> Required Items | Item(s) ({}) {} platinum [{}] gold [{}] silver [{}] copper [{}]",
+		r.items.size(),
+		Strings::Join(log_entries, ", "),
+		r.money.platinum,
+		r.money.gold,
+		r.money.silver,
+		r.money.copper
+	);
+
+	if (met_requirement) {
+		log_entries = {};
+		for (const auto &h_item : h.items) {
+			auto it = std::find_if(r.items.begin(), r.items.end(), [&](const auto &r_item) {
+				return h_item.item_id == r_item.item_id && h_item.count == r_item.count;
+			});
+
+			if (it != r.items.end()) {
+				m_hand_in.items.erase(
+					std::remove_if(
+						m_hand_in.items.begin(),
+						m_hand_in.items.end(),
+						[&](const HandinEntry &i) {
+							bool removed = i.item_id == h_item.item_id && i.count == h_item.count;
+							if (removed) {
+								log_entries.emplace_back(
+									fmt::format(
+										" >>> Hand-in success | Removing from hand-in bucket | item [{}] ({}) count [{}]",
+										i.item->GetItem()->Name,
+										i.item_id,
+										i.count
+									)
+								);
+							}
+							return removed;
+						}
+					),
+					m_hand_in.items.end()
+				);
+			}
+		}
+
+		// log successful hand-in items
+		if (!log_entries.empty()) {
+			for (const auto& log : log_entries) {
+				LogNpcHandin("{}", log);
+			}
+		}
+
+		LogNpcHandin(
+			" > End of hand-in | client [{}] met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
+			GetCleanName(),
+			met_requirement,
+			m_hand_in.items.size(),
+			m_hand_in.money.platinum,
+			m_hand_in.money.gold,
+			m_hand_in.money.silver,
+			m_hand_in.money.copper
+		);
+		for (const auto &i: m_hand_in.items) {
+			LogNpcHandin(
+				"Hand-in success, item [{}] ({}) count [{}]",
+				i.item->GetItem()->Name,
+				i.item_id,
+				i.count
+			);
+		}
+
+		// decrement successful hand-in money from current hand-in bucket
+		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
+			LogNpcHandin(
+				"Hand-in success, removing money p [{}] g [{}] s [{}] c [{}]",
+				h.money.platinum,
+				h.money.gold,
+				h.money.silver,
+				h.money.copper
+			);
+			m_hand_in.money.platinum -= h.money.platinum;
+			m_hand_in.money.gold -= h.money.gold;
+			m_hand_in.money.silver -= h.money.silver;
+			m_hand_in.money.copper -= h.money.copper;
+		}
+	}
+
+	return met_requirement;
+}
+
+void Client::ReturnHandinItems()
+{
+	// player event
+	std::vector<PlayerEvent::HandinEntry> handin_items;
+	PlayerEvent::HandinMoney              handin_money{};
+	std::vector<PlayerEvent::HandinEntry> return_items;
+	PlayerEvent::HandinMoney              return_money{};
+	for (const auto& i : m_hand_in.original_items) {
+		if (i.item && i.item->GetItem()) {
+			handin_items.emplace_back(
+				PlayerEvent::HandinEntry{
+					.item_id = i.item->GetID(),
+					.item_name = i.item->GetItem()->Name,
+					.augment_ids = i.item->GetAugmentIDs(),
+					.augment_names = i.item->GetAugmentNames(),
+					.charges = std::max(static_cast<uint16>(i.item->GetCharges()), static_cast<uint16>(1))
+				}
+			);
+		}
+	}
+
+	// check if any money was handed in
+	if (m_hand_in.original_money.platinum > 0 ||
+		m_hand_in.original_money.gold > 0 ||
+		m_hand_in.original_money.silver > 0 ||
+		m_hand_in.original_money.copper > 0
+		) {
+		handin_money.copper   = m_hand_in.original_money.copper;
+		handin_money.silver   = m_hand_in.original_money.silver;
+		handin_money.gold     = m_hand_in.original_money.gold;
+		handin_money.platinum = m_hand_in.original_money.platinum;
+	}
+
+	bool return_handin = false;
+	for (const auto& i: m_hand_in.items) {
+		if (i.item && i.item->GetItem()) {
+			return_items.emplace_back(
+				PlayerEvent::HandinEntry{
+					.item_id = i.item->GetID(),
+					.item_name = i.item->GetItem()->Name,
+					.augment_ids = i.item->GetAugmentIDs(),
+					.augment_names = i.item->GetAugmentNames(),
+					.charges = std::max(static_cast<uint16>(i.item->GetCharges()), static_cast<uint16>(1))
+				}
+			);
+
+			PushItemOnCursor(*i.item, true);
+			LogNpcHandin("Hand-in failed, returning item [{}]", i.item->GetItem()->Name);
+			return_handin = true;
+		}
+	}
+
+	// check if any money was handed in
+	if (m_hand_in.money.platinum > 0 ||
+		m_hand_in.money.gold > 0 ||
+		m_hand_in.money.silver > 0 ||
+		m_hand_in.money.copper > 0
+		) {
+		AddMoneyToPP(
+			m_hand_in.money.copper,
+			m_hand_in.money.silver,
+			m_hand_in.money.gold,
+			m_hand_in.money.platinum,
+			true
+		);
+		return_handin = true;
+		LogNpcHandin(
+			"Hand-in failed, returning money p [{}] g [{}] s [{}] c [{}]",
+			m_hand_in.money.platinum,
+			m_hand_in.money.gold,
+			m_hand_in.money.silver,
+			m_hand_in.money.copper
+		);
+
+		// player event
+		return_money.copper   = m_hand_in.money.copper;
+		return_money.silver   = m_hand_in.money.silver;
+		return_money.gold     = m_hand_in.money.gold;
+		return_money.platinum = m_hand_in.money.platinum;
+	}
+
+	m_has_processed_handin_return = return_handin;
+
+	if (return_handin) {
+		if (m_hand_in.npc) {
+			m_hand_in.npc->Say(
+				fmt::format(
+					"I have no need for this {}, you can have it back.",
+					GetCleanName()
+				).c_str()
+			);
+		}
+	}
+
+	const bool handed_in_money = (
+		handin_money.platinum > 0 ||
+		handin_money.gold > 0 ||
+		handin_money.silver > 0 ||
+		handin_money.copper > 0
+	);
+	const bool event_has_data_to_record = !handin_items.empty() || handed_in_money;
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+		auto e = PlayerEvent::HandinEvent{
+			.npc_id = m_hand_in.npc->GetNPCTypeID(),
+			.npc_name = m_hand_in.npc->GetCleanName(),
+			.handin_items = handin_items,
+			.handin_money = handin_money,
+			.return_items = return_items,
+			.return_money = return_money,
+			.is_quest_handin = parse->HasQuestSub(m_hand_in.npc->GetNPCTypeID(), EVENT_TRADE)
+		};
+
+		RecordPlayerEventLogWithClient(this, PlayerEvent::NPC_HANDIN, e);
+	}
+}
+
+void Client::ResetHandin()
+{
+	m_has_processed_handin_return = false;
+	m_handin_started              = false;
+	m_hand_in.original_money             = {};
+	m_hand_in                     = {};
 }

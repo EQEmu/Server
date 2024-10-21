@@ -558,6 +558,15 @@ public:
 	bool CanPathTo(float x, float y, float z);
 
 	void DoNpcToNpcAggroScan();
+
+	bool CanPetTakeItem(const EQ::ItemInstance *inst);
+
+	bool IsMultiQuest() { return m_multiquest_enabled; }
+	void SetMultiQuest(bool b) { m_multiquest_enabled = b; }
+	std::vector<const EQ::ItemInstance *> GetMultiQuestItems() const;
+	void SetMultiQuestItems(std::vector<const EQ::ItemInstance *> multiquest_items);
+	bool IsGuildmasterForClient(Client *c);
+
 protected:
 
 	void HandleRoambox();
@@ -699,6 +708,9 @@ protected:
 	bool raid_target;
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
+	bool m_multiquest_enabled;
+
+	std::vector<const EQ::ItemInstance *> m_multiquest_items;
 
 private:
 	uint32              m_loottable_id;

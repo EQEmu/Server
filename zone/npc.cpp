@@ -226,6 +226,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	ATK                  = npc_type_data->ATK;
 	heroic_strikethrough = npc_type_data->heroic_strikethrough;
 	keeps_sold_items     = npc_type_data->keeps_sold_items;
+	m_multiquest_enabled = npc_type_data->multiquest_enabled;
 
 	// used for when switch back to charm
 	default_ac               = npc_type_data->AC;
@@ -4231,4 +4232,62 @@ void NPC::DoNpcToNpcAggroScan()
 		RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax)),
 		false
 	);
+}
+
+bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
+{
+	if (!inst) {
+		return false;
+	}
+
+	if (!IsPetOwnerClient()) {
+		return false;
+	}
+
+	const bool can_take_nodrop   = RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0;
+	const bool can_pet_take_item = !inst->GetItem()->IsQuestItem()
+		&& can_take_nodrop
+		&& inst->GetItem()->IsPetUsable()
+		&& !inst->IsAttuned();
+
+	if (!can_pet_take_item) {
+		return false;
+	}
+
+	return true;
+}
+
+std::vector<const EQ::ItemInstance *> NPC::GetMultiQuestItems() const
+{
+	return m_multiquest_items;
+}
+
+void NPC::SetMultiQuestItems(std::vector<const EQ::ItemInstance *> multiquest_items)
+{
+	m_multiquest_items = multiquest_items;
+}
+
+bool NPC::IsGuildmasterForClient(Client *c) {
+	std::map<uint8, uint8> guildmaster_map = {
+		{ Class::Warrior,      Class::WarriorGM },
+		{ Class::Cleric,       Class::ClericGM },
+		{ Class::Paladin,      Class::PaladinGM },
+		{ Class::Ranger,       Class::RangerGM },
+		{ Class::ShadowKnight, Class::ShadowKnightGM },
+		{ Class::Druid,        Class::DruidGM },
+		{ Class::Monk,         Class::MonkGM },
+		{ Class::Bard,         Class::BardGM },
+		{ Class::Rogue,        Class::RogueGM },
+		{ Class::Shaman,       Class::ShamanGM },
+		{ Class::Beastlord,    Class::BeastlordGM },
+		{ Class::Berserker,    Class::BerserkerGM },
+	};
+
+	if (guildmaster_map.find(c->GetClass()) != guildmaster_map.end()) {
+		if (guildmaster_map[c->GetClass()] == GetClass()) {
+			return true;
+		}
+	}
+
+	return false;
 }
