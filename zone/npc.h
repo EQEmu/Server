@@ -562,8 +562,11 @@ public:
 
 	bool CanPetTakeItem(const EQ::ItemInstance *inst);
 
-	bool IsMultiQuest() { return multiquest_enabled; }
-	void SetMultiQuest(bool b) { multiquest_enabled = b; }
+	bool IsMultiQuest() { return m_multiquest_enabled; }
+	void SetMultiQuest(bool b) { m_multiquest_enabled = b; }
+	std::vector<const EQ::ItemInstance *> GetMultiQuestItems() const;
+	void SetMultiQuestItems(std::vector<const EQ::ItemInstance *> multiquest_items);
+	bool IsGuildmasterForClient(Client *c);
 
 protected:
 
@@ -706,7 +709,9 @@ protected:
 	bool raid_target;
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
-	bool multiquest_enabled;
+	bool m_multiquest_enabled;
+
+	std::vector<const EQ::ItemInstance *> m_multiquest_items;
 
 private:
 	uint32              m_loottable_id;

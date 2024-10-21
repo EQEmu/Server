@@ -12928,6 +12928,10 @@ bool Client::CheckHandin(
 		}
 	}
 
+	if (n->IsMultiQuest()) {
+		//
+	}
+
 	// in-case we trigger CheckHand-in multiple times, only set these once
 	if (!m_handin_started) {
 		m_handin_started  = true;
@@ -12936,6 +12940,44 @@ bool Client::CheckHandin(
 		m_hand_in.original_items = m_hand_in.items;
 		m_hand_in.original_money = m_hand_in.money;
 		m_hand_in.npc = n;
+	}
+
+	// check if npc is guildmaster
+	if (n->IsGuildmaster()) {
+		for (const auto &h_item: m_hand_in.items) {
+			if (!h_item.item) {
+				continue;
+			}
+
+			if (!IsDisciplineTome(h_item.item->GetItem())) {
+				continue;
+			}
+
+			if (n->IsGuildmasterForClient(this)) {
+				TrainDiscipline(h_item.item->GetID());
+				m_hand_in.items.erase(
+					std::remove_if(
+						m_hand_in.items.begin(),
+						m_hand_in.items.end(),
+						[&](const HandinEntry &i) {
+							bool removed = i.item_id == h_item.item_id;
+							if (removed) {
+								LogNpcHandin(
+									"Hand-in success, removing discipline tome [{}] from hand-in bucket",
+									i.item_id
+								);
+							}
+							return removed;
+						}
+					),
+					m_hand_in.items.end()
+				);
+			} else {
+				n->Say("You are not a member of my guild. I will not train you!");
+				met_requirement = false;
+				break;
+			}
+		}
 	}
 
 	// print current hand-in bucket

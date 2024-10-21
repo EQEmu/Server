@@ -1492,6 +1492,7 @@ public:
 	void CheckScanCloseMobsMovingTimer();
 
 	void ClearDataBucketCache();
+	bool IsGuildmaster() const;
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
