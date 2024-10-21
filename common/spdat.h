@@ -20,6 +20,7 @@
 
 #include "classes.h"
 #include "skills.h"
+#include "item_data.h"
 
 #define SPELL_UNKNOWN 0xFFFF
 #define POISON_PROC 0xFFFE
@@ -1628,5 +1629,6 @@ bool IsCastRestrictedSpell(uint16 spell_id);
 bool IsAegolismSpell(uint16 spell_id);
 bool AegolismStackingIsSymbolSpell(uint16 spell_id);
 bool AegolismStackingIsArmorClassSpell(uint16 spell_id);
+bool IsDisciplineTome(const EQ::ItemData* item);
 
 #endif

@@ -2367,7 +2367,7 @@ bool IsAegolismSpell(uint16 spell_id) {
 
 
 bool AegolismStackingIsSymbolSpell(uint16 spell_id) {
-	
+
 	/*
 		This is hardcoded to be specific to the type of HP buffs that are removed if a mob has an Aegolism buff.
 	*/
@@ -2429,4 +2429,45 @@ bool AegolismStackingIsArmorClassSpell(uint16 spell_id) {
 	}
 
 	return 0;
+}
+
+bool IsDisciplineTome(const EQ::ItemData* item)
+{
+	if (!item->IsClassCommon() || item->ItemType != EQ::item::ItemTypeSpell) {
+		return false;
+	}
+
+	//Need a way to determine the difference between a spell and a tome
+	//so they cant turn in a spell and get it as a discipline
+	//this is kinda a hack:
+
+	const std::string item_name = item->Name;
+
+	if (
+		!Strings::BeginsWith(item_name, "Tome of ") &&
+		!Strings::BeginsWith(item_name, "Skill: ")
+		) {
+		return false;
+	}
+
+	//we know for sure none of the int casters get disciplines
+	uint32 class_bit = 0;
+	class_bit |= 1 << (Class::Wizard - 1);
+	class_bit |= 1 << (Class::Enchanter - 1);
+	class_bit |= 1 << (Class::Magician - 1);
+	class_bit |= 1 << (Class::Necromancer - 1);
+	if (item->Classes & class_bit) {
+		return false;
+	}
+
+	const auto& spell_id = static_cast<uint32>(item->Scroll.Effect);
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	if (!IsDiscipline(spell_id)) {
+		return false;
+	}
+
+	return true;
 }
