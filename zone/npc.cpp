@@ -4300,22 +4300,18 @@ void NPC::SetMultiQuestItems(std::vector<const EQ::ItemInstance *> multiquest_it
 
 bool NPC::IsGuildmasterForClient(Client *c) {
 	std::map<uint8, uint8> guildmaster_map = {
-		{ Class::Warrior, Class::WarriorGM },
-		{ Class::Cleric, Class::ClericGM },
-		{ Class::Paladin, Class::PaladinGM },
-		{ Class::Ranger, Class::RangerGM },
+		{ Class::Warrior,      Class::WarriorGM },
+		{ Class::Cleric,       Class::ClericGM },
+		{ Class::Paladin,      Class::PaladinGM },
+		{ Class::Ranger,       Class::RangerGM },
 		{ Class::ShadowKnight, Class::ShadowKnightGM },
-		{ Class::Druid, Class::DruidGM },
-		{ Class::Monk, Class::MonkGM },
-		{ Class::Bard, Class::BardGM },
-		{ Class::Rogue, Class::RogueGM },
-		{ Class::Shaman, Class::ShamanGM },
-		{ Class::Necromancer, Class::NecromancerGM },
-		{ Class::Wizard, Class::WizardGM },
-		{ Class::Magician, Class::MagicianGM },
-		{ Class::Enchanter, Class::EnchanterGM },
-		{ Class::Beastlord, Class::BeastlordGM },
-		{ Class::Berserker, Class::BerserkerGM },
+		{ Class::Druid,        Class::DruidGM },
+		{ Class::Monk,         Class::MonkGM },
+		{ Class::Bard,         Class::BardGM },
+		{ Class::Rogue,        Class::RogueGM },
+		{ Class::Shaman,       Class::ShamanGM },
+		{ Class::Beastlord,    Class::BeastlordGM },
+		{ Class::Berserker,    Class::BerserkerGM },
 	};
 
 	if (guildmaster_map.find(c->GetClass()) != guildmaster_map.end()) {
