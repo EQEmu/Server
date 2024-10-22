@@ -563,8 +563,6 @@ public:
 
 	bool IsMultiQuestEnabled() { return m_multiquest_enabled; }
 	void MultiQuestEnable() { m_multiquest_enabled = true; }
-	std::vector<const EQ::ItemInstance *> GetMultiQuestItems() const;
-	void SetMultiQuestItems(std::vector<const EQ::ItemInstance *> multiquest_items);
 	bool IsGuildmasterForClient(Client *c);
 
 protected:
@@ -708,9 +706,7 @@ protected:
 	bool raid_target;
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
-	bool m_multiquest_enabled;
-
-	std::vector<const EQ::ItemInstance *> m_multiquest_items;
+	bool m_multiquest_enabled = false;
 
 private:
 	uint32              m_loottable_id;

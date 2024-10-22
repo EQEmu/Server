@@ -4257,16 +4257,6 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 	return true;
 }
 
-std::vector<const EQ::ItemInstance *> NPC::GetMultiQuestItems() const
-{
-	return m_multiquest_items;
-}
-
-void NPC::SetMultiQuestItems(std::vector<const EQ::ItemInstance *> multiquest_items)
-{
-	m_multiquest_items = multiquest_items;
-}
-
 bool NPC::IsGuildmasterForClient(Client *c) {
 	std::map<uint8, uint8> guildmaster_map = {
 		{ Class::Warrior, Class::WarriorGM },

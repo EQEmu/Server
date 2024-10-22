@@ -1821,9 +1821,10 @@ public:
 
 	// NPC Handin
 	struct HandinEntry {
-		std::string            item_id = "0";
-		uint16                 count   = 0;
-		const EQ::ItemInstance *item   = nullptr;
+		std::string            item_id            = "0";
+		uint16                 count              = 0;
+		const EQ::ItemInstance *item              = nullptr;
+		bool                   is_multiquest_item = false;
 	};
 
 	struct HandinMoney {
