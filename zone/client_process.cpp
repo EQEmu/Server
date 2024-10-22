@@ -398,15 +398,10 @@ bool Client::Process() {
 									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack()) {
 										CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
 									}
-								} else {
-									ranged_timer.Start();
 								}
-							} else {
-								ranged_timer.Start();
 							}
-						} else {
-							ranged_timer.Start();
 						}
+						ranged_timer.Start();
 					}
 				} else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
 					if (ranged_timer.Check(false)) {
@@ -427,15 +422,10 @@ bool Client::Process() {
 									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack()) {
 										CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
 									}
-								} else {
-									ranged_timer.Start();
 								}
-							} else {
-								ranged_timer.Start();
 							}
-						} else {
-							ranged_timer.Start();
 						}
+						ranged_timer.Start();
 					}
 				}
 			}
