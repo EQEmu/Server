@@ -294,6 +294,13 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	database.ClearBuyerDetails();
 	LogInfo("Clearing buyer table details");
 
+	if (RuleB(Bots, Enabled)) {
+		LogInfo("Clearing [bot_pet_buffs] table of stale entries");
+		database.QueryDatabase(
+			"DELETE FROM bot_pet_buffs WHERE NOT EXISTS (SELECT * FROM bot_pets WHERE bot_pets.pets_index = bot_pet_buffs.pets_index)"
+		);
+	}
+
 	if (!content_db.LoadItems(hotfix_name)) {
 		LogError("Error: Could not load item data. But ignoring");
 	}
