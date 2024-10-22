@@ -1,3 +1,14 @@
+## [22.57.1] 10/22/2024
+
+### Bots
+
+* Enable Bot Commands Only if Rule Enabled ([#4519](https://github.com/EQEmu/Server/pull/4519)) @Kinglykrab 2024-10-22
+* Fix pet buffs from saving duplicates every save ([#4520](https://github.com/EQEmu/Server/pull/4520)) @nytmyr 2024-10-22
+
+### Loginserver
+
+* Automatic Opcode File Creation ([#4521](https://github.com/EQEmu/Server/pull/4521)) @KimLS 2024-10-22
+
 ## [22.57.0] 10/20/2024
 
 ### Bots
