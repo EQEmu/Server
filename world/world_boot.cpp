@@ -295,7 +295,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	LogInfo("Clearing buyer table details");
 
 	if (RuleB(Bots, Enabled)) {
-		LogInfo("Clearing bot_pet_buffs table");
+		LogInfo("Clearing [bot_pet_buffs] table of stale entries");
 		database.QueryDatabase(
 			"DELETE FROM bot_pet_buffs WHERE NOT EXISTS (SELECT * FROM bot_pets WHERE bot_pets.pets_index = bot_pet_buffs.pets_index)"
 		);
