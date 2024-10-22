@@ -7,6 +7,8 @@
 #include "npc.h"
 #include "lua_npc.h"
 #include "lua_client.h"
+#include "lua_item.h"
+#include "lua_iteminst.h"
 
 struct Lua_NPC_Loot_List {
 	std::vector<uint32> entries;
@@ -849,6 +851,87 @@ void Lua_NPC::MultiQuestEnable()
 	self->MultiQuestEnable();
 }
 
+bool Lua_NPC::LuaCheckHandin(
+	Lua_Client c,
+	luabind::adl::object handin_table,
+	luabind::adl::object required_table,
+	luabind::adl::object items_table
+)
+{
+	Lua_Safe_Call_Bool();
+
+	if (
+		luabind::type(handin_table) != LUA_TTABLE ||
+		luabind::type(required_table) != LUA_TTABLE ||
+		luabind::type(items_table) != LUA_TTABLE
+		) {
+		return false;
+	}
+
+	std::map<std::string, uint16>         handin_map;
+	std::map<std::string, uint16>         required_map;
+	std::vector<const EQ::ItemInstance *> items;
+
+	for (luabind::iterator i(handin_table), end; i != end; i++) {
+		std::string key;
+		if (luabind::type(i.key()) == LUA_TSTRING) {
+			key = luabind::object_cast<std::string>(i.key());
+		}
+		else if (luabind::type(i.key()) == LUA_TNUMBER) {
+			key = fmt::format("{}", luabind::object_cast<int>(i.key()));
+		}
+		else {
+			LogError("Handin key type [{}] not supported", luabind::type(i.key()));
+		}
+
+		if (!key.empty()) {
+			handin_map[key] = luabind::object_cast<uint32>(handin_table[i.key()]);
+			LogNpcHandinDetail("Handin key [{}] value [{}]", key, handin_map[key]);
+		}
+	}
+
+	for (luabind::iterator i(required_table), end; i != end; i++) {
+		std::string key;
+		if (luabind::type(i.key()) == LUA_TSTRING) {
+			key = luabind::object_cast<std::string>(i.key());
+		}
+		else if (luabind::type(i.key()) == LUA_TNUMBER) {
+			key = fmt::format("{}", luabind::object_cast<int>(i.key()));
+		}
+		else {
+			LogError("Required key type [{}] not supported", luabind::type(i.key()));
+		}
+
+		if (!key.empty()) {
+			required_map[key] = luabind::object_cast<uint32>(required_table[i.key()]);
+			LogNpcHandinDetail("Required key [{}] value [{}]", key, required_map[key]);
+		}
+	}
+
+	for (luabind::iterator i(items_table), end; i != end; i++) {
+		auto item = luabind::object_cast<Lua_ItemInst>(items_table[i.key()]);
+
+		if (item && item.GetItem()) {
+			LogNpcHandinDetail(
+				"Item instance [{}] ({}) UUID ({}) added to handin list",
+				item.GetName(),
+				item.GetID(),
+				item.GetSerialNumber()
+			);
+
+			items.emplace_back(item);
+		}
+	}
+
+	return self->CheckHandin(c, handin_map, required_map, items);
+}
+
+void Lua_NPC::ReturnHandinItems(Lua_Client c)
+{
+	Lua_Safe_Call_Void();
+	self->ReturnHandinItems(c);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -871,6 +954,7 @@ luabind::scope lua_register_npc() {
 	.def("AssignWaypoints", (void(Lua_NPC::*)(int))&Lua_NPC::AssignWaypoints)
 	.def("CalculateNewWaypoint", (void(Lua_NPC::*)(void))&Lua_NPC::CalculateNewWaypoint)
 	.def("ChangeLastName", (void(Lua_NPC::*)(std::string))&Lua_NPC::ChangeLastName)
+	.def("CheckHandin", (bool(Lua_NPC::*)(Lua_Client,luabind::adl::object,luabind::adl::object,luabind::adl::object))&Lua_NPC::LuaCheckHandin)
 	.def("CheckNPCFactionAlly", (int(Lua_NPC::*)(int))&Lua_NPC::CheckNPCFactionAlly)
 	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLootItems)
 	.def("ClearLastName", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLastName)
@@ -967,6 +1051,7 @@ luabind::scope lua_register_npc() {
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int))&Lua_NPC::RemoveItem)
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int,int))&Lua_NPC::RemoveItem)
 	.def("ResumeWandering", (void(Lua_NPC::*)(void))&Lua_NPC::ResumeWandering)
+	.def("ReturnHandinItems", (void(Lua_NPC::*)(Lua_Client))&Lua_NPC::ReturnHandinItems)
 	.def("SaveGuardSpot", (void(Lua_NPC::*)(void))&Lua_NPC::SaveGuardSpot)
 	.def("SaveGuardSpot", (void(Lua_NPC::*)(bool))&Lua_NPC::SaveGuardSpot)
 	.def("SaveGuardSpot", (void(Lua_NPC::*)(float,float,float,float))&Lua_NPC::SaveGuardSpot)

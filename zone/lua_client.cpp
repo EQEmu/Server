@@ -3436,87 +3436,6 @@ void Lua_Client::AreaTaunt(float range, int bonus_hate)
 	entity_list.AETaunt(self, range, bonus_hate);
 }
 
-bool Lua_Client::LuaCheckHandin(
-	Lua_NPC n,
-	luabind::adl::object handin_table,
-	luabind::adl::object required_table,
-	luabind::adl::object items_table
-)
-{
-	Lua_Safe_Call_Bool();
-
-	if (
-		luabind::type(handin_table) != LUA_TTABLE ||
-		luabind::type(required_table) != LUA_TTABLE ||
-		luabind::type(items_table) != LUA_TTABLE
-	) {
-		return false;
-	}
-
-	std::map<std::string, uint16>             handin_map;
-	std::map<std::string, uint16>             required_map;
-	std::vector<const EQ::ItemInstance*> items;
-
-	for (luabind::iterator i(handin_table), end; i != end; i++) {
-		std::string key;
-		if (luabind::type(i.key()) == LUA_TSTRING) {
-			key = luabind::object_cast<std::string>(i.key());
-		}
-		else if (luabind::type(i.key()) == LUA_TNUMBER) {
-			key = fmt::format("{}", luabind::object_cast<int>(i.key()));
-		}
-		else {
-			LogError("Handin key type [{}] not supported", luabind::type(i.key()));
-		}
-
-		if (!key.empty()) {
-			handin_map[key] = luabind::object_cast<uint32>(handin_table[i.key()]);
-			LogNpcHandinDetail("Handin key [{}] value [{}]", key, handin_map[key]);
-		}
-	}
-
-	for (luabind::iterator i(required_table), end; i != end; i++) {
-		std::string key;
-		if (luabind::type(i.key()) == LUA_TSTRING) {
-			key = luabind::object_cast<std::string>(i.key());
-		}
-		else if (luabind::type(i.key()) == LUA_TNUMBER) {
-			key = fmt::format("{}", luabind::object_cast<int>(i.key()));
-		}
-		else {
-			LogError("Required key type [{}] not supported", luabind::type(i.key()));
-		}
-
-		if (!key.empty()) {
-			required_map[key] = luabind::object_cast<uint32>(required_table[i.key()]);
-			LogNpcHandinDetail("Required key [{}] value [{}]", key, required_map[key]);
-		}
-	}
-
-	for (luabind::iterator i(items_table), end; i != end; i++) {
-		auto item = luabind::object_cast<Lua_ItemInst>(items_table[i.key()]);
-
-		if (item && item.GetItem()) {
-			LogNpcHandinDetail(
-				"Item instance [{}] ({}) UUID ({}) added to handin list",
-				item.GetName(),
-				item.GetID(),
-				item.GetSerialNumber()
-			);
-
-			items.emplace_back(item);
-		}
-	}
-
-	return self->CheckHandin(n, handin_map, required_map, items);
-}
-
-void Lua_Client::ReturnHandinItems()
-{
-	Lua_Safe_Call_Void();
-	self->ReturnHandinItems();
-}
-
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3586,7 +3505,6 @@ luabind::scope lua_register_client() {
 	.def("CashReward", &Lua_Client::CashReward)
 	.def("ChangeLastName", (void(Lua_Client::*)(std::string))&Lua_Client::ChangeLastName)
 	.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
-	.def("CheckHandin", (bool(Lua_Client::*)(Lua_NPC,luabind::adl::object,luabind::adl::object,luabind::adl::object))&Lua_Client::LuaCheckHandin)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob,int))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckSpecializeIncrease", (void(Lua_Client::*)(int))&Lua_Client::CheckSpecializeIncrease)
@@ -3923,7 +3841,6 @@ luabind::scope lua_register_client() {
 	.def("ResetItemCooldown", (void(Lua_Client::*)(uint32))&Lua_Client::ResetItemCooldown)
 	.def("ResetLeadershipAA", (void(Lua_Client::*)(void))&Lua_Client::ResetLeadershipAA)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
-	.def("ReturnHandinItems", (void(Lua_Client::*)(void))&Lua_Client::ReturnHandinItems)
 	.def("RewardFaction", (void(Lua_Client::*)(int,int))&Lua_Client::RewardFaction)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)
 	.def("Save", (void(Lua_Client::*)(void))&Lua_Client::Save)

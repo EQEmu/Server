@@ -3212,75 +3212,6 @@ Merc* Perl_Client_GetMerc(Client* self)
 	return self->GetMerc();
 }
 
-bool Perl_Client_CheckHandin(
-	Client* self,
-	NPC* n,
-	perl::reference handin_ref,
-	perl::reference required_ref,
-	perl::array items_ref
-)
-{
-	perl::hash handin   = handin_ref;
-	perl::hash required = required_ref;
-
-	std::map<std::string, uint16>        handin_map;
-	std::map<std::string, uint16>        required_map;
-	std::vector<const EQ::ItemInstance*> items;
-
-	for (auto e: handin) {
-		if (!e.first) {
-			continue;
-		}
-
-		if (Strings::EqualFold(e.first, "0")) {
-			continue;
-		}
-
-		LogNpcHandinDetail("Handin key [{}] value [{}]", e.first, handin.at(e.first).c_str());
-
-		const uint32 count = static_cast<uint32>(handin.at(e.first));
-		handin_map[e.first] = count;
-	}
-
-	for (auto e: required) {
-		if (!e.first) {
-			continue;
-		}
-
-		if (Strings::EqualFold(e.first, "0")) {
-			continue;
-		}
-
-		LogNpcHandinDetail("Required key [{}] value [{}]", e.first, required.at(e.first).c_str());
-
-		const uint32 count = static_cast<uint32>(required.at(e.first));
-		required_map[e.first] = count;
-	}
-
-	for (auto e : items_ref) {
-		const EQ::ItemInstance* i = static_cast<EQ::ItemInstance*>(e);
-		if (!i) {
-			continue;
-		}
-
-		items.emplace_back(i);
-
-		LogNpcHandinDetail(
-			"Item instance [{}] ({}) UUID ({}) added to handin list",
-			i->GetItem()->Name,
-			i->GetItem()->ID,
-			i->GetSerialNumber()
-		);
-	}
-
-	return self->CheckHandin(n, handin_map, required_map, items);
-}
-
-void Perl_Client_ReturnHandinItems(Client* self)
-{
-	self->ReturnHandinItems();
-}
-
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3353,7 +3284,6 @@ void perl_register_client()
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
 	package.add("CharacterID", &Perl_Client_CharacterID);
-	package.add("CheckHandin", &Perl_Client_CheckHandin);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckSpecializeIncrease", &Perl_Client_CheckSpecializeIncrease);
@@ -3684,7 +3614,6 @@ void perl_register_client()
 	package.add("ResetItemCooldown", &Perl_Client_ResetItemCooldown);
 	package.add("ResetLeadershipAA", &Perl_Client_ResetLeadershipAA);
 	package.add("ResetTrade", &Perl_Client_ResetTrade);
-	package.add("ReturnHandinItems", &Perl_Client_ReturnHandinItems);
 	package.add("Save", &Perl_Client_Save);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int))&Perl_Client_ScribeSpell);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int, bool))&Perl_Client_ScribeSpell);
