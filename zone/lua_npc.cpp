@@ -837,16 +837,16 @@ void Lua_NPC::DescribeSpecialAbilities(Lua_Client c)
 	self->DescribeSpecialAbilities(c);
 }
 
-bool Lua_NPC::IsMultiQuest()
+bool Lua_NPC::IsMultiQuestEnabled()
 {
 	Lua_Safe_Call_Bool();
-	return self->IsMultiQuest();
+	return self->IsMultiQuestEnabled();
 }
 
-void Lua_NPC::SetMultiQuest(bool b)
+void Lua_NPC::MultiQuestEnable()
 {
 	Lua_Safe_Call_Void();
-	self->SetMultiQuest(b);
+	self->MultiQuestEnable();
 }
 
 luabind::scope lua_register_npc() {
@@ -942,7 +942,7 @@ luabind::scope lua_register_npc() {
 	.def("IsAnimal", (bool(Lua_NPC::*)(void))&Lua_NPC::IsAnimal)
 	.def("IsGuarding", (bool(Lua_NPC::*)(void))&Lua_NPC::IsGuarding)
 	.def("IsLDoNLocked", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNLocked)
-	.def("IsMultiQuest", (bool(Lua_NPC::*)(void))&Lua_NPC::IsMultiQuest)
+	.def("IsMultiQuestEnabled", (bool(Lua_NPC::*)(void))&Lua_NPC::IsMultiQuestEnabled)
 	.def("IsLDoNTrapped", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNTrapped)
 	.def("IsLDoNTrapDetected", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNTrapDetected)
 	.def("IsOnHatelist", (bool(Lua_NPC::*)(Lua_Mob))&Lua_NPC::IsOnHatelist)
@@ -954,6 +954,7 @@ luabind::scope lua_register_npc() {
 	.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
 	.def("ModifyNPCStat", (void(Lua_NPC::*)(std::string,std::string))&Lua_NPC::ModifyNPCStat)
 	.def("MoveTo", (void(Lua_NPC::*)(float,float,float,float,bool))&Lua_NPC::MoveTo)
+	.def("MultiQuestEnable", &Lua_NPC::MultiQuestEnable)
 	.def("NextGuardPosition", (void(Lua_NPC::*)(void))&Lua_NPC::NextGuardPosition)
 	.def("PauseWandering", (void(Lua_NPC::*)(int))&Lua_NPC::PauseWandering)
 	.def("PickPocket", (void(Lua_NPC::*)(Lua_Client))&Lua_NPC::PickPocket)
@@ -982,7 +983,6 @@ luabind::scope lua_register_npc() {
 	.def("SetGold", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetGold)
 	.def("SetGrid", (void(Lua_NPC::*)(int))&Lua_NPC::SetGrid)
 	.def("SetKeepsSoldItems", (void(Lua_NPC::*)(bool))&Lua_NPC::SetKeepsSoldItems)
-	.def("SetMultiQuest", (void(Lua_NPC::*)(bool))&Lua_NPC::SetMultiQuest)
 	.def("SetLDoNLocked", (void(Lua_NPC::*)(bool))&Lua_NPC::SetLDoNLocked)
 	.def("SetLDoNLockedSkill", (void(Lua_NPC::*)(uint16))&Lua_NPC::SetLDoNLockedSkill)
 	.def("SetLDoNTrapped", (void(Lua_NPC::*)(bool))&Lua_NPC::SetLDoNTrapped)
