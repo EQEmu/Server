@@ -4108,6 +4108,13 @@ bool Mob::SpellOnTarget(
 		return false;
 	}
 
+	if (zone->GetZoneID() == Zones::BAZAAR && spelltar->IsNPC() && !spelltar->IsPet()) {
+		if (spellOwner->IsClient()) {
+			spellOwner->Message(Chat::SpellFailure, "Your spell would not take hold on your target.");
+		}
+		return false;
+	}
+
 	// well we can't cast a spell on target without a target
 	if (!spelltar) {
 		LogSpells("Unable to apply spell [{}] without a target", spell_id);
