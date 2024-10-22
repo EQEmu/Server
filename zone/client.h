@@ -1732,15 +1732,6 @@ public:
 	void DuplicateLoreMessage(uint32 ItemID);
 	void GarbleMessage(char *, uint8);
 
-	bool CheckHandin(
-		NPC* n,
-		std::map<std::string, uint16> handin,
-		std::map<std::string, uint16> required,
-		std::vector<const EQ::ItemInstance*> items
-	);
-	void ReturnHandinItems();
-	void ResetHandin();
-
 	void ItemTimerCheck();
 	void TryItemTimer(int slot);
 	void SendItemScale(EQ::ItemInstance *inst);
@@ -1818,37 +1809,6 @@ public:
 	void RecordKilledNPCEvent(NPC *n);
 
 	uint32 GetEXPForLevel(uint16 check_level);
-
-	// NPC Handin
-	struct HandinEntry {
-		std::string            item_id            = "0";
-		uint16                 count              = 0;
-		const EQ::ItemInstance *item              = nullptr;
-		bool                   is_multiquest_item = false;
-	};
-
-	struct HandinMoney {
-		uint32 platinum = 0;
-		uint32 gold     = 0;
-		uint32 silver   = 0;
-		uint32 copper   = 0;
-	};
-
-	struct Handin {
-		std::vector<HandinEntry> original_items = {}; // this is what the player originally handed in, never modified
-		std::vector<HandinEntry> items          = {}; // items can be removed from this set as successful handins are made
-		HandinMoney              original_money = {}; // this is what the player originally handed in, never modified
-		HandinMoney              money          = {}; // money can be removed from this set as successful handins are made
-		NPC                      *npc           = nullptr; // the NPC the player is handing in to
-	};
-
-	bool m_handin_started              = false;
-	bool m_has_processed_handin_return = false;
-
-	// this is the working handin data from the player
-	// items can be decremented from this as each successful
-	// check is ran in scripts, the remainder is what is returned
-	Handin m_hand_in = {};
 
 protected:
 	friend class Mob;

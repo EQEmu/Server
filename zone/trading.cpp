@@ -871,11 +871,13 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			LogNpcHandinDetail("EVENT_TRADE triggered for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
 
+		auto handin_npc = tradingWith->CastToNPC();
+
 		// this is a catch-all return for items that weren't consumed by the EVENT_TRADE subroutine
 		// it's possible we have a quest NPC that doesn't have an EVENT_TRADE subroutine
 		// we can't double fire the ReturnHandinItems() event, so we need to check if it's already been processed from EVENT_TRADE
-		if (!m_has_processed_handin_return) {
-			if (!m_handin_started) {
+		if (!handin_npc->HasProcessedHandinReturn()) {
+			if (!handin_npc->HandinStarted()) {
 				LogNpcHandinDetail("EVENT_TRADE did not process handin, calling ReturnHandinItems() for NPC [{}]", tradingWith->GetNPCTypeID());
 				std::map<std::string, uint16> handin = {
 					{"copper",   trade->cp},
@@ -894,14 +896,14 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					item_list.emplace_back(inst);
 				}
 
-				CheckHandin(tradingWith->CastToNPC(), handin, {}, list);
+				handin_npc->CheckHandin(this, handin, {}, list);
 			}
 
-			ReturnHandinItems();
-			LogNpcHandin("ReturnHandinItems() called for NPC [{}]", tradingWith->GetNPCTypeID());
+			handin_npc->ReturnHandinItems(this);
+			LogNpcHandin("ReturnHandinItems() called for NPC [{}]", handin_npc->GetNPCTypeID());
 		}
 
-		ResetHandin();
+		handin_npc->ResetHandin();
 
 		for (auto &inst: insts) {
 			if (inst) {
