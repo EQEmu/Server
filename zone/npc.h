@@ -561,8 +561,8 @@ public:
 
 	bool CanPetTakeItem(const EQ::ItemInstance *inst);
 
-	bool IsMultiQuest() { return m_multiquest_enabled; }
-	void SetMultiQuest(bool b) { m_multiquest_enabled = b; }
+	bool IsMultiQuestEnabled() { return m_multiquest_enabled; }
+	void MultiQuestEnable() { m_multiquest_enabled = true; }
 	std::vector<const EQ::ItemInstance *> GetMultiQuestItems() const;
 	void SetMultiQuestItems(std::vector<const EQ::ItemInstance *> multiquest_items);
 	bool IsGuildmasterForClient(Client *c);

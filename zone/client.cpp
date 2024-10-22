@@ -12928,7 +12928,7 @@ bool Client::CheckHandin(
 		}
 	}
 
-	if (n->IsMultiQuest()) {
+	if (n->IsMultiQuestEnabled()) {
 		//
 	}
 
