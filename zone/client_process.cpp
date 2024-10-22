@@ -385,10 +385,12 @@ bool Client::Process() {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
-									if (RangedAttack(GetTarget()) && (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack()))) {
-										if (RangedAttack(GetTarget(), true) && RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack()) {
-											RangedAttack(GetTarget(), true);
-										}
+									RangedAttack(GetTarget());
+									if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
+										RangedAttack(GetTarget(), true);
+									}
+									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack()) {
+										RangedAttack(GetTarget(), true);
 									}
 									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack()) {
 										CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
@@ -412,10 +414,12 @@ bool Client::Process() {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
-									if (ThrowingAttack(GetTarget()) && (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack()))) {
-										if (ThrowingAttack(GetTarget(), true) && RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack()) {
-											ThrowingAttack(GetTarget(), true);
-										}
+									ThrowingAttack(GetTarget());
+									if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
+										ThrowingAttack(GetTarget(), true);
+									}
+									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack()) {
+										ThrowingAttack(GetTarget(), true);
 									}
 									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack()) {
 										CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
