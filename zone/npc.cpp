@@ -4331,7 +4331,7 @@ bool NPC::CheckHandin(
 	std::string log_handin_prefix = fmt::format("[{}] -> [{}]", c->GetCleanName(), GetCleanName());
 
 	// if the npc is a multi-quest npc, we want to re-use our previously set hand-in bucket
-	if (!m_handin_started && m_hand_in.npc && m_hand_in.npc->IsMultiQuestEnabled()) {
+	if (!m_handin_started && IsMultiQuestEnabled()) {
 		h = m_hand_in;
 	}
 
@@ -4448,7 +4448,6 @@ bool NPC::CheckHandin(
 		// save original items for logging
 		m_hand_in.original_items = m_hand_in.items;
 		m_hand_in.original_money = m_hand_in.money;
-		m_hand_in.npc = this;
 	}
 
 	// check if npc is guildmaster
@@ -4726,8 +4725,8 @@ void NPC::ReturnHandinItems(Client *c)
 
 	m_has_processed_handin_return = returned_handin;
 
-	if (returned_handin && m_hand_in.npc) {
-		m_hand_in.npc->Say(
+	if (returned_handin) {
+		Say(
 			fmt::format(
 				"I have no need for this {}, you can have it back.",
 				GetCleanName()
@@ -4745,13 +4744,13 @@ void NPC::ReturnHandinItems(Client *c)
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
 		auto e = PlayerEvent::HandinEvent{
-			.npc_id = m_hand_in.npc->GetNPCTypeID(),
-			.npc_name = m_hand_in.npc->GetCleanName(),
+			.npc_id = GetNPCTypeID(),
+			.npc_name = GetCleanName(),
 			.handin_items = handin_items,
 			.handin_money = handin_money,
 			.return_items = return_items,
 			.return_money = return_money,
-			.is_quest_handin = parse->HasQuestSub(m_hand_in.npc->GetNPCTypeID(), EVENT_TRADE)
+			.is_quest_handin = parse->HasQuestSub(GetNPCTypeID(), EVENT_TRADE)
 		};
 
 		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
@@ -4762,7 +4761,11 @@ void NPC::ResetHandin()
 {
 	m_has_processed_handin_return = false;
 	m_handin_started              = false;
-	if (m_hand_in.npc && !m_hand_in.npc->IsMultiQuestEnabled()) {
+	if (!IsMultiQuestEnabled()) {
+		for (auto &i: m_hand_in.items) {
+			safe_delete(i.item);
+		}
+
 		m_hand_in = {};
 	}
 }
