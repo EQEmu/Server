@@ -1451,7 +1451,7 @@ bool BotDatabase::DeletePetBuffs(const uint32 bot_id)
 		return true;
 	}
 
-	BotPetBuffsRepository::DeleteOne(database, saved_pet_index);
+	BotPetBuffsRepository::DeleteWhere(database, fmt::format("pets_index = {}", saved_pet_index));
 
 	return true;
 }

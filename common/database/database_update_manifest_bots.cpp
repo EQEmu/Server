@@ -162,6 +162,20 @@ ADD COLUMN `extra_haste` mediumint(8) NOT NULL DEFAULT 0 AFTER `wis`;
 ALTER TABLE `bot_spells_entries`
 CHANGE COLUMN `spellid` `spell_id` smallint(5) UNSIGNED NOT NULL DEFAULT 0 AFTER `npc_spells_id`;
 )"
+	},
+	ManifestEntry{
+		.version = 9046,
+		.description = "2024_10_21_bot_pet_buffs_cleanup.sql",
+		.check = "SHOW COLUMNS FROM `bot_pet_buffs` LIKE 'spell_id'",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+DELETE
+FROM bot_pet_buffs
+WHERE NOT EXISTS (SELECT *
+	FROM bot_pets
+	WHERE bot_pets.pets_index = bot_pet_buffs.pets_index)
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
