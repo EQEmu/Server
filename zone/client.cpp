@@ -12844,6 +12844,13 @@ bool Client::CheckHandin(
 	auto h = Handin{};
 	auto r = Handin{};
 
+	std::string log_handin_prefix = fmt::format("[{}] -> [{}]", GetCleanName(), n->GetCleanName());
+
+	// if the npc is a multi-quest npc, we want to re-use our previously set hand-in bucket
+	if (!m_handin_started && m_hand_in.npc && m_hand_in.npc->IsMultiQuestEnabled()) {
+		h = m_hand_in;
+	}
+
 	std::vector<std::pair<const std::map<std::string, uint16>&, Handin&>> datasets = {};
 
 	// if we've already started the hand-in process, we don't want to re-process the hand-in data
@@ -12890,7 +12897,7 @@ bool Client::CheckHandin(
 				HandinEntry{
 					.item_id = std::to_string(i->GetItem()->ID),
 					.count = std::max(static_cast<uint16>(i->GetCharges()), static_cast<uint16>(1)),
-					.item = i
+					.item = i->Clone()
 				}
 			);
 		}
@@ -12899,7 +12906,7 @@ bool Client::CheckHandin(
 	// compare hand-in to required, the item_id can be in any slot
 	bool met_requirement = true;
 	if (h.items.size() == r.items.size() && !h.items.empty() && !r.items.empty()) {
-		for (const auto &h_item: h.items) {
+		for (auto &h_item: h.items) {
 			bool found = false;
 			for (const auto &r_item: r.items) {
 				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
@@ -12918,6 +12925,28 @@ bool Client::CheckHandin(
 		met_requirement = false;
 	}
 
+	// multi-quest
+	if (n && n->IsMultiQuestEnabled()) {
+		for (auto &h_item: h.items) {
+			for (const auto &r_item: r.items) {
+				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
+					h_item.is_multiquest_item = true;
+				}
+			}
+		}
+	}
+
+	for (auto &h_item: h.items) {
+		LogNpcHandinDetail(
+			"{} Hand-in item [{}] ({}) count [{}] is_multiquest_item [{}]",
+			log_handin_prefix,
+			h_item.item->GetItem()->Name,
+			h_item.item_id,
+			h_item.count,
+			h_item.is_multiquest_item
+		);
+	}
+
 	// compare hand-in money to required
 	if (met_requirement) {
 		if (h.money.platinum != r.money.platinum ||
@@ -12926,10 +12955,6 @@ bool Client::CheckHandin(
 			h.money.copper != r.money.copper) {
 			met_requirement = false;
 		}
-	}
-
-	if (n->IsMultiQuestEnabled()) {
-		//
 	}
 
 	// in-case we trigger CheckHand-in multiple times, only set these once
@@ -12963,7 +12988,8 @@ bool Client::CheckHandin(
 							bool removed = i.item_id == h_item.item_id;
 							if (removed) {
 								LogNpcHandin(
-									"Hand-in success, removing discipline tome [{}] from hand-in bucket",
+									"{} Hand-in success, removing discipline tome [{}] from hand-in bucket",
+									log_handin_prefix,
 									i.item_id
 								);
 							}
@@ -12982,8 +13008,8 @@ bool Client::CheckHandin(
 
 	// print current hand-in bucket
 	LogNpcHandin(
-		" > Before processing hand-in | client [{}] met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
-		GetCleanName(),
+		"{} > Before processing hand-in | met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
+		log_handin_prefix,
 		met_requirement,
 		h.items.size(),
 		h.money.platinum,
@@ -12991,60 +13017,60 @@ bool Client::CheckHandin(
 		h.money.silver,
 		h.money.copper
 	);
-	std::vector<std::string> log_entries = {};
-	int item_count = 1;
-	for (const auto &i: h.items) {
-		log_entries.emplace_back(
-			fmt::format(
-				"item{} [{}] ({}) count [{}]",
-				item_count,
-				i.item->GetItem()->Name,
-				i.item_id,
-				i.count
-			)
-		);
-		item_count++;
-	}
 
 	LogNpcHandin(
-		" >> Handed Items | Item(s) ({}) {} platinum [{}] gold [{}] silver [{}] copper [{}]",
+		"{} >> Handed Items | Item(s) ({}) platinum [{}] gold [{}] silver [{}] copper [{}]",
+		log_handin_prefix,
 		h.items.size(),
-		Strings::Join(log_entries, ", "),
 		h.money.platinum,
 		h.money.gold,
 		h.money.silver,
 		h.money.copper
 	);
 
-	log_entries.clear();
-	item_count = 1;
-	for (const auto &i: r.items) {
-		auto item = database.GetItem(Strings::ToUnsignedInt(i.item_id));
-
-		log_entries.emplace_back(
-			fmt::format(
-				"item{} [{}] ({}) count [{}]",
-				item_count,
-				item ? item->Name : "Unknown",
-				i.item_id,
-				i.count
-			)
+	int item_count = 1;
+	for (const auto &i: h.items) {
+		LogNpcHandin(
+			"{} >>> item{} [{}] ({}) count [{}]",
+			log_handin_prefix,
+			item_count,
+			i.item->GetItem()->Name,
+			i.item_id,
+			i.count
 		);
 		item_count++;
 	}
 
+
+
 	LogNpcHandin(
-		" >> Required Items | Item(s) ({}) {} platinum [{}] gold [{}] silver [{}] copper [{}]",
+		"{} >> Required Items | Item(s) ({}) platinum [{}] gold [{}] silver [{}] copper [{}]",
+		log_handin_prefix,
 		r.items.size(),
-		Strings::Join(log_entries, ", "),
 		r.money.platinum,
 		r.money.gold,
 		r.money.silver,
 		r.money.copper
 	);
 
+	item_count = 1;
+	for (const auto &i: r.items) {
+		auto item = database.GetItem(Strings::ToUnsignedInt(i.item_id));
+
+		LogNpcHandin(
+			"{} >>> item{} [{}] ({}) count [{}]",
+			log_handin_prefix,
+			item_count,
+			item ? item->Name : "Unknown",
+			i.item_id,
+			i.count
+		);
+
+		item_count++;
+	}
+
 	if (met_requirement) {
-		log_entries = {};
+		std::vector<std::string> log_entries = {};
 		for (const auto &h_item : h.items) {
 			auto it = std::find_if(r.items.begin(), r.items.end(), [&](const auto &r_item) {
 				return h_item.item_id == r_item.item_id && h_item.count == r_item.count;
@@ -13060,7 +13086,8 @@ bool Client::CheckHandin(
 							if (removed) {
 								log_entries.emplace_back(
 									fmt::format(
-										" >>> Hand-in success | Removing from hand-in bucket | item [{}] ({}) count [{}]",
+										"{} >>> Hand-in success | Removing from hand-in bucket | item [{}] ({}) count [{}]",
+										log_handin_prefix,
 										i.item->GetItem()->Name,
 										i.item_id,
 										i.count
@@ -13083,8 +13110,8 @@ bool Client::CheckHandin(
 		}
 
 		LogNpcHandin(
-			" > End of hand-in | client [{}] met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
-			GetCleanName(),
+			"{} > End of hand-in | met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
+			log_handin_prefix,
 			met_requirement,
 			m_hand_in.items.size(),
 			m_hand_in.money.platinum,
@@ -13094,7 +13121,8 @@ bool Client::CheckHandin(
 		);
 		for (const auto &i: m_hand_in.items) {
 			LogNpcHandin(
-				"Hand-in success, item [{}] ({}) count [{}]",
+				"{} Hand-in success, item [{}] ({}) count [{}]",
+				log_handin_prefix,
 				i.item->GetItem()->Name,
 				i.item_id,
 				i.count
@@ -13104,7 +13132,8 @@ bool Client::CheckHandin(
 		// decrement successful hand-in money from current hand-in bucket
 		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
 			LogNpcHandin(
-				"Hand-in success, removing money p [{}] g [{}] s [{}] c [{}]",
+				"{} Hand-in success, removing money p [{}] g [{}] s [{}] c [{}]",
+				log_handin_prefix,
 				h.money.platinum,
 				h.money.gold,
 				h.money.silver,
@@ -13153,24 +13182,36 @@ void Client::ReturnHandinItems()
 		handin_money.platinum = m_hand_in.original_money.platinum;
 	}
 
-	bool return_handin = false;
-	for (const auto& i: m_hand_in.items) {
-		if (i.item && i.item->GetItem()) {
-			return_items.emplace_back(
-				PlayerEvent::HandinEntry{
-					.item_id = i.item->GetID(),
-					.item_name = i.item->GetItem()->Name,
-					.augment_ids = i.item->GetAugmentIDs(),
-					.augment_names = i.item->GetAugmentNames(),
-					.charges = std::max(static_cast<uint16>(i.item->GetCharges()), static_cast<uint16>(1))
-				}
-			);
+	bool returned_handin = false;
+	m_hand_in.items.erase(
+		std::remove_if(
+			m_hand_in.items.begin(),
+			m_hand_in.items.end(),
+			[&](auto& i) {
+				if (i.item && i.item->GetItem() && !i.is_multiquest_item) {
+					return_items.emplace_back(
+						PlayerEvent::HandinEntry{
+							.item_id = i.item->GetID(),
+							.item_name = i.item->GetItem()->Name,
+							.augment_ids = i.item->GetAugmentIDs(),
+							.augment_names = i.item->GetAugmentNames(),
+							.charges = std::max(static_cast<uint16>(i.item->GetCharges()), static_cast<uint16>(1))
+						}
+					);
 
-			PushItemOnCursor(*i.item, true);
-			LogNpcHandin("Hand-in failed, returning item [{}]", i.item->GetItem()->Name);
-			return_handin = true;
-		}
-	}
+					PushItemOnCursor(*i.item, true);
+					LogNpcHandin("Hand-in failed, returning item [{}]", i.item->GetItem()->Name);
+
+					// Safely delete the item
+					safe_delete(i.item);
+					returned_handin = true;
+					return true; // Mark this item for removal
+				}
+				return false;
+			}
+		),
+		m_hand_in.items.end()
+	);
 
 	// check if any money was handed in
 	if (m_hand_in.money.platinum > 0 ||
@@ -13185,7 +13226,7 @@ void Client::ReturnHandinItems()
 			m_hand_in.money.platinum,
 			true
 		);
-		return_handin = true;
+		returned_handin = true;
 		LogNpcHandin(
 			"Hand-in failed, returning money p [{}] g [{}] s [{}] c [{}]",
 			m_hand_in.money.platinum,
@@ -13201,17 +13242,15 @@ void Client::ReturnHandinItems()
 		return_money.platinum = m_hand_in.money.platinum;
 	}
 
-	m_has_processed_handin_return = return_handin;
+	m_has_processed_handin_return = returned_handin;
 
-	if (return_handin) {
-		if (m_hand_in.npc) {
-			m_hand_in.npc->Say(
-				fmt::format(
-					"I have no need for this {}, you can have it back.",
-					GetCleanName()
-				).c_str()
-			);
-		}
+	if (returned_handin && m_hand_in.npc) {
+		m_hand_in.npc->Say(
+			fmt::format(
+				"I have no need for this {}, you can have it back.",
+				GetCleanName()
+			).c_str()
+		);
 	}
 
 	const bool handed_in_money = (
@@ -13241,6 +13280,7 @@ void Client::ResetHandin()
 {
 	m_has_processed_handin_return = false;
 	m_handin_started              = false;
-	m_hand_in.original_money             = {};
-	m_hand_in                     = {};
+	if (m_hand_in.npc && !m_hand_in.npc->IsMultiQuestEnabled()) {
+		m_hand_in = {};
+	}
 }
