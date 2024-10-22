@@ -74,6 +74,11 @@ void PathManager::LoadPaths()
 		m_patch_path = fs::relative(fs::path{m_server_path + "/" + c->PatchDir}).string();
 	}
 
+	// patches
+	if (File::Exists(fs::path{ m_server_path + "/" + c->OpcodeDir }.string())) {
+		m_opcode_path = fs::relative(fs::path{ m_server_path + "/" + c->OpcodeDir }).string();
+	}
+
 	// shared_memory_path
 	if (File::Exists(fs::path{m_server_path + "/" + c->SharedMemDir}.string())) {
 		m_shared_memory_path = fs::relative(fs::path{ m_server_path + "/" + c->SharedMemDir }).string();
@@ -89,6 +94,7 @@ void PathManager::LoadPaths()
 	LogInfo("lua_modules path [{}]", m_lua_modules_path);
 	LogInfo("maps path [{}]", m_maps_path);
 	LogInfo("patches path [{}]", m_patch_path);
+	LogInfo("opcode path [{}]", m_opcode_path);
 	LogInfo("plugins path [{}]", m_plugins_path);
 	LogInfo("quests path [{}]", m_quests_path);
 	LogInfo("shared_memory path [{}]", m_shared_memory_path);
@@ -127,6 +133,11 @@ const std::string &PathManager::GetLogPath() const
 const std::string &PathManager::GetPatchPath() const
 {
 	return m_patch_path;
+}
+
+const std::string &PathManager::GetOpcodePath() const
+{
+	return m_opcode_path;
 }
 
 const std::string &PathManager::GetLuaModulesPath() const

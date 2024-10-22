@@ -7,6 +7,79 @@ extern bool        run_server;
 #include "../common/eqemu_logsys.h"
 #include "../common/misc.h"
 #include "../common/path_manager.h"
+#include "../common/file.h"
+
+void CheckTitaniumOpcodeFile(const std::string &path) {
+	if (File::Exists(path)) {
+		return;
+	}
+
+	auto f = fopen(path.c_str(), "w");
+	if (f) {
+		fprintf(f, "#EQEmu Public Login Server OPCodes\n");
+		fprintf(f, "OP_SessionReady=0x0001\n");
+		fprintf(f, "OP_Login=0x0002\n");
+		fprintf(f, "OP_ServerListRequest=0x0004\n");
+		fprintf(f, "OP_PlayEverquestRequest=0x000d\n");
+		fprintf(f, "OP_PlayEverquestResponse=0x0021\n");
+		fprintf(f, "OP_ChatMessage=0x0016\n");
+		fprintf(f, "OP_LoginAccepted=0x0017\n");
+		fprintf(f, "OP_ServerListResponse=0x0018\n");
+		fprintf(f, "OP_Poll=0x0029\n");
+		fprintf(f, "OP_EnterChat=0x000f\n");
+		fprintf(f, "OP_PollResponse=0x0011\n");
+		fclose(f);
+	}
+}
+
+void CheckSoDOpcodeFile(const std::string& path) {
+	if (File::Exists(path)) {
+		return;
+	}
+
+	auto f = fopen(path.c_str(), "w");
+	if (f) {
+		fprintf(f, "#EQEmu Public Login Server OPCodes\n");
+		fprintf(f, "OP_SessionReady=0x0001\n");
+		fprintf(f, "OP_Login=0x0002\n");
+		fprintf(f, "OP_ServerListRequest=0x0004\n");
+		fprintf(f, "OP_PlayEverquestRequest=0x000d\n");
+		fprintf(f, "OP_PlayEverquestResponse=0x0022\n");
+		fprintf(f, "OP_ChatMessage=0x0017\n");
+		fprintf(f, "OP_LoginAccepted=0x0018\n");
+		fprintf(f, "OP_ServerListResponse=0x0019\n");
+		fprintf(f, "OP_Poll=0x0029\n");
+		fprintf(f, "OP_LoginExpansionPacketData=0x0031\n");
+		fprintf(f, "OP_EnterChat=0x000f\n");
+		fprintf(f, "OP_PollResponse=0x0011\n");
+		fclose(f);
+	}
+}
+
+void CheckLarionOpcodeFile(const std::string& path) {
+	if (File::Exists(path)) {
+		return;
+	}
+
+	auto f = fopen(path.c_str(), "w");
+	if (f) {
+		fprintf(f, "#EQEmu Public Login Server OPCodes\n");
+		fprintf(f, "OP_SessionReady=0x0001\n");
+		fprintf(f, "OP_Login=0x0002\n");
+		fprintf(f, "OP_ServerListRequest=0x0004\n");
+		fprintf(f, "OP_PlayEverquestRequest=0x000d\n");
+		fprintf(f, "OP_PlayEverquestResponse=0x0022\n");
+		fprintf(f, "OP_ChatMessage=0x0017\n");
+		fprintf(f, "OP_LoginAccepted=0x0018\n");
+		fprintf(f, "OP_ServerListResponse=0x0019\n");
+		fprintf(f, "OP_Poll=0x0029\n");
+		fprintf(f, "OP_EnterChat=0x000f\n");
+		fprintf(f, "OP_PollResponse=0x0011\n");
+		fprintf(f, "OP_SystemFingerprint=0x0016\n");
+		fprintf(f, "OP_ExpansionList=0x0030\n");
+		fclose(f);
+	}
+}
 
 ClientManager::ClientManager()
 {
@@ -19,13 +92,11 @@ ClientManager::ClientManager()
 
 	std::string opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetServerPath(),
-		server.config.GetVariableString(
-			"client_configuration",
-			"titanium_opcodes",
-			"login_opcodes.conf"
-		)
+		path.GetOpcodePath(),
+		"login_opcodes.conf"
 	);
+
+	CheckTitaniumOpcodeFile(opcodes_path);
 
 	if (!titanium_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
@@ -58,13 +129,11 @@ ClientManager::ClientManager()
 
 	opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetServerPath(),
-		server.config.GetVariableString(
-			"client_configuration",
-			"sod_opcodes",
-			"login_opcodes.conf"
-		)
+		path.GetOpcodePath(),
+		"login_opcodes_sod.conf"
 	);
+
+	CheckSoDOpcodeFile(opcodes_path);
 
 	if (!sod_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
@@ -98,13 +167,11 @@ ClientManager::ClientManager()
 
 	opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetServerPath(),
-		server.config.GetVariableString(
-			"client_configuration",
-			"larion_opcodes",
-			"login_opcodes.conf"
-		)
+		path.GetOpcodePath(),
+		"login_opcodes_larion.conf"
 	);
+
+	CheckLarionOpcodeFile(opcodes_path);
 
 	if (!larion_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(

@@ -95,6 +95,7 @@ class EQEmuConfig
 		std::string PluginDir;
 		std::string LuaModuleDir;
 		std::string PatchDir;
+		std::string OpcodeDir;
 		std::string SharedMemDir;
 		std::string LogDir;
 
