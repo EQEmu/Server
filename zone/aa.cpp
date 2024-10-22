@@ -1161,6 +1161,14 @@ int Client::SetDynamicAATimer(int aa_id) {
     return 0;
 }
 
+void Client::ClearDynamicAATimers() {
+	ResetAlternateAdvancementTimers();
+	for (int timerID = 1; timerID < (pTimerAAEnd - pTimerAAStart); ++timerID) {
+		std::string key = "aaTimer_" + std::to_string(timerID);
+		DeleteBucket(key);
+	}
+}
+
 void Client::ResetAlternateAdvancementTimer(int ability) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
 	if(rank) {

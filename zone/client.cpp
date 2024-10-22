@@ -12929,6 +12929,8 @@ bool Client::RemoveExtraClass(int class_id) {
 		}
 	}
 
+	ClearDynamicAATimers();
+
 	auto pets = GetAllPets();
 	for (auto pet : pets) {
 		if (pet->IsNPC() && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), class_id) != UINT8_MAX) {
