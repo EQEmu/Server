@@ -119,6 +119,8 @@ public:
 				columns[98] = "6";
 			}
 
+			columns[149] = 0;
+
 			// Adjust disc timers (Why are discs -1 here)
 			if (columns[168] == "-1") {
 				// Check how many of the class columns (104-119) are <= 70
