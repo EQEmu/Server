@@ -6046,6 +6046,7 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 )"
+	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
@@ -6084,7 +6085,7 @@ ENGINE=InnoDB
 //)",
 //	}
 
-	};
+};
 
 // see struct definitions for what each field does
 // struct ManifestEntry {

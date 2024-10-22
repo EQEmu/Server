@@ -20,7 +20,7 @@ class PlayerEventLogs {
 public:
 	void Init();
 	void ReloadSettings();
-	void LoadETLIDs();
+	void LoadEtlIds();
 	PlayerEventLogs *SetDatabase(Database *db);
 	bool ValidateDatabaseConnection();
 	bool IsEventEnabled(PlayerEvent::EventType event);
@@ -68,18 +68,18 @@ public:
 	static std::string GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e);
 
 	struct EtlQueues {
-		std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems>               queue_loot_items;
-		std::vector<PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase> queue_merchant_purchase;
-		std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell>         queue_merchant_sell;
-		std::vector<PlayerEventNpcHandinRepository::PlayerEventNpcHandin>               queue_npc_handin;
-		std::vector<PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries> queue_npc_handin_entries;
+		std::vector<PlayerEventLootItemsRepository::PlayerEventLootItems>               loot_items;
+		std::vector<PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase> merchant_purchase;
+		std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell>         merchant_sell;
+		std::vector<PlayerEventNpcHandinRepository::PlayerEventNpcHandin>               npc_handin;
+		std::vector<PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries> npc_handin_entries;
 	};
 
 private:
-	struct EtlInfo {
-		bool        etl_enabled;
-		std::string etl_table_name;
-		int64       etl_next_id;
+	struct EtlSettings {
+		bool        enabled;
+		std::string table_name;
+		int64       next_id;
 	};
 
 	Database                                                 *m_database; // reference to database
@@ -91,8 +91,7 @@ private:
 	static std::unique_ptr<ServerPacket>
 	BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e);
 
-	std::map<PlayerEvent::EventType, std::any> m_record_etl_queue{};
-	std::map<PlayerEvent::EventType, EtlInfo>  m_etl_info{};
+	std::map<PlayerEvent::EventType, EtlSettings>  m_etl_settings{};
 
 	// timers
 	Timer m_process_batch_events_timer; // events processing timer
