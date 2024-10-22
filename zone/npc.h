@@ -600,11 +600,6 @@ public:
 
 protected:
 
-	// this is the working handin data from the player
-	// items can be decremented from this as each successful
-	// check is ran in scripts, the remainder is what is returned
-	Handin m_hand_in = {};
-
 	void HandleRoambox();
 
 	const NPCType*	NPCTypedata;
@@ -748,6 +743,11 @@ protected:
 	bool m_multiquest_enabled          = false;
 	bool m_handin_started              = false;
 	bool m_has_processed_handin_return = false;
+
+	// this is the working handin data from the player
+	// items can be decremented from this as each successful
+	// check is ran in scripts, the remainder is what is returned
+	Handin m_hand_in = {};
 
 private:
 	uint32              m_loottable_id;
