@@ -595,7 +595,6 @@ public:
 		std::vector<HandinEntry> items          = {}; // items can be removed from this set as successful handins are made
 		HandinMoney              original_money = {}; // this is what the player originally handed in, never modified
 		HandinMoney              money          = {}; // money can be removed from this set as successful handins are made
-		NPC                      *npc           = nullptr; // the NPC the player is handing in to
 	};
 
 protected:
