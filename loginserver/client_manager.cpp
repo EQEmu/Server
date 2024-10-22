@@ -92,12 +92,8 @@ ClientManager::ClientManager()
 
 	std::string opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetServerPath(),
-		server.config.GetVariableString(
-			"client_configuration",
-			"titanium_opcodes",
-			"login_opcodes.conf"
-		)
+		path.GetOpcodePath(),
+		"login_opcodes.conf"
 	);
 
 	CheckTitaniumOpcodeFile(opcodes_path);
@@ -133,12 +129,8 @@ ClientManager::ClientManager()
 
 	opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetServerPath(),
-		server.config.GetVariableString(
-			"client_configuration",
-			"sod_opcodes",
-			"login_opcodes.conf"
-		)
+		path.GetOpcodePath(),
+		"login_opcodes_sod.conf"
 	);
 
 	CheckSoDOpcodeFile(opcodes_path);
@@ -175,12 +167,8 @@ ClientManager::ClientManager()
 
 	opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetServerPath(),
-		server.config.GetVariableString(
-			"client_configuration",
-			"larion_opcodes",
-			"login_opcodes.conf"
-		)
+		path.GetOpcodePath(),
+		"login_opcodes_larion.conf"
 	);
 
 	CheckLarionOpcodeFile(opcodes_path);
