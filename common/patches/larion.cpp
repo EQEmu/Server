@@ -126,7 +126,16 @@ namespace Larion
 
 	// ENCODE methods
 	ENCODE(OP_LogServer) {
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		LogServer_Struct* emu = (LogServer_Struct*)in->pBuffer;
 
+		auto outapp = new EQApplicationPacket(OP_LogServer, 1840);
+
+
+		
+		dest->FastQueuePacket(&outapp);
+		safe_delete(in);
 	}
 
 	// DECODE methods

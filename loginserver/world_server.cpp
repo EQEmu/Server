@@ -977,18 +977,13 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	return false;
 }
 
-void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_local_ip, LSClientVersion version) const
-{
+void WorldServer::SerializeForClientServerListLegacy(class SerializeBuffer& out, bool use_local_ip) const {
 	// see LoginClientServerData_Struct
 	if (use_local_ip) {
 		out.WriteString(GetLocalIP());
 	}
 	else {
 		out.WriteString(GetRemoteIP());
-	}
-
-	if (version == cv_larion) {
-		out.WriteUInt32(9000);
 	}
 
 	switch (GetServerListID()) {
@@ -1002,15 +997,8 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_lo
 		out.WriteInt32(LS::ServerTypeFlags::Standard);
 		break;
 	}
-	if (version == cv_larion) {
-		auto server_id = GetServerId();
-		//if this is 0, the client will not show the server in the list
-		out.WriteUInt32(1);
-		out.WriteUInt32(server_id);
-	}
-	else {
-		out.WriteUInt32(GetServerId());
-	}
+
+	out.WriteUInt32(GetServerId());
 
 	out.WriteString(GetServerLongName());
 	out.WriteString("us"); // country code
@@ -1030,6 +1018,61 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_lo
 	}
 
 	out.WriteUInt32(GetPlayersOnline());
+}
+
+void WorldServer::SerializeForClientServerListLarion(class SerializeBuffer& out, bool use_local_ip) const {
+	if (use_local_ip) {
+		out.WriteString(GetLocalIP());
+	}
+	else {
+		out.WriteString(GetRemoteIP());
+	}
+
+	out.WriteUInt32(9000);
+	out.WriteUInt32(0);
+
+	uint32_t flags = 32; //all servers i saw had this set
+	switch (GetServerListID()) {
+	case LS::ServerType::Legends:
+		flags += LS::ServerTypeFlags::Legends;
+		break;
+	case LS::ServerType::Preferred:
+		flags += LS::ServerTypeFlags::Preferred;
+		break;
+	default:
+		flags += LS::ServerTypeFlags::Standard;
+		break;
+	}
+
+	out.WriteUInt32(flags);
+	out.WriteUInt32(GetServerId());
+	out.WriteString(GetServerLongName());
+	out.WriteString("EN");
+	out.WriteString("US");
+
+	if (GetStatus() < 0) {
+		if (GetZonesBooted() == 0) {
+			out.WriteInt32(LS::ServerStatusFlags::Down);
+		}
+		else {
+			out.WriteInt32(LS::ServerStatusFlags::Locked);
+		}
+	}
+	else {
+		out.WriteInt32(LS::ServerStatusFlags::Up);
+	}
+
+	out.WriteUInt32(GetPlayersOnline());
+}
+
+void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_local_ip, LSClientVersion version) const
+{
+	if (version == cv_larion) {
+		SerializeForClientServerListLarion(out, use_local_ip);
+	}
+	else {
+		SerializeForClientServerListLegacy(out, use_local_ip);
+	}
 }
 
 /**
