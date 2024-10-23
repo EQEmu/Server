@@ -232,7 +232,7 @@ bool Spawn2::Process() {
 				return (true);
 			}
 		} else {
-			LogDebug("Spawn [{}] has not triggered", spawn2_id);
+			LogDebugDetail("Spawn [{}] has not triggered", spawn2_id);
 		}
 
 		bool ignore_despawn = false;

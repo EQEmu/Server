@@ -4546,7 +4546,7 @@ void Mob::SetOwnerID(uint16 new_owner_id) {
 
 	ownerid = new_owner_id;
 
-	LogDebug("Setting OwnerID to [{}]:[{}]", ownerid, new_owner_id);
+	LogDebugDetail("Setting OwnerID to [{}]:[{}]", ownerid, new_owner_id);
 
 	// if we're setting the owner ID to 0 and they're not either charmed or not-a-pet then
 	// they're a normal pet and should be despawned
