@@ -573,10 +573,13 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 {
 	SerializeBuffer buf;
 	//from eqlsstr_us.txt id of each expansion, excluding 'Everquest'
-	int ExpansionLookup[20] = { 3007, 3008, 3009, 3010,	3012,
+	int ExpansionLookup[30] = { 3007, 3008, 3009, 3010,	3012,
 								3014, 3031, 3033, 3036, 3040,
 								3045, 3046, 3047, 3514, 3516,
-								3518, 3520, 3522, 3524 };
+								3518, 3520, 3522, 3524, 3526,
+								3528, 3530, 3532, 3534, 3535,
+								3536, 3537, 3538, 3539, 3540
+	};
 
 
 	if (server.options.IsDisplayExpansions()) {
@@ -584,7 +587,26 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 		int32_t expansion = server.options.GetMaxExpansions();
 		int32_t owned_expansion = (expansion << 1) | 1;
 
-		if (m_client_version == cv_sod) {
+		if (m_client_version == cv_larion) {
+			buf.WriteInt32(0x00);
+			buf.WriteInt32(0x00);
+			buf.WriteInt16(0x00);
+			buf.WriteInt32(30);
+
+			for (int i = 0; i < 30; i++)
+			{
+				buf.WriteUInt32(i + 1);
+				buf.WriteUInt8(1);
+				buf.WriteInt32(ExpansionLookup[i]);
+				buf.WriteInt32(6046);
+				buf.WriteUInt32(0xFFFFFFFF);
+				buf.WriteUInt32(0);
+			}
+
+			auto out = std::make_unique<EQApplicationPacket>(OP_LoginExpansionPacketData, buf);
+			m_connection->QueuePacket(out.get());
+		}
+		else if (m_client_version == cv_sod) {
 
 			// header info of packet.  Requires OP_LoginExpansionPacketData=0x0031 to be in login_opcodes_sod.conf
 			buf.WriteInt32(0x00);
