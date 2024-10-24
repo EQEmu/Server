@@ -716,29 +716,37 @@ bool CheckForCompatibleQuestPlugins()
 {
 	const std::vector<std::string>& directories = { "lua_modules", "plugins" };
 
-	bool lua_found  = true;
-	bool perl_found = true;
+	bool lua_found  = false;
+	bool perl_found = false;
 
 	for (const auto& directory : directories) {
 		for (const auto& file : fs::directory_iterator(path.GetServerPath() + "/" + directory)) {
 			if (file.is_regular_file()) {
-				auto f = path.GetServerPath() + "/" + file.path().string();
+				auto f = file.path().string();
 				if (File::Exists(f)) {
 					auto r = File::GetContents(std::filesystem::path{ f }.string());
-					if (!Strings::Contains(r.contents, "CheckHandin")) {
+					if (Strings::Contains(r.contents, "CheckHandin")) {
 						if (Strings::EqualFold(directory, "lua_modules")) {
-							lua_found = false;
-							LogError("Failed to find CheckHandin in lua_modules");
+							lua_found = true;
 						} else if (Strings::EqualFold(directory, "plugins")) {
-							perl_found = false;
-							LogError("Failed to find CheckHandin in plugins");
+							perl_found = true;
 						}
 
-						break;
+						if (lua_found && perl_found) {
+							return true;
+						}
 					}
 				}
 			}
 		}
+	}
+
+	if (!lua_found) {
+		LogError("Failed to find CheckHandin in lua_modules");
+	}
+
+	if (!perl_found) {
+		LogError("Failed to find CheckHandin in plugins");
 	}
 
 	return lua_found && perl_found;
