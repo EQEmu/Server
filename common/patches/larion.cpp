@@ -131,9 +131,87 @@ namespace Larion
 		LogServer_Struct* emu = (LogServer_Struct*)in->pBuffer;
 
 		auto outapp = new EQApplicationPacket(OP_LogServer, 1840);
+		auto buffer = outapp->pBuffer;
 
+		//pvp
+		if (emu->enable_pvp) {
+			*(char*)&buffer[0x04] = 1;
+		}
 
-		
+		if (emu->enable_FV) {
+			//FV sets these both to 1
+			//one appears to enable the no drop flag the other just marks the server as special?
+			*(char*)&buffer[0x08] = 1;
+			*(char*)&buffer[0x0a] = 1;
+		}
+
+		//This has something to do with heirloom and prestige items but im not sure what it does
+		//Seems to sit at 0
+		*(char*)&buffer[0x71d] = 0;
+
+		//not sure what this does, something to do with server select
+		*(char*)&buffer[0x09] = 0;
+
+		//this appears to have some effect on the tradeskill system; disabling made by tags perhaps?
+		*(char*)&buffer[0x0b] = 0;
+
+		//not sure, setting it to the value ive seen
+		*(char*)&buffer[0x0c] = 1;
+
+		//Something to do with languages
+		*(char*)&buffer[0x0d] = 1;
+
+		//These seem to affect if server has betabuff enabled
+		*(char*)&buffer[0x5c0] = 0;
+		*(char*)&buffer[0x5c1] = 0;
+		//This is set on test so it's probably indicating this is a test server
+		*(char*)&buffer[0x5c2] = 0;
+
+		//not sure, but it's grouped with the beta and test stuff
+		*(char*)&buffer[0x5c3] = 0;
+
+		//world short name
+		strncpy((char*)&buffer[0x15], emu->worldshortname, 32);
+
+		//not sure, affects some player calculation but didn't care to look more
+		*(char*)&buffer[0x5c2] = 0;
+
+		//Looks right
+		if (emu->enablemail) {
+			*(char*)&buffer[0x5b5] = 1;
+		}
+
+		//Looks right
+		if (emu->enablevoicemacros) {
+			*(char*)&buffer[0x5b4] = 1;
+		}
+
+		//Not sure, sending what we've seen
+		*(char*)&buffer[0x5b6] = 0;
+
+		//Not sure sending what we've seen
+		*(char*)&buffer[0x5b8] = 1;
+
+		//Not sure sending what we've seen
+		*(int32_t*)&buffer[0x5fc] = -1;
+
+		//Test sets this to 1, everyone else seems to set it to 0
+		*(int32_t*)&buffer[0x600] = 0;
+
+		//Disassembly puts it next to code dealing with commands, ive not seen anyone send anything but 0
+		*(char*)&buffer[0x705] = 0;
+
+		//Something about item restrictions, seems to always be set to 1
+		*(char*)&buffer[0x710] = 0;
+
+		//This and 0x724 are often multiplied together in guild favor calcs, live and test send 1.0f
+		*(float*)&buffer[0x720] = 1.0f;
+		*(float*)&buffer[0x724] = 1.0f;
+
+		//This and 0x72c are often multiplied together in non-guild favor calcs, live and test send 1.0f
+		*(float*)&buffer[0x728] = 1.0f;
+		*(float*)&buffer[0x72c] = 1.0f;
+
 		dest->FastQueuePacket(&outapp);
 		safe_delete(in);
 	}
