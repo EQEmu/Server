@@ -5635,6 +5635,16 @@ int lua_are_tasks_completed(luabind::object task_ids)
 	return quest_manager.aretaskscompleted(v);
 }
 
+void lua_spawn_circle(uint32 npc_id, float x, float y, float z, float heading, float radius, uint32 points)
+{
+	quest_manager.SpawnCircle(npc_id, glm::vec4(x, y, z, heading), radius, points);
+}
+
+void lua_spawn_grid(uint32 npc_id, float x, float y, float z, float heading, float spacing, uint32 spawn_count)
+{
+	quest_manager.SpawnGrid(npc_id, glm::vec4(x, y, z, heading), spacing, spawn_count);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6442,6 +6452,8 @@ luabind::scope lua_register_general() {
 		luabind::def("send_parcel", &lua_send_parcel),
 		luabind::def("get_zone_uptime", &lua_get_zone_uptime),
 		luabind::def("are_tasks_completed", &lua_are_tasks_completed),
+		luabind::def("spawn_circle", &lua_spawn_circle),
+		luabind::def("spawn_grid", &lua_spawn_grid),
 		/*
 			Cross Zone
 		*/
