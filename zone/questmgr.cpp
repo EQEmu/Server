@@ -4683,7 +4683,6 @@ void QuestManager::SpawnGrid(uint32 npc_id, glm::vec4 position, float spacing, u
 
 			NPC* n = new NPC(t, nullptr, npc_position, GravityBehavior::Water);
 
-
 			n->FixZ();
 
 			n->AddLootTable();
