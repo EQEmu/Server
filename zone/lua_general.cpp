@@ -5642,7 +5642,7 @@ void lua_spawn_circle(uint32 npc_id, float x, float y, float z, float heading, f
 
 void lua_spawn_grid(uint32 npc_id, float x, float y, float z, float heading, float spacing, uint32 spawn_count)
 {
-	quest_manager.SpawnCircle(npc_id, glm::vec4(x, y, z, heading), spacing, spawn_count);
+	quest_manager.SpawnGrid(npc_id, glm::vec4(x, y, z, heading), spacing, spawn_count);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
