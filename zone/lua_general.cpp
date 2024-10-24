@@ -6772,7 +6772,6 @@ luabind::scope lua_register_random() {
 		)];
 }
 
-
 luabind::scope lua_register_events() {
 	return luabind::class_<Events>("Event")
 		.enum_("constants")
@@ -8007,7 +8006,6 @@ luabind::scope lua_register_journal_mode() {
 			luabind::value("Log2", static_cast<int>(Journal::Mode::Log2))
 		)];
 }
-
 
 luabind::scope lua_register_exp_source() {
 	return luabind::class_<ExpSource>("ExpSource")
