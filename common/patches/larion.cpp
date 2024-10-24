@@ -216,6 +216,55 @@ namespace Larion
 		safe_delete(in);
 	}
 
+	ENCODE(OP_SendMembership) {
+		ENCODE_LENGTH_EXACT(Membership_Struct);
+		SETUP_DIRECT_ENCODE(Membership_Struct, structs::Membership_Struct);
+
+		eq->membership = emu->membership;
+		eq->races = emu->races;
+		eq->classes = emu->classes;
+		eq->entrysize = 33;
+		eq->entries[0] = -1;
+		eq->entries[1] = -1;
+		eq->entries[2] = -1;
+		eq->entries[3] = -1;
+		eq->entries[4] = -1;
+		eq->entries[5] = -1;
+		eq->entries[6] = 1;
+		eq->entries[7] = 1;
+		eq->entries[8] = 1;
+		eq->entries[9] = -1;
+		eq->entries[10] = 1;
+		eq->entries[11] = -1;
+		eq->entries[12] = -1;
+		eq->entries[13] = 1;
+		eq->entries[14] = 1;
+		eq->entries[15] = 1;
+		eq->entries[16] = 1;
+		eq->entries[17] = 1;
+		eq->entries[18] = 1;
+		eq->entries[19] = -1;
+		eq->entries[20] = -1;
+		eq->entries[21] = 0;
+		eq->entries[22] = 0;
+		eq->entries[23] = 0;
+		eq->entries[24] = 0;
+		eq->entries[25] = 0;
+		eq->entries[26] = 0;
+		eq->entries[27] = 0;
+		eq->entries[28] = 0;
+		eq->entries[29] = 0;
+		eq->entries[30] = 0;
+		eq->entries[31] = 0;
+		eq->entries[32] = 0;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SendMembershipDetails) {
+
+	}
+
 	// DECODE methods
 	
 } /*Larion*/
