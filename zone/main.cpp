@@ -297,7 +297,7 @@ int main(int argc, char **argv)
 	}
 
 	// command handler
-	if (ZoneCLI::RanConsoleCommand(argc, argv) && !ZoneCLI::RanSidecarCommand(argc, argv)) {
+	if (ZoneCLI::RanConsoleCommand(argc, argv) && !(ZoneCLI::RanSidecarCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv))) {
 		LogSys.EnableConsoleLogging();
 		ZoneCLI::CommandHandler(argc, argv);
 	}
@@ -480,7 +480,8 @@ int main(int argc, char **argv)
 	worldserver.SetScheduler(&event_scheduler);
 
 	// sidecar command handler
-	if (ZoneCLI::RanConsoleCommand(argc, argv) && ZoneCLI::RanSidecarCommand(argc, argv)) {
+	if (ZoneCLI::RanConsoleCommand(argc, argv)
+		&& (ZoneCLI::RanSidecarCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv))) {
 		ZoneCLI::CommandHandler(argc, argv);
 	}
 
