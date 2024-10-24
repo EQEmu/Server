@@ -1102,6 +1102,7 @@ RULE_INT(Custom, 	StaticInstanceVersion,					UINT8_MAX, "Instances with the vers
 RULE_INT(Custom, 	StaticInstanceTemplateVersion,			0, "Template version for non-respawning instances")
 RULE_BOOL(Custom, 	DoubleAttackSkillRanged, 				false, "Use Double & Triple Attack skills for ranged attacks")
 RULE_BOOL(Custom, 	TemporaryStunImmunity, 					true, "Clients become immune to Stun for a duration after being stunned")
+RULE_INT(Custom, 	MaximumMeleeMitigationEffects, 			75, "Maximum value which SPA 168 can reduce melee damage")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")

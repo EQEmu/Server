@@ -3536,96 +3536,96 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			return GetClair();
 		case statSpellCastTime01: {
 			int spellId = m_pp.mem_spells[0];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime02: {
 			int spellId = m_pp.mem_spells[1];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime03: {
 			int spellId = m_pp.mem_spells[2];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime04: {
 			int spellId = m_pp.mem_spells[3];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime05: {
 			int spellId = m_pp.mem_spells[4];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime06: {
 			int spellId = m_pp.mem_spells[5];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime07: {
 			int spellId = m_pp.mem_spells[6];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime08: {
 			int spellId = m_pp.mem_spells[7];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime09: {
 			int spellId = m_pp.mem_spells[8];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime10: {
 			int spellId = m_pp.mem_spells[9];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime11: {
 			int spellId = m_pp.mem_spells[10];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;
 		}
 		case statSpellCastTime12: {
 			int spellId = m_pp.mem_spells[11];
-			int castTime = 0;
-			if (IsValidSpell(spellId)) {
+			int castTime = 2000;
+			if (IsValidSpell(spellId) && !IsBardSong(spellId)) {
 				castTime = GetActSpellCasttime(spellId, spells[spellId].cast_time, true);
 			}
 			return castTime;

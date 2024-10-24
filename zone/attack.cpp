@@ -6046,15 +6046,19 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 			damage_bonus_mod -= 5;
 		}
 
-		if (defender->IsOfClientBotMerc()) {
-			damage_bonus_mod += (
+		if (defender->IsOfClientBotMerc() || (defender->HasOwner() && defender->GetOwner()->IsClient())) {
+			int melee_mitigation_effect = (
 				defender->spellbonuses.MeleeMitigationEffect +
 				defender->itembonuses.MeleeMitigationEffect +
 				defender->aabonuses.MeleeMitigationEffect
 			);
+
+			melee_mitigation_effect = std::min(RuleI(Custom, MaximumMeleeMitigationEffects), melee_mitigation_effect);
+			damage_bonus_mod += melee_mitigation_effect;
 		}
 	}
 
+	damage_bonus_mod = std::min(100, damage_bonus_mod);
 	damage += damage * damage_bonus_mod / 100;
 }
 
