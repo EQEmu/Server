@@ -6583,7 +6583,7 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_reset_activity_by_guild_id", &lua_cross_zone_reset_activity_by_guild_id),
 		luabind::def("cross_zone_reset_activity_by_expedition_id", &lua_cross_zone_reset_activity_by_expedition_id),
 		luabind::def("cross_zone_reset_activity_by_client_name", &lua_cross_zone_reset_activity_by_client_name),
-		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
+		luabind::def("cross_zone_set_entity_variable_by_char_id", &lua_cross_zone_set_entity_variable_by_char_id),
 		luabind::def("cross_zone_set_entity_variable_by_group_id", &lua_cross_zone_set_entity_variable_by_group_id),
 		luabind::def("cross_zone_set_entity_variable_by_raid_id", &lua_cross_zone_set_entity_variable_by_raid_id),
 		luabind::def("cross_zone_set_entity_variable_by_guild_id", &lua_cross_zone_set_entity_variable_by_guild_id),
