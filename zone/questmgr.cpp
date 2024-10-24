@@ -1262,50 +1262,7 @@ bool QuestManager::isdisctome(uint32 item_id) {
 		return false;
 	}
 
-	if (!item->IsClassCommon() || item->ItemType != EQ::item::ItemTypeSpell) {
-		return false;
-	}
-
-	//Need a way to determine the difference between a spell and a tome
-	//so they cant turn in a spell and get it as a discipline
-	//this is kinda a hack:
-
-	const std::string item_name = item->Name;
-
-	if (
-		!Strings::BeginsWith(item_name, "Tome of ") &&
-		!Strings::BeginsWith(item_name, "Skill: ")
-	) {
-		return false;
-	}
-
-	//we know for sure none of the int casters get disciplines
-	uint32 class_bit = 0;
-	class_bit |= 1 << (Class::Wizard - 1);
-	class_bit |= 1 << (Class::Enchanter - 1);
-	class_bit |= 1 << (Class::Magician - 1);
-	class_bit |= 1 << (Class::Necromancer - 1);
-	if (item->Classes & class_bit) {
-		return false;
-	}
-
-	const auto& spell_id = static_cast<uint32>(item->Scroll.Effect);
-	if (!IsValidSpell(spell_id)) {
-		return false;
-	}
-
-	//we know for sure none of the int casters get disciplines
-	const auto& spell = spells[spell_id];
-	if(
-		spell.classes[Class::Wizard - 1] != 255 &&
-		spell.classes[Class::Enchanter - 1] != 255 &&
-		spell.classes[Class::Magician - 1] != 255 &&
-		spell.classes[Class::Necromancer - 1] != 255
-	) {
-		return false;
-	}
-
-	return true;
+	return IsDisciplineTome(item);
 }
 
 std::string QuestManager::getracename(uint16 race_id) {

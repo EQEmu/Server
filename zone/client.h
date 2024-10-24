@@ -239,6 +239,7 @@ public:
 	#include "client_packet.h"
 
 	Client(EQStreamInterface * ieqs);
+	Client(); // mocking
 	~Client();
 
 	void ReconnectUCS();
@@ -1809,6 +1810,7 @@ public:
 	void RecordKilledNPCEvent(NPC *n);
 
 	uint32 GetEXPForLevel(uint16 check_level);
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
@@ -2227,11 +2229,11 @@ private:
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
 	void PlayerTradeEventLog(Trade *t, Trade *t2);
-	void NPCHandinEventLog(Trade* t, NPC* n);
 
 	// full and partial mail key cache
 	std::string m_mail_key_full;
 	std::string m_mail_key;
+
 public:
 	const std::string &GetMailKeyFull() const;
 	const std::string &GetMailKey() const;

@@ -8625,3 +8625,27 @@ std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
 {
 	return entity_list.GetCloseMobList(this, distance);
 }
+
+bool Mob::IsGuildmaster() const {
+	switch (GetClass()) {
+		case Class::WarriorGM:
+		case Class::ClericGM:
+		case Class::PaladinGM:
+		case Class::RangerGM:
+		case Class::ShadowKnightGM:
+		case Class::DruidGM:
+		case Class::MonkGM:
+		case Class::BardGM:
+		case Class::RogueGM:
+		case Class::ShamanGM:
+		case Class::NecromancerGM:
+		case Class::WizardGM:
+		case Class::MagicianGM:
+		case Class::EnchanterGM:
+		case Class::BeastlordGM:
+		case Class::BerserkerGM:
+			return true;
+		default:
+			return false;
+	}
+}
