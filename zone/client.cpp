@@ -1247,6 +1247,21 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 	}
 
+	if (PlayerEvent::EventType::SPEECH) {
+		PlayerEvent::PlayerSpeech e{};
+		e.message    = message;
+		e.min_status = Admin();
+		e.type       = chan_num;
+		e.to         = targetname;
+		e.from       = GetName();
+
+		if (chan_num == ChatChannel_Guild) {
+			e.guild_id = GuildID();
+		}
+
+		RecordPlayerEventLog(PlayerEvent::SPEECH, e);
+	}
+
 	/* Logs Player Chat */
 	if (RuleB(QueryServ, PlayerLogChat)) {
 		auto pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(message) + 1);
@@ -12681,7 +12696,8 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 	};
 
 	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
-	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
+	//Not sure the usefulness of sending the same data twice??
+	//RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
 }
 
 void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)

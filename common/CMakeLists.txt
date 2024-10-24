@@ -289,6 +289,9 @@ SET(repositories
     repositories/base/base_player_event_merchant_sell_repository.h
     repositories/base/base_player_event_npc_handin_repository.h
     repositories/base/base_player_event_npc_handin_entries_repository.h
+    repositories/base/base_player_event_speech_repository.h
+    repositories/base/base_player_event_trade_repository.h
+    repositories/base/base_player_event_trade_entries_repository.h
     repositories/base/base_quest_globals_repository.h
     repositories/base/base_raid_details_repository.h
     repositories/base/base_raid_members_repository.h
@@ -479,6 +482,9 @@ SET(repositories
     repositories/player_event_merchant_sell_repository.h
     repositories/player_event_npc_handin_repository.h
     repositories/player_event_npc_handin_entries_repository.h
+    repositories/player_event_speech_repository.h
+    repositories/player_event_trade_repository.h
+    repositories/player_event_trade_entries_repository.h
     repositories/quest_globals_repository.h
     repositories/raid_details_repository.h
     repositories/raid_members_repository.h

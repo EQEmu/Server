@@ -311,6 +311,105 @@ void PlayerEventLogs::ProcessBatchQueue()
 				etl_queues.npc_handin.push_back(out);
 				break;
 			}
+			case PlayerEvent::EventType::TRADE: {
+				PlayerEvent::TradeEvent in{};
+				PlayerEventTradeRepository::PlayerEventTrade out{};
+				PlayerEventTradeEntriesRepository::PlayerEventTradeEntries out_entries{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.char1_id       = in.character_1_id;
+				out.char1_platinum = in.character_1_give_money.platinum;
+				out.char1_gold     = in.character_1_give_money.gold;
+				out.char1_silver   = in.character_1_give_money.silver;
+				out.char1_copper   = in.character_1_give_money.copper;
+				out.char2_id       = in.character_2_id;
+				out.char2_platinum = in.character_2_give_money.platinum;
+				out.char2_gold     = in.character_2_give_money.gold;
+				out.char2_silver   = in.character_2_give_money.silver;
+				out.char2_copper   = in.character_2_give_money.copper;
+				out.created_at     = r.created_at;
+
+				if (m_etl_settings.contains(PlayerEvent::EventType::TRADE)) {
+					r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::TRADE).next_id;
+					m_etl_settings.at(PlayerEvent::EventType::TRADE).next_id++;
+				}
+
+				if (!in.character_1_give_items.empty()) {
+					for (auto const &i: in.character_1_give_items) {
+						out_entries.char_id               = in.character_1_id;
+						out_entries.charges               = i.charges;
+						out_entries.slot                  = i.slot;
+						out_entries.item_id               = i.item_id;
+						out_entries.player_event_trade_id = r.etl_table_id;
+						out_entries.in_bag                = i.in_bag;
+						out.created_at                    = r.created_at;
+						out_entries.augment_1_id          = i.aug_1_item_id;
+						out_entries.augment_2_id          = i.aug_2_item_id;
+						out_entries.augment_3_id          = i.aug_3_item_id;
+						out_entries.augment_4_id          = i.aug_4_item_id;
+						out_entries.augment_5_id          = i.aug_5_item_id;
+						out_entries.augment_6_id          = i.aug_6_item_id;
+						out_entries.created_at            = r.created_at;
+					}
+					etl_queues.trade_entries.push_back(out_entries);
+				}
+
+				if (!in.character_2_give_items.empty()) {
+					for (auto const &i: in.character_2_give_items) {
+						out_entries.char_id               = in.character_2_id;
+						out_entries.charges               = i.charges;
+						out_entries.slot                  = i.slot;
+						out_entries.item_id               = i.item_id;
+						out_entries.player_event_trade_id = r.etl_table_id;
+						out_entries.in_bag                = i.in_bag;
+						out.created_at                    = r.created_at;
+						out_entries.augment_1_id          = i.aug_1_item_id;
+						out_entries.augment_2_id          = i.aug_2_item_id;
+						out_entries.augment_3_id          = i.aug_3_item_id;
+						out_entries.augment_4_id          = i.aug_4_item_id;
+						out_entries.augment_5_id          = i.aug_5_item_id;
+						out_entries.augment_6_id          = i.aug_6_item_id;
+						out_entries.created_at            = r.created_at;
+					}
+					etl_queues.trade_entries.push_back(out_entries);
+				}
+
+				etl_queues.trade.push_back(out);
+				break;
+			}
+			case PlayerEvent::EventType::SPEECH: {
+				PlayerEvent::PlayerSpeech in{};
+				PlayerEventSpeechRepository::PlayerEventSpeech out{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.from_char_id = in.from;
+				out.to_char_id   = in.to;
+				out.type         = in.type;
+				out.min_status   = in.min_status;
+				out.message      = in.message;
+				out.guild_id     = in.guild_id;
+				out.created_at   = r.created_at;
+
+				if (m_etl_settings.contains(PlayerEvent::EventType::SPEECH)) {
+					r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::SPEECH).next_id;
+					m_etl_settings.at(PlayerEvent::EventType::SPEECH).next_id++;
+				}
+
+				etl_queues.speech.push_back(out);
+				break;
+			}
 			default: {
 				LogError("Non-Implemented ETL routing <red>[{}]", r.event_type_id);
 			}
@@ -344,6 +443,21 @@ void PlayerEventLogs::ProcessBatchQueue()
 			etl_queues.npc_handin_entries.clear();
 		}
 	}
+
+	if (!etl_queues.trade.empty()) {
+		PlayerEventTradeRepository::InsertMany(*m_database, etl_queues.trade);
+		etl_queues.trade.clear();
+		if (!etl_queues.trade_entries.empty()) {
+			PlayerEventTradeEntriesRepository::InsertMany(*m_database, etl_queues.trade_entries);
+			etl_queues.trade_entries.clear();
+		}
+	}
+
+	if (!etl_queues.speech.empty()) {
+		PlayerEventSpeechRepository::InsertMany(*m_database, etl_queues.speech);
+		etl_queues.speech.clear();
+	}
+
 
 	LogPlayerEventsDetail(
 		"Processing batch player event log queue of [{}] took [{}]",
@@ -877,6 +991,27 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 								m_settings[i].retention_days));
 						break;
 					}
+					case PlayerEvent::TRADE: {
+						deleted_count = PlayerEventTradeRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						deleted_count += PlayerEventTradeEntriesRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
+					}
+					case PlayerEvent::SPEECH: {
+						deleted_count = PlayerEventSpeechRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
+					}
 					default: {
 						LogError("NonImplemented ETL Event Type <red>[{}] ", static_cast<uint32>(m_settings[i].id));
 					}
@@ -984,6 +1119,7 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::PARCEL_DELETE].event_enabled             = 1;
 	m_settings[PlayerEvent::BARTER_TRANSACTION].event_enabled        = 1;
 	m_settings[PlayerEvent::EVOLVE_ITEM].event_enabled               = 1;
+	m_settings[PlayerEvent::SPEECH].event_enabled                    = 1;
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;
@@ -1026,5 +1162,21 @@ void PlayerEventLogs::LoadEtlIds()
 				.next_id = PlayerEventNpcHandinRepository::GetMaxId(*m_database) + 1
 			}
 		},
+		{
+			PlayerEvent::TRADE,
+			{
+				.enabled = true,
+				.table_name = "player_event_trade",
+				.next_id = PlayerEventTradeRepository::GetMaxId(*m_database) + 1
+			}
+		},
+		{
+			PlayerEvent::SPEECH,
+			{
+				.enabled = true,
+				.table_name = "player_event_speech",
+				.next_id = PlayerEventSpeechRepository::GetMaxId(*m_database) + 1
+			}
+		}
 	};
 }

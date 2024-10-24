@@ -63,6 +63,7 @@ namespace PlayerEvent {
 		PARCEL_DELETE,
 		BARTER_TRANSACTION,
 		EVOLVE_ITEM,
+		SPEECH,
 		MAX // dont remove
 	};
 
@@ -126,7 +127,8 @@ namespace PlayerEvent {
 		"Parcel Item Retrieved",
 		"Parcel Prune Routine",
 		"Barter Transaction",
-		"Evolve Item Update"
+		"Evolve Item Update",
+		"Player Speech"
 	};
 
 	// Generic struct used by all events
@@ -1137,6 +1139,26 @@ namespace PlayerEvent {
 				CEREAL_NVP(item_name),
 				CEREAL_NVP(level),
 				CEREAL_NVP(progression)
+			)
+		}
+	};
+
+	struct PlayerSpeech {
+		std::string to;
+		std::string from;
+		uint32      guild_id;
+		int16       min_status;
+		uint32      type;
+		std::string message;
+
+		template<class Archive> void serialize(Archive &ar)
+		{
+			ar(CEREAL_NVP(to),
+			   CEREAL_NVP(from),
+			   CEREAL_NVP(guild_id),
+			   CEREAL_NVP(min_status),
+			   CEREAL_NVP(type),
+			   CEREAL_NVP(message)
 			);
 		}
 	};
