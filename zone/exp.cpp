@@ -627,21 +627,21 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 				return 5.0f;
 			}
 
-			if (item->HP   >= 0) return_value  += item->HP 	/ 10.0f;
-			if (item->Mana >= 0) return_value += item->Mana / 10.0f;
+			return_value += item->HP   / 10.0f;
+			return_value += item->Mana / 10.0f;
 
-			if (item->AStr >= 0) return_value += item->AStr;
-			if (item->ASta >= 0) return_value += item->ASta;
-			if (item->ADex >= 0) return_value += item->ADex;
-			if (item->AAgi >= 0) return_value += item->AAgi;
-			if (item->AInt >= 0) return_value += item->AInt;
-			if (item->AWis >= 0) return_value += item->AWis;
+			return_value += item->AStr;
+			return_value += item->ASta;
+			return_value += item->ADex;
+			return_value += item->AAgi;
+			return_value += item->AInt;
+			return_value += item->AWis;
 
-			if (item->MR >= 0) 	return_value += item->MR;
-			if (item->FR >= 0) 	return_value += item->FR;
-			if (item->CR >= 0) 	return_value += item->CR;
-			if (item->DR >= 0) 	return_value += item->DR;
-			if (item->PR >= 0) 	return_value += item->PR;
+			return_value += item->MR;
+			return_value += item->FR;
+			return_value += item->CR;
+			return_value += item->DR;
+			return_value += item->PR;
 
 			return_value += 2 * item->HeroicStr;
 			return_value += 2 * item->HeroicSta;
@@ -698,6 +698,8 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
 		exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
 
+
+		exp_value /= (tier+1);
 		LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
 
 		return exp_value;
@@ -716,7 +718,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 
 	int   item_tier 		  = item->GetID() / 1000000;
 	float cur_item_experience = Strings::ToFloat(item->GetCustomData("Exp"), 0);
-	float new_item_experience = GetBaseExpValueForKill(conlevel, static_cast<int>(upgrade_item->GetID() / 1000000), upgrade_item);
+	float new_item_experience = GetBaseExpValueForKill(conlevel, static_cast<int>(upgrade_item->GetID() / 1000000), item->GetMaxUpgrade(database));
 	float new_percentage 	  = std::min(100.0f, cur_item_experience + new_item_experience);
 
 	EQ::SayLinkEngine linker;

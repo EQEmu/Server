@@ -148,7 +148,7 @@ namespace EQ
 		static bool CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll = false);
 
 		// Dynamic Item Stuff
-		ItemData* GetMutableItem();		
+		ItemData* GetMutableItem();
 		const bool IsItemDynamic() const;
 		const int  GetItemTier() const;
 		const int  GetBaseID() const;
@@ -156,13 +156,15 @@ namespace EQ
 		void ReplaceItemData(EQ::ItemData* new_data);
 
 		ItemInstance* GetUpgrade(SharedDatabase &database);
+		ItemInstance* GetMaxUpgrade(SharedDatabase &database);
+
 
 		// Has attack/delay?
 		bool IsWeapon() const;
 		bool IsAmmo() const;
 		const void SetID(uint32 id) {  if (m_item) { const_cast<ItemData*>(m_item)->ID = id; } }
-		const void SetComment(const std::string& comment) {  
-			if (m_item) { 
+		const void SetComment(const std::string& comment) {
+			if (m_item) {
 				auto mutable_item = const_cast<ItemData*>(m_item);
 				std::strncpy(mutable_item->Comment, comment.c_str(), sizeof(mutable_item->Comment) - 1);
     			mutable_item->Comment[sizeof(mutable_item->Comment) - 1] = '\0';
@@ -170,11 +172,11 @@ namespace EQ
 		}
 
 		bool HasProc() const;
-		
+
 		// Accessors
 		const uint32 GetID() const { return ((m_item) ? m_item->ID : 0); }
 		const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : 0); }
-		ItemData* GetItem() const;		
+		ItemData* GetItem() const;
 		const ItemData* GetUnscaledItem() const;
 
 		const uint8 GetItemType() const { return m_item ? m_item->ItemType : 255; } // Return 255 so you know there's no valid item

@@ -850,7 +850,7 @@ const bool EQ::ItemInstance::IsItemDynamic() const
 	if (!m_item)
 		return false;
 
-	return !GetCustomData("original_id").empty();	
+	return !GetCustomData("original_id").empty();
 }
 
 // Returns the original ID of a dynamic item
@@ -858,8 +858,8 @@ const int EQ::ItemInstance::GetOriginalID() const
 {
 	if (!m_item)
 		return 0;
-				
-	return m_item->OriginalID;		
+
+	return m_item->OriginalID;
 }
 
 // Returns the base ID of an item.
@@ -868,7 +868,7 @@ const int EQ::ItemInstance::GetBaseID() const
 	if (!m_item)
 		return 0;
 
-	return GetOriginalID() % 1000000;		
+	return GetOriginalID() % 1000000;
 }
 
 
@@ -882,14 +882,34 @@ const int EQ::ItemInstance::GetItemTier() const
 
 EQ::ItemInstance* EQ::ItemInstance::GetUpgrade(SharedDatabase &database) {
 	// TODO - expand for Affixes, perhaps for newly created Artifacts.
-	
+
 	auto new_item = database.CreateItem(GetOriginalID() + 1000000);
-	
+
 	if (new_item) {
 		return new_item;
 	} else {
 		return nullptr;
 	}
+}
+
+EQ::ItemInstance* EQ::ItemInstance::GetMaxUpgrade(SharedDatabase &database) {
+    EQ::ItemInstance* current_item = this;
+    EQ::ItemInstance* next_item = nullptr;
+
+    while (true) {
+        next_item = current_item->GetUpgrade(database);
+
+        if (next_item) {
+            if (current_item != this) {
+                delete current_item;
+            }
+            current_item = next_item;
+        } else {
+            return (current_item == this) ? nullptr : current_item;
+        }
+    }
+
+    return nullptr;
 }
 
 const EQ::ItemData* EQ::ItemInstance::GetUnscaledItem() const
