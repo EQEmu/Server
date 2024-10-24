@@ -562,21 +562,6 @@ public:
 
 	bool CanPetTakeItem(const EQ::ItemInstance *inst);
 
-	// NPC Hand-in
-	bool IsMultiQuestEnabled() { return m_multiquest_enabled; }
-	void MultiQuestEnable() { m_multiquest_enabled = true; }
-	bool IsGuildmasterForClient(Client *c);
-	bool CheckHandin(
-		Client *c,
-		std::map<std::string, uint16> handin,
-		std::map<std::string, uint16> required,
-		std::vector<const EQ::ItemInstance *> items
-	);
-	void ReturnHandinItems(Client *c);
-	void ResetHandin();
-	bool HasProcessedHandinReturn() { return m_has_processed_handin_return; }
-	bool HandinStarted() { return m_handin_started; }
-
 	struct HandinEntry {
 		std::string            item_id            = "0";
 		uint16                 count              = 0;
@@ -597,6 +582,22 @@ public:
 		HandinMoney              original_money = {}; // this is what the player originally handed in, never modified
 		HandinMoney              money          = {}; // money can be removed from this set as successful handins are made
 	};
+
+	// NPC Hand-in
+	bool IsMultiQuestEnabled() { return m_multiquest_enabled; }
+	void MultiQuestEnable() { m_multiquest_enabled = true; }
+	bool IsGuildmasterForClient(Client *c);
+	bool CheckHandin(
+		Client *c,
+		std::map<std::string, uint16> handin,
+		std::map<std::string, uint16> required,
+		std::vector<const EQ::ItemInstance *> items
+	);
+	Handin ReturnHandinItems(Client *c);
+	void ResetHandin();
+	bool HasProcessedHandinReturn() { return m_has_processed_handin_return; }
+	bool HandinStarted() { return m_handin_started; }
+
 
 protected:
 

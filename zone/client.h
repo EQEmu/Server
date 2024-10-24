@@ -239,7 +239,7 @@ public:
 	#include "client_packet.h"
 
 	Client(EQStreamInterface * ieqs);
-	Client();
+	Client(); // mocking
 	~Client();
 
 	void ReconnectUCS();
