@@ -5978,6 +5978,16 @@ bool Perl__aretaskscompleted(perl::array task_ids)
 	return quest_manager.aretaskscompleted(v);
 }
 
+void Perl__SpawnCircle(uint32 npc_id, float x, float y, float z, float heading, float radius, uint32 points)
+{
+	quest_manager.SpawnCircle(npc_id, glm::vec4(x, y, z, heading), radius, points);
+}
+
+void Perl__SpawnGrid(uint32 npc_id, float x, float y, float z, float heading, float spacing, uint32 spawn_count)
+{
+	quest_manager.SpawnGrid(npc_id, glm::vec4(x, y, z, heading), spacing, spawn_count);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6287,6 +6297,8 @@ void perl_register_quest()
 	package.add("SendMail", &Perl__SendMail);
 	package.add("SetAutoLoginCharacterNameByAccountID", &Perl__SetAutoLoginCharacterNameByAccountID);
 	package.add("SetRunning", &Perl__SetRunning);
+	package.add("SpawnCircle", &Perl__SpawnCircle);
+	package.add("SpawnGrid", &Perl__SpawnGrid);
 	package.add("activespeakactivity", &Perl__activespeakactivity);
 	package.add("activespeaktask", &Perl__activespeaktask);
 	package.add("activetasksinset", &Perl__activetasksinset);
