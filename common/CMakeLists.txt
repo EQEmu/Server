@@ -277,6 +277,9 @@ SET(repositories
     repositories/base/base_pets_equipmentset_repository.h
     repositories/base/base_pets_equipmentset_entries_repository.h
     repositories/base/base_player_titlesets_repository.h
+    repositories/base/base_player_event_killed_npc_repository.h
+    repositories/base/base_player_event_killed_named_npc_repository.h
+    repositories/base/base_player_event_killed_raid_npc_repository.h
     repositories/base/base_player_event_log_settings_repository.h
     repositories/base/base_player_event_logs_repository.h
     repositories/base/base_player_event_loot_items_repository.h
@@ -468,6 +471,9 @@ SET(repositories
     repositories/pets_equipmentset_repository.h
     repositories/pets_equipmentset_entries_repository.h
     repositories/player_titlesets_repository.h
+    repositories/player_event_killed_npc_repository.h
+    repositories/player_event_killed_named_npc_repository.h
+    repositories/player_event_killed_raid_npc_repository.h
     repositories/player_event_log_settings_repository.h
     repositories/player_event_logs_repository.h
     repositories/player_event_loot_items_repository.h
