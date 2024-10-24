@@ -4358,7 +4358,7 @@ bool NPC::CheckHandin(
 	}
 
 	// compare hand-in to required, the item_id can be in any slot
-	bool met_requirement = true;
+	bool requirement_met = true;
 
 	// money
 	bool money_met = h.money.platinum == r.money.platinum
@@ -4398,7 +4398,7 @@ bool NPC::CheckHandin(
 		items_met = false;
 	}
 
-	met_requirement = money_met && items_met;
+	requirement_met = money_met && items_met;
 
 	// multi-quest
 	if (IsMultiQuestEnabled()) {
@@ -4464,7 +4464,7 @@ bool NPC::CheckHandin(
 				);
 			} else {
 				Say("You are not a member of my guild. I will not train you!");
-				met_requirement = false;
+				requirement_met = false;
 				break;
 			}
 		}
@@ -4472,9 +4472,9 @@ bool NPC::CheckHandin(
 
 	// print current hand-in bucket
 	LogNpcHandin(
-		"{} > Before processing hand-in | met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
+		"{} > Before processing hand-in | requirement_met [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
 		log_handin_prefix,
-		met_requirement,
+		requirement_met,
 		h.items.size(),
 		h.money.platinum,
 		h.money.gold,
@@ -4531,7 +4531,7 @@ bool NPC::CheckHandin(
 		item_count++;
 	}
 
-	if (met_requirement) {
+	if (requirement_met) {
 		std::vector<std::string> log_entries = {};
 		for (const auto &h_item : h.items) {
 			m_hand_in.items.erase(
@@ -4567,26 +4567,6 @@ bool NPC::CheckHandin(
 			}
 		}
 
-		LogNpcHandin(
-			"{} > End of hand-in | met_requirement [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
-			log_handin_prefix,
-			met_requirement,
-			m_hand_in.items.size(),
-			m_hand_in.money.platinum,
-			m_hand_in.money.gold,
-			m_hand_in.money.silver,
-			m_hand_in.money.copper
-		);
-		for (const auto &i: m_hand_in.items) {
-			LogNpcHandin(
-				"{} Hand-in success, item [{}] ({}) count [{}]",
-				log_handin_prefix,
-				i.item->GetItem()->Name,
-				i.item_id,
-				i.count
-			);
-		}
-
 		// decrement successful hand-in money from current hand-in bucket
 		if (h.money.platinum > 0 || h.money.gold > 0 || h.money.silver > 0 || h.money.copper > 0) {
 			LogNpcHandin(
@@ -4602,9 +4582,29 @@ bool NPC::CheckHandin(
 			m_hand_in.money.silver -= h.money.silver;
 			m_hand_in.money.copper -= h.money.copper;
 		}
+
+		LogNpcHandin(
+			"{} > End of hand-in | requirement_met [{}] item_count [{}] platinum [{}] gold [{}] silver [{}] copper [{}]",
+			log_handin_prefix,
+			requirement_met,
+			m_hand_in.items.size(),
+			m_hand_in.money.platinum,
+			m_hand_in.money.gold,
+			m_hand_in.money.silver,
+			m_hand_in.money.copper
+		);
+		for (const auto &i: m_hand_in.items) {
+			LogNpcHandin(
+				"{} Hand-in success, item [{}] ({}) count [{}]",
+				log_handin_prefix,
+				i.item->GetItem()->Name,
+				i.item_id,
+				i.count
+			);
+		}
 	}
 
-	return met_requirement;
+	return requirement_met;
 }
 
 void NPC::ReturnHandinItems(Client *c)
@@ -4672,11 +4672,11 @@ void NPC::ReturnHandinItems(Client *c)
 	);
 
 	// check if any money was handed in
-	if (m_hand_in.money.platinum > 0 ||
-		m_hand_in.money.gold > 0 ||
-		m_hand_in.money.silver > 0 ||
-		m_hand_in.money.copper > 0
-		) {
+	bool money_handed = m_hand_in.money.platinum > 0 ||
+						m_hand_in.money.gold > 0 ||
+						m_hand_in.money.silver > 0 ||
+						m_hand_in.money.copper > 0;
+	if (money_handed) {
 		c->AddMoneyToPP(
 			m_hand_in.money.copper,
 			m_hand_in.money.silver,
