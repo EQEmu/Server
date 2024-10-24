@@ -77,6 +77,8 @@ public:
 
 	bool IsDoorBlacklisted();
 
+	const char* GetDoorZone() const { return m_zone_name; }
+
 private:
 	bool GetIsDoorBlacklisted();
 

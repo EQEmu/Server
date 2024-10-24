@@ -131,6 +131,16 @@
         OutF(LogSys, Logs::Detail, Logs::Error, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogEvolveItem(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::EvolveItem))\
+        OutF(LogSys, Logs::General, Logs::EvolveItem, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogEvolveItemDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::EvolveItem))\
+        OutF(LogSys, Logs::Detail, Logs::EvolveItem, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define LogGuilds(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Guilds))\
         OutF(LogSys, Logs::General, Logs::Guilds, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

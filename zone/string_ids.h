@@ -419,6 +419,11 @@
 #define GUILD_BANK_FULL				6098	// There is no more room in the Guild Bank.
 #define GUILD_BANK_TRANSFERRED  	6100	// '%1' transferred to Guild Bank from Deposits.
 #define GUILD_BANK_EMPTY_HANDS  	6108	// You must empty your hands to withdraw from the Guild Bank.
+#define EVOLVE_ITEM_EVOLVED         6145    //Your %1 has evolved!
+#define EVOLVE_DETAILS              6146    //Evolving: Level %1/%2 %3%% %4
+#define EVOLVE_LEVEL_LIMIT          6147    //Your %1 can not evolve until you reach level %2.
+#define EVOLVE_XP_TXFR_CONFIRM      6148    //Are you sure you want to transfer experience between these two items?
+#define EVOLVE_XP_TXFRD             6149    //Your item's experience has been transferred!
 #define TRADESKILL_COMBINE_LORE 	6199	// Combine would result in a LORE item (%1) you already possess.
 #define TRANSFORM_FAILED			6326	//This mold cannot be applied to your %1.
 #define TRANSFORM_COMPLETE			6327	//You have successfully transformed your %1.

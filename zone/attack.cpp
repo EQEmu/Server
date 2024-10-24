@@ -2818,7 +2818,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 				if (con_level != ConsiderColor::Gray) {
 					if (!GetOwner() || (GetOwner() && !GetOwner()->IsClient())) {
-						give_exp_client->AddEXP(ExpSource::Kill, final_exp, con_level);
+						give_exp_client->AddEXP(ExpSource::Kill, final_exp, con_level, false, this);
 
 						if (
 							killer_mob &&
