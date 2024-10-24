@@ -16746,6 +16746,11 @@ struct RecordKillCheck {
 
 void Client::RecordKilledNPCEvent(NPC *n)
 {
+	if (!n) {
+		LogError("NPC passed was invalid.");
+		return;
+	}
+
 	bool is_named = Strings::Contains(n->GetName(), "#") && !n->IsRaidTarget();
 
 	std::vector<RecordKillCheck> checks = {

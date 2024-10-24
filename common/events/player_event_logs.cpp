@@ -137,7 +137,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 	EtlQueues etl_queues{};
 
 	for (auto &r:m_record_batch_queue) {
-		switch (r.event_type_id) {
+		switch (r.event_type_id && m_settings[r.event_type_id].etl_enabled) {
 			case PlayerEvent::EventType::LOOT_ITEM: {
 				PlayerEvent::LootItemEvent in{};
 				PlayerEventLootItemsRepository::PlayerEventLootItems out{};
@@ -410,6 +410,84 @@ void PlayerEventLogs::ProcessBatchQueue()
 				etl_queues.speech.push_back(out);
 				break;
 			}
+			case PlayerEvent::EventType::KILLED_NPC: {
+				PlayerEvent::KilledNPCEvent in{};
+				PlayerEventKilledNpcRepository::PlayerEventKilledNpc out{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.npc_id                        = in.npc_id;
+				out.npc_name                      = in.npc_name;
+				out.combat_time_seconds           = in.combat_time_seconds;
+				out.total_damage_per_second_taken = in.total_damage_per_second_taken;
+				out.total_heal_per_second_taken   = in.total_heal_per_second_taken;
+				out.created_at                    = r.created_at;
+
+				if (m_etl_settings.contains(PlayerEvent::EventType::KILLED_NPC)) {
+					r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::KILLED_NPC).next_id;
+					m_etl_settings.at(PlayerEvent::EventType::KILLED_NPC).next_id++;
+				}
+
+				etl_queues.killed_npc.push_back(out);
+				break;
+			}
+			case PlayerEvent::EventType::KILLED_NAMED_NPC: {
+				PlayerEvent::KilledNPCEvent in{};
+				PlayerEventKilledNamedNpcRepository::PlayerEventKilledNamedNpc out{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.npc_id                        = in.npc_id;
+				out.npc_name                      = in.npc_name;
+				out.combat_time_seconds           = in.combat_time_seconds;
+				out.total_damage_per_second_taken = in.total_damage_per_second_taken;
+				out.total_heal_per_second_taken   = in.total_heal_per_second_taken;
+				out.created_at                    = r.created_at;
+
+				if (m_etl_settings.contains(PlayerEvent::EventType::KILLED_NAMED_NPC)) {
+					r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::KILLED_NAMED_NPC).next_id;
+					m_etl_settings.at(PlayerEvent::EventType::KILLED_NAMED_NPC).next_id++;
+				}
+
+				etl_queues.killed_named_npc.push_back(out);
+				break;
+			}
+			case PlayerEvent::EventType::KILLED_RAID_NPC: {
+				PlayerEvent::KilledNPCEvent in{};
+				PlayerEventKilledRaidNpcRepository::PlayerEventKilledRaidNpc out{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.npc_id                        = in.npc_id;
+				out.npc_name                      = in.npc_name;
+				out.combat_time_seconds           = in.combat_time_seconds;
+				out.total_damage_per_second_taken = in.total_damage_per_second_taken;
+				out.total_heal_per_second_taken   = in.total_heal_per_second_taken;
+				out.created_at                    = r.created_at;
+
+				if (m_etl_settings.contains(PlayerEvent::EventType::KILLED_RAID_NPC)) {
+					r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::KILLED_RAID_NPC).next_id;
+					m_etl_settings.at(PlayerEvent::EventType::KILLED_RAID_NPC).next_id++;
+				}
+
+				etl_queues.killed_raid_npc.push_back(out);
+				break;
+			}
 			default: {
 				LogError("Non-Implemented ETL routing <red>[{}]", r.event_type_id);
 			}
@@ -458,6 +536,20 @@ void PlayerEventLogs::ProcessBatchQueue()
 		etl_queues.speech.clear();
 	}
 
+	if (!etl_queues.killed_npc.empty()) {
+		PlayerEventKilledNpcRepository::InsertMany(*m_database, etl_queues.killed_npc);
+		etl_queues.killed_npc.clear();
+	}
+
+	if (!etl_queues.killed_named_npc.empty()) {
+		PlayerEventKilledNamedNpcRepository::InsertMany(*m_database, etl_queues.killed_named_npc);
+		etl_queues.killed_named_npc.clear();
+	}
+
+	if (!etl_queues.killed_raid_npc.empty()) {
+		PlayerEventKilledRaidNpcRepository::InsertMany(*m_database, etl_queues.killed_raid_npc);
+		etl_queues.killed_raid_npc.clear();
+	}
 
 	LogPlayerEventsDetail(
 		"Processing batch player event log queue of [{}] took [{}]",
@@ -1012,6 +1104,30 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 								m_settings[i].retention_days));
 						break;
 					}
+					case PlayerEvent::KILLED_NPC: {
+						deleted_count = PlayerEventKilledNpcRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
+					}
+					case PlayerEvent::KILLED_NAMED_NPC: {
+						deleted_count = PlayerEventKilledNamedNpcRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
+					}
+					case PlayerEvent::KILLED_RAID_NPC: {
+						deleted_count = PlayerEventKilledRaidNpcRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
+					}
 					default: {
 						LogError("NonImplemented ETL Event Type <red>[{}] ", static_cast<uint32>(m_settings[i].id));
 					}
@@ -1176,6 +1292,30 @@ void PlayerEventLogs::LoadEtlIds()
 				.enabled = true,
 				.table_name = "player_event_speech",
 				.next_id = PlayerEventSpeechRepository::GetMaxId(*m_database) + 1
+			}
+		},
+		{
+			PlayerEvent::KILLED_NPC,
+			{
+				.enabled = true,
+				.table_name = "player_event_killed_npc",
+				.next_id = PlayerEventKilledNpcRepository::GetMaxId(*m_database) + 1
+			}
+		},
+		{
+			PlayerEvent::KILLED_NAMED_NPC,
+			{
+				.enabled = true,
+				.table_name = "player_event_killed_named_npc",
+				.next_id = PlayerEventKilledNamedNpcRepository::GetMaxId(*m_database) + 1
+			}
+		},
+		{
+			PlayerEvent::KILLED_RAID_NPC,
+			{
+				.enabled = true,
+				.table_name = "player_event_killed_raid_npc",
+				.next_id = PlayerEventKilledRaidNpcRepository::GetMaxId(*m_database) + 1
 			}
 		}
 	};

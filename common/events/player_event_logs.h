@@ -18,6 +18,9 @@
 #include "../repositories/player_event_trade_repository.h"
 #include "../repositories/player_event_trade_entries_repository.h"
 #include "../repositories/player_event_speech_repository.h"
+#include "../repositories/player_event_killed_npc_repository.h"
+#include "../repositories/player_event_killed_named_npc_repository.h"
+#include "../repositories/player_event_killed_raid_npc_repository.h"
 
 
 class PlayerEventLogs {
@@ -80,6 +83,9 @@ public:
 		std::vector<PlayerEventTradeRepository::PlayerEventTrade>                       trade;
 		std::vector<PlayerEventTradeEntriesRepository::PlayerEventTradeEntries>         trade_entries;
 		std::vector<PlayerEventSpeechRepository::PlayerEventSpeech>                     speech;
+		std::vector<PlayerEventKilledNpcRepository::PlayerEventKilledNpc>               killed_npc;
+		std::vector<PlayerEventKilledNamedNpcRepository::PlayerEventKilledNamedNpc>     killed_named_npc;
+		std::vector<PlayerEventKilledRaidNpcRepository::PlayerEventKilledRaidNpc>       killed_raid_npc;
 	};
 
 private:

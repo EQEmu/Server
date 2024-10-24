@@ -1247,19 +1247,21 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 	}
 
-	if (PlayerEvent::EventType::SPEECH) {
+	if (player_event_logs.IsEventEnabled(PlayerEvent::EventType::SPEECH)) {
 		PlayerEvent::PlayerSpeech e{};
-		e.message    = message;
-		e.min_status = Admin();
-		e.type       = chan_num;
-		e.to         = targetname;
-		e.from       = GetName();
+		std::string msg = message;
+		if (!msg.empty() && msg.at(0) != '#' && msg.at(0) != '^') {
+			e.message    = message;
+			e.min_status = Admin();
+			e.type       = chan_num;
+			e.to         = targetname;
+			e.from       = GetName();
+			if (chan_num == ChatChannel_Guild) {
+				e.guild_id = GuildID();
+			}
 
-		if (chan_num == ChatChannel_Guild) {
-			e.guild_id = GuildID();
+			RecordPlayerEventLog(PlayerEvent::SPEECH, e);
 		}
-
-		RecordPlayerEventLog(PlayerEvent::SPEECH, e);
 	}
 
 	/* Logs Player Chat */
