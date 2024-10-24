@@ -87,6 +87,110 @@ extern PetitionList petition_list;
 
 void UpdateWindowTitle(char* iNewTitle);
 
+Client::Client() : Mob(
+	"No name", // in_name
+	"", // in_lastname
+	0, // in_cur_hp
+	0, // in_max_hp
+	Gender::Male, // in_gender
+	Race::Doug, // in_race
+	Class::None, // in_class
+	BodyType::Humanoid, // in_bodytype
+	Deity::Unknown, // in_deity
+	0, // in_level
+	0, // in_npctype_id
+	0.0f, // in_size
+	0.7f, // in_runspeed
+	glm::vec4(), // position
+	0, // in_light
+	0xFF, // in_texture
+	0xFF, // in_helmtexture
+	0, // in_ac
+	0, // in_atk
+	0, // in_str
+	0, // in_sta
+	0, // in_dex
+	0, // in_agi
+	0, // in_int
+	0, // in_wis
+	0, // in_cha
+	0, // in_haircolor
+	0, // in_beardcolor
+	0, // in_eyecolor1
+	0, // in_eyecolor2
+	0, // in_hairstyle
+	0, // in_luclinface
+	0, // in_beard
+	0, // in_drakkin_heritage
+	0, // in_drakkin_tattoo
+	0, // in_drakkin_details
+	EQ::TintProfile(), // in_armor_tint
+	0xff, // in_aa_title
+	0, // in_see_invis
+	0, // in_see_invis_undead
+	0, // in_see_hide
+	0, // in_see_improved_hide
+	0, // in_hp_regen
+	0, // in_mana_regen
+	0, // in_qglobal
+	0, // in_maxlevel
+	0, // in_scalerate
+	0, // in_armtexture
+	0, // in_bracertexture
+	0, // in_handtexture
+	0, // in_legtexture
+	0, // in_feettexture
+	0, // in_usemodel
+	false, // in_always_aggros_foes
+	0, // in_heroic_strikethrough
+	false // in_keeps_sold_items
+),
+				   hpupdate_timer(2000),
+				   camp_timer(29000),
+				   process_timer(100),
+				   consume_food_timer(CONSUMPTION_TIMER),
+				   zoneinpacket_timer(1000),
+				   linkdead_timer(RuleI(Zone, ClientLinkdeadMS)),
+				   dead_timer(2000),
+				   global_channel_timer(1000),
+				   fishing_timer(8000),
+				   endupkeep_timer(1000),
+				   autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
+				   m_client_npc_aggro_scan_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
+				   m_client_zone_wide_full_position_update_timer(5 * 60 * 1000),
+				   tribute_timer(Tribute_duration),
+				   proximity_timer(ClientProximity_interval),
+				   TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
+				   charm_update_timer(6000),
+				   rest_timer(1),
+				   pick_lock_timer(1000),
+				   charm_class_attacks_timer(3000),
+				   charm_cast_timer(3500),
+				   qglobal_purge_timer(30000),
+				   TrackingTimer(2000),
+				   RespawnFromHoverTimer(0),
+				   merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
+				   ItemQuestTimer(500),
+				   anon_toggle_timer(250),
+				   afk_toggle_timer(250),
+				   helm_toggle_timer(250),
+				   aggro_meter_timer(AGGRO_METER_UPDATE_MS),
+				   m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
+				   m_ZoneSummonLocation(-2.0f, -2.0f, -2.0f, -2.0f),
+				   m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
+				   m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
+				   last_region_type(RegionTypeUnsupported),
+				   m_dirtyautohaters(false),
+				   m_position_update_timer(10000),
+				   consent_throttle_timer(2000),
+				   tmSitting(0),
+				   parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
+				   lazy_load_bank_check_timer(1000),
+				   bandolier_throttle_timer(0)
+{
+	return this;
+}
+
 Client::Client(EQStreamInterface *ieqs) : Mob(
 	"No name", // in_name
 	"", // in_lastname
