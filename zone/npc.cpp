@@ -4729,7 +4729,7 @@ void NPC::ReturnHandinItems(Client *c)
 		Say(
 			fmt::format(
 				"I have no need for this {}, you can have it back.",
-				GetCleanName()
+				c->GetCleanName()
 			).c_str()
 		);
 	}
