@@ -4607,7 +4607,7 @@ bool NPC::CheckHandin(
 	return requirement_met;
 }
 
-void NPC::ReturnHandinItems(Client *c)
+NPC::Handin NPC::ReturnHandinItems(Client *c)
 {
 	// player event
 	std::vector<PlayerEvent::HandinEntry> handin_items;
@@ -4627,6 +4627,8 @@ void NPC::ReturnHandinItems(Client *c)
 			);
 		}
 	}
+
+	auto returned = m_hand_in;
 
 	// check if any money was handed in
 	if (m_hand_in.original_money.platinum > 0 ||
@@ -4732,6 +4734,8 @@ void NPC::ReturnHandinItems(Client *c)
 
 		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
 	}
+
+	return returned;
 }
 
 void NPC::ResetHandin()

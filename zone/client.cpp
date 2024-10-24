@@ -87,6 +87,7 @@ extern PetitionList petition_list;
 
 void UpdateWindowTitle(char* iNewTitle);
 
+// client constructor purely for testing / mocking
 Client::Client() : Mob(
 	"No name", // in_name
 	"", // in_lastname
@@ -188,7 +189,210 @@ Client::Client() : Mob(
 				   lazy_load_bank_check_timer(1000),
 				   bandolier_throttle_timer(0)
 {
-	return this;
+	eqs = nullptr;
+	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
+		SetFilter(client_filter, FilterShow);
+	}
+
+	cheat_manager.SetClient(this);
+	mMovementManager->AddClient(this);
+	character_id = 0;
+	conn_state = NoPacketsReceived;
+	client_data_loaded = false;
+	berserk = false;
+	dead = false;
+	client_state = CLIENT_CONNECTING;
+	SetTrader(false);
+	Haste = 0;
+	SetCustomerID(0);
+	SetTraderID(0);
+	TrackingID = 0;
+	WID = 0;
+	account_id = 0;
+	admin = AccountStatus::Player;
+	lsaccountid = 0;
+	guild_id = GUILD_NONE;
+	guildrank = 0;
+	guild_tribute_opt_in = 0;
+	SetGuildListDirty(false);
+	GuildBanker = false;
+	memset(lskey, 0, sizeof(lskey));
+	strcpy(account_name, "");
+	tellsoff = false;
+	last_reported_mana = 0;
+	last_reported_endurance = 0;
+	last_reported_endurance_percent = 0;
+	last_reported_mana_percent = 0;
+	gm_hide_me = false;
+	AFK = false;
+	LFG = false;
+	LFGFromLevel = 0;
+	LFGToLevel = 0;
+	LFGMatchFilter = false;
+	LFGComments[0] = '\0';
+	LFP = false;
+	gmspeed = 0;
+	gminvul = false;
+	playeraction = 0;
+	SetTarget(0);
+	auto_attack = false;
+	auto_fire = false;
+	runmode = false;
+	linkdead_timer.Disable();
+	zonesummon_id = 0;
+	zonesummon_ignorerestrictions = 0;
+	bZoning              = false;
+	m_lock_save_position = false;
+	zone_mode            = ZoneUnsolicited;
+	casting_spell_id = 0;
+	npcflag = false;
+	npclevel = 0;
+	fishing_timer.Disable();
+	dead_timer.Disable();
+	camp_timer.Disable();
+	autosave_timer.Disable();
+	GetMercTimer()->Disable();
+	instalog = false;
+	m_pp.autosplit = false;
+	// initialise haste variable
+	m_tradeskill_object = nullptr;
+	delaytimer = false;
+	PendingRezzXP = -1;
+	PendingRezzDBID = 0;
+	PendingRezzSpellID = 0;
+	numclients++;
+	// emuerror;
+	UpdateWindowTitle(nullptr);
+	horseId = 0;
+	tgb = false;
+	tribute_master_id = 0xFFFFFFFF;
+	tribute_timer.Disable();
+	task_state         = nullptr;
+	TotalSecondsPlayed = 0;
+	keyring.clear();
+	bind_sight_target = nullptr;
+	p_raid_instance = nullptr;
+	mercid = 0;
+	mercSlot = 0;
+	InitializeMercInfo();
+	SetMerc(0);
+	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
+	dynamiczone_removal_timer.Disable();
+
+	//for good measure:
+	memset(&m_pp, 0, sizeof(m_pp));
+	memset(&m_epp, 0, sizeof(m_epp));
+	PendingTranslocate = false;
+	PendingSacrifice = false;
+	sacrifice_caster_id = 0;
+	controlling_boat_id = 0;
+	controlled_mob_id = 0;
+	qGlobals = nullptr;
+
+	if (!RuleB(Character, PerCharacterQglobalMaxLevel) && !RuleB(Character, PerCharacterBucketMaxLevel)) {
+		SetClientMaxLevel(0);
+	} else if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
+		SetClientMaxLevel(GetCharMaxLevelFromQGlobal());
+	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
+		SetClientMaxLevel(GetCharMaxLevelFromBucket());
+	}
+
+	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
+	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
+	AttemptedMessages = 0;
+	TotalKarma = 0;
+	m_ClientVersion = EQ::versions::ClientVersion::Unknown;
+	m_ClientVersionBit = 0;
+	AggroCount = 0;
+	ooc_regen = false;
+	AreaHPRegen = 1.0f;
+	AreaManaRegen = 1.0f;
+	AreaEndRegen = 1.0f;
+	XPRate = 100;
+	current_endurance = 0;
+
+	CanUseReport = true;
+	aa_los_them_mob = nullptr;
+	los_status = false;
+	los_status_facing = false;
+	HideCorpseMode = HideCorpseNone;
+	PendingGuildInvitation = false;
+
+	InitializeBuffSlots();
+
+	adventure_request_timer = nullptr;
+	adventure_create_timer = nullptr;
+	adventure_leave_timer = nullptr;
+	adventure_door_timer = nullptr;
+	adv_requested_data = nullptr;
+	adventure_stats_timer = nullptr;
+	adventure_leaderboard_timer = nullptr;
+	adv_data = nullptr;
+	adv_requested_theme = LDoNThemes::Unused;
+	adv_requested_id = 0;
+	adv_requested_member_count = 0;
+
+	for(int i = 0; i < XTARGET_HARDCAP; ++i)
+	{
+		XTargets[i].Type = Auto;
+		XTargets[i].ID = 0;
+		XTargets[i].Name[0] = 0;
+		XTargets[i].dirty = false;
+	}
+	MaxXTargets = 5;
+	XTargetAutoAddHaters = true;
+	m_autohatermgr.SetOwner(this, nullptr, nullptr);
+	m_activeautohatermgr = &m_autohatermgr;
+
+	initial_respawn_selection = 0;
+	alternate_currency_loaded = false;
+
+	interrogateinv_flag = false;
+
+	trapid = 0;
+
+	for (int i = 0; i < InnateSkillMax; ++i)
+		m_pp.InnateSkills[i] = InnateDisabled;
+
+	temp_pvp = false;
+
+	moving = false;
+
+	environment_damage_modifier = 0;
+	invulnerable_environment_damage = false;
+
+	// rate limiter
+	m_list_task_timers_rate_limit.Start(1000);
+
+	// gm
+	SetDisplayMobInfoWindow(true);
+	SetDevToolsEnabled(true);
+
+	bot_owner_options[booDeathMarquee] = false;
+	bot_owner_options[booStatsUpdate] = false;
+	bot_owner_options[booSpawnMessageSay] = false;
+	bot_owner_options[booSpawnMessageTell] = true;
+	bot_owner_options[booSpawnMessageClassSpecific] = true;
+	bot_owner_options[booAutoDefend] = RuleB(Bots, AllowOwnerOptionAutoDefend);
+	bot_owner_options[booBuffCounter] = false;
+	bot_owner_options[booMonkWuMessage] = false;
+
+	m_parcel_platinum         = 0;
+	m_parcel_gold             = 0;
+	m_parcel_silver           = 0;
+	m_parcel_copper           = 0;
+	m_parcel_count            = 0;
+	m_parcel_enabled          = true;
+	m_parcel_merchant_engaged = false;
+	m_parcels.clear();
+
+	m_buyer_id = 0;
+
+	SetBotPulling(false);
+	SetBotPrecombat(false);
+
+	AI_Init();
+
 }
 
 Client::Client(EQStreamInterface *ieqs) : Mob(
@@ -603,9 +807,11 @@ Client::~Client() {
 		zone->RemoveAuth(GetName(), lskey);
 
 	//let the stream factory know were done with this stream
-	eqs->Close();
-	eqs->ReleaseFromUse();
-	safe_delete(eqs);
+	if (eqs) {
+		eqs->Close();
+		eqs->ReleaseFromUse();
+		safe_delete(eqs);
+	}
 
 	UninitializeBuffSlots();
 }
