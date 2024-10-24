@@ -1017,6 +1017,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	//Check the disc timer
 	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.timer_id;
+
 	if(!p_timers.Expired(&database, DiscTimer, false)) { // lets not set the reuse timer in case CastSpell fails (or we would have to turn off the timer, but CastSpell will set it as well)
 		uint32 remaining_time = p_timers.GetRemainingTime(DiscTimer);
 		LogDebug("Timer ID [{}] not expired.", spell.timer_id);
@@ -1048,6 +1049,8 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			reduced_recast -= focus;
 		}
 
+		LogDebug("reduced_recast: [{}]", reduced_recast);
+
 		if (reduced_recast > 0) {
 			instant_recast = false;
 
@@ -1065,6 +1068,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 				}
 			}
 			SendDisciplineTimer(spells[spell_id].timer_id, reduced_recast);
+			p_timers.Start(DiscTimer, reduced_recast); // something in the bowels of SpellFinished is causing this to not start for certain DiscTimer values, so go ahead and do it here. Lazy, but effective.
 		}
 	}
 
