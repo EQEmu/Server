@@ -6058,7 +6058,7 @@ ENGINE=InnoDB
 //
 //)"
 
-		// Used for testing
+	// Used for testing
 //	ManifestEntry{
 //		.version = 9229,
 //		.description = "new_database_check_test",

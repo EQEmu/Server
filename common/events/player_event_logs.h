@@ -13,8 +13,12 @@
 #include "../repositories/player_event_loot_items_repository.h"
 #include "../repositories/player_event_merchant_purchase_repository.h"
 #include "../repositories/player_event_merchant_sell_repository.h"
-#include "../repositories/player_event_npc_handin_entries_repository.h"
 #include "../repositories/player_event_npc_handin_repository.h"
+#include "../repositories/player_event_npc_handin_entries_repository.h"
+#include "../repositories/player_event_trade_repository.h"
+#include "../repositories/player_event_trade_entries_repository.h"
+#include "../repositories/player_event_speech_repository.h"
+
 
 class PlayerEventLogs {
 public:
@@ -73,6 +77,9 @@ public:
 		std::vector<PlayerEventMerchantSellRepository::PlayerEventMerchantSell>         merchant_sell;
 		std::vector<PlayerEventNpcHandinRepository::PlayerEventNpcHandin>               npc_handin;
 		std::vector<PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries> npc_handin_entries;
+		std::vector<PlayerEventTradeRepository::PlayerEventTrade>                       trade;
+		std::vector<PlayerEventTradeEntriesRepository::PlayerEventTradeEntries>         trade_entries;
+		std::vector<PlayerEventSpeechRepository::PlayerEventSpeech>                     speech;
 	};
 
 private:
