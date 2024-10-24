@@ -4634,7 +4634,8 @@ void QuestManager::SpawnCircle(uint32 npc_id, glm::vec4 position, float radius, 
 	glm::vec4 npc_position = position;
 
 	for (uint32 i = 0; i < points; i++) {
-		float angle   = 2 * M_PI * i / points;
+		float angle = 2 * M_PI * i / points;
+
 		npc_position.x = position.x + radius * std::cos(angle);
 		npc_position.y = position.y + radius * std::sin(angle);
 
