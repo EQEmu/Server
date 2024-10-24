@@ -4350,7 +4350,8 @@ bool NPC::CheckHandin(
 				HandinEntry{
 					.item_id = std::to_string(i->GetItem()->ID),
 					.count = std::max(static_cast<uint16>(i->GetCharges()), static_cast<uint16>(1)),
-					.item = i->Clone()
+					.item = i->Clone(),
+					.is_multiquest_item = false
 				}
 			);
 		}
@@ -4358,25 +4359,46 @@ bool NPC::CheckHandin(
 
 	// compare hand-in to required, the item_id can be in any slot
 	bool met_requirement = true;
+
+	// money
+	bool money_met = h.money.platinum == r.money.platinum
+					 && h.money.gold == r.money.gold
+					 && h.money.silver == r.money.silver
+					 && h.money.copper == r.money.copper;
+
+	// items
+	bool items_met = true;
 	if (h.items.size() == r.items.size() && !h.items.empty() && !r.items.empty()) {
-		for (auto &h_item: h.items) {
-			bool found = false;
-			for (const auto &r_item: r.items) {
+		for (const auto &r_item: r.items) {
+			bool      found = false;
+			for (auto &h_item: h.items) {
 				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
 					found = true;
+					LogNpcHandinDetail(
+						"{} >>>> Found required item [{}] ({}) count [{}]",
+						log_handin_prefix,
+						h_item.item->GetItem()->Name,
+						h_item.item_id,
+						h_item.count
+					);
 					break;
 				}
 			}
 
 			if (!found) {
-				met_requirement = false;
+				items_met = false;
 				break;
 			}
 		}
 	}
-	else {
-		met_requirement = false;
+	else if (h.items.empty() && r.items.empty()) {
+		items_met = true;
 	}
+	else {
+		items_met = false;
+	}
+
+	met_requirement = money_met && items_met;
 
 	// multi-quest
 	if (IsMultiQuestEnabled()) {
@@ -4398,16 +4420,6 @@ bool NPC::CheckHandin(
 			h_item.count,
 			h_item.is_multiquest_item
 		);
-	}
-
-	// compare hand-in money to required
-	if (met_requirement) {
-		if (h.money.platinum != r.money.platinum ||
-			h.money.gold != r.money.gold ||
-			h.money.silver != r.money.silver ||
-			h.money.copper != r.money.copper) {
-			met_requirement = false;
-		}
 	}
 
 	// in-case we trigger CheckHand-in multiple times, only set these once
@@ -4522,34 +4534,30 @@ bool NPC::CheckHandin(
 	if (met_requirement) {
 		std::vector<std::string> log_entries = {};
 		for (const auto &h_item : h.items) {
-			auto it = std::find_if(r.items.begin(), r.items.end(), [&](const auto &r_item) {
-				return h_item.item_id == r_item.item_id && h_item.count == r_item.count;
-			});
-
-			if (it != r.items.end()) {
-				m_hand_in.items.erase(
-					std::remove_if(
-						m_hand_in.items.begin(),
-						m_hand_in.items.end(),
-						[&](const HandinEntry &i) {
-							bool removed = i.item_id == h_item.item_id && i.count == h_item.count;
-							if (removed) {
-								log_entries.emplace_back(
-									fmt::format(
-										"{} >>> Hand-in success | Removing from hand-in bucket | item [{}] ({}) count [{}]",
-										log_handin_prefix,
-										i.item->GetItem()->Name,
-										i.item_id,
-										i.count
-									)
-								);
-							}
-							return removed;
+			m_hand_in.items.erase(
+				std::remove_if(
+					m_hand_in.items.begin(),
+					m_hand_in.items.end(),
+					[&](const HandinEntry &i) {
+						bool removed = i.item_id == h_item.item_id
+									   && i.count == h_item.count
+									   && i.item->GetSerialNumber() == h_item.item->GetSerialNumber();
+						if (removed) {
+							log_entries.emplace_back(
+								fmt::format(
+									"{} >>> Hand-in success | Removing from hand-in bucket | item [{}] ({}) count [{}]",
+									log_handin_prefix,
+									i.item->GetItem()->Name,
+									i.item_id,
+									i.count
+								)
+							);
 						}
-					),
-					m_hand_in.items.end()
-				);
-			}
+						return removed;
+					}
+				),
+				m_hand_in.items.end()
+			);
 		}
 
 		// log successful hand-in items
