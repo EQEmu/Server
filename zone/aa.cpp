@@ -1054,6 +1054,10 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 				aai->grant_only = 0; // Make these AA available
 				aai->spell_type = 99;
 		};
+
+		if (aai->level_req == 51) {
+			aai->level = 1;
+		}
 	}
 
 	QueuePacket(outapp);
