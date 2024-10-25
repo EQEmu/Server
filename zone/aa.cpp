@@ -1055,7 +1055,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 				aai->spell_type = 99;
 		};
 
-		if (aai->level_req == 51) {
+		if (aai->cost > 0 && aai->level_req == 51) {
 			aai->level_req = 1;
 		}
 	}
@@ -1864,6 +1864,10 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 	}
 	if (check_grant && a->grant_only) {
 		return false;
+	}
+
+	if (rank->cost == 0 && rank->level_req == 51) {
+		rank->level_req = 1;
 	}
 
 	if (rank->level_req > GetLevel()) {
