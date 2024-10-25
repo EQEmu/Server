@@ -710,7 +710,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile* inv)
 			row.augment_six
 		};
 
-		if (EQ::ValueWithin(slot_id, EQ::invslot::POSSESSIONS_END, EQ::invslot::POSSESSIONS_BEGIN)) {
+		if (EQ::ValueWithin(slot_id, EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END)) {
 			// Titanium thru UF check
 			if (((static_cast<uint64>(1) << slot_id) & pmask) == 0) {
 				cv_conflict = true;
@@ -723,7 +723,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile* inv)
 				cv_conflict = true;
 				continue;
 			}
-		} else if (EQ::ValueWithin(slot_id, EQ::invslot::BANK_END, EQ::invslot::BANK_BEGIN)) {
+		} else if (EQ::ValueWithin(slot_id, EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END)) {
 			// Titanium check
 			if ((slot_id - EQ::invslot::BANK_BEGIN) >= bank_size) {
 				cv_conflict = true;
@@ -804,7 +804,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile* inv)
 		}
 
 		int16 put_slot_id;
-		if (slot_id > EQ::invbag::TRADE_BAGS_END) {
+		if (EQ::ValueWithin(slot_id, EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END) || slot_id == EQ::invslot::slotCursor) {
 			put_slot_id = inv->PushCursor(*inst);
 		} else {
 			put_slot_id = inv->PutItem(slot_id, *inst);
