@@ -776,11 +776,12 @@ void Client::BulkSendInventoryItems()
 	EQ::OutBuffer ob;
 	EQ::OutBuffer::pos_type last_pos = ob.tellp();
 
-	// Possessions items
-	for (int16 slot_id = EQ::invslot::POSSESSIONS_BEGIN; slot_id <= EQ::invslot::POSSESSIONS_END; slot_id++) {
+	// Equipment items
+	for (int16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; slot_id++) {
 		const EQ::ItemInstance* inst = m_inv[slot_id];
-		if (!inst)
+		if (!inst) {
 			continue;
+		}
 
 		inst->Serialize(ob, slot_id);
 
@@ -790,7 +791,7 @@ void Client::BulkSendInventoryItems()
 		last_pos = ob.tellp();
 	}
 
-    if (!RuleB(Inventory, LazyLoadBank)) {
+	if (!RuleB(Inventory, LazyLoadBank)) {
         // Bank items
         for (int16 slot_id = EQ::invslot::BANK_BEGIN; slot_id <= EQ::invslot::BANK_END; slot_id++) {
             const EQ::ItemInstance* inst = m_inv[slot_id];
@@ -829,12 +830,6 @@ void Client::BulkSendInventoryItems()
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const EQ::ItemData* handy_item = nullptr;
-
-	uint32 merchant_slots = 80; //The max number of items passed in the transaction.
-	if (m_ClientVersionBit & EQ::versions::maskRoFAndLater) { // RoF+ can send 200 items
-		merchant_slots = 200;
-	}
-
 	const EQ::ItemData *item = nullptr;
 	auto merchant_list = zone->merchanttable[merchant_id];
 	auto npc = entity_list.GetMobByNpcTypeID(npcid);
@@ -845,6 +840,8 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			return;
 		}
 	}
+
+	const int16 merchant_slots = (m_ClientVersionBit & EQ::versions::maskRoFAndLater) ? EQ::invtype::MERCHANT_SIZE : 80;
 
 	auto temporary_merchant_list = zone->tmpmerchanttable[npcid];
 	uint32 slot_id = 1;

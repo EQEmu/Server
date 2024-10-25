@@ -6380,18 +6380,102 @@ CREATE INDEX idx_trader_active_transaction ON trader (active_transaction);
 	},
 	ManifestEntry{
 		.version = 9296,
-		.description = "2025_02_01_trader_table_listing_date.sql",
-		.check = "SHOW CREATE TABLE `trader`",
-		.condition = "missing",
-		.match = "listing_date",
+		.description = "2024_01_22_sharedbank_guid_primary_key.sql",
+		.check = "SHOW COLUMN FROM `sharedbank` LIKE 'guid'",
+		.condition = "empty",
+		.match = "",
 		.sql = R"(
-ALTER TABLE `trader`
-	ADD COLUMN `listing_date` DATETIME NULL DEFAULT NULL AFTER `active_transaction`,
-	ADD INDEX `idx_trader_listing_date` (`listing_date`);
-)",
-		.content_schema_update = false
-	}
+ALTER TABLE `sharedbank`
+CHANGE COLUMN `acctid` `account_id` int(11) UNSIGNED NOT NULL DEFAULT 0 FIRST,
+CHANGE COLUMN `slotid` `slot_id` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `account_id`,
+CHANGE COLUMN `itemid` `item_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `slot_id`,
+CHANGE COLUMN `augslot1` `augment_one` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `charges`,
+CHANGE COLUMN `augslot2` `augment_two` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_one`,
+CHANGE COLUMN `augslot3` `augment_three` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_two`,
+CHANGE COLUMN `augslot4` `augment_four` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_three`,
+CHANGE COLUMN `augslot5` `augment_five` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_four`,
+CHANGE COLUMN `augslot6` `augment_six` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`,
+MODIFY COLUMN `charges` smallint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `item_id`,
+ADD COLUMN `color` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `charges`,
+ADD COLUMN `ornament_icon` int(11) UNSIGNED NOT NULL AFTER `custom_data`,
+ADD COLUMN `ornament_idfile` int(11) UNSIGNED NOT NULL AFTER `ornament_icon`,
+ADD COLUMN `ornament_hero_model` int(11) NOT NULL AFTER `ornament_idfile`,
+ADD COLUMN `guid` bigint(20) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_hero_model`,
+ADD PRIMARY KEY (`account_id`, `slot_id`);
+)"
+	},
+	ManifestEntry{
+		.version = 9297,
+		.description = "2024_10_24_inventory_changes.sql",
+		.check = "SHOW COLUMN FROM `inventory` LIKE 'charid'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `inventory`
+CHANGE COLUMN `charid` `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0 FIRST,
+CHANGE COLUMN `slotid` `slot_id` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `character_id`,
+CHANGE COLUMN `itemid` `item_id` int(11) UNSIGNED NULL DEFAULT 0 AFTER `slot_id`,
+CHANGE COLUMN `augslot1` `augment_one` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `color`,
+CHANGE COLUMN `augslot2` `augment_two` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_one`,
+CHANGE COLUMN `augslot3` `augment_three` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_two`,
+CHANGE COLUMN `augslot4` `augment_four` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_three`,
+CHANGE COLUMN `augslot5` `augment_five` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_four`,
+CHANGE COLUMN `augslot6` `augment_six` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`,
+CHANGE COLUMN `ornamenticon` `ornament_icon` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `custom_data`,
+CHANGE COLUMN `ornamentidfile` `ornament_idfile` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_icon`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`character_id`, `slot_id`) USING BTREE;
 
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 251) + 4010) WHERE `slot_id` BETWEEN 251 AND 260; -- Bag 1
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 261) + 4210) WHERE `slot_id` BETWEEN 261 AND 270; -- Bag 2
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 271) + 4410) WHERE `slot_id` BETWEEN 271 AND 280; -- Bag 3
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 281) + 4610) WHERE `slot_id` BETWEEN 281 AND 290; -- Bag 4
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 291) + 4810) WHERE `slot_id` BETWEEN 291 AND 300; -- Bag 5
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 301) + 5010) WHERE `slot_id` BETWEEN 301 AND 310; -- Bag 6
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 311) + 5210) WHERE `slot_id` BETWEEN 311 AND 320; -- Bag 7
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 321) + 5410) WHERE `slot_id` BETWEEN 321 AND 330; -- Bag 8
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 331) + 5610) WHERE `slot_id` BETWEEN 331 AND 340; -- Bag 9
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 341) + 5810) WHERE `slot_id` BETWEEN 341 AND 350; -- Bag 10
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 351) + 6010) WHERE `slot_id` BETWEEN 351 AND 360; -- Cursor Bag
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2031) + 6210) WHERE `slot_id` BETWEEN 2031 AND 2040; -- Bank Bag 1
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2041) + 6410) WHERE `slot_id` BETWEEN 2041 AND 2050; -- Bank Bag 2
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2051) + 6610) WHERE `slot_id` BETWEEN 2051 AND 2060; -- Bank Bag 3
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2061) + 6810) WHERE `slot_id` BETWEEN 2061 AND 2070; -- Bank Bag 4
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2071) + 7010) WHERE `slot_id` BETWEEN 2071 AND 2080; -- Bank Bag 5
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2081) + 7210) WHERE `slot_id` BETWEEN 2081 AND 2090; -- Bank Bag 6
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2091) + 7410) WHERE `slot_id` BETWEEN 2091 AND 2100; -- Bank Bag 7
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2101) + 7610) WHERE `slot_id` BETWEEN 2101 AND 2110; -- Bank Bag 8
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2111) + 7810) WHERE `slot_id` BETWEEN 2111 AND 2120; -- Bank Bag 9
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2121) + 8010) WHERE `slot_id` BETWEEN 2121 AND 2130; -- Bank Bag 10
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2131) + 8210) WHERE `slot_id` BETWEEN 2131 AND 2140; -- Bank Bag 11
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2141) + 8410) WHERE `slot_id` BETWEEN 2141 AND 2150; -- Bank Bag 12
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2151) + 8610) WHERE `slot_id` BETWEEN 2151 AND 2160; -- Bank Bag 13
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2161) + 8810) WHERE `slot_id` BETWEEN 2161 AND 2170; -- Bank Bag 14
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2171) + 9010) WHERE `slot_id` BETWEEN 2171 AND 2180; -- Bank Bag 15
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2181) + 9210) WHERE `slot_id` BETWEEN 2181 AND 2190; -- Bank Bag 16
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2191) + 9410) WHERE `slot_id` BETWEEN 2191 AND 2200; -- Bank Bag 17
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2201) + 9610) WHERE `slot_id` BETWEEN 2201 AND 2210; -- Bank Bag 18
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2211) + 9810) WHERE `slot_id` BETWEEN 2211 AND 2220; -- Bank Bag 19
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2221) + 10010) WHERE `slot_id` BETWEEN 2221 AND 2230; -- Bank Bag 20
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2231) + 10210) WHERE `slot_id` BETWEEN 2231 AND 2240; -- Bank Bag 21
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2241) + 10410) WHERE `slot_id` BETWEEN 2241 AND 2250; -- Bank Bag 22
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2251) + 10610) WHERE `slot_id` BETWEEN 2251 AND 2260; -- Bank Bag 23
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2261) + 10810) WHERE `slot_id` BETWEEN 2261 AND 2270; -- Bank Bag 24
+UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2540; -- Shared Bank Bag 1
+UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id` BETWEEN 2541 AND 2550; -- Shared Bank Bag 2
+)"
+	},
+	ManifestEntry{
+		.version = 9298,
+		.description = "2024_10_24_merchantlist_temp_uncap.sql",
+		.check = "SHOW CREATE TABLE `merchantlist_temp`",
+		.condition = "contains",
+		.match = "`slot` tinyint(3)",
+		.sql = R"(
+ALTER TABLE `merchantlist_temp`
+MODIFY COLUMN `slot` int UNSIGNED NOT NULL DEFAULT 0 AFTER `npcid`;
+)"
+	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

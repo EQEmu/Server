@@ -2463,25 +2463,25 @@ struct WhoAllReturnStruct {
 struct BeginTrader_Struct {
 	uint32 action;
 	uint32 unknown04;
-	uint64 serial_number[80];
-	uint32 cost[80];
+	uint64 serial_number[EQ::invtype::BAZAAR_SIZE];
+	uint32 cost[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct Trader_Struct {
 	uint32 action;
 	uint32 unknown004;
-	uint64 item_id[80];
-	uint32 item_cost[80];
+	uint64 item_id[EQ::invtype::BAZAAR_SIZE];
+	uint32 item_cost[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct ClickTrader_Struct {
 	uint32	code;
 	uint32	unknown[161];//damn soe this is totally pointless :/ but at least your finally using memset! Good job :) -LE
-	uint32	itemcost[80];
+	uint32	itemcost[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct GetItems_Struct{
-	uint32	items[80];
+	uint32	items[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct BecomeTrader_Struct {

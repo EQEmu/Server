@@ -9210,7 +9210,7 @@ void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
 		auto l = InventoryRepository::GetWhere(
 			database,
 			fmt::format(
-				"`charid` = {} AND `slotid` = {}",
+				"`character_id` = {} AND `slot_id` = {}",
 				character_id,
 				EQ::invslot::slotPrimary
 			)
@@ -9222,7 +9222,7 @@ void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
 
 		auto e = l.front();
 
-		e.ornamentidfile = model_id;
+		e.ornament_idfile = model_id;
 
 		const int updated = InventoryRepository::UpdateOne(database, e);
 
@@ -9243,7 +9243,7 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 		auto l = InventoryRepository::GetWhere(
 			database,
 			fmt::format(
-				"`charid` = {} AND `slotid` = {}",
+				"`character_id` = {} AND `slot_id` = {}",
 				character_id,
 				EQ::invslot::slotSecondary
 			)
@@ -9255,7 +9255,7 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 
 		auto e = l.front();
 
-		e.ornamentidfile = model_id;
+		e.ornament_idfile = model_id;
 
 		const int updated = InventoryRepository::UpdateOne(database, e);
 
