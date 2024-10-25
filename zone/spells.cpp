@@ -2121,7 +2121,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 		case ST_SummonedPet:
 		{
-			if(!spell_target || (spell_target != GetPet()) ||
+			if(!spell_target || !GetPetByID(spell_target->GetID()) ||
 				(mob_body != BodyType::Summoned && mob_body != BodyType::Summoned2 && mob_body != BodyType::Summoned3 && mob_body != BodyType::Animal && mob_body != BodyType::SummonedUndead))
 			{
 				LogSpells("Spell [{}] canceled: invalid target of body type [{}] (summoned pet)",
