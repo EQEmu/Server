@@ -29,7 +29,7 @@
 #include "../common/patches/uf_limits.h"
 #include "../common/patches/rof_limits.h"
 #include "../common/patches/rof2_limits.h"
-
+#include "../common/patches/larion_limits.h"
 
 namespace EQ
 {
