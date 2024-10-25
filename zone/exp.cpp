@@ -927,7 +927,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	// AA Sanity Checking for players who set aa exp and deleveled below allowed aa level.
-	if (!RuleB(Custom, MulticlassingEnabled())) {
+	if (!RuleB(Custom, MulticlassingEnabled)) {
 		if (GetLevel() <= 50 && m_epp.perAA > 0) {
 			Message(Chat::Yellow, "You are below the level allowed to gain AA Experience. AA Experience set to 0%");
 			aaexp = 0;
@@ -1211,7 +1211,7 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 	m_pp.exp = set_exp;
 	m_pp.expAA = set_aaxp;
 
-	if (GetLevel() < 51 && !RuleB(Custom, MulticlassingEnabled())) {
+	if (GetLevel() < 51 && !RuleB(Custom, MulticlassingEnabled)) {
 		m_epp.perAA = 0;	// turn off aa exp if they drop below 51
 	} else {
 		SendAlternateAdvancementStats();    //otherwise, send them an AA update

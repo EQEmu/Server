@@ -6033,7 +6033,7 @@ void Mob::DoRiposte(Mob *defender)
 
 void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, ExtraAttackOptions *opts)
 {
-	int64 damage_bonus_mod = 0;
+	int damage_bonus_mod = 0;
 	damage_bonus_mod += GetMeleeDamageMod_SE(skill);
 	damage_bonus_mod += GetMeleeDmgPositionMod(defender);
 
