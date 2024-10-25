@@ -5771,6 +5771,66 @@ CREATE INDEX idx_character_expires ON data_buckets (character_id, expires);
 CREATE INDEX idx_npc_expires ON data_buckets (npc_id, expires);
 CREATE INDEX idx_bot_expires ON data_buckets (bot_id, expires);
 )"
+	},
+	ManifestEntry{
+		.version = 9286,
+		.description = "2024_10_24_sharedbank_guid_primary_key.sql",
+		.check = "SHOW COLUMN FROM `sharedbank` LIKE 'guid'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `sharedbank`
+CHANGE COLUMN `acctid` `account_id` int(11) UNSIGNED NOT NULL DEFAULT 0 FIRST,
+CHANGE COLUMN `slotid` `slot_id` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `account_id`,
+CHANGE COLUMN `itemid` `item_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `slot_id`,
+CHANGE COLUMN `augslot1` `augment_one` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `charges`,
+CHANGE COLUMN `augslot2` `augment_two` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_one`,
+CHANGE COLUMN `augslot3` `augment_three` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_two`,
+CHANGE COLUMN `augslot4` `augment_four` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_three`,
+CHANGE COLUMN `augslot5` `augment_five` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_four`,
+CHANGE COLUMN `augslot6` `augment_six` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`,
+MODIFY COLUMN `charges` smallint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `item_id`,
+ADD COLUMN `color` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `charges`,
+ADD COLUMN `ornament_icon` int(11) UNSIGNED NOT NULL AFTER `custom_data`,
+ADD COLUMN `ornament_idfile` int(11) UNSIGNED NOT NULL AFTER `ornament_icon`,
+ADD COLUMN `ornament_hero_model` int(11) NOT NULL AFTER `ornament_idfile`,
+ADD COLUMN `guid` bigint(20) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_hero_model`,
+ADD PRIMARY KEY (`account_id`, `slot_id`);
+)"
+	},
+	ManifestEntry{
+		.version = 9287,
+		.description = "2024_10_24_inventory_changes.sql",
+		.check = "SHOW COLUMN FROM `inventory` LIKE 'charid'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `inventory`
+CHANGE COLUMN `charid` `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0 FIRST,
+CHANGE COLUMN `slotid` `slot_id` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `character_id`,
+CHANGE COLUMN `itemid` `item_id` int(11) UNSIGNED NULL DEFAULT 0 AFTER `slot_id`,
+CHANGE COLUMN `augslot1` `augment_one` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `color`,
+CHANGE COLUMN `augslot2` `augment_two` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_one`,
+CHANGE COLUMN `augslot3` `augment_three` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_two`,
+CHANGE COLUMN `augslot4` `augment_four` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_three`,
+CHANGE COLUMN `augslot5` `augment_five` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_four`,
+CHANGE COLUMN `augslot6` `augment_six` mediumint(7) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`,
+CHANGE COLUMN `ornamenticon` `ornament_icon` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `custom_data`,
+CHANGE COLUMN `ornamentidfile` `ornament_idfile` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_icon`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`character_id`, `slot_id`) USING BTREE;
+)"
+	},
+	ManifestEntry{
+		.version = 9288,
+		.description = "2024_10_24_merchantlist_temp_uncap.sql",
+		.check = "SHOW CREATE TABLE `merchantlist_temp`",
+		.condition = "contains",
+		.match = "`slot` tinyint(3)",
+		.sql = R"(
+ALTER TABLE `merchantlist_temp`
+MODIFY COLUMN `slot` int UNSIGNED NOT NULL DEFAULT 0 AFTER `npcid`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
