@@ -6,6 +6,7 @@ E(OP_LogServer)
 E(OP_SendMembership)
 E(OP_SendMembershipDetails)
 E(OP_SendMaxCharacters)
+E(OP_SendCharInfo)
 
 #undef E
 #undef D

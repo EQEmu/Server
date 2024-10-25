@@ -791,6 +791,67 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_SendCharInfo) {
+		SETUP_VAR_ENCODE(CharacterSelect_Struct);
+
+		SerializeBuffer buffer;
+
+		buffer.WriteUInt32(emu->CharCount);
+
+		for (int i = 0; i < emu->CharCount; ++i) {
+			auto *char_info = &emu->Entries[i];
+			buffer.WriteString(char_info->Name);
+			buffer.WriteUInt32(char_info->Class);
+			buffer.WriteUInt32(char_info->Race);
+			buffer.WriteUInt8(1); //not sure seen 1
+			buffer.WriteUInt32(char_info->ShroudRace);
+			buffer.WriteUInt32(char_info->ShroudClass);
+			buffer.WriteUInt16(char_info->Zone);
+			buffer.WriteUInt16(char_info->Instance);
+			buffer.WriteUInt8(char_info->Gender);
+			buffer.WriteUInt8(char_info->Face);
+
+			for (int j = 0; j < 9; ++j) {
+				buffer.WriteUInt32(char_info->Equip[j].Material);
+				buffer.WriteUInt32(char_info->Equip[j].Unknown1);
+				buffer.WriteUInt32(char_info->Equip[j].EliteModel);
+				buffer.WriteUInt32(char_info->Equip[j].HerosForgeModel);
+				buffer.WriteUInt32(char_info->Equip[j].Unknown2);
+				buffer.WriteUInt32(char_info->Equip[j].Color);
+			}
+
+			buffer.WriteUInt8(255); //seen 255
+			buffer.WriteUInt8(0); //seen 0
+			buffer.WriteUInt32(char_info->DrakkinTattoo);
+			buffer.WriteUInt32(char_info->DrakkinDetails);
+			buffer.WriteUInt32(char_info->Deity);
+			buffer.WriteUInt32(char_info->PrimaryIDFile);
+			buffer.WriteUInt32(char_info->SecondaryIDFile);
+			buffer.WriteUInt8(char_info->HairColor);
+			buffer.WriteUInt8(char_info->BeardColor);
+			buffer.WriteUInt8(char_info->EyeColor1);
+			buffer.WriteUInt8(char_info->EyeColor2);
+			buffer.WriteUInt8(char_info->HairStyle);
+			buffer.WriteUInt8(char_info->Beard);
+			buffer.WriteUInt8(char_info->GoHome);
+			buffer.WriteUInt8(char_info->Tutorial);
+			buffer.WriteUInt32(char_info->DrakkinHeritage);
+			buffer.WriteUInt8(0); //seen 0
+			buffer.WriteUInt8(0); //seen 0
+			buffer.WriteUInt32(char_info->LastLogin);
+			buffer.WriteUInt32(0); //last login might just be 64bit now
+			buffer.WriteUInt32(2590000 + i); //unique character id?
+			buffer.WriteUInt32(104);
+		}
+
+		buffer.WriteUInt8(0);
+
+		__packet->size = buffer.size();
+		__packet->pBuffer = new unsigned char[__packet->size];
+		memcpy(__packet->pBuffer, buffer.buffer(), __packet->size);
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 	
 } /*Larion*/
