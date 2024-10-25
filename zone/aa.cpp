@@ -1056,7 +1056,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		};
 
 		if (aai->level_req == 51) {
-			aai->level = 1;
+			aai->level_req = 1;
 		}
 	}
 
