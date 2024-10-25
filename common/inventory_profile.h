@@ -178,7 +178,6 @@ namespace EQ
 		// Locate an available inventory slot
 		int16 FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size = 0, bool is_arrow = false);
 		int16 FindFreeSlotForTradeItem(const ItemInstance* inst, int16 general_start = invslot::GENERAL_BEGIN, uint8 bag_start = invbag::SLOT_BEGIN);
-		std::vector<int16> FindAllFreeSlotsThatFitItem(const EQ::ItemData *inst);
 		int16 FindFirstFreeSlotThatFitsItem(const EQ::ItemData *inst);
 
 		// Calculate slot_id for an item within a bag
@@ -201,12 +200,6 @@ namespace EQ
 
 		uint8 FindBrightestLightType();
 
-		void dumpEntireInventory();
-		void dumpWornItems();
-		void dumpInventory();
-		void dumpBankItems();
-		void dumpSharedBankItems();
-
 		void SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, const std::string& value);
 		void SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, int value);
 		void SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, float value);
@@ -226,8 +219,6 @@ namespace EQ
 		///////////////////////////////
 
 		int GetSlotByItemInstCollection(const std::map<int16, ItemInstance*> &collection, ItemInstance *inst);
-		void dumpItemCollection(const std::map<int16, ItemInstance*> &collection);
-		void dumpBagContents(ItemInstance *inst, std::map<int16, ItemInstance*>::const_iterator *it);
 
 		// Retrieves item within an inventory bucket
 		ItemInstance* _GetItem(const std::map<int16, ItemInstance*>& bucket, int16 slot_id) const;

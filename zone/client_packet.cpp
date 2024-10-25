@@ -1666,11 +1666,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			m_pp.abilitySlotRefresh = 0;
 	}
 
-#ifdef _EQDEBUG
-	printf("Dumping inventory on load:\n");
-	m_inv.dumpEntireInventory();
-#endif
-
 	/* Reset to max so they dont drown on zone in if its underwater */
 	m_pp.air_remaining = 60;
 	/* Check for PVP Zone status*/
