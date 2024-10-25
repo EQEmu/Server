@@ -310,7 +310,7 @@ void ShowInventory(Client *c, const Seperator *sep)
 						Chat::White,
 						fmt::format(
 							"Slot {} | {} ({}){}",
-							(8000 + limboIndex),
+							(EQ::invbag::CURSOR_BAG_BEGIN + limboIndex),
 							item_data->ID,
 							linker.GenerateLink(),
 							(
@@ -339,7 +339,7 @@ void ShowInventory(Client *c, const Seperator *sep)
 							Chat::White,
 							fmt::format(
 								"Slot {} (Augment Slot {}) | {} ({}){}",
-								(8000 + limboIndex),
+								(EQ::invbag::CURSOR_BAG_BEGIN + limboIndex),
 								augment_index,
 								linker.GenerateLink(),
 								item_data->ID,
@@ -375,7 +375,7 @@ void ShowInventory(Client *c, const Seperator *sep)
 							Chat::White,
 							fmt::format(
 								"Slot {} Bag Slot {} | {} ({}){}",
-								(8000 + limboIndex),
+								(EQ::invbag::CURSOR_BAG_BEGIN + limboIndex),
 								sub_index,
 								linker.GenerateLink(),
 								item_data->ID,
@@ -407,7 +407,7 @@ void ShowInventory(Client *c, const Seperator *sep)
 								Chat::White,
 								fmt::format(
 									"Slot {} Bag Slot {} (Augment Slot {}) | {} ({}){}",
-									(8000 + limboIndex),
+									(EQ::invbag::CURSOR_BAG_BEGIN + limboIndex),
 									sub_index,
 									augment_index,
 									linker.GenerateLink(),

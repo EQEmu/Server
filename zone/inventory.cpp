@@ -1919,13 +1919,20 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		return false;
 	}
 	//verify shared bank transactions in the database
-	if (src_inst && src_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && src_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END) {
+	if (
+		src_inst &&
+		(
+			EQ::ValueWithin(src_slot_id, EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END) ||
+			EQ::ValueWithin(src_slot_id, EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END)
+		)
+	) {
 		if(!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
 			LogError("Player [{}] on account [{}] was found exploiting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(dst_slot_id,0,true);
 			return(false);
 		}
-		if (src_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && src_slot_id <= EQ::invslot::SHARED_BANK_END && src_inst->IsClassBag()){
+
+		if (EQ::ValueWithin(src_slot_id, EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END) && src_inst->IsClassBag()){
 			for (uint8 idx = EQ::invbag::SLOT_BEGIN; idx <= EQ::invbag::SLOT_END; idx++) {
 				const EQ::ItemInstance* baginst = src_inst->GetItem(idx);
 				if (baginst && !database.VerifyInventory(account_id, EQ::InventoryProfile::CalcSlotId(src_slot_id, idx), baginst)){
@@ -1934,13 +1941,21 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 		}
 	}
-	if (dst_inst && dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END) {
+
+	if (
+		dst_inst &&
+		(
+			EQ::ValueWithin(dst_slot_id, EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END) ||
+			EQ::ValueWithin(dst_slot_id, EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END)
+		)
+	) {
 		if(!database.VerifyInventory(account_id, dst_slot_id, dst_inst)) {
 			LogError("Player [{}] on account [{}] was found exploting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(src_slot_id,0,true);
 			return(false);
 		}
-		if (dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invslot::SHARED_BANK_END && dst_inst->IsClassBag()){
+
+		if (EQ::ValueWithin(dst_slot_id, EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END) && dst_inst->IsClassBag()){
 			for (uint8 idx = EQ::invbag::SLOT_BEGIN; idx <= EQ::invbag::SLOT_END; idx++) {
 				const EQ::ItemInstance* baginst = dst_inst->GetItem(idx);
 				if (baginst && !database.VerifyInventory(account_id, EQ::InventoryProfile::CalcSlotId(dst_slot_id, idx), baginst)){
@@ -1953,10 +1968,20 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Check for No Drop Hacks
 	Mob* with = trade->With();
-	if (((with && with->IsClient() && !with->CastToClient()->IsBecomeNPC() && dst_slot_id >= EQ::invslot::TRADE_BEGIN && dst_slot_id <= EQ::invslot::TRADE_END) ||
-		(dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
-	&& GetInv().CheckNoDrop(src_slot_id)
-	&& !CanTradeFVNoDropItem()) {
+	if (
+		(
+			(
+				with &&
+				with->IsClient() &&
+				!with->CastToClient()->IsBecomeNPC() &&
+				EQ::ValueWithin(dst_slot_id, EQ::invslot::TRADE_BEGIN, EQ::invslot::TRADE_END)
+			) ||
+			EQ::ValueWithin(dst_slot_id, EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END) ||
+			EQ::ValueWithin(dst_slot_id, EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END)
+		) &&
+		GetInv().CheckNoDrop(src_slot_id) &&
+		!CanTradeFVNoDropItem()
+	) {
 		auto ndh_inst = m_inv[src_slot_id];
 		std::string ndh_item_data;
 		if (ndh_inst == nullptr) {
@@ -3651,7 +3676,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		if (cursor_itr == m_inv.cursor_cbegin())
 			continue;
 
-		instmap[8000 + limbo] = *cursor_itr;
+		instmap[EQ::invbag::CURSOR_BAG_BEGIN + limbo] = *cursor_itr;
 	}
 
 	// call InterrogateInventory_ for error check
@@ -3754,11 +3779,12 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const EQ::ItemI
 	// very basic error checking - can be elaborated upon if more in-depth testing is needed...
 
 	if (
-		(head >= EQ::invslot::EQUIPMENT_BEGIN && head <= EQ::invslot::EQUIPMENT_END) ||
-		(head >= EQ::invslot::TRIBUTE_BEGIN && head <= EQ::invslot::TRIBUTE_END) ||
-		(head >= EQ::invslot::GUILD_TRIBUTE_BEGIN && head <= EQ::invslot::GUILD_TRIBUTE_END) ||
-		(head >= EQ::invslot::WORLD_BEGIN && head <= EQ::invslot::WORLD_END) ||
-		(head >= 8000 && head <= 8101)) {
+		EQ::ValueWithin(head, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END) ||
+		EQ::ValueWithin(head, EQ::invslot::TRIBUTE_BEGIN, EQ::invslot::TRIBUTE_END) ||
+		EQ::ValueWithin(head, EQ::invslot::GUILD_TRIBUTE_BEGIN, EQ::invslot::GUILD_TRIBUTE_END) ||
+		EQ::ValueWithin(head, EQ::invslot::WORLD_BEGIN, EQ::invslot::WORLD_END) ||
+		EQ::ValueWithin(head, EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END)
+	) {
 		switch (depth)
 		{
 		case 0: // requirement: inst is extant

@@ -50,6 +50,7 @@
 #include "repositories/skill_caps_repository.h"
 #include "repositories/inventory_repository.h"
 #include "repositories/books_repository.h"
+#include "repositories/sharedbank_repository.h"
 
 namespace ItemField
 {
@@ -192,242 +193,268 @@ SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 	return MailKeys{};
 }
 
-bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
+bool SharedDatabase::SaveCursor(
+	uint32 char_id,
+	std::list<EQ::ItemInstance*>::const_iterator& start,
+	std::list<EQ::ItemInstance*>::const_iterator& end
+)
 {
-	// Delete cursor items
-	const std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
-	                                       "AND ((slotid >= 8000 AND slotid <= 8999) "
-	                                       "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
-	                                       char_id, EQ::invslot::slotCursor,
-	                                       EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
-	const auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
-        return false;
-    }
+	const int deleted = InventoryRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`character_id` = {} AND (`slot_id` = {} OR `slot_id` BETWEEN {} AND {})",
+			char_id,
+			EQ::invslot::slotCursor,
+			EQ::invbag::CURSOR_BAG_BEGIN,
+			EQ::invbag::CURSOR_BAG_END
+		)
+	);
 
-    int i = 8000;
-    for(auto& it = start; it != end; ++it, i++) {
-		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
-		const EQ::ItemInstance *inst = *it;
-		const int16 use_slot = (i == 8000) ? EQ::invslot::slotCursor : i;
+	int16 i = EQ::invslot::slotCursor;
+	for (auto& it = start; it != end; ++it, i++) {
+		// shouldn't be anything in the queue that indexes this high
+		if (i > EQ::invbag::CURSOR_BAG_END) {
+			break;
+		}
+
+		const EQ::ItemInstance* inst   = *it;
+		const int16           use_slot = i == EQ::invslot::slotCursor ? EQ::invslot::slotCursor : i;
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
 		}
-    }
+	}
 
 	return true;
 }
 
 bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQ::ItemInstance* inst)
 {
-	// Delete cursor items
-	const std::string query = StringFormat("SELECT itemid, charges FROM sharedbank "
-	                                       "WHERE acctid = %d AND slotid = %d",
-	                                       account_id, slot_id);
-    auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		//returning true is less harmful in the face of a query error
-		return true;
+	if (!inst || !inst->GetItem()) {
+		return false;
 	}
 
-	if (results.RowCount() == 0)
-        return false;
+	const auto& l = SharedbankRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`account_id` = {} AND `slot_id` = {} LIMIT 1",
+			account_id,
+			slot_id
+		)
+	);
 
-	auto& row = results.begin();
+	if (l.empty()) {
+		return false;
+	}
 
-	const uint32 id = Strings::ToUnsignedInt(row[0]);
-	const uint16 charges = Strings::ToUnsignedInt(row[1]);
+	const auto& e = l.front();
 
-    uint16 expect_charges;
+	uint16 expect_charges = inst->GetCharges() >= 0 ? inst->GetCharges() : std::numeric_limits<int16>::max();
 
-    if(inst->GetCharges() >= 0)
-        expect_charges = inst->GetCharges();
-    else
-        expect_charges = 0x7FFF;
-
-    if(id != inst->GetItem()->ID || charges != expect_charges)
-        return false;
-
-	return true;
+	return e.item_id == inst->GetID() && e.charges == expect_charges;
 }
 
-bool SharedDatabase::SaveInventory(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id) {
-
-	//never save tribute slots:
-	if (slot_id >= EQ::invslot::TRIBUTE_BEGIN && slot_id <= EQ::invslot::TRIBUTE_END)
+bool SharedDatabase::SaveInventory(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id)
+{
+	// Don't save any Tribute slots
+	if (
+		EQ::ValueWithin(slot_id, EQ::invslot::GUILD_TRIBUTE_BEGIN, EQ::invslot::GUILD_TRIBUTE_END) ||
+		EQ::ValueWithin(slot_id, EQ::invslot::TRIBUTE_BEGIN, EQ::invslot::TRIBUTE_END)
+	) {
 		return true;
-	if (slot_id >= EQ::invslot::GUILD_TRIBUTE_BEGIN && slot_id <= EQ::invslot::GUILD_TRIBUTE_END)
-		return true;
+	}
 
-	if (slot_id >= EQ::invslot::SHARED_BANK_BEGIN && slot_id <= EQ::invbag::SHARED_BANK_BAGS_END) {
-        // Shared bank inventory
+	if (
+		EQ::ValueWithin(slot_id, EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END) ||
+		EQ::ValueWithin(slot_id, EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END)
+	) {
 		if (!inst) {
 			return DeleteSharedBankSlot(char_id, slot_id);
-		}
-		else {
+		} else {
 			// Needed to clear out bag slots that 'REPLACE' in UpdateSharedBankSlot does not overwrite..otherwise, duplication occurs
 			// (This requires that parent then child items be sent..which should be how they are currently passed)
-			if (EQ::InventoryProfile::SupportsContainers(slot_id))
+			if (EQ::InventoryProfile::SupportsContainers(slot_id)) {
 				DeleteSharedBankSlot(char_id, slot_id);
+			}
+
 			return UpdateSharedBankSlot(char_id, inst, slot_id);
 		}
-	}
-	else if (!inst) { // All other inventory
+	} else if (!inst) { // All other inventory
 		return DeleteInventorySlot(char_id, slot_id);
 	}
 
 	// Needed to clear out bag slots that 'REPLACE' in UpdateInventorySlot does not overwrite..otherwise, duplication occurs
 	// (This requires that parent then child items be sent..which should be how they are currently passed)
-	if (EQ::InventoryProfile::SupportsContainers(slot_id))
+	if (EQ::InventoryProfile::SupportsContainers(slot_id)) {
 		DeleteInventorySlot(char_id, slot_id);
-    return UpdateInventorySlot(char_id, inst, slot_id);
-}
-
-bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id) {
-	// need to check 'inst' argument for valid pointer
-
-	uint32 augslot[EQ::invaug::SOCKET_COUNT] = { 0, 0, 0, 0, 0, 0 };
-	if (inst->IsClassCommon()) {
-		for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-			const EQ::ItemInstance *auginst = inst->GetItem(i);
-			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
-		}
 	}
 
-    uint16 charges;
-	if(inst->GetCharges() >= 0)
-		charges = inst->GetCharges();
-	else
-		charges = 0x7FFF;
-
-	// Update/Insert item
-	const std::string query = StringFormat("REPLACE INTO inventory "
-	                                       "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
-	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model, guid) "
-	                                       "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
-	                                       "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
-	                                       static_cast<unsigned long>(char_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
-	                                       static_cast<unsigned long>(charges), static_cast<unsigned long>(inst->IsAttuned() ? 1 : 0),
-	                                       inst->GetCustomDataString().c_str(), static_cast<unsigned long>(inst->GetColor()),
-	                                       static_cast<unsigned long>(augslot[0]), static_cast<unsigned long>(augslot[1]), static_cast<unsigned long>(augslot[2]),
-	                                       static_cast<unsigned long>(augslot[3]), static_cast<unsigned long>(augslot[4]), static_cast<unsigned long>(augslot[5]), static_cast<unsigned long>(inst->GetOrnamentationIcon()),
-	                                       static_cast<unsigned long>(inst->GetOrnamentationIDFile()), static_cast<unsigned long>(inst->GetOrnamentHeroModel()), inst->GetSerialNumber());
-	const auto results = QueryDatabase(query);
-
-    // Save bag contents, if slot supports bag contents
-	if (inst->IsClassBag() && EQ::InventoryProfile::SupportsContainers(slot_id))
-		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
-		// messages through attrition (and the modded code in SaveInventory)
-		for (uint8 idx = EQ::invbag::SLOT_BEGIN; idx < inst->GetItem()->BagSlots && idx <= EQ::invbag::SLOT_END; idx++) {
-			const EQ::ItemInstance* baginst = inst->GetItem(idx);
-			SaveInventory(char_id, baginst, EQ::InventoryProfile::CalcSlotId(slot_id, idx));
-		}
-
-    if (!results.Success()) {
-        return false;
-    }
-
-	return true;
+	return UpdateInventorySlot(char_id, inst, slot_id);
 }
 
-bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id) {
-	// need to check 'inst' argument for valid pointer
-
-	uint32 augslot[EQ::invaug::SOCKET_COUNT] = { 0, 0, 0, 0, 0, 0 };
-	if (inst->IsClassCommon()) {
-		for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-			const EQ::ItemInstance *auginst = inst->GetItem(i);
-			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
-		}
+bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id)
+{
+	if (!inst || !inst->GetItem()) {
+		return false;
 	}
 
-// Update/Insert item
-	const uint32 account_id = GetAccountIDByChar(char_id);
-    uint16 charges;
-    if(inst->GetCharges() >= 0)
-        charges = inst->GetCharges();
-    else
-        charges = 0x7FFF;
+	std::vector<uint32> augment_ids = inst->GetAugmentIDs();
 
-	const std::string query = StringFormat("REPLACE INTO sharedbank "
-	                                       "(acctid, slotid, itemid, charges, custom_data, "
-	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6) "
-	                                       "VALUES( %lu, %lu, %lu, %lu, '%s', "
-	                                       "%lu, %lu, %lu, %lu, %lu, %lu)",
-	                                       static_cast<unsigned long>(account_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
-	                                       static_cast<unsigned long>(charges), inst->GetCustomDataString().c_str(), static_cast<unsigned long>(augslot[0]),
-	                                       static_cast<unsigned long>(augslot[1]), static_cast<unsigned long>(augslot[2]), static_cast<unsigned long>(augslot[3]), static_cast<unsigned long>(augslot[4]),
-	                                       static_cast<unsigned long>(augslot[5]));
-	const auto results = QueryDatabase(query);
+	uint16 charges = inst->GetCharges() >= 0 ? inst->GetCharges() : std::numeric_limits<int16>::max();
 
-    // Save bag contents, if slot supports bag contents
+	auto e = InventoryRepository::NewEntity();
+
+	e.character_id        = char_id;
+	e.slot_id             = slot_id;
+	e.item_id             = inst->GetID();
+	e.charges             = charges;
+	e.color               = inst->GetColor();
+	e.augment_one         = augment_ids[0];
+	e.augment_two         = augment_ids[1];
+	e.augment_three       = augment_ids[2];
+	e.augment_four        = augment_ids[3];
+	e.augment_five        = augment_ids[4];
+	e.augment_six         = augment_ids[5];
+	e.instnodrop          = inst->IsAttuned() ? 1 : 0;
+	e.custom_data         = inst->GetCustomDataString();
+	e.ornament_icon       = inst->GetOrnamentationIcon();
+	e.ornament_idfile     = inst->GetOrnamentationIDFile();
+	e.ornament_hero_model = inst->GetOrnamentHeroModel();
+	e.guid                = inst->GetSerialNumber();
+
+	const int replaced = InventoryRepository::ReplaceOne(*this, e);
+
+	// Save bag contents, if slot supports bag contents
 	if (inst->IsClassBag() && EQ::InventoryProfile::SupportsContainers(slot_id)) {
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
-		for (uint8 idx = EQ::invbag::SLOT_BEGIN; idx < inst->GetItem()->BagSlots && idx <= EQ::invbag::SLOT_END; idx++) {
-			const EQ::ItemInstance* baginst = inst->GetItem(idx);
-			SaveInventory(char_id, baginst, EQ::InventoryProfile::CalcSlotId(slot_id, idx));
+		for (
+			uint8 i = EQ::invbag::SLOT_BEGIN;
+			i < inst->GetItem()->BagSlots && i <= EQ::invbag::SLOT_END;
+			i++
+		) {
+			const EQ::ItemInstance* bag_inst = inst->GetItem(i);
+			SaveInventory(char_id, bag_inst, EQ::InventoryProfile::CalcSlotId(slot_id, i));
 		}
 	}
 
-    if (!results.Success()) {
-        return false;
-    }
-
-	return true;
+	return replaced;
 }
 
-bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
+bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id)
+{
+	if (!inst || !inst->GetItem()) {
+		return false;
+	}
 
-	// Delete item
-	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid = %i", char_id, slot_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return false;
-    }
+	std::vector<uint32> augment_ids = inst->GetAugmentIDs();
 
-    // Delete bag slots, if need be
-	if (!EQ::InventoryProfile::SupportsContainers(slot_id))
-        return true;
+	uint16 charges = inst->GetCharges() >= 0 ? inst->GetCharges() : std::numeric_limits<int16>::max();
 
-	const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
-    query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
-                        char_id, base_slot_id, (base_slot_id+10));
-    results = QueryDatabase(query);
-    if (!results.Success()) {
-        return false;
-    }
+	const uint32 account_id = GetAccountIDByChar(char_id);
 
-    // @merth: need to delete augments here
-    return true;
+	auto e = SharedbankRepository::NewEntity();
+
+	e.account_id          = account_id;
+	e.slot_id             = slot_id;
+	e.item_id             = inst->GetID();
+	e.charges             = charges;
+	e.color               = inst->GetColor();
+	e.augment_one         = augment_ids[0];
+	e.augment_two         = augment_ids[1];
+	e.augment_three       = augment_ids[2];
+	e.augment_four        = augment_ids[3];
+	e.augment_five        = augment_ids[4];
+	e.augment_six         = augment_ids[5];
+	e.custom_data         = inst->GetCustomDataString();
+	e.ornament_icon       = inst->GetOrnamentationIcon();
+	e.ornament_idfile     = inst->GetOrnamentationIDFile();
+	e.ornament_hero_model = inst->GetOrnamentHeroModel();
+	e.guid                = inst->GetSerialNumber();
+
+	const int replaced = SharedbankRepository::ReplaceOne(*this, e);
+
+	// Save bag contents, if slot supports bag contents
+	if (inst->IsClassBag() && EQ::InventoryProfile::SupportsContainers(slot_id)) {
+		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
+		// messages through attrition (and the modded code in SaveInventory)
+		for (
+			uint8 i = EQ::invbag::SLOT_BEGIN;
+			i < inst->GetItem()->BagSlots && i <= EQ::invbag::SLOT_END;
+			i++
+		) {
+			const EQ::ItemInstance* bag_inst = inst->GetItem(i);
+			SaveInventory(char_id, bag_inst, EQ::InventoryProfile::CalcSlotId(slot_id, i));
+		}
+	}
+
+	return replaced;
 }
 
-bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
+bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id)
+{
+	const int deleted = InventoryRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`character_id` = {} AND `slot_id` = {}",
+			char_id,
+			slot_id
+		)
+	);
 
-    // Delete item
-    const uint32 account_id = GetAccountIDByChar(char_id);
-	std::string query = StringFormat("DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i", account_id, slot_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return false;
-    }
+	if (!deleted) {
+		return false;
+	}
 
 	// Delete bag slots, if need be
-	if (!EQ::InventoryProfile::SupportsContainers(slot_id))
-        return true;
+	if (!EQ::InventoryProfile::SupportsContainers(slot_id)) {
+		return true;
+	}
 
-    const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
-    query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
-                        "AND slotid >= %i AND slotid < %i",
-                        account_id, base_slot_id, (base_slot_id+10));
-    results = QueryDatabase(query);
-    if (!results.Success()) {
-        return false;
-    }
+	const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
 
-    // @merth: need to delete augments here
-    return true;
+	return InventoryRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`character_id` = {} AND `slot_id` BETWEEN {} AND {}",
+			char_id,
+			base_slot_id,
+			base_slot_id + (EQ::invbag::SLOT_COUNT - 1)
+		)
+	);
+}
+
+bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id)
+{
+	const uint32 account_id = GetAccountIDByChar(char_id);
+
+	const int deleted = SharedbankRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`account_id` = {} AND `slot_id` = {}",
+			account_id,
+			slot_id
+		)
+	);
+
+	if (!deleted) {
+		return false;
+	}
+
+	if (!EQ::InventoryProfile::SupportsContainers(slot_id)) {
+		return true;
+	}
+
+	const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
+
+	return SharedbankRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`account_id` = {} AND `slotid` BETWEEN {} AND {}",
+			account_id,
+			base_slot_id,
+			base_slot_id + (EQ::invbag::SLOT_COUNT - 1)
+		)
+	);
 }
 
 
@@ -552,96 +579,81 @@ bool SharedDatabase::SetStartingItems(
 // Retrieve shared bank inventory based on either account or character
 bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is_charid)
 {
-	std::string query;
+	const uint32 account_id = is_charid ? GetAccountIDByChar(id) : id;
 
-	if (is_charid) {
-		query = fmt::format(
-			"SELECT sb.slotid, sb.itemid, sb.charges, "
-			"sb.augslot1, sb.augslot2, sb.augslot3, "
-			"sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
-			"FROM sharedbank sb INNER JOIN character_data ch "
-			"ON ch.account_id = sb.acctid WHERE ch.id = {} ORDER BY sb.slotid",
-			id
-		);
-	} else {
-		query = fmt::format(
-			"SELECT slotid, itemid, charges, "
-			"augslot1, augslot2, augslot3, "
-			"augslot4, augslot5, augslot6, custom_data "
-			"FROM sharedbank WHERE acctid = {} ORDER BY slotid",
-			id
-		);
-	}
-
-	auto results = QueryDatabase(query);
-	// If we have no results we still need to return true
-	if (!results.Success()) {
+	if (!account_id) {
 		return false;
 	}
 
-	for (auto row : results) {
-		int16 slot_id = static_cast<int16>(Strings::ToInt(row[0]));
-		uint32 item_id = Strings::ToUnsignedInt(row[1]);
-		const int16 charges = static_cast<int16>(Strings::ToInt(row[2]));
+	const auto& l = SharedbankRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`account_id` = {}",
+			account_id
+		)
+	);
 
-		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = Strings::ToUnsignedInt(row[3]);
-		aug[1] = Strings::ToUnsignedInt(row[4]);
-		aug[2] = Strings::ToUnsignedInt(row[5]);
-		aug[3] = Strings::ToUnsignedInt(row[6]);
-		aug[4] = Strings::ToUnsignedInt(row[7]);
-		aug[5] = Strings::ToUnsignedInt(row[8]);
+	if (l.empty()) {
+		return true;
+	}
 
-		const EQ::ItemData *item = GetItem(item_id);
+	for (const auto& e : l) {
+		uint32 augment_ids[EQ::invaug::SOCKET_COUNT] = {
+			e.augment_one,
+			e.augment_two,
+			e.augment_three,
+			e.augment_four,
+			e.augment_five,
+			e.augment_six
+		};
+
+		const EQ::ItemData* item = GetItem(e.item_id);
 
 		if (!item) {
 			LogError(
-				"Warning: [{}] [{}] has an invalid item_id [{}] in inventory slot [{}]",
-				is_charid ? "charid" : "acctid",
+				"Warning: {} [{}] has an invalid item_id [{}] in slot_id [{}]",
+				is_charid ? "character_id" : "account_id",
 				id,
-				item_id,
-				slot_id
+				e.item_id,
+				e.slot_id
 			);
 			continue;
 		}
 
-		auto inst = CreateBaseItem(item, charges);
+		EQ::ItemInstance* inst = CreateBaseItem(item, e.charges);
 		if (!inst) {
 			continue;
 		}
 
-		if (inst && item->IsClassCommon()) {
+		if (item->IsClassCommon()) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-				if (aug[i]) {
-					inst->PutAugment(this, i, aug[i]);
+				if (augment_ids[i]) {
+					inst->PutAugment(this, i, augment_ids[i]);
 				}
 			}
 		}
 
-		if (inst && row[9]) {
-			std::string data_str(row[9]);
-			inst->SetCustomDataString(data_str);
+		if (!e.custom_data.empty()) {
+			inst->SetCustomDataString(e.custom_data);
 		}
 
-		// theoretically inst can be nullptr ... this would be very bad ...
-		const int16 put_slot_id = inv->PutItem(slot_id, *inst);
+		const int16 put_slot_id = inv->PutItem(e.slot_id, *inst);
 		safe_delete(inst);
 
-		// Save ptr to item in inventory
 		if (put_slot_id != INVALID_INDEX) {
 			continue;
 		}
 
 		LogError(
-			"Warning: Invalid slot_id for item in shared bank inventory: [{}]=[{}], item_id=[{}], slot_id=[{}]",
-			is_charid ? "charid" : "acctid",
+			"Warning: Invalid slot_id for item in shared bank inventory for {} [{}] item_id [{}] slot_id [{}]",
+			is_charid ? "character_id" : "account_id",
 			id,
-			item_id,
-			slot_id
+			e.item_id,
+			e.slot_id
 		);
 
 		if (is_charid) {
-			SaveInventory(id, nullptr, slot_id);
+			SaveInventory(id, nullptr, e.slot_id);
 		}
 	}
 
@@ -669,60 +681,57 @@ bool SharedDatabase::GetInventory(Client *c)
 		return false;
 	}
 
-	for (auto const &row: results) {
+	for (auto const& row: results) {
 		if (row.guid != 0) {
 			EQ::ItemInstance::AddGUIDToMap(row.guid);
 		}
 	}
 
-	const auto timestamps = GetItemRecastTimestamps(char_id);
-	auto cv_conflict      = false;
-	const auto pmask      = inv.GetLookup()->PossessionsBitmask;
-	const auto bank_size  = inv.GetLookup()->InventoryTypeSize.Bank;
+	const auto timestamps  = GetItemRecastTimestamps(char_id);
+	auto       cv_conflict = false;
+	const auto pmask       = inv->GetLookup()->PossessionsBitmask;
+	const auto bank_size   = inv->GetLookup()->InventoryTypeSize.Bank;
 
-	std::vector<InventoryRepository::Inventory> queue{};
-	for (auto &row: results) {
-		const int16 slot_id              = row.slotid;
-		const uint32 item_id             = row.itemid;
+	std::vector<InventoryRepository::Inventory> queue{ };
+	for (auto& row: results) {
+		const int16  slot_id             = row.slot_id;
+		const uint32 item_id             = row.item_id;
 		const uint16 charges             = row.charges;
 		const uint32 color               = row.color;
-		const bool instnodrop            = row.instnodrop;
-		const uint32 ornament_icon       = row.ornamenticon;
-		const uint32 ornament_idfile     = row.ornamentidfile;
+		const bool   instnodrop          = row.instnodrop;
+		const uint32 ornament_icon       = row.ornament_icon;
+		const uint32 ornament_idfile     = row.ornament_idfile;
 		const uint32 ornament_hero_model = row.ornament_hero_model;
 
-		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = row.augslot1;
-		aug[1] = row.augslot2;
-		aug[2] = row.augslot3;
-		aug[3] = row.augslot4;
-		aug[4] = row.augslot5;
-		aug[5] = row.augslot6;
+		uint32 augment_ids[EQ::invaug::SOCKET_COUNT] = {
+			row.augment_one,
+			row.augment_two,
+			row.augment_three,
+			row.augment_four,
+			row.augment_five,
+			row.augment_six
+		};
 
-		if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {
+		if (EQ::ValueWithin(slot_id, EQ::invslot::POSSESSIONS_END, EQ::invslot::POSSESSIONS_BEGIN)) {
 			// Titanium thru UF check
 			if (((static_cast<uint64>(1) << slot_id) & pmask) == 0) {
 				cv_conflict = true;
 				continue;
 			}
-		}
-		else if (slot_id <= EQ::invbag::GENERAL_BAGS_END && slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+		} else if (EQ::ValueWithin(slot_id, EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END)) {
 			// Titanium thru UF check
-			const auto parent_slot = EQ::invslot::GENERAL_BEGIN + (
-				                         (slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
+			const auto parent_slot = EQ::invslot::GENERAL_BEGIN + ((slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
 			if (((static_cast<uint64>(1) << parent_slot) & pmask) == 0) {
 				cv_conflict = true;
 				continue;
 			}
-		}
-		else if (slot_id <= EQ::invslot::BANK_END && slot_id >= EQ::invslot::BANK_BEGIN) {
+		} else if (EQ::ValueWithin(slot_id, EQ::invslot::BANK_END, EQ::invslot::BANK_BEGIN)) {
 			// Titanium check
 			if ((slot_id - EQ::invslot::BANK_BEGIN) >= bank_size) {
 				cv_conflict = true;
 				continue;
 			}
-		}
-		else if (slot_id <= EQ::invbag::BANK_BAGS_END && slot_id >= EQ::invbag::BANK_BAGS_BEGIN) {
+		} else if (EQ::ValueWithin(slot_id, EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END)) {
 			// Titanium check
 			const auto parent_index = ((slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
 			if (parent_index >= bank_size) {
@@ -731,7 +740,7 @@ bool SharedDatabase::GetInventory(Client *c)
 			}
 		}
 
-		auto *item = GetItem(item_id);
+		auto* item = GetItem(item_id);
 		if (!item) {
 			LogError(
 				"Warning: charid [{}] has an invalid item_id [{}] in inventory slot [{}]",
@@ -742,7 +751,7 @@ bool SharedDatabase::GetInventory(Client *c)
 			continue;
 		}
 
-		auto *inst = CreateBaseItem(item, charges);
+		auto* inst = CreateBaseItem(item, charges);
 		if (!inst) {
 			continue;
 		}
@@ -755,8 +764,13 @@ bool SharedDatabase::GetInventory(Client *c)
 		inst->SetOrnamentationIDFile(ornament_idfile);
 		inst->SetOrnamentHeroModel(item->HerosForgeModel);
 
-		if (instnodrop || (inst->GetItem()->Attuneable && slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <=
-		                   EQ::invslot::EQUIPMENT_END)) {
+		if (
+			instnodrop ||
+			(
+				inst->GetItem()->Attuneable &&
+				EQ::ValueWithin(slot_id, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)
+			)
+		) {
 			inst->SetAttuned(true);
 		}
 
@@ -764,33 +778,29 @@ bool SharedDatabase::GetInventory(Client *c)
 			inst->SetColor(color);
 		}
 
-		if (charges == 0x7FFF) {
+		if (charges == std::numeric_limits<int16>::max()) {
 			inst->SetCharges(-1);
-		}
-		else if (charges == 0 && inst->IsStackable()) {
+		} else if (charges == 0 && inst->IsStackable()) {
 			// Stackable items need a minimum charge of 1 remain moveable.
 			inst->SetCharges(1);
-		}
-		else {
+		} else {
 			inst->SetCharges(charges);
 		}
 
 		if (item->RecastDelay) {
 			if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM && timestamps.count(item->RecastType)) {
 				inst->SetRecastTimestamp(timestamps.at(item->RecastType));
-			}
-			else if (item->RecastType == RECAST_TYPE_UNLINKED_ITEM && timestamps.count(item->ID)) {
+			} else if (item->RecastType == RECAST_TYPE_UNLINKED_ITEM && timestamps.count(item->ID)) {
 				inst->SetRecastTimestamp(timestamps.at(item->ID));
-			}
-			else {
+			} else {
 				inst->SetRecastTimestamp(0);
 			}
 		}
 
 		if (item->IsClassCommon()) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-				if (aug[i]) {
-					inst->PutAugment(this, i, aug[i]);
+				if (augment_ids[i]) {
+					inst->PutAugment(this, i, augment_ids[i]);
 				}
 			}
 		}
@@ -842,21 +852,10 @@ bool SharedDatabase::GetInventory(Client *c)
 		}
 
 		int16 put_slot_id;
-		if (slot_id >= 8000 && slot_id <= 8999) {
-			put_slot_id = inv.PushCursor(*inst);
-		}
-		else if (slot_id >= 3111 && slot_id <= 3179) {
-			// Admins: please report any occurrences of this error
-			LogError(
-				"Warning: Defunct location for item in inventory: charid={}, item_id={}, slot_id={} .. pushing to cursor...",
-				char_id,
-				item_id,
-				slot_id
-			);
-			put_slot_id = inv.PushCursor(*inst);
-		}
-		else {
-			put_slot_id = inv.PutItem(slot_id, *inst);
+		if (slot_id > EQ::invbag::TRADE_BAGS_END) {
+			put_slot_id = inv->PushCursor(*inst);
+		} else {
+			put_slot_id = inv->PutItem(slot_id, *inst);
 		}
 
 		row.guid = inst->GetSerialNumber();
@@ -867,7 +866,7 @@ bool SharedDatabase::GetInventory(Client *c)
 		// Save ptr to item in inventory
 		if (put_slot_id == INVALID_INDEX) {
 			LogError(
-				"Warning: Invalid slot_id for item in inventory: charid=[{}], item_id=[{}], slot_id=[{}]",
+				"Warning: Invalid slot_id for item in inventory for character_id [{}] item_id [{}] slot_id [{}]",
 				char_id,
 				item_id,
 				slot_id
@@ -876,7 +875,7 @@ bool SharedDatabase::GetInventory(Client *c)
 	}
 
 	if (cv_conflict) {
-		const std::string &char_name = GetCharName(char_id);
+		const std::string& char_name = GetCharName(char_id);
 		LogError(
 			"ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 			char_name,
@@ -894,94 +893,6 @@ bool SharedDatabase::GetInventory(Client *c)
 
 	// Retrieve shared inventory
 	return GetSharedBank(char_id, &inv, true);
-}
-
-// Overloaded: Retrieve character inventory based on account_id and character name (char select)
-bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryProfile *inv) // deprecated
-{
-	// Retrieve character inventory
-	const std::string query =
-	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
-			 "augslot2, augslot3, augslot4, augslot5, augslot6, instnodrop, custom_data, ornamenticon, "
-			 "ornamentidfile, ornament_hero_model "
-			 "FROM inventory INNER JOIN character_data ch "
-			 "ON ch.id = charid WHERE ch.name = '%s' AND ch.account_id = %i ORDER BY slotid",
-			 name, account_id);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("If you got an error related to the 'instnodrop' field, run the "
-						    "following SQL Queries:\nalter table inventory add instnodrop "
-						    "tinyint(1) unsigned default 0 not null;\n");
-		return false;
-	}
-
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = Strings::ToInt(row[0]);
-		uint32 item_id = Strings::ToUnsignedInt(row[1]);
-		const int8 charges = Strings::ToInt(row[2]);
-		const uint32 color = Strings::ToUnsignedInt(row[3]);
-
-		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = Strings::ToUnsignedInt(row[4]);
-		aug[1] = Strings::ToUnsignedInt(row[5]);
-		aug[2] = Strings::ToUnsignedInt(row[6]);
-		aug[3] = Strings::ToUnsignedInt(row[7]);
-		aug[4] = Strings::ToUnsignedInt(row[8]);
-		aug[5] = Strings::ToUnsignedInt(row[9]);
-
-		const bool instnodrop = (row[10] && static_cast<uint16>(Strings::ToUnsignedInt(row[10])));
-		const uint32 ornament_icon = Strings::ToUnsignedInt(row[12]);
-		const uint32 ornament_idfile = Strings::ToUnsignedInt(row[13]);
-		uint32 ornament_hero_model = Strings::ToUnsignedInt(row[14]);
-
-		const EQ::ItemData *item = GetItem(item_id);
-		if (!item)
-			continue;
-
-		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
-
-		if (inst == nullptr)
-			continue;
-
-		inst->SetAttuned(instnodrop);
-
-		if (row[11]) {
-			std::string data_str(row[11]);
-			inst->SetCustomDataString(data_str);
-		}
-
-		inst->SetOrnamentIcon(ornament_icon);
-		inst->SetOrnamentationIDFile(ornament_idfile);
-		inst->SetOrnamentHeroModel(item->HerosForgeModel);
-
-		if (color > 0)
-			inst->SetColor(color);
-
-		inst->SetCharges(charges);
-
-		if (item->IsClassCommon()) {
-			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-				if (aug[i])
-					inst->PutAugment(this, i, aug[i]);
-			}
-		}
-
-		int16 put_slot_id;
-		if (slot_id >= 8000 && slot_id <= 8999)
-			put_slot_id = inv->PushCursor(*inst);
-		else
-			put_slot_id = inv->PutItem(slot_id, *inst);
-
-		safe_delete(inst);
-
-		// Save ptr to item in inventory
-		if (put_slot_id == INVALID_INDEX)
-			LogError("Warning: Invalid slot_id for item in inventory: name={}, acctid={}, item_id={}, slot_id={}",
-				name, account_id, item_id, slot_id);
-	}
-
-	// Retrieve shared inventory
-	return GetSharedBank(account_id, inv, false);
 }
 
 std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
@@ -1335,7 +1246,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// Bag
 		item.BagSize = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bagsize]));
-		item.BagSlots = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagslots]), 0, 10)); // Will need to be changed from std::min to just use database value when bag slots are increased
+		item.BagSlots = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagslots]), 0, static_cast<int>(EQ::invbag::SLOT_COUNT)));
 		item.BagType = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bagtype]));
 		item.BagWR = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagwr]), 0, 100));
 
