@@ -629,7 +629,7 @@ bool Client::Process() {
 							return;
 						}
 
-						Message(Chat::Shout, "You are not using the latest Heroes' Journey client. Visit HeroesJourneyEQ.com for more information. You will be disconnected in %d seconds.", (11 - CUnauth_tics) * 6);
+						Message(Chat::Shout, "You are not using the latest Heroes' Journey client. Visit HeroesJourneyEQ.com for more information. Moved to the Bazaar in %d seconds.", (11 - CUnauth_tics) * 6);
 					} else {
 						if (CUnauth_tics % 2 == 0) {
 							Message(Chat::Shout, "You are not using the latest Heroes' Journey client. Visit HeroesJourneyEQ.com for more information. You will be disconnected if you leave the Bazaar.");
