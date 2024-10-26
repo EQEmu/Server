@@ -401,6 +401,10 @@ Client::~Client() {
 		DoParcelCancel();
 	}
 
+	for (auto& info : m_petinfomulti) {
+        safe_delete(info);
+    }
+
 	mMovementManager->RemoveClient(this);
 
 	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Client, CharacterID());
