@@ -1154,7 +1154,12 @@ bool Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		LogCombat("Endless Quiver prevented Ammo Consumption.");
 	}
 
-	CheckIncreaseSkill(EQ::skills::SkillArchery, GetTarget(), -15);
+	
+	if (IsClient()) {
+		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillArchery, GetTarget(), -15);
+		// increase offense during archery
+		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillOffense, GetTarget(), -15);
+	}
 	CommonBreakInvisibleFromCombat();
 
 	return true;
@@ -1896,6 +1901,9 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 
 	if (IsClient()) {
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillThrowing, GetTarget());
+		
+		// increase offense during throwing
+		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillOffense, GetTarget(), -15);
 	}
 }
 
