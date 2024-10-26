@@ -569,7 +569,8 @@ void NPC::SetTarget(Mob* mob) {
 			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
 			auto ct = (ClientTarget_Struct *)app->pBuffer;
 			ct->new_target = mob ? mob->GetID() : 0;
-			client->FastQueuePacket(&app);
+			client->QueuePacket(app);
+			safe_delete(app);
 		}
 	}
 	Mob::SetTarget(mob);
