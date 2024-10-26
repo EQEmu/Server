@@ -1103,13 +1103,13 @@ int16 EQ::InventoryProfile::CalcSlotId(int16 bagslot_id, uint8 bagidx)
 	if (bagslot_id == invslot::slotCursor) {
 		slot_id = invbag::CURSOR_BAG_BEGIN + bagidx;
 	} else if (EQ::ValueWithin(bagslot_id, invslot::GENERAL_BEGIN, invslot::GENERAL_END)) {
-		slot_id = invbag::GENERAL_BAGS_BEGIN + (bagslot_id - invbag::GENERAL_BAGS_BEGIN) * invbag::SLOT_COUNT + bagidx;
+		slot_id = invbag::GENERAL_BAGS_BEGIN + (bagslot_id - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT + bagidx;
 	} else if (EQ::ValueWithin(bagslot_id, invslot::BANK_BEGIN, invslot::BANK_END)) {
-		slot_id = invbag::BANK_BAGS_BEGIN + (bagslot_id - invbag::BANK_BAGS_BEGIN) * invbag::SLOT_COUNT + bagidx;
+		slot_id = invbag::BANK_BAGS_BEGIN + (bagslot_id - invslot::BANK_BEGIN) * invbag::SLOT_COUNT + bagidx;
 	} else if (EQ::ValueWithin(bagslot_id, invslot::SHARED_BANK_BEGIN, invslot::SHARED_BANK_END)) {
-		slot_id = invbag::SHARED_BANK_BAGS_BEGIN + (bagslot_id - invbag::SHARED_BANK_BAGS_BEGIN) * invbag::SLOT_COUNT + bagidx;
+		slot_id = invbag::SHARED_BANK_BAGS_BEGIN + (bagslot_id - invslot::SHARED_BANK_BEGIN) * invbag::SLOT_COUNT + bagidx;
 	} else if (EQ::ValueWithin(bagslot_id, invslot::TRADE_BEGIN, invslot::TRADE_END)) {
-		slot_id = invbag::TRADE_BAGS_BEGIN + (bagslot_id - invbag::TRADE_BAGS_BEGIN) * invbag::SLOT_COUNT + bagidx;
+		slot_id = invbag::TRADE_BAGS_BEGIN + (bagslot_id - invslot::TRADE_BEGIN) * invbag::SLOT_COUNT + bagidx;
 	}
 
 	return slot_id;
