@@ -804,7 +804,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile* inv)
 		}
 
 		int16 put_slot_id;
-		if (EQ::ValueWithin(slot_id, EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END) || slot_id == EQ::invslot::slotCursor) {
+		if (EQ::ValueWithin(slot_id, EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END)) {
 			put_slot_id = inv->PushCursor(*inst);
 		} else {
 			put_slot_id = inv->PutItem(slot_id, *inst);
