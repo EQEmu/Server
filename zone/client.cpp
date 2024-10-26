@@ -768,10 +768,6 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SavePetInfo(this);
 
-	for (auto info : m_petinfomulti) {
-		safe_delete(info);
-	}
-
 	if(tribute_timer.Enabled()) {
 		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
 	}

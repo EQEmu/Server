@@ -1739,6 +1739,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	for (auto& info : m_petinfomulti) {
+		memset(info, 0, sizeof(info));
 		safe_delete(info);
 	}
 
