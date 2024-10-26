@@ -7,6 +7,7 @@ E(OP_SendMembership)
 E(OP_SendMembershipDetails)
 E(OP_SendMaxCharacters)
 E(OP_SendCharInfo)
+E(OP_ExpansionInfo)
 
 #undef E
 #undef D

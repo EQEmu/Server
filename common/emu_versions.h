@@ -65,7 +65,7 @@ namespace EQ
 			maskAllClients = 0xFFFFFFFF
 		};
 
-		const ClientVersion LastClientVersion = ClientVersion::RoF2;
+		const ClientVersion LastClientVersion = ClientVersion::Larion;
 		const size_t ClientVersionCount = (static_cast<size_t>(LastClientVersion) + 1);
 
 		bool IsValidClientVersion(ClientVersion client_version);

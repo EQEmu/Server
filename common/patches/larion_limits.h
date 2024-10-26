@@ -263,9 +263,9 @@ namespace Larion
 	namespace constants {
 		inline EQ::versions::ClientVersion GetConstantsRef() { return EQ::versions::ClientVersion::Larion; }
 
-		const EQ::expansions::Expansion EXPANSION = EQ::expansions::Expansion::RoF;
-		const uint32 EXPANSION_BIT = EQ::expansions::bitRoF;
-		const uint32 EXPANSIONS_MASK = EQ::expansions::maskRoF;
+		const EQ::expansions::Expansion EXPANSION = EQ::expansions::Expansion::LS;
+		const uint32 EXPANSION_BIT = EQ::expansions::bitLS;
+		const uint32 EXPANSIONS_MASK = EQ::expansions::maskLS;
 
 		const size_t CHARACTER_CREATION_LIMIT = 12;
 

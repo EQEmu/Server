@@ -257,514 +257,98 @@ namespace Larion
 	}
 
 	ENCODE(OP_SendMembershipDetails) {
-		SETUP_VAR_ENCODE(Membership_Details_Struct);
+		ENCODE_LENGTH_EXACT(Membership_Details_Struct);
+		SETUP_DIRECT_ENCODE(Membership_Details_Struct, structs::Membership_Details_Struct);
+
+		int32 settings[96][3] = {
+			{ 0, 0, 250 }, { 1, 0, 1000 }, { 0, 1, -1 }, { 1, 1, -1 }, 
+			{ 0, 2, 2 }, { 2, 0, -1 }, { 3, 0, -1 }, { 1, 2, 4 }, 
+			{ 0, 3, 1 }, { 2, 1, -1 }, { 3, 1, -1 }, { 1, 3, 1 }, 
+			{ 0, 4, -1 }, { 2, 2, -1 }, { 3, 2, -1 }, { 1, 4, -1 }, 
+			{ 0, 5, -1 }, { 2, 3, -1 }, { 3, 3, -1 }, { 1, 5, -1 }, 
+			{ 0, 6, 0 }, { 2, 4, -1 }, { 3, 4, -1 }, { 1, 6, 0 }, 
+			{ 0, 7, 1 }, { 2, 5, -1 }, { 3, 5, -1 }, { 1, 7, 1 }, 
+			{ 0, 8, 1 }, { 2, 6, 1 }, { 3, 6, 1 }, { 1, 8, 1 }, 
+			{ 0, 9, 5 }, { 2, 7, 1 }, { 3, 7, 1 }, { 1, 9, 5 }, 
+			{ 0, 10, 0 }, { 2, 8, 1 }, { 3, 8, 1 }, { 0, 11, -1 }, 
+			{ 1, 10, 1 }, { 2, 9, -1 }, { 3, 9, -1 }, { 0, 12, -1 }, 
+			{ 1, 11, -1 }, { 2, 10, 1 }, { 3, 10, 1 }, { 0, 13, 0 }, 
+			{ 1, 12, -1 }, { 2, 11, -1 }, { 3, 11, -1 }, { 0, 14, 0 }, 
+			{ 1, 13, 1 }, { 2, 12, -1 }, { 3, 12, -1 }, { 0, 15, 0 }, 
+			{ 1, 14, 0 }, { 2, 13, 1 }, { 3, 13, 1 }, { 0, 16, 0 }, 
+			{ 1, 15, 0 }, { 2, 14, 1 }, { 3, 14, 1 }, { 0, 17, 0 }, 
+			{ 1, 16, 1 }, { 2, 15, 1 }, { 3, 15, 1 }, { 0, 18, 0 }, 
+			{ 1, 17, 0 }, { 2, 16, 1 }, { 3, 16, 1 }, { 0, 19, 0 }, 
+			{ 1, 18, 0 }, { 2, 17, 1 }, { 3, 17, 1 }, { 0, 20, 0 }, 
+			{ 1, 19, 0 }, { 2, 18, 1 }, { 3, 18, 1 }, { 0, 21, 0 }, 
+			{ 1, 20, 0 }, { 2, 19, -1 }, { 3, 19, -1 }, { 0, 22, 0 }, 
+			{ 1, 21, 0 }, { 2, 20, -1 }, { 3, 20, -1 }, { 2, 21, 0 }, 
+			{ 0, 23, 0 }, { 1, 22, 0 }, { 3, 21, 0 }, { 2, 22, 0 }, 
+			{ 1, 23, 0 }, { 3, 22, 0 }, { 2, 23, 0 }, { 3, 23, 0 }
+		};
+
+		uint32 races[17][2] = {
+			{ 1, 131071 },
+			{ 333, 131071 },
+			{ 90287, 131071 },
+			{ 90289, 16 },
+			{ 90290, 32 },
+			{ 90291, 64 },
+			{ 90292, 128 },
+			{ 90293, 256 },
+			{ 90294, 512 },
+			{ 90295, 1024 },
+			{ 90296, 2048 },
+			{ 90297, 8192 },
+			{ 90298, 16384 },
+			{ 90299, 32768 },
+			{ 90300, 65536 },
+			{ 2012271, 131071 },
+			{ 2012277, 131071 }
+		};
+		
+		uint32 classes[17][2] = {
+			{ 1, 131071 },
+			{ 333, 131071 },
+			{ 90287, 131071 },
+			{ 90301, 8 },
+			{ 90302, 16 },
+			{ 90303, 32 },
+			{ 90304, 64 },
+			{ 90305, 128 },
+			{ 90306, 256 },
+			{ 90307, 1024 },
+			{ 90308, 2048 },
+			{ 90309, 8192 },
+			{ 90310, 16384 },
+			{ 90311, 32768 },
+			{ 90312, 65536 },
+			{ 2012271, 131071 },
+			{ 2012277, 131071 }
+		};
+
+		eq->membership_setting_count = 96;
+
+		for (int i = 0; i < 96; ++i) {
+			eq->settings[i].setting_index = (int8)settings[i][0];
+			eq->settings[i].setting_id = settings[i][1];
+			eq->settings[i].setting_value = settings[i][2];
+		}
+
+		eq->class_entry_count = 17;
+		for (int i = 0; i < 17; ++i) {
+			eq->membership_classes[i].purchase_id = classes[i][0];
+			eq->membership_classes[i].bitwise_entry = classes[i][1];
+		}
+
+		eq->race_entry_count = 17;
+		for (int i = 0; i < 17; ++i) {
+			eq->membership_races[i].purchase_id = races[i][0];
+			eq->membership_races[i].bitwise_entry = races[i][1];
+		}
+
+		eq->exit_url_length = 0;
 
-		SerializeBuffer buffer;
-		// Generated via script; we should put this in a better format later
-		// count
-		buffer.WriteUInt32(96);
-
-		// settings
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(0);
-		buffer.WriteInt32(250);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(0);
-		buffer.WriteInt32(1000);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(1);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(1);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(2);
-		buffer.WriteInt32(2);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(0);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(0);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(2);
-		buffer.WriteInt32(4);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(3);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(1);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(1);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(3);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(4);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(2);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(2);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(4);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(5);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(3);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(3);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(5);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(6);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(4);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(4);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(6);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(7);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(5);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(5);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(7);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(8);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(6);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(6);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(8);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(9);
-		buffer.WriteInt32(5);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(7);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(7);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(9);
-		buffer.WriteInt32(5);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(10);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(8);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(8);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(11);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(10);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(9);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(9);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(12);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(11);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(10);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(10);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(13);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(12);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(11);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(11);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(14);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(13);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(12);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(12);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(15);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(14);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(13);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(13);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(16);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(15);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(14);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(14);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(17);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(16);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(15);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(15);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(18);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(17);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(16);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(16);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(19);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(18);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(17);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(17);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(20);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(19);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(18);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(18);
-		buffer.WriteInt32(1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(21);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(20);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(19);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(19);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(22);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(21);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(20);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(20);
-		buffer.WriteInt32(-1);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(21);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(23);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(22);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(21);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(22);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt32(23);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(22);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(2);
-		buffer.WriteUInt32(23);
-		buffer.WriteInt32(0);
-
-		buffer.WriteUInt8(3);
-		buffer.WriteUInt32(23);
-		buffer.WriteInt32(0);
-
-		// race count
-		buffer.WriteUInt32(17);
-
-		// races
-		buffer.WriteUInt32(1);
-		buffer.WriteUInt32(131071);
-
-		buffer.WriteUInt32(333);
-		buffer.WriteUInt32(131071);
-
-		buffer.WriteUInt32(90287);
-		buffer.WriteUInt32(131071);
-
-		buffer.WriteUInt32(90289);
-		buffer.WriteUInt32(16);
-
-		buffer.WriteUInt32(90290);
-		buffer.WriteUInt32(32);
-
-		buffer.WriteUInt32(90291);
-		buffer.WriteUInt32(64);
-
-		buffer.WriteUInt32(90292);
-		buffer.WriteUInt32(128);
-
-		buffer.WriteUInt32(90293);
-		buffer.WriteUInt32(256);
-
-		buffer.WriteUInt32(90294);
-		buffer.WriteUInt32(512);
-
-		buffer.WriteUInt32(90295);
-		buffer.WriteUInt32(1024);
-
-		buffer.WriteUInt32(90296);
-		buffer.WriteUInt32(2048);
-
-		buffer.WriteUInt32(90297);
-		buffer.WriteUInt32(8192);
-
-		buffer.WriteUInt32(90298);
-		buffer.WriteUInt32(16384);
-
-		buffer.WriteUInt32(90299);
-		buffer.WriteUInt32(32768);
-
-		buffer.WriteUInt32(90300);
-		buffer.WriteUInt32(65536);
-
-		buffer.WriteUInt32(2012271);
-		buffer.WriteUInt32(131071);
-
-		buffer.WriteUInt32(2012277);
-		buffer.WriteUInt32(131071);
-
-		// classes count
-		buffer.WriteUInt32(17);
-
-		// classes
-		buffer.WriteUInt32(1);
-		buffer.WriteUInt32(131071);
-
-		buffer.WriteUInt32(333);
-		buffer.WriteUInt32(131071);
-
-		buffer.WriteUInt32(90287);
-		buffer.WriteUInt32(131071);
-
-		buffer.WriteUInt32(90301);
-		buffer.WriteUInt32(8);
-
-		buffer.WriteUInt32(90302);
-		buffer.WriteUInt32(16);
-
-		buffer.WriteUInt32(90303);
-		buffer.WriteUInt32(32);
-
-		buffer.WriteUInt32(90304);
-		buffer.WriteUInt32(64);
-
-		buffer.WriteUInt32(90305);
-		buffer.WriteUInt32(128);
-
-		buffer.WriteUInt32(90306);
-		buffer.WriteUInt32(256);
-
-		buffer.WriteUInt32(90307);
-		buffer.WriteUInt32(1024);
-
-		buffer.WriteUInt32(90308);
-		buffer.WriteUInt32(2048);
-
-		buffer.WriteUInt32(90309);
-		buffer.WriteUInt32(8192);
-
-		buffer.WriteUInt32(90310);
-		buffer.WriteUInt32(16384);
-
-		buffer.WriteUInt32(90311);
-		buffer.WriteUInt32(32768);
-
-		buffer.WriteUInt32(90312);
-		buffer.WriteUInt32(65536);
-
-		buffer.WriteUInt32(2012271);
-		buffer.WriteUInt32(131071);
-
-		buffer.WriteUInt32(2012277);
-		buffer.WriteUInt32(131071);
-
-		// exit string length
-		buffer.WriteUInt32(0);
-
-		__packet->size = buffer.size();
-		__packet->pBuffer = new unsigned char[__packet->size];
-		memcpy(__packet->pBuffer, buffer.buffer(), __packet->size);
 		FINISH_ENCODE();
 	}
 
@@ -792,63 +376,116 @@ namespace Larion
 	}
 
 	ENCODE(OP_SendCharInfo) {
+		ENCODE_LENGTH_ATLEAST(CharacterSelect_Struct);
 		SETUP_VAR_ENCODE(CharacterSelect_Struct);
 
-		SerializeBuffer buffer;
+		// Zero-character count shunt
+		if (emu->CharCount == 0) {
+			ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, sizeof(structs::CharacterSelect_Struct));
+			eq->CharCount = emu->CharCount;
 
-		buffer.WriteUInt32(emu->CharCount);
-
-		for (int i = 0; i < emu->CharCount; ++i) {
-			auto *char_info = &emu->Entries[i];
-			buffer.WriteString(char_info->Name);
-			buffer.WriteUInt32(char_info->Class);
-			buffer.WriteUInt32(char_info->Race);
-			buffer.WriteUInt8(1); //not sure seen 1
-			buffer.WriteUInt32(char_info->ShroudRace);
-			buffer.WriteUInt32(char_info->ShroudClass);
-			buffer.WriteUInt16(char_info->Zone);
-			buffer.WriteUInt16(char_info->Instance);
-			buffer.WriteUInt8(char_info->Gender);
-			buffer.WriteUInt8(char_info->Face);
-
-			for (int j = 0; j < 9; ++j) {
-				buffer.WriteUInt32(char_info->Equip[j].Material);
-				buffer.WriteUInt32(char_info->Equip[j].Unknown1);
-				buffer.WriteUInt32(char_info->Equip[j].EliteModel);
-				buffer.WriteUInt32(char_info->Equip[j].HerosForgeModel);
-				buffer.WriteUInt32(char_info->Equip[j].Unknown2);
-				buffer.WriteUInt32(char_info->Equip[j].Color);
-			}
-
-			buffer.WriteUInt8(255); //seen 255
-			buffer.WriteUInt8(0); //seen 0
-			buffer.WriteUInt32(char_info->DrakkinTattoo);
-			buffer.WriteUInt32(char_info->DrakkinDetails);
-			buffer.WriteUInt32(char_info->Deity);
-			buffer.WriteUInt32(char_info->PrimaryIDFile);
-			buffer.WriteUInt32(char_info->SecondaryIDFile);
-			buffer.WriteUInt8(char_info->HairColor);
-			buffer.WriteUInt8(char_info->BeardColor);
-			buffer.WriteUInt8(char_info->EyeColor1);
-			buffer.WriteUInt8(char_info->EyeColor2);
-			buffer.WriteUInt8(char_info->HairStyle);
-			buffer.WriteUInt8(char_info->Beard);
-			buffer.WriteUInt8(char_info->GoHome);
-			buffer.WriteUInt8(char_info->Tutorial);
-			buffer.WriteUInt32(char_info->DrakkinHeritage);
-			buffer.WriteUInt8(0); //seen 0
-			buffer.WriteUInt8(0); //seen 0
-			buffer.WriteUInt32(char_info->LastLogin);
-			buffer.WriteUInt32(0); //last login might just be 64bit now
-			buffer.WriteUInt32(2590000 + i); //unique character id?
-			buffer.WriteUInt32(104);
+			FINISH_ENCODE();
+			return;
 		}
 
-		buffer.WriteUInt8(0);
+		unsigned char* emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+		CharacterSelectEntry_Struct* emu_cse = (CharacterSelectEntry_Struct*)nullptr;
 
-		__packet->size = buffer.size();
-		__packet->pBuffer = new unsigned char[__packet->size];
-		memcpy(__packet->pBuffer, buffer.buffer(), __packet->size);
+		size_t names_length = 0;
+		size_t character_count = 0;
+		for (; character_count < emu->CharCount; ++character_count) {
+			emu_cse = (CharacterSelectEntry_Struct*)emu_ptr;
+			names_length += strlen(emu_cse->Name);
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+		}
+
+		size_t total_length = sizeof(structs::CharacterSelect_Struct)
+			+ character_count * sizeof(structs::CharacterSelectEntry_Struct)
+			+ names_length;
+
+		ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
+		structs::CharacterSelectEntry_Struct* eq_cse = (structs::CharacterSelectEntry_Struct*)nullptr;
+
+		eq->CharCount = character_count;
+
+		emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+
+		unsigned char* eq_ptr = __packet->pBuffer;
+		eq_ptr += sizeof(structs::CharacterSelect_Struct);
+
+		for (int counter = 0; counter < character_count; ++counter) {
+			emu_cse = (CharacterSelectEntry_Struct*)emu_ptr;
+			eq_cse = (structs::CharacterSelectEntry_Struct*)eq_ptr; // base address
+
+			strcpy(eq_cse->Name, emu_cse->Name);
+			eq_ptr += strlen(emu_cse->Name);
+
+			eq_cse = (structs::CharacterSelectEntry_Struct*)eq_ptr;
+			eq_cse->Name[0] = '\0';
+
+			eq_cse->Class = emu_cse->Class;
+			eq_cse->Race = emu_cse->Race;
+			eq_cse->Level = emu_cse->Level;
+			eq_cse->ShroudClass = emu_cse->ShroudClass;
+			eq_cse->ShroudRace = emu_cse->ShroudRace;
+			eq_cse->Zone = emu_cse->Zone;
+			eq_cse->Instance = emu_cse->Instance;
+			eq_cse->Gender = emu_cse->Gender;
+			eq_cse->Face = emu_cse->Face;
+
+			for (int equip_index = 0; equip_index < EQ::textures::materialCount; equip_index++) {
+				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
+				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
+				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HerosForgeModel;
+				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Unknown2;
+				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
+			}
+
+			eq_cse->Unknown1 = 255;
+			eq_cse->Unknown2 = 0;
+			eq_cse->DrakkinTattoo = emu_cse->DrakkinTattoo;
+			eq_cse->DrakkinDetails = emu_cse->DrakkinDetails;
+			eq_cse->Deity = emu_cse->Deity;
+			eq_cse->PrimaryIDFile = emu_cse->PrimaryIDFile;
+			eq_cse->SecondaryIDFile = emu_cse->SecondaryIDFile;
+			eq_cse->HairColor = emu_cse->HairColor;
+			eq_cse->BeardColor = emu_cse->BeardColor;
+			eq_cse->EyeColor1 = emu_cse->EyeColor1;
+			eq_cse->EyeColor2 = emu_cse->EyeColor2;
+			eq_cse->HairStyle = emu_cse->HairStyle;
+			eq_cse->Beard = emu_cse->Beard;
+			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->Tutorial = emu_cse->Tutorial;
+			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
+			eq_cse->Enabled = emu_cse->Enabled;
+			eq_cse->LastLogin = emu_cse->LastLogin;
+			eq_cse->Unknown3 = 0;
+			eq_cse->Unknown4 = 0;
+			eq_cse->Unknown5 = 0;
+			eq_cse->Unknown6 = 0;
+			eq_cse->Unknown7 = 0;
+			eq_cse->CharacterId = 0;
+			eq_cse->Unknown8 = 1;
+
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
+		}
+
+		DumpPacket(__packet);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ExpansionInfo)
+	{
+		ENCODE_LENGTH_EXACT(ExpansionInfo_Struct);
+		SETUP_DIRECT_ENCODE(ExpansionInfo_Struct, structs::ExpansionInfo_Struct);
+
+		OUT(Expansions);
+
 		FINISH_ENCODE();
 	}
 

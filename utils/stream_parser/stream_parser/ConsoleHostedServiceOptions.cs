@@ -22,5 +22,8 @@ namespace StreamParser
 
         [Option("decompress", Default = null, HelpText = "Which opcodes to attempt to decompress")]
         public IEnumerable<int> DecompressOpcodes { get; set; }
+
+        [Option("enable-unknown-streams", Default = false, HelpText = "Enable dumping of unknown streams; they will be skipped otherwise.")]
+        public bool DumpUnknownStreams { get; set; }
     }
 }

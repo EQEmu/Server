@@ -3,6 +3,9 @@
 
 namespace Larion {
 	namespace structs {
+
+#pragma pack(1)
+		
 		struct LoginInfo_Struct {
 			/*000*/	char	login_info[64];
 			/*064*/	uint8	unknown064[124];
@@ -37,8 +40,8 @@ namespace Larion {
 
 		struct Membership_Setting_Struct
 		{
-			/*000*/ uint8 setting_index;	// 0, 1, 2 or 3: f2p, silver, gold, platinum?
-			/*001*/ uint32 setting_id;		// 0 to 23 actually seen but the OP_Membership packet has up to 32
+			/*000*/ int8 setting_index;	// 0, 1, 2 or 3: f2p, silver, gold, platinum?
+			/*001*/ int32 setting_id;		// 0 to 23 actually seen but the OP_Membership packet has up to 32
 			/*005*/ int32 setting_value;	
 			/*009*/
 		};
@@ -73,17 +76,98 @@ namespace Larion {
 			/*038*/
 		};
 
+		struct ExpansionInfo_Struct {
+			/*000*/	char	Unknown000[64];
+			/*064*/	uint32	Expansions;
+		};
+
+		/*
+		* Visible equiptment.
+		* Size: 20 Octets
+		*/
+		struct Texture_Struct
+		{
+			uint32 Material;
+			uint32 Unknown1;
+			uint32 EliteMaterial;
+			uint32 HeroForgeModel;
+			uint32 Material2;	// Same as material?
+		};
+
+		/*
+		** Color_Struct
+		** Size: 4 bytes
+		** Used for convenience
+		** Merth: Gave struct a name so gcc 2.96 would compile
+		**
+		*/
+		struct Tint_Struct
+		{
+			union {
+				struct {
+					uint8 Blue;
+					uint8 Green;
+					uint8 Red;
+					uint8 UseTint;	// if there's a tint this is FF
+				};
+				uint32 Color;
+			};
+		};
+
+		struct CharSelectEquip : Texture_Struct, Tint_Struct {};
+
+		struct CharacterSelectEntry_Struct
+		{
+			char Name[1];
+			uint32 Class;
+			uint32 Race;
+			uint8 Level;
+			uint32 ShroudClass;
+			uint32 ShroudRace;
+			uint16 Zone;
+			uint16 Instance;
+			uint8 Gender;
+			uint8 Face;
+			CharSelectEquip Equip[9];
+			uint8 Unknown1; //Seen 256
+			uint8 Unknown2; //Seen 0
+			uint32 DrakkinTattoo;
+			uint32 DrakkinDetails;
+			uint32 Deity;
+			uint32 PrimaryIDFile;
+			uint32 SecondaryIDFile;
+			uint8 HairColor;
+			uint8 BeardColor;
+			uint8 EyeColor1;
+			uint8 EyeColor2;
+			uint8 HairStyle;
+			uint8 Beard;
+			uint8 Enabled;
+			uint8 Tutorial;
+			uint32 DrakkinHeritage;
+			uint8 Unknown3;
+			uint8 GoHome;
+			uint32 LastLogin;
+			uint8 Unknown4; // Seen 0
+			uint8 Unknown5; // Seen 0
+			uint8 Unknown6; // Seen 0
+			uint8 Unknown7; // Seen 0
+			uint32 CharacterId; //A Guess, Character I made a little bit after has a number a few hundred after the first
+			uint32 Unknown8; // Seen 1
+		};
+
+		/*
+		** Character Selection Struct
+		**
+		*/
+		struct CharacterSelect_Struct
+		{
+			/*000*/	uint32 CharCount;	//number of chars in this packet
+		};
+
+#pragma pack()
+
 	};	//end namespace structs
 };	//end namespace larion
 
 #endif /*LARION_STRUCTS_H_*/
-
-
-
-
-
-
-
-
-
-

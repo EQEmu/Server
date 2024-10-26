@@ -57,42 +57,54 @@ namespace StreamParser
             {
                 var args = Environment.GetCommandLineArgs();
 
-                CommandLine.Parser.Default.ParseArguments<ConsoleHostedServiceOptions>(args)
-                   .WithParsed<ConsoleHostedServiceOptions>(o =>
-                   {
-                       _parser.OnNewConnection += OnNewConnection;
-                       _parser.OnLostConnection += OnLostConnection;
-
-                       foreach(var f in o.Input)
+                try
+                {
+                    CommandLine.Parser.Default.ParseArguments<ConsoleHostedServiceOptions>(args)
+                       .WithParsed<ConsoleHostedServiceOptions>(o =>
                        {
-                           _logger.LogInformation("Parsing {0}...", f);
-                           _parser.Parse(f);
-                       }
+                           _parser.OnNewConnection += OnNewConnection;
+                           _parser.OnLostConnection += OnLostConnection;
 
-                       foreach(var c in _connections)
-                       {
-                           if(o.Text)
+                           foreach (var f in o.Input)
                            {
-                               DumpConnectionToTextFile(c.Value, o.Output, o.Decrypt, o.DecompressOpcodes);
+                               _logger.LogInformation("Parsing {0}...", f);
+                               _parser.Parse(f);
                            }
-                       }
 
-                       _applicationLifetime.StopApplication();
-                   })
-                   .WithNotParsed<ConsoleHostedServiceOptions>(e =>
-                   {
-                       bool stops_processing = false;
-                       foreach(var err in e)
-                       {
-                           _logger.LogError("Error: {0}", err.Tag);
-                           stops_processing = stops_processing || err.StopsProcessing;
-                       }
+                           foreach (var c in _connections)
+                           {
+                               if (c.Value.ConnectionType == ConnectionType.Unknown && !o.DumpUnknownStreams)
+                               {
+                                   continue;
+                               }
 
-                       if(stops_processing)
-                       {
+                               if (o.Text)
+                               {
+                                   DumpConnectionToTextFile(c.Value, o.Output, o.Decrypt, o.DecompressOpcodes);
+                               }
+                           }
+
                            _applicationLifetime.StopApplication();
-                       }
-                   });
+                       })
+                       .WithNotParsed<ConsoleHostedServiceOptions>(e =>
+                       {
+                           bool stops_processing = false;
+                           foreach (var err in e)
+                           {
+                               stops_processing = stops_processing || err.StopsProcessing || err is MissingRequiredOptionError;
+                           }
+
+                           if (stops_processing)
+                           {
+                               _applicationLifetime.StopApplication();
+                           }
+                       });
+                } 
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex, "Error parsing command line arguments");
+                    _applicationLifetime.StopApplication();
+                }
             });
 
             return Task.CompletedTask;
