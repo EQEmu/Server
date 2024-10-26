@@ -176,6 +176,11 @@ namespace StreamParser.Common.Daybreak
                     case Opcode.SessionResponse:
                         if (_connect_code == 0)
                         {
+                            if(data.Length != 21)
+                            {
+                                return;
+                            }
+
                             _connect_code = BitConverter.ToUInt32(data.Slice(2, 4));
                             _encode_key = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(data.Slice(6, 4)));
                             _crc_bytes = data[10];
@@ -443,27 +448,33 @@ namespace StreamParser.Common.Daybreak
 
         private bool ValidateCRC(ReadOnlySpan<byte> p)
         {
-            if (_crc_bytes == 0)
+            try
             {
-                return true;
-            }
+                if (_crc_bytes == 0)
+                {
+                    return true;
+                }
 
-            int actual = 0;
-            int calculated = _crc_generator.Calculate(p.Slice(0, p.Length - _crc_bytes), _encode_key);
-            switch (_crc_bytes)
+                int actual = 0;
+                int calculated = _crc_generator.Calculate(p.Slice(0, p.Length - _crc_bytes), _encode_key);
+                switch (_crc_bytes)
+                {
+                    case 2:
+                        actual = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(p.Slice(p.Length - 2, 2))) & 0xFFFF;
+                        calculated = calculated & 0xFFFF;
+                        break;
+                    case 4:
+                        actual = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(p.Slice(p.Length - 4, 4)));
+                        break;
+                    default:
+                        return false;
+                }
+
+                return actual == calculated;
+            } catch(Exception ex)
             {
-                case 2:
-                    actual = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(p.Slice(p.Length - 2, 2))) & 0xFFFF;
-                    calculated = calculated & 0xFFFF;
-                    break;
-                case 4:
-                    actual = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(p.Slice(p.Length - 4, 4)));
-                    break;
-                default:
-                    return false;
+                return false;
             }
-
-            return actual == calculated;
         }
 
         private byte[] Decompress(byte[] p, int offset, int length)

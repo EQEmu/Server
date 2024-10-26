@@ -87,6 +87,12 @@ namespace StreamParser.Common.Daybreak
             }
             else if (data[0] == 0 && data[1] == Opcode.SessionRequest)
             {
+                if(data.Length != 24)
+                {
+                    _logger.LogTrace("Tossing packet, {0} was not the right size for a SessionRequest", data.Length);
+                    return;
+                }
+
                 c = new Connection(this, srcAddr, srcPort, dstAddr, dstPort);
                 _connections.Add(c);
                 c.ProcessPacket(srcAddr, srcPort, packetTime, data);
