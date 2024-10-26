@@ -852,7 +852,8 @@ bool SharedDatabase::GetInventory(Client *c)
 		}
 
 		int16 put_slot_id;
-		if (EQ::ValueWithin(slot_id, EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END) || slot_id == EQ::invslot::slotCursor) {
+		// this had  || slot_id == EQ::invslot::slotCursor ??s
+		if (EQ::ValueWithin(slot_id, EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END)) {
 			put_slot_id = inv.PushCursor(*inst);
 		} else {
 			put_slot_id = inv.PutItem(slot_id, *inst);
