@@ -1392,7 +1392,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 
 			int new_limit = newbon->SpellCritDmgIncNoStack + limit_value;
-			// If this is the first instance of crit damage, add the full amount
+
 			if (new_limit > RuleI(Custom, AdditiveSpellCritDmgSoftCap)) {
 				int above_limit = new_limit - RuleI(Custom, AdditiveSpellCritDmgSoftCap);
     			newbon->SpellCritDmgIncNoStack = RuleI(Custom, AdditiveSpellCritDmgSoftCap) + static_cast<int>(above_limit * RuleR(Custom, AdditiveSpellCritDmgMultiplier));
