@@ -2416,15 +2416,17 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					break;
 				}
 
+				int16 dmg_mod = ((RuleB(Spells, AllowFocusOnSkillDamageSpells)) ? caster->GetMeleeDamageMod_SE(spells[spell_id].skill) : 0);
+
 				switch(spells[spell_id].skill) {
-				case EQ::skills::SkillThrowing:
-					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, ReuseTime, 0, 0, 4.0f, true);
+				case EQ::skills::SkillThrowing:					
+					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], dmg_mod, ReuseTime, 0, 0, 4.0f, true);
 					break;
 				case EQ::skills::SkillArchery:
-					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, ReuseTime, 0, 0, nullptr, 0, 4.0f, true);
+					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], dmg_mod, ReuseTime, 0, 0, nullptr, 0, 4.0f, true);
 					break;
 				default:
-					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base_value[i], spells[spell_id].skill, spells[spell_id].limit_value[i], 0, false, ReuseTime);
+					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base_value[i], spells[spell_id].skill, spells[spell_id].limit_value[i], dmg_mod, false, ReuseTime);
 					break;
 				}
 				break;
