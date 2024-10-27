@@ -526,9 +526,31 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		SendEnterWorld(cle->name());
 		SendPostEnterWorld();
 		if (!is_player_zoning) {
-			SendExpansionInfo();
-			SendCharInfo();
-			database.LoginIP(cle->AccountID(), long2ip(GetIP()));
+			const auto supported_clients = RuleS(World, SupportedClients);
+			bool skip_char_info = false;
+			if (!supported_clients.empty()) {
+				auto name = EQ::versions::ClientVersionName(m_ClientVersion);
+				bool supported = false;
+				std::stringstream ss(supported_clients);
+				std::string item;
+				while (std::getline(ss, item, ',')) {
+					if (item == name) {
+						supported = true;
+						break;
+					}
+				}
+				if (!supported) {
+					std::string message = "Client Not In Supported List [" + supported_clients + "]";
+					SendUnsupportedClientPacket(message);
+					skip_char_info = true;
+				}
+			}
+
+			if (!skip_char_info) {
+				SendExpansionInfo();
+				SendCharInfo();
+				database.LoginIP(cle->AccountID(), long2ip(GetIP()));
+			}
 		}
 
 		cle->SetIP(GetIP());
@@ -2452,4 +2474,36 @@ void Client::SendGuildTributeOptInToggle(const GuildTributeMemberToggle *in)
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::SendUnsupportedClientPacket(const std::string& message)
+{
+	auto character_count = 1;
+	auto character_limit = 1;
+	size_t packet_size = sizeof(CharacterSelect_Struct) + (sizeof(CharacterSelectEntry_Struct) * character_count);
+	EQApplicationPacket packet(OP_SendCharInfo, packet_size);
+
+	unsigned char *buff_ptr = packet.pBuffer;
+	CharacterSelect_Struct *cs = (CharacterSelect_Struct *) buff_ptr;
+
+	cs->CharCount = character_count;
+	cs->TotalChars = character_limit;
+
+	buff_ptr += sizeof(CharacterSelect_Struct);
+
+	CharacterSelectEntry_Struct *entry = (CharacterSelectEntry_Struct *) buff_ptr;
+	strcpy(entry->Name, message.c_str());
+
+	entry->Race = HUMAN;
+	entry->Class = 1;
+	entry->Level = 1;
+	entry->ShroudClass = entry->Class;
+	entry->ShroudRace = entry->Race;
+	entry->Zone = -1;
+	entry->Instance = 0;
+	entry->Gender = 0;
+	entry->GoHome = 0;
+	entry->Tutorial = 0;
+	entry->Enabled = 0;
+	QueuePacket(&packet);
 }
