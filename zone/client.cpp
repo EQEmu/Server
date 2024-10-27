@@ -401,10 +401,6 @@ Client::~Client() {
 		DoParcelCancel();
 	}
 
-	for (auto& info : m_petinfomulti) {
-        safe_delete(info);
-    }
-
 	mMovementManager->RemoveClient(this);
 
 	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Client, CharacterID());
@@ -739,29 +735,25 @@ bool Client::Save(uint8 iCommitNow) {
 
 	ValidatePetList(); // make sure pet list is compacted correctly
 
-   	for (auto& pet_info : m_petinfomulti) {
-		if (pet_info) {
-			memset(pet_info, 0, sizeof(PetInfo)); // Dereference the pointer correctly
-		}
-	}
-
 	auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
-	m_petinfomulti.resize(pets.size()); // Resize m_petinfomulti to match the number of pets
 
 	if (!dead) {
-		for (size_t i = 0; i < pets.size(); ++i) {
-			NPC *pet = pets[i]->CastToNPC();
-			if (pet && pet->GetPetSpellID()) {
-				if (!m_petinfomulti[i]) {
-					m_petinfomulti[i] = new PetInfo(); // Ensure memory is allocated
+		for (Mob* mob : pets) {
+			if (mob)
+			{
+				NPC* pet = mob->CastToNPC();
+				if (pet && pet->GetPetSpellID()) {
+					PetInfo newPetInfo = PetInfo();
+					memset(&newPetInfo, 0, sizeof(PetInfo));
+					newPetInfo.SpellID = pet->GetPetSpellID();
+					newPetInfo.HP = pet->GetHP();
+					newPetInfo.Mana = pet->GetMana();
+					pet->GetPetState(newPetInfo.Buffs, newPetInfo.Items, newPetInfo.Name);
+					newPetInfo.petpower = pet->GetPetPower();
+					newPetInfo.size = pet->GetSize();
+					newPetInfo.taunting = pet->IsTaunting();
+					m_petinfomulti.push_back(newPetInfo);
 				}
-				m_petinfomulti[i]->SpellID = pet->GetPetSpellID();
-				m_petinfomulti[i]->HP = pet->GetHP();
-				m_petinfomulti[i]->Mana = pet->GetMana();
-				pet->GetPetState(m_petinfomulti[i]->Buffs, m_petinfomulti[i]->Items, m_petinfomulti[i]->Name);
-				m_petinfomulti[i]->petpower = pet->GetPetPower();
-				m_petinfomulti[i]->size = pet->GetSize();
-				m_petinfomulti[i]->taunting = pet->IsTaunting();
 			}
 		}
 	}
