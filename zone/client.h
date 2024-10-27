@@ -469,9 +469,8 @@ public:
 	inline ExtendedProfile_Struct& GetEPP() { return m_epp; }
 	inline EQ::InventoryProfile& GetInv() { return m_inv; }
 	inline const EQ::InventoryProfile& GetInv() const { return m_inv; }
-	inline std::vector<PetInfo>& GetPetsInfo() { return m_petinfomulti; }
+	inline std::vector<PetInfo*>& GetPetsInfo() { return m_petinfomulti; }
 	inline PetInfo& GetSuspendedPetInfo() { return m_suspendedminion; }
-	inline void SetSuspendedPetInfo(PetInfo& info) { m_suspendedminion = info; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 	void ReloadExpansionProfileSetting();
@@ -2082,7 +2081,7 @@ private:
 	PetInfo m_suspendedminion; // pet data for our suspended minion.
 	MercInfo m_mercinfo[MAXMERCS]; // current mercenary
 
-	std::vector<PetInfo> m_petinfomulti;
+	std::vector<PetInfo*> m_petinfomulti;
 
 	InspectMessage_Struct m_inspect_message;
 	bool temp_pvp;

@@ -894,6 +894,7 @@ void Mob::ConfigurePetWindow(Mob* selected_pet) {
 			auto ct = (ClientTarget_Struct *)app->pBuffer;
 			ct->new_target = pet_npc->GetTarget() ? pet_npc->GetTarget()->GetID() : 0;
 			this_client->FastQueuePacket(&app);
+			safe_delete(app);
 		}
 	}
 }
