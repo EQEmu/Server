@@ -4088,7 +4088,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 
     if (!buffs.empty() && !pets_info.empty()) 
 	{
-        for (const auto& e : buffs) 
+    for (const auto& e : buffs) 
 		{
 			if (e.pet == 100)
 			{
@@ -4134,8 +4134,8 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 				pets_info[e.pet].Buffs[e.slot].counters = e.counters;
 				pets_info[e.pet].Buffs[e.slot].bard_modifier = e.instrument_mod;
 			}
-        }
     }
+  }
 
     // Load pet inventory from the database
     const auto& inventory = CharacterPetInventoryRepository::GetWhere(
@@ -4147,10 +4147,10 @@ void ZoneDatabase::LoadPetInfo(Client *client)
     );
 
     if (!inventory.empty() && !pets_info.empty()) {
-        for (const auto& e : inventory) {
-            if (!EQ::ValueWithin(e.slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
-                continue;
-            }
+    for (const auto& e : inventory) {
+     if (!EQ::ValueWithin(e.slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
+       continue;
+      }
 			if (e.pet == 100)
 			{
 				client->GetSuspendedPetInfo().Items[e.slot] = e.item_id;
@@ -4159,8 +4159,8 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 			{
 				pets_info[e.pet].Items[e.slot] = e.item_id;
 			}
-        }
     }
+  }
 }
 
 void ZoneDatabase::RemoveTempFactions(Client *client) {

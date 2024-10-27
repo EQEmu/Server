@@ -6053,12 +6053,12 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 				defender->aabonuses.MeleeMitigationEffect
 			);
 
-			melee_mitigation_effect = std::min(RuleI(Custom, MaximumMeleeMitigationEffects), melee_mitigation_effect);
 			damage_bonus_mod += melee_mitigation_effect;
 		}
 	}
 
-	damage_bonus_mod = std::min(100, damage_bonus_mod);
+	damage_bonus_mod = std::max(damage_bonus_mod, -RuleI(Custom, MaximumMeleeMitigationEffects));
+
 	damage += damage * damage_bonus_mod / 100;
 }
 
