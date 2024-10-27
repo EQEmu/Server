@@ -2279,12 +2279,12 @@ bool Lua_Mob::HasPet() {
 
 void Lua_Mob::RemovePet() {
 	Lua_Safe_Call_Void();
-	return self->RemovePetByIndex();
+	self->RemovePetByIndex();
 }
 
 void Lua_Mob::SetPet(Lua_Mob new_pet) {
 	Lua_Safe_Call_Void();
-	return self->SetPet(new_pet);
+	self->SetPet(new_pet);
 }
 
 bool Lua_Mob::IsSilenced() {
