@@ -1335,7 +1335,7 @@ bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::
 		return false;
 	if (!CheckLosFN(other)) {
 		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch
-		return;
+		return false;
 	}
 	int slot = -1;
 

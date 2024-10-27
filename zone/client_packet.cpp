@@ -1700,35 +1700,34 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		LogDebug("Got [{}] pets on load", m_petinfomulti.size());
 		// Iterate over each pet in m_petinfomulti
 		for (int i = 0; i < m_petinfomulti.size(); i++) {
-			auto pet_info = m_petinfomulti[i];
-			if (!pet_info) {
-				continue; // Skip null pointers
-			}
+			auto& pet_info = m_petinfomulti[i];
 
-			if (pet_info->SpellID > 1 && GetAllPets().size() <= RuleI(Custom, AbsolutePetLimit) && pet_info->SpellID <= SPDAT_RECORDS) {
+			if (pet_info.SpellID > 1 && GetAllPets().size() <= RuleI(Custom, AbsolutePetLimit) && pet_info.SpellID <= SPDAT_RECORDS) {
 				// Create the pet using the stored data
-				MakePoweredPet(pet_info->SpellID, spells[pet_info->SpellID].teleport_zone, pet_info->petpower, pet_info->Name, pet_info->size);
+				MakePoweredPet(pet_info.SpellID, spells[pet_info.SpellID].teleport_zone, pet_info.petpower, pet_info.Name, pet_info.size);
 
 				// Check if the pet was successfully created
 				if (GetPet(i) && GetPet(i)->IsNPC()) {
 					NPC *pet = GetPet(i)->CastToNPC();
+					if (pet)
+					{
+						// Apply the pet's state
+						pet->SetPetState(pet_info.Buffs, pet_info.Items);
+						pet->CalcBonuses();
+						pet->SetHP(pet_info.HP);
+						pet->SetMana(pet_info.Mana);
 
-					// Apply the pet's state
-					pet->SetPetState(pet_info->Buffs, pet_info->Items);
-					pet->CalcBonuses();
-					pet->SetHP(pet_info->HP);
-					pet->SetMana(pet_info->Mana);
-
-					// Taunt persists when zoning on newer clients, overwrite default.
-					if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-						pet->SetTaunting(pet_info->taunting);
+						// Taunt persists when zoning on newer clients, overwrite default.
+						if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
+							pet->SetTaunting(pet_info.taunting);
+						}
 					}
 
 					DoPetBagResync();
 				}
 
 				// Reset the pet info's SpellID to indicate it has been handled
-				pet_info->SpellID = 0;
+				pet_info.SpellID = 0;
 			}
 		}
 	}
@@ -1738,10 +1737,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		ConfigurePetWindow(GetPet(0));
 	}
 
-	for (auto& info : m_petinfomulti) {
-		memset(info, 0, sizeof(info));
-		safe_delete(info);
-	}
+	m_petinfomulti.clear();
 
 	/* Moved here so it's after where we load the pet data. */
 	if (!aabonuses.ZoneSuspendMinion && !spellbonuses.ZoneSuspendMinion && !itembonuses.ZoneSuspendMinion) {

@@ -626,7 +626,7 @@ bool Client::Process() {
 
 							zone->SendDiscordMessage("admin", fmt::format("Moving [{}] to Bazaar. Unauthorized Client.", GetCleanName()));
 							MoveZone("bazaar");
-							return;
+							return false;
 						}
 
 						Message(Chat::Shout, "You are not using the latest Heroes' Journey client. Visit HeroesJourneyEQ.com for more information. Moved to the Bazaar in %d seconds.", (11 - CUnauth_tics) * 6);
