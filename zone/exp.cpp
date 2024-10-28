@@ -485,43 +485,7 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 	}
 
 	//Enforce Percent XP Cap per kill, if rule is enabled
-	int kill_percent_xp_cap = RuleI(Character, ExperiencePercentCapPerKill);
-	float max_scale 		= RuleR(Custom, FloatingExperienceMaxScaleFactor);
-	int terminal_level 		= RuleI(Custom, FloatingExperienceScaleTerminalLevel);
-
-	float level_scaling = 1.0f;
-	if (GetLevel() < terminal_level) {
-		level_scaling = max_scale - ((max_scale - 1.0f) * (GetLevel() - 1.0f) / (terminal_level - 1.0f));
-	}
-
-	int cap = 0;
-
-	switch (conlevel) {
-		case ConsiderColor::Red:
-			cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerRedKill) * level_scaling);
-			break;
-		case ConsiderColor::Yellow:
-			cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerYellowKill) * level_scaling);
-			break;
-		case ConsiderColor::White:
-			cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerWhiteKill) * level_scaling);
-			break;
-		case ConsiderColor::DarkBlue:
-			cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerBlueKill) * level_scaling);
-			break;
-		case ConsiderColor::LightBlue:
-			cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerLightBlueKill) * level_scaling);
-			break;
-		case ConsiderColor::Green:
-			cap = static_cast<int>(RuleR(Character, FloatingExperiencePercentCapPerGreenKill) * level_scaling);
-			break;
-		default:
-			break;
-	}
-	// Override kill_percent_xp_cap if a valid cap was calculated
-	if (cap > 0) {
-		kill_percent_xp_cap = std::min(kill_percent_xp_cap, cap);
-	}
+	int kill_percent_xp_cap = static_cast<int>(ceil(RuleI(Character, ExperiencePercentCapPerKill) * GetConLevelModifierPercent(conlevel)));
 
 	if (kill_percent_xp_cap >= 0) {
 		auto experience_for_level = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()));
@@ -891,8 +855,10 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	// Check for AA XP Cap
-	if (RuleI(AA, MaxAAEXPPerKill) >= 0 && aaexp > RuleI(AA, MaxAAEXPPerKill)) {
-		aaexp = RuleI(AA, MaxAAEXPPerKill);
+	int aaexp_cap = RuleI(AA, MaxAAEXPPerKill) * GetConLevelModifierPercent(conlevel);
+
+	if (RuleI(AA, MaxAAEXPPerKill) >= 0 && aaexp > aaexp_cap) {
+		aaexp = aaexp_cap;
 	}
 
 	// Get current AA XP total
