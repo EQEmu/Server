@@ -4086,33 +4086,56 @@ void ZoneDatabase::LoadPetInfo(Client *client)
         )
     );
 
-    if (!buffs.empty()) {
-        for (const auto& e : buffs) {
+    if (!buffs.empty() && !pets_info.empty()) 
+	{
+    for (const auto& e : buffs) 
+		{
+			if (e.pet == 100)
+			{
+				if (e.slot >= RuleI(Spells, MaxTotalSlotsPET)) {
+					continue;
+				}
 
-			PetInfo p;
-			memset(&p, 0, sizeof(PetInfo));
-            p = (e.pet == 100) ? client->GetSuspendedPetInfo() : (e.pet < pets_info.size() ? pets_info[e.pet] : p);
-                if (e.slot >= RuleI(Spells, MaxTotalSlotsPET)) {
-                    continue;
-                }
+				if (!IsValidSpell(e.spell_id)) {
+					continue;
+				}
 
-                if (!IsValidSpell(e.spell_id)) {
-                    continue;
-                }
+				strn0cpy(client->GetSuspendedPetInfo().Buffs[e.slot].caster_name, e.castername.c_str(), sizeof(client->GetSuspendedPetInfo().Buffs[e.slot].caster_name));
 
-                strn0cpy(p.Buffs[e.slot].caster_name, e.castername.c_str(), sizeof(p.Buffs[e.slot].caster_name));
+				auto caster = entity_list.GetClientByName(client->GetSuspendedPetInfo().Buffs[e.slot].caster_name);
 
-                auto caster = entity_list.GetClientByName(p.Buffs[e.slot].caster_name);
+				client->GetSuspendedPetInfo().Buffs[e.slot].spellid = e.spell_id;
+				client->GetSuspendedPetInfo().Buffs[e.slot].level = e.caster_level;
+				client->GetSuspendedPetInfo().Buffs[e.slot].player_id = caster ? caster->GetID() : 0;
+				client->GetSuspendedPetInfo().Buffs[e.slot].effect_type = BuffEffectType::Buff;
+				client->GetSuspendedPetInfo().Buffs[e.slot].duration = e.ticsremaining;
+				client->GetSuspendedPetInfo().Buffs[e.slot].counters = e.counters;
+				client->GetSuspendedPetInfo().Buffs[e.slot].bard_modifier = e.instrument_mod;
+			}
+			else if(e.pet < pets_info.size())
+			{
+				if (e.slot >= RuleI(Spells, MaxTotalSlotsPET)) {
+					continue;
+				}
 
-                p.Buffs[e.slot].spellid       = e.spell_id;
-                p.Buffs[e.slot].level         = e.caster_level;
-                p.Buffs[e.slot].player_id     = caster ? caster->GetID() : 0;
-                p.Buffs[e.slot].effect_type   = BuffEffectType::Buff;
-                p.Buffs[e.slot].duration      = e.ticsremaining;
-                p.Buffs[e.slot].counters      = e.counters;
-                p.Buffs[e.slot].bard_modifier = e.instrument_mod;
-        }
+				if (!IsValidSpell(e.spell_id)) {
+					continue;
+				}
+
+				strn0cpy(pets_info[e.pet].Buffs[e.slot].caster_name, e.castername.c_str(), sizeof(pets_info[e.pet].Buffs[e.slot].caster_name));
+
+				auto caster = entity_list.GetClientByName(pets_info[e.pet].Buffs[e.slot].caster_name);
+
+				pets_info[e.pet].Buffs[e.slot].spellid = e.spell_id;
+				pets_info[e.pet].Buffs[e.slot].level = e.caster_level;
+				pets_info[e.pet].Buffs[e.slot].player_id = caster ? caster->GetID() : 0;
+				pets_info[e.pet].Buffs[e.slot].effect_type = BuffEffectType::Buff;
+				pets_info[e.pet].Buffs[e.slot].duration = e.ticsremaining;
+				pets_info[e.pet].Buffs[e.slot].counters = e.counters;
+				pets_info[e.pet].Buffs[e.slot].bard_modifier = e.instrument_mod;
+			}
     }
+  }
 
     // Load pet inventory from the database
     const auto& inventory = CharacterPetInventoryRepository::GetWhere(
@@ -4123,18 +4146,21 @@ void ZoneDatabase::LoadPetInfo(Client *client)
         )
     );
 
-    if (!inventory.empty()) {
-        for (const auto& e : inventory) {
-			PetInfo p;
-			memset(&p, 0, sizeof(PetInfo));
-			p = (e.pet == 100) ? client->GetSuspendedPetInfo() : (e.pet < pets_info.size() ? pets_info[e.pet] : p);
-            if (!EQ::ValueWithin(e.slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
-                continue;
-            }
-
-            p.Items[e.slot] = e.item_id;
-        }
+    if (!inventory.empty() && !pets_info.empty()) {
+    for (const auto& e : inventory) {
+     if (!EQ::ValueWithin(e.slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
+       continue;
+      }
+			if (e.pet == 100)
+			{
+				client->GetSuspendedPetInfo().Items[e.slot] = e.item_id;
+			}
+			else if(e.pet < pets_info.size())
+			{
+				pets_info[e.pet].Items[e.slot] = e.item_id;
+			}
     }
+  }
 }
 
 void ZoneDatabase::RemoveTempFactions(Client *client) {
