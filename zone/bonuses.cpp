@@ -110,7 +110,7 @@ void Client::CalcBonuses()
 
 	rooted = FindType(SE_Root);
 
-	XPRate = 100 + spellbonuses.XPRateMod;
+	XPRate = 100 + spellbonuses.XPRateMod + aabonuses.XPRateMod + itembonuses.XPRateMod;
 
 	if (GetMaxXTargets() != 5 + aabonuses.extra_xtargets)
 		SetMaxXTargets(5 + aabonuses.extra_xtargets);
