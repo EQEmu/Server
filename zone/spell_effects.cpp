@@ -10219,10 +10219,11 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 		return false;
 	}
 	else if (petids.size() >= RuleI(Custom, AbsolutePetLimit) && IsClient()) {
-		LogSpells("Spell casting canceled: Can not cast charm if you have a pet.");
+		LogSpells("Spell casting canceled: You cannot control an additional pet");
+		Message(Chat::SpellFailure, "You cannot control an additional pet.");
 		return false;
 	}
-	else if (target->GetOwner()) {
+	else if (target->GetOwner() && !target->IsCharmed()) {
 		MessageString(Chat::Red, CANNOT_CHARM);
 		LogSpells("Spell casting canceled: Can not cast charm on a pet.");
 		return false;
