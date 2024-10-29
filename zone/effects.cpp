@@ -1028,7 +1028,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 				Strings::SecondsToTime(remaining_time)
 			).c_str()
 		);
-		return false;
+		return RuleB(Custom, MulticlassingEnabled) ? true : false;
 	}
 
 	bool instant_recast = true;

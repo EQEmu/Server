@@ -847,20 +847,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		// THJ Custom Bullshit - Mutate Fist of Steel
 		if (RuleB(Custom, MulticlassingEnabled) && (rank.id == 12706 || rank.id == 12707)) {
-			if ((e.effect_id == SE_LimitToSkill && e.base_value == 0) || (e.effect_id == SE_SkillDamageAmount && e.limit_value == 0) ) {
+			// Remove the H2H and 1HB damage bonuses
+			if (e.effect_id == SE_SkillDamageAmount && (e.limit_value == EQ::skills::SkillHandtoHand || e.limit_value == EQ::skills::Skill1HBlunt)) {
 				continue;
 			}
-
-			/* Version Cata Likes
-			// Remove the ability to proc off of anything but H2H
-			if ((e.effect_id == SE_LimitToSkill && e.base_value == EQ::skills::Skill1HBlunt) && e.effect_id == SE_SkillDamageAmount && e.limit_value == EQ::skills::Skill1HBlunt) {
-				continue;
-			}
-			// Hack the damage bonus to apply to all skills
-			if (e.effect_id == SE_SkillDamageAmount && e.limit_value == EQ::skills::SkillHandtoHand) {
-				limit_value = -1;
-			}
-			*/
 		}
 
 		// we default to 0 (SE_CurrentHP) for the effect, so if there aren't any base1/2 values, we'll just skip it
