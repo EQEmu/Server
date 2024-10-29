@@ -738,7 +738,7 @@ bool Client::Save(uint8 iCommitNow) {
 	m_petinfomulti.clear();
 
 	auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
-	m_petinfomulti.resize(pets.size()); // Resize m_petinfomulti to match the number of pets
+	m_petinfomulti.empty();
 
 	if (!dead) {
 		for (Mob* mob : pets) {
