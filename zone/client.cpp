@@ -12943,13 +12943,17 @@ bool Client::RemoveExtraClass(int class_id) {
 	CalcBonuses();
 	SendBulkStatsUpdate();
 
+	/*
 	ServerPacket *pack = new ServerPacket(ServerOP_ReloadAAData, 0);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+	*/
 
 	SendAlternateAdvancementTable();
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
+
+	Save();
 
 	return true;
 }
