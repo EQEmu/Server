@@ -5805,7 +5805,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 
 			if (RuleR(Custom, DevastatingFrenzyDamageMultiplier) > 0 &&
 				HasClass(Class::Berserker) &&
-				GetLevel() >= 51 && // Replace this for correct check for Decap AA
+				GetLevel() >= 50 && // Replace this for correct check for Decap AA
 				hit.skill == EQ::skills::SkillFrenzy) {
 
 				int target_hp_ratio = defender->GetHPRatio();
