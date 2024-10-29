@@ -3062,8 +3062,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				new_bonus->CriticalSpellChance += effect_value;
 
-				if (limit_value > new_bonus->SpellCritDmgIncNoStack)
-					new_bonus->SpellCritDmgIncNoStack = limit_value;
+				int new_limit = new_bonus->SpellCritDmgIncNoStack + limit_value;
+
+				if (new_limit > RuleI(Custom, AdditiveSpellCritDmgSoftCap)) {
+					int above_limit = new_limit - RuleI(Custom, AdditiveSpellCritDmgSoftCap);
+					new_bonus->SpellCritDmgIncNoStack = RuleI(Custom, AdditiveSpellCritDmgSoftCap) + static_cast<int>(above_limit * RuleR(Custom, AdditiveSpellCritDmgMultiplier));
+				} else {
+					new_bonus->SpellCritDmgIncNoStack = new_limit;
+				}
+
 				break;
 			}
 
