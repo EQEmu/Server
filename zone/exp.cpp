@@ -663,7 +663,11 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
 
 
-		exp_value /= (tier+1);
+
+		if (tier == 1) {
+			exp_value *= 1.5;
+		}
+
 		LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
 
 		return exp_value;
