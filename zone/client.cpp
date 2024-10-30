@@ -12952,10 +12952,9 @@ bool Client::RemoveExtraClass(int class_id) {
 		DoGuildTributeUpdate();
 	}
 
-	ServerPacket *pack = new ServerPacket(ServerOP_ReloadAAData, 0);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
+	zone->LoadAlternateAdvancement();
 
+	SendClearPlayerAA();
 	SendAlternateAdvancementTable();
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();

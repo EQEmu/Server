@@ -1976,7 +1976,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ReloadAAData:
 	{
 		if (zone && zone->IsLoaded()) {
-			zone->SendReloadMessage("Alternate Advancement Data");
+			//zone->SendReloadMessage("Alternate Advancement Data");
 			zone->LoadAlternateAdvancement();
 			entity_list.SendAlternateAdvancementStats();
 		}
