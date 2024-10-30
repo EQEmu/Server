@@ -567,7 +567,7 @@ void Client::SendZoneInPackets()
 
 	if (IsInAGuild()) {
 		guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
-		//SendGuildMembers();
+		SendGuildMembers();
 		SendGuildURL();
 		SendGuildChannel();
 		SendGuildLFGuildStatus();
@@ -12879,8 +12879,12 @@ bool Client::AddExtraClass(int class_id) {
 			SetBucket("GestaltClasses", std::to_string(classes_bits | n_class_bit));
 			m_pp.classes = classes_bits | n_class_bit;
 			CalcBonuses();
-			SendBulkStatsUpdate();
 			SendAlternateAdvancementTable();
+
+			if (IsInAGuild()) {
+				guild_mgr.SendToWorldMemberLevelUpdate(GuildID(), RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : GetLevel(), std::string(GetCleanName()));
+				DoGuildTributeUpdate();
+			}
 		}
 
 		return true;
@@ -12941,13 +12945,15 @@ bool Client::RemoveExtraClass(int class_id) {
 
 	SetBucket("GestaltClasses", std::to_string(m_pp.classes));
 	CalcBonuses();
-	SendBulkStatsUpdate();
 
-	/*
+	if (IsInAGuild()) {
+		guild_mgr.SendToWorldMemberLevelUpdate(GuildID(), RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : GetLevel(), std::string(GetCleanName()));
+		DoGuildTributeUpdate();
+	}
+
 	ServerPacket *pack = new ServerPacket(ServerOP_ReloadAAData, 0);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-	*/
 
 	SendAlternateAdvancementTable();
 	SendAlternateAdvancementPoints();

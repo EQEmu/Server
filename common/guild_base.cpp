@@ -844,7 +844,7 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg)
 " g.`guild_id`, g.`rank`, g.`tribute_enable`, g.`total_tribute`, g.`last_tribute`," \
 " g.`banker`, g.`public_note`, g.`alt`, g.`online` " \
 " FROM `character_data` AS c LEFT JOIN `guild_members` AS g ON c.`id` = g.`char_id` "
-static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into)
+static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into, uint16 class_bitmask = 0)
 {
 	//fields from `characer_`
 	into.char_id      = Strings::ToUnsignedInt(row[0]);
@@ -872,8 +872,35 @@ static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into)
 	if (into.rank > GUILD_MAX_RANK + 1) {
 		into.rank = GUILD_RANK_NONE;
 	}
+
+	if (class_bitmask) {
+		into.class_ = into.level;
+		into.level  = class_bitmask;
+	}
 }
 
+static uint16 GetClassBitmask(int char_id, Database *db) {
+	uint16 bitmask = 0;
+
+	std::string query 	= fmt::format("select data_buckets.value from data_buckets where data_buckets.character_id = {} and data_buckets.key = 'GestaltClasses' limit 1;", char_id);
+	auto		results = db->QueryDatabase(query);
+
+	if (!results.Success()) {
+		return 0;
+	}
+
+	if (results.RowCount() == 0) {
+		return 0;
+	}
+
+	auto row = results.begin();
+
+	bitmask = Strings::ToUnsignedInt(row[0], 0);
+
+	LogDebug("Got Bitmask: [{}]", bitmask);
+
+	return bitmask;
+}
 
 bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo *> &members)
 {
@@ -888,7 +915,7 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		auto ci = new CharGuildInfo;
-		ProcessGuildMember(row, *ci);
+		ProcessGuildMember(row, *ci, GetClassBitmask(Strings::ToUnsignedInt(row[0]), m_db));
 		members.push_back(ci);
 	}
 
@@ -917,7 +944,7 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into)
 	}
 
 	auto row = results.begin();
-	ProcessGuildMember(row, into);
+	ProcessGuildMember(row, into, GetClassBitmask(Strings::ToUnsignedInt(row[0]), m_db));
 	LogGuilds("Retrieved guild member info for char [{}] from the database", char_name);
 
 	return true;
@@ -937,7 +964,7 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into)
 	}
 
 	auto row = results.begin();
-	ProcessGuildMember(row, into);
+	ProcessGuildMember(row, into, GetClassBitmask(char_id, m_db));
 	LogGuilds("Retrieved guild member info for char [{}]", char_id);
 
 	return true;

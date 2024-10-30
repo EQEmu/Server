@@ -1688,6 +1688,8 @@ void ZoneGuildManager::SendToWorldMemberLevelUpdate(uint32 guild_id, uint32 leve
 
 	worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
+
+	SendToWorldSendGuildMembersList(guild_id);
 }
 
 void ZoneGuildManager::SendToWorldMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note)

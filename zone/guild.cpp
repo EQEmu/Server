@@ -610,7 +610,7 @@ void Client::SendGuildMemberLevel(uint32 guild_id, uint32 level, std::string pla
 	auto out    = (GuildMemberLevel_Struct *) outapp->pBuffer;
 
 	out->guild_id = guild_id;
-	out->level    = RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : level;
+	out->level    = level;
 	strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 	QueuePacket(outapp);

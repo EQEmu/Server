@@ -2535,10 +2535,6 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	// Step 8: Re-calc stats
 	CalcBonuses();
 
-	if (RuleB(Custom, ServerAuthStats)) {
-		SendBulkStatsUpdate();
-	}
-
 	ApplyWeaponsStance();
 
 	if (RuleB(Custom, EnablePetBags)) {
