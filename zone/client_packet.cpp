@@ -4934,7 +4934,7 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 					hrs = "Unknown";
 			}
 
-			bool kick = zone->random.Roll(25);
+			bool kick = zone->random.Roll(90);
 
 			std::string message = fmt::format("HACK DETECTED: Character: {} [Account: {}, IP: {}] has been detected using MQ2. (Hook Detection: {} [{}])\n",
 											  GetCleanName(),
@@ -4942,10 +4942,11 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 											  GetIPString(),
 											  hrs,
 											  buf->unk);
-			zone->SendDiscordMessage("admin", message);
+			zone->SendDiscordMessage("guides", message);
 
 			if (kick) {
 				message = fmt::format("Disconnecting [{}]", GetCleanName());
+				zone->SendDiscordMessage("guides", message);
 				LinkDead();
 			}
 		}
