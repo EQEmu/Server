@@ -8151,7 +8151,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 	SetGuildID(new_guild_id);
 	SendGuildList();
-	guild_mgr.MemberAdd(new_guild_id, CharacterID(), GetLevel(), GetClass(), GUILD_LEADER, GetZoneID(), GetName());
+	guild_mgr.MemberAdd(new_guild_id, CharacterID(), RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : GetLevel(), RuleB(Custom, MulticlassingEnabled) ? GetLevel() : GetClass(), GUILD_LEADER, GetZoneID(), GetName());
 	guild_mgr.SendToWorldSendGuildList();
 	SendGuildSpawnAppearance();
 
@@ -8521,7 +8521,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 	guild_mgr.VerifyAndClearInvite(CharacterID(), guild_id, gj->response);
 	c_invitee->SetGuildID(guild_id);
 	c_invitee->SetGuildListDirty(false);
-	guild_mgr.MemberAdd(guild_id, c_invitee->CharacterID(), c_invitee->GetLevel(), c_invitee->GetClass(), response, c_invitee->GetZoneID(), std::string(c_invitee->GetCleanName()));
+	guild_mgr.MemberAdd(guild_id, c_invitee->CharacterID(), RuleB(Custom, MulticlassingEnabled) ? c_invitee->GetClassesBits() : c_invitee->GetLevel(), RuleB(Custom, MulticlassingEnabled) ? c_invitee->GetLevel() : c_invitee->GetClass(), response, c_invitee->GetZoneID(), std::string(c_invitee->GetCleanName()));
 	SendGuildSpawnAppearance();
 
 	LogGuilds("Adding [{}] ([{}]) to guild [{}] ([{}]) at rank [{}]",

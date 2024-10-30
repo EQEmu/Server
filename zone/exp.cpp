@@ -1337,7 +1337,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	}
 
 	if (IsInAGuild()) {
-		guild_mgr.SendToWorldMemberLevelUpdate(GuildID(), GetLevel(), std::string(GetCleanName()));
+		guild_mgr.SendToWorldMemberLevelUpdate(GuildID(), RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : GetLevel(), std::string(GetCleanName()));
 		DoGuildTributeUpdate();
 	}
 
