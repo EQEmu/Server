@@ -896,7 +896,7 @@ EQ::ItemInstance* EQ::ItemInstance::GetMaxUpgrade(SharedDatabase &database) {
 
         if (next_item) {
             if (current_item != this) {
-                delete current_item;
+                safe_delete(current_item);
             }
             current_item = next_item;
         } else {

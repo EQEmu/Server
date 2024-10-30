@@ -499,6 +499,20 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 	add_exp = GetEXP() + add_exp;
 }
 
+int Client::GetItemTier(EQ::ItemData* item) {
+	if (item->ID <= 1000000) {
+		return 0;
+	}
+	else if (item->ID <= 2000000) {
+		return 1;
+	}
+	else if (item->ID <= 3000000) {
+		return 2;
+	}
+	
+	return 0;
+};
+
 bool Client::ConsumeItemOnCursor() {
 	auto pow_item = m_inv.GetItem(EQ::invslot::slotPowerSource);
 	auto cur_item = m_inv.GetCursorItem();
@@ -516,13 +530,6 @@ bool Client::ConsumeItemOnCursor() {
 		Message(Chat::SpellFailure, "You may not consume items which have already absorbed energy in this way.");
 		return false;
 	}
-
-	auto GetItemTier = [](EQ::ItemData* item) -> int {
-		if (item->ID <= 1000000) { return 0; }
-		else if (item->ID <= 2000000) { return 1; }
-		else if (item->ID <= 3000000) { return 2; }
-		else return 0;
-	};
 
 	int pow_item_tier = GetItemTier(pow_item->GetItem());
 	int cur_item_tier = GetItemTier(cur_item->GetItem());
@@ -568,110 +575,108 @@ bool Client::ConsumeItemOnCursor() {
 	return false;
 }
 
+void Client::EjectItemFromSlot(int16 slot_id) {
+	const EQ::ItemInstance* pop_item = m_inv.PopItem(slot_id);
+	if (pop_item) {
+		database.SaveInventory(CharacterID(), NULL, slot_id);
+		DeleteItemInInventory(slot_id, 0, true, true);
+		PushItemOnCursor(*pop_item, true);
+	}
+}
+
+bool Client::GetItemStatValue(EQ::ItemData* item) {
+	if (item) {
+		float return_value = 0.0f;
+
+		if (item->ID % 1000000 == 150000) {
+			return 5.0f;
+		}
+
+		return_value += item->HP / 10.0f;
+		return_value += item->Mana / 10.0f;
+
+		return_value += item->AStr;
+		return_value += item->ASta;
+		return_value += item->ADex;
+		return_value += item->AAgi;
+		return_value += item->AInt;
+		return_value += item->AWis;
+
+		return_value += item->MR;
+		return_value += item->FR;
+		return_value += item->CR;
+		return_value += item->DR;
+		return_value += item->PR;
+
+		return_value += 2 * item->HeroicStr;
+		return_value += 2 * item->HeroicSta;
+		return_value += 2 * item->HeroicAgi;
+		return_value += 2 * item->HeroicDex;
+		return_value += 2 * item->HeroicWis;
+		return_value += 2 * item->HeroicInt;
+		return_value += 2 * item->HeroicCha;
+
+		return_value += 2 * item->HeroicMR;
+		return_value += 2 * item->HeroicFR;
+		return_value += 2 * item->HeroicCR;
+		return_value += 2 * item->HeroicDR;
+		return_value += 2 * item->HeroicPR;
+
+		return_value += 2 * item->HealAmt;
+		return_value += 2 * item->SpellDmg;
+
+		if (item->Click.Effect > 0) return_value += 25;
+		if (item->Worn.Effect > 0)  return_value += 25;
+		if (item->Focus.Effect > 0) return_value += 25;
+
+		return std::max(1.0f, (return_value));
+	}
+}
+
+float Client::GetBaseExpValueForKill(int conlevel, int tier, EQ::ItemInstance* upgrade_item) {
+	float exp_value = 0.0f;
+	float norm_val = GetItemStatValue(upgrade_item->GetItem());
+
+	switch (conlevel) {
+	case ConsiderColor::Green:
+		exp_value = 1.0f;
+		break;
+	case ConsiderColor::LightBlue:
+		exp_value = 5.0f;
+		break;
+	case ConsiderColor::DarkBlue:
+		exp_value = 7.5f;
+		break;
+	case ConsiderColor::White:
+		exp_value = 10.0f;
+		break;
+	case ConsiderColor::Yellow:
+		exp_value = 15.0f;
+		break;
+	case ConsiderColor::Red:
+		exp_value = 25.0f;
+		break;
+	}
+
+	exp_value = exp_value / (norm_val * 0.75f);
+
+	exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
+	exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
+
+	if (tier == 1) {
+		exp_value *= 1.5;
+	}
+
+	LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
+
+	return exp_value;
+}
+
 bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	if (!item || conlevel == 0xFF) {
 		LogError("Attempted to add experience to an invalid item, or from an invalid source.");
-        return false;
-    }
-
-	auto EjectItem = [&](int16 slot_id) {
-		const EQ::ItemInstance* pop_item = m_inv.PopItem(slot_id);
-		if (pop_item) {
-			database.SaveInventory(CharacterID(), NULL, slot_id);
-			DeleteItemInInventory(slot_id, 0, true, true);
-			PushItemOnCursor(*pop_item, true);
-		}
-	};
-
-	auto GetItemStatValue = [](EQ::ItemData* item) -> float {
-		if (item) {
-			float return_value = 0.0f;
-
-			if (item->ID % 1000000 == 150000) {
-				return 5.0f;
-			}
-
-			return_value += item->HP   / 10.0f;
-			return_value += item->Mana / 10.0f;
-
-			return_value += item->AStr;
-			return_value += item->ASta;
-			return_value += item->ADex;
-			return_value += item->AAgi;
-			return_value += item->AInt;
-			return_value += item->AWis;
-
-			return_value += item->MR;
-			return_value += item->FR;
-			return_value += item->CR;
-			return_value += item->DR;
-			return_value += item->PR;
-
-			return_value += 2 * item->HeroicStr;
-			return_value += 2 * item->HeroicSta;
-			return_value += 2 * item->HeroicAgi;
-			return_value += 2 * item->HeroicDex;
-			return_value += 2 * item->HeroicWis;
-			return_value += 2 * item->HeroicInt;
-			return_value += 2 * item->HeroicCha;
-
-			return_value += 2 * item->HeroicMR;
-			return_value += 2 * item->HeroicFR;
-			return_value += 2 * item->HeroicCR;
-			return_value += 2 * item->HeroicDR;
-			return_value += 2 * item->HeroicPR;
-
-			return_value += 2 * item->HealAmt;
-			return_value += 2 * item->SpellDmg;
-
-			if (item->Click.Effect > 0) return_value += 25;
-			if (item->Worn.Effect > 0)  return_value += 25;
-			if (item->Focus.Effect > 0) return_value += 25;
-
-			return std::max(1.0f, (return_value));
-		}
-	};
-
-	auto GetBaseExpValueForKill = [&](int conlevel, int tier, EQ::ItemInstance* upgrade_item) -> float {
-		float exp_value = 0.0f;
-		float norm_val = GetItemStatValue(upgrade_item->GetItem());
-
-		switch (conlevel) {
-			case ConsiderColor::Green:
-				exp_value = 1.0f;
-				break;
-			case ConsiderColor::LightBlue:
-				exp_value = 5.0f;
-				break;
-			case ConsiderColor::DarkBlue:
-				exp_value = 7.5f;
-				break;
-			case ConsiderColor::White:
-				exp_value = 10.0f;
-				break;
-			case ConsiderColor::Yellow:
-				exp_value = 15.0f;
-				break;
-			case ConsiderColor::Red:
-				exp_value = 25.0f;
-				break;
-		}
-
-		exp_value = exp_value / (norm_val * 0.75f);
-
-		exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
-		exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
-
-
-
-		if (tier == 1) {
-			exp_value *= 1.5;
-		}
-
-		LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
-
-		return exp_value;
-	};
+		return false;
+	}
 
 	EQ::ItemInstance* upgrade_item = item->GetUpgrade(database);
 	if (!upgrade_item) {
@@ -680,13 +685,15 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		linker.SetItemInst(item);
 		Message(Chat::Experience, "Your [%s] is fully upgraded.", linker.GenerateLink().c_str());
 
-		EjectItem(EQ::invslot::slotPowerSource);
+		EjectItemFromSlot(EQ::invslot::slotPowerSource);
 		return false;
 	}
 
 	int   item_tier 		  = item->GetID() / 1000000;
+	EQ::ItemInstance* max_upgrade_item = item->GetMaxUpgrade(database);
 	float cur_item_experience = Strings::ToFloat(item->GetCustomData("Exp"), 0);
-	float new_item_experience = GetBaseExpValueForKill(conlevel, static_cast<int>(upgrade_item->GetID() / 1000000), item->GetMaxUpgrade(database));
+	float new_item_experience = GetBaseExpValueForKill(conlevel, static_cast<int>(upgrade_item->GetID() / 1000000), max_upgrade_item);
+	safe_delete(max_upgrade_item);
 	float new_percentage 	  = std::min(100.0f, cur_item_experience + new_item_experience);
 
 	EQ::SayLinkEngine linker;
@@ -778,8 +785,18 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, upgrade_item->GetItem()->ID);
 			}
 		}
+		else
+		{
+			//This item wasn't added to the inventory. Delete it.
+			safe_delete(upgrade_item);
+		}
 
 		safe_delete(item);
+	}
+	else
+	{
+		//We didn't end up using this item. Delete it.
+		safe_delete(upgrade_item);
 	}
 
 	EQ::ItemInstance* final_item = m_inv.GetItem(EQ::invslot::slotPowerSource);
@@ -795,7 +812,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		database.UpdateInventorySlot(CharacterID(), final_item, EQ::invslot::slotPowerSource);
 
 		if (final_item->GetID() > 2000000) {
-			EjectItem(EQ::invslot::slotPowerSource);
+			EjectItemFromSlot(EQ::invslot::slotPowerSource);
 		}
 	}
 

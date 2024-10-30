@@ -716,9 +716,14 @@ public:
 	void SetEbonCrystals(uint32 value);
 	void SendCrystalCounts();
 
+	bool GetItemStatValue(EQ::ItemData* item);
+
+	float GetBaseExpValueForKill(int conlevel, int tier, EQ::ItemInstance* upgrade_item);
+
 	bool AddItemExperience(EQ::ItemInstance* item, int conlevel);
 
 	bool ConsumeItemOnCursor();
+	void EjectItemFromSlot(int16 slot_id);
 	uint64 GetExperienceForKill(Mob *against);
 	void AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	uint64 CalcEXP(uint8 conlevel = 0xFF, bool ignore_mods = false);
@@ -726,6 +731,7 @@ public:
 	void CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
 	void CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel);
 	void CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, uint8 conlevel, bool resexp);
+	inline int GetItemTier(EQ::ItemData* item);
 	void SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool resexp = false);
 	void AddLevelBasedExp(ExpSource exp_source, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false);
 	void SetLeadershipEXP(uint64 group_exp, uint64 raid_exp);
