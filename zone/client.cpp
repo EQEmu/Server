@@ -12959,6 +12959,10 @@ bool Client::RemoveExtraClass(int class_id) {
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
 
+	SaveSpells();
+	SaveDisciplines();
+	SaveAA();
+	SaveCurrency();
 	Save();
 
 	return true;

@@ -2051,12 +2051,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 	if(IsIllusionSpell(spell_id)
 		&& spell_target != nullptr
-		&& (!spell_target->IsNPC() || spell_target->IsPet())
+		&& (!spell_target->IsNPC() || spell_target->HasOwner())
 		&& IsClient()
 		&& (spell_target->GetID() == GetID() || grouped_target || raid_group_target || is_my_pet)
 		&& (HasProjectIllusion())) {
 			LogAA("Project Illusion overwrote target caster: [{}] spell id: [{}] was ON", GetName(), spell_id);
-			targetType = ST_GroupClientAndPet;
+			targetType = ST_Target;
 	}
 
 	// NPC innate procs override the target type to single target.
@@ -2409,7 +2409,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 							}
 						}
 					}
-					else if(spell_target->IsPet())
+					else if(spell_target->HasOwner())
 					{
 						Mob *owner = spell_target->GetOwner();
 						if(owner->IsGrouped())
