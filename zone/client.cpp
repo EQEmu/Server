@@ -537,8 +537,9 @@ void Client::SendZoneInPackets()
 	}
 
 	//Send AA Exp packet:
-	if (GetLevel() >= 51)
+	if (GetLevel() >= 51 || RuleB(Custom, MulticlassingEnabled)) {
 		SendAlternateAdvancementStats();
+	}
 
 	// Send exp packets
 	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
