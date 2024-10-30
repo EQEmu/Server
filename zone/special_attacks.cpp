@@ -1120,7 +1120,7 @@ bool Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	}
 
 	if (!IsAttackAllowed(other) ||
-		IsCasting() ||
+		(IsCasting() && !IsBardSong(casting_spell_id)) ||
 		IsSitting() ||
 		(DivineAura() && !GetGM()) ||
 		IsStunned() ||
@@ -1154,7 +1154,7 @@ bool Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		LogCombat("Endless Quiver prevented Ammo Consumption.");
 	}
 
-	
+
 	if (IsClient()) {
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillArchery, GetTarget(), -15);
 		// increase offense during archery
@@ -1750,7 +1750,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	}
 
 	if(!IsAttackAllowed(other) ||
-		(IsCasting() && GetClass() != Class::Bard) ||
+		(IsCasting() && !IsBardSong(casting_spell_id)) ||
 		IsSitting() ||
 		(DivineAura() && !GetGM()) ||
 		IsStunned() ||
@@ -1901,7 +1901,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 
 	if (IsClient()) {
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillThrowing, GetTarget());
-		
+
 		// increase offense during throwing
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillOffense, GetTarget(), -15);
 	}
