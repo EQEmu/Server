@@ -69,6 +69,7 @@ public:
 	void	GetMemberList(std::list<Mob*>& member_list, bool clear_list = true);
 	void	GetClientList(std::list<Client*>& client_list, bool clear_list = true);
 	void	GetBotList(std::list<Bot*>& bot_list, bool clear_list = true);
+	void	GetRawBotList(std::list<uint32>& bot_list, bool clear_list = true);
 	bool	IsGroupMember(Mob* c);
 	bool	IsGroupMember(const char* name);
 	bool	Process();
@@ -153,6 +154,7 @@ public:
 	void	AddToGroup(AddToGroupRequest r);
 	void	AddToGroup(Mob* m);
 	static void	RemoveFromGroup(Mob* m);
+	void RemoveClientsBots(Client* c);
 
 	void SetGroupMentor(int percent, char *name);
 	void ClearGroupMentor();

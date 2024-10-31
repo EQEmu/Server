@@ -836,7 +836,7 @@ RULE_INT(Bots, PullSpellID, 5225, "Default 5225 - Throw Stone. Spell that will b
 RULE_BOOL(Bots, AllowBotEquipAnyClassGear, false, "Allows Bots to wear Equipment even if their class is not valid")
 RULE_BOOL(Bots, BotArcheryConsumesAmmo, true, "Set to false to disable Archery Ammo Consumption")
 RULE_BOOL(Bots, BotThrowingConsumesAmmo, true, "Set to false to disable Throwing Ammo Consumption")
-RULE_INT(Bots, StackSizeMin, 100, "100 Default. -1 to disable and use default max stack size. Minimum stack size to give a bot (Arrows/Throwing).")
+RULE_INT(Bots, StackSizeMin, 20, "20 Default. -1 to disable and use default max stack size. Minimum stack size to give a bot (Arrows/Throwing).")
 RULE_INT(Bots, HasOrMayGetAggroThreshold, 90, "90 Default. Percent threshold of total hate where bots will stop casting spells that generate hate if they are set to try to not pull aggro via spells.")
 RULE_BOOL(Bots, UseFlatNormalMeleeRange, false, "False Default. If true, bots melee distance will be a flat distance set by Bots:NormalMeleeRangeDistance.")
 RULE_REAL(Bots, NormalMeleeRangeDistance, 0.75, "Multiplier of the max melee range at which a bot will stand in melee combat. 0.75 Recommended, max melee for all abilities to land.")
@@ -871,6 +871,8 @@ RULE_INT(Bots, StatusSpawnLimit, 120, "Minimum status to bypass spawn limit. Def
 RULE_INT(Bots, MinStatusToBypassCreateLimit, 100, "Minimum status to bypass the anti-spam system")
 RULE_INT(Bots, StatusCreateLimit, 120, "Minimum status to bypass spawn limit. Default 120.")
 RULE_BOOL(Bots, BardsAnnounceCasts, false, "This determines whether or not Bard bots will announce that they're casting songs (Buffs, Heals, Nukes, Slows, etc.) they will always announce Mez.")
+RULE_BOOL(Bots, EnableBotTGB, true, "If enabled bots will cast group buffs as TGB.")
+RULE_BOOL(Bots, DoResponseAnimations, true, "If enabled bots will do animations to certain responses or commands.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)

@@ -179,7 +179,9 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 					).c_str()
 				);
 
-				bot_iter->DoAnim(29);
+				if (RuleB(Bots, DoResponseAnimations)) {
+					bot_iter->DoAnim(29);
+				}
 			}
 			else if (!equipped_item) {
 				c->Message(
@@ -204,7 +206,9 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 					).c_str()
 				);
 
-				bot_iter->DoAnim(29);
+				if (RuleB(Bots, DoResponseAnimations)) {
+					bot_iter->DoAnim(29);
+				}
 			}
 		}
 	}

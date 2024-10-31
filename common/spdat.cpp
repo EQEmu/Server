@@ -2782,15 +2782,16 @@ int8 SpellEffectsCount(uint16 spell_id) {
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}
-	int8 i = 0;
+
+	int8 x = 0;
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (!IsBlankSpellEffect(spell_id, i)) {
-			++i;
+			++x;
 		}
 	}
 
-	return i;
+	return x;
 }
 
 bool IsLichSpell(uint16 spell_id)
@@ -3171,6 +3172,75 @@ bool RequiresStackCheck(uint16 spellType) {
 			return false;
 		default:
 			return true;
+	}
+
+	return true;
+}
+
+bool IsResistanceOnlySpell(uint16 spell_id) {
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	const auto& spell = spells[spell_id];
+
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (IsBlankSpellEffect(spell_id, i)) {
+			continue;
+		}
+
+		if (
+			spell.effect_id[i] == SE_ResistFire ||
+			spell.effect_id[i] == SE_ResistCold ||
+			spell.effect_id[i] == SE_ResistPoison ||
+			spell.effect_id[i] == SE_ResistDisease ||
+			spell.effect_id[i] == SE_ResistMagic ||
+			spell.effect_id[i] == SE_ResistCorruption ||
+			spell.effect_id[i] == SE_ResistAll
+		) {
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+bool IsDamageShieldOnlySpell(uint16 spell_id) {
+	if (SpellEffectsCount(spell_id) == 1 && IsEffectInSpell(spell_id, SE_DamageShield)) {
+		return true;
+	}
+
+	return false;
+}
+
+bool IsDamageShieldAndResistanceSpellOnly(uint16 spell_id) {
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	const auto& spell = spells[spell_id];
+
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (IsBlankSpellEffect(spell_id, i)) {
+			continue;
+		}
+
+		if (
+			spell.effect_id[i] == SE_DamageShield ||
+			spell.effect_id[i] == SE_ResistFire ||
+			spell.effect_id[i] == SE_ResistCold ||
+			spell.effect_id[i] == SE_ResistPoison ||
+			spell.effect_id[i] == SE_ResistDisease ||
+			spell.effect_id[i] == SE_ResistMagic ||
+			spell.effect_id[i] == SE_ResistCorruption ||
+			spell.effect_id[i] == SE_ResistAll
+		) {
+			continue;
+		}
+
+		return false;
 	}
 
 	return true;

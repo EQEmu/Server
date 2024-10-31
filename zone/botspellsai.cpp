@@ -995,10 +995,27 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 				}
 
 				if (
+					!RuleB(Bots, EnableBotTGB) &&
+					IsGroupSpell(botSpellList[i].spellid) &&
+					!IsTGBCompatibleSpell(botSpellList[i].spellid) &&
+					!botCaster->IsInGroupOrRaid(tar, true)
+				) {
+					continue;
+				}
+
+				if (
 					(
-						!botCaster->IsCommandedSpell() || (botCaster->IsCommandedSpell() && (spellType != BotSpellTypes::Mez && spellType != BotSpellTypes::AEMez))
+						!botCaster->IsCommandedSpell() || 
+						(
+							botCaster->IsCommandedSpell() && 
+							(spellType != BotSpellTypes::Mez && spellType != BotSpellTypes::AEMez)
+						)
 					)
-					&& (!IsPBAESpell(botSpellList[i].spellid) && !botCaster->CastChecks(botSpellList[i].spellid, tar, spellType, false, IsGroupBotSpellType(spellType))) // TODO bot rewrite - needed for ae spells?
+					&& 
+					(
+						!IsPBAESpell(botSpellList[i].spellid) && 
+						!botCaster->CastChecks(botSpellList[i].spellid, tar, spellType, false, IsAEBotSpellType(spellType))
+					)
 				) {
 					continue;
 				}
@@ -1232,7 +1249,15 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* botCaster, Mob* tar, uint16 spell
 
 	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_CurrentHP);
-		const std::vector<Mob*> v = botCaster->GatherSpellTargets();
+		std::vector<Mob*> v;
+
+		if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
+			v = botCaster->GatherSpellTargets(true);
+		}
+		else {
+			v = botCaster->GatherGroupSpellTargets();
+		}
+
 		int targetCount = 0;
 
 		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
@@ -1273,7 +1298,15 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* botCaster, Mob* tar, uint
 
 	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_HealOverTime);
-		const std::vector<Mob*> v = botCaster->GatherSpellTargets();
+		std::vector<Mob*> v;
+
+		if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
+			v = botCaster->GatherSpellTargets(true);
+		}
+		else {
+			v = botCaster->GatherGroupSpellTargets();
+		}
+
 		int targetCount = 0;
 
 		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
@@ -1314,7 +1347,15 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* botCaster, Mob* tar, uint
 
 	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_CompleteHeal);
-		const std::vector<Mob*> v = botCaster->GatherSpellTargets();
+		std::vector<Mob*> v;
+
+		if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
+			v = botCaster->GatherSpellTargets(true);
+		}
+		else {
+			v = botCaster->GatherGroupSpellTargets();
+		}
+
 		int targetCount = 0;
 
 		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
@@ -1629,7 +1670,7 @@ BotSpell Bot::GetBestBotSpellForNukeByTargetType(Bot* botCaster, SpellTargetType
 					continue;
 				}
 
-				if (!IsPBAESpell(botSpellListItr->SpellId) && !botCaster->CastChecks(botSpellListItr->SpellId, tar, spellType, false, IsGroupBotSpellType(spellType))) {
+				if (!IsPBAESpell(botSpellListItr->SpellId) && !botCaster->CastChecks(botSpellListItr->SpellId, tar, spellType, false, IsAEBotSpellType(spellType))) {
 					continue;
 				}
 
@@ -1679,7 +1720,7 @@ BotSpell Bot::GetBestBotSpellForStunByTargetType(Bot* botCaster, SpellTargetType
 					continue;
 				}
 
-				if (!IsPBAESpell(botSpellListItr->SpellId) && !botCaster->CastChecks(botSpellListItr->SpellId, tar, spellType, false, IsGroupBotSpellType(spellType))) {
+				if (!IsPBAESpell(botSpellListItr->SpellId) && !botCaster->CastChecks(botSpellListItr->SpellId, tar, spellType, false, IsAEBotSpellType(spellType))) {
 					continue;
 				}
 
@@ -2583,19 +2624,27 @@ bool Bot::HasBotSpellEntry(uint16 spellid) {
 	return false;
 }
 
-bool Bot::IsValidSpellRange(uint16 spell_id, Mob const* tar) {
+bool Bot::IsValidSpellRange(uint16 spell_id, Mob* tar) {
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}
 
 	if (tar) {
-		int spellrange = (GetActSpellRange(spell_id, spells[spell_id].range) * GetActSpellRange(spell_id, spells[spell_id].range));
-		if (spellrange >= DistanceSquared(m_Position, tar->GetPosition())) {
+		float range = spells[spell_id].range;
+		
+		if (tar != this) {
+			range += GetRangeDistTargetSizeMod(tar);
+		}
+
+		range = GetActSpellRange(spell_id, range);
+
+		if (range >= Distance(m_Position, tar->GetPosition())) {
 			return true;
 		}
 
-		spellrange = (GetActSpellRange(spell_id, spells[spell_id].aoe_range) * GetActSpellRange(spell_id, spells[spell_id].aoe_range));
-		if (spellrange >= DistanceSquared(m_Position, tar->GetPosition())) {
+		range = GetActSpellRange(spell_id, spells[spell_id].aoe_range);
+
+		if (range >= Distance(m_Position, tar->GetPosition())) {
 			return true;
 		}
 	}

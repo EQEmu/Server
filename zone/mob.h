@@ -774,6 +774,7 @@ public:
 	virtual bool HasGroup() = 0;
 	virtual Raid* GetRaid() = 0;
 	virtual Group* GetGroup() = 0;
+	bool IsInGroupOrRaid(Mob* other, bool sameRaidGroup = false);
 
 	//Faction
 	virtual inline int32 GetPrimaryFaction() const { return 0; }
