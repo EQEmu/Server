@@ -2196,14 +2196,42 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_Group:
 		case ST_GroupNoPets:
 		{
-			if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id) && (slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB))) {
-				if( (!target) ||
-					(target->IsNPC() && !(target->GetOwner() && target->GetOwner()->IsClient())) ||
-					(target->IsCorpse()) )
+			if (
+				IsClient() && CastToClient()->TGB() &&
+				IsTGBCompatibleSpell(spell_id) &&
+				(slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB))
+				) {
+				if (
+					!target ||
+					target->IsCorpse() ||
+					(
+						target->IsNPC() &&
+						!(target->GetOwner() && target->GetOwner()->IsClient())
+						)
+				) {
 					spell_target = this;
-				else
+				}
+				else {
 					spell_target = target;
-			} else {
+				}
+			}
+			else if (
+				IsBot() && RuleB(Bots, EnableBotTGB)  &&
+				IsTGBCompatibleSpell(spell_id) &&
+				(slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB))
+			) {
+				if (
+					!spell_target ||
+					spell_target->IsCorpse() ||
+					(
+						spell_target->IsNPC() && 
+						!(spell_target->GetOwner() && spell_target->GetOwner()->IsOfClientBot())
+					)
+				) {
+					spell_target = this;
+				}
+			}
+			else {
 				spell_target = this;
 			}
 
@@ -2530,8 +2558,14 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 
 	//range check our target, if we have one and it is not us
 	float range = spells[spell_id].range + GetRangeDistTargetSizeMod(spell_target);
-	if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id) && IsGroupSpell(spell_id))
+	if (
+		(
+			(IsClient() && CastToClient()->TGB()) || (IsBot() && RuleB(Bots, EnableBotTGB)
+		) &&
+		IsTGBCompatibleSpell(spell_id) && IsGroupSpell(spell_id))
+	) {
 		range = spells[spell_id].aoe_range;
+	}
 
 	range = GetActSpellRange(spell_id, range);
 	if(IsClient() && IsIllusionSpell(spell_id) && (HasProjectIllusion())){

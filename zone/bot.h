@@ -278,6 +278,7 @@ public:
 	void SetHoldFlag(bool flag = true) { m_hold_flag = flag; }
 	bool GetAttackFlag() const { return m_attack_flag; }
 	void SetAttackFlag(bool flag = true) { m_attack_flag = flag; }
+	bool GetCombatRoundForAlerts() const { return m_combat_round_alert_flag; }
 	bool GetAttackingFlag() const { return m_attacking_flag; }
 	bool GetPullFlag() const { return m_pull_flag; }
 	void SetPullFlag(bool flag = true) { m_pull_flag = flag; }
@@ -403,7 +404,7 @@ public:
 	void SetGuardMode();
 	void SetHoldMode();
 
-	bool IsValidSpellRange(uint16 spell_id, Mob const* tar);
+	bool IsValidSpellRange(uint16 spell_id, Mob* tar);
 
 	// Bot AI Methods
 	void AI_Bot_Init();
@@ -519,7 +520,6 @@ public:
 	void SetHasLoS(bool hasLoS) { _hasLoS = hasLoS; }
 	bool HasLoS() const { return _hasLoS; }
 	
-	bool IsInGroupOrRaid(bool announce = false);
 	void SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, std::string arg2, bool helpPrompt = false);
 
 	std::list<BotSpellTypeOrder> GetSpellTypesPrioritized(uint8 priorityType);
@@ -981,7 +981,7 @@ public:
 	bool CheckDoubleRangedAttack();
 
 	// Public "Refactor" Methods
-	static bool CheckSpawnConditions(Client* c);
+	static bool CheckCampSpawnConditions(Client* c);
 
 	inline bool CommandedDoSpellCast(int32 i, Mob* tar, int32 mana_cost) { return AIDoSpellCast(i, tar, mana_cost); }
 
@@ -1047,6 +1047,7 @@ private:
 	bool m_guard_flag;
 	bool m_hold_flag;
 	bool m_attack_flag;
+	bool m_combat_round_alert_flag;
 	bool m_attacking_flag;
 	bool m_pull_flag;
 	bool m_pulling_flag;
@@ -1104,6 +1105,7 @@ private:
 	int32 GenerateBaseManaPoints();
 	void GenerateSpecialAttacks();
 	void SetBotID(uint32 botID);
+	void SetCombatRoundForAlerts(bool flag = true) { m_combat_round_alert_flag; }
 	void SetAttackingFlag(bool flag = true) { m_attacking_flag = flag; }
 	void SetPullingFlag(bool flag = true) { m_pulling_flag = flag; }
 	void SetReturningFlag(bool flag = true) { m_returning_flag = flag; }

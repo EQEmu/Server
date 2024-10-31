@@ -1722,5 +1722,8 @@ bool IsLichSpell(uint16 spell_id);
 bool IsInstantHealSpell(uint32 spell_id);
 bool IsResurrectSpell(uint16 spell_id);
 bool RequiresStackCheck(uint16 spellType);
+bool IsResistanceOnlySpell(uint16 spell_id);
+bool IsDamageShieldOnlySpell(uint16 spell_id);
+bool IsDamageShieldAndResistanceSpellOnly(uint16 spell_id);
 
 #endif

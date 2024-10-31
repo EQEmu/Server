@@ -20,7 +20,7 @@ void bot_command_mesmerize(Client *c, const Seperator *sep)
 				continue;
 			}
 
-			if (!bot_iter->IsInGroupOrRaid()) {
+			if (!bot_iter->IsInGroupOrRaid(c)) {
 				continue;
 			}
 

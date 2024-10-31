@@ -30,12 +30,19 @@ void bot_command_bot(Client *c, const Seperator *sep)
 
 void bot_command_camp(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_camp", sep->arg[0], "botcamp"))
+	if (helper_command_alias_fail(c, "bot_command_camp", sep->arg[0], "botcamp")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
+
+	if (!Bot::CheckCampSpawnConditions(c)) {
+		return;
+	}
+
 	const int ab_mask = ActionableBots::ABM_Type1;
 
 	std::string class_race_arg = sep->arg[1];
@@ -49,8 +56,14 @@ void bot_command_camp(Client *c, const Seperator *sep)
 		return;
 	}
 
-	for (auto bot_iter : sbl)
+	uint16 campCount;
+
+	for (auto bot_iter : sbl) {
 		bot_iter->Camp();
+		++campCount;
+	}
+
+	c->Message(Chat::White, "%i of your bots have been camped.", campCount);
 }
 
 void bot_command_clone(Client *c, const Seperator *sep)
@@ -425,6 +438,10 @@ void bot_command_delete(Client *c, const Seperator *sep)
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(Chat::White, "usage: <target_bot> %s", sep->arg[0]);
+		return;
+	}
+
+	if (!Bot::CheckCampSpawnConditions(c)) {
 		return;
 	}
 
@@ -829,7 +846,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!Bot::CheckSpawnConditions(c)) {
+	if (!Bot::CheckCampSpawnConditions(c)) {
 		return;
 	}
 

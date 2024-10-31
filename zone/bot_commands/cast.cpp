@@ -174,7 +174,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			if (!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) {
 				c->Message(Chat::Yellow, "[%s] is an invalid target.", tar->GetCleanName());
 				return;
-			}
+			}			
 		}
 	}
 	LogTestDebug("{}: Attempting {} on {}", __LINE__, c->GetSpellTypeNameByID(spellType), (tar ? tar->GetCleanName() : "NOBODY")); //deleteme
@@ -223,7 +223,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	Bot* firstFound = nullptr;
 
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->IsInGroupOrRaid()) {
+		if (!bot_iter->IsInGroupOrRaid(c)) {
 			continue;
 		}
 
@@ -245,6 +245,14 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		}
 
 		if (!newTar) {
+			continue;
+		}
+
+		if (
+			BOT_SPELL_TYPES_BENEFICIAL(spellType) &&
+			!RuleB(Bots, CrossRaidBuffingAndHealing) &&
+			!bot_iter->IsInGroupOrRaid(newTar, true)
+		) {
 			continue;
 		}
 

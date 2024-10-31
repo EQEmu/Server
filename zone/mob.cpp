@@ -6119,18 +6119,17 @@ int32 Mob::GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining, 
 bool Mob::IsTargetedFocusEffect(int focus_type) {
 
 	switch (focus_type) {
-	case focusSpellVulnerability:
-	case focusFcSpellDamagePctIncomingPC:
-	case focusFcDamageAmtIncoming:
-	case focusFcSpellDamageAmtIncomingPC:
-	case focusFcCastSpellOnLand:
-	case focusFcHealAmtIncoming:
-	case focusFcHealPctCritIncoming:
-	case focusFcHealPctIncoming:
-		return true;
-	default:
-		return false;
-
+		case focusSpellVulnerability:
+		case focusFcSpellDamagePctIncomingPC:
+		case focusFcDamageAmtIncoming:
+		case focusFcSpellDamageAmtIncomingPC:
+		case focusFcCastSpellOnLand:
+		case focusFcHealAmtIncoming:
+		case focusFcHealPctCritIncoming:
+		case focusFcHealPctIncoming:
+			return true;
+		default:
+			return false;
 	}
 }
 
@@ -7261,56 +7260,56 @@ void Mob::SlowMitigation(Mob* caster)
 EQ::skills::SkillType Mob::GetSkillByItemType(int ItemType)
 {
 	switch (ItemType) {
-	case EQ::item::ItemType1HSlash:
-		return EQ::skills::Skill1HSlashing;
-	case EQ::item::ItemType2HSlash:
-		return EQ::skills::Skill2HSlashing;
-	case EQ::item::ItemType1HPiercing:
-		return EQ::skills::Skill1HPiercing;
-	case EQ::item::ItemType1HBlunt:
-		return EQ::skills::Skill1HBlunt;
-	case EQ::item::ItemType2HBlunt:
-		return EQ::skills::Skill2HBlunt;
-	case EQ::item::ItemType2HPiercing:
-		if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
+		case EQ::item::ItemType1HSlash:
+			return EQ::skills::Skill1HSlashing;
+		case EQ::item::ItemType2HSlash:
+			return EQ::skills::Skill2HSlashing;
+		case EQ::item::ItemType1HPiercing:
 			return EQ::skills::Skill1HPiercing;
-		else
-			return EQ::skills::Skill2HPiercing;
-	case EQ::item::ItemTypeBow:
-		return EQ::skills::SkillArchery;
-	case EQ::item::ItemTypeLargeThrowing:
-	case EQ::item::ItemTypeSmallThrowing:
-		return EQ::skills::SkillThrowing;
-	case EQ::item::ItemTypeMartial:
-		return EQ::skills::SkillHandtoHand;
-	default:
-		return EQ::skills::SkillHandtoHand;
+		case EQ::item::ItemType1HBlunt:
+			return EQ::skills::Skill1HBlunt;
+		case EQ::item::ItemType2HBlunt:
+			return EQ::skills::Skill2HBlunt;
+		case EQ::item::ItemType2HPiercing:
+			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
+				return EQ::skills::Skill1HPiercing;
+			else
+				return EQ::skills::Skill2HPiercing;
+		case EQ::item::ItemTypeBow:
+			return EQ::skills::SkillArchery;
+		case EQ::item::ItemTypeLargeThrowing:
+		case EQ::item::ItemTypeSmallThrowing:
+			return EQ::skills::SkillThrowing;
+		case EQ::item::ItemTypeMartial:
+			return EQ::skills::SkillHandtoHand;
+		default:
+			return EQ::skills::SkillHandtoHand;
 	}
  }
 
 uint8 Mob::GetItemTypeBySkill(EQ::skills::SkillType skill)
 {
 	switch (skill) {
-	case EQ::skills::SkillThrowing:
-		return EQ::item::ItemTypeSmallThrowing;
-	case EQ::skills::SkillArchery:
-		return EQ::item::ItemTypeArrow;
-	case EQ::skills::Skill1HSlashing:
-		return EQ::item::ItemType1HSlash;
-	case EQ::skills::Skill2HSlashing:
-		return EQ::item::ItemType2HSlash;
-	case EQ::skills::Skill1HPiercing:
-		return EQ::item::ItemType1HPiercing;
-	case EQ::skills::Skill2HPiercing: // watch for undesired client behavior
-		return EQ::item::ItemType2HPiercing;
-	case EQ::skills::Skill1HBlunt:
-		return EQ::item::ItemType1HBlunt;
-	case EQ::skills::Skill2HBlunt:
-		return EQ::item::ItemType2HBlunt;
-	case EQ::skills::SkillHandtoHand:
-		return EQ::item::ItemTypeMartial;
-	default:
-		return EQ::item::ItemTypeMartial;
+		case EQ::skills::SkillThrowing:
+			return EQ::item::ItemTypeSmallThrowing;
+		case EQ::skills::SkillArchery:
+			return EQ::item::ItemTypeArrow;
+		case EQ::skills::Skill1HSlashing:
+			return EQ::item::ItemType1HSlash;
+		case EQ::skills::Skill2HSlashing:
+			return EQ::item::ItemType2HSlash;
+		case EQ::skills::Skill1HPiercing:
+			return EQ::item::ItemType1HPiercing;
+		case EQ::skills::Skill2HPiercing: // watch for undesired client behavior
+			return EQ::item::ItemType2HPiercing;
+		case EQ::skills::Skill1HBlunt:
+			return EQ::item::ItemType1HBlunt;
+		case EQ::skills::Skill2HBlunt:
+			return EQ::item::ItemType2HBlunt;
+		case EQ::skills::SkillHandtoHand:
+			return EQ::item::ItemTypeMartial;
+		default:
+			return EQ::item::ItemTypeMartial;
 	}
  }
 
@@ -7318,7 +7317,6 @@ uint16 Mob::GetWeaponSpeedbyHand(uint16 hand) {
 
 	uint16 weapon_speed = 0;
 	switch (hand) {
-
 		case 13:
 			weapon_speed = attack_timer.GetDuration();
 			break;
@@ -9433,14 +9431,52 @@ void Mob::SetBaseSetting(uint16 baseSetting, int settingValue) {
 }
 
 bool Mob::TargetValidation(Mob* other) {
-	 if (!other || GetAppearance() == eaDead) {
-		 return false; 
-	 }
+	if (!other || GetAppearance() == eaDead) {
+		return false;
+	}
 
-	 return true;
+	return true;
 }
 
-std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
+std::unordered_map<uint16, Mob*>& Mob::GetCloseMobList(float distance)
 {
 	return entity_list.GetCloseMobList(this, distance);
+}
+
+bool Mob::IsInGroupOrRaid(Mob *other, bool sameRaidGroup) {
+	if (!other || !IsOfClientBotMerc() || !other->IsOfClientBotMerc()) {
+		return false;
+	}
+
+	auto* r = GetRaid();
+	auto* rO = other->GetRaid();
+
+	if (r) {
+		if (!rO || r != rO) {
+			return false;
+		}
+
+		auto rG = r->GetGroup(GetCleanName());
+		auto rOG = rO->GetGroup(other->GetCleanName());
+
+		if (rG == RAID_GROUPLESS || rOG == RAID_GROUPLESS || (sameRaidGroup && rG != rOG)) {
+			return false;
+		}
+
+		return true;
+	}
+	else {
+		auto* g = GetGroup();
+		auto* gO = other->GetGroup();
+
+		if (g) {
+			if (!gO || g != gO) {
+				return false;
+			}
+
+			return true;
+		}
+	}
+
+	return false;
 }
