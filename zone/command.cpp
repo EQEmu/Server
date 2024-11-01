@@ -248,7 +248,8 @@ int command_init(void)
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", AccountStatus::GMLeadAdmin, command_zoneshutdown) ||
 		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave) ||
 		command_add("disable_seasonal", "Remove a character from seasonal event.", AccountStatus::Player, command_disable_seasonal) ||
-		command_add("seasoninfo", "Display info about seasonal event", AccountStatus::Player, command_seasoninfo) 	
+		command_add("seasoninfo", "Display info about seasonal event", AccountStatus::Player, command_seasoninfo) ||
+		command_add("tim", "Toggles display of improved NPC models.", AccountStatus::Player, command_toggleimprovedmodels)
 	) {
 		command_deinit();
 		return -1;
@@ -944,3 +945,4 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/zsave.cpp"
 #include "gm_commands/seasonal.cpp"
 #include "gm_commands/soulmark.cpp"
+#include "gm_commands/toggleimprovedmodels.cpp"

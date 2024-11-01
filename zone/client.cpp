@@ -859,27 +859,842 @@ bool Client::SendAllPackets() {
 	return true;
 }
 
+void Client::FixModel(Spawn_Struct* npc) {
+	auto caseInsensitiveFind = [](const std::string& haystack, const std::string& needle) {
+        std::string haystackLower = haystack;
+        std::string needleLower = needle;
+
+        // Convert both strings to lowercase
+        std::transform(haystackLower.begin(), haystackLower.end(), haystackLower.begin(), ::tolower);
+        std::transform(needleLower.begin(), needleLower.end(), needleLower.begin(), ::tolower);
+
+        return haystackLower.find(needleLower) != std::string::npos;
+    };
+
+	int defGolemTextures[] = { 0, 9, 8, 7 };
+	const int defFungusmanTextures[] = { 0, 10, 11, 12, 2, 4, 6, 8 };
+	static const int defaultRatTextures[] = { 0, 3, 4 };
+	float level_size_scale = 1.0f + (npc->level / 50.0f);
+
+	switch (npc->race) {
+		case Race::Human:
+		case Race::Erudite:
+		case Race::Barbarian:
+		case Race::HalfElf:
+		case Race::HighElf:
+		case Race::WoodElf:
+		case Race::DarkElf:
+		case Race::Halfling:
+		case Race::Gnome:
+		case Race::Dwarf:
+		case Race::Troll:
+		case Race::Ogre:
+		case Race::Iksar:
+		case Race::Froglok2:
+			switch (npc->class_) {
+				case Class::Warrior:
+				case Class::Paladin:
+				case Class::ShadowKnight:
+				case Class::WarriorGM:
+				case Class::ShadowKnightGM:
+				case Class::PaladinGM:
+					npc->equip_chest2 = std::max(npc->equip_chest2, static_cast<uint8>(zone->random.Int(2,3)));
+					npc->helm = zone->random.Int(0,1) ? npc->equip_chest2 : 0;
+					break;
+				case Class::Cleric:
+				case Class::Rogue:
+				case Class::Shaman:
+				case Class::Ranger:
+				case Class::Berserker:
+				case Class::ClericGM:
+				case Class::RogueGM:
+				case Class::ShamanGM:
+				case Class::RangerGM:
+				case Class::BerserkerGM:
+					npc->equip_chest2 = std::max(npc->equip_chest2, static_cast<uint8>(zone->random.Int(1,2)));
+					npc->helm = zone->random.Int(0,1) ? npc->equip_chest2 : 0;
+					break;
+				case Class::Beastlord:
+				case Class::BeastlordGM:
+				case Class::Druid:
+				case Class::DruidGM:
+				case Class::Monk:
+				case Class::MonkGM:
+					npc->equip_chest2 = std::max(npc->equip_chest2, static_cast<uint8>(1));
+					npc->helm = zone->random.Int(0,1) ? npc->equip_chest2 : 0;
+					break;
+				case Class::Wizard:
+				case Class::WizardGM:
+				case Class::Magician:
+				case Class::MagicianGM:
+				case Class::Necromancer:
+				case Class::NecromancerGM:
+				case Class::Enchanter:
+				case Class::EnchanterGM:
+					npc->equip_chest2 = std::max(npc->equip_chest2, static_cast<uint8>(zone->random.Int(10,16)));
+					npc->helm = 0;
+					break;
+				default:
+					npc->equip_chest2 = std::max(npc->equip_chest2, static_cast<uint8>(zone->random.Int(0,2)));
+					npc->helm = 0;
+					break;
+			}
+		break;
+
+		case Race::Fayguard:
+			npc->race = Race::WoodElf;
+			if (npc->equip_chest2 == 0 && npc->gender == Gender::Male) {
+				npc->gender = zone->random.Int(0,1);
+				npc->equip_chest2 = zone->random.Int(2,3);
+				npc->helm = npc->equip_chest2;
+			} else {
+				npc->equip_chest2 = zone->random.Int(0,1);
+				npc->helm = 0;
+			}
+			break;
+
+        case Race::GiantRat:
+            npc->race = Race::Rat;
+			switch(npc->equip_chest2) {
+				case 1:
+					npc->equip_chest2 = 2;
+					break;
+				case 2:
+					npc->equip_chest2 = 1;
+					break;
+				case 0:
+				default:
+					npc->equip_chest2 = defaultRatTextures[zone->random.Int(0, 2)];
+					break;
+
+			}
+            npc->size *= level_size_scale;
+            break;
+
+        case Race::GiantBat:
+            npc->race = Race::Bat2;
+            npc->gender = Gender::Neuter;
+            npc->size *= .25;
+            break;
+
+        case Race::GiantSpider:
+            npc->race = Race::Spider;
+            npc->gender = Gender::Neuter;
+            npc->size *= level_size_scale;
+            break;
+
+        case Race::Wolf:
+			if (caseInsensitiveFind(npc->name, "Scaled") || caseInsensitiveFind(npc->name, "Chokidai")) {
+				npc->race = Race::Chokidai;
+			}
+            break;
+
+		case Race::Bear:
+			if (npc->equip_chest2 < 2) {
+				npc->race = Race::Bear2;
+				npc->size *= level_size_scale;
+			}
+			break;
+
+		case Race::QeynosCitizen:
+			npc->race = Race::Human2;
+			if (npc->equip_chest2 == 1 && npc->helm == 1 && npc->class_ != Class::Merchant) {
+				npc->equip_chest2 = 3;
+				npc->helm = 3;
+			} else {
+				int choice = zone->random.Int(0,6);
+				npc->equip_chest2 = 0;
+				switch(choice) {
+					case 0:
+					case 3:
+						npc->helm = 0;
+						break;
+					case 1:
+						npc->helm = 1;
+						break;
+					case 2:
+						npc->helm = 2;
+						break;
+					case 4:
+						npc->helm = 4;
+						break;
+					case 5:
+						npc->helm = 5;
+						break;
+					case 6:
+						npc->helm = npc->gender == Gender::Male ? 6 : 7;
+						break;
+				}
+			}
+			break;
+
+		case Race::Giant:
+			npc->race = Race::Giant3;
+			switch (npc->equip_chest2) {
+				case 0: // Cyclops
+					break;
+				case 1: // Fire Giant
+					npc->equip_chest2 = 0;
+					npc->helm = 0;
+					break;
+				case 2: // Hill Giant
+					npc->equip_chest2 = 1;
+					npc->helm = 1;
+					break;
+				case 3: // Ice Giant
+					npc->equip_chest2 = 2;
+					npc->helm = 2;
+					break;
+				case 4: // Sand Giant
+					break;
+			}
+			break;
+
+		case Race::OggokCitizen:
+			npc->race = Race::Ogre;
+			if (npc->gender == 0 && npc->equip_chest2 == 0) {
+				npc->equip_chest2 = 3;
+			} else {
+				npc->equip_chest2 = 1;
+			}
+			break;
+
+		case Race::Spectre:
+			npc->race = Race::Spectre2;
+			break;
+
+		case Race::Gorgon:
+			npc->race = Race::DemonVulture;
+			break;
+
+		case Race::Denizen:
+			npc->race = Race::Amygdalan;
+			break;
+
+		case Race::Alligator:
+			npc->race = Race::Crocodile;
+			npc->size *= .5;
+			break;
+
+		case Race::GrobbCitizen:
+			npc->race = Race::Troll;
+			if (npc->gender == Gender::Female) {
+				npc->equip_chest2 = 1;
+			} else {
+				if (npc->equip_chest2 = 1) {
+					npc->equip_chest2 = 1;
+				} else {
+					npc->equip_chest2 = 3;
+				}
+			}
+			break;
+
+		case Race::FroglokGhoul:
+			if (npc->equip_chest2 != 0) {
+				npc->race = Race::UndeadFroglok;
+				break;
+			} // fall through
+
+		case Race::Froglok:
+			npc->race = Race::Froglok2;
+			npc->gender = zone->random.Int(0,1) ? Gender::Male : Gender::Female;
+
+			switch(npc->class_) {
+				case Class::Warrior:
+				case Class::ShadowKnight:
+				case Class::Paladin:
+				case Class::Cleric:
+					npc->equip_chest2 = zone->random.Int(1,3);
+					npc->helm = npc->equip_chest2;
+					break;
+				case Class::Wizard:
+				case Class::Magician:
+				case Class::Necromancer:
+				case Class::Enchanter:
+					npc->equip_chest2 = zone->random.Int(10,16);
+					npc->helm = 0;
+					break;
+				case Class::Druid:
+				case Class::Shaman:
+					npc->equip_chest2 = zone->random.Int(2,3);
+					npc->helm = npc->equip_chest2;
+					break;
+				default:
+					npc->equip_chest2 = zone->random.Int(1,3);
+					npc->helm = npc->equip_chest2;
+					break;
+			}
+
+			npc->face = zone->random.Int(0,9);
+			npc->eyecolor1 = zone->random.Int(0,9);
+			npc->eyecolor2 = npc->eyecolor1;
+
+			break;
+
+		case Race::DragonSkeleton:
+			npc->race = Race::Dracolich;
+			npc->size = npc->size * 10;
+			break;
+
+		case Race::Coldain:
+			if (strstr(npc->name, "Dain_Frostreaver_IV") == nullptr) {
+				npc->race = Race::Coldain2;
+			}
+			break;
+
+		case Race::Trakanon:
+			npc->race = Race::Drake2;
+			npc->size = 130;
+			break;
+
+		case Race::CazicThule:
+			npc->race = Race::CazicThule2;
+			break;
+
+		case Race::Sphinx:
+			npc->race = Race::Sphinx2;
+			break;
+
+		case Race::Mammoth:
+			npc->race = Race::Mammoth2;
+			break;
+
+		case Race::Pegasus:
+			npc->race = Race::Pegasus2;
+			break;
+
+		case Race::UndeadIksar:
+			npc->race = Race::IksarSkeleton;
+			break;
+
+		case Race::Gorilla:
+			npc->race = Race::Gorilla2;
+			npc->equip_chest2 = 0;
+			npc->helm = 0;
+			break;
+
+		case Race::Scorpion:
+			npc->race = Race::Scorpion2;
+			break;
+
+		case Race::Burynai:
+			npc->race = Race::Burynai2;
+			npc->equip_chest2 = zone->random.Int(0,4);
+			npc->helm = npc->equip_chest2;
+			break;
+
+		case Race::Centaur:
+			npc->race = Race::Centaur2;
+			if (strstr(npc->name, "_foal") != nullptr) {
+				npc->equip_chest2 = 0;
+				npc->helm = 0;
+			} else {
+				npc->equip_chest2 = zone->random.Int(1, 7);
+				npc->helm = npc->equip_chest2;
+			}
+			break;
+
+		case Race::Griffin:
+			npc->race = Race::Griffin2;
+			break;
+
+		case Race::Lion:
+			npc->race = Race::Puma2;
+			npc->equip_chest2 = 6;
+			npc->helm = npc->gender == Gender::Male ? 7 : 0;
+			npc->gender = Gender::Neuter;
+			break;
+
+		case Race::Gnoll:
+			npc->race = Race::Gnoll2;
+			switch (npc->equip_chest2) {
+				default:
+				case 0:
+					npc->equip_chest2 = zone->random.Int(0,1) == 1 ? 4 : 0;
+					break;
+				case 1:
+					npc->equip_chest2 = 2;
+					break;
+				case 2:
+					npc->equip_chest2 = 3;
+					break;
+				case 3:
+					npc->equip_chest2 = 1;
+					break;
+			}
+			break;
+
+		case Race::Fairy:
+			npc->race = Race::Fairy2;
+			npc->gender = Gender::Neuter;
+			npc->size *= level_size_scale;
+			break;
+
+		case Race::Unicorn:
+			npc->race = Race::Unicorn3;
+			npc->helm = npc->equip_chest2;
+			// This does not map super well. PoG Horses are broken.
+			break;
+
+		case Race::Gargoyle:
+			npc->race = Race::NightmareGargoyle;
+			break;
+
+		case Race::Vampire:
+			npc->race = Race::Vampire3;
+			npc->equip_chest2 = 1;
+			npc->helm = 1;
+			break;
+
+		case Race::Kobold:
+			if (strstr(npc->name, "werebat") == nullptr) {
+				npc->race = Race::Kobold2;
+				npc->equip_chest2 = zone->random.Int(0, 6);
+				npc->helm = zone->random.Int(0, 6);
+			}
+			break;
+
+		case Race::EruditeGhost:
+			npc->race = Race::HumanGhost;
+			break;
+
+		case Race::Imp:
+			npc->race = Race::Fiend;
+			break;
+
+		case Race::Sarnak:
+			npc->race = Race::Sarnak2;
+			break;
+
+		case Race::ForestGiant:
+			npc->race = Race::ForestGiant2;
+			npc->helm = npc->equip_chest2;
+			break;
+
+		case Race::FrostGiant:
+			npc->race = Race::Giant2;
+			npc->equip_chest2 = zone->random.Int(0,2);
+			npc->helm = npc->equip_chest2;
+			break;
+
+		case Race::StormGiant:
+			npc->race = Race::Giant4;
+			npc->equip_chest2 = zone->random.Int(0,2);
+			npc->helm = npc->equip_chest2;
+			npc->size = 25;
+			break;
+
+		case Race::Golem:
+			npc->race = Race::Muddite;
+			npc->gender = Gender::Neuter;
+			switch (npc->equip_chest2) {
+				case 0:
+				default:
+					npc->equip_chest2 = defGolemTextures[zone->random.Int(0, (sizeof(defGolemTextures) / sizeof(defGolemTextures[0])) - 1)];
+					break;
+				case 1:
+					npc->equip_chest2 = 5;
+					break;
+				case 2:
+					npc->equip_chest2 = 1;
+					break;
+				case 3:
+					npc->equip_chest2 = 2;
+					break;
+			}
+			break;
+
+		case Race::IksarCitizen:
+			npc->helm = 0;
+			npc->race = Race::Iksar;
+			if (npc->gender = 2) {
+				npc->gender = zone->random.Int(0,1);
+				npc->equip_chest2 = 2;
+			} else {
+				npc->equip_chest2 = 2;
+			}
+
+			switch (npc->class_) {
+				case Class::Wizard:
+				case Class::Necromancer:
+				case Class::Magician:
+				case Class::Enchanter:
+					npc->equip_chest2 = zone->random.Int(10,16);
+					break;
+				default:
+					npc->equip_chest2 = 2;
+					break;
+			}
+
+			npc->face = zone->random.Int(0,9);
+			npc->eyecolor1 = zone->random.Int(0,9);
+			npc->eyecolor2 = npc->eyecolor1;
+			break;
+
+		case Race::TentacleTerror:
+			npc->race = Race::TentacleTerror2;
+			break;
+
+		case Race::IksarSpirit:
+			npc->race = Race::IksarGhost;
+			npc->gender = Gender::Neuter;
+			break;
+
+		case Race::Kerran:
+			npc->race = Race::Kerran2;
+			break;
+
+		case Race::EruditeCitizen:
+			npc->race = Race::Erudite2;
+			if (npc->gender == 0 && npc->equip_chest2 == 0 && npc->helm == 0) {
+				npc->gender = Gender::Male;
+				npc->equip_chest2 = 4;
+				npc->helm = 4;
+			} else {
+				npc->gender == Gender::Male;
+				npc->equip_chest2 = zone->random.Int(0, 3);
+				npc->helm = zone->random.Int(0, 3);
+			}
+			break;
+
+		case Race::Felguard:
+			npc->race = Race::HighElf;
+			npc->gender = zone->random.Int(0,1);
+			npc->face = zone->random.Int(0,9);
+			npc->eyecolor1 = zone->random.Int(0,9);
+			npc->eyecolor2 = npc->eyecolor1;
+			npc->equip_chest2 = zone->random.Int(2,3);
+			npc->helm = zone->random.Int(0,1) == 1 ? 0 : npc->equip_chest2;
+			break;
+
+		case Race::Fungusman:
+			npc->equip_chest2 = defFungusmanTextures[zone->random.Int(0, (sizeof(defFungusmanTextures) / sizeof(defFungusmanTextures[0])) - 1)];
+			npc->race = Race::Sporali;
+			break;
+
+		case Race::Aviak:
+			npc->race = Race::Aviak2;
+			break;
+
+		case Race::Harpy:
+			npc->race = Race::Harpy2;
+			break;
+
+		case Race::Minotaur:
+			npc->race = Race::Minotaur4;
+			break;
+
+		case Race::Puma:
+			npc->race = Race::Puma2;
+			// I think this maps correctly natively
+			break;
+
+		case Race::Goblin:
+			npc->race = Race::NewGoblin;
+			if (npc->equip_chest2 == 3) {
+				npc->equip_chest2 = 1;
+			}
+			break;
+
+		case Race::Beetle:
+			npc->race = Race::Beetle2;
+			switch (npc->equip_chest2) {
+				case 0:
+				case 1:
+					npc->equip_chest2 = 0;
+					break;
+				case 3:
+					npc->equip_chest2 = 1;
+					break;
+				default:
+					npc->equip_chest2 = 2;
+					break;
+			}
+			npc->size  *= level_size_scale;
+			break;
+
+		case Race::PhinigelAutropos:
+			npc->race = Race::Kedge;
+			break;
+
+		case Race::Scarecrow:
+			npc->race = Race::Scarecrow2;
+			npc->equip_chest2 = zone->random.Int(0,1);
+			npc->helm =  zone->random.Int(0,3);
+			break;
+
+		case Race::Zombie:
+			npc->race = Race::Zombie2;
+			break;
+
+		case Race::Ghoul:
+			npc->race = Race::Ghoul2;
+			break;
+
+		case Race::GiantSnake:
+			npc->race = Race::Snake;
+			npc->size  *= level_size_scale;
+			break;
+
+		case Race::ClockworkGnome:
+			npc->race = Race::Gnomework;
+			npc->gender = Gender::Neuter;
+			npc->equip_chest2 = zone->random.Int(0,3);
+			npc->helm = zone->random.Int(0,3);
+			break;
+
+		case Race::Treant:
+			npc->race = Race::Treant3;
+			switch(zone->GetZoneID()) {
+				case Zones::GFAYDARK:
+				case Zones::LFAYDARK:
+					npc->equip_chest2 		= 2;
+					npc->helm 	= zone->random.Int(0,3);
+					break;
+				case Zones::NORTHKARANA:
+				case Zones::EASTKARANA:
+				case Zones::QEY2HH1:
+				case Zones::SOUTHKARANA:
+				default:
+					npc->equip_chest2 		= 1;
+					npc->helm 	= zone->random.Int(0,3);
+			}
+			npc->size  *= level_size_scale;
+			npc->gender = Gender::Neuter;
+			break;
+
+		case Race::Brownie:
+			npc->race = Race::Brownie2;
+			npc->equip_chest2 = 0;
+			npc->helm = 0;
+			break;
+
+		case Race::Orc: {
+			static const std::vector<std::pair<int, int>> deathfistCasters = { {1, 1}, {1, 4} };
+			static const std::vector<std::pair<int, int>> deathfistElites = { {2, 2} };
+			static const std::vector<std::pair<int, int>> deathfistTrash = { {0, 0}, {0, 3}, {0, 9}, {1, 0}, {1, 3}, {1, 9}, {2, 0}, {2, 9}	};
+			static const std::vector<std::pair<int, int>> crushboneCasters = { {3, 4}, {3, 9}, {4, 4}, {4, 9}, {5, 4}, {5, 6}, {5, 7} };
+			static const std::vector<std::pair<int, int>> crushboneElites = { {3, 0}, {5, 0}, {5, 5} };
+			static const std::vector<std::pair<int, int>> crushboneTrash = { {3, 3}, {4, 0}, {4, 3},  {5, 3}, {5, 9} };
+			static const std::vector<std::pair<int, int>> frostCasters = { {6, 6}, {7, 6}, {7, 7} };
+			static const std::vector<std::pair<int, int>> frostElites = { {7, 5} };
+			static const std::vector<std::pair<int, int>> frostTrash = { {6, 0}, {6, 3}, {7, 0}, {7, 3}, {7, 4}, {7, 9}, {8, 0}, {8, 3}, {8, 8}, {8, 9} };
+
+            bool isCaster = IsCasterClass(npc->class_);
+#if defined(WIN32)
+			bool isElite = (StrStrA(npc->name, "centurion") != nullptr) ||
+				(StrStrA(npc->name, "legionnaire") != nullptr);
+			bool isStandard = StrStrA(npc->name, "pawn") != nullptr;
+#else
+            bool isElite = (strcasestr(npc->name, "centurion") != nullptr) ||
+                           (strcasestr(npc->name, "legionnaire") != nullptr);
+            bool isStandard = strcasestr(npc->name, "pawn") != nullptr;
+#endif
+            const std::vector<std::pair<int, int>>* appearancePool = nullptr;
+            std::vector<std::pair<int, int>> combinedPool;
+
+            if (npc->equip_chest2 == 0) {
+                // Deathfist
+                if (isCaster) {
+                    appearancePool = &deathfistCasters;
+                } else if (isElite) {
+                    appearancePool = &deathfistElites;
+                } else if (isStandard) {
+                    appearancePool = &deathfistTrash;
+                } else {
+                    combinedPool.insert(combinedPool.end(), deathfistCasters.begin(), deathfistCasters.end());
+                    combinedPool.insert(combinedPool.end(), deathfistElites.begin(), deathfistElites.end());
+                    combinedPool.insert(combinedPool.end(), deathfistTrash.begin(), deathfistTrash.end());
+                    appearancePool = &combinedPool;
+                }
+            } else if (npc->equip_chest2 == 1) {
+                // Crushbone
+                if (isCaster) {
+                    appearancePool = &crushboneCasters;
+                } else if (isElite) {
+                    appearancePool = &crushboneElites;
+                } else if (isStandard) {
+                    appearancePool = &crushboneTrash;
+                } else {
+                    combinedPool.insert(combinedPool.end(), crushboneCasters.begin(), crushboneCasters.end());
+                    combinedPool.insert(combinedPool.end(), crushboneElites.begin(), crushboneElites.end());
+                    combinedPool.insert(combinedPool.end(), crushboneTrash.begin(), crushboneTrash.end());
+                    appearancePool = &combinedPool;
+                }
+            } else {
+                // Frost (default)
+                if (isCaster) {
+                    appearancePool = &frostCasters;
+                } else if (isElite) {
+                    appearancePool = &frostElites;
+                } else if (isStandard) {
+                    appearancePool = &frostTrash;
+                } else {
+                    combinedPool.insert(combinedPool.end(), frostCasters.begin(), frostCasters.end());
+                    combinedPool.insert(combinedPool.end(), frostElites.begin(), frostElites.end());
+                    combinedPool.insert(combinedPool.end(), frostTrash.begin(), frostTrash.end());
+                    appearancePool = &combinedPool;
+                }
+            }
+
+            if (appearancePool != nullptr && !appearancePool->empty()) {
+                int randomIndex = zone->random.Int(0, appearancePool->size() - 1);
+                npc->equip_chest2 = (*appearancePool)[randomIndex].first;
+                npc->helm = (*appearancePool)[randomIndex].second;
+				npc->race = Race::Orc2;
+				npc->gender = Gender::Neuter;
+            }
+
+            break;
+        }
+
+		case Race::GelatinousCube:
+			npc->race = Race::GelatinousCube2;
+			break;
+
+		case Race::Ratman:
+			npc->race = Race::Ratman2;
+			npc->equip_chest2 = zone->random.Int(0,2);
+			break;
+
+		case Race::Dervish:
+			if (npc->equip_chest2 != 0) {
+				npc->equip_chest2 = zone->random.Int(0,2);
+				npc->helm = npc->equip_chest2;
+				npc->race = Race::Dervish3;
+			}
+			break;
+
+		case Race::NeriakCitizen:
+			npc->gender = zone->random.Int(0,1);
+			if (npc->equip_chest2 == 0) {
+				npc->race = Race::KnightOfHate;
+			} else {
+				npc->race = Race::ArcanistOfHate;
+			}
+			break;
+
+		case Race::ElfVampire:
+			npc->race = Race::UndeadVampire;
+			break;
+
+		case Race::Bixie:
+			npc->race = Race::Bixie2;
+			npc->equip_chest2 = zone->random.Int(0,2);
+			npc->helm = zone->random.Int(0,2);
+			break;
+
+		case Race::LavaDragon:
+			npc->race = Race::Dragon5;
+			switch(npc->equip_chest2) {
+				case 0:
+					npc->equip_chest2 = 4;
+					break;
+				case 1:
+					npc->equip_chest2 = 0;
+					break;
+				case 2:
+					npc->equip_chest2 = 1;
+					break;
+				case 3:
+					npc->equip_chest2 = 0;
+					break;
+				case 4:
+					npc->equip_chest2 = 5;
+					break;
+				case 5:
+					npc->equip_chest2 = 1;
+					break;
+				case 6:
+					npc->equip_chest2 = 3;
+					break;
+				case 7:
+					npc->equip_chest2 = 2;
+					break;
+			}
+			npc->helm = npc->equip_chest2;
+			npc->size = 100;
+
+		break;
+
+        case Race::Drake:
+            npc->race = Race::Drake3;
+            npc->gender = Gender::Neuter;
+            if (npc->equip_chest2 < 1 || npc->equip_chest2 > 3) {
+                npc->equip_chest2 = 0; // Black Drake
+            }
+            npc->size *= level_size_scale;
+            break;
+
+        case Race::Wurm:
+            npc->race = Race::Wurm2;
+            npc->gender = Gender::Neuter;
+            if (strstr(npc->name, "flame") != nullptr || strstr(npc->name, "fire") != nullptr) {
+                npc->equip_chest2 = 1;
+            } else if (strstr(npc->name, "frost") != nullptr) {
+                npc->equip_chest2 = 3;
+            } else {
+                npc->equip_chest2 = zone->random.Int(0, 5);
+            }
+            break;
+
+        case Race::Wyvern:
+            npc->race = Race::Wyvern2;
+            break;
+
+        case Race::Raptor:
+            npc->race = Race::Raptor2;
+            break;
+
+        default:
+            // Handle other races if necessary
+            break;
+	}
+}
+
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CONN_STATUS required_state, eqFilterType filter) {
 	if (filter != FilterNone && GetFilter(filter) == FilterHide) {
 		return;
 	}
 
+	auto copy = app->Copy();
+
+	if (app->GetOpcode() == OP_NewSpawn && GetBucket("DisableFancyModels").empty()) {
+		NewSpawn_Struct* ns = reinterpret_cast<NewSpawn_Struct*>(copy->pBuffer);
+
+		FixModel(&ns->spawn);
+	}
+
 	if (client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED) {
-		AddPacket(app, ack_req);
+		AddPacket(copy, ack_req);
+		safe_delete(copy);
 		return;
 	}
 
 	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
 		// todo: save packets for later use
-		AddPacket(app, ack_req);
+		AddPacket(copy, ack_req);
 	}
 	else if (eqs) {
-		eqs->QueuePacket(app, ack_req);
+		eqs->QueuePacket(copy, ack_req);
 	}
+	safe_delete(copy);
 }
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
+
+	if ((*app)->GetOpcode() == OP_ZoneSpawns && GetBucket("DisableFancyModels").empty()) {
+		uint32 numSpawns = (*app)->Size() / sizeof(NewSpawn_Struct);
+		NewSpawn_Struct* spawnArray = reinterpret_cast<NewSpawn_Struct*>((*app)->pBuffer);
+
+		for (uint32 i = 0; i < numSpawns; ++i) {
+			NewSpawn_Struct& data = spawnArray[i];
+
+			FixModel(&data.spawn);
+		}
+	}
+
 	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
 		// todo: save packets for later use

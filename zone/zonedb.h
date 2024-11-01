@@ -570,8 +570,6 @@ public:
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
 
-	NPCType* MutateRace(NPCType* npc);
-
 	/*Bots	*/
 	DBbotspells_Struct*	GetBotSpells(uint32 bot_spell_id);
 	void ClearBotSpells() { bot_spells_cache.clear(); bot_spells_loadtried.clear(); }
