@@ -873,6 +873,8 @@ RULE_INT(Bots, StatusCreateLimit, 120, "Minimum status to bypass spawn limit. De
 RULE_BOOL(Bots, BardsAnnounceCasts, false, "This determines whether or not Bard bots will announce that they're casting songs (Buffs, Heals, Nukes, Slows, etc.) they will always announce Mez.")
 RULE_BOOL(Bots, EnableBotTGB, true, "If enabled bots will cast group buffs as TGB.")
 RULE_BOOL(Bots, DoResponseAnimations, true, "If enabled bots will do animations to certain responses or commands.")
+RULE_INT(Bots, DefaultFollowDistance, 20, "Default 20. Distance a bot will follow behind.")
+RULE_INT(Bots, MaxFollowDistance, 300, "Default 300. Max distance a bot can be set to follow behind.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)
