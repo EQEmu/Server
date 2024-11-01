@@ -1105,7 +1105,7 @@ private:
 	int32 GenerateBaseManaPoints();
 	void GenerateSpecialAttacks();
 	void SetBotID(uint32 botID);
-	void SetCombatRoundForAlerts(bool flag = true) { m_combat_round_alert_flag; }
+	void SetCombatRoundForAlerts(bool flag = true) { m_combat_round_alert_flag = flag; }
 	void SetAttackingFlag(bool flag = true) { m_attacking_flag = flag; }
 	void SetPullingFlag(bool flag = true) { m_pulling_flag = flag; }
 	void SetReturningFlag(bool flag = true) { m_returning_flag = flag; }
