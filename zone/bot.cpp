@@ -87,7 +87,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	SetGuardFlag(false);
 	SetHoldFlag(false);
 	SetAttackFlag(false);
-	SetCombatRoundForAlerts(true);
+	SetCombatRoundForAlerts(false);
 	SetAttackingFlag(false);
 	SetPullFlag(false);
 	SetPullingFlag(false);
@@ -211,7 +211,7 @@ Bot::Bot(
 	SetGuardFlag(false);
 	SetHoldFlag(false);
 	SetAttackFlag(false);
-	SetCombatRoundForAlerts(true);
+	SetCombatRoundForAlerts(false);
 	SetAttackingFlag(false);
 	SetPullFlag(false);
 	SetPullingFlag(false);
@@ -2106,7 +2106,6 @@ void Bot::AI_Process()
 // ATTACKING FLAG (HATE VALIDATION)
 
 		if (GetAttackingFlag() && tar->CheckAggro(this)) {
-			SetCombatRoundForAlerts(true);
 			SetAttackingFlag(false);
 		}
 
@@ -2277,7 +2276,7 @@ void Bot::AI_Process()
 	}
 	else { // Out-of-combat behavior
 		SetAttackFlag(false);
-		SetCombatRoundForAlerts(true);
+		SetCombatRoundForAlerts(false);
 		SetAttackingFlag(false);
 		if (!bot_owner->GetBotPulling()) {
 
@@ -2422,7 +2421,6 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 						AddToHateList(hater, 1);
 						SetTarget(hater);
 						SetAttackingFlag();
-						SetCombatRoundForAlerts();
 
 						if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 							GetPet()->AddToHateList(hater, 1);
@@ -2884,7 +2882,7 @@ bool Bot::IsValidTarget(
 		SetTarget(nullptr);
 
 		SetAttackFlag(false);
-		SetCombatRoundForAlerts(true);
+		SetCombatRoundForAlerts(false);
 		SetAttackingFlag(false);
 
 		if (PULLING_BOT) {
@@ -2918,7 +2916,6 @@ Mob* Bot::GetBotTarget(Client* bot_owner)
 
 		WipeHateList();
 		SetAttackFlag(false);
-		SetCombatRoundForAlerts(true);
 		SetAttackingFlag(false);
 
 		if (PULLING_BOT) {
@@ -3137,7 +3134,6 @@ void Bot::SetOwnerTarget(Client* bot_owner) {
 	}
 
 	SetAttackFlag(false);
-	SetCombatRoundForAlerts(true);
 	SetAttackingFlag(false);
 	SetPullFlag(false);
 	SetPullingFlag(false);
@@ -3152,7 +3148,6 @@ void Bot::SetOwnerTarget(Client* bot_owner) {
 			WipeHateList();
 			AddToHateList(attack_target, 1);
 			SetTarget(attack_target);
-			SetCombatRoundForAlerts();
 			SetAttackingFlag();
 			if (GetPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 				GetPet()->WipeHateList();
@@ -3165,7 +3160,7 @@ void Bot::SetOwnerTarget(Client* bot_owner) {
 
 void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 	SetAttackFlag(false);
-	SetCombatRoundForAlerts(true);
+	SetCombatRoundForAlerts(false);
 	SetAttackingFlag(false);
 	SetPullFlag(false);
 	SetPullingFlag(false);
@@ -4915,6 +4910,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 
 	if (!botpiercer || (botpiercer->ItemType != EQ::item::ItemType1HPiercing)) {
 		if (!GetCombatRoundForAlerts()) {
+			SetCombatRoundForAlerts();
 			BotGroupSay(this, "I can't backstab with this weapon!");
 		}
 

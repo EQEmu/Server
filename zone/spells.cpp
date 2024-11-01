@@ -2560,9 +2560,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	float range = spells[spell_id].range + GetRangeDistTargetSizeMod(spell_target);
 	if (
 		(
-			(IsClient() && CastToClient()->TGB()) || (IsBot() && RuleB(Bots, EnableBotTGB)
+			(IsClient() && CastToClient()->TGB()) || (IsBot() && RuleB(Bots, EnableBotTGB))
 		) &&
-		IsTGBCompatibleSpell(spell_id) && IsGroupSpell(spell_id))
+		IsTGBCompatibleSpell(spell_id) && IsGroupSpell(spell_id)
 	) {
 		range = spells[spell_id].aoe_range;
 	}
