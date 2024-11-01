@@ -729,7 +729,7 @@ void Client::AI_Process()
 		}
 	}
 
-	if (RuleB(Combat, EnableFearPathing)) {
+	if (RuleB(Combat, EnableFearPathing) || RuleB(Custom, ForceNPCFearPathing)) {
 		if (currently_fleeing) {
 
 			if (IsRooted()) {
@@ -991,7 +991,7 @@ void Mob::AI_Process() {
 
 	// Begin: Additions for Wiz Fear Code
 	//
-	if (RuleB(Combat, EnableFearPathing)) {
+	if (RuleB(Combat, EnableFearPathing)  || RuleB(Custom, ForceNPCFearPathing)) {
 		if (currently_fleeing) {
 			if ((IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosestEntOnHateList(this)))) && !IsPetStop() &&
 				!IsPetRegroup()) {
