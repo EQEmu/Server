@@ -9,7 +9,7 @@ void bot_command_behind_mob(Client* c, const Seperator* sep)
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		std::vector<std::string> description =
 		{
-			"Toggles whether or not bots will stay behind the mob during combat."
+			"-Toggles whether or not bots will stay behind the mob during combat."
 		};
 
 		std::vector<std::string> notes = { };

@@ -29,7 +29,7 @@ void bot_command_actionable(Client* c, const Seperator* sep)
 		"[spawned] - selects all spawned bots.",
 		"[all] - selects all spawned bots.",
 		"<br>",
-		"You may only select your bots as actionable"
+		"You may only select your own bots."
 	};
 
 	std::vector<std::string> example_format = { };

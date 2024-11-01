@@ -16,8 +16,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 		{
 			"- All pet types are based off the pet's owner's setting",
 			"- Any remaining types use the owner's setting when a pet is the target",
-			"- All Heals, Cures, Buffs (DS and resists included)",
-			"are based off the target's setting, not the caster",
+			"- All Heals, Cures, Buffs (DS and resists included) are based off the target's setting, not the caster",
 			"- e.g., BotA is healing BotB using BotB's settings",
 		};
 

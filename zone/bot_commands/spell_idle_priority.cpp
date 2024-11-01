@@ -14,8 +14,8 @@ void bot_command_spell_idle_priority(Client* c, const Seperator* sep)
 
 		std::vector<std::string> notes =
 		{
-			"-Setting a spell type to 0 will prevent that type from being cast.",
-			"-If 2 or more are set to the same priority they will sort by spell type ID."
+			"- Setting a spell type to 0 will prevent that type from being cast.",
+			"- If 2 or more are set to the same priority they will sort by spell type ID."
 		};
 
 		std::vector<std::string> example_format =
