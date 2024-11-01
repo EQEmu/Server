@@ -118,7 +118,6 @@ void bot_command_follow(Client* c, const Seperator* sep)
 	}
 
 	std::list<Bot*> sbl;
-	//if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg] : nullptr, class_race_check ? atoi(sep->arg[ab_arg]) : 0) == ActionableBots::ABT_None) {
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
