@@ -986,6 +986,7 @@ void Client::FixModel(Spawn_Struct* npc) {
         case Race::Wolf:
 			if (caseInsensitiveFind(npc->name, "Scaled") || caseInsensitiveFind(npc->name, "Chokidai")) {
 				npc->race = Race::Chokidai;
+				npc->gender = Gender::Male;
 			}
             break;
 
