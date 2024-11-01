@@ -466,58 +466,205 @@ void bot_command_delete(Client *c, const Seperator *sep)
 
 void bot_command_follow_distance(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_follow_distance", sep->arg[0], "botfollowdistance"))
-		return;
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [set [1 to %i]] [distance] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0], BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
-		c->Message(Chat::White, "usage: %s [clear] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
+	if (helper_command_alias_fail(c, "bot_command_follow_distance", sep->arg[0], "botfollowdistance")) {
 		return;
 	}
-	const int ab_mask = ActionableBots::ABM_NoFilter;
 
-	uint32 bfd = BOT_FOLLOW_DISTANCE_DEFAULT;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		std::vector<std::string> description =
+		{
+			"Sets or resets the follow distance of the selected bots."
+		};
+
+		std::vector<std::string> notes =
+		{
+			fmt::format(
+				"[Default]: {}",
+				RuleI(Bots, MaxFollowDistance)
+			),
+
+			fmt::format(
+				"- You must use a value between 1 and {}.",
+				RuleI(Bots, MaxFollowDistance)
+			)
+		};
+
+		std::vector<std::string> example_format =
+		{
+			fmt::format(
+				"{} [reset]/[set [value]] [actionable]"
+				, sep->arg[0]
+			)
+		};
+		std::vector<std::string> examples_one =
+		{
+			"To set all bots to follow at a distance of 25:",
+			fmt::format(
+				"{} set 25 spawned",
+				sep->arg[0]
+			)
+		};
+		std::vector<std::string> examples_two =
+		{
+			"To check the curret following distance of all bots:",
+			fmt::format(
+				"{} current spawned",
+				sep->arg[0]
+			)
+		};
+		std::vector<std::string> examples_three =
+		{
+			"To reset the following distance of all Wizards:",
+			fmt::format(
+				"{} reset byclass {}",
+				sep->arg[0],
+				Class::Wizard
+			)
+		};
+
+		std::vector<std::string> actionables =
+		{
+			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
+		};
+
+		std::vector<std::string> options = { };
+		std::vector<std::string> options_one = { };
+		std::vector<std::string> options_two = { };
+		std::vector<std::string> options_three = { };
+
+		std::string popup_text = c->SendCommandHelpWindow(
+			c,
+			description,
+			notes,
+			example_format,
+			examples_one, examples_two, examples_three,
+			actionables,
+			options,
+			options_one, options_two, options_three
+		);
+
+		popup_text = DialogueWindow::Table(popup_text);
+
+		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+
+		return;
+	}
+
+	const int ab_mask = ActionableBots::ABM_Type2;
+	
+	uint32 bfd = RuleI(Bots, DefaultFollowDistance);
 	bool set_flag = false;
+	bool currentCheck = false;
 	int ab_arg = 2;
 
-	if (!strcasecmp(sep->arg[1], "set")) {
+	std::string arg1 = sep->arg[1];
+
+	if (!arg1.compare("set")) {
 		if (!sep->IsNumber(2)) {
-			c->Message(Chat::White, "A numeric [distance] is required to use this command. [1 to %i]", BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
+			c->Message(Chat::Yellow, "You must enter a value between 1 and %i.", RuleI(Bots, MaxFollowDistance));
+
 			return;
 		}
 
 		bfd = Strings::ToInt(sep->arg[2]);
-		if (bfd < 1)
-			bfd = 1;
-		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
-			bfd = BOT_FOLLOW_DISTANCE_DEFAULT_MAX;
+
+		if (bfd < 1) {
+			c->Message(Chat::Yellow, "You must enter a value between 1 and %i.", RuleI(Bots, MaxFollowDistance));
+
+			return;
+		}
+
+		if (bfd > RuleI(Bots, MaxFollowDistance)) {
+			c->Message(Chat::Yellow, "You must enter a value between 1 and %i.", RuleI(Bots, MaxFollowDistance));
+
+			return;
+		}
+
 		set_flag = true;
-		ab_arg = 3;
+		++ab_arg;
 	}
-	else if (strcasecmp(sep->arg[1], "clear")) {
-		c->Message(Chat::White, "This command requires a [set | clear] argument");
+	else if (!arg1.compare("current")) {
+		currentCheck = true;
+	}
+	else if (arg1.compare("reset")) {
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Incorrect argument, use {} for information regarding this command.",
+				Saylink::Silent(
+					fmt::format("{} help", sep->arg[0])
+				)
+			).c_str()
+		);
+
 		return;
+	}
+
+	std::string class_race_arg = sep->arg[ab_arg];
+	bool class_race_check = false;
+	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
+		class_race_check = true;
 	}
 
 	std::list<Bot*> sbl;
-	auto ab_type = ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[(ab_arg + 1)]);
-	if (ab_type == ActionableBots::ABT_None)
+
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
-
-	int bot_count = 0;
-	for (auto bot_iter : sbl) {
-		if (!bot_iter)
-			continue;
-
-		bot_iter->SetFollowDistance(bfd);
-
-		++bot_count;
 	}
 
-	if (ab_type == ActionableBots::ABT_All) {
-		c->Message(Chat::White, "%s all of your bot follow distances to %i", set_flag ? "Set" : "Cleared", bfd);
+	sbl.remove(nullptr);
+
+	int botCount = 0;
+	for (auto bot_iter : sbl) {
+		if (!bot_iter) {
+			continue;
+		}
+
+		if (currentCheck) {
+			Mob* follow_mob = entity_list.GetMob(bot_iter->GetFollowID());
+
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} says, 'I am currently following {} at a distance of {}.'",
+					bot_iter->GetCleanName(),
+					follow_mob ? follow_mob->GetCleanName() : "no one",
+					sqrt(bot_iter->GetFollowDistance())
+				).c_str()
+			);
+		}
+		else {
+			bot_iter->SetFollowDistance(bfd * bfd);
+			++botCount;
+		}
+	}
+
+	if (currentCheck) {
+		return;
+	}
+
+	if (botCount == 1) {
+		Mob* follow_mob = entity_list.GetMob(sbl.front()->GetFollowID());
+
+		c->Message(
+			Chat::Green,
+			fmt::format(
+				"{} says, 'Following {} at a distance of {}.'",
+				sbl.front()->GetCleanName(),
+				follow_mob ? follow_mob->GetCleanName() : "you",
+				bfd
+			).c_str()
+		);
 	}
 	else {
-		c->Message(Chat::White, "%s %i of your spawned bot follow distances to %i", (set_flag ? "Set" : "Cleared"), bot_count, bfd);
+		c->Message(
+			Chat::Green,
+			fmt::format(
+				"{} of your bots are now following at a distance of {}.",
+				botCount,
+				bfd
+			).c_str()
+		);
 	}
 }
 

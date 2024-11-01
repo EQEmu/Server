@@ -189,7 +189,7 @@ WHERE rv.rule_name LIKE 'Bots:BotExpansionSettings'
 AND bd.expansion_bitmask != rv.rule_value;
 
 INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, 1, 0, `show_helm`, 'BaseSetting', 'ShowHelm' FROM bot_data WHERE `show_helm` != 1;
-INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, 2, 0, `follow_distance`, 'BaseSetting', 'FollowDistance' FROM bot_data WHERE `follow_distance` != 184;
+INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, 2, 0, sqrt(`follow_distance`), 'BaseSetting', 'FollowDistance' FROM bot_data WHERE `follow_distance` != 184;
 
 INSERT INTO bot_settings 
 SELECT NULL, 0, `bot_id`, 3, 0, `stop_melee_level`, 'BaseSetting', 'StopMeleeLevel'
@@ -238,6 +238,7 @@ ALTER TABLE `bot_data`
 
 UPDATE `bot_command_settings` SET `aliases`= 'bh' WHERE `bot_command`='behindmob';
 UPDATE `bot_command_settings` SET `aliases`= 'bs|settings' WHERE `bot_command`='botsettings';
+UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|followdistance') ELSE 'followd||followdistance' END WHERE `bot_command`='botfollowdistance' AND `aliases` NOT LIKE '%followdistance%';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|ranged|toggleranged|btr') ELSE 'ranged|toggleranged|btr' END WHERE `bot_command`='bottoggleranged' AND `aliases` NOT LIKE '%ranged|toggleranged|btr%';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|cr') ELSE 'cr' END WHERE `bot_command`='casterrange' AND `aliases` NOT LIKE '%cr%';
 UPDATE `bot_command_settings` SET `aliases`= 'copy' WHERE `bot_command`='copysettings';

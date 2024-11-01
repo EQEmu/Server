@@ -9904,7 +9904,7 @@ void Bot::SetBotBaseSetting(uint16 botSetting, int settingValue) {
 			SetShowHelm(settingValue);
 			break;
 		case BotBaseSettings::FollowDistance:
-			SetFollowDistance(EQ::Clamp(static_cast<uint32>(settingValue), static_cast<uint32>(1), BOT_FOLLOW_DISTANCE_DEFAULT_MAX));
+			SetFollowDistance(EQ::Clamp(static_cast<uint32>(settingValue * settingValue), static_cast<uint32>(1), static_cast<uint32>((RuleI(Bots, MaxFollowDistance) * RuleI(Bots, MaxFollowDistance)))));
 			break;
 		case BotBaseSettings::StopMeleeLevel:
 			SetStopMeleeLevel(settingValue);
@@ -9953,8 +9953,8 @@ int Bot::GetBotBaseSetting(uint16 botSetting) {
 			//LogBotSettingsDetail("Returning current GetShowHelm of [{}] for [{}]", GetShowHelm(), GetCleanName()); //deleteme
 			return GetShowHelm();
 		case BotBaseSettings::FollowDistance:
-			//LogBotSettingsDetail("Returning current GetFollowDistance of [{}] for [{}]", GetFollowDistance(), GetCleanName()); //deleteme
-			return GetFollowDistance();		
+			//LogBotSettingsDetail("Returning current GetFollowDistance of [{}] for [{}]", sqrt(GetFollowDistance()), GetCleanName()); //deleteme
+			return sqrt(GetFollowDistance());		
 		case BotBaseSettings::StopMeleeLevel:
 			//LogBotSettingsDetail("Returning current GetStopMeleeLevel of [{}] for [{}]", GetStopMeleeLevel(), GetCleanName()); //deleteme
 			return GetStopMeleeLevel();
@@ -10002,7 +10002,7 @@ int Bot::GetDefaultBotBaseSetting(uint16 botSetting) {
 		case BotBaseSettings::ShowHelm:
 			return true;
 		case BotBaseSettings::FollowDistance:
-			return BOT_FOLLOW_DISTANCE_DEFAULT;
+			return (RuleI(Bots, DefaultFollowDistance) * RuleI(Bots, DefaultFollowDistance));
 		case BotBaseSettings::StopMeleeLevel:
 			if (IsCasterClass(GetClass())) {
 				return RuleI(Bots, CasterStopMeleeLevel);
