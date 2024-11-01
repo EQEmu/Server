@@ -1096,6 +1096,7 @@ RULE_INT(Custom, 	MaximumMeleeMitigationEffects, 			75, "Maximum value which SPA
 RULE_INT(Custom,    AdditiveSpellCritDmgSoftCap,			700, "This is a soft cap for the additive spell crit damage multiplier. Additional increases to crit spell damage multiplier after this will be reduced by AdditiveSpellCritDmgMultiplier.")
 RULE_REAL(Custom,   AdditiveSpellCritDmgMultiplier,		    0.5, "The multiplier to apply after the soft cap for additive spell crit damage multiplier. Every point after the soft cap will be multiplied by this.")
 RULE_BOOL(Custom,   ForceNPCFearPathing, 					true, "Forces NPCs to Fear path even if Combat:EnableFearPathing is disabled.")
+RULE_INT(Custom,    EventEOMDropChance,						1,     "Increase this value to make EoM drops during event more rare")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
