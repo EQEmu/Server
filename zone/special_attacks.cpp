@@ -564,6 +564,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	if (ca_atk->m_atk == 100 && ca_atk->m_skill == EQ::skills::SkillFrenzy) {
 		int attack_rounds = 1;
 		int max_dmg       = GetBaseSkillDamage(EQ::skills::SkillFrenzy, GetTarget());
+		int min_dmg       = 0;
 
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 
@@ -605,7 +606,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
 			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
-			max_dmg = max_dmg + weapon_damage;
+			max_dmg = max_dmg + static_cast<int>((3 * weapon_damage) * (GetLevel() / 70.0f));
+			min_dmg = min_dmg + static_cast<int>((3 * weapon_damage) * (GetLevel() / 70.0f));
 		}
 
 		int animType = (GetRace() == Race::Iksar || GetRace() == Race::Human) ? animRoundKick : animHand2Hand;
@@ -629,7 +631,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 		while (attack_rounds > 0) {
 			if (GetTarget()) {
-				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, max_dmg, 0, max_dmg, reuse_time);
+				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, max_dmg, min_dmg, max_dmg, reuse_time);
 			}
 
 			attack_rounds--;
