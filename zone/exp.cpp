@@ -509,7 +509,7 @@ int Client::GetItemTier(EQ::ItemData* item) {
 	else if (item->ID <= 3000000) {
 		return 2;
 	}
-	
+
 	return 0;
 };
 
@@ -595,6 +595,8 @@ bool Client::GetItemStatValue(EQ::ItemData* item) {
 		return_value += item->HP / 10.0f;
 		return_value += item->Mana / 10.0f;
 
+		return_value += item->Damage;
+
 		return_value += item->AStr;
 		return_value += item->ASta;
 		return_value += item->ADex;
@@ -629,6 +631,8 @@ bool Client::GetItemStatValue(EQ::ItemData* item) {
 		if (item->Worn.Effect > 0)  return_value += 25;
 		if (item->Focus.Effect > 0) return_value += 25;
 
+		LogDebug("EXPVAL: [{}]", return_value);
+
 		return std::max(1.0f, (return_value));
 	}
 }
@@ -658,14 +662,10 @@ float Client::GetBaseExpValueForKill(int conlevel, int tier, EQ::ItemInstance* u
 		break;
 	}
 
-	exp_value = exp_value / (norm_val * 0.75f);
+	exp_value = exp_value / norm_val;
 
 	exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
 	exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
-
-	if (tier == 1) {
-		exp_value *= 1.5;
-	}
 
 	LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
 
