@@ -896,7 +896,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	// Check for AA XP Cap
 	int aaexp_cap = RuleI(AA, MaxAAEXPPerKill) * GetConLevelModifierPercent(conlevel) * (GetLevel()/50.0f) * (XPRate / 100.0f);
 
-	if (RuleI(AA, MaxAAEXPPerKill) >= 0 && aaexp > aaexp_cap) {
+	if (exp_source == ExpSource::Kill && RuleI(AA, MaxAAEXPPerKill) >= 0 && aaexp > aaexp_cap) {
 		aaexp = aaexp_cap;
 	}
 
