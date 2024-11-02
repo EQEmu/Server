@@ -3258,8 +3258,10 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	}
 
 	// Too lazy to figure this out correctly
-	if (IsEffectInSpell(spellid1, SE_Charm) && spellid1 == spellid2) {
-		return 1;
+	if (IsEffectInSpell(spellid1, SE_Charm) && IsEffectInSpell(spellid2, SE_Charm)) {
+		if (caster1 && caster2 && caster1 == caster2) {
+			return 1;
+		}
 	}
 
 	if ((RuleB(Custom, BypassProcStackConflicts) || RuleB(Custom, BypassDSStackConflicts) || RuleB(Custom, BypassMulticlassStackConflict))) {
