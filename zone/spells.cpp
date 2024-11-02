@@ -3257,6 +3257,11 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		return 0;
 	}
 
+	// Too lazy to figure this out correctly
+	if (IsEffectInSpell(spellid1, SE_Charm) && spellid1 == spellid2) {
+		return 1;
+	}
+
 	if ((RuleB(Custom, BypassProcStackConflicts) || RuleB(Custom, BypassDSStackConflicts) || RuleB(Custom, BypassMulticlassStackConflict))) {
 		auto checkClassOverlap = [&](int spellid1, int spellid2) -> bool {
 			// Automatically reject if the spell IDs are the same
