@@ -1560,7 +1560,7 @@ void Client::FixModel(Spawn_Struct* npc) {
 			break;
 
 		case Race::NeriakCitizen:
-			if (zone == Zones::HATEPLANEB) {
+			if (zone->GetZoneID() == Zones::HATEPLANEB) {
 				npc->gender = zone->random.Int(0,1);
 				if (npc->equip_chest2 == 0) {
 					npc->race = Race::KnightOfHate;
