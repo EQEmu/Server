@@ -955,6 +955,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	}
 
 	if(!CanUseAlternateAdvancementRank(rank)) {
+		safe_delete(outapp);
 		return;
 	}
 
