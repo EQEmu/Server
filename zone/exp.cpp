@@ -650,7 +650,7 @@ float Client::GetBaseExpValueForKill(int conlevel, int target_tier, EQ::ItemInst
 		exp_value = 1.0f;
 		break;
 	case ConsiderColor::LightBlue:
-		clamp_scale = (RuleI(Character, LightBlueModifer) / 100);
+		clamp_scale = (RuleI(Character, LightBlueModifier) / 100);
 		exp_value = 5.0f;
 		break;
 	case ConsiderColor::DarkBlue:
