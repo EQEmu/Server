@@ -983,13 +983,6 @@ void Client::FixModel(Spawn_Struct* npc) {
             npc->size *= level_size_scale;
             break;
 
-        case Race::Wolf:
-			if (caseInsensitiveFind(npc->name, "Scaled") || caseInsensitiveFind(npc->name, "Chokidai")) {
-				npc->race = Race::Chokidai;
-				npc->gender = Gender::Male;
-			}
-            break;
-
 		case Race::Bear:
 			if (npc->equip_chest2 < 2) {
 				npc->race = Race::Bear2;
@@ -1567,11 +1560,13 @@ void Client::FixModel(Spawn_Struct* npc) {
 			break;
 
 		case Race::NeriakCitizen:
-			npc->gender = zone->random.Int(0,1);
-			if (npc->equip_chest2 == 0) {
-				npc->race = Race::KnightOfHate;
-			} else {
-				npc->race = Race::ArcanistOfHate;
+			if (zone == Zones::HATEPLANEB) {
+				npc->gender = zone->random.Int(0,1);
+				if (npc->equip_chest2 == 0) {
+					npc->race = Race::KnightOfHate;
+				} else {
+					npc->race = Race::ArcanistOfHate;
+				}
 			}
 			break;
 
