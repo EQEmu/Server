@@ -592,7 +592,7 @@ float Client::GetItemStatValue(EQ::ItemData* item) {
 			return 5.0f;
 		}
 
-		return_value += item->HP / 10.0f;
+		return_value += item->HP   / 10.0f;
 		return_value += item->Mana / 10.0f;
 
 		return_value += item->Damage - (item->Delay / 2);
@@ -627,9 +627,9 @@ float Client::GetItemStatValue(EQ::ItemData* item) {
 		return_value += 2 * item->HealAmt;
 		return_value += 2 * item->SpellDmg;
 
-		if (item->Click.Effect > 0) return_value += 25;
-		if (item->Worn.Effect > 0)  return_value += 25;
-		if (item->Focus.Effect > 0) return_value += 25;
+		if (item->Click.Effect > 0) return_value  += 25;
+		if (item->Worn.Effect  > 0)  return_value += 25;
+		if (item->Focus.Effect > 0) return_value  += 25;
 
 		return_value = std::max(1.0f, return_value);
 
@@ -639,43 +639,53 @@ float Client::GetItemStatValue(EQ::ItemData* item) {
 	}
 }
 
-float Client::GetBaseExpValueForKill(int conlevel, int tier, EQ::ItemInstance* upgrade_item) {
-	float exp_value = 0.0f;
-	float norm_val = GetItemStatValue(upgrade_item->GetItem());
-
-	LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
+float Client::GetBaseExpValueForKill(int conlevel, int target_tier, EQ::ItemInstance* upgrade_item) {
+	float exp_value   = 0.0f;
+	float norm_val 	  = GetItemStatValue(upgrade_item->GetItem());
+	float clamp_scale = 0.0f;
 
 	switch (conlevel) {
 	case ConsiderColor::Green:
+		clamp_scale = (RuleI(Character, GreenModifier) / 100);
 		exp_value = 1.0f;
 		break;
 	case ConsiderColor::LightBlue:
+		clamp_scale = (RuleI(Character, LightBlueModifer) / 100);
 		exp_value = 5.0f;
 		break;
 	case ConsiderColor::DarkBlue:
+		clamp_scale = (RuleI(Character, BlueModifier) / 100);
 		exp_value = 7.5f;
 		break;
 	case ConsiderColor::White:
+		clamp_scale = (RuleI(Character, WhiteModifier) / 100);
 		exp_value = 10.0f;
 		break;
 	case ConsiderColor::Yellow:
+		clamp_scale = (RuleI(Character, YellowModifier) / 100);
 		exp_value = 15.0f;
 		break;
 	case ConsiderColor::Red:
+		clamp_scale = (RuleI(Character, RedModifier) / 100);
 		exp_value = 25.0f;
 		break;
 	}
+	exp_value = exp_value * clamp_scale;
+	exp_value = exp_value / (norm_val * 0.75f);
 
-	exp_value = exp_value / (norm_val * 0.5f);
+	// Clamp based on tier
+	if (target_tier == 1) {
+		exp_value = EQ::Clamp(exp_value, 1.0f * clamp_scale, 5.0f * clamp_scale);
+	}
 
-	if (tier == 1) {
-		exp_value *= 2;
+	if (target_tier == 2) {
+		exp_value = EQ::Clamp(exp_value, 0.1f * clamp_scale, 1.0f * clamp_scale);
 	}
 
 	exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
 	exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
 
-	LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
+	LogDebug("tier: [{}], norm_val: [{}], exp_value [{}], conlevel [{}]", target_tier, norm_val, exp_value, conlevel);
 
 	return exp_value;
 }
