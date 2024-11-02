@@ -717,7 +717,7 @@ public:
 	void SetEbonCrystals(uint32 value);
 	void SendCrystalCounts();
 
-	bool GetItemStatValue(EQ::ItemData* item);
+	float GetItemStatValue(EQ::ItemData* item);
 
 	float GetBaseExpValueForKill(int conlevel, int tier, EQ::ItemInstance* upgrade_item);
 

@@ -584,7 +584,7 @@ void Client::EjectItemFromSlot(int16 slot_id) {
 	}
 }
 
-bool Client::GetItemStatValue(EQ::ItemData* item) {
+float Client::GetItemStatValue(EQ::ItemData* item) {
 	if (item) {
 		float return_value = 0.0f;
 
@@ -595,7 +595,7 @@ bool Client::GetItemStatValue(EQ::ItemData* item) {
 		return_value += item->HP / 10.0f;
 		return_value += item->Mana / 10.0f;
 
-		return_value += item->Damage;
+		return_value += item->Damage - (item->Delay / 2);
 
 		return_value += item->AStr;
 		return_value += item->ASta;
@@ -631,15 +631,19 @@ bool Client::GetItemStatValue(EQ::ItemData* item) {
 		if (item->Worn.Effect > 0)  return_value += 25;
 		if (item->Focus.Effect > 0) return_value += 25;
 
+		return_value = std::max(1.0f, return_value);
+
 		LogDebug("EXPVAL: [{}]", return_value);
 
-		return std::max(1.0f, (return_value));
+		return return_value;
 	}
 }
 
 float Client::GetBaseExpValueForKill(int conlevel, int tier, EQ::ItemInstance* upgrade_item) {
 	float exp_value = 0.0f;
 	float norm_val = GetItemStatValue(upgrade_item->GetItem());
+
+	LogDebug("norm_val: [{}], exp_value [{}], conlevel [{}]", norm_val, exp_value, conlevel);
 
 	switch (conlevel) {
 	case ConsiderColor::Green:
@@ -662,7 +666,11 @@ float Client::GetBaseExpValueForKill(int conlevel, int tier, EQ::ItemInstance* u
 		break;
 	}
 
-	exp_value = exp_value / norm_val;
+	exp_value = exp_value / (norm_val * 0.5f);
+
+	if (tier == 1) {
+		exp_value *= 2;
+	}
 
 	exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
 	exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
