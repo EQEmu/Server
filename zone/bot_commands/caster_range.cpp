@@ -70,7 +70,7 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"{} says, 'My current Caster Range is {}.'",
+					"{} says, 'My current caster range is {}.'",
 					my_bot->GetCleanName(),
 					my_bot->GetBotCasterRange()
 				).c_str()

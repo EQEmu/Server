@@ -132,6 +132,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 	for (auto bot_iter : sbl) {
 		if (currentCheck) {
 			follow_mob = entity_list.GetMob(bot_iter->GetFollowID());
+
 			c->Message(
 				Chat::Green,
 				fmt::format(
