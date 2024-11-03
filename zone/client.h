@@ -1838,6 +1838,8 @@ public:
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);
 
+	void SetWeaponAppearance(bool bow_visible = false);
+
 	inline int32 GetEnvironmentDamageModifier() const { return environment_damage_modifier; }
 	void SetEnvironmentDamageModifier(int32 val) { environment_damage_modifier = val; }
 	inline bool GetInvulnerableEnvironmentDamage() const { return invulnerable_environment_damage; }
@@ -2072,6 +2074,7 @@ private:
 	int32 current_endurance;
 
 	int sent_inventory;
+	bool sent_weapon;
 
 	// https://github.com/EQEmu/Server/pull/2479
 	bool m_lock_save_position = false;

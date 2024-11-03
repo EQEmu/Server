@@ -541,6 +541,7 @@ public:
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { return 0; }
 	virtual uint32 GetEquippedItemFromTextureSlot(uint8 material_slot) const { return(0); }
 	virtual uint32 GetEquipmentMaterial(uint8 material_slot) const;
+	virtual uint32 GetWeaponMaterial(EQ::ItemInstance* inst) const;
 	virtual uint8 GetEquipmentType(uint8 material_slot) const;
 	virtual uint32 GetHerosForgeModel(uint8 material_slot) const;
 	virtual uint32 GetEquipmentColor(uint8 material_slot) const;
@@ -1363,7 +1364,6 @@ public:
 	WeaponStance_Struct weaponstance;
 	bool IsWeaponStanceEnabled() const { return weaponstance.enabled; }
 	inline void SetWeaponStanceEnabled(bool val) { weaponstance.enabled = val; }
-
 
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }

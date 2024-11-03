@@ -573,6 +573,11 @@ bool Client::Process() {
 			BuffProcess();
 			SendBulkStatsUpdate();
 
+			if (!sent_weapon) {
+				SetWeaponAppearance(true);
+				sent_weapon = true;
+			}
+
 
 			// If there are spellcasting bugs, look here first
 			if (!IsCasting()) {
@@ -621,18 +626,15 @@ bool Client::Process() {
 				if (CUnauth_tics > 1) {
 					if (GetZoneID() != Zones::BAZAAR) {
 						if (CUnauth_tics >= 11) {
-							//zone->SendDiscordMessage("admin", fmt::format("Kicking [{}]. Unauthorized Client.", GetCleanName()));
-							//Kick("Custom client required. Visit heroesjourneyeq.com for more information.");
-
 							zone->SendDiscordMessage("admin", fmt::format("Moving [{}] to Bazaar. Unauthorized Client.", GetCleanName()));
 							MoveZone("bazaar");
 							return false;
 						}
 
-						Message(Chat::Shout, "You are not using the latest Heroes' Journey client. Visit HeroesJourneyEQ.com for more information. Moved to the Bazaar in %d seconds.", (11 - CUnauth_tics) * 6);
+						Message(Chat::Shout, "You are not using the latest Heroes' Journey client. Visit HeroesJourneyEMU.com for more information. Moved to the Bazaar in %d seconds.", (11 - CUnauth_tics) * 6);
 					} else {
 						if (CUnauth_tics % 2 == 0) {
-							Message(Chat::Shout, "You are not using the latest Heroes' Journey client. Visit HeroesJourneyEQ.com for more information. You will be disconnected if you leave the Bazaar.");
+							Message(Chat::Shout, "You are not using the latest Heroes' Journey client. Visit HeroesJourneyEMU.com for more information. You will be disconnected if you leave the Bazaar.");
 						}
 					}
 				}

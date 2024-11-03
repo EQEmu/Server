@@ -989,6 +989,8 @@ void Client::CompleteConnect()
 		GoToBind();
 		return;
 	}
+
+	SetWeaponAppearance(true);
 }
 
 // connecting opcode handlers
@@ -3641,6 +3643,8 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		m_AutoAttackPosition       = glm::vec4();
 		m_AutoAttackTargetLocation = glm::vec3();
 		aa_los_them_mob            = nullptr;
+
+		SetWeaponAppearance(true);
 	}
 	else if (app->pBuffer[0] == 1) {
 		auto_attack = true;
@@ -3664,6 +3668,8 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 			los_status                 = false;
 			los_status_facing          = false;
 		}
+
+		SetWeaponAppearance();
 	}
 }
 

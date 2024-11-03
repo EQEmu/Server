@@ -334,6 +334,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	adv_requested_id = 0;
 	adv_requested_member_count = 0;
 
+	sent_weapon = false;
+
 	for(int i = 0; i < XTARGET_HARDCAP; ++i)
 	{
 		XTargets[i].Type = Auto;
@@ -11633,6 +11635,20 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 				}
 			}
 		}
+	}
+}
+
+void Client::SetWeaponAppearance(bool bow_visible) {
+	if (!HasClass(Class::Ranger)) {
+		return;
+	}
+
+	if (bow_visible && m_inv.GetItem(EQ::invslot::slotRange) && m_inv.GetItem(EQ::invslot::slotRange)->GetItemType() == EQ::item::ItemTypeBow) {
+		SendTextureWC(EQ::textures::TextureSlot::weaponPrimary, 0);
+		SendTextureWC(EQ::textures::TextureSlot::weaponSecondary, GetWeaponMaterial(m_inv.GetItem(EQ::invslot::slotRange)));
+	} else {
+		SendTextureWC(EQ::textures::TextureSlot::weaponPrimary, GetEquipmentMaterial(EQ::textures::TextureSlot::weaponPrimary));
+		SendTextureWC(EQ::textures::TextureSlot::weaponSecondary, GetEquipmentMaterial(EQ::textures::TextureSlot::weaponSecondary));
 	}
 }
 

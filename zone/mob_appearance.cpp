@@ -227,6 +227,37 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	return equipment_material;
 }
 
+uint32 Mob::GetWeaponMaterial(EQ::ItemInstance* inst) const
+{
+	if (!inst) {
+		return 0;
+	}
+
+	uint32       equipment_material       = 0;
+
+	// Todo, reject if not a weapon
+
+	const EQ::ItemData* item = inst->GetItem();
+
+	if (item) {
+		const auto augment = inst->GetOrnamentationAugment();
+		if (augment) {
+			item = augment->GetItem();
+			if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
+				equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
+			}
+		} else if (inst->GetOrnamentationIDFile()) {
+			equipment_material = inst->GetOrnamentationIDFile();
+		}
+
+		if (!equipment_material && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
+			equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
+		}
+	}
+
+	return equipment_material;
+}
+
 uint8 Mob::GetEquipmentType(uint8 material_slot) const
 {
 	const auto item      = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
