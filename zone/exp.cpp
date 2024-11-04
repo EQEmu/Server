@@ -646,27 +646,27 @@ float Client::GetBaseExpValueForKill(int conlevel, int target_tier, EQ::ItemInst
 
 	switch (conlevel) {
 	case ConsiderColor::Green:
-		clamp_scale = (RuleI(Character, GreenModifier) / 100);
+		clamp_scale = ((float)RuleI(Character, GreenModifier) / 100.0f);
 		exp_value = 1.0f;
 		break;
 	case ConsiderColor::LightBlue:
-		clamp_scale = (RuleI(Character, LightBlueModifier) / 100);
+		clamp_scale = ((float)RuleI(Character, LightBlueModifier) / 100.0f);
 		exp_value = 5.0f;
 		break;
 	case ConsiderColor::DarkBlue:
-		clamp_scale = (RuleI(Character, BlueModifier) / 100);
+		clamp_scale = ((float)RuleI(Character, BlueModifier) / 100.0f);
 		exp_value = 7.5f;
 		break;
 	case ConsiderColor::White:
-		clamp_scale = (RuleI(Character, WhiteModifier) / 100);
+		clamp_scale = ((float)RuleI(Character, WhiteModifier) / 100.0f);
 		exp_value = 10.0f;
 		break;
 	case ConsiderColor::Yellow:
-		clamp_scale = (RuleI(Character, YellowModifier) / 100);
+		clamp_scale = ((float)RuleI(Character, YellowModifier) / 100.0f);
 		exp_value = 15.0f;
 		break;
 	case ConsiderColor::Red:
-		clamp_scale = (RuleI(Character, RedModifier) / 100);
+		clamp_scale = ((float)RuleI(Character, RedModifier) / 100.0f);
 		exp_value = 25.0f;
 		break;
 	}
