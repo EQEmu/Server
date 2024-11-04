@@ -812,6 +812,9 @@ bool ZoneDatabase::GetPoweredPetEntry(const std::string& pet_type, int16 pet_pow
 }
 
 void Mob::ConfigurePetWindow(Mob* selected_pet) {
+	if (!IsClient()) {
+		return;
+	}
 	if (selected_pet && selected_pet->GetOwnerID() == GetID()) {
 		auto this_client = CastToClient();
 		auto pet_npc	 = selected_pet->CastToNPC();

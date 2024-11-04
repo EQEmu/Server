@@ -1134,17 +1134,27 @@ void Client::SendAlternateAdvancementTimers() {
 }
 
 int Client::GetDynamicAATimer(int aa_id) {
+    // Check cache first
+    auto it = aa_timers_cache.find(aa_id);
+    if (it != aa_timers_cache.end()) {
+        LogDebugDetail("Returning TimerID from cache: [{}] - [{}]", it->second, aa_id);
+        return it->second;
+    }
+
+    // If not in cache, check the data bucket
     for (int i = 1; i < 100; i++) {
         std::string key = "aaTimer_" + std::to_string(i);
         std::string bucketValue = GetBucket(key);
 
-        // Check if the bucket has a value before attempting conversion
         if (!bucketValue.empty()) {
-            int value = std::stoi(bucketValue); // Convert string value to integer
-			LogDebugDetail("Got TimerID: [{}]", value);
+            int value = std::stoi(bucketValue);
+            LogDebugDetail("Got TimerID from bucket: [{}]", value);
             if (value == aa_id) {
-				LogDebugDetail("Returning TimerID: [{}] - [{}]", i, value);
-                return i; // Return the timer ID associated with aa_id
+                // Cache the value
+                aa_timers_cache[aa_id] = i;
+
+                LogDebugDetail("Returning TimerID: [{}] - [{}]", i, value);
+                return i;
             }
         }
     }
@@ -1153,25 +1163,32 @@ int Client::GetDynamicAATimer(int aa_id) {
 
 int Client::SetDynamicAATimer(int aa_id) {
     // Iterate through possible timer IDs to find an available one
-    for (int timerID = 1; timerID < (pTimerAAEnd - pTimerAAStart); ++timerID) {
-        std::string key = "aaTimer_" + std::to_string(timerID);
-		auto bucket_value = GetBucket(key);
-        if (bucket_value.empty()) { // If the timer is available
+    for (int timerID = 1; timerID <= (pTimerAAEnd - pTimerAAStart); ++timerID) {
+        if (std::none_of(aa_timers_cache.begin(), aa_timers_cache.end(), [timerID](const auto& pair) { return pair.second == timerID; })) {
             // Associate this timer with the given aa_id
+            aa_timers_cache[aa_id] = timerID;
+
+            // Persist to data bucket
+            std::string key = "aaTimer_" + std::to_string(timerID);
             SetBucket(key, std::to_string(aa_id));
+
+            LogDebugDetail("Set TimerID: [{}] for AA ID: [{}]", timerID, aa_id);
             return timerID; // Return the assigned timer ID
         }
     }
-
-    return 0;
+    return 0; // No available timer ID found
 }
 
 void Client::ClearDynamicAATimers() {
-	ResetAlternateAdvancementTimers();
-	for (int timerID = 1; timerID < (pTimerAAEnd - pTimerAAStart); ++timerID) {
-		std::string key = "aaTimer_" + std::to_string(timerID);
-		DeleteBucket(key);
-	}
+    ResetAlternateAdvancementTimers();
+    aa_timers_cache.clear();
+
+    for (int timerID = 1; timerID <= (pTimerAAEnd - pTimerAAStart); ++timerID) {
+        std::string key = "aaTimer_" + std::to_string(timerID);
+        DeleteBucket(key);
+    }
+
+    LogDebugDetail("Cleared all dynamic AA timers");
 }
 
 void Client::ResetAlternateAdvancementTimer(int ability) {

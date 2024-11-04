@@ -1034,6 +1034,8 @@ public:
 	int SetDynamicAATimer(int aa_id);
 	void ClearDynamicAATimers();
 
+	std::unordered_map<int, int> aa_timers_cache; // Cache to store AA timers as key-value pairs (aa_id -> timerID)
+
 	//New AA Methods
 	void SendAlternateAdvancementRank(int aa_id, int level);
 	void SendAlternateAdvancementTable();
