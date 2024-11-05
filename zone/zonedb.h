@@ -576,6 +576,7 @@ public:
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 	std::unordered_map<uint32, GlobalBuffsRepository::GlobalBuffs>& GetGlobalBuffs() { return global_buffs_cache; }
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
+
 	void ClearGlobalBuffs() { global_buffs_cache.clear(); }
 	void LoadGlobalBuffs();
 	bool LootBuffEnabled();
