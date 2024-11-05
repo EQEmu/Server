@@ -2896,15 +2896,17 @@ void ZoneDatabase::LoadGlobalBuffs()
 bool ZoneDatabase::LootBuffEnabled() {
 	auto itr = global_buffs_cache.find(17779);
 	if (itr != global_buffs_cache.end()) {
-		return  global_buffs_cache[17779].duration > Timer::GetTimeSeconds();
+		return global_buffs_cache[17779].duration > Timer::GetTimeSeconds();
 	}
+	return false;
 }
 
 bool ZoneDatabase::ExpBuffEnabled() {
 	auto itr = global_buffs_cache.find(43002);
 	if (itr != global_buffs_cache.end()) {
-		return  global_buffs_cache[43002].duration > Timer::GetTimeSeconds();
+		return global_buffs_cache[43002].duration > Timer::GetTimeSeconds();
 	}
+	return false;
 }
 
 DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
