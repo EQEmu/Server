@@ -1411,6 +1411,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadMerchants:
 		case ServerOP_ReloadNPCEmotes:
 		case ServerOP_ReloadNPCSpells:
+		case ServerOP_ReloadGlobalBuffs:
 		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
 		case ServerOP_ReloadStaticZoneData:

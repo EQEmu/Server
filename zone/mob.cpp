@@ -8760,3 +8760,75 @@ std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
 {
 	return entity_list.GetCloseMobList(this, distance);
 }
+
+void Mob::ApplyGlobalBuffs()
+{
+	auto all_global_buffs = database.GetGlobalBuffs();
+	int64 current_time = Timer::GetTimeSeconds();
+	for (auto& buff : all_global_buffs)
+	{
+		ApplyGlobalBuff(buff.second.spell_id, buff.second.duration, current_time);
+	}
+}
+
+void Mob::RemoveGlobalBuffs()
+{
+	auto all_global_buffs = database.GetGlobalBuffs();
+	int64 current_time = Timer::GetTimeSeconds();
+	for (auto& buff : all_global_buffs)
+	{
+		BuffFadeBySpellID(buff.second.spell_id);
+	}
+}
+
+void Mob::ApplyGlobalBuff(uint32 spell_id, uint32 duration, time_t current_time)
+{
+	if (current_time == 0)
+		current_time = Timer::GetTimeSeconds();
+
+	int64 time_difference = duration - current_time;
+
+	if (time_difference > 0)
+	{
+		//unexpired, calc duration and refresh
+		int64 duration = std::max((int64)1, time_difference / (int64)6);
+
+		int slot = FindFirstBuffSlotBySpellId(spell_id);
+		if (slot == 0xFFFFFFFF)
+		{
+			ApplySpellBuff(spell_id, duration);
+		}
+		else if(slot < GetMaxTotalSlots())
+		{
+			//Update duration on server side.
+			buffs[slot].ticsremaining = duration;
+			if (IsClient())
+			{
+				//Send duration to client if client.
+				CastToClient()->SendBuffDurationPacket(buffs[slot], slot);
+				CastToClient()->SendBuffNumHitPacket(buffs[slot], slot);
+			}
+			else if (GetOwner())
+			{
+				//Send to pet owner, if any.
+				SendPetBuffsToClient();
+			}
+
+			//Send to interested targeters.
+			auto& clients = entity_list.GetClientList();
+			for (auto& c : clients)
+			{
+				if (c.second->GetTarget() && c.second->GetTarget()->GetID() == GetID())
+				{
+					SendBuffsToClient(c.second);
+				}
+			}
+		}
+	}
+	else
+	{
+		//expired, remove
+		BuffFadeBySpellID(spell_id);
+	}
+}
+

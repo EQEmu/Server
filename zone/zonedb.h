@@ -13,6 +13,7 @@
 #include "../common/repositories/doors_repository.h"
 #include "../common/races.h"
 #include "../common/repositories/npc_faction_entries_repository.h"
+#include "../common/repositories/global_buffs_repository.h"
 
 #include "bot_database.h"
 
@@ -97,6 +98,12 @@ struct DBnpcspells_Struct {
 	uint32  idle_no_sp_recast_max;
 	uint8	idle_beneficial_chance;
 	std::vector<DBnpcspells_entries_Struct> entries;
+};
+
+struct DBglobalbuffs_Struct
+{
+	uint32 expiration_timestamp;
+	uint16 spell_id;
 };
 
 struct DBnpcspellseffects_Struct {
@@ -567,7 +574,10 @@ public:
 
 	DBnpcspells_Struct*				GetNPCSpells(uint32 npc_spells_id);
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
+	std::unordered_map<uint32, GlobalBuffsRepository::GlobalBuffs>& GetGlobalBuffs() { return global_buffs_cache; }
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
+	void ClearGlobalBuffs() { global_buffs_cache.clear(); }
+	void LoadGlobalBuffs();
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
 
 	/*Bots	*/
@@ -660,6 +670,7 @@ protected:
 	Faction**			faction_array;
 	uint32 npc_spellseffects_maxid;
 	std::unordered_map<uint32, DBnpcspells_Struct> npc_spells_cache;
+	std::unordered_map<uint32, GlobalBuffsRepository::GlobalBuffs> global_buffs_cache;
 	std::unordered_set<uint32> npc_spells_loadtried;
 	DBnpcspellseffects_Struct** npc_spellseffects_cache;
 	bool*				npc_spellseffects_loadtried;

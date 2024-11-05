@@ -2097,6 +2097,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_ReloadGlobalBuffs:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Global Buffs");
+			database.LoadGlobalBuffs();
+			zone->ApplyGlobalBuffs();
+		}
+		break;
+	}
+
 	case ServerOP_ReloadPerlExportSettings:
 	{
 		zone->SendReloadMessage("Perl Event Export Settings");

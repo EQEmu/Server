@@ -389,6 +389,8 @@ void NPC::AddLootDropFixed(
 	);
 
 	if (!inst) {
+		safe_delete(outapp);
+		safe_delete(item);
 		return;
 	}
 

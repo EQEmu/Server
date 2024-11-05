@@ -115,6 +115,7 @@ public:
 	AA::Rank *GetAlternateAdvancementRank(int rank_id);
 	bool is_zone_time_localized;
 	bool quest_idle_override;
+	void ApplyGlobalBuffs();
 	bool IsIdleWhenEmpty() const;
 	void SetIdleWhenEmpty(bool idle_when_empty);
 	uint32 GetSecondsBeforeIdle() const;
@@ -281,6 +282,10 @@ public:
 	void SetAAEXPModifierByCharacterID(const uint32 character_id, float aa_modifier);
 	void SetEXPModifier(Client* c, float exp_modifier);
 	void SetEXPModifierByCharacterID(const uint32 character_id, float exp_modifier);
+
+	void ReloadGlobalBuffs();
+
+	uint32 AddGlobalBuffTime(uint32 spell_id, uint32 add_duration);
 
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);
@@ -503,6 +508,7 @@ private:
 	Timer                               clientauth_timer;
 	Timer                               initgrids_timer;
 	Timer                               qglobal_purge_timer;
+	Timer*								global_buffs_timer;
 	ZoneSpellsBlocked                   *blocked_spells;
 
 	// Factions

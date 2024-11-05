@@ -849,6 +849,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						ps->command = 1;
 						entity_list.QueueClients(this, app);
 						safe_delete(app);
+						ApplyGlobalBuffs();
 						SendPetBuffsToClient();
 						SendAppearancePacket(AppearanceType::Pet, caster->GetID(), true, true);
 					}
@@ -4621,6 +4622,11 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				{
 					owner->RemovePet(this);
 					owner->ValidatePetList();
+				}
+
+				if (!IsClient())
+				{
+					RemoveGlobalBuffs();
 				}
 
 				// Custom charm inventory handling

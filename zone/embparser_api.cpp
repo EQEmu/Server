@@ -5993,6 +5993,16 @@ bool Perl__aretaskscompleted(perl::array task_ids)
 	return quest_manager.aretaskscompleted(v);
 }
 
+void Perl__reload_global_buffs()
+{
+	quest_manager.ReloadGlobalBuffs();
+}
+
+uint32_t Perl__add_global_buff_time(uint32 spell_id, uint32 duration)
+{
+	return quest_manager.AddGlobalBuffTime(spell_id, duration);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6997,6 +7007,13 @@ void perl_register_quest()
 	 */
 	package.add("is_content_flag_enabled", &Perl__IsContentFlagEnabled);
 	package.add("set_content_flag", &Perl__SetContentFlag);
+
+
+	/**
+	* CUSTOM TO THJ: Global Buffs
+	*/
+	package.add("reload_global_buffs", &Perl__reload_global_buffs);
+	package.add("add_global_buff", (uint32_t(*)(uint32, uint32))&Perl__add_global_buff_time);
 
 }
 

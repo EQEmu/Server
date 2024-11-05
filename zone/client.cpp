@@ -27,6 +27,8 @@
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include "../common/unix.h"
+#else
+	#include <Shlwapi.h>
 #endif
 
 extern volatile bool RunLoops;

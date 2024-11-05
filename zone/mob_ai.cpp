@@ -35,6 +35,7 @@
 #include "bot.h"
 #include "../common/repositories/npc_spells_repository.h"
 #include "../common/repositories/npc_spells_entries_repository.h"
+#include "../common/repositories/global_buffs_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <glm/gtx/projection.hpp>
@@ -2873,6 +2874,20 @@ void NPC::AISpellsList(Client *c)
 				GetCleanName()
 			).c_str()
 		);
+	}
+
+	return;
+}
+
+void ZoneDatabase::LoadGlobalBuffs()
+{
+	ClearGlobalBuffs();
+
+	auto all_buffs = GlobalBuffsRepository::All(database);
+
+	for (auto& buff : all_buffs)
+	{
+		global_buffs_cache[buff.spell_id] = buff;
 	}
 
 	return;

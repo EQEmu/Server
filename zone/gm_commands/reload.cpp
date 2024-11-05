@@ -23,6 +23,7 @@ void command_reload(Client *c, const Seperator *sep)
 	bool is_doors                = !strcasecmp(sep->arg[1], "doors");
 	bool is_dztemplates          = !strcasecmp(sep->arg[1], "dztemplates");
 	bool is_factions             = !strcasecmp(sep->arg[1], "factions");
+	bool is_global_buffs		 = !strcasecmp(sep->arg[1], "global_buffs");
 	bool is_ground_spawns        = !strcasecmp(sep->arg[1], "ground_spawns");
 	bool is_level_mods           = !strcasecmp(sep->arg[1], "level_mods");
 	bool is_logs                 = !strcasecmp(sep->arg[1], "logs") || is_logs_reload_alias;
@@ -58,6 +59,7 @@ void command_reload(Client *c, const Seperator *sep)
 		!is_dztemplates &&
 		!is_factions &&
 		!is_ground_spawns &&
+		!is_global_buffs &&
 		!is_level_mods &&
 		!is_logs &&
 		!is_loot &&
@@ -119,7 +121,11 @@ void command_reload(Client *c, const Seperator *sep)
 	} else if (is_ground_spawns) {
 		c->Message(Chat::White, "Attempting to reload Ground Spawns globally.");
 		pack = new ServerPacket(ServerOP_ReloadGroundSpawns, 0);
-	} else if (is_level_mods) {
+	} else if (is_global_buffs) {
+		c->Message(Chat::White, "Attempting to reload Global Buffs globally.");
+		pack = new ServerPacket(ServerOP_ReloadGlobalBuffs, 0);
+	}
+	else if (is_level_mods) {
 		if (!RuleB(Zone, LevelBasedEXPMods)) {
 			c->Message(Chat::White, "Level Based Experience Modifiers are disabled.");
 			return;

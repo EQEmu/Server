@@ -4990,6 +4990,18 @@ uint16 Mob::FindBuffBySlot(int slot) {
 	return 0;
 }
 
+int Mob::FindFirstBuffSlotBySpellId(uint16 spell_id) {
+	const int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (buffs[buff_slot].spellid == spell_id)
+		{
+			return buff_slot;
+		}
+	}
+
+	return 0xFFFFFFFF;
+}
+
 uint32 Mob::BuffCount(bool is_beneficial, bool is_detrimental) {
 	uint32 active_buff_count = 0;
 	int buff_count = GetMaxTotalSlots();

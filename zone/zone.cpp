@@ -1205,6 +1205,7 @@ bool Zone::Init(bool is_static) {
 	LoadBaseData();
 	LoadMerchants();
 	LoadTempMerchantData();
+	database.LoadGlobalBuffs();
 
 	// Merc data
 	if (RuleB(Mercs, AllowMercs)) {
@@ -3215,6 +3216,71 @@ void Zone::SetEXPModifierByCharacterID(const uint32 character_id, float exp_modi
 		GetInstanceVersion(),
 		m
 	);
+}
+
+void Zone::ReloadGlobalBuffs()
+{
+	auto pack = new ServerPacket(ServerOP_ReloadGlobalBuffs, 0);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+uint32 Zone::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)
+{
+	auto global_buff = GlobalBuffsRepository::FindOne(database, spell_id);
+	auto cur_time = Timer::GetTimeSeconds();
+	uint32 new_timestamp = global_buff.duration;
+	int64 time_difference = global_buff.duration - cur_time;
+
+	if (global_buff.spell_id == 0 && global_buff.duration == 0)
+	{
+		//New DB row
+		new_timestamp = cur_time;
+	}
+	else
+	{
+		//Update existing row, including expired data
+		if (time_difference <= 0 || global_buff.duration == 0)
+		{
+			new_timestamp = cur_time;
+		}
+	}
+
+	new_timestamp += add_duration;
+
+	global_buff.duration = new_timestamp;
+	global_buff.spell_id = spell_id;
+	GlobalBuffsRepository::ReplaceOne(database, global_buff);
+	return new_timestamp;
+}
+
+void Zone::ApplyGlobalBuffs()
+{
+	time_t cur_time = Timer::GetTimeSeconds();
+
+	auto all_global_buffs = database.GetGlobalBuffs();
+	std::vector<Mob*> mobs_to_buff;
+
+	for (auto& e : entity_list.GetClientList()) {
+		if (e.second && e.second->IsClient())
+		{
+			auto pets_owned = e.second->GetAllPets();
+			for (auto& client_pet : pets_owned)
+			{
+				mobs_to_buff.push_back(client_pet);
+			}
+
+			mobs_to_buff.push_back(e.second);
+		}
+	}
+
+	for (auto& buff: all_global_buffs)
+	{
+		for (auto& mob : mobs_to_buff)
+		{
+			mob->ApplyGlobalBuff(buff.second.spell_id, buff.second.duration, cur_time);
+		}
+	}
 }
 
 bool Zone::IsIdleWhenEmpty() const

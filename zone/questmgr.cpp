@@ -4195,6 +4195,22 @@ void QuestManager::ReloadZoneStaticData()
 	}
 }
 
+void QuestManager::ReloadGlobalBuffs()
+{
+	if (zone && zone->IsLoaded()) {
+		zone->ReloadGlobalBuffs();
+	}
+}
+
+uint32 QuestManager::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)
+{
+	if (zone && zone->IsLoaded()) {
+		uint32 timestamp = zone->AddGlobalBuffTime(spell_id, add_duration);
+		return timestamp;
+	}
+}
+
+
 Client *QuestManager::GetInitiator() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();

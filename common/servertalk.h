@@ -282,6 +282,7 @@
 #define ServerOP_ReloadBaseData 0x4128
 #define ServerOP_ReloadSkillCaps 0x4129
 #define ServerOP_ReloadNPCSpells 0x4130
+#define ServerOP_ReloadGlobalBuffs 0x4199
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
