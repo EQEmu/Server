@@ -488,6 +488,31 @@ void PlayerEventLogs::ProcessBatchQueue()
 				etl_queues.killed_raid_npc.push_back(out);
 				break;
 			}
+			case PlayerEvent::EventType::AA_PURCHASE: {
+				PlayerEvent::AAPurchasedEvent in{};
+				PlayerEventAaPurchaseRepository::PlayerEventAaPurchase out{};
+
+				{
+					std::stringstream ss;
+					ss << r.event_data;
+					cereal::JSONInputArchive ar(ss);
+					in.serialize(ar);
+				}
+
+				out.aa_ability_id = in.aa_id;
+				out.cost          = in.aa_cost;
+				out.previous_id   = in.aa_previous_id;
+				out.next_id       = in.aa_next_id;
+				out.created_at    = r.created_at;
+
+				if (m_etl_settings.contains(PlayerEvent::EventType::AA_PURCHASE)) {
+					r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::AA_PURCHASE).next_id;
+					m_etl_settings.at(PlayerEvent::EventType::AA_PURCHASE).next_id++;
+				}
+
+				etl_queues.aa_purchase.push_back(out);
+				break;
+			}
 			default: {
 				LogError("Non-Implemented ETL routing <red>[{}]", r.event_type_id);
 			}
@@ -549,6 +574,11 @@ void PlayerEventLogs::ProcessBatchQueue()
 	if (!etl_queues.killed_raid_npc.empty()) {
 		PlayerEventKilledRaidNpcRepository::InsertMany(*m_database, etl_queues.killed_raid_npc);
 		etl_queues.killed_raid_npc.clear();
+	}
+
+	if (!etl_queues.aa_purchase.empty()) {
+		PlayerEventAaPurchaseRepository::InsertMany(*m_database, etl_queues.aa_purchase);
+		etl_queues.aa_purchase.clear();
 	}
 
 	LogPlayerEventsDetail(
@@ -1043,8 +1073,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
+			uint32 deleted_count;
 			if (m_settings[i].etl_enabled) {
-				uint32 deleted_count;
 				switch (m_settings[i].id) {
 					case PlayerEvent::LOOT_ITEM: {
 						deleted_count = PlayerEventLootItemsRepository::DeleteWhere(
@@ -1128,28 +1158,29 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 								m_settings[i].retention_days));
 						break;
 					}
+					case PlayerEvent::AA_PURCHASE: {
+						deleted_count = PlayerEventAaPurchaseRepository::DeleteWhere(
+							*m_database,
+							fmt::format(
+								"created_at < (NOW() - INTERVAL {} DAY)",
+								m_settings[i].retention_days));
+						break;
+					}
 					default: {
 						LogError("NonImplemented ETL Event Type <red>[{}] ", static_cast<uint32>(m_settings[i].id));
 					}
 				}
-
-				LogInfo(
-					"Truncated [{}] events of type [{}] ({}) older than [{}] days from etl table",
-					deleted_count,
-					PlayerEvent::EventName[i],
-					i,
-					m_settings[i].retention_days);
 			}
-
-
-			int deleted_count = PlayerEventLogsRepository::DeleteWhere(
-				*m_database,
-				fmt::format(
-					"event_type_id = {} AND created_at < (NOW() - INTERVAL {} DAY)",
-					i,
-					m_settings[i].retention_days
-				)
-			);
+			else {
+				deleted_count = PlayerEventLogsRepository::DeleteWhere(
+					*m_database,
+					fmt::format(
+						"event_type_id = {} AND created_at < (NOW() - INTERVAL {} DAY)",
+						i,
+						m_settings[i].retention_days
+					)
+				);
+			}
 
 			if (deleted_count > 0) {
 				LogInfo(
@@ -1316,6 +1347,14 @@ void PlayerEventLogs::LoadEtlIds()
 				.enabled = true,
 				.table_name = "player_event_killed_raid_npc",
 				.next_id = PlayerEventKilledRaidNpcRepository::GetMaxId(*m_database) + 1
+			}
+		},
+		{
+			PlayerEvent::AA_PURCHASE,
+			{
+				.enabled = true,
+				.table_name = "player_event_aa_purchase",
+				.next_id = PlayerEventAaPurchaseRepository::GetMaxId(*m_database) + 1
 			}
 		}
 	};

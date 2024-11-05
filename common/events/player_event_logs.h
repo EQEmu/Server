@@ -21,6 +21,8 @@
 #include "../repositories/player_event_killed_npc_repository.h"
 #include "../repositories/player_event_killed_named_npc_repository.h"
 #include "../repositories/player_event_killed_raid_npc_repository.h"
+#include "../repositories/player_event_aa_purchase_repository.h"
+
 
 
 class PlayerEventLogs {
@@ -86,6 +88,7 @@ public:
 		std::vector<PlayerEventKilledNpcRepository::PlayerEventKilledNpc>               killed_npc;
 		std::vector<PlayerEventKilledNamedNpcRepository::PlayerEventKilledNamedNpc>     killed_named_npc;
 		std::vector<PlayerEventKilledRaidNpcRepository::PlayerEventKilledRaidNpc>       killed_raid_npc;
+		std::vector<PlayerEventAaPurchaseRepository::PlayerEventAaPurchase>             aa_purchase;
 	};
 
 private:
