@@ -1356,6 +1356,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							c->SetPetCommandState(PET_BUTTON_FOCUS, 0);
 							c->SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
 						}
+
+						pet->ApplyGlobalBuffs();
 					}
 				}
 				break;
