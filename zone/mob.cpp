@@ -8774,7 +8774,6 @@ void Mob::ApplyGlobalBuffs()
 void Mob::RemoveGlobalBuffs()
 {
 	auto all_global_buffs = database.GetGlobalBuffs();
-	int64 current_time = Timer::GetTimeSeconds();
 	for (auto& buff : all_global_buffs)
 	{
 		BuffFadeBySpellID(buff.second.spell_id);

@@ -272,7 +272,7 @@ bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 a
 
 			LogDebug("First Upgrade: [{}]", item_id);
 
-			if ((!DataBucket::GetData("eom_17779").empty()) && item_id < GetMaxItemUpgrade(original_id)) {
+			if (database.LootBuffEnabled() && item_id < GetMaxItemUpgrade(original_id)) {
 				LogDebug("Trying Second-Round Upgrade");
 				auto old_id = item_id;
 				item_id = GetMaxItemUpgrade(item_id);

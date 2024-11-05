@@ -2952,7 +2952,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		entity_list.RemoveFromAutoXTargets(this);
 
-		if (!DataBucket::GetData("eom_17779").empty()) {
+
+		if (database.LootBuffEnabled()) {
 			for (LootItem* item : m_loot_items) {
 				if (item != nullptr) {
 					auto old_id = item->item_id;

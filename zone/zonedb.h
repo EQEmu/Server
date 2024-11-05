@@ -14,6 +14,7 @@
 #include "../common/races.h"
 #include "../common/repositories/npc_faction_entries_repository.h"
 #include "../common/repositories/global_buffs_repository.h"
+#include "../common/timer.h"
 
 #include "bot_database.h"
 
@@ -578,6 +579,9 @@ public:
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
 	void ClearGlobalBuffs() { global_buffs_cache.clear(); }
 	void LoadGlobalBuffs();
+	bool LootBuffEnabled() { global_buffs_cache[17779].duration > Timer::GetTimeSeconds(); }
+	bool ExpBuffEnabled() { global_buffs_cache[43002].duration > Timer::GetTimeSeconds(); }
+
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
 
 	/*Bots	*/

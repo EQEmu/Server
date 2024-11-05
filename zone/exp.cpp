@@ -682,8 +682,8 @@ float Client::GetBaseExpValueForKill(int conlevel, int target_tier, EQ::ItemInst
 		exp_value = EQ::Clamp(exp_value, 0.1f * clamp_scale, 1.0f * clamp_scale);
 	}
 
-	exp_value = exp_value * (DataBucket::GetData("eom_17779").empty() ? 1 : 1.5);
-	exp_value = exp_value * (DataBucket::GetData("eom_43002").empty() ? 1 : 1.5);
+	exp_value = exp_value * (database.LootBuffEnabled() ? 1 : 1.5);
+	exp_value = exp_value * (database.ExpBuffEnabled() ? 1 : 1.5);
 
 	LogDebug("tier: [{}], norm_val: [{}], exp_value [{}], conlevel [{}]", target_tier, norm_val, exp_value, conlevel);
 
