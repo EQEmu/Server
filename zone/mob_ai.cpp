@@ -2893,6 +2893,18 @@ void ZoneDatabase::LoadGlobalBuffs()
 	return;
 }
 
+bool ZoneDatabase::LootBuffEnabled() [
+	if (global_buffs_cache[17779]) {
+		return  global_buffs_cache[17779].duration > Timer::GetCurrentTimeSeconds();
+	}
+]
+
+bool ZoneDatabase::LootBuffEnabled() [
+	if (global_buffs_cache[43002]) {
+		return  global_buffs_cache[43002].duration > Timer::GetCurrentTimeSeconds();
+	}
+]
+
 DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 {
 	if (npc_spells_id == 0) {
