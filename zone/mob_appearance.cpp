@@ -180,13 +180,14 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	uint32       equipment_material       = 0;
 	const uint32 texture_profile_material = GetTextureProfileMaterial(material_slot);
 
+	LogMobAppearance(
+		"[{}] material_slot [{}] texture_profile_material [{}]",
+		clean_name,
+		material_slot,
+		texture_profile_material
+	);
+
 	if (texture_profile_material) {
-		LogMobAppearance(
-			"[{}] material_slot [{}] texture_profile_material [{}]",
-			clean_name,
-			material_slot,
-			texture_profile_material
-		);
 		return texture_profile_material;
 	}
 
@@ -194,28 +195,24 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 
 	if (item) {
 		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
-		const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
-
-		if (inventory_slot == INVALID_INDEX) {
-			return 0;
-
-		}
-		const auto inst = IsClient() ? CastToClient()->m_inv[inventory_slot] : m_inv[inventory_slot];
-		const auto augment = inst ? inst->GetOrnamentationAugment() : nullptr;
-
-		if (augment) {
-			LogDebug("Found a valid ornament; material", augment->GetItem()->Material);
-		}
-
 
 		if (is_equipped_weapon) {
-			if (augment) {
-				item = augment->GetItem();
-				if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
-					equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
+			const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+			if (inventory_slot == INVALID_INDEX) {
+				return 0;
+			}
+			const auto inst = IsClient() ? CastToClient()->m_inv[inventory_slot] : m_inv[inventory_slot];
+
+			if (inst) {
+				const auto augment = inst->GetOrnamentationAugment();
+				if (augment) {
+					item = augment->GetItem();
+					if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
+						equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
+					}
+				} else if (inst->GetOrnamentationIDFile()) {
+					equipment_material = inst->GetOrnamentationIDFile();
 				}
-			} else if (inst->GetOrnamentationIDFile()) {
-				equipment_material = inst->GetOrnamentationIDFile();
 			}
 
 			if (!equipment_material && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
@@ -223,20 +220,9 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 			}
 
 		} else {
-			if (augment) {
-				item = augment->GetItem();
-			}
-
 			equipment_material = (IsClient() && HasClass(Class::Monk) && item->Material == 1) ? 4 : item->Material;
 		}
 	}
-
-	LogMobAppearance(
-		"[{}] material_slot [{}] equipment_material [{}]",
-		clean_name,
-		material_slot,
-		equipment_material
-	);
 
 	return equipment_material;
 }

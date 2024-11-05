@@ -52,8 +52,8 @@ typedef enum {
 } byFlagSetting;
 
 enum OrnamentationAugmentTypes {
-	StandardOrnamentation = 524288,
-	SpecialOrnamentation = 1048576
+	StandardOrnamentation = 20,
+	SpecialOrnamentation = 21
 };
 
 class SharedDatabase;
