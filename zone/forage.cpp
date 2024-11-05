@@ -346,6 +346,7 @@ void Client::GoFish(bool guarantee, bool use_bait)
 		if (food_id == 0) {
 			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
 			food_id = (RuleB(Character, UseNoJunkFishing) ? 13019 : common_fish_ids[index]);
+			food_id = GetApocItemUpgrade(food_id);
 		}
 
 		const EQ::ItemData* food_item = database.GetItem(food_id);
