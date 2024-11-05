@@ -1728,6 +1728,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 					}
 
 					DoPetBagResync();
+					pet->ApplyGlobalBuffs();
 				}
 
 				// Reset the pet info's SpellID to indicate it has been handled

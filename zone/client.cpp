@@ -6839,6 +6839,8 @@ void Client::SuspendMinion(int value)
 
 			MessageString(Chat::Magenta, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
 
+			CurrentPet->ApplyGlobalBuffs();
+
 			memset(&m_suspendedminion, 0, sizeof(PetInfo));
 		}
 	};

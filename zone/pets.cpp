@@ -293,11 +293,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		CastToClient()->DoPetBagResync();
 	}
 
-	if (IsClient())
-	{
-		npc->ApplyGlobalBuffs();
-	}
-
 	if (record.petcontrol == petTargetLock)
 	{
 		Mob* m_target = GetTarget();
