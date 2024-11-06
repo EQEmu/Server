@@ -13080,6 +13080,8 @@ void Client::ClientToNpcAggroProcess()
 }
 
 void Client::LoadDefaultBotSettings() {
+	_spellSettings.clear();
+
 	// Only illusion block supported currently
 	SetBotSetting(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
 	LogBotSettingsDetail("{} says, 'Setting default {} [{}] to [{}]'", GetCleanName(), CastToBot()->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock), BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock)); //deleteme
@@ -13132,21 +13134,21 @@ int Client::GetBotSetting(uint8 settingType, uint16 botSetting) {
 
 void Client::SetBotSetting(uint8 settingType, uint16 botSetting, uint32 settingValue) {
 	switch (settingType) {
-	case BotSettingCategories::BaseSetting:
-		SetBaseSetting(botSetting, settingValue);
-		break;
-	case BotSettingCategories::SpellHold:
-		SetSpellHold(botSetting, settingValue);
-		break;
-	case BotSettingCategories::SpellDelay:
-		SetSpellDelay(botSetting, settingValue);
-		break;
-	case BotSettingCategories::SpellMinThreshold:
-		SetSpellMinThreshold(botSetting, settingValue);
-		break;
-	case BotSettingCategories::SpellMaxThreshold:
-		SetSpellMaxThreshold(botSetting, settingValue);
-		break;
+		case BotSettingCategories::BaseSetting:
+			SetBaseSetting(botSetting, settingValue);
+			break;
+		case BotSettingCategories::SpellHold:
+			SetSpellHold(botSetting, settingValue);
+			break;
+		case BotSettingCategories::SpellDelay:
+			SetSpellDelay(botSetting, settingValue);
+			break;
+		case BotSettingCategories::SpellMinThreshold:
+			SetSpellMinThreshold(botSetting, settingValue);
+			break;
+		case BotSettingCategories::SpellMaxThreshold:
+			SetSpellMaxThreshold(botSetting, settingValue);
+			break;
 	}
 }
 

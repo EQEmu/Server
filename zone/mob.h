@@ -437,10 +437,10 @@ public:
 	std::string GetSpellTypeNameByID(uint16 spellType);
 	std::string GetSpellTypeShortNameByID(uint16 spellType);		
 
-	bool GetDefaultSpellHold(uint16 spellType);
-	uint16 GetDefaultSpellDelay(uint16 spellType);
-	uint8 GetDefaultSpellMinThreshold(uint16 spellType);
-	uint8 GetDefaultSpellMaxThreshold(uint16 spellType);
+	bool GetDefaultSpellHold(uint16 spellType, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellDelay(uint16 spellType, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellMinThreshold(uint16 spellType, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance = Stance::Balanced);
 
 	inline bool GetSpellHold(uint16 spellType) const { return _spellSettings[spellType].hold; }
 	void SetSpellHold(uint16 spellType, bool holdStatus);
