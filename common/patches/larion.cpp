@@ -489,6 +489,91 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_ZoneSpawns); }
+
+	ENCODE(OP_ZoneSpawns)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		//store away the emu struct
+		unsigned char* __emu_buffer = in->pBuffer;
+		Spawn_Struct* emu = (Spawn_Struct*)__emu_buffer;
+
+		int entrycount = in->size / sizeof(Spawn_Struct);
+		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			delete in;
+			return;
+		}
+		
+		for (int i = 0; i < entrycount; i++, emu++) {
+			SerializeBuffer buffer;
+
+			auto SpawnSize = emu->size;
+			if (!((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
+				(emu->race == Race::VahShir) || (emu->race == Race::Froglok2) || (emu->race == Race::Drakkin))
+				)
+			{
+				if (emu->size == 0)
+				{
+					emu->size = 6;
+					SpawnSize = 6;
+				}
+			}
+
+			if (SpawnSize == 0)
+			{
+				SpawnSize = 3;
+			}
+			
+			buffer.WriteString(emu->name);
+			buffer.WriteUInt32(emu->spawnId);
+			buffer.WriteUInt8(emu->level);
+			if (emu->DestructibleObject) //bounding radius: we should consider supporting this officially in the future
+			{
+				buffer.WriteFloat(10.0f); 
+			}
+			else 
+			{
+				
+				buffer.WriteFloat(SpawnSize - 0.7f);
+			}
+			
+			buffer.WriteUInt32(emu->spawnId); //player "id" we should consider supporting this in the future
+			buffer.WriteUInt32(103); //not sure
+			buffer.WriteUInt8(emu->NPC); //npc/player flag
+
+			structs::Spawn_Struct_Bitfields flags;
+			flags.gender = emu->gender;
+			flags.gender = emu->gender;
+			flags.ispet = emu->is_pet;
+			flags.afk = emu->afk;
+			flags.anon = emu->anon;
+			flags.gm = emu->gm;
+			flags.sneak = 0;
+			flags.lfg = emu->lfg;
+			flags.invis = emu->invis;
+			flags.linkdead = 0;
+			flags.showhelm = emu->showhelm;
+			flags.trader = emu->trader ? 1 : 0;
+			flags.targetable = 1;
+			flags.targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
+			flags.showname = emu->show_name;
+
+		}
+	}
+
 	// DECODE methods
+
+	DECODE(OP_ZoneEntry)
+	{
+		DECODE_LENGTH_EXACT(structs::ClientZoneEntry_Struct);
+		SETUP_DIRECT_DECODE(ClientZoneEntry_Struct, structs::ClientZoneEntry_Struct);
+
+		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+
+		FINISH_DIRECT_DECODE();
+	}
 	
 } /*Larion*/
