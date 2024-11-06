@@ -1,7 +1,7 @@
 #pragma once
 
 constexpr int perlbind_version_major = 1;
-constexpr int perlbind_version_minor = 0;
+constexpr int perlbind_version_minor = 1;
 constexpr int perlbind_version_patch = 0;
 
 constexpr int perlbind_version()
