@@ -5461,8 +5461,9 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	}
 
 	int16 poison_slot=-1;
+	int procCount = 0;
 
-	for (uint32 i = 0; i < m_max_procs; i++) {
+	for (uint32 i = 0; i < MAX_PROCS; i++) {
 		if (IsPet() && hand != EQ::invslot::slotPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
@@ -5501,6 +5502,11 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 						ExecWeaponProc(nullptr, SpellProcs[i].spellID, on, SpellProcs[i].level_override);
 						SetProcLimitTimer(SpellProcs[i].base_spellID, SpellProcs[i].proc_reuse_time, ProcType::MELEE_PROC);
 						CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0, SpellProcs[i].base_spellID);
+
+						procCount++;
+						if (procCount >= m_max_procs) {
+							break;
+						}
 					}
 					else {
 						LogCombat("Spell proc [{}] failed to proc [{}] ([{}] percent chance)", i, SpellProcs[i].spellID, chance);
@@ -5521,6 +5527,11 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 						ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
 						CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0, RangedProcs[i].base_spellID);
 						SetProcLimitTimer(RangedProcs[i].base_spellID, RangedProcs[i].proc_reuse_time, ProcType::RANGED_PROC);
+
+						procCount++;
+						if (procCount >= m_max_procs) {
+							break;
+						}
 					}
 					else {
 						LogCombat("Ranged proc [{}] failed to proc [{}] ([{}] percent chance)", i, RangedProcs[i].spellID, chance);
@@ -5531,7 +5542,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	}
 
 	//AA Melee and Ranged Procs
-	if (IsOfClientBot()) {
+	if (IsOfClientBot() && procCount < m_max_procs) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 
 			int32 aa_rank_id = 0;
@@ -5566,6 +5577,11 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 						LogCombat("AA proc [{}] procing spell [{}] ([{}] percent chance)", aa_rank_id, aa_spell_id, chance);
 						ExecWeaponProc(nullptr, aa_spell_id, on);
 						SetProcLimitTimer(-aa_rank_id, aa_proc_reuse_timer, proc_type);
+
+						procCount++;
+						if (procCount >= m_max_procs) {
+							break;
+						}
 					}
 					else {
 						LogCombat("AA proc [{}] failed to proc [{}] ([{}] percent chance)", aa_rank_id, aa_spell_id, chance);
