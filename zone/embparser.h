@@ -118,6 +118,24 @@ public:
 		std::vector<std::any>* extra_pointers
 	);
 
+	virtual int EventMerc(
+		QuestEventID event_id,
+		Merc* merc,
+		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+
+	virtual int EventGlobalMerc(
+		QuestEventID event_id,
+		Merc* merc,
+		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+
 	virtual bool HasQuestSub(uint32 npc_id, QuestEventID event_id);
 	virtual bool HasGlobalQuestSub(QuestEventID event_id);
 	virtual bool PlayerHasQuestSub(QuestEventID event_id);
@@ -126,6 +144,8 @@ public:
 	virtual bool ItemHasQuestSub(EQ::ItemInstance* inst, QuestEventID event_id);
 	virtual bool BotHasQuestSub(QuestEventID event_id);
 	virtual bool GlobalBotHasQuestSub(QuestEventID event_id);
+	virtual bool MercHasQuestSub(QuestEventID event_id);
+	virtual bool GlobalMercHasQuestSub(QuestEventID event_id);
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
@@ -135,6 +155,8 @@ public:
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id);
 	virtual void LoadBotScript(std::string filename);
 	virtual void LoadGlobalBotScript(std::string filename);
+	virtual void LoadMercScript(std::string filename);
+	virtual void LoadGlobalMercScript(std::string filename);
 
 	virtual void AddVar(std::string name, std::string val);
 	virtual std::string GetVar(std::string name);
@@ -182,6 +204,8 @@ private:
 		bool& is_global_player_quest,
 		bool& is_bot_quest,
 		bool& is_global_bot_quest,
+		bool& is_merc_quest,
+		bool& is_global_merc_quest,
 		bool& is_global_npc_quest,
 		bool& is_item_quest,
 		bool& is_spell_quest,
@@ -197,6 +221,8 @@ private:
 		bool& is_global_player_quest,
 		bool& is_bot_quest,
 		bool& is_global_bot_quest,
+		bool& is_merc_quest,
+		bool& is_global_merc_quest,
 		bool& is_global_npc_quest,
 		bool& is_item_quest,
 		bool& is_spell_quest,
@@ -216,6 +242,8 @@ private:
 		bool is_global_player_quest,
 		bool is_bot_quest,
 		bool is_global_bot_quest,
+		bool is_merc_quest,
+		bool is_global_merc_quest,
 		bool is_global_npc_quest,
 		bool is_item_quest,
 		bool is_spell_quest,
@@ -230,6 +258,8 @@ private:
 		bool is_global_player_quest,
 		bool is_bot_quest,
 		bool is_global_bot_quest,
+		bool is_merc_quest,
+		bool is_global_merc_quest,
 		bool is_global_npc_quest,
 		bool is_item_quest,
 		bool is_spell_quest,
@@ -263,6 +293,8 @@ private:
 	PerlQuestStatus global_player_quest_status_;
 	PerlQuestStatus bot_quest_status_;
 	PerlQuestStatus global_bot_quest_status_;
+	PerlQuestStatus merc_quest_status_;
+	PerlQuestStatus global_merc_quest_status_;
 
 	SV* _empty_sv;
 

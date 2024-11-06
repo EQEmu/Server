@@ -40,7 +40,7 @@ extern FastMath g_Math;
 void CatchSignal(int sig_num);
 
 
-int                                                           command_count; // how many commands we have
+int command_count; // how many commands we have
 
 // this is the pointer to the dispatch function, updated once
 // init has been performed to point at the real function
@@ -98,7 +98,7 @@ int command_init(void)
 		command_add("soulmark", "Manipulate account flags", AccountStatus::GMAdmin, command_soulmark) ||
 		command_add("ban", "[Character Name] [Reason] - Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("bugs", "[Close|Delete|Review|Search|View] - Handles player bug reports", AccountStatus::QuestTroupe, command_bugs) ||
-		command_add("bot", "Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot) ||
+		(RuleB(Bots, Enabled) && command_add("bot", "Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot)) ||
 		command_add("camerashake", "[Duration (Milliseconds)] [Intensity (1-10)] - Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
 		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", AccountStatus::Guide, command_castspell) ||
 		command_add("chat", "[Channel ID] [Message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||

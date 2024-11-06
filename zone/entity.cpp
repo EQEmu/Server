@@ -776,6 +776,10 @@ void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)
 
 		merc_list.emplace(std::pair<uint16, Merc *>(merc->GetID(), merc));
 		mob_list.emplace(std::pair<uint16, Mob *>(merc->GetID(), merc));
+
+		if (parse->MercHasQuestSub(EVENT_SPAWN)) {
+			parse->EventMerc(EVENT_SPAWN, merc, nullptr, "", 0);
+		}
 	}
 }
 

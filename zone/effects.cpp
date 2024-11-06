@@ -1205,11 +1205,6 @@ void EntityList::AESpell(
 		max_targets = nullptr;
 	}
 
-	if (!IsValidSpell(spell_id)) {
-		LogError("AESpell called with invalid spell ID");
-		return;
-	}
-
 	int max_targets_allowed = RuleI(Spells, DefaultAOEMaxTargets);;
 	if (max_targets) { // rains pass this in since they need to preserve the count through waves
 		max_targets_allowed = *max_targets;

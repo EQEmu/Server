@@ -45,6 +45,7 @@ struct SPDat_Spell_Struct;
 struct NPCFactionList;
 struct FactionAssociations;
 
+
 namespace EQ {
 
 	struct ItemData;

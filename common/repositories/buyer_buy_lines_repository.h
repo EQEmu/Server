@@ -236,6 +236,10 @@ public:
 				)
 			);
 
+			if (buyers.empty()) {
+				return all_entries;
+			}
+
 			std::vector<std::string> char_ids{};
 			for (auto const &bl : buyers) {
 				char_ids.push_back((std::to_string(bl.char_id)));

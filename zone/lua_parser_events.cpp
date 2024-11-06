@@ -734,6 +734,18 @@ void handle_player_death(
 
 	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[4]));
 	lua_setfield(L, -2, "killed_entity_id");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[5]));
+	lua_setfield(L, -2, "combat_start_time");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[6]));
+	lua_setfield(L, -2, "combat_end_time");
+
+	lua_pushinteger(L, Strings::ToBigInt(sep.arg[7]));
+	lua_setfield(L, -2, "damage_received");
+
+	lua_pushinteger(L, Strings::ToBigInt(sep.arg[8]));
+	lua_setfield(L, -2, "healing_received");
 }
 
 void handle_player_timer(
@@ -1761,7 +1773,7 @@ void handle_player_read_item(
 	lua_setfield(L, -2, "item_id");
 
 	if (extra_pointers) {
-		if (extra_pointers->size() == 6) {
+		if (extra_pointers->size() == 7) {
 			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
 			lua_setfield(L, -2, "book_text");
 
@@ -1779,6 +1791,11 @@ void handle_player_read_item(
 
 			lua_pushinteger(L, std::any_cast<uint8>(extra_pointers->at(5)));
 			lua_setfield(L, -2, "type");
+
+			Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(6)));
+			luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+			l_item_o.push(L);
+			lua_setfield(L, -2, "item");
 		}
 	}
 }

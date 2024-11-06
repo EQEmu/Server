@@ -120,6 +120,10 @@ public:
 			}
 
 			DeleteWhere(db, fmt::format("`char_id` = '{}';", char_id));
+			if (buy_line_ids.empty()) {
+				return false;
+			}
+
 			BaseBuyerBuyLinesRepository::DeleteWhere(
 				db,
 				fmt::format("`id` IN({})", Strings::Implode(", ", buy_line_ids))

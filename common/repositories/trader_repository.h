@@ -217,6 +217,10 @@ public:
 			delete_ids.push_back(std::to_string(e.id));
 		}
 
+		if (delete_ids.empty()) {
+			return 0;
+		}
+
 		return DeleteWhere(db, fmt::format("`id` IN({})", Strings::Implode(",", delete_ids)));
 	}
 };

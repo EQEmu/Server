@@ -188,7 +188,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	tmSitting(0),
 	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
 	lazy_load_bank_check_timer(1000),
-    fast_tic_timer(250),
 	bandolier_throttle_timer(0)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
@@ -2081,45 +2080,28 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			entity_list.ProcessProximitySay(message, this, language);
 		}
 
+		Mob* t = GetTarget();
+
 		if (
-			GetTarget() &&
-			GetTarget()->IsNPC() &&
-			!IsInvisible(GetTarget())
+			t &&
+			!IsInvisible(t) &&
+			DistanceNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)
 		) {
-			auto* t = GetTarget()->CastToNPC();
-			if (!t->IsEngaged()) {
-				CheckLDoNHail(t);
-				CheckEmoteHail(t, message);
+			const bool is_engaged = t->IsEngaged();
 
-				if (DistanceNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)) {
-					if (parse->HasQuestSub(t->GetNPCTypeID(), EVENT_SAY)) {
-						parse->EventNPC(EVENT_SAY, t, this, message, language);
-					}
-
-					if (RuleB(TaskSystem, EnableTaskSystem)) {
-						if (UpdateTasksOnSpeakWith(t)) {
-							t->DoQuestPause(this);
-						}
-					}
-				}
+			if (is_engaged) {
+				parse->EventBotMercNPC(EVENT_AGGRO_SAY, t, this, [&]() { return message; }, language);
 			} else {
-				if (parse->HasQuestSub(t->GetNPCTypeID(), EVENT_AGGRO_SAY)) {
-					if (DistanceSquaredNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)) {
-						parse->EventNPC(EVENT_AGGRO_SAY, t, this, message, language);
-					}
-				}
+				parse->EventBotMercNPC(EVENT_SAY, t, this, [&]() { return message; }, language);
 			}
 
-		}
-		else if (GetTarget() && GetTarget()->IsBot() && !IsInvisible(GetTarget())) {
-			if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
-				if (GetTarget()->IsEngaged()) {
-					if (parse->BotHasQuestSub(EVENT_AGGRO_SAY)) {
-						parse->EventBot(EVENT_AGGRO_SAY, GetTarget()->CastToBot(), this, message, language);
-					}
-				} else {
-					if (parse->BotHasQuestSub(EVENT_SAY)) {
-						parse->EventBot(EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
+			if (t->IsNPC() && !is_engaged) {
+				CheckLDoNHail(t->CastToNPC());
+				CheckEmoteHail(t->CastToNPC(), message);
+
+				if (RuleB(TaskSystem, EnableTaskSystem)) {
+					if (UpdateTasksOnSpeakWith(t->CastToNPC())) {
+						t->CastToNPC()->DoQuestPause(this);
 					}
 				}
 			}
@@ -3200,11 +3182,27 @@ void Client::ReadBook(BookRequest_Struct* book)
 
 				t->type       = inst->GetItem()->Book;
 				t->can_scribe = !recipe.empty();
+		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && book->invslot <= EQ::invbag::GENERAL_BAGS_END) {
+			if (inst && inst->GetItem()) {
+				auto recipe = TradeskillRecipeRepository::GetWhere(
+					content_db,
+					fmt::format(
+						"learned_by_item_id = {} LIMIT 1",
+						inst->GetItem()->ID
+					)
+				);
+
+				t->type       = inst->GetItem()->Book;
+				t->can_scribe = !recipe.empty();
 			}
 		}
 
 		memcpy(t->booktext, b.text.c_str(), b.text.size());
+		memcpy(t->booktext, b.text.c_str(), b.text.size());
 
+		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[b.language] < Language::MaxValue) {
+				GarbleMessage(t->booktext, (Language::MaxValue - m_pp.languages[b.language]));
 		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
 			if (m_pp.languages[b.language] < Language::MaxValue) {
 				GarbleMessage(t->booktext, (Language::MaxValue - m_pp.languages[b.language]));
@@ -9645,14 +9643,16 @@ int Client::GetAccountAge() {
 
 void Client::CheckRegionTypeChanges()
 {
-	if (!zone->HasWaterMap())
+	if (!zone->HasWaterMap()) {
 		return;
+	}
 
 	auto new_region = zone->watermap->ReturnRegionType(glm::vec3(m_Position));
 
 	// still same region, do nothing
-	if (last_region_type == new_region)
+	if (last_region_type == new_region) {
 		return;
+	}
 
 	// If we got out of water clear any water aggro for water only npcs
 	if (last_region_type == RegionTypeWater) {
@@ -9663,8 +9663,15 @@ void Client::CheckRegionTypeChanges()
 	last_region_type = new_region;
 
 	// PVP is the only state we need to keep track of, so we can just return now for PVP servers
-	if (RuleI(World, PVPSettings) > 0)
+	if (RuleI(World, PVPSettings) > 0) {
 		return;
+	}
+
+	if (last_region_type == RegionTypePVP && RuleB(World, EnablePVPRegions)) {
+		temp_pvp = true;
+	} else if (temp_pvp) {
+		temp_pvp = false;
+	}
 }
 
 void Client::ProcessAggroMeter()
@@ -11933,7 +11940,11 @@ void Client::ReadBookByName(std::string book_name, uint8 book_type)
 		o->invslot = 0;
 
 		memcpy(o->booktext, b.text.c_str(), b.text.size());
+		memcpy(o->booktext, b.text.c_str(), b.text.size());
 
+		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[b.language] < Language::MaxValue) {
+				GarbleMessage(o->booktext, (Language::MaxValue - m_pp.languages[b.language]));
 		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
 			if (m_pp.languages[b.language] < Language::MaxValue) {
 				GarbleMessage(o->booktext, (Language::MaxValue - m_pp.languages[b.language]));
@@ -13435,6 +13446,248 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 
 	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
 	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
+}
+
+void Client::NPCHandinEventLog(Trade* t, NPC* n)
+{
+	Client* c = t->GetOwner()->CastToClient();
+
+	std::vector<PlayerEvent::HandinEntry> hi = {};
+	std::vector<PlayerEvent::HandinEntry> ri = {};
+	PlayerEvent::HandinMoney              hm{};
+	PlayerEvent::HandinMoney              rm{};
+
+	if (
+		c->EntityVariableExists("HANDIN_ITEMS") &&
+		c->EntityVariableExists("HANDIN_MONEY") &&
+		c->EntityVariableExists("RETURN_ITEMS") &&
+		c->EntityVariableExists("RETURN_MONEY")
+	) {
+		const std::string& handin_items = c->GetEntityVariable("HANDIN_ITEMS");
+		const std::string& return_items = c->GetEntityVariable("RETURN_ITEMS");
+		const std::string& handin_money = c->GetEntityVariable("HANDIN_MONEY");
+		const std::string& return_money = c->GetEntityVariable("RETURN_MONEY");
+
+		// Handin Items
+		if (!handin_items.empty()) {
+			if (Strings::Contains(handin_items, ",")) {
+				const auto handin_data = Strings::Split(handin_items, ",");
+				for (const auto& h : handin_data) {
+					const auto item_data = Strings::Split(h, "|");
+					if (
+						item_data.size() == 3 &&
+						Strings::IsNumber(item_data[0]) &&
+						Strings::IsNumber(item_data[1]) &&
+						Strings::IsNumber(item_data[2])
+					) {
+						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+						if (item_id != 0) {
+							const auto* item = database.GetItem(item_id);
+
+							if (item) {
+								hi.emplace_back(
+									PlayerEvent::HandinEntry{
+										.item_id = item_id,
+										.item_name = item->Name,
+										.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+										.attuned = Strings::ToInt(item_data[2]) ? true : false
+									}
+								);
+							}
+						}
+					}
+				}
+			} else if (Strings::Contains(handin_items, "|")) {
+				const auto item_data = Strings::Split(handin_items, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+				) {
+					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+					const auto*  item    = database.GetItem(item_id);
+
+					if (item) {
+						hi.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+
+		// Handin Money
+		if (!handin_money.empty()) {
+			const auto hms = Strings::Split(handin_money, "|");
+
+			hm.copper   = Strings::ToUnsignedInt(hms[0]);
+			hm.silver   = Strings::ToUnsignedInt(hms[1]);
+			hm.gold     = Strings::ToUnsignedInt(hms[2]);
+			hm.platinum = Strings::ToUnsignedInt(hms[3]);
+		}
+
+		// Return Items
+		if (!return_items.empty()) {
+			if (Strings::Contains(return_items, ",")) {
+				const auto return_data = Strings::Split(return_items, ",");
+				for (const auto& r : return_data) {
+					const auto item_data = Strings::Split(r, "|");
+					if (
+						item_data.size() == 3 &&
+						Strings::IsNumber(item_data[0]) &&
+						Strings::IsNumber(item_data[1]) &&
+						Strings::IsNumber(item_data[2])
+					) {
+						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+						const auto*  item    = database.GetItem(item_id);
+
+						if (item) {
+							ri.emplace_back(
+								PlayerEvent::HandinEntry{
+									.item_id = item_id,
+									.item_name = item->Name,
+									.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+									.attuned = Strings::ToInt(item_data[2]) ? true : false
+								}
+							);
+						}
+					}
+				}
+			} else if (Strings::Contains(return_items, "|")) {
+				const auto item_data = Strings::Split(return_items, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+				) {
+					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
+					const auto*  item    = database.GetItem(item_id);
+
+					if (item) {
+						ri.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+
+		// Return Money
+		if (!return_money.empty()) {
+			const auto rms = Strings::Split(return_money, "|");
+			rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
+			rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
+			rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
+			rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
+		}
+
+		c->DeleteEntityVariable("HANDIN_ITEMS");
+		c->DeleteEntityVariable("HANDIN_MONEY");
+		c->DeleteEntityVariable("RETURN_ITEMS");
+		c->DeleteEntityVariable("RETURN_MONEY");
+
+		const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
+
+		const bool event_has_data_to_record = (
+			!hi.empty() || handed_in_money
+		);
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+			auto e = PlayerEvent::HandinEvent{
+				.npc_id = n->GetNPCTypeID(),
+				.npc_name = n->GetCleanName(),
+				.handin_items = hi,
+				.handin_money = hm,
+				.return_items = ri,
+				.return_money = rm,
+				.is_quest_handin = true
+			};
+
+			RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
+		}
+
+		return;
+	}
+
+	uint8 item_count = 0;
+
+	hm.platinum = t->pp;
+	hm.gold     = t->gp;
+	hm.silver   = t->sp;
+	hm.copper   = t->cp;
+
+	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
+		if (c->GetInv().GetItem(i)) {
+			item_count++;
+		}
+	}
+
+	hi.reserve(item_count);
+
+	if (item_count > 0) {
+		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
+			const EQ::ItemInstance* inst = c->GetInv().GetItem(i);
+			if (inst) {
+				hi.emplace_back(
+					PlayerEvent::HandinEntry{
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name,
+						.charges = static_cast<uint16>(inst->GetCharges()),
+						.attuned = inst->IsAttuned()
+					}
+				);
+
+				if (inst->IsClassBag()) {
+					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
+						inst = c->GetInv().GetItem(i, j);
+						if (inst) {
+							hi.emplace_back(
+								PlayerEvent::HandinEntry{
+									.item_id = inst->GetItem()->ID,
+									.item_name = inst->GetItem()->Name,
+									.charges = static_cast<uint16>(inst->GetCharges()),
+									.attuned = inst->IsAttuned()
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
+
+	ri = hi;
+	rm = hm;
+
+	const bool event_has_data_to_record = !hi.empty() || handed_in_money;
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+		auto e = PlayerEvent::HandinEvent{
+			.npc_id = n->GetNPCTypeID(),
+			.npc_name = n->GetCleanName(),
+			.handin_items = hi,
+			.handin_money = hm,
+			.return_items = ri,
+			.return_money = rm,
+			.is_quest_handin = false
+		};
+
+		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
+	}
 }
 
 void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)

@@ -2335,6 +2335,7 @@ private:
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
 	void PlayerTradeEventLog(Trade *t, Trade *t2);
+	void NPCHandinEventLog(Trade* t, NPC* n);
 
 	// full and partial mail key cache
 	std::string m_mail_key_full;
