@@ -28,8 +28,8 @@ struct pusher
     ++m_pushed;
   }
   void push(const std::string& value) { mPUSHp(value.c_str(), value.size()); ++m_pushed; }
-  void push(scalar value) { mPUSHs(value.release()); ++m_pushed; };
-  void push(reference value) { mPUSHs(value.release()); ++m_pushed; };
+  void push(scalar value) { mPUSHs(value.release()); ++m_pushed; }
+  void push(reference value) { mPUSHs(value.release()); ++m_pushed; }
 
   void push(array value)
   {
@@ -38,7 +38,8 @@ struct pusher
     for (int i = 0; i < count; ++i)
     {
       // mortalizes one reference to array element to avoid copying
-      PUSHs(sv_2mortal(SvREFCNT_inc(value[i].sv())));
+      SV** sv = av_fetch(static_cast<AV*>(value), i, true);
+      mPUSHs(SvREFCNT_inc(*sv));
     }
     m_pushed += count;
   }
