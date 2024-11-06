@@ -745,10 +745,27 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();
 	Mob *our_owner = GetOwner();
-	if(target_owner && target_owner == this)
+	Mob* target_ultimate_owner = target->GetUltimateOwner();
+	Mob* our_ultimate_owner = GetUltimateOwner();
+
+	if (target_owner && target_owner == this) {
 		return false;
-	else if(our_owner && our_owner == target)
+	}
+	else if (
+		IsBot() && target_ultimate_owner && 
+		(
+			(target_ultimate_owner == our_ultimate_owner) ||
+			(target_ultimate_owner->IsOfClientBot())
+		)
+	) {
 		return false;
+	}
+	else if (our_owner && our_owner == target) {
+		return false;
+	}
+	else if (IsBot() && our_ultimate_owner && our_ultimate_owner == target) {
+		return false;
+	}
 
 	// invalidate for swarm pets for later on if their owner is a corpse
 	if (IsNPC() && CastToNPC()->GetSwarmInfo() && our_owner &&
