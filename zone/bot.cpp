@@ -2116,6 +2116,13 @@ void Bot::AI_Process()
 
 // TARGET VALIDATION
 		if (!IsValidTarget(bot_owner, leash_owner, lo_distance, leash_distance, tar, tar_distance)) {
+			if (HasPet()) {
+				if (tar && GetPet()->GetTarget() && GetPet()->GetTarget() == tar) {
+					GetPet()->WipeHateList();
+					GetPet()->SetTarget(nullptr);
+				}
+			}
+
 			return;
 		}
 
