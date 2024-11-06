@@ -1,3 +1,27 @@
+## [22.58.0] 11/5/2024
+
+### Code
+
+* Add mysql prepared statement support ([#4530](https://github.com/EQEmu/Server/pull/4530)) @hgtw 2024-11-06
+* Update perlbind to 1.1.0 ([#4529](https://github.com/EQEmu/Server/pull/4529)) @hgtw 2024-11-06
+
+### Feature
+
+* Focus Skill Attack Spells ([#4528](https://github.com/EQEmu/Server/pull/4528)) @mmcgarvey 2024-10-31
+
+### Fixes
+
+* Add Missing Lua Registers ([#4525](https://github.com/EQEmu/Server/pull/4525)) @Kinglykrab 2024-10-24
+* Fix cross_zone_set_entity_variable_by_char_id in Lua ([#4526](https://github.com/EQEmu/Server/pull/4526)) @Kinglykrab 2024-10-24
+
+### Loginserver
+
+* Automatifc Opcode File Creation ([#4521](https://github.com/EQEmu/Server/pull/4521)) @KimLS 2024-10-22
+
+### Quest API
+
+* Add Spawn Circle/Grid Methods to Perl/Lua ([#4524](https://github.com/EQEmu/Server/pull/4524)) @Kinglykrab 2024-10-24
+
 ## [22.57.1] 10/22/2024
 
 ### Bots
