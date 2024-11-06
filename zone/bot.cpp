@@ -2607,8 +2607,16 @@ bool Bot::TryFacingTarget(Mob* tar) {
 
 
 bool Bot::TryEvade(Mob* tar) {
-	if (HasTargetReflection() && !tar->IsFeared() && !tar->IsStunned()) {
-		if (GetClass() == Class::Rogue && !GetSpellHold(BotSpellTypes::Escape)) {
+	if (GetSpellHold(BotSpellTypes::Escape)) {
+		return false;
+	}
+
+	switch (GetClass()) {
+		case Class::Rogue: {
+			if (GetSkill(EQ::skills::SkillHide) == 0) {
+				return false;
+			}
+
 			if (m_rogue_evade_timer.Check(false)) {
 				int timer_duration = (HideReuseTime - GetSkillReuseTime(EQ::skills::SkillHide)) * 1000;
 
@@ -2617,18 +2625,47 @@ bool Bot::TryEvade(Mob* tar) {
 				}
 
 				m_rogue_evade_timer.Start(timer_duration);
-				BotGroupSay(this, "Attempting to evade %s", tar->GetCleanName());
 
 				if (zone->random.Int(0, 260) < (int)GetSkill(EQ::skills::SkillHide)) {
+					
+				}
+
+				float hidechance = ((GetSkill(EQ::skills::SkillHide) / 250.0f) + .25) * 100;
+				float random = zone->random.Real(0, 100);
+
+				if (random < hidechance) {
 					//SendAppearancePacket(AT_Invis, Invisibility::Invisible);
+
+					if (spellbonuses.ShroudofStealth || aabonuses.ShroudofStealth || itembonuses.ShroudofStealth) {
+						improved_hidden = true;
+						hidden = true;
+					}
+					else {
+						hidden = true;
+					}
+				}
+
+				if (zone->random.Int(0, 260) < (int)GetSkill(EQ::skills::SkillHide)) {
+					BotGroupSay(this, "I have momentarily ducked away from the main combat.");
 					RogueEvade(tar);
+				}
+				else {
+					BotGroupSay(this, "My attempts at ducking clear of combat fail.");
 				}
 
 				//SendAppearancePacket(AT_Invis, Invisibility::Visible);
+				hidden = false;
+
 				return true;
 			}
+
+			break;
 		}
-		else if (GetClass() == Class::Monk && GetLevel() >= 17 && !GetSpellHold(BotSpellTypes::Escape)) {
+		case Class::Monk: {
+			if (GetSkill(EQ::skills::SkillFeignDeath) == 0) {
+				return false;
+			}
+
 			if (m_monk_evade_timer.Check(false)) {
 				int timer_duration = (FeignDeathReuseTime - GetSkillReuseTime(EQ::skills::SkillFeignDeath)) * 1000;
 
@@ -2637,13 +2674,26 @@ bool Bot::TryEvade(Mob* tar) {
 				}
 
 				m_monk_evade_timer.Start(timer_duration);
-				BotGroupSay(this, "Attempting to evade %s", tar->GetCleanName());
 
-				if (zone->random.Int(0, 260) < (int)GetSkill(EQ::skills::SkillFeignDeath)) {
+				uint16 primfeign = GetSkill(EQ::skills::SkillFeignDeath);
+				uint16 secfeign = GetSkill(EQ::skills::SkillFeignDeath);
+				if (primfeign > 100) {
+					primfeign = 100;
+					secfeign = secfeign - 100;
+					secfeign = secfeign / 2;
+				}
+				else
+					secfeign = 0;
+
+				uint16 totalfeign = primfeign + secfeign;
+
+				if (zone->random.Real(0, 160) > totalfeign) {
 					//SendAppearancePacket(AT_Anim, ANIM_DEATH);
-					entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
+					BotGroupSay(this, "I have fallen to the ground.");
+					SetFeigned(false);
 				}
 				else {
+					BotGroupSay(this, "I have successfully feigned my death.");
 					SetFeigned(true);
 					//SendAppearancePacket(AT_Anim, ANIM_DEATH);
 				}
@@ -7107,6 +7157,10 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		tar = m;
 
 		if (!tar) {
+			continue;
+		}
+
+		if (caster == tar) {
 			continue;
 		}
 
