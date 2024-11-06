@@ -851,7 +851,7 @@ void Client::BulkSendInventoryItems()
 		}
 	}
 
-	const bool delete_no_rent = database.NoRentExpired(GetName());
+	const bool delete_no_rent = !HasClass(Class::Magician) && database.NoRentExpired(GetName());
 	if (delete_no_rent) { //client was offline for more than 30 minutes, delete no rent items
 		if (RuleB(Inventory, TransformSummonedBags)) {
 			DisenchantSummonedBags(false);
