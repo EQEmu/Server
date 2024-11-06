@@ -458,7 +458,7 @@ public:
 	void CopyBotSpellSettings(Bot* to);
 	void ResetBotSpellSettings();
 	int GetBotBaseSetting(uint16 botSetting);
-	int GetDefaultBotBaseSetting(uint16 botSetting);
+	int GetDefaultBotBaseSetting(uint16 botSetting, uint8 stance = Stance::Balanced);
 	void SetBotBaseSetting(uint16 botSetting, int settingValue);
 	void LoadDefaultBotSettings();
 	void SetBotSpellRecastTimer(uint16 spellType, Mob* spelltar, bool preCast = false);
@@ -467,18 +467,18 @@ public:
 	std::string GetBotSpellCategoryName(uint8 setting_type);
 	std::string GetBotSettingCategoryName(uint8 setting_type);
 
-	int GetDefaultSetting(uint16 settingCategory, uint16 settingType);
-	uint16 GetDefaultSpellTypePriority(uint16 spellType, uint8 priorityType, uint8 botClass);
-	uint16 GetDefaultSpellTypeIdlePriority(uint16 spellType, uint8 botClass);
-	uint16 GetDefaultSpellTypeEngagedPriority(uint16 spellType, uint8 botClass);
-	uint16 GetDefaultSpellTypePursuePriority(uint16 spellType, uint8 botClass);
-	uint16 GetDefaultSpellTypeResistLimit(uint16 spellType);
-	bool GetDefaultSpellTypeAggroCheck(uint16 spellType);
-	uint8 GetDefaultSpellTypeMinManaLimit(uint16 spellType);
-	uint8 GetDefaultSpellTypeMaxManaLimit(uint16 spellType);
-	uint8 GetDefaultSpellTypeMinHPLimit(uint16 spellType);
-	uint8 GetDefaultSpellTypeMaxHPLimit(uint16 spellType);
-	uint16 GetDefaultSpellTypeAEOrGroupTargetCount(uint16 spellType);
+	int GetDefaultSetting(uint16 settingCategory, uint16 settingType, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypePriority(uint16 spellType, uint8 priorityType, uint8 botClass, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeIdlePriority(uint16 spellType, uint8 botClass, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeEngagedPriority(uint16 spellType, uint8 botClass, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypePursuePriority(uint16 spellType, uint8 botClass, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeResistLimit(uint16 spellType, uint8 stance = Stance::Balanced);
+	bool GetDefaultSpellTypeAggroCheck(uint16 spellType, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMinManaLimit(uint16 spellType, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMaxManaLimit(uint16 spellType, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMinHPLimit(uint16 spellType, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMaxHPLimit(uint16 spellType, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeAEOrGroupTargetCount(uint16 spellType, uint8 stance = Stance::Balanced);
 
 	int GetSetting(uint16 settingCategory, uint16 settingType);
 	uint16 GetSpellTypePriority(uint16 spellType, uint8 priorityType);

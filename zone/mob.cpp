@@ -9063,18 +9063,30 @@ std::string Mob::GetSpellTypeShortNameByID(uint16 spellType) {
 	return spellTypeName;
 }
 
-bool Mob::GetDefaultSpellHold(uint16 spellType) {
+bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 	switch (spellType) {
+		case BotSpellTypes::Nuke:
+		case BotSpellTypes::DOT:
+		case BotSpellTypes::Stun:
+			switch (stance) {
+				case Stance::Assist:
+					return true;
+				default:
+					return false;
+			}
 		case BotSpellTypes::AENukes:
 		case BotSpellTypes::AERains:
-		case BotSpellTypes::AEMez:
 		case BotSpellTypes::AEStun:
-		case BotSpellTypes::AEDebuff:
-		case BotSpellTypes::AESlow:
-		case BotSpellTypes::AESnare:
 		case BotSpellTypes::AEDoT:
 		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::PBAENuke:
+			switch (stance) {
+				case Stance::AEBurn:
+					return false;
+				default:
+					return true;
+			}
+		case BotSpellTypes::AESnare:
 		case BotSpellTypes::AERoot:
 		case BotSpellTypes::Root:
 		case BotSpellTypes::AEDispel:
@@ -9082,28 +9094,46 @@ bool Mob::GetDefaultSpellHold(uint16 spellType) {
 		case BotSpellTypes::AEFear:
 		case BotSpellTypes::Fear:
 			return true;
-		case BotSpellTypes::Snare:
-			if (GetClass() == Class::Wizard) {
-				return true;
+		case BotSpellTypes::AEMez:
+		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::AESlow:
+		case BotSpellTypes::HateRedux:
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+					return true;
+				default:
+					return false;
 			}
-			else {
-				return false;
+		case BotSpellTypes::Snare:
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Assist:
+					return true;
+				default:
+					if (GetClass() == Class::Wizard) {
+						return true;
+					}
+					else {
+						return false;
+					}
 			}
 		case BotSpellTypes::InCombatBuffSong:
 		case BotSpellTypes::OutOfCombatBuffSong:
 		case BotSpellTypes::PreCombatBuffSong:
 			if (GetClass() == Class::Bard) {
-				return true;
+				return false;
 			}
 			else {
-				return false;
+				return true;
 			}
 		default:
 			return false;
 	}
 }
 
-uint16 Mob::GetDefaultSpellDelay(uint16 spellType) {
+uint16 Mob::GetDefaultSpellDelay(uint16 spellType, uint8 stance) {
 	switch (spellType) {
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
@@ -9111,12 +9141,31 @@ uint16 Mob::GetDefaultSpellDelay(uint16 spellType) {
 		case BotSpellTypes::FastHeals:
 		case BotSpellTypes::PetFastHeals:
 			return 2500;
-		case BotSpellTypes::AEDoT:
-		case BotSpellTypes::DOT:
 		case BotSpellTypes::GroupHeals:
 		case BotSpellTypes::RegularHeal:
 		case BotSpellTypes::PetRegularHeals:
 			return 4000;
+		case BotSpellTypes::CompleteHeal:
+		case BotSpellTypes::GroupCompleteHeals:
+		case BotSpellTypes::PetCompleteHeals:
+			return 8000;
+		case BotSpellTypes::GroupHoTHeals:
+		case BotSpellTypes::HoTHeals:
+		case BotSpellTypes::PetHoTHeals:
+			return 22000;
+		case BotSpellTypes::AEDoT:
+		case BotSpellTypes::DOT:
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+					return 1;
+				case Stance::Aggressive:
+					return 2000;
+				case Stance::Efficient:
+					return 8000;
+				default:
+					return 4000;
+			}
 		case BotSpellTypes::AENukes:
 		case BotSpellTypes::AERains:
 		case BotSpellTypes::PBAENuke:
@@ -9129,43 +9178,68 @@ uint16 Mob::GetDefaultSpellDelay(uint16 spellType) {
 		case BotSpellTypes::Slow:
 		case BotSpellTypes::AEStun:
 		case BotSpellTypes::Stun:
-			return 6000;
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+					return 1;
+				case Stance::Aggressive:
+					return 3000;
+				case Stance::Efficient:
+					return 10000;
+				default:
+					return 6000;
+			}
 		case BotSpellTypes::AERoot:
 		case BotSpellTypes::Root:
-		case BotSpellTypes::CompleteHeal:
-		case BotSpellTypes::GroupCompleteHeals:
-		case BotSpellTypes::PetCompleteHeals:
-			return 8000;		
+			return 8000;
 		case BotSpellTypes::Fear:
 		case BotSpellTypes::AEFear:
 			return 15000;
-		case BotSpellTypes::GroupHoTHeals:
-		case BotSpellTypes::HoTHeals:
-		case BotSpellTypes::PetHoTHeals:
-			return 22000;
 		default:
 			return 1;
 	}
 }
 
-uint8 Mob::GetDefaultSpellMinThreshold(uint16 spellType) {
+uint8 Mob::GetDefaultSpellMinThreshold(uint16 spellType, uint8 stance) {
 	switch (spellType) {
-		case BotSpellTypes::AENukes:
-		case BotSpellTypes::AERains:
-		case BotSpellTypes::PBAENuke:
-		case BotSpellTypes::Nuke:
 		case BotSpellTypes::AEDebuff:
 		case BotSpellTypes::Debuff:
 		case BotSpellTypes::AEDispel:
 		case BotSpellTypes::Dispel:
 		case BotSpellTypes::AESlow:
 		case BotSpellTypes::Slow:
-			return 20;
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 0;
+				default:
+					return 20;
+			}
+		case BotSpellTypes::AENukes:
+		case BotSpellTypes::AERains:
+		case BotSpellTypes::PBAENuke:
+		case BotSpellTypes::Nuke:
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 0;
+				default:
+					return 5;
+			}
 		case BotSpellTypes::AEDoT:
 		case BotSpellTypes::DOT:
-			return 35;
-		case BotSpellTypes::Charm:
-			return 50;
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 0;
+				case Stance::Efficient:
+					return 40;
+				default:
+					return 25;
+			}
 		case BotSpellTypes::Mez:
 		case BotSpellTypes::AEMez:
 			return 85;
@@ -9174,25 +9248,60 @@ uint8 Mob::GetDefaultSpellMinThreshold(uint16 spellType) {
 	}
 }
 
-uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType) {
+uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 	switch (spellType) {
 		case BotSpellTypes::Escape:
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
-			return 25;
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 40;
+				case Stance::Efficient:
+				default:
+					return 25;
+			}
 		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::Lifetap:
 		case BotSpellTypes::FastHeals:
 		case BotSpellTypes::PetFastHeals:
-			return 40;
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 55;
+				case Stance::Efficient:
+					return 35;
+				default:
+					return 40;
+			}
 		case BotSpellTypes::GroupHeals:
 		case BotSpellTypes::RegularHeal:
 		case BotSpellTypes::PetRegularHeals:
-			return 60;
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 70;
+				case Stance::Efficient:
+					return 50;
+				default:
+					return 60;
+			}
 		case BotSpellTypes::CompleteHeal:
 		case BotSpellTypes::GroupCompleteHeals:
 		case BotSpellTypes::PetCompleteHeals:
-			return 80;
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 90;
+				case Stance::Efficient:
+					return 65;
+				default:
+					return 80;
+			}
 		case BotSpellTypes::AENukes:
 		case BotSpellTypes::AERains:
 		case BotSpellTypes::PBAENuke:
@@ -9212,7 +9321,17 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType) {
 		case BotSpellTypes::AEDebuff:
 		case BotSpellTypes::Debuff:
 		case BotSpellTypes::Stun:
-			return 99;
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+					return 100;
+				case Stance::Aggressive:
+					return 100;
+				case Stance::Efficient:
+					return 90;
+				default:
+					return 99;
+			}
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::Charm:
 		case BotSpellTypes::Cure:
@@ -9237,7 +9356,16 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType) {
 				return 60;
 			}
 			else {
-				return 90;
+				switch (stance) {
+					case Stance::AEBurn:
+					case Stance::Burn:
+					case Stance::Aggressive:
+						return 95;
+					case Stance::Efficient:
+						return 80;
+					default:
+						return 90;
+				}
 			}
 		default:
 			return 100;

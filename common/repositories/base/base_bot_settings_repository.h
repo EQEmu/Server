@@ -22,6 +22,7 @@ public:
 		uint32_t id;
 		uint32_t char_id;
 		uint32_t bot_id;
+		uint8_t stance;
 		uint16_t setting_id;
 		uint8_t setting_type;
 		int32_t value;
@@ -40,6 +41,7 @@ public:
 			"id",
 			"char_id",
 			"bot_id",
+			"stance",
 			"setting_id",
 			"setting_type",
 			"value",
@@ -54,6 +56,7 @@ public:
 			"id",
 			"char_id",
 			"bot_id",
+			"stance",
 			"setting_id",
 			"setting_type",
 			"value",
@@ -102,6 +105,7 @@ public:
 		e.id			= 0;
 		e.char_id		= 0;
 		e.bot_id		= 0;
+		e.stance		= 0;
 		e.setting_id	= 0;
 		e.setting_type	= 0;
 		e.value			= 0;
@@ -146,11 +150,12 @@ public:
 			e.id			= row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_id		= row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.bot_id		= row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.setting_id	= row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.setting_type	= row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.value			= row[5] ? static_cast<int32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.category_name = row[6] ? row[6] : "";
-			e.setting_name	= row[7] ? row[7] : "";
+			e.stance		= row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.setting_id	= row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.setting_type	= row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.value			= row[6] ? static_cast<int32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.category_name = row[7] ? row[7] : "";
+			e.setting_name	= row[8] ? row[8] : "";
 
 			return e;
 		}
@@ -187,11 +192,12 @@ public:
 		v.push_back(columns[0] + " = " + std::to_string(e.id));
 		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.bot_id));
-		v.push_back(columns[3] + " = " + std::to_string(e.setting_id));
-		v.push_back(columns[4] + " = " + std::to_string(e.setting_type));
-		v.push_back(columns[5] + " = " + std::to_string(e.value));
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.category_name) + "'");
-		v.push_back(columns[7] + " = '" + Strings::Escape(e.setting_name) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.stance));
+		v.push_back(columns[4] + " = " + std::to_string(e.setting_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.setting_type));
+		v.push_back(columns[6] + " = " + std::to_string(e.value));
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.category_name) + "'");
+		v.push_back(columns[8] + " = '" + Strings::Escape(e.setting_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,6 +222,7 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.char_id));
 		v.push_back(std::to_string(e.bot_id));
+		v.push_back(std::to_string(e.stance));
 		v.push_back(std::to_string(e.setting_id));
 		v.push_back(std::to_string(e.setting_type));
 		v.push_back(std::to_string(e.value));
@@ -253,6 +260,7 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.char_id));
 			v.push_back(std::to_string(e.bot_id));
+			v.push_back(std::to_string(e.stance));
 			v.push_back(std::to_string(e.setting_id));
 			v.push_back(std::to_string(e.setting_type));
 			v.push_back(std::to_string(e.value));
@@ -294,11 +302,12 @@ public:
 			e.id			= row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_id		= row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.bot_id		= row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.setting_id	= row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.setting_type	= row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.value			= row[5] ? static_cast<int32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.category_name = row[6] ? row[6] : "";
-			e.setting_name	= row[7] ? row[7] : "";
+			e.stance		= row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.setting_id	= row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.setting_type	= row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.value			= row[6] ? static_cast<int32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.category_name = row[7] ? row[7] : "";
+			e.setting_name	= row[8] ? row[8] : "";
 
 			all_entries.push_back(e);
 		}
@@ -326,11 +335,12 @@ public:
 			e.id			= row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_id		= row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.bot_id		= row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.setting_id	= row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.setting_type	= row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.value			= row[5] ? static_cast<int32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.category_name = row[6] ? row[6] : "";
-			e.setting_name	= row[7] ? row[7] : "";
+			e.stance		= row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.setting_id	= row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.setting_type	= row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.value			= row[6] ? static_cast<int32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.category_name = row[7] ? row[7] : "";
+			e.setting_name	= row[8] ? row[8] : "";
 
 			all_entries.push_back(e);
 		}
@@ -408,6 +418,7 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.char_id));
 		v.push_back(std::to_string(e.bot_id));
+		v.push_back(std::to_string(e.stance));
 		v.push_back(std::to_string(e.setting_id));
 		v.push_back(std::to_string(e.setting_type));
 		v.push_back(std::to_string(e.value));
@@ -438,6 +449,7 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.char_id));
 			v.push_back(std::to_string(e.bot_id));
+			v.push_back(std::to_string(e.stance));
 			v.push_back(std::to_string(e.setting_id));
 			v.push_back(std::to_string(e.setting_type));
 			v.push_back(std::to_string(e.value));

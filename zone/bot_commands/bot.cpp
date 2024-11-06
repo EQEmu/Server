@@ -1180,43 +1180,188 @@ void bot_command_stance(Client *c, const Seperator *sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [current | value: 1-9] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
-		c->Message(
-			Chat::White,
+		std::vector<std::string> description =
+		{
+			"Change a bot's stance to control the way it behaves."
+		};
+
+		std::vector<std::string> notes =
+		{
+			"- <b>Changing a stance will reset all settings to match that stance type.</b>",
+			"- Any changes made will only save to that stance for future use.",
 			fmt::format(
-				"Value: {} ({}), {} ({}), {} ({})",
-				Stance::Passive,
+				"- {} (#{}) will tell Non-Warrior classes to taunt automatically.",
+				Stance::GetName(Stance::Aggressive),
+				Stance::Aggressive
+			),
+			"<br>",
+			"Available stances:",
+			fmt::format(
+				"{} (#{}), {} (#{}), {} (#{}), {} (#{}), {} (#{}), {} (#{}), {} (#{})",
 				Stance::GetName(Stance::Passive),
-				Stance::Balanced,
+				Stance::Passive,
 				Stance::GetName(Stance::Balanced),
+				Stance::Balanced,
+				Stance::GetName(Stance::Efficient),
+				Stance::Efficient,
+				Stance::GetName(Stance::Aggressive),
 				Stance::Aggressive,
-				Stance::GetName(Stance::Aggressive)
-			).c_str()
+				Stance::GetName(Stance::Assist),
+				Stance::Assist,
+				Stance::GetName(Stance::Burn),
+				Stance::Burn,
+				Stance::GetName(Stance::AEBurn),
+				Stance::AEBurn
+			),
+			"<br>",
+				fmt::format(
+					"- {} (#{}) [Default] - Overall balance and casts most spell types by default.",
+					Stance::GetName(Stance::Balanced),
+					Stance::Balanced
+			),
+				fmt::format(
+					"- {} (#{}) - Idle. Does not cast or engage in combat.",
+					Stance::GetName(Stance::Passive),
+					Stance::Passive
+			),
+				fmt::format(
+					"- {} (#{}) - More mana and aggro efficient (SKs will still cast hate line). Longer delays between detrimental spells, thresholds adjusted to cast less often.",
+					Stance::GetName(Stance::Efficient),
+					Stance::Efficient
+			),
+				fmt::format(
+					"- {} (#{}) - Much more aggressive in their cast times and thresholds. More DPS, debuffs and slow but a higher risk of snagging aggro.",
+					Stance::GetName(Stance::Aggressive),
+					Stance::Aggressive
+			),
+			fmt::format(
+					"- {} (#{}) - Support role. Most offensive spell types are disabled. Focused on heals, cures, CC, debuffs and slows.",
+					Stance::GetName(Stance::Assist),
+					Stance::Assist
+			),
+			fmt::format(
+					"- {} (#{}) - Murder. Doesn't care about aggro, just wants to kill. DPS Machine.",
+					Stance::GetName(Stance::Burn),
+					Stance::Burn
+			),
+			fmt::format(
+					"- {} (#{}) - Murder EVERYTHING. Doesn't care about aggro, casts AEs. Everything must die ASAP.",
+					Stance::GetName(Stance::AEBurn),
+					Stance::AEBurn
+			)
+		};
+
+		std::vector<std::string> example_format =
+		{
+			fmt::format(
+				"{} [current | value: {}-{}]", 
+				sep->arg[0],
+				Stance::Passive,
+				Stance::AEBurn
+			)
+		};
+		std::vector<std::string> examples_one =
+		{
+			"To set all bots to BurnAE:",
+			fmt::format(
+				"{} {} spawned {}",
+				sep->arg[0],
+				Stance::Aggressive,
+				Class::ShadowKnight
+			)
+		};
+		std::vector<std::string> examples_two =
+		{
+			"To set all Shadowknights to Aggressive:",
+			fmt::format(
+				"{} {} byclass {}",
+				sep->arg[0],
+				Stance::Aggressive,
+				Class::ShadowKnight
+			)
+		};
+		std::vector<std::string> examples_three =
+		{
+			"To check the current stances of all bots:",
+			fmt::format(
+				"{} current spawned",
+				sep->arg[0]
+			)
+		};
+
+		std::vector<std::string> actionables =
+		{
+			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
+		};
+
+		std::vector<std::string> options = { };
+		std::vector<std::string> options_one = { };
+		std::vector<std::string> options_two = { };
+		std::vector<std::string> options_three = { };
+
+		std::string popup_text = c->SendCommandHelpWindow(
+			c,
+			description,
+			notes,
+			example_format,
+			examples_one, examples_two, examples_three,
+			actionables,
+			options,
+			options_one, options_two, options_three
 		);
+
+		popup_text = DialogueWindow::Table(popup_text);
+
+		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+
 		return;
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
 
-	std::string arg1 = sep->arg[1];
+	bool currentCheck = false;
 	int ab_arg = 1;
-	bool current_check = false;
 	uint32 value = 0;
+
+	std::string arg1 = sep->arg[1];
 
 	if (sep->IsNumber(1)) {
 		++ab_arg;
 		value = atoi(sep->arg[1]);
-		if (value < 0 || value > 300) {
-			c->Message(Chat::White, "You must enter a value within the range of 0 - 300.");
+		if (
+			value < Stance::Passive || 
+			value > Stance::AEBurn ||
+			value == Stance::Reactive ||
+			value == Stance::Assist
+		) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"You must choose a valid stance ID, use {} for information regarding this command.",
+					Saylink::Silent(
+						fmt::format("{} help", sep->arg[0])
+					)
+				).c_str()
+			);
+
 			return;
 		}
 	}
 	else if (!arg1.compare("current")) {
 		++ab_arg;
-		current_check = true;
+		currentCheck = true;
 	}
 	else {
-		c->Message(Chat::White, "Incorrect argument, use %s help for a list of options.", sep->arg[0]);
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Incorrect argument, use {} for information regarding this command.",
+				Saylink::Silent(
+					fmt::format("{} help", sep->arg[0])
+				)
+			).c_str()
+		);
+
 		return;
 	}
 
@@ -1232,26 +1377,56 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!current_check && (value == Stance::Unknown || (value != Stance::Passive && value != Stance::Balanced && value != Stance::Aggressive))) {
-		c->Message(Chat::White, "A [current] argument or valid numeric [value] is required to use this command");
+	Bot* first_found = nullptr;
+	int success_count = 0;
+	for (auto bot_iter : sbl) {
+		if (!first_found) {
+			first_found = bot_iter;
+		}
+
+		if (currentCheck) {
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} says, 'My current stance is {} ({}).'",
+					bot_iter->GetCleanName(),
+					Stance::GetName(bot_iter->GetBotStance()),
+					bot_iter->GetBotStance()
+				).c_str()
+			);
+
+			continue;
+		}
+
+		bot_iter->Save();
+		bot_iter->SetBotStance(value);
+		bot_iter->LoadDefaultBotSettings();
+		database.botdb.LoadBotSettings(bot_iter);
+		bot_iter->Save();
+		++success_count;
+	}
+
+	if (currentCheck) {
 		return;
 	}
 
-	for (auto bot_iter : sbl) {
-		if (!bot_iter)
-			continue;
-
-		if (!current_check) {
-			bot_iter->SetBotStance(value);
-			bot_iter->Save();
-		}
-
-		Bot::BotGroupSay(
-			bot_iter,
+	if (success_count == 1 && first_found) {
+		c->Message(
+			Chat::Green,
 			fmt::format(
-				"My current stance is {} ({}).",
-				Stance::GetName(bot_iter->GetBotStance()),
-				bot_iter->GetBotStance()
+				"{} says, 'I am now set to the stance [{}].'",
+				first_found->GetCleanName(),
+				Stance::GetName(value)
+			).c_str()
+		);
+	}
+	else {
+		c->Message(
+			Chat::Green,
+			fmt::format(
+				"{} of your bots are now set to the stance [{}].",
+				success_count,
+				Stance::GetName(value)
 			).c_str()
 		);
 	}
@@ -1278,7 +1453,7 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 	uint8 sml = RuleI(Bots, CasterStopMeleeLevel);
 	bool sync_sml = false;
 	bool reset_sml = false;
-	bool current_check = false;
+	bool currentCheck = false;
 
 	if (sep->IsNumber(1)) {
 		ab_arg = 2;
@@ -1294,14 +1469,23 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 	}
 	else if (!arg1.compare("current")) {
 		ab_arg = 2;
-		current_check = true;
+		currentCheck = true;
 	}
 	else if (!strcasecmp(sep->arg[1], "reset")) {
 		ab_arg = 2;
 		reset_sml = true;
 	}
 	else {
-		c->Message(Chat::White, "Incorrect argument, use %s help for a list of options.", sep->arg[0]);
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Incorrect argument, use {} for information regarding this command.",
+				Saylink::Silent(
+					fmt::format("{} help", sep->arg[0])
+				)
+			).c_str()
+		);
+
 		return;
 	}
 
@@ -1347,7 +1531,7 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 			sml = my_bot->GetDefaultBotBaseSetting(BotBaseSettings::StopMeleeLevel);
 		}
 
-		if (current_check) {
+		if (currentCheck) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -1364,7 +1548,7 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 		}
 	}
 
-	if (!current_check) {
+	if (!currentCheck) {
 		if (success_count == 1 && first_found) {
 			c->Message(
 				Chat::White,
