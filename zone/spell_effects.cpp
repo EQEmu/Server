@@ -1978,8 +1978,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
-				if (proc_id == SPELL_VAMPIRIC_EMBRACE && (HasClass(Class::ShadowKnight))) {
+				// Special case for Vampiric Embrace. If this is not a Necromancer, the proc is different.
+				if (proc_id == SPELL_VAMPIRIC_EMBRACE && !(HasClass(Class::Necromancer))) {
 					proc_id = SPELL_VAMPIRIC_EMBRACE_OF_SHADOW;
 				}
 
@@ -4497,8 +4497,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				uint16 proc_id = GetProcID(buffs[slot].spellid, i);
 
-				// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
-				if (proc_id == SPELL_VAMPIRIC_EMBRACE && (HasClass(Class::ShadowKnight))) {
+				// Special case for Vampiric Embrace. If this is not a Necromancer, the proc is different.
+				if (proc_id == SPELL_VAMPIRIC_EMBRACE && !(HasClass(Class::Necromancer))) {
 					proc_id = SPELL_VAMPIRIC_EMBRACE_OF_SHADOW;
 				}
 
