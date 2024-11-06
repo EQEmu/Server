@@ -24,6 +24,11 @@ Perl_Database* Perl_Database::Connect(Connection type)
 	return new Perl_Database(type);
 }
 
+Perl_Database* Perl_Database::Connect(Connection type, bool connect)
+{
+	return new Perl_Database(type, connect);
+}
+
 Perl_Database* Perl_Database::Connect(const char* host, const char* user, const char* pass, const char* db, uint32_t port)
 {
 	return new Perl_Database(host, user, pass, db, port);
@@ -223,6 +228,7 @@ void perl_register_database()
 		package.add("DESTROY", &Perl_Database::Destroy);
 		package.add("new", static_cast<Perl_Database*(*)()>(&Perl_Database::Connect));
 		package.add("new", static_cast<Perl_Database*(*)(QuestDB::Connection)>(&Perl_Database::Connect));
+		package.add("new", static_cast<Perl_Database*(*)(QuestDB::Connection, bool)>(&Perl_Database::Connect));
 		package.add("new", static_cast<Perl_Database*(*)(const char*, const char*, const char*, const char*, uint32_t)>(&Perl_Database::Connect));
 		package.add("close", &Perl_Database::Close);
 		package.add("prepare", &Perl_Database::Prepare);

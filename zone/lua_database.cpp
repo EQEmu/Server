@@ -192,6 +192,7 @@ luabind::scope lua_register_database()
 		)]
 		.def(luabind::constructor<>())
 		.def(luabind::constructor<QuestDB::Connection>())
+		.def(luabind::constructor<QuestDB::Connection, bool>())
 		.def(luabind::constructor<const char*, const char*, const char*, const char*, uint32_t>())
 		.def("close", &Lua_Database::Close)
 		.def("prepare", &Lua_Database::Prepare, luabind::adopt(luabind::result)),

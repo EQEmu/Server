@@ -13,6 +13,7 @@ public:
 	static void Destroy(Perl_Database* ptr);
 	static Perl_Database* Connect();
 	static Perl_Database* Connect(Connection type);
+	static Perl_Database* Connect(Connection type, bool connect);
 	static Perl_Database* Connect(const char* host, const char* user, const char* pass, const char* db, uint32_t port);
 
 	void Close();
