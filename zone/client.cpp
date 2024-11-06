@@ -877,7 +877,6 @@ void Client::FixModel(Spawn_Struct* npc) {
 	int defGolemTextures[] = { 0, 9, 8, 7 };
 	const int defFungusmanTextures[] = { 0, 10, 11, 12, 2, 4, 6, 8 };
 	static const int defaultRatTextures[] = { 0, 3, 4 };
-	float level_size_scale = 1.0f + (npc->level / 50.0f);
 
 	switch (npc->race) {
 		case Race::Human:
@@ -971,7 +970,6 @@ void Client::FixModel(Spawn_Struct* npc) {
 					break;
 
 			}
-            npc->size *= level_size_scale;
             break;
 
         case Race::GiantBat:
@@ -983,13 +981,11 @@ void Client::FixModel(Spawn_Struct* npc) {
         case Race::GiantSpider:
             npc->race = Race::Spider;
             npc->gender = Gender::Neuter;
-            npc->size *= level_size_scale;
             break;
 
 		case Race::Bear:
 			if (npc->equip_chest2 < 2) {
 				npc->race = Race::Bear2;
-				npc->size *= level_size_scale;
 			}
 			break;
 
@@ -1070,7 +1066,7 @@ void Client::FixModel(Spawn_Struct* npc) {
 
 		case Race::Alligator:
 			npc->race = Race::Crocodile;
-			npc->size *= .5;
+			npc->size *= .25;
 			break;
 
 		case Race::GrobbCitizen:
@@ -1224,7 +1220,6 @@ void Client::FixModel(Spawn_Struct* npc) {
 		case Race::Fairy:
 			npc->race = Race::Fairy2;
 			npc->gender = Gender::Neuter;
-			npc->size *= level_size_scale;
 			break;
 
 		case Race::Unicorn:
@@ -1407,7 +1402,6 @@ void Client::FixModel(Spawn_Struct* npc) {
 					npc->equip_chest2 = 2;
 					break;
 			}
-			npc->size  *= level_size_scale;
 			break;
 
 		case Race::PhinigelAutropos:
@@ -1430,7 +1424,6 @@ void Client::FixModel(Spawn_Struct* npc) {
 
 		case Race::GiantSnake:
 			npc->race = Race::Snake;
-			npc->size  *= level_size_scale;
 			break;
 
 		case Race::ClockworkGnome:
@@ -1456,7 +1449,6 @@ void Client::FixModel(Spawn_Struct* npc) {
 					npc->equip_chest2 		= 1;
 					npc->helm 	= zone->random.Int(0,3);
 			}
-			npc->size  *= level_size_scale;
 			npc->gender = Gender::Neuter;
 			break;
 
@@ -1585,6 +1577,8 @@ void Client::FixModel(Spawn_Struct* npc) {
 
 		case Race::LavaDragon:
 			npc->race = Race::Dragon5;
+			npc->helm = npc->equip_chest2;
+			npc->size = 100;
 			switch(npc->equip_chest2) {
 				case 0:
 					npc->equip_chest2 = 4;
@@ -1611,9 +1605,6 @@ void Client::FixModel(Spawn_Struct* npc) {
 					npc->equip_chest2 = 2;
 					break;
 			}
-			npc->helm = npc->equip_chest2;
-			npc->size = 100;
-
 		break;
 
         case Race::Drake:
@@ -1622,7 +1613,6 @@ void Client::FixModel(Spawn_Struct* npc) {
             if (npc->equip_chest2 < 1 || npc->equip_chest2 > 3) {
                 npc->equip_chest2 = 0; // Black Drake
             }
-            npc->size *= level_size_scale;
             break;
 
         case Race::Wurm:
@@ -3182,27 +3172,11 @@ void Client::ReadBook(BookRequest_Struct* book)
 
 				t->type       = inst->GetItem()->Book;
 				t->can_scribe = !recipe.empty();
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && book->invslot <= EQ::invbag::GENERAL_BAGS_END) {
-			if (inst && inst->GetItem()) {
-				auto recipe = TradeskillRecipeRepository::GetWhere(
-					content_db,
-					fmt::format(
-						"learned_by_item_id = {} LIMIT 1",
-						inst->GetItem()->ID
-					)
-				);
-
-				t->type       = inst->GetItem()->Book;
-				t->can_scribe = !recipe.empty();
 			}
 		}
 
 		memcpy(t->booktext, b.text.c_str(), b.text.size());
-		memcpy(t->booktext, b.text.c_str(), b.text.size());
 
-		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
-			if (m_pp.languages[b.language] < Language::MaxValue) {
-				GarbleMessage(t->booktext, (Language::MaxValue - m_pp.languages[b.language]));
 		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
 			if (m_pp.languages[b.language] < Language::MaxValue) {
 				GarbleMessage(t->booktext, (Language::MaxValue - m_pp.languages[b.language]));
@@ -11940,11 +11914,7 @@ void Client::ReadBookByName(std::string book_name, uint8 book_type)
 		o->invslot = 0;
 
 		memcpy(o->booktext, b.text.c_str(), b.text.size());
-		memcpy(o->booktext, b.text.c_str(), b.text.size());
 
-		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
-			if (m_pp.languages[b.language] < Language::MaxValue) {
-				GarbleMessage(o->booktext, (Language::MaxValue - m_pp.languages[b.language]));
 		if (EQ::ValueWithin(b.language, Language::CommonTongue, Language::Unknown27)) {
 			if (m_pp.languages[b.language] < Language::MaxValue) {
 				GarbleMessage(o->booktext, (Language::MaxValue - m_pp.languages[b.language]));

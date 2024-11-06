@@ -1387,7 +1387,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 				(spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE))
 			);
 
-			if (is_delayed_packet) {
+			if (is_delayed_packet || true) {
 				app = new EQApplicationPacket;
 				spawn->CreateSpawnPacket(app);
 				client->QueuePacket(app, true, Client::CLIENT_CONNECTED);

@@ -1781,12 +1781,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_ModelSize:
 			case SE_ChangeHeight:
 			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Model Size: %d%%", effect_value);
-#endif
-				if (!IsClient() && !(GetOwner() && GetOwner()->IsClient())) {
+				if (!IsClient() && (spells[spell_id].target_type != SpellTargetType::ST_Pet || spells[spell_id].target_type != SpellTargetType::ST_SummonedPet)) {
 					break; // not dealing with this
 				}
+
+				LogDebug("How did we get here?");
 
 				if (effect_value && effect_value != 100) {
 					// Only allow 2 size changes from Base Size
