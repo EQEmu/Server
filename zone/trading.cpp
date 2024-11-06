@@ -3526,7 +3526,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	ps.item_slot = parcel_out.slot_id;
 	strn0cpy(ps.send_to, GetCleanName(), sizeof(ps.send_to));
 
-	if (!buy_item->IsStackable())
+	if (!buy_item->IsStackable()) {
 		TraderRepository::DeleteOne(database, trader_item.id);
 	} else {
 		TraderRepository::UpdateQuantity(
