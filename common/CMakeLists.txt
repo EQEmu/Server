@@ -62,6 +62,7 @@ SET(common_sources
     mutex.cpp
     mysql_request_result.cpp
     mysql_request_row.cpp
+    mysql_stmt.cpp
     opcode_map.cpp
     opcodemgr.cpp
     packet_dump.cpp
@@ -586,6 +587,7 @@ SET(common_headers
     mutex.h
     mysql_request_result.h
     mysql_request_row.h
+    mysql_stmt.h
     op_codes.h
     opcode_dispatch.h
     opcodemgr.h
