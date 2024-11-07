@@ -4,7 +4,7 @@ void bot_command_bot_settings(Client* c, const Seperator* sep)
 {
 	std::list<const char*> subcommand_list;
 	subcommand_list.push_back("behindmob");
-	subcommand_list.push_back("casterrange");
+	subcommand_list.push_back("distanceranged");
 	subcommand_list.push_back("copysettings");
 	subcommand_list.push_back("defaultsettings");
 	subcommand_list.push_back("enforcespelllist");
