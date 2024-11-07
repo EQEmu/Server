@@ -1153,6 +1153,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				DispelMagic(caster, spell_id, effect_value);
+				ApplyGlobalBuffs();
 				break;
 			}
 
@@ -1184,6 +1185,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 				}
+				ApplyGlobalBuffs();
 				break;
 			}
 
@@ -1211,6 +1213,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 				}
+				ApplyGlobalBuffs();
 				break;
 			}
 
