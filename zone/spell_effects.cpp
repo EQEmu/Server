@@ -1153,7 +1153,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				DispelMagic(caster, spell_id, effect_value);
-				ApplyGlobalBuffs();
+				if (IsClient() || (GetOwner() && GetOwner()->IsClient())) {
+					ApplyGlobalBuffs();
+				}
 				break;
 			}
 
@@ -1185,7 +1187,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 				}
-				ApplyGlobalBuffs();
+				if (IsClient() || (GetOwner() && GetOwner()->IsClient())) {
+					ApplyGlobalBuffs();
+				}
 				break;
 			}
 
@@ -1213,7 +1217,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 				}
-				ApplyGlobalBuffs();
+				if (IsClient() || (GetOwner() && GetOwner()->IsClient())) {
+					ApplyGlobalBuffs();
+				}
 				break;
 			}
 
@@ -3920,6 +3926,47 @@ snare has both of them negative, yet their range should work the same:
 	return result;
 }
 
+bool Mob::IsGroupSuspendableBuff(uint16 spell_id, Buffs_Struct buff) {
+	if (!RuleB(Custom, SuspendGroupBuffs)) {
+		return false;
+	}
+
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	if (!IsBeneficialSpell(spell_id)) {
+		return false;
+	}
+
+	if (!(IsClient() || GetOwnerID())) {
+		return false;
+	}
+
+	if (strlen(buff.caster_name) == 0) {
+		return false;
+	}
+
+	Client* caster = entity_list.GetClientByName(buff.caster_name);
+	Client* client = GetOwnerOrSelf()->CastToClient();
+
+	if (caster && client) {
+		if (caster == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(client))) {
+			if (GetSpellEffectIndex(spell_id, SE_DivineAura) == -1) {
+				if (caster->GetInv().IsClickEffectEquipped(spell_id)) {
+					return true;
+				} else if (caster->FindSpellBookSlotBySpellID(spell_id) >= 0 && !spells[spell_id].short_buff_box && !IsBardSong(spell_id)) {
+					return true;
+				} else if (suspendable_aa.find(spell_id) != suspendable_aa.end()) {
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
 
 void Mob::BuffProcess()
 {
@@ -3941,29 +3988,7 @@ void Mob::BuffProcess()
 				buffs[buffs_i].ticsremaining != PERMANENT_BUFF_DURATION) {
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
-					bool suspended = false;
-
-					if (RuleB(Custom, SuspendGroupBuffs) && IsBeneficialSpell(buffs[buffs_i].spellid)) {
-						uint32 spellid = buffs[buffs_i].spellid;
-						if ((IsClient() || IsPet()) && buffs[buffs_i].caster_name) {
-							Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
-							Client* client = GetOwnerOrSelf()->CastToClient();
-
-							if (caster && client) {
-								if (caster == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(client))) {
-									if (GetSpellEffectIndex(spellid, SE_DivineAura) == -1) {
-										if (caster->GetInv().IsClickEffectEquipped(spellid)) {
-											suspended = true;
-										} else if (caster->FindSpellBookSlotBySpellID(spellid) >= 0 && !spells[spellid].short_buff_box && !IsBardSong(spellid)) {
-											suspended = true;
-										} else if (suspendable_aa.find(spellid) != suspendable_aa.end()) {
-											suspended = true;
-										}
-									}
-								}
-							}
-						}
-					}
+					bool suspended = IsGroupSuspendableBuff(buffs[buffs_i].spellid, buffs[buffs_i]);
 
 					if (RuleB(Custom, MulticlassingEnabled) && IsBardSong(buffs[buffs_i].spellid)) {
 						if (IsClient() || (IsPetOwnerClient()) && buffs[buffs_i].caster_name) {
@@ -3998,6 +4023,8 @@ void Mob::BuffProcess()
 								SendBuffsToClient(c.second);
 							}
 						}
+
+						SendPetBuffsToClient();
 					}
 
 					if (buffs[buffs_i].ticsremaining < 0) {
