@@ -74,7 +74,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 			"[misc] copies all miscellaneous options such as:",
 			"- ^showhelm, ^followd, ^stopmeleelevel",
 			"- ^enforcespellsettings, ^bottoggleranged, ^petsettype",
-			"- ^behindmob, ^casterrange, ^illusionblock",
+			"- ^behindmob, ^distanceranged, ^illusionblock",
 			"- ^sitincombat, ^sithppercent and ^sitmanapercent",
 
 		};

@@ -136,7 +136,7 @@ namespace BotBaseSettings {
 	constexpr uint16 RangedSetting				= 5;
 	constexpr uint16 PetSetTypeSetting			= 6;
 	constexpr uint16 BehindMob					= 7;
-	constexpr uint16 CasterRange				= 8;
+	constexpr uint16 DistanceRanged				= 8;
 	constexpr uint16 IllusionBlock				= 9;
 	constexpr uint16 MaxMeleeRange				= 10;
 	constexpr uint16 MedInCombat				= 11;
@@ -506,8 +506,8 @@ public:
 	void SetMaxMeleeRange(bool value) { _maxMeleeRangeStatus = value; }	
 	uint8 GetStopMeleeLevel() const { return _stopMeleeLevel; }
 	void SetStopMeleeLevel(uint8 level) { _stopMeleeLevel = level; }
-	uint32 GetBotCasterRange() const { return _casterRange; }
-	void SetBotCasterRange(uint32 casterRange) { _casterRange = casterRange; }
+	uint32 GetBotDistanceRanged() const { return _distanceRanged; }
+	void SetBotDistanceRanged(uint32 distanceRanged) { _distanceRanged = distanceRanged; }
 	bool GetMedInCombat() const { return _medInCombat; }
 	void SetMedInCombat(bool value) { _medInCombat = value; }
 	uint8 GetHPWhenToMed() const { return _HPWhenToMed; }
@@ -640,7 +640,6 @@ public:
 	bool GetRangerAutoWeaponSelect() { return _rangerAutoWeaponSelect; }
 	uint8 GetBotStance() { return _botStance; }
 	uint8 GetChanceToCastBySpellType(uint16 spellType);
-	float GetBotCasterMaxRange(float melee_distance_max);
 	bool IsGroupHealer() const { return m_CastingRoles.GroupHealer; }
 	bool IsGroupSlower() const { return m_CastingRoles.GroupSlower; }
 	bool IsGroupNuker() const { return m_CastingRoles.GroupNuker; }
@@ -929,9 +928,9 @@ public:
 		const EQ::ItemInstance* const& s_item,
 		bool behindMob,
 		bool backstab_weapon,
-		float& melee_distance_max,
-		float& melee_distance,
 		float& melee_distance_min,
+		float& melee_distance,
+		float& melee_distance_max,
 		uint8 stopMeleeLevel
 	);
 
@@ -947,8 +946,8 @@ public:
 		const EQ::ItemInstance*& p_item, 
 		const EQ::ItemInstance*& s_item,
 		float& melee_distance_min,
-		float& melee_distance_max,
 		float& melee_distance,
+		float& melee_distance_max,
 		uint8 stopMeleeLevel
 		);
 	bool GetCombatJitterFlag() { return m_combat_jitter_flag; }
@@ -1065,7 +1064,7 @@ private:
 	bool _showHelm;
 	bool _botRangedSetting;
 	uint8 _stopMeleeLevel;
-	uint32 _casterRange;
+	uint32 _distanceRanged;
 	bool _behindMobStatus;
 	bool _maxMeleeRangeStatus;
 	bool _medInCombat;

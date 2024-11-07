@@ -209,18 +209,18 @@ INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM b
 INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 5, 0, `archery_setting`, 'BaseSetting', 'RangedSetting' FROM bot_data WHERE `archery_setting` != 0;
 
 INSERT INTO bot_settings
-SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 8, 0, `caster_range`, 'BaseSetting', 'CasterRange'
+SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 8, 0, `caster_range`, 'BaseSetting', 'DistanceRanged'
 FROM (
     SELECT `bot_id`, 
            (CASE 
                WHEN (`class` IN (1, 7, 19, 16)) THEN 0
                 WHEN `class` = 8 THEN 0
                ELSE 90
-           END) AS `casterRange`,
+           END) AS `DistanceRanged`,
            `caster_range`
     FROM bot_data
 ) AS `subquery`
-WHERE `casterRange` != `caster_range`;
+WHERE `DistanceRanged` != `caster_range`;
 
 ALTER TABLE `bot_data`
 	DROP COLUMN `show_helm`;
@@ -241,7 +241,7 @@ UPDATE `bot_command_settings` SET `aliases`= 'bh' WHERE `bot_command`='behindmob
 UPDATE `bot_command_settings` SET `aliases`= 'bs|settings' WHERE `bot_command`='botsettings';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|followdistance') ELSE 'followd||followdistance' END WHERE `bot_command`='botfollowdistance' AND `aliases` NOT LIKE '%followdistance%';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|ranged|toggleranged|btr') ELSE 'ranged|toggleranged|btr' END WHERE `bot_command`='bottoggleranged' AND `aliases` NOT LIKE '%ranged|toggleranged|btr%';
-UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|cr') ELSE 'cr' END WHERE `bot_command`='casterrange' AND `aliases` NOT LIKE '%cr%';
+UPDATE `bot_command_settings` SET `aliases`= 'distranged|dr' WHERE `bot_command`='distanceranged';
 UPDATE `bot_command_settings` SET `aliases`= 'copy' WHERE `bot_command`='copysettings';
 UPDATE `bot_command_settings` SET `aliases`= 'default' WHERE `bot_command`='defaultsettings';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|enforce') ELSE 'enforce' END WHERE `bot_command`='enforcespellsettings' AND `aliases` NOT LIKE '%enforce%';

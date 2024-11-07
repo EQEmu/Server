@@ -1285,7 +1285,7 @@ int bot_command_init(void)
 		bot_command_add("botupdate", "Updates a bot to reflect any level changes that you have experienced", AccountStatus::Player, bot_command_update) ||
 		bot_command_add("botwoad", "Changes the Barbarian woad of a bot", AccountStatus::Player, bot_command_woad) ||
 		bot_command_add("cast", "Tells the first found specified bot to cast the given spell type", AccountStatus::Player, bot_command_cast) ||
-		bot_command_add("casterrange", "Controls the range casters will try to stay away from a mob (if too far, they will skip spells that are out-of-range)", AccountStatus::Player, bot_command_caster_range) ||
+		bot_command_add("distanceranged", "Controls the range casters and ranged will try to stay away from a mob", AccountStatus::Player, bot_command_distance_ranged) ||
 		bot_command_add("charm", "Attempts to have a bot charm your target", AccountStatus::Player, bot_command_charm) ||
 		bot_command_add("circle", "Orders a Druid bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_circle) ||
 		bot_command_add("classracelist", "Lists the classes and races and their appropriate IDs", AccountStatus::Player, bot_command_class_race_list) ||
@@ -2256,7 +2256,6 @@ void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, st
 #include "bot_commands/bot.cpp"
 #include "bot_commands/bot_settings.cpp"
 #include "bot_commands/cast.cpp"
-#include "bot_commands/caster_range.cpp"
 #include "bot_commands/charm.cpp"
 #include "bot_commands/class_race_list.cpp"
 #include "bot_commands/click_item.cpp"
@@ -2265,6 +2264,7 @@ void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, st
 #include "bot_commands/default_settings.cpp"
 #include "bot_commands/defensive.cpp"
 #include "bot_commands/depart.cpp"
+#include "bot_commands/distance_ranged.cpp"
 #include "bot_commands/escape.cpp"
 #include "bot_commands/find_aliases.cpp"
 #include "bot_commands/follow.cpp"
