@@ -2794,7 +2794,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 	}
 
 	if (IsBuyer()) {
-		ToggleBuyerMode();
+		ToggleBuyerMode(false);
 	}
 
 	/* Item to Currency Storage */

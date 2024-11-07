@@ -4627,6 +4627,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					owner->ValidatePetList();
 				}
 
+				SetOwnerID(0);
+
 				if (!IsClient())
 				{
 					RemoveGlobalBuffs();
@@ -10216,6 +10218,12 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 	//Level restriction check should not go here.
 	if (!target) {
 		return false;
+	}
+
+	for (auto pet : GetAllPets()) {
+		if (pet && pet->GetID() == target->GetID()) {
+			return true;
+		}
 	}
 
 	if (target->IsClient()) {

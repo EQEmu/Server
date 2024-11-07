@@ -3229,23 +3229,7 @@ uint32 Zone::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)
 {
 	auto global_buff = GlobalBuffsRepository::FindOne(database, spell_id);
 	auto cur_time = Timer::GetTimeSeconds();
-	uint32 new_timestamp = global_buff.duration;
-	int64 time_difference = global_buff.duration - cur_time;
-
-	if (global_buff.spell_id == 0 && global_buff.duration == 0)
-	{
-		//New DB row
-		new_timestamp = cur_time;
-	}
-	else
-	{
-		//Update existing row, including expired data
-		if (time_difference <= 0 || global_buff.duration == 0)
-		{
-			new_timestamp = cur_time;
-		}
-	}
-
+	uint32 new_timestamp = std::max(static_cast<uint32>(global_buff.duration), cur_time);
 	new_timestamp += add_duration;
 
 	global_buff.duration = new_timestamp;

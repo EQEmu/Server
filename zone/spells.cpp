@@ -3282,7 +3282,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		return -1;
 	}
 
-	if (spellid1 == spellid2 ) {
+	if (spellid1 == spellid2) {
 
 		if (spellid1 == SPELL_EYE_OF_ZOMM && spellid2 == SPELL_EYE_OF_ZOMM) {//only the original Eye of Zomm spell will not take hold if affect is already on you, other versions client fades the buff as soon as cast.
 			MessageString(Chat::Red, SPELL_NO_HOLD);
@@ -4041,6 +4041,8 @@ bool Mob::SpellOnTarget(
 		}
 	}
 
+	LogDebug("Spell Target: [{}]", spelltar->GetName());
+
 	if (spelltar->IsClient() && spelltar->CastToClient()->IsTrader()) {
 		if (spellOwner->IsClient()) {
 			spellOwner->Message(Chat::SpellFailure, "Your spell would not take hold on your target.");
@@ -4067,7 +4069,8 @@ bool Mob::SpellOnTarget(
 		IsDetrimentalSpell(spell_id) &&
 		!IsAttackAllowed(spelltar, true) &&
 		!IsResurrectionEffects(spell_id) &&
-		!IsEffectInSpell(spell_id, SE_BindSight)
+		!IsEffectInSpell(spell_id, SE_BindSight) &&
+		!IsCharmSpell(spell_id)
 	) {
 		if (!IsClient() || !CastToClient()->GetGM()) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
@@ -4408,7 +4411,7 @@ bool Mob::SpellOnTarget(
 		} else if (
 			!IsAttackAllowed(spelltar, true) &&
 			!IsResurrectionEffects(spell_id) &&
-			!IsEffectInSpell(spell_id, SE_BindSight)
+			!IsEffectInSpell(spell_id, SE_BindSight) && !(IsCharmSpell(spell_id) && spelltar->IsNPC() && spelltar->IsCharmed() && spelltar->GetOwnerID() == GetID())
 		) { // Detrimental spells - PVP check
 			LogSpells(
 				"Detrimental spell [{}] can't take hold [{}] -> [{}]",
