@@ -4350,9 +4350,6 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 	if (brrs->EntityID == GetID()) {
 		m = this;
 	}
-	else if (brrs->EntityID == GetPetID()) {
-		m = GetPet();
-	}
 	else if (GetGM())
 	{
 		m = entity_list.GetMobID(brrs->EntityID);
@@ -4363,6 +4360,13 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 			if (bot_test && bot_test->IsBot() && bot_test->GetOwner() == this) {
 				m = bot_test;
 			}
+		}
+	}
+
+	for (auto pet : GetAllPets()) {
+		if (pet->GetID() == brrs->EntityID) {
+			m = pet;
+			break;
 		}
 	}
 
