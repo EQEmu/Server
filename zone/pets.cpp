@@ -1112,14 +1112,21 @@ bool Mob::RemovePet(Mob* pet) {
 }
 
 bool Mob::RemovePet(uint16 pet_id) {
-	ValidatePetList();
     // Iterate through the petids vector to find and remove the pet by its ID
     for (auto it = petids.begin(); it != petids.end(); ++it) {
         if (*it == pet_id) {
             // Retrieve the Mob associated with the pet ID
             auto pet = entity_list.GetMob(pet_id);
             if (pet) {
-                pet->SetOwnerID(0);  // Detach the pet from its owner
+				pet->SetOwnerID(0);  // Detach the pet from its owner
+				pet->SendAppearancePacket(AppearanceType::Pet, 0, true, true);
+				pet->SetPetType(petNone);
+				pet->etHeld(false);
+				pet->SetGHeld(false);
+				pet->SetNoCast(false);
+				pet->SetFocused(false);
+				pet->SetPetStop(false);
+				pet->SetPetRegroup(false);
             }
             petids.erase(it);        // Remove the pet ID from the vector
 			ValidatePetList();
