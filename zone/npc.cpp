@@ -613,41 +613,6 @@ bool NPC::Process()
 		}
 	}
 
-	if (!GetTarget() && (GetOwnerOrSelf())) {
-		auto owner = GetOwner()->CastToClient();
-		if (!owner) {
-			owner = entity_list.GetClientByID(GetSwarmOwner());
-		}
-
-		if (owner && GetPetOrder() == eStandingPetOrder::SPO_Guard && !(owner->GetPet()->IsHeld() || owner->GetPet()->IsGHeld())) {
-			std::vector<NPC*> npc_vector;
-			for (const auto& npc_entity : entity_list.GetNPCList()) {
-				bool match = false;
-				for (const auto& pet_entity : owner->GetAllPets()) {
-					if (pet_entity->GetTarget() == npc_entity.second) {
-						match = true;
-						break;
-					}
-				}
-				if (!match && DistanceSquared(GetPosition(), npc_entity.second->GetPosition()) <= (RuleR(Aggro, PetAttackRange) / 4)) {
-					npc_vector.push_back(npc_entity.second);
-				}
-			}
-
-			std::random_device rd;
-			std::mt19937 g(rd());
-			std::shuffle(npc_vector.begin(), npc_vector.end(), g);
-
-			for (const auto target : npc_vector) {
-				if (!GetTarget() && target->IsOnHatelist(owner) && !IsOnHatelist(target)) {
-					AddToHateList(target, 100, 0, true, false, false, SPELL_UNKNOWN, true);
-					SetTarget(target);
-					MessageString(Chat::PetResponse, PET_ATTACKING, GetCleanName(), target->GetCleanName());
-				}
-			}
-		}
-	}
-
 	ScanCloseMobProcess();
 	CheckScanCloseMobsMovingTimer();
 
@@ -660,6 +625,41 @@ bool NPC::Process()
 	if (tic_timer.Check()) {
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TICK)) {
 			parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
+		}
+
+		if (!GetTarget() && (GetOwnerOrSelf())) {
+			auto owner = GetOwner()->CastToClient();
+			if (!owner) {
+				owner = entity_list.GetClientByID(GetSwarmOwner());
+			}
+
+			if (owner && GetPetOrder() == eStandingPetOrder::SPO_Guard && !(owner->GetPet()->IsHeld() || owner->GetPet()->IsGHeld())) {
+				std::vector<NPC*> npc_vector;
+				for (const auto& npc_entity : entity_list.GetNPCList()) {
+					bool match = false;
+					for (const auto& pet_entity : owner->GetAllPets()) {
+						if (pet_entity->GetTarget() == npc_entity.second) {
+							match = true;
+							break;
+						}
+					}
+					if (!match && DistanceSquared(GetPosition(), npc_entity.second->GetPosition()) <= (RuleR(Aggro, PetAttackRange) / 4)) {
+						npc_vector.push_back(npc_entity.second);
+					}
+				}
+
+				std::random_device rd;
+				std::mt19937 g(rd());
+				std::shuffle(npc_vector.begin(), npc_vector.end(), g);
+
+				for (const auto target : npc_vector) {
+					if (!GetTarget() && target->IsOnHatelist(owner) && !IsOnHatelist(target)) {
+						AddToHateList(target, 100, 0, true, false, false, SPELL_UNKNOWN, true);
+						SetTarget(target);
+						MessageString(Chat::PetResponse, PET_ATTACKING, GetCleanName(), target->GetCleanName());
+					}
+				}
+			}
 		}
 
 		BuffProcess();
