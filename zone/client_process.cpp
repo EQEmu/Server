@@ -111,25 +111,6 @@ bool Client::Process() {
 				HandleRespawnFromHover(0);
 		}
 
-		uint32 banker_max_dist = 0;
-		if (RuleB(Custom, BlockBankItemsOnZone) && Connected() && sent_inventory <= EQ::invslot::SHARED_BANK_END && entity_list.GetClosestBanker(this, banker_max_dist) && banker_max_dist <= USE_NPC_RANGE2) {
-			LogInventoryDetail("Filling character [{}] inventory slot: [{}] ", GetCleanName(), sent_inventory);
-			const EQ::ItemInstance* inst = nullptr;
-			// Jump the gaps
-			if (sent_inventory > EQ::invslot::GENERAL_END && sent_inventory < EQ::invslot::BANK_BEGIN) {
-				sent_inventory = EQ::invslot::BANK_BEGIN;
-			} else if (sent_inventory > EQ::invslot::BANK_END && sent_inventory < EQ::invslot::SHARED_BANK_BEGIN) {
-				sent_inventory = EQ::invslot::SHARED_BANK_BEGIN;
-			} else {
-				sent_inventory++;
-			}
-
-			inst = m_inv[sent_inventory];
-			if (inst) {
-				SendItemPacket(sent_inventory, inst, ItemPacketType::ItemPacketTrade);
-			}
-		}
-
 		if (IsTracking() && (ClientVersion() >= EQ::versions::ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 

@@ -1048,10 +1048,6 @@ RULE_BOOL(Custom, 	ServerAuthStats, 						true, "Enable this rule in order to se
 RULE_BOOL(Custom, 	MulticlassingEnabled, 					true, "Enable this to enable all multiclass-related tweaks. Requires ServerAuthStats and UseDynamicAATimers for full functionality.")
 RULE_BOOL(Custom, 	UseDynamicAATimers, 					true, "Enable using dynamic AA timers. Required to deconflict multiclass AA timers")
 
-// Needed to support 200-slot bags
-RULE_BOOL(Custom,   BlockBankItemsOnZone, 					true, "Don't send bank contents on zoning or initial login")
-RULE_BOOL(Custom, 	SendGeneralInventoryAtOnce, 			true, "Send all of the general inventory in first ClientUpdate")
-
 // The Heroes Journey Options
 RULE_BOOL(Custom, 	SuspendGroupBuffs, 						true, 	"Enable this to cause self buffs and group's buffs to not tick down")
 RULE_BOOL(Custom, 	FadeNPCDebuffsOutofCombat, 				true, 	"Enable to to cause NPCs to lose all buffs automatically when combat ends")
