@@ -200,7 +200,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 							nextTar = target_mob;
 						}
 					}
-					LogTestDebug("{} is now following {}.", bot_iter->GetCleanName(), nextTar->GetCleanName()); //deleteme
+
 					chainList.push_back(bot_iter);
 					++it;
 					++count;
