@@ -3854,6 +3854,9 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		for (; cur != end; ++cur) {
 			// strip spell
 			if (!from_bard_song_pulse) {
+				if (IsCharmSpell(spell_id)) {
+					SetEntityVariable("preserve_inventory", "true");
+				}
 				BuffFadeBySlot(*cur, false);
 			}
 
@@ -4040,8 +4043,6 @@ bool Mob::SpellOnTarget(
 			}
 		}
 	}
-
-	LogDebug("Spell Target: [{}]", spelltar->GetName());
 
 	if (spelltar->IsClient() && spelltar->CastToClient()->IsTrader()) {
 		if (spellOwner->IsClient()) {

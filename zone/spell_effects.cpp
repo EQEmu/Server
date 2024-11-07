@@ -862,21 +862,24 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						CastToNPC()->ModifyStatsOnCharm(false);
 					}
 
-
 					// Custom charm inventory handling
 					if (RuleB(Custom, StripCharmItems) && IsNPC() && GetOwner()->IsClient()) {
-						auto inventory = CastToNPC()->GetLootList();
-						std::vector<std::string> inventory_strings;
+						if (!EntityVariableExists("is_charmed")) {
+							auto inventory = CastToNPC()->GetLootList();
+							std::vector<std::string> inventory_strings;
 
-						for (int item_id : inventory) {
-							inventory_strings.push_back(std::to_string(item_id));
+							for (int item_id : inventory) {
+								inventory_strings.push_back(std::to_string(item_id));
+							}
+
+							auto serialized_inventory = Strings::Join(inventory_strings, ",");
+
+							CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
+
+							LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+						} else {
+							LogDebug("Pre-Existing Serialized Inventory: [{}]", GetEntityVariable("is_charmed"));
 						}
-
-						auto serialized_inventory = Strings::Join(inventory_strings, ",");
-
-						CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
-
-						LogDebug("Serialized Inventory: [{}]", serialized_inventory);
 					}
 
 					bool bBreak = false;
@@ -4621,6 +4624,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				SetFocused(false);
 				SetPetStop(false);
 				SetPetRegroup(false);
+
 				if(owner)
 				{
 					owner->RemovePet(this);
@@ -4629,40 +4633,42 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 				SetOwnerID(0);
 
-				if (!IsClient())
-				{
-					RemoveGlobalBuffs();
-				}
-
 				// Custom charm inventory handling
-				if (RuleB(Custom, StripCharmItems) && EntityVariableExists("is_charmed")) {
-					auto serialized_inventory = GetEntityVariable("is_charmed");
-					LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+				if (RuleB(Custom, StripCharmItems) && EntityVariableExists("is_charmed") && !EntityVariableExists("preserve_inventory")) {
+					if (!EntityVariableExists("charm_refresh")) {
+						auto serialized_inventory = GetEntityVariable("is_charmed");
+						LogDebug("Serialized Inventory: [{}]", serialized_inventory);
 
-					// Clear current loot list
-					while(CastToNPC()->CountLoot()) {
-						for (int item_id : CastToNPC()->GetLootList()) {
-							LogDebug("Removed Item: [{}], qty [{}]", item_id, CastToNPC()->CountItem(item_id));
-							CastToNPC()->RemoveItem(item_id);
-						}
-					}
-
-					if (!serialized_inventory.empty()) {
-						auto inventory = Strings::Split(serialized_inventory, ",");
-
-						for (auto item : inventory) {
-							int item_id = Strings::ToInt(item);
-							auto item_data = database.GetItem(item_id);
-
-							LogDebug("ItemID to Add: [{}]", item_id);
-
-							if (item_data) {
-								CastToNPC()->AddItem(item_data, item_data->MaxCharges);
+						// Clear current loot list
+						while(CastToNPC()->CountLoot()) {
+							for (int item_id : CastToNPC()->GetLootList()) {
+								LogDebug("Removed Item: [{}], qty [{}]", item_id, CastToNPC()->CountItem(item_id));
+								CastToNPC()->RemoveItem(item_id);
 							}
 						}
+
+						if (!serialized_inventory.empty()) {
+							auto inventory = Strings::Split(serialized_inventory, ",");
+
+							for (auto item : inventory) {
+								int item_id = Strings::ToInt(item);
+								auto item_data = database.GetItem(item_id);
+
+								if (item_data) {
+									CastToNPC()->AddItem(item_data, item_data->MaxCharges);
+								}
+							}
+						}
+
+						DeleteEntityVariable("is_charmed");
 					}
 
-					DeleteEntityVariable("is_charmed");
+					if (!IsClient())
+					{
+						RemoveGlobalBuffs();
+					}
+				} else {
+					DeleteEntityVariable("preserve_inventory");
 				}
 
 				// Any client that has a previous charmed pet targetted shouldo
