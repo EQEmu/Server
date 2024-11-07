@@ -1784,7 +1784,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_ModelSize:
 			case SE_ChangeHeight:
 			{
-				if (!IsClient() && (spells[spell_id].target_type != SpellTargetType::ST_Pet || spells[spell_id].target_type != SpellTargetType::ST_SummonedPet)) {
+				if (!IsClient() && !GetOwnerID()) {
 					break; // not dealing with this
 				}
 
