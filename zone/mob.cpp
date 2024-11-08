@@ -8584,6 +8584,7 @@ bool Mob::HasBotAttackFlag(Mob* tar) {
 const uint16 scan_close_mobs_timer_moving = 6000; // 6 seconds
 const uint16 scan_close_mobs_timer_idle   = 60000; // 60 seconds
 
+// If the moving timer triggers, lets see if we are moving or idle to restart the appropriate dynamic timer
 void Mob::CheckScanCloseMobsMovingTimer()
 {
 	LogAIScanCloseDetail(
@@ -8593,31 +8594,20 @@ void Mob::CheckScanCloseMobsMovingTimer()
 		m_scan_close_mobs_timer.GetRemainingTime()
 	);
 
-	// If the moving timer triggers, lets see if we are moving or idle to restart the appropriate
-	// dynamic timer
-	if (m_mob_check_moving_timer.Check()) {
-		// If the mob is still moving, restart the moving timer
-		if (moving) {
-			if (m_scan_close_mobs_timer.GetRemainingTime() > scan_close_mobs_timer_moving) {
-				LogAIScanCloseDetail("Mob [{}] Restarting with moving timer", GetCleanName());
-				m_scan_close_mobs_timer.Disable();
-				m_scan_close_mobs_timer.Start(scan_close_mobs_timer_moving);
-				m_scan_close_mobs_timer.Trigger();
-			}
-		}
-		// If the mob is not moving, restart the idle timer
-		else if (m_scan_close_mobs_timer.GetDuration() == scan_close_mobs_timer_moving) {
-			LogAIScanCloseDetail("Mob [{}] Restarting with idle timer", GetCleanName());
+	// If the mob is still moving, restart the moving timer
+	if (moving) {
+		if (m_scan_close_mobs_timer.GetRemainingTime() > scan_close_mobs_timer_moving) {
+			LogAIScanCloseDetail("Mob [{}] Restarting with moving timer", GetCleanName());
 			m_scan_close_mobs_timer.Disable();
-			m_scan_close_mobs_timer.Start(scan_close_mobs_timer_idle);
+			m_scan_close_mobs_timer.Start(scan_close_mobs_timer_moving);
+			m_scan_close_mobs_timer.Trigger();
 		}
 	}
-}
-
-void Mob::ScanCloseMobProcess()
-{
-	if (m_scan_close_mobs_timer.Check()) {
-		entity_list.ScanCloseMobs(this);
+		// If the mob is not moving, restart the idle timer
+	else if (m_scan_close_mobs_timer.GetDuration() == scan_close_mobs_timer_moving) {
+		LogAIScanCloseDetail("Mob [{}] Restarting with idle timer", GetCleanName());
+		m_scan_close_mobs_timer.Disable();
+		m_scan_close_mobs_timer.Start(scan_close_mobs_timer_idle);
 	}
 }
 

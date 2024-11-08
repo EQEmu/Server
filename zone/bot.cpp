@@ -1578,7 +1578,10 @@ bool Bot::Process()
 		return false;
 	}
 
-	ScanCloseMobProcess();
+	if (m_scan_close_mobs_timer.Check()) {
+		entity_list.ScanCloseMobs(this);
+	}
+
 	SpellProcess();
 
 	if (tic_timer.Check()) {

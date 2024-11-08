@@ -2947,6 +2947,12 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 {
 	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
 
+	// Reserve memory in m_close_mobs to avoid frequent re-allocations if not already reserved.
+	// Assuming mob_list.size() as an upper bound for reservation.
+	if (scanning_mob->m_close_mobs.bucket_count() < mob_list.size()) {
+		scanning_mob->m_close_mobs.reserve(mob_list.size());
+	}
+
 	scanning_mob->m_close_mobs.clear();
 
 	for (auto &e : mob_list) {
@@ -2957,28 +2963,14 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 
 		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
 		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
-			scanning_mob->m_close_mobs.emplace(std::pair<uint16, Mob *>(mob->GetID(), mob));
-
-			// add self to other mobs close list
-			if (scanning_mob->GetID() > 0) {
-				bool has_mob = false;
-
-				for (auto &cm: mob->m_close_mobs) {
-					if (scanning_mob->GetID() == cm.first) {
-						has_mob = true;
-						break;
-					}
-				}
-
-				if (!has_mob) {
-					mob->m_close_mobs.insert(std::pair<uint16, Mob *>(scanning_mob->GetID(), scanning_mob));
-				}
-			}
+			// add mob to scanning_mob's close list and vice versa
+			mob->m_close_mobs[scanning_mob->GetID()] = scanning_mob;
+			scanning_mob->m_close_mobs[mob->GetID()] = mob;
 		}
 	}
 
-	LogAIScanCloseDetail(
-		"[{}] Scanning Close List | list_size [{}] moving [{}]",
+	LogAIScanClose(
+		"[{}] Scanning close list > list_size [{}] moving [{}]",
 		scanning_mob->GetCleanName(),
 		scanning_mob->m_close_mobs.size(),
 		scanning_mob->IsMoving() ? "true" : "false"
