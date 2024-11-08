@@ -8586,16 +8586,16 @@ const uint16 scan_close_mobs_timer_idle   = 60000; // 60 seconds
 
 void Mob::CheckScanCloseMobsMovingTimer()
 {
-	LogAIScanCloseDetail(
-		"Mob [{}] {}moving, scan timer [{}]",
-		GetCleanName(),
-		IsMoving() ? "" : "NOT ",
-		m_scan_close_mobs_timer.GetRemainingTime()
-	);
-
 	// If the moving timer triggers, lets see if we are moving or idle to restart the appropriate
 	// dynamic timer
 	if (m_mob_check_moving_timer.Check()) {
+		LogAIScanCloseDetail(
+			"Mob [{}] {}moving, scan timer [{}]",
+			GetCleanName(),
+			IsMoving() ? "" : "NOT ",
+			m_scan_close_mobs_timer.GetRemainingTime()
+		);
+
 		// If the mob is still moving, restart the moving timer
 		if (moving) {
 			if (m_scan_close_mobs_timer.GetRemainingTime() > scan_close_mobs_timer_moving) {
