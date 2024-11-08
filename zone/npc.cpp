@@ -633,7 +633,7 @@ bool NPC::Process()
 				owner = entity_list.GetClientByID(GetSwarmOwner());
 			}
 
-			if (owner && GetPetOrder() == eStandingPetOrder::SPO_Guard && !(owner->GetPet()->IsHeld() || owner->GetPet()->IsGHeld())) {
+			if (owner && GetPetOrder() == eStandingPetOrder::SPO_Guard && !(IsHeld() || IsGHeld())) {
 				std::vector<NPC*> npc_vector;
 				for (const auto& npc_entity : entity_list.GetNPCList()) {
 					bool match = false;
