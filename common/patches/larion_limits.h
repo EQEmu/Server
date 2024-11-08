@@ -304,15 +304,16 @@ namespace Larion
 			Gem10 = 9,
 			Gem11 = 10,
 			Gem12 = 11,
-			MaxGems = 16, // fallacy..only 12 slot are useable...
+			MaxGems = 18, // fallacy..only 12 slot are useable...
 			Item = 12,
 			Discipline = 13,
 			AltAbility = 0xFF
 		};
 
 		const int SPELL_ID_MAX = 45000;
-		const int SPELLBOOK_SIZE = 720;
+		const int SPELLBOOK_SIZE = 1120;
 		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
+		const int SPELL_GEM_RECAST_TIMER = 15;
 
 		const int LONG_BUFFS = 42;
 		const int SHORT_BUFFS = 20;

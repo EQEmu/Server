@@ -3,7 +3,15 @@
 
 namespace Larion {
 	namespace structs {
-
+		// constants
+		static const uint32 MAX_PP_AA_ARRAY = 300;
+		static const uint32 MAX_PP_SKILL = PACKET_SKILL_ARRAY_SIZE;
+		static const uint32 MAX_PP_INNATE_SKILL = 25;
+		static const uint32 MAX_PP_DISCIPLINES = 300;
+		static const uint32 MAX_PP_DISCIPLINE_TIMERS = 25;
+		static const uint32 MAX_RECAST_TYPES = 25;
+		static const uint32 MAX_ITEM_RECAST_TYPES = 100;
+		static const uint32 BUFF_COUNT = 62;
 #pragma pack(1)
 		
 		struct LoginInfo_Struct {
@@ -168,6 +176,17 @@ namespace Larion {
 		struct CharacterSelect_Struct
 		{
 			/*000*/	uint32 CharCount;	//number of chars in this packet
+		};
+
+		struct SpawnAppearance_Struct
+		{
+			/*0000*/ uint32 spawn_id;		// ID of the spawn
+			/*0004*/ uint32 type;			// Values associated with the type
+			/*0008*/ uint32 parameter;		// Type of data sent
+			/*0012*/ uint32 unknown012;
+			/*0016*/ uint32 unknown016;
+			/*0020*/ uint32 unknown020;
+			/*0024*/
 		};
 
 		struct Spawn_Struct_Bitfields

@@ -489,7 +489,291 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_ZoneSpawns); }
+	ENCODE(OP_SpawnAppearance)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		unsigned char* emu_buffer = in->pBuffer;
+
+		SpawnAppearance_Struct* sas = (SpawnAppearance_Struct*)emu_buffer;
+
+		if (sas->type != AppearanceType::Size)
+		{
+			//larion struct is different than rof2's but the idea is the same
+			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
+			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
+
+			eq->spawn_id = sas->spawn_id;
+			eq->type = sas->type;
+			eq->parameter = sas->parameter;
+
+			dest->FastQueuePacket(&outapp, ack_req);
+			delete in;
+			return;
+		}
+
+		auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
+
+		ChangeSize_Struct* css = (ChangeSize_Struct*)outapp->pBuffer;
+
+		css->EntityID = sas->spawn_id;
+		css->Size = (float)sas->parameter;
+		css->Unknown08 = 0;
+		css->Unknown12 = 1.0f;
+
+		dest->FastQueuePacket(&outapp, ack_req);
+		delete in;
+	}
+
+	ENCODE(OP_PlayerProfile) {
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		unsigned char* __emu_buffer = in->pBuffer;
+		PlayerProfile_Struct* emu = (PlayerProfile_Struct*)__emu_buffer;
+
+		SerializeBuffer buffer;
+		buffer.WriteUInt32(0); //crc
+		buffer.WriteUInt32(0); //size;
+		buffer.WriteUInt32(0); //profile_type;
+		buffer.WriteUInt32(0); //profile_id;
+		buffer.WriteUInt32(0); //shroud_template_id;
+		buffer.WriteUInt8(emu->gender);
+		buffer.WriteUInt32(emu->race);
+		buffer.WriteUInt32(emu->class_);
+		buffer.WriteUInt8(emu->level);
+		buffer.WriteUInt8(emu->level2);
+
+		buffer.WriteUInt32(5); //bind_count
+		for (int r = 0; r < 5; r++) //binds
+		{
+			buffer.WriteUInt32(emu->binds[r].zone_id);
+			buffer.WriteFloat(emu->binds[r].x);
+			buffer.WriteFloat(emu->binds[r].y);
+			buffer.WriteFloat(emu->binds[r].z);
+			buffer.WriteFloat(emu->binds[r].heading);
+		}
+
+		buffer.WriteUInt32(emu->deity);
+		buffer.WriteUInt32(emu->intoxication);
+
+		buffer.WriteUInt32(10); //properties count
+		for (int r = 0; r < 10; r++) //properties
+		{
+			buffer.WriteUInt32(0);
+		}
+
+		buffer.WriteUInt32(22);	// Equipment count
+
+		for (int r = EQ::textures::textureBegin; r < EQ::textures::materialCount; r++)
+		{
+			buffer.WriteUInt32(emu->item_material.Slot[r].Material);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+		}
+
+		// Write zeroes for the next 13 equipment slots
+
+		for (int r = 0; r < 13; r++)
+		{
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+		}
+
+		buffer.WriteUInt32(EQ::textures::materialCount); // Base Equipment count 
+		
+		//live seems to send the materials you had when you created the character here
+		//not entirely sure for what purpose though
+
+		for (int r = EQ::textures::textureBegin; r < EQ::textures::materialCount; r++)
+		{
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+		}
+
+		buffer.WriteUInt32(EQ::textures::materialCount); // Tint Count
+
+		for (int r = 0; r < 7; r++)
+		{
+			buffer.WriteUInt32(emu->item_tint.Slot[r].Color);
+		}
+
+		// Write extra two tint values
+		buffer.WriteUInt32(0);
+		buffer.WriteUInt32(0);
+
+		buffer.WriteUInt32(EQ::textures::materialCount); // Equip Tint Count
+		for (int r = 0; r < 7; r++)
+		{
+			buffer.WriteUInt32(emu->item_tint.Slot[r].Color);
+		}
+
+		buffer.WriteUInt32(0);
+		buffer.WriteUInt32(0);
+
+		buffer.WriteUInt8(emu->haircolor);
+		buffer.WriteUInt8(emu->beardcolor);
+		buffer.WriteUInt32(0); //npc tint index
+		buffer.WriteUInt8(emu->eyecolor1);
+		buffer.WriteUInt8(emu->eyecolor2);
+		buffer.WriteUInt8(emu->hairstyle);
+		buffer.WriteUInt8(emu->beard);
+		buffer.WriteUInt8(emu->face);
+		buffer.WriteUInt8(0); //old_face
+		buffer.WriteUInt32(emu->drakkin_heritage);
+		buffer.WriteUInt32(emu->drakkin_tattoo);
+		buffer.WriteUInt32(emu->drakkin_details);
+		buffer.WriteInt8(-1); //texture type
+		buffer.WriteInt8(0); //material
+		buffer.WriteInt8(0); //variation
+		buffer.WriteFloat(5.0f); //height
+		buffer.WriteFloat(3.0f); //width
+		buffer.WriteFloat(2.5f); //length
+		buffer.WriteFloat(5.5f); //view height
+		buffer.WriteInt32(0); //primary_actor
+		buffer.WriteInt32(0); //secondary_actor
+
+		buffer.WriteUInt32(emu->points); // Unspent skill points
+		buffer.WriteUInt32(emu->mana); 
+		buffer.WriteUInt32(emu->cur_hp);
+		buffer.WriteUInt32(emu->STR);
+		buffer.WriteUInt32(emu->STA);
+		buffer.WriteUInt32(emu->CHA);
+		buffer.WriteUInt32(emu->DEX);
+		buffer.WriteUInt32(emu->INT);
+		buffer.WriteUInt32(emu->AGI);
+		buffer.WriteUInt32(emu->WIS);
+		buffer.WriteUInt32(0); //heroic_sta
+		buffer.WriteUInt32(0); //heroic_str
+		buffer.WriteUInt32(0); //heroic_cha
+		buffer.WriteUInt32(0); //heroic_dex
+		buffer.WriteUInt32(0); //heroic_int
+		buffer.WriteUInt32(0); //heroic_agi
+		buffer.WriteUInt32(0); //heroic_wis
+
+		buffer.WriteUInt32(structs::MAX_PP_AA_ARRAY); // AA Count
+		for (uint32 r = 0; r < MAX_PP_AA_ARRAY; r++)
+		{
+			buffer.WriteUInt32(emu->aa_array[r].AA);
+			buffer.WriteUInt32(emu->aa_array[r].value);
+			buffer.WriteUInt32(emu->aa_array[r].charges);
+		}
+
+		//honestly we should look to up the base size and just limit titanium later
+		for (uint32 r = 0; r < structs::MAX_PP_AA_ARRAY - MAX_PP_AA_ARRAY; r++)
+		{
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+		}
+
+		buffer.WriteUInt32(structs::MAX_PP_SKILL);
+
+		for (uint32 r = 0; r < structs::MAX_PP_SKILL; r++)
+		{
+			buffer.WriteUInt32(emu->skills[r]);
+		}
+
+		buffer.WriteUInt32(structs::MAX_PP_INNATE_SKILL); // Innate Skills count
+
+		for (uint32 r = 0; r < structs::MAX_PP_INNATE_SKILL; r++)
+		{
+			buffer.WriteUInt32(emu->InnateSkills[r]); // Innate Skills (regen, slam, etc)
+		}
+
+		buffer.WriteUInt32(structs::MAX_PP_DISCIPLINES); // Discipline count
+
+		for (uint32 r = 0; r < MAX_PP_DISCIPLINES; r++)
+		{
+			buffer.WriteUInt32(emu->disciplines.values[r]);
+		}
+
+		for (uint32 r = 0; r < structs::MAX_PP_DISCIPLINES - MAX_PP_DISCIPLINES; r++)
+		{
+			buffer.WriteUInt32(0);
+		}
+
+		buffer.WriteUInt32(structs::MAX_PP_DISCIPLINE_TIMERS); // Disc timers
+
+		for (uint32 r = 0; r < structs::MAX_PP_DISCIPLINE_TIMERS; r++)
+		{
+			buffer.WriteUInt32(0); //todo: support sending actual timestamps
+		}
+
+		buffer.WriteUInt32(0); // Unk Ability Count
+
+		buffer.WriteUInt32(structs::MAX_RECAST_TYPES); // linked_spell_timer_count
+
+		for (uint32 r = 0; r < MAX_RECAST_TYPES; r++)
+		{
+			buffer.WriteUInt32(emu->recastTimers[r]);
+		}
+
+		for (uint32 r = 0; r < structs::MAX_RECAST_TYPES - MAX_RECAST_TYPES; r++)
+		{
+			buffer.WriteUInt32(0);
+		}
+
+		buffer.WriteUInt32(structs::MAX_ITEM_RECAST_TYPES); // item recast timers
+
+		for (uint32 r = 0; r < structs::MAX_ITEM_RECAST_TYPES; r++)
+		{
+			buffer.WriteUInt32(0);
+		}
+
+		buffer.WriteUInt32(spells::SPELLBOOK_SIZE);
+
+		for (uint32 r = 0; r < EQ::spells::SPELLBOOK_SIZE; r++)
+		{
+			if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
+				buffer.WriteUInt32(emu->spell_book[r]);
+			else
+				buffer.WriteInt32(-1);
+		}
+
+		for (uint32 r = 0; r < spells::SPELLBOOK_SIZE - EQ::spells::SPELLBOOK_SIZE; r++)
+		{
+			buffer.WriteInt32(-1);
+		}
+		
+		buffer.WriteUInt32(spells::SPELL_GEM_COUNT); // Memorised spell slots
+
+		for (uint32 r = 0; r < EQ::spells::SPELL_GEM_COUNT; r++) // write first 12, we need to actually look into this for larion im sure it's changed
+		{
+			buffer.WriteUInt32(emu->mem_spells[r]);
+		}
+
+		for (uint32 r = 0; r < spells::SPELL_GEM_COUNT - EQ::spells::SPELL_GEM_COUNT; r++)
+		{
+			buffer.WriteInt32(-1);
+		}
+
+		buffer.WriteUInt32(spells::SPELL_GEM_RECAST_TIMER);
+
+		for (uint32 r = 0; r < EQ::spells::SPELL_GEM_COUNT; r++)
+		{
+			buffer.WriteUInt32(emu->spellSlotRefresh[r]); // spell gem refresh
+		}
+		//also refresh
+		buffer.WriteUInt32(0);
+		buffer.WriteUInt32(0);
+		buffer.WriteUInt32(0);
+
+		buffer.WriteUInt8(0); 
+
+		buffer.WriteUInt32(structs::BUFF_COUNT);
+	}
+
+	/*ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_ZoneSpawns); }
 
 	ENCODE(OP_ZoneSpawns)
 	{
@@ -562,7 +846,7 @@ namespace Larion
 			flags.showname = emu->show_name;
 
 		}
-	}
+	}*/
 
 	// DECODE methods
 
