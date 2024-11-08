@@ -5013,7 +5013,11 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	SetMoving(!(cy == m_Position.y && cx == m_Position.x));
 
 	CheckClientToNpcAggroTimer();
-	CheckScanCloseMobsMovingTimer();
+
+	if (m_mob_check_moving_timer.Check()) {
+		CheckScanCloseMobsMovingTimer();
+	}
+
 	CheckSendBulkClientPositionUpdate();
 
 	int32 new_animation = ppu->animation;

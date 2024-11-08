@@ -2957,9 +2957,10 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 
 		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
 		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
-			// Avoid duplicates in mob->m_close_mobs by using emplace directly
+			// add ourselves to other mobs close list
 			mob->m_close_mobs.emplace(scanning_mob->GetID(), scanning_mob);
 
+			// add to self, so we can keep track of who is close to us
 			scanning_mob->m_close_mobs.emplace(std::pair<uint16, Mob *>(mob->GetID(), mob));
 		}
 	}

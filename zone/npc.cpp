@@ -601,8 +601,13 @@ bool NPC::Process()
 		DepopSwarmPets();
 	}
 
-	ScanCloseMobProcess();
-	CheckScanCloseMobsMovingTimer();
+	if (m_scan_close_mobs_timer.Check()) {
+		entity_list.ScanCloseMobs(this);
+	}
+
+	if (m_mob_check_moving_timer.Check()) {
+		CheckScanCloseMobsMovingTimer();
+	}
 
 	if (hp_regen_per_second > 0 && hp_regen_per_second_timer.Check()) {
 		if (GetHP() < GetMaxHP()) {
