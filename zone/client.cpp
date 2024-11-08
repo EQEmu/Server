@@ -744,7 +744,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
 
-	if (!dead) {
+	if (!dead || RuleB(Custom, SuspendGroupBuffs)) {
 		for (Mob* mob : pets) {
 			if (mob)
 			{

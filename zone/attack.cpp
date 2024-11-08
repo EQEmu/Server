@@ -1898,15 +1898,18 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	InterruptSpell();
 	ZeroBardPulseVars();
 
-	Mob* m_pet = GetPet();
-	RemoveAllPets();
+	if (!RuleB(Custom, SuspendGroupBuffs)) {
+		RemoveAllPets();
+	}
 
 	SetHorseId(0);
 	ShieldAbilityClearVariables();
 	dead = true;
 
-	if (m_pet && m_pet->IsCharmed()) {
-		m_pet->BuffFadeByEffect(SE_Charm);
+	for (auto m_pet : GetAllPets()) {
+		if (m_pet && m_pet->IsCharmed()) {
+			m_pet->BuffFadeByEffect(SE_Charm);
+		}
 	}
 
 	if (GetMerc()) {

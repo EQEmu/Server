@@ -3967,7 +3967,6 @@ bool Mob::IsGroupSuspendableBuff(uint16 spell_id, Buffs_Struct buff) {
 	return false;
 }
 
-
 void Mob::BuffProcess()
 {
 	int buff_count = GetMaxTotalSlots();
