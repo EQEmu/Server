@@ -588,7 +588,7 @@ void Bot::ChangeBotRangedWeapons(bool isRanged) {
 		BotAddEquipItem(EQ::invslot::slotAmmo, GetBotItemBySlot(EQ::invslot::slotAmmo));
 		BotAddEquipItem(EQ::invslot::slotSecondary, GetBotItemBySlot(EQ::invslot::slotRange));
 		SetAttackTimer();
-		BotGroupSay(this, "My bow is true and ready"); //TODO bot rewrite - make this say throwing or bow
+		BotGroupSay(this, "My blades are sheathed");
 	}
 }
 
@@ -1593,6 +1593,7 @@ bool Bot::Process()
 {
 	if (IsStunned() && stunned_timer.Check()) {
 		Mob::UnStun();
+		spun_timer.Disable();
 	}
 
 	if (!GetBotOwner()) {
@@ -1600,7 +1601,6 @@ bool Bot::Process()
 	}
 
 	if (GetDepop()) {
-
 		_botOwner = nullptr;
 		_botOwnerCharacterID = 0;
 
@@ -1623,7 +1623,7 @@ bool Bot::Process()
 		BuffProcess();
 		CalcRestState();
 
-		if (currently_fleeing) {
+		if (currently_fleeing || IsFeared()) {
 			ProcessFlee();
 		}
 
@@ -1658,6 +1658,16 @@ bool Bot::Process()
 		}
 	}
 
+	if (viral_timer.Check()) { // TODO bot rewrite -- necessary for bots?
+		VirusEffectProcess();
+	}
+
+	if (spellbonuses.GravityEffect == 1) {
+		if (gravity_timer.Check()) {
+			DoGravityEffect();
+		}
+	}
+
 	if (GetAppearance() == eaDead && GetHP() > 0) {
 		SetAppearance(eaStanding);
 	}
@@ -1666,7 +1676,6 @@ bool Bot::Process()
 		ping_timer.Disable();
 	}
 	else {
-
 		if (!ping_timer.Enabled()) {
 			ping_timer.Start(BOT_KEEP_ALIVE_INTERVAL);
 		}
@@ -1687,7 +1696,19 @@ bool Bot::Process()
 		auto_save_timer.Start(RuleI(Bots, AutosaveIntervalSeconds) * 1000);
 	}
 
-	if (IsStunned() || IsMezzed()) {
+	if (ForcedMovement) {
+		ProcessForcedMovement();
+	}
+
+	if (IsMezzed()) {
+		return true;
+	}
+
+	if (IsStunned()) {
+		if (spun_timer.Check()) {
+			Spin();
+		}
+
 		return true;
 	}
 
@@ -2158,7 +2179,6 @@ void Bot::AI_Process()
 // PULLING FLAG (ACTIONABLE RANGE)
 
 		if (GetPullingFlag()) {
-			//TODO bot rewrite - add ways to here to determine if throw stone is allowed, then check for ranged/spell/melee
 			if (!IsBotNonSpellFighter() && !HOLDING && AI_HasSpells() && AI_EngagedCastCheck()) {
 				return;
 			}
@@ -3130,6 +3150,25 @@ bool Bot::CheckIfIncapacitated() {
 
 	if (IsRooted() && IsMoving()) {
 		StopMoving();
+		return true;
+	}
+
+	if (currently_fleeing) {
+		if (RuleB(Combat, EnableFearPathing) && AI_movement_timer->Check()) {
+			// Check if we have reached the last fear point
+			if (DistanceNoZ(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget) <= 5.0f) {
+				// Calculate a new point to run to
+				StopNavigation();
+				CalculateNewFearpoint();
+			}
+
+			RunTo(
+				m_FearWalkTarget.x,
+				m_FearWalkTarget.y,
+				m_FearWalkTarget.z
+			);
+		}
+
 		return true;
 	}
 
@@ -10881,7 +10920,7 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spellType, uint16 spellid) {
 		return false;
 	}
 
-	switch (spellType) { //TODO bot rewrite - fix Buff/ResistBuff
+	switch (spellType) {
 		case BotSpellTypes::Buff:
 			if (IsResistanceOnlySpell(spellid) || IsDamageShieldOnlySpell(spellid) || IsDamageShieldAndResistanceSpellOnly(spellid)) {
 				return false;
