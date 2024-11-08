@@ -63,6 +63,14 @@ void bot_command_illusion_block(Client* c, const Seperator* sep)
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Use {} for information about race/class IDs.",
+				Saylink::Silent("^classracelist")
+			).c_str()
+		);
+
 
 		return;
 	}
