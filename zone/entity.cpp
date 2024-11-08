@@ -2969,28 +2969,15 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 
 		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
 		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
+			// Avoid duplicates in mob->m_close_mobs by using emplace directly
+			mob->m_close_mobs.emplace(scanning_mob->GetID(), scanning_mob);
+
 			scanning_mob->m_close_mobs.emplace(std::pair<uint16, Mob *>(mob->GetID(), mob));
-
-			// add self to other mobs close list
-			if (scanning_mob->GetID() > 0) {
-				bool has_mob = false;
-
-				for (auto &cm: mob->m_close_mobs) {
-					if (scanning_mob->GetID() == cm.first) {
-						has_mob = true;
-						break;
-					}
-				}
-
-				if (!has_mob) {
-					mob->m_close_mobs.insert(std::pair<uint16, Mob *>(scanning_mob->GetID(), scanning_mob));
-				}
-			}
 		}
 	}
 
-	LogAIScanCloseDetail(
-		"[{}] Scanning Close List | list_size [{}] moving [{}]",
+	LogAIScanClose(
+		"[{}] Scanning close list > list_size [{}] moving [{}]",
 		scanning_mob->GetCleanName(),
 		scanning_mob->m_close_mobs.size(),
 		scanning_mob->IsMoving() ? "true" : "false"
