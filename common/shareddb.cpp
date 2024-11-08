@@ -1537,6 +1537,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				item.NoDrop = !item.NoDrop;
 				item.Attuneable = 0;
 			}
+
+			if (item.HP < 0) {
+				item.HP = 0;
+			}
 		}
 
 		if (RuleB(Custom, AttuneOnExp) && item.ItemType == EQ::item::ItemTypeAugmentation) {
