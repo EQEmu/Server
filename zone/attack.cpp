@@ -2767,6 +2767,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 					player_count++;
 				}
+
+				m.member->kill_counters[GetBaseRace()]++;
 			}
 
 			// QueryServ Logging - Raid Kills

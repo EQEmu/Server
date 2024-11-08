@@ -2223,6 +2223,9 @@ public:
 	void SetSharedTaskId(int64 shared_task_id);
 	int64 GetSharedTaskId() const;
 	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
+
+	std::unordered_map<int, int> kill_counters;
+	void ProcessSlayerCredits();
 private:
 
 	bool m_exp_enabled;
