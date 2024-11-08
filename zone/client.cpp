@@ -8485,6 +8485,10 @@ bool Client::ReloadCharacterFaction(Client *c, uint32 facid, uint32 charid)
 
 FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
 {
+	if !(tnpc) {
+		return FACTION_VALUE::FACTION_ALLY; // Not sure how this could happen
+	}
+
 	if (RuleB(Custom, MulticlassingEnabled)) {
 		FACTION_VALUE faction_val = FACTION_SCOWLS;
 

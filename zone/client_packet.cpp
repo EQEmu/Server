@@ -4923,6 +4923,11 @@ void Client::Handle_OP_ClientTimeStamp(const EQApplicationPacket *app)
 }
 
 void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
+	if (GetGM()) {
+		CAuthorized = true;
+		return;
+	}
+
 	if (RuleB(Custom, ServerAuthStats)) {
 		AuthResponse_Struct *buf = (AuthResponse_Struct *)app->pBuffer;
 
