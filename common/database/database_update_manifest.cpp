@@ -5759,6 +5759,18 @@ ALTER TABLE `character_exp_modifiers`
 MODIFY COLUMN `aa_modifier` float NOT NULL DEFAULT 1.0 AFTER `instance_version`,
 MODIFY COLUMN `exp_modifier` float NOT NULL DEFAULT 1.0 AFTER `aa_modifier`;
 )"
+	},
+	ManifestEntry{
+		.version = 9285,
+		.description = "2024_11_08_data_buckets_indexes.sql",
+		.check = "SHOW CREATE TABLE `data_buckets`",
+		.condition = "contains",
+		.match = "idx_character_expires",
+		.sql = R"(
+CREATE INDEX idx_character_expires ON data_buckets (character_id, expires);
+CREATE INDEX idx_npc_expires ON data_buckets (npc_id, expires);
+CREATE INDEX idx_bot_expires ON data_buckets (bot_id, expires);
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
