@@ -766,7 +766,7 @@ void Client::CompleteConnect()
 	entity_list.SendIllusionWearChange(this);
 
 	if (GetBucket("DisableFancyModels").empty()) {
-		entity_list.SendZoneSpawnsBulk(this);
+
 	}
 
 	if (RuleB(NPC, PetZoneWithOwner)) {
@@ -1765,15 +1765,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	FastQueuePacket(&outapp);
 
 	/* Zone Spawns Packet */
-
+	entity_list.SendZoneSpawnsBulk(this);
 	entity_list.SendZoneCorpsesBulk(this);
 	entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
 	entity_list.SendZoneSeasonalUpdates(this);
 
-	if (!GetBucket("DisableFancyModels").empty()) {
-		entity_list.SendZoneSpawnsBulk(this);
-	}
-											/* Time of Day packet */
+	/* Time of Day packet */
 	outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 	TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
 	zone->zone_time.GetCurrentEQTimeOfDay(time(0), tod);
