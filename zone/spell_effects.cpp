@@ -3971,6 +3971,8 @@ void Mob::BuffProcess()
 {
 	int buff_count = GetMaxTotalSlots();
 
+	bool update_pet_owner = false;
+
 	for (int buffs_i = 0; buffs_i < buff_count; ++buffs_i)
 	{
 		if (IsValidSpell(buffs[buffs_i].spellid))
@@ -4016,14 +4018,16 @@ void Mob::BuffProcess()
 					} else {
 						buffs[buffs_i].UpdateClient = true;
 
+						if (GetOwner() && GetOwner()->focused_pet_id == GetID()) {
+							update_pet_owner = true;
+						}
+
 						auto clients = entity_list.GetClientList();
 						for (auto c : clients) {
 							if (c.second->GetTarget() && c.second->GetTarget()->GetID() == GetID()) {
 								SendBuffsToClient(c.second);
 							}
 						}
-
-						SendPetBuffsToClient();
 					}
 
 					if (buffs[buffs_i].ticsremaining < 0) {
@@ -4051,6 +4055,10 @@ void Mob::BuffProcess()
                 }
             }
 		}
+	}
+
+	if (update_pet_owner) {
+		SendPetBuffsToClient();
 	}
 }
 
