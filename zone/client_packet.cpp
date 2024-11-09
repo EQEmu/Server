@@ -765,50 +765,6 @@ void Client::CompleteConnect()
 
 	entity_list.SendIllusionWearChange(this);
 
-	if (GetBucket("DisableFancyModels").empty()) {
-
-	}
-
-	if (RuleB(NPC, PetZoneWithOwner)) {
-		/* Load Pets */
-		database.LoadPetInfo(this);
-
-		LogDebug("Got [{}] pets on load", m_petinfomulti.size());
-		// Iterate over each pet in m_petinfomulti
-		for (int i = 0; i < m_petinfomulti.size(); i++) {
-			auto& pet_info = m_petinfomulti[i];
-
-			if (pet_info.SpellID > 1 && GetAllPets().size() <= RuleI(Custom, AbsolutePetLimit) && pet_info.SpellID <= SPDAT_RECORDS) {
-				// Create the pet using the stored data
-				MakePoweredPet(pet_info.SpellID, spells[pet_info.SpellID].teleport_zone, pet_info.petpower, pet_info.Name, pet_info.size);
-
-				// Check if the pet was successfully created
-				if (GetPet(i) && GetPet(i)->IsNPC()) {
-					NPC *pet = GetPet(i)->CastToNPC();
-					if (pet)
-					{
-						// Apply the pet's state
-						pet->SetPetState(pet_info.Buffs, pet_info.Items);
-						pet->CalcBonuses();
-						pet->SetHP(pet_info.HP);
-						pet->SetMana(pet_info.Mana);
-
-						// Taunt persists when zoning on newer clients, overwrite default.
-						if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-							pet->SetTaunting(pet_info.taunting);
-						}
-					}
-
-					DoPetBagResync();
-					pet->ApplyGlobalBuffs();
-				}
-
-				// Reset the pet info's SpellID to indicate it has been handled
-				pet_info.SpellID = 0;
-			}
-		}
-	}
-
 	SendWearChangeAndLighting(EQ::textures::LastTexture);
 	Mob* pet = GetPet();
 	if (pet) {
@@ -1739,6 +1695,46 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	if (m_pp.RestTimer) {
 		rest_timer.Start(m_pp.RestTimer * 1000);
+	}
+
+	if (RuleB(NPC, PetZoneWithOwner)) {
+		/* Load Pets */
+		database.LoadPetInfo(this);
+
+		LogDebug("Got [{}] pets on load", m_petinfomulti.size());
+		// Iterate over each pet in m_petinfomulti
+		for (int i = 0; i < m_petinfomulti.size(); i++) {
+			auto& pet_info = m_petinfomulti[i];
+
+			if (pet_info.SpellID > 1 && GetAllPets().size() <= RuleI(Custom, AbsolutePetLimit) && pet_info.SpellID <= SPDAT_RECORDS) {
+				// Create the pet using the stored data
+				MakePoweredPet(pet_info.SpellID, spells[pet_info.SpellID].teleport_zone, pet_info.petpower, pet_info.Name, pet_info.size);
+
+				// Check if the pet was successfully created
+				if (GetPet(i) && GetPet(i)->IsNPC()) {
+					NPC *pet = GetPet(i)->CastToNPC();
+					if (pet)
+					{
+						// Apply the pet's state
+						pet->SetPetState(pet_info.Buffs, pet_info.Items);
+						pet->CalcBonuses();
+						pet->SetHP(pet_info.HP);
+						pet->SetMana(pet_info.Mana);
+
+						// Taunt persists when zoning on newer clients, overwrite default.
+						if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
+							pet->SetTaunting(pet_info.taunting);
+						}
+					}
+
+					DoPetBagResync();
+					pet->ApplyGlobalBuffs();
+				}
+
+				// Reset the pet info's SpellID to indicate it has been handled
+				pet_info.SpellID = 0;
+			}
+		}
 	}
 
 	if (GetPet(0)) {
