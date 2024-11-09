@@ -452,6 +452,12 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		no_respawn = true;
 	}
 
+	auto suppress_spawn = false;
+	if (RuleI(Custom, FarmingInstanceVersion) == version) {
+		version = RuleI(Custom, FarmingInstanceTemplateVersion);
+		suppress_spawn = true;
+	}
+
 	/* Bulk Load NPC Types Data into the cache */
 	content_db.LoadNPCTypesData(0, true);
 
@@ -492,6 +498,10 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		if (no_respawn) {
 			s.respawntime = 604800000; // arbitrary large number
 			s.variance = 0;
+		}
+
+		if (suppress_spawn & (s.respawntime + s.variance) >= (2 * 60 * 60)) {
+			continue;
 		}
 		spawn2_ids.push_back(s.id);
 	}
