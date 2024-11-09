@@ -2731,6 +2731,14 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 		return;
 	}
 
+	if (IsTrader()) {
+		TraderEndTrader();
+	}
+
+	if (IsBuyer()) {
+		ToggleBuyerMode(false);
+	}
+
 	/* Item to Currency Storage */
 	if (reclaim->reclaim_flag == 1) {
 		uint32 removed = NukeItem(item_id, invWhereWorn | invWherePersonal | invWhereCursor);
