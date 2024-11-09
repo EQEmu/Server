@@ -1690,6 +1690,31 @@ void Mob::StopMoving(float new_heading)
 	}
 }
 
+float Mob::FixTIMSize(int race_id, float original_size) {
+	float new_size = original_size;
+	switch (race_id) {
+		case Race::GiantBat:
+			new_size = original_size * .25;
+			break;
+		case Race::Alligator:
+			new_size = original_size * .25;
+			break;
+		case Race::DragonSkeleton:
+			new_size = original_size * 10;
+			break;
+		case Race::Trakanon:
+			new_size = 130;
+			break;
+		case Race::StormGiant:
+			new_size = 25;
+			break;
+		case Race::LavaDragon:
+			new_size = 100;
+			break;
+	}
+	return original_size;
+}
+
 void Mob::SentPositionPacket(float dx, float dy, float dz, float dh, int anim, bool send_to_self)
 {
 	EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));

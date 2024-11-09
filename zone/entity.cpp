@@ -4806,11 +4806,14 @@ void EntityList::SendZoneAppearance(Client *c)
 				++it;
 				continue;
 			}
+
+			float cur_size 	= !(c->GetBucket("DisableFancyModels").empty()) ? cur->GetSize() : cur->FixTIMSize(cur->GetRace(), cur->GetSize());
+
 			if (cur->GetAppearance() != eaStanding) {
 				cur->SendAppearancePacket(AppearanceType::Animation, cur->GetAppearanceValue(cur->GetAppearance()), false, true, c);
 			}
-			if (cur->GetSize() != cur->GetBaseSize()) {
-				cur->SendAppearancePacket(AppearanceType::Size, (uint32) cur->GetSize(), false, true, c);
+			if (cur->GetSize() != cur->GetBaseSize() && !c->GetBucket("DisableFancyModels").empty()) {
+				cur->SendAppearancePacket(AppearanceType::Size, cur->GetSize(), false, true, c);
 			}
 		}
 		++it;

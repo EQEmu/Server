@@ -1577,7 +1577,6 @@ void Client::FixModel(Spawn_Struct* npc) {
 
 		case Race::LavaDragon:
 			npc->race = Race::Dragon5;
-			npc->helm = npc->equip_chest2;
 			npc->size = 100;
 			switch(npc->equip_chest2) {
 				case 0:
@@ -1605,6 +1604,7 @@ void Client::FixModel(Spawn_Struct* npc) {
 					npc->equip_chest2 = 2;
 					break;
 			}
+			npc->helm = npc->equip_chest2;
 		break;
 
         case Race::Drake:

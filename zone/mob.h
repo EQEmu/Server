@@ -756,6 +756,8 @@ public:
 	inline void SetForcedMovement(int in) { ForcedMovement = in; }
 	void SetHeading(float iHeading) { m_Position.w = iHeading; }
 
+	float FixTIMSize(int race_id, float original_size);
+
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
 	inline uint32 GetLevelCon(uint8 iOtherLevel) const { return GetLevelCon(GetLevel(), iOtherLevel); }
