@@ -2767,8 +2767,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 					player_count++;
 				}
-
-				m.member->kill_counters[GetBaseRace()]++;
 			}
 
 			// QueryServ Logging - Raid Kills
@@ -3241,6 +3239,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_KILLED_MERIT)) {
 				parse->EventNPC(EVENT_KILLED_MERIT, this, m, "killed", 0);
 			}
+
+			m->CastToClient()->kill_counters[GetBaseRace()]++;
 		}
 	}
 

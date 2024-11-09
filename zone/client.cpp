@@ -823,9 +823,10 @@ void Client::ProcessSlayerCredits() {
         entry.count = pair.second;
 
         entries.push_back(entry);
+		LogDebug("Attempting to log [{}] - [{}]", entry.race_id, entry.count);
     }
 
-    AccountKillCountsRepository::InsertMany(database, entries);
+    AccountKillCountsRepository::ReplaceMany(database, entries);
 
     kill_counters.clear();
 }
