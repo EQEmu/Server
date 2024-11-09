@@ -458,7 +458,7 @@ bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_
 	}
 
 	if (RuleI(Custom, FarmingInstanceVersion) == instance_version) {
-		version = RuleI(Custom, FarmingInstanceTemplateVersion);
+		instance_version = RuleI(Custom, FarmingInstanceTemplateVersion);
 	}
 
 	const auto& l = TrapsRepository::GetWhere(

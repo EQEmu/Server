@@ -500,9 +500,6 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 			s.variance = 0;
 		}
 
-		if (suppress_spawn & (s.respawntime + s.variance) >= (2 * 60 * 60)) {
-			continue;
-		}
 		spawn2_ids.push_back(s.id);
 	}
 
@@ -534,6 +531,12 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		for (auto &ds: disabled_spawns) {
 			if (ds.spawn2_id == s.id) {
 				spawn_enabled = !ds.disabled;
+			}
+		}
+
+		if (suppress_spawn) {
+			if (s.respawntime >= (2 * 60 * 60)) {
+				spawn_enabled = false;
 			}
 		}
 
