@@ -234,7 +234,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		NEED TO CHECK: precombat, AE Dispel, AE Lifetap
 		DO I NEED A PBAE CHECK???
 		*/
-		if (bot_iter->GetHoldFlag() || bot_iter->GetAppearance() == eaDead || bot_iter->IsFeared() || bot_iter->IsStunned() || bot_iter->IsMezzed() || bot_iter->DivineAura() || bot_iter->GetHP() < 0) {
+		if (bot_iter->GetBotStance() == Stance::Passive || bot_iter->GetHoldFlag() || bot_iter->GetAppearance() == eaDead || bot_iter->IsFeared() || bot_iter->IsStunned() || bot_iter->IsMezzed() || bot_iter->DivineAura() || bot_iter->GetHP() < 0) {
 			continue;
 		}
 

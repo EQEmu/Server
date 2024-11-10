@@ -57,6 +57,10 @@ void bot_command_distance_ranged(Client* c, const Seperator* sep)
 	int success_count = 0;
 
 	for (auto my_bot : sbl) {
+		if (my_bot->BotPassiveCheck()) {
+			continue;
+		}
+
 		if (!first_found) {
 			first_found = my_bot;
 		}
