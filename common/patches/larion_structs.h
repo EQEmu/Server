@@ -8,10 +8,12 @@ namespace Larion {
 		static const uint32 MAX_PP_SKILL = PACKET_SKILL_ARRAY_SIZE;
 		static const uint32 MAX_PP_INNATE_SKILL = 25;
 		static const uint32 MAX_PP_DISCIPLINES = 300;
-		static const uint32 MAX_PP_DISCIPLINE_TIMERS = 25;
+		static const uint32 MAX_PP_COMBAT_ABILITY_TIMERS = 25;
+		static const uint32 MAX_PP_UNKNOWN_ABILITIES = 25;
 		static const uint32 MAX_RECAST_TYPES = 25;
 		static const uint32 MAX_ITEM_RECAST_TYPES = 100;
 		static const uint32 BUFF_COUNT = 62;
+		static const uint32 MAX_PP_LANGUAGE = 32;
 #pragma pack(1)
 		
 		struct LoginInfo_Struct {

@@ -8,6 +8,7 @@ public:
 	static uint32			Generate(const uint8* buf, uint32 bufsize);
 	static uint32			GenerateNoFlip(const uint8* buf, uint32 bufsize); // Same as Generate(), but without the ~
 	static void				SetEQChecksum(uchar* in_data, uint32 in_length, uint32 start_at=4);
+	static unsigned long	GetEQChecksum(uchar* in_data, uint32 in_length, uint32 start_at = 4);
 
 	// Multiple buffer CRC32
 	static uint32			Update(const uint8* buf, uint32 bufsize, uint32 crc32 = 0xFFFFFFFF);

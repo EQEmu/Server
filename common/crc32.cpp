@@ -101,6 +101,24 @@ void CRC32::SetEQChecksum(uchar* in_data, uint32 in_length, uint32 start_at)
 	memcpy(in_data, (char*)&check, 4);
 }
 
+unsigned long CRC32::GetEQChecksum(uchar* in_data, uint32 in_length, uint32 start_at)
+{
+	unsigned long data;
+	unsigned long check = 0xffffffff;
+
+	for (uint32 i = start_at; i < in_length; i++)
+	{
+		data = in_data[i];
+		data = data ^ (check);
+		data = data & 0x000000ff;
+		check = check >> 8;
+		data = CRC32Table[data];
+		check = check ^ data;
+	}
+
+	return check;
+}
+
 uint32 CRC32::Update(const uint8* buf, uint32 bufsize, uint32 crc32var) {
 	for(uint32 i=0; i < bufsize; i++)
 		Calc(buf[i], crc32var);

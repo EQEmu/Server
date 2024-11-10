@@ -59,6 +59,7 @@ public:
 	void WriteUInt8(uint8 value) { *(uint8 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint8); }
 	void WriteUInt32(uint32 value) { *(uint32 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint32); }
 	void WriteUInt64(uint64 value) { *(uint64 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint64); }
+	void WriteSInt16(int32 value) { *(int16*)(pBuffer + _wpos) = value; _wpos += sizeof(int16); }
 	void WriteUInt16(uint32 value) { *(uint16 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint16); }
 	void WriteSInt32(int32 value) { *(int32 *)(pBuffer + _wpos) = value; _wpos += sizeof(int32); }
 	void WriteFloat(float value) { *(float *)(pBuffer + _wpos) = value; _wpos += sizeof(float); }

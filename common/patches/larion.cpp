@@ -533,244 +533,988 @@ namespace Larion
 		unsigned char* __emu_buffer = in->pBuffer;
 		PlayerProfile_Struct* emu = (PlayerProfile_Struct*)__emu_buffer;
 
-		SerializeBuffer buffer;
-		buffer.WriteUInt32(0); //crc
-		buffer.WriteUInt32(0); //size;
-		buffer.WriteUInt32(0); //profile_type;
-		buffer.WriteUInt32(0); //profile_id;
-		buffer.WriteUInt32(0); //shroud_template_id;
-		buffer.WriteUInt8(emu->gender);
-		buffer.WriteUInt32(emu->race);
-		buffer.WriteUInt32(emu->class_);
-		buffer.WriteUInt8(emu->level);
-		buffer.WriteUInt8(emu->level2);
+		SerializeBuffer out;
 
-		buffer.WriteUInt32(5); //bind_count
-		for (int r = 0; r < 5; r++) //binds
+		/*
+		u32 crc;
+		u32 length;
+		*/
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		/*
+		u32 profile_type;
+		u32 profile_id;
+		u32 shroud_template_id;
+		*/
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		/*
+		u8 gender;
+		u32 race;
+		u32 class;
+		u8 level;
+		u8 level1;
+		*/
+		out.WriteUInt8(emu->gender);
+		out.WriteUInt32(emu->race);
+		out.WriteUInt32(emu->class_);
+		out.WriteUInt8(emu->level);
+		out.WriteUInt8(emu->level);
+
+		//u32 bind_count;
+		out.WriteUInt32(5);
+
+		for (int r = 0; r < 5; r++)
 		{
-			buffer.WriteUInt32(emu->binds[r].zone_id);
-			buffer.WriteFloat(emu->binds[r].x);
-			buffer.WriteFloat(emu->binds[r].y);
-			buffer.WriteFloat(emu->binds[r].z);
-			buffer.WriteFloat(emu->binds[r].heading);
+			/*
+			u32 zoneid;
+			float x;
+			float y;
+			float z;
+			float heading;
+			*/
+			out.WriteUInt32(emu->binds[r].zone_id);
+			out.WriteFloat(emu->binds[r].x);
+			out.WriteFloat(emu->binds[r].y);
+			out.WriteFloat(emu->binds[r].z);
+			out.WriteFloat(emu->binds[r].heading);
 		}
 
-		buffer.WriteUInt32(emu->deity);
-		buffer.WriteUInt32(emu->intoxication);
+		/*
+		u32 deity;
+		u32 intoxication;
+		*/
+		out.WriteUInt32(emu->deity);
+		out.WriteUInt32(emu->intoxication);
 
-		buffer.WriteUInt32(10); //properties count
-		for (int r = 0; r < 10; r++) //properties
-		{
-			buffer.WriteUInt32(0);
+		//u32 property_count;
+		out.WriteUInt32(10); // properties count
+
+		//u32 properties[property_count]; 
+		for (int i = 0; i < 10; i++) {
+			out.WriteUInt32(0);
 		}
 
-		buffer.WriteUInt32(22);	// Equipment count
-
-		for (int r = EQ::textures::textureBegin; r < EQ::textures::materialCount; r++)
-		{
-			buffer.WriteUInt32(emu->item_material.Slot[r].Material);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
+		//u32 armor_prop_count;
+		out.WriteUInt32(22); //armor count
+		for (int i = 0; i < 22; ++i) {
+			/*
+			s32 type;
+			s32 variation;
+			s32 material;
+			s32 newArmorId;
+			s32 newArmorType;
+			*/
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
 		}
 
-		// Write zeroes for the next 13 equipment slots
-
-		for (int r = 0; r < 13; r++)
-		{
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
+		//u32 base_armor_prop_count;
+		out.WriteUInt32(9); //base armor count
+		for (int i = 0; i < 9; ++i) {
+			/*
+			s32 type;
+			s32 variation;
+			s32 material;
+			s32 newArmorId;
+			s32 newArmorType;
+			*/
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
 		}
 
-		buffer.WriteUInt32(EQ::textures::materialCount); // Base Equipment count 
+		//u32 body_tint_count;
+		out.WriteUInt32(9); //body_tint_count
+		//u32 body_tints[body_tint_count];
+		for (int i = 0; i < 9; ++i) {
+			out.WriteUInt32(0);
+		}
+
+		//u32 equip_tint_count;
+		out.WriteUInt32(9); //equip_tint_count
+		//u32 equip_tints[equip_tint_count];
+		for (int i = 0; i < 9; ++i) {
+			out.WriteUInt32(0);
+		}
+
+		/*
+		u8 hair_color;
+		u8 facial_hair_color;
+		u32 npc_tint_index;
+		u8 eye_color1;
+		u8 eye_color2;
+		u8 hair_style;
+		u8 facial_hair;
+		u8 face;
+		u8 old_face;
+		u32 heritage;
+		u32 tattoo;
+		u32 details;
+		*/
+		out.WriteUInt8(emu->haircolor);
+		out.WriteUInt8(emu->beardcolor);
+		out.WriteUInt32(0); //npc tint index
+		out.WriteUInt8(emu->eyecolor1);
+		out.WriteUInt8(emu->eyecolor2);
+		out.WriteUInt8(emu->hairstyle);
+		out.WriteUInt8(emu->beard);
+		out.WriteUInt8(emu->face);
+		out.WriteUInt8(0); //old face
+		out.WriteUInt32(emu->drakkin_heritage);
+		out.WriteUInt32(emu->drakkin_tattoo);
+		out.WriteUInt32(emu->drakkin_details);
+
+		/*
+		u8 texture_type;
+		u8 material;
+		u8 variation;
+		*/
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+
+		/*
+		float height;
+		float width;
+		float length;
+		float view_height;
+		*/
+		out.WriteFloat(5.0f);
+		out.WriteFloat(3.0f);
+		out.WriteFloat(2.5f);
+		out.WriteFloat(5.5f);
+
+		/*
+		u32 primary;
+		u32 secondary;
+		*/
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		/*
+		u32 practices;
+		u32 base_mana;
+		u32 base_hp;
+		u32 base_str;
+		u32 base_sta;
+		u32 base_cha;
+		u32 base_dex;
+		u32 base_int;
+		u32 base_agi;
+		u32 base_wis;
+		u32 base_heroic_str;
+		u32 base_heroic_sta;
+		u32 base_heroic_cha;
+		u32 base_heroic_dex;
+		u32 base_heroic_int;
+		u32 base_heroic_agi;
+		u32 base_heroic_wis;
+		*/
+		out.WriteUInt32(emu->points);
+		out.WriteUInt32(emu->mana);
+		out.WriteUInt32(emu->cur_hp);
+		out.WriteUInt32(emu->STR);
+		out.WriteUInt32(emu->STA);
+		out.WriteUInt32(emu->CHA);
+		out.WriteUInt32(emu->DEX);
+		out.WriteUInt32(emu->INT);
+		out.WriteUInt32(emu->AGI);
+		out.WriteUInt32(emu->WIS);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		//u32 aa_count;
+		out.WriteUInt32(300);
+		for (int i = 0; i < 240; ++i) {
+			/*
+			s32 index;
+			s32 points_spent;
+			s32 charges_spent;
+			u8 unknown1; 
+			*/
+			out.WriteUInt32(emu->aa_array[i].AA);
+			out.WriteUInt32(emu->aa_array[i].value);
+			out.WriteUInt32(emu->aa_array[i].charges);
+			out.WriteUInt8(0);
+		}
+
+		for (int i = 0; i < 60; ++i) {
+			/*
+			s32 index;
+			s32 points_spent;
+			s32 charges_spent;
+			u8 unknown1; //not sure about this one
+			*/
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt8(0);
+		}
+
+		/*u32 skill_count;*/
+		out.WriteUInt32(100);
+		//s32 skills[skill_count];
+		for (int i = 0; i < 100; ++i) {
+			out.WriteUInt32(emu->skills[i]);
+		}
+
+		//u32 innate_skill_count;
+		out.WriteUInt32(25);
+		//s32 innate_skills[innate_skill_count];
+		for (int i = 0; i < 25; ++i) {
+			out.WriteUInt32(emu->InnateSkills[i]);
+		}
+
+		/*
+		u32 combat_ability_count;
+		*/
+		out.WriteUInt32(300);
+		//s32 combat_abilities[combat_ability_count];
+		for (int i = 0; i < 100; ++i) {
+			out.WriteUInt32(emu->disciplines.values[i]);
+		}
+
+		for (int i = 0; i < 200; ++i) {
+			out.WriteUInt32(0);
+		}
+
+		//u32 combat_ability_timer_count;
+		out.WriteUInt32(25);
+		//s32 combat_ability_timers[combat_ability_timer_count];
+		for (int i = 0; i < 20; ++i) {
+			out.WriteUInt32(emu->disciplines.values[i]);
+		}
+
+		for (int i = 0; i < 5; ++i) {
+			out.WriteUInt32(0);
+		}
+
+		//u32 unk_ability_count;
+		out.WriteUInt32(0);
+
+		//u32 linked_spell_timer_count;
+		out.WriteUInt32(25);
+		//s32 linked_spell_timers[linked_spell_timer_count];
+		for (int i = 0; i < 25; ++i) {
+			out.WriteUInt32(0);
+		}
+
+		//u32 item_recast_timer_count;
+		out.WriteUInt32(100);
+		//s32 item_recast_timers[item_recast_timer_count];
+		for (int i = 0; i < 100; ++i) {
+			out.WriteUInt32(0);
+		}
+
+		//u32 spell_book_slot_count;
+		out.WriteUInt32(1120);
+
+		//s32 spell_book_slots[spell_book_slot_count];
+		for (int i = 0; i < 720; ++i) {
+			out.WriteUInt32(emu->spell_book[i]);
+		}
+
+		for (int i = 0; i < 400; ++i) {
+			out.WriteUInt32(0xFFFFFFFF);
+		}
+
+		//u32 spell_gem_count;
+		out.WriteUInt32(18);
+		//s32 spell_gems[spell_gem_count];
+		for (int i = 0; i < 12; ++i) {
+			out.WriteUInt32(emu->mem_spells[i]);
+		}
+
+		for (int i = 0; i < 6; ++i) {
+			out.WriteUInt32(0xFFFFFFFF);
+		}
+
+		/*
+		u32 spell_recast_timer_count;
+		*/
+		out.WriteUInt32(15);
+
+		//s32 spell_recast_timers[spell_recast_timer_count];
+		for (int i = 0; i < 12; ++i) {
+			out.WriteUInt32(emu->spellSlotRefresh[i]);
+		}
+
+		for (int i = 0; i < 3; ++i) {
+			out.WriteUInt32(0);
+		}
+
+		//u8 max_allowed_spell_slots;
+		out.WriteUInt8(0);
+
+		//u32 buff_count;
+		out.WriteUInt32(42);
+
+		//PackedEQAffect buffs[buff_count];
+		for (int i = 0; i < 42; ++i) {
+			/*
+			float modifier;
+			u32 caster;
+			u32 flags;
+			u32 duration;
+			u32 max_duration;
+			u8 level;
+			s32 spell_id;
+			s32 hitcount;
+			u8 unknown1;
+			u32 unknown2;
+			u32 unknown3;
+			*/
+			out.WriteFloat(1.0f);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt8(0);
+			out.WriteUInt32(0xFFFFFFFF);
+			out.WriteUInt32(0);
+			out.WriteUInt8(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			//SlotData slots[6];
+			for (int j = 0; j < 6; ++j) {
+				/*
+				s32 slot_id;
+				s64 value;
+				*/
+				out.WriteInt32(-1);
+				out.WriteUInt64(0);
+			}
+		}
+
+		//Coin coin;
+		/*
+		u32 platinum;
+		u32 gold;
+		u32 silver;
+		u32 copper;
+		*/
+		out.WriteUInt32(emu->platinum);
+		out.WriteUInt32(emu->gold);
+		out.WriteUInt32(emu->silver);
+		out.WriteUInt32(emu->copper);
+
+		//Coin cursor_coin;
+		/*
+		u32 platinum;
+		u32 gold;
+		u32 silver;
+		u32 copper;
+		*/
+		out.WriteUInt32(emu->platinum_cursor);
+		out.WriteUInt32(emu->gold_cursor);
+		out.WriteUInt32(emu->silver_cursor);
+		out.WriteUInt32(emu->copper_cursor);
+
+		/*
+		u32 disc_timer;
+		u32 mend_timer;
+		u32 forage_timer;
+		u32 thirst;
+		u32 hunger;
+		*/
+
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(emu->thirst_level);
+		out.WriteUInt32(emu->hunger_level);
+
+		//u32 aa_spent;
+		out.WriteUInt32(emu->aapoints_spent);
+
+		//u32 aa_window_count;
+		out.WriteUInt32(6);
+		//u32 aa_window_stats[aa_window_count];
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		//u32 aa_points_unspent;
+		out.WriteUInt32(emu->aapoints);
+
+		/*
+		u8 sneak;
+		u8 hide;
+		*/
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+
+		//u32 bandolier_count;
+		out.WriteUInt32(20);
+
+		//BandolierSet bandolier_sets[bandolier_count];
+		for (int i = 0; i < 20; ++i) {
+			//char name[];
+			out.WriteString(emu->bandoliers[i].Name);
+
+			//BandolierItemInfo items[4];
+			for (int j = 0; j < 4; ++j) {
+				//char name[];
+				out.WriteString(emu->bandoliers[i].Items[j].Name);
+				//s32 item_id;
+				out.WriteUInt32(emu->bandoliers[i].Items[j].ID);
+				//s32 icon;
+				out.WriteUInt32(emu->bandoliers[i].Items[j].Icon);
+			}
+		}
+
+		//u32 invslot_bitmask;
+		out.WriteUInt32(0xFFFFFFFF);
+
+		/*
+		u32 basedata_hp;
+		u32 basedata_mana;
+		u32 basedata_endur;
+		u32 basedata_mr;
+		u32 basedata_fr;
+		u32 basedata_cr;
+		u32 basedata_pr;
+		u32 basedata_dr;
+		u32 basedata_corrupt;
+		u32 basedata_phr;
+		*/
+
+		out.WriteUInt32(5);
+		out.WriteUInt32(5);
+		out.WriteUInt32(5);
+		out.WriteUInt32(25);
+		out.WriteUInt32(25);
+		out.WriteUInt32(25);
+		out.WriteUInt32(15);
+		out.WriteUInt32(15);
+		out.WriteUInt32(15);
+		out.WriteUInt32(15);
+
+		/*
+		float basedata_walkspeed;
+		float basedata_runspeed;
+		*/
+
+		out.WriteFloat(0.46f);
+		out.WriteFloat(0.7f);
+
+		/*
+		u32 basedata_hpregen;
+		u32 basedata_manaregen;
+		u32 basedata_mountmanaregen;
+		u32 basedata_endurregen;
+		u32 basedata_ac;
+		u32 basedata_atk;
+		u32 basedata_dmg;
+		u32 basedata_delay;
+		u32 endurance;
+		u32 heroic_type;
+		*/
+
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(emu->endurance);
+		out.WriteUInt32(0);
+
+		//ItemIndex keyring_item_index[5];
+		for (int i = 0; i < 5; ++i) {
+			/*
+			s16 slot1;
+			s16 slot2;
+			s16 slot3;
+			*/
+
+			out.WriteInt16(-1);
+			out.WriteInt16(-1);
+			out.WriteInt16(-1);
+		}
+
+		/*
+		u64 exp;
+		u32 aa_exp;
+		*/
+		out.WriteUInt64(emu->exp);
+		out.WriteUInt32(emu->expAA);
+
+		/*
+		u32 character_id;
+		u32 character_id2;
+		*/
+		out.WriteUInt32(emu->char_id);
+		out.WriteUInt32(100);
+
+		/*u32 name_length;*/
+		/*char name[name_length];*/
+		out.WriteLengthString(64, emu->name);
+
+		//u32 last_name_length;
+		//char last_name[last_name_length];
+		out.WriteLengthString(32, emu->last_name);
+
+		/*
+		u32 creation_time;
+		u32 account_creation_time;
+		u32 last_played_time;
+		u32 played_minutes;
+		u32 entitled_days;
+		u32 expansion_flags;
+		*/
+
+		out.WriteUInt32(emu->birthday);
+		out.WriteUInt32(emu->birthday);
+		out.WriteUInt32(emu->lastlogin);
+		out.WriteUInt32(emu->timePlayedMin);
+		out.WriteUInt32(6000);
+		out.WriteUInt32(0x3FFFFFFF);
+
+		//u32 language_count;
+		out.WriteUInt32(32);
+		for (int i = 0; i < 28; i++)
+		{
+			//u8 languages[language_count];
+			out.WriteUInt8(emu->languages[i]);
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			out.WriteUInt8(0);
+		}
+
+		/*
+		u32 current_zone;
+		float current_x;
+		float current_y;
+		float current_z;
+		float current_heading;
+		*/
+		out.WriteUInt16(emu->zone_id);
+		out.WriteUInt16(emu->zoneInstance);
+		out.WriteFloat(emu->x);
+		out.WriteFloat(emu->y);
+		out.WriteFloat(emu->z);
+		out.WriteFloat(emu->heading);
+
+		/*
+		u8 animation;
+		u8 pvp;
+		u8 anon;
+		u8 gm;
+		*/
+		out.WriteUInt8(100);
+		out.WriteUInt8(emu->pvp);
+		out.WriteUInt8(emu->anon);
+		out.WriteUInt8(emu->gm);
+
+		/*
+		u64 guild_id;
+		u8 guild_show_sprite;
+		u8 status;
+		*/
+
+		out.WriteUInt64(0);
+		out.WriteUInt8(1);
+		out.WriteUInt8(5);
+
+		//Coin coin;
+		out.WriteUInt32(emu->platinum);
+		out.WriteUInt32(emu->gold);
+		out.WriteUInt32(emu->silver);
+		out.WriteUInt32(emu->copper);
+
+		//Coin bank;
+		out.WriteUInt32(emu->platinum_bank);
+		out.WriteUInt32(emu->gold_bank);
+		out.WriteUInt32(emu->silver_bank);
+		out.WriteUInt32(emu->copper_bank);
+
+		//u32 bank_shared_plat;
+		out.WriteUInt32(emu->platinum_shared);
+
+		//u32 claim_count;
+		out.WriteUInt32(0);
+		//Claim claims[claim_count];	
 		
-		//live seems to send the materials you had when you created the character here
-		//not entirely sure for what purpose though
+		//Tribute tribute;
+		/*
+		u32 BenefitTimer;
+		s32 unknown1;
+		s32 current_favor;
+		s32 unknown2;
+		s32 all_time_favor;
+		s32 unknown3; //some of these are probably the bools on the pcclient;
+		u16 unknown4;
+		*/
+		out.WriteUInt32(600000);
+		out.WriteInt32(-1);
+		out.WriteUInt32(emu->tribute_points);
+		out.WriteUInt32(0);
+		out.WriteUInt32(emu->career_tribute_points);
+		out.WriteUInt32(0);
+		out.WriteUInt16(0);
 
-		for (int r = EQ::textures::textureBegin; r < EQ::textures::materialCount; r++)
-		{
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
+		//u32 tribute_benefit_count
+		out.WriteUInt32(5);
+
+		//TributeBenefit tribute_benefits[tribute_benefit_count];
+		for (int i = 0; i < 5; ++i) {
+			/*
+			s32 benefit_id;
+			s32 benefit_tier;
+			*/
+
+			out.WriteUInt32(emu->tributes[i].tribute);
+			out.WriteUInt32(emu->tributes[i].tier);
 		}
 
-		buffer.WriteUInt32(EQ::textures::materialCount); // Tint Count
+		//u32 trophy_tribute_benefit_count;
+		out.WriteUInt32(10);
 
-		for (int r = 0; r < 7; r++)
-		{
-			buffer.WriteUInt32(emu->item_tint.Slot[r].Color);
+		//TributeBenefit trophy_tribute_benefit[trophy_tribute_benefit_count];
+		for (int i = 0; i < 10; ++i) {
+			/*
+			s32 benefit_id;
+			s32 benefit_tier;
+			*/
+
+			out.WriteUInt32(0xFFFFFFFF);
+			out.WriteUInt32(0);
 		}
 
-		// Write extra two tint values
-		buffer.WriteUInt32(0);
-		buffer.WriteUInt32(0);
-
-		buffer.WriteUInt32(EQ::textures::materialCount); // Equip Tint Count
-		for (int r = 0; r < 7; r++)
+		//u8 tasks[137]; //on live and on xac's capture from 12/28/23 these both are the same size;
+		for (int i = 0; i < 137; i++)
 		{
-			buffer.WriteUInt32(emu->item_tint.Slot[r].Color);
+			out.WriteUInt8(0);
 		}
 
-		buffer.WriteUInt32(0);
-		buffer.WriteUInt32(0);
+		/*
+		u32 good_points_available;
+		u32 good_points_earned;
+		u32 bad_points_available;
+		u32 bad_points_earned;
+		*/
 
-		buffer.WriteUInt8(emu->haircolor);
-		buffer.WriteUInt8(emu->beardcolor);
-		buffer.WriteUInt32(0); //npc tint index
-		buffer.WriteUInt8(emu->eyecolor1);
-		buffer.WriteUInt8(emu->eyecolor2);
-		buffer.WriteUInt8(emu->hairstyle);
-		buffer.WriteUInt8(emu->beard);
-		buffer.WriteUInt8(emu->face);
-		buffer.WriteUInt8(0); //old_face
-		buffer.WriteUInt32(emu->drakkin_heritage);
-		buffer.WriteUInt32(emu->drakkin_tattoo);
-		buffer.WriteUInt32(emu->drakkin_details);
-		buffer.WriteInt8(-1); //texture type
-		buffer.WriteInt8(0); //material
-		buffer.WriteInt8(0); //variation
-		buffer.WriteFloat(5.0f); //height
-		buffer.WriteFloat(3.0f); //width
-		buffer.WriteFloat(2.5f); //length
-		buffer.WriteFloat(5.5f); //view height
-		buffer.WriteInt32(0); //primary_actor
-		buffer.WriteInt32(0); //secondary_actor
+		out.WriteUInt32(emu->currentRadCrystals);
+		out.WriteUInt32(emu->careerRadCrystals);
+		out.WriteUInt32(emu->currentEbonCrystals);
+		out.WriteUInt32(emu->careerEbonCrystals);
 
-		buffer.WriteUInt32(emu->points); // Unspent skill points
-		buffer.WriteUInt32(emu->mana); 
-		buffer.WriteUInt32(emu->cur_hp);
-		buffer.WriteUInt32(emu->STR);
-		buffer.WriteUInt32(emu->STA);
-		buffer.WriteUInt32(emu->CHA);
-		buffer.WriteUInt32(emu->DEX);
-		buffer.WriteUInt32(emu->INT);
-		buffer.WriteUInt32(emu->AGI);
-		buffer.WriteUInt32(emu->WIS);
-		buffer.WriteUInt32(0); //heroic_sta
-		buffer.WriteUInt32(0); //heroic_str
-		buffer.WriteUInt32(0); //heroic_cha
-		buffer.WriteUInt32(0); //heroic_dex
-		buffer.WriteUInt32(0); //heroic_int
-		buffer.WriteUInt32(0); //heroic_agi
-		buffer.WriteUInt32(0); //heroic_wis
+		/*
+		u32 momentum_balance;
+		u32 loyalty_reward_balance;
+		u32 parcel_status;
+		*/
 
-		buffer.WriteUInt32(structs::MAX_PP_AA_ARRAY); // AA Count
-		for (uint32 r = 0; r < MAX_PP_AA_ARRAY; r++)
-		{
-			buffer.WriteUInt32(emu->aa_array[r].AA);
-			buffer.WriteUInt32(emu->aa_array[r].value);
-			buffer.WriteUInt32(emu->aa_array[r].charges);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		/*
+		u32 vehicle_name_length;
+		char vehicle_name[vehicle_name_length];
+		*/
+
+		out.WriteUInt32(64);
+		for (int i = 0; i < 64; ++i) {
+			out.WriteUInt8(0);
 		}
 
-		//honestly we should look to up the base size and just limit titanium later
-		for (uint32 r = 0; r < structs::MAX_PP_AA_ARRAY - MAX_PP_AA_ARRAY; r++)
-		{
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(0);
+		/*
+		u8 super_pkill;
+		u8 unclone;
+		u8 dead;
+		*/
+
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+
+		/*
+		u32 ld_timer;
+		u32 spell_interrupt_count;
+		u8 autosplit;
+		u8 tells_off;
+		*/
+
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt8(emu->autosplit);
+		out.WriteUInt8(0);
+
+		/*
+		u8 gm_invis;
+		u32 kill_me;
+		u8 cheater_ld_flag;
+		u8 norent;
+		u8 corpse;
+		u8 client_gm_flag_set;
+		u32 mentor_pct;
+		*/
+
+		out.WriteUInt8(0);
+		out.WriteUInt32(0);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+		out.WriteUInt32(0);
+
+		//RaidData raid;
+		/*
+		u32 main_assist1;
+		u32 main_assist2;
+		u32 main_assist3;
+		char main_assist_name1[];
+		char main_assist_name2[];
+		char main_assist_name3[];
+		u32 main_marker1;
+		u32 main_marker2;
+		u32 main_marker3;
+		u32 master_looter;
+		*/
+
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		//u32 unique_player_id;
+		out.WriteUInt32(emu->char_id);
+
+		//LdonData ldon_data;
+		/*
+		u32 count;
+		u32 ldon_categories[count];
+		u32 ldon_points_available;
+		*/
+
+		out.WriteUInt32(6);
+		out.WriteUInt32(0);
+		out.WriteUInt32(emu->ldon_points_guk);
+		out.WriteUInt32(emu->ldon_points_mir);
+		out.WriteUInt32(emu->ldon_points_mmc);
+		out.WriteUInt32(emu->ldon_points_ruj);
+		out.WriteUInt32(emu->ldon_points_tak);
+		out.WriteUInt32(emu->ldon_points_available);
+
+		//u32 air_supply;
+		out.WriteUInt32(emu->air_remaining);
+
+		//PvPData pvp_data;
+		/*
+		u32 kills;
+		u32 deaths;
+		u32 current_points;
+		u32 career_points;
+		u32 best_kill_streak;
+		u32 worst_death_streak;
+		u32 current_kill_streak;
+		*/
+
+		out.WriteUInt32(emu->PVPKills);
+		out.WriteUInt32(emu->PVPDeaths);
+		out.WriteUInt32(emu->PVPCurrentPoints);
+		out.WriteUInt32(emu->PVPCareerPoints);
+		out.WriteUInt32(emu->PVPBestKillStreak);
+		out.WriteUInt32(emu->PVPWorstDeathStreak);
+		out.WriteUInt32(emu->PVPCurrentKillStreak);
+
+		//PvPKill last_kill;
+		/*
+		char name[];
+		u32 level;
+		u32 unknown1; //not sure
+		u32 unknown2; //not sure
+		u32 race;
+		u32 class;
+		u32 zone;
+		u32 time;
+		u32 points;
+		*/
+		out.WriteString(emu->PVPLastKill.Name);
+		out.WriteUInt32(emu->PVPLastKill.Level);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(emu->PVPLastKill.Race);
+		out.WriteUInt32(emu->PVPLastKill.Class);
+		out.WriteUInt32(emu->PVPLastKill.Zone);
+		out.WriteUInt32(emu->PVPLastKill.Time);
+		out.WriteUInt32(emu->PVPLastKill.Points);
+
+		//PvPDeath last_death;
+		/*
+		char name[];
+		u32 level;
+		u32 race;
+		u32 class;
+		u32 zone;
+		u32 time;
+		u32 points;
+		*/
+
+		out.WriteString(emu->PVPLastDeath.Name);
+		out.WriteUInt32(emu->PVPLastDeath.Level);
+		out.WriteUInt32(emu->PVPLastDeath.Race);
+		out.WriteUInt32(emu->PVPLastDeath.Class);
+		out.WriteUInt32(emu->PVPLastDeath.Zone);
+		out.WriteUInt32(emu->PVPLastDeath.Time);
+		out.WriteUInt32(emu->PVPLastDeath.Points);
+
+		/*
+		u32 kills_in_past_24_hours;
+		*/
+
+		out.WriteUInt32(emu->PVPNumberOfKillsInLast24Hours);
+
+		//u32 kill_list_count;
+		out.WriteUInt32(50);
+
+		//PvPKill kill_list[kill_list_count];
+		for (int i = 0; i < 50; ++i) {
+			/*
+			char name[];
+			u32 level;
+			u32 unknown1; //not sure
+			u32 unknown2; //not sure
+			u32 race;
+			u32 class;
+			u32 zone;
+			u32 time;
+			u32 points;
+			*/
+			out.WriteString(emu->PVPRecentKills[i].Name);
+			out.WriteUInt32(emu->PVPRecentKills[i].Level);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(emu->PVPRecentKills[i].Race);
+			out.WriteUInt32(emu->PVPRecentKills[i].Class);
+			out.WriteUInt32(emu->PVPRecentKills[i].Zone);
+			out.WriteUInt32(emu->PVPRecentKills[i].Time);
+			out.WriteUInt32(emu->PVPRecentKills[i].Points);
 		}
 
-		buffer.WriteUInt32(structs::MAX_PP_SKILL);
+		/*
+		u32 pvp_infamy_level;
+		u32 pvp_vitality;
+		*/
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
 
-		for (uint32 r = 0; r < structs::MAX_PP_SKILL; r++)
-		{
-			buffer.WriteUInt32(emu->skills[r]);
-		}
+		/*
+		u32 cursor_krono;
+		u32 krono;
+		*/
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
 
-		buffer.WriteUInt32(structs::MAX_PP_INNATE_SKILL); // Innate Skills count
+		/*
+		u8 autoconsent_group;
+		u8 autoconsent_raid;
+		u8 autoconsent_guild;
+		u8 autoconsent_fellowship;
+		*/
 
-		for (uint32 r = 0; r < structs::MAX_PP_INNATE_SKILL; r++)
-		{
-			buffer.WriteUInt32(emu->InnateSkills[r]); // Innate Skills (regen, slam, etc)
-		}
+		out.WriteUInt8(emu->groupAutoconsent);
+		out.WriteUInt8(emu->raidAutoconsent);
+		out.WriteUInt8(emu->guildAutoconsent);
+		out.WriteUInt8(1);
 
-		buffer.WriteUInt32(structs::MAX_PP_DISCIPLINES); // Discipline count
+		/*
+		u8 private_for_eq_players;
+		u32 main_level;
+		u8 show_helm;
+		u32 downtime;
+		*/
+		out.WriteUInt8(0);
+		out.WriteUInt32(emu->level);
+		out.WriteUInt8(emu->showhelm);
+		out.WriteUInt32(emu->RestTimer);
 
-		for (uint32 r = 0; r < MAX_PP_DISCIPLINES; r++)
-		{
-			buffer.WriteUInt32(emu->disciplines.values[r]);
-		}
+		//AltCurrency alt_currency;
+		/*
+		u32 alt_currency_str_length;
+		u32 unknown1;
+		char alt_currency_string[alt_currency_str_length];
+		*/
+		out.WriteUInt32(1);
+		out.WriteUInt32(0);
+		out.WriteUInt8(0x31);
 
-		for (uint32 r = 0; r < structs::MAX_PP_DISCIPLINES - MAX_PP_DISCIPLINES; r++)
-		{
-			buffer.WriteUInt32(0);
-		}
+		//u32 completed_event_subcomponent_count;
+		out.WriteUInt32(0);
+		//AchivementSubComponentData completed_event_subcomponents[completed_event_subcomponent_count];
 
-		buffer.WriteUInt32(structs::MAX_PP_DISCIPLINE_TIMERS); // Disc timers
+		//u32 inprogress_event_subcomponent_count;
+		out.WriteUInt32(0);
+		//AchivementSubComponentData inprogress_event_subcomponents[inprogress_event_subcomponent_count];
 
-		for (uint32 r = 0; r < structs::MAX_PP_DISCIPLINE_TIMERS; r++)
-		{
-			buffer.WriteUInt32(0); //todo: support sending actual timestamps
-		}
+		/*
+		u64 merc_aa_exp;
+		u32 merc_aa_points;
+		u32 merc_aa_spent;
+		*/
+		out.WriteUInt64(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
 
-		buffer.WriteUInt32(0); // Unk Ability Count
+		//u32 starting_city_zone_id;
+		//we don't actually support this yet
+		out.WriteUInt32(1);
 
-		buffer.WriteUInt32(structs::MAX_RECAST_TYPES); // linked_spell_timer_count
+		/*
+		u8 use_advanced_looting;
+		u8 is_master_loot_candidate;
+		*/
 
-		for (uint32 r = 0; r < MAX_RECAST_TYPES; r++)
-		{
-			buffer.WriteUInt32(emu->recastTimers[r]);
-		}
+		out.WriteUInt8(1);
+		out.WriteUInt8(1);
 
-		for (uint32 r = 0; r < structs::MAX_RECAST_TYPES - MAX_RECAST_TYPES; r++)
-		{
-			buffer.WriteUInt32(0);
-		}
+		//alchemy_bonus_list_count
+		out.WriteUInt32(0);
+		//AlchemyBonusSkillData alchemy_bonus_list[alchemy_bonus_list_count];
 
-		buffer.WriteUInt32(structs::MAX_ITEM_RECAST_TYPES); // item recast timers
+		//u32 persona_count;
+		out.WriteUInt32(0);
+		//PersonaEquipmentSet persona_equipment_set[persona_count];
 
-		for (uint32 r = 0; r < structs::MAX_ITEM_RECAST_TYPES; r++)
-		{
-			buffer.WriteUInt32(0);
-		}
+		//u8 term;
+		out.WriteUInt8(0);
 
-		buffer.WriteUInt32(spells::SPELLBOOK_SIZE);
-
-		for (uint32 r = 0; r < EQ::spells::SPELLBOOK_SIZE; r++)
-		{
-			if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
-				buffer.WriteUInt32(emu->spell_book[r]);
-			else
-				buffer.WriteInt32(-1);
-		}
-
-		for (uint32 r = 0; r < spells::SPELLBOOK_SIZE - EQ::spells::SPELLBOOK_SIZE; r++)
-		{
-			buffer.WriteInt32(-1);
-		}
-		
-		buffer.WriteUInt32(spells::SPELL_GEM_COUNT); // Memorised spell slots
-
-		for (uint32 r = 0; r < EQ::spells::SPELL_GEM_COUNT; r++) // write first 12, we need to actually look into this for larion im sure it's changed
-		{
-			buffer.WriteUInt32(emu->mem_spells[r]);
-		}
-
-		for (uint32 r = 0; r < spells::SPELL_GEM_COUNT - EQ::spells::SPELL_GEM_COUNT; r++)
-		{
-			buffer.WriteInt32(-1);
-		}
-
-		buffer.WriteUInt32(spells::SPELL_GEM_RECAST_TIMER);
-
-		for (uint32 r = 0; r < EQ::spells::SPELL_GEM_COUNT; r++)
-		{
-			buffer.WriteUInt32(emu->spellSlotRefresh[r]); // spell gem refresh
-		}
-		//also refresh
-		buffer.WriteUInt32(0);
-		buffer.WriteUInt32(0);
-		buffer.WriteUInt32(0);
-
-		buffer.WriteUInt8(0); 
-
-		buffer.WriteUInt32(structs::BUFF_COUNT);
+		auto outapp = new EQApplicationPacket(OP_PlayerProfile, out.length());
+		outapp->WriteData(out.buffer(), out.length());
+		outapp->SetWritePosition(4);
+		outapp->WriteUInt32(outapp->size - 9);
+		CRC32::SetEQChecksum(outapp->pBuffer, outapp->size - 1, 8);
+		dest->FastQueuePacket(&outapp, ack_req);
+		delete in;
 	}
 
 	/*ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_ZoneSpawns); }

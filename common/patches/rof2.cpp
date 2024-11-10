@@ -2680,7 +2680,7 @@ namespace RoF2
 		{
 			float instrument_mod = 0.0f;
 			uint8 effect_type = emu->buffs[r].effect_type;
-			uint32 player_id = emu->buffs[r].player_id;;
+			uint32 player_id = emu->buffs[r].player_id;
 
 			if (emu->buffs[r].spellid != 0xFFFF && emu->buffs[r].spellid != 0)
 			{
