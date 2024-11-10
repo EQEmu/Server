@@ -117,6 +117,7 @@ public:
 		int32_t     min_lava_damage;
 		uint8_t     idle_when_empty;
 		uint32_t    seconds_before_idle;
+		int32_t     shard_at_player_count;
 	};
 
 	static std::string PrimaryKey()
@@ -225,6 +226,7 @@ public:
 			"min_lava_damage",
 			"idle_when_empty",
 			"seconds_before_idle",
+			"shard_at_player_count",
 		};
 	}
 
@@ -329,6 +331,7 @@ public:
 			"min_lava_damage",
 			"idle_when_empty",
 			"seconds_before_idle",
+			"shard_at_player_count",
 		};
 	}
 
@@ -467,6 +470,7 @@ public:
 		e.min_lava_damage           = 10;
 		e.idle_when_empty           = 1;
 		e.seconds_before_idle       = 60;
+		e.shard_at_player_count     = 0;
 
 		return e;
 	}
@@ -601,6 +605,7 @@ public:
 			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
 			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
 			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			return e;
 		}
@@ -731,6 +736,7 @@ public:
 		v.push_back(columns[95] + " = " + std::to_string(e.min_lava_damage));
 		v.push_back(columns[96] + " = " + std::to_string(e.idle_when_empty));
 		v.push_back(columns[97] + " = " + std::to_string(e.seconds_before_idle));
+		v.push_back(columns[98] + " = " + std::to_string(e.shard_at_player_count));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -850,6 +856,7 @@ public:
 		v.push_back(std::to_string(e.min_lava_damage));
 		v.push_back(std::to_string(e.idle_when_empty));
 		v.push_back(std::to_string(e.seconds_before_idle));
+		v.push_back(std::to_string(e.shard_at_player_count));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -977,6 +984,7 @@ public:
 			v.push_back(std::to_string(e.min_lava_damage));
 			v.push_back(std::to_string(e.idle_when_empty));
 			v.push_back(std::to_string(e.seconds_before_idle));
+			v.push_back(std::to_string(e.shard_at_player_count));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1108,6 +1116,7 @@ public:
 			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
 			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
 			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1230,6 +1239,7 @@ public:
 			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
 			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
 			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1402,6 +1412,7 @@ public:
 		v.push_back(std::to_string(e.min_lava_damage));
 		v.push_back(std::to_string(e.idle_when_empty));
 		v.push_back(std::to_string(e.seconds_before_idle));
+		v.push_back(std::to_string(e.shard_at_player_count));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1522,6 +1533,7 @@ public:
 			v.push_back(std::to_string(e.min_lava_damage));
 			v.push_back(std::to_string(e.idle_when_empty));
 			v.push_back(std::to_string(e.seconds_before_idle));
+			v.push_back(std::to_string(e.shard_at_player_count));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

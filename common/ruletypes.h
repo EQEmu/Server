@@ -372,6 +372,7 @@ RULE_INT(Zone, FishingChance, 399, "Chance of fishing from zone table vs global 
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnBots, false, "Set to true to allow cross zone spells (cast/remove) to affect bots")
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnMercs, false, "Set to true to allow cross zone spells (cast/remove) to affect mercenaries")
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross zone spells (cast/remove) to affect pets")
+RULE_BOOL(Zone, ZoneShardQuestMenuOnly, false, "Set to true if you only want quests to show the zone shard menu")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
