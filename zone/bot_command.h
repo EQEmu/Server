@@ -1775,7 +1775,6 @@ void bot_command_toggle_ranged(Client* c, const Seperator* sep);
 void bot_command_update(Client *c, const Seperator *sep);
 void bot_command_woad(Client *c, const Seperator *sep);
 
-void bot_command_circle(Client *c, const Seperator *sep);
 void bot_command_heal_rotation_adaptive_targeting(Client *c, const Seperator *sep);
 void bot_command_heal_rotation_add_member(Client *c, const Seperator *sep);
 void bot_command_heal_rotation_add_target(Client *c, const Seperator *sep);
@@ -1803,7 +1802,6 @@ void bot_command_inventory_window(Client *c, const Seperator *sep);
 void bot_command_pet_get_lost(Client *c, const Seperator *sep);
 void bot_command_pet_remove(Client *c, const Seperator *sep);
 void bot_command_pet_set_type(Client *c, const Seperator *sep);
-void bot_command_portal(Client *c, const Seperator *sep);
 
 
 // bot command helpers
