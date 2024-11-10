@@ -3542,6 +3542,11 @@ void Lua_Client::AreaTaunt(float range, int bonus_hate)
 	entity_list.AETaunt(self, range, bonus_hate);
 }
 
+void Lua_Client::ShowZoneShardMenu() {
+	Lua_Safe_Call_Void();
+	self->ShowZoneShardMenu();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -4064,6 +4069,7 @@ luabind::scope lua_register_client() {
 	.def("SetTint", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetTint)
 	.def("SetTitleSuffix", (void(Lua_Client::*)(const char *))&Lua_Client::SetTitleSuffix)
 	.def("SetZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::SetZoneFlag)
+	.def("ShowZoneShardMenu", (void(Lua_Client::*)(void))&Lua_Client::ShowZoneShardMenu)
 	.def("Signal", (void(Lua_Client::*)(int))&Lua_Client::Signal)
 	.def("Sit", (void(Lua_Client::*)(void))&Lua_Client::Sit)
 	.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)

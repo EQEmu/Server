@@ -1858,6 +1858,11 @@ int Perl_Client_GetClientMaxLevel(Client* self)
 	return self->GetClientMaxLevel();
 }
 
+void Perl_Client_ShowZoneShardMenu(Client* self) // @categories Script Utility
+{
+	self->ShowZoneShardMenu();
+}
+
 DynamicZoneLocation GetDynamicZoneLocationFromHash(perl::hash table)
 {
 	// dynamic zone helper method, defaults invalid/missing keys to 0
@@ -3878,6 +3883,7 @@ void perl_register_client()
 	package.add("SetTitleSuffix", (void(*)(Client*, std::string))&Perl_Client_SetTitleSuffix);
 	package.add("SetTitleSuffix", (void(*)(Client*, std::string, bool))&Perl_Client_SetTitleSuffix);
 	package.add("SetZoneFlag", &Perl_Client_SetZoneFlag);
+	package.add("ShowZoneShardMenu", &Perl_Client_ShowZoneShardMenu);
 	package.add("Signal", &Perl_Client_Signal);
 	package.add("SignalClient", &Perl_Client_SignalClient);
 	package.add("SilentMessage", &Perl_Client_SilentMessage);

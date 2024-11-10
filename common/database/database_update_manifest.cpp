@@ -5771,6 +5771,17 @@ CREATE INDEX idx_character_expires ON data_buckets (character_id, expires);
 CREATE INDEX idx_npc_expires ON data_buckets (npc_id, expires);
 CREATE INDEX idx_bot_expires ON data_buckets (bot_id, expires);
 )"
+	},
+	ManifestEntry{
+		.version = 9286,
+		.description = "2024_11_10_zone_player_partitioning.sql",
+		.check = "SHOW CREATE TABLE `zone`",
+		.condition = "missing",
+		.match = "shard_at_player_count",
+		.sql = R"(
+ALTER TABLE `zone`
+ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_idle`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

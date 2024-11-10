@@ -954,6 +954,11 @@ void Client::CompleteConnect()
 		ShowDevToolsMenu();
 	}
 
+	auto z = GetZone(GetZoneID(), GetInstanceVersion());
+	if (z && z->shard_at_player_count > 0 && !RuleB(Zone, ZoneShardQuestMenuOnly)) {
+		ShowZoneShardMenu();
+	}
+
 	// shared tasks memberlist
 	if (RuleB(TaskSystem, EnableTaskSystem) && GetTaskState()->HasActiveSharedTask()) {
 
