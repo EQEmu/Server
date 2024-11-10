@@ -526,6 +526,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		SendEnterWorld(cle->name());
 		SendPostEnterWorld();
 		if (!is_player_zoning) {
+			const auto supported_clients = RuleS(World, SupportedClients);
 			bool skip_char_info = false;
 			if (!supported_clients.empty()) {
 				const std::string& name = EQ::versions::ClientVersionName(m_ClientVersion);
