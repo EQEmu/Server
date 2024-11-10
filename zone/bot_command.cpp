@@ -1287,7 +1287,6 @@ int bot_command_init(void)
 		bot_command_add("cast", "Tells the first found specified bot to cast the given spell type", AccountStatus::Player, bot_command_cast) ||
 		bot_command_add("distanceranged", "Controls the range casters and ranged will try to stay away from a mob", AccountStatus::Player, bot_command_distance_ranged) ||
 		bot_command_add("charm", "Attempts to have a bot charm your target", AccountStatus::Player, bot_command_charm) ||
-		bot_command_add("circle", "Orders a Druid bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_circle) ||
 		bot_command_add("classracelist", "Lists the classes and races and their appropriate IDs", AccountStatus::Player, bot_command_class_race_list) ||
 		bot_command_add("clickitem", "Orders your targeted bot to click the item in the provided inventory slot.", AccountStatus::Player, bot_command_click_item) ||
 		bot_command_add("copysettings", "Copies settings from one bot to another", AccountStatus::Player, bot_command_copy_settings) ||
@@ -1345,7 +1344,6 @@ int bot_command_init(void)
 		bot_command_add("picklock", "Orders a capable bot to pick the lock of the closest door", AccountStatus::Player, bot_command_pick_lock) ||
 		bot_command_add("pickpocket", "Orders a capable bot to pickpocket a NPC", AccountStatus::Player, bot_command_pickpocket) ||
 		bot_command_add("precombat", "Sets flag used to determine pre-combat behavior", AccountStatus::Player, bot_command_precombat) ||
-		bot_command_add("portal", "Orders a Wizard bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_portal) ||
 		bot_command_add("pull", "Orders a designated bot to 'pull' an enemy", AccountStatus::Player, bot_command_pull) ||
 		bot_command_add("release", "Releases a suspended bot's AI processing (with hate list wipe)", AccountStatus::Player, bot_command_release) ||
 		bot_command_add("resistance", "Orders a bot to cast a specified resistance buff", AccountStatus::Player, bot_command_resistance) ||
@@ -2316,7 +2314,6 @@ void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, st
 #include "bot_commands/summon_corpse.cpp"
 #include "bot_commands/suspend.cpp"
 #include "bot_commands/taunt.cpp"
-#include "bot_commands/teleport.cpp"
 #include "bot_commands/timer.cpp"
 #include "bot_commands/track.cpp"
 #include "bot_commands/view_combos.cpp"
