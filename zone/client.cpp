@@ -13061,6 +13061,11 @@ const std::vector<int16>& Client::GetInventorySlots()
 
 void Client::ShowZoneShardMenu()
 {
+	auto z = GetZone(GetZoneID());
+	if (z && !z->shard_at_player_count) {
+		return;
+	}
+
 	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, GetZoneID());
 	LogZoning("Zone sharding results count [{}]", results.size());
 
@@ -13073,7 +13078,6 @@ void Client::ShowZoneShardMenu()
 		Message(Chat::White, "Available Zone Shards:");
 	}
 
-	auto z = GetZone(GetZoneID());
 	int number = 1;
 	for (auto &e: results) {
 		std::string teleport = fmt::format(
