@@ -2356,7 +2356,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 		for (uint16 i = BotSettingCategories::START_CLIENT; i <= BotSettingCategories::END_CLIENT; ++i) {
 			for (uint16 x = BotSpellTypes::START; x <= BotSpellTypes::END; ++x) {
 				LogBotSettings("{} says, 'Checking {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->CastToBot()->GetBotSpellCategoryName(i), m->CastToBot()->GetSpellTypeNameByID(x), x, m->CastToClient()->GetBotSetting(i, x), m->CastToClient()->GetDefaultBotSettings(i, x)); //deleteme
-				if (IsClientBotSpellType(x) && m->CastToClient()->GetBotSetting(i, x) != m->CastToClient()->GetDefaultBotSettings(i, x)) {
+				if (m->CastToClient()->GetBotSetting(i, x) != m->CastToClient()->GetDefaultBotSettings(i, x)) {
 					auto e = BotSettingsRepository::BotSettings{
 						.char_id				= charID,
 						.bot_id					= botID,
