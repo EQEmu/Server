@@ -2472,32 +2472,31 @@ void Client::SendGuildTributeOptInToggle(const GuildTributeMemberToggle *in)
 
 void Client::SendUnsupportedClientPacket(const std::string& message)
 {
-	auto character_count = 1;
-	auto character_limit = 1;
-	size_t packet_size = sizeof(CharacterSelect_Struct) + (sizeof(CharacterSelectEntry_Struct) * character_count);
-	EQApplicationPacket packet(OP_SendCharInfo, packet_size);
+	EQApplicationPacket packet(OP_SendCharInfo, sizeof(CharacterSelect_Struct) + sizeof(CharacterSelectEntry_Struct));
 
-	unsigned char *buff_ptr = packet.pBuffer;
-	CharacterSelect_Struct *cs = (CharacterSelect_Struct *) buff_ptr;
+	unsigned char* buff_ptr = packet.pBuffer;
+	auto cs = (CharacterSelect_Struct*) buff_ptr;
 
-	cs->CharCount = character_count;
-	cs->TotalChars = character_limit;
+	cs->CharCount  = 1;
+	cs->TotalChars = 1;
 
 	buff_ptr += sizeof(CharacterSelect_Struct);
 
-	CharacterSelectEntry_Struct *entry = (CharacterSelectEntry_Struct *) buff_ptr;
-	strcpy(entry->Name, message.c_str());
+	auto e = (CharacterSelectEntry_Struct*) buff_ptr;
 
-	entry->Race = HUMAN;
-	entry->Class = 1;
-	entry->Level = 1;
-	entry->ShroudClass = entry->Class;
-	entry->ShroudRace = entry->Race;
-	entry->Zone = -1;
-	entry->Instance = 0;
-	entry->Gender = 0;
-	entry->GoHome = 0;
-	entry->Tutorial = 0;
-	entry->Enabled = 0;
+	strcpy(e->Name, message.c_str());
+
+	e->Race        = Race::Human;
+	e->Class       = Class::Warrior;
+	e->Level       = 1;
+	e->ShroudClass = e->Class;
+	e->ShroudRace  = e->Race;
+	e->Zone        = std::numeric_limits<uint16>::max();
+	e->Instance    = 0;
+	e->Gender      = Gender::Male;
+	e->GoHome      = 0;
+	e->Tutorial    = 0;
+	e->Enabled     = 0;
+
 	QueuePacket(&packet);
 }
