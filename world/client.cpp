@@ -526,22 +526,16 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		SendEnterWorld(cle->name());
 		SendPostEnterWorld();
 		if (!is_player_zoning) {
-			const auto supported_clients = RuleS(World, SupportedClients);
-			bool skip_char_info = false;
 			if (!supported_clients.empty()) {
-				auto name = EQ::versions::ClientVersionName(m_ClientVersion);
-				bool supported = false;
-				std::stringstream ss(supported_clients);
-				std::string item;
-				while (std::getline(ss, item, ',')) {
-					if (item == name) {
-						supported = true;
-						break;
-					}
-				}
-				if (!supported) {
-					std::string message = "Client Not In Supported List [" + supported_clients + "]";
-					SendUnsupportedClientPacket(message);
+				const std::string& name = EQ::versions::ClientVersionName(m_ClientVersion);
+				const auto& clients = Strings::Split(supported_clients, ",");
+				if (std::find(clients.begin(), clients.end(), name) == clients.end()) {
+					SendUnsupportedClientPacket(
+						fmt::format(
+							"Client Not In Supported List [{}]",
+							supported_clients
+						)
+					);
 					skip_char_info = true;
 				}
 			}
