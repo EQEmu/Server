@@ -56,6 +56,11 @@ void command_zone_shard(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if (zone_id != c->GetZoneID()) {
+		c->Message(Chat::White, "You must request a shard change from the zone you are currently in.");
+		return;
+	}
+
 	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, c->GetZoneID());
 	if (results.size() <= 1) {
 		c->Message(Chat::White, "No shards found.");
