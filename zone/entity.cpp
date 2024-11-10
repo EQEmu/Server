@@ -2955,10 +2955,14 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
 // All of the above makes a tremendous impact on the bottom line of cpu cycle performance because we run an order of magnitude
 // less checks by focusing our hot path logic down to a very small subset of relevant entities instead of looping an entire
 // entity list (zone wide)
-void EntityList::ScanCloseMobs(Mob *scanning_mob) {
-	// Ensure scanning_mob has a valid ID
+void EntityList::ScanCloseMobs(Mob *scanning_mob)
+{
+	if (!scanning_mob) {
+		return;
+	}
+
 	if (scanning_mob->GetID() <= 0) {
-		return; // Exit early if scanning_mob has an unassigned or invalid ID
+		return;
 	}
 
 	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
