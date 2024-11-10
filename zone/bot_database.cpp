@@ -2221,6 +2221,11 @@ bool BotDatabase::LoadBotSettings(Mob* m)
 	else {
 		query = fmt::format("`bot_id` = {} AND `stance` = {}", mobID, stanceID);
 	}
+	
+	if (stanceID == Stance::Passive) {
+		LogBotSettings("{} is currently set to {} [#{}]. No saving or loading required.", m->GetCleanName(), Stance::GetName(Stance::Passive), Stance::Passive);
+		return true;
+	}
 
 	const auto& l = BotSettingsRepository::GetWhere(database, query);
 
@@ -2267,6 +2272,11 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 	uint32 botID = (m->IsBot() ? m->CastToBot()->GetBotID() : 0);
 	uint32 charID = (m->IsClient() ? m->CastToClient()->CharacterID() : 0);
 	uint8 stanceID = (m->IsBot() ? m->CastToBot()->GetBotStance() : 0);
+
+	if (stanceID == Stance::Passive) {
+		LogBotSettings("{} is currently set to {} [#{}]. No saving or loading required.", m->GetCleanName(), Stance::GetName(Stance::Passive), Stance::Passive);
+		return true;
+	}
 
 	std::string query = "";
 	

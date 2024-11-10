@@ -9844,7 +9844,6 @@ bool Bot::IsMobEngagedByAnyone(Mob* tar) {
 		if (m->GetTarget() == tar) {
 			if (
 				m->IsBot() && 
-				!m->CastToBot()->GetHoldFlag() && 
 				m->IsEngaged() && 
 				(
 					!m->CastToBot()->IsBotNonSpellFighter() || 
@@ -11431,4 +11430,22 @@ void Bot::ResetBotSpellSettings()
 	LoadBotSpellSettings();
 	AI_AddBotSpells(GetBotSpellID());
 	SetBotEnforceSpellSetting(false);
+}
+
+bool Bot::BotPassiveCheck() {
+	if (GetBotStance() == Stance::Passive) {
+		GetOwner()->Message(
+			Chat::Yellow,
+			fmt::format(
+				"{} says, 'I am currently set to stance {} [#{}]. My settings cannot be modified.'",
+				GetCleanName(),
+				Stance::GetName(Stance::Passive),
+				Stance::Passive
+			).c_str()
+		);
+
+		return true;
+	}
+
+	return false;
 }

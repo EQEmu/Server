@@ -497,7 +497,8 @@ public:
 	void SetSpellTypeMaxHPLimit(uint16 spellType, uint8 hpLimit);
 	inline uint16 GetSpellTypeAEOrGroupTargetCount(uint16 spellType) const { return _spellSettings[spellType].AEOrGroupTargetCount; }
 	void SetSpellTypeAEOrGroupTargetCount(uint16 spellType, uint16 targetCount);
-	
+	bool BotPassiveCheck();
+
 	bool GetShowHelm() const { return _showHelm; }
 	void SetShowHelm(bool showHelm) { _showHelm = showHelm; }
 	bool GetBehindMob() const { return _behindMobStatus; }

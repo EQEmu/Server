@@ -40,12 +40,18 @@ void bot_command_click_item(Client* c, const Seperator* sep)
 	}
 
 	std::list<Bot*> sbl;
+
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
+
 	sbl.remove(nullptr);
 
 	for (auto my_bot : sbl) {
+		if (my_bot->BotPassiveCheck()) {
+			continue;
+		}
+
 		if (RuleI(Bots, BotsClickItemsMinLvl) > my_bot->GetLevel()) {
 			c->Message(Chat::White, "%s must be level %i to use clickable items.", my_bot->GetCleanName(), RuleI(Bots, BotsClickItemsMinLvl));
 			continue;

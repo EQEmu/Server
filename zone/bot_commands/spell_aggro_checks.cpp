@@ -190,9 +190,14 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 	Bot* first_found = nullptr;
 	int success_count = 0;
 	for (auto my_bot : sbl) {
+		if (my_bot->BotPassiveCheck()) {
+			continue;
+		}
+
 		if (!first_found) {
 			first_found = my_bot;
 		}
+
 		if (current_check) {
 			c->Message(
 				Chat::Green,

@@ -1440,7 +1440,6 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(Chat::White, "usage: %s [current | reset | sync | value: 0-255] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
-		c->Message(Chat::White, "note: Only caster or hybrid class bots may be modified");
 		c->Message(Chat::White, "note: Use [reset] to set stop melee level to server rule");
 		c->Message(Chat::White, "note: Use [sync] to set stop melee level to current bot level");
 		return;
@@ -1508,14 +1507,7 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 	int success_count = 0;
 
 	for (auto my_bot : sbl) {
-		if (!IsCasterClass(my_bot->GetClass()) && !IsHybridClass(my_bot->GetClass())) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"{} says, 'This command only works on caster or hybrid classes.'",
-					my_bot->GetCleanName()
-				).c_str()
-			);
+		if (my_bot->BotPassiveCheck()) {
 			continue;
 		}
 
