@@ -11,6 +11,11 @@ void command_zone_shard(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if (c->GetAggroCount() > 0) {
+		c->Message(Chat::White, "You cannot request a shard change while in combat.");
+		return;
+	}
+
 	std::string zone_input = sep->arg[1];
 	uint32      zone_id    = 0;
 
