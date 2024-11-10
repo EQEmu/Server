@@ -2945,6 +2945,14 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
 // entity list (zone wide)
 void EntityList::ScanCloseMobs(Mob *scanning_mob)
 {
+	if (!scanning_mob) {
+		return;
+	}
+
+	if (scanning_mob->GetID() <= 0) {
+		return;
+	}
+
 	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
 
 	// Reserve memory in m_close_mobs to avoid frequent re-allocations if not already reserved.
