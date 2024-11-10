@@ -778,7 +778,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		}
 	}
 
-	// zone partitioning
+	// zone sharding
 	if (zoneID == zd->zoneidnumber &&
 		instance_id == 0 &&
 		zd->shard_at_player_count > 0) {
