@@ -127,10 +127,10 @@ void command_zone_shard(Client *c, const Seperator *sep)
 	c->MovePC(
 		zone_id,
 		instance_id,
-		0,
-		0,
-		0,
-		0.0f,
+		z->safe_x,
+		z->safe_y,
+		z->safe_z,
+		z->safe_heading,
 		0,
 		ZoneSolicited
 	);
