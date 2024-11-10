@@ -11426,7 +11426,7 @@ bool Bot::BotPassiveCheck() {
 		GetOwner()->Message(
 			Chat::Yellow,
 			fmt::format(
-				"{} says, 'I am currently set to stance {} [#{}]. My settings cannot be modified.'",
+				"{} says, 'I am currently set to stance {} [#{}]. I cannot do commands and my settings cannot be modified.'",
 				GetCleanName(),
 				Stance::GetName(Stance::Passive),
 				Stance::Passive
