@@ -1707,7 +1707,7 @@ uint32 Client::GetRequiredAAExperience() {
 
 	int total_aa = GetSpentAA() + GetAAPoints() - (RuleB(AA, ModernAAScalingEnabled) ? RuleI(AA, ModernAAScalingAALimit) : 0);
 
-	float aa_scale = RuleB(Custom, EnableAAXPDimReturn) ? 10.0f * (std::min(total_aa, 3000) / 3000.0f)
+	float aa_scale = RuleB(Custom, EnableAAXPDimReturn) ? 10.0f * (std::min(total_aa, 3000) / 3000.0f) : 1.0f;
 
 	return std::floor(aa_scale * RuleI(AA, ExpPerPoint));
 }
