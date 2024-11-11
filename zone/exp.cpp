@@ -321,7 +321,7 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 		add_aaxp *= zone->GetAAEXPModifier(this);
 	}
 
-	add_aaxp = (uint64)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
+	add_aaxp = (uint64)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod * (GetLevel()/50.0f));
 }
 
 void Client::CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel)
@@ -894,7 +894,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	// Check for AA XP Cap
-	int aaexp_cap = RuleI(AA, MaxAAEXPPerKill) * GetConLevelModifierPercent(conlevel) * (GetLevel()/50.0f) * (XPRate / 100.0f);
+	int aaexp_cap = RuleI(AA, MaxAAEXPPerKill) * GetConLevelModifierPercent(conlevel) * (GetLevel()/50.0f) * (XPRate / 100.0f) * (zone->newzone_data.zone_exp_multiplier - 1.0f);
 
 	if (exp_source == ExpSource::Kill && RuleI(AA, MaxAAEXPPerKill) >= 0 && aaexp > aaexp_cap) {
 		aaexp = aaexp_cap;
@@ -1707,7 +1707,7 @@ uint32 Client::GetRequiredAAExperience() {
 
 	int total_aa = GetSpentAA() + GetAAPoints() - (RuleB(AA, ModernAAScalingEnabled) ? RuleI(AA, ModernAAScalingAALimit) : 0);
 
-	float aa_scale = RuleB(Custom, EnableAAXPDimReturn) ? 10.0f * (std::min(total_aa, 3000) / 3000.0f) : 1.0f;
+	float aa_scale = RuleB(Custom, EnableAAXPDimReturn) ? (10.0f * (std::min(total_aa, 3000) / 3000.0f)) : 1.0f;
 
 	return std::floor(aa_scale * RuleI(AA, ExpPerPoint));
 }
