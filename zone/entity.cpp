@@ -2986,7 +2986,10 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
 		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
 			// add mob to scanning_mob's close list and vice versa
-			mob->m_close_mobs[scanning_mob->GetID()] = scanning_mob;
+			// check if the mob is already in the close mobs list before inserting
+            if (mob->m_close_mobs.find(scanning_mob->GetID()) == mob->m_close_mobs.end()) {
+                mob->m_close_mobs[scanning_mob->GetID()] = scanning_mob;
+            }
 			scanning_mob->m_close_mobs[mob->GetID()] = mob;
 		}
 	}
