@@ -5784,7 +5784,7 @@ CREATE INDEX idx_bot_expires ON data_buckets (bot_id, expires);
 ALTER TABLE `zone`
 ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_idle`;
 )",
-	.content_schema_update = true
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
