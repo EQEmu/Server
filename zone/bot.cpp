@@ -9516,7 +9516,9 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar) {
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::PreCombatBuff:
 		case BotSpellTypes::DamageShields:
-		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::ResistBuffs:		
+		case BotSpellTypes::PetResistBuffs:
 			if (
 				!(
 					spells[spellid].target_type == ST_Target ||
@@ -10412,6 +10414,14 @@ uint16 Bot::GetDefaultSpellTypeIdlePriority(uint16 spellType, uint8 botClass, ui
 			priority = 23;
 
 			break;
+		case BotSpellTypes::PetResistBuffs:
+			priority = 24;
+
+			break;
+		case BotSpellTypes::PetDamageShields:
+			priority = 25;
+
+			break;
 		default:
 			priority = 0; //unused
 
@@ -10872,7 +10882,9 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::DamageShields:
-		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::ResistBuffs:		
+		case BotSpellTypes::PetResistBuffs:
 			return BotSpellTypes::Buff;
 		case BotSpellTypes::AEMez:
 		case BotSpellTypes::Mez:
@@ -10932,18 +10944,21 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spellType, uint16 spellid) {
 
 	switch (spellType) {
 		case BotSpellTypes::Buff:
+		case BotSpellTypes::PetBuffs:
 			if (IsResistanceOnlySpell(spellid) || IsDamageShieldOnlySpell(spellid) || IsDamageShieldAndResistanceSpellOnly(spellid)) {
 				return false;
 			}
 
 			return true;
 		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::PetResistBuffs:
 			if (IsResistanceOnlySpell(spellid)) {
 				return true;
 			}
 			
 			return false;
 		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::PetDamageShields:
 			if (IsDamageShieldOnlySpell(spellid) || IsDamageShieldAndResistanceSpellOnly(spellid)) {
 				return true;
 			}

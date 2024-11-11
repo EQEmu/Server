@@ -705,10 +705,12 @@ namespace BotSpellTypes
 	constexpr uint16	PetVeryFastHeals			= 49;
 	constexpr uint16	PetHoTHeals					= 50;
 	constexpr uint16	DamageShields				= 51;
-	constexpr uint16	ResistBuffs					= 52;	
+	constexpr uint16	ResistBuffs					= 52;
+	constexpr uint16	PetDamageShields			= 53;
+	constexpr uint16	PetResistBuffs				= 54;
 				  
-	constexpr uint16	START = BotSpellTypes::Nuke;							// Do not remove or change this
-	constexpr uint16	END = BotSpellTypes::ResistBuffs;						// Do not remove this, increment as needed
+	constexpr uint16	START						= BotSpellTypes::Nuke;							// Do not remove or change this
+	constexpr uint16	END							= BotSpellTypes::PetResistBuffs;				// Do not remove this, increment as needed
 }
 
 const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow);

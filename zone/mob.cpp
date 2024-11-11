@@ -8886,6 +8886,12 @@ std::string Mob::GetSpellTypeNameByID(uint16 spellType) {
 		case BotSpellTypes::ResistBuffs:
 			spellTypeName = "Resist Buff";
 			break;
+		case BotSpellTypes::PetDamageShields:
+			spellTypeName = "Pet Damage Shield";
+			break;
+		case BotSpellTypes::PetResistBuffs:
+			spellTypeName = "Pet Resist Buff";
+			break;
 		default:
 			break;
 	}
@@ -9055,6 +9061,12 @@ std::string Mob::GetSpellTypeShortNameByID(uint16 spellType) {
 			break;
 		case BotSpellTypes::ResistBuffs:
 			spellTypeName = "resistbuffs";
+			break;
+		case BotSpellTypes::PetDamageShields:
+			spellTypeName = "petdamageshields";
+			break;
+		case BotSpellTypes::PetResistBuffs:
+			spellTypeName = "petresistbuffs";
 			break;
 		default:
 			break;
@@ -9335,7 +9347,7 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::Charm:
 		case BotSpellTypes::Cure:
-		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::DamageShields:		
 		case BotSpellTypes::HateRedux:
 		case BotSpellTypes::InCombatBuff:
 		case BotSpellTypes::InCombatBuffSong:
@@ -9346,6 +9358,8 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::PreCombatBuff:
 		case BotSpellTypes::PreCombatBuffSong:
+		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::PetResistBuffs:
 		case BotSpellTypes::ResistBuffs:
 		case BotSpellTypes::Resurrect:
 			return 100;
@@ -9416,10 +9430,6 @@ bool Mob::GetUltimateSpellHold(uint16 spellType, Mob* tar) {
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
 		return tar->GetOwner()->GetSpellHold(GetPetSpellType(spellType));
-	}
-
-	if (BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType) && tar->IsOfClientBot()) {
-		return tar->GetSpellHold(spellType);
 	}
 
 	return GetSpellHold(spellType);
@@ -9503,6 +9513,10 @@ uint16 Mob::GetPetSpellType(uint16 spellType) {
 			return BotSpellTypes::PetHoTHeals;
 		case BotSpellTypes::Buff:
 			return BotSpellTypes::PetBuffs;
+		case BotSpellTypes::DamageShields:
+			return BotSpellTypes::PetDamageShields;
+		case BotSpellTypes::ResistBuffs:
+			return BotSpellTypes::PetResistBuffs;
 		default:
 			break;
 	}

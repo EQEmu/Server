@@ -9,15 +9,12 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		std::vector<std::string> description = 
 		{ 
-			"Toggles whether or not bots can cast or receive certain spell types" 
+			"Toggles whether or not bots can cast certain spell types" 
 		};
 
 		std::vector<std::string> notes =
 		{
-			"- All pet types are based off the pet's owner's setting",
-			"- Any remaining types use the owner's setting when a pet is the target",
-			"- All Heals, Cures, Buffs (DS and resists included) are based off the target's setting, not the caster",
-			"- e.g., BotA is healing BotB using BotB's settings",
+			"- All pet types are based off the pet owner's setting when a pet is the target"
 		};
 
 		std::vector<std::string> example_format =
