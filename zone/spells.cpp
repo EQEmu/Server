@@ -152,6 +152,13 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			}
 		}
 
+		if (IsCharmSpell(spell_id) && target_id) {
+			auto original_target = entity_list.GetNPCByID(target_id);
+			if (original_target && original_target->IsCharmed() && original_target->GetOwner() && original_target->GetOwnerID() == GetID()) {
+				return target_id;
+			}
+		}
+
 		// Shortcut Project Illusion
 		// DO NOT CHANGE THE ORDER OF THIS
 		if (IsIllusionSpell(spell_id) && HasProjectIllusion()) {
