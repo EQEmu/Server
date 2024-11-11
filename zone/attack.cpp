@@ -2152,6 +2152,11 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
 		database.MoveCharacterToZone(CharacterID(), m_pp.zone_id);
 		Save();
+
+		if (RuleB(Custom, SuspendGroupBuffs)) {
+			RemoveAllPets();
+		}
+
 		GoToDeath();
 	}
 
