@@ -96,7 +96,7 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
 
-		if (cle->zone() == Zones::BAZAAR) {
+		if (cle->zone() == Zones::BAZAAR || cle->zone() == 0 || cle->zone() > 999) {
 			iterator.Advance();
 			continue;
 		}

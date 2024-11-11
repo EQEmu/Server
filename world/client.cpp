@@ -816,7 +816,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		RuleB(World, EnableIPExemptions) ||
 		RuleI(World, MaxClientsPerIP) > 0
 	) {
-		if (zone_id != Zones::BAZAAR) {
+		if (zone_id != Zones::BAZAAR && zone_id >= 1 && zone_id <= 999) {
 			client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
 		}
 	}
