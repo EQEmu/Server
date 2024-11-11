@@ -2034,6 +2034,22 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType) //TODO bot rewrite - adj
 		case BotSpellTypes::AENukes:
 		case BotSpellTypes::AERains:
 		case BotSpellTypes::AEStun:
+		case BotSpellTypes::AESnare:
+		case BotSpellTypes::AEMez:
+		case BotSpellTypes::AESlow:
+		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::AEFear:
+		case BotSpellTypes::AEDispel:
+		case BotSpellTypes::AEDoT:
+		case BotSpellTypes::AELifetap:
+		case BotSpellTypes::AERoot:
+		case BotSpellTypes::PBAENuke:
+			return RuleI(Bots, PercentChanceToCastAEs);
+		case BotSpellTypes::GroupHeals:
+		case BotSpellTypes::GroupCompleteHeals:
+		case BotSpellTypes::GroupHoTHeals:
+		case BotSpellTypes::GroupCures:
+			return RuleI(Bots, PercentChanceToCastGroupHeal);
 		case BotSpellTypes::Nuke:
 			return RuleI(Bots, PercentChanceToCastNuke);
 		case BotSpellTypes::Root:
@@ -2049,7 +2065,6 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType) //TODO bot rewrite - adj
 			return RuleI(Bots, PercentChanceToCastEscape);
 		case BotSpellTypes::Lifetap:
 			return RuleI(Bots, PercentChanceToCastLifetap);
-		case BotSpellTypes::AESnare:
 		case BotSpellTypes::Snare:
 			return RuleI(Bots, PercentChanceToCastSnare);
 		case BotSpellTypes::DOT:
@@ -2057,30 +2072,23 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType) //TODO bot rewrite - adj
 		case BotSpellTypes::Dispel:
 			return RuleI(Bots, PercentChanceToCastDispel);
 		case BotSpellTypes::InCombatBuff:
-			return RuleI(Bots, PercentChanceToCastInCombatBuff);
-		case BotSpellTypes::AEMez:
+			return RuleI(Bots, PercentChanceToCastInCombatBuff);		
 		case BotSpellTypes::Mez:
-			return RuleI(Bots, PercentChanceToCastMez);
-		case BotSpellTypes::AESlow:
+			return RuleI(Bots, PercentChanceToCastMez);		
 		case BotSpellTypes::Slow:
-			return RuleI(Bots, PercentChanceToCastSlow);
-		case BotSpellTypes::AEDebuff:
+			return RuleI(Bots, PercentChanceToCastSlow);		
 		case BotSpellTypes::Debuff:
 			return RuleI(Bots, PercentChanceToCastDebuff);
 		case BotSpellTypes::Cure:
 			return RuleI(Bots, PercentChanceToCastCure);
 		case BotSpellTypes::HateRedux:
-			return RuleI(Bots, PercentChanceToCastHateRedux);
-		case BotSpellTypes::AEFear:
+			return RuleI(Bots, PercentChanceToCastHateRedux);		
 		case BotSpellTypes::Fear:
 			return RuleI(Bots, PercentChanceToCastFear);
 		case BotSpellTypes::RegularHeal:
 		case BotSpellTypes::CompleteHeal:
 		case BotSpellTypes::FastHeals:
 		case BotSpellTypes::VeryFastHeals:
-		case BotSpellTypes::GroupHeals:
-		case BotSpellTypes::GroupCompleteHeals:
-		case BotSpellTypes::GroupHoTHeals:
 		case BotSpellTypes::HoTHeals:
 		case BotSpellTypes::PetRegularHeals:
 		case BotSpellTypes::PetCompleteHeals:
