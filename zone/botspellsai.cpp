@@ -639,6 +639,10 @@ bool Bot::AI_PursueCastCheck() {
 				continue;
 			}
 
+			if (RuleB(Bots, AllowAIMez) && (currentCast.spellType == BotSpellTypes::AEMez || currentCast.spellType == BotSpellTypes::Mez)) {
+				continue;
+			}
+
 			if (currentCast.spellType == BotSpellTypes::Resurrect || currentCast.spellType == BotSpellTypes::Charm) { // Unsupported by AI currently.
 				continue;
 			}
@@ -698,6 +702,10 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
+			if (RuleB(Bots, AllowAIMez) && (currentCast.spellType == BotSpellTypes::AEMez || currentCast.spellType == BotSpellTypes::Mez)) {
+				continue;
+			}
+
 			if (currentCast.spellType == BotSpellTypes::Resurrect || currentCast.spellType == BotSpellTypes::Charm) { // Unsupported by AI currently.
 				continue;
 			}
@@ -741,6 +749,10 @@ bool Bot::AI_EngagedCastCheck() {
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
 				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
+				continue;
+			}
+
+			if (RuleB(Bots, AllowAIMez) && (currentCast.spellType == BotSpellTypes::AEMez || currentCast.spellType == BotSpellTypes::Mez)) {
 				continue;
 			}
 

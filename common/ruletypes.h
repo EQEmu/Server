@@ -870,6 +870,7 @@ RULE_BOOL(Bots, DoResponseAnimations, true, "If enabled bots will do animations 
 RULE_INT(Bots, DefaultFollowDistance, 20, "Default 20. Distance a bot will follow behind.")
 RULE_INT(Bots, MaxFollowDistance, 300, "Default 300. Max distance a bot can be set to follow behind.")
 RULE_INT(Bots, MaxDistanceRanged, 300, "Default 300. Max distance a bot can be set to ranged.")
+RULE_BOOL(Bots, AllowAIMez, true, "If enabled bots will automatically mez/AE mez eligible targets.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)
