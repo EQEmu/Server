@@ -63,7 +63,9 @@ void bot_command_camp(Client *c, const Seperator *sep)
 		++campCount;
 	}
 
-	c->Message(Chat::White, "%i of your bots have been camped.", campCount);
+	if (campCount) {
+		c->Message(Chat::White, "%i of your bots have been camped.", campCount);
+	}
 }
 
 void bot_command_clone(Client *c, const Seperator *sep)
