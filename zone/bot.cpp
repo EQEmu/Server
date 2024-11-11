@@ -3398,6 +3398,10 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			}
 		}
 
+		if (IsBotRanged()) {
+			ChangeBotRangedWeapons(true);
+		}
+
 		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
 			// Safety Check to confirm we have a valid raid
 			auto owner = GetBotOwner();
