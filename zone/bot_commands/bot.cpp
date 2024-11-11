@@ -1695,6 +1695,7 @@ void bot_command_toggle_ranged(Client *c, const Seperator *sep)
 		else {
 			bot_iter->SetBotRangedSetting(ranged_state);
 		}
+
 		bot_iter->ChangeBotRangedWeapons(bot_iter->IsBotRanged());
 	}
 }

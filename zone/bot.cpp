@@ -2163,7 +2163,8 @@ void Bot::AI_Process()
 // COMBAT RANGE CALCS
 
 		bool atCombatRange = false;
-		bool behindMob = false;
+		bool behindMob = BehindMob(tar, GetX(), GetY());
+		bool frontMob = InFrontMob(tar, GetX(), GetY());
 		uint8 stopMeleeLevel = GetStopMeleeLevel();
 		const EQ::ItemInstance* p_item;
 		const EQ::ItemInstance* s_item;
@@ -2230,7 +2231,7 @@ void Bot::AI_Process()
 			}
 
 			if (!jitterCooldown && AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == Class::Bard)) {
-				DoCombatPositioning(tar, Goal, stopMeleeLevel, tar_distance, melee_distance_min, melee_distance, melee_distance_max, behindMob);
+				DoCombatPositioning(tar, Goal, stopMeleeLevel, tar_distance, melee_distance_min, melee_distance, melee_distance_max, behindMob, frontMob);
 				return;
 			}
 			else {
@@ -2363,10 +2364,10 @@ bool Bot::TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, g
 		else {
 			Goal = follow_mob->GetPosition();
 		}
+
 		float destination_distance = DistanceSquared(GetPosition(), Goal);
 
 		if ((!bot_owner->GetBotPulling() || PULLING_BOT) && (destination_distance > GetFollowDistance())) {
-
 			if (!IsRooted()) {
 				if (rest_timer.Enabled()) {
 					rest_timer.Disable();
@@ -2380,7 +2381,6 @@ bool Bot::TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, g
 		else {
 
 			if (IsMoving()) {
-
 				StopMoving();
 				return true;
 			}
@@ -2733,7 +2733,7 @@ bool Bot::TryEvade(Mob* tar) {
 	return false;
 }
 
-void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, bool& behindMob, const EQ::ItemInstance*& p_item, const EQ::ItemInstance*& s_item, float& melee_distance_min, float& melee_distance, float& melee_distance_max, uint8 stopMeleeLevel) {
+void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, bool behindMob, const EQ::ItemInstance*& p_item, const EQ::ItemInstance*& s_item, float& melee_distance_min, float& melee_distance, float& melee_distance_max, uint8 stopMeleeLevel) {
 	atCombatRange= false;
 
 	p_item = GetBotItem(EQ::invslot::slotPrimary);
@@ -2742,32 +2742,46 @@ void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, bo
 	bool backstab_weapon = false;
 
 	if (GetBehindMob()) {
-		behindMob = BehindMob(tar, GetX(), GetY()); // Can be separated for other future use
 		if (GetClass() == Class::Rogue) {
 			backstab_weapon = p_item && p_item->GetItemBackstabDamage();
 		}
 	}
 
 	// Calculate melee distances
-	CalcMeleeDistances(tar, p_item, s_item, behindMob, backstab_weapon, melee_distance_min, melee_distance, melee_distance_max, stopMeleeLevel);
+	CalcMeleeDistances(tar, p_item, s_item, backstab_weapon, behindMob, melee_distance_min, melee_distance, melee_distance_max, stopMeleeLevel);
 
-	//LogTestDebugDetail("{} is {} {}. They are currently {} away {} to be between [{} - {}] away. MMR is {}."
-	//	, GetCleanName()
-	//	, (tar_distance < melee_distance_min ? "too close to" : (tar_distance <= melee_distance ? "within range of" : "too far away from"))
-	//	, tar->GetCleanName()
-	//	, tar_distance
-	//	, (tar_distance <= melee_distance ? "but only needed" : "but need to be")
-	//	, melee_distance_min
-	//	, melee_distance		
-	//	, melee_distance_max
-	//); //deleteme
+	if (!GetCombatRoundForAlerts()) {
+		SetCombatRoundForAlerts();
+		LogTestDebugDetail("{} says, 'I'm {} {}. I am currently {} away {} to be between [{} - {}] away. MMR is {}.'"
+			, GetCleanName()
+			, (tar_distance < melee_distance_min ? "too close to" : (tar_distance <= melee_distance ? "within range of" : "too far away from"))
+			, tar->GetCleanName()
+			, tar_distance
+			, (tar_distance <= melee_distance ? "but only needed" : "but need to be")
+			, melee_distance_min
+			, melee_distance
+			, melee_distance_max
+		); //deleteme
+		LogTestDebugDetail("{} says, 'My stance is {} #{}, I am {} taunting. I am set to {} {}, {} at MMR, distanceranged {}, sml {} [{}]'"
+			, GetCleanName()
+			, Stance::GetName(GetBotStance())
+			, GetBotStance()
+			, (IsTaunting() ? "currently" : "not")
+			, (BehindMob() ? "stay behind" : "not stay behind")
+			, tar->GetCleanName()
+			, (GetMaxMeleeRange() ? "I stay" : "I do not stay")
+			, GetBotDistanceRanged()
+			, GetStopMeleeLevel()
+			, ((GetLevel() <= GetStopMeleeLevel()) ? "disabled" : "enabled")
+		); //deleteme
+	}
 
 	if (tar_distance <= melee_distance) {
 		atCombatRange = true;
 	}
 }
 
-void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_item, const EQ::ItemInstance* const& s_item, bool behindMob, bool backstab_weapon, float& melee_distance_min, float& melee_distance, float& melee_distance_max, uint8 stopMeleeLevel) {
+void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_item, const EQ::ItemInstance* const& s_item, bool backstab_weapon, bool behindMob, float& melee_distance_min, float& melee_distance, float& melee_distance_max, uint8 stopMeleeLevel) {
 	float size_mod = GetSize();
 	float other_size_mod = tar->GetSize();
 
@@ -2880,27 +2894,26 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 		melee_distance = RuleR(Bots, MaxDistanceForMelee);
 	}
 
-	melee_distance_min = melee_distance_max * RuleR(Bots, PercentMinMeleeDistance);
+	melee_distance_min = melee_distance * RuleR(Bots, PercentMinMeleeDistance);
 
-	if (taunting) {
-		melee_distance_min = melee_distance_max * RuleR(Bots, PercentTauntMinMeleeDistance);
-		melee_distance = melee_distance_max * RuleR(Bots, TauntNormalMeleeRangeDistance);
+	if (IsTaunting()) {
+		melee_distance_min = melee_distance * RuleR(Bots, PercentTauntMinMeleeDistance);
+		melee_distance = melee_distance * RuleR(Bots, TauntNormalMeleeRangeDistance);
 	}
 
 	bool isStopMeleeLevel = GetLevel() >= stopMeleeLevel;
 
-	if (!taunting && !IsBotRanged() && !isStopMeleeLevel && GetMaxMeleeRange()) {
-		melee_distance = melee_distance_max * RuleR(Bots, PercentMaxMeleeRangeDistance);
+	if (!IsTaunting() && !IsBotRanged() && !isStopMeleeLevel && GetMaxMeleeRange()) {
 		melee_distance_min = melee_distance_max * RuleR(Bots, PercentMinMaxMeleeRangeDistance);
+		melee_distance = melee_distance_max * RuleR(Bots, PercentMaxMeleeRangeDistance);		
 	}
 
 	if (isStopMeleeLevel && !IsBotRanged()) {
 		float desiredRange = GetBotDistanceRanged();
-		melee_distance_min = std::min(melee_distance, (desiredRange / 2));
+		melee_distance_min = std::max(melee_distance, (desiredRange / 2));
 		melee_distance = std::max((melee_distance + 1), desiredRange);
 	}
 
-	/* Archer Checks*/
 	if (IsBotRanged()) {
 		float minDistance = RuleI(Combat, MinRangedAttackDist);
 		float maxDistance = GetBotRangedValue();
@@ -3003,7 +3016,6 @@ Mob* Bot::GetBotTarget(Client* bot_owner)
 }
 
 bool Bot::ReturningFlagChecks(Client* bot_owner, float fm_distance) {// Need to make it back to group before clearing return flag
-
 	if (fm_distance <= GetFollowDistance()) {
 
 		// Once we're back, clear blocking flags so everyone else can join in
@@ -3022,13 +3034,12 @@ bool Bot::ReturningFlagChecks(Client* bot_owner, float fm_distance) {// Need to 
 		WipeHateList();
 		return false;
 	}
+
 	return true;
 }
 
 bool Bot::PullingFlagChecks(Client* bot_owner) {
-
 	if (!GetTarget()) {
-
 		WipeHateList();
 		SetTarget(nullptr);
 		SetPullingFlag(false);
@@ -3042,7 +3053,6 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		return false;
 	}
 	else if (GetTarget()->GetHateList().size()) {
-
 		WipeHateList();
 		SetTarget(nullptr);
 		SetPullingFlag(false);
@@ -3064,7 +3074,6 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 }
 
 void Bot::HealRotationChecks() {
-
 	if (IsMyHealRotationSet()) {
 		if (AIHealRotation(HealRotationTarget(), UseHealRotationFastHeals())) {
 			m_member_of_heal_rotation->SetMemberIsCasting(this);
@@ -3079,7 +3088,6 @@ void Bot::HealRotationChecks() {
 }
 
 bool Bot::IsAIProcessValid(const Client* bot_owner, const Group* bot_group, const Raid* raid) {
-
 	if (!bot_owner || (!bot_group && !raid) || !IsAIControlled()) {
 		return false;
 	}
@@ -3089,11 +3097,11 @@ bool Bot::IsAIProcessValid(const Client* bot_owner, const Group* bot_group, cons
 		SetBotOwner(nullptr);
 		return false;
 	}
+
 	return true;
 }
 
 bool Bot::CheckIfCasting(float fm_distance) {
-
 	if (IsCasting()) {
 		if (IsHealRotationMember() &&
 			m_member_of_heal_rotation->CastingOverride() &&
@@ -3105,12 +3113,10 @@ bool Bot::CheckIfCasting(float fm_distance) {
 			InterruptSpell();
 		}
 		else if (AmICastingForHealRotation() && m_member_of_heal_rotation->CastingMember() == this) {
-
 			AdvanceHealRotation(false);
 			return true;
 		}
 		else if (GetClass() != Class::Bard) {
-
 			if (IsEngaged()) {
 				return true;
 			}
@@ -3128,13 +3134,12 @@ bool Bot::CheckIfCasting(float fm_distance) {
 	else if (IsHealRotationMember()) {
 		m_member_of_heal_rotation->SetMemberIsCasting(this, false);
 	}
+
 	return false;
 }
 
 bool Bot::CheckIfIncapacitated() {
-
 	if (GetPauseAI() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead)) {
-
 		if (IsCasting()) {
 			InterruptSpell();
 		}
@@ -3143,6 +3148,7 @@ bool Bot::CheckIfIncapacitated() {
 			AdvanceHealRotation(false);
 			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
 		}
+
 		return true;
 	}
 
@@ -3188,29 +3194,29 @@ void Bot::SetBerserkState() {// Berserk updates should occur if primary AI crite
 
 Mob* Bot::SetFollowMob(Client* leash_owner) {
 	Mob* follow_mob = entity_list.GetMob(GetFollowID());
-	if (!follow_mob) {
 
+	if (!follow_mob) {
 		follow_mob = leash_owner;
 		SetFollowID(leash_owner->GetID());
 	}
+
 	return follow_mob;
 }
 
 Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint32 r_group) const {
-
 	Client* leash_owner = nullptr;
+
 	if (raid && r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group)) {
 		leash_owner =
 			raid->GetGroupLeader(r_group) &&
 			raid->GetGroupLeader(r_group)->IsClient() ?
 				raid->GetGroupLeader(r_group)->CastToClient() : bot_owner;
-
 	} else if (bot_group) {
 		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
-
 	} else {
 		leash_owner = bot_owner;
 	}
+
 	return leash_owner;
 }
 
@@ -3235,6 +3241,7 @@ void Bot::SetOwnerTarget(Client* bot_owner) {
 			AddToHateList(attack_target, 1);
 			SetTarget(attack_target);
 			SetAttackingFlag();
+
 			if (GetPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 				GetPet()->WipeHateList();
 				GetPet()->AddToHateList(attack_target, 1);
@@ -3275,8 +3282,8 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 			SetTarget(pull_target);
 			SetPullingFlag();
 			bot_owner->SetBotPulling();
-			if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
 
+			if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
 				GetPet()->WipeHateList();
 				GetPet()->SetTarget(nullptr);				
 				m_previous_pet_order = GetPet()->GetPetOrder();
@@ -5132,7 +5139,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		}
 	}
 
-	if (taunting && target->IsNPC() && taunt_time) {
+	if (IsTaunting() && target->IsNPC() && taunt_time) {
 		if (GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this) {
 			BotGroupSay(
 				this,
@@ -6758,6 +6765,7 @@ void Bot::Zone() {
 
 bool Bot::IsAtRange(Mob *target) {
 	bool result = false;
+
 	if (target) {
 		float range = (GetBotRangedValue() + 5.0);
 		range *= range;
@@ -7501,6 +7509,7 @@ void EntityList::ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mob
 		}
 
 		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
+
 		if (distance <= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob*>(mob->GetID(), mob));
 		}
@@ -9480,7 +9489,7 @@ bool Bot::CastChecks(uint16 spellid, Mob* tar, uint16 spellType, bool doPrecheck
 		return false;
 	}
 
-	if (!IsCommandedSpell() && !taunting && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting(), spellid) && !tar->IsFleeing()) {
+	if (!IsCommandedSpell() && !IsTaunting() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting(), spellid) && !tar->IsFleeing()) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to HasOrMayGetAggro.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
 		return false;
 	}
@@ -10831,7 +10840,7 @@ bool Bot::AttemptAICastSpell(uint16 spellType) {
 
 	Mob* tar = GetTarget();
 
-	if (!taunting && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting())) {
+	if (!IsTaunting() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting())) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of [{}] due to GetSpellTypeAggroCheck and HasOrMayGetAggro.'", GetCleanName(), GetSpellTypeNameByID(spellType)); //deleteme
 		return result;
 	}
@@ -11058,63 +11067,81 @@ void Bot::SetCombatJitter() {
 	}
 }
 
-void Bot::DoCombatPositioning(Mob* tar, glm::vec3 Goal, bool stopMeleeLevel, float tar_distance, float melee_distance_min, float melee_distance, float melee_distance_max, bool behindMob) {
+void Bot::DoCombatPositioning(
+	Mob* tar,
+	glm::vec3 Goal,
+	bool stopMeleeLevel,
+	float tar_distance,
+	float melee_distance_min,
+	float melee_distance,
+	float melee_distance_max,
+	bool behindMob,
+	bool frontMob
+) {
+	//LogTestDebug("{} says, 'DoCombatPositioning. {} #{}", GetCleanName(), __FILE__, __LINE__); //deleteme
+
 	if (HasTargetReflection()) {
-		if (!taunting && !tar->IsFeared() && !tar->IsStunned()) {
+		if (!IsTaunting() && !tar->IsFeared() && !tar->IsStunned()) {
 			if (TryEvade(tar)) {
 				return;
 			}
 		}
-
-		if (tar->IsRooted() && !taunting) { // Move non-taunters out of range - Above already checks if bot is targeted, otherwise they would stay
+		else if (tar->IsRooted() && !IsTaunting()) { // Move non-taunters out of range - Above already checks if bot is targeted, otherwise they would stay
 			if (tar_distance <= melee_distance_max) {
-				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, (melee_distance_max + 1), (melee_distance_max * 2), false, taunting)) {
+				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, (melee_distance_max + 1), (melee_distance_max * 2), false, IsTaunting())) {
 					RunToGoalWithJitter(Goal);
+
 					return;
 				}
 			}
 		}
-
-		if (taunting && tar_distance < melee_distance_min) { // Back up any bots that are too close
-			if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, false, taunting)) {
+		else if (IsTaunting() && ((tar_distance < melee_distance_min) || !frontMob)) { // Back up any bots that are too close
+			if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, false, IsTaunting())) {
 				RunToGoalWithJitter(Goal);
+
 				return;
 			}
 		}
 	}
 	else {
 		if (!tar->IsFeared()) {
-			if (taunting) { // Taunting adjustments
+			if (IsTaunting()) { // Taunting adjustments
 				Mob* mobTar = tar->GetTarget();
+
 				if (!mobTar || mobTar == nullptr) {
 					DoFaceCheckNoJitter(tar);
+
 					return;
 				}
 
 				if (RuleB(Bots, TauntingBotsFollowTopHate)) { // If enabled, taunting bots will stick to top hate
-					if ((DistanceSquared(m_Position, mobTar->GetPosition()) > pow(RuleR(Bots, DistanceTauntingBotsStickMainHate), 2))) {
+					if (Distance(m_Position, mobTar->GetPosition()) > RuleI(Bots, DistanceTauntingBotsStickMainHate)) {
 						Goal = mobTar->GetPosition();
 						RunToGoalWithJitter(Goal);
+
 						return;
 					}
 				}
 				else { // Otherwise, stick to any other bots that are taunting
-					if (mobTar->IsBot() && mobTar->CastToBot()->taunting && (DistanceSquared(m_Position, mobTar->GetPosition()) > pow(RuleR(Bots, DistanceTauntingBotsStickMainHate), 2))) {
+					if (mobTar->IsBot() && mobTar->CastToBot()->IsTaunting() && (Distance(m_Position, mobTar->GetPosition()) > RuleI(Bots, DistanceTauntingBotsStickMainHate))) {
 						Goal = mobTar->GetPosition();
 						RunToGoalWithJitter(Goal);
+
 						return;
 					}
 				}
 			}
-			else if (tar_distance < melee_distance_min || (GetBehindMob() && !behindMob) || !HasRequiredLoSForPositioning(tar)) { // Regular adjustment
-				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, GetBehindMob(), taunting)) {
+			else if (tar_distance < melee_distance_min || (GetBehindMob() && !behindMob) || (IsTaunting() && !frontMob)|| !HasRequiredLoSForPositioning(tar)) { // Regular adjustment
+				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, GetBehindMob(), IsTaunting())) {
 					RunToGoalWithJitter(Goal);
+
 					return;
 				}
 			}
-			else if (tar->IsEnraged() && !taunting && !stopMeleeLevel && !behindMob) { // Move non-taunting melee bots behind target during enrage
+			else if (tar->IsEnraged() && !IsTaunting() && !stopMeleeLevel && !behindMob) { // Move non-taunting melee bots behind target during enrage
 				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, true)) {
 					RunToGoalWithJitter(Goal);
+
 					return;
 				}
 			}
@@ -11122,6 +11149,7 @@ void Bot::DoCombatPositioning(Mob* tar, glm::vec3 Goal, bool stopMeleeLevel, flo
 	}
 
 	DoFaceCheckNoJitter(tar);
+
 	return;
 }
 

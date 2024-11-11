@@ -943,7 +943,7 @@ public:
 		Mob* tar, 
 		float tar_distance, 
 		bool& atCombatRange, 
-		bool& behindMob, 
+		bool behindMob, 
 		const EQ::ItemInstance*& p_item, 
 		const EQ::ItemInstance*& s_item,
 		float& melee_distance_min,
@@ -957,7 +957,7 @@ public:
 	void SetCombatOutOfRangeJitterFlag(bool flag = true) { m_combat_out_of_range_jitter_flag = flag; }
 	void SetCombatJitter();
 	void SetCombatOutOfRangeJitter();
-	void DoCombatPositioning(Mob* tar, glm::vec3 Goal, bool stopMeleeLevel, float tar_distance, float melee_distance_min, float melee_distance, float melee_distance_max, bool behindMob);
+	void DoCombatPositioning(Mob* tar, glm::vec3 Goal, bool stopMeleeLevel, float tar_distance, float melee_distance_min, float melee_distance, float melee_distance_max, bool behindMob, bool frontMob);
 	void DoFaceCheckWithJitter(Mob* tar);
 	void DoFaceCheckNoJitter(Mob* tar);
 	void RunToGoalWithJitter(glm::vec3 Goal);
