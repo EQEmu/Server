@@ -595,7 +595,7 @@ public:
 	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, int16 spellid, uint16 spellType, bool AE = false);
 	bool IsValidMezTarget(Mob* owner, Mob* npc, uint16 spellid);
 	static BotSpell GetBestBotSpellForMez(Bot* botCaster, uint16 spellType = BotSpellTypes::Mez);
-	static BotSpell GetBestBotMagicianPetSpell(Bot* botCaster, uint16 spellType = BotSpellTypes::Mez);
+	static BotSpell GetBestBotMagicianPetSpell(Bot* botCaster, uint16 spellType = BotSpellTypes::Pet);
 	static std::string GetBotMagicianPetType(Bot* botCaster);
 	static BotSpell GetBestBotSpellForNukeByTargetType(Bot* botCaster, SpellTargetType targetType, uint16 spellType, bool AE = false, Mob* tar = nullptr);
 	static BotSpell GetBestBotSpellForStunByTargetType(Bot* botCaster, SpellTargetType targetType, uint16 spellType, bool AE = false, Mob* tar = nullptr);
