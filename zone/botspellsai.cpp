@@ -125,7 +125,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType) {
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::PreCombatBuff:
 		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::PetResistBuffs:
 			if (!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) {
 				return false;
 			}
@@ -2039,7 +2041,9 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType) //TODO bot rewrite - adj
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::PetResistBuffs:
 		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::PetDamageShields:
 			return RuleI(Bots, PercentChanceToCastBuff);
 		case BotSpellTypes::Escape:
 			return RuleI(Bots, PercentChanceToCastEscape);

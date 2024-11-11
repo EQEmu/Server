@@ -2874,14 +2874,16 @@ bool BOT_SPELL_TYPES_BENEFICIAL(uint16 spellType, uint8 cls) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::Cure:
 		case BotSpellTypes::GroupCures:
-		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::DamageShields:		
 		case BotSpellTypes::InCombatBuffSong:
 		case BotSpellTypes::OutOfCombatBuffSong:
 		case BotSpellTypes::Pet:
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::PreCombatBuff:
 		case BotSpellTypes::PreCombatBuffSong:
-		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::PetResistBuffs:
+		case BotSpellTypes::ResistBuffs:		
 		case BotSpellTypes::Resurrect:
 			return true;
 		case BotSpellTypes::InCombatBuff:
@@ -2916,8 +2918,10 @@ bool BOT_SPELL_TYPES_OTHER_BENEFICIAL(uint16 spellType) {
 		case BotSpellTypes::Cure:
 		case BotSpellTypes::GroupCures:
 		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::PetResistBuffs:
 			return true;
 		default:
 			return false;
@@ -3050,8 +3054,10 @@ bool IsClientBotSpellType(uint16 spellType) {
 		case BotSpellTypes::Cure:
 		case BotSpellTypes::GroupCures:
 		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::PetResistBuffs:
 			return true;
 		default:
 			return false;
