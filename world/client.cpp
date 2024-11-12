@@ -526,9 +526,27 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		SendEnterWorld(cle->name());
 		SendPostEnterWorld();
 		if (!is_player_zoning) {
-			SendExpansionInfo();
-			SendCharInfo();
-			database.LoginIP(cle->AccountID(), long2ip(GetIP()));
+			const auto supported_clients = RuleS(World, SupportedClients);
+			bool skip_char_info = false;
+			if (!supported_clients.empty()) {
+				const std::string& name = EQ::versions::ClientVersionName(m_ClientVersion);
+				const auto& clients = Strings::Split(supported_clients, ",");
+				if (std::find(clients.begin(), clients.end(), name) == clients.end()) {
+					SendUnsupportedClientPacket(
+						fmt::format(
+							"Client Not In Supported List [{}]",
+							supported_clients
+						)
+					);
+					skip_char_info = true;
+				}
+			}
+
+			if (!skip_char_info) {
+				SendExpansionInfo();
+				SendCharInfo();
+				database.LoginIP(cle->AccountID(), long2ip(GetIP()));
+			}
 		}
 
 		cle->SetIP(GetIP());
@@ -2452,4 +2470,35 @@ void Client::SendGuildTributeOptInToggle(const GuildTributeMemberToggle *in)
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::SendUnsupportedClientPacket(const std::string& message)
+{
+	EQApplicationPacket packet(OP_SendCharInfo, sizeof(CharacterSelect_Struct) + sizeof(CharacterSelectEntry_Struct));
+
+	unsigned char* buff_ptr = packet.pBuffer;
+	auto cs = (CharacterSelect_Struct*) buff_ptr;
+
+	cs->CharCount  = 1;
+	cs->TotalChars = 1;
+
+	buff_ptr += sizeof(CharacterSelect_Struct);
+
+	auto e = (CharacterSelectEntry_Struct*) buff_ptr;
+
+	strcpy(e->Name, message.c_str());
+
+	e->Race        = Race::Human;
+	e->Class       = Class::Warrior;
+	e->Level       = 1;
+	e->ShroudClass = e->Class;
+	e->ShroudRace  = e->Race;
+	e->Zone        = std::numeric_limits<uint16>::max();
+	e->Instance    = 0;
+	e->Gender      = Gender::Male;
+	e->GoHome      = 0;
+	e->Tutorial    = 0;
+	e->Enabled     = 0;
+
+	QueuePacket(&packet);
 }
