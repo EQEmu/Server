@@ -737,35 +737,37 @@ bool Client::Save(uint8 iCommitNow) {
 
 	m_pp.lastlogin = time(nullptr);
 
-	ValidatePetList(); // make sure pet list is compacted correctly
+	if (!dead || !RuleB(Custom, SuspendGroupBuffs)) {
+		ValidatePetList(); // make sure pet list is compacted correctly
 
-	m_petinfomulti.clear();
-	m_petinfomulti.empty();
+		m_petinfomulti.clear();
+		m_petinfomulti.empty();
 
-	auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
+		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
 
-	if (!dead || RuleB(Custom, SuspendGroupBuffs)) {
-		for (Mob* mob : pets) {
-			if (mob)
-			{
-				NPC* pet = mob->CastToNPC();
-				if (pet && pet->GetPetSpellID()) {
-					PetInfo newPetInfo = PetInfo();
-					memset(&newPetInfo, 0, sizeof(PetInfo));
-					newPetInfo.SpellID = pet->GetPetSpellID();
-					newPetInfo.HP = pet->GetHP();
-					newPetInfo.Mana = pet->GetMana();
-					pet->GetPetState(newPetInfo.Buffs, newPetInfo.Items, newPetInfo.Name);
-					newPetInfo.petpower = pet->GetPetPower();
-					newPetInfo.size = pet->GetSize();
-					newPetInfo.taunting = pet->IsTaunting();
-					m_petinfomulti.push_back(newPetInfo);
+		if (!dead || RuleB(Custom, SuspendGroupBuffs)) {
+			for (Mob* mob : pets) {
+				if (mob)
+				{
+					NPC* pet = mob->CastToNPC();
+					if (pet && pet->GetPetSpellID()) {
+						PetInfo newPetInfo = PetInfo();
+						memset(&newPetInfo, 0, sizeof(PetInfo));
+						newPetInfo.SpellID = pet->GetPetSpellID();
+						newPetInfo.HP = pet->GetHP();
+						newPetInfo.Mana = pet->GetMana();
+						pet->GetPetState(newPetInfo.Buffs, newPetInfo.Items, newPetInfo.Name);
+						newPetInfo.petpower = pet->GetPetPower();
+						newPetInfo.size = pet->GetSize();
+						newPetInfo.taunting = pet->IsTaunting();
+						m_petinfomulti.push_back(newPetInfo);
+					}
 				}
 			}
 		}
-	}
 
-	database.SavePetInfo(this);
+		database.SavePetInfo(this);
+	}
 
 	if(tribute_timer.Enabled()) {
 		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();

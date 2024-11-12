@@ -1900,6 +1900,39 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 
 	if (!RuleB(Custom, SuspendGroupBuffs)) {
 		RemoveAllPets();
+	} else {
+		// Manual Save of pets
+		ValidatePetList(); // make sure pet list is compacted correctly
+
+		m_petinfomulti.clear();
+		m_petinfomulti.empty();
+
+		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
+
+		if (!dead || RuleB(Custom, SuspendGroupBuffs)) {
+			for (Mob* mob : pets) {
+				if (mob)
+				{
+					NPC* pet = mob->CastToNPC();
+					if (pet && pet->GetPetSpellID()) {
+						PetInfo newPetInfo = PetInfo();
+						memset(&newPetInfo, 0, sizeof(PetInfo));
+						newPetInfo.SpellID = pet->GetPetSpellID();
+						newPetInfo.HP = pet->GetHP();
+						newPetInfo.Mana = pet->GetMana();
+						pet->GetPetState(newPetInfo.Buffs, newPetInfo.Items, newPetInfo.Name);
+						newPetInfo.petpower = pet->GetPetPower();
+						newPetInfo.size = pet->GetSize();
+						newPetInfo.taunting = pet->IsTaunting();
+						m_petinfomulti.push_back(newPetInfo);
+					}
+				}
+			}
+		}
+
+		database.SavePetInfo(this);
+
+		RemoveAllPets();
 	}
 
 	SetHorseId(0);
@@ -2152,11 +2185,6 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
 		database.MoveCharacterToZone(CharacterID(), m_pp.zone_id);
 		Save();
-
-		if (RuleB(Custom, SuspendGroupBuffs)) {
-			RemoveAllPets();
-		}
-
 		GoToDeath();
 	}
 
@@ -2195,6 +2223,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 
 		parse->EventPlayer(EVENT_DEATH_COMPLETE, this, export_string, 0, &args);
 	}
+
 	return true;
 }
 
