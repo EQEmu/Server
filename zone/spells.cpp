@@ -152,6 +152,10 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			}
 		}
 
+		if (spell_id == 11087 || spell_id == 13722 || spell_id == 16743 || spell_id == 11086 || spell_id == 13721 || spell_id == 16742) {
+			return target_id;
+		}
+
 		if (IsCharmSpell(spell_id)) {
 			return target_id;
 		}
