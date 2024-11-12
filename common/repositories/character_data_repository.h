@@ -124,7 +124,7 @@ public:
 			zone_player_counts.push_back(e);
 		}
 
-		// duration 100000000 is for shards explicitly
+		// duration 3155760000 is for shards explicitly
 		query = fmt::format(
 			SQL(
 				SELECT
@@ -139,9 +139,8 @@ public:
 				i.zone = c.zone_id
 				AND i.id = c.zone_instance
 				AND c.last_login >= UNIX_TIMESTAMP(NOW()) - 600
-				AND i.start_time <= UNIX_TIMESTAMP(NOW())
 				AND (i.start_time + i.duration >= UNIX_TIMESTAMP(NOW()) OR i.never_expires = 0)
-				AND i.duration = 100000000
+				AND i.duration = 3155760000
 				WHERE
 				i.zone IS NOT NULL AND i.zone = {}
 				GROUP BY
