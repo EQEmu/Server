@@ -7157,8 +7157,9 @@ void Bot::CalcBotStats(bool showtext) {
 }
 
 bool Bot::CheckLoreConflict(const EQ::ItemData* item) {
-	if (!item || !(item->LoreFlag))
+	if (!item || !(item->LoreFlag) || (item->LoreGroup == 0)) {
 		return false;
+	}
 
 	if (item->LoreGroup == -1)	// Standard lore items; look everywhere except the shared bank, return the result
 		return (m_inv.HasItem(item->ID, 0, invWhereWorn) != INVALID_INDEX);
