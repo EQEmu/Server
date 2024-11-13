@@ -148,6 +148,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 ),
 	hpupdate_timer(2000),
 	camp_timer(29000),
+	bot_camp_timer((RuleI(Bots, CampTimer) * 1000)),
 	process_timer(100),
 	consume_food_timer(CONSUMPTION_TIMER),
 	zoneinpacket_timer(1000),
@@ -252,6 +253,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	fishing_timer.Disable();
 	dead_timer.Disable();
 	camp_timer.Disable();
+	bot_camp_timer.Disable();
 	autosave_timer.Disable();
 	GetMercTimer()->Disable();
 	instalog = false;
