@@ -2339,6 +2339,15 @@ void Client::SendBuyerResults(BarterSearchRequest_Struct& bsr)
 			return;
 		}
 
+		for (auto it = results.buy_line.begin(); it != results.buy_line.end(); /* no increment here */) {
+			auto bid = entity_list.GetClientByID(it->buyer_entity_id);
+			if (!bid) {
+				it = results.buy_line.erase(it);  // Erase and move to the next element
+			} else {
+				++it;  // Only increment if no erasure
+			}
+		}
+
 		std::string buyer_name = "ID {} not in zone.";
 		if (search_string.empty()) {
 			search_string = "*";
