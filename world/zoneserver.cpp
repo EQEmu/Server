@@ -1755,7 +1755,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				return;
 			}
 
-			zoneserver_list.SendPacket(Zones::BAZAAR, pack);
+			auto trader = client_list.FindCLEByCharacterID(in->trader_buy_struct.trader_id);
+			if (trader) {
+				zoneserver_list.SendPacket(trader->zone(), trader->instance(), pack);
+			}
+
 			break;
 		}
 		case ServerOP_BuyerMessaging: {
