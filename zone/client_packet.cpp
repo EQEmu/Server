@@ -4341,6 +4341,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 		return;
 	}
 	camp_timer.Start(29000, true);
+	bot_camp_timer.Start((RuleI(Bots, CampTimer) * 1000), true);
 	return;
 }
 
@@ -14760,6 +14761,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			SetFeigned(false);
 			BindWound(this, false, true);
 			camp_timer.Disable();
+			bot_camp_timer.Disable();
 		}
 		else if (sa->parameter == Animation::Sitting) {
 			SetAppearance(eaSitting);

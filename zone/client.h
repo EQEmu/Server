@@ -2036,6 +2036,7 @@ private:
 	PTimerList p_timers; //persistent timers
 	Timer hpupdate_timer;
 	Timer camp_timer;
+	Timer bot_camp_timer;
 	Timer process_timer;
 	Timer consume_food_timer;
 	Timer zoneinpacket_timer;
