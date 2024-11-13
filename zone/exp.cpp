@@ -321,7 +321,7 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 		add_aaxp *= zone->GetAAEXPModifier(this);
 	}
 
-	add_aaxp = (uint64)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod * (GetLevel()/50.0f));
+	add_aaxp = (uint64)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
 }
 
 void Client::CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel)
