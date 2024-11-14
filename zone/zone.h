@@ -417,7 +417,7 @@ public:
 		SendDiscordMessage(webhook_id, message_prefix + Discord::FormatDiscordMessage(log_category, message));
 	};
 
-	double GetMaxMovementUpdateRange() const { return max_movement_update_range; }
+	double GetMaxUpdateRange() const { return max_movement_update_range; }
 
 	void SetIsHotzone(bool is_hotzone);
 
