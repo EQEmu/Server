@@ -1237,7 +1237,7 @@ LinkedList<BotCommandRecord *> cleanup_bot_command_list;
 
 int bot_command_not_avail(Client *c, const char *message)
 {
-	c->Message(Chat::White, "Bot commands not available.");
+	c->Message(Chat::Yellow, "Bot commands not available.");
 	return -1;
 }
 
@@ -1540,7 +1540,7 @@ int bot_command_real_dispatch(Client *c, const char *message)
 
 	BotCommandRecord *cur = bot_command_list[cstr];
 	if(c->Admin() < cur->access){
-		c->Message(Chat::White, "Your access level is not high enough to use this bot command.");
+		c->Message(Chat::Yellow, "Your access level is not high enough to use this bot command.");
 		return(-1);
 	}
 
@@ -1569,13 +1569,13 @@ bool helper_bot_appearance_fail(Client *bot_owner, Bot *my_bot, BCEnum::AFType f
 {
 	switch (fail_type) {
 	case BCEnum::AFT_Value:
-		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid value for this command", type_desc, my_bot->GetCleanName());
+		bot_owner->Message(Chat::Yellow, "Failed to change '%s' for %s due to invalid value for this command", type_desc, my_bot->GetCleanName());
 		return true;
 	case BCEnum::AFT_GenderRace:
-		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid bot gender and/or race for this command", type_desc, my_bot->GetCleanName());
+		bot_owner->Message(Chat::Yellow, "Failed to change '%s' for %s due to invalid bot gender and/or race for this command", type_desc, my_bot->GetCleanName());
 		return true;
 	case BCEnum::AFT_Race:
-		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid bot race for this command", type_desc, my_bot->GetCleanName());
+		bot_owner->Message(Chat::Yellow, "Failed to change '%s' for %s due to invalid bot race for this command", type_desc, my_bot->GetCleanName());
 		return true;
 	default:
 		return false;
@@ -1587,7 +1587,7 @@ void helper_bot_appearance_form_final(Client *bot_owner, Bot *my_bot)
 	if (!MyBots::IsMyBot(bot_owner, my_bot))
 		return;
 	if (!my_bot->Save()) {
-		bot_owner->Message(Chat::White, "Failed to save appearance change for %s due to unknown cause...", my_bot->GetCleanName());
+		bot_owner->Message(Chat::Yellow, "Failed to save appearance change for %s due to unknown cause...", my_bot->GetCleanName());
 		return;
 	}
 
@@ -1631,7 +1631,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 
 	if (!Bot::IsValidName(bot_name)) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"'{}' is an invalid name. You may only use characters 'A-Z' or 'a-z' and it must be between 4 and 15 characters. Mixed case {} allowed.",
 				bot_name, RuleB(Bots, AllowCamelCaseNames) ? "is" : "is not"
@@ -1643,7 +1643,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	bool available_flag = false;
 	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"'{}' is already in use or an invalid name.",
 				bot_name
@@ -1654,7 +1654,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 
 	if (!available_flag) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"The name '{}' is already being used. Please choose a different name",
 				bot_name
@@ -1668,7 +1668,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		const std::string bot_class_name = GetClassIDName(bot_class);
 
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"{} {} is an invalid race-class combination, would you like to {} proper combinations for {}?",
 				bot_race_name,
@@ -1704,7 +1704,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	uint32 bot_count = 0;
 	uint32 bot_class_count = 0;
 	if (!database.botdb.QueryBotCount(bot_owner->CharacterID(), bot_class, bot_count, bot_class_count)) {
-		bot_owner->Message(Chat::White, "Failed to query bot count.");
+		bot_owner->Message(Chat::Yellow, "Failed to query bot count.");
 		return bot_id;
 	}
 
@@ -1721,7 +1721,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			message = "You cannot create any bots.";
 		}
 
-		bot_owner->Message(Chat::White, message.c_str());
+		bot_owner->Message(Chat::Yellow, message.c_str());
 		return bot_id;
 	}
 
@@ -1742,7 +1742,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			);
 		}
 
-		bot_owner->Message(Chat::White, message.c_str());
+		bot_owner->Message(Chat::Yellow, message.c_str());
 		return bot_id;
 	}
 
@@ -1753,7 +1753,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		bot_owner->GetLevel() < bot_character_level
 	) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"You must be level {} to use bots.",
 				bot_character_level
@@ -1769,7 +1769,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		bot_owner->GetLevel() < bot_character_level_class
 	) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"You must be level {} to use {} bots.",
 				bot_character_level_class,
@@ -1784,7 +1784,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"Failed to create '{}' due to unknown cause.",
 				my_bot->GetCleanName()
@@ -1918,7 +1918,7 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 bool helper_command_disabled(Client* bot_owner, bool rule_value, const char* command)
 {
 	if (!rule_value) {
-		bot_owner->Message(Chat::White, "Bot command %s is not enabled on this server.", command);
+		bot_owner->Message(Chat::Yellow, "Bot command %s is not enabled on this server.", command);
 		return true;
 	}
 
@@ -1929,7 +1929,7 @@ bool helper_command_alias_fail(Client *bot_owner, const char* command_handler, c
 {
 	auto alias_iter = bot_command_aliases.find(&alias[1]);
 	if (alias_iter == bot_command_aliases.end() || alias_iter->second.compare(command)) {
-		bot_owner->Message(Chat::White, "Undefined linker usage in %s (%s)", command_handler, &alias[1]);
+		bot_owner->Message(Chat::Yellow, "Undefined linker usage in %s (%s)", command_handler, &alias[1]);
 		return true;
 	}
 
@@ -1951,12 +1951,12 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 	}
 
 	if (!druid_bot && !wizard_bot) {
-		bot_owner->Message(Chat::White, "No bots are capable of performing this action");
+		bot_owner->Message(Chat::Yellow, "No bots are capable of performing this action");
 		return;
 	}
 
 	if (!local_list) {
-		bot_owner->Message(Chat::White, "There are no destinations you can be taken to.");
+		bot_owner->Message(Chat::Yellow, "There are no destinations you can be taken to.");
 		return;
 	}
 
@@ -2030,7 +2030,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 	}
 
 	if (!destination_count) {
-		bot_owner->Message(Chat::White, "There are no destinations you can be taken to.");
+		bot_owner->Message(Chat::Yellow, "There are no destinations you can be taken to.");
 	}
 }
 
@@ -2049,7 +2049,7 @@ bool helper_no_available_bots(Client *bot_owner, Bot *my_bot)
 	if (!bot_owner)
 		return true;
 	if (!my_bot) {
-		bot_owner->Message(Chat::White, "No bots are capable of performing this action");
+		bot_owner->Message(Chat::Yellow, "No bots are capable of performing this action");
 		return true;
 	}
 
@@ -2108,7 +2108,7 @@ bool helper_spell_check_fail(STBaseEntry* local_entry)
 bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type)
 {
 	if (!spell_list || spell_list->empty()) {
-		bot_owner->Message(Chat::White, "%s", required_bots_map[spell_type].c_str());
+		bot_owner->Message(Chat::Yellow, "%s", required_bots_map[spell_type].c_str());
 		return true;
 	}
 
