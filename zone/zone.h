@@ -156,9 +156,6 @@ public:
 	bool SaveZoneCFG();
 	bool DoesAlternateCurrencyExist(uint32 currency_id);
 
-	int GetNpcPositionUpdateDistance() const;
-	void SetNpcPositionUpdateDistance(int in_npc_position_update_distance);
-
 	char *adv_data;
 
 	const char *GetSpellBlockedMessage(uint32 spell_id, const glm::vec3 &location);

@@ -1717,15 +1717,6 @@ void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *a
 	}
 }
 
-/**
- * @param sender
- * @param app
- * @param ignore_sender
- * @param distance
- * @param skipped_mob
- * @param is_ack_required
- * @param filter
- */
 void EntityList::QueueCloseClients(
 	Mob *sender,
 	const EQApplicationPacket *app,
@@ -1742,7 +1733,7 @@ void EntityList::QueueCloseClients(
 	}
 
 	if (distance <= 0) {
-		distance = 600;
+		distance = zone->GetMaxUpdateRange();
 	}
 
 	float distance_squared = distance * distance;
@@ -5864,14 +5855,10 @@ void EntityList::ReloadMerchants() {
  * then we return the full list
  *
  * See comments @EntityList::ScanCloseMobs for system explanation
- *
- * @param mob
- * @param distance
- * @return
  */
 std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float distance)
 {
-	if (distance <= RuleI(Range, MobCloseScanDistance)) {
+	if (distance <= zone->GetMaxUpdateRange()) {
 		return mob->m_close_mobs;
 	}
 
