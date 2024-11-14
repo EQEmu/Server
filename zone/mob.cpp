@@ -1277,23 +1277,23 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 	}
 
-	ns->spawn.heading     = FloatToEQ12(m_Position.w);
-	ns->spawn.x           = FloatToEQ19(m_Position.x);//((int32)x_pos)<<3;
-	ns->spawn.y           = FloatToEQ19(m_Position.y);//((int32)y_pos)<<3;
-	ns->spawn.z           = FloatToEQ19(m_Position.z);//((int32)z_pos)<<3;
-	ns->spawn.spawnId     = GetID();
-	ns->spawn.curHp       = static_cast<uint8>(GetHPRatio());
-	ns->spawn.max_hp      = 100;        //this field needs a better name
-	ns->spawn.race        = (use_model) ? use_model : race;
-	ns->spawn.runspeed    = runspeed;
-	ns->spawn.walkspeed   = walkspeed;
-	ns->spawn.class_      = class_;
-	ns->spawn.gender      = gender;
-	ns->spawn.level       = level;
-	ns->spawn.PlayerState = GetPlayerState();
-	ns->spawn.deity       = deity;
-	ns->spawn.animation   = 0;
-	ns->spawn.findable    = findable ? 1 : 0;
+	ns->spawn.heading	= FloatToEQ12(m_Position.w);
+	ns->spawn.x			= FloatToEQ19(m_Position.x);//((int32)x_pos)<<3;
+	ns->spawn.y			= FloatToEQ19(m_Position.y);//((int32)y_pos)<<3;
+	ns->spawn.z			= FloatToEQ19(m_Position.z);//((int32)z_pos)<<3;
+	ns->spawn.spawnId	= GetID();
+	ns->spawn.curHp	= static_cast<uint8>(GetHPRatio());
+	ns->spawn.max_hp	= 100;		//this field needs a better name
+	ns->spawn.race		= (use_model) ? use_model : race;
+	ns->spawn.runspeed	= runspeed;
+	ns->spawn.walkspeed	= walkspeed;
+	ns->spawn.class_	= class_;
+	ns->spawn.gender	= gender;
+	ns->spawn.level		= level;
+	ns->spawn.PlayerState	= GetPlayerState();
+	ns->spawn.deity		= deity;
+	ns->spawn.animation	= 0;
+	ns->spawn.findable	= findable?1:0;
 
 	UpdateActiveLight();
 	ns->spawn.light		= m_Light.Type[EQ::lightsource::LightActive];
