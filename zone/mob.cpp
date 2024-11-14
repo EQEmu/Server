@@ -1266,8 +1266,6 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
 	} else {
 		strcpy(ns2->spawn.lastName, ns->spawn.lastName);
 	}
-
-	memset(&app->pBuffer[sizeof(Spawn_Struct)-7], 0xFF, 7);
 }
 
 void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
@@ -1296,7 +1294,6 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.deity       = deity;
 	ns->spawn.animation   = 0;
 	ns->spawn.findable    = findable ? 1 : 0;
-	ns->spawn.trader      = 0;
 
 	UpdateActiveLight();
 	ns->spawn.light		= m_Light.Type[EQ::lightsource::LightActive];

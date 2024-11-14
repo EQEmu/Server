@@ -2156,6 +2156,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	UpdateActiveLight();
 	ns->spawn.light = GetActiveLightType();
 	ns->spawn.show_name = NPCTypedata->show_name;
+	ns->spawn.trader = false;
 }
 
 void NPC::PetOnSpawn(NewSpawn_Struct* ns)
