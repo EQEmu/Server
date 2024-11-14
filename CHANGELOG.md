@@ -1,3 +1,9 @@
+## [22.59.1] 11/13/2024
+
+### Hotfix
+
+* Fix faulty database migration condition with databuckets (9285)
+
 ## [22.59.0] 11/13/2024
 
 ### Databuckets
