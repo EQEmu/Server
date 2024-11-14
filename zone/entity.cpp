@@ -2953,7 +2953,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 		return;
 	}
 
-	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
+	float scan_range = zone->GetMaxUpdateRange();
 
 	// Reserve memory in m_close_mobs to avoid frequent re-allocations if not already reserved.
 	// Assuming mob_list.size() as an upper bound for reservation.
@@ -2969,7 +2969,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 			continue;
 		}
 
-		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
+		float distance = Distance(scanning_mob->GetPosition(), mob->GetPosition());
 		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
 			// add mob to scanning_mob's close list and vice versa
 			// check if the mob is already in the close mobs list before inserting
@@ -2980,12 +2980,105 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 		}
 	}
 
+	UpdateVisibility(scanning_mob);
+
 	LogAIScanClose(
 		"[{}] Scanning close list > list_size [{}] moving [{}]",
 		scanning_mob->GetCleanName(),
 		scanning_mob->m_close_mobs.size(),
 		scanning_mob->IsMoving() ? "true" : "false"
 	);
+}
+
+void EntityList::UpdateVisibility(Mob *scanning_mob)
+{
+	if (!scanning_mob || !scanning_mob->IsClient()) {
+		return;
+	}
+
+	// Ensure sufficient capacity in the visibility map
+	if (scanning_mob->m_can_see_mob.bucket_count() < scanning_mob->m_close_mobs.size()) {
+		scanning_mob->m_can_see_mob.reserve(scanning_mob->m_close_mobs.size());
+	}
+
+	// Update visibility for all mobs in the close list of `scanning_mob`
+	for (auto &e : scanning_mob->m_close_mobs) {
+		auto mob = e.second;
+		if (!mob) continue;
+
+		int mob_id = mob->GetID();
+
+		// Update visibility for `scanning_mob` to `mob`
+		auto [it_scanning_visible, inserted_scanning_visible] = scanning_mob->m_can_see_mob.try_emplace(mob_id, false);
+		bool scanning_last_known_visible = it_scanning_visible->second;
+
+		if (!scanning_last_known_visible) {
+			scanning_mob->SendAppearancePacket(
+				AppearanceType::Invisibility,
+				0,
+				false,
+				true,
+				mob->CastToClient()
+			);
+			it_scanning_visible->second = true;
+			scanning_mob->Shout(fmt::format("Setting scanning_mob visible to mob [{}]", mob->GetCleanName()).c_str());
+		}
+
+		// Now update the visibility for `mob` to `scanning_mob`
+		auto [it_mob_visible, inserted_mob_visible] = mob->m_can_see_mob.try_emplace(scanning_mob->GetID(), false);
+		bool mob_last_known_visible = it_mob_visible->second;
+
+		if (!mob_last_known_visible) {
+			mob->SendAppearancePacket(
+				AppearanceType::Invisibility,
+				0,
+				false,
+				true,
+				scanning_mob->CastToClient()
+			);
+			it_mob_visible->second = true;
+			mob->Shout(fmt::format("Setting mob visible to scanning_mob [{}]", scanning_mob->GetCleanName()).c_str());
+		}
+	}
+
+	// Check all other mobs to make invisible if they are no longer close
+	for (auto &e : mob_list) {
+		auto mob = e.second;
+		if (!mob) continue;
+
+		int mob_id = mob->GetID();
+		bool is_on_close_list = mob->m_close_mobs.find(scanning_mob->GetID()) != mob->m_close_mobs.end();
+
+		// Update scanning_mob's view of mob visibility
+		auto [it, inserted] = scanning_mob->m_can_see_mob.try_emplace(mob_id, false);
+		bool last_known_visible = it->second;
+
+		if (!is_on_close_list && last_known_visible) {
+			scanning_mob->SendAppearancePacket(
+				AppearanceType::Invisibility,
+				3001,
+				false,
+				true,
+				mob->CastToClient()
+			);
+			it->second = false;
+			scanning_mob->Shout(fmt::format("Setting mob [{}] invisible to scanning_mob", mob->GetCleanName()).c_str());
+		}
+
+		// Inverse: Update mob's view of scanning_mob visibility
+		auto it_mob = mob->m_can_see_mob.find(scanning_mob->GetID());
+		if (it_mob != mob->m_can_see_mob.end() && !scanning_mob->m_close_mobs.count(mob_id) && it_mob->second) {
+			mob->SendAppearancePacket(
+				AppearanceType::Invisibility,
+				3001,
+				false,
+				true,
+				scanning_mob->CastToClient()
+			);
+			it_mob->second = false;
+			mob->Shout(fmt::format("Setting scanning_mob [{}] invisible to mob", scanning_mob->GetCleanName()).c_str());
+		}
+	}
 }
 
 bool EntityList::RemoveMerc(uint16 delete_id)

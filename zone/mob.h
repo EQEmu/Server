@@ -202,6 +202,7 @@ public:
 	void DisplayInfo(Mob *mob);
 
 	std::unordered_map<uint16, Mob *> m_close_mobs;
+	std::unordered_map<int, bool>     m_can_see_mob;
 	Timer                             m_scan_close_mobs_timer;
 	Timer                             m_mob_check_moving_timer;
 

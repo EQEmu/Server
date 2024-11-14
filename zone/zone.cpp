@@ -2772,7 +2772,7 @@ void Zone::CalculateNpcUpdateDistanceSpread()
 	int x_spread        = int(std::abs(max_x - min_x));
 	int y_spread        = int(std::abs(max_y - min_y));
 	int combined_spread = int(std::abs((x_spread + y_spread) / 2));
-	int update_distance = EQ::ClampLower(int(combined_spread / 4), int(zone->GetMaxMovementUpdateRange()));
+	int update_distance = EQ::ClampLower(int(combined_spread / 4), int(zone->GetMaxUpdateRange()));
 
 	SetNpcPositionUpdateDistance(update_distance);
 
