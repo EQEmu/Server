@@ -1,3 +1,33 @@
+## [22.59.1] 11/13/2024
+
+### Hotfix
+
+* Fix faulty database migration condition with databuckets (9285)
+
+## [22.59.0] 11/13/2024
+
+### Databuckets
+
+* Add database index to data_buckets ([#4535](https://github.com/EQEmu/Server/pull/4535)) @Akkadius 2024-11-09
+
+### Fixes
+
+* Bazaar two edge case issues resolved ([#4533](https://github.com/EQEmu/Server/pull/4533)) @neckkola 2024-11-09
+* Check if the mob is already in the close mobs list before inserting  @Akkadius 2024-11-11
+* ScanCloseMobs - Ensure scanning mob has an entity ID  @Akkadius 2024-11-10
+
+### Performance
+
+* Improvements to ScanCloseMobs logic ([#4534](https://github.com/EQEmu/Server/pull/4534)) @Akkadius 2024-11-08
+
+### Quest API
+
+* Add Native Database Querying Interface ([#4531](https://github.com/EQEmu/Server/pull/4531)) @hgtw 2024-11-13
+
+### Rules
+
+* Add Rule for restricting client versions to world server ([#4527](https://github.com/EQEmu/Server/pull/4527)) @knervous 2024-11-12
+
 ## [22.58.0] 11/5/2024
 
 ### Code
