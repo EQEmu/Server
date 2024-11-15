@@ -2557,10 +2557,13 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	}
 
 	if (RuleB(Custom, GroupIncentiveProgram)) {
-		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
-			int member_scale = GetGroup() ? std::min(0,(GetGroup()->GroupCount() - 2)) : 0;
-			for (int i = 0; i < member_scale; i++) {
-				if (zone->random.Roll0(4) == 0) {
+		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) ||
+			zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
+
+			int member_scale = GetGroup() ? (GetGroup()->GroupCount() - 2) : 0;
+			if (member_scale > 0) {
+				float chance = member_scale * 0.2f;
+				if (zone->random.Roll(100) < (chance * 100)) {
 					AddLootTable();
 				}
 			}
