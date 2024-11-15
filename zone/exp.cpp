@@ -42,14 +42,34 @@ extern WorldServer worldserver;
 
 extern QueryServ* QServ;
 
-static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp)
+static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Client* client = nullptr)
 {
 	float baseModifier = RuleR(AA, ModernAAScalingStartPercent);
 	int aaMinimum = RuleI(AA, ModernAAScalingAAMinimum);
 	int aaLimit = RuleI(AA, ModernAAScalingAALimit);
 
+	if (RuleB(Custom, UseAAEXPVeternacy) && client) {
+		auto where_filter = fmt::format(
+							"`account_id` = '{}' AND `id` != '{}' ORDER BY `aa_points_spent` DESC LIMIT 1",
+							client->AccountID(),
+							client->CharacterID()
+						);
+
+		const auto& char_data = CharacterDataRepository::GetWhere(database, where_filter);
+
+		if (char_data.size() == 1) {
+			int high_earned_aa = char_data[0].aa_points_spent;
+
+			if (high_earned_aa > aaLimit) {
+				client->Message(Chat::Experience, "You gain additional Alternate Advancement experience through your Veterancy.");
+			}
+
+			aaLimit = std::max(aaLimit, high_earned_aa);
+		}
+	}
+
 	// Are we within the scaling window?
-	LogDebug("earnedAA: [{}], aaLimit: [{}], aaMinimum [{}]", earnedAA, aaMinimum, aaLimit);
+	LogDebug("earnedAA: [{}], aaLimit: [{}], aaMinimum [{}]", earnedAA, aaLimit, aaMinimum);
 	if (earnedAA >= aaLimit || earnedAA < aaMinimum)
 	{
 		LogDebug("Not within AA scaling window");
@@ -902,7 +922,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	// Are we also doing linear AA acceleration?
 	if (RuleB(AA, ModernAAScalingEnabled) && aaexp > 0)
 	{
-		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetSpentAA() + GetAAPoints(), aaexp);
+		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetSpentAA() + GetAAPoints(), aaexp, this);
 	}
 
 	// Check for AA XP Cap
