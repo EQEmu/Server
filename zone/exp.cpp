@@ -48,7 +48,7 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Clie
 	int aaMinimum = RuleI(AA, ModernAAScalingAAMinimum);
 	int aaLimit = RuleI(AA, ModernAAScalingAALimit);
 
-	if (RuleB(Custom, UseAAEXPVeternacy) && client) {
+	if (RuleB(Custom, UseAAEXPVeterancy) && client) {
 		auto where_filter = fmt::format(
 							"`account_id` = '{}' AND `id` != '{}' ORDER BY `aa_points_spent` DESC LIMIT 1",
 							client->AccountID(),

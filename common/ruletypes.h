@@ -1100,7 +1100,7 @@ RULE_REAL(Custom,   AdditiveSpellCritDmgMultiplier,		    0.5, "The multiplier to
 RULE_BOOL(Custom,   ForceNPCFearPathing, 					true, "Forces NPCs to Fear path even if Combat:EnableFearPathing is disabled.")
 RULE_INT(Custom,    EventEOMDropChance,						1,     "Increase this value to make EoM drops during event more rare")
 RULE_BOOL(Custom,	GroupIncentiveProgram,					false, "Enable GroupIncentiveProgram")
-RULE_BOOL(Custom, 	UseAAEXPVeternacy,						false, "Use max AA on any character in account for value of AA:ModernAAScalingAALimit if it is higher")
+RULE_BOOL(Custom, 	UseAAEXPVeterancy,						false, "Use max AA on any character in account for value of AA:ModernAAScalingAALimit if it is higher")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
