@@ -716,7 +716,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	safe_delete(max_upgrade_item);
 
 	if (RuleB(Custom, GroupIncentiveProgram)) {
-		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
+
 			int member_scale = GetGroup() ? std::min(0,(GetGroup()->GroupCount() - 2)) : 0;
 			if (member_scale > 0) {
 				Message(Chat::Experience, fmt::format("Your item absorbs {}%% bonus energy due to your group Expedition!", member_scale).c_str());
@@ -907,6 +907,11 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 
 	// Check for AA XP Cap
 	int aaexp_cap = RuleI(AA, MaxAAEXPPerKill) * GetConLevelModifierPercent(conlevel) * (GetLevel()/50.0f) * (XPRate / 100.0f) * (zone->newzone_data.zone_exp_multiplier - 1.0f);
+
+	if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
+		int member_scale = GetGroup() ? std::min(0,(GetGroup()->GroupCount() - 2)) : 0;
+		aaexp_cap += aaexp_cap * (member_scale/100);
+	}
 
 	if (exp_source == ExpSource::Kill && RuleI(AA, MaxAAEXPPerKill) >= 0 && aaexp > aaexp_cap) {
 		aaexp = aaexp_cap;
