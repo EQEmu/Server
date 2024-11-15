@@ -235,7 +235,8 @@ Bazaar::GetSearchResults(
 		std::vector<ItemSearchType> item_search_types = {
 			{EQ::item::ItemType::ItemTypeAll,                  true},
 			{EQ::item::ItemType::ItemTypeBook,                 item->ItemClass == EQ::item::ItemType::ItemTypeBook},
-			{EQ::item::ItemType::ItemTypeContainer,            item->ItemClass == EQ::item::ItemType::ItemTypeContainer},
+			{EQ::item::ItemType::ItemTypeContainer,            item->ItemClass == EQ::item::ItemType::ItemTypeContainer ||
+			                                                   item->IsClassBag()},
 			{EQ::item::ItemType::ItemTypeAllEffects,           item->Scroll.Effect > 0 && item->Scroll.Effect < 65000},
 			{EQ::item::ItemType::ItemTypeUnknown9,             item->Worn.Effect == 998},
 			{EQ::item::ItemType::ItemTypeUnknown10,            item->Worn.Effect >= 1298 && item->Worn.Effect <= 1307},
