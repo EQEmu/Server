@@ -129,6 +129,7 @@ Mob::Mob(
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
 	m_scan_close_mobs_timer(6000),
+	m_see_close_mobs_timer(1000),
 	m_mob_check_moving_timer(1000),
 	bot_attack_flag_timer(10000)
 {

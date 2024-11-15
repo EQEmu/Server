@@ -2881,6 +2881,7 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 		);
 
 		it->second->m_close_mobs.erase(entity_id);
+		it->second->m_can_see_mob.erase(entity_id);
 		++it;
 	}
 
@@ -2934,6 +2935,9 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
 // All of the above makes a tremendous impact on the bottom line of cpu cycle performance because we run an order of magnitude
 // less checks by focusing our hot path logic down to a very small subset of relevant entities instead of looping an entire
 // entity list (zone wide)
+
+BenchTimer g_scan_bench_timer;
+
 void EntityList::ScanCloseMobs(Mob *scanning_mob)
 {
 	if (!scanning_mob) {
@@ -2943,6 +2947,8 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 	if (scanning_mob->GetID() <= 0) {
 		return;
 	}
+
+	g_scan_bench_timer.reset();
 
 	float scan_range = zone->GetMaxUpdateRange();
 
@@ -2971,21 +2977,26 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 		}
 	}
 
-	UpdateVisibility(scanning_mob);
-
 	LogAIScanClose(
-		"[{}] Scanning close list > list_size [{}] moving [{}]",
+		"[{}] Scanning close list > list_size [{}] moving [{}] elapsed [{}] us",
 		scanning_mob->GetCleanName(),
 		scanning_mob->m_close_mobs.size(),
-		scanning_mob->IsMoving() ? "true" : "false"
+		scanning_mob->IsMoving() ? "true" : "false",
+		g_scan_bench_timer.elapsedMicroseconds()
 	);
 }
+
+BenchTimer g_vis_bench_timer;
 
 void EntityList::UpdateVisibility(Mob *scanning_mob)
 {
 	if (!scanning_mob || !scanning_mob->IsClient()) {
 		return;
 	}
+
+	ScanCloseMobs(scanning_mob);
+
+	g_vis_bench_timer.reset();
 
 	// Ensure sufficient capacity in the visibility map
 	if (scanning_mob->m_can_see_mob.bucket_count() < scanning_mob->m_close_mobs.size()) {
@@ -3003,7 +3014,7 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 		auto [it_scanning_visible, inserted_scanning_visible] = scanning_mob->m_can_see_mob.try_emplace(mob_id, false);
 		bool scanning_last_known_visible = it_scanning_visible->second;
 
-		if (!scanning_last_known_visible) {
+		if (!scanning_last_known_visible && mob->IsClient()) {
 			scanning_mob->SendAppearancePacket(
 				AppearanceType::Invisibility,
 				0,
@@ -3012,14 +3023,14 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 				mob->CastToClient()
 			);
 			it_scanning_visible->second = true;
-			scanning_mob->Shout(fmt::format("Setting scanning_mob visible to mob [{}]", mob->GetCleanName()).c_str());
+			LogVisibilityDetail("Setting scanning_mob [{}] visible to mob [{}]", scanning_mob->GetCleanName(), mob->GetCleanName());
 		}
 
 		// Now update the visibility for `mob` to `scanning_mob`
 		auto [it_mob_visible, inserted_mob_visible] = mob->m_can_see_mob.try_emplace(scanning_mob->GetID(), false);
 		bool mob_last_known_visible = it_mob_visible->second;
 
-		if (!mob_last_known_visible) {
+		if (!mob_last_known_visible && scanning_mob->IsClient()) {
 			mob->SendAppearancePacket(
 				AppearanceType::Invisibility,
 				0,
@@ -3028,7 +3039,7 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 				scanning_mob->CastToClient()
 			);
 			it_mob_visible->second = true;
-			mob->Shout(fmt::format("Setting mob visible to scanning_mob [{}]", scanning_mob->GetCleanName()).c_str());
+			LogVisibilityDetail("Setting mob [{}] visible to scanning_mob [{}]", mob->GetCleanName(), scanning_mob->GetCleanName());
 		}
 	}
 
@@ -3044,7 +3055,7 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 		auto [it, inserted] = scanning_mob->m_can_see_mob.try_emplace(mob_id, false);
 		bool last_known_visible = it->second;
 
-		if (!is_on_close_list && last_known_visible) {
+		if (!is_on_close_list && last_known_visible && mob->IsClient()) {
 			scanning_mob->SendAppearancePacket(
 				AppearanceType::Invisibility,
 				3001,
@@ -3053,12 +3064,12 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 				mob->CastToClient()
 			);
 			it->second = false;
-			scanning_mob->Shout(fmt::format("Setting mob [{}] invisible to scanning_mob", mob->GetCleanName()).c_str());
+			LogVisibilityDetail("Setting mob [{}] invisible to scanning_mob [{}]", mob->GetCleanName(), scanning_mob->GetCleanName());
 		}
 
 		// Inverse: Update mob's view of scanning_mob visibility
 		auto it_mob = mob->m_can_see_mob.find(scanning_mob->GetID());
-		if (it_mob != mob->m_can_see_mob.end() && !scanning_mob->m_close_mobs.count(mob_id) && it_mob->second) {
+		if (it_mob != mob->m_can_see_mob.end() && !scanning_mob->m_close_mobs.count(mob_id) && it_mob->second && scanning_mob->IsClient()) {
 			mob->SendAppearancePacket(
 				AppearanceType::Invisibility,
 				3001,
@@ -3067,9 +3078,17 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 				scanning_mob->CastToClient()
 			);
 			it_mob->second = false;
-			mob->Shout(fmt::format("Setting scanning_mob [{}] invisible to mob", scanning_mob->GetCleanName()).c_str());
+			LogVisibilityDetail("Setting scanning_mob [{}] invisible to mob [{}]", scanning_mob->GetCleanName(), mob->GetCleanName());
 		}
 	}
+
+	LogVisibility(
+		"[{}] Visibility > list_size [{}] moving [{}] elapsed [{}] us",
+		scanning_mob->GetCleanName(),
+		scanning_mob->m_can_see_mob.size(),
+		scanning_mob->IsMoving() ? "true" : "false",
+		g_vis_bench_timer.elapsedMicroseconds()
+	);
 }
 
 bool EntityList::RemoveMerc(uint16 delete_id)
