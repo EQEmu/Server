@@ -2606,6 +2606,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 				data->zone_id          = GetZoneID();
 				data->slot             = sell_line.slot;
 				data->seller_quantity  = sell_line.seller_quantity;
+				data->purchase_method  = sell_line.purchase_method;
 				strn0cpy(data->item_name, sell_line.item_name, sizeof(data->item_name));
 				strn0cpy(data->buyer_name, sell_line.buyer_name.c_str(), sizeof(data->buyer_name));
 				strn0cpy(data->seller_name, GetCleanName(), sizeof(data->seller_name));
@@ -4250,6 +4251,14 @@ bool Client::DoBarterSellerChecks(BuyerLineSellItem_Struct &sell_line)
 						 sell_line.item_name
 		);
 		Message(Chat::Red, "The item that you are trying to sell is augmented. Please remove augments first");
+	}
+
+	if (sell_item && !sell_item->IsDroppable()) {
+		seller_error = true;
+		LogTradingDetail("Seller item <red>[{}] is non-tradeable therefore cannot be sold.",
+						 sell_line.item_name
+		);
+		Message(Chat::Red, "The item that you are trying to sell is non-tradeable and therefore cannot be sold.");
 	}
 
 	if (seller_error) {
