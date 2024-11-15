@@ -1323,7 +1323,7 @@ bool Bot::IsValidName()
 
 bool Bot::IsValidName(std::string& name)
 {
-	if (name.length() < 4 || name.length() > 15) {
+	if (name.empty() || name.length() < 4 || name.length() > 15) {
 		return false;
 	}
 
@@ -1332,10 +1332,15 @@ bool Bot::IsValidName(std::string& name)
 	}
 
 	for (char c : name.substr(1)) {
-		if (!RuleB(Bots, AllowCamelCaseNames) && !islower(c)) {
+		if (c == '_') {
 			return false;
 		}
-		if (isdigit(c) || ispunct(c)) {
+
+		if (!isalpha(c)) {
+			return false;
+		}
+
+		if (!RuleB(Bots, AllowCamelCaseNames) && !islower(c)) {
 			return false;
 		}
 	}
