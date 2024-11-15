@@ -1099,7 +1099,6 @@ RULE_INT(Custom,    AdditiveSpellCritDmgSoftCap,			700, "This is a soft cap for 
 RULE_REAL(Custom,   AdditiveSpellCritDmgMultiplier,		    0.5, "The multiplier to apply after the soft cap for additive spell crit damage multiplier. Every point after the soft cap will be multiplied by this.")
 RULE_BOOL(Custom,   ForceNPCFearPathing, 					true, "Forces NPCs to Fear path even if Combat:EnableFearPathing is disabled.")
 RULE_INT(Custom,    EventEOMDropChance,						1,     "Increase this value to make EoM drops during event more rare")
-RULE_BOOL(Custom, 	EnableAAXPDimReturn, 					false, "Enable to make AA cost more as you exceed ModernAAScalingAALimit")
 RULE_BOOL(Custom,	GroupIncentiveProgram,					false, "Enable GroupIncentiveProgram")
 
 // Exploit Prevention
