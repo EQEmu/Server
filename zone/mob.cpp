@@ -1275,6 +1275,14 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	strcpy(ns->spawn.name, name);
 	if(IsClient()) {
 		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
+		ns->spawn.CharacterGuid.Id = CastToClient()->CharacterID();
+		ns->spawn.CharacterGuid.WorldId = RuleI(World, Id);
+		ns->spawn.CharacterGuid.Reserved = 0;
+	}
+	else {
+		ns->spawn.CharacterGuid.Id = 0;
+		ns->spawn.CharacterGuid.WorldId = 0;
+		ns->spawn.CharacterGuid.Reserved = 0;
 	}
 
 	ns->spawn.heading	= FloatToEQ12(m_Position.w);

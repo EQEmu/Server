@@ -47,6 +47,13 @@ static const uint32 ADVANCED_LORE_LENGTH = 8192;
 */
 #pragma pack(1)
 
+struct EqGuid
+{
+	uint32_t Id;
+	uint16_t WorldId;
+	uint16_t Reserved;
+};
+
 struct LoginInfo_Struct {
 /*000*/	char	login_info[64];
 /*064*/	uint8	unknown064[124];
@@ -324,6 +331,7 @@ union
 	bool guild_show;
 	bool trader;
 	bool buyer;
+	EqGuid CharacterGuid;
 };
 
 struct PlayerState_Struct {
@@ -6434,13 +6442,6 @@ struct BazaarSearchMessaging_Struct {
 struct BuylineItemDetails_Struct {
 	uint64      item_cost;
 	uint32      item_quantity;
-};
-
-struct EqGuid
-{
-	uint32_t Id;
-	uint16_t WorldId;
-	uint16_t Reserved;
 };
 
 // Restore structure packing to default
