@@ -2558,7 +2558,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	if (RuleB(Custom, GroupIncentiveProgram)) {
 		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
-			int member_scale = std::max(0, static_cast<int>((zone->GetDynamicZone()->GetMemberCount() - 2)));
+			int member_scale = GetGroup() ? std::min(0,(GetGroup()->GroupCount() - 2)) : 0;
 			for (int i = 0; i < member_scale; i++) {
 				if (zone->random.Roll0(4) == 0) {
 					AddLootTable();
