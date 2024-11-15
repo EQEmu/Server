@@ -2731,6 +2731,14 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 		return;
 	}
 
+	if (IsTrader()) {
+		TraderEndTrader();
+	}
+
+	if (IsBuyer()) {
+		ToggleBuyerMode(false);
+	}
+
 	/* Item to Currency Storage */
 	if (reclaim->reclaim_flag == 1) {
 		uint32 removed = NukeItem(item_id, invWhereWorn | invWherePersonal | invWhereCursor);
@@ -5013,7 +5021,11 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	SetMoving(!(cy == m_Position.y && cx == m_Position.x));
 
 	CheckClientToNpcAggroTimer();
-	CheckScanCloseMobsMovingTimer();
+
+	if (m_mob_check_moving_timer.Check()) {
+		CheckScanCloseMobsMovingTimer();
+	}
+
 	CheckSendBulkClientPositionUpdate();
 
 	int32 new_animation = ppu->animation;

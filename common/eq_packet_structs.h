@@ -3221,6 +3221,7 @@ struct BuyerMessaging_Struct {
 	char   item_name[64];
 	uint32 slot;
 	uint32 seller_quantity;
+	uint32 purchase_method; // 0 direct merchant, 1 via /barter window
 };
 
 struct BuyerAddBuyertoBarterWindow_Struct {

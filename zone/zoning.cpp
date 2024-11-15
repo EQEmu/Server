@@ -737,7 +737,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		default:
-			LogError("Client::ProcessMovePC received a reguest to perform an unsupported client zone operation");
+			LogError("Received a request to perform an unsupported client zone operation");
 			break;
 	}
 }

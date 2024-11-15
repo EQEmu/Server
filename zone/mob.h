@@ -1488,7 +1488,6 @@ public:
 
 	bool IsCloseToBanker();
 
-	void ScanCloseMobProcess();
 	std::unordered_map<uint16, Mob *> &GetCloseMobList(float distance = 0.0f);
 	void CheckScanCloseMobsMovingTimer();
 

@@ -1755,7 +1755,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				return;
 			}
 
-			zoneserver_list.SendPacket(Zones::BAZAAR, pack);
+			auto trader = client_list.FindCLEByCharacterID(in->trader_buy_struct.trader_id);
+			if (trader) {
+				zoneserver_list.SendPacket(trader->zone(), trader->instance(), pack);
+			}
+
 			break;
 		}
 		case ServerOP_BuyerMessaging: {
@@ -1775,12 +1779,20 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					break;
 				}
 				case Barter_SellItem: {
-					zoneserver_list.SendPacket(Zones::BAZAAR, pack);
+					auto buyer = client_list.FindCharacter(in->buyer_name);
+					if (buyer) {
+						zoneserver_list.SendPacket(buyer->zone(), buyer->instance(), pack);
+					}
+
 					break;
 				}
 				case Barter_FailedTransaction:
 				case Barter_BuyerTransactionComplete: {
-					zoneserver_list.SendPacket(in->zone_id, pack);
+					auto seller = client_list.FindCharacter(in->seller_name);
+					if (seller) {
+						zoneserver_list.SendPacket(seller->zone(), seller->instance(), pack);
+					}
+
 					break;
 				}
 				default:

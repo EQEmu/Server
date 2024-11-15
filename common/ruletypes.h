@@ -339,6 +339,7 @@ RULE_STRING(World, MOTD, "", "Server MOTD sent on login, change from empty to ha
 RULE_STRING(World, Rules, "", "Server Rules, change from empty to have this be used instead of variables table 'rules' value, lines are pipe (|) separated, example: A|B|C")
 RULE_BOOL(World, EnableAutoLogin, false, "Enables or disables auto login of characters, allowing people to log characters in directly from loginserver to ingame")
 RULE_BOOL(World, EnablePVPRegions, true, "Enables or disables PVP Regions automatically setting your PVP flag")
+RULE_STRING(World, SupportedClients, "", "Comma-delimited list of clients to restrict to. Supported values are Titanium | SoF | SoD | UF | RoF | RoF2. Example: Titanium,RoF2")
 RULE_INT(World, Id, 100, "Used by later clients to create GUIDs, expected to be Unique to the world but ultimately not that important")
 RULE_CATEGORY_END()
 
@@ -519,6 +520,7 @@ RULE_BOOL(Spells, SnareOverridesSpeedBonuses, false, "Enabling will allow snares
 RULE_INT(Spells, TargetedAOEMaxTargets, 4, "Max number of targets a Targeted AOE spell can cast on. Set to 0 for no limit.")
 RULE_INT(Spells, PointBlankAOEMaxTargets, 0, "Max number of targets a Point-Blank AOE spell can cast on. Set to 0 for no limit.")
 RULE_INT(Spells, DefaultAOEMaxTargets, 0, "Max number of targets that an AOE spell which does not meet other descriptions can cast on. Set to 0 for no limit.")
+RULE_BOOL(Spells, AllowFocusOnSkillDamageSpells, false, "Allow focus effects 185, 459, and 482 to enhance SkillAttack spell effect 193")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

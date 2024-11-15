@@ -4623,3 +4623,78 @@ bool QuestManager::SetAutoLoginCharacterNameByAccountID(uint32 account_id, const
 {
 	return AccountRepository::SetAutoLoginCharacterNameByAccountID(database, account_id, character_name);
 }
+
+void QuestManager::SpawnCircle(uint32 npc_id, glm::vec4 position, float radius, uint32 points)
+{
+	const NPCType* t = content_db.LoadNPCTypesData(npc_id);
+	if (!t) {
+		return;
+	}
+
+	glm::vec4 npc_position = position;
+
+	for (uint32 i = 0; i < points; i++) {
+		float angle = 2 * M_PI * i / points;
+
+		npc_position.x = position.x + radius * std::cos(angle);
+		npc_position.y = position.y + radius * std::sin(angle);
+
+		NPC* n = new NPC(t, nullptr, npc_position, GravityBehavior::Water);
+
+		n->FixZ();
+
+		n->AddLootTable();
+
+		if (n->DropsGlobalLoot()) {
+			n->CheckGlobalLootTables();
+		}
+
+		entity_list.AddNPC(n, true, true);
+	}
+}
+
+void QuestManager::SpawnGrid(uint32 npc_id, glm::vec4 position, float spacing, uint32 spawn_count)
+{
+	const NPCType* t = content_db.LoadNPCTypesData(npc_id);
+	if (!t) {
+		return;
+	}
+
+	glm::vec4 npc_position = position;
+
+	uint32 columns = std::ceil(std::sqrt(spawn_count));
+	uint32 rows    = std::ceil(spawn_count / columns);
+
+	float total_width  = ((columns - 1) * spacing);
+	float total_height = ((rows - 1) * spacing);
+
+	float start_x = position.x - total_width / 2;
+	float start_y = position.y - total_height / 2;
+
+	uint32 spawned = 0;
+
+	for (uint32 row = 0; row < rows; row++) {
+		for (uint32 column = 0; column < columns; column++) {
+			if (spawned >= spawn_count) {
+				break;
+			}
+
+			npc_position.x = start_x + column * spacing;
+			npc_position.y = start_y + row * spacing;
+
+			NPC* n = new NPC(t, nullptr, npc_position, GravityBehavior::Water);
+
+			n->FixZ();
+
+			n->AddLootTable();
+
+			if (n->DropsGlobalLoot()) {
+				n->CheckGlobalLootTables();
+			}
+
+			entity_list.AddNPC(n, true, true);
+
+			spawned++;
+		}
+	}
+}

@@ -242,7 +242,7 @@ struct read_as<hash>
   static bool check(PerlInterpreter* my_perl, int i, int ax, int items)
   {
     int remaining = items - i;
-    return remaining > 0 && remaining % 2 == 0 && SvTYPE(ST(i)) == SVt_PV;
+    return remaining > 0 && remaining % 2 == 0 && SvTYPE(ST(i)) < SVt_PVAV;
   }
 
   static hash get(PerlInterpreter* my_perl, int i, int ax, int items)

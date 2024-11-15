@@ -1,3 +1,123 @@
+## [22.59.1] 11/13/2024
+
+### Hotfix
+
+* Fix faulty database migration condition with databuckets (9285)
+
+## [22.59.0] 11/13/2024
+
+### Databuckets
+
+* Add database index to data_buckets ([#4535](https://github.com/EQEmu/Server/pull/4535)) @Akkadius 2024-11-09
+
+### Fixes
+
+* Bazaar two edge case issues resolved ([#4533](https://github.com/EQEmu/Server/pull/4533)) @neckkola 2024-11-09
+* Check if the mob is already in the close mobs list before inserting  @Akkadius 2024-11-11
+* ScanCloseMobs - Ensure scanning mob has an entity ID  @Akkadius 2024-11-10
+
+### Performance
+
+* Improvements to ScanCloseMobs logic ([#4534](https://github.com/EQEmu/Server/pull/4534)) @Akkadius 2024-11-08
+
+### Quest API
+
+* Add Native Database Querying Interface ([#4531](https://github.com/EQEmu/Server/pull/4531)) @hgtw 2024-11-13
+
+### Rules
+
+* Add Rule for restricting client versions to world server ([#4527](https://github.com/EQEmu/Server/pull/4527)) @knervous 2024-11-12
+
+## [22.58.0] 11/5/2024
+
+### Code
+
+* Add mysql prepared statement support ([#4530](https://github.com/EQEmu/Server/pull/4530)) @hgtw 2024-11-06
+* Update perlbind to 1.1.0 ([#4529](https://github.com/EQEmu/Server/pull/4529)) @hgtw 2024-11-06
+
+### Feature
+
+* Focus Skill Attack Spells ([#4528](https://github.com/EQEmu/Server/pull/4528)) @mmcgarvey 2024-10-31
+
+### Fixes
+
+* Add Missing Lua Registers ([#4525](https://github.com/EQEmu/Server/pull/4525)) @Kinglykrab 2024-10-24
+* Fix cross_zone_set_entity_variable_by_char_id in Lua ([#4526](https://github.com/EQEmu/Server/pull/4526)) @Kinglykrab 2024-10-24
+
+### Loginserver
+
+* Automatifc Opcode File Creation ([#4521](https://github.com/EQEmu/Server/pull/4521)) @KimLS 2024-10-22
+
+### Quest API
+
+* Add Spawn Circle/Grid Methods to Perl/Lua ([#4524](https://github.com/EQEmu/Server/pull/4524)) @Kinglykrab 2024-10-24
+
+## [22.57.1] 10/22/2024
+
+### Bots
+
+* Enable Bot Commands Only if Rule Enabled ([#4519](https://github.com/EQEmu/Server/pull/4519)) @Kinglykrab 2024-10-22
+* Fix pet buffs from saving duplicates every save ([#4520](https://github.com/EQEmu/Server/pull/4520)) @nytmyr 2024-10-22
+
+### Loginserver
+
+* Automatic Opcode File Creation ([#4521](https://github.com/EQEmu/Server/pull/4521)) @KimLS 2024-10-22
+
+## [22.57.0] 10/20/2024
+
+### Bots
+
+* Add "silent" option to ^spawn and mute raid spawn ([#4494](https://github.com/EQEmu/Server/pull/4494)) @nytmyr 2024-10-05
+* Add attack flag when told to attack ([#4490](https://github.com/EQEmu/Server/pull/4490)) @nytmyr 2024-09-29
+* Fix timers loading on spawn and zone ([#4516](https://github.com/EQEmu/Server/pull/4516)) @nytmyr 2024-10-20
+
+### Code
+
+* Fixed a typo in Zoning.cpp ([#4515](https://github.com/EQEmu/Server/pull/4515)) @carolus21rex 2024-10-20
+* Optimization Code Cleanup ([#4489](https://github.com/EQEmu/Server/pull/4489)) @Akkadius 2024-09-30
+* Remove Extra Skill in EQ::skills::GetExtraDamageSkills() ([#4486](https://github.com/EQEmu/Server/pull/4486)) @Kinglykrab 2024-10-03
+
+### Crash
+
+* Fixes a crash when the faction_list db table is empty. ([#4511](https://github.com/EQEmu/Server/pull/4511)) @KimLS 2024-10-14
+
+### Fixes
+
+* Add character_instance_safereturns to tables_to_zero_id ([#4485](https://github.com/EQEmu/Server/pull/4485)) @Morzain 2024-09-26
+* Correctly limit max targets of PBAOE ([#4507](https://github.com/EQEmu/Server/pull/4507)) @catapultam-habeo 2024-10-11
+* FindBestZ selecting false zone floor as bestz - Results in roambox failures ([#4504](https://github.com/EQEmu/Server/pull/4504)) @fryguy503 2024-10-13
+* Fix #set motd Crash ([#4495](https://github.com/EQEmu/Server/pull/4495)) @Kinglykrab 2024-10-05
+* Fix `character_exp_modifiers` Default Values ([#4502](https://github.com/EQEmu/Server/pull/4502)) @Kinglykrab 2024-10-09
+* Fix a display error regarding a few trader/buyer query errors ([#4514](https://github.com/EQEmu/Server/pull/4514)) @neckkola 2024-10-17
+* Fix Group ID 0 in Group::SaveGroupLeaderAA() ([#4487](https://github.com/EQEmu/Server/pull/4487)) @Kinglykrab 2024-10-03
+* Fix Mercenary Encounter Crash ([#4509](https://github.com/EQEmu/Server/pull/4509)) @Kinglykrab 2024-10-12
+* Fix NPC::CanTalk() Crash ([#4499](https://github.com/EQEmu/Server/pull/4499)) @Kinglykrab 2024-10-07
+* Fix Spells:DefaultAOEMaxTargets Default Value ([#4508](https://github.com/EQEmu/Server/pull/4508)) @Kinglykrab 2024-10-12
+* Fix Targeted AOE Max Targets Rule ([#4488](https://github.com/EQEmu/Server/pull/4488)) @Kinglykrab 2024-10-03
+* fixed a bug where it would use npc value instead of faction value in the database. ([#4491](https://github.com/EQEmu/Server/pull/4491)) @regneq 2024-09-29
+* Master of Disguise should apply to illusions casted by others. ([#4506](https://github.com/EQEmu/Server/pull/4506)) @fryguy503 2024-10-11
+* Spells - Self Only (Yellow) cast when non group member is targeted ([#4503](https://github.com/EQEmu/Server/pull/4503)) @fryguy503 2024-10-11
+
+### Loginserver
+
+* Larion loginserver support ([#4492](https://github.com/EQEmu/Server/pull/4492)) @KimLS 2024-10-03
+* Login Fatal Error Spamming ([#4476](https://github.com/EQEmu/Server/pull/4476)) @KimLS 2024-10-09
+
+### Logs
+
+* Add NPC Trades to Player Events ([#4505](https://github.com/EQEmu/Server/pull/4505)) @Kinglykrab 2024-10-13
+
+### Quest API
+
+* Add Buff Fade Methods to Perl/Lua ([#4501](https://github.com/EQEmu/Server/pull/4501)) @Kinglykrab 2024-10-09
+* Add EVENT_READ_ITEM to Perl/Lua ([#4497](https://github.com/EQEmu/Server/pull/4497)) @Kinglykrab 2024-10-08
+* Add NPC List Filter Methods to Perl/Lua ([#4493](https://github.com/EQEmu/Server/pull/4493)) @Kinglykrab 2024-10-04
+* Add Scripting Support to Mercenaries ([#4500](https://github.com/EQEmu/Server/pull/4500)) @Kinglykrab 2024-10-11
+
+### Rules
+
+* Add Rule to disable PVP Regions ([#4513](https://github.com/EQEmu/Server/pull/4513)) @Kinglykrab 2024-10-17
+
 ## [22.56.3] 9/23/2024
 
 ### Fixes

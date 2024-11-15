@@ -281,7 +281,9 @@ bool Client::Process() {
 			}
 		}
 
-		ScanCloseMobProcess();
+		if (m_scan_close_mobs_timer.Check()) {
+			entity_list.ScanCloseMobs(this);
+		}
 
 		if (RuleB(Inventory, LazyLoadBank)) {
 			// poll once a second to see if we are close to a banker and we haven't loaded the bank yet

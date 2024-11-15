@@ -42,6 +42,7 @@
 #include "lua_spawn.h"
 #include "lua_spell.h"
 #include "lua_stat_bonuses.h"
+#include "lua_database.h"
 
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
@@ -1312,11 +1313,14 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_rulei(),
 			lua_register_ruler(),
 			lua_register_ruleb(),
+			lua_register_rules(),
 			lua_register_journal_speakmode(),
 			lua_register_journal_mode(),
 			lua_register_expedition(),
 			lua_register_expedition_lock_messages(),
-			lua_register_buff()
+			lua_register_buff(),
+			lua_register_exp_source(),
+			lua_register_database()
 		)];
 
 	} catch(std::exception &ex) {

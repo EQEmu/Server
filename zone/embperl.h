@@ -21,6 +21,8 @@ Eglin
 #include <perlbind/perlbind.h>
 namespace perl = perlbind;
 
+#undef connect
+#undef bind
 #undef Null
 
 #ifdef WIN32

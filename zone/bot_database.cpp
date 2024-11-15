@@ -828,7 +828,7 @@ bool BotDatabase::LoadTimers(Bot* b)
 	BotTimer_Struct t{ };
 
 	for (const auto& e : l) {
-		if (t.timer_value < (Timer::GetCurrentTime() + t.recast_time)) {
+		if (e.timer_value < (Timer::GetCurrentTime() + e.recast_time)) {
 			t.timer_id    = e.timer_id;
 			t.timer_value = e.timer_value;
 			t.recast_time = e.recast_time;
@@ -1451,7 +1451,7 @@ bool BotDatabase::DeletePetBuffs(const uint32 bot_id)
 		return true;
 	}
 
-	BotPetBuffsRepository::DeleteOne(database, saved_pet_index);
+	BotPetBuffsRepository::DeleteWhere(database, fmt::format("pets_index = {}", saved_pet_index));
 
 	return true;
 }
