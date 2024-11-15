@@ -720,8 +720,8 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 			int member_scale = std::max(0, static_cast<int>((zone->GetDynamicZone()->GetMemberCount() - 2) * 25));
 			if (member_scale > 0) {
 				Message(Chat::Experience, fmt::format("Your item absorbs {}%% bonus energy due to your group Expedition!", member_scale).c_str());
-				new_percentage += (new_percentage * (static_cast<float>(member_scale) / 100.0f));
-				new_percentage = std::min(100.0f, new_percentage); // Cap at 100%
+				new_item_experience += (new_item_experience * (static_cast<float>(member_scale) / 100.0f));
+				new_percentage = std::min(100.0f, cur_item_experience + new_item_experience);
 			}
 		}
 	}
