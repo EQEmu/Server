@@ -716,7 +716,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	safe_delete(max_upgrade_item);
 
 	if (RuleB(Custom, GroupIncentiveProgram)) {
-
+		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
 			int member_scale = GetGroup() ? std::min(0,(GetGroup()->GroupCount() - 2)) : 0;
 			if (member_scale > 0) {
 				Message(Chat::Experience, fmt::format("Your item absorbs {}%% bonus energy due to your group Expedition!", member_scale).c_str());
