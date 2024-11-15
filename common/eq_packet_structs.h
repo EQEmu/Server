@@ -6435,6 +6435,13 @@ struct BuylineItemDetails_Struct {
 	uint32      item_quantity;
 };
 
+struct EqGuid
+{
+	uint32_t Id;
+	uint16_t WorldId;
+	uint16_t Reserved;
+};
+
 // Restore structure packing to default
 #pragma pack()
 

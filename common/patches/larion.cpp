@@ -542,6 +542,7 @@ namespace Larion
 		out.WriteUInt32(0);
 		out.WriteUInt32(0);
 
+		//PcProfile begin
 		/*
 		u32 profile_type;
 		u32 profile_id;
@@ -1059,6 +1060,7 @@ namespace Larion
 		out.WriteUInt64(emu->exp);
 		out.WriteUInt32(emu->expAA);
 
+		//PcClient begin
 		/*
 		u32 character_id;
 		u32 character_id2;
@@ -1086,7 +1088,7 @@ namespace Larion
 		out.WriteUInt32(emu->birthday);
 		out.WriteUInt32(emu->birthday);
 		out.WriteUInt32(emu->lastlogin);
-		out.WriteUInt32(emu->timePlayedMin);
+		out.WriteUInt32(5000);
 		out.WriteUInt32(6000);
 		out.WriteUInt32(0x3FFFFFFF);
 
@@ -1135,7 +1137,7 @@ namespace Larion
 		*/
 
 		out.WriteUInt64(0);
-		out.WriteUInt8(1);
+		out.WriteUInt8(0);
 		out.WriteUInt8(5);
 
 		//Coin coin;
@@ -1202,11 +1204,22 @@ namespace Larion
 			out.WriteUInt32(0xFFFFFFFF);
 			out.WriteUInt32(0);
 		}
+		const uint8_t task_data[137] = {
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00,
+		};
 
 		//u8 tasks[137]; //on live and on xac's capture from 12/28/23 these both are the same size;
 		for (int i = 0; i < 137; i++)
 		{
-			out.WriteUInt8(0);
+			out.WriteUInt8(task_data[i]);
 		}
 
 		/*
@@ -1453,7 +1466,7 @@ namespace Larion
 		u8 show_helm;
 		u32 downtime;
 		*/
-		out.WriteUInt8(0);
+		out.WriteUInt8(1);
 		out.WriteUInt32(emu->level);
 		out.WriteUInt8(emu->showhelm);
 		out.WriteUInt32(emu->RestTimer);
@@ -1487,7 +1500,7 @@ namespace Larion
 
 		//u32 starting_city_zone_id;
 		//we don't actually support this yet
-		out.WriteUInt32(1);
+		out.WriteUInt32(394);
 
 		/*
 		u8 use_advanced_looting;
@@ -1517,7 +1530,7 @@ namespace Larion
 		delete in;
 	}
 
-	/*ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_ZoneSpawns); }
+	ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_ZoneSpawns); }
 
 	ENCODE(OP_ZoneSpawns)
 	{
@@ -1568,29 +1581,31 @@ namespace Larion
 				buffer.WriteFloat(SpawnSize - 0.7f);
 			}
 			
-			buffer.WriteUInt32(emu->spawnId); //player "id" we should consider supporting this in the future
-			buffer.WriteUInt32(103); //not sure
-			buffer.WriteUInt8(emu->NPC); //npc/player flag
+			//buffer.WriteUInt32(0); //should be character id
+			//buffer.WriteUInt16(RuleI(World, Id)); //world id
+			//buffer.WriteUInt16(0); //reserved
 
-			structs::Spawn_Struct_Bitfields flags;
-			flags.gender = emu->gender;
-			flags.gender = emu->gender;
-			flags.ispet = emu->is_pet;
-			flags.afk = emu->afk;
-			flags.anon = emu->anon;
-			flags.gm = emu->gm;
-			flags.sneak = 0;
-			flags.lfg = emu->lfg;
-			flags.invis = emu->invis;
-			flags.linkdead = 0;
-			flags.showhelm = emu->showhelm;
-			flags.trader = emu->trader ? 1 : 0;
-			flags.targetable = 1;
-			flags.targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
-			flags.showname = emu->show_name;
+			//buffer.WriteUInt8(emu->NPC); //npc/player flag
+
+			//structs::Spawn_Struct_Bitfields flags;
+			//flags.gender = emu->gender;
+			//flags.gender = emu->gender;
+			//flags.ispet = emu->is_pet;
+			//flags.afk = emu->afk;
+			//flags.anon = emu->anon;
+			//flags.gm = emu->gm;
+			//flags.sneak = 0;
+			//flags.lfg = emu->lfg;
+			//flags.invis = emu->invis;
+			//flags.linkdead = 0;
+			//flags.showhelm = emu->showhelm;
+			//flags.trader = emu->trader ? 1 : 0;
+			//flags.targetable = 1;
+			//flags.targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
+			//flags.showname = emu->show_name;
 
 		}
-	}*/
+	}
 
 	// DECODE methods
 

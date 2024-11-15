@@ -339,6 +339,7 @@ RULE_STRING(World, MOTD, "", "Server MOTD sent on login, change from empty to ha
 RULE_STRING(World, Rules, "", "Server Rules, change from empty to have this be used instead of variables table 'rules' value, lines are pipe (|) separated, example: A|B|C")
 RULE_BOOL(World, EnableAutoLogin, false, "Enables or disables auto login of characters, allowing people to log characters in directly from loginserver to ingame")
 RULE_BOOL(World, EnablePVPRegions, true, "Enables or disables PVP Regions automatically setting your PVP flag")
+RULE_INT(World, Id, 100, "Used by later clients to create GUIDs, expected to be Unique to the world but ultimately not that important")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
