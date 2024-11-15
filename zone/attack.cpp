@@ -2556,20 +2556,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		return false;
 	}
 
-	if (RuleB(Custom, GroupIncentiveProgram)) {
-		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) ||
-			zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
-
-			int member_scale = GetGroup() ? (GetGroup()->GroupCount() - 2) : 0;
-			if (member_scale > 0) {
-				float chance = member_scale * 0.2f;
-				if (zone->random.Roll(100) < (chance * 100)) {
-					AddLootTable();
-				}
-			}
-		}
-	}
-
 	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
 		char val1[20] = { 0 };
 
@@ -3257,6 +3243,20 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	}
 
 	std::vector<std::any> args = { corpse };
+
+	if (RuleB(Custom, GroupIncentiveProgram)) {
+		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
+			auto real_killer = killer_mob->GetOwner() ? killer_mob->GetOwner() : killer_mob;
+
+			int member_scale = real_killer->GetGroup() ? std::max(0,(real_killer->GetGroup()->GroupCount() - 2)) : 0;
+			if (member_scale > 0) {
+				float chance = member_scale * 0.2f;
+				if (zone->random.Roll(100) < (chance * 100)) {
+					AddLootTable();
+				}
+			}
+		}
+	}
 
 	parse->EventMercNPC(
 		EVENT_DEATH_COMPLETE,
