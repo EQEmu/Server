@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/misc_functions.h"
 #include "../common/events/player_event_logs.h"
 #include "queryserv.h"
+#include "dynamic_zone.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "water_map.h"
@@ -2553,6 +2554,17 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 
 		return false;
+	}
+
+	if (RuleB(Custom, GroupIncentiveProgram)) {
+		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
+			int member_scale = std::max(0, static_cast<int>((zone->GetDynamicZone()->GetMemberCount() - 2)));
+			for (int i = 0; i < member_scale; i++) {
+				if (zone->random.Roll0(4) == 0) {
+					AddLootTable();
+				}
+			}
+		}
 	}
 
 	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {

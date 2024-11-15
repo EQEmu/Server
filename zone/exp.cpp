@@ -26,6 +26,7 @@
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"
+#include "dynamic_zone.h"
 
 #include "queryserv.h"
 #include "quest_parser_collection.h"
@@ -711,8 +712,19 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	EQ::ItemInstance* max_upgrade_item = item->GetMaxUpgrade(database);
 	float cur_item_experience = Strings::ToFloat(item->GetCustomData("Exp"), 0);
 	float new_item_experience = GetBaseExpValueForKill(conlevel, static_cast<int>(upgrade_item->GetID() / 1000000), max_upgrade_item);
+	float new_percentage = std::min(100.0f, cur_item_experience + new_item_experience);
 	safe_delete(max_upgrade_item);
-	float new_percentage 	  = std::min(100.0f, cur_item_experience + new_item_experience);
+
+	if (RuleB(Custom, GroupIncentiveProgram)) {
+		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
+			int member_scale = std::max(0, static_cast<int>((zone->GetDynamicZone()->GetMemberCount() - 2) * 25));
+			if (member_scale > 0) {
+				Message(Chat::Experience, fmt::format("Your item absorbs {}%% bonus energy due to your group Expedition!", member_scale).c_str());
+				new_percentage += (new_percentage * (static_cast<float>(member_scale) / 100.0f));
+				new_percentage = std::min(100.0f, new_percentage); // Cap at 100%
+			}
+		}
+	}
 
 	EQ::SayLinkEngine linker;
 	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
@@ -721,45 +733,45 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	LogDebug("Raw Values: [{}] [{}] [{}]", cur_item_experience, new_item_experience, new_percentage);
 
 	if (new_percentage <= 5.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, emitting a very faint shimmer. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, emitting a very faint shimmer. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 10.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, emitting a faint shimmer. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, emitting a faint shimmer. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 15.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, glowing faintly. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing faintly. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 20.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, glowing softly. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing softly. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 25.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, glowing steadily. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing steadily. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 30.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, glowing with a gentle light. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing with a gentle light. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 35.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, glowing with a soft light. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing with a soft light. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 40.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, glowing brightly. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing brightly. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 45.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, glowing intensely. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, glowing intensely. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 50.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, shining steadily. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, shining steadily. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 55.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, shining brightly. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, shining brightly. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 60.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, shining intensely. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, shining intensely. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 65.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, radiating softly. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, radiating softly. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 70.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, radiating brightly. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, radiating brightly. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 75.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, radiating intensely. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, radiating intensely. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 80.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, shining brilliantly. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, shining brilliantly. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 85.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, shining with great power. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, shining with great power. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 90.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, radiating with great power. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, radiating with great power. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else if (new_percentage <= 95.0f) {
-		Message(Chat::Experience, "Your [%s] absorbs energy, radiating with immense power. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, radiating with immense power. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	} else {
-		Message(Chat::Experience, "Your [%s] absorbs energy, radiating with overwhelming power. (%05.2f)", linker.GenerateLink().c_str(), new_percentage);
+		Message(Chat::Experience, "Your [%s] absorbs energy, radiating with overwhelming power. (%05.2f%%)", linker.GenerateLink().c_str(), new_percentage);
 	}
 
 	LogDebug("New Exp for Item [{}] is [{}]", linker.GenerateLink().c_str(), new_percentage);
@@ -975,7 +987,6 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 		return; // Must be invalid class/race
 	}
 
-
 	uint32 i = 0;
 	uint32 membercount = 0;
 	if(GetGroup())
@@ -1039,6 +1050,17 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 					Message(Chat::Experience, "You gain experience (with a bonus)!");
 				} else {
 					MessageString(Chat::Experience, GAIN_XP);
+				}
+			}
+
+			if (RuleB(Custom, GroupIncentiveProgram)) {
+				if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
+					int member_scale = std::max(0,static_cast<int>((zone->GetDynamicZone()->GetMemberCount() - 2) * 25));
+					if (member_scale) {
+						Message(Chat::Experience, fmt::format("You gain {}%% bonus experience for your group Expedition!", member_scale).c_str());
+						set_exp += exp_gained * (member_scale/100);
+						set_aaxp += aa_exp_gained * (member_scale/100);
+					}
 				}
 			}
 		}
