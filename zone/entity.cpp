@@ -697,6 +697,7 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	mob_list.emplace(std::pair<uint16, Mob *>(npc->GetID(), npc));
 
 	entity_list.ScanCloseMobs(npc);
+	entity_list.UpdateVisibility(npc);
 
 	if (parse->HasQuestSub(npc->GetNPCTypeID(), EVENT_SPAWN)) {
 		parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
@@ -2978,7 +2979,7 @@ BenchTimer g_vis_bench_timer;
 
 void EntityList::UpdateVisibility(Mob *scanning_mob)
 {
-	if (!scanning_mob || !scanning_mob->IsClient()) {
+	if (!scanning_mob) {
 		return;
 	}
 
@@ -3002,14 +3003,17 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 		auto [it_scanning_visible, inserted_scanning_visible] = scanning_mob->m_can_see_mob.try_emplace(mob_id, false);
 		bool scanning_last_known_visible = it_scanning_visible->second;
 
-		if (!scanning_last_known_visible && mob->IsClient()) {
-			scanning_mob->SendAppearancePacket(
-				AppearanceType::Invisibility,
-				0,
-				false,
-				true,
-				mob->CastToClient()
-			);
+		if (!scanning_last_known_visible) {
+			if (mob->IsClient()) {
+				scanning_mob->SendAppearancePacket(
+					AppearanceType::Invisibility,
+					0,
+					false,
+					true,
+					mob->CastToClient()
+				);
+			}
+
 			it_scanning_visible->second = true;
 			LogVisibilityDetail("Setting scanning_mob [{}] visible to mob [{}]", scanning_mob->GetCleanName(), mob->GetCleanName());
 		}
@@ -3018,14 +3022,17 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 		auto [it_mob_visible, inserted_mob_visible] = mob->m_can_see_mob.try_emplace(scanning_mob->GetID(), false);
 		bool mob_last_known_visible = it_mob_visible->second;
 
-		if (!mob_last_known_visible && scanning_mob->IsClient()) {
-			mob->SendAppearancePacket(
-				AppearanceType::Invisibility,
-				0,
-				false,
-				true,
-				scanning_mob->CastToClient()
-			);
+		if (!mob_last_known_visible) {
+			if (scanning_mob->IsClient()) {
+				mob->SendAppearancePacket(
+					AppearanceType::Invisibility,
+					0,
+					false,
+					true,
+					scanning_mob->CastToClient()
+				);
+			}
+
 			it_mob_visible->second = true;
 			LogVisibilityDetail("Setting mob [{}] visible to scanning_mob [{}]", mob->GetCleanName(), scanning_mob->GetCleanName());
 		}
@@ -3043,28 +3050,34 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 		auto [it, inserted] = scanning_mob->m_can_see_mob.try_emplace(mob_id, false);
 		bool last_known_visible = it->second;
 
-		if (!is_on_close_list && last_known_visible && mob->IsClient()) {
-			scanning_mob->SendAppearancePacket(
-				AppearanceType::Invisibility,
-				3001,
-				false,
-				true,
-				mob->CastToClient()
-			);
+		if (!is_on_close_list && last_known_visible) {
+			if (mob->IsClient()) {
+				scanning_mob->SendAppearancePacket(
+					AppearanceType::Invisibility,
+					3001,
+					false,
+					true,
+					mob->CastToClient()
+				);
+			}
+
 			it->second = false;
 			LogVisibilityDetail("Setting mob [{}] invisible to scanning_mob [{}]", mob->GetCleanName(), scanning_mob->GetCleanName());
 		}
 
 		// Inverse: Update mob's view of scanning_mob visibility
 		auto it_mob = mob->m_can_see_mob.find(scanning_mob->GetID());
-		if (it_mob != mob->m_can_see_mob.end() && !scanning_mob->m_close_mobs.count(mob_id) && it_mob->second && scanning_mob->IsClient()) {
-			mob->SendAppearancePacket(
-				AppearanceType::Invisibility,
-				3001,
-				false,
-				true,
-				scanning_mob->CastToClient()
-			);
+		if (it_mob != mob->m_can_see_mob.end() && !scanning_mob->m_close_mobs.count(mob_id) && it_mob->second) {
+			if (scanning_mob->IsClient()) {
+				mob->SendAppearancePacket(
+					AppearanceType::Invisibility,
+					3001,
+					false,
+					true,
+					scanning_mob->CastToClient()
+				);
+			}
+
 			it_mob->second = false;
 			LogVisibilityDetail("Setting scanning_mob [{}] invisible to mob [{}]", scanning_mob->GetCleanName(), mob->GetCleanName());
 		}
