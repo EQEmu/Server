@@ -72,7 +72,6 @@ extern volatile bool RunLoops;
 #include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/keyring_repository.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
-#include "../common/repositories/account_kill_counts_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
@@ -806,29 +805,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveCharacterEXPModifier(this);
 
-	ProcessSlayerCredits();
-
 	return true;
-}
-
-void Client::ProcessSlayerCredits() {
-    int account_id = AccountID();
-
-    std::vector<AccountKillCountsRepository::AccountKillCounts> entries;
-
-    for (const auto& pair : kill_counters) {
-        AccountKillCountsRepository::AccountKillCounts entry;
-        entry.account_id = account_id;
-        entry.race_id = pair.first;
-        entry.count = pair.second;
-
-        entries.push_back(entry);
-		LogDebug("Attempting to log [{}] - [{}]", entry.race_id, entry.count);
-    }
-
-    AccountKillCountsRepository::ReplaceMany(database, entries);
-
-    kill_counters.clear();
 }
 
 CLIENTPACKET::CLIENTPACKET()

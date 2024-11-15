@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/account_kill_counts_repository.h"
 #include "queryserv.h"
 #include "dynamic_zone.h"
 #include "quest_parser_collection.h"
@@ -3240,7 +3241,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				parse->EventNPC(EVENT_KILLED_MERIT, this, m, "killed", 0);
 			}
 
-			m->CastToClient()->kill_counters[GetBaseRace()]++;
+			AccountKillCountsRepository::AccountKillCounts entry;
+			entry.account_id = m->CastToClient()->AccountID();
+			entry.race_id = GetBaseRace();
+			entry.count = AccountKillCountsRepository::GetRaceCount(database, entry.account_id, entry.race_id) + 1;
+
+			AccountKillCountsRepository::ReplaceOne(database, entry);
 		}
 	}
 

@@ -45,6 +45,25 @@ public:
 
 	// Custom extended repository methods here
 
+	static int GetRaceCount(Database& db, uint account_id, uint race_id) {
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {} = {} and {} = {} LIMIT 1",
+				BaseSelect(),
+				"account_id",
+				account_id,
+				"race_id",
+				race_id
+			)
+		);
+
+		auto row = results.begin();
+		if (results.RowCount() == 1) {
+			return row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+		}
+		return 0;
+	}
+
 };
 
 #endif //EQEMU_ACCOUNT_KILL_COUNTS_REPOSITORY_H
