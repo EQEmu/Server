@@ -4206,7 +4206,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		}
 
 		if (
-			!trade_instance->IsClassEquipable(GetClass()) ||
+			(!trade_instance->IsClassEquipable(GetClass()) && !RuleB(Bots, AllowBotEquipAnyClassGear))||
 			GetLevel() < trade_instance->GetItem()->ReqLevel ||
 			(!trade_instance->IsRaceEquipable(GetBaseRace()) && !RuleB(Bots, AllowBotEquipAnyRaceGear))
 		) {
