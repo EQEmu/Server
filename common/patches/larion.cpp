@@ -2079,7 +2079,171 @@ namespace Larion
 		s32 LavaDamage;
 		s32 MinLavaDamage;
 		*/
-		//buffer.WriteUInt8(emu->);
+		buffer.WriteUInt8(emu->sky);
+		buffer.WriteFloat(1.0f);
+		buffer.WriteFloat(emu->gravity);
+		buffer.WriteInt32(emu->lava_damage);
+		buffer.WriteInt32(emu->min_lava_damage);
+
+		/*
+		s32 TimeStringID;
+		s32 Unknown3;
+		s32 SkyLock;
+		s32 SkyLockOverride;
+		*/
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(1);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(-1);
+
+		/*
+		float SafeY;
+		float SafeX;
+		float SafeZ;
+		float SafeHeading;
+		float Ceiling;
+		float Floor;
+		*/
+
+		buffer.WriteFloat(emu->safe_y);
+		buffer.WriteFloat(emu->safe_x);
+		buffer.WriteFloat(emu->safe_z);
+		buffer.WriteFloat(emu->safe_heading);
+		buffer.WriteFloat(emu->max_z);
+		buffer.WriteFloat(emu->underworld);
+
+		/*
+		float MinClip;
+		float MaxClip;
+		s32 FallThroughWorldTeleportID;
+		*/
+		buffer.WriteFloat(emu->minclip);
+		buffer.WriteFloat(emu->maxclip);
+		buffer.WriteInt32(emu->underworld_teleport_index);
+
+		/*
+		s32 Unknown4;
+		s32 ScriptIDHour;
+		s32 ScriptIDMinute;
+		s32 ScriptIDTick;
+		s32 ScriptIDOnPlayerDeath;
+		s32 ScriptIDOnNPCDeath;
+		s32 ScriptIDPlayerEnteringZone;
+		s32 ScriptIDOnZonePop;
+		s32 ScriptIDNPCLoot;
+		s32 Unknown4b;
+		s32 ScriptIDOnFishing;
+		s32 ScriptIDOnForage;
+		s32 Unknown4c;
+		*/
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+
+		/*
+		s32 NPCAgroMaxDist;
+		*/
+		buffer.WriteInt32(600);
+
+		/*
+		s32 ForageLow;
+		s32 ForageMedium;
+		s32 ForageHigh;
+		s32 ForageSpecial;
+		s32 FishingLow;
+		s32 FishingMedium;
+		s32 FishingHigh;
+		s32 FishingRelated;
+		*/
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+
+		/*
+		s32 CanPlaceCampsite;
+		s32 CanPlaceGuildBanner;
+		s32 Unknown4d;
+		*/
+
+		buffer.WriteInt32(2);
+		buffer.WriteInt32(2);
+		buffer.WriteInt32(0);
+
+		/*
+		s32 FastRegenHP;
+		s32 FastRegenMana;
+		s32 FastRegenEndurance;
+		*/
+		buffer.WriteInt32(emu->fast_regen_hp);
+		buffer.WriteInt32(emu->fast_regen_mana);
+		buffer.WriteInt32(emu->fast_regen_endurance);
+
+		/*
+		u8 NewEngineZone;
+		u8 SkyEnabled;
+		u8 FogOnOff;
+		u8 ClimateType;
+		u8 bNoPlayerLight;
+		*/
+		buffer.WriteUInt8(0); //not sure what happens if we set this incorrectly but we probably need to add this to the zone database
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+
+		/*
+		u8 bUnknown5;
+		u8 bNoAttack;
+		u8 bAllowPVP;
+		u8 bNoEncumber;
+		u8 Unknown6;
+		u8 Unknown7;
+		*/
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+
+		/*
+		u8 bNoLevitate;
+		u8 bNoBuffExpiration;
+		u8 bDisallowManaStone;
+		u8 bNoBind;
+		u8 bNoCallOfTheHero;
+		u8 bUnknown8;
+		u8 bNoFear;
+		u8 bUnknown9;
+		*/
+
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(emu->suspend_buffs);
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+
+		auto outapp = new EQApplicationPacket(OP_NewZone, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
 
 		delete in;
 	}
