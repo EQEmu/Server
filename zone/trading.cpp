@@ -3235,7 +3235,10 @@ void Client::SendBulkBazaarTraders()
 
 void Client::DoBazaarInspect(const BazaarInspect_Struct &in)
 {
-	auto items = TraderRepository::GetWhere(database, fmt::format("item_sn = {}", in.serial_number));
+	auto items = TraderRepository::GetWhere(
+		database, fmt::format("`char_id` = '{}' AND `item_sn` = '{}'", in.trader_id, in.serial_number)
+	);
+
 	if (items.empty()) {
 		LogInfo("Failed to find item with serial number [{}]", in.serial_number);
 		return;
@@ -3304,7 +3307,7 @@ std::string Client::DetermineMoneyString(uint64 cp)
 void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicationPacket *app)
 {
 	auto in          = (TraderBuy_Struct *) app->pBuffer;
-	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number);
+	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number, tbs->trader_id);
 	if (!trader_item.id) {
 		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
 				   "<red>[{}] The Traders data was outdated.",
