@@ -13144,3 +13144,13 @@ void Client::BroadcastPositionUpdate()
 
 	entity_list.QueueCloseClients(this, &outapp, true, zone->GetMaxUpdateRange());
 }
+
+void Client::SetVisibility(Mob* mob, bool visible) {
+	mob->SendAppearancePacket(
+		AppearanceType::Invisibility,
+		visible ? m_invisibility_state : 3001, // reset back to original visibility state when visible
+		false,
+		true,
+		this
+	);
+}

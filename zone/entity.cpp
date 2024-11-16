@@ -697,7 +697,6 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	mob_list.emplace(std::pair<uint16, Mob *>(npc->GetID(), npc));
 
 	entity_list.ScanCloseMobs(npc);
-	entity_list.UpdateVisibility(npc);
 
 	if (parse->HasQuestSub(npc->GetNPCTypeID(), EVENT_SPAWN)) {
 		parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
@@ -2976,14 +2975,13 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 }
 
 BenchTimer g_vis_bench_timer;
+#define STATE_HIDDEN -1
+#define STATE_VISIBLE 1
 
-void EntityList::UpdateVisibility(Mob *scanning_mob)
-{
+void EntityList::UpdateVisibility(Mob *scanning_mob) {
 	if (!scanning_mob) {
 		return;
 	}
-
-	ScanCloseMobs(scanning_mob);
 
 	g_vis_bench_timer.reset();
 
@@ -2992,94 +2990,31 @@ void EntityList::UpdateVisibility(Mob *scanning_mob)
 		scanning_mob->m_can_see_mob.reserve(scanning_mob->m_close_mobs.size());
 	}
 
-	// Update visibility for all mobs in the close list of `scanning_mob`
-	for (auto &e : scanning_mob->m_close_mobs) {
+	// Iterate through all mobs in the zone
+	for (auto &e: mob_list) {
 		auto mob = e.second;
-		if (!mob) continue;
+		if (!mob || mob == scanning_mob) { continue; }
 
-		int mob_id = mob->GetID();
+		// Update scanning_mob's visibility of mob
+		auto   it_scanning_visible = scanning_mob->m_can_see_mob.find(mob->GetID());
+		int8_t scanning_visibility = (it_scanning_visible != scanning_mob->m_can_see_mob.end())
+			? it_scanning_visible->second : 0;
 
-		// Update visibility for `scanning_mob` to `mob`
-		auto [it_scanning_visible, inserted_scanning_visible] = scanning_mob->m_can_see_mob.try_emplace(mob_id, false);
-		bool scanning_last_known_visible = it_scanning_visible->second;
-
-		if (!scanning_last_known_visible) {
-			if (mob->IsClient()) {
-				scanning_mob->SendAppearancePacket(
-					AppearanceType::Invisibility,
-					0,
-					false,
-					true,
-					mob->CastToClient()
-				);
+		if (scanning_mob->CalculateDistance(mob) <= zone->GetMaxUpdateRange()) {
+			if (scanning_visibility != STATE_VISIBLE) { // Become visible
+				if (scanning_mob->IsClient()) {
+					scanning_mob->CastToClient()->SetVisibility(mob, true);
+				}
+				scanning_mob->m_can_see_mob[mob->GetID()] = STATE_VISIBLE;
 			}
-
-			it_scanning_visible->second = true;
-			LogVisibilityDetail("Setting scanning_mob [{}] visible to mob [{}]", scanning_mob->GetCleanName(), mob->GetCleanName());
 		}
-
-		// Now update the visibility for `mob` to `scanning_mob`
-		auto [it_mob_visible, inserted_mob_visible] = mob->m_can_see_mob.try_emplace(scanning_mob->GetID(), false);
-		bool mob_last_known_visible = it_mob_visible->second;
-
-		if (!mob_last_known_visible) {
-			if (scanning_mob->IsClient()) {
-				mob->SendAppearancePacket(
-					AppearanceType::Invisibility,
-					0,
-					false,
-					true,
-					scanning_mob->CastToClient()
-				);
+		else {
+			if (scanning_visibility != STATE_HIDDEN) { // Become invisible
+				if (scanning_mob->IsClient()) {
+					scanning_mob->CastToClient()->SetVisibility(mob, false);
+				}
+				scanning_mob->m_can_see_mob[mob->GetID()] = STATE_HIDDEN;
 			}
-
-			it_mob_visible->second = true;
-			LogVisibilityDetail("Setting mob [{}] visible to scanning_mob [{}]", mob->GetCleanName(), scanning_mob->GetCleanName());
-		}
-	}
-
-	// Check all other mobs to make invisible if they are no longer close
-	for (auto &e : mob_list) {
-		auto mob = e.second;
-		if (!mob) continue;
-
-		int mob_id = mob->GetID();
-		bool is_on_close_list = mob->m_close_mobs.find(scanning_mob->GetID()) != mob->m_close_mobs.end();
-
-		// Update scanning_mob's view of mob visibility
-		auto [it, inserted] = scanning_mob->m_can_see_mob.try_emplace(mob_id, false);
-		bool last_known_visible = it->second;
-
-		if (!is_on_close_list && last_known_visible) {
-			if (mob->IsClient()) {
-				scanning_mob->SendAppearancePacket(
-					AppearanceType::Invisibility,
-					3001,
-					false,
-					true,
-					mob->CastToClient()
-				);
-			}
-
-			it->second = false;
-			LogVisibilityDetail("Setting mob [{}] invisible to scanning_mob [{}]", mob->GetCleanName(), scanning_mob->GetCleanName());
-		}
-
-		// Inverse: Update mob's view of scanning_mob visibility
-		auto it_mob = mob->m_can_see_mob.find(scanning_mob->GetID());
-		if (it_mob != mob->m_can_see_mob.end() && !scanning_mob->m_close_mobs.count(mob_id) && it_mob->second) {
-			if (scanning_mob->IsClient()) {
-				mob->SendAppearancePacket(
-					AppearanceType::Invisibility,
-					3001,
-					false,
-					true,
-					scanning_mob->CastToClient()
-				);
-			}
-
-			it_mob->second = false;
-			LogVisibilityDetail("Setting scanning_mob [{}] invisible to mob [{}]", scanning_mob->GetCleanName(), mob->GetCleanName());
 		}
 	}
 
