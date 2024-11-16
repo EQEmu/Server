@@ -46,25 +46,28 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Clie
 {
 	float baseModifier = RuleR(AA, ModernAAScalingStartPercent);
 	int aaMinimum = RuleI(AA, ModernAAScalingAAMinimum);
-	int aaLimit = RuleI(AA, ModernAAScalingAALimit);
+	int aaLimit = RuleI(AA, ModernAAScalingAALimit) + 21;
 
 	if (RuleB(Custom, UseAAEXPVeterancy) && client) {
 		auto where_filter = fmt::format(
-							"`account_id` = '{}' AND `id` != '{}' ORDER BY `aa_points_spent` DESC LIMIT 1",
+							"`account_id` = '{}' AND `id` != '{}'",
 							client->AccountID(),
 							client->CharacterID()
 						);
 
+		int sum_earned_aa = 0;
+
 		const auto& char_data = CharacterDataRepository::GetWhere(database, where_filter);
+		for (const auto entry : char_data) {
+			sum_earned_aa += std::max(0, entry.aa_points_spent - 21 - RuleI(AA, ModernAAScalingAALimit));
+		}
 
-		if (char_data.size() == 1) {
-			int high_earned_aa = char_data[0].aa_points_spent;
-
-			if (high_earned_aa > aaLimit) {
+		if (sum_earned_aa > 0) {
+			if (sum_earned_aa > aaLimit) {
 				client->Message(Chat::Experience, "You gain additional Alternate Advancement experience through your Veterancy.");
 			}
 
-			aaLimit = std::max(aaLimit, high_earned_aa);
+			aaLimit = std::max(aaLimit, sum_earned_aa);
 		}
 	}
 
