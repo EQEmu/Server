@@ -230,6 +230,27 @@ namespace Larion {
 				uint8_t data[5];
 			};
 		};
+
+		struct Spawn_Struct_Position
+		{
+			signed y : 19;
+			signed deltaX : 13;
+
+			unsigned heading : 12;
+			signed z : 19;
+			unsigned pad1 : 1;
+
+			unsigned pitch : 12;
+			signed animation : 10;    //these might be swapped
+			signed deltaHeading : 10; //these might be swapped
+
+			signed deltaY : 13;
+			signed deltaZ : 13;
+			unsigned pad3 : 6;
+
+			signed x : 19;
+			unsigned pad4 : 13;
+		};
 #pragma pack()
 
 	};	//end namespace structs
