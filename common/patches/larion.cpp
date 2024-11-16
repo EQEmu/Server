@@ -1626,11 +1626,7 @@ namespace Larion
 			}
 
 			//write flags
-			buffer.WriteUInt8(flags.data[0]);
-			buffer.WriteUInt8(flags.data[1]);
-			buffer.WriteUInt8(flags.data[2]);
-			buffer.WriteUInt8(flags.data[3]);
-			buffer.WriteUInt8(flags.data[4]);
+			buffer.WriteStructure(flags);
 
 			/*
 			float EmitterScalingRadius;
@@ -1871,10 +1867,106 @@ namespace Larion
 			}
 
 			//u8 CPhysicsData[20];
+			structs::Spawn_Struct_Position position;
 
+			position.y = emu->y;
+			position.deltaZ = emu->deltaZ;
+			position.deltaX = emu->deltaX;
+			position.x = emu->x;
+			position.heading = emu->heading;
+			position.deltaHeading = emu->deltaHeading;
+			position.z = emu->z;
+			position.animation = emu->animation;
+			position.deltaY = emu->deltaY;
 
+			buffer.WriteStructure(position);
+
+			/*
+			if(Flags.title) {
+				char Title[];
+			}
+			*/
+			if (flags.title) {
+				buffer.WriteString(emu->title);
+			}
+
+			/*
+			if(Flags.suffix) {
+				char Suffix[];
+			}
+			*/
+			if (flags.suffix) {
+				buffer.WriteString(emu->suffix);
+			}
+
+			/*
+			u32 Unknown0x0164;
+			s32 SplineID;
+			*/
+
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+
+			/*
+			u8 Mercenary;
+			*/
+			buffer.WriteUInt8(emu->IsMercenary);
+
+			/*
+				char realEstateItemGuid[];
+				s32 RealEstateID;
+				s32 RealEstateItemId;
+			*/
+
+			buffer.WriteString("0000000000000000");
+			buffer.WriteInt32(-1);
+			buffer.WriteInt32(-1);
+
+			/*
+			s32 MercId;
+			s32 ContractorID;
+			u32 Birthdate;
+			u8 bAlwaysShowAura;
+			*/
+
+			buffer.WriteInt32(0);
+			buffer.WriteInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt8(0);
+
+			/*
+			u32 physicsEffectCount;
+			PhysicsEffect physicsEffects[physicsEffectCount];
+			*/
+			buffer.WriteUInt32(0);
+
+			//s32 SpawnStatus[6];
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+
+			if (flags.interactiveobject && emu->DestructibleUnk9 == 4) {
+				/*
+				s32 BannerIndex0;
+				s32 BannerIndex1;
+				s32 BannerTint0;
+				s32 BannerTint1;
+				*/
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+			}
+
+			auto outapp = new EQApplicationPacket(OP_ZoneEntry, buffer.size());
+			outapp->WriteData(buffer.buffer(), buffer.size());
+			dest->FastQueuePacket(&outapp, ack_req);
 		}
-			
+
+		delete in;
 	}
 
 	// DECODE methods
