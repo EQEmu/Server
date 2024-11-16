@@ -246,6 +246,8 @@ namespace Larion {
 			signed x : 19;
 			unsigned pad4 : 13;
 		};
+
+
 #pragma pack()
 
 	};	//end namespace structs

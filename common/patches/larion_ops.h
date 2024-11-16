@@ -11,6 +11,8 @@ E(OP_SpawnAppearance)
 E(OP_PlayerProfile)
 E(OP_ZoneEntry)
 E(OP_ZoneSpawns)
+E(OP_CharInventory)
+E(OP_NewZone)
 
 //list of packets we need to decode on the way in:
 D(OP_ZoneEntry)

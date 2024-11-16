@@ -1969,6 +1969,121 @@ namespace Larion
 		delete in;
 	}
 
+	ENCODE(OP_CharInventory) {
+		//consume the packet
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		if (!in->size) {
+			in->size = 4;
+			in->pBuffer = new uchar[in->size];
+			memset(in->pBuffer, 0, in->size);
+
+			dest->FastQueuePacket(&in, ack_req);
+			return;
+		}
+
+		//store away the emu struct
+		uchar* __emu_buffer = in->pBuffer;
+
+		int item_count = in->size / sizeof(EQ::InternalSerializedItem_Struct);
+		if (!item_count || (in->size % sizeof(EQ::InternalSerializedItem_Struct)) != 0) {
+			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
+				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQ::InternalSerializedItem_Struct));
+
+			delete in;
+			return;
+		}
+
+		EQ::InternalSerializedItem_Struct* eq = (EQ::InternalSerializedItem_Struct*)in->pBuffer;
+
+		auto outapp = new EQApplicationPacket(OP_CharInventory, 4);
+		dest->FastQueuePacket(&outapp, ack_req);
+
+		delete in;
+	}
+
+	ENCODE(OP_NewZone) {
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		unsigned char* __emu_buffer = in->pBuffer;
+		NewZone_Struct* emu = (NewZone_Struct*)__emu_buffer;
+
+		SerializeBuffer buffer;
+		/*
+		char Shortname[];
+		char Longname[];
+		char WeatherType[];
+		char WeatherTypeOverride[];
+		char SkyType[];
+		char SkyTypeOverride[];
+		*/
+		buffer.WriteString(emu->zone_short_name);
+		buffer.WriteString(emu->zone_long_name);
+		buffer.WriteString("");
+		buffer.WriteString("");
+		buffer.WriteString("");
+		buffer.WriteString("");
+
+		/*
+		s32 ZoneType;
+		s16 ZoneId;
+		s16 ZoneInstance;
+		float ZoneExpModifier;
+		s32 GroupLvlExpRelated;
+		s32 FilterID;
+		s32 Unknown1;
+		*/
+		buffer.WriteInt32(emu->ztype);
+		buffer.WriteInt16(emu->zone_id);
+		buffer.WriteInt16(emu->zone_instance);
+		buffer.WriteFloat(emu->zone_exp_multiplier);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+
+		//float FogDensity;
+		buffer.WriteFloat(emu->fog_density);
+
+		//WeatherState state[4];
+		for (int i = 0; i < 4; ++i) {
+			/*
+			float FogStart;
+			float FogEnd;
+			u8 FogRed;
+			u8 FogGreen;
+			u8 FogBlue;
+			u8 RainChance;
+			u8 RainDuration;
+			u8 SnowChance;
+			u8 SnowDuration;
+			*/
+
+			buffer.WriteFloat(emu->fog_minclip[i]);
+			buffer.WriteFloat(emu->fog_maxclip[i]);
+			buffer.WriteUInt8(emu->fog_red[i]);
+			buffer.WriteUInt8(emu->fog_green[i]);
+			buffer.WriteUInt8(emu->fog_blue[i]);
+			buffer.WriteUInt8(emu->rain_chance[i]);
+			buffer.WriteUInt8(emu->rain_duration[i]);
+			buffer.WriteUInt8(emu->snow_chance[i]);
+			buffer.WriteUInt8(emu->snow_duration[i]);
+			
+		}
+
+		/*
+		u8 PrecipitationType;
+		float BloomIntensity;
+		float ZoneGravity;
+		s32 LavaDamage;
+		s32 MinLavaDamage;
+		*/
+		//buffer.WriteUInt8(emu->);
+
+		delete in;
+	}
+
 	// DECODE methods
 
 	DECODE(OP_ZoneEntry)
