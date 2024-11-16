@@ -1255,7 +1255,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			e.min_status = Admin();
 			e.type       = chan_num;
 			e.to         = targetname;
-			e.from       = GetName();
+			e.from       = GetCleanName();
 			if (chan_num == ChatChannel_Guild) {
 				e.guild_id = GuildID();
 			}
@@ -12699,7 +12699,7 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 
 	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
 	//Not sure the usefulness of sending the same data twice??
-	//RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
+	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
 }
 
 void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
