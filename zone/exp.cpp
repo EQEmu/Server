@@ -46,7 +46,7 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Clie
 {
 	float baseModifier = RuleR(AA, ModernAAScalingStartPercent);
 	int aaMinimum = RuleI(AA, ModernAAScalingAAMinimum);
-	int aaLimit = RuleI(AA, ModernAAScalingAALimit) + 21;
+	int aaLimit = RuleI(AA, ModernAAScalingAALimit);
 
 	if (RuleB(Custom, UseAAEXPVeterancy) && client) {
 		auto where_filter = fmt::format(
@@ -63,10 +63,6 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Clie
 		}
 
 		if (sum_earned_aa > 0) {
-			if (sum_earned_aa > aaLimit) {
-				client->Message(Chat::Experience, "You gain additional Alternate Advancement experience through your Veterancy.");
-			}
-
 			aaLimit = std::max(aaLimit, sum_earned_aa);
 		}
 	}
@@ -107,6 +103,7 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Clie
 		"Total before the modifier %d :: NewTotal %d :: ScaleRange: %d, SpentAA: %d, RemainingAA: %d, normalizedScale: %0.3f",
 		add_aaxp, totalWithExpMod, scaleRange, earnedAA, remainingAA, normalizedScale);
 
+	client->Message(Chat::Experience, "You gain bonus Alternate Advancement experience!");
 	return totalWithExpMod;
 }
 
