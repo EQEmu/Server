@@ -1063,10 +1063,12 @@ namespace Larion
 		//PcClient begin
 		/*
 		u32 character_id;
-		u32 character_id2;
+		u16 world_id;
+		u16 reserved;
 		*/
 		out.WriteUInt32(emu->char_id);
-		out.WriteUInt32(100);
+		out.WriteUInt16(RuleI(World, Id));
+		out.WriteUInt16(0);
 
 		/*u32 name_length;*/
 		/*char name[name_length];*/
@@ -1567,44 +1569,312 @@ namespace Larion
 			{
 				SpawnSize = 3;
 			}
-			
+
+			/*
+			char Name[];
+			u32 SpawnId;
+			u8 Level;
+			float MeleeRadius;
+			*/
 			buffer.WriteString(emu->name);
 			buffer.WriteUInt32(emu->spawnId);
 			buffer.WriteUInt8(emu->level);
 			if (emu->DestructibleObject) //bounding radius: we should consider supporting this officially in the future
 			{
-				buffer.WriteFloat(10.0f); 
+				buffer.WriteFloat(10.0f);
 			}
-			else 
+			else
 			{
-				
+
 				buffer.WriteFloat(SpawnSize - 0.7f);
 			}
-			
-			//buffer.WriteUInt32(0); //should be character id
-			//buffer.WriteUInt16(RuleI(World, Id)); //world id
-			//buffer.WriteUInt16(0); //reserved
 
-			//buffer.WriteUInt8(emu->NPC); //npc/player flag
+			/*
+			EqGuid HashKey;
+			*/
+			buffer.WriteUInt32(emu->CharacterGuid.Id);
+			buffer.WriteUInt16(emu->CharacterGuid.WorldId);
+			buffer.WriteUInt16(0);
 
-			//structs::Spawn_Struct_Bitfields flags;
-			//flags.gender = emu->gender;
-			//flags.gender = emu->gender;
-			//flags.ispet = emu->is_pet;
-			//flags.afk = emu->afk;
-			//flags.anon = emu->anon;
-			//flags.gm = emu->gm;
-			//flags.sneak = 0;
-			//flags.lfg = emu->lfg;
-			//flags.invis = emu->invis;
-			//flags.linkdead = 0;
-			//flags.showhelm = emu->showhelm;
-			//flags.trader = emu->trader ? 1 : 0;
-			//flags.targetable = 1;
-			//flags.targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
-			//flags.showname = emu->show_name;
+			/*
+			u8 Type;
+			ActorFlags Flags;
+			*/
+			buffer.WriteUInt8(emu->NPC);
+
+			structs::Spawn_Struct_Bitfields flags;
+			flags.gender = emu->gender;
+			flags.ispet = emu->is_pet;
+			flags.afk = emu->afk;
+			flags.anon = emu->anon;
+			flags.gm = emu->gm;
+			flags.sneak = 0;
+			flags.lfg = emu->lfg;
+			flags.invis = emu->invis; //we need to implement this
+			flags.linkdead = 0; //on live I often see this as 1 for npcs, maybe consider adding this in the future
+			flags.showhelm = emu->showhelm;
+			flags.trader = emu->trader ? 1 : 0;
+			flags.targetable = 1;
+			flags.targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
+			flags.showname = emu->show_name;
+			flags.buyer = emu->buyer ? 1 : 0;
+			flags.title = strlen(emu->title) > 0 ? 1 : 0;
+			flags.suffix = strlen(emu->suffix) > 0 ? 1 : 0;
+
+			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure) {
+				flags.interactiveobject = 1;
+			}
+
+			//write flags
+			buffer.WriteUInt8(flags.data[0]);
+			buffer.WriteUInt8(flags.data[1]);
+			buffer.WriteUInt8(flags.data[2]);
+			buffer.WriteUInt8(flags.data[3]);
+			buffer.WriteUInt8(flags.data[4]);
+
+			/*
+			float EmitterScalingRadius;
+			s32 DefaultEmitterID;
+			*/
+
+			//we don't support this atm; wouldn't be hard to add I don't think
+			//RoF also supports this so might be worth implementing.
+			buffer.WriteFloat(1.0f);
+			buffer.WriteInt32(-1);
+
+			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure)
+			{
+				/*
+				char InteractiveObjectModelName[];
+				char InteractiveObjectName[];
+				char InteractiveObjectOtherName[];
+				*/
+
+				buffer.WriteString(emu->DestructibleModel);
+				buffer.WriteString(emu->DestructibleName2);
+				buffer.WriteString(emu->DestructibleString);
+
+				/*
+				s32 CurrIOState;
+				s32 ObjectAnimationID;
+				*/
+				buffer.WriteUInt32(emu->DestructibleAppearance);
+				buffer.WriteUInt32(emu->DestructibleUnk1);
+
+				/*
+				s32 SoundId[10];
+				*/
+				buffer.WriteUInt32(emu->DestructibleID1);
+				buffer.WriteUInt32(emu->DestructibleID2);
+				buffer.WriteUInt32(emu->DestructibleID3);
+				buffer.WriteUInt32(emu->DestructibleID4);
+				buffer.WriteUInt32(emu->DestructibleUnk2);
+				buffer.WriteUInt32(emu->DestructibleUnk3);
+				buffer.WriteUInt32(emu->DestructibleUnk4);
+				buffer.WriteUInt32(emu->DestructibleUnk5);
+				buffer.WriteUInt32(emu->DestructibleUnk6);
+				buffer.WriteUInt32(emu->DestructibleUnk7);
+				/*
+				s8 Collidable;
+				s8 ObjectType;
+				*/
+				buffer.WriteUInt8(emu->DestructibleUnk8);
+				buffer.WriteUInt8(emu->DestructibleUnk9);
+			}
+
+			/*
+			u8 PropertyCount;
+			u32 Properties[PropertyCount];
+			*/
+			//We don't actually support multiple body types yet, but we should consider it in the future
+
+			if (!emu->DestructibleObject)
+			{
+				buffer.WriteUInt8(1);
+				buffer.WriteUInt32(emu->bodytype);
+			}
+			else
+			{
+				buffer.WriteUInt8(0);
+			}
+
+			/*
+			u8 HPCurrentPct;
+			*/
+			buffer.WriteUInt8(emu->curHp);
+
+			/*
+			s8 HairColor;
+			s8 FacialHairColor;
+			s8 EyeColor1;
+			s8 EyeColor2;
+			s8 HairStyle;
+			s8 FacialHair;
+			s32 Heritage;
+			s32 Tattoo;
+			s32 Details;
+			*/
+
+			buffer.WriteUInt8(emu->haircolor);
+			buffer.WriteUInt8(emu->beardcolor);
+			buffer.WriteUInt8(emu->eyecolor1);
+			buffer.WriteUInt8(emu->eyecolor2);
+			buffer.WriteUInt8(emu->hairstyle);
+			buffer.WriteUInt8(emu->beard);
+			buffer.WriteUInt32(emu->drakkin_heritage);
+			buffer.WriteUInt32(emu->drakkin_tattoo);
+			buffer.WriteUInt32(emu->drakkin_details);
+
+			/*
+			s8 TextureType;
+			s8 Material;
+			s8 Variation;
+			s8 HeadType;
+			*/
+			buffer.WriteUInt8(emu->equip_chest2);
+			buffer.WriteUInt8(0);
+			buffer.WriteUInt8(0);
+			buffer.WriteUInt8(emu->helm);
+
+			/*
+			float Height;
+			s8 FaceStyle;
+			float MyWalkSpeed;
+			float RunSpeed;
+			s32 Race;
+			*/
+
+			buffer.WriteFloat(emu->size);
+			buffer.WriteInt8(emu->face);
+			buffer.WriteFloat(emu->walkspeed);
+			buffer.WriteFloat(emu->runspeed);
+			buffer.WriteInt32(emu->race);
+
+			/*
+			u8 HoldingAnimation;
+			u32 Deity;
+			EqGuid GuildID;
+			u32 Class;
+			*/
+
+			buffer.WriteUInt8(0);
+			buffer.WriteUInt32(emu->deity);
+			if (emu->NPC) {
+				buffer.WriteInt32(-1);
+				buffer.WriteUInt32(0);
+			}
+			else { //guilds will probably need a ton of work
+				buffer.WriteUInt32(emu->guildID);
+				buffer.WriteUInt32(0);
+			}
+			buffer.WriteUInt32(emu->class_);
+
+			/*
+			u8 PvP;
+			u8 StandState;
+			u8 Light;
+			u8 GravityBehavior;
+			*/
+
+			buffer.WriteUInt8(0);
+			buffer.WriteUInt8(emu->StandState);
+			buffer.WriteUInt8(emu->light);
+			buffer.WriteUInt8(emu->flymode);
+
+			/*
+			char LastName[];
+			*/
+			buffer.WriteString(emu->lastName);
+
+			/*
+			u8 bGuildShowAnim;
+			u8 bTempPet;
+			u32 MasterID;
+			u8 FindBits;
+			*/
+
+			buffer.WriteUInt8(emu->guild_show);
+			buffer.WriteUInt8(0);
+			buffer.WriteUInt32(emu->petOwnerId);
+			buffer.WriteUInt8(0);
+
+			/*
+			u32 PlayerState;
+			u32 NpcTintIndex;
+			u32 PrimaryTintIndex;
+			u32 SecondaryTintIndex;
+			*/
+
+			buffer.WriteUInt32(emu->PlayerState);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(0);
+
+			/*
+			u32 EncounterLockState;
+			u64 LockID;
+			*/
+
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt64(0);
+
+			//u32 SeeInvis[3];
+			if (emu->NPC) {
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+			}
+
+			if ((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
+				(emu->race == Race::VahShir) || (emu->race == Race::Froglok2) || (emu->race == Race::Drakkin)
+				)
+			{
+				/*
+				u32 ArmorColor[9];
+				*/
+				for (int k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
+				{
+					buffer.WriteUInt32(emu->equipment_tint.Slot[k].Color);
+				}
+
+				/*
+				Armor Armor[9];
+				*/
+				for (int k = EQ::textures::textureBegin; k < EQ::textures::materialCount; k++) {
+					buffer.WriteUInt32(emu->equipment.Slot[k].Material);
+					buffer.WriteUInt32(emu->equipment.Slot[k].Unknown1);
+					buffer.WriteUInt32(emu->equipment.Slot[k].EliteModel);
+					buffer.WriteUInt32(emu->equipment.Slot[k].HerosForgeModel);
+					buffer.WriteUInt32(emu->equipment.Slot[k].Unknown2);
+				}
+			}
+			else
+			{
+				//Armor Armor[3];
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+
+				buffer.WriteUInt32(emu->equipment.Primary.Material);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+
+				buffer.WriteUInt32(emu->equipment.Secondary.Material);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+				buffer.WriteUInt32(0);
+			}
+
+			//u8 CPhysicsData[20];
+
 
 		}
+			
 	}
 
 	// DECODE methods

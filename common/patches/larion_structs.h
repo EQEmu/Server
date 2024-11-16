@@ -193,37 +193,42 @@ namespace Larion {
 
 		struct Spawn_Struct_Bitfields
 		{
-			// byte 1
-			/*00*/	unsigned   gender : 2;		// Gender (0=male, 1=female, 2=monster)
-			/*02*/	unsigned   ispet : 1;			// Guessed based on observing live spawns
-			/*03*/	unsigned   afk : 1;			// 0=no, 1=afk
-			/*04*/	unsigned   anon : 2;			// 0=normal, 1=anon, 2=roleplay
-			/*06*/	unsigned   gm : 1;
-			/*07*/	unsigned   sneak : 1;
-			// byte 2
-			/*08*/	unsigned   lfg : 1;
-			/*09*/	unsigned   unk9 : 1;
-			/*10*/	unsigned   invis : 12;		// there are 3000 different (non-GM) invis levels
-			/*22*/	unsigned   linkdead : 1;		// 1 Toggles LD on or off after name. Correct for RoF2
-			/*23*/	unsigned   showhelm : 1;
-			// byte 4
-			/*24*/	unsigned   betabuffed : 1;		// Prefixes name with !
-			/*25*/	unsigned   trader : 1;
-			/*26*/	unsigned   animationonpop : 1;
-			/*27*/	unsigned   targetable : 1;
-			/*28*/	unsigned   targetable_with_hotkey : 1;
-			/*29*/	unsigned   showname : 1;
-			/*30*/	unsigned   idleanimationsoff : 1; // what we called statue?
-			/*31*/	unsigned   untargetable : 1;	// bClickThrough
-			// byte 5
-			/*32*/	unsigned   buyer : 1;
-			/*33*/	unsigned   offline : 1;
-			/*34*/	unsigned   interactiveobject : 1;
-			/*35*/	unsigned   missile : 1;
-			/*36*/	unsigned   title : 1;
-			/*37*/	unsigned   suffix : 1;
-			/*38*/	unsigned   unk38 : 1;
-			/*39*/	unsigned   unk39 : 1;
+			union {
+				struct {
+					// byte 1
+					/*00*/	unsigned   gender : 2;		// Gender (0=male, 1=female, 2=monster)
+					/*02*/	unsigned   ispet : 1;			// Guessed based on observing live spawns
+					/*03*/	unsigned   afk : 1;			// 0=no, 1=afk
+					/*04*/	unsigned   anon : 2;			// 0=normal, 1=anon, 2=roleplay
+					/*06*/	unsigned   gm : 1;
+					/*07*/	unsigned   sneak : 1;
+					// byte 2
+					/*08*/	unsigned   lfg : 1;
+					/*09*/	unsigned   unk9 : 1;
+					/*10*/	unsigned   invis : 12;		// there are 3000 different (non-GM) invis levels
+					/*22*/	unsigned   linkdead : 1;		// 1 Toggles LD on or off after name. Correct for RoF2
+					/*23*/	unsigned   showhelm : 1;
+					// byte 4
+					/*24*/	unsigned   betabuffed : 1;		// Prefixes name with !
+					/*25*/	unsigned   trader : 1;
+					/*26*/	unsigned   animationonpop : 1;
+					/*27*/	unsigned   targetable : 1;
+					/*28*/	unsigned   targetable_with_hotkey : 1;
+					/*29*/	unsigned   showname : 1;
+					/*30*/	unsigned   idleanimationsoff : 1; // what we called statue?
+					/*31*/	unsigned   untargetable : 1;	// bClickThrough
+					// byte 5
+					/*32*/	unsigned   buyer : 1;
+					/*33*/	unsigned   offline : 1;
+					/*34*/	unsigned   interactiveobject : 1;
+					/*35*/	unsigned   missile : 1;
+					/*36*/	unsigned   title : 1;
+					/*37*/	unsigned   suffix : 1;
+					/*38*/	unsigned   unk38 : 1;
+					/*39*/	unsigned   unk39 : 1;
+				};
+				uint8_t data[5];
+			};
 		};
 #pragma pack()
 
