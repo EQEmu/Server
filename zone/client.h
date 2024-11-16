@@ -1809,6 +1809,9 @@ public:
 	void RecordKilledNPCEvent(NPC *n);
 
 	uint32 GetEXPForLevel(uint16 check_level);
+
+	void SetVisibility(Mob* mob, bool visible);
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
