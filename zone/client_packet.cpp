@@ -969,6 +969,8 @@ void Client::CompleteConnect()
 	RecordStats();
 	AutoGrantAAPoints();
 
+	m_last_seen_mob_position.reserve(entity_list.GetMobList().size());
+
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());

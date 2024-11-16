@@ -571,6 +571,7 @@ public:
 	void SendAlternateAdvancementStats();
 	void ScanCloseMobs(Mob *scanning_mob);
 	void UpdateVisibility(Mob *scanning_mob);
+	void UpdateKnownPositions(Mob *scanning_mob);
 
 	void GetTrapInfo(Client* c);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);

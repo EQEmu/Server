@@ -2882,6 +2882,7 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 
 		it->second->m_close_mobs.erase(entity_id);
 		it->second->m_can_see_mob.erase(entity_id);
+		it->second->m_last_seen_mob_position.erase(entity_id);
 		++it;
 	}
 
@@ -2987,7 +2988,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 }
 
 BenchTimer g_vis_bench_timer;
-#define STATE_HIDDEN -1
+#define STATE_HIDDEN (-1)
 #define STATE_VISIBLE 1
 
 void EntityList::UpdateVisibility(Mob *scanning_mob) {

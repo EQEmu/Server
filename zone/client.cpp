@@ -13010,6 +13010,18 @@ void Client::CheckSendBulkClientPositionUpdate()
 				}
 			}
 
+			// if we have seen this mob before and it hasn't moved, skip it
+			if (m_last_seen_mob_position.contains(mob->GetID())) {
+				if (m_last_seen_mob_position[mob->GetID()] == mob->GetPosition()) {
+					LogVisibilityDetail(
+						"Mob [{}] has already been sent to client [{}] at this position, skipping",
+						mob->GetCleanName(),
+						GetCleanName()
+					);
+					continue;
+				}
+			}
+
 			mob_movement_manager.SendCommandToClients(
 				mob,
 				0.0,
