@@ -93,6 +93,7 @@ public:
 	bool	IsLeader(const char* name);
 	inline bool IsLeader(Mob* m) { return m == leader; };
 	uint8	GroupCount();
+	uint8 	GroupCountInZone();
 	uint32	GetHighestLevel();
 	uint32	GetLowestLevel();
 	void	QueuePacket(const EQApplicationPacket *app, bool ack_req = true);

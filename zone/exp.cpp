@@ -739,8 +739,8 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	safe_delete(max_upgrade_item);
 
 	if (RuleB(Custom, GroupIncentiveProgram)) {
-		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
-			int member_scale = GetGroup() ? std::max(0,(GetGroup()->GroupCount() - 2)) : 0;
+		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion)) {
+			int member_scale = GetGroup() ? std::max(0,(GetGroup()->GroupCountInZone() - 2)) : 0;
 			if (member_scale > 0) {
 				Message(Chat::Experience, fmt::format("Your item absorbs {}%% bonus energy due to your group Expedition!", member_scale).c_str());
 				new_item_experience += (new_item_experience * (static_cast<float>(member_scale) / 100.0f));
@@ -1082,8 +1082,8 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 			}
 
 			if (RuleB(Custom, GroupIncentiveProgram)) {
-				if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
-					int member_scale = (GetGroup() ? std::max(0,(GetGroup()->GroupCount() - 2)) : 0) * 25;
+				if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion)) {
+					int member_scale = (GetGroup() ? std::max(0,(GetGroup()->GroupCountInZone() - 2)) : 0) * 25;
 					if (member_scale) {
 						Message(Chat::Experience, fmt::format("You gain {}%% bonus experience for your group Expedition!", member_scale).c_str());
 						set_exp += exp_gained * (member_scale/100);

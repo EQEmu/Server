@@ -1107,6 +1107,20 @@ uint8 Group::GroupCount() {
 	return MemberCount;
 }
 
+uint8 Group::GroupCountInZone() {
+	uint8 MemberCount = 0;
+
+	for(uint8 i = 0; i < MAX_GROUP_MEMBERS; ++i)
+	{
+		if(entity_list.GetClientByName(membername[i]))
+		{
+			++MemberCount;
+		}
+	}
+
+	return MemberCount;
+}
+
 uint32 Group::GetHighestLevel()
 {
 	uint32 level = 1;
