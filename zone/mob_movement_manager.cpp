@@ -852,6 +852,7 @@ void MobMovementManager::SendCommandToClients(
 			}
 
 			c->QueuePacket(&outapp, false);
+			c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
 		}
 	}
 	else {
@@ -902,6 +903,7 @@ void MobMovementManager::SendCommandToClients(
 				}
 
 				c->QueuePacket(&outapp, false);
+				c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
 			}
 		}
 	}
