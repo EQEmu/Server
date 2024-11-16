@@ -2538,9 +2538,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	Mob* owner_or_self = killer_mob ? killer_mob->GetOwnerOrSelf() : nullptr;
 
-	std::vector<std::any> args = { corpse };
-
-	if (RuleB(Custom, GroupIncentiveProgram) && !IsCorpse() && killer_mob) {
+	if (RuleB(Custom, GroupIncentiveProgram) && killer_mob && !IsCorpse()) {
 		if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
 			auto real_killer = killer_mob->GetOwner() ? killer_mob->GetOwner() : killer_mob;
 
@@ -3257,6 +3255,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			}
 		}
 	}
+
+	std::vector<std::any> args = { corpse };
 
 	parse->EventMercNPC(
 		EVENT_DEATH_COMPLETE,
