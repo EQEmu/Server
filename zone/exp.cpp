@@ -59,7 +59,7 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Clie
 
 		const auto& char_data = CharacterDataRepository::GetWhere(database, where_filter);
 		for (const auto entry : char_data) {
-			sum_earned_aa += std::max(0, entry.aa_points_spent - 21 - RuleI(AA, ModernAAScalingAALimit));
+			sum_earned_aa += std::max(0, static_cast<int>(entry.aa_points_spent - RuleI(AA, ModernAAScalingAALimit)));
 		}
 
 		if (sum_earned_aa > 0) {
