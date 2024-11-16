@@ -1073,7 +1073,7 @@ public:
 
 	EQ::LightSourceProfile* GetLightProfile() { return &m_Light; }
 
-    uint16 GetPetID(uint8 idx = 0) const;            // Get the ID of the pet at the given index (default is index 0)
+    uint16 GetPetID(uint8 idx = 0);            // Get the ID of the pet at the given index (default is index 0)
     Mob* GetPet(uint8 idx = 0);                      // Get the Mob instance of the pet at the given index (default is index 0)
 	std::vector<Mob*> GetAllPets();  			 // Returns a vector of all Mob* pets associated with this Mob
 	bool RemovePetByIndex(uint8 idx = 0);            // Remove the pet at the given index (default is index 0)

@@ -902,7 +902,8 @@ void Mob::ConfigurePetWindow(Mob* selected_pet) {
 }
 
 // Get the ID of the pet at the given index
-uint16 Mob::GetPetID(uint8 idx) const {
+uint16 Mob::GetPetID(uint8 idx) {
+	ValidatePetList();
     // Check if the index is greater than or equal to the pet limit
     if (idx >= RuleI(Custom, AbsolutePetLimit)) {
         return 0;  // Return 0 if the index exceeds the pet limit
