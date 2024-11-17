@@ -181,21 +181,6 @@ public:
 		m_pos += len;
 	}
 
-	template<typename T>
-	void WriteStructurePtr(T *value) {
-		auto type_size = sizeof(T);
-
-		if (m_pos + type_size > m_capacity)
-			Grow(m_capacity + type_size);
-		memcpy(m_buffer + m_pos, value, type_size);
-		m_pos += sizeof(type_size);
-	}
-
-	template<typename T>
-	void WriteStructure(T& value) {
-		WriteStructurePtr(&value);
-	}
-
 	size_t size() const { return m_pos; }
 	size_t length() const { return size(); }
 	size_t capacity() const { return m_capacity; }

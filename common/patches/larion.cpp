@@ -1603,6 +1603,8 @@ namespace Larion
 			buffer.WriteUInt8(emu->NPC);
 
 			structs::Spawn_Struct_Bitfields flags;
+			memset(&flags, 0, sizeof(structs::Spawn_Struct_Bitfields));
+
 			flags.gender = emu->gender;
 			flags.ispet = emu->is_pet;
 			flags.afk = emu->afk;
@@ -1626,7 +1628,10 @@ namespace Larion
 			}
 
 			//write flags
-			buffer.WriteStructure(flags);
+			//buffer.WriteStructure(flags);
+			for (int j = 0; j < 5; ++j) {
+				buffer.WriteUInt8(flags.raw[j]);
+			}
 
 			/*
 			float EmitterScalingRadius;
@@ -1868,6 +1873,7 @@ namespace Larion
 
 			//u8 CPhysicsData[20];
 			structs::Spawn_Struct_Position position;
+			memset(&position, 0, sizeof(structs::Spawn_Struct_Position));
 
 			position.y = emu->y;
 			position.deltaZ = emu->deltaZ;
@@ -1879,7 +1885,10 @@ namespace Larion
 			position.animation = emu->animation;
 			position.deltaY = emu->deltaY;
 
-			buffer.WriteStructure(position);
+			//buffer.WriteStructure(position);
+			for (int j = 0; j < 5; ++j) {
+				buffer.WriteUInt32(position.raw[j]);
+			}
 
 			/*
 			if(Flags.title) {
