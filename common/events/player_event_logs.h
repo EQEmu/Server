@@ -118,6 +118,9 @@ private:
 	void ProcessBatchQueue();
 	void ProcessRetentionTruncation();
 	void SetSettingsDefaults();
+
+public:
+	std::map<PlayerEvent::EventType, EtlSettings> &GetEtlSettings() { return m_etl_settings;}
 };
 
 extern PlayerEventLogs player_event_logs;
