@@ -1278,12 +1278,22 @@ void PlayerEventLogs::SetSettingsDefaults()
 
 void PlayerEventLogs::LoadEtlIds()
 {
+	auto e = [&](auto p) -> bool {
+		for (PlayerEventLogSettingsRepository::PlayerEventLogSettings const& c : m_settings) {
+			if(c.id == p) {
+				return c.etl_enabled ? true : false;
+			}
+		}
+
+		return false;
+	};
+
 	m_etl_settings.clear();
 	m_etl_settings = {
 		{
 			PlayerEvent::LOOT_ITEM,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::LOOT_ITEM),
 				.table_name = "player_event_loot_items",
 				.next_id = PlayerEventLootItemsRepository::GetMaxId(*m_database) + 1
 			}
@@ -1291,7 +1301,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::MERCHANT_SELL,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::MERCHANT_SELL),
 				.table_name = "player_event_merchant_sell",
 				.next_id = BasePlayerEventMerchantSellRepository::GetMaxId(*m_database) + 1
 			}
@@ -1299,7 +1309,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::MERCHANT_PURCHASE,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::MERCHANT_PURCHASE),
 				.table_name = "player_event_merchant_purchase",
 				.next_id = PlayerEventMerchantPurchaseRepository::GetMaxId(*m_database) + 1
 			}
@@ -1307,7 +1317,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::NPC_HANDIN,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::NPC_HANDIN),
 				.table_name = "player_event_npc_handin",
 				.next_id = PlayerEventNpcHandinRepository::GetMaxId(*m_database) + 1
 			}
@@ -1315,7 +1325,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::TRADE,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::TRADE),
 				.table_name = "player_event_trade",
 				.next_id = PlayerEventTradeRepository::GetMaxId(*m_database) + 1
 			}
@@ -1323,7 +1333,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::SPEECH,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::SPEECH),
 				.table_name = "player_event_speech",
 				.next_id = PlayerEventSpeechRepository::GetMaxId(*m_database) + 1
 			}
@@ -1331,7 +1341,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::KILLED_NPC,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::KILLED_NPC),
 				.table_name = "player_event_killed_npc",
 				.next_id = PlayerEventKilledNpcRepository::GetMaxId(*m_database) + 1
 			}
@@ -1339,7 +1349,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::KILLED_NAMED_NPC,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::KILLED_NAMED_NPC),
 				.table_name = "player_event_killed_named_npc",
 				.next_id = PlayerEventKilledNamedNpcRepository::GetMaxId(*m_database) + 1
 			}
@@ -1347,7 +1357,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::KILLED_RAID_NPC,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::KILLED_RAID_NPC),
 				.table_name = "player_event_killed_raid_npc",
 				.next_id = PlayerEventKilledRaidNpcRepository::GetMaxId(*m_database) + 1
 			}
@@ -1355,7 +1365,7 @@ void PlayerEventLogs::LoadEtlIds()
 		{
 			PlayerEvent::AA_PURCHASE,
 			{
-				.enabled = true,
+				.enabled = e(PlayerEvent::AA_PURCHASE),
 				.table_name = "player_event_aa_purchase",
 				.next_id = PlayerEventAaPurchaseRepository::GetMaxId(*m_database) + 1
 			}
