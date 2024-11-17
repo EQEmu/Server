@@ -257,6 +257,46 @@ namespace Larion {
 			};
 		};
 
+		struct Door_Struct
+		{
+			/*000*/ char name[32];
+			/*032*/ float DefaultY;
+			/*036*/ float DefaultX;
+			/*040*/ float DefaultZ;
+			/*044*/ float DefaultHeading;
+			/*048*/ uint32 DefaultDoorAngle; //rof2's incline
+			/*052*/ float Y; //most (all I've seen?) doors match the defaults here
+			/*056*/ float X;
+			/*060*/ float Z;
+			/*064*/ float Heading;
+			/*068*/ float DoorAngle; //not sure if this is actually a float; it might be a uint32 like DefaultDoorAngle
+			/*072*/ uint32 ScaleFactor; //rof2's size
+			/*076*/ uint32 Unknown76; //client doesn't seem to read this
+			/*080*/ uint8 Id; //doorid
+			/*081*/ uint8 Type; //opentype
+			/*082*/ uint8 State; //state_at_spawn
+			/*083*/ uint8 DefaultState; //invert_state
+			/*084*/ int32 SpellId; //door_param
+			/*088*/ uint32 AdventureDoorId;
+			/*092*/ uint32 DynDoorID;
+			/*096*/ uint32 RealEstateDoorID;
+			/*100*/ uint8 bHasScript;
+			/*101*/ uint8 bUsable; //1 if clickable
+			/*102*/ uint8 bRemainOpen;
+			/*103*/ uint8 bVisible; //1 is visible
+			/*104*/ uint8 bHeadingChanged;
+			/*105*/ uint8 padding1[3];
+			/*108*/ float TopSpeed1;
+			/*112*/ float TopSpeed2;
+			/*116*/ uint8 bNeedsTimeStampSet;
+			/*117*/ uint8 padding2[3];
+			/*120*/ float unknownFloat1;
+			/*124*/ float unknownFloat2;
+			/*128*/ uint8 unknownByte1;
+			/*129*/ uint8 padding3[3];
+			/*132*/
+		};
+
 
 #pragma pack()
 

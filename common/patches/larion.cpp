@@ -489,42 +489,42 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
-	//ENCODE(OP_SpawnAppearance)
-	//{
-	//	EQApplicationPacket* in = *p;
-	//	*p = nullptr;
-	//
-	//	unsigned char* emu_buffer = in->pBuffer;
-	//
-	//	SpawnAppearance_Struct* sas = (SpawnAppearance_Struct*)emu_buffer;
-	//
-	//	if (sas->type != AppearanceType::Size)
-	//	{
-	//		//larion struct is different than rof2's but the idea is the same
-	//		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
-	//		structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
-	//
-	//		eq->spawn_id = sas->spawn_id;
-	//		eq->type = sas->type;
-	//		eq->parameter = sas->parameter;
-	//
-	//		dest->FastQueuePacket(&outapp, ack_req);
-	//		delete in;
-	//		return;
-	//	}
-	//
-	//	auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
-	//
-	//	ChangeSize_Struct* css = (ChangeSize_Struct*)outapp->pBuffer;
-	//
-	//	css->EntityID = sas->spawn_id;
-	//	css->Size = (float)sas->parameter;
-	//	css->Unknown08 = 0;
-	//	css->Unknown12 = 1.0f;
-	//
-	//	dest->FastQueuePacket(&outapp, ack_req);
-	//	delete in;
-	//}
+	ENCODE(OP_SpawnAppearance)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+	
+		unsigned char* emu_buffer = in->pBuffer;
+	
+		SpawnAppearance_Struct* sas = (SpawnAppearance_Struct*)emu_buffer;
+	
+		if (sas->type != AppearanceType::Size)
+		{
+			//larion struct is different than rof2's but the idea is the same
+			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
+			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
+	
+			eq->spawn_id = sas->spawn_id;
+			eq->type = sas->type;
+			eq->parameter = sas->parameter;
+	
+			dest->FastQueuePacket(&outapp, ack_req);
+			delete in;
+			return;
+		}
+	
+		auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
+	
+		ChangeSize_Struct* css = (ChangeSize_Struct*)outapp->pBuffer;
+	
+		css->EntityID = sas->spawn_id;
+		css->Size = (float)sas->parameter;
+		css->Unknown08 = 0;
+		css->Unknown12 = 1.0f;
+	
+		dest->FastQueuePacket(&outapp, ack_req);
+		delete in;
+	}
 
 	ENCODE(OP_PlayerProfile) {
 		EQApplicationPacket* in = *p;
@@ -2257,18 +2257,37 @@ namespace Larion
 		delete in;
 	}
 
-	ENCODE(OP_SpawnAppearance)
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-		delete in;
-	}
-
 	ENCODE(OP_SpawnDoor)
 	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-		delete in;
+		SETUP_VAR_ENCODE(Door_Struct);
+		int door_count = __packet->size / sizeof(Door_Struct);
+		int total_length = door_count * sizeof(structs::Door_Struct);
+		ALLOC_VAR_ENCODE(structs::Door_Struct, total_length);
+
+		int r;
+		for (r = 0; r < door_count; r++) {
+		//	strncpy(eq[r].name, emu[r].name, sizeof(eq[r].name));
+		//	eq[r].xPos = emu[r].xPos;
+		//	eq[r].yPos = emu[r].yPos;
+		//	eq[r].zPos = emu[r].zPos;
+		//	eq[r].heading = emu[r].heading;
+		//	eq[r].incline = emu[r].incline;
+		//	eq[r].size = emu[r].size;
+		//	eq[r].doorId = emu[r].doorId;
+		//	eq[r].opentype = emu[r].opentype;
+		//	eq[r].state_at_spawn = emu[r].state_at_spawn;
+		//	eq[r].invert_state = emu[r].invert_state;
+		//	eq[r].door_param = emu[r].door_param;
+		//	eq[r].unknown0080 = 0;
+		//	eq[r].unknown0081 = 1; // Both must be 1 to allow clicking doors
+		//	eq[r].unknown0082 = 0;
+		//	eq[r].unknown0083 = 1; // Both must be 1 to allow clicking doors
+		//	eq[r].unknown0084 = 0;
+		//	eq[r].unknown0085 = 0;
+		//	eq[r].unknown0086 = 0;
+		}
+
+		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_GroundSpawn)
