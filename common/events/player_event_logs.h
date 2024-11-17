@@ -1,7 +1,6 @@
 #ifndef EQEMU_PLAYER_EVENT_LOGS_H
 #define EQEMU_PLAYER_EVENT_LOGS_H
 
-#include <any>
 #include <cereal/archives/json.hpp>
 #include <mutex>
 #include "../json/json_archive_single_line.h"

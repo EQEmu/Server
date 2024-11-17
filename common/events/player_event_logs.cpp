@@ -132,9 +132,25 @@ void PlayerEventLogs::ProcessBatchQueue()
 		return;
 	}
 
+	std::map<uint32, uint32> counter{};
+	for (auto const& e: m_record_batch_queue) {
+		counter[e.event_type_id]++;
+	}
+
+
 	BenchTimer benchmark;
 
 	EtlQueues etl_queues{};
+	etl_queues.trade.reserve(counter[PlayerEvent::TRADE] ? counter[PlayerEvent::TRADE] : 0);
+	etl_queues.speech.reserve(counter[PlayerEvent::SPEECH] ? counter[PlayerEvent::SPEECH] : 0);
+	etl_queues.loot_items.reserve(counter[PlayerEvent::LOOT_ITEM] ? counter[PlayerEvent::LOOT_ITEM] : 0);
+	etl_queues.killed_npc.reserve(counter[PlayerEvent::KILLED_NPC] ? counter[PlayerEvent::KILLED_NPC] : 0);
+	etl_queues.npc_handin.reserve(counter[PlayerEvent::NPC_HANDIN] ? counter[PlayerEvent::NPC_HANDIN] : 0);
+	etl_queues.aa_purchase.reserve(counter[PlayerEvent::AA_PURCHASE] ? counter[PlayerEvent::AA_PURCHASE] : 0);
+	etl_queues.merchant_sell.reserve(counter[PlayerEvent::MERCHANT_SELL] ? counter[PlayerEvent::MERCHANT_SELL] : 0);
+	etl_queues.killed_raid_npc.reserve(counter[PlayerEvent::KILLED_RAID_NPC] ? counter[PlayerEvent::KILLED_RAID_NPC] : 0);
+	etl_queues.killed_named_npc.reserve(counter[PlayerEvent::KILLED_NAMED_NPC] ? counter[PlayerEvent::KILLED_NAMED_NPC] : 0);
+	etl_queues.merchant_purchase.reserve(counter[PlayerEvent::MERCHANT_PURCHASE] ? counter[PlayerEvent::MERCHANT_PURCHASE] : 0);
 
 	for (auto &r:m_record_batch_queue) {
 		if (m_settings[r.event_type_id].etl_enabled) {
@@ -259,6 +275,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 					}
 
 					if (!in.handin_items.empty()) {
+						etl_queues.npc_handin_entries.reserve(etl_queues.npc_handin_entries.size() + in.handin_items.size());
 						for (auto const &i: in.handin_items) {
 							out_entries.charges                    = i.charges;
 							out_entries.evolve_amount              = 0;
@@ -285,6 +302,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 					}
 
 					if (!in.return_items.empty()) {
+						etl_queues.npc_handin_entries.reserve(etl_queues.npc_handin_entries.size() + in.return_items.size());
 						for (auto const &i: in.handin_items) {
 							out_entries.charges                    = i.charges;
 							out_entries.evolve_amount              = 0;
@@ -343,6 +361,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 					}
 
 					if (!in.character_1_give_items.empty()) {
+						etl_queues.trade_entries.reserve(etl_queues.trade_entries.size() + in.character_1_give_items.size());
 						for (auto const &i: in.character_1_give_items) {
 							out_entries.char_id               = in.character_1_id;
 							out_entries.charges               = i.charges;
@@ -363,6 +382,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 					}
 
 					if (!in.character_2_give_items.empty()) {
+						etl_queues.trade_entries.reserve(etl_queues.trade_entries.size() + in.character_2_give_items.size());
 						for (auto const &i: in.character_2_give_items) {
 							out_entries.char_id               = in.character_2_id;
 							out_entries.charges               = i.charges;
@@ -1295,7 +1315,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::LOOT_ITEM),
 				.table_name = "player_event_loot_items",
-				.next_id = PlayerEventLootItemsRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventLootItemsRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1303,7 +1323,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::MERCHANT_SELL),
 				.table_name = "player_event_merchant_sell",
-				.next_id = BasePlayerEventMerchantSellRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventMerchantSellRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1311,7 +1331,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::MERCHANT_PURCHASE),
 				.table_name = "player_event_merchant_purchase",
-				.next_id = PlayerEventMerchantPurchaseRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventMerchantPurchaseRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1319,7 +1339,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::NPC_HANDIN),
 				.table_name = "player_event_npc_handin",
-				.next_id = PlayerEventNpcHandinRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventNpcHandinRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1327,7 +1347,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::TRADE),
 				.table_name = "player_event_trade",
-				.next_id = PlayerEventTradeRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventTradeRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1335,7 +1355,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::SPEECH),
 				.table_name = "player_event_speech",
-				.next_id = PlayerEventSpeechRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventSpeechRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1343,7 +1363,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::KILLED_NPC),
 				.table_name = "player_event_killed_npc",
-				.next_id = PlayerEventKilledNpcRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventKilledNpcRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1351,7 +1371,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::KILLED_NAMED_NPC),
 				.table_name = "player_event_killed_named_npc",
-				.next_id = PlayerEventKilledNamedNpcRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventKilledNamedNpcRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1359,7 +1379,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::KILLED_RAID_NPC),
 				.table_name = "player_event_killed_raid_npc",
-				.next_id = PlayerEventKilledRaidNpcRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventKilledRaidNpcRepository::GetNextAutoIncrementId(*m_database)
 			}
 		},
 		{
@@ -1367,7 +1387,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::AA_PURCHASE),
 				.table_name = "player_event_aa_purchase",
-				.next_id = PlayerEventAaPurchaseRepository::GetMaxId(*m_database) + 1
+				.next_id = PlayerEventAaPurchaseRepository::GetNextAutoIncrementId(*m_database)
 			}
 		}
 	};
