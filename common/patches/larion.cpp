@@ -489,42 +489,42 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_SpawnAppearance)
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-
-		unsigned char* emu_buffer = in->pBuffer;
-
-		SpawnAppearance_Struct* sas = (SpawnAppearance_Struct*)emu_buffer;
-
-		if (sas->type != AppearanceType::Size)
-		{
-			//larion struct is different than rof2's but the idea is the same
-			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
-			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
-
-			eq->spawn_id = sas->spawn_id;
-			eq->type = sas->type;
-			eq->parameter = sas->parameter;
-
-			dest->FastQueuePacket(&outapp, ack_req);
-			delete in;
-			return;
-		}
-
-		auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
-
-		ChangeSize_Struct* css = (ChangeSize_Struct*)outapp->pBuffer;
-
-		css->EntityID = sas->spawn_id;
-		css->Size = (float)sas->parameter;
-		css->Unknown08 = 0;
-		css->Unknown12 = 1.0f;
-
-		dest->FastQueuePacket(&outapp, ack_req);
-		delete in;
-	}
+	//ENCODE(OP_SpawnAppearance)
+	//{
+	//	EQApplicationPacket* in = *p;
+	//	*p = nullptr;
+	//
+	//	unsigned char* emu_buffer = in->pBuffer;
+	//
+	//	SpawnAppearance_Struct* sas = (SpawnAppearance_Struct*)emu_buffer;
+	//
+	//	if (sas->type != AppearanceType::Size)
+	//	{
+	//		//larion struct is different than rof2's but the idea is the same
+	//		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
+	//		structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
+	//
+	//		eq->spawn_id = sas->spawn_id;
+	//		eq->type = sas->type;
+	//		eq->parameter = sas->parameter;
+	//
+	//		dest->FastQueuePacket(&outapp, ack_req);
+	//		delete in;
+	//		return;
+	//	}
+	//
+	//	auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
+	//
+	//	ChangeSize_Struct* css = (ChangeSize_Struct*)outapp->pBuffer;
+	//
+	//	css->EntityID = sas->spawn_id;
+	//	css->Size = (float)sas->parameter;
+	//	css->Unknown08 = 0;
+	//	css->Unknown12 = 1.0f;
+	//
+	//	dest->FastQueuePacket(&outapp, ack_req);
+	//	delete in;
+	//}
 
 	ENCODE(OP_PlayerProfile) {
 		EQApplicationPacket* in = *p;
@@ -2245,6 +2245,27 @@ namespace Larion
 		outapp->WriteData(buffer.buffer(), buffer.size());
 		dest->FastQueuePacket(&outapp, ack_req);
 
+		delete in;
+	}
+
+	ENCODE(OP_SpawnAppearance)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		delete in;
+	}
+
+	ENCODE(OP_SpawnDoor)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		delete in;
+	}
+
+	ENCODE(OP_GroundSpawn)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
 		delete in;
 	}
 
