@@ -42,6 +42,17 @@ public:
 	 * method that can be re-used easily elsewhere especially if it can use a base repository
 	 * method and encapsulate filters there
 	 */
+	static int64 GetNextAutoIncrementId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT AUTO_INCREMENT FROM information_schema.tables WHERE TABLE_NAME = '{}';",
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
 };
 
 #endif //EQEMU_PLAYER_EVENT_LOOT_ITEMS_REPOSITORY_H

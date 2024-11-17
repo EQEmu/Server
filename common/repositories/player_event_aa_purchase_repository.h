@@ -44,7 +44,17 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int64 GetNextAutoIncrementId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT AUTO_INCREMENT FROM information_schema.tables WHERE TABLE_NAME = '{}';",
+				TableName()
+			)
+		);
 
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
 };
 
 #endif //EQEMU_PLAYER_EVENT_AA_PURCHASE_REPOSITORY_H
