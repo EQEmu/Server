@@ -376,7 +376,9 @@ int main(int argc, char **argv)
 	);
 
 	Timer player_event_process_timer(1000);
-	player_event_logs.SetDatabase(&database)->Init();
+	if (player_event_logs.LoadDatabaseConnection()) {
+		player_event_logs.Init();
+	}
 
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();

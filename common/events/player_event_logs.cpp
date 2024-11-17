@@ -1392,3 +1392,29 @@ void PlayerEventLogs::LoadEtlIds()
 		}
 	};
 }
+
+bool PlayerEventLogs::LoadDatabaseConnection()
+{
+	const auto c = EQEmuConfig::get();
+
+	LogInfo(
+		"Connecting to MySQL for PlayerEvents [{}]@[{}]:[{}]",
+		c->DatabaseUsername.c_str(),
+		c->DatabaseHost.c_str(),
+		c->DatabasePort
+	);
+
+	if (!player_event_database.Connect(
+		c->DatabaseHost.c_str(),
+		c->DatabaseUsername.c_str(),
+		c->DatabasePassword.c_str(),
+		c->DatabaseDB.c_str(),
+		c->DatabasePort
+	)) {
+		LogError("Cannot continue without a database connection for player events.");
+		return false;
+	}
+
+	SetDatabase(&player_event_database);
+	return true;
+}

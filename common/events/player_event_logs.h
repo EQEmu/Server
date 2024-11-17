@@ -6,6 +6,7 @@
 #include "../json/json_archive_single_line.h"
 #include "../servertalk.h"
 #include "../timer.h"
+#include "../eqemu_config.h"
 
 #include "../repositories/player_event_log_settings_repository.h"
 #include "../repositories/player_event_logs_repository.h"
@@ -26,7 +27,10 @@
 
 class PlayerEventLogs {
 public:
+	Database player_event_database{};
+
 	void Init();
+	bool LoadDatabaseConnection();
 	void ReloadSettings();
 	void LoadEtlIds();
 	PlayerEventLogs *SetDatabase(Database *db);
