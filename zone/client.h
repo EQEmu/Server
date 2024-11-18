@@ -2085,6 +2085,9 @@ public:
 	void SetLockSavePosition(bool lock_save_position);
 
 	PetInfo m_petinfoextra[MAXPETS]; // Hacky.
+
+	bool FancyModels = true;
+
 private:
 
 	PlayerProfile_Struct m_pp;

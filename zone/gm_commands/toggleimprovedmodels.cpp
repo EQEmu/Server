@@ -6,9 +6,11 @@ void command_toggleimprovedmodels(Client *c, const Seperator *sep)
 
 	if (cur_val.empty()) {
 		c->SetBucket("DisableFancyModels", "I have no taste.");
+		c->FancyModels = false;
 		c->Message(Chat::System, "You have disabled improved models. Please immediately use #tim to restore proper function.");
 	} else {
 		c->DeleteBucket("DisableFancyModels");
+		c->FancyModels = true;
 		c->Message(Chat::System, "You have regained your senses and re-enabled improved models. Never use this command again.");
 	}
 
