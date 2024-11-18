@@ -2883,6 +2883,7 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 		it->second->m_close_mobs.erase(entity_id);
 		it->second->m_can_see_mob.erase(entity_id);
 		it->second->m_last_seen_mob_position.erase(entity_id);
+
 		++it;
 	}
 

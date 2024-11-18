@@ -122,7 +122,11 @@ bool Client::Process() {
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
 		if (!IsMoving() && m_position_update_timer.Check()) {
-			CastToClient()->BroadcastPositionUpdate();
+			if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
+				CastToClient()->BroadcastPositionUpdate();
+			} else {
+				SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
+			}
 		}
 
 		if (mana_timer.Check())
@@ -285,7 +289,7 @@ bool Client::Process() {
 			entity_list.ScanCloseMobs(this);
 		}
 
-		if (m_see_close_mobs_timer.Check()) {
+		if (m_see_close_mobs_timer.Check() && RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
 			entity_list.UpdateVisibility(this);
 		}
 
