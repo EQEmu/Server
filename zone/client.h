@@ -2088,6 +2088,8 @@ public:
 	void SetLockSavePosition(bool lock_save_position);
 
 	PetInfo m_petinfoextra[MAXPETS]; // Hacky.
+
+	int m_fancy_models = -1;
 private:
 
 	PlayerProfile_Struct m_pp;
