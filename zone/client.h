@@ -2086,7 +2086,7 @@ public:
 
 	PetInfo m_petinfoextra[MAXPETS]; // Hacky.
 
-	bool FancyModels = true;
+	bool m_fancy_models;
 
 private:
 

@@ -1647,9 +1647,9 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 	if (filter != FilterNone && GetFilter(filter) == FilterHide) {
 		return;
 	}
-
-	if (app->GetOpcode() == OP_NewSpawn && FancyModels) {
-		auto copy = app->Copy();
+	/*
+	if (app->GetOpcode() == OP_NewSpawn && m_fancy_models) {
+		EQApplicationPacket* copy = app->Copy();
 		safe_delete(app);
 		app = copy;
 
@@ -1657,6 +1657,8 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 
 		FixModel(&ns->spawn);
 	}
+	*/
+
 
 	if (client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED) {
 		AddPacket(app, ack_req);
@@ -1677,8 +1679,9 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
 
+	/*
 	// This is never sent to multiple clients at once, and so we can just mangle the original
-	if ((*app)->GetOpcode() == OP_ZoneSpawns && FancyModels) {
+	if ((*app)->GetOpcode() == OP_ZoneSpawns && m_fancy_models) {
 		uint32 numSpawns = (*app)->Size() / sizeof(NewSpawn_Struct);
 		NewSpawn_Struct* spawnArray = reinterpret_cast<NewSpawn_Struct*>((*app)->pBuffer);
 
@@ -1688,6 +1691,7 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 			FixModel(&data.spawn);
 		}
 	}
+	*/
 
 	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {

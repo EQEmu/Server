@@ -1396,6 +1396,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 			else {
 				memset(&ns, 0, sizeof(NewSpawn_Struct));
 				spawn->FillSpawnStruct(&ns, client);
+
 				bulk_zone_spawn_packet->AddSpawn(&ns);
 			}
 
@@ -4820,12 +4821,12 @@ void EntityList::SendZoneAppearance(Client *c)
 				continue;
 			}
 
-			float cur_size 	= !(c->FancyModels) ? cur->GetSize() : cur->FixTIMSize(cur->GetRace(), cur->GetSize());
+			float cur_size 	= cur->GetSize();
 
 			if (cur->GetAppearance() != eaStanding) {
 				cur->SendAppearancePacket(AppearanceType::Animation, cur->GetAppearanceValue(cur->GetAppearance()), false, true, c);
 			}
-			if (cur->GetSize() != cur->GetBaseSize() && !c->FancyModels) {
+			if (cur->GetSize() != cur->GetBaseSize()) {
 				cur->SendAppearancePacket(AppearanceType::Size, cur->GetSize(), false, true, c);
 			}
 		}
