@@ -2297,6 +2297,28 @@ namespace Larion
 	{
 		EQApplicationPacket* in = *p;
 		*p = nullptr;
+		Object_Struct* emu = (Object_Struct*)in->pBuffer;
+
+		SerializeBuffer buffer;
+		buffer.WriteUInt32(emu->drop_id);
+		buffer.WriteString(emu->object_name);
+		buffer.WriteUInt16(emu->zone_id);
+		buffer.WriteUInt16(emu->zone_instance);
+		buffer.WriteUInt32(emu->drop_id); //this is some other sub but it's okay to duplicate
+		buffer.WriteUInt32(0); //expires
+		buffer.WriteFloat(emu->heading);
+		buffer.WriteFloat(emu->tilt_x);
+		buffer.WriteFloat(emu->tilt_y);
+		buffer.WriteFloat(emu->size != 0 && (float)emu->size < 5000.f ? (float)((float)emu->size / 100.0f) : 1.f); //size, with weird peq hack
+		buffer.WriteFloat(emu->y);
+		buffer.WriteFloat(emu->x);
+		buffer.WriteFloat(emu->z);
+		buffer.WriteFloat(emu->object_type); //weight
+
+		auto outapp = new EQApplicationPacket(OP_GroundSpawn, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
+
 		delete in;
 	}
 
