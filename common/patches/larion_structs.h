@@ -297,6 +297,23 @@ namespace Larion {
 			/*132*/
 		};
 
+		struct ZonePoint_Entry {
+			/*00*/ uint32 iterator;
+			/*04*/ float y;
+			/*08*/ float x;
+			/*12*/ float z;
+			/*16*/ float heading;
+			/*20*/ uint16 zoneid;
+			/*22*/ uint16 zoneinstance;
+			/*24*/ uint32 unknown024;
+			/*28*/ uint32 unknown028;
+			/*32*/
+		};
+
+		struct ZonePoints {
+			/*00*/ uint32 count;
+			/*04*/ struct ZonePoint_Entry zpe[0]; // Always add one extra to the end after all zonepoints
+		};
 
 #pragma pack()
 
