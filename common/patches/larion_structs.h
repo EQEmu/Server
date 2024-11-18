@@ -276,7 +276,7 @@ namespace Larion {
 			/*081*/ uint8 Type; //opentype
 			/*082*/ uint8 State; //state_at_spawn
 			/*083*/ uint8 DefaultState; //invert_state
-			/*084*/ int32 SpellId; //door_param
+			/*084*/ int32 Param; //door_param
 			/*088*/ uint32 AdventureDoorId;
 			/*092*/ uint32 DynDoorID;
 			/*096*/ uint32 RealEstateDoorID;

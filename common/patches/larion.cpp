@@ -2266,25 +2266,28 @@ namespace Larion
 
 		int r;
 		for (r = 0; r < door_count; r++) {
-		//	strncpy(eq[r].name, emu[r].name, sizeof(eq[r].name));
-		//	eq[r].xPos = emu[r].xPos;
-		//	eq[r].yPos = emu[r].yPos;
-		//	eq[r].zPos = emu[r].zPos;
-		//	eq[r].heading = emu[r].heading;
-		//	eq[r].incline = emu[r].incline;
-		//	eq[r].size = emu[r].size;
-		//	eq[r].doorId = emu[r].doorId;
-		//	eq[r].opentype = emu[r].opentype;
-		//	eq[r].state_at_spawn = emu[r].state_at_spawn;
-		//	eq[r].invert_state = emu[r].invert_state;
-		//	eq[r].door_param = emu[r].door_param;
-		//	eq[r].unknown0080 = 0;
-		//	eq[r].unknown0081 = 1; // Both must be 1 to allow clicking doors
-		//	eq[r].unknown0082 = 0;
-		//	eq[r].unknown0083 = 1; // Both must be 1 to allow clicking doors
-		//	eq[r].unknown0084 = 0;
-		//	eq[r].unknown0085 = 0;
-		//	eq[r].unknown0086 = 0;
+			strncpy(eq[r].name, emu[r].name, 32);
+			eq[r].DefaultY = emu[r].yPos;
+			eq[r].DefaultX = emu[r].xPos;
+			eq[r].DefaultZ = emu[r].zPos;
+			eq[r].DefaultHeading = emu[r].heading;
+			eq[r].DefaultDoorAngle = emu[r].incline;
+			eq[r].Y = emu[r].yPos;
+			eq[r].X = emu[r].xPos;
+			eq[r].Z = emu[r].zPos;
+			eq[r].Heading = emu[r].heading;
+			//there's a door angle here but im not sure if / what we set it to since ive literally never seen it as anything but 0 on live
+			//based on pattern it probably is supposed to match the default angle?
+			//I'm not 100% sure this is a float it might be a uint32
+			eq[r].DoorAngle = emu[r].incline;
+			eq[r].ScaleFactor = emu[r].size;
+			eq[r].Id = emu[r].doorId;
+			eq[r].Type = emu[r].opentype;
+			eq[r].State = emu[r].state_at_spawn;
+			eq[r].DefaultState = emu[r].invert_state;
+			eq[r].Param = emu[r].door_param;
+			eq[r].bVisible = 1;
+			eq[r].bUsable = 1;
 		}
 
 		FINISH_ENCODE();
