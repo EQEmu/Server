@@ -1710,7 +1710,7 @@ float Mob::FixTIMSize(int race_id, float original_size) {
 			new_size = 100;
 			break;
 	}
-	return original_size;
+	return new_size;
 }
 
 void Mob::SentPositionPacket(float dx, float dy, float dz, float dh, int anim, bool send_to_self)
