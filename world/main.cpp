@@ -443,7 +443,7 @@ int main(int argc, char **argv)
 		}
 
 		if (player_event_process_timer.Check()) {
-			player_event_logs.Process();
+			std::jthread event_thread(&PlayerEventLogs::Process, &player_event_logs);
 		}
 
 		if (PurgeInstanceTimer.Check()) {
