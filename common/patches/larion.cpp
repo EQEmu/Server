@@ -1826,6 +1826,13 @@ namespace Larion
 				buffer.WriteUInt32(0);
 			}
 
+			/*
+			s32 Primary;
+			s32 Secondary;
+			*/
+			buffer.WriteUInt32(0xffffffff);
+			buffer.WriteUInt32(0xffffffff);
+
 			if ((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
 				(emu->race == Race::VahShir) || (emu->race == Race::Froglok2) || (emu->race == Race::Drakkin)
 				)
