@@ -513,6 +513,12 @@ bool DataBucket::SendDataBucketCacheUpdate(const DataBucketCacheEntry &e)
 		return false;
 	}
 
+	if (RuleB(Zone, AkkadiusTempDataBucketsChangeFlag)) {
+		if (e.e.character_id > 0) {
+			return false;
+		}
+	}
+
 	EQ::Net::DynamicPacket p;
 	p.PutSerialize(0, e);
 
@@ -666,4 +672,30 @@ void DataBucket::ClearCache()
 {
 	g_data_bucket_cache.clear();
 	LogInfo("Cleared data buckets cache");
+}
+
+void DataBucket::DeleteCharacterFromCache(uint64 character_id) {
+	if (!RuleB(Zone, AkkadiusTempDataBucketsChangeFlag)) {
+		return;
+	}
+
+	size_t size_before = g_data_bucket_cache.size();
+
+	g_data_bucket_cache.erase(
+		std::remove_if(
+			g_data_bucket_cache.begin(),
+			g_data_bucket_cache.end(),
+			[&](DataBucketCacheEntry &ce) {
+				return ce.e.character_id == character_id;
+			}
+		),
+		g_data_bucket_cache.end()
+	);
+
+	LogDataBuckets(
+		"Deleted character id [{}] from cache size before [{}] after [{}]",
+		character_id,
+		size_before,
+		g_data_bucket_cache.size()
+	);
 }

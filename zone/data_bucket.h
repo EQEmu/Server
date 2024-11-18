@@ -89,6 +89,7 @@ public:
 	static void HandleWorldMessage(ServerPacket *p);
 	static void DeleteFromMissesCache(DataBucketsRepository::DataBuckets e);
 	static void ClearCache();
+	static void DeleteCharacterFromCache(uint64 character_id);
 };
 
 #endif //EQEMU_DATABUCKET_H

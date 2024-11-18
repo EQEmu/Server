@@ -474,6 +474,8 @@ Client::~Client() {
 		m_Position.z = m_pp.binds[0].z;
 	}
 
+	DataBucket::DeleteCharacterFromCache(CharacterID());
+
 	// we save right now, because the client might be zoning and the world
 	// will need this data right away
 	Save(2); // This fails when database destructor is called first on shutdown

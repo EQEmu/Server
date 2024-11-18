@@ -969,6 +969,8 @@ void Client::CompleteConnect()
 	RecordStats();
 	AutoGrantAAPoints();
 
+	DataBucket::DeleteCharacterFromCache(CharacterID());
+
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
