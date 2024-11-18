@@ -13109,6 +13109,11 @@ void Client::BroadcastPositionUpdate()
 	spu->animation     = 0;
 
 	entity_list.QueueCloseClients(this, &outapp, true, zone->GetMaxUpdateRange());
+
+	Group *g = GetGroup();
+	if (g) {
+		g->QueuePacket(&outapp);
+	}
 }
 
 void Client::SetVisibility(Mob* mob, bool visible) {
