@@ -2351,6 +2351,18 @@ namespace Larion
 
 	// DECODE methods
 
+	DECODE(OP_EnterWorld)
+	{
+		DECODE_LENGTH_EXACT(structs::EnterWorld_Struct);
+		SETUP_DIRECT_DECODE(EnterWorld_Struct, structs::EnterWorld_Struct);
+
+		memcpy(emu->name, eq->name, sizeof(emu->name));
+		emu->return_home = 0;
+		emu->tutorial = 0;
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_ZoneEntry)
 	{
 		DECODE_LENGTH_EXACT(structs::ClientZoneEntry_Struct);

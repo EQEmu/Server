@@ -18,6 +18,7 @@ E(OP_GroundSpawn)
 E(OP_SendZonepoints)
 
 //list of packets we need to decode on the way in:
+D(OP_EnterWorld)
 D(OP_ZoneEntry)
 
 #undef E

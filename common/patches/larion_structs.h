@@ -315,6 +315,12 @@ namespace Larion {
 			/*04*/ struct ZonePoint_Entry zpe[0]; // Always add one extra to the end after all zonepoints
 		};
 
+		struct EnterWorld_Struct {
+			/*000*/	char	name[64];
+			/*064*/	int32	unknown1;
+			/*068*/	int32	unknown2; //larion handles these differently so for now im just going to ignore them till i figure it out
+		};
+
 #pragma pack()
 
 	};	//end namespace structs
