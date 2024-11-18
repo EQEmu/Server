@@ -129,6 +129,7 @@ Mob::Mob(
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
 	m_scan_close_mobs_timer(6000),
+	m_see_close_mobs_timer(1000),
 	m_mob_check_moving_timer(1000),
 	bot_attack_flag_timer(10000)
 {
@@ -4138,6 +4139,10 @@ void Mob::SendAppearancePacket(
 
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	auto* a = (SpawnAppearance_Struct*)outapp->pBuffer;
+
+	if (type == AppearanceType::Invisibility) {
+		m_invisibility_state = value;
+	}
 
 	a->spawn_id  = GetID();
 	a->type      = type;

@@ -14212,17 +14212,10 @@ void Client::SendTopLevelInventory()
 	}
 }
 
-// On a normal basis we limit mob movement updates based on distance
-// This ensures we send a periodic full zone update to a client that has started moving after 5 or so minutes
-//
-// For very large zones we will also force a full update based on distance
-//
-// We ignore a small distance around us so that we don't interrupt already pathing deltas as those npcs will appear
-// to full stop when they are actually still pathing
 void Client::CheckSendBulkClientPositionUpdate()
 {
 	float distance_moved                      = DistanceNoZ(m_last_position_before_bulk_update, GetPosition());
-	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetNpcPositionUpdateDistance();
+	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetMaxUpdateRange();
 	bool  is_ready_to_update                  = (
 		m_client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
 	);
@@ -14231,25 +14224,47 @@ void Client::CheckSendBulkClientPositionUpdate()
 		LogDebug("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
 
 		auto &mob_movement_manager = MobMovementManager::Get();
-		auto &mob_list             = entity_list.GetMobList();
 
-		for (auto &it : mob_list) {
-			Mob *entity = it.second;
-			if (!entity->IsNPC()) {
+		for (auto &e: entity_list.GetMobList()) {
+			Mob *mob = e.second;
+			if (!mob->IsNPC()) {
 				continue;
 			}
 
 			int animation_speed = 0;
-			if (entity->IsMoving()) {
-				if (entity->IsRunning()) {
-					animation_speed = (entity->IsFeared() ? entity->GetFearSpeed() : entity->GetRunspeed());
+			if (mob->IsMoving()) {
+				if (mob->IsRunning()) {
+					animation_speed = (mob->IsFeared() ? mob->GetFearSpeed() : mob->GetRunspeed());
 				}
 				else {
-					animation_speed = entity->GetWalkspeed();
+					animation_speed = mob->GetWalkspeed();
 				}
 			}
 
-			mob_movement_manager.SendCommandToClients(entity, 0.0, 0.0, 0.0, 0.0, animation_speed, ClientRangeAny, this);
+			// if we have seen this mob before, and it hasn't moved, skip it
+			if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
+				if (m_last_seen_mob_position.contains(mob->GetID())) {
+					if (m_last_seen_mob_position[mob->GetID()] == mob->GetPosition()) {
+						LogVisibilityDetail(
+							"Mob [{}] has already been sent to client [{}] at this position, skipping",
+							mob->GetCleanName(),
+							GetCleanName()
+						);
+						continue;
+					}
+				}
+			}
+
+			mob_movement_manager.SendCommandToClients(
+				mob,
+				0.0,
+				0.0,
+				0.0,
+				0.0,
+				animation_speed,
+				ClientRangeAny,
+				this
+			);
 		}
 
 		m_last_position_before_bulk_update = GetPosition();
@@ -14356,4 +14371,34 @@ void Client::ShowZoneShardMenu()
 		);
 		number++;
 	}
+}
+
+void Client::BroadcastPositionUpdate()
+{
+	EQApplicationPacket               outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct *spu = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
+
+	memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
+	spu->spawn_id      = GetID();
+	spu->x_pos         = FloatToEQ19(GetX());
+	spu->y_pos         = FloatToEQ19(GetY());
+	spu->z_pos         = FloatToEQ19(GetZ());
+	spu->heading       = FloatToEQ12(GetHeading());
+	spu->delta_x       = FloatToEQ13(0);
+	spu->delta_y       = FloatToEQ13(0);
+	spu->delta_z       = FloatToEQ13(0);
+	spu->delta_heading = FloatToEQ10(0);
+	spu->animation     = 0;
+
+	entity_list.QueueCloseClients(this, &outapp, true, zone->GetMaxUpdateRange());
+}
+
+void Client::SetVisibility(Mob* mob, bool visible) {
+	mob->SendAppearancePacket(
+		AppearanceType::Invisibility,
+		visible ? m_invisibility_state : 3001, // reset back to original visibility state when visible
+		false,
+		true,
+		this
+	);
 }

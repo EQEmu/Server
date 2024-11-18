@@ -884,11 +884,14 @@ void MobMovementManager::SendCommandToClients(
 			}
 
 			c->QueuePacket(&outapp, false);
+			if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
+				c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
+			}
 		}
 	}
 	else {
 		float short_range = RuleR(Pathing, ShortMovementUpdateRange);
-		float long_range  = zone->GetNpcPositionUpdateDistance();
+		float long_range  = zone->GetMaxUpdateRange();
 
 		for (auto &c : _impl->Clients) {
 			if (single_client && c != single_client) {
@@ -934,6 +937,9 @@ void MobMovementManager::SendCommandToClients(
 				}
 
 				c->QueuePacket(&outapp, false);
+				if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
+					c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
+				}
 			}
 		}
 	}

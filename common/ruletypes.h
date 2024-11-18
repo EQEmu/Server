@@ -372,6 +372,7 @@ RULE_BOOL(Zone, AllowCrossZoneSpellsOnMercs, false, "Set to true to allow cross 
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross zone spells (cast/remove) to affect pets")
 RULE_BOOL(Zone, ZoneShardQuestMenuOnly, false, "Set to true if you only want quests to show the zone shard menu")
 RULE_BOOL(Zone, AkkadiusTempDataBucketsChangeFlag, true, "Set to true to allow the AkkadiusTempDataBucketsFlagChange to be used for zone specific data")
+RULE_BOOL(Zone, AkkadiusTempPerformanceFeatureFlag, true, "Enable or disable the Akkadius Temp Performance Feature Flag")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)

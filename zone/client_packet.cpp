@@ -990,6 +990,10 @@ void Client::CompleteConnect()
 
 	DataBucket::DeleteCharacterFromCache(CharacterID());
 
+	if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
+		m_last_seen_mob_position.reserve(entity_list.GetMobList().size());
+	}
+
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
@@ -5177,6 +5181,20 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 
 	if (m_mob_check_moving_timer.Check()) {
 		CheckScanCloseMobsMovingTimer();
+	}
+
+	// see_close
+	if (moving) {
+		if (m_see_close_mobs_timer.GetRemainingTime() > 1000) {
+			m_see_close_mobs_timer.Disable();
+			m_see_close_mobs_timer.Start(1000);
+			m_see_close_mobs_timer.Trigger();
+		}
+	}
+	else if (m_see_close_mobs_timer.GetDuration() == 1000) {
+		m_see_close_mobs_timer.Disable();
+		m_see_close_mobs_timer.Start(60000);
+		m_see_close_mobs_timer.Trigger();
 	}
 
 	CheckSendBulkClientPositionUpdate();

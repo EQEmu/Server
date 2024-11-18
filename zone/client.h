@@ -1898,6 +1898,9 @@ public:
 	void RecordKilledNPCEvent(NPC *n);
 
 	uint32 GetEXPForLevel(uint16 check_level);
+
+	void SetVisibility(Mob* mob, bool visible);
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
@@ -2172,6 +2175,7 @@ private:
 	Timer m_client_npc_aggro_scan_timer;
 	void CheckClientToNpcAggroTimer();
 	void ClientToNpcAggroProcess();
+	void BroadcastPositionUpdate();
 
 	// bulk position updates
 	glm::vec4 m_last_position_before_bulk_update;

@@ -179,6 +179,7 @@ void command_summonitem(Client *c, const Seperator *sep);
 void command_suspend(Client *c, const Seperator *sep);
 void command_suspendmulti(Client *c, const Seperator *sep);
 void command_takeplatinum(Client* c, const Seperator* sep);
+void command_test(Client *c, const Seperator *sep);
 void command_task(Client *c, const Seperator *sep);
 void command_petname(Client *c, const Seperator *sep);
 void command_traindisc(Client *c, const Seperator *sep);

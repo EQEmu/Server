@@ -572,6 +572,8 @@ public:
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
 	void ScanCloseMobs(Mob *scanning_mob);
+	void UpdateVisibility(Mob *scanning_mob);
+	void UpdateKnownPositions(Mob *scanning_mob);
 
 	void GetTrapInfo(Client* c);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
@@ -632,8 +634,6 @@ private:
 
 		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
-
-		void ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mobs, Mob* scanning_mob);
 
 		void GetBotList(std::list<Bot*> &b_list);
 	private:
