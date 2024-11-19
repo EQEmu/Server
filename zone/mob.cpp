@@ -8620,3 +8620,7 @@ std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
 {
 	return entity_list.GetCloseMobList(this, distance);
 }
+
+float Mob::GetUpdateRange() {
+	return IsClient() ? zone->GetMaxClientUpdateRange() : zone->GetMaxNpcUpdateRange();
+}

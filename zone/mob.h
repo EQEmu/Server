@@ -1493,6 +1493,7 @@ public:
 
 	std::unordered_map<uint16, Mob *> &GetCloseMobList(float distance = 0.0f);
 	void CheckScanCloseMobsMovingTimer();
+	float GetUpdateRange();
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
