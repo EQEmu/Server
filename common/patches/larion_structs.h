@@ -257,6 +257,41 @@ namespace Larion {
 			};
 		};
 
+		struct Client_Position
+		{
+			/*00*/ float delta_x;
+			/*04*/ float x;
+			/*08*/ float z;
+			/*12*/ signed animation : 10;
+				   signed padding1 : 22;
+			/*16*/ unsigned pitch : 12;
+			       signed padding2 : 20;
+			/*20*/ float delta_y;
+			/*24*/ float y;
+			/*28*/ signed delta_heading : 10;
+				   signed padding3 : 22;
+			/*32*/ signed heading : 12;
+				   signed padding4 : 20;
+			/*36*/ float delta_z;
+			/*40*/ 
+		};
+
+		struct PlayerPositionUpdateServer_Struct
+		{
+			/*00*/ uint16 spawn_id;
+			/*02*/ uint16 vehicle_id;
+			/*04*/ Spawn_Struct_Position position;
+			/*24*/
+		};
+
+		struct PlayerPositionUpdateClient_Struct {
+			/*00*/ uint16 sequence;
+			/*02*/ uint16 spawn_id;
+			/*04*/ uint16 vehicle_id;
+			/*06*/ Client_Position position;
+			/*46*/
+		};
+
 		struct Door_Struct
 		{
 			/*000*/ char name[32];
@@ -319,6 +354,35 @@ namespace Larion {
 			/*000*/	char	name[64];
 			/*064*/	int32	unknown1;
 			/*068*/	int32	unknown2; //larion handles these differently so for now im just going to ignore them till i figure it out
+		};
+
+		struct ZoneChange_Struct {
+			/*000*/	char	char_name[64];     // Character Name
+			/*064*/	uint16	zoneID;
+			/*066*/	uint16	instanceID;
+			/*068*/	uint32  Unknown068;
+			/*072*/	uint32  Unknown072;
+			/*076*/	float	y;
+			/*080*/	float	x;
+			/*084*/	float	z;
+			/*088*/	uint32	zone_reason;	//0x0A == death, I think
+			/*092*/	int32	success;		// =0 client->server, =1 server->client, -X=specific error
+			/*096*/ uint32	Unknown096;	// Not sure the extra 4 bytes goes here or earlier in the struct.
+			/*100*/
+		};
+
+		struct RequestClientZoneChange_Struct {
+			/*000*/	uint16	zone_id;
+			/*002*/	uint16	instance_id;
+			/*004*/	uint32	unknown004;
+			/*008*/	float	y;
+			/*012*/	float	x;
+			/*016*/	float	z;
+			/*020*/	float	heading;
+			/*024*/	uint32	type;	//unknown... values
+			/*032*/	uint8	unknown032[144];
+			/*172*/	uint32	unknown172;
+			/*176*/
 		};
 
 #pragma pack()

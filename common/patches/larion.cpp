@@ -2349,6 +2349,64 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_RequestClientZoneChange)
+	{
+		ENCODE_LENGTH_EXACT(RequestClientZoneChange_Struct);
+		SETUP_DIRECT_ENCODE(RequestClientZoneChange_Struct, structs::RequestClientZoneChange_Struct);
+
+		OUT(zone_id);
+		OUT(instance_id);
+		OUT(y);
+		OUT(x);
+		OUT(z);
+		OUT(heading);
+		eq->type = 0x0b;
+		eq->unknown004 = 0xffffffff;
+		eq->unknown172 = 0x0168b500;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ZoneChange)
+	{
+		ENCODE_LENGTH_EXACT(ZoneChange_Struct);
+		SETUP_DIRECT_ENCODE(ZoneChange_Struct, structs::ZoneChange_Struct);
+
+		memcpy(eq->char_name, emu->char_name, sizeof(emu->char_name));
+		OUT(zoneID);
+		OUT(instanceID);
+		OUT(y);
+		OUT(x);
+		OUT(z)
+			OUT(zone_reason);
+		OUT(success);
+
+		if (eq->success < 0)
+			eq->success -= 1;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ClientUpdate)
+	{
+		ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
+		SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::PlayerPositionUpdateServer_Struct);
+
+		OUT(spawn_id);
+		OUT(vehicle_id);
+		eq->position.x = emu->x_pos;
+		eq->position.y = emu->y_pos;
+		eq->position.z = emu->z_pos;
+		eq->position.heading = emu->heading;
+		eq->position.deltaX = emu->delta_x;
+		eq->position.deltaY = emu->delta_y;
+		eq->position.deltaZ = emu->delta_z;
+		eq->position.deltaHeading = emu->delta_heading;
+		eq->position.animation = emu->animation;
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -2369,6 +2427,45 @@ namespace Larion
 		SETUP_DIRECT_DECODE(ClientZoneEntry_Struct, structs::ClientZoneEntry_Struct);
 
 		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ZoneChange)
+	{
+		DECODE_LENGTH_EXACT(structs::ZoneChange_Struct);
+		SETUP_DIRECT_DECODE(ZoneChange_Struct, structs::ZoneChange_Struct);
+
+		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+		IN(zoneID);
+		IN(instanceID);
+		IN(y);
+		IN(x);
+		IN(z)
+			IN(zone_reason);
+		IN(success);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ClientUpdate)
+	{
+		// for some odd reason, there is an extra byte on the end of this on occasion..
+		DECODE_LENGTH_ATLEAST(structs::PlayerPositionUpdateClient_Struct);
+		SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::PlayerPositionUpdateClient_Struct);
+
+		IN(spawn_id);
+		IN(vehicle_id);
+		IN(sequence);
+		emu->x_pos = eq->position.x;
+		emu->y_pos = eq->position.y;
+		emu->z_pos = eq->position.z;
+		emu->heading = eq->position.heading;
+		emu->delta_x = eq->position.delta_x;
+		emu->delta_y = eq->position.delta_y;
+		emu->delta_z = eq->position.delta_z;
+		emu->delta_heading = eq->position.delta_heading;
+		emu->animation = eq->position.animation;
 
 		FINISH_DIRECT_DECODE();
 	}

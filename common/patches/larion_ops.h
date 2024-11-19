@@ -16,10 +16,14 @@ E(OP_NewZone)
 E(OP_SpawnDoor)
 E(OP_GroundSpawn)
 E(OP_SendZonepoints)
-
+E(OP_RequestClientZoneChange)
+E(OP_ZoneChange)
+E(OP_ClientUpdate)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)
+D(OP_ZoneChange)
+D(OP_ClientUpdate)
 
 #undef E
 #undef D
