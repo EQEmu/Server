@@ -370,6 +370,7 @@ RULE_BOOL(Zone, AllowCrossZoneSpellsOnBots, false, "Set to true to allow cross z
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnMercs, false, "Set to true to allow cross zone spells (cast/remove) to affect mercenaries")
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross zone spells (cast/remove) to affect pets")
 RULE_BOOL(Zone, AkkadiusTempPerformanceFeatureFlag, true, "Enable or disable the Akkadius Temp Performance Feature Flag")
+RULE_BOOL(Zone, EnableEntityClipping, true, "Enable or disable visual entity clipping server side")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
