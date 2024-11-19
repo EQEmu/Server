@@ -8617,17 +8617,21 @@ std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
 void Mob::ClearDataBucketCache()
 {
 	if (IsOfClientBot()) {
-		uint64 id = 0;
+		uint64                   id = 0;
 		DataBucketLoadType::Type t{};
 		if (IsBot()) {
 			id = CastToBot()->GetBotID();
-			t = DataBucketLoadType::Bot;
+			t  = DataBucketLoadType::Bot;
 		}
 		else if (IsClient()) {
 			id = CastToClient()->CharacterID();
-			t = DataBucketLoadType::Client;
+			t  = DataBucketLoadType::Client;
 		}
 
 		DataBucket::DeleteFromCache(id, t);
 	}
+}
+
+float Mob::GetUpdateRange() {
+	return IsClient() ? zone->GetMaxClientUpdateRange() : zone->GetMaxNpcUpdateRange();
 }
