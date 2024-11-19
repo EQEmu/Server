@@ -14213,7 +14213,7 @@ void Client::SendTopLevelInventory()
 void Client::CheckSendBulkClientPositionUpdate()
 {
 	float distance_moved                      = DistanceNoZ(m_last_position_before_bulk_update, GetPosition());
-	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetMaxUpdateRange();
+	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetMaxNpcUpdateRange();
 	bool  is_ready_to_update                  = (
 		m_client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
 	);
@@ -14268,6 +14268,7 @@ void Client::CheckSendBulkClientPositionUpdate()
 		m_last_position_before_bulk_update = GetPosition();
 	}
 }
+
 
 const uint16 scan_npc_aggro_timer_idle   = RuleI(Aggro, ClientAggroCheckIdleInterval);
 const uint16 scan_npc_aggro_timer_moving = RuleI(Aggro, ClientAggroCheckMovingInterval);
