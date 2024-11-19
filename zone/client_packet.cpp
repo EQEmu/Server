@@ -5185,18 +5185,19 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		CheckScanCloseMobsMovingTimer();
 	}
 
-	// see_close
-	if (moving) {
-		if (m_see_close_mobs_timer.GetRemainingTime() > 1000) {
+	if (RuleB(Zone, EnableEntityClipping)) {
+		if (moving) {
+			if (m_see_close_mobs_timer.GetRemainingTime() > 1000) {
+				m_see_close_mobs_timer.Disable();
+				m_see_close_mobs_timer.Start(1000);
+				m_see_close_mobs_timer.Trigger();
+			}
+		}
+		else if (m_see_close_mobs_timer.GetDuration() == 1000) {
 			m_see_close_mobs_timer.Disable();
-			m_see_close_mobs_timer.Start(1000);
+			m_see_close_mobs_timer.Start(60000);
 			m_see_close_mobs_timer.Trigger();
 		}
-	}
-	else if (m_see_close_mobs_timer.GetDuration() == 1000) {
-		m_see_close_mobs_timer.Disable();
-		m_see_close_mobs_timer.Start(60000);
-		m_see_close_mobs_timer.Trigger();
 	}
 
 	CheckSendBulkClientPositionUpdate();
