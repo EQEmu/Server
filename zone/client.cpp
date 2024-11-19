@@ -1656,7 +1656,7 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 
 	if (app->GetOpcode() == OP_NewSpawn && m_fancy_models) {
 		EQApplicationPacket* copy = app->Copy();
-		safe_delete(app);
+		//safe_delete(app);
 		app = copy;
 
 		NewSpawn_Struct* ns = reinterpret_cast<NewSpawn_Struct*>(app->pBuffer);
