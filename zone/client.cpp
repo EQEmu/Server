@@ -1646,37 +1646,27 @@ void Client::FixModel(Spawn_Struct* npc) {
 }
 
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CONN_STATUS required_state, eqFilterType filter) {
-	if (filter != FilterNone && GetFilter(filter) == FilterHide) {
-		return;
-	}
+    if (filter != FilterNone && GetFilter(filter) == FilterHide) {
+        return;
+    }
 
-	if (m_fancy_models == -1) {
-		m_fancy_models = GetBucket("DisableFancyModels").empty() ? 1 : 0;
-	}
+    const EQApplicationPacket* packet_to_send = app;
+    std::unique_ptr<EQApplicationPacket> copy;
 
-	if (app->GetOpcode() == OP_NewSpawn && m_fancy_models) {
-		EQApplicationPacket* copy = app->Copy();
-		//safe_delete(app);
-		app = copy;
+    if (app->GetOpcode() == OP_NewSpawn && m_fancy_models) {
+        copy.reset(app->Copy());
+        packet_to_send = copy.get();
+        auto* ns = reinterpret_cast<NewSpawn_Struct*>(copy->pBuffer);
+        FixModel(&ns->spawn);
+    }
 
-		NewSpawn_Struct* ns = reinterpret_cast<NewSpawn_Struct*>(app->pBuffer);
-
-		FixModel(&ns->spawn);
-	}
-
-	if (client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED) {
-		AddPacket(app, ack_req);
-		return;
-	}
-
-	// if the program doesnt care about the status or if the status isnt what we requested
-	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
-		// todo: save packets for later use
-		AddPacket(app, ack_req);
-	}
-	else if (eqs) {
-		eqs->QueuePacket(app, ack_req);
-	}
+    if (client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED) {
+        AddPacket(packet_to_send, ack_req);
+    } else if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
+        AddPacket(packet_to_send, ack_req);
+    } else if (eqs) {
+        eqs->QueuePacket(packet_to_send, ack_req);
+    }
 }
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
