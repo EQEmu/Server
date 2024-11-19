@@ -1373,17 +1373,18 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	newzone_data.suspend_buffs             = z->suspendbuffs;
 
 	// local attributes
-	can_bind                  = z->canbind != 0;
-	is_city                   = z->canbind == 2;
-	can_combat                = z->cancombat != 0;
-	can_levitate              = z->canlevitate != 0;
-	can_castoutdoor           = z->castoutdoor != 0;
-	is_hotzone                = z->hotzone != 0;
-	max_movement_update_range = z->max_movement_update_range;
-	default_ruleset           = z->ruleset;
-	allow_mercs               = true;
-	m_graveyard_id            = z->graveyard_id;
-	m_max_clients             = z->maxclients;
+	can_bind              = z->canbind != 0;
+	is_city               = z->canbind == 2;
+	can_combat            = z->cancombat != 0;
+	can_levitate          = z->canlevitate != 0;
+	can_castoutdoor       = z->castoutdoor != 0;
+	is_hotzone            = z->hotzone != 0;
+	m_npc_update_range    = z->npc_update_range;
+	m_client_update_range = z->client_update_range;
+	default_ruleset       = z->ruleset;
+	allow_mercs           = true;
+	m_graveyard_id        = z->graveyard_id;
+	m_max_clients         = z->maxclients;
 
 	SetIdleWhenEmpty(z->idle_when_empty);
 	SetSecondsBeforeIdle(z->seconds_before_idle);
