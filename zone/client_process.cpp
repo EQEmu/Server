@@ -289,7 +289,7 @@ bool Client::Process() {
 			entity_list.ScanCloseMobs(this);
 		}
 
-		if (m_see_close_mobs_timer.Check() && RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
+		if (RuleB(Zone, EnableEntityClipping) && m_see_close_mobs_timer.Check() && RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
 			entity_list.UpdateVisibility(this);
 		}
 
