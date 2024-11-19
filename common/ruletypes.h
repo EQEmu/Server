@@ -373,6 +373,7 @@ RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross z
 RULE_BOOL(Zone, ZoneShardQuestMenuOnly, false, "Set to true if you only want quests to show the zone shard menu")
 RULE_BOOL(Zone, AkkadiusTempDataBucketsChangeFlag, true, "Set to true to allow the AkkadiusTempDataBucketsFlagChange to be used for zone specific data")
 RULE_BOOL(Zone, AkkadiusTempPerformanceFeatureFlag, true, "Enable or disable the Akkadius Temp Performance Feature Flag")
+RULE_BOOL(Zone, EnableEntityClipping, true, "Enable or disable visual entity clipping server side")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
