@@ -14389,7 +14389,7 @@ void Client::BroadcastPositionUpdate()
 	spu->delta_heading = FloatToEQ10(0);
 	spu->animation     = 0;
 
-	entity_list.QueueCloseClients(this, &outapp, true, zone->GetMaxUpdateRange());
+	entity_list.QueueCloseClients(this, &outapp, true, zone->GetMaxClientUpdateRange());
 
 	Group *g = GetGroup();
 	if (g) {
