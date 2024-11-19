@@ -1746,7 +1746,7 @@ void EntityList::QueueCloseClients(
 	}
 
 	if (distance <= 0) {
-		distance = zone->GetMaxUpdateRange();
+		distance = zone->GetMaxClientUpdateRange();
 	}
 
 	float distance_squared = distance * distance;
@@ -2965,7 +2965,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 
 	g_scan_bench_timer.reset();
 
-	float scan_range = zone->GetMaxUpdateRange();
+	float scan_range = std::max(zone->GetMaxNpcUpdateRange(), zone->GetMaxClientUpdateRange());
 
 	// Reserve memory in m_close_mobs to avoid frequent re-allocations if not already reserved.
 	// Assuming mob_list.size() as an upper bound for reservation.
@@ -2973,7 +2973,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 		scanning_mob->m_close_mobs.reserve(mob_list.size());
 	}
 
-	scanning_mob->m_close_mobs.clear();
+	scanning_mob->m_close_mobs.clear();	
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
@@ -3029,7 +3029,7 @@ void EntityList::UpdateVisibility(Mob *scanning_mob) {
 		int8_t scanning_visibility = (it_scanning_visible != scanning_mob->m_can_see_mob.end())
 			? it_scanning_visible->second : 0;
 
-		if (scanning_mob->CalculateDistance(mob) <= zone->GetMaxUpdateRange()) {
+		if (scanning_mob->CalculateDistance(mob) <= mob->GetUpdateRange()) {
 			if (scanning_visibility != STATE_VISIBLE) { // Become visible
 				if (scanning_mob->IsClient()) {
 					scanning_mob->CastToClient()->SetVisibility(mob, true);
@@ -5861,7 +5861,7 @@ void EntityList::ReloadMerchants() {
  */
 std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float distance)
 {
-	if (distance <= zone->GetMaxUpdateRange()) {
+	if (distance <= zone->GetMaxNpcUpdateRange()) {
 		return mob->m_close_mobs;
 	}
 

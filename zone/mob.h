@@ -1527,6 +1527,7 @@ public:
 	void RemoveGlobalBuffs();
 	void ApplyGlobalBuff(uint32 spell_id, uint32 duration, time_t current_time = 0);
 	void CheckScanCloseMobsMovingTimer();
+	float GetUpdateRange();
 
 
 	uint16 focused_pet_id;

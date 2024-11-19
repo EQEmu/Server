@@ -419,7 +419,8 @@ public:
 		SendDiscordMessage(webhook_id, message_prefix + Discord::FormatDiscordMessage(log_category, message));
 	};
 
-	double GetMaxUpdateRange() const { return max_movement_update_range; }
+	double GetMaxNpcUpdateRange() const { return m_npc_update_range; }
+	double GetMaxClientUpdateRange() const { return m_client_update_range; }
 
 	void SetIsHotzone(bool is_hotzone);
 
@@ -471,7 +472,8 @@ private:
 	bool      staticzone;
 	bool      zone_has_current_time;
 	bool      quest_hot_reload_queued;
-	double    max_movement_update_range;
+	double    m_npc_update_range;
+	double    m_client_update_range;
 	char      *long_name;
 	char      *map_name;
 	char      *short_name;

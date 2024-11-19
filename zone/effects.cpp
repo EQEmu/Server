@@ -1231,7 +1231,7 @@ void EntityList::AESpell(
 
 	LogAoeCast(
 		"Close scan distance [{}] cast distance [{}]",
-		zone->GetMaxUpdateRange(),
+		zone->GetMaxNpcUpdateRange(),
 		distance
 	);
 
