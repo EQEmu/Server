@@ -2407,6 +2407,70 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_WearChange) 
+	{
+		ENCODE_LENGTH_EXACT(WearChange_Struct);
+		SETUP_DIRECT_ENCODE(WearChange_Struct, structs::WearChange_Struct);
+
+		OUT(spawn_id);
+		eq->wear_slot_id = emu->wear_slot_id;
+		eq->armor_id = emu->material;
+		eq->variation = emu->unknown06;
+		eq->material = emu->elite_material;
+		eq->new_armor_id = emu->hero_forge_model;
+		eq->new_armor_type = emu->unknown18;
+		eq->color = emu->color.Color;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SpecialMesg)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		SerializeBuffer buf(in->size);
+		buf.WriteInt8(in->ReadUInt8()); // speak mode
+		buf.WriteInt8(in->ReadUInt8()); // journal mode
+		buf.WriteInt8(in->ReadUInt8()); // language
+		buf.WriteInt32(in->ReadUInt32()); // message type
+		buf.WriteInt32(in->ReadUInt32()); // target spawn id
+
+		std::string name;
+		in->ReadString(name); // NPC names max out at 63 chars
+
+		buf.WriteString(name);
+
+		buf.WriteInt32(in->ReadUInt32()); // loc
+		buf.WriteInt32(in->ReadUInt32());
+		buf.WriteInt32(in->ReadUInt32());
+
+		std::string old_message;
+		std::string new_message;
+
+		in->ReadString(old_message);
+
+		//ServerToRoF2SayLink(new_message, old_message);
+
+		buf.WriteString(new_message);
+
+		auto outapp = new EQApplicationPacket(OP_SpecialMesg, buf);
+
+		dest->FastQueuePacket(&outapp, ack_req);
+		delete in;
+	}
+
+	ENCODE(OP_DeleteSpawn)
+	{
+		ENCODE_LENGTH_EXACT(DeleteSpawn_Struct);
+		SETUP_DIRECT_ENCODE(DeleteSpawn_Struct, structs::DeleteSpawn_Struct);
+
+		OUT(spawn_id);
+		eq->unknown04 = 1;	// Observed
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -2468,6 +2532,63 @@ namespace Larion
 		emu->animation = eq->position.animation;
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_WearChange)
+	{
+		DECODE_LENGTH_EXACT(structs::WearChange_Struct);
+		SETUP_DIRECT_DECODE(WearChange_Struct, structs::WearChange_Struct);
+
+		IN(spawn_id);
+		emu->wear_slot_id = eq->wear_slot_id;
+		emu->material = eq->armor_id;
+		emu->unknown06 = eq->variation;
+		emu->elite_material = eq->material;
+		emu->hero_forge_model = eq->new_armor_id;
+		emu->unknown18 = eq->new_armor_type;
+		emu->color.Color = eq->color;
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ChannelMessage)
+	{
+		unsigned char* __eq_buffer = __packet->pBuffer;
+
+		char* InBuffer = (char*)__eq_buffer;
+
+		char Sender[64];
+		char Target[64];
+
+		VARSTRUCT_DECODE_STRING(Sender, InBuffer);
+		VARSTRUCT_DECODE_STRING(Target, InBuffer);
+
+		//packet seems the same as rof2 with 5 more empty bytes before language
+		InBuffer += 9;
+
+		uint32 Language = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+		uint32 Channel = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+
+		InBuffer += 5;
+
+		uint32 Skill = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+
+		std::string old_message = InBuffer;
+		std::string new_message;
+		//RoF2ToServerSayLink(new_message, old_message);
+
+		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
+		__packet->pBuffer = new unsigned char[__packet->size];
+		ChannelMessage_Struct* emu = (ChannelMessage_Struct*)__packet->pBuffer;
+
+		strn0cpy(emu->targetname, Target, sizeof(emu->targetname));
+		strn0cpy(emu->sender, Target, sizeof(emu->sender));
+		emu->language = Language;
+		emu->chan_num = Channel;
+		emu->skill_in_language = Skill;
+		strcpy(emu->message, new_message.c_str());
+
+		delete[] __eq_buffer;
 	}
 	
 } /*Larion*/

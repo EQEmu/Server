@@ -534,20 +534,29 @@ void Client::SendZoneInPackets()
 	if (GetLevel() >= 51)
 		SendAlternateAdvancementStats();
 
-	// Send exp packets
+	
 	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
 	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
-	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
-	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
-
-	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
+	auto tmpxp2 = GetEXPForLevel(GetLevel() + 1);
+	auto tmpxp1 = GetEXPForLevel(GetLevel());
+	
 	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
 		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
-		eu->exp = (uint32)(330.0f * tmpxp);
-		outapp->priority = 6;
-		QueuePacket(outapp);
+
+		//Larion uses a more granular exp bar than other clients
+		if (m_ClientVersion >= EQ::versions::ClientVersion::Larion) {
+			eu->exp = (uint32)(100000.0f * tmpxp);
+		}
+		else {
+			eu->exp = (uint32)(330.0f * tmpxp);
+		}
+
+		FastQueuePacket(&outapp);
 	}
-	safe_delete(outapp);
+	else {
+		eu->exp = 0;
+		FastQueuePacket(&outapp);
+	}
 
 	SendAlternateAdvancementTimers();
 

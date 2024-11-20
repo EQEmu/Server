@@ -19,11 +19,16 @@ E(OP_SendZonepoints)
 E(OP_RequestClientZoneChange)
 E(OP_ZoneChange)
 E(OP_ClientUpdate)
+E(OP_WearChange)
+E(OP_SpecialMesg)
+E(OP_DeleteSpawn)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)
 D(OP_ZoneChange)
 D(OP_ClientUpdate)
+D(OP_WearChange)
+D(OP_ChannelMessage)
 
 #undef E
 #undef D

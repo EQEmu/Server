@@ -385,6 +385,31 @@ namespace Larion {
 			/*176*/
 		};
 
+		struct WearChange_Struct {
+			/*000*/ uint32 spawn_id;
+			/*004*/ uint32 wear_slot_id;
+			/*008*/ uint32 armor_id;
+			/*012*/ uint32 variation;
+			/*016*/ uint32 material;
+			/*020*/ uint32 new_armor_id;
+			/*024*/ uint32 new_armor_type;
+			/*028*/ uint32 color;
+			/*032*/
+		};
+
+		struct ExpUpdate_Struct
+		{
+			/*000*/ uint64 exp; //This is exp % / 1000 now; eg 69250 = 69.25%
+			/*008*/ uint64 unknown; //unclear, I didn't see the client actually read this value but i might have missed it
+		};
+
+		struct DeleteSpawn_Struct
+		{
+			/*00*/ uint32 spawn_id;		// Spawn ID to delete
+			/*04*/ uint8 unknown04;		// Seen 1
+			/*05*/
+		};
+
 #pragma pack()
 
 	};	//end namespace structs
