@@ -263,17 +263,15 @@ namespace Larion {
 			/*04*/ float x;
 			/*08*/ float z;
 			/*12*/ signed animation : 10;
-				   signed padding1 : 22;
-			/*16*/ unsigned pitch : 12;
-			       signed padding2 : 20;
-			/*20*/ float delta_y;
-			/*24*/ float y;
-			/*28*/ signed delta_heading : 10;
-				   signed padding3 : 22;
-			/*32*/ signed heading : 12;
-				   signed padding4 : 20;
-			/*36*/ float delta_z;
-			/*40*/ 
+			       unsigned pitch : 12;
+			       signed padding1 : 10;
+			/*16*/ float delta_y;
+			/*20*/ float y;
+			/*24*/ signed delta_heading : 10;
+				   signed heading : 12;
+				   signed padding2 : 10;
+			/*28*/ float delta_z;
+			/*32*/ 
 		};
 
 		struct PlayerPositionUpdateServer_Struct
@@ -289,7 +287,7 @@ namespace Larion {
 			/*02*/ uint16 spawn_id;
 			/*04*/ uint16 vehicle_id;
 			/*06*/ Client_Position position;
-			/*46*/
+			/*38*/
 		};
 
 		struct Door_Struct

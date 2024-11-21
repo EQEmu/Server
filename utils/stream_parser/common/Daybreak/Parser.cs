@@ -47,7 +47,7 @@ namespace StreamParser.Common.Daybreak
         private void OnPacketCapture(object sender, PacketCapture capture)
         {
             var raw = capture.GetPacket();
-            if (raw.LinkLayerType == PacketDotNet.LinkLayers.Ethernet)
+            if (raw.LinkLayerType == PacketDotNet.LinkLayers.Ethernet || raw.LinkLayerType == PacketDotNet.LinkLayers.Null)
             {
                 var packet = PacketDotNet.Packet.ParsePacket(raw.LinkLayerType, raw.Data);
                 var ipPacket = packet.Extract<PacketDotNet.IPv4Packet>();

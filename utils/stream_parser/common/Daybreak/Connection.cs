@@ -176,10 +176,10 @@ namespace StreamParser.Common.Daybreak
                     case Opcode.SessionResponse:
                         if (_connect_code == 0)
                         {
-                            if(data.Length != 21)
-                            {
-                                return;
-                            }
+                            //if(data.Length != 21)
+                            //{
+                            //    return;
+                            //}
 
                             _connect_code = BitConverter.ToUInt32(data.Slice(2, 4));
                             _encode_key = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(data.Slice(6, 4)));
