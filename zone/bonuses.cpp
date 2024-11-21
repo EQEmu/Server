@@ -1385,13 +1385,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->CriticalSpellChance += base_value;
 			}
 
-			int new_limit = newbon->SpellCritDmgIncNoStack + limit_value;
-
-			if (new_limit > RuleI(Custom, AdditiveSpellCritDmgSoftCap)) {
-				int above_limit = new_limit - RuleI(Custom, AdditiveSpellCritDmgSoftCap);
-    			newbon->SpellCritDmgIncNoStack = RuleI(Custom, AdditiveSpellCritDmgSoftCap) + static_cast<int>(above_limit * RuleR(Custom, AdditiveSpellCritDmgMultiplier));
-			} else {
-				newbon->SpellCritDmgIncNoStack = new_limit;
+			if (limit_value > newbon->SpellCritDmgIncNoStack) {
+				newbon->SpellCritDmgIncNoStack;
 			}
 
 			break;
@@ -3055,13 +3050,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				new_bonus->CriticalSpellChance += effect_value;
 
-				int new_limit = new_bonus->SpellCritDmgIncNoStack + limit_value;
-
-				if (new_limit > RuleI(Custom, AdditiveSpellCritDmgSoftCap)) {
-					int above_limit = new_limit - RuleI(Custom, AdditiveSpellCritDmgSoftCap);
-					new_bonus->SpellCritDmgIncNoStack = RuleI(Custom, AdditiveSpellCritDmgSoftCap) + static_cast<int>(above_limit * RuleR(Custom, AdditiveSpellCritDmgMultiplier));
-				} else {
-					new_bonus->SpellCritDmgIncNoStack = new_limit;
+	v			if (limit_value > newbon->SpellCritDmgIncNoStack) {
+					newbon->SpellCritDmgIncNoStack;
 				}
 
 				break;
