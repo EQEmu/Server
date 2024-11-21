@@ -406,9 +406,8 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 
 			std::vector<CharacterParcelsContainersRepository::CharacterParcelsContainers> all_entries{};
 			if (inst->IsNoneEmptyContainer()) {
-				CharacterParcelsContainersRepository::CharacterParcelsContainers cpc{};
-
 				for (auto const &kv: *inst->GetContents()) {
+					CharacterParcelsContainersRepository::CharacterParcelsContainers cpc{};
 					cpc.parcels_id = result.id;
 					cpc.slot_id    = kv.first;
 					cpc.item_id    = kv.second->GetID();
