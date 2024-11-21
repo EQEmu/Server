@@ -2563,8 +2563,8 @@ namespace Larion
 		VARSTRUCT_DECODE_STRING(Sender, InBuffer);
 		VARSTRUCT_DECODE_STRING(Target, InBuffer);
 
-		//packet seems the same as rof2 with 5 more empty bytes before language
-		InBuffer += 9;
+		//packet seems the same as rof2 with 4 more empty bytes before language
+		InBuffer += 8;
 
 		uint32 Language = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
 		uint32 Channel = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);

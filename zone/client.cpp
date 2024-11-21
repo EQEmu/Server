@@ -1177,7 +1177,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			}
 		}
 
-		if (message[0] == COMMAND_CHAR) {
+		if (message[0] == COMMAND_CHAR || message[0] == COMMAND_CHAR_NON_HASH) {
 			if (command_dispatch(this, message, false) == -2) {
 				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
@@ -7527,7 +7527,7 @@ void Client::GarbleMessage(char *message, uint8 variance)
 	int delimiter_count = 0;
 
 	// Don't garble # commands
-	if (message[0] == COMMAND_CHAR || message[0] == BOT_COMMAND_CHAR) {
+	if (message[0] == COMMAND_CHAR || message[0] == COMMAND_CHAR_NON_HASH || message[0] == BOT_COMMAND_CHAR) {
 		return;
 	}
 

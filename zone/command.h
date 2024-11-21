@@ -8,6 +8,7 @@ class Seperator;
 #include <string>
 
 #define    COMMAND_CHAR '#'
+#define    COMMAND_CHAR_NON_HASH '.'
 
 typedef void (*CmdFuncPtr)(Client *, const Seperator *);
 
