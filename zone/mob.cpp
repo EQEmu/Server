@@ -2048,8 +2048,8 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 0: {
 				mod2a_name = "Avoidance";
 				mod2b_name = "Combat Effects";
-				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAvoidanceCap));
-				mod2b_cap  = Strings::Commify(RuleI(Character, ItemCombatEffectsCap));
+				mod2a_cap  = RuleI(Character, ItemAvoidanceCap);
+				mod2b_cap  = RuleI(Character, ItemCombatEffectsCap);
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetAvoidance());
@@ -2068,8 +2068,8 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 1: {
 				mod2a_name = "Accuracy";
 				mod2b_name = "Strikethrough";
-				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAccuracyCap));
-				mod2b_cap  = Strings::Commify(RuleI(Character, ItemStrikethroughCap));
+				mod2a_cap  = RuleI(Character, ItemAccuracyCap);
+				mod2b_cap  = RuleI(Character, ItemStrikethroughCap);
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetAccuracy());
@@ -2088,8 +2088,8 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 2: {
 				mod2a_name = "Shielding";
 				mod2b_name = "Spell Shielding";
-				mod2a_cap  = Strings::Commify(RuleI(Character, ItemShieldingCap));
-				mod2b_cap  = Strings::Commify(RuleI(Character, ItemSpellShieldingCap));
+				mod2a_cap  = RuleI(Character, ItemShieldingCap);
+				mod2b_cap  = RuleI(Character, ItemSpellShieldingCap);
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetShielding());
@@ -2109,8 +2109,8 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 3: {
 				mod2a_name = "Stun Resist";
 				mod2b_name = "DOT Shielding";
-				mod2a_cap  = Strings::Commify(RuleI(Character, ItemStunResistCap));
-				mod2b_cap  = Strings::Commify(RuleI(Character, ItemDoTShieldingCap));
+				mod2a_cap  = RuleI(Character, ItemStunResistCap);
+				mod2b_cap  = RuleI(Character, ItemDoTShieldingCap);
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetStunResist());
