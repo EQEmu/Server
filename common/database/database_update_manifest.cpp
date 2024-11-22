@@ -6379,7 +6379,7 @@ CREATE INDEX idx_trader_active_transaction ON trader (active_transaction);
 		.content_schema_update = false
 	},
 	ManifestEntry{
-		.version = 9296,
+		.version = 9294,
 		.description = "2024_01_22_sharedbank_guid_primary_key.sql",
 		.check = "SHOW COLUMN FROM `sharedbank` LIKE 'guid'",
 		.condition = "empty",
@@ -6405,7 +6405,7 @@ ADD PRIMARY KEY (`account_id`, `slot_id`);
 )"
 	},
 	ManifestEntry{
-		.version = 9297,
+		.version = 9295,
 		.description = "2024_10_24_inventory_changes.sql",
 		.check = "SHOW COLUMN FROM `inventory` LIKE 'charid'",
 		.condition = "empty",
@@ -6466,7 +6466,7 @@ UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id`
 )"
 	},
 	ManifestEntry{
-		.version = 9298,
+		.version = 9296,
 		.description = "2024_10_24_merchantlist_temp_uncap.sql",
 		.check = "SHOW CREATE TABLE `merchantlist_temp`",
 		.condition = "contains",
