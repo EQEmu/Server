@@ -961,8 +961,9 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 			aaexp = 0;
 			m_epp.perAA = 0;
 		} else if (m_pp.aapoints > aa_cap) {
-			MessageString(Chat::Red, OVER_AA_CAP, fmt::format_int(aa_cap).c_str(), fmt::format_int(aa_cap).c_str());
-			m_pp.aapoints = aa_cap;
+			//MessageString(Chat::Red, OVER_AA_CAP, fmt::format_int(aa_cap).c_str(), fmt::format_int(aa_cap).c_str());
+			Message(Chat::Red, fmt::format("Warning: You are currently over the earned Advancement point limit of {}. Please spend some of your stored AA points. You will not be able to earn any additional AA until you are below the cap.", aa_cap).c_str());
+			//m_pp.aapoints = aa_cap;
 			aaexp = 0;
 			m_epp.perAA = 0;
 		}
