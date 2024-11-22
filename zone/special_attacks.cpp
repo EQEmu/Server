@@ -1668,6 +1668,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 		other->AddToHateList(this, 0, 0);
 	}
 
+	MeleeLifeTap(TotalDmg);
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillInUse);
 
 	//try proc on hits and misses
@@ -1873,6 +1874,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		other->AddToHateList(this, WDmg, 0);
 	}
 
+	MeleeLifeTap(TotalDmg);
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillThrowing);
 
 	if (!DisableProcs && other && !other->HasDied()) {
