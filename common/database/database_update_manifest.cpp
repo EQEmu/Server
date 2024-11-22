@@ -5819,6 +5819,20 @@ CHANGE COLUMN `ornamenticon` `ornament_icon` int(11) UNSIGNED NOT NULL DEFAULT 0
 CHANGE COLUMN `ornamentidfile` `ornament_idfile` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_icon`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`character_id`, `slot_id`) USING BTREE;
+
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 251) + 4010) WHERE `slot_id` BETWEEN 251 AND 260; -- Bag 1
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 261) + 4210) WHERE `slot_id` BETWEEN 261 AND 270; -- Bag 2
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 271) + 4410) WHERE `slot_id` BETWEEN 271 AND 280; -- Bag 3
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 281) + 4610) WHERE `slot_id` BETWEEN 281 AND 290; -- Bag 4
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 291) + 4810) WHERE `slot_id` BETWEEN 291 AND 300; -- Bag 5
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 301) + 5010) WHERE `slot_id` BETWEEN 301 AND 310; -- Bag 6
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 311) + 5210) WHERE `slot_id` BETWEEN 311 AND 320; -- Bag 7
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 321) + 5410) WHERE `slot_id` BETWEEN 321 AND 330; -- Bag 8
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 331) + 5610) WHERE `slot_id` BETWEEN 331 AND 340; -- Bag 9
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 341) + 5810) WHERE `slot_id` BETWEEN 341 AND 350; -- Bag 10
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 351) + 6010) WHERE `slot_id` BETWEEN 351 AND 360; -- Cursor Bag
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2031) + 6210) WHERE `slot_id` BETWEEN 2031 AND 2270; -- Bank Bags
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2550; -- Shared Bank Bags
 )"
 	},
 	ManifestEntry{
