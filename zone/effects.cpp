@@ -76,11 +76,10 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 	chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
 	chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
-	if (GetEntityVariable("ProcHint") == "true") {
-		chance += itembonuses.CriticalProcChance + spellbonuses.CriticalProcChance + aabonuses.CriticalProcChance;
-		LogDebug("This was a Proc, crit chance [{}]", chance);
-	} else {
-		LogDebug("This was not a Proc, crit chance [{}]", chance);
+	if ((IsClient() || (GetOwner() && GetOwner()->IsClient()))) {
+		if (GetEntityVariable("ProcHint") == "true") {
+			chance += itembonuses.CriticalProcChance + spellbonuses.CriticalProcChance + aabonuses.CriticalProcChance;
+		}
 	}
 
 	//Crtical Hit Calculation pathway
@@ -100,6 +99,14 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 			Critical = true;
 			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
 			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
+
+			if ((IsClient() || (GetOwner() && GetOwner()->IsClient())) && GetEntityVariable("ProcHint") == "true") {
+				if (GetEntityVariable("ProcHint") != "true") {
+					ratio *= RuleR(Custom, CastedSpellCritBonusRatio);
+				} else {
+					ratio *= RuleR(Custom, ProcSpellCritBonusRatio);
+				}
+			}
 		} else if ((IsOfClientBot() && HasClass(Class::Wizard)) || (IsMerc() && GetClass() == CASTERDPS)) {
 			if ((GetLevel() >= RuleI(Spells, WizCritLevel)) && zone->random.Roll(RuleI(Spells, WizCritChance))) {
 				//Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio. (20-70 is parse confirmed)

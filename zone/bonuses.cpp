@@ -3050,8 +3050,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				new_bonus->CriticalSpellChance += effect_value;
 
-	v			if (limit_value > newbon->SpellCritDmgIncNoStack) {
-					newbon->SpellCritDmgIncNoStack;
+				if (limit_value > new_bonus->SpellCritDmgIncNoStack) {
+					new_bonus->SpellCritDmgIncNoStack;
 				}
 
 				break;

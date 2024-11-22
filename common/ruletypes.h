@@ -1103,6 +1103,8 @@ RULE_BOOL(Custom,   ForceNPCFearPathing, 					true, "Forces NPCs to Fear path ev
 RULE_INT(Custom,    EventEOMDropChance,						1,     "Increase this value to make EoM drops during event more rare")
 RULE_BOOL(Custom,	GroupIncentiveProgram,					false, "Enable GroupIncentiveProgram")
 RULE_BOOL(Custom, 	UseAAEXPVeterancy,						false, "Use max AA on any character in account for value of AA:ModernAAScalingAALimit if it is higher")
+RULE_REAL(Custom,	CastedSpellCritBonusRatio, 				1.0, "Multiply casted (Not procs) spells crit ratio by this value")
+RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit ratio by this value")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
