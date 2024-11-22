@@ -1386,7 +1386,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 
 			if (limit_value > newbon->SpellCritDmgIncNoStack) {
-				newbon->SpellCritDmgIncNoStack;
+				new_bonus->SpellCritDmgIncNoStack = limit_value;
 			}
 
 			break;
@@ -3051,7 +3051,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->CriticalSpellChance += effect_value;
 
 				if (limit_value > new_bonus->SpellCritDmgIncNoStack) {
-					new_bonus->SpellCritDmgIncNoStack;
+					new_bonus->SpellCritDmgIncNoStack = limit_value;
 				}
 
 				break;
