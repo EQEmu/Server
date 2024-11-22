@@ -20,6 +20,7 @@ E(OP_RequestClientZoneChange)
 E(OP_ZoneChange)
 E(OP_ClientUpdate)
 E(OP_WearChange)
+E(OP_ChannelMessage)
 E(OP_SpecialMesg)
 E(OP_DeleteSpawn)
 //list of packets we need to decode on the way in:

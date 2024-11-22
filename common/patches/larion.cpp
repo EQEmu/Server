@@ -2424,6 +2424,46 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ChannelMessage)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		ChannelMessage_Struct* emu = (ChannelMessage_Struct*)in->pBuffer;
+
+		unsigned char* __emu_buffer = in->pBuffer;
+
+		std::string old_message = emu->message;
+		std::string new_message = old_message;
+		//ServerToRoF2SayLink(new_message, old_message);
+
+		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 43;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char* OutBuffer = (char*)in->pBuffer;
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->sender);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->targetname);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->language);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->chan_num);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->skill_in_language);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_SpecialMesg)
 	{
 		EQApplicationPacket* in = *p;
@@ -2451,6 +2491,7 @@ namespace Larion
 		in->ReadString(old_message);
 
 		//ServerToRoF2SayLink(new_message, old_message);
+		new_message = old_message;
 
 		buf.WriteString(new_message);
 
@@ -2574,7 +2615,7 @@ namespace Larion
 		uint32 Skill = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
 
 		std::string old_message = InBuffer;
-		std::string new_message;
+		std::string new_message = old_message;
 		//RoF2ToServerSayLink(new_message, old_message);
 
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
