@@ -2019,6 +2019,8 @@ namespace Larion
 		delete in;
 	}
 
+	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
+
 	ENCODE(OP_NewZone) {
 		EQApplicationPacket* in = *p;
 		*p = nullptr;
