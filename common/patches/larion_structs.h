@@ -408,6 +408,36 @@ namespace Larion {
 			/*05*/
 		};
 
+		//OP_SetServerFilter
+		struct SetServerFilter_Struct {
+			uint32 filters[68];
+		};
+
+		// Was new to RoF2, doesn't look changed
+		// The padding is because these structs are padded to the default 4 bytes
+		struct InventorySlot_Struct
+		{
+			/*000*/	int16 Type;
+			/*002*/	int16 Padding1;
+			/*004*/	int16 Slot;
+			/*006*/	int16 SubIndex;
+			/*008*/	int16 AugIndex;
+			/*010*/	int16 Padding2;
+			/*012*/
+		};
+
+		// Was new for RoF2 - Used for Merchant_Purchase_Struct, doesn't look changed
+		// Can't sellfrom other than main inventory so Slot Type is not needed.
+		// The padding is because these structs are padded to the default 4 bytes
+		struct TypelessInventorySlot_Struct
+		{
+			/*000*/	int16 Slot;
+			/*002*/	int16 SubIndex;
+			/*004*/	int16 AugIndex;
+			/*006*/	int16 Padding;
+			/*008*/
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

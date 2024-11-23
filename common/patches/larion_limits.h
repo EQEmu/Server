@@ -70,7 +70,23 @@ namespace Larion
 				typeMail,
 				typeGuildTrophyTribute,
 				typeKrono,
-				typeOther
+				typeOther,
+				typeMercenaryItems,
+				typeViewModMercenaryItems,
+				typeMountKeyRingItems,
+				typeViewModMountKeyRingItems,
+				typeIllusionKeyRingItems,
+				typeViewModIllusionKeyRingItems,
+				typeFamiliarKeyRingItems,
+				typeViewModFamiliarKeyRingItems,
+				typeHeroForgeKeyRingItems,
+				typeViewModHeroForgeKeyRingItems,
+				typeTeleportationKeyRingItems,
+				typeViewModTeleportationKeyRingItems,
+				typeOverflow,
+				typeDragonHoard,
+				typeTradeskillDepot,
+				typeGuildTradeskillDepot
 			};
 
 		} // namespace enum_

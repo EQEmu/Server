@@ -49,6 +49,20 @@ namespace Larion
 	static OpcodeManager* opcodes = nullptr;
 	static Strategy struct_strategy;
 
+	void SerializeItem(SerializeBuffer &buffer, const EQ::ItemInstance* inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
+
+	// server to client inventory location converters
+	static inline structs::InventorySlot_Struct ServerToLarionSlot(uint32 server_slot);
+	static inline structs::InventorySlot_Struct ServerToLarionCorpseSlot(uint32 server_corpse_slot);
+	static inline uint32 ServerToLarionCorpseMainSlot(uint32 server_corpse_slot);
+	static inline structs::TypelessInventorySlot_Struct ServerToLarionTypelessSlot(uint32 server_slot, int16 server_type);
+
+	// client to server inventory location converters
+	static inline uint32 LarionToServerSlot(structs::InventorySlot_Struct larion_slot);
+	static inline uint32 LarionToServerCorpseSlot(structs::InventorySlot_Struct larion_corpse_slot);
+	static inline uint32 LarionToServerCorpseMainSlot(uint32 larion_corpse_slot);
+	static inline uint32 LarionToServerTypelessSlot(structs::TypelessInventorySlot_Struct larion_slot, int16 larion_type);
+
 	void Register(EQStreamIdentifier& into)
 	{
 		//create our opcode manager if we havent already
@@ -2514,6 +2528,56 @@ namespace Larion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_FormattedMessage)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		FormattedMessage_Struct* emu = (FormattedMessage_Struct*)in->pBuffer;
+
+		unsigned char* __emu_buffer = in->pBuffer;
+
+		char* old_message_ptr = (char*)in->pBuffer;
+		old_message_ptr += sizeof(FormattedMessage_Struct);
+
+		std::string old_message_array[9];
+
+		for (int i = 0; i < 9; ++i) {
+			if (*old_message_ptr == 0) { break; }
+			old_message_array[i] = old_message_ptr;
+			old_message_ptr += old_message_array[i].length() + 1;
+		}
+
+		uint32 new_message_size = 0;
+		std::string new_message_array[9];
+
+		for (int i = 0; i < 9; ++i) {
+			if (old_message_array[i].length() == 0) { break; }
+			new_message_array[i] = old_message_array[i];
+			//ServerToRoF2SayLink(new_message_array[i], old_message_array[i]);
+			new_message_size += new_message_array[i].length() + 1;
+		}
+
+		in->size = sizeof(FormattedMessage_Struct) + new_message_size + 1;
+		in->pBuffer = new unsigned char[in->size];
+
+		char* OutBuffer = (char*)in->pBuffer;
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->unknown0);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->string_id);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
+
+		for (int i = 0; i < 9; ++i) {
+			if (new_message_array[i].length() == 0) { break; }
+			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
+		}
+
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -2633,5 +2697,1002 @@ namespace Larion
 
 		delete[] __eq_buffer;
 	}
+
+	DECODE(OP_SetServerFilter)
+	{
+		DECODE_LENGTH_EXACT(structs::SetServerFilter_Struct);
+		SETUP_DIRECT_DECODE(SetServerFilter_Struct, structs::SetServerFilter_Struct);
+
+		int r;
+		for (r = 0; r < 29; r++) {
+			// Size 68 in Larion
+			IN(filters[r]);
+		}
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	//Naive version but should work well enough for now
+	int ExtractIDFile(const std::string& input) {
+		std::string number;
+		for (char ch : input) {
+			if (std::isdigit(static_cast<unsigned char>(ch))) {
+				number += ch;
+			}
+		}
+
+		if (number.empty()) {
+			return 0;
+		}
+
+		return std::stoi(number);
+	}
+
+	// Helper Functions
+	void SerializeItemDefinition(SerializeBuffer& buffer, const EQ::ItemData* item) {
+		//u8 Type;
+		buffer.WriteUInt8(item->ItemClass);
+		//char Name[];
+		buffer.WriteString(item->Name);
+
+		//char LoreName[];
+		buffer.WriteString(item->Lore);
+
+		//we need to parse id file
+		//s32 IDFile;
+		int32 idfile = ExtractIDFile(item->IDFile);
+		
+		//s32 IDFile2;
+		buffer.WriteUInt32(0); //unsupported atm
+
+		/*
+		ibs.id = item->ID;
+		ibs.weight = item->Weight;
+		ibs.norent = item->NoRent;
+		ibs.nodrop = item->NoDrop;
+		ibs.attune = item->Attuneable;
+		ibs.size = item->Size;
+		ibs.slots = item->Slots;
+		ibs.price = item->Price;
+		ibs.icon = item->Icon;
+		*/
+
+		//s32 ItemNumber;
+		buffer.WriteUInt32(item->ID);
+		
+		//s32 Weight;
+		buffer.WriteInt32(item->Weight);
+		
+		//bool NoRent;
+		buffer.WriteUInt8(item->NoRent);
+
+		//bool IsDroppable;
+		buffer.WriteUInt8(item->NoDrop);
+
+		//bool Attuneable;
+		buffer.WriteUInt8(item->Attuneable);
+
+		//u8 Size;
+		buffer.WriteUInt8(item->Size);
+
+		//u32 EquipSlots;
+		buffer.WriteUInt32(item->Slots);
+
+		//u32 Cost;
+		buffer.WriteUInt32(item->Price);
+
+		//s32 IconNumber;
+		buffer.WriteInt32(item->Icon);
+
+		//bool eGMRequirement;
+		buffer.WriteUInt8(0); //unsupported atm
+
+		//bool Tradeskills;
+		buffer.WriteUInt8(0); //unsupported atm
+
+		//s8 SvCold;
+		//s8 SvDisease;
+		//s8 SvPoison;
+		//s8 SvMagic;
+		//s8 SvFire;
+		//s8 SvCorruption;
+		buffer.WriteInt8(item->CR);
+		buffer.WriteInt8(item->DR);
+		buffer.WriteInt8(item->PR);
+		buffer.WriteInt8(item->MR);
+		buffer.WriteInt8(item->FR);
+		buffer.WriteInt8(item->SVCorruption);
+		
+		//s8 STR;
+		//s8 STA;
+		//s8 AGI;
+		//s8 DEX;
+		//s8 CHA;
+		//s8 INT;
+		//s8 WIS;
+		buffer.WriteInt8(item->AStr);
+		buffer.WriteInt8(item->ASta);
+		buffer.WriteInt8(item->AAgi);
+		buffer.WriteInt8(item->ADex);
+		buffer.WriteInt8(item->ACha);
+		buffer.WriteInt8(item->AInt);
+		buffer.WriteInt8(item->AWis);
+
+		//s32 HP;
+		//s32 Mana;
+		//s32 Endurance;
+		//s32 AC;
+		buffer.WriteInt32(item->HP);
+		buffer.WriteInt32(item->Mana);
+		buffer.WriteInt32(item->Endur);
+		buffer.WriteInt32(item->AC);
+
+		//s32 HPRegen;
+		//s32 ManaRegen;
+		//s32 EnduranceRegen;
+		buffer.WriteInt32(item->Regen);
+		buffer.WriteInt32(item->ManaRegen);
+		buffer.WriteInt32(item->EnduranceRegen);
+		
+		//u32 Classes;
+		//u32 Races;
+		//u32 Deity;
+		buffer.WriteUInt32(item->Classes);
+		buffer.WriteUInt32(item->Races);
+		buffer.WriteUInt32(item->Deity);
+
+		//u32 SkillModValue;
+		//u32 SkillModMax;
+		//s32 SkillModType;
+		//s32 SkillModBonus;
+		buffer.WriteInt32(item->SkillModValue);
+		buffer.WriteUInt32(item->SkillModMax);
+		buffer.WriteInt32(item->SkillModType);
+		buffer.WriteInt32(0); //unsupported atm
+		
+		//s32 BaneDMGRace;
+		//s32 BaneDMGBodyType;
+		//s32 BaneDMGRaceValue;
+		//s32 BaneDMGBodyTypeValue;
+		buffer.WriteInt32(item->BaneDmgRace);
+		buffer.WriteInt32(item->BaneDmgBody);
+		buffer.WriteInt32(item->BaneDmgRaceAmt);
+		buffer.WriteInt32(item->BaneDmgAmt);
+
+		//bool Magic;
+		buffer.WriteUInt8(item->Magic);
+
+		//s32 FoodDuration;
+		buffer.WriteInt32(item->CastTime_);
+
+		//s32 RequiredLevel;
+		buffer.WriteInt32(item->ReqLevel > 125 ? 125 : item->ReqLevel);
+
+		//s32 RecommendedLevel;
+		buffer.WriteInt32(item->RecLevel > 125 ? 125 : item->RecLevel);
+
+		//s32 InstrumentType;
+		//s32 InstrumentMod;
+		buffer.WriteInt32(item->BardType);
+		buffer.WriteInt32(item->BardValue);
+
+		//u8 Light;
+		buffer.WriteUInt8(item->Light);
+
+		//u8 Delay;
+		buffer.WriteUInt8(item->Delay);
+
+		//u8 ElementalFlag;
+		//u8 ElementalDamage;
+		buffer.WriteUInt8(item->ElemDmgType);
+		buffer.WriteUInt8(item->ElemDmgAmt);
+
+		//u8 Range;
+		buffer.WriteUInt8(item->Range);
+
+		//u32 Damage;
+		buffer.WriteUInt32(item->Damage);
+
+		//u32 MaterialTintIndex;
+		//u32 Prestige;
+		buffer.WriteUInt32(item->Color);
+		buffer.WriteUInt32(0); //unsupported atm
+		
+		//u8 ItemClass;
+		buffer.WriteUInt8(item->ItemType);
+
+		//ArmorProperties properties;
+		//s32 Type;
+		//s32 Material;
+		//s32 Variation;
+		//s32 NewArmorId;
+		//s32 NewArmorType;
+		buffer.WriteUInt32(item->Material);
+		buffer.WriteUInt32(0); //unsupported atm
+		buffer.WriteUInt32(item->EliteMaterial);
+		buffer.WriteUInt32(item->HerosForgeModel);
+		buffer.WriteUInt32(0); //unsupported atm
+		
+		//float MerchantGreedMod;
+		buffer.WriteFloat(item->SellRate);
+
+		//s32 DmgBonusSkill;
+		//s32 DmgBonusValue;
+		buffer.WriteInt32(item->ExtraDmgSkill);
+		buffer.WriteInt32(item->ExtraDmgAmt);
+
+		//s32 ScriptID;
+		//char CharmFile[];
+		buffer.WriteUInt32(item->CharmFileID);
+		buffer.WriteString(item->CharmFile);
+
+		//s32 AugType;
+		//u32 AugSkinTypeMask;
+		//u32 AugRestrictions;
+		buffer.WriteUInt32(item->AugType);
+		buffer.WriteInt32(-1); //unsupported atm
+		buffer.WriteUInt32(item->AugRestrict);
+
+		//ItemAugmentationSocket AugData[6];
+		for (int j = 0; j < 6; ++j) {
+			/*
+			s32 Type;
+			bool Visible;
+			bool Infusible;
+			*/
+
+			buffer.WriteInt32(item->AugSlotType[j]);
+			buffer.WriteUInt8(item->AugSlotVisible[j]);
+			buffer.WriteUInt8(item->AugSlotUnk2[j]); //not entirely supported atm
+		}
+		
+		//s32 LDType;
+		//s32 LDTheme;
+		//s32 LDCost;
+		//s32 PointBuyBackPercent;
+		//s32 NeedAdventureCompleted;
+		buffer.WriteUInt32(item->PointType);
+		buffer.WriteUInt32(item->LDoNTheme);
+		buffer.WriteUInt32(item->LDoNPrice);
+		buffer.WriteUInt32(item->LDoNSellBackRate);
+		buffer.WriteUInt32(item->LDoNSold);
+
+		//u8 ContainerType;
+		//u8 Slots;
+		//u8 SizeCapacity;
+		//u8 WeightReduction;
+		buffer.WriteUInt8(item->BagType);
+		buffer.WriteUInt8(item->BagSlots);
+		buffer.WriteUInt8(item->BagSize);
+		buffer.WriteUInt8(item->BagWR);
+
+		//u8 BookType;
+		//u8 BookLang;
+		//char BookFile[];
+		buffer.WriteUInt8(item->Book);
+		buffer.WriteUInt8(item->BookType); //doesn't match the name for eqlib
+		buffer.WriteString(item->Filename);
+
+		//s32 Lore;
+		buffer.WriteInt32(item->LoreGroup);
+
+		//bool Artifact;
+		buffer.WriteUInt8(item->ArtifactFlag);
+
+		//s32 Favor;
+		buffer.WriteUInt32(item->Favor);
+
+		//bool bIsFVNoDrop;
+		buffer.WriteUInt8(item->FVNoDrop);
+
+		//s32 Attack;
+		//s32 Haste;
+		buffer.WriteInt32(item->Attack);
+		buffer.WriteInt32(item->Haste);
+
+		//s32 GuildFavor;
+		buffer.WriteUInt32(item->GuildFavor);
+
+		//s32 SolventItemID;
+		buffer.WriteUInt32(item->AugDistiller);
+		
+		//s32 AnimationOverride;
+		buffer.WriteInt32(-1); //unsupported atm
+
+		//u32 PaletteTintIndex;
+		buffer.WriteInt32(0); //unsupported atm
+
+		//bool bNoPetGive;
+		buffer.WriteUInt8(item->NoPet);
+
+		//bool bSomeProfile;
+		buffer.WriteUInt8(0); //unsupported atm
+
+		//u32 StackSize;
+		buffer.WriteUInt32(item->ID == PARCEL_MONEY_ITEM_ID ? 0x7FFFFFFF : ((item->Stackable ? item->StackSize : 0)));
+		
+		//bool bNoStorage;
+		buffer.WriteUInt8(item->NoTransfer);
+
+		//bool Expendable;
+		uint8 expendable = item->ExpendableArrow;
+
+		if (item->ItemType == EQ::item::ItemTypeFishingPole && item->SubType == 0) {
+			expendable = 1;
+		}
+
+		buffer.WriteUInt8(expendable);
+
+		//u8 SpellDataSkillMask[78];
+		for (int j = 0; j < 78; ++j) {
+			buffer.WriteUInt8(0); //unsure what this is exactly
+		}
+		/*
+		ItemSpellType_Clicky = 0,
+		ItemSpellType_Proc,
+		ItemSpellType_Worn,
+		ItemSpellType_Focus,
+		ItemSpellType_Scroll,
+		ItemSpellType_Focus2,
+		ItemSpellType_Blessing,
+		*/
+
+		/*
+		struct ProcEffectStruct
+		{
+			int32 effect;
+			uint8 level2;
+			uint32 type;
+			uint8 level;
+			uint32 unknown1; // poison?
+			uint32 unknown2;
+			uint32 unknown3;
+			uint32 unknown4;
+			uint32 procrate;
+			//uint8 effect_string;
+			//uint32 unknown5;
+		};
+		*/
+
+		/*
+		ipes.effect = item->Proc.Effect;
+		ipes.level2 = item->Proc.Level2;
+		ipes.type = item->Proc.Type;
+		ipes.level = item->Proc.Level;
+		ipes.procrate = item->ProcRate;
+		*/
+		//SpellData spell_data[7];
+
+		/*
+		s32 SpellId;
+		u8 RequiredLevel;
+		u8 EffectType;
+		s32 EffectiveCasterLevel;
+		s32 MaxCharges;
+		s32 CastTime;
+		s32 RecastTime;
+		s32 RecastType;
+		s32 ProcRate;
+		char OverrideName[];
+		s32 OverrideDesc;
+		*/
+		
+		
+		//s32 RightClickScriptID;
+		//bool QuestItem;
+		//s32 MaxPower;
+		//s32 Purity;
+		//s32 BackstabDamage;
+		//s32 HeroicSTR;
+		//s32 HeroicINT;
+		//s32 HeroicWIS;
+		//s32 HeroicAGI;
+		//s32 HeroicDEX;
+		//s32 HeroicSTA;
+		//s32 HeroicCHA;
+		//s32 HealAmount;
+		//s32 SpellDamage;
+		//s32 Clairvoyance;
+		//s32 SubClass;
+		//bool bLoginRegReqItem;
+		//s32 ItemLaunchScriptID;
+		//bool Heirloom;
+		//s32 Placeable;
+		//bool bPlaceableIgnoreCollisions;
+		//s32 PlacementType;
+		//s32 RealEstateDefID;
+		//float PlaceableScaleRangeMin;
+		//float PlaceableScaleRangeMax;
+		//s32 RealEstateUpkeepID;
+		//s32 MaxPerRealEstate;
+		//char HousepetFileName[];
+		//bool bInteractiveObject;
+		//s32 TrophyBenefitID;
+		//bool bDisablePlacementRotation;
+		//bool bDisableFreePlacement;
+		//s32 NpcRespawnInterval;
+		//float PlaceableDefScale;
+		//float PlaceableDefHeading;
+		//float PlaceableDefPitch;
+		//float PlaceableDefRoll;
+		//u8 SocketSubClassCount;
+		//s32 SocketSubClass[SocketSubClassCount];
+		//bool Collectible;
+		//bool NoDestroy;
+		//bool bNoNPC;
+		//bool NoZone;
+		//s32 MakerId;
+		//bool NoGround;
+		//bool bNoLoot;
+		//bool MarketPlace;
+		//bool bFreeSlot;
+		//bool bAutoUse;
+		//s32 Unknown0x0e4;
+		//s32 MinLuck;
+		//s32 MaxLuck;
+		//s32 LoreEquipped;
+	}
+
+	void SerializeItem(SerializeBuffer& buffer, const EQ::ItemInstance* inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type) {
+		const EQ::ItemData* item = inst->GetUnscaledItem();
+
+		//char ItemGUID[];
+		auto item_guid = fmt::format("{:016}", inst->GetSerialNumber());
+		buffer.WriteString(item_guid);
+
+		//u32 StackCount;
+		auto stacksize =
+			item->ID == PARCEL_MONEY_ITEM_ID ? inst->GetPrice() : (inst->IsStackable() ? ((inst->GetCharges() > 1000)
+				? 0xFFFFFFFF : inst->GetCharges()) : 1);
+		buffer.WriteUInt32(stacksize);
+
+		structs::InventorySlot_Struct slot_id{};
+		switch (packet_type) {
+		case ItemPacketLoot:
+			slot_id = ServerToLarionCorpseSlot(slot_id_in);
+			break;
+		default:
+			slot_id = ServerToLarionSlot(slot_id_in);
+			break;
+		}
+
+		//u32 slot_type;
+		buffer.WriteUInt32(inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
+		//s16 main_slot;
+		//s16 sub_slot;
+		//s16 aug_slot;
+		buffer.WriteInt16(inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
+		buffer.WriteInt16(inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
+		buffer.WriteInt16(inst->GetMerchantSlot() ? 0xffff : slot_id.AugIndex);
+
+		//u64 price;
+		buffer.WriteUInt64(inst->GetPrice());
+
+		//u32 MerchantQuantity;
+		buffer.WriteUInt32(inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1);
+
+		//u32 ScriptIndex;
+		buffer.WriteUInt32(inst->IsScaling() ? (inst->GetExp() / 100) : 0);
+
+		//u64 MerchantSlot;
+		buffer.WriteUInt64(inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
+
+		//u32 LastCastTime;
+		buffer.WriteUInt32(inst->GetRecastTimestamp());
+
+		//s32 Charges;
+		auto charges = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254)
+			? -1
+			: inst->GetCharges()));
+
+		buffer.WriteInt32(charges);
+
+		//s32 NoDropFlag;
+		buffer.WriteInt32(inst->IsAttuned() ? 1 : 0);
+
+		//s32 Power;
+		buffer.WriteInt32(0);
+
+		//s32 AugFlag;
+		buffer.WriteInt32(0);
+
+		//bool bConvertable;
+		buffer.WriteInt8(0);
+
+		//u32 ConvertItemNameLength;
+		buffer.WriteInt32(0);
+
+		//char ConvertItemName[ConvertItemNameLength];
+
+		//u32 Open;
+		buffer.WriteInt32(0);
+
+		//bool EvolvingItem;
+		buffer.WriteInt8(item->EvolvingItem);
+
+		//EvoData evoData;
+		if (item->EvolvingItem > 0) {
+			//s32 GroupId;
+			buffer.WriteInt32(0);
+
+			//s32 EvolvingCurrentLevel;
+			buffer.WriteInt32(item->EvolvingLevel);
+
+			//double EvolvingExpPct;
+			buffer.WriteDouble(0.0);
+			
+			//s32 EvolvingMaxLevel;
+			buffer.WriteInt32(item->EvolvingMax);
+
+			//s32 LastEquipped;
+			buffer.WriteInt32(0);
+		}
+
+		uint32 ornamentation_icon = (inst->GetOrnamentationIcon() ? inst->GetOrnamentationIcon() : 0);
+		uint32 hero_model = 0;
+
+		//s32 ActorTag1;
+		//s32 ActorTag2;
+		if (inst->GetOrnamentationIDFile()) {
+			hero_model = inst->GetOrnamentHeroModel(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id_in));
+
+			buffer.WriteInt32(inst->GetOrnamentationIDFile());
+			buffer.WriteInt32(inst->GetOrnamentationIDFile());
+		}
+		else {
+			buffer.WriteInt32(0);
+			buffer.WriteInt32(0);
+		}
+
+		//s32 OrnamentationIcon;
+		//s32 ArmorType;
+		//s32 NewArmorID;
+		//u32 Tint;
+		buffer.WriteInt32(ornamentation_icon);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(hero_model);
+		buffer.WriteInt32(0);
+
+		//bool bCopied;
+		buffer.WriteUInt8(0);
+
+		//s32 RealEstateID;
+		buffer.WriteInt32(-1);
+		//s32 RespawnTime;
+		buffer.WriteInt32(0);
+
+		//ItemDefinition Item;
+		SerializeItemDefinition(buffer, item);
+
+		//u32 RealEstateArrayCount;
+		buffer.WriteInt32(0);
+		//s32 RealEstateArray[RealEstateArrayCount];
+		
+		//bool bRealEstateItemPlaceable;
+		buffer.WriteInt8(0);
+
+		//u32 SubContentSize;
+	}
+
+	static inline structs::InventorySlot_Struct ServerToLarionSlot(uint32 server_slot)
+	{
+		structs::InventorySlot_Struct LarionSlot;
+		LarionSlot.Type = invtype::TYPE_INVALID;
+		LarionSlot.Slot = invslot::SLOT_INVALID;
+		LarionSlot.SubIndex = invbag::SLOT_INVALID;
+		LarionSlot.AugIndex = invaug::SOCKET_INVALID;
+
+		uint32 TempSlot = EQ::invslot::SLOT_INVALID;
+
+		if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
+			LarionSlot.Type = invtype::typePossessions;
+			LarionSlot.Slot = server_slot;
+		}
+
+		else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+			TempSlot = server_slot - EQ::invbag::GENERAL_BAGS_BEGIN;
+
+			LarionSlot.Type = invtype::typePossessions;
+			LarionSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
+			LarionSlot.SubIndex = TempSlot - ((LarionSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQ::invslot::TRIBUTE_END && server_slot >= EQ::invslot::TRIBUTE_BEGIN) {
+			LarionSlot.Type = invtype::typeTribute;
+			LarionSlot.Slot = server_slot - EQ::invslot::TRIBUTE_BEGIN;
+		}
+
+		else if (server_slot <= EQ::invslot::GUILD_TRIBUTE_END && server_slot >= EQ::invslot::GUILD_TRIBUTE_BEGIN) {
+			LarionSlot.Type = invtype::typeGuildTribute;
+			LarionSlot.Slot = server_slot - EQ::invslot::GUILD_TRIBUTE_BEGIN;
+		}
+
+		else if (server_slot == EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			LarionSlot.Type = invtype::typeWorld;
+		}
+
+		else if (server_slot <= EQ::invslot::BANK_END && server_slot >= EQ::invslot::BANK_BEGIN) {
+			LarionSlot.Type = invtype::typeBank;
+			LarionSlot.Slot = server_slot - EQ::invslot::BANK_BEGIN;
+		}
+
+		else if (server_slot <= EQ::invbag::BANK_BAGS_END && server_slot >= EQ::invbag::BANK_BAGS_BEGIN) {
+			TempSlot = server_slot - EQ::invbag::BANK_BAGS_BEGIN;
+
+			LarionSlot.Type = invtype::typeBank;
+			LarionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			LarionSlot.SubIndex = TempSlot - (LarionSlot.Slot * EQ::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQ::invslot::SHARED_BANK_END && server_slot >= EQ::invslot::SHARED_BANK_BEGIN) {
+			LarionSlot.Type = invtype::typeSharedBank;
+			LarionSlot.Slot = server_slot - EQ::invslot::SHARED_BANK_BEGIN;
+		}
+
+		else if (server_slot <= EQ::invbag::SHARED_BANK_BAGS_END && server_slot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) {
+			TempSlot = server_slot - EQ::invbag::SHARED_BANK_BAGS_BEGIN;
+
+			LarionSlot.Type = invtype::typeSharedBank;
+			LarionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			LarionSlot.SubIndex = TempSlot - (LarionSlot.Slot * EQ::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQ::invslot::TRADE_END && server_slot >= EQ::invslot::TRADE_BEGIN) {
+			LarionSlot.Type = invtype::typeTrade;
+			LarionSlot.Slot = server_slot - EQ::invslot::TRADE_BEGIN;
+		}
+
+		else if (server_slot <= EQ::invbag::TRADE_BAGS_END && server_slot >= EQ::invbag::TRADE_BAGS_BEGIN) {
+			TempSlot = server_slot - EQ::invbag::TRADE_BAGS_BEGIN;
+
+			LarionSlot.Type = invtype::typeTrade;
+			LarionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			LarionSlot.SubIndex = TempSlot - (LarionSlot.Slot * EQ::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQ::invslot::WORLD_END && server_slot >= EQ::invslot::WORLD_BEGIN) {
+			LarionSlot.Type = invtype::typeWorld;
+			LarionSlot.Slot = server_slot - EQ::invslot::WORLD_BEGIN;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Larion Slot [%i, %i, %i, %i]",
+			server_slot, LarionSlot.Type, LarionSlot.Slot, LarionSlot.SubIndex, LarionSlot.AugIndex);
+
+		return LarionSlot;
+	}
+
+	static inline structs::InventorySlot_Struct ServerToLarionCorpseSlot(uint32 server_corpse_slot)
+	{
+		structs::InventorySlot_Struct LarionSlot;
+		LarionSlot.Type = invtype::TYPE_INVALID;
+		LarionSlot.Slot = ServerToLarionCorpseMainSlot(server_corpse_slot);
+		LarionSlot.SubIndex = invbag::SLOT_INVALID;
+		LarionSlot.AugIndex = invaug::SOCKET_INVALID;
+
+		if (LarionSlot.Slot != invslot::SLOT_INVALID)
+			LarionSlot.Type = invtype::typeCorpse;
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to Larion Corpse Slot [%i, %i, %i, %i]",
+			server_corpse_slot, LarionSlot.Type, LarionSlot.Slot, LarionSlot.SubIndex, LarionSlot.AugIndex);
+
+		return LarionSlot;
+	}
 	
+	static inline uint32 ServerToLarionCorpseMainSlot(uint32 server_corpse_slot)
+	{
+		uint32 LarionSlot = invslot::SLOT_INVALID;
+
+		if (server_corpse_slot <= EQ::invslot::CORPSE_END && server_corpse_slot >= EQ::invslot::CORPSE_BEGIN) {
+			LarionSlot = server_corpse_slot;
+		}
+
+		LogNetcode("Convert Server Corpse Slot [{}] to Larion Corpse Main Slot [{}]", server_corpse_slot, LarionSlot);
+
+		return LarionSlot;
+	}
+
+	static inline structs::TypelessInventorySlot_Struct ServerToLarionTypelessSlot(uint32 server_slot, int16 server_type)
+	{
+		structs::TypelessInventorySlot_Struct LarionSlot;
+		LarionSlot.Slot = invslot::SLOT_INVALID;
+		LarionSlot.SubIndex = invbag::SLOT_INVALID;
+		LarionSlot.AugIndex = invaug::SOCKET_INVALID;
+
+		uint32 TempSlot = EQ::invslot::SLOT_INVALID;
+
+		if (server_type == EQ::invtype::typePossessions) {
+			if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
+				LarionSlot.Slot = server_slot;
+			}
+
+			else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+				TempSlot = server_slot - EQ::invbag::GENERAL_BAGS_BEGIN;
+
+				LarionSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
+				LarionSlot.SubIndex = TempSlot - ((LarionSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+			}
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Larion Typeless Slot [%i, %i, %i] (implied type: %i)",
+			server_slot, LarionSlot.Slot, LarionSlot.SubIndex, LarionSlot.AugIndex, server_type);
+
+		return LarionSlot;
+	}
+
+	static inline uint32 LarionToServerSlot(structs::InventorySlot_Struct larion_slot)
+	{
+		if (larion_slot.AugIndex < invaug::SOCKET_INVALID || larion_slot.AugIndex >= invaug::SOCKET_COUNT) {
+			Log(Logs::Detail, Logs::Netcode, "Convert Larion Slot [%i, %i, %i, %i] to Server Slot %i",
+				larion_slot.Type, larion_slot.Slot, larion_slot.SubIndex, larion_slot.AugIndex, EQ::invslot::SLOT_INVALID);
+
+			return EQ::invslot::SLOT_INVALID;
+		}
+
+		uint32 server_slot = EQ::invslot::SLOT_INVALID;
+		uint32 temp_slot = invslot::SLOT_INVALID;
+
+		switch (larion_slot.Type) {
+		case invtype::typePossessions: {
+			if (larion_slot.Slot >= invslot::POSSESSIONS_BEGIN && larion_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = larion_slot.Slot;
+				}
+
+				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
+					if (larion_slot.Slot < invslot::GENERAL_BEGIN)
+						return EQ::invslot::SLOT_INVALID;
+
+					temp_slot = (larion_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::GENERAL_BAGS_BEGIN + temp_slot + larion_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeBank: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::BANK_SIZE) {
+				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::BANK_BEGIN + larion_slot.Slot;
+				}
+
+				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = larion_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::BANK_BAGS_BEGIN + temp_slot + larion_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeSharedBank: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::SHARED_BANK_BEGIN + larion_slot.Slot;
+				}
+
+				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = larion_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + temp_slot + larion_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeTrade: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::TRADE_SIZE) {
+				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::TRADE_BEGIN + larion_slot.Slot;
+				}
+
+				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = larion_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::TRADE_BAGS_BEGIN + temp_slot + larion_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeWorld: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::WORLD_SIZE) {
+				server_slot = EQ::invslot::WORLD_BEGIN + larion_slot.Slot;
+			}
+
+			else if (larion_slot.Slot == invslot::SLOT_INVALID) {
+				server_slot = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+			}
+
+			break;
+		}
+		case invtype::typeLimbo: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::LIMBO_SIZE) {
+				server_slot = EQ::invslot::slotCursor;
+			}
+
+			break;
+		}
+		case invtype::typeTribute: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::TRIBUTE_SIZE) {
+				server_slot = EQ::invslot::TRIBUTE_BEGIN + larion_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeGuildTribute: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				server_slot = EQ::invslot::GUILD_TRIBUTE_BEGIN + larion_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeCorpse: {
+			if (larion_slot.Slot >= invslot::CORPSE_BEGIN && larion_slot.Slot <= invslot::CORPSE_END) {
+				server_slot = larion_slot.Slot;
+			}
+
+			break;
+		}
+		default: {
+
+			break;
+		}
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Larion Slot [%i, %i, %i, %i] to Server Slot %i",
+			larion_slot.Type, larion_slot.Slot, larion_slot.SubIndex, larion_slot.AugIndex, server_slot);
+
+		return server_slot;
+	}
+
+	static inline uint32 LarionToServerCorpseSlot(structs::InventorySlot_Struct larion_corpse_slot)
+	{
+		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
+
+		if (larion_corpse_slot.Type != invtype::typeCorpse || larion_corpse_slot.SubIndex != invbag::SLOT_INVALID || larion_corpse_slot.AugIndex != invaug::SOCKET_INVALID) {
+			ServerSlot = EQ::invslot::SLOT_INVALID;
+		}
+
+		else {
+			ServerSlot = LarionToServerCorpseMainSlot(larion_corpse_slot.Slot);
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Larion Slot [%i, %i, %i, %i] to Server Slot %i",
+			larion_corpse_slot.Type, larion_corpse_slot.Slot, larion_corpse_slot.SubIndex, larion_corpse_slot.AugIndex, ServerSlot);
+
+		return ServerSlot;
+	}
+
+	static inline uint32 LarionToServerCorpseMainSlot(uint32 larion_corpse_slot)
+	{
+		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
+
+		if (larion_corpse_slot <= invslot::CORPSE_END && larion_corpse_slot >= invslot::CORPSE_BEGIN) {
+			ServerSlot = larion_corpse_slot;
+		}
+
+		LogNetcode("Convert Larion Corpse Main Slot [{}] to Server Corpse Slot [{}]", larion_corpse_slot, ServerSlot);
+
+		return ServerSlot;
+	}
+
+	static inline uint32 LarionToServerTypelessSlot(structs::TypelessInventorySlot_Struct larion_slot, int16 larion_type)
+	{
+		if (larion_slot.AugIndex < invaug::SOCKET_INVALID || larion_slot.AugIndex >= invaug::SOCKET_COUNT) {
+			Log(Logs::Detail, Logs::Netcode, "Convert Larion Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
+				larion_slot.Slot, larion_slot.SubIndex, larion_slot.AugIndex, larion_type, EQ::invslot::SLOT_INVALID);
+
+			return EQ::invslot::SLOT_INVALID;
+		}
+
+		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
+		uint32 TempSlot = invslot::SLOT_INVALID;
+
+		switch (larion_type) {
+		case invtype::typePossessions: {
+			if (larion_slot.Slot >= invslot::POSSESSIONS_BEGIN && larion_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = larion_slot.Slot;
+				}
+
+				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
+					if (larion_slot.Slot < invslot::GENERAL_BEGIN)
+						return EQ::invslot::SLOT_INVALID;
+
+					TempSlot = (larion_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::GENERAL_BAGS_BEGIN + TempSlot + larion_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeBank: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::BANK_SIZE) {
+				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::BANK_BEGIN + larion_slot.Slot;
+				}
+
+				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = larion_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::BANK_BAGS_BEGIN + TempSlot + larion_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeSharedBank: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::SHARED_BANK_BEGIN + larion_slot.Slot;
+				}
+
+				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = larion_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + TempSlot + larion_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeTrade: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::TRADE_SIZE) {
+				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::TRADE_BEGIN + larion_slot.Slot;
+				}
+
+				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = larion_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::TRADE_BAGS_BEGIN + TempSlot + larion_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeWorld: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::WORLD_SIZE) {
+				ServerSlot = EQ::invslot::WORLD_BEGIN + larion_slot.Slot;
+			}
+
+			else if (larion_slot.Slot == invslot::SLOT_INVALID) {
+				ServerSlot = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+			}
+
+			break;
+		}
+		case invtype::typeLimbo: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::LIMBO_SIZE) {
+				ServerSlot = EQ::invslot::slotCursor;
+			}
+
+			break;
+		}
+		case invtype::typeTribute: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::TRIBUTE_SIZE) {
+				ServerSlot = EQ::invslot::TRIBUTE_BEGIN + larion_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeGuildTribute: {
+			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				ServerSlot = EQ::invslot::GUILD_TRIBUTE_BEGIN + larion_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeCorpse: {
+			if (larion_slot.Slot >= invslot::CORPSE_BEGIN && larion_slot.Slot <= invslot::CORPSE_END) {
+				ServerSlot = larion_slot.Slot;
+			}
+
+			break;
+		}
+		default: {
+
+			break;
+		}
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Larion Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
+			larion_slot.Slot, larion_slot.SubIndex, larion_slot.AugIndex, larion_type, ServerSlot);
+
+		return ServerSlot;
+	}
 } /*Larion*/
