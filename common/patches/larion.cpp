@@ -3027,62 +3027,152 @@ namespace Larion
 		for (int j = 0; j < 78; ++j) {
 			buffer.WriteUInt8(0); //unsure what this is exactly
 		}
-		/*
-		ItemSpellType_Clicky = 0,
-		ItemSpellType_Proc,
-		ItemSpellType_Worn,
-		ItemSpellType_Focus,
-		ItemSpellType_Scroll,
-		ItemSpellType_Focus2,
-		ItemSpellType_Blessing,
+
+		/* SpellData:
+			s32 SpellId;
+			u8 RequiredLevel;
+			u8 EffectType;
+			s32 EffectiveCasterLevel;
+			s32 MaxCharges;
+			s32 CastTime;
+			s32 RecastTime;
+			s32 RecastType;
+			s32 ProcRate;
+			char OverrideName[];
+			s32 OverrideDesc;
 		*/
 
-		/*
-		struct ProcEffectStruct
-		{
-			int32 effect;
-			uint8 level2;
-			uint32 type;
-			uint8 level;
-			uint32 unknown1; // poison?
-			uint32 unknown2;
-			uint32 unknown3;
-			uint32 unknown4;
-			uint32 procrate;
-			//uint8 effect_string;
-			//uint32 unknown5;
-		};
-		*/
+		//SpellData SpellDataClicky;
+		buffer.WriteInt32(item->Click.Effect);
+		buffer.WriteUInt8(item->Click.Level2);
+		buffer.WriteUInt8(item->Click.Type);
+		buffer.WriteInt32(item->Click.Level);
+		buffer.WriteInt32(item->MaxCharges);
+		buffer.WriteInt32(item->CastTime);
+		buffer.WriteInt32(item->RecastDelay);
+		buffer.WriteInt32(item->RecastType);
+		buffer.WriteInt32(0); //unsupported atm
+		if (strlen(item->ClickName) > 0) {
+			buffer.WriteString(item->ClickName);
+		}
+		else {
+			buffer.WriteString("");
+		}
+		buffer.WriteInt32(0); //unsupported atm
 
-		/*
-		ipes.effect = item->Proc.Effect;
-		ipes.level2 = item->Proc.Level2;
-		ipes.type = item->Proc.Type;
-		ipes.level = item->Proc.Level;
-		ipes.procrate = item->ProcRate;
-		*/
-		//SpellData spell_data[7];
+		//SpellData SpellDataProc;
+		buffer.WriteInt32(item->Proc.Effect);
+		buffer.WriteUInt8(item->Proc.Level2);
+		buffer.WriteUInt8(item->Proc.Type);
+		buffer.WriteInt32(item->Proc.Level);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0); //unsupported atm; even live sets this to 0 for procs
+		if (strlen(item->ProcName) > 0) {
+			buffer.WriteString(item->ProcName);
+		}
+		else {
+			buffer.WriteString("");
+		}
+		buffer.WriteInt32(0); //unsupported atm
 
-		/*
-		s32 SpellId;
-		u8 RequiredLevel;
-		u8 EffectType;
-		s32 EffectiveCasterLevel;
-		s32 MaxCharges;
-		s32 CastTime;
-		s32 RecastTime;
-		s32 RecastType;
-		s32 ProcRate;
-		char OverrideName[];
-		s32 OverrideDesc;
-		*/
-		
+		//SpellData SpellDataWorn;
+		buffer.WriteInt32(item->Worn.Effect);
+		buffer.WriteUInt8(item->Worn.Level2);
+		buffer.WriteUInt8(item->Worn.Type);
+		buffer.WriteInt32(item->Worn.Level);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		if (strlen(item->WornName) > 0) {
+			buffer.WriteString(item->WornName);
+		}
+		else {
+			buffer.WriteString("");
+		}
+		buffer.WriteInt32(0); //unsupported atm
+
+		//SpellData SpellDataFocus;
+		buffer.WriteInt32(item->Focus.Effect);
+		buffer.WriteUInt8(item->Focus.Level2);
+		buffer.WriteUInt8(item->Focus.Type);
+		buffer.WriteInt32(item->Focus.Level);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		if (strlen(item->FocusName) > 0) {
+			buffer.WriteString(item->FocusName);
+		}
+		else {
+			buffer.WriteString("");
+		}
+		buffer.WriteInt32(0); //unsupported atm
+
+		//SpellData SpellDataScroll;
+		buffer.WriteInt32(item->Scroll.Effect);
+		buffer.WriteUInt8(item->Scroll.Level2);
+		buffer.WriteUInt8(item->Scroll.Type);
+		buffer.WriteInt32(item->Scroll.Level);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		if (strlen(item->ScrollName) > 0) {
+			buffer.WriteString(item->ScrollName);
+		}
+		else {
+			buffer.WriteString("");
+		}
+		buffer.WriteInt32(0); //unsupported atm
+
+		//SpellData SpellDataFocus2; //unsupported atm
+		buffer.WriteInt32(-1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteString("");
+		buffer.WriteInt32(0);
+
+		//SpellData SpellDataBlessing; //unsupported atm
+		buffer.WriteInt32(-1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteString("");
+		buffer.WriteInt32(0);		
 		
 		//s32 RightClickScriptID;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//bool QuestItem;
+		buffer.WriteInt8(item->QuestItemFlag);
+
 		//s32 MaxPower;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//s32 Purity;
+		buffer.WriteInt32(item->Purity);
+
 		//s32 BackstabDamage;
+		buffer.WriteInt32(item->BackstabDmg);
+
 		//s32 HeroicSTR;
 		//s32 HeroicINT;
 		//s32 HeroicWIS;
@@ -3090,47 +3180,126 @@ namespace Larion
 		//s32 HeroicDEX;
 		//s32 HeroicSTA;
 		//s32 HeroicCHA;
+		buffer.WriteInt32(item->HeroicStr);
+		buffer.WriteInt32(item->HeroicInt);
+		buffer.WriteInt32(item->HeroicWis);
+		buffer.WriteInt32(item->HeroicAgi);
+		buffer.WriteInt32(item->HeroicDex);
+		buffer.WriteInt32(item->HeroicSta);
+		buffer.WriteInt32(item->HeroicCha);
+
 		//s32 HealAmount;
 		//s32 SpellDamage;
 		//s32 Clairvoyance;
+		buffer.WriteInt32(item->HealAmt);
+		buffer.WriteInt32(item->SpellDmg);
+		buffer.WriteInt32(item->Clairvoyance);
+
 		//s32 SubClass;
+		buffer.WriteInt32(item->SubType);
+
 		//bool bLoginRegReqItem;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//s32 ItemLaunchScriptID;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//bool Heirloom;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//s32 Placeable;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//bool bPlaceableIgnoreCollisions;
+		buffer.WriteUInt8(0);
+
 		//s32 PlacementType;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//s32 RealEstateDefID;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//float PlaceableScaleRangeMin;
 		//float PlaceableScaleRangeMax;
+		buffer.WriteFloat(0.0f); //unsupported atm
+		buffer.WriteFloat(0.0f); //unsupported atm
+
 		//s32 RealEstateUpkeepID;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//s32 MaxPerRealEstate;
+		buffer.WriteInt32(-1); //unsupported atm
+
 		//char HousepetFileName[];
+		buffer.WriteString(""); //unsupported atm
+
 		//bool bInteractiveObject;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//s32 TrophyBenefitID;
+		buffer.WriteInt32(-1); //unsupported atm
+
 		//bool bDisablePlacementRotation;
 		//bool bDisableFreePlacement;
+		buffer.WriteUInt8(0); //unsupported atm
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//s32 NpcRespawnInterval;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//float PlaceableDefScale;
 		//float PlaceableDefHeading;
 		//float PlaceableDefPitch;
 		//float PlaceableDefRoll;
+		buffer.WriteFloat(0.0f);
+		buffer.WriteFloat(0.0f);
+		buffer.WriteFloat(0.0f);
+		buffer.WriteFloat(0.0f);
+
 		//u8 SocketSubClassCount;
 		//s32 SocketSubClass[SocketSubClassCount];
+		buffer.WriteUInt8(0); //unsupported atm
+		
 		//bool Collectible;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//bool NoDestroy;
+		buffer.WriteUInt8(0); //unsupported atm
+		
 		//bool bNoNPC;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//bool NoZone;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//s32 MakerId;
+		buffer.WriteInt32(0); //unsupported atm
+
 		//bool NoGround;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//bool bNoLoot;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//bool MarketPlace;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//bool bFreeSlot;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//bool bAutoUse;
+		buffer.WriteUInt8(0); //unsupported atm
+
 		//s32 Unknown0x0e4;
+		buffer.WriteInt32(-1); //unsupported atm
+
 		//s32 MinLuck;
 		//s32 MaxLuck;
+		buffer.WriteUInt32(0); //unsupported atm
+		buffer.WriteUInt32(0); //unsupported atm
+
 		//s32 LoreEquipped;
+		buffer.WriteUInt32(0); //unsupported atm
 	}
 
 	void SerializeItem(SerializeBuffer& buffer, const EQ::ItemInstance* inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type) {
@@ -3272,6 +3441,15 @@ namespace Larion
 		buffer.WriteInt8(0);
 
 		//u32 SubContentSize;
+
+		//SubItems
+
+		//bool bCollected;
+		buffer.WriteInt8(0); //unsupported atm
+		//u64 DontKnow;
+		buffer.WriteUInt64(0); //unsupported atm
+		//s32 Luck;
+		buffer.WriteInt32(0); //unsupported atm
 	}
 
 	static inline structs::InventorySlot_Struct ServerToLarionSlot(uint32 server_slot)
