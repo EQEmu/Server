@@ -1386,7 +1386,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 
 			if (limit_value > newbon->SpellCritDmgIncNoStack) {
-				new_bonus->SpellCritDmgIncNoStack = limit_value;
+				newbon->SpellCritDmgIncNoStack = limit_value;
 			}
 
 			break;
