@@ -926,7 +926,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	// Check for AA XP Cap
-	int aaexp_cap = RuleI(AA, MaxAAEXPPerKill) * GetConLevelModifierPercent(conlevel) * (GetLevel()/50.0f) * (XPRate / 100.0f) * (zone->newzone_data.zone_exp_multiplier - 1.0f);
+	int aaexp_cap = RuleI(AA, MaxAAEXPPerKill) * GetConLevelModifierPercent(conlevel) * (GetLevel()/50.0f) * (XPRate / 100.0f) * (zone->newzone_data.zone_exp_multiplier - 1.0f) * (0.5 + RuleB(Character,FinalExpMultiplier));
 
 	if (zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion) || zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion)) {
 		int member_scale = GetGroup() ? std::min(0,(GetGroup()->GroupCount() - 2)) : 0;
