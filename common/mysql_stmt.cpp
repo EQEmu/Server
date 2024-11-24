@@ -415,12 +415,26 @@ static uint64_t MakeBits(std::span<const uint8_t> data)
 }
 
 template <typename T>
+concept has_from_chars = requires (const char* first, const char* last, T value)
+{
+	std::from_chars(first, last, value);
+};
+
+template <typename T>
 static T FromString(std::string_view sv)
 {
 	if constexpr (std::is_same_v<T, bool>)
 	{
 		// return false for empty (zero-length) strings
 		return !sv.empty();
+	}
+	else if constexpr (std::is_same_v<T, float> && !has_from_chars<T>)
+	{
+		return std::strtof(std::string(sv).c_str(), nullptr);
+	}
+	else if constexpr (std::is_same_v<T, double> && !has_from_chars<T>)
+	{
+		return std::strtod(std::string(sv).c_str(), nullptr);
 	}
 	else
 	{
