@@ -777,6 +777,8 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				tradingWith->SayString(TRADE_BACK, GetCleanName());
 				PushItemOnCursor(*inst, true);
 			}
+
+			items.clear();
 		}
 		// Only enforce trade rules if the NPC doesn't have an EVENT_TRADE
 		// subroutine.  That overrides all.
