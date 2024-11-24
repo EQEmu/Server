@@ -212,7 +212,7 @@ namespace Larion
 		*(char*)&__packet->pBuffer[0x705] = 0;
 
 		//Something about item restrictions, seems to always be set to 1
-		*(char*)&__packet->pBuffer[0x710] = 0;
+		*(char*)&__packet->pBuffer[0x710] = 1;
 
 		//This and 0x724 are often multiplied together in guild favor calcs, live and test send 1.0f
 		*(float*)&__packet->pBuffer[0x720] = 1.0f;
