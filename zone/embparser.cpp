@@ -1736,7 +1736,7 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_PAYLOAD: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "payload_id", sep.arg[0]);
-			ExportVar(package_name.c_str(), "payload_value", sep.arg[1]);
+			ExportVar(package_name.c_str(), "payload_value", sep.argplus[1]);
 			break;
 		}
 
