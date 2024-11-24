@@ -94,7 +94,7 @@ void EQEmuConfig::parse_config()
 		auto_database_updates = true;
 	}
 
-	WorldIP      = _root["server"]["world"]["tcp"].get("host", "127.0.0.1").asString();
+	WorldIP      = _root["server"]["world"]["tcp"].get("ip", "127.0.0.1").asString();
 	WorldTCPPort = Strings::ToUnsignedInt(_root["server"]["world"]["tcp"].get("port", "9000").asString());
 
 	TelnetIP      = _root["server"]["world"]["telnet"].get("ip", "127.0.0.1").asString();
