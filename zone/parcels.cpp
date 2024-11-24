@@ -278,6 +278,19 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 		return;
 	}
 
+	if (parcel_in->money_flag && parcel_in->item_slot != INVALID_INDEX) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"{} tells you, 'I am confused!  Do you want to send money or an item?'",
+				merchant->GetCleanName()
+			).c_str()
+		);
+		DoParcelCancel();
+		SendParcelAck();
+		return;
+	}
+
 	auto num_of_parcels = GetParcelCount();
 	if (num_of_parcels >= RuleI(Parcel, ParcelMaxItems)) {
 		SendParcelIconStatus();
