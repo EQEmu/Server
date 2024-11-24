@@ -6,6 +6,8 @@ SET(qserv_sources
     queryserv.cpp
     queryservconfig.cpp
     worldserver.cpp
+    zonelist.cpp
+    zoneserver.cpp
 )
 
 SET(qserv_headers
@@ -13,6 +15,8 @@ SET(qserv_headers
     lfguild.h
     queryservconfig.h
     worldserver.h
+    zonelist.h
+    zoneserver.h
 )
 
 ADD_EXECUTABLE(queryserv ${qserv_sources} ${qserv_headers})

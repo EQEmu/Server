@@ -1,6 +1,12 @@
 #ifndef QUERYSERV_ZONE_H
 #define QUERYSERV_ZONE_H
 
+//#include "../common/types.h"
+#include "../common/net/servertalk_server.h"
+#include "../common/net/servertalk_client_connection.h"
+//#include "../common/servertalk.h"
+#include "../common/event/timer.h"
+
 
 /*
 	enum PlayerGenericLogEventTypes
@@ -26,12 +32,35 @@ enum PlayerGenericLogEventTypes {
 };
 
 
-class QueryServ{
-	public:
-		QueryServ();
-		~QueryServ();
-		void SendQuery(std::string Query);
-		void PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
+class QueryServ {
+public:
+	QueryServ();
+	~QueryServ();
+	void SendQuery(std::string Query);
+	void PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
+	void Connect();
+	bool SendPacket(ServerPacket *pack);
+
+private:
+	void OnKeepAlive(EQ::Timer *t);
+
+	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
+	std::unique_ptr<EQ::Timer>                 m_keepalive;
+};
+
+class QueryServConnection
+{
+public:
+	QueryServConnection();
+	void AddConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection);
+	void RemoveConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection);
+	void HandleGenericMessage(uint16_t opcode, EQ::Net::Packet &p);
+	void HandleLFGuildUpdateMessage(uint16_t opcode, EQ::Net::Packet &p);
+	bool SendPacket(ServerPacket* pack);
+	void OnKeepAlive(EQ::Timer *t);
+private:
+	std::map<std::string, std::shared_ptr<EQ::Net::ServertalkServerConnection>> m_streams;
+	std::unique_ptr<EQ::Timer> m_keepalive;
 };
 
 #endif /* QUERYSERV_ZONE_H */

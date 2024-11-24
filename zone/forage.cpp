@@ -35,8 +35,10 @@
 #include "../common/repositories/fishing_repository.h"
 #include "../common/events/player_event_logs.h"
 #include "worldserver.h"
+#include "queryserv.h"
 
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf

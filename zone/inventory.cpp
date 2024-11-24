@@ -26,8 +26,10 @@
 #include "../common/events/player_event_logs.h"
 #include "bot.h"
 #include "../common/repositories/character_corpse_items_repository.h"
+#include "queryserv.h"
 
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 // @merth: this needs to be touched up
 uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {

@@ -27,6 +27,7 @@
 #include "../common/ruletypes.h"
 
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 void Client::SendBulkParcels()
 {

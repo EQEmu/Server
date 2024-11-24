@@ -81,7 +81,9 @@ class EQEmuConfig
 		std::string QSDatabaseUsername;
 		std::string QSDatabasePassword;
 		std::string QSDatabaseDB;
-		uint16 QSDatabasePort;
+		uint16      QSDatabasePort;
+		std::string QSHost;
+		int         QSPort;
 
 		// From <files/>
 		std::string SpellsFile;
