@@ -60,16 +60,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/guild_tributes_repository.h"
 #include "../common/patches/patches.h"
 #include "../common/skill_caps.h"
+#include "queryserv.h"
 
-extern EntityList entity_list;
-extern Zone* zone;
-extern volatile bool is_zone_loaded;
-extern void Shutdown();
-extern WorldServer worldserver;
-extern PetitionList petition_list;
-extern uint32 numclients;
-extern volatile bool RunLoops;
+extern EntityList             entity_list;
+extern Zone                  *zone;
+extern volatile bool          is_zone_loaded;
+extern void                   Shutdown();
+extern WorldServer            worldserver;
+extern PetitionList           petition_list;
+extern uint32                 numclients;
+extern volatile bool          RunLoops;
 extern QuestParserCollection *parse;
+extern QueryServ             *QServ;
 
 // QuestParserCollection *parse = 0;
 

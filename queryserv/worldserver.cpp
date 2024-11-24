@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 extern WorldServer           worldserver;
 extern const queryservconfig *Config;
-extern QSDatabase              database;
+extern QSDatabase            database;
 extern LFGuildManager        lfguildmanager;
 
 WorldServer::WorldServer()
@@ -103,6 +103,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 		case ServerOP_KeepAlive: {
+			ServerPacket pack(ServerOP_KeepAlive, 0);
+			SendPacket(&pack);
 			break;
 		}
 		case ServerOP_Speech: {

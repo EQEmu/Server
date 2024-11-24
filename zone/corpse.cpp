@@ -31,12 +31,14 @@
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/character_corpse_items_repository.h"
 #include <iostream>
+#include "queryserv.h"
 
 
 extern EntityList           entity_list;
-extern Zone                 *zone;
+extern Zone                *zone;
 extern WorldServer          worldserver;
 extern npcDecayTimes_Struct npcCorpseDecayTimes[100];
+extern QueryServ           *QServ;
 
 void Corpse::SendEndLootErrorPacket(Client *client)
 {

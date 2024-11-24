@@ -31,15 +31,17 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/ground_spawns_repository.h"
 #include "../common/repositories/object_repository.h"
+#include "queryserv.h"
 
 
 const char DEFAULT_OBJECT_NAME[] = "IT63_ACTORDEF";
 const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";
 
 
-extern Zone* zone;
-extern EntityList entity_list;
+extern Zone       *zone;
+extern EntityList  entity_list;
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 // Loading object from database
 Object::Object(

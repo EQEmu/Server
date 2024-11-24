@@ -483,6 +483,8 @@ int main(int argc, char **argv)
 	LogInfo("Loading quests");
 	parse->ReloadQuests();
 
+	QServ->Connect();
+
 	worldserver.Connect();
 	worldserver.SetScheduler(&event_scheduler);
 
@@ -672,6 +674,7 @@ int main(int argc, char **argv)
 	LogSys.CloseFileLogs();
 
 	safe_delete(mutex);
+	safe_delete(QServ);
 
 	return 0;
 }

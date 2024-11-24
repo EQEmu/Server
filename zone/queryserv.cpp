@@ -24,7 +24,7 @@ Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
 
 
 extern WorldServer worldserver;
-extern QueryServ *QServ;
+extern QueryServ  *QServ;
 
 QueryServ::QueryServ()
 {
@@ -51,4 +51,37 @@ void QueryServ::PlayerLogEvent(int Event_Type, int Character_ID, std::string Eve
 		Character_ID,
 		Strings::Escape(Event_Desc).c_str());
 	SendQuery(query);
+}
+
+void QueryServ::Connect()
+{
+	m_connection = std::make_unique<EQ::Net::ServertalkClient>(Config->QSHost, Config->QSPort, false, "Zone", Config->SharedKey);
+	m_keepalive = std::make_unique<EQ::Timer>(30000, true, std::bind(&QueryServ::OnKeepAlive, this, std::placeholders::_1));
+
+	LogInfo(
+		"New Query Server connection to [{}:{}]",
+		Config->QSHost,
+		Config->QSPort
+	);
+}
+
+bool QueryServ::SendPacket(ServerPacket *pack)
+{
+	if (m_connection.get() == nullptr) {
+		Connect();
+	}
+
+	if (!m_connection.get()) {
+		return false;
+	}
+
+	m_connection->SendPacket(pack);
+	return true;
+}
+
+void QueryServ::OnKeepAlive(EQ::Timer *t)
+{
+	ServerPacket pack(ServerOP_KeepAlive, 0);
+	m_connection->SendPacket(&pack);
+
 }

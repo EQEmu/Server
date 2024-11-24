@@ -4,6 +4,7 @@
 #include <string>
 #include <cereal/cereal.hpp>
 #include "../types.h"
+#include "../rulesys.h"
 #include "../repositories/player_event_logs_repository.h"
 
 namespace PlayerEvent {
@@ -1168,24 +1169,46 @@ namespace PlayerEvent {
 
 #define RecordPlayerEventLog(event_type, event_data) do {\
     if (player_event_logs.IsEventEnabled(event_type)) {\
-        worldserver.SendPacket(\
-            player_event_logs.RecordEvent(\
-                event_type,\
-                GetPlayerEvent(),\
-                event_data\
-            ).get()\
-        );\
-    }\
+		if (RuleB(Logging, PlayerEventsQSProcess)) {\
+			QServ->SendPacket(\
+				player_event_logs.RecordEvent(\
+					event_type,\
+					GetPlayerEvent(),\
+					event_data\
+				).get()\
+			);\
+		}                                                                                                          \
+		else {                                                                                                     \
+			worldserver.SendPacket(\
+				player_event_logs.RecordEvent(\
+					event_type,\
+					GetPlayerEvent(),\
+					event_data\
+				).get()\
+			);\
+		}\
+	}\
 } while (0)
 
 #define RecordPlayerEventLogWithClient(c, event_type, event_data) do {\
     if (player_event_logs.IsEventEnabled(event_type)) {\
-        worldserver.SendPacket(\
-            player_event_logs.RecordEvent(\
-                event_type,\
-                (c)->GetPlayerEvent(),\
-                event_data\
-            ).get()\
-        );\
-    }\
+		if (RuleB(Logging, PlayerEventsQSProcess)) {\
+	        QServ->SendPacket(\
+		        player_event_logs.RecordEvent(\
+			        event_type,\
+				    (c)->GetPlayerEvent(),\
+					event_data\
+				).get()\
+			);\
+		}\
+		else {\
+			worldserver.SendPacket(\
+				player_event_logs.RecordEvent(\
+					event_type,\
+					(c)->GetPlayerEvent(),\
+					event_data\
+				).get()\
+			);\
+		}\
+	}\
 } while (0)

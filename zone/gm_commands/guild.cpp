@@ -1,7 +1,9 @@
 #include "../client.h"
 #include "../worldserver.h"
+#include "queryserv.h"
 
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 #include "../guild_mgr.h"
 #include "../doors.h"
@@ -600,7 +602,28 @@ void command_guild(Client* c, const Seperator* sep)
 		else {
 			auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
 			auto guild    = guild_mgr.GetGuildByGuildID(guild_id);
-			c->SendGuildMembersList();
+
+			PlayerEvent::LootItemEvent e{};
+			e.charges     = -1;
+			e.corpse_name = "Test Corpse Name";
+			e.item_id     = 123456789;
+			e.item_name   = "Test Item Name";
+			e.npc_id      = 987654321;
+
+			RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);
+//			RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);
+			// auto d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
+			// QServ->SendPacket(d.get());
+			// d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
+			// QServ->SendPacket(d.get());
+			//  d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
+			// QServ->SendPacket(d.get());
+			// d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
+			// QServ->SendPacket(d.get());
+			// d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
+			// QServ->SendPacket(d.get());
+			// d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
+			// QServ->SendPacket(d.get());
 		}
 	}
 }
