@@ -3942,7 +3942,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					c.second->QueuePacket(outapp);
 					safe_delete(outapp);
 				}
-				if (zone && zone->GetZoneID() == Zones::BAZAAR) {
+				if (zone && zone->GetZoneID() == Zones::BAZAAR && in->instance_id == zone->GetInstanceID()) {
 					if (in->action == TraderOn) {
 						c.second->SendBecomeTrader(TraderOn, in->entity_id);
 					}
