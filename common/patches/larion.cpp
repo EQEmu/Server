@@ -2026,11 +2026,20 @@ namespace Larion
 		}
 
 		EQ::InternalSerializedItem_Struct* eq = (EQ::InternalSerializedItem_Struct*)in->pBuffer;
+		SerializeBuffer buffer;
+		buffer.WriteUInt32(item_count);
 
-		auto outapp = new EQApplicationPacket(OP_CharInventory, 4);
-		dest->FastQueuePacket(&outapp, ack_req);
+		for (int index = 0; index < item_count; ++index, ++eq) {
+			SerializeItem(buffer, (const EQ::ItemInstance*)eq->inst, eq->slot_id, 0, ItemPacketCharInventory);
+		}
 
-		delete in;
+		in->size = buffer.size();
+		in->pBuffer = new unsigned char[buffer.size()];
+		memcpy(in->pBuffer, buffer.buffer(), buffer.size());
+
+		delete[] __emu_buffer;
+
+		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
@@ -2741,7 +2750,8 @@ namespace Larion
 		//we need to parse id file
 		//s32 IDFile;
 		int32 idfile = ExtractIDFile(item->IDFile);
-		
+		buffer.WriteUInt32(idfile);
+
 		//s32 IDFile2;
 		buffer.WriteUInt32(0); //unsupported atm
 
@@ -3372,6 +3382,9 @@ namespace Larion
 		buffer.WriteInt32(0);
 
 		//char ConvertItemName[ConvertItemNameLength];
+
+		//u32 ConvertItemID;
+		buffer.WriteInt32(0);
 
 		//u32 Open;
 		buffer.WriteInt32(0);
