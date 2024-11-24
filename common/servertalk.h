@@ -1945,6 +1945,7 @@ struct ServerOP_GuildMessage_Struct {
 struct TraderMessaging_Struct {
 	uint32 action;
 	uint32 zone_id;
+	uint32 instance_id;
 	uint32 trader_id;
 	uint32 entity_id;
 	char   trader_name[64];
