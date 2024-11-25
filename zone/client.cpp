@@ -1625,7 +1625,7 @@ void Client::FixModel(Spawn_Struct* npc) {
             if (strstr(npc->name, "flame") != nullptr || strstr(npc->name, "fire") != nullptr) {
                 npc->equip_chest2 = 1;
             } else if (strstr(npc->name, "frost") != nullptr) {
-                npc->equip_chest2 = 3;
+                npc->equip_chest2 = 4;
             } else {
                 npc->equip_chest2 = zone->random.Int(0, 5);
             }
