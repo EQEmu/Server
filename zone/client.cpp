@@ -13161,7 +13161,11 @@ void Client::BroadcastPositionUpdate()
 
 	Group *g = GetGroup();
 	if (g) {
-		g->QueuePacket(&outapp);
+		for (auto & m : g->members) {
+			if (m && m->IsClient() && m != this) {
+				m->CastToClient()->QueuePacket(&outapp);
+			}
+		}
 	}
 }
 
