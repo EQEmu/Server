@@ -754,6 +754,10 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	inst->SetOrnamentationIDFile(ornament_idfile);
 	inst->SetOrnamentHeroModel(ornament_hero_model);
 
+	if (!ornament_icon && !ornament_idfile && !ornament_hero_model) {
+		inst->UpdateOrnamentationInfo();
+	}
+
 	// check to see if item is usable in requested slot
 	if (enforce_usable && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
 		uint32 slottest = to_slot;
