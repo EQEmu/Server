@@ -783,15 +783,13 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		// is allowed.
 		if (tradingWith->CheckAggro(this))
 		{
-			if (RuleB(Custom, EatCombatTrades)) {
-				for (EQ::ItemInstance* inst : items) {
-					if (!inst || !inst->GetItem()) {
-						continue;
-					}
-
-					tradingWith->SayString(TRADE_BACK, GetCleanName());
-					PushItemOnCursor(*inst, true);
+			for (EQ::ItemInstance* inst : items) {
+				if (!inst || !inst->GetItem()) {
+					continue;
 				}
+
+				tradingWith->SayString(TRADE_BACK, GetCleanName());
+				PushItemOnCursor(*inst, true);
 			}
 
 			items.clear();

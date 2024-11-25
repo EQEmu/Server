@@ -1109,7 +1109,6 @@ RULE_REAL(Custom,	CastedSpellCritBonusRatio, 				1.0, "Multiply casted (Not proc
 RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit ratio by this value")
 
 // Exploit Prevention
-RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
 RULE_BOOL(Custom, 	StripCharmItems, 						true, "Remove all items handed to charmed mobs when charm breaks. Additionally, return items handed to charmed mobs and give mob a copy.")
 
 // Seasonal
