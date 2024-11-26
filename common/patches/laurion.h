@@ -17,14 +17,14 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef COMMON_LARION_H
-#define COMMON_LARION_H
+#ifndef COMMON_LAURION_H
+#define COMMON_LAURION_H
 
 #include "../struct_strategy.h"
 
 class EQStreamIdentifier;
 
-namespace Larion
+namespace Laurion
 {
 
 	//these are the only public member of this namespace.
@@ -47,9 +47,9 @@ namespace Larion
 
 		//magic macro to declare our opcode processors
 #include "ss_declare.h"
-#include "larion_ops.h"
+#include "laurion_ops.h"
 	};
 
-}; /*Larion*/
+}; /*Laurion*/
 
-#endif /*COMMON_LARION_H*/
+#endif /*COMMON_LAURION_H*/

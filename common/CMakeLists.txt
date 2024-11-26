@@ -112,8 +112,8 @@ SET(common_sources
     net/websocket_server.cpp
     net/websocket_server_connection.cpp
     patches/patches.cpp
-	patches/larion.cpp
-    patches/larion_limits.cpp
+	patches/laurion.cpp
+    patches/laurion_limits.cpp
     patches/sod.cpp
     patches/sod_limits.cpp
     patches/sof.cpp
@@ -657,10 +657,10 @@ SET(common_headers
     net/websocket_server.h
     net/websocket_server_connection.h
     patches/patches.h
-    patches/larion.h
-    patches/larion_limits.h
-    patches/larion_ops.h
-    patches/larion_structs.h
+    patches/laurion.h
+    patches/laurion_limits.h
+    patches/laurion_ops.h
+    patches/laurion_structs.h
 	patches/sod.h
     patches/sod_limits.h
     patches/sod_ops.h
@@ -747,10 +747,10 @@ SOURCE_GROUP(Net FILES
 
 SOURCE_GROUP(Patches FILES
     patches/patches.h
-	patches/larion.h
-    patches/larion_limits.h
-    patches/larion_ops.h
-    patches/larion_structs.h
+	patches/laurion.h
+    patches/laurion_limits.h
+    patches/laurion_ops.h
+    patches/laurion_structs.h
     patches/sod.h
     patches/sod_limits.h
     patches/sod_ops.h
@@ -779,8 +779,8 @@ SOURCE_GROUP(Patches FILES
     patches/uf_ops.h
     patches/uf_structs.h
     patches/patches.cpp
-	patches/larion.cpp
-    patches/larion_limits.cpp
+	patches/laurion.cpp
+    patches/laurion_limits.cpp
     patches/sod.cpp
     patches/sod_limits.cpp
     patches/sof.cpp

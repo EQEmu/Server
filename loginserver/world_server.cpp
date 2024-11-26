@@ -1020,7 +1020,7 @@ void WorldServer::SerializeForClientServerListLegacy(class SerializeBuffer& out,
 	out.WriteUInt32(GetPlayersOnline());
 }
 
-void WorldServer::SerializeForClientServerListLarion(class SerializeBuffer& out, bool use_local_ip) const {
+void WorldServer::SerializeForClientServerListLaurion(class SerializeBuffer& out, bool use_local_ip) const {
 	if (use_local_ip) {
 		out.WriteString(GetLocalIP());
 	}
@@ -1067,8 +1067,8 @@ void WorldServer::SerializeForClientServerListLarion(class SerializeBuffer& out,
 
 void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_local_ip, LSClientVersion version) const
 {
-	if (version == cv_larion) {
-		SerializeForClientServerListLarion(out, use_local_ip);
+	if (version == cv_laurion) {
+		SerializeForClientServerListLaurion(out, use_local_ip);
 	}
 	else {
 		SerializeForClientServerListLegacy(out, use_local_ip);

@@ -587,7 +587,7 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 		int32_t expansion = server.options.GetMaxExpansions();
 		int32_t owned_expansion = (expansion << 1) | 1;
 
-		if (m_client_version == cv_larion) {
+		if (m_client_version == cv_laurion) {
 			buf.WriteInt32(0x00);
 			buf.WriteInt32(0x00);
 			buf.WriteInt16(0x00);

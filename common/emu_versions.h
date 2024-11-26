@@ -37,7 +37,7 @@ namespace EQ
 			UF,			// Build: 'Jun  8 2010 16:44:32'
 			RoF,		// Build: 'Dec 10 2012 17:35:44'
 			RoF2,		// Build: 'May 10 2013 23:30:08'
-			Larion
+			Laurion
 		};
 
 		enum ClientVersionBitmask : uint32 {
@@ -49,7 +49,7 @@ namespace EQ
 			bitUF = 0x00000010,
 			bitRoF = 0x00000020,
 			bitRoF2 = 0x00000040,
-			bitLarion = 0x00000080,
+			bitLaurion = 0x00000080,
 			maskUnknown = 0x00000000,
 			maskTitaniumAndEarlier = 0x00000003,
 			maskSoFAndEarlier = 0x00000007,
@@ -61,11 +61,11 @@ namespace EQ
 			maskUFAndLater = 0xFFFFFFF0,
 			maskRoFAndLater = 0xFFFFFFE0,
 			maskRoF2AndLater = 0xFFFFFFC0,
-			maskLarionAndLater = 0xFFFFFF80,
+			maskLaurionAndLater = 0xFFFFFF80,
 			maskAllClients = 0xFFFFFFFF
 		};
 
-		const ClientVersion LastClientVersion = ClientVersion::Larion;
+		const ClientVersion LastClientVersion = ClientVersion::Laurion;
 		const size_t ClientVersionCount = (static_cast<size_t>(LastClientVersion) + 1);
 
 		bool IsValidClientVersion(ClientVersion client_version);
@@ -83,7 +83,7 @@ namespace EQ
 			UF,
 			RoF,
 			RoF2,
-			Larion,
+			Laurion,
 			NPC,
 			NPCMerchant,
 			Merc,
@@ -98,13 +98,13 @@ namespace EQ
 			OfflineUF,
 			OfflineRoF,
 			OfflineRoF2,
-			OfflineLarion
+			OfflineLaurion
 		};
 
-		const MobVersion LastMobVersion = MobVersion::OfflineLarion;
-		const MobVersion LastPCMobVersion = MobVersion::Larion;
+		const MobVersion LastMobVersion = MobVersion::OfflineLaurion;
+		const MobVersion LastPCMobVersion = MobVersion::Laurion;
 		const MobVersion LastNonPCMobVersion = MobVersion::BotPet;
-		const MobVersion LastOfflinePCMobVersion = MobVersion::OfflineLarion;
+		const MobVersion LastOfflinePCMobVersion = MobVersion::OfflineLaurion;
 		const size_t MobVersionCount = (static_cast<size_t>(LastMobVersion) + 1);
 
 		bool IsValidMobVersion(MobVersion mob_version);

@@ -1,7 +1,7 @@
-#ifndef LARION_STRUCTS_H_
-#define LARION_STRUCTS_H_
+#ifndef LAURION_STRUCTS_H_
+#define LAURION_STRUCTS_H_
 
-namespace Larion {
+namespace Laurion {
 	namespace structs {
 		// constants
 		static const uint32 MAX_PP_AA_ARRAY = 300;
@@ -351,7 +351,7 @@ namespace Larion {
 		struct EnterWorld_Struct {
 			/*000*/	char	name[64];
 			/*064*/	int32	unknown1;
-			/*068*/	int32	unknown2; //larion handles these differently so for now im just going to ignore them till i figure it out
+			/*068*/	int32	unknown2; //laurion handles these differently so for now im just going to ignore them till i figure it out
 		};
 
 		struct ZoneChange_Struct {
@@ -441,6 +441,6 @@ namespace Larion {
 #pragma pack()
 
 	};	//end namespace structs
-};	//end namespace larion
+};	//end namespace laurion
 
-#endif /*LARION_STRUCTS_H_*/
+#endif /*LAURION_STRUCTS_H_*/

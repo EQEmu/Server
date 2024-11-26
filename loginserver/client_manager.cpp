@@ -56,7 +56,7 @@ void CheckSoDOpcodeFile(const std::string& path) {
 	}
 }
 
-void CheckLarionOpcodeFile(const std::string& path) {
+void CheckLaurionOpcodeFile(const std::string& path) {
 	if (File::Exists(path)) {
 		return;
 	}
@@ -158,40 +158,40 @@ ClientManager::ClientManager()
 		}
 	);
 
-	int larion_port = server.config.GetVariableInt("client_configuration", "larion_port", 15900);
+	int laurion_port = server.config.GetVariableInt("client_configuration", "laurion_port", 15900);
 
-	EQStreamManagerInterfaceOptions larion_opts(larion_port, false, false);
+	EQStreamManagerInterfaceOptions laurion_opts(laurion_port, false, false);
 
-	larion_stream = new EQ::Net::EQStreamManager(larion_opts);
-	larion_ops = new RegularOpcodeManager;
+	laurion_stream = new EQ::Net::EQStreamManager(laurion_opts);
+	laurion_ops = new RegularOpcodeManager;
 
 	opcodes_path = fmt::format(
 		"{}/{}",
 		path.GetOpcodePath(),
-		"login_opcodes_larion.conf"
+		"login_opcodes_laurion.conf"
 	);
 
-	CheckLarionOpcodeFile(opcodes_path);
+	CheckLaurionOpcodeFile(opcodes_path);
 
-	if (!larion_ops->LoadOpcodes(opcodes_path.c_str())) {
+	if (!laurion_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
-			"ClientManager fatal error: couldn't load opcodes for Larion file [{0}]",
-			server.config.GetVariableString("client_configuration", "larion_opcodes", "login_opcodes.conf")
+			"ClientManager fatal error: couldn't load opcodes for Laurion file [{0}]",
+			server.config.GetVariableString("client_configuration", "laurion_opcodes", "login_opcodes.conf")
 		);
 
 		run_server = false;
 	}
 
-	larion_stream->OnNewConnection(
+	laurion_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New Larion client connection from [{0}:{1}]",
+				"New Laurion client connection from [{0}:{1}]",
 				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
 
-			stream->SetOpcodeManager(&larion_ops);
-			Client* c = new Client(stream, cv_larion);
+			stream->SetOpcodeManager(&laurion_ops);
+			Client* c = new Client(stream, cv_laurion);
 			clients.push_back(c);
 		}
 	);

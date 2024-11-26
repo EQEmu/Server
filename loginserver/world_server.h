@@ -151,7 +151,7 @@ public:
 	bool HandleNewLoginserverInfoUnregisteredAllowed(Database::DbWorldRegistration &world_registration);
 private:
 	void SerializeForClientServerListLegacy(class SerializeBuffer& out, bool use_local_ip) const;
-	void SerializeForClientServerListLarion(class SerializeBuffer& out, bool use_local_ip) const;
+	void SerializeForClientServerListLaurion(class SerializeBuffer& out, bool use_local_ip) const;
 public:
 	void SerializeForClientServerList(class SerializeBuffer& out, bool use_local_ip, LSClientVersion version) const;
 

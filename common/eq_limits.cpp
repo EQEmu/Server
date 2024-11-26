@@ -105,13 +105,13 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		RoF2::constants::CHARACTER_CREATION_LIMIT,
 		RoF2::constants::SAY_LINK_BODY_SIZE
 	),
-	/*[ClientVersion::Larion] =*/
+	/*[ClientVersion::Laurion] =*/
 	EQ::constants::LookupEntry(
-		Larion::constants::EXPANSION,
-		Larion::constants::EXPANSION_BIT,
-		Larion::constants::EXPANSIONS_MASK,
-		Larion::constants::CHARACTER_CREATION_LIMIT,
-		Larion::constants::SAY_LINK_BODY_SIZE
+		Laurion::constants::EXPANSION,
+		Laurion::constants::EXPANSION_BIT,
+		Laurion::constants::EXPANSIONS_MASK,
+		Laurion::constants::CHARACTER_CREATION_LIMIT,
+		Laurion::constants::SAY_LINK_BODY_SIZE
 	)
 };
 
@@ -1273,18 +1273,18 @@ static const EQ::spells::LookupEntry spells_static_lookup_entries[EQ::versions::
 		RoF2::spells::PET_BUFFS,
 		RoF2::spells::MERC_BUFFS
 	),
-	/*[ClientVersion::Larion] =*/
+	/*[ClientVersion::Laurion] =*/
 	EQ::spells::LookupEntry(
-		Larion::spells::SPELL_ID_MAX,
-		Larion::spells::SPELLBOOK_SIZE,
+		Laurion::spells::SPELL_ID_MAX,
+		Laurion::spells::SPELLBOOK_SIZE,
 		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
-		Larion::spells::LONG_BUFFS,
-		Larion::spells::SHORT_BUFFS,
-		Larion::spells::DISC_BUFFS,
-		Larion::spells::TOTAL_BUFFS,
-		Larion::spells::NPC_BUFFS,
-		Larion::spells::PET_BUFFS,
-		Larion::spells::MERC_BUFFS
+		Laurion::spells::LONG_BUFFS,
+		Laurion::spells::SHORT_BUFFS,
+		Laurion::spells::DISC_BUFFS,
+		Laurion::spells::TOTAL_BUFFS,
+		Laurion::spells::NPC_BUFFS,
+		Laurion::spells::PET_BUFFS,
+		Laurion::spells::MERC_BUFFS
 	)
 };
 

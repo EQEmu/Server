@@ -17,20 +17,20 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef COMMON_LARION_LIMITS_H
-#define COMMON_LARION_LIMITS_H
+#ifndef COMMON_LAURION_LIMITS_H
+#define COMMON_LAURION_LIMITS_H
 
 #include "../types.h"
 #include "../emu_versions.h"
 #include "../skills.h"
 
-namespace Larion
+namespace Laurion
 {
 	const int16 IINVALID = -1;
 	const int16 INULL = 0;
 
 	namespace inventory {
-		inline EQ::versions::ClientVersion GetInventoryRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetInventoryRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		const bool ConcatenateInvTypeLimbo = false;
 
@@ -42,7 +42,7 @@ namespace Larion
 	} /*inventory*/
 
 	namespace invtype {
-		inline EQ::versions::ClientVersion GetInvTypeRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetInvTypeRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		namespace enum_ {
 			enum InventoryTypes : int16 {
@@ -133,7 +133,7 @@ namespace Larion
 	} /*invtype*/
 
 	namespace invslot {
-		inline EQ::versions::ClientVersion GetInvSlotRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetInvSlotRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		namespace enum_ {
 			enum InventorySlots : int16 {
@@ -212,7 +212,7 @@ namespace Larion
 	} /*invslot*/
 
 	namespace invbag {
-		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		const int16 SLOT_INVALID = IINVALID;
 		const int16 SLOT_BEGIN = INULL;
@@ -224,7 +224,7 @@ namespace Larion
 	} /*invbag*/
 
 	namespace invaug {
-		inline EQ::versions::ClientVersion GetInvAugRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetInvAugRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		const int16 SOCKET_INVALID = IINVALID;
 		const int16 SOCKET_BEGIN = INULL;
@@ -236,7 +236,7 @@ namespace Larion
 	} /*invaug*/
 
 	namespace item {
-		inline EQ::versions::ClientVersion GetItemRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetItemRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		//enum Unknown : int { // looks like item class..but, RoF has it too - nothing in UF-
 		//	Unknown1 = 0,
@@ -265,7 +265,7 @@ namespace Larion
 	} /*item*/
 
 	namespace profile {
-		inline EQ::versions::ClientVersion GetProfileRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetProfileRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		const int16 BANDOLIERS_SIZE = 20;		// number of bandolier instances
 		const int16 BANDOLIER_ITEM_COUNT = 4;	// number of equipment slots in bandolier instance
@@ -277,7 +277,7 @@ namespace Larion
 	} /*profile*/
 
 	namespace constants {
-		inline EQ::versions::ClientVersion GetConstantsRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetConstantsRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		const EQ::expansions::Expansion EXPANSION = EQ::expansions::Expansion::LS;
 		const uint32 EXPANSION_BIT = EQ::expansions::bitLS;
@@ -291,21 +291,21 @@ namespace Larion
 	} /*constants*/
 
 	namespace behavior {
-		inline EQ::versions::ClientVersion GetBehaviorRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetBehaviorRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		const bool CoinHasWeight = false;
 
 	} /*behavior*/
 
 	namespace skills {
-		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		const size_t LastUsableSkill = EQ::skills::Skill2HPiercing;
 
 	} /*skills*/
 
 	namespace spells {
-		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::Larion; }
+		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::Laurion; }
 
 		enum class CastingSlot : uint32 {
 			Gem1 = 0,
@@ -341,6 +341,6 @@ namespace Larion
 
 	} /*spells*/
 	
-}; /* Larion */
+}; /* Laurion */
 
-#endif /*COMMON_LARION_LIMITS_H*/
+#endif /*COMMON_LAURION_LIMITS_H*/

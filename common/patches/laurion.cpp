@@ -20,7 +20,7 @@
 #include "../global_define.h"
 #include "../eqemu_config.h"
 #include "../eqemu_logsys.h"
-#include "larion.h"
+#include "laurion.h"
 #include "../opcodemgr.h"
 
 #include "../eq_stream_ident.h"
@@ -30,7 +30,7 @@
 #include "../misc_functions.h"
 #include "../strings.h"
 #include "../inventory_profile.h"
-#include "larion_structs.h"
+#include "laurion_structs.h"
 #include "../rulesys.h"
 #include "../path_manager.h"
 #include "../classes.h"
@@ -43,25 +43,25 @@
 #include <cassert>
 #include <cinttypes>
 
-namespace Larion
+namespace Laurion
 {
-	static const char* name = "Larion";
+	static const char* name = "Laurion";
 	static OpcodeManager* opcodes = nullptr;
 	static Strategy struct_strategy;
 
 	void SerializeItem(SerializeBuffer &buffer, const EQ::ItemInstance* inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
 
 	// server to client inventory location converters
-	static inline structs::InventorySlot_Struct ServerToLarionSlot(uint32 server_slot);
-	static inline structs::InventorySlot_Struct ServerToLarionCorpseSlot(uint32 server_corpse_slot);
-	static inline uint32 ServerToLarionCorpseMainSlot(uint32 server_corpse_slot);
-	static inline structs::TypelessInventorySlot_Struct ServerToLarionTypelessSlot(uint32 server_slot, int16 server_type);
+	static inline structs::InventorySlot_Struct ServerToLaurionSlot(uint32 server_slot);
+	static inline structs::InventorySlot_Struct ServerToLaurionCorpseSlot(uint32 server_corpse_slot);
+	static inline uint32 ServerToLaurionCorpseMainSlot(uint32 server_corpse_slot);
+	static inline structs::TypelessInventorySlot_Struct ServerToLaurionTypelessSlot(uint32 server_slot, int16 server_type);
 
 	// client to server inventory location converters
-	static inline uint32 LarionToServerSlot(structs::InventorySlot_Struct larion_slot);
-	static inline uint32 LarionToServerCorpseSlot(structs::InventorySlot_Struct larion_corpse_slot);
-	static inline uint32 LarionToServerCorpseMainSlot(uint32 larion_corpse_slot);
-	static inline uint32 LarionToServerTypelessSlot(structs::TypelessInventorySlot_Struct larion_slot, int16 larion_type);
+	static inline uint32 LaurionToServerSlot(structs::InventorySlot_Struct laurion_slot);
+	static inline uint32 LaurionToServerCorpseSlot(structs::InventorySlot_Struct laurion_corpse_slot);
+	static inline uint32 LaurionToServerCorpseMainSlot(uint32 laurion_corpse_slot);
+	static inline uint32 LaurionToServerTypelessSlot(structs::TypelessInventorySlot_Struct laurion_slot, int16 laurion_type);
 
 	void Register(EQStreamIdentifier& into)
 	{
@@ -120,7 +120,7 @@ namespace Larion
 	{
 		//all opcodes default to passthrough.
 #include "ss_register.h"
-#include "larion_ops.h"
+#include "laurion_ops.h"
 	}
 
 	std::string Strategy::Describe() const
@@ -133,7 +133,7 @@ namespace Larion
 
 	const EQ::versions::ClientVersion Strategy::ClientVersion() const
 	{
-		return EQ::versions::ClientVersion::Larion;
+		return EQ::versions::ClientVersion::Laurion;
 	}
 
 #include "ss_define.h"
@@ -514,7 +514,7 @@ namespace Larion
 	
 		if (sas->type != AppearanceType::Size)
 		{
-			//larion struct is different than rof2's but the idea is the same
+			//laurion struct is different than rof2's but the idea is the same
 			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
 			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
 	
@@ -2714,7 +2714,7 @@ namespace Larion
 
 		int r;
 		for (r = 0; r < 29; r++) {
-			// Size 68 in Larion
+			// Size 68 in Laurion
 			IN(filters[r]);
 		}
 
@@ -3328,10 +3328,10 @@ namespace Larion
 		structs::InventorySlot_Struct slot_id{};
 		switch (packet_type) {
 		case ItemPacketLoot:
-			slot_id = ServerToLarionCorpseSlot(slot_id_in);
+			slot_id = ServerToLaurionCorpseSlot(slot_id_in);
 			break;
 		default:
-			slot_id = ServerToLarionSlot(slot_id_in);
+			slot_id = ServerToLaurionSlot(slot_id_in);
 			break;
 		}
 
@@ -3499,156 +3499,156 @@ namespace Larion
 		buffer.WriteInt32(0); //unsupported atm
 	}
 
-	static inline structs::InventorySlot_Struct ServerToLarionSlot(uint32 server_slot)
+	static inline structs::InventorySlot_Struct ServerToLaurionSlot(uint32 server_slot)
 	{
-		structs::InventorySlot_Struct LarionSlot;
-		LarionSlot.Type = invtype::TYPE_INVALID;
-		LarionSlot.Slot = invslot::SLOT_INVALID;
-		LarionSlot.SubIndex = invbag::SLOT_INVALID;
-		LarionSlot.AugIndex = invaug::SOCKET_INVALID;
+		structs::InventorySlot_Struct LaurionSlot;
+		LaurionSlot.Type = invtype::TYPE_INVALID;
+		LaurionSlot.Slot = invslot::SLOT_INVALID;
+		LaurionSlot.SubIndex = invbag::SLOT_INVALID;
+		LaurionSlot.AugIndex = invaug::SOCKET_INVALID;
 
 		uint32 TempSlot = EQ::invslot::SLOT_INVALID;
 
 		if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
-			LarionSlot.Type = invtype::typePossessions;
-			LarionSlot.Slot = server_slot;
+			LaurionSlot.Type = invtype::typePossessions;
+			LaurionSlot.Slot = server_slot;
 		}
 
 		else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 			TempSlot = server_slot - EQ::invbag::GENERAL_BAGS_BEGIN;
 
-			LarionSlot.Type = invtype::typePossessions;
-			LarionSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
-			LarionSlot.SubIndex = TempSlot - ((LarionSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+			LaurionSlot.Type = invtype::typePossessions;
+			LaurionSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
+			LaurionSlot.SubIndex = TempSlot - ((LaurionSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
 		}
 
 		else if (server_slot <= EQ::invslot::TRIBUTE_END && server_slot >= EQ::invslot::TRIBUTE_BEGIN) {
-			LarionSlot.Type = invtype::typeTribute;
-			LarionSlot.Slot = server_slot - EQ::invslot::TRIBUTE_BEGIN;
+			LaurionSlot.Type = invtype::typeTribute;
+			LaurionSlot.Slot = server_slot - EQ::invslot::TRIBUTE_BEGIN;
 		}
 
 		else if (server_slot <= EQ::invslot::GUILD_TRIBUTE_END && server_slot >= EQ::invslot::GUILD_TRIBUTE_BEGIN) {
-			LarionSlot.Type = invtype::typeGuildTribute;
-			LarionSlot.Slot = server_slot - EQ::invslot::GUILD_TRIBUTE_BEGIN;
+			LaurionSlot.Type = invtype::typeGuildTribute;
+			LaurionSlot.Slot = server_slot - EQ::invslot::GUILD_TRIBUTE_BEGIN;
 		}
 
 		else if (server_slot == EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
-			LarionSlot.Type = invtype::typeWorld;
+			LaurionSlot.Type = invtype::typeWorld;
 		}
 
 		else if (server_slot <= EQ::invslot::BANK_END && server_slot >= EQ::invslot::BANK_BEGIN) {
-			LarionSlot.Type = invtype::typeBank;
-			LarionSlot.Slot = server_slot - EQ::invslot::BANK_BEGIN;
+			LaurionSlot.Type = invtype::typeBank;
+			LaurionSlot.Slot = server_slot - EQ::invslot::BANK_BEGIN;
 		}
 
 		else if (server_slot <= EQ::invbag::BANK_BAGS_END && server_slot >= EQ::invbag::BANK_BAGS_BEGIN) {
 			TempSlot = server_slot - EQ::invbag::BANK_BAGS_BEGIN;
 
-			LarionSlot.Type = invtype::typeBank;
-			LarionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
-			LarionSlot.SubIndex = TempSlot - (LarionSlot.Slot * EQ::invbag::SLOT_COUNT);
+			LaurionSlot.Type = invtype::typeBank;
+			LaurionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			LaurionSlot.SubIndex = TempSlot - (LaurionSlot.Slot * EQ::invbag::SLOT_COUNT);
 		}
 
 		else if (server_slot <= EQ::invslot::SHARED_BANK_END && server_slot >= EQ::invslot::SHARED_BANK_BEGIN) {
-			LarionSlot.Type = invtype::typeSharedBank;
-			LarionSlot.Slot = server_slot - EQ::invslot::SHARED_BANK_BEGIN;
+			LaurionSlot.Type = invtype::typeSharedBank;
+			LaurionSlot.Slot = server_slot - EQ::invslot::SHARED_BANK_BEGIN;
 		}
 
 		else if (server_slot <= EQ::invbag::SHARED_BANK_BAGS_END && server_slot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) {
 			TempSlot = server_slot - EQ::invbag::SHARED_BANK_BAGS_BEGIN;
 
-			LarionSlot.Type = invtype::typeSharedBank;
-			LarionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
-			LarionSlot.SubIndex = TempSlot - (LarionSlot.Slot * EQ::invbag::SLOT_COUNT);
+			LaurionSlot.Type = invtype::typeSharedBank;
+			LaurionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			LaurionSlot.SubIndex = TempSlot - (LaurionSlot.Slot * EQ::invbag::SLOT_COUNT);
 		}
 
 		else if (server_slot <= EQ::invslot::TRADE_END && server_slot >= EQ::invslot::TRADE_BEGIN) {
-			LarionSlot.Type = invtype::typeTrade;
-			LarionSlot.Slot = server_slot - EQ::invslot::TRADE_BEGIN;
+			LaurionSlot.Type = invtype::typeTrade;
+			LaurionSlot.Slot = server_slot - EQ::invslot::TRADE_BEGIN;
 		}
 
 		else if (server_slot <= EQ::invbag::TRADE_BAGS_END && server_slot >= EQ::invbag::TRADE_BAGS_BEGIN) {
 			TempSlot = server_slot - EQ::invbag::TRADE_BAGS_BEGIN;
 
-			LarionSlot.Type = invtype::typeTrade;
-			LarionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
-			LarionSlot.SubIndex = TempSlot - (LarionSlot.Slot * EQ::invbag::SLOT_COUNT);
+			LaurionSlot.Type = invtype::typeTrade;
+			LaurionSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			LaurionSlot.SubIndex = TempSlot - (LaurionSlot.Slot * EQ::invbag::SLOT_COUNT);
 		}
 
 		else if (server_slot <= EQ::invslot::WORLD_END && server_slot >= EQ::invslot::WORLD_BEGIN) {
-			LarionSlot.Type = invtype::typeWorld;
-			LarionSlot.Slot = server_slot - EQ::invslot::WORLD_BEGIN;
+			LaurionSlot.Type = invtype::typeWorld;
+			LaurionSlot.Slot = server_slot - EQ::invslot::WORLD_BEGIN;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Larion Slot [%i, %i, %i, %i]",
-			server_slot, LarionSlot.Type, LarionSlot.Slot, LarionSlot.SubIndex, LarionSlot.AugIndex);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Laurion Slot [%i, %i, %i, %i]",
+			server_slot, LaurionSlot.Type, LaurionSlot.Slot, LaurionSlot.SubIndex, LaurionSlot.AugIndex);
 
-		return LarionSlot;
+		return LaurionSlot;
 	}
 
-	static inline structs::InventorySlot_Struct ServerToLarionCorpseSlot(uint32 server_corpse_slot)
+	static inline structs::InventorySlot_Struct ServerToLaurionCorpseSlot(uint32 server_corpse_slot)
 	{
-		structs::InventorySlot_Struct LarionSlot;
-		LarionSlot.Type = invtype::TYPE_INVALID;
-		LarionSlot.Slot = ServerToLarionCorpseMainSlot(server_corpse_slot);
-		LarionSlot.SubIndex = invbag::SLOT_INVALID;
-		LarionSlot.AugIndex = invaug::SOCKET_INVALID;
+		structs::InventorySlot_Struct LaurionSlot;
+		LaurionSlot.Type = invtype::TYPE_INVALID;
+		LaurionSlot.Slot = ServerToLaurionCorpseMainSlot(server_corpse_slot);
+		LaurionSlot.SubIndex = invbag::SLOT_INVALID;
+		LaurionSlot.AugIndex = invaug::SOCKET_INVALID;
 
-		if (LarionSlot.Slot != invslot::SLOT_INVALID)
-			LarionSlot.Type = invtype::typeCorpse;
+		if (LaurionSlot.Slot != invslot::SLOT_INVALID)
+			LaurionSlot.Type = invtype::typeCorpse;
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to Larion Corpse Slot [%i, %i, %i, %i]",
-			server_corpse_slot, LarionSlot.Type, LarionSlot.Slot, LarionSlot.SubIndex, LarionSlot.AugIndex);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to Laurion Corpse Slot [%i, %i, %i, %i]",
+			server_corpse_slot, LaurionSlot.Type, LaurionSlot.Slot, LaurionSlot.SubIndex, LaurionSlot.AugIndex);
 
-		return LarionSlot;
+		return LaurionSlot;
 	}
 	
-	static inline uint32 ServerToLarionCorpseMainSlot(uint32 server_corpse_slot)
+	static inline uint32 ServerToLaurionCorpseMainSlot(uint32 server_corpse_slot)
 	{
-		uint32 LarionSlot = invslot::SLOT_INVALID;
+		uint32 LaurionSlot = invslot::SLOT_INVALID;
 
 		if (server_corpse_slot <= EQ::invslot::CORPSE_END && server_corpse_slot >= EQ::invslot::CORPSE_BEGIN) {
-			LarionSlot = server_corpse_slot;
+			LaurionSlot = server_corpse_slot;
 		}
 
-		LogNetcode("Convert Server Corpse Slot [{}] to Larion Corpse Main Slot [{}]", server_corpse_slot, LarionSlot);
+		LogNetcode("Convert Server Corpse Slot [{}] to Laurion Corpse Main Slot [{}]", server_corpse_slot, LaurionSlot);
 
-		return LarionSlot;
+		return LaurionSlot;
 	}
 
-	static inline structs::TypelessInventorySlot_Struct ServerToLarionTypelessSlot(uint32 server_slot, int16 server_type)
+	static inline structs::TypelessInventorySlot_Struct ServerToLaurionTypelessSlot(uint32 server_slot, int16 server_type)
 	{
-		structs::TypelessInventorySlot_Struct LarionSlot;
-		LarionSlot.Slot = invslot::SLOT_INVALID;
-		LarionSlot.SubIndex = invbag::SLOT_INVALID;
-		LarionSlot.AugIndex = invaug::SOCKET_INVALID;
+		structs::TypelessInventorySlot_Struct LaurionSlot;
+		LaurionSlot.Slot = invslot::SLOT_INVALID;
+		LaurionSlot.SubIndex = invbag::SLOT_INVALID;
+		LaurionSlot.AugIndex = invaug::SOCKET_INVALID;
 
 		uint32 TempSlot = EQ::invslot::SLOT_INVALID;
 
 		if (server_type == EQ::invtype::typePossessions) {
 			if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
-				LarionSlot.Slot = server_slot;
+				LaurionSlot.Slot = server_slot;
 			}
 
 			else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 				TempSlot = server_slot - EQ::invbag::GENERAL_BAGS_BEGIN;
 
-				LarionSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
-				LarionSlot.SubIndex = TempSlot - ((LarionSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+				LaurionSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
+				LaurionSlot.SubIndex = TempSlot - ((LaurionSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
 			}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Larion Typeless Slot [%i, %i, %i] (implied type: %i)",
-			server_slot, LarionSlot.Slot, LarionSlot.SubIndex, LarionSlot.AugIndex, server_type);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Laurion Typeless Slot [%i, %i, %i] (implied type: %i)",
+			server_slot, LaurionSlot.Slot, LaurionSlot.SubIndex, LaurionSlot.AugIndex, server_type);
 
-		return LarionSlot;
+		return LaurionSlot;
 	}
 
-	static inline uint32 LarionToServerSlot(structs::InventorySlot_Struct larion_slot)
+	static inline uint32 LaurionToServerSlot(structs::InventorySlot_Struct laurion_slot)
 	{
-		if (larion_slot.AugIndex < invaug::SOCKET_INVALID || larion_slot.AugIndex >= invaug::SOCKET_COUNT) {
-			Log(Logs::Detail, Logs::Netcode, "Convert Larion Slot [%i, %i, %i, %i] to Server Slot %i",
-				larion_slot.Type, larion_slot.Slot, larion_slot.SubIndex, larion_slot.AugIndex, EQ::invslot::SLOT_INVALID);
+		if (laurion_slot.AugIndex < invaug::SOCKET_INVALID || laurion_slot.AugIndex >= invaug::SOCKET_COUNT) {
+			Log(Logs::Detail, Logs::Netcode, "Convert Laurion Slot [%i, %i, %i, %i] to Server Slot %i",
+				laurion_slot.Type, laurion_slot.Slot, laurion_slot.SubIndex, laurion_slot.AugIndex, EQ::invslot::SLOT_INVALID);
 
 			return EQ::invslot::SLOT_INVALID;
 		}
@@ -3656,101 +3656,101 @@ namespace Larion
 		uint32 server_slot = EQ::invslot::SLOT_INVALID;
 		uint32 temp_slot = invslot::SLOT_INVALID;
 
-		switch (larion_slot.Type) {
+		switch (laurion_slot.Type) {
 		case invtype::typePossessions: {
-			if (larion_slot.Slot >= invslot::POSSESSIONS_BEGIN && larion_slot.Slot <= invslot::POSSESSIONS_END) {
-				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
-					server_slot = larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::POSSESSIONS_BEGIN && laurion_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = laurion_slot.Slot;
 				}
 
-				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
-					if (larion_slot.Slot < invslot::GENERAL_BEGIN)
+				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
+					if (laurion_slot.Slot < invslot::GENERAL_BEGIN)
 						return EQ::invslot::SLOT_INVALID;
 
-					temp_slot = (larion_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
-					server_slot = EQ::invbag::GENERAL_BAGS_BEGIN + temp_slot + larion_slot.SubIndex;
+					temp_slot = (laurion_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::GENERAL_BAGS_BEGIN + temp_slot + laurion_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeBank: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::BANK_SIZE) {
-				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
-					server_slot = EQ::invslot::BANK_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::BANK_SIZE) {
+				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::BANK_BEGIN + laurion_slot.Slot;
 				}
 
-				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
-					temp_slot = larion_slot.Slot * invbag::SLOT_COUNT;
-					server_slot = EQ::invbag::BANK_BAGS_BEGIN + temp_slot + larion_slot.SubIndex;
+				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = laurion_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::BANK_BAGS_BEGIN + temp_slot + laurion_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeSharedBank: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::SHARED_BANK_SIZE) {
-				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
-					server_slot = EQ::invslot::SHARED_BANK_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::SHARED_BANK_BEGIN + laurion_slot.Slot;
 				}
 
-				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
-					temp_slot = larion_slot.Slot * invbag::SLOT_COUNT;
-					server_slot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + temp_slot + larion_slot.SubIndex;
+				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = laurion_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + temp_slot + laurion_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeTrade: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::TRADE_SIZE) {
-				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
-					server_slot = EQ::invslot::TRADE_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::TRADE_SIZE) {
+				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::TRADE_BEGIN + laurion_slot.Slot;
 				}
 
-				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
-					temp_slot = larion_slot.Slot * invbag::SLOT_COUNT;
-					server_slot = EQ::invbag::TRADE_BAGS_BEGIN + temp_slot + larion_slot.SubIndex;
+				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = laurion_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::TRADE_BAGS_BEGIN + temp_slot + laurion_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeWorld: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::WORLD_SIZE) {
-				server_slot = EQ::invslot::WORLD_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::WORLD_SIZE) {
+				server_slot = EQ::invslot::WORLD_BEGIN + laurion_slot.Slot;
 			}
 
-			else if (larion_slot.Slot == invslot::SLOT_INVALID) {
+			else if (laurion_slot.Slot == invslot::SLOT_INVALID) {
 				server_slot = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
 			}
 
 			break;
 		}
 		case invtype::typeLimbo: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::LIMBO_SIZE) {
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::LIMBO_SIZE) {
 				server_slot = EQ::invslot::slotCursor;
 			}
 
 			break;
 		}
 		case invtype::typeTribute: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::TRIBUTE_SIZE) {
-				server_slot = EQ::invslot::TRIBUTE_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::TRIBUTE_SIZE) {
+				server_slot = EQ::invslot::TRIBUTE_BEGIN + laurion_slot.Slot;
 			}
 
 			break;
 		}
 		case invtype::typeGuildTribute: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
-				server_slot = EQ::invslot::GUILD_TRIBUTE_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				server_slot = EQ::invslot::GUILD_TRIBUTE_BEGIN + laurion_slot.Slot;
 			}
 
 			break;
 		}
 		case invtype::typeCorpse: {
-			if (larion_slot.Slot >= invslot::CORPSE_BEGIN && larion_slot.Slot <= invslot::CORPSE_END) {
-				server_slot = larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::CORPSE_BEGIN && laurion_slot.Slot <= invslot::CORPSE_END) {
+				server_slot = laurion_slot.Slot;
 			}
 
 			break;
@@ -3761,48 +3761,48 @@ namespace Larion
 		}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Larion Slot [%i, %i, %i, %i] to Server Slot %i",
-			larion_slot.Type, larion_slot.Slot, larion_slot.SubIndex, larion_slot.AugIndex, server_slot);
+		Log(Logs::Detail, Logs::Netcode, "Convert Laurion Slot [%i, %i, %i, %i] to Server Slot %i",
+			laurion_slot.Type, laurion_slot.Slot, laurion_slot.SubIndex, laurion_slot.AugIndex, server_slot);
 
 		return server_slot;
 	}
 
-	static inline uint32 LarionToServerCorpseSlot(structs::InventorySlot_Struct larion_corpse_slot)
+	static inline uint32 LaurionToServerCorpseSlot(structs::InventorySlot_Struct laurion_corpse_slot)
 	{
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 
-		if (larion_corpse_slot.Type != invtype::typeCorpse || larion_corpse_slot.SubIndex != invbag::SLOT_INVALID || larion_corpse_slot.AugIndex != invaug::SOCKET_INVALID) {
+		if (laurion_corpse_slot.Type != invtype::typeCorpse || laurion_corpse_slot.SubIndex != invbag::SLOT_INVALID || laurion_corpse_slot.AugIndex != invaug::SOCKET_INVALID) {
 			ServerSlot = EQ::invslot::SLOT_INVALID;
 		}
 
 		else {
-			ServerSlot = LarionToServerCorpseMainSlot(larion_corpse_slot.Slot);
+			ServerSlot = LaurionToServerCorpseMainSlot(laurion_corpse_slot.Slot);
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Larion Slot [%i, %i, %i, %i] to Server Slot %i",
-			larion_corpse_slot.Type, larion_corpse_slot.Slot, larion_corpse_slot.SubIndex, larion_corpse_slot.AugIndex, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert Laurion Slot [%i, %i, %i, %i] to Server Slot %i",
+			laurion_corpse_slot.Type, laurion_corpse_slot.Slot, laurion_corpse_slot.SubIndex, laurion_corpse_slot.AugIndex, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 LarionToServerCorpseMainSlot(uint32 larion_corpse_slot)
+	static inline uint32 LaurionToServerCorpseMainSlot(uint32 laurion_corpse_slot)
 	{
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 
-		if (larion_corpse_slot <= invslot::CORPSE_END && larion_corpse_slot >= invslot::CORPSE_BEGIN) {
-			ServerSlot = larion_corpse_slot;
+		if (laurion_corpse_slot <= invslot::CORPSE_END && laurion_corpse_slot >= invslot::CORPSE_BEGIN) {
+			ServerSlot = laurion_corpse_slot;
 		}
 
-		LogNetcode("Convert Larion Corpse Main Slot [{}] to Server Corpse Slot [{}]", larion_corpse_slot, ServerSlot);
+		LogNetcode("Convert Laurion Corpse Main Slot [{}] to Server Corpse Slot [{}]", laurion_corpse_slot, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 LarionToServerTypelessSlot(structs::TypelessInventorySlot_Struct larion_slot, int16 larion_type)
+	static inline uint32 LaurionToServerTypelessSlot(structs::TypelessInventorySlot_Struct laurion_slot, int16 laurion_type)
 	{
-		if (larion_slot.AugIndex < invaug::SOCKET_INVALID || larion_slot.AugIndex >= invaug::SOCKET_COUNT) {
-			Log(Logs::Detail, Logs::Netcode, "Convert Larion Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
-				larion_slot.Slot, larion_slot.SubIndex, larion_slot.AugIndex, larion_type, EQ::invslot::SLOT_INVALID);
+		if (laurion_slot.AugIndex < invaug::SOCKET_INVALID || laurion_slot.AugIndex >= invaug::SOCKET_COUNT) {
+			Log(Logs::Detail, Logs::Netcode, "Convert Laurion Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
+				laurion_slot.Slot, laurion_slot.SubIndex, laurion_slot.AugIndex, laurion_type, EQ::invslot::SLOT_INVALID);
 
 			return EQ::invslot::SLOT_INVALID;
 		}
@@ -3810,101 +3810,101 @@ namespace Larion
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 		uint32 TempSlot = invslot::SLOT_INVALID;
 
-		switch (larion_type) {
+		switch (laurion_type) {
 		case invtype::typePossessions: {
-			if (larion_slot.Slot >= invslot::POSSESSIONS_BEGIN && larion_slot.Slot <= invslot::POSSESSIONS_END) {
-				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
-					ServerSlot = larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::POSSESSIONS_BEGIN && laurion_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = laurion_slot.Slot;
 				}
 
-				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
-					if (larion_slot.Slot < invslot::GENERAL_BEGIN)
+				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
+					if (laurion_slot.Slot < invslot::GENERAL_BEGIN)
 						return EQ::invslot::SLOT_INVALID;
 
-					TempSlot = (larion_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
-					ServerSlot = EQ::invbag::GENERAL_BAGS_BEGIN + TempSlot + larion_slot.SubIndex;
+					TempSlot = (laurion_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::GENERAL_BAGS_BEGIN + TempSlot + laurion_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeBank: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::BANK_SIZE) {
-				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
-					ServerSlot = EQ::invslot::BANK_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::BANK_SIZE) {
+				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::BANK_BEGIN + laurion_slot.Slot;
 				}
 
-				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
-					TempSlot = larion_slot.Slot * invbag::SLOT_COUNT;
-					ServerSlot = EQ::invbag::BANK_BAGS_BEGIN + TempSlot + larion_slot.SubIndex;
+				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = laurion_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::BANK_BAGS_BEGIN + TempSlot + laurion_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeSharedBank: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::SHARED_BANK_SIZE) {
-				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
-					ServerSlot = EQ::invslot::SHARED_BANK_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::SHARED_BANK_BEGIN + laurion_slot.Slot;
 				}
 
-				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
-					TempSlot = larion_slot.Slot * invbag::SLOT_COUNT;
-					ServerSlot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + TempSlot + larion_slot.SubIndex;
+				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = laurion_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + TempSlot + laurion_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeTrade: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::TRADE_SIZE) {
-				if (larion_slot.SubIndex == invbag::SLOT_INVALID) {
-					ServerSlot = EQ::invslot::TRADE_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::TRADE_SIZE) {
+				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::TRADE_BEGIN + laurion_slot.Slot;
 				}
 
-				else if (larion_slot.SubIndex >= invbag::SLOT_BEGIN && larion_slot.SubIndex <= invbag::SLOT_END) {
-					TempSlot = larion_slot.Slot * invbag::SLOT_COUNT;
-					ServerSlot = EQ::invbag::TRADE_BAGS_BEGIN + TempSlot + larion_slot.SubIndex;
+				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = laurion_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::TRADE_BAGS_BEGIN + TempSlot + laurion_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeWorld: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::WORLD_SIZE) {
-				ServerSlot = EQ::invslot::WORLD_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::WORLD_SIZE) {
+				ServerSlot = EQ::invslot::WORLD_BEGIN + laurion_slot.Slot;
 			}
 
-			else if (larion_slot.Slot == invslot::SLOT_INVALID) {
+			else if (laurion_slot.Slot == invslot::SLOT_INVALID) {
 				ServerSlot = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
 			}
 
 			break;
 		}
 		case invtype::typeLimbo: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::LIMBO_SIZE) {
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::LIMBO_SIZE) {
 				ServerSlot = EQ::invslot::slotCursor;
 			}
 
 			break;
 		}
 		case invtype::typeTribute: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::TRIBUTE_SIZE) {
-				ServerSlot = EQ::invslot::TRIBUTE_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::TRIBUTE_SIZE) {
+				ServerSlot = EQ::invslot::TRIBUTE_BEGIN + laurion_slot.Slot;
 			}
 
 			break;
 		}
 		case invtype::typeGuildTribute: {
-			if (larion_slot.Slot >= invslot::SLOT_BEGIN && larion_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
-				ServerSlot = EQ::invslot::GUILD_TRIBUTE_BEGIN + larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::SLOT_BEGIN && laurion_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				ServerSlot = EQ::invslot::GUILD_TRIBUTE_BEGIN + laurion_slot.Slot;
 			}
 
 			break;
 		}
 		case invtype::typeCorpse: {
-			if (larion_slot.Slot >= invslot::CORPSE_BEGIN && larion_slot.Slot <= invslot::CORPSE_END) {
-				ServerSlot = larion_slot.Slot;
+			if (laurion_slot.Slot >= invslot::CORPSE_BEGIN && laurion_slot.Slot <= invslot::CORPSE_END) {
+				ServerSlot = laurion_slot.Slot;
 			}
 
 			break;
@@ -3915,9 +3915,9 @@ namespace Larion
 		}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Larion Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
-			larion_slot.Slot, larion_slot.SubIndex, larion_slot.AugIndex, larion_type, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert Laurion Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
+			laurion_slot.Slot, laurion_slot.SubIndex, laurion_slot.AugIndex, laurion_type, ServerSlot);
 
 		return ServerSlot;
 	}
-} /*Larion*/
+} /*Laurion*/

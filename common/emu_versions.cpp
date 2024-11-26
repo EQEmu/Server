@@ -56,8 +56,8 @@ const char* EQ::versions::ClientVersionName(ClientVersion client_version)
 		return "RoF";
 	case ClientVersion::RoF2:
 		return "RoF2";
-	case ClientVersion::Larion:
-		return "Larion";
+	case ClientVersion::Laurion:
+		return "Laurion";
 	default:
 		return "Invalid Version";
 	};
@@ -78,8 +78,8 @@ uint32 EQ::versions::ConvertClientVersionToClientVersionBit(ClientVersion client
 		return bitRoF;
 	case ClientVersion::RoF2:
 		return bitRoF2;
-	case ClientVersion::Larion:
-		return bitLarion;
+	case ClientVersion::Laurion:
+		return bitLaurion;
 	default:
 		return bitUnknown;
 	}
@@ -100,8 +100,8 @@ EQ::versions::ClientVersion EQ::versions::ConvertClientVersionBitToClientVersion
 		return ClientVersion::RoF;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::RoF2) - 1)) :
 		return ClientVersion::RoF2;
-	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::Larion) - 1)):
-		return ClientVersion::Larion;
+	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::Laurion) - 1)):
+		return ClientVersion::Laurion;
 	default:
 		return ClientVersion::Unknown;
 	}
@@ -190,8 +190,8 @@ const char* EQ::versions::MobVersionName(MobVersion mob_version)
 		return "RoF";
 	case MobVersion::RoF2:
 		return "RoF2";
-	case MobVersion::Larion:
-		return "Larion";
+	case MobVersion::Laurion:
+		return "Laurion";
 	case MobVersion::NPC:
 		return "NPC";
 	case MobVersion::NPCMerchant:
@@ -220,8 +220,8 @@ const char* EQ::versions::MobVersionName(MobVersion mob_version)
 		return "Offline RoF";
 	case MobVersion::OfflineRoF2:
 		return "Offline RoF2";
-	case MobVersion::OfflineLarion:
-		return "Offline Larion";
+	case MobVersion::OfflineLaurion:
+		return "Offline Laurion";
 	default:
 		return "Invalid Version";
 	};
@@ -245,8 +245,8 @@ EQ::versions::ClientVersion EQ::versions::ConvertMobVersionToClientVersion(MobVe
 		return ClientVersion::RoF;
 	case MobVersion::RoF2:
 		return ClientVersion::RoF2;
-	case MobVersion::Larion:
-		return ClientVersion::Larion;
+	case MobVersion::Laurion:
+		return ClientVersion::Laurion;
 	default:
 		return ClientVersion::Unknown;
 	}
@@ -270,8 +270,8 @@ EQ::versions::MobVersion EQ::versions::ConvertClientVersionToMobVersion(ClientVe
 		return MobVersion::RoF;
 	case ClientVersion::RoF2:
 		return MobVersion::RoF2;
-	case ClientVersion::Larion:
-		return MobVersion::Larion;
+	case ClientVersion::Laurion:
+		return MobVersion::Laurion;
 	default:
 		return MobVersion::Unknown;
 	}
@@ -292,8 +292,8 @@ EQ::versions::MobVersion EQ::versions::ConvertPCMobVersionToOfflinePCMobVersion(
 		return MobVersion::OfflineRoF;
 	case MobVersion::RoF2:
 		return MobVersion::OfflineRoF2;
-	case MobVersion::Larion:
-		return MobVersion::OfflineLarion;
+	case MobVersion::Laurion:
+		return MobVersion::OfflineLaurion;
 	default:
 		return MobVersion::Unknown;
 	}
@@ -314,8 +314,8 @@ EQ::versions::MobVersion EQ::versions::ConvertOfflinePCMobVersionToPCMobVersion(
 		return MobVersion::RoF;
 	case MobVersion::OfflineRoF2:
 		return MobVersion::RoF2;
-	case MobVersion::OfflineLarion:
-		return MobVersion::Larion;
+	case MobVersion::OfflineLaurion:
+		return MobVersion::Laurion;
 	default:
 		return MobVersion::Unknown;
 	}
@@ -336,8 +336,8 @@ EQ::versions::ClientVersion EQ::versions::ConvertOfflinePCMobVersionToClientVers
 		return ClientVersion::RoF;
 	case MobVersion::OfflineRoF2:
 		return ClientVersion::RoF2;
-	case MobVersion::OfflineLarion:
-		return ClientVersion::Larion;
+	case MobVersion::OfflineLaurion:
+		return ClientVersion::Laurion;
 	default:
 		return ClientVersion::Unknown;
 	}
@@ -358,8 +358,8 @@ EQ::versions::MobVersion EQ::versions::ConvertClientVersionToOfflinePCMobVersion
 		return MobVersion::OfflineRoF;
 	case ClientVersion::RoF2:
 		return MobVersion::OfflineRoF2;
-	case ClientVersion::Larion:
-		return MobVersion::OfflineLarion;
+	case ClientVersion::Laurion:
+		return MobVersion::OfflineLaurion;
 	default:
 		return MobVersion::Unknown;
 	}
