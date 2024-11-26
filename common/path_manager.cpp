@@ -34,7 +34,7 @@ void PathManager::LoadPaths()
 
 	const auto c = EQEmuConfig::get();
 
-	auto resolve_path = [&](const std::string& dir, const std::vector<std::string>& fallbackDirs = {}) -> std::string {
+	auto resolve_path = [&](const std::string& dir, const std::vector<std::string>& fallback_dirs = {}) -> std::string {
 		// relative
 		if (File::Exists(fs::path{m_server_path + "/" + dir}.string())) {
 			return fs::relative(fs::path{m_server_path + "/" + dir}).lexically_normal().string();
@@ -46,13 +46,13 @@ void PathManager::LoadPaths()
 		}
 
 		// fallback search options if specified
-		for (const auto& fallback : fallbackDirs) {
+		for (const auto& fallback : fallback_dirs) {
 			if (File::Exists(fs::path{m_server_path + "/" + fallback}.string())) {
 				return fs::relative(fs::path{m_server_path + "/" + fallback}).lexically_normal().string();
 			}
 		}
 
-		// if all else fails, just set it to th	e config value
+		// if all else fails, just set it to the config value
 		return dir;
 	};
 
