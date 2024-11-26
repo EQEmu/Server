@@ -445,13 +445,13 @@ public:
 	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, bool noClients = false, bool noBots = false, bool noPets = false);	
 
 	bool PrecastChecks(Mob* tar, uint16 spellType);	
-	bool CastChecks(uint16 spellid, Mob* tar, uint16 spellType, bool doPrechecks = false, bool AECheck = false);	
-	bool CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar);
+	bool CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechecks = false, bool AECheck = false);
+	bool CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar);
 	bool BotHasEnoughMana(uint16 spell_id);
-	bool IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spellid);
-	bool DoResistCheck(Mob* target, uint16 spellid, int32 resist_limit);
-	bool DoResistCheckBySpellType(Mob* tar, uint16 spellid, uint16 spellType);
-	bool IsValidTargetType(uint16 spellid, int targetType, uint8 bodyType);
+	bool IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id);
+	bool DoResistCheck(Mob* target, uint16 spell_id, int32 resist_limit);
+	bool DoResistCheckBySpellType(Mob* tar, uint16 spell_id, uint16 spellType);
+	bool IsValidTargetType(uint16 spell_id, int targetType, uint8 bodyType);
 	bool IsMobEngagedByAnyone(Mob* tar);
 	void SetBotSetting(uint8 settingType, uint16 botSetting, int settingValue);
 	void CopySettings(Bot* to, uint8 settingType, uint16 spellType = UINT16_MAX);
@@ -522,11 +522,11 @@ public:
 
 	std::list<BotSpellTypeOrder> GetSpellTypesPrioritized(uint8 priorityType);
 	uint16 GetSpellListSpellType(uint16 spellType);
-	bool IsValidSpellTypeBySpellID(uint16 spellType, uint16 spellid);
+	bool IsValidSpellTypeBySpellID(uint16 spellType, uint16 spell_id);
 	inline uint16 GetCastedSpellType() const { return _castedSpellType; }
 	void SetCastedSpellType(uint16 spellType);
 
-	bool HasValidAETarget(Bot* botCaster, uint16 spellid, uint16 spellType, Mob* tar);
+	bool HasValidAETarget(Bot* botCaster, uint16 spell_id, uint16 spellType, Mob* tar);
 
 	void CheckBotSpells();
 
@@ -592,8 +592,8 @@ public:
 	static BotSpell GetBestBotSpellForGroupCompleteHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
 	static BotSpell GetBestBotSpellForGroupHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
 
-	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, int16 spellid, uint16 spellType, bool AE = false);
-	bool IsValidMezTarget(Mob* owner, Mob* npc, uint16 spellid);
+	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, int16 spell_id, uint16 spellType, bool AE = false);
+	bool IsValidMezTarget(Mob* owner, Mob* npc, uint16 spell_id);
 	static BotSpell GetBestBotSpellForMez(Bot* botCaster, uint16 spellType = BotSpellTypes::Mez);
 	static BotSpell GetBestBotMagicianPetSpell(Bot* botCaster, uint16 spellType = BotSpellTypes::Pet);
 	static std::string GetBotMagicianPetType(Bot* botCaster);
@@ -735,7 +735,7 @@ public:
 	inline const InspectMessage_Struct& GetInspectMessage() const { return _botInspectMessage; }
 
 	// "Quest API" Methods
-	bool HasBotSpellEntry(uint16 spellid);
+	bool HasBotSpellEntry(uint16 spell_id);
 	void ApplySpell(int spell_id, int duration = 0, int level = -1, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
 	void BreakInvis();
 	void Escape();

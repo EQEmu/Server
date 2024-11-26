@@ -1429,11 +1429,11 @@ BotSpell Bot::GetBestBotSpellForMez(Bot* botCaster, uint16 spellType) {
 	return result;
 }
 
-Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, int16 spellid, uint16 spellType, bool AE) {
+Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, int16 spell_id, uint16 spellType, bool AE) {
 	Mob* result = nullptr;
 
 	if (botCaster && botCaster->GetOwner()) {
-		int spellRange = (!AE ? botCaster->GetActSpellRange(spellid, spells[spellid].range) : botCaster->GetActSpellRange(spellid, spells[spellid].aoe_range));
+		int spellRange = (!AE ? botCaster->GetActSpellRange(spell_id, spells[spell_id].range) : botCaster->GetActSpellRange(spell_id, spells[spell_id].aoe_range));
 		int buff_count = 0;
 		NPC* npc = nullptr;
 
@@ -1445,7 +1445,7 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, int16 spellid, uint16 spellTy
 				continue;
 			}
 
-			if (!botCaster->IsValidMezTarget(botCaster->GetOwner(), npc, spellid)) {
+			if (!botCaster->IsValidMezTarget(botCaster->GetOwner(), npc, spell_id)) {
 				continue;
 			}
 
@@ -1459,11 +1459,11 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, int16 spellid, uint16 spellTy
 						continue;
 					}
 
-					if (!botCaster->IsValidMezTarget(botCaster->GetOwner(), m, spellid)) {
+					if (!botCaster->IsValidMezTarget(botCaster->GetOwner(), m, spell_id)) {
 						continue;
 					}
 
-					if (IsPBAESpell(spellid)) {
+					if (IsPBAESpell(spell_id)) {
 						if (spellRange < Distance(botCaster->GetPosition(), m->GetPosition())) {
 							continue;							
 						}
@@ -1474,7 +1474,7 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, int16 spellid, uint16 spellTy
 						}
 					}
 
-					if (botCaster->CastChecks(spellid, m, spellType, true, true)) {
+					if (botCaster->CastChecks(spell_id, m, spellType, true, true)) {
 						++targetCount;
 					}
 
@@ -1499,7 +1499,7 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, int16 spellid, uint16 spellTy
 					continue;
 				}
 
-				if (!botCaster->CastChecks(spellid, npc, spellType, true)) {
+				if (!botCaster->CastChecks(spell_id, npc, spellType, true)) {
 					continue;
 				}
 
@@ -2631,7 +2631,7 @@ void Bot::AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot) {
 	}
 }
 
-bool Bot::HasBotSpellEntry(uint16 spellid) {
+bool Bot::HasBotSpellEntry(uint16 spell_id) {
 	auto* spell_list = content_db.GetBotSpells(GetBotSpellID());
 
 	if (!spell_list) {
@@ -2640,7 +2640,7 @@ bool Bot::HasBotSpellEntry(uint16 spellid) {
 
 	// Check if Spell ID is found in Bot Spell Entries
 	for (auto& e : spell_list->entries) {
-		if (spellid == e.spellid) {
+		if (spell_id == e.spellid) {
 			return true;
 		}
 	}
