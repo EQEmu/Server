@@ -25,6 +25,8 @@
 #include "repositories/discord_webhooks_repository.h"
 #include "repositories/logsys_categories_repository.h"
 #include "termcolor/rang.hpp"
+#include "path_manager.h"
+#include "file.h"
 
 #include <iostream>
 #include <string>
@@ -531,6 +533,11 @@ void EQEmuLogSys::CloseFileLogs()
 void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 {
 	EQEmuLogSys::CloseFileLogs();
+
+	if (!File::Exists(path.GetLogPath())) {
+		LogInfo("Logs directory not found, creating [{}]", path.GetLogPath());
+		File::Makedir(path.GetLogPath());
+	}
 
 	/**
 	 * When loading settings, we must have been given a reason in category based logging to output to a file in order to even create or open one...
