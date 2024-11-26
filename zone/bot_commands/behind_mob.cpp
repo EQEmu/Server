@@ -64,23 +64,21 @@ void bot_command_behind_mob(Client* c, const Seperator* sep)
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
-		c->Message(
-			Chat::Yellow,
-			fmt::format(
-				"Use {} for information about race/class IDs.",
-				Saylink::Silent("^classracelist")
-			).c_str()
-		);
+
+		if (RuleB(Bots, SendClassRaceOnHelp)) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Use {} for information about race/class IDs.",
+					Saylink::Silent("^classracelist")
+				).c_str()
+			);
+		}
 
 		return;
 	}
 
 	std::string arg1 = sep->arg[1];
-
-	if (!arg1.compare("listid") || !arg1.compare("listname")) {
-		c->CastToBot()->SendSpellTypesWindow(c, sep->arg[0], sep->arg[1], sep->arg[2]);
-		return;
-	}
 
 	int ab_arg = 1;
 	bool current_check = false;

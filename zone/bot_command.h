@@ -1733,6 +1733,8 @@ void bot_command_spell_settings_delete(Client* c, const Seperator *sep);
 void bot_command_spell_settings_list(Client* c, const Seperator *sep);
 void bot_command_spell_settings_toggle(Client* c, const Seperator *sep);
 void bot_command_spell_settings_update(Client* c, const Seperator *sep);
+void bot_command_spelltype_ids(Client* c, const Seperator* sep);
+void bot_command_spelltype_names(Client* c, const Seperator* sep);
 void bot_spell_info_dialogue_window(Client* c, const Seperator *sep);
 void bot_command_enforce_spell_list(Client* c, const Seperator* sep);
 void bot_command_summon_corpse(Client *c, const Seperator *sep);
@@ -1820,4 +1822,6 @@ void helper_send_available_subcommands(Client *bot_owner, const char* command_si
 void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class = Class::None);
 bool helper_spell_check_fail(STBaseEntry* local_entry);
 bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type);
+void SendSpellTypePrompts(Client *c, bool commandedTypes = false);
+void SendSpellTypeWindow(Client *c, const Seperator* sep);
 #endif

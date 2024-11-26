@@ -92,25 +92,22 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
-		c->CastToBot()->SendSpellTypesWindow(c, sep->arg[0], "", "", true);
-		c->Message(
-			Chat::Yellow,
-			fmt::format(
-				"Use {} for information about race/class IDs.",
-				Saylink::Silent("^classracelist")
-			).c_str()
-		);
+		SendSpellTypePrompts(c);
+
+		if (RuleB(Bots, SendClassRaceOnHelp)) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Use {} for information about race/class IDs.",
+					Saylink::Silent("^classracelist")
+				).c_str()
+			);
+		}
 
 		return;
 	}
 
 	std::string arg1 = sep->arg[1];
-
-	if (!arg1.compare("listid") || !arg1.compare("listname")) {
-		c->CastToBot()->SendSpellTypesWindow(c, sep->arg[0], sep->arg[1], sep->arg[2]);
-		return;
-	}
-
 	std::string arg2 = sep->arg[2];
 	int ab_arg = 2;
 	bool current_check = false;
