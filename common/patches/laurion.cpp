@@ -2544,47 +2544,32 @@ namespace Laurion
 
 		FormattedMessage_Struct* emu = (FormattedMessage_Struct*)in->pBuffer;
 
-		unsigned char* __emu_buffer = in->pBuffer;
-
 		char* old_message_ptr = (char*)in->pBuffer;
 		old_message_ptr += sizeof(FormattedMessage_Struct);
-
+		
 		std::string old_message_array[9];
-
+		
 		for (int i = 0; i < 9; ++i) {
 			if (*old_message_ptr == 0) { break; }
 			old_message_array[i] = old_message_ptr;
 			old_message_ptr += old_message_array[i].length() + 1;
 		}
 
-		uint32 new_message_size = 0;
-		std::string new_message_array[9];
+		SerializeBuffer buffer;
+		buffer.WriteUInt32(emu->unknown0);
+		buffer.WriteUInt8(0); // Observed
+		buffer.WriteUInt32(emu->string_id);
+		buffer.WriteUInt32(emu->type);
 
 		for (int i = 0; i < 9; ++i) {
-			if (old_message_array[i].length() == 0) { break; }
-			new_message_array[i] = old_message_array[i];
-			//ServerToRoF2SayLink(new_message_array[i], old_message_array[i]);
-			new_message_size += new_message_array[i].length() + 1;
+			buffer.WriteLengthString(old_message_array[i]);
 		}
 
-		in->size = sizeof(FormattedMessage_Struct) + new_message_size + 1;
-		in->pBuffer = new unsigned char[in->size];
+		auto outapp = new EQApplicationPacket(OP_FormattedMessage, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
 
-		char* OutBuffer = (char*)in->pBuffer;
-
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->unknown0);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->string_id);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->type);
-
-		for (int i = 0; i < 9; ++i) {
-			if (new_message_array[i].length() == 0) { break; }
-			VARSTRUCT_ENCODE_STRING(OutBuffer, new_message_array[i].c_str());
-		}
-
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
+		delete in;
 	}
 
 	// DECODE methods
