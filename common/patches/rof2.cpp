@@ -6358,9 +6358,19 @@ namespace RoF2
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
 		strn0cpy(hdr.unknown000, fmt::format("{:016}\0", inst->GetSerialNumber()).c_str(),sizeof(hdr.unknown000));
 
-		hdr.stacksize =
-			item->ID == PARCEL_MONEY_ITEM_ID ? inst->GetPrice() : (inst->IsStackable() ? ((inst->GetCharges() > 1000)
-				? 0xFFFFFFFF : inst->GetCharges()) : 1);
+		hdr.stacksize = (
+			item->ID == PARCEL_MONEY_ITEM_ID ?
+			inst->GetPrice() :
+			(
+				inst->IsStackable() ?
+				(
+					inst->GetCharges() > std::numeric_limits<int16>::max() ?
+					std::numeric_limits<uint32>::max() :
+					inst->GetCharges()
+				) :
+				1
+			)
+		);
 		hdr.unknown004 = 0;
 
 		structs::InventorySlot_Struct slot_id{};
