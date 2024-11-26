@@ -1251,7 +1251,6 @@ int bot_command_init(void)
 		bot_command_add("applypoison", "Applies cursor-held poison to a rogue bot's weapon", AccountStatus::Player, bot_command_apply_poison) ||
 		bot_command_add("attack", "Orders bots to attack a designated target", AccountStatus::Player, bot_command_attack) ||
 		bot_command_add("behindmob", "Toggles whether or not your bot tries to stay behind a mob", AccountStatus::Player, bot_command_behind_mob) ||
-		bot_command_add("bindaffinity", "Orders a bot to attempt an affinity binding", AccountStatus::Player, bot_command_bind_affinity) ||
 		bot_command_add("bot", "Lists the available bot management [subcommands]", AccountStatus::Player, bot_command_bot) ||
 		bot_command_add("botappearance", "Lists the available bot appearance [subcommands]", AccountStatus::Player, bot_command_appearance) ||
 		bot_command_add("botbeardcolor", "Changes the beard color of a bot", AccountStatus::Player, bot_command_beard_color) ||
@@ -1286,16 +1285,13 @@ int bot_command_init(void)
 		bot_command_add("botwoad", "Changes the Barbarian woad of a bot", AccountStatus::Player, bot_command_woad) ||
 		bot_command_add("cast", "Tells the first found specified bot to cast the given spell type", AccountStatus::Player, bot_command_cast) ||
 		bot_command_add("distanceranged", "Controls the range casters and ranged will try to stay away from a mob", AccountStatus::Player, bot_command_distance_ranged) ||
-		bot_command_add("charm", "Attempts to have a bot charm your target", AccountStatus::Player, bot_command_charm) ||
 		bot_command_add("classracelist", "Lists the classes and races and their appropriate IDs", AccountStatus::Player, bot_command_class_race_list) ||
 		bot_command_add("clickitem", "Orders your targeted bot to click the item in the provided inventory slot.", AccountStatus::Player, bot_command_click_item) ||
 		bot_command_add("copysettings", "Copies settings from one bot to another", AccountStatus::Player, bot_command_copy_settings) ||
-		bot_command_add("cure", "Orders a bot to remove any ailments", AccountStatus::Player, bot_command_cure) ||
 		bot_command_add("defaultsettings", "Restores a bot back to default settings", AccountStatus::Player, bot_command_default_settings) ||
 		bot_command_add("defensive", "Orders a bot to use a defensive discipline", AccountStatus::Player, bot_command_defensive) ||
-		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_depart) ||
+		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_depart) || //TODO bot rewrite - deleteme
 		bot_command_add("enforcespellsettings", "Toggles your Bot to cast only spells in their spell settings list.", AccountStatus::Player, bot_command_enforce_spell_list) ||
-		bot_command_add("escape", "Orders a bot to send a target group to a safe location within the zone", AccountStatus::Player, bot_command_escape) ||
 		bot_command_add("findaliases", "Find available aliases for a bot command", AccountStatus::Player, bot_command_find_aliases) ||
 		bot_command_add("follow", "Orders bots to follow a designated target (option 'chain' auto-links eligible spawned bots)", AccountStatus::Player, bot_command_follow) ||
 		bot_command_add("guard", "Orders bots to guard their current positions", AccountStatus::Player, bot_command_guard) ||
@@ -1322,20 +1318,15 @@ int bot_command_init(void)
 		bot_command_add("healrotationstop", "Stops a heal rotation", AccountStatus::Player, bot_command_heal_rotation_stop) ||
 		bot_command_add("help", "List available commands and their description - specify partial command as argument to search", AccountStatus::Player, bot_command_help) ||
 		bot_command_add("hold", "Prevents a bot from attacking until released", AccountStatus::Player, bot_command_hold) ||
-		bot_command_add("identify", "Orders a bot to cast an item identification spell", AccountStatus::Player, bot_command_identify) ||
 		bot_command_add("illusionblock", "Control whether or not illusion effects will land on the bot if casted by another player or bot", AccountStatus::Player, bot_command_illusion_block) ||
 		bot_command_add("inventory", "Lists the available bot inventory [subcommands]", AccountStatus::Player, bot_command_inventory) ||
 		bot_command_add("inventorygive", "Gives the item on your cursor to a bot", AccountStatus::Player, bot_command_inventory_give) ||
 		bot_command_add("inventorylist", "Lists all items in a bot's inventory", AccountStatus::Player, bot_command_inventory_list) ||
 		bot_command_add("inventoryremove", "Removes an item from a bot's inventory", AccountStatus::Player, bot_command_inventory_remove) ||
 		bot_command_add("inventorywindow", "Displays all items in a bot's inventory in a pop-up window", AccountStatus::Player, bot_command_inventory_window) ||
-		bot_command_add("invisibility", "Orders a bot to cast a cloak of invisibility, or allow them to be seen", AccountStatus::Player, bot_command_invisibility) ||
 		bot_command_add("itemuse", "Elicits a report from spawned bots that can use the item on your cursor (option 'empty' yields only empty slots)", AccountStatus::Player, bot_command_item_use) ||
-		bot_command_add("levitation", "Orders a bot to cast a levitation spell", AccountStatus::Player, bot_command_levitation) ||
-		bot_command_add("lull", "Orders a bot to cast a pacification spell", AccountStatus::Player, bot_command_lull) ||
+		bot_command_add("lull", "Orders a bot to cast a pacification spell", AccountStatus::Player, bot_command_lull) || //TODO bot rewrite - IMPLEMENT
 		bot_command_add("maxmeleerange", "Toggles whether your bot is at max melee range or not. This will disable all special abilities, including taunt.", AccountStatus::Player, bot_command_max_melee_range) ||		
-		bot_command_add("mesmerize", "Orders a bot to cast a mesmerization spell", AccountStatus::Player, bot_command_mesmerize) ||
-		bot_command_add("movementspeed", "Orders a bot to cast a movement speed enhancement spell", AccountStatus::Player, bot_command_movement_speed) ||
 		bot_command_add("owneroption", "Sets options available to bot owners", AccountStatus::Player, bot_command_owner_option) ||
 		bot_command_add("pet", "Lists the available bot pet [subcommands]", AccountStatus::Player, bot_command_pet) ||
 		bot_command_add("petgetlost", "Orders a bot to remove its summoned pet", AccountStatus::Player, bot_command_pet_get_lost) ||
@@ -1346,14 +1337,9 @@ int bot_command_init(void)
 		bot_command_add("precombat", "Sets flag used to determine pre-combat behavior", AccountStatus::Player, bot_command_precombat) ||
 		bot_command_add("pull", "Orders a designated bot to 'pull' an enemy", AccountStatus::Player, bot_command_pull) ||
 		bot_command_add("release", "Releases a suspended bot's AI processing (with hate list wipe)", AccountStatus::Player, bot_command_release) ||
-		bot_command_add("resistance", "Orders a bot to cast a specified resistance buff", AccountStatus::Player, bot_command_resistance) ||
-		bot_command_add("resurrect", "Orders a bot to resurrect a player's (players') corpse(s)", AccountStatus::Player, bot_command_resurrect) ||
-		bot_command_add("rune", "Orders a bot to cast a rune of protection", AccountStatus::Player, bot_command_rune) ||
-		bot_command_add("sendhome", "Orders a bot to open a magical doorway home", AccountStatus::Player, bot_command_send_home) ||
 		bot_command_add("sithppercent", "HP threshold for a bot to start sitting in combat if allowed", AccountStatus::Player, bot_command_sit_hp_percent) ||
 		bot_command_add("sitincombat", "Toggles whether or a not a bot will attempt to med or sit to heal in combat", AccountStatus::Player, bot_command_sit_in_combat) ||
 		bot_command_add("sitmanapercent", "Mana threshold for a bot to start sitting in combat if allowed", AccountStatus::Player, bot_command_sit_mana_percent) ||
-		bot_command_add("size", "Orders a bot to change a player's size", AccountStatus::Player, bot_command_size) ||		
 		bot_command_add("spellaggrochecks", "Toggles whether or not bots will cast a spell type if they think it will get them aggro", AccountStatus::Player, bot_command_spell_aggro_checks) ||
 		bot_command_add("spellengagedpriority", "Controls the order of casts by spell type when engaged in combat", AccountStatus::Player, bot_command_spell_engaged_priority) ||
 		bot_command_add("spelldelays", "Controls the delay between casts for a specific spell type", AccountStatus::Player, bot_command_spell_delays) ||
@@ -1374,15 +1360,14 @@ int bot_command_init(void)
 		bot_command_add("spellsettingsdelete", "Delete a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_delete) ||
 		bot_command_add("spellsettingstoggle", "Toggle a bot spell use", AccountStatus::Player, bot_command_spell_settings_toggle) ||
 		bot_command_add("spellsettingsupdate", "Update a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_update) ||
-		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) ||
 		bot_command_add("spelltypeids", "Lists spelltypes by ID", AccountStatus::Player, bot_command_spelltype_ids) ||
 		bot_command_add("spelltypenames", "Lists spelltypes by shortname", AccountStatus::Player, bot_command_spelltype_names) ||
+		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) || //TODO bot rewrite - IMPLEMENT
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", AccountStatus::Player, bot_command_suspend) ||
 		bot_command_add("taunt", "Toggles taunt use by a bot", AccountStatus::Player, bot_command_taunt) ||
 		bot_command_add("timer", "Checks or clears timers of the chosen type.", AccountStatus::GMMgmt, bot_command_timer) ||
 		bot_command_add("track", "Orders a capable bot to track enemies", AccountStatus::Player, bot_command_track) ||
-		bot_command_add("viewcombos", "Views bot race class combinations", AccountStatus::Player, bot_command_view_combos) ||
-		bot_command_add("waterbreathing", "Orders a bot to cast a water breathing spell", AccountStatus::Player, bot_command_water_breathing)	
+		bot_command_add("viewcombos", "Views bot race class combinations", AccountStatus::Player, bot_command_view_combos)
 	) {
 		bot_command_deinit();
 		return -1;
@@ -2266,36 +2251,27 @@ void SendSpellTypeWindow(Client *c, const Seperator* sep) {
 #include "bot_commands/apply_potion.cpp"
 #include "bot_commands/attack.cpp"
 #include "bot_commands/behind_mob.cpp"
-#include "bot_commands/bind_affinity.cpp"
 #include "bot_commands/bot.cpp"
 #include "bot_commands/bot_settings.cpp"
 #include "bot_commands/cast.cpp"
-#include "bot_commands/charm.cpp"
 #include "bot_commands/class_race_list.cpp"
 #include "bot_commands/click_item.cpp"
 #include "bot_commands/copy_settings.cpp"
-#include "bot_commands/cure.cpp"
 #include "bot_commands/default_settings.cpp"
 #include "bot_commands/defensive.cpp"
 #include "bot_commands/depart.cpp"
 #include "bot_commands/distance_ranged.cpp"
-#include "bot_commands/escape.cpp"
 #include "bot_commands/find_aliases.cpp"
 #include "bot_commands/follow.cpp"
 #include "bot_commands/guard.cpp"
 #include "bot_commands/heal_rotation.cpp"
 #include "bot_commands/help.cpp"
 #include "bot_commands/hold.cpp"
-#include "bot_commands/identify.cpp"
 #include "bot_commands/illusion_block.cpp"
 #include "bot_commands/inventory.cpp"
-#include "bot_commands/invisibility.cpp"
 #include "bot_commands/item_use.cpp"
-#include "bot_commands/levitation.cpp"
 #include "bot_commands/lull.cpp"
 #include "bot_commands/max_melee_range.cpp"
-#include "bot_commands/mesmerize.cpp"
-#include "bot_commands/movement_speed.cpp"
 #include "bot_commands/name.cpp"
 #include "bot_commands/owner_option.cpp"
 #include "bot_commands/pet.cpp"
@@ -2304,14 +2280,9 @@ void SendSpellTypeWindow(Client *c, const Seperator* sep) {
 #include "bot_commands/precombat.cpp"
 #include "bot_commands/pull.cpp"
 #include "bot_commands/release.cpp"
-#include "bot_commands/resistance.cpp"
-#include "bot_commands/resurrect.cpp"
-#include "bot_commands/rune.cpp"
-#include "bot_commands/send_home.cpp"
 #include "bot_commands/sit_hp_percent.cpp"
 #include "bot_commands/sit_in_combat.cpp"
 #include "bot_commands/sit_mana_percent.cpp"
-#include "bot_commands/size.cpp"
 #include "bot_commands/spell.cpp"
 #include "bot_commands/spell_aggro_checks.cpp"
 #include "bot_commands/spell_delays.cpp"
@@ -2334,4 +2305,3 @@ void SendSpellTypeWindow(Client *c, const Seperator* sep) {
 #include "bot_commands/timer.cpp"
 #include "bot_commands/track.cpp"
 #include "bot_commands/view_combos.cpp"
-#include "bot_commands/water_breathing.cpp"

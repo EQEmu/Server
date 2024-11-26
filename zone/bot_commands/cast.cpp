@@ -99,8 +99,8 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
-				"Use {} for information about race/class IDs.",
-				Saylink::Silent("^classracelist")
+				"Use help after any command type for more subtypes to use, for example: {}.",
+				Saylink::Silent("^cast invisibility help")
 			).c_str()
 		);
 
@@ -118,9 +118,58 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	}
 
 	std::string arg1 = sep->arg[1];
+	std::string arg2 = sep->arg[2];
 
-	if (!arg1.compare("listid") || !arg1.compare("listname")) {
-		c->CastToBot()->SendSpellTypesWindow(c, sep->arg[0], sep->arg[1], sep->arg[2]);
+	//Commanded type help prompts
+	if (!arg2.compare("help")) {
+		c->Message(Chat::Yellow, "You can also use [single], [group], [ae]. Ex: ^cast movementspeed group.", sep->arg[0]);
+	}
+
+	if (!arg1.compare("invisibility") && !arg2.compare("help")) {
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Available options for {} are: {}, {}, {}, {}.",
+				sep->arg[0],
+				Saylink::Silent("^cast invisibility see", "see"),
+				Saylink::Silent("^cast invisibility invis", "invis"),
+				Saylink::Silent("^cast invisibility undead", "undead"),
+				Saylink::Silent("^cast invisibility animals", "animals")
+			).c_str()
+		);
+
+		return;
+	}
+
+	if (!arg1.compare("size") && !arg2.compare("help")) {
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Available options for {} are: {}, {}.",
+				sep->arg[0],
+				Saylink::Silent("^cast size grow", "grow"),
+				Saylink::Silent("^cast size shrink", "shrink")
+			).c_str()
+		);
+
+		return;
+	}
+
+	if (!arg1.compare("movementspeed") && !arg2.compare("help")) {
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Available options for {} are: {}, {}.",
+				sep->arg[0],
+				Saylink::Silent("^cast movementspeed selo"), "selo"
+			).c_str()
+		);
+
+		return;
+	}
+
+	if (!arg2.compare("help")) {
+		c->Message(Chat::Yellow, "There are no additional options for {}.", sep->arg[0]);
 		return;
 	}
 
@@ -131,8 +180,16 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	if (sep->IsNumber(1)) {
 		spellType = atoi(sep->arg[1]);
 
-		if (spellType < BotSpellTypes::START || spellType > BotSpellTypes::END) {
-			c->Message(Chat::Yellow, "You must choose a valid spell type. Spell types range from %i to %i", BotSpellTypes::START, BotSpellTypes::END);
+		if (spellType < BotSpellTypes::START || (spellType > BotSpellTypes::END && spellType < BotSpellTypes::COMMANDED_START) || spellType > BotSpellTypes::COMMANDED_END) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"You must choose a valid spell type. Use {} for information regarding this command.",
+					Saylink::Silent(
+						fmt::format("{} help", sep->arg[0])
+					)
+				).c_str()
+			);
 
 			return;
 		}
@@ -156,6 +213,88 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		}
 	}
 
+	switch (spellType) { //Allowed command checks
+		case BotSpellTypes::Charm:
+			if (!RuleB(Bots, AllowCommandedCharm)) {
+				c->Message(Chat::Yellow, "This commanded type is currently disabled.");
+				return;
+			}
+
+			break;
+		case BotSpellTypes::AEMez:
+		case BotSpellTypes::Mez:
+			if (!RuleB(Bots, AllowCommandedMez)) {
+				c->Message(Chat::Yellow, "This commanded type is currently disabled.");
+				return;
+			}
+
+			break;
+		case BotSpellTypes::Resurrect:
+			if (!RuleB(Bots, AllowCommandedResurrect)) {
+				c->Message(Chat::Yellow, "This commanded type is currently disabled.");
+				return;
+			}
+
+			break;
+		case BotSpellTypes::SummonCorpse:
+			if (!RuleB(Bots, AllowCommandedSummonCorpse)) {
+				c->Message(Chat::Yellow, "This commanded type is currently disabled.");
+				return;
+			}
+
+			break;
+		default:
+			break;
+	}
+
+	std::string argString = sep->arg[ab_arg];
+	uint16 subType = UINT16_MAX;
+	uint16 subTargetType = UINT16_MAX;
+	
+	if (!argString.compare("shrink")) {
+		subType = CommandedSubTypes::Shrink;
+		++ab_arg;
+	}
+	else if (!argString.compare("grow")) {
+		subType = CommandedSubTypes::Grow;
+		++ab_arg;
+	}
+	else if (!argString.compare("see")) {
+		subType = CommandedSubTypes::SeeInvis;
+		++ab_arg;
+	}
+	else if (!argString.compare("invis")) {
+		subType = CommandedSubTypes::Invis;
+		++ab_arg;
+	}
+	else if (!argString.compare("undead")) {
+		subType = CommandedSubTypes::InvisUndead;
+		++ab_arg;
+	}
+	else if (!argString.compare("animals")) {
+		subType = CommandedSubTypes::InvisAnimals;
+		++ab_arg;
+	}
+	else if (!argString.compare("selo")) {
+		subType = CommandedSubTypes::Selo;
+		++ab_arg;
+	}
+
+	argString = sep->arg[ab_arg];
+
+	if (!argString.compare("single")) {
+		subTargetType = CommandedSubTypes::SingleTarget;
+		++ab_arg;
+	}
+	else if (!argString.compare("group")) {
+		subTargetType = CommandedSubTypes::GroupTarget;
+		++ab_arg;
+	}
+	else if (!argString.compare("ae")) {
+		subTargetType = CommandedSubTypes::AETarget;
+		++ab_arg;
+	}
+
 	if (
 		spellType == BotSpellTypes::PetBuffs ||
 		spellType == BotSpellTypes::PetCompleteHeals ||
@@ -169,47 +308,63 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	}
 
 	Mob* tar = c->GetTarget();
-	LogTestDebug("{}: Attempting {} on {}", __LINE__, c->GetSpellTypeNameByID(spellType), (tar ? tar->GetCleanName() : "NOBODY")); //deleteme
-	if (spellType != BotSpellTypes::Escape && spellType != BotSpellTypes::Pet) {
-		if (!tar) {
+	LogTestDebug("{}: 'Attempting {} [{}] on {}'", __LINE__, c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (tar ? tar->GetCleanName() : "NOBODY")); //deleteme
+
+	if (!tar) {
+		if (spellType != BotSpellTypes::Escape && spellType != BotSpellTypes::Pet) {
 			c->Message(Chat::Yellow, "You need a target for that.");
 			return;
 		}
-
-		if (BOT_SPELL_TYPES_DETRIMENTAL(spellType) && !c->IsAttackAllowed(tar)) {
-			c->Message(Chat::Yellow, "You cannot attack [%s].", tar->GetCleanName());
-			return;
-		}
-
-		if (BOT_SPELL_TYPES_BENEFICIAL(spellType)) {
-			if (!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) {
-				c->Message(Chat::Yellow, "[%s] is an invalid target.", tar->GetCleanName());
-				return;
-			}			
-		}
 	}
-	LogTestDebug("{}: Attempting {} on {}", __LINE__, c->GetSpellTypeNameByID(spellType), (tar ? tar->GetCleanName() : "NOBODY")); //deleteme
-	switch (spellType) {
-		case BotSpellTypes::Stun:
-		case BotSpellTypes::AEStun:
-			if (tar->GetSpecialAbility(SpecialAbility::StunImmunity)) {
-				c->Message(Chat::Yellow, "[%s] is immune to stuns.", tar->GetCleanName());
-				return;
-			}
-			
-			break;
+
+	switch (spellType) { //Target Checks
 		case BotSpellTypes::Resurrect:
 			if (!tar->IsCorpse() || !tar->CastToCorpse()->IsPlayerCorpse()) {
-				c->Message(Chat::Yellow, "[%s] is an invalid target. I can only resurrect player corpses.", tar->GetCleanName());
+				c->Message(Chat::Yellow, "[%s] is not a player's corpse.", tar->GetCleanName());
+
+				return;
+			}
+
+			break;
+		case BotSpellTypes::Identify:
+		case BotSpellTypes::SendHome:
+		case BotSpellTypes::BindAffinity:
+		case BotSpellTypes::SummonCorpse:
+			if (!tar->IsClient() || !c->IsInGroupOrRaid(tar)) {
+				c->Message(Chat::Yellow, "[%s] is an invalid target. Only players in your group or raid are eligible targets.", tar->GetCleanName());
+
 				return;
 			}
 
 			break;
 		default:
+			if (BOT_SPELL_TYPES_DETRIMENTAL(spellType) && !c->IsAttackAllowed(tar)) {
+				c->Message(Chat::Yellow, "You cannot attack [%s].", tar->GetCleanName());
+
+				return;
+			}
+
+			if (BOT_SPELL_TYPES_BENEFICIAL(spellType)) {
+				if (
+					(!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) ||
+					((tar->IsOfClientBot() && !c->IsInGroupOrRaid(tar)) || (tar->GetOwner() && tar->GetOwner()->IsOfClientBot() && !c->IsInGroupOrRaid(tar->GetOwner())))
+				) {
+					c->Message(Chat::Yellow, "[%s] is an invalid target. Only players in your group or raid are eligible targets.", tar->GetCleanName());
+
+					return;
+				}
+			}
+
 			break;
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
+	std::string actionableArg = sep->arg[ab_arg];
+
+	if (actionableArg.empty()) {
+		actionableArg = "spawned";
+	}
+
 	std::string class_race_arg = sep->arg[ab_arg];
 	bool class_race_check = false;
 
@@ -219,7 +374,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 	std::list<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
@@ -240,7 +395,8 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 		/*
 		TODO bot rewrite - 
-		FIX: Snares, Group Cures, OOC Song, Precombat, HateRedux, Fear/AE Fear
+		FIX: Depart, SummonCorpse, Lull, 
+		Group Cures, Precombat, Fear/AE Fear
 		ICB (SK) casting hate on friendly but not hostile?
 		NEED TO CHECK: precombat, AE Dispel, AE Lifetap
 		DO I NEED A PBAE CHECK???
@@ -250,7 +406,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		}
 
 		Mob* newTar = tar;
-		LogTestDebug("{}: Attempting {} on {}", __LINE__, c->GetSpellTypeNameByID(spellType), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
+		LogTestDebug("{}: {} says, 'Attempting {} [{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
 		if (!SpellTypeRequiresTarget(spellType, bot_iter->GetClass())) {
 			newTar = bot_iter;
 		}
@@ -279,11 +435,11 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			continue;
 		}
 
-		LogTestDebug("{}: Attempting {} on {}", __LINE__, c->GetSpellTypeNameByID(spellType), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
+		LogTestDebug("{}: {} says, 'Attempting {} [{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
 
 		bot_iter->SetCommandedSpell(true);
 
-		if (bot_iter->AICastSpell(newTar, 100, spellType)) {
+		if (bot_iter->AICastSpell(newTar, 100, spellType, subTargetType, subType)) {
 			if (!firstFound) {
 				firstFound = bot_iter;
 			}

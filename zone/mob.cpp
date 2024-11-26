@@ -8703,6 +8703,12 @@ uint16 Mob::GetSpellTypeIDByShortName(std::string spellTypeString) {
 		}
 	}
 
+	for (int i = BotSpellTypes::COMMANDED_START; i <= BotSpellTypes::COMMANDED_END; ++i) {
+		if (!Strings::ToLower(spellTypeString).compare(GetSpellTypeShortNameByID(i))) {
+			return i;
+		}
+	}
+
 	return UINT16_MAX;
 }
 
@@ -8874,6 +8880,45 @@ std::string Mob::GetSpellTypeNameByID(uint16 spellType) {
 			break;
 		case BotSpellTypes::PetResistBuffs:
 			spellTypeName = "Pet Resist Buff";
+			break;
+		case BotSpellTypes::Lull:
+			spellTypeName = "Lull";
+			break;
+		case BotSpellTypes::Teleport:
+			spellTypeName = "Teleport";
+			break;
+		case BotSpellTypes::Succor:
+			spellTypeName = "Succor";
+			break;
+		case BotSpellTypes::BindAffinity:
+			spellTypeName = "Bind Affinity";
+			break;
+		case BotSpellTypes::Identify:
+			spellTypeName = "Identify";
+			break;
+		case BotSpellTypes::Levitate:
+			spellTypeName = "Levitate";
+			break;
+		case BotSpellTypes::Rune:
+			spellTypeName = "Rune";
+			break;
+		case BotSpellTypes::WaterBreathing:
+			spellTypeName = "Water Breathing";
+			break;
+		case BotSpellTypes::Size:
+			spellTypeName = "Size";
+			break;
+		case BotSpellTypes::Invisibility:
+			spellTypeName = "Invisibility";
+			break;
+		case BotSpellTypes::MovementSpeed:
+			spellTypeName = "Movement Speed";
+			break;
+		case BotSpellTypes::SendHome:
+			spellTypeName = "Send Home";
+			break;
+		case BotSpellTypes::SummonCorpse:
+			spellTypeName = "Summon Corpse";
 			break;
 		default:
 			break;
@@ -9051,11 +9096,91 @@ std::string Mob::GetSpellTypeShortNameByID(uint16 spellType) {
 		case BotSpellTypes::PetResistBuffs:
 			spellTypeName = "petresistbuffs";
 			break;
+		case BotSpellTypes::Lull:
+			spellTypeName = "lull";
+			break;
+		case BotSpellTypes::Teleport:
+			spellTypeName = "teleport";
+			break;
+		case BotSpellTypes::Succor:
+			spellTypeName = "succor";
+			break;
+		case BotSpellTypes::BindAffinity:
+			spellTypeName = "bindaffinity";
+			break;
+		case BotSpellTypes::Identify:
+			spellTypeName = "identify";
+			break;
+		case BotSpellTypes::Levitate:
+			spellTypeName = "levitate";
+			break;
+		case BotSpellTypes::Rune:
+			spellTypeName = "rune";
+			break;
+		case BotSpellTypes::WaterBreathing:
+			spellTypeName = "waterbreathing";
+			break;
+		case BotSpellTypes::Size:
+			spellTypeName = "size";
+			break;
+		case BotSpellTypes::Invisibility:
+			spellTypeName = "invisibility";
+			break;
+		case BotSpellTypes::MovementSpeed:
+			spellTypeName = "movementspeed";
+			break;
+		case BotSpellTypes::SendHome:
+			spellTypeName = "sendhome";
+			break;
+		case BotSpellTypes::SummonCorpse:
+			spellTypeName = "summoncorpse";
+			break;
 		default:
 			break;
 	}
 
 	return spellTypeName;
+}
+
+std::string Mob::GetSubTypeNameByID(uint16 subType) {
+	std::string subTypeName = "null";
+
+	switch (subType) {
+		case CommandedSubTypes::SingleTarget:
+			subTypeName = "SingleTarget";
+			break;
+		case CommandedSubTypes::GroupTarget:
+			subTypeName = "GroupTarget";
+			break;
+		case CommandedSubTypes::AETarget:
+			subTypeName = "AETarget";
+			break;
+		case CommandedSubTypes::SeeInvis:
+			subTypeName = "SeeInvis";
+			break;
+		case CommandedSubTypes::Invis:
+			subTypeName = "Invis";
+			break;
+		case CommandedSubTypes::InvisUndead:
+			subTypeName = "InvisUndead";
+			break;
+		case CommandedSubTypes::InvisAnimals:
+			subTypeName = "InvisAnimals";
+			break;
+		case CommandedSubTypes::Shrink:
+			subTypeName = "Shrink";
+			break;
+		case CommandedSubTypes::Grow:
+			subTypeName = "Grow";
+			break;
+		case CommandedSubTypes::Selo:
+			subTypeName = "Selo";
+			break;
+		default:
+			break;
+	}
+
+	return subTypeName;
 }
 
 bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {

@@ -312,7 +312,7 @@ UPDATE `bot_spells_entries` SET `type` = 21 WHERE `type` = 2097152;
 		.sql = R"(
 UPDATE bot_spells_entries b, spells_new s
 SET b.`type` = 22
-WHERE b.spellid = s.id
+WHERE b.spell_id = s.id
 AND (
 	s.`effectid1` = 23 OR
 	s.`effectid2` = 23 OR
@@ -332,177 +332,764 @@ AND (
 	ManifestEntry{
 		.version = 9049,
 		.description = "2024_05_18_correct_bot_spell_entries_types.sql",
-		.check = "SELECT * FROM `bot_spells_entries` where `npc_spells_id` = 3002 AND `spellid` = 14312",
+		.check = "SELECT * FROM `bot_spells_entries` where `npc_spells_id` = 3002 AND `spell_id` = 14312",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
 -- Class fixes
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spellid` = 14312;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spellid` = 14313;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spellid` = 14314;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spellid` = 15186;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spellid` = 15187;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spellid` = 15188;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spellid` = 14446;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spellid` = 14447;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spellid` = 14467;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spellid` = 14468;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spellid` = 14469;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3003 WHERE b.`spellid` = 14955;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3003 WHERE b.`spellid` = 14956;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spellid` = 14387;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spellid` = 14388;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spellid` = 14389;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spell_id` = 14312;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spell_id` = 14313;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spell_id` = 14314;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spell_id` = 15186;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spell_id` = 15187;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spell_id` = 15188;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14446;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14447;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14467;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14468;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14469;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3003 WHERE b.`spell_id` = 14955;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3003 WHERE b.`spell_id` = 14956;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14387;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14388;
+UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14389;
 
 -- Minlevel fixes
-UPDATE bot_spells_entries SET `minlevel` = 34 WHERE `spellid` = 1445 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 2 WHERE `spellid` = 229 AND `npc_spells_id` = 3011;
-UPDATE bot_spells_entries SET `minlevel` = 13 WHERE `spellid` = 333 AND `npc_spells_id` = 3013;
-UPDATE bot_spells_entries SET `minlevel` = 29 WHERE `spellid` = 106 AND `npc_spells_id` = 3013;
-UPDATE bot_spells_entries SET `minlevel` = 38 WHERE `spellid` = 754 AND `npc_spells_id` = 3010;
-UPDATE bot_spells_entries SET `minlevel` = 58 WHERE `spellid` = 2589 AND `npc_spells_id` = 3003;
-UPDATE bot_spells_entries SET `minlevel` = 67 WHERE `spellid` = 5305 AND `npc_spells_id` = 3004;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 14267 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 14268 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 14269 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 23 WHERE `spellid` = 738 AND `npc_spells_id` = 3008;
-UPDATE bot_spells_entries SET `minlevel` = 51 WHERE `spellid` = 1751 AND `npc_spells_id` = 3008;
-UPDATE bot_spells_entries SET `minlevel` = 7 WHERE `spellid` = 734 AND `npc_spells_id` = 3008;
-UPDATE bot_spells_entries SET `minlevel` = 5 WHERE `spellid` = 717 AND `npc_spells_id` = 3008;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 15186 AND `npc_spells_id` = 3005;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 15187 AND `npc_spells_id` = 3005;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 15188 AND `npc_spells_id` = 3005;
-UPDATE bot_spells_entries SET `minlevel` = 80 WHERE `spellid` = 14446 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 80 WHERE `spellid` = 14447 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 14467 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 14468 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spellid` = 14469 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spellid` = 14955 AND `npc_spells_id` = 3003;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spellid` = 14956 AND `npc_spells_id` = 3003;
-UPDATE bot_spells_entries SET `minlevel` = 78 WHERE `spellid` = 14387 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spellid` = 14388 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spellid` = 14389 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spellid` = 14312 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spellid` = 14313 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spellid` = 14314 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `minlevel` = 34 WHERE `spell_id` = 1445 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `minlevel` = 2 WHERE `spell_id` = 229 AND `npc_spells_id` = 3011;
+UPDATE bot_spells_entries SET `minlevel` = 13 WHERE `spell_id` = 333 AND `npc_spells_id` = 3013;
+UPDATE bot_spells_entries SET `minlevel` = 29 WHERE `spell_id` = 106 AND `npc_spells_id` = 3013;
+UPDATE bot_spells_entries SET `minlevel` = 38 WHERE `spell_id` = 754 AND `npc_spells_id` = 3010;
+UPDATE bot_spells_entries SET `minlevel` = 58 WHERE `spell_id` = 2589 AND `npc_spells_id` = 3003;
+UPDATE bot_spells_entries SET `minlevel` = 67 WHERE `spell_id` = 5305 AND `npc_spells_id` = 3004;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14267 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14268 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14269 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `minlevel` = 23 WHERE `spell_id` = 738 AND `npc_spells_id` = 3008;
+UPDATE bot_spells_entries SET `minlevel` = 51 WHERE `spell_id` = 1751 AND `npc_spells_id` = 3008;
+UPDATE bot_spells_entries SET `minlevel` = 7 WHERE `spell_id` = 734 AND `npc_spells_id` = 3008;
+UPDATE bot_spells_entries SET `minlevel` = 5 WHERE `spell_id` = 717 AND `npc_spells_id` = 3008;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 15186 AND `npc_spells_id` = 3005;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 15187 AND `npc_spells_id` = 3005;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 15188 AND `npc_spells_id` = 3005;
+UPDATE bot_spells_entries SET `minlevel` = 80 WHERE `spell_id` = 14446 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `minlevel` = 80 WHERE `spell_id` = 14447 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14467 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14468 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14469 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14955 AND `npc_spells_id` = 3003;
+UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14956 AND `npc_spells_id` = 3003;
+UPDATE bot_spells_entries SET `minlevel` = 78 WHERE `spell_id` = 14387 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14388 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14389 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14312 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14313 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14314 AND `npc_spells_id` = 3002;
 
 -- Maxlevel fixes
-UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spellid` = 14267 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spellid` = 14268 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spellid` = 14269 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spellid` = 14446 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spellid` = 14447 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spellid` = 14467 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spellid` = 14468 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spellid` = 14469 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spellid` = 14312 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spellid` = 14313 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spellid` = 14314 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14267 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14268 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14269 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14446 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14447 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14467 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14468 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14469 AND `npc_spells_id` = 3006;
+UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14312 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14313 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14314 AND `npc_spells_id` = 3002;
 
 -- Type fixes
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 201;
-UPDATE bot_spells_entries SET `type` = 17 WHERE `spellid` = 752;
-UPDATE bot_spells_entries SET `type` = 17 WHERE `spellid` = 2117;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 2542;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 2544;
-UPDATE bot_spells_entries SET `type` = 6 WHERE `spellid` = 2115;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 1403;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 1405;
-UPDATE bot_spells_entries SET `type` = 9 WHERE `spellid` = 289;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 294;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 302;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 521;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 185;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 450;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 186;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 4074;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 195;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 1712;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 1703;
-UPDATE bot_spells_entries SET `type` = 17 WHERE `spellid` = 3229;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 3345;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 5509;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 6826;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 270;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 281;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 505;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 526;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 110;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 506;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 162;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 111;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 507;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 527;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 163;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 112;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 1588;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 1573;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 1592;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 1577;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 1578;
-UPDATE bot_spells_entries SET `type` = 1 WHERE `spellid` = 1576;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 3386;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 3387;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 4900;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 3395;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 5394;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 5392;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 6827;
-UPDATE bot_spells_entries SET `type` = 1 WHERE `spellid` = 5416;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 1437;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 1436;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 5348;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 8008;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 2571;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 370;
-UPDATE bot_spells_entries SET `type` = 17 WHERE `spellid` = 1741;
-UPDATE bot_spells_entries SET `type` = 17 WHERE `spellid` = 1296;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 270;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 2634;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 2942;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 3462;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spellid` = 6828;
-UPDATE bot_spells_entries SET `type` = 4 WHERE `spellid` = 14312;
-UPDATE bot_spells_entries SET `type` = 4 WHERE `spellid` = 14313;
-UPDATE bot_spells_entries SET `type` = 4 WHERE `spellid` = 14314;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 18392;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 18393;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 18394;
-UPDATE bot_spells_entries SET `type` = 10 WHERE `spellid` = 15186;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 15187;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 15188;
-UPDATE bot_spells_entries SET `type` = 1 WHERE `spellid` = 14446;
-UPDATE bot_spells_entries SET `type` = 1 WHERE `spellid` = 14447;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 14467;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 14468;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 14469;
-UPDATE bot_spells_entries SET `type` = 0 WHERE `spellid` = 14267;
-UPDATE bot_spells_entries SET `type` = 0 WHERE `spellid` = 14268;
-UPDATE bot_spells_entries SET `type` = 0 WHERE `spellid` = 14269;
-UPDATE bot_spells_entries SET `type` = 10 WHERE `spellid` = 14955;
-UPDATE bot_spells_entries SET `type` = 10 WHERE `spellid` = 14956;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 14387;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 14388;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spellid` = 14389;
-UPDATE bot_spells_entries SET `type` = 4 WHERE `spellid` = 10436;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 201;
+UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 752;
+UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 2117;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2542;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2544;
+UPDATE bot_spells_entries SET `type` = 6 WHERE `spell_id` = 2115;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1403;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1405;
+UPDATE bot_spells_entries SET `type` = 9 WHERE `spell_id` = 289;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 294;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 302;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 521;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 185;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 450;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 186;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 4074;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 195;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 1712;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1703;
+UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 3229;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 3345;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 5509;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6826;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 270;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 281;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 505;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 526;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 110;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 506;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 162;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 111;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 507;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 527;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 163;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 112;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 1588;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1573;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1592;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1577;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1578;
+UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 1576;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 3386;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 3387;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 4900;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 3395;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 5394;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 5392;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6827;
+UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 5416;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1437;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1436;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 5348;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 8008;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 2571;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 370;
+UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 1741;
+UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 1296;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 270;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2634;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2942;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 3462;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6828;
+UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14312;
+UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14313;
+UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14314;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18392;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18393;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18394;
+UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 15186;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 15187;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 15188;
+UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 14446;
+UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 14447;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14467;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14468;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14469;
+UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14267;
+UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14268;
+UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14269;
+UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 14955;
+UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 14956;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 14387;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14388;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14389;
+UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 10436;
 
--- UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 3440; -- Ro's Illumination [#3440] from DoT [#8] to Debuff [#14] [Should be 0]
--- UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 303; -- Whirl till you hurl [#303] from Nuke [#0] to Debuff [#14] [Should be 0]
--- UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 619; -- Dyn's Dizzying Draught [#619] from Nuke [#0] to Debuff [#14] [Should be 0]
+-- UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 3440; -- Ro's Illumination [#3440] from DoT [#8] to Debuff [#14] [Should be 0]
+-- UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 303; -- Whirl till you hurl [#303] from Nuke [#0] to Debuff [#14] [Should be 0]
+-- UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 619; -- Dyn's Dizzying Draught [#619] from Nuke [#0] to Debuff [#14] [Should be 0]
 
--- UPDATE bot_spells_entries SET `type` = 14 WHERE `spellid` = 74; -- Mana Sieve [#74] from Nuke [#0] to Debuff [#14]
--- UPDATE bot_spells_entries SET `type` = 6 WHERE `spellid` = 1686; -- Theft of Thought [#1686] from Nuke [#0] to Lifetap [#6]
+-- UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 74; -- Mana Sieve [#74] from Nuke [#0] to Debuff [#14]
+-- UPDATE bot_spells_entries SET `type` = 6 WHERE `spell_id` = 1686; -- Theft of Thought [#1686] from Nuke [#0] to Lifetap [#6]
 
--- UPDATE bot_spells_entries SET `type` = 1 WHERE `spellid` = 3694; -- Stoicism [#3694] from In-Combat Buff [#10] to Regular Heal [#1]
--- UPDATE bot_spells_entries SET `type` = 1 WHERE `spellid` = 4899; -- Breath of Trushar [#4899] from In-Combat Buff [#10] to Regular Heal [#1]
+-- UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 3694; -- Stoicism [#3694] from In-Combat Buff [#10] to Regular Heal [#1]
+-- UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 4899; -- Breath of Trushar [#4899] from In-Combat Buff [#10] to Regular Heal [#1]
 
--- UPDATE bot_spells_entries SET `type` = 7 WHERE `spellid` = 738; -- Selo's Consonant Chain [#738] from Slow [#13] to Snare [#7]
--- UPDATE bot_spells_entries SET `type` = 7 WHERE `spellid` = 1751; -- Largo's Assonant Binding [#1751] from Slow [#13] to Snare [#7]
--- UPDATE bot_spells_entries SET `type` = 8 WHERE `spellid` = 1748; -- Angstlich's Assonance [#1748] from Slow [#13] to DoT [#8]
--- UPDATE bot_spells_entries SET `type` = 7 WHERE `spellid` = 738; -- Selo's Consonant Chain [#738] from Slow [#13] to Snare [#7]
--- UPDATE bot_spells_entries SET `type` = 7 WHERE `spellid` = 1751; -- Largo's Assonant Binding [#1751] from Slow [#13] to Snare [#7]
--- UPDATE bot_spells_entries SET `type` = 7 WHERE `spellid` = 738; -- Selo's Consonant Chain [#738] from Slow [#13] to Snare [#7]
+-- UPDATE bot_spells_entries SET `type` = 7 WHERE `spell_id` = 738; -- Selo's Consonant Chain [#738] from Slow [#13] to Snare [#7]
+-- UPDATE bot_spells_entries SET `type` = 7 WHERE `spell_id` = 1751; -- Largo's Assonant Binding [#1751] from Slow [#13] to Snare [#7]
+-- UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1748; -- Angstlich's Assonance [#1748] from Slow [#13] to DoT [#8]
+-- UPDATE bot_spells_entries SET `type` = 7 WHERE `spell_id` = 738; -- Selo's Consonant Chain [#738] from Slow [#13] to Snare [#7]
+-- UPDATE bot_spells_entries SET `type` = 7 WHERE `spell_id` = 1751; -- Largo's Assonant Binding [#1751] from Slow [#13] to Snare [#7]
+-- UPDATE bot_spells_entries SET `type` = 7 WHERE `spell_id` = 738; -- Selo's Consonant Chain [#738] from Slow [#13] to Snare [#7]
 
+)"
+	},
+	ManifestEntry{
+		.version = 9050,
+		.description = "2024_11_26_add_commanded_spelltypes.sql",
+		.check = "SELECT * FROM `bot_spells_entries` where `type` = 100",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+INSERT INTO `bot_spells_entries` (`npc_spells_id`, `spell_id`, `type`, `minlevel`, `maxlevel`) 
+VALUES 
+(3006, 9957, 100, 20, 254),
+(3006, 9956, 100, 20, 254),
+(3006, 552, 100, 25, 254),
+(3006, 550, 100, 25, 254),
+(3006, 553, 100, 25, 254),
+(3006, 2432, 100, 26, 254),
+(3006, 2020, 100, 26, 254),
+(3006, 551, 100, 27, 254),
+(3006, 3792, 100, 28, 254),
+(3006, 2419, 100, 29, 254),
+(3006, 554, 100, 30, 254),
+(3006, 557, 100, 31, 254),
+(3006, 1434, 100, 32, 254),
+(3006, 555, 100, 32, 254),
+(3006, 25898, 100, 32, 254),
+(3006, 25904, 100, 32, 254),
+(3006, 556, 100, 32, 254),
+(3006, 25698, 100, 33, 254),
+(3006, 1517, 100, 33, 254),
+(3006, 2424, 100, 33, 254),
+(3006, 25689, 100, 33, 254),
+(3006, 25899, 100, 34, 254),
+(3006, 25690, 100, 35, 254),
+(3006, 25903, 100, 35, 254),
+(3006, 25900, 100, 35, 254),
+(3006, 558, 100, 36, 254),
+(3006, 2429, 100, 37, 254),
+(3006, 1438, 100, 38, 254),
+(3006, 3184, 100, 38, 254),
+(3006, 25697, 100, 38, 254),
+(3006, 25902, 100, 39, 254),
+(3006, 25695, 100, 39, 254),
+(3006, 25901, 100, 40, 254),
+(3006, 25694, 100, 40, 254),
+(3006, 1398, 100, 40, 254),
+(3006, 25905, 100, 41, 254),
+(3006, 25696, 100, 42, 254),
+(3006, 1440, 100, 42, 254),
+(3006, 25906, 100, 43, 254),
+(3006, 25693, 100, 44, 254),
+(3006, 25699, 100, 45, 254),
+(3006, 24773, 100, 46, 254),
+(3006, 8965, 100, 52, 254),
+(3006, 24771, 100, 52, 254),
+(3006, 8235, 100, 52, 254),
+(3006, 24775, 100, 52, 254),
+(3006, 4966, 100, 54, 254),
+(3006, 6184, 100, 55, 254),
+(3006, 5731, 100, 55, 254),
+(3006, 24776, 100, 56, 254),
+(3006, 25700, 100, 56, 254),
+(3006, 25691, 100, 57, 254),
+(3006, 24772, 100, 57, 254),
+(3006, 25692, 100, 57, 254),
+(3006, 11981, 100, 59, 254),
+(3006, 9953, 100, 60, 254),
+(3006, 9954, 100, 60, 254),
+(3006, 11980, 100, 64, 254),
+(3006, 6179, 100, 64, 254),
+(3006, 24774, 100, 67, 254),
+(3006, 9950, 100, 70, 254),
+(3006, 9951, 100, 70, 254),
+(3006, 15886, 100, 75, 254),
+(3006, 15887, 100, 75, 254),
+(3006, 21989, 100, 80, 254),
+(3006, 20539, 100, 80, 254),
+(3006, 21984, 100, 80, 254),
+(3006, 20538, 100, 80, 254),
+(3006, 17883, 100, 85, 254),
+(3006, 17884, 100, 85, 254),
+(3006, 28997, 100, 90, 254),
+(3006, 28998, 100, 90, 254),
+(3006, 29000, 100, 92, 254),
+(3006, 29001, 100, 92, 254),
+(3006, 34832, 100, 95, 254),
+(3006, 40217, 100, 95, 254),
+(3006, 34833, 100, 95, 254),
+(3006, 40216, 100, 95, 254),
+(3012, 10881, 100, 20, 254),
+(3012, 10880, 100, 20, 254),
+(3012, 562, 100, 25, 254),
+(3012, 563, 100, 27, 254),
+(3012, 3793, 100, 27, 254),
+(3012, 561, 100, 28, 254),
+(3012, 2420, 100, 29, 254),
+(3012, 2944, 100, 29, 254),
+(3012, 564, 100, 32, 254),
+(3012, 565, 100, 33, 254),
+(3012, 1418, 100, 33, 254),
+(3012, 2425, 100, 33, 254),
+(3012, 1516, 100, 34, 254),
+(3012, 1338, 100, 35, 254),
+(3012, 3833, 100, 35, 254),
+(3012, 566, 100, 35, 254),
+(3012, 1336, 100, 36, 254),
+(3012, 2943, 100, 36, 254),
+(3012, 1423, 100, 36, 254),
+(3012, 567, 100, 36, 254),
+(3012, 568, 100, 37, 254),
+(3012, 1337, 100, 37, 254),
+(3012, 3180, 100, 38, 254),
+(3012, 1339, 100, 38, 254),
+(3012, 2421, 100, 39, 254),
+(3012, 2430, 100, 39, 254),
+(3012, 1372, 100, 40, 254),
+(3012, 2426, 100, 41, 254),
+(3012, 1371, 100, 41, 254),
+(3012, 1399, 100, 42, 254),
+(3012, 1374, 100, 42, 254),
+(3012, 1373, 100, 43, 254),
+(3012, 1425, 100, 43, 254),
+(3012, 1375, 100, 44, 254),
+(3012, 3181, 100, 45, 254),
+(3012, 2022, 100, 45, 254),
+(3012, 666, 100, 46, 254),
+(3012, 3849, 100, 46, 254),
+(3012, 674, 100, 46, 254),
+(3012, 2023, 100, 46, 254),
+(3012, 2024, 100, 47, 254),
+(3012, 2025, 100, 48, 254),
+(3012, 2431, 100, 49, 254),
+(3012, 8966, 100, 51, 254),
+(3012, 8236, 100, 51, 254),
+(3012, 4965, 100, 54, 254),
+(3012, 8969, 100, 55, 254),
+(3012, 8239, 100, 55, 254),
+(3012, 6183, 100, 55, 254),
+(3012, 5732, 100, 55, 254),
+(3012, 4964, 100, 57, 254),
+(3012, 6182, 100, 58, 254),
+(3012, 5735, 100, 60, 254),
+(3012, 10877, 100, 60, 254),
+(3012, 10878, 100, 60, 254),
+(3012, 6178, 100, 64, 254),
+(3012, 6177, 100, 67, 254),
+(3012, 11984, 100, 69, 254),
+(3012, 10874, 100, 70, 254),
+(3012, 10875, 100, 70, 254),
+(3012, 11983, 100, 74, 254),
+(3012, 15889, 100, 75, 254),
+(3012, 15890, 100, 75, 254),
+(3012, 21988, 100, 80, 254),
+(3012, 20542, 100, 80, 254),
+(3012, 21985, 100, 80, 254),
+(3012, 20541, 100, 80, 254),
+(3012, 17886, 100, 85, 254),
+(3012, 17887, 100, 85, 254),
+(3012, 29840, 100, 90, 254),
+(3012, 29841, 100, 90, 254),
+(3012, 29843, 100, 92, 254),
+(3012, 29844, 100, 92, 254),
+(3012, 40443, 100, 95, 254),
+(3012, 35715, 100, 95, 254),
+(3012, 40442, 100, 95, 254),
+(3012, 35714, 100, 95, 254),
+(3002, 208, 101, 1, 4),
+(3002, 501, 101, 5, 14),
+(3002, 47, 101, 15, 35),
+(3002, 45, 101, 36, 64),
+(3002, 1541, 101, 55, 254),
+(3002, 3197, 101, 65, 254),
+(3002, 5274, 101, 70, 70),
+(3002, 9798, 101, 71, 75),
+(3002, 9799, 101, 71, 75),
+(3002, 9797, 101, 71, 75),
+(3002, 14288, 101, 76, 80),
+(3002, 14289, 101, 76, 80),
+(3002, 14290, 101, 76, 80),
+(3002, 18309, 101, 81, 85),
+(3002, 18310, 101, 81, 85),
+(3002, 18311, 101, 81, 85),
+(3002, 25103, 101, 86, 90),
+(3002, 25101, 101, 86, 90),
+(3002, 25102, 101, 86, 90),
+(3002, 28102, 101, 91, 95),
+(3002, 28100, 101, 91, 95),
+(3002, 28101, 101, 91, 95),
+(3002, 34096, 101, 96, 254),
+(3002, 34094, 101, 96, 254),
+(3002, 34095, 101, 96, 254),
+(3003, 208, 101, 10, 24),
+(3003, 501, 101, 25, 42),
+(3003, 47, 101, 43, 48),
+(3003, 45, 101, 49, 254),
+(3003, 25294, 101, 86, 90),
+(3003, 25295, 101, 86, 90),
+(3003, 25296, 101, 86, 90),
+(3003, 28340, 101, 91, 95),
+(3003, 28338, 101, 91, 95),
+(3003, 28339, 101, 91, 95),
+(3003, 34346, 101, 96, 254),
+(3003, 34344, 101, 96, 254),
+(3003, 34345, 101, 96, 254),
+(3004, 240, 101, 4, 30),
+(3004, 250, 101, 22, 254),
+(3004, 513, 101, 31, 254),
+(3004, 3601, 101, 39, 254),
+(3004, 5316, 101, 68, 70),
+(3004, 10112, 101, 71, 75),
+(3004, 10110, 101, 71, 75),
+(3004, 10111, 101, 71, 75),
+(3004, 15037, 101, 76, 80),
+(3004, 15035, 101, 76, 80),
+(3004, 15036, 101, 76, 80),
+(3004, 19168, 101, 81, 85),
+(3004, 19169, 101, 81, 85),
+(3004, 19167, 101, 81, 85),
+(3004, 25417, 101, 86, 87),
+(3004, 25418, 101, 86, 90),
+(3004, 25419, 101, 86, 90),
+(3004, 25466, 101, 88, 90),
+(3004, 25467, 101, 88, 90),
+(3004, 25465, 101, 88, 90),
+(3004, 28479, 101, 91, 92),
+(3004, 28480, 101, 91, 95),
+(3004, 28481, 101, 91, 95),
+(3004, 28542, 101, 93, 95),
+(3004, 28543, 101, 93, 95),
+(3004, 28544, 101, 93, 95),
+(3004, 34500, 101, 96, 97),
+(3004, 34502, 101, 96, 254),
+(3004, 34501, 101, 96, 254),
+(3004, 34565, 101, 98, 254),
+(3004, 34563, 101, 98, 254),
+(3004, 34564, 101, 98, 254),
+(3005, 347, 101, 9, 51),
+(3005, 448, 101, 52, 254),
+(3006, 240, 101, 1, 14),
+(3006, 250, 101, 5, 254),
+(3006, 513, 101, 15, 254),
+(3006, 3601, 101, 29, 254),
+(3006, 5347, 101, 67, 70),
+(3006, 9851, 101, 71, 75),
+(3006, 9852, 101, 71, 75),
+(3006, 9853, 101, 71, 75),
+(3006, 14369, 101, 76, 80),
+(3006, 14367, 101, 76, 80),
+(3006, 14368, 101, 76, 80),
+(3006, 18409, 101, 81, 85),
+(3006, 18407, 101, 81, 85),
+(3006, 18408, 101, 81, 85),
+(3006, 25736, 101, 86, 90),
+(3006, 25734, 101, 86, 90),
+(3006, 25735, 101, 86, 90),
+(3006, 28831, 101, 91, 95),
+(3006, 28832, 101, 91, 95),
+(3006, 28830, 101, 91, 95),
+(3006, 34863, 101, 96, 254),
+(3006, 34864, 101, 96, 254),
+(3006, 34862, 101, 96, 254),
+(3007, 4614, 101, 35, 49),
+(3007, 4683, 101, 50, 56),
+(3007, 4684, 101, 57, 63),
+(3007, 4698, 101, 64, 64),
+(3007, 5019, 101, 65, 254),
+(3007, 5020, 101, 65, 254),
+(3007, 6175, 101, 69, 70),
+(3007, 10949, 101, 71, 75),
+(3007, 10947, 101, 71, 75),
+(3007, 10948, 101, 71, 75),
+(3007, 14800, 101, 76, 80),
+(3007, 14801, 101, 76, 80),
+(3007, 14799, 101, 76, 80),
+(3007, 18905, 101, 81, 85),
+(3007, 18906, 101, 81, 85),
+(3007, 18904, 101, 81, 85),
+(3007, 25912, 101, 86, 90),
+(3007, 25913, 101, 86, 90),
+(3007, 25911, 101, 86, 90),
+(3007, 29006, 101, 91, 95),
+(3007, 29007, 101, 91, 95),
+(3007, 29008, 101, 91, 95),
+(3007, 35047, 101, 96, 254),
+(3007, 35048, 101, 96, 254),
+(3007, 35049, 101, 96, 254),
+(3008, 728, 101, 8, 60),
+(3008, 3361, 101, 61, 254),
+(3008, 5370, 101, 66, 70),
+(3008, 10403, 101, 71, 75),
+(3008, 10401, 101, 71, 75),
+(3008, 10402, 101, 71, 75),
+(3008, 14002, 101, 76, 80),
+(3008, 14000, 101, 76, 80),
+(3008, 14001, 101, 76, 80),
+(3008, 18001, 101, 81, 85),
+(3008, 18002, 101, 81, 85),
+(3008, 18000, 101, 81, 85),
+(3008, 25978, 101, 86, 90),
+(3008, 25979, 101, 86, 90),
+(3008, 25977, 101, 86, 90),
+(3008, 29079, 101, 91, 95),
+(3008, 29080, 101, 91, 95),
+(3008, 29078, 101, 91, 95),
+(3008, 35131, 101, 96, 254),
+(3008, 35132, 101, 96, 254),
+(3008, 35133, 101, 96, 254),
+(3011, 347, 101, 2, 22),
+(3011, 448, 101, 23, 254),
+(3014, 208, 101, 1, 5),
+(3014, 501, 101, 6, 17),
+(3014, 47, 101, 18, 34),
+(3014, 45, 101, 35, 61),
+(3014, 1541, 101, 51, 254),
+(3014, 3197, 101, 62, 254),
+(3014, 5506, 101, 67, 71),
+(3014, 10601, 101, 72, 76),
+(3014, 10599, 101, 72, 76),
+(3014, 10600, 101, 72, 76),
+(3014, 14510, 101, 77, 81),
+(3014, 14511, 101, 77, 81),
+(3014, 14509, 101, 77, 81),
+(3014, 18568, 101, 82, 86),
+(3014, 18569, 101, 82, 86),
+(3014, 18567, 101, 82, 86),
+(3014, 26921, 101, 87, 91),
+(3014, 26922, 101, 87, 91),
+(3014, 26920, 101, 87, 91),
+(3014, 30054, 101, 92, 96),
+(3014, 30055, 101, 92, 96),
+(3014, 30056, 101, 92, 96),
+(3014, 36116, 101, 97, 254),
+(3014, 36117, 101, 97, 254),
+(3014, 36118, 101, 97, 254),
+(3006, 2183, 102, 18, 56),
+(3006, 1567, 102, 57, 254),
+(3012, 2184, 102, 18, 56),
+(3012, 2558, 102, 56, 64),
+(3012, 1628, 102, 57, 254),
+(3012, 3244, 102, 65, 254),
+(3002, 35, 103, 10, 254),
+(3006, 35, 103, 12, 254),
+(3010, 35, 103, 14, 254),
+(3011, 35, 103, 12, 254),
+(3012, 35, 103, 12, 254),
+(3013, 35, 103, 12, 254),
+(3014, 35, 103, 12, 254),
+(3008, 737, 104, 14, 254),
+(3011, 305, 104, 17, 254),
+(3012, 305, 104, 14, 254),
+(3013, 305, 104, 13, 254),
+(3014, 305, 104, 15, 254),
+(3004, 261, 105, 35, 64),
+(3004, 2517, 105, 65, 254),
+(3006, 261, 105, 14, 49),
+(3006, 2894, 105, 50, 53),
+(3006, 2517, 105, 54, 254),
+(3006, 3185, 105, 62, 254),
+(3008, 718, 105, 31, 50),
+(3008, 1750, 105, 51, 254),
+(3010, 261, 105, 10, 50),
+(3010, 2894, 105, 51, 254),
+(3011, 457, 105, 41, 254),
+(3011, 1391, 105, 45, 254),
+(3012, 261, 105, 22, 49),
+(3012, 2894, 105, 50, 254),
+(3014, 261, 105, 15, 50),
+(3014, 2894, 105, 51, 254),
+(3015, 261, 105, 32, 254),
+(3003, 1743, 106, 55, 254),
+(3008, 714, 106, 41, 254),
+(3008, 748, 106, 47, 57),
+(3008, 1450, 106, 49, 254),
+(3008, 1752, 106, 52, 254),
+(3008, 1763, 106, 58, 72),
+(3008, 11881, 106, 73, 77),
+(3008, 11879, 106, 73, 77),
+(3008, 11880, 106, 73, 77),
+(3008, 14055, 106, 78, 82),
+(3008, 14056, 106, 78, 82),
+(3008, 14054, 106, 78, 82),
+(3008, 18040, 106, 83, 87),
+(3008, 18041, 106, 83, 87),
+(3008, 18039, 106, 83, 87),
+(3008, 26026, 106, 88, 92),
+(3008, 26027, 106, 88, 92),
+(3008, 26025, 106, 88, 92),
+(3008, 29120, 106, 93, 97),
+(3008, 29121, 106, 93, 97),
+(3008, 29122, 106, 93, 97),
+(3008, 35170, 106, 98, 254),
+(3008, 35171, 106, 98, 254),
+(3008, 35172, 106, 98, 254),
+(3012, 2559, 106, 58, 254),
+(3014, 481, 106, 13, 21),
+(3014, 21, 106, 19, 21),
+(3014, 482, 106, 22, 32),
+(3014, 483, 106, 33, 39),
+(3014, 648, 106, 38, 39),
+(3014, 484, 106, 40, 57),
+(3014, 176, 106, 47, 57),
+(3014, 1689, 106, 52, 57),
+(3014, 1713, 106, 58, 60),
+(3014, 3343, 106, 61, 66),
+(3014, 6739, 106, 61, 68),
+(3014, 3351, 106, 63, 66),
+(3014, 5504, 106, 67, 70),
+(3014, 5514, 106, 69, 70),
+(3014, 6671, 106, 69, 254),
+(3014, 10598, 106, 71, 75),
+(3014, 10596, 106, 71, 75),
+(3014, 10597, 106, 71, 75),
+(3014, 10643, 106, 74, 75),
+(3014, 10641, 106, 74, 75),
+(3014, 10642, 106, 74, 75),
+(3014, 11887, 106, 74, 78),
+(3014, 11885, 106, 74, 78),
+(3014, 11886, 106, 74, 78),
+(3014, 14507, 106, 76, 80),
+(3014, 14508, 106, 76, 80),
+(3014, 14506, 106, 76, 80),
+(3014, 14543, 106, 79, 80),
+(3014, 14544, 106, 79, 80),
+(3014, 14542, 106, 79, 80),
+(3014, 14582, 106, 79, 83),
+(3014, 14583, 106, 79, 83),
+(3014, 14581, 106, 79, 83),
+(3014, 18564, 106, 81, 85),
+(3014, 18565, 106, 81, 85),
+(3014, 18566, 106, 81, 85),
+(3014, 18600, 106, 84, 85),
+(3014, 18601, 106, 84, 85),
+(3014, 18602, 106, 84, 85),
+(3014, 18641, 106, 84, 88),
+(3014, 18639, 106, 84, 88),
+(3014, 18640, 106, 84, 88),
+(3014, 26901, 106, 86, 90),
+(3014, 26899, 106, 86, 90),
+(3014, 26900, 106, 86, 90),
+(3014, 26999, 106, 89, 90),
+(3014, 26997, 106, 89, 90),
+(3014, 26998, 106, 89, 90),
+(3014, 27025, 106, 89, 93),
+(3014, 27026, 106, 89, 93),
+(3014, 27024, 106, 89, 93),
+(3014, 30028, 106, 91, 95),
+(3014, 30029, 106, 91, 95),
+(3014, 30027, 106, 91, 95),
+(3014, 30132, 106, 93, 95),
+(3014, 30133, 106, 93, 95),
+(3014, 30131, 106, 93, 95),
+(3014, 30140, 106, 94, 95),
+(3014, 30141, 106, 94, 95),
+(3014, 30142, 106, 94, 95),
+(3014, 30167, 106, 94, 98),
+(3014, 30168, 106, 94, 98),
+(3014, 30169, 106, 94, 98),
+(3014, 36091, 106, 96, 254),
+(3014, 36089, 106, 96, 254),
+(3014, 36090, 106, 96, 254),
+(3014, 36189, 106, 98, 254),
+(3014, 36187, 106, 98, 254),
+(3014, 36188, 106, 98, 254),
+(3014, 36216, 106, 99, 254),
+(3014, 36196, 106, 99, 254),
+(3014, 36217, 106, 99, 254),
+(3014, 36194, 106, 99, 254),
+(3014, 36215, 106, 99, 254),
+(3014, 36195, 106, 99, 254),
+(3004, 86, 107, 20, 254),
+(3006, 86, 107, 6, 49),
+(3006, 2881, 107, 50, 254),
+(3008, 729, 107, 16, 254),
+(3010, 86, 107, 12, 50),
+(3010, 2881, 107, 51, 254),
+(3011, 457, 107, 41, 254),
+(3011, 1391, 107, 45, 254),
+(3014, 86, 107, 12, 43),
+(3014, 3696, 107, 44, 50),
+(3014, 2881, 107, 51, 254),
+(3015, 86, 107, 25, 254),
+(3010, 345, 108, 15, 254),
+(3010, 2522, 108, 16, 254),
+(3015, 345, 108, 23, 254),
+(3002, 235, 109, 11, 254),
+(3002, 1726, 109, 51, 254),
+(3002, 6125, 109, 66, 254),
+(3002, 14348, 109, 77, 81),
+(3002, 14346, 109, 77, 81),
+(3002, 14347, 109, 77, 81),
+(3002, 18369, 109, 82, 254),
+(3002, 18367, 109, 82, 254),
+(3002, 18368, 109, 82, 254),
+(3003, 235, 109, 17, 254),
+(3004, 247, 109, 14, 46),
+(3004, 80, 109, 32, 64),
+(3004, 34, 109, 47, 254),
+(3004, 2517, 109, 65, 254),
+(3005, 235, 109, 4, 254),
+(3006, 247, 109, 4, 17),
+(3006, 255, 109, 8, 254),
+(3006, 80, 109, 13, 53),
+(3006, 34, 109, 18, 254),
+(3006, 2516, 109, 52, 254),
+(3006, 4058, 109, 52, 254),
+(3006, 2517, 109, 54, 254),
+(3006, 3185, 109, 62, 254),
+(3006, 6123, 109, 68, 254),
+(3008, 719, 109, 19, 50),
+(3008, 735, 109, 24, 254),
+(3008, 1750, 109, 51, 254),
+(3010, 79, 109, 7, 55),
+(3010, 255, 109, 10, 254),
+(3010, 42, 109, 27, 254),
+(3010, 1575, 109, 56, 254),
+(3010, 2886, 109, 58, 254),
+(3011, 235, 109, 1, 254),
+(3011, 457, 109, 41, 254),
+(3011, 1391, 109, 45, 254),
+(3011, 6124, 109, 68, 254),
+(3012, 80, 109, 4, 39),
+(3012, 42, 109, 16, 254),
+(3012, 3811, 109, 40, 254),
+(3012, 6120, 109, 67, 254),
+(3012, 15513, 109, 76, 80),
+(3012, 15511, 109, 76, 80),
+(3012, 15512, 109, 76, 80),
+(3012, 19701, 109, 81, 254),
+(3012, 19699, 109, 81, 254),
+(3012, 19700, 109, 81, 254),
+(3013, 42, 109, 8, 254),
+(3013, 80, 109, 16, 254),
+(3014, 42, 109, 4, 254),
+(3014, 80, 109, 6, 43),
+(3014, 235, 109, 14, 254),
+(3014, 3696, 109, 44, 254),
+(3014, 6122, 109, 66, 254),
+(3015, 79, 109, 29, 64),
+(3015, 42, 109, 43, 254),
+(3015, 1575, 109, 65, 254),
+(3004, 278, 110, 28, 64),
+(3004, 4054, 110, 41, 64),
+(3004, 4055, 110, 49, 254),
+(3004, 2517, 110, 65, 254),
+(3006, 278, 110, 10, 53),
+(3006, 424, 110, 26, 254),
+(3006, 4054, 110, 30, 53),
+(3006, 169, 110, 35, 61),
+(3006, 4055, 110, 35, 254),
+(3006, 3579, 110, 45, 254),
+(3006, 4058, 110, 52, 254),
+(3006, 1554, 110, 53, 254),
+(3006, 2517, 110, 54, 254),
+(3006, 3185, 110, 62, 254),
+(3008, 717, 110, 5, 48),
+(3008, 4395, 110, 25, 48),
+(3008, 2605, 110, 49, 50),
+(3008, 1750, 110, 51, 254),
+(3010, 278, 110, 9, 254),
+(3010, 424, 110, 22, 254),
+(3010, 4054, 110, 29, 254),
+(3010, 4055, 110, 34, 254),
+(3010, 2524, 110, 36, 254),
+(3010, 1554, 110, 52, 254),
+(3015, 278, 110, 24, 254),
+(3015, 4054, 110, 39, 254),
+(3015, 4055, 110, 44, 254),
+(3012, 1422, 111, 50, 254),
+(3012, 1334, 111, 52, 254),
+(3005, 2213, 112, 12, 34),
+(3005, 3, 112, 35, 56),
+(3005, 1773, 112, 57, 70),
+(3005, 10042, 112, 71, 75),
+(3005, 14823, 112, 76, 80),
+(3005, 18928, 112, 81, 85),
+(3005, 25555, 112, 86, 90),
+(3005, 28632, 112, 91, 95),
+(3005, 34662, 112, 96, 254),
+(3011, 2213, 112, 12, 34),
+(3011, 3, 112, 35, 56),
+(3011, 1773, 112, 57, 70),
+(3011, 10042, 112, 71, 75),
+(3011, 14823, 112, 76, 80),
+(3011, 18928, 112, 81, 85),
+(3011, 25555, 112, 86, 90),
+(3011, 28632, 112, 91, 95),
+(3011, 34662, 112, 96, 254);
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry

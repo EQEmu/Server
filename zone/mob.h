@@ -435,7 +435,8 @@ public:
 	uint16 GetSpellTypeIDByShortName(std::string spellTypeString);
 
 	std::string GetSpellTypeNameByID(uint16 spellType);
-	std::string GetSpellTypeShortNameByID(uint16 spellType);		
+	std::string GetSpellTypeShortNameByID(uint16 spellType);
+	std::string GetSubTypeNameByID(uint16 subType);
 
 	bool GetDefaultSpellHold(uint16 spellType, uint8 stance = Stance::Balanced);
 	uint16 GetDefaultSpellDelay(uint16 spellType, uint8 stance = Stance::Balanced);
