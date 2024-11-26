@@ -2842,6 +2842,7 @@ bool BOT_SPELL_TYPES_DETRIMENTAL(uint16 spellType, uint8 cls) {
 		case BotSpellTypes::AEDoT:
 		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::PBAENuke:
+		case BotSpellTypes::Lull:
 			return true;
 		case BotSpellTypes::InCombatBuff:
 			if (cls == Class::ShadowKnight) {
@@ -2885,6 +2886,18 @@ bool BOT_SPELL_TYPES_BENEFICIAL(uint16 spellType, uint8 cls) {
 		case BotSpellTypes::PetResistBuffs:
 		case BotSpellTypes::ResistBuffs:		
 		case BotSpellTypes::Resurrect:
+		case BotSpellTypes::Teleport:
+		case BotSpellTypes::Succor:
+		case BotSpellTypes::BindAffinity:
+		case BotSpellTypes::Identify:
+		case BotSpellTypes::Levitate:
+		case BotSpellTypes::Rune:
+		case BotSpellTypes::WaterBreathing:
+		case BotSpellTypes::Size:
+		case BotSpellTypes::Invisibility:
+		case BotSpellTypes::MovementSpeed:
+		case BotSpellTypes::SendHome:
+		case BotSpellTypes::SummonCorpse:
 			return true;
 		case BotSpellTypes::InCombatBuff:
 			if (cls == Class::ShadowKnight) {
@@ -2922,6 +2935,18 @@ bool BOT_SPELL_TYPES_OTHER_BENEFICIAL(uint16 spellType) {
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::ResistBuffs:
 		case BotSpellTypes::PetResistBuffs:
+		case BotSpellTypes::Teleport:
+		case BotSpellTypes::Succor:
+		case BotSpellTypes::BindAffinity:
+		case BotSpellTypes::Identify:
+		case BotSpellTypes::Levitate:
+		case BotSpellTypes::Rune:
+		case BotSpellTypes::WaterBreathing:
+		case BotSpellTypes::Size:
+		case BotSpellTypes::Invisibility:
+		case BotSpellTypes::MovementSpeed:
+		case BotSpellTypes::SendHome:
+		case BotSpellTypes::SummonCorpse:
 			return true;
 		default:
 			return false;
@@ -2953,6 +2978,7 @@ bool BOT_SPELL_TYPES_INNATE(uint16 spellType) {
 		case BotSpellTypes::Stun:
 		case BotSpellTypes::AEMez:
 		case BotSpellTypes::Mez:
+		case BotSpellTypes::Lull:
 			return true;
 		default:
 			return false;
@@ -3233,4 +3259,35 @@ bool IsDamageShieldOnlySpell(uint16 spell_id) {
 	}
 
 	return true;
+}
+
+bool IsCommandedSpellType(uint16 spellType) {
+	switch (spellType) {
+		case BotSpellTypes::Lull:
+		case BotSpellTypes::Teleport:
+		case BotSpellTypes::Succor:
+		case BotSpellTypes::BindAffinity:
+		case BotSpellTypes::Identify:
+		case BotSpellTypes::Levitate:
+		case BotSpellTypes::Rune:
+		case BotSpellTypes::WaterBreathing:
+		case BotSpellTypes::Size:
+		case BotSpellTypes::Invisibility:
+		case BotSpellTypes::MovementSpeed:
+		case BotSpellTypes::SendHome:
+		case BotSpellTypes::SummonCorpse:
+		//case BotSpellTypes::Charm:
+		//case BotSpellTypes::Resurrect:
+		//case BotSpellTypes::Cure:
+		//case BotSpellTypes::GroupCures:
+		//case BotSpellTypes::DamageShields:
+		//case BotSpellTypes::PetDamageShields:
+		//case BotSpellTypes::ResistBuffs:
+		//case BotSpellTypes::PetResistBuffs:
+			return true;
+		default:
+			return false;
+	}
+
+	return false;
 }

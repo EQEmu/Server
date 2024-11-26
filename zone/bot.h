@@ -147,6 +147,19 @@ namespace BotBaseSettings {
 	constexpr uint16 END						= BotBaseSettings::ManaWhenToMed; // Increment as needed
 };
 
+namespace CommandedSubTypes {
+	constexpr uint16 SingleTarget				= 1;
+	constexpr uint16 GroupTarget				= 2;
+	constexpr uint16 AETarget					= 3;
+	constexpr uint16 SeeInvis					= 4;
+	constexpr uint16 Invis						= 5;
+	constexpr uint16 InvisUndead				= 6;
+	constexpr uint16 InvisAnimals				= 7;
+	constexpr uint16 Shrink						= 8;
+	constexpr uint16 Grow						= 9;
+	constexpr uint16 Selo						= 10;
+};
+
 class Bot : public NPC {
 	friend class Mob;
 public:
@@ -387,7 +400,7 @@ public:
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 
 	// AI Methods
-	bool AICastSpell(Mob* tar, uint8 iChance, uint16 spellType);
+	bool AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
 	bool AttemptAICastSpell(uint16 spellType);
 	bool AI_EngagedCastCheck() override;
 	bool AI_PursueCastCheck() override;
@@ -523,6 +536,7 @@ public:
 	bool IsValidSpellTypeBySpellID(uint16 spellType, uint16 spell_id);
 	inline uint16 GetCastedSpellType() const { return _castedSpellType; }
 	void SetCastedSpellType(uint16 spellType);
+	bool IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell_id);
 
 	bool HasValidAETarget(Bot* botCaster, uint16 spell_id, uint16 spellType, Mob* tar);
 
@@ -577,7 +591,7 @@ public:
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, uint16 spellType, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, uint16 spellType, int spellEffect, SpellTargetType targetType);
 	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint16 spellType);
-	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE = false);
+	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE = false, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
 
 	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType);
 	static BotSpell GetBestBotSpellForVeryFastHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);

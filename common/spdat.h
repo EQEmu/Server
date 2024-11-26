@@ -708,9 +708,26 @@ namespace BotSpellTypes
 	constexpr uint16	ResistBuffs					= 52;
 	constexpr uint16	PetDamageShields			= 53;
 	constexpr uint16	PetResistBuffs				= 54;
+
+	// Command Spell Types
+	constexpr uint16	Teleport					= 100; // this is handled by ^depart so uses other logic
+	constexpr uint16	Lull						= 101;
+	constexpr uint16	Succor						= 102;
+	constexpr uint16	BindAffinity				= 103;
+	constexpr uint16	Identify					= 104;
+	constexpr uint16	Levitate					= 105;
+	constexpr uint16	Rune						= 106;
+	constexpr uint16	WaterBreathing				= 107;
+	constexpr uint16	Size						= 108;
+	constexpr uint16	Invisibility				= 109;
+	constexpr uint16	MovementSpeed				= 110;
+	constexpr uint16	SendHome					= 111;
+	constexpr uint16	SummonCorpse				= 112;
 				  
 	constexpr uint16	START						= BotSpellTypes::Nuke;							// Do not remove or change this
 	constexpr uint16	END							= BotSpellTypes::PetResistBuffs;				// Do not remove this, increment as needed
+	constexpr uint16	COMMANDED_START				= BotSpellTypes::Lull;							// Do not remove or change this
+	constexpr uint16	COMMANDED_END				= BotSpellTypes::SummonCorpse;					// Do not remove this, increment as needed
 }
 
 const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow);
@@ -730,6 +747,7 @@ bool IsClientBotSpellType(uint16 spellType);
 bool IsHealBotSpellType(uint16 spellType);
 bool SpellTypeRequiresLoS(uint16 spellType, uint16 cls = 0);
 bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls = 0);
+bool IsCommandedSpellType(uint16 spellType);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only

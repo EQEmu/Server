@@ -21,7 +21,7 @@
 #include "../common/repositories/bot_spells_entries_repository.h"
 #include "../common/repositories/npc_spells_repository.h"
 
-bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType) {
+bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTargetType, uint16 subType) {
 	if (!tar) {
 		return false;
 	}
@@ -48,7 +48,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType) {
 		return false;
 	}
 
-	if (spellType != BotSpellTypes::Resurrect && tar->GetAppearance() == eaDead) {
+	if ((spellType != BotSpellTypes::Resurrect && spellType != BotSpellTypes::SummonCorpse) && tar->GetAppearance() == eaDead) {
 		if (!((tar->IsClient() && tar->CastToClient()->GetFeigned()) || tar->IsBot())) {
 			return false;
 		}
@@ -83,7 +83,12 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType) {
 			}
 
 			break;
-		//SpecialAbility::PacifyImmunity -- TODO bot rewrite
+		case BotSpellTypes::Lull:
+			if (tar->GetSpecialAbility(SpecialAbility::PacifyImmunity)) {
+				return false;
+			}
+
+			break;
 		case BotSpellTypes::Fear:
 			if (tar->GetSpecialAbility(SpecialAbility::FearImmunity)) {
 				return false;
@@ -128,6 +133,17 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType) {
 		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::ResistBuffs:
 		case BotSpellTypes::PetResistBuffs:
+		case BotSpellTypes::Teleport:
+		case BotSpellTypes::Succor:
+		case BotSpellTypes::BindAffinity:
+		case BotSpellTypes::Identify:
+		case BotSpellTypes::Levitate:
+		case BotSpellTypes::Rune:
+		case BotSpellTypes::WaterBreathing:
+		case BotSpellTypes::Size:
+		case BotSpellTypes::Invisibility:
+		case BotSpellTypes::MovementSpeed:
+		case BotSpellTypes::SendHome:
 			if (!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) {
 				return false;
 			}
@@ -182,6 +198,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType) {
 
 			return BotCastPet(tar, botClass, botSpell, spellType);
 		case BotSpellTypes::Resurrect:
+		case BotSpellTypes::SummonCorpse:
 			if (!tar->IsCorpse() || !tar->CastToCorpse()->IsPlayerCorpse()) {
 				return false;
 			}
@@ -197,7 +214,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType) {
 			break;
 	}
 
-	std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, IsAEBotSpellType(spellType));
+	std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, IsAEBotSpellType(spellType), subTargetType, subType);
 
 	for (const auto& s : botSpellList) {
 
@@ -643,7 +660,7 @@ bool Bot::AI_PursueCastCheck() {
 				continue;
 			}
 
-			if (currentCast.spellType == BotSpellTypes::Resurrect || currentCast.spellType == BotSpellTypes::Charm) { // Unsupported by AI currently.
+			if (IsCommandedSpellType(currentCast.spellType) || currentCast.spellType == BotSpellTypes::Resurrect || currentCast.spellType == BotSpellTypes::Charm) { // Unsupported by AI currently.
 				continue;
 			}
 
@@ -706,7 +723,7 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
-			if (currentCast.spellType == BotSpellTypes::Resurrect || currentCast.spellType == BotSpellTypes::Charm) { // Unsupported by AI currently.
+			if (IsCommandedSpellType(currentCast.spellType) || currentCast.spellType == BotSpellTypes::Resurrect || currentCast.spellType == BotSpellTypes::Charm) { // Unsupported by AI currently.
 				continue;
 			}
 
@@ -756,7 +773,7 @@ bool Bot::AI_EngagedCastCheck() {
 				continue;
 			}
 
-			if (currentCast.spellType == BotSpellTypes::Resurrect || currentCast.spellType == BotSpellTypes::Charm) { // Unsupported by AI currently.
+			if (IsCommandedSpellType(currentCast.spellType) || currentCast.spellType == BotSpellTypes::Resurrect || currentCast.spellType == BotSpellTypes::Charm) { // Unsupported by AI currently.
 				continue;
 			}
 
@@ -979,7 +996,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellTyp
 	return result;
 }
 
-std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE) {
+std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE, uint16 subTargetType, uint16 subType) {
 	std::list<BotSpell_wPriority> result;
 
 	if (botCaster && botCaster->AI_HasSpells()) {
@@ -1001,6 +1018,16 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetSpellListSpellType(spellType)) &&
 				botCaster->IsValidSpellTypeBySpellID(spellType, botSpellList[i].spellid)
 			) {
+				if (
+					botCaster->IsCommandedSpell() &&
+					(
+						!botCaster->IsValidSpellTypeSubType(spellType, subTargetType, botSpellList[i].spellid) ||
+						!botCaster->IsValidSpellTypeSubType(spellType, subType, botSpellList[i].spellid)
+					)
+				) {
+					continue;
+				}
+
 				if (!AE && IsAnyAESpell(botSpellList[i].spellid) && !IsGroupSpell(botSpellList[i].spellid)) {
 					continue;
 				}
@@ -2040,7 +2067,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType)
 	return result;
 }
 
-uint8 Bot::GetChanceToCastBySpellType(uint16 spellType) //TODO bot rewrite - adjust, move AEs to own rule?
+uint8 Bot::GetChanceToCastBySpellType(uint16 spellType)
 {
 	switch (spellType) {
 		case BotSpellTypes::AENukes:
@@ -2072,6 +2099,18 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType) //TODO bot rewrite - adj
 		case BotSpellTypes::PetResistBuffs:
 		case BotSpellTypes::DamageShields:
 		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::Teleport:
+		case BotSpellTypes::Succor:
+		case BotSpellTypes::BindAffinity:
+		case BotSpellTypes::Identify:
+		case BotSpellTypes::Levitate:
+		case BotSpellTypes::Rune:
+		case BotSpellTypes::WaterBreathing:
+		case BotSpellTypes::Size:
+		case BotSpellTypes::Invisibility:
+		case BotSpellTypes::MovementSpeed:
+		case BotSpellTypes::SendHome:
+		case BotSpellTypes::SummonCorpse:
 			return RuleI(Bots, PercentChanceToCastBuff);
 		case BotSpellTypes::Escape:
 			return RuleI(Bots, PercentChanceToCastEscape);
@@ -2949,6 +2988,7 @@ void Bot::CheckBotSpells() {
 					break;
 				}
 				break;
+			//TODO bot rewrite - add commanded types
 			default:
 				break;
 
@@ -3044,6 +3084,7 @@ void Bot::CheckBotSpells() {
 		else if (IsEffectInSpell(spell_id, SE_Revive)) {
 			correctType = BotSpellTypes::Resurrect;
 		}
+		//TODO bot rewrite - add commanded types
 
 		if (!valid || (correctType == UINT16_MAX) || (s.type != correctType)) {
 			LogBotSpellTypeChecks("{} [#{}] is incorrect. It is currently set as {} [#{}] and should be {} [#{}]"
