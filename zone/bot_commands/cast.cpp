@@ -94,7 +94,8 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
-		c->CastToBot()->SendSpellTypesWindow(c, sep->arg[0], "", "", true);
+		SendSpellTypePrompts(c, true);
+
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
@@ -102,6 +103,16 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				Saylink::Silent("^classracelist")
 			).c_str()
 		);
+
+		if (RuleB(Bots, SendClassRaceOnHelp)) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Use {} for information about race/class IDs.",
+					Saylink::Silent("^classracelist")
+				).c_str()
+			);
+		}
 
 		return;
 	}

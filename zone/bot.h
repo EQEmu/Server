@@ -517,8 +517,6 @@ public:
 	void SetManaWhenToMed(uint8 value) { _ManaWhenToMed = value; }
 	void SetHasLoS(bool hasLoS) { _hasLoS = hasLoS; }
 	bool HasLoS() const { return _hasLoS; }
-	
-	void SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, std::string arg2, bool helpPrompt = false);
 
 	std::list<BotSpellTypeOrder> GetSpellTypesPrioritized(uint8 priorityType);
 	uint16 GetSpellListSpellType(uint16 spellType);

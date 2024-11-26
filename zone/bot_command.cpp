@@ -1375,6 +1375,8 @@ int bot_command_init(void)
 		bot_command_add("spellsettingstoggle", "Toggle a bot spell use", AccountStatus::Player, bot_command_spell_settings_toggle) ||
 		bot_command_add("spellsettingsupdate", "Update a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_update) ||
 		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) ||
+		bot_command_add("spelltypeids", "Lists spelltypes by ID", AccountStatus::Player, bot_command_spelltype_ids) ||
+		bot_command_add("spelltypenames", "Lists spelltypes by shortname", AccountStatus::Player, bot_command_spelltype_names) ||
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", AccountStatus::Player, bot_command_suspend) ||
 		bot_command_add("taunt", "Toggles taunt use by a bot", AccountStatus::Player, bot_command_taunt) ||
 		bot_command_add("timer", "Checks or clears timers of the chosen type.", AccountStatus::GMMgmt, bot_command_timer) ||
@@ -2115,42 +2117,53 @@ bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::Sp
 	return false;
 }
 
-void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, std::string arg2, bool helpPrompt) {
-	if (helpPrompt) {
+void SendSpellTypePrompts(Client *c, bool commandedTypes) {
+	c->Message(
+		Chat::Yellow,
+		fmt::format(
+			"You can view spell types by ID or shortname: {}, {}, {} / {}, {}, {}",
+			Saylink::Silent(
+				fmt::format("^spelltypeids 0-19"), "ID 0-19"
+			),
+			Saylink::Silent(
+				fmt::format("^spelltypeids 20-39"), "20-39"
+			),
+			Saylink::Silent(
+				fmt::format("^spelltypeids 40+"), "40+"
+			),
+			Saylink::Silent(
+				fmt::format("^spelltypenames 0-19"), "Shortname 0-19"
+			),
+			Saylink::Silent(
+				fmt::format("^spelltypenames 20-39"), "20-39"
+			),
+			Saylink::Silent(
+				fmt::format("^spelltypenames 40+"), "40+"
+			)
+		).c_str()
+	);
+
+	if (commandedTypes) {
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
-				"Use {}, {}, {} for a list of spell types by ID",
+				"You can view commanded spell types by ID or shortname: {} / {}",
 				Saylink::Silent(
-					fmt::format("{} listid 0-19", arg0)
+					fmt::format("^spelltypeids commanded"), "ID"
 				),
 				Saylink::Silent(
-					fmt::format("{} listid 20-39", arg0)
-				),
-				Saylink::Silent(
-					fmt::format("{} listid 40+", arg0)
+					fmt::format("^spelltypenames commanded"), "Shortname"
 				)
 			).c_str()
 		);
-
-		c->Message(
-			Chat::Yellow,
-			fmt::format(
-				"Use {}, {}, {} for a list of spell types by short name",
-				Saylink::Silent(
-					fmt::format("{} listname 0-19", arg0)
-				),
-				Saylink::Silent(
-					fmt::format("{} listname 20-39", arg0)
-				),
-				Saylink::Silent(
-					fmt::format("{} listname 40+", arg0)
-				)
-			).c_str()
-		);
-
-		return;
 	}
+
+	return;
+}
+
+void SendSpellTypeWindow(Client *c, const Seperator* sep) {
+	std::string arg0 = sep->arg[0];
+	std::string arg1 = sep->arg[1];
 
 	uint8 minCount = 0;
 	uint8 maxCount = 0;
@@ -2159,17 +2172,21 @@ void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, st
 		minCount = BotSpellTypes::START;
 		maxCount = BotSpellTypes::END;
 	}
-	else if (!arg2.compare("0-19")) {
+	else if (!arg1.compare("0-19")) {
 		minCount = BotSpellTypes::START;
 		maxCount = 19;
 	}
-	else if (!arg2.compare("20-39")) {
+	else if (!arg1.compare("20-39")) {
 		minCount = std::min(static_cast<uint8_t>(20), static_cast<uint8_t>(BotSpellTypes::END));
 		maxCount = std::min(static_cast<uint8_t>(39), static_cast<uint8_t>(BotSpellTypes::END));
 	}
-	else if (!arg2.compare("40+")) {
+	else if (!arg1.compare("40+")) {
 		minCount = std::min(static_cast<uint8_t>(40), static_cast<uint8_t>(BotSpellTypes::END));
 		maxCount = BotSpellTypes::END;
+	}
+	else if (!arg1.compare("commanded")) {
+		minCount = BotSpellTypes::COMMANDED_START;
+		maxCount = BotSpellTypes::COMMANDED_END;
 	}
 	else {
 		c->Message(Chat::Yellow, "You must choose a valid range option");
@@ -2199,7 +2216,7 @@ void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, st
 		DialogueWindow::TableCell(
 			fmt::format(
 				"{}",
-				(!arg1.compare("listid") ? DialogueWindow::ColorMessage(goldenrod, idField) : DialogueWindow::ColorMessage(goldenrod, shortnameField))
+				(!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(goldenrod, idField) : DialogueWindow::ColorMessage(goldenrod, shortnameField))
 			)
 		)
 	);
@@ -2231,7 +2248,7 @@ void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, st
 			DialogueWindow::TableCell(
 				fmt::format(
 					"{}",
-					(!arg1.compare("listid") ? DialogueWindow::ColorMessage(slate_blue, std::to_string(i)) : DialogueWindow::ColorMessage(slate_blue, c->GetSpellTypeShortNameByID(i)))
+					(!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(slate_blue, std::to_string(i)) : DialogueWindow::ColorMessage(slate_blue, c->GetSpellTypeShortNameByID(i)))
 				)
 			)
 		);
@@ -2241,7 +2258,6 @@ void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, st
 
 	c->SendPopupToClient("Spell Types", popup_text.c_str());
 }
-
 
 #include "bot_commands/actionable.cpp"
 #include "bot_commands/aggressive.cpp"
@@ -2310,6 +2326,7 @@ void Bot::SendSpellTypesWindow(Client* c, std::string arg0, std::string arg1, st
 #include "bot_commands/spell_min_thresholds.cpp"
 #include "bot_commands/spell_pursue_priority.cpp"
 #include "bot_commands/spell_target_count.cpp"
+#include "bot_commands/spelltypes.cpp"
 #include "bot_commands/summon.cpp"
 #include "bot_commands/summon_corpse.cpp"
 #include "bot_commands/suspend.cpp"
