@@ -9406,14 +9406,14 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spellType) {
 	return true;
 }
 
-bool Bot::CastChecks(uint16 spellid, Mob* tar, uint16 spellType, bool doPrechecks, bool AECheck) {
+bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechecks, bool AECheck) {
 	if (!tar) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast due to CastChecks !tar.'", GetCleanName()); //deleteme
 		return false;
 	}
 
 	if (doPrechecks) {
-		if (spells[spellid].target_type == ST_Self && tar != this) {
+		if (spells[spell_id].target_type == ST_Self && tar != this) {
 			tar = this;
 		}
 
@@ -9425,105 +9425,105 @@ bool Bot::CastChecks(uint16 spellid, Mob* tar, uint16 spellType, bool doPrecheck
 
 	LogBotPreChecksDetail("{} says, 'Running [{}] CastChecks on [{}].'", GetCleanName(), GetSpellTypeNameByID(spellType), tar->GetCleanName()); //deleteme
 
-	if (!IsValidSpell(spellid)) {
+	if (!IsValidSpell(spell_id)) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast due to !IsValidSpell.'", GetCleanName()); //deleteme
 		return false;
 	}
 
-	if (spells[spellid].target_type == ST_Self && tar != this) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to ST_Self.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+	if (spells[spell_id].target_type == ST_Self && tar != this) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to ST_Self.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
-	if (!CheckSpellRecastTimer(spellid)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} due to !CheckSpellRecastTimer.'", GetCleanName(), GetSpellName(spellid)); //deleteme
+	if (!CheckSpellRecastTimer(spell_id)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} due to !CheckSpellRecastTimer.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
 		return false;
 	}
 
-	if (!BotHasEnoughMana(spellid)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} due to !BotHasEnoughMana.'", GetCleanName(), GetSpellName(spellid)); //deleteme
+	if (!BotHasEnoughMana(spell_id)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} due to !BotHasEnoughMana.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
 		return false;
 	}
 
-	if (zone->IsSpellBlocked(spellid, glm::vec3(GetPosition()))) {
-		LogBotPreChecks("{} says, 'Cancelling cast of {} due to IsSpellBlocked.'", GetCleanName(), GetSpellName(spellid)); //deleteme
+	if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
+		LogBotPreChecks("{} says, 'Cancelling cast of {} due to IsSpellBlocked.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
 		return false;
 	}
 
-	if (!zone->CanLevitate() && IsEffectInSpell(spellid, SE_Levitate)) {
-		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !CanLevitate.'", GetCleanName(), GetSpellName(spellid)); //deleteme
+	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) {
+		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !CanLevitate.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
 		return false;
 	}
 
-	if (spells[spellid].time_of_day == SpellTimeRestrictions::Day && !zone->zone_time.IsDayTime()) {
-		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !IsDayTime.'", GetCleanName(), GetSpellName(spellid)); //deleteme
+	if (spells[spell_id].time_of_day == SpellTimeRestrictions::Day && !zone->zone_time.IsDayTime()) {
+		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !IsDayTime.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
 		return false;
 	}
 
-	if (spells[spellid].time_of_day == SpellTimeRestrictions::Night && !zone->zone_time.IsNightTime()) {
-		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !IsNightTime.'", GetCleanName(), GetSpellName(spellid)); //deleteme
+	if (spells[spell_id].time_of_day == SpellTimeRestrictions::Night && !zone->zone_time.IsNightTime()) {
+		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !IsNightTime.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
 		return false;
 	}
 
-	if (spells[spellid].zone_type == 1 && !zone->CanCastOutdoor()) {
-		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !CanCastOutdoor.'", GetCleanName(), GetSpellName(spellid)); //deleteme
+	if (spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()) {
+		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !CanCastOutdoor.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
 		return false;
 	}
 
-	if (!AECheck && !IsValidSpellRange(spellid, tar)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidSpellRange.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+	if (!AECheck && !IsValidSpellRange(spell_id, tar)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidSpellRange.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
-	if (!IsValidTargetType(spellid, GetSpellTargetType(spellid), tar->GetBodyType())) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidTargetType.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+	if (!IsValidTargetType(spell_id, GetSpellTargetType(spell_id), tar->GetBodyType())) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidTargetType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
 	if (tar->GetSpecialAbility(SpecialAbility::CastingFromRangeImmunity) && !CombatRange(tar)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IMMUNE_CASTING_FROM_RANGE.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IMMUNE_CASTING_FROM_RANGE.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
-	if (tar->IsImmuneToBotSpell(spellid, this)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsImmuneToBotSpell.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+	if (tar->IsImmuneToBotSpell(spell_id, this)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsImmuneToBotSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
-	if (!DoResistCheckBySpellType(tar, spellid, spellType)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to DoResistCheckBySpellType.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+	if (!DoResistCheckBySpellType(tar, spell_id, spellType)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to DoResistCheckBySpellType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
-	if (!IsCommandedSpell() && !IsTaunting() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting(), spellid) && !tar->IsFleeing()) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to HasOrMayGetAggro.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+	if (!IsCommandedSpell() && !IsTaunting() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting(), spell_id) && !tar->IsFleeing()) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to HasOrMayGetAggro.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 	
 	if (
-		(RequiresStackCheck(spellType) || (!RequiresStackCheck(spellType) && CalcBuffDuration(this, tar, spellid) != 0))
+		(RequiresStackCheck(spellType) || (!RequiresStackCheck(spellType) && CalcBuffDuration(this, tar, spell_id) != 0))
 		&& 
-		tar->CanBuffStack(spellid, GetLevel(), true) < 0
+		tar->CanBuffStack(spell_id, GetLevel(), true) < 0
 	) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to !CanBuffStack.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to !CanBuffStack.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
-	if (IsBeneficialSpell(spellid) && tar->BuffCount() >= tar->GetCurrentBuffSlots() && CalcBuffDuration(this, tar, spellid) != 0) {
+	if (IsBeneficialSpell(spell_id) && tar->BuffCount() >= tar->GetCurrentBuffSlots() && CalcBuffDuration(this, tar, spell_id) != 0) {
 		return false;
 	}
 
-	LogBotPreChecksDetail("{} says, 'Doing CanCastSpellType checks of {} on {}.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
-	if (!CanCastSpellType(spellType, spellid, tar)) {
+	LogBotPreChecksDetail("{} says, 'Doing CanCastSpellType checks of {} on {}.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+	if (!CanCastSpellType(spellType, spell_id, tar)) {
 		return false;
 	}
 
 	return true;
 }
 
-bool Bot::CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar) {
-	if (!spellid || !tar) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to failsafe checks.'", GetCleanName(), (spellid ? GetSpellName(spellid) : (spellType ? GetSpellTypeNameByID(spellType) : "Unknown")), (tar ? tar->GetCleanName() : "Unknown")); //deleteme
+bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
+	if (!spell_id || !tar) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to failsafe checks.'", GetCleanName(), (spell_id ? GetSpellName(spell_id) : (spellType ? GetSpellTypeNameByID(spellType) : "Unknown")), (tar ? tar->GetCleanName() : "Unknown")); //deleteme
 		return false;
 	}
 
@@ -9540,44 +9540,44 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar) {
 		case BotSpellTypes::PetResistBuffs:
 			if (
 				!(
-					spells[spellid].target_type == ST_Target ||
-					spells[spellid].target_type == ST_Pet ||
-					(tar == this && spells[spellid].target_type != ST_TargetsTarget) ||
-					spells[spellid].target_type == ST_Group ||
-					spells[spellid].target_type == ST_GroupTeleport
+					spells[spell_id].target_type == ST_Target ||
+					spells[spell_id].target_type == ST_Pet ||
+					(tar == this && spells[spell_id].target_type != ST_TargetsTarget) ||
+					spells[spell_id].target_type == ST_Group ||
+					spells[spell_id].target_type == ST_GroupTeleport
 					)
 				) {
-				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to target_type checks.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to target_type checks.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
-			if (tar->IsBlockedBuff(spellid)) {
-				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+			if (tar->IsBlockedBuff(spell_id)) {
+				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
-			if (IsEffectInSpell(spellid, SE_Teleport) || IsEffectInSpell(spellid, SE_Succor)) {
-				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to Teleport.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+			if ((spellType != BotSpellTypes::Teleport && spellType != BotSpellTypes::Succor) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Succor))) {
+				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to Teleport.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
-			if (tar->IsPet() && !RuleB(Bots, CanCastIllusionsOnPets) && IsEffectInSpell(spellid, SE_Illusion)) {
-				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to PetSE_Illusion.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+			if (tar->IsPet() && !RuleB(Bots, CanCastIllusionsOnPets) && IsEffectInSpell(spell_id, SE_Illusion)) {
+				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to PetSE_Illusion.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
-			if (spells[spellid].target_type == ST_Pet && (!tar->IsPet() || (tar->GetOwner() != this && !RuleB(Bots, CanCastPetOnlyOnOthersPets)))) {
-				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to PetOnly.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+			if (spells[spell_id].target_type == ST_Pet && (!tar->IsPet() || (tar->GetOwner() != this && !RuleB(Bots, CanCastPetOnlyOnOthersPets)))) {
+				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to PetOnly.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
-			if ((IsGroupSpell(spellid) && tar->IsPet()) && (!tar->GetOwner() || (RuleB(Bots, RequirePetAffinity) && !tar->GetOwner()->HasPetAffinity()))) {
-				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to PetGroupSpellTarget.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+			if ((IsGroupSpell(spell_id) && tar->IsPet()) && (!tar->GetOwner() || (RuleB(Bots, RequirePetAffinity) && !tar->GetOwner()->HasPetAffinity()))) {
+				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to PetGroupSpellTarget.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
-			if (!IsCommandedSpell() && IsTargetAlreadyReceivingSpell(tar, spellid)) {
-				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsTargetAlreadyReceivingSpell.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+			if (!IsCommandedSpell() && IsTargetAlreadyReceivingSpell(tar, spell_id)) {
+				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsTargetAlreadyReceivingSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
@@ -9587,21 +9587,21 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar) {
 						if (
 							tar->IsBot() && tar->GetLevel() > tar->CastToBot()->GetStopMeleeLevel() &&
 							(
-								IsEffectInSpell(spellid, SE_AttackSpeed) || IsEffectInSpell(spellid, SE_ReverseDS)) ||
-								(SpellEffectsCount(spellid) == 1 && (IsEffectInSpell(spellid, SE_ATK) || IsEffectInSpell(spellid, SE_STR))
+								IsEffectInSpell(spell_id, SE_AttackSpeed) || IsEffectInSpell(spell_id, SE_ReverseDS)) ||
+								(SpellEffectsCount(spell_id) == 1 && (IsEffectInSpell(spell_id, SE_ATK) || IsEffectInSpell(spell_id, SE_STR))
 							)
 						) {
-							LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Archetype::Caster.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+							LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Archetype::Caster.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 							return false;
 						}
 						break;
 					case Archetype::Melee:
 						if (
-							IsEffectInSpell(spellid, SE_IncreaseSpellHaste) || IsEffectInSpell(spellid, SE_ManaPool) ||
-							IsEffectInSpell(spellid, SE_CastingLevel) || IsEffectInSpell(spellid, SE_ManaRegen_v2) ||
-							IsEffectInSpell(spellid, SE_CurrentMana)
+							IsEffectInSpell(spell_id, SE_IncreaseSpellHaste) || IsEffectInSpell(spell_id, SE_ManaPool) ||
+							IsEffectInSpell(spell_id, SE_CastingLevel) || IsEffectInSpell(spell_id, SE_ManaRegen_v2) ||
+							IsEffectInSpell(spell_id, SE_CurrentMana)
 							) {
-							LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Archetype::Melee.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+							LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Archetype::Melee.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 							return false;
 						}
 						break;
@@ -9613,14 +9613,14 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar) {
 
 			// Differences for each type
 			if (spellType != BotSpellTypes::InCombatBuff) {
-				if (IsEffectInSpell(spellid, SE_AbsorbMagicAtt) || IsEffectInSpell(spellid, SE_Rune)) {
+				if (IsEffectInSpell(spell_id, SE_AbsorbMagicAtt) || IsEffectInSpell(spell_id, SE_Rune)) {
 					for (int i = 0; i < tar->GetMaxTotalSlots(); i++) {
 						uint32 buff_count = tar->GetMaxTotalSlots();
 
 						for (unsigned int j = 0; j < buff_count; j++) {
 							if (IsValidSpell(tar->GetBuffs()[j].spellid)) {
 								if (IsLichSpell(tar->GetBuffs()[j].spellid)) {
-									LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsLichSpell.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+									LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsLichSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 									return false;
 								}
 							}
@@ -9633,8 +9633,8 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar) {
 		case BotSpellTypes::PreCombatBuffSong:
 		case BotSpellTypes::InCombatBuffSong:
 		case BotSpellTypes::OutOfCombatBuffSong:
-			if (!IsCommandedSpell() && IsTargetAlreadyReceivingSpell(tar, spellid)) {
-				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsTargetAlreadyReceivingSpell.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+			if (!IsCommandedSpell() && IsTargetAlreadyReceivingSpell(tar, spell_id)) {
+				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsTargetAlreadyReceivingSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
@@ -9644,21 +9644,21 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar) {
 						if (
 							tar->IsBot() && tar->GetLevel() > tar->CastToBot()->GetStopMeleeLevel() &&
 							(
-								IsEffectInSpell(spellid, SE_AttackSpeed) || IsEffectInSpell(spellid, SE_ReverseDS)) ||
-								(SpellEffectsCount(spellid) == 1 && (IsEffectInSpell(spellid, SE_ATK) || IsEffectInSpell(spellid, SE_STR))
+								IsEffectInSpell(spell_id, SE_AttackSpeed) || IsEffectInSpell(spell_id, SE_ReverseDS)) ||
+								(SpellEffectsCount(spell_id) == 1 && (IsEffectInSpell(spell_id, SE_ATK) || IsEffectInSpell(spell_id, SE_STR))
 							)
 						) {
-							LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Archetype::Caster.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+							LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Archetype::Caster.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 							return false;
 						}
 						break;
 					case Archetype::Melee:
 						if (
-							IsEffectInSpell(spellid, SE_IncreaseSpellHaste) || IsEffectInSpell(spellid, SE_ManaPool) ||
-							IsEffectInSpell(spellid, SE_CastingLevel) || IsEffectInSpell(spellid, SE_ManaRegen_v2) ||
-							IsEffectInSpell(spellid, SE_CurrentMana)
+							IsEffectInSpell(spell_id, SE_IncreaseSpellHaste) || IsEffectInSpell(spell_id, SE_ManaPool) ||
+							IsEffectInSpell(spell_id, SE_CastingLevel) || IsEffectInSpell(spell_id, SE_ManaRegen_v2) ||
+							IsEffectInSpell(spell_id, SE_CurrentMana)
 							) {
-							LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Archetype::Melee.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+							LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Archetype::Melee.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 							return false;
 						}
 						break;
@@ -9673,7 +9673,7 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spellid, Mob* tar) {
 			break;
 	}
 	
-	LogBotPreChecksDetail("{} says, {} on {} passed CanCastSpellType.'", GetCleanName(), GetSpellName(spellid), tar->GetCleanName()); //deleteme
+	LogBotPreChecksDetail("{} says, {} on {} passed CanCastSpellType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 	return true;
 }
 
@@ -9692,9 +9692,9 @@ bool Bot::BotHasEnoughMana(uint16 spell_id) {
 	return true;
 }
 
-bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spellid) {
+bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) {
 
-	if (!tar || !spellid) {
+	if (!tar || !spell_id) {
 		return true;
 	}
 
@@ -9717,18 +9717,18 @@ bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spellid) {
 			m->IsCasting() &&
 			m->CastToBot()->casting_spell_targetid &&
 			entity_list.GetMobID(m->CastToBot()->casting_spell_targetid) == entity_list.GetMobID(tar->GetID()) &&
-			m->CastingSpellID() == spellid
+			m->CastingSpellID() == spell_id
 		) {
 
 			return true;
 		}
 		else {
-			if (IsGroupSpell(spellid)) {
+			if (IsGroupSpell(spell_id)) {
 				if (
 					m->IsBot() &&
 					m->IsCasting() &&
 					m->CastToBot()->casting_spell_targetid &&
-					m->CastingSpellID() == spellid
+					m->CastingSpellID() == spell_id
 				) {
 
 					std::vector<Mob*> x = GatherGroupSpellTargets();
@@ -9746,13 +9746,13 @@ bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spellid) {
 	return false;
 }
 
-bool Bot::DoResistCheck(Mob* tar, uint16 spellid, int32 resist_limit) {
+bool Bot::DoResistCheck(Mob* tar, uint16 spell_id, int32 resist_limit) {
 
-	if (!tar || spellid == 0) {
+	if (!tar || spell_id == 0) {
 		return false;
 	}
 
-	int32 resist_difficulty = -spells[spellid].resist_difficulty;
+	int32 resist_difficulty = -spells[spell_id].resist_difficulty;
 	int32 level_mod = (tar->GetLevel() - GetLevel()) * (tar->GetLevel() - GetLevel()) / 2;
 
 	if (tar->GetLevel() - GetLevel() < 0) {
@@ -9761,7 +9761,7 @@ bool Bot::DoResistCheck(Mob* tar, uint16 spellid, int32 resist_limit) {
 
 	int32 targetResist = 0;
 
-	switch (GetSpellResistType(spellid)) {
+	switch (GetSpellResistType(spell_id)) {
 		case RESIST_NONE:
 			return true;
 		case RESIST_MAGIC:
@@ -9785,7 +9785,7 @@ bool Bot::DoResistCheck(Mob* tar, uint16 spellid, int32 resist_limit) {
 		default:
 			return true;
 	}
-	//LogBotPreChecksDetail("DoResistCheck on {} for {} - TarResist [{}] LMod [{}] ResistDiff [{}] - Adjust [{}] > ResistLim [{}]", tar->GetCleanName(), GetSpellName(spellid), targetResist, level_mod, resist_difficulty, (targetResist + level_mod - resist_difficulty), resist_limit); //deleteme)
+	//LogBotPreChecksDetail("DoResistCheck on {} for {} - TarResist [{}] LMod [{}] ResistDiff [{}] - Adjust [{}] > ResistLim [{}]", tar->GetCleanName(), GetSpellName(spell_id), targetResist, level_mod, resist_difficulty, (targetResist + level_mod - resist_difficulty), resist_limit); //deleteme)
 	if ((targetResist + level_mod - resist_difficulty) > resist_limit) {
 		return false;
 	}
@@ -9793,8 +9793,8 @@ bool Bot::DoResistCheck(Mob* tar, uint16 spellid, int32 resist_limit) {
 	return true;
 }
 
-bool Bot::DoResistCheckBySpellType(Mob* tar, uint16 spellid, uint16 spellType) {
-	if (!tar || !IsValidSpell(spellid)) {
+bool Bot::DoResistCheckBySpellType(Mob* tar, uint16 spell_id, uint16 spellType) {
+	if (!tar || !IsValidSpell(spell_id)) {
 		return false;
 	}
 
@@ -9802,11 +9802,11 @@ bool Bot::DoResistCheckBySpellType(Mob* tar, uint16 spellid, uint16 spellType) {
 		return true;
 	}
 
-	return DoResistCheck(tar, spellid, GetSpellTypeResistLimit(spellType));
+	return DoResistCheck(tar, spell_id, GetSpellTypeResistLimit(spellType));
 }
 
-bool Bot::IsValidTargetType(uint16 spellid, int targetType, uint8 bodyType) {
-	if (!spellid) {
+bool Bot::IsValidTargetType(uint16 spell_id, int targetType, uint8 bodyType) {
+	if (!spell_id) {
 		return false;
 	}
 
@@ -9890,7 +9890,7 @@ bool Bot::IsMobEngagedByAnyone(Mob* tar) {
 	return false;
 }
 
-bool Bot::IsValidMezTarget(Mob* owner, Mob* npc, uint16 spellid) {
+bool Bot::IsValidMezTarget(Mob* owner, Mob* npc, uint16 spell_id) {
 	if (npc->GetSpecialAbility(SpecialAbility::MesmerizeImmunity)) {
 		return false;
 	}
@@ -9907,7 +9907,7 @@ bool Bot::IsValidMezTarget(Mob* owner, Mob* npc, uint16 spellid) {
 		return false;
 	}
 
-	if (!IsValidTargetType(spellid, GetSpellTargetType(spellid), npc->GetBodyType())) {
+	if (!IsValidTargetType(spell_id, GetSpellTargetType(spell_id), npc->GetBodyType())) {
 		return false;
 	}
 
@@ -10952,58 +10952,58 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 	return spellType;
 }
 
-bool Bot::IsValidSpellTypeBySpellID(uint16 spellType, uint16 spellid) {
-	if (IsAEBotSpellType(spellType) && !IsAnyAESpell(spellid)) {
+bool Bot::IsValidSpellTypeBySpellID(uint16 spellType, uint16 spell_id) {
+	if (IsAEBotSpellType(spellType) && !IsAnyAESpell(spell_id)) {
 		return false;
 	}
 
-	if (IsGroupBotSpellType(spellType) && !IsGroupSpell(spellid)) {
+	if (IsGroupBotSpellType(spellType) && !IsGroupSpell(spell_id)) {
 		return false;
 	}
 
 	switch (spellType) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::PetBuffs:
-			if (IsResistanceOnlySpell(spellid) || IsDamageShieldOnlySpell(spellid) || IsDamageShieldAndResistanceSpellOnly(spellid)) {
+			if (IsResistanceOnlySpell(spell_id) || IsDamageShieldOnlySpell(spell_id) || IsDamageShieldAndResistanceSpellOnly(spell_id)) {
 				return false;
 			}
 
 			return true;
 		case BotSpellTypes::ResistBuffs:
 		case BotSpellTypes::PetResistBuffs:
-			if (IsResistanceOnlySpell(spellid)) {
+			if (IsResistanceOnlySpell(spell_id)) {
 				return true;
 			}
 			
 			return false;
 		case BotSpellTypes::DamageShields:
 		case BotSpellTypes::PetDamageShields:
-			if (IsDamageShieldOnlySpell(spellid) || IsDamageShieldAndResistanceSpellOnly(spellid)) {
+			if (IsDamageShieldOnlySpell(spell_id) || IsDamageShieldAndResistanceSpellOnly(spell_id)) {
 				return true;
 			}
 
 			return false;
 		case BotSpellTypes::PBAENuke:
-			if (IsPBAENukeSpell(spellid) && !IsStunSpell(spellid)) {
+			if (IsPBAENukeSpell(spell_id) && !IsStunSpell(spell_id)) {
 				return true;
 			}
 
 			return false;
 		case BotSpellTypes::AERains:
-			if (IsAERainNukeSpell(spellid) && !IsStunSpell(spellid)) {
+			if (IsAERainNukeSpell(spell_id) && !IsStunSpell(spell_id)) {
 				return true;
 			}
 			return false;
 		case BotSpellTypes::AEStun:
 		case BotSpellTypes::Stun:
-			if (IsStunSpell(spellid)) {
+			if (IsStunSpell(spell_id)) {
 				return true;
 			}
 
 			return false;
 		case BotSpellTypes::AENukes:
 		case BotSpellTypes::Nuke:
-			if (!IsStunSpell(spellid)) {
+			if (!IsStunSpell(spell_id)) {
 				return true;
 			}
 
@@ -11199,9 +11199,9 @@ bool Bot::HasRequiredLoSForPositioning(Mob* tar) {
 	return true;
 }
 
-bool Bot::HasValidAETarget(Bot* botCaster, uint16 spellid, uint16 spellType, Mob* tar) {
-	int spellRange = botCaster->GetActSpellRange(spellid, spells[spellid].range);
-	int spellAERange = botCaster->GetActSpellRange(spellid, spells[spellid].aoe_range);
+bool Bot::HasValidAETarget(Bot* botCaster, uint16 spell_id, uint16 spellType, Mob* tar) {
+	int spellRange = botCaster->GetActSpellRange(spell_id, spells[spell_id].range);
+	int spellAERange = botCaster->GetActSpellRange(spell_id, spells[spell_id].aoe_range);
 	int targetCount = 0;
 
 	for (auto& close_mob : botCaster->m_close_mobs) {
@@ -11244,14 +11244,14 @@ bool Bot::HasValidAETarget(Bot* botCaster, uint16 spellid, uint16 spellType, Mob
 			continue;
 		}
 
-		if (SpellBreaksMez(spellid) && m->IsMezzed()) {
+		if (SpellBreaksMez(spell_id) && m->IsMezzed()) {
 			continue;
 		}
 
-		if (IsPBAESpell(spellid)) {
+		if (IsPBAESpell(spell_id)) {
 			if (
 				spellAERange >= Distance(botCaster->GetPosition(), m->GetPosition()) &&
-				botCaster->CastChecks(spellid, m, spellType, true, true)
+				botCaster->CastChecks(spell_id, m, spellType, true, true)
 			) {
 				++targetCount;
 			}
@@ -11263,7 +11263,7 @@ bool Bot::HasValidAETarget(Bot* botCaster, uint16 spellid, uint16 spellType, Mob
 
 			if (
 				spellAERange >= Distance(tar->GetPosition(), m->GetPosition()) &&
-				botCaster->CastChecks(spellid, m, spellType, true, true)
+				botCaster->CastChecks(spell_id, m, spellType, true, true)
 			) {
 				++targetCount;
 			}
