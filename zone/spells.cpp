@@ -159,7 +159,18 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			}
 		}
 
-		if (spell_id == 11087 || spell_id == 13722 || spell_id == 16743 || spell_id == 11086 || spell_id == 13721 || spell_id == 16742) {
+		if (spell_id == 11086 || spell_id == 11087 || spell_id == 13721 || spell_id == 13732 || spell_id == 16742 || spell_id == 16743) {
+			auto potential_target = entity_list.GetMob(target_id);
+
+			if (!potential_target || potential_target->IsNPC()) {
+				if (potential_target && potential_target->GetTarget()) {
+					if (potential_target->GetTarget()->IsClient()) {
+						return potential_target->GetTarget()->GetID();
+					}
+				}
+				return GetID();
+			}
+
 			return target_id;
 		}
 
