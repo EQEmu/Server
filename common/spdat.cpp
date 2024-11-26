@@ -3214,14 +3214,6 @@ bool IsResistanceOnlySpell(uint16 spell_id) {
 }
 
 bool IsDamageShieldOnlySpell(uint16 spell_id) {
-	if (SpellEffectsCount(spell_id) == 1 && IsEffectInSpell(spell_id, SE_DamageShield)) {
-		return true;
-	}
-
-	return false;
-}
-
-bool IsDamageShieldAndResistanceSpellOnly(uint16 spell_id) {
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}
@@ -3234,19 +3226,10 @@ bool IsDamageShieldAndResistanceSpellOnly(uint16 spell_id) {
 		}
 
 		if (
-			spell.effect_id[i] == SE_DamageShield ||
-			spell.effect_id[i] == SE_ResistFire ||
-			spell.effect_id[i] == SE_ResistCold ||
-			spell.effect_id[i] == SE_ResistPoison ||
-			spell.effect_id[i] == SE_ResistDisease ||
-			spell.effect_id[i] == SE_ResistMagic ||
-			spell.effect_id[i] == SE_ResistCorruption ||
-			spell.effect_id[i] == SE_ResistAll
+			spell.effect_id[i] != SE_DamageShield
 		) {
-			continue;
+			return false;
 		}
-
-		return false;
 	}
 
 	return true;
