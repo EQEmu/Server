@@ -25,6 +25,8 @@ E(OP_ChannelMessage)
 E(OP_SpecialMesg)
 E(OP_DeleteSpawn)
 E(OP_FormattedMessage)
+E(OP_Consider)
+E(OP_HPUpdate)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)
@@ -33,6 +35,8 @@ D(OP_ClientUpdate)
 D(OP_WearChange)
 D(OP_ChannelMessage)
 D(OP_SetServerFilter)
+D(OP_Consider)
+D(OP_ConsiderCorpse)
 
 #undef E
 #undef D

@@ -438,6 +438,36 @@ namespace Laurion {
 			/*008*/
 		};
 
+		struct Consider_Struct {
+			/*000*/ uint32	playerid;               // PlayerID
+			/*004*/ uint32	targetid;               // TargetID
+			/*008*/ uint32	faction;                // Faction
+			/*012*/ uint32	level;					// Level
+			/*016*/ uint32	report_mode;			// 0 normally, 4 will do a more detailed report that only works if you have GM flag set
+			/*020*/ uint8	rare_creature;			// Will do the rare creature string
+			/*021*/ uint8	loot_locked;			// Will list the target as (loot locked)
+			/*022*/ uint8	unknown022;				// Padding probably
+			/*023*/ uint8	unknown023;				// Padding probably
+			/*024*/
+		};
+
+		struct ChangeSize_Struct
+		{
+			/*00*/ uint32 EntityID;
+			/*04*/ float Size;
+			/*08*/ uint32 Unknown08;	// Observed 0
+			/*12*/ float Unknown12;		// Observed 1.0f
+			/*16*/
+		};
+
+		struct SpawnHPUpdate_Struct
+		{
+			/*00*/ int16	spawn_id;
+			/*02*/ int64	cur_hp;
+			/*10*/ int64	max_hp;
+			/*18*/
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

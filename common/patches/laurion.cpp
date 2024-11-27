@@ -2572,6 +2572,30 @@ namespace Laurion
 		delete in;
 	}
 
+	ENCODE(OP_Consider)
+	{
+		ENCODE_LENGTH_EXACT(Consider_Struct);
+		SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
+
+		OUT(playerid);
+		OUT(targetid);
+		OUT(faction);
+		OUT(level);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_HPUpdate)
+	{
+		SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct, structs::SpawnHPUpdate_Struct);
+
+		OUT(spawn_id);
+		OUT(cur_hp);
+		OUT(max_hp);
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -2705,6 +2729,24 @@ namespace Laurion
 
 		FINISH_DIRECT_DECODE();
 	}
+
+	DECODE(OP_Consider)
+	{
+		DECODE_LENGTH_EXACT(structs::Consider_Struct);
+		SETUP_DIRECT_DECODE(Consider_Struct, structs::Consider_Struct);
+
+		IN(playerid);
+		IN(targetid);
+		IN(faction);
+		IN(level);
+		//emu->cur_hp = 1;
+		//emu->max_hp = 2;
+		//emu->pvpcon = 0;
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
 
 	//Naive version but should work well enough for now
 	int ExtractIDFile(const std::string& input) {
