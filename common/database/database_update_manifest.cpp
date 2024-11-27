@@ -5771,6 +5771,17 @@ CREATE INDEX idx_character_expires ON data_buckets (character_id, expires);
 CREATE INDEX idx_npc_expires ON data_buckets (npc_id, expires);
 CREATE INDEX idx_bot_expires ON data_buckets (bot_id, expires);
 )"
+	},
+	ManifestEntry{
+		.version = 9286,
+		.description = "2024_11_26_bazaar_find_trader.sql",
+		.check       = "SHOW COLUMNS FROM `trader` LIKE 'char_zone_instance_id'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `trader`
+	ADD COLUMN `char_zone_instance_id` INT NULL DEFAULT '0' AFTER `char_zone_id`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
