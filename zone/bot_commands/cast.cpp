@@ -308,7 +308,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	}
 
 	Mob* tar = c->GetTarget();
-	LogTestDebug("{}: 'Attempting {} [{}] on {}'", __LINE__, c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (tar ? tar->GetCleanName() : "NOBODY")); //deleteme
+	//LogTestDebug("{}: 'Attempting {} [{}-{}] on {}'", __LINE__, c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (tar ? tar->GetCleanName() : "NOBODY")); //deleteme
 
 	if (!tar) {
 		if (spellType != BotSpellTypes::Escape && spellType != BotSpellTypes::Pet) {
@@ -338,7 +338,17 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 			break;
 		default:
-			if (BOT_SPELL_TYPES_DETRIMENTAL(spellType) && !c->IsAttackAllowed(tar)) {
+			if (
+				(BOT_SPELL_TYPES_DETRIMENTAL(spellType) && !c->IsAttackAllowed(tar)) ||
+				(
+					spellType == BotSpellTypes::Charm && 
+					(
+						tar->IsClient() || 
+						tar->IsCorpse() ||
+						tar->GetOwner()
+					)
+				)
+			) {
 				c->Message(Chat::Yellow, "You cannot attack [%s].", tar->GetCleanName());
 
 				return;
@@ -395,18 +405,16 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 		/*
 		TODO bot rewrite - 
-		FIX: Depart, SummonCorpse, Lull, 
-		Group Cures, Precombat, Fear/AE Fear
-		ICB (SK) casting hate on friendly but not hostile?
+		FIX: Depart
+		Group Cures, Precombat
 		NEED TO CHECK: precombat, AE Dispel, AE Lifetap
-		DO I NEED A PBAE CHECK???
 		*/
-		if (bot_iter->GetBotStance() == Stance::Passive || bot_iter->GetHoldFlag() || bot_iter->GetAppearance() == eaDead || bot_iter->IsFeared() || bot_iter->IsStunned() || bot_iter->IsMezzed() || bot_iter->DivineAura() || bot_iter->GetHP() < 0) {
+		if (bot_iter->GetBotStance() == Stance::Passive || bot_iter->GetHoldFlag() || bot_iter->GetAppearance() == eaDead || bot_iter->IsFeared() || bot_iter->IsSilenced() || bot_iter->IsAmnesiad() || bot_iter->GetHP() < 0) {
 			continue;
 		}
 
 		Mob* newTar = tar;
-		LogTestDebug("{}: {} says, 'Attempting {} [{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
+		//LogTestDebug("{}: {} says, 'Attempting {} [{}-{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
 		if (!SpellTypeRequiresTarget(spellType, bot_iter->GetClass())) {
 			newTar = bot_iter;
 		}
@@ -435,7 +443,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			continue;
 		}
 
-		LogTestDebug("{}: {} says, 'Attempting {} [{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
+		LogTestDebug("{}: {} says, 'Attempting {} [{}-{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
 
 		bot_iter->SetCommandedSpell(true);
 

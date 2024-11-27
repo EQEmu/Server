@@ -2843,13 +2843,8 @@ bool BOT_SPELL_TYPES_DETRIMENTAL(uint16 spellType, uint8 cls) {
 		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::PBAENuke:
 		case BotSpellTypes::Lull:
+		case BotSpellTypes::HateLine:
 			return true;
-		case BotSpellTypes::InCombatBuff:
-			if (cls == Class::ShadowKnight) {
-				return true;
-			}
-
-			return false;
 		default:
 			return false;
 	}
@@ -2898,12 +2893,6 @@ bool BOT_SPELL_TYPES_BENEFICIAL(uint16 spellType, uint8 cls) {
 		case BotSpellTypes::MovementSpeed:
 		case BotSpellTypes::SendHome:
 		case BotSpellTypes::SummonCorpse:
-			return true;
-		case BotSpellTypes::InCombatBuff:
-			if (cls == Class::ShadowKnight) {
-				return false;
-			}
-			
 			return true;
 		default:
 			return false;
@@ -3134,12 +3123,7 @@ bool SpellTypeRequiresLoS(uint16 spellType, uint16 cls) {
 		case BotSpellTypes::PetFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
 		case BotSpellTypes::PetHoTHeals:
-			return false;
 		case BotSpellTypes::InCombatBuff:
-			if (cls && cls == Class::ShadowKnight) {
-				return true;
-			}
-
 			return false;
 		default:
 			return true;
@@ -3150,13 +3134,44 @@ bool SpellTypeRequiresLoS(uint16 spellType, uint16 cls) {
 
 bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls) {
 	switch (spellType) {
-		case BotSpellTypes::Escape:
-			if (cls == Class::ShadowKnight) {
-				return false;
-			}
-			
-			return true;
 		case BotSpellTypes::Pet:
+		case BotSpellTypes::Succor:
+			return false;
+		default:
+			return true;
+	}
+
+	return true;
+}
+
+bool SpellTypeRequiresCastChecks(uint16 spellType) {
+	switch (spellType) {
+		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::AEDispel:
+		case BotSpellTypes::AEDoT:
+		case BotSpellTypes::AEFear:
+		case BotSpellTypes::AELifetap:
+		case BotSpellTypes::AEMez:
+		case BotSpellTypes::AENukes:
+		case BotSpellTypes::AERains:
+		case BotSpellTypes::AERoot:
+		case BotSpellTypes::AESlow:
+		case BotSpellTypes::AESnare:
+		case BotSpellTypes::AEStun:
+		case BotSpellTypes::PBAENuke:
+		case BotSpellTypes::Mez:
+		case BotSpellTypes::SummonCorpse:
+			return false;
+		default:
+			return true;
+	}
+
+	return true;
+}
+
+bool SpellTypeRequiresAEChecks(uint16 spellType) {
+	switch (spellType) {
+		case BotSpellTypes::AEMez:
 			return false;
 		default:
 			return true;
@@ -3263,6 +3278,10 @@ bool IsDamageShieldOnlySpell(uint16 spell_id) {
 
 bool IsCommandedSpellType(uint16 spellType) {
 	switch (spellType) {
+		case BotSpellTypes::Charm:
+		case BotSpellTypes::AEFear:
+		case BotSpellTypes::Fear:
+		case BotSpellTypes::Resurrect:
 		case BotSpellTypes::Lull:
 		case BotSpellTypes::Teleport:
 		case BotSpellTypes::Succor:
@@ -3276,8 +3295,6 @@ bool IsCommandedSpellType(uint16 spellType) {
 		case BotSpellTypes::MovementSpeed:
 		case BotSpellTypes::SendHome:
 		case BotSpellTypes::SummonCorpse:
-		//case BotSpellTypes::Charm:
-		//case BotSpellTypes::Resurrect:
 		//case BotSpellTypes::Cure:
 		//case BotSpellTypes::GroupCures:
 		//case BotSpellTypes::DamageShields:

@@ -796,7 +796,12 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 			if (IsGroupSpell(spell_id)) {
 				return true;
 			} else if (spells[spell_id].target_type == ST_Self) {
-				spell_target = this;
+				if (IsBot() && (IsEffectInSpell(spell_id, SE_SummonCorpse) && RuleB(Bots, AllowCommandedSummonCorpse))) {
+					//spell_target = this;
+				}
+				else {
+					spell_target = this;
+				}
 			}
 		} else {
 			if (IsGroupSpell(spell_id) && spell_target != this) {
@@ -1937,7 +1942,13 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // single target spells
 		case ST_Self:
 		{
-			spell_target = this;
+			if (IsBot() && (IsEffectInSpell(spell_id, SE_SummonCorpse) && RuleB(Bots, AllowCommandedSummonCorpse))) {
+				//spell_target = this;
+			}
+			else {
+				spell_target = this;
+			}
+
 			CastAction = SingleTarget;
 			break;
 		}
