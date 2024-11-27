@@ -5675,9 +5675,7 @@ bool Bot::CastSpell(
 				casting_spell_id ||
 				delaytimer ||
 				spellend_timer.Enabled() ||
-				IsStunned() ||
-				IsFeared() ||
-				IsMezzed() ||
+				((IsStunned() || IsMezzed() || DivineAura()) && !IsCastNotStandingSpell(spell_id)) ||
 				(IsSilenced() && !IsDiscipline(spell_id)) ||
 				(IsAmnesiad() && IsDiscipline(spell_id))
 			) {
@@ -9414,7 +9412,12 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 
 	if (doPrechecks) {
 		if (spells[spell_id].target_type == ST_Self && tar != this) {
-			tar = this;
+			if (IsEffectInSpell(spell_id, SE_SummonCorpse) && RuleB(Bots, AllowCommandedSummonCorpse)) {
+				//tar = this;
+			}
+			else {
+				tar = this;
+			}
 		}
 
 		if (!PrecastChecks(tar, spellType)) {
@@ -9430,8 +9433,27 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		return false;
 	}
 
-	if (spells[spell_id].target_type == ST_Self && tar != this) {
+	if (IsFeared() || IsSilenced() || IsAmnesiad()) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Incapacitated.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
+	if ((IsStunned() || IsMezzed() || DivineAura()) && !IsCastNotStandingSpell(spell_id)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to !IsCastNotStandingSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
+	if (
+		spells[spell_id].target_type == ST_Self 
+		&& tar != this && 
+		(spellType != BotSpellTypes::SummonCorpse || RuleB(Bots, AllowCommandedSummonCorpse))
+	) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to ST_Self.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
+	if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to !CanDoCombat.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
@@ -9448,6 +9470,42 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 	if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
 		LogBotPreChecks("{} says, 'Cancelling cast of {} due to IsSpellBlocked.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
 		return false;
+	}
+
+	if (this == tar && IsSacrificeSpell(spell_id)) {
+		LogBotPreChecks("{} says, 'Cancelling cast of {} due to IsSacrificeSpell.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
+		return false;
+	}
+
+	if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
+		LogBotPreChecks("{} says, 'Cancelling cast of {} due to !PassCastRestriction.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
+		return false;
+	}
+
+	if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
+		if (IsBeneficialSpell(spell_id)) {
+			if (IsEngaged()) {
+				LogBotPreChecks("{} says, 'Cancelling cast of {} due to !can_cast_in_combat.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
+				return false;
+			}
+		}
+	}
+	else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
+		if (IsBeneficialSpell(spell_id)) {
+			if (!IsEngaged()) {
+				LogBotPreChecks("{} says, 'Cancelling cast of {} due to !can_cast_out_of_combat.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
+				return false;
+			}
+		}
+	}
+	
+	if (!IsDiscipline(spell_id)) {
+		int chance = GetFocusEffect(focusFcMute, spell_id);
+
+		if (chance && zone->random.Roll(chance)) {
+			LogBotPreChecks("{} says, 'Cancelling cast of {} due to focusFcMute.'", GetCleanName(), GetSpellName(spell_id)); //deleteme
+			return(false);
+		}
 	}
 
 	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) {
@@ -9534,6 +9592,7 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::PreCombatBuff:
+		case BotSpellTypes::InCombatBuff:
 		case BotSpellTypes::DamageShields:
 		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::ResistBuffs:		
@@ -9564,6 +9623,11 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 
 			if (tar->IsBlockedBuff(spell_id)) {
 				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+				return false;
+			}
+
+			if (!tar->CheckSpellLevelRestriction(this, spell_id)) {
+				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to CheckSpellLevelRestriction.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
@@ -9677,6 +9741,13 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 					default:
 						break;
 				}
+			}
+
+			break;
+		case BotSpellTypes::Lull:
+			if (IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, tar)) {
+				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to HarmonySpellLevelCheck.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+				return false;
 			}
 
 			break;
@@ -10505,50 +10576,48 @@ uint16 Bot::GetDefaultSpellTypeEngagedPriority(uint16 spellType, uint8 botClass,
 			return 20;
 		case BotSpellTypes::Mez:
 			return 21;
-		case BotSpellTypes::AEDispel:
+		case BotSpellTypes::HateLine:
 			return 22;
-		case BotSpellTypes::Dispel:
+		case BotSpellTypes::AEDispel:
 			return 23;
-		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::Dispel:
 			return 24;
-		case BotSpellTypes::Debuff:
+		case BotSpellTypes::AEDebuff:
 			return 25;
-		case BotSpellTypes::AESnare:
+		case BotSpellTypes::Debuff:
 			return 26;
-		case BotSpellTypes::Snare:
+		case BotSpellTypes::AESnare:
 			return 27;
-		case BotSpellTypes::AEFear:
+		case BotSpellTypes::Snare:
 			return 28;
-		case BotSpellTypes::Fear:
-			return 29;
 		case BotSpellTypes::AESlow:
-			return 30;
+			return 29;
 		case BotSpellTypes::Slow:
-			return 31;
+			return 30;
 		case BotSpellTypes::AERoot:
-			return 32;
+			return 31;
 		case BotSpellTypes::Root:
-			return 33;
+			return 32;
 		case BotSpellTypes::AEDoT:
-			return 34;
+			return 33;
 		case BotSpellTypes::DOT:
-			return 35;
+			return 34;
 		case BotSpellTypes::AEStun:
-			return 36;
+			return 35;
 		case BotSpellTypes::PBAENuke:
-			return 37;
+			return 36;
 		case BotSpellTypes::AENukes:
-			return 38;
+			return 37;
 		case BotSpellTypes::AERains:
-			return 39;
+			return 38;
 		case BotSpellTypes::Stun:
-			return 40;
+			return 39;
 		case BotSpellTypes::Nuke:
-			return 41;
+			return 40;
 		case BotSpellTypes::InCombatBuff:
-			return 42;
+			return 41;
 		case BotSpellTypes::InCombatBuffSong:
-			return 43;
+			return 42;
 		default:
 			return 0;
 	}
@@ -10915,8 +10984,6 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::ResistBuffs:		
 		case BotSpellTypes::PetResistBuffs:
-		case BotSpellTypes::Teleport:
-		case BotSpellTypes::Succor:
 		case BotSpellTypes::BindAffinity:
 		case BotSpellTypes::Identify:
 		case BotSpellTypes::Levitate:
@@ -10925,8 +10992,6 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 		case BotSpellTypes::Size:
 		case BotSpellTypes::Invisibility:
 		case BotSpellTypes::MovementSpeed:
-		case BotSpellTypes::SendHome:
-		case BotSpellTypes::SummonCorpse:
 			return BotSpellTypes::Buff;
 		case BotSpellTypes::AEMez:
 		case BotSpellTypes::Mez:
@@ -10961,6 +11026,7 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 		case BotSpellTypes::Charm:		
 		case BotSpellTypes::Escape:
 		case BotSpellTypes::HateRedux:
+		case BotSpellTypes::HateLine:
 		case BotSpellTypes::InCombatBuff:
 		case BotSpellTypes::InCombatBuffSong:		
 		case BotSpellTypes::OutOfCombatBuffSong:
@@ -11032,84 +11098,84 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spellType, uint16 spell_id) {
 			}
 
 			return false;
-		case BotSpellTypes::Lull:
-			if (!IsHarmonySpell(spell_id)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::Teleport:
-			if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Translocate))) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::Succor:
-			if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_Succor)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::BindAffinity:
-			if (IsEffectInSpell(spell_id, SE_BindAffinity)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::Identify:
-			if (IsEffectInSpell(spell_id, SE_Identify)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::Levitate:
-			if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Levitate))) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::Rune:
-			if (IsEffectInSpell(spell_id, SE_AbsorbMagicAtt) || IsEffectInSpell(spell_id, SE_Rune)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::WaterBreathing:
-			if (IsEffectInSpell(spell_id, SE_WaterBreathing)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::Size:
-			if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_ModelSize) || IsEffectInSpell(spell_id, SE_ChangeHeight))) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::Invisibility:
-			if (IsEffectInSpell(spell_id, SE_SeeInvis) || IsInvisibleSpell(spell_id)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::MovementSpeed:
-			if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_MovementSpeed)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::SendHome:
-			if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_GateToHomeCity)) {
-				return true;
-			}
-
-			return false;
-		case BotSpellTypes::SummonCorpse:
-			if (IsEffectInSpell(spell_id, SE_SummonCorpse)) {
-				return true;
-			}
-
-			return false;
+		//case BotSpellTypes::Lull:
+		//	if (IsHarmonySpell(spell_id)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::Teleport:
+		//	if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Translocate))) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::Succor:
+		//	if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_Succor)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::BindAffinity:
+		//	if (IsEffectInSpell(spell_id, SE_BindAffinity)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::Identify:
+		//	if (IsEffectInSpell(spell_id, SE_Identify)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::Levitate:
+		//	if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Levitate))) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::Rune:
+		//	if (IsEffectInSpell(spell_id, SE_AbsorbMagicAtt) || IsEffectInSpell(spell_id, SE_Rune)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::WaterBreathing:
+		//	if (IsEffectInSpell(spell_id, SE_WaterBreathing)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::Size:
+		//	if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_ModelSize) || IsEffectInSpell(spell_id, SE_ChangeHeight))) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::Invisibility:
+		//	if (IsEffectInSpell(spell_id, SE_SeeInvis) || IsInvisibleSpell(spell_id)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::MovementSpeed:
+		//	if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_MovementSpeed)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::SendHome:
+		//	if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_GateToHomeCity)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
+		//case BotSpellTypes::SummonCorpse:
+		//	if (IsEffectInSpell(spell_id, SE_SummonCorpse)) {
+		//		return true;
+		//	}
+		//
+		//	return false;
 		default:
 			return true;
 	}
@@ -11342,7 +11408,7 @@ bool Bot::HasValidAETarget(Bot* botCaster, uint16 spell_id, uint16 spellType, Mo
 				break;
 		}
 
-		if (!m->IsNPC() || !m->CastToNPC()->IsOnHatelist(botCaster->GetOwner())) {
+		if (!m->IsNPC() || (!IsCommandedSpell() && !m->CastToNPC()->IsOnHatelist(botCaster->GetOwner()))) {
 			continue;
 		}
 
