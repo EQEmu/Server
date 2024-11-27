@@ -8,13 +8,14 @@ std::vector<BazaarSearchResultsFromDB_Struct>
 Bazaar::GetSearchResults(
 	SharedDatabase &db,
 	BazaarSearchCriteria_Struct search,
-	uint32 char_zone_id
+	uint32 char_zone_id,
+	int32 char_zone_instance_id
 )
 {
 	LogTrading(
 		"Searching for items with search criteria - item_name [{}] min_cost [{}] max_cost [{}] min_level [{}] "
 		"max_level [{}] max_results [{}] prestige [{}] augment [{}] trader_entity_id [{}] trader_id [{}] "
-		"search_scope [{}] char_zone_id [{}]",
+		"search_scope [{}] char_zone_id [{}], char_zone_instance_id [{}]",
 		search.item_name,
 		search.min_cost,
 		search.max_cost,
@@ -26,7 +27,8 @@ Bazaar::GetSearchResults(
 		search.trader_entity_id,
 		search.trader_id,
 		search.search_scope,
-		char_zone_id
+		char_zone_id,
+		char_zone_instance_id
 	);
 
 	std::string search_criteria_trader("TRUE ");
@@ -34,14 +36,19 @@ Bazaar::GetSearchResults(
 	if (search.search_scope == NonRoFBazaarSearchScope) {
 		search_criteria_trader.append(
 			fmt::format(
-				" AND trader.char_entity_id = {} AND trader.char_zone_id = {}",
+				" AND trader.char_entity_id = {} AND trader.char_zone_id = {} AND trader.char_zone_instance_id = {}",
 				search.trader_entity_id,
-				Zones::BAZAAR
+				Zones::BAZAAR,
+				char_zone_instance_id
 			)
 		);
 	}
 	else if (search.search_scope == Local_Scope) {
-		search_criteria_trader.append(fmt::format(" AND trader.char_zone_id = {}", char_zone_id));
+		search_criteria_trader.append(fmt::format(
+			" AND trader.char_zone_id = {} AND trader.char_zone_instance_id = {}",
+			char_zone_id,
+			char_zone_instance_id)
+		);
 	}
 	else if (search.trader_id > 0) {
 		search_criteria_trader.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
@@ -62,7 +69,7 @@ Bazaar::GetSearchResults(
 	std::string query = fmt::format(
 		"SELECT COUNT(item_id), trader.char_id, trader.item_id, trader.item_sn, trader.item_charges, trader.item_cost, "
 		"trader.slot_id, SUM(trader.item_charges), trader.char_zone_id, trader.char_entity_id, character_data.name, "
-		"aug_slot_1, aug_slot_2, aug_slot_3, aug_slot_4, aug_slot_5, aug_slot_6 "
+		"aug_slot_1, aug_slot_2, aug_slot_3, aug_slot_4, aug_slot_5, aug_slot_6, trader.char_zone_instance_id "
 		"FROM trader, character_data "
 		"WHERE {} AND trader.char_id = character_data.id "
 		"GROUP BY trader.item_sn, trader.item_charges, trader.char_id",
@@ -122,19 +129,20 @@ Bazaar::GetSearchResults(
 			continue;
 		}
 
-		r.count             = Strings::ToInt(row[0]);
-		r.trader_id         = Strings::ToInt(row[1]);
-		r.serial_number     = Strings::ToInt(row[3]);
-		r.cost              = Strings::ToInt(row[5]);
-		r.slot_id           = Strings::ToInt(row[6]);
-		r.sum_charges       = Strings::ToInt(row[7]);
-		r.stackable         = item->Stackable;
-		r.icon_id           = item->Icon;
-		r.trader_zone_id    = Strings::ToInt(row[8]);
-		r.trader_entity_id  = Strings::ToInt(row[9]);
-		r.serial_number_RoF = fmt::format("{:016}\0", Strings::ToInt(row[3]));
-		r.item_name         = fmt::format("{:.63}\0", item->Name);
-		r.trader_name       = fmt::format("{:.63}\0", std::string(row[10]).c_str());
+		r.count                   = Strings::ToInt(row[0]);
+		r.trader_id               = Strings::ToInt(row[1]);
+		r.serial_number           = Strings::ToInt(row[3]);
+		r.cost                    = Strings::ToInt(row[5]);
+		r.slot_id                 = Strings::ToInt(row[6]);
+		r.sum_charges             = Strings::ToInt(row[7]);
+		r.stackable               = item->Stackable;
+		r.icon_id                 = item->Icon;
+		r.trader_zone_id          = Strings::ToInt(row[8]);
+		r.trader_zone_instance_id = Strings::ToInt(row[17]);
+		r.trader_entity_id        = Strings::ToInt(row[9]);
+		r.serial_number_RoF       = fmt::format("{:016}\0", Strings::ToInt(row[3]));
+		r.item_name               = fmt::format("{:.63}\0", item->Name);
+		r.trader_name             = fmt::format("{:.63}\0", std::string(row[10]).c_str());
 
 		LogTradingDetail(
 			"Searching against item [{}] ({}) for trader [{}]",

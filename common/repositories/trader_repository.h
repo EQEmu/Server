@@ -35,7 +35,8 @@ public:
 	GetBazaarSearchResults(
 		SharedDatabase &db,
 		BazaarSearchCriteria_Struct search,
-		uint32 char_zone_id
+		uint32 char_zone_id,
+		int32 char_zone_instance_id
 	);
 
 	static BulkTraders_Struct GetDistinctTraders(Database &db)
