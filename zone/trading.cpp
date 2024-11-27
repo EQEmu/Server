@@ -785,7 +785,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		{
 
 			items.clear();
-			
+
 			for (EQ::ItemInstance* inst : items) {
 				if (!inst || !inst->GetItem()) {
 					continue;
@@ -1110,6 +1110,16 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 			inst->SetPrice(in->item_cost[i]);
 			TraderRepository::Trader trader_item{};
 
+			trader_item.id                    = 0;
+			trader_item.char_entity_id        = GetID();
+			trader_item.char_id               = CharacterID();
+			trader_item.char_zone_id          = GetZoneID();
+			trader_item.char_zone_instance_id = GetInstanceID();
+			trader_item.item_charges          = inst->GetCharges() == 0 ? 1 : inst->GetCharges();
+			trader_item.item_cost             = inst->GetPrice();
+			trader_item.item_id               = inst->GetID();
+			trader_item.item_sn               = in->serial_number[i];
+			trader_item.slot_id               = i;
 			trader_item.id                    = 0;
 			trader_item.char_entity_id        = GetID();
 			trader_item.char_id               = CharacterID();
