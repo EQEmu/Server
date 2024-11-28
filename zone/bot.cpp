@@ -10565,48 +10565,50 @@ uint16 Bot::GetDefaultSpellTypeEngagedPriority(uint16 spellType, uint8 botClass,
 			return 20;
 		case BotSpellTypes::Mez:
 			return 21;
-		case BotSpellTypes::HateLine:
+		case BotSpellTypes::AEHateLine:
 			return 22;
-		case BotSpellTypes::AEDispel:
+		case BotSpellTypes::HateLine:
 			return 23;
-		case BotSpellTypes::Dispel:
+		case BotSpellTypes::AEDispel:
 			return 24;
-		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::Dispel:
 			return 25;
-		case BotSpellTypes::Debuff:
+		case BotSpellTypes::AEDebuff:
 			return 26;
-		case BotSpellTypes::AESnare:
+		case BotSpellTypes::Debuff:
 			return 27;
-		case BotSpellTypes::Snare:
+		case BotSpellTypes::AESnare:
 			return 28;
-		case BotSpellTypes::AESlow:
+		case BotSpellTypes::Snare:
 			return 29;
-		case BotSpellTypes::Slow:
+		case BotSpellTypes::AESlow:
 			return 30;
-		case BotSpellTypes::AERoot:
+		case BotSpellTypes::Slow:
 			return 31;
-		case BotSpellTypes::Root:
+		case BotSpellTypes::AERoot:
 			return 32;
-		case BotSpellTypes::AEDoT:
+		case BotSpellTypes::Root:
 			return 33;
-		case BotSpellTypes::DOT:
+		case BotSpellTypes::AEDoT:
 			return 34;
-		case BotSpellTypes::AEStun:
+		case BotSpellTypes::DOT:
 			return 35;
-		case BotSpellTypes::PBAENuke:
+		case BotSpellTypes::AEStun:
 			return 36;
-		case BotSpellTypes::AENukes:
+		case BotSpellTypes::PBAENuke:
 			return 37;
-		case BotSpellTypes::AERains:
+		case BotSpellTypes::AENukes:
 			return 38;
-		case BotSpellTypes::Stun:
+		case BotSpellTypes::AERains:
 			return 39;
-		case BotSpellTypes::Nuke:
+		case BotSpellTypes::Stun:
 			return 40;
-		case BotSpellTypes::InCombatBuff:
+		case BotSpellTypes::Nuke:
 			return 41;
-		case BotSpellTypes::InCombatBuffSong:
+		case BotSpellTypes::InCombatBuff:
 			return 42;
+		case BotSpellTypes::InCombatBuffSong:
+			return 43;
 		default:
 			return 0;
 	}
@@ -11016,6 +11018,7 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 		case BotSpellTypes::Escape:
 		case BotSpellTypes::HateRedux:
 		case BotSpellTypes::HateLine:
+		case BotSpellTypes::AEHateLine:
 		case BotSpellTypes::InCombatBuff:
 		case BotSpellTypes::InCombatBuffSong:		
 		case BotSpellTypes::OutOfCombatBuffSong:
@@ -11393,6 +11396,10 @@ bool Bot::HasValidAETarget(Bot* botCaster, uint16 spell_id, uint16 spellType, Mo
 				}
 
 				break;
+			case BotSpellTypes::AEHateLine:
+				if (!m->IsNPC()) {
+					continue;
+				}
 			default:
 				break;
 		}

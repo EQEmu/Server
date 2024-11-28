@@ -709,6 +709,7 @@ namespace BotSpellTypes
 	constexpr uint16	PetDamageShields			= 53;
 	constexpr uint16	PetResistBuffs				= 54;
 	constexpr uint16	HateLine					= 55;
+	constexpr uint16	AEHateLine					= 56;
 
 	// Command Spell Types
 	constexpr uint16	Teleport					= 100; // this is handled by ^depart so uses other logic
@@ -726,7 +727,7 @@ namespace BotSpellTypes
 	constexpr uint16	SummonCorpse				= 112;
 				  
 	constexpr uint16	START						= BotSpellTypes::Nuke;							// Do not remove or change this
-	constexpr uint16	END							= BotSpellTypes::HateLine;				// Do not remove this, increment as needed
+	constexpr uint16	END							= BotSpellTypes::AEHateLine;				// Do not remove this, increment as needed
 	constexpr uint16	COMMANDED_START				= BotSpellTypes::Lull;							// Do not remove or change this
 	constexpr uint16	COMMANDED_END				= BotSpellTypes::SummonCorpse;					// Do not remove this, increment as needed
 }

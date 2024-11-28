@@ -2076,6 +2076,7 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType)
 		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::AERoot:
 		case BotSpellTypes::PBAENuke:
+		case BotSpellTypes::AEHateLine:
 			return RuleI(Bots, PercentChanceToCastAEs);
 		case BotSpellTypes::GroupHeals:
 		case BotSpellTypes::GroupCompleteHeals:

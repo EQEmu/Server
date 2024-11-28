@@ -2844,6 +2844,7 @@ bool BOT_SPELL_TYPES_DETRIMENTAL(uint16 spellType, uint8 cls) {
 		case BotSpellTypes::PBAENuke:
 		case BotSpellTypes::Lull:
 		case BotSpellTypes::HateLine:
+		case BotSpellTypes::AEHateLine:
 			return true;
 		default:
 			return false;

@@ -8884,6 +8884,9 @@ std::string Mob::GetSpellTypeNameByID(uint16 spellType) {
 		case BotSpellTypes::HateLine:
 			spellTypeName = "Hate Line";
 			break;
+		case BotSpellTypes::AEHateLine:
+			spellTypeName = "AE Hate Line";
+			break;
 		case BotSpellTypes::Lull:
 			spellTypeName = "Lull";
 			break;
@@ -9102,6 +9105,9 @@ std::string Mob::GetSpellTypeShortNameByID(uint16 spellType) {
 		case BotSpellTypes::HateLine:
 			spellTypeName = "hateline";
 			break;
+		case BotSpellTypes::AEHateLine:
+			spellTypeName = "aehateline";
+			break;
 		case BotSpellTypes::Lull:
 			spellTypeName = "lull";
 			break;
@@ -9219,6 +9225,7 @@ bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::Dispel:
 		case BotSpellTypes::AEFear:
 		case BotSpellTypes::Fear:
+		case BotSpellTypes::AEHateLine:
 			return true;
 		case BotSpellTypes::Mez:
 		case BotSpellTypes::AEMez:
@@ -9524,6 +9531,7 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::ResistBuffs:
 		case BotSpellTypes::Resurrect:
 		case BotSpellTypes::HateLine:
+		case BotSpellTypes::AEHateLine:
 			return 100;
 		case BotSpellTypes::GroupHoTHeals:
 		case BotSpellTypes::HoTHeals:
