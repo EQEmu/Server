@@ -1042,14 +1042,11 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 					IsGroupSpell(botSpellList[i].spellid) &&
 					!IsTGBCompatibleSpell(botSpellList[i].spellid) &&
 					!botCaster->IsInGroupOrRaid(tar, true)
-				) {
+				) {					
 					continue;
 				}
-
-				if (
-					(!botCaster->IsCommandedSpell() || (botCaster->IsCommandedSpell() && SpellTypeRequiresCastChecks(spellType))) &&
-					(!IsPBAESpell(botSpellList[i].spellid) && !botCaster->CastChecks(botSpellList[i].spellid, tar, spellType, false, IsAEBotSpellType(spellType)))
-				) {
+				if (spellType == debugSpellType) { LogTestDebugDetail("{} - #{}: [{} #{}] - {} says, '{} #{} - Passed TGB checks.'", __FILE__, __LINE__, botCaster->GetSpellTypeNameByID(spellType), spellType, botCaster->GetCleanName(), spells[botSpellList[i].spellid].name, botSpellList[i].spellid); }; //deleteme
+				if (!IsPBAESpell(botSpellList[i].spellid) && !botCaster->CastChecks(botSpellList[i].spellid, tar, spellType, false, IsAEBotSpellType(spellType))) {					
 					continue;
 				}
 
