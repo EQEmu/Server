@@ -545,8 +545,8 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			if (!skip_char_info && !custom_files_key.empty()) {
 				// Modified clients can utilize this unused block in login_info to send custom payloads on login
 				// which indicates they are using custom client files with the correct version, based on key payload.
-				const auto server_name = std::string(reinterpret_cast<char*>(login_info->unknown064));
-				if (custom_files_key != server_name) {
+				const auto client_key = std::string(reinterpret_cast<char*>(login_info->unknown064));
+				if (custom_files_key != client_key) {
 					std::string message = fmt::format("Missing Files [{}]", RuleS(World, CustomFilesUrl) );
 					SendUnsupportedClientPacket(message);
 					skip_char_info = true;
