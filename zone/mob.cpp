@@ -9777,6 +9777,10 @@ bool Mob::IsInGroupOrRaid(Mob *other, bool sameRaidGroup) {
 		return false;
 	}
 
+	if (this == other) {
+		return true;
+	}
+
 	auto* r = GetRaid();
 	auto* rO = other->GetRaid();
 
