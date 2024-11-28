@@ -2757,28 +2757,6 @@ void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, bo
 
 	if (!GetCombatRoundForAlerts()) {
 		SetCombatRoundForAlerts();
-		LogTestDebugDetail("{} says, 'I'm {} {}. I am currently {} away {} to be between [{} - {}] away. MMR is {}.'"
-			, GetCleanName()
-			, (tar_distance < melee_distance_min ? "too close to" : (tar_distance <= melee_distance ? "within range of" : "too far away from"))
-			, tar->GetCleanName()
-			, tar_distance
-			, (tar_distance <= melee_distance ? "but only needed" : "but need to be")
-			, melee_distance_min
-			, melee_distance
-			, melee_distance_max
-		); //deleteme
-		LogTestDebugDetail("{} says, 'My stance is {} #{}, I am {} taunting. I am set to {} {}, {} at MMR, distanceranged {}, sml {} [{}]'"
-			, GetCleanName()
-			, Stance::GetName(GetBotStance())
-			, GetBotStance()
-			, (IsTaunting() ? "currently" : "not")
-			, (BehindMob() ? "stay behind" : "not stay behind")
-			, tar->GetCleanName()
-			, (GetMaxMeleeRange() ? "I stay" : "I do not stay")
-			, GetBotDistanceRanged()
-			, GetStopMeleeLevel()
-			, ((GetLevel() <= GetStopMeleeLevel()) ? "disabled" : "enabled")
-		); //deleteme
 	}
 
 	if (tar_distance <= melee_distance) {
