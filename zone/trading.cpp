@@ -777,6 +777,8 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				tradingWith->SayString(TRADE_BACK, GetCleanName());
 				PushItemOnCursor(*inst, true);
 			}
+
+			items.clear();
 		}
 		// Only enforce trade rules if the NPC doesn't have an EVENT_TRADE
 		// subroutine.  That overrides all.
@@ -2913,10 +2915,11 @@ void Client::SendBecomeTraderToWorld(Client *trader, BazaarTraderBarterActions a
 	auto outapp = new ServerPacket(ServerOP_TraderMessaging, sizeof(TraderMessaging_Struct));
 	auto data   = (TraderMessaging_Struct *) outapp->pBuffer;
 
-	data->action    = action;
-	data->entity_id = trader->GetID();
-	data->trader_id = trader->CharacterID();
-	data->zone_id   = trader->GetZoneID();
+	data->action      = action;
+	data->entity_id   = trader->GetID();
+	data->trader_id   = trader->CharacterID();
+	data->zone_id     = trader->GetZoneID();
+	data->instance_id = trader->GetInstanceID();
 	strn0cpy(data->trader_name, trader->GetName(), sizeof(data->trader_name));
 
 	worldserver.SendPacket(outapp);
@@ -3235,7 +3238,10 @@ void Client::SendBulkBazaarTraders()
 
 void Client::DoBazaarInspect(const BazaarInspect_Struct &in)
 {
-	auto items = TraderRepository::GetWhere(database, fmt::format("item_sn = {}", in.serial_number));
+	auto items = TraderRepository::GetWhere(
+		database, fmt::format("`char_id` = '{}' AND `item_sn` = '{}'", in.trader_id, in.serial_number)
+	);
+
 	if (items.empty()) {
 		LogInfo("Failed to find item with serial number [{}]", in.serial_number);
 		return;
@@ -3304,7 +3310,7 @@ std::string Client::DetermineMoneyString(uint64 cp)
 void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicationPacket *app)
 {
 	auto in          = (TraderBuy_Struct *) app->pBuffer;
-	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number);
+	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number, tbs->trader_id);
 	if (!trader_item.id) {
 		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
 				   "<red>[{}] The Traders data was outdated.",

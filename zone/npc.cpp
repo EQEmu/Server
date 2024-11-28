@@ -3297,16 +3297,28 @@ uint32 NPC::GetSpawnKillCount()
 	return(0);
 }
 
-void NPC::DoQuestPause(Mob *other) {
-	if(IsMoving() && !IsOnHatelist(other)) {
-		PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-		if (other && !other->sneaking)
-			FaceTarget(other);
-	} else if(!IsMoving()) {
-		if (other && !other->sneaking && GetAppearance() != eaSitting && GetAppearance() != eaDead)
-			FaceTarget(other);
+void NPC::DoQuestPause(Mob* m)
+{
+	if (!m) {
+		return;
 	}
 
+	if (IsMoving() && !IsOnHatelist(m)) {
+		PauseWandering(RuleI(NPC, SayPauseTimeInSec));
+
+		if (FacesTarget() && !m->sneaking) {
+			FaceTarget(m);
+		}
+	} else if (!IsMoving()) {
+		if (
+			FacesTarget() &&
+			!m->sneaking &&
+			GetAppearance() != eaSitting &&
+			GetAppearance() != eaDead
+		) {
+			FaceTarget(m);
+		}
+	}
 }
 
 void NPC::ChangeLastName(std::string last_name)
@@ -4238,3 +4250,17 @@ void NPC::DoNpcToNpcAggroScan()
 		false
 	);
 }
+
+bool NPC::FacesTarget()
+{
+	const std::string& excluded_races_rule = RuleS(NPC, ExcludedFaceTargetRaces);
+
+	if (excluded_races_rule.empty()) {
+		return true;
+	}
+
+	const auto& v = Strings::Split(excluded_races_rule, ",");
+
+	return std::find(v.begin(), v.end(), std::to_string(GetBaseRace())) == v.end();
+}
+

@@ -278,6 +278,19 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 		return;
 	}
 
+	if (parcel_in->money_flag && parcel_in->item_slot != INVALID_INDEX) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"{} tells you, 'I am confused!  Do you want to send money or an item?'",
+				merchant->GetCleanName()
+			).c_str()
+		);
+		DoParcelCancel();
+		SendParcelAck();
+		return;
+	}
+
 	auto num_of_parcels = GetParcelCount();
 	if (num_of_parcels >= RuleI(Parcel, ParcelMaxItems)) {
 		SendParcelIconStatus();
@@ -406,9 +419,8 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 
 			std::vector<CharacterParcelsContainersRepository::CharacterParcelsContainers> all_entries{};
 			if (inst->IsNoneEmptyContainer()) {
-				CharacterParcelsContainersRepository::CharacterParcelsContainers cpc{};
-
 				for (auto const &kv: *inst->GetContents()) {
+					CharacterParcelsContainersRepository::CharacterParcelsContainers cpc{};
 					cpc.parcels_id = result.id;
 					cpc.slot_id    = kv.first;
 					cpc.item_id    = kv.second->GetID();

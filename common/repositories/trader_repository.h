@@ -164,37 +164,35 @@ public:
 		return UpdateOne(db, m);
 	}
 
-	static Trader GetItemBySerialNumber(Database &db, uint32 serial_number)
+	static Trader GetItemBySerialNumber(Database &db, uint32 serial_number, uint32 trader_id)
 	{
 		Trader     e{};
 		const auto trader_item = GetWhere(
 			db,
-			fmt::format("`item_sn` = '{}' LIMIT 1", serial_number)
+			fmt::format("`char_id` = '{}' AND `item_sn` = '{}' LIMIT 1", trader_id, serial_number)
 		);
 
 		if (trader_item.empty()) {
 			return e;
 		}
-		else {
-			return trader_item.at(0);
-		}
+
+		return trader_item.at(0);
 	}
 
-	static Trader GetItemBySerialNumber(Database &db, std::string serial_number)
+	static Trader GetItemBySerialNumber(Database &db, std::string serial_number, uint32 trader_id)
 	{
 		Trader     e{};
 		auto       sn          = Strings::ToUnsignedBigInt(serial_number);
 		const auto trader_item = GetWhere(
 			db,
-			fmt::format("`item_sn` = '{}' LIMIT 1", sn)
+			fmt::format("`char_id` = '{}' AND `item_sn` = '{}' LIMIT 1", trader_id, sn)
 		);
 
 		if (trader_item.empty()) {
 			return e;
 		}
-		else {
-			return trader_item.at(0);
-		}
+
+		return trader_item.at(0);
 	}
 
 	static int UpdateActiveTransaction(Database &db, uint32 id, bool status)
