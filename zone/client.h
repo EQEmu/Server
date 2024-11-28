@@ -1263,6 +1263,7 @@ public:
 	);
 	std::string GetCommandHelpHeader(std::string color, std::string header);
 	std::string SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 maxLength, bool secondColor = false, std::string secondaryColor = "");
+	void SendSpellTypePrompts(bool commandedTypes = false, bool clientOnlyTypes = false);
 
 	// Task System Methods
 	void LoadClientTaskState();

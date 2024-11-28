@@ -1688,7 +1688,6 @@ void bot_command_hold(Client *c, const Seperator *sep);
 void bot_command_illusion_block(Client* c, const Seperator* sep);
 void bot_command_inventory(Client *c, const Seperator *sep);
 void bot_command_item_use(Client *c, const Seperator *sep);
-void bot_command_lull(Client *c, const Seperator *sep);
 void bot_command_max_melee_range(Client* c, const Seperator* sep);
 void bot_command_owner_option(Client *c, const Seperator *sep);
 void bot_command_pet(Client *c, const Seperator *sep);
@@ -1723,7 +1722,6 @@ void bot_command_spelltype_ids(Client* c, const Seperator* sep);
 void bot_command_spelltype_names(Client* c, const Seperator* sep);
 void bot_spell_info_dialogue_window(Client* c, const Seperator *sep);
 void bot_command_enforce_spell_list(Client* c, const Seperator* sep);
-void bot_command_summon_corpse(Client *c, const Seperator *sep);
 void bot_command_suspend(Client *c, const Seperator *sep);
 void bot_command_taunt(Client *c, const Seperator *sep);
 void bot_command_timer(Client* c, const Seperator* sep);
@@ -1807,6 +1805,6 @@ void helper_send_available_subcommands(Client *bot_owner, const char* command_si
 void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class = Class::None);
 bool helper_spell_check_fail(STBaseEntry* local_entry);
 bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type);
-void SendSpellTypePrompts(Client *c, bool commandedTypes = false);
-void SendSpellTypeWindow(Client *c, const Seperator* sep);
+void SendSpellTypeWindow(Client* c, const Seperator* sep);
+
 #endif
