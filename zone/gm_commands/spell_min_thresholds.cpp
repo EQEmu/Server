@@ -7,101 +7,85 @@ void command_spell_min_thresholds(Client* c, const Seperator* sep)
 		const bool is_help = !strcasecmp(sep->arg[1], "help");
 
 		if (is_help) {
-			c->Message(Chat::White, "usage: %s [spelltype ID | spelltype Shortname] [current | value: 0-1].", sep->arg[0]);
-			c->Message(Chat::White, "example: [%s 15 15] or [%s cures 15] would prevent bots from casting cures on you when you are under 15%% health.", sep->arg[0], sep->arg[0]);
-			c->Message(Chat::White, "note: Use [current] to check your current setting.");
-			c->Message(
-				Chat::White,
+			std::vector<std::string> description =
+			{
+				"Threshold of your own health when bots will stop casting the chosen spell type"
+			};
+
+			std::vector<std::string> notes =
+			{
+				"- All pet types are control your how your pet will be affected"
+			};
+
+			std::vector<std::string> example_format =
+			{
 				fmt::format(
-					"note: Use {} for a list of spell types by ID or {} for a list of spell types by short name.",
-					Saylink::Silent(
-						fmt::format("{} listid", sep->arg[0])
-					),
-					Saylink::Silent(
-						fmt::format("{} listname", sep->arg[0])
-					)
-				).c_str()
+					"{} [Type Shortname] [value]"
+					, sep->arg[0]
+				),
+				fmt::format(
+					"{} [Type ID] [value]"
+					, sep->arg[0]
+				)
+			};
+			std::vector<std::string> examples_one =
+			{
+				"To set Fast Heals to be stopped at 65% health:",
+				fmt::format(
+					"{} {} 65",
+					sep->arg[0],
+					c->GetSpellTypeShortNameByID(BotSpellTypes::FastHeals)
+				),
+				fmt::format(
+					"{} {} 65",
+					sep->arg[0],
+					BotSpellTypes::FastHeals
+				)
+			};
+			std::vector<std::string> examples_two =
+			{
+				"To check your current Cure settings:",
+				fmt::format(
+					"{} {} current",
+					sep->arg[0],
+					c->GetSpellTypeShortNameByID(BotSpellTypes::Cure)
+				),
+				fmt::format(
+					"{} {} current",
+					sep->arg[0],
+					BotSpellTypes::Cure
+				)
+			};
+			std::vector<std::string> examples_three = { };
+
+			std::vector<std::string> actionables = { };
+
+			std::vector<std::string> options = { };
+			std::vector<std::string> options_one = { };
+			std::vector<std::string> options_two = { };
+			std::vector<std::string> options_three = { };
+
+			std::string popup_text = c->SendCommandHelpWindow(
+				c,
+				description,
+				notes,
+				example_format,
+				examples_one, examples_two, examples_three,
+				actionables,
+				options,
+				options_one, options_two, options_three
 			);
+
+			popup_text = DialogueWindow::Table(popup_text);
+
+			c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+			c->SendSpellTypePrompts(false, true);
 
 			return;
 		}
 	}
 
 	std::string arg1 = sep->arg[1];
-
-	if (!arg1.compare("listid") || !arg1.compare("listname")) {
-		const std::string& color_red = "red_1";
-		const std::string& color_blue = "royal_blue";
-		const std::string& color_green = "forest_green";
-		const std::string& bright_green = "green";
-		const std::string& bright_red = "red";
-		const std::string& heroic_color = "gold";
-
-		std::string fillerLine = "-----------";
-		std::string spellTypeField = "Spell Type";
-		std::string pluralS = "s";
-		std::string idField = "ID";
-		std::string shortnameField = "Short Name";
-
-		std::string popup_text = DialogueWindow::TableRow(
-			DialogueWindow::TableCell(
-				fmt::format(
-					"{}",
-					DialogueWindow::ColorMessage(bright_green, spellTypeField)
-				)
-			) +
-			DialogueWindow::TableCell(
-				fmt::format(
-					"{}",
-					(!arg1.compare("listid") ? DialogueWindow::ColorMessage(bright_green, idField) : DialogueWindow::ColorMessage(bright_green, shortnameField))
-				)
-			)
-		);
-
-		popup_text += DialogueWindow::TableRow(
-			DialogueWindow::TableCell(
-				fmt::format(
-					"{}",
-					DialogueWindow::ColorMessage(heroic_color, fillerLine)
-				)
-			) +
-			DialogueWindow::TableCell(
-				fmt::format(
-					"{}",
-					DialogueWindow::ColorMessage(heroic_color, fillerLine)
-				)
-			)
-		);
-
-		for (int i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-			if (!IsClientBotSpellType(i)) {
-				continue;
-			}
-
-			popup_text += DialogueWindow::TableRow(
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{}{}",
-						DialogueWindow::ColorMessage(color_green, c->GetSpellTypeNameByID(i)),
-						DialogueWindow::ColorMessage(color_green, pluralS)
-					)
-				) +
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{}",
-						(!arg1.compare("listid") ? DialogueWindow::ColorMessage(color_blue, std::to_string(i)) : DialogueWindow::ColorMessage(color_blue, c->GetSpellTypeShortNameByID(i)))
-					)
-				)
-			);
-		}
-
-		popup_text = DialogueWindow::Table(popup_text);
-
-		c->SendPopupToClient("Spell Types", popup_text.c_str());
-
-		return;
-	}
-
 	std::string arg2 = sep->arg[2];
 	int ab_arg = 2;
 	bool current_check = false;
@@ -112,18 +96,8 @@ void command_spell_min_thresholds(Client* c, const Seperator* sep)
 		spellType = atoi(sep->arg[1]);
 
 		if (!IsClientBotSpellType(spellType)) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"You must choose a valid spell type. Use {} for a list of spell types by ID or {} for a list of spell types by short name.",
-					Saylink::Silent(
-						fmt::format("{} listid", sep->arg[0])
-					),
-					Saylink::Silent(
-						fmt::format("{} listname", sep->arg[0])
-					)
-				).c_str()
-			);
+			c->Message(Chat::Yellow, "Invalid spell type.");
+			c->SendSpellTypePrompts(false, true);
 
 			return;
 		}
@@ -133,20 +107,8 @@ void command_spell_min_thresholds(Client* c, const Seperator* sep)
 			spellType = c->GetSpellTypeIDByShortName(arg1);
 
 			if (!IsClientBotSpellType(spellType)) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"You must choose a valid spell type. Use {} for a list of spell types by ID or {} for a list of spell types by short name.",
-						Saylink::Silent(
-							fmt::format("{} listid", sep->arg[0])
-						),
-						Saylink::Silent(
-							fmt::format("{} listname", sep->arg[0])
-						)
-					).c_str()
-				);
-
-				return;
+				c->Message(Chat::Yellow, "Invalid spell type.");
+				c->SendSpellTypePrompts(false, true);
 			}
 		}
 		else {
@@ -168,8 +130,8 @@ void command_spell_min_thresholds(Client* c, const Seperator* sep)
 	if (sep->IsNumber(2)) {
 		typeValue = atoi(sep->arg[2]);
 		++ab_arg;
-		if (typeValue < 0 || typeValue > 150) {
-			c->Message(Chat::Yellow, "You must enter a value between 0-150 (0%% to 150%% of health).");
+		if (typeValue < 0 || typeValue > 100) {
+			c->Message(Chat::Yellow, "You must enter a value between 0-100 (0%% to 100%% of your health).");
 
 			return;
 		}
@@ -196,18 +158,18 @@ void command_spell_min_thresholds(Client* c, const Seperator* sep)
 		c->Message(
 			Chat::Green,
 			fmt::format(
-				"Your current min threshold for {}s is {}%%.",
+				"Your [{}] minimum hold is currently [{}]%%.'",
 				c->GetSpellTypeNameByID(spellType),
 				c->GetSpellMinThreshold(spellType)
 			).c_str()
 		);
 	}
 	else {
-		c->SetSpellMinThreshold(spellType, typeValue);
+		c->SetSpellHold(spellType, typeValue);
 		c->Message(
 			Chat::Green,
 			fmt::format(
-				"Your min threshold for {}s was set to {}%%.",
+				"Your [{}] minimum hold was set to [{}]%%.'",
 				c->GetSpellTypeNameByID(spellType),
 				c->GetSpellMinThreshold(spellType)
 			).c_str()

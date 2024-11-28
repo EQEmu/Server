@@ -94,7 +94,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
-		SendSpellTypePrompts(c, true);
+		c->SendSpellTypePrompts(true);
 
 		c->Message(
 			Chat::Yellow,

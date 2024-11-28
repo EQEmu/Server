@@ -172,7 +172,7 @@ void command_spawn(Client *c, const Seperator *sep);
 void command_spawneditmass(Client *c, const Seperator *sep);
 void command_spawnfix(Client *c, const Seperator *sep);
 void command_spell_delays(Client* c, const Seperator* sep);
-void command_spell_holds(Client* c, const Seperator* sep);
+//void command_spell_holds(Client* c, const Seperator* sep); //currently unusued
 void command_spell_max_thresholds(Client* c, const Seperator* sep);
 void command_spell_min_thresholds(Client* c, const Seperator* sep);
 void command_stun(Client *c, const Seperator *sep);

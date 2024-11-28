@@ -92,7 +92,7 @@ void bot_command_spell_max_hp_pct(Client* c, const Seperator* sep)
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
-		SendSpellTypePrompts(c);
+		c->SendSpellTypePrompts();
 
 		if (RuleB(Bots, SendClassRaceOnHelp)) {
 			c->Message(

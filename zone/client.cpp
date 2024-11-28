@@ -13338,3 +13338,63 @@ std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::stri
 
 	return returnText;
 }
+
+void Client::SendSpellTypePrompts(bool commandedTypes, bool clientOnlyTypes) {
+	if (clientOnlyTypes) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view spell types by {} or {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids client"), "ID"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames client"), "Shortname"
+				)
+			).c_str()
+		);
+	}
+	else {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view spell types by {}, {}, {} or by {}, {}, {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids 0-19"), "ID 0-19"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypeids 20-39"), "20-39"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypeids 40+"), "40+"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 0-19"), "Shortname 0-19"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 20-39"), "20-39"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 40+"), "40+"
+				)
+			).c_str()
+		);
+	}
+
+	if (commandedTypes) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view commanded spell types by {} or {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids commanded"), "ID"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames commanded"), "Shortname"
+				)
+			).c_str()
+		);
+	}
+
+	return;
+}

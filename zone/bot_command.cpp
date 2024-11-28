@@ -1325,7 +1325,6 @@ int bot_command_init(void)
 		bot_command_add("inventoryremove", "Removes an item from a bot's inventory", AccountStatus::Player, bot_command_inventory_remove) ||
 		bot_command_add("inventorywindow", "Displays all items in a bot's inventory in a pop-up window", AccountStatus::Player, bot_command_inventory_window) ||
 		bot_command_add("itemuse", "Elicits a report from spawned bots that can use the item on your cursor (option 'empty' yields only empty slots)", AccountStatus::Player, bot_command_item_use) ||
-		bot_command_add("lull", "Orders a bot to cast a pacification spell", AccountStatus::Player, bot_command_lull) || //TODO bot rewrite - IMPLEMENT
 		bot_command_add("maxmeleerange", "Toggles whether your bot is at max melee range or not. This will disable all special abilities, including taunt.", AccountStatus::Player, bot_command_max_melee_range) ||		
 		bot_command_add("owneroption", "Sets options available to bot owners", AccountStatus::Player, bot_command_owner_option) ||
 		bot_command_add("pet", "Lists the available bot pet [subcommands]", AccountStatus::Player, bot_command_pet) ||
@@ -1362,7 +1361,6 @@ int bot_command_init(void)
 		bot_command_add("spellsettingsupdate", "Update a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_update) ||
 		bot_command_add("spelltypeids", "Lists spelltypes by ID", AccountStatus::Player, bot_command_spelltype_ids) ||
 		bot_command_add("spelltypenames", "Lists spelltypes by shortname", AccountStatus::Player, bot_command_spelltype_names) ||
-		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) || //TODO bot rewrite - IMPLEMENT
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", AccountStatus::Player, bot_command_suspend) ||
 		bot_command_add("taunt", "Toggles taunt use by a bot", AccountStatus::Player, bot_command_taunt) ||
 		bot_command_add("timer", "Checks or clears timers of the chosen type.", AccountStatus::GMMgmt, bot_command_timer) ||
@@ -2102,56 +2100,13 @@ bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::Sp
 	return false;
 }
 
-void SendSpellTypePrompts(Client *c, bool commandedTypes) {
-	c->Message(
-		Chat::Yellow,
-		fmt::format(
-			"You can view spell types by ID or shortname: {}, {}, {} / {}, {}, {}",
-			Saylink::Silent(
-				fmt::format("^spelltypeids 0-19"), "ID 0-19"
-			),
-			Saylink::Silent(
-				fmt::format("^spelltypeids 20-39"), "20-39"
-			),
-			Saylink::Silent(
-				fmt::format("^spelltypeids 40+"), "40+"
-			),
-			Saylink::Silent(
-				fmt::format("^spelltypenames 0-19"), "Shortname 0-19"
-			),
-			Saylink::Silent(
-				fmt::format("^spelltypenames 20-39"), "20-39"
-			),
-			Saylink::Silent(
-				fmt::format("^spelltypenames 40+"), "40+"
-			)
-		).c_str()
-	);
-
-	if (commandedTypes) {
-		c->Message(
-			Chat::Yellow,
-			fmt::format(
-				"You can view commanded spell types by ID or shortname: {} / {}",
-				Saylink::Silent(
-					fmt::format("^spelltypeids commanded"), "ID"
-				),
-				Saylink::Silent(
-					fmt::format("^spelltypenames commanded"), "Shortname"
-				)
-			).c_str()
-		);
-	}
-
-	return;
-}
-
-void SendSpellTypeWindow(Client *c, const Seperator* sep) {
+void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 	std::string arg0 = sep->arg[0];
 	std::string arg1 = sep->arg[1];
 
 	uint8 minCount = 0;
 	uint8 maxCount = 0;
+	bool clientOnly = false;
 
 	if (BotSpellTypes::END <= 19) {
 		minCount = BotSpellTypes::START;
@@ -2172,6 +2127,11 @@ void SendSpellTypeWindow(Client *c, const Seperator* sep) {
 	else if (!arg1.compare("commanded")) {
 		minCount = BotSpellTypes::COMMANDED_START;
 		maxCount = BotSpellTypes::COMMANDED_END;
+	}
+	else if (!arg1.compare("client")) {
+		minCount = BotSpellTypes::START;
+		maxCount = BotSpellTypes::END;
+		clientOnly = true;
 	}
 	else {
 		c->Message(Chat::Yellow, "You must choose a valid range option");
@@ -2222,6 +2182,10 @@ void SendSpellTypeWindow(Client *c, const Seperator* sep) {
 	);
 
 	for (int i = minCount; i <= maxCount; ++i) {
+		if (clientOnly && !IsClientBotSpellType(i)) {
+			continue;
+		}
+
 		popup_text += DialogueWindow::TableRow(
 			DialogueWindow::TableCell(
 				fmt::format(
@@ -2270,7 +2234,6 @@ void SendSpellTypeWindow(Client *c, const Seperator* sep) {
 #include "bot_commands/illusion_block.cpp"
 #include "bot_commands/inventory.cpp"
 #include "bot_commands/item_use.cpp"
-#include "bot_commands/lull.cpp"
 #include "bot_commands/max_melee_range.cpp"
 #include "bot_commands/name.cpp"
 #include "bot_commands/owner_option.cpp"
@@ -2299,7 +2262,6 @@ void SendSpellTypeWindow(Client *c, const Seperator* sep) {
 #include "bot_commands/spell_target_count.cpp"
 #include "bot_commands/spelltypes.cpp"
 #include "bot_commands/summon.cpp"
-#include "bot_commands/summon_corpse.cpp"
 #include "bot_commands/suspend.cpp"
 #include "bot_commands/taunt.cpp"
 #include "bot_commands/timer.cpp"
