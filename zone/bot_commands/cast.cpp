@@ -407,7 +407,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		TODO bot rewrite - 
 		FIX: Depart
 		Group Cures, Precombat
-		NEED TO CHECK: precombat, AE Dispel, AE Lifetap
+		NEED TO CHECK: precombat
 		*/
 		if (bot_iter->GetBotStance() == Stance::Passive || bot_iter->GetHoldFlag() || bot_iter->GetAppearance() == eaDead || bot_iter->IsFeared() || bot_iter->IsSilenced() || bot_iter->IsAmnesiad() || bot_iter->GetHP() < 0) {
 			continue;
