@@ -839,6 +839,7 @@ luabind::scope lua_register_packet_opcodes() {
 		luabind::value("GroupLeaderChange", static_cast<int>(OP_GroupLeaderChange)),
 		luabind::value("GroupLeadershipAAUpdate", static_cast<int>(OP_GroupLeadershipAAUpdate)),
 		luabind::value("GroupRoles", static_cast<int>(OP_GroupRoles)),
+		luabind::value("OP_SendFindableLocations", static_cast<int>(OP_SendFindableLocations)),
 		luabind::value("SendFindableNPCs", static_cast<int>(OP_SendFindableNPCs)),
 		luabind::value("HideCorpse", static_cast<int>(OP_HideCorpse)),
 		luabind::value("TargetBuffs", static_cast<int>(OP_TargetBuffs)),

@@ -140,6 +140,7 @@ std::vector<Reload> reload_types = {
 	Reload{.command = "aa", .opcode = ServerOP_ReloadAAData, .desc = "Alternate Advancement"},
 	Reload{.command = "alternate_currencies", .opcode = ServerOP_ReloadAlternateCurrencies, .desc = "Alternate Currencies"},
 	Reload{.command = "base_data", .opcode = ServerOP_ReloadBaseData, .desc = "Base Data"},
+	Reload{.command = "finable_locations", .opcode = ServerOP_ReloadFindableLocations, .desc = "Findable Locations"},
 	Reload{.command = "blocked_spells", .opcode = ServerOP_ReloadBlockedSpells, .desc = "Blocked Spells"},
 	Reload{.command = "commands", .opcode = ServerOP_ReloadCommands, .desc = "Commands"},
 	Reload{.command = "content_flags", .opcode = ServerOP_ReloadContentFlags, .desc = "Content Flags"},

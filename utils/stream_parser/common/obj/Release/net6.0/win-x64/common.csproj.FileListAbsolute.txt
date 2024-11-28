@@ -1,0 +1,13 @@
+E:\eqemu_build\Server\utils\stream_parser\common\bin\Release\net6.0\win-x64\common.deps.json
+E:\eqemu_build\Server\utils\stream_parser\common\bin\Release\net6.0\win-x64\common.dll
+E:\eqemu_build\Server\utils\stream_parser\common\bin\Release\net6.0\win-x64\common.pdb
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\common.csproj.AssemblyReference.cache
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\common.GeneratedMSBuildEditorConfig.editorconfig
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\common.AssemblyInfoInputs.cache
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\common.AssemblyInfo.cs
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\common.csproj.CoreCompileInputs.cache
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\common.sourcelink.json
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\common.dll
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\refint\common.dll
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\common.pdb
+E:\eqemu_build\Server\utils\stream_parser\common\obj\Release\net6.0\win-x64\ref\common.dll

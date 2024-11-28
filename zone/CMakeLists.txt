@@ -170,6 +170,7 @@ SET(zone_sources
     zonedb.cpp
     zone_base_data.cpp
     zone_event_scheduler.cpp
+	zone_finable_locations.cpp
     zone_npc_factions.cpp
     zone_reload.cpp
     zoning.cpp

@@ -454,6 +454,12 @@ public:
 	void LoadBaseData();
 	void ReloadBaseData();
 
+	// Findable Locations
+	void LoadFindableLocations();
+	void ReloadFindableLocations();
+	void ClearFindableLocations();
+	void SendFindableLocations(Client* client = nullptr);
+
 
 private:
 	bool      allow_mercs;
@@ -518,6 +524,8 @@ private:
 
 	// Base Data
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
+
+	// Findable Locations
 };
 
 #endif

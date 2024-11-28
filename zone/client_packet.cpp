@@ -858,6 +858,9 @@ void Client::CompleteConnect()
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoD)
 		entity_list.SendFindableNPCList(this);
 
+	if (ClientVersion() >= EQ::versions::ClientVersion::RoF2)
+		zone->SendFindableLocations(this);
+
 	if (IsInAGuild()) {
 		if (firstlogon == 1) {
 			guild_mgr.UpdateDbMemberOnline(CharacterID(), true);

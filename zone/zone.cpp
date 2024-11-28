@@ -1200,6 +1200,7 @@ bool Zone::Init(bool is_static) {
 	LoadNPCEmotes(&npc_emote_list);
 	LoadAlternateAdvancement();
 	LoadBaseData();
+	LoadFindableLocations();
 	LoadMerchants();
 	LoadTempMerchantData();
 

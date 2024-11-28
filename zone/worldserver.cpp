@@ -2005,6 +2005,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		break;
 	}
+	case ServerOP_ReloadFindableLocations:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Findable Locations");
+			zone->ReloadFindableLocations();
+		}
+
+		break;
+	}
 	case ServerOP_ReloadBlockedSpells:
 	{
 		if (zone && zone->IsLoaded()) {
