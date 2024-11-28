@@ -47,6 +47,7 @@
 #include "../common/repositories/lootdrop_entries_repository.h"
 #include "../common/repositories/base_data_repository.h"
 #include "../common/repositories/skill_caps_repository.h"
+#include "../common/repositories/findable_location_repository.h"
 
 struct EXPModifier
 {
@@ -526,6 +527,7 @@ private:
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
 
 	// Findable Locations
+	std::vector<FindableLocationRepository::FindableLocation> m_findable_locations = { };
 };
 
 #endif

@@ -50,9 +50,8 @@
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/character_corpse_items_repository.h"
 #include "../common/repositories/zone_repository.h"
-
 #include "../common/repositories/trader_repository.h"
-
+#include "../common/repositories/findable_location_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -2873,6 +2872,15 @@ void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, ui
 	e.amount      = value;
 
 	CharacterAltCurrencyRepository::ReplaceOne(*this, e);
+}
+
+std::vector<FindableLocationRepository::FindableLocation> ZoneDatabase::LoadFindableLocations(const std::string& zone_name, int16 version) {
+	auto findable_locations = FindableLocationRepository::GetWhere(
+		*this, fmt::format(
+			"zone = '{}' AND (version = {} OR version = -1) {} ORDER BY id ASC",
+			zone_name, version, ContentFilterCriteria::apply()));
+
+	return findable_locations;
 }
 
 void ZoneDatabase::SaveBuffs(Client *client)

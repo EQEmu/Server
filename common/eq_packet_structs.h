@@ -6436,6 +6436,31 @@ struct BuylineItemDetails_Struct {
 	uint32      item_quantity;
 };
 
+/* Taken from libeq */
+enum FindLocationType : uint32 {
+	LocationUnknown,
+	LocationPlayer,
+	LocationPOI,
+	LocationRealEstateItem,
+	LocationRealEstatePlot,
+	LocationMapPoint,
+	LocationSwitch,
+	LocationLocation
+};
+
+//For reference
+struct FindableLocation_Struct {
+/*00*/ FindLocationType type;
+/*04*/ int32 id;
+/*08*/ int32 sub_id;
+/*12*/ int32 zone_id;
+/*16*/ int32 zone_point_identifier;
+/*20*/ float y;
+/*24*/ float x;
+/*28*/ float z;
+/*32*/
+};
+
 // Restore structure packing to default
 #pragma pack()
 

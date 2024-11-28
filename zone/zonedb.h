@@ -13,6 +13,7 @@
 #include "../common/repositories/doors_repository.h"
 #include "../common/races.h"
 #include "../common/repositories/npc_faction_entries_repository.h"
+#include "../common/repositories/findable_location_repository.h"
 
 #include "bot_database.h"
 
@@ -637,6 +638,9 @@ public:
 	/* Alternate Currency   */
 	void LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency);
 	void UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value);
+
+	/* Findable Locations */
+	std::vector<FindableLocationRepository::FindableLocation> LoadFindableLocations(const std::string& zone_name, int16 version);
 
 	/*
 		* Misc stuff.
