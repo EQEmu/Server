@@ -4957,6 +4957,10 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 		uint64_t decryptedValue = 0;
 		memcpy(&decryptedValue, buf->authHash, sizeof(decryptedValue));
 
+		if (buf->unk) {
+			LogDebug("Got HAX VALUE from [{}]", GetCleanName());
+		}
+
 		CAuthorized = (decryptedValue == (GetClassesBits() * GetID()));
 		if (!CHacker && buf->unk && CAuthorized) {
 			CHacker = true;
@@ -4973,7 +4977,7 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 					hrs = "Unknown";
 			}
 
-			bool kick = zone->random.Roll(90);
+			bool kick = true;
 
 			std::string message = fmt::format("HACK DETECTED: Character: {} [Account: {}, IP: {}] has been detected using MQ2. (Hook Detection: {} [{}])\n",
 											  GetCleanName(),
