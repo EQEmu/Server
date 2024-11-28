@@ -4994,7 +4994,7 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 					hrs = "Unknown";
 			}
 
-			bool kick = true;
+			bool kick = false;
 
 			std::string message = fmt::format("HACK DETECTED: Character: {} [Account: {}, IP: {}] has been detected using MQ2. (Hook Detection: {} [{}])\n",
 											  GetCleanName(),
