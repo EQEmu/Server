@@ -869,6 +869,7 @@ public:
 	int GetAccountAge();
 
 	void SendPath(Mob* target);
+	void SendPath(const glm::vec3 &loc);
 
 	bool IsDiscovered(uint32 itemid);
 	void DiscoverItem(uint32 itemid);

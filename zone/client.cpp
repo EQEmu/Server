@@ -11995,14 +11995,12 @@ void Client::MaxSkills()
 	}
 }
 
-void Client::SendPath(Mob* target)
-{
+void Client::SendPath(Mob* target) {
 	if (!target) {
 		EQApplicationPacket outapp(OP_FindPersonReply, 0);
 		QueuePacket(&outapp);
 		return;
 	}
-
 
 	if (
 		!RuleB(Pathing, Find) &&
@@ -12011,7 +12009,7 @@ void Client::SendPath(Mob* target)
 		(
 			target->CastToClient()->IsTrader() ||
 			target->CastToClient()->IsBuyer()
-		)
+			)
 		) {
 		Message(
 			Chat::Yellow,
@@ -12031,6 +12029,17 @@ void Client::SendPath(Mob* target)
 		return;
 	}
 
+	glm::vec3 target_loc(
+		target->GetX(),
+		target->GetY(),
+		target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION
+	);
+
+	SendPath(target_loc);
+}
+
+void Client::SendPath(const glm::vec3& loc)
+{
 	std::vector<FindPerson_Point> points;
 
 	if (!RuleB(Pathing, Find) || !zone->pathing) {
@@ -12041,9 +12050,9 @@ void Client::SendPath(Mob* target)
 		a.x = GetX();
 		a.y = GetY();
 		a.z = GetZ();
-		b.x = target->GetX();
-		b.y = target->GetY();
-		b.z = target->GetZ();
+		b.x = loc.x;
+		b.y = loc.y;
+		b.z = loc.z;
 
 		points.push_back(a);
 		points.push_back(b);
@@ -12056,9 +12065,9 @@ void Client::SendPath(Mob* target)
 		);
 
 		glm::vec3 path_end(
-			target->GetX(),
-			target->GetY(),
-			target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION
+			loc.x,
+			loc.y,
+			loc.z
 		);
 
 		bool partial   = false;
@@ -12081,18 +12090,6 @@ void Client::SendPath(Mob* target)
 
 		bool leads_to_teleporter = false;
 
-		auto v = path_list.back();
-
-		p.x = v.pos.x;
-		p.y = v.pos.y;
-		p.z = v.pos.z;
-		points.push_back(p);
-
-		p.x = GetX();
-		p.y = GetY();
-		p.z = GetZ();
-		points.push_back(p);
-
 		for (const auto &n: path_list) {
 			if (n.teleport) {
 				leads_to_teleporter = true;
@@ -12107,14 +12104,6 @@ void Client::SendPath(Mob* target)
 			points.push_back(p);
 
 			++point_number;
-		}
-
-		if (!leads_to_teleporter) {
-			p.x = target->GetX();
-			p.y = target->GetY();
-			p.z = target->GetZ();
-
-			points.push_back(p);
 		}
 	}
 

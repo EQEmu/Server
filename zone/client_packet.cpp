@@ -6477,9 +6477,40 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 	else {
 		auto* t = (FindPersonRequest_Struct*)app->pBuffer;
 
-		auto* m = entity_list.GetMob(t->npc_id);
+		switch (t->type) {
+		case FindLocationType::LocationPlayer: {
+			auto* m = entity_list.GetMob(t->id);
+			SendPath(m);
+			break;
+		}
+		case FindLocationType::LocationSwitch:
+		{
+			auto *d = entity_list.GetDoorsByDoorID(t->id);
+			if (d == nullptr) {
+				Message(Chat::Red, "Switch for find not found.");
+				return;
+			}
 
-		SendPath(m);
+			glm::vec3 door_loc;
+			door_loc.x = d->GetX();
+			door_loc.y = d->GetY();
+			door_loc.z = d->GetZ();
+			SendPath(door_loc);
+			break;
+		}
+		case FindLocationType::LocationLocation:
+		{
+			glm::vec3 target_pos;
+			target_pos.x = t->target_pos.x;
+			target_pos.y = t->target_pos.y;
+			target_pos.z = t->target_pos.z;
+
+			SendPath(target_pos);
+			break;
+		}
+		default:
+			break;
+		}
 	}
 }
 

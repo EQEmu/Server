@@ -4400,11 +4400,6 @@ struct FindPerson_Point {
 	float z;
 };
 
-struct FindPersonRequest_Struct {
-	uint32	npc_id;
-	FindPerson_Point client_pos;
-};
-
 //variable length packet of points
 struct FindPersonResult_Struct {
 	FindPerson_Point dest;
@@ -6459,6 +6454,13 @@ struct FindableLocation_Struct {
 /*24*/ float x;
 /*28*/ float z;
 /*32*/
+};
+
+struct FindPersonRequest_Struct {
+	FindLocationType type;
+	int32 id;
+	FindPerson_Point client_pos;
+	FindPerson_Point target_pos;
 };
 
 // Restore structure packing to default

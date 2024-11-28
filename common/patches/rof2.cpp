@@ -5517,10 +5517,14 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::FindPersonRequest_Struct);
 		SETUP_DIRECT_DECODE(FindPersonRequest_Struct, structs::FindPersonRequest_Struct);
 
-		IN(npc_id);
+		IN(type)
+		IN(id);
 		IN(client_pos.x);
 		IN(client_pos.y);
 		IN(client_pos.z);
+		IN(target_pos.x);
+		IN(target_pos.y);
+		IN(target_pos.z);
 
 		FINISH_DIRECT_DECODE();
 	}

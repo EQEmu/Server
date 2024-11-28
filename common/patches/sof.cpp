@@ -2605,7 +2605,8 @@ namespace SoF
 		DECODE_LENGTH_EXACT(structs::FindPersonRequest_Struct);
 		SETUP_DIRECT_DECODE(FindPersonRequest_Struct, structs::FindPersonRequest_Struct);
 
-		IN(npc_id);
+		emu->type = FindLocationType::LocationPlayer;
+		emu->id = eq->npc_id;
 		IN(client_pos.x);
 		IN(client_pos.y);
 		IN(client_pos.z);

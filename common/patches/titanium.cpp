@@ -3327,6 +3327,20 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_FindPersonRequest)
+	{
+		DECODE_LENGTH_EXACT(structs::FindPersonRequest_Struct);
+		SETUP_DIRECT_DECODE(FindPersonRequest_Struct, structs::FindPersonRequest_Struct);
+
+		emu->type = FindLocationType::LocationPlayer;
+		emu->id = eq->npc_id;
+		IN(client_pos.x);
+		IN(client_pos.y);
+		IN(client_pos.z);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 // file scope helper methods
 	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance *inst, int16 slot_id_in, uint8 depth) {
 		const char *protection      = "\\\\\\\\\\";

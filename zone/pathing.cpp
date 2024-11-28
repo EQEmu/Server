@@ -72,22 +72,19 @@ void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
 			Message(Chat::System, "Total points %u", points.size());
 		}
 		
-		int len = sizeof(FindPersonResult_Struct) + (points.size() + 1) * sizeof(FindPerson_Point);
+		int len = (points.size() + 1) * sizeof(FindPerson_Point);
 		auto outapp = new EQApplicationPacket(OP_FindPersonReply, len);
-		FindPersonResult_Struct* fpr = (FindPersonResult_Struct*)outapp->pBuffer;
 		
-		std::vector<FindPerson_Point>::iterator cur, end;
-		cur = points.begin();
-		end = points.end();
-		unsigned int r;
-		for (r = 0; cur != end; ++cur, r++) {
-			fpr->path[r] = *cur;
-		
+		auto& last = points.back();
+		outapp->WriteFloat(last.y);
+		outapp->WriteFloat(last.x);
+		outapp->WriteFloat(last.z);
+
+		for (auto& p : points) {
+			outapp->WriteFloat(p.y);
+			outapp->WriteFloat(p.x);
+			outapp->WriteFloat(p.z);
 		}
-		//put the last element into the destination field
-		--cur;
-		fpr->path[r] = *cur;
-		fpr->dest = *cur;
 		
 		FastQueuePacket(&outapp);
 	})
