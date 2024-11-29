@@ -678,29 +678,6 @@ bool IsAnyNukeOrStunSpell(uint16 spell_id) {
 }
 
 bool IsAnyAESpell(uint16 spell_id) {
-	//if (
-	//	spells[spell_id].target_type == ST_Target ||
-	//	spells[spell_id].target_type == ST_Self ||
-	//	spells[spell_id].target_type == ST_Animal ||
-	//	spells[spell_id].target_type == ST_Undead ||
-	//	spells[spell_id].target_type == ST_Summoned ||
-	//	spells[spell_id].target_type == ST_Tap ||
-	//	spells[spell_id].target_type == ST_Pet ||
-	//	spells[spell_id].target_type == ST_Corpse ||
-	//	spells[spell_id].target_type == ST_Plant ||
-	//	spells[spell_id].target_type == ST_Giant ||
-	//	spells[spell_id].target_type == ST_Dragon ||
-	//	spells[spell_id].target_type == ST_HateList ||
-	//	spells[spell_id].target_type == ST_LDoNChest_Cursed ||
-	//	spells[spell_id].target_type == ST_Muramite ||
-	//	spells[spell_id].target_type == ST_SummonedPet ||
-	//	spells[spell_id].target_type == ST_TargetsTarget ||
-	//	spells[spell_id].target_type == ST_PetMaster //||
-	//	//spells[spell_id].target_type == ST_AEBard //TODO needed?
-	//) {
-	//	return false;
-	//}
-
 	if (IsAESpell(spell_id) || IsPBAENukeSpell(spell_id) || IsPBAESpell(spell_id) || IsAERainSpell(spell_id) || IsAERainNukeSpell(spell_id) || IsAEDurationSpell(spell_id)) {
 		return true;
 	}
