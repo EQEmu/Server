@@ -369,7 +369,6 @@ RULE_INT(Zone, FishingChance, 399, "Chance of fishing from zone table vs global 
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnBots, false, "Set to true to allow cross zone spells (cast/remove) to affect bots")
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnMercs, false, "Set to true to allow cross zone spells (cast/remove) to affect mercenaries")
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross zone spells (cast/remove) to affect pets")
-RULE_BOOL(Zone, AkkadiusTempDataBucketsChangeFlag, true, "Set to true to allow the AkkadiusTempDataBucketsFlagChange to be used for zone specific data")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)

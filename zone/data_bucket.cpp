@@ -513,10 +513,8 @@ bool DataBucket::SendDataBucketCacheUpdate(const DataBucketCacheEntry &e)
 		return false;
 	}
 
-	if (RuleB(Zone, AkkadiusTempDataBucketsChangeFlag)) {
-		if (e.e.character_id > 0) {
-			return false;
-		}
+	if (e.e.character_id > 0) {
+		return false;
 	}
 
 	EQ::Net::DynamicPacket p;
@@ -675,10 +673,6 @@ void DataBucket::ClearCache()
 }
 
 void DataBucket::DeleteCharacterFromCache(uint64 character_id) {
-	if (!RuleB(Zone, AkkadiusTempDataBucketsChangeFlag)) {
-		return;
-	}
-
 	size_t size_before = g_data_bucket_cache.size();
 
 	g_data_bucket_cache.erase(
