@@ -11318,14 +11318,14 @@ bool Bot::RequiresLoSForPositioning() {
 	if (GetLevel() < GetStopMeleeLevel()) {
 		return true;
 	}
-	else if (GetClass() == Class::Bard) {
-		return false;
-	}
-	else if (GetClass() == Class::Cleric) { //TODO bot rewrite - add check to see if spell requires los
-		return false;
+
+	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
+		if (BOT_SPELL_TYPES_DETRIMENTAL(i) && !GetSpellHold(i)) {
+			return true;
+		}
 	}
 
-	return true;
+	return false;
 }
 
 bool Bot::HasRequiredLoSForPositioning(Mob* tar) {
@@ -11333,13 +11333,7 @@ bool Bot::HasRequiredLoSForPositioning(Mob* tar) {
 		return true;
 	}
 
-	if (GetClass() == Class::Cleric) { //add check to see if spell requires los
-		return true;
-	}
-	else if (GetClass() == Class::Bard && GetLevel() >= GetStopMeleeLevel()) {
-		return true;
-	}
-	if (!DoLosChecks(this, tar)) {
+	if (RequiresLoSForPositioning() && !DoLosChecks(this, tar)) {
 		return false;
 	}
 
