@@ -1410,6 +1410,7 @@ enum StatEntry
 	statSpellCastTime10,
 	statSpellCastTime11,
 	statSpellCastTime12,
+	statTrackingValue,
 	statDummyValue,
 	statMax
 };

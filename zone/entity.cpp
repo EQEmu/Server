@@ -2973,7 +2973,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 		scanning_mob->m_close_mobs.reserve(mob_list.size());
 	}
 
-	scanning_mob->m_close_mobs.clear();	
+	scanning_mob->m_close_mobs.clear();
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
@@ -3794,7 +3794,7 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 bool EntityList::MakeTrackPacket(Client *client)
 {
 	std::list<std::pair<Mob *, float> > tracking_list;
-	auto distance = static_cast<float>(client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));
+	auto distance = client->GetTrackingDistance();
 
 	if (distance <= 0.0f) {
 		return false;

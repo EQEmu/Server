@@ -12235,8 +12235,20 @@ uint16 Client::GetClassTrackingDistanceMultiplier(uint16 class_) {
 	}
 }
 
+float Client::GetTrackingDistance() {
+	auto distance = 0.0f;
+
+	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+		if (HasClass(i)) {
+			distance = std::max(distance, static_cast<float>(GetSkill(EQ::skills::SkillTracking) * GetClassTrackingDistanceMultiplier(GetClass())));
+		}
+	}
+
+	return distance;
+}
+
 bool Client::CanThisClassTrack() {
-	return (GetClassTrackingDistanceMultiplier(GetClass()) > 0) ? true : false;
+	return (GetTrackingDistance() > 0) ? true : false;
 }
 
 void Client::ReconnectUCS()

@@ -3630,6 +3630,9 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			}
 			return castTime;
 		}
+		case statTrackingValue: {
+			return GetTrackingDistance();
+		}
 		default:
 			return 0;
 	}

@@ -964,6 +964,7 @@ public:
 
 	// Configurable Tracking Skill
 	uint16 GetClassTrackingDistanceMultiplier(uint16 class_);
+	float  GetTrackingDistance();
 
 	bool CanThisClassTrack();
 
