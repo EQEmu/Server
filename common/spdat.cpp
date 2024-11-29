@@ -3309,3 +3309,42 @@ bool IsCommandedSpellType(uint16 spellType) {
 
 	return false;
 }
+
+bool BotSpellTypeRequiresLoS(uint16 spellType, uint8 cls) {
+	switch (spellType) {
+		case BotSpellTypes::Nuke:
+		case BotSpellTypes::Root:
+		case BotSpellTypes::Lifetap:
+		case BotSpellTypes::Snare:
+		case BotSpellTypes::DOT:
+		case BotSpellTypes::Dispel:
+		case BotSpellTypes::Mez:
+		//case BotSpellTypes::Charm: // commanded
+		case BotSpellTypes::Slow:
+		case BotSpellTypes::Debuff:
+		case BotSpellTypes::HateRedux:
+		//case BotSpellTypes::Fear: // commanded
+		case BotSpellTypes::Stun:
+		case BotSpellTypes::AENukes:
+		case BotSpellTypes::AERains:
+		case BotSpellTypes::AEMez:
+		case BotSpellTypes::AEStun:
+		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::AESlow:
+		case BotSpellTypes::AESnare:
+		//case BotSpellTypes::AEFear: // commanded
+		case BotSpellTypes::AEDispel:
+		case BotSpellTypes::AERoot:
+		case BotSpellTypes::AEDoT:
+		case BotSpellTypes::AELifetap:
+		case BotSpellTypes::PBAENuke:
+		// case BotSpellTypes::Lull: // commanded
+		case BotSpellTypes::HateLine:
+		case BotSpellTypes::AEHateLine:
+			return true;
+		default:
+			return false;
+	}
+
+	return false;
+}
