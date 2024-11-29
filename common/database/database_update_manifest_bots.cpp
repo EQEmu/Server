@@ -1065,6 +1065,13 @@ VALUES
 (3011, 25555, 112, 86, 90),
 (3011, 28632, 112, 91, 95),
 (3011, 34662, 112, 96, 254);
+
+DELETE
+FROM bot_spells_entries
+WHERE NOT EXISTS
+(SELECT *
+FROM spells_new
+WHERE bot_spells_entries.spell_id = spells_new.id);
 )"
 	},
 	ManifestEntry{
@@ -1163,6 +1170,13 @@ VALUES
 (3005, 34752, 55, 99, 254),
 (3005, 34753, 55, 99, 254),
 (3005, 34751, 55, 99, 254);
+
+DELETE
+FROM bot_spells_entries
+WHERE NOT EXISTS
+(SELECT *
+FROM spells_new
+WHERE bot_spells_entries.spell_id = spells_new.id);
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
