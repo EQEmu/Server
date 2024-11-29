@@ -17,11 +17,11 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		std::vector<std::string> example_format =
 		{
 			fmt::format(
-				"{} [Type Shortname] [actionable]"
+				"{} [Type Shortname] [actionable, default: spawned]"
 				, sep->arg[0]
 			),
 			fmt::format(
-				"{} [Type ID] [actionable]"
+				"{} [Type ID] [actionable, default: spawned]"
 				, sep->arg[0]
 			)
 		};
