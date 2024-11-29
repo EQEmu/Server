@@ -542,7 +542,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 				}
 			}
 			const auto& custom_files_key = RuleS(World, CustomFilesKey);
-			if (!skip_char_info && !custom_files_key.empty()) {
+			if (!skip_char_info && !custom_files_key.empty() && cle->Admin() < AccountStatus::ApprenticeGuide) {
 				// Modified clients can utilize this unused block in login_info to send custom payloads on login
 				// which indicates they are using custom client files with the correct version, based on key payload.
 				const auto client_key = std::string(reinterpret_cast<char*>(login_info->unknown064));
