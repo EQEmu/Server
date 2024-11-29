@@ -1663,7 +1663,7 @@ bool Bot::Process()
 		}
 	}
 
-	if (viral_timer.Check()) { // TODO bot rewrite -- necessary for bots?
+	if (viral_timer.Check()) {
 		VirusEffectProcess();
 	}
 
@@ -7149,7 +7149,7 @@ bool Bot::CheckLoreConflict(const EQ::ItemData* item) {
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, invWhereWorn) != INVALID_INDEX);
 }
 
-bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 spellType) {
+bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, uint16 spellType) {
 
 	if (BOT_SPELL_TYPES_DETRIMENTAL(spellType, caster->GetClass())) {
 		LogError("[EntityList::Bot_AICheckCloseBeneficialSpells] detrimental spells requested");
@@ -10916,7 +10916,7 @@ bool Bot::AttemptAICastSpell(uint16 spellType) {
 			}
 
 			if (!tar || !PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
-				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(spellType), BotAISpellRange, spellType)) {
+				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(spellType), spellType)) {
 					return result;
 				}
 			}

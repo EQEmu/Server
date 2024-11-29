@@ -46,7 +46,6 @@ constexpr uint32 MAG_EPIC_1_0 = 28034;
 
 extern WorldServer worldserver;
 
-constexpr int BotAISpellRange = 100; // TODO: Write a method that calcs what the bot's spell range is based on spell, equipment, AA, whatever and replace this
 constexpr int NegativeItemReuse = -1; // Unlinked timer for items
 
 constexpr uint8 SumWater = 1;
