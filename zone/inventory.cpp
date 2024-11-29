@@ -3631,7 +3631,17 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 			return castTime;
 		}
 		case statTrackingValue: {
-			return GetTrackingDistance();
+			int tracking_distance = GetTrackingDistance();
+			if (IsGrouped()) {
+				auto group = GetGroup();
+				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if (GetGroup()->members[i] != nullptr) {
+						auto member = GetGroup()->members[i]->CastToClient();
+						tracking_distance = std::max(tracking_distance, member->GetTrackingDistance());
+					}
+				}
+			}
+			return tracking_distance;
 		}
 		default:
 			return 0;

@@ -3794,7 +3794,7 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 bool EntityList::MakeTrackPacket(Client *client)
 {
 	std::list<std::pair<Mob *, float> > tracking_list;
-	auto distance = client->GetTrackingDistance();
+	auto distance = static_cast<float>(client->GetTrackingDistance());
 
 	if (distance <= 0.0f) {
 		return false;
