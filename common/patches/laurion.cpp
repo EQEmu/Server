@@ -2748,6 +2748,17 @@ namespace Laurion
 
 	DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
 
+	DECODE(OP_ClickDoor)
+	{
+		DECODE_LENGTH_EXACT(structs::ClickDoor_Struct);
+		SETUP_DIRECT_DECODE(ClickDoor_Struct, structs::ClickDoor_Struct);
+
+		IN(doorid);
+		IN(player_id);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	//Naive version but should work well enough for now
 	int ExtractIDFile(const std::string& input) {
 		std::string number;

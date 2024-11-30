@@ -468,6 +468,16 @@ namespace Laurion {
 			/*18*/
 		};
 
+		struct ClickDoor_Struct {
+			/*00*/ uint16 player_id;
+			/*02*/ uint8 padding1[2];
+			/*04*/ int32 unknown1;
+			/*08*/ int32 unknown2;
+			/*12*/ uint8 doorid;
+			/*13*/ uint8 padding2[3];
+
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

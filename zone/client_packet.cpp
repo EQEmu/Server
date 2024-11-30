@@ -118,7 +118,6 @@ void MapOpcodes()
 	ConnectingOpcodes[OP_ZoneEntry] = &Client::Handle_Connect_OP_ZoneEntry;
 
 	// connected opcode handler assignments:
-	ConnectedOpcodes[OP_0x0193] = &Client::Handle_0x0193;
 	ConnectedOpcodes[OP_AAAction] = &Client::Handle_OP_AAAction;
 	ConnectedOpcodes[OP_AcceptNewTask] = &Client::Handle_OP_AcceptNewTask;
 	ConnectedOpcodes[OP_AdventureInfoRequest] = &Client::Handle_OP_AdventureInfoRequest;
@@ -1203,10 +1202,6 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ZoneComplete(const EQApplicationPacket *app)
 {
-	auto outapp = new EQApplicationPacket(OP_0x0347, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-	return;
 }
 
 void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
@@ -1831,16 +1826,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	SetAttackTimer();
 	conn_state = ZoneInfoSent;
 	zoneinpacket_timer.Start();
-	return;
-}
-
-// connected opcode handlers
-void Client::Handle_0x0193(const EQApplicationPacket *app)
-{
-	// Not sure what this opcode does. It started being sent when OP_ClientUpdate was
-	// changed to pump OP_ClientUpdate back out instead of OP_MobUpdate
-	// 2 bytes: 00 00
-
 	return;
 }
 

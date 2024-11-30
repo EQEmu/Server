@@ -37,6 +37,7 @@ D(OP_ChannelMessage)
 D(OP_SetServerFilter)
 D(OP_Consider)
 D(OP_ConsiderCorpse)
+D(OP_ClickDoor)
 
 #undef E
 #undef D
