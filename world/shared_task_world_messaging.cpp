@@ -283,7 +283,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			auto t = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(buf->task_id, buf->source_character_id);
 			if (t) {
 				DynamicZone dz;
-				dz.LoadSerializedDzPacket(buf->cereal_data, buf->cereal_size);
+				dz.Unserialize({ buf->cereal_data, buf->cereal_size });
 
 				shared_task_manager.CreateDynamicZone(t, dz);
 			}

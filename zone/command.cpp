@@ -22,7 +22,6 @@
 #include "data_bucket.h"
 #include "command.h"
 #include "dynamic_zone.h"
-#include "expedition.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "titles.h"

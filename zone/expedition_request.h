@@ -21,12 +21,11 @@
 #ifndef EXPEDITION_REQUEST_H
 #define EXPEDITION_REQUEST_H
 
-#include "expedition.h"
-#include "../common/expedition_lockout_timer.h"
+#include "dynamic_zone.h"
+#include "../common/dynamic_zone_lockout.h"
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <unordered_map>
 
 class Client;
 class Group;
@@ -35,19 +34,16 @@ class Raid;
 class ExpeditionRequest
 {
 public:
-	ExpeditionRequest(const DynamicZone& dz, bool disable_messages = false);
+	ExpeditionRequest(const DynamicZone& dz, Client& client, bool silent = false);
 
-	bool Validate(Client* requester);
+	bool Validate();
 
-	const std::string& GetExpeditionName() const { return m_expedition_name; }
 	Client* GetLeaderClient() const { return m_leader; }
 	uint32_t GetLeaderID() const { return m_leader_id; }
 	const std::string& GetLeaderName() const { return m_leader_name; }
-	const std::string& GetNotAllAddedMessage() const { return m_not_all_added_msg; }
-	uint32_t GetMinPlayers() const { return m_min_players; }
-	uint32_t GetMaxPlayers() const { return m_max_players; }
 	const std::vector<DynamicZoneMember>& GetMembers() const { return m_members; }
-	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
+	const std::vector<DzLockout>& GetLockouts() const { return m_lockouts; }
+	bool IsRaid() const { return m_is_raid; }
 
 private:
 	bool CanMembersJoin(const std::vector<std::string>& member_names);
@@ -55,23 +51,21 @@ private:
 	bool CanGroupRequest(Group* group);
 	bool CheckMembersForConflicts(const std::vector<std::string>& member_names);
 	bool IsPlayerCountValidated();
-	bool SaveLeaderLockouts(const std::vector<ExpeditionLockoutTimer>& leader_lockouts);
-	void SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo);
-	void SendLeaderMemberReplayLockout(const std::string& member_name, const ExpeditionLockoutTimer& lockout, bool is_solo);
-	void SendLeaderMemberEventLockout(const std::string& member_name, const ExpeditionLockoutTimer& lockout);
-	void SendLeaderMessage(uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& args = {});
+	bool SaveLeaderLockouts(const std::vector<DzLockout>& leader_lockouts);
+	void SendLeaderMemberInExpedition(const std::string& name, bool is_solo);
+	void SendLeaderMemberReplayLockout(const std::string& name, const DzLockout& lockout, bool is_solo);
+	void SendLeaderMemberEventLockout(const std::string& name, const DzLockout& lockout);
+	void SendLeaderMessage(uint16_t chat_type, uint32_t string_id, std::initializer_list<std::string> args = {});
 
+	const DynamicZone* m_dz         = nullptr;
 	Client*  m_requester            = nullptr;
 	Client*  m_leader               = nullptr;
 	uint32_t m_leader_id            = 0;
-	uint32_t m_min_players          = 0;
-	uint32_t m_max_players          = 0;
-	bool     m_disable_messages     = false;
-	std::string m_expedition_name;
+	bool     m_silent               = false;
+	bool     m_is_raid              = false;
 	std::string m_leader_name;
-	std::string m_not_all_added_msg;
 	std::vector<DynamicZoneMember> m_members;
-	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;
+	std::vector<DzLockout> m_lockouts;
 };
 
 #endif

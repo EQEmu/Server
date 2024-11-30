@@ -22,6 +22,7 @@ SET(common_sources
     dbcore.cpp
     deity.cpp
     dynamic_zone_base.cpp
+    dynamic_zone_lockout.cpp
     emu_constants.cpp
     emu_limits.cpp
     emu_opcodes.cpp
@@ -40,7 +41,6 @@ SET(common_sources
     events/player_event_logs.cpp
     events/player_event_discord_formatter.cpp
     evolving_items.cpp
-    expedition_lockout_timer.cpp
     extprofile.cpp
     discord/discord_manager.cpp
     faction.cpp
@@ -213,10 +213,9 @@ SET(repositories
     repositories/base/base_discovered_items_repository.h
     repositories/base/base_doors_repository.h
     repositories/base/base_dynamic_zones_repository.h
+    repositories/base/base_dynamic_zone_lockouts_repository.h
     repositories/base/base_dynamic_zone_members_repository.h
     repositories/base/base_dynamic_zone_templates_repository.h
-    repositories/base/base_expeditions_repository.h
-    repositories/base/base_expedition_lockouts_repository.h
     repositories/base/base_faction_association_repository.h
     repositories/base/base_faction_base_data_repository.h
     repositories/base/base_faction_list_repository.h
@@ -410,10 +409,9 @@ SET(repositories
     repositories/discovered_items_repository.h
     repositories/doors_repository.h
     repositories/dynamic_zones_repository.h
+    repositories/dynamic_zone_lockouts_repository.h
     repositories/dynamic_zone_members_repository.h
     repositories/dynamic_zone_templates_repository.h
-    repositories/expeditions_repository.h
-    repositories/expedition_lockouts_repository.h
     repositories/faction_association_repository.h
     repositories/faction_base_data_repository.h
     repositories/faction_list_repository.h
@@ -561,6 +559,7 @@ SET(common_headers
     discord/discord.h
     discord/discord_manager.h
     dynamic_zone_base.h
+    dynamic_zone_lockout.h
     emu_constants.h
     emu_limits.h
     emu_opcodes.h
@@ -587,7 +586,6 @@ SET(common_headers
     events/player_events.h
     event_sub.h
     evolving_items.h
-    expedition_lockout_timer.h
     extprofile.h
     faction.h
     file.h

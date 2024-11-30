@@ -164,132 +164,6 @@ void DynamicZone::SendZonesLeaderChanged()
 	zoneserver_list.SendPacket(pack.get());
 }
 
-void DynamicZone::HandleZoneMessage(ServerPacket* pack)
-{
-	switch (pack->opcode)
-	{
-	case ServerOP_DzCreated:
-	{
-		dynamic_zone_manager.CacheNewDynamicZone(pack);
-		break;
-	}
-	case ServerOP_DzSetCompass:
-	case ServerOP_DzSetSafeReturn:
-	case ServerOP_DzSetZoneIn:
-	{
-		auto buf = reinterpret_cast<ServerDzLocation_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz)
-		{
-			if (pack->opcode == ServerOP_DzSetCompass)
-			{
-				dz->SetCompass(buf->zone_id, buf->x, buf->y, buf->z, false);
-			}
-			else if (pack->opcode == ServerOP_DzSetSafeReturn)
-			{
-				dz->SetSafeReturn(buf->zone_id, buf->x, buf->y, buf->z, buf->heading, false);
-			}
-			else if (pack->opcode == ServerOP_DzSetZoneIn)
-			{
-				dz->SetZoneInLocation(buf->x, buf->y, buf->z, buf->heading, false);
-			}
-		}
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_DzSetSwitchID:
-	{
-		auto buf = reinterpret_cast<ServerDzSwitchID_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz)
-		{
-			dz->ProcessSetSwitchID(buf->dz_switch_id);
-		}
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_DzAddRemoveMember:
-	{
-		auto buf = reinterpret_cast<ServerDzMember_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz)
-		{
-			auto status = static_cast<DynamicZoneMemberStatus>(buf->character_status);
-			dz->ProcessMemberAddRemove({ buf->character_id, buf->character_name, status }, buf->removed);
-		}
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_DzSwapMembers:
-	{
-		auto buf = reinterpret_cast<ServerDzMemberSwap_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz)
-		{
-			// we add first in world so new member can be chosen if leader is removed
-			auto status = static_cast<DynamicZoneMemberStatus>(buf->add_character_status);
-			dz->ProcessMemberAddRemove({ buf->add_character_id, buf->add_character_name, status }, false);
-			dz->ProcessMemberAddRemove({ buf->remove_character_id, buf->remove_character_name }, true);
-		}
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_DzRemoveAllMembers:
-	{
-		auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz)
-		{
-			dz->ProcessRemoveAllMembers();
-		}
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_DzSetSecondsRemaining:
-	{
-		auto buf = reinterpret_cast<ServerDzSetDuration_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz)
-		{
-			dz->SetSecondsRemaining(buf->seconds);
-		}
-		break;
-	}
-	case ServerOP_DzGetMemberStatuses:
-	{
-		auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz)
-		{
-			dz->SendZoneMemberStatuses(buf->sender_zone_id, buf->sender_instance_id);
-		}
-		break;
-	}
-	case ServerOP_DzUpdateMemberStatus:
-	{
-		auto buf = reinterpret_cast<ServerDzMemberStatus_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz)
-		{
-			auto status = static_cast<DynamicZoneMemberStatus>(buf->status);
-			dz->ProcessMemberStatusChange(buf->character_id, status);
-		}
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_DzMovePC:
-	{
-		auto buf = reinterpret_cast<ServerDzMovePC_Struct*>(pack->pBuffer);
-		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
-		if (dz && dz->HasMember(buf->character_id))
-		{
-			zoneserver_list.SendPacket(buf->sender_zone_id, buf->sender_instance_id, pack);
-		}
-		break;
-	}
-	};
-}
-
 void DynamicZone::ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed)
 {
 	DynamicZoneBase::ProcessMemberAddRemove(member, removed);
@@ -345,13 +219,13 @@ void DynamicZone::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)
 
 void DynamicZone::CacheMemberStatuses()
 {
-	if (m_has_member_statuses)
+	if (m_has_member_statuses || m_members.empty())
 	{
 		return;
 	}
 
 	// called when a new dz is cached to fill member statuses
-	std::string zone_name{};
+	std::string zone_name;
 	std::vector<ClientListEntry*> all_clients;
 	all_clients.reserve(client_list.GetClientCount());
 	client_list.GetClients(zone_name.c_str(), all_clients);

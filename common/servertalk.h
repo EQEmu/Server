@@ -170,18 +170,6 @@
 #define ServerOP_LFPMatches			0x0214
 #define ServerOP_ClientVersionSummary 0x0215
 
-// expedition
-#define ServerOP_ExpeditionCreate             0x0400
-#define ServerOP_ExpeditionLockout            0x0403
-#define ServerOP_ExpeditionDzAddPlayer        0x0408
-#define ServerOP_ExpeditionDzMakeLeader       0x0409
-#define ServerOP_ExpeditionCharacterLockout   0x040d
-#define ServerOP_ExpeditionSaveInvite         0x040e
-#define ServerOP_ExpeditionRequestInvite      0x040f
-#define ServerOP_ExpeditionReplayOnJoin       0x0410
-#define ServerOP_ExpeditionLockState          0x0411
-#define ServerOP_ExpeditionLockoutDuration    0x0414
-
 // dz
 #define ServerOP_DzAddRemoveMember            0x0450
 #define ServerOP_DzRemoveAllMembers           0x0451
@@ -199,6 +187,15 @@
 #define ServerOP_DzDeleted                    0x045d
 #define ServerOP_DzSetSwitchID                0x045e
 #define ServerOP_DzMovePC                     0x045f
+#define ServerOP_DzLock                       0x0460
+#define ServerOP_DzReplayOnJoin               0x0461
+#define ServerOP_DzLockout                    0x0462
+#define ServerOP_DzLockoutDuration            0x0463
+#define ServerOP_DzCharacterLockout           0x0464
+#define ServerOP_DzAddPlayer                  0x0465
+#define ServerOP_DzSaveInvite                 0x0466
+#define ServerOP_DzRequestInvite              0x0467
+#define ServerOP_DzMakeLeader                 0x0468
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -1543,10 +1540,8 @@ struct UCSServerStatus_Struct {
 	};
 };
 
-struct ServerExpeditionID_Struct {
-	uint32 expedition_id;
-	uint32 sender_zone_id;
-	uint32 sender_instance_id;
+struct ServerCharacterID_Struct {
+	uint32_t char_id;
 };
 
 struct ServerDzLeaderID_Struct {
@@ -1580,45 +1575,42 @@ struct ServerDzMovePC_Struct {
 	uint32 character_id;
 };
 
-struct ServerExpeditionLockout_Struct {
-	uint32 expedition_id;
+struct ServerDzLockout_Struct {
+	uint32 dz_id;
 	uint64 expire_time;
 	uint32 duration;
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
 	uint8  remove;
 	uint8  members_only;
-	int    seconds_adjust;
+	int    seconds;
 	char   event_name[256];
 };
 
-struct ServerExpeditionLockState_Struct {
-	uint32 expedition_id;
+struct ServerDzLock_Struct {
+	uint32 dz_id;
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
-	uint8  enabled;
+	bool   lock;
 	uint8  lock_msg; // 0: none, 1: closing 2: trial begin
+	uint32 color;
 };
 
-struct ServerExpeditionSetting_Struct {
-	uint32 expedition_id;
+struct ServerDzBool_Struct {
+	uint32 dz_id;
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
-	uint8  enabled;
+	bool   enabled;
 };
 
-struct ServerExpeditionCharacterLockout_Struct {
+struct ServerDzCharacterLockout_Struct {
 	uint8  remove;
-	uint32 character_id;
+	uint32 char_id;
 	uint64 expire_time;
 	uint32 duration;
 	char   uuid[37];
-	char   expedition_name[128];
-	char   event_name[256];
-};
-
-struct ServerExpeditionCharacterID_Struct {
-	uint32_t character_id;
+	char   expedition[128];
+	char   event[256];
 };
 
 struct ServerDzExpireWarning_Struct {
@@ -1627,7 +1619,7 @@ struct ServerDzExpireWarning_Struct {
 };
 
 struct ServerDzCommand_Struct {
-	uint32 expedition_id;
+	uint32 dz_id;
 	uint8  is_char_online;     // 0: target name is offline, 1: online
 	char   requester_name[64];
 	char   target_name[64];
@@ -1696,11 +1688,12 @@ struct ServerDzSetDuration_Struct {
 	uint32 seconds;
 };
 
-struct ServerDzCreateSerialized_Struct {
+struct ServerDzCreate_Struct {
 	uint16_t origin_zone_id;
 	uint16_t origin_instance_id;
+	uint32_t dz_id;
 	uint32_t cereal_size;
-	char     cereal_data[0];
+	char     cereal_data[1];
 };
 
 struct ServerSendPlayerEvent_Struct {

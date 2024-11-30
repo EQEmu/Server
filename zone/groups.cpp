@@ -18,11 +18,12 @@
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
-#include "expedition.h"
+#include "dynamic_zone.h"
 #include "masterentity.h"
 #include "worldserver.h"
 #include "string_ids.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/character_expedition_lockouts_repository.h"
 #include "../common/repositories/group_id_repository.h"
 #include "../common/repositories/group_leaders_repository.h"
 #include "queryserv.h"
@@ -2515,25 +2516,21 @@ void Group::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_r
 	}
 }
 
-bool Group::DoesAnyMemberHaveExpeditionLockout(
-	const std::string& expedition_name, const std::string& event_name, int max_check_count)
+bool Group::AnyMemberHasDzLockout(const std::string& expedition, const std::string& event)
 {
-	if (max_check_count <= 0)
+	std::vector<std::string> names;
+	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
-		max_check_count = MAX_GROUP_MEMBERS;
-	}
-
-	for (int i = 0; i < MAX_GROUP_MEMBERS && i < max_check_count; ++i)
-	{
-		if (membername[i][0])
+		if (!members[i] && membername[i][0])
 		{
-			if (Expedition::HasLockoutByCharacterName(membername[i], expedition_name, event_name))
-			{
-				return true;
-			}
+			names.emplace_back(membername[i]); // out of zone member
+		}
+		else if (members[i] && members[i]->IsClient() && members[i]->CastToClient()->HasDzLockout(expedition, event))
+		{
+			return true;
 		}
 	}
-	return false;
+	return !CharacterExpeditionLockoutsRepository::GetLockouts(database, names, expedition, event).empty();
 }
 
 bool Group::IsLeader(const char* name) {

@@ -1172,7 +1172,7 @@ void SharedTaskManager::CreateDynamicZone(SharedTask *shared_task, DynamicZone &
 		}
 	}
 
-	auto new_dz = dynamic_zone_manager.CreateNew(dz_request, dz_members);
+	auto new_dz = dynamic_zone_manager.TryCreate(dz_request, dz_members);
 	if (new_dz) {
 		auto shared_task_dz = SharedTaskDynamicZonesRepository::NewEntity();
 		shared_task_dz.shared_task_id  = shared_task->GetDbSharedTask().id;

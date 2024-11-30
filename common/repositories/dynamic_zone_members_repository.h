@@ -65,7 +65,7 @@ public:
 		));
 	}
 
-	static std::vector<MemberWithName> GetAllWithNames(Database& db)
+	static std::vector<MemberWithName> AllWithNames(Database& db)
 	{
 		std::vector<MemberWithName> all_entries;
 
@@ -146,65 +146,34 @@ public:
 
 	static void RemoveMember(Database& db, uint32_t dynamic_zone_id, uint32_t character_id)
 	{
-		db.QueryDatabase(fmt::format(SQL(
-			DELETE FROM {}
-			WHERE dynamic_zone_id = {} AND character_id = {};
-		),
-			TableName(), dynamic_zone_id, character_id
-		));
+		DeleteWhere(db, fmt::format("dynamic_zone_id = {} AND character_id = {}", dynamic_zone_id, character_id));
 	}
 
 	static void RemoveAllMembers(Database& db, uint32_t dynamic_zone_id)
 	{
-		db.QueryDatabase(fmt::format(SQL(
-			DELETE FROM {}
-			WHERE dynamic_zone_id = {};
-		),
-			TableName(), dynamic_zone_id
-		));
+		DeleteWhere(db, fmt::format("dynamic_zone_id = {}", dynamic_zone_id));
 	}
 
-	static void RemoveAllMembers(Database& db, std::vector<uint32_t> dynamic_zone_ids)
+	static uint32_t InsertOrUpdateMany(Database& db, const std::vector<DynamicZoneMembers>& entries)
 	{
-		if (!dynamic_zone_ids.empty())
+		if (entries.empty())
 		{
-			db.QueryDatabase(fmt::format(SQL(
-				DELETE FROM {}
-				WHERE dynamic_zone_id IN ({});
-			),
-				TableName(), Strings::Join(dynamic_zone_ids, ",")
-			));
-		}
-	}
-
-	static int InsertOrUpdateMany(Database& db,
-		const std::vector<DynamicZoneMembers>& dynamic_zone_members_entries)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &dynamic_zone_members_entry: dynamic_zone_members_entries)
-		{
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(dynamic_zone_members_entry.id));
-			insert_values.push_back(std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
-			insert_values.push_back(std::to_string(dynamic_zone_members_entry.character_id));
-
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			return 0;
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> values;
+		values.reserve(entries.size());
 
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"INSERT INTO {} ({}) VALUES {} ON DUPLICATE KEY UPDATE id = id;",
-				TableName(),
-				ColumnsRaw(),
-				Strings::Implode(",", insert_chunks)
-			)
-		);
+		for (const auto& entry : entries)
+		{
+			values.push_back(fmt::format("({},{},{})", entry.id, entry.dynamic_zone_id, entry.character_id));
+		}
 
-		return (results.Success() ? results.RowsAffected() : 0);
+		auto results = db.QueryDatabase(fmt::format(
+			"INSERT INTO {} ({}) VALUES {} ON DUPLICATE KEY UPDATE id = id;",
+			TableName(), ColumnsRaw(), fmt::join(values, ",")));
+
+		return results.Success() ? results.RowsAffected() : 0;
 	}
 };
 

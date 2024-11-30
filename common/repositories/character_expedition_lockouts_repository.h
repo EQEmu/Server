@@ -2,7 +2,7 @@
 #define EQEMU_CHARACTER_EXPEDITION_LOCKOUTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../expedition_lockout_timer.h"
+#include "../dynamic_zone_lockout.h"
 #include "../strings.h"
 #include "base/base_character_expedition_lockouts_repository.h"
 #include <unordered_map>
@@ -47,33 +47,8 @@ public:
 
 	// Custom extended repository methods here
 
-	struct CharacterExpeditionLockoutsTimeStamp {
-		int         id;
-		int         character_id;
-		std::string expedition_name;
-		std::string event_name;
-		time_t      expire_time;
-		int         duration;
-		std::string from_expedition_uuid;
-	};
-
-	static ExpeditionLockoutTimer GetExpeditionLockoutTimerFromEntry(
-		CharacterExpeditionLockoutsTimeStamp&& entry)
-	{
-		ExpeditionLockoutTimer lockout_timer{
-			std::move(entry.from_expedition_uuid),
-			std::move(entry.expedition_name),
-			std::move(entry.event_name),
-			static_cast<uint64_t>(entry.expire_time),
-			static_cast<uint32_t>(entry.duration)
-		};
-
-		return lockout_timer;
-	}
-
-	static std::unordered_map<uint32_t, std::vector<ExpeditionLockoutTimer>> GetManyCharacterLockoutTimers(
-		Database& db, const std::vector<uint32_t>& character_ids,
-		const std::string& expedition_name, const std::string& ordered_event_name)
+	static std::unordered_map<uint32_t, std::vector<DzLockout>> GetLockouts(
+		Database& db, const std::vector<uint32_t>& char_ids, const std::string& expedition)
 	{
 		auto results = db.QueryDatabase(fmt::format(SQL(
 			SELECT
@@ -84,39 +59,171 @@ public:
 				from_expedition_uuid
 			FROM character_expedition_lockouts
 			WHERE
-				character_id IN ({})
+				character_id IN ({0})
 				AND expire_time > NOW()
-				AND expedition_name = '{}'
+				AND expedition_name = '{1}'
 			ORDER BY
-				FIELD(character_id, {}),
-				FIELD(event_name, '{}') DESC
+				FIELD(character_id, {0}),
+				FIELD(event_name, '{2}') DESC
 		),
-			fmt::join(character_ids, ","),
-			Strings::Escape(expedition_name),
-			fmt::join(character_ids, ","),
-			Strings::Escape(ordered_event_name)
+			fmt::join(char_ids, ","),
+			Strings::Escape(expedition),
+			Strings::Escape(DzLockout::ReplayTimer)
 		));
 
-		std::unordered_map<uint32_t, std::vector<ExpeditionLockoutTimer>> lockouts;
+		std::unordered_map<uint32_t, std::vector<DzLockout>> lockouts;
 
 		for (auto row = results.begin(); row != results.end(); ++row)
 		{
-			CharacterExpeditionLockoutsTimeStamp entry{};
-
 			int col = 0;
-			entry.character_id         = std::strtoul(row[col++], nullptr, 10);
-			entry.expire_time          = std::strtoull(row[col++], nullptr, 10);
-			entry.duration             = std::strtoul(row[col++], nullptr, 10);
-			entry.event_name           = row[col++];
-			entry.expedition_name      = expedition_name;
-			entry.from_expedition_uuid = row[col++];
+			uint32_t    char_id     = std::strtoul(row[col++], nullptr, 10);
+			time_t      expire_time = std::strtoull(row[col++], nullptr, 10);
+			uint32_t    duration    = std::strtoul(row[col++], nullptr, 10);
+			std::string event       = row[col++];
+			std::string uuid        = row[col++];
 
-			auto lockout = GetExpeditionLockoutTimerFromEntry(std::move(entry));
-			lockouts[entry.character_id].emplace_back(std::move(lockout));
+			lockouts[char_id].emplace_back(std::move(uuid), expedition, std::move(event), expire_time, duration);
 		}
 
 		return lockouts;
 	}
+
+	static std::vector<DzLockout> GetLockouts(Database& db, uint32_t char_id)
+	{
+		std::vector<DzLockout> lockouts;
+
+		auto rows = GetWhere(db, fmt::format("character_id = {} AND expire_time > NOW()", char_id));
+		lockouts.reserve(rows.size());
+
+		for (auto& row : rows)
+		{
+			lockouts.emplace_back(
+				std::move(row.from_expedition_uuid),
+				std::move(row.expedition_name),
+				std::move(row.event_name),
+				row.expire_time,
+				row.duration
+			);
+		}
+
+		return lockouts;
+	}
+
+	static std::vector<CharacterExpeditionLockouts> GetLockouts(Database& db, const std::vector<std::string>& names, const std::string& expedition, const std::string& event)
+	{
+		if (names.empty())
+		{
+			return {};
+		}
+
+		return GetWhere(db, fmt::format(
+			"character_id IN (select id from character_data where name IN ('{}')) AND expire_time > NOW() AND expedition_name = '{}' AND event_name = '{}' LIMIT 1",
+			fmt::join(names, "','"), Strings::Escape(expedition), Strings::Escape(event)));
+	}
+
+	static void InsertLockouts(Database& db, uint32_t char_id, const std::vector<DzLockout>& lockouts)
+	{
+		std::string insert_values;
+		for (const auto& lockout : lockouts)
+		{
+			fmt::format_to(std::back_inserter(insert_values),
+				"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
+				char_id,
+				lockout.GetExpireTime(),
+				lockout.GetDuration(),
+				Strings::Escape(lockout.UUID()),
+				Strings::Escape(lockout.DzName()),
+				Strings::Escape(lockout.Event())
+			);
+		}
+
+		if (!insert_values.empty())
+		{
+			insert_values.pop_back(); // trailing comma
+
+			auto query = fmt::format(SQL(
+				INSERT INTO character_expedition_lockouts
+					(character_id, expire_time, duration, from_expedition_uuid, expedition_name, event_name)
+				VALUES {}
+				ON DUPLICATE KEY UPDATE
+					from_expedition_uuid = VALUES(from_expedition_uuid),
+					expire_time = VALUES(expire_time),
+					duration = VALUES(duration);
+			), insert_values);
+
+			db.QueryDatabase(query);
+		}
+	}
+
+	static void InsertLockout(Database& db, const std::vector<uint32_t>& char_ids, const DzLockout& lockout)
+	{
+		std::string insert_values;
+		for (const auto& char_id : char_ids)
+		{
+			fmt::format_to(std::back_inserter(insert_values),
+				"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
+				char_id,
+				lockout.GetExpireTime(),
+				lockout.GetDuration(),
+				Strings::Escape(lockout.UUID()),
+				Strings::Escape(lockout.DzName()),
+				Strings::Escape(lockout.Event())
+			);
+		}
+
+		if (!insert_values.empty())
+		{
+			insert_values.pop_back(); // trailing comma
+
+			auto query = fmt::format(SQL(
+				INSERT INTO character_expedition_lockouts
+					(character_id, expire_time, duration, from_expedition_uuid, expedition_name, event_name)
+				VALUES {}
+				ON DUPLICATE KEY UPDATE
+					from_expedition_uuid = VALUES(from_expedition_uuid),
+					expire_time = VALUES(expire_time),
+					duration = VALUES(duration);
+			), insert_values);
+
+			db.QueryDatabase(query);
+		}
+	}
+
+	// inserts a new lockout or updates existing lockout with seconds added to current time
+	static void AddLockoutDuration(Database& db, const std::vector<uint32_t>& char_ids, const DzLockout& lockout, int seconds)
+	{
+		std::string insert_values;
+		for (const auto& char_id : char_ids)
+		{
+			fmt::format_to(std::back_inserter(insert_values),
+				"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
+				char_id,
+				lockout.GetExpireTime(),
+				lockout.GetDuration(),
+				Strings::Escape(lockout.UUID()),
+				Strings::Escape(lockout.DzName()),
+				Strings::Escape(lockout.Event())
+			);
+		}
+
+		if (!insert_values.empty())
+		{
+			insert_values.pop_back(); // trailing comma
+
+			auto query = fmt::format(SQL(
+				INSERT INTO character_expedition_lockouts
+					(character_id, expire_time, duration, from_expedition_uuid, expedition_name, event_name)
+				VALUES {0}
+				ON DUPLICATE KEY UPDATE
+					from_expedition_uuid = VALUES(from_expedition_uuid),
+					expire_time = DATE_ADD(expire_time, INTERVAL {1} SECOND),
+					duration = GREATEST(0, CAST(duration AS SIGNED) + {1});
+			), insert_values, seconds);
+
+			db.QueryDatabase(query);
+		}
+	}
+
 };
 
 #endif //EQEMU_CHARACTER_EXPEDITION_LOCKOUTS_REPOSITORY_H
