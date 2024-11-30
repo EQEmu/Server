@@ -3632,7 +3632,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 		}
 		case statTrackingValue: {
 			int tracking_distance = GetTrackingDistance();
-			if (IsGrouped()) {
+			if (GetGroup()) {
 				auto group = GetGroup();
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 					if (GetGroup()->members[i] != nullptr) {
