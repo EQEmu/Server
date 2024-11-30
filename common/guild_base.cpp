@@ -896,9 +896,6 @@ static uint16 GetClassBitmask(int char_id, Database *db) {
 	auto row = results.begin();
 
 	bitmask = Strings::ToUnsignedInt(row[0], 0);
-
-	LogDebug("Got Bitmask: [{}]", bitmask);
-
 	return bitmask;
 }
 
