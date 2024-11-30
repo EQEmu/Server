@@ -190,17 +190,25 @@ bool PersistentTimer::Clear(Database *db) {
 
 /* This function checks if the timer triggered */
 bool PersistentTimer::Expired(Database *db, bool iReset) {
-	uint32 current_time = get_current_time();
-	if (current_time-start_time >= timer_time) {
-		if (enabled && iReset) {
-			start_time = current_time; // Reset timer
-		} else if(enabled) {
-			Clear(db);	//remove it from DB too
-		}
-		return(true);
-	}
+    uint32 current_time = get_current_time();
+    uint32 max_timer_duration = 86400; // 24 hours in seconds
 
-	return(false);
+    // Sanity check: Ensure the timer isn't set more than 24 hours into the future
+    if (start_time > current_time + max_timer_duration) {
+        LogError("PersistentTimer: Timer start_time is more than 24 hours in the future. Adjusting to current_time.");
+        start_time = current_time; // Reset to the current time
+    }
+
+    if (current_time - start_time >= timer_time) {
+        if (enabled && iReset) {
+            start_time = current_time; // Reset timer
+        } else if (enabled) {
+            Clear(db); // Remove it from DB too
+        }
+        return true;
+    }
+
+    return false;
 }
 
 /* This function set the timer and restart it */

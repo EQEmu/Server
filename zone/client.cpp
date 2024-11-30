@@ -12236,11 +12236,13 @@ uint16 Client::GetClassTrackingDistanceMultiplier(uint16 class_) {
 }
 
 int Client::GetTrackingDistance() {
-	auto distance = 0.0f;
+	#define AA_SITUATIONAL_AWARENESS 18973
+	auto distance = 10.0f;
+	int base_skill = 10 * GetAA(AA_SITUATIONAL_AWARENESS);
 
 	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
 		if (HasClass(i)) {
-			distance = std::max(distance, static_cast<float>(GetSkill(EQ::skills::SkillTracking) * GetClassTrackingDistanceMultiplier(i)));
+			distance = std::max(distance, static_cast<float>((base_skill + GetSkill(EQ::skills::SkillTracking)) * std::max(static_cast<uint16>(1),GetClassTrackingDistanceMultiplier(i))));
 		}
 	}
 
