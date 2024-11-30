@@ -874,6 +874,14 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 		return;
 	}
 
+	if (exp_source == ExpSource::Quest)
+	{
+		if (!RuleB(Character, EnableQuestExperience))
+		{
+			return;
+		}
+	}
+
 	if (RuleB(Custom, PowerSourceItemUpgrade) && m_inv.GetItem(EQ::invslot::slotPowerSource) && exp_source == ExpSource::Kill && conlevel != 0xFF) {
 		if (!(GetRaid() && GetRaid()->RaidCount())) {
 			AddItemExperience(m_inv.GetItem(EQ::invslot::slotPowerSource), conlevel);
