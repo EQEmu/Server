@@ -842,11 +842,14 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg)
 #define GuildMemberBaseQuery \
 "SELECT c.`id`, c.`name`, c.`class`, c.`level`, c.`last_login`, c.`zone_id`," \
 " g.`guild_id`, g.`rank`, g.`tribute_enable`, g.`total_tribute`, g.`last_tribute`," \
-" g.`banker`, g.`public_note`, g.`alt`, g.`online` " \
-" FROM `character_data` AS c LEFT JOIN `guild_members` AS g ON c.`id` = g.`char_id` "
-static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into, uint16 class_bitmask = 0)
+" g.`banker`, g.`public_note`, g.`alt`, g.`online`," \
+" db.`value` AS `class_bitmask` " \
+" FROM `character_data` AS c " \
+" LEFT JOIN `guild_members` AS g ON c.`id` = g.`char_id` " \
+" LEFT JOIN `data_buckets` AS db ON c.`id` = db.`character_id` AND db.`key` = 'GestaltClasses' "
+static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into)
 {
-	//fields from `characer_`
+	//fields from `character_data`
 	into.char_id      = Strings::ToUnsignedInt(row[0]);
 	into.char_name    = row[1];
 	into.class_       = Strings::ToUnsignedInt(row[2]);
@@ -856,7 +859,7 @@ static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into, uint16 
 
 	//fields from `guild_members`, leave at defaults if missing
 	into.guild_id       = row[6] ? Strings::ToUnsignedInt(row[6]) : GUILD_NONE;
-	into.rank           = row[7] ? Strings::ToUnsignedInt(row[7]) : (GUILD_MAX_RANK);
+	into.rank           = row[7] ? Strings::ToUnsignedInt(row[7]) : GUILD_MAX_RANK;
 	into.tribute_enable = row[8] ? (row[8][0] == '0' ? false : true) : false;
 	into.total_tribute  = row[9] ? Strings::ToUnsignedInt(row[9]) : 0;
 	into.last_tribute   = row[10] ? Strings::ToUnsignedInt(row[10]) : 0;        //timestamp
@@ -864,6 +867,9 @@ static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into, uint16 
 	into.public_note    = row[12] ? row[12] : "";
 	into.alt            = row[13] ? (row[13][0] == '0' ? false : true) : false;
 	into.online         = row[14] ? (row[14][0] == '0' ? false : true) : false;
+
+	//field from `data_buckets`
+	uint16 class_bitmask = row[15] ? Strings::ToUnsignedInt(row[15]) : 0;
 
 	//a little sanity checking/cleanup
 	if (into.guild_id == 0) {
@@ -879,26 +885,6 @@ static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into, uint16 
 	}
 }
 
-static uint16 GetClassBitmask(int char_id, Database *db) {
-	uint16 bitmask = 0;
-
-	std::string query 	= fmt::format("select data_buckets.value from data_buckets where data_buckets.character_id = {} and data_buckets.key = 'GestaltClasses' limit 1;", char_id);
-	auto		results = db->QueryDatabase(query);
-
-	if (!results.Success()) {
-		return 0;
-	}
-
-	if (results.RowCount() == 0) {
-		return 0;
-	}
-
-	auto row = results.begin();
-
-	bitmask = Strings::ToUnsignedInt(row[0], 0);
-	return bitmask;
-}
-
 bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo *> &members)
 {
 	members.clear();
@@ -912,7 +898,7 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		auto ci = new CharGuildInfo;
-		ProcessGuildMember(row, *ci, GetClassBitmask(Strings::ToUnsignedInt(row[0]), m_db));
+		ProcessGuildMember(row, *ci);
 		members.push_back(ci);
 	}
 
@@ -941,7 +927,7 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into)
 	}
 
 	auto row = results.begin();
-	ProcessGuildMember(row, into, GetClassBitmask(Strings::ToUnsignedInt(row[0]), m_db));
+	ProcessGuildMember(row, into);
 	LogGuilds("Retrieved guild member info for char [{}] from the database", char_name);
 
 	return true;
@@ -961,7 +947,7 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into)
 	}
 
 	auto row = results.begin();
-	ProcessGuildMember(row, into, GetClassBitmask(char_id, m_db));
+	ProcessGuildMember(row, into);
 	LogGuilds("Retrieved guild member info for char [{}]", char_id);
 
 	return true;
