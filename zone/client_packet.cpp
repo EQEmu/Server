@@ -1028,6 +1028,7 @@ void Client::Handle_Connect_OP_ApproveZone(const EQApplicationPacket *app)
 	ApproveZone_Struct* azone = (ApproveZone_Struct*)app->pBuffer;
 	azone->approve = 1;
 	QueuePacket(app);
+	SendBulkStatsUpdate();
 	return;
 }
 
@@ -1159,6 +1160,7 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	if (ClientVersion() < EQ::versions::ClientVersion::SoF)
 	{
 		SendZoneInPackets();
+		SendBulkStatsUpdate();
 	}
 
 	return;
@@ -1239,6 +1241,7 @@ void Client::Handle_Connect_OP_ZoneComplete(const EQApplicationPacket *app)
 	auto outapp = new EQApplicationPacket(OP_0x0347, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
+	SendBulkStatsUpdate();
 	return;
 }
 
