@@ -3478,7 +3478,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 		case statEndurRegen:
 			return CalcEnduranceRegen(true);
 		case statHaste:
-			return CalcHaste();
+			return GetHaste() - 100;
 		case statATK:
 			return GetTotalATK();
 		case statHeroicSTR:

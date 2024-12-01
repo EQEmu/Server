@@ -1109,6 +1109,8 @@ RULE_BOOL(Custom, 	UseAAEXPVeterancy,						false, "Use max AA on any character i
 RULE_REAL(Custom,	CastedSpellCritBonusRatio, 				1.0, "Multiply casted (Not procs) spells crit ratio by this value")
 RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit ratio by this value")
 
+RULE_BOOL(Custom,   UseHasteForMeleeSkills, 				true, "Use Haste stat for activated melee skills")
+
 // Exploit Prevention
 RULE_BOOL(Custom, 	StripCharmItems, 						true, "Remove all items handed to charmed mobs when charm breaks. Additionally, return items handed to charmed mobs and give mob a copy.")
 

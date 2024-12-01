@@ -507,7 +507,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	}
 
 	int reuse_time     = 0;
-	int haste          = GetHaste();
+	int haste          = GetHaste() - 100;
 	int haste_modifier = 0;
 
 	if (haste >= 0) {
@@ -540,7 +540,14 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			}
 
 			reuse_time = BashReuseTime - 1 - skill_reduction;
-			reuse_time = (reuse_time * haste_modifier) / 100;
+
+			if (RuleB(Custom, UseHasteForMeleeSkills)) {
+				reuse_time = (reuse_time * haste_modifier) / 100;
+			}
+
+			if (RuleB(Custom, ServerAuthStats)) {
+				reuse_time++;
+			}
 
 			DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillBash, damage, 0, hate_override, reuse_time);
 
@@ -590,7 +597,15 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			max_dmg = DMG_INVULNERABLE;
 		}
 
-		reuse_time = ((FrenzyReuseTime - 1 - skill_reduction) * haste_modifier) / 100;
+		reuse_time = FrenzyReuseTime - 1 - skill_reduction;
+
+		if (RuleB(Custom, UseHasteForMeleeSkills)) {
+			reuse_time = (reuse_time * haste_modifier) / 100;
+		}
+
+		if (RuleB(Custom, ServerAuthStats)) {
+			reuse_time++;
+		}
 
 		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
 			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
@@ -667,6 +682,10 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 			reuse_time = (KickReuseTime - 1 - skill_reduction);
 
+			if (RuleB(Custom, ServerAuthStats)) {
+				reuse_time++;
+			}
+
 			DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillKick, damage, 0, hate_override, reuse_time);
 
 			found_skill = true;
@@ -680,7 +699,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		 ca_atk->m_skill == EQ::skills::SkillTigerClaw ||
 		 ca_atk->m_skill == EQ::skills::SkillRoundKick)) {
 
-		reuse_time = ((MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction) * haste_modifier) / 100;
+		reuse_time = (MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction);
 
 		// Live AA - Technique of Master Wu
 		int wu_chance = (
@@ -711,8 +730,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			}
 
 			if (extra) {
-				SendColoredText(
-					400,
+				Message(
+					Chat::Skills,
 					fmt::format(
 						"The spirit of Master Wu fills you! You gain {} additional attack{}.",
 						extra,
@@ -746,7 +765,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		ca_atk->m_skill == EQ::skills::SkillBackstab &&
 		((HasClass(Class::Rogue)))
 	) {
-		reuse_time = ((BackstabReuseTime - 1 - skill_reduction) * haste_modifier) / 100;
+		reuse_time = BackstabReuseTime - 1 - skill_reduction;
 
 		TryBackstab(GetTarget(), reuse_time);
 		found_skill = true;
@@ -756,8 +775,12 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		reuse_time = 9 - skill_reduction;
 	}
 
-	if (!RuleB(Custom, MulticlassingEnabled)) {
+	if (RuleB(Custom, UseHasteForMeleeSkills)) {
 		reuse_time = (reuse_time * haste_modifier) / 100;
+	}
+
+	if (RuleB(Custom, ServerAuthStats)) {
+		reuse_time++;
 	}
 
 	reuse_time = EQ::Clamp(reuse_time, 0, reuse_time);
