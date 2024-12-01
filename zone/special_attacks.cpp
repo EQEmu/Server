@@ -736,7 +736,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 						"The spirit of Master Wu fills you! You gain {} additional attack{}.",
 						extra,
 						extra != 1 ? "s" : ""
-					)
+					).c_str()
 				);
 			}
 
