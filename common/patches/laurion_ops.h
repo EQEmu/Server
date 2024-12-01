@@ -38,6 +38,7 @@ D(OP_SetServerFilter)
 D(OP_Consider)
 D(OP_ConsiderCorpse)
 D(OP_ClickDoor)
+D(OP_SpawnAppearance)
 
 #undef E
 #undef D

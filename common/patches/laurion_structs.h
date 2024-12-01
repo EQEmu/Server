@@ -180,14 +180,61 @@ namespace Laurion {
 			/*000*/	uint32 CharCount;	//number of chars in this packet
 		};
 
+		enum LaurionAppearance : uint32
+		{
+			None,
+			WhoLevel,
+			MaxHealth,
+			Invisibility,
+			PVP,
+			Light,
+			Animation,
+			Sneak,
+			SpawnID,
+			Health,
+			Linkdead,
+			FlyMode,
+			GM,
+			Anonymous,
+			GuildID,
+			AFK,
+			Pet,
+			Summoned,
+			Unknown18,
+			Unknown19,
+			SetType,
+			NPCName,
+			CancelSneakHide,
+			AreaHealthRegen,
+			AreaManaRegen,
+			AreaEnduranceRegen,
+			FreezeBeneficialBuffs,
+			NPCTintIndex,
+			Unknown28,
+			Unknown29,
+			Unknown30,
+			ShowHelm,
+			DamageState,
+			Unknown33, //Some virtual function call; based on location might be EQPlayers (my guess personally) or FindBits
+			TextureType, //Texture ID
+			Unknown35,
+			Unknown36,
+			GuildShow,
+			OfflineMode,
+			Unknown39,
+			Unknown40,
+			Unknown41,
+			Unknown42,
+			Birthdate,
+			EncounterLock
+		};
+
 		struct SpawnAppearance_Struct
 		{
 			/*0000*/ uint32 spawn_id;		// ID of the spawn
 			/*0004*/ uint32 type;			// Values associated with the type
-			/*0008*/ uint32 parameter;		// Type of data sent
-			/*0012*/ uint32 unknown012;
-			/*0016*/ uint32 unknown016;
-			/*0020*/ uint32 unknown020;
+			/*0008*/ uint64 parameter;		// Type of data sent
+			/*0016*/ uint64 lock_id; //the only place client uses this as far as I can tell is when you send 0x2c as type in which case it sets LockID = this
 			/*0024*/
 		};
 

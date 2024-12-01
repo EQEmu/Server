@@ -51,6 +51,10 @@ namespace Laurion
 
 	void SerializeItem(SerializeBuffer &buffer, const EQ::ItemInstance* inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
 
+	//SpawnAppearance
+	static inline uint32 ServerToLaurionSpawnAppearanceType(uint32 server_type);
+	static inline uint32 LaurionToServerSpawnAppearanceType(uint32 laurion_type);
+
 	// server to client inventory location converters
 	static inline structs::InventorySlot_Struct ServerToLaurionSlot(uint32 server_slot);
 	static inline structs::InventorySlot_Struct ServerToLaurionCorpseSlot(uint32 server_corpse_slot);
@@ -515,11 +519,12 @@ namespace Laurion
 		if (sas->type != AppearanceType::Size)
 		{
 			//laurion struct is different than rof2's but the idea is the same
+			//we will probably want to better implement Laurion's structure later
 			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
 			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
 	
 			eq->spawn_id = sas->spawn_id;
-			eq->type = sas->type;
+			eq->type = ServerToLaurionSpawnAppearanceType(sas->type);
 			eq->parameter = sas->parameter;
 	
 			dest->FastQueuePacket(&outapp, ack_req);
@@ -2759,6 +2764,17 @@ namespace Laurion
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_SpawnAppearance) {
+		DECODE_LENGTH_EXACT(structs::SpawnAppearance_Struct);
+		SETUP_DIRECT_DECODE(SpawnAppearance_Struct, structs::SpawnAppearance_Struct);
+
+		IN(spawn_id);
+		emu->type = LaurionToServerSpawnAppearanceType(eq->type);
+		IN(parameter);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	//Naive version but should work well enough for now
 	int ExtractIDFile(const std::string& input) {
 		std::string number;
@@ -3535,6 +3551,138 @@ namespace Laurion
 		buffer.WriteUInt64(0); //unsupported atm
 		//s32 Luck;
 		buffer.WriteInt32(0); //unsupported atm
+	}
+
+	static inline uint32 ServerToLaurionSpawnAppearanceType(uint32 server_type) {
+		switch (server_type)
+		{
+		case AppearanceType::WhoLevel:
+			return structs::LaurionAppearance::WhoLevel;
+		case AppearanceType::MaxHealth:
+			return structs::LaurionAppearance::MaxHealth;
+		case AppearanceType::Invisibility:
+			return structs::LaurionAppearance::Invisibility;
+		case AppearanceType::PVP:
+			return structs::LaurionAppearance::PVP;
+		case AppearanceType::Light:
+			return structs::LaurionAppearance::Light;
+		case AppearanceType::Animation:
+			return structs::LaurionAppearance::Animation;
+		case AppearanceType::Sneak:
+			return structs::LaurionAppearance::Sneak;
+		case AppearanceType::SpawnID:
+			return structs::LaurionAppearance::SpawnID;
+		case AppearanceType::Health:
+			return structs::LaurionAppearance::Health;
+		case AppearanceType::Linkdead:
+			return structs::LaurionAppearance::Linkdead;
+		case AppearanceType::FlyMode:
+			return structs::LaurionAppearance::FlyMode;
+		case AppearanceType::GM:
+			return structs::LaurionAppearance::GM;
+		case AppearanceType::Anonymous:
+			return structs::LaurionAppearance::Anonymous;
+		case AppearanceType::GuildID:
+			return structs::LaurionAppearance::GuildID;
+		case AppearanceType::AFK:
+			return structs::LaurionAppearance::AFK;
+		case AppearanceType::Pet:
+			return structs::LaurionAppearance::Pet;
+		case AppearanceType::Summoned:
+			return structs::LaurionAppearance::Summoned;
+		case AppearanceType::SetType:
+			return structs::LaurionAppearance::NPCName;
+		case AppearanceType::CancelSneakHide:
+			return structs::LaurionAppearance::CancelSneakHide;
+		case AppearanceType::AreaHealthRegen:
+			return structs::LaurionAppearance::AreaHealthRegen;
+		case AppearanceType::AreaManaRegen:
+			return structs::LaurionAppearance::AreaManaRegen;
+		case AppearanceType::AreaEnduranceRegen:
+			return structs::LaurionAppearance::AreaEnduranceRegen;
+		case AppearanceType::FreezeBeneficialBuffs:
+			return structs::LaurionAppearance::FreezeBeneficialBuffs;
+		case AppearanceType::NPCTintIndex:
+			return structs::LaurionAppearance::NPCTintIndex;
+		case AppearanceType::ShowHelm:
+			return structs::LaurionAppearance::ShowHelm;
+		case AppearanceType::DamageState:
+			return structs::LaurionAppearance::DamageState;
+		case AppearanceType::TextureType:
+			return structs::LaurionAppearance::TextureType;
+		case AppearanceType::GuildShow:
+			return structs::LaurionAppearance::GuildShow;
+		case AppearanceType::OfflineMode:
+			return structs::LaurionAppearance::OfflineMode;
+		default:
+			return structs::LaurionAppearance::None;
+		}
+	}
+
+	static inline uint32 LaurionToServerSpawnAppearanceType(uint32 laurion_type) {
+		switch (laurion_type)
+		{
+		case structs::LaurionAppearance::WhoLevel:
+			return AppearanceType::WhoLevel;
+		case structs::LaurionAppearance::MaxHealth:
+			return AppearanceType::MaxHealth;
+		case structs::LaurionAppearance::Invisibility:
+			return AppearanceType::Invisibility;
+		case structs::LaurionAppearance::PVP:
+			return AppearanceType::PVP;
+		case structs::LaurionAppearance::Light:
+			return AppearanceType::Light;
+		case structs::LaurionAppearance::Animation:
+			return AppearanceType::Animation;
+		case structs::LaurionAppearance::Sneak:
+			return AppearanceType::Sneak;
+		case structs::LaurionAppearance::SpawnID:
+			return AppearanceType::SpawnID;
+		case structs::LaurionAppearance::Health:
+			return AppearanceType::Health;
+		case structs::LaurionAppearance::Linkdead:
+			return AppearanceType::Linkdead;
+		case structs::LaurionAppearance::FlyMode:
+			return AppearanceType::FlyMode;
+		case structs::LaurionAppearance::GM:
+			return AppearanceType::GM;
+		case structs::LaurionAppearance::Anonymous:
+			return AppearanceType::Anonymous;
+		case structs::LaurionAppearance::GuildID:
+			return AppearanceType::GuildID;
+		case structs::LaurionAppearance::AFK:
+			return AppearanceType::AFK;
+		case structs::LaurionAppearance::Pet:
+			return AppearanceType::Pet;
+		case structs::LaurionAppearance::Summoned:
+			return AppearanceType::Summoned;
+		case structs::LaurionAppearance::SetType:
+			return AppearanceType::NPCName;
+		case structs::LaurionAppearance::CancelSneakHide:
+			return AppearanceType::CancelSneakHide;
+		case structs::LaurionAppearance::AreaHealthRegen:
+			return AppearanceType::AreaHealthRegen;
+		case structs::LaurionAppearance::AreaManaRegen:
+			return AppearanceType::AreaManaRegen;
+		case structs::LaurionAppearance::AreaEnduranceRegen:
+			return AppearanceType::AreaEnduranceRegen;
+		case structs::LaurionAppearance::FreezeBeneficialBuffs:
+			return AppearanceType::FreezeBeneficialBuffs;
+		case structs::LaurionAppearance::NPCTintIndex:
+			return AppearanceType::NPCTintIndex;
+		case structs::LaurionAppearance::ShowHelm:
+			return AppearanceType::ShowHelm;
+		case structs::LaurionAppearance::DamageState:
+			return AppearanceType::DamageState;
+		case structs::LaurionAppearance::TextureType:
+			return AppearanceType::TextureType;
+		case structs::LaurionAppearance::GuildShow:
+			return AppearanceType::GuildShow;
+		case structs::LaurionAppearance::OfflineMode:
+			return AppearanceType::OfflineMode;
+		default:
+			return AppearanceType::Die;
+		}
 	}
 
 	static inline structs::InventorySlot_Struct ServerToLaurionSlot(uint32 server_slot)
