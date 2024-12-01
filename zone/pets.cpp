@@ -422,9 +422,11 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         // Set the selected name into the first available bucket
         for (int i = 0; i < 10; i++) {
             std::string bucket_name = fmt::format("bear_name_{}", i);
-            std::string ret_name = owner->GetBucket(bucket_name);
+            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
             if (ret_name.empty()) {  // Found the first unused bucket slot
-                owner->SetBucket(bucket_name, selected_name); // Assuming SetBucket is the correct method to use
+				if (owner->IsClient()) {
+                	owner->SetBucket(bucket_name, selected_name);
+				}
                 break;
             }
         }
@@ -440,7 +442,7 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         // Check existing bucket names first
         for (int i = 1; i < 10; ++i) {
             std::string bucket_name = fmt::format("skeleton_name_{}", i);
-            std::string ret_name = owner->GetBucket(bucket_name);
+            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -462,7 +464,9 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         for (int i = 1; i <= 100; ++i) {
             std::string bucket_name = fmt::format("skeleton_name_{}", i);
             if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-                owner->SetBucket(bucket_name, selected_name);
+				if (owner->IsClient()) {
+                	owner->SetBucket(bucket_name, selected_name);
+				}
                 break;
             }
         }
@@ -494,7 +498,7 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         // Check existing bucket names first
         for (int i = 1; i <= 10; ++i) {
             std::string bucket_name = fmt::format("warder_name_{}", i);
-            std::string ret_name = owner->GetBucket(bucket_name);
+            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -515,7 +519,9 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         for (int i = 1; i <= 10; ++i) {
             std::string bucket_name = fmt::format("warder_name_{}", i);
             if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-                owner->SetBucket(bucket_name, selected_name);
+				if (owner->IsClient()) {
+                	owner->SetBucket(bucket_name, selected_name);
+				}
                 break;
             }
         }
@@ -542,7 +548,7 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         // Check existing bucket names first
         for (int i = 1; i <= 10; ++i) {
             std::string bucket_name = fmt::format("spirit_name_{}", i);
-            std::string ret_name = owner->GetBucket(bucket_name);
+            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -562,7 +568,9 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         for (int i = 1; i <= 10; ++i) {
             std::string bucket_name = fmt::format("spirit_name_{}", i);
             if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-                owner->SetBucket(bucket_name, selected_name);
+				if (owner->IsClient()) {
+                	owner->SetBucket(bucket_name, selected_name);
+				}
                 break;
             }
         }
@@ -577,7 +585,7 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         // Check existing bucket names first
         for (int i = 1; i <= 100; ++i) {
             std::string bucket_name = fmt::format("{}_name_{}", bucket_prefix, i);
-            pet_name = owner->GetBucket(bucket_name);
+			pet_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
             if (!pet_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), pet_name) == existing_pet_names.end()) {
                     return pet_name;
@@ -591,7 +599,9 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
             for (int i = 1; i <= 100; ++i) {
                 std::string bucket_name = fmt::format("{}_name_{}", bucket_prefix, i);
                 if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-                    owner->SetBucket(bucket_name, pet_name);
+					if (owner->IsClient()) {
+                    	owner->SetBucket(bucket_name, pet_name);
+					}
                     return pet_name;
                 }
             }
@@ -606,7 +616,7 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         // Check existing bucket names first
         for (int i = 1; i <= 100; ++i) {
             std::string bucket_name = fmt::format("spectre_name_{}", i);
-            std::string ret_name = owner->GetBucket(bucket_name);
+            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
             if (!ret_name.empty()) {
                 if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
                     return ret_name;
@@ -627,8 +637,10 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
         // Set the selected name into the first available bucket
         for (int i = 1; i <= 100; ++i) {
             std::string bucket_name = fmt::format("spectre_name_{}", i);
-            if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-                owner->SetBucket(bucket_name, selected_name);
+            if (owner->GetBucket(bucket_name).empty()) {
+				if (owner->IsClient()) {
+                	owner->SetBucket(bucket_name, selected_name);
+				}
                 return selected_name;
             }
         }
