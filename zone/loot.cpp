@@ -408,36 +408,40 @@ void NPC::AddLootDropFixed(
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (int i = EQ::invslot::EQUIPMENT_BEGIN; !found && i <= EQ::invslot::EQUIPMENT_END; i++) {
-				const uint32 slots = (1 << i);
-				if (item2->Slots & slots) {
-					if (equipment[i]) {
-						compitem = database.GetItem(equipment[i]);
-						if (item2->AC > compitem->AC || (item2->AC == compitem->AC && item2->HP > compitem->HP)) {
-							// item would be an upgrade
-							// check if we're multi-slot, if yes then we have to keep
-							// looking in case any of the other slots we can fit into are empty.
-							if (item2->Slots != slots) {
-								found_slot = i;
-							}
-							else {
-								// Unequip old item
-								auto *old_item = GetItem(i);
+			for (int i = EQ::invslot::EQUIPMENT_BEGIN - 2; i <= EQ::invslot::EQUIPMENT_END; i++) {
+				int slot_to_check;
+				if (i == EQ::invslot::EQUIPMENT_BEGIN - 2) {
+					slot_to_check = EQ::invslot::slotPrimary;
+				} else if (i == EQ::invslot::EQUIPMENT_BEGIN - 1) {
+					slot_to_check = EQ::invslot::slotSecondary;
+				} else {
+					slot_to_check = i;
+				}
 
+				const uint32 slots = (1 << slot_to_check);
+				if (item2->Slots & slots) {
+					if (equipment[slot_to_check]) {
+						compitem = database.GetItem(equipment[slot_to_check]);
+						if (item2->AC > compitem->AC || (item2->AC == compitem->AC && item2->HP > compitem->HP)) {
+							if (item2->Slots != slots) {
+								found_slot = slot_to_check;
+							} else {
+								auto *old_item = GetItem(slot_to_check);
 								old_item->equip_slot = EQ::invslot::SLOT_INVALID;
 
-								equipment[i] = item2->ID;
+								equipment[slot_to_check] = item2->ID;
 
-								found_slot = i;
+								found_slot = slot_to_check;
 								found      = true;
+								break;
 							}
 						}
-					}
-					else {
-						equipment[i] = item2->ID;
+					} else {
+						equipment[slot_to_check] = item2->ID;
 
-						found_slot = i;
+						found_slot = slot_to_check;
 						found      = true;
+						break;
 					}
 				}
 			}
