@@ -1153,9 +1153,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				DispelMagic(caster, spell_id, effect_value);
-				if (IsClient() || (GetOwner() && GetOwner()->IsClient())) {
-					ApplyGlobalBuffs();
-				}
 				break;
 			}
 
@@ -1187,9 +1184,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 				}
-				if (IsClient() || (GetOwner() && GetOwner()->IsClient())) {
-					ApplyGlobalBuffs();
-				}
 				break;
 			}
 
@@ -1216,9 +1210,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							slot = buff_count;
 						}
 					}
-				}
-				if (IsClient() || (GetOwner() && GetOwner()->IsClient())) {
-					ApplyGlobalBuffs();
 				}
 				break;
 			}
