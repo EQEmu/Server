@@ -749,7 +749,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						stun_immune_timer.Start(effect_value * 4);
 						LogCombat("Setting Stun-Immune for [{}] seconds", effect_value * 4 / 1000);
 					} else {
-						MessageString(Chat::Stun, SHAKE_OFF_STUN);
+						MessageString(Chat::Skills, SHAKE_OFF_STUN);
 						LogCombat("Stun Resisted. We are temporarily immune.");
 						break;
 					}
@@ -785,7 +785,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						Stun(effect_value);
 					} else {
 						if (IsClient())
-							MessageString(Chat::Stun, SHAKE_OFF_STUN);
+							MessageString(Chat::Skills, SHAKE_OFF_STUN);
 
 						LogCombat("Stun Resisted. We had [{}] percent resist chance", stun_resist);
 					}

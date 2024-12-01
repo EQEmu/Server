@@ -1486,7 +1486,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 
 			FilteredMessageString(
 				this, /* Sender */
-				Chat::StrikeThrough, /* Type: 339 */
+				Chat::Skills, /* Type: 339 */
 				FilterStrikethrough, /* FilterType: 12 */
 				STRIKETHROUGH_STRING /* You strike through your opponent's defenses! */
 			);
@@ -1512,14 +1512,14 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 					if (zone->random.Roll(stun_resist2)) {
 						other->FilteredMessageString(
 							this,
-							Chat::Stun,
+							Chat::Skills,
 							FilterStuns,
 							AVOID_STUNNING_BLOW
 						);
 					} else if (zone->random.Roll(stun_resist)) {
 						other->FilteredMessageString(
 							this,
-							Chat::Stun,
+							Chat::Skills,
 							FilterStuns,
 							SHAKE_OFF_STUN
 						);
@@ -4656,7 +4656,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 									this,
 									true,
 									RuleI(Range, StunMessages),
-									Chat::Stun,
+									Chat::Skills,
 									FilterStuns,
 									"%s is stunned after being bashed by %s.",
 									GetCleanName(),
@@ -4667,7 +4667,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 									this,
 									true,
 									RuleI(Range, StunMessages),
-									Chat::Stun,
+									Chat::Skills,
 									FilterStuns,
 									"%s is stunned by a bash to the head.",
 									GetCleanName()
@@ -4679,7 +4679,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						if (IsClient()) {
 							FilteredMessageString(
 								this,
-								Chat::Stun,
+								Chat::Skills,
 								FilterStuns,
 								SHAKE_OFF_STUN
 							);
@@ -4690,7 +4690,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					if (IsClient()) {
 						FilteredMessageString(
 							this,
-							Chat::Stun,
+							Chat::Skills,
 							FilterStuns,
 							AVOID_STUNNING_BLOW
 						);

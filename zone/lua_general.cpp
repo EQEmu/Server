@@ -7413,7 +7413,7 @@ luabind::scope lua_register_message_types() {
 			luabind::value("PetResponse", Chat::PetResponse),
 			luabind::value("ItemSpeech", Chat::ItemSpeech),
 			luabind::value("StrikeThrough", Chat::StrikeThrough),
-			luabind::value("Stun", Chat::Stun)
+			luabind::value("Stun", Chat::Skills)
 	)];
 }
 
