@@ -2200,15 +2200,28 @@ void Bot::AI_Process()
 // PULLING FLAG (ACTIONABLE RANGE)
 
 		if (GetPullingFlag()) {
-			if (!IsBotNonSpellFighter() && !HOLDING && AI_HasSpells()) {
-				SetPullingSpell(true);
+			if (!TargetValidation(tar)) { return; }
 
-				if (AI_EngagedCastCheck()) {
-					SetPullingSpell(false);
+			if (atCombatRange) {
+				if (RuleB(Bots, AllowRangedPulling) && IsBotRanged() && ranged_timer.Check(false)) {
+					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
+
+					if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
+						BotRangedAttack(tar, true);
+					}
+
+					ranged_timer.Start();
+
 					return;
 				}
 
-				SetPullingSpell(false);
+				if (RuleB(Bots, AllowAISpellPulling) && !IsBotNonSpellFighter() && AI_HasSpells()) {
+					SetPullingSpell(true);
+					AI_EngagedCastCheck();
+					SetPullingSpell(false);
+
+					return;
+				}
 			}
 
 			if (RuleB(Bots, UseSpellPulling)) {
@@ -2216,38 +2229,15 @@ void Bot::AI_Process()
 
 				if (tar_distance <= spells[pullSpell].range) {
 					StopMoving();
-
-					if (!TargetValidation(tar)) { return; }
-
+					SetPullingSpell(true);
 					CastSpell(pullSpell, tar->GetID());
 					SetPullingSpell(false);
 
 					return;
 				}
 			}
-			else {
-				if (atCombatRange) {
-					if (RuleB(Bots, AllowRangedPulling) && IsBotRanged() && ranged_timer.Check(false)) {
-						StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
 
-						if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
-							BotRangedAttack(tar, true);
-						}
-
-						ranged_timer.Start();
-						SetPullingSpell(false);
-
-						return;
-					}
-					else if (RuleB(Bots, AllowAISpellPulling) && !IsBotNonSpellFighter() && !HOLDING && AI_HasSpells() && AI_EngagedCastCheck()) {
-						SetPullingSpell(false);
-
-						return;
-					}
-				}
-
-				return;
-			}
+			return;
 		}
 
 // ENGAGED AT COMBAT RANGE
