@@ -61,6 +61,8 @@ extern volatile bool RunLoops;
 #include "cheat_manager.h"
 #include "lua_parser.h"
 
+#include "titles.h"
+
 #include "../common/repositories/character_alternate_abilities_repository.h"
 #include "../common/repositories/account_flags_repository.h"
 #include "../common/repositories/bug_reports_repository.h"
@@ -14346,7 +14348,6 @@ void Client::ClientToNpcAggroProcess()
 		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
 	}
 }
-
 void Client::ShowZoneShardMenu()
 {
 	auto z = GetZone(GetZoneID());

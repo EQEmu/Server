@@ -3553,9 +3553,16 @@ void Lua_Client::ShowZoneShardMenu() {
 	self->ShowZoneShardMenu();
 }
 
+bool Lua_Client::CheckTitle(int title_set)
+{
+	Lua_Safe_Call_Bool();
+	return self->CheckTitle(title_set);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
+	.def("CheckTitle", (bool(Lua_Client::*)(int))&Lua_Client::CheckTitle)
 	.def("GetKillCount", (int(Lua_Client::*)(int))&Lua_Client::GetKillCount)
 	.def("AccountID", (uint32(Lua_Client::*)(void))&Lua_Client::AccountID)
 	.def("AccountName", (const char *(Lua_Client::*)(void))&Lua_Client::AccountName)

@@ -3362,12 +3362,18 @@ Merc* Perl_Client_GetMerc(Client* self)
 	return self->GetMerc();
 }
 
+bool Perl_Client_CheckTitle(Client* self, int title_set)
+{
+	return self->CheckTitle(title_set);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
 
 	auto package = perl.new_class<Client>("Client");
 	package.add_base_class("Mob");
+	package.add("CheckTitle", (bool(*)(Client*, int))&Perl_Client_CheckTitle);
 	package.add("AccountID", &Perl_Client_AccountID);
 	package.add("AccountName", &Perl_Client_AccountName);
 	package.add("AddAAPoints", &Perl_Client_AddAAPoints);
