@@ -15,6 +15,12 @@ void bot_command_pull(Client *c, const Seperator *sep)
 
 	std::string arg1 = sep->arg[1];
 	int ab_arg = 1;
+	std::string actionableArg = sep->arg[ab_arg];
+
+	if (actionableArg.empty()) {
+		actionableArg = "spawned";
+	}
+
 	std::string class_race_arg = sep->arg[ab_arg];
 	bool class_race_check = false;
 
@@ -24,7 +30,7 @@ void bot_command_pull(Client *c, const Seperator *sep)
 
 	std::list<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
