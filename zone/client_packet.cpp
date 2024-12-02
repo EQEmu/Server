@@ -4939,11 +4939,6 @@ void Client::Handle_OP_ClientTimeStamp(const EQApplicationPacket *app)
 }
 
 void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
-	if (GetGM()) {
-		CAuthorized = true;
-		return;
-	}
-
 	if (RuleB(Custom, ServerAuthStats)) {
 		AuthResponse_Struct *buf = (AuthResponse_Struct *)app->pBuffer;
 
@@ -4972,6 +4967,17 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 		}
 
 		CAuthorized = (decryptedValue == (GetClassesBits() * GetID()));
+
+		if (GetGM()) {
+			CAuthorized = true;
+			return;
+		}
+
+		if (CAuthorized) {
+			// Echo the packet back
+			QueuePacket(app);
+		}
+
 		if (!CHacker && buf->unk && CAuthorized) {
 			CHacker = true;
 
