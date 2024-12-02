@@ -67,6 +67,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/guild_tributes_repository.h"
 #include "../common/repositories/buyer_buy_lines_repository.h"
 #include "../common/repositories/account_ip_repository.h"
+#include "../common/repositories/account_kill_counts_repository.h"
 
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_stats_record_repository.h"
@@ -529,6 +530,12 @@ void Client::CompleteConnect()
 
 	if (RuleB(Custom, MulticlassingEnabled)) {
 		m_pp.classes = Strings::ToInt(GetBucket("GestaltClasses"), GetPlayerClassBit(m_pp.class_));
+	}
+
+	// Load Kill Counters
+	auto kdb = AccountKillCountsRepository::GetWhere(database, fmt::format("account_id = {}", account_id));
+	for (auto kinfo : kdb) {
+		kill_counters[kinfo.race_id] = kinfo.count;
 	}
 
 	UpdateWho();

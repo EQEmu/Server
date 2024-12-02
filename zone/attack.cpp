@@ -3241,12 +3241,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				parse->EventNPC(EVENT_KILLED_MERIT, this, m, "killed", 0);
 			}
 
-			AccountKillCountsRepository::AccountKillCounts entry;
-			entry.account_id = m->CastToClient()->AccountID();
-			entry.race_id = GetBaseRace();
-			entry.count = AccountKillCountsRepository::GetRaceCount(database, entry.account_id, entry.race_id) + 1;
-
-			AccountKillCountsRepository::ReplaceOne(database, entry);
+			m->CastToClient()->kill_counters[GetBaseRace()]++;
 		}
 	}
 

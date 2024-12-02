@@ -72,6 +72,7 @@ extern volatile bool RunLoops;
 #include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/keyring_repository.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
+#include "../common/repositories/account_kill_counts_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
@@ -707,6 +708,17 @@ bool Client::Save(uint8 iCommitNow) {
 		m_pp.mana      = current_mana;
 		m_pp.endurance = current_endurance;
 	}
+
+	/* Save Account Kill Counts */
+	std::vector<AccountKillCountsRepository::AccountKillCounts> entries;
+    for (const auto& [race_id, count] : kill_counters) {
+        entries.push_back(AccountKillCountsRepository::AccountKillCounts{
+            .account_id = account_id,
+            .race_id = race_id,
+            .count = count
+        });
+    }
+	AccountKillCountsRepository::ReplaceMany(database, entries);
 
 	/* Save Character Currency */
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);

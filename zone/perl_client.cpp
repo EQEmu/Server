@@ -2962,6 +2962,10 @@ perl::array Perl_Client_GetZoneFlags(Client* self)
 	return a;
 }
 
+int Perl_Client_GetKillCount(Client* self, int race_id) {
+	return self->kill_counters[race_id];
+}
+
 void Perl_Client_SendPayload(Client* self, int payload_id) // @categories Script Utility
 {
 	self->SendPayload(payload_id);
@@ -3531,6 +3535,7 @@ void perl_register_client()
 	package.add("GetClassesBitmask", &Perl_Client_GetClassesBitmask);
 	package.add("AddExtraClass", (bool(*)(Client*, int))&Perl_Client_AddExtraClass);
 	package.add("RemoveExtraClass", (bool(*)(Client*, int))&Perl_Client_RemoveExtraClass);
+	package.add("GetKillCount", (int(*)(Client*, int))&Perl_Client_GetKillCount);
 	package.add("GetClientMaxLevel", &Perl_Client_GetClientMaxLevel);
 	package.add("GetClientVersion", &Perl_Client_GetClientVersion);
 	package.add("GetClientVersionBit", &Perl_Client_GetClientVersionBit);

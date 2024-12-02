@@ -1900,6 +1900,9 @@ public:
 
 	uint32 GetEXPForLevel(uint16 check_level);
 
+	std::map<int, int> kill_counters;
+
+
 	void SetVisibility(Mob* mob, bool visible);
 
 protected:
@@ -1948,7 +1951,6 @@ private:
 	void OPGMSummon(const EQApplicationPacket *app);
 	void OPCombatAbility(const CombatAbility_Struct *ca_atk);
 	void SendCombatAbilityTimers();
-
 
 	// Custom ServerAuthStats Skill refactor
 	pTimerType GetCombatTimer(uint32 skill);
