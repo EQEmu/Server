@@ -736,10 +736,10 @@ const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellT
 const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong);
 const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
 
-bool BOT_SPELL_TYPES_DETRIMENTAL (uint16 spellType, uint8 cls = 0);
-bool BOT_SPELL_TYPES_BENEFICIAL (uint16 spellType, uint8 cls = 0);
-bool BOT_SPELL_TYPES_OTHER_BENEFICIAL(uint16 spellType);
-bool BOT_SPELL_TYPES_INNATE (uint16 spellType);
+bool IsBotSpellTypeDetrimental (uint16 spellType, uint8 cls = 0);
+bool IsBotSpellTypeBeneficial (uint16 spellType, uint8 cls = 0);
+bool IsBotSpellTypeOtherBeneficial(uint16 spellType);
+bool IsBotSpellTypeInnate (uint16 spellType);
 bool IsBotSpellType (uint16 spellType);
 bool IsAEBotSpellType(uint16 spellType);
 bool IsGroupBotSpellType(uint16 spellType);

@@ -243,7 +243,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 		}
 
 		if (AIDoSpellCast(s.SpellIndex, tar, s.ManaCost)) {
-			if (BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType)) {
+			if (IsBotSpellTypeOtherBeneficial(spellType)) {
 				SetCastedSpellType(UINT16_MAX);
 
 				if (!IsCommandedSpell()) {
@@ -293,7 +293,7 @@ bool Bot::BotCastMez(Mob* tar, uint8 botClass, BotSpell& botSpell, uint16 spellT
 		}
 
 		if (AIDoSpellCast(s.SpellIndex, tar, s.ManaCost)) {
-			if (BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType)) {
+			if (IsBotSpellTypeOtherBeneficial(spellType)) {
 				SetCastedSpellType(UINT16_MAX);
 				
 				if (!IsCommandedSpell()) {
@@ -2514,7 +2514,7 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 				entry.bucket_comparison = e.bucket_comparison;
 
 				// some spell types don't make much since to be priority 0, so fix that
-				if (!BOT_SPELL_TYPES_INNATE(entry.type) && entry.priority == 0) {
+				if (!IsBotSpellTypeInnate(entry.type) && entry.priority == 0) {
 					entry.priority = 1;
 				}
 
