@@ -928,7 +928,7 @@ void Client::CompleteConnect()
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
-	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
+	if (ClientVersion() >= EQ::versions::ClientVersion::RoF && !RuleB(Custom, DisableInitialSendBulkBazaarTraders)) {
 		SendBulkBazaarTraders();
 	}
 
