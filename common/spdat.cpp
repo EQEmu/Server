@@ -2954,14 +2954,6 @@ bool IsBotSpellTypeInnate(uint16 spellType) {
 	return false;
 }
 
-bool IsBotSpellType(uint16 spellType) {
-	if (IsBotSpellTypeDetrimental(spellType) && IsBotSpellTypeBeneficial(spellType) && IsBotSpellTypeInnate(spellType)) {
-		return true;
-	}
-	
-	return false;
-}
-
 bool IsAEBotSpellType(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::AEDebuff:

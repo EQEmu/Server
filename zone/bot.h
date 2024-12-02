@@ -991,8 +991,6 @@ public:
 	// Public "Refactor" Methods
 	static bool CheckCampSpawnConditions(Client* c);
 
-	inline bool CommandedDoSpellCast(int32 i, Mob* tar, int32 mana_cost) { return AIDoSpellCast(i, tar, mana_cost); }
-
 protected:
 	void BotMeditate(bool isSitting);
 	bool CheckBotDoubleAttack(bool Triple = false);
