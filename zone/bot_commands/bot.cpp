@@ -1404,6 +1404,25 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		bot_iter->SetBotStance(value);
 		bot_iter->LoadDefaultBotSettings();
 		database.botdb.LoadBotSettings(bot_iter);
+
+		if (
+			(bot_iter->GetClass() == Class::Warrior || bot_iter->GetClass() == Class::Paladin || bot_iter->GetClass() == Class::ShadowKnight) && 
+			(bot_iter->GetBotStance() == Stance::Aggressive)
+		) {
+			bot_iter->SetTaunting(true);
+
+			if (bot_iter->HasPet() && bot_iter->GetPet()->GetSkill(EQ::skills::SkillTaunt)) {
+				bot_iter->GetPet()->CastToNPC()->SetTaunting(true);
+			}
+		}
+		else {
+			bot_iter->SetTaunting(false);
+
+			if (bot_iter->HasPet() && bot_iter->GetPet()->GetSkill(EQ::skills::SkillTaunt)) {
+				bot_iter->GetPet()->CastToNPC()->SetTaunting(false);
+			}
+		}
+	
 		bot_iter->Save();
 		++success_count;
 	}
