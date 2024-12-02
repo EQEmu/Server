@@ -720,7 +720,9 @@ bool Client::Save(uint8 iCommitNow) {
             .count = count
         });
     }
-	AccountKillCountsRepository::ReplaceMany(database, entries);
+	if (!entries.empty()) {
+		AccountKillCountsRepository::ReplaceMany(database, entries);
+	}
 
 	/* Save Character Currency */
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
