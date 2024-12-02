@@ -10919,7 +10919,7 @@ bool Bot::AttemptAICastSpell(uint16 spellType) {
 
 	Mob* tar = GetTarget();
 
-	if (!IsTaunting() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting())) {
+	if (!IsTaunting() && !IsCommandedSpell() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting())) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of [{}] due to GetSpellTypeAggroCheck and HasOrMayGetAggro.'", GetCleanName(), GetSpellTypeNameByID(spellType)); //deleteme
 		return result;
 	}
