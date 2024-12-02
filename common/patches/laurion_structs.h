@@ -525,6 +525,68 @@ namespace Laurion {
 
 		};
 
+		/*
+		Flags for special:
+		WildRampage: 0x1
+		Rampage: 0x2
+		NoCastOnText: 0x4
+		DoubleBowShot: 0x8
+		UnknownSpellFlag: 0x10
+		Flurry: 0x20
+		Riposte: 0x40
+		Critical: 0x80
+		Lucky: 0x100
+		FinishingBlow: 0x200
+		CripplingBlow: 0x400
+		Assassinate: 0x800
+		DeadlyStrike: 0x1000
+		SlayUndead: 0x2000
+		Headshot: 0x4000
+		Strikethrough: 0x8000
+		LuckyRiposte: 0x10000
+		Twincast: 0x20000
+		Might be more flags beyond this but I'm not sure
+		*/
+
+		struct CombatDamage_Struct
+		{
+			/*000*/ uint16 target;
+			/*002*/ uint16 source;
+			/*004*/ uint32 unknown1; //not read by the client
+			/*008*/ int64 damage;
+			/*016*/ uint32 special; //flags; will document above
+			/*020*/ int32 spellid;
+			/*024*/ uint32 spell_level; //spell caster level (unconfirmed; it is used for the spell link)
+			/*028*/ float force; //I haven't actually been able to confirm these three yet
+			/*032*/ float hit_heading;
+			/*036*/ int32 hit_pitch;
+			/*040*/ uint8 type;
+			/*041*/ uint8 padding[3];
+			/*044*/ uint32 unknown2; //not read by the client
+			/*048*/ 
+		};
+
+		struct Animation_Struct {
+			/*00*/	uint16 spawnid;
+			/*02*/	uint8 action;
+			/*03*/	uint8 speed;
+			/*04*/
+		};
+
+		struct Death_Struct
+		{
+			/*000*/	uint32	spawn_id;
+			/*004*/	uint32	killer_id;
+			/*008*/	uint32	corpseid; //not read by client
+			/*012*/	uint32	unknown1; //not read by client
+			/*016*/	uint32	spell_id;
+			/*020*/ uint32	attack_skill;
+			/*024*/	uint64	damage;
+			/*032*/	uint32	unknown2; //not read by client
+			/*036*/	uint32	unknown3; //not read by client
+			/*040*/
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

@@ -2601,6 +2601,62 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_Damage) {
+		SETUP_DIRECT_ENCODE(CombatDamage_Struct, structs::CombatDamage_Struct);
+
+		OUT(target);
+		OUT(source);
+		OUT(type);
+		OUT(spellid);
+		OUT(damage);
+		OUT(force);
+		OUT(hit_heading);
+		OUT(hit_pitch);
+		OUT(special);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Animation)
+	{
+		ENCODE_LENGTH_EXACT(Animation_Struct);
+		SETUP_DIRECT_ENCODE(Animation_Struct, structs::Animation_Struct);
+
+		OUT(spawnid);
+		OUT(action);
+		OUT(speed);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Death)
+	{
+		ENCODE_LENGTH_EXACT(Death_Struct);
+		SETUP_DIRECT_ENCODE(Death_Struct, structs::Death_Struct);
+
+		OUT(spawn_id);
+		OUT(killer_id);
+		OUT(spell_id);
+		OUT(attack_skill);
+		OUT(damage);
+
+		//This is a hack, we need to actually fix the ordering in source as this wont respect filters etc
+		if (emu->attack_skill != 231) {
+			auto combat_packet = new EQApplicationPacket(OP_Damage, sizeof(structs::CombatDamage_Struct));
+			structs::CombatDamage_Struct* cds = (structs::CombatDamage_Struct*)combat_packet->pBuffer;
+
+			cds->target = emu->spawn_id;
+			cds->source = emu->killer_id;
+			cds->type = emu->attack_skill;
+			cds->damage = emu->damage;
+			cds->spellid = -1;
+
+			dest->FastQueuePacket(&combat_packet, ack_req);
+		}
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
