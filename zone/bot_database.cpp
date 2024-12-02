@@ -2294,7 +2294,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 	if (m->IsBot()) {
 		uint8 botStance = m->CastToBot()->GetBotStance();
 
-		for (uint16 i = BotBaseSettings::START; i <= BotBaseSettings::END; ++i) {
+		for (uint16 i = BotBaseSettings::START_ALL; i <= BotBaseSettings::END; ++i) {
 			if (m->CastToBot()->GetBotBaseSetting(i) != m->CastToBot()->GetDefaultBotBaseSetting(i, botStance)) {
 				auto e = BotSettingsRepository::BotSettings{
 					.char_id					= charID,

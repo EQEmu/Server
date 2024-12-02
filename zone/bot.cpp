@@ -248,11 +248,11 @@ Bot::Bot(
 
 	database.botdb.LoadTimers(this);
 
-	LoadAAs();
-
 	LoadDefaultBotSettings();
 
 	database.botdb.LoadBotSettings(this);
+
+	LoadAAs();
 
 	if (database.botdb.LoadBuffs(this)) {
 		//reapply some buffs
@@ -1258,7 +1258,6 @@ int32 Bot::GenerateBaseHitPoints() {
 }
 
 void Bot::LoadAAs() {
-
 	aa_ranks.clear();
 
 	int id = 0;
@@ -10202,7 +10201,7 @@ void Bot::LoadDefaultBotSettings() {
 
 	uint8 botStance = GetBotStance();
 
-	for (uint16 i = BotBaseSettings::START; i <= BotBaseSettings::END; ++i) {
+	for (uint16 i = BotBaseSettings::START_ALL; i <= BotBaseSettings::END; ++i) {
 		SetBotBaseSetting(i, GetDefaultSetting(BotSettingCategories::BaseSetting, i, botStance));
 		LogBotSettingsDetail("{} says, 'Setting default {} [{}] to [{}]'", GetCleanName(), GetBotSettingCategoryName(i), i, GetDefaultBotBaseSetting(i, botStance)); //deleteme
 	}	

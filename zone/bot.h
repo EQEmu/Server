@@ -142,6 +142,7 @@ namespace BotBaseSettings {
 	constexpr uint16 HPWhenToMed				= 12;
 	constexpr uint16 ManaWhenToMed				= 13;
 
+	constexpr uint16 START_ALL					= ExpansionBitmask;
 	constexpr uint16 START						= BotBaseSettings::ShowHelm; // Everything above this cannot be copied, changed or viewed by players
 	constexpr uint16 END						= BotBaseSettings::ManaWhenToMed; // Increment as needed
 };
