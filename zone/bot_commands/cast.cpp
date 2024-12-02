@@ -451,6 +451,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		}
 
 		bot_iter->SetCommandedSpell(false);
+
 		continue;
 	}
 
