@@ -410,6 +410,8 @@ public:
 	void SetPauseAI(bool pause_flag) { _pauseAI = pause_flag; }
 	bool IsCommandedSpell() const { return _commandedSpell; }
 	void SetCommandedSpell(bool value) { _commandedSpell = value;  }
+	bool IsPullingSpell() const { return _pullingSpell; }
+	void SetPullingSpell(bool value) { _pullingSpell = value; }
 	
 	void SetGuardMode();
 	void SetHoldMode();
@@ -1083,6 +1085,7 @@ private:
 	uint16 _castedSpellType;
 	bool _hasLoS;
 	bool _commandedSpell;
+	bool _pullingSpell;
 
 	// Private "base stats" Members
 	int32 _baseMR;

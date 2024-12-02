@@ -740,7 +740,6 @@ bool IsBotSpellTypeDetrimental (uint16 spellType, uint8 cls = 0);
 bool IsBotSpellTypeBeneficial (uint16 spellType, uint8 cls = 0);
 bool IsBotSpellTypeOtherBeneficial(uint16 spellType);
 bool IsBotSpellTypeInnate (uint16 spellType);
-bool IsBotSpellType (uint16 spellType);
 bool IsAEBotSpellType(uint16 spellType);
 bool IsGroupBotSpellType(uint16 spellType);
 bool IsGroupTargetOnlyBotSpellType(uint16 spellType);
@@ -752,6 +751,7 @@ bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls = 0);
 bool SpellTypeRequiresCastChecks(uint16 spellType);
 bool SpellTypeRequiresAEChecks(uint16 spellType);
 bool IsCommandedSpellType(uint16 spellType);
+bool IsPullingSpellType(uint16 spellType);
 bool BotSpellTypeRequiresLoS(uint16 spellType, uint8 cls);
 
 // These should not be used to determine spell category..
