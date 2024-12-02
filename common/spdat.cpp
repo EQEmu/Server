@@ -3279,6 +3279,25 @@ bool IsCommandedSpellType(uint16 spellType) {
 	return false;
 }
 
+bool IsPullingSpellType(uint16 spellType) {
+	switch (spellType) {
+		case BotSpellTypes::Nuke:
+		case BotSpellTypes::Lifetap:
+		case BotSpellTypes::Snare:
+		case BotSpellTypes::DOT:
+		case BotSpellTypes::Dispel:
+		case BotSpellTypes::Slow:
+		case BotSpellTypes::Debuff:
+		case BotSpellTypes::Stun:
+		case BotSpellTypes::HateLine:
+			return true;
+		default:
+			return false;
+		}
+
+	return false;
+}
+
 bool BotSpellTypeRequiresLoS(uint16 spellType, uint8 cls) {
 	switch (spellType) {
 		case BotSpellTypes::Nuke:

@@ -101,6 +101,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	LoadDefaultBotSettings();
 	SetCastedSpellType(UINT16_MAX);
 	SetCommandedSpell(false);
+	SetPullingSpell(false);
 	//DisableBotSpellTimers();
 
 	// Do this once and only in this constructor
@@ -178,6 +179,7 @@ Bot::Bot(
 	SetBotCharmer(false);
 	SetCastedSpellType(UINT16_MAX);
 	SetCommandedSpell(false);
+	SetPullingSpell(false);
 
 	bool stance_flag = false;
 	if (!database.botdb.LoadStance(this, stance_flag) && bot_owner) {
@@ -2200,36 +2202,53 @@ void Bot::AI_Process()
 // PULLING FLAG (ACTIONABLE RANGE)
 
 		if (GetPullingFlag()) {
-			if (!IsBotNonSpellFighter() && !HOLDING && AI_HasSpells() && AI_EngagedCastCheck()) {
-				return;
+			if (!IsBotNonSpellFighter() && !HOLDING && AI_HasSpells()) {
+				SetPullingSpell(true);
+
+				if (AI_EngagedCastCheck()) {
+					SetPullingSpell(false);
+					return;
+				}
+
+				SetPullingSpell(false);
 			}
 
-			if (RuleB(Bots, AllowSpellPulling)) {
+			if (RuleB(Bots, UseSpellPulling)) {
 				uint16 pullSpell = RuleI(Bots, PullSpellID);
 
-				if (tar_distance <= (spells[pullSpell].range * spells[pullSpell].range)) {
+				if (tar_distance <= spells[pullSpell].range) {
 					StopMoving();
 
 					if (!TargetValidation(tar)) { return; }
 
 					CastSpell(pullSpell, tar->GetID());
+					SetPullingSpell(false);
 
 					return;
 				}
 			}
 			else {
-				//TODO bot rewrite - add casting AI to this
-				if (atCombatRange && IsBotRanged() && ranged_timer.Check(false)) {
-					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
+				if (atCombatRange) {
+					if (RuleB(Bots, AllowRangedPulling) && IsBotRanged() && ranged_timer.Check(false)) {
+						StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
 
-					if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
-						BotRangedAttack(tar, true);
+						if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
+							BotRangedAttack(tar, true);
+						}
+
+						ranged_timer.Start();
+						SetPullingSpell(false);
+
+						return;
 					}
+					else if (RuleB(Bots, AllowAISpellPulling) && !IsBotNonSpellFighter() && !HOLDING && AI_HasSpells() && AI_EngagedCastCheck()) {
+						SetPullingSpell(false);
 
-					ranged_timer.Start();
-
-					return;
+						return;
+					}
 				}
+
+				return;
 			}
 		}
 
@@ -2624,7 +2643,7 @@ void Bot::DoAttackRounds(Mob* target, int hand) {
 								NPC_FLURRY,
 								GetCleanName(),
 								target->GetCleanName()
-							); //TODO bot rewrite - add output to others hits with flurry message
+							);
 						}
 					}
 				}
@@ -9344,6 +9363,10 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spellType) {
 	if (GetUltimateSpellHold(spellType, tar)) {
 		LogBotHoldChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellHold.'", GetCleanName(), GetSpellTypeNameByID(spellType), tar->GetCleanName()); //deleteme
 		return false;
+	}
+
+	if (IsPullingSpell() && IsPullingSpellType(spellType)) { //Skip remaining checks for commanded
+		return true;
 	}
 
 	if (GetManaRatio() < GetSpellTypeMinManaLimit(spellType) || GetManaRatio() > GetSpellTypeMaxManaLimit(spellType)) {
