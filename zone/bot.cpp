@@ -5664,13 +5664,13 @@ bool Bot::CastSpell(
 				LogSpellsDetail("Spell casting canceled: not able to cast now. Valid? [{}] casting [{}] waiting? [{}] spellend? [{}] stunned? [{}] feared? [{}] mezed? [{}] silenced? [{}]",
 					IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced()
 				);
-				if (IsSilenced() && !IsDiscipline(spell_id)) {
-					MessageString(Chat::White, SILENCED_STRING);
-				}
-
-				if (IsAmnesiad() && IsDiscipline(spell_id)) {
-					MessageString(Chat::White, MELEE_SILENCE);
-				}
+				//if (IsSilenced() && !IsDiscipline(spell_id)) {
+				//	MessageString(Chat::White, SILENCED_STRING);
+				//}
+				//
+				//if (IsAmnesiad() && IsDiscipline(spell_id)) {
+				//	MessageString(Chat::White, MELEE_SILENCE);
+				//}
 
 				if (casting_spell_id) {
 					AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
@@ -5681,7 +5681,7 @@ bool Bot::CastSpell(
 		}
 
 		if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
-			MessageString(Chat::White, SPELL_WOULDNT_HOLD);
+			//MessageString(Chat::White, SPELL_WOULDNT_HOLD);
 			if (casting_spell_id) {
 				AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 			}
