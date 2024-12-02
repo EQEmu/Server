@@ -9614,7 +9614,7 @@ uint16 Mob::GetUltimateSpellDelay(uint16 spellType, Mob* tar) {
 		return tar->GetOwner()->GetSpellDelay(GetPetSpellType(spellType));
 	}
 
-	if (BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType) && tar->IsOfClientBot()) {
+	if (IsBotSpellTypeOtherBeneficial(spellType) && tar->IsOfClientBot()) {
 		return tar->GetSpellDelay(spellType);
 	}
 
@@ -9630,7 +9630,7 @@ bool Mob::GetUltimateSpellDelayCheck(uint16 spellType, Mob* tar) {
 		return tar->GetOwner()->SpellTypeRecastCheck(GetPetSpellType(spellType));
 	}
 
-	if (BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType) && tar->IsOfClientBot()) {
+	if (IsBotSpellTypeOtherBeneficial(spellType) && tar->IsOfClientBot()) {
 		return tar->SpellTypeRecastCheck(spellType);
 	}
 
@@ -9646,7 +9646,7 @@ uint8 Mob::GetUltimateSpellMinThreshold(uint16 spellType, Mob* tar) {
 		return tar->GetOwner()->GetSpellMinThreshold(GetPetSpellType(spellType));
 	}
 
-	if (BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType) && tar->IsOfClientBot()) {
+	if (IsBotSpellTypeOtherBeneficial(spellType) && tar->IsOfClientBot()) {
 		return tar->GetSpellMinThreshold(spellType);
 	}
 
@@ -9662,7 +9662,7 @@ uint8 Mob::GetUltimateSpellMaxThreshold(uint16 spellType, Mob* tar) {
 		return tar->GetOwner()->GetSpellMaxThreshold(GetPetSpellType(spellType));
 	}
 
-	if (BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType) && tar->IsOfClientBot()) {
+	if (IsBotSpellTypeOtherBeneficial(spellType) && tar->IsOfClientBot()) {
 		return tar->GetSpellMaxThreshold(spellType);
 	}
 

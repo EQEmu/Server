@@ -2791,7 +2791,7 @@ bool IsLichSpell(uint16 spell_id)
 	return false;
 }
 
-bool BOT_SPELL_TYPES_DETRIMENTAL(uint16 spellType, uint8 cls) {
+bool IsBotSpellTypeDetrimental(uint16 spellType, uint8 cls) {
 	switch (spellType) {
 		case BotSpellTypes::Nuke:
 		case BotSpellTypes::Root:
@@ -2830,7 +2830,7 @@ bool BOT_SPELL_TYPES_DETRIMENTAL(uint16 spellType, uint8 cls) {
 	return false;
 }
 
-bool BOT_SPELL_TYPES_BENEFICIAL(uint16 spellType, uint8 cls) {
+bool IsBotSpellTypeBeneficial(uint16 spellType, uint8 cls) {
 	switch (spellType) {
 		case BotSpellTypes::RegularHeal:
 		case BotSpellTypes::CompleteHeal:
@@ -2879,7 +2879,7 @@ bool BOT_SPELL_TYPES_BENEFICIAL(uint16 spellType, uint8 cls) {
 	return false;
 }
 
-bool BOT_SPELL_TYPES_OTHER_BENEFICIAL(uint16 spellType) {
+bool IsBotSpellTypeOtherBeneficial(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::RegularHeal:
 		case BotSpellTypes::CompleteHeal:
@@ -2922,7 +2922,7 @@ bool BOT_SPELL_TYPES_OTHER_BENEFICIAL(uint16 spellType) {
 	return false;
 }
 
-bool BOT_SPELL_TYPES_INNATE(uint16 spellType) {
+bool IsBotSpellTypeInnate(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::AENukes:
 		case BotSpellTypes::AERains:
@@ -2955,7 +2955,7 @@ bool BOT_SPELL_TYPES_INNATE(uint16 spellType) {
 }
 
 bool IsBotSpellType(uint16 spellType) {
-	if (BOT_SPELL_TYPES_DETRIMENTAL(spellType) && BOT_SPELL_TYPES_BENEFICIAL(spellType) && BOT_SPELL_TYPES_INNATE(spellType)) {
+	if (IsBotSpellTypeDetrimental(spellType) && IsBotSpellTypeBeneficial(spellType) && IsBotSpellTypeInnate(spellType)) {
 		return true;
 	}
 	

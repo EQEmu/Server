@@ -339,7 +339,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			break;
 		default:
 			if (
-				(BOT_SPELL_TYPES_DETRIMENTAL(spellType) && !c->IsAttackAllowed(tar)) ||
+				(IsBotSpellTypeDetrimental(spellType) && !c->IsAttackAllowed(tar)) ||
 				(
 					spellType == BotSpellTypes::Charm && 
 					(
@@ -354,7 +354,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				return;
 			}
 
-			if (BOT_SPELL_TYPES_BENEFICIAL(spellType)) {
+			if (IsBotSpellTypeBeneficial(spellType)) {
 				if (
 					(!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) ||
 					((tar->IsOfClientBot() && !c->IsInGroupOrRaid(tar)) || (tar->GetOwner() && tar->GetOwner()->IsOfClientBot() && !c->IsInGroupOrRaid(tar->GetOwner())))
@@ -418,14 +418,14 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		}
 
 		if (
-			BOT_SPELL_TYPES_BENEFICIAL(spellType) &&
+			IsBotSpellTypeBeneficial(spellType) &&
 			!RuleB(Bots, CrossRaidBuffingAndHealing) &&
 			!bot_iter->IsInGroupOrRaid(newTar, true)
 		) {
 			continue;
 		}
 
-		if (BOT_SPELL_TYPES_DETRIMENTAL(spellType, bot_iter->GetClass()) && !bot_iter->IsAttackAllowed(newTar)) {
+		if (IsBotSpellTypeDetrimental(spellType, bot_iter->GetClass()) && !bot_iter->IsAttackAllowed(newTar)) {
 			bot_iter->BotGroupSay(
 				bot_iter,
 				fmt::format(

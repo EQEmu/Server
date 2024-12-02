@@ -7155,7 +7155,7 @@ bool Bot::CheckLoreConflict(const EQ::ItemData* item) {
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, uint16 spellType) {
 
-	if (BOT_SPELL_TYPES_DETRIMENTAL(spellType, caster->GetClass())) {
+	if (IsBotSpellTypeDetrimental(spellType, caster->GetClass())) {
 		LogError("[EntityList::Bot_AICheckCloseBeneficialSpells] detrimental spells requested");
 		return false;
 	}
@@ -10247,7 +10247,7 @@ void Bot::SetBotSpellRecastTimer(uint16 spellType, Mob* tar, bool preCast) {
 		return;
 	}
 
-	if (!preCast && BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType)) {
+	if (!preCast && IsBotSpellTypeOtherBeneficial(spellType)) {
 		return;
 	}
 
@@ -10265,7 +10265,7 @@ void Bot::SetBotSpellRecastTimer(uint16 spellType, Mob* tar, bool preCast) {
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
 		return tar->GetOwner()->SetSpellTypeRecastTimer(spellType, (GetUltimateSpellDelay(spellType, tar) + addedDelay));
 	}
-	else if (BOT_SPELL_TYPES_OTHER_BENEFICIAL(spellType)) {
+	else if (IsBotSpellTypeOtherBeneficial(spellType)) {
 		tar->SetSpellTypeRecastTimer(spellType, (GetUltimateSpellDelay(spellType, tar) + addedDelay));
 	}
 	else {
@@ -10396,7 +10396,7 @@ uint16 Bot::GetDefaultSpellTypePriority(uint16 spellType, uint8 priorityType, ui
 }
 
 uint16 Bot::GetDefaultSpellTypeIdlePriority(uint16 spellType, uint8 botClass, uint8 stance) {
-	if (!BOT_SPELL_TYPES_BENEFICIAL(spellType, botClass)) {
+	if (!IsBotSpellTypeBeneficial(spellType, botClass)) {
 		return 0;
 	}
 	
@@ -10658,7 +10658,7 @@ uint16 Bot::GetDefaultSpellTypePursuePriority(uint16 spellType, uint8 botClass, 
 
 uint16 Bot::GetDefaultSpellTypeResistLimit(uint16 spellType, uint8 stance) {
 
-	if (!BOT_SPELL_TYPES_BENEFICIAL(spellType, GetClass())) {
+	if (!IsBotSpellTypeBeneficial(spellType, GetClass())) {
 		return RuleI(Bots, SpellResistLimit);
 	}
 	else {
@@ -10913,7 +10913,7 @@ bool Bot::AttemptAICastSpell(uint16 spellType) {
 		return result;
 	}
 
-	if (BOT_SPELL_TYPES_BENEFICIAL(spellType, GetClass())) {
+	if (IsBotSpellTypeBeneficial(spellType, GetClass())) {
 		if (!PrecastChecks(this, spellType) || !AICastSpell(this, GetChanceToCastBySpellType(spellType), spellType)) {
 			if (GetClass() == Class::Bard) {
 				return result;
@@ -11326,7 +11326,7 @@ bool Bot::RequiresLoSForPositioning() {
 	}
 
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-		if (BOT_SPELL_TYPES_DETRIMENTAL(i) && !GetSpellHold(i)) {
+		if (IsBotSpellTypeDetrimental(i) && !GetSpellHold(i)) {
 			return true;
 		}
 	}
