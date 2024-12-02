@@ -1779,29 +1779,43 @@ void Bot::BotMeditate(bool isSitting) {
 	}
 }
 
-void Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
-	if (!TargetValidation(other)) { return; }
+bool Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
+	if (!other || !IsAttackAllowed(other) || IsCasting() || DivineAura() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead)) {
+		return false;
+	}
+
+	if (
+		!GetPullingFlag() &&
+		(
+			(GetBotStance() != Stance::Aggressive && GetBotStance() != Stance::Burn && GetBotStance() != Stance::AEBurn) &&
+			other->GetHPRatio() > 99.0f
+		)
+	) {
+		return false;
+	}
 
 	if (!CanDoubleAttack && ((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check()))) {
 		LogCombatDetail("Bot ranged attack canceled. Timer not up. Attack [{}] ranged [{}]", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
-		Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
-		return;
+		return false;
 	}
 
 	const auto rangedItem = GetBotItem(EQ::invslot::slotRange);
 	const EQ::ItemData* RangeWeapon = nullptr;
+
 	if (rangedItem) {
 		RangeWeapon = rangedItem->GetItem();
 	}
 
 	if (!RangeWeapon) {
-		return;
+		return false;
 	}
 
 	const auto ammoItem = GetBotItem(EQ::invslot::slotAmmo);
 	const EQ::ItemData* Ammo = nullptr;
-	if (ammoItem)
+
+	if (ammoItem) {
 		Ammo = ammoItem->GetItem();
+	}
 
 	// Bow requires arrows
 	if (
@@ -1827,7 +1841,7 @@ void Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
 			}
 		}
 
-		return;
+		return false;
 	}
 
 	LogCombatDetail("Ranged attacking [{}] with {} [{}] ([{}]){}{}{}",
@@ -1839,10 +1853,6 @@ void Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
 		(Ammo && Ammo->ItemType == EQ::item::ItemTypeArrow ? Ammo->Name : ""),
 		(Ammo && Ammo->ItemType == EQ::item::ItemTypeArrow ? std::to_string(Ammo->ID) : "")
 	);
-
-	if (!IsAttackAllowed(other) || IsCasting() || DivineAura() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead)) {
-		return;
-	}
 
 	SendItemAnimation(other, Ammo, (RangeWeapon->ItemType == EQ::item::ItemTypeBow ? EQ::skills::SkillArchery : EQ::skills::SkillThrowing));
 	if (RangeWeapon->ItemType == EQ::item::ItemTypeBow) {
@@ -1861,7 +1871,7 @@ void Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
 				)
 		) {
 			ammoItem->SetCharges((ammoItem->GetCharges() - 1));
-			LogCombat("Consumed Archery Ammo from slot {}.", EQ::invslot::slotAmmo);
+			LogCombatDetail("Consumed Archery Ammo from slot {}.", EQ::invslot::slotAmmo);
 
 			if (ammoItem->GetCharges() < 1) {
 				RemoveBotItemBySlot(EQ::invslot::slotAmmo);
@@ -1869,10 +1879,10 @@ void Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
 			}
 		}
 		else if (!consumes_ammo) {
-			LogCombat("Archery Ammo Consumption is disabled.");
+			LogCombatDetail("Archery Ammo Consumption is disabled.");
 		}
 		else {
-			LogCombat("Endless Quiver prevented Ammo Consumption.");
+			LogCombatDetail("Endless Quiver prevented Ammo Consumption.");
 		}
 	}
 	else {
@@ -1880,7 +1890,7 @@ void Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
 		// Consume Ammo, unless Ammo Consumption is disabled
 		if (RuleB(Bots, BotThrowingConsumesAmmo)) {
 			ammoItem->SetCharges((ammoItem->GetCharges() - 1));
-			LogCombat("Consumed Throwing Ammo from slot {}.", EQ::invslot::slotAmmo);
+			LogCombatDetail("Consumed Throwing Ammo from slot {}.", EQ::invslot::slotAmmo);
 
 			if (ammoItem->GetCharges() < 1) {
 				RemoveBotItemBySlot(EQ::invslot::slotAmmo);
@@ -1888,45 +1898,51 @@ void Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
 			}
 		}
 		else {
-			LogCombat("Throwing Ammo Consumption is disabled.");
+			LogCombatDetail("Throwing Ammo Consumption is disabled.");
 		}
 	}
 
 	CommonBreakInvisibleFromCombat();
+
+	return true;
 }
 
 bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	//Check for bonuses that give you a double attack chance regardless of skill (ie Bestial Frenzy/Harmonious Attack AA)
-	uint32 bonusGiveDA = (aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack);
-	// If you don't have the double attack skill, return
-	if (!GetSkill(EQ::skills::SkillDoubleAttack) && !(GetClass() == Class::Bard || GetClass() == Class::Beastlord))
+	uint32 bonus_give_double_attack = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
+
+	if (!GetSkill(EQ::skills::SkillDoubleAttack) && !bonus_give_double_attack) {
 		return false;
-
-	// You start with no chance of double attacking
-	float chance = 0.0f;
-	uint16 skill = GetSkill(EQ::skills::SkillDoubleAttack);
-	int32 bonusDA = (aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance);
-	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
-	if (skill)
-		chance = ((float(skill + GetLevel()) * (float(100.0f + bonusDA + bonusGiveDA) / 100.0f)) / 500.0f);
-	else
-		chance = ((float(bonusGiveDA) * (float(100.0f + bonusDA) / 100.0f)) / 100.0f);
-
-	//Live now uses a static Triple Attack skill (lv 46 = 2% lv 60 = 20%) - We do not have this skill on EMU ATM.
-	//A reasonable forumla would then be TA = 20% * chance
-	//AA's can also give triple attack skill over cap. (ie Burst of Power) NOTE: Skill ID in spell data is 76 (Triple Attack)
-	//Kayen: Need to decide if we can implement triple attack skill before working in over the cap effect.
-	if (tripleAttack) {
-		// Only some Double Attack classes get Triple Attack [This is already checked in client_processes.cpp]
-		int32 triple_bonus = (spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance);
-		chance *= 0.2f; //Baseline chance is 20% of your double attack chance.
-		chance *= (float(100.0f + triple_bonus) / 100.0f); //Apply modifiers.
 	}
 
-	if (zone->random.Real(0, 1) < chance)
-		return true;
+	float chance = 0.0f;
+	uint16 skill = GetSkill(EQ::skills::SkillDoubleAttack);
 
-	return false;
+	int32 bonus_double_attack = 0;
+	if ((GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight) && (!HasTwoHanderEquipped())) {
+		LogCombatDetail("Knight class without a 2 hand weapon equipped = No DA Bonus!");
+	}
+	else {
+		bonus_double_attack = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
+	}
+
+	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
+	if (skill) {
+		chance = (float(skill + GetLevel()) * (float(100.0f + bonus_double_attack + bonus_give_double_attack) / 100.0f)) / 500.0f;
+	}
+	else {
+		chance = (float(bonus_give_double_attack + bonus_double_attack) / 100.0f);
+	}
+
+	LogCombatDetail(
+		"skill [{}] bonus_give_double_attack [{}] bonus_double_attack [{}] chance [{}]",
+		skill,
+		bonus_give_double_attack,
+		bonus_double_attack,
+		chance
+	);
+
+	return zone->random.Roll(chance);
 }
 
 bool Bot::CheckTripleAttack()
@@ -2200,16 +2216,15 @@ void Bot::AI_Process()
 				}
 			}
 			else {
-				if (atCombatRange && IsBotRanged()){
-					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY())); 
+				//TODO bot rewrite - add casting AI to this
+				if (atCombatRange && IsBotRanged() && ranged_timer.Check(false)) {
+					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
 
-					TryRangedAttack(tar);
-
-					if (!TargetValidation(tar)) { return; }
-
-					if (CheckDoubleRangedAttack()) {
+					if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
 						BotRangedAttack(tar, true);
 					}
+
+					ranged_timer.Start();
 
 					return;
 				}
@@ -2255,13 +2270,11 @@ void Bot::AI_Process()
 			}
 
 			if (IsBotRanged() && ranged_timer.Check(false)) {
-				TryRangedAttack(tar);
-
-				if (!TargetValidation(tar)) { return; }
-
-				if (CheckDoubleRangedAttack()) {
+				if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
 					BotRangedAttack(tar, true);
 				}
+
+				ranged_timer.Start();
 			}
 			else if (!IsBotRanged() && GetLevel() < stopMeleeLevel) {
 				if (!GetMaxMeleeRange() || !RuleB(Bots, DisableSpecialAbilitiesAtMaxMelee)) {
@@ -2551,7 +2564,7 @@ void Bot::DoAttackRounds(Mob* target, int hand) {
 		(aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack) > 0;
 
 	if (candouble) {
-		if (CastToClient()->CheckDoubleAttack()) {
+		if (CheckBotDoubleAttack()) {
 			Attack(target, hand, false, false);
 
 			if (hand == EQ::invslot::slotPrimary) {
@@ -2593,8 +2606,8 @@ void Bot::DoAttackRounds(Mob* target, int hand) {
 			if (hand == EQ::invslot::slotPrimary && CanThisClassTripleAttack()) {
 				if (CheckTripleAttack()) {
 					Attack(target, hand, false, false);
-					int flurry_chance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
-						itembonuses.FlurryChance;
+
+					int flurry_chance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
 
 					if (flurry_chance && zone->random.Roll(flurry_chance)) {
 						Attack(target, hand, false, false);
@@ -2602,28 +2615,20 @@ void Bot::DoAttackRounds(Mob* target, int hand) {
 						if (zone->random.Roll(flurry_chance)) {
 							Attack(target, hand, false, false);
 						}
-						//MessageString(Chat::NPCFlurry, YOU_FLURRY); //TODO bot rewrite - add output to others hits with flurry message
+						
+						if (GetOwner()) {
+							GetOwner()->MessageString(
+								Chat::NPCFlurry,
+								NPC_FLURRY,
+								GetCleanName(),
+								target->GetCleanName()
+							); //TODO bot rewrite - add output to others hits with flurry message
+						}
 					}
 				}
 			}
 		}
 	}
-}
-
-bool Bot::TryRangedAttack(Mob* tar) {
-
-	if (IsBotRanged() && ranged_timer.Check(false)) {
-
-		if (!TargetValidation(tar)) { return false; }
-
-		if (GetPullingFlag() || GetTarget()->GetHPRatio() <= 99.0f) {
-			BotRangedAttack(tar);
-		}
-
-		return true;
-	}
-
-	return false;
 }
 
 bool Bot::TryFacingTarget(Mob* tar) {
@@ -11318,8 +11323,10 @@ void Bot::DoCombatPositioning(
 
 bool Bot::CheckDoubleRangedAttack() {
 	int32 chance = spellbonuses.DoubleRangedAttack + itembonuses.DoubleRangedAttack + aabonuses.DoubleRangedAttack;
-	if (chance && zone->random.Roll(chance))
+
+	if (chance && zone->random.Roll(chance)) {
 		return true;
+	}
 
 	return false;
 }

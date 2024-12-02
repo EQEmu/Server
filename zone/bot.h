@@ -979,14 +979,13 @@ public:
 	// Try Combat Methods
 	bool TryEvade(Mob* tar);
 	bool TryFacingTarget(Mob* tar);
-	bool TryRangedAttack(Mob* tar);
 	bool TryPursueTarget(float leash_distance, glm::vec3& Goal);
 	bool TryMeditate();
 	bool TryAutoDefend(Client* bot_owner, float leash_distance);
 	bool TryIdleChecks(float fm_distance);
 	bool TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, glm::vec3& Goal);
 	bool TryBardMovementCasts();
-	void BotRangedAttack(Mob* other, bool CanDoubleAttack = false);
+	bool BotRangedAttack(Mob* other, bool CanDoubleAttack = false);
 	bool CheckDoubleRangedAttack();
 
 	// Public "Refactor" Methods
