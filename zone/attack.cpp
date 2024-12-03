@@ -3077,17 +3077,19 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			}
 		}
 
+
+
 		corpse = new Corpse(
 			this,
 			&m_loot_items,
 			GetNPCTypeID(),
 			&NPCTypedata,
 			(
-				level > 54 ?
-				RuleI(NPC, MajorNPCCorpseDecayTime) :
-				RuleI(NPC, MinorNPCCorpseDecayTime)
+				std::min(static_cast<uint32>(level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTime) : RuleI(NPC, MinorNPCCorpseDecayTime)), respawn2->RespawnTimer()*1000)
 			)
 		);
+
+		LogDebug("Respawn Timer: [{}]", respawn2->RespawnTimer());
 
 		corpse->SetSeasonal(seasonal_killer);
 		corpse->SetHardcore(hardcore_killer);
