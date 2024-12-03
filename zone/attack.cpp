@@ -3077,6 +3077,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			}
 		}
 
+		uint32 corpse_timer = static_cast<uint32>(level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTime) : RuleI(NPC, MinorNPCCorpseDecayTime));
+
+		if (respawn2 && respawn2->RespawnTimer() > 0) {
+			corpse_timer = std::min(corpse_timer, respawn2->RespawnTimer() * 1000);
+		}
 
 
 		corpse = new Corpse(
@@ -3084,9 +3089,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			&m_loot_items,
 			GetNPCTypeID(),
 			&NPCTypedata,
-			(
-				std::min(static_cast<uint32>(level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTime) : RuleI(NPC, MinorNPCCorpseDecayTime)), respawn2->RespawnTimer()*1000)
-			)
+			corpse_timer
 		);
 
 		LogDebug("Respawn Timer: [{}]", respawn2->RespawnTimer());
