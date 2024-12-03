@@ -30,6 +30,7 @@ E(OP_HPUpdate)
 E(OP_Damage)
 E(OP_Animation)
 E(OP_Death)
+E(OP_MoveItem)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)
@@ -42,6 +43,7 @@ D(OP_Consider)
 D(OP_ConsiderCorpse)
 D(OP_ClickDoor)
 D(OP_SpawnAppearance)
+D(OP_MoveItem)
 
 #undef E
 #undef D

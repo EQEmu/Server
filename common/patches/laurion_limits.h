@@ -170,6 +170,8 @@ namespace Laurion
 				slotGeneral8,
 				slotGeneral9,
 				slotGeneral10,
+				slotGeneral11,
+				slotGeneral12,
 				slotCursor
 			};
 
@@ -188,6 +190,7 @@ namespace Laurion
 		const int16 EQUIPMENT_END = slotAmmo;
 		const int16 EQUIPMENT_COUNT = (EQUIPMENT_END - EQUIPMENT_BEGIN) + 1;
 
+		//We support more if enabled but for now lets leave it at the 10 slots
 		const int16 GENERAL_BEGIN = slotGeneral1;
 		const int16 GENERAL_END = slotGeneral10;
 		const int16 GENERAL_COUNT = (GENERAL_END - GENERAL_BEGIN) + 1;
@@ -200,10 +203,10 @@ namespace Laurion
 		const int16 CORPSE_END = invslot::slotGeneral1 + invslot::slotCursor;
 
 		const uint64 EQUIPMENT_BITMASK = 0x00000000007FFFFF;
-		const uint64 GENERAL_BITMASK = 0x00000001FF800000;
-		const uint64 CURSOR_BITMASK = 0x0000000200000000;
-		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 34-slot count (RoF+)
-		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 34)); // based on 34-slot count (RoF+)
+		const uint64 GENERAL_BITMASK = 0x00000007FF800000;
+		const uint64 CURSOR_BITMASK = 0x0000000800000000;
+		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 36-slot count (Laurion+)
+		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 36)); // based on 36-slot count (Laurion+)
 
 
 		const char* GetInvPossessionsSlotName(int16 inv_slot);

@@ -4317,13 +4317,23 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
 
-	if (GetGM())
-	{
-		OnDisconnect(true);
-		return;
+	if (ClientVersion() >= EQ::versions::ClientVersion::Laurion) {
+		if (!GetGM()) {
+			camp_timer.Start(29000, true);
+		}
+
+		auto outapp = new EQApplicationPacket(OP_Camp, 1);
+		FastQueuePacket(&outapp);
 	}
-	camp_timer.Start(29000, true);
-	return;
+	else {
+		if (GetGM())
+		{
+			OnDisconnect(true);
+			return;
+		}
+
+		camp_timer.Start(29000, true);
+	}
 }
 
 void Client::Handle_OP_CancelTask(const EQApplicationPacket *app)

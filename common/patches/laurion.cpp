@@ -1178,7 +1178,7 @@ namespace Laurion
 
 		//u32 claim_count;
 		out.WriteUInt32(0);
-		//Claim claims[claim_count];	
+		//Claim claims[claim_count];
 		
 		//Tribute tribute;
 		/*
@@ -2657,6 +2657,20 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_MoveItem)
+	{
+		ENCODE_LENGTH_EXACT(MoveItem_Struct);
+		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "Laurion::ENCODE(OP_MoveItem)");
+
+		eq->from_slot = ServerToLaurionSlot(emu->from_slot);
+		eq->to_slot = ServerToLaurionSlot(emu->to_slot);
+		OUT(number_in_stack);
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -2827,6 +2841,20 @@ namespace Laurion
 		IN(spawn_id);
 		emu->type = LaurionToServerSpawnAppearanceType(eq->type);
 		IN(parameter);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_MoveItem)
+	{
+		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
+		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "Laurion::DECODE(OP_MoveItem)");
+
+		emu->from_slot = LaurionToServerSlot(eq->from_slot);
+		emu->to_slot = LaurionToServerSlot(eq->to_slot);
+		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
 	}

@@ -587,6 +587,22 @@ namespace Laurion {
 			/*040*/
 		};
 
+		struct DeleteItem_Struct
+		{
+			/*0000*/ InventorySlot_Struct	from_slot;
+			/*0012*/ InventorySlot_Struct	to_slot;
+			/*0024*/ uint32			number_in_stack;
+			/*0028*/
+		};
+
+		struct MoveItem_Struct
+		{
+			/*0000*/ InventorySlot_Struct	from_slot;
+			/*0012*/ InventorySlot_Struct	to_slot;
+			/*0024*/ uint32			number_in_stack;
+			/*0028*/
+		};
+
 #pragma pack()
 
 	};	//end namespace structs
