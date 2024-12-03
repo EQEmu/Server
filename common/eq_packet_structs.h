@@ -6348,6 +6348,7 @@ enum BazaarTraderBarterActions {
 	TraderAck2                   = 22,
 	AddTraderToBazaarWindow      = 24,
 	RemoveTraderFromBazaarWindow = 25,
+	FirstOpenSearch              = 26,
 	ClickTrader                  = 28,
 	DeliveryCostUpdate           = 29
 };

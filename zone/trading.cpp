@@ -3228,7 +3228,8 @@ void Client::SendBulkBazaarTraders()
 	VARSTRUCT_ENCODE_TYPE(uint32, bufptr, results.count);
 
 	for (auto t : results.traders) {
-		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, t.zone_id);
+		VARSTRUCT_ENCODE_TYPE(uint16, bufptr, t.zone_id);
+		VARSTRUCT_ENCODE_TYPE(uint16, bufptr, t.zone_instance_id);
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, t.trader_id);
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, t.entity_id);
 		VARSTRUCT_ENCODE_STRING(bufptr, t.trader_name.c_str());
