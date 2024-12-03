@@ -11,6 +11,7 @@
 #include "find/faction.cpp"
 #include "find/item.cpp"
 #include "find/language.cpp"
+#include "find/ldon_theme.cpp"
 #include "find/npctype.cpp"
 #include "find/object_type.cpp"
 #include "find/race.cpp"
@@ -47,6 +48,7 @@ void command_find(Client *c, const Seperator *sep)
 		Cmd{.cmd = "faction", .u = "faction [Search Criteria]", .fn = FindFaction, .a = {"#findfaction"}},
 		Cmd{.cmd = "item", .u = "item [Search Criteria]", .fn = FindItem, .a = {"#fi", "#finditem"}},
 		Cmd{.cmd = "language", .u = "language [Search Criteria]", .fn = FindLanguage, .a = {"#findlanguage"}},
+		Cmd{.cmd = "ldon_theme", .u = "ldon_theme [Search Criteria]", .fn = FindLDoNTheme, .a = {"#findldontheme"}},
 		Cmd{
 			.cmd = "npctype", .u = "npctype [Search Criteria]", .fn = FindNPCType, .a = {
 				"#fn",

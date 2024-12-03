@@ -49,23 +49,23 @@ public:
 		std::string field;
 
 		switch (theme_id) {
-			case LDoNThemes::GUK: {
+			case LDoNTheme::GUK: {
 				field = "guk_";
 				break;
 			}
-			case LDoNThemes::MIR: {
+			case LDoNTheme::MIR: {
 				field = "mir_";
 				break;
 			}
-			case LDoNThemes::MMC: {
+			case LDoNTheme::MMC: {
 				field = "mmc_";
 				break;
 			}
-			case LDoNThemes::RUJ: {
+			case LDoNTheme::RUJ: {
 				field = "ruj_";
 				break;
 			}
-			case LDoNThemes::TAK: {
+			case LDoNTheme::TAK: {
 				field = "tak_";
 				break;
 			}

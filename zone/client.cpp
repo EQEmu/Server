@@ -329,7 +329,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	adventure_stats_timer = nullptr;
 	adventure_leaderboard_timer = nullptr;
 	adv_data = nullptr;
-	adv_requested_theme = LDoNThemes::Unused;
+	adv_requested_theme = LDoNTheme::Unused;
 	adv_requested_id = 0;
 	adv_requested_member_count = 0;
 
@@ -1469,7 +1469,7 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
 	bool is_loss = false;
 
 	switch (theme_id) {
-		case LDoNThemes::Unused: { // No theme, so distribute evenly across all
+		case LDoNTheme::Unused: { // No theme, so distribute evenly across all
 			int split_points = (points / 5);
 
 			int guk_points = (split_points + (points % 5));
@@ -1522,12 +1522,12 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
 			points -= split_points;
 
 			if (split_points != 0) { // if anything left, recursively loop thru again
-				UpdateLDoNPoints(LDoNThemes::Unused, split_points);
+				UpdateLDoNPoints(LDoNTheme::Unused, split_points);
 			}
 
 			break;
 		}
-		case LDoNThemes::GUK: {
+		case LDoNTheme::GUK: {
 			if (points < 0) {
 				if (m_pp.ldon_points_guk < (0 - points)) {
 					return false;
@@ -1539,7 +1539,7 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
 			m_pp.ldon_points_guk += points;
 			break;
 		}
-		case LDoNThemes::MIR: {
+		case LDoNTheme::MIR: {
 			if (points < 0) {
 				if (m_pp.ldon_points_mir < (0 - points)) {
 					return false;
@@ -1551,7 +1551,7 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
 			m_pp.ldon_points_mir += points;
 			break;
 		}
-		case LDoNThemes::MMC: {
+		case LDoNTheme::MMC: {
 			if (points < 0) {
 				if (m_pp.ldon_points_mmc < (0 - points)) {
 					return false;
@@ -1563,7 +1563,7 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
 			m_pp.ldon_points_mmc += points;
 			break;
 		}
-		case LDoNThemes::RUJ: {
+		case LDoNTheme::RUJ: {
 			if (points < 0) {
 				if (m_pp.ldon_points_ruj < (0 - points)) {
 					return false;
@@ -1575,7 +1575,7 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
 			m_pp.ldon_points_ruj += points;
 			break;
 		}
-		case LDoNThemes::TAK: {
+		case LDoNTheme::TAK: {
 			if (points < 0) {
 				if (m_pp.ldon_points_tak < (0 - points)) {
 					return false;
@@ -1623,23 +1623,23 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
 void Client::SetLDoNPoints(uint32 theme_id, uint32 points)
 {
 	switch (theme_id) {
-		case LDoNThemes::GUK: {
+		case LDoNTheme::GUK: {
 			m_pp.ldon_points_guk = points;
 			break;
 		}
-		case LDoNThemes::MIR: {
+		case LDoNTheme::MIR: {
 			m_pp.ldon_points_mir = points;
 			break;
 		}
-		case LDoNThemes::MMC: {
+		case LDoNTheme::MMC: {
 			m_pp.ldon_points_mmc = points;
 			break;
 		}
-		case LDoNThemes::RUJ: {
+		case LDoNTheme::RUJ: {
 			m_pp.ldon_points_ruj = points;
 			break;
 		}
-		case LDoNThemes::TAK: {
+		case LDoNTheme::TAK: {
 			m_pp.ldon_points_tak = points;
 			break;
 		}
@@ -5676,15 +5676,15 @@ uint32 Client::GetLDoNPointsTheme(uint32 t)
 {
 	switch(t)
 	{
-	case LDoNThemes::GUK:
+	case LDoNTheme::GUK:
 		return m_pp.ldon_points_guk;
-	case LDoNThemes::MIR:
+	case LDoNTheme::MIR:
 		return m_pp.ldon_points_mir;
-	case LDoNThemes::MMC:
+	case LDoNTheme::MMC:
 		return m_pp.ldon_points_mmc;
-	case LDoNThemes::RUJ:
+	case LDoNTheme::RUJ:
 		return m_pp.ldon_points_ruj;
-	case LDoNThemes::TAK:
+	case LDoNTheme::TAK:
 		return m_pp.ldon_points_tak;
 	default:
 		return 0;
@@ -5695,15 +5695,15 @@ uint32 Client::GetLDoNWinsTheme(uint32 t)
 {
 	switch(t)
 	{
-	case LDoNThemes::GUK:
+	case LDoNTheme::GUK:
 		return m_pp.ldon_wins_guk;
-	case LDoNThemes::MIR:
+	case LDoNTheme::MIR:
 		return m_pp.ldon_wins_mir;
-	case LDoNThemes::MMC:
+	case LDoNTheme::MMC:
 		return m_pp.ldon_wins_mmc;
-	case LDoNThemes::RUJ:
+	case LDoNTheme::RUJ:
 		return m_pp.ldon_wins_ruj;
-	case LDoNThemes::TAK:
+	case LDoNTheme::TAK:
 		return m_pp.ldon_wins_tak;
 	default:
 		return 0;
@@ -5714,15 +5714,15 @@ uint32 Client::GetLDoNLossesTheme(uint32 t)
 {
 	switch(t)
 	{
-	case LDoNThemes::GUK:
+	case LDoNTheme::GUK:
 		return m_pp.ldon_losses_guk;
-	case LDoNThemes::MIR:
+	case LDoNTheme::MIR:
 		return m_pp.ldon_losses_mir;
-	case LDoNThemes::MMC:
+	case LDoNTheme::MMC:
 		return m_pp.ldon_losses_mmc;
-	case LDoNThemes::RUJ:
+	case LDoNTheme::RUJ:
 		return m_pp.ldon_losses_ruj;
-	case LDoNThemes::TAK:
+	case LDoNTheme::TAK:
 		return m_pp.ldon_losses_tak;
 	default:
 		return 0;
@@ -5731,35 +5731,35 @@ uint32 Client::GetLDoNLossesTheme(uint32 t)
 
 void Client::UpdateLDoNWinLoss(uint32 theme_id, bool win, bool remove) {
 	switch (theme_id) {
-		case LDoNThemes::GUK:
+		case LDoNTheme::GUK:
 			if (win) {
 				m_pp.ldon_wins_guk += (remove ? -1 : 1);
 			} else {
 				m_pp.ldon_losses_guk += (remove ? -1 : 1);
 			}
 			break;
-		case LDoNThemes::MIR:
+		case LDoNTheme::MIR:
 			if (win) {
 				m_pp.ldon_wins_mir += (remove ? -1 : 1);
 			} else {
 				m_pp.ldon_losses_mir += (remove ? -1 : 1);
 			}
 			break;
-		case LDoNThemes::MMC:
+		case LDoNTheme::MMC:
 			if (win) {
 				m_pp.ldon_wins_mmc += (remove ? -1 : 1);
 			} else {
 				m_pp.ldon_losses_mmc += (remove ? -1 : 1);
 			}
 			break;
-		case LDoNThemes::RUJ:
+		case LDoNTheme::RUJ:
 			if (win) {
 				m_pp.ldon_wins_ruj += (remove ? -1 : 1);
 			} else {
 				m_pp.ldon_losses_ruj += (remove ? -1 : 1);
 			}
 			break;
-		case LDoNThemes::TAK:
+		case LDoNTheme::TAK:
 			if (win) {
 				m_pp.ldon_wins_tak += (remove ? -1 : 1);
 			} else {
@@ -6227,7 +6227,7 @@ void Client::NewAdventure(int id, int theme, const char *text, int member_count,
 void Client::ClearPendingAdventureData()
 {
 	adv_requested_id = 0;
-	adv_requested_theme = LDoNThemes::Unused;
+	adv_requested_theme = LDoNTheme::Unused;
 	safe_delete_array(adv_requested_data);
 	adv_requested_member_count = 0;
 }
