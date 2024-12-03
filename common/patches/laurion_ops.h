@@ -31,6 +31,7 @@ E(OP_Damage)
 E(OP_Animation)
 E(OP_Death)
 E(OP_MoveItem)
+E(OP_ExpUpdate)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)

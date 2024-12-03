@@ -2671,6 +2671,17 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ExpUpdate)
+	{
+		SETUP_DIRECT_ENCODE(ExpUpdate_Struct, structs::ExpUpdate_Struct);
+
+		//later we should change the underlying server to use this more accurate value
+		//and encode the 330 in the other patches
+		eq->exp = emu->exp * 100000 / 330;
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)

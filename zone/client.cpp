@@ -542,15 +542,7 @@ void Client::SendZoneInPackets()
 	
 	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
 		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
-
-		//Laurion uses a more granular exp bar than other clients
-		if (m_ClientVersion >= EQ::versions::ClientVersion::Laurion) {
-			eu->exp = (uint32)(100000.0f * tmpxp);
-		}
-		else {
-			eu->exp = (uint32)(330.0f * tmpxp);
-		}
-
+		eu->exp = (uint32)(330.0f * tmpxp);
 		FastQueuePacket(&outapp);
 	}
 	else {
