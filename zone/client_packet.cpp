@@ -928,7 +928,7 @@ void Client::CompleteConnect()
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
-	if (ClientVersion() >= EQ::versions::ClientVersion::RoF && !RuleB(Custom, DisableInitialSendBulkBazaarTraders)) {
+	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 		SendBulkBazaarTraders();
 	}
 
@@ -4071,6 +4071,10 @@ void Client::Handle_OP_BazaarSearch(const EQApplicationPacket *app)
 		}
 		case WelcomeMessage: {
 			SendBazaarWelcome();
+			break;
+		}
+		case FirstOpenSearch: {
+			SendBulkBazaarTraders();
 			break;
 		}
 		default: {

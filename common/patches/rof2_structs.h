@@ -3119,7 +3119,8 @@ enum RoF2BazaarTraderBuyerActions {
 	BazaarInspect    = 18,
 	ClickTrader      = 28,
 	ItemMove         = 19,
-	ReconcileItems   = 20
+	ReconcileItems   = 20,
+	FirstOpenSearch  = 26
 };
 
 enum RoF2BuyerActions {

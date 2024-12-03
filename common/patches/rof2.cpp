@@ -6220,6 +6220,11 @@ namespace RoF2
 				FINISH_DIRECT_DECODE();
 				break;
 			}
+			case structs::RoF2BazaarTraderBuyerActions::FirstOpenSearch: {
+				__packet->SetOpcode(OP_BazaarSearch);
+				LogTrading("(RoF2) First time opening Bazaar Search since zoning. Action <green>[{}]", action);
+				break;
+			}
 			case structs::RoF2BazaarTraderBuyerActions::WelcomeMessage: {
 				__packet->SetOpcode(OP_BazaarSearch);
 				LogTrading("(RoF2) WelcomeMessage action <green>[{}]", action);
