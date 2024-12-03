@@ -2087,7 +2087,7 @@ void Bot::AI_Process()
 		return;
 	}
 
-	if (raid && r_group == RAID_GROUPLESS) {
+	if (HOLDING || (raid && r_group == RAID_GROUPLESS)) {
 		glm::vec3 Goal(0, 0, 0);
 		TryNonCombatMovementChecks(bot_owner, follow_mob, Goal);
 		
@@ -2269,7 +2269,7 @@ void Bot::AI_Process()
 				}
 			}
 
-			if (!IsBotNonSpellFighter() && !HOLDING && AI_HasSpells() && AI_EngagedCastCheck()) {
+			if (!IsBotNonSpellFighter() && AI_HasSpells() && AI_EngagedCastCheck()) {
 				return;
 			}
 
@@ -2330,6 +2330,7 @@ void Bot::AI_Process()
 		SetAttackFlag(false);
 		SetCombatRoundForAlerts(false);
 		SetAttackingFlag(false);
+
 		if (!bot_owner->GetBotPulling()) {
 
 			SetPullingFlag(false);
@@ -2345,7 +2346,6 @@ void Bot::AI_Process()
 		SetTarget(nullptr);
 
 		if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
-
 			GetPet()->WipeHateList();
 			GetPet()->SetTarget(nullptr);
 		}
@@ -2360,10 +2360,10 @@ void Bot::AI_Process()
 		if (TryNonCombatMovementChecks(bot_owner, follow_mob, Goal)) {
 			return;
 		}
-		if (!HOLDING && AI_HasSpells() && TryIdleChecks(fm_distance)) {
+		if (AI_HasSpells() && TryIdleChecks(fm_distance)) {
 			return;
 		}
-		if (!HOLDING && AI_HasSpells() && TryBardMovementCasts()) {
+		if (AI_HasSpells() && TryBardMovementCasts()) {
 			return;
 		}
 	}
