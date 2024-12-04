@@ -3506,7 +3506,6 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 		case statHeroicPR:
 			return GetHeroicPR();
 		case statAC:
-			CalcAC();
 			return GetAC();
 		case statSpellDmg:
 			return itembonuses.SpellDmg;
