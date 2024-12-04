@@ -2419,7 +2419,7 @@ bool Group::AmIMainAssist(const char *mob_name)
 	if (!mob_name)
 		return false;
 
-	return !((bool)MainTankName.compare(mob_name));
+	return !((bool)MainAssistName.compare(mob_name));
 }
 
 bool Group::AmIPuller(const char *mob_name)
