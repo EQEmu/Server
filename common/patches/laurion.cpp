@@ -51,6 +51,10 @@ namespace Laurion
 
 	void SerializeItem(SerializeBuffer &buffer, const EQ::ItemInstance* inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
 
+	// message link converters
+	static inline void ServerToLaurionConvertLinks(std::string& message_out, const std::string& message_in);
+	static inline void LaurionToServerConvertLinks(std::string& message_out, const std::string& message_in);
+
 	//SpawnAppearance
 	static inline uint32 ServerToLaurionSpawnAppearanceType(uint32 server_type);
 	static inline uint32 LaurionToServerSpawnAppearanceType(uint32 laurion_type);
@@ -2464,8 +2468,8 @@ namespace Laurion
 		unsigned char* __emu_buffer = in->pBuffer;
 
 		std::string old_message = emu->message;
-		std::string new_message = old_message;
-		//ServerToRoF2SayLink(new_message, old_message);
+		std::string new_message;
+		ServerToLaurionConvertLinks(new_message, old_message);
 
 		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 43;
 
@@ -2520,8 +2524,7 @@ namespace Laurion
 
 		in->ReadString(old_message);
 
-		//ServerToRoF2SayLink(new_message, old_message);
-		new_message = old_message;
+		ServerToLaurionConvertLinks(new_message, old_message);
 
 		buf.WriteString(new_message);
 
@@ -2567,7 +2570,9 @@ namespace Laurion
 		buffer.WriteUInt32(emu->type);
 
 		for (int i = 0; i < 9; ++i) {
-			buffer.WriteLengthString(old_message_array[i]);
+			std::string new_message;
+			ServerToLaurionConvertLinks(new_message, old_message_array[i]);
+			buffer.WriteLengthString(new_message);
 		}
 
 		auto outapp = new EQApplicationPacket(OP_FormattedMessage, buffer.size());
@@ -2785,8 +2790,8 @@ namespace Laurion
 		uint32 Skill = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
 
 		std::string old_message = InBuffer;
-		std::string new_message = old_message;
-		//RoF2ToServerSayLink(new_message, old_message);
+		std::string new_message;
+		LaurionToServerConvertLinks(new_message, old_message);
 
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -3648,6 +3653,15 @@ namespace Laurion
 		buffer.WriteInt32(0); //unsupported atm
 	}
 
+	static inline void ServerToLaurionConvertLinks(std::string& message_out, const std::string& message_in)
+	{
+		message_out = message_in;
+	}
+
+	static inline void LaurionToServerConvertLinks(std::string& message_out, const std::string& message_in) {
+		message_out = message_in;
+	}
+
 	static inline uint32 ServerToLaurionSpawnAppearanceType(uint32 server_type) {
 		switch (server_type)
 		{
@@ -3941,7 +3955,16 @@ namespace Laurion
 		case invtype::typePossessions: {
 			if (laurion_slot.Slot >= invslot::POSSESSIONS_BEGIN && laurion_slot.Slot <= invslot::POSSESSIONS_END) {
 				if (laurion_slot.SubIndex == invbag::SLOT_INVALID) {
-					server_slot = laurion_slot.Slot;
+					if (laurion_slot.Slot == invslot::slotCursor) {
+						server_slot = EQ::invslot::slotCursor;
+					} 
+					else if(laurion_slot.Slot == invslot::slotGeneral11 || laurion_slot.Slot == invslot::slotGeneral12) 
+					{
+						return EQ::invslot::SLOT_INVALID;
+					}
+					else {
+						server_slot = laurion_slot.Slot;
+					}
 				}
 
 				else if (laurion_slot.SubIndex >= invbag::SLOT_BEGIN && laurion_slot.SubIndex <= invbag::SLOT_END) {
