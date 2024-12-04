@@ -2687,6 +2687,169 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_SendAATable) 
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		AARankInfo_Struct* emu = (AARankInfo_Struct*)in->pBuffer;
+
+		std::vector<int32> skill;
+		std::vector<int32> points;
+		in->SetReadPosition(sizeof(AARankInfo_Struct) + emu->total_effects * sizeof(AARankEffect_Struct));
+		for (auto i = 0; i < emu->total_prereqs; ++i) {
+			skill.push_back(in->ReadUInt32());
+			points.push_back(in->ReadUInt32());
+		}
+
+		SerializeBuffer buffer;
+
+		/*
+		s32 AbilityId;
+		u8 ShowInAbilityWindow;
+		s32 ShortName;
+		s32 ShortName2;
+		s32 Name;
+		s32 Desc;
+		*/
+
+		buffer.WriteUInt32(emu->id);
+		buffer.WriteUInt8(1);
+		buffer.WriteInt32(emu->upper_hotkey_sid);
+		buffer.WriteInt32(emu->lower_hotkey_sid);
+		buffer.WriteInt32(emu->title_sid);
+		buffer.WriteInt32(emu->desc_sid);
+
+		/*
+		s32 MinLevel;
+		s32 Cost;
+		s32 GroupID;
+		s32 CurrentRank;
+		*/
+		buffer.WriteInt32(emu->level_req);
+		buffer.WriteInt32(emu->cost);
+		buffer.WriteUInt32(emu->seq);
+		buffer.WriteUInt32(emu->current_level);
+
+		/*
+		u32 PrereqSkillCount;
+		s32 PrereqSkills[PrereqSkillCount];
+		u32 PrereqLevelCount;
+		s32 PrereqLevels[PrereqLevelCount];
+		*/
+
+		if (emu->total_prereqs) {
+			buffer.WriteUInt32(emu->total_prereqs);
+			for (auto& e : skill)
+				buffer.WriteInt32(e);
+			buffer.WriteUInt32(emu->total_prereqs);
+			for (auto& e : points)
+				buffer.WriteInt32(e);
+		}
+		else {
+			buffer.WriteUInt32(1);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(1);
+			buffer.WriteUInt32(0);
+		}
+
+		/*
+		u32 Type;
+		s32 SpellId;
+		*/
+		buffer.WriteInt32(emu->type);
+		buffer.WriteInt32(emu->spell);
+
+		/*
+		u32 TimerIdCount;
+		s32 TimerIds[TimerIdCount];
+		s32 ReuseTimer;
+		u32 Classes;
+		*/
+		buffer.WriteInt32(1);
+		buffer.WriteInt32(emu->spell_type);
+		buffer.WriteInt32(emu->spell_refresh);
+		buffer.WriteInt32(emu->classes);
+
+		/*
+		s32 MaxRank;
+		s32 PrevAbilityId;
+		s32 NextAbilityId;
+		s32 TotalPoints;
+		*/
+
+		buffer.WriteInt32(emu->max_level);
+		buffer.WriteInt32(emu->prev_id);
+		buffer.WriteInt32(emu->next_id);
+		buffer.WriteInt32(emu->total_cost);
+
+		/*
+		u8 bRefund;
+		s32 QuestOnly;
+		u8 bIgnoreDeLevel;
+		*/
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt32(emu->grant_only);
+		buffer.WriteUInt8(0);
+
+		/*
+		s32 Charges;
+		s32 Expansion;
+		s32 Category;
+		*/
+		buffer.WriteUInt32(emu->charges);
+		buffer.WriteInt32(emu->expansion);
+		buffer.WriteInt32(emu->category);
+
+		/*
+		u8 bShroud;
+		u8 bBetaOnly;
+		u8 bResetOnDeath;
+		u8 AutoGrant;
+		*/
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+
+		/*
+		s32 AutoGrantExpansion;
+		s32 Unknown098;
+		u8 Unknown09C;
+		*/
+
+		buffer.WriteInt32(emu->expansion);
+		buffer.WriteInt32(0);
+		buffer.WriteUInt8(0);
+
+		//u32 TotalEffects;
+		buffer.WriteUInt32(emu->total_effects);
+		in->SetReadPosition(sizeof(AARankInfo_Struct));
+		for (auto i = 0; i < emu->total_effects; ++i) {
+			auto skill_id = in->ReadUInt32();
+			auto base1 = in->ReadUInt32();
+			auto base2 = in->ReadUInt32();
+			auto slot = in->ReadUInt32();
+			
+			/*
+			u32 effect_id;
+			s64 base1;
+			s64 base2;
+			u32 slot;
+			*/
+
+			buffer.WriteUInt32(skill_id);
+			buffer.WriteInt64(base1);
+			buffer.WriteInt64(base2);
+			buffer.WriteUInt32(slot);
+		}
+
+		auto outapp = new EQApplicationPacket(OP_SendAATable, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
+
+		delete in;
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
