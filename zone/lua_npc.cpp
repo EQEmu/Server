@@ -597,7 +597,7 @@ bool Lua_NPC::HasItem(uint32 item_id)
 	return self->HasItem(item_id);
 }
 
-uint16 Lua_NPC::CountItem(uint32 item_id)
+uint32 Lua_NPC::CountItem(uint32 item_id)
 {
 	Lua_Safe_Call_Int();
 	return self->CountItem(item_id);
@@ -862,7 +862,7 @@ luabind::scope lua_register_npc() {
 	.def("CheckNPCFactionAlly", (int(Lua_NPC::*)(int))&Lua_NPC::CheckNPCFactionAlly)
 	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLootItems)
 	.def("ClearLastName", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLastName)
-	.def("CountItem", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::CountItem)
+	.def("CountItem", (uint32(Lua_NPC::*)(uint32))&Lua_NPC::CountItem)
 	.def("CountLoot", (int(Lua_NPC::*)(void))&Lua_NPC::CountLoot)
 	.def("DeleteBucket", (void(Lua_NPC::*)(std::string))&Lua_NPC::DeleteBucket)
 	.def("DescribeSpecialAbilities", (void(Lua_NPC::*)(Lua_Client))&Lua_NPC::DescribeSpecialAbilities)

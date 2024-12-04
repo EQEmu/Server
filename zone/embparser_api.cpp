@@ -1446,7 +1446,7 @@ int Perl__collectitems(uint32_t item_id, bool remove_item)
 	return quest_manager.collectitems(item_id, remove_item);
 }
 
-int Perl__countitem(uint32_t item_id)
+uint32 Perl__countitem(uint32_t item_id)
 {
 	return quest_manager.countitem(item_id);
 }

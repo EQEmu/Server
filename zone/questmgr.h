@@ -249,7 +249,7 @@ public:
 	int getlevel(uint8 type);
 	int collectitems(uint32 item_id, bool remove);
 	int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
-	int countitem(uint32 item_id);
+	uint32 countitem(uint32 item_id);
 	void removeitem(uint32 item_id, uint32 quantity = 1);
 	std::string getitemcomment(uint32 item_id);
 	std::string getitemlore(uint32 item_id);

@@ -859,9 +859,9 @@ bool NPC::HasItem(uint32 item_id)
 	return false;
 }
 
-uint16 NPC::CountItem(uint32 item_id)
+uint32 NPC::CountItem(uint32 item_id)
 {
-	uint16 item_count = 0;
+	uint32 item_count = 0;
 	if (!database.GetItem(item_id)) {
 		return item_count;
 	}

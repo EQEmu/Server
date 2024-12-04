@@ -164,7 +164,7 @@ int Lua_Inventory::GetSlotByItemInst(Lua_ItemInst inst) {
 	return self->GetSlotByItemInst(inst);
 }
 
-int Lua_Inventory::CountAugmentEquippedByID(uint32 item_id) {
+uint32 Lua_Inventory::CountAugmentEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->CountAugmentEquippedByID(item_id);
 }
@@ -174,7 +174,7 @@ bool Lua_Inventory::HasAugmentEquippedByID(uint32 item_id) {
 	return self->HasAugmentEquippedByID(item_id);
 }
 
-int Lua_Inventory::CountItemEquippedByID(uint32 item_id) {
+uint32 Lua_Inventory::CountItemEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->CountItemEquippedByID(item_id);
 }
@@ -208,8 +208,8 @@ luabind::scope lua_register_inventory() {
 	.def("CalcSlotId", (int(Lua_Inventory::*)(int,int))&Lua_Inventory::CalcSlotId)
 	.def("CanItemFitInContainer", (bool(Lua_Inventory::*)(Lua_Item,Lua_Item))&Lua_Inventory::CanItemFitInContainer)
 	.def("CheckNoDrop", (bool(Lua_Inventory::*)(int))&Lua_Inventory::CheckNoDrop)
-	.def("CountAugmentEquippedByID", (int(Lua_Inventory::*)(uint32))&Lua_Inventory::CountAugmentEquippedByID)
-	.def("CountItemEquippedByID", (int(Lua_Inventory::*)(uint32))&Lua_Inventory::CountItemEquippedByID)
+	.def("CountAugmentEquippedByID", (uint32(Lua_Inventory::*)(uint32))&Lua_Inventory::CountAugmentEquippedByID)
+	.def("CountItemEquippedByID", (uint32(Lua_Inventory::*)(uint32))&Lua_Inventory::CountItemEquippedByID)
 	.def("DeleteItem", (bool(Lua_Inventory::*)(int))&Lua_Inventory::DeleteItem)
 	.def("DeleteItem", (bool(Lua_Inventory::*)(int,int))&Lua_Inventory::DeleteItem)
 	.def("FindFreeSlot", (int(Lua_Inventory::*)(bool,bool))&Lua_Inventory::FindFreeSlot)

@@ -3343,7 +3343,7 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	return quantity;
 }
 
-int QuestManager::countitem(uint32 item_id) {
+uint32 QuestManager::countitem(uint32 item_id) {
 	QuestManagerCurrentQuestVars();
 
 	if (!initiator) {

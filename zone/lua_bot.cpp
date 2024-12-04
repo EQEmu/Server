@@ -274,7 +274,7 @@ void Lua_Bot::SetSpellDurationRaid(int spell_id, int duration, int level, bool a
 	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
 }
 
-int Lua_Bot::CountAugmentEquippedByID(uint32 item_id) {
+uint32 Lua_Bot::CountAugmentEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->GetInv().CountAugmentEquippedByID(item_id);
 }
@@ -284,7 +284,7 @@ bool Lua_Bot::HasAugmentEquippedByID(uint32 item_id) {
 	return self->GetInv().HasAugmentEquippedByID(item_id);
 }
 
-int Lua_Bot::CountItemEquippedByID(uint32 item_id) {
+uint32 Lua_Bot::CountItemEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->GetInv().CountItemEquippedByID(item_id);
 }
@@ -701,8 +701,9 @@ luabind::scope lua_register_bot() {
 	.def("ClearItemReuseTimer", (void(Lua_Bot::*)(uint32))&Lua_Bot::ClearItemReuseTimer)
 	.def("ClearSpellRecastTimer", (void(Lua_Bot::*)())&Lua_Bot::ClearSpellRecastTimer)
 	.def("ClearSpellRecastTimer", (void(Lua_Bot::*)(uint16))&Lua_Bot::ClearSpellRecastTimer)
+	.def("CountAugmentEquippedByID", (uint32(Lua_Bot::*)(uint32))&Lua_Bot::CountAugmentEquippedByID)
 	.def("CountBotItem", (uint32(Lua_Bot::*)(uint32))&Lua_Bot::CountBotItem)
-	.def("CountItemEquippedByID", (int(Lua_Bot::*)(uint32))&Lua_Bot::CountItemEquippedByID)
+	.def("CountItemEquippedByID", (uint32(Lua_Bot::*)(uint32))&Lua_Bot::CountItemEquippedByID)
 	.def("DeleteBot", (void(Lua_Bot::*)(void))&Lua_Bot::DeleteBot)
 	.def("DeleteBucket", (void(Lua_Bot::*)(std::string))&Lua_Bot::DeleteBucket)
 	.def("Escape", (void(Lua_Bot::*)(void))&Lua_Bot::Escape)
