@@ -783,6 +783,9 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		// is allowed.
 		if (tradingWith->CheckAggro(this))
 		{
+
+			items.clear();
+			
 			for (EQ::ItemInstance* inst : items) {
 				if (!inst || !inst->GetItem()) {
 					continue;
