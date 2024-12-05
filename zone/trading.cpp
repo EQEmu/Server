@@ -739,22 +739,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			}
 		}
 
-		// Regardless of quest or non-quest NPC - No in combat trade completion
-		// is allowed.
-		if (tradingWith->CheckAggro(this))
-		{
-			for (EQ::ItemInstance* inst : items) {
-				if (!inst || !inst->GetItem()) {
-					continue;
-				}
-
-				tradingWith->SayString(TRADE_BACK, GetCleanName());
-				PushItemOnCursor(*inst, true);
-			}
-
-			items.clear();
-		}
-
 		bool quest_npc = false;
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
 			// This is a quest NPC
@@ -795,6 +779,24 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			}
 		}
 
+		// Regardless of quest or non-quest NPC - No in combat trade completion
+		// is allowed.
+		if (tradingWith->CheckAggro(this))
+		{
+
+			items.clear();
+
+			for (EQ::ItemInstance* inst : items) {
+				if (!inst || !inst->GetItem()) {
+					continue;
+				}
+
+				tradingWith->SayString(TRADE_BACK, GetCleanName());
+				PushItemOnCursor(*inst, true);
+			}
+
+			items.clear();
+		}
 		// Only enforce trade rules if the NPC doesn't have an EVENT_TRADE
 		// subroutine.  That overrides all.
 		else if (!quest_npc)
