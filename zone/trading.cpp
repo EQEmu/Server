@@ -752,20 +752,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			database.SaveInventory(CharacterID(), nullptr, i);
 		}
 
-		// We are going to abort the trade if any of them are dynamic
-		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; ++i) {
-			if (insts[i - EQ::invslot::TRADE_BEGIN] && insts[i - EQ::invslot::TRADE_BEGIN]->GetItem()->ID != insts[i - EQ::invslot::TRADE_BEGIN]->GetItem()->OriginalID) {
-				PushItemOnCursor(*insts[i - EQ::invslot::TRADE_BEGIN], true);
-
-				EQ::SayLinkEngine linker;
-				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-				linker.SetItemInst(insts[i - EQ::invslot::TRADE_BEGIN]);
-
-				Message(Chat::Red, "[%s] is not eligible to be traded to an NPC.", linker.GenerateLink().c_str());
-				insts[i - EQ::invslot::TRADE_BEGIN] = nullptr;
-			}
-		}
-
 		// copy to be filtered by task updates, null trade slots preserved for quest event arg
 		std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
 
@@ -783,9 +769,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		// is allowed.
 		if (tradingWith->CheckAggro(this))
 		{
-
-			items.clear();
-
+			/*
 			for (EQ::ItemInstance* inst : items) {
 				if (!inst || !inst->GetItem()) {
 					continue;
@@ -794,9 +778,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				tradingWith->SayString(TRADE_BACK, GetCleanName());
 				PushItemOnCursor(*inst, true);
 			}
+			*/
 
 			items.clear();
 		}
+
 		// Only enforce trade rules if the NPC doesn't have an EVENT_TRADE
 		// subroutine.  That overrides all.
 		else if (!quest_npc)
@@ -929,7 +915,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			tradingWith->FaceTarget(this);
 		}
 
-		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
+		if (!items.empty() && parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
 			std::vector<std::any> item_list(items.begin(), items.end());
 			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 		}
