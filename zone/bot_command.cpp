@@ -1336,6 +1336,7 @@ int bot_command_init(void)
 		bot_command_add("precombat", "Sets flag used to determine pre-combat behavior", AccountStatus::Player, bot_command_precombat) ||
 		bot_command_add("pull", "Orders a designated bot to 'pull' an enemy", AccountStatus::Player, bot_command_pull) ||
 		bot_command_add("release", "Releases a suspended bot's AI processing (with hate list wipe)", AccountStatus::Player, bot_command_release) ||
+		bot_command_add("setassistee", "Sets your target to be the person your bots assist. Bots will always assist you before others", AccountStatus::Player, bot_command_set_assistee) ||
 		bot_command_add("sithppercent", "HP threshold for a bot to start sitting in combat if allowed", AccountStatus::Player, bot_command_sit_hp_percent) ||
 		bot_command_add("sitincombat", "Toggles whether or a not a bot will attempt to med or sit to heal in combat", AccountStatus::Player, bot_command_sit_in_combat) ||
 		bot_command_add("sitmanapercent", "Mana threshold for a bot to start sitting in combat if allowed", AccountStatus::Player, bot_command_sit_mana_percent) ||
@@ -2243,6 +2244,7 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 #include "bot_commands/precombat.cpp"
 #include "bot_commands/pull.cpp"
 #include "bot_commands/release.cpp"
+#include "bot_commands/set_assistee.cpp"
 #include "bot_commands/sit_hp_percent.cpp"
 #include "bot_commands/sit_in_combat.cpp"
 #include "bot_commands/sit_mana_percent.cpp"

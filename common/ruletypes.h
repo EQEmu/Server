@@ -880,6 +880,7 @@ RULE_BOOL(Bots, AllowCommandedResurrect, true, "If enabled bots can be commanded
 RULE_BOOL(Bots, AllowCommandedSummonCorpse, true, "If enabled bots can be commanded to summon other's corpses.")
 RULE_INT(Bots, CampTimer, 25, "Number of seconds after /camp has begun before bots camp out.")
 RULE_BOOL(Bots, SendClassRaceOnHelp, true, "If enabled a reminder of how to check class/race IDs will be sent when using compatible commands.")
+RULE_BOOL(Bots, AllowCrossGroupRaidAssist, true, "If enabled bots will autodefend group or raid members set as main assist.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)

@@ -1747,6 +1747,7 @@ void bot_command_heritage(Client *c, const Seperator *sep);
 void bot_command_inspect_message(Client *c, const Seperator *sep);
 void bot_command_list_bots(Client *c, const Seperator *sep);
 void bot_command_report(Client *c, const Seperator *sep);
+void bot_command_set_assistee(Client* c, const Seperator* sep);
 void bot_command_spawn(Client *c, const Seperator *sep);
 void bot_command_stance(Client *c, const Seperator *sep);
 void bot_command_stop_melee_level(Client *c, const Seperator *sep);
