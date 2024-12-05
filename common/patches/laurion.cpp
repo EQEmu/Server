@@ -2859,19 +2859,40 @@ namespace Laurion
 		uchar* __emu_buffer = in->pBuffer;
 		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
 
-		switch (old_item_pkt->PacketType)
+		auto type = ServerToLaurionItemPacketType(old_item_pkt->PacketType);
+		if (type == structs::ItemPacketInvalid) {
+			delete in;
+			return;
+		}
+
+		switch (type)
 		{
-			case ItemPacketParcel: {
-				//parcels are significantly changed so we will need to figure this out
+			case structs::ItemPacketType::ItemPacketParcel: {
+				ParcelMessaging_Struct       pms{};
+				EQ::Util::MemoryStreamReader ss(reinterpret_cast<char*>(in->pBuffer), in->size);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(pms);
+
+				uint32 player_name_length = pms.player_name.length();
+				uint32 note_length = pms.note.length();
+
+				auto* int_struct = (EQ::InternalSerializedItem_Struct*)pms.serialized_item.data();
+
+				SerializeBuffer buffer;
+				buffer.WriteInt32((int32_t)type);
+				SerializeItem(buffer, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
+
+				buffer.WriteUInt32(pms.sent_time);
+				buffer.WriteLengthString(pms.player_name);
+				buffer.WriteLengthString(pms.note);
+
+				auto outapp = new EQApplicationPacket(OP_ItemPacket, buffer.size());
+				outapp->WriteData(buffer.buffer(), buffer.size());
+				dest->FastQueuePacket(&outapp, ack_req);
+				break;
 			}
 			default: {
 				EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
-
-				auto type = ServerToLaurionItemPacketType(old_item_pkt->PacketType);
-				if (type == structs::ItemPacketInvalid) {
-					break;
-				}
-
 				SerializeBuffer buffer;
 				buffer.WriteInt32((int32_t)type);
 				SerializeItem(buffer, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
@@ -4444,6 +4465,14 @@ namespace Laurion
 			return structs::ItemPacketType::ItemPacketCharInventory;
 		case ItemPacketType::ItemPacketLimbo:
 			return structs::ItemPacketType::ItemPacketLimbo;
+		case ItemPacketType::ItemPacketWorldContainer:
+			return structs::ItemPacketType::ItemPacketWorldContainer;
+		case ItemPacketType::ItemPacketTributeItem:
+			return structs::ItemPacketType::ItemPacketTributeItem;
+		case ItemPacketType::ItemPacketGuildTribute:
+			return structs::ItemPacketType::ItemPacketGuildTribute;
+		case ItemPacketType::ItemPacketCharmUpdate:
+			return structs::ItemPacketType::ItemPacketCharmUpdate;
 		default:
 			return structs::ItemPacketType::ItemPacketInvalid;
 		}
