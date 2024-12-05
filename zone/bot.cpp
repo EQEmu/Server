@@ -2041,6 +2041,7 @@ void Bot::AI_Process()
 
 	auto raid = entity_list.GetRaidByBotName(GetName());
 	uint32 r_group = RAID_GROUPLESS;
+
 	if (raid) {
 		raid->VerifyRaid();
 		r_group = raid->GetGroup(GetName());
@@ -2137,7 +2138,6 @@ void Bot::AI_Process()
 // RETURNING FLAG
 
 		if (GetReturningFlag()) {
-			LogTestDebugDetail("#{}: {} has ReturningFlag", __LINE__, GetCleanName()); //deleteme
 			ReturningFlagChecks(bot_owner, leash_owner, fm_distance);
 
 			return;
@@ -2210,6 +2210,7 @@ void Bot::AI_Process()
 			if (!DoLosChecks(this, tar)) {
 				return;
 			}
+
 			if (atCombatRange) {
 				if (RuleB(Bots, AllowRangedPulling) && IsBotRanged() && ranged_timer.Check(false)) {
 					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
@@ -2246,8 +2247,8 @@ void Bot::AI_Process()
 			}
 
 			TryPursueTarget(leash_distance, Goal);
+
 			return;
-			//TODO bot rewrite - need pulling checks below to prevent assist
 		}
 
 // ENGAGED AT COMBAT RANGE
@@ -2459,42 +2460,150 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 
 		if (
 			m_auto_defend_timer.Check() &&
-			bot_owner->GetAggroCount() &&
 			NOT_HOLDING &&
 			NOT_PASSIVE
 		) {
-			auto xhaters = bot_owner->GetXTargetAutoMgr();
+			XTargetAutoHaters* tempHaters;
+			std::vector<XTargetAutoHaters*> assisteeHaters;
+			std::vector<Client*> assisteeMembers;
+			bool found = false;
 
-			if (xhaters && !xhaters->empty()) {
-				for (auto hater_iter : xhaters->get_list()) {
-					if (!hater_iter.spawn_id) {
-						continue;
-					}
+			if (bot_owner->GetAggroCount()) {
+				tempHaters = bot_owner->GetXTargetAutoMgr();
 
-					if (bot_owner->GetBotPulling() && bot_owner->GetTarget() && hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
-						continue;
-					}
+				if (tempHaters && !tempHaters->empty()) {
+					assisteeHaters.emplace_back(tempHaters);
+					assisteeMembers.emplace_back(bot_owner);
+				}
+			}
 
-					auto hater = entity_list.GetMob(hater_iter.spawn_id);
-					if (hater && hater->CastToNPC()->IsOnHatelist(bot_owner) && !hater->IsMezzed() && DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) {
-						// This is roughly equivilent to npc attacking a client pet owner
-						AddToHateList(hater, 1);
-						SetTarget(hater);
-						SetAttackingFlag();
+			if (
+				(!bot_owner->GetAssistee() || !entity_list.GetClientByCharID(bot_owner->GetAssistee())) &&
+				RuleB(Bots, AllowCrossGroupRaidAssist)
+			) {
+				XTargetAutoHaters* temp_xhaters = bot_owner->GetXTargetAutoMgr();
+				bool assisteeFound = false;
 
-						if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-							GetPet()->AddToHateList(hater, 1);
-							GetPet()->SetTarget(hater);
+				if (IsRaidGrouped()) {
+					Raid* r = entity_list.GetRaidByBotName(GetName());
+					if (r) {						
+						for (const auto& m : r->members) {
+							if (
+								m.member && 
+								m.member->IsClient() &&
+								m.member->GetAggroCount() &&
+								r->IsAssister(m.member_name)
+							) {
+								temp_xhaters = m.member->GetXTargetAutoMgr();
+
+								if (!temp_xhaters || temp_xhaters->empty()) {
+									continue;
+								}
+
+								assisteeHaters.emplace_back(temp_xhaters);
+								assisteeMembers.emplace_back(m.member);
+							}
 						}
+					}
+				}
+				else if (HasGroup()) {
+					Group* g = GetGroup();
+					if (g) {
+						for (auto& m : g->members) {
+							if (
+								m && 
+								m->IsClient() &&
+								m->CastToClient()->GetAggroCount() &&
+								g->AmIMainAssist(m->GetName())			
+							) {
+								temp_xhaters = m->CastToClient()->GetXTargetAutoMgr();
 
-						m_auto_defend_timer.Disable();
+								if (!temp_xhaters || temp_xhaters->empty()) {
+									continue;
+								}
 
-						return true;
+								assisteeHaters.emplace_back(temp_xhaters);
+								assisteeMembers.emplace_back(m->CastToClient());
+							}
+						}
+					}
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				if (bot_owner->GetAssistee()) {
+					Client* c = entity_list.GetClientByCharID(bot_owner->GetAssistee());
+
+					if (bot_owner->IsInGroupOrRaid(c) && c->GetAggroCount()) {
+						tempHaters = bot_owner->GetXTargetAutoMgr();
+
+						if (tempHaters && !tempHaters->empty()) {
+							assisteeHaters.emplace_back(tempHaters);
+							assisteeMembers.emplace_back(c);
+						}
 					}
 				}
 			}
+
+			if (!assisteeHaters.empty()) {
+				for (XTargetAutoHaters* xHaters : assisteeHaters) {
+					if (!xHaters->empty()) {
+						for (auto hater_iter : xHaters->get_list()) {
+							if (!hater_iter.spawn_id) {
+								continue;
+							}
+							
+							Mob* hater = nullptr;
+
+							for (Client* xMember : assisteeMembers) {
+								if (
+									xMember &&
+									xMember->GetBotPulling() &&
+									xMember->GetTarget() &&
+									(hater_iter.spawn_id == xMember->GetTarget()->GetID())
+								) {
+									continue;
+								}
+
+								hater = entity_list.GetMob(hater_iter.spawn_id);
+
+								if (
+									hater && 
+									!hater->IsMezzed() &&
+									(DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) &&
+									hater->CastToNPC()->IsOnHatelist(xMember)
+								) {
+									break;
+								}
+
+								hater = nullptr;
+							}
+							
+							if (hater) {
+								AddToHateList(hater, 1);
+								SetTarget(hater);
+								SetAttackingFlag();
+
+								if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+									GetPet()->AddToHateList(hater, 1);
+									GetPet()->SetTarget(hater);
+								}
+
+								m_auto_defend_timer.Disable();
+
+								return true;
+							}
+						}
+					}
+				}
+			}
+
+			return false;
 		}
 	}
+
 	return false;
 }
 
@@ -3054,6 +3163,7 @@ bool Bot::ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_dist
 
 			Goal = follow_mob->GetPosition();
 		}
+
 		RunTo(Goal.x, Goal.y, Goal.z);
 	}
 
@@ -11272,8 +11382,6 @@ void Bot::DoCombatPositioning(
 	bool behindMob,
 	bool frontMob
 ) {
-	//LogTestDebug("{} says, 'DoCombatPositioning. {} #{}", GetCleanName(), __FILE__, __LINE__); //deleteme
-
 	if (HasTargetReflection()) {
 		if (!IsTaunting() && !tar->IsFeared() && !tar->IsStunned()) {
 			if (TryEvade(tar)) {

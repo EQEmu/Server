@@ -2221,6 +2221,8 @@ public:
 
 	bool GetBotPulling() { return m_bot_pulling; }
 	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
+	uint32 GetAssistee() { return _assistee; }
+	void SetAssistee(uint32 id = 0) { _assistee = id; }
 
 	bool GetBotPrecombat() { return m_bot_precombat; }
 	void SetBotPrecombat(bool flag = true) { m_bot_precombat = flag; }
@@ -2257,6 +2259,7 @@ private:
 	uint8 cure_min_threshold;
 	uint8 cure_threshold;
 	bool illusion_block;
+	uint32 _assistee;
 
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
