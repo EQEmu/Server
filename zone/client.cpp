@@ -10613,11 +10613,7 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 
 		item = GetInv().GetItem(slot_id);
 		if (item && item->GetID() == item_id) {
-			uint32 charges = (
-				item->IsStackable() ?
-				(item->GetCharges() > 0 ? item->GetCharges() : 1) :
-				1
-			);
+			uint32 charges    = item->IsStackable() ? item->GetCharges() : 0;
 			uint32 stack_size = std::max(charges, static_cast<uint32>(1));
 			if ((removed_count + stack_size) <= quantity) {
 				removed_count += stack_size;
@@ -12810,11 +12806,7 @@ void Client::RemoveItemBySerialNumber(uint32 serial_number, uint32 quantity)
 
 		item = GetInv().GetItem(slot_id);
 		if (item && item->GetSerialNumber() == serial_number) {
-			uint32 charges    = (
-				item->IsStackable() ?
-				(item->GetCharges() > 0 ? item->GetCharges() : 1) :
-				1
-			);
+			uint32 charges    = item->IsStackable() ? item->GetCharges() : 0;
 			uint32 stack_size = std::max(charges, static_cast<uint32>(1));
 			if ((removed_count + stack_size) <= quantity) {
 				removed_count += stack_size;
