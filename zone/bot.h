@@ -932,7 +932,7 @@ public:
 	);
 
 	bool PullingFlagChecks(Client* bot_owner);
-	bool ReturningFlagChecks(Client* bot_owner, float fm_distance);
+	bool ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_distance);
 	void BotPullerProcess(Client* bot_owner, Raid* raid);
 
 

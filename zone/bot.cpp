@@ -2117,6 +2117,7 @@ void Bot::AI_Process()
 //ALT COMBAT (ACQUIRE HATE)
 	glm::vec3 Goal(0, 0, 0);
 
+
 	// We have aggro to choose from
 	if (IsEngaged()) {
 		if (rest_timer.Enabled()) {
@@ -2133,16 +2134,18 @@ void Bot::AI_Process()
 
 // RETURNING FLAG
 
-		else if (GetReturningFlag()) {
-			if (!ReturningFlagChecks(bot_owner, fm_distance)) {
-				return;
-			}
+		if (GetReturningFlag()) {
+			LogTestDebugDetail("#{}: {} has ReturningFlag", __LINE__, GetCleanName()); //deleteme
+			ReturningFlagChecks(bot_owner, leash_owner, fm_distance);
+
+			return;
 		}
 
 // DEFAULT (ACQUIRE TARGET)
 
 // VERIFY TARGET AND STANCE
 		auto tar = GetBotTarget(bot_owner);
+
 		if (!tar) {
 			return;
 		}
@@ -2202,6 +2205,9 @@ void Bot::AI_Process()
 		if (GetPullingFlag()) {
 			if (!TargetValidation(tar)) { return; }
 
+			if (!DoLosChecks(this, tar)) {
+				return;
+			}
 			if (atCombatRange) {
 				if (RuleB(Bots, AllowRangedPulling) && IsBotRanged() && ranged_timer.Check(false)) {
 					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
@@ -2237,7 +2243,9 @@ void Bot::AI_Process()
 				}
 			}
 
+			TryPursueTarget(leash_distance, Goal);
 			return;
+			//TODO bot rewrite - need pulling checks below to prevent assist
 		}
 
 // ENGAGED AT COMBAT RANGE
@@ -2332,7 +2340,6 @@ void Bot::AI_Process()
 		SetAttackingFlag(false);
 
 		if (!bot_owner->GetBotPulling()) {
-
 			SetPullingFlag(false);
 			SetReturningFlag(false);
 		}
@@ -3011,24 +3018,41 @@ Mob* Bot::GetBotTarget(Client* bot_owner)
 	return t;
 }
 
-bool Bot::ReturningFlagChecks(Client* bot_owner, float fm_distance) {// Need to make it back to group before clearing return flag
-	if (fm_distance <= GetFollowDistance()) {
-
-		// Once we're back, clear blocking flags so everyone else can join in
+bool Bot::ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_distance) {
+	if (
+		(NOT_GUARDING && fm_distance <= GetFollowDistance()) ||
+		(GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())
+	) { // Once we're back, clear blocking flags so everyone else can join in
 		SetReturningFlag(false);
 		bot_owner->SetBotPulling(false);
 
 		if (GetPet()) {
 			GetPet()->SetPetOrder(m_previous_pet_order);
 		}
+
+		return false;
 	}
 
 	// Need to keep puller out of combat until they reach their 'return to' destination
-	if (HasTargetReflection()) {
+	WipeHateList();
 
-		SetTarget(nullptr);
-		WipeHateList();
-		return false;
+	if (!IsMoving()) {
+		glm::vec3 Goal(0, 0, 0);
+
+		if (GUARDING) {
+			Goal = GetGuardPoint();
+		}
+		else {
+			Mob* follow_mob = entity_list.GetMob(GetFollowID());
+
+			if (!follow_mob) {
+				follow_mob = leash_owner;
+				SetFollowID(leash_owner->GetID());
+			}
+
+			Goal = follow_mob->GetPosition();
+		}
+		RunTo(Goal.x, Goal.y, Goal.z);
 	}
 
 	return true;
