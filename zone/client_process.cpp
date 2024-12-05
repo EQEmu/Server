@@ -562,7 +562,6 @@ bool Client::Process() {
 			DoManaRegen();
 			DoEnduranceRegen();
 			BuffProcess();
-			SendBulkStatsUpdate();
 
 			if (!sent_weapon) {
 				SetWeaponAppearance(true);
