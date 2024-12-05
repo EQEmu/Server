@@ -33,6 +33,7 @@ E(OP_Death)
 E(OP_MoveItem)
 E(OP_ExpUpdate)
 E(OP_SendAATable)
+E(OP_ItemPacket)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)

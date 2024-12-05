@@ -522,7 +522,6 @@ namespace Laurion {
 			/*08*/ int32 unknown2;
 			/*12*/ uint8 doorid;
 			/*13*/ uint8 padding2[3];
-
 		};
 
 		/*
@@ -602,6 +601,39 @@ namespace Laurion {
 			/*0024*/ uint32			number_in_stack;
 			/*0028*/
 		};
+
+		//These are significantly changed in Laurion from RoF2
+		enum ItemPacketType {
+			//ItemPacketViewLink = 0x00,
+			ItemPacketMerchant = 0x64,
+			ItemPacketTradeView = 0x65,
+			ItemPacketLoot = 0x66,
+			ItemPacketTrade = 0x67,
+			ItemPacketCharInventory = 0x6A, //Rof 0x69 -> Larion 0x6a (requires translation)
+			ItemPacketLimbo = 0x6B, //0x6A -> 0x6B
+			//ItemPacketWorldContainer = 0x6B, //These aren't found yet
+			//ItemPacketTributeItem = 0x6C,
+			//ItemPacketGuildTribute = 0x6D,
+			//ItemPacketCharmUpdate = 0x6E, // Larion has a specific packet for this
+			//ItemPacketRecovery = 0x71,
+			//ItemPacketParcel = 0x73,
+			ItemPacketInvalid = 0xFF
+		};
+
+		/*
+		enum ItemPacketType
+		{
+			ItemPacketViewLink			= 0x00,
+			ItemPacketTradeView			= 0x65,
+			ItemPacketLoot				= 0x66,
+			ItemPacketTrade				= 0x67,
+			ItemPacketCharInventory		= 0x69,
+			ItemPacketSummonItem		= 0x6A,
+			ItemPacketTributeItem		= 0x6C,
+			ItemPacketMerchant			= 0x64,
+			ItemPacketWorldContainer	= 0x6B
+		};
+		*/
 
 #pragma pack()
 

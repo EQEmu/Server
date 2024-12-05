@@ -71,6 +71,8 @@ namespace Laurion
 	static inline uint32 LaurionToServerCorpseMainSlot(uint32 laurion_corpse_slot);
 	static inline uint32 LaurionToServerTypelessSlot(structs::TypelessInventorySlot_Struct laurion_slot, int16 laurion_type);
 
+	structs::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType laurion_type);
+
 	void Register(EQStreamIdentifier& into)
 	{
 		//create our opcode manager if we havent already
@@ -2850,6 +2852,39 @@ namespace Laurion
 		delete in;
 	}
 
+	ENCODE(OP_ItemPacket)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		uchar* __emu_buffer = in->pBuffer;
+		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
+
+		switch (old_item_pkt->PacketType)
+		{
+			case ItemPacketParcel: {
+				//parcels are significantly changed so we will need to figure this out
+			}
+			default: {
+				EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
+
+				auto type = ServerToLaurionItemPacketType(old_item_pkt->PacketType);
+				if (type == structs::ItemPacketInvalid) {
+					break;
+				}
+
+				SerializeBuffer buffer;
+				buffer.WriteInt32((int32_t)type);
+				SerializeItem(buffer, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
+
+				auto outapp = new EQApplicationPacket(OP_ItemPacket, buffer.size());
+				outapp->WriteData(buffer.buffer(), buffer.size());
+				dest->FastQueuePacket(&outapp, ack_req);
+			}
+		}
+
+		delete in;
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -3969,7 +4004,14 @@ namespace Laurion
 
 		if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
 			LaurionSlot.Type = invtype::typePossessions;
-			LaurionSlot.Slot = server_slot;
+
+			if (server_slot == EQ::invslot::slotCursor) {
+				LaurionSlot.Slot = invslot::slotCursor;
+			}
+			else 
+			{
+				LaurionSlot.Slot = server_slot;
+			}
 		}
 
 		else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
@@ -4386,5 +4428,24 @@ namespace Laurion
 			laurion_slot.Slot, laurion_slot.SubIndex, laurion_slot.AugIndex, laurion_type, ServerSlot);
 
 		return ServerSlot;
+	}
+
+	structs::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType server_type) {
+		switch (server_type) {
+		case ItemPacketType::ItemPacketMerchant:
+			return structs::ItemPacketType::ItemPacketMerchant;
+		case ItemPacketType::ItemPacketTradeView:
+			return structs::ItemPacketType::ItemPacketTradeView;
+		case ItemPacketType::ItemPacketLoot:
+			return structs::ItemPacketType::ItemPacketLoot;
+		case ItemPacketType::ItemPacketTrade:
+			return structs::ItemPacketType::ItemPacketTrade;
+		case ItemPacketType::ItemPacketCharInventory:
+			return structs::ItemPacketType::ItemPacketCharInventory;
+		case ItemPacketType::ItemPacketLimbo:
+			return structs::ItemPacketType::ItemPacketLimbo;
+		default:
+			return structs::ItemPacketType::ItemPacketInvalid;
+		}
 	}
 } /*Laurion*/
