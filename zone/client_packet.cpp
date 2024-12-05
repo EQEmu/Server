@@ -928,9 +928,11 @@ void Client::CompleteConnect()
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
+	/*
 	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 		SendBulkBazaarTraders();
 	}
+	*/
 
 	// TODO: load these states
 	// We at least will set them to the correct state for now
