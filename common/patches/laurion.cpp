@@ -71,7 +71,7 @@ namespace Laurion
 	static inline uint32 LaurionToServerCorpseMainSlot(uint32 laurion_corpse_slot);
 	static inline uint32 LaurionToServerTypelessSlot(structs::TypelessInventorySlot_Struct laurion_slot, int16 laurion_type);
 
-	structs::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType laurion_type);
+	item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType laurion_type);
 
 	void Register(EQStreamIdentifier& into)
 	{
@@ -246,35 +246,35 @@ namespace Laurion
 		eq->entries[0] = -1;  // Max AA Restriction
 		eq->entries[1] = -1;  // Max Level Restriction
 		eq->entries[2] = -1;  // Max Char Slots per Account (not used by client?)
-		eq->entries[3] = -1;  // 1 for Silver
+		eq->entries[3] = -1;  // SpellTier
 		eq->entries[4] = -1;  // Main Inventory Size
 		eq->entries[5] = -1;  // Max Platinum per level
 		eq->entries[6] = 1;   // Send Mail
-		eq->entries[7] = 1;   // Use Parcels?
-		eq->entries[8] = 1;   // Voice Chat
+		eq->entries[7] = 1;   // Use Parcels
+		eq->entries[8] = 1;   // Loyalty
 		eq->entries[9] = -1;  // Merc Tiers
-		eq->entries[10] = 1;  // Create Guilds
+		eq->entries[10] = 1;  // Housing
 		eq->entries[11] = -1; // Shared Bank Slots
 		eq->entries[12] = -1; // Max Journal Quests
-		eq->entries[13] = 1;  // Housing Enabled
-		eq->entries[14] = 1;  // Prestiege
-		eq->entries[15] = 1;  // Broker System
+		eq->entries[13] = 1;  // CreateGuild
+		eq->entries[14] = 1;  // Bazaar
+		eq->entries[15] = 1;  // Barter
 		eq->entries[16] = 1;  // Chat
-		eq->entries[17] = 1;  // Progression Server Access
-		eq->entries[18] = 1;  // Customer Support
-		eq->entries[19] = -1; // Popup reminders?
-		eq->entries[20] = -1; // Exit Popup?
-		eq->entries[21] = 0;
-		eq->entries[22] = 0;
-		eq->entries[23] = 0;  // This is the highest we actually see in detail entries
-		eq->entries[24] = 0;  
-		eq->entries[25] = 0;
-		eq->entries[26] = 0;
-		eq->entries[27] = 0;
-		eq->entries[28] = 0;
-		eq->entries[29] = 0;
-		eq->entries[30] = 0;
-		eq->entries[31] = 0;
+		eq->entries[17] = 1;  // Petition
+		eq->entries[18] = 1;  // Advertising
+		eq->entries[19] = -1; // UseItem
+		eq->entries[20] = -1; // StartingCity
+		eq->entries[21] = 1;  // Ornament
+		eq->entries[22] = 0;  // HeroicCharacter
+		eq->entries[23] = 0;  // AutoGrantAA
+		eq->entries[24] = 0;  // MountKeyRingSlots
+		eq->entries[25] = 0;  // IllusionKeyRingSlots
+		eq->entries[26] = 0;  // FamiliarKeyRingSlots
+		eq->entries[27] = 0;  // FamiliarAutoLeave
+		eq->entries[28] = 0;  // HeroForgeKeyRingSlots
+		eq->entries[29] = 0;  // DragonHoardSlots
+		eq->entries[30] = 0;  // TeleportKeyRingSlots
+		eq->entries[31] = 0;  // PersonalDepotSlots
 		eq->entries[32] = 0;
 
 		FINISH_ENCODE();
@@ -2860,14 +2860,14 @@ namespace Laurion
 		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
 
 		auto type = ServerToLaurionItemPacketType(old_item_pkt->PacketType);
-		if (type == structs::ItemPacketInvalid) {
+		if (type == item::ItemPacketType::ItemPacketInvalid) {
 			delete in;
 			return;
 		}
 
 		switch (type)
 		{
-			case structs::ItemPacketType::ItemPacketParcel: {
+			case item::ItemPacketType::ItemPacketParcel: {
 				ParcelMessaging_Struct       pms{};
 				EQ::Util::MemoryStreamReader ss(reinterpret_cast<char*>(in->pBuffer), in->size);
 				cereal::BinaryInputArchive   ar(ss);
@@ -2904,6 +2904,26 @@ namespace Laurion
 		}
 
 		delete in;
+	}
+
+	ENCODE(OP_ShopRequest)
+	{
+		ENCODE_LENGTH_EXACT(MerchantClick_Struct);
+		SETUP_DIRECT_ENCODE(MerchantClick_Struct, structs::MerchantClickResponse_Struct);
+
+		if (emu->command == 0) {
+			OUT(player_id);
+			eq->npc_id = 0;
+		}
+		else {
+			OUT(npc_id);
+			OUT(player_id);
+			OUT(rate);
+			OUT(tab_display);
+			eq->unknown028 = 256;
+		}
+
+		FINISH_ENCODE();
 	}
 
 	// DECODE methods
@@ -3090,6 +3110,16 @@ namespace Laurion
 		emu->from_slot = LaurionToServerSlot(eq->from_slot);
 		emu->to_slot = LaurionToServerSlot(eq->to_slot);
 		IN(number_in_stack);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ShopRequest)
+	{
+		DECODE_LENGTH_EXACT(structs::MerchantClickRequest_Struct);
+		SETUP_DIRECT_DECODE(MerchantClick_Struct, structs::MerchantClickRequest_Struct);
+
+		IN(npc_id);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4451,30 +4481,30 @@ namespace Laurion
 		return ServerSlot;
 	}
 
-	structs::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType server_type) {
+	item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType server_type) {
 		switch (server_type) {
 		case ItemPacketType::ItemPacketMerchant:
-			return structs::ItemPacketType::ItemPacketMerchant;
+			return item::ItemPacketType::ItemPacketMerchant;
 		case ItemPacketType::ItemPacketTradeView:
-			return structs::ItemPacketType::ItemPacketTradeView;
+			return item::ItemPacketType::ItemPacketTradeView;
 		case ItemPacketType::ItemPacketLoot:
-			return structs::ItemPacketType::ItemPacketLoot;
+			return item::ItemPacketType::ItemPacketLoot;
 		case ItemPacketType::ItemPacketTrade:
-			return structs::ItemPacketType::ItemPacketTrade;
+			return item::ItemPacketType::ItemPacketTrade;
 		case ItemPacketType::ItemPacketCharInventory:
-			return structs::ItemPacketType::ItemPacketCharInventory;
+			return item::ItemPacketType::ItemPacketCharInventory;
 		case ItemPacketType::ItemPacketLimbo:
-			return structs::ItemPacketType::ItemPacketLimbo;
+			return item::ItemPacketType::ItemPacketLimbo;
 		case ItemPacketType::ItemPacketWorldContainer:
-			return structs::ItemPacketType::ItemPacketWorldContainer;
+			return item::ItemPacketType::ItemPacketWorldContainer;
 		case ItemPacketType::ItemPacketTributeItem:
-			return structs::ItemPacketType::ItemPacketTributeItem;
+			return item::ItemPacketType::ItemPacketTributeItem;
 		case ItemPacketType::ItemPacketGuildTribute:
-			return structs::ItemPacketType::ItemPacketGuildTribute;
+			return item::ItemPacketType::ItemPacketGuildTribute;
 		case ItemPacketType::ItemPacketCharmUpdate:
-			return structs::ItemPacketType::ItemPacketCharmUpdate;
+			return item::ItemPacketType::ItemPacketCharmUpdate;
 		default:
-			return structs::ItemPacketType::ItemPacketInvalid;
+			return item::ItemPacketType::ItemPacketInvalid;
 		}
 	}
 } /*Laurion*/

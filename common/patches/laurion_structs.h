@@ -602,29 +602,23 @@ namespace Laurion {
 			/*0028*/
 		};
 
-		//These are significantly changed in Laurion from RoF2
-		enum ItemPacketType {
-			//ItemPacketViewLink = 0x00,
-			ItemPacketMerchant = 0x64,
-			ItemPacketTradeView = 0x65,
-			ItemPacketLoot = 0x66,
-			ItemPacketTrade = 0x67,
-			//looks like they added something at 0x68 that didn't exist before and shifted everything after it up by 1
-			ItemPacketUnknown068 = 0x68, //Not sure but it seems to deal with the cursor somehow.
-			ItemPacketCharInventory = 0x6A, //Rof 0x69 -> Larion 0x6a (requires translation)
-			ItemPacketLimbo = 0x6B, //0x6A -> 0x6B
-			ItemPacketWorldContainer = 0x6C,
-			ItemPacketTributeItem = 0x6D,
-			ItemPacketGuildTribute = 0x6E,
-			ItemPacketCharmUpdate = 0x6f,
-			ItemPacketRecovery = 0x72,
-			ItemPacketParcel = 0x74,
-			ItemPacketUnknown075 = 0x75, //Not sure but uses a lot of the same logic as the trade and char inventory types
-			ItemPacketOverflow = 0x76,
-			ItemPacketDragonHoard = 0x77,
-			ItemPacketTradeskill = 0x78,
-			ItemPacketTradeskillDepot = 0x79,
-			ItemPacketInvalid = 0xFF
+		struct MerchantClickRequest_Struct
+		{
+			/*000*/ uint32 npc_id;      // Merchant NPC's entity id
+			/*004*/
+		};
+
+		struct MerchantClickResponse_Struct
+		{
+			/*000*/ uint32 npc_id;      // Merchant NPC's entity id
+			/*004*/ uint32 player_id;
+			/*008*/ float rate;
+			/*012*/ uint32 tab_display; // bitmask b000 none, b001 Purchase/Sell, b010 Recover, b100 Parcels
+			/*016*/ uint32 ldon_category; // ldon cat for ldon merchants
+			/*020*/ uint32 alt_currency1; //These two usually match but I imagine they could be different?
+			/*024*/ uint32 alt_currency2;
+			/*028*/ uint32 unknown028; // Observed 256
+			/*032*/
 		};
 
 #pragma pack()

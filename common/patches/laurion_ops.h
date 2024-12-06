@@ -34,6 +34,7 @@ E(OP_MoveItem)
 E(OP_ExpUpdate)
 E(OP_SendAATable)
 E(OP_ItemPacket)
+E(OP_ShopRequest)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)
@@ -47,6 +48,7 @@ D(OP_ConsiderCorpse)
 D(OP_ClickDoor)
 D(OP_SpawnAppearance)
 D(OP_MoveItem)
+D(OP_ShopRequest)
 
 #undef E
 #undef D

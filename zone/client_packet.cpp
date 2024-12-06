@@ -14639,7 +14639,10 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		mco->rate = 1 / buy_cost_mod;
 	}
 
-	outapp->priority = 6;
+	if (m_ClientVersion >= EQ::versions::ClientVersion::Laurion) {
+		mco->player_id = GetID();
+	}
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 

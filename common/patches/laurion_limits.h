@@ -249,20 +249,26 @@ namespace Laurion
 		//};
 
 		enum ItemPacketType : int {
-			ItemPacketMerchant = 100,
-			ItemPacketTradeView = 101,
-			ItemPacketLoot = 102,
-			ItemPacketTrade = 103,
-			ItemPacketCharInventory = 105,
-			ItemPacketLimbo = 106,
-			ItemPacketWorldContainer = 107,
-			ItemPacketTributeItem = 108,
-			ItemPacketGuildTribute = 109,
-			ItemPacket10 = 110,
-			ItemPacket11 = 111,
-			ItemPacket12 = 112,
-			ItemPacketRecovery = 113,
-			ItemPacket14 = 115 // Parcel? adds to merchant window too
+			ItemPacketMerchant = 0x64,
+			ItemPacketTradeView = 0x65,
+			ItemPacketLoot = 0x66,
+			ItemPacketTrade = 0x67,
+			//looks like they added something at 0x68 that didn't exist before and shifted everything after it up by 1
+			ItemPacketUnknown068 = 0x68, //Not sure but it seems to deal with the cursor somehow.
+			ItemPacketCharInventory = 0x6A, //Rof 0x69 -> Larion 0x6a (requires translation)
+			ItemPacketLimbo = 0x6B, //0x6A -> 0x6B
+			ItemPacketWorldContainer = 0x6C,
+			ItemPacketTributeItem = 0x6D,
+			ItemPacketGuildTribute = 0x6E,
+			ItemPacketCharmUpdate = 0x6f,
+			ItemPacketRecovery = 0x72,
+			ItemPacketParcel = 0x74,
+			ItemPacketUnknown075 = 0x75, //Not sure but uses a lot of the same logic as the trade and char inventory types
+			ItemPacketOverflow = 0x76,
+			ItemPacketDragonHoard = 0x77,
+			ItemPacketTradeskill = 0x78,
+			ItemPacketTradeskillDepot = 0x79,
+			ItemPacketInvalid = 0xFF
 		};
 
 	} /*item*/
