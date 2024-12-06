@@ -1045,7 +1045,7 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 				) {					
 					continue;
 				}
-				if (spellType == debugSpellType) { LogTestDebugDetail("{} - #{}: [{} #{}] - {} says, '{} #{} - Passed TGB checks.'", __FILE__, __LINE__, botCaster->GetSpellTypeNameByID(spellType), spellType, botCaster->GetCleanName(), spells[botSpellList[i].spellid].name, botSpellList[i].spellid); }; //deleteme
+
 				if (!IsPBAESpell(botSpellList[i].spellid) && !botCaster->CastChecks(botSpellList[i].spellid, tar, spellType, false, IsAEBotSpellType(spellType))) {					
 					continue;
 				}
