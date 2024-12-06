@@ -6836,7 +6836,7 @@ void Client::SuspendMinion(int value)
 	};
 
 	bool valid_stored_pet	= m_suspendedminion.SpellID > 0;
-	bool total_pet_limit 	= GetAllPets().size() < RuleI(Custom, AbsolutePetLimit);
+	bool total_pet_limit 	= GetAllPets().size() <= RuleI(Custom, AbsolutePetLimit);
 	bool pet_slot_allowed 	= IsPetAllowed(m_suspendedminion.SpellID);
 
 	bool valid_pet_to_store = CurrentPet && CurrentPet->GetPetSpellID();

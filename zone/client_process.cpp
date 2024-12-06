@@ -612,6 +612,7 @@ bool Client::Process() {
 				}
 			}
 
+			SendBulkStatsUpdate();
 			if (RuleB(Custom, ServerAuthStats) && InZone() && !CAuthorized) {
 				if (CUnauth_tics > 1) {
 					if (GetZoneID() != Zones::BAZAAR) {

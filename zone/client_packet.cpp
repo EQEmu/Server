@@ -1060,8 +1060,9 @@ void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket *app)
 {
 	conn_state = ClientReadyReceived;
-	if (!Spawned())
+	if (!Spawned()) {
 		SendZoneInPackets();
+	}
 	CompleteConnect();
 	SendHPUpdate();
 }
@@ -1704,8 +1705,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	m_pp.entityid = GetID();
 	memcpy(outapp->pBuffer, &m_pp, outapp->size);
 	outapp->priority = 6;
-	FastQueuePacket(&outapp);
+
 	SendBulkStatsUpdate();
+
+	FastQueuePacket(&outapp);
 
 	if (m_pp.RestTimer) {
 		rest_timer.Start(m_pp.RestTimer * 1000);
@@ -4946,7 +4949,6 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 
 		size_t key_length = sizeof(private_key);
 
-
 		auto xor_proc = [](char* data, size_t length, const uint32_t key, size_t key_length) {
 			const char* key_bytes = reinterpret_cast<const char*>(&key);
 			for (size_t i = 0; i < length; ++i) {
@@ -4967,7 +4969,6 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 
 		if (GetGM()) {
 			CAuthorized = true;
-			return;
 		}
 
 		if (CAuthorized) {
@@ -4975,7 +4976,7 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 			QueuePacket(app);
 		}
 
-		if (!CHacker && buf->unk && CAuthorized) {
+		if (!CHacker && buf->unk) {
 			CHacker = true;
 
 			std::string hrs;
