@@ -534,7 +534,7 @@ void DataBucket::DeleteFromCache(uint64 id, DataBucketLoadType::Type type)
 // npcs (ids) can be in multiple zones so we can't cache locally to the zone
 bool DataBucket::CanCache(const DataBucketKey &key)
 {
-	if (key.character_id > 0) {
+	if (key.character_id > 0 || key.bot_id > 0) {
 		return true;
 	}
 
