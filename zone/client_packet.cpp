@@ -524,7 +524,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 // Finish client connecting state
 void Client::CompleteConnect()
 {
-
 	UpdateWho();
 	client_state = CLIENT_CONNECTED;
 	SendAllPackets();
@@ -543,6 +542,8 @@ void Client::CompleteConnect()
 
 	// Task Packets
 	LoadClientTaskState();
+
+	ClearDataBucketCache();
 
 	// moved to dbload and translators since we iterate there also .. keep m_pp values whatever they are when they get here
 	/*const auto sbs = EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize;
@@ -968,8 +969,6 @@ void Client::CompleteConnect()
 
 	RecordStats();
 	AutoGrantAAPoints();
-
-	DataBucket::DeleteCharacterFromCache(CharacterID());
 
 	// enforce some rules..
 	if (!CanEnterZone()) {

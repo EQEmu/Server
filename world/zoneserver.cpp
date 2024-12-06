@@ -1564,11 +1564,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			DynamicZone::HandleZoneMessage(pack);
 			break;
 		}
-		case ServerOP_DataBucketCacheUpdate: {
-			zoneserver_list.SendPacket(pack);
-
-			break;
-		}
 		case ServerOP_GuildTributeUpdate: {
 			auto data  = (GuildTributeUpdate *)pack->pBuffer;
 			auto guild = guild_mgr.GetGuildByGuildID(data->guild_id);

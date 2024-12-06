@@ -12,25 +12,8 @@
 #include "../common/json/json_archive_single_line.h"
 #include "../common/servertalk.h"
 
-enum DataBucketCacheUpdateAction : uint8 {
-	Upsert,
-	Delete
-};
-
 struct DataBucketCacheEntry {
 	DataBucketsRepository::DataBuckets e;
-	int64_t                            updated_time{};
-	DataBucketCacheUpdateAction        update_action{};
-
-	template<class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(
-			CEREAL_NVP(e),
-			CEREAL_NVP(updated_time),
-			CEREAL_NVP(update_action)
-		);
-	}
 };
 
 struct DataBucketKey {
@@ -85,11 +68,10 @@ public:
 	static void BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32> ids);
 	static void DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id);
 
-	static bool SendDataBucketCacheUpdate(const DataBucketCacheEntry &e);
-	static void HandleWorldMessage(ServerPacket *p);
 	static void DeleteFromMissesCache(DataBucketsRepository::DataBuckets e);
 	static void ClearCache();
-	static void DeleteCharacterFromCache(uint64 character_id);
+	static void DeleteFromCache(uint64 id, DataBucketLoadType::Type type);
+	static bool CanCache(const DataBucketKey &key);
 };
 
 #endif //EQEMU_DATABUCKET_H
