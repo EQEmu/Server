@@ -3443,7 +3443,6 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 		case statClassesBitmask:
 			return GetClassesBits();
 		case statMitigation:
-			CalcAC();
 			return GetMitigationAC();
 		case statEvasion:
 			return GetTotalDefense();
@@ -3506,7 +3505,7 @@ int64_t Client::GetStatEntryValue(StatEntry label)
 		case statHeroicPR:
 			return GetHeroicPR();
 		case statAC:
-			return GetAC();
+			return ACSum();
 		case statSpellDmg:
 			return itembonuses.SpellDmg;
 		case statHealAmt:
