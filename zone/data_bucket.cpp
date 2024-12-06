@@ -74,8 +74,8 @@ void DataBucket::SetData(const DataBucketKey &k)
 		b.key_ = k.key;
 		b = DataBucketsRepository::InsertOne(database, b);
 		if (CanCache(k) && !ExistsInCache(b)) {
-			g_data_bucket_cache.emplace_back(b);
 			DeleteFromMissesCache(b);
+			g_data_bucket_cache.emplace_back(b);
 		}
 	}
 }
