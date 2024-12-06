@@ -9541,10 +9541,10 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		}
 
 		if (spells[spell_id].target_type == ST_Self && tar != this) {
-			if (IsEffectInSpell(spell_id, SE_SummonCorpse) && RuleB(Bots, AllowCommandedSummonCorpse)) {
-				//tar = this;
-			}
-			else {
+			if (
+				!IsEffectInSpell(spell_id, SE_SummonCorpse) || 
+				(IsEffectInSpell(spell_id, SE_SummonCorpse) && !RuleB(Bots, AllowCommandedSummonCorpse))
+			) {
 				tar = this;
 			}
 		}
