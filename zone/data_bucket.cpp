@@ -459,13 +459,6 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
 	);
 }
 
-int64_t DataBucket::GetCurrentTimeUNIX()
-{
-	return std::chrono::duration_cast<std::chrono::nanoseconds>(
-		std::chrono::system_clock::now().time_since_epoch()
-	).count();
-}
-
 bool DataBucket::ExistsInCache(const DataBucketsRepository::DataBuckets &e)
 {
 	for (const auto &ce: g_data_bucket_cache) {

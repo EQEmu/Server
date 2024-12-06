@@ -1,7 +1,3 @@
-//
-// Created by Akkadius on 7/7/18.
-//
-
 #ifndef EQEMU_DATABUCKET_H
 #define EQEMU_DATABUCKET_H
 
@@ -11,10 +7,6 @@
 #include "mob.h"
 #include "../common/json/json_archive_single_line.h"
 #include "../common/servertalk.h"
-
-struct DataBucketCacheEntry {
-	DataBucketsRepository::DataBuckets e;
-};
 
 struct DataBucketKey {
 	std::string key;
@@ -50,8 +42,6 @@ public:
 	static std::string GetDataRemaining(const std::string &bucket_key);
 
 	static bool GetDataBuckets(Mob *mob);
-
-	static int64_t GetCurrentTimeUNIX();
 
 	// scoped bucket methods
 	static void SetData(const DataBucketKey &k);
