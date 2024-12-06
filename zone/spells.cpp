@@ -6609,10 +6609,18 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 			}
 		}
 
+		// Sanity check here to ensure that we aren't adding the same proc buff multiple times -- if the spell is already in the array, bail.
+		for (i = 0; i < 10; i++) {
+		    // Check if the spell_id already exists in the array
+		    if (SpellProcs[i].spellID == spell_id) {
+		        LogSpells("Spell ID [{}] is already in the SpellProcs array at slot [{}], skipping add.", spell_id, i);
+		        return false; // Prevent duplicates
+		    }
+		}
+
 		// If we get here it either wasn't poison (which can only use 1 slot)
 		// or it is poison and no poison procs are currently present.
 		// Find a slot and use it as normal.
-
 		for (i = 0; i < 10; i++) {
 			if (!IsValidSpell(SpellProcs[i].spellID)) {
 				SpellProcs[i].spellID = spell_id;
