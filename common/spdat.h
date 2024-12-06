@@ -752,7 +752,6 @@ bool SpellTypeRequiresCastChecks(uint16 spellType);
 bool SpellTypeRequiresAEChecks(uint16 spellType);
 bool IsCommandedSpellType(uint16 spellType);
 bool IsPullingSpellType(uint16 spellType);
-bool BotSpellTypeRequiresLoS(uint16 spellType, uint8 cls);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only
