@@ -58,7 +58,8 @@ void DataBucket::SetData(const DataBucketKey &k)
 	b.value   = k.value;
 
 	if (bucket_id) {
-		// loop cache and update cache value and timestamp
+
+		// update the cache if it exists
 		if (CanCache(k)) {
 			for (auto &ce: g_data_bucket_cache) {
 				if (CheckBucketMatch(ce, k)) {
@@ -73,6 +74,8 @@ void DataBucket::SetData(const DataBucketKey &k)
 	else {
 		b.key_ = k.key;
 		b = DataBucketsRepository::InsertOne(database, b);
+
+		// add to cache if it doesn't exist
 		if (CanCache(k) && !ExistsInCache(b)) {
 			DeleteFromMissesCache(b);
 			g_data_bucket_cache.emplace_back(b);
@@ -82,9 +85,7 @@ void DataBucket::SetData(const DataBucketKey &k)
 
 std::string DataBucket::GetData(const std::string &bucket_key)
 {
-	DataBucketKey k = {};
-	k.key = bucket_key;
-	return GetData(k).value;
+	return GetData(DataBucketKey{.key = bucket_key}).value;
 }
 
 // GetData fetches bucket data from the database or cache if it exists
@@ -188,24 +189,17 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 
 std::string DataBucket::GetDataExpires(const std::string &bucket_key)
 {
-	DataBucketKey k = {};
-	k.key = bucket_key;
-
-	return GetDataExpires(k);
+	return GetDataExpires(DataBucketKey{.key = bucket_key});
 }
 
 std::string DataBucket::GetDataRemaining(const std::string &bucket_key)
 {
-	DataBucketKey k = {};
-	k.key = bucket_key;
-	return GetDataRemaining(k);
+	return GetDataRemaining(DataBucketKey{.key = bucket_key});
 }
 
 bool DataBucket::DeleteData(const std::string &bucket_key)
 {
-	DataBucketKey k = {};
-	k.key = bucket_key;
-	return DeleteData(k);
+	return DeleteData(DataBucketKey{.key = bucket_key});
 }
 
 // GetDataBuckets bulk loads all data buckets for a mob
@@ -533,7 +527,6 @@ void DataBucket::DeleteFromCache(uint64 id, DataBucketLoadType::Type type)
 		g_data_bucket_cache.size()
 	);
 }
-
 
 // CanCache returns whether a bucket can be cached or not
 // characters are only in one zone at a time so we can cache locally to the zone
