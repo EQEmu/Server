@@ -996,6 +996,8 @@ void Client::CompleteConnect()
 		SendDisciplineUpdate();
 	}
 
+	DataBucket::DeleteCharacterFromCache(CharacterID());
+
 	if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
 		m_last_seen_mob_position.reserve(entity_list.GetMobList().size());
 	}
@@ -1451,7 +1453,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	drakkin_details = m_pp.drakkin_details;
 
 	// Load Data Buckets
-	ClearDataBucketCache();
 	DataBucket::GetDataBuckets(this);
 
 	// Max Level for Character:PerCharacterQglobalMaxLevel and Character:PerCharacterBucketMaxLevel

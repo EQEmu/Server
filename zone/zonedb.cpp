@@ -1956,6 +1956,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		}
 	}
 
+	DataBucket::BulkLoadEntities(DataBucketLoadType::NPC, npc_ids);
+
 	if (!npc_faction_ids.empty()) {
 		zone->LoadNPCFactions(npc_faction_ids);
 		zone->LoadNPCFactionAssociations(npc_faction_ids);

@@ -1,3 +1,7 @@
+//
+// Created by Akkadius on 7/7/18.
+//
+
 #ifndef EQEMU_DATABUCKET_H
 #define EQEMU_DATABUCKET_H
 
@@ -7,6 +11,27 @@
 #include "mob.h"
 #include "../common/json/json_archive_single_line.h"
 #include "../common/servertalk.h"
+
+enum DataBucketCacheUpdateAction : uint8 {
+	Upsert,
+	Delete
+};
+
+struct DataBucketCacheEntry {
+	DataBucketsRepository::DataBuckets e;
+	int64_t                            updated_time{};
+	DataBucketCacheUpdateAction        update_action{};
+
+	template<class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(
+			CEREAL_NVP(e),
+			CEREAL_NVP(updated_time),
+			CEREAL_NVP(update_action)
+		);
+	}
+};
 
 struct DataBucketKey {
 	std::string key;
@@ -43,6 +68,8 @@ public:
 
 	static bool GetDataBuckets(Mob *mob);
 
+	static int64_t GetCurrentTimeUNIX();
+
 	// scoped bucket methods
 	static void SetData(const DataBucketKey &k);
 	static bool DeleteData(const DataBucketKey &k);
@@ -58,10 +85,11 @@ public:
 	static void BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32> ids);
 	static void DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id);
 
+	static bool SendDataBucketCacheUpdate(const DataBucketCacheEntry &e);
+	static void HandleWorldMessage(ServerPacket *p);
 	static void DeleteFromMissesCache(DataBucketsRepository::DataBuckets e);
 	static void ClearCache();
-	static void DeleteFromCache(uint64 id, DataBucketLoadType::Type type);
-	static bool CanCache(const DataBucketKey &key);
+	static void DeleteCharacterFromCache(uint64 character_id);
 };
 
 #endif //EQEMU_DATABUCKET_H
