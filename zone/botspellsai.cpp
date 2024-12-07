@@ -633,7 +633,7 @@ bool Bot::AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 }
 
 bool Bot::AI_PursueCastCheck() {
-	if (GetAppearance() == eaDead || IsFeared() || IsSilenced() || IsAmnesiad() || GetHP() < 0) {
+	if (GetAppearance() == eaDead || delaytimer || spellend_timer.Enabled() || IsFeared() || IsSilenced() || IsAmnesiad() || GetHP() < 0) {
 		return false;
 	}
 
@@ -682,7 +682,7 @@ bool Bot::AI_PursueCastCheck() {
 }
 
 bool Bot::AI_IdleCastCheck() {
-	if (GetAppearance() == eaDead || IsFeared() || IsSilenced() || IsAmnesiad() || GetHP() < 0) {
+	if (GetAppearance() == eaDead || delaytimer || spellend_timer.Enabled() || IsFeared() || IsSilenced() || IsAmnesiad() || GetHP() < 0) {
 		return false;
 	}
 
@@ -745,7 +745,7 @@ bool Bot::AI_IdleCastCheck() {
 }
 
 bool Bot::AI_EngagedCastCheck() {
-	if (GetAppearance() == eaDead || IsFeared() || IsSilenced() || IsAmnesiad() || GetHP() < 0) {
+	if (GetAppearance() == eaDead || delaytimer || spellend_timer.Enabled() || IsFeared() || IsSilenced() || IsAmnesiad() || GetHP() < 0) {
 		return false;
 	}
 
