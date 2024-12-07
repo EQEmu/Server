@@ -5834,7 +5834,7 @@ bool Bot::CastSpell(
 
 		if (DivineAura()) {
 			LogSpellsDetail("Spell casting canceled: cannot cast while Divine Aura is in effect");
-			InterruptSpell(173, 0x121, false);
+			InterruptSpell(SPELL_FIZZLE, 0x121, false);
 			return false;
 		}
 
