@@ -1265,7 +1265,7 @@ void Bot::LoadAAs() {
 		}
 
 		while(current) {
-			if (!CanUseAlternateAdvancementRank(current)) {
+			if (current->level_req > GetLevel() || !CanUseAlternateAdvancementRank(current)) {
 				current = nullptr;
 			} else {
 				current = current->next;
