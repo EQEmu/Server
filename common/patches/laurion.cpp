@@ -55,7 +55,7 @@ namespace Laurion
 	static inline void ServerToLaurionConvertLinks(std::string& message_out, const std::string& message_in);
 	static inline void LaurionToServerConvertLinks(std::string& message_out, const std::string& message_in);
 
-	//SpawnAppearance
+	// SpawnAppearance
 	static inline uint32 ServerToLaurionSpawnAppearanceType(uint32 server_type);
 	static inline uint32 LaurionToServerSpawnAppearanceType(uint32 laurion_type);
 
@@ -71,7 +71,16 @@ namespace Laurion
 	static inline uint32 LaurionToServerCorpseMainSlot(uint32 laurion_corpse_slot);
 	static inline uint32 LaurionToServerTypelessSlot(structs::TypelessInventorySlot_Struct laurion_slot, int16 laurion_type);
 
-	item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType laurion_type);
+	// Item packet types
+	static item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType laurion_type);
+
+	// casting slots
+	static inline spells::CastingSlot ServerToLaurionCastingSlot(EQ::spells::CastingSlot slot);
+	static inline EQ::spells::CastingSlot LaurionToServerCastingSlot(spells::CastingSlot slot);
+
+	// buff slots
+	static inline int ServerToLaurionBuffSlot(int index);
+	static inline int LaurionToServerBuffSlot(int index);
 
 	void Register(EQStreamIdentifier& into)
 	{
@@ -1163,7 +1172,8 @@ namespace Laurion
 		u8 status;
 		*/
 
-		out.WriteUInt64(0);
+		out.WriteInt32(emu->guild_id);
+		out.WriteUInt32(0);
 		out.WriteUInt8(0);
 		out.WriteUInt8(5);
 
@@ -1262,7 +1272,7 @@ namespace Laurion
 		out.WriteUInt32(emu->careerEbonCrystals);
 
 		/*
-		u32 momentum_balance;
+		u32 momentum_balance;  
 		u32 loyalty_reward_balance;
 		u32 parcel_status;
 		*/
@@ -2926,6 +2936,104 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_BeginCast)
+	{
+		SETUP_DIRECT_ENCODE(BeginCast_Struct, structs::BeginCast_Struct);
+
+		OUT(spell_id);
+		OUT(caster_id);
+		OUT(cast_time);
+		eq->unknown0e = 1; //not sure what this is; but its usually 1 on live
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_BuffCreate)
+	{
+		SETUP_VAR_ENCODE(BuffIcon_Struct);
+
+		//Laurion has one extra 0x00 byte before the end byte
+		uint32 sz = 13 + (17 * emu->count) + emu->name_lengths; // 17 includes nullterm
+		__packet->size = sz;
+		__packet->pBuffer = new unsigned char[sz];
+		memset(__packet->pBuffer, 0, sz);
+
+		__packet->WriteUInt32(emu->entity_id);
+		__packet->WriteUInt32(emu->tic_timer);
+		__packet->WriteUInt8(emu->all_buffs);			// 1 indicates all buffs on the player (0 to add or remove a single buff)
+		__packet->WriteUInt16(emu->count);
+
+		for (int i = 0; i < emu->count; ++i)
+		{
+			__packet->WriteUInt32(emu->type == 0 ? ServerToLaurionBuffSlot(emu->entries[i].buff_slot) : emu->entries[i].buff_slot);
+			__packet->WriteUInt32(emu->entries[i].spell_id);
+			__packet->WriteUInt32(emu->entries[i].tics_remaining);
+			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
+			__packet->WriteString(emu->entries[i].caster);
+		}
+		__packet->WriteUInt8(0); // Unknown1
+		__packet->WriteUInt8(emu->type); // Unknown2
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Buff)
+	{
+		ENCODE_LENGTH_EXACT(SpellBuffPacket_Struct);
+		SETUP_DIRECT_ENCODE(SpellBuffPacket_Struct, structs::EQAffectPacket_Struct);
+
+		eq->entity_id = emu->entityid;
+		eq->unknown004 = 0;
+
+		//fill in affect info
+		eq->affect.caster_id.Id = emu->buff.player_id;
+		eq->affect.flags = 0;
+		eq->affect.spell_id = emu->buff.spellid;
+		eq->affect.duration = emu->buff.duration;
+		eq->affect.initial_duration = emu->buff.duration;
+		eq->affect.hit_count = emu->buff.num_hits;
+		eq->affect.viral_timer = 0;
+		eq->affect.modifier = emu->buff.bard_modifier == 10 ? 1.0f : emu->buff.bard_modifier / 10.0f;
+		eq->affect.y = emu->buff.y;
+		eq->affect.x = emu->buff.x;
+		eq->affect.z = emu->buff.z;
+		eq->affect.level = emu->buff.level;
+
+		eq->slot_id = ServerToLaurionBuffSlot(emu->slotid);
+		if (emu->bufffade == 1)
+		{
+			eq->buff_fade = 1;
+		}
+		else
+		{
+			eq->buff_fade = 2;
+		}
+
+		EQApplicationPacket* outapp = nullptr;
+		if (emu->bufffade == 1)
+		{
+			// Bit of a hack. OP_Buff appears to add/remove the buff while OP_BuffCreate adds/removes the actual buff icon
+			outapp = new EQApplicationPacket(OP_BuffCreate, 30);
+			outapp->WriteUInt32(emu->entityid);
+			outapp->WriteUInt32(0);	// tic timer
+			outapp->WriteUInt8(0);		// Type of OP_BuffCreate packet ?
+			outapp->WriteUInt16(1);		// 1 buff in this packet
+			outapp->WriteUInt32(ServerToLaurionBuffSlot(emu->slotid));
+			outapp->WriteUInt32(0xffffffff);		// SpellID (0xffff to remove)
+			outapp->WriteUInt32(0);			// Duration
+			outapp->WriteUInt32(0);			// numhits
+			outapp->WriteUInt8(0);		// Caster name
+			outapp->WriteUInt8(0);		// Type
+			outapp->WriteUInt8(0);		// Type
+		}
+
+		FINISH_ENCODE();
+
+		if (outapp) {
+			dest->FastQueuePacket(&outapp);
+		}
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -3121,6 +3229,23 @@ namespace Laurion
 
 		IN(npc_id);
 
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_CastSpell)
+	{
+		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
+		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
+		
+		emu->slot = static_cast<uint32>(LaurionToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot)));
+		
+		//We need to figure out the x y z position stuff
+		IN(spell_id);
+		emu->inventoryslot = LaurionToServerSlot(eq->inventory_slot);
+		IN(target_id);
+		//IN(y_pos);
+		//IN(x_pos);
+		//IN(z_pos);
 		FINISH_DIRECT_DECODE();
 	}
 
@@ -4481,7 +4606,7 @@ namespace Laurion
 		return ServerSlot;
 	}
 
-	item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType server_type) {
+	static item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType server_type) {
 		switch (server_type) {
 		case ItemPacketType::ItemPacketMerchant:
 			return item::ItemPacketType::ItemPacketMerchant;
@@ -4506,5 +4631,109 @@ namespace Laurion
 		default:
 			return item::ItemPacketType::ItemPacketInvalid;
 		}
+	}
+
+	//This stuff isn't right because they for one removed potion belt
+	//This will probably be enough to get casting working for now though
+	static inline spells::CastingSlot ServerToLaurionCastingSlot(EQ::spells::CastingSlot slot) {
+		switch (slot) {
+		case EQ::spells::CastingSlot::Gem1:
+			return spells::CastingSlot::Gem1;
+		case EQ::spells::CastingSlot::Gem2:
+			return spells::CastingSlot::Gem2;
+		case EQ::spells::CastingSlot::Gem3:
+			return spells::CastingSlot::Gem3;
+		case EQ::spells::CastingSlot::Gem4:
+			return spells::CastingSlot::Gem4;
+		case EQ::spells::CastingSlot::Gem5:
+			return spells::CastingSlot::Gem5;
+		case EQ::spells::CastingSlot::Gem6:
+			return spells::CastingSlot::Gem6;
+		case EQ::spells::CastingSlot::Gem7:
+			return spells::CastingSlot::Gem7;
+		case EQ::spells::CastingSlot::Gem8:
+			return spells::CastingSlot::Gem8;
+		case EQ::spells::CastingSlot::Gem9:
+			return spells::CastingSlot::Gem9;
+		case EQ::spells::CastingSlot::Gem10:
+			return spells::CastingSlot::Gem10;
+		case EQ::spells::CastingSlot::Gem11:
+			return spells::CastingSlot::Gem11;
+		case EQ::spells::CastingSlot::Gem12:
+			return spells::CastingSlot::Gem12;
+		case EQ::spells::CastingSlot::Item:
+		case EQ::spells::CastingSlot::PotionBelt:
+			return spells::CastingSlot::Item;
+		case EQ::spells::CastingSlot::Discipline:
+			return spells::CastingSlot::Discipline;
+		case EQ::spells::CastingSlot::AltAbility:
+			return spells::CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return spells::CastingSlot::Discipline;
+		}
+	}
+
+	static inline EQ::spells::CastingSlot LaurionToServerCastingSlot(spells::CastingSlot slot) {
+		switch (slot) {
+		case spells::CastingSlot::Gem1:
+			return EQ::spells::CastingSlot::Gem1;
+		case spells::CastingSlot::Gem2:
+			return EQ::spells::CastingSlot::Gem2;
+		case spells::CastingSlot::Gem3:
+			return EQ::spells::CastingSlot::Gem3;
+		case spells::CastingSlot::Gem4:
+			return EQ::spells::CastingSlot::Gem4;
+		case spells::CastingSlot::Gem5:
+			return EQ::spells::CastingSlot::Gem5;
+		case spells::CastingSlot::Gem6:
+			return EQ::spells::CastingSlot::Gem6;
+		case spells::CastingSlot::Gem7:
+			return EQ::spells::CastingSlot::Gem7;
+		case spells::CastingSlot::Gem8:
+			return EQ::spells::CastingSlot::Gem8;
+		case spells::CastingSlot::Gem9:
+			return EQ::spells::CastingSlot::Gem9;
+		case spells::CastingSlot::Gem10:
+			return EQ::spells::CastingSlot::Gem10;
+		case spells::CastingSlot::Gem11:
+			return EQ::spells::CastingSlot::Gem11;
+		case spells::CastingSlot::Gem12:
+			return EQ::spells::CastingSlot::Gem12;
+		case spells::CastingSlot::Discipline:
+			return EQ::spells::CastingSlot::Discipline;
+		case spells::CastingSlot::Item:
+			return EQ::spells::CastingSlot::Item;
+		case spells::CastingSlot::AltAbility:
+			return EQ::spells::CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return EQ::spells::CastingSlot::Discipline;
+		}
+	}
+
+	//Laurion has the same # of long buffs as rof2, but 10 more short buffs
+	static inline int ServerToLaurionBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= EQ::spells::LONG_BUFFS + EQ::spells::SHORT_BUFFS)
+			return index - EQ::spells::LONG_BUFFS - EQ::spells::SHORT_BUFFS +
+			spells::LONG_BUFFS + spells::SHORT_BUFFS;
+		// we're a song
+		if (index >= EQ::spells::LONG_BUFFS)
+			return index - EQ::spells::LONG_BUFFS + spells::LONG_BUFFS;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
+	}
+
+	static inline int LaurionToServerBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= spells::LONG_BUFFS + spells::SHORT_BUFFS)
+			return index - spells::LONG_BUFFS - spells::SHORT_BUFFS + EQ::spells::LONG_BUFFS +
+			EQ::spells::SHORT_BUFFS;
+		// we're a song
+		if (index >= spells::LONG_BUFFS)
+			return index - spells::LONG_BUFFS + EQ::spells::LONG_BUFFS;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
 	}
 } /*Laurion*/

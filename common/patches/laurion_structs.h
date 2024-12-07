@@ -621,6 +621,65 @@ namespace Laurion {
 			/*032*/
 		};
 
+		struct BeginCast_Struct
+		{
+			/*000*/	uint32 spell_id;
+			/*004*/	uint16 caster_id;
+			/*006*/	uint32 cast_time; // in miliseconds
+			/*010*/	uint32 unknown0a; // I think this is caster effective level but im not sure. live always sends 0
+			/*014*/	uint8 unknown0e; // 0 will short circuit the cast, seen 1 from live usually, maybe related to interrupts or particles or something
+			/*015*/
+		};
+
+		struct CastSpell_Struct
+		{
+			/*00*/	uint32	slot;
+			/*04*/	uint32	spell_id;
+			/*08*/	InventorySlot_Struct inventory_slot;  // slot for clicky item, Seen unknown of 131 = normal cast
+			/*20*/	uint32	spell_crc; // this is pinstSpellManager_x->SpellsCrc[spell_id]
+			/*24*/	uint32	target_id;
+			/*28*/	uint8	unknown2[11];
+			/*39*/
+		};
+
+		struct EQAffectSlot_Struct {
+			/*00*/ int32 slot;
+			/*04*/ int32 padding;
+			/*08*/ int64 value;
+			/*16*/
+		};
+
+		struct EQAffect_Struct
+		{
+			/*000*/ EQAffectSlot_Struct slots[6];
+			/*096*/ EqGuid caster_id;
+			/*104*/ uint32 flags;
+			/*108*/ uint32 spell_id;
+			/*112*/ uint32 duration;
+			/*116*/ uint32 initial_duration;
+			/*120*/ uint32 hit_count;
+			/*124*/ uint32 viral_timer;
+			/*128*/ float modifier;
+			/*132*/ float y;
+			/*136*/ float x;
+			/*140*/ float z;
+			/*144*/ uint8 level;
+			/*145*/ uint8 type;
+			/*146*/ uint8 charges; //no idea if these are right; eqlib doesn't seem to know either
+			/*147*/ uint8 activatable;
+			/*148*/ uint32 unknown1; //might be some timer, not sure though
+			/*152*/
+		};
+
+		struct EQAffectPacket_Struct {
+			/*000*/ uint32 entity_id;
+			/*004*/ int32 unknown004;
+			/*008*/ EQAffect_Struct affect;
+			/*160*/ uint32 slot_id;
+			/*164*/ uint32 buff_fade;
+			/*168*/
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

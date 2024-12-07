@@ -341,10 +341,10 @@ namespace Laurion
 		const int SPELL_GEM_RECAST_TIMER = 15;
 
 		const int LONG_BUFFS = 42;
-		const int SHORT_BUFFS = 20;
+		const int SHORT_BUFFS = 30;
 		const int DISC_BUFFS = 1;
 		const int TOTAL_BUFFS = LONG_BUFFS + SHORT_BUFFS + DISC_BUFFS;
-		const int NPC_BUFFS = 97;
+		const int NPC_BUFFS = 400;
 		const int PET_BUFFS = NPC_BUFFS;
 		const int MERC_BUFFS = LONG_BUFFS;
 
