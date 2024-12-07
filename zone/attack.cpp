@@ -1840,15 +1840,13 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
 		char val1[20] = { 0 };
 
-		entity_list.MessageCloseString(
-			this, /* Sender */
-			false, /* Skip Sender */
-			RuleI(Range, DamageMessages),
-			Chat::NonMelee, /* 283 */
-			HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
-			killer_mob->GetCleanName(), /* Message1 */
-			GetCleanName(), /* Message2 */
-			ConvertArray(damage, val1)/* Message3 */
+		entity_list.FilteredMessageClose(
+			this,
+			false,
+			RuleI(Range, SpellMessages),
+			Chat::NonMelee,
+			FilterSpellDamage,
+			fmt::format("{} hit {} for {} points of non-melee damage. ({})", killer_mob->GetCleanName(), GetCleanName(), damage, spells[spell].name).c_str()
 		);
 	}
 
@@ -2560,15 +2558,13 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
 		char val1[20] = { 0 };
 
-		entity_list.MessageCloseString(
-			this, /* Sender */
-			false, /* Skip Sender */
-			RuleI(Range, DamageMessages),
-			Chat::NonMelee, /* 283 */
-			HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
-			killer_mob->GetCleanName(), /* Message1 */
-			GetCleanName(), /* Message2 */
-			ConvertArray(damage, val1) /* Message3 */
+		entity_list.FilteredMessageClose(
+			this,
+			false,
+			RuleI(Range, SpellMessages),
+			Chat::NonMelee,
+			FilterSpellDamage,
+			fmt::format("{} hit {} for {} points of non-melee damage. ({})", killer_mob->GetCleanName(), GetCleanName(), damage, spells[spell].name).c_str()
 		);
 	}
 
@@ -4819,31 +4815,38 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						owner->MessageString(Chat::NonMelee, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
 					} else {
 						if (iBuffTic) {
-							entity_list.FilteredMessageCloseString(
-								attacker, /* Sender */
-								true, /* Skip Sender */
-								RuleI(Range, SpellMessages),
-								Chat::DotDamage, /* Type: 325 */
-								FilterPetSpells, /* FilterType: 19 */
-								OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
-								attacker,		/* sent above */
-								GetCleanName(), /* Message1 */
-								itoa(damage), /* Message2 */
-								spells[spell_id].name, /* Message3 */
-								attacker->GetCleanName() /* Message4 */
-							);
+
+						//	entity_list.FilteredMessageCloseString(
+						//		attacker, /* Sender */
+						//		true, /* Skip Sender */
+						//		RuleI(Range, SpellMessages),
+						//		Chat::DotDamage, /* Type: 325 */
+						//		FilterPetSpells, /* FilterType: 19 */
+						//		OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
+						//		attacker,		/* sent above */
+						//		GetCleanName(), /* Message1 */
+						//		itoa(damage), /* Message2 */
+						//		spells[spell_id].name, /* Message3 */
+						//		attacker->GetCleanName() /* Message4 */
+						//	);
+
+						entity_list.FilteredMessageClose(
+							attacker,
+							true,
+							RuleI(Range, SpellMessages),
+							Chat::NonMelee,
+							FilterPetSpells,
+							fmt::format("{} (Owner: {}) hit {} for {} points of non-melee damage. ({})", attacker->GetCleanName(), owner->GetCleanName(), GetCleanName(), damage, spells[spell_id].name).c_str()
+						);
+
 						} else {
-							entity_list.FilteredMessageCloseString(
-								attacker, /* Sender */
-								true, /* Sender is attacker, so do not skip */
+							entity_list.FilteredMessageClose(
+								attacker,
+								false,
 								RuleI(Range, SpellMessages),
-								Chat::NonMelee, /* 283 */
+								Chat::NonMelee,
 								FilterPetSpells,
-								HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
-								0,
-								attacker->GetCleanName(),
-								GetCleanName(), /* Message1 */
-								ConvertArray(damage, val1) /* Message2 */
+								fmt::format("{} (Owner: {}) hit {} for {} points of non-melee damage. ({})", attacker->GetCleanName(), owner->GetCleanName(), GetCleanName(), damage, spells[spell_id].name).c_str()
 							);
 						}
 					}
@@ -4900,17 +4903,13 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						}
 					}
 					else {
-						entity_list.FilteredMessageCloseString(
-							attacker, /* Sender */
-							false, /* Sender is attacker, so do not skip */
+						entity_list.FilteredMessageClose(
+							attacker,
+							false,
 							RuleI(Range, SpellMessages),
-							Chat::NonMelee, /* 283 */
-							FilterSpellDamage, /* FilterType: 13 */
-							HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
-							0,
-							attacker->GetCleanName(), /* Message1 */
-							GetCleanName(), /* Message2 */
-							ConvertArray(damage, val1) /* Message3 */
+							Chat::NonMelee,
+							FilterSpellDamage,
+							fmt::format("{} hit {} for {} points of non-melee damage. ({})", attacker->GetCleanName(), GetCleanName(), damage, spells[spell_id].name).c_str()
 						);
 					}
 				}
@@ -5028,6 +5027,8 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		// So we can see our dot dmg like live shows it.
 		if (IsValidSpell(spell_id) && damage > 0 && attacker && attacker != this) {
 			//might filter on (attack_skill>200 && attack_skill<250), but I dont think we need it
+
+			/*
 			if (!attacker->IsCorpse() && attacker->IsClient()) {
 				attacker->FilteredMessageString(attacker, Chat::DotDamage,
 					FilterDOT, YOUR_HIT_DOT, GetCleanName(), itoa(damage),
@@ -5039,20 +5040,15 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					YOU_TAKE_DOT, itoa(damage), attacker->GetCleanName(),
 					spells[spell_id].name);
 			}
+			*/
 
-			/* older clients don't have the below String ID, but it will be filtered */
-			entity_list.FilteredMessageCloseString(
-				this, /* Sender */
-				true, /* Skip Sender */
+			entity_list.FilteredMessageClose(
+				attacker,
+				false,
 				RuleI(Range, SpellMessages),
-				Chat::DotDamage, /* Type: 325 */
-				FilterDOT, /* FilterType: 19 */
-				OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
-				attacker,		/* sent above */
-				GetCleanName(), /* Message1 */
-				itoa(damage), /* Message2 */
-				spells[spell_id].name, /* Message3 */
-				attacker->GetCleanName() /* Message4 */
+				Chat::NonMelee,
+				FilterSpellDamage,
+				fmt::format("{} hit {} for {} points of non-melee damage. ({})", attacker->GetCleanName(), GetCleanName(), damage, spells[spell_id].name).c_str()
 			);
 		}
 	}

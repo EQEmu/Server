@@ -173,12 +173,17 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 				}
 			}
 
-			entity_list.FilteredMessageCloseString(
-				this, true, 100, Chat::SpellCrit, FilterSpellCrits,
-				OTHER_CRIT_BLAST, nullptr, GetName(), itoa(-value));
+			entity_list.FilteredMessageClose(
+				this,
+				true,
+				RuleI(Range, SpellMessages),
+				Chat::SpellCrit,
+				FilterSpellCrits,
+				fmt::format("{} delivers a critical blast! ({}) ({})", GetCleanName(), -value, spells[spell_id].name).c_str()
+			);
 
 			if (IsClient()) {
-				MessageString(Chat::SpellCrit, YOU_CRIT_BLAST, itoa(-value));
+				Message(Chat::SpellCrit, fmt::format("You deliver a critical blast! ({}) ({})", -value, spells[spell_id].name).c_str());
 			}
 
 			return value;
