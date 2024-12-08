@@ -1870,12 +1870,18 @@ void Mob::AI_Event_NoLongerEngaged() {
 	StopNavigation();
 	ClearRampage();
 
-	parse->EventBotMercNPC(EVENT_COMBAT, this, nullptr, [&]() { return "0"; });
-
 	if (IsNPC()) {
 		SetPrimaryAggro(false);
 		SetAssistAggro(false);
-		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
+		if (
+			CastToNPC()->GetCombatEvent() &&
+			GetHP() > 0 &&
+			entity_list.GetNPCByID(GetID())
+		) {
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_COMBAT)) {
+				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
+			}
+
 			const uint32 emote_id = CastToNPC()->GetEmoteID();
 			if (emote_id) {
 				CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emote_id);
@@ -1884,6 +1890,8 @@ void Mob::AI_Event_NoLongerEngaged() {
 			m_combat_record.Stop();
 			CastToNPC()->SetCombatEvent(false);
 		}
+	} else {
+		parse->EventBotMerc(EVENT_COMBAT, this, nullptr, [&]() { return "0"; });
 	}
 }
 

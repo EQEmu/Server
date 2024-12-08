@@ -573,6 +573,8 @@ Mob::~Mob()
 
 	m_close_mobs.clear();
 
+	ClearDataBucketCache();
+
 	LeaveHealRotationTargetPool();
 }
 
@@ -8788,4 +8790,22 @@ void Mob::ApplyGlobalBuff(uint32 spell_id, uint32 duration, time_t current_time)
 
 float Mob::GetUpdateRange() {
 	return IsClient() ? zone->GetMaxClientUpdateRange() : zone->GetMaxNpcUpdateRange();
+}
+
+void Mob::ClearDataBucketCache()
+{
+	if (IsOfClientBot()) {
+		uint64 id = 0;
+		DataBucketLoadType::Type t{};
+		if (IsBot()) {
+			id = CastToBot()->GetBotID();
+			t = DataBucketLoadType::Bot;
+		}
+		else if (IsClient()) {
+			id = CastToClient()->CharacterID();
+			t = DataBucketLoadType::Client;
+		}
+
+		DataBucket::DeleteFromCache(id, t);
+	}
 }
