@@ -4336,7 +4336,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 				healed = attacker->GetActSpellHealing(spell_id, healed);
 				LogCombat("Applying lifetap heal of [{}] to [{}]", healed, attacker->GetName());
-				attacker->HealDamage(healed);
+				attacker->HealDamage(healed, attacker, spell_id);
 
 				//we used to do a message to the client, but its gone now.
 				// emote goes with every one ... even npcs
@@ -5082,12 +5082,24 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 			if (caster->GetOwner() && filter == FilterNPCSpells) {
 				filter = FilterPetSpells;
 			}
-			entity_list.FilteredMessageClose(this,
-											false,
-											RuleI(Range, SpellMessages),
-											Chat::NonMelee,
-											filter,
-											fmt::format("{} has healed {} for {} points of damage. ({})", caster->GetCleanName(), GetCleanName(), acthealed, spells[spell_id].name).c_str());
+
+			auto caster_name = (filter == FilterPetSpells) ? fmt::format("{} (Owner: {})", caster->GetCleanName(), caster->GetOwner()->GetCleanName()) : caster->GetCleanName();
+
+			if (caster == this) {
+				entity_list.FilteredMessageClose(this,
+								false,
+								RuleI(Range, SpellMessages),
+								Chat::NonMelee,
+								filter,
+								fmt::format("{} has healed themselves for {} points of damage. ({})", caster_name, acthealed, spells[spell_id].name).c_str());
+			} else {
+				entity_list.FilteredMessageClose(this,
+												false,
+												RuleI(Range, SpellMessages),
+												Chat::NonMelee,
+												filter,
+												fmt::format("{} has healed {} for {} points of damage. ({})", caster_name, GetCleanName(), acthealed, spells[spell_id].name).c_str());
+			}
 		} else if ( // this is going to almost always be a HoT, this a fallback condition for spells with no valid caster.
 			CastToClient()->GetFilter(FilterHealOverTime) != FilterShowSelfOnly ||
 			CastToClient()->GetFilter(FilterHealOverTime) != FilterHide
