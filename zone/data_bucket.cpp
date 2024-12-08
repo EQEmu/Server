@@ -171,8 +171,10 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		return {};
 	}
 
+	auto bucket = r.front();
+
 	// if the entry has expired, delete it
-	if (r[0].expires > 0 && r[0].expires < (long long) std::time(nullptr)) {
+	if (bucket.expires > 0 && bucket.expires < (long long) std::time(nullptr)) {
 		DeleteData(k);
 		return {};
 	}
@@ -182,18 +184,18 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		bool has_cache = false;
 
 		for (auto &e: g_data_bucket_cache) {
-			if (e.id == r[0].id) {
+			if (e.id == bucket.id) {
 				has_cache = true;
 				break;
 			}
 		}
 
 		if (!has_cache) {
-			g_data_bucket_cache.emplace_back(r[0]);
+			g_data_bucket_cache.emplace_back(bucket);
 		}
 	}
 
-	return r[0];
+	return bucket;
 }
 
 std::string DataBucket::GetDataExpires(const std::string &bucket_key)
