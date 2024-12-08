@@ -231,7 +231,7 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 		t = DataBucketLoadType::Client;
 	}
 
-	BulkLoadEntities(t, {id});
+	BulkLoadEntitiesToCache(t, {id});
 
 	return true;
 }
@@ -349,7 +349,7 @@ bool DataBucket::CheckBucketMatch(const DataBucketsRepository::DataBuckets &dbe,
 	);
 }
 
-void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32> ids)
+void DataBucket::BulkLoadEntitiesToCache(DataBucketLoadType::Type t, std::vector<uint32> ids)
 {
 	if (ids.empty()) {
 		return;
