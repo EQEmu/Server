@@ -103,7 +103,7 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Clie
 		"Total before the modifier %d :: NewTotal %d :: ScaleRange: %d, SpentAA: %d, RemainingAA: %d, normalizedScale: %0.3f",
 		add_aaxp, totalWithExpMod, scaleRange, earnedAA, remainingAA, normalizedScale);
 
-	client->Message(Chat::Experience, "You gain bonus Alternate Advancement experience!");
+	client->Message(Chat::Experience, fmt::format("You gain bonus AA experience! ({}/{})", earnedAA, aaLimit).c_str());
 	return totalWithExpMod;
 }
 

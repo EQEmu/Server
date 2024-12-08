@@ -996,8 +996,6 @@ void Client::CompleteConnect()
 		SendDisciplineUpdate();
 	}
 
-	DataBucket::DeleteCharacterFromCache(CharacterID());
-
 	if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
 		m_last_seen_mob_position.reserve(entity_list.GetMobList().size());
 	}
