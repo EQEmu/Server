@@ -2335,20 +2335,19 @@ void EntityList::QueueClientsGuild(const EQApplicationPacket *app, uint32 guild_
 void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID)
 {
 	auto outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankItemUpdate_Struct));
+	auto data = (GuildBankItemUpdate_Struct*)outapp->pBuffer;
 
-	GuildBankItemUpdate_Struct *outgbius = (GuildBankItemUpdate_Struct*)outapp->pBuffer;
+	memcpy(data, gbius, sizeof(GuildBankItemUpdate_Struct));
 
-	memcpy(outgbius, gbius, sizeof(GuildBankItemUpdate_Struct));
-
-	const EQ::ItemData *Item = database.GetItem(gbius->ItemID);
+	const EQ::ItemData *Item = database.GetItem(gbius->item_id);
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *client = it->second;
 
 		if (client->IsInGuild(GuildID)) {
-			if (Item && (gbius->Permissions == GuildBankPublicIfUsable))
-				outgbius->Useable = Item->IsEquipable(client->GetBaseRace(), client->GetBaseClass());
+			if (Item && (gbius->permissions == GuildBankPublicIfUsable))
+				data->is_useable = Item->IsEquipable(client->GetBaseRace(), client->GetBaseClass());
 
 			client->QueuePacket(outapp);
 		}

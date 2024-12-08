@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_GUILD_BANK_REPOSITORY_H
@@ -16,19 +16,24 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseGuildBankRepository {
 public:
 	struct GuildBank {
 		uint32_t    id;
-		uint32_t    guildid;
+		uint32_t    guild_id;
 		uint8_t     area;
 		uint32_t    slot;
-		uint32_t    itemid;
-		uint32_t    qty;
+		uint32_t    item_id;
+		uint32_t    augment_1_id;
+		uint32_t    augment_2_id;
+		uint32_t    augment_3_id;
+		uint32_t    augment_4_id;
+		uint32_t    augment_5_id;
+		uint32_t    augment_6_id;
+		int32_t     quantity;
 		std::string donator;
 		uint8_t     permissions;
-		std::string whofor;
+		std::string who_for;
 	};
 
 	static std::string PrimaryKey()
@@ -40,14 +45,20 @@ public:
 	{
 		return {
 			"id",
-			"guildid",
+			"guild_id",
 			"area",
 			"slot",
-			"itemid",
-			"qty",
+			"item_id",
+			"augment_1_id",
+			"augment_2_id",
+			"augment_3_id",
+			"augment_4_id",
+			"augment_5_id",
+			"augment_6_id",
+			"quantity",
 			"donator",
 			"permissions",
-			"whofor",
+			"who_for",
 		};
 	}
 
@@ -55,14 +66,20 @@ public:
 	{
 		return {
 			"id",
-			"guildid",
+			"guild_id",
 			"area",
 			"slot",
-			"itemid",
-			"qty",
+			"item_id",
+			"augment_1_id",
+			"augment_2_id",
+			"augment_3_id",
+			"augment_4_id",
+			"augment_5_id",
+			"augment_6_id",
+			"quantity",
 			"donator",
 			"permissions",
-			"whofor",
+			"who_for",
 		};
 	}
 
@@ -103,15 +120,21 @@ public:
 	{
 		GuildBank e{};
 
-		e.id          = 0;
-		e.guildid     = 0;
-		e.area        = 0;
-		e.slot        = 0;
-		e.itemid      = 0;
-		e.qty         = 0;
-		e.donator     = "";
-		e.permissions = 0;
-		e.whofor      = "";
+		e.id           = 0;
+		e.guild_id     = 0;
+		e.area         = 0;
+		e.slot         = 0;
+		e.item_id      = 0;
+		e.augment_1_id = 0;
+		e.augment_2_id = 0;
+		e.augment_3_id = 0;
+		e.augment_4_id = 0;
+		e.augment_5_id = 0;
+		e.augment_6_id = 0;
+		e.quantity     = 0;
+		e.donator      = "";
+		e.permissions  = 0;
+		e.who_for      = "";
 
 		return e;
 	}
@@ -148,15 +171,21 @@ public:
 		if (results.RowCount() == 1) {
 			GuildBank e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.guildid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.area        = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.slot        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.itemid      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.qty         = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.donator     = row[6] ? row[6] : "";
-			e.permissions = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.whofor      = row[8] ? row[8] : "";
+			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.guild_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.area         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.slot         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.item_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.augment_1_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_2_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_3_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_4_id = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_5_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.augment_6_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.quantity     = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.donator      = row[12] ? row[12] : "";
+			e.permissions  = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.who_for      = row[14] ? row[14] : "";
 
 			return e;
 		}
@@ -190,14 +219,20 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[1] + " = " + std::to_string(e.guildid));
+		v.push_back(columns[1] + " = " + std::to_string(e.guild_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.area));
 		v.push_back(columns[3] + " = " + std::to_string(e.slot));
-		v.push_back(columns[4] + " = " + std::to_string(e.itemid));
-		v.push_back(columns[5] + " = " + std::to_string(e.qty));
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.donator) + "'");
-		v.push_back(columns[7] + " = " + std::to_string(e.permissions));
-		v.push_back(columns[8] + " = '" + Strings::Escape(e.whofor) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.augment_1_id));
+		v.push_back(columns[6] + " = " + std::to_string(e.augment_2_id));
+		v.push_back(columns[7] + " = " + std::to_string(e.augment_3_id));
+		v.push_back(columns[8] + " = " + std::to_string(e.augment_4_id));
+		v.push_back(columns[9] + " = " + std::to_string(e.augment_5_id));
+		v.push_back(columns[10] + " = " + std::to_string(e.augment_6_id));
+		v.push_back(columns[11] + " = " + std::to_string(e.quantity));
+		v.push_back(columns[12] + " = '" + Strings::Escape(e.donator) + "'");
+		v.push_back(columns[13] + " = " + std::to_string(e.permissions));
+		v.push_back(columns[14] + " = '" + Strings::Escape(e.who_for) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -220,14 +255,20 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back(std::to_string(e.guildid));
+		v.push_back(std::to_string(e.guild_id));
 		v.push_back(std::to_string(e.area));
 		v.push_back(std::to_string(e.slot));
-		v.push_back(std::to_string(e.itemid));
-		v.push_back(std::to_string(e.qty));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.augment_1_id));
+		v.push_back(std::to_string(e.augment_2_id));
+		v.push_back(std::to_string(e.augment_3_id));
+		v.push_back(std::to_string(e.augment_4_id));
+		v.push_back(std::to_string(e.augment_5_id));
+		v.push_back(std::to_string(e.augment_6_id));
+		v.push_back(std::to_string(e.quantity));
 		v.push_back("'" + Strings::Escape(e.donator) + "'");
 		v.push_back(std::to_string(e.permissions));
-		v.push_back("'" + Strings::Escape(e.whofor) + "'");
+		v.push_back("'" + Strings::Escape(e.who_for) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -258,14 +299,20 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.guildid));
+			v.push_back(std::to_string(e.guild_id));
 			v.push_back(std::to_string(e.area));
 			v.push_back(std::to_string(e.slot));
-			v.push_back(std::to_string(e.itemid));
-			v.push_back(std::to_string(e.qty));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.augment_1_id));
+			v.push_back(std::to_string(e.augment_2_id));
+			v.push_back(std::to_string(e.augment_3_id));
+			v.push_back(std::to_string(e.augment_4_id));
+			v.push_back(std::to_string(e.augment_5_id));
+			v.push_back(std::to_string(e.augment_6_id));
+			v.push_back(std::to_string(e.quantity));
 			v.push_back("'" + Strings::Escape(e.donator) + "'");
 			v.push_back(std::to_string(e.permissions));
-			v.push_back("'" + Strings::Escape(e.whofor) + "'");
+			v.push_back("'" + Strings::Escape(e.who_for) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -299,15 +346,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GuildBank e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.guildid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.area        = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.slot        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.itemid      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.qty         = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.donator     = row[6] ? row[6] : "";
-			e.permissions = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.whofor      = row[8] ? row[8] : "";
+			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.guild_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.area         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.slot         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.item_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.augment_1_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_2_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_3_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_4_id = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_5_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.augment_6_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.quantity     = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.donator      = row[12] ? row[12] : "";
+			e.permissions  = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.who_for      = row[14] ? row[14] : "";
 
 			all_entries.push_back(e);
 		}
@@ -332,15 +385,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GuildBank e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.guildid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.area        = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.slot        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.itemid      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.qty         = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.donator     = row[6] ? row[6] : "";
-			e.permissions = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.whofor      = row[8] ? row[8] : "";
+			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.guild_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.area         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.slot         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.item_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.augment_1_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_2_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_3_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_4_id = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_5_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.augment_6_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.quantity     = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.donator      = row[12] ? row[12] : "";
+			e.permissions  = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.who_for      = row[14] ? row[14] : "";
 
 			all_entries.push_back(e);
 		}
@@ -399,6 +458,90 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const GuildBank &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.guild_id));
+		v.push_back(std::to_string(e.area));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.augment_1_id));
+		v.push_back(std::to_string(e.augment_2_id));
+		v.push_back(std::to_string(e.augment_3_id));
+		v.push_back(std::to_string(e.augment_4_id));
+		v.push_back(std::to_string(e.augment_5_id));
+		v.push_back(std::to_string(e.augment_6_id));
+		v.push_back(std::to_string(e.quantity));
+		v.push_back("'" + Strings::Escape(e.donator) + "'");
+		v.push_back(std::to_string(e.permissions));
+		v.push_back("'" + Strings::Escape(e.who_for) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<GuildBank> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.guild_id));
+			v.push_back(std::to_string(e.area));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.augment_1_id));
+			v.push_back(std::to_string(e.augment_2_id));
+			v.push_back(std::to_string(e.augment_3_id));
+			v.push_back(std::to_string(e.augment_4_id));
+			v.push_back(std::to_string(e.augment_5_id));
+			v.push_back(std::to_string(e.augment_6_id));
+			v.push_back(std::to_string(e.quantity));
+			v.push_back("'" + Strings::Escape(e.donator) + "'");
+			v.push_back(std::to_string(e.permissions));
+			v.push_back("'" + Strings::Escape(e.who_for) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_GUILD_BANK_REPOSITORY_H

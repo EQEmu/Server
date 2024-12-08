@@ -6789,6 +6789,29 @@ UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 321) + 5410)
 UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 331) + 5610) WHERE `equip_slot` BETWEEN 331 AND 340; -- Bag 9
 UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 341) + 5810) WHERE `equip_slot` BETWEEN 341 AND 350; -- Bag 10
 )",
+	},
+	ManifestEntry{
+		.version     = 9304,
+		.description = "2024_12_01_2024_update_guild_bank",
+		.check       = "SHOW COLUMNS FROM `guild_bank` LIKE 'augment_1_id'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `guild_bank`
+	DROP INDEX `guildid`,
+	CHANGE COLUMN `guildid` `guild_id` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`,
+	CHANGE COLUMN `itemid` `item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `slot`,
+	CHANGE COLUMN `whofor` `who_for` VARCHAR(64) NULL DEFAULT NULL COLLATE 'utf8_general_ci' AFTER `permissions`,
+	ADD COLUMN `augment_1_id` INT UNSIGNED NULL DEFAULT '0' AFTER `item_id`,
+	ADD COLUMN `augment_2_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_1_id`,
+	ADD COLUMN `augment_3_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_2_id`,
+	ADD COLUMN `augment_4_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_3_id`,
+	ADD COLUMN `augment_5_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_4_id`,
+	ADD COLUMN `augment_6_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_5_id`,
+	CHANGE COLUMN `qty` `quantity` INT(10) NOT NULL DEFAULT '0' AFTER `augment_6_id`;
+ALTER TABLE `guild_bank`
+	ADD INDEX `guild_id` (`guild_id`);
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

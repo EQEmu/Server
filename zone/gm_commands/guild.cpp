@@ -632,6 +632,25 @@ void command_guild(Client* c, const Seperator* sep)
 			e2.reason      = "Test Item Destroy Reason";
 
 			RecordPlayerEventLogWithClient(c, PlayerEvent::ITEM_DESTROY, e2);
+			auto id       = Strings::ToUnsignedInt(sep->arg[3]);
+			//auto guild    = guild_mgr.GetGuildByGuildID(guild_id);
+			// c->SendGuildMembersList();
+			auto bank = GuildBanks->GetGuildBank(guild_id);
+			if (id == 1) {
+				for (auto &[key, item]: bank->items.main_area) {
+					auto i = ItemsRepository::FindOne(content_db, item.item_id);
+					c->Message(Chat::Yellow, fmt::format("key:{:02} item:{:05} Name:{:40} Qty:{:40} Slot:{}",
+						key, item.item_id, i.Name, item.quantity, item.slot).c_str());
+				}
+				return;
+			}
+			if (id == 2) {
+				for (auto &[key, item]: bank->items.deposit_area) {
+					auto i = ItemsRepository::FindOne(content_db, item.item_id);
+					c->Message(Chat::Yellow, fmt::format("key:{:02} item:{:05} Name:{} Qty:{:40} Slot:{}",
+						key, item.item_id, i.Name, item.quantity, item.slot).c_str());
+				}
+			}
 		}
 	}
 }

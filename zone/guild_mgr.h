@@ -1,10 +1,12 @@
 #ifndef GUILD_MGR_H_
 #define GUILD_MGR_H_
 
-#include "../common/types.h"
-#include "../common/guild_base.h"
-#include <map>
 #include <list>
+#include <map>
+#include "../common/guild_base.h"
+#include "../common/types.h"
+
+#include "../common/repositories/guild_bank_repository.h"
 #include "../zone/petitions.h"
 
 extern PetitionList petition_list;
@@ -14,38 +16,69 @@ extern PetitionList petition_list;
 #define PBUFFER 50
 #define MBUFFER 50
 
-#define GUILD_BANK_MAIN_AREA_SIZE	200
-#define GUILD_BANK_DEPOSIT_AREA_SIZE	20
+//#define GUILD_BANK_MAIN_AREA_SIZE	200
+//#define GUILD_BANK_DEPOSIT_AREA_SIZE	20
+
 class Client;
 class ServerPacket;
 
-struct GuildBankItem
-{
-	uint32	ItemID;
-	uint32	Quantity;
-	char	Donator[64];
-	uint8	Permissions;
-	char	WhoFor[64];
-};
+// struct GuildBankItem {
+// 	uint32      item_id;
+// 	uint32      augment_1_id;
+// 	uint32      augment_2_id;
+// 	uint32      augment_3_id;
+// 	uint32      augment_4_id;
+// 	uint32      augment_5_id;
+// 	uint32      augment_6_id;
+// 	int32       quantity;
+// 	uint8       permissions;
+// 	std::string donator;
+// 	std::string who_for;
+// };
 
 struct GuildBankItems
 {
-	GuildBankItem	MainArea[GUILD_BANK_MAIN_AREA_SIZE];
-	GuildBankItem	DepositArea[GUILD_BANK_DEPOSIT_AREA_SIZE];
+	//GuildBankItem	MainArea[GUILD_BANK_MAIN_AREA_SIZE];
+	//GuildBankItem	DepositArea[GUILD_BANK_DEPOSIT_AREA_SIZE];
+	std::map<int32, GuildBankRepository::GuildBank> main_area{};
+	std::map<int32, GuildBankRepository::GuildBank> deposit_area{};
 };
 
 struct GuildBank
 {
-	uint32	GuildID;
-	GuildBankItems	Items;
+	uint32         guild_id;
+	GuildBankItems items{};
+
+	GuildBank()
+	{
+		guild_id = 0;
+	}
 };
 
-enum {	GuildBankBulkItems = 0, GuildBankItemUpdate = 1, GuildBankPromote = 3, GuildBankViewItem = 4, GuildBankDeposit = 5,
-	GuildBankPermissions = 6, GuildBankWithdraw = 7, GuildBankSplitStacks = 8, GuildBankMergeStacks = 9, GuildBankAcknowledge = 10 };
+enum {
+	GuildBankBulkItems   = 0,
+	GuildBankItemUpdate  = 1,
+	GuildBankPromote     = 3,
+	GuildBankViewItem    = 4,
+	GuildBankDeposit     = 5,
+	GuildBankPermissions = 6,
+	GuildBankWithdraw    = 7,
+	GuildBankSplitStacks = 8,
+	GuildBankMergeStacks = 9,
+	GuildBankAcknowledge = 10
+};
 
-enum {	GuildBankDepositArea = 0, GuildBankMainArea = 1 };
+enum {
+	GuildBankDepositArea = 0,
+	GuildBankMainArea    = 1
+};
 
-enum {	GuildBankBankerOnly = 0, GuildBankSingleMember = 1, GuildBankPublicIfUsable = 2, GuildBankPublic = 3 };
+enum {
+	GuildBankBankerOnly     = 0,
+	GuildBankSingleMember   = 1,
+	GuildBankPublicIfUsable = 2,
+	GuildBankPublic         = 3
+};
 
 class ZoneGuildManager : public BaseGuildManager {
 public:
@@ -103,29 +136,34 @@ class GuildBankManager
 public:
 	~GuildBankManager();
 	void SendGuildBank(Client *c);
-	bool AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 QtyOrCharges, const char *Donator, uint8 Permissions, const char *WhoFor);
+//	bool AddItem(uint32 guild_id, uint8 area, uint32 item_id, int32 quantity, std::string& donator, uint8 permissions, std::string& who_for, uint32 augement_1_id = 0, uint32 augement_2_id = 0, uint32 augement_3_id = 0, uint32 augement_4_id = 0, uint32 augement_5_id = 0, uint32 augement_6_id = 0);
+	bool AddItem(GuildBankRepository::GuildBank &guild_bank_item);
 	int Promote(uint32 GuildID, int SlotID);
 	void SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName);
-	EQ::ItemInstance* GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
+	std::unique_ptr<EQ::ItemInstance> GetItem(uint32 guild_id, uint16 area, uint16 slot_id, uint32 quantity);
 	bool DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
-	bool HasItem(uint32 GuildID, uint32 ItemID);
-	bool IsAreaFull(uint32 GuildID, uint16 Area);
+	bool HasItem(uint32 guild_id, uint32 item_id);
+	bool IsAreaFull(uint32 guild_id, uint16 area);
+	int32 NextFreeBankSlot(uint32 guild_id, uint32 area);
 	bool MergeStacks(uint32 GuildID, uint16 SlotID);
 	bool SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity);
 	bool AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name);
+	void SendGuildBankItemUpdate(uint32 guild_id, int32 slot_id, uint32 area, bool useable);
+	void InitializeUpdateStruct(GuildBankItemUpdate_Struct &gbius, uint32 in_action, GuildBankRepository::GuildBank &item, uint32 icon, bool mergeable, bool useable, std::string name = std::string());
+	std::shared_ptr<GuildBank> GetGuildBank(uint32 guild_id);
 
 private:
 	bool IsLoaded(uint32 GuildID);
 	bool Load(uint32 GuildID);
-	std::list<GuildBank*>::iterator GetGuildBank(uint32 GuildID);
 	void UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
 
-	std::list<GuildBank*> Banks;
+	std::list<std::shared_ptr<GuildBank>> banks;
 
 };
 
 extern ZoneGuildManager guild_mgr;
 extern GuildBankManager *GuildBanks;
+//extern std::shared_ptr<GuildBankManager> guild_bank_mgr;
 
 
 #endif /*GUILD_MGR_H_*/
