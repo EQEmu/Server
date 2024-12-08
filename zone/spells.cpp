@@ -6015,6 +6015,16 @@ void Mob::UnStun() {
 // Stuns "this"
 void Client::Stun(int duration)
 {
+	if (RuleB(Custom, TemporaryStunImmunity)) {
+		m_stun_immune_timer.Enable();
+		if (!m_stun_immune_timer.Check(false)) {
+			Message(Chat::Skills, fmt::format("You are temporarily immune to the stun effect.").c_str());
+			return;
+		}
+	}
+
+	m_stun_immune_timer.Start(duration * 3);
+
 	Mob::Stun(duration);
 
 	auto outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));

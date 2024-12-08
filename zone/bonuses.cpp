@@ -293,7 +293,20 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 			b->Endurance += item->Endur;
 
 			b->AC += item->AC;
-			b->ATK += item->Attack;
+
+			if (item->Attack != 0) {
+				unsigned int cap = RuleI(Character, ItemATKCap);
+				cap += itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
+
+				if (
+					IsOfClientBotMerc() &&
+					(b->ATK + item->Attack) > cap
+				) {
+					b->ATK = RuleI(Character, ItemATKCap);
+				} else {
+					b->ATK += item->Attack;
+				}
+			}
 
 			b->STR += (item->AStr + item->HeroicStr);
 			b->STA += (item->ASta + item->HeroicSta);
@@ -345,7 +358,20 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 			b->Endurance += CalcRecommendedLevelBonus(current_level, recommended_level, item->Endur);
 
 			b->AC += CalcRecommendedLevelBonus(current_level, recommended_level, item->AC);
-			b->ATK += CalcRecommendedLevelBonus(current_level, recommended_level, item->Attack);
+
+			if (item->Attack != 0) {
+				unsigned int cap = RuleI(Character, ItemATKCap);
+				cap += itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
+
+				if (
+					IsOfClientBotMerc() &&
+					(b->ATK + CalcRecommendedLevelBonus(current_level, recommended_level, item->Attack)) > cap
+				) {
+					b->ATK = RuleI(Character, ItemATKCap);
+				} else {
+					b->ATK += CalcRecommendedLevelBonus(current_level, recommended_level, item->Attack);
+				}
+			}
 
 			b->STR += CalcRecommendedLevelBonus(current_level, recommended_level, (item->AStr + item->HeroicStr));
 			b->STA += CalcRecommendedLevelBonus(current_level, recommended_level, (item->ASta + item->HeroicSta));
@@ -407,20 +433,6 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 
 		if (item->EnduranceRegen != 0) {
 			b->EnduranceRegen += item->EnduranceRegen;
-		}
-
-		if (item->Attack != 0) {
-			unsigned int cap = RuleI(Character, ItemATKCap);
-			cap += itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
-
-			if (
-				IsOfClientBotMerc() &&
-				(b->ATK + item->Attack) > cap
-			) {
-				b->ATK = RuleI(Character, ItemATKCap);
-			} else {
-				b->ATK += item->Attack;
-			}
 		}
 
 		if (item->DamageShield != 0) {

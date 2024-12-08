@@ -744,17 +744,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_Stun:
 			{
-				if (RuleB(Custom, TemporaryStunImmunity) && IsClient()) {
-					if (stun_immune_timer.Check(false) || !stun_immune_timer.Enabled()) {
-						stun_immune_timer.Start(effect_value * 4);
-						LogCombat("Setting Stun-Immune for [{}] seconds", effect_value * 4 / 1000);
-					} else {
-						MessageString(Chat::Skills, SHAKE_OFF_STUN);
-						LogCombat("Stun Resisted. We are temporarily immune.");
-						break;
-					}
-				}
-
 				//Typically we check for immunities else where but since stun immunities are different and only
 				//Block the stun part and not the whole spell, we do it here, also do the message here so we wont get the message on a resist
 				int max_level = spell.max_value[i];

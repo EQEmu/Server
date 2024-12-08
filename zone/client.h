@@ -2182,6 +2182,8 @@ private:
 	void ClientToNpcAggroProcess();
 	void BroadcastPositionUpdate();
 
+	Timer m_stun_immune_timer;
+
 	// bulk position updates
 	glm::vec4 m_last_position_before_bulk_update;
 	Timer     m_client_zone_wide_full_position_update_timer;
