@@ -5069,61 +5069,26 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 	int64 curhp = GetHP();
 	uint64 acthealed = 0;
 
-	if (amount > (maxhp - curhp))
+	if (amount > (maxhp - curhp)) {
 		acthealed = (maxhp - curhp);
-	else
+	}
+	else {
 		acthealed = amount;
+	}
 
-	if (acthealed > RuleI(Spells, HealAmountMessageFilterThreshold)) {
-		if (caster) {
-			if (IsBuffSpell(spell_id)) { // hots
-				// message to caster
-				if ((caster->IsClient() && caster == this)) {
-					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater) {
-						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
-					}
-					else
-						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							YOU_HEALED, GetCleanName(), itoa(acthealed));
-				}
-				else if ((caster->IsClient() && caster != this)) {
-					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
-						caster->FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							HOT_HEAL_OTHER, GetCleanName(), itoa(acthealed),
-							spells[spell_id].name);
-					else
-						caster->FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							YOU_HEAL, GetCleanName(), itoa(acthealed));
-				}
-
-				// message to target
-				if (IsClient() && caster != this) {
-					if (CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
-						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							HOT_HEALED_OTHER, caster->GetCleanName(),
-							itoa(acthealed), spells[spell_id].name);
-					else
-						FilteredMessageString(this, Chat::NonMelee, FilterHealOverTime,
-							YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
-				}
+	if (acthealed >= (GetMaxHP() / 100.0f)) {
+		if (caster && IsValidSpell(spell_id)) {
+			eqFilterType filter = caster->IsClient() ? FilterPCSpells : FilterNPCSpells;
+			if (caster->GetOwner() && filter == FilterNPCSpells) {
+				filter = FilterPetSpells;
 			}
-			else { // normal heals
-				// Message to caster
-				if (caster->IsClient()) {
-					caster->FilteredMessageString(caster, Chat::NonMelee,
-						FilterSpellDamage, YOU_HEAL, GetCleanName(),
-						itoa(acthealed));
-					}
-
-				// Message to target
-				if (IsClient() && caster != this) {
-					FilteredMessageString(caster, Chat::NonMelee,
-					FilterSpellDamage, YOU_HEALED, caster->GetCleanName(),
-					itoa(acthealed));
-				}
-			}
-		} else if (
+			entity_list.FilteredMessageClose(this,
+											false,
+											RuleI(Range, SpellMessages),
+											Chat::NonMelee,
+											filter,
+											fmt::format("{} has healed {} for {} points of damage. ({})", caster->GetCleanName(), GetCleanName(), acthealed, spells[spell_id].name).c_str());
+		} else if ( // this is going to almost always be a HoT, this a fallback condition for spells with no valid caster.
 			CastToClient()->GetFilter(FilterHealOverTime) != FilterShowSelfOnly ||
 			CastToClient()->GetFilter(FilterHealOverTime) != FilterHide
 		) {
