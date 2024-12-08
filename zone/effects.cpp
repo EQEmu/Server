@@ -452,6 +452,8 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		target = this;
 	}
 
+	bool lifetap = IsLifetapSpell(spell_id) && RuleB(Spells, CompoundLifetapHeals);
+
 	EQ::spells::CastingSlot cast_slot = static_cast<EQ::spells::CastingSlot>(Strings::ToUnsignedInt(GetEntityVariable(fmt::format("SpellGemHint_%d", spell_id)), static_cast<uint32>(EQ::spells::CastingSlot::MaxGems)));
 	if (cast_slot >= EQ::spells::CastingSlot::Gem1 && cast_slot <= EQ::spells::CastingSlot::Gem12) {
 		float scalar = 1.0f;
@@ -526,19 +528,21 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
 
 		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
-		if (
-			RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
-			!spells[spell_id].no_heal_damage_item_mod &&
-			GetHealAmt()
-		) {
-			value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
-		}
-		else if (
-			!spells[spell_id].no_heal_damage_item_mod &&
-			GetHealAmt() &&
-			GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
-		) {
-			value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
+		if (!lifetap) {
+			if (
+				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
+				!spells[spell_id].no_heal_damage_item_mod &&
+				GetHealAmt()
+			) {
+				value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
+			}
+			else if (
+				!spells[spell_id].no_heal_damage_item_mod &&
+				GetHealAmt() &&
+				GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
+			) {
+				value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
+			}
 		}
 
 		if (target) {
@@ -579,20 +583,22 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 			extra_heal += GetSkillDmgAmt(spells[spell_id].skill);
 		}
 
-		if (RuleB(Spells, HOTsScaleWithHealAmt)) {
-			if (
-				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
-				!spells[spell_id].no_heal_damage_item_mod &&
-				GetHealAmt()
-			) {
-				extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
-			}
-			else if (
-				!spells[spell_id].no_heal_damage_item_mod &&
-				GetHealAmt() &&
-				GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
-			) {
-				extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
+		if (!lifetap) {
+			if (RuleB(Spells, HOTsScaleWithHealAmt)) {
+				if (
+					RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
+					!spells[spell_id].no_heal_damage_item_mod &&
+					GetHealAmt()
+				) {
+					extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
+				}
+				else if (
+					!spells[spell_id].no_heal_damage_item_mod &&
+					GetHealAmt() &&
+					GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
+				) {
+					extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
+				}
 			}
 		}
 
