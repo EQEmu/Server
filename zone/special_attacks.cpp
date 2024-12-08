@@ -1284,6 +1284,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		other->AddToHateList(this, hate, 0);
 	}
 
+	MeleeLifeTap(TotalDmg);
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillArchery);
 
 	LogDebug("Doing Archery Attack Damage. Procs Disaled? [{}]", DisableProcs);
