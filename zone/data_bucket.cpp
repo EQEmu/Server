@@ -104,22 +104,25 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 
 	bool can_cache = CanCache(k);
 
-	for (const auto &e: g_data_bucket_cache) {
-		if (CheckBucketMatch(e, k)) {
-			if (e.expires > 0 && e.expires < std::time(nullptr)) {
-				LogDataBuckets("Attempted to read expired key [{}] removing from cache", e.key_);
-				DeleteData(k);
-				return DataBucketsRepository::NewEntity();
-			}
+	// check the cache first if we can cache
+	if (can_cache) {
+		for (const auto &e: g_data_bucket_cache) {
+			if (CheckBucketMatch(e, k)) {
+				if (e.expires > 0 && e.expires < std::time(nullptr)) {
+					LogDataBuckets("Attempted to read expired key [{}] removing from cache", e.key_);
+					DeleteData(k);
+					return DataBucketsRepository::NewEntity();
+				}
 
-			// this is a bucket miss, return empty entity
-			// we still cache bucket misses, so we don't have to hit the database
-			if (e.id == 0) {
-				return DataBucketsRepository::NewEntity();
-			}
+				// this is a bucket miss, return empty entity
+				// we still cache bucket misses, so we don't have to hit the database
+				if (e.id == 0) {
+					return DataBucketsRepository::NewEntity();
+				}
 
-			LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
-			return e;
+				LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
+				return e;
+			}
 		}
 	}
 
@@ -136,7 +139,8 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 
 		// if we're ignoring the misses cache, don't add to the cache
 		// the only place this is ignored is during the initial read of SetData
-		if (!ignore_misses_cache && can_cache) {
+		bool add_to_misses_cache = !ignore_misses_cache && can_cache;
+		if (add_to_misses_cache) {
 			size_t size_before = g_data_bucket_cache.size();
 
 			// cache bucket misses, so we don't have to hit the database
@@ -173,6 +177,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		return {};
 	}
 
+	// add to cache if it doesn't exist
 	if (can_cache) {
 		bool has_cache = false;
 
@@ -222,9 +227,6 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 	}
 	else if (mob->IsClient()) {
 		t = DataBucketLoadType::Client;
-	}
-	else if (mob->IsNPC()) {
-		t = DataBucketLoadType::NPC;
 	}
 
 	BulkLoadEntities(t, {id});
@@ -352,16 +354,14 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 	}
 
 	if (ids.size() == 1) {
-		bool            has_cache = false;
+		bool has_cache = false;
+
 		for (const auto &e: g_data_bucket_cache) {
 			if (t == DataBucketLoadType::Bot) {
 				has_cache = e.bot_id == ids[0];
 			}
 			else if (t == DataBucketLoadType::Client) {
 				has_cache = e.character_id == ids[0];
-			}
-			else if (t == DataBucketLoadType::NPC) {
-				has_cache = e.npc_id == ids[0];
 			}
 		}
 
@@ -379,9 +379,6 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 			break;
 		case DataBucketLoadType::Client:
 			column = "character_id";
-			break;
-		case DataBucketLoadType::NPC:
-			column = "npc_id";
 			break;
 		default:
 			LogError("Incorrect LoadType [{}]", static_cast<int>(t));
@@ -441,8 +438,7 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id)
 			[&](DataBucketsRepository::DataBuckets &e) {
 				return (
 					(type == DataBucketLoadType::Bot && e.bot_id == id) ||
-					(type == DataBucketLoadType::Client && e.character_id == id) ||
-					(type == DataBucketLoadType::NPC && e.npc_id == id)
+					(type == DataBucketLoadType::Client && e.character_id == id)
 				);
 			}
 		),

@@ -21,14 +21,12 @@ namespace DataBucketLoadType {
 	enum Type : uint8 {
 		Bot,
 		Client,
-		NPC,
 		MaxType
 	};
 
 	static const std::string Name[Type::MaxType] = {
 		"Bot",
 		"Client",
-		"NPC",
 	};
 }
 
