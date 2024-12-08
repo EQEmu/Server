@@ -2938,6 +2938,7 @@ namespace Laurion
 
 	ENCODE(OP_BeginCast)
 	{
+		ENCODE_LENGTH_EXACT(BeginCast_Struct);
 		SETUP_DIRECT_ENCODE(BeginCast_Struct, structs::BeginCast_Struct);
 
 		OUT(spell_id);
@@ -3032,6 +3033,19 @@ namespace Laurion
 		if (outapp) {
 			dest->FastQueuePacket(&outapp);
 		}
+	}
+
+	ENCODE(OP_ManaChange) {
+		ENCODE_LENGTH_EXACT(ManaChange_Struct);
+		SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
+
+		OUT(new_mana);
+		OUT(stamina);
+		OUT(spell_id);
+		OUT(keepcasting);
+		OUT(slot);
+
+		FINISH_ENCODE();
 	}
 
 	// DECODE methods
@@ -3238,14 +3252,13 @@ namespace Laurion
 		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 		
 		emu->slot = static_cast<uint32>(LaurionToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot)));
-		
-		//We need to figure out the x y z position stuff
+
 		IN(spell_id);
-		emu->inventoryslot = LaurionToServerSlot(eq->inventory_slot);
+		emu->inventoryslot = -1;
 		IN(target_id);
-		//IN(y_pos);
-		//IN(x_pos);
-		//IN(z_pos);
+		IN(y_pos);
+		IN(x_pos);
+		IN(z_pos);
 		FINISH_DIRECT_DECODE();
 	}
 

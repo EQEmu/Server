@@ -631,14 +631,29 @@ namespace Laurion {
 			/*015*/
 		};
 
+		//I've observed 5 s16 that are all -1.
+		//Clicky items don't even trigger this as far as i can tell so not sure what this is for now.
+		//One of these could have changed to a s32 but im not sure.
+		struct CastSpellInventorySlot_Struct {
+			/*00*/ int16 type;
+			/*02*/ int16 slot;
+			/*04*/ int16 sub_index;
+			/*06*/ int16 aug_index;
+			/*08*/ int16 unknown1;
+			/*10*/
+		};
+
 		struct CastSpell_Struct
 		{
 			/*00*/	uint32	slot;
 			/*04*/	uint32	spell_id;
-			/*08*/	InventorySlot_Struct inventory_slot;  // slot for clicky item, Seen unknown of 131 = normal cast
-			/*20*/	uint32	spell_crc; // this is pinstSpellManager_x->SpellsCrc[spell_id]
-			/*24*/	uint32	target_id;
-			/*28*/	uint8	unknown2[11];
+			/*08*/	CastSpellInventorySlot_Struct inventory_slot; 
+			/*18*/	uint32	target_id;
+			/*22*/	uint32	spell_crc; 
+			/*26*/  float y_pos;
+			/*30*/  float x_pos;
+			/*34*/  float z_pos;
+			/*38*/	uint8 unknown; //not sure, might also be before y_pos; only ever seen zero for both but should be easy to figure out later
 			/*39*/
 		};
 
@@ -678,6 +693,15 @@ namespace Laurion {
 			/*160*/ uint32 slot_id;
 			/*164*/ uint32 buff_fade;
 			/*168*/
+		};
+
+		struct ManaChange_Struct
+		{
+			uint32 new_mana;
+			uint32 stamina;
+			uint32 spell_id;
+			uint32 keepcasting;
+			int32 slot;
 		};
 
 #pragma pack()

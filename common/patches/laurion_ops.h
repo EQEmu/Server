@@ -38,6 +38,7 @@ E(OP_ShopRequest)
 E(OP_BeginCast)
 E(OP_BuffCreate)
 E(OP_Buff)
+E(OP_ManaChange)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)
