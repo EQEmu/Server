@@ -927,12 +927,6 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 		CalculateNormalizedAAExp(aaexp, conlevel, resexp);
 	}
 
-	// Are we also doing linear AA acceleration?
-	if (RuleB(AA, ModernAAScalingEnabled) && aaexp > 0)
-	{
-		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetSpentAA() + GetAAPoints(), aaexp, this);
-	}
-
 	// Check for AA XP Cap
 	int aaexp_cap = RuleI(AA, MaxAAEXPPerKill) * GetConLevelModifierPercent(conlevel) * (GetLevel()/50.0f) * (XPRate / 100.0f) * (zone->newzone_data.zone_exp_multiplier - 1.0f) * (0.5 + RuleR(Character, FinalExpMultiplier));
 
@@ -943,6 +937,12 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 
 	if (exp_source == ExpSource::Kill && RuleI(AA, MaxAAEXPPerKill) >= 0 && aaexp > aaexp_cap) {
 		aaexp = aaexp_cap;
+	}
+
+	// Are we also doing linear AA acceleration?
+	if (RuleB(AA, ModernAAScalingEnabled) && aaexp > 0)
+	{
+		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetSpentAA() + GetAAPoints(), aaexp, this);
 	}
 
 	// Get current AA XP total
