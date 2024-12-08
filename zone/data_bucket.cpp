@@ -61,9 +61,9 @@ void DataBucket::SetData(const DataBucketKey &k)
 
 		// update the cache if it exists
 		if (CanCache(k)) {
-			for (auto &ce: g_data_bucket_cache) {
-				if (CheckBucketMatch(ce, k)) {
-					ce = b;
+			for (auto &e: g_data_bucket_cache) {
+				if (CheckBucketMatch(e, k)) {
+					e = b;
 					break;
 				}
 			}
@@ -102,22 +102,24 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		k.npc_id
 	);
 
-	for (const auto &ce: g_data_bucket_cache) {
-		if (CheckBucketMatch(ce, k)) {
-			if (ce.expires > 0 && ce.expires < std::time(nullptr)) {
-				LogDataBuckets("Attempted to read expired key [{}] removing from cache", ce.key_);
+	bool can_cache = CanCache(k);
+
+	for (const auto &e: g_data_bucket_cache) {
+		if (CheckBucketMatch(e, k)) {
+			if (e.expires > 0 && e.expires < std::time(nullptr)) {
+				LogDataBuckets("Attempted to read expired key [{}] removing from cache", e.key_);
 				DeleteData(k);
 				return DataBucketsRepository::NewEntity();
 			}
 
 			// this is a bucket miss, return empty entity
 			// we still cache bucket misses, so we don't have to hit the database
-			if (ce.id == 0) {
+			if (e.id == 0) {
 				return DataBucketsRepository::NewEntity();
 			}
 
-			LogDataBuckets("Returning key [{}] value [{}] from cache", ce.key_, ce.value);
-			return ce;
+			LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
+			return e;
 		}
 	}
 
@@ -134,7 +136,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 
 		// if we're ignoring the misses cache, don't add to the cache
 		// the only place this is ignored is during the initial read of SetData
-		if (!ignore_misses_cache) {
+		if (!ignore_misses_cache && can_cache) {
 			size_t size_before = g_data_bucket_cache.size();
 
 			// cache bucket misses, so we don't have to hit the database
@@ -171,17 +173,19 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		return {};
 	}
 
-	bool has_cache = false;
+	if (can_cache) {
+		bool has_cache = false;
 
-	for (auto &ce: g_data_bucket_cache) {
-		if (ce.id == r[0].id) {
-			has_cache = true;
-			break;
+		for (auto &e: g_data_bucket_cache) {
+			if (e.id == r[0].id) {
+				has_cache = true;
+				break;
+			}
 		}
-	}
 
-	if (!has_cache) {
-		g_data_bucket_cache.emplace_back(r[0]);
+		if (!has_cache) {
+			g_data_bucket_cache.emplace_back(r[0]);
+		}
 	}
 
 	return r[0];
@@ -206,7 +210,8 @@ bool DataBucket::DeleteData(const std::string &bucket_key)
 bool DataBucket::GetDataBuckets(Mob *mob)
 {
 	DataBucketLoadType::Type t{};
-	const uint32             id = mob->GetMobTypeIdentifier();
+
+	const uint32 id = mob->GetMobTypeIdentifier();
 
 	if (!id) {
 		return false;
@@ -236,8 +241,8 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 		std::remove_if(
 			g_data_bucket_cache.begin(),
 			g_data_bucket_cache.end(),
-			[&](DataBucketsRepository::DataBuckets &ce) {
-				return CheckBucketMatch(ce, k);
+			[&](DataBucketsRepository::DataBuckets &e) {
+				return CheckBucketMatch(e, k);
 			}
 		),
 		g_data_bucket_cache.end()
@@ -348,15 +353,15 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 
 	if (ids.size() == 1) {
 		bool            has_cache = false;
-		for (const auto &ce: g_data_bucket_cache) {
+		for (const auto &e: g_data_bucket_cache) {
 			if (t == DataBucketLoadType::Bot) {
-				has_cache = ce.bot_id == ids[0];
+				has_cache = e.bot_id == ids[0];
 			}
 			else if (t == DataBucketLoadType::Client) {
-				has_cache = ce.character_id == ids[0];
+				has_cache = e.character_id == ids[0];
 			}
 			else if (t == DataBucketLoadType::NPC) {
-				has_cache = ce.npc_id == ids[0];
+				has_cache = e.npc_id == ids[0];
 			}
 		}
 
@@ -425,7 +430,7 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 	);
 }
 
-void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
+void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id)
 {
 	size_t size_before = g_data_bucket_cache.size();
 
@@ -433,11 +438,11 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
 		std::remove_if(
 			g_data_bucket_cache.begin(),
 			g_data_bucket_cache.end(),
-			[&](DataBucketsRepository::DataBuckets &ce) {
+			[&](DataBucketsRepository::DataBuckets &e) {
 				return (
-					(t == DataBucketLoadType::Bot && ce.bot_id == id) ||
-					(t == DataBucketLoadType::Client && ce.character_id == id) ||
-					(t == DataBucketLoadType::NPC && ce.npc_id == id)
+					(type == DataBucketLoadType::Bot && e.bot_id == id) ||
+					(type == DataBucketLoadType::Client && e.character_id == id) ||
+					(type == DataBucketLoadType::NPC && e.npc_id == id)
 				);
 			}
 		),
@@ -446,17 +451,17 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
 
 	LogDataBuckets(
 		"LoadType [{}] id [{}] cache size before [{}] after [{}]",
-		DataBucketLoadType::Name[t],
+		DataBucketLoadType::Name[type],
 		id,
 		size_before,
 		g_data_bucket_cache.size()
 	);
 }
 
-bool DataBucket::ExistsInCache(const DataBucketsRepository::DataBuckets &e)
+bool DataBucket::ExistsInCache(const DataBucketsRepository::DataBuckets &entry)
 {
-	for (const auto &ce: g_data_bucket_cache) {
-		if (ce.id == e.id) {
+	for (const auto &e: g_data_bucket_cache) {
+		if (e.id == entry.id) {
 			return true;
 		}
 	}
@@ -505,12 +510,12 @@ void DataBucket::DeleteFromCache(uint64 id, DataBucketLoadType::Type type)
 		std::remove_if(
 			g_data_bucket_cache.begin(),
 			g_data_bucket_cache.end(),
-			[&](DataBucketsRepository::DataBuckets &ce) {
+			[&](DataBucketsRepository::DataBuckets &e) {
 				switch (type) {
 					case DataBucketLoadType::Bot:
-						return ce.bot_id == id;
+						return e.bot_id == id;
 					case DataBucketLoadType::Client:
-						return ce.character_id == id;
+						return e.character_id == id;
 					default:
 						return false;
 				}

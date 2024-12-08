@@ -53,10 +53,10 @@ public:
 
 	// bucket repository versus key matching
 	static bool CheckBucketMatch(const DataBucketsRepository::DataBuckets &dbe, const DataBucketKey &k);
-	static bool ExistsInCache(const DataBucketsRepository::DataBuckets &e);
+	static bool ExistsInCache(const DataBucketsRepository::DataBuckets &entry);
 
 	static void BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32> ids);
-	static void DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id);
+	static void DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id);
 
 	static void DeleteFromMissesCache(DataBucketsRepository::DataBuckets e);
 	static void ClearCache();
