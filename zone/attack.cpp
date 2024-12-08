@@ -5087,11 +5087,15 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 
 			if (caster == this) {
 				entity_list.FilteredMessageClose(this,
-								false,
-								RuleI(Range, SpellMessages),
-								Chat::NonMelee,
-								filter,
-								fmt::format("{} has healed themselves for {} points of damage. ({})", caster_name, acthealed, spells[spell_id].name).c_str());
+												false,
+												RuleI(Range, SpellMessages),
+												Chat::NonMelee,
+												filter,
+												fmt::format("{} has healed {} for {} points of damage. ({})",
+															caster_name,
+															(GetGender() == 0 ? "himself" : (GetGender() == 1 ? "herself" : "itself")),
+															acthealed,
+															spells[spell_id].name).c_str());
 			} else {
 				entity_list.FilteredMessageClose(this,
 												false,
