@@ -5083,27 +5083,25 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 				filter = FilterPetSpells;
 			}
 
-			auto caster_name = (filter == FilterPetSpells) ? fmt::format("{} (Owner: {})", caster->GetCleanName(), caster->GetOwner()->GetCleanName()) : caster->GetCleanName();
+			auto caster_name = (filter == FilterPetSpells)
+				? fmt::format("{} (Owner: {})", caster->GetCleanName(), caster->GetOwner()->GetCleanName())
+				: caster->GetCleanName();
 
-			if (caster == this) {
-				entity_list.FilteredMessageClose(this,
-												false,
-												RuleI(Range, SpellMessages),
-												Chat::NonMelee,
-												filter,
-												fmt::format("{} has healed {} for {} points of damage. ({})",
-															caster_name,
-															(GetGender() == 0 ? "himself" : (GetGender() == 1 ? "herself" : "itself")),
-															acthealed,
-															spells[spell_id].name).c_str());
-			} else {
-				entity_list.FilteredMessageClose(this,
-												false,
-												RuleI(Range, SpellMessages),
-												Chat::NonMelee,
-												filter,
-												fmt::format("{} has healed {} for {} points of damage. ({})", caster_name, GetCleanName(), acthealed, spells[spell_id].name).c_str());
-			}
+			std::string target_name = (caster == this)
+				? (GetGender() == 0 ? "himself" : (GetGender() == 1 ? "herself" : "itself"))
+				: GetCleanName();
+
+			entity_list.FilteredMessageClose(this,
+											false,
+											RuleI(Range, SpellMessages),
+											Chat::NonMelee,
+											filter,
+											fmt::format("{} has healed {} for {} points of damage. ({})",
+														caster_name,
+														target_name,
+														acthealed,
+														spells[spell_id].name).c_str());
+
 		} else if ( // this is going to almost always be a HoT, this a fallback condition for spells with no valid caster.
 			CastToClient()->GetFilter(FilterHealOverTime) != FilterShowSelfOnly ||
 			CastToClient()->GetFilter(FilterHealOverTime) != FilterHide

@@ -1427,6 +1427,31 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 
 					buffs[buffslot].melee_rune = effect_value + bonus_value;
+
+					eqFilterType filter = caster->IsClient() ? FilterPCSpells : FilterNPCSpells;
+					if (caster->GetOwner() && filter == FilterNPCSpells) {
+						filter = FilterPetSpells;
+					}
+
+					auto caster_name = (filter == FilterPetSpells)
+						? fmt::format("{} (Owner: {})", caster->GetCleanName(), caster->GetOwner()->GetCleanName())
+						: caster->GetCleanName();
+
+					std::string target_name = (caster == this)
+						? (GetGender() == 0 ? "himself" : (GetGender() == 1 ? "herself" : "itself"))
+						: GetCleanName();
+
+					entity_list.FilteredMessageClose(this,
+													false,
+													RuleI(Range, SpellMessages),
+													Chat::NonMelee,
+													filter,
+													fmt::format("{} has shielded {} from {} points of damage. ({})",
+																caster_name,
+																target_name,
+																buffs[buffslot].melee_rune,
+																spells[spell_id].name).c_str());
+
 				}
 				break;
 			}
