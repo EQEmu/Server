@@ -2669,31 +2669,40 @@ bool Bot::HasBotSpellEntry(uint16 spell_id) {
 }
 
 bool Bot::IsValidSpellRange(uint16 spell_id, Mob* tar) {
-	if (!IsValidSpell(spell_id)) {
+	if (!IsValidSpell(spell_id) || !tar) {
 		return false;
 	}
 
-	if (tar) {
-		float range = spells[spell_id].range;
-		
-		if (tar != this) {
-			range += GetRangeDistTargetSizeMod(tar);
-		}
+	float range = spells[spell_id].range + GetRangeDistTargetSizeMod(tar);
 
-		range = GetActSpellRange(spell_id, range);
-
-		if (range >= Distance(m_Position, tar->GetPosition())) {
-			return true;
-		}
-
-		range = GetActSpellRange(spell_id, spells[spell_id].aoe_range);
-
-		if (range >= Distance(m_Position, tar->GetPosition())) {
-			return true;
-		}
+	if (IsAnyAESpell(spell_id)) {			
+		range = GetAOERange(spell_id);
+	}
+	
+	if (RuleB(Bots, EnableBotTGB) && IsTGBCompatibleSpell(spell_id) && IsGroupSpell(spell_id)) {			
+		range = spells[spell_id].aoe_range;
 	}
 
-	return false;
+	range = GetActSpellRange(spell_id, range);
+
+	if (IsIllusionSpell(spell_id) && (HasProjectIllusion())) {
+		range = 100;
+	}
+
+	float dist2 = DistanceSquared(m_Position, tar->GetPosition());
+	float range2 = range * range;
+	float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
+
+	if (dist2 > range2) {
+		//target is out of range.
+		return false;
+	}
+	else if (dist2 < min_range2) {
+		//target is too close range.
+		return false;
+	}
+
+	return true;
 }
 
 BotSpell Bot::GetBestBotSpellForNukeByBodyType(Bot* botCaster, uint8 bodyType, uint16 spellType, bool AE, Mob* tar) {
