@@ -650,6 +650,17 @@ void command_guild(Client* c, const Seperator* sep)
 					c->Message(Chat::Yellow, fmt::format("key:{:02} item:{:05} Name:{} Qty:{:40} Slot:{}",
 						key, item.item_id, i.Name, item.quantity, item.slot).c_str());
 				}
+				return;
+			}
+			if (id == 3) {
+				for (auto &[key, item]: bank->items.main_area) {
+					if (item.item_id == 30416) {
+						auto i = ItemsRepository::FindOne(content_db, item.item_id);
+						c->Message(Chat::Yellow, fmt::format("key:{:02} item:{:05} Name:{:40} Qty:{:40} Slot:{}",
+							key, item.item_id, i.Name, item.quantity, item.slot).c_str());
+					}
+				}
+				return;
 			}
 		}
 	}
