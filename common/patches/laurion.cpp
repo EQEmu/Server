@@ -3048,6 +3048,29 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_Action) {
+		ENCODE_LENGTH_EXACT(Action_Struct);
+		SETUP_DIRECT_ENCODE(Action_Struct, structs::MissileHitInfo);
+
+		//This is mostly figured out; there's two unknowns, only unknown1 is read by the client
+		OUT(target);
+		OUT(source);
+		eq->spell_id = emu->spell;
+		eq->effect_type = emu->effect_flag;
+		eq->effective_casting_level = 0; //if you set this to != 0 it will use this level instead of calculating it
+		eq->unknown1 = 0;
+		eq->unknown2 = 0;
+		eq->damage = 0; //client doesn't read this but live sends it here, can just set 0
+		eq->modifier = 1.0f + (emu->instrument_mod - 10) / 10.0f;
+		OUT(force);
+		OUT(hit_heading);
+		OUT(hit_pitch);
+		eq->skill = emu->type;
+		OUT(level);
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)

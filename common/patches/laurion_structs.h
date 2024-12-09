@@ -704,6 +704,35 @@ namespace Laurion {
 			int32 slot;
 		};
 
+		//This is what we call OP_Action
+		//To the client though this is basically a missile hit though
+		//OP_Action is basically "instant missile hit" to the client
+		//@0x1401f0970 MissileHitInfo::Deserialize(CUnSerializeBuffer *buffer);
+		struct MissileHitInfo
+		{
+			uint16 target;
+			uint16 source;
+			uint32 spell_id;
+			//4 leaves a buff
+			uint32 effect_type; 
+			uint32 effective_casting_level;
+			//Client does read this but only does something if it's negative
+			int64 unknown1;
+			//I don't see the client read this one outside basic serialization
+			int64 unknown2;
+			//I don't see the client read this one either but based on captures from live it seems to match spell damage
+			int64 damage;
+			float modifier;
+			float force;
+			float hit_heading;
+			float hit_pitch;
+			//same convention as damage
+			//231 for spell, otherwise it's skill in use
+			uint8 skill; 
+			uint8 level; //the client doesn't actually deserialize anything past level
+			//live however has a lot more info here depending on packet type
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

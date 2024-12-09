@@ -39,6 +39,7 @@ E(OP_BeginCast)
 E(OP_BuffCreate)
 E(OP_Buff)
 E(OP_ManaChange)
+E(OP_Action)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)
