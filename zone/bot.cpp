@@ -9679,16 +9679,6 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsImmuneToBotSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
-
-	if (!IsCommandedSpell() && !IsTaunting() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting(), spell_id) && !tar->IsFleeing()) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to HasOrMayGetAggro.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-		return false;
-	}
-
-	if (!DoResistCheckBySpellType(tar, spell_id, spellType)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to DoResistCheckBySpellType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-		return false;
-	}
 	
 	if (
 		(RequiresStackCheck(spellType) || (!RequiresStackCheck(spellType) && CalcBuffDuration(this, tar, spell_id) != 0))
@@ -9700,6 +9690,20 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 	}
 
 	if (IsBeneficialSpell(spell_id) && tar->BuffCount() >= tar->GetCurrentBuffSlots() && CalcBuffDuration(this, tar, spell_id) != 0) {
+		return false;
+	}
+
+	if (spellType == UINT16_MAX) { //AA cast checks, return here
+		return true;
+	}
+
+	if (!IsTaunting() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting(), spell_id) && !tar->IsFleeing()) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to HasOrMayGetAggro.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
+	if (!DoResistCheckBySpellType(tar, spell_id, spellType)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to DoResistCheckBySpellType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
@@ -11084,6 +11088,81 @@ bool Bot::AttemptAICastSpell(uint16 spellType) {
 	return result;
 }
 
+bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
+	if (!tar) {
+		tar = this;
+	}
+
+	if (!DoLosChecks(this, tar)) {
+		return false;
+	}
+
+	if (CheckSpellRecastTimer(spell_id)) {
+		if (IsBeneficialSpell(spell_id)) {
+			if (
+				(tar->IsNPC() && !tar->GetOwner()) ||
+				(tar->GetOwner() && tar->GetOwner()->IsOfClientBot() && !GetOwner()->IsInGroupOrRaid(tar->GetOwner())) ||
+				(tar->IsOfClientBot() && !GetOwner()->IsInGroupOrRaid(tar))
+			) {
+				GetBotOwner()->Message(Chat::Yellow, "[%s] is an invalid target. Only players or their pet in your group or raid are eligible targets.", tar->GetCleanName());
+
+				return false;
+			}
+		}
+		
+		if (IsDetrimentalSpell(spell_id) && !IsAttackAllowed(tar)) {
+			GetBotOwner()->Message(Chat::Yellow, "%s says, 'I cannot attack [%s]'.", GetCleanName(), tar->GetCleanName());
+
+			return false;
+		}
+
+		if (!CastChecks(spell_id, tar, UINT16_MAX)) {
+			GetBotOwner()->Message(Chat::Red, "%s says, 'Ability failed to cast. This could be due to this to any number of things: range, mana, immune, etc.'", GetCleanName());
+
+			return false;
+		}
+
+
+		if (CastSpell(spell_id, tar->GetID())) {
+			BotGroupSay(
+				this,
+				fmt::format(
+					"Casting {} on {}.",
+					GetSpellName(spell_id),
+					(tar == this ? "myself" : tar->GetCleanName())
+				).c_str()
+			);
+
+			int timer_duration = (rank->recast_time - GetAlternateAdvancementCooldownReduction(rank)) * 1000;
+
+			if (timer_duration < 0) {
+				timer_duration = 0;
+			}
+
+			SetSpellRecastTimer(spell_id, timer_duration);
+		}
+		else {
+			GetBotOwner()->Message(Chat::Red, "%s says, 'Ability failed to cast. This could be due to this to any number of things: range, mana, immune, etc.'", GetCleanName());
+
+			return false;
+		}
+	}
+	else {
+		GetBotOwner()->Message(
+		Chat::Yellow,
+			fmt::format(
+				"{} says, 'Ability recovery time not yet met. {} remaining.'",
+				GetCleanName(),
+				Strings::SecondsToTime(GetSpellRecastRemainingTime(spell_id), true)
+			).c_str()
+		);
+
+		return false;
+	}
+	
+	return true;
+}
+
 uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::AENukes:
@@ -11878,4 +11957,33 @@ bool Bot::IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell
 	}
 
 	return false;
+}
+
+uint16 Bot::GetSpellByAA(int id, AA::Rank*& rank) {
+	uint16 spell_id = 0;
+	std::pair<AA::Ability*, AA::Rank*> aa_ability = std::make_pair(nullptr, nullptr);
+	AA::Ability* ability = zone->GetAlternateAdvancementAbility(id);
+
+	if (!ability || !ability->first_rank_id) {
+		return spell_id;
+	}
+
+	uint32 points = GetAA(ability->first_rank_id);
+	//if (points) { LogTestDebug("{}: {} says, '{} points for {} [#{} - {}] rank {}'", __LINE__, GetCleanName(), points, zone->GetAAName(aa_ability.first->id), aa_ability.first->id, aa_ability.second->id, points); } //deleteme
+	if (points > 0) {
+		aa_ability = zone->GetAlternateAdvancementAbilityAndRank(ability->id, points);
+	}
+
+	rank = aa_ability.second;
+
+	if (!points || !rank) {
+		LogTestDebug("{}: {} says, 'No {} found'", __LINE__, GetCleanName(), (!points ? "points" : "rank")); //deleteme
+		return spell_id;
+	}	
+
+	spell_id = rank->spell;
+
+	LogTestDebug("{}: {} says, 'Found {} [#{}]'", __LINE__, GetCleanName(), spells[spell_id].name, spell_id); //deleteme
+
+	return spell_id;
 }
