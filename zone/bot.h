@@ -402,6 +402,7 @@ public:
 	// AI Methods
 	bool AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
 	bool AttemptAICastSpell(uint16 spellType);
+	bool AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank);
 	bool AI_EngagedCastCheck() override;
 	bool AI_PursueCastCheck() override;
 	bool AI_IdleCastCheck() override;
@@ -478,6 +479,7 @@ public:
 	void LoadDefaultBotSettings();
 	void SetBotSpellRecastTimer(uint16 spellType, Mob* spelltar, bool preCast = false);
 	BotSpell GetSpellByHealType(uint16 spellType, Mob* tar);
+	uint16 GetSpellByAA(int id, AA::Rank* &rank);
 
 	std::string GetBotSpellCategoryName(uint8 setting_type);
 	std::string GetBotSettingCategoryName(uint8 setting_type);
