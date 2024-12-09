@@ -88,7 +88,7 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp, Clie
 	float normalizedScale = (float)remainingAA / scaleRange;
 
 	// Scale.
-	uint64 totalWithExpMod = add_aaxp * (baseModifier / 100) * normalizedScale;
+	uint64 totalWithExpMod = add_aaxp * (1.0f + ((baseModifier / 100.0f) - 1.0f) * normalizedScale);
 
 	// Are we so close to the scale limit that we're earning more XP without scaling?  This
 	// will happen when we get very close to the limit.  In this case, just grant the unscaled
