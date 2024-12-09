@@ -3012,6 +3012,8 @@ bool IsPetBotSpellType(uint16 spellType) {
 		case BotSpellTypes::PetFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
 		case BotSpellTypes::PetHoTHeals:
+		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::PetResistBuffs:
 			return true;
 		default:
 			return false;
