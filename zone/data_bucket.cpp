@@ -238,29 +238,31 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 
 bool DataBucket::DeleteData(const DataBucketKey &k)
 {
-	size_t size_before = g_data_bucket_cache.size();
+	if (CanCache(k)) {
+		size_t size_before = g_data_bucket_cache.size();
 
-	// delete from cache where contents match
-	g_data_bucket_cache.erase(
-		std::remove_if(
-			g_data_bucket_cache.begin(),
-			g_data_bucket_cache.end(),
-			[&](DataBucketsRepository::DataBuckets &e) {
-				return CheckBucketMatch(e, k);
-			}
-		),
-		g_data_bucket_cache.end()
-	);
+		// delete from cache where contents match
+		g_data_bucket_cache.erase(
+			std::remove_if(
+				g_data_bucket_cache.begin(),
+				g_data_bucket_cache.end(),
+				[&](DataBucketsRepository::DataBuckets &e) {
+					return CheckBucketMatch(e, k);
+				}
+			),
+			g_data_bucket_cache.end()
+		);
 
-	LogDataBuckets(
-		"Deleting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}] cache size before [{}] after [{}]",
-		k.key,
-		k.bot_id,
-		k.character_id,
-		k.npc_id,
-		size_before,
-		g_data_bucket_cache.size()
-	);
+		LogDataBuckets(
+			"Deleting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}] cache size before [{}] after [{}]",
+			k.key,
+			k.bot_id,
+			k.character_id,
+			k.npc_id,
+			size_before,
+			g_data_bucket_cache.size()
+		);
+	}
 
 	return DataBucketsRepository::DeleteWhere(
 		database,
