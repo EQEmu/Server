@@ -2580,7 +2580,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	}
 
 	range = GetActSpellRange(spell_id, range);
-	if(IsClient() && IsIllusionSpell(spell_id) && (HasProjectIllusion())){
+	if(IsOfClientBot() && IsIllusionSpell(spell_id) && (HasProjectIllusion())){
 		range = 100;
 	}
 

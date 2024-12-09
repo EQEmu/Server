@@ -9750,7 +9750,7 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 		case BotSpellTypes::Invisibility:
 		case BotSpellTypes::MovementSpeed:
 		case BotSpellTypes::SendHome:
-			if (
+			if ( // TODO bot rewrite - fix this, missing other target types (43 for example)
 				!(
 					spells[spell_id].target_type == ST_Target ||
 					spells[spell_id].target_type == ST_Pet ||
@@ -9759,7 +9759,7 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 					spells[spell_id].target_type == ST_GroupTeleport
 					)
 				) {
-				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to target_type checks.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to target_type checks. Using {}'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName(), GetSpellTargetType(spell_id)); //deleteme
 				return false;
 			}
 
