@@ -2368,10 +2368,10 @@ void Bot::AI_Process()
 		if (TryNonCombatMovementChecks(bot_owner, follow_mob, Goal)) {
 			return;
 		}
-		if (AI_HasSpells() && TryIdleChecks(fm_distance)) {
+		if (!IsBotNonSpellFighter() && AI_HasSpells() && TryIdleChecks(fm_distance)) {
 			return;
 		}
-		if (AI_HasSpells() && TryBardMovementCasts()) {
+		if (!IsBotNonSpellFighter() && AI_HasSpells() && TryBardMovementCasts()) {
 			return;
 		}
 	}
@@ -2663,7 +2663,7 @@ bool Bot::TryPursueTarget(float leash_distance, glm::vec3& Goal) {
 		}
 
 		// This is a mob that is fleeing either because it has been feared or is low on hitpoints
-		if (!HOLDING && AI_HasSpells()) {
+		if (!HOLDING && !IsBotNonSpellFighter() && AI_HasSpells()) {
 			AI_PursueCastCheck();
 		}
 
