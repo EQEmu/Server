@@ -947,19 +947,10 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		row.guid = inst->GetSerialNumber();
 		queue.push_back(row);
 
-		row.guid = inst->GetSerialNumber();
-		queue.push_back(row);
-
 		safe_delete(inst);
 
 		// Save ptr to item in inventory
 		if (put_slot_id == INVALID_INDEX) {
-			LogError(
-				"Warning: Invalid slot_id for item in inventory: charid=[{}], item_id=[{}], slot_id=[{}]",
-				char_id,
-				item_id,
-				slot_id
-			);
 			LogError(
 				"Warning: Invalid slot_id for item in inventory: charid=[{}], item_id=[{}], slot_id=[{}]",
 				char_id,
@@ -979,12 +970,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			(inv->GMInventory() ? "true" : "false")
 		);
 	}
-
-	if (!queue.empty()) {
-		InventoryRepository::ReplaceMany(*this, queue);
-	}
-
-	EQ::ItemInstance::ClearGUIDMap();
 
 	if (!queue.empty()) {
 		InventoryRepository::ReplaceMany(*this, queue);
