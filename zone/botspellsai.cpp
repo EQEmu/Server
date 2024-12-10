@@ -83,6 +83,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 			}
 
 			break;
+		case BotSpellTypes::AELull:
 		case BotSpellTypes::Lull:
 			if (tar->GetSpecialAbility(SpecialAbility::PacifyImmunity)) {
 				return false;

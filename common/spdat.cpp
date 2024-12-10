@@ -2820,6 +2820,7 @@ bool IsBotSpellTypeDetrimental(uint16 spellType, uint8 cls) {
 		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::PBAENuke:
 		case BotSpellTypes::Lull:
+		case BotSpellTypes::AELull:
 		case BotSpellTypes::HateLine:
 		case BotSpellTypes::AEHateLine:
 			return true;
@@ -2946,6 +2947,9 @@ bool IsBotSpellTypeInnate(uint16 spellType) {
 		case BotSpellTypes::AEMez:
 		case BotSpellTypes::Mez:
 		case BotSpellTypes::Lull:
+		case BotSpellTypes::AELull:
+		case BotSpellTypes::HateLine:
+		case BotSpellTypes::AEHateLine:
 			return true;
 		default:
 			return false;
@@ -2969,6 +2973,8 @@ bool IsAEBotSpellType(uint16 spellType) {
 		case BotSpellTypes::PBAENuke:
 		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::AERoot:
+		case BotSpellTypes::AEHateLine:
+		case BotSpellTypes::AELull:
 			return true;
 		default:
 			return false;
@@ -3242,6 +3248,7 @@ bool IsCommandedSpellType(uint16 spellType) {
 		case BotSpellTypes::MovementSpeed:
 		case BotSpellTypes::SendHome:
 		case BotSpellTypes::SummonCorpse:
+		case BotSpellTypes::AELull:
 		//case BotSpellTypes::Cure:
 		//case BotSpellTypes::GroupCures:
 		//case BotSpellTypes::DamageShields:
