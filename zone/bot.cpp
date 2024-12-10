@@ -11905,7 +11905,7 @@ bool Bot::IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell
 
 			break;
 		case CommandedSubTypes::AETarget:
-			if (IsAnyAESpell(spell_id)) {
+			if (IsAnyAESpell(spell_id) && !IsGroupSpell(spell_id)) {
 				return true;
 			}
 
