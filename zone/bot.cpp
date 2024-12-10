@@ -9750,12 +9750,12 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 			}
 
 			if (!tar->CheckSpellLevelRestriction(this, spell_id)) {
-				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to CheckSpellLevelRestriction.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to CheckSpellLevelRestriction.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
 			if ((spellType != BotSpellTypes::Teleport && spellType != BotSpellTypes::Succor) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Succor))) {
-				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to Teleport.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Teleport.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
@@ -11302,84 +11302,6 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spellType, uint16 spell_id) {
 			}
 
 			return false;
-		//case BotSpellTypes::Lull:
-		//	if (IsHarmonySpell(spell_id)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::Teleport:
-		//	if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Translocate))) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::Succor:
-		//	if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_Succor)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::BindAffinity:
-		//	if (IsEffectInSpell(spell_id, SE_BindAffinity)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::Identify:
-		//	if (IsEffectInSpell(spell_id, SE_Identify)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::Levitate:
-		//	if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Levitate))) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::Rune:
-		//	if (IsEffectInSpell(spell_id, SE_AbsorbMagicAtt) || IsEffectInSpell(spell_id, SE_Rune)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::WaterBreathing:
-		//	if (IsEffectInSpell(spell_id, SE_WaterBreathing)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::Size:
-		//	if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_ModelSize) || IsEffectInSpell(spell_id, SE_ChangeHeight))) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::Invisibility:
-		//	if (IsEffectInSpell(spell_id, SE_SeeInvis) || IsInvisibleSpell(spell_id)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::MovementSpeed:
-		//	if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_MovementSpeed)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::SendHome:
-		//	if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_GateToHomeCity)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
-		//case BotSpellTypes::SummonCorpse:
-		//	if (IsEffectInSpell(spell_id, SE_SummonCorpse)) {
-		//		return true;
-		//	}
-		//
-		//	return false;
 		default:
 			return true;
 	}
