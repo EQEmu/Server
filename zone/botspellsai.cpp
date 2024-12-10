@@ -216,7 +216,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 			break;
 	}
 
-	std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, IsAEBotSpellType(spellType), subTargetType, subType);
+	std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, (IsAEBotSpellType(spellType) || subTargetType == CommandedSubTypes::AETarget), subTargetType, subType);
 
 	for (const auto& s : botSpellList) {
 
