@@ -3251,30 +3251,14 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							args.push_back(old_aug);
 
 							if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-								parse->EventItem(
-									EVENT_UNAUGMENT_ITEM,
-									this,
-									tobe_auged,
-									nullptr,
-									"",
-									in_augment->augment_index,
-									&args
-								);
+								parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 							}
 
 							args.assign(1, tobe_auged);
 							args.push_back(false);
 
 							if (parse->ItemHasQuestSub(old_aug, EVENT_AUGMENT_REMOVE)) {
-								parse->EventItem(
-									EVENT_AUGMENT_REMOVE,
-									this,
-									old_aug,
-									nullptr,
-									"",
-									in_augment->augment_index,
-									&args
-								);
+								parse->EventItem(EVENT_AUGMENT_REMOVE, this, old_aug, nullptr, "", in_augment->augment_index, &args);
 							}
 
 							if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
@@ -3306,29 +3290,13 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							args.push_back(aug);
 
 							if (parse->ItemHasQuestSub(tobe_auged, EVENT_AUGMENT_ITEM)) {
-								parse->EventItem(
-									EVENT_AUGMENT_ITEM,
-									this,
-									tobe_auged,
-									nullptr,
-									"",
-									in_augment->augment_index,
-									&args
-								);
+								parse->EventItem(EVENT_AUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 							}
 
 							args.assign(1, tobe_auged);
 
 							if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_INSERT)) {
-								parse->EventItem(
-									EVENT_AUGMENT_INSERT,
-									this,
-									aug,
-									nullptr,
-									"",
-									in_augment->augment_index,
-									&args
-								);
+								parse->EventItem(EVENT_AUGMENT_INSERT, this, aug, nullptr, "", in_augment->augment_index, &args);
 							}
 
 							args.push_back(aug);
@@ -3398,30 +3366,14 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					args.push_back(aug);
 
 					if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-						parse->EventItem(
-							EVENT_UNAUGMENT_ITEM,
-							this,
-							tobe_auged,
-							nullptr,
-							"",
-							in_augment->augment_index,
-							&args
-						);
+						parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 					}
 
 					args.assign(1, tobe_auged);
 					args.push_back(false);
 
 					if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
-						parse->EventItem(
-							EVENT_AUGMENT_REMOVE,
-							this,
-							aug,
-							nullptr,
-							"",
-							in_augment->augment_index,
-							&args
-						);
+						parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
 					}
 
 					args.push_back(aug);
@@ -3486,30 +3438,14 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					args.push_back(aug);
 
 					if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-						parse->EventItem(
-							EVENT_UNAUGMENT_ITEM,
-							this,
-							tobe_auged,
-							nullptr,
-							"",
-							in_augment->augment_index,
-							&args
-						);
+						parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 					}
 
 					args.assign(1, tobe_auged);
 					args.push_back(true);
 
 					if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
-						parse->EventItem(
-							EVENT_AUGMENT_REMOVE,
-							this,
-							aug,
-							nullptr,
-							"",
-							in_augment->augment_index,
-							&args
-						);
+						parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
 					}
 
 					args.push_back(aug);
@@ -4479,14 +4415,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 							int i = 0;
 
 							if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
-								i = parse->EventItem(
-									EVENT_ITEM_CLICK_CAST,
-									this,
-									p_inst,
-									nullptr,
-									"",
-									castspell->inventoryslot
-								);
+								i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 							}
 
 							if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
@@ -4518,14 +4447,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 						int i = 0;
 
 						if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
-							i = parse->EventItem(
-								EVENT_ITEM_CLICK_CAST,
-								this,
-								p_inst,
-								nullptr,
-								"",
-								castspell->inventoryslot
-							);
+							i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 						}
 
 						if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
@@ -9591,14 +9513,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					int i = 0;
 
 					if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
-						i = parse->EventItem(
-							EVENT_ITEM_CLICK_CAST,
-							this,
-							p_inst,
-							nullptr,
-							"",
-							slot_id
-						);
+						i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", slot_id);
 					}
 
 					if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
@@ -9662,14 +9577,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					int i = 0;
 
 					if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
-						i = parse->EventItem(
-							EVENT_ITEM_CLICK_CAST,
-							this,
-							clickaug,
-							nullptr,
-							"",
-							slot_id
-						);
+						i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, nullptr, "", slot_id);
 					}
 
 					if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {

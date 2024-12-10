@@ -1817,25 +1817,13 @@ void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 		if (parse->PlayerHasQuestSub(EVENT_DUEL_WIN)) {
 			std::vector<std::any> args = { winner, loser };
 
-			parse->EventPlayer(
-				EVENT_DUEL_WIN,
-				winner->CastToClient(),
-				loser->GetName(),
-				loser->CastToClient()->CharacterID(),
-				&args
-			);
+			parse->EventPlayer(EVENT_DUEL_WIN, winner->CastToClient(), loser->GetName(), loser->CastToClient()->CharacterID(), &args);
 		}
 
 		if (parse->PlayerHasQuestSub(EVENT_DUEL_LOSE)) {
 			std::vector<std::any> args = { winner, loser };
 
-			parse->EventPlayer(
-				EVENT_DUEL_LOSE,
-				loser->CastToClient(),
-				winner->GetName(),
-				winner->CastToClient()->CharacterID(),
-				&args
-			);
+			parse->EventPlayer(EVENT_DUEL_LOSE, loser->CastToClient(), winner->GetName(), winner->CastToClient()->CharacterID(), &args);
 		}
 	}
 

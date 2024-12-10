@@ -254,24 +254,19 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
+	std::function<std::string()> f = [&]() {
+		return fmt::format(
+			"{} {} {} {}",
+			spell_id,
+			GetID(),
+			GetCasterLevel(spell_id),
+			target_id
+		);
+	};
+
 	Mob* spell_target = entity_list.GetMobID(target_id);
 	std::vector<std::any> args = { spell_target };
-	int return_value = parse->EventMob(
-		EVENT_CAST_BEGIN,
-		this,
-		nullptr,
-		[&]() {
-			return fmt::format(
-				"{} {} {} {}",
-				spell_id,
-				GetID(),
-				GetCasterLevel(spell_id),
-				target_id
-			);
-		},
-		0,
-		&args
-	);
+	int return_value = parse->EventMob(EVENT_CAST_BEGIN, this, nullptr, f, 0, &args);
 
 	if (IsClient() && return_value != 0) {
 		if (IsDiscipline(spell_id)) {
@@ -1804,22 +1799,17 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	std::vector<std::any> args = { spell_target };
 
-	parse->EventMob(
-		EVENT_CAST,
-		this,
-		nullptr,
-		[&]() {
-			return fmt::format(
-				"{} {} {} {}",
-				spell_id,
-				GetID(),
-				GetCasterLevel(spell_id),
-				target_id
-			);
-		},
-		0,
-		&args
-	);
+	std::function<std::string()> f = [&]() {
+		return fmt::format(
+			"{} {} {} {}",
+			spell_id,
+			GetID(),
+			GetCasterLevel(spell_id),
+			target_id
+		);
+	};
+
+	parse->EventMob(EVENT_CAST, this, nullptr, f, 0, &args);
 
 	if(bard_song_mode)
 	{
@@ -3965,22 +3955,17 @@ bool Mob::SpellOnTarget(
 
 	std::vector<std::any> args = { spelltar };
 
-	parse->EventMob(
-		EVENT_CAST_ON,
-		spelltar,
-		this,
-		[&]() {
-			return fmt::format(
-				"{} {} {} {}",
-				spell_id,
-				GetID(),
-				caster_level,
-				target_id
-			);
-		},
-		0,
-		&args
-	);
+	std::function<std::string()> f = [&]() {
+		return fmt::format(
+			"{} {} {} {}",
+			spell_id,
+			GetID(),
+			caster_level,
+			target_id
+		);
+	};
+
+	parse->EventMob(EVENT_CAST_ON, spelltar, this, f, 0, &args);
 
 	if (!DoCastingChecksOnTarget(false, spell_id, spelltar)) {
 		safe_delete(action_packet);
