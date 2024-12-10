@@ -725,11 +725,12 @@ namespace BotSpellTypes
 	constexpr uint16	MovementSpeed				= 110;
 	constexpr uint16	SendHome					= 111;
 	constexpr uint16	SummonCorpse				= 112;
+	constexpr uint16	AELull						= 113;
 				  
 	constexpr uint16	START						= BotSpellTypes::Nuke;							// Do not remove or change this
 	constexpr uint16	END							= BotSpellTypes::PetResistBuffs;				// Do not remove this, increment as needed
 	constexpr uint16	COMMANDED_START				= BotSpellTypes::Lull;							// Do not remove or change this
-	constexpr uint16	COMMANDED_END				= BotSpellTypes::SummonCorpse;					// Do not remove this, increment as needed
+	constexpr uint16	COMMANDED_END				= BotSpellTypes::AELull;						// Do not remove this, increment as needed
 }
 
 const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow);

@@ -8943,6 +8943,9 @@ std::string Mob::GetSpellTypeNameByID(uint16 spellType) {
 		case BotSpellTypes::SummonCorpse:
 			spellTypeName = "Summon Corpse";
 			break;
+		case BotSpellTypes::AELull:
+			spellTypeName = "AE Lull";
+			break;
 		default:
 			break;
 	}
@@ -9163,6 +9166,9 @@ std::string Mob::GetSpellTypeShortNameByID(uint16 spellType) {
 			break;
 		case BotSpellTypes::SummonCorpse:
 			spellTypeName = "summoncorpse";
+			break;
+		case BotSpellTypes::AELull:
+			spellTypeName = "aelull";
 			break;
 		default:
 			break;

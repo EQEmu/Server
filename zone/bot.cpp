@@ -9878,6 +9878,7 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 			}
 
 			break;
+		case BotSpellTypes::AELull:
 		case BotSpellTypes::Lull:
 			if (IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, tar)) {
 				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to HarmonySpellLevelCheck.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
@@ -11234,6 +11235,9 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::Lifetap:
 			return BotSpellTypes::Lifetap;
+		case BotSpellTypes::AELull:
+		case BotSpellTypes::Lull:
+			return BotSpellTypes::Lull;
 		case BotSpellTypes::Charm:		
 		case BotSpellTypes::Escape:
 		case BotSpellTypes::HateRedux:
@@ -11245,8 +11249,7 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 		case BotSpellTypes::Pet:
 		case BotSpellTypes::PreCombatBuff:
 		case BotSpellTypes::PreCombatBuffSong:
-		case BotSpellTypes::Resurrect:
-		case BotSpellTypes::Lull:
+		case BotSpellTypes::Resurrect:		
 		default:
 			return spellType;
 	}
