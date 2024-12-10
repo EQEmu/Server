@@ -899,19 +899,24 @@ namespace Laurion
 		out.WriteUInt32(42);
 
 		//PackedEQAffect buffs[buff_count];
+		//todo: fix
 		for (int i = 0; i < 42; ++i) {
 			/*
-			float modifier;
-			u32 caster;
-			u32 flags;
-			u32 duration;
-			u32 max_duration;
-			u8 level;
-			s32 spell_id;
-			s32 hitcount;
-			u8 unknown1;
-			u32 unknown2;
-			u32 unknown3;
+			struct EQAffect
+			{
+				float modifier;
+				EqGuid caster;
+				u32 duration;
+				u32 max_duration;
+				u8 level;
+				s32 spell_id;
+				s32 hitcount;
+				u32 flags;
+				u32 viral_timer;
+				u8 type;
+				SlotData slots[6];
+			};
+
 			*/
 			out.WriteFloat(1.0f);
 			out.WriteUInt32(0);
@@ -4065,7 +4070,94 @@ namespace Laurion
 
 	static inline void ServerToLaurionConvertLinks(std::string& message_out, const std::string& message_in)
 	{
-		message_out = message_in;
+		if (message_in.find('\x12') == std::string::npos) {
+			message_out = message_in;
+			return;
+		}
+
+		auto segments = Strings::Split(message_in, '\x12');
+		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
+			if (segment_iter & 1) {
+				auto etag = std::stoi(segments[segment_iter].substr(0, 1));
+
+				switch (etag) {
+				case 0:
+				{
+					size_t index = 1;
+					auto item_id = segments[segment_iter].substr(index, 5);
+					index += 5;
+					
+					auto aug1 = segments[segment_iter].substr(index, 5);
+					index += 5;
+					
+					auto aug2 = segments[segment_iter].substr(index, 5);
+					index += 5;
+					
+					auto aug3 = segments[segment_iter].substr(index, 5);
+					index += 5;
+					
+					auto aug4 = segments[segment_iter].substr(index, 5);
+					index += 5;
+					
+					auto aug5 = segments[segment_iter].substr(index, 5);
+					index += 5;
+					
+					auto aug6 = segments[segment_iter].substr(index, 5);
+					index += 5;
+					
+					auto is_evolving = segments[segment_iter].substr(index, 1);
+					index += 1;
+					
+					auto evolutionGroup = segments[segment_iter].substr(index, 4);
+					index += 4;
+					
+					auto evolutionLevel = segments[segment_iter].substr(index, 2);
+					index += 2;
+					
+					auto ornamentationIconID = segments[segment_iter].substr(index, 5);
+					index += 5;
+					
+					auto itemHash = segments[segment_iter].substr(index, 8);
+					index += 8;
+					
+					auto text = segments[segment_iter].substr(index);
+					
+					message_out.push_back('\x12');
+					message_out.push_back('0'); //etag item
+					message_out.append(item_id);
+					message_out.append(aug1);
+					message_out.append("00000");
+					message_out.append(aug2);
+					message_out.append("00000");
+					message_out.append(aug3);
+					message_out.append("00000");
+					message_out.append(aug4);
+					message_out.append("00000");
+					message_out.append(aug5);
+					message_out.append("00000");
+					message_out.append(aug6);
+					message_out.append("00000");
+					message_out.append(is_evolving);
+					message_out.append(evolutionGroup);
+					message_out.append(evolutionLevel);
+					message_out.append(ornamentationIconID);
+					message_out.append("00000");
+					message_out.append(itemHash);
+					message_out.append(text);
+					message_out.push_back('\x12');
+
+					break;
+				}
+				default:
+					//unsupported etag right now; just pass it as is
+					message_out.append(segments[segment_iter]);
+					break;
+				}
+			}
+			else {
+				message_out.append(segments[segment_iter]);
+			}
+		}
 	}
 
 	static inline void LaurionToServerConvertLinks(std::string& message_out, const std::string& message_in) {
