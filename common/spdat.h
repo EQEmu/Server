@@ -748,7 +748,6 @@ bool IsClientBotSpellType(uint16 spellType);
 bool IsHealBotSpellType(uint16 spellType);
 bool SpellTypeRequiresLoS(uint16 spellType, uint16 cls = 0);
 bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls = 0);
-bool SpellTypeRequiresCastChecks(uint16 spellType);
 bool SpellTypeRequiresAEChecks(uint16 spellType);
 bool IsCommandedSpellType(uint16 spellType);
 bool IsPullingSpellType(uint16 spellType);

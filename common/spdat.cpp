@@ -3116,31 +3116,6 @@ bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls) {
 	return true;
 }
 
-bool SpellTypeRequiresCastChecks(uint16 spellType) {
-	switch (spellType) {
-		case BotSpellTypes::AEDebuff:
-		case BotSpellTypes::AEDispel:
-		case BotSpellTypes::AEDoT:
-		case BotSpellTypes::AEFear:
-		case BotSpellTypes::AELifetap:
-		case BotSpellTypes::AEMez:
-		case BotSpellTypes::AENukes:
-		case BotSpellTypes::AERains:
-		case BotSpellTypes::AERoot:
-		case BotSpellTypes::AESlow:
-		case BotSpellTypes::AESnare:
-		case BotSpellTypes::AEStun:
-		case BotSpellTypes::PBAENuke:
-		case BotSpellTypes::Mez:
-		case BotSpellTypes::SummonCorpse:
-			return false;
-		default:
-			return true;
-	}
-
-	return true;
-}
-
 bool SpellTypeRequiresAEChecks(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::AEMez:
