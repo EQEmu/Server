@@ -2753,10 +2753,11 @@ BotSpell Bot::GetBestBotSpellForNukeByBodyType(Bot* botCaster, uint8 bodyType, u
 }
 
 void Bot::CheckBotSpells() {
-	bool valid = false;
-	uint16 correctType;
 	auto spellList = BotSpellsEntriesRepository::All(content_db);
 	uint16 spell_id;
+	SPDat_Spell_Struct spell;
+	uint16 correctType;
+	uint16 parentType;
 
 	for (const auto& s : spellList) {
 		if (!IsValidSpell(s.spell_id)) {
@@ -2764,64 +2765,65 @@ void Bot::CheckBotSpells() {
 			continue;
 		}
 
-		spell_id = s.spell_id;
+		spell = spells[s.spell_id];
+		spell_id = spell.id;
 
-		if (spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX] >= 255) {
+		if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] >= 255) {
 			LogBotSpellTypeChecks("{} [#{}] is not usable by a {} [#{}].", GetSpellName(spell_id), spell_id, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX), s.npc_spells_id); //deleteme
 		}
 		else {
-			if (spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX] > s.minlevel) {
+			if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] > s.minlevel) {
 				LogBotSpellTypeChecks("{} [#{}] is not usable until level {} for a {} [#{}] and the min level is currently set to {}."
 					, GetSpellName(spell_id)
 					, spell_id
-					, spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX]
+					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
 					, s.minlevel
 				); //deleteme
 
 				LogBotSpellTypeChecksDetail("UPDATE bot_spells_entries SET `minlevel` = {} WHERE `spellid` = {} AND `npc_spells_id` = {}; -- {} [#{}] from minlevel {} to {} for {} [#{}]"
-					, spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX]
+					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, spell_id
 					, s.npc_spells_id
 					, GetSpellName(spell_id)
 					, spell_id
 					, s.minlevel
-					, spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX]
+					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
 				); //deleteme
 			}
 
-			if (spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX] < s.minlevel) {
+			if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] < s.minlevel) {
 				LogBotSpellTypeChecks("{} [#{}] could be used starting at level {} for a {} [#{}] instead of the current min level of {}."
 					, GetSpellName(spell_id)
 					, spell_id
-					, spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX]
+					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
 					, s.minlevel
 				); //deleteme
 
 				LogBotSpellTypeChecksDetail("UPDATE bot_spells_entries SET `minlevel` = {} WHERE `spellid` = {} AND `npc_spells_id` = {}; -- {} [#{}] from minlevel {} to {} for {} [#{}]"
-					, spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX]
+					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, spell_id
 					, s.npc_spells_id
 					, GetSpellName(spell_id)
 					, spell_id
 					, s.minlevel
-					, spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX]
+					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
 				); //deleteme
 			}
 
 
-			if (spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX] > s.maxlevel) {
+			if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] > s.maxlevel) {
 				LogBotSpellTypeChecks("{} [#{}] is not usable until level {} for a {} [#{}] and the max level is currently set to {}."
 					, GetSpellName(spell_id)
 					, spell_id
-					, spells[spell_id].classes[s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX]
+					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
 					, s.maxlevel
@@ -2829,380 +2831,33 @@ void Bot::CheckBotSpells() {
 			}
 		}
 
-		correctType = UINT16_MAX;
-		valid = false;
+		correctType = GetCorrectSpellType(s.type, spell_id);
+		parentType = GetSpellListSpellType(correctType);
 		
-
-		switch (s.type) {
-			case BotSpellTypes::Nuke:
-				if (IsAnyNukeOrStunSpell(spell_id) && !IsEffectInSpell(spell_id, SE_Root) && !IsDebuffSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::RegularHeal:
-				if (IsAnyHealSpell(spell_id) && !IsEscapeSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Root:
-				if (IsEffectInSpell(spell_id, SE_Root)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Buff:
-				if (IsAnyBuffSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Pet:
-				if (IsSummonPetSpell(spell_id) || IsEffectInSpell(spell_id, SE_TemporaryPets)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Lifetap:
-				if (IsLifetapSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Snare:
-				if (IsEffectInSpell(spell_id, SE_MovementSpeed) && IsDetrimentalSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::DOT:
-				if (IsStackableDOT(spell_id) || IsDamageOverTimeSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Dispel:
-				if (IsDispelSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::InCombatBuff:
-				if (
-					IsSelfConversionSpell(spell_id) ||
-					IsAnyBuffSpell(spell_id)
-				) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::HateLine:
-				if (
-					(IsEffectInSpell(spell_id, SE_Hate) && spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_Hate)] > 0) ||
-					(IsEffectInSpell(spell_id, SE_InstantHate) && spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_InstantHate)] > 0)
-				) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Mez:
-				if (IsMesmerizeSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Charm:
-				if (IsCharmSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Slow:
-				if (IsSlowSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Debuff:
-				if (IsDebuffSpell(spell_id) && !IsEscapeSpell(spell_id) && !IsHateReduxSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Cure:
-				if (IsCureSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::PreCombatBuff:
-				if (
-					IsBuffSpell(spell_id) &&
-					IsBeneficialSpell(spell_id) &&
-					!IsBardSong(spell_id) &&
-					!IsEscapeSpell(spell_id) &&
-					(!IsSummonPetSpell(spell_id) && !IsEffectInSpell(spell_id, SE_TemporaryPets))
-				) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::InCombatBuffSong:
-			case BotSpellTypes::OutOfCombatBuffSong:
-			case BotSpellTypes::PreCombatBuffSong:
-				if (
-					IsBuffSpell(spell_id) &&
-					IsBeneficialSpell(spell_id) &&
-					IsBardSong(spell_id) &&
-					!IsEscapeSpell(spell_id) &&
-					(!IsSummonPetSpell(spell_id) && !IsEffectInSpell(spell_id, SE_TemporaryPets))
-				) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Fear:
-				if (IsFearSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Escape:
-				if (IsEscapeSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::HateRedux:
-				if (IsHateReduxSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Resurrect:
-				if (IsEffectInSpell(spell_id, SE_Revive)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Lull:
-				if (IsHarmonySpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Teleport:
-				if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Translocate))) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Succor:
-				if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_Succor)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::BindAffinity:
-				if (IsEffectInSpell(spell_id, SE_BindAffinity)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Identify:
-				if (IsEffectInSpell(spell_id, SE_Identify)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Levitate:
-				if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Levitate))) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Rune:
-				if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_AbsorbMagicAtt) || IsEffectInSpell(spell_id, SE_Rune)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::WaterBreathing:
-				if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_WaterBreathing)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Size:
-				if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_ModelSize) || IsEffectInSpell(spell_id, SE_ChangeHeight))) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::Invisibility:
-				if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_SeeInvis) || IsInvisibleSpell(spell_id)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::MovementSpeed:
-				if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_MovementSpeed)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::SendHome:
-				if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_GateToHomeCity)) {
-					valid = true;
-					break;
-				}
-				break;
-			case BotSpellTypes::SummonCorpse:
-				if (IsEffectInSpell(spell_id, SE_SummonCorpse)) {
-					valid = true;
-					break;
-				}
-				break;
-			default:
-				break;
-
-		}
-
-		if (IsAnyNukeOrStunSpell(spell_id) && !IsEffectInSpell(spell_id, SE_Root) && !IsDebuffSpell(spell_id)) {
-			correctType = BotSpellTypes::Nuke;
-		}
-		else if (IsAnyHealSpell(spell_id) && !IsEscapeSpell(spell_id)) {
-			correctType = BotSpellTypes::RegularHeal;
-		}
-		else if (IsEffectInSpell(spell_id, SE_Root)) {
-			correctType = BotSpellTypes::Root;
-		}
-		else if (IsAnyBuffSpell(spell_id)) {
-			correctType = BotSpellTypes::Buff;
-		}
-		else if (IsSummonPetSpell(spell_id) || IsEffectInSpell(spell_id, SE_TemporaryPets)) {
-			correctType = BotSpellTypes::Pet;
-		}
-		else if (IsLifetapSpell(spell_id)) {
-			correctType = BotSpellTypes::Lifetap;
-		}
-		else if (IsEffectInSpell(spell_id, SE_MovementSpeed) && IsDetrimentalSpell(spell_id)) {
-			correctType = BotSpellTypes::Snare;
-		}
-		else if (IsStackableDOT(spell_id) || IsDamageOverTimeSpell(spell_id)) {
-			correctType = BotSpellTypes::DOT;
-		}
-		else if (IsDispelSpell(spell_id)) {
-			correctType = BotSpellTypes::Dispel;
-		}
-		else if (
-			IsSelfConversionSpell(spell_id) || 
-			IsAnyBuffSpell(spell_id)
-		) {
-			correctType = BotSpellTypes::InCombatBuff;
-		}
-		else if (
-			(IsEffectInSpell(spell_id, SE_Hate) && spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_Hate)] > 0) ||
-			(IsEffectInSpell(spell_id, SE_InstantHate) && spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_InstantHate)] > 0)
-		) {
-			correctType = BotSpellTypes::HateLine;
-		}
-		else if (IsMesmerizeSpell(spell_id)) {
-			correctType = BotSpellTypes::Mez;
-		}
-		else if (IsCharmSpell(spell_id)) {
-			correctType = BotSpellTypes::Charm;
-		}
-		else if (IsSlowSpell(spell_id)) {
-			correctType = BotSpellTypes::Slow;
-		}
-		else if (IsDebuffSpell(spell_id) && !IsEscapeSpell(spell_id) && !IsHateReduxSpell(spell_id)) {
-			correctType = BotSpellTypes::Debuff;
-		}
-		else if (IsCureSpell(spell_id)) {
-			correctType = BotSpellTypes::Cure;
-		}
-		else if (
-			IsBuffSpell(spell_id) &&
-			IsBeneficialSpell(spell_id) &&
-			IsBardSong(spell_id) &&
-			!IsEscapeSpell(spell_id) &&
-			(!IsSummonPetSpell(spell_id) && !IsEffectInSpell(spell_id, SE_TemporaryPets))
-		) {
-			if (
-				s.type == BotSpellTypes::InCombatBuffSong ||
-				s.type == BotSpellTypes::OutOfCombatBuffSong ||
-				s.type == BotSpellTypes::PreCombatBuffSong
-			) {
-				correctType = s.type;
-			}
-			else {
-				correctType = BotSpellTypes::OutOfCombatBuffSong;
+		if (RuleB(Bots, UseParentSpellTypeForChecks)) {
+			if (s.type == parentType || s.type == correctType) {
+				continue;
 			}
 		}
-		else if (
-			IsBuffSpell(spell_id) &&
-			IsBeneficialSpell(spell_id) &&
-			!IsBardSong(spell_id) &&
-			!IsEscapeSpell(spell_id) &&
-			(!IsSummonPetSpell(spell_id) && !IsEffectInSpell(spell_id, SE_TemporaryPets))
-		) {
-			correctType = BotSpellTypes::PreCombatBuff;
-		}
-		else if (IsFearSpell(spell_id)) {
-			correctType = BotSpellTypes::Fear;
-		}
-		else if (IsEscapeSpell(spell_id)) {
-			correctType = BotSpellTypes::Escape;
-		}
-		else if (IsHateReduxSpell(spell_id)) {
-			correctType = BotSpellTypes::HateRedux;
-		}
-		else if (IsEffectInSpell(spell_id, SE_Revive)) {
-			correctType = BotSpellTypes::Resurrect;
-		}
-		else if (IsHarmonySpell(spell_id)) {
-			correctType = BotSpellTypes::Lull;
-		}
-		else if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Translocate))) {
-			correctType = BotSpellTypes::Teleport;
-		}
-		else if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_Succor)) {
-			correctType = BotSpellTypes::Succor;
-		}
-		else if (IsEffectInSpell(spell_id, SE_BindAffinity)) {
-			correctType = BotSpellTypes::BindAffinity;
-		}
-		else if (IsEffectInSpell(spell_id, SE_Identify)) {
-			correctType = BotSpellTypes::Identify;
-		}
-		else if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Levitate))) {
-			correctType = BotSpellTypes::Levitate;
-		}
-		else if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_AbsorbMagicAtt) || IsEffectInSpell(spell_id, SE_Rune)) {
-			correctType = BotSpellTypes::Rune;
-		}
-		else if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_WaterBreathing)) {
-			correctType = BotSpellTypes::WaterBreathing;
-		}
-		else if (IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_ModelSize) || IsEffectInSpell(spell_id, SE_ChangeHeight))) {
-			correctType = BotSpellTypes::Size;
-		}
-		else if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_SeeInvis) || IsInvisibleSpell(spell_id)) {
-			correctType = BotSpellTypes::Invisibility;
-		}
-		else if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_MovementSpeed)) {
-			correctType = BotSpellTypes::MovementSpeed;
-		}
-		else if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_GateToHomeCity)) {
-			correctType = BotSpellTypes::SendHome;
-		}
-		else if (IsEffectInSpell(spell_id, SE_SummonCorpse)) {
-			correctType = BotSpellTypes::SummonCorpse;
+		else { 
+			if (IsPetBotSpellType(s.type)) {
+				correctType = GetPetSpellType(correctType);
+			}
 		}
 
-		if (!valid || (correctType == UINT16_MAX) || (s.type != correctType)) {
+		if (correctType == s.type) {
+			continue;
+		}
+		
+		if (correctType == UINT16_MAX) {
+			LogBotSpellTypeChecks("{} [#{}] is incorrect. It is currently set as {} [#{}] but the correct type is unknown."
+				, GetSpellName(spell_id)
+				, spell_id
+				, GetSpellTypeNameByID(s.type)
+				, s.type
+			); //deleteme
+		}
+		else {
 			LogBotSpellTypeChecks("{} [#{}] is incorrect. It is currently set as {} [#{}] and should be {} [#{}]"
 				, GetSpellName(spell_id)
 				, spell_id
@@ -3211,7 +2866,7 @@ void Bot::CheckBotSpells() {
 				, GetSpellTypeNameByID(correctType)
 				, correctType
 			); //deleteme
-			LogBotSpellTypeChecksDetail("UPDATE bot_spells_entries SET `type` = {} WHERE `spellid` = {}; -- {} [#{}] from {} [#{}] to {} [#{}]"
+			LogBotSpellTypeChecksDetail("UPDATE bot_spells_entries SET `type` = {} WHERE `spell_id` = {}; -- {} [#{}] from {} [#{}] to {} [#{}]"
 				, correctType
 				, spell_id
 				, GetSpellName(spell_id)

@@ -752,6 +752,8 @@ bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls = 0);
 bool SpellTypeRequiresAEChecks(uint16 spellType);
 bool IsCommandedSpellType(uint16 spellType);
 bool IsPullingSpellType(uint16 spellType);
+uint16 GetCorrectSpellType(uint16 spellType, uint16 spell_id);
+uint16 GetPetSpellType(uint16 spellType);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only
@@ -1748,5 +1750,6 @@ bool IsResurrectSpell(uint16 spell_id);
 bool RequiresStackCheck(uint16 spellType);
 bool IsResistanceOnlySpell(uint16 spell_id);
 bool IsDamageShieldOnlySpell(uint16 spell_id);
+bool IsHateSpell(uint16 spell_id);
 
 #endif

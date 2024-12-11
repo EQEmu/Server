@@ -1582,11 +1582,11 @@ bool IsRegularPetHealSpell(uint16 spell_id)
 
 	if (spell_id) {
 		if (
-			spells[spell_id].target_type == ST_Pet &&
+			(spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_Undead) &&
 			!IsCompleteHealSpell(spell_id) &&
 			!IsHealOverTimeSpell(spell_id) &&
 			!IsGroupSpell(spell_id)
-			) {
+		) {
 			for (int i = 0; i < EFFECT_COUNT; i++) {
 				if (
 					spells[spell_id].base_value[i] > 0 &&
@@ -1594,8 +1594,8 @@ bool IsRegularPetHealSpell(uint16 spell_id)
 					(
 						spells[spell_id].effect_id[i] == SE_CurrentHP ||
 						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
-						)
-					) {
+					)
+				) {
 					return true;
 				}
 			}
@@ -3229,6 +3229,17 @@ bool IsDamageShieldOnlySpell(uint16 spell_id) {
 	return true;
 }
 
+bool IsHateSpell(uint16 spell_id) {
+	if (
+		(IsEffectInSpell(spell_id, SE_Hate) && spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_Hate)] > 0) ||
+		(IsEffectInSpell(spell_id, SE_InstantHate) && spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_InstantHate)] > 0)
+	) {
+		return true;
+	}
+
+	return false;
+}
+
 bool IsCommandedSpellType(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::Charm:
@@ -3280,4 +3291,235 @@ bool IsPullingSpellType(uint16 spellType) {
 		}
 
 	return false;
+}
+
+uint16 GetCorrectSpellType(uint16 spellType, uint16 spell_id) {
+	uint16 correctType = UINT16_MAX;
+	SPDat_Spell_Struct spell = spells[spell_id];
+	std::string teleportZone = spell.teleport_zone;
+
+	if (IsCharmSpell(spell_id)) {
+		correctType = BotSpellTypes::Charm;
+	}
+	else if (IsFearSpell(spell_id)) {
+		correctType = BotSpellTypes::Fear;
+	}
+	else if (IsEffectInSpell(spell_id, SE_Revive)) {
+		correctType = BotSpellTypes::Resurrect;
+	}
+	else if (IsHarmonySpell(spell_id)) {
+		correctType = BotSpellTypes::Lull;
+	}
+	else if (teleportZone.compare("") && !IsEffectInSpell(spell_id, SE_GateToHomeCity) && IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Translocate))) {
+		correctType = BotSpellTypes::Teleport;
+	}
+	else if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_Succor)) {
+		correctType = BotSpellTypes::Succor;
+	}
+	else if (IsEffectInSpell(spell_id, SE_BindAffinity)) {
+		correctType = BotSpellTypes::BindAffinity;
+	}
+	else if (IsEffectInSpell(spell_id, SE_Identify)) {
+		correctType = BotSpellTypes::Identify;
+	}
+	else if (spellType == BotSpellTypes::Levitate && IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Levitate))) {
+		correctType = BotSpellTypes::Levitate;
+	}
+	else if (spellType == BotSpellTypes::Rune && IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_AbsorbMagicAtt) || IsEffectInSpell(spell_id, SE_Rune))) {
+		correctType = BotSpellTypes::Rune;
+	}
+	else if (spellType == BotSpellTypes::WaterBreathing && IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_WaterBreathing)) {
+		correctType = BotSpellTypes::WaterBreathing;
+	}
+	else if (spellType == BotSpellTypes::Size && IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_ModelSize) || IsEffectInSpell(spell_id, SE_ChangeHeight))) {
+		correctType = BotSpellTypes::Size;
+	}
+	else if (spellType == BotSpellTypes::Invisibility && IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_SeeInvis) || IsInvisibleSpell(spell_id))) {
+		correctType = BotSpellTypes::Invisibility;
+	}
+	else if (spellType == BotSpellTypes::MovementSpeed && IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_MovementSpeed)) {
+		correctType = BotSpellTypes::MovementSpeed;
+	}
+	else if (!teleportZone.compare("") && IsBeneficialSpell(spell_id) && (IsEffectInSpell(spell_id, SE_Translocate) || IsEffectInSpell(spell_id, SE_GateToHomeCity))) {
+		correctType = BotSpellTypes::SendHome;
+	}
+	else if (IsEffectInSpell(spell_id, SE_SummonCorpse)) {
+		correctType = BotSpellTypes::SummonCorpse;
+	}
+
+	if (correctType == UINT16_MAX) {
+		if (IsSummonPetSpell(spell_id) || IsEffectInSpell(spell_id, SE_TemporaryPets)) {
+			correctType = BotSpellTypes::Pet;
+		}
+		else if (IsMesmerizeSpell(spell_id)) {
+			correctType = BotSpellTypes::Mez;
+		}
+		else if (IsEscapeSpell(spell_id)) {
+			correctType = BotSpellTypes::Escape;
+		}
+		else if (IsDetrimentalSpell(spell_id) && IsEffectInSpell(spell_id, SE_Root)) {
+			if (IsAnyAESpell(spell_id)) {
+				correctType = BotSpellTypes::AERoot;
+			}
+			else {
+				correctType = BotSpellTypes::Root;
+			}
+		}
+		else if (IsDetrimentalSpell(spell_id) && IsLifetapSpell(spell_id)) {
+			correctType = BotSpellTypes::Lifetap;
+		}
+		else if (IsDetrimentalSpell(spell_id) && IsEffectInSpell(spell_id, SE_MovementSpeed)) {
+			correctType = BotSpellTypes::Snare;
+		}
+		else if (IsDetrimentalSpell(spell_id) && (IsStackableDOT(spell_id) || IsDamageOverTimeSpell(spell_id))) {
+			correctType = BotSpellTypes::DOT;
+		}
+		else if (IsDispelSpell(spell_id)) {
+			correctType = BotSpellTypes::Dispel;
+		}
+		else if (IsDetrimentalSpell(spell_id) && IsSlowSpell(spell_id)) {
+			correctType = BotSpellTypes::Slow;
+		}
+		else if (IsDebuffSpell(spell_id) && !IsHateReduxSpell(spell_id) && !IsHateSpell(spell_id)) {
+			correctType = BotSpellTypes::Debuff;
+		}
+		else if (IsHateReduxSpell(spell_id)) {
+			correctType = BotSpellTypes::HateRedux;
+		}
+		else if (IsDetrimentalSpell(spell_id) && IsHateSpell(spell_id)) {
+			correctType = BotSpellTypes::HateLine;
+		}
+		else if (
+			IsBuffSpell(spell_id) &&
+			IsBeneficialSpell(spell_id) &&
+			IsBardSong(spell_id)
+		) {
+			if (
+				spellType == BotSpellTypes::InCombatBuffSong ||
+				spellType == BotSpellTypes::OutOfCombatBuffSong ||
+				spellType == BotSpellTypes::PreCombatBuffSong
+				) {
+				correctType = spellType;
+			}
+			else {
+				correctType = BotSpellTypes::OutOfCombatBuffSong;
+			}
+		}
+		else if (
+			!IsBardSong(spell_id) &&
+			(
+				(IsSelfConversionSpell(spell_id) && spell.buff_duration < 1) ||
+				(spellType == BotSpellTypes::InCombatBuff && IsAnyBuffSpell(spell_id))
+			)
+		) {
+			correctType = BotSpellTypes::InCombatBuff;
+		}
+		else if (
+			spellType == BotSpellTypes::PreCombatBuff &&
+			IsAnyBuffSpell(spell_id) &&
+			!IsBardSong(spell_id)
+		) {
+			correctType = BotSpellTypes::PreCombatBuff;
+		}
+		else if (
+			(IsCureSpell(spell_id) && spellType == BotSpellTypes::Cure) ||
+			(IsCureSpell(spell_id) && !IsAnyHealSpell(spell_id))
+		) {
+			correctType = BotSpellTypes::Cure;
+		}
+		else if (IsAnyNukeOrStunSpell(spell_id)) {
+			if (IsAnyAESpell(spell_id)) {
+				if (IsAERainSpell(spell_id)) {
+					correctType = BotSpellTypes::AERains;
+				}
+				else if (IsPBAENukeSpell(spell_id)) {
+					correctType = BotSpellTypes::PBAENuke;
+				}
+				else if (IsStunSpell(spell_id)) {
+					correctType = BotSpellTypes::AEStun;
+				}
+				else {
+					correctType = BotSpellTypes::AENukes;
+				}
+			}
+			else if (IsStunSpell(spell_id)) {
+				correctType = BotSpellTypes::Stun;
+			}
+			else {
+				correctType = BotSpellTypes::Nuke;
+			}
+		}
+		else if (IsAnyHealSpell(spell_id)) {
+			if (IsGroupSpell(spell_id)) {
+				if (IsGroupCompleteHealSpell(spell_id)) {
+					correctType = BotSpellTypes::GroupCompleteHeals;
+				}
+				else if (IsGroupHealOverTimeSpell(spell_id)) {
+					correctType = BotSpellTypes::GroupHoTHeals;
+				}
+				else if (IsRegularGroupHealSpell(spell_id)) {
+					correctType = BotSpellTypes::GroupHeals;
+				}
+			}
+			else {
+				if (IsVeryFastHealSpell(spell_id)) {
+					correctType = BotSpellTypes::VeryFastHeals;
+				}
+				else if (IsFastHealSpell(spell_id)) {
+					correctType = BotSpellTypes::FastHeals;
+				}
+				else if (IsCompleteHealSpell(spell_id)) {
+					correctType = BotSpellTypes::CompleteHeal;
+				}
+				else if (IsHealOverTimeSpell(spell_id)) {
+					correctType = BotSpellTypes::HoTHeals;
+				}
+				else if (IsRegularSingleTargetHealSpell(spell_id)) {
+					correctType = BotSpellTypes::RegularHeal;
+				}
+				else if (IsRegularPetHealSpell(spell_id)) {
+					correctType = BotSpellTypes::RegularHeal;
+				}
+			}
+		}
+		else if (IsAnyBuffSpell(spell_id)) {
+			if (IsResistanceOnlySpell(spell_id)) {
+				correctType = BotSpellTypes::ResistBuffs;
+			}
+			else if (IsDamageShieldOnlySpell(spell_id)) {
+				correctType = BotSpellTypes::DamageShields;
+			}
+			else {
+				correctType = BotSpellTypes::Buff;
+			}
+		}
+	}
+
+
+	return correctType;
+}
+
+uint16 GetPetSpellType(uint16 spellType) {
+	switch (spellType) {
+	case BotSpellTypes::Buff:
+		return BotSpellTypes::PetBuffs;
+	case BotSpellTypes::RegularHeal:
+		return BotSpellTypes::PetRegularHeals;
+	case BotSpellTypes::CompleteHeal:
+		return BotSpellTypes::PetCompleteHeals;
+	case BotSpellTypes::FastHeals:
+		return BotSpellTypes::PetFastHeals;
+	case BotSpellTypes::VeryFastHeals:
+		return BotSpellTypes::PetVeryFastHeals;
+	case BotSpellTypes::HoTHeals:
+		return BotSpellTypes::PetHoTHeals;
+	case BotSpellTypes::DamageShields:
+		return BotSpellTypes::PetDamageShields;
+	case BotSpellTypes::ResistBuffs:
+		return BotSpellTypes::PetResistBuffs;
+	default:
+		return spellType;
+	}
+
+	return spellType;
 }
