@@ -1813,7 +1813,9 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 	parse->EventBotMerc(EVENT_COMBAT, this, attacker, [&] { return "1"; });
 
 	if (IsNPC()) {
-		CastToNPC()->AIautocastspell_timer->Start(300, false);
+		if (CastToNPC()->AIautocastspell_timer) {
+			CastToNPC()->AIautocastspell_timer->Start(300, false);
+		}
 
 		if (yell_for_help) {
 			if (IsPet()) {
