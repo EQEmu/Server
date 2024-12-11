@@ -9709,7 +9709,7 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		return false;
 	}
 
-	if (spellType == UINT16_MAX) { //AA cast checks, return here
+	if (spellType == UINT16_MAX) { //AA/Forced cast checks, return here
 		return true;
 	}
 
@@ -11098,7 +11098,7 @@ bool Bot::AttemptAICastSpell(uint16 spellType) {
 }
 
 bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
-	if (!tar) {
+	if (!tar || spells[spell_id].target_type == ST_Self) {
 		tar = this;
 	}
 
@@ -11132,11 +11132,25 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 		}
 
 
+		if (IsCasting()) {
+			BotGroupSay(
+				this,
+				fmt::format(
+					"Interrupting {}. I have been commanded to try to cast an AA - {} on {}.",
+					CastingSpellID() ? spells[CastingSpellID()].name : "my spell",
+					spells[spell_id].name,
+					tar->GetCleanName()
+				).c_str()
+			);
+
+			InterruptSpell();
+		}
+
 		if (CastSpell(spell_id, tar->GetID())) {
 			BotGroupSay(
 				this,
 				fmt::format(
-					"Casting {} on {}.",
+					"Casting an AA - {} on {}.",
 					GetSpellName(spell_id),
 					(tar == this ? "myself" : tar->GetCleanName())
 				).c_str()
@@ -11170,6 +11184,121 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 	}
 	
 	return true;
+}
+
+bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id) {
+	SPDat_Spell_Struct spell = spells[spell_id];
+	uint16 forcedSpellID = spell.id;
+
+	if (!tar || (spells[spell_id].target_type == ST_Self && tar != this)) {
+		LogTestDebug("{} set my target to myself for {} [#{}] due to !tar.", GetCleanName(), spell.name, forcedSpellID); //deleteme
+		tar = this;
+	}
+
+	if (IsBeneficialSpell(forcedSpellID)) {
+		if (
+			(tar->IsNPC() && !tar->GetOwner()) ||
+			(tar->GetOwner() && tar->GetOwner()->IsOfClientBot() && !GetBotOwner()->IsInGroupOrRaid(tar->GetOwner())) ||
+			(tar->IsOfClientBot() && !GetBotOwner()->IsInGroupOrRaid(tar))
+		) {
+			GetBotOwner()->Message(
+				Chat::Yellow, 
+				fmt::format(
+					"[{}] is an invalid target. Only players or their pet in your group or raid are eligible targets."
+					, tar->GetCleanName()
+				).c_str()
+			);
+
+			return false;
+		}
+	}
+
+	if (IsDetrimentalSpell(forcedSpellID) && (!GetBotOwner()->IsAttackAllowed(tar) || !IsAttackAllowed(tar))) {
+		GetBotOwner()->Message(
+			Chat::Yellow,
+			fmt::format(
+				"{} says, 'I cannot attack [{}]'.", 
+				GetCleanName(), 
+				tar->GetCleanName()
+			).c_str()
+		);
+
+		return false;
+	}
+
+	if (!CheckSpellRecastTimer(forcedSpellID)) {
+		LogTestDebug("{} failed CheckSpellRecastTimer for {} [#{}].", GetCleanName(), spell.name, forcedSpellID); //deleteme
+		return false;
+	}
+
+	if (
+		!RuleB(Bots, EnableBotTGB) &&
+		IsGroupSpell(forcedSpellID) &&
+		!IsTGBCompatibleSpell(forcedSpellID) &&
+		!IsInGroupOrRaid(tar, true)
+	) {
+		LogTestDebug("{} failed TGB for {} [#{}].", GetCleanName(), spell.name, forcedSpellID); //deleteme
+		return false;
+	}
+
+	if (!DoLosChecks(this, tar)) {
+		LogTestDebug("{} failed LoS for {} [#{}].", GetCleanName(), spell.name, forcedSpellID); //deleteme
+		return false;
+	}
+
+	if (!CastChecks(forcedSpellID, tar, UINT16_MAX)) {
+		LogTestDebug("{} failed CastChecks for {} [#{}].", GetCleanName(), spell.name, forcedSpellID); //deleteme
+		GetBotOwner()->Message(
+			Chat::Red, 
+			fmt::format(
+				"{} says, 'Ability failed to cast. This could be due to this to any number of things: range, mana, immune, etc.'",
+				GetBotOwner()->GetCleanName()
+			).c_str()
+		);
+
+		return false;
+	}
+
+	if (IsCasting()) {
+		BotGroupSay(
+			this,
+			fmt::format(
+				"Interrupting {}. I have been commanded to try to cast {} on {}.",
+				CastingSpellID() ? spells[CastingSpellID()].name : "my spell",
+				spell.name,
+				tar->GetCleanName()
+			).c_str()
+		);
+
+		InterruptSpell();
+	}
+
+	if (CastSpell(forcedSpellID, tar->GetID())) {
+		BotGroupSay(
+			this,
+			fmt::format(
+				"Casting {} on {}.",
+				GetSpellName(forcedSpellID),
+				(tar == this ? "myself" : tar->GetCleanName())
+			).c_str()
+		);
+
+		int timer_duration = CalcBuffDuration(tar, this, forcedSpellID);
+
+		if (timer_duration) { // negatives are perma buffs
+			timer_duration = GetActSpellDuration(forcedSpellID, timer_duration);
+		}
+
+		if (timer_duration < 0) {
+			timer_duration = 0;
+		}
+
+		SetSpellRecastTimer(forcedSpellID, timer_duration);
+
+		return true;
+	}
+
+	return false;
 }
 
 uint16 Bot::GetSpellListSpellType(uint16 spellType) {

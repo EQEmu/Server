@@ -47,22 +47,6 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		};
 		std::vector<std::string> examples_two =
 		{
-			"To tell all Enchanters to slow the target:",
-			fmt::format(
-				"{} {} byclass {}",
-				sep->arg[0],
-				Class::Enchanter,
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Slow)
-			),
-			fmt::format(
-				"{} {} byclass {}",
-				sep->arg[0],
-				Class::Enchanter,
-				BotSpellTypes::Slow
-			)
-		};
-		std::vector<std::string> examples_three =
-		{
 			"To tell Skbot to Harm Touch the target:",
 			fmt::format(
 				"{} aa 6000 byname Skbot",
@@ -70,6 +54,14 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			),
 			fmt::format(
 				"{} harmtouch byname Skbot",
+				sep->arg[0]
+			)
+		};
+		std::vector<std::string> examples_three =
+		{
+			"To tell all bots to try to cast spell #93 (Burst of Flame)",
+			fmt::format(
+				"{} spellid 93",
 				sep->arg[0]
 			)
 		};
@@ -188,8 +180,15 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	uint16 subTargetType = UINT16_MAX;
 	bool aaType = false;
 	int aaID = 0;
+	bool bySpellID = false;
+	uint16 chosenSpellID = UINT16_MAX;
 
 	if (!arg1.compare("aa") || !arg1.compare("harmtouch") || !arg1.compare("layonhands")) {
+		if (!RuleB(Bots, AllowForcedCastsBySpellID)) {
+			c->Message(Chat::Yellow, "This commanded type is currently disabled.");
+			return;
+		}
+
 		if (!arg1.compare("harmtouch")) {
 			aaID = zone->GetAlternateAdvancementAbilityByRank(aaHarmTouch)->id;
 		}
@@ -208,8 +207,25 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		aaType = true;		
 	}
 
-	if (!aaType) {
-		// String/Int type checks
+	if (!arg1.compare("spellid")) {
+		if (!RuleB(Bots, AllowCastAAs)) {
+			c->Message(Chat::Yellow, "This commanded type is currently disabled.");
+			return;
+		}
+
+		if (sep->IsNumber(2) && IsValidSpell(atoi(sep->arg[2]))) {
+			++ab_arg;
+			chosenSpellID = atoi(sep->arg[2]);
+			bySpellID = true;
+		}
+		else {
+			c->Message(Chat::Yellow, "You must enter a valid spell ID.");
+
+			return;
+		}
+	}
+
+	if (!aaType && !bySpellID) {
 		if (sep->IsNumber(1)) {
 			spellType = atoi(sep->arg[1]);
 
@@ -342,7 +358,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			spellType == BotSpellTypes::PetHoTHeals ||
 			spellType == BotSpellTypes::PetRegularHeals ||
 			spellType == BotSpellTypes::PetVeryFastHeals
-			) {
+		) {
 			c->Message(Chat::Yellow, "Pet type heals and buffs are not supported, use the regular spell type.");
 			return;
 		}
@@ -352,62 +368,88 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	//LogTestDebug("{}: 'Attempting {} [{}-{}] on {}'", __LINE__, c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (tar ? tar->GetCleanName() : "NOBODY")); //deleteme
 
 	if (!tar) {
-		if (!aaType && spellType != BotSpellTypes::Escape && spellType != BotSpellTypes::Pet) {
+		if ((!aaType && !bySpellID) && spellType != BotSpellTypes::Escape && spellType != BotSpellTypes::Pet) {
 			c->Message(Chat::Yellow, "You need a target for that.");
 			return;
 		}
 	}
 
-	switch (spellType) { //Target Checks
-		case BotSpellTypes::Resurrect:
-			if (!tar->IsCorpse() || !tar->CastToCorpse()->IsPlayerCorpse()) {
-				c->Message(Chat::Yellow, "[%s] is not a player's corpse.", tar->GetCleanName());
-
-				return;
-			}
-
-			break;
-		case BotSpellTypes::Identify:
-		case BotSpellTypes::SendHome:
-		case BotSpellTypes::BindAffinity:
-		case BotSpellTypes::SummonCorpse:
-			if (!tar->IsClient() || !c->IsInGroupOrRaid(tar)) {
-				c->Message(Chat::Yellow, "[%s] is an invalid target. Only players in your group or raid are eligible targets.", tar->GetCleanName());
-
-				return;
-			}
-
-			break;
-		default:
-			if (
-				(IsBotSpellTypeDetrimental(spellType) && !c->IsAttackAllowed(tar)) ||
-				(
-					spellType == BotSpellTypes::Charm && 
-					(
-						tar->IsClient() || 
-						tar->IsCorpse() ||
-						tar->GetOwner()
-					)
-				)
-			) {
-				c->Message(Chat::Yellow, "You cannot attack [%s].", tar->GetCleanName());
-
-				return;
-			}
-
-			if (IsBotSpellTypeBeneficial(spellType)) {
-				if (
-					(tar->IsNPC() && !tar->GetOwner()) ||
-					(tar->GetOwner() && tar->GetOwner()->IsOfClientBot() && !c->IsInGroupOrRaid(tar->GetOwner())) ||
-					(tar->IsOfClientBot() && !c->IsInGroupOrRaid(tar))
-				) {
-					c->Message(Chat::Yellow, "[%s] is an invalid target. Only players or their pet in your group or raid are eligible targets.", tar->GetCleanName());
+	if (!aaType && !bySpellID) {
+		switch (spellType) { //Target Checks
+			case BotSpellTypes::Resurrect:
+				if (!tar->IsCorpse() || !tar->CastToCorpse()->IsPlayerCorpse()) {
+					c->Message(
+						Chat::Yellow, 
+						fmt::format(
+							"[{}] is not a player's corpse.", 
+							tar->GetCleanName()
+						).c_str()
+					);
 
 					return;
 				}
-			}
 
-			break;
+				break;
+			case BotSpellTypes::Identify:
+			case BotSpellTypes::SendHome:
+			case BotSpellTypes::BindAffinity:
+			case BotSpellTypes::SummonCorpse:
+				if (!tar->IsClient() || !c->IsInGroupOrRaid(tar)) {
+					c->Message(
+						Chat::Yellow,
+						fmt::format(
+							"[{}] is an invalid target. Only players in your group or raid are eligible targets.", 
+							tar->GetCleanName()
+						).c_str()
+					);
+
+					return;
+				}
+
+				break;
+			default:
+				if (
+					(IsBotSpellTypeDetrimental(spellType) && !c->IsAttackAllowed(tar)) ||
+					(
+						spellType == BotSpellTypes::Charm &&
+						(
+							tar->IsClient() ||
+							tar->IsCorpse() ||
+							tar->GetOwner()
+						)
+					)
+				) {
+					c->Message(
+						Chat::Yellow,
+						fmt::format(
+							"You cannot attack [{}].", 
+							tar->GetCleanName()
+						).c_str()
+					);
+
+					return;
+				}
+
+				if (IsBotSpellTypeBeneficial(spellType)) {
+					if (
+						(tar->IsNPC() && !tar->GetOwner()) ||
+						(tar->GetOwner() && tar->GetOwner()->IsOfClientBot() && !c->IsInGroupOrRaid(tar->GetOwner())) ||
+						(tar->IsOfClientBot() && !c->IsInGroupOrRaid(tar))
+					) {
+						c->Message(
+							Chat::Yellow,
+							fmt::format(
+								"[{}] is an invalid target. Only players or their pet in your group or raid are eligible targets.",
+								tar->GetCleanName()
+							).c_str()
+						);
+
+						return;
+					}
+				}
+
+				break;
+		}
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
@@ -451,7 +493,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 		Mob* newTar = tar;
 
-		if (!aaType) {
+		if (!aaType && !bySpellID) {
 			//LogTestDebug("{}: {} says, 'Attempting {} [{}-{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
 			if (!SpellTypeRequiresTarget(spellType, bot_iter->GetClass())) {
 				newTar = bot_iter;
@@ -502,9 +544,48 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 			isSuccess = true;
 			++successCount;
+
+			continue;
+		}
+		else if (bySpellID) {
+			SPDat_Spell_Struct spell = spells[chosenSpellID];
+
+			LogTestDebug("Starting bySpellID checks."); //deleteme
+			if (!bot_iter->HasBotSpellEntry(chosenSpellID)) {
+				LogTestDebug("{} does not have {} [#{}].", bot_iter->GetCleanName(), spell.name, chosenSpellID); //deleteme
+				continue;
+			}
+
+			if (!tar || (spell.target_type == ST_Self && tar != bot_iter)) {
+				LogTestDebug("{} set my target to myself for {} [#{}] due to !tar.", bot_iter->GetCleanName(), spell.name, chosenSpellID); //deleteme
+				tar = bot_iter;
+			}
+
+			if (bot_iter->AttemptForcedCastSpell(tar, chosenSpellID)) {
+				if (!firstFound) {
+					firstFound = bot_iter;
+				}
+
+				isSuccess = true;
+				++successCount;
+			}
+			else {
+				c->Message(
+					Chat::Red, 
+					fmt::format(
+						"{} says, '{} [#{}] failed to cast on [{}]. This could be due to this to any number of things: range, mana, immune, etc.'", 
+						bot_iter->GetCleanName(), 
+						spell.name, 
+						chosenSpellID,
+						tar->GetCleanName()
+					).c_str()
+				);
+			}
+
+			continue;
 		}
 		else {
-			LogTestDebug("{}: {} says, 'Attempting {} [{}-{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
+			LogTestDebug("{}: {} says, 'Attempting {} [{}-{}] on [{}]'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
 			bot_iter->SetCommandedSpell(true);
 			
 			if (bot_iter->AICastSpell(newTar, 100, spellType, subTargetType, subType)) {
@@ -516,15 +597,34 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				++successCount;
 			}
 			else {
-				bot_iter->GetBotOwner()->Message(Chat::Red, "%s says, 'Ability failed to cast. This could be due to this to any number of things: range, mana, immune, etc.'", bot_iter->GetCleanName());
-
-				continue;
+				c->Message(
+					Chat::Red, 
+					fmt::format(
+						"{} says, 'Ability failed to cast [{}]. This could be due to this to any number of things: range, mana, immune, etc.'",
+						bot_iter->GetCleanName(), 
+						tar->GetCleanName()
+					).c_str()
+				);
 			}
 
 			bot_iter->SetCommandedSpell(false);
+
+			continue;
 		}
 
 		continue;
+	}
+
+	std::string type = "";
+
+	if (aaType) {
+		type = zone->GetAAName(zone->GetAlternateAdvancementAbility(aaID)->first_rank_id);
+	}
+	else if (bySpellID) {
+		type = "Forced";
+	}
+	else {
+		type = c->GetSpellTypeNameByID(spellType);
 	}
 
 	if (!isSuccess) {
@@ -532,18 +632,19 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			Chat::Yellow,
 			fmt::format(
 				"No bots are capable of casting [{}] on {}.",
-				(!aaType ? c->GetSpellTypeNameByID(spellType) : zone->GetAAName(zone->GetAlternateAdvancementAbility(aaID)->first_rank_id)),
+				(bySpellID ? spells[chosenSpellID].name : type),
 				tar ? tar->GetCleanName() : "your target"
 			).c_str()
 		);
 	}
 	else {
-		c->Message( Chat::Yellow,
+		c->Message(
+			Chat::Yellow,
 			fmt::format(
 				"{} {} [{}]{}",
 				((successCount == 1 && firstFound) ? firstFound->GetCleanName() : (fmt::format("{}", successCount).c_str())),
 				((successCount == 1 && firstFound) ? "casted" : "of your bots casted"),
-				(!aaType ? c->GetSpellTypeNameByID(spellType) : zone->GetAAName(zone->GetAlternateAdvancementAbility(aaID)->first_rank_id)),
+				(bySpellID ? spells[chosenSpellID].name : type),
 				tar ? (fmt::format(" on {}.", tar->GetCleanName()).c_str()) : "."
 			).c_str()
 		);
