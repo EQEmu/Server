@@ -3953,8 +3953,6 @@ bool Mob::SpellOnTarget(
 
 	std::vector<std::any> args = { spelltar };
 
-	std::function<std::string()> f = ;
-
 	parse->EventMob(EVENT_CAST_ON, spelltar, this,
 		[&]() {
 			return fmt::format(
