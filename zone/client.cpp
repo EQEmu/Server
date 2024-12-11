@@ -13982,86 +13982,107 @@ bool Client::AddExtraClass(int class_id) {
 }
 
 bool Client::RemoveExtraClass(int class_id) {
-	if (!(RuleB(Custom, MulticlassingEnabled) && class_id >= Class::Warrior && class_id <= Class::Berserker)) {
-		LogDebug("Invalid usage of RemoveExtraClass");
-		return false;
-	}
+    if (!(RuleB(Custom, MulticlassingEnabled) && class_id >= Class::Warrior && class_id <= Class::Berserker)) {
+        LogDebug("Invalid usage of RemoveExtraClass");
+        return false;
+    }
 
-	if (!(GetClassesBits() & GetPlayerClassBit(class_id))) {
-		LogDebug("Attempted to removed class_id [{}] from player [{}], but they don't have that class to remove", class_id, GetCleanName());
-		return false;
-	}
+    if (!(GetClassesBits() & GetPlayerClassBit(class_id))) {
+        LogDebug("Attempted to remove class_id [{}] from player [{}], but they don't have that class to remove", class_id, GetCleanName());
+        return false;
+    }
 
-	m_pp.classes = m_pp.classes & ~GetPlayerClassBit(class_id);
+    // Calculate new class bitmask after removal
+    auto new_classes = m_pp.classes & ~GetPlayerClassBit(class_id);
 
-	for (int skill_id = EQ::skills::Skill1HBlunt; skill_id < EQ::skills::SkillCount; skill_id++) {
-		if (!CanHaveSkill(static_cast<EQ::skills::SkillType>(skill_id))) {
-			SetSkill(static_cast<EQ::skills::SkillType>(skill_id), 0);
+    // Lambda to check if a spell is usable by any of the given classes
+    auto is_spell_usable_by_classes = [this, new_classes](int spell_id) {
+        for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+            if ((new_classes & GetPlayerClassBit(i)) && GetSpellLevel(spell_id, i) != UINT8_MAX) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Update classes bitmask
+    m_pp.classes = new_classes;
+
+    // Update skills
+    for (int skill_id = EQ::skills::Skill1HBlunt; skill_id < EQ::skills::SkillCount; skill_id++) {
+        auto skill = static_cast<EQ::skills::SkillType>(skill_id);
+        if (!CanHaveSkill(skill)) {
+            SetSkill(skill, 0);
+        }
+    }
+
+    // Remove spells that are no longer usable
+    auto memorized_spells = GetMemmedSpells();
+    for (auto memmed_id : memorized_spells) {
+        if (IsValidSpell(memmed_id) && !is_spell_usable_by_classes(memmed_id)) {
+            UnmemSpellBySpellID(memmed_id);
+        }
+    }
+
+    auto scribed_spells = GetScribedSpells();
+    for (auto spell_id : scribed_spells) {
+        if (IsValidSpell(spell_id) && !is_spell_usable_by_classes(spell_id)) {
+            UnscribeSpellBySpellID(spell_id, true);
+        }
+    }
+
+    auto scribed_disc = GetLearnedDisciplines();
+    for (auto disc_id : scribed_disc) {
+        if (IsValidSpell(disc_id) && !is_spell_usable_by_classes(disc_id)) {
+            UntrainDiscBySpellID(disc_id, true);
+        }
+    }
+
+	for (int slot = EQ::invslot::EQUIPMENT_BEGIN; slot <= EQ::invslot::EQUIPMENT_END; slot++) {
+		auto item = m_inv.GetItem(slot);
+		if (item && (m_pp.classes & item->GetItem()->Classes) == 0) {
+			EjectItemFromSlot(slot);
 		}
 	}
 
-	auto memorized_spells = GetMemmedSpells();
-	for (auto memmed_id : memorized_spells) {
-		if (IsValidSpell(memmed_id) && GetSpellLevel(memmed_id, class_id) != UINT8_MAX) {
-			UnmemSpellBySpellID(memmed_id);
-		}
-	}
+    // Clear dynamic AA timers
+    ClearDynamicAATimers();
 
-	auto scribed_spells = GetScribedSpells();
-	for (auto spell_id : scribed_spells) {
-		if (IsValidSpell(spell_id) && GetSpellLevel(spell_id, class_id) != UINT8_MAX) {
-			UnscribeSpellBySpellID(spell_id, true);
-		}
-	}
+    // Remove pets that are no longer summonable by remaining classes
+    auto pets = GetAllPets();
+    for (auto pet : pets) {
+        if (pet->IsNPC() && !is_spell_usable_by_classes(pet->CastToNPC()->GetPetSpellID())) {
+            RemovePet(pet->GetID());
+        }
+    }
 
-	auto scribed_disc = GetLearnedDisciplines();
-	for (auto disc_id : scribed_disc) {
-		if (IsValidSpell(disc_id) && GetSpellLevel(disc_id, class_id) != UINT8_MAX) {
-			UntrainDiscBySpellID(disc_id, true);
-		}
-	}
+    // Update bucket and recalculate bonuses
+    SetBucket("GestaltClasses", std::to_string(m_pp.classes));
+    CalcBonuses();
 
-	for (int i = EQ::skills::Skill1HBlunt; i < EQ::skills::SkillCount; ++i) {
-		auto skill = static_cast<EQ::skills::SkillType>(i);
-		if (!CanHaveSkill(skill)) {
-			SetSkill(skill, 0);
-		}
-	}
+    // Update guild and alternate advancement information
+    if (IsInAGuild()) {
+        guild_mgr.SendToWorldMemberLevelUpdate(GuildID(), RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : GetLevel(), std::string(GetCleanName()));
+        DoGuildTributeUpdate();
+    }
 
-	ClearDynamicAATimers();
+    zone->LoadAlternateAdvancement();
 
-	auto pets = GetAllPets();
-	for (auto pet : pets) {
-		if (pet->IsNPC() && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), class_id) != UINT8_MAX) {
-			RemovePet(pet->GetID());
-		}
-	}
+    SendClearPlayerAA();
+    SendAlternateAdvancementTable();
+    SendAlternateAdvancementPoints();
+    SendAlternateAdvancementStats();
 
-	// Might need to manually remove AA here. This might just work elegantly where the AA go 'inactive' and come back if you get this class back.
+    // Save changes
+    SaveSpells();
+    SaveDisciplines();
+    SaveAA();
+    SaveCurrency();
+    Save();
 
-	SetBucket("GestaltClasses", std::to_string(m_pp.classes));
-	CalcBonuses();
-
-	if (IsInAGuild()) {
-		guild_mgr.SendToWorldMemberLevelUpdate(GuildID(), RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : GetLevel(), std::string(GetCleanName()));
-		DoGuildTributeUpdate();
-	}
-
-	zone->LoadAlternateAdvancement();
-
-	SendClearPlayerAA();
-	SendAlternateAdvancementTable();
-	SendAlternateAdvancementPoints();
-	SendAlternateAdvancementStats();
-
-	SaveSpells();
-	SaveDisciplines();
-	SaveAA();
-	SaveCurrency();
-	Save();
-
-	return true;
+    return true;
 }
+
 
 uint16 Client::GetSkill(EQ::skills::SkillType skill_id) const
 {
