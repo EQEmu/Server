@@ -928,7 +928,7 @@ int32 Perl_StatBonuses_GetCombatStability(StatBonuses* self)
 
 int32 Perl_StatBonuses_GetDoubleRiposte(StatBonuses* self)
 {
-	return self->DoubleRiposte;
+	//return self->DoubleRiposte;
 }
 
 int32 Perl_StatBonuses_GetAmbidexterity(StatBonuses* self)
@@ -1243,7 +1243,7 @@ int32 Perl_StatBonuses_GetSlayUndead(StatBonuses* self, int slot)
 
 int32 Perl_StatBonuses_GetGiveDoubleRiposte(StatBonuses* self, int slot)
 {
-	return self->GiveDoubleRiposte[slot];
+	//return self->GiveDoubleRiposte[slot];
 }
 
 uint32 Perl_StatBonuses_GetRaiseSkillCap(StatBonuses* self, int slot)

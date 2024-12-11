@@ -4519,19 +4519,6 @@ void Bot::DoRiposte(Mob* defender) {
 		return;
 
 	defender->Attack(this, EQ::invslot::slotPrimary, true);
-	int32 DoubleRipChance = (defender->GetAABonuses().GiveDoubleRiposte[0] + defender->GetSpellBonuses().GiveDoubleRiposte[0] + defender->GetItemBonuses().GiveDoubleRiposte[0]);
-	if (DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
-		LogCombatDetail("Preforming a double riposte ([{}] percent chance)", DoubleRipChance);
-		defender->Attack(this, EQ::invslot::slotPrimary, true);
-	}
-
-	DoubleRipChance = defender->GetAABonuses().GiveDoubleRiposte[1];
-	if (DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
-		if (defender->HasClass(Class::Monk))
-			defender->MonkSpecialAttack(this, defender->GetAABonuses().GiveDoubleRiposte[2]);
-		else if (defender->IsBot())
-			defender->CastToClient()->DoClassAttacks(this,defender->GetAABonuses().GiveDoubleRiposte[2], true);
-	}
 }
 
 int Bot::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)

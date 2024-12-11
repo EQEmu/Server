@@ -1481,26 +1481,31 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
-		case SE_DoubleRiposte: {
-			newbon->DoubleRiposte += base_value;
+		case SE_DoubleRiposte:
+		case SE_GiveDoubleRiposte:
+		{
+			EQ::skills::SkillType skill = effect ==  SE_DoubleRiposte ? EQ::skills::SkillCount : static_cast<EQ::skills::SkillType>(limit_value);
+
+			switch (skill) // Only some skills will be supported here. 'Skill Attacks'. 1HB can never be supported without database work
+			{
+				case EQ::skills::SkillKick:
+				case EQ::skills::SkillFlyingKick:
+				case EQ::skills::SkillRoundKick:
+				case EQ::skills::SkillDragonPunch:
+				case EQ::skills::SkillEagleStrike:
+				case EQ::skills::SkillTigerClaw:
+				case EQ::skills::SkillBackstab:
+				case EQ::skills::SkillFrenzy:
+				case EQ::skills::SkillBash:
+				case EQ::skills::SkillDoubleAttack:
+					newbon->GiveDoubleRiposte[skill] += base_value;
+					break;
+				default:
+					newbon->GiveDoubleRiposte[EQ::skills::SkillCount] += base_value;
+			}
 			break;
 		}
 
-		case SE_GiveDoubleRiposte: {
-			// 0=Regular Riposte 1=Skill Attack Riposte 2=Skill
-			if (limit_value == 0) {
-				/*if (newbon->GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] < base_value)
-					newbon->GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] = base_value;*/
-				newbon->GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] += base_value;
-			}
-			// Only for special attacks.
-			else if (limit_value > 0/* && (newbon->GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL_ATK_CHANCE] < base_value)*/) {
-				newbon->GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL_ATK_CHANCE] += base_value;
-				newbon->GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL]            = limit_value;
-			}
-
-			break;
-		}
 
 		// Physically raises skill cap ie if 55/55 it will raise to 55/60
 		case SE_RaiseSkillCap: {
@@ -3646,17 +3651,25 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			}
 
 			case SE_DoubleRiposte:
-			{
-				new_bonus->DoubleRiposte += effect_value;
-				break;
-			}
-
 			case SE_GiveDoubleRiposte:
 			{
-				//Only allow for regular double riposte chance.
-				if(new_bonus->GiveDoubleRiposte[limit_value] == 0){
-					if(new_bonus->GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] < effect_value)
-						new_bonus->GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] = effect_value;
+				EQ::skills::SkillType skill = spell_effect_id == SE_DoubleRiposte ? EQ::skills::SkillCount : static_cast<EQ::skills::SkillType>(limit_value);
+
+				switch (skill) // Only some skills will be supported here. 'Skill Attacks'. 1HB can never be supported without database work
+				{
+					case EQ::skills::SkillKick:
+					case EQ::skills::SkillFlyingKick:
+					case EQ::skills::SkillRoundKick:
+					case EQ::skills::SkillDragonPunch:
+					case EQ::skills::SkillEagleStrike:
+					case EQ::skills::SkillTigerClaw:
+					case EQ::skills::SkillBackstab:
+					case EQ::skills::SkillFrenzy:
+					case EQ::skills::SkillBash:
+						new_bonus->GiveDoubleRiposte[skill] += effect_value;
+						break;
+					default:
+						new_bonus->GiveDoubleRiposte[EQ::skills::SkillCount] += effect_value;
 				}
 				break;
 			}
@@ -5617,18 +5630,6 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					if (negate_spellbonus) { spellbonuses.MasteryofPast = effect_value; }
 					if (negate_aabonus) { aabonuses.MasteryofPast = effect_value; }
 					if (negate_itembonus) { itembonuses.MasteryofPast = effect_value; }
-					break;
-
-				case SE_DoubleRiposte:
-					if (negate_spellbonus) { spellbonuses.DoubleRiposte = effect_value; }
-					if (negate_itembonus) { itembonuses.DoubleRiposte = effect_value; }
-					if (negate_aabonus) { aabonuses.DoubleRiposte = effect_value; }
-					break;
-
-				case SE_GiveDoubleRiposte:
-					if (negate_spellbonus) { spellbonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] = effect_value; }
-					if (negate_itembonus) { itembonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] = effect_value; }
-					if (negate_aabonus) { aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] = effect_value; }
 					break;
 
 				case SE_SlayUndead:

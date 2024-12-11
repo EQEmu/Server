@@ -5949,57 +5949,64 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 
 void Mob::DoRiposte(Mob *defender)
 {
-	LogCombat("Preforming a riposte");
+    LogCombat("Performing a riposte");
 
-	if (!defender)
-		return;
+    if (!defender)
+        return;
 
-	// so ahhh the angle you can riposte is larger than the angle you can hit :P
-	if (!defender->IsFacingMob(this)) {
-		defender->MessageString(Chat::TooFarAway, CANT_SEE_TARGET);
-		return;
-	}
+    // The angle you can riposte is larger than the angle you can hit
+    if (!defender->IsFacingMob(this)) {
+        defender->MessageString(Chat::TooFarAway, CANT_SEE_TARGET);
+        return;
+    }
 
-	defender->Attack(this, EQ::invslot::slotPrimary, true);
+    // Perform the initial riposte attack
+    defender->Attack(this, EQ::invslot::slotPrimary, true);
 
-	if (HasDied())
-		return;
+    if (HasDied())
+        return;
 
-	// this effect isn't used on live? See no AAs or spells
-	int32 DoubleRipChance = defender->aabonuses.DoubleRiposte + defender->spellbonuses.DoubleRiposte +
-		defender->itembonuses.DoubleRiposte;
+    // Initialize the array for DoubleRiposte chances
+    int DoubleRiposte[EQ::skills::SkillCount + 1] = {0};
 
-	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
-		LogCombat("Preforming a double riposted from SE_DoubleRiposte ([{}] percent chance)", DoubleRipChance);
-		defender->Attack(this, EQ::invslot::slotPrimary, true);
-		if (HasDied())
-			return;
-	}
+    // Add AA bonuses to DoubleRiposte
+    for (int skill = 0; skill <= EQ::skills::SkillCount; ++skill) {
+        DoubleRiposte[skill] += defender->aabonuses.GiveDoubleRiposte[skill];
+    }
 
-	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] + defender->spellbonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE] +
-					  defender->itembonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_CHANCE];
+    // Add spell bonuses to DoubleRiposte
+    for (int skill = 0; skill <= EQ::skills::SkillCount; ++skill) {
+        DoubleRiposte[skill] += defender->spellbonuses.GiveDoubleRiposte[skill];
+    }
 
-	// Live AA - Double Riposte
-	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
-		LogCombat("Preforming a double riposted from SE_GiveDoubleRiposte base1 == 0 ([{}] percent chance)", DoubleRipChance);
-		defender->Attack(this, EQ::invslot::slotPrimary, true);
-		if (HasDied())
-			return;
-	}
+    // Process each skill in DoubleRiposte
+    for (int skill = 0; skill <= EQ::skills::SkillCount; ++skill) {
+        if (DoubleRiposte[skill] == 0) {
+            continue; // Skip skills with no chance
+        }
 
-	// Double Riposte effect, allows for a chance to do RIPOSTE with a skill specific special attack (ie Return Kick).
-	// Coded narrowly: Limit to one per client. Limit AA only. [1 = Skill Attack Chance, 2 = Skill]
+        if (HasDied()) {
+            return; // Stop processing if the mob has died
+        }
 
-	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL_ATK_CHANCE];
+        if (zone->random.Roll(DoubleRiposte[skill])) {
+            if (skill == EQ::skills::SkillCount) { // SkillCount used as 'no skill' in this context
+                defender->Attack(this, EQ::invslot::slotPrimary, true);
+                continue;
+            }
 
-	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
-		LogCombat("Preforming a return SPECIAL ATTACK ([{}] percent chance)", DoubleRipChance);
+            if (!defender->IsClient()) {
+                continue;
+            }
 
-	if (defender->HasClass(Class::Monk))
-		defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL]);
-	else if (defender->IsClient()) // so yeah, even if you don't have the skill you can still do the attack :P (and we don't crash anymore)
-		defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL], true);
-	}
+			if (skill == EQ::skills::SkillDoubleAttack) {
+				defender->Attack(this, EQ::invslot::slotPrimary, true);
+                continue;
+			}
+
+			defender->CastToClient()->DoClassAttacks(this, skill, true);
+        }
+    }
 }
 
 void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, ExtraAttackOptions *opts)

@@ -933,7 +933,7 @@ int32 Lua_StatBonuses::GetCombatStability() const {
 
 int32 Lua_StatBonuses::GetDoubleRiposte() const {
 	Lua_Safe_Call_Int();
-	return self->DoubleRiposte;
+	//return self->DoubleRiposte;
 }
 
 int32 Lua_StatBonuses::GetAmbidexterity() const {
@@ -1247,7 +1247,7 @@ int32 Lua_StatBonuses::GetSlayUndead(int idx) const {
 
 int32 Lua_StatBonuses::GetGiveDoubleRiposte(int idx) const {
 	Lua_Safe_Call_Int();
-	return self->GiveDoubleRiposte[idx];
+	//return self->GiveDoubleRiposte[idx];
 }
 
 uint32 Lua_StatBonuses::GetRaiseSkillCap(int idx) const {

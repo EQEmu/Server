@@ -407,7 +407,7 @@ void Client::SendCombatAbilityTimers() {
 }
 
 // We should probably refactor this to take the struct not the packet
-void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
+void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk, bool is_riposte)
 {
 	if (!GetTarget()) {
 		return;
@@ -463,14 +463,10 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			ThrowingAttack(GetTarget());
 			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
 				ThrowingAttack(GetTarget(), true);
+				CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
 			}
 			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack()) {
 				ThrowingAttack(GetTarget(), true);
-			}
-			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack()) {
-				CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
-			}
-			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack()) {
 				CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
 			}
 			return;
@@ -482,14 +478,10 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			RangedAttack(GetTarget());
 			if (CheckDoubleRangedAttack() || (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
 				RangedAttack(GetTarget(), true);
+				CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
 			}
 			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack() && CheckTripleAttack()) {
 				RangedAttack(GetTarget(), true);
-			}
-			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack()) {
-				CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
-			}
-			if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack()) {
 				CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
 			}
 			return;
@@ -501,7 +493,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		return;
 	}
 
-	if (!p_timers.Expired(&database, timer, false)) {
+	if (!p_timers.Expired(&database, timer, false) && !is_riposte) {
 		Message(Chat::Red, "Ability recovery time not yet met.");
 		return;
 	}
@@ -551,7 +543,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 			DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillBash, damage, 0, hate_override, reuse_time);
 
-			if (reuse_time) {
+			if (reuse_time && !is_riposte) {
 				p_timers.Start(timer, reuse_time);
 				SendCombatAbilityTimers();
 			}
@@ -640,7 +632,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			attack_rounds--;
 		}
 
-		if (reuse_time) {
+		if (reuse_time && !is_riposte) {
 			p_timers.Start(timer, reuse_time);
 			SendCombatAbilityTimers();
 		}
@@ -785,7 +777,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 	reuse_time = EQ::Clamp(reuse_time, 0, reuse_time);
 
-	if (reuse_time) {
+	if (reuse_time && !is_riposte) {
 		p_timers.Start(timer, reuse_time);
 	}
 	SendCombatAbilityTimers();
@@ -2204,195 +2196,18 @@ void NPC::DoClassAttacks(Mob *target) {
 	classattack_timer.Start(reuse / HasteModifier);
 }
 
-// this should be refactored to generate an OP_CombatAbility struct and call OPCombatAbility
 void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 {
-	if(!ca_target)
-		return;
+	CombatAbility_Struct* ca_atk = new CombatAbility_Struct;
 
-	if(spellend_timer.Enabled() || IsFeared() || IsStunned() || IsMezzed() || DivineAura() || dead)
-		return;
+	ca_atk->m_atk = 100;
+	ca_atk->m_skill = skill;
+	ca_atk->m_target = ca_target->GetID();
 
-	if(!IsAttackAllowed(ca_target))
-		return;
+	OPCombatAbility(ca_atk, IsRiposte);
 
-	//check range for all these abilities, they are all close combat stuff
-	if(!CombatRange(ca_target)){
-		return;
-	}
-
-	pTimerType timer = GetCombatTimer(skill);
-
-	if(!IsRiposte && (!p_timers.Expired(&database, timer, false))) {
-		return;
-	}
-
-	int ReuseTime = 0;
-	float HasteMod = GetHaste() * 0.01f;
-
-	uint16 skill_to_use = -1;
-
-	if (skill == -1){
-		switch(GetClass()){
-		case Class::Warrior:
-		case Class::Ranger:
-		case Class::Beastlord:
-			skill_to_use = EQ::skills::SkillKick;
-			break;
-		case Class::Berserker:
-			skill_to_use = EQ::skills::SkillFrenzy;
-			break;
-		case Class::ShadowKnight:
-		case Class::Paladin:
-			skill_to_use = EQ::skills::SkillBash;
-			break;
-		case Class::Monk:
-			if(GetLevel() >= 30)
-			{
-				skill_to_use = EQ::skills::SkillFlyingKick;
-			}
-			else if(GetLevel() >= 25)
-			{
-				skill_to_use = EQ::skills::SkillDragonPunch;
-			}
-			else if(GetLevel() >= 20)
-			{
-				skill_to_use = EQ::skills::SkillEagleStrike;
-			}
-			else if(GetLevel() >= 10)
-			{
-				skill_to_use = EQ::skills::SkillTigerClaw;
-			}
-			else if(GetLevel() >= 5)
-			{
-				skill_to_use = EQ::skills::SkillRoundKick;
-			}
-			else
-			{
-				skill_to_use = EQ::skills::SkillKick;
-			}
-			break;
-		case Class::Rogue:
-			skill_to_use = EQ::skills::SkillBackstab;
-			break;
-		}
-	}
-
-	else
-		skill_to_use = skill;
-
-	if(skill_to_use == -1)
-		return;
-
-	int64 dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
-
-	if (skill_to_use == EQ::skills::SkillBash) {
-		if (ca_target!=this) {
-			DoAnim(animTailRake, 0, false);
-
-			if (GetWeaponDamage(ca_target, GetInv().GetItem(EQ::invslot::slotSecondary)) <= 0 && GetWeaponDamage(ca_target, GetInv().GetItem(EQ::invslot::slotShoulders)) <= 0)
-				dmg = DMG_INVULNERABLE;
-
-			ReuseTime = (BashReuseTime - 1) / HasteMod;
-
-			DoSpecialAttackDamage(ca_target, EQ::skills::SkillBash, dmg, 0, -1, ReuseTime);
-
-			if(ReuseTime > 0 && !IsRiposte) {
-				p_timers.Start(timer, ReuseTime);
-			}
-		}
-		return;
-	}
-
-	if (skill_to_use == EQ::skills::SkillFrenzy) {
-		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
-		int AtkRounds = 1;
-		DoAnim(anim1HWeapon, 0, false);
-
-		ReuseTime = (FrenzyReuseTime - 1) / HasteMod;
-
-		// bards can do riposte frenzy for some reason
-		if (!IsRiposte && HasClass(Class::Berserker)) {
-			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
-			if (zone->random.Roll0(450) < chance)
-				AtkRounds++;
-			if (zone->random.Roll0(450) < chance)
-				AtkRounds++;
-		}
-
-		while(AtkRounds > 0) {
-			if (ca_target!=this)
-				DoSpecialAttackDamage(ca_target, EQ::skills::SkillFrenzy, dmg, 0, dmg, ReuseTime);
-			AtkRounds--;
-		}
-
-		if(ReuseTime > 0 && !IsRiposte) {
-			p_timers.Start(timer, ReuseTime);
-		}
-		return;
-	}
-
-	if (skill_to_use == EQ::skills::SkillKick){
-		if(ca_target!=this){
-			DoAnim(animKick, 0, false);
-
-			if (GetWeaponDamage(ca_target, GetInv().GetItem(EQ::invslot::slotFeet)) <= 0)
-				dmg = DMG_INVULNERABLE;
-
-			ReuseTime = KickReuseTime-1;
-
-			DoSpecialAttackDamage(ca_target, EQ::skills::SkillKick, dmg, 0, -1, ReuseTime);
-		}
-	}
-
-	if (skill_to_use == EQ::skills::SkillFlyingKick || skill_to_use == EQ::skills::SkillDragonPunch || skill_to_use == EQ::skills::SkillEagleStrike || skill_to_use == EQ::skills::SkillTigerClaw || skill_to_use == EQ::skills::SkillRoundKick) {
-		ReuseTime = MonkSpecialAttack(ca_target, skill_to_use) - 1;
-		MonkSpecialAttack(ca_target, skill_to_use);
-
-		if (IsRiposte)
-			return;
-
-		//Live AA - Technique of Master Wu
-		int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
-		if (wuchance) {
-			const int MonkSPA[5] = {EQ::skills::SkillFlyingKick, EQ::skills::SkillDragonPunch,
-						EQ::skills::SkillEagleStrike, EQ::skills::SkillTigerClaw,
-						EQ::skills::SkillRoundKick};
-			int extra = 0;
-			// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
-			while (wuchance > 0) {
-				if (zone->random.Roll(wuchance))
-					extra++;
-				else
-					break;
-				wuchance /= 4;
-			}
-			// They didn't add a string ID for this.
-			std::string msg = StringFormat(
-			    "The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
-			// live uses 400 here -- not sure if it's the best for all clients though
-			SendColoredText(400, msg);
-			auto classic = RuleB(Combat, ClassicMasterWu);
-			while (extra) {
-				MonkSpecialAttack(GetTarget(),
-						  classic ? MonkSPA[zone->random.Int(0, 4)] : skill_to_use);
-				extra--;
-			}
-		}
-	}
-
-	if (skill_to_use == EQ::skills::SkillBackstab){
-		ReuseTime = BackstabReuseTime-1;
-
-		if (IsRiposte)
-			ReuseTime=0;
-
-		TryBackstab(ca_target,ReuseTime);
-	}
-
-	ReuseTime = ReuseTime / HasteMod;
-	if(ReuseTime > 0 && !IsRiposte){
-		p_timers.Start(timer, ReuseTime);
+	if (ca_atk) {
+		safe_delete(ca_atk);
 	}
 }
 

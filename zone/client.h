@@ -1949,7 +1949,7 @@ private:
 	void OPGMEndTraining(const EQApplicationPacket *app);
 	void OPGMTrainSkill(const EQApplicationPacket *app);
 	void OPGMSummon(const EQApplicationPacket *app);
-	void OPCombatAbility(const CombatAbility_Struct *ca_atk);
+	void OPCombatAbility(const CombatAbility_Struct *ca_atk, bool is_riposte = false);
 	void SendCombatAbilityTimers();
 
 	// Custom ServerAuthStats Skill refactor

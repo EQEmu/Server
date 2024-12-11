@@ -542,8 +542,7 @@ struct StatBonuses {
 	int32	PetCriticalHit;						// Allow pets to critical hit with % value.
 	int32	PetAvoidance;						// Pet avoidance chance.
 	int32	CombatStability;					// Melee damage mitigation.
-	int32	DoubleRiposte;						// Chance to double riposte
-	int32	GiveDoubleRiposte[3];				// 0=Regular Chance, 1=Skill Attack Chance, 2=Skill
+	int32   GiveDoubleRiposte[EQ::skills::SkillCount + 1];
 	uint32	RaiseSkillCap[EQ::skills::HIGHEST_SKILL + 1];		// Raise a specific skill cap (base1= value, base2=skill)
 	int32	Ambidexterity;						// Increase chance to duel wield by adding bonus 'skill'.
 	int32	PetMaxHP;							// Increase the max hp of your pet.
