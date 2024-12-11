@@ -1550,15 +1550,15 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			hit.damage_done = 0;
 		}
 
-		std::function<std::string()> f = [&]() {
-			return fmt::format(
-				"{} {}",
-				hit.skill,
-				GetSkill(hit.skill)
-			);
-		};
-
-		parse->EventBotMerc(EVENT_USE_SKILL, this, nullptr, f);
+		parse->EventBotMerc(EVENT_USE_SKILL, this, nullptr,
+			[&]() {
+				return fmt::format(
+					"{} {}",
+					hit.skill,
+					GetSkill(hit.skill)
+				);
+			}
+		);
 	}
 }
 
@@ -3075,22 +3075,23 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	std::vector<std::any> args = { corpse };
 
-	std::function<std::string()> f = [&]() {
-		return fmt::format(
-			"{} {} {} {} {} {} {} {} {}",
-			killer_mob ? killer_mob->GetID() : 0,
-			damage,
-			spell,
-			static_cast<int>(attack_skill),
-			entity_id,
-			m_combat_record.GetStartTime(),
-			m_combat_record.GetEndTime(),
-			m_combat_record.GetDamageReceived(),
-			m_combat_record.GetHealingReceived()
-		);
-	};
-
-	parse->EventMercNPC(EVENT_DEATH_COMPLETE, this, owner_or_self, f, 0, &args);
+	parse->EventMercNPC(EVENT_DEATH_COMPLETE, this, owner_or_self,
+		[&]() {
+			return fmt::format(
+				"{} {} {} {} {} {} {} {} {}",
+				killer_mob ? killer_mob->GetID() : 0,
+				damage,
+				spell,
+				static_cast<int>(attack_skill),
+				entity_id,
+				m_combat_record.GetStartTime(),
+				m_combat_record.GetEndTime(),
+				m_combat_record.GetDamageReceived(),
+				m_combat_record.GetHealingReceived()
+			);
+		},
+		0, &args
+	);
 
 	// Zone controller process EVENT_DEATH_ZONE (Death events)
 	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DEATH_ZONE)) {
@@ -4258,10 +4259,32 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		if (attacker) {
 			args = { this };
 
-			std::function<std::string()> f = [&]() {
+			parse->EventMob(EVENT_DAMAGE_GIVEN, attacker, this,
+				[&]() {
+					return fmt::format(
+						"{} {} {} {} {} {} {} {} {}",
+						GetID(),
+						damage,
+						spell_id,
+						static_cast<int>(skill_used),
+						FromDamageShield ? 1 : 0,
+						avoidable ? 1 : 0,
+						buffslot,
+						iBuffTic ? 1 : 0,
+						static_cast<int>(special)
+					);
+				},
+				0, &args
+			);
+		}
+
+		args = { attacker };
+
+		damage_override = parse->EventMob(EVENT_DAMAGE_TAKEN, this, attacker,
+			[&]() {
 				return fmt::format(
 					"{} {} {} {} {} {} {} {} {}",
-					GetID(),
+					attacker ? attacker->GetID() : 0,
 					damage,
 					spell_id,
 					static_cast<int>(skill_used),
@@ -4271,29 +4294,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					iBuffTic ? 1 : 0,
 					static_cast<int>(special)
 				);
-			};
-
-			parse->EventMob(EVENT_DAMAGE_GIVEN, attacker, this, f, 0, &args);
-		}
-
-		args = { attacker };
-
-		std::function<std::string()> f = [&]() {
-			return fmt::format(
-				"{} {} {} {} {} {} {} {} {}",
-				attacker ? attacker->GetID() : 0,
-				damage,
-				spell_id,
-				static_cast<int>(skill_used),
-				FromDamageShield ? 1 : 0,
-				avoidable ? 1 : 0,
-				buffslot,
-				iBuffTic ? 1 : 0,
-				static_cast<int>(special)
-			);
-		};
-
-		damage_override = parse->EventMob(EVENT_DAMAGE_TAKEN, this, attacker, f, 0, &args);
+			},
+			0, &args
+		);
 
 		if (damage_override > 0) {
 			damage = damage_override;

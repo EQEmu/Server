@@ -819,15 +819,13 @@ void QuestManager::pausetimer(const std::string& timer_name, Mob* m)
 		}
 	);
 
-	std::function<std::string()> f = [&]() {
+	parse->EventMob(EVENT_TIMER_PAUSE, mob, nullptr, [&]() {
 		return fmt::format(
 			"{} {}",
 			timer_name,
 			milliseconds
 		);
-	};
-
-	parse->EventMob(EVENT_TIMER_PAUSE, mob, nullptr, f);
+	});
 
 	LogQuests("Pausing timer [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
 }
