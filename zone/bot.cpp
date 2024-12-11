@@ -9652,7 +9652,7 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		spells[spell_id].target_type == ST_Self
 		&& tar != this &&
 		(spellType != BotSpellTypes::SummonCorpse || RuleB(Bots, AllowCommandedSummonCorpse))
-		) {
+	) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to ST_Self.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
@@ -9664,6 +9664,11 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 
 	if (!AECheck && !IsValidSpellRange(spell_id, tar)) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidSpellRange.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
+	if (IsBeneficialSpell(spell_id) && tar->IsBlockedBuff(spell_id)) {
+		LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
