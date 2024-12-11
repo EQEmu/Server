@@ -536,11 +536,7 @@ bool EQ::ItemInstance::IsOrnamentationAugment(EQ::ItemInstance* augment) const
 	const std::string& idfile = augment_item->IDFile;
 
 	if (
-		EQ::ValueWithin(
-			augment->GetAugmentType(),
-			OrnamentationAugmentTypes::StandardOrnamentation,
-			OrnamentationAugmentTypes::SpecialOrnamentation
-		) ||
+		augment->GetAugmentType() == 524288 || augment->GetAugmentType() == 1048576 ||
 		(
 			idfile != "IT63" &&
 			idfile != "IT64"

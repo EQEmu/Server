@@ -196,13 +196,13 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	if (item) {
 		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
 
-		if (is_equipped_weapon) {
-			const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
-			if (inventory_slot == INVALID_INDEX) {
-				return 0;
-			}
-			const auto inst = IsClient() ? CastToClient()->m_inv[inventory_slot] : m_inv[inventory_slot];
+		const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+		if (inventory_slot == INVALID_INDEX) {
+			return 0;
+		}
+		const auto inst = IsClient() ? CastToClient()->m_inv[inventory_slot] : m_inv[inventory_slot];
 
+		if (is_equipped_weapon) {
 			if (inst) {
 				const auto augment = inst->GetOrnamentationAugment();
 				if (augment) {
@@ -220,9 +220,30 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 			}
 
 		} else {
-			equipment_material = (IsClient() && HasClass(Class::Monk) && item->Material == 1) ? 4 : item->Material;
+			equipment_material = item->Material;
+
+			if (inst) {
+				const auto augment = inst->GetOrnamentationAugment();
+				if (augment) {
+					item = augment->GetItem();
+					if (item) {
+						equipment_material = item->Material;
+					}
+				}
+			}
+
+			const auto inst = IsClient() ? CastToClient()->m_inv[inventory_slot] : m_inv[inventory_slot];
+
+			equipment_material = (IsClient() && HasClass(Class::Monk) && equipment_material == 1) ? 4 : equipment_material;
 		}
 	}
+
+	LogMobAppearance(
+		"[{}] material_slot [{}] equipment_material [{}]",
+		clean_name,
+		material_slot,
+		equipment_material
+	);
 
 	return equipment_material;
 }
@@ -286,13 +307,29 @@ uint8 Mob::GetEquipmentType(uint8 material_slot) const
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	if (armor_tint.Slot[material_slot].Color) {
-		return armor_tint.Slot[material_slot].Color;
+	auto item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
+	if (item) {
+		const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+		if (inventory_slot == INVALID_INDEX) {
+			return 0;
+		}
+		const auto inst = IsClient() ? CastToClient()->m_inv[inventory_slot] : m_inv[inventory_slot];
+		if (inst) {
+			const auto augment = inst->GetOrnamentationAugment();
+			if (augment) {
+				return augment->GetItem()->Color;
+			}
+		}
+
+		if (armor_tint.Slot[material_slot].Color) {
+			return armor_tint.Slot[material_slot].Color;
+		}
+
+		return item->Color;
 	}
 
-	const auto item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
-	if (item) {
-		return item->Color;
+	if (armor_tint.Slot[material_slot].Color) {
+		return armor_tint.Slot[material_slot].Color;
 	}
 
 	return 0;
@@ -354,6 +391,12 @@ uint32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		heros_forge_model += material_slot;
 	}
 
+	if (material_slot == EQ::textures::armorLegs || material_slot == EQ::textures::armorWrist || material_slot == EQ::textures::armorArms)  {
+		if (GetHerosForgeModel(EQ::textures::armorChest) % 10 == 7) {
+			heros_forge_model = GetHerosForgeModel(EQ::textures::armorChest);
+		}
+	}
+
 	return heros_forge_model;
 }
 
@@ -398,9 +441,9 @@ void Mob::SendArmorAppearance(Client *one_client)
 	}
 
 	for (uint8 slot_id = 0; slot_id <= EQ::textures::materialCount; ++slot_id) {
-		if (GetTextureProfileMaterial(slot_id)) {
+		//if (GetTextureProfileMaterial(slot_id)) {
 			SendWearChange(slot_id, one_client);
-		}
+		//}
 	}
 }
 
@@ -422,16 +465,29 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 		const auto item_inst = CastToBot()->GetBotItem(EQ::InventoryProfile::CalcSlotFromMaterial(material_slot));
 		w->color.Color = item_inst ? item_inst->GetColor() : 0;
 	} else {
+		LogDebug("WTF 1");
 		w->color.Color = GetEquipmentColor(material_slot);
 	}
 
 	w->wear_slot_id = material_slot;
+
+	LogDebug("WTF 2");
 
 	if (!one_client) {
 		entity_list.QueueClients(this, packet);
 	} else {
 		one_client->QueuePacket(packet, false, Client::CLIENT_CONNECTED);
 	}
+
+	/*
+	if (material_slot == EQ::textures::armorChest) {
+		// Just in case, go ahead and send these too..
+		SendWearChange(EQ::textures::armorArms);
+		SendWearChange(EQ::textures::armorLegs);
+		SendWearChange(EQ::textures::armorWrist);
+		LogDebug("WC? [{}]", static_cast<uint32>(GetHerosForgeModel(EQ::textures::armorChest)));
+	}
+	*/
 
 	safe_delete(packet);
 }

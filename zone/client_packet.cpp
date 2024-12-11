@@ -16556,6 +16556,7 @@ void Client::Handle_OP_UpdateAura(const EQApplicationPacket *app)
 
 void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 {
+	LogDebug("Got OP_WearChange from client");
 	if (app->size != sizeof(WearChange_Struct)) {
 		std::cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << std::endl;
 		return;
@@ -16572,6 +16573,10 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 	// we could maybe ignore this and just send our own from moveitem
 	// We probably need to skip this entirely when it is send as an ack, but not sure how to ID that.
 	entity_list.QueueClients(this, app, true);
+
+	if (wc->wear_slot_id == EQ::textures::armorChest || GetHerosForgeModel(EQ::textures::armorChest) % 10 == 7) {
+		SendArmorAppearance();
+	}
 }
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)

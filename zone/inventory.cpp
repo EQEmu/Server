@@ -3736,9 +3736,30 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 	if (material_slot > EQ::textures::LastTexture)
 		return 0;
 
+	const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+	if (inventory_slot == INVALID_INDEX)
+		return 0;
+
+	// Get the inventory item instance
+	const auto inst = m_inv[inventory_slot];
+	if (inst) {
+		// Check for ornamentation augment
+		const auto augment = inst->GetOrnamentationAugment();
+		if (augment) {
+			return augment->GetItem()->Color;
+		}
+	}
+
+	// Check if custom tint is used
+	if (m_pp.item_tint.Slot[material_slot].UseTint) {
+		return m_pp.item_tint.Slot[material_slot].Color;
+	}
+
+	// Fallback to item color
 	const EQ::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
-	if(item != nullptr)
-		return ((m_pp.item_tint.Slot[material_slot].UseTint) ? m_pp.item_tint.Slot[material_slot].Color : item->Color);
+	if (item) {
+		return item->Color;
+	}
 
 	return 0;
 }
