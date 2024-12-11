@@ -3235,6 +3235,7 @@ bool IsCommandedSpellType(uint16 spellType) {
 		case BotSpellTypes::AEFear:
 		case BotSpellTypes::Fear:
 		case BotSpellTypes::Resurrect:
+		case BotSpellTypes::AELull:
 		case BotSpellTypes::Lull:
 		case BotSpellTypes::Teleport:
 		case BotSpellTypes::Succor:
@@ -3248,7 +3249,6 @@ bool IsCommandedSpellType(uint16 spellType) {
 		case BotSpellTypes::MovementSpeed:
 		case BotSpellTypes::SendHome:
 		case BotSpellTypes::SummonCorpse:
-		case BotSpellTypes::AELull:
 		//case BotSpellTypes::Cure:
 		//case BotSpellTypes::GroupCures:
 		//case BotSpellTypes::DamageShields:
