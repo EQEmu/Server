@@ -1,18 +1,18 @@
 #include "../../client.h"
-#include "../../common/repositories/character_data_repository.h"
+#include "../../common/repositories/bot_data_repository.h"
 
-void FindCharacter(Client *c, const Seperator *sep)
+void FindBot(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
-		const auto character_id = Strings::ToUnsignedInt(sep->arg[2]);
+		const auto bot_id = Strings::ToUnsignedInt(sep->arg[2]);
 
-		const auto& e = CharacterDataRepository::FindOne(content_db, character_id);
-		if (!e.id) {
+		const auto& e = BotDataRepository::FindOne(content_db, bot_id);
+		if (!e.bot_id) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Character ID {} does not exist or is invalid.",
-					character_id
+					"Bot ID {} does not exist or is invalid.",
+					bot_id
 				).c_str()
 			);
 
@@ -22,8 +22,8 @@ void FindCharacter(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Character ID {} | {}",
-				character_id,
+				"Bot ID {} | {}",
+				bot_id,
 				e.name
 			).c_str()
 		);
@@ -33,10 +33,10 @@ void FindCharacter(Client *c, const Seperator *sep)
 
 	const auto search_criteria = Strings::ToLower(sep->argplus[2]);
 
-	const auto& l = CharacterDataRepository::GetWhere(
+	const auto& l = BotDataRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"LOWER(`name`) LIKE '%%{}%%' AND `name` NOT LIKE '%-deleted-%' ORDER BY `id` ASC LIMIT 50",
+			"LOWER(`name`) LIKE '%%{}%%' AND `name` NOT LIKE '%-deleted-%' ORDER BY `bot_id` ASC LIMIT 50",
 			search_criteria
 		)
 	);
@@ -45,7 +45,7 @@ void FindCharacter(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"No characters found matching '{}'.",
+				"No bots found matching '{}'.",
 				sep->argplus[2]
 			).c_str()
 		);
@@ -57,8 +57,8 @@ void FindCharacter(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Character ID {} | {}",
-				Strings::Commify(e.id),
+				"Bot ID {} | {}",
+				Strings::Commify(e.bot_id),
 				e.name
 			).c_str()
 		);
@@ -74,7 +74,7 @@ void FindCharacter(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"50 Characters found matching '{}', max reached.",
+				"50 Bots found matching '{}', max reached.",
 				sep->argplus[2]
 			).c_str()
 		);
@@ -85,7 +85,7 @@ void FindCharacter(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"{} Character{} found matching '{}'.",
+			"{} Bot{} found matching '{}'.",
 			found_count,
 			found_count != 1 ? "s" : "",
 			sep->argplus[2]

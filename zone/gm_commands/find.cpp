@@ -1,6 +1,7 @@
 #include "../client.h"
 #include "find/aa.cpp"
 #include "find/body_type.cpp"
+#include "find/bot.cpp"
 #include "find/bug_category.cpp"
 #include "find/character.cpp"
 #include "find/class.cpp"
@@ -66,6 +67,16 @@ void command_find(Client *c, const Seperator *sep)
 		Cmd{.cmd = "task", .u = "task [Search Criteria]", .fn = FindTask, .a = {"#findtask"}},
 		Cmd{.cmd = "zone", .u = "zone [Search Criteria]", .fn = FindZone, .a = {"#fz", "#findzone"}},
 	};
+
+	if (RuleB(Bots, Enabled)) {
+		commands.emplace_back(
+			Cmd{.cmd = "bot", .u = "bot [Search Criteria]", .fn = FindBot, .a = {"#findbot"}}
+		);
+	
+		std::sort(commands.begin(), commands.end(), [](const Cmd& a, const Cmd& b) {
+			return a.cmd < b.cmd;
+		});
+	}
 
 	// Check for arguments
 	const auto arguments = sep->argnum;
