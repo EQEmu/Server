@@ -3441,9 +3441,8 @@ luabind::object Lua_Client::GetInventorySlots(lua_State* L) {
 
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
-		const auto& slot_ids = self->GetInventorySlots();
 		int index = 1;
-		for (const int16& slot_id : slot_ids) {
+		for (const int16& slot_id : self->GetInventorySlots()) {
 			lua_table[index] = slot_id;
 			index++;
 		}

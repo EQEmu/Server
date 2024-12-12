@@ -10,9 +10,7 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 	EQ::ItemInstance *item = nullptr;
 	uint32 removed_count = 0;
 
-	const auto& slot_ids = t->GetInventorySlots();
-
-	for (const int16& slot_id : slot_ids) {
+	for (const int16& slot_id : t->GetInventorySlots()) {
 		item = t->GetInv().GetItem(slot_id);
 
 		if (item) {
