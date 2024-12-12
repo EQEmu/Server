@@ -20,7 +20,7 @@ uint32 Client::GetBotCreationLimit(uint8 class_id)
 	uint32 bot_creation_limit = RuleI(Bots, CreationLimit);
 
 	if (Admin() >= RuleI(Bots, MinStatusToBypassCreateLimit)) {
-		return RuleI(Bots, MinStatusToBypassCreateLimit);
+		return RuleI(Bots, StatusCreateLimit);
 	}
 
 	const auto bucket_name = fmt::format(
