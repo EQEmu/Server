@@ -5223,7 +5223,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	bool taunt_time = taunt_timer.Check();
 	bool ca_time = classattack_timer.Check(false);
 	bool ma_time = monkattack_timer.Check(false);
-	bool ka_time = knightattack_timer.Check(false);
 
 	if (taunt_time) {
 
@@ -5240,34 +5239,8 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		}
 	}
 
-	if ((ca_time || ma_time || ka_time) && !IsAttackAllowed(target)) {
+	if ((ca_time || ma_time) && !IsAttackAllowed(target)) {
 		return;
-	}
-
-	if (ka_time) {
-
-		switch (GetClass()) {
-			case Class::ShadowKnight: {
-				CastSpell(SPELL_NPC_HARM_TOUCH, target->GetID());
-				knightattack_timer.Start(HarmTouchReuseTime * 1000);
-
-				break;
-			}
-			case Class::Paladin: {
-				if (GetHPRatio() < 20) {
-					CastSpell(SPELL_LAY_ON_HANDS, GetID());
-					knightattack_timer.Start(LayOnHandsReuseTime * 1000);
-				}
-				else {
-					knightattack_timer.Start(2000);
-				}
-
-				break;
-			}
-			default: {
-				break;
-			}
-		}
 	}
 
 	if (IsTaunting() && target->IsNPC() && taunt_time) {
