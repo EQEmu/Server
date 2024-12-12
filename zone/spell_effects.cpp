@@ -3992,31 +3992,24 @@ void Mob::BuffProcess()
 			if (spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Permanent &&
 			    spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Aura &&
 				buffs[buffs_i].ticsremaining != PERMANENT_BUFF_DURATION) {
-				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
-				{
-					bool suspended = IsGroupSuspendableBuff(buffs[buffs_i].spellid, buffs[buffs_i]);
 
-					if (RuleB(Custom, MulticlassingEnabled) && IsBardSong(buffs[buffs_i].spellid)) {
-						if (IsClient() || (IsPetOwnerClient()) && buffs[buffs_i].caster_name) {
-							uint32 spellid = buffs[buffs_i].spellid;
-							Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
-							Client* client = GetOwnerOrSelf()->CastToClient();
-							if (caster && client) {
-								if (caster == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(client))) {
-									if (GetSpellEffectIndex(spellid, SE_DivineAura) == -1) {
-										if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(spellid)) {
-											if (buffs[buffs_i].ticsremaining == 1 && caster == this && caster->IsLinkedSpellReuseTimerReady(spells[spellid].timer_id)) {
-												auto tt = spells[spellid].target_type;
-												if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
-													caster->ApplyBardPulse(spellid, this, (EQ::spells::CastingSlot)caster->FindMemmedSpellBySpellID(spellid));
-												}
-											}
-										}
-									}
-								}
+
+				if (RuleB(Custom, MulticlassingEnabled) && IsBardSong(buffs[buffs_i].spellid) && !IsEffectInSpell(buffs[buffs_i].spellid, SE_DivineAura)) {
+					Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
+					if (caster && caster == this) {
+						auto slot = caster->FindMemmedSpellBySpellID(buffs[buffs_i].spellid);
+						if (slot && buffs[buffs_i].ticsremaining == 1 && caster->IsLinkedSpellReuseTimerReady(spells[buffs[buffs_i].spellid].timer_id)) {
+							auto tt = spells[buffs[buffs_i].spellid].target_type;
+							if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
+								caster->ApplyBardPulse(buffs[buffs_i].spellid, this, (EQ::spells::CastingSlot)slot);
 							}
 						}
 					}
+				}
+
+				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
+				{
+					bool suspended = IsGroupSuspendableBuff(buffs[buffs_i].spellid, buffs[buffs_i]);
 
 					if (!suspended || !RuleB(Custom, SuspendGroupBuffs)) {
 						--buffs[buffs_i].ticsremaining;
