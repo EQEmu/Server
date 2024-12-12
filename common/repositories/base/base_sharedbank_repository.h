@@ -9,17 +9,17 @@
  * @docs https://docs.eqemu.io/developer/repositories
  */
 
-#ifndef EQEMU_BASE_INVENTORY_REPOSITORY_H
-#define EQEMU_BASE_INVENTORY_REPOSITORY_H
+#ifndef EQEMU_BASE_SHAREDBANK_REPOSITORY_H
+#define EQEMU_BASE_SHAREDBANK_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
 
-class BaseInventoryRepository {
+class BaseSharedbankRepository {
 public:
-	struct Inventory {
-		uint32_t    character_id;
+	struct Sharedbank {
+		uint32_t    account_id;
 		uint32_t    slot_id;
 		uint32_t    item_id;
 		uint16_t    charges;
@@ -30,7 +30,6 @@ public:
 		uint32_t    augment_four;
 		uint32_t    augment_five;
 		uint32_t    augment_six;
-		uint8_t     instnodrop;
 		std::string custom_data;
 		uint32_t    ornament_icon;
 		uint32_t    ornament_idfile;
@@ -40,13 +39,13 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("character_id");
+		return std::string("account_id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"character_id",
+			"account_id",
 			"slot_id",
 			"item_id",
 			"charges",
@@ -57,7 +56,6 @@ public:
 			"augment_four",
 			"augment_five",
 			"augment_six",
-			"instnodrop",
 			"custom_data",
 			"ornament_icon",
 			"ornament_idfile",
@@ -69,7 +67,7 @@ public:
 	static std::vector<std::string> SelectColumns()
 	{
 		return {
-			"character_id",
+			"account_id",
 			"slot_id",
 			"item_id",
 			"charges",
@@ -80,7 +78,6 @@ public:
 			"augment_four",
 			"augment_five",
 			"augment_six",
-			"instnodrop",
 			"custom_data",
 			"ornament_icon",
 			"ornament_idfile",
@@ -101,7 +98,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("inventory");
+		return std::string("sharedbank");
 	}
 
 	static std::string BaseSelect()
@@ -122,11 +119,11 @@ public:
 		);
 	}
 
-	static Inventory NewEntity()
+	static Sharedbank NewEntity()
 	{
-		Inventory e{};
+		Sharedbank e{};
 
-		e.character_id        = 0;
+		e.account_id          = 0;
 		e.slot_id             = 0;
 		e.item_id             = 0;
 		e.charges             = 0;
@@ -137,7 +134,6 @@ public:
 		e.augment_four        = 0;
 		e.augment_five        = 0;
 		e.augment_six         = 0;
-		e.instnodrop          = 0;
 		e.custom_data         = "";
 		e.ornament_icon       = 0;
 		e.ornament_idfile     = 0;
@@ -147,23 +143,23 @@ public:
 		return e;
 	}
 
-	static Inventory GetInventory(
-		const std::vector<Inventory> &inventorys,
-		int inventory_id
+	static Sharedbank GetSharedbank(
+		const std::vector<Sharedbank> &sharedbanks,
+		int sharedbank_id
 	)
 	{
-		for (auto &inventory : inventorys) {
-			if (inventory.character_id == inventory_id) {
-				return inventory;
+		for (auto &sharedbank : sharedbanks) {
+			if (sharedbank.account_id == sharedbank_id) {
+				return sharedbank;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static Inventory FindOne(
+	static Sharedbank FindOne(
 		Database& db,
-		int inventory_id
+		int sharedbank_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -171,15 +167,15 @@ public:
 				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
 				PrimaryKey(),
-				inventory_id
+				sharedbank_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Inventory e{};
+			Sharedbank e{};
 
-			e.character_id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.account_id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.charges             = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -190,12 +186,11 @@ public:
 			e.augment_four        = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.augment_five        = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 			e.augment_six         = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.custom_data         = row[12] ? row[12] : "";
-			e.ornament_icon       = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.ornament_idfile     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
-			e.guid                = row[16] ? strtoull(row[16], nullptr, 10) : 0;
+			e.custom_data         = row[11] ? row[11] : "";
+			e.ornament_icon       = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.ornament_idfile     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.guid                = row[15] ? strtoull(row[15], nullptr, 10) : 0;
 
 			return e;
 		}
@@ -205,7 +200,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int inventory_id
+		int sharedbank_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -213,7 +208,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				inventory_id
+				sharedbank_id
 			)
 		);
 
@@ -222,14 +217,14 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		const Inventory &e
+		const Sharedbank &e
 	)
 	{
 		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		v.push_back(columns[0] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.account_id));
 		v.push_back(columns[1] + " = " + std::to_string(e.slot_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.charges));
@@ -240,12 +235,11 @@ public:
 		v.push_back(columns[8] + " = " + std::to_string(e.augment_four));
 		v.push_back(columns[9] + " = " + std::to_string(e.augment_five));
 		v.push_back(columns[10] + " = " + std::to_string(e.augment_six));
-		v.push_back(columns[11] + " = " + std::to_string(e.instnodrop));
-		v.push_back(columns[12] + " = '" + Strings::Escape(e.custom_data) + "'");
-		v.push_back(columns[13] + " = " + std::to_string(e.ornament_icon));
-		v.push_back(columns[14] + " = " + std::to_string(e.ornament_idfile));
-		v.push_back(columns[15] + " = " + std::to_string(e.ornament_hero_model));
-		v.push_back(columns[16] + " = " + std::to_string(e.guid));
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.custom_data) + "'");
+		v.push_back(columns[12] + " = " + std::to_string(e.ornament_icon));
+		v.push_back(columns[13] + " = " + std::to_string(e.ornament_idfile));
+		v.push_back(columns[14] + " = " + std::to_string(e.ornament_hero_model));
+		v.push_back(columns[15] + " = " + std::to_string(e.guid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -253,21 +247,21 @@ public:
 				TableName(),
 				Strings::Implode(", ", v),
 				PrimaryKey(),
-				e.character_id
+				e.account_id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static Inventory InsertOne(
+	static Sharedbank InsertOne(
 		Database& db,
-		Inventory e
+		Sharedbank e
 	)
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.account_id));
 		v.push_back(std::to_string(e.slot_id));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.charges));
@@ -278,7 +272,6 @@ public:
 		v.push_back(std::to_string(e.augment_four));
 		v.push_back(std::to_string(e.augment_five));
 		v.push_back(std::to_string(e.augment_six));
-		v.push_back(std::to_string(e.instnodrop));
 		v.push_back("'" + Strings::Escape(e.custom_data) + "'");
 		v.push_back(std::to_string(e.ornament_icon));
 		v.push_back(std::to_string(e.ornament_idfile));
@@ -294,7 +287,7 @@ public:
 		);
 
 		if (results.Success()) {
-			e.character_id = results.LastInsertedID();
+			e.account_id = results.LastInsertedID();
 			return e;
 		}
 
@@ -305,7 +298,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		const std::vector<Inventory> &entries
+		const std::vector<Sharedbank> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -313,7 +306,7 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.account_id));
 			v.push_back(std::to_string(e.slot_id));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.charges));
@@ -324,7 +317,6 @@ public:
 			v.push_back(std::to_string(e.augment_four));
 			v.push_back(std::to_string(e.augment_five));
 			v.push_back(std::to_string(e.augment_six));
-			v.push_back(std::to_string(e.instnodrop));
 			v.push_back("'" + Strings::Escape(e.custom_data) + "'");
 			v.push_back(std::to_string(e.ornament_icon));
 			v.push_back(std::to_string(e.ornament_idfile));
@@ -347,9 +339,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Inventory> All(Database& db)
+	static std::vector<Sharedbank> All(Database& db)
 	{
-		std::vector<Inventory> all_entries;
+		std::vector<Sharedbank> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -361,9 +353,9 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Inventory e{};
+			Sharedbank e{};
 
-			e.character_id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.account_id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.charges             = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -374,12 +366,11 @@ public:
 			e.augment_four        = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.augment_five        = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 			e.augment_six         = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.custom_data         = row[12] ? row[12] : "";
-			e.ornament_icon       = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.ornament_idfile     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
-			e.guid                = row[16] ? strtoull(row[16], nullptr, 10) : 0;
+			e.custom_data         = row[11] ? row[11] : "";
+			e.ornament_icon       = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.ornament_idfile     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.guid                = row[15] ? strtoull(row[15], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -387,9 +378,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Inventory> GetWhere(Database& db, const std::string &where_filter)
+	static std::vector<Sharedbank> GetWhere(Database& db, const std::string &where_filter)
 	{
-		std::vector<Inventory> all_entries;
+		std::vector<Sharedbank> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -402,9 +393,9 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Inventory e{};
+			Sharedbank e{};
 
-			e.character_id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.account_id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.charges             = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -415,12 +406,11 @@ public:
 			e.augment_four        = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.augment_five        = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 			e.augment_six         = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.custom_data         = row[12] ? row[12] : "";
-			e.ornament_icon       = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.ornament_idfile     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
-			e.guid                = row[16] ? strtoull(row[16], nullptr, 10) : 0;
+			e.custom_data         = row[11] ? row[11] : "";
+			e.ornament_icon       = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.ornament_idfile     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.guid                = row[15] ? strtoull(row[15], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -490,12 +480,12 @@ public:
 
 	static int ReplaceOne(
 		Database& db,
-		const Inventory &e
+		const Sharedbank &e
 	)
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.account_id));
 		v.push_back(std::to_string(e.slot_id));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.charges));
@@ -506,7 +496,6 @@ public:
 		v.push_back(std::to_string(e.augment_four));
 		v.push_back(std::to_string(e.augment_five));
 		v.push_back(std::to_string(e.augment_six));
-		v.push_back(std::to_string(e.instnodrop));
 		v.push_back("'" + Strings::Escape(e.custom_data) + "'");
 		v.push_back(std::to_string(e.ornament_icon));
 		v.push_back(std::to_string(e.ornament_idfile));
@@ -526,7 +515,7 @@ public:
 
 	static int ReplaceMany(
 		Database& db,
-		const std::vector<Inventory> &entries
+		const std::vector<Sharedbank> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -534,7 +523,7 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.account_id));
 			v.push_back(std::to_string(e.slot_id));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.charges));
@@ -545,7 +534,6 @@ public:
 			v.push_back(std::to_string(e.augment_four));
 			v.push_back(std::to_string(e.augment_five));
 			v.push_back(std::to_string(e.augment_six));
-			v.push_back(std::to_string(e.instnodrop));
 			v.push_back("'" + Strings::Escape(e.custom_data) + "'");
 			v.push_back(std::to_string(e.ornament_icon));
 			v.push_back(std::to_string(e.ornament_idfile));
@@ -569,4 +557,4 @@ public:
 	}
 };
 
-#endif //EQEMU_BASE_INVENTORY_REPOSITORY_H
+#endif //EQEMU_BASE_SHAREDBANK_REPOSITORY_H

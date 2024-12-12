@@ -26,6 +26,7 @@
 #include <vector>
 #include "sof_char_create_data.h"
 #include "../common/repositories/character_instance_safereturns_repository.h"
+#include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/zone_store.h"
 
@@ -857,115 +858,90 @@ bool WorldDatabase::LoadCharacterCreateCombos()
 // this is a slightly modified version of SharedDatabase::GetInventory(...) for character select use-only
 bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::InventoryProfile *inv)
 {
-	if (!account_id || !name || !inv)
+	if (!account_id || !name || !inv) {
 		return false;
+	}
 
-	std::string query = StringFormat(
-		"SELECT"
-		" slotid,"
-		" itemid,"
-		" charges,"
-		" color,"
-		" augslot1,"
-		" augslot2,"
-		" augslot3,"
-		" augslot4,"
-		" augslot5,"
-		" augslot6,"
-		" instnodrop,"
-		" custom_data,"
-		" ornamenticon,"
-		" ornamentidfile,"
-		" ornament_hero_model "
-		"FROM"
-		" inventory "
-		"INNER JOIN"
-		" character_data ch "
-		"ON"
-		" ch.id = charid "
-		"WHERE"
-		" ch.name = '%s' "
-		"AND"
-		" ch.account_id = %i "
-		"AND"
-		" slotid >= %i "
-		"AND"
-		" slotid <= %i",
-		name,
-		account_id,
-		EQ::invslot::slotHead,
-		EQ::invslot::slotFeet
+	const uint32 character_id = GetCharacterID(name);
+
+	if (!character_id) {
+		return false;
+	}
+
+	const auto& l = InventoryRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`character_id` = {} AND `slot_id` BETWEEN {} AND {}",
+			character_id,
+			EQ::invslot::slotHead,
+			EQ::invslot::slotFeet
+		)
 	);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
-		return false;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = Strings::ToInt(row[0]);
+	if (l.empty()) {
+		return true;
+	}
 
-		switch (slot_id) {
-		case EQ::invslot::slotFace:
-		case EQ::invslot::slotEar2:
-		case EQ::invslot::slotNeck:
-		case EQ::invslot::slotShoulders:
-		case EQ::invslot::slotBack:
-		case EQ::invslot::slotFinger1:
-		case EQ::invslot::slotFinger2:
-			continue;
-		default:
-			break;
+	for (const auto& e : l) {
+		switch (e.slot_id) {
+			case EQ::invslot::slotFace:
+			case EQ::invslot::slotEar2:
+			case EQ::invslot::slotNeck:
+			case EQ::invslot::slotShoulders:
+			case EQ::invslot::slotBack:
+			case EQ::invslot::slotFinger1:
+			case EQ::invslot::slotFinger2:
+				continue;
+			default:
+				break;
 		}
 
-		uint32 item_id = Strings::ToInt(row[1]);
-		int8 charges = Strings::ToInt(row[2]);
-		uint32 color = Strings::ToUnsignedInt(row[3]);
 
-		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = (uint32)Strings::ToInt(row[4]);
-		aug[1] = (uint32)Strings::ToInt(row[5]);
-		aug[2] = (uint32)Strings::ToInt(row[6]);
-		aug[3] = (uint32)Strings::ToInt(row[7]);
-		aug[4] = (uint32)Strings::ToInt(row[8]);
-		aug[5] = (uint32)Strings::ToInt(row[9]);
+		uint32 augment_ids[EQ::invaug::SOCKET_COUNT] = {
+			e.augment_one,
+			e.augment_two,
+			e.augment_three,
+			e.augment_four,
+			e.augment_five,
+			e.augment_six
+		};
 
-		bool instnodrop = ((row[10] && (uint16)Strings::ToInt(row[10])) ? true : false);
-		uint32 ornament_icon = (uint32)Strings::ToUnsignedInt(row[12]);
-		uint32 ornament_idfile = (uint32)Strings::ToUnsignedInt(row[13]);
-		uint32 ornament_hero_model = (uint32)Strings::ToUnsignedInt(row[14]);
-
-		const EQ::ItemData *item = content_db.GetItem(item_id);
-		if (!item)
+		const EQ::ItemData* item = content_db.GetItem(e.item_id);
+		if (!item) {
 			continue;
-
-		EQ::ItemInstance *inst = content_db.CreateBaseItem(item, charges);
-
-		if (inst == nullptr)
-			continue;
-
-		inst->SetAttuned(instnodrop);
-
-		if (row[11]) {
-			std::string data_str(row[11]);
-			inst->SetCustomDataString(data_str);
 		}
 
-		inst->SetOrnamentIcon(ornament_icon);
-		inst->SetOrnamentationIDFile(ornament_idfile);
-		inst->SetOrnamentHeroModel(item->HerosForgeModel);
+		EQ::ItemInstance *inst = content_db.CreateBaseItem(item, e.charges);
 
-		if (color > 0)
-			inst->SetColor(color);
+		if (!inst) {
+			continue;
+		}
 
-		inst->SetCharges(charges);
+		inst->SetCharges(e.charges);
+
+		if (e.color > 0) {
+			inst->SetColor(e.color);
+		}
 
 		if (item->IsClassCommon()) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-				if (aug[i])
-					inst->PutAugment(this, i, aug[i]);
+				if (augment_ids[i]) {
+					inst->PutAugment(this, i, augment_ids[i]);
+				}
 			}
 		}
 
-		inv->PutItem(slot_id, *inst);
+		inst->SetAttuned(e.instnodrop);
+
+		if (!e.custom_data.empty()) {
+			inst->SetCustomDataString(e.custom_data);
+		}
+
+		inst->SetOrnamentIcon(e.ornament_icon);
+		inst->SetOrnamentationIDFile(e.ornament_idfile);
+		inst->SetOrnamentHeroModel(e.ornament_hero_model);
+
+		inv->PutItem(e.slot_id, *inst);
 
 		safe_delete(inst);
 	}
