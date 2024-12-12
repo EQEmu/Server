@@ -3644,11 +3644,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		SharedTaskZoneMessaging::HandleWorldMessage(pack);
 		break;
 	}
-	case ServerOP_DataBucketCacheUpdate:
-	{
-		DataBucket::HandleWorldMessage(pack);
-		break;
-	}
 	case ServerOP_GuildTributeUpdate: {
 		GuildTributeUpdate* in = (GuildTributeUpdate*)pack->pBuffer;
 

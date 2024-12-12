@@ -572,6 +572,8 @@ Mob::~Mob()
 
 	m_close_mobs.clear();
 
+	ClearDataBucketCache();
+
 	LeaveHealRotationTargetPool();
 }
 
@@ -8605,4 +8607,22 @@ void Mob::CheckScanCloseMobsMovingTimer()
 std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
 {
 	return entity_list.GetCloseMobList(this, distance);
+}
+
+void Mob::ClearDataBucketCache()
+{
+	if (IsOfClientBot()) {
+		uint64 id = 0;
+		DataBucketLoadType::Type t{};
+		if (IsBot()) {
+			id = CastToBot()->GetBotID();
+			t = DataBucketLoadType::Bot;
+		}
+		else if (IsClient()) {
+			id = CastToClient()->CharacterID();
+			t = DataBucketLoadType::Client;
+		}
+
+		DataBucket::DeleteFromCache(id, t);
+	}
 }

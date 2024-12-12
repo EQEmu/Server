@@ -319,8 +319,6 @@
 // player events
 #define ServerOP_PlayerEvent 0x5100
 
-#define ServerOP_DataBucketCacheUpdate 0x5200
-
 enum {
 	CZUpdateType_Character,
 	CZUpdateType_Group,
