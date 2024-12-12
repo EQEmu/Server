@@ -5383,18 +5383,32 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	}
 
 	if (skill_to_use == EQ::skills::SkillFrenzy) {
-		int AtkRounds = 3;
+		int AtkRounds = 1;
+		float HasteMod = (FrenzyReuseTime - 1) / (GetHaste() * 0.01f);
+		reuse = (FrenzyReuseTime * 1000);
 		DoAnim(anim2HSlashing);
 
-		reuse = (FrenzyReuseTime * 1000);
-		did_attack = true;
-		while(AtkRounds > 0) {
-			if (GetTarget() && (AtkRounds == 1 || zone->random.Int(0, 100) < 75)) {
-				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, dmg, 0, dmg, reuse, true);
-			}
+		// bards can do riposte frenzy for some reason
+		if (!IsRiposte && GetClass() == Class::Berserker) {
+			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
+			if (zone->random.Roll0(450) < chance)
+				AtkRounds++;
+			if (zone->random.Roll0(450) < chance)
+				AtkRounds++;
+		}
 
+		while (AtkRounds > 0) {
+			if (GetTarget() != this)
+
+				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, dmg, 0, dmg, HasteMod);
 			AtkRounds--;
 		}
+
+		if (reuse > 0 && IsRiposte) {
+			reuse = 0;
+		}
+
+		did_attack = true;
 	}
 
 	if (skill_to_use == EQ::skills::SkillKick) {

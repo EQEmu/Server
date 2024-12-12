@@ -249,9 +249,6 @@ public:
 	inline	uint16	MaxSkill(EQ::skills::SkillType skillid) { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr) override;
 	void DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance = false);
-	void TryBackstab(Mob *other,int ReuseTime = 10) override;
-	void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10) override;
-	void RogueAssassinate(Mob* other) override;
 	void DoClassAttacks(Mob *target, bool IsRiposte=false);
 	void CalcBonuses() override;
 
