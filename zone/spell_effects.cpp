@@ -6700,6 +6700,10 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 		}
 
 		if (proc_target) {
+			if (proc_target->GetID() == GetID() && IsDetrimentalSpell(spell_id)) {
+				LogSpells("Sympathetic Proc could not find a target");
+				return false;
+			}
 			LogSpells("Sympathetic Proc final target: [{}]", proc_target->GetCleanName());
 			SpellFinished(proc_spellid, proc_target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
 			return true;
