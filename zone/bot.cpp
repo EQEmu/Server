@@ -11195,6 +11195,14 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id) {
 		tar = this;
 	}
 
+	if ((IsCharmSpell(forcedSpellID) || IsPetSpell(forcedSpellID) && HasPet())) {
+		return false;
+	}
+
+	if (IsResurrectSpell(forcedSpellID) && (!tar->IsCorpse() || !tar->CastToCorpse()->IsPlayerCorpse())) {
+		return false;
+	}
+
 	if (IsBeneficialSpell(forcedSpellID)) {
 		if (
 			(tar->IsNPC() && !tar->GetOwner()) ||

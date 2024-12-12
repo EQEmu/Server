@@ -752,6 +752,7 @@ public:
 
 	// "Quest API" Methods
 	bool HasBotSpellEntry(uint16 spell_id);
+	bool CanUseBotSpell(uint16 spell_id);
 	void ApplySpell(int spell_id, int duration = 0, int level = -1, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
 	void BreakInvis();
 	void Escape();
