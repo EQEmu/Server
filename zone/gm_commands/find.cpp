@@ -70,6 +70,10 @@ void command_find(Client *c, const Seperator *sep)
 		commands.emplace_back(
 			Cmd{.cmd = "bot", .u = "bot [Search Criteria]", .fn = FindBot, .a = {"#findbot"}}
 		);
+	
+		std::sort(commands.begin(), commands.end(), [](const Cmd& a, const Cmd& b) {
+			return a.cmd < b.cmd;
+		});
 	}
 
 	// Check for arguments
