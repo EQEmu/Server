@@ -2213,7 +2213,7 @@ void Bot::AI_Process()
 			}
 
 			if (atCombatRange) {
-				if (RuleB(Bots, AllowRangedPulling) && IsBotRanged() && ranged_timer.Check(false)) {
+				if (!tar->GetSpecialAbility(SpecialAbility::RangedAttackImmunity) && RuleB(Bots, AllowRangedPulling) && IsBotRanged() && ranged_timer.Check(false)) {
 					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
 
 					if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
@@ -2290,7 +2290,7 @@ void Bot::AI_Process()
 				return;
 			}
 
-			if (IsBotRanged() && ranged_timer.Check(false)) {
+			if (!tar->GetSpecialAbility(SpecialAbility::RangedAttackImmunity) && IsBotRanged() && ranged_timer.Check(false)) {
 				if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
 					BotRangedAttack(tar, true);
 				}
