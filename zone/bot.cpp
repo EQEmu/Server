@@ -9652,6 +9652,21 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		return false;
 	}
 
+	if (tar->GetSpecialAbility(SpecialAbility::MagicImmunity)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to MagicImmunity.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
+	if (tar->GetSpecialAbility(SpecialAbility::CastingFromRangeImmunity) && !CombatRange(tar)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to CastingFromRangeImmunity.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
+	if (tar->IsImmuneToBotSpell(spell_id, this)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsImmuneToBotSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
 	if (!AECheck && !IsValidSpellRange(spell_id, tar)) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidSpellRange.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
@@ -9673,16 +9688,6 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 
 	if (!IsValidTargetType(spell_id, GetSpellTargetType(spell_id), tar->GetBodyType())) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidTargetType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-		return false;
-	}
-
-	if (tar->GetSpecialAbility(SpecialAbility::CastingFromRangeImmunity) && !CombatRange(tar)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IMMUNE_CASTING_FROM_RANGE.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-		return false;
-	}
-
-	if (tar->IsImmuneToBotSpell(spell_id, this)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsImmuneToBotSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 	

@@ -7561,8 +7561,9 @@ bool Mob::IsImmuneToBotSpell(uint16 spell_id, Mob* caster)
 {
 	int effect_index;
 
-	if (caster == nullptr)
+	if (caster == nullptr) {
 		return(false);
+	}
 
 	//TODO: this function loops through the effect list for
 	//this spell like 10 times, this could easily be consolidated
@@ -7570,14 +7571,19 @@ bool Mob::IsImmuneToBotSpell(uint16 spell_id, Mob* caster)
 
 	LogSpells("Checking to see if we are immune to spell [{}] cast by [{}]", spell_id, caster->GetName());
 
-	if (!IsValidSpell(spell_id))
+	if (!IsValidSpell(spell_id)) {
 		return true;
+	}
 
-	if (IsBeneficialSpell(spell_id) && (caster->GetNPCTypeID())) //then skip the rest, stop NPCs aggroing each other with buff spells. 2013-03-05
+	if (IsDispelSpell(spell_id) && GetSpecialAbility(SpecialAbility::DispellImmunity)) {
 		return false;
+	}
 
-	if (IsMesmerizeSpell(spell_id))
-	{
+	if (IsHarmonySpell(spell_id) && GetSpecialAbility(SpecialAbility::PacifyImmunity)) {
+		return false;
+	}
+
+	if (IsMesmerizeSpell(spell_id)) {
 		if (GetSpecialAbility(SpecialAbility::MesmerizeImmunity)) {
 			return true;
 		}
@@ -7586,90 +7592,76 @@ bool Mob::IsImmuneToBotSpell(uint16 spell_id, Mob* caster)
 		effect_index = GetSpellEffectIndex(spell_id, SE_Mez);
 		assert(effect_index >= 0);
 		// NPCs get to ignore the max level
-		if ((GetLevel() > spells[spell_id].max_value[effect_index]) &&
-			(!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity))))
-		{
+		if (
+			(GetLevel() > spells[spell_id].max_value[effect_index]) &&
+			(!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity)))
+		)  {
 			return true;
 		}
 	}
 
 	// slow and haste spells
-	if (GetSpecialAbility(SpecialAbility::SlowImmunity) && IsEffectInSpell(spell_id, SE_AttackSpeed))
-	{
+	if (GetSpecialAbility(SpecialAbility::SlowImmunity) && IsEffectInSpell(spell_id, SE_AttackSpeed)) {
 		return true;
 	}
 
 	// client vs client fear
-	if (IsEffectInSpell(spell_id, SE_Fear))
-	{
+	if (IsEffectInSpell(spell_id, SE_Fear)) {
 		effect_index = GetSpellEffectIndex(spell_id, SE_Fear);
+
 		if (GetSpecialAbility(SpecialAbility::FearImmunity)) {
 			return true;
 		}
-		else if (IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
-		{
+		else if (IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false)) {
 			LogSpells("Clients cannot fear eachother!");
 			caster->MessageString(Chat::Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			return true;
 		}
-		else if (GetLevel() > spells[spell_id].max_value[effect_index] && spells[spell_id].max_value[effect_index] != 0)
-		{
+		else if (GetLevel() > spells[spell_id].max_value[effect_index] && spells[spell_id].max_value[effect_index] != 0) {
 			return true;
 		}
-		else if (CheckAATimer(aaTimerWarcry))
-		{
+		else if (CheckAATimer(aaTimerWarcry)) {
 			return true;
 		}
 	}
 
-	if (IsCharmSpell(spell_id))
-	{
-		if (GetSpecialAbility(SpecialAbility::CharmImmunity))
-		{
+	if (IsCharmSpell(spell_id))	{
+		if (GetSpecialAbility(SpecialAbility::CharmImmunity)) {
 			return true;
 		}
 
-		if (this == caster)
-		{
+		if (this == caster) {
 			return true;
 		}
 
 		//let npcs cast whatever charm on anyone
-		if (!caster->IsNPC())
-		{
+		if (!caster->IsNPC()) {
 			// check level limit of charm spell
 			effect_index = GetSpellEffectIndex(spell_id, SE_Charm);
 			assert(effect_index >= 0);
-			if (GetLevel() > spells[spell_id].max_value[effect_index] && spells[spell_id].max_value[effect_index] != 0)
-			{
+			if (GetLevel() > spells[spell_id].max_value[effect_index] && spells[spell_id].max_value[effect_index] != 0) {
 				return true;
 			}
 		}
 	}
 
-	if
-		(
-			IsEffectInSpell(spell_id, SE_Root) ||
-			IsEffectInSpell(spell_id, SE_MovementSpeed)
-			)
-	{
+	if (
+		IsEffectInSpell(spell_id, SE_Root) ||
+		IsEffectInSpell(spell_id, SE_MovementSpeed)
+	) {
 		if (GetSpecialAbility(SpecialAbility::SnareImmunity)) {
 			return true;
 		}
 	}
 
-	if (IsLifetapSpell(spell_id))
-	{
-		if (this == caster)
-		{
+	if (IsLifetapSpell(spell_id)) {
+		if (this == caster) {
 			return true;
 		}
 	}
 
-	if (IsSacrificeSpell(spell_id))
-	{
-		if (this == caster)
-		{
+	if (IsSacrificeSpell(spell_id)) {
+		if (this == caster) {
 			return true;
 		}
 	}
