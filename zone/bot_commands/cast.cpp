@@ -551,7 +551,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			SPDat_Spell_Struct spell = spells[chosenSpellID];
 
 			LogTestDebug("Starting bySpellID checks."); //deleteme
-			if (!bot_iter->HasBotSpellEntry(chosenSpellID)) {
+			if (!bot_iter->CanUseBotSpell(chosenSpellID)) {
 				LogTestDebug("{} does not have {} [#{}].", bot_iter->GetCleanName(), spell.name, chosenSpellID); //deleteme
 				continue;
 			}
