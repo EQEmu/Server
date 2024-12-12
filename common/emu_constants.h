@@ -352,9 +352,6 @@ namespace EQ
 		extern const std::map<uint8, std::string>& GetLanguageMap();
 		std::string GetLanguageName(uint8 language_id);
 
-		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
-		std::string GetLDoNThemeName(uint32 theme_id);
-
 		extern const std::map<int8, std::string>& GetFlyModeMap();
 		std::string GetFlyModeName(int8 flymode_id);
 
@@ -749,6 +746,35 @@ static std::map<uint32, std::string> stance_names = {
 	{ Stance::Burn,       "Burn" },
 	{ Stance::Efficient2, "Efficient" },
 	{ Stance::AEBurn,     "AE Burn" }
+};
+
+namespace LDoNTheme {
+	constexpr uint32 Unused = 0;
+	constexpr uint32 GUK    = 1;
+	constexpr uint32 MIR    = 2;
+	constexpr uint32 MMC    = 3;
+	constexpr uint32 RUJ    = 4;
+	constexpr uint32 TAK    = 5;
+
+	constexpr uint32 UnusedBit = 0;
+	constexpr uint32 GUKBit    = 1;
+	constexpr uint32 MIRBit    = 2;
+	constexpr uint32 MMCBit    = 4;
+	constexpr uint32 RUJBit    = 8;
+	constexpr uint32 TAKBit    = 16;
+
+	uint32 GetBitmask(uint32 theme_id);
+	std::string GetName(uint32 theme_id);
+	bool IsValid(uint32 theme_id);
+}
+
+static std::map<uint32, std::pair<std::string, uint32>> ldon_theme_names = {
+	{ LDoNTheme::Unused, { "Unused",              LDoNTheme::UnusedBit }, },
+	{ LDoNTheme::GUK,    { "Deepest Guk",         LDoNTheme::GUKBit }, },
+	{ LDoNTheme::MIR,    { "Miragul's Menagerie", LDoNTheme::MIRBit }, },
+	{ LDoNTheme::MMC,    { "Mistmoore Catacombs", LDoNTheme::MMCBit }, },
+	{ LDoNTheme::RUJ,    { "Rujarkian Hills",     LDoNTheme::RUJBit }, },
+	{ LDoNTheme::TAK,    { "Takish-Hiz",          LDoNTheme::TAKBit }, },
 };
 
 namespace PCNPCOnlyFlagType {

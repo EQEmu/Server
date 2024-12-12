@@ -1287,7 +1287,7 @@ std::string QuestManager::getskillname(int skill_id) {
 }
 
 std::string QuestManager::getldonthemename(uint32 theme_id) {
-	return EQ::constants::GetLDoNThemeName(theme_id);
+	return LDoNTheme::GetName(theme_id);
 }
 
 std::string QuestManager::getfactionname(int faction_id) {
