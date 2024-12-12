@@ -1797,7 +1797,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	std::vector<std::any> args = { spell_target };
 
-	std::function<std::string()> f = [&]() {
+	parse->EventMob(EVENT_CAST, this, nullptr, [&]() {
 		return fmt::format(
 			"{} {} {} {}",
 			spell_id,
@@ -1805,9 +1805,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			GetCasterLevel(spell_id),
 			target_id
 		);
-	};
-
-	parse->EventMob(EVENT_CAST, this, nullptr, f, 0, &args);
+	}, 0, &args);
 
 	if(bard_song_mode)
 	{
