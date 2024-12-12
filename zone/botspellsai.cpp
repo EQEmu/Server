@@ -207,7 +207,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 
 			break;
 		case BotSpellTypes::Charm:
-			if (tar->IsCharmed() || !tar->IsNPC() || tar->GetSpecialAbility(SpecialAbility::CharmImmunity)) {
+			if (HasPet() || tar->IsCharmed() || !tar->IsNPC() || tar->GetSpecialAbility(SpecialAbility::CharmImmunity)) {
 				return false;
 			}
 
@@ -596,27 +596,6 @@ bool Bot::AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	} else
 		dist2 = DistanceSquared(m_Position, tar->GetPosition());
 
-	//if (
-	//	(
-	//		(
-	//			(
-	//				(spells[AIBot_spells[i].spellid].target_type==ST_GroupTeleport && AIBot_spells[i].type == BotSpellTypes::RegularHeal) ||
-	//				spells[AIBot_spells[i].spellid].target_type ==ST_AECaster ||
-	//				spells[AIBot_spells[i].spellid].target_type ==ST_Group ||
-	//				spells[AIBot_spells[i].spellid].target_type ==ST_AEBard ||
-	//				(
-	//					tar == this && spells[AIBot_spells[i].spellid].target_type != ST_TargetsTarget
-	//				)
-	//			) &&
-	//			dist2 <= spells[AIBot_spells[i].spellid].aoe_range*spells[AIBot_spells[i].spellid].aoe_range
-	//		) ||
-	//		dist2 <= GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)*GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)
-	//	) &&
-	//	(
-	//		mana_cost <= GetMana() ||
-	//		IsBotNonSpellFighter()
-	//	)
-	//) {
 	if (IsValidSpellRange(AIBot_spells[i].spellid, tar) && (mana_cost <= GetMana() || IsBotNonSpellFighter())) {
 		casting_spell_AIindex = i;
 		LogAI("spellid [{}] tar [{}] mana [{}] Name [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
