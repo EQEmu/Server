@@ -5,16 +5,8 @@
 #include "strings.h"
 
 #include <filesystem>
+
 namespace fs = std::filesystem;
-
-inline std::string striptrailingslash(const std::string &file_path)
-{
-	if (file_path.back() == '/' || file_path.back() == '\\') {
-		return file_path.substr(0, file_path.length() - 1);
-	}
-
-	return file_path;
-}
 
 void PathManager::LoadPaths()
 {
@@ -36,8 +28,8 @@ void PathManager::LoadPaths()
 
 	auto resolve_path = [&](const std::string& dir, const std::vector<std::string>& fallback_dirs = {}) -> std::string {
 		// relative
-		if (File::Exists(fs::path{m_server_path + "/" + dir}.string())) {
-			return fs::relative(fs::path{m_server_path + "/" + dir}).lexically_normal().string();
+		if (File::Exists((fs::path{m_server_path} / dir).string())) {
+			return fs::relative(fs::path{m_server_path} / dir).lexically_normal().string();
 		}
 
 		// absolute
@@ -47,8 +39,8 @@ void PathManager::LoadPaths()
 
 		// fallback search options if specified
 		for (const auto& fallback : fallback_dirs) {
-			if (File::Exists(fs::path{m_server_path + "/" + fallback}.string())) {
-				return fs::relative(fs::path{m_server_path + "/" + fallback}).lexically_normal().string();
+			if (File::Exists((fs::path{m_server_path} / fallback).string())) {
+				return fs::relative(fs::path{m_server_path} / fallback).lexically_normal().string();
 			}
 		}
 
