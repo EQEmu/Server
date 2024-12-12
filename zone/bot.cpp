@@ -1839,7 +1839,8 @@ bool Bot::BotRangedAttack(Mob* other, bool CanDoubleAttack) {
 	) {
 		if (!Ammo || ammoItem->GetCharges() < 1) {
 			if (!GetCombatRoundForAlerts()) {
-				GetOwner()->Message(Chat::Yellow, "I do not have enough any ammo.");
+				SetCombatRoundForAlerts();
+				BotGroupSay(this, "I do not have enough any ammo!");
 			}
 		}
 
