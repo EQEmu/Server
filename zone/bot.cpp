@@ -2887,10 +2887,6 @@ void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, bo
 	// Calculate melee distances
 	CalcMeleeDistances(tar, p_item, s_item, backstab_weapon, behindMob, melee_distance_min, melee_distance, melee_distance_max, stopMeleeLevel);
 
-	if (!GetCombatRoundForAlerts()) {
-		SetCombatRoundForAlerts();
-	}
-
 	if (tar_distance <= melee_distance) {
 		atCombatRange = true;
 	}
