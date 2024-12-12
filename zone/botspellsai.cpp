@@ -2649,6 +2649,30 @@ bool Bot::HasBotSpellEntry(uint16 spell_id) {
 	return false;
 }
 
+bool Bot::CanUseBotSpell(uint16 spell_id) {
+	if (AIBot_spells.empty()) {
+		return false;
+	}
+
+	for (const auto& s : AIBot_spells) {
+		if (!IsValidSpell(s.spellid)) {
+			return false;
+		}
+
+		if (s.spellid != spell_id) {
+			continue;
+		}
+
+		if (s.minlevel > GetLevel()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
 bool Bot::IsValidSpellRange(uint16 spell_id, Mob* tar) {
 	if (!IsValidSpell(spell_id) || !tar) {
 		return false;
