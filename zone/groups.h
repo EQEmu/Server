@@ -63,7 +63,6 @@ public:
 	void	AddMember(const std::string& new_member_name);
 	void	SendUpdate(uint32 type,Mob* member);
 	void	SendLeadershipAAUpdate();
-	void	SendWorldGroup(uint32 zone_id,Mob* zoningmember);
 	bool	DelMemberOOZ(const char *Name);
 	bool	DelMember(Mob* oldmember,bool ignoresender = false);
 	void	DisbandGroup(bool joinraid = false);
@@ -73,7 +72,6 @@ public:
 	bool	IsGroupMember(Mob* c);
 	bool	IsGroupMember(const char* name);
 	bool	Process();
-	bool	IsGroup()			{ return true; }
 	void	SendGroupJoinOOZ(Mob* NewMember);
 	void	CastGroupSpell(Mob* caster,uint16 spellid);
 	void	SplitExp(ExpSource exp_source, const uint64 exp, Mob* other);
