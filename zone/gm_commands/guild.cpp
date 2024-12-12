@@ -662,6 +662,14 @@ void command_guild(Client* c, const Seperator* sep)
 				}
 				return;
 			}
+			if (id == 4) {
+				c->Message(Chat::Yellow, "Guild Test 4");
+				auto inst = database.CreateItem(30416, 30);
+				database.UpdateInventorySlot(c->CharacterID(), inst, -1);
+				safe_delete(inst);
+
+				return;
+			}
 		}
 	}
 }

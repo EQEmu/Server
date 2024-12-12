@@ -1969,10 +1969,9 @@ struct GuildBankItemUpdate_Struct
 			uint32 inPermissions, uint32 inAllowMerge, bool inUseable)
 	{
 		action = inAction;
-		unknown004 = inUnknown004;
 		slot_id = inSlotID;
 		area = inArea;
-		unknown016 = inUnknown016;
+		display = inUnknown016;
 		item_id = inItemID;
 		icon_id = inIcon;
 		quantity = inQuantity;
@@ -1985,11 +1984,11 @@ struct GuildBankItemUpdate_Struct
 	};
 
 /*000*/	uint32	action;
-/*004*/	uint32	unknown004;
-/*008*/	uint32	unknown008;
+/*004*/	uint32	not_used004;  //disassemble of client did not use this
+/*008*/	uint32	not_used008;  //disassemble of client did not use this
 /*012*/	uint16	slot_id;
 /*014*/	uint16	area;
-/*016*/	uint32	unknown016;
+/*016*/	uint32	display;
 /*020*/	uint32	item_id;
 /*024*/	uint32	icon_id;
 /*028*/	uint32	quantity;
@@ -1999,7 +1998,6 @@ struct GuildBankItemUpdate_Struct
 /*038*/	char	item_name[64];
 /*102*/	char	donator[64];
 /*166*/ char	who_for[64];
-/*230*/	uint16	unknown230;
 };
 
 struct GuildBankClear_Struct

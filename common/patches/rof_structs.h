@@ -1950,7 +1950,7 @@ struct GuildBankItemUpdate_Struct
 		unknown004 = inUnknown004;
 		slot_id = inSlotID;
 		area = inArea;
-		unknown012 = inUnknown012;
+		display = inUnknown012;
 		item_id = inItemID;
 		icon_id = inIcon;
 		quantity = inQuantity;
@@ -1967,7 +1967,7 @@ struct GuildBankItemUpdate_Struct
 /*008*/	uint32	unknown008;
 /*012*/	uint16	slot_id;
 /*014*/	uint16	area;
-/*016*/	uint32	unknown012;
+/*016*/	uint32	display;
 /*020*/	uint32	item_id;
 /*024*/	uint32	icon_id;
 /*028*/	uint32	quantity;

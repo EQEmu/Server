@@ -7640,7 +7640,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			}
 
 			auto gbps    = (GuildBankPromote_Struct *) app->pBuffer;
-			int  slot_id = GuildBanks->Promote(GuildID(), gbps->Slot);
+			int  slot_id = GuildBanks->Promote(GuildID(), gbps->Slot, this);
 
 			if (slot_id >= 0) {
 				auto inst = GuildBanks->GetItem(GuildID(), GuildBankMainArea, slot_id, 1);
@@ -7685,7 +7685,8 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				GuildBankDepositAck(true, sentAction);
 				if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 					GetInv().PopItem(EQ::invslot::slotCursor);
-					PushItemOnCursor(cursor_item, true);
+					PushItemOnCursor(*cursor_item_inst, true);
+					//PushItemOnCursor(cursor_item, true);
 				}
 
 				return;
@@ -7706,7 +7707,8 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 				if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 					GetInv().PopItem(EQ::invslot::slotCursor);
-					PushItemOnCursor(cursor_item, true);
+//					PushItemOnCursor(cursor_item, true);
+					PushItemOnCursor(*cursor_item_inst, true);
 				}
 				return;
 			}
@@ -7728,7 +7730,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				item.augment_6_id = augs.at(5);
 			}
 
-			if (GuildBanks->AddItem(item)) {
+			if (GuildBanks->AddItem(item, this)) {
 				GuildBankDepositAck(false, sentAction);
 				DeleteItemInInventory(EQ::invslot::slotCursor, 0, false);
 			}
@@ -7740,10 +7742,10 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			auto gbps = (GuildBankPermissions_Struct *) app->pBuffer;
 
 			if (gbps->Permissions == 1) {
-				GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, gbps->MemberName);
+				GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, gbps->MemberName, this);
 			}
 			else {
-				GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, "");
+				GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, "", this);
 			}
 
 			GuildBankAck();
@@ -7775,7 +7777,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			break;
 		}
 
-		if (!IsGuildBanker() && !GuildBanks->AllowedToWithdraw(GuildID(), gbwis->Area, gbwis->SlotID, GetName()))
+		if (!IsGuildBanker()) // && !GuildBanks->AllowedToWithdraw(GuildID(), gbwis->Area, gbwis->SlotID, GetName()))
 		{
 			LogError("Suspected attempted hack on the guild bank from [{}]", GetName());
 			GuildBankAck();
@@ -7793,7 +7795,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		{
 			PushItemOnCursor(*inst.get());
 			SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketLimbo);
-			GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
+			GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity, this);
 		}
 		else
 		{
@@ -7809,7 +7811,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		}
 		else {
 			auto gbwis = (GuildBankWithdrawItem_Struct *) app->pBuffer;
-			GuildBanks->SplitStack(GuildID(), gbwis->SlotID, gbwis->Quantity);
+			GuildBanks->SplitStack(GuildID(), gbwis->SlotID, gbwis->Quantity, this);
 		}
 
 		GuildBankAck();
@@ -7817,7 +7819,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 	}
 	case GuildBankMergeStacks: {
 		auto gbwis = (GuildBankWithdrawItem_Struct *) app->pBuffer;
-		GuildBanks->MergeStacks(GuildID(), gbwis->SlotID);
+		GuildBanks->MergeStacks(GuildID(), gbwis->SlotID, this);
 		GuildBankAck();
 		break;
 	}

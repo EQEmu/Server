@@ -1218,7 +1218,7 @@ namespace RoF
 			eq->unknown008 = 0;
 			OUT(slot_id);
 			OUT(area);
-			OUT(unknown012);
+			OUT(display);
 			OUT(item_id);
 			OUT(icon_id);
 			OUT(quantity);

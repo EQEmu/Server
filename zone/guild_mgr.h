@@ -137,19 +137,18 @@ public:
 	~GuildBankManager();
 	void SendGuildBank(Client *c);
 //	bool AddItem(uint32 guild_id, uint8 area, uint32 item_id, int32 quantity, std::string& donator, uint8 permissions, std::string& who_for, uint32 augement_1_id = 0, uint32 augement_2_id = 0, uint32 augement_3_id = 0, uint32 augement_4_id = 0, uint32 augement_5_id = 0, uint32 augement_6_id = 0);
-	bool AddItem(GuildBankRepository::GuildBank &guild_bank_item);
-	int Promote(uint32 GuildID, int SlotID);
-	void SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName);
+	bool AddItem(GuildBankRepository::GuildBank &guild_bank_item, Client* client);
+	int Promote(uint32 GuildID, int SlotID, Client* c);
+	void SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName, Client* c);
 	std::unique_ptr<EQ::ItemInstance> GetItem(uint32 guild_id, uint16 area, uint16 slot_id, uint32 quantity);
-	bool DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
+	bool DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity, Client* c);
 	bool HasItem(uint32 guild_id, uint32 item_id);
 	bool IsAreaFull(uint32 guild_id, uint16 area);
 	int32 NextFreeBankSlot(uint32 guild_id, uint32 area);
-	bool MergeStacks(uint32 GuildID, uint16 SlotID);
-	bool SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity);
-	bool AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name);
-	void SendGuildBankItemUpdate(uint32 guild_id, int32 slot_id, uint32 area, bool useable);
-	void InitializeUpdateStruct(GuildBankItemUpdate_Struct &gbius, uint32 in_action, GuildBankRepository::GuildBank &item, uint32 icon, bool mergeable, bool useable, std::string name = std::string());
+	bool MergeStacks(uint32 GuildID, uint16 SlotID, Client* c);
+	bool SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity, Client* c);
+	//bool AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name);
+	void SendGuildBankItemUpdate(uint32 guild_id, int32 slot_id, uint32 area, bool display, Client* c);
 	std::shared_ptr<GuildBank> GetGuildBank(uint32 guild_id);
 
 private:

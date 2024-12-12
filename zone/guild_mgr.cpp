@@ -952,7 +952,7 @@ bool GuildBankManager::IsAreaFull(uint32 guild_id, uint16 area)
 	return NextFreeBankSlot(guild_id, area) == -1;
 }
 
-bool GuildBankManager::AddItem(GuildBankRepository::GuildBank &guild_bank_item)
+bool GuildBankManager::AddItem(GuildBankRepository::GuildBank &guild_bank_item, Client* c)
 {
 	auto guild_bank = GetGuildBank(guild_bank_item.guild_id);
 	if (!guild_bank) {
@@ -999,65 +999,12 @@ bool GuildBankManager::AddItem(GuildBankRepository::GuildBank &guild_bank_item)
 		}
 	}
 
-	const EQ::ItemData *Item = database.GetItem(guild_bank_item.item_id);
-	GuildBankItemUpdate_Struct gbius;
+	SendGuildBankItemUpdate(guild_bank_item.guild_id, guild_bank_item.slot, guild_bank_item.area, true, c);
 
-	if (!Item->Stackable) {
-		gbius.Init(
-			GuildBankItemUpdate,
-			1,
-			guild_bank_item.slot,
-			guild_bank_item.area,
-			1,
-			guild_bank_item.item_id,
-			Item->Icon,
-			Item->Stackable ? guild_bank_item.quantity : 1,
-			guild_bank_item.permissions,
-			0,
-			false);
-	}
-	else {
-		if (guild_bank_item.quantity == Item->StackSize) {
-			gbius.Init(
-				GuildBankItemUpdate,
-				1,
-				guild_bank_item.slot,
-				guild_bank_item.area,
-				1,
-				guild_bank_item.item_id,
-				Item->Icon,
-				Item->Stackable ? guild_bank_item.quantity : 1,
-				guild_bank_item.permissions,
-				1,
-				false
-			);
-		}
-		else {
-			gbius.Init(
-				GuildBankItemUpdate,
-				1,
-				guild_bank_item.slot,
-				guild_bank_item.area,
-				1,
-				guild_bank_item.item_id,
-				Item->Icon,
-				Item->Stackable ? guild_bank_item.quantity : 1,
-				guild_bank_item.permissions,
-				1,
-				false
-			);
-		}
-	}
-
-	strn0cpy(gbius.item_name, Item->Name, sizeof(gbius.item_name));
-	strn0cpy(gbius.donator, guild_bank_item.donator.c_str(), sizeof(gbius.donator));
-	strn0cpy(gbius.who_for, guild_bank_item.who_for.c_str(), sizeof(gbius.who_for));
-
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_bank_item.guild_id);
 	return true;
 }
 
-int GuildBankManager::Promote(uint32 guild_id, int slot_id)
+int GuildBankManager::Promote(uint32 guild_id, int slot_id, Client* c)
 {
 	if (slot_id < 0) {
 		return -1;
@@ -1074,6 +1021,7 @@ int GuildBankManager::Promote(uint32 guild_id, int slot_id)
 	}
 
 	auto new_item         = GuildBankRepository::NewEntity();
+	new_item.id           = it_deposit->second.id;
 	new_item.guild_id     = it_deposit->second.guild_id;
 	new_item.area         = GuildBankMainArea;
 	new_item.slot         = NextFreeBankSlot(guild_id, GuildBankMainArea);
@@ -1089,40 +1037,17 @@ int GuildBankManager::Promote(uint32 guild_id, int slot_id)
 	new_item.who_for      = it_deposit->second.who_for;
 	new_item.permissions  = it_deposit->second.permissions;
 
-	GuildBankRepository::DeleteOne(database, it_deposit->second.id);
-	auto e = GuildBankRepository::InsertOne(database, new_item);
+	GuildBankRepository::UpdateOne(database, new_item);
 
-	new_item.id = e.id;
-
+	SendGuildBankItemUpdate(it_deposit->second.guild_id, it_deposit->second.slot, it_deposit->second.area, false, c);
+	it_deposit->second = std::move(GuildBankRepository::NewEntity());
 	guild_bank->items.main_area[new_item.slot] = new_item;
-	it_deposit->second = GuildBankRepository::NewEntity();
-
-	const EQ::ItemData *item = database.GetItem(new_item.item_id);
-
-	GuildBankItemUpdate_Struct gbius;
-
-	if(!item->Stackable)
-		gbius.Init(GuildBankItemUpdate, 1, new_item.slot, GuildBankMainArea, 1, item->ID, item->Icon, 1, 0, 0, false);
-	else
-	{
-		if(new_item.quantity == item->StackSize)
-			gbius.Init(GuildBankItemUpdate, 1, new_item.slot, GuildBankMainArea, 1, item->ID, item->Icon,
-					new_item.quantity, 0, 1, false);
-		else
-			gbius.Init(GuildBankItemUpdate, 1, new_item.slot, GuildBankMainArea, 1, item->ID, item->Icon,
-					new_item.quantity, 0, 1, false);
-	}
-
-	strn0cpy(gbius.item_name, item->Name, sizeof(gbius.item_name));
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
-
-	gbius.Init(GuildBankItemUpdate, 1, slot_id, GuildBankDepositArea, 0, 0, 0, 0, 0, 0, false);
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
+	SendGuildBankItemUpdate(new_item.guild_id, new_item.slot, new_item.area, true, c);
 
 	return new_item.slot;
 }
 
-void GuildBankManager::SetPermissions(uint32 guild_id, uint16 slot_id, uint32 permissions, const char *member_name)
+void GuildBankManager::SetPermissions(uint32 guild_id, uint16 slot_id, uint32 permissions, const char *member_name, Client* c)
 {
 	auto guild_bank = GetGuildBank(guild_id);
 	if (!guild_bank) {
@@ -1133,63 +1058,12 @@ void GuildBankManager::SetPermissions(uint32 guild_id, uint16 slot_id, uint32 pe
 	item->permissions = permissions;
 	item->who_for.clear();
 
-	GuildBankRepository::UpdateOne(database, *item);
-
 	if (permissions == GuildBankSingleMember) {
 		item->who_for = member_name;
 	}
 
-	const auto                 item_data = database.GetItem(item->item_id);
-	GuildBankItemUpdate_Struct gbius;
-
-	if (!item_data->Stackable) {
-		gbius.Init(
-			GuildBankItemUpdate,
-			1,
-			item->slot,
-			GuildBankMainArea,
-			1,
-			item_data->ID,
-			item_data->Icon,
-			1,
-			item->permissions,
-			0,
-			false);
-	}
-	else {
-		if (item->quantity == item_data->StackSize) {
-			gbius.Init(
-				GuildBankItemUpdate,
-				1,
-				item->slot,
-				GuildBankMainArea,
-				1,
-				item_data->ID,
-				item_data->Icon,
-				item->quantity,
-				item->permissions,
-				1,
-				false);
-		}
-		else {
-			gbius.Init(
-				GuildBankItemUpdate,
-				1,
-				item->slot,
-				GuildBankMainArea,
-				1,
-				item_data->ID,
-				item_data->Icon,
-				item->quantity,
-				item->permissions,
-				1,
-				0);
-		}
-	}
-
-	strn0cpy(gbius.item_name, item_data->Name, sizeof(gbius.item_name));
-	strn0cpy(gbius.who_for, item->who_for.c_str(), sizeof(gbius.who_for));
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
+	GuildBankRepository::UpdateOne(database, *item);
+	SendGuildBankItemUpdate(item->guild_id, item->slot, item->area, true, c);
 }
 
 std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uint16 area, uint16 slot_id, uint32 quantity)
@@ -1201,8 +1075,7 @@ std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uin
 
 	std::unique_ptr<EQ::ItemInstance> inst;
 
-	if(area == GuildBankDepositArea)
-	{
+	if (area == GuildBankDepositArea) {
 		if (slot_id > guild_bank->items.deposit_area.size()) {
 			return nullptr;
 		}
@@ -1222,21 +1095,31 @@ std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uin
 			return nullptr;
 		}
 
-		if(!inst_new->IsStackable()) {
-			inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
+		inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
+		if (quantity <= guild_bank->items.deposit_area[slot_id].quantity) {
+			inst_new->SetCharges(quantity);
 		}
-		else
-		{
-			if(quantity <= guild_bank->items.deposit_area[slot_id].quantity)
-				inst_new->SetCharges(quantity);
-			else
-				inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
-		}
+
+		// if (!inst_new->IsStackable()) {
+		// 	inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
+		// }
+		// else {
+		// }
+		// if (!inst_new->IsStackable()) {
+		// 	inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
+		// }
+		// else {
+		// 	if (quantity <= guild_bank->items.deposit_area[slot_id].quantity) {
+		// 		inst_new->SetCharges(quantity);
+		// 	}
+		// 	else {
+		// 		inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
+		// 	}
+		// }
 
 		inst = std::move(inst_new);
 	}
-	else
-	{
+	else {
 		if (slot_id > guild_bank->items.main_area.size()) {
 			return nullptr;
 		}
@@ -1249,22 +1132,22 @@ std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uin
 			guild_bank->items.main_area[slot_id].augment_3_id,
 			guild_bank->items.main_area[slot_id].augment_4_id,
 			guild_bank->items.main_area[slot_id].augment_5_id,
-			guild_bank->items.main_area[slot_id].augment_6_id)
-		);
+			guild_bank->items.main_area[slot_id].augment_6_id));
 
 		if (!inst_new) {
 			return nullptr;
 		}
 
-		if(!inst_new->IsStackable()) {
+		if (!inst_new->IsStackable()) {
 			inst_new->SetCharges(guild_bank->items.main_area[slot_id].quantity);
 		}
-		else
-		{
-			if(quantity <= guild_bank->items.main_area[slot_id].quantity)
+		else {
+			if (quantity <= guild_bank->items.main_area[slot_id].quantity) {
 				inst_new->SetCharges(quantity);
-			else
+			}
+			else {
 				inst_new->SetCharges(guild_bank->items.main_area[slot_id].quantity);
+			}
 		}
 
 		inst = std::move(inst_new);
@@ -1306,7 +1189,7 @@ std::shared_ptr<GuildBank> GuildBankManager::GetGuildBank(const uint32 guild_id)
 	return nullptr;
 }
 
-bool GuildBankManager::DeleteItem(uint32 guild_id, uint16 area, uint16 slot_id, uint32 quantity)
+bool GuildBankManager::DeleteItem(uint32 guild_id, uint16 area, uint16 slot_id, uint32 quantity, Client* c)
 {
 	auto guild_bank = GetGuildBank(guild_id);
 	if (!guild_bank) {
@@ -1323,22 +1206,19 @@ bool GuildBankManager::DeleteItem(uint32 guild_id, uint16 area, uint16 slot_id, 
 		return false;
 	}
 
+	// delete the item
 	if (item->quantity == quantity) {
-		//delete the item
+		SendGuildBankItemUpdate(item->guild_id, item->slot, item->area, false, c);
+		GuildBankRepository::DeleteOne(database, item->id);
+
 		item->item_id     = 0;
+		item->id          = 0;
+		item->guild_id    = 0;
+		item->slot        = 0;
 		item->quantity    = 0;
 		item->permissions = 0;
 		item->donator.clear();
 		item->who_for.clear();
-
-		GuildBankRepository::DeleteOne(database, item->id);
-		GuildBankItemUpdate_Struct gbius;
-		InitializeUpdateStruct(gbius, GuildBankItemUpdate, *item, 0, false,false);
-		entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
-
-		item->id          = 0;
-		item->guild_id    = 0;
-		item->slot        = 0;
 
 		return true;
 	}
@@ -1346,46 +1226,12 @@ bool GuildBankManager::DeleteItem(uint32 guild_id, uint16 area, uint16 slot_id, 
 	//otherwise update the quantity
 	item->quantity -= quantity;
 	GuildBankRepository::UpdateOne(database, *item);
-	//SendGuildBankItemUpdate(guild_id, item->slot, GuildBankMainArea, false);
-	const auto                 item_data = database.GetItem(item->item_id);
-	GuildBankItemUpdate_Struct gbius;
+	SendGuildBankItemUpdate(item->guild_id, item->slot, item->area, true, c);
 
-	if (!item_data->Stackable) {
-		gbius.Init(
-			GuildBankItemUpdate,
-			1,
-			item->slot,
-			GuildBankMainArea,
-			1,
-			item_data->ID,
-			item_data->Icon,
-			1,
-			item->permissions,
-			0,
-			false);
-	}
-	else {
-		gbius.Init(
-			GuildBankItemUpdate,
-			1,
-			item->slot,
-			GuildBankMainArea,
-			1,
-			item_data->ID,
-			item_data->Icon,
-			item->quantity,
-			item->permissions,
-			1,
-			false);
-	}
-
-	strn0cpy(gbius.item_name, item_data->Name, sizeof(gbius.item_name));
-	strn0cpy(gbius.who_for, item->who_for.c_str(), sizeof(gbius.who_for));
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
 	return true;
 }
 
-bool GuildBankManager::MergeStacks(uint32 guild_id, uint16 slot_id)
+bool GuildBankManager::MergeStacks(uint32 guild_id, uint16 slot_id, Client* c)
 {
 	auto guild_bank = GetGuildBank(guild_id);
 	if (!guild_bank) {
@@ -1399,7 +1245,7 @@ bool GuildBankManager::MergeStacks(uint32 guild_id, uint16 slot_id)
 		return false;
 	}
 
-	int16                                         stack_size = merge_item->StackSize;
+	const int16                                   stack_size = merge_item->StackSize;
 	std::vector<GuildBankRepository::GuildBank *> queue{};
 	std::vector<std::string>                      queue_delete{};
 	std::vector<GuildBankRepository::GuildBank>   queue_updates{};
@@ -1416,8 +1262,8 @@ bool GuildBankManager::MergeStacks(uint32 guild_id, uint16 slot_id)
 
 	std::ranges::sort(queue.begin(), queue.end(), [](auto &a, auto &b) { return a->quantity < b->quantity; });
 
-	for (auto &i: queue) {
-		int16 remaining_stack_size = stack_size - static_cast<int16>(merge_bank_item->quantity);
+	for (auto const &i: queue) {
+		const int16 remaining_stack_size = stack_size - static_cast<int16>(merge_bank_item->quantity);
 		merge_bank_item->quantity += i->quantity;
 
 		if (merge_bank_item->quantity <= stack_size) {
@@ -1429,7 +1275,7 @@ bool GuildBankManager::MergeStacks(uint32 guild_id, uint16 slot_id)
 
 		if (merge_bank_item->quantity > stack_size) {
 			merge_bank_item->quantity = stack_size;
-			i->quantity -= remaining_stack_size;
+			i->quantity              -= remaining_stack_size;
 			queue_updates.push_back(*i);
 			queue_updates.push_back(*merge_bank_item);
 			break;
@@ -1443,39 +1289,24 @@ bool GuildBankManager::MergeStacks(uint32 guild_id, uint16 slot_id)
 
 	GuildBankRepository::ReplaceMany(database, queue_updates);
 	if (!queue_delete.empty()) {
-		GuildBankRepository::DeleteWhere(database, fmt::format("`id` IN({})", Strings::Implode(",", queue_delete)).c_str());
+		GuildBankRepository::DeleteWhere(
+			database, fmt::format("`id` IN({})", Strings::Implode(",", queue_delete)).c_str()
+		);
 	}
 
-	for (auto &i: queue_updates) {
-		GuildBankItemUpdate_Struct gbius;
+	for (auto const &i: queue_updates) {
 		if (i.item_id == 0) {
-			gbius.Init(GuildBankItemUpdate, 1, i.slot, GuildBankMainArea, 0, 0, 0, 0, 0, 0, false);
-			entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
+			SendGuildBankItemUpdate(i.guild_id, i.slot, GuildBankMainArea, false, c);
 			continue;
 		}
 
-		gbius.Init(
-			GuildBankItemUpdate,
-			1,
-			i.slot,
-			GuildBankMainArea,
-			1,
-			i.item_id,
-			merge_item->Icon,
-			i.quantity,
-			i.permissions,
-			1,
-			false
-		);
-		strn0cpy(gbius.item_name, merge_item->Name, sizeof(gbius.item_name));
-		strn0cpy(gbius.who_for, i.who_for.c_str(), sizeof(gbius.who_for));
-		entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
+		SendGuildBankItemUpdate(i.guild_id, i.slot, GuildBankMainArea, true, c);
 	}
 
 	return true;
 }
 
-bool GuildBankManager::SplitStack(uint32 guild_id, uint16 slot_id, uint32 quantity)
+bool GuildBankManager::SplitStack(uint32 guild_id, uint16 slot_id, uint32 quantity, Client* c)
 {
 	auto guild_bank = GetGuildBank(guild_id);
 	if (!guild_bank) {
@@ -1505,89 +1336,47 @@ bool GuildBankManager::SplitStack(uint32 guild_id, uint16 slot_id, uint32 quanti
 	new_item.id                                = e.id;
 	guild_bank->items.main_area[new_item.slot] = new_item;
 
-	GuildBankItemUpdate_Struct gbius;
-	gbius.Init(
-		GuildBankItemUpdate,
-		1,
-		split_bank_item->slot,
-		GuildBankMainArea,
-		1,
-		split_bank_item->item_id,
-		split_item->Icon,
-		split_bank_item->quantity,
-		split_bank_item->permissions,
-		1,
-		false
-	);
-	strn0cpy(gbius.item_name, split_item->Name, sizeof(gbius.item_name));
-	strn0cpy(gbius.who_for, new_item.who_for.c_str(), sizeof(gbius.who_for));
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
-
-	gbius.Init(
-		GuildBankItemUpdate,
-		1,
-		new_item.slot,
-		GuildBankMainArea,
-		1,
-		new_item.item_id,
-		split_item->Icon,
-		new_item.quantity,
-		new_item.permissions,
-		1,
-		false);
-	strn0cpy(gbius.item_name, split_item->Name, sizeof(gbius.item_name));
-	strn0cpy(gbius.who_for, new_item.who_for.c_str(), sizeof(gbius.who_for));
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
+	SendGuildBankItemUpdate(split_bank_item->guild_id, split_bank_item->slot, split_bank_item->area, true, c);
+	SendGuildBankItemUpdate(new_item.guild_id, new_item.slot, new_item.area, true, c);
 
 	return true;
 }
 
-void GuildBankManager::UpdateItemQuantity(uint32 guildID, uint16 area, uint16 slotID, uint32 quantity)
-{
-	// Helper method for MergeStacks. Assuming all passed parameters are valid.
-	//
-	std::string query = StringFormat("UPDATE `guild_bank` SET `qty` = %i "
-                                    "WHERE `guildid` = %i AND `area` = %i "
-                                    "AND `slot` = %i LIMIT 1",
-                                    quantity, guildID, area, slotID);
-    auto results = database.QueryDatabase(query);
-	if(!results.Success()) {
-		return;
-	}
+// void GuildBankManager::UpdateItemQuantity(uint32 guildID, uint16 area, uint16 slotID, uint32 quantity)
+// {
+// 	// Helper method for MergeStacks. Assuming all passed parameters are valid.
+// 	//
+// 	std::string query = StringFormat("UPDATE `guild_bank` SET `qty` = %i "
+//                                     "WHERE `guildid` = %i AND `area` = %i "
+//                                     "AND `slot` = %i LIMIT 1",
+//                                     quantity, guildID, area, slotID);
+//     auto results = database.QueryDatabase(query);
+// 	if(!results.Success()) {
+// 		return;
+// 	}
+//
+// }
 
-}
-
-bool GuildBankManager::AllowedToWithdraw(uint32 guild_id, uint16 area, uint16 slot_id, const char *name)
-{
-	auto guild_bank = GetGuildBank(guild_id);
-	if (!guild_bank) {
-		return false;
-	}
-
-	if (area != GuildBankMainArea) {
-		return false;
-	}
-
-	auto item = &guild_bank->items.main_area[slot_id];
-	uint8 permissions = item->permissions;
-
-	if (permissions == GuildBankBankerOnly) {
-		return false;
-	}
-	//
-	// if (Permissions !=
-	// 	GuildBankSingleMember) {    // Public or Public-If-Useable (should really check if item is useable)
-	// 	return true;
-	// }
-	//
-	// if (!strncmp((*Iterator)->Items.MainArea[SlotID].WhoFor,
-	// 			 Name,
-	// 			 sizeof((*Iterator)->Items.MainArea[SlotID].WhoFor))) {
-	// 	return true;
-	// }
-
-	return false;
-}
+// bool GuildBankManager::AllowedToWithdraw(uint32 guild_id, uint16 area, uint16 slot_id, const char *name)
+// {
+// 	auto guild_bank = GetGuildBank(guild_id);
+// 	if (!guild_bank) {
+// 		return false;
+// 	}
+//
+// 	if (area != GuildBankMainArea) {
+// 		return false;
+// 	}
+//
+// 	auto item = &guild_bank->items.main_area[slot_id];
+// 	uint8 permissions = item->permissions;
+//
+// 	if (permissions == GuildBankBankerOnly) {
+// 		return false;
+// 	}
+//
+// 	return false;
+// }
 
 int32 GuildBankManager::NextFreeBankSlot(uint32 guild_id, uint32 area)
 {
@@ -1597,8 +1386,8 @@ int32 GuildBankManager::NextFreeBankSlot(uint32 guild_id, uint32 area)
 	}
 
 	if (area == GuildBankMainArea) {
-		auto it = std::ranges::find_if(
-			guild_bank->items.main_area.begin(), guild_bank->items.main_area.end(), [&](auto &m) {
+		auto it =
+			std::ranges::find_if(guild_bank->items.main_area.begin(), guild_bank->items.main_area.end(), [&](auto &m) {
 				return m.second.item_id == 0;
 			}
 		);
@@ -1960,53 +1749,35 @@ void ZoneGuildManager::SendToWorldSendGuildMembersList(uint32 guild_id)
 	safe_delete(outapp)
 }
 
-void GuildBankManager::SendGuildBankItemUpdate(uint32 guild_id, int32 slot_id, uint32 area, bool useable)
+void GuildBankManager::SendGuildBankItemUpdate(uint32 guild_id, int32 slot_id, uint32 area, bool display, Client* c)
 {
 	auto guild_bank = GetGuildBank(guild_id);
 	if (!guild_bank) {
 		return;
 	}
 
-	auto item = &guild_bank->items.deposit_area[slot_id];
+	auto item = guild_bank->items.deposit_area[slot_id];
 	if (area == GuildBankMainArea) {
-		item = &guild_bank->items.main_area[slot_id];
+		item = guild_bank->items.main_area[slot_id];
 	}
 
-	const auto                 item_data = database.GetItem(item->item_id);
-	GuildBankItemUpdate_Struct gbius;
+	const auto item_data = database.GetItem(item.item_id);
 
-	if (item_data && !item_data->Stackable) {
-		InitializeUpdateStruct(gbius, GuildBankItemUpdate, *item, item_data->Icon, false, useable);
-	}
-	else {
-		InitializeUpdateStruct(gbius, GuildBankItemUpdate, *item, item_data->Icon, true, useable);
-	}
-
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
-}
-
-void GuildBankManager::InitializeUpdateStruct(
-	GuildBankItemUpdate_Struct     &gbius,
-	uint32                          in_action,
-	GuildBankRepository::GuildBank &item,
-	uint32                          icon,
-	bool                            mergeable,
-	bool                            useable,
-	std::string                     name)
-{
-	gbius.action      = in_action;
-	gbius.unknown004  = 0;
+	GuildBankItemUpdate_Struct gbius{};
+	gbius.action      = GuildBankItemUpdate;
 	gbius.slot_id     = item.slot;
 	gbius.area        = item.area;
-	gbius.unknown012  = 0;
 	gbius.item_id     = item.item_id;
-	gbius.icon_id     = icon;
-	gbius.quantity    = item.quantity;
 	gbius.permissions = item.permissions;
-	gbius.allow_merge = mergeable;
-	gbius.is_useable  = useable; // Used in conjunction with the Public-if-useable permission.
-	gbius.unknown226  = false;
-	strn0cpy(gbius.item_name, name.c_str(), sizeof(gbius.item_name));
-	strn0cpy(gbius.donator, item.donator.c_str(), sizeof(gbius.donator));
-	strn0cpy(gbius.who_for, item.who_for.c_str(), sizeof(gbius.who_for));
+	gbius.icon_id     = item_data ? item_data->Icon : 0;
+	gbius.display     = display;
+	gbius.allow_merge = item_data ? item_data->Stackable : false;
+	gbius.is_useable  = item_data ? item_data->IsEquipable(c->GetRace(), c->GetClass()) : false;
+	gbius.quantity    = item.quantity;
+
+	strn0cpy(gbius.item_name, item_data ? item_data->Name : "", sizeof(gbius.item_name));
+	strn0cpy(gbius.donator, item.donator.empty() ? "" : item.donator.c_str(), sizeof(gbius.donator));
+	strn0cpy(gbius.who_for, item.who_for.empty() ? "" : item.who_for.c_str(), sizeof(gbius.who_for));
+
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
 }

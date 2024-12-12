@@ -1744,10 +1744,7 @@ namespace RoF2
 			auto emu = (GuildBankItemUpdate_Struct *)in->pBuffer;
 			auto eq = (structs::GuildBankItemUpdate_Struct *)outapp->pBuffer;
 			eq->action = 0;
-			OUT(unknown004);
-			eq->unknown008 = 0;
-			eq->unknown016 = emu->unknown012;
-			eq->unknown230 = emu->unknown226;
+			OUT(display);
 			OUT(slot_id);
 			OUT(area);
 			OUT(item_id);
