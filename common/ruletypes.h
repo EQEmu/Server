@@ -340,6 +340,9 @@ RULE_STRING(World, Rules, "", "Server Rules, change from empty to have this be u
 RULE_BOOL(World, EnableAutoLogin, false, "Enables or disables auto login of characters, allowing people to log characters in directly from loginserver to ingame")
 RULE_BOOL(World, EnablePVPRegions, true, "Enables or disables PVP Regions automatically setting your PVP flag")
 RULE_STRING(World, SupportedClients, "", "Comma-delimited list of clients to restrict to. Supported values are Titanium | SoF | SoD | UF | RoF | RoF2. Example: Titanium,RoF2")
+RULE_STRING(World, CustomFilesKey, "", "Enable if the server requires custom files and sends a key to validate. Empty string to disable. Example: eqcustom_v1")
+RULE_STRING(World, CustomFilesUrl, "github.com/knervous/eqnexus/releases", "URL to display at character select if client is missing custom files")
+RULE_INT(World, CustomFilesAdminLevel, 20, "Admin level at which custom file key is not required when CustomFilesKey is specified")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
