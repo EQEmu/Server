@@ -3742,7 +3742,8 @@ struct GetItems_Struct{
 
 struct BecomeTrader_Struct {
 	uint32 action;
-	uint32 zone_id;
+	uint16 zone_id;
+	uint16 zone_instance_id;
 	uint32 trader_id;
 	uint32 entity_id;
 	char   trader_name[64];
@@ -6347,6 +6348,7 @@ enum BazaarTraderBarterActions {
 	TraderAck2                   = 22,
 	AddTraderToBazaarWindow      = 24,
 	RemoveTraderFromBazaarWindow = 25,
+	FirstOpenSearch              = 26,
 	ClickTrader                  = 28,
 	DeliveryCostUpdate           = 29
 };
@@ -6386,6 +6388,7 @@ struct BazaarSearchResultsFromDB_Struct {
 	uint32      icon_id;
 	uint32      sum_charges;
 	uint32      trader_zone_id;
+	int32       trader_zone_instance_id;
 	uint32      trader_entity_id;
 	uint32      item_stat;
 	bool        stackable;
@@ -6407,6 +6410,7 @@ struct BazaarSearchResultsFromDB_Struct {
 			CEREAL_NVP(icon_id),
 			CEREAL_NVP(sum_charges),
 			CEREAL_NVP(trader_zone_id),
+			CEREAL_NVP(trader_zone_instance_id),
 			CEREAL_NVP(trader_entity_id),
 			CEREAL_NVP(item_stat),
 			CEREAL_NVP(stackable),

@@ -1093,15 +1093,16 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 			inst->SetPrice(in->item_cost[i]);
 			TraderRepository::Trader trader_item{};
 
-			trader_item.id             = 0;
-			trader_item.char_entity_id = GetID();
-			trader_item.char_id        = CharacterID();
-			trader_item.char_zone_id   = GetZoneID();
-			trader_item.item_charges   = inst->GetCharges() == 0 ? 1 : inst->GetCharges();
-			trader_item.item_cost      = inst->GetPrice();
-			trader_item.item_id        = inst->GetID();
-			trader_item.item_sn        = in->serial_number[i];
-			trader_item.slot_id        = i;
+			trader_item.id                    = 0;
+			trader_item.char_entity_id        = GetID();
+			trader_item.char_id               = CharacterID();
+			trader_item.char_zone_id          = GetZoneID();
+			trader_item.char_zone_instance_id = GetInstanceID();
+			trader_item.item_charges          = inst->GetCharges() == 0 ? 1 : inst->GetCharges();
+			trader_item.item_cost             = inst->GetPrice();
+			trader_item.item_id               = inst->GetID();
+			trader_item.item_sn               = in->serial_number[i];
+			trader_item.slot_id               = i;
 			if (inst->IsAugmented()) {
 				auto augs              = inst->GetAugmentIDs();
 				trader_item.aug_slot_1 = augs.at(0);
@@ -1796,7 +1797,7 @@ void Client::SendBarterWelcome()
 
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 {
-	auto results = Bazaar::GetSearchResults(database, search_criteria, GetZoneID());
+	auto results = Bazaar::GetSearchResults(database, search_criteria, GetZoneID(), GetInstanceID());
 	if (results.empty()) {
 		SendBazaarDone(GetID());
 		return;
@@ -2940,9 +2941,11 @@ void Client::SendBecomeTrader(BazaarTraderBarterActions action, uint32 entity_id
 	auto outapp = new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct));
 	auto data   = (BecomeTrader_Struct *) outapp->pBuffer;
 
-	data->action    = action;
-	data->entity_id = trader->GetID();
-	data->trader_id = trader->CharacterID();
+	data->action           = action;
+	data->entity_id        = trader->GetID();
+	data->trader_id        = trader->CharacterID();
+	data->zone_id          = trader->GetZoneID();
+	data->zone_instance_id = trader->GetInstanceID();
 	strn0cpy(data->trader_name, trader->GetCleanName(), sizeof(data->trader_name));
 
 	QueuePacket(outapp);
@@ -3088,14 +3091,15 @@ void Client::TraderPriceUpdate(const EQApplicationPacket *app)
 				auto item_detail = FindTraderItemBySerialNumber(newgis->serial_number[i]);
 
 				TraderRepository::Trader trader_item{};
-				trader_item.id             = 0;
-				trader_item.char_entity_id = GetID();
-				trader_item.char_id        = CharacterID();
-				trader_item.char_zone_id   = GetZoneID();
-				trader_item.item_charges   = newgis->charges[i];
-				trader_item.item_cost      = tpus->NewPrice;
-				trader_item.item_id        = newgis->items[i];
-				trader_item.item_sn        = newgis->serial_number[i];
+				trader_item.id                    = 0;
+				trader_item.char_entity_id        = GetID();
+				trader_item.char_id               = CharacterID();
+				trader_item.char_zone_id          = GetZoneID();
+				trader_item.char_zone_instance_id = GetInstanceID();
+				trader_item.item_charges          = newgis->charges[i];
+				trader_item.item_cost             = tpus->NewPrice;
+				trader_item.item_id               = newgis->items[i];
+				trader_item.item_sn               = newgis->serial_number[i];
 				if (item_detail->IsAugmented()) {
 					auto augs              = item_detail->GetAugmentIDs();
 					trader_item.aug_slot_1 = augs.at(0);
@@ -3224,7 +3228,8 @@ void Client::SendBulkBazaarTraders()
 	VARSTRUCT_ENCODE_TYPE(uint32, bufptr, results.count);
 
 	for (auto t : results.traders) {
-		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, t.zone_id);
+		VARSTRUCT_ENCODE_TYPE(uint16, bufptr, t.zone_id);
+		VARSTRUCT_ENCODE_TYPE(uint16, bufptr, t.zone_instance_id);
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, t.trader_id);
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, t.entity_id);
 		VARSTRUCT_ENCODE_STRING(bufptr, t.trader_name.c_str());

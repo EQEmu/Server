@@ -3929,9 +3929,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 							out->action = 0;
 						}
 					}
-					out->entity_id = in->entity_id;
-					out->zone_id   = in->zone_id;
-					out->trader_id = in->trader_id;
+
+					out->entity_id        = in->entity_id;
+					out->zone_id          = in->zone_id;
+					out->zone_instance_id = in->instance_id;
+					out->trader_id        = in->trader_id;
 					strn0cpy(out->trader_name, in->trader_name, sizeof(out->trader_name));
 
 					c.second->QueuePacket(outapp);

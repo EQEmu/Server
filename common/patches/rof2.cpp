@@ -583,19 +583,21 @@ namespace RoF2
 				auto outapp = new EQApplicationPacket(OP_TraderShop, sizeof(BecomeTrader_Struct));
 				auto eq     = (BecomeTrader_Struct *) outapp->pBuffer;
 
-				eq->action    = emu->action;
-				eq->entity_id = emu->entity_id;
-				eq->trader_id = emu->trader_id;
-				eq->zone_id   = emu->zone_id;
+				eq->action           = emu->action;
+				eq->entity_id        = emu->entity_id;
+				eq->trader_id        = emu->trader_id;
+				eq->zone_id          = emu->zone_id;
+				eq->zone_instance_id = emu->zone_instance_id;
 				strn0cpy(eq->trader_name, emu->trader_name, sizeof(eq->trader_name));
 
 				LogTrading(
-					"(RoF2) AddTraderToBazaarWindow action <green>[{}] trader_id <green>[{}] entity_id <green>[{}] zone_id <green>[{}]",
+					"(RoF2) AddTraderToBazaarWindow action <green>[{}] trader_id <green>[{}] entity_id <green>[{}] "
+					"zone_id <green>[{}] zone_instance_id <green>[{}]",
 					eq->action,
 					eq->trader_id,
 					eq->entity_id,
-					eq->zone_id
-				);
+					eq->zone_id,
+					eq->zone_instance_id);
 				dest->FastQueuePacket(&outapp);
 				break;
 			}
@@ -6216,6 +6218,11 @@ namespace RoF2
 						   eq->serial_number
 				);
 				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::RoF2BazaarTraderBuyerActions::FirstOpenSearch: {
+				__packet->SetOpcode(OP_BazaarSearch);
+				LogTrading("(RoF2) First time opening Bazaar Search since zoning. Action <green>[{}]", action);
 				break;
 			}
 			case structs::RoF2BazaarTraderBuyerActions::WelcomeMessage: {
