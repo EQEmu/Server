@@ -5325,14 +5325,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		//It should be safe as we don't have any truly const EQ::ItemInstance floating around anywhere.
 		//So we'll live with it for now
 		if (parse->ItemHasQuestSub(const_cast<EQ::ItemInstance*>(inst), EVENT_WEAPON_PROC)) {
-			int i = parse->EventItem(
-				EVENT_WEAPON_PROC,
-				CastToClient(),
-				const_cast<EQ::ItemInstance*>(inst),
-				on,
-				"",
-				spell_id
-			);
+			int i = parse->EventItem(EVENT_WEAPON_PROC, CastToClient(), const_cast<EQ::ItemInstance*>(inst), on, "", spell_id);
 
 			if (i != 0) {
 				return;

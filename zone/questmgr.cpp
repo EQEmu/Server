@@ -91,13 +91,7 @@ void QuestManager::Process() {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
 			if (cur->mob) {
 				if (cur->mob->IsEncounter()) {
-					parse->EventEncounter(
-						EVENT_TIMER,
-						cur->mob->CastToEncounter()->GetEncounterName(),
-						cur->name,
-						0,
-						nullptr
-					);
+					parse->EventEncounter(EVENT_TIMER, cur->mob->CastToEncounter()->GetEncounterName(), cur->name, 0, nullptr);
 				} else {
 					parse->EventMob(EVENT_TIMER, cur->mob, nullptr, [&]() { return cur->name; }, 0);
 				}
@@ -661,14 +655,7 @@ void QuestManager::stoptimer(const std::string& timer_name)
 
 	for (auto e = QTimerList.begin(); e != QTimerList.end(); ++e) {
 		if (e->mob && e->mob == owner && e->name == timer_name) {
-			parse->EventMob(
-				EVENT_TIMER_STOP,
-				owner,
-				nullptr,
-				[&]() {
-					return timer_name;
-				}
-			);
+			parse->EventMob(EVENT_TIMER_STOP, owner, nullptr, [&]() { return timer_name; });
 
 			QTimerList.erase(e);
 			break;
@@ -695,14 +682,7 @@ void QuestManager::stoptimer(const std::string& timer_name, Mob* m)
 
 	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
 		if (e->mob && e->mob == m) {
-			parse->EventMob(
-				EVENT_TIMER_STOP,
-				m,
-				nullptr,
-				[&]() {
-					return timer_name;
-				}
-			);
+			parse->EventMob(EVENT_TIMER_STOP, m, nullptr, [&]() { return timer_name; });
 
 			QTimerList.erase(e);
 			break;
@@ -743,14 +723,7 @@ void QuestManager::stopalltimers()
 
 	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
 		if (e->mob && e->mob == owner) {
-			parse->EventMob(
-				EVENT_TIMER_STOP,
-				owner,
-				nullptr,
-				[&]() {
-					return e->name;
-				}
-			);
+			parse->EventMob(EVENT_TIMER_STOP, owner, nullptr, [&]() { return e->name; });
 
 			e = QTimerList.erase(e);
 		} else {
@@ -792,14 +765,7 @@ void QuestManager::stopalltimers(Mob* m)
 
 	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
 		if (e->mob && e->mob == m) {
-			parse->EventMob(
-				EVENT_TIMER_STOP,
-				m,
-				nullptr,
-				[&]() {
-					return e->name;
-				}
-			);
+			parse->EventMob(EVENT_TIMER_STOP, m, nullptr, [&]() { return e->name; });
 
 			e = QTimerList.erase(e);
 		} else {
@@ -853,18 +819,13 @@ void QuestManager::pausetimer(const std::string& timer_name, Mob* m)
 		}
 	);
 
-	parse->EventMob(
-		EVENT_TIMER_PAUSE,
-		mob,
-		nullptr,
-		[&]() {
-			return fmt::format(
-				"{} {}",
-				timer_name,
-				milliseconds
-			);
-		}
-	);
+	parse->EventMob(EVENT_TIMER_PAUSE, mob, nullptr, [&]() {
+		return fmt::format(
+			"{} {}",
+			timer_name,
+			milliseconds
+		);
+	});
 
 	LogQuests("Pausing timer [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
 }
