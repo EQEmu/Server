@@ -13998,7 +13998,7 @@ bool Client::RemoveExtraClass(int class_id) {
     // Lambda to check if a spell is usable by any of the given classes
     auto is_spell_usable_by_classes = [this, new_classes](int spell_id) {
         for (int i = Class::Warrior; i <= Class::Berserker; i++) {
-            if ((new_classes & GetPlayerClassBit(i)) && GetSpellLevel(spell_id, i) != UINT8_MAX) {
+            if ((new_classes & GetPlayerClassBit(i)) && GetSpellLevel(spell_id, i) <= GetLevel()) {
                 return true;
             }
         }
