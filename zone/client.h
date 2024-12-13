@@ -2220,12 +2220,6 @@ public:
 	void CampAllBots(uint8 class_id = Class::None);
 	void SpawnRaidBotsOnConnect(Raid* raid);
 
-	inline void SetZoneShardRequest(const std::vector<PickZoneEntry_Struct>& entries) { m_zoneshard_request = entries; };
-	inline const std::vector<PickZoneEntry_Struct>& GetZoneShardRequest() { return m_zoneshard_request; };
-
-	inline void SetZoneShardSessionID(int64 session_id) { m_zoneshard_session_id = session_id; }
-	inline int64 GetZoneShardSessionID() { return m_zoneshard_session_id; }
-
 private:
 	bool bot_owner_options[_booCount];
 	bool m_bot_pulling;

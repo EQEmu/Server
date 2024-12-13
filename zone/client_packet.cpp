@@ -11855,8 +11855,8 @@ void Client::Handle_OP_PickZone(const EQApplicationPacket *app)
 
 	auto pzs = (PickZone_Struct*) app->pBuffer;
 
-	if (GetZoneShardSessionID() != pzs->session_id) {
-		LogError("Mismatched session ID in PickZone request character_id [{}] session_id sent [{}] session_id required [{}]", CharacterID(), GetZoneShardSessionID(), pzs->session_id);
+	if (m_zoneshard_session_id != pzs->session_id) {
+		LogError("Mismatched session ID in PickZone request character_id [{}] session_id sent [{}] session_id required [{}]", CharacterID(), m_zoneshard_session_id, pzs->session_id);
 		return;
 	}
 
@@ -11865,8 +11865,7 @@ void Client::Handle_OP_PickZone(const EQApplicationPacket *app)
 		return;
 	}
 
-	const auto& shards = GetZoneShardRequest();
-	const auto& shard = shards[pzs->selection_id];
+	const auto& shard = m_zoneshard_request[pzs->selection_id];
 
 	if (!database.CheckInstanceExists(shard.instance_id)) {
 		Message(

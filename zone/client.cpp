@@ -13074,16 +13074,57 @@ void Client::ShowZoneShardMenu()
 		return;
 	}
 
+	if (!results.empty()) {
+		Message(Chat::White, "Available Zone Shards:");
+	}
+
+	int number = 1;
+	for (auto &e: results) {
+		std::string teleport_link = Saylink::Silent(
+			fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
+			"Teleport"
+		);
+
+		std::string yours;
+		if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
+			teleport_link = "Teleport";
+			yours         = " (Yours)";
+		}
+
+		Message(
+			Chat::White, fmt::format(
+				" --> [{}] #{} {} ({}) [{}/{}] players {}",
+				teleport_link,
+				number,
+				z->long_name,
+				e.instance_id,
+				e.player_count,
+				z->shard_at_player_count,
+				yours
+			).c_str()
+		);
+		number++;
+	}
+
 	auto outapp = new EQApplicationPacket(OP_PickZoneWindow, sizeof(PickZoneWindow_Struct));
+
+	LogError("Size of PZWS [{}]", sizeof(PickZoneWindow_Struct));
+
 	auto pzw = (PickZoneWindow_Struct*) outapp->pBuffer;
 
-	std::hash<int64_t> hasher;
+	//std::hash<int64_t> hasher;
 
-	int64 session_id = hasher(1234567890123456789LL);
+	//int64 session_id = 0x11223344556677;
 
-	SetZoneShardSessionID(session_id);
+	//LogError("session_id [{}]", session_id);
 
-	pzw->session_id = session_id;
+	m_zoneshard_session_id = 0x11223344556677;
+
+	m_zoneshard_request.clear();
+
+	pzw->session_id = 0x11223344556677;
+
+	PickZoneEntry_Struct p {};
 
 	uint8 index = 0;
 	for (const auto& e : results) {
@@ -13093,14 +13134,47 @@ void Client::ShowZoneShardMenu()
 
 		pzw->option_count++;
 
-		pzw->entries[index] = PickZoneEntry_Struct{
-			.zone_id = static_cast<int16>(e.zone_id),
-			.unknown = 1,
-			.player_count = static_cast<int>(e.player_count),
-			.instance_id = e.instance_id
-		};
+		p.zone_id      = static_cast<int16>(e.zone_id);
+		p.unknown      = 1;
+		p.player_count = static_cast<int>(e.player_count);
+		p.instance_id  = e.instance_id;
+
+		LogError(
+			"index [{}] zone_id [{}] player_count [{}] instance_id [{}]",
+			index,
+			e.zone_id,
+			e.player_count,
+			e.instance_id
+		);
+
+		pzw->entries[index] = p;
+
+		m_zoneshard_request.emplace_back(p);
 
 		index++;
+	}
+
+	if (index < 9) {
+		while (index < 9) {
+			p.zone_id      = 0;
+			p.unknown      = 1;
+			p.player_count = 0;
+			p.instance_id  = 0;
+
+			LogError(
+				"index [{}] zone_id [{}] player_count [{}] instance_id [{}]",
+				index,
+				0,
+				0,
+				0
+			);
+
+			pzw->entries[index] = p;
+
+			m_zoneshard_request.emplace_back(p);
+
+			index++;
+		}
 	}
 
 	QueuePacket(outapp);
