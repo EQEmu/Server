@@ -2624,27 +2624,17 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		bool owner_in_group = false;
 
 		if (
-			(
-				give_exp->HasGroup() &&
-				give_exp->GetGroup()->IsGroupMember(give_exp->GetUltimateOwner())
-			) ||
-			(
-				give_exp->IsPet() &&
-				(
-					give_exp->GetOwner()->IsClient() ||
-					(
-						give_exp->GetOwner()->HasGroup() &&
-						give_exp->GetOwner()->GetGroup()->IsGroupMember(give_exp->GetOwner()->GetUltimateOwner())
-					)
-				)
-			)
+			give_exp->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP)) ||
+			give_exp->IsPet() && 
+			give_exp->GetOwner() && 
+			give_exp->GetOwner()->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP))
 		) {
 			owner_in_group = true;
 		}
 
 		give_exp = give_exp->GetUltimateOwner();
 
-		if (!RuleB(Bots, BotGroupXP) && !owner_in_group) {
+		if (!owner_in_group) {
 			give_exp = nullptr;
 		}
 	}
