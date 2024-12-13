@@ -11854,6 +11854,80 @@ void Client::Handle_OP_PickZone(const EQApplicationPacket *app)
 	}
 
 	auto pzs = (PickZone_Struct*) app->pBuffer;
+
+	if (GetZoneShardSessionID() != pzs->session_id) {
+		LogError("Mismatched session ID in PickZone request character_id [{}] session_id sent [{}] session_id required [{}]", CharacterID(), GetZoneShardSessionID(), pzs->session_id);
+		return;
+	}
+
+	if (!EQ::ValueWithin(pzs->selection_id, 0, 9)) {
+		LogError("Invalid selection_id [{}]", pzs->selection_id);
+		return;
+	}
+
+	const auto& shards = GetZoneShardRequest();
+	const auto& shard = shards[pzs->selection_id];
+
+	if (!database.CheckInstanceExists(shard.instance_id)) {
+		Message(
+			Chat::White,
+			fmt::format(
+				"Instance ID {} does not exist.",
+				shard.instance_id
+			).c_str()
+		);
+		return;
+	}
+
+	const uint32 instance_zone_id = database.GetInstanceZoneID(shard.instance_id);
+	if (!instance_zone_id) {
+		Message(
+			Chat::White,
+			fmt::format(
+				"Instance ID {} not found or zone is set to null.",
+				shard.instance_id
+			).c_str()
+		);
+		return;
+	}
+
+	if (instance_zone_id != shard.zone_id) {
+		Message(
+			Chat::White,
+			fmt::format(
+				"Instance Zone ID {} does not match zone ID {}.",
+				instance_zone_id,
+				shard.zone_id
+			).c_str()
+		);
+		return;
+	}
+
+	if (!database.CheckInstanceByCharID(shard.instance_id, CharacterID())) {
+		database.AddClientToInstance(shard.instance_id, CharacterID());
+	}
+
+	if (!database.VerifyInstanceAlive(shard.instance_id, CharacterID())) {
+		Message(
+			Chat::White,
+			fmt::format(
+				"Instance ID {} expired.",
+				shard.instance_id
+			).c_str()
+		);
+		return;
+	}
+
+	MovePC(
+		shard.zone_id,
+		shard.instance_id,
+		GetX(),
+		GetY(),
+		GetZ(),
+		GetHeading(),
+		0,
+		ZoneSolicited
+	);
 }
 
 void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)

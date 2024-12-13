@@ -13077,6 +13077,14 @@ void Client::ShowZoneShardMenu()
 	auto outapp = new EQApplicationPacket(OP_PickZoneWindow, sizeof(PickZoneWindow_Struct));
 	auto pzw = (PickZoneWindow_Struct*) outapp->pBuffer;
 
+	std::hash<int64_t> hasher;
+
+	int64 session_id = hasher(1234567890123456789LL);
+
+	SetZoneShardSessionID(session_id);
+
+	pzw->session_id = session_id;
+
 	uint8 index = 0;
 	for (const auto& e : results) {
 		if (index > 9) {
