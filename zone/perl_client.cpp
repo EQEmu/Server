@@ -1169,7 +1169,7 @@ void Perl_Client_AddAAPoints(Client* self, uint32 points) // @categories Alterna
 
 void Perl_Client_RefundAA(Client* self) // @categories Alternative Advancement
 {
-	self->RefundAA();
+	self->ResetAA();
 }
 
 int Perl_Client_GetModCharacterFactionLevel(Client* self, int faction_id) // @categories Faction

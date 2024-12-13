@@ -1256,7 +1256,7 @@ void Lua_Client::AddAAPoints(int points) {
 
 void Lua_Client::RefundAA() {
 	Lua_Safe_Call_Void();
-	self->RefundAA();
+	self->ResetAA();
 }
 
 int Lua_Client::GetModCharacterFactionLevel(int faction) {
