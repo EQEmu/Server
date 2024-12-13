@@ -2088,6 +2088,13 @@ void Bot::AI_Process()
 
 	SetFollowID(follow_mob->GetID());
 
+		if (!follow_mob || !IsInGroupOrRaid(follow_mob)) {
+			follow_mob = leash_owner;
+		}
+	}
+
+	SetFollowID(follow_mob->GetID());
+
 	SetBerserkState();
 
 	// Secondary reasons for not processing AI
@@ -2124,6 +2131,7 @@ void Bot::AI_Process()
 
 //ALT COMBAT (ACQUIRE HATE)
 	glm::vec3 Goal(0, 0, 0);
+
 
 
 	// We have aggro to choose from
@@ -2326,6 +2334,11 @@ void Bot::AI_Process()
 						DoAttackRounds(tar, EQ::invslot::slotSecondary);
 					}
 				}
+
+				if (!TargetValidation(tar)) { return; }
+
+			}
+		}
 
 				if (!TargetValidation(tar)) { return; }
 
