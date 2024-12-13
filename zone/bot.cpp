@@ -5121,96 +5121,6 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 max
 		TrySkillProc(who, skill, (ReuseTime * 1000), true);
 }
 
-void Bot::TryBackstab(Mob *other, int ReuseTime) {
-	if (!other)
-		return;
-
-	bool bIsBehind = false;
-	bool bCanFrontalBS = false;
-	const EQ::ItemInstance* inst = GetBotItem(EQ::invslot::slotPrimary);
-	const EQ::ItemData* botpiercer = nullptr;
-	if (inst)
-		botpiercer = inst->GetItem();
-
-	if (!botpiercer || (botpiercer->ItemType != EQ::item::ItemType1HPiercing)) {
-		if (!GetCombatRoundForAlerts()) {
-			SetCombatRoundForAlerts();
-			BotGroupSay(this, "I can't backstab with this weapon!");
-		}
-
-		return;
-	}
-
-	int tripleChance = (itembonuses.TripleBackstab + spellbonuses.TripleBackstab + aabonuses.TripleBackstab);
-	if (BehindMob(other, GetX(), GetY()))
-		bIsBehind = true;
-	else {
-		int FrontalBSChance = (itembonuses.FrontalBackstabChance + spellbonuses.FrontalBackstabChance + aabonuses.FrontalBackstabChance);
-		if (FrontalBSChance && (FrontalBSChance > zone->random.Int(0, 100)))
-			bCanFrontalBS = true;
-	}
-
-	if (bIsBehind || bCanFrontalBS) {
-		int chance = (10 + (GetDEX() / 10) + (itembonuses.HeroicDEX / 10));
-		if (level >= 60 && other->GetLevel() <= 45 && !other->CastToNPC()->IsEngaged() && other->GetHP()<= 32000 && other->IsNPC() && zone->random.Real(0, 99) < chance) {
-			entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, ASSASSINATES, GetName());
-			RogueAssassinate(other);
-		} else {
-			RogueBackstab(other);
-			if (level > 54) {
-				float DoubleAttackProbability = ((GetSkill(EQ::skills::SkillDoubleAttack) + GetLevel()) / 500.0f);
-				if (zone->random.Real(0, 1) < DoubleAttackProbability) {
-					if (other->GetHP() > 0)
-						RogueBackstab(other,false,ReuseTime);
-
-					if (tripleChance && other->GetHP() > 0 && tripleChance > zone->random.Int(0, 100))
-						RogueBackstab(other,false,ReuseTime);
-				}
-			}
-		}
-	} else if (aabonuses.FrontalBackstabMinDmg || itembonuses.FrontalBackstabMinDmg || spellbonuses.FrontalBackstabMinDmg) {
-		m_specialattacks = eSpecialAttacks::ChaoticStab;
-		RogueBackstab(other, true);
-		m_specialattacks = eSpecialAttacks::None;
-	}
-	else
-		Attack(other, EQ::invslot::slotPrimary);
-}
-
-void Bot::RogueBackstab(Mob *other, bool min_damage, int ReuseTime)
-{
-	if (!other)
-		return;
-
-	EQ::ItemInstance *botweaponInst = GetBotItem(EQ::invslot::slotPrimary);
-	if (botweaponInst) {
-		if (!GetWeaponDamage(other, botweaponInst))
-			return;
-	} else if (!GetWeaponDamage(other, (const EQ::ItemData *)nullptr)) {
-		return;
-	}
-
-	int64 hate = 0;
-
-	int base_damage = GetBaseSkillDamage(EQ::skills::SkillBackstab, other);
-	hate = base_damage;
-
-	DoSpecialAttackDamage(other, EQ::skills::SkillBackstab, base_damage, 0, hate, ReuseTime);
-	DoAnim(anim1HPiercing);
-}
-
-void Bot::RogueAssassinate(Mob* other) {
-	EQ::ItemInstance* botweaponInst = GetBotItem(EQ::invslot::slotPrimary);
-	if (botweaponInst) {
-		if (GetWeaponDamage(other, botweaponInst))
-			other->Damage(this, 32000, SPELL_UNKNOWN, EQ::skills::SkillBackstab);
-		else
-			other->Damage(this, -5, SPELL_UNKNOWN, EQ::skills::SkillBackstab);
-	}
-
-	DoAnim(anim1HPiercing);
-}
-
 void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	if (!target || GetAppearance() == eaDead || spellend_timer.Enabled() || IsFeared() || IsStunned() || IsMezzed() || DivineAura() || GetHP() < 0 || !IsAttackAllowed(target)) {
 		return;
@@ -5399,7 +5309,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 		while (AtkRounds > 0) {
 			if (GetTarget() != this)
-
 				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, dmg, 0, dmg, HasteMod);
 			AtkRounds--;
 		}
@@ -5479,11 +5388,14 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	if (skill_to_use == EQ::skills::SkillBackstab) {
 		reuse = (BackstabReuseTime * 1000);
 		did_attack = true;
-		if (IsRiposte)
-			reuse = 0;
 
-		TryBackstab(target,reuse);
+		if (IsRiposte) {
+			reuse = 0;
+		}
+
+		Mob::TryBackstab(target, reuse);
 	}
+
 	classattack_timer.Start(reuse / HasteModifier);
 }
 
