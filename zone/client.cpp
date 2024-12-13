@@ -13107,16 +13107,7 @@ void Client::ShowZoneShardMenu()
 	}
 
 	auto outapp = new EQApplicationPacket(OP_PickZoneWindow, sizeof(PickZoneWindow_Struct));
-
-	LogError("Size of PZWS [{}]", sizeof(PickZoneWindow_Struct));
-
-	auto pzw = (PickZoneWindow_Struct*) outapp->pBuffer;
-
-	//std::hash<int64_t> hasher;
-
-	//int64 session_id = 0x11223344556677;
-
-	//LogError("session_id [{}]", session_id);
+	auto pzw    = (PickZoneWindow_Struct*) outapp->pBuffer;
 
 	m_zoneshard_session_id = 0x11223344556677;
 
@@ -13139,14 +13130,6 @@ void Client::ShowZoneShardMenu()
 		p.player_count = static_cast<int>(e.player_count);
 		p.instance_id  = e.instance_id;
 
-		LogError(
-			"index [{}] zone_id [{}] player_count [{}] instance_id [{}]",
-			index,
-			e.zone_id,
-			e.player_count,
-			e.instance_id
-		);
-
 		pzw->entries[index] = p;
 
 		m_zoneshard_request.emplace_back(p);
@@ -13160,14 +13143,6 @@ void Client::ShowZoneShardMenu()
 			p.unknown      = 1;
 			p.player_count = 0;
 			p.instance_id  = 0;
-
-			LogError(
-				"index [{}] zone_id [{}] player_count [{}] instance_id [{}]",
-				index,
-				0,
-				0,
-				0
-			);
 
 			pzw->entries[index] = p;
 
