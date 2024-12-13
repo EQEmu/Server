@@ -667,7 +667,7 @@ bool EQ::InventoryProfile::IsClickEffectEquipped(uint32 spellid) {
 	ItemInstance* augment = nullptr;
 	EQ::item::ItemEffect_Struct eff;
 
-	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::slotWaist; ++slot_id) {
 		item = GetItem(slot_id);
 		if (!item) { continue; }
 		eff = item->GetItem()->Click;
