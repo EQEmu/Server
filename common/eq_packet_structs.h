@@ -6449,7 +6449,7 @@ struct PickZoneEntry_Struct {
 
 struct PickZoneWindow_Struct {
 	char                 padding000[64];
-	int64_t              session_id;
+	int64                session_id;
 	int8                 option_count;
 	char                 padding073[23];
 	PickZoneEntry_Struct entries[10];
