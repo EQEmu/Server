@@ -5197,7 +5197,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 					}
 
 					auto classic = RuleB(Combat, ClassicMasterWu);
-					while (extra) {
+					while (extra && TargetValidation(GetTarget())) {
 						MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : EQ::skills::SkillTigerClaw));
 						--extra;
 					}
@@ -5301,8 +5301,9 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		}
 
 		while (AtkRounds > 0) {
-			if (GetTarget() != this)
+			if (GetTarget() != this && TargetValidation(GetTarget())) {
 				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, dmg, 0, dmg, HasteMod);
+			}
 			AtkRounds--;
 		}
 
@@ -5368,7 +5369,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 			}
 
 			auto classic = RuleB(Combat, ClassicMasterWu);
-			while (extra) {
+			while (extra && TargetValidation(GetTarget())) {
 				MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : skill_to_use));
 				--extra;
 			}
