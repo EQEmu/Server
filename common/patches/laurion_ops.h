@@ -56,6 +56,7 @@ D(OP_SpawnAppearance)
 D(OP_MoveItem)
 D(OP_ShopRequest)
 D(OP_CastSpell)
+D(OP_GMTraining)
 
 #undef E
 #undef D

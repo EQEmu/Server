@@ -3300,6 +3300,21 @@ namespace Laurion
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_GMTraining)
+	{
+		DECODE_LENGTH_EXACT(structs::GMTrainee_Struct);
+		SETUP_DIRECT_DECODE(GMTrainee_Struct, structs::GMTrainee_Struct);
+
+		OUT(npcid);
+		OUT(playerid);
+
+		for (int i = 0; i < 100; ++i) {
+			OUT(skills[i]);
+		}
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	//Naive version but should work well enough for now
 	int ExtractIDFile(const std::string& input) {
 		std::string number;

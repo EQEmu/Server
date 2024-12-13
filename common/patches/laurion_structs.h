@@ -739,6 +739,15 @@ namespace Laurion {
 			/*00*/ uint32 hp;
 		};
 
+		struct GMTrainee_Struct
+		{
+			/*000*/ uint32 npcid;
+			/*004*/ uint32 playerid;
+			/*008*/ uint32 skills[PACKET_SKILL_ARRAY_SIZE];
+			/*408*/ uint8 unknown408[36];
+			/*444*/
+		};
+
 #pragma pack()
 
 	};	//end namespace structs
