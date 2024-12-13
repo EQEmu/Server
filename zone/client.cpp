@@ -2886,11 +2886,11 @@ const int64& Client::SetMana(int64 amount) {
 	return current_mana;
 }
 
-void Client::CheckManaEndUpdate() {
+void Client::CheckManaEndUpdate(bool force) {
 	if (!Connected())
 		return;
 
-	if (last_reported_mana != current_mana || last_reported_endurance != current_endurance) {
+	if (last_reported_mana != current_mana || last_reported_endurance != current_endurance || force) {
 
 		if (ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 			SendManaUpdate();

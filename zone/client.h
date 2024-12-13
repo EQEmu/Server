@@ -862,7 +862,7 @@ public:
 	uint8 GetClientMaxLevel() const { return client_max_level; }
 	void SetClientMaxLevel(uint8 max_level) { client_max_level = max_level; }
 
-	void CheckManaEndUpdate();
+	void CheckManaEndUpdate(bool force = false);
 	void SendManaUpdate();
 	void SendEnduranceUpdate();
 	uint8 GetFace() const { return m_pp.face; }

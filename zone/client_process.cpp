@@ -571,7 +571,8 @@ bool Client::Process() {
 
 			// If there are spellcasting bugs, look here first
 			if (!IsCasting()) {
-				SendSpellBarEnable(SPELL_UNKNOWN);
+				//SendSpellBarEnable(SPELL_UNKNOWN);
+				CheckManaEndUpdate(true);
 			}
 
 			if (GetTarget()) {
