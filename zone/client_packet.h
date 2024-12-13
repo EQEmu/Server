@@ -242,6 +242,7 @@
 	void Handle_OP_PlayerStateAdd(const EQApplicationPacket *app);
 	void Handle_OP_PlayerStateRemove(const EQApplicationPacket *app);
 	void Handle_OP_PickPocket(const EQApplicationPacket *app);
+	void Handle_OP_PickZone(const EQApplicationPacket *app);
 	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
 	void Handle_OP_PotionBelt(const EQApplicationPacket *app);
 	void Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app);

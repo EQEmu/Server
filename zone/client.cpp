@@ -13074,38 +13074,27 @@ void Client::ShowZoneShardMenu()
 		return;
 	}
 
-	if (!results.empty()) {
-		Message(Chat::White, "Available Zone Shards:");
-	}
+	auto outapp = new EQApplicationPacket(OP_PickZoneWindow, sizeof(PickZoneWindow_Struct));
+	auto pzw = (PickZoneWindow_Struct*) outapp->pBuffer;
 
-	int number = 1;
-	for (auto &e: results) {
-		std::string teleport = fmt::format(
-			"{}",
-			Saylink::Silent(
-				fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
-				"Teleport"
-			)
-		);
-
-		std::string yours;
-		if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
-			teleport = "Teleport";
-			yours = " (Yours)";
+	uint8 index = 0;
+	for (const auto& e : results) {
+		if (index > 9) {
+			break;
 		}
 
-		Message(
-			Chat::White, fmt::format(
-				" --> [{}] #{} {} ({}) [{}/{}] players {}",
-				teleport,
-				number,
-				z->long_name,
-				e.instance_id,
-				e.player_count,
-				z->shard_at_player_count,
-				yours
-			).c_str()
-		);
-		number++;
+		pzw->option_count++;
+
+		pzw->entries[index] = PickZoneEntry_Struct{
+			.zone_id = static_cast<int16>(e.zone_id),
+			.unknown = 1,
+			.player_count = static_cast<int>(e.player_count),
+			.instance_id = e.instance_id
+		};
+
+		index++;
 	}
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }

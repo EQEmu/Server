@@ -6440,6 +6440,24 @@ struct BuylineItemDetails_Struct {
 	uint32      item_quantity;
 };
 
+struct PickZoneEntry_Struct {
+	int16 zone_id;
+	int16 unknown;
+	int   player_count;
+	int   instance_id;
+};
+
+struct PickZoneWindow_Struct {
+	int64                session_id;
+	int8                 option_count;
+	PickZoneEntry_Struct entries[10];
+};
+
+struct PickZone_Struct {
+	int64 session_id;
+	int   selection_id;
+};
+
 // Restore structure packing to default
 #pragma pack()
 
