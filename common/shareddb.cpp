@@ -449,7 +449,7 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id)
 	return SharedbankRepository::DeleteWhere(
 		*this,
 		fmt::format(
-			"`account_id` = {} AND `slotid` BETWEEN {} AND {}",
+			"`account_id` = {} AND `slot_id` BETWEEN {} AND {}",
 			account_id,
 			base_slot_id,
 			base_slot_id + (EQ::invbag::SLOT_COUNT - 1)
