@@ -1617,6 +1617,10 @@ bool Bot::Process()
 		entity_list.ScanCloseMobs(this);
 	}
 
+	if (m_mob_check_moving_timer.Check()) { //TODO bot rewrite - is this necessary
+		CheckScanCloseMobsMovingTimer();
+	}
+
 	SpellProcess();
 
 	if (tic_timer.Check()) {
