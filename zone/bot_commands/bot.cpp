@@ -453,6 +453,15 @@ void bot_command_delete(Client *c, const Seperator *sep)
 		return;
 	}
 
+	std::string delete_confirm = sep->arg[1];
+
+	std::string deleted_check = "confirm";
+
+	if (!(delete_confirm.find(deleted_check) != std::string::npos)) {
+		c->Message(Chat::White, "You must type %s confirm to confirm the deletion of %s.", sep->arg[0], my_bot->GetCleanName());
+		return;
+	}
+
 	if (!my_bot->DeleteBot()) {
 		c->Message(Chat::White, "Failed to delete '%s' due to database error", my_bot->GetCleanName());
 		return;
