@@ -3086,6 +3086,57 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_GMTraining) {
+		ENCODE_LENGTH_EXACT(GMTrainee_Struct);
+		SETUP_DIRECT_ENCODE(GMTrainee_Struct, structs::GMTrainee_Struct);
+	
+		OUT(npcid);
+		OUT(playerid);
+
+		for (int i = 0; i < 100; ++i) {
+			OUT(skills[i]);
+		}
+
+		eq->unknown408[0] = 1;
+		eq->unknown408[1] = 0xC9;
+		eq->unknown408[2] = 0xC9;
+		eq->unknown408[3] = 0xC9;
+		eq->unknown408[4] = 0xC9;
+		eq->unknown408[5] = 0xC9;
+		eq->unknown408[6] = 0xC9;
+		eq->unknown408[7] = 0xC9;
+		eq->unknown408[8] = 0xC9;
+		eq->unknown408[9] = 0xC9;
+		eq->unknown408[10] = 0xC9;
+		eq->unknown408[11] = 0xC9;
+		eq->unknown408[12] = 0xC9;
+		eq->unknown408[13] = 0xC9;
+		eq->unknown408[14] = 0xC9;
+		eq->unknown408[15] = 0xC9;
+		eq->unknown408[16] = 0xC9;
+		eq->unknown408[17] = 0xC9;
+		eq->unknown408[18] = 0xC9;
+		eq->unknown408[19] = 0xC9;
+		eq->unknown408[20] = 0xC9;
+		eq->unknown408[21] = 0xC9;
+		eq->unknown408[22] = 0xC9;
+		eq->unknown408[23] = 0xC9;
+		eq->unknown408[24] = 0xC9;
+		eq->unknown408[25] = 0xC9;
+		eq->unknown408[26] = 0xC9;
+		eq->unknown408[27] = 0xC9;
+		eq->unknown408[28] = 0xC9;
+		eq->unknown408[29] = 0xC9;
+		eq->unknown408[30] = 0xC9;
+		eq->unknown408[31] = 0xC9;
+		eq->unknown408[32] = 0xC9;
+		eq->unknown408[33] = 0xCA; //the client far as I can tell doesn't read past the 1 byte + 32 0xc9s, but still setting it to what we saw
+		eq->unknown408[34] = 0x8C;
+		eq->unknown408[35] = 0xEC;
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -3305,11 +3356,11 @@ namespace Laurion
 		DECODE_LENGTH_EXACT(structs::GMTrainee_Struct);
 		SETUP_DIRECT_DECODE(GMTrainee_Struct, structs::GMTrainee_Struct);
 
-		OUT(npcid);
-		OUT(playerid);
+		IN(npcid);
+		IN(playerid);
 
 		for (int i = 0; i < 100; ++i) {
-			OUT(skills[i]);
+			IN(skills[i]);
 		}
 
 		FINISH_DIRECT_DECODE();
