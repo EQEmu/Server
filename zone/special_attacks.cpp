@@ -2453,7 +2453,7 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 	// Only works on YOUR target.
 	if (
 		defender &&
-		!defender->IsClient() &&
+		!defender->IsOfClientBot() &&
 		skillInUse == EQ::skills::SkillArchery &&
 		GetTarget() == defender &&
 		(defender->GetBodyType() == BodyType::Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids)) &&
@@ -2466,7 +2466,7 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 		if (HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)) {
 			int chance = GetDEX();
 			chance = 100 * chance / (chance + 3500);
-			if (IsClient() || IsBot()) {
+			if (IsOfClientBot()) {
 				chance += GetHeroicDEX() / 25;
 			}
 			chance *= 10;
@@ -2490,7 +2490,7 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 {
 	if (
 		defender &&
-		!defender->IsClient() &&
+		!defender->IsOfClientBot() &&
 		GetLevel() >= RuleI(Combat, AssassinateLevelRequirement) &&
 		(skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing) &&
 		(defender->GetBodyType() == BodyType::Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids)) &&
