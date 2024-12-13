@@ -3998,7 +3998,7 @@ void Mob::BuffProcess()
 					Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
 					if (caster && caster == this) {
 						auto slot = caster->FindMemmedSpellBySpellID(buffs[buffs_i].spellid);
-						if (slot && buffs[buffs_i].ticsremaining == 1 && caster->IsLinkedSpellReuseTimerReady(spells[buffs[buffs_i].spellid].timer_id)) {
+						if (slot > -1 && buffs[buffs_i].ticsremaining == 1 && caster->IsLinkedSpellReuseTimerReady(spells[buffs[buffs_i].spellid].timer_id)) {
 							auto tt = spells[buffs[buffs_i].spellid].target_type;
 							if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
 								caster->ApplyBardPulse(buffs[buffs_i].spellid, this, (EQ::spells::CastingSlot)slot);
