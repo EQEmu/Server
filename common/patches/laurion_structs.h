@@ -733,6 +733,12 @@ namespace Laurion {
 			//live however has a lot more info here depending on packet type
 		};
 
+		struct MobHealth_Struct
+		{
+			/*01*/ int16 spawn_id;
+			/*00*/ uint32 hp;
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

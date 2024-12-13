@@ -3076,6 +3076,16 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_MobHealth) {
+		ENCODE_LENGTH_EXACT(SpawnHPUpdate_Struct2);
+		SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct2, structs::MobHealth_Struct);
+
+		OUT(spawn_id);
+		OUT(hp);
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
