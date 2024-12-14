@@ -3936,7 +3936,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					out->trader_id        = in->trader_id;
 					strn0cpy(out->trader_name, in->trader_name, sizeof(out->trader_name));
 
-					c.second->QueuePacket(outapp);
+					c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
 					safe_delete(outapp);
 				}
 				if (zone && zone->GetZoneID() == Zones::BAZAAR && in->instance_id == zone->GetInstanceID()) {
