@@ -288,11 +288,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	AddPet(npc);
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 
-
-	if (IsClient()) {
-		CastToClient()->DoPetBagResync();
-	}
-
 	if (record.petcontrol == petTargetLock)
 	{
 		Mob* m_target = GetTarget();
@@ -321,6 +316,24 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			if (!npc->HasDied()) {
 				npc->Kill(); //Ensure pet dies if over 20k HP.
 			}
+		}
+	}
+
+	if (IsClient()) {
+		CastToClient()->DoPetBagResync();
+
+		auto inst = GetInv().GetItem(EQ::invslot::slotAmmo);
+		if (!inst) {
+			return;
+		}
+
+		auto wand = inst->GetItem();
+		if (!wand || wand->Click.Effect <= 0) {
+			return;
+		}
+
+		if (strncmp(wand->Name, "Petamorph Wand", 14) == 0) {
+			npc->ApplySpellBuff(wand->Click.Effect);
 		}
 	}
 }
@@ -786,6 +799,8 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 			}
 		}
 	}
+
+
 
 	// Class should use npc constructor to set light properties
 }

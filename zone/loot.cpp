@@ -553,6 +553,14 @@ void NPC::AddLootDropFixed(
 		m_rolled_items.emplace_back(item->item_id);
 	}
 
+	//sync with Mob::GetEquipmentMaterial
+	switch (GetRace()) {
+		case Race::Wrulon:
+		case Race::Phoenix:
+		case Race::Spider:
+			return 0;
+	}
+
 	if (wear_change && outapp) {
 		entity_list.QueueClients(this, outapp);
 		safe_delete(outapp);

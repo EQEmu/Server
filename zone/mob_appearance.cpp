@@ -203,6 +203,14 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 		const auto inst = IsClient() ? CastToClient()->m_inv[inventory_slot] : m_inv[inventory_slot];
 
 		if (is_equipped_weapon) {
+			// custom override races that shouldn't show weapons
+			// sync with NPC::AddLootDropFixed
+			switch (GetRace()) {
+				case Race::Wrulon:
+				case Race::Phoenix:
+				case Race::Spider:
+					return 0;
+			}
 			if (inst) {
 				const auto augment = inst->GetOrnamentationAugment();
 				if (augment) {
@@ -411,7 +419,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	 * The other packets work for primary/secondary.
 	 */
 
-	LogMobAppearance("[{}]", GetCleanName());
+	LogMobAppearance("[{}]", GetRace());
 
 	if (IsPlayerRace(race)) {
 		if (!IsClient()) {

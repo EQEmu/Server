@@ -10868,6 +10868,8 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 		}
 
 		SendAppearancePacket(AppearanceType::Size, race_size);
+		SendWearChange(EQ::textures::weaponPrimary);
+		SendWearChange(EQ::textures::weaponSecondary);
 	}
 
 	for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
