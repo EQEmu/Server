@@ -6418,8 +6418,6 @@ UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2251) + 10610) WHERE `slot_id` 
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2261) + 10810) WHERE `slot_id` BETWEEN 2261 AND 2270; -- Bank Bag 24
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2540; -- Shared Bank Bag 1
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id` BETWEEN 2541 AND 2550; -- Shared Bank Bag 2
-UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2031) + 6210) WHERE `slot_id` BETWEEN 2031 AND 2270; -- Bank Bags
-UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2550; -- Shared Bank Bags
 )"
 	},
 	ManifestEntry{
