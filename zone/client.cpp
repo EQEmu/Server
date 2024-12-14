@@ -1251,7 +1251,9 @@ void Client::FixModel(Spawn_Struct* npc) {
 			break;
 
 		case Race::Gargoyle:
-			npc->race = Race::NightmareGargoyle;
+			if (zone->GetZoneID() != Zones::SLEEPER) {
+				npc->race = Race::NightmareGargoyle;
+			}
 			break;
 
 		case Race::Vampire:

@@ -3077,6 +3077,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		if (respawn2 && respawn2->RespawnTimer() > 0) {
 			corpse_timer = std::min(corpse_timer, respawn2->RespawnTimer() * 1000);
+			LogDebug("Respawn Timer: [{}]", respawn2->RespawnTimer());
 		}
 
 
@@ -3087,8 +3088,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			&NPCTypedata,
 			corpse_timer
 		);
-
-		LogDebug("Respawn Timer: [{}]", respawn2->RespawnTimer());
 
 		corpse->SetSeasonal(seasonal_killer);
 		corpse->SetHardcore(hardcore_killer);
