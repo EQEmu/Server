@@ -11,7 +11,7 @@ EvolvingItemsManager::EvolvingItemsManager()
 
 void EvolvingItemsManager::LoadEvolvingItems() const
 {
-	auto const &results = ItemsEvolvingDetailsRepository::All(*m_db);
+	auto const &results = ItemsEvolvingDetailsRepository::All(*m_content_db);
 
 	if (results.empty()) {
 		return;

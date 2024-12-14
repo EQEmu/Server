@@ -660,7 +660,9 @@ bool SharedDatabase::GetInventory(Client *c)
 
 	// Retrieve character inventory
 	auto results   = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}' ORDER BY `slotid`", char_id));
-	auto e_results = CharacterEvolvingItemsRepository::GetWhere(*this, fmt::format("`char_id` = '{}' AND `deleted_at` IS NULL", char_id));
+	auto e_results = CharacterEvolvingItemsRepository::GetWhere(
+		*this, fmt::format("`char_id` = '{}' AND `deleted_at` IS NULL", char_id)
+	);
 
 	if (results.empty()) {
 		LogError("Error loading inventory for char_id {} from the database.", char_id);

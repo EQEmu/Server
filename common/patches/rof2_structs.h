@@ -5446,8 +5446,8 @@ struct EvolveXPWindowSendDetails_Struct {
 	/*012*/	uint64 item2_unique_id;
 	/*020*/	uint32 compatibility;
 	/*024*/	uint32 max_transfer_level;
-	/*028*/	uint8  unknown_028;
-	/*029*/ uint8  unknown_029;
+	/*028*/	uint8  item1_present;
+	/*029*/ uint8  item2_present;
 	/*030*/ char   serialize_data[];
 };
 

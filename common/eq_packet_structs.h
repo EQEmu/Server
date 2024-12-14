@@ -6486,8 +6486,8 @@ struct EvolveXPWindowSend_Struct {
 	/*012*/	uint64 item2_unique_id;
 	/*020*/	uint32 compatibility;
 	/*024*/	uint32 max_transfer_level;
-	/*028*/	uint8  unknown_028;
-	/*029*/ uint8  unknown_029;
+	/*028*/	uint8  item1_present;
+	/*029*/ uint8  item2_present;
 	/*030*/ std::string   serialize_item_1;
 	/*034*/ std::string   serialize_item_2;
 
@@ -6500,8 +6500,8 @@ struct EvolveXPWindowSend_Struct {
 			CEREAL_NVP(item2_unique_id),
 			CEREAL_NVP(compatibility),
 			CEREAL_NVP(max_transfer_level),
-			CEREAL_NVP(unknown_028),
-			CEREAL_NVP(unknown_029),
+			CEREAL_NVP(item1_present),
+			CEREAL_NVP(item2_present),
 			CEREAL_NVP(serialize_item_1),
 			CEREAL_NVP(serialize_item_2)
 		);

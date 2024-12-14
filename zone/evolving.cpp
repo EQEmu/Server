@@ -18,22 +18,22 @@
 
 #include "../common/evolving.h"
 
-#include "../common/global_define.h"
-#include "../common/rulesys.h"
 #include "../common/eq_constants.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/global_define.h"
 #include "../common/repositories/character_evolving_items_repository.h"
+#include "../common/rulesys.h"
 
 #include "client.h"
-#include "worldserver.h"
 #include "string_ids.h"
+#include "worldserver.h"
 
 extern WorldServer worldserver;
 
 void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 {
-	const auto in = reinterpret_cast<EvolveItemToggle_Struct *>(app->pBuffer);
-	auto item     = CharacterEvolvingItemsRepository::FindOne(database, in->unique_id);
+	const auto in   = reinterpret_cast<EvolveItemToggle_Struct *>(app->pBuffer);
+	auto       item = CharacterEvolvingItemsRepository::FindOne(database, in->unique_id);
 
 	LogEvolveItemDetail(
 		"Character ID <green>[{}] requested to set evolve item with unique id <yellow>[{}] to status <yellow>[{}]",
@@ -43,12 +43,12 @@ void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 	);
 
 	if (!item.id) {
-		LogEvolveItemDetail("Character ID <green>[{}] toggle evolve item unique id <yellow>[{}] failed", CharacterID(), in->unique_id);
+		LogEvolveItemDetail(
+			"Character ID <green>[{}] toggle evolve item unique id <yellow>[{}] failed", CharacterID(), in->unique_id);
 		return;
 	}
 
-	item.activated = in->activated;
-
+	item.activated  = in->activated;
 	const auto inst = GetInv().GetItem(GetInv().HasItem(item.item_id));
 	inst->SetEvolveActivated(item.activated ? true : false);
 
@@ -59,11 +59,12 @@ void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 
 void Client::SendEvolvingPacket(const int8 action, const CharacterEvolvingItemsRepository::CharacterEvolvingItems &item)
 {
-	auto out        = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
+	auto       out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
 	const auto data = reinterpret_cast<EvolveItemToggle_Struct *>(out->pBuffer);
 
 	LogEvolveItemDetail(
-		"Character ID <green>[{}] requested info for evolving item with unique id <yellow>[{}] status <yellow>[{}] percentage <yellow>[{}]",
+		"Character ID <green>[{}] requested info for evolving item with unique id <yellow>[{}] status <yellow>[{}] "
+		"percentage <yellow>[{}]",
 		CharacterID(),
 		item.id,
 		item.activated,
@@ -78,7 +79,8 @@ void Client::SendEvolvingPacket(const int8 action, const CharacterEvolvingItemsR
 	QueuePacket(out.get());
 
 	LogEvolveItem(
-		"Sent evolve item with unique id <yellow>[{}] status <yellow>[{}] percentage <yellow>[{}] to Character ID <green>[{}]",
+		"Sent evolve item with unique id <yellow>[{}] status <yellow>[{}] percentage <yellow>[{}] to Character ID "
+		"<green>[{}]",
 		data->unique_id,
 		data->activated,
 		data->percentage,
@@ -91,52 +93,49 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 	std::vector<const EQ::ItemInstance *> queue{};
 
 	for (auto &[key, inst]: GetInv().GetWorn()) {
-		LogEvolveItemDetail("CharacterID <green>[{}] found equipped item ID <yellow>[{}]", CharacterID(), inst->GetID());
+		LogEvolveItemDetail(
+			"CharacterID <green>[{}] found equipped item ID <yellow>[{}]", CharacterID(), inst->GetID());
 		if (!inst->IsEvolving() || !inst->GetEvolveActivated()) {
-			LogEvolveItemDetail("CharacterID <green>[{}], item ID <yellow>[{}] not an evolving item.",
-				CharacterID(),
-				inst->GetID()
-				);
+			LogEvolveItemDetail(
+				"CharacterID <green>[{}], item ID <yellow>[{}] not an evolving item.", CharacterID(), inst->GetID());
 			continue;
 		}
 
 		if (inst->GetTimers().contains("evolve") && !inst->GetTimers().at("evolve").Check()) {
-			LogEvolveItemDetail("CharacterID <green>[{}], item ID <yellow>[{}] timer not yet expired. <red>[{}] secs remaining.",
+			LogEvolveItemDetail(
+				"CharacterID <green>[{}], item ID <yellow>[{}] timer not yet expired. <red>[{}] secs remaining.",
 				CharacterID(),
 				inst->GetID(),
-				inst->GetTimers().at("evolve").GetRemainingTime() / 1000
-				);
+				inst->GetTimers().at("evolve").GetRemainingTime() / 1000);
 			continue;
 		}
 
 		auto const type     = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).type;
 		auto const sub_type = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).sub_type;
 
-		LogEvolveItemDetail("CharacterID <green>[{}] item id <green>[{}] type {} sub_type {} is Evolving.  Continue processing...",
+		LogEvolveItemDetail(
+			"CharacterID <green>[{}] item id <green>[{}] type {} sub_type {} is Evolving.  Continue processing...",
 			CharacterID(),
 			inst->GetID(),
 			type,
-			sub_type
-		);
+			sub_type);
 
 		switch (type) {
 			case EvolvingItems::Types::AMOUNT_OF_EXP: {
 				LogEvolveItemDetail("Type <green>[{}] Processing sub_type", type);
 				if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
-				    (sub_type == EvolvingItems::SubTypes::GROUP_EXP && IsGrouped())
-				) {
+					(sub_type == EvolvingItems::SubTypes::GROUP_EXP && IsGrouped())) {
 					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
 					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100);
 				}
-				else if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
-				         (sub_type == EvolvingItems::SubTypes::RAID_EXP && IsRaidGrouped())
-				) {
+				else if (
+					sub_type == EvolvingItems::SubTypes::ALL_EXP ||
+					(sub_type == EvolvingItems::SubTypes::RAID_EXP && IsRaidGrouped())) {
 					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
 					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100);
 				}
-				else if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
-				         sub_type == EvolvingItems::SubTypes::SOLO_EXP
-				) {
+				else if (
+					sub_type == EvolvingItems::SubTypes::ALL_EXP || sub_type == EvolvingItems::SubTypes::SOLO_EXP) {
 					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
 					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100);
 				}
@@ -144,11 +143,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 				inst->CalculateEvolveProgression();
 
 				auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(
-					database,
-					inst->GetEvolveUniqueID(),
-					inst->GetEvolveCurrentAmount(),
-					inst->GetEvolveProgression()
-				);
+					database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression());
 				if (!e.id) {
 					break;
 				}
@@ -156,7 +151,8 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 				SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, e);
 
 				LogEvolveItem(
-					"Processing Complete for item id <green>[{1}] Type 1 Amount of EXP - SubType <yellow>[{0}] - Assigned <yellow>[{2}] of exp to <green>[{1}]",
+					"Processing Complete for item id <green>[{1}] Type 1 Amount of EXP - SubType <yellow>[{0}] - "
+					"Assigned <yellow>[{2}] of exp to <green>[{1}]",
 					sub_type,
 					inst->GetID(),
 					exp * 0.001
@@ -179,8 +175,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 						database,
 						inst->GetEvolveUniqueID(),
 						inst->GetEvolveCurrentAmount(),
-						inst->GetEvolveProgression()
-					);
+						inst->GetEvolveProgression());
 					if (!e.id) {
 						break;
 					}
@@ -188,7 +183,8 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, e);
 
 					LogEvolveItem(
-						"Processing Complete for item id <green>[{1}] Type 3 Specific Mob Race - SubType <yellow>[{0}] - Increased count by 1 for <green>[{1}]",
+						"Processing Complete for item id <green>[{1}] Type 3 Specific Mob Race - SubType <yellow>[{0}] "
+						"- Increased count by 1 for <green>[{1}]",
 						sub_type,
 						inst->GetID()
 					);
@@ -211,8 +207,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 						database,
 						inst->GetEvolveUniqueID(),
 						inst->GetEvolveCurrentAmount(),
-						inst->GetEvolveProgression()
-					);
+						inst->GetEvolveProgression());
 					if (!e.id) {
 						break;
 					}
@@ -220,7 +215,8 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, e);
 
 					LogEvolveItem(
-						"Processing Complete for item id <green>[{1}] Type 4 Specific Zone ID - SubType <yellow>[{0}] - Increased count by 1 for <green>[{1}]",
+						"Processing Complete for item id <green>[{1}] Type 4 Specific Zone ID - SubType <yellow>[{0}] "
+						"- Increased count by 1 for <green>[{1}]",
 						sub_type,
 						inst->GetID()
 					);
@@ -244,9 +240,9 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 	}
 }
 
-void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app)
+void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket *app)
 {
-	const auto in = reinterpret_cast<EvolveItemToggle_Struct*>(app->pBuffer);
+	const auto in        = reinterpret_cast<EvolveItemToggle_Struct *>(app->pBuffer);
 
 	const uint32 item_id = static_cast<uint32>(in->unique_id & 0xFFFFFFFF);
 	if (item_id == 0) {
@@ -256,16 +252,17 @@ void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app)
 
 	std::unique_ptr<EQ::ItemInstance> const inst(database.CreateItem(item_id));
 
-	LogEvolveItemDetail("Character ID <green>[{}] requested to view final evolve item id <yellow>[{}] for evolve item id <yellow>[{}]",
+	LogEvolveItemDetail(
+		"Character ID <green>[{}] requested to view final evolve item id <yellow>[{}] for evolve item id <yellow>[{}]",
 		CharacterID(),
 		item_id,
-		evolving_items_manager.GetFirstItemInLoreGroupByItemID(item_id)
-		);
+		evolving_items_manager.GetFirstItemInLoreGroupByItemID(item_id));
 
 	inst->SetEvolveProgression(100);
 
 	if (inst) {
-		LogEvolveItemDetail("Sending final result for item id <yellow>[{}] to Character ID <green>[{}]", item_id, CharacterID());
+		LogEvolveItemDetail(
+			"Sending final result for item id <yellow>[{}] to Character ID <green>[{}]", item_id, CharacterID());
 		SendItemPacket(0, inst.get(), ItemPacketViewLink);
 	}
 }
@@ -297,38 +294,40 @@ bool Client::DoEvolveCheckProgression(const EQ::ItemInstance &inst)
 
 	MessageString(Chat::Yellow, EVOLVE_ITEM_EVOLVED, inst.GetItem()->Name);
 
-	LogEvolveItem("Evolved item id <red>[{}] into item id <green>[{}] for Character ID <green>[{}]",
+	LogEvolveItem(
+		"Evolved item id <red>[{}] into item id <green>[{}] for Character ID <green>[{}]",
 		inst.GetID(),
 		new_inst->GetID(),
-		CharacterID()
-	);
+		CharacterID());
 
 	return true;
 }
 
 void Client::SendEvolveXPTransferWindow()
 {
-	auto out = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
-	const auto data = reinterpret_cast<EvolveItemToggle_Struct*>(out->pBuffer);
+	auto       out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
+	const auto data = reinterpret_cast<EvolveItemToggle_Struct *>(out->pBuffer);
 
-	data->action = 1;
+	data->action    = 1;
 
 	QueuePacket(out.get());
 }
 
 void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 {
-	const auto in = reinterpret_cast<EvolveXPWindowReceive_Struct*>(app->pBuffer);
+	const auto in = reinterpret_cast<EvolveXPWindowReceive_Struct *>(app->pBuffer);
 
-	const auto item_1_slot = GetInv().HasEvolvingItem(in->item1_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
-	const auto item_2_slot = GetInv().HasEvolvingItem(in->item2_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
+	const auto item_1_slot =
+		GetInv().HasEvolvingItem(in->item1_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
+	const auto item_2_slot =
+		GetInv().HasEvolvingItem(in->item2_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
 
 	if (item_1_slot == INVALID_INDEX || item_2_slot == INVALID_INDEX) {
 		return;
 	}
 
 	const auto inst_from = GetInv().GetItem(item_1_slot);
-	const auto inst_to = GetInv().GetItem(item_2_slot);
+	const auto inst_to   = GetInv().GetItem(item_2_slot);
 
 	if (!inst_from || !inst_to) {
 		return;
@@ -341,8 +340,8 @@ void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 		return;
 	}
 
-	std::unique_ptr<EQ::ItemInstance> const inst_from_new (database.CreateItem(results.item_from_id));
-	std::unique_ptr<EQ::ItemInstance> const inst_to_new (database.CreateItem(results.item_to_id));
+	std::unique_ptr<EQ::ItemInstance> const inst_from_new(database.CreateItem(results.item_from_id));
+	std::unique_ptr<EQ::ItemInstance> const inst_to_new(database.CreateItem(results.item_to_id));
 	if (!inst_from_new || !inst_to_new) {
 		SendEvolveTransferResults(*inst_from, *inst_to, *inst_from, *inst_to, 0, 0);
 		return;
@@ -354,28 +353,24 @@ void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 	inst_to_new->CalculateEvolveProgression();
 
 	SendEvolveTransferResults(
-		*inst_from,
-		*inst_to,
-		*inst_from_new,
-		*inst_to_new,
-		results.compatibility,
-		results.max_transfer_level
-	);
+		*inst_from, *inst_to, *inst_from_new, *inst_to_new, results.compatibility, results.max_transfer_level);
 }
 
-void Client::DoEvolveTransferXP(const EQApplicationPacket* app)
+void Client::DoEvolveTransferXP(const EQApplicationPacket *app)
 {
-	const auto in = reinterpret_cast<EvolveXPWindowReceive_Struct*>(app->pBuffer);
+	const auto in = reinterpret_cast<EvolveXPWindowReceive_Struct *>(app->pBuffer);
 
-	const auto item_1_slot = GetInv().HasEvolvingItem(in->item1_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
-	const auto item_2_slot = GetInv().HasEvolvingItem(in->item2_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
+	const auto item_1_slot =
+		GetInv().HasEvolvingItem(in->item1_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
+	const auto item_2_slot =
+		GetInv().HasEvolvingItem(in->item2_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
 
 	if (item_1_slot == INVALID_INDEX || item_2_slot == INVALID_INDEX) {
 		return;
 	}
 
 	const auto inst_from = GetInv().GetItem(item_1_slot);
-	const auto inst_to = GetInv().GetItem(item_2_slot);
+	const auto inst_to   = GetInv().GetItem(item_2_slot);
 
 	if (!inst_from || !inst_to) {
 		Message(Chat::Red, "Transfer Failed.  Incompatible Items.");
@@ -427,14 +422,22 @@ void Client::DoEvolveTransferXP(const EQApplicationPacket* app)
 	e.status = "Transfer XP - Updated TO Evolve item placed in inventory.";
 	RecordPlayerEventLog(PlayerEvent::EVOLVE_ITEM, e);
 
-	LogEvolveItem("Evolve Transfer XP resulted in evolved item id <red>[{}] into item id <green>[{}] for Character ID <green>[{}]",
+	LogEvolveItem(
+		"Evolve Transfer XP resulted in evolved item id <red>[{}] into item id <green>[{}] for Character ID "
+		"<green>[{}]",
 		inst_to->GetID(),
 		inst_to_new->GetID(),
 		CharacterID()
 	);
 }
 
-void Client::SendEvolveTransferResults(const EQ::ItemInstance &inst_from, const EQ::ItemInstance &inst_to, const EQ::ItemInstance &inst_from_new, const EQ::ItemInstance &inst_to_new, const uint32 compatibility, const uint32 max_transfer_level)
+void Client::SendEvolveTransferResults(
+	const EQ::ItemInstance &inst_from,
+	const EQ::ItemInstance &inst_to,
+	const EQ::ItemInstance &inst_from_new,
+	const EQ::ItemInstance &inst_to_new,
+	const uint32            compatibility,
+	const uint32            max_transfer_level)
 {
 	std::stringstream           ss;
 	cereal::BinaryOutputArchive ar(ss);
@@ -445,8 +448,8 @@ void Client::SendEvolveTransferResults(const EQ::ItemInstance &inst_from, const 
 	e.item1_unique_id    = inst_from.GetEvolveUniqueID();
 	e.item2_unique_id    = inst_to.GetEvolveUniqueID();
 	e.max_transfer_level = max_transfer_level;
-	e.unknown_028        = 1;
-	e.unknown_029        = 1;
+	e.item1_present      = 1;
+	e.item2_present      = 1;
 	e.serialize_item_1   = inst_from_new.Serialize(0);
 	e.serialize_item_2   = inst_to_new.Serialize(0);
 
@@ -457,9 +460,9 @@ void Client::SendEvolveTransferResults(const EQ::ItemInstance &inst_from, const 
 	uint32 packet_size = sizeof(EvolveItemMessaging_Struct) + ss.str().length();
 
 	std::unique_ptr<EQApplicationPacket> out(new EQApplicationPacket(OP_EvolveItem, packet_size));
-	const auto data    = reinterpret_cast<EvolveItemMessaging_Struct *>(out->pBuffer);
+	const auto                           data = reinterpret_cast<EvolveItemMessaging_Struct *>(out->pBuffer);
 
-	data->action = EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS;
+	data->action                              = EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS;
 	memcpy(data->serialized_data, ss.str().data(), ss.str().length());
 
 	QueuePacket(out.get());

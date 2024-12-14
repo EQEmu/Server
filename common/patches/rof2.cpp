@@ -1387,8 +1387,8 @@ namespace RoF2
 				data->max_transfer_level = e.max_transfer_level;
 				data->item1_unique_id    = e.item1_unique_id;
 				data->item2_unique_id    = e.item2_unique_id;
-				data->unknown_028        = e.unknown_028;
-				data->unknown_029        = e.unknown_029;
+				data->item1_present      = e.item1_present;
+				data->item2_present      = e.item2_present;
 
 				memcpy(data->serialize_data, ob.str().data(), ob.size());
 				dest->QueuePacket(out.get());
