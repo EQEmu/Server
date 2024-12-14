@@ -6335,51 +6335,6 @@ CREATE TABLE `character_pet_name` (
 	},
 	ManifestEntry{
 		.version = 9294,
-		.description = "2025_01_26_items_table_bazaar_search_indexes.sql",
-		.check = "SHOW CREATE TABLE `items`",
-		.condition = "missing",
-		.match = "idx_slots_reclevel",
-		.sql = R"(
--- indexes for the `items` table
-CREATE INDEX idx_slots_reclevel ON items (slots, reclevel);
-CREATE INDEX idx_itemclass_itemtype ON items (itemclass, itemtype);
-CREATE INDEX idx_augment_slots ON items (
-    augslot1type,
-    augslot2type,
-    augslot3type,
-    augslot4type,
-    augslot5type,
-    augslot6type
-);
-CREATE INDEX idx_races_classes ON items (races, classes);
-
--- common stat fields
-CREATE INDEX idx_item_ac ON items (ac);
-CREATE INDEX idx_item_hp ON items (hp);
-CREATE INDEX idx_item_mana ON items (mana);
-CREATE INDEX idx_item_reclevel ON items (reclevel);
-CREATE INDEX idx_item_type_skill ON items (itemtype, skillmodtype);
-)",
-		.content_schema_update = true
-	},
-	ManifestEntry{
-		.version = 9295,
-		.description = "2025_01_26_trader_table_bazaar_search_indexes.sql",
-		.check = "SHOW CREATE TABLE `trader`",
-		.condition = "missing",
-		.match = "idx_trader_item",
-		.sql = R"(
--- indexes for the `trader` table
-CREATE INDEX idx_trader_item ON trader (item_id, item_cost);
-CREATE INDEX idx_trader_char ON trader (char_id, char_zone_id, char_zone_instance_id);
-CREATE INDEX idx_trader_item_sn ON trader (item_sn);
-CREATE INDEX idx_trader_item_cost ON trader (item_cost);
-CREATE INDEX idx_trader_active_transaction ON trader (active_transaction);
-)",
-		.content_schema_update = false
-	},
-	ManifestEntry{
-		.version = 9294,
 		.description = "2024_01_22_sharedbank_guid_primary_key.sql",
 		.check = "SHOW COLUMN FROM `sharedbank` LIKE 'guid'",
 		.condition = "empty",
@@ -6403,7 +6358,7 @@ ADD COLUMN `ornament_hero_model` int(11) NOT NULL AFTER `ornament_idfile`,
 ADD COLUMN `guid` bigint(20) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_hero_model`,
 ADD PRIMARY KEY (`account_id`, `slot_id`);
 )"
-	},
+	}
 	ManifestEntry{
 		.version = 9295,
 		.description = "2024_10_24_inventory_changes.sql",
@@ -6461,8 +6416,7 @@ UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2231) + 10210) WHERE `slot_id` 
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2241) + 10410) WHERE `slot_id` BETWEEN 2241 AND 2250; -- Bank Bag 22
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2251) + 10610) WHERE `slot_id` BETWEEN 2251 AND 2260; -- Bank Bag 23
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2261) + 10810) WHERE `slot_id` BETWEEN 2261 AND 2270; -- Bank Bag 24
-UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2540; -- Shared Bank Bag 1
-UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id` BETWEEN 2541 AND 2550; -- Shared Bank Bag 2
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2550; -- Shared Bank Bags
 )"
 	},
 	ManifestEntry{
