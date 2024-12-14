@@ -7585,13 +7585,12 @@ void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 {
-	if (!GuildBanks)
+	if (!GuildBanks) {
 		return;
+	}
 
-	if (zone->GetZoneID() != Zones::GUILDHALL)
-	{
+	if (zone->GetZoneID() != Zones::GUILDHALL) {
 		Message(Chat::Red, "The Guild Bank is not available in this zone.");
-
 		return;
 	}
 
@@ -7601,37 +7600,33 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		return;
 	}
 
-	char *Buffer = (char *)app->pBuffer;
-
-	uint32 Action = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
+	char  *Buffer     = (char *) app->pBuffer;
+	uint32 Action     = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 	uint32 sentAction = Action;
 
-	if (!IsInAGuild())
-	{
+	if (!IsInAGuild()) {
 		Message(Chat::Red, "You must be in a Guild to use the Guild Bank.");
-
-		if (Action == GuildBankDeposit)
+		if (Action == GuildBankDeposit) {
 			GuildBankDepositAck(true, sentAction);
-		else
+		}
+		else {
 			GuildBankAck();
+		}
 
 		return;
 	}
 
 	if (!IsGuildBanker())
 	{
-		if ((Action != GuildBankDeposit) && (Action != GuildBankViewItem) && (Action != GuildBankWithdraw))
+		if (Action != GuildBankDeposit && Action != GuildBankViewItem && Action != GuildBankWithdraw)
 		{
 			LogError("Suspected hacking attempt on guild bank from [{}]", GetName());
-
 			GuildBankAck();
-
 			return;
 		}
 	}
 
-	switch (Action)
-	{
+	switch (Action) {
 		case GuildBankPromote: {
 			if (GuildBanks->IsAreaFull(GuildID(), GuildBankMainArea)) {
 				MessageString(Chat::Red, GUILD_BANK_FULL);
@@ -7645,6 +7640,25 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			if (slot_id >= 0) {
 				auto inst = GuildBanks->GetItem(GuildID(), GuildBankMainArea, slot_id, 1);
 				if (inst) {
+					if (player_event_logs.IsEventEnabled(PlayerEvent::GUILD_BANK_MOVE_TO_BANK_AREA)) {
+						PlayerEvent::GuildBankTransaction log{};
+						log.char_id  = CharacterID();
+						log.guild_id = GuildID();
+						log.item_id  = inst->GetID();
+						log.quantity = inst->GetCharges();
+						if (inst->IsAugmented()) {
+							auto augs      = inst->GetAugmentIDs();
+							log.aug_slot_1 = augs.at(0);
+							log.aug_slot_2 = augs.at(1);
+							log.aug_slot_3 = augs.at(2);
+							log.aug_slot_4 = augs.at(3);
+							log.aug_slot_5 = augs.at(4);
+							log.aug_slot_6 = augs.at(5);
+						}
+
+						RecordPlayerEventLog(PlayerEvent::GUILD_BANK_MOVE_TO_BANK_AREA, log);
+					}
+
 					MessageString(Chat::LightGray, GUILD_BANK_TRANSFERRED, inst->GetItem()->Name);
 				}
 			}
@@ -7670,8 +7684,8 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		case GuildBankDeposit: // Deposit Item
 		{
-			EQ::ItemInstance *cursor_item_inst = GetInv().GetItem(EQ::invslot::slotCursor);
-			bool              allowed          = true;
+			const auto cursor_item_inst = GetInv().GetItem(EQ::invslot::slotCursor);
+			bool       allowed          = true;
 
 			if (!cursor_item_inst) {
 				Message(Chat::Red, "No Item on the cursor.");
@@ -7679,14 +7693,13 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				return;
 			}
 
-			const EQ::ItemData *cursor_item = cursor_item_inst->GetItem();
+			const auto cursor_item = cursor_item_inst->GetItem();
 			if (GuildBanks->IsAreaFull(GuildID(), GuildBankDepositArea)) {
 				MessageString(Chat::Red, GUILD_BANK_FULL);
 				GuildBankDepositAck(true, sentAction);
 				if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 					GetInv().PopItem(EQ::invslot::slotCursor);
 					PushItemOnCursor(*cursor_item_inst, true);
-					//PushItemOnCursor(cursor_item, true);
 				}
 
 				return;
@@ -7697,7 +7710,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				cursor_item_inst->IsNoneEmptyContainer() ||
 				cursor_item->NoRent == 0 ||
 				(cursor_item->LoreFlag && GuildBanks->HasItem(GuildID(), cursor_item->ID))
-			) {
+				) {
 				allowed = false;
 			}
 
@@ -7707,7 +7720,6 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 				if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 					GetInv().PopItem(EQ::invslot::slotCursor);
-//					PushItemOnCursor(cursor_item, true);
 					PushItemOnCursor(*cursor_item_inst, true);
 				}
 				return;
@@ -7733,6 +7745,22 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			if (GuildBanks->AddItem(item, this)) {
 				GuildBankDepositAck(false, sentAction);
 				DeleteItemInInventory(EQ::invslot::slotCursor, 0, false);
+
+				if (player_event_logs.IsEventEnabled(PlayerEvent::GUILD_BANK_DEPOSIT)) {
+					PlayerEvent::GuildBankTransaction log{};
+					log.char_id    = CharacterID();
+					log.guild_id   = GuildID();
+					log.item_id    = item.item_id;
+					log.quantity   = item.quantity;
+					log.aug_slot_1 = item.augment_1_id;
+					log.aug_slot_2 = item.augment_2_id;
+					log.aug_slot_3 = item.augment_3_id;
+					log.aug_slot_4 = item.augment_4_id;
+					log.aug_slot_5 = item.augment_5_id;
+					log.aug_slot_6 = item.augment_6_id;
+
+					RecordPlayerEventLog(PlayerEvent::GUILD_BANK_DEPOSIT, log);
+				}
 			}
 
 			break;
@@ -7752,82 +7780,93 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			break;
 		}
 
-	case GuildBankWithdraw:
-	{
-		if (GetInv()[EQ::invslot::slotCursor])
-		{
-			MessageString(Chat::Red, GUILD_BANK_EMPTY_HANDS);
-			GuildBankAck();
-			break;
-		}
+		case GuildBankWithdraw: {
+			if (GetInv()[EQ::invslot::slotCursor]) {
+				MessageString(Chat::Red, GUILD_BANK_EMPTY_HANDS);
+				GuildBankAck();
+				break;
+			}
 
-		auto gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
-		auto inst = GuildBanks->GetItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
-
-		if (!inst)
-		{
-			GuildBankAck();
-			break;
-		}
-
-		if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_BANK_WITHDRAW_ITEMS))
-		{
-			Message(Chat::Red, "You do not have permission to withdraw.");
-			GuildBankAck();
-			break;
-		}
-
-		if (!IsGuildBanker()) // && !GuildBanks->AllowedToWithdraw(GuildID(), gbwis->Area, gbwis->SlotID, GetName()))
-		{
-			LogError("Suspected attempted hack on the guild bank from [{}]", GetName());
-			GuildBankAck();
-			break;
-		}
-
-		if (CheckLoreConflict(inst->GetItem()))
-		{
-			MessageString(Chat::Red, DUP_LORE);
-			GuildBankAck();
-			break;
-		}
-
-		if (gbwis->Quantity > 0)
-		{
-			PushItemOnCursor(*inst.get());
-			SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketLimbo);
-			GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity, this);
-		}
-		else
-		{
-			Message(Chat::Red, "Unable to withdraw 0 quantity of %s", inst->GetItem()->Name);
-		}
-
-		GuildBankAck();
-		break;
-	}
-	case GuildBankSplitStacks: {
-		if (GuildBanks->IsAreaFull(GuildID(), GuildBankMainArea)) {
-			MessageString(Chat::Red, GUILD_BANK_FULL);
-		}
-		else {
 			auto gbwis = (GuildBankWithdrawItem_Struct *) app->pBuffer;
-			GuildBanks->SplitStack(GuildID(), gbwis->SlotID, gbwis->Quantity, this);
+			auto inst  = GuildBanks->GetItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
+
+			if (!inst) {
+				GuildBankAck();
+				break;
+			}
+
+			if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_BANK_WITHDRAW_ITEMS)) {
+				Message(Chat::Red, "You do not have permission to withdraw.");
+				GuildBankAck();
+				break;
+			}
+
+			if (!IsGuildBanker()) {
+				LogError("Suspected attempted hack on the guild bank from [{}]", GetName());
+				GuildBankAck();
+				break;
+			}
+
+			if (CheckLoreConflict(inst->GetItem())) {
+				MessageString(Chat::Red, DUP_LORE);
+				GuildBankAck();
+				break;
+			}
+
+			if (gbwis->Quantity > 0) {
+				PushItemOnCursor(*inst.get());
+				SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketLimbo);
+				GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity, this);
+
+				if (player_event_logs.IsEventEnabled(PlayerEvent::GUILD_BANK_WITHDRAWAL)) {
+					PlayerEvent::GuildBankTransaction log{};
+					log.char_id  = CharacterID();
+					log.guild_id = GuildID();
+					log.item_id  = inst->GetID();
+					log.quantity = gbwis->Quantity;
+					if (inst->IsAugmented()) {
+						auto augs      = inst->GetAugmentIDs();
+						log.aug_slot_1 = augs.at(0);
+						log.aug_slot_2 = augs.at(1);
+						log.aug_slot_3 = augs.at(2);
+						log.aug_slot_4 = augs.at(3);
+						log.aug_slot_5 = augs.at(4);
+						log.aug_slot_6 = augs.at(5);
+					}
+
+					RecordPlayerEventLog(PlayerEvent::GUILD_BANK_WITHDRAWAL, log);
+				}
+			}
+			else {
+				Message(Chat::Red, "Unable to withdraw 0 quantity of %s", inst->GetItem()->Name);
+			}
+
+			GuildBankAck();
+			break;
+		}
+		case GuildBankSplitStacks: {
+			if (GuildBanks->IsAreaFull(GuildID(), GuildBankMainArea)) {
+				MessageString(Chat::Red, GUILD_BANK_FULL);
+			}
+			else {
+				auto gbwis = (GuildBankWithdrawItem_Struct *) app->pBuffer;
+				GuildBanks->SplitStack(GuildID(), gbwis->SlotID, gbwis->Quantity, this);
+			}
+
+			GuildBankAck();
+			break;
+		}
+		case GuildBankMergeStacks: {
+			auto gbwis = (GuildBankWithdrawItem_Struct *) app->pBuffer;
+			GuildBanks->MergeStacks(GuildID(), gbwis->SlotID, this);
+			GuildBankAck();
+			break;
 		}
 
-		GuildBankAck();
-		break;
-	}
-	case GuildBankMergeStacks: {
-		auto gbwis = (GuildBankWithdrawItem_Struct *) app->pBuffer;
-		GuildBanks->MergeStacks(GuildID(), gbwis->SlotID, this);
-		GuildBankAck();
-		break;
-	}
-
-	default: {
-		Message(Chat::Red, "Unexpected GuildBank action.");
-		LogError("Received unexpected guild bank action code [{}] from [{}]", Action, GetName());
-	}
+		default: {
+			Message(Chat::Red, "Unexpected GuildBank action.");
+			LogError("Received unexpected guild bank action code [{}] from [{}]", Action, GetName());
+		}
 	}
 }
 

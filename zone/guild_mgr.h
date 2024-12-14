@@ -136,7 +136,6 @@ class GuildBankManager
 public:
 	~GuildBankManager();
 	void SendGuildBank(Client *c);
-//	bool AddItem(uint32 guild_id, uint8 area, uint32 item_id, int32 quantity, std::string& donator, uint8 permissions, std::string& who_for, uint32 augement_1_id = 0, uint32 augement_2_id = 0, uint32 augement_3_id = 0, uint32 augement_4_id = 0, uint32 augement_5_id = 0, uint32 augement_6_id = 0);
 	bool AddItem(GuildBankRepository::GuildBank &guild_bank_item, Client* client);
 	int Promote(uint32 GuildID, int SlotID, Client* c);
 	void SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName, Client* c);
@@ -157,7 +156,6 @@ private:
 	void UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
 
 	std::list<std::shared_ptr<GuildBank>> banks;
-
 };
 
 extern ZoneGuildManager guild_mgr;

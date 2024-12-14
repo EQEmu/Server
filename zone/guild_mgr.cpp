@@ -685,14 +685,7 @@ ZoneGuildManager::~ZoneGuildManager()
 
 GuildBankManager::~GuildBankManager()
 {
-	// auto Iterator = banks.begin();
-	//
-	// while(Iterator != banks.end())
-	// {
-	// 	safe_delete(*Iterator);
-	//
-	// 	++Iterator;
-	// }
+
 }
 
 bool GuildBankManager::Load(uint32 guild_id)
@@ -750,10 +743,9 @@ void GuildBankManager::SendGuildBank(Client *c)
 
 	// RoF+ uses a bulk list packet -- This is also how the Action 0 of older clients basically works
 	if (c->ClientVersionBit() & EQ::versions::maskRoFAndLater) {
-		//auto size = c->GetInv().GetLookup()->InventoryTypeSize.GuildBankDeposit;
 
 		auto outapp = new EQApplicationPacket(OP_GuildBankItemList, sizeof(GuildBankItemListEntry_Struct) * 240);
-		for (int i = 0; i < c->GetInv().GetLookup()->InventoryTypeSize.GuildBankDeposit; i++) { // GUILD_BANK_DEPOSIT_AREA_SIZE; ++i) {
+		for (int i = 0; i < c->GetInv().GetLookup()->InventoryTypeSize.GuildBankDeposit; i++) {
 			const EQ::ItemData *item = database.GetItem(guild_bank->items.deposit_area[i].item_id);
 			if (item) {
 				outapp->WriteUInt8(1);
@@ -777,10 +769,6 @@ void GuildBankManager::SendGuildBank(Client *c)
 				outapp->WriteUInt8(0); // empty
 			}
 		}
-		// outapp->SetWritePosition(
-		// 	outapp->GetWritePosition() + 20); // newer clients have 40 deposit slots, keep them 0 for now
-
-		//size = c->GetInv().GetLookup()->InventoryTypeSize.GuildBankMain;
 
 		for (int i = 0; i < c->GetInv().GetLookup()->InventoryTypeSize.GuildBankMain; ++i) {
 			const EQ::ItemData *Item = database.GetItem(guild_bank->items.main_area[i].item_id);
