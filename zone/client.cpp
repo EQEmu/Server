@@ -3153,7 +3153,7 @@ void Client::ReadBook(BookRequest_Struct* book)
 		auto discovered_by = GetDiscoverer(item_id);
 
 
-		if (item_id > 999999 && !discovered_by.empty()) {
+		if (item_id >= 700000 && !discovered_by.empty()) {
 			if (!item_text.empty()) {
 				item_text += "<br>";
 			}
