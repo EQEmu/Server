@@ -13181,9 +13181,8 @@ EQ::ItemInstance* Client::GetActivePetBag() {
 
 int16 Client::GetActivePetBagSlot() {
 	EQ::ItemInstance* active_bag = nullptr;
-	EQ::ItemInstance* potential_bag = nullptr;
 	uint16 active_bag_slot = -1;
-
+	auto potential_bag = nullptr;
 	if (RuleB(Custom, EnablePetBags)) {
 		for (int slot = EQ::invslot::GENERAL_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
 			potential_bag = GetInv().GetItem(slot);
