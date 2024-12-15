@@ -748,6 +748,23 @@ namespace Laurion {
 			/*444*/
 		};
 
+		struct GMTrainSkillConfirm_Struct {
+			/*000*/	uint32	SkillID;
+			/*004*/	uint32	Cost;
+			/*008*/	uint8	NewSkill;	// Set to 1 for 'You have learned the basics' message.
+			/*009*/	char	TrainerName[64];
+			/*073*/ uint8	Unknown073[3];
+			/*076*/
+		};
+
+		struct SkillUpdate_Struct {
+			/*00*/	uint32 skillId;
+			/*04*/	uint32 value;
+			/*08*/	uint8 active;
+			/*09*/	uint8 padding[3];
+			/*12*/
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

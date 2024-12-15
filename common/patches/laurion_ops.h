@@ -42,6 +42,8 @@ E(OP_ManaChange)
 E(OP_Action)
 E(OP_MobHealth)
 E(OP_GMTraining)
+E(OP_GMTrainSkillConfirm)
+E(OP_SkillUpdate)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)

@@ -3137,6 +3137,31 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_GMTrainSkillConfirm)
+	{
+		ENCODE_LENGTH_EXACT(GMTrainSkillConfirm_Struct);
+		SETUP_DIRECT_ENCODE(GMTrainSkillConfirm_Struct, structs::GMTrainSkillConfirm_Struct);
+
+		OUT(SkillID);
+		OUT(Cost);
+		OUT(NewSkill);
+		OUT_str(TrainerName);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SkillUpdate)
+	{
+		ENCODE_LENGTH_EXACT(SkillUpdate_Struct);
+		SETUP_DIRECT_ENCODE(SkillUpdate_Struct, structs::SkillUpdate_Struct);
+
+		OUT(skillId);
+		OUT(value);
+		eq->active = 1;
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
