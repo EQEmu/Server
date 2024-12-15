@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tcp_server.h"
+#include "../event/timer.h"
 #include <memory>
 #include <map>
 
@@ -58,6 +59,7 @@ namespace EQ
 			int m_user_id;
 			int m_admin;
 			bool m_accept_messages;
+			std::unique_ptr<EQ::Timer> m_keepalive;
 
 			size_t m_cursor;
 			char m_line[MaxConsoleLineLength];
