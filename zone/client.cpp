@@ -13182,9 +13182,10 @@ EQ::ItemInstance* Client::GetActivePetBag() {
 int16 Client::GetActivePetBagSlot() {
 	EQ::ItemInstance* active_bag = nullptr;
 	uint16 active_bag_slot = -1;
+	auto potential_bag = nullptr;
 	if (RuleB(Custom, EnablePetBags)) {
 		for (int slot = EQ::invslot::GENERAL_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
-			auto potential_bag = GetInv().GetItem(slot);
+			potential_bag = GetInv().GetItem(slot);
 			if (potential_bag && IsValidPetBag(potential_bag->GetID())) {
 				if (!active_bag || active_bag->GetItem()->BagSlots > potential_bag->GetItem()->BagSlots) {
 					active_bag = potential_bag;
@@ -13192,7 +13193,20 @@ int16 Client::GetActivePetBagSlot() {
 				}
 			}
 		}
+
+		if (!active_bag) {
+			for (int slot = EQ::invslot::BANK_BEGIN; slot <= EQ::invslot::BANK_END; slot++) {
+				potential_bag = GetInv().GetItem(slot);
+				if (potential_bag && IsValidPetBag(potential_bag->GetID())) {
+					if (!active_bag || active_bag->GetItem()->BagSlots > potential_bag->GetItem()->BagSlots) {
+						active_bag = potential_bag;
+						active_bag_slot = slot;
+					}
+				}
+			}
+		}
 	}
+
 	return active_bag_slot;
 }
 
