@@ -24,9 +24,7 @@ EQ::Net::ConsoleServerConnection::ConsoleServerConnection(ConsoleServer *parent,
 	ClearBuffer();
 
 	m_keepalive = std::make_unique<EQ::Timer>(1000, true, [this](EQ::Timer *t) {
-		EQ::Net::DynamicPacket clear;
-		clear.PutUInt8(0, 0);
-		m_connection->Write((const char*)clear.Data(), clear.Length());
+		m_connection->Write("", 0);
 	});
 
 	auto addr = m_connection->RemoteIP();
