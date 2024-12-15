@@ -1860,7 +1860,7 @@ namespace Laurion
 			buffer.WriteUInt64(0);
 
 			//u32 SeeInvis[3];
-			if (emu->NPC) {
+			if (emu->NPC == 1) {
 				buffer.WriteUInt32(0);
 				buffer.WriteUInt32(0);
 				buffer.WriteUInt32(0);
