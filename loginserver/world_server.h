@@ -187,13 +187,6 @@ private:
 	bool         m_is_server_logged_in;
 	bool         m_is_server_trusted;
 
-	/**
-	 * Keepalive
-	 * @param t
-	 */
-	void OnKeepAlive(EQ::Timer *t);
-	std::unique_ptr<EQ::Timer> m_keepalive;
-
 	static void FormatWorldServerName(char *name, int8 server_list_type);
 };
 

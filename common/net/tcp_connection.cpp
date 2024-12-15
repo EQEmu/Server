@@ -80,6 +80,8 @@ void EQ::Net::TCPConnection::Start() {
 			}
 		}
 		else if (nread == UV_EOF) {
+			connection->Disconnect();
+
 			if (buf->base) {
 				delete[] buf->base;
 			}
