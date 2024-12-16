@@ -178,6 +178,7 @@ namespace EQ
 		int16 FindFreeSlotForTradeItem(const ItemInstance* inst, int16 general_start = invslot::GENERAL_BEGIN, uint8 bag_start = invbag::SLOT_BEGIN);
 		std::vector<int16> FindAllFreeSlotsThatFitItem(const EQ::ItemData *inst);
 		int16 FindFirstFreeSlotThatFitsItem(const EQ::ItemData *inst);
+		int16 FindFirstFreeSlotThatFitsItemWithStacking(ItemInstance *inst) const;
 
 		// Calculate slot_id for an item within a bag
 		static int16 CalcSlotId(int16 slot_id); // Calc parent bag's slot_id

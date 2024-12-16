@@ -3367,6 +3367,21 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		return;
 	}
 
+	auto next_slot = FindNextFreeParcelSlot(CharacterID());
+	if (next_slot == INVALID_INDEX) {
+		LogTrading(
+			"{} attempted to purchase {} from the bazaar with parcel delivery.  Unfortunately their parcel limit was reached.  "
+			"Purchase unsuccessful.",
+			GetCleanName(),
+			buy_item->GetItem()->Name
+		);
+		in->method     = BazaarByParcel;
+		in->sub_action = TooManyParcels;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
+		TradeRequestFailed(app);
+		return;
+	}
+
 	LogTrading(
 		"Name: <green>[{}] IsStackable: <green>[{}] Requested Quantity: <green>[{}] Charges on Item <green>[{}]",
 		buy_item->GetItem()->Name,
@@ -3442,20 +3457,6 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	}
 
 	CharacterParcelsRepository::CharacterParcels parcel_out{};
-	auto next_slot = FindNextFreeParcelSlot(CharacterID());
-	if (next_slot == INVALID_INDEX) {
-		LogTrading(
-			"{} attempted to purchase {} from the bazaar with parcel delivery.  Unfortunately their parcel limit was reached.  "
-			"Purchase unsuccessful.",
-			GetCleanName(),
-			buy_item->GetItem()->Name
-		);
-		in->method     = BazaarByParcel;
-		in->sub_action = TooManyParcels;
-		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
-		TradeRequestFailed(app);
-		return;
-	}
 	parcel_out.from_name  = tbs->seller_name;
 	parcel_out.note       = "Delivered from a Bazaar Purchase";
 	parcel_out.sent_date  = time(nullptr);
