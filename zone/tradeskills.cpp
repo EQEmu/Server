@@ -389,7 +389,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	if (container->GetItem() && container->GetItem()->BagType == EQ::item::BagTypeUnattuner) {
 		EQ::ItemInstance* inst = container->GetItem(0);
-		if (inst && inst->IsAttuned() && !inst->GetItem()->NoDrop) {
+		if (inst && inst->IsAttuned() && inst->GetItem()->NoDrop) { // Future Me: inst->GetItem()->NoDrop is opposite of what you expect
 			inst->SetAttuned(false);
 			user->PushItemOnCursor(*inst, true);
 
