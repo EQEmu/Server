@@ -171,29 +171,30 @@ CHANGE COLUMN `spellid` `spell_id` smallint(5) UNSIGNED NOT NULL DEFAULT 0 AFTER
 		.match = "",
 		.sql = R"(
 CREATE TABLE `bot_settings` (
-	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`char_id` INT UNSIGNED NOT NULL,
-	`bot_id` INT UNSIGNED NOT NULL,
-	`stance` INT UNSIGNED NOT NULL,
-	`setting_id` INT UNSIGNED NOT NULL,
-	`setting_type` INT UNSIGNED NOT NULL,
-	`value` INT UNSIGNED NOT NULL,
-	`category_name` VARCHAR(64) NULL DEFAULT '',
-	`setting_name` VARCHAR(64) NULL DEFAULT '',
-	PRIMARY KEY (`id`) USING BTREE
+	`char_id` INT(10) UNSIGNED NOT NULL,
+	`bot_id` INT(10) UNSIGNED NOT NULL,
+	`stance` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+	`setting_id` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+	`setting_type` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+	`value` INT(10) UNSIGNED NOT NULL,
+	`category_name` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+	`setting_name` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+	PRIMARY KEY (`char_id`, `bot_id`, `stance`, `setting_id`, `setting_type`) USING BTREE
 )
-COLLATE='utf8mb4_general_ci';
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
 
-INSERT INTO bot_settings SELECT NULL, 0, bd.`bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 0, 0, bd.`expansion_bitmask`, 'BaseSetting', 'ExpansionBitmask' FROM bot_data bd
+INSERT INTO bot_settings SELECT 0, bd.`bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 0, 0, bd.`expansion_bitmask`, 'BaseSetting', 'ExpansionBitmask' FROM bot_data bd
 JOIN rule_values rv
 WHERE rv.rule_name LIKE 'Bots:BotExpansionSettings'
 AND bd.expansion_bitmask != rv.rule_value;
 
-INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 1, 0, `show_helm`, 'BaseSetting', 'ShowHelm' FROM bot_data WHERE `show_helm` != 1;
-INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 2, 0, sqrt(`follow_distance`), 'BaseSetting', 'FollowDistance' FROM bot_data WHERE `follow_distance` != 184;
+INSERT INTO bot_settings SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 1, 0, `show_helm`, 'BaseSetting', 'ShowHelm' FROM bot_data WHERE `show_helm` != 1;
+INSERT INTO bot_settings SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 2, 0, sqrt(`follow_distance`), 'BaseSetting', 'FollowDistance' FROM bot_data WHERE `follow_distance` != 184;
 
 INSERT INTO bot_settings 
-SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 3, 0, `stop_melee_level`, 'BaseSetting', 'StopMeleeLevel'
+SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 3, 0, `stop_melee_level`, 'BaseSetting', 'StopMeleeLevel'
 FROM (
     SELECT `bot_id`, 
            (CASE 
@@ -205,11 +206,11 @@ FROM (
 ) AS `subquery`
 WHERE `sml` != `stop_melee_level`;
 
-INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 4, 0, `enforce_spell_settings`, 'BaseSetting', 'EnforceSpellSettings' FROM bot_data WHERE `enforce_spell_settings` != 0;
-INSERT INTO bot_settings SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 5, 0, `archery_setting`, 'BaseSetting', 'RangedSetting' FROM bot_data WHERE `archery_setting` != 0;
+INSERT INTO bot_settings SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 4, 0, `enforce_spell_settings`, 'BaseSetting', 'EnforceSpellSettings' FROM bot_data WHERE `enforce_spell_settings` != 0;
+INSERT INTO bot_settings SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 5, 0, `archery_setting`, 'BaseSetting', 'RangedSetting' FROM bot_data WHERE `archery_setting` != 0;
 
 INSERT INTO bot_settings
-SELECT NULL, 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 8, 0, `caster_range`, 'BaseSetting', 'DistanceRanged'
+SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = bd.`bot_id`) AS stance_id, 8, 0, `caster_range`, 'BaseSetting', 'DistanceRanged'
 FROM (
     SELECT `bot_id`, 
            (CASE 
