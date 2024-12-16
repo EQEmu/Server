@@ -4080,7 +4080,10 @@ bool Mob::SpellOnTarget(
 	}
 
 	// now check if the spell is allowed to land
-	if (RuleB(Spells, EnableBlockedBuffs)) {
+	if (
+		(!spelltar->IsBot() && RuleB(Spells, EnableBlockedBuffs)) ||
+		(spelltar->IsBot() && RuleB(Bots, AllowBotBlockedBuffs))
+	) {
 		// We return true here since the caster's client should act like normal
 		if (spelltar->IsBlockedBuff(spell_id)) {
 			LogSpells(

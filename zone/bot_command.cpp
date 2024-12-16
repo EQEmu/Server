@@ -1251,6 +1251,8 @@ int bot_command_init(void)
 		bot_command_add("applypoison", "Applies cursor-held poison to a rogue bot's weapon", AccountStatus::Player, bot_command_apply_poison) ||
 		bot_command_add("attack", "Orders bots to attack a designated target", AccountStatus::Player, bot_command_attack) ||
 		bot_command_add("behindmob", "Toggles whether or not your bot tries to stay behind a mob", AccountStatus::Player, bot_command_behind_mob) ||
+		bot_command_add("blockedbuffs", "Set, view and clear blocked buffs for the selected bot(s)", AccountStatus::Player, bot_command_blocked_buffs) ||
+		bot_command_add("blockedpetbuffs", "Set, view and clear blocked pet buffs for the selected bot(s)", AccountStatus::Player, bot_command_blocked_pet_buffs) ||
 		bot_command_add("bot", "Lists the available bot management [subcommands]", AccountStatus::Player, bot_command_bot) ||
 		bot_command_add("botappearance", "Lists the available bot appearance [subcommands]", AccountStatus::Player, bot_command_appearance) ||
 		bot_command_add("botbeardcolor", "Changes the beard color of a bot", AccountStatus::Player, bot_command_beard_color) ||
@@ -2216,6 +2218,7 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 #include "bot_commands/apply_potion.cpp"
 #include "bot_commands/attack.cpp"
 #include "bot_commands/behind_mob.cpp"
+#include "bot_commands/blocked_buffs.cpp"
 #include "bot_commands/bot.cpp"
 #include "bot_commands/bot_settings.cpp"
 #include "bot_commands/cast.cpp"

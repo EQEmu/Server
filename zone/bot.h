@@ -478,6 +478,12 @@ public:
 	void SetBotSpellRecastTimer(uint16 spellType, Mob* spelltar, bool preCast = false);
 	BotSpell GetSpellByHealType(uint16 spellType, Mob* tar);
 	uint16 GetSpellByAA(int id, AA::Rank* &rank);
+	void CleanBotBlockedBuffs();
+	void ClearBotBlockedBuffs() { bot_blocked_buffs.clear(); }
+	bool IsBlockedBuff(int32 spell_id) override; //TODO bot rewrite - fix these to call from mob.h
+	bool IsBlockedPetBuff(int32 spell_id) override; //TODO bot rewrite - fix these to call from mob.h
+	void SetBotBlockedBuff(uint16 spell_id, bool block);
+	void SetBotBlockedPetBuff(uint16 spell_id, bool block);
 
 	std::string GetBotSpellCategoryName(uint8 setting_type);
 	std::string GetBotSettingCategoryName(uint8 setting_type);
@@ -882,6 +888,8 @@ public:
 	bool DeleteBot();
 	std::vector<BotTimer_Struct> GetBotTimers() { return bot_timers; }
 	void SetBotTimers(std::vector<BotTimer_Struct> timers) { bot_timers = timers; }
+	std::vector<BotBlockedBuffs_Struct> GetBotBlockedBuffs() { return bot_blocked_buffs; }
+	void SetBotBlockedBuffs(std::vector<BotBlockedBuffs_Struct> blockedBuff) { bot_blocked_buffs = blockedBuff; }
 	uint32 GetLastZoneID() const { return _lastZoneId; }
 	int32 GetBaseAC() const { return _baseAC; }
 	int32 GetBaseATK() const { return _baseATK; }
@@ -1010,6 +1018,7 @@ protected:
 	std::vector<BotSpells_Struct> AIBot_spells;
 	std::vector<BotSpells_Struct> AIBot_spells_enforced;
 	std::vector<BotTimer_Struct> bot_timers;
+	std::vector<BotBlockedBuffs_Struct> bot_blocked_buffs;
 
 private:
 	// Class Members

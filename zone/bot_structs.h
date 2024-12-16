@@ -97,4 +97,11 @@ struct BotSpellTypeOrder {
 	uint16		priority;
 };
 
+struct BotBlockedBuffs_Struct {
+	uint32_t	bot_id;
+	uint32_t	spell_id;
+	uint8_t		blocked;
+	uint8_t		blocked_pet;
+};
+
 #endif // BOT_STRUCTS

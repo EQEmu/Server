@@ -74,6 +74,9 @@ public:
 	bool SaveTimers(Bot* b);
 	bool DeleteTimers(const uint32 bot_id);
 
+	bool LoadBotBlockedBuffs(Bot* b);
+	bool SaveBotBlockedBuffs(Bot* b);
+	bool DeleteBotBlockedBuffs(const uint32 bot_id);
 
 	/* Bot inventory functions   */
 	bool QueryInventoryCount(const uint32 bot_id, uint32& item_count);

@@ -1179,6 +1179,25 @@ WHERE NOT EXISTS
 FROM spells_new
 WHERE bot_spells_entries.spell_id = spells_new.id);
 )"
+	},
+ManifestEntry{
+	.version = 9052,
+	.description = "2024_12_15_bot_blocked_buffs.sql",
+	.check = "SHOW TABLES LIKE 'bot_blocked_buffs'",
+	.condition = "empty",
+	.match = "",
+	.sql = R"(
+CREATE TABLE `bot_blocked_buffs` (
+	`bot_id` INT(11) UNSIGNED NOT NULL,
+	`spell_id` INT(11) UNSIGNED NOT NULL,
+	`blocked` TINYINT(4) UNSIGNED NULL DEFAULT '0',
+	`blocked_pet` TINYINT(4) UNSIGNED NULL DEFAULT '0',
+	PRIMARY KEY (`bot_id`, `spell_id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

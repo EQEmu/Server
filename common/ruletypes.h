@@ -891,6 +891,7 @@ RULE_BOOL(Bots, AllowCommandedLull, true, "If enabled bots can be commanded to l
 RULE_INT(Bots, CampTimer, 25, "Number of seconds after /camp has begun before bots camp out.")
 RULE_BOOL(Bots, SendClassRaceOnHelp, true, "If enabled a reminder of how to check class/race IDs will be sent when using compatible commands.")
 RULE_BOOL(Bots, AllowCrossGroupRaidAssist, true, "If enabled bots will autodefend group or raid members set as main assist.")
+RULE_BOOL(Bots, AllowBotBlockedBuffs, true, "If enabled, you can create blocked buffs for each bot and for their pets.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)

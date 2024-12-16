@@ -10,7 +10,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 		std::vector<std::string> notes =
 		{
-			"- This will interrupt any spell currently being cast by bots told to use the command.",
+			"- This will interrupt any spell currently being cast by bots told to use the command",
 			"- Bots will still check to see if they have the spell in their spell list, whether the target is immune, spell is allowed and all other sanity checks for spells",
 			fmt::format(
 				"- You can use {} aa # to cast any clickable AA or specifically {} harmtouch / {} layonhands"

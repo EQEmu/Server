@@ -22,6 +22,7 @@
 #include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 
+#include "../common/repositories/bot_blocked_buffs_repository.h"
 #include "../common/repositories/bot_buffs_repository.h"
 #include "../common/repositories/bot_create_combinations_repository.h"
 #include "../common/repositories/bot_data_repository.h"
@@ -2394,6 +2395,113 @@ bool BotDatabase::DeleteBotSettings(const uint32 bot_id)
 	}
 
 	BotSettingsRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`bot_id` = {}",
+			bot_id
+		)
+	);
+
+	return true;
+}
+
+bool BotDatabase::LoadBotBlockedBuffs(Bot* b)
+{
+	if (!b) {
+		return false;
+	}
+
+	const auto& l = BotBlockedBuffsRepository::GetWhere(
+		database,
+		fmt::format(
+			"`bot_id` = {}",
+			b->GetBotID()
+		)
+	);
+
+	std::vector<BotBlockedBuffs_Struct> v;
+
+	BotBlockedBuffs_Struct t{ };
+
+	for (const auto& e : l) {
+		t.spell_id				= e.spell_id;
+		t.blocked				= e.blocked;
+		t.blocked_pet			= e.blocked_pet;
+
+		v.push_back(t);
+	}
+
+	if (!v.empty()) {
+		b->SetBotBlockedBuffs(v);
+	}
+
+	return true;
+}
+
+bool BotDatabase::SaveBotBlockedBuffs(Bot* b)
+{
+	if (!b) {
+		return false;
+	}
+
+	if (!DeleteBotBlockedBuffs(b->GetBotID())) {
+		return false;
+	}
+
+	std::vector<BotBlockedBuffs_Struct> v = b->GetBotBlockedBuffs();
+
+	if (v.empty()) {
+		return true;
+	}
+
+	std::vector<BotBlockedBuffsRepository::BotBlockedBuffs> l;
+
+	if (!v.empty()) {
+		for (auto& blocked_buff : v) {
+			if (blocked_buff.blocked == 0 && blocked_buff.blocked_pet == 0) {
+				continue;
+			}
+
+			auto e = BotBlockedBuffsRepository::BotBlockedBuffs{
+				.bot_id			= b->GetBotID(),
+				.spell_id		= blocked_buff.spell_id,
+				.blocked		= blocked_buff.blocked,
+				.blocked_pet	= blocked_buff.blocked_pet
+			};
+
+			l.push_back(e);
+		}
+
+		if (l.empty()) {
+			return true;
+		}
+
+		BotBlockedBuffsRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`bot_id` = {}",
+				b->GetBotID()
+			)
+		);
+
+		const int inserted = BotBlockedBuffsRepository::InsertMany(database, l);
+
+		if (!inserted) {
+			DeleteBotBlockedBuffs(b->GetBotID());
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool BotDatabase::DeleteBotBlockedBuffs(const uint32 bot_id)
+{
+	if (!bot_id) {
+		return false;
+	}
+
+	BotBlockedBuffsRepository::DeleteWhere(
 		database,
 		fmt::format(
 			"`bot_id` = {}",

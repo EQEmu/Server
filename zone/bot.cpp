@@ -108,6 +108,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	GenerateAppearance();
 	GenerateBaseStats();
 	bot_timers.clear();
+	bot_blocked_buffs.clear();
 
 	// Calculate HitPoints Last As It Uses Base Stats
 	current_hp = GenerateBaseHitPoints();
@@ -247,12 +248,15 @@ Bot::Bot(
 	GenerateBaseStats();
 
 	bot_timers.clear();
-
 	database.botdb.LoadTimers(this);
 
 	LoadDefaultBotSettings();
-
 	database.botdb.LoadBotSettings(this);
+
+	if (RuleB(Bots, AllowBotBlockedBuffs)) {
+		bot_blocked_buffs.clear();
+		database.botdb.LoadBotBlockedBuffs(this);
+	}
 
 	LoadAAs();
 
@@ -1374,6 +1378,10 @@ bool Bot::Save()
 	database.botdb.SaveStance(this);
 	database.botdb.SaveBotSettings(this);
 
+	if (RuleB(Bots, AllowBotBlockedBuffs)) {
+		database.botdb.SaveBotBlockedBuffs(this);
+	}
+
 	if (!SavePet())
 		bot_owner->Message(Chat::White, "Failed to save pet for '%s'", GetCleanName());
 
@@ -1436,6 +1444,10 @@ bool Bot::DeleteBot()
 		}
 
 		if (!database.botdb.DeleteBotSettings(GetBotID())) {
+			return false;
+		}
+
+		if (!database.botdb.DeleteBotBlockedBuffs(GetBotID())) {
 			return false;
 		}
 
@@ -9573,9 +9585,20 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		return false;
 	}
 
-	if (IsBeneficialSpell(spell_id) && tar->IsBlockedBuff(spell_id)) {
-		LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+	if (RuleB(Spells, EnableBlockedBuffs) && IsBeneficialSpell(spell_id) && tar->IsClient() && tar->IsBlockedBuff(spell_id)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
+	}
+
+	if (RuleB(Bots, AllowBotBlockedBuffs) && IsBeneficialSpell(spell_id)) {
+		if (tar->IsBot() && tar->IsBlockedBuff(spell_id)) {
+			LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+			return false;
+		}
+		else if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsBot() && tar->GetOwner()->IsBlockedPetBuff(spell_id)) {
+			LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsBlockedPetBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+			return false;
+		}
 	}
 
 	LogBotPreChecksDetail("{} says, 'Doing CanCastSpellType checks of {} on {}.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
@@ -11887,7 +11910,7 @@ bool Bot::IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell
 				return true;
 			}
 
-			break;
+break;
 		case CommandedSubTypes::InvisAnimals:
 			if (IsEffectInSpell(spell_id, SE_InvisVsAnimals) || IsEffectInSpell(spell_id, SE_ImprovedInvisAnimals)) {
 				return true;
@@ -11898,7 +11921,7 @@ bool Bot::IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell
 			if (
 				(IsEffectInSpell(spell_id, SE_ModelSize) && CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ModelSize), GetLevel()) < 100) ||
 				(IsEffectInSpell(spell_id, SE_ChangeHeight) && CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ChangeHeight), GetLevel()) < 100)
-			) {
+				) {
 				return true;
 			}
 
@@ -11907,7 +11930,7 @@ bool Bot::IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell
 			if (
 				(IsEffectInSpell(spell_id, SE_ModelSize) && CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ModelSize), GetLevel()) > 100) ||
 				(IsEffectInSpell(spell_id, SE_ChangeHeight) && CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ChangeHeight), GetLevel()) > 100)
-			) {
+				) {
 				return true;
 			}
 
@@ -11945,11 +11968,161 @@ uint16 Bot::GetSpellByAA(int id, AA::Rank*& rank) {
 	if (!points || !rank) {
 		LogTestDebug("{}: {} says, 'No {} found'", __LINE__, GetCleanName(), (!points ? "points" : "rank")); //deleteme
 		return spell_id;
-	}	
+	}
 
 	spell_id = rank->spell;
 
 	LogTestDebug("{}: {} says, 'Found {} [#{}]'", __LINE__, GetCleanName(), spells[spell_id].name, spell_id); //deleteme
 
 	return spell_id;
+}
+
+void Bot::SetBotBlockedBuff(uint16 spell_id, bool block) {
+	if (!IsValidSpell(spell_id)) {
+		OwnerMessage("Failed to set blocked buff.");
+
+		return;
+	}
+
+	if (!bot_blocked_buffs.empty()) {
+		bool found = false;
+
+		for (int i = 0; i < bot_blocked_buffs.size(); i++) {
+			if (bot_blocked_buffs[i].spell_id != spell_id) {
+				continue;
+			}
+
+			bot_blocked_buffs[i].blocked = block;
+			found = true;
+		}
+
+		if (!found) {
+			BotBlockedBuffs_Struct t;
+
+			t.spell_id = spell_id;
+			t.blocked = block;
+
+			bot_blocked_buffs.push_back(t);
+		}
+	}
+	else {
+
+		BotBlockedBuffs_Struct t;
+
+		t.spell_id = spell_id;
+		t.blocked = block;
+
+		bot_blocked_buffs.push_back(t);
+	}
+
+	CleanBotBlockedBuffs();
+}
+
+bool Bot::IsBlockedBuff(int32 spell_id)
+{
+	bool result = false;
+
+	if (!IsValidSpell(spell_id)) {
+		OwnerMessage("Failed to get blocked buff.");
+
+		return result;
+	}
+
+	CleanBotBlockedBuffs();
+
+	if (!bot_blocked_buffs.empty()) {
+		for (int i = 0; i < bot_blocked_buffs.size(); i++) {
+			if (bot_blocked_buffs[i].spell_id != spell_id) {
+				continue;
+			}
+
+			return bot_blocked_buffs[i].blocked;
+		}
+	}
+
+	return result;
+}
+
+void Bot::SetBotBlockedPetBuff(uint16 spell_id, bool block) {
+	if (!IsValidSpell(spell_id)) {
+		OwnerMessage("Failed to set blocked pet buff.");
+
+		return;
+	}
+
+	if (!bot_blocked_buffs.empty()) {
+		bool found = false;
+
+		for (int i = 0; i < bot_blocked_buffs.size(); i++) {
+			if (bot_blocked_buffs[i].spell_id != spell_id) {
+				continue;
+			}
+
+			bot_blocked_buffs[i].blocked_pet = block;
+			found = true;
+		}
+
+		if (!found) {
+			BotBlockedBuffs_Struct t;
+
+			t.spell_id = spell_id;
+			t.blocked_pet = block;
+
+			bot_blocked_buffs.push_back(t);
+		}
+	}
+	else {
+		BotBlockedBuffs_Struct t;
+
+		t.spell_id = spell_id;
+		t.blocked_pet = block;
+
+		bot_blocked_buffs.push_back(t);
+	}
+
+	CleanBotBlockedBuffs();
+}
+
+bool Bot::IsBlockedPetBuff(int32 spell_id)
+{
+	bool result = false;
+
+	if (!IsValidSpell(spell_id)) {
+		OwnerMessage("Failed to get blocked pet buff.");
+
+		return result;
+	}
+
+	CleanBotBlockedBuffs();
+
+	if (!bot_blocked_buffs.empty()) {
+		for (int i = 0; i < bot_blocked_buffs.size(); i++) {
+			if (bot_blocked_buffs[i].spell_id != spell_id) {
+				continue;
+			}
+
+			return bot_blocked_buffs[i].blocked_pet;
+		}
+	}
+
+	return result;
+}
+
+void Bot::CleanBotBlockedBuffs()
+{
+	if (!bot_blocked_buffs.empty()) {
+		int current = 0;
+		int end = bot_blocked_buffs.size();
+
+		while (current < end) {
+			if (!IsValidSpell(bot_blocked_buffs[current].spell_id) || (bot_blocked_buffs[current].blocked == 0 && bot_blocked_buffs[current].blocked_pet == 0)) {
+				bot_blocked_buffs.erase(bot_blocked_buffs.begin() + current);
+			}
+			else {
+				current++;
+			}
+
+			end = bot_blocked_buffs.size();
+		}
+	}
 }

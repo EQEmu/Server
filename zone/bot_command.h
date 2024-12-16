@@ -1669,6 +1669,8 @@ void bot_command_apply_poison(Client *c, const Seperator *sep);
 void bot_command_apply_potion(Client* c, const Seperator* sep);
 void bot_command_attack(Client *c, const Seperator *sep);
 void bot_command_behind_mob(Client* c, const Seperator* sep);
+void bot_command_blocked_buffs(Client* c, const Seperator* sep);
+void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep);
 void bot_command_bot(Client *c, const Seperator *sep);
 void bot_command_bot_settings(Client* c, const Seperator* sep);
 void bot_command_cast(Client* c, const Seperator* sep);
