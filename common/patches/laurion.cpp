@@ -3162,6 +3162,30 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_RespondAA)
+	{
+		SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
+
+		eq->aa_spent = emu->aa_spent;
+		// These fields may need to be correctly populated at some point
+		eq->aapoints_assigned[0] = emu->aa_spent;
+		eq->aapoints_assigned[1] = 0;
+		eq->aapoints_assigned[2] = 0;
+		eq->aapoints_assigned[3] = 0;
+		eq->aapoints_assigned[4] = 0;
+		eq->aapoints_assigned[5] = 0;
+
+		for (uint32 i = 0; i < MAX_PP_AA_ARRAY; ++i)
+		{
+			eq->aa_list[i].AA = emu->aa_list[i].AA;
+			eq->aa_list[i].value = emu->aa_list[i].value;
+			eq->aa_list[i].charges = emu->aa_list[i].charges;
+			eq->aa_list[i].bUnknown0x0c = false;
+		}
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)

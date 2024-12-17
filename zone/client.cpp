@@ -537,18 +537,17 @@ void Client::SendZoneInPackets()
 	
 	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
 	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
-	auto tmpxp2 = GetEXPForLevel(GetLevel() + 1);
-	auto tmpxp1 = GetEXPForLevel(GetLevel());
-	
+	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
+	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
+
+	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
 	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
 		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
 		eu->exp = (uint32)(330.0f * tmpxp);
-		FastQueuePacket(&outapp);
+		outapp->priority = 6;
+		QueuePacket(outapp);
 	}
-	else {
-		eu->exp = 0;
-		FastQueuePacket(&outapp);
-	}
+	safe_delete(outapp);
 
 	SendAlternateAdvancementTimers();
 

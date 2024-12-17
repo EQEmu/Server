@@ -765,6 +765,26 @@ namespace Laurion {
 			/*12*/
 		};
 
+		struct AA_Array
+		{
+			uint32 AA;
+			uint32 value;
+			uint32 charges;	// expendable charges
+			bool bUnknown0x0c; // added test winter 2024; removed sometime in summer 2024
+		};
+
+		struct AATable_Struct {
+			/*00*/ uint32 aa_spent;				// Total AAs Spent
+			/*04*/ uint32 aapoints_assigned[6];	// none, general, arch, class, special, focus, merc
+			/*24*/ AA_Array aa_list[MAX_PP_AA_ARRAY];
+		};
+
+		struct AltAdvStats_Struct {
+			/*000*/	uint32 experience;
+			/*004*/	uint32 unspent;
+			/*008*/	uint8 percentage;
+			/*009*/	uint8 unknown009[3];
+		};
 #pragma pack()
 
 	};	//end namespace structs
