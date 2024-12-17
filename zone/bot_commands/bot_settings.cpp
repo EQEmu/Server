@@ -4,6 +4,8 @@ void bot_command_bot_settings(Client* c, const Seperator* sep)
 {
 	std::list<const char*> subcommand_list;
 	subcommand_list.push_back("behindmob");
+	subcommand_list.push_back("blockedbuffs");
+	subcommand_list.push_back("blockedpetbuffs");
 	subcommand_list.push_back("distanceranged");
 	subcommand_list.push_back("copysettings");
 	subcommand_list.push_back("defaultsettings");

@@ -55,7 +55,7 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 
 		std::vector<std::string> actionables =
 		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets mmr, byclass, byrace, spawned"
+			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
 		};
 
 		std::vector<std::string> options = { };
@@ -313,7 +313,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 
 		std::vector<std::string> actionables =
 		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets mmr, byclass, byrace, spawned"
+			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
 		};
 
 		std::vector<std::string> options = { };

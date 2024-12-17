@@ -70,7 +70,7 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 
 		std::vector<std::string> actionables =
 		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets mmr, byclass, byrace, spawned"
+			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
 		};
 
 		std::vector<std::string> options = { };

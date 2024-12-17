@@ -48,7 +48,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 
 		std::vector<std::string> actionables =
 		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets mmr, byclass, byrace, spawned"
+			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
 		};
 
 		std::vector<std::string> options = { };

@@ -50,18 +50,12 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 
 		std::vector<std::string> actionables =
 		{
-			"target, byname, ownergroup, ownerraid",
-			"targetgroup, namesgroup, healrotationtargets",
-			"mmr, byclass, byrace, spawned"
+			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
 		};
 
 		std::vector<std::string> options =
 		{
-			"all, misc, spellsettings, spelltypesettings",
-			"holds, delays, minthresholds, maxthresholds",
-			"minmanapct, maxmanapct, minhppct, maxhppct",
-			"idlepriority, engagedpriority, pursuepriority",
-			"aggrochecks, targetcounts"
+			"all, misc, spellsettings, spelltypesettings, spellholds, spelldelays, spellminthresholds, spellmaxthresholds, spellminmanapct, spellmaxmanapct, spellminhppct, spellmaxhppct, spellidlepriority, spellengagedpriority, spellpursuepriority, spellaggrochecks, spelltargetcounts, showhelm, followd, stopmeleelevel, enforcespellsettings, bottoggleranged, petsettype, behindmob, distanceranged, illusionblock, sitincombat, sithppercent, sitmanapercent, blockedbuffs, blockedpetbuffs"
 		};
 		std::vector<std::string> options_one =
 		{
@@ -72,10 +66,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 		std::vector<std::string> options_two =
 		{
 			"[misc] copies all miscellaneous options such as:",
-			"- ^showhelm, ^followd, ^stopmeleelevel",
-			"- ^enforcespellsettings, ^bottoggleranged, ^petsettype",
-			"- ^behindmob, ^distanceranged, ^illusionblock",
-			"- ^sitincombat, ^sithppercent and ^sitmanapercent",
+			"- ^showhelm, ^followd, ^stopmeleelevel, ^enforcespellsettings, ^bottoggleranged, ^petsettype, ^behindmob, ^distanceranged, ^illusionblock, ^sitincombat, ^sithppercent, ^sitmanapercent, ^blockedbuffs, ^blockedpetbuffs",
 
 		};
 		std::vector<std::string> options_three =
@@ -120,22 +111,36 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 	std::vector<std::string> options =
 	{
 		"all",
-		"misc"
+		"misc",
 		"spellsettings",
 		"spelltypesettings",
-		"holds",
-		"delays",
-		"minthresholds",
-		"maxthresholds",
-		"aggrochecks",
-		"minmanapct",
-		"maxmanapct",
-		"minhppct",
-		"maxhppct",
-		"idlepriority",
-		"engagedpriority",
-		"pursuepriority",
-		"targetcounts"
+		"spellholds",
+		"spelldelays",
+		"spellminthresholds",
+		"spellmaxthresholds",
+		"spellminmanapct",
+		"spellmaxmanapct",
+		"spellminhppct",
+		"spellmaxhppct",
+		"spellidlepriority",
+		"spellengagedpriority",
+		"spellpursuepriority",
+		"spellaggrochecks",
+		"spelltargetcounts",
+		"showhelm",
+		"followd",
+		"stopmeleelevel",
+		"enforcespellsettings",
+		"bottoggleranged",
+		"petsettype",
+		"behindmob",
+		"distanceranged",
+		"illusionblock",
+		"sitincombat",
+		"sithppercent",
+		"sitmanapercent",
+		"blockedbuffs",
+		"blockedpetbuffs"
 	};
 
 	for (int i = 0; i < options.size(); i++) {
