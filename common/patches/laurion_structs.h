@@ -12,6 +12,7 @@ namespace Laurion {
 		static const uint32 MAX_PP_UNKNOWN_ABILITIES = 25;
 		static const uint32 MAX_RECAST_TYPES = 25;
 		static const uint32 MAX_ITEM_RECAST_TYPES = 100;
+		static const uint32 BLOCKED_BUFF_COUNT = 40;
 		static const uint32 BUFF_COUNT = 62;
 		static const uint32 MAX_PP_LANGUAGE = 32;
 #pragma pack(1)
@@ -784,6 +785,15 @@ namespace Laurion {
 			/*004*/	uint32 unspent;
 			/*008*/	uint8 percentage;
 			/*009*/	uint8 unknown009[3];
+		};
+
+		struct BlockedBuffs_Struct
+		{
+			/*000*/ int32 SpellID[BLOCKED_BUFF_COUNT];
+			/*120*/ uint32 Count;
+			/*124*/ uint8 Pet;
+			/*125*/ uint8 Initialise;
+			/*126*/ uint16 Flags;
 		};
 #pragma pack()
 

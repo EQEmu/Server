@@ -3186,6 +3186,27 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_BlockedBuffs)
+	{
+		ENCODE_LENGTH_EXACT(BlockedBuffs_Struct);
+		SETUP_DIRECT_ENCODE(BlockedBuffs_Struct, structs::BlockedBuffs_Struct);
+
+		for (uint32 i = 0; i < BLOCKED_BUFF_COUNT; ++i)
+			eq->SpellID[i] = emu->SpellID[i];
+
+		for (uint32 i = BLOCKED_BUFF_COUNT; i < structs::BLOCKED_BUFF_COUNT; ++i)
+			eq->SpellID[i] = -1;
+
+		OUT(Count);
+		OUT(Pet);
+		OUT(Initialise);
+		OUT(Flags);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_RemoveBlockedBuffs) { ENCODE_FORWARD(OP_BlockedBuffs); }
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
@@ -3414,6 +3435,24 @@ namespace Laurion
 
 		FINISH_DIRECT_DECODE();
 	}
+
+	DECODE(OP_BlockedBuffs)
+	{
+		DECODE_LENGTH_EXACT(structs::BlockedBuffs_Struct);
+		SETUP_DIRECT_DECODE(BlockedBuffs_Struct, structs::BlockedBuffs_Struct);
+
+		for (uint32 i = 0; i < BLOCKED_BUFF_COUNT; ++i)
+			emu->SpellID[i] = eq->SpellID[i];
+
+		IN(Count);
+		IN(Pet);
+		IN(Initialise);
+		IN(Flags);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_RemoveBlockedBuffs) { DECODE_FORWARD(OP_BlockedBuffs); }
 
 	//Naive version but should work well enough for now
 	int ExtractIDFile(const std::string& input) {
