@@ -9585,22 +9585,31 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		return false;
 	}
 
-	if (RuleB(Spells, EnableBlockedBuffs) && IsBeneficialSpell(spell_id) && tar->IsClient() && tar->IsBlockedBuff(spell_id)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-		return false;
-	}
-
-	if (RuleB(Bots, AllowBotBlockedBuffs) && IsBeneficialSpell(spell_id)) {
-		if (tar->IsBot() && tar->IsBlockedBuff(spell_id)) {
-			LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-			return false;
-		}
-		else if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsBot() && tar->GetOwner()->IsBlockedPetBuff(spell_id)) {
+	if (
+		IsBeneficialSpell(spell_id) &&
+		(
+			(RuleB(Spells, EnableBlockedBuffs) && tar->IsClient()) ||
+			(RuleB(Bots, AllowBotBlockedBuffs) && tar->IsBot())
+		)
+	) {
+		if (tar->IsBlockedBuff(spell_id)) {
 			LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsBlockedPetBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 			return false;
 		}
 	}
 
+	if (
+		IsBeneficialSpell(spell_id) && tar->IsPet() &&
+		(
+			(RuleB(Spells, EnableBlockedBuffs) && tar->GetOwner() && tar->GetOwner()->IsClient()) ||
+			(RuleB(Bots, AllowBotBlockedBuffs) && tar->GetOwner() && tar->GetOwner()->IsBot())
+		)
+	) {
+		if (tar->GetOwner()->IsBlockedPetBuff(spell_id)) {
+			LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsBlockedPetBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+			return false;
+		}
+	}
 	LogBotPreChecksDetail("{} says, 'Doing CanCastSpellType checks of {} on {}.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 	if (!CanCastSpellType(spellType, spell_id, tar)) {
 		return false;

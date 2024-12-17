@@ -480,8 +480,8 @@ public:
 	uint16 GetSpellByAA(int id, AA::Rank* &rank);
 	void CleanBotBlockedBuffs();
 	void ClearBotBlockedBuffs() { bot_blocked_buffs.clear(); }
-	bool IsBlockedBuff(int32 spell_id) override; //TODO bot rewrite - fix these to call from mob.h
-	bool IsBlockedPetBuff(int32 spell_id) override; //TODO bot rewrite - fix these to call from mob.h
+	bool IsBlockedBuff(int32 spell_id) override;
+	bool IsBlockedPetBuff(int32 spell_id) override;
 	void SetBotBlockedBuff(uint16 spell_id, bool block);
 	void SetBotBlockedPetBuff(uint16 spell_id, bool block);
 
