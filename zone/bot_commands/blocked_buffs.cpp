@@ -108,9 +108,8 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 	bool wipe = false;
 	uint16 spell_id;
 
-	//AA help
 	if (!arg1.compare("add")) {
-		if (!sep->IsNumber(2) || !IsValidSpell(atoi(sep->arg[2]))) {
+		if (!sep->IsNumber(2) || !IsValidSpell(atoi(sep->arg[2])) || !IsBeneficialSpell(atoi(sep->arg[2]))) {
 			c->Message(Chat::Yellow, "You must enter a valid spell ID.");
 			return;
 		}
@@ -368,9 +367,8 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 	bool wipe = false;
 	uint16 spell_id;
 
-	//AA help
 	if (!arg1.compare("add")) {
-		if (!sep->IsNumber(2) || !IsValidSpell(atoi(sep->arg[2]))) {
+		if (!sep->IsNumber(2) || !IsValidSpell(atoi(sep->arg[2])) || !IsBeneficialSpell(atoi(sep->arg[2])) {
 			c->Message(Chat::Yellow, "You must enter a valid spell ID.");
 			return;
 		}
