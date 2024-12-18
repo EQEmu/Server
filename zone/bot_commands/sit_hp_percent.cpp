@@ -141,12 +141,12 @@ void bot_command_sit_hp_percent(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'I sit in combat whem at or below [{}%%] HP.'",
 					my_bot->GetCleanName(),
-					my_bot->GetHPWhenToMed()
+					my_bot->GetSitHPPct()
 				).c_str()
 			);
 		}
 		else {
-			my_bot->SetHPWhenToMed(typeValue);
+			my_bot->SetSitHPPct(typeValue);
 			++success_count;
 		}
 	}
@@ -157,7 +157,7 @@ void bot_command_sit_hp_percent(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'I will now sit in combat whem at or below [{}%%] HP.'",
 					first_found->GetCleanName(),
-					first_found->GetHPWhenToMed()
+					first_found->GetSitHPPct()
 				).c_str()
 			);
 		}

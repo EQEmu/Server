@@ -139,12 +139,12 @@ namespace BotBaseSettings {
 	constexpr uint16 IllusionBlock				= 9;
 	constexpr uint16 MaxMeleeRange				= 10;
 	constexpr uint16 MedInCombat				= 11;
-	constexpr uint16 HPWhenToMed				= 12;
-	constexpr uint16 ManaWhenToMed				= 13;
+	constexpr uint16 SitHPPct					= 12;
+	constexpr uint16 SitManaPct					= 13;
 
 	constexpr uint16 START_ALL					= ExpansionBitmask;
 	constexpr uint16 START						= BotBaseSettings::ShowHelm; // Everything above this cannot be copied, changed or viewed by players
-	constexpr uint16 END						= BotBaseSettings::ManaWhenToMed; // Increment as needed
+	constexpr uint16 END						= BotBaseSettings::SitManaPct; // Increment as needed
 };
 
 namespace CommandedSubTypes {
@@ -471,6 +471,7 @@ public:
 	void CopySettings(Bot* to, uint8 settingType, uint16 spellType = UINT16_MAX);
 	void CopyBotSpellSettings(Bot* to);
 	void ResetBotSpellSettings();
+	void CopyBotBlockedBuffs(Bot* to);
 	int GetBotBaseSetting(uint16 botSetting);
 	int GetDefaultBotBaseSetting(uint16 botSetting, uint8 stance = Stance::Balanced);
 	void SetBotBaseSetting(uint16 botSetting, int settingValue);
@@ -484,9 +485,6 @@ public:
 	bool IsBlockedPetBuff(int32 spell_id) override;
 	void SetBotBlockedBuff(uint16 spell_id, bool block);
 	void SetBotBlockedPetBuff(uint16 spell_id, bool block);
-
-	std::string GetBotSpellCategoryName(uint8 setting_type);
-	std::string GetBotSettingCategoryName(uint8 setting_type);
 
 	int GetDefaultSetting(uint16 settingCategory, uint16 settingType, uint8 stance = Stance::Balanced);
 	uint16 GetDefaultSpellTypePriority(uint16 spellType, uint8 priorityType, uint8 botClass, uint8 stance = Stance::Balanced);
@@ -532,10 +530,10 @@ public:
 	void SetBotDistanceRanged(uint32 distanceRanged) { _distanceRanged = distanceRanged; }
 	bool GetMedInCombat() const { return _medInCombat; }
 	void SetMedInCombat(bool value) { _medInCombat = value; }
-	uint8 GetHPWhenToMed() const { return _HPWhenToMed; }
-	void SetHPWhenToMed(uint8 value) { _HPWhenToMed = value; }
-	uint8 GetManaWhenToMed() const { return _ManaWhenToMed; }
-	void SetManaWhenToMed(uint8 value) { _ManaWhenToMed = value; }
+	uint8 GetSitHPPct() const { return _SitHPPct; }
+	void SetSitHPPct(uint8 value) { _SitHPPct = value; }
+	uint8 GetSitManaPct() const { return _SitManaPct; }
+	void SetSitManaPct(uint8 value) { _SitManaPct = value; }
 	void SetHasLoS(bool hasLoS) { _hasLoS = hasLoS; }
 	bool HasLoS() const { return _hasLoS; }
 
@@ -1089,8 +1087,8 @@ private:
 	bool _behindMobStatus;
 	bool _maxMeleeRangeStatus;
 	bool _medInCombat;
-	uint8 _HPWhenToMed;
-	uint8 _ManaWhenToMed;
+	uint8 _SitHPPct;
+	uint8 _SitManaPct;
 	uint16 _castedSpellType;
 	bool _hasLoS;
 	bool _commandedSpell;

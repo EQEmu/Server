@@ -434,6 +434,9 @@ public:
 
 	uint16 GetSpellTypeIDByShortName(std::string spellTypeString);
 
+	std::string GetBotSpellCategoryName(uint8 setting_type);
+	std::string GetBotSettingCategoryName(uint8 setting_type);
+	uint16 GetBaseSettingIDByShortName(std::string settingString);
 	std::string GetSpellTypeNameByID(uint16 spellType);
 	std::string GetSpellTypeShortNameByID(uint16 spellType);
 	std::string GetSubTypeNameByID(uint16 subType);

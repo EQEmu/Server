@@ -1787,7 +1787,7 @@ void Bot::SpellProcess() {
 }
 
 void Bot::BotMeditate(bool isSitting) {
-	if (GetManaRatio() < GetManaWhenToMed() || (GetHPRatio() < GetHPWhenToMed() && GetLevel() < GetStopMeleeLevel())) {
+	if (GetManaRatio() < GetSitManaPct() || (GetHPRatio() < GetSitHPPct() && GetLevel() < GetStopMeleeLevel())) {
 		if ((!IsEngaged() || (IsEngaged() && GetMedInCombat() && !HasTargetReflection())) && !isSitting) {
 			Sit();
 		}
@@ -10170,11 +10170,11 @@ void Bot::SetBotBaseSetting(uint16 botSetting, int settingValue) {
 		case BotBaseSettings::MedInCombat:
 			SetMedInCombat(settingValue);
 			break;
-		case BotBaseSettings::HPWhenToMed:
-			SetHPWhenToMed(settingValue);
+		case BotBaseSettings::SitHPPct:
+			SetSitHPPct(settingValue);
 			break;
-		case BotBaseSettings::ManaWhenToMed:
-			SetManaWhenToMed(settingValue);
+		case BotBaseSettings::SitManaPct:
+			SetSitManaPct(settingValue);
 			break;
 		default:
 			break;
@@ -10219,12 +10219,12 @@ int Bot::GetBotBaseSetting(uint16 botSetting) {
 		case BotBaseSettings::MedInCombat:
 			//LogBotSettingsDetail("Returning current GetMedInCombate of [{}] for [{}]", GetMaxMeleeRange(), GetCleanName()); //deleteme
 			return GetMedInCombat();
-		case BotBaseSettings::HPWhenToMed:
-			//LogBotSettingsDetail("Returning current GetHPWhenToMed of [{}] for [{}]", GetMaxMeleeRange(), GetCleanName()); //deleteme
-			return GetHPWhenToMed();
-		case BotBaseSettings::ManaWhenToMed:
-			//LogBotSettingsDetail("Returning current GetManaWhenToMed of [{}] for [{}]", GetMaxMeleeRange(), GetCleanName()); //deleteme
-			return GetManaWhenToMed();
+		case BotBaseSettings::SitHPPct:
+			//LogBotSettingsDetail("Returning current GetSitHPPct of [{}] for [{}]", GetMaxMeleeRange(), GetCleanName()); //deleteme
+			return GetSitHPPct();
+		case BotBaseSettings::SitManaPct:
+			//LogBotSettingsDetail("Returning current GetSitManaPct of [{}] for [{}]", GetMaxMeleeRange(), GetCleanName()); //deleteme
+			return GetSitManaPct();
 		default:
 			return true;
 	}
@@ -10274,8 +10274,8 @@ int Bot::GetDefaultBotBaseSetting(uint16 botSetting, uint8 stance) {
 			}
 
 			return false;
-		case BotBaseSettings::HPWhenToMed:
-		case BotBaseSettings::ManaWhenToMed:
+		case BotBaseSettings::SitHPPct:
+		case BotBaseSettings::SitManaPct:
 			return 80;
 		case BotBaseSettings::EnforceSpellSettings:
 		case BotBaseSettings::RangedSetting:
@@ -10881,82 +10881,6 @@ void Bot::SetSpellTypeMaxHPLimit(uint16 spellType, uint8 hpLimit) {
 
 void Bot::SetSpellTypeAEOrGroupTargetCount(uint16 spellType, uint16 targetCount) {
 	_spellSettings[spellType].AEOrGroupTargetCount = targetCount;
-}
-
-std::string Bot::GetBotSettingCategoryName(uint8 setting_type) {
-	switch (setting_type) {
-		case BotBaseSettings::ExpansionBitmask:
-			return "ExpansionBitmask";
-		case BotBaseSettings::ShowHelm:
-			return "ShowHelm";
-		case BotBaseSettings::FollowDistance:
-			return "FollowDistance";
-		case BotBaseSettings::StopMeleeLevel:
-			return "StopMeleeLevel";
-		case BotBaseSettings::EnforceSpellSettings:
-			return "EnforceSpellSettings";
-		case BotBaseSettings::RangedSetting:
-			return "RangedSetting";
-		case BotBaseSettings::PetSetTypeSetting:
-			return "PetSetTypeSetting";
-		case BotBaseSettings::BehindMob:
-			return "BehindMob";
-		case BotBaseSettings::DistanceRanged:
-			return "DistanceRanged";
-		case BotBaseSettings::IllusionBlock:
-			return "IllusionBlock";
-		case BotBaseSettings::MaxMeleeRange:
-			return "MaxMeleeRange";
-		case BotBaseSettings::MedInCombat:
-			return "MedInCombat";
-		case BotBaseSettings::HPWhenToMed:
-			return "HPWhenToMed";
-		case BotBaseSettings::ManaWhenToMed:
-			return "ManaWhenToMed";
-		default:
-			return "Null";
-	}
-
-	return "Null";
-}
-
-std::string Bot::GetBotSpellCategoryName(uint8 setting_type) {
-	switch (setting_type) {
-		case BotSettingCategories::BaseSetting:
-			return "BaseSetting";
-		case BotSettingCategories::SpellHold:
-			return "SpellHold";
-		case BotSettingCategories::SpellDelay:
-			return "SpellDelay";
-		case BotSettingCategories::SpellMinThreshold:
-			return "SpellMinThreshold";
-		case BotSettingCategories::SpellMaxThreshold:
-			return "SpellMaxThreshold";
-		case BotSettingCategories::SpellTypeAggroCheck:
-			return "SpellTypeAggroCheck";
-		case BotSettingCategories::SpellTypeMinManaPct:
-			return "SpellTypeMinManaPct";
-		case BotSettingCategories::SpellTypeMaxManaPct:
-			return "SpellTypeMaxManaPct";
-		case BotSettingCategories::SpellTypeMinHPPct:
-			return "SpellTypeMinHPPct";
-		case BotSettingCategories::SpellTypeMaxHPPct:
-			return "SpellTypeMaxHPPct";
-		case BotSettingCategories::SpellTypeIdlePriority:
-			return "SpellTypeIdlePriority";
-		case BotSettingCategories::SpellTypeEngagedPriority:
-			return "SpellTypeEngagedPriority";
-		case BotSettingCategories::SpellTypePursuePriority:
-			return "SpellTypePursuePriority";
-		case BotSettingCategories::SpellTypeAEOrGroupTargetCount:
-			return "SpellTypeAEOrGroupTargetCount";
-		case BotSettingCategories::SpellTypeRecastDelay:
-			return "SpellTypeRecastDelay";
-		default:
-			return "Null";
-	}
-
-	return "Null";
 }
 
 std::list<BotSpellTypeOrder> Bot::GetSpellTypesPrioritized(uint8 priorityType) {

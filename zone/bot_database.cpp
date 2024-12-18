@@ -2238,7 +2238,7 @@ bool BotDatabase::LoadBotSettings(Mob* m)
 		if (e.setting_type == BotSettingCategories::BaseSetting) {
 			LogBotSettings("[{}] says, 'Loading {} [{}] - setting to [{}]."
 				, m->GetCleanName()
-				, m->CastToBot()->GetBotSettingCategoryName(e.setting_type)
+				, m->GetBotSettingCategoryName(e.setting_type)
 				, e.setting_type
 				, e.value
 			); //deleteme
@@ -2246,7 +2246,7 @@ bool BotDatabase::LoadBotSettings(Mob* m)
 		else {
 			LogBotSettings("[{}] says, 'Loading {} [{}], {} [{}] - setting to [{}]."
 				, m->GetCleanName()
-				, m->CastToBot()->GetBotSpellCategoryName(e.setting_type)
+				, m->GetBotSpellCategoryName(e.setting_type)
 				, e.setting_type
 				, m->GetSpellTypeNameByID(e.setting_id)
 				, e.setting_id
@@ -2304,13 +2304,13 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 					.setting_id					= static_cast<uint16_t>(i),
 					.setting_type				= static_cast<uint8_t>(BotSettingCategories::BaseSetting),
 					.value						= static_cast<int32_t>(m->CastToBot()->GetBotBaseSetting(i)),
-					.category_name				= m->CastToBot()->GetBotSpellCategoryName(BotSettingCategories::BaseSetting),
-					.setting_name				= m->CastToBot()->GetBotSettingCategoryName(i)
+					.category_name				= m->GetBotSpellCategoryName(BotSettingCategories::BaseSetting),
+					.setting_name				= m->GetBotSettingCategoryName(i)
 				};
 
 				v.emplace_back(e);
 
-				LogBotSettings("{} says, 'Saving {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->CastToBot()->GetBotSettingCategoryName(i), i, e.value, m->CastToBot()->GetDefaultBotBaseSetting(i)); //deleteme
+				LogBotSettings("{} says, 'Saving {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->GetBotSettingCategoryName(i), i, e.value, m->CastToBot()->GetDefaultBotBaseSetting(i)); //deleteme
 			}
 		}
 
@@ -2324,13 +2324,13 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 						.setting_id				= static_cast<uint16_t>(x),
 						.setting_type			= static_cast<uint8_t>(i),
 						.value					= m->CastToBot()->GetSetting(i, x),
-						.category_name			= m->CastToBot()->GetBotSpellCategoryName(i),
+						.category_name			= m->GetBotSpellCategoryName(i),
 						.setting_name			= m->CastToBot()->GetSpellTypeNameByID(x)
 					};
 
 					v.emplace_back(e);
 
-					LogBotSettings("{} says, 'Saving {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->CastToBot()->GetBotSpellCategoryName(i), m->GetSpellTypeNameByID(x), x, e.value, m->CastToBot()->GetDefaultSetting(i, x, botStance)); //deleteme
+					LogBotSettings("{} says, 'Saving {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->GetBotSpellCategoryName(i), m->GetSpellTypeNameByID(x), x, e.value, m->CastToBot()->GetDefaultSetting(i, x, botStance)); //deleteme
 				}
 			}
 		}
@@ -2345,18 +2345,18 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 						.setting_id				= static_cast<uint16_t>(BotBaseSettings::IllusionBlock),
 						.setting_type			= static_cast<uint8_t>(BotSettingCategories::BaseSetting),
 						.value					= m->GetIllusionBlock(),
-						.category_name			= m->CastToBot()->GetBotSpellCategoryName(BotSettingCategories::BaseSetting),
-						.setting_name			= m->CastToBot()->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock)
+						.category_name			= m->GetBotSpellCategoryName(BotSettingCategories::BaseSetting),
+						.setting_name			= m->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock)
 			};
 
 			v.emplace_back(e);
 
-			LogBotSettings("{} says, 'Saving {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->CastToBot()->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock), BotBaseSettings::IllusionBlock, e.value, m->GetIllusionBlock()); //deleteme
+			LogBotSettings("{} says, 'Saving {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock), BotBaseSettings::IllusionBlock, e.value, m->GetIllusionBlock()); //deleteme
 		}
 
 		for (uint16 i = BotSettingCategories::START_CLIENT; i <= BotSettingCategories::END_CLIENT; ++i) {
 			for (uint16 x = BotSpellTypes::START; x <= BotSpellTypes::END; ++x) {
-				LogBotSettings("{} says, 'Checking {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->CastToBot()->GetBotSpellCategoryName(i), m->CastToBot()->GetSpellTypeNameByID(x), x, m->CastToClient()->GetBotSetting(i, x), m->CastToClient()->GetDefaultBotSettings(i, x)); //deleteme
+				LogBotSettings("{} says, 'Checking {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->GetBotSpellCategoryName(i), m->CastToBot()->GetSpellTypeNameByID(x), x, m->CastToClient()->GetBotSetting(i, x), m->CastToClient()->GetDefaultBotSettings(i, x)); //deleteme
 				if (m->CastToClient()->GetBotSetting(i, x) != m->CastToClient()->GetDefaultBotSettings(i, x)) {
 					auto e = BotSettingsRepository::BotSettings{
 						.char_id				= charID,
@@ -2365,13 +2365,13 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 						.setting_id				= static_cast<uint16_t>(x),
 						.setting_type			= static_cast<uint8_t>(i),
 						.value					= m->CastToClient()->GetBotSetting(i, x),
-						.category_name			= m->CastToBot()->GetBotSpellCategoryName(i),
+						.category_name			= m->GetBotSpellCategoryName(i),
 						.setting_name			= m->CastToBot()->GetSpellTypeNameByID(x)
 					};
 
 					v.emplace_back(e);
 
-					LogBotSettings("{} says, 'Saving {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->CastToBot()->GetBotSpellCategoryName(i), m->CastToBot()->GetSpellTypeNameByID(x), x, e.value, m->CastToClient()->GetDefaultBotSettings(i, x)); //deleteme
+					LogBotSettings("{} says, 'Saving {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->GetBotSpellCategoryName(i), m->CastToBot()->GetSpellTypeNameByID(x), x, e.value, m->CastToClient()->GetDefaultBotSettings(i, x)); //deleteme
 				}
 			}
 		}

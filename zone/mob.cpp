@@ -8712,6 +8712,93 @@ uint16 Mob::GetSpellTypeIDByShortName(std::string spellTypeString) {
 	return UINT16_MAX;
 }
 
+std::string Mob::GetBotSpellCategoryName(uint8 setting_type) {
+	switch (setting_type) {
+		case BotSettingCategories::BaseSetting:
+			return "BaseSetting";
+		case BotSettingCategories::SpellHold:
+			return "SpellHolds";
+		case BotSettingCategories::SpellDelay:
+			return "SpellDelays";
+		case BotSettingCategories::SpellMinThreshold:
+			return "SpellMinThresholds";
+		case BotSettingCategories::SpellMaxThreshold:
+			return "SpellMaxThresholds";
+		case BotSettingCategories::SpellTypeAggroCheck:
+			return "SpellAggroChecks";
+		case BotSettingCategories::SpellTypeMinManaPct:
+			return "SpellMinManaPct";
+		case BotSettingCategories::SpellTypeMaxManaPct:
+			return "SpellMaxManaPct";
+		case BotSettingCategories::SpellTypeMinHPPct:
+			return "SpellMinHPPct";
+		case BotSettingCategories::SpellTypeMaxHPPct:
+			return "SpellMaxHPPct";
+		case BotSettingCategories::SpellTypeIdlePriority:
+			return "SpellIdlePriority";
+		case BotSettingCategories::SpellTypeEngagedPriority:
+			return "SpellEngagedPriority";
+		case BotSettingCategories::SpellTypePursuePriority:
+			return "SpellPursuePriority";
+		case BotSettingCategories::SpellTypeAEOrGroupTargetCount:
+			return "SpellTargetCounts";
+		case BotSettingCategories::SpellTypeRecastDelay:
+			return "SpellRecastDelay";
+		default:
+			return "Null";
+	}
+
+	return "Null";
+}
+
+std::string Mob::GetBotSettingCategoryName(uint8 setting_type) {
+	switch (setting_type) {
+		case BotBaseSettings::ExpansionBitmask:
+			return "ExpansionBitmask";
+		case BotBaseSettings::ShowHelm:
+			return "ShowHelm";
+		case BotBaseSettings::FollowDistance:
+			return "FollowDistance";
+		case BotBaseSettings::StopMeleeLevel:
+			return "StopMeleeLevel";
+		case BotBaseSettings::EnforceSpellSettings:
+			return "EnforceSpellSettings";
+		case BotBaseSettings::RangedSetting:
+			return "RangedSetting";
+		case BotBaseSettings::PetSetTypeSetting:
+			return "PetSetTypeSetting";
+		case BotBaseSettings::BehindMob:
+			return "BehindMob";
+		case BotBaseSettings::DistanceRanged:
+			return "DistanceRanged";
+		case BotBaseSettings::IllusionBlock:
+			return "IllusionBlock";
+		case BotBaseSettings::MaxMeleeRange:
+			return "MaxMeleeRange";
+		case BotBaseSettings::MedInCombat:
+			return "MedInCombat";
+		case BotBaseSettings::SitHPPct:
+			return "SitHPPct";
+		case BotBaseSettings::SitManaPct:
+			return "SitManaPct";
+		default:
+			return "Null";
+	}
+
+	return "Null";
+}
+
+uint16 Mob::GetBaseSettingIDByShortName(std::string settingString) {
+
+	for (int i = BotSettingCategories::START; i <= BotSettingCategories::END; ++i) {
+		if (!Strings::ToLower(settingString).compare(GetBotSettingCategoryName(i))) {
+			return i;
+		}
+	}
+
+	return UINT16_MAX;
+}
+
 std::string Mob::GetSpellTypeNameByID(uint16 spellType) {
 	std::string spellTypeName = "null";
 

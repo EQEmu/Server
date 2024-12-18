@@ -141,12 +141,12 @@ void bot_command_sit_mana_percent(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'I sit in combat whem at or below [{}%%] mana.'",
 					my_bot->GetCleanName(),
-					my_bot->GetManaWhenToMed()
+					my_bot->GetSitManaPct()
 				).c_str()
 			);
 		}
 		else {
-			my_bot->SetManaWhenToMed(typeValue);
+			my_bot->SetSitManaPct(typeValue);
 			++success_count;
 		}
 	}
@@ -157,7 +157,7 @@ void bot_command_sit_mana_percent(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'I will now sit in combat whem at or below [{}%%] mana.'",
 					first_found->GetCleanName(),
-					first_found->GetManaWhenToMed()
+					first_found->GetSitManaPct()
 				).c_str()
 			);
 		}
