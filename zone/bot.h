@@ -472,6 +472,7 @@ public:
 	void CopyBotSpellSettings(Bot* to);
 	void ResetBotSpellSettings();
 	void CopyBotBlockedBuffs(Bot* to);
+	void CopyBotBlockedPetBuffs(Bot* to);
 	int GetBotBaseSetting(uint16 botSetting);
 	int GetDefaultBotBaseSetting(uint16 botSetting, uint8 stance = Stance::Balanced);
 	void SetBotBaseSetting(uint16 botSetting, int settingValue);

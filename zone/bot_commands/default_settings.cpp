@@ -358,7 +358,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		}
 		else if (!strcasecmp(sep->arg[1], "targetcounts")) {
 			if (spellType != UINT16_MAX) {
-				myBot->SetSpellDelay(spellType, myBot->GetDefaultSpellDelay(spellType, botStance));
+				myBot->SetSpellTypeAEOrGroupTargetCount(spellType, myBot->GetDefaultSpellTypeAEOrGroupTargetCount(spellType, botStance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
@@ -366,7 +366,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				}
 			}
 
-			output = "ae/group count settings";
+			output = "target count settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "spellsettings")) {
 			myBot->ResetBotSpellSettings();
@@ -430,6 +430,9 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 			};
 
 			myBot->ResetBotSpellSettings();
+			myBot->ClearBotBlockedBuffs();
+			
+			myBot->Save();
 
 			output = "settings";
 

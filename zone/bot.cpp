@@ -11734,6 +11734,10 @@ void Bot::CopySettings(Bot* to, uint8 settingType, uint16 spellType) {
 
 void Bot::CopyBotSpellSettings(Bot* to)
 {
+	if (!to) {
+		return;
+	}
+
 	to->ResetBotSpellSettings();
 	to->bot_spell_settings.clear();
 
@@ -11782,6 +11786,38 @@ void Bot::ResetBotSpellSettings()
 	LoadBotSpellSettings();
 	AI_AddBotSpells(GetBotSpellID());
 	SetBotEnforceSpellSetting(false);
+}
+
+void Bot::CopyBotBlockedBuffs(Bot* to) {
+	if (!to) {
+		return;
+	}
+
+	to->ClearBotBlockedBuffs();
+
+	std::vector<BotBlockedBuffs_Struct> blockedBuffs = GetBotBlockedBuffs();
+
+	if (!blockedBuffs.empty()) {
+		for (auto& blocked_buff : blockedBuffs) {
+			to->SetBotBlockedBuff(blocked_buff.spell_id, blocked_buff.blocked);
+		}
+	}
+}
+
+void Bot::CopyBotBlockedPetBuffs(Bot* to) {
+	if (!to) {
+		return;
+	}
+
+	to->ClearBotBlockedBuffs();
+
+	std::vector<BotBlockedBuffs_Struct> blockedBuffs = GetBotBlockedBuffs();
+
+	if (!blockedBuffs.empty()) {
+		for (auto& blocked_buff : blockedBuffs) {
+			to->SetBotBlockedPetBuff(blocked_buff.spell_id, blocked_buff.blocked_pet);
+		}
+	}
 }
 
 bool Bot::BotPassiveCheck() {

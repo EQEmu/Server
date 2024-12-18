@@ -8751,6 +8751,16 @@ std::string Mob::GetBotSpellCategoryName(uint8 setting_type) {
 	return "Null";
 }
 
+uint16 Mob::GetBotSpellCategoryIDByShortName(std::string settingString) {
+	for (int i = BotSettingCategories::START; i <= BotSettingCategories::END; ++i) {
+		if (!Strings::ToLower(settingString).compare(Strings::ToLower(GetBotSpellCategoryName(i)))) {
+			return i;
+		}
+	}
+
+	return UINT16_MAX;
+}
+
 std::string Mob::GetBotSettingCategoryName(uint8 setting_type) {
 	switch (setting_type) {
 		case BotBaseSettings::ExpansionBitmask:
@@ -8789,9 +8799,8 @@ std::string Mob::GetBotSettingCategoryName(uint8 setting_type) {
 }
 
 uint16 Mob::GetBaseSettingIDByShortName(std::string settingString) {
-
 	for (int i = BotSettingCategories::START; i <= BotSettingCategories::END; ++i) {
-		if (!Strings::ToLower(settingString).compare(GetBotSettingCategoryName(i))) {
+		if (!Strings::ToLower(settingString).compare(Strings::ToLower(GetBotSettingCategoryName(i)))) {
 			return i;
 		}
 	}
