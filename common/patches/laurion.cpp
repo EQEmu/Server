@@ -3207,6 +3207,27 @@ namespace Laurion
 
 	ENCODE(OP_RemoveBlockedBuffs) { ENCODE_FORWARD(OP_BlockedBuffs); }
 
+	ENCODE(OP_ZonePlayerToBind)
+	{
+		SETUP_VAR_ENCODE(ZonePlayerToBind_Struct);
+		ALLOC_LEN_ENCODE(sizeof(structs::ZonePlayerToBind_Struct) + strlen(emu->zone_name));
+
+		__packet->SetWritePosition(0);
+		__packet->WriteUInt16(emu->bind_zone_id);
+		__packet->WriteUInt16(emu->bind_instance_id);
+		__packet->WriteFloat(emu->x);
+		__packet->WriteFloat(emu->y);
+		__packet->WriteFloat(emu->z);
+		__packet->WriteFloat(emu->heading);
+		__packet->WriteString(emu->zone_name);
+		__packet->WriteUInt32(60);
+		__packet->WriteUInt32(0);
+		__packet->WriteUInt32(51);
+		__packet->WriteUInt32(41);
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)

@@ -46,6 +46,7 @@ E(OP_SkillUpdate)
 E(OP_RespondAA)
 E(OP_BlockedBuffs)
 E(OP_RemoveBlockedBuffs)
+E(OP_ZonePlayerToBind)
 
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)

@@ -795,6 +795,21 @@ namespace Laurion {
 			/*125*/ uint8 Initialise;
 			/*126*/ uint16 Flags;
 		};
+
+		struct ZonePlayerToBind_Struct {
+			//Same structure as the binds in PlayerProfile_Struct
+			//Assembly calls the same function
+			/*000*/	uint16	bind_zone_id;
+			/*002*/	uint16	bind_instance_id;
+			/*004*/	float	x;
+			/*008*/	float	y;
+			/*012*/	float	z;
+			/*016*/	float	heading;
+			/*020*/	char	zone_name[1];  // Or "Bind Location"
+			/*021*/	uint32	unknown1;
+			/*025*/	uint32	unknown2;
+			/*029*/	uint32	unknown3;
+		};
 #pragma pack()
 
 	};	//end namespace structs
