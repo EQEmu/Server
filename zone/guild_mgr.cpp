@@ -1168,6 +1168,10 @@ bool GuildBankManager::HasItem(uint32 guild_id, uint32 item_id)
 
 std::shared_ptr<GuildBank> GuildBankManager::GetGuildBank(const uint32 guild_id)
 {
+	if (!GuildBanks) {
+		return nullptr;
+	}
+
 	for (auto &b:banks) {
 		if (b->guild_id == guild_id) {
 			return b;

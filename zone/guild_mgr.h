@@ -155,13 +155,11 @@ private:
 	bool Load(uint32 GuildID);
 	void UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
 
-	std::list<std::shared_ptr<GuildBank>> banks;
+	std::list<std::shared_ptr<GuildBank>> banks{};
 };
 
 extern ZoneGuildManager guild_mgr;
 extern GuildBankManager *GuildBanks;
-//extern std::shared_ptr<GuildBankManager> guild_bank_mgr;
-
 
 #endif /*GUILD_MGR_H_*/
 
