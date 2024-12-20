@@ -2664,7 +2664,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			}
 
 			if(IsIllusionSpell(spell_id)
-			&& IsClient()
+			&& IsOfClientBot()
 			&& (HasProjectIllusion())){
 				LogAA("Effect Project Illusion for [{}] on spell id: [{}] was ON", GetName(), spell_id);
 				SetProjectIllusion(false);
