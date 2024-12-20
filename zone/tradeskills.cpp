@@ -403,6 +403,40 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 
+
+	// Ensure all items in the 4 slots of this container are augments with the same ID.
+	if (container->GetItem() && container->GetItem()->ID == 4041) {
+		auto first_item = container->GetItem(0);
+
+		if (first_item && first_item->GetItemType() == EQ::item::ItemTypeAugmentation) {
+			int aug_id = first_item->GetID();
+
+			// Check if all items in the container match the ID of the first item
+			bool all_same = true;
+			for (int i = 1; i < 4; ++i) {
+				auto item = container->GetItem(i);
+				if (!item || item->GetID() != aug_id) {
+					all_same = false;
+					break;
+				}
+			}
+
+			if (all_same) {
+				auto new_item = database.GetItem(aug_id + 1000000);
+				if (new_item) {
+					container->Clear();
+					user->PushItemOnCursor(new_item, true);
+					user->DeleteItemInInventory(in_combine->container_slot, 0, true);
+
+					auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+					user->QueuePacket(outapp);
+					safe_delete(outapp);
+					return;
+				}
+			}
+		}
+	}
+
 	DBTradeskillRecipe_Struct spec;
 	bool is_augmented = false;
 
