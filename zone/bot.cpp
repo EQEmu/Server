@@ -9580,6 +9580,11 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		return false;
 	}
 
+	if (!tar->CheckSpellLevelRestriction(this, spell_id)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to CheckSpellLevelRestriction.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
 	if (!AECheck && !IsValidSpellRange(spell_id, tar)) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidSpellRange.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
@@ -9651,6 +9656,11 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		return false;
 	}
 
+	if (spells[spell_id].target_type != ST_Self && IsBeneficialSpell(spell_id) && IsTargetAlreadyReceivingSpell(tar, spell_id)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsTargetAlreadyReceivingSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
 	return true;
 }
 
@@ -9687,16 +9697,6 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 				return false;
 			}
 
-			if (tar->IsBlockedBuff(spell_id)) {
-				LogBotPreChecks("{} says, 'Cancelling cast of {} on {} due to IsBlockedBuff.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-				return false;
-			}
-
-			if (!tar->CheckSpellLevelRestriction(this, spell_id)) {
-				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to CheckSpellLevelRestriction.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-				return false;
-			}
-
 			if ((spellType != BotSpellTypes::Teleport && spellType != BotSpellTypes::Succor) && (IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Succor))) {
 				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to Teleport.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
@@ -9714,11 +9714,6 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 
 			if ((IsGroupSpell(spell_id) && tar->IsPet()) && (!tar->GetOwner() || (RuleB(Bots, RequirePetAffinity) && !tar->GetOwner()->HasPetAffinity()))) {
 				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to PetGroupSpellTarget.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-				return false;
-			}
-
-			if (!IsCommandedSpell() && IsTargetAlreadyReceivingSpell(tar, spell_id)) {
-				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsTargetAlreadyReceivingSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 				return false;
 			}
 
@@ -9774,11 +9769,6 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 		case BotSpellTypes::PreCombatBuffSong:
 		case BotSpellTypes::InCombatBuffSong:
 		case BotSpellTypes::OutOfCombatBuffSong:
-			if (!IsCommandedSpell() && IsTargetAlreadyReceivingSpell(tar, spell_id)) {
-				LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsTargetAlreadyReceivingSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-				return false;
-			}
-
 			if (!IsCommandedSpell()) {
 				switch (tar->GetArchetype()) {
 					case Archetype::Caster:
