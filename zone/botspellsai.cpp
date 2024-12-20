@@ -885,7 +885,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, uint16 spell
 
 			if (
 				botCaster->CheckSpellRecastTimer(botSpellList[i].spellid) &&
-				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetSpellListSpellType(spellType)) &&
+				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetParentSpellType(spellType)) &&
 				botCaster->IsValidSpellTypeBySpellID(spellType, botSpellList[i].spellid) &&
 				(IsEffectInSpell(botSpellList[i].spellid, spellEffect) || GetSpellTriggerSpellID(botSpellList[i].spellid, spellEffect))
 			) {
@@ -923,7 +923,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 
 			if (
 				botCaster->CheckSpellRecastTimer(botSpellList[i].spellid) && 
-				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetSpellListSpellType(spellType)) &&
+				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetParentSpellType(spellType)) &&
 				botCaster->IsValidSpellTypeBySpellID(spellType, botSpellList[i].spellid) &&
 				(
 					IsEffectInSpell(botSpellList[i].spellid, spellEffect) ||
@@ -964,7 +964,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellTyp
 
 			if (
 				botCaster->CheckSpellRecastTimer(botSpellList[i].spellid) && 
-				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetSpellListSpellType(spellType)) &&
+				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetParentSpellType(spellType)) &&
 				botCaster->IsValidSpellTypeBySpellID(spellType, botSpellList[i].spellid)
 			) {
 				BotSpell botSpell;
@@ -999,7 +999,7 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 
 			if (
 				botCaster->CheckSpellRecastTimer(botSpellList[i].spellid) &&
-				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetSpellListSpellType(spellType)) &&
+				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetParentSpellType(spellType)) &&
 				botCaster->IsValidSpellTypeBySpellID(spellType, botSpellList[i].spellid)
 			) {
 				if (
@@ -1080,7 +1080,7 @@ BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType) {
 
 			if (
 				botCaster->CheckSpellRecastTimer(botSpellList[i].spellid) &&
-				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetSpellListSpellType(spellType)) &&
+				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetParentSpellType(spellType)) &&
 				botCaster->IsValidSpellTypeBySpellID(spellType, botSpellList[i].spellid)
 			) {
 				result.SpellId = botSpellList[i].spellid;
@@ -1186,7 +1186,7 @@ BotSpell Bot::GetBestBotSpellForPercentageHeal(Bot *botCaster, Mob* tar, uint16 
 			}
 
 			if (
-				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetSpellListSpellType(spellType)) &&
+				(botSpellList[i].type == spellType || botSpellList[i].type == botCaster->GetParentSpellType(spellType)) &&
 				botCaster->IsValidSpellTypeBySpellID(spellType, botSpellList[i].spellid) &&
 				IsCompleteHealSpell(botSpellList[i].spellid) &&
 				botCaster->CastChecks(botSpellList[i].spellid, tar, spellType)
@@ -2839,7 +2839,7 @@ void Bot::CheckBotSpells() {
 		}
 
 		correctType = GetCorrectSpellType(s.type, spell_id);
-		parentType = GetSpellListSpellType(correctType);
+		parentType = GetParentSpellType(correctType);
 		
 		if (RuleB(Bots, UseParentSpellTypeForChecks)) {
 			if (s.type == parentType || s.type == correctType) {

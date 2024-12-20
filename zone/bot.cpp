@@ -11168,7 +11168,7 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id) {
 	return false;
 }
 
-uint16 Bot::GetSpellListSpellType(uint16 spellType) {
+uint16 Bot::GetParentSpellType(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::AENukes:
 		case BotSpellTypes::AERains:

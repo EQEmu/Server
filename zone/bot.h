@@ -539,7 +539,7 @@ public:
 	bool HasLoS() const { return _hasLoS; }
 
 	std::list<BotSpellTypeOrder> GetSpellTypesPrioritized(uint8 priorityType);
-	uint16 GetSpellListSpellType(uint16 spellType);
+	uint16 GetParentSpellType(uint16 spellType);
 	bool IsValidSpellTypeBySpellID(uint16 spellType, uint16 spell_id);
 	inline uint16 GetCastedSpellType() const { return _castedSpellType; }
 	void SetCastedSpellType(uint16 spellType);
