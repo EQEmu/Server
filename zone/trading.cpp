@@ -320,7 +320,11 @@ void Client::ResetTrade() {
 }
 
 void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, std::list<void*>* event_details) {
-	if(tradingWith && tradingWith->IsClient()) {
+	if (!tradingWith) {
+		return;
+	}
+
+	if (tradingWith->IsClient()) {
 		Client                * other    = tradingWith->CastToClient();
 		PlayerLogTrade_Struct * qs_audit = nullptr;
 		bool qs_log = false;
@@ -663,8 +667,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			//Do not reset the trade here, done by the caller.
 		}
 	}
-	else if(tradingWith && tradingWith->IsNPC()) {
-		NPCHandinEventLog(trade, tradingWith->CastToNPC());
+	else if(tradingWith->IsNPC()) {
 
 		QSPlayerLogHandin_Struct* qs_audit = nullptr;
 		bool qs_log = false;
@@ -741,7 +744,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 		bool quest_npc = false;
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
-			// This is a quest NPC
 			quest_npc = true;
 		}
 
@@ -757,20 +759,18 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 		if (RuleB(TaskSystem, EnableTaskSystem)) {
 			if (UpdateTasksOnDeliver(items, *trade, tradingWith->CastToNPC())) {
-				if (!tradingWith->IsMoving())
+				if (!tradingWith->IsMoving()) {
 					tradingWith->FaceTarget(this);
+				}
 
 				EVENT_ITEM_ScriptStopReturn();
-
 			}
 		}
 
 		// Regardless of quest or non-quest NPC - No in combat trade completion
 		// is allowed.
-		if (tradingWith->CheckAggro(this))
-		{
-			/*
-			for (EQ::ItemInstance* inst : items) {
+		if (tradingWith->CheckAggro(this)) {
+			for (EQ::ItemInstance *inst: items) {
 				if (!inst || !inst->GetItem()) {
 					continue;
 				}
@@ -778,16 +778,14 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				tradingWith->SayString(TRADE_BACK, GetCleanName());
 				PushItemOnCursor(*inst, true);
 			}
-			*/
 
 			items.clear();
 		}
 
 		// Only enforce trade rules if the NPC doesn't have an EVENT_TRADE
 		// subroutine.  That overrides all.
-		else if (!quest_npc)
-		{
-			for (EQ::ItemInstance* inst : items) {
+		else if (!quest_npc) {
+			for (auto &inst: items) {
 				if (!inst || !inst->GetItem()) {
 					continue;
 				}
@@ -801,128 +799,116 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					}
 				}
 
-				const EQ::ItemData* item = inst->GetItem();
-				const bool is_pet = _CLIENTPET(tradingWith) && tradingWith->GetPetType()<=petCharmed;
-				const bool is_quest_npc = tradingWith->CastToNPC()->IsQuestNPC();
-				const bool restrict_quest_items_to_quest_npc = RuleB(NPC, ReturnQuestItemsFromNonQuestNPCs);
-				const bool pets_can_take_quest_items = RuleB(Pets, CanTakeQuestItems);
-				const bool is_pet_and_can_have_nodrop_items = (RuleB(Pets, CanTakeNoDrop) &&	is_pet);
-				const bool is_pet_and_can_have_quest_items = (pets_can_take_quest_items &&	is_pet);
+				auto               with  = tradingWith->CastToNPC();
+				const EQ::ItemData *item = inst->GetItem();
 
+				if (with->IsPetOwnerClient() && with->CanPetTakeItem(inst)) {
+					// pets need to look inside bags and try to equip items found there
+					if (item->IsClassBag() && item->BagSlots > 0) {
+						// if an item inside the bag can't be given to the pet, keep the bag
+						bool       keep_bag   = false;
+						int        item_count = 0;
+						for (int16 bslot      = EQ::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
+							const EQ::ItemInstance *baginst = inst->GetItem(bslot);
+							if (baginst && baginst->GetItem() && with->CanPetTakeItem(baginst)) {
+								// add item to pet's inventory
+								auto lde = LootdropEntriesRepository::NewNpcEntity();
+								lde.equip_item   = 1;
+								lde.item_charges = static_cast<int8>(baginst->GetCharges());
+								with->AddLootDrop(baginst->GetItem(), lde, true);
+								inst->DeleteItem(bslot);
+								item_count++;
+							}
+							else {
+								keep_bag = true;
+							}
+						}
 
-				EQ::ItemInstance* pet_bag = nullptr;
-				if (RuleB(Custom, EnablePetBags) && is_pet) {
-					auto trade_owner = tradingWith->GetOwner()->CastToClient();
-					pet_bag = tradingWith->GetOwner()->CastToClient()->GetActivePetBag();
-				}
-				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
-				LogDebug("Test: [{}], spellID [{}]", GetSpellLevel(tradingWith->CastToNPC()->GetPetSpellID(), Class::Magician), tradingWith->CastToNPC()->GetPetSpellID());
-				LogDebug("[{}] [{}] [{}] [{}]", RuleB(Custom, EnablePetBags) , is_pet , pet_bag != nullptr , (GetSpellLevel(tradingWith->CastToNPC()->GetPetSpellID(), Class::Magician) < UINT8_MAX));
-				if (RuleB(Custom, EnablePetBags) && is_pet && pet_bag && (GetSpellLevel(tradingWith->CastToNPC()->GetPetSpellID(), Class::Magician) < UINT8_MAX)) {
-					tradingWith->SayString(TRADE_BACK, GetCleanName());
-					PushItemOnCursor(*inst, true);
-
-
-					EQ::SayLinkEngine linker;
-					linker.SetLinkType(EQ::saylink::SayLinkItemData);
-					linker.SetItemData(pet_bag->GetItem());
-
-					auto pet_bag_link = linker.GenerateLink();
-
-					if (tradingWith->GetOwner()->GetID() == GetID()) {
-						Message(Chat::Yellow, "You must either use your [%s] to manage this pet's inventory, or put it inside of another bag to disable it.", pet_bag_link.c_str());
-					} else {
-						Message(Chat::Yellow, "This pet cannot accept trades due to being managed with a [%s]", pet_bag_link.c_str());
+						// add item to pet's inventory
+						if (!keep_bag || item_count == 0) {
+							auto lde = LootdropEntriesRepository::NewNpcEntity();
+							lde.equip_item   = 1;
+							lde.item_charges = static_cast<int8>(inst->GetCharges());
+							with->AddLootDrop(item, lde, true);
+							inst = nullptr;
+						}
 					}
-
-				} else {
-					if (is_pet) {
-						LogDebug("Pet Trade Event [{}]", tradingWith->GetOwner()->GetCleanName());
-						// pets need to look inside bags and try to equip items found there
-						if (item->IsClassBag() && item->BagSlots > 0) {
-							for (int16 bslot = EQ::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
-								const EQ::ItemInstance *baginst = inst->GetItem(bslot);
-								if (baginst) {
-									const EQ::ItemData *bagitem = baginst->GetItem();
-									auto loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
-									loot_drop_entry.equip_item = 1;
-									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
-									if (tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
-										bool no_drop = bagitem->NoDrop == 0 && tradingWith->GetOwner()->GetID() == GetID();
-										if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal() && !no_drop) {
-											tradingWith->CastToNPC()->AddLootDropFixed(
-												bagitem,
-												loot_drop_entry,
-												true
-											);
-										}
-									}
-								}
-							}
-						}
-
-						auto new_loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
-						new_loot_drop_entry.equip_item = 1;
-						new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
-						bool no_drop = item->NoDrop == 0 && tradingWith->GetOwner()->GetID() != GetID();
-
-						if (no_drop) {
-							PushItemOnCursor(*inst, true);
-							Message(Chat::Red, "You may not equip pets that you do not own with No-Drop items.");
-							return;
-						}
-
-						if (IsSeasonal() != tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
-							PushItemOnCursor(*inst, true);
-							if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
-								Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");
-							}
-							return;
-						}
-
-						tradingWith->CastToNPC()->AddLootDropFixed(
-							item,
-							new_loot_drop_entry,
-							true
-						);
-
-
-						if (RuleB(Custom, StripCharmItems) && tradingWith->IsCharmed()) {
-							PushItemOnCursor(*inst, true);
-							Message(Chat::Yellow, "The magic of your charm spell returns your items to you.");
-						}
+					else {
+						// add item to pet's inventory
+						auto lde = LootdropEntriesRepository::NewNpcEntity();
+						lde.equip_item   = 1;
+						lde.item_charges = static_cast<int8>(inst->GetCharges());
+						with->AddLootDrop(item, lde, true);
+						inst = nullptr;
 					}
 				}
 			}
 		}
 
-		char temp1[100] = { 0 };
-		char temp2[100] = { 0 };
-		snprintf(temp1, 100, "copper.%d", tradingWith->GetNPCTypeID());
-		snprintf(temp2, 100, "%u", trade->cp);
-		parse->AddVar(temp1, temp2);
-		snprintf(temp1, 100, "silver.%d", tradingWith->GetNPCTypeID());
-		snprintf(temp2, 100, "%u", trade->sp);
-		parse->AddVar(temp1, temp2);
-		snprintf(temp1, 100, "gold.%d", tradingWith->GetNPCTypeID());
-		snprintf(temp2, 100, "%u", trade->gp);
-		parse->AddVar(temp1, temp2);
-		snprintf(temp1, 100, "platinum.%d", tradingWith->GetNPCTypeID());
-		snprintf(temp2, 100, "%u", trade->pp);
-		parse->AddVar(temp1, temp2);
+		std::string currencies[] = {"copper", "silver", "gold", "platinum"};
+		int32       amounts[]    = {trade->cp, trade->sp, trade->gp, trade->pp};
+
+		for (int i = 0; i < 4; ++i) {
+			parse->AddVar(
+				fmt::format("{}.{}", currencies[i], tradingWith->GetNPCTypeID()).c_str(),
+				fmt::format("{}", amounts[i]).c_str()
+			);
+		}
 
 		if(tradingWith->GetAppearance() != eaDead) {
 			tradingWith->FaceTarget(this);
 		}
 
-		if (!items.empty() && parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
-			std::vector<std::any> item_list(items.begin(), items.end());
-			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
+		std::vector<std::any> item_list(items.begin(), items.end());
+		for (EQ::ItemInstance *inst: items) {
+			if (!inst || !inst->GetItem()) {
+				continue;
+			}
+			item_list.emplace_back(inst);
 		}
 
-		for(int i = 0; i < 4; ++i) {
-			if(insts[i]) {
-				safe_delete(insts[i]);
+		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
+			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
+			LogNpcHandinDetail("EVENT_TRADE triggered for NPC [{}]", tradingWith->GetNPCTypeID());
+		}
+
+		auto handin_npc = tradingWith->CastToNPC();
+
+		// this is a catch-all return for items that weren't consumed by the EVENT_TRADE subroutine
+		// it's possible we have a quest NPC that doesn't have an EVENT_TRADE subroutine
+		// we can't double fire the ReturnHandinItems() event, so we need to check if it's already been processed from EVENT_TRADE
+		if (!handin_npc->HasProcessedHandinReturn()) {
+			if (!handin_npc->HandinStarted()) {
+				LogNpcHandinDetail("EVENT_TRADE did not process handin, calling ReturnHandinItems() for NPC [{}]", tradingWith->GetNPCTypeID());
+				std::map<std::string, uint16> handin = {
+					{"copper",   trade->cp},
+					{"silver",   trade->sp},
+					{"gold",     trade->gp},
+					{"platinum", trade->pp}
+				};
+				std::vector<const EQ::ItemInstance *> list(items.begin(), items.end());
+				for (EQ::ItemInstance *inst: items) {
+					if (!inst || !inst->GetItem()) {
+						continue;
+					}
+
+					std::string item_id = fmt::format("{}", inst->GetItem()->ID);
+					handin[item_id] += inst->GetCharges();
+					item_list.emplace_back(inst);
+				}
+
+				handin_npc->CheckHandin(this, handin, {}, list);
+			}
+
+			handin_npc->ReturnHandinItems(this);
+			LogNpcHandin("ReturnHandinItems() called for NPC [{}]", handin_npc->GetNPCTypeID());
+		}
+
+		handin_npc->ResetHandin();
+
+		for (auto &inst: insts) {
+			if (inst) {
+				safe_delete(inst);
 			}
 		}
 	}

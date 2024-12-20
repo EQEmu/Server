@@ -3767,8 +3767,13 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 // Send an item packet (including all subitems of the item)
 void Client::SendItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPacketType packet_type)
 {
-	if (!inst)
+	if (!inst) {
 		return;
+	}
+
+	if (!eqs) {
+		return;
+	}
 
 	if (packet_type != ItemPacketMerchant) {
 		if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {

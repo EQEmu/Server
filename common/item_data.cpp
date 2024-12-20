@@ -222,6 +222,27 @@ bool EQ::ItemData::IsType1HWeapon() const
 	return ((ItemType == item::ItemType1HBlunt) || (ItemType == item::ItemType1HSlash) || (ItemType == item::ItemType1HPiercing) || (ItemType == item::ItemTypeMartial));
 }
 
+bool EQ::ItemData::IsPetUsable() const
+{
+	if (ItemClass == item::ItemClassBag) {
+		return true;
+	}
+
+	switch (ItemType) {
+		case item::ItemType1HBlunt:
+		case item::ItemType1HSlash:
+		case item::ItemType1HPiercing:
+		case item::ItemType2HBlunt:
+		case item::ItemType2HSlash:
+		case item::ItemTypeMartial:
+		case item::ItemTypeShield:
+		case item::ItemTypeArmor:
+			return true;
+		default:
+			return false;
+	}
+}
+
 bool EQ::ItemData::IsType2HWeapon() const
 {
 	return ((ItemType == item::ItemType2HBlunt) || (ItemType == item::ItemType2HSlash) || (ItemType == item::ItemType2HPiercing));

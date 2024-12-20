@@ -17647,3 +17647,5 @@ void Client::Handle_OP_ShopRetrieveParcel(const EQApplicationPacket *app)
     auto parcel_in = (ParcelRetrieve_Struct *)app->pBuffer;
     DoParcelRetrieve(*parcel_in);
 }
+
+

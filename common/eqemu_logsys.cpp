@@ -102,6 +102,8 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::QuestErrors].log_to_console          = static_cast<uint8>(Logs::General);
 	log_settings[Logs::EqTime].log_to_console               = static_cast<uint8>(Logs::General);
 	log_settings[Logs::EqTime].log_to_gmsay                 = static_cast<uint8>(Logs::General);
+	log_settings[Logs::NpcHandin].log_to_console            = static_cast<uint8>(Logs::General);
+	log_settings[Logs::NpcHandin].log_to_gmsay              = static_cast<uint8>(Logs::General);
 
 	/**
 	 * RFC 5424
@@ -655,7 +657,7 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 	std::vector<LogsysCategoriesRepository::LogsysCategories> db_categories_to_add{};
 
 	for (int i = Logs::AA; i != Logs::MaxCategoryID; i++) {
-
+		LogInfo("Checking log category [{}] ({})", Logs::LogCategoryName[i], i);
 		bool is_missing_in_database = std::find(db_categories.begin(), db_categories.end(), i) == db_categories.end();
 		bool is_deprecated_category = Strings::Contains(fmt::format("{}", Logs::LogCategoryName[i]), "Deprecated");
 		if (!is_missing_in_database && is_deprecated_category) {
