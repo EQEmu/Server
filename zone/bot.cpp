@@ -7205,72 +7205,47 @@ bool Bot::CheckLoreConflict(const EQ::ItemData* item) {
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, invWhereWorn) != INVALID_INDEX);
 }
 
-bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, uint16 spellType) {
-
-	if (IsBotSpellTypeDetrimental(spellType, caster->GetClass())) {
-		LogError("[EntityList::Bot_AICheckCloseBeneficialSpells] detrimental spells requested");
-		return false;
-	}
-
-	std::vector<Mob*> v;
-
-	if (IsGroupTargetOnlyBotSpellType(spellType)) {
-		v = caster->GatherGroupSpellTargets();
-	}
-	else {
-		if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
-			v = caster->GatherSpellTargets(true);
-		}
-		else {
-			v = caster->GatherGroupSpellTargets();
-		}
-	}
-
+bool Bot::AttemptCloseBeneficialSpells(uint16 spellType, Raid* raid, std::vector<Mob*> targetList) {
+	bool result = false;
 	Mob* tar = nullptr;
 
-	for (Mob* m : v) {
+	for (Mob* m : targetList) {
 		tar = m;
 
 		if (!tar) {
 			continue;
 		}
 
-		if (caster == tar) {
-			continue;
-		}
-
-		uint8 chanceToCast = caster->IsEngaged() ? caster->GetChanceToCastBySpellType(spellType) : 100;
-
-		if (!caster->PrecastChecks(tar, spellType)) {
-			continue;
-		}
-
-		if (caster->AICastSpell(tar, chanceToCast, spellType)) {
-			return true;
-		}
-
-		if (tar->HasPet() && (!m->GetPet()->IsFamiliar() || RuleB(Bots, AllowBuffingHealingFamiliars))) {
-			tar = m->GetPet();
-
-			if (!tar) {
+		if (IsGroupTargetOnlyBotSpellType(spellType)) {
+			if (raid && (raid->GetGroup(GetName()) == raid->GetGroup(tar->GetName()))) {
 				continue;
 			}
+		}
 
-			if (!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) {
-				continue;
-			}
+		result = AttemptAICastSpell(spellType, tar);
 
-			if (!caster->PrecastChecks(tar, spellType)) {
-				continue;
-			}
+		if (!result) {
+			if (tar->HasPet() && (!m->GetPet()->IsFamiliar() || RuleB(Bots, AllowBuffingHealingFamiliars))) {
+				tar = m->GetPet();
 
-			if (caster->AICastSpell(tar, chanceToCast, spellType)) {
-				return true;
+				if (!tar) {
+					continue;
+				}
+
+				if (!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) {
+					continue;
+				}
+
+				result = AttemptAICastSpell(spellType, tar);
 			}
+		}
+		
+		if (result) {
+			break;
 		}
 	}
 
-	return false;
+	return result;
 }
 
 Mob* EntityList::GetMobByBotID(uint32 botID) {
@@ -10835,31 +10810,36 @@ std::list<BotSpellTypeOrder> Bot::GetSpellTypesPrioritized(uint8 priorityType) {
 	return castOrder;
 }
 
-bool Bot::AttemptAICastSpell(uint16 spellType) {
+bool Bot::AttemptAICastSpell(uint16 spellType, Mob* tar) {
 	bool result = false;
 
-	Mob* tar = GetTarget();
+	if (!tar) {
+		if (GetTarget()) {
+			tar = GetTarget();
+		}
+		else {
+			if (!IsBotSpellTypeBeneficial(spellType)) {
+				return result;
+			}
+		}
+	}
 
 	if (!IsTaunting() && !IsCommandedSpell() && GetSpellTypeAggroCheck(spellType) && HasOrMayGetAggro(IsSitting())) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of [{}] due to GetSpellTypeAggroCheck and HasOrMayGetAggro.'", GetCleanName(), GetSpellTypeNameByID(spellType)); //deleteme
 		return result;
 	}
 
-	if (IsBotSpellTypeBeneficial(spellType, GetClass())) {
-		if (!PrecastChecks(this, spellType) || !AICastSpell(this, GetChanceToCastBySpellType(spellType), spellType)) {
-			if (GetClass() == Class::Bard) {
-				return result;
-			}
+	if (IsBotSpellTypeBeneficial(spellType)) {
+		if (GetClass() == Class::Bard) {
+			tar = this;
+		}
 
-			if (!tar || !PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
-				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(spellType), spellType)) {
-					return result;
-				}
-			}
+		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
+			return result;
 		}
 	}
 	else {
-		if (!tar || !PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
+		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
 			return result;
 		}
 	}

@@ -633,6 +633,9 @@ bool Bot::AI_PursueCastCheck() {
 		}
 
 		auto castOrder = GetSpellTypesPrioritized(BotPriorityCategories::Pursue);
+		Mob* tar = nullptr;
+		Raid* raid = GetRaid();
+		std::vector<Mob*> v = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
@@ -649,6 +652,10 @@ bool Bot::AI_PursueCastCheck() {
 			}
 
 			result = AttemptAICastSpell(currentCast.spellType);
+
+			if (!result && IsBotSpellTypeBeneficial(currentCast.spellType)) {
+				result = AttemptCloseBeneficialSpells(currentCast.spellType, raid, v);
+			}
 
 			if (result) {
 				break;
@@ -692,6 +699,9 @@ bool Bot::AI_IdleCastCheck() {
 		}
 
 		auto castOrder = GetSpellTypesPrioritized(BotPriorityCategories::Idle);
+		Mob* tar = nullptr;
+		Raid* raid = GetRaid();
+		std::vector<Mob*> v = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));		
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
@@ -711,7 +721,17 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
+			if (!IsBotSpellTypeBeneficial(currentCast.spellType)) {
+				continue;
+			}
+
 			result = AttemptAICastSpell(currentCast.spellType);
+
+			if (result) {
+				break;
+			}
+
+			result = AttemptCloseBeneficialSpells(currentCast.spellType, raid, v);
 
 			if (result) {
 				break;
@@ -746,6 +766,9 @@ bool Bot::AI_EngagedCastCheck() {
 		}
 
 		auto castOrder = GetSpellTypesPrioritized(BotPriorityCategories::Engaged);
+		Mob* tar = nullptr;
+		Raid* raid = GetRaid();
+		std::vector<Mob*> v = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
@@ -762,6 +785,10 @@ bool Bot::AI_EngagedCastCheck() {
 			}
 
 			result = AttemptAICastSpell(currentCast.spellType);
+
+			if (!result && IsBotSpellTypeBeneficial(currentCast.spellType)) {
+				result = AttemptCloseBeneficialSpells(currentCast.spellType, raid, v);
+			}
 
 			if (result) {
 				break;
