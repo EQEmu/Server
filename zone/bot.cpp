@@ -9783,31 +9783,23 @@ bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) {
 	
 	for (Mob* m : v) {
 		if (
-			m->IsBot() &&
-			m->IsCasting() &&
-			m->CastToBot()->casting_spell_targetid &&
-			entity_list.GetMobID(m->CastToBot()->casting_spell_targetid) == entity_list.GetMobID(tar->GetID()) &&
+			m->IsBot() && 
+			m->IsCasting() && 
+			m->CastToBot()->casting_spell_targetid && 
 			m->CastingSpellID() == spell_id
 		) {
-
-			return true;
-		}
-		else {
 			if (IsGroupSpell(spell_id)) {
-				if (
-					m->IsBot() &&
-					m->IsCasting() &&
-					m->CastToBot()->casting_spell_targetid &&
-					m->CastingSpellID() == spell_id
-				) {
+				std::vector<Mob*> t = GatherSpellTargets(false, tar);
 
-					std::vector<Mob*> x = GatherGroupSpellTargets();
-
-					for (Mob* t : x) {
-						if (entity_list.GetMobID(t->CastToBot()->casting_spell_targetid) == entity_list.GetMobID(t->GetID())) {
-							return true;
-						}
+				for (Mob* x : t) {
+					if (x->GetID() == m->CastToBot()->casting_spell_targetid) {
+						return true;
 					}
+				}
+			}
+			else {
+				if (m->CastToBot()->casting_spell_targetid == targetID) {
+					return true;
 				}
 			}
 		}
