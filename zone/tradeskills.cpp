@@ -417,13 +417,24 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 					all_same = false;
 					break;
 				}
+
+				if (item->IsAugmentable()) {
+					for(int aug_index = EQ::invaug::SOCKET_BEGIN; aug_index < EQ::invaug::SOCKET_END; ++aug_index) {
+						if (item->GetAugmentItemID(aug_index) != 0) {
+							all_same = false;
+							user->Message(Chat::Red, "You must remove augments from all component items before you can attempt this combine.");
+							break;
+						}
+					}
+				}
 			}
 
 			if (all_same) {
 				auto new_item = database.GetItem(aug_id + 1000000);
 				if (new_item) {
 					container->Clear();
-					user->PushItemOnCursor(new_item, true);
+
+					user->SummonItem(new_item->ID, new_item->MaxCharges);
 					user->DeleteItemInInventory(in_combine->container_slot, 0, true);
 
 					auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
