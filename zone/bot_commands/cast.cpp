@@ -495,7 +495,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 		if (!aaType && !bySpellID) {
 			//LogTestDebug("{}: {} says, 'Attempting {} [{}-{}] on {}'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
-			if (!SpellTypeRequiresTarget(spellType, bot_iter->GetClass())) {
+			if (!SpellTypeRequiresTarget(spellType)) {
 				newTar = bot_iter;
 			}
 
@@ -511,7 +511,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				continue;
 			}
 
-			if (IsBotSpellTypeDetrimental(spellType, bot_iter->GetClass()) && !bot_iter->IsAttackAllowed(newTar)) {
+			if (IsBotSpellTypeDetrimental(spellType) && !bot_iter->IsAttackAllowed(newTar)) {
 				bot_iter->BotGroupSay(
 					bot_iter,
 					fmt::format(
