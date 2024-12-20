@@ -409,6 +409,9 @@ void NPC::AddLootDropFixed(
 
 		if (!item2->NoPet) {
 			for (int i = EQ::invslot::EQUIPMENT_BEGIN; !found && i <= EQ::invslot::EQUIPMENT_END; i++) {
+				if (i == EQ::invslot::slotRange) {
+					continue;
+				}
 				const uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if (equipment[i]) {
