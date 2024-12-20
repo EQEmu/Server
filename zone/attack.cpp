@@ -1906,11 +1906,14 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 
 		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
 
-		if (!dead || RuleB(Custom, SuspendGroupBuffs)) {
-			for (Mob* mob : pets) {
-				if (mob)
-				{
-					NPC* pet = mob->CastToNPC();
+		for (Mob* mob : pets) {
+			if (mob)
+			{
+				NPC* pet = mob->CastToNPC();
+
+				if (pet && !(FindSpellBookSlotBySpellID(pet->GetPetSpellID()) >= 0 || GetInv().IsClickEffectEquipped(pet->GetPetSpellID()))) {
+					RemovePet(pet);
+				} else {
 					if (pet && pet->GetPetSpellID()) {
 						PetInfo newPetInfo = PetInfo();
 						memset(&newPetInfo, 0, sizeof(PetInfo));
@@ -1926,6 +1929,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 				}
 			}
 		}
+
 
 		database.SavePetInfo(this);
 

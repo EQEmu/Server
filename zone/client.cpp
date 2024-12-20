@@ -770,7 +770,7 @@ bool Client::Save(uint8 iCommitNow) {
 				if (mob)
 				{
 					NPC* pet = mob->CastToNPC();
-					if (pet && pet->GetPetSpellID()) {
+					if (pet && pet->GetPetSpellID() && (!dead || FindSpellBookSlotBySpellID(pet->GetPetSpellID() >= 0))) {
 						PetInfo newPetInfo = PetInfo();
 						memset(&newPetInfo, 0, sizeof(PetInfo));
 						newPetInfo.SpellID = pet->GetPetSpellID();
