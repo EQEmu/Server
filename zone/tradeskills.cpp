@@ -403,12 +403,10 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 
-
-	// Ensure all items in the 4 slots of this container are augments with the same ID.
 	if (container->GetItem() && container->GetItem()->ID == 4041) {
 		auto first_item = container->GetItem(0);
 
-		if (first_item && first_item->GetItemType() == EQ::item::ItemTypeAugmentation) {
+		if (first_item && first_item->GetItemType()) {
 			int aug_id = first_item->GetID();
 
 			// Check if all items in the container match the ID of the first item
