@@ -2060,7 +2060,6 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType)
 		case BotSpellTypes::GroupHeals:
 		case BotSpellTypes::GroupCompleteHeals:
 		case BotSpellTypes::GroupHoTHeals:
-		case BotSpellTypes::GroupCures:
 			return RuleI(Bots, PercentChanceToCastGroupHeal);
 		case BotSpellTypes::Nuke:
 			return RuleI(Bots, PercentChanceToCastNuke);
