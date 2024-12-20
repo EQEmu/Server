@@ -6007,12 +6007,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 		if (!noGroupSpell) {
 			std::vector<Mob*> v;
 
-			if (RuleB(Bots, RaidBuffing)) {
-				v = GatherSpellTargets(true);
-			}
-			else {
-				v = GatherGroupSpellTargets();
-			}
+			v = GatherSpellTargets(RuleB(Bots, RaidBuffing));
 
 			for (Mob* m : v) {
 				if (IsEffectInSpell(thespell, SE_AbsorbMagicAtt) || IsEffectInSpell(thespell, SE_Rune)) {
@@ -6072,7 +6067,7 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spel
 				v = GatherSpellTargets(true);
 			}
 			else {
-				v = GatherGroupSpellTargets(spellTarget);
+				v = GatherSpellTargets(false, spellTarget);
 			}
 
 			for (Mob* m : v) {
@@ -9287,74 +9282,11 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND] = { 0 };
 
-std::vector<Mob*> Bot::GatherGroupSpellTargets(Mob* target, bool noClients, bool noBots) {
+std::vector<Mob*> Bot::GatherSpellTargets(bool entireRaid, Mob* target, bool noClients, bool noBots, bool noPets) {
 	std::vector<Mob*> valid_spell_targets;
 
 	if (IsRaidGrouped()) {
-		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
-			std::vector<RaidMember> raidGroupMembers;
-			if (target) {
-				auto raidGroup = raid->GetGroup(target->GetName());
-
-				if (raidGroup != RAID_GROUPLESS) {
-					raidGroupMembers = raid->GetRaidGroupMembers(raidGroup);
-				}
-				else {
-					return valid_spell_targets;
-				}
-			}
-			else {
-				auto raidGroup = raid->GetGroup(GetName());
-
-				if (raidGroup != RAID_GROUPLESS) {
-					raidGroupMembers = raid->GetRaidGroupMembers(raidGroup);
-				}
-				else {
-					return valid_spell_targets;
-				}
-			}
-
-			for (const auto& m : raidGroupMembers) {
-				if (
-					m.member && m.group_number != RAID_GROUPLESS &&
-					(
-						(m.member->IsClient() && !noClients) ||
-						(m.member->IsBot() && !noBots)
-						)
-					) {
-					valid_spell_targets.emplace_back(m.member);
-				}
-			}
-		}
-	}
-	else if (IsGrouped()) {
-		Group* group = GetGroup();
-		if (group) {
-			for (const auto& m : group->members) {
-				if (
-					m &&
-					(
-						(m->IsClient() && !noClients) ||
-						(m->IsBot() && !noBots)
-						)
-					) {
-					valid_spell_targets.emplace_back(m);
-				}
-			}
-		}
-	}
-	else {
-		valid_spell_targets.emplace_back(this);
-	}
-
-	return valid_spell_targets;
-}
-
-std::vector<Mob*> Bot::GatherSpellTargets(bool entireRaid, bool noClients, bool noBots, bool noPets) {
-	std::vector<Mob*> valid_spell_targets;
-
-	if (IsRaidGrouped()) {
-		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
+		if (auto raid = GetRaid()) {
 			if (entireRaid) {
 				for (const auto& m : raid->members) {
 					if (m.member && m.group_number != RAID_GROUPLESS && ((m.member->IsClient() && !noClients) || (m.member->IsBot() && !noBots))) {
@@ -9363,8 +9295,15 @@ std::vector<Mob*> Bot::GatherSpellTargets(bool entireRaid, bool noClients, bool 
 				}
 			}
 			else {
-				std::vector<RaidMember> raidGroup = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
+				std::vector<RaidMember> raidGroup;
 
+				if (target) {
+					raidGroup = raid->GetRaidGroupMembers(raid->GetGroup(target->GetName()));
+				}
+				else {
+					raidGroup = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
+				}
+	
 				for (const auto& m : raidGroup) {
 					if (m.member && m.group_number != RAID_GROUPLESS && ((m.member->IsClient() && !noClients) || (m.member->IsBot() && !noBots))) {
 						valid_spell_targets.emplace_back(m.member);
@@ -9375,6 +9314,7 @@ std::vector<Mob*> Bot::GatherSpellTargets(bool entireRaid, bool noClients, bool 
 	}
 	else if (IsGrouped()) {
 		Group* group = GetGroup();
+	
 		if (group) {
 			for (const auto& m : group->members) {
 				if (m && ((m->IsClient() && !noClients) || (m->IsBot() && !noBots))) {
@@ -9384,9 +9324,9 @@ std::vector<Mob*> Bot::GatherSpellTargets(bool entireRaid, bool noClients, bool 
 		}
 	}
 	else {
-			valid_spell_targets.emplace_back(this);
+		valid_spell_targets.emplace_back(this);
 	}
-
+	
 	return valid_spell_targets;
 }
 
@@ -9832,24 +9772,15 @@ bool Bot::BotHasEnoughMana(uint16 spell_id) {
 }
 
 bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) {
-
 	if (!tar || !spell_id) {
 		return true;
 	}
 
-	if (IsNPC() && CastToNPC()->GetSwarmOwner()) {
-		return true;
-	}
-
 	std::vector<Mob*> v;
-
-	if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
-		v = GatherSpellTargets(true);
-	}
-	else {
-		v = GatherGroupSpellTargets();
-	}
-
+	uint16 targetID = tar->GetID();
+	
+	v = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
+	
 	for (Mob* m : v) {
 		if (
 			m->IsBot() &&

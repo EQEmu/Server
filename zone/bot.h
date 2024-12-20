@@ -455,8 +455,7 @@ public:
 			{ return Mob::Attack(other, Hand, FromRiposte, IsStrikethrough, IsFromSpell, opts); }
 	void DoAttackRounds(Mob* target, int hand);
 
-	std::vector<Mob*> GatherGroupSpellTargets(Mob* target = nullptr, bool noClients = false, bool noBots = false);
-	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, bool noClients = false, bool noBots = false, bool noPets = false);	
+	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool noClients = false, bool noBots = false, bool noPets = false);
 
 	bool PrecastChecks(Mob* tar, uint16 spellType);	
 	bool CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechecks = false, bool AECheck = false);

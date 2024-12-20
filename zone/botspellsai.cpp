@@ -350,7 +350,7 @@ bool Bot::BotCastCure(Mob* tar, uint8 botClass, BotSpell& botSpell, uint16 spell
 					).c_str()
 				);
 
-				const std::vector<Mob*> v = GatherGroupSpellTargets(tar);
+				const std::vector<Mob*> v = GatherSpellTargets(false, tar);
 
 
 				if (!IsCommandedSpell()) {
@@ -533,7 +533,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botClass, BotSpell& botSpell, uint16 spell
 				);
 
 				if (botClass != Class::Bard) {
-					const std::vector<Mob*> v = GatherGroupSpellTargets(tar);
+					const std::vector<Mob*> v = GatherSpellTargets(false, tar);
 
 					if (!IsCommandedSpell()) {
 						for (Mob* m : v) {
@@ -1264,12 +1264,7 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* botCaster, Mob* tar, uint16 spell
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_CurrentHP);
 		std::vector<Mob*> v;
 
-		if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
-			v = botCaster->GatherSpellTargets(true);
-		}
-		else {
-			v = botCaster->GatherGroupSpellTargets();
-		}
+		v = botCaster->GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 
 		int targetCount = 0;
 
@@ -1313,12 +1308,7 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* botCaster, Mob* tar, uint
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_HealOverTime);
 		std::vector<Mob*> v;
 
-		if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
-			v = botCaster->GatherSpellTargets(true);
-		}
-		else {
-			v = botCaster->GatherGroupSpellTargets();
-		}
+		v = botCaster->GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 
 		int targetCount = 0;
 
@@ -1362,12 +1352,7 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* botCaster, Mob* tar, uint
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_CompleteHeal);
 		std::vector<Mob*> v;
 
-		if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
-			v = botCaster->GatherSpellTargets(true);
-		}
-		else {
-			v = botCaster->GatherGroupSpellTargets();
-		}
+		v = botCaster->GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 
 		int targetCount = 0;
 
@@ -1970,7 +1955,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType)
 		std::list<BotSpell_wPriority> botSpellListItr = GetPrioritizedBotSpellsBySpellType(botCaster, spellType, tar);
 		
 		if (IsGroupBotSpellType(spellType)) {
-			const std::vector<Mob*> v = botCaster->GatherGroupSpellTargets(tar);
+			const std::vector<Mob*> v = botCaster->GatherSpellTargets(false, tar);
 			int countNeedsCured = 0;
 			uint16 countPoisoned = 0;
 			uint16 countDiseased = 0;
