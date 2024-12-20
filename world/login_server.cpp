@@ -595,11 +595,6 @@ bool LoginServer::Connect()
 		);
 	}
 
-	m_keepalive = std::make_unique<EQ::Timer>(
-		1000,
-		true,
-		std::bind(&LoginServer::OnKeepAlive, this, std::placeholders::_1));
-
 	return true;
 }
 
@@ -716,8 +711,3 @@ void LoginServer::SendAccountUpdate(ServerPacket *pack)
 	}
 }
 
-void LoginServer::OnKeepAlive(EQ::Timer *t)
-{
-	ServerPacket pack(ServerOP_KeepAlive, 0);
-	SendPacket(&pack);
-}

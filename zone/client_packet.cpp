@@ -928,12 +928,6 @@ void Client::CompleteConnect()
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
-	/*
-	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-		SendBulkBazaarTraders();
-	}
-	*/
-
 	// TODO: load these states
 	// We at least will set them to the correct state for now
 	if (m_ClientVersionBit & EQ::versions::maskUFAndLater && GetPet()) {
@@ -2092,38 +2086,38 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 			return;
 		}
 
-		if (item->LDoNTheme <= LDoNThemeBits::TAKBit) {
+		if (item->LDoNTheme <= LDoNTheme::TAKBit) {
 			uint32 ldon_theme;
-			if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
+			if (item->LDoNTheme & LDoNTheme::TAKBit) {
 				if (m_pp.ldon_points_tak < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::TAK;
+					ldon_theme = LDoNTheme::TAK;
 				}
-			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+			} else if (item->LDoNTheme & LDoNTheme::RUJBit) {
 				if (m_pp.ldon_points_ruj < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::RUJ;
+					ldon_theme = LDoNTheme::RUJ;
 				}
-			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
+			} else if (item->LDoNTheme & LDoNTheme::MMCBit) {
 				if (m_pp.ldon_points_mmc < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::MMC;
+					ldon_theme = LDoNTheme::MMC;
 				}
-			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
+			} else if (item->LDoNTheme & LDoNTheme::MIRBit) {
 				if (m_pp.ldon_points_mir < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::MIR;
+					ldon_theme = LDoNTheme::MIR;
 				}
-			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
+			} else if (item->LDoNTheme & LDoNTheme::GUKBit) {
 				if (m_pp.ldon_points_guk < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::GUK;
+					ldon_theme = LDoNTheme::GUK;
 				}
 			}
 
 			merchant_type = fmt::format(
 				"{} Point{}",
-				EQ::constants::GetLDoNThemeName(ldon_theme),
+				LDoNTheme::GetName(ldon_theme),
 				item_cost != 1 ? "s" : ""
 			);
 		}
@@ -2267,19 +2261,19 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 
 		item = database.GetItem(ml.item);
 		if (item) {
-			uint32 theme = LDoNThemes::Unused;
-			if (item->LDoNTheme > LDoNThemeBits::TAKBit) {
-				theme = LDoNThemes::Unused;
-			} else if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
-				theme = LDoNThemes::TAK;
-			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
-				theme = LDoNThemes::RUJ;
-			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
-				theme = LDoNThemes::MMC;
-			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
-				theme = LDoNThemes::MIR;
-			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
-				theme = LDoNThemes::GUK;
+			uint32 theme = LDoNTheme::Unused;
+			if (item->LDoNTheme > LDoNTheme::TAKBit) {
+				theme = LDoNTheme::Unused;
+			} else if (item->LDoNTheme & LDoNTheme::TAKBit) {
+				theme = LDoNTheme::TAK;
+			} else if (item->LDoNTheme & LDoNTheme::RUJBit) {
+				theme = LDoNTheme::RUJ;
+			} else if (item->LDoNTheme & LDoNTheme::MMCBit) {
+				theme = LDoNTheme::MMC;
+			} else if (item->LDoNTheme & LDoNTheme::MIRBit) {
+				theme = LDoNTheme::MIR;
+			} else if (item->LDoNTheme & LDoNTheme::GUKBit) {
+				theme = LDoNTheme::GUK;
 			}
 			ss << "^" << item->Name << "|";
 			ss << item->ID << "|";
@@ -3319,30 +3313,14 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							args.push_back(old_aug);
 
 							if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-								parse->EventItem(
-									EVENT_UNAUGMENT_ITEM,
-									this,
-									tobe_auged,
-									nullptr,
-									"",
-									in_augment->augment_index,
-									&args
-								);
+								parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 							}
 
 							args.assign(1, tobe_auged);
 							args.push_back(false);
 
 							if (parse->ItemHasQuestSub(old_aug, EVENT_AUGMENT_REMOVE)) {
-								parse->EventItem(
-									EVENT_AUGMENT_REMOVE,
-									this,
-									old_aug,
-									nullptr,
-									"",
-									in_augment->augment_index,
-									&args
-								);
+								parse->EventItem(EVENT_AUGMENT_REMOVE, this, old_aug, nullptr, "", in_augment->augment_index, &args);
 							}
 
 							if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
@@ -3378,29 +3356,13 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							args.push_back(aug);
 
 							if (parse->ItemHasQuestSub(tobe_auged, EVENT_AUGMENT_ITEM)) {
-								parse->EventItem(
-									EVENT_AUGMENT_ITEM,
-									this,
-									tobe_auged,
-									nullptr,
-									"",
-									in_augment->augment_index,
-									&args
-								);
+								parse->EventItem(EVENT_AUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 							}
 
 							args.assign(1, tobe_auged);
 
 							if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_INSERT)) {
-								parse->EventItem(
-									EVENT_AUGMENT_INSERT,
-									this,
-									aug,
-									nullptr,
-									"",
-									in_augment->augment_index,
-									&args
-								);
+								parse->EventItem(EVENT_AUGMENT_INSERT, this, aug, nullptr, "", in_augment->augment_index, &args);
 							}
 
 							args.push_back(aug);
@@ -3470,30 +3432,14 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					args.push_back(aug);
 
 					if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-						parse->EventItem(
-							EVENT_UNAUGMENT_ITEM,
-							this,
-							tobe_auged,
-							nullptr,
-							"",
-							in_augment->augment_index,
-							&args
-						);
+						parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 					}
 
 					args.assign(1, tobe_auged);
 					args.push_back(false);
 
 					if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
-						parse->EventItem(
-							EVENT_AUGMENT_REMOVE,
-							this,
-							aug,
-							nullptr,
-							"",
-							in_augment->augment_index,
-							&args
-						);
+						parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
 					}
 
 					args.push_back(aug);
@@ -3558,30 +3504,14 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					args.push_back(aug);
 
 					if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-						parse->EventItem(
-							EVENT_UNAUGMENT_ITEM,
-							this,
-							tobe_auged,
-							nullptr,
-							"",
-							in_augment->augment_index,
-							&args
-						);
+						parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 					}
 
 					args.assign(1, tobe_auged);
 					args.push_back(true);
 
 					if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
-						parse->EventItem(
-							EVENT_AUGMENT_REMOVE,
-							this,
-							aug,
-							nullptr,
-							"",
-							in_augment->augment_index,
-							&args
-						);
+						parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
 					}
 
 					args.push_back(aug);
@@ -4578,14 +4508,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 							int i = 0;
 
 							if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
-								i = parse->EventItem(
-									EVENT_ITEM_CLICK_CAST,
-									this,
-									p_inst,
-									nullptr,
-									"",
-									castspell->inventoryslot
-								);
+								i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 							}
 
 							if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
@@ -4617,14 +4540,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 						int i = 0;
 
 						if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
-							i = parse->EventItem(
-								EVENT_ITEM_CLICK_CAST,
-								this,
-								p_inst,
-								nullptr,
-								"",
-								castspell->inventoryslot
-							);
+							i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 						}
 
 						if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
@@ -9826,14 +9742,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					int i = 0;
 
 					if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
-						i = parse->EventItem(
-							EVENT_ITEM_CLICK_CAST,
-							this,
-							p_inst,
-							nullptr,
-							"",
-							slot_id
-						);
+						i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", slot_id);
 					}
 
 					if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
@@ -9900,14 +9809,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					int i = 0;
 
 					if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
-						i = parse->EventItem(
-							EVENT_ITEM_CLICK_CAST,
-							this,
-							clickaug,
-							nullptr,
-							"",
-							slot_id
-						);
+						i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, nullptr, "", slot_id);
 					}
 
 					if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {

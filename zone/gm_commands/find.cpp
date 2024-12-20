@@ -1,6 +1,7 @@
 #include "../client.h"
 #include "find/aa.cpp"
 #include "find/body_type.cpp"
+#include "find/bot.cpp"
 #include "find/bug_category.cpp"
 #include "find/character.cpp"
 #include "find/class.cpp"
@@ -11,6 +12,7 @@
 #include "find/faction.cpp"
 #include "find/item.cpp"
 #include "find/language.cpp"
+#include "find/ldon_theme.cpp"
 #include "find/npctype.cpp"
 #include "find/object_type.cpp"
 #include "find/race.cpp"
@@ -47,6 +49,7 @@ void command_find(Client *c, const Seperator *sep)
 		Cmd{.cmd = "faction", .u = "faction [Search Criteria]", .fn = FindFaction, .a = {"#findfaction"}},
 		Cmd{.cmd = "item", .u = "item [Search Criteria]", .fn = FindItem, .a = {"#fi", "#finditem"}},
 		Cmd{.cmd = "language", .u = "language [Search Criteria]", .fn = FindLanguage, .a = {"#findlanguage"}},
+		Cmd{.cmd = "ldon_theme", .u = "ldon_theme [Search Criteria]", .fn = FindLDoNTheme, .a = {"#findldontheme"}},
 		Cmd{
 			.cmd = "npctype", .u = "npctype [Search Criteria]", .fn = FindNPCType, .a = {
 				"#fn",
@@ -64,6 +67,16 @@ void command_find(Client *c, const Seperator *sep)
 		Cmd{.cmd = "task", .u = "task [Search Criteria]", .fn = FindTask, .a = {"#findtask"}},
 		Cmd{.cmd = "zone", .u = "zone [Search Criteria]", .fn = FindZone, .a = {"#fz", "#findzone"}},
 	};
+
+	if (RuleB(Bots, Enabled)) {
+		commands.emplace_back(
+			Cmd{.cmd = "bot", .u = "bot [Search Criteria]", .fn = FindBot, .a = {"#findbot"}}
+		);
+	
+		std::sort(commands.begin(), commands.end(), [](const Cmd& a, const Cmd& b) {
+			return a.cmd < b.cmd;
+		});
+	}
 
 	// Check for arguments
 	const auto arguments = sep->argnum;

@@ -57,7 +57,7 @@ void FindClass(Client *c, const Seperator *sep)
 				(
 					IsPlayerClass(class_id) ?
 					fmt::format(
-						" | ({})",
+						" ({})",
 						Strings::Commify(GetPlayerClassBit(class_id))
 					) :
 					""

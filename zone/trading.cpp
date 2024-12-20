@@ -1106,16 +1106,6 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 			trader_item.item_id               = inst->GetID();
 			trader_item.item_sn               = in->serial_number[i];
 			trader_item.slot_id               = i;
-			trader_item.id                    = 0;
-			trader_item.char_entity_id        = GetID();
-			trader_item.char_id               = CharacterID();
-			trader_item.char_zone_id          = GetZoneID();
-			trader_item.char_zone_instance_id = GetInstanceID();
-			trader_item.item_charges          = inst->GetCharges() == 0 ? 1 : inst->GetCharges();
-			trader_item.item_cost             = inst->GetPrice();
-			trader_item.item_id               = inst->GetID();
-			trader_item.item_sn               = in->serial_number[i];
-			trader_item.slot_id               = i;
 			if (inst->IsAugmented()) {
 				auto augs              = inst->GetAugmentIDs();
 				trader_item.aug_slot_1 = augs.at(0);

@@ -89,11 +89,11 @@ void ShowCurrencies(Client *c, const Seperator *sep)
 		}
 	}
 
-	for (const auto& l : EQ::constants::GetLDoNThemeMap()) {
+	for (const auto& l : ldon_theme_names) {
 		const uint32 ldon_currency_value = t->GetLDoNPointsTheme(l.first);
 		if (ldon_currency_value) {
 			currency_table += DialogueWindow::TableRow(
-				DialogueWindow::TableCell(l.second) +
+				DialogueWindow::TableCell(l.second.first) +
 				DialogueWindow::TableCell(Strings::Commify(ldon_currency_value))
 			);
 

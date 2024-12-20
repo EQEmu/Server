@@ -1541,10 +1541,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			hit.damage_done = 0;
 		}
 
-		parse->EventBotMerc(
-			EVENT_USE_SKILL,
-			this,
-			nullptr,
+		parse->EventBotMerc(EVENT_USE_SKILL, this, nullptr,
 			[&]() {
 				return fmt::format(
 					"{} {}",
@@ -3247,10 +3244,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	std::vector<std::any> args = { corpse };
 
-	parse->EventMercNPC(
-		EVENT_DEATH_COMPLETE,
-		this,
-		owner_or_self,
+	parse->EventMercNPC(EVENT_DEATH_COMPLETE, this, owner_or_self,
 		[&]() {
 			return fmt::format(
 				"{} {} {} {} {} {} {} {} {}",
@@ -3265,8 +3259,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				m_combat_record.GetHealingReceived()
 			);
 		},
-		0,
-		&args
+		0, &args
 	);
 
 	// Zone controller process EVENT_DEATH_ZONE (Death events)
@@ -4458,10 +4451,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		if (attacker) {
 			args = { this };
 
-			parse->EventMob(
-				EVENT_DAMAGE_GIVEN,
-				attacker,
-				this,
+			parse->EventMob(EVENT_DAMAGE_GIVEN, attacker, this,
 				[&]() {
 					return fmt::format(
 						"{} {} {} {} {} {} {} {} {}",
@@ -4476,17 +4466,13 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						static_cast<int>(special)
 					);
 				},
-				0,
-				&args
+				0, &args
 			);
 		}
 
 		args = { attacker };
 
-		damage_override = parse->EventMob(
-			EVENT_DAMAGE_TAKEN,
-			this,
-			attacker,
+		damage_override = parse->EventMob(EVENT_DAMAGE_TAKEN, this, attacker,
 			[&]() {
 				return fmt::format(
 					"{} {} {} {} {} {} {} {} {}",
@@ -4501,8 +4487,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					static_cast<int>(special)
 				);
 			},
-			0,
-			&args
+			0, &args
 		);
 
 		if (damage_override > 0) {
