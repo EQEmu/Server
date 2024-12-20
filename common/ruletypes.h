@@ -811,6 +811,7 @@ RULE_INT(Bots, PercentChanceToCastMez, 75, "The chance for a bot to attempt to c
 RULE_INT(Bots, PercentChanceToCastSlow, 75, "The chance for a bot to attempt to cast the given spell type in combat. Default 75%.")
 RULE_INT(Bots, PercentChanceToCastDebuff, 75, "The chance for a bot to attempt to cast the given spell type in combat. Default 75%.")
 RULE_INT(Bots, PercentChanceToCastCure, 75, "The chance for a bot to attempt to cast the given spell type in combat. Default 75%.")
+RULE_INT(Bots, PercentChanceToCastGroupCure, 75, "The chance for a bot to attempt to cast the given spell type in combat. Default 75%.")
 RULE_INT(Bots, PercentChanceToCastHateRedux, 75, "The chance for a bot to attempt to cast the given spell type in combat. Default 75%.")
 RULE_INT(Bots, PercentChanceToCastFear, 75, "The chance for a bot to attempt to cast the given spell type in combat. Default 75%.")
 RULE_INT(Bots, PercentChanceToCastOtherType, 90, "The chance for a bot to attempt to cast the remaining spell types in combat. Default 0-%.")

@@ -2094,6 +2094,8 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType)
 			return RuleI(Bots, PercentChanceToCastDebuff);
 		case BotSpellTypes::Cure:
 			return RuleI(Bots, PercentChanceToCastCure);
+		case BotSpellTypes::GroupCures:
+			return RuleI(Bots, PercentChanceToCastGroupCure);
 		case BotSpellTypes::HateRedux:
 			return RuleI(Bots, PercentChanceToCastHateRedux);		
 		case BotSpellTypes::Fear:
