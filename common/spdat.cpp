@@ -2849,6 +2849,7 @@ bool IsBotSpellTypeBeneficial(uint16 spellType) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::Cure:
 		case BotSpellTypes::GroupCures:
+		case BotSpellTypes::PetCures:
 		case BotSpellTypes::DamageShields:		
 		case BotSpellTypes::InCombatBuffSong:
 		case BotSpellTypes::OutOfCombatBuffSong:
@@ -2898,6 +2899,7 @@ bool IsBotSpellTypeOtherBeneficial(uint16 spellType) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::Cure:
 		case BotSpellTypes::GroupCures:
+		case BotSpellTypes::PetCures:
 		case BotSpellTypes::DamageShields:
 		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::PetBuffs:
@@ -3020,6 +3022,7 @@ bool IsPetBotSpellType(uint16 spellType) {
 		case BotSpellTypes::PetHoTHeals:
 		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::PetResistBuffs:
+		case BotSpellTypes::PetCures:
 			return true;
 		default:
 			return false;
@@ -3046,6 +3049,7 @@ bool IsClientBotSpellType(uint16 spellType) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::Cure:
 		case BotSpellTypes::GroupCures:
+		case BotSpellTypes::PetCures:
 		case BotSpellTypes::DamageShields:
 		case BotSpellTypes::PetDamageShields:
 		case BotSpellTypes::PetBuffs:
@@ -3513,6 +3517,8 @@ uint16 GetPetSpellType(uint16 spellType) {
 		return BotSpellTypes::PetVeryFastHeals;
 	case BotSpellTypes::HoTHeals:
 		return BotSpellTypes::PetHoTHeals;
+	case BotSpellTypes::Cures:
+		return BotSpellTypes::PetCures;
 	case BotSpellTypes::DamageShields:
 		return BotSpellTypes::PetDamageShields;
 	case BotSpellTypes::ResistBuffs:

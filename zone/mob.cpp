@@ -8863,6 +8863,9 @@ std::string Mob::GetSpellTypeNameByID(uint16 spellType) {
 		case BotSpellTypes::GroupCures:
 			spellTypeName = "Group Cure";
 			break;
+		case BotSpellTypes::PetCures:
+			spellTypeName = "Pet Cure";
+			break;
 		case BotSpellTypes::Resurrect:
 			spellTypeName = "Resurrect";
 			break;
@@ -9087,6 +9090,9 @@ std::string Mob::GetSpellTypeShortNameByID(uint16 spellType) {
 		case BotSpellTypes::GroupCures:
 			spellTypeName = "groupcures";
 			break;
+		case BotSpellTypes::PetCures:
+			spellTypeName = "petcure";
+			break;
 		case BotSpellTypes::Resurrect:
 			spellTypeName = "resurrect";
 			break;
@@ -9298,7 +9304,56 @@ std::string Mob::GetSubTypeNameByID(uint16 subType) {
 }
 
 bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
+	uint8 botClass = GetClass();
+
 	switch (spellType) {
+		case BotSpellTypes::FastHeals:
+		case BotSpellTypes::VeryFastHeals:
+		case BotSpellTypes::Pet:
+		case BotSpellTypes::Escape:
+		case BotSpellTypes::Lifetap:
+		case BotSpellTypes::Buff:
+		case BotSpellTypes::PetBuffs:
+		case BotSpellTypes::InCombatBuff:
+		case BotSpellTypes::PreCombatBuff:
+		case BotSpellTypes::DamageShields:		
+			return false;
+		case BotSpellTypes::GroupCompleteHeals:
+		case BotSpellTypes::GroupHeals:
+		case BotSpellTypes::GroupHoTHeals:
+		case BotSpellTypes::HoTHeals:
+		case BotSpellTypes::CompleteHeal:
+		case BotSpellTypes::PetFastHeals:
+		case BotSpellTypes::PetRegularHeals:
+		case BotSpellTypes::PetVeryFastHeals:
+		case BotSpellTypes::RegularHeal:
+			switch (stance) {
+			case Stance::Aggressive:
+			case Stance::AEBurn:
+			case Stance::Burn:
+				return true;
+			default:
+				return false;
+			}
+		case BotSpellTypes::Cure:
+		case BotSpellTypes::GroupCures:
+			switch (stance) {
+			case Stance::Aggressive:
+			case Stance::AEBurn:
+			case Stance::Burn:
+				return true;
+			default:
+				return false;
+			}
+		case BotSpellTypes::InCombatBuffSong:
+		case BotSpellTypes::OutOfCombatBuffSong:
+		case BotSpellTypes::PreCombatBuffSong:
+			if (botClass == Class::Bard) {
+				return false;
+			}
+			else {
+				return true;
+			}
 		case BotSpellTypes::Nuke:
 		case BotSpellTypes::DOT:
 		case BotSpellTypes::Stun:
@@ -9320,15 +9375,6 @@ bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 				default:
 					return true;
 			}
-		case BotSpellTypes::AESnare:
-		case BotSpellTypes::AERoot:
-		case BotSpellTypes::Root:
-		case BotSpellTypes::AEDispel:
-		case BotSpellTypes::Dispel:
-		case BotSpellTypes::AEFear:
-		case BotSpellTypes::Fear:
-		case BotSpellTypes::AEHateLine:
-			return true;
 		case BotSpellTypes::Mez:
 		case BotSpellTypes::AEMez:
 		case BotSpellTypes::Debuff:
@@ -9352,17 +9398,8 @@ bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 				default:
 					return false;
 			}
-		case BotSpellTypes::InCombatBuffSong:
-		case BotSpellTypes::OutOfCombatBuffSong:
-		case BotSpellTypes::PreCombatBuffSong:
-			if (GetClass() == Class::Bard) {
-				return false;
-			}
-			else {
-				return true;
-			}
 		case BotSpellTypes::HateLine:
-			if (GetClass() == Class::ShadowKnight || GetClass() == Class::Paladin) {
+			if (botClass == Class::ShadowKnight || botClass == Class::Paladin) {
 				switch (stance) {
 					case Stance::Aggressive:
 						return false;
@@ -9373,45 +9410,23 @@ bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 			else {
 				return true;
 			}
-		case BotSpellTypes::Cure:
-		case BotSpellTypes::GroupCures:
-			switch (stance) {
-				case Stance::Aggressive:
-				case Stance::AEBurn:
-				case Stance::Burn:
-					return true;
-				default:
-					return false;
-			}
-		case BotSpellTypes::GroupCompleteHeals:
-		case BotSpellTypes::GroupHeals:
-		case BotSpellTypes::GroupHoTHeals:
-		case BotSpellTypes::HoTHeals:
-		case BotSpellTypes::CompleteHeal:
-		case BotSpellTypes::PetCompleteHeals:
-		case BotSpellTypes::PetFastHeals:
+		case BotSpellTypes::Charm:
+		case BotSpellTypes::Resurrect:
+		case BotSpellTypes::AESnare:
+		case BotSpellTypes::AERoot:
+		case BotSpellTypes::Root:
+		case BotSpellTypes::AEDispel:
+		case BotSpellTypes::Dispel:
+		case BotSpellTypes::AEFear:
+		case BotSpellTypes::Fear:
+		case BotSpellTypes::AEHateLine:
+		case BotSpellTypes::PetCures:
 		case BotSpellTypes::PetHoTHeals:
-		case BotSpellTypes::PetRegularHeals:
-		case BotSpellTypes::PetVeryFastHeals:
-		case BotSpellTypes::RegularHeal:
-			switch (stance) {
-				case Stance::Aggressive:
-				case Stance::AEBurn:
-				case Stance::Burn:
-					return true;
-				default:
-					return false;
-			}
-		case BotSpellTypes::FastHeals:
-		case BotSpellTypes::VeryFastHeals:
-		case BotSpellTypes::Pet:
-		case BotSpellTypes::Escape:
-		case BotSpellTypes::Lifetap:
-		case BotSpellTypes::Buff:
-		case BotSpellTypes::InCombatBuff:
-		case BotSpellTypes::PreCombatBuff:
+		case BotSpellTypes::PetCompleteHeals:
+		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::PetResistBuffs:
 		default:
-			return false;
+			return true;
 	}
 }
 
@@ -9531,6 +9546,8 @@ uint8 Mob::GetDefaultSpellMinThreshold(uint16 spellType, uint8 stance) {
 }
 
 uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
+	uint8 botClass = GetClass();
+
 	switch (spellType) {
 		case BotSpellTypes::Escape:
 		case BotSpellTypes::VeryFastHeals:
@@ -9599,6 +9616,7 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::Snare:
 		case BotSpellTypes::AEFear:
 		case BotSpellTypes::Fear:
+		case BotSpellTypes::AEDispel:
 		case BotSpellTypes::Dispel:
 		case BotSpellTypes::AEDebuff:
 		case BotSpellTypes::Debuff:
@@ -9614,10 +9632,30 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 				default:
 					return 99;
 			}
+		case BotSpellTypes::GroupHoTHeals:
+		case BotSpellTypes::HoTHeals:
+		case BotSpellTypes::PetHoTHeals:
+			if (botClass == Class::Necromancer || botClass == Class::Shaman) {
+				return 60;
+			}
+			else {
+				switch (stance) {
+					case Stance::AEBurn:
+					case Stance::Burn:
+					case Stance::Aggressive:
+						return 95;
+					case Stance::Efficient:
+						return 80;
+					default:
+						return 90;
+				}
+			}
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::Charm:
 		case BotSpellTypes::Cure:
-		case BotSpellTypes::DamageShields:		
+		case BotSpellTypes::GroupCures:
+		case BotSpellTypes::PetCures:
+		case BotSpellTypes::DamageShields:
 		case BotSpellTypes::HateRedux:
 		case BotSpellTypes::InCombatBuff:
 		case BotSpellTypes::InCombatBuffSong:
@@ -9634,25 +9672,6 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::Resurrect:
 		case BotSpellTypes::HateLine:
 		case BotSpellTypes::AEHateLine:
-			return 100;
-		case BotSpellTypes::GroupHoTHeals:
-		case BotSpellTypes::HoTHeals:
-		case BotSpellTypes::PetHoTHeals:
-			if (GetClass() == Class::Necromancer || GetClass() == Class::Shaman) {
-				return 60;
-			}
-			else {
-				switch (stance) {
-					case Stance::AEBurn:
-					case Stance::Burn:
-					case Stance::Aggressive:
-						return 95;
-					case Stance::Efficient:
-						return 80;
-					default:
-						return 90;
-				}
-			}
 		default:
 			return 100;
 	}
@@ -9785,6 +9804,8 @@ uint16 Mob::GetPetSpellType(uint16 spellType) {
 			return BotSpellTypes::PetHoTHeals;
 		case BotSpellTypes::Buff:
 			return BotSpellTypes::PetBuffs;
+		case BotSpellTypes::Cure:
+			return BotSpellTypes::PetCures;
 		case BotSpellTypes::DamageShields:
 			return BotSpellTypes::PetDamageShields;
 		case BotSpellTypes::ResistBuffs:

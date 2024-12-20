@@ -10550,44 +10550,48 @@ uint16 Bot::GetDefaultSpellTypeIdlePriority(uint16 spellType, uint8 botClass, ui
 			priority = 15;
 
 			break;
-		case BotSpellTypes::Pet:
+		case BotSpellTypes::PetCures:
 			priority = 16;
 
 			break;
-		case BotSpellTypes::Buff:
+		case BotSpellTypes::Pet:
 			priority = 17;
 
 			break;
-		case BotSpellTypes::OutOfCombatBuffSong:
+		case BotSpellTypes::Buff:
 			priority = 18;
 
 			break;
-		case BotSpellTypes::ResistBuffs:
+		case BotSpellTypes::OutOfCombatBuffSong:
 			priority = 19;
 
 			break;
-		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::ResistBuffs:
 			priority = 20;
 
 			break;
-		case BotSpellTypes::PetBuffs:
+		case BotSpellTypes::DamageShields:
 			priority = 21;
 
 			break;
-		case BotSpellTypes::PreCombatBuff:
+		case BotSpellTypes::PetBuffs:
 			priority = 22;
 
 			break;
-		case BotSpellTypes::PreCombatBuffSong:
+		case BotSpellTypes::PreCombatBuff:
 			priority = 23;
 
 			break;
-		case BotSpellTypes::PetResistBuffs:
+		case BotSpellTypes::PreCombatBuffSong:
 			priority = 24;
 
 			break;
-		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::PetResistBuffs:
 			priority = 25;
+
+			break;
+		case BotSpellTypes::PetDamageShields:
+			priority = 26;
 
 			break;
 		default:
@@ -10633,60 +10637,62 @@ uint16 Bot::GetDefaultSpellTypeEngagedPriority(uint16 spellType, uint8 botClass,
 			return 15;
 		case BotSpellTypes::PetHoTHeals:
 			return 16;
-		case BotSpellTypes::AELifetap:
+		case BotSpellTypes::PetCures:
 			return 17;
-		case BotSpellTypes::Lifetap:
+		case BotSpellTypes::AELifetap:
 			return 18;
-		case BotSpellTypes::HateRedux:
+		case BotSpellTypes::Lifetap:
 			return 19;
-		case BotSpellTypes::AEMez:
+		case BotSpellTypes::HateRedux:
 			return 20;
-		case BotSpellTypes::Mez:
+		case BotSpellTypes::AEMez:
 			return 21;
-		case BotSpellTypes::AEHateLine:
+		case BotSpellTypes::Mez:
 			return 22;
-		case BotSpellTypes::HateLine:
+		case BotSpellTypes::AEHateLine:
 			return 23;
-		case BotSpellTypes::AEDispel:
+		case BotSpellTypes::HateLine:
 			return 24;
-		case BotSpellTypes::Dispel:
+		case BotSpellTypes::AEDispel:
 			return 25;
-		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::Dispel:
 			return 26;
-		case BotSpellTypes::Debuff:
+		case BotSpellTypes::AEDebuff:
 			return 27;
-		case BotSpellTypes::AESnare:
+		case BotSpellTypes::Debuff:
 			return 28;
-		case BotSpellTypes::Snare:
+		case BotSpellTypes::AESnare:
 			return 29;
-		case BotSpellTypes::AESlow:
+		case BotSpellTypes::Snare:
 			return 30;
-		case BotSpellTypes::Slow:
+		case BotSpellTypes::AESlow:
 			return 31;
-		case BotSpellTypes::AERoot:
+		case BotSpellTypes::Slow:
 			return 32;
-		case BotSpellTypes::Root:
+		case BotSpellTypes::AERoot:
 			return 33;
-		case BotSpellTypes::AEDoT:
+		case BotSpellTypes::Root:
 			return 34;
-		case BotSpellTypes::DOT:
+		case BotSpellTypes::AEDoT:
 			return 35;
-		case BotSpellTypes::AEStun:
+		case BotSpellTypes::DOT:
 			return 36;
-		case BotSpellTypes::PBAENuke:
+		case BotSpellTypes::AEStun:
 			return 37;
-		case BotSpellTypes::AENukes:
+		case BotSpellTypes::PBAENuke:
 			return 38;
-		case BotSpellTypes::AERains:
+		case BotSpellTypes::AENukes:
 			return 39;
-		case BotSpellTypes::Stun:
+		case BotSpellTypes::AERains:
 			return 40;
-		case BotSpellTypes::Nuke:
+		case BotSpellTypes::Stun:
 			return 41;
-		case BotSpellTypes::InCombatBuff:
+		case BotSpellTypes::Nuke:
 			return 42;
-		case BotSpellTypes::InCombatBuffSong:
+		case BotSpellTypes::InCombatBuff:
 			return 43;
+		case BotSpellTypes::InCombatBuffSong:
+			return 44;
 		default:
 			return 0;
 	}
@@ -10738,6 +10744,8 @@ uint16 Bot::GetDefaultSpellTypePursuePriority(uint16 spellType, uint8 botClass, 
 			return 21;
 		case BotSpellTypes::PetHoTHeals:
 			return 22;	
+		case BotSpellTypes::PetCures:
+			return 23;
 		default:
 			return 0;
 	}
@@ -11215,6 +11223,7 @@ uint16 Bot::GetSpellListSpellType(uint16 spellType) {
 			return BotSpellTypes::Fear;
 		case BotSpellTypes::GroupCures:
 		case BotSpellTypes::Cure:		
+		case BotSpellTypes::PetCures:
 			return BotSpellTypes::Cure;
 		case BotSpellTypes::AERoot:
 		case BotSpellTypes::Root:

@@ -706,10 +706,11 @@ namespace BotSpellTypes
 	constexpr uint16	PetFastHeals				= 50;
 	constexpr uint16	PetVeryFastHeals			= 51;
 	constexpr uint16	PetHoTHeals					= 52;
-	constexpr uint16	DamageShields				= 53;
-	constexpr uint16	ResistBuffs					= 54;
-	constexpr uint16	PetDamageShields			= 55;
-	constexpr uint16	PetResistBuffs				= 56;
+	constexpr uint16	PetCures					= 53;
+	constexpr uint16	DamageShields				= 54;
+	constexpr uint16	ResistBuffs					= 55;
+	constexpr uint16	PetDamageShields			= 56;
+	constexpr uint16	PetResistBuffs				= 57;
 
 	// Command Spell Types
 	constexpr uint16	Teleport					= 100; // this is handled by ^depart so uses other logic

@@ -38,7 +38,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 		(spellType == BotSpellTypes::PreCombatBuffSong && tar->IsPet()) ||
 		(!RuleB(Bots, AllowBuffingHealingFamiliars) && tar->IsFamiliar()) ||
 		(tar->IsPet() && tar->IsCharmed() && spellType == BotSpellTypes::PetBuffs && !RuleB(Bots, AllowCharmedPetBuffs)) ||
-		(tar->IsPet() && tar->IsCharmed() && (spellType == BotSpellTypes::Cure || spellType == BotSpellTypes::GroupCures) && !RuleB(Bots, AllowCharmedPetCures)) ||
+		(tar->IsPet() && tar->IsCharmed() && spellType == BotSpellTypes::PetCures && !RuleB(Bots, AllowCharmedPetCures)) ||
 		(tar->IsPet() && tar->IsCharmed() && IsHealBotSpellType(spellType) && !RuleB(Bots, AllowCharmedPetHeals))
 	) {
 		return false;
@@ -189,6 +189,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 			return BotCastHeal(tar, botClass, botSpell, spellType);
 		case BotSpellTypes::GroupCures:
 		case BotSpellTypes::Cure:
+		case BotSpellTypes::PetCures:
 			if (!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) {
 				return false;
 			}
@@ -2093,6 +2094,7 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spellType)
 		case BotSpellTypes::Debuff:
 			return RuleI(Bots, PercentChanceToCastDebuff);
 		case BotSpellTypes::Cure:
+		case BotSpellTypes::PetCures:
 			return RuleI(Bots, PercentChanceToCastCure);
 		case BotSpellTypes::GroupCures:
 			return RuleI(Bots, PercentChanceToCastGroupCure);
