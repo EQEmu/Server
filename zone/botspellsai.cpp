@@ -2693,7 +2693,6 @@ bool Bot::IsValidSpellRange(uint16 spell_id, Mob* tar) {
 
 	range = GetActSpellRange(spell_id, range);
 
-	if (IsIllusionSpell(spell_id) && (HasProjectIllusion())) {
 	if (HasProjectIllusion() && IsIllusionSpell(spell_id)) {
 		range = 100;
 	}
