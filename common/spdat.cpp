@@ -2791,7 +2791,7 @@ bool IsLichSpell(uint16 spell_id)
 	return false;
 }
 
-bool IsBotSpellTypeDetrimental(uint16 spellType, uint8 cls) {
+bool IsBotSpellTypeDetrimental(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::Nuke:
 		case BotSpellTypes::Root:
@@ -2831,7 +2831,7 @@ bool IsBotSpellTypeDetrimental(uint16 spellType, uint8 cls) {
 	return false;
 }
 
-bool IsBotSpellTypeBeneficial(uint16 spellType, uint8 cls) {
+bool IsBotSpellTypeBeneficial(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::RegularHeal:
 		case BotSpellTypes::CompleteHeal:
@@ -2999,12 +2999,12 @@ bool IsGroupBotSpellType(uint16 spellType) {
 
 bool IsGroupTargetOnlyBotSpellType(uint16 spellType) {
 	switch (spellType) {
-	case BotSpellTypes::GroupCures:
-	case BotSpellTypes::GroupCompleteHeals:
-	case BotSpellTypes::GroupHeals:
-		return true;
-	default:
-		return false;
+		case BotSpellTypes::GroupCures:
+		case BotSpellTypes::GroupCompleteHeals:
+		case BotSpellTypes::GroupHeals:
+			return true;
+		default:
+			return false;
 	}
 
 	return false;
@@ -3082,7 +3082,7 @@ bool IsHealBotSpellType(uint16 spellType) {
 	return false;
 }
 
-bool SpellTypeRequiresLoS(uint16 spellType, uint16 cls) {
+bool SpellTypeRequiresLoS(uint16 spellType) {
 	if (IsAEBotSpellType(spellType)) { // These gather their own targets later
 		return false;
 	}
@@ -3110,7 +3110,7 @@ bool SpellTypeRequiresLoS(uint16 spellType, uint16 cls) {
 	return true;
 }
 
-bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls) {
+bool SpellTypeRequiresTarget(uint16 spellType) {
 	switch (spellType) {
 		case BotSpellTypes::Pet:
 		case BotSpellTypes::Succor:

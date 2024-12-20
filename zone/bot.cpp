@@ -9661,7 +9661,6 @@ bool Bot::CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar) {
 	}
 
 	uint8 botClass = GetClass();
-	//uint8 botLevel = GetLevel();
 
 	switch (spellType) {
 		case BotSpellTypes::Buff:
@@ -10484,7 +10483,7 @@ uint16 Bot::GetDefaultSpellTypePriority(uint16 spellType, uint8 priorityType, ui
 }
 
 uint16 Bot::GetDefaultSpellTypeIdlePriority(uint16 spellType, uint8 botClass, uint8 stance) {
-	if (!IsBotSpellTypeBeneficial(spellType, botClass)) {
+	if (!IsBotSpellTypeBeneficial(spellType)) {
 		return 0;
 	}
 	
@@ -10746,7 +10745,7 @@ uint16 Bot::GetDefaultSpellTypePursuePriority(uint16 spellType, uint8 botClass, 
 
 uint16 Bot::GetDefaultSpellTypeResistLimit(uint16 spellType, uint8 stance) {
 
-	if (!IsBotSpellTypeBeneficial(spellType, GetClass())) {
+	if (!IsBotSpellTypeBeneficial(spellType)) {
 		return RuleI(Bots, SpellResistLimit);
 	}
 	else {

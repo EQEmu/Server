@@ -737,8 +737,8 @@ const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellT
 const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong);
 const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
 
-bool IsBotSpellTypeDetrimental (uint16 spellType, uint8 cls = 0);
-bool IsBotSpellTypeBeneficial (uint16 spellType, uint8 cls = 0);
+bool IsBotSpellTypeDetrimental (uint16 spellType);
+bool IsBotSpellTypeBeneficial (uint16 spellType);
 bool IsBotSpellTypeOtherBeneficial(uint16 spellType);
 bool IsBotSpellTypeInnate (uint16 spellType);
 bool IsAEBotSpellType(uint16 spellType);
@@ -747,8 +747,8 @@ bool IsGroupTargetOnlyBotSpellType(uint16 spellType);
 bool IsPetBotSpellType(uint16 spellType);
 bool IsClientBotSpellType(uint16 spellType);
 bool IsHealBotSpellType(uint16 spellType);
-bool SpellTypeRequiresLoS(uint16 spellType, uint16 cls = 0);
-bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls = 0);
+bool SpellTypeRequiresLoS(uint16 spellType);
+bool SpellTypeRequiresTarget(uint16 spellType);
 bool SpellTypeRequiresAEChecks(uint16 spellType);
 bool IsCommandedSpellType(uint16 spellType);
 bool IsPullingSpellType(uint16 spellType);
