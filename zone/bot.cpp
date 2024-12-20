@@ -2056,7 +2056,7 @@ void Bot::AI_Process()
 		return;
 	}
 
-	auto raid = entity_list.GetRaidByBotName(GetName());
+	auto raid = entity_list.GetRaidByBot(this);
 	uint32 r_group = RAID_GROUPLESS;
 
 	if (raid) {
@@ -2503,7 +2503,7 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 				bool assisteeFound = false;
 
 				if (IsRaidGrouped()) {
-					Raid* r = entity_list.GetRaidByBotName(GetName());
+					Raid* r = entity_list.GetRaidByBot(this);
 					if (r) {						
 						for (const auto& m : r->members) {
 							if (
@@ -3553,7 +3553,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			ChangeBotRangedWeapons(true);
 		}
 
-		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
+		if (auto raid = entity_list.GetRaidByBot(this)) {
 			// Safety Check to confirm we have a valid raid
 			auto owner = GetBotOwner();
 			if (owner && !raid->IsRaidMember(owner->GetCleanName())) {
@@ -3564,7 +3564,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 				raid->VerifyRaid();
 			}
 		}
-		else if (auto group = entity_list.GetGroupByMobName(GetName())) {
+		else if (auto group = entity_list.GetGroupByMob(this)) {
 			// Safety Check to confirm we have a valid group
 			auto owner = GetBotOwner();
 			if (owner && !group->IsGroupMember(owner->GetCleanName())) {
@@ -6047,7 +6047,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 
 bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
-	Raid* raid = entity_list.GetRaidByBotName(GetName());
+	Raid* raid = entity_list.GetRaidByBot(this);
 
 	if (isMainGroupMGB && (GetClass() != Class::Bard)) {
 		BotGroupSay(
@@ -6783,7 +6783,7 @@ void Bot::Camp(bool save_to_database) {
 }
 
 void Bot::Zone() {
-	if (auto raid = entity_list.GetRaidByBotName(GetName())) {
+	if (auto raid = entity_list.GetRaidByBot(this)) {
 		raid->MemberZoned(CastToClient());
 	}
 	else if (HasGroup()) {
@@ -7027,7 +7027,7 @@ void Bot::ProcessBotGroupDisband(Client* c, const std::string& botName) {
 // Processes a raid disband request from a Client for a Bot.
 void Bot::RemoveBotFromRaid(Bot* bot) {
 
-	Raid* bot_raid = entity_list.GetRaidByBotName(bot->GetName());
+	Raid* bot_raid = entity_list.GetRaidByBot(bot);
 	if (bot_raid) {
 		uint32 gid = bot_raid->GetGroup(bot->GetName());
 		bot_raid->SendRaidGroupRemove(bot->GetName(), gid);
@@ -7048,7 +7048,7 @@ void Bot::ProcessClientZoneChange(Client* botOwner) {
 			Bot* tempBot = *itr;
 
 			if (tempBot) {
-				Raid* raid = entity_list.GetRaidByBotName(tempBot->GetName());
+				Raid* raid = entity_list.GetRaidByBot(tempBot);
 				if (raid) {
 					tempBot->Zone();
 				}
@@ -7781,7 +7781,7 @@ void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
 	va_end(ap);
 
 	if (speaker->IsRaidGrouped()) {
-		Raid* r = entity_list.GetRaidByBotName(speaker->GetName());
+		Raid* r = entity_list.GetRaidByBot(speaker->CastToBot());
 		if (r) {
 			for (const auto& m : r->members) {
 				if (m.member && !m.is_bot) {
