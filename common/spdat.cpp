@@ -3517,7 +3517,7 @@ uint16 GetPetSpellType(uint16 spellType) {
 		return BotSpellTypes::PetVeryFastHeals;
 	case BotSpellTypes::HoTHeals:
 		return BotSpellTypes::PetHoTHeals;
-	case BotSpellTypes::Cures:
+	case BotSpellTypes::Cure:
 		return BotSpellTypes::PetCures;
 	case BotSpellTypes::DamageShields:
 		return BotSpellTypes::PetDamageShields;
