@@ -252,6 +252,7 @@ UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THE
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|ir') ELSE 'invremove|ir' END WHERE `bot_command`='inventoryremove' AND `aliases` NOT LIKE '%ir%';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|iw') ELSE 'invwindow|iw' END WHERE `bot_command`='inventorywindow' AND `aliases` NOT LIKE '%iw%';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|iu') ELSE 'iu' END WHERE `bot_command`='itemuse' AND `aliases` NOT LIKE '%iu%';
+UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|pst') ELSE 'pset||pst' END WHERE `bot_command`='petsettype' AND `aliases` NOT LIKE '%pst%';
 UPDATE `bot_command_settings` SET `aliases`= 'mmr' WHERE `bot_command`='maxmeleerange';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|pp') ELSE 'pp' END WHERE `bot_command`='pickpocket' AND `aliases` NOT LIKE '%pp%';
 UPDATE `bot_command_settings` SET `aliases`= 'sithp' WHERE `bot_command`='sithppercent';

@@ -1541,9 +1541,17 @@ std::string Bot::GetBotMagicianPetType(Bot* botCaster) {
 	std::string result;
 
 	if (botCaster) {
+		uint8 petType = botCaster->GetPetChooserID();
+		uint8 botLevel = botCaster->GetLevel();
 		bool epicAllowed = false;
+		std::string epicSpellName = RuleS(Bots, EpicPetSpellName);
+
+		if (epicSpellName.empty()) {
+			epicSpellName = "SumMageMultiElement";
+		}
+
 		if (RuleB(Bots, AllowMagicianEpicPet)) {
-			if (botCaster->GetLevel() >= RuleI(Bots, AllowMagicianEpicPetLevel)) {
+			if (botLevel >= RuleI(Bots, AllowMagicianEpicPetLevel)) {
 				if (!RuleI(Bots, RequiredMagicianEpicPetItemID)) {
 					epicAllowed = true;
 				}
@@ -1557,8 +1565,8 @@ std::string Bot::GetBotMagicianPetType(Bot* botCaster) {
 			}
 		}
 
-		if (botCaster->GetPetChooserID() > 0) {
-			switch (botCaster->GetPetChooserID()) {
+		if (petType > 0) {
+			switch (petType) {
 				case SumWater:
 					result = std::string("SumWater");
 					break;
@@ -1576,66 +1584,100 @@ std::string Bot::GetBotMagicianPetType(Bot* botCaster) {
 					break;
 				case SumMageMultiElement:
 					if (epicAllowed) {
-						result = std::string(RuleS(Bots, EpicPetSpellName));
-
-						if (result.empty()) {
-							result = "SumMageMultiElement";
-						}
+						result = epicSpellName;
 					}
 					else {
-						result = std::string("MonsterSum");
+						botCaster->SetPetChooserID(0);
 					}
 					break;
 			}
 		}
 		else {
-			if (epicAllowed) {
-				result = std::string(RuleS(Bots, EpicPetSpellName));
+			uint8 airMinLevel = 255;
+			uint8 fireMinLevel = 255;
+			uint8 waterMinLevel = 255;
+			uint8 earthMinLevel = 255;
+			uint8 monsterMinLevel = 255;
+			uint8 epicMinLevel = 255;
+			std::list<BotSpell> botSpellList = botCaster->GetBotSpellsBySpellType(botCaster, BotSpellTypes::Pet);
 
-				if (result.empty()) {
-					result = "SumMageMultiElement";
+			for (const auto& s : botSpellList) {
+				if (!IsValidSpell(s.SpellId)) {
+					continue;
+				}
+
+				if (!IsEffectInSpell(s.SpellId, SE_SummonPet)) {
+					continue;
+				}
+
+				auto spell = spells[s.SpellId];
+
+				if (!strncmp(spell.teleport_zone, "SumWater", 8) && spell.classes[Class::Magician - 1] < waterMinLevel) {
+					waterMinLevel = spell.classes[Class::Magician - 1];
+				}
+				else if (!strncmp(spell.teleport_zone, "SumFire", 7) && spell.classes[Class::Magician - 1] < fireMinLevel) {
+					fireMinLevel = spell.classes[Class::Magician - 1];
+				}
+				else if (!strncmp(spell.teleport_zone, "SumAir", 6) && spell.classes[Class::Magician - 1] < airMinLevel) {
+					airMinLevel = spell.classes[Class::Magician - 1];
+				}
+				else if (!strncmp(spell.teleport_zone, "SumEarth", 8) && spell.classes[Class::Magician - 1] < earthMinLevel) {
+					earthMinLevel = spell.classes[Class::Magician - 1];
+				}
+				else if (!strncmp(spell.teleport_zone, "MonsterSum", 10) && spell.classes[Class::Magician - 1] < monsterMinLevel) {
+					monsterMinLevel = spell.classes[Class::Magician - 1];
+				}
+				else if (!strncmp(spell.teleport_zone, epicSpellName.c_str(), epicSpellName.length()) && spell.classes[Class::Magician - 1] < epicMinLevel) {
+					epicMinLevel = spell.classes[Class::Magician - 1];
+				}
+			}
+
+			if (epicAllowed) {
+				epicMinLevel = std::max(int(epicMinLevel), RuleI(Bots, AllowMagicianEpicPetLevel));
+
+				if (botLevel >= epicMinLevel) {
+					result = epicSpellName;
 				}
 			}
 			else {
-				if (botCaster->GetLevel() == 2) {
-					result = std::string("SumWater");
-				}
-				else if (botCaster->GetLevel() == 3) {
-					result = std::string("SumFire");
-				}
-				else if (botCaster->GetLevel() == 4) {
-					result = std::string("SumAir");
-				}
-				else if (botCaster->GetLevel() == 5) {
-					result = std::string("SumEarth");
-				}
-				else {
-					int counter;
+				bool found = false;
+				uint8 count = 0;
 
-					if (botCaster->GetLevel() < 30) {
-						counter = zone->random.Int(1, 4);
-					}
-					else {
-						counter = zone->random.Int(1, 5);
-					}
+				while (count <= 4 && !found) {
+					int counter = zone->random.Int(1, 4);
 
 					switch (counter) {
-						case 1:
-							result = std::string("SumWater");
+						case SumWater:
+							if (botLevel >= waterMinLevel) {
+								result = std::string("SumWater");
+							}
+							
+							found = true;
 							break;
-						case 2:
-							result = std::string("SumFire");
+						case SumFire:
+							if (botLevel >= fireMinLevel) {
+								result = std::string("SumFire");
+							}
+
+							found = true;
 							break;
-						case 3:
-							result = std::string("SumAir");
+						case SumAir:
+							if (botLevel >= airMinLevel) {
+								result = std::string("SumAir");
+							}
+
+							found = true;
 							break;
-						case 4:
-							result = std::string("SumEarth");
-							break;
-						default:
-							result = std::string("MonsterSum");
+						case SumEarth:
+							if (botLevel >= earthMinLevel) {
+								result = std::string("SumEarth");
+							}
+
+							found = true;
 							break;
 					}
+
+					++count;
 				}
 			}
 		}

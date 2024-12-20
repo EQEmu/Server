@@ -838,6 +838,7 @@ RULE_BOOL(Bots, AllowMagicianEpicPet, false, "If enabled, magician bots can summ
 RULE_INT(Bots, AllowMagicianEpicPetLevel, 50, "If AllowMagicianEpicPet is enabled, bots can start using their epic pets at this level")
 RULE_INT(Bots, RequiredMagicianEpicPetItemID, 28034, "If AllowMagicianEpicPet is enabled and this is set, bots will be required to have this item ID equipped to cast their epic. Takes in to account AllowMagicianEpicPetLevel as well. Set to 0 to disable requirement")
 RULE_STRING(Bots, EpicPetSpellName, "", "'teleport_zone' in the spell to be cast for epic pets. This must be in their spell list to cast.")
+RULE_INT(Bots, ReclaimEnergySpellID, 331, "Spell ID for reclaim energy when using ^petsettype. Default 331")
 RULE_BOOL(Bots, UseSpellPulling, true, "If enabled bots will use a spell to pull when within range. Uses PullSpellID.")
 RULE_INT(Bots, PullSpellID, 5225, "Default 5225 - Throw Stone. Spell that will be cast to pull by bots")
 RULE_BOOL(Bots, AllowRangedPulling, true, "If enabled bots will pull with their ranged items if set to ranged.")
