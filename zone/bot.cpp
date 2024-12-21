@@ -9500,11 +9500,6 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 		return false;
 	}
 
-	if (!AECheck && !IsValidSpellRange(spell_id, tar)) {
-		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidSpellRange.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
-		return false;
-	}
-
 	if (
 		IsBeneficialSpell(spell_id) &&
 		(
@@ -9568,6 +9563,11 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 
 	if (!DoResistCheckBySpellType(tar, spell_id, spellType)) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to DoResistCheckBySpellType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
+		return false;
+	}
+
+	if (!AECheck && !IsValidSpellRange(spell_id, tar)) {
+		LogBotPreChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidSpellRange.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName()); //deleteme
 		return false;
 	}
 
