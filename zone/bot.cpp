@@ -2093,7 +2093,7 @@ void Bot::AI_Process()
 	else {
 		follow_mob = entity_list.GetMob(GetFollowID());
 
-		if (!follow_mob || !IsInGroupOrRaid(follow_mob)) {
+		if (!follow_mob || !IsInGroupOrRaid(follow_mob, raid)) {
 			follow_mob = leash_owner;
 		}
 	}
@@ -2367,7 +2367,7 @@ void Bot::AI_Process()
 
 // AUTO DEFEND
 
-		if (TryAutoDefend(bot_owner, leash_distance) ) {
+		if (TryAutoDefend(bot_owner, leash_distance, raid) ) {
 			return;
 		}
 
@@ -2466,7 +2466,7 @@ bool Bot::TryIdleChecks(float fm_distance) {
 
 // This is as close as I could get without modifying the aggro mechanics and making it an expensive process...
 // 'class Client' doesn't make use of hate_list
-bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
+bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance, Raid* raid) {
 
 	if (RuleB(Bots, AllowOwnerOptionAutoDefend) && bot_owner->GetBotOption(Client::booAutoDefend)) {
 
@@ -2503,14 +2503,13 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 				bool assisteeFound = false;
 
 				if (IsRaidGrouped()) {
-					Raid* r = entity_list.GetRaidByBot(this);
-					if (r) {						
-						for (const auto& m : r->members) {
+					if (raid) {						
+						for (const auto& m : raid->members) {
 							if (
 								m.member && 
 								m.member->IsClient() &&
 								m.member->GetAggroCount() &&
-								r->IsAssister(m.member_name)
+								raid->IsAssister(m.member_name)
 							) {
 								temp_xhaters = m.member->GetXTargetAutoMgr();
 
@@ -2554,7 +2553,7 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 				if (bot_owner->GetAssistee()) {
 					Client* c = entity_list.GetClientByCharID(bot_owner->GetAssistee());
 
-					if (bot_owner->IsInGroupOrRaid(c) && c->GetAggroCount()) {
+					if (bot_owner->IsInGroupOrRaid(c, raid) && c->GetAggroCount()) {
 						tempHaters = bot_owner->GetXTargetAutoMgr();
 
 						if (tempHaters && !tempHaters->empty()) {
@@ -7222,7 +7221,7 @@ bool Bot::AttemptCloseBeneficialSpells(uint16 spellType, Raid* raid, std::vector
 			}
 		}
 
-		result = AttemptAICastSpell(spellType, tar);
+		result = AttemptAICastSpell(spellType, tar, raid);
 
 		if (!result) {
 			if (tar->HasPet() && (!m->GetPet()->IsFamiliar() || RuleB(Bots, AllowBuffingHealingFamiliars))) {
@@ -7236,7 +7235,7 @@ bool Bot::AttemptCloseBeneficialSpells(uint16 spellType, Raid* raid, std::vector
 					continue;
 				}
 
-				result = AttemptAICastSpell(spellType, tar);
+				result = AttemptAICastSpell(spellType, tar, raid);
 			}
 		}
 		
@@ -10810,7 +10809,7 @@ std::list<BotSpellTypeOrder> Bot::GetSpellTypesPrioritized(uint8 priorityType) {
 	return castOrder;
 }
 
-bool Bot::AttemptAICastSpell(uint16 spellType, Mob* tar) {
+bool Bot::AttemptAICastSpell(uint16 spellType, Mob* tar, Raid* raid) {
 	bool result = false;
 
 	if (!tar) {
@@ -10834,12 +10833,12 @@ bool Bot::AttemptAICastSpell(uint16 spellType, Mob* tar) {
 			tar = this;
 		}
 
-		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
+		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType, raid)) {
 			return result;
 		}
 	}
 	else {
-		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
+		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType, raid)) {
 			return result;
 		}
 	}
@@ -10995,7 +10994,7 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id) {
 		!RuleB(Bots, EnableBotTGB) &&
 		IsGroupSpell(forcedSpellID) &&
 		!IsTGBCompatibleSpell(forcedSpellID) &&
-		!IsInGroupOrRaid(tar, true)
+		!IsInGroupOrRaid(tar, nullptr, true)
 	) {
 		LogTestDebug("{} failed TGB for {} [#{}].", GetCleanName(), spell.name, forcedSpellID); //deleteme
 		return false;

@@ -397,8 +397,8 @@ public:
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 
 	// AI Methods
-	bool AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
-	bool AttemptAICastSpell(uint16 spellType, Mob* tar = nullptr);
+	bool AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, Raid* raid = nullptr, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
+	bool AttemptAICastSpell(uint16 spellType, Mob* tar = nullptr, Raid* raid = nullptr);
 	bool AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank);
 	bool AttemptForcedCastSpell(Mob* tar, uint16 spell_id);
 	bool AttemptCloseBeneficialSpells(uint16 spellType, Raid* raid, std::vector<Mob*> targetList);
@@ -597,7 +597,7 @@ public:
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, uint16 spellType, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, uint16 spellType, int spellEffect, SpellTargetType targetType);
 	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint16 spellType);
-	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE = false, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
+	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE = false, Raid* raid = nullptr, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
 
 	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType);
 	static BotSpell GetBestBotSpellForVeryFastHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
@@ -990,7 +990,7 @@ public:
 	bool TryFacingTarget(Mob* tar);
 	bool TryPursueTarget(float leash_distance, glm::vec3& Goal);
 	bool TryMeditate();
-	bool TryAutoDefend(Client* bot_owner, float leash_distance);
+	bool TryAutoDefend(Client* bot_owner, float leash_distance, Raid* raid = nullptr);
 	bool TryIdleChecks(float fm_distance);
 	bool TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, glm::vec3& Goal);
 	bool TryBardMovementCasts();

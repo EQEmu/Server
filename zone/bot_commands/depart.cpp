@@ -164,7 +164,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 	std::map<std::string, std::pair<uint8_t, uint8_t>> listZones;
 
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->IsInGroupOrRaid(tar, !single)) {
+		if (!bot_iter->IsInGroupOrRaid(tar, nullptr, !single)) {
 			continue;
 		}
 

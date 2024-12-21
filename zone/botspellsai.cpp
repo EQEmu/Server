@@ -21,7 +21,7 @@
 #include "../common/repositories/bot_spells_entries_repository.h"
 #include "../common/repositories/npc_spells_repository.h"
 
-bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTargetType, uint16 subType) {
+bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, Raid* raid, uint16 subTargetType, uint16 subType) {
 	if (!tar) {
 		return false;
 	}
@@ -217,7 +217,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 			break;
 	}
 
-	std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, (IsAEBotSpellType(spellType) || subTargetType == CommandedSubTypes::AETarget), subTargetType, subType);
+	std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, (IsAEBotSpellType(spellType) || subTargetType == CommandedSubTypes::AETarget), raid, subTargetType, subType);
 
 	for (const auto& s : botSpellList) {
 
@@ -651,7 +651,7 @@ bool Bot::AI_PursueCastCheck() {
 				continue;
 			}
 
-			result = AttemptAICastSpell(currentCast.spellType);
+			result = AttemptAICastSpell(currentCast.spellType, nullptr, raid);
 
 			if (!result && IsBotSpellTypeBeneficial(currentCast.spellType)) {
 				result = AttemptCloseBeneficialSpells(currentCast.spellType, raid, v);
@@ -725,7 +725,7 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
-			result = AttemptAICastSpell(currentCast.spellType);
+			result = AttemptAICastSpell(currentCast.spellType, nullptr, raid);
 
 			if (result) {
 				break;
@@ -784,7 +784,7 @@ bool Bot::AI_EngagedCastCheck() {
 				continue;
 			}
 
-			result = AttemptAICastSpell(currentCast.spellType);
+			result = AttemptAICastSpell(currentCast.spellType, nullptr, raid);
 
 			if (!result && IsBotSpellTypeBeneficial(currentCast.spellType)) {
 				result = AttemptCloseBeneficialSpells(currentCast.spellType, raid, v);
@@ -1007,8 +1007,12 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellTyp
 	return result;
 }
 
-std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE, uint16 subTargetType, uint16 subType) {
+std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE, Raid* raid, uint16 subTargetType, uint16 subType) {
 	std::list<BotSpell_wPriority> result;
+
+	if (!raid) {
+		raid = botCaster->GetRaid();
+	}
 
 	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
@@ -1050,7 +1054,7 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 					!RuleB(Bots, EnableBotTGB) &&
 					IsGroupSpell(botSpellList[i].spellid) &&
 					!IsTGBCompatibleSpell(botSpellList[i].spellid) &&
-					!botCaster->IsInGroupOrRaid(tar, true)
+					!botCaster->IsInGroupOrRaid(tar, raid, true)
 				) {					
 					continue;
 				}
@@ -2009,7 +2013,7 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 	return result;
 }
 
-BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType) {
+BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType) { //TODO bot rewrite - add raid nd target list?
 	BotSpell_wPriority result;
 
 	result.SpellId = 0;
