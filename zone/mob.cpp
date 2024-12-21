@@ -9316,7 +9316,8 @@ bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::PetBuffs:
 		case BotSpellTypes::InCombatBuff:
 		case BotSpellTypes::PreCombatBuff:
-		case BotSpellTypes::DamageShields:		
+		case BotSpellTypes::DamageShields:
+		case BotSpellTypes::ResistBuffs:
 			return false;
 		case BotSpellTypes::GroupCompleteHeals:
 		case BotSpellTypes::GroupHeals:
