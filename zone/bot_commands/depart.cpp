@@ -172,9 +172,9 @@ void bot_command_depart(Client* c, const Seperator* sep)
 			continue;
 		}
 
-		std::list<BotSpell_wPriority> botSpellListItr = bot_iter->GetPrioritizedBotSpellsBySpellType(bot_iter, BotSpellTypes::Teleport, tar);
+		std::vector<BotSpell_wPriority> botSpellListItr = bot_iter->GetPrioritizedBotSpellsBySpellType(bot_iter, BotSpellTypes::Teleport, tar);
 
-		for (std::list<BotSpell_wPriority>::iterator itr = botSpellListItr.begin(); itr != botSpellListItr.end(); ++itr) {
+		for (std::vector<BotSpell_wPriority>::iterator itr = botSpellListItr.begin(); itr != botSpellListItr.end(); ++itr) {
 			if (!IsValidSpell(itr->SpellId)) {
 				continue;
 			}

@@ -595,7 +595,7 @@ public:
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, uint16 spellType, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, uint16 spellType, int spellEffect, SpellTargetType targetType);
 	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint16 spellType);
-	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE = false, Raid* raid = nullptr, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
+	static std::vector<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE = false, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
 
 	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType);
 	static BotSpell GetBestBotSpellForVeryFastHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
