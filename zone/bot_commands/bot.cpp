@@ -121,35 +121,29 @@ void bot_command_clone(Client *c, const Seperator *sep)
 
 	if (!Bot::IsValidName(bot_name)) {
 		c->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
-				"'{}' is an invalid name. You may only use characters 'A-Z', 'a-z' and '_'.",
-				bot_name
+				"'{}' is an invalid name. You may only use characters 'A-Z' or 'a-z' and it must be between 4 and 15 characters. Mixed case {} allowed.",
+				bot_name, RuleB(Bots, AllowCamelCaseNames) ? "is" : "is not"
 			).c_str()
 		);
+
 		return;
 	}
 
 	bool available_flag = false;
-	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to query name availability for '{}'.",
-				bot_name
-			).c_str()
-		);
-		return;
-	}
+
+	!database.botdb.QueryNameAvailablity(bot_name, available_flag);
 
 	if (!available_flag) {
 		c->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
-				"The name '{}' is already being used. Please choose a different name.",
+				"The name '{}' is already being used or prohibited. Please choose a different name",
 				bot_name
 			).c_str()
 		);
+
 		return;
 	}
 
