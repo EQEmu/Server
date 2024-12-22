@@ -2695,6 +2695,7 @@ void Client::ToggleBuyerMode(bool status)
 		Message(Chat::Yellow, "Barter Mode ON.");
 	}
 	else {
+		SetBuyerID(CharacterID());
 		data->status = BuyerBarter::Off;
 		BuyerRepository::DeleteBuyer(database, GetBuyerID());
 		SetCustomerID(0);
