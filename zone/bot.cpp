@@ -1328,25 +1328,27 @@ bool Bot::IsValidName()
 
 bool Bot::IsValidName(std::string& name)
 {
-	if (name.empty() || name.length() < 4 || name.length() > 15) {
+	if (name.empty()) { // can't be empty
 		return false;
 	}
 
-	if (!isupper(name[0])) {
+	if (islower(name[0])) { // capitalize first letter if not
+		name[0] = toupper(name[0]);
+	}
+
+	if (!EQ::ValueWithin(name.size(), 4, 15)) { // must be between 4 and 15 characters
 		return false;
 	}
 
-	for (char c : name.substr(1)) {
-		if (c == '_') {
-			return false;
-		}
+	if (std::any_of(name.begin(), name.end(), [](char c) { return c == ' ' || c == '_'; })) { // cannot contain spaces or _
+		return false;
+	}
 
-		if (!isalpha(c)) {
-			return false;
-		}
-
-		if (!RuleB(Bots, AllowCamelCaseNames) && !islower(c)) {
-			return false;
+	if (!RuleB(Bots, AllowCamelCaseNames)) {
+		for (int i = 1; i < name.size(); ++i) {
+			if (isupper(name[i])) {
+				return false;
+			}
 		}
 	}
 
@@ -1450,10 +1452,10 @@ bool Bot::DeleteBot()
 		if (!database.botdb.DeleteBotBlockedBuffs(GetBotID())) {
 			return false;
 		}
+	}
 
-		if (!database.botdb.DeleteBot(GetBotID())) {
-			return false;
-		}
+	if (!database.botdb.DeleteBot(GetBotID())) {
+		return false;
 	}
 
 	return true;

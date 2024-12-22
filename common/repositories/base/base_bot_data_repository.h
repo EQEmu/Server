@@ -349,14 +349,25 @@ public:
 		int bot_data_id
 	)
 	{
-		auto results = db.QueryDatabase(
-			fmt::format(
+		std::string query;
+
+		if (RuleB(Bots, BotSoftDeletes)) {
+			query = fmt::format(
+				"UPDATE {} SET name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64) WHERE {} = {}",
+				TableName(),
+				PrimaryKey(),
+				bot_data_id
+			);
+		}
+		else {
+			query = fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
 				bot_data_id
-			)
-		);
+			);
+		}
+		auto results = db.QueryDatabase(query);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}

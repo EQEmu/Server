@@ -186,6 +186,7 @@ bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& availa
 	if (
 		bot_name.empty() ||
 		bot_name.size() > 60 ||
+		!database.CheckNameFilter(bot_name) ||
 		database.IsNameUsed(bot_name)
 	) {
 		return false;
@@ -246,6 +247,8 @@ bool BotDatabase::LoadBotsList(const uint32 owner_id, std::list<BotsAvailableLis
 							SELECT `account_id` FROM `character_data` WHERE `id` = {}
 						)
 					)
+					AND 
+					`name` NOT LIKE '%-deleted-%'
 				),
 				owner_id
 			)
@@ -272,7 +275,7 @@ bool BotDatabase::LoadBotsList(const uint32 owner_id, std::list<BotsAvailableLis
 		const auto& l = BotDataRepository::GetWhere(
 			database,
 			fmt::format(
-				"`owner_id` = {}",
+				"`owner_id` = {} AND `name` NOT LIKE '%-deleted-%'",
 				owner_id
 			)
 		);
@@ -319,7 +322,7 @@ bool BotDatabase::LoadBotID(const std::string& bot_name, uint32& bot_id, uint8& 
 	const auto& l = BotDataRepository::GetWhere(
 		database,
 		fmt::format(
-			"`name` = '{}' LIMIT 1",
+			"`name` = '{}' AND `name` NOT LIKE '%-deleted-%' LIMIT 1",
 			Strings::Escape(bot_name)
 		)
 	);
