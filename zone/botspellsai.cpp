@@ -21,7 +21,7 @@
 #include "../common/repositories/bot_spells_entries_repository.h"
 #include "../common/repositories/npc_spells_repository.h"
 
-bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, Raid* raid, uint16 subTargetType, uint16 subType) {
+bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTargetType, uint16 subType) {
 	if (!tar) {
 		return false;
 	}
@@ -217,7 +217,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, Raid* raid, uin
 			break;
 	}
 
-	std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, (IsAEBotSpellType(spellType) || subTargetType == CommandedSubTypes::AETarget), raid, subTargetType, subType);
+	std::vector<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, (IsAEBotSpellType(spellType) || subTargetType == CommandedSubTypes::AETarget), subTargetType, subType);
 
 	for (const auto& s : botSpellList) {
 
@@ -277,7 +277,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, Raid* raid, uin
 }
 
 bool Bot::BotCastMez(Mob* tar, uint8 botClass, BotSpell& botSpell, uint16 spellType) {
-	std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, IsAEBotSpellType(spellType));
+	std::vector<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, IsAEBotSpellType(spellType));
 
 	for (const auto& s : botSpellList) {
 		if (!IsValidSpellAndLoS(s.SpellId, HasLoS())) {
@@ -351,7 +351,6 @@ bool Bot::BotCastCure(Mob* tar, uint8 botClass, BotSpell& botSpell, uint16 spell
 				);
 
 				const std::vector<Mob*> v = GatherSpellTargets(false, tar);
-
 
 				if (!IsCommandedSpell()) {
 					for (Mob* m : v) {
@@ -464,7 +463,7 @@ bool Bot::BotCastNuke(Mob* tar, uint8 botClass, BotSpell& botSpell, uint16 spell
 	}
 
 	if (!IsValidSpellAndLoS(botSpell.SpellId, HasLoS())) {
-		std::list<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, IsAEBotSpellType(spellType));
+		std::vector<BotSpell_wPriority> botSpellList = GetPrioritizedBotSpellsBySpellType(this, spellType, tar, IsAEBotSpellType(spellType));
 
 		for (const auto& s : botSpellList) {
 			if (!IsValidSpellAndLoS(s.SpellId, HasLoS())) {
@@ -624,7 +623,7 @@ bool Bot::AI_PursueCastCheck() {
 	if (GetTarget() && AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Pursue autocast check triggered: [{}]", GetCleanName());
-		LogBotPreChecksDetail("{} says, 'AI_PursueCastCheck started.'", GetCleanName()); //deleteme
+		//LogBotPreChecksDetail("{} says, 'AI_PursueCastCheck started.'", GetCleanName()); //deleteme
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -634,12 +633,10 @@ bool Bot::AI_PursueCastCheck() {
 
 		auto castOrder = GetSpellTypesPrioritized(BotPriorityCategories::Pursue);
 		Mob* tar = nullptr;
-		Raid* raid = GetRaid();
-		std::vector<Mob*> v = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
-				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
+				//LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
 				continue;
 			}
 
@@ -651,10 +648,10 @@ bool Bot::AI_PursueCastCheck() {
 				continue;
 			}
 
-			result = AttemptAICastSpell(currentCast.spellType, nullptr, raid);
+			result = AttemptAICastSpell(currentCast.spellType, nullptr);
 
 			if (!result && IsBotSpellTypeBeneficial(currentCast.spellType)) {
-				result = AttemptCloseBeneficialSpells(currentCast.spellType, raid, v);
+				result = AttemptCloseBeneficialSpells(currentCast.spellType);
 			}
 
 			if (result) {
@@ -680,7 +677,7 @@ bool Bot::AI_IdleCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Non-Engaged autocast check triggered: [{}]", GetCleanName());
-		LogBotPreChecksDetail("{} says, 'AI_IdleCastCheck started.'", GetCleanName()); //deleteme
+		//LogBotPreChecksDetail("{} says, 'AI_IdleCastCheck started.'", GetCleanName()); //deleteme
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -700,12 +697,10 @@ bool Bot::AI_IdleCastCheck() {
 
 		auto castOrder = GetSpellTypesPrioritized(BotPriorityCategories::Idle);
 		Mob* tar = nullptr;
-		Raid* raid = GetRaid();
-		std::vector<Mob*> v = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));		
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
-				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
+				//LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
 				continue;
 			}
 
@@ -725,13 +720,13 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
-			result = AttemptAICastSpell(currentCast.spellType, nullptr, raid);
+			result = AttemptAICastSpell(currentCast.spellType, nullptr);
 
 			if (result) {
 				break;
 			}
 
-			result = AttemptCloseBeneficialSpells(currentCast.spellType, raid, v);
+			result = AttemptCloseBeneficialSpells(currentCast.spellType);
 
 			if (result) {
 				break;
@@ -757,7 +752,7 @@ bool Bot::AI_EngagedCastCheck() {
 	if (GetTarget() && AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Engaged autocast check triggered: [{}]", GetCleanName());
-		LogBotPreChecksDetail("{} says, 'AI_EngagedCastCheck started.'", GetCleanName()); //deleteme
+		//LogBotPreChecksDetail("{} says, 'AI_EngagedCastCheck started.'", GetCleanName()); //deleteme
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -767,12 +762,10 @@ bool Bot::AI_EngagedCastCheck() {
 
 		auto castOrder = GetSpellTypesPrioritized(BotPriorityCategories::Engaged);
 		Mob* tar = nullptr;
-		Raid* raid = GetRaid();
-		std::vector<Mob*> v = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
-				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
+				//LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
 				continue;
 			}
 
@@ -784,10 +777,10 @@ bool Bot::AI_EngagedCastCheck() {
 				continue;
 			}
 
-			result = AttemptAICastSpell(currentCast.spellType, nullptr, raid);
+			result = AttemptAICastSpell(currentCast.spellType, nullptr);
 
 			if (!result && IsBotSpellTypeBeneficial(currentCast.spellType)) {
-				result = AttemptCloseBeneficialSpells(currentCast.spellType, raid, v);
+				result = AttemptCloseBeneficialSpells(currentCast.spellType);
 			}
 
 			if (result) {
@@ -1007,12 +1000,8 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellTyp
 	return result;
 }
 
-std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE, Raid* raid, uint16 subTargetType, uint16 subType) {
-	std::list<BotSpell_wPriority> result;
-
-	if (!raid) {
-		raid = botCaster->GetRaid();
-	}
+std::vector<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE, uint16 subTargetType, uint16 subType) {
+	std::vector<BotSpell_wPriority> result;
 
 	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
@@ -1054,7 +1043,7 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 					!RuleB(Bots, EnableBotTGB) &&
 					IsGroupSpell(botSpellList[i].spellid) &&
 					!IsTGBCompatibleSpell(botSpellList[i].spellid) &&
-					!botCaster->IsInGroupOrRaid(tar, raid, true)
+					!botCaster->IsInGroupOrRaid(tar, true)
 				) {					
 					continue;
 				}
@@ -1077,17 +1066,15 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 					botSpell.ManaCost = botSpellList[i].manacost;
 					botSpell.Priority = botSpellList[i].priority;
 
-					result.push_back(botSpell);
+					result.emplace_back(botSpell);
 				}
 			}
 		}
 
 		if (result.size() > 1) {
-			result.sort(
-				[](BotSpell_wPriority const& l, BotSpell_wPriority const& r) {
-					return l.Priority < r.Priority;
-				}
-			);
+			std::sort(result.begin(), result.end(), [](BotSpell_wPriority const& l, BotSpell_wPriority const& r) {
+				return l.Priority < r.Priority;
+			});
 		}
 	}
 
@@ -1293,10 +1280,7 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* botCaster, Mob* tar, uint16 spell
 
 	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_CurrentHP);
-		std::vector<Mob*> v;
-
-		v = botCaster->GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
-
+		
 		int targetCount = 0;
 
 		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
@@ -1305,7 +1289,7 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* botCaster, Mob* tar, uint16 spell
 				if (!botCaster->IsCommandedSpell()) {
 					targetCount = 0;
 
-					for (Mob* m : v) {
+					for (Mob* m : botCaster->GetSpellTargetList()) {
 						if (botCaster->IsValidSpellRange(botSpellListItr->SpellId, m) && botCaster->CastChecks(botSpellListItr->SpellId, m, spellType, true, IsGroupBotSpellType(spellType))) {
 							++targetCount;
 						}
@@ -1337,9 +1321,6 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* botCaster, Mob* tar, uint
 
 	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_HealOverTime);
-		std::vector<Mob*> v;
-
-		v = botCaster->GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 
 		int targetCount = 0;
 
@@ -1349,7 +1330,7 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* botCaster, Mob* tar, uint
 				if (!botCaster->IsCommandedSpell()) {
 					targetCount = 0;
 
-					for (Mob* m : v) {
+					for (Mob* m : botCaster->GetSpellTargetList()) {
 						if (botCaster->IsValidSpellRange(botSpellListItr->SpellId, m) && botCaster->CastChecks(botSpellListItr->SpellId, m, spellType, true, IsGroupBotSpellType(spellType))) {
 							++targetCount;
 						}
@@ -1381,10 +1362,7 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* botCaster, Mob* tar, uint
 
 	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, spellType, SE_CompleteHeal);
-		std::vector<Mob*> v;
-
-		v = botCaster->GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
-
+		
 		int targetCount = 0;
 
 		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
@@ -1393,7 +1371,7 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* botCaster, Mob* tar, uint
 				if (!botCaster->IsCommandedSpell()) {
 					targetCount = 0;
 
-					for (Mob* m : v) {
+					for (Mob* m : botCaster->GetSpellTargetList()) {
 						if (botCaster->IsValidSpellRange(botSpellListItr->SpellId, m) && botCaster->CastChecks(botSpellListItr->SpellId, m, spellType, true, IsGroupBotSpellType(spellType))) {
 							++targetCount;
 						}
@@ -2013,7 +1991,7 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 	return result;
 }
 
-BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType) { //TODO bot rewrite - add raid nd target list?
+BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType) {
 	BotSpell_wPriority result;
 
 	result.SpellId = 0;
@@ -2025,22 +2003,27 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType)
 	}
 
 	if (botCaster) {
-		std::list<BotSpell_wPriority> botSpellListItr = GetPrioritizedBotSpellsBySpellType(botCaster, spellType, tar);
+		std::vector<BotSpell_wPriority> botSpellListItr = GetPrioritizedBotSpellsBySpellType(botCaster, spellType, tar);
 		
 		if (IsGroupBotSpellType(spellType)) {
-			const std::vector<Mob*> v = botCaster->GatherSpellTargets(false, tar);
 			int countNeedsCured = 0;
 			uint16 countPoisoned = 0;
 			uint16 countDiseased = 0;
 			uint16 countCursed = 0;
 			uint16 countCorrupted = 0;
 
-			for (std::list<BotSpell_wPriority>::iterator itr = botSpellListItr.begin(); itr != botSpellListItr.end(); ++itr) {
+			for (std::vector<BotSpell_wPriority>::iterator itr = botSpellListItr.begin(); itr != botSpellListItr.end(); ++itr) {
 				if (!IsValidSpell(itr->SpellId) || !IsGroupSpell(itr->SpellId)) {
 					continue;
 				}
 
-				for (Mob* m : v) {
+				for (Mob* m : botCaster->GetSpellTargetList()) {
+					if (IsGroupBotSpellType(spellType)) {
+						if (!botCaster->IsInGroupOrRaid(m, true)) {
+							continue;
+						}
+					}
+
 					if (botCaster->IsCommandedSpell() || botCaster->GetNeedsCured(m)) {
 						if (botCaster->CastChecks(itr->SpellId, m, spellType, true, IsGroupBotSpellType(spellType))) {
 							if (m->FindType(SE_PoisonCounter)) {
@@ -2074,7 +2057,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType)
 			}
 		}
 		else {
-			for (std::list<BotSpell_wPriority>::iterator itr = botSpellListItr.begin(); itr != botSpellListItr.end(); ++itr) {
+			for (std::vector<BotSpell_wPriority>::iterator itr = botSpellListItr.begin(); itr != botSpellListItr.end(); ++itr) {
 				if (!IsValidSpell(itr->SpellId) || IsGroupSpell(itr->SpellId)) {
 					continue;
 				}
@@ -2825,7 +2808,7 @@ void Bot::CheckBotSpells() {
 
 	for (const auto& s : spellList) {
 		if (!IsValidSpell(s.spell_id)) {
-			LogBotSpellTypeChecks("{} is an invalid spell", s.spell_id); //deleteme
+			//LogBotSpellTypeChecks("{} is an invalid spell", s.spell_id); //deleteme
 			continue;
 		}
 
@@ -2833,7 +2816,7 @@ void Bot::CheckBotSpells() {
 		spell_id = spell.id;
 
 		if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] >= 255) {
-			LogBotSpellTypeChecks("{} [#{}] is not usable by a {} [#{}].", GetSpellName(spell_id), spell_id, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX), s.npc_spells_id); //deleteme
+			//LogBotSpellTypeChecks("{} [#{}] is not usable by a {} [#{}].", GetSpellName(spell_id), spell_id, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX), s.npc_spells_id); //deleteme
 		}
 		else {
 			if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] > s.minlevel) {

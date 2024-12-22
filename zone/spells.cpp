@@ -7580,19 +7580,15 @@ bool Mob::IsImmuneToBotSpell(uint16 spell_id, Mob* caster)
 		return true;
 	}
 
-	if (IsDispelSpell(spell_id) && GetSpecialAbility(SpecialAbility::DispellImmunity)) {
-		return false;
+	if (GetSpecialAbility(SpecialAbility::DispellImmunity) && IsDispelSpell(spell_id)) {
+		return true;
 	}
 
-	if (IsHarmonySpell(spell_id) && GetSpecialAbility(SpecialAbility::PacifyImmunity)) {
-		return false;
+	if (GetSpecialAbility(SpecialAbility::PacifyImmunity) && IsHarmonySpell(spell_id)) {
+		return true;
 	}
 
-	if (IsMesmerizeSpell(spell_id)) {
-		if (GetSpecialAbility(SpecialAbility::MesmerizeImmunity)) {
-			return true;
-		}
-
+	if (!GetSpecialAbility(SpecialAbility::MesmerizeImmunity) && IsMesmerizeSpell(spell_id)) {
 		// check max level for spell
 		effect_index = GetSpellEffectIndex(spell_id, SE_Mez);
 		assert(effect_index >= 0);
@@ -7611,13 +7607,10 @@ bool Mob::IsImmuneToBotSpell(uint16 spell_id, Mob* caster)
 	}
 
 	// client vs client fear
-	if (IsEffectInSpell(spell_id, SE_Fear)) {
+	if (!GetSpecialAbility(SpecialAbility::FearImmunity) && IsEffectInSpell(spell_id, SE_Fear)) {
 		effect_index = GetSpellEffectIndex(spell_id, SE_Fear);
 
-		if (GetSpecialAbility(SpecialAbility::FearImmunity)) {
-			return true;
-		}
-		else if (IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false)) {
+		if (IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false)) {
 			LogSpells("Clients cannot fear eachother!");
 			caster->MessageString(Chat::Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			return true;
@@ -7630,10 +7623,7 @@ bool Mob::IsImmuneToBotSpell(uint16 spell_id, Mob* caster)
 		}
 	}
 
-	if (IsCharmSpell(spell_id))	{
-		if (GetSpecialAbility(SpecialAbility::CharmImmunity)) {
-			return true;
-		}
+	if (!GetSpecialAbility(SpecialAbility::CharmImmunity) && IsCharmSpell(spell_id))	{
 
 		if (this == caster) {
 			return true;
@@ -7651,8 +7641,11 @@ bool Mob::IsImmuneToBotSpell(uint16 spell_id, Mob* caster)
 	}
 
 	if (
-		IsEffectInSpell(spell_id, SE_Root) ||
-		IsEffectInSpell(spell_id, SE_MovementSpeed)
+		GetSpecialAbility(SpecialAbility::SnareImmunity) &&
+		(
+			IsEffectInSpell(spell_id, SE_Root) ||
+			IsEffectInSpell(spell_id, SE_MovementSpeed)
+		)
 	) {
 		if (GetSpecialAbility(SpecialAbility::SnareImmunity)) {
 			return true;
