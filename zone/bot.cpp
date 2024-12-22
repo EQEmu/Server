@@ -9258,54 +9258,6 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND] = { 0 };
 
-std::vector<Mob*> Bot::GatherSpellTargets(bool entireRaid, Mob* target, bool noClients, bool noBots, bool noPets) {
-	std::vector<Mob*> valid_spell_targets;
-
-	if (IsRaidGrouped()) {
-		if (auto raid = GetRaid()) {
-			if (entireRaid) {
-				for (const auto& m : raid->members) {
-					if (m.member && m.group_number != RAID_GROUPLESS && ((m.member->IsClient() && !noClients) || (m.member->IsBot() && !noBots))) {
-						valid_spell_targets.emplace_back(m.member);
-					}
-				}
-			}
-			else {
-				std::vector<RaidMember> raidGroup;
-
-				if (target) {
-					raidGroup = raid->GetRaidGroupMembers(raid->GetGroup(target->GetName()));
-				}
-				else {
-					raidGroup = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
-				}
-	
-				for (const auto& m : raidGroup) {
-					if (m.member && m.group_number != RAID_GROUPLESS && ((m.member->IsClient() && !noClients) || (m.member->IsBot() && !noBots))) {
-						valid_spell_targets.emplace_back(m.member);
-					}
-				}
-			}
-		}
-	}
-	else if (IsGrouped()) {
-		Group* group = GetGroup();
-	
-		if (group) {
-			for (const auto& m : group->members) {
-				if (m && ((m->IsClient() && !noClients) || (m->IsBot() && !noBots))) {
-					valid_spell_targets.emplace_back(m);
-				}
-			}
-		}
-	}
-	else {
-		valid_spell_targets.emplace_back(this);
-	}
-	
-	return valid_spell_targets;
-}
-
 bool Bot::PrecastChecks(Mob* tar, uint16 spellType) {
 	if (!tar) {
 		LogBotPreChecksDetail("{} says, 'Cancelling cast due to PrecastChecks !tar.'", GetCleanName()); //deleteme

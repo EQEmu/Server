@@ -432,6 +432,8 @@ public:
 
 	inline bool SpellTypeRecastCheck(uint16 spellType) { return (IsClient() ? true : _spellSettings[spellType].recastTimer.GetRemainingTime() > 0 ? false : true); }
 
+	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool noClients = false, bool noBots = false, bool noPets = false);
+
 	uint16 GetSpellTypeIDByShortName(std::string spellTypeString);
 
 	std::string GetBotSpellCategoryName(uint8 setting_type);
