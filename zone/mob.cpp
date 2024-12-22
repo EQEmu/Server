@@ -9753,11 +9753,11 @@ void Mob::SetSpellMaxThreshold(uint16 spellType, uint8 thresholdValue) {
 
 void Mob::SetSpellTypeRecastTimer(uint16 spellType, uint32 recastTime) {
 	_spellSettings[spellType].recastTimer.Start(recastTime);
-	LogBotDelayChecksDetail("{} says, 'My {} Delay was to {} seconds.'"
-		, GetCleanName()
-		, GetSpellTypeNameByID(spellType)
-		, (recastTime / 1000.00)
-	); //deleteme
+	//LogBotDelayChecksDetail("{} says, 'My {} Delay was to {} seconds.'"
+	//	, GetCleanName()
+	//	, GetSpellTypeNameByID(spellType)
+	//	, (recastTime / 1000.00)
+	//); //deleteme
 }
 
 void Mob::StartBotSpellTimers() {

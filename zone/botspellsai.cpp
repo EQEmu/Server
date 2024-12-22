@@ -26,7 +26,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 		return false;
 	}
 
-	LogBotPreChecksDetail("{} says, 'Attempting {} AICastSpell on {}.'", GetCleanName(), GetSpellTypeNameByID(spellType), tar->GetCleanName()); //deleteme
+	//LogBotPreChecksDetail("{} says, 'Attempting {} AICastSpell on {}.'", GetCleanName(), GetSpellTypeNameByID(spellType), tar->GetCleanName()); //deleteme
 
 	if (
 		!AI_HasSpells() ||
