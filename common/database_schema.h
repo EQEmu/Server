@@ -103,6 +103,7 @@ namespace DatabaseSchema {
 			"account_ip",
 			"account_flags",
 			"account_rewards",
+			"account_kill_counts",
 			"adventure_details",
 			"adventure_stats",
 			"buyer",
