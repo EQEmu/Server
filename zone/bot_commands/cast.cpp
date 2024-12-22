@@ -588,7 +588,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			LogTestDebug("{}: {} says, 'Attempting {} [{}-{}] on [{}]'", __LINE__, bot_iter->GetCleanName(), c->GetSpellTypeNameByID(spellType), (subType != UINT16_MAX ? c->GetSubTypeNameByID(subType) : "Standard"), (subTargetType != UINT16_MAX ? c->GetSubTypeNameByID(subTargetType) : "Standard"), (newTar ? newTar->GetCleanName() : "NOBODY")); //deleteme
 			bot_iter->SetCommandedSpell(true);
 			
-			if (bot_iter->AICastSpell(newTar, 100, spellType, nullptr, subTargetType, subType)) {
+			if (bot_iter->AICastSpell(newTar, 100, spellType, subTargetType, subType)) {
 				if (!firstFound) {
 					firstFound = bot_iter;
 				}

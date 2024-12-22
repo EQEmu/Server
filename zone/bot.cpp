@@ -109,6 +109,9 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	GenerateBaseStats();
 	bot_timers.clear();
 	bot_blocked_buffs.clear();
+	_spellTargetList.clear();
+	_groupSpellTargetList.clear();
+	_storedRaid = nullptr;
 
 	// Calculate HitPoints Last As It Uses Base Stats
 	current_hp = GenerateBaseHitPoints();
@@ -258,6 +261,9 @@ Bot::Bot(
 		database.botdb.LoadBotBlockedBuffs(this);
 	}
 
+	_spellTargetList.clear();
+	_groupSpellTargetList.clear();
+	_storedRaid = nullptr;
 	LoadAAs();
 
 	if (database.botdb.LoadBuffs(this)) {
@@ -2095,7 +2101,7 @@ void Bot::AI_Process()
 	else {
 		follow_mob = entity_list.GetMob(GetFollowID());
 
-		if (!follow_mob || !IsInGroupOrRaid(follow_mob, raid)) {
+		if (!follow_mob || !IsInGroupOrRaid(follow_mob)) {
 			follow_mob = leash_owner;
 		}
 	}
@@ -2125,6 +2131,12 @@ void Bot::AI_Process()
 	if (CheckIfCasting(fm_distance)) {
 		return;
 	}
+
+	SetStoredRaid(raid);
+	std::vector<Mob*> spellTargetList = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
+	SetSpellTargetList(spellTargetList);
+	std::vector<Mob*> groupSpellTargetList = GatherSpellTargets();
+	SetGroupSpellTargetList(groupSpellTargetList);
 
 // HEAL ROTATION CASTING CHECKS
 	HealRotationChecks();
@@ -2369,7 +2381,7 @@ void Bot::AI_Process()
 
 // AUTO DEFEND
 
-		if (TryAutoDefend(bot_owner, leash_distance, raid) ) {
+		if (TryAutoDefend(bot_owner, leash_distance) ) {
 			return;
 		}
 
@@ -2468,7 +2480,7 @@ bool Bot::TryIdleChecks(float fm_distance) {
 
 // This is as close as I could get without modifying the aggro mechanics and making it an expensive process...
 // 'class Client' doesn't make use of hate_list
-bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance, Raid* raid) {
+bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 
 	if (RuleB(Bots, AllowOwnerOptionAutoDefend) && bot_owner->GetBotOption(Client::booAutoDefend)) {
 
@@ -2505,6 +2517,7 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance, Raid* raid) {
 				bool assisteeFound = false;
 
 				if (IsRaidGrouped()) {
+					Raid* raid = GetStoredRaid();
 					if (raid) {						
 						for (const auto& m : raid->members) {
 							if (
@@ -2555,7 +2568,7 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance, Raid* raid) {
 				if (bot_owner->GetAssistee()) {
 					Client* c = entity_list.GetClientByCharID(bot_owner->GetAssistee());
 
-					if (bot_owner->IsInGroupOrRaid(c, raid) && c->GetAggroCount()) {
+					if (bot_owner->IsInGroupOrRaid(c) && c->GetAggroCount()) {
 						tempHaters = bot_owner->GetXTargetAutoMgr();
 
 						if (tempHaters && !tempHaters->empty()) {
@@ -5976,7 +5989,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 	if (
 		spellTarget &&
 		GetClass() != Class::Bard &&
-		(IsGrouped() || (IsRaidGrouped() && GetRaid()->GetGroup(GetCleanName()) != RAID_GROUPLESS)) &&
+		(IsGrouped() || (IsRaidGrouped() && GetStoredRaid()->GetGroup(GetCleanName()) != RAID_GROUPLESS)) &&
 		(spellTarget->IsBot() || spellTarget->IsClient()) &&
 		(RuleB(Bots, GroupBuffing) || RuleB(Bots, RaidBuffing))
 	) {
@@ -6008,7 +6021,12 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 		if (!noGroupSpell) {
 			std::vector<Mob*> v;
 
-			v = GatherSpellTargets(RuleB(Bots, RaidBuffing));
+			if (RuleB(Bots, RaidBuffing)) {
+				v = GetSpellTargetList();
+			}
+			else {
+				v = GatherSpellTargets(false, spellTarget);
+			}
 
 			for (Mob* m : v) {
 				if (IsEffectInSpell(thespell, SE_AbsorbMagicAtt) || IsEffectInSpell(thespell, SE_Rune)) {
@@ -6043,7 +6061,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 
 bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
-	Raid* raid = entity_list.GetRaidByBot(this);
+	Raid* raid = GetStoredRaid();
 
 	if (isMainGroupMGB && (GetClass() != Class::Bard)) {
 		BotGroupSay(
@@ -6065,7 +6083,7 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spel
 			std::vector<Mob*> v;
 
 			if (RuleB(Bots, RaidBuffing)) {
-				v = GatherSpellTargets(true);
+				v = GetSpellTargetList();
 			}
 			else {
 				v = GatherSpellTargets(false, spellTarget);
@@ -7206,11 +7224,11 @@ bool Bot::CheckLoreConflict(const EQ::ItemData* item) {
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, invWhereWorn) != INVALID_INDEX);
 }
 
-bool Bot::AttemptCloseBeneficialSpells(uint16 spellType, Raid* raid, std::vector<Mob*> targetList) {
+bool Bot::AttemptCloseBeneficialSpells(uint16 spellType) {
 	bool result = false;
 	Mob* tar = nullptr;
 
-	for (Mob* m : targetList) {
+	for (Mob* m : GetSpellTargetList()) {
 		tar = m;
 
 		if (!tar) {
@@ -7218,12 +7236,13 @@ bool Bot::AttemptCloseBeneficialSpells(uint16 spellType, Raid* raid, std::vector
 		}
 
 		if (IsGroupTargetOnlyBotSpellType(spellType)) {
+			Raid* raid = GetStoredRaid();
 			if (raid && (raid->GetGroup(GetName()) == raid->GetGroup(tar->GetName()))) {
 				continue;
 			}
 		}
 
-		result = AttemptAICastSpell(spellType, tar, raid);
+		result = AttemptAICastSpell(spellType, tar);
 
 		if (!result) {
 			if (tar->HasPet() && (!m->GetPet()->IsFamiliar() || RuleB(Bots, AllowBuffingHealingFamiliars))) {
@@ -7237,7 +7256,7 @@ bool Bot::AttemptCloseBeneficialSpells(uint16 spellType, Raid* raid, std::vector
 					continue;
 				}
 
-				result = AttemptAICastSpell(spellType, tar, raid);
+				result = AttemptAICastSpell(spellType, tar);
 			}
 		}
 		
@@ -7752,7 +7771,7 @@ void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
 	va_end(ap);
 
 	if (speaker->IsRaidGrouped()) {
-		Raid* r = entity_list.GetRaidByBot(speaker->CastToBot());
+		Raid* r = speaker->CastToBot()->GetStoredRaid();
 		if (r) {
 			for (const auto& m : r->members) {
 				if (m.member && !m.is_bot) {
@@ -9699,16 +9718,21 @@ bool Bot::BotHasEnoughMana(uint16 spell_id) {
 	return true;
 }
 
-bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) {
+bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) { //TODO bot rewrite - add raid and spell targets
 	if (!tar || !spell_id) {
 		return true;
 	}
 
 	std::vector<Mob*> v;
 	uint16 targetID = tar->GetID();
-	
-	v = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
-	
+
+	if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
+		v = GetSpellTargetList();
+	}
+	else {
+		v = GetGroupSpellTargetList();
+	}
+
 	for (Mob* m : v) {
 		if (
 			m->IsBot() && 
@@ -9716,7 +9740,7 @@ bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) {
 			m->CastToBot()->casting_spell_targetid && 
 			m->CastingSpellID() == spell_id
 		) {
-			if (IsGroupSpell(spell_id)) {
+			if (RuleB(Bots, CrossRaidBuffingAndHealing) && IsGroupSpell(spell_id)) {
 				std::vector<Mob*> t = GatherSpellTargets(false, tar);
 
 				for (Mob* x : t) {
@@ -9849,9 +9873,7 @@ bool Bot::IsMobEngagedByAnyone(Mob* tar) {
 		return false;
 	}
 
-	const std::vector<Mob*> v = GatherSpellTargets(true);
-
-	for (Mob* m : v) {
+	for (Mob* m : GetSpellTargetList()) {
 		if (m->GetTarget() == tar) {
 			if (
 				m->IsBot() && 
@@ -10763,7 +10785,7 @@ std::list<BotSpellTypeOrder> Bot::GetSpellTypesPrioritized(uint8 priorityType) {
 	return castOrder;
 }
 
-bool Bot::AttemptAICastSpell(uint16 spellType, Mob* tar, Raid* raid) {
+bool Bot::AttemptAICastSpell(uint16 spellType, Mob* tar) {
 	bool result = false;
 
 	if (!tar) {
@@ -10787,12 +10809,12 @@ bool Bot::AttemptAICastSpell(uint16 spellType, Mob* tar, Raid* raid) {
 			tar = this;
 		}
 
-		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType, raid)) {
+		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
 			return result;
 		}
 	}
 	else {
-		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType, raid)) {
+		if (!PrecastChecks(tar, spellType) || !AICastSpell(tar, GetChanceToCastBySpellType(spellType), spellType)) {
 			return result;
 		}
 	}
@@ -10948,7 +10970,7 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id) {
 		!RuleB(Bots, EnableBotTGB) &&
 		IsGroupSpell(forcedSpellID) &&
 		!IsTGBCompatibleSpell(forcedSpellID) &&
-		!IsInGroupOrRaid(tar, nullptr, true)
+		!IsInGroupOrRaid(tar, true)
 	) {
 		LogTestDebug("{} failed TGB for {} [#{}].", GetCleanName(), spell.name, forcedSpellID); //deleteme
 		return false;

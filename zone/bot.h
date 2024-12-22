@@ -397,11 +397,11 @@ public:
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 
 	// AI Methods
-	bool AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, Raid* raid = nullptr, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
-	bool AttemptAICastSpell(uint16 spellType, Mob* tar = nullptr, Raid* raid = nullptr);
+	bool AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
+	bool AttemptAICastSpell(uint16 spellType, Mob* tar = nullptr);
 	bool AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank);
 	bool AttemptForcedCastSpell(Mob* tar, uint16 spell_id);
-	bool AttemptCloseBeneficialSpells(uint16 spellType, Raid* raid, std::vector<Mob*> targetList);
+	bool AttemptCloseBeneficialSpells(uint16 spellType);
 	bool AI_EngagedCastCheck() override;
 	bool AI_PursueCastCheck() override;
 	bool AI_IdleCastCheck() override;
@@ -460,6 +460,12 @@ public:
 	bool CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechecks = false, bool AECheck = false);
 	bool CanCastSpellType(uint16 spellType, uint16 spell_id, Mob* tar);
 	bool BotHasEnoughMana(uint16 spell_id);
+	std::vector<Mob*> GetSpellTargetList() { return _spellTargetList; }
+	void SetSpellTargetList(std::vector<Mob*> spellTargetList) { _spellTargetList = spellTargetList; }
+	std::vector<Mob*> GetGroupSpellTargetList() { return _groupSpellTargetList; }
+	void SetGroupSpellTargetList(std::vector<Mob*> spellTargetList) { _groupSpellTargetList = spellTargetList; }
+	Raid* GetStoredRaid() { return _storedRaid; }
+	void SetStoredRaid(Raid* storedRaid) { _storedRaid = storedRaid; }
 	bool IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id);
 	bool DoResistCheck(Mob* target, uint16 spell_id, int32 resist_limit);
 	bool DoResistCheckBySpellType(Mob* tar, uint16 spell_id, uint16 spellType);
@@ -476,7 +482,6 @@ public:
 	void SetBotBaseSetting(uint16 botSetting, int settingValue);
 	void LoadDefaultBotSettings();
 	void SetBotSpellRecastTimer(uint16 spellType, Mob* spelltar, bool preCast = false);
-	BotSpell GetSpellByHealType(uint16 spellType, Mob* tar);
 	uint16 GetSpellByAA(int id, AA::Rank* &rank);
 	void CleanBotBlockedBuffs();
 	void ClearBotBlockedBuffs() { bot_blocked_buffs.clear(); }
@@ -598,6 +603,7 @@ public:
 	static std::vector<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint16 spellType, Mob* tar, bool AE = false, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
 
 	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType);
+	BotSpell GetSpellByHealType(uint16 spellType, Mob* tar);
 	static BotSpell GetBestBotSpellForVeryFastHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
 	static BotSpell GetBestBotSpellForFastHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
 	static BotSpell GetBestBotSpellForHealOverTime(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
@@ -608,7 +614,7 @@ public:
 	static BotSpell GetBestBotSpellForGroupCompleteHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
 	static BotSpell GetBestBotSpellForGroupHeal(Bot* botCaster, Mob* tar, uint16 spellType = BotSpellTypes::RegularHeal);
 
-	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, int16 spell_id, uint16 spellType, bool AE = false);
+	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, int16 spell_id, uint16 spellType, bool AE);
 	bool IsValidMezTarget(Mob* owner, Mob* npc, uint16 spell_id);
 	static BotSpell GetBestBotSpellForMez(Bot* botCaster, uint16 spellType = BotSpellTypes::Mez);
 	static BotSpell GetBestBotMagicianPetSpell(Bot* botCaster, uint16 spellType = BotSpellTypes::Pet);
@@ -988,7 +994,7 @@ public:
 	bool TryFacingTarget(Mob* tar);
 	bool TryPursueTarget(float leash_distance, glm::vec3& Goal);
 	bool TryMeditate();
-	bool TryAutoDefend(Client* bot_owner, float leash_distance, Raid* raid = nullptr);
+	bool TryAutoDefend(Client* bot_owner, float leash_distance);
 	bool TryIdleChecks(float fm_distance);
 	bool TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, glm::vec3& Goal);
 	bool TryBardMovementCasts();
@@ -1092,6 +1098,10 @@ private:
 	bool _hasLoS;
 	bool _commandedSpell;
 	bool _pullingSpell;
+
+	std::vector<Mob*> _spellTargetList; // TODO bot rewrite - implement this and raid
+	std::vector<Mob*> _groupSpellTargetList;
+	Raid* _storedRaid;
 
 	// Private "base stats" Members
 	int32 _baseMR;
