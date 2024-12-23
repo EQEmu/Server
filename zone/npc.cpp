@@ -4328,6 +4328,18 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 	return true;
 }
 
+int NPC::GetPetOriginClass() {
+	if (!GetPetSpellID()) {
+		return -1;
+	}
+
+	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+		if (GetSpellLevel(GetPetSpellID(), i) < UINT8_MAX) {
+			return i;
+		}
+	}
+}
+
 bool NPC::IsGuildmasterForClient(Client *c) {
 	std::map<uint8, uint8> guildmaster_map = {
 		{ Class::Warrior, Class::WarriorGM },

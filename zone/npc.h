@@ -329,6 +329,9 @@ public:
 	bool	IsAnimal() const { return(bodytype == BodyType::Animal); }
 	uint16	GetPetSpellID() const {return pet_spell_id;}
 	void	SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
+
+	int   	GetPetOriginClass();
+
 	uint32	GetMaxDamage(uint8 tlevel);
 	void	SetTaunting(bool is_taunting);
 	bool	IsTaunting() const { return taunting; }

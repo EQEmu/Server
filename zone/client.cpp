@@ -14088,9 +14088,11 @@ bool Client::RemoveExtraClass(int class_id) {
     auto is_spell_usable_by_classes = [this, new_classes](int spell_id) {
         for (int i = Class::Warrior; i <= Class::Berserker; i++) {
             if ((new_classes & GetPlayerClassBit(i)) && GetSpellLevel(spell_id, i) <= GetLevel()) {
+				LogDebug("Spell [{}] is usable by class [{}]", spell_id, i);
                 return true;
             }
         }
+		LogDebug("Spell [{}] is not usable by any of the remaining classes", spell_id);
         return false;
     };
 
@@ -14109,6 +14111,7 @@ bool Client::RemoveExtraClass(int class_id) {
     auto memorized_spells = GetMemmedSpells();
     for (auto memmed_id : memorized_spells) {
         if (IsValidSpell(memmed_id) && !is_spell_usable_by_classes(memmed_id)) {
+			LogDebug("Unmemming spell [{}]", memmed_id);
             UnmemSpellBySpellID(memmed_id);
         }
     }
@@ -14116,6 +14119,7 @@ bool Client::RemoveExtraClass(int class_id) {
     auto scribed_spells = GetScribedSpells();
     for (auto spell_id : scribed_spells) {
         if (IsValidSpell(spell_id) && !is_spell_usable_by_classes(spell_id)) {
+			LogDebug("Unscribing spell [{}]", spell_id);
             UnscribeSpellBySpellID(spell_id, true);
         }
     }
@@ -14123,6 +14127,7 @@ bool Client::RemoveExtraClass(int class_id) {
     auto scribed_disc = GetLearnedDisciplines();
     for (auto disc_id : scribed_disc) {
         if (IsValidSpell(disc_id) && !is_spell_usable_by_classes(disc_id)) {
+			LogDebug("Unscribing discipline [{}]", disc_id);
             UntrainDiscBySpellID(disc_id, true);
         }
     }
