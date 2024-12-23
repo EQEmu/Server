@@ -236,6 +236,7 @@ public:
 	uint16 BotGetSpells(int spellslot) { return AIBot_spells[spellslot].spellid; }
 	uint32 BotGetSpellType(int spellslot) { return AIBot_spells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIBot_spells[spellslot].priority; }
+	std::vector<BotSpells_Struct_wIndex> BotGetSpellsByType(uint16 spellType);
 	float GetProcChances(float ProcBonus, uint16 hand) override;
 	int GetHandToHandDamage(void) override;
 	bool TryFinishingBlow(Mob *defender, int64 &damage) override;
@@ -466,6 +467,7 @@ public:
 	void SetGroupSpellTargetList(std::vector<Mob*> spellTargetList) { _groupSpellTargetList = spellTargetList; }
 	Raid* GetStoredRaid() { return _storedRaid; }
 	void SetStoredRaid(Raid* storedRaid) { _storedRaid = storedRaid; }
+	void AssignBotSpellsToTypes(std::vector<BotSpells_Struct>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>>& AIBot_spells_by_type);
 	bool IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id);
 	bool DoResistCheck(Mob* target, uint16 spell_id, int32 resist_limit);
 	bool DoResistCheckBySpellType(Mob* tar, uint16 spell_id, uint16 spellType);
@@ -622,9 +624,9 @@ public:
 	static BotSpell GetBestBotSpellForNukeByTargetType(Bot* botCaster, SpellTargetType targetType, uint16 spellType, bool AE = false, Mob* tar = nullptr);
 	static BotSpell GetBestBotSpellForStunByTargetType(Bot* botCaster, SpellTargetType targetType, uint16 spellType, bool AE = false, Mob* tar = nullptr);
 	static BotSpell GetBestBotWizardNukeSpellByTargetResists(Bot* botCaster, Mob* target, uint16 spellType);
-	static BotSpell GetDebuffBotSpell(Bot* botCaster, Mob* target);
+	static BotSpell GetDebuffBotSpell(Bot* botCaster, Mob* target, uint16 spellType);
 	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target, uint16 spellType);
-	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
+	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target, uint16 spellType);
 	static BotSpell GetBestBotSpellForNukeByBodyType(Bot* botCaster, uint8 bodyType, uint16 spellType, bool AE = false, Mob* tar = nullptr);
 	static BotSpell GetBestBotSpellForRez(Bot* botCaster, Mob* target, uint16 spellType);
 	static BotSpell GetBestBotSpellForCharm(Bot* botCaster, Mob* target, uint16 spellType);
@@ -1020,6 +1022,7 @@ protected:
 
 	std::vector<BotSpells_Struct> AIBot_spells;
 	std::vector<BotSpells_Struct> AIBot_spells_enforced;
+	std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>> AIBot_spells_by_type;
 	std::vector<BotTimer_Struct> bot_timers;
 	std::vector<BotBlockedBuffs_Struct> bot_blocked_buffs;
 
@@ -1099,7 +1102,7 @@ private:
 	bool _commandedSpell;
 	bool _pullingSpell;
 
-	std::vector<Mob*> _spellTargetList; // TODO bot rewrite - implement this and raid
+	std::vector<Mob*> _spellTargetList;
 	std::vector<Mob*> _groupSpellTargetList;
 	Raid* _storedRaid;
 

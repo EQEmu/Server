@@ -896,7 +896,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, uint16 spell
 	}
 
 	if (botCaster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
+		std::vector<BotSpells_Struct_wIndex> botSpellList = botCaster->BotGetSpellsByType(spellType);
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(botSpellList[i].spellid, botCaster->HasLoS())) {
@@ -911,7 +911,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, uint16 spell
 			) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;
-				botSpell.SpellIndex = i;
+				botSpell.SpellIndex = botSpellList[i].index;
 				botSpell.ManaCost = botSpellList[i].manacost;
 
 				result.push_back(botSpell);
@@ -934,7 +934,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 	}
 
 	if (botCaster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
+		std::vector<BotSpells_Struct_wIndex> botSpellList = botCaster->BotGetSpellsByType(spellType);
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(botSpellList[i].spellid, botCaster->HasLoS())) {
@@ -953,7 +953,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 			) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;
-				botSpell.SpellIndex = i;
+				botSpell.SpellIndex = botSpellList[i].index;
 				botSpell.ManaCost = botSpellList[i].manacost;
 				result.push_back(botSpell);
 			}
@@ -975,7 +975,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellTyp
 	}
 
 	if (botCaster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
+		std::vector<BotSpells_Struct_wIndex> botSpellList = botCaster->BotGetSpellsByType(spellType);
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(botSpellList[i].spellid, botCaster->HasLoS())) {
@@ -989,7 +989,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellTyp
 			) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;
-				botSpell.SpellIndex = i;
+				botSpell.SpellIndex = botSpellList[i].index;
 				botSpell.ManaCost = botSpellList[i].manacost;
 
 				result.push_back(botSpell);
@@ -1004,7 +1004,7 @@ std::vector<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* bot
 	std::vector<BotSpell_wPriority> result;
 
 	if (botCaster && botCaster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
+		std::vector<BotSpells_Struct_wIndex> botSpellList = botCaster->BotGetSpellsByType(spellType);
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(botSpellList[i].spellid, botCaster->HasLoS())) {
@@ -1062,7 +1062,7 @@ std::vector<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* bot
 				) {
 					BotSpell_wPriority botSpell;
 					botSpell.SpellId = botSpellList[i].spellid;
-					botSpell.SpellIndex = i;
+					botSpell.SpellIndex = botSpellList[i].index;
 					botSpell.ManaCost = botSpellList[i].manacost;
 					botSpell.Priority = botSpellList[i].priority;
 
@@ -1089,7 +1089,7 @@ BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType) {
 	result.ManaCost = 0;
 
 	if (botCaster && botCaster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
+		std::vector<BotSpells_Struct_wIndex> botSpellList = botCaster->BotGetSpellsByType(spellType);
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(botSpellList[i].spellid, botCaster->HasLoS())) {
@@ -1102,7 +1102,7 @@ BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType) {
 				botCaster->IsValidSpellTypeBySpellID(spellType, botSpellList[i].spellid)
 			) {
 				result.SpellId = botSpellList[i].spellid;
-				result.SpellIndex = i;
+				result.SpellIndex = botSpellList[i].index;
 				result.ManaCost = botSpellList[i].manacost;
 
 				break;
@@ -1197,7 +1197,7 @@ BotSpell Bot::GetBestBotSpellForPercentageHeal(Bot *botCaster, Mob* tar, uint16 
 	result.ManaCost = 0;
 
 	if (botCaster && botCaster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
+		std::vector<BotSpells_Struct_wIndex> botSpellList = botCaster->BotGetSpellsByType(spellType);
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (!IsValidSpell(botSpellList[i].spellid)) {
 				continue;
@@ -1210,7 +1210,7 @@ BotSpell Bot::GetBestBotSpellForPercentageHeal(Bot *botCaster, Mob* tar, uint16 
 				botCaster->CastChecks(botSpellList[i].spellid, tar, spellType)
 			) {
 				result.SpellId = botSpellList[i].spellid;
-				result.SpellIndex = i;
+				result.SpellIndex = botSpellList[i].index;
 				result.ManaCost = botSpellList[i].manacost;
 
 				break;
@@ -1906,7 +1906,7 @@ BotSpell Bot::GetBestBotWizardNukeSpellByTargetResists(Bot* botCaster, Mob* targ
 	return result;
 }
 
-BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
+BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar, uint16 spellType) {
 	BotSpell result;
 
 	result.SpellId = 0;
@@ -1917,7 +1917,7 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 		return result;
 
 	if (botCaster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
+		std::vector<BotSpells_Struct_wIndex> botSpellList = botCaster->BotGetSpellsByType(spellType);
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(botSpellList[i].spellid, botCaster->HasLoS())) {
@@ -1929,7 +1929,7 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 				&& tar->CanBuffStack(botSpellList[i].spellid, botCaster->GetLevel(), true) >= 0)
 				&& botCaster->CheckSpellRecastTimer(botSpellList[i].spellid)) {
 				result.SpellId = botSpellList[i].spellid;
-				result.SpellIndex = i;
+				result.SpellIndex = botSpellList[i].index;
 				result.ManaCost = botSpellList[i].manacost;
 
 				break;
@@ -1940,7 +1940,7 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 	return result;
 }
 
-BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
+BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar, uint16 spellType) {
 	BotSpell result;
 
 	result.SpellId = 0;
@@ -1963,7 +1963,7 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 	bool needsDiseaseResistDebuff = (tar->GetDR() + level_mod) > 100;
 
 	if (botCaster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
+		std::vector<BotSpells_Struct_wIndex> botSpellList = botCaster->BotGetSpellsByType(spellType);
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(botSpellList[i].spellid, botCaster->HasLoS())) {
@@ -1980,7 +1980,7 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 				&& tar->CanBuffStack(botSpellList[i].spellid, botCaster->GetLevel(), true) >= 0)
 				&& botCaster->CheckSpellRecastTimer(botSpellList[i].spellid)) {
 				result.SpellId = botSpellList[i].spellid;
-				result.SpellIndex = i;
+				result.SpellIndex = botSpellList[i].index;
 				result.ManaCost = botSpellList[i].manacost;
 
 				break;
@@ -2165,6 +2165,8 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 	npc_spells_id = bot_spell_id;
 	AIBot_spells.clear();
 	AIBot_spells_enforced.clear();
+	AIBot_spells_by_type.clear();
+
 	if (!bot_spell_id) {
 		AIautocastspell_timer->Disable();
 		return false;
@@ -2455,6 +2457,7 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 		AIautocastspell_timer->Disable();
 	} else {
 		AIautocastspell_timer->Trigger();
+		AssignBotSpellsToTypes(AIBot_spells, AIBot_spells_by_type); // Assign AIBot_spells to AIBot_spells_by_type with an index
 	}
 	return true;
 }
@@ -2630,20 +2633,20 @@ void Bot::AddSpellToBotEnforceList(
 	HasAISpell = true;
 	BotSpells_Struct t;
 
-	t.priority = iPriority;
-	t.spellid = iSpellID;
-	t.type = iType;
-	t.manacost = iManaCost;
-	t.recast_delay = iRecastDelay;
-	t.time_cancast = 0;
-	t.resist_adjust = iResistAdjust;
-	t.minlevel = min_level;
-	t.maxlevel = maxlevel;
-	t.min_hp = min_hp;
-	t.max_hp = max_hp;
-	t.bucket_name = bucket_name;
-	t.bucket_value = bucket_value;
-	t.bucket_comparison = bucket_comparison;
+	t.priority			= iPriority;
+	t.spellid			= iSpellID;
+	t.type				= iType;
+	t.manacost			= iManaCost;
+	t.recast_delay		= iRecastDelay;
+	t.time_cancast		= 0;
+	t.resist_adjust		= iResistAdjust;
+	t.minlevel			= min_level;
+	t.maxlevel			= maxlevel;
+	t.min_hp			= min_hp;
+	t.max_hp			= max_hp;
+	t.bucket_name		= bucket_name;
+	t.bucket_value		= bucket_value;
+	t.bucket_comparison	= bucket_comparison;
 
 	AIBot_spells_enforced.push_back(t);
 }

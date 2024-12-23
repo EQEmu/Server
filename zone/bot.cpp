@@ -6061,7 +6061,6 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 
 bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
-	Raid* raid = GetStoredRaid();
 
 	if (isMainGroupMGB && (GetClass() != Class::Bard)) {
 		BotGroupSay(
@@ -9718,7 +9717,7 @@ bool Bot::BotHasEnoughMana(uint16 spell_id) {
 	return true;
 }
 
-bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) { //TODO bot rewrite - add raid and spell targets
+bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) {
 	if (!tar || !spell_id) {
 		return true;
 	}
@@ -11969,5 +11968,48 @@ void Bot::CleanBotBlockedBuffs()
 
 			end = bot_blocked_buffs.size();
 		}
+	}
+}
+
+std::vector<BotSpells_Struct_wIndex> Bot::BotGetSpellsByType(uint16 spellType) {
+	if (!AIBot_spells_by_type[spellType].empty()) {
+		return AIBot_spells_by_type[spellType];
+	}
+	else {
+		spellType = GetParentSpellType(spellType);
+
+		return AIBot_spells_by_type[spellType];
+	}
+}
+
+void Bot::AssignBotSpellsToTypes(std::vector<BotSpells_Struct>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>>& AIBot_spells_by_type) {
+	AIBot_spells_by_type.clear();
+
+	for (size_t i = 0; i < AIBot_spells.size(); ++i) {
+		const auto& spell = AIBot_spells[i];
+
+		if (spell.spellid <= 0) {
+			continue;
+		}
+
+		BotSpells_Struct_wIndex spellWithIndex{
+			static_cast<uint32>(i),
+			spell.type,
+			spell.spellid,
+			spell.manacost,
+			spell.time_cancast,
+			spell.recast_delay,
+			spell.priority,
+			spell.resist_adjust,
+			spell.minlevel,
+			spell.maxlevel,
+			spell.min_hp,
+			spell.max_hp,
+			spell.bucket_name,
+			spell.bucket_value,
+			spell.bucket_comparison
+		};
+
+		AIBot_spells_by_type[spell.type].emplace_back(spellWithIndex);
 	}
 }
