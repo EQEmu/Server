@@ -5996,7 +5996,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 	) {
 		bool noGroupSpell = false;
 		uint16 thespell = spell_id;
-		for (int i = 0; i < AIBot_spells.size(); i++) {
+		for (int i = 0; i < AIBot_spells.size(); i++) { // TODO bot rewrite - fix this to reduce loop with AIBot_spells_by_type?
 			int j = BotGetSpells(i);
 			int spelltype = BotGetSpellType(i);
 			bool spellequal = (j == thespell);
