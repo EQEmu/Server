@@ -2137,6 +2137,7 @@ void Bot::AI_Process()
 	SetSpellTargetList(spellTargetList);
 	std::vector<Mob*> groupSpellTargetList = GatherSpellTargets();
 	SetGroupSpellTargetList(groupSpellTargetList);
+	SetTempSpellType(UINT16_MAX);
 
 // HEAL ROTATION CASTING CHECKS
 	HealRotationChecks();

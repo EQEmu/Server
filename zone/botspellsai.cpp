@@ -56,7 +56,8 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 
 	uint8 botClass = GetClass();
 
-	SetCastedSpellType(UINT16_MAX);
+	SetCastedSpellType(UINT16_MAX); // this is for recast timers
+	SetTempSpellType(spellType); // this is for spell checks
 
 	BotSpell botSpell;
 	botSpell.SpellId = 0;
