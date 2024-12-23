@@ -1177,12 +1177,6 @@ bool Mob::AddPet(uint16 pet_id) {
     petids.push_back(pet_id);
     newpet->SetOwnerID(GetID());  // Set the owner ID to this mob's ID
 
-    // Log the contents of the petids list before the final return
-    LogDebug("Pet ID [{}] added to petids list for Mob [{}]. Current petids:", pet_id, GetCleanName());
-    for (auto id : petids) {
-        LogDebug("  - Pet ID: [{}]", id);
-    }
-
 	focused_pet_id = pet_id;
 	ConfigurePetWindow(newpet);
 

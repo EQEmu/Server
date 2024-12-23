@@ -2546,9 +2546,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	if (RuleB(Custom, EnablePetBags)) {
 		for (int class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
 			auto pet_bag_idx = GetActivePetBagSlot(class_id);
-			LogDebug("Checking Pet bag index: {}", pet_bag_idx);
 			if (pet_bag_idx >= 0) {
-				LogDebug("Found Pet bag index: {}", pet_bag_idx);
 				if (pet_bag_idx == move_in->to_slot || pet_bag_idx == move_in->from_slot) {
 					DoPetBagResync(class_id);
 					break;

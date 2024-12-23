@@ -4462,21 +4462,44 @@ bool NPC::CheckHandin(
 					 && h.money.copper == r.money.copper;
 
 	// items
+	bool normalize = true;
+	for (auto required_item : required) {
+		int item_id = Strings::ToInt(required_item.first);
+		if (item_id > 1000000) {
+			normalize = false;
+			break;
+		}
+	}
+
 	bool items_met = true;
 	if (h.items.size() == r.items.size() && !h.items.empty() && !r.items.empty()) {
 		for (const auto &r_item: r.items) {
 			bool      found = false;
 			for (auto &h_item: h.items) {
-				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
-					found = true;
-					LogNpcHandinDetail(
-						"{} >>>> Found required item [{}] ({}) count [{}]",
-						log_handin_prefix,
-						h_item.item->GetItem()->Name,
-						h_item.item_id,
-						h_item.count
-					);
-					break;
+				if (!normalize) {
+					if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
+						found = true;
+						LogNpcHandinDetail(
+							"{} >>>> Found required item [{}] ({}) count [{}]",
+							log_handin_prefix,
+							h_item.item->GetItem()->Name,
+							h_item.item_id,
+							h_item.count
+						);
+						break;
+					}
+				} else {
+					if ((Strings::ToInt(h_item.item_id) % 1000000) == Strings::ToInt(r_item.item_id) && h_item.count == r_item.count) {
+						found = true;
+						LogNpcHandinDetail(
+							"{} >>>> Found required item [{}] ({}) count [{}]",
+							log_handin_prefix,
+							h_item.item->GetItem()->Name,
+							h_item.item_id,
+							h_item.count
+						);
+						break;
+					}
 				}
 			}
 
