@@ -1989,6 +1989,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				}
 			}
 
+			int item_id = inst ? inst->GetItem()->ID : 0;
+
 			DeleteItemInInventory(move_in->from_slot);
 			SendCursorBuffer();
 

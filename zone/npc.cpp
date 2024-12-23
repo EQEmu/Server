@@ -4316,6 +4316,19 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 		return false;
 	}
 
+	if (GetOwner()->IsClient()) {
+		auto owner   = GetOwner()->CastToClient();
+		auto pet_bag = owner->GetActivePetBag(GetPetOriginClass());
+		if (pet_bag) {
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemData);
+			linker.SetItemData(pet_bag->GetItem());
+
+			owner->Message(Chat::Yellow, "You must use [%s] to equip your pet.", linker.GenerateLink().c_str());
+			return false;
+		}
+	}
+
 	const bool can_take_nodrop   = RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0;
 	const bool can_pet_take_item = !inst->GetItem()->IsQuestItem()
 		&& can_take_nodrop
