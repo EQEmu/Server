@@ -1081,7 +1081,6 @@ RULE_BOOL(Custom, 	UseDynamicItemDiscoveryTags, 			true, "Enable appfending Disc
 RULE_BOOL(Custom, 	TauntTogglesPetTanking, 				true, "Enable to let pets hold aggro while taunt is on")
 RULE_BOOL(Custom, 	LessStrictSpellStacking, 				true, "Don't check songs and buffs or detrimental and beneficial against each other for buff slot blocking")
 RULE_BOOL(Custom, 	EnablePetBags, 							true, "Enable 'Pet Bag' features")
-RULE_STRING(Custom, PetBagList, 							"199999,900000", "Comma-seperated list of ItemIDs for Enabled Pet Bags")
 RULE_REAL(Custom,  	ItemExtraSpellAmtBardFactor, 			0.10, "Factor to multiple rune healamt bonus values by for bard songs")
 RULE_BOOL(Custom,   MultipleTwoHandedProcs,					false, "Allow two-handed weapons to proc multiple procs (such as augments)")
 RULE_INT(Custom,   	DevastatingFrenzyRateModifier, 			0, "Subtract this value from the chance for Devastating Frenzy to trigger")

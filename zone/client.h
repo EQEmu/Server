@@ -1189,11 +1189,14 @@ public:
 	// Pet Bag Methods
 
 	bool IsPetBagActive();
-	EQ::ItemInstance* GetActivePetBag();
-	void DoPetBagResync();
-	int16 GetActivePetBagSlot();
+	bool IsValidPetBagForClass(int bag_id, int class_id);
 	bool IsValidPetBag(int item_id);
+
+	EQ::ItemInstance* GetActivePetBag(int class_id);
+	void DoPetBagResync(int class_id);
+	int16 GetActivePetBagSlot(int class_id);
 	void DoPetBagFlush(Mob* pet);
+
 	std::vector<NPC*> GetSwarmPets(bool permanent_only = true);
 
 	bool IsAugmentRestricted(uint8 item_type, uint32 augment_restriction);

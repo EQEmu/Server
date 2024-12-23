@@ -1737,7 +1737,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 						}
 					}
 
-					DoPetBagResync();
+					DoPetBagResync(pet->GetPetOriginClass());
 					pet->ApplyGlobalBuffs();
 				}
 
@@ -3575,9 +3575,12 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		Object::HandleAugmentation(this, in_augment, m_tradeskill_object); // Delegate to tradeskill object to perform combine
 	}
 
-	auto pet_bag_idx = GetActivePetBagSlot();
-	if (EQ::InventoryProfile::CalcSlotId(in_augment->container_slot) == pet_bag_idx) {
-		DoPetBagResync();
+	for (int class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
+		auto pet_bag_idx = GetActivePetBagSlot(class_id);
+		if (pet_bag_idx >= 0 && EQ::InventoryProfile::CalcSlotId(in_augment->container_slot) == pet_bag_idx) {
+			DoPetBagResync(class_id);
+			break;
+		}
 	}
 
 	return;

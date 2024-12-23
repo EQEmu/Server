@@ -320,7 +320,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	}
 
 	if (IsClient()) {
-		CastToClient()->DoPetBagResync();
+		CastToClient()->DoPetBagResync(npc->GetPetOriginClass());
 
 		auto inst = GetInv().GetItem(EQ::invslot::slotAmmo);
 		if (!inst) {
@@ -1104,8 +1104,8 @@ bool Mob::RemovePet(uint16 pet_id) {
             }
             petids.erase(it);        // Remove the pet ID from the vector
 			ValidatePetList();
-			if (IsClient()) {
-				CastToClient()->DoPetBagResync();
+			if (IsClient() && pet->IsNPC()) {
+				CastToClient()->DoPetBagResync(pet->CastToNPC()->GetPetOriginClass());
 			}
 
 			if (pet_id == focused_pet_id) {

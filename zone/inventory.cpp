@@ -2542,23 +2542,22 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	ApplyWeaponsStance();
 
 	if (RuleB(Custom, EnablePetBags)) {
-		auto pet_bag_idx = GetActivePetBagSlot();
-		// Check to see if we are moving an entire pet bag first
-		if (dst_inst && IsValidPetBag(dst_inst->GetID()) || src_inst && IsValidPetBag(src_inst->GetID())) {
-			if (IsPetBagActive()) {
-				DoPetBagResync();
-			} else {
-				//DoPetBagFlush();
-			}
-		}
+		for (int class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
+			auto pet_bag_idx = GetActivePetBagSlot(class_id);
+			LogDebug("Checking Pet bag index: {}", pet_bag_idx);
+			if (pet_bag_idx >= 0) {
+				LogDebug("Found Pet bag index: {}", pet_bag_idx);
+				if (pet_bag_idx == move_in->to_slot || pet_bag_idx == move_in->from_slot) {
+					DoPetBagResync(class_id);
+					break;
+				}
+				if (EQ::InventoryProfile::CalcSlotId(move_in->to_slot) == pet_bag_idx) {
+					DoPetBagResync(class_id);
+				}
 
-		if (pet_bag_idx) {
-			if (EQ::InventoryProfile::CalcSlotId(move_in->to_slot) == pet_bag_idx) {
-				DoPetBagResync();
-			}
-
-			if (EQ::InventoryProfile::CalcSlotId(move_in->from_slot) == pet_bag_idx) {
-				DoPetBagResync();
+				if (EQ::InventoryProfile::CalcSlotId(move_in->from_slot) == pet_bag_idx) {
+					DoPetBagResync(class_id);
+				}
 			}
 		}
 	}
