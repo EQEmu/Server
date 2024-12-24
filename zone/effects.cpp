@@ -47,7 +47,7 @@ int Mob::GetSharedSpellDamage() {
 	unsigned int pet_count = GetOwner()->GetAllPets().size();
 
 	if (pet_count) {
-		int ret_val = itembonuses.SpellDmg + (GetOwner()->GetSharedSpellDamage() / pet_count);
+		int ret_val = itembonuses.SpellDmg + (GetOwner()->GetSharedSpellDamage() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
@@ -62,7 +62,7 @@ int Mob::GetSharedHealAmount() {
 	unsigned int pet_count = GetOwner()->GetAllPets().size();
 
 	if (pet_count) {
-		int ret_val = itembonuses.HealAmt + (GetOwner()->GetSharedHealAmount() / pet_count);
+		int ret_val = itembonuses.HealAmt + (GetOwner()->GetSharedHealAmount() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
@@ -80,7 +80,7 @@ int Mob::GetSharedCriticalSpellChance() {
 
 	if (pet_count) {
 		auto owner = GetOwner()->CastToClient();
-		int ret_val = base_chance + (owner->GetSharedCriticalSpellChance() / pet_count);
+		int ret_val = base_chance + (owner->GetSharedCriticalSpellChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
@@ -98,7 +98,7 @@ int Mob::GetSharedSpellCritDmgIncrease() {
 
 	if (pet_count) {
 		auto owner = GetOwner()->CastToClient();
-		int ret_val = base_chance + (owner->GetSharedSpellCritDmgIncrease() / pet_count);
+		int ret_val = base_chance + (owner->GetSharedSpellCritDmgIncrease() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
@@ -116,7 +116,7 @@ int Mob::GetSharedSpellCritDmgIncNoStack() {
 
 	if (pet_count) {
 		auto owner = GetOwner()->CastToClient();
-		int ret_val = base_chance + (owner->GetSharedSpellCritDmgIncNoStack() / pet_count);
+		int ret_val = base_chance + (owner->GetSharedSpellCritDmgIncNoStack() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
@@ -134,7 +134,7 @@ int Mob::GetSharedCriticalDoTChance() {
 
 	if (pet_count) {
 		auto owner = GetOwner()->CastToClient();
-		int ret_val = base_chance + (owner->GetSharedCriticalDoTChance() / pet_count);
+		int ret_val = base_chance + (owner->GetSharedCriticalDoTChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
@@ -152,7 +152,7 @@ int Mob::GetSharedDotCritDmgIncrease() {
 
 	if (pet_count) {
 		auto owner = GetOwner()->CastToClient();
-		int ret_val = base_chance + (owner->GetSharedDotCritDmgIncrease() / pet_count);
+		int ret_val = base_chance + (owner->GetSharedDotCritDmgIncrease() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
@@ -170,7 +170,7 @@ int Mob::GetSharedCriticalHealChance() {
 
 	if (pet_count) {
 		auto owner = GetOwner()->CastToClient();
-		int ret_val = base_chance + (owner->GetSharedCriticalHealChance() / pet_count);
+		int ret_val = base_chance + (owner->GetSharedCriticalHealChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
@@ -188,7 +188,7 @@ int Mob::GetSharedCriticalHealOverTime() {
 
 	if (pet_count) {
 		auto owner = GetOwner()->CastToClient();
-		int ret_val = base_chance + (owner->GetSharedCriticalHealOverTime() / pet_count);
+		int ret_val = base_chance + (owner->GetSharedCriticalHealOverTime() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 		return ret_val;
 	}
 
