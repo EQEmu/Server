@@ -41,7 +41,6 @@ float Mob::GetActSpellRange(uint16 spell_id, float range)
 
 int Mob::GetOwnerSpellDamage() {
 	if (!GetOwner() || !GetOwner()->IsClient()) {
-		LogDebug("Unable to find Owner, using my own spell damage.");
 		return itembonuses.SpellDmg;
 	}
 
@@ -49,7 +48,6 @@ int Mob::GetOwnerSpellDamage() {
 
 	if (pet_count) {
 		int ret_val = itembonuses.SpellDmg + (GetOwner()->CastToClient()->GetSpellDmg() / pet_count);
-		LogDebug("Using owner spell damage [{}]", ret_val);
 		return ret_val;
 	}
 
