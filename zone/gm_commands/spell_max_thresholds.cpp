@@ -158,18 +158,18 @@ void command_spell_max_thresholds(Client* c, const Seperator* sep)
 		c->Message(
 			Chat::Green,
 			fmt::format(
-				"Your [{}] maximum hold is currently [{}]%%.'",
+				"Your [{}] maximum hold is currently [{}%%].'",
 				c->GetSpellTypeNameByID(spellType),
 				c->GetSpellMaxThreshold(spellType)
 			).c_str()
 		);
 	}
 	else {
-		c->SetSpellHold(spellType, typeValue);
+		c->SetSpellMaxThreshold(spellType, typeValue);
 		c->Message(
 			Chat::Green,
 			fmt::format(
-				"Your [{}] maximum hold was set to [{}]%%.'",
+				"Your [{}] maximum hold was set to [{}%%].'",
 				c->GetSpellTypeNameByID(spellType),
 				c->GetSpellMaxThreshold(spellType)
 			).c_str()

@@ -165,7 +165,7 @@ void command_spell_delays(Client* c, const Seperator* sep)
 		);
 	}
 	else {
-		c->SetSpellHold(spellType, typeValue);
+		c->SetSpellDelay(spellType, typeValue);
 		c->Message(
 			Chat::Green,
 			fmt::format(

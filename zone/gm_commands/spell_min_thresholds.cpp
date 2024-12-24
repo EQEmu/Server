@@ -158,18 +158,18 @@ void command_spell_min_thresholds(Client* c, const Seperator* sep)
 		c->Message(
 			Chat::Green,
 			fmt::format(
-				"Your [{}] minimum hold is currently [{}]%%.'",
+				"Your [{}] minimum hold is currently [{}%%].'",
 				c->GetSpellTypeNameByID(spellType),
 				c->GetSpellMinThreshold(spellType)
 			).c_str()
 		);
 	}
 	else {
-		c->SetSpellHold(spellType, typeValue);
+		c->SetSpellMinThreshold(spellType, typeValue);
 		c->Message(
 			Chat::Green,
 			fmt::format(
-				"Your [{}] minimum hold was set to [{}]%%.'",
+				"Your [{}] minimum hold was set to [{}%%].'",
 				c->GetSpellTypeNameByID(spellType),
 				c->GetSpellMinThreshold(spellType)
 			).c_str()
