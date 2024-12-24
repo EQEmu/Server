@@ -658,6 +658,7 @@ float Client::GetItemStatValue(EQ::ItemData* item) {
 
 		return return_value;
 	}
+	return 0;
 }
 
 float Client::GetBaseExpValueForKill(int conlevel, int target_tier, EQ::ItemInstance* upgrade_item) {
