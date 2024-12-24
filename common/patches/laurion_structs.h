@@ -810,6 +810,58 @@ namespace Laurion {
 			/*025*/	uint32	unknown2;
 			/*029*/	uint32	unknown3;
 		};
+
+		struct ArmorPropertyStruct
+		{
+			/*000*/ uint32 type;
+			/*004*/ uint32 variation;
+			/*008*/ uint32 material;
+			/*012*/ uint32 newArmorID;
+			/*016*/ uint32 newArmorType;
+			/*020*/
+		};
+
+		struct Illusion_Struct {
+			/*000*/ uint32 spawnid;
+			/*004*/ char charname[64];
+			/*068*/ uint16 race; //according to eqlib this is s32
+			/*070*/ char unknown006[2];
+			/*072*/ uint8 gender;
+			/*073*/ uint8 texture;
+			/*074*/ uint8 armorVariation;
+			/*075*/ uint8 armorMaterial;
+			/*076*/ uint8 helmtexture;
+			/*077*/ uint8 unknown077; //padding from this being a pack(4) struct actually
+			/*078*/ uint8 unknown078;
+			/*079*/ uint8 unknown079;
+			/*080*/ uint32 face;
+			/*084*/ uint8 hairstyle;
+			/*085*/ uint8 haircolor;
+			/*086*/ uint8 beard;
+			/*087*/ uint8 beardcolor;
+			/*088*/ float size;
+			/*092*/ uint32_t npc_tint;
+			/*096*/ bool keep_armor_properties;
+			/*097*/ uint8 unknown097[3]; //padding from this being a pack(4) struct actually
+			/*100*/ ArmorPropertyStruct armorProperties[9];
+			/*280*/ uint32_t armorTints[9];
+			/*316*/ int32 class_;
+			/*320*/ uint32 drakkin_heritage;
+			/*324*/ uint32 drakkin_tattoo;
+			/*328*/ uint32 drakkin_details;
+			/*332*/
+		};
+
+		struct moneyOnCorpseStruct {
+			/*000*/ uint8 type;
+			/*001*/ uint8 padding1[3];
+			/*004*/ uint32 flags;
+			/*008*/ uint32 platinum;
+			/*012*/ uint32 gold;
+			/*016*/ uint32 silver;
+			/*020*/ uint32 copper;
+			/*024*/
+		}
 #pragma pack()
 
 	};	//end namespace structs

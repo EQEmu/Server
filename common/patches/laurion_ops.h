@@ -47,7 +47,8 @@ E(OP_RespondAA)
 E(OP_BlockedBuffs)
 E(OP_RemoveBlockedBuffs)
 E(OP_ZonePlayerToBind)
-
+E(OP_Illusion)
+E(OP_MoneyOnCorpse)
 //list of packets we need to decode on the way in:
 D(OP_EnterWorld)
 D(OP_ZoneEntry)

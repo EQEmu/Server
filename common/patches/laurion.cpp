@@ -3228,6 +3228,47 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_Illusion)
+	{
+		ENCODE_LENGTH_EXACT(Illusion_Struct);
+		SETUP_DIRECT_ENCODE(Illusion_Struct, structs::Illusion_Struct);
+
+		OUT(spawnid);
+		OUT_str(charname);
+		OUT(race);
+		eq->unknown006[0] = 0;
+		eq->unknown006[1] = 0;
+		OUT(gender);
+		OUT(texture);
+		OUT(helmtexture);
+		OUT(face);
+		OUT(hairstyle);
+		OUT(haircolor);
+		OUT(beard);
+		OUT(beardcolor);
+		OUT(size);
+		OUT(drakkin_heritage);
+		OUT(drakkin_tattoo);
+		OUT(drakkin_details);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_MoneyOnCorpse)
+	{
+		ENCODE_LENGTH_EXACT(moneyOnCorpseStruct);
+		SETUP_DIRECT_ENCODE(moneyOnCorpseStruct, structs::moneyOnCorpseStruct);
+
+		eq->type = emu->response;
+		OUT(platinum);
+		OUT(gold);
+		OUT(silver);
+		OUT(copper);
+		eq->flags = 0;
+
+		FINISH_ENCODE();
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
