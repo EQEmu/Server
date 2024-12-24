@@ -561,7 +561,7 @@ void NPC::AddLootDropFixed(
 		case Race::Wrulon:
 		case Race::Phoenix:
 		case Race::Spider:
-			return 0;
+			return;
 	}
 
 	if (wear_change && outapp) {
