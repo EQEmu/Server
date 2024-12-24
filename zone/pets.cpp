@@ -1179,6 +1179,9 @@ bool Mob::AddPet(uint16 pet_id) {
 
 	focused_pet_id = pet_id;
 	ConfigurePetWindow(newpet);
+	if (newpet->IsNPC() && IsClient()) {
+		CastToClient()->DoPetBagResync(newpet->CastToNPC()->GetPetOriginClass());
+	}
 
     return true;  // Return true to indicate the pet was successfully added
 }

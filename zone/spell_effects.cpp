@@ -835,32 +835,32 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						SendPetBuffsToClient();
 						SendAppearancePacket(AppearanceType::Pet, caster->GetID(), true, true);
 					}
-
 					if (IsClient())
 					{
 						CastToClient()->AI_Start();
 					} else if(IsNPC()) {
-						CastToNPC()->SetPetSpellID(0);	//not a pet spell.
+						CastToNPC()->SetPetSpellID(spell_id);	//not a pet spell.
 						CastToNPC()->ModifyStatsOnCharm(false);
-					}
 
-					// Custom charm inventory handling
-					if (RuleB(Custom, StripCharmItems) && IsNPC() && GetOwner()->IsClient()) {
-						if (!EntityVariableExists("is_charmed")) {
-							auto inventory = CastToNPC()->GetLootList();
-							std::vector<std::string> inventory_strings;
+						if (GetOwner() && GetOwner()->IsClient()) {
+							if (!EntityVariableExists("is_charmed")) {
+								auto inventory = CastToNPC()->GetLootList();
+								std::vector<std::string> inventory_strings;
 
-							for (int item_id : inventory) {
-								inventory_strings.push_back(std::to_string(item_id));
+								for (int item_id : inventory) {
+									inventory_strings.push_back(std::to_string(item_id));
+								}
+
+								auto serialized_inventory = Strings::Join(inventory_strings, ",");
+
+								CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
+
+								LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+							} else {
+								LogDebug("Pre-Existing Serialized Inventory: [{}]", GetEntityVariable("is_charmed"));
 							}
 
-							auto serialized_inventory = Strings::Join(inventory_strings, ",");
-
-							CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
-
-							LogDebug("Serialized Inventory: [{}]", serialized_inventory);
-						} else {
-							LogDebug("Pre-Existing Serialized Inventory: [{}]", GetEntityVariable("is_charmed"));
+							GetOwner()->CastToClient()->DoPetBagResync(CastToNPC()->GetPetOriginClass());
 						}
 					}
 
@@ -4661,7 +4661,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				SetOwnerID(0);
 
 				// Custom charm inventory handling
-				if (RuleB(Custom, StripCharmItems) && EntityVariableExists("is_charmed") && !EntityVariableExists("preserve_inventory")) {
+				if (EntityVariableExists("is_charmed") && !EntityVariableExists("preserve_inventory")) {
 					if (!EntityVariableExists("charm_refresh")) {
 						auto serialized_inventory = GetEntityVariable("is_charmed");
 						LogDebug("Serialized Inventory: [{}]", serialized_inventory);
