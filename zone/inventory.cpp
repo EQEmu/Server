@@ -2983,8 +2983,16 @@ static uint32 GetDisenchantedBagID(uint8 bag_slots)
 		return 77776; // "Large Disenchanted Backpack"
 	case 10:
 		return 77778; // "Huge Disenchanted Backpack"
+	case 11:
+	case 12:
+		return 4079; // "Disenchanted Backpack"
+	case 14:
+	case 16:
+		return 4644; // "Disenchanted Backpack"
+	case 20:
+		return 4645; // "Disenchanted Backpack"
 	default:
-		return 0; // no suitable conversions
+		return 4645; // "Disenchanted Backpack"
 	}
 }
 
