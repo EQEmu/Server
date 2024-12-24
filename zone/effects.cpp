@@ -39,7 +39,24 @@ float Mob::GetActSpellRange(uint16 spell_id, float range)
 	return (range * extrange) / 100;
 }
 
-int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int percent_modifier) {
+int Mob::GetOwnerSpellDamage() {
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		LogDebug("Unable to find Owner, using my own spell damage.");
+		return itembonuses.SpellDmg;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		int ret_val = itembonuses.SpellDmg + (GetOwner()->CastToClient()->GetSpellDmg() / pet_count);
+		LogDebug("Using owner spell damage [{}]", ret_val);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	if (spells[spell_id].target_type == ST_Self) {
 		return value;
 	}
@@ -159,11 +176,11 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 				value -= GetSkillDmgAmt(spells[spell_id].skill) * ratio / 100;
 			}
 
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value) * ratio / 100;
+			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && GetOwnerSpellDamage()) {
+				value -= GetExtraSpellAmt(spell_id, GetOwnerSpellDamage(), base_value) * ratio / 100;
 
-			} else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value) * ratio / 100;
+			} else if (!spells[spell_id].no_heal_damage_item_mod && GetOwnerSpellDamage() && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+				value -= GetExtraSpellAmt(spell_id, GetOwnerSpellDamage(), base_value) * ratio / 100;
 			}
 
 			// legacy manaburn can crit, but is still held to the same cap
@@ -213,8 +230,8 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 		value -= GetSkillDmgAmt(spells[spell_id].skill);
 	}
 
-	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && GetOwnerSpellDamage())
+		value -= GetExtraSpellAmt(spell_id, GetOwnerSpellDamage(), base_value);
 
 	else if (
 		!spells[spell_id].no_heal_damage_item_mod &&
@@ -229,12 +246,6 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 		if (value < -legacy_manaburn_cap) {
 			value = -legacy_manaburn_cap;
 		}
-	}
-
-	if (percent_modifier > 0) {
-		int addedValue = value - base_value;
-		addedValue = (addedValue * percent_modifier) / 100;
-		value = base_value + addedValue;
 	}
 
 	return value;
@@ -322,16 +333,16 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 			if (
 				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
 				!spells[spell_id].no_heal_damage_item_mod &&
-				GetSpellDmg()
+				GetOwnerSpellDamage()
 			) {
-				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value)*ratio/100;
+				extra_dmg += GetExtraSpellAmt(spell_id, GetOwnerSpellDamage(), base_value)*ratio/100;
 			}
 			else if (
 				!spells[spell_id].no_heal_damage_item_mod &&
-				GetSpellDmg() &&
+				GetOwnerSpellDamage() &&
 				GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
 			) {
-				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value)*ratio/100;
+				extra_dmg += GetExtraSpellAmt(spell_id, GetOwnerSpellDamage(), base_value)*ratio/100;
 			}
 		}
 
@@ -367,15 +378,15 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
 			if (
 				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
-				!spells[spell_id].no_heal_damage_item_mod && GetSpellDmg()
+				!spells[spell_id].no_heal_damage_item_mod && GetOwnerSpellDamage()
 			) {
-				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
+				extra_dmg += GetExtraSpellAmt(spell_id, GetOwnerSpellDamage(), base_value);
 			}
 			else if (
-				!spells[spell_id].no_heal_damage_item_mod && GetSpellDmg() &&
+				!spells[spell_id].no_heal_damage_item_mod && GetOwnerSpellDamage() &&
 				GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
 			) {
-				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
+				extra_dmg += GetExtraSpellAmt(spell_id, GetOwnerSpellDamage(), base_value);
 			}
 		}
 
