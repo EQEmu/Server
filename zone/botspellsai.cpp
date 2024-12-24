@@ -2025,7 +2025,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob* tar, uint16 spellType)
 						}
 					}
 
-					if (botCaster->IsCommandedSpell() || botCaster->GetNeedsCured(m)) {
+					if (botCaster->GetNeedsCured(m)) {
 						if (botCaster->CastChecks(itr->SpellId, m, spellType, true, IsGroupBotSpellType(spellType))) {
 							if (m->FindType(SE_PoisonCounter)) {
 								++countPoisoned;
