@@ -3269,6 +3269,32 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_OnLevelMessage)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		OnLevelMessage_Struct* emu = (OnLevelMessage_Struct*)in->pBuffer;
+		SerializeBuffer buffer;
+
+		buffer.WriteLengthString(emu->Title);
+		buffer.WriteLengthString(emu->Text);
+		buffer.WriteLengthString(emu->ButtonName0);
+		buffer.WriteLengthString(emu->ButtonName1);
+		buffer.WriteUInt8(emu->Buttons);
+		buffer.WriteUInt8(emu->SoundControls);
+		buffer.WriteUInt32(emu->Duration);
+		buffer.WriteUInt32(emu->PopupID);
+		buffer.WriteUInt32(emu->NegativeID);
+		buffer.WriteUInt32(0); //seen -1 & 0
+		buffer.WriteUInt32(0); //seen 0
+
+		auto outapp = new EQApplicationPacket(OP_OnLevelMessage, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
+
+		delete in;
+	}
+
 	// DECODE methods
 
 	DECODE(OP_EnterWorld)
