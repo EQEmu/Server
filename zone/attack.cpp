@@ -7073,6 +7073,61 @@ void NPC::SetAttackTimer()
 			}
 		}
 
+		if (GetOwner() && GetOwner()->IsClient()) {
+			const EQ::ItemData *ItemToUse = nullptr;
+
+			//find our item
+			EQ::ItemInstance *ci = GetInv().GetItem(i);
+			if (ci)
+				ItemToUse = ci->GetItem();
+
+			//special offhand stuff
+			if (i == EQ::invslot::slotSecondary) {
+				//if we cant dual wield, skip it
+				if (!CanThisClassDualWield() || HasTwoHanderEquipped()) {
+					attack_dw_timer.Disable();
+					continue;
+				}
+			}
+
+			//see if we have a valid weapon
+			if (ItemToUse != nullptr) {
+				//check type and damage/delay
+				if (!ItemToUse->IsClassCommon()
+					|| ItemToUse->Damage == 0
+					|| ItemToUse->Delay == 0) {
+					//no weapon
+					ItemToUse = nullptr;
+				}
+				// Check to see if skill is valid
+				else if ((ItemToUse->ItemType > EQ::item::ItemTypeLargeThrowing) &&
+					(ItemToUse->ItemType != EQ::item::ItemTypeMartial) &&
+					(ItemToUse->ItemType != EQ::item::ItemType2HPiercing)) {
+					//no weapon
+					ItemToUse = nullptr;
+				}
+			}
+
+			int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
+			int speed = 0;
+			int delay = 3500;
+
+			//if we have no weapon..
+			if (ItemToUse == nullptr)
+				delay = 100 * GetHandToHandDelay();
+			else
+				//we have a weapon, use its delay
+				delay = 100 * ItemToUse->Delay;
+
+			speed = delay / haste_mod;
+
+			if (RuleB(Spells, Jun182014HundredHandsRevamp))
+				speed = static_cast<int>(speed + ((hhe / 1000.0f) * speed));
+			else
+				speed = static_cast<int>(speed + ((hhe / 100.0f) * delay));
+
+		}
+
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
 	}
 }
