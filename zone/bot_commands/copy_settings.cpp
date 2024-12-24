@@ -55,7 +55,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 
 		std::vector<std::string> options =
 		{
-			"all, misc, spellsettings, spelltypesettings, spellholds, spelldelays, spellminthresholds, spellmaxthresholds, spellminmanapct, spellmaxmanapct, spellminhppct, spellmaxhppct, spellidlepriority, spellengagedpriority, spellpursuepriority, spellaggrochecks, spelltargetcounts, showhelm, followd, stopmeleelevel, enforcespellsettings, bottoggleranged, petsettype, behindmob, distanceranged, illusionblock, sitincombat, sithppercent, sitmanapercent, blockedbuffs, blockedpetbuffs"
+			"[all], [misc], [spellsettings], [spelltypesettings], [spellholds], [spelldelays], [spellminthresholds], [spellmaxthresholds], [spellminmanapct], [spellmaxmanapct], [spellminhppct], [spellmaxhppct], [spellidlepriority], [spellengagedpriority], [spellpursuepriority], [spellaggrochecks], [spelltargetcounts], [sithppercent], [sitmanapercent], [blockedbuffs], [blockedpetbuffs]"
 		};
 		std::vector<std::string> options_one =
 		{
@@ -108,6 +108,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 	int ab_arg = 2;
 	bool validOption = false;
 	uint16 spellType = UINT16_MAX;
+	uint16 settingType = UINT16_MAX;
 	std::vector<std::string> options =
 	{
 		"all",
@@ -127,49 +128,24 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 		"spellpursuepriority",
 		"spellaggrochecks",
 		"spelltargetcounts",
-		"showhelm",
-		"followd",
-		"stopmeleelevel",
-		"enforcespellsettings",
-		"bottoggleranged",
-		"petsettype",
-		"behindmob",
-		"distanceranged",
-		"illusionblock",
-		"sitincombat",
-		"sithppercent",
-		"sitmanapercent",
 		"blockedbuffs",
 		"blockedpetbuffs"
 	};
 
+	if (sep->IsNumber(4)) {
+		spellType = atoi(sep->arg[4]);
+	}
+	else {
+		spellType = c->GetSpellTypeIDByShortName(sep->arg[4]);
+	}
+
+	if (spellType < BotSpellTypes::START || spellType > BotSpellTypes::END) {
+		spellType = UINT16_MAX;
+	}
+
 	for (int i = 0; i < options.size(); i++) {
 		if (sep->arg[3] == options[i]) {
-			if (options[i] != "all" && options[i] != "misc" && options[i] != "spellsettings") {
-
-				if (sep->IsNumber(4) || c->GetSpellTypeIDByShortName(sep->arg[4]) != UINT16_MAX) {
-					if (sep->IsNumber(4)) {
-						spellType = atoi(sep->arg[4]);
-					}
-
-					if (c->GetSpellTypeIDByShortName(sep->arg[4]) != UINT16_MAX) {
-						spellType = c->GetSpellTypeIDByShortName(sep->arg[4]);
-					}
-
-					if (spellType < BotSpellTypes::START || spellType > BotSpellTypes::END) {
-						c->Message(Chat::Yellow, "You must choose a valid spell type. Spell types range from %i to %i", BotSpellTypes::START, BotSpellTypes::END);
-
-						return;
-					}
-				}
-			}
-			else if (
-				(options[i] == "all" || options[i] == "misc" || options[i] == "spellsettings") &&
-				((sep->IsNumber(2) || c->GetSpellTypeIDByShortName(sep->arg[4]) != UINT16_MAX))
-			) {
-				break;
-			}
-
+			settingType = c->GetBotSpellCategoryIDByShortName(sep->arg[3]);
 			validOption = true;
 			break;
 		}
@@ -243,112 +219,126 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 
 	std::string output = "";
 
-	if (!strcasecmp(sep->arg[3], "misc")) {
-		from->CopySettings(to, BotSettingCategories::BaseSetting);
-		output = "Miscellaneous";
-	}
-	else if (!strcasecmp(sep->arg[3], "holds")) {
-		from->CopySettings(to, BotSettingCategories::SpellHold, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellHold);
-	}
-	else if (!strcasecmp(sep->arg[3], "delays")) {
-		from->CopySettings(to, BotSettingCategories::SpellDelay, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellDelay);
-	}
-	else if (!strcasecmp(sep->arg[3], "minthresholds")) {
-		from->CopySettings(to, BotSettingCategories::SpellMinThreshold, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellMinThreshold);
-	}
-	else if (!strcasecmp(sep->arg[3], "maxthresholds")) {
-		from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellMaxThreshold);
-	}
-	else if (!strcasecmp(sep->arg[3], "aggrochecks")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypeAggroCheck);
-	}
-	else if (!strcasecmp(sep->arg[3], "minmanapct")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypeMinManaPct);
-	}
-	else if (!strcasecmp(sep->arg[3], "maxmanapct")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypeMaxManaPct);
-	}
-	else if (!strcasecmp(sep->arg[3], "minhppct")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypeMinHPPct);
-	}
-	else if (!strcasecmp(sep->arg[3], "maxhppct")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypeMaxHPPct);
-	}
-	else if (!strcasecmp(sep->arg[3], "idlepriority")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypeIdlePriority);
-	}
-	else if (!strcasecmp(sep->arg[3], "engagedpriority")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypeEngagedPriority);
-	}
-	else if (!strcasecmp(sep->arg[3], "pursuepriority")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypePursuePriority);
-	}
-	else if (!strcasecmp(sep->arg[3], "targetcounts")) {
-		from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, spellType);
-		output = from->GetBotSpellCategoryName(BotSettingCategories::SpellTypeAEOrGroupTargetCount);
-	}
-	else if (!strcasecmp(sep->arg[3], "spellsettings")) {		
-		from->CopyBotSpellSettings(to);
-		output = "^spellsettings";
-	}
-	else if (!strcasecmp(sep->arg[3], "spelltypesettings")) {		
-		from->CopySettings(to, BotSettingCategories::SpellHold, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellDelay, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellMinThreshold, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, spellType);
-		output = "spell type";
-	}
-	else if (!strcasecmp(sep->arg[3], "all")) {
-		from->CopySettings(to, BotSettingCategories::BaseSetting);
-		from->CopySettings(to, BotSettingCategories::SpellHold, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellDelay, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellMinThreshold, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spellType);
-		from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, spellType);
-		from->CopyBotSpellSettings(to);
+	if (settingType != UINT16_MAX) {
+		if (spellType != UINT16_MAX) {
+			from->CopySettings(to, settingType, spellType);
+		}
+		else {
+			for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
+				from->CopySettings(to, settingType, i);
+			}
+		}
+
+		output = from->GetBotSpellCategoryName(settingType);
 	}
 	else {
-		c->Message(
-			Chat::Yellow,
-			fmt::format(
-				"Incorrect argument, use {} for information regarding this command.",
-				Saylink::Silent(
-					fmt::format("{} help", sep->arg[0])
-				)
-			).c_str()
-		);
+		if (!strcasecmp(sep->arg[3], "misc")) {
+			from->CopySettings(to, BotSettingCategories::BaseSetting);
+			output = "Miscellaneous";
+		}
+		else if (!strcasecmp(sep->arg[3], "spellsettings")) {
+			from->CopyBotSpellSettings(to);
+			output = "^spellsettings";
+		}
+		else if (!strcasecmp(sep->arg[3], "spelltypesettings")) {
+			if (spellType != UINT16_MAX) {
+				from->CopySettings(to, BotSettingCategories::SpellHold, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellDelay, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellMinThreshold, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, spellType);
+			}
+			else {
+				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
+					from->CopySettings(to, BotSettingCategories::SpellHold, i);
+					from->CopySettings(to, BotSettingCategories::SpellDelay, i);
+					from->CopySettings(to, BotSettingCategories::SpellMinThreshold, i);
+					from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, i);
+				}
+			}
 
-		return;
+			output = "spell type";
+		}
+		else if (!strcasecmp(sep->arg[3], "blockedbuffs")) {
+			from->CopyBotBlockedBuffs(to);
+		}
+		else if (!strcasecmp(sep->arg[3], "blockedpetbuffs")) {
+			from->CopyBotBlockedPetBuffs(to);
+		}
+		else if (!strcasecmp(sep->arg[3], "all")) {
+			from->CopySettings(to, BotSettingCategories::BaseSetting);
+
+			if (spellType != UINT16_MAX) {
+				from->CopySettings(to, BotSettingCategories::SpellHold, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellDelay, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellMinThreshold, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spellType);
+				from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, spellType);
+			}
+			else {
+				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
+					from->CopySettings(to, BotSettingCategories::SpellHold, i);
+					from->CopySettings(to, BotSettingCategories::SpellDelay, i);
+					from->CopySettings(to, BotSettingCategories::SpellMinThreshold, i);
+					from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, i);
+				}
+			}
+
+			from->CopyBotSpellSettings(to);
+			from->CopyBotBlockedBuffs(to);
+			from->CopyBotBlockedPetBuffs(to);
+			output = "spell type";
+		}
+		else {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Incorrect argument, use {} for information regarding this command.",
+					Saylink::Silent(
+						fmt::format("{} help", sep->arg[0])
+					)
+				).c_str()
+			);
+
+			return;
+		}
 	}
+
+	to->Save();
 
 	c->Message(
 		Chat::Green,
