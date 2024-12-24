@@ -1637,10 +1637,10 @@ bool Bot::Process()
 		entity_list.ScanCloseMobs(this);
 	}
 
-	if (m_mob_check_moving_timer.Check()) { //TODO bot rewrite - is this necessary
-		CheckScanCloseMobsMovingTimer();
-	}
-
+	//if (m_mob_check_moving_timer.Check()) { //TODO bot rewrite - is this necessary
+	//	CheckScanCloseMobsMovingTimer();
+	//}
+	//
 	SpellProcess();
 
 	if (tic_timer.Check()) {
@@ -2065,19 +2065,20 @@ void Bot::AI_Process()
 	}
 
 	auto raid = entity_list.GetRaidByBot(this);
+	SetStoredRaid(raid);
 	uint32 r_group = RAID_GROUPLESS;
 
 	if (raid) {
-		raid->VerifyRaid();
+		//raid->VerifyRaid();
 		r_group = raid->GetGroup(GetName());
-
-		if (mana_timer.Check(false)) {
-			raid->SendHPManaEndPacketsFrom(this);
-		}
-
-		if (send_hp_update_timer.Check(false)) {
-			raid->SendHPManaEndPacketsFrom(this);
-		}
+	
+		//if (mana_timer.Check(false)) {
+		//	raid->SendHPManaEndPacketsFrom(this);
+		//}
+		//
+		//if (send_hp_update_timer.Check(false)) {
+		//	raid->SendHPManaEndPacketsFrom(this);
+		//}
 	}
 
 	auto bot_group = GetGroup();
@@ -2132,7 +2133,6 @@ void Bot::AI_Process()
 		return;
 	}
 
-	SetStoredRaid(raid);
 	std::vector<Mob*> spellTargetList = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
 	SetSpellTargetList(spellTargetList);
 	std::vector<Mob*> groupSpellTargetList = GatherSpellTargets();
