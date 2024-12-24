@@ -9966,7 +9966,7 @@ bool Mob::IsInGroupOrRaid(Mob *other, bool sameRaidGroup) {
 	Raid* raid = nullptr;
 
 	if (IsBot()) {
-		CastToBot()->GetStoredRaid();
+		raid = CastToBot()->GetStoredRaid();
 	}
 	else {
 		if (IsRaidGrouped()) {
