@@ -51,7 +51,7 @@ void bot_command_camp(Client *c, const Seperator *sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, !class_race_check ? sep->arg[2] : nullptr, class_race_check ? atoi(sep->arg[2]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -611,13 +611,13 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
 	int botCount = 0;
 	for (auto bot_iter : sbl) {
@@ -704,7 +704,7 @@ void bot_command_inspect_message(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	auto ab_type = ActionableBots::PopulateSBL(c, sep->arg[2], sbl, ab_mask, sep->arg[3]);
 	if (ab_type == ActionableBots::ABT_None)
 		return;
@@ -947,7 +947,7 @@ void bot_command_report(Client *c, const Seperator *sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -1377,7 +1377,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -1519,13 +1519,13 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
 	Bot* first_found = nullptr;
 	int success_count = 0;
@@ -1614,12 +1614,12 @@ void bot_command_summon(Client *c, const Seperator *sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
 	for (auto bot_iter : sbl) {
 		if (!bot_iter) {
@@ -1695,7 +1695,7 @@ void bot_command_toggle_ranged(Client *c, const Seperator *sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
@@ -1747,7 +1747,7 @@ void bot_command_toggle_helm(Client *c, const Seperator *sep)
 		++ab_arg;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	auto ab_type = ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[(ab_arg + 1)]);
 	if (ab_type == ActionableBots::ABT_None)
 		return;
@@ -1844,7 +1844,7 @@ void bot_command_update(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 	if (sbl.empty()) {
 		c->Message(Chat::White, "You currently have no spawned bots");

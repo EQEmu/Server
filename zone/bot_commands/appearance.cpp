@@ -214,7 +214,7 @@ void bot_command_dye_armor(Client *c, const Seperator *sep)
 
 	uint32 rgb_value = ((uint32)red_value << 16) | ((uint32)green_value << 8) | ((uint32)blue_value);
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	auto ab_type = ActionableBots::PopulateSBL(c, sep->arg[5], sbl, ab_mask);
 	if (ab_type == ActionableBots::ABT_None) {
 		return;

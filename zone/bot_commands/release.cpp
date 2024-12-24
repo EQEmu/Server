@@ -10,11 +10,11 @@ void bot_command_release(Client *c, const Seperator *sep)
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
 		return;
 
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 	for (auto bot_iter : sbl) {
 		bot_iter->WipeHateList();
 		bot_iter->SetPauseAI(false);

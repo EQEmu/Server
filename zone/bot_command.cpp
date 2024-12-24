@@ -1814,7 +1814,7 @@ int helper_bot_follow_option_chain(Client* bot_owner)
 		return 0;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(bot_owner, sbl);
 	if (sbl.empty()) {
 		return 0;

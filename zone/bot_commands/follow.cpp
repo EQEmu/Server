@@ -117,12 +117,12 @@ void bot_command_follow(Client* c, const Seperator* sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
 	auto botCount = sbl.size();
 	Mob* follow_mob = nullptr;

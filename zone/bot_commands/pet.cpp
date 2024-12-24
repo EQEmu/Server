@@ -25,7 +25,7 @@ void bot_command_pet_get_lost(Client *c, const Seperator *sep)
 	}
 	int ab_mask = ActionableBots::ABM_NoFilter;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
 		return;
 
@@ -56,7 +56,7 @@ void bot_command_pet_remove(Client *c, const Seperator *sep)
 	}
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
 		return;
 
@@ -66,7 +66,7 @@ void bot_command_pet_remove(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You have no spawned bots capable of charming");
 		return;
 	}
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
 	int charmed_pet = 0;
 	int summoned_pet = 0;
@@ -241,13 +241,13 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 
 	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
 	std::string currentType;
 	uint16 reclaim_energy_id = RuleI(Bots, ReclaimEnergySpellID);

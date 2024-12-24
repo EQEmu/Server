@@ -466,13 +466,13 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 
 	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
 	BotSpell botSpell;
 	botSpell.SpellId = 0;

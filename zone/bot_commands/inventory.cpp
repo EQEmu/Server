@@ -34,7 +34,7 @@ void bot_command_inventory_give(Client* c, const Seperator* sep)
 
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -67,7 +67,7 @@ void bot_command_inventory_list(Client* c, const Seperator* sep)
 
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -168,7 +168,7 @@ void bot_command_inventory_remove(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[2], sbl, ab_mask, sep->arg[3]) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -311,7 +311,7 @@ void bot_command_inventory_window(Client* c, const Seperator* sep)
 
 	int ab_mask = ActionableBots::ABM_Target;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
 		return;
 	}

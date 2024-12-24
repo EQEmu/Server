@@ -1900,13 +1900,13 @@ Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* ex
 
 	for (const auto& b : bot_list) {
 		if (
-			b != exclude_bot &&
+			b.second != exclude_bot &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(b->GetPosition()), location) <= distance_squared
-			)
+				DistanceSquared(static_cast<glm::vec3>(b.second->GetPosition()), location) <= distance_squared
+				)
 		) {
-			bots_in_range.push_back(b);
+			bots_in_range.push_back(b.second);
 		}
 	}
 
@@ -5121,9 +5121,10 @@ void EntityList::GetClientList(std::list<Client *> &c_list)
 void EntityList::GetBotList(std::list<Bot *> &b_list)
 {
 	b_list.clear();
-
-	for (const auto& b : bot_list) {
-		b_list.push_back(b);
+	auto it = bot_list.begin();
+	while (it != bot_list.end()) {
+		b_list.push_back(it->second);
+		++it;
 	}
 }
 
@@ -5135,14 +5136,13 @@ std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id, uint
 		return client_bot_list;
 	}
 
-	for (const auto& b : bot_list) {
-		if (
-			b->GetOwner() &&
-			b->GetBotOwnerCharacterID() == character_id &&
-			(!class_id || b->GetClass() == class_id)
-		) {
-			client_bot_list.push_back(b);
+	auto it = bot_list.begin();
+
+	while (it != bot_list.end()) {
+		if (it->second->GetOwner() && it->second->GetBotOwnerCharacterID() == character_id && (!class_id || it->second->GetClass() == class_id)) {
+			client_bot_list.push_back(it->second);
 		}
+		++it;
 	}
 
 	return client_bot_list;
@@ -5156,14 +5156,13 @@ std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name, u
 		return client_bot_list;
 	}
 
-	for (const auto& b : bot_list) {
-		if (
-			b->GetOwner() &&
-			Strings::ToLower(b->GetOwner()->GetCleanName()) == Strings::ToLower(client_name) &&
-			(!class_id || b->GetClass() == class_id)
-		) {
-			client_bot_list.push_back(b);
+	auto it = bot_list.begin();
+
+	while (it != bot_list.end()) {
+		if (it->second->GetOwner() && Strings::ToLower(it->second->GetOwner()->GetCleanName()) == Strings::ToLower(client_name) && (!class_id || it->second->GetClass() == class_id)) {
+			client_bot_list.push_back(it->second);
 		}
+		++it;
 	}
 
 	return client_bot_list;

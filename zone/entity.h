@@ -547,7 +547,7 @@ public:
 	inline const std::unordered_map<uint16, NPC *> &GetNPCList() { return npc_list; }
 	inline const std::unordered_map<uint16, Merc *> &GetMercList() { return merc_list; }
 	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
-	inline const std::list<Bot *> &GetBotList() { return bot_list; }
+	inline const std::unordered_map<uint16, Bot*> &GetBotList() { return bot_list; }
 	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id, uint8 class_id = Class::None);
 	std::vector<Bot *> GetBotListByClientName(std::string client_name, uint8 class_id = Class::None);
 	void SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id);
@@ -623,10 +623,10 @@ private:
 		bool RemoveBot(uint16 entityID);
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);
-		Bot* GetBotByBotName(std::string_view botName);
+		Bot* GetBotByBotName(std::string botName);
 		Client* GetBotOwnerByBotEntityID(uint32 entity_id);
 		Client* GetBotOwnerByBotID(const uint32 bot_id);
-		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
+		std::vector<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
 
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
 
@@ -634,7 +634,7 @@ private:
 
 		void GetBotList(std::list<Bot*> &b_list);
 	private:
-		std::list<Bot*> bot_list;
+		std::unordered_map<uint16, Bot*> bot_list;
 };
 
 class BulkZoneSpawnPacket {

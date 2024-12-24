@@ -272,13 +272,13 @@ namespace MyBots
 		return (grouped_player->GetGroup() == grouped_bot->GetGroup());
 	}
 
-	static void UniquifySBL(std::list<Bot*> &sbl) {
-		sbl.remove(nullptr);
-		sbl.sort();
-		sbl.unique();
+	static void UniquifySBL(std::vector<Bot*> &sbl) {
+		sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
+		std::sort(sbl.begin(), sbl.end());
+		sbl.erase(std::unique(sbl.begin(), sbl.end()), sbl.end());
 	}
 
-	static void PopulateSBL_ByTargetedBot(Client *bot_owner, std::list<Bot*> &sbl, bool clear_list = true) {
+	static void PopulateSBL_ByTargetedBot(Client *bot_owner, std::vector<Bot*> &sbl, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -292,7 +292,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_ByNamedBot(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
+	static void PopulateSBL_ByNamedBot(Client *bot_owner, std::vector<Bot*> &sbl, const char* name, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -314,7 +314,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_ByMyGroupedBots(Client *bot_owner, std::list<Bot*> &sbl, bool clear_list = true) {
+	static void PopulateSBL_ByMyGroupedBots(Client *bot_owner, std::vector<Bot*> &sbl, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -363,7 +363,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_ByMyRaidBots(Client* bot_owner, std::list<Bot*>& sbl, bool clear_list = true) {
+	static void PopulateSBL_ByMyRaidBots(Client* bot_owner, std::vector<Bot*>& sbl, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -396,7 +396,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_ByTargetsGroupedBots(Client *bot_owner, std::list<Bot*> &sbl, bool clear_list = true) {
+	static void PopulateSBL_ByTargetsGroupedBots(Client *bot_owner, std::vector<Bot*> &sbl, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -448,7 +448,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_ByNamesGroupedBots(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
+	static void PopulateSBL_ByNamesGroupedBots(Client *bot_owner, std::vector<Bot*> &sbl, const char* name, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -507,7 +507,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_ByHealRotation(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
+	static void PopulateSBL_ByHealRotation(Client *bot_owner, std::vector<Bot*> &sbl, const char* name, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -516,7 +516,7 @@ namespace MyBots
 			return;
 		}
 
-		std::list<Bot*> selectable_bot_list;
+		std::vector<Bot*> selectable_bot_list;
 		if (name) {
 			PopulateSBL_ByNamedBot(bot_owner, selectable_bot_list, name);
 		}
@@ -545,7 +545,7 @@ namespace MyBots
 		UniquifySBL(sbl);
 	}
 
-	static void PopulateSBL_ByHealRotationMembers(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
+	static void PopulateSBL_ByHealRotationMembers(Client *bot_owner, std::vector<Bot*> &sbl, const char* name, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -554,7 +554,7 @@ namespace MyBots
 			return;
 		}
 
-		std::list<Bot*> selectable_bot_list;
+		std::vector<Bot*> selectable_bot_list;
 		if (name) {
 			PopulateSBL_ByNamedBot(bot_owner, selectable_bot_list, name);
 		}
@@ -578,7 +578,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_ByHealRotationTargets(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
+	static void PopulateSBL_ByHealRotationTargets(Client *bot_owner, std::vector<Bot*> &sbl, const char* name, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -587,7 +587,7 @@ namespace MyBots
 			return;
 		}
 
-		std::list<Bot*> selectable_bot_list;
+		std::vector<Bot*> selectable_bot_list;
 		if (name) {
 			PopulateSBL_ByNamedBot(bot_owner, selectable_bot_list, name);
 		}
@@ -611,17 +611,17 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_BySpawnedBots(Client *bot_owner, std::list<Bot*> &sbl) { // should be used for most spell casting commands
+	static void PopulateSBL_BySpawnedBots(Client *bot_owner, std::vector<Bot*> &sbl) { // should be used for most spell casting commands
 		sbl.clear();
 		if (!bot_owner) {
 			return;
 		}
 
 		sbl = entity_list.GetBotsByBotOwnerCharacterID(bot_owner->CharacterID());
-		sbl.remove(nullptr);
+		sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 	}
 
-	static void PopulateSBL_BySpawnedBotsClass(Client * bot_owner, std::list<Bot*> &sbl, uint16 cls, bool clear_list = true) {
+	static void PopulateSBL_BySpawnedBotsClass(Client * bot_owner, std::vector<Bot*> &sbl, uint16 cls, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -644,7 +644,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_BySpawnedBotsRace(Client* bot_owner, std::list<Bot*>& sbl, uint16 race, bool clear_list = true) {
+	static void PopulateSBL_BySpawnedBotsRace(Client* bot_owner, std::vector<Bot*>& sbl, uint16 race, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -667,7 +667,7 @@ namespace MyBots
 		}
 	}
 
-	static void PopulateSBL_ByAtMMR(Client* bot_owner, std::list<Bot*>& sbl, bool clear_list = true) {
+	static void PopulateSBL_ByAtMMR(Client* bot_owner, std::vector<Bot*>& sbl, bool clear_list = true) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -927,7 +927,7 @@ namespace ActionableBots
 	};
 
 	// Populates 'sbl'
-	static ABType PopulateSBL(Client* bot_owner, std::string ab_type_arg, std::list<Bot*> &sbl, int ab_mask, const char* name = nullptr, uint16 classrace = 0, bool clear_list = true, bool suppress_message = false) {
+	static ABType PopulateSBL(Client* bot_owner, std::string ab_type_arg, std::vector<Bot*> &sbl, int ab_mask, const char* name = nullptr, uint16 classrace = 0, bool clear_list = true, bool suppress_message = false) {
 		if (clear_list) {
 			sbl.clear();
 		}
@@ -1164,7 +1164,7 @@ namespace ActionableBots
 		return nullptr;
 	}
 
-	static Bot* AsSpawned_ByClass(Client *bot_owner, std::list<Bot*> &sbl, uint8 cls, bool petless = false) {
+	static Bot* AsSpawned_ByClass(Client *bot_owner, std::vector<Bot*> &sbl, uint8 cls, bool petless = false) {
 		if (!bot_owner) {
 			return nullptr;
 		}
@@ -1188,7 +1188,7 @@ namespace ActionableBots
 		return nullptr;
 	}
 
-	static Bot* AsSpawned_ByMinLevelAndClass(Client *bot_owner, std::list<Bot*> &sbl, uint8 minlvl, uint8 cls, bool petless = false) {
+	static Bot* AsSpawned_ByMinLevelAndClass(Client *bot_owner, std::vector<Bot*> &sbl, uint8 minlvl, uint8 cls, bool petless = false) {
 		// This function can be nixed if we can enforce bot level as owner level..and the level check can then be moved to the spell loop in the command function
 		if (!bot_owner)
 			return nullptr;
@@ -1218,7 +1218,7 @@ namespace ActionableBots
 		if (!bot_owner || bot_name.empty())
 			return nullptr;
 
-		std::list<Bot*> selectable_bot_list;
+		std::vector<Bot*> selectable_bot_list;
 		MyBots::PopulateSBL_BySpawnedBots(bot_owner, selectable_bot_list);
 		for (auto bot_iter : selectable_bot_list) {
 			if (!bot_name.compare(bot_iter->GetCleanName()))
@@ -1228,7 +1228,7 @@ namespace ActionableBots
 		return nullptr;
 	}
 
-	static Bot* Select_ByClass(Client* bot_owner, BCEnum::TType target_type, std::list<Bot*>& sbl, uint8 cls, Mob* target_mob = nullptr, bool petless = false) {
+	static Bot* Select_ByClass(Client* bot_owner, BCEnum::TType target_type, std::vector<Bot*>& sbl, uint8 cls, Mob* target_mob = nullptr, bool petless = false) {
 		if (!bot_owner || sbl.empty())
 			return nullptr;
 
@@ -1252,7 +1252,7 @@ namespace ActionableBots
 		return nullptr;
 	}
 
-	static Bot* Select_ByMinLevelAndClass(Client* bot_owner, BCEnum::TType target_type, std::list<Bot*>& sbl, uint8 minlvl, uint8 cls, Mob* target_mob = nullptr, bool petless = false) {
+	static Bot* Select_ByMinLevelAndClass(Client* bot_owner, BCEnum::TType target_type, std::vector<Bot*>& sbl, uint8 minlvl, uint8 cls, Mob* target_mob = nullptr, bool petless = false) {
 		if (!bot_owner || sbl.empty())
 			return nullptr;
 
@@ -1277,23 +1277,23 @@ namespace ActionableBots
 	}
 
 	// Filters actual 'sbl' list
-	static void Filter_ByClasses(Client* bot_owner, std::list<Bot*>& sbl, uint16 class_mask) {
-		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
-		sbl.remove_if([class_mask](const Bot* l) { return (GetPlayerClassBit(l->GetClass()) & (~class_mask)); });
+	static void Filter_ByClasses(Client* bot_owner, std::vector<Bot*>& sbl, uint16 class_mask) {
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
+		std::erase_if(sbl, [class_mask](Bot* l) { return (GetPlayerClassBit(l->GetClass()) & (~class_mask)); });
 	}
 
-	static void Filter_ByMinLevel(Client* bot_owner, std::list<Bot*>& sbl, uint8 min_level) {
-		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
-		sbl.remove_if([min_level](const Bot* l) { return (l->GetLevel() < min_level); });
+	static void Filter_ByMinLevel(Client* bot_owner, std::vector<Bot*>& sbl, uint8 min_level) {
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
+		std::erase_if(sbl, [min_level](Bot* l) { return (l->GetLevel() < min_level); });
 	}
 
-	static void Filter_ByRanged(Client* bot_owner, std::list<Bot*>& sbl) {
-		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
-		sbl.remove_if([bot_owner](Bot* l) { return (!l->IsBotRanged()); });
+	static void Filter_ByRanged(Client* bot_owner, std::vector<Bot*>& sbl) {
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (l->IsBotRanged()); });
 	}
 
-	static void Filter_ByHighestSkill(Client* bot_owner, std::list<Bot*>& sbl, EQ::skills::SkillType skill_type, float& skill_value) {
-		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
+	static void Filter_ByHighestSkill(Client* bot_owner, std::vector<Bot*>& sbl, EQ::skills::SkillType skill_type, float& skill_value) {
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
 		skill_value = 0.0f;
 
 		float mod_skill_value = 0.0f;
@@ -1319,15 +1319,14 @@ namespace ActionableBots
 				skilled_bot = bot_iter;
 			}
 		}
-
-		sbl.remove_if([skilled_bot](const Bot* l) { return (l != skilled_bot); });
+		std::erase_if(sbl, [skilled_bot](Bot* l) { return (l != skilled_bot); });
 	}
 
-	static void Filter_ByHighestPickLock(Client* bot_owner, std::list<Bot*>& sbl, float& pick_lock_value) {
-		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
-		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() != Class::Rogue && l->GetClass() != Class::Bard); });
-		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == Class::Rogue && l->GetLevel() < 5); });
-		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == Class::Bard && l->GetLevel() < 40); });
+	static void Filter_ByHighestPickLock(Client* bot_owner, std::vector<Bot*>& sbl, float& pick_lock_value) {
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (l->GetClass() != Class::Rogue && l->GetClass() != Class::Bard); });
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (l->GetClass() == Class::Rogue && l->GetLevel() < 5); });
+		std::erase_if(sbl, [bot_owner](Bot* l) { return (l->GetClass() == Class::Bard && l->GetLevel() < 40); });
 
 		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, EQ::skills::SkillPickLock, pick_lock_value);
 	}

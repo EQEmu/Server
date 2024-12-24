@@ -34,7 +34,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 
 	if (ActionableBots::PopulateSBL(c, ab_arg.c_str(), sbl, ab_mask, !class_race_check ? sep->arg[2] : nullptr, class_race_check ? atoi(sep->arg[2]) : 0) == ActionableBots::ABT_None) {
 		return;
@@ -47,7 +47,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 
 	size_t attacker_count = 0;
 	Bot *first_attacker = nullptr;
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 	for (auto bot_iter : sbl) {
 
 		if (bot_iter->GetAppearance() != eaDead && bot_iter->GetBotStance() != Stance::Passive) {

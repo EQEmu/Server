@@ -5529,9 +5529,9 @@ void Bot::BotOrderCampAll(Client* c, uint8 class_id) {
 
 void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 	if (botOwner && botOwner->IsClient()) {
-		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CastToClient()->CharacterID());
+		std::vector<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CastToClient()->CharacterID());
 		if (!BotList.empty()) {
-			for (std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
+			for (std::vector<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
 				Bot* tempBot = *botListItr;
 				if (tempBot) {
 					tempBot->SetTarget(nullptr);
@@ -6966,7 +6966,7 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName) {
 	Bot* Result = nullptr;
 	if (c) {
-		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
+		std::vector<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
 		if (!BotList.empty()) {
 			for (auto botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
 				if (std::string((*botListItr)->GetCleanName()) == botName) {
@@ -7056,9 +7056,9 @@ void Bot::RemoveBotFromRaid(Bot* bot) {
 // Handles all client zone change event
 void Bot::ProcessClientZoneChange(Client* botOwner) {
 	if (botOwner) {
-		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CharacterID());
+		std::vector<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CharacterID());
 
-		for (std::list<Bot*>::iterator itr = BotList.begin(); itr != BotList.end(); ++itr) {
+		for (std::vector<Bot*>::iterator itr = BotList.begin(); itr != BotList.end(); ++itr) {
 			Bot* tempBot = *itr;
 
 			if (tempBot) {
@@ -7285,65 +7285,54 @@ Mob* EntityList::GetMobByBotID(uint32 botID) {
 }
 
 Bot* EntityList::GetBotByBotID(uint32 botID) {
-	Bot* Result = nullptr;
-	if (botID > 0) {
-		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if (tempBot && tempBot->GetBotID() == botID) {
-				Result = tempBot;
-				break;
-			}
-		}
+	auto it = bot_list.begin();
+	while (it != bot_list.end()) {
+		if (it->second->GetBotID() == botID)
+			return it->second;
+		++it;
 	}
-	return Result;
+	return nullptr;
 }
 
-Bot* EntityList::GetBotByBotName(std::string_view botName) {
-	Bot* Result = nullptr;
-	if (!botName.empty()) {
-		for (const auto b : bot_list) {
-			if (b && std::string_view(b->GetName()) == botName) {
-				Result = b;
-				break;
-			}
+Bot* EntityList::GetBotByBotName(std::string botName) {
+	for (const auto& e : bot_list) {
+		if (e.second && Strings::EqualFold(e.second->GetName(), botName)) {
+			return e.second;
 		}
 	}
-	return Result;
+
+	return nullptr;
 }
 
 Client* EntityList::GetBotOwnerByBotEntityID(uint32 entity_id) {
-	Client* c = nullptr;
-
 	if (entity_id) {
-		for (const auto& b : bot_list) {
-			if (b && b->GetID() == entity_id) {
-				c = b->GetBotOwner()->CastToClient();
-				break;
-			}
+		auto it = bot_list.begin();
+		while (it != bot_list.end()) {
+			if (it->second->GetID() == entity_id)
+				return it->second->GetBotOwner()->CastToClient();
+			++it;
 		}
 	}
-
-	return c;
+	return nullptr;
 }
 
 Client* EntityList::GetBotOwnerByBotID(const uint32 bot_id)  {
-	Client* c = nullptr;
-
 	if (bot_id) {
-		const auto owner_id = database.botdb.GetOwnerID(bot_id);
-		if (owner_id) {
-			c = GetClientByCharID(owner_id);
+		auto it = bot_list.begin();
+		while (it != bot_list.end()) {
+			if (it->second->GetBotID() == bot_id)
+				return it->second->GetBotOwner()->CastToClient();
+			++it;
 		}
 	}
-
-	return c;
+	return nullptr;
 }
 
 void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 	if (new_bot) {
 		new_bot->SetID(GetFreeID());
-		bot_list.push_back(new_bot);
-		mob_list.insert(std::pair<uint16, Mob*>(new_bot->GetID(), new_bot));
+		bot_list.emplace(std::pair<uint16, Bot*>(new_bot->GetID(), new_bot));
+		mob_list.emplace(std::pair<uint16, Mob*>(new_bot->GetID(), new_bot));
 
 		if (parse->BotHasQuestSub(EVENT_SPAWN)) {
 			parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
@@ -7372,31 +7361,32 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 	}
 }
 
-std::list<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID) {
-	std::list<Bot*> Result;
-	if (botOwnerCharacterID > 0) {
-		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if (tempBot && tempBot->GetBotOwnerCharacterID() == botOwnerCharacterID)
-				Result.push_back(tempBot);
-		}
+std::vector<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID) {
+	std::vector<Bot*> client_bot_list;
+
+	if (botOwnerCharacterID <= 0) {
+		return client_bot_list;
 	}
-	return Result;
+
+	auto it = bot_list.begin();
+
+	while (it != bot_list.end()) {
+		if (it->second->GetOwner() && it->second->GetBotOwnerCharacterID() == botOwnerCharacterID) {
+			client_bot_list.push_back(it->second);
+		}
+		++it;
+	}
+
+	return client_bot_list;
 }
 
 bool EntityList::RemoveBot(uint16 entityID) {
-	bool Result = false;
-	if (entityID > 0) {
-		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if (tempBot && tempBot->GetID() == entityID) {
-				bot_list.erase(botListItr);
-				Result = true;
-				break;
-			}
-		}
+	auto it = bot_list.find(entityID);
+	if (it != bot_list.end()) {
+		bot_list.erase(it); // Already deleted
+		return true;
 	}
-	return Result;
+	return false;
 }
 
 void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
@@ -11973,14 +11963,11 @@ void Bot::CleanBotBlockedBuffs()
 }
 
 std::vector<BotSpells_Struct_wIndex> Bot::BotGetSpellsByType(uint16 spellType) {
-	if (!AIBot_spells_by_type[spellType].empty()) {
-		return AIBot_spells_by_type[spellType];
-	}
-	else {
+	if (AIBot_spells_by_type[spellType].empty()) {
 		spellType = GetParentSpellType(spellType);
-
-		return AIBot_spells_by_type[spellType];
 	}
+
+	return AIBot_spells_by_type[spellType];
 }
 
 void Bot::AssignBotSpellsToTypes(std::vector<BotSpells_Struct>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>>& AIBot_spells_by_type) {

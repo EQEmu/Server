@@ -419,10 +419,13 @@ perl::array Perl_EntityList_GetBotList(EntityList* self) // @categories Script U
 {
 	perl::array result;
 	auto current_bot_list = self->GetBotList();
-	for (Bot* bot_iterator : current_bot_list)
-	{
-		result.push_back(bot_iterator);
+	auto it = current_bot_list.begin();
+
+	while (it != current_bot_list.end()) {
+		result.push_back(it->second);
+		++it;
 	}
+
 	return result;
 }
 
