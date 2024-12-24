@@ -54,6 +54,21 @@ int Mob::GetOwnerSpellDamage() {
 	return 0;
 }
 
+int Mob::GetOwnerHealAmount() {
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return itembonuses.HealAmt;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		int ret_val = itembonuses.HealAmt + (GetOwner()->CastToClient()->GetHealAmt() / pet_count);
+		return ret_val;
+	}
+
+	return 0;
+}
+
 int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	if (spells[spell_id].target_type == ST_Self) {
 		return value;
@@ -541,16 +556,16 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 			if (
 				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
 				!spells[spell_id].no_heal_damage_item_mod &&
-				GetHealAmt()
+				GetOwnerHealAmount()
 			) {
-				value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
+				value += GetExtraSpellAmt(spell_id, GetOwnerHealAmount(), base_value); //Item Heal Amt Add before critical
 			}
 			else if (
 				!spells[spell_id].no_heal_damage_item_mod &&
-				GetHealAmt() &&
+				GetOwnerHealAmount() &&
 				GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
 			) {
-				value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
+				value += GetExtraSpellAmt(spell_id, GetOwnerHealAmount(), base_value); //Item Heal Amt Add before critical
 			}
 		}
 
@@ -597,16 +612,16 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 				if (
 					RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
 					!spells[spell_id].no_heal_damage_item_mod &&
-					GetHealAmt()
+					GetOwnerHealAmount()
 				) {
-					extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
+					extra_heal += GetExtraSpellAmt(spell_id, GetOwnerHealAmount(), base_value);
 				}
 				else if (
 					!spells[spell_id].no_heal_damage_item_mod &&
-					GetHealAmt() &&
+					GetOwnerHealAmount() &&
 					GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
 				) {
-					extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
+					extra_heal += GetExtraSpellAmt(spell_id, GetOwnerHealAmount(), base_value);
 				}
 			}
 		}
