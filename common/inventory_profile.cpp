@@ -1844,7 +1844,7 @@ int16 EQ::InventoryProfile::FindFirstFreeSlotThatFitsItemWithStacking(ItemInstan
 
 			for (uint8 bag_slot = invbag::SLOT_BEGIN; bag_slot < bag_size; bag_slot++) {
 				auto bag_item = GetItem(base_slot_id + bag_slot);
-				if (!bag_item && inv_item->GetItem()->Size >= item_size) {
+				if (!bag_item && inv_item->GetItem()->BagSize >= item_size) {
 					// Found available slot within bag that will hold inbound item
 					return base_slot_id + bag_slot;
 				}
