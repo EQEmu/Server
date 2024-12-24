@@ -2625,9 +2625,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		if (
 			give_exp->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP)) ||
-			give_exp->IsPet() && 
-			give_exp->GetOwner() && 
-			give_exp->GetOwner()->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP))
+			(
+				give_exp->IsPet() && 
+				give_exp->GetOwner() && 
+				give_exp->GetOwner()->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP))
+			)
 		) {
 			owner_in_group = true;
 		}
@@ -2639,7 +2641,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-	if (give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerClient()) {
+	if (give_exp && give_exp->IsTempPet() && (give_exp->IsPetOwnerClient() || give_exp->IsPetOwnerBot())) {
 		if (give_exp->IsNPC() && give_exp->CastToNPC()->GetSwarmOwner()) {
 			Mob* temp_owner = entity_list.GetMobID(give_exp->CastToNPC()->GetSwarmOwner());
 			if (temp_owner) {
