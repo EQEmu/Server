@@ -482,6 +482,11 @@ void NPC::AddLootDropFixed(
 
 			if (item2->IsType2HWeapon()) {
 				SetTwoHanderEquipped(true);
+				equipment[EQ::invslot::slotSecondary] = 0;
+				auto secondary = GetItem(EQ::invslot::slotSecondary);
+				if (secondary) {
+					secondary->equip_slot = EQ::invslot::SLOT_INVALID;
+				}
 			}
 		}
 		else if (
@@ -497,10 +502,22 @@ void NPC::AddLootDropFixed(
 				item2->ItemType == EQ::item::ItemTypeLight
 			)
 			) {
-			equipment_slot = EQ::textures::weaponSecondary;
+			if (!HasTwoHanderEquipped()) {
+				LogDebug("Equipping a secondary weapon");
+				equipment_slot = EQ::textures::weaponSecondary;
 
-			if (item2->Damage > 0) {
-				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
+				if (item2->Damage > 0) {
+					SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
+				}
+			} else {
+				LogDebug("Not equipping a secondary weapon because a two-hander is equipped");
+				equipment[EQ::invslot::slotSecondary] = 0;
+				auto secondary = GetItem(EQ::invslot::slotSecondary);
+				if (secondary) {
+					secondary->equip_slot = EQ::invslot::SLOT_INVALID;
+				}
+				found = false;
+				found_slot = INVALID_INDEX;
 			}
 		}
 		else if (found_slot == EQ::invslot::slotHead) {
@@ -561,6 +578,9 @@ void NPC::AddLootDropFixed(
 		case Race::Wrulon:
 		case Race::Phoenix:
 		case Race::Spider:
+			safe_delete(outapp);
+			safe_delete(item);
+			safe_delete(inst);
 			return;
 	}
 

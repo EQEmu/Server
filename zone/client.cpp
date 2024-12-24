@@ -1071,7 +1071,6 @@ bool Client::Save(uint8 iCommitNow) {
 		ValidatePetList(); // make sure pet list is compacted correctly
 
 		m_petinfomulti.clear();
-		m_petinfomulti.empty();
 
 		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
 

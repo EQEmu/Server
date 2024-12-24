@@ -1902,7 +1902,6 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 		ValidatePetList(); // make sure pet list is compacted correctly
 
 		m_petinfomulti.clear();
-		m_petinfomulti.empty();
 
 		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
 
@@ -2411,9 +2410,6 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		if (GetOwner() && weapon_instance) {
 			int64 base_damage_bonus = weapon_instance->GetItemWeaponDamage(true);
-			if (weapon_instance->GetItemType() == EQ::item::ItemType2HBlunt || weapon_instance->GetItemType() == EQ::item::ItemType2HSlash || weapon_instance->GetItemType() == EQ::item::ItemType2HPiercing) {
-				base_damage_bonus /= 2;
-			}
 			my_hit.base_damage += base_damage_bonus;
 		}
 
