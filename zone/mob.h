@@ -357,8 +357,17 @@ public:
 	bool NegateSpellEffect(uint16 spell_id, int effect_id);
 	float GetActSpellRange(uint16 spell_id, float range);
 	int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr);
-	int GetOwnerSpellDamage();
-	int GetOwnerHealAmount();
+
+	int GetSharedSpellDamage();
+	int GetSharedHealAmount();
+	int GetSharedCriticalSpellChance();
+	int GetSharedSpellCritDmgIncrease();
+	int GetSharedSpellCritDmgIncNoStack();
+	int GetSharedCriticalDoTChance();
+	int GetSharedDotCritDmgIncrease();
+	int GetSharedCriticalHealChance();
+	int GetSharedCriticalHealOverTime();
+
 	int64 GetActDoTDamage(uint16 spell_id, int64 value, Mob *target, bool from_buff_tic = true);
 	int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr, bool from_buff_tic = false);
 	int32 GetActSpellCost(uint16 spell_id, int32 cost);
