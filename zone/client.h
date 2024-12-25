@@ -1260,6 +1260,8 @@ public:
 	virtual void ThrowingAttack(Mob* other, bool CanDoubleAttack = false);
 	void DoClassAttacks(Mob *ca_target, uint16 skill = -1, bool IsRiposte=false);
 
+	bool CanSummonItem(int item_id);
+
 	void ClearZoneFlag(uint32 zone_id);
 	inline std::set<uint32> GetZoneFlags() { return zone_flags; } ;
 	bool HasZoneFlag(uint32 zone_id) const;

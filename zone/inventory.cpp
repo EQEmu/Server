@@ -3136,6 +3136,18 @@ void Client::DisenchantSummonedBags(bool client_update)
 	}
 }
 
+bool Client::CanSummonItem(int item_id) {
+	for (auto spell : m_pp.spell_book) {
+		if (!IsValidSpell(spell)) {
+			continue;
+		}
+
+
+	}
+
+	return false;
+}
+
 void Client::RemoveNoRent(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
