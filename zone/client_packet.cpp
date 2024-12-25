@@ -916,6 +916,7 @@ void Client::CompleteConnect()
 	}
 
 	SendDynamicZoneUpdates();
+	SendBulkBazaarTraders();
 
 	/** Request adventure info **/
 	auto pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
