@@ -3542,6 +3542,33 @@ namespace Laurion
 
 	DECODE(OP_RemoveBlockedBuffs) { DECODE_FORWARD(OP_BlockedBuffs); }
 
+	DECODE(OP_GroupDisband)
+	{
+		DECODE_LENGTH_EXACT(structs::GroupGeneric_Struct);
+		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupGeneric_Struct);
+
+		memcpy(emu->name1, eq->name1, sizeof(emu->name1));
+		memcpy(emu->name2, eq->name2, sizeof(emu->name2));
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_GroupInvite)
+	{
+		DECODE_LENGTH_EXACT(structs::GroupGeneric_Struct);
+		SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupGeneric_Struct);
+
+		memcpy(emu->name1, eq->name1, sizeof(emu->name1));
+		memcpy(emu->name2, eq->name2, sizeof(emu->name2));
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_GroupInvite2)
+	{
+		DECODE_FORWARD(OP_GroupInvite);
+	}
+
 	//Naive version but should work well enough for now
 	int ExtractIDFile(const std::string& input) {
 		std::string number;

@@ -68,6 +68,8 @@ D(OP_CastSpell)
 D(OP_GMTraining)
 D(OP_BlockedBuffs)
 D(OP_RemoveBlockedBuffs)
-
+D(OP_GroupDisband)
+D(OP_GroupInvite)
+D(OP_GroupInvite2)
 #undef E
 #undef D

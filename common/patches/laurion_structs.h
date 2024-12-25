@@ -861,7 +861,20 @@ namespace Laurion {
 			/*016*/ uint32 silver;
 			/*020*/ uint32 copper;
 			/*024*/
-		}
+		};
+
+		struct GroupGeneric_Struct {
+			/*0000*/ char name1[64];
+			/*0064*/ char name2[64];
+			/*0128*/ uint32	unknown0128;
+			/*0132*/ uint32	unknown0132;
+			/*0136*/ uint32	unknown0136;
+			/*0140*/ uint32	unknown0140;
+			/*0144*/ uint32	unknown0144;
+			/*0148*/ uint32	unknown0148;
+			/*0152*/ uint16	unknown0152;
+			/*0154*/
+		};
 #pragma pack()
 
 	};	//end namespace structs
