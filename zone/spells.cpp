@@ -6811,7 +6811,6 @@ void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 
 void Mob::SendPetBuffsToClient()
 {
-	LogDebug("Check 1");
 	// Don't really need this check, as it should be checked before this method is called, but it doesn't hurt
 	// too much to check again.
 	if(!(GetOwner() && GetOwner()->IsClient()))

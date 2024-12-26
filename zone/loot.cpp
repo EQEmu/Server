@@ -503,14 +503,12 @@ void NPC::AddLootDropFixed(
 			)
 			) {
 			if (!HasTwoHanderEquipped()) {
-				LogDebug("Equipping a secondary weapon");
 				equipment_slot = EQ::textures::weaponSecondary;
 
 				if (item2->Damage > 0) {
 					SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 				}
 			} else {
-				LogDebug("Not equipping a secondary weapon because a two-hander is equipped");
 				equipment[EQ::invslot::slotSecondary] = 0;
 				auto secondary = GetItem(EQ::invslot::slotSecondary);
 				if (secondary) {

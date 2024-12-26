@@ -13585,8 +13585,24 @@ void Client::DoPetBagResync(int class_id) {
 		if (pet && pet_bag && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), class_id) < UINT8_MAX) {
 			NPC* pet_npc = pet->CastToNPC();
 
-			if (IsEffectInSpell(pet_npc->GetPetSpellID(), SE_Charm) && !EntityVariableExists("is_charmed")) {
-				pet_npc->SetEntityVariable("is_charmed", "");
+			if (IsEffectInSpell(pet_npc->GetPetSpellID(), SE_Charm)) {
+				if (!pet_npc->EntityVariableExists("is_charmed")) {
+					auto inventory = pet_npc->GetLootList();
+
+					std::vector<std::string> inventory_strings;
+
+					for (int item_id : inventory) {
+						inventory_strings.push_back(std::to_string(item_id));
+					}
+
+					auto serialized_inventory = Strings::Join(inventory_strings, ",");
+
+					pet_npc->SetEntityVariable("is_charmed", serialized_inventory);
+
+					LogDebug("On Resync Serialized Inventory: [{}]", serialized_inventory);
+				} else {
+					LogDebug("Pre-Existing Serialized Inventory: [{}]", pet_npc->GetEntityVariable("is_charmed"));
+				}
 			}
 
 			DoPetBagFlush(pet);

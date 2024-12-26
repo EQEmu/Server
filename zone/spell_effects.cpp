@@ -801,6 +801,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						my_pet->Kill();
 					}
 
+					CastToNPC()->SetPetSpellID(spell_id);
+
 					caster->AddPet(this);
 					SetOwnerID(caster->GetID());
 					SetPetOrder(SPO_Follow);
@@ -839,12 +841,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					{
 						CastToClient()->AI_Start();
 					} else if(IsNPC()) {
-						CastToNPC()->SetPetSpellID(spell_id);	//not a pet spell.
+						CastToNPC()->SetPetSpellID(spell_id);
 						CastToNPC()->ModifyStatsOnCharm(false);
 
-						if (GetOwner() && GetOwner()->IsClient()) {
-							if (!EntityVariableExists("is_charmed") && GetOwner()->CastToClient()->GetActivePetBagSlot(CastToNPC()->GetPetOriginClass())) {
+						if (GetOwner() && GetOwner()->IsClient() && GetOwner()->CastToClient()->GetActivePetBag(CastToNPC()->GetPetOriginClass())) {
+							if (!EntityVariableExists("is_charmed")) {
+								LogDebug("Check Omega");
 								auto inventory = CastToNPC()->GetLootList();
+								LogDebug("The other Check");
 								std::vector<std::string> inventory_strings;
 
 								for (int item_id : inventory) {
@@ -855,7 +859,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 								CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
 
-								LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+								LogDebug("Initial Charm Serialized Inventory: [{}]", serialized_inventory);
 							} else {
 								LogDebug("Pre-Existing Serialized Inventory: [{}]", GetEntityVariable("is_charmed"));
 							}
@@ -4664,7 +4668,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if (EntityVariableExists("is_charmed") && !EntityVariableExists("preserve_inventory")) {
 					if (!EntityVariableExists("charm_refresh")) {
 						auto serialized_inventory = GetEntityVariable("is_charmed");
-						LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+						LogDebug("Final Serialized Inventory: [{}]", serialized_inventory);
 
 						// Clear current loot list
 						while(CastToNPC()->CountLoot()) {
@@ -4682,7 +4686,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 								auto item_data = database.GetItem(item_id);
 
 								if (item_data) {
-									CastToNPC()->AddItem(item_data, item_data->MaxCharges);
+									CastToNPC()->AddItemFixed(item_data->ID, item_data->MaxCharges);
 								}
 							}
 						}

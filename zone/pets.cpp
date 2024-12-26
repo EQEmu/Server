@@ -1179,7 +1179,7 @@ bool Mob::AddPet(uint16 pet_id) {
 
 	focused_pet_id = pet_id;
 	ConfigurePetWindow(newpet);
-	if (newpet->IsNPC() && IsClient()) {
+	if (newpet->IsNPC() && IsClient() && !IsEffectInSpell(newpet->CastToNPC()->GetPetSpellID(), SE_Charm)) {
 		CastToClient()->DoPetBagResync(newpet->CastToNPC()->GetPetOriginClass());
 	}
 
