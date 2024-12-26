@@ -2409,8 +2409,9 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		int32 hate = my_hit.base_damage + my_hit.min_damage;
 
 		if (GetOwner() && weapon_instance) {
-			int64 base_damage_bonus = weapon_instance->GetItemWeaponDamage(true);
-			my_hit.base_damage += base_damage_bonus;
+			int weapon_damage = weapon_instance->GetItemWeaponDamage(true);
+			float weapon_ratio = weapon_damage / weapon_instance->GetItem()->Delay;
+			my_hit.base_damage += weapon_damage;
 		}
 
 		int hit_chance_bonus = 0;
@@ -7109,6 +7110,9 @@ void NPC::SetAttackTimer()
 			}
 
 			int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
+
+			int original_speed = speed;
+
 			int speed = 0;
 			int delay = 3500;
 
@@ -7126,6 +7130,7 @@ void NPC::SetAttackTimer()
 			else
 				speed = static_cast<int>(speed + ((hhe / 100.0f) * delay));
 
+			speed = std::min(speed, original_speed); // use npc attack speed if it is faster.
 		}
 
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);

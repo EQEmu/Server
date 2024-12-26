@@ -1109,6 +1109,7 @@ RULE_REAL(Custom,	CastedSpellCritBonusRatio, 				1.0, "Multiply casted (Not proc
 RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit ratio by this value")
 
 RULE_BOOL(Custom,   UseHasteForMeleeSkills, 				true, "Use Haste stat for activated melee skills")
+RULE_REAL(Custom, 	PetWeaponTuningMult, 					0.5, "Value added to weapon ratio for pet weapon usage")
 
 RULE_BOOL(Custom, 	DisableInitialSendBulkBazaarTraders, 	true, "Disable initial send of SendBulkBazaarTraders on client login")
 
