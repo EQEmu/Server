@@ -1025,7 +1025,6 @@ Mob* Mob::GetPet(uint8 idx) {
 }
 
 std::vector<Mob*> Mob::GetAllPets() {
-	ValidatePetList();
     std::vector<Mob*> pets;
 
     for (uint16 pet_id : petids) {
@@ -1120,6 +1119,7 @@ bool Mob::RemovePet(uint16 pet_id) {
 
 // Remove all pets from the pet list
 void Mob::RemoveAllPets() {
+	LogDebug("RemoveAllPets called..");
     // Iterate over each pet ID in the petids vector
     for (auto pet_id : petids) {
         // Retrieve the Mob associated with the pet ID
@@ -1192,7 +1192,7 @@ bool Mob::AddPet(uint16 pet_id) {
 void Mob::ValidatePetList() {
     for (auto it = petids.begin(); it != petids.end(); ) {
 		auto pet = entity_list.GetMob(*it);
-        if (!pet || !pet->GetOwner()) {
+        if (!pet || !pet->GetOwner() && entity_list.GetNPCList().size() > 0) {
             LogDebug("Removing invalid pet ID [{}] from petids list for Mob [{}].", *it, GetCleanName());
             it = petids.erase(it);  // Remove invalid pet ID and advance the iterator
         } else {

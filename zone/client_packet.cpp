@@ -1712,7 +1712,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		database.LoadPetInfo(this);
 
 		LogDebug("Got [{}] pets on load", m_petinfomulti.size());
-		// Iterate over each pet in m_petinfomulti
 		for (int i = 0; i < m_petinfomulti.size(); i++) {
 			auto& pet_info = m_petinfomulti[i];
 

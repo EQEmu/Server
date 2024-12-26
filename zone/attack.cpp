@@ -1895,9 +1895,21 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	InterruptSpell();
 	ZeroBardPulseVars();
 
+	for (auto m_pet : GetAllPets()) {
+		if (m_pet && m_pet->IsCharmed()) {
+			m_pet->BuffFadeByEffect(SE_Charm);
+		}
+	}
+
 	if (!RuleB(Custom, SuspendGroupBuffs)) {
 		RemoveAllPets();
 	} else {
+		auto pets = GetAllPets();
+		for (auto pet : pets) {
+
+		}
+
+		/*
 		// Manual Save of pets
 		ValidatePetList(); // make sure pet list is compacted correctly
 
@@ -1929,17 +1941,12 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 		database.SavePetInfo(this);
 
 		RemoveAllPets();
+		*/
 	}
 
 	SetHorseId(0);
 	ShieldAbilityClearVariables();
 	dead = true;
-
-	for (auto m_pet : GetAllPets()) {
-		if (m_pet && m_pet->IsCharmed()) {
-			m_pet->BuffFadeByEffect(SE_Charm);
-		}
-	}
 
 	if (GetMerc()) {
 		GetMerc()->Suspend();

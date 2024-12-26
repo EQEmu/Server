@@ -1067,35 +1067,32 @@ bool Client::Save(uint8 iCommitNow) {
 
 	m_pp.lastlogin = time(nullptr);
 
-	if (!dead || !RuleB(Custom, SuspendGroupBuffs)) {
-		ValidatePetList(); // make sure pet list is compacted correctly
-
+	if (!dead) {
+		auto pets = GetAllPets();
 		m_petinfomulti.clear();
 
-		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
-
-		if (!dead || RuleB(Custom, SuspendGroupBuffs)) {
-			for (Mob* mob : pets) {
-				if (mob)
-				{
-					NPC* pet = mob->CastToNPC();
-					if (pet && pet->GetPetSpellID()) {
-						PetInfo newPetInfo = PetInfo();
-						memset(&newPetInfo, 0, sizeof(PetInfo));
-						newPetInfo.SpellID = pet->GetPetSpellID();
-						newPetInfo.HP = pet->GetHP();
-						newPetInfo.Mana = pet->GetMana();
-						pet->GetPetState(newPetInfo.Buffs, newPetInfo.Items, newPetInfo.Name);
-						newPetInfo.petpower = pet->GetPetPower();
-						newPetInfo.size = pet->GetSize();
-						newPetInfo.taunting = pet->IsTaunting();
-						m_petinfomulti.push_back(newPetInfo);
-					}
+		for (Mob* mob : pets) {
+			if (mob)
+			{
+				NPC* pet = mob->CastToNPC();
+				if (pet && pet->GetPetSpellID()) {
+					PetInfo newPetInfo = PetInfo();
+					memset(&newPetInfo, 0, sizeof(PetInfo));
+					newPetInfo.SpellID = pet->GetPetSpellID();
+					newPetInfo.HP = pet->GetHP();
+					newPetInfo.Mana = pet->GetMana();
+					pet->GetPetState(newPetInfo.Buffs, newPetInfo.Items, newPetInfo.Name);
+					newPetInfo.petpower = pet->GetPetPower();
+					newPetInfo.size = pet->GetSize();
+					newPetInfo.taunting = pet->IsTaunting();
+					m_petinfomulti.push_back(newPetInfo);
 				}
 			}
 		}
 
-		database.SavePetInfo(this);
+		if (entity_list.GetNPCList().size() > 0) {
+			database.SavePetInfo(this);
+		}
 	}
 
 	if(tribute_timer.Enabled()) {
@@ -14151,7 +14148,7 @@ bool Client::RemoveExtraClass(int class_id) {
     // Lambda to check if a spell is usable by any of the given classes
     auto is_spell_usable_by_classes = [this, new_classes](int spell_id) {
         for (int i = Class::Warrior; i <= Class::Berserker; i++) {
-            if ((new_classes & GetPlayerClassBit(i)) && GetSpellLevel(spell_id, i) <= GetLevel()) {
+            if ((new_classes & GetPlayerClassBit(i)) && GetSpellLevel(spell_id, i) < UINT8_MAX) {
 				LogDebug("Spell [{}] is usable by class [{}]", spell_id, i);
                 return true;
             }
