@@ -843,7 +843,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						CastToNPC()->ModifyStatsOnCharm(false);
 
 						if (GetOwner() && GetOwner()->IsClient()) {
-							if (!EntityVariableExists("is_charmed")) {
+							if (!EntityVariableExists("is_charmed") && GetOwner()->CastToClient()->GetActivePetBagSlot(CastToNPC()->GetPetOriginClass())) {
 								auto inventory = CastToNPC()->GetLootList();
 								std::vector<std::string> inventory_strings;
 
