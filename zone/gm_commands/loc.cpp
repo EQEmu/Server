@@ -9,6 +9,19 @@ void command_loc(Client *c, const Seperator *sep)
 
 	auto target_position = target->GetPosition();
 
+	// check los benchmark
+	BenchTimer timer;
+	for (int i = 0; i < 1000; i++) {
+		zone->zonemap->CheckLoS(c->GetPosition(), target_position);
+	}
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"CheckLoS benchmark took [{}]",
+			timer.elapsed()
+		).c_str()
+	);
+
 	c->Message(
 		Chat::White,
 		fmt::format(
