@@ -1129,6 +1129,8 @@ void Mob::RemoveAllPets() {
         }
     }
 
+
+
     // Clear the petids vector to remove all pet IDs
     petids.clear();
 }
@@ -1181,6 +1183,7 @@ bool Mob::AddPet(uint16 pet_id) {
 	ConfigurePetWindow(newpet);
 	if (newpet->IsNPC() && IsClient() && !IsEffectInSpell(newpet->CastToNPC()->GetPetSpellID(), SE_Charm)) {
 		CastToClient()->DoPetBagResync(newpet->CastToNPC()->GetPetOriginClass());
+		CastToClient()->Save();
 	}
 
     return true;  // Return true to indicate the pet was successfully added
