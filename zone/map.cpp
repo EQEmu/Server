@@ -7,6 +7,7 @@
 #include "raycast_mesh.h"
 #include "zone.h"
 #include "../common/file.h"
+#include "../common/memory/ksm.hpp"
 
 #include <algorithm>
 #include <map>
@@ -952,6 +953,7 @@ bool Map::LoadV2(FILE *f) {
 
 	return true;
 }
+
 
 void Map::RotateVertex(glm::vec3 &v, float rx, float ry, float rz) {
 	glm::vec3 nv = v;
