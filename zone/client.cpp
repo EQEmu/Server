@@ -13583,8 +13583,13 @@ void Client::DoPetBagResync(int class_id) {
 
 	for (auto pet : GetAllPets()) {
 		if (pet && pet_bag && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), class_id) < UINT8_MAX) {
-			DoPetBagFlush(pet);
 			NPC* pet_npc = pet->CastToNPC();
+
+			if (IsEffectInSpell(pet_npc->GetPetSpellID(), SE_Charm) && !EntityVariableExists("is_charmed")) {
+				pet_npc->SetEntityVariable("is_charmed", "");
+			}
+
+			DoPetBagFlush(pet);
 
 			int bag_top = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, 0);
 			int bag_bot = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, pet_bag->GetItem()->BagSlots);

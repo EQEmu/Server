@@ -1991,8 +1991,23 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 			int item_id = inst ? inst->GetItem()->ID : 0;
 
+			int class_id = -1;
+			for (int cid = Class::Warrior; cid <= Class::Berserker; cid++) {
+				if (IsValidPetBagForClass(item_id, cid)) {
+					class_id = cid;
+				}
+			}
+
 			DeleteItemInInventory(move_in->from_slot);
 			SendCursorBuffer();
+
+			if (class_id > -1) {
+				for (auto pet : GetAllPets()) {
+					if (pet->CastToNPC()->GetPetOriginClass() == class_id) {
+						DoPetBagFlush(pet);
+					}
+				}
+			}
 
 			return true; // Item destroyed by client
 		}
@@ -2545,20 +2560,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	if (RuleB(Custom, EnablePetBags)) {
 		for (int class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
-			auto pet_bag_idx = GetActivePetBagSlot(class_id);
-			if (pet_bag_idx >= 0) {
-				if (pet_bag_idx == move_in->to_slot || pet_bag_idx == move_in->from_slot) {
-					DoPetBagResync(class_id);
-					break;
-				}
-				if (EQ::InventoryProfile::CalcSlotId(move_in->to_slot) == pet_bag_idx) {
-					DoPetBagResync(class_id);
-				}
-
-				if (EQ::InventoryProfile::CalcSlotId(move_in->from_slot) == pet_bag_idx) {
-					DoPetBagResync(class_id);
-				}
-			}
+			DoPetBagResync(class_id);
 		}
 	}
 
