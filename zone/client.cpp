@@ -1908,6 +1908,20 @@ void Client::FixModel(Spawn_Struct* npc) {
 			npc->helm = zone->random.Int(0,2);
 			break;
 
+		case Race::WaterDragon:
+			npc->race = Race::Dragon2;
+			npc->helm = npc->equip_chest2;
+			npc->size = 100;
+			break;
+
+		case Race::PrismaticDragon:
+			npc->race = Race::Dragon7;
+			npc->helm = npc->equip_chest2;
+			npc->size = 120;
+			break;
+
+		case Race::BlackAndWhiteDragon:
+		case Race::VeliousDragon:
 		case Race::LavaDragon:
 			npc->race = Race::Dragon5;
 			npc->size = 100;
