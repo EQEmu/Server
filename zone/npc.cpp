@@ -4329,12 +4329,20 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 		}
 	}
 
-	const bool can_take_nodrop   = RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0;
-	const bool can_pet_take_item = !inst->GetItem()->IsQuestItem()
-		&& can_take_nodrop
-		&& inst->GetItem()->IsPetUsable()
-		&& (!inst->IsAttuned() || RuleB(Pets, CanTakeNoDrop));
-	if (!can_pet_take_item) {
+	auto owner = GetOwner();
+
+	if (!(RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0) || (inst->IsAttuned() && IsCharmedPet())) {
+		owner->Message(Chat::PetResponse, "I cannot equip NO-DROP items, master.");
+		return false;
+	}
+
+	if (inst->GetItem()->IsQuestItem()) {
+		owner->Message(Chat::PetResponse, "I cannot equip QUEST items, master.");
+		return false;
+	}
+
+	if (!inst->GetItem()->IsPetUsable()) {
+		owner->Message(Chat::PetResponse, "I cannot equip that item, master.");
 		return false;
 	}
 

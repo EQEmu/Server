@@ -2417,8 +2417,15 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		if (GetOwner() && weapon_instance) {
 			int weapon_damage = weapon_instance->GetItemWeaponDamage(true);
-			float weapon_ratio = weapon_damage / weapon_instance->GetItem()->Delay;
-			my_hit.base_damage += weapon_damage;
+			int weapon_delay = weapon_instance->GetItem()->Delay;
+
+			float normalized_max_damage = GetBaseDamage() * (static_cast<float>(weapon_delay) / (attack_delay/100.0f));
+			float normalized_min_damage = GetMinDamage()  * (static_cast<float>(weapon_delay) / (attack_delay/100.0f));
+
+			my_hit.base_damage = normalized_max_damage + weapon_damage + eleBane;
+			my_hit.min_damage  = normalized_min_damage + weapon_damage + eleBane;
+
+			LogDebug("HitCalculation: AttackSpeed: [{}]->[{}], Damage: [{}] -> [{}], Extra: [{}]", attack_delay, weapon_delay, GetBaseDamage() + GetMinDamage(), normalized_max_damage + normalized_min_damage, weapon_damage + eleBane);
 		}
 
 		int hit_chance_bonus = 0;
