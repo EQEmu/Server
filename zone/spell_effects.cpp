@@ -1794,12 +1794,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_ModelSize:
 			case SE_ChangeHeight:
 			{
-				if (!IsClient() && !GetOwnerID()) {
-					break; // not dealing with this
-				}
-
-				LogDebug("How did we get here?");
-
+#ifdef SPELL_EFFECT_SPAM
+				snprintf(effect_desc, _EDLEN, "Model Size: %d%%", effect_value);
+#endif
 				if (effect_value && effect_value != 100) {
 					// Only allow 2 size changes from Base Size
 					float modifyAmount = (static_cast<float>(effect_value) / 100.0f);

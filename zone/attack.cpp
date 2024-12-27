@@ -2411,7 +2411,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		otherlevel = otherlevel ? otherlevel : 1;
 		mylevel = mylevel ? mylevel : 1;
 
-		my_hit.base_damage = GetBaseDamage() + eleBane;
+		my_hit.base_damage = GetBaseDamage();
 		my_hit.min_damage = GetMinDamage();
 		int32 hate = my_hit.base_damage + my_hit.min_damage;
 
@@ -2419,13 +2419,11 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			int weapon_damage = weapon_instance->GetItemWeaponDamage(true);
 			int weapon_delay = weapon_instance->GetItem()->Delay;
 
-			float normalized_max_damage = GetBaseDamage() * std::max(1.0f, (static_cast<float>(weapon_delay) / (attack_delay/100.0f)));
-			float normalized_min_damage = GetMinDamage()  * std::max(1.0f, (static_cast<float>(weapon_delay) / (attack_delay/100.0f)));
+			float normalized_max_damage = GetBaseDamage() * (static_cast<float>(weapon_delay) / (attack_delay/100.0f));
+			float normalized_min_damage = GetMinDamage()  * (static_cast<float>(weapon_delay) / (attack_delay/100.0f));
 
 			my_hit.base_damage = normalized_max_damage + weapon_damage + eleBane;
 			my_hit.min_damage  = normalized_min_damage + weapon_damage + eleBane;
-
-			LogDebug("HitCalculation: AttackSpeed: [{}]->[{}], Damage: [{}] -> [{}], Extra: [{}]", attack_delay, weapon_delay, GetBaseDamage() + GetMinDamage(), normalized_max_damage + normalized_min_damage, weapon_damage + eleBane);
 		}
 
 		int hit_chance_bonus = 0;
@@ -7153,8 +7151,6 @@ void NPC::SetAttackTimer()
 				speed = static_cast<int>(speed + ((hhe / 1000.0f) * speed));
 			else
 				speed = static_cast<int>(speed + ((hhe / 100.0f) * delay));
-
-			speed = std::min(speed, original_speed); // use npc attack speed if it is faster.
 		}
 
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
