@@ -294,6 +294,8 @@ void print_trace()
 		SendCrashReport(crash_report);
 	}
 
+	LogSys.CloseFileLogs();
+
 	exit(1);
 }
 
