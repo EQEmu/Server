@@ -1025,6 +1025,7 @@ Mob* Mob::GetPet(uint8 idx) {
 }
 
 std::vector<Mob*> Mob::GetAllPets() {
+	ValidatePetList();
     std::vector<Mob*> pets;
 
     for (uint16 pet_id : petids) {

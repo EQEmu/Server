@@ -1799,16 +1799,19 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					// Only allow 2 size changes from Base Size
 					float modifyAmount = (static_cast<float>(effect_value) / 100.0f);
 					float maxModAmount = GetBaseSize() * modifyAmount * modifyAmount;
+					LogDebug("SE_ModelSize: modifyAmount: %f, maxModAmount: %f, GetSize: %f, GetBaseSize: %f", modifyAmount, maxModAmount, GetSize(), GetBaseSize());
 					if ((GetSize() <= GetBaseSize() && GetSize() > maxModAmount) ||
 						(GetSize() >= GetBaseSize() && GetSize() < maxModAmount) ||
 						(GetSize() <= GetBaseSize() && maxModAmount > 1.0f) ||
 						(GetSize() >= GetBaseSize() && maxModAmount < 1.0f))
 					{
+						LogDebug("SE_ModelSize: Setting size to %f", GetSize() * modifyAmount);
 						ChangeSize(GetSize() * modifyAmount);
 					}
 				}
 				//Only applies to SPA 89, max value also likely does something, but unknown.
 				else if (effect == SE_ModelSize && spells[spell_id].limit_value[i]) {
+					LogDebug("SE_ModelSize: Setting size to %f", spells[spell_id].limit_value[i]);
 					ChangeSize(spells[spell_id].limit_value[i]);
 				}
 
