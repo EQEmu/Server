@@ -1330,7 +1330,8 @@ bool ZoneDatabase::NoRentExpired(const std::string& name)
 {
 	const uint32 seconds = CharacterDataRepository::GetSecondsSinceLastLogin(*this, name);
 
-	return seconds > 1800;
+	//return seconds > 1800;
+	return seconds > 1;
 }
 
 bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
