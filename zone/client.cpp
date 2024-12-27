@@ -92,6 +92,314 @@ extern PetitionList petition_list;
 
 void UpdateWindowTitle(char* iNewTitle);
 
+// client constructor purely for testing / mocking
+Client::Client() : Mob(
+	"No name", // in_name
+	"", // in_lastname
+	0, // in_cur_hp
+	0, // in_max_hp
+	Gender::Male, // in_gender
+	Race::Doug, // in_race
+	Class::None, // in_class
+	BodyType::Humanoid, // in_bodytype
+	Deity::Unknown, // in_deity
+	0, // in_level
+	0, // in_npctype_id
+	0.0f, // in_size
+	0.7f, // in_runspeed
+	glm::vec4(), // position
+	0, // in_light
+	0xFF, // in_texture
+	0xFF, // in_helmtexture
+	0, // in_ac
+	0, // in_atk
+	0, // in_str
+	0, // in_sta
+	0, // in_dex
+	0, // in_agi
+	0, // in_int
+	0, // in_wis
+	0, // in_cha
+	0, // in_haircolor
+	0, // in_beardcolor
+	0, // in_eyecolor1
+	0, // in_eyecolor2
+	0, // in_hairstyle
+	0, // in_luclinface
+	0, // in_beard
+	0, // in_drakkin_heritage
+	0, // in_drakkin_tattoo
+	0, // in_drakkin_details
+	EQ::TintProfile(), // in_armor_tint
+	0xff, // in_aa_title
+	0, // in_see_invis
+	0, // in_see_invis_undead
+	0, // in_see_hide
+	0, // in_see_improved_hide
+	0, // in_hp_regen
+	0, // in_mana_regen
+	0, // in_qglobal
+	0, // in_maxlevel
+	0, // in_scalerate
+	0, // in_armtexture
+	0, // in_bracertexture
+	0, // in_handtexture
+	0, // in_legtexture
+	0, // in_feettexture
+	0, // in_usemodel
+	false, // in_always_aggros_foes
+	0, // in_heroic_strikethrough
+	false // in_keeps_sold_items
+),
+				   hpupdate_timer(2000),
+				   camp_timer(29000),
+				   process_timer(100),
+				   consume_food_timer(CONSUMPTION_TIMER),
+				   zoneinpacket_timer(1000),
+				   linkdead_timer(RuleI(Zone, ClientLinkdeadMS)),
+				   dead_timer(2000),
+				   global_channel_timer(1000),
+				   fishing_timer(8000),
+				   endupkeep_timer(1000),
+				   autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
+				   m_client_npc_aggro_scan_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
+				   m_client_zone_wide_full_position_update_timer(5 * 60 * 1000),
+				   tribute_timer(Tribute_duration),
+				   proximity_timer(ClientProximity_interval),
+				   TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
+				   charm_update_timer(6000),
+				   rest_timer(1),
+				   pick_lock_timer(1000),
+				   charm_class_attacks_timer(3000),
+				   charm_cast_timer(3500),
+				   qglobal_purge_timer(30000),
+				   TrackingTimer(2000),
+				   RespawnFromHoverTimer(0),
+				   merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
+				   ItemQuestTimer(500),
+				   anon_toggle_timer(250),
+				   afk_toggle_timer(250),
+				   helm_toggle_timer(250),
+				   aggro_meter_timer(AGGRO_METER_UPDATE_MS),
+				   m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
+				   m_ZoneSummonLocation(-2.0f, -2.0f, -2.0f, -2.0f),
+				   m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
+				   m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
+				   last_region_type(RegionTypeUnsupported),
+				   m_dirtyautohaters(false),
+				   m_position_update_timer(10000),
+				   consent_throttle_timer(2000),
+				   tmSitting(0),
+				   parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
+				   lazy_load_bank_check_timer(1000),
+				   bandolier_throttle_timer(0)
+{
+	eqs = nullptr;
+	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
+		SetFilter(client_filter, FilterShow);
+	}
+
+	cheat_manager.SetClient(this);
+	mMovementManager->AddClient(this);
+	character_id = 0;
+	conn_state = NoPacketsReceived;
+	client_data_loaded = false;
+	berserk = false;
+	dead = false;
+	client_state = CLIENT_CONNECTING;
+	SetTrader(false);
+	Haste = 0;
+	SetCustomerID(0);
+	SetTraderID(0);
+	TrackingID = 0;
+	WID = 0;
+	account_id = 0;
+	admin = AccountStatus::Player;
+	lsaccountid = 0;
+	guild_id = GUILD_NONE;
+	guildrank = 0;
+	guild_tribute_opt_in = 0;
+	SetGuildListDirty(false);
+	GuildBanker = false;
+	memset(lskey, 0, sizeof(lskey));
+	strcpy(account_name, "");
+	tellsoff = false;
+	last_reported_mana = 0;
+	last_reported_endurance = 0;
+	last_reported_endurance_percent = 0;
+	last_reported_mana_percent = 0;
+	gm_hide_me = false;
+	AFK = false;
+	LFG = false;
+	LFGFromLevel = 0;
+	LFGToLevel = 0;
+	LFGMatchFilter = false;
+	LFGComments[0] = '\0';
+	LFP = false;
+	gmspeed = 0;
+	gminvul = false;
+	playeraction = 0;
+	SetTarget(0);
+	auto_attack = false;
+	auto_fire = false;
+	runmode = false;
+	linkdead_timer.Disable();
+	zonesummon_id = 0;
+	zonesummon_ignorerestrictions = 0;
+	bZoning              = false;
+	m_lock_save_position = false;
+	zone_mode            = ZoneUnsolicited;
+	casting_spell_id = 0;
+	npcflag = false;
+	npclevel = 0;
+	fishing_timer.Disable();
+	dead_timer.Disable();
+	camp_timer.Disable();
+	autosave_timer.Disable();
+	GetMercTimer()->Disable();
+	instalog = false;
+	m_pp.autosplit = false;
+	// initialise haste variable
+	m_tradeskill_object = nullptr;
+	delaytimer = false;
+	PendingRezzXP = -1;
+	PendingRezzDBID = 0;
+	PendingRezzSpellID = 0;
+	numclients++;
+	// emuerror;
+	UpdateWindowTitle(nullptr);
+	horseId = 0;
+	tgb = false;
+	tribute_master_id = 0xFFFFFFFF;
+	tribute_timer.Disable();
+	task_state         = nullptr;
+	TotalSecondsPlayed = 0;
+	keyring.clear();
+	bind_sight_target = nullptr;
+	p_raid_instance = nullptr;
+	mercid = 0;
+	mercSlot = 0;
+	InitializeMercInfo();
+	SetMerc(0);
+	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
+	dynamiczone_removal_timer.Disable();
+
+	//for good measure:
+	memset(&m_pp, 0, sizeof(m_pp));
+	memset(&m_epp, 0, sizeof(m_epp));
+	PendingTranslocate = false;
+	PendingSacrifice = false;
+	sacrifice_caster_id = 0;
+	controlling_boat_id = 0;
+	controlled_mob_id = 0;
+	qGlobals = nullptr;
+
+	if (!RuleB(Character, PerCharacterQglobalMaxLevel) && !RuleB(Character, PerCharacterBucketMaxLevel)) {
+		SetClientMaxLevel(0);
+	} else if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
+		SetClientMaxLevel(GetCharMaxLevelFromQGlobal());
+	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
+		SetClientMaxLevel(GetCharMaxLevelFromBucket());
+	}
+
+	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
+	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
+	AttemptedMessages = 0;
+	TotalKarma = 0;
+	m_ClientVersion = EQ::versions::ClientVersion::Unknown;
+	m_ClientVersionBit = 0;
+	AggroCount = 0;
+	ooc_regen = false;
+	AreaHPRegen = 1.0f;
+	AreaManaRegen = 1.0f;
+	AreaEndRegen = 1.0f;
+	XPRate = 100;
+	current_endurance = 0;
+
+	CanUseReport = true;
+	aa_los_them_mob = nullptr;
+	los_status = false;
+	los_status_facing = false;
+	HideCorpseMode = HideCorpseNone;
+	PendingGuildInvitation = false;
+
+	InitializeBuffSlots();
+
+	adventure_request_timer = nullptr;
+	adventure_create_timer = nullptr;
+	adventure_leave_timer = nullptr;
+	adventure_door_timer = nullptr;
+	adv_requested_data = nullptr;
+	adventure_stats_timer = nullptr;
+	adventure_leaderboard_timer = nullptr;
+	adv_data = nullptr;
+	adv_requested_theme = LDoNTheme::Unused;
+	adv_requested_id = 0;
+	adv_requested_member_count = 0;
+
+	for(int i = 0; i < XTARGET_HARDCAP; ++i)
+	{
+		XTargets[i].Type = Auto;
+		XTargets[i].ID = 0;
+		XTargets[i].Name[0] = 0;
+		XTargets[i].dirty = false;
+	}
+	MaxXTargets = 5;
+	XTargetAutoAddHaters = true;
+	m_autohatermgr.SetOwner(this, nullptr, nullptr);
+	m_activeautohatermgr = &m_autohatermgr;
+
+	initial_respawn_selection = 0;
+	alternate_currency_loaded = false;
+
+	interrogateinv_flag = false;
+
+	trapid = 0;
+
+	for (int i = 0; i < InnateSkillMax; ++i)
+		m_pp.InnateSkills[i] = InnateDisabled;
+
+	temp_pvp = false;
+
+	moving = false;
+
+	environment_damage_modifier = 0;
+	invulnerable_environment_damage = false;
+
+	// rate limiter
+	m_list_task_timers_rate_limit.Start(1000);
+
+	// gm
+	SetDisplayMobInfoWindow(true);
+	SetDevToolsEnabled(true);
+
+	bot_owner_options[booDeathMarquee] = false;
+	bot_owner_options[booStatsUpdate] = false;
+	bot_owner_options[booSpawnMessageSay] = false;
+	bot_owner_options[booSpawnMessageTell] = true;
+	bot_owner_options[booSpawnMessageClassSpecific] = true;
+	bot_owner_options[booAutoDefend] = RuleB(Bots, AllowOwnerOptionAutoDefend);
+	bot_owner_options[booBuffCounter] = false;
+	bot_owner_options[booMonkWuMessage] = false;
+
+	m_parcel_platinum         = 0;
+	m_parcel_gold             = 0;
+	m_parcel_silver           = 0;
+	m_parcel_copper           = 0;
+	m_parcel_count            = 0;
+	m_parcel_enabled          = true;
+	m_parcel_merchant_engaged = false;
+	m_parcels.clear();
+
+	m_buyer_id = 0;
+
+	SetBotPulling(false);
+	SetBotPrecombat(false);
+
+	AI_Init();
+
+}
+
 Client::Client(EQStreamInterface *ieqs) : Mob(
 	"No name", // in_name
 	"", // in_lastname
@@ -506,9 +814,11 @@ Client::~Client() {
 		zone->RemoveAuth(GetName(), lskey);
 
 	//let the stream factory know were done with this stream
-	eqs->Close();
-	eqs->ReleaseFromUse();
-	safe_delete(eqs);
+	if (eqs) {
+		eqs->Close();
+		eqs->ReleaseFromUse();
+		safe_delete(eqs);
+	}
 
 	UninitializeBuffSlots();
 }
@@ -757,36 +1067,32 @@ bool Client::Save(uint8 iCommitNow) {
 
 	m_pp.lastlogin = time(nullptr);
 
-	if (!dead || !RuleB(Custom, SuspendGroupBuffs)) {
-		ValidatePetList(); // make sure pet list is compacted correctly
-
+	if (!dead) {
+		auto pets = GetAllPets();
 		m_petinfomulti.clear();
-		m_petinfomulti.empty();
 
-		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
-
-		if (!dead || RuleB(Custom, SuspendGroupBuffs)) {
-			for (Mob* mob : pets) {
-				if (mob)
-				{
-					NPC* pet = mob->CastToNPC();
-					if (pet && pet->GetPetSpellID() && (!dead || FindSpellBookSlotBySpellID(pet->GetPetSpellID() >= 0))) {
-						PetInfo newPetInfo = PetInfo();
-						memset(&newPetInfo, 0, sizeof(PetInfo));
-						newPetInfo.SpellID = pet->GetPetSpellID();
-						newPetInfo.HP = pet->GetHP();
-						newPetInfo.Mana = pet->GetMana();
-						pet->GetPetState(newPetInfo.Buffs, newPetInfo.Items, newPetInfo.Name);
-						newPetInfo.petpower = pet->GetPetPower();
-						newPetInfo.size = pet->GetSize();
-						newPetInfo.taunting = pet->IsTaunting();
-						m_petinfomulti.push_back(newPetInfo);
-					}
+		for (Mob* mob : pets) {
+			if (mob)
+			{
+				NPC* pet = mob->CastToNPC();
+				if (pet && pet->GetPetSpellID()) {
+					PetInfo newPetInfo = PetInfo();
+					memset(&newPetInfo, 0, sizeof(PetInfo));
+					newPetInfo.SpellID = pet->GetPetSpellID();
+					newPetInfo.HP = pet->GetHP();
+					newPetInfo.Mana = pet->GetMana();
+					pet->GetPetState(newPetInfo.Buffs, newPetInfo.Items, newPetInfo.Name);
+					newPetInfo.petpower = pet->GetPetPower();
+					newPetInfo.size = pet->GetSize();
+					newPetInfo.taunting = pet->IsTaunting();
+					m_petinfomulti.push_back(newPetInfo);
 				}
 			}
 		}
 
-		database.SavePetInfo(this);
+		if (entity_list.GetNPCList().size() > 0) {
+			database.SavePetInfo(this);
+		}
 	}
 
 	if(tribute_timer.Enabled()) {
@@ -1599,6 +1905,20 @@ void Client::FixModel(Spawn_Struct* npc) {
 			npc->helm = zone->random.Int(0,2);
 			break;
 
+		case Race::WaterDragon:
+			npc->race = Race::Dragon2;
+			npc->helm = npc->equip_chest2;
+			npc->size = 100;
+			break;
+
+		case Race::PrismaticDragon:
+			npc->race = Race::Dragon7;
+			npc->helm = npc->equip_chest2;
+			npc->size = 120;
+			break;
+
+		case Race::BlackAndWhiteDragon:
+		case Race::VeliousDragon:
 		case Race::LavaDragon:
 			npc->race = Race::Dragon5;
 			npc->size = 100;
@@ -13172,77 +13492,145 @@ void Client::SendPath(Mob* target)
 }
 
 bool Client::IsPetBagActive() {
-	return GetActivePetBagSlot() >= 0;
-}
-
-EQ::ItemInstance* Client::GetActivePetBag() {
-	return GetInv().GetItem(GetActivePetBagSlot());
-}
-
-int16 Client::GetActivePetBagSlot() {
-	EQ::ItemInstance* active_bag = nullptr;
-	uint16 active_bag_slot = -1;
-	if (RuleB(Custom, EnablePetBags)) {
-		for (int slot = EQ::invslot::GENERAL_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
-			auto potential_bag = GetInv().GetItem(slot);
-			if (potential_bag && IsValidPetBag(potential_bag->GetID())) {
-				if (!active_bag || active_bag->GetItem()->BagSlots > potential_bag->GetItem()->BagSlots) {
-					active_bag = potential_bag;
-					active_bag_slot = slot;
-				}
-			}
-		}
-	}
-	return active_bag_slot;
-}
-
-bool Client::IsValidPetBag(int item_id) {
-	std::vector<std::string> item_strings = Strings::Split(RuleS(Custom, PetBagList), ",");
-	for (const std::string& item_string : item_strings) {
-		if (item_id == Strings::ToInt(item_string, -1)) {
+	for (int class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
+		if (HasClass(class_id) && GetActivePetBagSlot(class_id) >= 0) {
 			return true;
 		}
 	}
+
+	return false;
+}
+
+EQ::ItemInstance* Client::GetActivePetBag(int class_id) {
+	return GetInv().GetItem(GetActivePetBagSlot(class_id));
+}
+
+int16 Client::GetActivePetBagSlot(int class_id) {
+    EQ::ItemInstance* active_bag = nullptr;
+    EQ::ItemInstance* potential_bag = nullptr;
+    uint16 active_bag_slot = -1;
+
+    if (!RuleB(Custom, EnablePetBags)) {
+        return active_bag_slot; // Return -1 if pet bags are disabled
+    }
+
+    // Helper lambda to evaluate bags in a range
+    auto evaluate_bags_in_range = [&](int start_slot, int end_slot) {
+        for (int slot = start_slot; slot <= end_slot; slot++) {
+            potential_bag = GetInv().GetItem(slot);
+            if (potential_bag && IsValidPetBagForClass(potential_bag->GetID(), class_id)) {
+                if (!active_bag || active_bag->GetItem()->BagSlots < potential_bag->GetItem()->BagSlots) {
+                    active_bag = potential_bag;
+                    active_bag_slot = slot;
+                }
+            }
+        }
+    };
+
+    // Check general inventory slots
+    evaluate_bags_in_range(EQ::invslot::GENERAL_BEGIN, EQ::invslot::GENERAL_END);
+
+    // If no bag was found, check bank slots
+    if (!active_bag) {
+        evaluate_bags_in_range(EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END);
+    }
+
+    return active_bag_slot;
+}
+
+bool Client::IsValidPetBagForClass(int bag_id, int class_id) {
+    static const std::unordered_map<int, std::vector<int>> class_to_bag_map = {
+        {5,  {899980}},
+		{6,  {899981}},
+		{8,  {899983}},
+		{10, {899984}},
+		{11, {899985}},
+		{13, {899986, 900000}},
+		{14, {899987}},
+		{15, {899988}},
+    };
+
+    auto it = class_to_bag_map.find(class_id);
+    if (it != class_to_bag_map.end()) {
+        const auto& valid_bags = it->second;
+        return std::find(valid_bags.begin(), valid_bags.end(), bag_id) != valid_bags.end();
+    }
+
+    return false; // No valid bags for the class
+}
+
+bool Client::IsValidPetBag(int bag_id) {
+	for (int class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
+		if (IsValidPetBagForClass(bag_id, class_id)) {
+			return true;
+		}
+	}
+
 	return false;
 }
 
 // It might make more sense to do invidual syncs at some point in the future, but this is fast enough
-void Client::DoPetBagResync() {
-	if (RuleB(Custom, EnablePetBags)) {
-		auto pet_bag = GetActivePetBag();
-		auto pet_bag_slot = GetActivePetBagSlot();
+void Client::DoPetBagResync(int class_id) {
+	if (!RuleB(Custom, EnablePetBags)) {
+		return;
+	}
 
-		for (auto pet : GetAllPets()) {
-			if (pet && pet_bag && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), Class::Magician) < UINT8_MAX) {
-				DoPetBagFlush(pet);
-				NPC* pet_npc = pet->CastToNPC();
+	auto pet_bag = GetActivePetBag(class_id);
+	auto pet_bag_slot = GetActivePetBagSlot(class_id);
 
-				int bag_top = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, 0);
-				int bag_bot = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, pet_bag->GetItem()->BagSlots);
+	for (auto pet : GetAllPets()) {
+		if (pet && pet_bag && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), class_id) < UINT8_MAX) {
+			NPC* pet_npc = pet->CastToNPC();
 
-				for (int slot_id = bag_top; slot_id < bag_bot; slot_id++) {
-					auto item_inst = GetInv().GetItem(slot_id);
-					if (item_inst) {
-						auto aug0 = item_inst->GetAugment(0);
-						auto aug1 = item_inst->GetAugment(1);
-						auto aug2 = item_inst->GetAugment(2);
-						auto aug3 = item_inst->GetAugment(3);
-						auto aug4 = item_inst->GetAugment(4);
-						auto aug5 = item_inst->GetAugment(5);
+			if (IsEffectInSpell(pet_npc->GetPetSpellID(), SE_Charm)) {
+				if (!pet_npc->EntityVariableExists("is_charmed")) {
+					auto inventory = pet_npc->GetLootList();
 
-						pet_npc->AddItemFixed(item_inst->GetID(), 1,	true,
-											aug0 != nullptr ? aug0->GetID() : 0,
-											aug1 != nullptr ? aug1->GetID() : 0,
-											aug2 != nullptr ? aug2->GetID() : 0,
-											aug3 != nullptr ? aug3->GetID() : 0,
-											aug4 != nullptr ? aug4->GetID() : 0,
-											aug5 != nullptr ? aug5->GetID() : 0);
+					std::vector<std::string> inventory_strings;
+
+					for (int item_id : inventory) {
+						inventory_strings.push_back(std::to_string(item_id));
 					}
-				}
 
-				pet->SendWearChange(EQ::textures::weaponPrimary);
-				pet->SendWearChange(EQ::textures::weaponSecondary);
+					auto serialized_inventory = Strings::Join(inventory_strings, ",");
+
+					pet_npc->SetEntityVariable("is_charmed", serialized_inventory);
+
+					LogDebug("On Resync Serialized Inventory: [{}]", serialized_inventory);
+				} else {
+					LogDebug("Pre-Existing Serialized Inventory: [{}]", pet_npc->GetEntityVariable("is_charmed"));
+				}
 			}
+
+			DoPetBagFlush(pet);
+
+			int bag_top = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, 0);
+			int bag_bot = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, pet_bag->GetItem()->BagSlots);
+
+			for (int slot_id = bag_top; slot_id < bag_bot; slot_id++) {
+				auto item_inst = GetInv().GetItem(slot_id);
+				if (item_inst) {
+					auto aug0 = item_inst->GetAugment(0);
+					auto aug1 = item_inst->GetAugment(1);
+					auto aug2 = item_inst->GetAugment(2);
+					auto aug3 = item_inst->GetAugment(3);
+					auto aug4 = item_inst->GetAugment(4);
+					auto aug5 = item_inst->GetAugment(5);
+
+					pet_npc->AddItemFixed(item_inst->GetID(), 1,	true,
+										  aug0 != nullptr ? aug0->GetID() : 0,
+										  aug1 != nullptr ? aug1->GetID() : 0,
+										  aug2 != nullptr ? aug2->GetID() : 0,
+										  aug3 != nullptr ? aug3->GetID() : 0,
+										  aug4 != nullptr ? aug4->GetID() : 0,
+										  aug5 != nullptr ? aug5->GetID() : 0);
+				}
+			}
+
+			pet->SendWearChange(EQ::textures::weaponPrimary);
+			pet->SendWearChange(EQ::textures::weaponSecondary);
+
+			pet_npc->SetAttackTimer();
 		}
 	}
 }
@@ -13456,248 +13844,6 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 
 	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
 	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
-}
-
-void Client::NPCHandinEventLog(Trade* t, NPC* n)
-{
-	Client* c = t->GetOwner()->CastToClient();
-
-	std::vector<PlayerEvent::HandinEntry> hi = {};
-	std::vector<PlayerEvent::HandinEntry> ri = {};
-	PlayerEvent::HandinMoney              hm{};
-	PlayerEvent::HandinMoney              rm{};
-
-	if (
-		c->EntityVariableExists("HANDIN_ITEMS") &&
-		c->EntityVariableExists("HANDIN_MONEY") &&
-		c->EntityVariableExists("RETURN_ITEMS") &&
-		c->EntityVariableExists("RETURN_MONEY")
-	) {
-		const std::string& handin_items = c->GetEntityVariable("HANDIN_ITEMS");
-		const std::string& return_items = c->GetEntityVariable("RETURN_ITEMS");
-		const std::string& handin_money = c->GetEntityVariable("HANDIN_MONEY");
-		const std::string& return_money = c->GetEntityVariable("RETURN_MONEY");
-
-		// Handin Items
-		if (!handin_items.empty()) {
-			if (Strings::Contains(handin_items, ",")) {
-				const auto handin_data = Strings::Split(handin_items, ",");
-				for (const auto& h : handin_data) {
-					const auto item_data = Strings::Split(h, "|");
-					if (
-						item_data.size() == 3 &&
-						Strings::IsNumber(item_data[0]) &&
-						Strings::IsNumber(item_data[1]) &&
-						Strings::IsNumber(item_data[2])
-					) {
-						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
-						if (item_id != 0) {
-							const auto* item = database.GetItem(item_id);
-
-							if (item) {
-								hi.emplace_back(
-									PlayerEvent::HandinEntry{
-										.item_id = item_id,
-										.item_name = item->Name,
-										.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
-										.attuned = Strings::ToInt(item_data[2]) ? true : false
-									}
-								);
-							}
-						}
-					}
-				}
-			} else if (Strings::Contains(handin_items, "|")) {
-				const auto item_data = Strings::Split(handin_items, "|");
-				if (
-					item_data.size() == 3 &&
-					Strings::IsNumber(item_data[0]) &&
-					Strings::IsNumber(item_data[1]) &&
-					Strings::IsNumber(item_data[2])
-				) {
-					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
-					const auto*  item    = database.GetItem(item_id);
-
-					if (item) {
-						hi.emplace_back(
-							PlayerEvent::HandinEntry{
-								.item_id = item_id,
-								.item_name = item->Name,
-								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
-								.attuned = Strings::ToInt(item_data[2]) ? true : false
-							}
-						);
-					}
-				}
-			}
-		}
-
-		// Handin Money
-		if (!handin_money.empty()) {
-			const auto hms = Strings::Split(handin_money, "|");
-
-			hm.copper   = Strings::ToUnsignedInt(hms[0]);
-			hm.silver   = Strings::ToUnsignedInt(hms[1]);
-			hm.gold     = Strings::ToUnsignedInt(hms[2]);
-			hm.platinum = Strings::ToUnsignedInt(hms[3]);
-		}
-
-		// Return Items
-		if (!return_items.empty()) {
-			if (Strings::Contains(return_items, ",")) {
-				const auto return_data = Strings::Split(return_items, ",");
-				for (const auto& r : return_data) {
-					const auto item_data = Strings::Split(r, "|");
-					if (
-						item_data.size() == 3 &&
-						Strings::IsNumber(item_data[0]) &&
-						Strings::IsNumber(item_data[1]) &&
-						Strings::IsNumber(item_data[2])
-					) {
-						const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
-						const auto*  item    = database.GetItem(item_id);
-
-						if (item) {
-							ri.emplace_back(
-								PlayerEvent::HandinEntry{
-									.item_id = item_id,
-									.item_name = item->Name,
-									.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
-									.attuned = Strings::ToInt(item_data[2]) ? true : false
-								}
-							);
-						}
-					}
-				}
-			} else if (Strings::Contains(return_items, "|")) {
-				const auto item_data = Strings::Split(return_items, "|");
-				if (
-					item_data.size() == 3 &&
-					Strings::IsNumber(item_data[0]) &&
-					Strings::IsNumber(item_data[1]) &&
-					Strings::IsNumber(item_data[2])
-				) {
-					const uint32 item_id = Strings::ToUnsignedInt(item_data[0]);
-					const auto*  item    = database.GetItem(item_id);
-
-					if (item) {
-						ri.emplace_back(
-							PlayerEvent::HandinEntry{
-								.item_id = item_id,
-								.item_name = item->Name,
-								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
-								.attuned = Strings::ToInt(item_data[2]) ? true : false
-							}
-						);
-					}
-				}
-			}
-		}
-
-		// Return Money
-		if (!return_money.empty()) {
-			const auto rms = Strings::Split(return_money, "|");
-			rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
-			rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
-			rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
-			rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
-		}
-
-		c->DeleteEntityVariable("HANDIN_ITEMS");
-		c->DeleteEntityVariable("HANDIN_MONEY");
-		c->DeleteEntityVariable("RETURN_ITEMS");
-		c->DeleteEntityVariable("RETURN_MONEY");
-
-		const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
-
-		const bool event_has_data_to_record = (
-			!hi.empty() || handed_in_money
-		);
-
-		if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
-			auto e = PlayerEvent::HandinEvent{
-				.npc_id = n->GetNPCTypeID(),
-				.npc_name = n->GetCleanName(),
-				.handin_items = hi,
-				.handin_money = hm,
-				.return_items = ri,
-				.return_money = rm,
-				.is_quest_handin = true
-			};
-
-			RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
-		}
-
-		return;
-	}
-
-	uint8 item_count = 0;
-
-	hm.platinum = t->pp;
-	hm.gold     = t->gp;
-	hm.silver   = t->sp;
-	hm.copper   = t->cp;
-
-	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
-		if (c->GetInv().GetItem(i)) {
-			item_count++;
-		}
-	}
-
-	hi.reserve(item_count);
-
-	if (item_count > 0) {
-		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; i++) {
-			const EQ::ItemInstance* inst = c->GetInv().GetItem(i);
-			if (inst) {
-				hi.emplace_back(
-					PlayerEvent::HandinEntry{
-						.item_id = inst->GetItem()->ID,
-						.item_name = inst->GetItem()->Name,
-						.charges = static_cast<uint16>(inst->GetCharges()),
-						.attuned = inst->IsAttuned()
-					}
-				);
-
-				if (inst->IsClassBag()) {
-					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
-						inst = c->GetInv().GetItem(i, j);
-						if (inst) {
-							hi.emplace_back(
-								PlayerEvent::HandinEntry{
-									.item_id = inst->GetItem()->ID,
-									.item_name = inst->GetItem()->Name,
-									.charges = static_cast<uint16>(inst->GetCharges()),
-									.attuned = inst->IsAttuned()
-								}
-							);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	const bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
-
-	ri = hi;
-	rm = hm;
-
-	const bool event_has_data_to_record = !hi.empty() || handed_in_money;
-
-	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
-		auto e = PlayerEvent::HandinEvent{
-			.npc_id = n->GetNPCTypeID(),
-			.npc_name = n->GetCleanName(),
-			.handin_items = hi,
-			.handin_money = hm,
-			.return_items = ri,
-			.return_money = rm,
-			.is_quest_handin = false
-		};
-
-		RecordPlayerEventLogWithClient(c, PlayerEvent::NPC_HANDIN, e);
-	}
 }
 
 void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
@@ -14004,10 +14150,12 @@ bool Client::RemoveExtraClass(int class_id) {
     // Lambda to check if a spell is usable by any of the given classes
     auto is_spell_usable_by_classes = [this, new_classes](int spell_id) {
         for (int i = Class::Warrior; i <= Class::Berserker; i++) {
-            if ((new_classes & GetPlayerClassBit(i)) && GetSpellLevel(spell_id, i) <= GetLevel()) {
+            if ((new_classes & GetPlayerClassBit(i)) && GetSpellLevel(spell_id, i) < UINT8_MAX) {
+				LogDebug("Spell [{}] is usable by class [{}]", spell_id, i);
                 return true;
             }
         }
+		LogDebug("Spell [{}] is not usable by any of the remaining classes", spell_id);
         return false;
     };
 
@@ -14026,6 +14174,7 @@ bool Client::RemoveExtraClass(int class_id) {
     auto memorized_spells = GetMemmedSpells();
     for (auto memmed_id : memorized_spells) {
         if (IsValidSpell(memmed_id) && !is_spell_usable_by_classes(memmed_id)) {
+			LogDebug("Unmemming spell [{}]", memmed_id);
             UnmemSpellBySpellID(memmed_id);
         }
     }
@@ -14033,6 +14182,7 @@ bool Client::RemoveExtraClass(int class_id) {
     auto scribed_spells = GetScribedSpells();
     for (auto spell_id : scribed_spells) {
         if (IsValidSpell(spell_id) && !is_spell_usable_by_classes(spell_id)) {
+			LogDebug("Unscribing spell [{}]", spell_id);
             UnscribeSpellBySpellID(spell_id, true);
         }
     }
@@ -14040,6 +14190,7 @@ bool Client::RemoveExtraClass(int class_id) {
     auto scribed_disc = GetLearnedDisciplines();
     for (auto disc_id : scribed_disc) {
         if (IsValidSpell(disc_id) && !is_spell_usable_by_classes(disc_id)) {
+			LogDebug("Unscribing discipline [{}]", disc_id);
             UntrainDiscBySpellID(disc_id, true);
         }
     }

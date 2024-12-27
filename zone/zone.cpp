@@ -879,6 +879,11 @@ void Zone::Shutdown(bool quiet)
 
 	entity_list.StopMobAI();
 
+	for (auto client : entity_list.GetClientList()) {
+		client.second->Save();
+		client.second->WorldKick();
+	}
+
 	std::map<uint32, NPCType *>::iterator itr;
 	while (!zone->npctable.empty()) {
 		itr = zone->npctable.begin();

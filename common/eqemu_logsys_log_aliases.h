@@ -361,7 +361,6 @@
         OutF(LogSys, Logs::Detail, Logs::PacketServerClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-
 #define LogLoginserver(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Loginserver))\
         OutF(LogSys, Logs::General, Logs::Loginserver, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -842,6 +841,16 @@
 #define LogXTargetsDetail(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::Detail, Logs::XTargets))\
         OutF(LogSys, Logs::Detail, Logs::XTargets, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogNpcHandin(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::NpcHandin))\
+        OutF(LogSys, Logs::General, Logs::NpcHandin, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogNpcHandinDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::NpcHandin))\
+        OutF(LogSys, Logs::Detail, Logs::NpcHandin, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogVisibility(message, ...) do {\

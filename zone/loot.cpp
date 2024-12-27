@@ -409,6 +409,9 @@ void NPC::AddLootDropFixed(
 
 		if (!item2->NoPet) {
 			for (int i = EQ::invslot::EQUIPMENT_BEGIN; !found && i <= EQ::invslot::EQUIPMENT_END; i++) {
+				if (i == EQ::invslot::slotRange) {
+					continue;
+				}
 				const uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if (equipment[i]) {
@@ -479,6 +482,11 @@ void NPC::AddLootDropFixed(
 
 			if (item2->IsType2HWeapon()) {
 				SetTwoHanderEquipped(true);
+				equipment[EQ::invslot::slotSecondary] = 0;
+				auto secondary = GetItem(EQ::invslot::slotSecondary);
+				if (secondary) {
+					secondary->equip_slot = EQ::invslot::SLOT_INVALID;
+				}
 			}
 		}
 		else if (
@@ -494,10 +502,20 @@ void NPC::AddLootDropFixed(
 				item2->ItemType == EQ::item::ItemTypeLight
 			)
 			) {
-			equipment_slot = EQ::textures::weaponSecondary;
+			if (!HasTwoHanderEquipped()) {
+				equipment_slot = EQ::textures::weaponSecondary;
 
-			if (item2->Damage > 0) {
-				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
+				if (item2->Damage > 0) {
+					SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
+				}
+			} else {
+				equipment[EQ::invslot::slotSecondary] = 0;
+				auto secondary = GetItem(EQ::invslot::slotSecondary);
+				if (secondary) {
+					secondary->equip_slot = EQ::invslot::SLOT_INVALID;
+				}
+				found = false;
+				found_slot = INVALID_INDEX;
 			}
 		}
 		else if (found_slot == EQ::invslot::slotHead) {
@@ -558,7 +576,10 @@ void NPC::AddLootDropFixed(
 		case Race::Wrulon:
 		case Race::Phoenix:
 		case Race::Spider:
-			return 0;
+			safe_delete(outapp);
+			safe_delete(item);
+			safe_delete(inst);
+			return;
 	}
 
 	if (wear_change && outapp) {

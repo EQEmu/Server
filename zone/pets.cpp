@@ -320,7 +320,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	}
 
 	if (IsClient()) {
-		CastToClient()->DoPetBagResync();
+		CastToClient()->DoPetBagResync(npc->GetPetOriginClass());
 
 		auto inst = GetInv().GetItem(EQ::invslot::slotAmmo);
 		if (!inst) {
@@ -686,7 +686,9 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
 			break;
 		// Necromancer Skeletons
 		case 338: case 491: case 351: case 362: case 492: case 440: case 493: case 441:
-		case 494: case 442: case 495: case 443: case 1621: case 1622:
+		case 494: case 442: case 495: case 443: case 1621: case 1622: case 33634:
+		case 33635: case 33636: case 33637: case 33638: case 33639: case 33640: case 33641:
+		case 33643: case 17786:
 			tmp_lastname 	= fmt::format("{}'s Skeleton", owner->GetCleanName());
 			tmp_name 		= (static_name == nullptr) ? getRandomSkeletonName() : static_name;
 			break;
@@ -739,14 +741,6 @@ void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
 			tmp_lastname 	= fmt::format("{}'s Animated Sword", owner->GetCleanName());
 			tmp_name 		= (static_name == nullptr) ? fmt::format("{}`s {}", owner->GetCleanName(), spells[spell_id].name) : static_name;
 			break;
-		// Clockworks
-		case 16601: case 16995:
-			tmp_lastname = fmt::format("{}'s Clockwork Servant", owner->GetCleanName());
-			if (spell_id = 16995) {
-				tmp_name = (static_name == nullptr) ? fmt::format("{}`s Resupply Agent", owner->GetCleanName()) : static_name;
-			} else {
-				tmp_name = (static_name == nullptr) ? fmt::format("{}`s Clockwork Banker", owner->GetCleanName()) : static_name;
-			}
 	}
 
 	if (tmp_lastname.size() < sizeof(lastname)) {
@@ -943,30 +937,30 @@ uint16 Mob::GetPetID(uint8 idx) const {
     }
 }
 
-bool Mob::IsPetAllowed(uint16 incoming_spell) {
+bool Mob::IsPetAllowed(uint16 spell_id) {
     ValidatePetList();
-    std::map<uint8, uint16> class_spell_map; // Maps class_id to spell_id
-    std::set<uint8> assigned_classes; // Track assigned classes
-    uint32 player_classes_bitmask = GetClassesBits();
     int pet_count = petids.size();
+    int cumulative_bitmask = 0;
 
     // Check if the total number of pets exceeds the allowed limit
-    if (pet_count + 1 > RuleI(Custom, AbsolutePetLimit)) {
+    if (pet_count >= RuleI(Custom, AbsolutePetLimit)) {
         Message(Chat::SpellFailure, "You may not control any additional pets.");
         return false;
     }
 
-    std::vector<uint16> spell_list;
-    spell_list.push_back(incoming_spell);
-
     for (auto pet : GetAllPets()) {
-        uint16 origin_spell = 0;
+        if (!pet) {
+            continue;
+        }
 
+        uint16 origin_spell = 0;
         auto pet_buffs = pet->GetBuffs();
+
+        // Find the spell that created the current pet
         for (int i = 0; i < pet->GetMaxTotalSlots(); i++) {
             if (IsCharmSpell(pet_buffs[i].spellid)) {
                 origin_spell = pet_buffs[i].spellid;
-				LogDebug("Found Charm Spell: [{}]", origin_spell);
+                LogDebug("Found Charm Spell: [{}]", origin_spell);
                 break;
             }
         }
@@ -975,78 +969,31 @@ bool Mob::IsPetAllowed(uint16 incoming_spell) {
             origin_spell = pet->CastToNPC()->GetPetSpellID();
         }
 
-        if (origin_spell == incoming_spell) {
-            Message(Chat::SpellFailure, "You may not have more than one pet of the same type.");
-            return false; // Never allow identical pets.
+		// Check if this spell matches the origin spell of an existing pet
+        if (origin_spell == spell_id) {
+            Message(Chat::SpellFailure, "You may not control any additional pets of this type (%s).", spells[spell_id].name);
+            return false;
         }
 
-        spell_list.push_back(origin_spell);
+        // Aggregate the bitmask of the classes that can summon this pet
+        for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+            if (GetSpellLevel(origin_spell, i) < UINT8_MAX) {
+                cumulative_bitmask |= (1 << i); // Mark class `i` as having a pet
+            }
+        }
     }
 
-    // Lambda function to check if a spell is unusable by any class the player has
-    auto is_unusable_by_player_classes = [&](uint16 spell_id) -> bool {
-        for (int i = Class::Warrior; i <= Class::Berserker; i++) {
-            if (player_classes_bitmask & GetPlayerClassBit(i)) {
-                if (GetSpellLevel(spell_id, i) < UINT8_MAX) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    };
-
-    // Process spells iteratively
-    while (!spell_list.empty()) {
-        uint16 spell_id = spell_list.back();
-        spell_list.pop_back();
-
-        std::map<uint8, uint16> class_levels;
-        for (int i = Class::Warrior; i <= Class::Berserker; i++) {
-            if (player_classes_bitmask & GetPlayerClassBit(i)) {
-                uint16 level = GetSpellLevel(spell_id, i);
-                if (level < UINT8_MAX) {
-                    class_levels[i] = level;
-                }
-            }
-        }
-
-        bool assigned = false;
-
-        // Assign to the lowest level class available among the player's classes
-        for (auto &pair : class_levels) {
-            uint8 class_id = pair.first;
-            uint16 spell_level = pair.second;
-
-            if (!assigned_classes.count(class_id)) {
-                if (class_spell_map.count(class_id)) {
-                    if (spell_level < GetSpellLevel(class_spell_map[class_id], class_id)) {
-                        spell_list.push_back(class_spell_map[class_id]);
-                        class_spell_map[class_id] = spell_id;
-                        assigned_classes.insert(class_id);
-                        assigned = true;
-                        break;
-                    }
-                } else {
-                    class_spell_map[class_id] = spell_id;
-                    assigned_classes.insert(class_id);
-                    assigned = true;
-                    break;
-                }
-            }
-        }
-
-        // If the spell couldn't be assigned, check if it's unusable by any of the player's classes
-        if (!assigned) {
-            if (is_unusable_by_player_classes(spell_id)) {
-                continue; // Allow it to pass if it's unusable by any of the player's classes
-            } else {
-				Message(Chat::SpellFailure, "You may not have more than one pet from the same class.");
+    // Check if the new spell's classes overlap with the bitmask of existing pet classes
+    for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+        if (GetSpellLevel(spell_id, i) < UINT8_MAX) { // This class can cast the spell
+            if (cumulative_bitmask & (1 << i)) { // This class already has a pet
+                Message(Chat::SpellFailure, "You may not control any additional pets for this class (%s).", GetClassIDName(i));
                 return false;
             }
         }
     }
 
-    return true;
+    return true; // Allow the pet
 }
 
 // Get the Mob instance of the pet at the given index
@@ -1145,6 +1092,7 @@ bool Mob::RemovePet(uint16 pet_id) {
             // Retrieve the Mob associated with the pet ID
             auto pet = entity_list.GetMob(pet_id);
             if (pet) {
+
 				pet->SetOwnerID(0);  // Detach the pet from its owner
 				pet->SendAppearancePacket(AppearanceType::Pet, 0, true, true);
 				pet->SetPetType(petNone);
@@ -1157,13 +1105,11 @@ bool Mob::RemovePet(uint16 pet_id) {
             }
             petids.erase(it);        // Remove the pet ID from the vector
 			ValidatePetList();
-			if (IsClient()) {
-				CastToClient()->DoPetBagResync();
-			}
 
 			if (pet_id == focused_pet_id) {
 				focused_pet_id = 0;
 			}
+
             return true;             // Return true to indicate successful removal
         }
     }
@@ -1230,14 +1176,12 @@ bool Mob::AddPet(uint16 pet_id) {
     petids.push_back(pet_id);
     newpet->SetOwnerID(GetID());  // Set the owner ID to this mob's ID
 
-    // Log the contents of the petids list before the final return
-    LogDebug("Pet ID [{}] added to petids list for Mob [{}]. Current petids:", pet_id, GetCleanName());
-    for (auto id : petids) {
-        LogDebug("  - Pet ID: [{}]", id);
-    }
-
 	focused_pet_id = pet_id;
 	ConfigurePetWindow(newpet);
+	if (newpet->IsNPC() && IsClient() && !IsEffectInSpell(newpet->CastToNPC()->GetPetSpellID(), SE_Charm)) {
+		CastToClient()->DoPetBagResync(newpet->CastToNPC()->GetPetOriginClass());
+		CastToClient()->Save();
+	}
 
     return true;  // Return true to indicate the pet was successfully added
 }
@@ -1245,7 +1189,7 @@ bool Mob::AddPet(uint16 pet_id) {
 void Mob::ValidatePetList() {
     for (auto it = petids.begin(); it != petids.end(); ) {
 		auto pet = entity_list.GetMob(*it);
-        if (!pet || !pet->GetOwner()) {
+        if (!pet || !pet->GetOwner() && entity_list.GetNPCList().size() > 0) {
             LogDebug("Removing invalid pet ID [{}] from petids list for Mob [{}].", *it, GetCleanName());
             it = petids.erase(it);  // Remove invalid pet ID and advance the iterator
         } else {

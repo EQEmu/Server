@@ -119,7 +119,7 @@ public:
 				columns[98] = "6";
 			}
 
-			columns[149] = "0";
+			columns[149] = "1";
 
 			// Adjust disc timers (Why are discs -1 here)
 			if (columns[168] == "-1") {

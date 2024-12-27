@@ -606,58 +606,60 @@ void Client::EjectItemFromSlot(int16 slot_id) {
 }
 
 float Client::GetItemStatValue(EQ::ItemData* item) {
-	if (item) {
-		float return_value = 0.0f;
-
-		if (item->ID % 1000000 == 150000) {
-			return 5.0f;
-		}
-
-		return_value += item->HP   / 10.0f;
-		return_value += item->Mana / 10.0f;
-
-		return_value += item->Damage - (item->Delay / 2);
-
-		return_value += item->AStr;
-		return_value += item->ASta;
-		return_value += item->ADex;
-		return_value += item->AAgi;
-		return_value += item->AInt;
-		return_value += item->AWis;
-
-		return_value += item->MR;
-		return_value += item->FR;
-		return_value += item->CR;
-		return_value += item->DR;
-		return_value += item->PR;
-
-		return_value += 2 * item->HeroicStr;
-		return_value += 2 * item->HeroicSta;
-		return_value += 2 * item->HeroicAgi;
-		return_value += 2 * item->HeroicDex;
-		return_value += 2 * item->HeroicWis;
-		return_value += 2 * item->HeroicInt;
-		return_value += 2 * item->HeroicCha;
-
-		return_value += 2 * item->HeroicMR;
-		return_value += 2 * item->HeroicFR;
-		return_value += 2 * item->HeroicCR;
-		return_value += 2 * item->HeroicDR;
-		return_value += 2 * item->HeroicPR;
-
-		return_value += 2 * item->HealAmt;
-		return_value += 2 * item->SpellDmg;
-
-		if (item->Click.Effect > 0) return_value  += 25;
-		if (item->Worn.Effect  > 0)  return_value += 25;
-		if (item->Focus.Effect > 0) return_value  += 25;
-
-		return_value = std::max(1.0f, return_value);
-
-		LogDebug("EXPVAL: [{}]", return_value);
-
-		return return_value;
+	if (!item) {
+		return 0.0f;
 	}
+
+	float return_value = 0.0f;
+
+	if (item->ID % 1000000 == 150000) {
+		return 5.0f;
+	}
+
+	return_value += item->HP   / 10.0f;
+	return_value += item->Mana / 10.0f;
+
+	return_value += item->Damage - (item->Delay / 2);
+
+	return_value += item->AStr;
+	return_value += item->ASta;
+	return_value += item->ADex;
+	return_value += item->AAgi;
+	return_value += item->AInt;
+	return_value += item->AWis;
+
+	return_value += item->MR;
+	return_value += item->FR;
+	return_value += item->CR;
+	return_value += item->DR;
+	return_value += item->PR;
+
+	return_value += 2 * item->HeroicStr;
+	return_value += 2 * item->HeroicSta;
+	return_value += 2 * item->HeroicAgi;
+	return_value += 2 * item->HeroicDex;
+	return_value += 2 * item->HeroicWis;
+	return_value += 2 * item->HeroicInt;
+	return_value += 2 * item->HeroicCha;
+
+	return_value += 2 * item->HeroicMR;
+	return_value += 2 * item->HeroicFR;
+	return_value += 2 * item->HeroicCR;
+	return_value += 2 * item->HeroicDR;
+	return_value += 2 * item->HeroicPR;
+
+	return_value += 2 * item->HealAmt;
+	return_value += 2 * item->SpellDmg;
+
+	if (item->Click.Effect > 0) return_value  += 25;
+	if (item->Worn.Effect  > 0)  return_value += 25;
+	if (item->Focus.Effect > 0) return_value  += 25;
+
+	return_value = std::max(1.0f, return_value);
+
+	LogDebug("EXPVAL: [{}]", return_value);
+
+	return return_value;
 }
 
 float Client::GetBaseExpValueForKill(int conlevel, int target_tier, EQ::ItemInstance* upgrade_item) {

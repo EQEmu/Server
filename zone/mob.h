@@ -356,8 +356,19 @@ public:
 	void NegateSpellEffectBonuses(uint16 spell_id);
 	bool NegateSpellEffect(uint16 spell_id, int effect_id);
 	float GetActSpellRange(uint16 spell_id, float range);
-	int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr, int percent_modifier = 0);
-	int64 GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_buff_tic = true);
+	int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr);
+
+	int GetSharedSpellDamage();
+	int GetSharedHealAmount();
+	int GetSharedCriticalSpellChance();
+	int GetSharedSpellCritDmgIncrease();
+	int GetSharedSpellCritDmgIncNoStack();
+	int GetSharedCriticalDoTChance();
+	int GetSharedDotCritDmgIncrease();
+	int GetSharedCriticalHealChance();
+	int GetSharedCriticalHealOverTime();
+
+	int64 GetActDoTDamage(uint16 spell_id, int64 value, Mob *target, bool from_buff_tic = true);
 	int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr, bool from_buff_tic = false);
 	int32 GetActSpellCost(uint16 spell_id, int32 cost);
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
@@ -1533,6 +1544,8 @@ public:
 	uint16 focused_pet_id;
 
 	void ClearDataBucketCache();
+
+	bool IsGuildmaster() const;
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);

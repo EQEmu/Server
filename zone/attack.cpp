@@ -1895,14 +1895,25 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	InterruptSpell();
 	ZeroBardPulseVars();
 
+	for (auto m_pet : GetAllPets()) {
+		if (m_pet && m_pet->IsCharmed()) {
+			m_pet->BuffFadeByEffect(SE_Charm);
+		}
+	}
+
 	if (!RuleB(Custom, SuspendGroupBuffs)) {
 		RemoveAllPets();
 	} else {
+		auto pets = GetAllPets();
+		for (auto pet : pets) {
+
+		}
+
+		/*
 		// Manual Save of pets
 		ValidatePetList(); // make sure pet list is compacted correctly
 
 		m_petinfomulti.clear();
-		m_petinfomulti.empty();
 
 		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
 
@@ -1934,17 +1945,12 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 		database.SavePetInfo(this);
 
 		RemoveAllPets();
+		*/
 	}
 
 	SetHorseId(0);
 	ShieldAbilityClearVariables();
 	dead = true;
-
-	for (auto m_pet : GetAllPets()) {
-		if (m_pet && m_pet->IsCharmed()) {
-			m_pet->BuffFadeByEffect(SE_Charm);
-		}
-	}
 
 	if (GetMerc()) {
 		GetMerc()->Suspend();
@@ -2409,16 +2415,19 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		otherlevel = otherlevel ? otherlevel : 1;
 		mylevel = mylevel ? mylevel : 1;
 
-		my_hit.base_damage = GetBaseDamage() + eleBane;
+		my_hit.base_damage = GetBaseDamage();
 		my_hit.min_damage = GetMinDamage();
 		int32 hate = my_hit.base_damage + my_hit.min_damage;
 
 		if (GetOwner() && weapon_instance) {
-			int64 base_damage_bonus = weapon_instance->GetItemWeaponDamage(true);
-			if (weapon_instance->GetItemType() == EQ::item::ItemType2HBlunt || weapon_instance->GetItemType() == EQ::item::ItemType2HSlash || weapon_instance->GetItemType() == EQ::item::ItemType2HPiercing) {
-				base_damage_bonus /= 2;
-			}
-			my_hit.base_damage += base_damage_bonus;
+			int weapon_damage = weapon_instance->GetItemWeaponDamage(true);
+			int weapon_delay = weapon_instance->GetItem()->Delay;
+
+			float normalized_max_damage = GetBaseDamage() * (static_cast<float>(weapon_delay) / (attack_delay/100.0f));
+			float normalized_min_damage = GetMinDamage()  * (static_cast<float>(weapon_delay) / (attack_delay/100.0f));
+
+			my_hit.base_damage = normalized_max_damage + weapon_damage + eleBane;
+			my_hit.min_damage  = normalized_min_damage + weapon_damage + eleBane;
 		}
 
 		int hit_chance_bonus = 0;
@@ -2554,6 +2563,17 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 
 		return false;
+	}
+
+	if (IsMultiQuestEnabled()) {
+		for (auto &i: m_hand_in.items) {
+			if (i.is_multiquest_item && i.item->GetItem()->NoDrop != 0) {
+				auto lde = LootdropEntriesRepository::NewNpcEntity();
+				lde.equip_item   = 0;
+				lde.item_charges = i.item->GetCharges();
+				AddLootDrop(i.item->GetItem(), lde, true);
+			}
+		}
 	}
 
 	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
@@ -6926,6 +6946,16 @@ void Mob::CommonBreakInvisibleFromCombat()
 
 void Mob::SetAttackTimer()
 {
+	if (IsNPC()) {
+		CastToNPC()->SetAttackTimer();
+		return;
+	}
+
+	if (IsClient()) {
+		CastToClient()->SetAttackTimer();
+		return;
+	}
+
 	attack_timer.SetAtTrigger(4000, true);
 }
 
@@ -7045,6 +7075,9 @@ void NPC::SetAttackTimer()
 	// ex. Mob's delay set to 20, weapon set to 19, delay 19
 	// Mob's delay set to 20, weapon set to 21, delay 20
 	int speed = 0;
+	int primary_speed = 0;
+	int secondary_speed = 0;
+
 	if (RuleB(Spells, Jun182014HundredHandsRevamp))
 		speed = static_cast<int>((attack_delay / haste_mod) + ((hhe / 1000.0f) * (attack_delay / haste_mod)));
 	else
@@ -7054,8 +7087,6 @@ void NPC::SetAttackTimer()
 		//pick a timer
 		if (i == EQ::invslot::slotPrimary)
 			TimerToUse = &attack_timer;
-		else if (i == EQ::invslot::slotRange)
-			TimerToUse = &ranged_timer;
 		else if (i == EQ::invslot::slotSecondary)
 			TimerToUse = &attack_dw_timer;
 		else	//invalid slot (hands will always hit this)
@@ -7070,7 +7101,78 @@ void NPC::SetAttackTimer()
 			}
 		}
 
+		if (GetOwner() && GetOwner()->IsClient()) {
+			const EQ::ItemData *ItemToUse = nullptr;
+
+			//find our item
+			EQ::ItemInstance *ci = GetInv().GetItem(i);
+			if (ci)
+				ItemToUse = ci->GetItem();
+
+			//special offhand stuff
+			if (i == EQ::invslot::slotSecondary) {
+				//if we cant dual wield, skip it
+				if (!CanThisClassDualWield() || HasTwoHanderEquipped()) {
+					attack_dw_timer.Disable();
+					continue;
+				}
+			}
+
+			//see if we have a valid weapon
+			if (ItemToUse != nullptr) {
+				//check type and damage/delay
+				if (!ItemToUse->IsClassCommon()
+					|| ItemToUse->Damage == 0
+					|| ItemToUse->Delay == 0) {
+					//no weapon
+					ItemToUse = nullptr;
+				}
+				// Check to see if skill is valid
+				else if ((ItemToUse->ItemType > EQ::item::ItemTypeLargeThrowing) &&
+					(ItemToUse->ItemType != EQ::item::ItemTypeMartial) &&
+					(ItemToUse->ItemType != EQ::item::ItemType2HPiercing)) {
+					//no weapon
+					ItemToUse = nullptr;
+				}
+			}
+
+			int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
+
+			int original_speed = speed;
+
+			int delay = 3500;
+
+			//if we have no weapon..
+			if (ItemToUse == nullptr)
+				delay = 100 * GetHandToHandDelay();
+			else
+				//we have a weapon, use its delay
+				delay = 100 * ItemToUse->Delay;
+
+			speed = delay / haste_mod;
+
+			if (RuleB(Spells, Jun182014HundredHandsRevamp))
+				speed = static_cast<int>(speed + ((hhe / 1000.0f) * speed));
+			else
+				speed = static_cast<int>(speed + ((hhe / 100.0f) * delay));
+		}
+
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
+
+		if (i == EQ::invslot::slotPrimary) {
+			primary_speed = speed;
+		}
+		else if (i == EQ::invslot::slotSecondary) {
+			secondary_speed = speed;
+		}
+	}
+
+	//To allow for duel wield animation to display correctly if both weapons have same delay
+	if (primary_speed == secondary_speed) {
+		SetDualWieldingSameDelayWeapons(1);
+	}
+	else {
+		SetDualWieldingSameDelayWeapons(0);
 	}
 }
 

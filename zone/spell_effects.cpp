@@ -287,13 +287,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							dmg = caster->GetActReflectedSpellDamage(spell_id, (int64)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
 						}
 						else {
-							//maybe allowing pets to cast spells as if the owner cast them by a % number.
-							if (RuleI(Spells, PetsScaleWithOwnerPercent) > 0 && caster->GetOwner() && caster->GetOwner()->IsClient() && !IsCharmed())
-							{
-								//share stats
-								Client* owner = caster->GetOwner()->CastToClient();
-								dmg = owner->GetActSpellDamage(spell_id, dmg, this, RuleI(Spells, PetsScaleWithOwnerPercent));
-							}
 							dmg = caster->GetActSpellDamage(spell_id, dmg, this);
 						}
 						caster->ResourceTap(-dmg, spell_id);
@@ -808,6 +801,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						my_pet->Kill();
 					}
 
+					CastToNPC()->SetPetSpellID(spell_id);
+
 					caster->AddPet(this);
 					SetOwnerID(caster->GetID());
 					SetPetOrder(SPO_Follow);
@@ -842,32 +837,32 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						SendPetBuffsToClient();
 						SendAppearancePacket(AppearanceType::Pet, caster->GetID(), true, true);
 					}
-
 					if (IsClient())
 					{
 						CastToClient()->AI_Start();
 					} else if(IsNPC()) {
-						CastToNPC()->SetPetSpellID(0);	//not a pet spell.
+						CastToNPC()->SetPetSpellID(spell_id);
 						CastToNPC()->ModifyStatsOnCharm(false);
-					}
 
-					// Custom charm inventory handling
-					if (RuleB(Custom, StripCharmItems) && IsNPC() && GetOwner()->IsClient()) {
-						if (!EntityVariableExists("is_charmed")) {
-							auto inventory = CastToNPC()->GetLootList();
-							std::vector<std::string> inventory_strings;
+						if (GetOwner() && GetOwner()->IsClient() && GetOwner()->CastToClient()->GetActivePetBag(CastToNPC()->GetPetOriginClass())) {
+							if (!EntityVariableExists("is_charmed")) {
+								auto inventory = CastToNPC()->GetLootList();
+								std::vector<std::string> inventory_strings;
 
-							for (int item_id : inventory) {
-								inventory_strings.push_back(std::to_string(item_id));
+								for (int item_id : inventory) {
+									inventory_strings.push_back(std::to_string(item_id));
+								}
+
+								auto serialized_inventory = Strings::Join(inventory_strings, ",");
+
+								CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
+
+								LogDebug("Initial Charm Serialized Inventory: [{}]", serialized_inventory);
+							} else {
+								LogDebug("Pre-Existing Serialized Inventory: [{}]", GetEntityVariable("is_charmed"));
 							}
 
-							auto serialized_inventory = Strings::Join(inventory_strings, ",");
-
-							CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
-
-							LogDebug("Serialized Inventory: [{}]", serialized_inventory);
-						} else {
-							LogDebug("Pre-Existing Serialized Inventory: [{}]", GetEntityVariable("is_charmed"));
+							GetOwner()->CastToClient()->DoPetBagResync(CastToNPC()->GetPetOriginClass());
 						}
 					}
 
@@ -1323,7 +1318,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			{
 				if(petids.size() >= RuleI(Custom, AbsolutePetLimit) || !IsPetAllowed(spell_id))
 				{
-					LogDebug("Failed to Cast Pet: [{}]", petids.size(),  IsPetAllowed(spell_id));
 					return false;
 				}
 				else
@@ -1410,7 +1404,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Melee Absorb Rune: %+i", effect_value);
 #endif
 				if (buffslot > -1) {
-					int bonus_value = caster->GetExtraSpellAmt(spell_id, caster->GetHealAmt(), effect_value);
+					int bonus_value = caster->GetExtraSpellAmt(spell_id, caster->GetSharedHealAmount(), effect_value);
 					if (IsBardSong(spell_id) && bonus_value > 0) {
 						bonus_value = std::ceil(RuleR(Custom, ItemExtraSpellAmtBardFactor) * bonus_value);
 					}
@@ -1798,26 +1792,26 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_ModelSize:
 			case SE_ChangeHeight:
 			{
-				if (!IsClient() && !GetOwnerID()) {
-					break; // not dealing with this
-				}
-
-				LogDebug("How did we get here?");
-
+#ifdef SPELL_EFFECT_SPAM
+				snprintf(effect_desc, _EDLEN, "Model Size: %d%%", effect_value);
+#endif
 				if (effect_value && effect_value != 100) {
 					// Only allow 2 size changes from Base Size
 					float modifyAmount = (static_cast<float>(effect_value) / 100.0f);
 					float maxModAmount = GetBaseSize() * modifyAmount * modifyAmount;
+					LogDebug("SE_ModelSize: modifyAmount: %f, maxModAmount: %f, GetSize: %f, GetBaseSize: %f", modifyAmount, maxModAmount, GetSize(), GetBaseSize());
 					if ((GetSize() <= GetBaseSize() && GetSize() > maxModAmount) ||
 						(GetSize() >= GetBaseSize() && GetSize() < maxModAmount) ||
 						(GetSize() <= GetBaseSize() && maxModAmount > 1.0f) ||
 						(GetSize() >= GetBaseSize() && maxModAmount < 1.0f))
 					{
+						LogDebug("SE_ModelSize: Setting size to %f", GetSize() * modifyAmount);
 						ChangeSize(GetSize() * modifyAmount);
 					}
 				}
 				//Only applies to SPA 89, max value also likely does something, but unknown.
 				else if (effect == SE_ModelSize && spells[spell_id].limit_value[i]) {
+					LogDebug("SE_ModelSize: Setting size to %f", spells[spell_id].limit_value[i]);
 					ChangeSize(spells[spell_id].limit_value[i]);
 				}
 
@@ -4669,10 +4663,10 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				SetOwnerID(0);
 
 				// Custom charm inventory handling
-				if (RuleB(Custom, StripCharmItems) && EntityVariableExists("is_charmed") && !EntityVariableExists("preserve_inventory")) {
+				if (EntityVariableExists("is_charmed") && !EntityVariableExists("preserve_inventory")) {
 					if (!EntityVariableExists("charm_refresh")) {
 						auto serialized_inventory = GetEntityVariable("is_charmed");
-						LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+						LogDebug("Final Serialized Inventory: [{}]", serialized_inventory);
 
 						// Clear current loot list
 						while(CastToNPC()->CountLoot()) {
@@ -4690,7 +4684,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 								auto item_data = database.GetItem(item_id);
 
 								if (item_data) {
-									CastToNPC()->AddItem(item_data, item_data->MaxCharges);
+									CastToNPC()->AddItemFixed(item_data->ID, item_data->MaxCharges);
 								}
 							}
 						}

@@ -1330,7 +1330,8 @@ bool ZoneDatabase::NoRentExpired(const std::string& name)
 {
 	const uint32 seconds = CharacterDataRepository::GetSecondsSinceLastLogin(*this, name);
 
-	return seconds > 1800;
+	//return seconds > 1800;
+	return seconds > 1;
 }
 
 bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
@@ -1936,6 +1937,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->heroic_strikethrough   = n.heroic_strikethrough;
 		t->faction_amount         = n.faction_amount;
 		t->keeps_sold_items       = n.keeps_sold_items;
+		t->multiquest_enabled     = n.multiquest_enabled != 0;
 
 
 

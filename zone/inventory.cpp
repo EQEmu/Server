@@ -1989,8 +1989,25 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				}
 			}
 
+			int item_id = inst ? inst->GetItem()->ID : 0;
+
+			int class_id = -1;
+			for (int cid = Class::Warrior; cid <= Class::Berserker; cid++) {
+				if (IsValidPetBagForClass(item_id, cid)) {
+					class_id = cid;
+				}
+			}
+
 			DeleteItemInInventory(move_in->from_slot);
 			SendCursorBuffer();
+
+			if (class_id > -1) {
+				for (auto pet : GetAllPets()) {
+					if (pet->CastToNPC()->GetPetOriginClass() == class_id) {
+						DoPetBagFlush(pet);
+					}
+				}
+			}
 
 			return true; // Item destroyed by client
 		}
@@ -2542,24 +2559,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	ApplyWeaponsStance();
 
 	if (RuleB(Custom, EnablePetBags)) {
-		auto pet_bag_idx = GetActivePetBagSlot();
-		// Check to see if we are moving an entire pet bag first
-		if (dst_inst && IsValidPetBag(dst_inst->GetID()) || src_inst && IsValidPetBag(src_inst->GetID())) {
-			if (IsPetBagActive()) {
-				DoPetBagResync();
-			} else {
-				//DoPetBagFlush();
-			}
-		}
-
-		if (pet_bag_idx) {
-			if (EQ::InventoryProfile::CalcSlotId(move_in->to_slot) == pet_bag_idx) {
-				DoPetBagResync();
-			}
-
-			if (EQ::InventoryProfile::CalcSlotId(move_in->from_slot) == pet_bag_idx) {
-				DoPetBagResync();
-			}
+		for (int class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
+			DoPetBagResync(class_id);
 		}
 	}
 
@@ -2944,6 +2945,7 @@ bool Client::DecreaseByID(uint32 type, int16 quantity) {
 
 static bool IsSummonedBagID(uint32 item_id)
 {
+	item_id = item_id % 1000000;
 	switch (item_id) {
 	case 17147: // "Spiritual Prismatic Pack"
 	case 17303: // "Spirit Pouch"
@@ -2966,7 +2968,7 @@ static bool IsSummonedBagID(uint32 item_id)
 	case 95202: // "Journeyman Artisan Satchel"
 	case 95203: // "Expert Artisan Satchel"
 	case 95204: // "Master Artisan Satchel"
-	//case 96960: // "Artisan Satchel" - no 12-slot disenchanted bags
+	case 96960: // "Artisan Satchel" - no 12-slot disenchanted bags
 		return true;
 	default:
 		return false;
@@ -2977,25 +2979,45 @@ static uint32 GetDisenchantedBagID(uint8 bag_slots)
 {
 	switch (bag_slots) {
 	case 4:
+	case 5:
 		return 77772; // "Small Disenchanted Backpack"
+
 	case 6:
 		return 77774; // "Disenchanted Backpack"
+
+	case 7: // Fall through to case 8
 	case 8:
 		return 77776; // "Large Disenchanted Backpack"
+
+	case 9: // Fall through to case 10
 	case 10:
 		return 77778; // "Huge Disenchanted Backpack"
-	case 11:
+
+	case 11: // Fall through to case 12
 	case 12:
-		return 4079; // "Disenchanted Backpack"
+	case 13: // Fall through to case 14
 	case 14:
+	case 15: // Fall through to case 16
 	case 16:
 		return 4644; // "Disenchanted Backpack"
+
+	case 17: // Fall through to case 20
+	case 18:
+	case 19:
 	case 20:
 		return 4645; // "Disenchanted Backpack"
+
+	case 21: // Fall through to case 24
+	case 22:
+	case 23:
+	case 24:
+		return 4646; // "Disenchanted Backpack"
+
 	default:
-		return 4645; // "Disenchanted Backpack"
+		return 4646; // "Disenchanted Backpack"
 	}
 }
+
 
 static bool CopyBagContents(EQ::ItemInstance* new_bag, const EQ::ItemInstance* old_bag)
 {
@@ -3020,28 +3042,87 @@ static bool CopyBagContents(EQ::ItemInstance* new_bag, const EQ::ItemInstance* o
 	return true;
 }
 
+bool Client::CanSummonItem(int item_id) {
+
+	if (HasClass(Class::Magician)) { return true; }
+
+	for(int book_index = 0; book_index < EQ::spells::SPELLBOOK_SIZE; book_index++) {
+		auto spell_id = m_pp.spell_book[book_index];
+		if (!IsValidSpell(spell_id)) { continue; }
+		LogDebug("Examining [{}]", spells[spell_id].name);
+		for (int effect_id = 0; effect_id < 12; effect_id++) {
+			if ((spells[spell_id].base_value[effect_id] % 1000000) == (item_id % 1000000)) {
+				if (GetSpellEffectIndex(spell_id, SE_SummonItem) == effect_id) {
+					LogDebug("CanSummonItem: Spell [{}] can summon item [{}]", spell_id, item_id);
+					return true;
+				}
+
+				if (GetSpellEffectIndex(spell_id, SE_SummonItemIntoBag) == effect_id) {
+					LogDebug("CanSummonItem: Spell [{}] can summon item into bag [{}]", spell_id, item_id);
+					return true;
+				}
+			}
+		}
+	}
+
+	LogDebug("CanSummonItem: Item [{}] cannot be summoned", item_id);
+	return false;
+}
+
 void Client::DisenchantSummonedBags(bool client_update)
 {
-	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
-			continue; // not usable this session - will be disenchanted once player logs in on client that doesn't exclude affected slots
+    for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
+        LogInventoryDetail("Processing slot [{}]", slot_id);
 
-		auto inst = m_inv[slot_id];
-		if (!inst) { continue; }
-		if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
-		if (!inst->GetItem()->IsClassBag()) { continue; }
-		if (inst->GetTotalItemCount() == 1) { continue; }
+        auto inst = m_inv[slot_id];
+        if (!inst) {
+            LogInventoryDetail("Slot [{}]: No item instance found, skipping.", slot_id);
+            continue;
+        }
 
-		auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
-		if (!new_id) { continue; }
-		auto new_item = database.GetItem(new_id);
-		if (!new_item) { continue; }
-		auto new_inst = database.CreateBaseItem(new_item);
-		if (!new_inst) { continue; }
+		if (CanSummonItem(inst->GetItem()->ID)) {
+			LogInventoryDetail("Slot [{}]: Item [{}] is a summonable item, skipping.", slot_id, inst->GetItem()->Name);
+			continue;
+		}
+
+        if (!IsSummonedBagID(inst->GetItem()->ID)) {
+            LogInventoryDetail("Slot [{}]: Item [{}] is not a summoned bag, skipping.", slot_id, inst->GetItem()->Name);
+            continue;
+        }
+
+        if (!inst->GetItem()->IsClassBag()) {
+            LogInventoryDetail("Slot [{}]: Item [{}] is not a class bag, skipping.", slot_id, inst->GetItem()->Name);
+            continue;
+        }
+
+        if (inst->GetTotalItemCount() == 1) {
+            LogInventoryDetail("Slot [{}]: Bag [{}] contains only one item, skipping.", slot_id, inst->GetItem()->Name);
+            continue;
+        }
+
+        auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
+        if (!new_id) {
+            LogInventoryDetail("Slot [{}]: No disenchanted bag ID found for bag [{}], skipping.", slot_id, inst->GetItem()->Name);
+            continue;
+        }
+
+        auto new_item = database.GetItem(new_id);
+        if (!new_item) {
+            LogInventoryDetail("Slot [{}]: Failed to retrieve item for disenchanted bag ID [{}], skipping.", slot_id, new_id);
+            continue;
+        }
+
+        auto new_inst = database.CreateBaseItem(new_item);
+        if (!new_inst) {
+            LogInventoryDetail("Slot [{}]: Failed to create item instance for disenchanted item [{}], skipping.", slot_id, new_item->Name);
+            continue;
+        }
 
 		if (CopyBagContents(new_inst, inst)) {
 			LogInventory("Disenchant Summoned Bags: Replacing [{}] with [{}] in slot [{}]", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
 			PutItemInInventory(slot_id, *new_inst, client_update);
+		} else {
+			LogInventory("Disenchant Summoned Bags: Failed to copy contents of [{}] to [{}] in slot [{}]", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
 		}
 		safe_delete(new_inst);
 	}
@@ -3144,7 +3225,7 @@ void Client::RemoveNoRent(bool client_update)
 			continue;
 
 		auto inst = m_inv[slot_id];
-		if(inst && !inst->GetItem()->NoRent) {
+		if(inst && !inst->GetItem()->NoRent && !CanSummonItem(inst->GetItem()->ID)) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
 			DeleteItemInInventory(slot_id, 0, client_update);
 		}
@@ -3155,7 +3236,7 @@ void Client::RemoveNoRent(bool client_update)
 			continue;
 
 		auto inst = m_inv[slot_id];
-		if (inst && !inst->GetItem()->NoRent) {
+		if (inst && !inst->GetItem()->NoRent && !CanSummonItem(inst->GetItem()->ID)) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
 			DeleteItemInInventory(slot_id, 0, client_update);
 		}
@@ -3167,7 +3248,7 @@ void Client::RemoveNoRent(bool client_update)
 			continue;
 
 		auto inst = m_inv[slot_id];
-		if(inst && !inst->GetItem()->NoRent) {
+		if(inst && !inst->GetItem()->NoRent && !CanSummonItem(inst->GetItem()->ID)) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
 			DeleteItemInInventory(slot_id, 0, client_update);
 		}
@@ -3178,7 +3259,7 @@ void Client::RemoveNoRent(bool client_update)
 			continue;
 
 		auto inst = m_inv[slot_id];
-		if(inst && !inst->GetItem()->NoRent) {
+		if(inst && !inst->GetItem()->NoRent && !CanSummonItem(inst->GetItem()->ID)) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
 			DeleteItemInInventory(slot_id); // Can't delete from client Bank slots
 		}
@@ -3190,7 +3271,7 @@ void Client::RemoveNoRent(bool client_update)
 			continue;
 
 		auto inst = m_inv[slot_id];
-		if(inst && !inst->GetItem()->NoRent) {
+		if(inst && !inst->GetItem()->NoRent && !CanSummonItem(inst->GetItem()->ID)) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
 			DeleteItemInInventory(slot_id); // Can't delete from client Bank Container slots
 		}
@@ -3198,7 +3279,7 @@ void Client::RemoveNoRent(bool client_update)
 
 	for (auto slot_id = EQ::invslot::SHARED_BANK_BEGIN; slot_id <= EQ::invslot::SHARED_BANK_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
-		if(inst && !inst->GetItem()->NoRent) {
+		if(inst && !inst->GetItem()->NoRent && !CanSummonItem(inst->GetItem()->ID)) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
 			DeleteItemInInventory(slot_id); // Can't delete from client Shared Bank slots
 		}
@@ -3206,7 +3287,7 @@ void Client::RemoveNoRent(bool client_update)
 
 	for (auto slot_id = EQ::invbag::SHARED_BANK_BAGS_BEGIN; slot_id <= EQ::invbag::SHARED_BANK_BAGS_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
-		if(inst && !inst->GetItem()->NoRent) {
+		if(inst && !inst->GetItem()->NoRent && !CanSummonItem(inst->GetItem()->ID)) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
 			DeleteItemInInventory(slot_id); // Can't delete from client Shared Bank Container slots
 		}
@@ -3224,7 +3305,7 @@ void Client::RemoveNoRent(bool client_update)
 		for (auto iter = local.begin(); iter != local.end(); ++iter) {
 			auto inst = *iter;
 			if (inst == nullptr) { continue; }
-			if (!inst->GetItem()->NoRent) {
+			if (!inst->GetItem()->NoRent && !CanSummonItem(inst->GetItem()->ID)) {
 				LogInventory("NoRent Timer Lapse: Deleting [{}] from `Limbo`", inst->GetItem()->Name);
 			}
 			else {
@@ -3775,8 +3856,13 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 // Send an item packet (including all subitems of the item)
 void Client::SendItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPacketType packet_type)
 {
-	if (!inst)
+	if (!inst) {
 		return;
+	}
+
+	if (!eqs) {
+		return;
+	}
 
 	if (packet_type != ItemPacketMerchant) {
 		if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {

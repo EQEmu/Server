@@ -305,6 +305,12 @@ std::string Lua_ItemInst::GetName() {
 	return self->GetItem()->Name;
 }
 
+int Lua_ItemInst::GetSerialNumber()
+{
+	Lua_Safe_Call_Int();
+	return self->GetSerialNumber();
+}
+
 void Lua_ItemInst::ItemSay(const char* text) // @categories Inventory and Items
 {
 	Lua_Safe_Call_Void();
@@ -379,6 +385,7 @@ luabind::scope lua_register_iteminst() {
 	.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded)
 	.def("GetMaxEvolveLvl", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetMaxEvolveLvl)
 	.def("GetName", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetName)
+	.def("GetSerialNumber", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetSerialNumber)
 	.def("GetPrice", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetPrice)
 	.def("GetTaskDeliveredCount", &Lua_ItemInst::GetTaskDeliveredCount)
 	.def("GetTotalItemCount", (uint8(Lua_ItemInst::*)(void))&Lua_ItemInst::GetTotalItemCount)

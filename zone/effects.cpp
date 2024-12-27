@@ -39,7 +39,163 @@ float Mob::GetActSpellRange(uint16 spell_id, float range)
 	return (range * extrange) / 100;
 }
 
-int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int percent_modifier) {
+int Mob::GetSharedSpellDamage() {
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return itembonuses.SpellDmg;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		int ret_val = itembonuses.SpellDmg + (GetOwner()->GetSharedSpellDamage() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int Mob::GetSharedHealAmount() {
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return itembonuses.HealAmt;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		int ret_val = itembonuses.HealAmt + (GetOwner()->GetSharedHealAmount() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int Mob::GetSharedCriticalSpellChance() {
+	int base_chance = itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
+
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return base_chance;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		auto owner = GetOwner()->CastToClient();
+		int ret_val = base_chance + (owner->GetSharedCriticalSpellChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int Mob::GetSharedSpellCritDmgIncrease() {
+	int base_chance = itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
+
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return base_chance;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		auto owner = GetOwner()->CastToClient();
+		int ret_val = base_chance + (owner->GetSharedSpellCritDmgIncrease() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int Mob::GetSharedSpellCritDmgIncNoStack() {
+	int base_chance = itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
+
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return base_chance;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		auto owner = GetOwner()->CastToClient();
+		int ret_val = base_chance + (owner->GetSharedSpellCritDmgIncNoStack() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int Mob::GetSharedCriticalDoTChance() {
+	int base_chance = itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
+
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return base_chance;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		auto owner = GetOwner()->CastToClient();
+		int ret_val = base_chance + (owner->GetSharedCriticalDoTChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int Mob::GetSharedDotCritDmgIncrease() {
+	int base_chance = itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
+
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return base_chance;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		auto owner = GetOwner()->CastToClient();
+		int ret_val = base_chance + (owner->GetSharedDotCritDmgIncrease() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int Mob::GetSharedCriticalHealChance() {
+	int base_chance = itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return base_chance;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		auto owner = GetOwner()->CastToClient();
+		int ret_val = base_chance + (owner->GetSharedCriticalHealChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int Mob::GetSharedCriticalHealOverTime() {
+	int base_chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
+
+	if (!GetOwner() || !GetOwner()->IsClient()) {
+		return base_chance;
+	}
+
+	unsigned int pet_count = GetOwner()->GetAllPets().size();
+
+	if (pet_count) {
+		auto owner = GetOwner()->CastToClient();
+		int ret_val = base_chance + (owner->GetSharedCriticalHealOverTime() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
+		return ret_val;
+	}
+
+	return 0;
+}
+
+int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	if (spells[spell_id].target_type == ST_Self) {
 		return value;
 	}
@@ -73,7 +229,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 	int legacy_manaburn_cap = RuleI(Spells, LegacyManaburnCap);
 
 	chance = RuleI(Spells, BaseCritChance); //Wizard base critical chance is 2% (Does not scale with level)
-	chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
+	chance += GetSharedCriticalSpellChance();
 	chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
 	if ((IsClient() || (GetOwner() && GetOwner()->IsClient()))) {
@@ -97,8 +253,8 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 
 		if (zone->random.Roll(chance)) {
 			Critical = true;
-			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
-			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
+			ratio += GetSharedSpellCritDmgIncrease();
+			ratio += GetSharedSpellCritDmgIncNoStack();
 
 			if ((IsClient() || (GetOwner() && GetOwner()->IsClient())) && GetEntityVariable("ProcHint") == "true") {
 				if (GetEntityVariable("ProcHint") != "true") {
@@ -159,11 +315,11 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 				value -= GetSkillDmgAmt(spells[spell_id].skill) * ratio / 100;
 			}
 
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value) * ratio / 100;
+			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && GetSharedSpellDamage()) {
+				value -= GetExtraSpellAmt(spell_id, GetSharedSpellDamage(), base_value) * ratio / 100;
 
-			} else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value) * ratio / 100;
+			} else if (!spells[spell_id].no_heal_damage_item_mod && GetSharedSpellDamage() && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+				value -= GetExtraSpellAmt(spell_id, GetSharedSpellDamage(), base_value) * ratio / 100;
 			}
 
 			// legacy manaburn can crit, but is still held to the same cap
@@ -213,8 +369,8 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 		value -= GetSkillDmgAmt(spells[spell_id].skill);
 	}
 
-	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && GetSharedSpellDamage())
+		value -= GetExtraSpellAmt(spell_id, GetSharedSpellDamage(), base_value);
 
 	else if (
 		!spells[spell_id].no_heal_damage_item_mod &&
@@ -229,12 +385,6 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 		if (value < -legacy_manaburn_cap) {
 			value = -legacy_manaburn_cap;
 		}
-	}
-
-	if (percent_modifier > 0) {
-		int addedValue = value - base_value;
-		addedValue = (addedValue * percent_modifier) / 100;
-		value = base_value + addedValue;
 	}
 
 	return value;
@@ -295,7 +445,7 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 	int64 base_value = value;
 	int64 extra_dmg = 0;
 	int16 chance = 0;
-	chance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
+	chance += GetSharedCriticalDoTChance();
 
 	if (spellbonuses.CriticalDotDecay)
 		chance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
@@ -305,7 +455,7 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 
 	if (!spells[spell_id].good_effect && chance > 0 && (zone->random.Roll(chance))) {
 		int64 ratio = 200;
-		ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
+		ratio += GetSharedDotCritDmgIncrease();
 		value = base_value*ratio/100;
 		value += int64(base_value*GetFocusEffect(focusImprovedDamage, spell_id, nullptr, from_buff_tic)/100)*ratio/100;
 		value += int64(base_value*GetFocusEffect(focusImprovedDamage2, spell_id, nullptr, from_buff_tic)/100)*ratio/100;
@@ -322,16 +472,16 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 			if (
 				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
 				!spells[spell_id].no_heal_damage_item_mod &&
-				GetSpellDmg()
+				GetSharedSpellDamage()
 			) {
-				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value)*ratio/100;
+				extra_dmg += GetExtraSpellAmt(spell_id, GetSharedSpellDamage(), base_value)*ratio/100;
 			}
 			else if (
 				!spells[spell_id].no_heal_damage_item_mod &&
-				GetSpellDmg() &&
+				GetSharedSpellDamage() &&
 				GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
 			) {
-				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value)*ratio/100;
+				extra_dmg += GetExtraSpellAmt(spell_id, GetSharedSpellDamage(), base_value)*ratio/100;
 			}
 		}
 
@@ -367,15 +517,15 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
 			if (
 				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
-				!spells[spell_id].no_heal_damage_item_mod && GetSpellDmg()
+				!spells[spell_id].no_heal_damage_item_mod && GetSharedSpellDamage()
 			) {
-				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
+				extra_dmg += GetExtraSpellAmt(spell_id, GetSharedSpellDamage(), base_value);
 			}
 			else if (
-				!spells[spell_id].no_heal_damage_item_mod && GetSpellDmg() &&
+				!spells[spell_id].no_heal_damage_item_mod && GetSharedSpellDamage() &&
 				GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
 			) {
-				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
+				extra_dmg += GetExtraSpellAmt(spell_id, GetSharedSpellDamage(), base_value);
 			}
 		}
 
@@ -482,14 +632,14 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 	int8  critical_modifier = 1;
 
 	if (spells[spell_id].buff_duration < 1) {
-		critical_chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+		critical_chance += GetSharedCriticalHealChance();
 
 		if (spellbonuses.CriticalHealDecay) {
 			critical_chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
 		}
 	}
 	else {
-		critical_chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
+		critical_chance = GetSharedCriticalHealOverTime();
 
 		if (spellbonuses.CriticalRegenDecay) {
 			critical_chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
@@ -532,16 +682,16 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 			if (
 				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
 				!spells[spell_id].no_heal_damage_item_mod &&
-				GetHealAmt()
+				GetSharedHealAmount()
 			) {
-				value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
+				value += GetExtraSpellAmt(spell_id, GetSharedHealAmount(), base_value); //Item Heal Amt Add before critical
 			}
 			else if (
 				!spells[spell_id].no_heal_damage_item_mod &&
-				GetHealAmt() &&
+				GetSharedHealAmount() &&
 				GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
 			) {
-				value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
+				value += GetExtraSpellAmt(spell_id, GetSharedHealAmount(), base_value); //Item Heal Amt Add before critical
 			}
 		}
 
@@ -588,16 +738,16 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 				if (
 					RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
 					!spells[spell_id].no_heal_damage_item_mod &&
-					GetHealAmt()
+					GetSharedHealAmount()
 				) {
-					extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
+					extra_heal += GetExtraSpellAmt(spell_id, GetSharedHealAmount(), base_value);
 				}
 				else if (
 					!spells[spell_id].no_heal_damage_item_mod &&
-					GetHealAmt() &&
+					GetSharedHealAmount() &&
 					GetSpellLevelForCaster(spell_id) >= GetLevel() - 5
 				) {
-					extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
+					extra_heal += GetExtraSpellAmt(spell_id, GetSharedHealAmount(), base_value);
 				}
 			}
 		}
@@ -624,7 +774,6 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 
 	return value;
 }
-
 
 int32 Mob::GetActSpellCost(uint16 spell_id, int32 cost)
 {

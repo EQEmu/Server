@@ -2690,11 +2690,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 
 			if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
 				for (const auto& pet : CastToClient()->GetAllPets()) {
-					SetEntityVariable("SympProcTargetOverride", std::to_string(pet->GetID()));
-					LogDebug("Adding Extra Pet Target: [{}]", pet->GetCleanName());
-					LogDebug("Setting Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
 					SpellOnTarget(spell_id, pet, -1, true, resist_adjust, true, level_override);
-					TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+					if (pet->GetID() != spell_target->GetID()) {
+						LogDebug("Adding Extra Pet Target: [{}]", pet->GetCleanName());
+						LogDebug("Setting Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
+						SetEntityVariable("SympProcTargetOverride", std::to_string(pet->GetID()));
+						TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+					}
 					DeleteEntityVariable("SympProcTargetOverride");
 				}
 			} else {
@@ -6811,7 +6813,6 @@ void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 
 void Mob::SendPetBuffsToClient()
 {
-	LogDebug("Check 1");
 	// Don't really need this check, as it should be checked before this method is called, but it doesn't hurt
 	// too much to check again.
 	if(!(GetOwner() && GetOwner()->IsClient()))
