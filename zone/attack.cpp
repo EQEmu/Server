@@ -2419,8 +2419,8 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			int weapon_damage = weapon_instance->GetItemWeaponDamage(true);
 			int weapon_delay = weapon_instance->GetItem()->Delay;
 
-			float normalized_max_damage = GetBaseDamage() * (static_cast<float>(weapon_delay) / (attack_delay/100.0f));
-			float normalized_min_damage = GetMinDamage()  * (static_cast<float>(weapon_delay) / (attack_delay/100.0f));
+			float normalized_max_damage = GetBaseDamage() * std::max(1.0f, (static_cast<float>(weapon_delay) / (attack_delay/100.0f)));
+			float normalized_min_damage = GetMinDamage()  * std::max(1.0f, (static_cast<float>(weapon_delay) / (attack_delay/100.0f)));
 
 			my_hit.base_damage = normalized_max_damage + weapon_damage + eleBane;
 			my_hit.min_damage  = normalized_min_damage + weapon_damage + eleBane;
