@@ -1175,6 +1175,7 @@ void Mob::AI_Process() {
 
 				//try main hand first
 				if (attack_timer.Check()) {
+					LogDebug("Sanity Check: [{}] vs [{}]", attack_timer.GetSetAtTrigger(), CastToNPC()->attack_timer.GetSetAtTrigger());
 					DoMainHandAttackRounds(target);
 					TriggerDefensiveProcs(target, EQ::invslot::slotPrimary, false);
 

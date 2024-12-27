@@ -551,7 +551,7 @@ void NPC::SetTarget(Mob* mob) {
 		SetAttackTimer();
 	} else {
 		ranged_timer.Disable();
-		//attack_timer.Disable();
+		attack_timer.Disable();
 		attack_dw_timer.Disable();
 	}
 

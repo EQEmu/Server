@@ -6937,6 +6937,16 @@ void Mob::CommonBreakInvisibleFromCombat()
 
 void Mob::SetAttackTimer()
 {
+	if (IsNPC()) {
+		CastToNPC()->SetAttackTimer();
+		return;
+	}
+
+	if (IsClient()) {
+		CastToClient()->SetAttackTimer();
+		return;
+	}
+
 	attack_timer.SetAtTrigger(4000, true);
 }
 
@@ -7056,6 +7066,9 @@ void NPC::SetAttackTimer()
 	// ex. Mob's delay set to 20, weapon set to 19, delay 19
 	// Mob's delay set to 20, weapon set to 21, delay 20
 	int speed = 0;
+	int primary_speed = 0;
+	int secondary_speed = 0;
+
 	if (RuleB(Spells, Jun182014HundredHandsRevamp))
 		speed = static_cast<int>((attack_delay / haste_mod) + ((hhe / 1000.0f) * (attack_delay / haste_mod)));
 	else
@@ -7065,8 +7078,6 @@ void NPC::SetAttackTimer()
 		//pick a timer
 		if (i == EQ::invslot::slotPrimary)
 			TimerToUse = &attack_timer;
-		else if (i == EQ::invslot::slotRange)
-			TimerToUse = &ranged_timer;
 		else if (i == EQ::invslot::slotSecondary)
 			TimerToUse = &attack_dw_timer;
 		else	//invalid slot (hands will always hit this)
@@ -7120,7 +7131,6 @@ void NPC::SetAttackTimer()
 
 			int original_speed = speed;
 
-			int speed = 0;
 			int delay = 3500;
 
 			//if we have no weapon..
@@ -7141,6 +7151,21 @@ void NPC::SetAttackTimer()
 		}
 
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
+
+		if (i == EQ::invslot::slotPrimary) {
+			primary_speed = speed;
+		}
+		else if (i == EQ::invslot::slotSecondary) {
+			secondary_speed = speed;
+		}
+	}
+
+	//To allow for duel wield animation to display correctly if both weapons have same delay
+	if (primary_speed == secondary_speed) {
+		SetDualWieldingSameDelayWeapons(1);
+	}
+	else {
+		SetDualWieldingSameDelayWeapons(0);
 	}
 }
 
