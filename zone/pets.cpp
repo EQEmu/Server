@@ -1091,6 +1091,7 @@ bool Mob::RemovePet(uint16 pet_id) {
             // Retrieve the Mob associated with the pet ID
             auto pet = entity_list.GetMob(pet_id);
             if (pet) {
+
 				pet->SetOwnerID(0);  // Detach the pet from its owner
 				pet->SendAppearancePacket(AppearanceType::Pet, 0, true, true);
 				pet->SetPetType(petNone);
@@ -1103,13 +1104,11 @@ bool Mob::RemovePet(uint16 pet_id) {
             }
             petids.erase(it);        // Remove the pet ID from the vector
 			ValidatePetList();
-			if (IsClient() && pet->IsNPC()) {
-				CastToClient()->DoPetBagResync(pet->CastToNPC()->GetPetOriginClass());
-			}
 
 			if (pet_id == focused_pet_id) {
 				focused_pet_id = 0;
 			}
+
             return true;             // Return true to indicate successful removal
         }
     }
@@ -1119,7 +1118,6 @@ bool Mob::RemovePet(uint16 pet_id) {
 
 // Remove all pets from the pet list
 void Mob::RemoveAllPets() {
-	LogDebug("RemoveAllPets called..");
     // Iterate over each pet ID in the petids vector
     for (auto pet_id : petids) {
         // Retrieve the Mob associated with the pet ID
@@ -1128,8 +1126,6 @@ void Mob::RemoveAllPets() {
             pet->SetOwnerID(0);  // Detach the pet from its owner if the Mob exists
         }
     }
-
-
 
     // Clear the petids vector to remove all pet IDs
     petids.clear();

@@ -846,9 +846,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 						if (GetOwner() && GetOwner()->IsClient() && GetOwner()->CastToClient()->GetActivePetBag(CastToNPC()->GetPetOriginClass())) {
 							if (!EntityVariableExists("is_charmed")) {
-								LogDebug("Check Omega");
 								auto inventory = CastToNPC()->GetLootList();
-								LogDebug("The other Check");
 								std::vector<std::string> inventory_strings;
 
 								for (int item_id : inventory) {
