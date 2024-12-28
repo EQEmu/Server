@@ -778,7 +778,7 @@ LootItem *NPC::GetItem(int slot_id)
 	end = m_loot_items.end();
 	for (; cur != end; ++cur) {
 		LootItem *item = *cur;
-		if (item->equip_slot == slot_id) {
+		if (item && item->equip_slot == slot_id) {
 			return item;
 		}
 	}

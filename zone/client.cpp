@@ -13581,8 +13581,12 @@ void Client::DoPetBagResync(int class_id) {
 	auto pet_bag_slot = GetActivePetBagSlot(class_id);
 
 	for (auto pet : GetAllPets()) {
-		if (pet && pet_bag && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), class_id) < UINT8_MAX) {
+		if (pet && pet_bag && pet->IsNPC() && GetSpellLevel(pet->CastToNPC()->GetPetSpellID(), class_id) < UINT8_MAX) {
 			NPC* pet_npc = pet->CastToNPC();
+
+			if (!pet_npc) {
+				continue;
+			}
 
 			if (IsEffectInSpell(pet_npc->GetPetSpellID(), SE_Charm)) {
 				if (!pet_npc->EntityVariableExists("is_charmed")) {

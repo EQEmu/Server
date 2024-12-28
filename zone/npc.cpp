@@ -525,12 +525,13 @@ NPC::~NPC()
 	LootItems::iterator cur, end;
 	cur = m_loot_items.begin();
 	end = m_loot_items.end();
-	for (; cur != end; ++cur) {
-		LootItem *item = *cur;
-		safe_delete(item);
+	for (auto& item : m_loot_items) {
+		if (item) {  // Checks if the pointer is non-null
+			delete item;  // Deletes the object
+			item = nullptr;  // Sets the pointer to nullptr
+		}
 	}
-
-	m_loot_items.clear();
+	m_loot_items.clear();  // Clears the container
 	faction_list.clear();
 
 	safe_delete(reface_timer);
