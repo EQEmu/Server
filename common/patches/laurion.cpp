@@ -3296,82 +3296,35 @@ namespace Laurion
 	}
 
 	// DECODE methods
-
-	DECODE(OP_EnterWorld)
+	DECODE(OP_BlockedBuffs)
 	{
-		DECODE_LENGTH_EXACT(structs::EnterWorld_Struct);
-		SETUP_DIRECT_DECODE(EnterWorld_Struct, structs::EnterWorld_Struct);
+		DECODE_LENGTH_EXACT(structs::BlockedBuffs_Struct);
+		SETUP_DIRECT_DECODE(BlockedBuffs_Struct, structs::BlockedBuffs_Struct);
 
-		memcpy(emu->name, eq->name, sizeof(emu->name));
-		emu->return_home = 0;
-		emu->tutorial = 0;
+		for (uint32 i = 0; i < BLOCKED_BUFF_COUNT; ++i)
+			emu->SpellID[i] = eq->SpellID[i];
+
+		IN(Count);
+		IN(Pet);
+		IN(Initialise);
+		IN(Flags);
 
 		FINISH_DIRECT_DECODE();
 	}
 
-	DECODE(OP_ZoneEntry)
+	DECODE(OP_CastSpell)
 	{
-		DECODE_LENGTH_EXACT(structs::ClientZoneEntry_Struct);
-		SETUP_DIRECT_DECODE(ClientZoneEntry_Struct, structs::ClientZoneEntry_Struct);
+		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
+		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+		emu->slot = static_cast<uint32>(LaurionToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot)));
 
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_ZoneChange)
-	{
-		DECODE_LENGTH_EXACT(structs::ZoneChange_Struct);
-		SETUP_DIRECT_DECODE(ZoneChange_Struct, structs::ZoneChange_Struct);
-
-		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
-		IN(zoneID);
-		IN(instanceID);
-		IN(y);
-		IN(x);
-		IN(z)
-			IN(zone_reason);
-		IN(success);
-
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_ClientUpdate)
-	{
-		// for some odd reason, there is an extra byte on the end of this on occasion..
-		DECODE_LENGTH_ATLEAST(structs::PlayerPositionUpdateClient_Struct);
-		SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::PlayerPositionUpdateClient_Struct);
-
-		IN(spawn_id);
-		IN(vehicle_id);
-		IN(sequence);
-		emu->x_pos = eq->position.x;
-		emu->y_pos = eq->position.y;
-		emu->z_pos = eq->position.z;
-		emu->heading = eq->position.heading;
-		emu->delta_x = eq->position.delta_x;
-		emu->delta_y = eq->position.delta_y;
-		emu->delta_z = eq->position.delta_z;
-		emu->delta_heading = eq->position.delta_heading;
-		emu->animation = eq->position.animation;
-
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_WearChange)
-	{
-		DECODE_LENGTH_EXACT(structs::WearChange_Struct);
-		SETUP_DIRECT_DECODE(WearChange_Struct, structs::WearChange_Struct);
-
-		IN(spawn_id);
-		emu->wear_slot_id = eq->wear_slot_id;
-		emu->material = eq->armor_id;
-		emu->unknown06 = eq->variation;
-		emu->elite_material = eq->material;
-		emu->hero_forge_model = eq->new_armor_id;
-		emu->unknown18 = eq->new_armor_type;
-		emu->color.Color = eq->color;
-
+		IN(spell_id);
+		emu->inventoryslot = -1;
+		IN(target_id);
+		IN(y_pos);
+		IN(x_pos);
+		IN(z_pos);
 		FINISH_DIRECT_DECODE();
 	}
 
@@ -3415,16 +3368,35 @@ namespace Laurion
 		delete[] __eq_buffer;
 	}
 
-	DECODE(OP_SetServerFilter)
+	DECODE(OP_ClickDoor)
 	{
-		DECODE_LENGTH_EXACT(structs::SetServerFilter_Struct);
-		SETUP_DIRECT_DECODE(SetServerFilter_Struct, structs::SetServerFilter_Struct);
+		DECODE_LENGTH_EXACT(structs::ClickDoor_Struct);
+		SETUP_DIRECT_DECODE(ClickDoor_Struct, structs::ClickDoor_Struct);
 
-		int r;
-		for (r = 0; r < 29; r++) {
-			// Size 68 in Laurion
-			IN(filters[r]);
-		}
+		IN(doorid);
+		IN(player_id);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ClientUpdate)
+	{
+		// for some odd reason, there is an extra byte on the end of this on occasion..
+		DECODE_LENGTH_ATLEAST(structs::PlayerPositionUpdateClient_Struct);
+		SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::PlayerPositionUpdateClient_Struct);
+
+		IN(spawn_id);
+		IN(vehicle_id);
+		IN(sequence);
+		emu->x_pos = eq->position.x;
+		emu->y_pos = eq->position.y;
+		emu->z_pos = eq->position.z;
+		emu->heading = eq->position.heading;
+		emu->delta_x = eq->position.delta_x;
+		emu->delta_y = eq->position.delta_y;
+		emu->delta_z = eq->position.delta_z;
+		emu->delta_heading = eq->position.delta_heading;
+		emu->animation = eq->position.animation;
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -3447,65 +3419,15 @@ namespace Laurion
 
 	DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
 
-	DECODE(OP_ClickDoor)
+	DECODE(OP_EnterWorld)
 	{
-		DECODE_LENGTH_EXACT(structs::ClickDoor_Struct);
-		SETUP_DIRECT_DECODE(ClickDoor_Struct, structs::ClickDoor_Struct);
+		DECODE_LENGTH_EXACT(structs::EnterWorld_Struct);
+		SETUP_DIRECT_DECODE(EnterWorld_Struct, structs::EnterWorld_Struct);
 
-		IN(doorid);
-		IN(player_id);
+		memcpy(emu->name, eq->name, sizeof(emu->name));
+		emu->return_home = 0;
+		emu->tutorial = 0;
 
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_SpawnAppearance) {
-		DECODE_LENGTH_EXACT(structs::SpawnAppearance_Struct);
-		SETUP_DIRECT_DECODE(SpawnAppearance_Struct, structs::SpawnAppearance_Struct);
-
-		IN(spawn_id);
-		emu->type = LaurionToServerSpawnAppearanceType(eq->type);
-		IN(parameter);
-
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_MoveItem)
-	{
-		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
-		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-		Log(Logs::Detail, Logs::Netcode, "Laurion::DECODE(OP_MoveItem)");
-
-		emu->from_slot = LaurionToServerSlot(eq->from_slot);
-		emu->to_slot = LaurionToServerSlot(eq->to_slot);
-		IN(number_in_stack);
-
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_ShopRequest)
-	{
-		DECODE_LENGTH_EXACT(structs::MerchantClickRequest_Struct);
-		SETUP_DIRECT_DECODE(MerchantClick_Struct, structs::MerchantClickRequest_Struct);
-
-		IN(npc_id);
-
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_CastSpell)
-	{
-		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
-		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
-		
-		emu->slot = static_cast<uint32>(LaurionToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot)));
-
-		IN(spell_id);
-		emu->inventoryslot = -1;
-		IN(target_id);
-		IN(y_pos);
-		IN(x_pos);
-		IN(z_pos);
 		FINISH_DIRECT_DECODE();
 	}
 
@@ -3523,24 +3445,6 @@ namespace Laurion
 
 		FINISH_DIRECT_DECODE();
 	}
-
-	DECODE(OP_BlockedBuffs)
-	{
-		DECODE_LENGTH_EXACT(structs::BlockedBuffs_Struct);
-		SETUP_DIRECT_DECODE(BlockedBuffs_Struct, structs::BlockedBuffs_Struct);
-
-		for (uint32 i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-			emu->SpellID[i] = eq->SpellID[i];
-
-		IN(Count);
-		IN(Pet);
-		IN(Initialise);
-		IN(Flags);
-
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_RemoveBlockedBuffs) { DECODE_FORWARD(OP_BlockedBuffs); }
 
 	DECODE(OP_GroupDisband)
 	{
@@ -3567,6 +3471,101 @@ namespace Laurion
 	DECODE(OP_GroupInvite2)
 	{
 		DECODE_FORWARD(OP_GroupInvite);
+	}
+
+	DECODE(OP_MoveItem)
+	{
+		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
+		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "Laurion::DECODE(OP_MoveItem)");
+
+		emu->from_slot = LaurionToServerSlot(eq->from_slot);
+		emu->to_slot = LaurionToServerSlot(eq->to_slot);
+		IN(number_in_stack);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_RemoveBlockedBuffs) { DECODE_FORWARD(OP_BlockedBuffs); }
+
+	DECODE(OP_SetServerFilter)
+	{
+		DECODE_LENGTH_EXACT(structs::SetServerFilter_Struct);
+		SETUP_DIRECT_DECODE(SetServerFilter_Struct, structs::SetServerFilter_Struct);
+
+		int r;
+		for (r = 0; r < 29; r++) {
+			// Size 68 in Laurion
+			IN(filters[r]);
+		}
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ShopRequest)
+	{
+		DECODE_LENGTH_EXACT(structs::MerchantClickRequest_Struct);
+		SETUP_DIRECT_DECODE(MerchantClick_Struct, structs::MerchantClickRequest_Struct);
+
+		IN(npc_id);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_SpawnAppearance) {
+		DECODE_LENGTH_EXACT(structs::SpawnAppearance_Struct);
+		SETUP_DIRECT_DECODE(SpawnAppearance_Struct, structs::SpawnAppearance_Struct);
+
+		IN(spawn_id);
+		emu->type = LaurionToServerSpawnAppearanceType(eq->type);
+		IN(parameter);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_WearChange)
+	{
+		DECODE_LENGTH_EXACT(structs::WearChange_Struct);
+		SETUP_DIRECT_DECODE(WearChange_Struct, structs::WearChange_Struct);
+
+		IN(spawn_id);
+		emu->wear_slot_id = eq->wear_slot_id;
+		emu->material = eq->armor_id;
+		emu->unknown06 = eq->variation;
+		emu->elite_material = eq->material;
+		emu->hero_forge_model = eq->new_armor_id;
+		emu->unknown18 = eq->new_armor_type;
+		emu->color.Color = eq->color;
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ZoneEntry)
+	{
+		DECODE_LENGTH_EXACT(structs::ClientZoneEntry_Struct);
+		SETUP_DIRECT_DECODE(ClientZoneEntry_Struct, structs::ClientZoneEntry_Struct);
+
+		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ZoneChange)
+	{
+		DECODE_LENGTH_EXACT(structs::ZoneChange_Struct);
+		SETUP_DIRECT_DECODE(ZoneChange_Struct, structs::ZoneChange_Struct);
+
+		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+		IN(zoneID);
+		IN(instanceID);
+		IN(y);
+		IN(x);
+		IN(z)
+			IN(zone_reason);
+		IN(success);
+
+		FINISH_DIRECT_DECODE();
 	}
 
 	//Naive version but should work well enough for now
