@@ -13575,8 +13575,6 @@ void Client::DoPetBagResync(int class_id) {
 		return;
 	}
 
-	ValidatePetList();
-
 	auto pet_bag = GetActivePetBag(class_id);
 	auto pet_bag_slot = GetActivePetBagSlot(class_id);
 
