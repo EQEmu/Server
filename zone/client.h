@@ -1811,6 +1811,21 @@ public:
 
 	uint32 GetEXPForLevel(uint16 check_level);
 
+	// this is used to prevent things like quest::givecash and AddMoneyToPP
+	// from double giving money back to players in scripts when return_items
+	// also gives money back to players
+	struct ExternalHandinMoneyReturned {
+		uint32 copper;
+		uint32 silver;
+		uint32 gold;
+		uint32 platinum;
+		std::string return_source;
+	};
+private:
+	ExternalHandinMoneyReturned m_external_handin_money_returned = {};
+public:
+	ExternalHandinMoneyReturned GetExternalHandinMoneyReturned() { return m_external_handin_money_returned; }
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
