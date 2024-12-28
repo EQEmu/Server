@@ -70,7 +70,9 @@ int Mob::GetSharedHealAmount() {
 }
 
 int Mob::GetSharedCriticalSpellChance() {
-	int base_chance = itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
+	int base_chance = RuleI(Spells, BaseCritChance);
+	base_chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
+	base_chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
 	if (!GetOwner() || !GetOwner()->IsClient()) {
 		return base_chance;
@@ -228,9 +230,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	int chance = 0;
 	int legacy_manaburn_cap = RuleI(Spells, LegacyManaburnCap);
 
-	chance = RuleI(Spells, BaseCritChance); //Wizard base critical chance is 2% (Does not scale with level)
 	chance += GetSharedCriticalSpellChance();
-	chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
 	if ((IsClient() || (GetOwner() && GetOwner()->IsClient()))) {
 		if (GetEntityVariable("ProcHint") == "true") {
@@ -251,6 +251,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 			chance = spells[spell_id].override_crit_chance;
 		}
 
+		LogDebug("Critical Chance: [{}]", chance);
 		if (zone->random.Roll(chance)) {
 			Critical = true;
 			ratio += GetSharedSpellCritDmgIncrease();

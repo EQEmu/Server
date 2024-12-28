@@ -1159,7 +1159,6 @@ void Mob::AI_Process() {
 					glm::vec3 target_position;
 					PlotPositionAroundTarget(target, target_position.x, target_position.y, target_position.z, true);
 					RunToPrecise(target_position.x, target_position.y, target_position.z);
-					LogDebug("Moving Behind to [{}][{}][{}] Currently [{}]", target_position.x, target_position.y, target_position.z, MobAngle(target, GetX(), GetY()));
 				}
 			}  else {
 				if (IsMoving()) {
@@ -1175,7 +1174,6 @@ void Mob::AI_Process() {
 
 				//try main hand first
 				if (attack_timer.Check()) {
-					LogDebug("Main Hand Attack Timer: [{}]", attack_timer.GetSetAtTrigger());
 					DoMainHandAttackRounds(target);
 					TriggerDefensiveProcs(target, EQ::invslot::slotPrimary, false);
 
@@ -1335,7 +1333,6 @@ void Mob::AI_Process() {
 
 				//now off hand
 				if (attack_dw_timer.Check() && CanThisClassDualWield()) {
-					LogDebug("Off Hand Attack Timer: [{}]", attack_dw_timer.GetSetAtTrigger());
 					DoOffHandAttackRounds(target);
 				}
 

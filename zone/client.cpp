@@ -1309,6 +1309,11 @@ void Client::FixModel(Spawn_Struct* npc) {
         case Race::GiantSpider:
             npc->race = Race::Spider;
             npc->gender = Gender::Neuter;
+
+			if (npc->equip_chest2 == 5) {
+				npc->equip_chest2 = 8;
+			}
+
             break;
 
 		case Race::Bear:
@@ -1458,10 +1463,10 @@ void Client::FixModel(Spawn_Struct* npc) {
 			break;
 
 		case Race::Coldain:
-			if (strstr(npc->name, "Dain_Frostreaver_IV") == nullptr) {
+			if (npc->gender != Gender::Neuter) {
 				npc->race = Race::Coldain2;
 			}
-			break;
+		break;
 
 		case Race::Trakanon:
 			npc->race = Race::Drake2;
@@ -1557,9 +1562,8 @@ void Client::FixModel(Spawn_Struct* npc) {
 			break;
 
 		case Race::Gargoyle:
-			if (zone->GetZoneID() != Zones::SLEEPER) {
-				npc->race = Race::NightmareGargoyle;
-			}
+			npc->gender = 2;
+			npc->race = Race::NightmareGargoyle;
 			break;
 
 		case Race::Vampire:
@@ -1594,16 +1598,25 @@ void Client::FixModel(Spawn_Struct* npc) {
 			break;
 
 		case Race::FrostGiant:
+
 			npc->race = Race::Giant2;
 			npc->equip_chest2 = zone->random.Int(0,2);
 			npc->helm = npc->equip_chest2;
 			break;
 
 		case Race::StormGiant:
-			npc->race = Race::Giant4;
-			npc->equip_chest2 = zone->random.Int(0,2);
-			npc->helm = npc->equip_chest2;
+			if (npc->gender == Gender::Male) { // 'Sorcerer' model
+				npc->race = Race::Giant3;
+				npc->equip_chest2 = 2;
+				npc->helm = 2;
+			} else {
+				npc->race = Race::Giant4;
+				npc->equip_chest2 = zone->random.Int(0,2);
+				npc->helm = npc->equip_chest2;
+			}
+
 			npc->size = 25;
+			npc->gender = Gender::Neuter;
 			break;
 
 		case Race::Golem:
@@ -1622,6 +1635,13 @@ void Client::FixModel(Spawn_Struct* npc) {
 					break;
 				case 3:
 					npc->equip_chest2 = 2;
+					break;
+			}
+
+			switch (zone->GetZoneID()) {
+				case Zones::VELKETOR:
+				case Zones::SLEEPER:
+					npc->equip_chest2 = 3;
 					break;
 			}
 			break;
@@ -1708,7 +1728,20 @@ void Client::FixModel(Spawn_Struct* npc) {
 
 		case Race::Puma:
 			npc->race = Race::Puma2;
-			// I think this maps correctly natively
+
+			switch (npc->equip_chest2) {
+				case 0:
+					npc->equip_chest2 = 0;
+					break;
+				case 1:
+				case 2:
+					npc->equip_chest2 = 1;
+					break;
+				case 3:
+					npc->equip_chest2 = 3;
+					break;
+			}
+
 			break;
 
 		case Race::Goblin:

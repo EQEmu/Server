@@ -4319,12 +4319,19 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 	if (GetOwner()->IsClient()) {
 		auto owner   = GetOwner()->CastToClient();
 		auto pet_bag = owner->GetActivePetBag(GetPetOriginClass());
-		if (pet_bag) {
-			EQ::SayLinkEngine linker;
-			linker.SetLinkType(EQ::saylink::SayLinkItemData);
-			linker.SetItemData(pet_bag->GetItem());
 
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemData);
+
+		if (pet_bag) {
+			linker.SetItemData(pet_bag->GetItem());
 			owner->Message(Chat::Yellow, "You must use [%s] to equip your pet.", linker.GenerateLink().c_str());
+			return false;
+		}
+
+		if (owner->IsValidPetBag(inst->GetID())) {
+			linker.SetItemData(inst->GetItem());
+			owner->Message(Chat::Yellow, "Your [%s] is used by placing items inside of it while in your inventory, not by trading it to your pet.", linker.GenerateLink().c_str());
 			return false;
 		}
 	}
@@ -4452,7 +4459,7 @@ bool NPC::CheckHandin(
 			h.items.emplace_back(
 				HandinEntry{
 					.item_id = std::to_string(i->GetItem()->ID),
-					.count = std::max(static_cast<uint16>(i->GetCharges()), static_cast<uint16>(1)),
+					.count = std::max(static_cast<uint16>(i->IsStackable() ? i->GetCharges() : 1), static_cast<uint16>(1)),
 					.item = i->Clone(),
 					.is_multiquest_item = false
 				}
@@ -4472,6 +4479,7 @@ bool NPC::CheckHandin(
 	// items
 	bool normalize = true;
 	for (auto required_item : required) {
+		LogDebug("Checking required item first [{}] second[{}]", required_item.first, required_item.second);
 		int item_id = Strings::ToInt(required_item.first);
 		if (item_id > 1000000) {
 			normalize = false;
