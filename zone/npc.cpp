@@ -4476,7 +4476,7 @@ bool NPC::CheckHandin(
 					 && h.money.silver == r.money.silver
 					 && h.money.copper == r.money.copper;
 
-
+	// items
 	bool normalize = true;
 	for (auto required_item : required) {
 		LogDebug("Checking required item first [{}] second[{}]", required_item.first, required_item.second);
@@ -4487,132 +4487,50 @@ bool NPC::CheckHandin(
 		}
 	}
 
-// items
-bool items_met = true;
+	bool items_met = true;
+	if (h.items.size() == r.items.size() && !h.items.empty() && !r.items.empty()) {
+		for (const auto &r_item: r.items) {
+			bool      found = false;
+			for (auto &h_item: h.items) {
+				if (!normalize) {
+					if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
+						found = true;
+						LogNpcHandinDetail(
+							"{} >>>> Found required item [{}] ({}) count [{}]",
+							log_handin_prefix,
+							h_item.item->GetItem()->Name,
+							h_item.item_id,
+							h_item.count
+						);
+						break;
+					}
+				} else {
+					if ((Strings::ToInt(h_item.item_id) % 1000000) == Strings::ToInt(r_item.item_id) && h_item.count == r_item.count) {
+						found = true;
+						LogNpcHandinDetail(
+							"{} >>>> Found required item [{}] ({}) count [{}]",
+							log_handin_prefix,
+							h_item.item->GetItem()->Name,
+							h_item.item_id,
+							h_item.count
+						);
+						break;
+					}
+				}
+			}
 
-if (!h.items.empty() && !r.items.empty()) {
-    // Log the initial state of hand-in and required items
-    LogNpcHandinDetail("{} >>>> Starting item comparison", log_handin_prefix);
-    for (const auto &h_item : h.items) {
-        LogNpcHandinDetail(
-            "{} >>>> Hand-in item [{}], ID [{}], Count [{}]",
-            log_handin_prefix,
-            h_item.item ? h_item.item->GetItem()->Name : "Unknown",
-            h_item.item_id,
-            h_item.count
-        );
-    }
-
-    for (const auto &r_item : r.items) {
-        LogNpcHandinDetail(
-            "{} >>>> Required item ID [{}], Count [{}]",
-            log_handin_prefix,
-            r_item.item_id,
-            r_item.count
-        );
-    }
-
-    // Temporary maps to aggregate counts
-    std::unordered_map<std::string, uint16> h_item_counts;
-    std::unordered_map<std::string, uint16> r_item_counts;
-
-    // Populate r_item_counts with required items
-    for (const auto &r_item : r.items) {
-        std::string r_item_id = normalize
-            ? std::to_string(Strings::ToInt(r_item.item_id) % 1000000)
-            : r_item.item_id;
-
-        r_item_counts[r_item_id] += r_item.count;
-
-        LogNpcHandinDetail(
-            "{} >>>> Aggregated required item ID [{}], Total Count [{}]",
-            log_handin_prefix,
-            r_item_id,
-            r_item_counts[r_item_id]
-        );
-    }
-
-    // Populate h_item_counts with hand-in items
-    for (const auto &h_item : h.items) {
-        std::string h_item_id = normalize
-            ? std::to_string(Strings::ToInt(h_item.item_id) % 1000000)
-            : h_item.item_id;
-
-        h_item_counts[h_item_id] += h_item.count;
-
-        LogNpcHandinDetail(
-            "{} >>>> Aggregated hand-in item ID [{}], Total Count [{}]",
-            log_handin_prefix,
-            h_item_id,
-            h_item_counts[h_item_id]
-        );
-    }
-
-    // Check if all required items are met
-    for (const auto &r_entry : r_item_counts) {
-        const auto &r_item_id = r_entry.first;
-        uint16 r_count = r_entry.second;
-
-        LogNpcHandinDetail(
-            "{} >>>> Checking if hand-in meets required item ID [{}], Required Count [{}]",
-            log_handin_prefix,
-            r_item_id,
-            r_count
-        );
-
-        auto h_entry = h_item_counts.find(r_item_id);
-        if (h_entry == h_item_counts.end()) {
-            LogNpcHandinDetail(
-                "{} >>>> Failed to find required item ID [{}] in hand-in items",
-                log_handin_prefix,
-                r_item_id
-            );
-            items_met = false;
-            break;
-        } else if (h_entry->second < r_count) {
-            LogNpcHandinDetail(
-                "{} >>>> Insufficient count for item ID [{}]: Hand-in Count [{}], Required Count [{}]",
-                log_handin_prefix,
-                r_item_id,
-                h_entry->second,
-                r_count
-            );
-            items_met = false;
-            break;
-        } else {
-            LogNpcHandinDetail(
-                "{} >>>> Found sufficient count for item ID [{}]: Hand-in Count [{}], Required Count [{}]",
-                log_handin_prefix,
-                r_item_id,
-                h_entry->second,
-                r_count
-            );
-        }
-    }
-
-    // Log matched items if all requirements are met
-    if (items_met) {
-        LogNpcHandinDetail("{} >>>> All required items met", log_handin_prefix);
-        for (const auto &r_entry : r_item_counts) {
-            const auto &r_item_id = r_entry.first;
-            uint16 r_count = r_entry.second;
-
-            LogNpcHandinDetail(
-                "{} >>>> Matched required item ID [{}] with Count [{}]",
-                log_handin_prefix,
-                r_item_id,
-                r_count
-            );
-        }
-    }
-} else if (h.items.empty() && r.items.empty()) {
-    items_met = true; // Both empty means all items are trivially met
-    LogNpcHandinDetail("{} >>>> Both hand-in and required items are empty, items trivially met", log_handin_prefix);
-} else {
-    items_met = false; // Mismatched item presence
-    LogNpcHandinDetail("{} >>>> Mismatch in hand-in and required items, items not met", log_handin_prefix);
-}
-
+			if (!found) {
+				items_met = false;
+				break;
+			}
+		}
+	}
+	else if (h.items.empty() && r.items.empty()) {
+		items_met = true;
+	}
+	else {
+		items_met = false;
+	}
 
 	requirement_met = money_met && items_met;
 
