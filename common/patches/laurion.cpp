@@ -158,6 +158,572 @@ namespace Laurion
 #include "ss_define.h"
 
 	// ENCODE methods
+	ENCODE(OP_Action) {
+		ENCODE_LENGTH_EXACT(Action_Struct);
+		SETUP_DIRECT_ENCODE(Action_Struct, structs::MissileHitInfo);
+
+		//This is mostly figured out; there's two unknowns, only unknown1 is read by the client
+		OUT(target);
+		OUT(source);
+		eq->spell_id = emu->spell;
+		eq->effect_type = emu->effect_flag;
+		eq->effective_casting_level = 0; //if you set this to != 0 it will use this level instead of calculating it
+		eq->unknown1 = 0;
+		eq->unknown2 = 0;
+		eq->damage = 0; //client doesn't read this but live sends it here, can just set 0
+		eq->modifier = 1.0f + (emu->instrument_mod - 10) / 10.0f;
+		OUT(force);
+		OUT(hit_heading);
+		OUT(hit_pitch);
+		eq->skill = emu->type;
+		OUT(level);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Animation)
+	{
+		ENCODE_LENGTH_EXACT(Animation_Struct);
+		SETUP_DIRECT_ENCODE(Animation_Struct, structs::Animation_Struct);
+
+		OUT(spawnid);
+		OUT(action);
+		OUT(speed);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_BeginCast)
+	{
+		ENCODE_LENGTH_EXACT(BeginCast_Struct);
+		SETUP_DIRECT_ENCODE(BeginCast_Struct, structs::BeginCast_Struct);
+
+		OUT(spell_id);
+		OUT(caster_id);
+		OUT(cast_time);
+		eq->unknown0e = 1; //not sure what this is; but its usually 1 on live
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_BlockedBuffs)
+	{
+		ENCODE_LENGTH_EXACT(BlockedBuffs_Struct);
+		SETUP_DIRECT_ENCODE(BlockedBuffs_Struct, structs::BlockedBuffs_Struct);
+
+		for (uint32 i = 0; i < BLOCKED_BUFF_COUNT; ++i)
+			eq->SpellID[i] = emu->SpellID[i];
+
+		for (uint32 i = BLOCKED_BUFF_COUNT; i < structs::BLOCKED_BUFF_COUNT; ++i)
+			eq->SpellID[i] = -1;
+
+		OUT(Count);
+		OUT(Pet);
+		OUT(Initialise);
+		OUT(Flags);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Buff)
+	{
+		ENCODE_LENGTH_EXACT(SpellBuffPacket_Struct);
+		SETUP_DIRECT_ENCODE(SpellBuffPacket_Struct, structs::EQAffectPacket_Struct);
+
+		eq->entity_id = emu->entityid;
+		eq->unknown004 = 0;
+
+		//fill in affect info
+		eq->affect.caster_id.Id = emu->buff.player_id;
+		eq->affect.flags = 0;
+		eq->affect.spell_id = emu->buff.spellid;
+		eq->affect.duration = emu->buff.duration;
+		eq->affect.initial_duration = emu->buff.duration;
+		eq->affect.hit_count = emu->buff.num_hits;
+		eq->affect.viral_timer = 0;
+		eq->affect.modifier = emu->buff.bard_modifier == 10 ? 1.0f : emu->buff.bard_modifier / 10.0f;
+		eq->affect.y = emu->buff.y;
+		eq->affect.x = emu->buff.x;
+		eq->affect.z = emu->buff.z;
+		eq->affect.level = emu->buff.level;
+
+		eq->slot_id = ServerToLaurionBuffSlot(emu->slotid);
+		if (emu->bufffade == 1)
+		{
+			eq->buff_fade = 1;
+		}
+		else
+		{
+			eq->buff_fade = 2;
+		}
+
+		EQApplicationPacket* outapp = nullptr;
+		if (emu->bufffade == 1)
+		{
+			// Bit of a hack. OP_Buff appears to add/remove the buff while OP_BuffCreate adds/removes the actual buff icon
+			outapp = new EQApplicationPacket(OP_BuffCreate, 30);
+			outapp->WriteUInt32(emu->entityid);
+			outapp->WriteUInt32(0);	// tic timer
+			outapp->WriteUInt8(0);		// Type of OP_BuffCreate packet ?
+			outapp->WriteUInt16(1);		// 1 buff in this packet
+			outapp->WriteUInt32(ServerToLaurionBuffSlot(emu->slotid));
+			outapp->WriteUInt32(0xffffffff);		// SpellID (0xffff to remove)
+			outapp->WriteUInt32(0);			// Duration
+			outapp->WriteUInt32(0);			// numhits
+			outapp->WriteUInt8(0);		// Caster name
+			outapp->WriteUInt8(0);		// Type
+			outapp->WriteUInt8(0);		// Type
+		}
+
+		FINISH_ENCODE();
+
+		if (outapp) {
+			dest->FastQueuePacket(&outapp);
+		}
+	}
+
+	ENCODE(OP_BuffCreate)
+	{
+		SETUP_VAR_ENCODE(BuffIcon_Struct);
+
+		//Laurion has one extra 0x00 byte before the end byte
+		uint32 sz = 13 + (17 * emu->count) + emu->name_lengths; // 17 includes nullterm
+		__packet->size = sz;
+		__packet->pBuffer = new unsigned char[sz];
+		memset(__packet->pBuffer, 0, sz);
+
+		__packet->WriteUInt32(emu->entity_id);
+		__packet->WriteUInt32(emu->tic_timer);
+		__packet->WriteUInt8(emu->all_buffs);			// 1 indicates all buffs on the player (0 to add or remove a single buff)
+		__packet->WriteUInt16(emu->count);
+
+		for (int i = 0; i < emu->count; ++i)
+		{
+			__packet->WriteUInt32(emu->type == 0 ? ServerToLaurionBuffSlot(emu->entries[i].buff_slot) : emu->entries[i].buff_slot);
+			__packet->WriteUInt32(emu->entries[i].spell_id);
+			__packet->WriteUInt32(emu->entries[i].tics_remaining);
+			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
+			__packet->WriteString(emu->entries[i].caster);
+		}
+		__packet->WriteUInt8(0); // Unknown1
+		__packet->WriteUInt8(emu->type); // Unknown2
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ChannelMessage)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		ChannelMessage_Struct* emu = (ChannelMessage_Struct*)in->pBuffer;
+
+		unsigned char* __emu_buffer = in->pBuffer;
+
+		std::string old_message = emu->message;
+		std::string new_message;
+		ServerToLaurionConvertLinks(new_message, old_message);
+
+		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 43;
+
+		in->pBuffer = new unsigned char[in->size];
+
+		char* OutBuffer = (char*)in->pBuffer;
+
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->sender);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->targetname);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->language);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->chan_num);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->skill_in_language);
+		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
+
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, 0);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_CharInventory) {
+		//consume the packet
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		if (!in->size) {
+			in->size = 4;
+			in->pBuffer = new uchar[in->size];
+			memset(in->pBuffer, 0, in->size);
+
+			dest->FastQueuePacket(&in, ack_req);
+			return;
+		}
+
+		//store away the emu struct
+		uchar* __emu_buffer = in->pBuffer;
+
+		int item_count = in->size / sizeof(EQ::InternalSerializedItem_Struct);
+		if (!item_count || (in->size % sizeof(EQ::InternalSerializedItem_Struct)) != 0) {
+			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
+				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQ::InternalSerializedItem_Struct));
+
+			delete in;
+			return;
+		}
+
+		EQ::InternalSerializedItem_Struct* eq = (EQ::InternalSerializedItem_Struct*)in->pBuffer;
+		SerializeBuffer buffer;
+		buffer.WriteUInt32(item_count);
+
+		for (int index = 0; index < item_count; ++index, ++eq) {
+			SerializeItem(buffer, (const EQ::ItemInstance*)eq->inst, eq->slot_id, 0, ItemPacketCharInventory);
+		}
+
+		in->size = buffer.size();
+		in->pBuffer = new unsigned char[buffer.size()];
+		memcpy(in->pBuffer, buffer.buffer(), buffer.size());
+
+		delete[] __emu_buffer;
+
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_ClientUpdate)
+	{
+		ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
+		SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::PlayerPositionUpdateServer_Struct);
+
+		OUT(spawn_id);
+		OUT(vehicle_id);
+		eq->position.x = emu->x_pos;
+		eq->position.y = emu->y_pos;
+		eq->position.z = emu->z_pos;
+		eq->position.heading = emu->heading;
+		eq->position.deltaX = emu->delta_x;
+		eq->position.deltaY = emu->delta_y;
+		eq->position.deltaZ = emu->delta_z;
+		eq->position.deltaHeading = emu->delta_heading;
+		eq->position.animation = emu->animation;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Consider)
+	{
+		ENCODE_LENGTH_EXACT(Consider_Struct);
+		SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
+
+		OUT(playerid);
+		OUT(targetid);
+		OUT(faction);
+		OUT(level);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Damage) {
+		SETUP_DIRECT_ENCODE(CombatDamage_Struct, structs::CombatDamage_Struct);
+
+		OUT(target);
+		OUT(source);
+		OUT(type);
+		OUT(spellid);
+		OUT(damage);
+		OUT(force);
+		OUT(hit_heading);
+		OUT(hit_pitch);
+		OUT(special);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Death)
+	{
+		ENCODE_LENGTH_EXACT(Death_Struct);
+		SETUP_DIRECT_ENCODE(Death_Struct, structs::Death_Struct);
+
+		OUT(spawn_id);
+		OUT(killer_id);
+		OUT(spell_id);
+		OUT(attack_skill);
+		OUT(damage);
+
+		//This is a hack, we need to actually fix the ordering in source as this wont respect filters etc
+		if (emu->attack_skill != 231) {
+			auto combat_packet = new EQApplicationPacket(OP_Damage, sizeof(structs::CombatDamage_Struct));
+			structs::CombatDamage_Struct* cds = (structs::CombatDamage_Struct*)combat_packet->pBuffer;
+
+			cds->target = emu->spawn_id;
+			cds->source = emu->killer_id;
+			cds->type = emu->attack_skill;
+			cds->damage = emu->damage;
+			cds->spellid = -1;
+
+			dest->FastQueuePacket(&combat_packet, ack_req);
+		}
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_DeleteSpawn)
+	{
+		ENCODE_LENGTH_EXACT(DeleteSpawn_Struct);
+		SETUP_DIRECT_ENCODE(DeleteSpawn_Struct, structs::DeleteSpawn_Struct);
+
+		OUT(spawn_id);
+		eq->unknown04 = 1;	// Observed
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ExpansionInfo)
+	{
+		ENCODE_LENGTH_EXACT(ExpansionInfo_Struct);
+		SETUP_DIRECT_ENCODE(ExpansionInfo_Struct, structs::ExpansionInfo_Struct);
+
+		OUT(Expansions);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ExpUpdate)
+	{
+		SETUP_DIRECT_ENCODE(ExpUpdate_Struct, structs::ExpUpdate_Struct);
+
+		//later we should change the underlying server to use this more accurate value
+		//and encode the 330 in the other patches
+		eq->exp = emu->exp * 100000 / 330;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_FormattedMessage)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		FormattedMessage_Struct* emu = (FormattedMessage_Struct*)in->pBuffer;
+
+		char* old_message_ptr = (char*)in->pBuffer;
+		old_message_ptr += sizeof(FormattedMessage_Struct);
+
+		std::string old_message_array[9];
+
+		for (int i = 0; i < 9; ++i) {
+			if (*old_message_ptr == 0) { break; }
+			old_message_array[i] = old_message_ptr;
+			old_message_ptr += old_message_array[i].length() + 1;
+		}
+
+		SerializeBuffer buffer;
+		buffer.WriteUInt32(emu->unknown0);
+		buffer.WriteUInt8(0); // Observed
+		buffer.WriteUInt32(emu->string_id);
+		buffer.WriteUInt32(emu->type);
+
+		for (int i = 0; i < 9; ++i) {
+			std::string new_message;
+			ServerToLaurionConvertLinks(new_message, old_message_array[i]);
+			buffer.WriteLengthString(new_message);
+		}
+
+		auto outapp = new EQApplicationPacket(OP_FormattedMessage, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
+
+		delete in;
+	}
+
+	ENCODE(OP_GMTraining) {
+		ENCODE_LENGTH_EXACT(GMTrainee_Struct);
+		SETUP_DIRECT_ENCODE(GMTrainee_Struct, structs::GMTrainee_Struct);
+
+		OUT(npcid);
+		OUT(playerid);
+
+		for (int i = 0; i < 100; ++i) {
+			OUT(skills[i]);
+		}
+
+		eq->unknown408[0] = 1;
+		eq->unknown408[1] = 0xC9;
+		eq->unknown408[2] = 0xC9;
+		eq->unknown408[3] = 0xC9;
+		eq->unknown408[4] = 0xC9;
+		eq->unknown408[5] = 0xC9;
+		eq->unknown408[6] = 0xC9;
+		eq->unknown408[7] = 0xC9;
+		eq->unknown408[8] = 0xC9;
+		eq->unknown408[9] = 0xC9;
+		eq->unknown408[10] = 0xC9;
+		eq->unknown408[11] = 0xC9;
+		eq->unknown408[12] = 0xC9;
+		eq->unknown408[13] = 0xC9;
+		eq->unknown408[14] = 0xC9;
+		eq->unknown408[15] = 0xC9;
+		eq->unknown408[16] = 0xC9;
+		eq->unknown408[17] = 0xC9;
+		eq->unknown408[18] = 0xC9;
+		eq->unknown408[19] = 0xC9;
+		eq->unknown408[20] = 0xC9;
+		eq->unknown408[21] = 0xC9;
+		eq->unknown408[22] = 0xC9;
+		eq->unknown408[23] = 0xC9;
+		eq->unknown408[24] = 0xC9;
+		eq->unknown408[25] = 0xC9;
+		eq->unknown408[26] = 0xC9;
+		eq->unknown408[27] = 0xC9;
+		eq->unknown408[28] = 0xC9;
+		eq->unknown408[29] = 0xC9;
+		eq->unknown408[30] = 0xC9;
+		eq->unknown408[31] = 0xC9;
+		eq->unknown408[32] = 0xC9;
+		eq->unknown408[33] = 0xCA; //the client far as I can tell doesn't read past the 1 byte + 32 0xc9s, but still setting it to what we saw
+		eq->unknown408[34] = 0x8C;
+		eq->unknown408[35] = 0xEC;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_GMTrainSkillConfirm)
+	{
+		ENCODE_LENGTH_EXACT(GMTrainSkillConfirm_Struct);
+		SETUP_DIRECT_ENCODE(GMTrainSkillConfirm_Struct, structs::GMTrainSkillConfirm_Struct);
+
+		OUT(SkillID);
+		OUT(Cost);
+		OUT(NewSkill);
+		OUT_str(TrainerName);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_GroundSpawn)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		Object_Struct* emu = (Object_Struct*)in->pBuffer;
+
+		SerializeBuffer buffer;
+		buffer.WriteUInt32(emu->drop_id);
+		buffer.WriteString(emu->object_name);
+		buffer.WriteUInt16(emu->zone_id);
+		buffer.WriteUInt16(emu->zone_instance);
+		buffer.WriteUInt32(emu->drop_id); //this is some other sub but it's okay to duplicate
+		buffer.WriteUInt32(0); //expires
+		buffer.WriteFloat(emu->heading);
+		buffer.WriteFloat(emu->tilt_x);
+		buffer.WriteFloat(emu->tilt_y);
+		buffer.WriteFloat(emu->size != 0 && (float)emu->size < 5000.f ? (float)((float)emu->size / 100.0f) : 1.f); //size, with weird peq hack
+		buffer.WriteFloat(emu->y);
+		buffer.WriteFloat(emu->x);
+		buffer.WriteFloat(emu->z);
+		buffer.WriteFloat(emu->object_type); //weight
+
+		auto outapp = new EQApplicationPacket(OP_GroundSpawn, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
+
+		delete in;
+	}
+
+	ENCODE(OP_HPUpdate)
+	{
+		SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct, structs::SpawnHPUpdate_Struct);
+
+		OUT(spawn_id);
+		OUT(cur_hp);
+		OUT(max_hp);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Illusion)
+	{
+		ENCODE_LENGTH_EXACT(Illusion_Struct);
+		SETUP_DIRECT_ENCODE(Illusion_Struct, structs::Illusion_Struct);
+
+		OUT(spawnid);
+		OUT_str(charname);
+		OUT(race);
+		eq->unknown006[0] = 0;
+		eq->unknown006[1] = 0;
+		OUT(gender);
+		OUT(texture);
+		OUT(helmtexture);
+		OUT(face);
+		OUT(hairstyle);
+		OUT(haircolor);
+		OUT(beard);
+		OUT(beardcolor);
+		OUT(size);
+		OUT(drakkin_heritage);
+		OUT(drakkin_tattoo);
+		OUT(drakkin_details);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ItemPacket)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		uchar* __emu_buffer = in->pBuffer;
+		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
+
+		auto type = ServerToLaurionItemPacketType(old_item_pkt->PacketType);
+		if (type == item::ItemPacketType::ItemPacketInvalid) {
+			delete in;
+			return;
+		}
+
+		switch (type)
+		{
+		case item::ItemPacketType::ItemPacketParcel: {
+			ParcelMessaging_Struct       pms{};
+			EQ::Util::MemoryStreamReader ss(reinterpret_cast<char*>(in->pBuffer), in->size);
+			cereal::BinaryInputArchive   ar(ss);
+			ar(pms);
+
+			uint32 player_name_length = pms.player_name.length();
+			uint32 note_length = pms.note.length();
+
+			auto* int_struct = (EQ::InternalSerializedItem_Struct*)pms.serialized_item.data();
+
+			SerializeBuffer buffer;
+			buffer.WriteInt32((int32_t)type);
+			SerializeItem(buffer, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
+
+			buffer.WriteUInt32(pms.sent_time);
+			buffer.WriteLengthString(pms.player_name);
+			buffer.WriteLengthString(pms.note);
+
+			auto outapp = new EQApplicationPacket(OP_ItemPacket, buffer.size());
+			outapp->WriteData(buffer.buffer(), buffer.size());
+			dest->FastQueuePacket(&outapp, ack_req);
+			break;
+		}
+		default: {
+			EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
+			SerializeBuffer buffer;
+			buffer.WriteInt32((int32_t)type);
+			SerializeItem(buffer, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
+
+			auto outapp = new EQApplicationPacket(OP_ItemPacket, buffer.size());
+			outapp->WriteData(buffer.buffer(), buffer.size());
+			dest->FastQueuePacket(&outapp, ack_req);
+		}
+		}
+
+		delete in;
+	}
+
 	ENCODE(OP_LogServer) {
 		SETUP_VAR_ENCODE(LogServer_Struct);
 		ALLOC_LEN_ENCODE(1840);
@@ -244,319 +810,328 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_SendMembership) {
-		ENCODE_LENGTH_EXACT(Membership_Struct);
-		SETUP_DIRECT_ENCODE(Membership_Struct, structs::Membership_Struct);
+	ENCODE(OP_ManaChange) {
+		ENCODE_LENGTH_EXACT(ManaChange_Struct);
+		SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
 
-		eq->membership = emu->membership;
-		eq->races = emu->races;
-		eq->classes = emu->classes;
-		eq->entrysize = 33;
-		eq->entries[0] = -1;  // Max AA Restriction
-		eq->entries[1] = -1;  // Max Level Restriction
-		eq->entries[2] = -1;  // Max Char Slots per Account (not used by client?)
-		eq->entries[3] = -1;  // SpellTier
-		eq->entries[4] = -1;  // Main Inventory Size
-		eq->entries[5] = -1;  // Max Platinum per level
-		eq->entries[6] = 1;   // Send Mail
-		eq->entries[7] = 1;   // Use Parcels
-		eq->entries[8] = 1;   // Loyalty
-		eq->entries[9] = -1;  // Merc Tiers
-		eq->entries[10] = 1;  // Housing
-		eq->entries[11] = -1; // Shared Bank Slots
-		eq->entries[12] = -1; // Max Journal Quests
-		eq->entries[13] = 1;  // CreateGuild
-		eq->entries[14] = 1;  // Bazaar
-		eq->entries[15] = 1;  // Barter
-		eq->entries[16] = 1;  // Chat
-		eq->entries[17] = 1;  // Petition
-		eq->entries[18] = 1;  // Advertising
-		eq->entries[19] = -1; // UseItem
-		eq->entries[20] = -1; // StartingCity
-		eq->entries[21] = 1;  // Ornament
-		eq->entries[22] = 0;  // HeroicCharacter
-		eq->entries[23] = 0;  // AutoGrantAA
-		eq->entries[24] = 0;  // MountKeyRingSlots
-		eq->entries[25] = 0;  // IllusionKeyRingSlots
-		eq->entries[26] = 0;  // FamiliarKeyRingSlots
-		eq->entries[27] = 0;  // FamiliarAutoLeave
-		eq->entries[28] = 0;  // HeroForgeKeyRingSlots
-		eq->entries[29] = 0;  // DragonHoardSlots
-		eq->entries[30] = 0;  // TeleportKeyRingSlots
-		eq->entries[31] = 0;  // PersonalDepotSlots
-		eq->entries[32] = 0;
+		OUT(new_mana);
+		OUT(stamina);
+		OUT(spell_id);
+		OUT(keepcasting);
+		OUT(slot);
 
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_SendMembershipDetails) {
-		ENCODE_LENGTH_EXACT(Membership_Details_Struct);
-		SETUP_DIRECT_ENCODE(Membership_Details_Struct, structs::Membership_Details_Struct);
+	ENCODE(OP_MobHealth) {
+		ENCODE_LENGTH_EXACT(SpawnHPUpdate_Struct2);
+		SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct2, structs::MobHealth_Struct);
 
-		int32 settings[96][3] = {
-			{ 0, 0, 250 }, { 1, 0, 1000 }, { 0, 1, -1 }, { 1, 1, -1 }, 
-			{ 0, 2, 2 }, { 2, 0, -1 }, { 3, 0, -1 }, { 1, 2, 4 }, 
-			{ 0, 3, 1 }, { 2, 1, -1 }, { 3, 1, -1 }, { 1, 3, 1 }, 
-			{ 0, 4, -1 }, { 2, 2, -1 }, { 3, 2, -1 }, { 1, 4, -1 }, 
-			{ 0, 5, -1 }, { 2, 3, -1 }, { 3, 3, -1 }, { 1, 5, -1 }, 
-			{ 0, 6, 0 }, { 2, 4, -1 }, { 3, 4, -1 }, { 1, 6, 0 }, 
-			{ 0, 7, 1 }, { 2, 5, -1 }, { 3, 5, -1 }, { 1, 7, 1 }, 
-			{ 0, 8, 1 }, { 2, 6, 1 }, { 3, 6, 1 }, { 1, 8, 1 }, 
-			{ 0, 9, 5 }, { 2, 7, 1 }, { 3, 7, 1 }, { 1, 9, 5 }, 
-			{ 0, 10, 0 }, { 2, 8, 1 }, { 3, 8, 1 }, { 0, 11, -1 }, 
-			{ 1, 10, 1 }, { 2, 9, -1 }, { 3, 9, -1 }, { 0, 12, -1 }, 
-			{ 1, 11, -1 }, { 2, 10, 1 }, { 3, 10, 1 }, { 0, 13, 0 }, 
-			{ 1, 12, -1 }, { 2, 11, -1 }, { 3, 11, -1 }, { 0, 14, 0 }, 
-			{ 1, 13, 1 }, { 2, 12, -1 }, { 3, 12, -1 }, { 0, 15, 0 }, 
-			{ 1, 14, 0 }, { 2, 13, 1 }, { 3, 13, 1 }, { 0, 16, 0 }, 
-			{ 1, 15, 0 }, { 2, 14, 1 }, { 3, 14, 1 }, { 0, 17, 0 }, 
-			{ 1, 16, 1 }, { 2, 15, 1 }, { 3, 15, 1 }, { 0, 18, 0 }, 
-			{ 1, 17, 0 }, { 2, 16, 1 }, { 3, 16, 1 }, { 0, 19, 0 }, 
-			{ 1, 18, 0 }, { 2, 17, 1 }, { 3, 17, 1 }, { 0, 20, 0 }, 
-			{ 1, 19, 0 }, { 2, 18, 1 }, { 3, 18, 1 }, { 0, 21, 0 }, 
-			{ 1, 20, 0 }, { 2, 19, -1 }, { 3, 19, -1 }, { 0, 22, 0 }, 
-			{ 1, 21, 0 }, { 2, 20, -1 }, { 3, 20, -1 }, { 2, 21, 0 }, 
-			{ 0, 23, 0 }, { 1, 22, 0 }, { 3, 21, 0 }, { 2, 22, 0 }, 
-			{ 1, 23, 0 }, { 3, 22, 0 }, { 2, 23, 0 }, { 3, 23, 0 }
-		};
-
-		uint32 races[17][2] = {
-			{ 1, 131071 },
-			{ 333, 131071 },
-			{ 90287, 131071 },
-			{ 90289, 16 },
-			{ 90290, 32 },
-			{ 90291, 64 },
-			{ 90292, 128 },
-			{ 90293, 256 },
-			{ 90294, 512 },
-			{ 90295, 1024 },
-			{ 90296, 2048 },
-			{ 90297, 8192 },
-			{ 90298, 16384 },
-			{ 90299, 32768 },
-			{ 90300, 65536 },
-			{ 2012271, 131071 },
-			{ 2012277, 131071 }
-		};
-		
-		uint32 classes[17][2] = {
-			{ 1, 131071 },
-			{ 333, 131071 },
-			{ 90287, 131071 },
-			{ 90301, 8 },
-			{ 90302, 16 },
-			{ 90303, 32 },
-			{ 90304, 64 },
-			{ 90305, 128 },
-			{ 90306, 256 },
-			{ 90307, 1024 },
-			{ 90308, 2048 },
-			{ 90309, 8192 },
-			{ 90310, 16384 },
-			{ 90311, 32768 },
-			{ 90312, 65536 },
-			{ 2012271, 131071 },
-			{ 2012277, 131071 }
-		};
-
-		eq->membership_setting_count = 96;
-
-		for (int i = 0; i < 96; ++i) {
-			eq->settings[i].setting_index = (int8)settings[i][0];
-			eq->settings[i].setting_id = settings[i][1];
-			eq->settings[i].setting_value = settings[i][2];
-		}
-
-		eq->class_entry_count = 17;
-		for (int i = 0; i < 17; ++i) {
-			eq->membership_classes[i].purchase_id = classes[i][0];
-			eq->membership_classes[i].bitwise_entry = classes[i][1];
-		}
-
-		eq->race_entry_count = 17;
-		for (int i = 0; i < 17; ++i) {
-			eq->membership_races[i].purchase_id = races[i][0];
-			eq->membership_races[i].bitwise_entry = races[i][1];
-		}
-
-		eq->exit_url_length = 0;
+		OUT(spawn_id);
+		OUT(hp);
 
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_SendMaxCharacters) {
-		ENCODE_LENGTH_EXACT(MaxCharacters_Struct);
-		SETUP_DIRECT_ENCODE(MaxCharacters_Struct, structs::MaxCharacters_Struct);
-
-		//OUT(max_chars);
-		eq->max_chars = 8; //needs to be fixed
-		eq->marketplace_chars = 0;
-		eq->unknown008 = -1;
-		eq->unknown00c = 196608;
-		eq->unknown010 = 0;
-		eq->unknown014 = 0;
-		eq->unknown018 = 0;
-		eq->unknown01c = 0;
-		eq->unknown020 = -1;
-		eq->unknown024 = 0;
-		eq->unknown028 = 0;
-		eq->unknown02c = 0;
-		eq->unknown030 = 0;
-		eq->unknown034 = 0;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_SendCharInfo) {
-		ENCODE_LENGTH_ATLEAST(CharacterSelect_Struct);
-		SETUP_VAR_ENCODE(CharacterSelect_Struct);
-
-		// Zero-character count shunt
-		if (emu->CharCount == 0) {
-			ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, sizeof(structs::CharacterSelect_Struct));
-			eq->CharCount = emu->CharCount;
-
-			FINISH_ENCODE();
-			return;
-		}
-
-		unsigned char* emu_ptr = __emu_buffer;
-		emu_ptr += sizeof(CharacterSelect_Struct);
-		CharacterSelectEntry_Struct* emu_cse = (CharacterSelectEntry_Struct*)nullptr;
-
-		size_t names_length = 0;
-		size_t character_count = 0;
-		for (; character_count < emu->CharCount; ++character_count) {
-			emu_cse = (CharacterSelectEntry_Struct*)emu_ptr;
-			names_length += strlen(emu_cse->Name);
-			emu_ptr += sizeof(CharacterSelectEntry_Struct);
-		}
-
-		size_t total_length = sizeof(structs::CharacterSelect_Struct)
-			+ character_count * sizeof(structs::CharacterSelectEntry_Struct)
-			+ names_length;
-
-		ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
-		structs::CharacterSelectEntry_Struct* eq_cse = (structs::CharacterSelectEntry_Struct*)nullptr;
-
-		eq->CharCount = character_count;
-
-		emu_ptr = __emu_buffer;
-		emu_ptr += sizeof(CharacterSelect_Struct);
-
-		unsigned char* eq_ptr = __packet->pBuffer;
-		eq_ptr += sizeof(structs::CharacterSelect_Struct);
-
-		for (int counter = 0; counter < character_count; ++counter) {
-			emu_cse = (CharacterSelectEntry_Struct*)emu_ptr;
-			eq_cse = (structs::CharacterSelectEntry_Struct*)eq_ptr; // base address
-
-			strcpy(eq_cse->Name, emu_cse->Name);
-			eq_ptr += strlen(emu_cse->Name);
-
-			eq_cse = (structs::CharacterSelectEntry_Struct*)eq_ptr;
-			eq_cse->Name[0] = '\0';
-
-			eq_cse->Class = emu_cse->Class;
-			eq_cse->Race = emu_cse->Race;
-			eq_cse->Level = emu_cse->Level;
-			eq_cse->ShroudClass = emu_cse->ShroudClass;
-			eq_cse->ShroudRace = emu_cse->ShroudRace;
-			eq_cse->Zone = emu_cse->Zone;
-			eq_cse->Instance = emu_cse->Instance;
-			eq_cse->Gender = emu_cse->Gender;
-			eq_cse->Face = emu_cse->Face;
-
-			for (int equip_index = 0; equip_index < EQ::textures::materialCount; equip_index++) {
-				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
-				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
-				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
-				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HerosForgeModel;
-				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Unknown2;
-				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
-			}
-
-			eq_cse->Unknown1 = 255;
-			eq_cse->Unknown2 = 0;
-			eq_cse->DrakkinTattoo = emu_cse->DrakkinTattoo;
-			eq_cse->DrakkinDetails = emu_cse->DrakkinDetails;
-			eq_cse->Deity = emu_cse->Deity;
-			eq_cse->PrimaryIDFile = emu_cse->PrimaryIDFile;
-			eq_cse->SecondaryIDFile = emu_cse->SecondaryIDFile;
-			eq_cse->HairColor = emu_cse->HairColor;
-			eq_cse->BeardColor = emu_cse->BeardColor;
-			eq_cse->EyeColor1 = emu_cse->EyeColor1;
-			eq_cse->EyeColor2 = emu_cse->EyeColor2;
-			eq_cse->HairStyle = emu_cse->HairStyle;
-			eq_cse->Beard = emu_cse->Beard;
-			eq_cse->GoHome = emu_cse->GoHome;
-			eq_cse->Tutorial = emu_cse->Tutorial;
-			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
-			eq_cse->Enabled = emu_cse->Enabled;
-			eq_cse->LastLogin = emu_cse->LastLogin;
-			eq_cse->Unknown3 = 0;
-			eq_cse->Unknown4 = 0;
-			eq_cse->Unknown5 = 0;
-			eq_cse->Unknown6 = 0;
-			eq_cse->Unknown7 = 0;
-			eq_cse->CharacterId = 0;
-			eq_cse->Unknown8 = 1;
-
-			emu_ptr += sizeof(CharacterSelectEntry_Struct);
-			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
-		}
-
-		DumpPacket(__packet);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_ExpansionInfo)
+	ENCODE(OP_MoneyOnCorpse)
 	{
-		ENCODE_LENGTH_EXACT(ExpansionInfo_Struct);
-		SETUP_DIRECT_ENCODE(ExpansionInfo_Struct, structs::ExpansionInfo_Struct);
+		ENCODE_LENGTH_EXACT(moneyOnCorpseStruct);
+		SETUP_DIRECT_ENCODE(moneyOnCorpseStruct, structs::moneyOnCorpseStruct);
 
-		OUT(Expansions);
+		eq->type = emu->response;
+		OUT(platinum);
+		OUT(gold);
+		OUT(silver);
+		OUT(copper);
+		eq->flags = 0;
 
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_SpawnAppearance)
+	ENCODE(OP_MoveItem)
+	{
+		ENCODE_LENGTH_EXACT(MoveItem_Struct);
+		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "Laurion::ENCODE(OP_MoveItem)");
+
+		eq->from_slot = ServerToLaurionSlot(emu->from_slot);
+		eq->to_slot = ServerToLaurionSlot(emu->to_slot);
+		OUT(number_in_stack);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
+
+	ENCODE(OP_NewZone) {
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		unsigned char* __emu_buffer = in->pBuffer;
+		NewZone_Struct* emu = (NewZone_Struct*)__emu_buffer;
+
+		SerializeBuffer buffer;
+		/*
+		char Shortname[];
+		char Longname[];
+		char WeatherType[];
+		char WeatherTypeOverride[];
+		char SkyType[];
+		char SkyTypeOverride[];
+		*/
+		buffer.WriteString(emu->zone_short_name);
+		buffer.WriteString(emu->zone_long_name);
+		buffer.WriteString("");
+		buffer.WriteString("");
+		buffer.WriteString("");
+		buffer.WriteString("");
+
+		/*
+		s32 ZoneType;
+		s16 ZoneId;
+		s16 ZoneInstance;
+		float ZoneExpModifier;
+		s32 GroupLvlExpRelated;
+		s32 FilterID;
+		s32 Unknown1;
+		*/
+		buffer.WriteInt32(emu->ztype);
+		buffer.WriteInt16(emu->zone_id);
+		buffer.WriteInt16(emu->zone_instance);
+		buffer.WriteFloat(emu->zone_exp_multiplier);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+
+		//float FogDensity;
+		buffer.WriteFloat(emu->fog_density);
+
+		//WeatherState state[4];
+		for (int i = 0; i < 4; ++i) {
+			/*
+			float FogStart;
+			float FogEnd;
+			u8 FogRed;
+			u8 FogGreen;
+			u8 FogBlue;
+			u8 RainChance;
+			u8 RainDuration;
+			u8 SnowChance;
+			u8 SnowDuration;
+			*/
+
+			buffer.WriteFloat(emu->fog_minclip[i]);
+			buffer.WriteFloat(emu->fog_maxclip[i]);
+			buffer.WriteUInt8(emu->fog_red[i]);
+			buffer.WriteUInt8(emu->fog_green[i]);
+			buffer.WriteUInt8(emu->fog_blue[i]);
+			buffer.WriteUInt8(emu->rain_chance[i]);
+			buffer.WriteUInt8(emu->rain_duration[i]);
+			buffer.WriteUInt8(emu->snow_chance[i]);
+			buffer.WriteUInt8(emu->snow_duration[i]);
+
+		}
+
+		/*
+		u8 PrecipitationType;
+		float BloomIntensity;
+		float ZoneGravity;
+		s32 LavaDamage;
+		s32 MinLavaDamage;
+		*/
+		buffer.WriteUInt8(emu->sky);
+		buffer.WriteFloat(1.0f);
+		buffer.WriteFloat(emu->gravity);
+		buffer.WriteInt32(emu->lava_damage);
+		buffer.WriteInt32(emu->min_lava_damage);
+
+		/*
+		s32 TimeStringID;
+		s32 Unknown3;
+		s32 SkyLock;
+		s32 SkyLockOverride;
+		*/
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(1);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(-1);
+
+		/*
+		float SafeY;
+		float SafeX;
+		float SafeZ;
+		float SafeHeading;
+		float Ceiling;
+		float Floor;
+		*/
+
+		buffer.WriteFloat(emu->safe_y);
+		buffer.WriteFloat(emu->safe_x);
+		buffer.WriteFloat(emu->safe_z);
+		buffer.WriteFloat(emu->safe_heading);
+		buffer.WriteFloat(emu->max_z);
+		buffer.WriteFloat(emu->underworld);
+
+		/*
+		float MinClip;
+		float MaxClip;
+		s32 FallThroughWorldTeleportID;
+		*/
+		buffer.WriteFloat(emu->minclip);
+		buffer.WriteFloat(emu->maxclip);
+		buffer.WriteInt32(emu->underworld_teleport_index);
+
+		/*
+		s32 Unknown4;
+		s32 ScriptIDHour;
+		s32 ScriptIDMinute;
+		s32 ScriptIDTick;
+		s32 ScriptIDOnPlayerDeath;
+		s32 ScriptIDOnNPCDeath;
+		s32 ScriptIDPlayerEnteringZone;
+		s32 ScriptIDOnZonePop;
+		s32 ScriptIDNPCLoot;
+		s32 Unknown4b;
+		s32 ScriptIDOnFishing;
+		s32 ScriptIDOnForage;
+		s32 Unknown4c;
+		*/
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+		buffer.WriteInt32(0);
+
+		/*
+		s32 NPCAgroMaxDist;
+		*/
+		buffer.WriteInt32(600);
+
+		/*
+		s32 ForageLow;
+		s32 ForageMedium;
+		s32 ForageHigh;
+		s32 ForageSpecial;
+		s32 FishingLow;
+		s32 FishingMedium;
+		s32 FishingHigh;
+		s32 FishingRelated;
+		*/
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+		buffer.WriteInt32(-1);
+
+		/*
+		s32 CanPlaceCampsite;
+		s32 CanPlaceGuildBanner;
+		s32 Unknown4d;
+		*/
+
+		buffer.WriteInt32(2);
+		buffer.WriteInt32(2);
+		buffer.WriteInt32(0);
+
+		/*
+		s32 FastRegenHP;
+		s32 FastRegenMana;
+		s32 FastRegenEndurance;
+		*/
+		buffer.WriteInt32(emu->fast_regen_hp);
+		buffer.WriteInt32(emu->fast_regen_mana);
+		buffer.WriteInt32(emu->fast_regen_endurance);
+
+		/*
+		u8 NewEngineZone;
+		u8 SkyEnabled;
+		u8 FogOnOff;
+		u8 ClimateType;
+		u8 bNoPlayerLight;
+		*/
+		buffer.WriteUInt8(0); //not sure what happens if we set this incorrectly but we probably need to add this to the zone database
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+
+		/*
+		u8 bUnknown5;
+		u8 bNoAttack;
+		u8 bAllowPVP;
+		u8 bNoEncumber;
+		u8 Unknown6;
+		u8 Unknown7;
+		*/
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+
+		/*
+		u8 bNoLevitate;
+		u8 bNoBuffExpiration;
+		u8 bDisallowManaStone;
+		u8 bNoBind;
+		u8 bNoCallOfTheHero;
+		u8 bUnknown8;
+		u8 bNoFear;
+		u8 bUnknown9;
+		*/
+
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(emu->suspend_buffs);
+		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+
+		auto outapp = new EQApplicationPacket(OP_NewZone, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
+
+		delete in;
+	}
+
+	ENCODE(OP_OnLevelMessage)
 	{
 		EQApplicationPacket* in = *p;
 		*p = nullptr;
-	
-		unsigned char* emu_buffer = in->pBuffer;
-	
-		SpawnAppearance_Struct* sas = (SpawnAppearance_Struct*)emu_buffer;
-	
-		if (sas->type != AppearanceType::Size)
-		{
-			//laurion struct is different than rof2's but the idea is the same
-			//we will probably want to better implement Laurion's structure later
-			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
-			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
-	
-			eq->spawn_id = sas->spawn_id;
-			eq->type = ServerToLaurionSpawnAppearanceType(sas->type);
-			eq->parameter = sas->parameter;
-	
-			dest->FastQueuePacket(&outapp, ack_req);
-			delete in;
-			return;
-		}
-	
-		auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
-	
-		ChangeSize_Struct* css = (ChangeSize_Struct*)outapp->pBuffer;
-	
-		css->EntityID = sas->spawn_id;
-		css->Size = (float)sas->parameter;
-		css->Unknown08 = 0;
-		css->Unknown12 = 1.0f;
-	
+		OnLevelMessage_Struct* emu = (OnLevelMessage_Struct*)in->pBuffer;
+		SerializeBuffer buffer;
+
+		buffer.WriteLengthString(emu->Title);
+		buffer.WriteLengthString(emu->Text);
+		buffer.WriteLengthString(emu->ButtonName0);
+		buffer.WriteLengthString(emu->ButtonName1);
+		buffer.WriteUInt8(emu->Buttons);
+		buffer.WriteUInt8(emu->SoundControls);
+		buffer.WriteUInt32(emu->Duration);
+		buffer.WriteUInt32(emu->PopupID);
+		buffer.WriteUInt32(emu->NegativeID);
+		buffer.WriteUInt32(0); //seen -1 & 0
+		buffer.WriteUInt32(0); //seen 0
+
+		auto outapp = new EQApplicationPacket(OP_OnLevelMessage, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
 		dest->FastQueuePacket(&outapp, ack_req);
+
 		delete in;
 	}
 
@@ -779,7 +1354,7 @@ namespace Laurion
 			s32 index;
 			s32 points_spent;
 			s32 charges_spent;
-			u8 unknown1; 
+			u8 unknown1;
 			*/
 			out.WriteUInt32(emu->aa_array[i].AA);
 			out.WriteUInt32(emu->aa_array[i].value);
@@ -1200,7 +1775,7 @@ namespace Laurion
 		//u32 claim_count;
 		out.WriteUInt32(0);
 		//Claim claims[claim_count];
-		
+
 		//Tribute tribute;
 		/*
 		u32 BenefitTimer;
@@ -1277,7 +1852,7 @@ namespace Laurion
 		out.WriteUInt32(emu->careerEbonCrystals);
 
 		/*
-		u32 momentum_balance;  
+		u32 momentum_balance;
 		u32 loyalty_reward_balance;
 		u32 parcel_status;
 		*/
@@ -1572,7 +2147,702 @@ namespace Laurion
 		delete in;
 	}
 
+	ENCODE(OP_RemoveBlockedBuffs) { ENCODE_FORWARD(OP_BlockedBuffs); }
+
+	ENCODE(OP_RespondAA)
+	{
+		SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
+
+		eq->aa_spent = emu->aa_spent;
+		// These fields may need to be correctly populated at some point
+		eq->aapoints_assigned[0] = emu->aa_spent;
+		eq->aapoints_assigned[1] = 0;
+		eq->aapoints_assigned[2] = 0;
+		eq->aapoints_assigned[3] = 0;
+		eq->aapoints_assigned[4] = 0;
+		eq->aapoints_assigned[5] = 0;
+
+		for (uint32 i = 0; i < MAX_PP_AA_ARRAY; ++i)
+		{
+			eq->aa_list[i].AA = emu->aa_list[i].AA;
+			eq->aa_list[i].value = emu->aa_list[i].value;
+			eq->aa_list[i].charges = emu->aa_list[i].charges;
+			eq->aa_list[i].bUnknown0x0c = false;
+		}
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_RequestClientZoneChange)
+	{
+		ENCODE_LENGTH_EXACT(RequestClientZoneChange_Struct);
+		SETUP_DIRECT_ENCODE(RequestClientZoneChange_Struct, structs::RequestClientZoneChange_Struct);
+
+		OUT(zone_id);
+		OUT(instance_id);
+		OUT(y);
+		OUT(x);
+		OUT(z);
+		OUT(heading);
+		eq->type = 0x0b;
+		eq->unknown004 = 0xffffffff;
+		eq->unknown172 = 0x0168b500;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SendAATable)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+		AARankInfo_Struct* emu = (AARankInfo_Struct*)in->pBuffer;
+
+		std::vector<int32> skill;
+		std::vector<int32> points;
+		in->SetReadPosition(sizeof(AARankInfo_Struct) + emu->total_effects * sizeof(AARankEffect_Struct));
+		for (auto i = 0; i < emu->total_prereqs; ++i) {
+			skill.push_back(in->ReadUInt32());
+			points.push_back(in->ReadUInt32());
+		}
+
+		SerializeBuffer buffer;
+
+		/*
+		s32 AbilityId;
+		u8 ShowInAbilityWindow;
+		s32 ShortName;
+		s32 ShortName2;
+		s32 Name;
+		s32 Desc;
+		*/
+
+		buffer.WriteUInt32(emu->id);
+		buffer.WriteUInt8(1);
+		buffer.WriteInt32(emu->upper_hotkey_sid);
+		buffer.WriteInt32(emu->lower_hotkey_sid);
+		buffer.WriteInt32(emu->title_sid);
+		buffer.WriteInt32(emu->desc_sid);
+
+		/*
+		s32 MinLevel;
+		s32 Cost;
+		s32 GroupID;
+		s32 CurrentRank;
+		*/
+		buffer.WriteInt32(emu->level_req);
+		buffer.WriteInt32(emu->cost);
+		buffer.WriteUInt32(emu->seq);
+		buffer.WriteUInt32(emu->current_level);
+
+		/*
+		u32 PrereqSkillCount;
+		s32 PrereqSkills[PrereqSkillCount];
+		u32 PrereqLevelCount;
+		s32 PrereqLevels[PrereqLevelCount];
+		*/
+
+		if (emu->total_prereqs) {
+			buffer.WriteUInt32(emu->total_prereqs);
+			for (auto& e : skill)
+				buffer.WriteInt32(e);
+			buffer.WriteUInt32(emu->total_prereqs);
+			for (auto& e : points)
+				buffer.WriteInt32(e);
+		}
+		else {
+			buffer.WriteUInt32(1);
+			buffer.WriteUInt32(0);
+			buffer.WriteUInt32(1);
+			buffer.WriteUInt32(0);
+		}
+
+		/*
+		u32 Type;
+		s32 SpellId;
+		*/
+		buffer.WriteInt32(emu->type);
+		buffer.WriteInt32(emu->spell);
+
+		/*
+		u32 TimerIdCount;
+		s32 TimerIds[TimerIdCount];
+		s32 ReuseTimer;
+		u32 Classes;
+		*/
+		buffer.WriteInt32(1);
+		buffer.WriteInt32(emu->spell_type);
+		buffer.WriteInt32(emu->spell_refresh);
+		buffer.WriteInt32(emu->classes);
+
+		/*
+		s32 MaxRank;
+		s32 PrevAbilityId;
+		s32 NextAbilityId;
+		s32 TotalPoints;
+		*/
+
+		buffer.WriteInt32(emu->max_level);
+		buffer.WriteInt32(emu->prev_id);
+		buffer.WriteInt32(emu->next_id);
+		buffer.WriteInt32(emu->total_cost);
+
+		/*
+		u8 bRefund;
+		s32 QuestOnly;
+		u8 bIgnoreDeLevel;
+		*/
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt32(emu->grant_only);
+		buffer.WriteUInt8(0);
+
+		/*
+		s32 Charges;
+		s32 Expansion;
+		s32 Category;
+		*/
+		buffer.WriteUInt32(emu->charges);
+		buffer.WriteInt32(emu->expansion);
+		buffer.WriteInt32(emu->category);
+
+		/*
+		u8 bShroud;
+		u8 bBetaOnly;
+		u8 bResetOnDeath;
+		u8 AutoGrant;
+		*/
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+		buffer.WriteUInt8(0);
+
+		/*
+		s32 AutoGrantExpansion;
+		s32 Unknown098;
+		u8 Unknown09C;
+		*/
+
+		buffer.WriteInt32(emu->expansion);
+		buffer.WriteInt32(0);
+		buffer.WriteUInt8(0);
+
+		//u32 TotalEffects;
+		buffer.WriteUInt32(emu->total_effects);
+		in->SetReadPosition(sizeof(AARankInfo_Struct));
+		for (auto i = 0; i < emu->total_effects; ++i) {
+			auto skill_id = in->ReadUInt32();
+			auto base1 = in->ReadUInt32();
+			auto base2 = in->ReadUInt32();
+			auto slot = in->ReadUInt32();
+
+			/*
+			u32 effect_id;
+			s64 base1;
+			s64 base2;
+			u32 slot;
+			*/
+
+			buffer.WriteUInt32(skill_id);
+			buffer.WriteInt64(base1);
+			buffer.WriteInt64(base2);
+			buffer.WriteUInt32(slot);
+		}
+
+		auto outapp = new EQApplicationPacket(OP_SendAATable, buffer.size());
+		outapp->WriteData(buffer.buffer(), buffer.size());
+		dest->FastQueuePacket(&outapp, ack_req);
+
+		delete in;
+	}
+
+	ENCODE(OP_SendCharInfo) {
+		ENCODE_LENGTH_ATLEAST(CharacterSelect_Struct);
+		SETUP_VAR_ENCODE(CharacterSelect_Struct);
+
+		// Zero-character count shunt
+		if (emu->CharCount == 0) {
+			ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, sizeof(structs::CharacterSelect_Struct));
+			eq->CharCount = emu->CharCount;
+
+			FINISH_ENCODE();
+			return;
+		}
+
+		unsigned char* emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+		CharacterSelectEntry_Struct* emu_cse = (CharacterSelectEntry_Struct*)nullptr;
+
+		size_t names_length = 0;
+		size_t character_count = 0;
+		for (; character_count < emu->CharCount; ++character_count) {
+			emu_cse = (CharacterSelectEntry_Struct*)emu_ptr;
+			names_length += strlen(emu_cse->Name);
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+		}
+
+		size_t total_length = sizeof(structs::CharacterSelect_Struct)
+			+ character_count * sizeof(structs::CharacterSelectEntry_Struct)
+			+ names_length;
+
+		ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
+		structs::CharacterSelectEntry_Struct* eq_cse = (structs::CharacterSelectEntry_Struct*)nullptr;
+
+		eq->CharCount = character_count;
+
+		emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+
+		unsigned char* eq_ptr = __packet->pBuffer;
+		eq_ptr += sizeof(structs::CharacterSelect_Struct);
+
+		for (int counter = 0; counter < character_count; ++counter) {
+			emu_cse = (CharacterSelectEntry_Struct*)emu_ptr;
+			eq_cse = (structs::CharacterSelectEntry_Struct*)eq_ptr; // base address
+
+			strcpy(eq_cse->Name, emu_cse->Name);
+			eq_ptr += strlen(emu_cse->Name);
+
+			eq_cse = (structs::CharacterSelectEntry_Struct*)eq_ptr;
+			eq_cse->Name[0] = '\0';
+
+			eq_cse->Class = emu_cse->Class;
+			eq_cse->Race = emu_cse->Race;
+			eq_cse->Level = emu_cse->Level;
+			eq_cse->ShroudClass = emu_cse->ShroudClass;
+			eq_cse->ShroudRace = emu_cse->ShroudRace;
+			eq_cse->Zone = emu_cse->Zone;
+			eq_cse->Instance = emu_cse->Instance;
+			eq_cse->Gender = emu_cse->Gender;
+			eq_cse->Face = emu_cse->Face;
+
+			for (int equip_index = 0; equip_index < EQ::textures::materialCount; equip_index++) {
+				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
+				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
+				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HerosForgeModel;
+				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Unknown2;
+				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
+			}
+
+			eq_cse->Unknown1 = 255;
+			eq_cse->Unknown2 = 0;
+			eq_cse->DrakkinTattoo = emu_cse->DrakkinTattoo;
+			eq_cse->DrakkinDetails = emu_cse->DrakkinDetails;
+			eq_cse->Deity = emu_cse->Deity;
+			eq_cse->PrimaryIDFile = emu_cse->PrimaryIDFile;
+			eq_cse->SecondaryIDFile = emu_cse->SecondaryIDFile;
+			eq_cse->HairColor = emu_cse->HairColor;
+			eq_cse->BeardColor = emu_cse->BeardColor;
+			eq_cse->EyeColor1 = emu_cse->EyeColor1;
+			eq_cse->EyeColor2 = emu_cse->EyeColor2;
+			eq_cse->HairStyle = emu_cse->HairStyle;
+			eq_cse->Beard = emu_cse->Beard;
+			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->Tutorial = emu_cse->Tutorial;
+			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
+			eq_cse->Enabled = emu_cse->Enabled;
+			eq_cse->LastLogin = emu_cse->LastLogin;
+			eq_cse->Unknown3 = 0;
+			eq_cse->Unknown4 = 0;
+			eq_cse->Unknown5 = 0;
+			eq_cse->Unknown6 = 0;
+			eq_cse->Unknown7 = 0;
+			eq_cse->CharacterId = 0;
+			eq_cse->Unknown8 = 1;
+
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
+		}
+
+		DumpPacket(__packet);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SendMaxCharacters) {
+		ENCODE_LENGTH_EXACT(MaxCharacters_Struct);
+		SETUP_DIRECT_ENCODE(MaxCharacters_Struct, structs::MaxCharacters_Struct);
+
+		//OUT(max_chars);
+		eq->max_chars = 8; //needs to be fixed
+		eq->marketplace_chars = 0;
+		eq->unknown008 = -1;
+		eq->unknown00c = 196608;
+		eq->unknown010 = 0;
+		eq->unknown014 = 0;
+		eq->unknown018 = 0;
+		eq->unknown01c = 0;
+		eq->unknown020 = -1;
+		eq->unknown024 = 0;
+		eq->unknown028 = 0;
+		eq->unknown02c = 0;
+		eq->unknown030 = 0;
+		eq->unknown034 = 0;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SendMembership) {
+		ENCODE_LENGTH_EXACT(Membership_Struct);
+		SETUP_DIRECT_ENCODE(Membership_Struct, structs::Membership_Struct);
+
+		eq->membership = emu->membership;
+		eq->races = emu->races;
+		eq->classes = emu->classes;
+		eq->entrysize = 33;
+		eq->entries[0] = -1;  // Max AA Restriction
+		eq->entries[1] = -1;  // Max Level Restriction
+		eq->entries[2] = -1;  // Max Char Slots per Account (not used by client?)
+		eq->entries[3] = -1;  // SpellTier
+		eq->entries[4] = -1;  // Main Inventory Size
+		eq->entries[5] = -1;  // Max Platinum per level
+		eq->entries[6] = 1;   // Send Mail
+		eq->entries[7] = 1;   // Use Parcels
+		eq->entries[8] = 1;   // Loyalty
+		eq->entries[9] = -1;  // Merc Tiers
+		eq->entries[10] = 1;  // Housing
+		eq->entries[11] = -1; // Shared Bank Slots
+		eq->entries[12] = -1; // Max Journal Quests
+		eq->entries[13] = 1;  // CreateGuild
+		eq->entries[14] = 1;  // Bazaar
+		eq->entries[15] = 1;  // Barter
+		eq->entries[16] = 1;  // Chat
+		eq->entries[17] = 1;  // Petition
+		eq->entries[18] = 1;  // Advertising
+		eq->entries[19] = -1; // UseItem
+		eq->entries[20] = -1; // StartingCity
+		eq->entries[21] = 1;  // Ornament
+		eq->entries[22] = 0;  // HeroicCharacter
+		eq->entries[23] = 0;  // AutoGrantAA
+		eq->entries[24] = 0;  // MountKeyRingSlots
+		eq->entries[25] = 0;  // IllusionKeyRingSlots
+		eq->entries[26] = 0;  // FamiliarKeyRingSlots
+		eq->entries[27] = 0;  // FamiliarAutoLeave
+		eq->entries[28] = 0;  // HeroForgeKeyRingSlots
+		eq->entries[29] = 0;  // DragonHoardSlots
+		eq->entries[30] = 0;  // TeleportKeyRingSlots
+		eq->entries[31] = 0;  // PersonalDepotSlots
+		eq->entries[32] = 0;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SendMembershipDetails) {
+		ENCODE_LENGTH_EXACT(Membership_Details_Struct);
+		SETUP_DIRECT_ENCODE(Membership_Details_Struct, structs::Membership_Details_Struct);
+
+		int32 settings[96][3] = {
+			{ 0, 0, 250 }, { 1, 0, 1000 }, { 0, 1, -1 }, { 1, 1, -1 }, 
+			{ 0, 2, 2 }, { 2, 0, -1 }, { 3, 0, -1 }, { 1, 2, 4 }, 
+			{ 0, 3, 1 }, { 2, 1, -1 }, { 3, 1, -1 }, { 1, 3, 1 }, 
+			{ 0, 4, -1 }, { 2, 2, -1 }, { 3, 2, -1 }, { 1, 4, -1 }, 
+			{ 0, 5, -1 }, { 2, 3, -1 }, { 3, 3, -1 }, { 1, 5, -1 }, 
+			{ 0, 6, 0 }, { 2, 4, -1 }, { 3, 4, -1 }, { 1, 6, 0 }, 
+			{ 0, 7, 1 }, { 2, 5, -1 }, { 3, 5, -1 }, { 1, 7, 1 }, 
+			{ 0, 8, 1 }, { 2, 6, 1 }, { 3, 6, 1 }, { 1, 8, 1 }, 
+			{ 0, 9, 5 }, { 2, 7, 1 }, { 3, 7, 1 }, { 1, 9, 5 }, 
+			{ 0, 10, 0 }, { 2, 8, 1 }, { 3, 8, 1 }, { 0, 11, -1 }, 
+			{ 1, 10, 1 }, { 2, 9, -1 }, { 3, 9, -1 }, { 0, 12, -1 }, 
+			{ 1, 11, -1 }, { 2, 10, 1 }, { 3, 10, 1 }, { 0, 13, 0 }, 
+			{ 1, 12, -1 }, { 2, 11, -1 }, { 3, 11, -1 }, { 0, 14, 0 }, 
+			{ 1, 13, 1 }, { 2, 12, -1 }, { 3, 12, -1 }, { 0, 15, 0 }, 
+			{ 1, 14, 0 }, { 2, 13, 1 }, { 3, 13, 1 }, { 0, 16, 0 }, 
+			{ 1, 15, 0 }, { 2, 14, 1 }, { 3, 14, 1 }, { 0, 17, 0 }, 
+			{ 1, 16, 1 }, { 2, 15, 1 }, { 3, 15, 1 }, { 0, 18, 0 }, 
+			{ 1, 17, 0 }, { 2, 16, 1 }, { 3, 16, 1 }, { 0, 19, 0 }, 
+			{ 1, 18, 0 }, { 2, 17, 1 }, { 3, 17, 1 }, { 0, 20, 0 }, 
+			{ 1, 19, 0 }, { 2, 18, 1 }, { 3, 18, 1 }, { 0, 21, 0 }, 
+			{ 1, 20, 0 }, { 2, 19, -1 }, { 3, 19, -1 }, { 0, 22, 0 }, 
+			{ 1, 21, 0 }, { 2, 20, -1 }, { 3, 20, -1 }, { 2, 21, 0 }, 
+			{ 0, 23, 0 }, { 1, 22, 0 }, { 3, 21, 0 }, { 2, 22, 0 }, 
+			{ 1, 23, 0 }, { 3, 22, 0 }, { 2, 23, 0 }, { 3, 23, 0 }
+		};
+
+		uint32 races[17][2] = {
+			{ 1, 131071 },
+			{ 333, 131071 },
+			{ 90287, 131071 },
+			{ 90289, 16 },
+			{ 90290, 32 },
+			{ 90291, 64 },
+			{ 90292, 128 },
+			{ 90293, 256 },
+			{ 90294, 512 },
+			{ 90295, 1024 },
+			{ 90296, 2048 },
+			{ 90297, 8192 },
+			{ 90298, 16384 },
+			{ 90299, 32768 },
+			{ 90300, 65536 },
+			{ 2012271, 131071 },
+			{ 2012277, 131071 }
+		};
+		
+		uint32 classes[17][2] = {
+			{ 1, 131071 },
+			{ 333, 131071 },
+			{ 90287, 131071 },
+			{ 90301, 8 },
+			{ 90302, 16 },
+			{ 90303, 32 },
+			{ 90304, 64 },
+			{ 90305, 128 },
+			{ 90306, 256 },
+			{ 90307, 1024 },
+			{ 90308, 2048 },
+			{ 90309, 8192 },
+			{ 90310, 16384 },
+			{ 90311, 32768 },
+			{ 90312, 65536 },
+			{ 2012271, 131071 },
+			{ 2012277, 131071 }
+		};
+
+		eq->membership_setting_count = 96;
+
+		for (int i = 0; i < 96; ++i) {
+			eq->settings[i].setting_index = (int8)settings[i][0];
+			eq->settings[i].setting_id = settings[i][1];
+			eq->settings[i].setting_value = settings[i][2];
+		}
+
+		eq->class_entry_count = 17;
+		for (int i = 0; i < 17; ++i) {
+			eq->membership_classes[i].purchase_id = classes[i][0];
+			eq->membership_classes[i].bitwise_entry = classes[i][1];
+		}
+
+		eq->race_entry_count = 17;
+		for (int i = 0; i < 17; ++i) {
+			eq->membership_races[i].purchase_id = races[i][0];
+			eq->membership_races[i].bitwise_entry = races[i][1];
+		}
+
+		eq->exit_url_length = 0;
+
+		FINISH_ENCODE();
+	}	
+
+	ENCODE(OP_SendZonepoints)
+	{
+		SETUP_VAR_ENCODE(ZonePoints);
+		ALLOC_VAR_ENCODE(structs::ZonePoints, sizeof(structs::ZonePoints) + sizeof(structs::ZonePoint_Entry) * (emu->count + 1));
+
+		eq->count = emu->count;
+		for (uint32 i = 0; i < emu->count; ++i)
+		{
+			eq->zpe[i].iterator = emu->zpe[i].iterator;
+			eq->zpe[i].x = emu->zpe[i].x;
+			eq->zpe[i].y = emu->zpe[i].y;
+			eq->zpe[i].z = emu->zpe[i].z;
+			eq->zpe[i].heading = emu->zpe[i].heading;
+			eq->zpe[i].zoneid = emu->zpe[i].zoneid;
+			eq->zpe[i].zoneinstance = emu->zpe[i].zoneinstance;
+		}
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ShopRequest)
+	{
+		ENCODE_LENGTH_EXACT(MerchantClick_Struct);
+		SETUP_DIRECT_ENCODE(MerchantClick_Struct, structs::MerchantClickResponse_Struct);
+
+		if (emu->command == 0) {
+			OUT(player_id);
+			eq->npc_id = 0;
+		}
+		else {
+			OUT(npc_id);
+			OUT(player_id);
+			OUT(rate);
+			OUT(tab_display);
+			eq->unknown028 = 256;
+		}
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SkillUpdate)
+	{
+		ENCODE_LENGTH_EXACT(SkillUpdate_Struct);
+		SETUP_DIRECT_ENCODE(SkillUpdate_Struct, structs::SkillUpdate_Struct);
+
+		OUT(skillId);
+		OUT(value);
+		eq->active = 1;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SpecialMesg)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		SerializeBuffer buf(in->size);
+		buf.WriteInt8(in->ReadUInt8()); // speak mode
+		buf.WriteInt8(in->ReadUInt8()); // journal mode
+		buf.WriteInt8(in->ReadUInt8()); // language
+		buf.WriteInt32(in->ReadUInt32()); // message type
+		buf.WriteInt32(in->ReadUInt32()); // target spawn id
+
+		std::string name;
+		in->ReadString(name); // NPC names max out at 63 chars
+
+		buf.WriteString(name);
+
+		buf.WriteInt32(in->ReadUInt32()); // loc
+		buf.WriteInt32(in->ReadUInt32());
+		buf.WriteInt32(in->ReadUInt32());
+
+		std::string old_message;
+		std::string new_message;
+
+		in->ReadString(old_message);
+
+		ServerToLaurionConvertLinks(new_message, old_message);
+
+		buf.WriteString(new_message);
+
+		auto outapp = new EQApplicationPacket(OP_SpecialMesg, buf);
+
+		dest->FastQueuePacket(&outapp, ack_req);
+		delete in;
+	}
+
+	ENCODE(OP_SpawnAppearance)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+	
+		unsigned char* emu_buffer = in->pBuffer;
+	
+		SpawnAppearance_Struct* sas = (SpawnAppearance_Struct*)emu_buffer;
+	
+		if (sas->type != AppearanceType::Size)
+		{
+			//laurion struct is different than rof2's but the idea is the same
+			//we will probably want to better implement Laurion's structure later
+			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
+			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
+	
+			eq->spawn_id = sas->spawn_id;
+			eq->type = ServerToLaurionSpawnAppearanceType(sas->type);
+			eq->parameter = sas->parameter;
+	
+			dest->FastQueuePacket(&outapp, ack_req);
+			delete in;
+			return;
+		}
+	
+		auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
+	
+		ChangeSize_Struct* css = (ChangeSize_Struct*)outapp->pBuffer;
+	
+		css->EntityID = sas->spawn_id;
+		css->Size = (float)sas->parameter;
+		css->Unknown08 = 0;
+		css->Unknown12 = 1.0f;
+	
+		dest->FastQueuePacket(&outapp, ack_req);
+		delete in;
+	}
+
+	ENCODE(OP_SpawnDoor)
+	{
+		SETUP_VAR_ENCODE(Door_Struct);
+		int door_count = __packet->size / sizeof(Door_Struct);
+		int total_length = door_count * sizeof(structs::Door_Struct);
+		ALLOC_VAR_ENCODE(structs::Door_Struct, total_length);
+
+		int r;
+		for (r = 0; r < door_count; r++) {
+			strncpy(eq[r].name, emu[r].name, 32);
+			eq[r].DefaultY = emu[r].yPos;
+			eq[r].DefaultX = emu[r].xPos;
+			eq[r].DefaultZ = emu[r].zPos;
+			eq[r].DefaultHeading = emu[r].heading;
+			eq[r].DefaultDoorAngle = emu[r].incline;
+			eq[r].Y = emu[r].yPos;
+			eq[r].X = emu[r].xPos;
+			eq[r].Z = emu[r].zPos;
+			eq[r].Heading = emu[r].heading;
+			//there's a door angle here but im not sure if / what we set it to since ive literally never seen it as anything but 0 on live
+			//based on pattern it probably is supposed to match the default angle?
+			//I'm not 100% sure this is a float it might be a uint32
+			eq[r].DoorAngle = emu[r].incline;
+			eq[r].ScaleFactor = emu[r].size;
+			eq[r].Id = emu[r].doorId;
+			eq[r].Type = emu[r].opentype;
+			eq[r].State = emu[r].state_at_spawn;
+			eq[r].DefaultState = emu[r].invert_state;
+			eq[r].Param = emu[r].door_param;
+			eq[r].bVisible = 1;
+			eq[r].bUsable = 1;
+		}
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_WearChange)
+	{
+		ENCODE_LENGTH_EXACT(WearChange_Struct);
+		SETUP_DIRECT_ENCODE(WearChange_Struct, structs::WearChange_Struct);
+
+		OUT(spawn_id);
+		eq->wear_slot_id = emu->wear_slot_id;
+		eq->armor_id = emu->material;
+		eq->variation = emu->unknown06;
+		eq->material = emu->elite_material;
+		eq->new_armor_id = emu->hero_forge_model;
+		eq->new_armor_type = emu->unknown18;
+		eq->color = emu->color.Color;
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ZoneChange)
+	{
+		ENCODE_LENGTH_EXACT(ZoneChange_Struct);
+		SETUP_DIRECT_ENCODE(ZoneChange_Struct, structs::ZoneChange_Struct);
+
+		memcpy(eq->char_name, emu->char_name, sizeof(emu->char_name));
+		OUT(zoneID);
+		OUT(instanceID);
+		OUT(y);
+		OUT(x);
+		OUT(z)
+			OUT(zone_reason);
+		OUT(success);
+
+		if (eq->success < 0)
+			eq->success -= 1;
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_ZoneSpawns); }
+
+	ENCODE(OP_ZonePlayerToBind)
+	{
+		SETUP_VAR_ENCODE(ZonePlayerToBind_Struct);
+		ALLOC_LEN_ENCODE(sizeof(structs::ZonePlayerToBind_Struct) + strlen(emu->zone_name));
+
+		__packet->SetWritePosition(0);
+		__packet->WriteUInt16(emu->bind_zone_id);
+		__packet->WriteUInt16(emu->bind_instance_id);
+		__packet->WriteFloat(emu->x);
+		__packet->WriteFloat(emu->y);
+		__packet->WriteFloat(emu->z);
+		__packet->WriteFloat(emu->heading);
+		__packet->WriteString(emu->zone_name);
+		__packet->WriteUInt32(60);
+		__packet->WriteUInt32(0);
+		__packet->WriteUInt32(51);
+		__packet->WriteUInt32(41);
+
+		FINISH_ENCODE();
+	}
 
 	ENCODE(OP_ZoneSpawns)
 	{
@@ -2021,1276 +3291,6 @@ namespace Laurion
 			outapp->WriteData(buffer.buffer(), buffer.size());
 			dest->FastQueuePacket(&outapp, ack_req);
 		}
-
-		delete in;
-	}
-
-	ENCODE(OP_CharInventory) {
-		//consume the packet
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-
-		if (!in->size) {
-			in->size = 4;
-			in->pBuffer = new uchar[in->size];
-			memset(in->pBuffer, 0, in->size);
-
-			dest->FastQueuePacket(&in, ack_req);
-			return;
-		}
-
-		//store away the emu struct
-		uchar* __emu_buffer = in->pBuffer;
-
-		int item_count = in->size / sizeof(EQ::InternalSerializedItem_Struct);
-		if (!item_count || (in->size % sizeof(EQ::InternalSerializedItem_Struct)) != 0) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
-				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQ::InternalSerializedItem_Struct));
-
-			delete in;
-			return;
-		}
-
-		EQ::InternalSerializedItem_Struct* eq = (EQ::InternalSerializedItem_Struct*)in->pBuffer;
-		SerializeBuffer buffer;
-		buffer.WriteUInt32(item_count);
-
-		for (int index = 0; index < item_count; ++index, ++eq) {
-			SerializeItem(buffer, (const EQ::ItemInstance*)eq->inst, eq->slot_id, 0, ItemPacketCharInventory);
-		}
-
-		in->size = buffer.size();
-		in->pBuffer = new unsigned char[buffer.size()];
-		memcpy(in->pBuffer, buffer.buffer(), buffer.size());
-
-		delete[] __emu_buffer;
-
-		dest->FastQueuePacket(&in, ack_req);
-	}
-
-	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
-
-	ENCODE(OP_NewZone) {
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-
-		unsigned char* __emu_buffer = in->pBuffer;
-		NewZone_Struct* emu = (NewZone_Struct*)__emu_buffer;
-
-		SerializeBuffer buffer;
-		/*
-		char Shortname[];
-		char Longname[];
-		char WeatherType[];
-		char WeatherTypeOverride[];
-		char SkyType[];
-		char SkyTypeOverride[];
-		*/
-		buffer.WriteString(emu->zone_short_name);
-		buffer.WriteString(emu->zone_long_name);
-		buffer.WriteString("");
-		buffer.WriteString("");
-		buffer.WriteString("");
-		buffer.WriteString("");
-
-		/*
-		s32 ZoneType;
-		s16 ZoneId;
-		s16 ZoneInstance;
-		float ZoneExpModifier;
-		s32 GroupLvlExpRelated;
-		s32 FilterID;
-		s32 Unknown1;
-		*/
-		buffer.WriteInt32(emu->ztype);
-		buffer.WriteInt16(emu->zone_id);
-		buffer.WriteInt16(emu->zone_instance);
-		buffer.WriteFloat(emu->zone_exp_multiplier);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-
-		//float FogDensity;
-		buffer.WriteFloat(emu->fog_density);
-
-		//WeatherState state[4];
-		for (int i = 0; i < 4; ++i) {
-			/*
-			float FogStart;
-			float FogEnd;
-			u8 FogRed;
-			u8 FogGreen;
-			u8 FogBlue;
-			u8 RainChance;
-			u8 RainDuration;
-			u8 SnowChance;
-			u8 SnowDuration;
-			*/
-
-			buffer.WriteFloat(emu->fog_minclip[i]);
-			buffer.WriteFloat(emu->fog_maxclip[i]);
-			buffer.WriteUInt8(emu->fog_red[i]);
-			buffer.WriteUInt8(emu->fog_green[i]);
-			buffer.WriteUInt8(emu->fog_blue[i]);
-			buffer.WriteUInt8(emu->rain_chance[i]);
-			buffer.WriteUInt8(emu->rain_duration[i]);
-			buffer.WriteUInt8(emu->snow_chance[i]);
-			buffer.WriteUInt8(emu->snow_duration[i]);
-			
-		}
-
-		/*
-		u8 PrecipitationType;
-		float BloomIntensity;
-		float ZoneGravity;
-		s32 LavaDamage;
-		s32 MinLavaDamage;
-		*/
-		buffer.WriteUInt8(emu->sky);
-		buffer.WriteFloat(1.0f);
-		buffer.WriteFloat(emu->gravity);
-		buffer.WriteInt32(emu->lava_damage);
-		buffer.WriteInt32(emu->min_lava_damage);
-
-		/*
-		s32 TimeStringID;
-		s32 Unknown3;
-		s32 SkyLock;
-		s32 SkyLockOverride;
-		*/
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(1);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(-1);
-
-		/*
-		float SafeY;
-		float SafeX;
-		float SafeZ;
-		float SafeHeading;
-		float Ceiling;
-		float Floor;
-		*/
-
-		buffer.WriteFloat(emu->safe_y);
-		buffer.WriteFloat(emu->safe_x);
-		buffer.WriteFloat(emu->safe_z);
-		buffer.WriteFloat(emu->safe_heading);
-		buffer.WriteFloat(emu->max_z);
-		buffer.WriteFloat(emu->underworld);
-
-		/*
-		float MinClip;
-		float MaxClip;
-		s32 FallThroughWorldTeleportID;
-		*/
-		buffer.WriteFloat(emu->minclip);
-		buffer.WriteFloat(emu->maxclip);
-		buffer.WriteInt32(emu->underworld_teleport_index);
-
-		/*
-		s32 Unknown4;
-		s32 ScriptIDHour;
-		s32 ScriptIDMinute;
-		s32 ScriptIDTick;
-		s32 ScriptIDOnPlayerDeath;
-		s32 ScriptIDOnNPCDeath;
-		s32 ScriptIDPlayerEnteringZone;
-		s32 ScriptIDOnZonePop;
-		s32 ScriptIDNPCLoot;
-		s32 Unknown4b;
-		s32 ScriptIDOnFishing;
-		s32 ScriptIDOnForage;
-		s32 Unknown4c;
-		*/
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-		buffer.WriteInt32(0);
-
-		/*
-		s32 NPCAgroMaxDist;
-		*/
-		buffer.WriteInt32(600);
-
-		/*
-		s32 ForageLow;
-		s32 ForageMedium;
-		s32 ForageHigh;
-		s32 ForageSpecial;
-		s32 FishingLow;
-		s32 FishingMedium;
-		s32 FishingHigh;
-		s32 FishingRelated;
-		*/
-		buffer.WriteInt32(-1);
-		buffer.WriteInt32(-1);
-		buffer.WriteInt32(-1);
-		buffer.WriteInt32(-1);
-		buffer.WriteInt32(-1);
-		buffer.WriteInt32(-1);
-		buffer.WriteInt32(-1);
-		buffer.WriteInt32(-1);
-
-		/*
-		s32 CanPlaceCampsite;
-		s32 CanPlaceGuildBanner;
-		s32 Unknown4d;
-		*/
-
-		buffer.WriteInt32(2);
-		buffer.WriteInt32(2);
-		buffer.WriteInt32(0);
-
-		/*
-		s32 FastRegenHP;
-		s32 FastRegenMana;
-		s32 FastRegenEndurance;
-		*/
-		buffer.WriteInt32(emu->fast_regen_hp);
-		buffer.WriteInt32(emu->fast_regen_mana);
-		buffer.WriteInt32(emu->fast_regen_endurance);
-
-		/*
-		u8 NewEngineZone;
-		u8 SkyEnabled;
-		u8 FogOnOff;
-		u8 ClimateType;
-		u8 bNoPlayerLight;
-		*/
-		buffer.WriteUInt8(0); //not sure what happens if we set this incorrectly but we probably need to add this to the zone database
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-
-		/*
-		u8 bUnknown5;
-		u8 bNoAttack;
-		u8 bAllowPVP;
-		u8 bNoEncumber;
-		u8 Unknown6;
-		u8 Unknown7;
-		*/
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-
-		/*
-		u8 bNoLevitate;
-		u8 bNoBuffExpiration;
-		u8 bDisallowManaStone;
-		u8 bNoBind;
-		u8 bNoCallOfTheHero;
-		u8 bUnknown8;
-		u8 bNoFear;
-		u8 bUnknown9;
-		*/
-
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(emu->suspend_buffs);
-		buffer.WriteUInt8(1);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-
-		auto outapp = new EQApplicationPacket(OP_NewZone, buffer.size());
-		outapp->WriteData(buffer.buffer(), buffer.size());
-		dest->FastQueuePacket(&outapp, ack_req);
-
-		delete in;
-	}
-
-	ENCODE(OP_SpawnDoor)
-	{
-		SETUP_VAR_ENCODE(Door_Struct);
-		int door_count = __packet->size / sizeof(Door_Struct);
-		int total_length = door_count * sizeof(structs::Door_Struct);
-		ALLOC_VAR_ENCODE(structs::Door_Struct, total_length);
-
-		int r;
-		for (r = 0; r < door_count; r++) {
-			strncpy(eq[r].name, emu[r].name, 32);
-			eq[r].DefaultY = emu[r].yPos;
-			eq[r].DefaultX = emu[r].xPos;
-			eq[r].DefaultZ = emu[r].zPos;
-			eq[r].DefaultHeading = emu[r].heading;
-			eq[r].DefaultDoorAngle = emu[r].incline;
-			eq[r].Y = emu[r].yPos;
-			eq[r].X = emu[r].xPos;
-			eq[r].Z = emu[r].zPos;
-			eq[r].Heading = emu[r].heading;
-			//there's a door angle here but im not sure if / what we set it to since ive literally never seen it as anything but 0 on live
-			//based on pattern it probably is supposed to match the default angle?
-			//I'm not 100% sure this is a float it might be a uint32
-			eq[r].DoorAngle = emu[r].incline;
-			eq[r].ScaleFactor = emu[r].size;
-			eq[r].Id = emu[r].doorId;
-			eq[r].Type = emu[r].opentype;
-			eq[r].State = emu[r].state_at_spawn;
-			eq[r].DefaultState = emu[r].invert_state;
-			eq[r].Param = emu[r].door_param;
-			eq[r].bVisible = 1;
-			eq[r].bUsable = 1;
-		}
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_GroundSpawn)
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-		Object_Struct* emu = (Object_Struct*)in->pBuffer;
-
-		SerializeBuffer buffer;
-		buffer.WriteUInt32(emu->drop_id);
-		buffer.WriteString(emu->object_name);
-		buffer.WriteUInt16(emu->zone_id);
-		buffer.WriteUInt16(emu->zone_instance);
-		buffer.WriteUInt32(emu->drop_id); //this is some other sub but it's okay to duplicate
-		buffer.WriteUInt32(0); //expires
-		buffer.WriteFloat(emu->heading);
-		buffer.WriteFloat(emu->tilt_x);
-		buffer.WriteFloat(emu->tilt_y);
-		buffer.WriteFloat(emu->size != 0 && (float)emu->size < 5000.f ? (float)((float)emu->size / 100.0f) : 1.f); //size, with weird peq hack
-		buffer.WriteFloat(emu->y);
-		buffer.WriteFloat(emu->x);
-		buffer.WriteFloat(emu->z);
-		buffer.WriteFloat(emu->object_type); //weight
-
-		auto outapp = new EQApplicationPacket(OP_GroundSpawn, buffer.size());
-		outapp->WriteData(buffer.buffer(), buffer.size());
-		dest->FastQueuePacket(&outapp, ack_req);
-
-		delete in;
-	}
-
-	ENCODE(OP_SendZonepoints)
-	{
-		SETUP_VAR_ENCODE(ZonePoints);
-		ALLOC_VAR_ENCODE(structs::ZonePoints, sizeof(structs::ZonePoints) + sizeof(structs::ZonePoint_Entry) * (emu->count + 1));
-
-		eq->count = emu->count;
-		for (uint32 i = 0; i < emu->count; ++i)
-		{
-			eq->zpe[i].iterator = emu->zpe[i].iterator;
-			eq->zpe[i].x = emu->zpe[i].x;
-			eq->zpe[i].y = emu->zpe[i].y;
-			eq->zpe[i].z = emu->zpe[i].z;
-			eq->zpe[i].heading = emu->zpe[i].heading;
-			eq->zpe[i].zoneid = emu->zpe[i].zoneid;
-			eq->zpe[i].zoneinstance = emu->zpe[i].zoneinstance;
-		}
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_RequestClientZoneChange)
-	{
-		ENCODE_LENGTH_EXACT(RequestClientZoneChange_Struct);
-		SETUP_DIRECT_ENCODE(RequestClientZoneChange_Struct, structs::RequestClientZoneChange_Struct);
-
-		OUT(zone_id);
-		OUT(instance_id);
-		OUT(y);
-		OUT(x);
-		OUT(z);
-		OUT(heading);
-		eq->type = 0x0b;
-		eq->unknown004 = 0xffffffff;
-		eq->unknown172 = 0x0168b500;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_ZoneChange)
-	{
-		ENCODE_LENGTH_EXACT(ZoneChange_Struct);
-		SETUP_DIRECT_ENCODE(ZoneChange_Struct, structs::ZoneChange_Struct);
-
-		memcpy(eq->char_name, emu->char_name, sizeof(emu->char_name));
-		OUT(zoneID);
-		OUT(instanceID);
-		OUT(y);
-		OUT(x);
-		OUT(z)
-			OUT(zone_reason);
-		OUT(success);
-
-		if (eq->success < 0)
-			eq->success -= 1;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_ClientUpdate)
-	{
-		ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
-		SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::PlayerPositionUpdateServer_Struct);
-
-		OUT(spawn_id);
-		OUT(vehicle_id);
-		eq->position.x = emu->x_pos;
-		eq->position.y = emu->y_pos;
-		eq->position.z = emu->z_pos;
-		eq->position.heading = emu->heading;
-		eq->position.deltaX = emu->delta_x;
-		eq->position.deltaY = emu->delta_y;
-		eq->position.deltaZ = emu->delta_z;
-		eq->position.deltaHeading = emu->delta_heading;
-		eq->position.animation = emu->animation;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_WearChange) 
-	{
-		ENCODE_LENGTH_EXACT(WearChange_Struct);
-		SETUP_DIRECT_ENCODE(WearChange_Struct, structs::WearChange_Struct);
-
-		OUT(spawn_id);
-		eq->wear_slot_id = emu->wear_slot_id;
-		eq->armor_id = emu->material;
-		eq->variation = emu->unknown06;
-		eq->material = emu->elite_material;
-		eq->new_armor_id = emu->hero_forge_model;
-		eq->new_armor_type = emu->unknown18;
-		eq->color = emu->color.Color;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_ChannelMessage)
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-
-		ChannelMessage_Struct* emu = (ChannelMessage_Struct*)in->pBuffer;
-
-		unsigned char* __emu_buffer = in->pBuffer;
-
-		std::string old_message = emu->message;
-		std::string new_message;
-		ServerToLaurionConvertLinks(new_message, old_message);
-
-		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 43;
-
-		in->pBuffer = new unsigned char[in->size];
-
-		char* OutBuffer = (char*)in->pBuffer;
-
-		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->sender);
-		VARSTRUCT_ENCODE_STRING(OutBuffer, emu->targetname);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->language);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->chan_num);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->skill_in_language);
-		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
-
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
-	}
-
-	ENCODE(OP_SpecialMesg)
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-
-		SerializeBuffer buf(in->size);
-		buf.WriteInt8(in->ReadUInt8()); // speak mode
-		buf.WriteInt8(in->ReadUInt8()); // journal mode
-		buf.WriteInt8(in->ReadUInt8()); // language
-		buf.WriteInt32(in->ReadUInt32()); // message type
-		buf.WriteInt32(in->ReadUInt32()); // target spawn id
-
-		std::string name;
-		in->ReadString(name); // NPC names max out at 63 chars
-
-		buf.WriteString(name);
-
-		buf.WriteInt32(in->ReadUInt32()); // loc
-		buf.WriteInt32(in->ReadUInt32());
-		buf.WriteInt32(in->ReadUInt32());
-
-		std::string old_message;
-		std::string new_message;
-
-		in->ReadString(old_message);
-
-		ServerToLaurionConvertLinks(new_message, old_message);
-
-		buf.WriteString(new_message);
-
-		auto outapp = new EQApplicationPacket(OP_SpecialMesg, buf);
-
-		dest->FastQueuePacket(&outapp, ack_req);
-		delete in;
-	}
-
-	ENCODE(OP_DeleteSpawn)
-	{
-		ENCODE_LENGTH_EXACT(DeleteSpawn_Struct);
-		SETUP_DIRECT_ENCODE(DeleteSpawn_Struct, structs::DeleteSpawn_Struct);
-
-		OUT(spawn_id);
-		eq->unknown04 = 1;	// Observed
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_FormattedMessage)
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-
-		FormattedMessage_Struct* emu = (FormattedMessage_Struct*)in->pBuffer;
-
-		char* old_message_ptr = (char*)in->pBuffer;
-		old_message_ptr += sizeof(FormattedMessage_Struct);
-		
-		std::string old_message_array[9];
-		
-		for (int i = 0; i < 9; ++i) {
-			if (*old_message_ptr == 0) { break; }
-			old_message_array[i] = old_message_ptr;
-			old_message_ptr += old_message_array[i].length() + 1;
-		}
-
-		SerializeBuffer buffer;
-		buffer.WriteUInt32(emu->unknown0);
-		buffer.WriteUInt8(0); // Observed
-		buffer.WriteUInt32(emu->string_id);
-		buffer.WriteUInt32(emu->type);
-
-		for (int i = 0; i < 9; ++i) {
-			std::string new_message;
-			ServerToLaurionConvertLinks(new_message, old_message_array[i]);
-			buffer.WriteLengthString(new_message);
-		}
-
-		auto outapp = new EQApplicationPacket(OP_FormattedMessage, buffer.size());
-		outapp->WriteData(buffer.buffer(), buffer.size());
-		dest->FastQueuePacket(&outapp, ack_req);
-
-		delete in;
-	}
-
-	ENCODE(OP_Consider)
-	{
-		ENCODE_LENGTH_EXACT(Consider_Struct);
-		SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
-
-		OUT(playerid);
-		OUT(targetid);
-		OUT(faction);
-		OUT(level);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_HPUpdate)
-	{
-		SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct, structs::SpawnHPUpdate_Struct);
-
-		OUT(spawn_id);
-		OUT(cur_hp);
-		OUT(max_hp);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_Damage) {
-		SETUP_DIRECT_ENCODE(CombatDamage_Struct, structs::CombatDamage_Struct);
-
-		OUT(target);
-		OUT(source);
-		OUT(type);
-		OUT(spellid);
-		OUT(damage);
-		OUT(force);
-		OUT(hit_heading);
-		OUT(hit_pitch);
-		OUT(special);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_Animation)
-	{
-		ENCODE_LENGTH_EXACT(Animation_Struct);
-		SETUP_DIRECT_ENCODE(Animation_Struct, structs::Animation_Struct);
-
-		OUT(spawnid);
-		OUT(action);
-		OUT(speed);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_Death)
-	{
-		ENCODE_LENGTH_EXACT(Death_Struct);
-		SETUP_DIRECT_ENCODE(Death_Struct, structs::Death_Struct);
-
-		OUT(spawn_id);
-		OUT(killer_id);
-		OUT(spell_id);
-		OUT(attack_skill);
-		OUT(damage);
-
-		//This is a hack, we need to actually fix the ordering in source as this wont respect filters etc
-		if (emu->attack_skill != 231) {
-			auto combat_packet = new EQApplicationPacket(OP_Damage, sizeof(structs::CombatDamage_Struct));
-			structs::CombatDamage_Struct* cds = (structs::CombatDamage_Struct*)combat_packet->pBuffer;
-
-			cds->target = emu->spawn_id;
-			cds->source = emu->killer_id;
-			cds->type = emu->attack_skill;
-			cds->damage = emu->damage;
-			cds->spellid = -1;
-
-			dest->FastQueuePacket(&combat_packet, ack_req);
-		}
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_MoveItem)
-	{
-		ENCODE_LENGTH_EXACT(MoveItem_Struct);
-		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-		Log(Logs::Detail, Logs::Netcode, "Laurion::ENCODE(OP_MoveItem)");
-
-		eq->from_slot = ServerToLaurionSlot(emu->from_slot);
-		eq->to_slot = ServerToLaurionSlot(emu->to_slot);
-		OUT(number_in_stack);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_ExpUpdate)
-	{
-		SETUP_DIRECT_ENCODE(ExpUpdate_Struct, structs::ExpUpdate_Struct);
-
-		//later we should change the underlying server to use this more accurate value
-		//and encode the 330 in the other patches
-		eq->exp = emu->exp * 100000 / 330;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_SendAATable) 
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-		AARankInfo_Struct* emu = (AARankInfo_Struct*)in->pBuffer;
-
-		std::vector<int32> skill;
-		std::vector<int32> points;
-		in->SetReadPosition(sizeof(AARankInfo_Struct) + emu->total_effects * sizeof(AARankEffect_Struct));
-		for (auto i = 0; i < emu->total_prereqs; ++i) {
-			skill.push_back(in->ReadUInt32());
-			points.push_back(in->ReadUInt32());
-		}
-
-		SerializeBuffer buffer;
-
-		/*
-		s32 AbilityId;
-		u8 ShowInAbilityWindow;
-		s32 ShortName;
-		s32 ShortName2;
-		s32 Name;
-		s32 Desc;
-		*/
-
-		buffer.WriteUInt32(emu->id);
-		buffer.WriteUInt8(1);
-		buffer.WriteInt32(emu->upper_hotkey_sid);
-		buffer.WriteInt32(emu->lower_hotkey_sid);
-		buffer.WriteInt32(emu->title_sid);
-		buffer.WriteInt32(emu->desc_sid);
-
-		/*
-		s32 MinLevel;
-		s32 Cost;
-		s32 GroupID;
-		s32 CurrentRank;
-		*/
-		buffer.WriteInt32(emu->level_req);
-		buffer.WriteInt32(emu->cost);
-		buffer.WriteUInt32(emu->seq);
-		buffer.WriteUInt32(emu->current_level);
-
-		/*
-		u32 PrereqSkillCount;
-		s32 PrereqSkills[PrereqSkillCount];
-		u32 PrereqLevelCount;
-		s32 PrereqLevels[PrereqLevelCount];
-		*/
-
-		if (emu->total_prereqs) {
-			buffer.WriteUInt32(emu->total_prereqs);
-			for (auto& e : skill)
-				buffer.WriteInt32(e);
-			buffer.WriteUInt32(emu->total_prereqs);
-			for (auto& e : points)
-				buffer.WriteInt32(e);
-		}
-		else {
-			buffer.WriteUInt32(1);
-			buffer.WriteUInt32(0);
-			buffer.WriteUInt32(1);
-			buffer.WriteUInt32(0);
-		}
-
-		/*
-		u32 Type;
-		s32 SpellId;
-		*/
-		buffer.WriteInt32(emu->type);
-		buffer.WriteInt32(emu->spell);
-
-		/*
-		u32 TimerIdCount;
-		s32 TimerIds[TimerIdCount];
-		s32 ReuseTimer;
-		u32 Classes;
-		*/
-		buffer.WriteInt32(1);
-		buffer.WriteInt32(emu->spell_type);
-		buffer.WriteInt32(emu->spell_refresh);
-		buffer.WriteInt32(emu->classes);
-
-		/*
-		s32 MaxRank;
-		s32 PrevAbilityId;
-		s32 NextAbilityId;
-		s32 TotalPoints;
-		*/
-
-		buffer.WriteInt32(emu->max_level);
-		buffer.WriteInt32(emu->prev_id);
-		buffer.WriteInt32(emu->next_id);
-		buffer.WriteInt32(emu->total_cost);
-
-		/*
-		u8 bRefund;
-		s32 QuestOnly;
-		u8 bIgnoreDeLevel;
-		*/
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt32(emu->grant_only);
-		buffer.WriteUInt8(0);
-
-		/*
-		s32 Charges;
-		s32 Expansion;
-		s32 Category;
-		*/
-		buffer.WriteUInt32(emu->charges);
-		buffer.WriteInt32(emu->expansion);
-		buffer.WriteInt32(emu->category);
-
-		/*
-		u8 bShroud;
-		u8 bBetaOnly;
-		u8 bResetOnDeath;
-		u8 AutoGrant;
-		*/
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-		buffer.WriteUInt8(0);
-
-		/*
-		s32 AutoGrantExpansion;
-		s32 Unknown098;
-		u8 Unknown09C;
-		*/
-
-		buffer.WriteInt32(emu->expansion);
-		buffer.WriteInt32(0);
-		buffer.WriteUInt8(0);
-
-		//u32 TotalEffects;
-		buffer.WriteUInt32(emu->total_effects);
-		in->SetReadPosition(sizeof(AARankInfo_Struct));
-		for (auto i = 0; i < emu->total_effects; ++i) {
-			auto skill_id = in->ReadUInt32();
-			auto base1 = in->ReadUInt32();
-			auto base2 = in->ReadUInt32();
-			auto slot = in->ReadUInt32();
-			
-			/*
-			u32 effect_id;
-			s64 base1;
-			s64 base2;
-			u32 slot;
-			*/
-
-			buffer.WriteUInt32(skill_id);
-			buffer.WriteInt64(base1);
-			buffer.WriteInt64(base2);
-			buffer.WriteUInt32(slot);
-		}
-
-		auto outapp = new EQApplicationPacket(OP_SendAATable, buffer.size());
-		outapp->WriteData(buffer.buffer(), buffer.size());
-		dest->FastQueuePacket(&outapp, ack_req);
-
-		delete in;
-	}
-
-	ENCODE(OP_ItemPacket)
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-		uchar* __emu_buffer = in->pBuffer;
-		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
-
-		auto type = ServerToLaurionItemPacketType(old_item_pkt->PacketType);
-		if (type == item::ItemPacketType::ItemPacketInvalid) {
-			delete in;
-			return;
-		}
-
-		switch (type)
-		{
-			case item::ItemPacketType::ItemPacketParcel: {
-				ParcelMessaging_Struct       pms{};
-				EQ::Util::MemoryStreamReader ss(reinterpret_cast<char*>(in->pBuffer), in->size);
-				cereal::BinaryInputArchive   ar(ss);
-				ar(pms);
-
-				uint32 player_name_length = pms.player_name.length();
-				uint32 note_length = pms.note.length();
-
-				auto* int_struct = (EQ::InternalSerializedItem_Struct*)pms.serialized_item.data();
-
-				SerializeBuffer buffer;
-				buffer.WriteInt32((int32_t)type);
-				SerializeItem(buffer, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
-
-				buffer.WriteUInt32(pms.sent_time);
-				buffer.WriteLengthString(pms.player_name);
-				buffer.WriteLengthString(pms.note);
-
-				auto outapp = new EQApplicationPacket(OP_ItemPacket, buffer.size());
-				outapp->WriteData(buffer.buffer(), buffer.size());
-				dest->FastQueuePacket(&outapp, ack_req);
-				break;
-			}
-			default: {
-				EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
-				SerializeBuffer buffer;
-				buffer.WriteInt32((int32_t)type);
-				SerializeItem(buffer, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
-
-				auto outapp = new EQApplicationPacket(OP_ItemPacket, buffer.size());
-				outapp->WriteData(buffer.buffer(), buffer.size());
-				dest->FastQueuePacket(&outapp, ack_req);
-			}
-		}
-
-		delete in;
-	}
-
-	ENCODE(OP_ShopRequest)
-	{
-		ENCODE_LENGTH_EXACT(MerchantClick_Struct);
-		SETUP_DIRECT_ENCODE(MerchantClick_Struct, structs::MerchantClickResponse_Struct);
-
-		if (emu->command == 0) {
-			OUT(player_id);
-			eq->npc_id = 0;
-		}
-		else {
-			OUT(npc_id);
-			OUT(player_id);
-			OUT(rate);
-			OUT(tab_display);
-			eq->unknown028 = 256;
-		}
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_BeginCast)
-	{
-		ENCODE_LENGTH_EXACT(BeginCast_Struct);
-		SETUP_DIRECT_ENCODE(BeginCast_Struct, structs::BeginCast_Struct);
-
-		OUT(spell_id);
-		OUT(caster_id);
-		OUT(cast_time);
-		eq->unknown0e = 1; //not sure what this is; but its usually 1 on live
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_BuffCreate)
-	{
-		SETUP_VAR_ENCODE(BuffIcon_Struct);
-
-		//Laurion has one extra 0x00 byte before the end byte
-		uint32 sz = 13 + (17 * emu->count) + emu->name_lengths; // 17 includes nullterm
-		__packet->size = sz;
-		__packet->pBuffer = new unsigned char[sz];
-		memset(__packet->pBuffer, 0, sz);
-
-		__packet->WriteUInt32(emu->entity_id);
-		__packet->WriteUInt32(emu->tic_timer);
-		__packet->WriteUInt8(emu->all_buffs);			// 1 indicates all buffs on the player (0 to add or remove a single buff)
-		__packet->WriteUInt16(emu->count);
-
-		for (int i = 0; i < emu->count; ++i)
-		{
-			__packet->WriteUInt32(emu->type == 0 ? ServerToLaurionBuffSlot(emu->entries[i].buff_slot) : emu->entries[i].buff_slot);
-			__packet->WriteUInt32(emu->entries[i].spell_id);
-			__packet->WriteUInt32(emu->entries[i].tics_remaining);
-			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
-			__packet->WriteString(emu->entries[i].caster);
-		}
-		__packet->WriteUInt8(0); // Unknown1
-		__packet->WriteUInt8(emu->type); // Unknown2
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_Buff)
-	{
-		ENCODE_LENGTH_EXACT(SpellBuffPacket_Struct);
-		SETUP_DIRECT_ENCODE(SpellBuffPacket_Struct, structs::EQAffectPacket_Struct);
-
-		eq->entity_id = emu->entityid;
-		eq->unknown004 = 0;
-
-		//fill in affect info
-		eq->affect.caster_id.Id = emu->buff.player_id;
-		eq->affect.flags = 0;
-		eq->affect.spell_id = emu->buff.spellid;
-		eq->affect.duration = emu->buff.duration;
-		eq->affect.initial_duration = emu->buff.duration;
-		eq->affect.hit_count = emu->buff.num_hits;
-		eq->affect.viral_timer = 0;
-		eq->affect.modifier = emu->buff.bard_modifier == 10 ? 1.0f : emu->buff.bard_modifier / 10.0f;
-		eq->affect.y = emu->buff.y;
-		eq->affect.x = emu->buff.x;
-		eq->affect.z = emu->buff.z;
-		eq->affect.level = emu->buff.level;
-
-		eq->slot_id = ServerToLaurionBuffSlot(emu->slotid);
-		if (emu->bufffade == 1)
-		{
-			eq->buff_fade = 1;
-		}
-		else
-		{
-			eq->buff_fade = 2;
-		}
-
-		EQApplicationPacket* outapp = nullptr;
-		if (emu->bufffade == 1)
-		{
-			// Bit of a hack. OP_Buff appears to add/remove the buff while OP_BuffCreate adds/removes the actual buff icon
-			outapp = new EQApplicationPacket(OP_BuffCreate, 30);
-			outapp->WriteUInt32(emu->entityid);
-			outapp->WriteUInt32(0);	// tic timer
-			outapp->WriteUInt8(0);		// Type of OP_BuffCreate packet ?
-			outapp->WriteUInt16(1);		// 1 buff in this packet
-			outapp->WriteUInt32(ServerToLaurionBuffSlot(emu->slotid));
-			outapp->WriteUInt32(0xffffffff);		// SpellID (0xffff to remove)
-			outapp->WriteUInt32(0);			// Duration
-			outapp->WriteUInt32(0);			// numhits
-			outapp->WriteUInt8(0);		// Caster name
-			outapp->WriteUInt8(0);		// Type
-			outapp->WriteUInt8(0);		// Type
-		}
-
-		FINISH_ENCODE();
-
-		if (outapp) {
-			dest->FastQueuePacket(&outapp);
-		}
-	}
-
-	ENCODE(OP_ManaChange) {
-		ENCODE_LENGTH_EXACT(ManaChange_Struct);
-		SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
-
-		OUT(new_mana);
-		OUT(stamina);
-		OUT(spell_id);
-		OUT(keepcasting);
-		OUT(slot);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_Action) {
-		ENCODE_LENGTH_EXACT(Action_Struct);
-		SETUP_DIRECT_ENCODE(Action_Struct, structs::MissileHitInfo);
-
-		//This is mostly figured out; there's two unknowns, only unknown1 is read by the client
-		OUT(target);
-		OUT(source);
-		eq->spell_id = emu->spell;
-		eq->effect_type = emu->effect_flag;
-		eq->effective_casting_level = 0; //if you set this to != 0 it will use this level instead of calculating it
-		eq->unknown1 = 0;
-		eq->unknown2 = 0;
-		eq->damage = 0; //client doesn't read this but live sends it here, can just set 0
-		eq->modifier = 1.0f + (emu->instrument_mod - 10) / 10.0f;
-		OUT(force);
-		OUT(hit_heading);
-		OUT(hit_pitch);
-		eq->skill = emu->type;
-		OUT(level);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_MobHealth) {
-		ENCODE_LENGTH_EXACT(SpawnHPUpdate_Struct2);
-		SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct2, structs::MobHealth_Struct);
-
-		OUT(spawn_id);
-		OUT(hp);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_GMTraining) {
-		ENCODE_LENGTH_EXACT(GMTrainee_Struct);
-		SETUP_DIRECT_ENCODE(GMTrainee_Struct, structs::GMTrainee_Struct);
-	
-		OUT(npcid);
-		OUT(playerid);
-
-		for (int i = 0; i < 100; ++i) {
-			OUT(skills[i]);
-		}
-
-		eq->unknown408[0] = 1;
-		eq->unknown408[1] = 0xC9;
-		eq->unknown408[2] = 0xC9;
-		eq->unknown408[3] = 0xC9;
-		eq->unknown408[4] = 0xC9;
-		eq->unknown408[5] = 0xC9;
-		eq->unknown408[6] = 0xC9;
-		eq->unknown408[7] = 0xC9;
-		eq->unknown408[8] = 0xC9;
-		eq->unknown408[9] = 0xC9;
-		eq->unknown408[10] = 0xC9;
-		eq->unknown408[11] = 0xC9;
-		eq->unknown408[12] = 0xC9;
-		eq->unknown408[13] = 0xC9;
-		eq->unknown408[14] = 0xC9;
-		eq->unknown408[15] = 0xC9;
-		eq->unknown408[16] = 0xC9;
-		eq->unknown408[17] = 0xC9;
-		eq->unknown408[18] = 0xC9;
-		eq->unknown408[19] = 0xC9;
-		eq->unknown408[20] = 0xC9;
-		eq->unknown408[21] = 0xC9;
-		eq->unknown408[22] = 0xC9;
-		eq->unknown408[23] = 0xC9;
-		eq->unknown408[24] = 0xC9;
-		eq->unknown408[25] = 0xC9;
-		eq->unknown408[26] = 0xC9;
-		eq->unknown408[27] = 0xC9;
-		eq->unknown408[28] = 0xC9;
-		eq->unknown408[29] = 0xC9;
-		eq->unknown408[30] = 0xC9;
-		eq->unknown408[31] = 0xC9;
-		eq->unknown408[32] = 0xC9;
-		eq->unknown408[33] = 0xCA; //the client far as I can tell doesn't read past the 1 byte + 32 0xc9s, but still setting it to what we saw
-		eq->unknown408[34] = 0x8C;
-		eq->unknown408[35] = 0xEC;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_GMTrainSkillConfirm)
-	{
-		ENCODE_LENGTH_EXACT(GMTrainSkillConfirm_Struct);
-		SETUP_DIRECT_ENCODE(GMTrainSkillConfirm_Struct, structs::GMTrainSkillConfirm_Struct);
-
-		OUT(SkillID);
-		OUT(Cost);
-		OUT(NewSkill);
-		OUT_str(TrainerName);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_SkillUpdate)
-	{
-		ENCODE_LENGTH_EXACT(SkillUpdate_Struct);
-		SETUP_DIRECT_ENCODE(SkillUpdate_Struct, structs::SkillUpdate_Struct);
-
-		OUT(skillId);
-		OUT(value);
-		eq->active = 1;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_RespondAA)
-	{
-		SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
-
-		eq->aa_spent = emu->aa_spent;
-		// These fields may need to be correctly populated at some point
-		eq->aapoints_assigned[0] = emu->aa_spent;
-		eq->aapoints_assigned[1] = 0;
-		eq->aapoints_assigned[2] = 0;
-		eq->aapoints_assigned[3] = 0;
-		eq->aapoints_assigned[4] = 0;
-		eq->aapoints_assigned[5] = 0;
-
-		for (uint32 i = 0; i < MAX_PP_AA_ARRAY; ++i)
-		{
-			eq->aa_list[i].AA = emu->aa_list[i].AA;
-			eq->aa_list[i].value = emu->aa_list[i].value;
-			eq->aa_list[i].charges = emu->aa_list[i].charges;
-			eq->aa_list[i].bUnknown0x0c = false;
-		}
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_BlockedBuffs)
-	{
-		ENCODE_LENGTH_EXACT(BlockedBuffs_Struct);
-		SETUP_DIRECT_ENCODE(BlockedBuffs_Struct, structs::BlockedBuffs_Struct);
-
-		for (uint32 i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-			eq->SpellID[i] = emu->SpellID[i];
-
-		for (uint32 i = BLOCKED_BUFF_COUNT; i < structs::BLOCKED_BUFF_COUNT; ++i)
-			eq->SpellID[i] = -1;
-
-		OUT(Count);
-		OUT(Pet);
-		OUT(Initialise);
-		OUT(Flags);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_RemoveBlockedBuffs) { ENCODE_FORWARD(OP_BlockedBuffs); }
-
-	ENCODE(OP_ZonePlayerToBind)
-	{
-		SETUP_VAR_ENCODE(ZonePlayerToBind_Struct);
-		ALLOC_LEN_ENCODE(sizeof(structs::ZonePlayerToBind_Struct) + strlen(emu->zone_name));
-
-		__packet->SetWritePosition(0);
-		__packet->WriteUInt16(emu->bind_zone_id);
-		__packet->WriteUInt16(emu->bind_instance_id);
-		__packet->WriteFloat(emu->x);
-		__packet->WriteFloat(emu->y);
-		__packet->WriteFloat(emu->z);
-		__packet->WriteFloat(emu->heading);
-		__packet->WriteString(emu->zone_name);
-		__packet->WriteUInt32(60);
-		__packet->WriteUInt32(0);
-		__packet->WriteUInt32(51);
-		__packet->WriteUInt32(41);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_Illusion)
-	{
-		ENCODE_LENGTH_EXACT(Illusion_Struct);
-		SETUP_DIRECT_ENCODE(Illusion_Struct, structs::Illusion_Struct);
-
-		OUT(spawnid);
-		OUT_str(charname);
-		OUT(race);
-		eq->unknown006[0] = 0;
-		eq->unknown006[1] = 0;
-		OUT(gender);
-		OUT(texture);
-		OUT(helmtexture);
-		OUT(face);
-		OUT(hairstyle);
-		OUT(haircolor);
-		OUT(beard);
-		OUT(beardcolor);
-		OUT(size);
-		OUT(drakkin_heritage);
-		OUT(drakkin_tattoo);
-		OUT(drakkin_details);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_MoneyOnCorpse)
-	{
-		ENCODE_LENGTH_EXACT(moneyOnCorpseStruct);
-		SETUP_DIRECT_ENCODE(moneyOnCorpseStruct, structs::moneyOnCorpseStruct);
-
-		eq->type = emu->response;
-		OUT(platinum);
-		OUT(gold);
-		OUT(silver);
-		OUT(copper);
-		eq->flags = 0;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_OnLevelMessage)
-	{
-		EQApplicationPacket* in = *p;
-		*p = nullptr;
-		OnLevelMessage_Struct* emu = (OnLevelMessage_Struct*)in->pBuffer;
-		SerializeBuffer buffer;
-
-		buffer.WriteLengthString(emu->Title);
-		buffer.WriteLengthString(emu->Text);
-		buffer.WriteLengthString(emu->ButtonName0);
-		buffer.WriteLengthString(emu->ButtonName1);
-		buffer.WriteUInt8(emu->Buttons);
-		buffer.WriteUInt8(emu->SoundControls);
-		buffer.WriteUInt32(emu->Duration);
-		buffer.WriteUInt32(emu->PopupID);
-		buffer.WriteUInt32(emu->NegativeID);
-		buffer.WriteUInt32(0); //seen -1 & 0
-		buffer.WriteUInt32(0); //seen 0
-
-		auto outapp = new EQApplicationPacket(OP_OnLevelMessage, buffer.size());
-		outapp->WriteData(buffer.buffer(), buffer.size());
-		dest->FastQueuePacket(&outapp, ack_req);
 
 		delete in;
 	}
