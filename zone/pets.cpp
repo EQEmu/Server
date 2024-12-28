@@ -998,6 +998,7 @@ bool Mob::IsPetAllowed(uint16 spell_id) {
 
 // Get the Mob instance of the pet at the given index
 Mob* Mob::GetPet(uint8 idx) {
+	ValidatePetList();
     // Check if the index is greater than or equal to the pet limit
     if (idx >= RuleI(Custom, AbsolutePetLimit)) {
         return nullptr;  // Return nullptr if the index exceeds the pet limit
@@ -1059,6 +1060,7 @@ Mob* Mob::GetPetByID(uint16 id) {
 
 // Remove the pet at the given index from the pet list
 bool Mob::RemovePetByIndex(uint8 idx /*= 0*/) {
+	ValidatePetList();
     // Check if the index is within the bounds of the petids vector
     if (idx >= petids.size()) {
         return false;  // Return false if the index is out of bounds
@@ -1077,6 +1079,7 @@ bool Mob::RemovePetByIndex(uint8 idx /*= 0*/) {
 }
 
 bool Mob::RemovePet(Mob* pet) {
+	ValidatePetList();
     if (!pet) {
         return false;  // Return false if the provided Mob pointer is null
     }
@@ -1086,6 +1089,7 @@ bool Mob::RemovePet(Mob* pet) {
 }
 
 bool Mob::RemovePet(uint16 pet_id) {
+	ValidatePetList();
     // Iterate through the petids vector to find and remove the pet by its ID
     for (auto it = petids.begin(); it != petids.end(); ++it) {
         if (*it == pet_id) {
@@ -1119,6 +1123,7 @@ bool Mob::RemovePet(uint16 pet_id) {
 
 // Remove all pets from the pet list
 void Mob::RemoveAllPets() {
+	ValidatePetList();
     // Iterate over each pet ID in the petids vector
     for (auto pet_id : petids) {
         // Retrieve the Mob associated with the pet ID
