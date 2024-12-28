@@ -4706,7 +4706,7 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 
 	// check if any money was handed in via external quest methods
 	auto em = c->GetExternalHandinMoneyReturned();
-	
+
 	bool money_returned_via_external_quest_methods =
 			 em.copper > 0 ||
 			 em.silver > 0 ||
@@ -4744,7 +4744,7 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 
 	if (money_returned_via_external_quest_methods) {
 		LogNpcHandin(
-			"Money handed in was returned via external quest methods, not returning money to player | handed-in p [{}] g [{}] s [{}] c [{}] returned-external p [{}] g [{}] s [{}] c [{}] source [{}]",
+			"Money handed in was returned via external quest methods, not returning money to player via ReturnHandinItems | handed-in p [{}] g [{}] s [{}] c [{}] returned-external p [{}] g [{}] s [{}] c [{}] source [{}]",
 			m_hand_in.money.platinum,
 			m_hand_in.money.gold,
 			m_hand_in.money.silver,
