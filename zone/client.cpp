@@ -8858,7 +8858,7 @@ bool Client::ReloadCharacterFaction(Client *c, uint32 facid, uint32 charid)
 		return false;
 }
 
-FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
+FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 player_race, uint32 player_class, uint32 player_deity, int32 pFaction, Mob* tnpc)
 {
 	if (!tnpc) {
 		return FACTION_VALUE::FACTION_ALLY; // Not sure how this could happen
@@ -8872,14 +8872,14 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
             uint16 class_bit = class_bitmask.second;
 
             if ((GetClassesBits() & class_bit) != 0) {
-				faction_val = std::min(_GetFactionLevel(char_id, npc_id, p_race, class_id, p_deity, pFaction, tnpc), faction_val);
+				faction_val = std::min(_GetFactionLevel(char_id, npc_id, player_race, class_id, player_deity, pFaction, tnpc), faction_val);
 			}
         }
 
 		return faction_val;
 	}
 
-	return _GetFactionLevel(char_id, npc_id, p_race, p_class, p_deity, pFaction, tnpc);
+	return _GetFactionLevel(char_id, npc_id, player_race, player_class, player_deity, pFaction, tnpc);
 }
 
 //o--------------------------------------------------------------
@@ -8888,7 +8888,7 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 //| Notes: Gets the characters faction standing with the specified NPC.
 //|			Will return Indifferent on failure.
 //o--------------------------------------------------------------
-FACTION_VALUE Client::_GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
+FACTION_VALUE Client::_GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 player_race, uint32 player_class, uint32 player_deity, int32 pFaction, Mob* tnpc)
 {
 	if (pFaction < 0)
 		return GetSpecialFactionCon(tnpc);
@@ -8917,7 +8917,7 @@ FACTION_VALUE Client::_GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_r
 	if(pFaction > 0)
 	{
 		//Get the faction data from the database
-		if(content_db.GetFactionData(&fmods, p_class, p_race, p_deity, pFaction))
+		if(content_db.GetFactionData(&fmods, player_class, player_race, player_deity, pFaction))
 		{
 			//Get the players current faction with pFaction
 			tmpFactionValue = GetCharacterFactionLevel(pFaction);

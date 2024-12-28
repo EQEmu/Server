@@ -2441,7 +2441,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 						MessageString(Chat::Skills, ESCAPE);
 					} else{
-						entity_list.RemoveFromTargets(caster);
+						entity_list.RemoveFromTargets(this);
 						SetInvisible(Invisibility::Invisible);
 					}
 				}

@@ -4312,7 +4312,7 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 		return false;
 	}
 
-	if (!IsPetOwnerClient()) {
+	if (!IsPetOwnerClient() || !GetOwner()) {
 		return false;
 	}
 
