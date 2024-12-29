@@ -4807,21 +4807,12 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 		m_hand_in.items.end()
 	);
 
-	// check if any money was handed in via external quest methods
-	auto em = c->GetExternalHandinMoneyReturned();
-	
-	bool money_returned_via_external_quest_methods =
-			 em.copper > 0 ||
-			 em.silver > 0 ||
-			 em.gold > 0 ||
-			 em.platinum > 0;
-
 	// check if any money was handed in
 	bool money_handed = m_hand_in.money.platinum > 0 ||
 						m_hand_in.money.gold > 0 ||
 						m_hand_in.money.silver > 0 ||
 						m_hand_in.money.copper > 0;
-	if (money_handed && !money_returned_via_external_quest_methods) {
+	if (money_handed) {
 		c->AddMoneyToPP(
 			m_hand_in.money.copper,
 			m_hand_in.money.silver,
@@ -4843,21 +4834,6 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 		return_money.silver   = m_hand_in.money.silver;
 		return_money.gold     = m_hand_in.money.gold;
 		return_money.platinum = m_hand_in.money.platinum;
-	}
-
-	if (money_returned_via_external_quest_methods) {
-		LogNpcHandin(
-			"Money handed in was returned via external quest methods, not returning money to player | handed-in p [{}] g [{}] s [{}] c [{}] returned-external p [{}] g [{}] s [{}] c [{}] source [{}]",
-			m_hand_in.money.platinum,
-			m_hand_in.money.gold,
-			m_hand_in.money.silver,
-			m_hand_in.money.copper,
-			em.platinum,
-			em.gold,
-			em.silver,
-			em.copper,
-			em.return_source
-		);
 	}
 
 	m_has_processed_handin_return = returned_handin;
