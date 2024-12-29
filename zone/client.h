@@ -1815,10 +1815,10 @@ public:
 	// from double giving money back to players in scripts when return_items
 	// also gives money back to players
 	struct ExternalHandinMoneyReturned {
-		uint32 copper;
-		uint32 silver;
-		uint32 gold;
-		uint32 platinum;
+		uint64 copper;
+		uint64 silver;
+		uint64 gold;
+		uint64 platinum;
 		std::string return_source;
 	};
 private:
