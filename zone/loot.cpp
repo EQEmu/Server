@@ -408,44 +408,58 @@ void NPC::AddLootDropFixed(
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (int i = EQ::invslot::EQUIPMENT_BEGIN; !found && i <= EQ::invslot::EQUIPMENT_END; i++) {
-				if (i == EQ::invslot::slotRange) {
-					continue;
-				}
+			std::vector<int> custom_order = {
+				EQ::invslot::slotPrimary,
+				EQ::invslot::slotSecondary,
+				EQ::invslot::slotRange,
+				EQ::invslot::slotCharm,
+				EQ::invslot::slotEar1,
+				EQ::invslot::slotHead,
+				EQ::invslot::slotFace,
+				EQ::invslot::slotEar2,
+				EQ::invslot::slotNeck,
+				EQ::invslot::slotShoulders,
+				EQ::invslot::slotArms,
+				EQ::invslot::slotBack,
+				EQ::invslot::slotWrist1,
+				EQ::invslot::slotWrist2,
+				EQ::invslot::slotHands,
+				EQ::invslot::slotFinger1,
+				EQ::invslot::slotFinger2,
+				EQ::invslot::slotChest,
+				EQ::invslot::slotLegs,
+				EQ::invslot::slotFeet,
+				EQ::invslot::slotWaist
+			};
+
+			for (int i : custom_order) {
+				if (found) break;
+
 				const uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if (equipment[i]) {
 						compitem = database.GetItem(equipment[i]);
 						if (item2->AC > compitem->AC || (item2->AC == compitem->AC && item2->HP > compitem->HP)) {
 							// item would be an upgrade
-							// check if we're multi-slot, if yes then we have to keep
-							// looking in case any of the other slots we can fit into are empty.
 							if (item2->Slots != slots) {
 								found_slot = i;
-							}
-							else {
-								// Unequip old item
-								auto *old_item = GetItem(i);
-
+							} else {
+								auto* old_item = GetItem(i);
 								old_item->equip_slot = EQ::invslot::SLOT_INVALID;
 
 								equipment[i] = item2->ID;
-
 								found_slot = i;
-								found      = true;
+								found = true;
 							}
 						}
-					}
-					else {
+					} else {
 						equipment[i] = item2->ID;
-
 						found_slot = i;
-						found      = true;
+						found = true;
 					}
 				}
 			}
 		}
-
 		// Possible slot was found but not selected. Pick it now.
 		if (!found && found_slot >= 0) {
 			equipment[found_slot] = item2->ID;
