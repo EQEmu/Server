@@ -4276,14 +4276,31 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 		return false;
 	}
 
-	const bool can_take_nodrop   = RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0;
-	const bool can_pet_take_item = !inst->GetItem()->IsQuestItem()
-		&& can_take_nodrop
-		&& inst->GetItem()->IsPetUsable()
-		&& !inst->IsAttuned();
+	const bool can_take_nodrop         = RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0;
+	const bool is_charmed_with_attuned = IsCharmed() && inst->IsAttuned();
 
-	if (!can_pet_take_item) {
-		return false;
+	auto o = GetOwner() && GetOwner()->IsClient() ? GetOwner()->CastToClient() : nullptr;
+
+	struct Check {
+		bool condition;
+		std::string message;
+	};
+
+	const Check checks[] = {
+		{inst->IsAttuned(), "I cannot equip attuned items, master."},
+		{!can_take_nodrop || is_charmed_with_attuned, "I cannot equip no-drop items, master."},
+		{inst->GetItem()->IsQuestItem(), "I cannot equip quest items, master."},
+		{!inst->GetItem()->IsPetUsable(), "I cannot equip that item, master."}
+	};
+
+	// Iterate over checks and return false if any condition is true
+	for (const auto &c : checks) {
+		if (c.condition) {
+			if (o) {
+				o->Message(Chat::PetResponse, c.message.c_str());
+			}
+			return false;
+		}
 	}
 
 	return true;
