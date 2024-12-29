@@ -5782,17 +5782,6 @@ CREATE INDEX idx_bot_expires ON data_buckets (bot_id, expires);
 ALTER TABLE `trader`
 	ADD COLUMN `char_zone_instance_id` INT NULL DEFAULT '0' AFTER `char_zone_id`;
 )"
-	},
-	ManifestEntry{
-		.version = 9287,
-		.description = "2024_10_15_npc_types_multiquest_enabled.sql",
-		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'multiquest_enabled'",
-		.condition = "empty",
-		.match = "",
-		.sql = R"(
-ALTER TABLE `npc_types`
-ADD COLUMN `multiquest_enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `is_parcel_merchant`;
-)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

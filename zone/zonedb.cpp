@@ -1938,8 +1938,6 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->keeps_sold_items       = n.keeps_sold_items;
 		t->multiquest_enabled     = n.multiquest_enabled != 0;
 
-
-
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
 		if (zone->npctable.find(t->npc_id) != zone->npctable.end()) {

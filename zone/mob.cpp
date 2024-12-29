@@ -8788,20 +8788,21 @@ float Mob::GetUpdateRange() {
 void Mob::ClearDataBucketCache()
 {
 	if (IsOfClientBot()) {
-		uint64 id = 0;
+		uint64                   id = 0;
 		DataBucketLoadType::Type t{};
 		if (IsBot()) {
 			id = CastToBot()->GetBotID();
-			t = DataBucketLoadType::Bot;
+			t  = DataBucketLoadType::Bot;
 		}
 		else if (IsClient()) {
 			id = CastToClient()->CharacterID();
-			t = DataBucketLoadType::Client;
+			t  = DataBucketLoadType::Client;
 		}
 
 		DataBucket::DeleteFromCache(id, t);
 	}
 }
+
 bool Mob::IsGuildmaster() const {
 	switch (GetClass()) {
 		case Class::WarriorGM:

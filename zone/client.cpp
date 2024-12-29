@@ -3712,6 +3712,7 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 
 	/* Add Amount of Platinum */
 	temporary_copper_two = temporary_copper / 1000;
+	m_external_handin_money_returned.platinum = temporary_copper_two;
 	int32 new_value = m_pp.platinum + temporary_copper_two;
 
 	if (new_value < 0) {
@@ -3720,11 +3721,13 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 		m_pp.platinum = m_pp.platinum + temporary_copper_two;
 	}
 
+
 	temporary_copper -= temporary_copper_two * 1000;
 
 	/* Add Amount of Gold */
 	temporary_copper_two = temporary_copper / 100;
 	new_value = m_pp.gold + temporary_copper_two;
+	m_external_handin_money_returned.gold = temporary_copper_two;
 
 	if (new_value < 0) {
 		m_pp.gold = 0;
@@ -3736,6 +3739,7 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 
 	/* Add Amount of Silver */
 	temporary_copper_two = temporary_copper / 10;
+	m_external_handin_money_returned.silver = temporary_copper_two;
 	new_value = m_pp.silver + temporary_copper_two;
 
 	if (new_value < 0) {
@@ -3748,6 +3752,7 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 
 	/* Add Amount of Copper */
 	temporary_copper_two = temporary_copper;
+	m_external_handin_money_returned.copper = temporary_copper_two;
 	new_value = m_pp.copper + temporary_copper_two;
 
 	if (new_value < 0) {
@@ -3764,6 +3769,13 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 	RecalcWeight();
 
 	SaveCurrency();
+
+	uint32 plat   = copper / 1000;
+	uint32 gold   = (copper - (plat * 1000)) / 100;
+	uint32 silver = (copper - (plat * 1000 + gold * 100)) / 10;
+	uint32 cp     = (copper - (plat * 1000 + gold * 100 + silver * 10));
+
+	m_external_handin_money_returned.return_source = "AddMoneyToPP";
 
 	LogDebug("Client::AddMoneyToPP() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 }
@@ -3808,6 +3820,14 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 
 	RecalcWeight();
 	SaveCurrency();
+
+	m_external_handin_money_returned = ExternalHandinMoneyReturned{
+		.copper = copper,
+		.silver = silver,
+		.gold = gold,
+		.platinum = platinum,
+		.return_source = "AddMoneyToPP"
+	};
 
 #if (EQDEBUG>=5)
 		LogDebug("Client::AddMoneyToPP() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]",
@@ -14366,6 +14386,14 @@ void Client::AddMoneyToPPWithOverflow(uint64 copper, bool update_client)
 
 	RecalcWeight();
 	SaveCurrency();
+
+	m_external_handin_money_returned = ExternalHandinMoneyReturned{
+		.copper = add_cp,
+		.silver = add_sp,
+		.gold = add_gp,
+		.platinum = add_pp,
+		.return_source = "AddMoneyToPPWithOverflow"
+	};
 
 	LogDebug("Client::AddMoneyToPPWithOverflow() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]",
 			 GetName(),

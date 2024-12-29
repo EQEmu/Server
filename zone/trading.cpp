@@ -815,7 +815,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 								auto lde = LootdropEntriesRepository::NewNpcEntity();
 								lde.equip_item   = 1;
 								lde.item_charges = static_cast<int8>(baginst->GetCharges());
-								with->AddLootDropFixed(baginst->GetItem(), lde, true);
+								with->AddLootDrop(baginst->GetItem(), lde, true);
 								inst->DeleteItem(bslot);
 								item_count++;
 							}
@@ -829,7 +829,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							auto lde = LootdropEntriesRepository::NewNpcEntity();
 							lde.equip_item   = 1;
 							lde.item_charges = static_cast<int8>(inst->GetCharges());
-							with->AddLootDropFixed(item, lde, true);
+							with->AddLootDrop(item, lde, true);
 							inst = nullptr;
 						}
 					}
@@ -838,7 +838,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						auto lde = LootdropEntriesRepository::NewNpcEntity();
 						lde.equip_item   = 1;
 						lde.item_charges = static_cast<int8>(inst->GetCharges());
-						with->AddLootDropFixed(item, lde, true);
+						with->AddLootDrop(item, lde, true);
 						inst = nullptr;
 					}
 				}
@@ -867,6 +867,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			item_list.emplace_back(inst);
 		}
 
+		m_external_handin_money_returned = {};
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
 			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 			LogNpcHandinDetail("EVENT_TRADE triggered for NPC [{}]", tradingWith->GetNPCTypeID());

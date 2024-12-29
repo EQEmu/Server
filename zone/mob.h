@@ -1544,6 +1544,7 @@ public:
 	uint16 focused_pet_id;
 
 	void ClearDataBucketCache();
+	bool IsGuildmaster() const;
 
 	bool IsGuildmaster() const;
 

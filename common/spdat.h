@@ -20,7 +20,6 @@
 
 #include "classes.h"
 #include "skills.h"
-#include <unordered_set>
 #include "item_data.h"
 
 #define SPELL_UNKNOWN 0xFFFF
