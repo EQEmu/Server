@@ -467,6 +467,8 @@ public:
 	void SetGroupSpellTargetList(std::vector<Mob*> spellTargetList) { _groupSpellTargetList = spellTargetList; }
 	Raid* GetStoredRaid() { return _storedRaid; }
 	void SetStoredRaid(Raid* storedRaid) { _storedRaid = storedRaid; }
+	bool GetVerifiedRaid() { return _verifiedRaid; }
+	void SetVerifiedRaid(bool status) { _verifiedRaid = status; }
 	uint16 GetTempSpellType() { return _tempSpellType; }
 	void SetTempSpellType(uint16 spellType) { _tempSpellType = spellType; }
 	void AssignBotSpellsToTypes(std::vector<BotSpells_Struct>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>>& AIBot_spells_by_type);
@@ -1107,6 +1109,7 @@ private:
 	std::vector<Mob*> _spellTargetList;
 	std::vector<Mob*> _groupSpellTargetList;
 	Raid* _storedRaid;
+	bool _verifiedRaid;
 	uint16 _tempSpellType;
 
 	// Private "base stats" Members

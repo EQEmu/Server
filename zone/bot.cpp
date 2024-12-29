@@ -111,7 +111,9 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	bot_blocked_buffs.clear();
 	_spellTargetList.clear();
 	_groupSpellTargetList.clear();
-	_storedRaid = nullptr;
+	SetStoredRaid(nullptr);
+	SetVerifiedRaid(false);
+	p_raid_instance = nullptr;
 
 	// Calculate HitPoints Last As It Uses Base Stats
 	current_hp = GenerateBaseHitPoints();
@@ -263,7 +265,9 @@ Bot::Bot(
 
 	_spellTargetList.clear();
 	_groupSpellTargetList.clear();
-	_storedRaid = nullptr;
+	SetStoredRaid(nullptr);
+	SetVerifiedRaid(false);
+	p_raid_instance = nullptr;
 	LoadAAs();
 
 	if (database.botdb.LoadBuffs(this)) {
@@ -1637,10 +1641,6 @@ bool Bot::Process()
 		entity_list.ScanCloseMobs(this);
 	}
 
-	//if (m_mob_check_moving_timer.Check()) { //TODO bot rewrite - is this necessary
-	//	CheckScanCloseMobsMovingTimer();
-	//}
-	//
 	SpellProcess();
 
 	if (tic_timer.Check()) {
@@ -2064,12 +2064,16 @@ void Bot::AI_Process()
 		return;
 	}
 
-	auto raid = entity_list.GetRaidByBot(this);
+	Raid* raid = entity_list.GetRaidByBot(this);
 	SetStoredRaid(raid);
 	uint32 r_group = RAID_GROUPLESS;
 
 	if (raid) {
-		//raid->VerifyRaid();
+		if (!GetVerifiedRaid()) {
+			raid->VerifyRaid();
+			SetVerifiedRaid(true);
+		}
+
 		r_group = raid->GetGroup(GetName());
 	
 		//if (mana_timer.Check(false)) {
@@ -3568,7 +3572,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			ChangeBotRangedWeapons(true);
 		}
 
-		if (auto raid = entity_list.GetRaidByBot(this)) {
+		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
 			// Safety Check to confirm we have a valid raid
 			auto owner = GetBotOwner();
 			if (owner && !raid->IsRaidMember(owner->GetCleanName())) {
@@ -3577,6 +3581,9 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 				SetRaidGrouped(true);
 				raid->LearnMembers();
 				raid->VerifyRaid();
+				SetStoredRaid(raid);
+				p_raid_instance = raid;
+				SetVerifiedRaid(true);
 			}
 		}
 		else if (auto group = entity_list.GetGroupByMob(this)) {
@@ -7051,6 +7058,10 @@ void Bot::RemoveBotFromRaid(Bot* bot) {
 			bot_raid->DisbandRaid();
 		}
 	}
+
+	bot->SetStoredRaid(nullptr);
+	bot->p_raid_instance = nullptr;
+	bot->SetVerifiedRaid(false);
 }
 
 // Handles all client zone change event

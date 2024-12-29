@@ -313,7 +313,9 @@ void Client::SpawnRaidBotsOnConnect(Raid* raid) {
 
 					if (bot) {
 						bot->SetRaidGrouped(true);
+						bot->SetStoredRaid(raid);
 						bot->p_raid_instance = raid;
+						bot->SetVerifiedRaid(false);
 					}
 				}
 			}

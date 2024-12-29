@@ -2244,14 +2244,24 @@ Raid* EntityList::GetRaidByBotName(const char* name)
 	return nullptr;
 }
 
-Raid* EntityList::GetRaidByBot(const Bot* bot)
+Raid* EntityList::GetRaidByBot(Bot* bot)
 {
-	for (const auto& r : raid_list) {
-		for (const auto& m : r->members) {
-			if (m.is_bot && m.member->CastToBot() == bot) {
-				return r;
+	if (bot->p_raid_instance) {
+		return bot->p_raid_instance;
+	}
+
+	std::list<Raid*>::iterator iterator;
+	iterator = raid_list.begin();
+
+	while (iterator != raid_list.end()) {
+		for (const auto& member : (*iterator)->members) {
+			if (member.member && member.is_bot && member.member->CastToBot() == bot) {
+				bot->p_raid_instance = *iterator;
+				return *iterator;
 			}
 		}
+
+		++iterator;
 	}
 
 	return nullptr;
