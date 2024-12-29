@@ -4380,7 +4380,7 @@ bool NPC::CheckHandin(
 			h.items.emplace_back(
 				HandinEntry{
 					.item_id = std::to_string(i->GetItem()->ID),
-					.count = std::max(static_cast<uint16>(i->GetCharges()), static_cast<uint16>(1)),
+					.count = std::max(static_cast<uint16>(i->IsStackable() ? i->GetCharges() : 1), static_cast<uint16>(1)),
 					.item = i->Clone(),
 					.is_multiquest_item = false
 				}
@@ -4422,7 +4422,59 @@ bool NPC::CheckHandin(
 			}
 		}
 	}
-	else if (h.items.empty() && r.items.empty()) {
+	// if we have items in the hand-in bucket and required items, but the individual counts don't match
+	// say we have 4 individual entries in hand-in but required has one entry for 4 items
+	// we need to check if the required item is in the hand-in bucket 4 times
+	// TestCase{
+	//	.description = "Test handing in 4 non-stacking helmets when 4 are required",
+	//	.hand_in = {
+	//		.items = {
+	//			HandinEntry{.item_id = "29062", .count = 1},
+	//			HandinEntry{.item_id = "29062", .count = 1},
+	//			HandinEntry{.item_id = "29062", .count = 1},
+	//			HandinEntry{.item_id = "29062", .count = 1},
+	//		},
+	//		.money = {},
+	//	},
+	//	.required = {
+	//		.items = {
+	//			HandinEntry{.item_id = "29062", .count = 4},
+	//		},
+	//		.money = {},
+	//	},
+	//	.returned = {
+	//		.items = {
+	//		},
+	//		.money = {},
+	//	},
+	//	.handin_check_result = true,
+	// },
+	else if (!h.items.empty() && !r.items.empty()) {
+		std::unordered_map<std::string, uint16> handin_aggregated;
+		std::unordered_map<std::string, uint16> required_aggregated;
+
+		// Aggregate counts for hand-in items
+		for (const auto &h_item : h.items) {
+			handin_aggregated[h_item.item_id] += h_item.count;
+		}
+
+		// Aggregate counts for required items
+		for (const auto &r_item : r.items) {
+			required_aggregated[r_item.item_id] += r_item.count;
+		}
+
+		// Compare aggregated hand-in and required counts
+		bool met = true;
+		for (const auto &[item_id, required_count] : required_aggregated) {
+			if (handin_aggregated[item_id] != required_count) {
+				met = false;
+				break;
+			}
+		}
+
+		items_met = met;
+	}
+	else if (h.items.empty() && r.items.empty()) { // no items required, money only
 		items_met = true;
 	}
 	else {

@@ -351,6 +351,51 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 				},
 				.handin_check_result = false,
 			},
+			TestCase{
+				.description = "Test handing in 4 non-stacking helmets when 4 are required",
+				.hand_in = {
+					.items = {
+						HandinEntry{.item_id = "29062", .count = 1},
+						HandinEntry{.item_id = "29062", .count = 1},
+						HandinEntry{.item_id = "29062", .count = 1},
+						HandinEntry{.item_id = "29062", .count = 1},
+					},
+					.money = {},
+				},
+				.required = {
+					.items = {
+						HandinEntry{.item_id = "29062", .count = 4},
+					},
+					.money = {},
+				},
+				.returned = {
+					.items = {
+					},
+					.money = {},
+				},
+				.handin_check_result = true,
+			},
+			TestCase{
+				.description = "Test handing in Soulfire that has 5 charges and have it count as 1 item",
+				.hand_in = {
+					.items = {
+						HandinEntry{.item_id = "5504", .count = 1},
+					},
+					.money = {},
+				},
+				.required = {
+					.items = {
+						HandinEntry{.item_id = "5504", .count = 1},
+					},
+					.money = {},
+				},
+				.returned = {
+					.items = {
+					},
+					.money = {},
+				},
+				.handin_check_result = true,
+			},
 		};
 
 		std::map<std::string, uint16>         hand_ins;
@@ -358,7 +403,9 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 		std::vector<const EQ::ItemInstance *> items;
 
 		// turn this on to see debugging output
-		LogSys.log_settings[Logs::NpcHandin].log_to_console = 0;
+		LogSys.log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;
+
+		std::cout << Strings::Repeat("-", 100) << std::endl;
 
 		for (auto &test_case: test_cases) {
 			hand_ins.clear();
@@ -366,10 +413,17 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 			items.clear();
 
 			for (auto &hand_in: test_case.hand_in.items) {
-				hand_ins[hand_in.item_id] = hand_in.count;
 				auto             item_id = Strings::ToInt(hand_in.item_id);
 				EQ::ItemInstance *inst   = database.CreateItem(item_id);
-				inst->SetCharges(hand_in.count);
+				if (inst->IsStackable()) {
+					inst->SetCharges(hand_in.count);
+				}
+
+				if (inst->GetItem()->MaxCharges > 0) {
+					inst->SetCharges(inst->GetItem()->MaxCharges);
+				}
+
+				hand_ins[hand_in.item_id] = inst->GetCharges();
 				items.push_back(inst);
 			}
 
@@ -440,6 +494,10 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 			}
 
 			npc->ResetHandin();
+
+			if (LogSys.log_settings[Logs::NpcHandin].log_to_console > 0) {
+				std::cout << std::endl;
+			}
 		}
 	}
 }
