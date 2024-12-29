@@ -1974,6 +1974,9 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		GMTrainSkillConfirm_Struct *gmtsc = (GMTrainSkillConfirm_Struct *)outapp->pBuffer;
 		gmtsc->SkillID = gmskill->skill_id;
 
+		auto maxskill = GetMaxSkillAfterSpecializationRules(static_cast<EQ::skills::SkillType>(gmskill->skill_id), MaxSkill(static_cast<EQ::skills::SkillType>(gmskill->skill_id)));
+		Message(Chat::Skills, "You have become better at %s! (%d/%d)", EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(gmskill->skill_id)).c_str(), GetSkill(static_cast<EQ::skills::SkillType>(gmskill->skill_id)), maxskill);
+
 		if(gmskill->skillbank == 1) {
 			gmtsc->NewSkill = (GetLanguageSkill(gmtsc->SkillID) == 1);
 			gmtsc->SkillID += 100;
@@ -1986,6 +1989,8 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		strcpy(gmtsc->TrainerName, pTrainer->GetCleanName());
 		QueuePacket(outapp);
 		safe_delete(outapp);
+
+
 	}
 
 	if(Cost)

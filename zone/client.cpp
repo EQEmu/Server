@@ -2882,6 +2882,10 @@ void Client::SetSkill(EQ::skills::SkillType skillid, uint16 value) {
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
 	skill->skillId=skillid;
 	skill->value=value;
+
+	auto maxskill = GetMaxSkillAfterSpecializationRules(static_cast<EQ::skills::SkillType>(skillid), MaxSkill(static_cast<EQ::skills::SkillType>(skillid)));
+	Message(Chat::Skills, "You have become better at %s! (%d/%d)", EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skillid)).c_str(), GetSkill(static_cast<EQ::skills::SkillType>(skillid)), maxskill);
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -3934,7 +3938,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
 			if (RuleB(Custom, MulticlassingEnabled)) {
-				Message(Chat::Skills, "You have become better at %s! (%d/%d)", EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skillid)).c_str(), GetSkill(skillid), maxskill);
+				//Message(Chat::Skills, "You have become better at %s! (%d/%d)", EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skillid)).c_str(), GetSkill(skillid), maxskill);
 			}
 
 			if (player_event_logs.IsEventEnabled(PlayerEvent::SKILL_UP)) {
