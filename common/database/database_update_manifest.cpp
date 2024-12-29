@@ -5793,6 +5793,7 @@ ALTER TABLE `trader`
 ALTER TABLE `npc_types`
 ADD COLUMN `multiquest_enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `is_parcel_merchant`;
 )"
+	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

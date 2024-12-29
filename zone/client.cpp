@@ -328,7 +328,7 @@ Client::Client() : Mob(
 	adventure_stats_timer = nullptr;
 	adventure_leaderboard_timer = nullptr;
 	adv_data = nullptr;
-	adv_requested_theme = LDoNThemes::Unused;
+	adv_requested_theme = LDoNTheme::Unused;
 	adv_requested_id = 0;
 	adv_requested_member_count = 0;
 
