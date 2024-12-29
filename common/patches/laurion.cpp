@@ -193,6 +193,18 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_AugmentInfo)
+	{
+		ENCODE_LENGTH_EXACT(AugmentInfo_Struct);
+		SETUP_DIRECT_ENCODE(AugmentInfo_Struct, structs::AugmentInfo_Struct);
+
+		OUT(itemid);
+		OUT(window);
+		strn0cpy(eq->augment_info, emu->augment_info, 64);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_BeginCast)
 	{
 		ENCODE_LENGTH_EXACT(BeginCast_Struct);
@@ -3296,6 +3308,32 @@ namespace Laurion
 	}
 
 	// DECODE methods
+	DECODE(OP_AugmentInfo)
+	{
+		DECODE_LENGTH_EXACT(structs::AugmentInfo_Struct);
+		SETUP_DIRECT_DECODE(AugmentInfo_Struct, structs::AugmentInfo_Struct);
+
+		IN(itemid);
+		IN(window);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_AugmentItem)
+	{
+		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
+		SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
+
+		emu->container_slot = LaurionToServerSlot(eq->container_slot);
+		emu->augment_slot = LaurionToServerSlot(eq->augment_slot);
+		emu->container_index = eq->container_index;
+		emu->augment_index = eq->augment_index;
+		emu->dest_inst_id = eq->dest_inst_id;
+		emu->augment_action = eq->augment_action;
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_BlockedBuffs)
 	{
 		DECODE_LENGTH_EXACT(structs::BlockedBuffs_Struct);

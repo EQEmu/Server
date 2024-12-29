@@ -875,6 +875,29 @@ namespace Laurion {
 			/*0152*/ uint16	unknown0152;
 			/*0154*/
 		};
+
+		struct AugmentInfo_Struct
+		{
+			/*000*/ uint32	itemid; // id of the solvent needed
+			/*004*/ uint32	window;	// window to display the information in
+			/*008*/ char	augment_info[64]; // total packet length 80, all the rest were always 00
+			/*072*/ uint32	unknown072; // seen 0, 56
+			/*076*/ uint32	unknown076; // seen 8, 3, 11, always matches what client sends
+			/*080*/
+		};
+
+		//seems to be unchanged from rof2?
+		//it's the same size at least
+		struct AugmentItem_Struct {
+			/*00*/	uint32	dest_inst_id;			// The unique serial number for the item instance that is being augmented
+			/*04*/	uint32	container_index;				// Seen 0
+			/*08*/	InventorySlot_Struct container_slot;	// Slot of the item being augmented
+			/*20*/	uint32	augment_index;				// Seen 0
+			/*24*/	InventorySlot_Struct augment_slot;	// Slot of the distiller to use (if one applies)
+			/*36*/	int32	augment_action;			// Guessed - 0 = augment, 1 = remove with distiller, 3 = delete aug
+			/*36*/	//int32	augment_slot;
+			/*40*/
+		};
 #pragma pack()
 
 	};	//end namespace structs
