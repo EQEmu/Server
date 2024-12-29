@@ -1904,18 +1904,12 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	if (!RuleB(Custom, SuspendGroupBuffs)) {
 		RemoveAllPets();
 	} else {
-		auto pets = GetAllPets();
-		for (auto pet : pets) {
-
-		}
-
-		/*
 		// Manual Save of pets
-		ValidatePetList(); // make sure pet list is compacted correctly
+		ValidatePetList();
 
 		m_petinfomulti.clear();
 
-		auto pets = GetAllPets(); // Assuming this function returns std::vector<Mob*>
+		auto pets = GetAllPets();
 
 		for (Mob* mob : pets) {
 			if (mob)
@@ -1945,7 +1939,6 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 		database.SavePetInfo(this);
 
 		RemoveAllPets();
-		*/
 	}
 
 	SetHorseId(0);
