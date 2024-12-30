@@ -615,6 +615,11 @@ void Perl_Bot_DeleteBot(Bot* self) // @categories Script Utility
 	self->DeleteBot();
 }
 
+void Perl_Bot_BotGroupSay(Bot* self, const char* message) // @categories Script Utility
+{
+	self->BotGroupSay(self, message);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -644,6 +649,7 @@ void perl_register_bot()
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int))&Perl_Bot_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool, bool))&Perl_Bot_ApplySpellRaid);
+	package.add("BotGroupSay", &Perl_Bot_BotGroupSay);
 	package.add("Camp", (void(*)(Bot*))&Perl_Bot_Camp);
 	package.add("Camp", (void(*)(Bot*, bool))&Perl_Bot_Camp);	
 	package.add("ClearDisciplineReuseTimer", (void(*)(Bot*))&Perl_Bot_ClearDisciplineReuseTimer);

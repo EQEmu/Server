@@ -659,6 +659,11 @@ void Lua_Bot::DeleteBot() {
 	self->DeleteBot();
 }
 
+void Lua_Bot::BotGroupSay(const char* message) {
+	Lua_Safe_Call_Void();
+	self->BotGroupSay(self, message);
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -688,6 +693,7 @@ luabind::scope lua_register_bot() {
 	.def("ApplySpellRaid", (void(Lua_Bot::*)(int,int,int,bool))&Lua_Bot::ApplySpellRaid)
 	.def("ApplySpellRaid", (void(Lua_Bot::*)(int,int,int,bool,bool))&Lua_Bot::ApplySpellRaid)
 	.def("ApplySpellRaid", (void(Lua_Bot::*)(int,int,int,bool,bool))&Lua_Bot::ApplySpellRaid)
+	.def("BotGroupSay", (void(Lua_Bot::*)(const char*)) & Lua_Bot::BotGroupSay)
 	.def("Camp", (void(Lua_Bot::*)(void))&Lua_Bot::Camp)
 	.def("Camp", (void(Lua_Bot::*)(bool))&Lua_Bot::Camp)
 	.def("ClearDisciplineReuseTimer", (void(Lua_Bot::*)())&Lua_Bot::ClearDisciplineReuseTimer)
