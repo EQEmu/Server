@@ -29,6 +29,15 @@
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/skill_caps.h"
 
+/*
+TODO bot rewrite:
+--have help option say first usable class level by spell list. Check existing options and update logic
+--remove all hardcoded spell grabbing when above is done
+--add slotid option to invgive
+--command cleanup (move to new help window, make more descriptive)
+--Add quest methods for functions
+*/
+
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
 	GiveNPCTypeData(npcTypeData);
