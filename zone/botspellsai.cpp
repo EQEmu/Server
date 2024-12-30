@@ -649,6 +649,10 @@ bool Bot::AI_PursueCastCheck() {
 				continue;
 			}
 
+			if (AIBot_spells_by_type[currentCast.spellType].empty()) {
+				continue;
+			}
+
 			result = AttemptAICastSpell(currentCast.spellType, nullptr);
 
 			if (!result && IsBotSpellTypeBeneficial(currentCast.spellType)) {
@@ -721,6 +725,10 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
+			if (AIBot_spells_by_type[currentCast.spellType].empty()) {
+				continue;
+			}
+
 			result = AttemptAICastSpell(currentCast.spellType, nullptr);
 
 			if (result) {
@@ -775,6 +783,10 @@ bool Bot::AI_EngagedCastCheck() {
 			}
 
 			if (IsCommandedSpellType(currentCast.spellType)) { // Unsupported by AI currently.
+				continue;
+			}
+
+			if (AIBot_spells_by_type[currentCast.spellType].empty()) {
 				continue;
 			}
 
@@ -1041,11 +1053,15 @@ std::vector<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* bot
 				}
 
 				if (
-					!RuleB(Bots, EnableBotTGB) &&
-					IsGroupSpell(botSpellList[i].spellid) &&
-					!IsTGBCompatibleSpell(botSpellList[i].spellid) &&
-					!botCaster->IsInGroupOrRaid(tar, true)
-				) {					
+					!botCaster->IsInGroupOrRaid(tar, true) &&
+					(
+						!RuleB(Bots, EnableBotTGB) ||
+						(
+							IsGroupSpell(botSpellList[i].spellid) &&
+							!IsTGBCompatibleSpell(botSpellList[i].spellid)
+						)
+					)
+				) {
 					continue;
 				}
 

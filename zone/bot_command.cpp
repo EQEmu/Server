@@ -1286,6 +1286,7 @@ int bot_command_init(void)
 		bot_command_add("botupdate", "Updates a bot to reflect any level changes that you have experienced", AccountStatus::Player, bot_command_update) ||
 		bot_command_add("botwoad", "Changes the Barbarian woad of a bot", AccountStatus::Player, bot_command_woad) ||
 		bot_command_add("cast", "Tells the first found specified bot to cast the given spell type", AccountStatus::Player, bot_command_cast) ||
+		bot_command_add("discipline", "Uses aggressive/defensive disciplines or can specify spell ID", AccountStatus::Player, bot_command_discipline) ||
 		bot_command_add("distanceranged", "Controls the range casters and ranged will try to stay away from a mob", AccountStatus::Player, bot_command_distance_ranged) ||
 		bot_command_add("classracelist", "Lists the classes and races and their appropriate IDs", AccountStatus::Player, bot_command_class_race_list) ||
 		bot_command_add("clickitem", "Orders your targeted bot to click the item in the provided inventory slot.", AccountStatus::Player, bot_command_click_item) ||
@@ -2222,6 +2223,7 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 #include "bot_commands/default_settings.cpp"
 #include "bot_commands/defensive.cpp"
 #include "bot_commands/depart.cpp"
+#include "bot_commands/discipline.cpp"
 #include "bot_commands/distance_ranged.cpp"
 #include "bot_commands/find_aliases.cpp"
 #include "bot_commands/follow.cpp"

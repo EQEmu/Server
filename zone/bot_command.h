@@ -1673,6 +1673,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep);
 void bot_command_bot(Client *c, const Seperator *sep);
 void bot_command_bot_settings(Client* c, const Seperator* sep);
 void bot_command_cast(Client* c, const Seperator* sep);
+void bot_command_discipline(Client* c, const Seperator* sep);
 void bot_command_distance_ranged(Client* c, const Seperator* sep);
 void bot_command_class_race_list(Client* c, const Seperator* sep);
 void bot_command_click_item(Client* c, const Seperator* sep);

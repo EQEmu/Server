@@ -401,7 +401,7 @@ public:
 	bool AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTargetType = UINT16_MAX, uint16 subType = UINT16_MAX);
 	bool AttemptAICastSpell(uint16 spellType, Mob* tar = nullptr);
 	bool AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank);
-	bool AttemptForcedCastSpell(Mob* tar, uint16 spell_id);
+	bool AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool isDisc = false);
 	bool AttemptCloseBeneficialSpells(uint16 spellType);
 	bool AI_EngagedCastCheck() override;
 	bool AI_PursueCastCheck() override;

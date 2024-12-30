@@ -184,7 +184,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	uint16 chosenSpellID = UINT16_MAX;
 
 	if (!arg1.compare("aa") || !arg1.compare("harmtouch") || !arg1.compare("layonhands")) {
-		if (!RuleB(Bots, AllowForcedCastsBySpellID)) {
+		if (!RuleB(Bots, AllowCastAAs)) {
 			c->Message(Chat::Yellow, "This commanded type is currently disabled.");
 			return;
 		}
@@ -208,7 +208,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	}
 
 	if (!arg1.compare("spellid")) {
-		if (!RuleB(Bots, AllowCastAAs)) {
+		if (!RuleB(Bots, AllowForcedCastsBySpellID)) {
 			c->Message(Chat::Yellow, "This commanded type is currently disabled.");
 			return;
 		}
@@ -561,13 +561,11 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			continue;
 		}
 		else if (bySpellID) {
-			SPDat_Spell_Struct spell = spells[chosenSpellID];
-
 			if (!bot_iter->CanUseBotSpell(chosenSpellID)) {
 				continue;
 			}
 
-			if (!tar || (spell.target_type == ST_Self && tar != bot_iter)) {
+			if (!tar || (spells[chosenSpellID].target_type == ST_Self && tar != bot_iter)) {
 				tar = bot_iter;
 			}
 
