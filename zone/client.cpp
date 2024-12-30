@@ -14226,7 +14226,7 @@ bool Client::RemoveExtraClass(int class_id) {
     // Update skills
     for (int skill_id = EQ::skills::Skill1HBlunt; skill_id < EQ::skills::SkillCount; skill_id++) {
         auto skill = static_cast<EQ::skills::SkillType>(skill_id);
-        if (!CanHaveSkill(skill)) {
+        if (!CanHaveSkill(skill) && GetSkill(skill)) {
             SetSkill(skill, 0);
         }
     }
@@ -14234,27 +14234,24 @@ bool Client::RemoveExtraClass(int class_id) {
     // Remove spells that are no longer usable
     auto memorized_spells = GetMemmedSpells();
     for (auto memmed_id : memorized_spells) {
-        if (IsValidSpell(memmed_id) && !is_spell_usable_by_classes(memmed_id)) {
-			LogDebug("Unmemming spell [{}]", memmed_id);
+        if (!is_spell_usable_by_classes(memmed_id)) {
             UnmemSpellBySpellID(memmed_id);
         }
     }
 
-    auto scribed_spells = GetScribedSpells();
-    for (auto spell_id : scribed_spells) {
-        if (IsValidSpell(spell_id) && !is_spell_usable_by_classes(spell_id)) {
-			LogDebug("Unscribing spell [{}]", spell_id);
-            UnscribeSpellBySpellID(spell_id, true);
+	for (int i = 0; i < EQ::spells::SPELLBOOK_SIZE; i++) {
+        if (m_pp.spell_book[i] != 0xFFFFFFFF && !is_spell_usable_by_classes(m_pp.spell_book[i])) {
+            UnscribeSpell(i, true, true);
         }
     }
+	SaveSpells();
 
-    auto scribed_disc = GetLearnedDisciplines();
-    for (auto disc_id : scribed_disc) {
-        if (IsValidSpell(disc_id) && !is_spell_usable_by_classes(disc_id)) {
-			LogDebug("Unscribing discipline [{}]", disc_id);
-            UntrainDiscBySpellID(disc_id, true);
+        for (int i = 0; i < MAX_PP_DISCIPLINES; i++) {
+        if (m_pp.disciplines.values[i] != 0 && !is_spell_usable_by_classes(m_pp.disciplines.values[i])) {
+            UntrainDisc(i, true, true);
         }
     }
+	SaveDisciplines();
 
 	for (int slot = EQ::invslot::EQUIPMENT_BEGIN; slot <= EQ::invslot::EQUIPMENT_END; slot++) {
 		auto item = m_inv.GetItem(slot);
@@ -14288,8 +14285,6 @@ bool Client::RemoveExtraClass(int class_id) {
     SendAlternateAdvancementStats();
 
     // Save changes
-    SaveSpells();
-    SaveDisciplines();
     SaveAA();
     SaveCurrency();
     Save();
