@@ -1168,7 +1168,7 @@ namespace PlayerEvent {
 #endif //EQEMU_PLAYER_EVENTS_H
 
 #define RecordPlayerEventLog(event_type, event_data) do {\
-    if (player_event_logs.IsEventEnabled(event_type)) {\
+	if (player_event_logs.IsEventEnabled(event_type)) {\
 		if (RuleB(Logging, PlayerEventsQSProcess)) {\
 			QServ->SendPacket(\
 				player_event_logs.RecordEvent(\
@@ -1191,12 +1191,12 @@ namespace PlayerEvent {
 } while (0)
 
 #define RecordPlayerEventLogWithClient(c, event_type, event_data) do {\
-    if (player_event_logs.IsEventEnabled(event_type)) {\
+	if (player_event_logs.IsEventEnabled(event_type)) {\
 		if (RuleB(Logging, PlayerEventsQSProcess)) {\
-	        QServ->SendPacket(\
-		        player_event_logs.RecordEvent(\
-			        event_type,\
-				    (c)->GetPlayerEvent(),\
+			QServ->SendPacket(\
+				player_event_logs.RecordEvent(\
+					event_type,\
+					(c)->GetPlayerEvent(),\
 					event_data\
 				).get()\
 			);\
