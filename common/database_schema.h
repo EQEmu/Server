@@ -402,6 +402,7 @@ namespace DatabaseSchema {
 	static std::vector<std::string> GetBotTables()
 	{
 		return {
+			"bot_blocked_buffs",
 			"bot_buffs",
 			"bot_command_settings",
 			"bot_create_combinations",
