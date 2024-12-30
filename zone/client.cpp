@@ -14219,6 +14219,10 @@ bool Client::RemoveExtraClass(int class_id) {
     // Update classes bitmask
     m_pp.classes = new_classes;
 
+	// Update bucket and recalculate bonuses
+    SetBucket("GestaltClasses", std::to_string(m_pp.classes));
+    CalcBonuses();
+
     // Update skills
     for (int skill_id = EQ::skills::Skill1HBlunt; skill_id < EQ::skills::SkillCount; skill_id++) {
         auto skill = static_cast<EQ::skills::SkillType>(skill_id);
@@ -14269,10 +14273,6 @@ bool Client::RemoveExtraClass(int class_id) {
             RemovePet(pet->GetID());
         }
     }
-
-    // Update bucket and recalculate bonuses
-    SetBucket("GestaltClasses", std::to_string(m_pp.classes));
-    CalcBonuses();
 
     // Update guild and alternate advancement information
     if (IsInAGuild()) {
