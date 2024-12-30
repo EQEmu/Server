@@ -1247,7 +1247,6 @@ int bot_command_init(void)
 
 	if (
 		bot_command_add("actionable", "Lists actionable command arguments and use descriptions", AccountStatus::Player, bot_command_actionable) ||
-		bot_command_add("aggressive", "Orders a bot to use a aggressive discipline", AccountStatus::Player, bot_command_aggressive) ||
 		bot_command_add("applypoison", "Applies cursor-held poison to a rogue bot's weapon", AccountStatus::Player, bot_command_apply_poison) ||
 		bot_command_add("attack", "Orders bots to attack a designated target", AccountStatus::Player, bot_command_attack) ||
 		bot_command_add("behindmob", "Toggles whether or not your bot tries to stay behind a mob", AccountStatus::Player, bot_command_behind_mob) ||
@@ -1292,7 +1291,6 @@ int bot_command_init(void)
 		bot_command_add("clickitem", "Orders your targeted bot to click the item in the provided inventory slot.", AccountStatus::Player, bot_command_click_item) ||
 		bot_command_add("copysettings", "Copies settings from one bot to another", AccountStatus::Player, bot_command_copy_settings) ||
 		bot_command_add("defaultsettings", "Restores a bot back to default settings", AccountStatus::Player, bot_command_default_settings) ||
-		bot_command_add("defensive", "Orders a bot to use a defensive discipline", AccountStatus::Player, bot_command_defensive) ||
 		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_depart) ||
 		bot_command_add("enforcespellsettings", "Toggles your Bot to cast only spells in their spell settings list.", AccountStatus::Player, bot_command_enforce_spell_list) ||
 		bot_command_add("findaliases", "Find available aliases for a bot command", AccountStatus::Player, bot_command_find_aliases) ||
@@ -2207,7 +2205,6 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 }
 
 #include "bot_commands/actionable.cpp"
-#include "bot_commands/aggressive.cpp"
 #include "bot_commands/appearance.cpp"
 #include "bot_commands/apply_poison.cpp"
 #include "bot_commands/apply_potion.cpp"
@@ -2221,7 +2218,6 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 #include "bot_commands/click_item.cpp"
 #include "bot_commands/copy_settings.cpp"
 #include "bot_commands/default_settings.cpp"
-#include "bot_commands/defensive.cpp"
 #include "bot_commands/depart.cpp"
 #include "bot_commands/discipline.cpp"
 #include "bot_commands/distance_ranged.cpp"

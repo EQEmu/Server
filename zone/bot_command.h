@@ -1663,7 +1663,6 @@ int bot_command_real_dispatch(Client *c, char const *message);
 
 // Bot Commands
 void bot_command_actionable(Client *c, const Seperator *sep);
-void bot_command_aggressive(Client *c, const Seperator *sep);
 void bot_command_apply_poison(Client *c, const Seperator *sep);
 void bot_command_apply_potion(Client* c, const Seperator* sep);
 void bot_command_attack(Client *c, const Seperator *sep);
@@ -1679,7 +1678,6 @@ void bot_command_class_race_list(Client* c, const Seperator* sep);
 void bot_command_click_item(Client* c, const Seperator* sep);
 void bot_command_copy_settings(Client* c, const Seperator* sep);
 void bot_command_default_settings(Client* c, const Seperator* sep);
-void bot_command_defensive(Client *c, const Seperator *sep);
 void bot_command_depart(Client *c, const Seperator *sep);
 void bot_command_find_aliases(Client *c, const Seperator *sep);
 void bot_command_follow(Client *c, const Seperator *sep);
