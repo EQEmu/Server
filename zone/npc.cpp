@@ -4762,8 +4762,6 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 					c->PushItemOnCursor(*i.item, true);
 					LogNpcHandin("Hand-in failed, returning item [{}]", i.item->GetItem()->Name);
 
-					// Safely delete the item
-					safe_delete(i.item);
 					returned_handin = true;
 					return true; // Mark this item for removal
 				}
@@ -4867,7 +4865,7 @@ void NPC::ResetHandin()
 	m_has_processed_handin_return = false;
 	m_handin_started              = false;
 	if (!IsMultiQuestEnabled()) {
-		for (auto &i: m_hand_in.items) {
+		for (auto &i: m_hand_in.original_items) {
 			safe_delete(i.item);
 		}
 
