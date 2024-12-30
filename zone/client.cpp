@@ -2847,11 +2847,6 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 
 	SaveCurrency();
 
-	uint32 plat   = copper / 1000;
-	uint32 gold   = (copper - (plat * 1000)) / 100;
-	uint32 silver = (copper - (plat * 1000 + gold * 100)) / 10;
-	uint32 cp     = (copper - (plat * 1000 + gold * 100 + silver * 10));
-
 	m_external_handin_money_returned.return_source = "AddMoneyToPP";
 
 	LogDebug("Client::AddMoneyToPP() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
