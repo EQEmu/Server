@@ -1,6 +1,6 @@
 #include "../client.h"
 #include "../worldserver.h"
-#include "queryserv.h"
+#include "../queryserv.h"
 
 extern WorldServer worldserver;
 extern QueryServ  *QServ;
