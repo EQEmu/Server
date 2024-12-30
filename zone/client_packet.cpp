@@ -3999,10 +3999,12 @@ void Client::Handle_OP_BazaarSearch(const EQApplicationPacket *app)
 			SendBazaarWelcome();
 			break;
 		}
+		/*
 		case FirstOpenSearch: {
 			SendBulkBazaarTraders();
 			break;
 		}
+		*/
 		default: {
 			LogError("Malformed BazaarSearch_Struct packet received, ignoring\n");
 		}
@@ -15030,6 +15032,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 
 	if (RuleB(Character, SneakAlwaysSucceedOver100)) {
 		hidechance = std::max(10, (int)GetSkill(EQ::skills::SkillSneak));
+		LogDebugDetail("hidechance: [{}]", hidechance);
 	}
 
 	float random = zone->random.Real(0, 99);

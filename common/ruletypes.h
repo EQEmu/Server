@@ -1111,8 +1111,6 @@ RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit r
 RULE_BOOL(Custom,   UseHasteForMeleeSkills, 				true, "Use Haste stat for activated melee skills")
 RULE_REAL(Custom, 	PetWeaponTuningMult, 					0.5, "Value added to weapon ratio for pet weapon usage")
 
-RULE_BOOL(Custom, 	DisableInitialSendBulkBazaarTraders, 	true, "Disable initial send of SendBulkBazaarTraders on client login")
-
 // Exploit Prevention
 RULE_BOOL(Custom, 	StripCharmItems, 						true, "Remove all items handed to charmed mobs when charm breaks. Additionally, return items handed to charmed mobs and give mob a copy.")
 
