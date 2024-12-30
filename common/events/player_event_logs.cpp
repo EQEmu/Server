@@ -166,12 +166,18 @@ void PlayerEventLogs::ProcessBatchQueue()
 						in.serialize(ar);
 					}
 
-					out.charges     = in.charges;
-					out.corpse_name = in.corpse_name;
-					out.item_id     = in.item_id;
-					out.item_name   = in.item_name;
-					out.npc_id      = in.npc_id;
-					out.created_at  = r.created_at;
+					out.charges      = in.charges;
+					out.corpse_name  = in.corpse_name;
+					out.item_id      = in.item_id;
+					out.item_name    = in.item_name;
+					out.augment_1_id = in.aug1;
+					out.augment_2_id = in.aug2;
+					out.augment_3_id = in.aug3;
+					out.augment_4_id = in.aug4;
+					out.augment_5_id = in.aug5;
+					out.augment_6_id = in.aug6;
+					out.npc_id       = in.npc_id;
+					out.created_at   = r.created_at;
 
 					if (m_etl_settings.contains(PlayerEvent::EventType::LOOT_ITEM)) {
 						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::LOOT_ITEM).next_id;

@@ -238,22 +238,22 @@ namespace PlayerEvent {
 	};
 
 	// used in Trade event
-	struct TradeItem {
-		int64       item_id;
-		std::string item_name;
-		int32       slot;
-
-		// cereal
-		template<class Archive>
-		void serialize(Archive &ar)
-		{
-			ar(
-				CEREAL_NVP(item_id),
-				CEREAL_NVP(item_name),
-				CEREAL_NVP(slot)
-			);
-		}
-	};
+	// struct TradeItem {
+	// 	int64       item_id;
+	// 	std::string item_name;
+	// 	int32       slot;
+	//
+	// 	// cereal
+	// 	template<class Archive>
+	// 	void serialize(Archive &ar)
+	// 	{
+	// 		ar(
+	// 			CEREAL_NVP(item_id),
+	// 			CEREAL_NVP(item_name),
+	// 			CEREAL_NVP(slot)
+	// 		);
+	// 	}
+	// };
 
 	// used in Trade event
 	class TradeItemEntry {
@@ -453,6 +453,13 @@ namespace PlayerEvent {
 		uint32      item_id;
 		std::string item_name;
 		int16       charges;
+		uint32      aug1;
+		uint32      aug2;
+		uint32      aug3;
+		uint32      aug4;
+		uint32      aug5;
+		uint32      aug6;
+		bool        attuned;
 		std::string reason;
 
 		// cereal
@@ -462,8 +469,15 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
-				CEREAL_NVP(reason),
-				CEREAL_NVP(charges)
+				CEREAL_NVP(charges),
+				CEREAL_NVP(aug1),
+				CEREAL_NVP(aug2),
+				CEREAL_NVP(aug3),
+				CEREAL_NVP(aug4),
+				CEREAL_NVP(aug5),
+				CEREAL_NVP(aug6),
+				CEREAL_NVP(attuned),
+				CEREAL_NVP(reason)
 			);
 		}
 	};
@@ -506,6 +520,12 @@ namespace PlayerEvent {
 		uint32      item_id;
 		std::string item_name;
 		int16       charges;
+		uint32      aug1;
+		uint32      aug2;
+		uint32      aug3;
+		uint32      aug4;
+		uint32      aug5;
+		uint32      aug6;
 		uint32      npc_id;
 		std::string corpse_name;
 
@@ -517,6 +537,12 @@ namespace PlayerEvent {
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
 				CEREAL_NVP(charges),
+				CEREAL_NVP(aug1),
+				CEREAL_NVP(aug2),
+				CEREAL_NVP(aug3),
+				CEREAL_NVP(aug4),
+				CEREAL_NVP(aug5),
+				CEREAL_NVP(aug6),
 				CEREAL_NVP(npc_id),
 				CEREAL_NVP(corpse_name)
 			);

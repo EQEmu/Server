@@ -5698,11 +5698,17 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		SetIntoxication(GetIntoxication()+IntoxicationIncrease);
 
 		if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY) && inst->GetItem()) {
-			auto e = PlayerEvent::DestroyItemEvent{
-				.item_id = inst->GetItem()->ID,
-				.item_name = inst->GetItem()->Name,
-				.charges = inst->GetCharges(),
-				.reason = "Client deleted",
+			auto e = PlayerEvent::DestroyItemEvent{ .item_id   = inst->GetItem()->ID,
+													.item_name = inst->GetItem()->Name,
+													.charges   = inst->GetCharges(),
+													.aug1      = inst->GetAugment(0)->GetID(),
+													.aug2      = inst->GetAugment(1)->GetID(),
+													.aug3      = inst->GetAugment(2)->GetID(),
+													.aug4      = inst->GetAugment(3)->GetID(),
+													.aug5      = inst->GetAugment(4)->GetID(),
+													.aug6      = inst->GetAugment(5)->GetID(),
+													.attuned   = inst->IsAttuned(),
+													.reason    = "Client deleted"
 			};
 
 			RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);

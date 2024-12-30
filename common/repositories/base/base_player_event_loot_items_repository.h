@@ -23,6 +23,12 @@ public:
 		uint32_t    item_id;
 		std::string item_name;
 		int32_t     charges;
+		uint32_t    augment_1_id;
+		uint32_t    augment_2_id;
+		uint32_t    augment_3_id;
+		uint32_t    augment_4_id;
+		uint32_t    augment_5_id;
+		uint32_t    augment_6_id;
 		uint32_t    npc_id;
 		std::string corpse_name;
 		time_t      created_at;
@@ -40,6 +46,12 @@ public:
 			"item_id",
 			"item_name",
 			"charges",
+			"augment_1_id",
+			"augment_2_id",
+			"augment_3_id",
+			"augment_4_id",
+			"augment_5_id",
+			"augment_6_id",
 			"npc_id",
 			"corpse_name",
 			"created_at",
@@ -53,6 +65,12 @@ public:
 			"item_id",
 			"item_name",
 			"charges",
+			"augment_1_id",
+			"augment_2_id",
+			"augment_3_id",
+			"augment_4_id",
+			"augment_5_id",
+			"augment_6_id",
 			"npc_id",
 			"corpse_name",
 			"UNIX_TIMESTAMP(created_at)",
@@ -96,13 +114,19 @@ public:
 	{
 		PlayerEventLootItems e{};
 
-		e.id          = 0;
-		e.item_id     = 0;
-		e.item_name   = "";
-		e.charges     = 0;
-		e.npc_id      = 0;
-		e.corpse_name = "";
-		e.created_at  = 0;
+		e.id           = 0;
+		e.item_id      = 0;
+		e.item_name    = "";
+		e.charges      = 0;
+		e.augment_1_id = 0;
+		e.augment_2_id = 0;
+		e.augment_3_id = 0;
+		e.augment_4_id = 0;
+		e.augment_5_id = 0;
+		e.augment_6_id = 0;
+		e.npc_id       = 0;
+		e.corpse_name  = "";
+		e.created_at   = 0;
 
 		return e;
 	}
@@ -139,13 +163,19 @@ public:
 		if (results.RowCount() == 1) {
 			PlayerEventLootItems e{};
 
-			e.id          = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.item_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_name   = row[2] ? row[2] : "";
-			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.corpse_name = row[5] ? row[5] : "";
-			e.created_at  = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.id           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.item_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_name    = row[2] ? row[2] : "";
+			e.charges      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.augment_1_id = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.augment_2_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_3_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_4_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_5_id = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_6_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.npc_id       = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.corpse_name  = row[11] ? row[11] : "";
+			e.created_at   = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -182,9 +212,15 @@ public:
 		v.push_back(columns[1] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.item_name) + "'");
 		v.push_back(columns[3] + " = " + std::to_string(e.charges));
-		v.push_back(columns[4] + " = " + std::to_string(e.npc_id));
-		v.push_back(columns[5] + " = '" + Strings::Escape(e.corpse_name) + "'");
-		v.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[4] + " = " + std::to_string(e.augment_1_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.augment_2_id));
+		v.push_back(columns[6] + " = " + std::to_string(e.augment_3_id));
+		v.push_back(columns[7] + " = " + std::to_string(e.augment_4_id));
+		v.push_back(columns[8] + " = " + std::to_string(e.augment_5_id));
+		v.push_back(columns[9] + " = " + std::to_string(e.augment_6_id));
+		v.push_back(columns[10] + " = " + std::to_string(e.npc_id));
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.corpse_name) + "'");
+		v.push_back(columns[12] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -210,6 +246,12 @@ public:
 		v.push_back(std::to_string(e.item_id));
 		v.push_back("'" + Strings::Escape(e.item_name) + "'");
 		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.augment_1_id));
+		v.push_back(std::to_string(e.augment_2_id));
+		v.push_back(std::to_string(e.augment_3_id));
+		v.push_back(std::to_string(e.augment_4_id));
+		v.push_back(std::to_string(e.augment_5_id));
+		v.push_back(std::to_string(e.augment_6_id));
 		v.push_back(std::to_string(e.npc_id));
 		v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
@@ -246,6 +288,12 @@ public:
 			v.push_back(std::to_string(e.item_id));
 			v.push_back("'" + Strings::Escape(e.item_name) + "'");
 			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.augment_1_id));
+			v.push_back(std::to_string(e.augment_2_id));
+			v.push_back(std::to_string(e.augment_3_id));
+			v.push_back(std::to_string(e.augment_4_id));
+			v.push_back(std::to_string(e.augment_5_id));
+			v.push_back(std::to_string(e.augment_6_id));
 			v.push_back(std::to_string(e.npc_id));
 			v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
@@ -282,13 +330,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLootItems e{};
 
-			e.id          = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.item_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_name   = row[2] ? row[2] : "";
-			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.corpse_name = row[5] ? row[5] : "";
-			e.created_at  = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.id           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.item_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_name    = row[2] ? row[2] : "";
+			e.charges      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.augment_1_id = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.augment_2_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_3_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_4_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_5_id = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_6_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.npc_id       = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.corpse_name  = row[11] ? row[11] : "";
+			e.created_at   = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -313,13 +367,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLootItems e{};
 
-			e.id          = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.item_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_name   = row[2] ? row[2] : "";
-			e.charges     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.npc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.corpse_name = row[5] ? row[5] : "";
-			e.created_at  = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.id           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.item_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_name    = row[2] ? row[2] : "";
+			e.charges      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.augment_1_id = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.augment_2_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_3_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_4_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_5_id = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_6_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.npc_id       = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.corpse_name  = row[11] ? row[11] : "";
+			e.created_at   = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -398,6 +458,12 @@ public:
 		v.push_back(std::to_string(e.item_id));
 		v.push_back("'" + Strings::Escape(e.item_name) + "'");
 		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.augment_1_id));
+		v.push_back(std::to_string(e.augment_2_id));
+		v.push_back(std::to_string(e.augment_3_id));
+		v.push_back(std::to_string(e.augment_4_id));
+		v.push_back(std::to_string(e.augment_5_id));
+		v.push_back(std::to_string(e.augment_6_id));
 		v.push_back(std::to_string(e.npc_id));
 		v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
@@ -427,6 +493,12 @@ public:
 			v.push_back(std::to_string(e.item_id));
 			v.push_back("'" + Strings::Escape(e.item_name) + "'");
 			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.augment_1_id));
+			v.push_back(std::to_string(e.augment_2_id));
+			v.push_back(std::to_string(e.augment_3_id));
+			v.push_back(std::to_string(e.augment_4_id));
+			v.push_back(std::to_string(e.augment_5_id));
+			v.push_back(std::to_string(e.augment_6_id));
 			v.push_back(std::to_string(e.npc_id));
 			v.push_back("'" + Strings::Escape(e.corpse_name) + "'");
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");

@@ -609,21 +609,29 @@ void command_guild(Client* c, const Seperator* sep)
 			e.item_id     = 123456789;
 			e.item_name   = "Test Item Name";
 			e.npc_id      = 987654321;
+			e.aug1        = 11;
+			e.aug2        = 0;
+			e.aug3        = 0;
+			e.aug4        = 44;
+			e.aug5        = 55,
+			e.aug6        = 66;
 
 			RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);
-//			RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);
-			// auto d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
-			// QServ->SendPacket(d.get());
-			// d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
-			// QServ->SendPacket(d.get());
-			//  d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
-			// QServ->SendPacket(d.get());
-			// d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
-			// QServ->SendPacket(d.get());
-			// d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
-			// QServ->SendPacket(d.get());
-			// d = player_event_logs.RecordEvent(PlayerEvent::LOOT_ITEM, c->GetPlayerEvent(), e);
-			// QServ->SendPacket(d.get());
+
+			PlayerEvent::DestroyItemEvent e2{};
+			e2.charges   = -1;
+			e2.attuned   = true;
+			e2.aug1      = 11;
+			e2.aug2      = 0;
+			e2.aug3      = 0;
+			e2.aug4      = 44;
+			e2.aug5      = 55;
+			e2.aug6      = 66;
+			e2.item_id   = 123456789;
+			e2.item_name = "Test Item Destroy Name";
+			e2.reason    = "Test Item Destroy Reason";
+
+			RecordPlayerEventLogWithClient(c, PlayerEvent::ITEM_DESTROY, e2);
 		}
 	}
 }
