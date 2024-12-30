@@ -1737,7 +1737,6 @@ bool Mob::CheckLosCheat(Mob* who, Mob* other) {
 					auto who_to_other = DistanceNoZ(who->GetPosition(), other->GetPosition());
 					auto distance_difference = who_to_other - (who_to_door + other_to_door);
 					if (distance_difference >= (-1 * RuleR(Maps, RangeCheckForLoSCheat)) && distance_difference <= RuleR(Maps, RangeCheckForLoSCheat)) {
-						LogTestDebug("CheckLosCheat failed at Door [{}], TriggerType [{}], GetLockpick [{}], GetKeyItem [{}], GetNoKeyring [{}]", door->GetDoorID(), door->GetTriggerType(), door->GetLockpick(), door->GetKeyItem(), door->GetNoKeyring()); //deleteme
 						return false;
 					}
 				}
@@ -1758,7 +1757,7 @@ bool Mob::CheckLosCheat(Mob* who, Mob* other) {
 	//
 	//	if (zone_id == 103) {
 	//		Doors* door_to_check = entity_list.FindDoor(8);
-	//		TestDebug("Entered LoSCheat for ZoneID: [{}]", zone_id); //deleteme
+	//		TestDebug("Entered LoSCheat for ZoneID: [{}]", zone_id);
 	//		glm::vec4 who_check; who_check.x = 1202; who_check.y = 559; who_check.z = -158.94;
 	//		glm::vec4 other_check; other_check.x = 1291; other_check.y = 559; other_check.z = -158.19;
 	//		float my_distance = DistanceNoZ(who->GetPosition(), who_check);
@@ -1766,11 +1765,11 @@ bool Mob::CheckLosCheat(Mob* who, Mob* other) {
 	//		float my_range = 16;
 	//		float tar_range = 75;
 	//		if (my_distance <= my_range && tar_distance <= tar_range && !quest_manager.isdooropen(8)) {
-	//			TestDebug("Door is NOT open"); //deleteme
-	//			TestDebug("LoSCheat failed"); //deleteme
+	//			TestDebug("Door is NOT open");
+	//			TestDebug("LoSCheat failed");
 	//			return false;
 	//		}
-	//		TestDebug("LoS Check for ZoneID: [{}] was [{}] units for [{}], [{}] units for [{}]", zone_id, my_distance, who->GetCleanName(), tar_distance, other->GetCleanName()); //deleteme
+	//		TestDebug("LoS Check for ZoneID: [{}] was [{}] units for [{}], [{}] units for [{}]", zone_id, my_distance, who->GetCleanName(), tar_distance, other->GetCleanName());
 	//	}
 	//}
 	return true;

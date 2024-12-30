@@ -4844,7 +4844,7 @@ bool Mob::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest,
 
 		const uint16 maxIterationsAllowed = 50;
 		uint16 counter = 0;
-		//LogTestDebug("Plotting for {} - Min: [{}] - Max: [{}] - BehindMob: [{}] - Taunt [{}] -- LosReq [{}]", GetCleanName(), min_distance, max_distance, behindOnly, frontOnly, bypassLoS ? "bypassed" : CastToBot()->RequiresLoSForPositioning() ? "true" : "false"); //deleteme
+
 		while (counter < maxIterationsAllowed) {
 			tempX = tarX + zone->random.Real(-max_distance, max_distance);
 			tempY = tarY + zone->random.Real(-max_distance, max_distance);
@@ -4858,7 +4858,6 @@ bool Mob::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest,
 				tempZ = bestZ;
 			}
 			else {
-				//LogTestDebug("{} - Plot Failed GetFixedZ - Try #[{}].", GetCleanName(), (counter + 1)); //deleteme
 				counter++;
 				continue;
 			}
@@ -4866,30 +4865,26 @@ bool Mob::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest,
 			temp_m_Position.x = tempX;
 			temp_m_Position.y = tempY;
 			temp_m_Position.z = tempZ;
-			//tar_distance = DistanceNoZ(target->GetPosition(), temp_m_Position);	
+
 			tar_distance = Distance(target->GetPosition(), temp_m_Position);
 
 			if (tar_distance > max_distance || tar_distance < min_distance) {
-				//LogTestDebug("{} - Plot Failed Distance - Try #[{}]. Target LOCs XYZ - [{}], [{}], [{}] - Temp LOCs [{}], [{}], [{}] - Distance between = [{}] - Melee Distance = [{}] - Difference = [{}]", GetCleanName(), (counter + 1), target->GetX(), target->GetY(), target->GetZ(), tempX, tempY, tempZ, tar_distance, max_distance, (tar_distance / max_distance));
 				counter++;
 				continue;
 			}
 			if (frontOnly && !InFrontMob(target, tempX, tempY)) {
-				//LogTestDebug("{} - Plot Failed frontOnly - Try #[{}]. Target LOCs XYZ - [{}], [{}], [{}] - Temp LOCs [{}], [{}], [{}] - Distance between = [{}] - Melee Distance = [{}] - Difference = [{}]", GetCleanName(), (counter + 1), target->GetX(), target->GetY(), target->GetZ(), tempX, tempY, tempZ, tar_distance, max_distance, (tar_distance / max_distance));
 				counter++;
 				continue;
 			}
 			else if (behindOnly && !BehindMob(target, tempX, tempY)) {
-				//LogTestDebug("{} - Plot Failed BehindMob - Try #[{}]. Target LOCs XYZ - [{}], [{}], [{}] - Temp LOCs [{}], [{}], [{}] - Distance between = [{}] - Melee Distance = [{}] - Difference = [{}]", GetCleanName(), (counter + 1), target->GetX(), target->GetY(), target->GetZ(), tempX, tempY, tempZ, tar_distance, max_distance, (tar_distance / max_distance));
 				counter++;
 				continue;
 			}
 			if (!bypassLoS && CastToBot()->RequiresLoSForPositioning() && !CheckPositioningLosFN(target, tempX, tempY, tempZ)) {
-				//LogTestDebug("{} - Plot Failed LoS - Try #[{}]. Target LOCs XYZ - [{}], [{}], [{}] - Temp LOCs [{}], [{}], [{}] - Distance between = [{}] - Melee Distance = [{}] - Difference = [{}]", GetCleanName(), (counter + 1), target->GetX(), target->GetY(), target->GetZ(), tempX, tempY, tempZ, tar_distance, max_distance, (tar_distance / max_distance));
 				counter++;
 				continue;
 			}
-			//LogTestDebug("{} - Plot PASSED! - Try #[{}]. Target LOCs XYZ - [{}], [{}], [{}] - Temp LOCs [{}], [{}], [{}] - Distance between = [{}] - Melee Distance = [{}] - Difference = [{}]", GetCleanName(), (counter + 1), target->GetX(), target->GetY(), target->GetZ(), tempX, tempY, tempZ, tar_distance, max_distance, (tar_distance / max_distance));
+
 			Result = true;
 			break;
 		}
@@ -9753,11 +9748,6 @@ void Mob::SetSpellMaxThreshold(uint16 spellType, uint8 thresholdValue) {
 
 void Mob::SetSpellTypeRecastTimer(uint16 spellType, uint32 recastTime) {
 	_spellSettings[spellType].recastTimer.Start(recastTime);
-	//LogBotDelayChecksDetail("{} says, 'My {} Delay was to {} seconds.'"
-	//	, GetCleanName()
-	//	, GetSpellTypeNameByID(spellType)
-	//	, (recastTime / 1000.00)
-	//); //deleteme
 }
 
 void Mob::StartBotSpellTimers() {

@@ -26,7 +26,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 		return false;
 	}
 
-	//LogBotPreChecksDetail("{} says, 'Attempting {} AICastSpell on {}.'", GetCleanName(), GetSpellTypeNameByID(spellType), tar->GetCleanName()); //deleteme
+	LogBotPreChecksDetail("{} says, 'Attempting {} AICastSpell on {}.'", GetCleanName(), GetSpellTypeNameByID(spellType), tar->GetCleanName());
 
 	if (
 		!AI_HasSpells() ||
@@ -271,7 +271,6 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 spellType, uint16 subTarge
 
 			return true;
 		}
-		else { LogTestDebug("{} says, '{} [#{}] - [{}] FAILED AIDoSpellCast on {}.'", GetCleanName(), spells[s.SpellId].name, s.SpellId, GetSpellTypeNameByID(spellType), tar->GetCleanName()); } //deleteme
 	}
 
 	return false;
@@ -624,7 +623,7 @@ bool Bot::AI_PursueCastCheck() {
 	if (GetTarget() && AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Pursue autocast check triggered: [{}]", GetCleanName());
-		//LogBotPreChecksDetail("{} says, 'AI_PursueCastCheck started.'", GetCleanName()); //deleteme
+		LogBotPreChecksDetail("{} says, 'AI_PursueCastCheck started.'", GetCleanName());
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -637,7 +636,7 @@ bool Bot::AI_PursueCastCheck() {
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
-				//LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
+				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType));
 				continue;
 			}
 
@@ -682,7 +681,7 @@ bool Bot::AI_IdleCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Non-Engaged autocast check triggered: [{}]", GetCleanName());
-		//LogBotPreChecksDetail("{} says, 'AI_IdleCastCheck started.'", GetCleanName()); //deleteme
+		LogBotPreChecksDetail("{} says, 'AI_IdleCastCheck started.'", GetCleanName());
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -705,7 +704,7 @@ bool Bot::AI_IdleCastCheck() {
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
-				//LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
+				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType));
 				continue;
 			}
 
@@ -761,7 +760,7 @@ bool Bot::AI_EngagedCastCheck() {
 	if (GetTarget() && AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Engaged autocast check triggered: [{}]", GetCleanName());
-		//LogBotPreChecksDetail("{} says, 'AI_EngagedCastCheck started.'", GetCleanName()); //deleteme
+		LogBotPreChecksDetail("{} says, 'AI_EngagedCastCheck started.'", GetCleanName());
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -774,7 +773,7 @@ bool Bot::AI_EngagedCastCheck() {
 
 		for (auto& currentCast : castOrder) {
 			if (currentCast.priority == 0) {
-				//LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType)); //deleteme
+				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(currentCast.spellType));
 				continue;
 			}
 
@@ -2828,7 +2827,7 @@ void Bot::CheckBotSpells() {
 
 	for (const auto& s : spellList) {
 		if (!IsValidSpell(s.spell_id)) {
-			//LogBotSpellTypeChecks("{} is an invalid spell", s.spell_id); //deleteme
+			LogBotSpellTypeChecks("{} is an invalid spell", s.spell_id);
 			continue;
 		}
 
@@ -2836,7 +2835,7 @@ void Bot::CheckBotSpells() {
 		spell_id = spell.id;
 
 		if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] >= 255) {
-			//LogBotSpellTypeChecks("{} [#{}] is not usable by a {} [#{}].", GetSpellName(spell_id), spell_id, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX), s.npc_spells_id); //deleteme
+			LogBotSpellTypeChecks("{} [#{}] is not usable by a {} [#{}].", GetSpellName(spell_id), spell_id, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX), s.npc_spells_id);
 		}
 		else {
 			if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] > s.minlevel) {
@@ -2847,7 +2846,7 @@ void Bot::CheckBotSpells() {
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
 					, s.minlevel
-				); //deleteme
+				);
 
 				LogBotSpellTypeChecksDetail("UPDATE bot_spells_entries SET `minlevel` = {} WHERE `spellid` = {} AND `npc_spells_id` = {}; -- {} [#{}] from minlevel {} to {} for {} [#{}]"
 					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
@@ -2859,7 +2858,7 @@ void Bot::CheckBotSpells() {
 					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
-				); //deleteme
+				);
 			}
 
 			if (spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)] < s.minlevel) {
@@ -2870,7 +2869,7 @@ void Bot::CheckBotSpells() {
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
 					, s.minlevel
-				); //deleteme
+				);
 
 				LogBotSpellTypeChecksDetail("UPDATE bot_spells_entries SET `minlevel` = {} WHERE `spellid` = {} AND `npc_spells_id` = {}; -- {} [#{}] from minlevel {} to {} for {} [#{}]"
 					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
@@ -2882,7 +2881,7 @@ void Bot::CheckBotSpells() {
 					, spell.classes[s.npc_spells_id - (BOT_CLASS_BASE_ID_PREFIX + 1)]
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
-				); //deleteme
+				);
 			}
 
 
@@ -2894,7 +2893,7 @@ void Bot::CheckBotSpells() {
 					, GetClassIDName(s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX)
 					, s.npc_spells_id
 					, s.maxlevel
-				); //deleteme
+				);
 			}
 		}
 
@@ -2922,7 +2921,7 @@ void Bot::CheckBotSpells() {
 				, spell_id
 				, GetSpellTypeNameByID(s.type)
 				, s.type
-			); //deleteme
+			);
 		}
 		else {
 			LogBotSpellTypeChecks("{} [#{}] is incorrect. It is currently set as {} [#{}] and should be {} [#{}]"
@@ -2932,7 +2931,7 @@ void Bot::CheckBotSpells() {
 				, s.type
 				, GetSpellTypeNameByID(correctType)
 				, correctType
-			); //deleteme
+			);
 			LogBotSpellTypeChecksDetail("UPDATE bot_spells_entries SET `type` = {} WHERE `spell_id` = {}; -- {} [#{}] from {} [#{}] to {} [#{}]"
 				, correctType
 				, spell_id
@@ -2942,7 +2941,7 @@ void Bot::CheckBotSpells() {
 				, s.type
 				, GetSpellTypeNameByID(correctType)
 				, correctType
-			); //deleteme
+			);
 		}
 	}
 }
