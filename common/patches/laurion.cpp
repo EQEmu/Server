@@ -70,6 +70,7 @@ namespace Laurion
 	static inline uint32 LaurionToServerCorpseSlot(structs::InventorySlot_Struct laurion_corpse_slot);
 	static inline uint32 LaurionToServerCorpseMainSlot(uint32 laurion_corpse_slot);
 	static inline uint32 LaurionToServerTypelessSlot(structs::TypelessInventorySlot_Struct laurion_slot, int16 laurion_type);
+	static inline structs::InventorySlot_Struct LaurionCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct laurion_slot);
 
 	// Item packet types
 	static item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType laurion_type);
@@ -189,6 +190,17 @@ namespace Laurion
 		OUT(spawnid);
 		OUT(action);
 		OUT(speed);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ApplyPoison)
+	{
+		ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
+		SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
+
+		eq->inventorySlot = ServerToLaurionTypelessSlot(emu->inventorySlot, EQ::invtype::typePossessions);
+		OUT(success);
 
 		FINISH_ENCODE();
 	}
@@ -319,6 +331,22 @@ namespace Laurion
 		}
 		__packet->WriteUInt8(0); // Unknown1
 		__packet->WriteUInt8(emu->type); // Unknown2
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_CastSpell)
+	{
+		ENCODE_LENGTH_EXACT(CastSpell_Struct);
+		SETUP_DIRECT_ENCODE(CastSpell_Struct, structs::CastSpell_Struct);
+
+		eq->slot = static_cast<uint32>(ServerToLaurionCastingSlot(static_cast<EQ::spells::CastingSlot>(emu->slot)));
+
+		OUT(spell_id);
+		//we should double check this cause it feels wrong
+		eq->inventory_slot = LaurionInventorySlotToCastingInventorySlot(ServerToLaurionSlot(emu->inventoryslot));
+		//OUT(inventoryslot);
+		OUT(target_id);
 
 		FINISH_ENCODE();
 	}
@@ -3308,6 +3336,29 @@ namespace Laurion
 	}
 
 	// DECODE methods
+	DECODE(OP_Animation)
+	{
+		DECODE_LENGTH_EXACT(structs::Animation_Struct);
+		SETUP_DIRECT_DECODE(Animation_Struct, structs::Animation_Struct);
+
+		IN(spawnid);
+		IN(action);
+		IN(speed);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ApplyPoison)
+	{
+		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
+		SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
+
+		emu->inventorySlot = LaurionToServerTypelessSlot(eq->inventorySlot, invtype::typePossessions);
+		IN(success);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_AugmentInfo)
 	{
 		DECODE_LENGTH_EXACT(structs::AugmentInfo_Struct);
@@ -5048,6 +5099,24 @@ namespace Laurion
 			laurion_slot.Slot, laurion_slot.SubIndex, laurion_slot.AugIndex, laurion_type, ServerSlot);
 
 		return ServerSlot;
+	}
+
+	static inline structs::InventorySlot_Struct LaurionCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct laurion_slot) {
+		structs::InventorySlot_Struct ret;
+		ret.Type = laurion_slot.type;
+		ret.Slot = laurion_slot.slot;
+		ret.SubIndex = laurion_slot.sub_index;
+		ret.AugIndex = laurion_slot.aug_index;
+		return ret;
+	}
+
+	static inline structs::CastSpellInventorySlot_Struct LaurionInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct laurion_slot) {
+		structs::CastSpellInventorySlot_Struct ret;
+		ret.type = laurion_slot.Type;
+		ret.slot = laurion_slot.Slot;
+		ret.sub_index = laurion_slot.SubIndex;
+		ret.aug_index = laurion_slot.AugIndex;
+		return ret;
 	}
 
 	static item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType server_type) {

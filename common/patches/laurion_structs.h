@@ -898,6 +898,12 @@ namespace Laurion {
 			/*36*/	//int32	augment_slot;
 			/*40*/
 		};
+
+		struct ApplyPoison_Struct
+		{
+			TypelessInventorySlot_Struct inventorySlot;
+			uint32 success;
+		};
 #pragma pack()
 
 	};	//end namespace structs

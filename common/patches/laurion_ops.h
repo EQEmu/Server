@@ -2,11 +2,13 @@
 //list of packets we need to encode on the way out:
 E(OP_Action)
 E(OP_Animation)
+E(OP_ApplyPoison)
 E(OP_AugmentInfo)
 E(OP_BeginCast)
 E(OP_BlockedBuffs)
 E(OP_Buff)
 E(OP_BuffCreate)
+E(OP_CastSpell)
 E(OP_ChannelMessage)
 E(OP_CharInventory)
 E(OP_ClientUpdate)
@@ -53,6 +55,8 @@ E(OP_ZonePlayerToBind)
 E(OP_ZoneSpawns)
 
 //list of packets we need to decode on the way in:
+D(OP_Animation)
+D(OP_ApplyPoison)
 D(OP_AugmentInfo)
 D(OP_AugmentItem)
 D(OP_BlockedBuffs)
