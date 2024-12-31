@@ -1860,13 +1860,45 @@ bool Database::CopyCharacter(
 
 	const int64 new_character_id = (CharacterDataRepository::GetMaxId(*this) + 1);
 
-	std::vector<std::string> tables_to_zero_id = { "keyring", "data_buckets", "character_instance_safereturns" };
+	// validate destination name doesn't exist already
+	const auto& destination_characters = CharacterDataRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`name` = '{}' AND `deleted_at` IS NULL LIMIT 1",
+			Strings::Escape(destination_character_name)
+		)
+	);
+	if (!destination_characters.empty()) {
+		LogError("Character [{}] already exists", destination_character_name);
+		return false;
+	}
+
+	std::vector<std::string> tables_to_zero_id = {
+		"keyring",
+		"data_buckets",
+		"character_instance_safereturns",
+		"character_expedition_lockouts",
+		"character_instance_lockouts",
+		"character_parcels",
+		"character_tribute",
+		"player_titlesets",
+	};
+
+	std::vector<std::string> ignore_tables = {
+		"guilds",
+	};
+
+	size_t total_rows_copied = 0;
 
 	TransactionBegin();
 
 	for (const auto &t : DatabaseSchema::GetCharacterTables()) {
 		const std::string& table_name               = t.first;
 		const std::string& character_id_column_name = t.second;
+
+		if (Strings::Contains(ignore_tables, table_name)) {
+			continue;
+		}
 
 		auto results = QueryDatabase(
 			fmt::format(
@@ -1918,6 +1950,10 @@ bool Database::CopyCharacter(
 					value = std::to_string(destination_account_id);
 				}
 
+				if (!Strings::IsNumber(value)) {
+					value = Strings::Escape(value);
+				}
+
 				new_values.emplace_back(value);
 			}
 
@@ -1950,6 +1986,11 @@ bool Database::CopyCharacter(
 				)
 			);
 
+			size_t rows_copied = insert_rows.size(); // Rows copied for this table
+			total_rows_copied += rows_copied; // Increment grand total
+
+			LogInfo("Copying table [{}] rows [{}]", table_name, Strings::Commify(rows_copied));
+
 			if (!insert.ErrorMessage().empty()) {
 				TransactionRollback();
 				return false;
@@ -1958,6 +1999,13 @@ bool Database::CopyCharacter(
 	}
 
 	TransactionCommit();
+
+	LogInfo(
+		"Character [{}] copied to [{}] total rows [{}]",
+		source_character_name,
+		destination_character_name,
+		Strings::Commify(total_rows_copied)
+	);
 
 	return true;
 }
