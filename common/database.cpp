@@ -1872,6 +1872,7 @@ bool Database::CopyCharacter(
 		"character_instance_safereturns",
 		"character_expedition_lockouts",
 		"character_instance_lockouts",
+		"character_parcels",
 		"character_tribute",
 		"player_titlesets",
 	};
@@ -1879,6 +1880,9 @@ bool Database::CopyCharacter(
 	std::vector<std::string> ignore_tables = {
 		"guilds",
 	};
+
+	size_t total_rows_copied = 0;
+	std::map<std::string, size_t> rows_per_table;
 
 	TransactionBegin();
 
@@ -1940,6 +1944,10 @@ bool Database::CopyCharacter(
 					value = std::to_string(destination_account_id);
 				}
 
+				if (!Strings::IsNumber(value)) {
+					value = Strings::Escape(value);
+				}
+
 				new_values.emplace_back(value);
 			}
 
@@ -1972,6 +1980,11 @@ bool Database::CopyCharacter(
 				)
 			);
 
+			size_t rows_copied = insert_rows.size(); // Rows copied for this table
+			total_rows_copied += rows_copied; // Increment grand total
+
+			LogInfo("Copying table [{}] rows [{}]", table_name, Strings::Commify(rows_copied));
+
 			if (!insert.ErrorMessage().empty()) {
 				TransactionRollback();
 				return false;
@@ -1980,6 +1993,13 @@ bool Database::CopyCharacter(
 	}
 
 	TransactionCommit();
+
+	LogInfo(
+		"Character [{}] copied to [{}] total rows [{}]",
+		source_character_name,
+		destination_character_name,
+		Strings::Commify(total_rows_copied)
+	);
 
 	return true;
 }
