@@ -1866,6 +1866,19 @@ bool Database::CopyCharacter(
 
 	const int64 new_character_id = (CharacterDataRepository::GetMaxId(*this) + 1);
 
+	// validate destination name doesn't exist already
+	const auto& destination_characters = CharacterDataRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`name` = '{}' AND `deleted_at` IS NULL LIMIT 1",
+			Strings::Escape(destination_character_name)
+		)
+	);
+	if (!destination_characters.empty()) {
+		LogError("Character [{}] already exists", destination_character_name);
+		return false;
+	}
+
 	std::vector<std::string> tables_to_zero_id = {
 		"keyring",
 		"data_buckets",
@@ -1882,7 +1895,6 @@ bool Database::CopyCharacter(
 	};
 
 	size_t total_rows_copied = 0;
-	std::map<std::string, size_t> rows_per_table;
 
 	TransactionBegin();
 
