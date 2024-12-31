@@ -519,7 +519,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	if (RuleB(Custom, MulticlassingEnabled)) {
 		std::string insertQuery = StringFormat("REPLACE INTO data_buckets (`key`, `value`,`character_id`) VALUES ('GestaltClasses', '%d', %d)", pp->classes, character_id);
     	auto results = QueryDatabase(insertQuery);
-	}	
+	}
 
 	CharacterDataRepository::ReplaceOne(*this, c);
 
@@ -1866,13 +1866,29 @@ bool Database::CopyCharacter(
 
 	const int64 new_character_id = (CharacterDataRepository::GetMaxId(*this) + 1);
 
-	std::vector<std::string> tables_to_zero_id = { "keyring", "data_buckets", "character_instance_safereturns" };
+	std::vector<std::string> tables_to_zero_id = {
+		"keyring",
+		"data_buckets",
+		"character_instance_safereturns",
+		"character_expedition_lockouts",
+		"character_instance_lockouts",
+		"character_tribute",
+		"player_titlesets",
+	};
+
+	std::vector<std::string> ignore_tables = {
+		"guilds",
+	};
 
 	TransactionBegin();
 
 	for (const auto &t : DatabaseSchema::GetCharacterTables()) {
 		const std::string& table_name               = t.first;
 		const std::string& character_id_column_name = t.second;
+
+		if (Strings::Contains(ignore_tables, table_name)) {
+			continue;
+		}
 
 		auto results = QueryDatabase(
 			fmt::format(
