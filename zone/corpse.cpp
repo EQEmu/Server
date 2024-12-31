@@ -1570,17 +1570,17 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		}
 
 		if (player_event_logs.IsEventEnabled(PlayerEvent::LOOT_ITEM) && !IsPlayerCorpse()) {
-			auto e = PlayerEvent::LootItemEvent{ .item_id     = inst->GetItem()->ID,
-												 .item_name   = inst->GetItem()->Name,
-												 .charges     = inst->GetCharges(),
-												 .aug1        = inst->GetAugment(0)->GetID(),
-												 .aug2        = inst->GetAugment(1)->GetID(),
-												 .aug3        = inst->GetAugment(2)->GetID(),
-												 .aug4        = inst->GetAugment(3)->GetID(),
-												 .aug5        = inst->GetAugment(4)->GetID(),
-												 .aug6        = inst->GetAugment(5)->GetID(),
-												 .npc_id      = GetNPCTypeID(),
-												 .corpse_name = EntityList::RemoveNumbers(corpse_name)
+			auto e = PlayerEvent::LootItemEvent{ .item_id      = inst->GetItem()->ID,
+												 .item_name    = inst->GetItem()->Name,
+												 .charges      = inst->GetCharges(),
+												 .augment_1_id = inst->GetAugmentItemID(0),
+												 .augment_2_id = inst->GetAugmentItemID(1),
+												 .augment_3_id = inst->GetAugmentItemID(2),
+												 .augment_4_id = inst->GetAugmentItemID(3),
+												 .augment_5_id = inst->GetAugmentItemID(4),
+												 .augment_6_id = inst->GetAugmentItemID(5),
+												 .npc_id       = GetNPCTypeID(),
+												 .corpse_name  = EntityList::RemoveNumbers(corpse_name)
 			};
 
 			RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);

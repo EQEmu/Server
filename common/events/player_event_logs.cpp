@@ -170,12 +170,12 @@ void PlayerEventLogs::ProcessBatchQueue()
 					out.corpse_name  = in.corpse_name;
 					out.item_id      = in.item_id;
 					out.item_name    = in.item_name;
-					out.augment_1_id = in.aug1;
-					out.augment_2_id = in.aug2;
-					out.augment_3_id = in.aug3;
-					out.augment_4_id = in.aug4;
-					out.augment_5_id = in.aug5;
-					out.augment_6_id = in.aug6;
+					out.augment_1_id = in.augment_1_id;
+					out.augment_2_id = in.augment_2_id;
+					out.augment_3_id = in.augment_3_id;
+					out.augment_4_id = in.augment_4_id;
+					out.augment_5_id = in.augment_5_id;
+					out.augment_6_id = in.augment_6_id;
 					out.npc_id       = in.npc_id;
 					out.created_at   = r.created_at;
 
@@ -376,12 +376,12 @@ void PlayerEventLogs::ProcessBatchQueue()
 							out_entries.player_event_trade_id = r.etl_table_id;
 							out_entries.in_bag                = i.in_bag;
 							out.created_at                    = r.created_at;
-							out_entries.augment_1_id          = i.aug_1_item_id;
-							out_entries.augment_2_id          = i.aug_2_item_id;
-							out_entries.augment_3_id          = i.aug_3_item_id;
-							out_entries.augment_4_id          = i.aug_4_item_id;
-							out_entries.augment_5_id          = i.aug_5_item_id;
-							out_entries.augment_6_id          = i.aug_6_item_id;
+							out_entries.augment_1_id          = i.augment_1_id;
+							out_entries.augment_2_id          = i.augment_2_id;
+							out_entries.augment_3_id          = i.augment_3_id;
+							out_entries.augment_4_id          = i.augment_4_id;
+							out_entries.augment_5_id          = i.augment_5_id;
+							out_entries.augment_6_id          = i.augment_6_id;
 							out_entries.created_at            = r.created_at;
 						}
 						etl_queues.trade_entries.push_back(out_entries);
@@ -397,12 +397,12 @@ void PlayerEventLogs::ProcessBatchQueue()
 							out_entries.player_event_trade_id = r.etl_table_id;
 							out_entries.in_bag                = i.in_bag;
 							out.created_at                    = r.created_at;
-							out_entries.augment_1_id          = i.aug_1_item_id;
-							out_entries.augment_2_id          = i.aug_2_item_id;
-							out_entries.augment_3_id          = i.aug_3_item_id;
-							out_entries.augment_4_id          = i.aug_4_item_id;
-							out_entries.augment_5_id          = i.aug_5_item_id;
-							out_entries.augment_6_id          = i.aug_6_item_id;
+							out_entries.augment_1_id          = i.augment_1_id;
+							out_entries.augment_2_id          = i.augment_2_id;
+							out_entries.augment_3_id          = i.augment_3_id;
+							out_entries.augment_4_id          = i.augment_4_id;
+							out_entries.augment_5_id          = i.augment_5_id;
+							out_entries.augment_6_id          = i.augment_6_id;
 							out_entries.created_at            = r.created_at;
 						}
 						etl_queues.trade_entries.push_back(out_entries);

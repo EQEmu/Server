@@ -5698,17 +5698,17 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		SetIntoxication(GetIntoxication()+IntoxicationIncrease);
 
 		if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY) && inst->GetItem()) {
-			auto e = PlayerEvent::DestroyItemEvent{ .item_id   = inst->GetItem()->ID,
-													.item_name = inst->GetItem()->Name,
-													.charges   = inst->GetCharges(),
-													.aug1      = inst->GetAugment(0)->GetID(),
-													.aug2      = inst->GetAugment(1)->GetID(),
-													.aug3      = inst->GetAugment(2)->GetID(),
-													.aug4      = inst->GetAugment(3)->GetID(),
-													.aug5      = inst->GetAugment(4)->GetID(),
-													.aug6      = inst->GetAugment(5)->GetID(),
-													.attuned   = inst->IsAttuned(),
-													.reason    = "Client deleted"
+			auto e = PlayerEvent::DestroyItemEvent{ .item_id      = inst->GetItem()->ID,
+													.item_name    = inst->GetItem()->Name,
+													.charges      = inst->GetCharges(),
+													.augment_1_id = inst->GetAugmentItemID(0),
+													.augment_2_id = inst->GetAugmentItemID(1),
+													.augment_3_id = inst->GetAugmentItemID(2),
+													.augment_4_id = inst->GetAugmentItemID(3),
+													.augment_5_id = inst->GetAugmentItemID(4),
+													.augment_6_id = inst->GetAugmentItemID(5),
+													.attuned      = inst->IsAttuned(),
+													.reason       = "Client deleted"
 			};
 
 			RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
@@ -17160,11 +17160,15 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket *app)
 		SendGuildTributeDonateItemReply(in, favor);
 
 		if(player_event_logs.IsEventEnabled(PlayerEvent::GUILD_TRIBUTE_DONATE_ITEM)) {
-			auto e = PlayerEvent::GuildTributeDonateItem {
-				.item_id = inst->GetID(),
-				.guild_favor = favor
+			auto e = PlayerEvent::GuildTributeDonateItem{ .item_id      = inst->GetID(),
+														  .augment_1_id = inst->GetAugmentItemID(0),
+														  .augment_2_id = inst->GetAugmentItemID(1),
+														  .augment_3_id = inst->GetAugmentItemID(2),
+														  .augment_4_id = inst->GetAugmentItemID(3),
+														  .augment_5_id = inst->GetAugmentItemID(4),
+														  .augment_6_id = inst->GetAugmentItemID(5),
+														  .guild_favor  = favor
 			};
-
 			RecordPlayerEventLog(PlayerEvent::GUILD_TRIBUTE_DONATE_ITEM, e);
 		}
 

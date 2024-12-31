@@ -2155,18 +2155,18 @@ void Database::PurgeCharacterParcels()
 	pel.event_type_name = PlayerEvent::EventName[pel.event_type_id];
 	std::stringstream ss;
 	for (auto const   &r: results) {
-		pd.from_name  = r.from_name;
-		pd.item_id    = r.item_id;
-		pd.aug_slot_1 = r.aug_slot_1;
-		pd.aug_slot_2 = r.aug_slot_2;
-		pd.aug_slot_3 = r.aug_slot_3;
-		pd.aug_slot_4 = r.aug_slot_4;
-		pd.aug_slot_5 = r.aug_slot_5;
-		pd.aug_slot_6 = r.aug_slot_6;
-		pd.note       = r.note;
-		pd.quantity   = r.quantity;
-		pd.sent_date  = r.sent_date;
-		pd.char_id    = r.char_id;
+		pd.from_name    = r.from_name;
+		pd.item_id      = r.item_id;
+		pd.augment_1_id = r.aug_slot_1;
+		pd.augment_2_id = r.aug_slot_2;
+		pd.augment_3_id = r.aug_slot_3;
+		pd.augment_4_id = r.aug_slot_4;
+		pd.augment_5_id = r.aug_slot_5;
+		pd.augment_6_id = r.aug_slot_6;
+		pd.note         = r.note;
+		pd.quantity     = r.quantity;
+		pd.sent_date    = r.sent_date;
+		pd.char_id      = r.char_id;
 		{
 			cereal::JSONOutputArchiveSingleLine ar(ss);
 			pd.serialize(ar);

@@ -1081,51 +1081,51 @@ std::string PlayerEventDiscordFormatter::FormatTradeEvent(
 	if (!e.character_1_give_items.empty()) {
 		for (const auto &i: e.character_1_give_items) {
 			std::string augment_info;
-			if (i.aug_1_item_id > 0) {
+			if (i.augment_1_id > 0) {
 				augment_info += fmt::format(
 					"Augment 1: {} ({})",
-					i.aug_1_item_name,
-					i.aug_1_item_id
+					i.augment_1_name,
+					i.augment_1_id
 				);
 			}
 
-			if (i.aug_2_item_id > 0) {
+			if (i.augment_2_id > 0) {
 				augment_info += fmt::format(
 					"Augment 2: {} ({})",
-					i.aug_2_item_name,
-					i.aug_2_item_id
+					i.augment_2_name,
+					i.augment_2_id
 				);
 			}
 
-			if (i.aug_3_item_id > 0) {
+			if (i.augment_3_id > 0) {
 				augment_info += fmt::format(
 					"Augment 3: {} ({})",
-					i.aug_3_item_name,
-					i.aug_3_item_id
+					i.augment_3_name,
+					i.augment_3_id
 				);
 			}
 
-			if (i.aug_4_item_id > 0) {
+			if (i.augment_4_id > 0) {
 				augment_info += fmt::format(
 					"Augment 4: {} ({})\n",
-					i.aug_4_item_name,
-					i.aug_4_item_id
+					i.augment_4_name,
+					i.augment_4_id
 				);
 			}
 
-			if (i.aug_5_item_id > 0) {
+			if (i.augment_5_id > 0) {
 				augment_info += fmt::format(
 					"Augment 5: {} ({})\n",
-					i.aug_5_item_name,
-					i.aug_5_item_id
+					i.augment_5_name,
+					i.augment_5_id
 				);
 			}
 
-			if (i.aug_6_item_id > 0) {
+			if (i.augment_6_id > 0) {
 				augment_info += fmt::format(
 					"Augment 6: {} ({})",
-					i.aug_6_item_name,
-					i.aug_6_item_id
+					i.augment_6_name,
+					i.augment_6_id
 				);
 			}
 
@@ -1146,51 +1146,51 @@ std::string PlayerEventDiscordFormatter::FormatTradeEvent(
 	if (!e.character_2_give_items.empty()) {
 		for (const auto &i: e.character_2_give_items) {
 			std::string augment_info;
-			if (i.aug_1_item_id > 0) {
+			if (i.augment_1_id > 0) {
 				augment_info += fmt::format(
 					"Augment 1: {} ({})",
-					i.aug_1_item_name,
-					i.aug_1_item_id
+					i.augment_1_name,
+					i.augment_1_id
 				);
 			}
 
-			if (i.aug_2_item_id > 0) {
+			if (i.augment_2_id > 0) {
 				augment_info += fmt::format(
 					"Augment 2: {} ({})",
-					i.aug_2_item_name,
-					i.aug_2_item_id
+					i.augment_2_name,
+					i.augment_2_id
 				);
 			}
 
-			if (i.aug_3_item_id > 0) {
+			if (i.augment_3_id > 0) {
 				augment_info += fmt::format(
 					"Augment 3: {} ({})",
-					i.aug_3_item_name,
-					i.aug_3_item_id
+					i.augment_3_name,
+					i.augment_3_id
 				);
 			}
 
-			if (i.aug_4_item_id > 0) {
+			if (i.augment_4_id > 0) {
 				augment_info += fmt::format(
 					"Augment 4: {} ({})\n",
-					i.aug_4_item_name,
-					i.aug_4_item_id
+					i.augment_4_name,
+					i.augment_4_id
 				);
 			}
 
-			if (i.aug_5_item_id > 0) {
+			if (i.augment_5_id > 0) {
 				augment_info += fmt::format(
 					"Augment 5: {} ({})\n",
-					i.aug_5_item_name,
-					i.aug_5_item_id
+					i.augment_5_name,
+					i.augment_5_id
 				);
 			}
 
-			if (i.aug_6_item_id > 0) {
+			if (i.augment_6_id > 0) {
 				augment_info += fmt::format(
 					"Augment 6: {} ({})",
-					i.aug_6_item_name,
-					i.aug_6_item_id
+					i.augment_6_name,
+					i.augment_6_id
 				);
 			}
 

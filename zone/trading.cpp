@@ -1684,16 +1684,22 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 	Trader->AddMoneyToPP(copper, silver, gold, platinum, true);
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
-        auto e = PlayerEvent::TraderPurchaseEvent{
-            .item_id              = buy_item->GetID(),
-            .item_name            = buy_item->GetItem()->Name,
-            .trader_id            = Trader->CharacterID(),
-            .trader_name          = Trader->GetCleanName(),
-            .price                = tbs->price,
-            .charges              = outtbs->quantity,
-            .total_cost           = (tbs->price * outtbs->quantity),
-            .player_money_balance = GetCarriedMoney(),
-        };
+		auto e = PlayerEvent::TraderPurchaseEvent{
+			.item_id              = buy_item->GetID(),
+			.augment_1_id         = buy_item->GetAugmentItemID(0),
+			.augment_2_id         = buy_item->GetAugmentItemID(1),
+			.augment_3_id         = buy_item->GetAugmentItemID(2),
+			.augment_4_id         = buy_item->GetAugmentItemID(3),
+			.augment_5_id         = buy_item->GetAugmentItemID(4),
+			.augment_6_id         = buy_item->GetAugmentItemID(5),
+			.item_name            = buy_item->GetItem()->Name,
+			.trader_id            = Trader->CharacterID(),
+			.trader_name          = Trader->GetCleanName(),
+			.price                = tbs->price,
+			.charges              = outtbs->quantity,
+			.total_cost           = (tbs->price * outtbs->quantity),
+			.player_money_balance = GetCarriedMoney(),
+		};
 
         RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
     }
@@ -1701,7 +1707,13 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
         auto e = PlayerEvent::TraderSellEvent{
             .item_id              = buy_item->GetID(),
-            .item_name            = buy_item->GetItem()->Name,
+        	.augment_1_id         = buy_item->GetAugmentItemID(0),
+			.augment_2_id         = buy_item->GetAugmentItemID(1),
+			.augment_3_id         = buy_item->GetAugmentItemID(2),
+			.augment_4_id         = buy_item->GetAugmentItemID(3),
+			.augment_5_id         = buy_item->GetAugmentItemID(4),
+			.augment_6_id         = buy_item->GetAugmentItemID(5),
+			.item_name            = buy_item->GetItem()->Name,
             .buyer_id             = CharacterID(),
             .buyer_name           = GetCleanName(),
             .price                = tbs->price,
@@ -3167,6 +3179,12 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
 		auto e = PlayerEvent::TraderPurchaseEvent{
 			.item_id              = buy_item->GetID(),
+			.augment_1_id         = buy_item->GetAugmentItemID(0),
+			.augment_2_id         = buy_item->GetAugmentItemID(1),
+			.augment_3_id         = buy_item->GetAugmentItemID(2),
+			.augment_4_id         = buy_item->GetAugmentItemID(3),
+			.augment_5_id         = buy_item->GetAugmentItemID(4),
+			.augment_6_id         = buy_item->GetAugmentItemID(5),
 			.item_name            = buy_item->GetItem()->Name,
 			.trader_id            = tbs->trader_id,
 			.trader_name          = tbs->seller_name,
@@ -3231,12 +3249,12 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		e.from_player_name = parcel_out.from_name;
 		e.to_player_name   = GetCleanName();
 		e.item_id          = parcel_out.item_id;
-		e.aug_slot_1       = parcel_out.aug_slot_1;
-		e.aug_slot_2       = parcel_out.aug_slot_2;
-		e.aug_slot_3       = parcel_out.aug_slot_3;
-		e.aug_slot_4       = parcel_out.aug_slot_4;
-		e.aug_slot_5       = parcel_out.aug_slot_5;
-		e.aug_slot_6       = parcel_out.aug_slot_6;
+		e.augment_1_id     = parcel_out.aug_slot_1;
+		e.augment_2_id     = parcel_out.aug_slot_2;
+		e.augment_3_id     = parcel_out.aug_slot_3;
+		e.augment_4_id     = parcel_out.aug_slot_4;
+		e.augment_5_id     = parcel_out.aug_slot_5;
+		e.augment_6_id     = parcel_out.aug_slot_6;
 		e.quantity         = parcel_out.quantity;
 		e.sent_date        = parcel_out.sent_date;
 

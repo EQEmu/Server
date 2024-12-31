@@ -12574,23 +12574,22 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 			if (inst) {
 				t_entries.emplace_back(
 					PlayerEvent::TradeItemEntry{
-						.slot = i,
-						.item_id = inst->GetItem()->ID,
-						.item_name = inst->GetItem()->Name,
-						.charges = static_cast<uint16>(inst->GetCharges()),
-						.aug_1_item_id = inst->GetAugmentItemID(0),
-						.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
-						.aug_2_item_id = inst->GetAugmentItemID(1),
-						.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
-						.aug_3_item_id = inst->GetAugmentItemID(2),
-						.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
-						.aug_4_item_id = inst->GetAugmentItemID(3),
-						.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
-						.aug_5_item_id = inst->GetAugmentItemID(4),
-						.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
-						.aug_6_item_id = inst->GetAugmentItemID(5),
-						.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
-						.in_bag = false,
+					.slot           = i,
+					.item_id        = inst->GetItem()->ID,
+					.augment_1_id   = inst->GetAugmentItemID(0),
+					.augment_1_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
+					.augment_2_id   = inst->GetAugmentItemID(1),
+					.augment_2_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
+					.augment_3_id   = inst->GetAugmentItemID(2),
+					.augment_3_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
+					.augment_4_id   = inst->GetAugmentItemID(3),
+					.augment_4_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
+					.augment_5_id   = inst->GetAugmentItemID(4),
+					.augment_5_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
+					.augment_6_id   = inst->GetAugmentItemID(5),
+					.augment_6_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",.item_name      = inst->GetItem()->Name,
+					.charges        = static_cast<uint16>(inst->GetCharges()),
+					.in_bag         = false,
 					}
 				);
 
@@ -12598,27 +12597,26 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
 						inst = trader->GetInv().GetItem(i, j);
 						if (inst) {
-							t_entries.emplace_back(
-								PlayerEvent::TradeItemEntry{
-									.slot = j,
-									.item_id = inst->GetItem()->ID,
-									.item_name = inst->GetItem()->Name,
-									.charges = static_cast<uint16>(inst->GetCharges()),
-									.aug_1_item_id = inst->GetAugmentItemID(0),
-									.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
-									.aug_2_item_id = inst->GetAugmentItemID(1),
-									.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
-									.aug_3_item_id = inst->GetAugmentItemID(2),
-									.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
-									.aug_4_item_id = inst->GetAugmentItemID(3),
-									.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
-									.aug_5_item_id = inst->GetAugmentItemID(4),
-									.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
-									.aug_6_item_id = inst->GetAugmentItemID(5),
-									.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
-									.in_bag = true,
-								}
-							);
+							t_entries.emplace_back(PlayerEvent::TradeItemEntry{
+								.slot           = j,
+								.item_id        = inst->GetItem()->ID,
+								.augment_1_id   = inst->GetAugmentItemID(0),
+								.augment_1_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
+								.augment_2_id   = inst->GetAugmentItemID(1),
+								.augment_2_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
+								.augment_3_id   = inst->GetAugmentItemID(2),
+								.augment_3_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
+								.augment_4_id   = inst->GetAugmentItemID(3),
+								.augment_4_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
+								.augment_5_id   = inst->GetAugmentItemID(4),
+								.augment_5_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
+								.augment_6_id   = inst->GetAugmentItemID(5),
+								.augment_6_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
+								.item_name      = inst->GetItem()->Name,
+								.charges        = static_cast<uint16>(inst->GetCharges()),
+								.in_bag         = true,
+							}
+						);
 						}
 					}
 				}
@@ -12632,52 +12630,50 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
 			const EQ::ItemInstance *inst = trader2->GetInv().GetItem(i);
 			if (inst) {
-				t2_entries.emplace_back(
-					PlayerEvent::TradeItemEntry{
-						.slot = i,
-						.item_id = inst->GetItem()->ID,
-						.item_name = inst->GetItem()->Name,
-						.charges = static_cast<uint16>(inst->GetCharges()),
-						.aug_1_item_id = inst->GetAugmentItemID(0),
-						.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
-						.aug_2_item_id = inst->GetAugmentItemID(1),
-						.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
-						.aug_3_item_id = inst->GetAugmentItemID(2),
-						.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
-						.aug_4_item_id = inst->GetAugmentItemID(3),
-						.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
-						.aug_5_item_id = inst->GetAugmentItemID(4),
-						.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
-						.aug_6_item_id = inst->GetAugmentItemID(5),
-						.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
-						.in_bag = false,
-					}
+				t2_entries.emplace_back(PlayerEvent::TradeItemEntry{
+					.slot           = i,
+					.item_id        = inst->GetItem()->ID,
+					.augment_1_id   = inst->GetAugmentItemID(0),
+					.augment_1_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
+					.augment_2_id   = inst->GetAugmentItemID(1),
+					.augment_2_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
+					.augment_3_id   = inst->GetAugmentItemID(2),
+					.augment_3_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
+					.augment_4_id   = inst->GetAugmentItemID(3),
+					.augment_4_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
+					.augment_5_id   = inst->GetAugmentItemID(4),
+					.augment_5_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
+					.augment_6_id   = inst->GetAugmentItemID(5),
+					.augment_6_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
+					.item_name      = inst->GetItem()->Name,
+					.charges        = static_cast<uint16>(inst->GetCharges()),
+					.in_bag         = false,
+				}
 				);
 
 				if (inst->IsClassBag()) {
 					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
 						inst = trader2->GetInv().GetItem(i, j);
 						if (inst) {
-							t2_entries.emplace_back(
-								PlayerEvent::TradeItemEntry{
-									.slot = j,
-									.item_id = inst->GetItem()->ID,
-									.item_name = inst->GetItem()->Name,
-									.charges = static_cast<uint16>(inst->GetCharges()),
-									.aug_1_item_id = inst->GetAugmentItemID(0),
-									.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
-									.aug_2_item_id = inst->GetAugmentItemID(1),
-									.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
-									.aug_3_item_id = inst->GetAugmentItemID(2),
-									.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
-									.aug_4_item_id = inst->GetAugmentItemID(3),
-									.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
-									.aug_5_item_id = inst->GetAugmentItemID(4),
-									.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
-									.aug_6_item_id = inst->GetAugmentItemID(5),
-									.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
-									.in_bag = true,
-								}
+							t2_entries.emplace_back(PlayerEvent::TradeItemEntry{
+								.slot           = j,
+								.item_id        = inst->GetItem()->ID,
+								.augment_1_id   = inst->GetAugmentItemID(0),
+								.augment_1_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
+								.augment_2_id   = inst->GetAugmentItemID(1),
+								.augment_2_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
+								.augment_3_id   = inst->GetAugmentItemID(2),
+								.augment_3_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
+								.augment_4_id   = inst->GetAugmentItemID(3),
+								.augment_4_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
+								.augment_5_id   = inst->GetAugmentItemID(4),
+								.augment_5_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
+								.augment_6_id   = inst->GetAugmentItemID(5),
+								.augment_6_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
+								.item_name      = inst->GetItem()->Name,
+								.charges        = static_cast<uint16>(inst->GetCharges()),
+								.in_bag         = true,
+							}
 							);
 						}
 					}

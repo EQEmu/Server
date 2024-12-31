@@ -4002,13 +4002,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			TraderRepository::UpdateActiveTransaction(database, in->id, false);
 
-			trader_pc->RemoveItemBySerialNumber(item_sn, in->trader_buy_struct.quantity);
-			trader_pc->AddMoneyToPP(in->trader_buy_struct.price * in->trader_buy_struct.quantity, true);
-			trader_pc->QueuePacket(outapp.get());
-
 			if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+				auto buy_item = trader_pc->FindTraderItemBySerialNumber(item_sn);
 				auto e = PlayerEvent::TraderSellEvent{
 					.item_id              = in->trader_buy_struct.item_id,
+					.augment_1_id         = buy_item->GetAugmentItemID(0),
+					.augment_2_id         = buy_item->GetAugmentItemID(1),
+					.augment_3_id         = buy_item->GetAugmentItemID(2),
+					.augment_4_id         = buy_item->GetAugmentItemID(3),
+					.augment_5_id         = buy_item->GetAugmentItemID(4),
+					.augment_6_id         = buy_item->GetAugmentItemID(5),
 					.item_name            = in->trader_buy_struct.item_name,
 					.buyer_id             = in->buyer_id,
 					.buyer_name           = in->trader_buy_struct.buyer_name,
@@ -4017,9 +4020,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					.total_cost           = (in->trader_buy_struct.price * in->trader_buy_struct.quantity),
 					.player_money_balance = trader_pc->GetCarriedMoney(),
 				};
+			RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
+		}
 
-				RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
-			}
+			trader_pc->RemoveItemBySerialNumber(item_sn, in->trader_buy_struct.quantity);
+			trader_pc->AddMoneyToPP(in->trader_buy_struct.price * in->trader_buy_struct.quantity, true);
+			trader_pc->QueuePacket(outapp.get());
 
 			break;
 		}
