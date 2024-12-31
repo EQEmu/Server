@@ -436,12 +436,16 @@ public:
 
 	uint16 GetSpellTypeIDByShortName(std::string spellTypeString);
 
+	bool IsValidBotSpellCategory(uint8 setting_type);
 	std::string GetBotSpellCategoryName(uint8 setting_type);
 	uint16 GetBotSpellCategoryIDByShortName(std::string settingString);
-	std::string GetBotSettingCategoryName(uint8 setting_type);
+	bool IsValidBotBaseSetting(uint16 setting_type);
+	std::string GetBotSettingCategoryName(uint16 setting_type);
 	uint16 GetBaseSettingIDByShortName(std::string settingString);
+	bool IsValidSpellType(uint16 spellType);
 	std::string GetSpellTypeNameByID(uint16 spellType);
 	std::string GetSpellTypeShortNameByID(uint16 spellType);
+	bool IsValidSubType(uint16 subType);
 	std::string GetSubTypeNameByID(uint16 subType);
 
 	bool GetDefaultSpellHold(uint16 spellType, uint8 stance = Stance::Balanced);
