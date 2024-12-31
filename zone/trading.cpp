@@ -880,16 +880,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					{"platinum", trade->pp}
 				};
 				std::vector<const EQ::ItemInstance *> list(items.begin(), items.end());
-				for (EQ::ItemInstance *inst: items) {
-					if (!inst || !inst->GetItem()) {
-						continue;
-					}
-
-					std::string item_id = fmt::format("{}", inst->GetItem()->ID);
-					handin[item_id] += inst->GetCharges();
-					item_list.emplace_back(inst);
-				}
-
 				handin_npc->CheckHandin(this, handin, {}, list);
 			}
 
