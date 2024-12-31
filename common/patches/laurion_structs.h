@@ -948,6 +948,10 @@ namespace Laurion {
 			/*12*/	InventorySlot_Struct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8)
 			/*24*/
 		};
+
+		struct Disciplines_Struct {
+			uint32 values[MAX_PP_DISCIPLINES];
+		};
 #pragma pack()
 
 	};	//end namespace structs

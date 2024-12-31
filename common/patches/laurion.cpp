@@ -557,6 +557,16 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_DisciplineUpdate)
+	{
+		ENCODE_LENGTH_EXACT(Disciplines_Struct);
+		SETUP_DIRECT_ENCODE(Disciplines_Struct, structs::Disciplines_Struct);
+
+		memcpy(&eq->values, &emu->values, sizeof(Disciplines_Struct));
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_ExpansionInfo)
 	{
 		ENCODE_LENGTH_EXACT(ExpansionInfo_Struct);
