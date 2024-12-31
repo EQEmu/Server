@@ -2143,7 +2143,6 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 
 	std::string fillerLine = "-----------";
 	std::string spellTypeField = "Spell Type";
-	std::string pluralS = "s";
 	std::string idField = "ID";
 	std::string shortnameField = "Short Name";
 
@@ -2185,9 +2184,8 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 		popup_text += DialogueWindow::TableRow(
 			DialogueWindow::TableCell(
 				fmt::format(
-					"{}{}",
-					DialogueWindow::ColorMessage(forest_green, c->GetSpellTypeNameByID(i)),
-					DialogueWindow::ColorMessage(forest_green, pluralS)
+					"{}",
+					DialogueWindow::ColorMessage(forest_green, c->GetSpellTypeNameByID(i))
 				)
 			) +
 			DialogueWindow::TableCell(
