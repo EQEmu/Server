@@ -859,13 +859,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 
 		std::vector<std::any> item_list(items.begin(), items.end());
-		for (EQ::ItemInstance *inst: items) {
-			if (!inst || !inst->GetItem()) {
-				continue;
-			}
-			item_list.emplace_back(inst);
-		}
-
 		m_external_handin_money_returned = {};
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
 			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
