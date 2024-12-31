@@ -527,6 +527,25 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_DeleteCharge)
+	{
+		Log(Logs::Detail, Logs::Netcode, "Laurion::ENCODE(OP_DeleteCharge)");
+
+		ENCODE_FORWARD(OP_MoveItem);
+	}
+
+	ENCODE(OP_DeleteItem)
+	{
+		ENCODE_LENGTH_EXACT(DeleteItem_Struct);
+		SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+
+		eq->from_slot = ServerToLaurionSlot(emu->from_slot);
+		eq->to_slot = ServerToLaurionSlot(emu->to_slot);
+		OUT(number_in_stack);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_DeleteSpawn)
 	{
 		ENCODE_LENGTH_EXACT(DeleteSpawn_Struct);
@@ -3546,6 +3565,18 @@ namespace Laurion
 
 	DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
 
+	DECODE(OP_DeleteItem)
+	{
+		DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
+		SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+
+		emu->from_slot = LaurionToServerSlot(eq->from_slot);
+		emu->to_slot = LaurionToServerSlot(eq->to_slot);
+		IN(number_in_stack);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_EnterWorld)
 	{
 		DECODE_LENGTH_EXACT(structs::EnterWorld_Struct);
@@ -3656,8 +3687,8 @@ namespace Laurion
 		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
 		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
-		emu->container_slot = RoF2ToServerSlot(eq->container_slot);
-		emu->guildtribute_slot = RoF2ToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
+		emu->container_slot = LaurionToServerSlot(eq->container_slot);
+		emu->guildtribute_slot = LaurionToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
 	}
