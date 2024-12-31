@@ -903,6 +903,8 @@ Mob *SwarmPet::GetOwner()
 //New AA
 void Client::SendAlternateAdvancementTable() {
 	LogDebug("Sending AA Table");
+	GetDynamicAATimers();
+
 	for(auto &aa : zone->aa_abilities) {
 		uint32 charges = 0;
 		auto ranks = GetAA(aa.second->first_rank_id, &charges);
@@ -1133,6 +1135,40 @@ void Client::SendAlternateAdvancementTimers() {
 	safe_delete(outapp);
 }
 
+void Client::GetDynamicAATimers() {
+    // Fetch all relevant aaTimer entries from the database
+    auto results = DataBucketsRepository::GetWhere(
+        database,
+        fmt::format(
+            "character_id = {} AND `key` LIKE '{}%%'",
+            CharacterID(),
+            "aaTimer_"
+        )
+    );
+
+    // Clear the existing cache to ensure it's up to date
+    aa_timers_cache.clear();
+
+    // Process the results and populate the cache
+    for (const auto& bucket : results) {
+        if (!bucket.value.empty()) {
+			int timer_value = Strings::ToInt(bucket.value, 0);
+
+			// Extract timer ID from the key (e.g., "aaTimer_42" -> 42)
+			int timer_id = Strings::ToInt(bucket.key_.substr(8), -1); // "aaTimer_" is 8 characters long
+
+			if (timer_id == -1) {
+				LogError("Could not parse TimerID for Character ID [{}], Timer Key [{}]", CharacterID(), bucket.key_);
+			}
+
+			// Populate the cache
+			aa_timers_cache[timer_value] = timer_id;
+
+			LogDebugDetail("Cached TimerID: [{}] - [{}]", timer_id, timer_value);
+        }
+    }
+}
+
 int Client::GetDynamicAATimer(int aa_id) {
     // Check cache first
     auto it = aa_timers_cache.find(aa_id);
@@ -1141,23 +1177,16 @@ int Client::GetDynamicAATimer(int aa_id) {
         return it->second;
     }
 
-    // If not in cache, check the data bucket
-    for (int i = 1; i < 100; i++) {
-        std::string key = "aaTimer_" + std::to_string(i);
-        std::string bucketValue = GetBucket(key);
+    // If cache is empty or the specific timer is not found, fetch all timers
+    GetDynamicAATimers();
 
-        if (!bucketValue.empty()) {
-            int value = std::stoi(bucketValue);
-            LogDebugDetail("Got TimerID from bucket: [{}]", value);
-            if (value == aa_id) {
-                // Cache the value
-                aa_timers_cache[aa_id] = i;
-
-                LogDebugDetail("Returning TimerID: [{}] - [{}]", i, value);
-                return i;
-            }
-        }
+    // Check the cache again after updating it
+    it = aa_timers_cache.find(aa_id);
+    if (it != aa_timers_cache.end()) {
+        LogDebugDetail("Returning TimerID after fetching: [{}] - [{}]", it->second, aa_id);
+        return it->second;
     }
+
     return 0; // Return 0 if no associated timer ID is found
 }
 
@@ -1181,12 +1210,17 @@ int Client::SetDynamicAATimer(int aa_id) {
 
 void Client::ClearDynamicAATimers() {
     ResetAlternateAdvancementTimers();
+
     aa_timers_cache.clear();
 
-    for (int timerID = 1; timerID <= (pTimerAAEnd - pTimerAAStart); ++timerID) {
-        std::string key = "aaTimer_" + std::to_string(timerID);
-        DeleteBucket(key);
-    }
+	DataBucketsRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"character_id = {} AND `key` LIKE '{}%%'",
+			CharacterID(),
+			"aaTimer_"
+		)
+	);
 
     LogDebugDetail("Cleared all dynamic AA timers");
 }

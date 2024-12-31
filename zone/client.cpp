@@ -2883,8 +2883,12 @@ void Client::SetSkill(EQ::skills::SkillType skillid, uint16 value) {
 	skill->skillId=skillid;
 	skill->value=value;
 
-	auto maxskill = GetMaxSkillAfterSpecializationRules(static_cast<EQ::skills::SkillType>(skillid), MaxSkill(static_cast<EQ::skills::SkillType>(skillid)));
-	Message(Chat::Skills, "You have become better at %s! (%d/%d)", EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skillid)).c_str(), GetSkill(static_cast<EQ::skills::SkillType>(skillid)), maxskill);
+	if (value > 0) {
+		auto maxskill = GetMaxSkillAfterSpecializationRules(static_cast<EQ::skills::SkillType>(skillid), MaxSkill(static_cast<EQ::skills::SkillType>(skillid)));
+		Message(Chat::Skills, "You have become better at %s! (%d/%d)", EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skillid)).c_str(), GetSkill(static_cast<EQ::skills::SkillType>(skillid)), maxskill);
+	} else {
+		Message(Chat::Skills, "You have lost access to the skill %s!", EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skillid)).c_str());
+	}
 
 	QueuePacket(outapp);
 	safe_delete(outapp);

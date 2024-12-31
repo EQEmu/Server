@@ -1032,6 +1032,7 @@ public:
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
 	//Dynamic AA timer stuff
+	void GetDynamicAATimers();
 	int GetDynamicAATimer(int aa_id);
 	int SetDynamicAATimer(int aa_id);
 	void ClearDynamicAATimers();
