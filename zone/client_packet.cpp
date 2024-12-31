@@ -916,7 +916,6 @@ void Client::CompleteConnect()
 	}
 
 	SendDynamicZoneUpdates();
-	SendBulkBazaarTraders();
 
 	/** Request adventure info **/
 	auto pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
@@ -927,6 +926,10 @@ void Client::CompleteConnect()
 	if (IsClient() && CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater) {
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
+	}
+
+	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
+		SendBulkBazaarTraders();
 	}
 
 	// TODO: load these states
@@ -3999,12 +4002,10 @@ void Client::Handle_OP_BazaarSearch(const EQApplicationPacket *app)
 			SendBazaarWelcome();
 			break;
 		}
-		/*
 		case FirstOpenSearch: {
 			SendBulkBazaarTraders();
 			break;
 		}
-		*/
 		default: {
 			LogError("Malformed BazaarSearch_Struct packet received, ignoring\n");
 		}
