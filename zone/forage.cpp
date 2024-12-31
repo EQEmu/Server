@@ -380,11 +380,15 @@ void Client::GoFish(bool guarantee, bool use_bait)
 
 				if (inst) {
 					if (player_event_logs.IsEventEnabled(PlayerEvent::FISH_SUCCESS)) {
-						auto e = PlayerEvent::FishSuccessEvent{
-							.item_id = inst->GetItem()->ID,
-							.item_name = inst->GetItem()->Name,
+						auto e = PlayerEvent::FishSuccessEvent{ .item_id      = inst->GetItem()->ID,
+																.augment_1_id = inst->GetAugmentItemID(0),
+																.augment_2_id = inst->GetAugmentItemID(1),
+																.augment_3_id = inst->GetAugmentItemID(2),
+																.augment_4_id = inst->GetAugmentItemID(3),
+																.augment_5_id = inst->GetAugmentItemID(4),
+																.augment_6_id = inst->GetAugmentItemID(5),
+																.item_name    = inst->GetItem()->Name,
 						};
-
 						RecordPlayerEventLog(PlayerEvent::FISH_SUCCESS, e);
 					}
 
@@ -514,8 +518,14 @@ void Client::ForageItem(bool guarantee) {
 			if (inst) {
 				if (player_event_logs.IsEventEnabled(PlayerEvent::FORAGE_SUCCESS)) {
 					auto e = PlayerEvent::ForageSuccessEvent{
-						.item_id = inst->GetItem()->ID,
-						.item_name = inst->GetItem()->Name
+						.item_id      = inst->GetItem()->ID,
+						.augment_1_id = inst->GetAugmentItemID(0),
+						.augment_2_id = inst->GetAugmentItemID(1),
+						.augment_3_id = inst->GetAugmentItemID(2),
+						.augment_4_id = inst->GetAugmentItemID(3),
+						.augment_5_id = inst->GetAugmentItemID(4),
+						.augment_6_id = inst->GetAugmentItemID(5),
+						.item_name    = inst->GetItem()->Name,
 					};
 					RecordPlayerEventLog(PlayerEvent::FORAGE_SUCCESS, e);
 				}
