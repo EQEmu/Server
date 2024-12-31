@@ -434,6 +434,22 @@ namespace Laurion
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
+	ENCODE(OP_ClickObjectAction)
+	{
+		ENCODE_LENGTH_EXACT(ClickObjectAction_Struct);
+		SETUP_DIRECT_ENCODE(ClickObjectAction_Struct, structs::ClickObjectAction_Struct);
+
+		OUT(drop_id);
+		eq->unknown04 = -1;
+		eq->unknown08 = -1;
+		OUT(type);
+		OUT(icon);
+		eq->unknown16 = 0;
+		OUT_str(object_name);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_ClientUpdate)
 	{
 		ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
@@ -2187,6 +2203,28 @@ namespace Laurion
 		delete in;
 	}
 
+	ENCODE(OP_RecipeAutoCombine)
+	{
+		ENCODE_LENGTH_EXACT(RecipeAutoCombine_Struct);
+		SETUP_DIRECT_ENCODE(RecipeAutoCombine_Struct, structs::RecipeAutoCombine_Struct);
+
+		OUT(object_type);
+		OUT(some_id);
+		eq->container_slot = ServerToLaurionSlot(emu->unknown1);
+		structs::InventorySlot_Struct LaurionSlot;
+		LaurionSlot.Type = 8;	// Observed
+		LaurionSlot.Padding1 = 0;
+		LaurionSlot.Slot = 0xffff;
+		LaurionSlot.SubIndex = 0xffff;
+		LaurionSlot.AugIndex = 0xffff;
+		LaurionSlot.Padding2 = 0;
+		eq->unknown_slot = LaurionSlot;
+		OUT(recipe_id);
+		OUT(reply_code);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_RemoveBlockedBuffs) { ENCODE_FORWARD(OP_BlockedBuffs); }
 
 	ENCODE(OP_RespondAA)
@@ -3609,6 +3647,17 @@ namespace Laurion
 		IN(spawn_id);
 		emu->type = LaurionToServerSpawnAppearanceType(eq->type);
 		IN(parameter);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_TradeSkillCombine)
+	{
+		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
+		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
+
+		emu->container_slot = RoF2ToServerSlot(eq->container_slot);
+		emu->guildtribute_slot = RoF2ToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
 	}

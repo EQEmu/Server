@@ -904,6 +904,50 @@ namespace Laurion {
 			TypelessInventorySlot_Struct inventorySlot;
 			uint32 success;
 		};
+
+		/*
+		** Click Object Acknowledgement Struct
+		** Response to client clicking on a World Container (ie, forge)
+		** Seems to have not changed from RoF2
+		*/
+		struct ClickObjectAction_Struct {
+		/*00*/  //uint32 player_id;	// Appears to have been removed
+		/*00*/	uint32	drop_id;	// Appears to use the object_count field now
+		/*04*/	int32	unknown04;	// Seen -1
+		/*08*/	int32	unknown08;	// Seen -1
+		/*08*/	//uint32 open;		// 1=opening, 0=closing - Removed?
+		/*12*/	uint32	type;		// See object.h, "Object Types"
+		/*16*/	uint32	unknown16;	//
+		/*20*/	uint32	icon;		// Icon to display for tradeskill containers
+		/*24*/	uint32	unknown24;	//
+		/*28*/	char	object_name[64]; // Object name to display
+		/*92*/
+		};
+
+		//received and sent back as an ACK with different reply_code
+		struct RecipeAutoCombine_Struct {
+			/*00*/	uint32 object_type;
+			/*04*/	uint32 some_id;
+			/*08*/	InventorySlot_Struct container_slot;		//echoed in reply - Was uint32 unknown1
+			/*20*/	InventorySlot_Struct unknown_slot;		//echoed in reply
+			/*32*/	uint32 recipe_id;
+			/*36*/	uint32 reply_code;
+			/*40*/
+		};
+
+		/*
+		** New Combine Struct
+		** Client requesting to perform a tradeskill combine
+		** Size: 24 bytes
+		** Used In: OP_TradeSkillCombine
+		** Last Updated: 01-05-2013
+		*/
+		struct NewCombine_Struct
+		{
+			/*00*/	InventorySlot_Struct container_slot;
+			/*12*/	InventorySlot_Struct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8)
+			/*24*/
+		};
 #pragma pack()
 
 	};	//end namespace structs
