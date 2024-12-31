@@ -1,39 +1,37 @@
-#include "../client.h"
+#include "../../common/eqemu_logsys_log_aliases.h"
+#include "../worlddb.h"
 
-void command_copycharacter(Client *c, const Seperator *sep)
+void WorldserverCLI::CopyCharacter(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
-	if (
-		sep->argnum < 3 ||
-		sep->IsNumber(1) ||
-		sep->IsNumber(2) ||
-		sep->IsNumber(3)
-		) {
-		c->Message(
-			Chat::White,
-			"Usage: #copycharacter [source_character_name] [destination_character_name] [destination_account_name]"
-		);
+	description = "Copies a character into a destination account";
+
+	std::vector<std::string> arguments = {
+		"source_character_name",
+		"destination_character_name",
+		"destination_account_name"
+	};
+	std::vector<std::string> options   = {};
+
+	EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+
+	if (cmd[{"-h", "--help"}]) {
 		return;
 	}
 
-	const std::string& source_character_name      = sep->arg[1];
-	const std::string& destination_character_name = sep->arg[2];
-	const std::string& destination_account_name   = sep->arg[3];
+	std::string source_character_name      = cmd(2).str();
+	std::string destination_character_name = cmd(3).str();
+	std::string destination_account_name   = cmd(4).str();
 
-	const bool result = database.CopyCharacter(
+	LogInfo(
+		"Attempting to copy character [{}] to [{}] via account [{}]",
 		source_character_name,
 		destination_character_name,
 		destination_account_name
 	);
 
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"Character Copy [{}] to [{}] via account [{}] [{}]",
-			source_character_name,
-			destination_character_name,
-			destination_account_name,
-			result ? "Success" : "Failed"
-		).c_str()
+	database.CopyCharacter(
+		source_character_name,
+		destination_character_name,
+		destination_account_name
 	);
 }
-
