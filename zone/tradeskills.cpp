@@ -415,7 +415,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				auto item = container->GetItem(i);
 				if (!item || item->GetID() != aug_id) {
 					all_same = false;
-					break;
+					return;
 				}
 
 				if (item->IsAugmentable()) {
@@ -423,7 +423,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 						if (item->GetAugmentItemID(aug_index) != 0) {
 							all_same = false;
 							user->Message(Chat::Red, "You must remove augments from all component items before you can attempt this combine.");
-							break;
+							return;
 						}
 					}
 				}
@@ -432,6 +432,11 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			if (all_same) {
 				auto new_item = database.GetItem(aug_id + 1000000);
 				if (new_item) {
+					if (user->CheckLoreConflict(new_item)) {
+						user->Message(Chat::Red, "This combine would result in a disallowed LORE item. Aborting...");
+						return;
+					}
+
 					container->Clear();
 
 					user->SummonItem(new_item->ID, new_item->MaxCharges);
