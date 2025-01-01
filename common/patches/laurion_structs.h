@@ -952,6 +952,43 @@ namespace Laurion {
 		struct Disciplines_Struct {
 			uint32 values[MAX_PP_DISCIPLINES];
 		};
+
+		struct Merchant_Sell_Request_Struct {
+			/*000*/ uint32 npcid;		// Merchant NPC's entity id
+			/*004*/ uint32 playerid;	// Player's entity id
+			/*008*/ uint32 itemslot;	// Merchant Slot / Item Instance ID
+			/*012*/ uint32 unknown12;
+			/*016*/ uint32 quantity;	// Already sold
+			/*020*/
+		};
+
+		struct Merchant_Sell_Response_Struct {
+			/*000*/ uint32 npcid;		// Merchant NPC's entity id
+			/*004*/ uint32 playerid;	// Player's entity id
+			/*008*/ uint32 itemslot;	// Merchant Slot / Item Instance ID
+			/*012*/ uint32 unknown12;
+			/*016*/ uint32 quantity;	// Already sold
+			/*020*/ uint32 unknown20;
+			/*024*/ uint32 price;
+			/*028*/ uint32 unknown28;	// Normally 0, but seen 84 c5 63 00 as well
+			/*032*/
+		};
+
+		struct Merchant_Purchase_Request_Struct {
+			/*000*/	uint32	npcid;			// Merchant NPC's entity id
+			/*004*/	TypelessInventorySlot_Struct	inventory_slot;
+			/*012*/	uint32	quantity;
+			/*016*/	
+		};
+
+		struct Merchant_Purchase_Response_Struct {
+			/*000*/	uint32	npcid;			// Merchant NPC's entity id
+			/*004*/	TypelessInventorySlot_Struct	inventory_slot;
+			/*012*/	uint32	quantity;
+			/*016*/	uint32	price;
+			/*020*/ uint32  unknown020;
+			/*024*/
+		};
 #pragma pack()
 
 	};	//end namespace structs

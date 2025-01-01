@@ -2749,6 +2749,33 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ShopPlayerBuy)
+	{
+		ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
+		SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Response_Struct);
+
+		OUT(npcid);
+		OUT(playerid);
+		OUT(itemslot);
+		OUT(quantity);
+		OUT(price);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_ShopPlayerSell)
+	{
+		ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
+		SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Response_Struct);
+
+		OUT(npcid);
+		eq->inventory_slot = ServerToLaurionTypelessSlot(emu->itemslot, EQ::invtype::typePossessions);
+		OUT(quantity);
+		OUT(price);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_ShopRequest)
 	{
 		ENCODE_LENGTH_EXACT(MerchantClick_Struct);
@@ -3667,6 +3694,31 @@ namespace Laurion
 			// Size 68 in Laurion
 			IN(filters[r]);
 		}
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ShopPlayerBuy)
+	{
+		DECODE_LENGTH_EXACT(structs::Merchant_Sell_Request_Struct);
+		SETUP_DIRECT_DECODE(Merchant_Sell_Struct, structs::Merchant_Sell_Request_Struct);
+
+		IN(npcid);
+		IN(playerid);
+		IN(itemslot);
+		IN(quantity);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ShopPlayerSell)
+	{
+		DECODE_LENGTH_EXACT(structs::Merchant_Purchase_Request_Struct);
+		SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Request_Struct);
+
+		IN(npcid);
+		emu->itemslot = LaurionToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
+		IN(quantity);
 
 		FINISH_DIRECT_DECODE();
 	}
