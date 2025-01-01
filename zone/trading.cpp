@@ -1126,6 +1126,14 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 		return;
 	}
 
+	const auto results = TraderRepository::GetWelcomeData(database);
+	if (results.count_of_traders >= 1) {
+		Message(Chat::Red, "You are not able to become a trader at this time.  Too Many Traders.");
+		TraderEndTrader();
+		safe_delete(inv);
+		return;
+	}
+
 	TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}';", CharacterID()));
 	TraderRepository::ReplaceMany(database, trader_items);
 	safe_delete(inv);
