@@ -1127,7 +1127,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 	}
 
 	const auto results = TraderRepository::GetWelcomeData(database);
-	if (results.count_of_traders >= 1) {
+	if (results.count_of_traders > 598) {
 		Message(Chat::Red, "You are not able to become a trader at this time.  Too Many Traders.");
 		TraderEndTrader();
 		safe_delete(inv);
