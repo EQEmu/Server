@@ -4600,16 +4600,28 @@ bool NPC::CheckHandin(
 			}
 		}
 
-		// Compare aggregated hand-in and required counts
-		bool met = true;
-		for (const auto &[item_id, required_count] : required_aggregated) {
-			if (handin_aggregated[item_id] != required_count) {
-				met = false;
-				break;
+		if (handin_aggregated.size() != required_aggregated.size()) {
+			items_met = false;
+		} else {
+			// Compare aggregated hand-in and required counts
+			bool met = false;
+			// Check if all required items are present and match exactly
+			for (const auto &[item_id, required_count] : required_aggregated) {
+				// Check if item exists in hand-in and has the exact count
+				if (handin_aggregated[item_id] != required_count) {
+					met = false; // Explicitly set false for clarity
+					break; // No need to continue if one mismatch is found
+				}
+				// If we reach here, it means current item matched
+				met = true;
+			}
+
+			items_met = met;
+
+			if (items_met) {
+				LogNpcHandin("Met aggregate item requirement case");
 			}
 		}
-
-		items_met = met;
 	}
 	else if (h.items.empty() && r.items.empty()) { // no items required, money only
 		items_met = true;
@@ -4823,6 +4835,7 @@ bool NPC::CheckHandin(
 			);
 		}
 	}
+	LogNpcHandin("");
 
 	return requirement_met;
 }
