@@ -4844,7 +4844,7 @@ bool NPC::CheckHandin(
 			m_hand_in.money.silver,
 			m_hand_in.money.copper
 		);
-		for (const auto &i: m_hand_in.items) {
+		for (const auto &i: items_to_remove) {
 			LogNpcHandin(
 				"{} Hand-in success, item [{}] ({}) count [{}]",
 				log_handin_prefix,
