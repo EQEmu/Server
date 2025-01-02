@@ -33,6 +33,7 @@
 #include "../common/repositories/spawn2_repository.h"
 #include "../common/repositories/spawn2_disabled_repository.h"
 #include "../common/repositories/respawn_times_repository.h"
+#include "../common/repositories/zone_state_spawns_repository.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -85,9 +86,9 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	x = in_x;
 	y = in_y;
 	z = in_z;
-	heading = in_heading;
-	respawn_ = respawn;
-	variance_ = variance;
+	heading        = in_heading;
+	m_respawn_time = respawn;
+	variance_      = variance;
 	grid_ = grid;
 	path_when_zone_idle = in_path_when_zone_idle;
 	condition_id = in_cond_id;
@@ -95,6 +96,7 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	npcthis = nullptr;
 	enabled = in_enabled;
 	this->anim = anim;
+	currentnpcid = 0;
 
 	if(timeleft == 0xFFFFFFFF) {
 		//special disable timeleft
@@ -115,7 +117,7 @@ Spawn2::~Spawn2()
 
 uint32 Spawn2::resetTimer()
 {
-	uint32 rspawn = respawn_ * 1000;
+	uint32 rspawn = m_respawn_time * 1000;
 
 	if (variance_ != 0) {
 		int var_over_2 = (variance_ * 1000) / 2;
@@ -150,12 +152,12 @@ uint32 Spawn2::despawnTimer(uint32 despawn_timer)
 bool Spawn2::Process() {
 	IsDespawned = false;
 
-	if (!Enabled())
+	if (!Enabled()) {
 		return true;
+	}
 
 	//grab our spawn group
 	SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
-
 	if (NPCPointerValid() && (spawn_group && spawn_group->despawn == 0 || condition_id != 0)) {
 		return true;
 	}
@@ -195,7 +197,7 @@ bool Spawn2::Process() {
 		}
 
 		//have the spawn group pick an NPC for us
-		uint32 npcid = spawn_group->GetNPCType(condition_value);
+		uint32 npcid = currentnpcid && currentnpcid > 0 ? currentnpcid : spawn_group->GetNPCType(condition_value);
 		if (npcid == 0) {
 			LogSpawns("Spawn2 [{}]: Spawn group [{}] did not yeild an NPC! not spawning", spawn2_id, spawngroup_id_);
 
@@ -505,37 +507,98 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		if (spawn_times.count(s.id) != 0) {
 			spawn_time_left = spawn_times[s.id];
 		}
+	}
 
-		// load from spawn2_disabled
-		bool spawn_enabled = true;
-
-		// check if spawn is disabled
-		for (auto &ds: disabled_spawns) {
-			if (ds.spawn2_id == s.id) {
-				spawn_enabled = !ds.disabled;
+	auto spawn_states = ZoneStateSpawnsRepository::GetWhere(
+		database,
+		fmt::format(
+			"zone_id = {} AND instance_id = {}",
+			zoneid,
+			zone->GetInstanceID()
+		)
+	);
+	if (!spawn_states.empty()) {
+		LogInfo("Loading zone state spawns for zone [{}] spawns [{}]", zone_name, spawn_states.size());
+		for (auto &s: spawn_states) {
+			uint32 spawn_time_left = 0;
+			if (spawn_times.count(s.id) != 0) {
+				spawn_time_left = spawn_times[s.spawn2_id];
 			}
+
+			// load from spawn2_disabled
+			bool spawn_enabled = true;
+
+			// check if spawn is disabled
+			for (auto &ds: disabled_spawns) {
+				if (ds.spawn2_id == s.spawn2_id) {
+					spawn_enabled = !ds.disabled;
+				}
+			}
+
+			auto new_spawn = new Spawn2(
+				s.id,
+				s.spawngroup_id,
+				s.x,
+				s.y,
+				s.z,
+				s.heading,
+				s.respawn_time,
+				s.variance,
+				spawn_time_left,
+				s.grid,
+				(bool) s.path_when_zone_idle,
+				s.condition_id,
+				s.condition_min_value,
+				spawn_enabled,
+				(EmuAppearance) s.anim
+			);
+
+			new_spawn->SetCurrentNPCID(s.npc_id);
+
+			spawn2_list.Insert(new_spawn);
+			new_spawn->Process();
 		}
+	} else {
+		for (auto &s: spawns) {
+			uint32 spawn_time_left = 0;
+			if (spawn_times.count(s.id) != 0) {
+				spawn_time_left = spawn_times[s.id];
+			}
 
-		auto new_spawn = new Spawn2(
-			s.id,
-			s.spawngroupID,
-			s.x,
-			s.y,
-			s.z,
-			s.heading,
-			s.respawntime,
-			s.variance,
-			spawn_time_left,
-			s.pathgrid,
-			(bool) s.path_when_zone_idle,
-			s._condition,
-			(int16) s.cond_value,
-			spawn_enabled,
-			(EmuAppearance) s.animation
-		);
+			// load from spawn2_disabled
+			bool spawn_enabled = true;
 
-		spawn2_list.Insert(new_spawn);
-		new_spawn->Process();
+
+			// check if spawn is disabled
+			for (auto &ds: disabled_spawns) {
+				if (ds.spawn2_id == s.id) {
+					spawn_enabled = !ds.disabled;
+				}
+			}
+
+			auto new_spawn = new Spawn2(
+				s.id,
+				s.spawngroupID,
+				s.x,
+				s.y,
+				s.z,
+				s.heading,
+				s.respawntime,
+				s.variance,
+				spawn_time_left,
+				s.pathgrid,
+				(bool) s.path_when_zone_idle,
+				s._condition,
+				(int16) s.cond_value,
+				spawn_enabled,
+				(EmuAppearance) s.animation
+			);
+
+			spawn2_list.Insert(new_spawn);
+
+			spawn2_list.Insert(new_spawn);
+			new_spawn->Process();
+		}
 	}
 
 	LogInfo("Loaded [{}] spawn2 entries", Strings::Commify(l.size()));
