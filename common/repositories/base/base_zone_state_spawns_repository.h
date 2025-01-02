@@ -31,7 +31,6 @@ public:
 		float    heading;
 		uint32_t respawn_time;
 		uint32_t variance;
-		uint32_t timeleft;
 		uint32_t grid;
 		int16_t  path_when_zone_idle;
 		uint16_t condition_id;
@@ -61,7 +60,6 @@ public:
 			"heading",
 			"respawn_time",
 			"variance",
-			"timeleft",
 			"grid",
 			"path_when_zone_idle",
 			"condition_id",
@@ -87,7 +85,6 @@ public:
 			"heading",
 			"respawn_time",
 			"variance",
-			"timeleft",
 			"grid",
 			"path_when_zone_idle",
 			"condition_id",
@@ -147,7 +144,6 @@ public:
 		e.heading             = 0;
 		e.respawn_time        = 0;
 		e.variance            = 0;
-		e.timeleft            = 0;
 		e.grid                = 0;
 		e.path_when_zone_idle = 0;
 		e.condition_id        = 0;
@@ -203,14 +199,13 @@ public:
 			e.heading             = row[9] ? strtof(row[9], nullptr) : 0;
 			e.respawn_time        = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.variance            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.timeleft            = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.grid                = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[14] ? static_cast<int16_t>(atoi(row[14])) : 0;
-			e.condition_id        = row[15] ? static_cast<uint16_t>(strtoul(row[15], nullptr, 10)) : 0;
-			e.condition_min_value = row[16] ? static_cast<int16_t>(atoi(row[16])) : 0;
-			e.enabled             = row[17] ? static_cast<int16_t>(atoi(row[17])) : 1;
-			e.anim                = row[18] ? static_cast<uint16_t>(strtoul(row[18], nullptr, 10)) : 0;
-			e.created_at          = strtoll(row[19] ? row[19] : "-1", nullptr, 10);
+			e.grid                = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.path_when_zone_idle = row[13] ? static_cast<int16_t>(atoi(row[13])) : 0;
+			e.condition_id        = row[14] ? static_cast<uint16_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.condition_min_value = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
+			e.enabled             = row[16] ? static_cast<int16_t>(atoi(row[16])) : 1;
+			e.anim                = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.created_at          = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -255,14 +250,13 @@ public:
 		v.push_back(columns[9] + " = " + std::to_string(e.heading));
 		v.push_back(columns[10] + " = " + std::to_string(e.respawn_time));
 		v.push_back(columns[11] + " = " + std::to_string(e.variance));
-		v.push_back(columns[12] + " = " + std::to_string(e.timeleft));
-		v.push_back(columns[13] + " = " + std::to_string(e.grid));
-		v.push_back(columns[14] + " = " + std::to_string(e.path_when_zone_idle));
-		v.push_back(columns[15] + " = " + std::to_string(e.condition_id));
-		v.push_back(columns[16] + " = " + std::to_string(e.condition_min_value));
-		v.push_back(columns[17] + " = " + std::to_string(e.enabled));
-		v.push_back(columns[18] + " = " + std::to_string(e.anim));
-		v.push_back(columns[19] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[12] + " = " + std::to_string(e.grid));
+		v.push_back(columns[13] + " = " + std::to_string(e.path_when_zone_idle));
+		v.push_back(columns[14] + " = " + std::to_string(e.condition_id));
+		v.push_back(columns[15] + " = " + std::to_string(e.condition_min_value));
+		v.push_back(columns[16] + " = " + std::to_string(e.enabled));
+		v.push_back(columns[17] + " = " + std::to_string(e.anim));
+		v.push_back(columns[18] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -296,7 +290,6 @@ public:
 		v.push_back(std::to_string(e.heading));
 		v.push_back(std::to_string(e.respawn_time));
 		v.push_back(std::to_string(e.variance));
-		v.push_back(std::to_string(e.timeleft));
 		v.push_back(std::to_string(e.grid));
 		v.push_back(std::to_string(e.path_when_zone_idle));
 		v.push_back(std::to_string(e.condition_id));
@@ -345,7 +338,6 @@ public:
 			v.push_back(std::to_string(e.heading));
 			v.push_back(std::to_string(e.respawn_time));
 			v.push_back(std::to_string(e.variance));
-			v.push_back(std::to_string(e.timeleft));
 			v.push_back(std::to_string(e.grid));
 			v.push_back(std::to_string(e.path_when_zone_idle));
 			v.push_back(std::to_string(e.condition_id));
@@ -398,14 +390,13 @@ public:
 			e.heading             = row[9] ? strtof(row[9], nullptr) : 0;
 			e.respawn_time        = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.variance            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.timeleft            = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.grid                = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[14] ? static_cast<int16_t>(atoi(row[14])) : 0;
-			e.condition_id        = row[15] ? static_cast<uint16_t>(strtoul(row[15], nullptr, 10)) : 0;
-			e.condition_min_value = row[16] ? static_cast<int16_t>(atoi(row[16])) : 0;
-			e.enabled             = row[17] ? static_cast<int16_t>(atoi(row[17])) : 1;
-			e.anim                = row[18] ? static_cast<uint16_t>(strtoul(row[18], nullptr, 10)) : 0;
-			e.created_at          = strtoll(row[19] ? row[19] : "-1", nullptr, 10);
+			e.grid                = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.path_when_zone_idle = row[13] ? static_cast<int16_t>(atoi(row[13])) : 0;
+			e.condition_id        = row[14] ? static_cast<uint16_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.condition_min_value = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
+			e.enabled             = row[16] ? static_cast<int16_t>(atoi(row[16])) : 1;
+			e.anim                = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.created_at          = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -442,14 +433,13 @@ public:
 			e.heading             = row[9] ? strtof(row[9], nullptr) : 0;
 			e.respawn_time        = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.variance            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.timeleft            = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.grid                = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[14] ? static_cast<int16_t>(atoi(row[14])) : 0;
-			e.condition_id        = row[15] ? static_cast<uint16_t>(strtoul(row[15], nullptr, 10)) : 0;
-			e.condition_min_value = row[16] ? static_cast<int16_t>(atoi(row[16])) : 0;
-			e.enabled             = row[17] ? static_cast<int16_t>(atoi(row[17])) : 1;
-			e.anim                = row[18] ? static_cast<uint16_t>(strtoul(row[18], nullptr, 10)) : 0;
-			e.created_at          = strtoll(row[19] ? row[19] : "-1", nullptr, 10);
+			e.grid                = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.path_when_zone_idle = row[13] ? static_cast<int16_t>(atoi(row[13])) : 0;
+			e.condition_id        = row[14] ? static_cast<uint16_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.condition_min_value = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
+			e.enabled             = row[16] ? static_cast<int16_t>(atoi(row[16])) : 1;
+			e.anim                = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.created_at          = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -536,7 +526,6 @@ public:
 		v.push_back(std::to_string(e.heading));
 		v.push_back(std::to_string(e.respawn_time));
 		v.push_back(std::to_string(e.variance));
-		v.push_back(std::to_string(e.timeleft));
 		v.push_back(std::to_string(e.grid));
 		v.push_back(std::to_string(e.path_when_zone_idle));
 		v.push_back(std::to_string(e.condition_id));
@@ -578,7 +567,6 @@ public:
 			v.push_back(std::to_string(e.heading));
 			v.push_back(std::to_string(e.respawn_time));
 			v.push_back(std::to_string(e.variance));
-			v.push_back(std::to_string(e.timeleft));
 			v.push_back(std::to_string(e.grid));
 			v.push_back(std::to_string(e.path_when_zone_idle));
 			v.push_back(std::to_string(e.condition_id));
