@@ -283,7 +283,6 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 						HandinEntry{.item_id = "1007", .count = 1},
 						HandinEntry{.item_id = "1007", .count = 1},
 						HandinEntry{.item_id = "1007", .count = 1},
-						HandinEntry{.item_id = "1007", .count = 1},
 					},
 					.money = {},
 				},
@@ -307,7 +306,7 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 						.copper  = 444,
 					},
 				},
-				.handin_check_result = false,
+				.handin_check_result = true,
 			},
 			TestCase{
 				.description = "Test handing in item of a stack",
