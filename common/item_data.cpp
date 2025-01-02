@@ -228,6 +228,12 @@ bool EQ::ItemData::IsPetUsable() const
 		return true;
 	}
 
+	// if it's a misc item and has slots, it's wearable
+	// this item type is conflated with many other item types
+	if (ItemClass == item::ItemTypeMisc && Slots != 0) {
+		return true;
+	}
+
 	switch (ItemType) {
 		case item::ItemType1HBlunt:
 		case item::ItemType1HSlash:
