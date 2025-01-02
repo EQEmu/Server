@@ -104,7 +104,7 @@ class MobMovementManager;
 class Zone {
 public:
 	static bool Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static = false);
-	static void Shutdown(bool quiet = false);
+	void Shutdown(bool quiet = false);
 
 	Zone(uint32 in_zoneid, uint32 in_instanceid, const char *in_short_name);
 	~Zone();
@@ -525,6 +525,7 @@ private:
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
 
 	uint32_t m_zone_server_id = 0;
+	void SaveZoneState();
 };
 
 #endif
