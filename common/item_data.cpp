@@ -237,6 +237,7 @@ bool EQ::ItemData::IsPetUsable() const
 		case item::ItemTypeMartial:
 		case item::ItemTypeShield:
 		case item::ItemTypeArmor:
+		case item::ItemTypeJewelry:
 			return true;
 		default:
 			return false;
