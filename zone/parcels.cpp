@@ -631,7 +631,13 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 		return;
 	}
 
-	auto p = m_parcels.find(parcel_in.parcel_slot_id);
+	auto p = std::find_if(
+		m_parcels.begin(),
+		m_parcels.end(),
+		[&](const std::pair<uint32, CharacterParcelsRepository::CharacterParcels> &x) {
+			return x.first == parcel_in.parcel_slot_id && x.second.item_id == parcel_in.parcel_item_id;
+		}
+	);
 	if (p != m_parcels.end()) {
 		uint32 item_id       = parcel_in.parcel_item_id;
 		uint32 item_quantity = p->second.quantity;
@@ -788,7 +794,6 @@ bool Client::DeleteParcel(uint32 parcel_id)
 		return false;
 	}
 
-	auto it = std::find_if(m_parcels.cbegin(), m_parcels.cend(), [&](const auto &x) { return x.second.id == parcel_id; });
 	SetParcelCount(GetParcelCount() - 1);
 
 	return true;
