@@ -854,6 +854,18 @@ void Client::CompleteConnect()
 	if (zone->GetZoneID() == Zones::GUILDHALL && GuildBanks)
 		GuildBanks->SendGuildBank(this);
 
+	if (zone->GetZoneID() == Zones::BAZAAR) {
+		if (IsTrader()) {
+			TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+
+			SendBecomeTraderToWorld(this, TraderOff);
+			SendTraderMode(TraderOff);
+
+			WithCustomer(0);
+			SetTrader(false);
+		}
+	}
+
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoD)
 		entity_list.SendFindableNPCList(this);
 

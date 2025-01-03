@@ -419,6 +419,16 @@ Client::~Client() {
 		}
 	}
 
+	if (IsTrader()) {
+		TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+
+		SendBecomeTraderToWorld(this, TraderOff);
+		SendTraderMode(TraderOff);
+
+		WithCustomer(0);
+		SetTrader(false);
+	}
+
 	Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
 	if (horse)
 		horse->Depop();
