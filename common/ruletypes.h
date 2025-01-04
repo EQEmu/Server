@@ -1075,6 +1075,8 @@ RULE_REAL(Custom, 	Tier2ItemDropRate, 						25, "Percentage chance that a drop w
 RULE_REAL(Custom, 	Tier1ItemDropRate, 						50, "Percentage chance that a drop will be upgraded to Tier 1. These percentages are independent of one another, but Tier2 is rolled first. Default value is twice as rare as Unmodified")
 RULE_BOOL(Custom, 	PowerSourceItemUpgrade, 		 		false, "Enable to add Power Source to all items which can be equipped by some race and class.")
 RULE_REAL(Custom, 	PowerSourceItemUpgradeRateScale, 		1.0, "Scale XP rate of items using this value.")
+RULE_REAL(Custom, 	PowerSourceItemTier1RateFloor,			1.0, "Smallest percentage item XP that a white can can award for a tier 1 item")
+RULE_REAL(Custom, 	PowerSourceItemTier2RateFloor,			0.1, "Smallest percentage item XP that a white can can award for a tier 2 item")
 
 // General QoL and Customizations
 RULE_BOOL(Custom, 	UseDynamicItemDiscoveryTags, 			true, "Enable appfending Discovered By: items using the charmfile method")
@@ -1110,10 +1112,6 @@ RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit r
 
 RULE_BOOL(Custom,   UseHasteForMeleeSkills, 				true, "Use Haste stat for activated melee skills")
 RULE_REAL(Custom, 	PetWeaponTuningMult, 					0.5, "Value added to weapon ratio for pet weapon usage")
-
-// Exploit Prevention
-RULE_BOOL(Custom, 	StripCharmItems, 						true, "Remove all items handed to charmed mobs when charm breaks. Additionally, return items handed to charmed mobs and give mob a copy.")
-
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
 RULE_CATEGORY_END()

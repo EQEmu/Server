@@ -698,11 +698,11 @@ float Client::GetBaseExpValueForKill(int conlevel, int target_tier, EQ::ItemInst
 
 	// Clamp based on tier
 	if (target_tier == 1) {
-		exp_value = EQ::Clamp(exp_value, 1.0f * clamp_scale, 5.0f * clamp_scale);
+		exp_value = EQ::Clamp(exp_value, RuleR(Custom, PowerSourceItemTier1RateFloor) * clamp_scale, 5.0f * clamp_scale);
 	}
 
 	if (target_tier == 2) {
-		exp_value = EQ::Clamp(exp_value, 0.1f * clamp_scale, 1.0f * clamp_scale);
+		exp_value = EQ::Clamp(exp_value, RuleR(Custom, PowerSourceItemTier2RateFloor) * clamp_scale, 1.0f * clamp_scale);
 	}
 
 	exp_value = exp_value * (database.LootBuffEnabled() ? 1.5 : 1);
@@ -969,13 +969,6 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 		if (m_pp.aapoints == aa_cap) {
 			MessageString(Chat::Red, AA_CAP);
 			aaexp = 0;
-			m_epp.perAA = 0;
-		} else if (m_pp.aapoints > aa_cap) {
-			//MessageString(Chat::Red, OVER_AA_CAP, fmt::format_int(aa_cap).c_str(), fmt::format_int(aa_cap).c_str());
-			Message(Chat::Red, fmt::format("Warning: You are currently over the earned Advancement point limit of {}. Please spend some of your stored AA points. You will not be able to earn any additional AA until you are below the cap.", aa_cap).c_str());
-			//m_pp.aapoints = aa_cap;
-			aaexp = 0;
-			m_epp.perAA = 0;
 		}
 	}
 
