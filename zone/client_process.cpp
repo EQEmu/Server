@@ -186,6 +186,16 @@ bool Client::Process() {
 				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
 			}
 
+			if (IsTrader()) {
+				TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+
+				SendBecomeTraderToWorld(this, TraderOff);
+				SendTraderMode(TraderOff);
+
+				WithCustomer(0);
+				SetTrader(false);
+			}
+
 			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 
 			RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
@@ -207,6 +217,16 @@ bool Client::Process() {
 			if (IsInAGuild()) {
 				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
 				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+			}
+
+			if (IsTrader()) {
+				TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+
+				SendBecomeTraderToWorld(this, TraderOff);
+				SendTraderMode(TraderOff);
+
+				WithCustomer(0);
+				SetTrader(false);
 			}
 
 			if (GetMerc())
@@ -667,6 +687,16 @@ bool Client::Process() {
 			if (IsInAGuild()) {
 				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
 				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+			}
+
+			if (IsTrader()) {
+				TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+
+				SendBecomeTraderToWorld(this, TraderOff);
+				SendTraderMode(TraderOff);
+
+				WithCustomer(0);
+				SetTrader(false);
 			}
 
 			return false;
