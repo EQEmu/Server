@@ -597,7 +597,6 @@ void NPC::AddLootDropFixed(
 
 	if (wear_change && outapp) {
 		entity_list.QueueClients(this, outapp);
-		safe_delete(outapp);
 	}
 
 	UpdateEquipmentLight();
@@ -606,6 +605,7 @@ void NPC::AddLootDropFixed(
 		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 	}
 
+	safe_delete(outapp);
 	safe_delete(inst);
 }
 
