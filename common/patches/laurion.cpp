@@ -335,6 +335,17 @@ namespace Laurion
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_CancelTrade)
+	{
+		ENCODE_LENGTH_EXACT(CancelTrade_Struct);
+		SETUP_DIRECT_ENCODE(CancelTrade_Struct, structs::CancelTrade_Struct);
+
+		OUT(fromid);
+		OUT(action);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_CastSpell)
 	{
 		ENCODE_LENGTH_EXACT(CastSpell_Struct);
@@ -2914,6 +2925,18 @@ namespace Laurion
 			eq[r].bVisible = 1;
 			eq[r].bUsable = 1;
 		}
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_Stun)
+	{
+		ENCODE_LENGTH_EXACT(Stun_Struct);
+		SETUP_DIRECT_ENCODE(Stun_Struct, structs::Stun_Struct);
+
+		OUT(duration);
+		eq->unknown005 = 163;
+		eq->unknown006 = 67;
 
 		FINISH_ENCODE();
 	}

@@ -989,6 +989,28 @@ namespace Laurion {
 			/*020*/ uint32  unknown020;
 			/*024*/
 		};
+
+		/*
+		** Cancel Trade struct
+		** Sent when a player cancels a trade
+		** Size: 8 bytes
+		** Used In: OP_CancelTrade
+		**
+		*/
+		struct CancelTrade_Struct {
+			/*00*/	uint32 fromid;
+			/*04*/	uint32 action;
+			/*08*/
+		};
+
+		struct Stun_Struct { // 8 bytes total
+			/*000*/	uint32	duration; // Duration of stun
+			/*004*/	uint8	unknown004; // seen 0
+			/*005*/	uint8	unknown005; // seen 163
+			/*006*/	uint8	unknown006; // seen 67
+			/*007*/	uint8	unknown007; // seen 0
+			/*008*/
+		};
 #pragma pack()
 
 	};	//end namespace structs
