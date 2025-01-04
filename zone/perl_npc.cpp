@@ -853,7 +853,7 @@ bool Perl_NPC_CheckHandin(
 
 	for (auto e : items_ref) {
 		const EQ::ItemInstance* i = static_cast<EQ::ItemInstance*>(e);
-		if (!i) {
+		if (!i || !i->GetItem()) {
 			continue;
 		}
 

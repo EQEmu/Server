@@ -4509,117 +4509,61 @@ bool NPC::CheckHandin(
 		}
 	}
 
+	// if we started the hand-in process, we want to use the hand-in items from the member variable hand-in bucket
+	auto &handin_items = !m_handin_started ? h.items : m_hand_in.items;
+
+	// remove items from the hand-in bucket that were used to fulfill the requirement
+	std::vector<HandinEntry> items_to_remove;
+
+	// check if the hand-in items fulfill the requirement
 	bool items_met = true;
-	if (h.items.size() == r.items.size() && !h.items.empty() && !r.items.empty()) {
-		for (const auto &r_item: r.items) {
-			bool      found = false;
-			for (auto &h_item: h.items) {
-				if (!normalize) {
-					if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
-						found = true;
-						LogNpcHandinDetail(
-							"{} >>>> Found required item [{}] ({}) count [{}]",
-							log_handin_prefix,
-							h_item.item->GetItem()->Name,
-							h_item.item_id,
-							h_item.count
-						);
-						break;
-					}
-				} else {
-					if ((Strings::ToInt(h_item.item_id) % 1000000) == Strings::ToInt(r_item.item_id) && h_item.count == r_item.count) {
-						found = true;
-						LogNpcHandinDetail(
-							"{} >>>> Found required item [{}] ({}) count [{}]",
-							log_handin_prefix,
-							h_item.item->GetItem()->Name,
-							h_item.item_id,
-							h_item.count
-						);
-						break;
+	if (!handin_items.empty() && !r.items.empty()) {
+		for (const auto &r_item : r.items) {
+			uint16 remaining_requirement = r_item.count;
+			bool fulfilled = false;
+
+			// Process the hand-in items using a standard for loop
+			for (size_t i = 0; i < handin_items.size() && remaining_requirement > 0; ++i) {
+				auto &h_item= handin_items[i];
+
+				// Check if the item IDs match (normalize if necessary)
+				bool id_match = (!normalize && h_item.item_id == r_item.item_id) ||
+								(normalize && (Strings::ToInt(h_item.item_id) % 1000000) == Strings::ToInt(r_item.item_id));
+
+				if (id_match) {
+					uint16 used_count = std::min(remaining_requirement, h_item.count);
+					h_item.count -= used_count;
+					remaining_requirement -= used_count;
+
+					LogNpcHandinDetail(
+						"{} >>>> Using item [{}] ({}) count [{}] to fulfill [{}], remaining requirement [{}]",
+						log_handin_prefix,
+						h_item.item->GetItem()->Name,
+						h_item.item_id,
+						used_count,
+						r_item.item_id,
+						remaining_requirement
+					);
+
+					// If the item is fully consumed, mark it for removal
+					if (h_item.count == 0) {
+						items_to_remove.push_back(h_item);
 					}
 				}
 			}
 
-			if (!found) {
+			// If we cannot fulfill the requirement, mark as not met
+			if (remaining_requirement > 0) {
+				LogNpcHandinDetail(
+					"{} >>>> Failed to fulfill requirement for [{}], remaining [{}]",
+					log_handin_prefix,
+					r_item.item_id,
+					remaining_requirement
+				);
 				items_met = false;
 				break;
-			}
-		}
-	}
-	// if we have items in the hand-in bucket and required items, but the individual counts don't match
-	// say we have 4 individual entries in hand-in but required has one entry for 4 items
-	// we need to check if the required item is in the hand-in bucket 4 times
-	// TestCase{
-	//	.description = "Test handing in 4 non-stacking helmets when 4 are required",
-	//	.hand_in = {
-	//		.items = {
-	//			HandinEntry{.item_id = "29062", .count = 1},
-	//			HandinEntry{.item_id = "29062", .count = 1},
-	//			HandinEntry{.item_id = "29062", .count = 1},
-	//			HandinEntry{.item_id = "29062", .count = 1},
-	//		},
-	//		.money = {},
-	//	},
-	//	.required = {
-	//		.items = {
-	//			HandinEntry{.item_id = "29062", .count = 4},
-	//		},
-	//		.money = {},
-	//	},
-	//	.returned = {
-	//		.items = {
-	//		},
-	//		.money = {},
-	//	},
-	//	.handin_check_result = true,
-	// },
-	else if (!h.items.empty() && !r.items.empty()) {
-		std::unordered_map<std::string, uint16> handin_aggregated;
-		std::unordered_map<std::string, uint16> required_aggregated;
-
-		if (!normalize) {
-			// Aggregate counts for hand-in items
-			for (const auto &h_item : h.items) {
-				handin_aggregated[h_item.item_id] += h_item.count;
-			}
-
-			// Aggregate counts for required items
-			for (const auto &r_item : r.items) {
-				required_aggregated[r_item.item_id] += r_item.count;
-			}
-		} else {
-			// Aggregate counts for hand-in items
-			for (const auto &h_item : h.items) {
-				handin_aggregated[std::to_string(Strings::ToInt(h_item.item_id) % 1000000)] += h_item.count;
-			}
-
-			// Aggregate counts for required items
-			for (const auto &r_item : r.items) {
-				required_aggregated[r_item.item_id] += r_item.count;
-			}
-		}
-
-		if (handin_aggregated.size() != required_aggregated.size()) {
-			items_met = false;
-		} else {
-			// Compare aggregated hand-in and required counts
-			bool met = false;
-			// Check if all required items are present and match exactly
-			for (const auto &[item_id, required_count] : required_aggregated) {
-				// Check if item exists in hand-in and has the exact count
-				if (handin_aggregated[item_id] != required_count) {
-					met = false; // Explicitly set false for clarity
-					break; // No need to continue if one mismatch is found
-				}
-				// If we reach here, it means current item matched
-				met = true;
-			}
-
-			items_met = met;
-
-			if (items_met) {
-				LogNpcHandin("Met aggregate item requirement case");
+			} else {
+				fulfilled = true;
 			}
 		}
 	}
@@ -4665,23 +4609,23 @@ bool NPC::CheckHandin(
 
 	// check if npc is guildmaster
 	if (IsGuildmaster()) {
-		for (const auto &h_item: m_hand_in.items) {
-			if (!h_item.item) {
+		for (const auto &remove_item : items_to_remove) {
+			if (!remove_item.item) {
 				continue;
 			}
 
-			if (!IsDisciplineTome(h_item.item->GetItem())) {
+			if (!IsDisciplineTome(remove_item.item->GetItem())) {
 				continue;
 			}
 
 			if (IsGuildmasterForClient(c)) {
-				c->TrainDiscipline(h_item.item->GetID());
+				c->TrainDiscipline(remove_item.item->GetID());
 				m_hand_in.items.erase(
 					std::remove_if(
 						m_hand_in.items.begin(),
 						m_hand_in.items.end(),
 						[&](const HandinEntry &i) {
-							bool removed = i.item_id == h_item.item_id;
+							bool removed = i.item == remove_item.item;
 							if (removed) {
 								LogNpcHandin(
 									"{} Hand-in success, removing discipline tome [{}] from hand-in bucket",
@@ -4765,15 +4709,13 @@ bool NPC::CheckHandin(
 
 	if (requirement_met) {
 		std::vector<std::string> log_entries = {};
-		for (const auto &h_item : h.items) {
+		for (const auto &remove_item: items_to_remove) {
 			m_hand_in.items.erase(
 				std::remove_if(
 					m_hand_in.items.begin(),
 					m_hand_in.items.end(),
 					[&](const HandinEntry &i) {
-						bool removed = i.item_id == h_item.item_id
-									   && i.count == h_item.count
-									   && i.item->GetSerialNumber() == h_item.item->GetSerialNumber();
+						bool removed = (remove_item.item == i.item);
 						if (removed) {
 							log_entries.emplace_back(
 								fmt::format(
@@ -4825,7 +4767,7 @@ bool NPC::CheckHandin(
 			m_hand_in.money.silver,
 			m_hand_in.money.copper
 		);
-		for (const auto &i: m_hand_in.items) {
+		for (const auto &i: items_to_remove) {
 			LogNpcHandin(
 				"{} Hand-in success, item [{}] ({}) count [{}]",
 				log_handin_prefix,
@@ -4880,7 +4822,7 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 		std::remove_if(
 			m_hand_in.items.begin(),
 			m_hand_in.items.end(),
-			[&](auto& i) {
+			[&](HandinEntry &i) {
 				if (i.item && i.item->GetItem() && !i.is_multiquest_item) {
 					return_items.emplace_back(
 						PlayerEvent::HandinEntry{
@@ -4891,6 +4833,12 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 							.charges = std::max(static_cast<uint16>(i.item->GetCharges()), static_cast<uint16>(1))
 						}
 					);
+
+					// If the item is stackable and the new charges don't match the original count
+					// set the charges to the original count
+					if (i.item->IsStackable() && i.item->GetCharges() != i.count) {
+						i.item->SetCharges(i.count);
+					}
 
 					c->PushItemOnCursor(*i.item, true);
 					LogNpcHandin("Hand-in failed, returning item [{}]", i.item->GetItem()->Name);
