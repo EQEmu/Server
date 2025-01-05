@@ -1067,7 +1067,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->DelayDeath += base_value;
 			break;
 		case SE_FrontalStunResist:
-			newbon->FrontalStunResist += base_value;
+			newbon->FrontalStunResist += std::min(200,base_value);
 			break;
 		case SE_ImprovedBindWound:
 			newbon->BindWound += base_value;
@@ -3452,7 +3452,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			//AA bonuses - implemented broadly into spell/item effects
 			case SE_FrontalStunResist:
-				new_bonus->FrontalStunResist += effect_value;
+				newbon->FrontalStunResist += std::min(200,effect_value);
 				break;
 
 			case SE_ImprovedBindWound:
