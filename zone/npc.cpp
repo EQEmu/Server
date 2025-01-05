@@ -61,6 +61,8 @@
 #else
 #include <stdlib.h>
 #include <pthread.h>
+#include <cereal/archives/json.hpp>
+
 #endif
 
 extern Zone* zone;
@@ -129,6 +131,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	  ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
+	  m_corpse_queue_timer(1000),
+	  m_corpse_queue_shutoff_timer(30000),
 	  classattack_timer(1000),
 	  monkattack_timer(1000),
 	  knightattack_timer(1000),
@@ -615,7 +619,41 @@ bool NPC::Process()
 		}
 	}
 
+	// zone state corpse creation timer
+	if (m_corpse_queue_timer.Check()) {
+		if (IsQueuedForCorpse()) {
+			LogInfo("NPC queued for corpse [{}] ({})", GetCleanName(), GetID());
+			auto decay_timer = m_corpse_decay_time;
+			uint16 corpse_id = GetID();
+			Death(this, GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
+			auto c = entity_list.GetCorpseByID(corpse_id);
+			if (c) {
+				c->UnLock();
+				c->SetDecayTimer(decay_timer);
+			}
+		}
+		m_corpse_queue_timer.Disable();
+		m_corpse_queue_shutoff_timer.Disable();
+	}
+
+	// shuts off the corpse queue timer if it is still running
+	if (m_corpse_queue_shutoff_timer.Check()) {
+		m_corpse_queue_timer.Disable();
+		m_corpse_queue_shutoff_timer.Disable();
+	}
+
 	if (tic_timer.Check()) {
+		if (IsQueuedForCorpse()) {
+			auto decay_timer = m_corpse_decay_time;
+			uint16 corpse_id = GetID();
+			Death(this, GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
+			auto c = entity_list.GetCorpseByID(corpse_id);
+			if (c) {
+				c->UnLock();
+				c->SetDecayTimer(decay_timer);
+			}
+		}
+
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TICK)) {
 			parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		}
@@ -4262,5 +4300,40 @@ bool NPC::FacesTarget()
 	const auto& v = Strings::Split(excluded_races_rule, ",");
 
 	return std::find(v.begin(), v.end(), std::to_string(GetBaseRace())) == v.end();
+}
+
+void NPC::AddLootStateData(const std::string& loot_data)
+{
+	LootStateData     l{};
+	std::stringstream ss;
+	{
+		ss << loot_data;
+		cereal::JSONInputArchive ar(ss);
+		l.serialize(ar);
+	}
+
+	AddLootCash(l.copper, l.silver, l.gold, l.platinum);
+
+	for (auto &e : l.entries) {
+		const auto *db_item = database.GetItem(e.item_id);
+		if (!db_item) {
+			continue;
+		}
+
+		const auto entries = zone->GetLootdropEntries(e.lootdrop_id);
+		if (entries.empty()) {
+			continue;
+		}
+
+		LootdropEntriesRepository::LootdropEntries lootdrop_entry;
+		for (auto &le: entries) {
+			if (e.item_id == le.item_id) {
+				lootdrop_entry = le;
+				break;
+			}
+		}
+
+		AddLootDrop(db_item, lootdrop_entry);
+	}
 }
 
