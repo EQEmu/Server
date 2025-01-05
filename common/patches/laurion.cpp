@@ -71,6 +71,7 @@ namespace Laurion
 	static inline uint32 LaurionToServerCorpseMainSlot(uint32 laurion_corpse_slot);
 	static inline uint32 LaurionToServerTypelessSlot(structs::TypelessInventorySlot_Struct laurion_slot, int16 laurion_type);
 	static inline structs::InventorySlot_Struct LaurionCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct laurion_slot);
+	static inline structs::CastSpellInventorySlot_Struct LaurionInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct laurion_slot);
 
 	// Item packet types
 	static item::ItemPacketType ServerToLaurionItemPacketType(ItemPacketType laurion_type);
