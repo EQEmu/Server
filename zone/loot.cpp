@@ -500,6 +500,7 @@ void NPC::AddLootDrop(
 		parse->EventNPC(EVENT_LOOT_ADDED, this, nullptr, "", 0, &args);
 	}
 
+	item->lootdrop_id = loot_drop.lootdrop_id;
 	m_loot_items.push_back(item);
 
 	if (found) {

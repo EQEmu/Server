@@ -438,6 +438,7 @@ public:
 	// loot
 	void LoadLootTable(const uint32 loottable_id);
 	void LoadLootTables(const std::vector<uint32> in_loottable_ids);
+	void LoadLootDrops(const std::vector<uint32> in_lootdrop_ids);
 	void ClearLootTables();
 	void ReloadLootTables();
 	LoottableRepository::Loottable *GetLootTable(const uint32 loottable_id);
@@ -516,6 +517,7 @@ private:
 	// Base Data
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
 	void SaveZoneState();
+	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 };
 
 #endif

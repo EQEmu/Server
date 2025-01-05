@@ -19,25 +19,28 @@
 class BaseZoneStateSpawnsRepository {
 public:
 	struct ZoneStateSpawns {
-		int64_t  id;
-		uint32_t zone_id;
-		uint32_t instance_id;
-		uint32_t npc_id;
-		uint32_t spawn2_id;
-		uint32_t spawngroup_id;
-		float    x;
-		float    y;
-		float    z;
-		float    heading;
-		uint32_t respawn_time;
-		uint32_t variance;
-		uint32_t grid;
-		int16_t  path_when_zone_idle;
-		uint16_t condition_id;
-		int16_t  condition_min_value;
-		int16_t  enabled;
-		uint16_t anim;
-		time_t   created_at;
+		int64_t     id;
+		uint32_t    zone_id;
+		uint32_t    instance_id;
+		int8_t      is_corpse;
+		uint32_t    decay_time;
+		uint32_t    npc_id;
+		uint32_t    spawn2_id;
+		uint32_t    spawngroup_id;
+		float       x;
+		float       y;
+		float       z;
+		float       heading;
+		uint32_t    respawn_time;
+		uint32_t    variance;
+		uint32_t    grid;
+		int16_t     path_when_zone_idle;
+		uint16_t    condition_id;
+		int16_t     condition_min_value;
+		int16_t     enabled;
+		uint16_t    anim;
+		std::string loot_data;
+		time_t      created_at;
 	};
 
 	static std::string PrimaryKey()
@@ -51,6 +54,8 @@ public:
 			"id",
 			"zone_id",
 			"instance_id",
+			"is_corpse",
+			"decay_time",
 			"npc_id",
 			"spawn2_id",
 			"spawngroup_id",
@@ -66,6 +71,7 @@ public:
 			"condition_min_value",
 			"enabled",
 			"anim",
+			"loot_data",
 			"created_at",
 		};
 	}
@@ -76,6 +82,8 @@ public:
 			"id",
 			"zone_id",
 			"instance_id",
+			"is_corpse",
+			"decay_time",
 			"npc_id",
 			"spawn2_id",
 			"spawngroup_id",
@@ -91,6 +99,7 @@ public:
 			"condition_min_value",
 			"enabled",
 			"anim",
+			"loot_data",
 			"UNIX_TIMESTAMP(created_at)",
 		};
 	}
@@ -135,6 +144,8 @@ public:
 		e.id                  = 0;
 		e.zone_id             = 0;
 		e.instance_id         = 0;
+		e.is_corpse           = 0;
+		e.decay_time          = 0;
 		e.npc_id              = 0;
 		e.spawn2_id           = 0;
 		e.spawngroup_id       = 0;
@@ -150,6 +161,7 @@ public:
 		e.condition_min_value = 0;
 		e.enabled             = 1;
 		e.anim                = 0;
+		e.loot_data           = "";
 		e.created_at          = 0;
 
 		return e;
@@ -190,22 +202,25 @@ public:
 			e.id                  = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.zone_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.instance_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.npc_id              = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.spawn2_id           = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.spawngroup_id       = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.x                   = row[6] ? strtof(row[6], nullptr) : 0;
-			e.y                   = row[7] ? strtof(row[7], nullptr) : 0;
-			e.z                   = row[8] ? strtof(row[8], nullptr) : 0;
-			e.heading             = row[9] ? strtof(row[9], nullptr) : 0;
-			e.respawn_time        = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.variance            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.grid                = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[13] ? static_cast<int16_t>(atoi(row[13])) : 0;
-			e.condition_id        = row[14] ? static_cast<uint16_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.condition_min_value = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
-			e.enabled             = row[16] ? static_cast<int16_t>(atoi(row[16])) : 1;
-			e.anim                = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
-			e.created_at          = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
+			e.is_corpse           = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.decay_time          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.npc_id              = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.spawn2_id           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.spawngroup_id       = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.x                   = row[8] ? strtof(row[8], nullptr) : 0;
+			e.y                   = row[9] ? strtof(row[9], nullptr) : 0;
+			e.z                   = row[10] ? strtof(row[10], nullptr) : 0;
+			e.heading             = row[11] ? strtof(row[11], nullptr) : 0;
+			e.respawn_time        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.variance            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.grid                = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.path_when_zone_idle = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
+			e.condition_id        = row[16] ? static_cast<uint16_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.condition_min_value = row[17] ? static_cast<int16_t>(atoi(row[17])) : 0;
+			e.enabled             = row[18] ? static_cast<int16_t>(atoi(row[18])) : 1;
+			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.loot_data           = row[20] ? row[20] : "";
+			e.created_at          = strtoll(row[21] ? row[21] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -241,22 +256,25 @@ public:
 
 		v.push_back(columns[1] + " = " + std::to_string(e.zone_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.instance_id));
-		v.push_back(columns[3] + " = " + std::to_string(e.npc_id));
-		v.push_back(columns[4] + " = " + std::to_string(e.spawn2_id));
-		v.push_back(columns[5] + " = " + std::to_string(e.spawngroup_id));
-		v.push_back(columns[6] + " = " + std::to_string(e.x));
-		v.push_back(columns[7] + " = " + std::to_string(e.y));
-		v.push_back(columns[8] + " = " + std::to_string(e.z));
-		v.push_back(columns[9] + " = " + std::to_string(e.heading));
-		v.push_back(columns[10] + " = " + std::to_string(e.respawn_time));
-		v.push_back(columns[11] + " = " + std::to_string(e.variance));
-		v.push_back(columns[12] + " = " + std::to_string(e.grid));
-		v.push_back(columns[13] + " = " + std::to_string(e.path_when_zone_idle));
-		v.push_back(columns[14] + " = " + std::to_string(e.condition_id));
-		v.push_back(columns[15] + " = " + std::to_string(e.condition_min_value));
-		v.push_back(columns[16] + " = " + std::to_string(e.enabled));
-		v.push_back(columns[17] + " = " + std::to_string(e.anim));
-		v.push_back(columns[18] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[3] + " = " + std::to_string(e.is_corpse));
+		v.push_back(columns[4] + " = " + std::to_string(e.decay_time));
+		v.push_back(columns[5] + " = " + std::to_string(e.npc_id));
+		v.push_back(columns[6] + " = " + std::to_string(e.spawn2_id));
+		v.push_back(columns[7] + " = " + std::to_string(e.spawngroup_id));
+		v.push_back(columns[8] + " = " + std::to_string(e.x));
+		v.push_back(columns[9] + " = " + std::to_string(e.y));
+		v.push_back(columns[10] + " = " + std::to_string(e.z));
+		v.push_back(columns[11] + " = " + std::to_string(e.heading));
+		v.push_back(columns[12] + " = " + std::to_string(e.respawn_time));
+		v.push_back(columns[13] + " = " + std::to_string(e.variance));
+		v.push_back(columns[14] + " = " + std::to_string(e.grid));
+		v.push_back(columns[15] + " = " + std::to_string(e.path_when_zone_idle));
+		v.push_back(columns[16] + " = " + std::to_string(e.condition_id));
+		v.push_back(columns[17] + " = " + std::to_string(e.condition_min_value));
+		v.push_back(columns[18] + " = " + std::to_string(e.enabled));
+		v.push_back(columns[19] + " = " + std::to_string(e.anim));
+		v.push_back(columns[20] + " = '" + Strings::Escape(e.loot_data) + "'");
+		v.push_back(columns[21] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -281,6 +299,8 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.zone_id));
 		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.is_corpse));
+		v.push_back(std::to_string(e.decay_time));
 		v.push_back(std::to_string(e.npc_id));
 		v.push_back(std::to_string(e.spawn2_id));
 		v.push_back(std::to_string(e.spawngroup_id));
@@ -296,6 +316,7 @@ public:
 		v.push_back(std::to_string(e.condition_min_value));
 		v.push_back(std::to_string(e.enabled));
 		v.push_back(std::to_string(e.anim));
+		v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -329,6 +350,8 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.zone_id));
 			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.is_corpse));
+			v.push_back(std::to_string(e.decay_time));
 			v.push_back(std::to_string(e.npc_id));
 			v.push_back(std::to_string(e.spawn2_id));
 			v.push_back(std::to_string(e.spawngroup_id));
@@ -344,6 +367,7 @@ public:
 			v.push_back(std::to_string(e.condition_min_value));
 			v.push_back(std::to_string(e.enabled));
 			v.push_back(std::to_string(e.anim));
+			v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -381,22 +405,25 @@ public:
 			e.id                  = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.zone_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.instance_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.npc_id              = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.spawn2_id           = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.spawngroup_id       = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.x                   = row[6] ? strtof(row[6], nullptr) : 0;
-			e.y                   = row[7] ? strtof(row[7], nullptr) : 0;
-			e.z                   = row[8] ? strtof(row[8], nullptr) : 0;
-			e.heading             = row[9] ? strtof(row[9], nullptr) : 0;
-			e.respawn_time        = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.variance            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.grid                = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[13] ? static_cast<int16_t>(atoi(row[13])) : 0;
-			e.condition_id        = row[14] ? static_cast<uint16_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.condition_min_value = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
-			e.enabled             = row[16] ? static_cast<int16_t>(atoi(row[16])) : 1;
-			e.anim                = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
-			e.created_at          = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
+			e.is_corpse           = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.decay_time          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.npc_id              = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.spawn2_id           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.spawngroup_id       = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.x                   = row[8] ? strtof(row[8], nullptr) : 0;
+			e.y                   = row[9] ? strtof(row[9], nullptr) : 0;
+			e.z                   = row[10] ? strtof(row[10], nullptr) : 0;
+			e.heading             = row[11] ? strtof(row[11], nullptr) : 0;
+			e.respawn_time        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.variance            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.grid                = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.path_when_zone_idle = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
+			e.condition_id        = row[16] ? static_cast<uint16_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.condition_min_value = row[17] ? static_cast<int16_t>(atoi(row[17])) : 0;
+			e.enabled             = row[18] ? static_cast<int16_t>(atoi(row[18])) : 1;
+			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.loot_data           = row[20] ? row[20] : "";
+			e.created_at          = strtoll(row[21] ? row[21] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -424,22 +451,25 @@ public:
 			e.id                  = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.zone_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.instance_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.npc_id              = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.spawn2_id           = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.spawngroup_id       = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.x                   = row[6] ? strtof(row[6], nullptr) : 0;
-			e.y                   = row[7] ? strtof(row[7], nullptr) : 0;
-			e.z                   = row[8] ? strtof(row[8], nullptr) : 0;
-			e.heading             = row[9] ? strtof(row[9], nullptr) : 0;
-			e.respawn_time        = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.variance            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.grid                = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[13] ? static_cast<int16_t>(atoi(row[13])) : 0;
-			e.condition_id        = row[14] ? static_cast<uint16_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.condition_min_value = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
-			e.enabled             = row[16] ? static_cast<int16_t>(atoi(row[16])) : 1;
-			e.anim                = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
-			e.created_at          = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
+			e.is_corpse           = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.decay_time          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.npc_id              = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.spawn2_id           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.spawngroup_id       = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.x                   = row[8] ? strtof(row[8], nullptr) : 0;
+			e.y                   = row[9] ? strtof(row[9], nullptr) : 0;
+			e.z                   = row[10] ? strtof(row[10], nullptr) : 0;
+			e.heading             = row[11] ? strtof(row[11], nullptr) : 0;
+			e.respawn_time        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.variance            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.grid                = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.path_when_zone_idle = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
+			e.condition_id        = row[16] ? static_cast<uint16_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.condition_min_value = row[17] ? static_cast<int16_t>(atoi(row[17])) : 0;
+			e.enabled             = row[18] ? static_cast<int16_t>(atoi(row[18])) : 1;
+			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.loot_data           = row[20] ? row[20] : "";
+			e.created_at          = strtoll(row[21] ? row[21] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -517,6 +547,8 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.zone_id));
 		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.is_corpse));
+		v.push_back(std::to_string(e.decay_time));
 		v.push_back(std::to_string(e.npc_id));
 		v.push_back(std::to_string(e.spawn2_id));
 		v.push_back(std::to_string(e.spawngroup_id));
@@ -532,6 +564,7 @@ public:
 		v.push_back(std::to_string(e.condition_min_value));
 		v.push_back(std::to_string(e.enabled));
 		v.push_back(std::to_string(e.anim));
+		v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -558,6 +591,8 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.zone_id));
 			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.is_corpse));
+			v.push_back(std::to_string(e.decay_time));
 			v.push_back(std::to_string(e.npc_id));
 			v.push_back(std::to_string(e.spawn2_id));
 			v.push_back(std::to_string(e.spawngroup_id));
@@ -573,6 +608,7 @@ public:
 			v.push_back(std::to_string(e.condition_min_value));
 			v.push_back(std::to_string(e.enabled));
 			v.push_back(std::to_string(e.anim));
+			v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
