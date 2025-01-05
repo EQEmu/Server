@@ -1845,11 +1845,11 @@ namespace RoF2
 			}
 		}
 
-		auto outapp     = new EQApplicationPacket(OP_GuildsList);
-		outapp->size    = packet_size;
-		outapp->pBuffer = buffer;
+		safe_delete_array(in->pBuffer);
 
-		dest->FastQueuePacket(&outapp);
+		in->pBuffer = buffer;
+		in->size    = packet_size;
+		dest->FastQueuePacket(&in);
 	}
 
 	ENCODE(OP_GuildTributeDonateItem)
