@@ -601,6 +601,12 @@ public:
 	bool HasProcessedHandinReturn() { return m_has_processed_handin_return; }
 	bool HandinStarted() { return m_handin_started; }
 
+	// zone state save
+	void AddLootStateData(const std::string& loot_data);
+	inline void SetQueuedToCorpse() { m_queued_for_corpse = true; }
+	inline uint32_t SetCorpseDecayTime(uint32_t decay_time) { return m_corpse_decay_time = decay_time; }
+	inline bool IsQueuedForCorpse() { return m_queued_for_corpse; }
+
 protected:
 
 	void HandleRoambox();
@@ -621,6 +627,12 @@ protected:
 	uint32    m_loot_gold;
 	uint32    m_loot_platinum;
 	LootItems m_loot_items;
+
+	// zone state
+	bool m_queued_for_corpse = false;
+	uint32_t m_corpse_decay_time = 0;
+	Timer m_corpse_queue_timer;
+	Timer m_corpse_queue_shutoff_timer;
 
 	std::list<NpcFactionEntriesRepository::NpcFactionEntries> faction_list;
 
