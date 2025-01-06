@@ -2209,7 +2209,7 @@ void Perl_Client_SendToInstance(Client* self, std::string instance_type, std::st
 	self->SendToInstance(instance_type, zone_short_name, instance_version, x, y, z, heading, instance_identifier, duration);
 }
 
-int Perl_Client_CountItem(Client* self, uint32 item_id)
+uint32 Perl_Client_CountItem(Client* self, uint32 item_id)
 {
 	return self->CountItem(item_id);
 }
@@ -2388,7 +2388,7 @@ void Perl_Client_AddItem(Client* self, perl::reference table_ref)
 		augment_four, augment_five, augment_six, attuned, slot_id);
 }
 
-int Perl_Client_CountAugmentEquippedByID(Client* self, uint32 item_id)
+uint32 Perl_Client_CountAugmentEquippedByID(Client* self, uint32 item_id)
 {
 	return self->GetInv().CountAugmentEquippedByID(item_id);
 }
@@ -2398,7 +2398,7 @@ bool Perl_Client_HasAugmentEquippedByID(Client* self, uint32 item_id)
 	return self->GetInv().HasAugmentEquippedByID(item_id);
 }
 
-int Perl_Client_CountItemEquippedByID(Client* self, uint32 item_id)
+uint32 Perl_Client_CountItemEquippedByID(Client* self, uint32 item_id)
 {
 	return self->GetInv().CountItemEquippedByID(item_id);
 }
@@ -3212,6 +3212,18 @@ Merc* Perl_Client_GetMerc(Client* self)
 	return self->GetMerc();
 }
 
+perl::array Perl_Client_GetInventorySlots(Client* self)
+{
+	perl::array result;
+	const auto& v = self->GetInventorySlots();
+
+	for (int i = 0; i < v.size(); ++i) {
+		result.push_back(v[i]);
+	}
+
+	return result;
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3426,6 +3438,7 @@ void perl_register_client()
 	package.add("GetInstanceID", &Perl_Client_GetInstanceID);
 	package.add("GetInstrumentMod", &Perl_Client_GetInstrumentMod);
 	package.add("GetInventory", &Perl_Client_GetInventory);
+	package.add("GetInventorySlots", &Perl_Client_GetInventorySlots);
 	package.add("GetInvulnerableEnvironmentDamage", &Perl_Client_GetInvulnerableEnvironmentDamage);
 	package.add("GetItemAt", &Perl_Client_GetItemAt);
 	package.add("GetItemCooldown", &Perl_Client_GetItemCooldown);

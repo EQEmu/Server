@@ -612,9 +612,9 @@ bool EQ::InventoryProfile::HasAugmentEquippedByID(uint32 item_id)
 	return has_equipped;
 }
 
-int EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
+uint32 EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
 {
-	int quantity = 0;
+	uint32 quantity = 0;
 	ItemInstance* item = nullptr;
 
 	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
@@ -643,9 +643,9 @@ bool EQ::InventoryProfile::HasItemEquippedByID(uint32 item_id)
 	return has_equipped;
 }
 
-int EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
+uint32 EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
 {
-	int quantity = 0;
+	uint32 quantity = 0;
 	ItemInstance* item = nullptr;
 
 	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {

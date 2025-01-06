@@ -43,8 +43,8 @@ public:
 	bool DeleteItem(int slot_id);
 	bool DeleteItem(int slot_id, int quantity);
 	bool CheckNoDrop(int slot_id);
-	int CountAugmentEquippedByID(uint32 item_id);
-	int CountItemEquippedByID(uint32 item_id);
+	uint32 CountAugmentEquippedByID(uint32 item_id);
+	uint32 CountItemEquippedByID(uint32 item_id);
 	Lua_ItemInst PopItem(int slot_id);
 	bool HasAugmentEquippedByID(uint32 item_id);
 	bool HasItemEquippedByID(uint32 item_id);

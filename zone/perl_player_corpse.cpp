@@ -161,7 +161,7 @@ bool Perl_Corpse_HasItem(Corpse* self, uint32_t item_id) // @categories Script U
 	return self->HasItem(item_id);
 }
 
-int Perl_Corpse_CountItem(Corpse* self, uint32_t item_id) // @categories Script Utility
+uint32 Perl_Corpse_CountItem(Corpse* self, uint32_t item_id) // @categories Script Utility
 {
 	return self->CountItem(item_id);
 }

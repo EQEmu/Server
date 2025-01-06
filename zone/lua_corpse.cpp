@@ -177,7 +177,7 @@ bool Lua_Corpse::HasItem(uint32 item_id) {
 	return self->HasItem(item_id);
 }
 
-uint16 Lua_Corpse::CountItem(uint32 item_id) {
+uint32 Lua_Corpse::CountItem(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->CountItem(item_id);
 }
@@ -226,7 +226,7 @@ luabind::scope lua_register_corpse() {
 	.def("AllowMobLoot", (void(Lua_Corpse::*)(Lua_Mob, uint8))&Lua_Corpse::AllowMobLoot)
 	.def("Bury", (void(Lua_Corpse::*)(void))&Lua_Corpse::Bury)
 	.def("CanMobLoot", (bool(Lua_Corpse::*)(int))&Lua_Corpse::CanMobLoot)
-	.def("CountItem", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::CountItem)
+	.def("CountItem", (uint32(Lua_Corpse::*)(uint32))&Lua_Corpse::CountItem)
 	.def("CountItems", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::CountItems)
 	.def("Delete", (void(Lua_Corpse::*)(void))&Lua_Corpse::Delete)
 	.def("Depop", (void(Lua_Corpse::*)(void))&Lua_Corpse::Depop)

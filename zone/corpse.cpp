@@ -1871,9 +1871,10 @@ bool Corpse::HasItem(uint32 item_id)
 	return false;
 }
 
-uint16 Corpse::CountItem(uint32 item_id)
+uint32 Corpse::CountItem(uint32 item_id)
 {
-	uint16 item_count = 0;
+	uint32 item_count = 0;
+
 	if (!database.GetItem(item_id)) {
 		return item_count;
 	}
@@ -1893,6 +1894,7 @@ uint16 Corpse::CountItem(uint32 item_id)
 			item_count += i->charges > 0 ? i->charges : 1;
 		}
 	}
+
 	return item_count;
 }
 
