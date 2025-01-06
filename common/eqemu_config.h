@@ -137,9 +137,9 @@ class EQEmuConfig
 		{
 
 		}
-		virtual ~EQEmuConfig() {}
 
 	public:
+		virtual ~EQEmuConfig() {}
 
 		// Produce a const singleton
 		static const EQEmuConfig *get()

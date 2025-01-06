@@ -43,11 +43,13 @@ class ZoneConfig : public EQEmuConfig {
 	}
 
 	// Load the config
-	static bool LoadConfig(const std::string& path = "") {
-		if (_zone_config != nullptr)
-			delete _zone_config;
-		_zone_config=new ZoneConfig;
-		_config=_zone_config;
+	static bool LoadConfig(const std::string &path = "")
+	{
+		safe_delete(_zone_config);
+		safe_delete(_config);
+
+		_zone_config = new ZoneConfig;
+		_config      = _zone_config;
 
 		return _config->parseFile(path);
 	}
