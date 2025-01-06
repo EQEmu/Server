@@ -31,8 +31,6 @@ void UCSConnection::SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConne
 			)
 		);
 	}
-
-	m_keepalive = std::make_unique<EQ::Timer>(1000, true, std::bind(&UCSConnection::OnKeepAlive, this, std::placeholders::_1));
 }
 
 const std::shared_ptr<EQ::Net::ServertalkServerConnection> &UCSConnection::GetConnection() const
@@ -91,14 +89,4 @@ void UCSConnection::SendMessage(const char *From, const char *Message)
 
 	SendPacket(pack);
 	safe_delete(pack);
-}
-
-void UCSConnection::OnKeepAlive(EQ::Timer *t)
-{
-	if (!connection) {
-		return;
-	}
-
-	ServerPacket pack(ServerOP_KeepAlive, 0);
-	connection->SendPacket(&pack);
 }
