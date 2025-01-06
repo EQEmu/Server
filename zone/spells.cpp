@@ -645,6 +645,11 @@ bool Mob::DoCastingChecksOnCaster(int32 spell_id, CastingSlot slot) {
 	return true;
 }
 
+struct SpellCheck {
+	std::function<bool()> condition; // The condition to check
+	std::function<bool()> action;    // The action if the condition fails
+};
+
 bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id) {
 
 	/*
@@ -656,178 +661,87 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 		If the spell is initiated from SpellFinished, then check at start of SpellFinished.
 	*/
 
-	bool bypass_casting_restrictions = IsClient() ? false : true;
+	bool bypass_casting_restrictions = !IsClient();
+	glm::vec3 position = glm::vec3(GetPosition());
 
-	/*
-		Zone ares that prevent blocked spells from being cast.
-		If on cast iniated then check any mob casting, if on spellfinished only check if is from client.
-	*/
-	if (
-		(check_on_casting && !bypass_casting_restrictions) ||
-		(!check_on_casting && IsClient())
-	) {
-		if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
-			if (CastToClient()->GetGM()) {
-				Message(
-					Chat::White,
-					fmt::format(
-						"Your GM flag allows you to bypass zone blocked spells and cast {} in this zone.",
-						Saylink::Silent(
-							fmt::format(
-								"#castspell {}",
-								spell_id
-							),
-							GetSpellName(spell_id)
-						)
-					).c_str()
-				);
+	auto gm_bypass_message = [&](const std::string& restriction) {
+		if (CastToClient()->GetGM()) {
+			Message(
+				Chat::White,
+				fmt::format(
+					"Your GM flag allows you to bypass {} and cast {}.",
+					restriction,
+					Saylink::Silent(
+						fmt::format("#castspell {}", spell_id),
+						GetSpellName(spell_id)
+					)
+				).c_str()
+			);
+			return true;
+		}
+		return false;
+	};
 
-				LogSpells("GM Cast Blocked Spell: [{}] (ID [{}])", GetSpellName(spell_id), spell_id);
-			} else {
-				const char* msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
-				if (msg) {
-					Message(Chat::Red, msg);
-					return false;
-				} else {
-					Message(Chat::Red, "You can't cast this spell here.");
-					return false;
-				}
-
-				LogSpells("Spell casting canceled [{}]: cannot cast in this zone location blocked spell.", spell_id);
+	std::vector<SpellCheck> spell_checks = {
+		// Blocked spells
+		{
+			[&]() { return !bypass_casting_restrictions && zone->IsSpellBlocked(spell_id, position); },
+			[&]() {
+				if (gm_bypass_message("zone blocked spells")) { return true; }
+				const char* msg = zone->GetSpellBlockedMessage(spell_id, position);
+				Message(Chat::Red, msg ? msg : "You can't cast this spell here.");
+				return false;
+			}
+		},
+		// Levitation restriction
+		{
+			[&]() { return !bypass_casting_restrictions && !zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate); },
+			[&]() {
+				if (gm_bypass_message("zone levitation restrictions")) { return true; }
+				Message(Chat::Red, "You have entered an area where levitation effects do not function.");
+				return false;
+			}
+		},
+		// Detrimental spells restriction
+		{
+			[&]() { return !bypass_casting_restrictions && IsDetrimentalSpell(spell_id) && !zone->CanDoCombat(); },
+			[&]() {
+				if (gm_bypass_message("no combat zone restrictions")) { return true; }
+				Message(Chat::Red, "You cannot cast detrimental spells here.");
+				return false;
+			}
+		},
+		// Daytime-only spells
+		{
+			[&]() { return !bypass_casting_restrictions && spells[spell_id].time_of_day == SpellTimeRestrictions::Day && !zone->zone_time.IsDayTime(); },
+			[&]() {
+				if (gm_bypass_message("spell daytime restrictions")) { return true; }
+				MessageString(Chat::Red, CAST_DAYTIME);
+				return false;
+			}
+		},
+		// Nighttime-only spells
+		{
+			[&]() { return !bypass_casting_restrictions && spells[spell_id].time_of_day == SpellTimeRestrictions::Night && !zone->zone_time.IsNightTime(); },
+			[&]() {
+				if (gm_bypass_message("spell nighttime restrictions")) return true;
+				MessageString(Chat::Red, CAST_NIGHTTIME);
+				return false;
+			}
+		},
+		// Outdoor-only spells
+		{
+			[&]() { return check_on_casting && !bypass_casting_restrictions && spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor(); },
+			[&]() {
+				if (gm_bypass_message("zone outdoor restrictions")) return true;
+				MessageString(Chat::Red, CAST_OUTDOORS);
+				return false;
 			}
 		}
-	}
+	};
 
-	// Zones where you cannot use levitate spells.
-	if (
-		!bypass_casting_restrictions &&
-		!zone->CanLevitate() &&
-		IsEffectInSpell(spell_id, SE_Levitate)
-	) { //check on spellfinished.
-		if (CastToClient()->GetGM()) {
-			Message(
-				Chat::White,
-				fmt::format(
-					"Your GM flag allows you to bypass zone levitation restrictions and cast {} in this zone.",
-					Saylink::Silent(
-						fmt::format(
-							"#castspell {}",
-							spell_id
-						),
-						GetSpellName(spell_id)
-					)
-				).c_str()
-			);
-		} else {
-			Message(Chat::Red, "You have entered an area where levitation effects do not function.");
-			LogSpells("Spell casting canceled [{}]: cannot cast levitation in this zone.", spell_id);
-			return false;
-		}
-	}
-
-	// Zones where you can not use detrimental spells.
-	if (
-		!bypass_casting_restrictions &&
-		IsDetrimentalSpell(spell_id) &&
-		!zone->CanDoCombat()
-	) {
-		if (CastToClient()->GetGM()) {
-			Message(
-				Chat::White,
-				fmt::format(
-					"Your GM flag allows you to bypass no combat zone restrictions and cast {} in this zone.",
-					Saylink::Silent(
-						fmt::format(
-							"#castspell {}",
-							spell_id
-						),
-						GetSpellName(spell_id)
-					)
-				).c_str()
-			);
-		} else {
-			Message(Chat::Red, "You cannot cast detrimental spells here.");
-			return false;
-		}
-	}
-
-	// Zones where you can not cast a spell that is for daytime only
-	if (
-		!bypass_casting_restrictions &&
-		spells[spell_id].time_of_day == SpellTimeRestrictions::Day &&
-		!zone->zone_time.IsDayTime()
-	) {
-		if (CastToClient()->GetGM()) {
-			Message(
-				Chat::White,
-				fmt::format(
-					"Your GM flag allows you to bypass spell daytime restrictions and cast {} during nighttime.",
-					Saylink::Silent(
-						fmt::format(
-							"#castspell {}",
-							spell_id
-						),
-						GetSpellName(spell_id)
-					)
-				).c_str()
-			);
-		} else {
-			MessageString(Chat::Red, CAST_DAYTIME);
-			return false;
-		}
-	}
-
-	// Zones where you can not cast a spell that is for nighttime only
-	if (
-		!bypass_casting_restrictions &&
-		spells[spell_id].time_of_day == SpellTimeRestrictions::Night &&
-		!zone->zone_time.IsNightTime()
-	) {
-		if (CastToClient()->GetGM()) {
-			Message(
-				Chat::White,
-				fmt::format(
-					"Your GM flag allows you to bypass spell nighttime restrictions and cast {} during daytime.",
-					Saylink::Silent(
-						fmt::format(
-							"#castspell {}",
-							spell_id
-						),
-						GetSpellName(spell_id)
-					)
-				).c_str()
-			);
-		} else {
-			MessageString(Chat::Red, CAST_NIGHTTIME);
-			return false;
-		}
-	}
-
-	// Zones where you can not cast out door only spells.
-	// This is only checked when casting is completed.
-	if (
-		check_on_casting &&
-		!bypass_casting_restrictions &&
-		spells[spell_id].zone_type == 1 &&
-		!zone->CanCastOutdoor()
-	) {
-		if (CastToClient()->GetGM()) {
-			Message(
-				Chat::White,
-				fmt::format(
-					"Your GM flag allows you to bypass zone outdoor restrictions and cast {} while indoors.",
-					Saylink::Silent(
-						fmt::format(
-							"#castspell {}",
-							spell_id
-						),
-						GetSpellName(spell_id)
-					)
-				).c_str()
-			);
-		} else {
-			MessageString(Chat::Red, CAST_OUTDOORS);
-			LogSpells("Spell casting canceled [{}]: cannot cast outdoors.", spell_id);
+	for (const auto& check : spell_checks) {
+		if (check.condition() && !check.action()) {
 			return false;
 		}
 	}
