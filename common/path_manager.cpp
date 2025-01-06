@@ -5,31 +5,19 @@
 #include "strings.h"
 
 #include <filesystem>
+
 namespace fs = std::filesystem;
-
-inline std::string striptrailingslash(const std::string &file_path)
-{
-	if (file_path.back() == '/' || file_path.back() == '\\') {
-		return file_path.substr(0, file_path.length() - 1);
-	}
-
-	return file_path;
-}
 
 void PathManager::LoadPaths()
 {
 	m_server_path = File::FindEqemuConfigPath();
-
-	if (!m_server_path.empty()) {
-		std::filesystem::current_path(m_server_path);
-	}
 
 	if (m_server_path.empty()) {
 		LogInfo("Failed to load server path");
 		return;
 	}
 
-	LogInfo("server [{}]", m_server_path);
+	std::filesystem::current_path(m_server_path);
 
 	if (!EQEmuConfig::LoadConfig()) {
 		LogError("Failed to load eqemu config");
@@ -38,66 +26,64 @@ void PathManager::LoadPaths()
 
 	const auto c = EQEmuConfig::get();
 
-	// maps
-	if (File::Exists(fs::path{m_server_path + "/" + c->MapDir}.string())) {
-		m_maps_path = fs::relative(fs::path{m_server_path + "/" + c->MapDir}).string();
-	}
-	else if (File::Exists(fs::path{m_server_path + "/maps"}.string())) {
-		m_maps_path = fs::relative(fs::path{m_server_path + "/maps"}).string();
-	}
-	else if (File::Exists(fs::path{m_server_path + "/Maps"}.string())) {
-		m_maps_path = fs::relative(fs::path{m_server_path + "/Maps"}).string();
-	}
+	auto resolve_path = [&](const std::string& dir, const std::vector<std::string>& fallback_dirs = {}) -> std::string {
+		// relative
+		if (File::Exists((fs::path{m_server_path} / dir).string())) {
+			return fs::relative(fs::path{m_server_path} / dir).lexically_normal().string();
+		}
 
-	// quests
-	if (File::Exists(fs::path{m_server_path + "/" + c->QuestDir}.string())) {
-		m_quests_path = fs::relative(fs::path{m_server_path + "/" + c->QuestDir}).string();
-	}
+		// absolute
+		if (File::Exists(fs::path{dir}.string())) {
+			return fs::absolute(fs::path{dir}).string();
+		}
 
-	// plugins
-	if (File::Exists(fs::path{m_server_path + "/" + c->PluginDir}.string())) {
-		m_plugins_path = fs::relative(fs::path{m_server_path + "/" + c->PluginDir}).string();
-	}
+		// fallback search options if specified
+		for (const auto& fallback : fallback_dirs) {
+			if (File::Exists((fs::path{m_server_path} / fallback).string())) {
+				return fs::relative(fs::path{m_server_path} / fallback).lexically_normal().string();
+			}
+		}
 
-	// lua_modules
-	if (File::Exists(fs::path{m_server_path + "/" + c->LuaModuleDir}.string())) {
-		m_lua_modules_path = fs::relative(fs::path{m_server_path + "/" + c->LuaModuleDir}).string();
-	}
+		// if all else fails, just set it to the config value
+		return dir;
+	};
 
-	// lua mods
-	if (File::Exists(fs::path{ m_server_path + "/mods" }.string())) {
-		m_lua_mods_path = fs::relative(fs::path{ m_server_path + "/mods" }).string();
-	}
+	m_maps_path          = resolve_path(c->MapDir, {"maps", "Maps"});
+	m_quests_path        = resolve_path(c->QuestDir);
+	m_plugins_path       = resolve_path(c->PluginDir);
+	m_lua_modules_path   = resolve_path(c->LuaModuleDir);
+	m_lua_mods_path      = resolve_path("mods");
+	m_patch_path         = resolve_path(c->PatchDir);
+	m_opcode_path        = resolve_path(c->OpcodeDir);
+	m_shared_memory_path = resolve_path(c->SharedMemDir);
+	m_log_path           = resolve_path(c->LogDir, {"logs"});
 
-	// patches
-	if (File::Exists(fs::path{m_server_path + "/" + c->PatchDir}.string())) {
-		m_patch_path = fs::relative(fs::path{m_server_path + "/" + c->PatchDir}).string();
-	}
+	// Log all paths in a loop
+	std::vector<std::pair<std::string, std::string>> paths = {
+		{"server", m_server_path},
+		{"logs", m_log_path},
+		{"lua mods", m_lua_mods_path},
+		{"lua_modules", m_lua_modules_path},
+		{"maps", m_maps_path},
+		{"patches", m_patch_path},
+		{"opcode", m_opcode_path},
+		{"plugins", m_plugins_path},
+		{"quests", m_quests_path},
+		{"shared_memory", m_shared_memory_path}
+	};
 
-	// patches
-	if (File::Exists(fs::path{ m_server_path + "/" + c->OpcodeDir }.string())) {
-		m_opcode_path = fs::relative(fs::path{ m_server_path + "/" + c->OpcodeDir }).string();
-	}
+	constexpr int name_width   = 15;
+	constexpr int path_width   = 0;
+	constexpr int break_length = 70;
 
-	// shared_memory_path
-	if (File::Exists(fs::path{m_server_path + "/" + c->SharedMemDir}.string())) {
-		m_shared_memory_path = fs::relative(fs::path{ m_server_path + "/" + c->SharedMemDir }).string();
+	std::cout << std::endl;
+	LogInfo("{}", Strings::Repeat("-", break_length));
+	for (const auto& [name, in_path] : paths) {
+		if (!in_path.empty()) {
+			LogInfo("{:>{}} > [{:<{}}]", name, name_width, in_path, path_width);
+		}
 	}
-
-	// logging path
-	if (File::Exists(fs::path{m_server_path + "/" + c->LogDir}.string())) {
-		m_log_path = fs::relative(fs::path{m_server_path + "/" + c->LogDir}).string();
-	}
-
-	LogInfo("logs path [{}]", m_log_path);
-	LogInfo("lua mods path [{}]", m_lua_mods_path);
-	LogInfo("lua_modules path [{}]", m_lua_modules_path);
-	LogInfo("maps path [{}]", m_maps_path);
-	LogInfo("patches path [{}]", m_patch_path);
-	LogInfo("opcode path [{}]", m_opcode_path);
-	LogInfo("plugins path [{}]", m_plugins_path);
-	LogInfo("quests path [{}]", m_quests_path);
-	LogInfo("shared_memory path [{}]", m_shared_memory_path);
+	LogInfo("{}", Strings::Repeat("-", break_length));
 }
 
 const std::string &PathManager::GetServerPath() const
