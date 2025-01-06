@@ -183,7 +183,7 @@ bool Client::Process() {
 			}
 			if (IsInAGuild()) {
 				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
-				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+				guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 			}
 
 			if (IsTrader()) {
@@ -216,7 +216,7 @@ bool Client::Process() {
 			Save();
 			if (IsInAGuild()) {
 				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
-				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+				guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 			}
 
 			if (IsTrader()) {
@@ -686,7 +686,7 @@ bool Client::Process() {
 			}
 			if (IsInAGuild()) {
 				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
-				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+				guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 			}
 
 			if (IsTrader()) {

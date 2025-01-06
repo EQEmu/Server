@@ -888,7 +888,7 @@ void Client::CompleteConnect()
 	if (IsInAGuild()) {
 		if (firstlogon == 1) {
 			guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
-			guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+			SendGuildMembersList();
 		}
 
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
