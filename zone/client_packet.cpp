@@ -7937,6 +7937,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 	SetGuildID(new_guild_id);
 	SendGuildList();
 	guild_mgr.MemberAdd(new_guild_id, CharacterID(), GetLevel(), GetClass(), GUILD_LEADER, GetZoneID(), GetName());
+	guild_mgr.SendGuildRefresh(new_guild_id, true, true, true, true);
 	guild_mgr.SendToWorldSendGuildList();
 	SendGuildSpawnAppearance();
 
