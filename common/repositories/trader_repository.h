@@ -40,15 +40,18 @@ public:
 		int32 char_zone_instance_id
 	);
 
-	static BulkTraders_Struct GetDistinctTraders(Database &db)
+	static BulkTraders_Struct GetDistinctTraders(Database &db, uint32 char_zone_instance_id, uint32 max_results)
 	{
 		BulkTraders_Struct                  all_entries{};
 		std::vector<DistinctTraders_Struct> distinct_traders;
 
-		auto results = db.QueryDatabase(
+		auto results = db.QueryDatabase(fmt::format(
 			"SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
 			"FROM trader AS t "
-			"JOIN character_data AS c ON t.char_id = c.id;"
+			"JOIN character_data AS c ON t.char_id = c.id "
+			"ORDER BY t.char_zone_instance_id = {} DESC LIMIT {};",
+			char_zone_instance_id,
+			max_results)
 		);
 
 		distinct_traders.reserve(results.RowCount());
