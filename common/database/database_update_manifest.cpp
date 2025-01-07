@@ -5791,7 +5791,8 @@ ALTER TABLE `trader`
 		.match       = "float",
 		.sql         = R"(
 ALTER TABLE `npc_types` MODIFY COLUMN `walkspeed` float NOT NULL DEFAULT 0;
-)"
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
