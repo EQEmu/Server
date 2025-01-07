@@ -3452,7 +3452,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			//AA bonuses - implemented broadly into spell/item effects
 			case SE_FrontalStunResist:
-				newbon->FrontalStunResist += std::min(200,effect_value);
+				new_bonus->FrontalStunResist += std::min(200,effect_value);
 				break;
 
 			case SE_ImprovedBindWound:
