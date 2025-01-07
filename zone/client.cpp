@@ -4193,8 +4193,11 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 				Message(Chat::Red, "Your spell casting specializations skills have been reset. "
 						"Only %i primary specialization skill is allowed.", MaxSpecializations);
 
-				for (int i = EQ::skills::SkillSpecializeAbjure; i <= EQ::skills::SkillSpecializeEvocation; ++i)
-					SetSkill((EQ::skills::SkillType)i, 1);
+				for (int i = EQ::skills::SkillSpecializeAbjure; i <= EQ::skills::SkillSpecializeEvocation; ++i) {
+					if (m_pp.skills[i] > 1) {
+						SetSkill((EQ::skills::SkillType) i, 1);
+					}
+				}
 
 				Save();
 
