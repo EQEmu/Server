@@ -5782,6 +5782,17 @@ CREATE INDEX idx_bot_expires ON data_buckets (bot_id, expires);
 ALTER TABLE `trader`
 	ADD COLUMN `char_zone_instance_id` INT NULL DEFAULT '0' AFTER `char_zone_id`;
 )"
+	},
+	ManifestEntry{
+		.version = 9287,
+		.description = "2024_11_26_bazaar_find_trader.sql",
+		.check       = "SHOW COLUMNS FROM `npc_types` LIKE 'walkspeed'",
+		.condition   = "missing",
+		.match       = "float",
+		.sql         = R"(
+ALTER TABLE `npc_types` MODIFY COLUMN `walkspeed` float NOT NULL DEFAULT 0;
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
