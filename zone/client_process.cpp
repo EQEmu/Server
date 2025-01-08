@@ -194,7 +194,7 @@ bool Client::Process() {
 		}
 
 		if (bot_camp_timer.Check()) {
-			Bot::BotOrderCampAll(this);
+			CampAllBots();
 		}
 
 		if (camp_timer.Check()) {
