@@ -471,7 +471,8 @@ void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
 
 void Database::DeleteInstance(uint16 instance_id)
 {
-//	InstanceListRepository::DeleteWhere(*this, fmt::format("id = {}", instance_id));
+	// I'm not sure why this isn't in here but we should add it in a later change and make sure it's tested
+	// InstanceListRepository::DeleteWhere(*this, fmt::format("id = {}", instance_id));
 	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id = {}", instance_id));
 	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
 	SpawnConditionValuesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
