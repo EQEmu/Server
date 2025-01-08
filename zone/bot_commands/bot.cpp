@@ -983,6 +983,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 	}
 
 	auto bot_character_level = c->GetBotRequiredLevel();
+
 	if (
 		bot_character_level >= 0 &&
 		c->GetLevel() < bot_character_level &&
@@ -1009,8 +1010,9 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 		bot_spawn_limit >= 0 &&
 		spawned_bot_count >= bot_spawn_limit &&
 		!c->GetGM()
-		) {
+	) {
 		std::string message;
+
 		if (bot_spawn_limit) {
 			message = fmt::format(
 				"You cannot have more than {} spawned bot{}.",
@@ -1034,6 +1036,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 
 	uint32 bot_id = 0;
 	uint8 bot_class = Class::None;
+
 	if (!database.botdb.LoadBotID(bot_name, bot_id, bot_class)) {
 		c->Message(
 			Chat::White,
@@ -1052,7 +1055,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 		bot_spawn_limit_class >= 0 &&
 		spawned_bot_count_class >= bot_spawn_limit_class &&
 		!c->GetGM()
-		) {
+	) {
 		std::string message;
 
 		if (bot_spawn_limit_class) {
@@ -1074,11 +1077,12 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 	}
 
 	auto bot_character_level_class = c->GetBotRequiredLevel(bot_class);
+
 	if (
 		bot_character_level_class >= 0 &&
 		c->GetLevel() < bot_character_level_class &&
 		!c->GetGM()
-		) {
+	) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -1113,6 +1117,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 	}
 
 	auto my_bot = Bot::LoadBot(bot_id);
+
 	if (!my_bot) {
 		c->Message(
 			Chat::White,
@@ -1134,6 +1139,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 				bot_id
 			).c_str()
 		);
+
 		safe_delete(my_bot);
 		return;
 	}

@@ -88,8 +88,22 @@ int Client::GetBotSpawnLimit(uint8 class_id)
 	);
 
 	auto bucket_value = GetBucket(bucket_name);
+
+	if (class_id && !bot_spawn_limit && bucket_value.empty()) {
+		const auto new_bucket_name = "bot_spawn_limit";
+
+		bucket_value = GetBucket(new_bucket_name);
+
+		if (!bucket_value.empty() && Strings::IsNumber(bucket_value)) {
+			bot_spawn_limit = Strings::ToInt(bucket_value);
+
+			return bot_spawn_limit;
+		}
+	}
+
 	if (!bucket_value.empty() && Strings::IsNumber(bucket_value)) {
 		bot_spawn_limit = Strings::ToInt(bucket_value);
+
 		return bot_spawn_limit;
 	}
 
@@ -101,6 +115,7 @@ int Client::GetBotSpawnLimit(uint8 class_id)
 		);
 
 		auto results = database.QueryDatabase(query); // use 'database' for non-bot table calls
+
 		if (!results.Success() || !results.RowCount()) {
 			return bot_spawn_limit;
 		}
