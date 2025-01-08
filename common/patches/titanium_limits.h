@@ -286,8 +286,8 @@ namespace Titanium
 
 		const size_t CHARACTER_CREATION_LIMIT = 8; // Hard-coded in client - DO NOT ALTER
 
-		const size_t SAY_LINK_BODY_SIZE = 45;
-		const uint32 MAX_GUILD_ID       = 1500;
+		const size_t SAY_LINK_BODY_SIZE       = 45;
+		const uint32 MAX_GUILD_ID             = 1500;
 
 	} /*constants*/
 
