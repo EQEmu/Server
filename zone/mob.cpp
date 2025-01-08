@@ -9477,3 +9477,61 @@ bool Mob::IsInGroupOrRaid(Mob *other, bool sameRaidGroup) {
 
 	return false;
 }
+
+bool Mob::DoLosChecks(Mob* who, Mob* other) {
+	if (!who->CheckLosFN(other) || !who->CheckWaterLoS(other)) {
+		if (who->CheckLosCheatExempt(who, other)) {
+			return true;
+		}
+
+		if (CheckLosCheat(who, other)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+bool Mob::CheckLosCheat(Mob* who, Mob* other) {
+	if (RuleB(Map, CheckForLoSCheat)) {
+		for (auto itr : entity_list.GetDoorsList()) {
+			Doors* d = itr.second;
+			if (d && !d->IsDoorOpen() && (d->GetTriggerType() == 255 || d->GetLockpick() != 0 || d->GetKeyItem() != 0 || d->GetNoKeyring() != 0)) {
+				if (DistanceNoZ(who->GetPosition(), d->GetPosition()) <= 50) {
+					auto who_to_door = DistanceNoZ(who->GetPosition(), d->GetPosition());
+					auto other_to_door = DistanceNoZ(other->GetPosition(), d->GetPosition());
+					auto who_to_other = DistanceNoZ(who->GetPosition(), other->GetPosition());
+					auto distance_difference = who_to_other - (who_to_door + other_to_door);
+
+					if (distance_difference >= (-1 * RuleR(Maps, RangeCheckForLoSCheat)) && distance_difference <= RuleR(Maps, RangeCheckForLoSCheat)) {
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool Mob::CheckLosCheatExempt(Mob* who, Mob* other) {
+	if (RuleB(Map, EnableLoSCheatExemptions)) {
+		glm::vec4 exempt_check_who;
+		glm::vec4 exempt_check_other;
+		/* This is an exmaple of how to configure exemptions for LoS checks.
+		if (zone->GetZoneID() == 222) { //PoEarthB
+			exempt_check_who.x = 2051; exempt_check_who.y = 407; exempt_check_who.z = -219; //Middle of councilman spawns
+			//check to be sure the player and the target are in the pit to PoEarthB
+			//if the player is inside the cove they cannot be higher than the ceiling (no exploiting from uptop)
+			//otherwise they can pass LoS checks even if they don't have true LoS
+			if (who->GetZ() <= -171 && other->GetZ() <= -171 && DistanceNoZ(other->GetPosition(), exempt_check_who) <= 800 && DistanceNoZ(who->GetPosition(), exempt_check_who) <= 800) {
+				return true;
+			}
+		}
+		*/
+	}
+
+	return false;
+}
