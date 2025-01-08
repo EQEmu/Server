@@ -132,4 +132,6 @@ void command_summonitem(Client *c, const Seperator *sep)
 			item_link
 		).c_str()
 	);
+
+	safe_delete(new_item);
 }
