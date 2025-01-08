@@ -25,6 +25,7 @@
 #include "string_ids.h"
 #include "lua_parser.h"
 #include "npc.h"
+#include "bot.h"
 
 #include <string.h>
 
