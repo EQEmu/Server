@@ -5172,7 +5172,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		// Bots without this skill shouldn't be 'checking' on this timer..let's just disable it and avoid the extra IsAttackAllowed() checks
 		// Note: this is done here instead of NPC::ctor() because taunt skill can be acquired during level ups (the timer is re-enabled in CalcBotStats())
 		if (!GetSkill(EQ::skills::SkillTaunt)) {
-
 			taunt_timer.Disable();
 			return;
 		}
@@ -5266,53 +5265,76 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	int bot_level = GetLevel();
 	int reuse = (TauntReuseTime * 1000); // Same as Bash and Kick
 	bool did_attack = false;
+
 	switch (GetClass()) {
 		case Class::Warrior:
-			if (bot_level >= RuleI(Combat, NPCBashKickLevel)) {
-				bool canBash = false;
-				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
-					canBash = true;
-
-				if (!canBash || zone->random.Int(0, 100) > 25)
-					skill_to_use = EQ::skills::SkillKick;
-				else
-					skill_to_use = EQ::skills::SkillBash;
-			}
-		case Class::Ranger:
-		case Class::Beastlord:
-			skill_to_use = EQ::skills::SkillKick;
-			break;
-		case Class::Berserker:
-			skill_to_use = EQ::skills::SkillFrenzy;
-			break;
 		case Class::Cleric:
 		case Class::ShadowKnight:
 		case Class::Paladin:
-			if (bot_level >= RuleI(Combat, NPCBashKickLevel)) {
-				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
+				if (
+					(GetBaseRace() == OGRE || GetBaseRace() == TROLL || GetBaseRace() == BARBARIAN) ||
+					(
+						GetSkill(EQ::skills::SkillBash) &&
+						(
+							(
+								m_inv.GetItem(EQ::invslot::slotSecondary) && 
+								m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield
+							) 
+							|| 
+							(
+								m_inv.GetItem(EQ::invslot::slotPrimary) && 
+								m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && 
+								GetAA(aa2HandBash) >= 1
+							)
+						)
+					)
+				) {
 					skill_to_use = EQ::skills::SkillBash;
+
+					break;
+				}
+
+				if (GetSkill(EQ::skills::SkillKick)) {
+					skill_to_use = EQ::skills::SkillKick;
+				}
+
+				break;
+		case Class::Ranger:
+		case Class::Beastlord:
+			if (GetSkill(EQ::skills::SkillKick)) {
+				skill_to_use = EQ::skills::SkillKick;
 			}
+
+			break;
+		case Class::Berserker:
+			if (GetSkill(EQ::skills::SkillFrenzy)) {
+				skill_to_use = EQ::skills::SkillFrenzy;
+			}
+
 			break;
 		case Class::Monk:
-			if (GetLevel() >= 30) {
+			if (GetSkill(EQ::skills::SkillFlyingKick)) {
 				skill_to_use = EQ::skills::SkillFlyingKick;
 			}
-			else if (GetLevel() >= 25) {
+			else if (GetSkill(EQ::skills::SkillDragonPunch)) {
 				skill_to_use = EQ::skills::SkillDragonPunch;
 			}
-			else if (GetLevel() >= 20) {
+			else if (GetSkill(EQ::skills::SkillEagleStrike)) {
 				skill_to_use = EQ::skills::SkillEagleStrike;
 			}
-			else if (GetLevel() >= 5) {
+			else if (GetSkill(EQ::skills::SkillRoundKick)) {
 				skill_to_use = EQ::skills::SkillRoundKick;
 			}
-			else {
+			else if (GetSkill(EQ::skills::SkillKick)) {
 				skill_to_use = EQ::skills::SkillKick;
 			}
 
 			break;
 		case Class::Rogue:
-			skill_to_use = EQ::skills::SkillBackstab;
+			if (GetSkill(EQ::skills::SkillBackstab)) {
+				skill_to_use = EQ::skills::SkillBackstab;
+			}
+
 			break;
 	}
 
