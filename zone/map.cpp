@@ -320,7 +320,7 @@ bool Map::Load(const std::string &filename)
 			}
 
 #ifdef USE_MAP_MMFS
-			if (v)
+			if (loaded_map_file)
 				return SaveMMF(filename, force_mmf_overwrite);
 #endif /*USE_MAP_MMFS*/
 
@@ -338,7 +338,7 @@ bool Map::Load(const std::string &filename)
 			}
 
 #ifdef USE_MAP_MMFS
-			if (v)
+			if (loaded_map_file)
 				return SaveMMF(filename, force_mmf_overwrite);
 #endif /*USE_MAP_MMFS*/
 
@@ -1064,7 +1064,7 @@ bool Map::LoadMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 	fclose(f);
 
 	std::vector<char> rm_buffer(rm_buffer_size);
-	uint32 v = InflateData(mmf_buffer.data(), mmf_buffer_size, rm_buffer.data(), rm_buffer_size);
+	uint32 v = EQ::InflateData(mmf_buffer.data(), mmf_buffer_size, rm_buffer.data(), rm_buffer_size);
 
 	if (imp) {
 		imp->rm->release();
@@ -1120,11 +1120,11 @@ bool Map::SaveMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 	}
 
 	uint32 rm_buffer_size = rm_buffer.size();
-	uint32 mmf_buffer_size = EstimateDeflateBuffer(rm_buffer.size());
+	uint32 mmf_buffer_size = EQ::EstimateDeflateBuffer(rm_buffer.size());
 
 	std::vector<char> mmf_buffer(mmf_buffer_size);
 
-	mmf_buffer_size = DeflateData(rm_buffer.data(), rm_buffer.size(), mmf_buffer.data(), mmf_buffer.size());
+	mmf_buffer_size = EQ::DeflateData(rm_buffer.data(), rm_buffer.size(), mmf_buffer.data(), mmf_buffer.size());
 	if (!mmf_buffer_size) {
 		LogInfo("Failed to save Map MMF file: [{}] - null MMF buffer size", mmf_file_name.c_str());
 		return false;

@@ -83,9 +83,9 @@ public:
 	void SendRankName(uint32 guild_id, uint32 rank, std::string rank_name);
 	void SendAllRankNames(uint32 guild_id, uint32 char_id);
 	BaseGuildManager::GuildInfo* GetGuildByGuildID(uint32 guild_id);
+	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation);
 
 protected:
-	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation);
 	virtual void SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid);
 	virtual void SendRankUpdate(uint32 CharID);
 	virtual void SendGuildDelete(uint32 guild_id);

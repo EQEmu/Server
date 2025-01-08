@@ -23,11 +23,6 @@ private:
 	inline std::string GetIP() const { return (connection && connection->Handle()) ? connection->Handle()->RemoteIP() : 0; }
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> connection;
 
-	/**
-	 * Keepalive
-	 */
-	std::unique_ptr<EQ::Timer> m_keepalive;
-	void OnKeepAlive(EQ::Timer *t);
 };
 
 #endif /*UCS_H_*/

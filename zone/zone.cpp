@@ -1100,7 +1100,12 @@ Zone::~Zone() {
 	if (worldserver.Connected()) {
 		worldserver.SetZoneData(0);
 	}
+
+	for (auto &e: npc_emote_list) {
+		safe_delete(e);
+	}
 	npc_emote_list.clear();
+
 	zone_point_list.Clear();
 	entity_list.Clear();
 	parse->ReloadQuests();
@@ -1257,7 +1262,6 @@ void Zone::ReloadStaticData() {
 
 	LoadVeteranRewards();
 	LoadAlternateCurrencies();
-	npc_emote_list.clear();
 	LoadNPCEmotes(&npc_emote_list);
 
 	//load the zone config file.
@@ -2575,6 +2579,10 @@ void Zone::DoAdventureActions()
 
 void Zone::LoadNPCEmotes(std::vector<NPC_Emote_Struct*>* v)
 {
+	for (auto &e: *v) {
+		safe_delete(e);
+	}
+
 	v->clear();
 
 	const auto& l = NpcEmotesRepository::All(content_db);

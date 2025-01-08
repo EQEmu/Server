@@ -615,7 +615,7 @@ bool Perl_NPC_HasItem(NPC* self, uint32 item_id) // @categories Script Utility
 	return self->HasItem(item_id);
 }
 
-int Perl_NPC_CountItem(NPC* self, uint32 item_id)
+uint32 Perl_NPC_CountItem(NPC* self, uint32 item_id)
 {
 	return self->CountItem(item_id);
 }

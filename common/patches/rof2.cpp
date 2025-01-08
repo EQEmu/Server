@@ -487,7 +487,7 @@ namespace RoF2
 					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.item_stat);                          //itemstat
 				}
 
-				safe_delete(in->pBuffer);
+				safe_delete_array(in->pBuffer);
 				in->size    = p_size;
 				in->pBuffer = (uchar *) buffer.get();
 				dest->QueuePacket(in);
@@ -508,7 +508,7 @@ namespace RoF2
 				eq->num_of_traders = emu->traders;
 				eq->num_of_items   = emu->items;
 
-				safe_delete(in->pBuffer);
+				safe_delete_array(in->pBuffer);
 				in->SetOpcode(OP_TraderShop);
 				in->size    = sizeof(structs::BazaarWelcome_Struct);
 				in->pBuffer = (uchar *) buffer.get();
@@ -1845,11 +1845,11 @@ namespace RoF2
 			}
 		}
 
-		auto outapp     = new EQApplicationPacket(OP_GuildsList);
-		outapp->size    = packet_size;
-		outapp->pBuffer = buffer;
+		safe_delete_array(in->pBuffer);
 
-		dest->FastQueuePacket(&outapp);
+		in->pBuffer = buffer;
+		in->size    = packet_size;
+		dest->FastQueuePacket(&in);
 	}
 
 	ENCODE(OP_GuildTributeDonateItem)
