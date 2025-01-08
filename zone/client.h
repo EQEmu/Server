@@ -2233,8 +2233,6 @@ private:
 	// full and partial mail key cache
 	std::string m_mail_key_full;
 	std::string m_mail_key;
-	std::vector<PickZoneEntry_Struct> m_zoneshard_request;
-	int64 m_zoneshard_session_id;
 public:
 	const std::string &GetMailKeyFull() const;
 	const std::string &GetMailKey() const;
