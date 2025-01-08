@@ -13037,19 +13037,19 @@ void Client::ClientToNpcAggroProcess()
 const std::vector<int16>& Client::GetInventorySlots()
 {
 	static const std::vector<std::pair<int16, int16>> slots = {
-		{ EQ::invslot::POSSESSIONS_BEGIN,     EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END },
-		{ EQ::invslot::BANK_BEGIN,            EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN,        EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN,     EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+		{EQ::invslot::POSSESSIONS_BEGIN,     EQ::invslot::POSSESSIONS_END},
+		{EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_END},
+		{EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END},
+		{EQ::invslot::BANK_BEGIN,            EQ::invslot::BANK_END},
+		{EQ::invbag::BANK_BAGS_BEGIN,        EQ::invbag::BANK_BAGS_END},
+		{EQ::invslot::SHARED_BANK_BEGIN,     EQ::invslot::SHARED_BANK_END},
+		{EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END},
 	};
 
 	static std::vector<int16> slot_ids;
 
 	if (slot_ids.empty()) {
-		for (const auto& [begin, end] : slots) {
+		for (const auto &[begin, end]: slots) {
 			for (int16 slot_id = begin; slot_id <= end; ++slot_id) {
 				slot_ids.emplace_back(slot_id);
 			}
@@ -13057,4 +13057,52 @@ const std::vector<int16>& Client::GetInventorySlots()
 	}
 
 	return slot_ids;
+}
+
+void Client::ShowZoneShardMenu()
+{
+	auto z = GetZone(GetZoneID());
+	if (z && !z->shard_at_player_count) {
+		return;
+	}
+
+	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, GetZoneID());
+	LogZoning("Zone sharding results count [{}]", results.size());
+
+	if (results.empty()) {
+		Message(Chat::White, "No zone shards found.");
+		return;
+	}
+
+	if (!results.empty()) {
+		Message(Chat::White, "Available Zone Shards:");
+	}
+
+	int number = 1;
+	for (auto &e: results) {
+		std::string teleport_link = Saylink::Silent(
+			fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
+			"Teleport"
+		);
+
+		std::string yours;
+		if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
+			teleport_link = "Teleport";
+			yours         = " (Yours)";
+		}
+
+		Message(
+			Chat::White, fmt::format(
+				" --> [{}] #{} {} ({}) [{}/{}] players {}",
+				teleport_link,
+				number,
+				z->long_name,
+				e.instance_id,
+				e.player_count,
+				z->shard_at_player_count,
+				yours
+			).c_str()
+		);
+		number++;
+	}
 }

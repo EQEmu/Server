@@ -80,6 +80,93 @@ public:
 
 		return l.empty() ? CharacterDataRepository::NewEntity() : l.front();
 	}
+
+	struct InstancePlayerCount {
+		int32_t instance_id;
+		uint32_t zone_id;
+		uint32_t player_count;
+	};
+
+	static std::vector<InstancePlayerCount> GetInstanceZonePlayerCounts(Database& db, int zone_id) {
+		std::vector<InstancePlayerCount> zone_player_counts;
+
+		uint64_t shard_instance_duration = 3155760000;
+
+		auto query = fmt::format(SQL(
+			SELECT
+				zone_id,
+				0 AS instance_id,
+				COUNT(id) AS player_count
+				FROM
+				character_data
+			WHERE
+				zone_instance = 0
+				AND zone_id = {}
+				AND last_login >= UNIX_TIMESTAMP(NOW()) - 600
+			GROUP BY
+				zone_id
+			ORDER BY
+				zone_id, player_count DESC
+		), zone_id);
+
+		auto results = db.QueryDatabase(query);
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			InstancePlayerCount e{};
+			e.zone_id      = std::stoi(row[0]);
+			e.instance_id  = 0;
+			e.player_count = std::stoi(row[2]);
+			zone_player_counts.push_back(e);
+		}
+
+		if (zone_player_counts.empty()) {
+			InstancePlayerCount e{};
+			e.zone_id      = zone_id;
+			e.instance_id  = 0;
+			e.player_count = 0;
+			zone_player_counts.push_back(e);
+		}
+
+		// duration 3155760000 is for shards explicitly
+		query = fmt::format(
+			SQL(
+				SELECT
+				i.id AS instance_id,
+				i.zone AS zone_id,
+				COUNT(c.id) AS player_count
+				FROM
+				instance_list  i
+				LEFT           JOIN
+				character_data c
+				ON
+				i.zone = c.zone_id
+				AND i.id = c.zone_instance
+				AND c.last_login >= UNIX_TIMESTAMP(NOW()) - 600
+				AND (i.start_time + i.duration >= UNIX_TIMESTAMP(NOW()) OR i.never_expires = 0)
+				AND i.duration = {}
+				WHERE
+				i.zone IS NOT NULL AND i.zone = {}
+				GROUP BY
+				i.id, i.zone, i.version
+				ORDER BY
+				i.id ASC;
+			), shard_instance_duration, zone_id
+		);
+
+		results = db.QueryDatabase(query);
+		if (!results.Success() || results.RowCount() == 0) {
+			return zone_player_counts;
+		}
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			InstancePlayerCount e{};
+			e.instance_id  = std::stoi(row[0]);
+			e.zone_id      = std::stoi(row[1]);
+			e.player_count = std::stoi(row[2]);
+			zone_player_counts.push_back(e);
+		}
+
+		return zone_player_counts;
+	}
 };
 
 #endif //EQEMU_CHARACTER_DATA_REPOSITORY_H

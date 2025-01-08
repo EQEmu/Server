@@ -778,6 +778,66 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		}
 	}
 
+	// zone sharding
+	if (zoneID == zd->zoneidnumber &&
+		instance_id == 0 &&
+		zd->shard_at_player_count > 0) {
+
+		bool found_shard = false;
+		auto results     = CharacterDataRepository::GetInstanceZonePlayerCounts(database, zoneID);
+
+		LogZoning("Zone sharding results count [{}]", results.size());
+
+		uint64_t shard_instance_duration = 3155760000;
+
+		for (auto &e: results) {
+			LogZoning(
+				"Zone sharding results [{}] ({}) instance_id [{}] player_count [{}]",
+				ZoneName(e.zone_id) ? ZoneName(e.zone_id) : "Unknown",
+				e.zone_id,
+				e.instance_id,
+				e.player_count
+			);
+
+			if (e.player_count < zd->shard_at_player_count) {
+				instance_id = e.instance_id;
+
+				database.AddClientToInstance(instance_id, CharacterID());
+
+				LogZoning(
+					"Client [{}] attempting zone to sharded zone > instance_id [{}] zone [{}] ({})",
+					GetCleanName(),
+					instance_id,
+					ZoneName(zoneID) ? ZoneName(zoneID) : "Unknown",
+					zoneID
+				);
+
+				found_shard = true;
+				break;
+			}
+		}
+
+		if (!found_shard) {
+			uint16 new_instance_id = 0;
+			database.GetUnusedInstanceID(new_instance_id);
+			database.CreateInstance(new_instance_id, zoneID, zd->version, shard_instance_duration);
+			database.AddClientToInstance(new_instance_id, CharacterID());
+			instance_id = new_instance_id;
+			LogZoning(
+				"Client [{}] creating new sharded zone > instance_id [{}] zone [{}] ({})",
+				GetCleanName(),
+				new_instance_id,
+				ZoneName(zoneID) ? ZoneName(zoneID) : "Unknown",
+				zoneID
+			);
+		}
+	}
+
+	// passed from zone shard request to normal zone
+	if (instance_id == -1) {
+		instance_id = 0;
+	}
+
 	LogInfo(
 		"Client [{}] zone_id [{}] instance_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
 		GetCleanName(),

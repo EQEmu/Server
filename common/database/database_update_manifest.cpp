@@ -5793,6 +5793,18 @@ ALTER TABLE `trader`
 ALTER TABLE `npc_types` MODIFY COLUMN `walkspeed` float NOT NULL DEFAULT 0;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9288,
+		.description = "2024_11_10_zone_player_partitioning.sql",
+		.check = "SHOW CREATE TABLE `zone`",
+		.condition = "missing",
+		.match = "shard_at_player_count",
+		.sql = R"(
+ALTER TABLE `zone`
+ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_idle`;
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
