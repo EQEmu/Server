@@ -46,7 +46,7 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 
 		struct HandinEntry {
 			std::string            item_id            = "0";
-			uint16                 count              = 0;
+			uint32                 count              = 0;
 			const EQ::ItemInstance *item              = nullptr;
 			bool                   is_multiquest_item = false; // state
 		};
@@ -397,9 +397,9 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 			},
 		};
 
-		std::map<std::string, uint16>         hand_ins;
-		std::map<std::string, uint16>         required;
-		std::vector<const EQ::ItemInstance *> items;
+		std::map<std::string, uint32>         hand_ins;
+		std::map<std::string, uint32>         required;
+		std::vector<EQ::ItemInstance *> items;
 
 		// turn this on to see debugging output
 		LogSys.log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;

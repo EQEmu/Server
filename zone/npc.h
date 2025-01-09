@@ -594,7 +594,7 @@ public:
 
 	struct HandinEntry {
 		std::string      item_id            = "0";
-		uint16           count              = 0;
+		uint32           count              = 0;
 		EQ::ItemInstance *item              = nullptr;
 		bool             is_multiquest_item = false; // state
 	};
@@ -619,9 +619,9 @@ public:
 	bool IsGuildmasterForClient(Client *c);
 	bool CheckHandin(
 		Client *c,
-		std::map<std::string, uint16> handin,
-		std::map<std::string, uint16> required,
-		std::vector<const EQ::ItemInstance *> items
+		std::map<std::string, uint32> handin,
+		std::map<std::string, uint32> required,
+		std::vector<EQ::ItemInstance *> items
 	);
 	Handin ReturnHandinItems(Client *c);
 	void ResetHandin();

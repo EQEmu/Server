@@ -767,24 +767,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			}
 		}
 
-		// Regardless of quest or non-quest NPC - No in combat trade completion
-		// is allowed.
-		if (tradingWith->CheckAggro(this)) {
-			for (EQ::ItemInstance *inst: items) {
-				if (!inst || !inst->GetItem()) {
-					continue;
-				}
-
-				tradingWith->SayString(TRADE_BACK, GetCleanName());
-				PushItemOnCursor(*inst, true);
-			}
-
-			items.clear();
-		}
-
-		// Only enforce trade rules if the NPC doesn't have an EVENT_TRADE
-		// subroutine.  That overrides all.
-		else if (!quest_npc) {
+		if (!quest_npc) {
 			for (auto &inst: items) {
 				if (!inst || !inst->GetItem()) {
 					continue;
@@ -850,15 +833,16 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 		for (int i = 0; i < 4; ++i) {
 			parse->AddVar(
-				fmt::format("{}.{}", currencies[i], tradingWith->GetNPCTypeID()).c_str(),
-				fmt::format("{}", amounts[i]).c_str()
+				fmt::format("{}.{}", currencies[i], tradingWith->GetNPCTypeID()),
+				fmt::format("{}", amounts[i])
 			);
 		}
 
-		if(tradingWith->GetAppearance() != eaDead) {
+		if (tradingWith->GetAppearance() != eaDead) {
 			tradingWith->FaceTarget(this);
 		}
 
+		// we cast to any to pass through the quest event system
 		std::vector<std::any> item_list(items.begin(), items.end());
 		for (EQ::ItemInstance *inst: items) {
 			if (!inst || !inst->GetItem()) {
@@ -868,7 +852,8 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 
 		m_external_handin_money_returned = {};
-		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
+		bool has_aggro = tradingWith->CheckAggro(this);
+		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE) && !has_aggro) {
 			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 			LogNpcHandinDetail("EVENT_TRADE triggered for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
@@ -881,13 +866,13 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		if (!handin_npc->HasProcessedHandinReturn()) {
 			if (!handin_npc->HandinStarted()) {
 				LogNpcHandinDetail("EVENT_TRADE did not process handin, calling ReturnHandinItems() for NPC [{}]", tradingWith->GetNPCTypeID());
-				std::map<std::string, uint16> handin = {
+				std::map<std::string, uint32> handin = {
 					{"copper",   trade->cp},
 					{"silver",   trade->sp},
 					{"gold",     trade->gp},
 					{"platinum", trade->pp}
 				};
-				std::vector<const EQ::ItemInstance *> list(items.begin(), items.end());
+
 				for (EQ::ItemInstance *inst: items) {
 					if (!inst || !inst->GetItem()) {
 						continue;
@@ -895,10 +880,9 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 					std::string item_id = fmt::format("{}", inst->GetItem()->ID);
 					handin[item_id] += inst->GetCharges();
-					item_list.emplace_back(inst);
 				}
 
-				handin_npc->CheckHandin(this, handin, {}, list);
+				handin_npc->CheckHandin(this, handin, {}, items);
 			}
 
 			handin_npc->ReturnHandinItems(this);

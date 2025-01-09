@@ -817,9 +817,9 @@ bool Perl_NPC_CheckHandin(
 	perl::hash handin   = handin_ref;
 	perl::hash required = required_ref;
 
-	std::map<std::string, uint16>        handin_map;
-	std::map<std::string, uint16>        required_map;
-	std::vector<const EQ::ItemInstance*> items;
+	std::map<std::string, uint32>        handin_map;
+	std::map<std::string, uint32>        required_map;
+	std::vector<EQ::ItemInstance*> items;
 
 	for (auto e: handin) {
 		if (!e.first) {
@@ -852,7 +852,7 @@ bool Perl_NPC_CheckHandin(
 	}
 
 	for (auto e : items_ref) {
-		const EQ::ItemInstance* i = static_cast<EQ::ItemInstance*>(e);
+		EQ::ItemInstance* i = static_cast<EQ::ItemInstance*>(e);
 		if (!i || !i->GetItem()) {
 			continue;
 		}
