@@ -133,10 +133,10 @@ void PlayerEventLogs::ProcessBatchQueue()
 	}
 
 	static std::map<uint32, uint32> counter{};
+	counter.clear();
 	for (auto const& e: m_record_batch_queue) {
 		counter[e.event_type_id]++;
 	}
-
 
 	BenchTimer benchmark;
 
