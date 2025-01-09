@@ -4512,19 +4512,31 @@ bool NPC::CheckHandin(
 	// if we started the hand-in process, we want to use the hand-in items from the member variable hand-in bucket
 	auto &handin_items = !m_handin_started ? h.items : m_hand_in.items;
 
+	for (auto &h_item: h.items) {
+		LogNpcHandinDetail(
+			"{} Hand-in item [{}] ({}) count [{}] is_multiquest_item [{}]",
+			log_handin_prefix,
+			h_item.item->GetItem()->Name,
+			h_item.item_id,
+			h_item.count,
+			h_item.is_multiquest_item
+		);
+	}
+
 	// remove items from the hand-in bucket that were used to fulfill the requirement
 	std::vector<HandinEntry> items_to_remove;
 
 	// check if the hand-in items fulfill the requirement
 	bool items_met = true;
 	if (!handin_items.empty() && !r.items.empty()) {
+		std::vector<HandinEntry> before_handin_state = handin_items;
 		for (const auto &r_item : r.items) {
 			uint32 remaining_requirement = r_item.count;
 			bool fulfilled = false;
 
 			// Process the hand-in items using a standard for loop
 			for (size_t i = 0; i < handin_items.size() && remaining_requirement > 0; ++i) {
-				auto &h_item= handin_items[i];
+				auto &h_item = handin_items[i];
 
 				// Check if the item IDs match (normalize if necessary)
 				bool id_match = (!normalize && h_item.item_id == r_item.item_id) ||
@@ -4566,6 +4578,13 @@ bool NPC::CheckHandin(
 				fulfilled = true;
 			}
 		}
+
+		// reset the hand-in items to the state prior to processing the hand-in
+		// if we failed to fulfill the requirement
+		if (!items_met) {
+			handin_items = before_handin_state;
+			items_to_remove.clear();
+		}
 	}
 	else if (h.items.empty() && r.items.empty()) { // no items required, money only
 		items_met = true;
@@ -4585,17 +4604,6 @@ bool NPC::CheckHandin(
 				}
 			}
 		}
-	}
-
-	for (auto &h_item: h.items) {
-		LogNpcHandinDetail(
-			"{} Hand-in item [{}] ({}) count [{}] is_multiquest_item [{}]",
-			log_handin_prefix,
-			h_item.item->GetItem()->Name,
-			h_item.item_id,
-			h_item.count,
-			h_item.is_multiquest_item
-		);
 	}
 
 	// in-case we trigger CheckHand-in multiple times, only set these once
