@@ -380,20 +380,21 @@ void Client::GoFish(bool guarantee, bool use_bait)
 
 				if (inst) {
 					if (player_event_logs.IsEventEnabled(PlayerEvent::FISH_SUCCESS)) {
-						auto e = PlayerEvent::FishSuccessEvent{ .item_id      = inst->GetItem()->ID,
-																.augment_1_id = inst->GetAugmentItemID(0),
-																.augment_2_id = inst->GetAugmentItemID(1),
-																.augment_3_id = inst->GetAugmentItemID(2),
-																.augment_4_id = inst->GetAugmentItemID(3),
-																.augment_5_id = inst->GetAugmentItemID(4),
-																.augment_6_id = inst->GetAugmentItemID(5),
-																.item_name    = inst->GetItem()->Name,
+						auto e = PlayerEvent::FishSuccessEvent{
+							.item_id      = inst->GetItem()->ID,
+							.augment_1_id = inst->GetAugmentItemID(0),
+							.augment_2_id = inst->GetAugmentItemID(1),
+							.augment_3_id = inst->GetAugmentItemID(2),
+							.augment_4_id = inst->GetAugmentItemID(3),
+							.augment_5_id = inst->GetAugmentItemID(4),
+							.augment_6_id = inst->GetAugmentItemID(5),
+							.item_name    = inst->GetItem()->Name,
 						};
 						RecordPlayerEventLog(PlayerEvent::FISH_SUCCESS, e);
 					}
 
 					if (parse->PlayerHasQuestSub(EVENT_FISH_SUCCESS)) {
-						std::vector<std::any> args = { inst };
+						std::vector<std::any> args = {inst};
 						parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
 					}
 				}

@@ -411,9 +411,9 @@ namespace PlayerEvent {
 
 	struct AAPurchasedEvent {
 		uint32 aa_id;
-		int32 aa_cost;
-		int32 aa_previous_id;
-		int32 aa_next_id;
+		int32  aa_cost;
+		int32  aa_previous_id;
+		int32  aa_next_id;
 
 		// cereal
 		template<class Archive>
@@ -1062,16 +1062,16 @@ namespace PlayerEvent {
 	};
 
 	struct GuildTributeDonateItem {
-		uint32      item_id;
-		uint32      augment_1_id;
-		uint32      augment_2_id;
-		uint32      augment_3_id;
-		uint32      augment_4_id;
-		uint32      augment_5_id;
-		uint32      augment_6_id;
-		int16       charges;
-		bool        attuned;
-		uint32 		guild_favor;
+		uint32 item_id;
+		uint32 augment_1_id;
+		uint32 augment_2_id;
+		uint32 augment_3_id;
+		uint32 augment_4_id;
+		uint32 augment_5_id;
+		uint32 augment_6_id;
+		int16  charges;
+		bool   attuned;
+		uint32 guild_favor;
 
 		// cereal
 		template<class Archive>
@@ -1091,8 +1091,8 @@ namespace PlayerEvent {
 	};
 
 	struct GuildTributeDonatePlat {
-		uint32      plat;
-		uint32 		guild_favor;
+		uint32 plat;
+		uint32 guild_favor;
 
 		// cereal
 		template<class Archive>
@@ -1200,7 +1200,7 @@ namespace PlayerEvent {
 				CEREAL_NVP(from_name),
 				CEREAL_NVP(note),
 				CEREAL_NVP(sent_date)
-				);
+			);
 		}
 	};
 
@@ -1261,14 +1261,16 @@ namespace PlayerEvent {
 		uint32      type;
 		std::string message;
 
-		template<class Archive> void serialize(Archive &ar)
+		template<class Archive>
+		void serialize(Archive &ar)
 		{
-			ar(CEREAL_NVP(to),
-			   CEREAL_NVP(from),
-			   CEREAL_NVP(guild_id),
-			   CEREAL_NVP(min_status),
-			   CEREAL_NVP(type),
-			   CEREAL_NVP(message)
+			ar(
+				CEREAL_NVP(to),
+				CEREAL_NVP(from),
+				CEREAL_NVP(guild_id),
+				CEREAL_NVP(min_status),
+				CEREAL_NVP(type),
+				CEREAL_NVP(message)
 			);
 		}
 	};
@@ -1277,47 +1279,47 @@ namespace PlayerEvent {
 #endif //EQEMU_PLAYER_EVENTS_H
 
 #define RecordPlayerEventLog(event_type, event_data) do {\
-	if (player_event_logs.IsEventEnabled(event_type)) {\
-		if (RuleB(Logging, PlayerEventsQSProcess)) {\
-			QServ->SendPacket(\
-				player_event_logs.RecordEvent(\
-					event_type,\
-					GetPlayerEvent(),\
-					event_data\
-				).get()\
-			);\
-		}                                                                                                          \
-		else {                                                                                                     \
-			worldserver.SendPacket(\
-				player_event_logs.RecordEvent(\
-					event_type,\
-					GetPlayerEvent(),\
-					event_data\
-				).get()\
-			);\
-		}\
-	}\
+    if (player_event_logs.IsEventEnabled(event_type)) {\
+        if (RuleB(Logging, PlayerEventsQSProcess)) {\
+            QServ->SendPacket(\
+                player_event_logs.RecordEvent(\
+                    event_type,\
+                    GetPlayerEvent(),\
+                    event_data\
+                ).get()\
+            );\
+        }                                                                                                          \
+        else {                                                                                                     \
+            worldserver.SendPacket(\
+                player_event_logs.RecordEvent(\
+                    event_type,\
+                    GetPlayerEvent(),\
+                    event_data\
+                ).get()\
+            );\
+        }\
+    }\
 } while (0)
 
 #define RecordPlayerEventLogWithClient(c, event_type, event_data) do {\
-	if (player_event_logs.IsEventEnabled(event_type)) {\
-		if (RuleB(Logging, PlayerEventsQSProcess)) {\
-			QServ->SendPacket(\
-				player_event_logs.RecordEvent(\
-					event_type,\
-					(c)->GetPlayerEvent(),\
-					event_data\
-				).get()\
-			);\
-		}\
-		else {\
-			worldserver.SendPacket(\
-				player_event_logs.RecordEvent(\
-					event_type,\
-					(c)->GetPlayerEvent(),\
-					event_data\
-				).get()\
-			);\
-		}\
-	}\
+    if (player_event_logs.IsEventEnabled(event_type)) {\
+        if (RuleB(Logging, PlayerEventsQSProcess)) {\
+            QServ->SendPacket(\
+                player_event_logs.RecordEvent(\
+                    event_type,\
+                    (c)->GetPlayerEvent(),\
+                    event_data\
+                ).get()\
+            );\
+        }\
+        else {\
+            worldserver.SendPacket(\
+                player_event_logs.RecordEvent(\
+                    event_type,\
+                    (c)->GetPlayerEvent(),\
+                    event_data\
+                ).get()\
+            );\
+        }\
+    }\
 } while (0)

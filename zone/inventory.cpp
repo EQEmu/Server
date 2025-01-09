@@ -764,16 +764,17 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		int i = 0;
 
 		if (player_event_logs.IsEventEnabled(PlayerEvent::DROPPED_ITEM)) {
-			auto e = PlayerEvent::DroppedItemEvent{ .item_id      = inst->GetID(),
-													.augment_1_id = inst->GetAugmentItemID(0),
-													.augment_2_id = inst->GetAugmentItemID(1),
-													.augment_3_id = inst->GetAugmentItemID(2),
-													.augment_4_id = inst->GetAugmentItemID(3),
-													.augment_5_id = inst->GetAugmentItemID(4),
-													.augment_6_id = inst->GetAugmentItemID(5),
-													.item_name    = inst->GetItem()->Name,
-													.slot_id      = slot_id,
-													.charges      = (uint32) inst->GetCharges()
+			auto e = PlayerEvent::DroppedItemEvent{
+				.item_id      = inst->GetID(),
+				.augment_1_id = inst->GetAugmentItemID(0),
+				.augment_2_id = inst->GetAugmentItemID(1),
+				.augment_3_id = inst->GetAugmentItemID(2),
+				.augment_4_id = inst->GetAugmentItemID(3),
+				.augment_5_id = inst->GetAugmentItemID(4),
+				.augment_6_id = inst->GetAugmentItemID(5),
+				.item_name    = inst->GetItem()->Name,
+				.slot_id      = slot_id,
+				.charges      = (uint32) inst->GetCharges()
 			};
 			RecordPlayerEventLog(PlayerEvent::DROPPED_ITEM, e);
 		}
@@ -1774,17 +1775,18 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				DeleteItemInInventory(EQ::invslot::slotCursor, 0, true);
 
 				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
-					auto e = PlayerEvent::DestroyItemEvent{ .item_id      = test_inst->GetItem()->ID,
-															.item_name    = test_inst->GetItem()->Name,
-															.charges      = test_inst->GetCharges(),
-															.augment_1_id = test_inst->GetAugmentItemID(0),
-															.augment_2_id = test_inst->GetAugmentItemID(1),
-															.augment_3_id = test_inst->GetAugmentItemID(2),
-															.augment_4_id = test_inst->GetAugmentItemID(3),
-															.augment_5_id = test_inst->GetAugmentItemID(4),
-															.augment_6_id = test_inst->GetAugmentItemID(5),
-															.attuned      = test_inst->IsAttuned(),
-															.reason       = "Duplicate lore item"
+					auto e = PlayerEvent::DestroyItemEvent{
+						.item_id      = test_inst->GetItem()->ID,
+						.item_name    = test_inst->GetItem()->Name,
+						.charges      = test_inst->GetCharges(),
+						.augment_1_id = test_inst->GetAugmentItemID(0),
+						.augment_2_id = test_inst->GetAugmentItemID(1),
+						.augment_3_id = test_inst->GetAugmentItemID(2),
+						.augment_4_id = test_inst->GetAugmentItemID(3),
+						.augment_5_id = test_inst->GetAugmentItemID(4),
+						.augment_6_id = test_inst->GetAugmentItemID(5),
+						.attuned      = test_inst->IsAttuned(),
+						.reason       = "Duplicate lore item"
 					};
 
 					RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
@@ -1804,17 +1806,18 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 			if (inst) {
 				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
-					auto e = PlayerEvent::DestroyItemEvent{ .item_id      = inst->GetItem()->ID,
-															.item_name    = inst->GetItem()->Name,
-															.charges      = inst->GetCharges(),
-															.augment_1_id = inst->GetAugmentItemID(0),
-															.augment_2_id = inst->GetAugmentItemID(1),
-															.augment_3_id = inst->GetAugmentItemID(2),
-															.augment_4_id = inst->GetAugmentItemID(3),
-															.augment_5_id = inst->GetAugmentItemID(4),
-															.augment_6_id = inst->GetAugmentItemID(5),
-															.attuned      = inst->IsAttuned(),
-															.reason       = "Client destroy cursor"
+					auto e = PlayerEvent::DestroyItemEvent{
+						.item_id      = inst->GetItem()->ID,
+						.item_name    = inst->GetItem()->Name,
+						.charges      = inst->GetCharges(),
+						.augment_1_id = inst->GetAugmentItemID(0),
+						.augment_2_id = inst->GetAugmentItemID(1),
+						.augment_3_id = inst->GetAugmentItemID(2),
+						.augment_4_id = inst->GetAugmentItemID(3),
+						.augment_5_id = inst->GetAugmentItemID(4),
+						.augment_6_id = inst->GetAugmentItemID(5),
+						.attuned      = inst->IsAttuned(),
+						.reason       = "Client destroy cursor"
 					};
 
 					RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
