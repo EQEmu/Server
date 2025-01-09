@@ -1320,7 +1320,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::LOOT_ITEM),
 				.table_name = "player_event_loot_items",
-				.next_id = PlayerEventLootItemsRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventLootItemsRepository::TableName()))
 			}
 		},
 		{
@@ -1328,7 +1328,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::MERCHANT_SELL),
 				.table_name = "player_event_merchant_sell",
-				.next_id = PlayerEventMerchantSellRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventMerchantSellRepository::TableName()))
 			}
 		},
 		{
@@ -1336,7 +1336,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::MERCHANT_PURCHASE),
 				.table_name = "player_event_merchant_purchase",
-				.next_id = PlayerEventMerchantPurchaseRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventMerchantPurchaseRepository::TableName()))
 			}
 		},
 		{
@@ -1344,7 +1344,8 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::NPC_HANDIN),
 				.table_name = "player_event_npc_handin",
-				.next_id = PlayerEventNpcHandinRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventNpcHandinRepository::TableName()))
+
 			}
 		},
 		{
@@ -1352,7 +1353,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::TRADE),
 				.table_name = "player_event_trade",
-				.next_id = PlayerEventTradeRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventTradeRepository::TableName()))
 			}
 		},
 		{
@@ -1360,7 +1361,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::SPEECH),
 				.table_name = "player_event_speech",
-				.next_id = PlayerEventSpeechRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventSpeechRepository::TableName()))
 			}
 		},
 		{
@@ -1368,7 +1369,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::KILLED_NPC),
 				.table_name = "player_event_killed_npc",
-				.next_id = PlayerEventKilledNpcRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventKilledNpcRepository::TableName()))
 			}
 		},
 		{
@@ -1376,7 +1377,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::KILLED_NAMED_NPC),
 				.table_name = "player_event_killed_named_npc",
-				.next_id = PlayerEventKilledNamedNpcRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventKilledNamedNpcRepository::TableName()))
 			}
 		},
 		{
@@ -1384,7 +1385,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::KILLED_RAID_NPC),
 				.table_name = "player_event_killed_raid_npc",
-				.next_id = PlayerEventKilledRaidNpcRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventKilledRaidNpcRepository::TableName()))
 			}
 		},
 		{
@@ -1392,7 +1393,7 @@ void PlayerEventLogs::LoadEtlIds()
 			{
 				.enabled = e(PlayerEvent::AA_PURCHASE),
 				.table_name = "player_event_aa_purchase",
-				.next_id = PlayerEventAaPurchaseRepository::GetNextAutoIncrementId(*m_database)
+				.next_id = static_cast<int64>(m_database->GetNextTableId(PlayerEventAaPurchaseRepository::TableName()))
 			}
 		}
 	};
