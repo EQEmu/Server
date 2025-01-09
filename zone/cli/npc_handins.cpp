@@ -13,11 +13,13 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 		return;
 	}
 
+	uint32 break_length = 50;
+
 	RegisterExecutablePlatform(EQEmuExePlatform::ExePlatformZoneSidecar);
 
-	LogInfo("----------------------------------------");
+	LogInfo("{}", Strings::Repeat("-", break_length));
 	LogInfo("Booting test zone for NPC handins");
-	LogInfo("----------------------------------------");
+	LogInfo("{}", Strings::Repeat("-", break_length));
 
 	Zone::Bootup(ZoneID("qrg"), 0, false);
 	zone->StopShutdownTimer();
@@ -25,9 +27,9 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 	entity_list.Process();
 	entity_list.MobProcess();
 
-	LogInfo("----------------------------------------");
-	LogInfo("Done booting test zone");
-	LogInfo("----------------------------------------");
+	LogInfo("{}", Strings::Repeat("-", break_length));
+	LogInfo("> Done booting test zone");
+	LogInfo("{}", Strings::Repeat("-", break_length));
 
 	Client *c       = new Client();
 	auto   npc_type = content_db.LoadNPCTypesData(754008);
@@ -41,8 +43,8 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 
 		entity_list.AddNPC(npc);
 
-		LogInfo("Spawned NPC [{}]", npc->GetCleanName());
-		LogInfo("Spawned client [{}]", c->GetCleanName());
+		LogInfo("> Spawned NPC [{}]", npc->GetCleanName());
+		LogInfo("> Spawned client [{}]", c->GetCleanName());
 
 		struct HandinEntry {
 			std::string            item_id            = "0";
@@ -283,6 +285,7 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 						HandinEntry{.item_id = "1007", .count = 1},
 						HandinEntry{.item_id = "1007", .count = 1},
 						HandinEntry{.item_id = "1007", .count = 1},
+						HandinEntry{.item_id = "1007", .count = 1},
 					},
 					.money = {},
 				},
@@ -294,7 +297,6 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 				},
 				.returned = {
 					.items = {
-						HandinEntry{.item_id = "1007", .count = 1},
 						HandinEntry{.item_id = "1007", .count = 1},
 						HandinEntry{.item_id = "1007", .count = 1},
 						HandinEntry{.item_id = "1007", .count = 1},
@@ -397,14 +399,14 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 			},
 		};
 
-		std::map<std::string, uint32>   hand_ins;
-		std::map<std::string, uint32>   required;
+		std::map<std::string, uint32>         hand_ins;
+		std::map<std::string, uint32>         required;
 		std::vector<EQ::ItemInstance *> items;
 
 		// turn this on to see debugging output
 		LogSys.log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;
 
-		std::cout << Strings::Repeat("-", 100) << std::endl;
+		LogInfo("{}", Strings::Repeat("-", break_length));
 
 		for (auto &test_case: test_cases) {
 			hand_ins.clear();
