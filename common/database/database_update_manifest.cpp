@@ -5824,7 +5824,7 @@ CREATE TABLE `player_event_loot_items` (
 	`item_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	`charges` INT(11) NULL DEFAULT NULL,
 	`augment_1_id` INT UNSIGNED NULL DEFAULT '0',
-	`augment_2_id` INT UNSIGNED NULL DEFAULT '0'`,
+	`augment_2_id` INT UNSIGNED NULL DEFAULT '0',
 	`augment_3_id` INT UNSIGNED NULL DEFAULT '0',
 	`augment_4_id` INT UNSIGNED NULL DEFAULT '0',
 	`augment_5_id` INT UNSIGNED NULL DEFAULT '0',
