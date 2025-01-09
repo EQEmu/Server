@@ -141,16 +141,25 @@ void PlayerEventLogs::ProcessBatchQueue()
 	BenchTimer benchmark;
 
 	EtlQueues etl_queues{};
-	etl_queues.trade.reserve(counter[PlayerEvent::TRADE] ? counter[PlayerEvent::TRADE] : 0);
-	etl_queues.speech.reserve(counter[PlayerEvent::SPEECH] ? counter[PlayerEvent::SPEECH] : 0);
-	etl_queues.loot_items.reserve(counter[PlayerEvent::LOOT_ITEM] ? counter[PlayerEvent::LOOT_ITEM] : 0);
-	etl_queues.killed_npc.reserve(counter[PlayerEvent::KILLED_NPC] ? counter[PlayerEvent::KILLED_NPC] : 0);
-	etl_queues.npc_handin.reserve(counter[PlayerEvent::NPC_HANDIN] ? counter[PlayerEvent::NPC_HANDIN] : 0);
-	etl_queues.aa_purchase.reserve(counter[PlayerEvent::AA_PURCHASE] ? counter[PlayerEvent::AA_PURCHASE] : 0);
-	etl_queues.merchant_sell.reserve(counter[PlayerEvent::MERCHANT_SELL] ? counter[PlayerEvent::MERCHANT_SELL] : 0);
-	etl_queues.killed_raid_npc.reserve(counter[PlayerEvent::KILLED_RAID_NPC] ? counter[PlayerEvent::KILLED_RAID_NPC] : 0);
-	etl_queues.killed_named_npc.reserve(counter[PlayerEvent::KILLED_NAMED_NPC] ? counter[PlayerEvent::KILLED_NAMED_NPC] : 0);
-	etl_queues.merchant_purchase.reserve(counter[PlayerEvent::MERCHANT_PURCHASE] ? counter[PlayerEvent::MERCHANT_PURCHASE] : 0);
+	for (const auto& [type, count] : counter) {
+		if (count > 0) {
+			switch (type) {
+				case PlayerEvent::TRADE: etl_queues.trade.reserve(count); break;
+				case PlayerEvent::SPEECH: etl_queues.speech.reserve(count); break;
+				case PlayerEvent::LOOT_ITEM: etl_queues.loot_items.reserve(count); break;
+				case PlayerEvent::KILLED_NPC: etl_queues.killed_npc.reserve(count); break;
+				case PlayerEvent::NPC_HANDIN: etl_queues.npc_handin.reserve(count); break;
+				case PlayerEvent::AA_PURCHASE: etl_queues.aa_purchase.reserve(count); break;
+				case PlayerEvent::MERCHANT_SELL: etl_queues.merchant_sell.reserve(count); break;
+				case PlayerEvent::KILLED_RAID_NPC: etl_queues.killed_raid_npc.reserve(count); break;
+				case PlayerEvent::KILLED_NAMED_NPC: etl_queues.killed_named_npc.reserve(count); break;
+				case PlayerEvent::MERCHANT_PURCHASE: etl_queues.merchant_purchase.reserve(count); break;
+				default:
+					LogPlayerEvents("Unknown event type [{}]", type);
+					break;
+			}
+		}
+	}
 
 	for (auto &r:m_record_batch_queue) {
 		if (m_settings[r.event_type_id].etl_enabled) {
@@ -548,67 +557,30 @@ void PlayerEventLogs::ProcessBatchQueue()
 		}
 	}
 
+	// Helper to flush and clear queues
+	auto flush_queue = [&](auto insert_many, auto& queue) {
+		if (!queue.empty()) {
+			insert_many(*m_database, queue);
+			queue.clear();
+		}
+	};
+
 	// flush many
 	PlayerEventLogsRepository::InsertMany(*m_database, m_record_batch_queue);
 
-	// flush detailed tables
-	if (!etl_queues.loot_items.empty()) {
-		PlayerEventLootItemsRepository::InsertMany(*m_database, etl_queues.loot_items);
-		etl_queues.loot_items.clear();
-	}
-
-	if (!etl_queues.merchant_sell.empty()) {
-		PlayerEventMerchantSellRepository::InsertMany(*m_database, etl_queues.merchant_sell);
-		etl_queues.merchant_sell.clear();
-	}
-
-	if (!etl_queues.merchant_purchase.empty()) {
-		PlayerEventMerchantPurchaseRepository::InsertMany(*m_database, etl_queues.merchant_purchase);
-		etl_queues.merchant_purchase.clear();
-	}
-
-	if (!etl_queues.npc_handin.empty()) {
-		PlayerEventNpcHandinRepository::InsertMany(*m_database, etl_queues.npc_handin);
-		etl_queues.npc_handin.clear();
-		if (!etl_queues.npc_handin_entries.empty()) {
-			PlayerEventNpcHandinEntriesRepository::InsertMany(*m_database, etl_queues.npc_handin_entries);
-			etl_queues.npc_handin_entries.clear();
-		}
-	}
-
-	if (!etl_queues.trade.empty()) {
-		PlayerEventTradeRepository::InsertMany(*m_database, etl_queues.trade);
-		etl_queues.trade.clear();
-		if (!etl_queues.trade_entries.empty()) {
-			PlayerEventTradeEntriesRepository::InsertMany(*m_database, etl_queues.trade_entries);
-			etl_queues.trade_entries.clear();
-		}
-	}
-
-	if (!etl_queues.speech.empty()) {
-		PlayerEventSpeechRepository::InsertMany(*m_database, etl_queues.speech);
-		etl_queues.speech.clear();
-	}
-
-	if (!etl_queues.killed_npc.empty()) {
-		PlayerEventKilledNpcRepository::InsertMany(*m_database, etl_queues.killed_npc);
-		etl_queues.killed_npc.clear();
-	}
-
-	if (!etl_queues.killed_named_npc.empty()) {
-		PlayerEventKilledNamedNpcRepository::InsertMany(*m_database, etl_queues.killed_named_npc);
-		etl_queues.killed_named_npc.clear();
-	}
-
-	if (!etl_queues.killed_raid_npc.empty()) {
-		PlayerEventKilledRaidNpcRepository::InsertMany(*m_database, etl_queues.killed_raid_npc);
-		etl_queues.killed_raid_npc.clear();
-	}
-
-	if (!etl_queues.aa_purchase.empty()) {
-		PlayerEventAaPurchaseRepository::InsertMany(*m_database, etl_queues.aa_purchase);
-		etl_queues.aa_purchase.clear();
-	}
+	// flush etl queues
+	flush_queue(PlayerEventLootItemsRepository::InsertMany, etl_queues.loot_items);
+	flush_queue(PlayerEventMerchantSellRepository::InsertMany, etl_queues.merchant_sell);
+	flush_queue(PlayerEventMerchantPurchaseRepository::InsertMany, etl_queues.merchant_purchase);
+	flush_queue(PlayerEventNpcHandinRepository::InsertMany, etl_queues.npc_handin);
+	flush_queue(PlayerEventNpcHandinEntriesRepository::InsertMany, etl_queues.npc_handin_entries);
+	flush_queue(PlayerEventTradeRepository::InsertMany, etl_queues.trade);
+	flush_queue(PlayerEventTradeEntriesRepository::InsertMany, etl_queues.trade_entries);
+	flush_queue(PlayerEventSpeechRepository::InsertMany, etl_queues.speech);
+	flush_queue(PlayerEventKilledNpcRepository::InsertMany, etl_queues.killed_npc);
+	flush_queue(PlayerEventKilledNamedNpcRepository::InsertMany, etl_queues.killed_named_npc);
+	flush_queue(PlayerEventKilledRaidNpcRepository::InsertMany, etl_queues.killed_raid_npc);
+	flush_queue(PlayerEventAaPurchaseRepository::InsertMany, etl_queues.aa_purchase);
 
 	LogPlayerEventsDetail(
 		"Processing batch player event log queue of [{}] took [{}]",
