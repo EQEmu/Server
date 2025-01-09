@@ -559,6 +559,46 @@ public:
 	bool CanPathTo(float x, float y, float z);
 
 	void DoNpcToNpcAggroScan();
+
+	// hand-ins
+	bool CanPetTakeItem(const EQ::ItemInstance *inst);
+
+	struct HandinEntry {
+		std::string      item_id            = "0";
+		uint32           count              = 0;
+		EQ::ItemInstance *item              = nullptr;
+		bool             is_multiquest_item = false; // state
+	};
+
+	struct HandinMoney {
+		uint32 platinum = 0;
+		uint32 gold     = 0;
+		uint32 silver   = 0;
+		uint32 copper   = 0;
+	};
+
+	struct Handin {
+		std::vector<HandinEntry> original_items = {}; // this is what the player originally handed in, never modified
+		std::vector<HandinEntry> items          = {}; // items can be removed from this set as successful handins are made
+		HandinMoney              original_money = {}; // this is what the player originally handed in, never modified
+		HandinMoney              money          = {}; // money can be removed from this set as successful handins are made
+	};
+
+	// NPC Hand-in
+	bool IsMultiQuestEnabled() { return m_multiquest_enabled; }
+	void MultiQuestEnable() { m_multiquest_enabled = true; }
+	bool IsGuildmasterForClient(Client *c);
+	bool CheckHandin(
+		Client *c,
+		std::map<std::string, uint32> handin,
+		std::map<std::string, uint32> required,
+		std::vector<EQ::ItemInstance *> items
+	);
+	Handin ReturnHandinItems(Client *c);
+	void ResetHandin();
+	bool HasProcessedHandinReturn() { return m_has_processed_handin_return; }
+	bool HandinStarted() { return m_handin_started; }
+
 protected:
 
 	void HandleRoambox();
@@ -700,6 +740,15 @@ protected:
 	bool raid_target;
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
+	// NPC Hand-in
+	bool m_multiquest_enabled          = false;
+	bool m_handin_started              = false;
+	bool m_has_processed_handin_return = false;
+
+	// this is the working handin data from the player
+	// items can be decremented from this as each successful
+	// check is ran in scripts, the remainder is what is returned
+	Handin m_hand_in = {};
 
 private:
 	uint32              m_loottable_id;

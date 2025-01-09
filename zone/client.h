@@ -255,6 +255,7 @@ public:
 	#include "client_packet.h"
 
 	Client(EQStreamInterface * ieqs);
+	Client(); // mocking / testing
 	~Client();
 
 	void ReconnectUCS();
@@ -1868,6 +1869,21 @@ public:
 	uint32 GetBandolierItemID(uint8 bandolier_slot, uint8 slot_id);
 	std::string GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id);
 
+	// this is used to prevent things like quest::givecash and AddMoneyToPP
+	// from double giving money back to players in scripts when return_items
+	// also gives money back to players
+	struct ExternalHandinMoneyReturned {
+		uint64 copper;
+		uint64 silver;
+		uint64 gold;
+		uint64 platinum;
+		std::string return_source;
+	};
+private:
+	ExternalHandinMoneyReturned m_external_handin_money_returned = {};
+public:
+	ExternalHandinMoneyReturned GetExternalHandinMoneyReturned() { return m_external_handin_money_returned; }
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
@@ -2317,7 +2333,6 @@ private:
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
 	void PlayerTradeEventLog(Trade *t, Trade *t2);
-	void NPCHandinEventLog(Trade* t, NPC* n);
 
 	// full and partial mail key cache
 	std::string m_mail_key_full;

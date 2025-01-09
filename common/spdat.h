@@ -20,6 +20,7 @@
 
 #include "classes.h"
 #include "skills.h"
+#include "item_data.h"
 
 #define SPELL_UNKNOWN 0xFFFF
 #define POISON_PROC 0xFFFE
@@ -651,8 +652,8 @@ enum SpellTypes : uint32
 	SpellType_PreCombatBuffSong      = (1 << 21)
 };
 
-namespace BotSpellTypes 
-{ 
+namespace BotSpellTypes
+{
 	constexpr uint16	Nuke                       = 0;
 	constexpr uint16	RegularHeal                = 1;
 	constexpr uint16	Root                       = 2;
@@ -1913,5 +1914,6 @@ bool IsResistanceOnlySpell(uint16 spell_id);
 bool IsDamageShieldOnlySpell(uint16 spell_id);
 bool IsDamageShieldAndResistSpell(uint16 spell_id);
 bool IsHateSpell(uint16 spell_id);
+bool IsDisciplineTome(const EQ::ItemData* item);
 
 #endif

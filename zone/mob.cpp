@@ -8648,7 +8648,7 @@ bool Mob::IsInGroupOrRaid(Mob* other, bool same_raid_group) {
 		auto other_raid_group = other_raid->GetGroup(other->GetCleanName());
 
 		if (
-			raid_group == RAID_GROUPLESS || 
+			raid_group == RAID_GROUPLESS ||
 			other_raid_group == RAID_GROUPLESS ||
 			(same_raid_group && raid_group != other_raid_group)
 		) {
@@ -8712,7 +8712,7 @@ bool Mob::CheckLosCheat(Mob* other) {
 					auto other_to_door = DistanceNoZ(other->GetPosition(), d->GetPosition());
 					auto who_to_other = DistanceNoZ(GetPosition(), other->GetPosition());
 					auto distance_difference = who_to_other - (who_to_door + other_to_door);
-				
+
 					if (distance_difference >= (-1 * RuleR(Maps, RangeCheckForLoSCheat)) && distance_difference <= RuleR(Maps, RangeCheckForLoSCheat)) {
 						return false;
 					}
@@ -8724,7 +8724,8 @@ bool Mob::CheckLosCheat(Mob* other) {
 	return true;
 }
 
-bool Mob::CheckLosCheatExempt(Mob* other) {
+bool Mob::CheckLosCheatExempt(Mob* other)
+{
 	if (RuleB(Map, EnableLoSCheatExemptions)) {
 		/* This is an exmaple of how to configure exemptions for LoS checks.
 		glm::vec4 exempt_check_who;
@@ -8746,4 +8747,28 @@ bool Mob::CheckLosCheatExempt(Mob* other) {
 	}
 
 	return false;
+}
+
+bool Mob::IsGuildmaster() const {
+	switch (GetClass()) {
+		case Class::WarriorGM:
+		case Class::ClericGM:
+		case Class::PaladinGM:
+		case Class::RangerGM:
+		case Class::ShadowKnightGM:
+		case Class::DruidGM:
+		case Class::MonkGM:
+		case Class::BardGM:
+		case Class::RogueGM:
+		case Class::ShamanGM:
+		case Class::NecromancerGM:
+		case Class::WizardGM:
+		case Class::MagicianGM:
+		case Class::EnchanterGM:
+		case Class::BeastlordGM:
+		case Class::BerserkerGM:
+			return true;
+		default:
+			return false;
+	}
 }

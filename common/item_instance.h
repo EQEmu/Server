@@ -305,6 +305,7 @@ namespace EQ
 		int GetItemSkillsStat(EQ::skills::SkillType skill, bool augments = false) const;
 		uint32 GetItemGuildFavor() const;
 		std::vector<uint32> GetAugmentIDs() const;
+		std::vector<std::string> GetAugmentNames() const;
 		static void AddGUIDToMap(uint64 existing_serial_number);
 		static void ClearGUIDMap();
 
