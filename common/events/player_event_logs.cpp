@@ -68,7 +68,7 @@ void PlayerEventLogs::Init()
 		if (is_missing_in_database && is_implemented && !is_deprecated) {
 			LogInfo("[New] PlayerEvent [{}] ({})", PlayerEvent::EventName[i], i);
 
-			auto c           = PlayerEventLogSettingsRepository::NewEntity();
+			auto c = PlayerEventLogSettingsRepository::NewEntity();
 			c.id             = i;
 			c.event_name     = PlayerEvent::EventName[i];
 			c.event_enabled  = m_settings[i].event_enabled;
@@ -134,26 +134,46 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	static std::map<uint32, uint32> counter{};
 	counter.clear();
-	for (auto const& e: m_record_batch_queue) {
+	for (auto const &e: m_record_batch_queue) {
 		counter[e.event_type_id]++;
 	}
 
 	BenchTimer benchmark;
 
 	EtlQueues etl_queues{};
-	for (const auto& [type, count] : counter) {
+	for (const auto &[type, count]: counter) {
 		if (count > 0) {
 			switch (type) {
-				case PlayerEvent::TRADE: etl_queues.trade.reserve(count); break;
-				case PlayerEvent::SPEECH: etl_queues.speech.reserve(count); break;
-				case PlayerEvent::LOOT_ITEM: etl_queues.loot_items.reserve(count); break;
-				case PlayerEvent::KILLED_NPC: etl_queues.killed_npc.reserve(count); break;
-				case PlayerEvent::NPC_HANDIN: etl_queues.npc_handin.reserve(count); break;
-				case PlayerEvent::AA_PURCHASE: etl_queues.aa_purchase.reserve(count); break;
-				case PlayerEvent::MERCHANT_SELL: etl_queues.merchant_sell.reserve(count); break;
-				case PlayerEvent::KILLED_RAID_NPC: etl_queues.killed_raid_npc.reserve(count); break;
-				case PlayerEvent::KILLED_NAMED_NPC: etl_queues.killed_named_npc.reserve(count); break;
-				case PlayerEvent::MERCHANT_PURCHASE: etl_queues.merchant_purchase.reserve(count); break;
+				case PlayerEvent::TRADE:
+					etl_queues.trade.reserve(count);
+					break;
+				case PlayerEvent::SPEECH:
+					etl_queues.speech.reserve(count);
+					break;
+				case PlayerEvent::LOOT_ITEM:
+					etl_queues.loot_items.reserve(count);
+					break;
+				case PlayerEvent::KILLED_NPC:
+					etl_queues.killed_npc.reserve(count);
+					break;
+				case PlayerEvent::NPC_HANDIN:
+					etl_queues.npc_handin.reserve(count);
+					break;
+				case PlayerEvent::AA_PURCHASE:
+					etl_queues.aa_purchase.reserve(count);
+					break;
+				case PlayerEvent::MERCHANT_SELL:
+					etl_queues.merchant_sell.reserve(count);
+					break;
+				case PlayerEvent::KILLED_RAID_NPC:
+					etl_queues.killed_raid_npc.reserve(count);
+					break;
+				case PlayerEvent::KILLED_NAMED_NPC:
+					etl_queues.killed_named_npc.reserve(count);
+					break;
+				case PlayerEvent::MERCHANT_PURCHASE:
+					etl_queues.merchant_purchase.reserve(count);
+					break;
 				default:
 					LogPlayerEvents("Unknown event type [{}]", type);
 					break;
@@ -161,404 +181,234 @@ void PlayerEventLogs::ProcessBatchQueue()
 		}
 	}
 
-	for (auto &r:m_record_batch_queue) {
+	// Helper to deserialize event data
+	auto Deserialize = [](const std::string &data, auto &out) {
+		std::stringstream        ss(data);
+		cereal::JSONInputArchive ar(ss);
+		out.serialize(ar);
+	};
+
+	// Helper to assign ETL table ID
+	auto AssignEtlId = [&](
+		PlayerEventLogsRepository::PlayerEventLogs &r,
+		PlayerEvent::EventType type
+	) {
+		if (m_etl_settings.contains(type)) {
+			r.etl_table_id = m_etl_settings.at(type).next_id++;
+		}
+	};
+
+	// Define event processors
+	std::unordered_map<PlayerEvent::EventType, std::function<void(PlayerEventLogsRepository::PlayerEventLogs &)>> event_processors = {
+		{
+			PlayerEvent::EventType::LOOT_ITEM,         [&](PlayerEventLogsRepository::PlayerEventLogs &r) {
+			PlayerEvent::LootItemEvent                           in{};
+			PlayerEventLootItemsRepository::PlayerEventLootItems out{};
+			Deserialize(r.event_data, in);
+
+			out.charges      = in.charges;
+			out.corpse_name  = in.corpse_name;
+			out.item_id      = in.item_id;
+			out.item_name    = in.item_name;
+			out.augment_1_id = in.augment_1_id;
+			out.augment_2_id = in.augment_2_id;
+			out.augment_3_id = in.augment_3_id;
+			out.augment_4_id = in.augment_4_id;
+			out.augment_5_id = in.augment_5_id;
+			out.augment_6_id = in.augment_6_id;
+			out.npc_id       = in.npc_id;
+			out.created_at   = r.created_at;
+
+			AssignEtlId(r, PlayerEvent::EventType::LOOT_ITEM);
+			etl_queues.loot_items.push_back(out);
+		}
+		},
+		{
+			PlayerEvent::EventType::MERCHANT_SELL,     [&](PlayerEventLogsRepository::PlayerEventLogs &r) {
+			PlayerEvent::MerchantSellEvent                             in{};
+			PlayerEventMerchantSellRepository::PlayerEventMerchantSell out{};
+			Deserialize(r.event_data, in);
+
+			out.npc_id                  = in.npc_id;
+			out.merchant_name           = in.merchant_name;
+			out.merchant_type           = in.merchant_type;
+			out.item_id                 = in.item_id;
+			out.item_name               = in.item_name;
+			out.charges                 = in.charges;
+			out.cost                    = in.cost;
+			out.alternate_currency_id   = in.alternate_currency_id;
+			out.player_money_balance    = in.player_money_balance;
+			out.player_currency_balance = in.player_currency_balance;
+			out.created_at              = r.created_at;
+
+			AssignEtlId(r, PlayerEvent::EventType::MERCHANT_SELL);
+			etl_queues.merchant_sell.push_back(out);
+		}},
+		{
+			PlayerEvent::EventType::MERCHANT_PURCHASE, [&](PlayerEventLogsRepository::PlayerEventLogs &r) {
+			PlayerEvent::MerchantPurchaseEvent                                 in{};
+			PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase out{};
+			Deserialize(r.event_data, in);
+
+			out.npc_id                  = in.npc_id;
+			out.merchant_name           = in.merchant_name;
+			out.merchant_type           = in.merchant_type;
+			out.item_id                 = in.item_id;
+			out.item_name               = in.item_name;
+			out.charges                 = in.charges;
+			out.cost                    = in.cost;
+			out.alternate_currency_id   = in.alternate_currency_id;
+			out.player_money_balance    = in.player_money_balance;
+			out.player_currency_balance = in.player_currency_balance;
+			out.created_at              = r.created_at;
+
+			AssignEtlId(r, PlayerEvent::EventType::MERCHANT_PURCHASE);
+			etl_queues.merchant_purchase.push_back(out);
+		}},
+		{
+			PlayerEvent::EventType::NPC_HANDIN,        [&](PlayerEventLogsRepository::PlayerEventLogs &r) {
+			PlayerEvent::HandinEvent                             in{};
+			PlayerEventNpcHandinRepository::PlayerEventNpcHandin out{};
+			Deserialize(r.event_data, in);
+
+			out.npc_id          = in.npc_id;
+			out.npc_name        = in.npc_name;
+			out.handin_copper   = in.handin_money.copper;
+			out.handin_silver   = in.handin_money.silver;
+			out.handin_gold     = in.handin_money.gold;
+			out.handin_platinum = in.handin_money.platinum;
+			out.return_copper   = in.return_money.copper;
+			out.return_silver   = in.return_money.silver;
+			out.return_gold     = in.return_money.gold;
+			out.return_platinum = in.return_money.platinum;
+			out.is_quest_handin = in.is_quest_handin;
+			out.created_at      = r.created_at;
+
+			AssignEtlId(r, PlayerEvent::EventType::NPC_HANDIN);
+			etl_queues.npc_handin.push_back(out);
+
+			for (const auto &i: in.handin_items) {
+				PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries entry{};
+				entry.player_event_npc_handin_id = r.etl_table_id;
+				entry.item_id                    = i.item_id;
+				entry.charges                    = i.charges;
+				entry.type                       = 1;
+				etl_queues.npc_handin_entries.push_back(entry);
+			}
+			for (const auto &i: in.return_items) {
+				PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries entry{};
+				entry.player_event_npc_handin_id = r.etl_table_id;
+				entry.item_id                    = i.item_id;
+				entry.charges                    = i.charges;
+				entry.type                       = 2;
+				etl_queues.npc_handin_entries.push_back(entry);
+			}
+		}},
+		{
+			PlayerEvent::EventType::TRADE,             [&](PlayerEventLogsRepository::PlayerEventLogs &r) {
+			PlayerEvent::TradeEvent                      in{};
+			PlayerEventTradeRepository::PlayerEventTrade out{};
+			Deserialize(r.event_data, in);
+
+			out.char1_id       = in.character_1_id;
+			out.char2_id       = in.character_2_id;
+			out.char1_copper   = in.character_1_give_money.copper;
+			out.char1_silver   = in.character_1_give_money.silver;
+			out.char1_gold     = in.character_1_give_money.gold;
+			out.char1_platinum = in.character_1_give_money.platinum;
+			out.char2_copper   = in.character_2_give_money.copper;
+			out.char2_silver   = in.character_2_give_money.silver;
+			out.char2_gold     = in.character_2_give_money.gold;
+			out.char2_platinum = in.character_2_give_money.platinum;
+			out.created_at     = r.created_at;
+
+			AssignEtlId(r, PlayerEvent::EventType::TRADE);
+			etl_queues.trade.push_back(out);
+
+			for (const auto &i: in.character_1_give_items) {
+				PlayerEventTradeEntriesRepository::PlayerEventTradeEntries entry{};
+				entry.player_event_trade_id = r.etl_table_id;
+				entry.char_id               = in.character_1_id;
+				entry.item_id               = i.item_id;
+				entry.charges               = i.charges;
+				entry.slot                  = i.slot;
+				etl_queues.trade_entries.push_back(entry);
+			}
+			for (const auto &i: in.character_2_give_items) {
+				PlayerEventTradeEntriesRepository::PlayerEventTradeEntries entry{};
+				entry.player_event_trade_id = r.etl_table_id;
+				entry.char_id               = in.character_2_id;
+				entry.item_id               = i.item_id;
+				entry.charges               = i.charges;
+				entry.slot                  = i.slot;
+				etl_queues.trade_entries.push_back(entry);
+			}
+		}},
+		{
+			PlayerEvent::EventType::SPEECH,            [&](PlayerEventLogsRepository::PlayerEventLogs &r) {
+			PlayerEvent::PlayerSpeech                      in{};
+			PlayerEventSpeechRepository::PlayerEventSpeech out{};
+			Deserialize(r.event_data, in);
+
+			out.from_char_id = in.from;
+			out.to_char_id   = in.to;
+			out.type         = in.type;
+			out.min_status   = in.min_status;
+			out.message      = in.message;
+			out.guild_id     = in.guild_id;
+			out.created_at   = r.created_at;
+
+			AssignEtlId(r, PlayerEvent::EventType::SPEECH);
+			etl_queues.speech.push_back(out);
+		}},
+		{
+			PlayerEvent::EventType::KILLED_NPC,        [&](PlayerEventLogsRepository::PlayerEventLogs &r) {
+			PlayerEvent::KilledNPCEvent                          in{};
+			PlayerEventKilledNpcRepository::PlayerEventKilledNpc out{};
+			Deserialize(r.event_data, in);
+
+			out.npc_id                        = in.npc_id;
+			out.npc_name                      = in.npc_name;
+			out.combat_time_seconds           = in.combat_time_seconds;
+			out.total_damage_per_second_taken = in.total_damage_per_second_taken;
+			out.total_heal_per_second_taken   = in.total_heal_per_second_taken;
+			out.created_at                    = r.created_at;
+
+			AssignEtlId(r, PlayerEvent::EventType::KILLED_NPC);
+			etl_queues.killed_npc.push_back(out);
+		}},
+		{
+			PlayerEvent::EventType::AA_PURCHASE,       [&](PlayerEventLogsRepository::PlayerEventLogs &r) {
+			PlayerEvent::AAPurchasedEvent                          in{};
+			PlayerEventAaPurchaseRepository::PlayerEventAaPurchase out{};
+			Deserialize(r.event_data, in);
+
+			out.aa_ability_id = in.aa_id;
+			out.cost          = in.aa_cost;
+			out.previous_id   = in.aa_previous_id;
+			out.next_id       = in.aa_next_id;
+			out.created_at    = r.created_at;
+
+			AssignEtlId(r, PlayerEvent::EventType::AA_PURCHASE);
+			etl_queues.aa_purchase.push_back(out);
+		}},
+	};
+
+	// Process the batch queue
+	for (auto &r: m_record_batch_queue) {
 		if (m_settings[r.event_type_id].etl_enabled) {
-			switch (r.event_type_id) {
-				case PlayerEvent::EventType::LOOT_ITEM: {
-					PlayerEvent::LootItemEvent in{};
-					PlayerEventLootItemsRepository::PlayerEventLootItems out{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.charges      = in.charges;
-					out.corpse_name  = in.corpse_name;
-					out.item_id      = in.item_id;
-					out.item_name    = in.item_name;
-					out.augment_1_id = in.augment_1_id;
-					out.augment_2_id = in.augment_2_id;
-					out.augment_3_id = in.augment_3_id;
-					out.augment_4_id = in.augment_4_id;
-					out.augment_5_id = in.augment_5_id;
-					out.augment_6_id = in.augment_6_id;
-					out.npc_id       = in.npc_id;
-					out.created_at   = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::LOOT_ITEM)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::LOOT_ITEM).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::LOOT_ITEM).next_id++;
-					}
-
-					etl_queues.loot_items.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::MERCHANT_SELL: {
-					PlayerEvent::MerchantSellEvent in{};
-					PlayerEventMerchantSellRepository::PlayerEventMerchantSell out{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.npc_id                  = in.npc_id;
-					out.merchant_name           = in.merchant_name;
-					out.merchant_type           = in.merchant_type;
-					out.item_id                 = in.item_id;
-					out.item_name               = in.item_name;
-					out.charges                 = in.charges;
-					out.cost                    = in.cost;
-					out.alternate_currency_id   = in.alternate_currency_id;
-					out.player_money_balance    = in.player_money_balance;
-					out.player_currency_balance = in.player_currency_balance;
-					out.created_at              = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::MERCHANT_SELL)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::MERCHANT_SELL).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::MERCHANT_SELL).next_id++;
-					}
-
-					etl_queues.merchant_sell.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::MERCHANT_PURCHASE: {
-					PlayerEvent::MerchantPurchaseEvent in{};
-					PlayerEventMerchantPurchaseRepository::PlayerEventMerchantPurchase out{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.npc_id                  = in.npc_id;
-					out.merchant_name           = in.merchant_name;
-					out.merchant_type           = in.merchant_type;
-					out.item_id                 = in.item_id;
-					out.item_name               = in.item_name;
-					out.charges                 = in.charges;
-					out.cost                    = in.cost;
-					out.alternate_currency_id   = in.alternate_currency_id;
-					out.player_money_balance    = in.player_money_balance;
-					out.player_currency_balance = in.player_currency_balance;
-					out.created_at              = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::MERCHANT_PURCHASE)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::MERCHANT_PURCHASE).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::MERCHANT_PURCHASE).next_id++;
-					}
-
-					etl_queues.merchant_purchase.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::NPC_HANDIN: {
-					PlayerEvent::HandinEvent in{};
-					PlayerEventNpcHandinRepository::PlayerEventNpcHandin out{};
-					PlayerEventNpcHandinEntriesRepository::PlayerEventNpcHandinEntries out_entries{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-
-					out.npc_id          = in.npc_id;
-					out.npc_name        = in.npc_name;
-					out.handin_copper   = in.handin_money.copper;
-					out.handin_silver   = in.handin_money.silver;
-					out.handin_gold     = in.handin_money.gold;
-					out.handin_platinum = in.handin_money.platinum;
-					out.return_copper   = in.return_money.copper;
-					out.return_silver   = in.return_money.silver;
-					out.return_gold     = in.return_money.gold;
-					out.return_platinum = in.return_money.platinum;
-					out.is_quest_handin = in.is_quest_handin;
-					out.created_at      = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::NPC_HANDIN)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::NPC_HANDIN).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::NPC_HANDIN).next_id++;
-					}
-
-					if (!in.handin_items.empty()) {
-						etl_queues.npc_handin_entries.reserve(etl_queues.npc_handin_entries.size() + in.handin_items.size());
-						for (auto const &i: in.handin_items) {
-							out_entries.charges                    = i.charges;
-							out_entries.evolve_amount              = 0;
-							out_entries.evolve_level               = 0;
-							out_entries.item_id                    = i.item_id;
-							out_entries.player_event_npc_handin_id = r.etl_table_id;
-							out_entries.type                       = 1;
-							out.created_at                         = r.created_at;
-
-							if (!i.augment_ids.empty()) {
-								uint32 augments[6]{};
-								for (int x = 0; x < i.augment_ids.size(); x++) {
-									augments[x] = i.augment_ids[x];
-								}
-								out_entries.augment_1_id = augments[0];
-								out_entries.augment_2_id = augments[1];
-								out_entries.augment_3_id = augments[2];
-								out_entries.augment_4_id = augments[3];
-								out_entries.augment_5_id = augments[4];
-								out_entries.augment_6_id = augments[5];
-							}
-							etl_queues.npc_handin_entries.push_back(out_entries);
-						}
-					}
-
-					if (!in.return_items.empty()) {
-						etl_queues.npc_handin_entries.reserve(etl_queues.npc_handin_entries.size() + in.return_items.size());
-						for (auto const &i: in.handin_items) {
-							out_entries.charges                    = i.charges;
-							out_entries.evolve_amount              = 0;
-							out_entries.evolve_level               = 0;
-							out_entries.item_id                    = i.item_id;
-							out_entries.player_event_npc_handin_id = r.etl_table_id;
-							out_entries.type                       = 2;
-							out.created_at                         = r.created_at;
-
-							if (!i.augment_ids.empty()) {
-								uint32 augments[6]{};
-								for (int x = 0; x < i.augment_ids.size(); x++) {
-									augments[x] = i.augment_ids[x];
-								}
-								out_entries.augment_1_id = augments[0];
-								out_entries.augment_2_id = augments[1];
-								out_entries.augment_3_id = augments[2];
-								out_entries.augment_4_id = augments[3];
-								out_entries.augment_5_id = augments[4];
-								out_entries.augment_6_id = augments[5];
-							}
-							etl_queues.npc_handin_entries.push_back(out_entries);
-						}
-					}
-
-					etl_queues.npc_handin.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::TRADE: {
-					PlayerEvent::TradeEvent in{};
-					PlayerEventTradeRepository::PlayerEventTrade out{};
-					PlayerEventTradeEntriesRepository::PlayerEventTradeEntries out_entries{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.char1_id       = in.character_1_id;
-					out.char1_platinum = in.character_1_give_money.platinum;
-					out.char1_gold     = in.character_1_give_money.gold;
-					out.char1_silver   = in.character_1_give_money.silver;
-					out.char1_copper   = in.character_1_give_money.copper;
-					out.char2_id       = in.character_2_id;
-					out.char2_platinum = in.character_2_give_money.platinum;
-					out.char2_gold     = in.character_2_give_money.gold;
-					out.char2_silver   = in.character_2_give_money.silver;
-					out.char2_copper   = in.character_2_give_money.copper;
-					out.created_at     = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::TRADE)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::TRADE).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::TRADE).next_id++;
-					}
-
-					if (!in.character_1_give_items.empty()) {
-						etl_queues.trade_entries.reserve(etl_queues.trade_entries.size() + in.character_1_give_items.size());
-						for (auto const &i: in.character_1_give_items) {
-							out_entries.char_id               = in.character_1_id;
-							out_entries.charges               = i.charges;
-							out_entries.slot                  = i.slot;
-							out_entries.item_id               = i.item_id;
-							out_entries.player_event_trade_id = r.etl_table_id;
-							out_entries.in_bag                = i.in_bag;
-							out.created_at                    = r.created_at;
-							out_entries.augment_1_id          = i.augment_1_id;
-							out_entries.augment_2_id          = i.augment_2_id;
-							out_entries.augment_3_id          = i.augment_3_id;
-							out_entries.augment_4_id          = i.augment_4_id;
-							out_entries.augment_5_id          = i.augment_5_id;
-							out_entries.augment_6_id          = i.augment_6_id;
-							out_entries.created_at            = r.created_at;
-						}
-						etl_queues.trade_entries.push_back(out_entries);
-					}
-
-					if (!in.character_2_give_items.empty()) {
-						etl_queues.trade_entries.reserve(etl_queues.trade_entries.size() + in.character_2_give_items.size());
-						for (auto const &i: in.character_2_give_items) {
-							out_entries.char_id               = in.character_2_id;
-							out_entries.charges               = i.charges;
-							out_entries.slot                  = i.slot;
-							out_entries.item_id               = i.item_id;
-							out_entries.player_event_trade_id = r.etl_table_id;
-							out_entries.in_bag                = i.in_bag;
-							out.created_at                    = r.created_at;
-							out_entries.augment_1_id          = i.augment_1_id;
-							out_entries.augment_2_id          = i.augment_2_id;
-							out_entries.augment_3_id          = i.augment_3_id;
-							out_entries.augment_4_id          = i.augment_4_id;
-							out_entries.augment_5_id          = i.augment_5_id;
-							out_entries.augment_6_id          = i.augment_6_id;
-							out_entries.created_at            = r.created_at;
-						}
-						etl_queues.trade_entries.push_back(out_entries);
-					}
-
-					etl_queues.trade.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::SPEECH: {
-					PlayerEvent::PlayerSpeech in{};
-					PlayerEventSpeechRepository::PlayerEventSpeech out{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.from_char_id = in.from;
-					out.to_char_id   = in.to;
-					out.type         = in.type;
-					out.min_status   = in.min_status;
-					out.message      = in.message;
-					out.guild_id     = in.guild_id;
-					out.created_at   = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::SPEECH)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::SPEECH).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::SPEECH).next_id++;
-					}
-
-					etl_queues.speech.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::KILLED_NPC: {
-					PlayerEvent::KilledNPCEvent in{};
-					PlayerEventKilledNpcRepository::PlayerEventKilledNpc out{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.npc_id                        = in.npc_id;
-					out.npc_name                      = in.npc_name;
-					out.combat_time_seconds           = in.combat_time_seconds;
-					out.total_damage_per_second_taken = in.total_damage_per_second_taken;
-					out.total_heal_per_second_taken   = in.total_heal_per_second_taken;
-					out.created_at                    = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::KILLED_NPC)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::KILLED_NPC).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::KILLED_NPC).next_id++;
-					}
-
-					etl_queues.killed_npc.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::KILLED_NAMED_NPC: {
-					PlayerEvent::KilledNPCEvent in{};
-					PlayerEventKilledNamedNpcRepository::PlayerEventKilledNamedNpc out{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.npc_id                        = in.npc_id;
-					out.npc_name                      = in.npc_name;
-					out.combat_time_seconds           = in.combat_time_seconds;
-					out.total_damage_per_second_taken = in.total_damage_per_second_taken;
-					out.total_heal_per_second_taken   = in.total_heal_per_second_taken;
-					out.created_at                    = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::KILLED_NAMED_NPC)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::KILLED_NAMED_NPC).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::KILLED_NAMED_NPC).next_id++;
-					}
-
-					etl_queues.killed_named_npc.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::KILLED_RAID_NPC: {
-					PlayerEvent::KilledNPCEvent in{};
-					PlayerEventKilledRaidNpcRepository::PlayerEventKilledRaidNpc out{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.npc_id                        = in.npc_id;
-					out.npc_name                      = in.npc_name;
-					out.combat_time_seconds           = in.combat_time_seconds;
-					out.total_damage_per_second_taken = in.total_damage_per_second_taken;
-					out.total_heal_per_second_taken   = in.total_heal_per_second_taken;
-					out.created_at                    = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::KILLED_RAID_NPC)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::KILLED_RAID_NPC).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::KILLED_RAID_NPC).next_id++;
-					}
-
-					etl_queues.killed_raid_npc.push_back(out);
-					break;
-				}
-				case PlayerEvent::EventType::AA_PURCHASE: {
-					PlayerEvent::AAPurchasedEvent in{};
-					PlayerEventAaPurchaseRepository::PlayerEventAaPurchase out{};
-
-					{
-						std::stringstream ss;
-						ss << r.event_data;
-						cereal::JSONInputArchive ar(ss);
-						in.serialize(ar);
-					}
-
-					out.aa_ability_id = in.aa_id;
-					out.cost          = in.aa_cost;
-					out.previous_id   = in.aa_previous_id;
-					out.next_id       = in.aa_next_id;
-					out.created_at    = r.created_at;
-
-					if (m_etl_settings.contains(PlayerEvent::EventType::AA_PURCHASE)) {
-						r.etl_table_id = m_etl_settings.at(PlayerEvent::EventType::AA_PURCHASE).next_id;
-						m_etl_settings.at(PlayerEvent::EventType::AA_PURCHASE).next_id++;
-					}
-
-					etl_queues.aa_purchase.push_back(out);
-					break;
-				}
-				default: {
-					LogError("Non-Implemented ETL routing <red>[{}]", r.event_type_id);
-				}
+			auto it = event_processors.find(static_cast<PlayerEvent::EventType>(r.event_type_id));
+			if (it != event_processors.end()) {
+				it->second(r);  // Call the appropriate lambda
+			}
+			else {
+				LogError("Non-Implemented ETL routing <red>[{}]", r.event_type_id);
 			}
 		}
 	}
 
 	// Helper to flush and clear queues
-	auto flush_queue = [&](auto insert_many, auto& queue) {
+	auto flush_queue = [&](auto insert_many, auto &queue) {
 		if (!queue.empty()) {
 			insert_many(*m_database, queue);
 			queue.clear();
@@ -1059,7 +909,8 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 // general process function, used in world or QS depending on rule Logging:PlayerEventsQSProcess
 void PlayerEventLogs::Process()
 {
-	if (m_process_batch_events_timer.Check() || m_record_batch_queue.size() >= RuleI(Logging, BatchPlayerEventProcessChunkSize)) {
+	if (m_process_batch_events_timer.Check() ||
+		m_record_batch_queue.size() >= RuleI(Logging, BatchPlayerEventProcessChunkSize)) {
 		ProcessBatchQueue();
 	}
 
@@ -1082,7 +933,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::MERCHANT_SELL: {
@@ -1090,7 +942,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::MERCHANT_PURCHASE: {
@@ -1098,7 +951,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::NPC_HANDIN: {
@@ -1106,12 +960,14 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						deleted_count += PlayerEventNpcHandinEntriesRepository::DeleteWhere(
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::TRADE: {
@@ -1119,12 +975,14 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						deleted_count += PlayerEventTradeEntriesRepository::DeleteWhere(
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::SPEECH: {
@@ -1132,7 +990,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::KILLED_NPC: {
@@ -1140,7 +999,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::KILLED_NAMED_NPC: {
@@ -1148,7 +1008,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::KILLED_RAID_NPC: {
@@ -1156,7 +1017,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					case PlayerEvent::AA_PURCHASE: {
@@ -1164,7 +1026,8 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 							*m_database,
 							fmt::format(
 								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days));
+								m_settings[i].retention_days
+							));
 						break;
 					}
 					default: {
@@ -1277,8 +1140,8 @@ void PlayerEventLogs::SetSettingsDefaults()
 void PlayerEventLogs::LoadEtlIds()
 {
 	auto e = [&](auto p) -> bool {
-		for (PlayerEventLogSettingsRepository::PlayerEventLogSettings const& c : m_settings) {
-			if(c.id == p) {
+		for (PlayerEventLogSettingsRepository::PlayerEventLogSettings const &c: m_settings) {
+			if (c.id == p) {
 				return c.etl_enabled ? true : false;
 			}
 		}
@@ -1371,7 +1234,7 @@ void PlayerEventLogs::LoadEtlIds()
 		}
 	};
 
-	for (auto &e : m_etl_settings) {
+	for (auto &e: m_etl_settings) {
 		LogPlayerEventsDetail(
 			"ETL Settings [{}] Enabled [{}] Table [{}] NextId [{}]",
 			PlayerEvent::EventName[e.first],
