@@ -136,11 +136,6 @@ std::string DatabaseDumpService::GetLoginTableList()
 	return Strings::Join(DatabaseSchema::GetLoginTables(), " ");
 }
 
-std::string DatabaseDumpService::GetQueryServTables()
-{
-	return Strings::Join(DatabaseSchema::GetQueryServerTables(), " ");
-}
-
 std::string DatabaseDumpService::GetSystemTablesList()
 {
 	auto system_tables  = DatabaseSchema::GetServerTables();
@@ -272,11 +267,6 @@ void DatabaseDumpService::DatabaseDump()
 			tables_to_dump += GetLoginTableList() + " ";
 			dump_descriptor += "-login";
 		}
-
-		if (IsDumpQueryServerTables()) {
-			tables_to_dump += GetQueryServTables();
-			dump_descriptor += "-queryserv";
-		}
 	}
 
 	if (IsDumpStaticInstanceData()) {
@@ -401,7 +391,6 @@ void DatabaseDumpService::DatabaseDump()
 //	LogDebug("[{}] dump-to-console", IsDumpOutputToConsole());
 //	LogDebug("[{}] dump-path", GetSetDumpPath());
 //	LogDebug("[{}] compression", (IsDumpWithCompression() ? "true" : "false"));
-//	LogDebug("[{}] query-serv", (IsDumpQueryServerTables() ? "true" : "false"));
 //	LogDebug("[{}] has-compression-binary", (HasCompressionBinary() ? "true" : "false"));
 //	LogDebug("[{}] content", (IsDumpContentTables() ? "true" : "false"));
 //	LogDebug("[{}] no-data", (IsDumpWithNoData() ? "true" : "false"));
@@ -509,16 +498,6 @@ void DatabaseDumpService::SetDumpFileName(const std::string &dump_file_name)
 const std::string &DatabaseDumpService::GetDumpFileName() const
 {
 	return dump_file_name;
-}
-
-bool DatabaseDumpService::IsDumpQueryServerTables() const
-{
-	return dump_query_server_tables;
-}
-
-void DatabaseDumpService::SetDumpQueryServerTables(bool dump_query_server_tables)
-{
-	DatabaseDumpService::dump_query_server_tables = dump_query_server_tables;
 }
 
 bool DatabaseDumpService::IsDumpOutputToConsole() const

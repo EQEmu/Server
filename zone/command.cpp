@@ -495,17 +495,6 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 		}
 	}
 
-	/* QS: Player_Log_Issued_Commands */
-	if (RuleB(QueryServ, PlayerLogIssuedCommandes)) {
-		auto event_desc = fmt::format(
-			"Issued command :: '{}' in Zone ID: {} Instance ID: {}",
-			message,
-			c->GetZoneID(),
-			c->GetInstanceID()
-		);
-		QServ->PlayerLogEvent(Player_Log_Issued_Commands, c->CharacterID(), event_desc);
-	}
-
 	if (current_command->admin >= COMMANDS_LOGGING_MIN_STATUS) {
 		LogCommands(
 			"[{}] ([{}]) used command: [{}] (target=[{}])",

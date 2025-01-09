@@ -45,8 +45,6 @@ public:
 	void SetDumpPath(const std::string &dump_path);
 	const std::string &GetDumpFileName() const;
 	void SetDumpFileName(const std::string &dump_file_name);
-	bool IsDumpQueryServerTables() const;
-	void SetDumpQueryServerTables(bool dump_query_server_tables);
 	bool IsDumpOutputToConsole() const;
 	void SetDumpOutputToConsole(bool dump_output_to_console);
 	bool IsDumpDropTableSyntaxOnly() const;
@@ -96,7 +94,6 @@ private:
 	bool HasCompressionBinary();
 	std::string GetDumpFileNameWithPath();
 	std::string GetSetDumpPath();
-	std::string GetQueryServTables();
 	void RemoveSqlBackup();
 	void BuildCredentialsFile();
 	void RemoveCredentialsFile();

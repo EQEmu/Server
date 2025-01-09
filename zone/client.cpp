@@ -1264,30 +1264,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 	}
 
-	/* Logs Player Chat */
-	if (RuleB(QueryServ, PlayerLogChat)) {
-		auto pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(message) + 1);
-		Server_Speech_Struct* sem = (Server_Speech_Struct*) pack->pBuffer;
-
-		if(chan_num == ChatChannel_Guild)
-			sem->guilddbid = GuildID();
-		else
-			sem->guilddbid = 0;
-
-		strcpy(sem->message, message);
-		sem->minstatus = Admin();
-		sem->type = chan_num;
-		if(targetname != 0)
-			strcpy(sem->to, targetname);
-
-		if(GetName() != 0)
-			strcpy(sem->from, GetName());
-
-		if(worldserver.Connected())
-			worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-
 	// Garble the message based on drunkness
 	if (GetIntoxication() > 0 && !(RuleB(Chat, ServerWideOOC) && chan_num == ChatChannel_OOC) && !GetGM()) {
 		GarbleMessage(message, (int)(GetIntoxication() / 3));
@@ -7233,15 +7209,6 @@ int Client::AddAlternateCurrencyValue(uint32 currency_id, int amount, bool is_sc
 {
 	if (!zone->DoesAlternateCurrencyExist(currency_id)) {
 		return 0;
-	}
-
-	/* Added via Quest, rest of the logging methods may be done inline due to information available in that area of the code */
-	if (is_scripted) {
-		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
-		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
-			std::string event_desc = StringFormat("Added via Quest :: Cursor to Item :: alt_currency_id:%i amount:%i in zoneid:%i instid:%i", currency_id, GetZoneID(), GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, CharacterID(), event_desc);
-		}
 	}
 
 	if (!amount) {

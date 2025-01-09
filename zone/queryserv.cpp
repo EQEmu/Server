@@ -43,16 +43,6 @@ void QueryServ::SendQuery(std::string Query)
 	safe_delete(pack);
 }
 
-void QueryServ::PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc)
-{
-	std::string query = StringFormat(
-		"INSERT INTO `qs_player_events` (event, char_id, event_desc, time) VALUES (%i, %i, '%s', UNIX_TIMESTAMP(now()))",
-		Event_Type,
-		Character_ID,
-		Strings::Escape(Event_Desc).c_str());
-	SendQuery(query);
-}
-
 void QueryServ::Connect()
 {
 	m_connection = std::make_unique<EQ::Net::ServertalkClient>(Config->QSHost, Config->QSPort, false, "Zone", Config->SharedKey);

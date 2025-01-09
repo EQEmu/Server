@@ -37,7 +37,6 @@ public:
 	QueryServ();
 	~QueryServ();
 	void SendQuery(std::string Query);
-	void PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
 	void Connect();
 	bool SendPacket(ServerPacket *pack);
 
