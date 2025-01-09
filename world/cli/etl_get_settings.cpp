@@ -5,7 +5,7 @@ void WorldserverCLI::EtlGetSettings(int argc, char **argv, argh::parser &cmd, st
 {
 	description = "Displays server player event logs that are etl enabled";
 
-	if (cmd[{ "-h", "--help" }]) {
+	if (cmd[{"-h", "--help"}]) {
 		return;
 	}
 
