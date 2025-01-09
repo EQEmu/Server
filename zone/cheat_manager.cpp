@@ -3,8 +3,10 @@
 #include "quest_parser_collection.h"
 #include "../common/events/player_event_logs.h"
 #include "worldserver.h"
+#include "queryserv.h"
 
 extern WorldServer worldserver;
+extern QueryServ *QServ;
 
 void CheatManager::SetClient(Client *cli)
 {

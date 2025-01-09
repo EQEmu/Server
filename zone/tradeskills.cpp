@@ -1172,13 +1172,6 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 				);
 			}
 
-			/* QS: Player_Log_Trade_Skill_Events */
-			if (RuleB(QueryServ, PlayerLogTradeSkillEvents)) {
-
-				std::string event_desc = StringFormat("Success :: fashioned recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, GetZoneID(), GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, CharacterID(), event_desc);
-			}
-
 			if (RuleB(TaskSystem, EnableTaskSystem)) {
 				UpdateTasksForItem(TaskActivityType::TradeSkill, itr->first, itr->second);
 			}
@@ -1201,12 +1194,6 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		{
 			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),GetGender() == Gender::Male ? "his" : GetGender() == Gender::Female ? "her" : "its");
 
-		}
-
-		/* QS: Player_Log_Trade_Skill_Events */
-		if (RuleB(QueryServ, PlayerLogTradeSkillEvents)){
-			std::string event_desc = StringFormat("Failed :: recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, GetZoneID(), GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, CharacterID(), event_desc);
 		}
 
 		itr = spec->onfail.begin();

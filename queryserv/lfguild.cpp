@@ -1,10 +1,7 @@
-#include <stdlib.h>
 #include "lfguild.h"
 #include "database.h"
 #include "worldserver.h"
-#include "../common/eqemu_logsys.h"
 #include "../common/strings.h"
-#include "../common/packet_dump.h"
 #include "../common/rulesys.h"
 
 extern WorldServer *worldserver;

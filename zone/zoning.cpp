@@ -489,12 +489,6 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	SendLogoutPackets();
 
-	/* QS: PlayerLogZone */
-	if (RuleB(QueryServ, PlayerLogZone)){
-		std::string event_desc = StringFormat("Zoning :: zoneid:%u instid:%u x:%4.2f y:%4.2f z:%4.2f h:%4.2f zonemode:%d from zoneid:%u instid:%i", zone_id, instance_id, dest_x, dest_y, dest_z, dest_h, zone_mode, GetZoneID(), GetInstanceID());
-		QServ->PlayerLogEvent(Player_Log_Zoning, CharacterID(), event_desc);
-	}
-
 	/* Dont clear aggro until the zone is successful */
 	entity_list.RemoveFromHateLists(this);
 

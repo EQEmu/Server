@@ -1,27 +1,7 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-*/
-
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/opcodemgr.h"
 #include "../common/rulesys.h"
-#include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/strings.h"
@@ -31,24 +11,29 @@
 #include "queryservconfig.h"
 #include "lfguild.h"
 #include "worldserver.h"
-#include "../common/path_manager.h"
 #include "../common/zone_store.h"
 #include "../common/events/player_event_logs.h"
 #include <list>
 #include <signal.h>
 #include <thread>
+#include "../common/net/servertalk_server.h"
+#include "../common/net/console_server.h"
+#include "../queryserv/zonelist.h"
+#include "../queryserv/zoneserver.h"
 
 volatile bool RunLoops = true;
 
-QSDatabase              database;
-LFGuildManager        lfguildmanager;
-std::string           WorldShortName;
+QSDatabase             database;
+LFGuildManager         lfguildmanager;
+std::string            WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
-EQEmuLogSys           LogSys;
-PathManager           path;
-ZoneStore             zone_store;
-PlayerEventLogs       player_event_logs;
+EQEmuLogSys            LogSys;
+PathManager            path;
+ZoneStore              zone_store;
+PlayerEventLogs        player_event_logs;
+ZSList                 zoneserver_list;
+uint32                 numzones = 0;
 
 void CatchSignal(int sig_num)
 {
@@ -101,6 +86,61 @@ int main()
 		return 1;
 	}
 
+	//rules:
+	{
+		std::string tmp;
+		if (database.GetVariable("RuleSet", tmp)) {
+			LogInfo("Loading rule set [{}]", tmp.c_str());
+			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
+				LogError("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
+			}
+		}
+		else {
+			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
+				LogInfo("No rule set configured, using default rules");
+			}
+		}
+
+		EQ::InitializeDynamicLookups();
+	}
+
+	std::unique_ptr<EQ::Net::ConsoleServer> console;
+	EQ::Net::ServertalkServerOptions        server_opts;
+	auto                                    server_connection = std::make_unique<EQ::Net::ServertalkServer>();
+	server_opts.port                                          = Config->QSPort;
+	server_opts.ipv6                                          = false;
+	server_opts.credentials                                   = Config->SharedKey;
+	server_connection->Listen(server_opts);
+	LogInfo("Server (TCP) listener started on port [{}]", Config->QSPort);
+
+	server_connection->OnConnectionIdentified(
+		"Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+			numzones++;
+			zoneserver_list.Add(new ZoneServer(connection, console.get()));
+
+			LogInfo(
+				"New Zone Server connection from [{}] at [{}:{}] zone_count [{}]",
+				connection->Handle()->RemoteIP(),
+				connection->Handle()->RemotePort(),
+				connection->GetUUID(),
+				numzones
+			);
+		}
+	);
+
+	server_connection->OnConnectionRemoved(
+		"Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+			numzones--;
+			zoneserver_list.Remove(connection->GetUUID());
+
+			LogInfo(
+				"Removed Zone Server connection from [{}] total zone_count [{}]",
+				connection->GetUUID(),
+				numzones
+			);
+		}
+	);
+
 	/* Initial Connection to Worldserver */
 	worldserver = new WorldServer;
 	worldserver->Connect();
@@ -124,7 +164,7 @@ int main()
 		}
 
 		if (player_event_process_timer.Check()) {
-			player_event_logs.Process();
+			std::jthread player_event_thread(&PlayerEventLogs::Process, &player_event_logs);
 		}
 	};
 
@@ -133,6 +173,7 @@ int main()
 
 	EQ::EventLoop::Get().Run();
 
+	safe_delete(worldserver);
 	LogSys.CloseFileLogs();
 }
 

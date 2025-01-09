@@ -31,12 +31,14 @@
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/character_corpse_items_repository.h"
 #include <iostream>
+#include "queryserv.h"
 
 
 extern EntityList           entity_list;
-extern Zone                 *zone;
+extern Zone                *zone;
 extern WorldServer          worldserver;
 extern npcDecayTimes_Struct npcCorpseDecayTimes[100];
+extern QueryServ           *QServ;
 
 void Corpse::SendEndLootErrorPacket(Client *client)
 {
@@ -1569,11 +1571,17 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 
 		if (player_event_logs.IsEventEnabled(PlayerEvent::LOOT_ITEM) && !IsPlayerCorpse()) {
 			auto e = PlayerEvent::LootItemEvent{
-				.item_id = inst->GetItem()->ID,
-				.item_name = inst->GetItem()->Name,
-				.charges = inst->GetCharges(),
-				.npc_id = GetNPCTypeID(),
-				.corpse_name = EntityList::RemoveNumbers(corpse_name)
+				.item_id      = inst->GetItem()->ID,
+				.item_name    = inst->GetItem()->Name,
+				.charges      = inst->GetCharges(),
+				.augment_1_id = inst->GetAugmentItemID(0),
+				.augment_2_id = inst->GetAugmentItemID(1),
+				.augment_3_id = inst->GetAugmentItemID(2),
+				.augment_4_id = inst->GetAugmentItemID(3),
+				.augment_5_id = inst->GetAugmentItemID(4),
+				.augment_6_id = inst->GetAugmentItemID(5),
+				.npc_id       = GetNPCTypeID(),
+				.corpse_name  = EntityList::RemoveNumbers(corpse_name)
 			};
 
 			RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);

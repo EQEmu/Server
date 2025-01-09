@@ -10,5 +10,7 @@ void WorldserverCLI::TestCommand(int argc, char **argv, argh::parser &cmd, std::
 		return;
 	}
 
-	
+	for (auto &table: DatabaseSchema::GetStateTables()) {
+		LogInfo("Table name [{}] next_free_id [{}]", table, database.GetNextTableId(table));
+	}
 }
