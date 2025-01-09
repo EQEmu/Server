@@ -4337,9 +4337,9 @@ bool NPC::IsGuildmasterForClient(Client *c) {
 
 bool NPC::CheckHandin(
 	Client *c,
-	std::map<std::string, uint16> handin,
-	std::map<std::string, uint16> required,
-	std::vector<const EQ::ItemInstance *> items
+	std::map<std::string, uint32> handin,
+	std::map<std::string, uint32> required,
+	std::vector<EQ::ItemInstance *> items
 )
 {
 	auto h = Handin{};
@@ -4352,7 +4352,7 @@ bool NPC::CheckHandin(
 		h = m_hand_in;
 	}
 
-	std::vector<std::pair<const std::map<std::string, uint16>&, Handin&>> datasets = {};
+	std::vector<std::pair<const std::map<std::string, uint32>&, Handin&>> datasets = {};
 
 	// if we've already started the hand-in process, we don't want to re-process the hand-in data
 	// we continue to use the originally set hand-in bucket and decrement from it with each successive hand-in
@@ -4424,7 +4424,7 @@ bool NPC::CheckHandin(
 	bool items_met = true;
 	if (!handin_items.empty() && !r.items.empty()) {
 		for (const auto &r_item : r.items) {
-			uint16 remaining_requirement = r_item.count;
+			uint32 remaining_requirement = r_item.count;
 			bool fulfilled = false;
 
 			// Process the hand-in items using a standard for loop
@@ -4435,7 +4435,7 @@ bool NPC::CheckHandin(
 				bool id_match = (h_item.item_id == r_item.item_id);
 
 				if (id_match) {
-					uint16 used_count = std::min(remaining_requirement, h_item.count);
+					uint32 used_count = std::min(remaining_requirement, h_item.count);
 					h_item.count -= used_count;
 					remaining_requirement -= used_count;
 
