@@ -105,6 +105,8 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::QuestErrors].log_to_console          = static_cast<uint8>(Logs::General);
 	log_settings[Logs::EqTime].log_to_console               = static_cast<uint8>(Logs::General);
 	log_settings[Logs::EqTime].log_to_gmsay                 = static_cast<uint8>(Logs::General);
+	log_settings[Logs::NpcHandin].log_to_console            = static_cast<uint8>(Logs::General);
+	log_settings[Logs::NpcHandin].log_to_gmsay              = static_cast<uint8>(Logs::General);
 
 	/**
 	 * RFC 5424

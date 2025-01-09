@@ -156,6 +156,7 @@ struct NPCType
 	bool            keeps_sold_items;
 	bool            is_parcel_merchant;
 	uint8			greed;
+	bool            multiquest_enabled;
 };
 
 #pragma pack()
