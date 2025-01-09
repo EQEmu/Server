@@ -923,128 +923,80 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 {
 	LogPlayerEvents("Running truncation");
 
+	// Map of repository-specific deletion functions
+	std::unordered_map<PlayerEvent::EventType, std::function<uint32(const std::string&)>> repository_deleters = {
+		{PlayerEvent::LOOT_ITEM, [&](const std::string& condition) {
+			return PlayerEventLootItemsRepository::DeleteWhere(*m_database, condition);
+		}},
+		{PlayerEvent::MERCHANT_SELL, [&](const std::string& condition) {
+			return PlayerEventMerchantSellRepository::DeleteWhere(*m_database, condition);
+		}},
+		{PlayerEvent::MERCHANT_PURCHASE, [&](const std::string& condition) {
+			return PlayerEventMerchantPurchaseRepository::DeleteWhere(*m_database, condition);
+		}},
+		{PlayerEvent::NPC_HANDIN, [&](const std::string& condition) {
+			uint32 deleted_count = PlayerEventNpcHandinRepository::DeleteWhere(*m_database, condition);
+			deleted_count += PlayerEventNpcHandinEntriesRepository::DeleteWhere(*m_database, condition);
+			return deleted_count;
+		}},
+		{PlayerEvent::TRADE, [&](const std::string& condition) {
+			uint32 deleted_count = PlayerEventTradeRepository::DeleteWhere(*m_database, condition);
+			deleted_count += PlayerEventTradeEntriesRepository::DeleteWhere(*m_database, condition);
+			return deleted_count;
+		}},
+		{PlayerEvent::SPEECH, [&](const std::string& condition) {
+			return PlayerEventSpeechRepository::DeleteWhere(*m_database, condition);
+		}},
+		{PlayerEvent::KILLED_NPC, [&](const std::string& condition) {
+			return PlayerEventKilledNpcRepository::DeleteWhere(*m_database, condition);
+		}},
+		{PlayerEvent::KILLED_NAMED_NPC, [&](const std::string& condition) {
+			return PlayerEventKilledNamedNpcRepository::DeleteWhere(*m_database, condition);
+		}},
+		{PlayerEvent::KILLED_RAID_NPC, [&](const std::string& condition) {
+			return PlayerEventKilledRaidNpcRepository::DeleteWhere(*m_database, condition);
+		}},
+		{PlayerEvent::AA_PURCHASE, [&](const std::string& condition) {
+			return PlayerEventAaPurchaseRepository::DeleteWhere(*m_database, condition);
+		}}
+	};
+
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
-			uint32 deleted_count;
+			std::string condition = fmt::format(
+				"created_at < (NOW() - INTERVAL {} DAY)",
+				m_settings[i].retention_days
+			);
+
+			// ETL
 			if (m_settings[i].etl_enabled) {
-				switch (m_settings[i].id) {
-					case PlayerEvent::LOOT_ITEM: {
-						deleted_count = PlayerEventLootItemsRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::MERCHANT_SELL: {
-						deleted_count = PlayerEventMerchantSellRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::MERCHANT_PURCHASE: {
-						deleted_count = PlayerEventMerchantPurchaseRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::NPC_HANDIN: {
-						deleted_count = PlayerEventNpcHandinRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						deleted_count += PlayerEventNpcHandinEntriesRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::TRADE: {
-						deleted_count = PlayerEventTradeRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						deleted_count += PlayerEventTradeEntriesRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::SPEECH: {
-						deleted_count = PlayerEventSpeechRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::KILLED_NPC: {
-						deleted_count = PlayerEventKilledNpcRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::KILLED_NAMED_NPC: {
-						deleted_count = PlayerEventKilledNamedNpcRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::KILLED_RAID_NPC: {
-						deleted_count = PlayerEventKilledRaidNpcRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					case PlayerEvent::AA_PURCHASE: {
-						deleted_count = PlayerEventAaPurchaseRepository::DeleteWhere(
-							*m_database,
-							fmt::format(
-								"created_at < (NOW() - INTERVAL {} DAY)",
-								m_settings[i].retention_days
-							));
-						break;
-					}
-					default: {
-						LogError("NonImplemented ETL Event Type <red>[{}] ", static_cast<uint32>(m_settings[i].id));
-					}
+				uint32 deleted_count = 0;
+				auto it = repository_deleters.find(static_cast<PlayerEvent::EventType>(m_settings[i].id));
+				if (it != repository_deleters.end()) {
+					deleted_count = it->second(condition);
+				} else {
+					LogError("Non-Implemented ETL Event Type <red>[{}]", static_cast<uint32>(m_settings[i].id));
 				}
-			}
-			else {
-				deleted_count = PlayerEventLogsRepository::DeleteWhere(
-					*m_database,
-					fmt::format(
-						"event_type_id = {} AND created_at < (NOW() - INTERVAL {} DAY)",
+
+				if (deleted_count > 0) {
+					LogInfo(
+						"Truncated [{}] ETL events of type [{}] ({}) older than [{}] days",
+						deleted_count,
+						PlayerEvent::EventName[i],
 						i,
 						m_settings[i].retention_days
-					)
-				);
+					);
+				}
 			}
+
+			uint32 deleted_count = PlayerEventLogsRepository::DeleteWhere(
+				*m_database,
+				fmt::format(
+					"event_type_id = {} AND {}",
+					i,
+					condition
+				)
+			);
 
 			if (deleted_count > 0) {
 				LogInfo(
