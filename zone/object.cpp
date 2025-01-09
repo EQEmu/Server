@@ -663,8 +663,6 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				sender->DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
 			}
 
-			sender->DropItemQS(m_inst, true);
-
 			if (!m_ground_spawn) {
 				safe_delete(m_inst);
 			}
