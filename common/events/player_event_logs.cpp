@@ -132,7 +132,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 		return;
 	}
 
-	std::map<uint32, uint32> counter{};
+	static std::map<uint32, uint32> counter{};
 	for (auto const& e: m_record_batch_queue) {
 		counter[e.event_type_id]++;
 	}
@@ -1398,6 +1398,16 @@ void PlayerEventLogs::LoadEtlIds()
 			}
 		}
 	};
+
+	for (auto &e : m_etl_settings) {
+		LogPlayerEventsDetail(
+			"ETL Settings [{}] Enabled [{}] Table [{}] NextId [{}]",
+			PlayerEvent::EventName[e.first],
+			e.second.enabled,
+			e.second.table_name,
+			e.second.next_id
+		);
+	}
 }
 
 bool PlayerEventLogs::LoadDatabaseConnection()
