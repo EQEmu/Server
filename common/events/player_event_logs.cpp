@@ -961,52 +961,63 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 		}}
 	};
 
+	// Group event types by retention interval
+	std::unordered_map<int, std::vector<int>> retention_groups;
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
-			std::string condition = fmt::format(
-				"created_at < (NOW() - INTERVAL {} DAY)",
-				m_settings[i].retention_days
-			);
+			retention_groups[m_settings[i].retention_days].push_back(i);
+		}
+	}
 
-			// ETL
-			if (m_settings[i].etl_enabled) {
-				uint32 deleted_count = 0;
-				auto it = repository_deleters.find(static_cast<PlayerEvent::EventType>(m_settings[i].id));
+	for (const auto& [retention_days, event_types] : retention_groups) {
+		std::string condition = fmt::format(
+			"created_at < (NOW() - INTERVAL {} DAY)",
+			retention_days
+		);
+
+		// Handle ETL deletions for each event type in the group
+		uint32 total_deleted_count = 0;
+		for (int event_type_id : event_types) {
+			if (m_settings[event_type_id].etl_enabled) {
+				auto it = repository_deleters.find(static_cast<PlayerEvent::EventType>(m_settings[event_type_id].id));
 				if (it != repository_deleters.end()) {
-					deleted_count = it->second(condition);
+					total_deleted_count += it->second(condition);
 				} else {
-					LogError("Non-Implemented ETL Event Type <red>[{}]", static_cast<uint32>(m_settings[i].id));
-				}
-
-				if (deleted_count > 0) {
-					LogInfo(
-						"Truncated [{}] ETL events of type [{}] ({}) older than [{}] days",
-						deleted_count,
-						PlayerEvent::EventName[i],
-						i,
-						m_settings[i].retention_days
-					);
+					LogError("Non-Implemented ETL Event Type <red>[{}]", static_cast<uint32>(m_settings[event_type_id].id));
 				}
 			}
+		}
 
-			uint32 deleted_count = PlayerEventLogsRepository::DeleteWhere(
-				*m_database,
-				fmt::format(
-					"event_type_id = {} AND {}",
-					i,
-					condition
-				)
+		if (total_deleted_count > 0) {
+			LogInfo(
+				"Truncated [{}] ETL events older than [{}] days",
+				total_deleted_count,
+				retention_days
 			);
+		}
 
-			if (deleted_count > 0) {
-				LogInfo(
-					"Truncated [{}] events of type [{}] ({}) older than [{}] days",
-					deleted_count,
-					PlayerEvent::EventName[i],
-					i,
-					m_settings[i].retention_days
-				);
-			}
+		// Batch deletion for player_event_logs
+		std::string event_type_ids = fmt::format(
+			"({})",
+			fmt::join(event_types, ", ")
+		);
+
+		uint32 deleted_count = PlayerEventLogsRepository::DeleteWhere(
+			*m_database,
+			fmt::format(
+				"event_type_id IN {} AND {}",
+				event_type_ids,
+				condition
+			)
+		);
+
+		if (deleted_count > 0) {
+			LogInfo(
+				"Truncated [{}] events of types [{}] older than [{}] days",
+				deleted_count,
+				event_type_ids,
+				retention_days
+			);
 		}
 	}
 
