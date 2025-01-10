@@ -9441,7 +9441,7 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spellType, bool doPrechec
 
 		if (chance && zone->random.Roll(chance)) {
 			LogBotPreChecksDetail("{} says, 'Cancelling cast of {} due to focusFcMute.'", GetCleanName(), GetSpellName(spell_id));
-			return(false);
+			return false;
 		}
 	}
 
@@ -11389,11 +11389,7 @@ void Bot::DoCombatPositioning(
 bool Bot::CheckDoubleRangedAttack() {
 	int32 chance = spellbonuses.DoubleRangedAttack + itembonuses.DoubleRangedAttack + aabonuses.DoubleRangedAttack;
 
-	if (chance && zone->random.Roll(chance)) {
-		return true;
-	}
-
-	return false;
+	return (chance && zone->random.Roll(chance));
 }
 
 bool Bot::RequiresLoSForPositioning() {
@@ -11775,7 +11771,10 @@ bool Bot::IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell
 
 	switch (subType) {
 		case CommandedSubTypes::SingleTarget:
-			if (!IsAnyAESpell(spell_id) && !IsGroupSpell(spell_id)) {
+			if (
+				!IsAnyAESpell(spell_id) && 
+				!IsGroupSpell(spell_id)
+			) {
 				return true;
 			}
 
@@ -11787,7 +11786,10 @@ bool Bot::IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell
 
 			break;
 		case CommandedSubTypes::AETarget:
-			if (IsAnyAESpell(spell_id) && !IsGroupSpell(spell_id)) {
+			if (
+				IsAnyAESpell(spell_id) && 
+				!IsGroupSpell(spell_id)
+			) {
 				return true;
 			}
 
@@ -11799,43 +11801,70 @@ bool Bot::IsValidSpellTypeSubType(uint16 spellType, uint16 subType, uint16 spell
 
 			break;
 		case CommandedSubTypes::Invis:
-			if (IsEffectInSpell(spell_id, SE_Invisibility) || IsEffectInSpell(spell_id, SE_Invisibility2)) {
+			if (
+				IsEffectInSpell(spell_id, SE_Invisibility) || 
+				IsEffectInSpell(spell_id, SE_Invisibility2)
+			) {
 				return true;
 			}
 
 			break;
 		case CommandedSubTypes::InvisUndead:
-			if (IsEffectInSpell(spell_id, SE_InvisVsUndead) || IsEffectInSpell(spell_id, SE_InvisVsUndead2)) {
+			if (
+				IsEffectInSpell(spell_id, SE_InvisVsUndead) || 
+				IsEffectInSpell(spell_id, SE_InvisVsUndead2)
+			) {
 				return true;
 			}
-
-break;
+			
+			break;
 		case CommandedSubTypes::InvisAnimals:
-			if (IsEffectInSpell(spell_id, SE_InvisVsAnimals) || IsEffectInSpell(spell_id, SE_ImprovedInvisAnimals)) {
+			if (
+				IsEffectInSpell(spell_id, SE_InvisVsAnimals) || 
+				IsEffectInSpell(spell_id, SE_ImprovedInvisAnimals)
+			) {
 				return true;
 			}
 
 			break;
 		case CommandedSubTypes::Shrink:
 			if (
-				(IsEffectInSpell(spell_id, SE_ModelSize) && CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ModelSize), GetLevel()) < 100) ||
-				(IsEffectInSpell(spell_id, SE_ChangeHeight) && CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ChangeHeight), GetLevel()) < 100)
-				) {
+				(
+					IsEffectInSpell(spell_id, SE_ModelSize) && 
+					CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ModelSize), GetLevel()) < 100
+				) 
+				||
+				(
+					IsEffectInSpell(spell_id, SE_ChangeHeight) && 
+					CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ChangeHeight), GetLevel()) < 100
+				)
+			) {
 				return true;
 			}
 
 			break;
 		case CommandedSubTypes::Grow:
 			if (
-				(IsEffectInSpell(spell_id, SE_ModelSize) && CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ModelSize), GetLevel()) > 100) ||
-				(IsEffectInSpell(spell_id, SE_ChangeHeight) && CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ChangeHeight), GetLevel()) > 100)
-				) {
+				(
+					IsEffectInSpell(spell_id, SE_ModelSize) && 
+					CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ModelSize), GetLevel()) > 100
+				) 
+				||
+				(
+					IsEffectInSpell(spell_id, SE_ChangeHeight) && 
+					CalcSpellEffectValue(spell_id, GetSpellEffectIndex(spell_id, SE_ChangeHeight), GetLevel()) > 100
+				)
+			) {
 				return true;
 			}
 
 			break;
 		case CommandedSubTypes::Selo:
-			if (IsBeneficialSpell(spell_id) && IsEffectInSpell(spell_id, SE_MovementSpeed) && IsBardSong(spell_id)) {
+			if (
+				IsBeneficialSpell(spell_id) && 
+				IsEffectInSpell(spell_id, SE_MovementSpeed) && 
+				IsBardSong(spell_id)
+			) {
 				return true;
 			}
 

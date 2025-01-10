@@ -13308,14 +13308,8 @@ std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::stri
 
 		for (const auto& s : msg_split) {
 			returnText += DialogueWindow::TableRow(
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{}",
-						DialogueWindow::ColorMessage(((secondColor && i == 0) ? color : secondaryColor), s)
-					)
-				)
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(((secondColor && i == 0) ? color : secondaryColor), s))
 			);
-
 		}
 	}
 

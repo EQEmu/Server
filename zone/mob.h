@@ -432,53 +432,53 @@ public:
 
 	inline bool SpellTypeRecastCheck(uint16 spellType) { return (IsClient() ? true : _spellSettings[spellType].recastTimer.GetRemainingTime() > 0 ? false : true); }
 
-	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool noClients = false, bool noBots = false, bool noPets = false);
+	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool no_clients = false, bool no_bots = false, bool no_pets = false);
 
-	uint16 GetSpellTypeIDByShortName(std::string spellTypeString);
+	uint16 GetSpellTypeIDByShortName(std::string spellType_string);
 
 	bool IsValidBotSpellCategory(uint8 setting_type);
 	std::string GetBotSpellCategoryName(uint8 setting_type);
-	uint16 GetBotSpellCategoryIDByShortName(std::string settingString);
+	uint16 GetBotSpellCategoryIDByShortName(std::string setting_string);
 	bool IsValidBotBaseSetting(uint16 setting_type);
 	std::string GetBotSettingCategoryName(uint16 setting_type);
-	uint16 GetBaseSettingIDByShortName(std::string settingString);
-	bool IsValidSpellType(uint16 spellType);
-	std::string GetSpellTypeNameByID(uint16 spellType);
-	std::string GetSpellTypeShortNameByID(uint16 spellType);
-	bool IsValidSubType(uint16 subType);
-	std::string GetSubTypeNameByID(uint16 subType);
+	uint16 GetBaseSettingIDByShortName(std::string setting_string);
+	bool IsValidSpellType(uint16 spell_type);
+	std::string GetSpellTypeNameByID(uint16 spell_type);
+	std::string GetSpellTypeShortNameByID(uint16 spell_type);
+	bool IsValidSubType(uint16 sub_type);
+	std::string GetSubTypeNameByID(uint16 sub_type);
 
-	bool GetDefaultSpellHold(uint16 spellType, uint8 stance = Stance::Balanced);
-	uint16 GetDefaultSpellDelay(uint16 spellType, uint8 stance = Stance::Balanced);
-	uint8 GetDefaultSpellMinThreshold(uint16 spellType, uint8 stance = Stance::Balanced);
-	uint8 GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance = Stance::Balanced);
+	bool GetDefaultSpellHold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellDelay(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
 
-	inline bool GetSpellHold(uint16 spellType) const { return _spellSettings[spellType].hold; }
-	void SetSpellHold(uint16 spellType, bool holdStatus);
-	inline uint16 GetSpellDelay(uint16 spellType) const { return _spellSettings[spellType].delay; }
-	void SetSpellDelay(uint16 spellType, uint16 delayValue);
-	inline uint8 GetSpellMinThreshold(uint16 spellType) const { return _spellSettings[spellType].minThreshold; }
-	void SetSpellMinThreshold(uint16 spellType, uint8 thresholdValue);
-	inline uint8 GetSpellMaxThreshold(uint16 spellType) const { return _spellSettings[spellType].maxThreshold; }				
-	void SetSpellMaxThreshold(uint16 spellType, uint8 thresholdValue);
+	inline bool GetSpellHold(uint16 spell_type) const { return _spellSettings[spell_type].hold; }
+	void SetSpellHold(uint16 spell_type, bool hold_status);
+	inline uint16 GetSpellDelay(uint16 spell_type) const { return _spellSettings[spell_type].delay; }
+	void SetSpellDelay(uint16 spell_type, uint16 delay_value);
+	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return _spellSettings[spell_type].minThreshold; }
+	void SetSpellMinThreshold(uint16 spell_type, uint8 threshold_value);
+	inline uint8 GetSpellMaxThreshold(uint16 spell_type) const { return _spellSettings[spell_type].maxThreshold; }
+	void SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value);
 
-	inline uint16 GetSpellTypeRecastTimer(uint16 spellType) { return _spellSettings[spellType].recastTimer.GetRemainingTime(); }
-	void SetSpellTypeRecastTimer(uint16 spellType, uint32 recastTime);
+	inline uint16 GetSpellTypeRecastTimer(uint16 spell_type) { return _spellSettings[spell_type].recastTimer.GetRemainingTime(); }
+	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time);
 
-	uint8 GetHPRatioForSpellType(uint16 spellType, Mob* tar);
-	bool GetUltimateSpellHold(uint16 spellType, Mob* tar);
-	uint16 GetUltimateSpellDelay(uint16 spellType, Mob* tar);
-	bool GetUltimateSpellDelayCheck(uint16 spellType, Mob* tar);
-	uint8 GetUltimateSpellMinThreshold(uint16 spellType, Mob* tar);
-	uint8 GetUltimateSpellMaxThreshold(uint16 spellType, Mob* tar);
+	uint8 GetHPRatioForSpellType(uint16 spell_type, Mob* tar);
+	bool GetUltimateSpellHold(uint16 spell_type, Mob* tar);
+	uint16 GetUltimateSpellDelay(uint16 spell_type, Mob* tar);
+	bool GetUltimateSpellDelayCheck(uint16 spell_type, Mob* tar);
+	uint8 GetUltimateSpellMinThreshold(uint16 spell_type, Mob* tar);
+	uint8 GetUltimateSpellMaxThreshold(uint16 spell_type, Mob* tar);
 
-	uint16 GetPetSpellType(uint16 spellType);
+	uint16 GetPetSpellType(uint16 spell_type);
 
 	void DisableBotSpellTimers();
 	void StartBotSpellTimers();	
 
-	void SetBotSetting(uint8 settingType, uint16 botSetting, int settingValue);
-	void SetBaseSetting(uint16 baseSetting, int settingValue);
+	void SetBotSetting(uint8 spell_type, uint16 bot_setting, int setting_value);
+	void SetBaseSetting(uint16 base_setting, int setting_value);
 
 	void SetIllusionBlock(bool value) { _illusionBlock = value; }
 	bool GetIllusionBlock() const { return _illusionBlock; }
@@ -785,7 +785,7 @@ public:
 	virtual bool HasGroup() = 0;
 	virtual Raid* GetRaid() = 0;
 	virtual Group* GetGroup() = 0;
-	bool IsInGroupOrRaid(Mob* other, bool sameRaidGroup = false);
+	bool IsInGroupOrRaid(Mob* other, bool same_raid_group = false);
 
 	//Faction
 	virtual inline int32 GetPrimaryFaction() const { return 0; }
@@ -940,7 +940,7 @@ public:
 	void ShowStats(Client* client);
 	void ShowBuffs(Client* c);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc = true);
-	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behindOnly = false, bool frontOnly = false, bool bypassLoS = false);
+	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
 	virtual int GetKillExpMod() const { return 100; }
 
 	// aura functions

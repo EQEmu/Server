@@ -2180,14 +2180,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 				IsClient() && CastToClient()->TGB() &&
 				IsTGBCompatibleSpell(spell_id) &&
 				(slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB))
-				) {
+			) {
 				if (
 					!target ||
 					target->IsCorpse() ||
 					(
 						target->IsNPC() &&
 						!(target->GetOwner() && target->GetOwner()->IsClient())
-						)
+					)
 				) {
 					spell_target = this;
 				}
@@ -7549,8 +7549,8 @@ bool Mob::IsImmuneToBotSpell(uint16 spell_id, Mob* caster)
 {
 	int effect_index;
 
-	if (caster == nullptr) {
-		return(false);
+	if (!caster) {
+		return false;
 	}
 
 	//TODO: this function loops through the effect list for

@@ -2147,33 +2147,15 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 	std::string shortnameField = "Short Name";
 
 	std::string popup_text = DialogueWindow::TableRow(
-		DialogueWindow::TableCell(
-			fmt::format(
-				"{}",
-				DialogueWindow::ColorMessage(goldenrod, spellTypeField)
-			)
-		) +
-		DialogueWindow::TableCell(
-			fmt::format(
-				"{}",
-				(!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(goldenrod, idField) : DialogueWindow::ColorMessage(goldenrod, shortnameField))
-			)
-		)
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(goldenrod, spellTypeField))
+		+
+		DialogueWindow::TableCell((!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(goldenrod, idField) : DialogueWindow::ColorMessage(goldenrod, shortnameField)))
 	);
 
 	popup_text += DialogueWindow::TableRow(
-		DialogueWindow::TableCell(
-			fmt::format(
-				"{}",
-				DialogueWindow::ColorMessage(gold, fillerLine)
-			)
-		) +
-		DialogueWindow::TableCell(
-			fmt::format(
-				"{}",
-				DialogueWindow::ColorMessage(gold, fillerLine)
-			)
-		)
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(gold, fillerLine))
+		+
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(gold, fillerLine))
 	);
 
 	for (int i = minCount; i <= maxCount; ++i) {
@@ -2182,18 +2164,9 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 		}
 
 		popup_text += DialogueWindow::TableRow(
-			DialogueWindow::TableCell(
-				fmt::format(
-					"{}",
-					DialogueWindow::ColorMessage(forest_green, c->GetSpellTypeNameByID(i))
-				)
-			) +
-			DialogueWindow::TableCell(
-				fmt::format(
-					"{}",
-					(!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(slate_blue, std::to_string(i)) : DialogueWindow::ColorMessage(slate_blue, c->GetSpellTypeShortNameByID(i)))
-				)
-			)
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(forest_green, c->GetSpellTypeNameByID(i)))
+			+
+			DialogueWindow::TableCell((!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(slate_blue, std::to_string(i)) : DialogueWindow::ColorMessage(slate_blue, c->GetSpellTypeShortNameByID(i))))
 		);
 	}
 

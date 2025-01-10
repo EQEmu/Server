@@ -4822,7 +4822,7 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 	return Result;
 }
 
-bool Mob::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behindOnly, bool frontOnly, bool bypassLoS) {
+bool Mob::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only, bool front_only, bool bypass_los) {
 	bool Result = false;
 
 	if (target) {
@@ -4830,41 +4830,41 @@ bool Mob::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest,
 
 		min_distance = min_distance;
 		max_distance = max_distance;
-		float tempX = 0;
-		float tempY = 0;
-		float tempZ = target->GetZ();
-		float bestZ = 0;
+		float temp_x = 0;
+		float temp_y = 0;
+		float temp_z = target->GetZ();
+		float best_z = 0;
 		auto offset = GetZOffset();
-		const float tarX = target->GetX();
-		const float tarY = target->GetY();
+		const float tar_x = target->GetX();
+		const float tar_y = target->GetY();
 		float tar_distance = 0;
 
 		glm::vec3 temp_z_Position;
 		glm::vec4 temp_m_Position;
 
-		const uint16 maxIterationsAllowed = 50;
+		const uint16 max_iterations_allowed = 50;
 		uint16 counter = 0;
 
-		while (counter < maxIterationsAllowed) {
-			tempX = tarX + zone->random.Real(-max_distance, max_distance);
-			tempY = tarY + zone->random.Real(-max_distance, max_distance);
+		while (counter < max_iterations_allowed) {
+			temp_x = tar_x + zone->random.Real(-max_distance, max_distance);
+			temp_y = tar_y + zone->random.Real(-max_distance, max_distance);
 
-			temp_z_Position.x = tempX;
-			temp_z_Position.y = tempY;
-			temp_z_Position.z = tempZ;
-			bestZ = GetFixedZ(temp_z_Position);
+			temp_z_Position.x = temp_z;
+			temp_z_Position.y = temp_y;
+			temp_z_Position.z = temp_z;
+			best_z = GetFixedZ(temp_z_Position);
 
-			if (bestZ != BEST_Z_INVALID) {
-				tempZ = bestZ;
+			if (best_z != BEST_Z_INVALID) {
+				temp_z = best_z;
 			}
 			else {
 				counter++;
 				continue;
 			}
 
-			temp_m_Position.x = tempX;
-			temp_m_Position.y = tempY;
-			temp_m_Position.z = tempZ;
+			temp_m_Position.x = temp_x;
+			temp_m_Position.y = temp_y;
+			temp_m_Position.z = temp_z;
 
 			tar_distance = Distance(target->GetPosition(), temp_m_Position);
 
@@ -4872,15 +4872,15 @@ bool Mob::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest,
 				counter++;
 				continue;
 			}
-			if (frontOnly && !InFrontMob(target, tempX, tempY)) {
+			if (front_only && !InFrontMob(target, temp_x, temp_y)) {
 				counter++;
 				continue;
 			}
-			else if (behindOnly && !BehindMob(target, tempX, tempY)) {
+			else if (behind_only && !BehindMob(target, temp_x, temp_y)) {
 				counter++;
 				continue;
 			}
-			if (!bypassLoS && CastToBot()->RequiresLoSForPositioning() && !CheckPositioningLosFN(target, tempX, tempY, tempZ)) {
+			if (!bypass_los && CastToBot()->RequiresLoSForPositioning() && !CheckPositioningLosFN(target, temp_x, temp_y, temp_z)) {
 				counter++;
 				continue;
 			}
@@ -4890,9 +4890,9 @@ bool Mob::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest,
 		}
 
 		if (Result) {
-			x_dest = tempX;
-			y_dest = tempY;
-			z_dest = tempZ;
+			x_dest = temp_x;
+			y_dest = temp_y;
+			z_dest = temp_z;
 		}
 	}
 
@@ -8690,7 +8690,7 @@ void Mob::CheckScanCloseMobsMovingTimer()
 	}
 }
 
-std::vector<Mob*> Mob::GatherSpellTargets(bool entireRaid, Mob* target, bool noClients, bool noBots, bool noPets) {
+std::vector<Mob*> Mob::GatherSpellTargets(bool entire_raid, Mob* target, bool no_clients, bool no_bots, bool no_pets) {
 	std::vector<Mob*> valid_spell_targets;
 
 	if (IsRaidGrouped()) {
@@ -8704,25 +8704,32 @@ std::vector<Mob*> Mob::GatherSpellTargets(bool entireRaid, Mob* target, bool noC
 		}
 
 		if (raid) {
-			if (entireRaid) {
+			if (entire_raid) {
 				for (const auto& m : raid->members) {
-					if (m.member && m.group_number != RAID_GROUPLESS && ((m.member->IsClient() && !noClients) || (m.member->IsBot() && !noBots))) {
+					if (m.member && m.group_number != RAID_GROUPLESS && ((m.member->IsClient() && !no_clients) || (m.member->IsBot() && !no_bots))) {
 						valid_spell_targets.emplace_back(m.member);
 					}
 				}
 			}
 			else {
-				std::vector<RaidMember> raidGroup;
+				std::vector<RaidMember> raid_group;
 
 				if (target) {
-					raidGroup = raid->GetRaidGroupMembers(raid->GetGroup(target->GetName()));
+					raid_group = raid->GetRaidGroupMembers(raid->GetGroup(target->GetName()));
 				}
 				else {
-					raidGroup = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
+					raid_group = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
 				}
 
-				for (const auto& m : raidGroup) {
-					if (m.member && m.group_number != RAID_GROUPLESS && ((m.member->IsClient() && !noClients) || (m.member->IsBot() && !noBots))) {
+				for (const auto& m : raid_group) {
+					if (
+						m.member && 
+						m.group_number != RAID_GROUPLESS && 
+						(
+							(m.member->IsClient() && !no_clients) || 
+							(m.member->IsBot() && !no_bots)
+						)
+					) {
 						valid_spell_targets.emplace_back(m.member);
 					}
 				}
@@ -8734,7 +8741,7 @@ std::vector<Mob*> Mob::GatherSpellTargets(bool entireRaid, Mob* target, bool noC
 
 		if (group) {
 			for (const auto& m : group->members) {
-				if (m && ((m->IsClient() && !noClients) || (m->IsBot() && !noBots))) {
+				if (m && ((m->IsClient() && !no_clients) || (m->IsBot() && !no_bots))) {
 					valid_spell_targets.emplace_back(m);
 				}
 			}
@@ -8747,16 +8754,16 @@ std::vector<Mob*> Mob::GatherSpellTargets(bool entireRaid, Mob* target, bool noC
 	return valid_spell_targets;
 }
 
-uint16 Mob::GetSpellTypeIDByShortName(std::string spellTypeString) {
+uint16 Mob::GetSpellTypeIDByShortName(std::string spell_type_string) {
 
 	for (int i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-		if (!Strings::ToLower(spellTypeString).compare(GetSpellTypeShortNameByID(i))) {
+		if (!Strings::ToLower(spell_type_string).compare(GetSpellTypeShortNameByID(i))) {
 			return i;
 		}
 	}
 
 	for (int i = BotSpellTypes::COMMANDED_START; i <= BotSpellTypes::COMMANDED_END; ++i) {
-		if (!Strings::ToLower(spellTypeString).compare(GetSpellTypeShortNameByID(i))) {
+		if (!Strings::ToLower(spell_type_string).compare(GetSpellTypeShortNameByID(i))) {
 			return i;
 		}
 	}
@@ -8765,16 +8772,16 @@ uint16 Mob::GetSpellTypeIDByShortName(std::string spellTypeString) {
 }
 
 bool Mob::IsValidBotSpellCategory(uint8 setting_type) {
-	return (setting_type >= BotSettingCategories::START && setting_type <= BotSettingCategories::END_FULL);
+	return EQ::ValueWithin(setting_type, BotSettingCategories::START, BotSettingCategories::END_FULL);
 }
 
 std::string Mob::GetBotSpellCategoryName(uint8 setting_type) {
 	return IsValidBotBaseSetting(setting_type) ? botSpellCategory_names[setting_type] : "UNKNOWN CATEGORY";
 }
 
-uint16 Mob::GetBotSpellCategoryIDByShortName(std::string settingString) {
+uint16 Mob::GetBotSpellCategoryIDByShortName(std::string setting_string) {
 	for (int i = BotSettingCategories::START; i <= BotSettingCategories::END; ++i) {
-		if (!Strings::ToLower(settingString).compare(Strings::ToLower(GetBotSpellCategoryName(i)))) {
+		if (!Strings::ToLower(setting_string).compare(Strings::ToLower(GetBotSpellCategoryName(i)))) {
 			return i;
 		}
 	}
@@ -8783,16 +8790,16 @@ uint16 Mob::GetBotSpellCategoryIDByShortName(std::string settingString) {
 }
 
 bool Mob::IsValidBotBaseSetting(uint16 setting_type) {
-	return (setting_type >= BotBaseSettings::START_ALL && setting_type <= BotBaseSettings::END);
+	return EQ::ValueWithin(setting_type, BotBaseSettings::START_ALL, BotBaseSettings::END);
 }
 
 std::string Mob::GetBotSettingCategoryName(uint16 setting_type) {
 	return IsValidBotBaseSetting(setting_type) ? botBaseSettings_names[setting_type] : "UNKNOWN SETTING";
 }
 
-uint16 Mob::GetBaseSettingIDByShortName(std::string settingString) {
+uint16 Mob::GetBaseSettingIDByShortName(std::string setting_string) {
 	for (int i = BotSettingCategories::START; i <= BotSettingCategories::END; ++i) {
-		if (!Strings::ToLower(settingString).compare(Strings::ToLower(GetBotSettingCategoryName(i)))) {
+		if (!Strings::ToLower(setting_string).compare(Strings::ToLower(GetBotSettingCategoryName(i)))) {
 			return i;
 		}
 	}
@@ -8800,30 +8807,33 @@ uint16 Mob::GetBaseSettingIDByShortName(std::string settingString) {
 	return UINT16_MAX;
 }
 
-bool Mob::IsValidSpellType(uint16 spellType) {
-	return (spellType >= BotSpellTypes::START && spellType <= BotSpellTypes::END) || (spellType >= BotSpellTypes::COMMANDED_START && spellType <= BotSpellTypes::COMMANDED_END);
+bool Mob::IsValidSpellType(uint16 spell_type) {
+	return (
+		EQ::ValueWithin(spell_type, BotSpellTypes::START, BotSpellTypes::END) ||
+		EQ::ValueWithin(spell_type, BotSpellTypes::COMMANDED_START, BotSpellTypes::COMMANDED_END)
+	);
 }
 
-std::string Mob::GetSpellTypeShortNameByID(uint16 spellType) {
-	return IsValidSpellType(spellType) ? spellType_shortNames[spellType] : "UNKNOWN SPELLTYPE";
+std::string Mob::GetSpellTypeShortNameByID(uint16 spell_type) {
+	return IsValidSpellType(spell_type) ? spellType_shortNames[spell_type] : "UNKNOWN SPELLTYPE";
 }
 
-std::string Mob::GetSpellTypeNameByID(uint16 spellType) {
-	return IsValidSpellType(spellType) ? spellType_names[spellType] : "UNKNOWN SPELLTYPE";
+std::string Mob::GetSpellTypeNameByID(uint16 spell_type) {
+	return IsValidSpellType(spell_type) ? spellType_names[spell_type] : "UNKNOWN SPELLTYPE";
 }
 
-bool Mob::IsValidSubType(uint16 subType) {
-	return (subType >= CommandedSubTypes::START && subType <= CommandedSubTypes::END);
+bool Mob::IsValidSubType(uint16 sub_type) {
+	return EQ::ValueWithin(sub_type, CommandedSubTypes::START, CommandedSubTypes::END);
 }
 
-std::string Mob::GetSubTypeNameByID(uint16 subType) {
-	return IsValidSpellType(subType) ? botSubType_names[subType] : "UNKNOWN SUBTYPE";
+std::string Mob::GetSubTypeNameByID(uint16 sub_type) {
+	return IsValidSpellType(sub_type) ? botSubType_names[sub_type] : "UNKNOWN SUBTYPE";
 }
 
-bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
-	uint8 botClass = GetClass();
+bool Mob::GetDefaultSpellHold(uint16 spell_type, uint8 stance) {
+	uint8 bot_class = GetClass();
 
-	switch (spellType) {
+	switch (spell_type) {
 		case BotSpellTypes::FastHeals:
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::Pet:
@@ -8866,7 +8876,7 @@ bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::InCombatBuffSong:
 		case BotSpellTypes::OutOfCombatBuffSong:
 		case BotSpellTypes::PreCombatBuffSong:
-			if (botClass == Class::Bard) {
+			if (bot_class == Class::Bard) {
 				return false;
 			}
 			else {
@@ -8917,7 +8927,7 @@ bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 					return false;
 			}
 		case BotSpellTypes::HateLine:
-			if (botClass == Class::ShadowKnight || botClass == Class::Paladin) {
+			if (bot_class == Class::ShadowKnight || bot_class == Class::Paladin) {
 				switch (stance) {
 					case Stance::Aggressive:
 						return false;
@@ -8948,8 +8958,8 @@ bool Mob::GetDefaultSpellHold(uint16 spellType, uint8 stance) {
 	}
 }
 
-uint16 Mob::GetDefaultSpellDelay(uint16 spellType, uint8 stance) {
-	switch (spellType) {
+uint16 Mob::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
+	switch (spell_type) {
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
 			return 1500;
@@ -9015,8 +9025,8 @@ uint16 Mob::GetDefaultSpellDelay(uint16 spellType, uint8 stance) {
 	}
 }
 
-uint8 Mob::GetDefaultSpellMinThreshold(uint16 spellType, uint8 stance) {
-	switch (spellType) {
+uint8 Mob::GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance) {
+	switch (spell_type) {
 		case BotSpellTypes::AEDebuff:
 		case BotSpellTypes::Debuff:
 		case BotSpellTypes::AEDispel:
@@ -9063,10 +9073,10 @@ uint8 Mob::GetDefaultSpellMinThreshold(uint16 spellType, uint8 stance) {
 	}
 }
 
-uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
-	uint8 botClass = GetClass();
+uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
+	uint8 bot_class = GetClass();
 
-	switch (spellType) {
+	switch (spell_type) {
 		case BotSpellTypes::Escape:
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
@@ -9153,7 +9163,7 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 		case BotSpellTypes::GroupHoTHeals:
 		case BotSpellTypes::HoTHeals:
 		case BotSpellTypes::PetHoTHeals:
-			if (botClass == Class::Necromancer || botClass == Class::Shaman) {
+			if (bot_class == Class::Necromancer || bot_class == Class::Shaman) {
 				return 60;
 			}
 			else {
@@ -9195,24 +9205,24 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spellType, uint8 stance) {
 	}
 }
 
-void Mob::SetSpellHold(uint16 spellType, bool holdStatus) { 
-	_spellSettings[spellType].hold = holdStatus; 
+void Mob::SetSpellHold(uint16 spell_type, bool hold_status) {
+	_spellSettings[spell_type].hold = hold_status;
 }
 
-void Mob::SetSpellDelay(uint16 spellType, uint16 delayValue) {
-	_spellSettings[spellType].delay = delayValue; 
+void Mob::SetSpellDelay(uint16 spell_type, uint16 delay_value) {
+	_spellSettings[spell_type].delay = delay_value;
 }
 
-void Mob::SetSpellMinThreshold(uint16 spellType, uint8 thresholdValue) {
-	_spellSettings[spellType].minThreshold = thresholdValue; 
+void Mob::SetSpellMinThreshold(uint16 spell_type, uint8 threshold_value) {
+	_spellSettings[spell_type].minThreshold = threshold_value;
 }
 
-void Mob::SetSpellMaxThreshold(uint16 spellType, uint8 thresholdValue) {
-	_spellSettings[spellType].maxThreshold = thresholdValue; 
+void Mob::SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value) {
+	_spellSettings[spell_type].maxThreshold = threshold_value;
 }
 
-void Mob::SetSpellTypeRecastTimer(uint16 spellType, uint32 recastTime) {
-	_spellSettings[spellType].recastTimer.Start(recastTime);
+void Mob::SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) {
+	_spellSettings[spell_type].recastTimer.Start(recast_time);
 }
 
 void Mob::StartBotSpellTimers() {
@@ -9227,84 +9237,84 @@ void Mob::DisableBotSpellTimers() {
 	}
 }
 
-bool Mob::GetUltimateSpellHold(uint16 spellType, Mob* tar) {
+bool Mob::GetUltimateSpellHold(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return GetSpellHold(spellType);
+		return GetSpellHold(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->GetSpellHold(GetPetSpellType(spellType));
+		return tar->GetOwner()->GetSpellHold(GetPetSpellType(spell_type));
 	}
 
-	return GetSpellHold(spellType);
+	return GetSpellHold(spell_type);
 }
 
-uint16 Mob::GetUltimateSpellDelay(uint16 spellType, Mob* tar) {
+uint16 Mob::GetUltimateSpellDelay(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return GetSpellDelay(spellType);
+		return GetSpellDelay(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->GetSpellDelay(GetPetSpellType(spellType));
+		return tar->GetOwner()->GetSpellDelay(GetPetSpellType(spell_type));
 	}
 
-	if (IsBotSpellTypeOtherBeneficial(spellType) && tar->IsOfClientBot()) {
-		return tar->GetSpellDelay(spellType);
+	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
+		return tar->GetSpellDelay(spell_type);
 	}
 
-	return GetSpellDelay(spellType);
+	return GetSpellDelay(spell_type);
 }
 
-bool Mob::GetUltimateSpellDelayCheck(uint16 spellType, Mob* tar) {
+bool Mob::GetUltimateSpellDelayCheck(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return SpellTypeRecastCheck(spellType);
+		return SpellTypeRecastCheck(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->SpellTypeRecastCheck(GetPetSpellType(spellType));
+		return tar->GetOwner()->SpellTypeRecastCheck(GetPetSpellType(spell_type));
 	}
 
-	if (IsBotSpellTypeOtherBeneficial(spellType) && tar->IsOfClientBot()) {
-		return tar->SpellTypeRecastCheck(spellType);
+	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
+		return tar->SpellTypeRecastCheck(spell_type);
 	}
 
-	return SpellTypeRecastCheck(spellType);
+	return SpellTypeRecastCheck(spell_type);
 }
 
-uint8 Mob::GetUltimateSpellMinThreshold(uint16 spellType, Mob* tar) {
+uint8 Mob::GetUltimateSpellMinThreshold(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return GetSpellMinThreshold(spellType);
+		return GetSpellMinThreshold(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->GetSpellMinThreshold(GetPetSpellType(spellType));
+		return tar->GetOwner()->GetSpellMinThreshold(GetPetSpellType(spell_type));
 	}
 
-	if (IsBotSpellTypeOtherBeneficial(spellType) && tar->IsOfClientBot()) {
-		return tar->GetSpellMinThreshold(spellType);
+	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
+		return tar->GetSpellMinThreshold(spell_type);
 	}
 
-	return GetSpellMinThreshold(spellType);
+	return GetSpellMinThreshold(spell_type);
 }
 
-uint8 Mob::GetUltimateSpellMaxThreshold(uint16 spellType, Mob* tar) {
+uint8 Mob::GetUltimateSpellMaxThreshold(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return GetSpellMaxThreshold(spellType);
+		return GetSpellMaxThreshold(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->GetSpellMaxThreshold(GetPetSpellType(spellType));
+		return tar->GetOwner()->GetSpellMaxThreshold(GetPetSpellType(spell_type));
 	}
 
-	if (IsBotSpellTypeOtherBeneficial(spellType) && tar->IsOfClientBot()) {
-		return tar->GetSpellMaxThreshold(spellType);
+	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
+		return tar->GetSpellMaxThreshold(spell_type);
 	}
 
-	return GetSpellMaxThreshold(spellType);
+	return GetSpellMaxThreshold(spell_type);
 }
 
-uint16 Mob::GetPetSpellType(uint16 spellType) {
-	switch (spellType) {
+uint16 Mob::GetPetSpellType(uint16 spell_type) {
+	switch (spell_type) {
 		case BotSpellTypes::VeryFastHeals:
 			return BotSpellTypes::PetVeryFastHeals;
 		case BotSpellTypes::FastHeals:
@@ -9327,11 +9337,11 @@ uint16 Mob::GetPetSpellType(uint16 spellType) {
 			break;
 	}
 
-	return spellType;
+	return spell_type;
 }
 
-uint8 Mob::GetHPRatioForSpellType(uint16 spellType, Mob* tar) {
-	switch (spellType) {
+uint8 Mob::GetHPRatioForSpellType(uint16 spell_type, Mob* tar) {
+	switch (spell_type) {
 		case BotSpellTypes::Escape:
 		case BotSpellTypes::HateRedux:
 		case BotSpellTypes::InCombatBuff:
@@ -9350,28 +9360,28 @@ uint8 Mob::GetHPRatioForSpellType(uint16 spellType, Mob* tar) {
 	return tar->GetHPRatio();
 }
 
-void Mob::SetBotSetting(uint8 settingType, uint16 botSetting, int settingValue) {
+void Mob::SetBotSetting(uint8 setting_type, uint16 bot_setting, int setting_value) {
 	if (!IsOfClientBot()) {
 		return;
 	}
 
 	if (IsClient()) {
-		CastToClient()->SetBotSetting(settingType, botSetting, settingValue);
+		CastToClient()->SetBotSetting(setting_type, bot_setting, setting_value);
 		return;
 	}
 
 	if (IsBot()) {
-		CastToBot()->SetBotSetting(settingType, botSetting, settingValue);
+		CastToBot()->SetBotSetting(setting_type, bot_setting, setting_value);
 		return;
 	}
 
 	return;
 }
 
-void Mob::SetBaseSetting(uint16 baseSetting, int settingValue) {
-	switch (baseSetting) {
+void Mob::SetBaseSetting(uint16 base_setting, int setting_value) {
+	switch (base_setting) {
 		case BotBaseSettings::IllusionBlock:
-			SetIllusionBlock(settingValue);
+			SetIllusionBlock(setting_value);
 			break;
 		default:
 			break;
@@ -9409,7 +9419,7 @@ void Mob::ClearDataBucketCache()
 	}
 }
 
-bool Mob::IsInGroupOrRaid(Mob *other, bool sameRaidGroup) {
+bool Mob::IsInGroupOrRaid(Mob *other, bool same_raid_group) {
 	if (!other || !IsOfClientBotMerc() || !other->IsOfClientBotMerc()) {
 		return false;
 	}
@@ -9440,23 +9450,23 @@ bool Mob::IsInGroupOrRaid(Mob *other, bool sameRaidGroup) {
 			return false;
 		}
 
-		Raid* otherRaid = nullptr;
+		Raid* other_raid = nullptr;
 
 		if (other->IsBot()) {
-			otherRaid = other->CastToBot()->GetStoredRaid();
+			other_raid = other->CastToBot()->GetStoredRaid();
 		}
 		else {
-			otherRaid = other->GetRaid();
+			other_raid = other->GetRaid();
 		}
 
-		if (!otherRaid) {
+		if (!other_raid) {
 			return false;
 		}
 
-		auto rGroup = raid->GetGroup(GetCleanName());
-		auto rOGroup = otherRaid->GetGroup(other->GetCleanName());
+		auto raid_group = raid->GetGroup(GetCleanName());
+		auto raid_other_group = other_raid->GetGroup(other->GetCleanName());
 
-		if (rGroup == RAID_GROUPLESS || rOGroup == RAID_GROUPLESS || (sameRaidGroup && rGroup != rOGroup)) {
+		if (raid_group == RAID_GROUPLESS || raid_other_group == RAID_GROUPLESS || (same_raid_group && raid_group != raid_other_group)) {
 			return false;
 		}
 
@@ -9464,10 +9474,10 @@ bool Mob::IsInGroupOrRaid(Mob *other, bool sameRaidGroup) {
 	}
 	else {
 		auto* group = GetGroup();
-		auto* groupOther = other->GetGroup();
+		auto* group_other = other->GetGroup();
 
 		if (group) {
-			if (!groupOther || group != groupOther) {
+			if (!group_other || group != group_other) {
 				return false;
 			}
 

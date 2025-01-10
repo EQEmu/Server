@@ -2239,21 +2239,21 @@ bool BotDatabase::LoadBotSettings(Mob* m)
 
 	for (const auto& e : l) {
 		if (e.setting_type == BotSettingCategories::BaseSetting) {
-			LogBotSettings("[{}] says, 'Loading {} [{}] - setting to [{}]."
-				, m->GetCleanName()
-				, m->GetBotSettingCategoryName(e.setting_type)
-				, e.setting_type
-				, e.value
+			LogBotSettings("[{}] says, 'Loading {} [{}] - setting to [{}].",
+				m->GetCleanName(),
+				m->GetBotSettingCategoryName(e.setting_type),
+				e.setting_type,
+				e.value
 			);
 		}
 		else {
-			LogBotSettings("[{}] says, 'Loading {} [{}], {} [{}] - setting to [{}]."
-				, m->GetCleanName()
-				, m->GetBotSpellCategoryName(e.setting_type)
-				, e.setting_type
-				, m->GetSpellTypeNameByID(e.setting_id)
-				, e.setting_id
-				, e.value
+			LogBotSettings("[{}] says, 'Loading {} [{}], {} [{}] - setting to [{}].",
+				m->GetCleanName(),
+				m->GetBotSpellCategoryName(e.setting_type),
+				e.setting_type,
+				m->GetSpellTypeNameByID(e.setting_id),
+				e.setting_id,
+				e.value
 			);
 		}
 
