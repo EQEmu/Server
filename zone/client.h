@@ -306,9 +306,10 @@ public:
 	void KeyRingAdd(uint32 item_id);
 	bool KeyRingCheck(uint32 item_id);
 	void KeyRingList();
-	uint GetPetNameChanges();
-	void ModifyPetNameChanges(int mod_value);
-	bool InvokeChangePetName();
+	bool IsPetNameChangeAllowed();
+	void GrantPetNameChange();
+	void ClearPetNameChange();
+	void InvokeChangePetName();
 	bool ChangePetName(char *new_name);
 	bool IsClient() const override { return true; }
 	bool IsOfClientBot() const override { return true; }

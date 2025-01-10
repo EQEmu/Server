@@ -4393,36 +4393,42 @@ void Client::KeyRingList()
 	}
 }
 
-uint Client::GetPetNameChanges() {
+bool Client::IsPetNameChangeAllowed() {
 	DataBucketKey k = GetScopedBucketKeys();
 	k.key = "PetNameChangesAllowed";
 
 	auto b = DataBucket::GetData(k);
 	if (!b.value.empty()) {
-		if (Strings::IsNumber(b.value)) {
-			return static_cast<uint8>(Strings::ToUnsignedInt(b.value));
-		}
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 
-void Client::ModifyPetNameChanges(int mod_value) {
-	uint num_changes = GetPetNameChanges();
-	DataBucketKey k = GetScopedBucketKeys();
-	k.key = "PetNameChangesAllowed";
-	k.value = std::to_string(num_changes + mod_value);
-	DataBucket::SetData(k);
-}
-
-bool Client::InvokeChangePetName() {
-	if (!GetPetNameChanges()) {
-		return false;
+void Client::InvokeChangePetName() {
+	if (!IsPetNameChangeAllowed()) {
+		return;
 	}
+
 	auto outapp = new EQApplicationPacket(OP_InvokeChangePetName, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	return true;
+}
+
+void Client::GrantPetNameChange() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+	k.value = "true";
+	DataBucket::SetData(k);
+
+	InvokeChangePetName();
+}
+
+void Client::ClearPetNameChange() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	DataBucket::DeleteData(k);
 }
 
 bool Client::ChangePetName(char* new_name) {
@@ -4430,8 +4436,7 @@ bool Client::ChangePetName(char* new_name) {
         return false;
     }
 
-    uint num_changes = GetPetNameChanges();
-    if (!num_changes) {
+    if (!IsPetNameChangeAllowed()) {
         return false;
     }
 
@@ -4453,12 +4458,12 @@ bool Client::ChangePetName(char* new_name) {
 		.name = new_name
 	});
 
-	ModifyPetNameChanges(-1);
 
 	if (GetPet()) {
 		GetPet()->TempName(new_name);
 	}
 
+	ClearPetNameChange();
     return true;
 }
 

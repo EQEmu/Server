@@ -3458,10 +3458,10 @@ void Lua_Client::ShowZoneShardMenu()
 	self->ShowZoneShardMenu();
 }
 
-bool Lua_Client::ChangePetName()
+void Lua_Client::ChangePetName()
 {
-	Lua_Safe_Call_Bool();
-	return self->InvokeChangePetName();
+	Lua_Safe_Call_Void();
+	self->GrantPetNameChange();
 }
 
 luabind::scope lua_register_client() {
@@ -3532,7 +3532,7 @@ luabind::scope lua_register_client() {
 	.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)
 	.def("CashReward", &Lua_Client::CashReward)
 	.def("ChangeLastName", (void(Lua_Client::*)(std::string))&Lua_Client::ChangeLastName)
-	.def("ChangePetName",(bool(Lua_Client::*)(void))&Lua_Client::ChangePetName)
+	.def("ChangePetName", &Lua_Client::ChangePetName)
 	.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob,int))&Lua_Client::CheckIncreaseSkill)

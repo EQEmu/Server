@@ -822,7 +822,7 @@ void Client::CompleteConnect()
 			)
 		);
 
-		if (GetPetNameChanges()) {
+		if (IsPetNameChangeAllowed()) {
 			InvokeChangePetName();
 		}
 	}
@@ -4570,7 +4570,7 @@ void Client::Handle_OP_ChangePetName(const EQApplicationPacket *app) {
 
 	auto payload = (ChangePetName_Struct*)app->pBuffer;
 
-	if (!GetPetNameChanges()) {
+	if (!IsPetNameChangeAllowed()) {
 		payload->response_code = ChangePetNameResponse::NotEligible;
 		QueuePacket(app);
 		return;
