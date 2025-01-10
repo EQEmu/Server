@@ -70,11 +70,13 @@ extern volatile bool RunLoops;
 #include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/keyring_repository.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
+#include "../common/repositories/character_pet_name_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
 #include "../common/zone_store.h"
 #include "../common/skill_caps.h"
+#include "client.h"
 
 
 extern QueryServ* QServ;
@@ -4389,6 +4391,65 @@ void Client::KeyRingList()
 			Message(Chat::LightBlue, item_string.c_str());
 		}
 	}
+}
+
+uint Client::GetPetNameChanges() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		if (Strings::IsNumber(b.value)) {
+			return static_cast<uint8>(Strings::ToUnsignedInt(b.value));
+		}
+	}
+
+	return 0;
+}
+
+void Client::ModifyPetNameChanges(int mod_value) {
+	uint num_changes = GetPetNameChanges();
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+	k.value = std::to_string(num_changes + mod_value);
+	DataBucket::SetData(k);
+}
+
+bool Client::ChangePetName(char* new_name) {
+    if (!new_name || strlen(new_name) == 0) {
+        return false;
+    }
+
+    uint num_changes = GetPetNameChanges();
+    if (!num_changes) {
+        return false;
+    }
+
+    const char* cur_name = nullptr;
+    if (GetPet()) {
+        cur_name = GetPet()->GetName();
+
+        if (cur_name && strncmp(new_name, cur_name, strlen(new_name)) == 0) {
+            return false;
+        }
+    }
+
+    if (!database.CheckNameFilter(new_name) || database.IsNameUsed(new_name)) {
+        return false;
+    }
+
+	CharacterPetNameRepository::ReplaceOne(database, {
+		.char_id = static_cast<int32_t>(CharacterID()),
+		.name = new_name
+	});
+
+	ModifyPetNameChanges(-1);
+
+	if (GetPet()) {
+		GetPet()->TempName(new_name);
+	}
+
+    return true;
 }
 
 bool Client::IsDiscovered(uint32 item_id) {

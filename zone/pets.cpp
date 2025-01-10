@@ -22,6 +22,7 @@
 
 #include "../common/repositories/pets_repository.h"
 #include "../common/repositories/pets_beastlord_data_repository.h"
+#include "../common/repositories/character_pet_name_repository.h"
 
 #include "entity.h"
 #include "client.h"
@@ -164,6 +165,17 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// 4 - Keep DB name
 	// 5 - `s ward
 
+	const std::vector<CharacterPetNameRepository::CharacterPetName>& vanity_name = CharacterPetNameRepository::GetWhere(
+		database,
+		fmt::format(
+			"`char_id` = '{}'",
+			IsClient() ? CastToClient()->CharacterID() : 0
+		)
+	);
+
+	if (!vanity_name.empty() && petname == nullptr) {
+		petname = vanity_name.front().name.c_str();
+	}
 
 	if (petname != nullptr) {
 		// Name was provided, use it.
