@@ -4415,6 +4415,15 @@ void Client::ModifyPetNameChanges(int mod_value) {
 	DataBucket::SetData(k);
 }
 
+void Client::InvokeChangePetName(bool increment) {
+	if (increment) {
+		ModifyPetNameChanges(1);
+	}
+	auto outapp = new EQApplicationPacket(OP_InvokeChangePetName, 0);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
 bool Client::ChangePetName(char* new_name) {
     if (!new_name || strlen(new_name) == 0) {
         return false;

@@ -978,6 +978,10 @@ void Client::CompleteConnect()
 		GoToBind();
 		return;
 	}
+
+	if (GetPetNameChanges()) {
+		InvokeChangePetName(false);
+	}
 }
 
 // connecting opcode handlers

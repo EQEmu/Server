@@ -308,6 +308,7 @@ public:
 	void KeyRingList();
 	uint GetPetNameChanges();
 	void ModifyPetNameChanges(int mod_value);
+	void InvokeChangePetName(bool increment = true);
 	bool ChangePetName(char *new_name);
 	bool IsClient() const override { return true; }
 	bool IsOfClientBot() const override { return true; }
