@@ -82,7 +82,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 
 	bool chain = false;
 	bool reset = false;
-	bool currentCheck = false;
+	bool current_check = false;
 	int ab_arg = 1;
 	Mob* target_mob = nullptr;
 
@@ -94,7 +94,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 		++ab_arg;
 	}
 	else if (!optional_arg.compare("current")) {
-		currentCheck = true;
+		current_check = true;
 		++ab_arg;
 	}
 	else {
@@ -124,13 +124,13 @@ void bot_command_follow(Client* c, const Seperator* sep)
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	auto botCount = sbl.size();
+	auto bot_count = sbl.size();
 	Mob* follow_mob = nullptr;
-	std::list<Bot*> chainList;
-	std::list<Bot*>::const_iterator it = chainList.begin();
+	std::list<Bot*> chain_list;
+	std::list<Bot*>::const_iterator it = chain_list.begin();
 	uint16 count = 0;
 	for (auto bot_iter : sbl) {
-		if (currentCheck) {
+		if (current_check) {
 			follow_mob = entity_list.GetMob(bot_iter->GetFollowID());
 
 			c->Message(
@@ -150,7 +150,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 		}
 
 		if (bot_iter == target_mob) {
-			if (botCount == 1) {
+			if (bot_count == 1) {
 				c->Message(
 					Chat::Yellow,
 					fmt::format(
@@ -167,13 +167,13 @@ void bot_command_follow(Client* c, const Seperator* sep)
 			}
 
 			bot_iter->WipeHateList();
-			--botCount;
+			--bot_count;
 
 			continue;
 		}
 
 		if (!bot_iter->IsInGroupOrRaid(target_mob)) {
-			--botCount;
+			--bot_count;
 
 			continue;
 		}
@@ -191,20 +191,20 @@ void bot_command_follow(Client* c, const Seperator* sep)
 			}
 			else {
 				if (chain) {
-					Mob* nextTar = target_mob;
+					Mob* next_tar = target_mob;
 
 					if (count > 0) {
-						nextTar = *it;
+						next_tar = *it;
 
-						if (!nextTar) {
-							nextTar = target_mob;
+						if (!next_tar) {
+							next_tar = target_mob;
 						}
 					}
 
-					chainList.push_back(bot_iter);
+					chain_list.push_back(bot_iter);
 					++it;
 					++count;
-					bot_iter->SetFollowID(nextTar->GetID());
+					bot_iter->SetFollowID(next_tar->GetID());
 				}
 				else {
 					bot_iter->SetFollowID(target_mob->GetID());
@@ -222,13 +222,13 @@ void bot_command_follow(Client* c, const Seperator* sep)
 		bot_iter->GetPet()->SetFollowID(bot_iter->GetID());
 	}
 
-	if (currentCheck || !botCount) {
+	if (current_check || !bot_count) {
 		return;
 	}
 
 	follow_mob = target_mob;
 
-	if (botCount == 1) {
+	if (bot_count == 1) {
 		follow_mob = entity_list.GetMob(sbl.front()->GetFollowID());
 
 		c->Message(
@@ -246,7 +246,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 				Chat::Green,
 				fmt::format(
 					"{} of your bots are following you.",
-					botCount
+					bot_count
 				).c_str()
 			);
 		}
@@ -255,7 +255,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 				Chat::Green,
 				fmt::format(
 					"{} of your bots are {} {}.",
-					botCount,
+					bot_count,
 					chain ? "chain following" : "following",
 					follow_mob ? follow_mob->GetCleanName() : "you"
 				).c_str()

@@ -117,14 +117,14 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 	std::string arg2 = sep->arg[2];
 	int ab_arg = 2;
 	bool current_check = false;
-	uint16 spellType = 0;
-	uint32 typeValue = 0;
+	uint16 spell_type = 0;
+	uint32 type_value = 0;
 
 	// String/Int type checks
 	if (sep->IsNumber(1)) {
-		spellType = atoi(sep->arg[1]);
+		spell_type = atoi(sep->arg[1]);
 
-		if (spellType < BotSpellTypes::START || spellType > BotSpellTypes::END) {
+		if (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END) {
 			c->Message(Chat::Yellow, "You must choose a valid spell type. Spell types range from %i to %i", BotSpellTypes::START, BotSpellTypes::END);
 
 			return;
@@ -132,7 +132,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 	}
 	else {
 		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spellType = c->GetSpellTypeIDByShortName(arg1);
+			spell_type = c->GetSpellTypeIDByShortName(arg1);
 		}
 		else {
 			c->Message(
@@ -150,9 +150,9 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 	}
 
 	if (sep->IsNumber(2)) {
-		typeValue = atoi(sep->arg[2]);
+		type_value = atoi(sep->arg[2]);
 		++ab_arg;
-		if (typeValue < 0 || typeValue > 100) {
+		if (type_value < 0 || type_value > 100) {
 			c->Message(Chat::Yellow, "You must enter a value between 0-100 (0%% to 100%% of health).");
 
 			return;
@@ -207,13 +207,13 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] maximum threshold is currently [{}%%].'",
 					my_bot->GetCleanName(),
-					c->GetSpellTypeNameByID(spellType),
-					my_bot->GetSpellMaxThreshold(spellType)
+					c->GetSpellTypeNameByID(spell_type),
+					my_bot->GetSpellMaxThreshold(spell_type)
 				).c_str()
 			);
 		}
 		else {
-			my_bot->SetSpellMaxThreshold(spellType, typeValue);
+			my_bot->SetSpellMaxThreshold(spell_type, type_value);
 			++success_count;
 		}
 	}
@@ -224,8 +224,8 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] maximum threshold was set to [{}%%].'",
 					first_found->GetCleanName(),
-					c->GetSpellTypeNameByID(spellType),
-					first_found->GetSpellMaxThreshold(spellType)
+					c->GetSpellTypeNameByID(spell_type),
+					first_found->GetSpellMaxThreshold(spell_type)
 				).c_str()
 			);
 		}
@@ -235,8 +235,8 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots set their [{}] maximum threshold to [{}%%].",
 					success_count,
-					c->GetSpellTypeNameByID(spellType),
-					typeValue
+					c->GetSpellTypeNameByID(spell_type),
+					type_value
 				).c_str()
 			);
 		}

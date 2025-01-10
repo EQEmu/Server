@@ -109,8 +109,8 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 	std::string arg1 = sep->arg[1];
 
 	int ab_arg = 2;
-	bool validOption = false;
-	uint16 spellType = UINT16_MAX;
+	bool valid_option = false;
+	uint16 spell_type = UINT16_MAX;
 	std::vector<std::string> options = 
 	{ 
 		"all",
@@ -138,14 +138,14 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 
 				if (sep->IsNumber(2) || c->GetSpellTypeIDByShortName(sep->arg[2]) != UINT16_MAX) {
 					if (sep->IsNumber(2)) {
-						spellType = atoi(sep->arg[2]);
+						spell_type = atoi(sep->arg[2]);
 					}
 
 					if (c->GetSpellTypeIDByShortName(sep->arg[2]) != UINT16_MAX) {
-						spellType = c->GetSpellTypeIDByShortName(sep->arg[2]);
+						spell_type = c->GetSpellTypeIDByShortName(sep->arg[2]);
 					}
 
-					if (spellType < BotSpellTypes::START || spellType > BotSpellTypes::END) {
+					if (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END) {
 						c->Message(Chat::Yellow, "You must choose a valid spell type. Spell types range from %i to %i", BotSpellTypes::START, BotSpellTypes::END);
 
 						return;
@@ -161,12 +161,12 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				break;
 			}
 
-			validOption = true;
+			valid_option = true;
 			break;
 		}
 	}
 
-	if (!validOption) {
+	if (!valid_option) {
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
@@ -197,212 +197,212 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 	Bot* first_found = nullptr;
 	int success_count = 0;
 	std::string output = "";
-	uint8 botStance = 2;
+	uint8 bot_stance = 2;
 
-	for (auto myBot : sbl) {
+	for (auto my_bot : sbl) {
 		if (!first_found) {
-			first_found = myBot;
+			first_found = my_bot;
 		}
 
-		botStance = myBot->GetBotStance();
+		bot_stance = my_bot->GetBotStance();
 
 		if (!strcasecmp(sep->arg[1], "misc")) {
 			for (uint16 i = BotBaseSettings::START; i <= BotBaseSettings::END; ++i) {
-				myBot->SetBotBaseSetting(i, myBot->GetDefaultBotBaseSetting(i, botStance));
+				my_bot->SetBotBaseSetting(i, my_bot->GetDefaultBotBaseSetting(i, bot_stance));
 				output = "miscellanous settings";
 			}
 		}
 		else if (!strcasecmp(sep->arg[1], "holds")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellHold(spellType, myBot->GetDefaultSpellHold(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellHold(spell_type, my_bot->GetDefaultSpellHold(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellHold(i, myBot->GetDefaultSpellHold(i, botStance));
+					my_bot->SetSpellHold(i, my_bot->GetDefaultSpellHold(i, bot_stance));
 				}
 			}
 
 			output = "hold settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "delays")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellDelay(spellType, myBot->GetDefaultSpellDelay(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellDelay(spell_type, my_bot->GetDefaultSpellDelay(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellDelay(i, myBot->GetDefaultSpellDelay(i, botStance));
+					my_bot->SetSpellDelay(i, my_bot->GetDefaultSpellDelay(i, bot_stance));
 				}
 			}
 
 			output = "delay settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "minthresholds")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellMinThreshold(spellType, myBot->GetDefaultSpellMinThreshold(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellMinThreshold(spell_type, my_bot->GetDefaultSpellMinThreshold(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellMinThreshold(i, myBot->GetDefaultSpellMinThreshold(i, botStance));
+					my_bot->SetSpellMinThreshold(i, my_bot->GetDefaultSpellMinThreshold(i, bot_stance));
 				}
 			}
 
 			output = "minimum threshold settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "maxthresholds")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellMaxThreshold(spellType, myBot->GetDefaultSpellMaxThreshold(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellMaxThreshold(spell_type, my_bot->GetDefaultSpellMaxThreshold(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellMaxThreshold(i, myBot->GetDefaultSpellMaxThreshold(i, botStance));
+					my_bot->SetSpellMaxThreshold(i, my_bot->GetDefaultSpellMaxThreshold(i, bot_stance));
 				}
 			}
 
 			output = "maximum threshold settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "aggrochecks")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypeAggroCheck(spellType, myBot->GetDefaultSpellTypeAggroCheck(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypeAggroCheck(spell_type, my_bot->GetDefaultSpellTypeAggroCheck(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypeAggroCheck(i, myBot->GetDefaultSpellTypeAggroCheck(i, botStance));
+					my_bot->SetSpellTypeAggroCheck(i, my_bot->GetDefaultSpellTypeAggroCheck(i, bot_stance));
 				}
 			}
 
 			output = "aggro check settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "minmanapct")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypeMinManaLimit(spellType, myBot->GetDefaultSpellTypeMinManaLimit(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypeMinManaLimit(spell_type, my_bot->GetDefaultSpellTypeMinManaLimit(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypeMinManaLimit(i, myBot->GetDefaultSpellTypeMinManaLimit(i, botStance));
+					my_bot->SetSpellTypeMinManaLimit(i, my_bot->GetDefaultSpellTypeMinManaLimit(i, bot_stance));
 				}
 			}
 
 			output = "min mana settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "maxmanapct")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypeMaxManaLimit(spellType, myBot->GetDefaultSpellTypeMaxManaLimit(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypeMaxManaLimit(spell_type, my_bot->GetDefaultSpellTypeMaxManaLimit(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypeMaxManaLimit(i, myBot->GetDefaultSpellTypeMaxManaLimit(i, botStance));
+					my_bot->SetSpellTypeMaxManaLimit(i, my_bot->GetDefaultSpellTypeMaxManaLimit(i, bot_stance));
 				}
 			}
 
 			output = "max mana settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "minhppct")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypeMinHPLimit(spellType, myBot->GetDefaultSpellTypeMinHPLimit(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypeMinHPLimit(spell_type, my_bot->GetDefaultSpellTypeMinHPLimit(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypeMinHPLimit(i, myBot->GetDefaultSpellTypeMinHPLimit(i, botStance));	
+					my_bot->SetSpellTypeMinHPLimit(i, my_bot->GetDefaultSpellTypeMinHPLimit(i, bot_stance));	
 				}
 			}
 
 			output = "min hp settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "maxhppct")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypeMaxHPLimit(spellType, myBot->GetDefaultSpellTypeMaxHPLimit(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypeMaxHPLimit(spell_type, my_bot->GetDefaultSpellTypeMaxHPLimit(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypeMaxHPLimit(i, myBot->GetDefaultSpellTypeMaxHPLimit(i, botStance));
+					my_bot->SetSpellTypeMaxHPLimit(i, my_bot->GetDefaultSpellTypeMaxHPLimit(i, bot_stance));
 				}
 			}
 
 			output = "max hp settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "idlepriority")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypePriority(spellType, BotPriorityCategories::Idle, myBot->GetDefaultSpellTypePriority(spellType, BotPriorityCategories::Idle, myBot->GetClass(), botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypePriority(spell_type, BotPriorityCategories::Idle, my_bot->GetDefaultSpellTypePriority(spell_type, BotPriorityCategories::Idle, my_bot->GetClass(), bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypePriority(i, BotPriorityCategories::Idle, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Idle, myBot->GetClass(), botStance));
+					my_bot->SetSpellTypePriority(i, BotPriorityCategories::Idle, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Idle, my_bot->GetClass(), bot_stance));
 				}
 			}
 
 			output = "idle priority settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "engagedpriority")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypePriority(spellType, BotPriorityCategories::Engaged, myBot->GetDefaultSpellTypePriority(spellType, BotPriorityCategories::Engaged, myBot->GetClass(), botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypePriority(spell_type, BotPriorityCategories::Engaged, my_bot->GetDefaultSpellTypePriority(spell_type, BotPriorityCategories::Engaged, my_bot->GetClass(), bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypePriority(i, BotPriorityCategories::Engaged, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Engaged, myBot->GetClass(), botStance));
+					my_bot->SetSpellTypePriority(i, BotPriorityCategories::Engaged, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Engaged, my_bot->GetClass(), bot_stance));
 				}
 			}
 
 			output = "engaged priority settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "pursuepriority")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypePriority(spellType, BotPriorityCategories::Pursue, myBot->GetDefaultSpellTypePriority(spellType, BotPriorityCategories::Pursue, myBot->GetClass(), botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypePriority(spell_type, BotPriorityCategories::Pursue, my_bot->GetDefaultSpellTypePriority(spell_type, BotPriorityCategories::Pursue, my_bot->GetClass(), bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypePriority(i, BotPriorityCategories::Pursue, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Pursue, myBot->GetClass(), botStance));
+					my_bot->SetSpellTypePriority(i, BotPriorityCategories::Pursue, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Pursue, my_bot->GetClass(), bot_stance));
 				}
 			}
 
 			output = "pursue priority settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "targetcounts")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellTypeAEOrGroupTargetCount(spellType, myBot->GetDefaultSpellTypeAEOrGroupTargetCount(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellTypeAEOrGroupTargetCount(spell_type, my_bot->GetDefaultSpellTypeAEOrGroupTargetCount(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellTypeAEOrGroupTargetCount(i, myBot->GetDefaultSpellTypeAEOrGroupTargetCount(i, botStance));
+					my_bot->SetSpellTypeAEOrGroupTargetCount(i, my_bot->GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance));
 				}
 			}
 
 			output = "target count settings";
 		}
 		else if (!strcasecmp(sep->arg[1], "spellsettings")) {
-			myBot->ResetBotSpellSettings();
+			my_bot->ResetBotSpellSettings();
 			output = "^spellsettings";
 		}
 		else if (!strcasecmp(sep->arg[1], "spelltypesettings")) {
-			if (spellType != UINT16_MAX) {
-				myBot->SetSpellHold(spellType, myBot->GetDefaultSpellHold(spellType, botStance));
-				myBot->SetSpellDelay(spellType, myBot->GetDefaultSpellDelay(spellType, botStance));
-				myBot->SetSpellMinThreshold(spellType, myBot->GetDefaultSpellMinThreshold(spellType, botStance));
-				myBot->SetSpellMaxThreshold(spellType, myBot->GetDefaultSpellMaxThreshold(spellType, botStance));
-				myBot->SetSpellTypeAggroCheck(spellType, myBot->GetDefaultSpellTypeAggroCheck(spellType, botStance));
-				myBot->SetSpellTypeMinManaLimit(spellType, myBot->GetDefaultSpellTypeMinManaLimit(spellType, botStance));
-				myBot->SetSpellTypeMaxManaLimit(spellType, myBot->GetDefaultSpellTypeMaxManaLimit(spellType, botStance));
-				myBot->SetSpellTypeMinHPLimit(spellType, myBot->GetDefaultSpellTypeMinHPLimit(spellType, botStance));
-				myBot->SetSpellTypeMaxHPLimit(spellType, myBot->GetDefaultSpellTypeMaxHPLimit(spellType, botStance));
-				myBot->SetSpellTypePriority(spellType, BotPriorityCategories::Idle, myBot->GetDefaultSpellTypePriority(spellType, BotPriorityCategories::Idle, myBot->GetClass(), botStance));
-				myBot->SetSpellTypePriority(spellType, BotPriorityCategories::Engaged, myBot->GetDefaultSpellTypePriority(spellType, BotPriorityCategories::Engaged, myBot->GetClass(), botStance));
-				myBot->SetSpellTypePriority(spellType, BotPriorityCategories::Pursue, myBot->GetDefaultSpellTypePriority(spellType, BotPriorityCategories::Pursue, myBot->GetClass(), botStance));
-				myBot->SetSpellTypeAEOrGroupTargetCount(spellType, myBot->GetDefaultSpellTypeAEOrGroupTargetCount(spellType, botStance));
+			if (spell_type != UINT16_MAX) {
+				my_bot->SetSpellHold(spell_type, my_bot->GetDefaultSpellHold(SpellType, bot_stance));
+				my_bot->SetSpellDelay(spell_type, my_bot->GetDefaultSpellDelay(spell_type, bot_stance));
+				my_bot->SetSpellMinThreshold(spell_type, my_bot->GetDefaultSpellMinThreshold(spell_type, bot_stance));
+				my_bot->SetSpellMaxThreshold(spell_type, my_bot->GetDefaultSpellMaxThreshold(spell_type, bot_stance));
+				my_bot->SetSpellTypeAggroCheck(spell_type, my_bot->GetDefaultSpellTypeAggroCheck(spell_type, bot_stance));
+				my_bot->SetSpellTypeMinManaLimit(spell_type, my_bot->GetDefaultSpellTypeMinManaLimit(spell_type, bot_stance));
+				my_bot->SetSpellTypeMaxManaLimit(spell_type, my_bot->GetDefaultSpellTypeMaxManaLimit(spell_type, bot_stance));
+				my_bot->SetSpellTypeMinHPLimit(spell_type, my_bot->GetDefaultSpellTypeMinHPLimit(spell_type, bot_stance));
+				my_bot->SetSpellTypeMaxHPLimit(spell_type, my_bot->GetDefaultSpellTypeMaxHPLimit(spell_type, bot_stance));
+				my_bot->SetSpellTypePriority(spell_type, BotPriorityCategories::Idle, my_bot->GetDefaultSpellTypePriority(spell_type, BotPriorityCategories::Idle, my_bot->GetClass(), bot_stance));
+				my_bot->SetSpellTypePriority(spell_type, BotPriorityCategories::Engaged, my_bot->GetDefaultSpellTypePriority(spell_type, BotPriorityCategories::Engaged, my_bot->GetClass(), bot_stance));
+				my_bot->SetSpellTypePriority(spell_type, BotPriorityCategories::Pursue, my_bot->GetDefaultSpellTypePriority(spell_type, BotPriorityCategories::Pursue, my_bot->GetClass(), bot_stance));
+				my_bot->SetSpellTypeAEOrGroupTargetCount(spell_type, my_bot->GetDefaultSpellTypeAEOrGroupTargetCount(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					myBot->SetSpellHold(i, myBot->GetDefaultSpellHold(i, botStance));
-					myBot->SetSpellDelay(i, myBot->GetDefaultSpellDelay(i, botStance));
-					myBot->SetSpellMinThreshold(i, myBot->GetDefaultSpellMinThreshold(i, botStance));
-					myBot->SetSpellMaxThreshold(i, myBot->GetDefaultSpellMaxThreshold(i, botStance));
-					myBot->SetSpellTypeAggroCheck(i, myBot->GetDefaultSpellTypeAggroCheck(i, botStance));
-					myBot->SetSpellTypeMinManaLimit(i, myBot->GetDefaultSpellTypeMinManaLimit(i, botStance));
-					myBot->SetSpellTypeMaxManaLimit(i, myBot->GetDefaultSpellTypeMaxManaLimit(i, botStance));
-					myBot->SetSpellTypeMinHPLimit(i, myBot->GetDefaultSpellTypeMinHPLimit(i, botStance));
-					myBot->SetSpellTypeMaxHPLimit(i, myBot->GetDefaultSpellTypeMaxHPLimit(i, botStance));
-					myBot->SetSpellTypePriority(i, BotPriorityCategories::Idle, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Idle, myBot->GetClass(), botStance));
-					myBot->SetSpellTypePriority(i, BotPriorityCategories::Engaged, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Engaged, myBot->GetClass(), botStance));
-					myBot->SetSpellTypePriority(i, BotPriorityCategories::Pursue, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Pursue, myBot->GetClass(), botStance));
-					myBot->SetSpellTypeAEOrGroupTargetCount(i, myBot->GetDefaultSpellTypeAEOrGroupTargetCount(i, botStance));
+					my_bot->SetSpellHold(i, my_bot->GetDefaultSpellHold(i, bot_stance));
+					my_bot->SetSpellDelay(i, my_bot->GetDefaultSpellDelay(i, bot_stance));
+					my_bot->SetSpellMinThreshold(i, my_bot->GetDefaultSpellMinThreshold(i, bot_stance));
+					my_bot->SetSpellMaxThreshold(i, my_bot->GetDefaultSpellMaxThreshold(i, bot_stance));
+					my_bot->SetSpellTypeAggroCheck(i, my_bot->GetDefaultSpellTypeAggroCheck(i, bot_stance));
+					my_bot->SetSpellTypeMinManaLimit(i, my_bot->GetDefaultSpellTypeMinManaLimit(i, bot_stance));
+					my_bot->SetSpellTypeMaxManaLimit(i, my_bot->GetDefaultSpellTypeMaxManaLimit(i, bot_stance));
+					my_bot->SetSpellTypeMinHPLimit(i, my_bot->GetDefaultSpellTypeMinHPLimit(i, bot_stance));
+					my_bot->SetSpellTypeMaxHPLimit(i, my_bot->GetDefaultSpellTypeMaxHPLimit(i, bot_stance));
+					my_bot->SetSpellTypePriority(i, BotPriorityCategories::Idle, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Idle, my_bot->GetClass(), bot_stance));
+					my_bot->SetSpellTypePriority(i, BotPriorityCategories::Engaged, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Engaged, my_bot->GetClass(), bot_stance));
+					my_bot->SetSpellTypePriority(i, BotPriorityCategories::Pursue, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Pursue, my_bot->GetClass(), bot_stance));
+					my_bot->SetSpellTypeAEOrGroupTargetCount(i, my_bot->GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance));
 				}
 			}
 
@@ -410,29 +410,29 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		}
 		else if (!strcasecmp(sep->arg[1], "all")) {
 			for (uint16 i = BotBaseSettings::START; i <= BotBaseSettings::END; ++i) {
-				myBot->SetBotBaseSetting(i, myBot->GetDefaultBotBaseSetting(i, botStance));
+				my_bot->SetBotBaseSetting(i, my_bot->GetDefaultBotBaseSetting(i, bot_stance));
 			}
 
 			for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-				myBot->SetSpellHold(i, myBot->GetDefaultSpellHold(i, botStance));
-				myBot->SetSpellDelay(i, myBot->GetDefaultSpellDelay(i, botStance));
-				myBot->SetSpellMinThreshold(i, myBot->GetDefaultSpellMinThreshold(i, botStance));
-				myBot->SetSpellMaxThreshold(i, myBot->GetDefaultSpellMaxThreshold(i, botStance));
-				myBot->SetSpellTypeAggroCheck(i, myBot->GetDefaultSpellTypeAggroCheck(i, botStance));
-				myBot->SetSpellTypeMinManaLimit(i, myBot->GetDefaultSpellTypeMinManaLimit(i, botStance));
-				myBot->SetSpellTypeMaxManaLimit(i, myBot->GetDefaultSpellTypeMaxManaLimit(i, botStance));
-				myBot->SetSpellTypeMinHPLimit(i, myBot->GetDefaultSpellTypeMinHPLimit(i, botStance));
-				myBot->SetSpellTypeMaxHPLimit(i, myBot->GetDefaultSpellTypeMaxHPLimit(i, botStance));
-				myBot->SetSpellTypePriority(i, BotPriorityCategories::Idle, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Idle, myBot->GetClass(), botStance));
-				myBot->SetSpellTypePriority(i, BotPriorityCategories::Engaged, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Engaged, myBot->GetClass(), botStance));
-				myBot->SetSpellTypePriority(i, BotPriorityCategories::Pursue, myBot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Pursue, myBot->GetClass(), botStance));
-				myBot->SetSpellTypeAEOrGroupTargetCount(i, myBot->GetDefaultSpellTypeAEOrGroupTargetCount(i, botStance));
+				my_bot->SetSpellHold(i, my_bot->GetDefaultSpellHold(i, bot_stance));
+				my_bot->SetSpellDelay(i, my_bot->GetDefaultSpellDelay(i, bot_stance));
+				my_bot->SetSpellMinThreshold(i, my_bot->GetDefaultSpellMinThreshold(i, bot_stance));
+				my_bot->SetSpellMaxThreshold(i, my_bot->GetDefaultSpellMaxThreshold(i, bot_stance));
+				my_bot->SetSpellTypeAggroCheck(i, my_bot->GetDefaultSpellTypeAggroCheck(i, bot_stance));
+				my_bot->SetSpellTypeMinManaLimit(i, my_bot->GetDefaultSpellTypeMinManaLimit(i, bot_stance));
+				my_bot->SetSpellTypeMaxManaLimit(i, my_bot->GetDefaultSpellTypeMaxManaLimit(i, bot_stance));
+				my_bot->SetSpellTypeMinHPLimit(i, my_bot->GetDefaultSpellTypeMinHPLimit(i, bot_stance));
+				my_bot->SetSpellTypeMaxHPLimit(i, my_bot->GetDefaultSpellTypeMaxHPLimit(i, bot_stance));
+				my_bot->SetSpellTypePriority(i, BotPriorityCategories::Idle, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Idle, my_bot->GetClass(), bot_stance));
+				my_bot->SetSpellTypePriority(i, BotPriorityCategories::Engaged, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Engaged, my_bot->GetClass(), bot_stance));
+				my_bot->SetSpellTypePriority(i, BotPriorityCategories::Pursue, my_bot->GetDefaultSpellTypePriority(i, BotPriorityCategories::Pursue, my_bot->GetClass(), bot_stance));
+				my_bot->SetSpellTypeAEOrGroupTargetCount(i, my_bot->GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance));
 			};
 
-			myBot->ResetBotSpellSettings();
-			myBot->ClearBotBlockedBuffs();
+			my_bot->ResetBotSpellSettings();
+			my_bot->ClearBotBlockedBuffs();
 			
-			myBot->Save();
+			my_bot->Save();
 
 			output = "settings";
 
@@ -448,9 +448,9 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				"{} says, '{}{} were restored.'",				
 				first_found->GetCleanName(),
 				(
-					spellType != UINT16_MAX ?
+					spell_type != UINT16_MAX ?
 					fmt::format("My [{}] ",
-						c->GetSpellTypeNameByID(spellType)
+						c->GetSpellTypeNameByID(spell_type)
 					)
 					: "My "
 				),
@@ -465,9 +465,9 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				"{} of your bot's{}{} were restored.",
 				success_count,
 				(
-					spellType != UINT16_MAX ?
+					spell_type != UINT16_MAX ?
 					fmt::format(" [{}] ",
-						c->GetSpellTypeNameByID(spellType)
+						c->GetSpellTypeNameByID(spell_type)
 					)
 					: " "
 				),

@@ -2262,24 +2262,24 @@ void Group::ClearAllNPCMarks()
 
 }
 
-int8 Group::GetNumberNeedingHealedInGroup(int8 hpr, bool includePets) {
-	int8 needHealed = 0;
+int8 Group::GetNumberNeedingHealedInGroup(int8 hpr, bool include_pets) {
+	int8 need_healed = 0;
 
 	for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
 		if(members[i] && !members[i]->qglobal) {
 
 			if(members[i]->GetHPRatio() <= hpr)
-				needHealed++;
+				need_healed++;
 
-			if(includePets) {
+			if(include_pets) {
 				if(members[i]->GetPet() && members[i]->GetPet()->GetHPRatio() <= hpr) {
-					needHealed++;
+					need_healed++;
 				}
 			}
 		}
 	}
 
-	return needHealed;
+	return need_healed;
 }
 
 void Group::UpdateGroupAAs()

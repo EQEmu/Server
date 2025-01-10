@@ -122,10 +122,10 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
-	std::string actionableArg = sep->arg[ab_arg];
+	std::string actionable_arg = sep->arg[ab_arg];
 
-	if (actionableArg.empty()) {
-		actionableArg = "spawned";
+	if (actionable_arg.empty()) {
+		actionable_arg = "spawned";
 	}
 
 	std::string class_race_arg = sep->arg[ab_arg];
@@ -137,15 +137,15 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 
 	std::vector<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	bool isSuccess = false;
-	uint16 successCount = 0;
-	Bot* firstFound = nullptr;
+	bool is_success = false;
+	uint16 success_count = 0;
+	Bot* first_found = nullptr;
 
 	for (auto bot_iter : sbl) {
 		if (!bot_iter->IsInGroupOrRaid(c)) {
@@ -157,22 +157,22 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 		}
 
 		if (spell_id == UINT16_MAX) { // Aggressive/Defensive type
-			std::vector<BotSpells_Struct_wIndex> botSpellList;
+			std::vector<BotSpells_Struct_wIndex> bot_spell_list;
 
 			if (aggressive) {
-				botSpellList = bot_iter->BotGetSpellsByType(BotSpellTypes::DiscAggressive);
+				bot_spell_list = bot_iter->BotGetSpellsByType(BotSpellTypes::DiscAggressive);
 			}
 			else if (defensive) {
-				botSpellList = bot_iter->BotGetSpellsByType(BotSpellTypes::DiscDefensive);
+				bot_spell_list = bot_iter->BotGetSpellsByType(BotSpellTypes::DiscDefensive);
 			}
 
-			for (int i = botSpellList.size() - 1; i >= 0; i--) {
-				if (!IsValidSpell(botSpellList[i].spellid)) {
+			for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
+				if (!IsValidSpell(bot_spell_list[i].spellid)) {
 					continue;
 				}
 
-				if (!bot_iter->CheckDisciplineReuseTimer(botSpellList[i].spellid)) {
-					uint32 remaining_time = (bot_iter->GetDisciplineReuseRemainingTime(botSpellList[i].spellid) / 1000);
+				if (!bot_iter->CheckDisciplineReuseTimer(bot_spell_list[i].spellid)) {
+					uint32 remaining_time = (bot_iter->GetDisciplineReuseRemainingTime(bot_spell_list[i].spellid) / 1000);
 
 					bot_iter->OwnerMessage(
 						fmt::format(
@@ -184,30 +184,30 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 					continue;
 				}
 
-				if (bot_iter->GetEndurance() < spells[botSpellList[i].spellid].endurance_cost) {
+				if (bot_iter->GetEndurance() < spells[bot_spell_list[i].spellid].endurance_cost) {
 					continue;
 				}
 
-				if (bot_iter->DivineAura() && !IsCastNotStandingSpell(botSpellList[i].spellid)) {
+				if (bot_iter->DivineAura() && !IsCastNotStandingSpell(bot_spell_list[i].spellid)) {
 					continue;
 				}
 
-				if (spells[botSpellList[i].spellid].buff_duration_formula != 0 && spells[botSpellList[i].spellid].target_type == ST_Self && bot_iter->HasDiscBuff()) {
+				if (spells[bot_spell_list[i].spellid].buff_duration_formula != 0 && spells[bot_spell_list[i].spellid].target_type == ST_Self && bot_iter->HasDiscBuff()) {
 					continue;
 				}
 
-				if (!tar || (spells[botSpellList[i].spellid].target_type == ST_Self && tar != bot_iter)) {
+				if (!tar || (spells[bot_spell_list[i].spellid].target_type == ST_Self && tar != bot_iter)) {
 					tar = bot_iter;
 				}
 
-				if (bot_iter->AttemptForcedCastSpell(tar, botSpellList[i].spellid, true)) {
-					if (!firstFound) {
-						firstFound = bot_iter;
+				if (bot_iter->AttemptForcedCastSpell(tar, bot_spell_list[i].spellid, true)) {
+					if (!first_found) {
+						first_found = bot_iter;
 					}
 
-					isSuccess = true;
-					++successCount;
-					spell_id = botSpellList[i].spellid;
+					is_success = true;
+					++success_count;
+					spell_id = bot_spell_list[i].spellid;
 				}
 			}
 		}
@@ -252,19 +252,19 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 			}
 
 			if (bot_iter->AttemptForcedCastSpell(tar, spell_id, true)) {
-				if (!firstFound) {
-					firstFound = bot_iter;
+				if (!first_found) {
+					first_found = bot_iter;
 				}
 
-				isSuccess = true;
-				++successCount;
+				is_success = true;
+				++success_count;
 			}
 		}
 
 		continue;
 	}
 
-	if (!isSuccess) {
+	if (!is_success) {
 		c->Message(Chat::Yellow, "No bots were selected.");
 	}
 	else {
@@ -273,8 +273,8 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 				Chat::Yellow,
 				fmt::format(
 					"{} {} {} {} discipline.",
-					((successCount == 1 && firstFound) ? firstFound->GetCleanName() : (fmt::format("{}", successCount).c_str())),
-					((successCount == 1 && firstFound) ? "used" : "of your bots used"),
+					((success_count == 1 && first_found) ? first_found->GetCleanName() : (fmt::format("{}", success_count).c_str())),
+					((success_count == 1 && first_found) ? "used" : "of your bots used"),
 					(aggressive ? "an" : "a"),
 					(aggressive ? "aggressive" : "defensive")
 				).c_str()
@@ -285,8 +285,8 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 				Chat::Yellow,
 				fmt::format(
 					"{} {} their {} [#{}] discipline.",
-					((successCount == 1 && firstFound) ? firstFound->GetCleanName() : (fmt::format("{}", successCount).c_str())),
-					((successCount == 1 && firstFound) ? "used" : "of your bots used"),
+					((success_count == 1 && first_found) ? first_found->GetCleanName() : (fmt::format("{}", success_count).c_str())),
+					((success_count == 1 && first_found) ? "used" : "of your bots used"),
 					spells[spell_id].name,
 					spell_id
 				).c_str()

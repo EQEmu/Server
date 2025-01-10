@@ -82,12 +82,12 @@ void bot_command_illusion_block(Client* c, const Seperator* sep)
 
 	int ab_arg = 1;
 	bool current_check = false;
-	uint32 typeValue = 0;
+	uint32 type_value = 0;
 
 	if (sep->IsNumber(1)) {
-		typeValue = atoi(sep->arg[1]);
+		type_value = atoi(sep->arg[1]);
 		++ab_arg;
-		if (typeValue < 0 || typeValue > 1) {
+		if (type_value < 0 || type_value > 1) {
 			c->Message(Chat::Yellow, "You must enter either 0 for disabled or 1 for enabled.");
 
 			return;
@@ -147,7 +147,7 @@ void bot_command_illusion_block(Client* c, const Seperator* sep)
 			);
 		}
 		else {
-			my_bot->SetIllusionBlock(typeValue);
+			my_bot->SetIllusionBlock(type_value);
 			++success_count;
 		}
 	}
@@ -168,7 +168,7 @@ void bot_command_illusion_block(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots {} block illusions.",
 					success_count,
-					typeValue ? "will now" : "will no longer"
+					type_value ? "will now" : "will no longer"
 				).c_str()
 			);
 		}

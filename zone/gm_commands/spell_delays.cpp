@@ -89,13 +89,13 @@ void command_spell_delays(Client* c, const Seperator* sep)
 	std::string arg2 = sep->arg[2];
 	int ab_arg = 2;
 	bool current_check = false;
-	uint16 spellType = 0;
-	uint32 typeValue = 0;
+	uint16 spell_type = 0;
+	uint32 type_value = 0;
 
 	if (sep->IsNumber(1)) {
-		spellType = atoi(sep->arg[1]);
+		spell_type = atoi(sep->arg[1]);
 
-		if (!IsClientBotSpellType(spellType)) {
+		if (!IsClientBotSpellType(spell_type)) {
 			c->Message(Chat::Yellow, "Invalid spell type.");
 			c->SendSpellTypePrompts(false, true);
 
@@ -104,9 +104,9 @@ void command_spell_delays(Client* c, const Seperator* sep)
 	}
 	else {
 		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spellType = c->GetSpellTypeIDByShortName(arg1);
+			spell_type = c->GetSpellTypeIDByShortName(arg1);
 
-			if (!IsClientBotSpellType(spellType)) {
+			if (!IsClientBotSpellType(spell_type)) {
 				c->Message(Chat::Yellow, "Invalid spell type.");
 				c->SendSpellTypePrompts(false, true);
 			}
@@ -128,9 +128,9 @@ void command_spell_delays(Client* c, const Seperator* sep)
 
 	// Enable/Disable/Current checks
 	if (sep->IsNumber(2)) {
-		typeValue = atoi(sep->arg[2]);
+		type_value = atoi(sep->arg[2]);
 		++ab_arg;
-		if (typeValue < 0 || typeValue > 60000) {
+		if (type_value < 0 || type_value > 60000) {
 			c->Message(Chat::Yellow, "You must enter a value between 1-60000 (1ms to 60s).");
 
 			return;
@@ -159,19 +159,19 @@ void command_spell_delays(Client* c, const Seperator* sep)
 			Chat::Green,
 			fmt::format(
 				"Your [{}] delay is currently {} seconds.'",
-				c->GetSpellTypeNameByID(spellType),
-				c->GetSpellDelay(spellType) / 1000.00
+				c->GetSpellTypeNameByID(spell_type),
+				c->GetSpellDelay(spell_type) / 1000.00
 			).c_str()
 		);
 	}
 	else {
-		c->SetSpellDelay(spellType, typeValue);
+		c->SetSpellDelay(spell_type, type_value);
 		c->Message(
 			Chat::Green,
 			fmt::format(
 				"Your [{}] delay was set to {} seconds.'",
-				c->GetSpellTypeNameByID(spellType),
-				c->GetSpellDelay(spellType) / 1000.00
+				c->GetSpellTypeNameByID(spell_type),
+				c->GetSpellDelay(spell_type) / 1000.00
 			).c_str()
 		);
 	}

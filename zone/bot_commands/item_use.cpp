@@ -123,10 +123,10 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
-	std::string actionableArg = sep->arg[ab_arg];
+	std::string actionable_arg = sep->arg[ab_arg];
 
-	if (actionableArg.empty()) {
-		actionableArg = "spawned";
+	if (actionable_arg.empty()) {
+		actionable_arg = "spawned";
 	}
 
 	std::string class_race_arg = sep->arg[ab_arg];
@@ -138,7 +138,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 
 	std::vector<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 

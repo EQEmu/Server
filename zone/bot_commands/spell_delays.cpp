@@ -117,14 +117,14 @@ void bot_command_spell_delays(Client* c, const Seperator* sep)
 	std::string arg2 = sep->arg[2];
 	int ab_arg = 2;
 	bool current_check = false;
-	uint16 spellType = 0;
-	uint32 typeValue = 0;
+	uint16 spell_type = 0;
+	uint32 type_value = 0;
 
 	// String/Int type checks
 	if (sep->IsNumber(1)) {
-		spellType = atoi(sep->arg[1]);
+		spell_type = atoi(sep->arg[1]);
 
-		if (spellType < BotSpellTypes::START || spellType > BotSpellTypes::END) {
+		if (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END) {
 			c->Message(Chat::Yellow, "You must choose a valid spell type. Spell types range from %i to %i", BotSpellTypes::START, BotSpellTypes::END);
 
 			return;
@@ -132,7 +132,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep)
 	}
 	else {
 		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spellType = c->GetSpellTypeIDByShortName(arg1);
+			spell_type = c->GetSpellTypeIDByShortName(arg1);
 		}
 		else {
 			c->Message(
@@ -150,9 +150,9 @@ void bot_command_spell_delays(Client* c, const Seperator* sep)
 	}
 
 	if (sep->IsNumber(2)) {
-		typeValue = atoi(sep->arg[2]);
+		type_value = atoi(sep->arg[2]);
 		++ab_arg;
-		if (typeValue < 1 || typeValue > 60000) {
+		if (type_value < 1 || type_value > 60000) {
 			c->Message(Chat::Yellow, "You must enter a value between 1-60000 (1ms to 60s).");
 
 			return;
@@ -207,13 +207,13 @@ void bot_command_spell_delays(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] spell delay is currently [{}] seconds.'",
 					my_bot->GetCleanName(),
-					c->GetSpellTypeNameByID(spellType),
-					my_bot->GetSpellDelay(spellType) / 1000.00
+					c->GetSpellTypeNameByID(spell_type),
+					my_bot->GetSpellDelay(spell_type) / 1000.00
 				).c_str()
 			);
 		}
 		else {
-			my_bot->SetSpellDelay(spellType, typeValue);
+			my_bot->SetSpellDelay(spell_type, type_value);
 			++success_count;
 		}
 	}
@@ -224,8 +224,8 @@ void bot_command_spell_delays(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] spell delay was set to [{}] seconds.'",
 					first_found->GetCleanName(),
-					c->GetSpellTypeNameByID(spellType),
-					first_found->GetSpellDelay(spellType) / 1000.00
+					c->GetSpellTypeNameByID(spell_type),
+					first_found->GetSpellDelay(spell_type) / 1000.00
 				).c_str()
 			);
 		}
@@ -235,8 +235,8 @@ void bot_command_spell_delays(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots set their [{}] spell delay to [{}] seconds.",
 					success_count,					
-					c->GetSpellTypeNameByID(spellType),
-					typeValue / 1000.00
+					c->GetSpellTypeNameByID(spell_type),
+					type_value / 1000.00
 				).c_str()
 			);
 		}

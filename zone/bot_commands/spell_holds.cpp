@@ -101,14 +101,14 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 	std::string arg2 = sep->arg[2];
 	int ab_arg = 2;
 	bool current_check = false;
-	uint16 spellType = 0;
-	uint32 typeValue = 0;
+	uint16 spell_type = 0;
+	uint32 type_value = 0;
 
 	// String/Int type checks
 	if (sep->IsNumber(1)) {
-		spellType = atoi(sep->arg[1]);
+		spell_type = atoi(sep->arg[1]);
 
-		if (spellType < BotSpellTypes::START || spellType > BotSpellTypes::END) {
+		if (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END) {
 			c->Message(Chat::Yellow, "You must choose a valid spell type. Spell types range from %i to %i", BotSpellTypes::START, BotSpellTypes::END);
 
 			return;
@@ -116,7 +116,7 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 	}
 	else {
 		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spellType = c->GetSpellTypeIDByShortName(arg1);
+			spell_type = c->GetSpellTypeIDByShortName(arg1);
 		}
 		else {
 			c->Message(
@@ -134,9 +134,9 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 	}
 
 	if (sep->IsNumber(2)) {
-		typeValue = atoi(sep->arg[2]);
+		type_value = atoi(sep->arg[2]);
 		++ab_arg;
-		if (typeValue < 0 || typeValue > 1) {
+		if (type_value < 0 || type_value > 1) {
 			c->Message(Chat::Yellow, "You must enter either 0 for disabled or 1 for enabled.");
 
 			return;
@@ -186,13 +186,13 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] spell hold is currently [{}].'",
 					my_bot->GetCleanName(),
-					c->GetSpellTypeNameByID(spellType),
-					my_bot->GetSpellHold(spellType) ? "enabled" : "disabled"
+					c->GetSpellTypeNameByID(spell_type),
+					my_bot->GetSpellHold(spell_type) ? "enabled" : "disabled"
 				).c_str()
 			);
 		}
 		else {
-			my_bot->SetSpellHold(spellType, typeValue);
+			my_bot->SetSpellHold(spell_type, type_value);
 			++success_count;
 		}
 	}
@@ -203,8 +203,8 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] spell hold was [{}].'",
 					first_found->GetCleanName(),
-					c->GetSpellTypeNameByID(spellType),
-					first_found->GetSpellHold(spellType) ? "enabled" : "disabled"
+					c->GetSpellTypeNameByID(spell_type),
+					first_found->GetSpellHold(spell_type) ? "enabled" : "disabled"
 				).c_str()
 			);
 		}
@@ -214,8 +214,8 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots [{}] their [{}] spell hold.",
 					success_count,
-					typeValue ? "enabled" : "disabled",
-					c->GetSpellTypeNameByID(spellType)
+					type_value ? "enabled" : "disabled",
+					c->GetSpellTypeNameByID(spell_type)
 				).c_str()
 			);
 		}

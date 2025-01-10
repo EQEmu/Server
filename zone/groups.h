@@ -107,7 +107,7 @@ public:
 	void	UpdateGroupAAs();
 	void	SaveGroupLeaderAA();
 	void	MarkNPC(Mob* Target, int Number);
-	int8	GetNumberNeedingHealedInGroup(int8 hpr, bool includePets);
+	int8	GetNumberNeedingHealedInGroup(int8 hpr, bool include_pets);
 	void	DelegateMainTank(const char *NewMainAssistName, uint8 toggle = 0);
 	void	DelegateMainAssist(const char *NewMainAssistName, uint8 toggle = 0);
 	void	DelegatePuller(const char *NewMainAssistName, uint8 toggle = 0);

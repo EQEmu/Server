@@ -88,29 +88,29 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 	std::string arg1 = sep->arg[1];
 	std::string arg2 = sep->arg[2];
 
-	bool tauntState = false;
-	bool petTaunt = false;
-	bool validOption = false;
+	bool taunt_state = false;
+	bool pet_taunt = false;
+	bool valid_option = false;
 
 	int ab_arg = 1;
 
 	if (!arg1.compare("on")) {
-		tauntState = true;
-		validOption = true;
+		taunt_state = true;
+		valid_option = true;
 		++ab_arg;
 	}
 	else if (!arg1.compare("off")) {
-		validOption = true;
+		valid_option = true;
 		++ab_arg;
 	}
 
 	if (!arg2.compare("pet")) {
-		petTaunt = true;
-		validOption = true;
+		pet_taunt = true;
+		valid_option = true;
 		++ab_arg;
 	}
 
-	if (!validOption) {
+	if (!valid_option) {
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
@@ -125,10 +125,10 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
-	std::string actionableArg = sep->arg[ab_arg];
+	std::string actionable_arg = sep->arg[ab_arg];
 
-	if (actionableArg.empty()) {
-		actionableArg = "target";
+	if (actionable_arg.empty()) {
+		actionable_arg = "target";
 	}
 
 	std::string class_race_arg = sep->arg[ab_arg];
@@ -140,22 +140,22 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 
 	std::vector<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	int botTauntingCount = 0;
-	int petTauntingCount = 0;
+	int bot_taunting_count = 0;
+	int pet_taunting_count = 0;
 
-	if (!petTaunt) {
+	if (!pet_taunt) {
 		for (auto bot_iter : sbl) {
 			if (!bot_iter->GetSkill(EQ::skills::SkillTaunt)) {
 				continue;
 			}
 
-			bot_iter->SetTaunting(tauntState);
+			bot_iter->SetTaunting(taunt_state);
 
 			Bot::BotGroupSay(
 				bot_iter,
@@ -165,11 +165,11 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 				).c_str()
 			);
 
-			++botTauntingCount;
+			++bot_taunting_count;
 		}
 	}
 
-	if (petTaunt) {
+	if (pet_taunt) {
 		for (auto bot_iter : sbl) {
 			if (!bot_iter->HasPet()) {
 				continue;
@@ -179,7 +179,7 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 				continue;
 			}
 
-			bot_iter->GetPet()->CastToNPC()->SetTaunting(tauntState);
+			bot_iter->GetPet()->CastToNPC()->SetTaunting(taunt_state);
 
 			Bot::BotGroupSay(
 				bot_iter,
@@ -189,18 +189,18 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 				).c_str()
 			);
 
-			++petTauntingCount;
+			++pet_taunting_count;
 		}
 	}
 
-	if (botTauntingCount || petTauntingCount) {
+	if (bot_taunting_count || pet_taunting_count) {
 		c->Message(
 			Chat::Green,
 			fmt::format(
 				"{} of your {} are {} taunting.",
-				(botTauntingCount ? botTauntingCount : petTauntingCount),
-				(botTauntingCount ? "bots" : "bots' pets"),
-				tauntState ? "now" : "no longer"
+				(bot_taunting_count ? bot_taunting_count : pet_taunting_count),
+				(bot_taunting_count ? "bots" : "bots' pets"),
+				taunt_state ? "now" : "no longer"
 			).c_str()
 		);
 	}
@@ -209,7 +209,7 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 			Chat::Yellow,
 			fmt::format(
 				"None of your {} are capable of taunting.",
-				!petTaunt ? "bots" : "bots' pets"
+				!pet_taunt ? "bots" : "bots' pets"
 			).c_str()
 		);
 	}

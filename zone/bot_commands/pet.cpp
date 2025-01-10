@@ -228,10 +228,10 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
-	std::string actionableArg = sep->arg[ab_arg];
+	std::string actionable_arg = sep->arg[ab_arg];
 
-	if (actionableArg.empty()) {
-		actionableArg = "target";
+	if (actionable_arg.empty()) {
+		actionable_arg = "target";
 	}
 
 	std::string class_race_arg = sep->arg[ab_arg];
@@ -243,17 +243,17 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 
 	std::vector<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	std::string currentType;
+	std::string current_type;
 	uint16 reclaim_energy_id = RuleI(Bots, ReclaimEnergySpellID);
-	bool isSuccess = false;
-	uint16 successCount = 0;
-	Bot* firstFound = nullptr;
+	bool is_success = false;
+	uint16 success_count = 0;
+	Bot* first_found = nullptr;
 
 	for (auto bot_iter : sbl) {
 		if (bot_iter->GetClass() != Class::Magician) {
@@ -284,28 +284,28 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 		if (current_check) {
 			switch (bot_iter->GetPetChooserID()) {
 				case 0:
-					currentType = "auto";
+					current_type = "auto";
 					break;
 				case SumWater:
-					currentType = "water";
+					current_type = "water";
 					break;
 				case SumFire:
-					currentType = "fire";
+					current_type = "fire";
 					break;
 				case SumAir:
-					currentType = "air";
+					current_type = "air";
 					break;
 				case SumEarth:
-					currentType = "earth";
+					current_type = "earth";
 					break;
 				case MonsterSum:
-					currentType = "monster";
+					current_type = "monster";
 					break;
 				case SumMageMultiElement:
-					currentType = "epic";
+					current_type = "epic";
 					break;
 				default:
-					currentType = "null";
+					current_type = "null";
 					break;
 			}
 
@@ -314,22 +314,22 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} says, 'I'm currently summoning {} pets.'",
 					bot_iter->GetCleanName(),
-					currentType
+					current_type
 				).c_str()
 			);
 
 			continue;
 		}
 
-		uint8 airMinLevel = 255;
-		uint8 fireMinLevel = 255;
-		uint8 waterMinLevel = 255;
-		uint8 earthMinLevel = 255;
-		uint8 monsterMinLevel = 255;
-		uint8 epicMinLevel = 255;
-		std::list<BotSpell> botSpellList = bot_iter->GetBotSpellsBySpellType(bot_iter, BotSpellTypes::Pet);
+		uint8 air_min_level = 255;
+		uint8 fire_min_level = 255;
+		uint8 water_min_level = 255;
+		uint8 earth_min_level = 255;
+		uint8 monster_min_level = 255;
+		uint8 epic_min_level = 255;
+		std::list<BotSpell> bot_spell_list = bot_iter->GetBotSpellsBySpellType(bot_iter, BotSpellTypes::Pet);
 
-		for (const auto& s : botSpellList) {
+		for (const auto& s : bot_spell_list) {
 			if (!IsValidSpell(s.SpellId)) {
 				continue;
 			}
@@ -340,65 +340,54 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 
 			auto spell = spells[s.SpellId];
 
-			if (!strncmp(spell.teleport_zone, "SumWater", 8) && spell.classes[Class::Magician - 1] < waterMinLevel) {
-				waterMinLevel = spell.classes[Class::Magician - 1];
+			if (!strncmp(spell.teleport_zone, "SumWater", 8) && spell.classes[Class::Magician - 1] < water_min_level) {
+				water_min_level = spell.classes[Class::Magician - 1];
 			}
-			else if (!strncmp(spell.teleport_zone, "SumFire", 7) && spell.classes[Class::Magician - 1] < fireMinLevel) {
-				fireMinLevel = spell.classes[Class::Magician - 1];
+			else if (!strncmp(spell.teleport_zone, "SumFire", 7) && spell.classes[Class::Magician - 1] < fire_min_level) {
+				fire_min_level = spell.classes[Class::Magician - 1];
 			}
-			else if (!strncmp(spell.teleport_zone, "SumAir", 6) && spell.classes[Class::Magician - 1] < airMinLevel) {
-				airMinLevel = spell.classes[Class::Magician - 1];
+			else if (!strncmp(spell.teleport_zone, "SumAir", 6) && spell.classes[Class::Magician - 1] < air_min_level) {
+				air_min_level = spell.classes[Class::Magician - 1];
 			}
-			else if (!strncmp(spell.teleport_zone, "SumEarth", 8) && spell.classes[Class::Magician - 1] < earthMinLevel) {
-				earthMinLevel = spell.classes[Class::Magician - 1];
+			else if (!strncmp(spell.teleport_zone, "SumEarth", 8) && spell.classes[Class::Magician - 1] < earth_min_level) {
+				earth_min_level = spell.classes[Class::Magician - 1];
 			}
-			else if (!strncmp(spell.teleport_zone, "MonsterSum", 10) && spell.classes[Class::Magician - 1] < monsterMinLevel) {
-				monsterMinLevel = spell.classes[Class::Magician - 1];
+			else if (!strncmp(spell.teleport_zone, "MonsterSum", 10) && spell.classes[Class::Magician - 1] < monster_min_level) {
+				monster_min_level = spell.classes[Class::Magician - 1];
 			}
 		}
 
-		uint8 minLevel = std::min({
-			waterMinLevel,
-			fireMinLevel,
-			airMinLevel,
-			earthMinLevel,
-			monsterMinLevel
+		uint8 min_level = std::min({
+			water_min_level,
+			fire_min_level,
+			air_min_level,
+			earth_min_level,
+			monster_min_level
 		});
 
-		epicMinLevel = RuleI(Bots, AllowMagicianEpicPetLevel);
-
-		LogTestDebug("{} says, 'minLevel = {} | waterMinLevel = {} | fireMinLevel = {} | airMinLevel = {} | earthMinLevel = {} | monsterMinLevel = {} | epicMinLevel = {}'",
-			bot_iter->GetCleanName(),
-			minLevel,
-			waterMinLevel,
-			fireMinLevel,
-			airMinLevel,
-			earthMinLevel,
-			monsterMinLevel,
-			epicMinLevel
-		); //deleteme
+		epic_min_level = RuleI(Bots, AllowMagicianEpicPetLevel);
 
 		switch (pet_type) {
 			case 0:
-				level_req = minLevel;
+				level_req = min_level;
 				break;
 			case SumWater:
-				level_req = waterMinLevel;
+				level_req = water_min_level;
 				break;
 			case SumFire:
-				level_req = fireMinLevel;
+				level_req = fire_min_level;
 				break;
 			case SumAir:
-				level_req = airMinLevel;
+				level_req = air_min_level;
 				break;
 			case SumEarth:
-				level_req = earthMinLevel;
+				level_req = earth_min_level;
 				break;
 			case MonsterSum:
-				level_req = monsterMinLevel;
+				level_req = monster_min_level;
 				break;
 			case SumMageMultiElement:
-				level_req = epicMinLevel;
+				level_req = epic_min_level;
 				break;
 			default:
 				break;
@@ -416,31 +405,31 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 			bot_iter->CastSpell(reclaim_energy_id, pet_id);
 		}
 
-		if (!firstFound) {
-			firstFound = bot_iter;
+		if (!first_found) {
+			first_found = bot_iter;
 		}
 
-		isSuccess = true;
-		++successCount;
+		is_success = true;
+		++success_count;
 	}
 
 	if (current_check) {
 		return;
 	}
 
-	if (!isSuccess) {
+	if (!is_success) {
 		c->Message(Chat::Yellow, "No bots were selected.");
 
 		return;
 	}
 	
-	if (successCount == 1 && firstFound) {
+	if (success_count == 1 && first_found) {
 		c->Message(
 			Chat::Green,
 			fmt::format(
 				"{} says, 'I will now summon {} pets.'",
-				firstFound->GetCleanName(),
-				currentType
+				first_found->GetCleanName(),
+				current_type
 			).c_str()
 		);
 	}
@@ -449,7 +438,7 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 			Chat::Green,
 			fmt::format(
 				"{} of your bots will now summon {} pets.",
-				successCount,
+				success_count,
 				arg1
 			).c_str()
 		);

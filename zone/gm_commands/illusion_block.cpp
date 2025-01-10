@@ -12,10 +12,10 @@ void command_illusion_block(Client* c, const Seperator* sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		int setStatus = atoi(sep->arg[1]);
-		if (setStatus == 0 || setStatus == 1) {
-			c->SetIllusionBlock(setStatus);
-			c->Message(Chat::White, "Your Illusion Block has been %s.", (setStatus ? "enabled" : "disabled"));
+		int set_status = atoi(sep->arg[1]);
+		if (set_status == 0 || set_status == 1) {
+			c->SetIllusionBlock(set_status);
+			c->Message(Chat::White, "Your Illusion Block has been %s.", (set_status ? "enabled" : "disabled"));
 		}
 		else {
 			c->Message(Chat::White, "You must enter 0 for disabled or 1 for enabled.");

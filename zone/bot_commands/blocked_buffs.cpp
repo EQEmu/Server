@@ -149,10 +149,10 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
-	std::string actionableArg = sep->arg[ab_arg];
+	std::string actionable_arg = sep->arg[ab_arg];
 
-	if (actionableArg.empty()) {
-		actionableArg = "target";
+	if (actionable_arg.empty()) {
+		actionable_arg = "target";
 	}
 
 	std::string class_race_arg = sep->arg[ab_arg];
@@ -164,23 +164,23 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 
 	std::vector<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	bool isSuccess = false;
-	uint16 successCount = 0;
-	Bot* firstFound = nullptr;
+	bool is_success = false;
+	uint16 success_count = 0;
+	Bot* first_found = nullptr;
 
 	for (auto bot_iter : sbl) {
 		if (!bot_iter->IsInGroupOrRaid(c)) {
 			continue;
 		}
 
-		if (!firstFound) {
-			firstFound = bot_iter;
+		if (!first_found) {
+			first_found = bot_iter;
 		}
 
 		if (add) {
@@ -190,11 +190,11 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 			bot_iter->SetBotBlockedBuff(spell_id, false);
 		}
 		else if (list) {
-			std::vector<BotBlockedBuffs_Struct> blockedBuffs = bot_iter->GetBotBlockedBuffs();
+			std::vector<BotBlockedBuffs_Struct> blocked_buffs = bot_iter->GetBotBlockedBuffs();
 			bool found = false;
 
-			if (!blockedBuffs.empty()) {
-				for (auto& blocked_buff : blockedBuffs) {
+			if (!blocked_buffs.empty()) {
+				for (auto& blocked_buff : blocked_buffs) {
 					if (blocked_buff.blocked == 1 && IsValidSpell(blocked_buff.spell_id)) {
 						found = true;
 						c->Message(
@@ -232,11 +232,11 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 			);
 		}
 
-		isSuccess = true;
-		++successCount;
+		is_success = true;
+		++success_count;
 	}
 
-	if (!isSuccess) {
+	if (!is_success) {
 		c->Message(Chat::Yellow, "No bots were selected.");
 	}
 	else {
@@ -245,8 +245,8 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 				Chat::Yellow,
 				fmt::format(
 					"{} {} {} blocking {} [#{}]",
-					((successCount == 1 && firstFound) ? firstFound->GetCleanName() : (fmt::format("{}", successCount).c_str())),
-					((successCount == 1 && firstFound) ? "is" : "of your bots"),
+					((success_count == 1 && first_found) ? first_found->GetCleanName() : (fmt::format("{}", success_count).c_str())),
+					((success_count == 1 && first_found) ? "is" : "of your bots"),
 					(add ? "now" : "no longer"),
 					spells[spell_id].name,
 					spell_id
@@ -408,10 +408,10 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
-	std::string actionableArg = sep->arg[ab_arg];
+	std::string actionable_arg = sep->arg[ab_arg];
 
-	if (actionableArg.empty()) {
-		actionableArg = "target";
+	if (actionable_arg.empty()) {
+		actionable_arg = "target";
 	}
 
 	std::string class_race_arg = sep->arg[ab_arg];
@@ -423,23 +423,23 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 
 	std::vector<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	bool isSuccess = false;
-	uint16 successCount = 0;
-	Bot* firstFound = nullptr;
+	bool is_success = false;
+	uint16 success_count = 0;
+	Bot* first_found = nullptr;
 
 	for (auto bot_iter : sbl) {
 		if (!bot_iter->IsInGroupOrRaid(c)) {
 			continue;
 		}
 
-		if (!firstFound) {
-			firstFound = bot_iter;
+		if (!first_found) {
+			first_found = bot_iter;
 		}
 
 		if (add) {
@@ -449,11 +449,11 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 			bot_iter->SetBotBlockedPetBuff(spell_id, false);
 		}
 		else if (list) {
-			std::vector<BotBlockedBuffs_Struct> blockedBuffs = bot_iter->GetBotBlockedBuffs();
+			std::vector<BotBlockedBuffs_Struct> blocked_buffs = bot_iter->GetBotBlockedBuffs();
 			bool found = false;
 
-			if (!blockedBuffs.empty()) {
-				for (auto& blocked_buff : blockedBuffs) {
+			if (!blocked_buffs.empty()) {
+				for (auto& blocked_buff : blocked_buffs) {
 					if (blocked_buff.blocked_pet == 1 && IsValidSpell(blocked_buff.spell_id)) {
 						found = true;
 						c->Message(
@@ -491,11 +491,11 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 			);
 		}
 
-		isSuccess = true;
-		++successCount;
+		is_success = true;
+		++success_count;
 	}
 
-	if (!isSuccess) {
+	if (!is_success) {
 		c->Message(Chat::Yellow, "No bots were selected.");
 	}
 	else {
@@ -504,8 +504,8 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 				Chat::Yellow,
 				fmt::format(
 					"{} {} {} blocking {} [#{}] on their pet.",
-					((successCount == 1 && firstFound) ? firstFound->GetCleanName() : (fmt::format("{}", successCount).c_str())),
-					((successCount == 1 && firstFound) ? "is" : "of your bots"),
+					((success_count == 1 && first_found) ? first_found->GetCleanName() : (fmt::format("{}", success_count).c_str())),
+					((success_count == 1 && first_found) ? "is" : "of your bots"),
 					(add ? "now" : "no longer"),
 					spells[spell_id].name,
 					spell_id

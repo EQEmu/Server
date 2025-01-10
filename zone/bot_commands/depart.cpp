@@ -131,13 +131,13 @@ void bot_command_depart(Client* c, const Seperator* sep)
 		tar = c;
 	}
 
-	std::string argString = sep->arg[ab_arg];
+	std::string arg_string = sep->arg[ab_arg];
 
 	const int ab_mask = ActionableBots::ABM_Type1;
-	std::string actionableArg = sep->arg[ab_arg];
+	std::string actionable_arg = sep->arg[ab_arg];
 
-	if (actionableArg.empty()) {
-		actionableArg = "spawned";
+	if (actionable_arg.empty()) {
+		actionable_arg = "spawned";
 	}
 
 	std::string class_race_arg = sep->arg[ab_arg];
@@ -149,19 +149,19 @@ void bot_command_depart(Client* c, const Seperator* sep)
 
 	std::vector<Bot*> sbl;
 
-	if (ActionableBots::PopulateSBL(c, actionableArg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	BotSpell botSpell;
-	botSpell.SpellId = 0;
-	botSpell.SpellIndex = 0;
-	botSpell.ManaCost = 0;
+	BotSpell bot_spell;
+	bot_spell.SpellId = 0;
+	bot_spell.SpellIndex = 0;
+	bot_spell.ManaCost = 0;
 
-	bool isSuccess = false;
-	std::map<std::string, std::pair<uint8_t, uint8_t>> listZones;
+	bool is_success = false;
+	std::map<std::string, std::pair<uint8_t, uint8_t>> list_zones;
 
 	for (auto bot_iter : sbl) {
 		if (!bot_iter->IsInGroupOrRaid(tar, !single)) {
@@ -172,9 +172,9 @@ void bot_command_depart(Client* c, const Seperator* sep)
 			continue;
 		}
 
-		std::vector<BotSpell_wPriority> botSpellListItr = bot_iter->GetPrioritizedBotSpellsBySpellType(bot_iter, BotSpellTypes::Teleport, tar);
+		std::vector<BotSpell_wPriority> bot_spell_list_itr = bot_iter->GetPrioritizedBotSpellsBySpellType(bot_iter, BotSpellTypes::Teleport, tar);
 
-		for (std::vector<BotSpell_wPriority>::iterator itr = botSpellListItr.begin(); itr != botSpellListItr.end(); ++itr) {
+		for (std::vector<BotSpell_wPriority>::iterator itr = bot_spell_list_itr.begin(); itr != bot_spell_list_itr.end(); ++itr) {
 			if (!IsValidSpell(itr->SpellId)) {
 				continue;
 			}
@@ -188,9 +188,9 @@ void bot_command_depart(Client* c, const Seperator* sep)
 			}
 
 			if (list) {
-				auto it = listZones.find(spells[itr->SpellId].teleport_zone);
+				auto it = list_zones.find(spells[itr->SpellId].teleport_zone);
 
-				if (it != listZones.end()) {
+				if (it != list_zones.end()) {
 					const auto& [val1, val2] = it->second;
 
 					if (val1 == spells[itr->SpellId].target_type && val2 == bot_iter->GetClass()) {
@@ -214,7 +214,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 					).c_str()
 				);
 
-				listZones.insert({ spells[itr->SpellId].teleport_zone, {spells[itr->SpellId].target_type, bot_iter->GetClass()} });
+				list_zones.insert({ spells[itr->SpellId].teleport_zone, {spells[itr->SpellId].target_type, bot_iter->GetClass()} });
 
 				continue;
 			}
@@ -268,12 +268,12 @@ void bot_command_depart(Client* c, const Seperator* sep)
 					);
 				}
 
-				isSuccess = true;
+				is_success = true;
 			}
 
 			bot_iter->SetCommandedSpell(false);
 
-			if (isSuccess) {
+			if (is_success) {
 				return;
 			}
 			else {
@@ -283,8 +283,8 @@ void bot_command_depart(Client* c, const Seperator* sep)
 	}
 
 	if (
-		(list && listZones.empty()) || 
-		(!list && !isSuccess)
+		(list && list_zones.empty()) || 
+		(!list && !is_success)
 	) {
 		c->Message(
 			Chat::Yellow,

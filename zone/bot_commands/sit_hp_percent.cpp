@@ -81,12 +81,12 @@ void bot_command_sit_hp_percent(Client* c, const Seperator* sep)
 
 	int ab_arg = 1;
 	bool current_check = false;
-	uint32 typeValue = 0;
+	uint32 type_value = 0;
 
 	if (sep->IsNumber(1)) {
-		typeValue = atoi(sep->arg[1]);
+		type_value = atoi(sep->arg[1]);
 		++ab_arg;
-		if (typeValue < 0 || typeValue > 100) {
+		if (type_value < 0 || type_value > 100) {
 			c->Message(Chat::Yellow, "You must enter a value between 0-100 (0%% to 100%% of health).");
 
 			return;
@@ -146,7 +146,7 @@ void bot_command_sit_hp_percent(Client* c, const Seperator* sep)
 			);
 		}
 		else {
-			my_bot->SetSitHPPct(typeValue);
+			my_bot->SetSitHPPct(type_value);
 			++success_count;
 		}
 	}
@@ -167,7 +167,7 @@ void bot_command_sit_hp_percent(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots will now sit in combat whem at or below [{}%%] HP.'",
 					success_count,
-					typeValue
+					type_value
 				).c_str()
 			);
 		}
