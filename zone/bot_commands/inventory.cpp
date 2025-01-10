@@ -2,12 +2,12 @@
 
 void bot_command_inventory(Client *c, const Seperator *sep)
 {
-
-	std::list<const char*> subcommand_list;
-	subcommand_list.push_back("inventorygive");
-	subcommand_list.push_back("inventorylist");
-	subcommand_list.push_back("inventoryremove");
-	subcommand_list.push_back("inventorywindow");
+	std::vector<const char*> subcommand_list = {
+		"inventorygive",
+		"inventorylist",
+		"inventoryremove",
+		"inventorywindow"
+	};
 
 	if (helper_command_alias_fail(c, "bot_command_inventory", sep->arg[0], "inventory"))
 		return;

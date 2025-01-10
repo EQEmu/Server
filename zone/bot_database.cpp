@@ -1161,8 +1161,8 @@ bool BotDatabase::SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, c
 	if (all_flag) {
 		where_clause = fmt::format(
 			"IN ({}, {}, {}, {}, {}, {}, {})",
-			EQ::invslot::SlotHead,
-			EQ::invslot::SlotArms,
+			EQ::invslot::slotHead,
+			EQ::invslot::slotArms,
 			EQ::invslot::slotWrist1,
 			EQ::invslot::slotHands,
 			EQ::invslot::slotChest,

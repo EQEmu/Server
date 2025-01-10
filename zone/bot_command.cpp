@@ -2037,7 +2037,7 @@ bool helper_no_available_bots(Client *bot_owner, Bot *my_bot)
 	return false;
 }
 
-void helper_send_available_subcommands(Client *bot_owner, const char* command_simile, const std::list<const char*>& subcommand_list)
+void helper_send_available_subcommands(Client* bot_owner, const char* command_simile, std::vector<const char*> subcommand_list)
 {
 	bot_owner->Message(Chat::White, "Available %s management subcommands:", command_simile);
 

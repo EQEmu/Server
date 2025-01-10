@@ -2,19 +2,19 @@
 
 void bot_command_appearance(Client *c, const Seperator *sep)
 {
-
-	std::list<const char*> subcommand_list;
-	subcommand_list.push_back("botbeardcolor");
-	subcommand_list.push_back("botbeardstyle");
-	subcommand_list.push_back("botdetails");
-	subcommand_list.push_back("botdyearmor");
-	subcommand_list.push_back("boteyes");
-	subcommand_list.push_back("botface");
-	subcommand_list.push_back("bothaircolor");
-	subcommand_list.push_back("bothairstyle");
-	subcommand_list.push_back("botheritage");
-	subcommand_list.push_back("bottattoo");
-	subcommand_list.push_back("botwoad");
+	std::vector<const char*> subcommand_list = {
+		"botbeardcolor",
+		"botbeardstyle",
+		"botdetails",
+		"botdyearmor",
+		"boteyes",
+		"botface",
+		"bothaircolor",
+		"bothairstyle",
+		"botheritage",
+		"bottattoo",
+		"botwoad"
+	};
 
 	if (helper_command_alias_fail(c, "bot_command_appearance", sep->arg[0], "botappearance"))
 		return;

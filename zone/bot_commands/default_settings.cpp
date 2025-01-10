@@ -374,7 +374,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		}
 		else if (!strcasecmp(sep->arg[1], "spelltypesettings")) {
 			if (spell_type != UINT16_MAX) {
-				my_bot->SetSpellHold(spell_type, my_bot->GetDefaultSpellHold(SpellType, bot_stance));
+				my_bot->SetSpellHold(spell_type, my_bot->GetDefaultSpellHold(spell_type, bot_stance));
 				my_bot->SetSpellDelay(spell_type, my_bot->GetDefaultSpellDelay(spell_type, bot_stance));
 				my_bot->SetSpellMinThreshold(spell_type, my_bot->GetDefaultSpellMinThreshold(spell_type, bot_stance));
 				my_bot->SetSpellMaxThreshold(spell_type, my_bot->GetDefaultSpellMaxThreshold(spell_type, bot_stance));

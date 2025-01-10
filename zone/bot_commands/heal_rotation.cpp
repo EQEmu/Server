@@ -2,28 +2,28 @@
 
 void bot_command_heal_rotation(Client *c, const Seperator *sep)
 {
-
-	std::list<const char*> subcommand_list;
-	subcommand_list.push_back("healrotationadaptivetargeting");
-	subcommand_list.push_back("healrotationaddmember");
-	subcommand_list.push_back("healrotationaddtarget");
-	subcommand_list.push_back("healrotationadjustcritical");
-	subcommand_list.push_back("healrotationadjustsafe");
-	subcommand_list.push_back("healrotationcastoverride");
-	subcommand_list.push_back("healrotationchangeinterval");
-	subcommand_list.push_back("healrotationclearhot");
-	subcommand_list.push_back("healrotationcleartargets");
-	subcommand_list.push_back("healrotationcreate");
-	subcommand_list.push_back("healrotationdelete");
-	subcommand_list.push_back("healrotationfastheals");
-	subcommand_list.push_back("healrotationlist");
-	subcommand_list.push_back("healrotationremovemember");
-	subcommand_list.push_back("healrotationremovetarget");
-	subcommand_list.push_back("healrotationresetlimits");
-	subcommand_list.push_back("healrotationsave");
-	subcommand_list.push_back("healrotationsethot");
-	subcommand_list.push_back("healrotationstart");
-	subcommand_list.push_back("healrotationstop");
+	std::vector<const char*> subcommand_list = {
+		"healrotationadaptivetargeting",
+		"healrotationaddmember",
+		"healrotationaddtarget",
+		"healrotationadjustcritical",
+		"healrotationadjustsafe",
+		"healrotationcastoverride",
+		"healrotationchangeinterval",
+		"healrotationclearhot",
+		"healrotationcleartargets",
+		"healrotationcreate",
+		"healrotationdelete",
+		"healrotationfastheals",
+		"healrotationlist",
+		"healrotationremovemember",
+		"healrotationremovetarget",
+		"healrotationresetlimits",
+		"healrotationsave",
+		"healrotationsethot",
+		"healrotationstart",
+		"healrotationstop"
+	};
 
 	if (helper_command_alias_fail(c, "bot_command_heal_rotation", sep->arg[0], "healrotation"))
 		return;

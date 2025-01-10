@@ -3,11 +3,11 @@
 
 void bot_command_pet(Client *c, const Seperator *sep)
 {
-
-	std::list<const char*> subcommand_list;
-	subcommand_list.push_back("petgetlost");
-	subcommand_list.push_back("petremove");
-	subcommand_list.push_back("petsettype");
+	std::vector<const char*> subcommand_list = {
+		"petgetlost",
+		"petremove",
+		"petsettype"
+	};
 
 	if (helper_command_alias_fail(c, "bot_command_pet", sep->arg[0], "pet"))
 		return;

@@ -167,7 +167,7 @@ void bot_command_sit_mana_percent(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots will now sit in combat whem at or below [{}%%] mana.'",
 					success_count,
-					TypeValue
+					type_value
 				).c_str()
 			);
 		}
