@@ -2100,34 +2100,34 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 	std::string arg0 = sep->arg[0];
 	std::string arg1 = sep->arg[1];
 
-	uint8 minCount = 0;
-	uint8 maxCount = 0;
-	bool clientOnly = false;
+	uint8 min_count = 0;
+	uint8 max_count = 0;
+	bool client_only = false;
 
 	if (BotSpellTypes::END <= 19) {
-		minCount = BotSpellTypes::START;
-		maxCount = BotSpellTypes::END;
+		min_count = BotSpellTypes::START;
+		max_count = BotSpellTypes::END;
 	}
 	else if (!arg1.compare("0-19")) {
-		minCount = BotSpellTypes::START;
-		maxCount = 19;
+		min_count = BotSpellTypes::START;
+		max_count = 19;
 	}
 	else if (!arg1.compare("20-39")) {
-		minCount = std::min(static_cast<uint8_t>(20), static_cast<uint8_t>(BotSpellTypes::END));
-		maxCount = std::min(static_cast<uint8_t>(39), static_cast<uint8_t>(BotSpellTypes::END));
+		min_count = std::min(static_cast<uint8_t>(20), static_cast<uint8_t>(BotSpellTypes::END));
+		max_count = std::min(static_cast<uint8_t>(39), static_cast<uint8_t>(BotSpellTypes::END));
 	}
 	else if (!arg1.compare("40+")) {
-		minCount = std::min(static_cast<uint8_t>(40), static_cast<uint8_t>(BotSpellTypes::END));
-		maxCount = BotSpellTypes::END;
+		min_count = std::min(static_cast<uint8_t>(40), static_cast<uint8_t>(BotSpellTypes::END));
+		max_count = BotSpellTypes::END;
 	}
 	else if (!arg1.compare("commanded")) {
-		minCount = BotSpellTypes::COMMANDED_START;
-		maxCount = BotSpellTypes::COMMANDED_END;
+		min_count = BotSpellTypes::COMMANDED_START;
+		max_count = BotSpellTypes::COMMANDED_END;
 	}
 	else if (!arg1.compare("client")) {
-		minCount = BotSpellTypes::START;
-		maxCount = BotSpellTypes::END;
-		clientOnly = true;
+		min_count = BotSpellTypes::START;
+		max_count = BotSpellTypes::END;
+		client_only = true;
 	}
 	else {
 		c->Message(Chat::Yellow, "You must choose a valid range option");
@@ -2141,25 +2141,25 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 	const std::string& forest_green = "forest_green";
 	const std::string& goldenrod = "goldenrod";
 
-	std::string fillerLine = "-----------";
-	std::string spellTypeField = "Spell Type";
-	std::string idField = "ID";
-	std::string shortnameField = "Short Name";
+	std::string filler_line = "-----------";
+	std::string spell_type_field = "Spell Type";
+	std::string id_field = "ID";
+	std::string shortname_field = "Short Name";
 
 	std::string popup_text = DialogueWindow::TableRow(
-		DialogueWindow::TableCell(DialogueWindow::ColorMessage(goldenrod, spellTypeField))
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(goldenrod, spell_type_field))
 		+
-		DialogueWindow::TableCell((!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(goldenrod, idField) : DialogueWindow::ColorMessage(goldenrod, shortnameField)))
+		DialogueWindow::TableCell((!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(goldenrod, id_field) : DialogueWindow::ColorMessage(goldenrod, shortname_field)))
 	);
 
 	popup_text += DialogueWindow::TableRow(
-		DialogueWindow::TableCell(DialogueWindow::ColorMessage(gold, fillerLine))
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(gold, filler_line))
 		+
-		DialogueWindow::TableCell(DialogueWindow::ColorMessage(gold, fillerLine))
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(gold, filler_line))
 	);
 
-	for (int i = minCount; i <= maxCount; ++i) {
-		if (clientOnly && !IsClientBotSpellType(i)) {
+	for (int i = min_count; i <= max_count; ++i) {
+		if (client_only && !IsClientBotSpellType(i)) {
 			continue;
 		}
 

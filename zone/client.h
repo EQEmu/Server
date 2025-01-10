@@ -2239,9 +2239,9 @@ public:
 	void SpawnRaidBotsOnConnect(Raid* raid);
 
 	void LoadDefaultBotSettings();
-	int GetDefaultBotSettings(uint8 settingType, uint16 botSetting);
-	int GetBotSetting(uint8 settingType, uint16 botSetting);
-	void SetBotSetting(uint8 settingType, uint16 botSetting, uint32 settingValue);	
+	int GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting);
+	int GetBotSetting(uint8 setting_type, uint16 bot_setting);
+	void SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value);	
 
 private:
 	bool bot_owner_options[_booCount];

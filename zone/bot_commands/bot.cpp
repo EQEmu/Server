@@ -56,15 +56,15 @@ void bot_command_camp(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint16 campCount;
+	uint16 camp_count;
 
 	for (auto bot_iter : sbl) {
 		bot_iter->Camp();
-		++campCount;
+		++camp_count;
 	}
 
-	if (campCount) {
-		c->Message(Chat::White, "%i of your bots have been camped.", campCount);
+	if (camp_count) {
+		c->Message(Chat::White, "%i of your bots have been camped.", camp_count);
 	}
 }
 
@@ -559,7 +559,7 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 	
 	uint32 bfd = RuleI(Bots, DefaultFollowDistance);
 	bool set_flag = false;
-	bool currentCheck = false;
+	bool current_check = false;
 	int ab_arg = 2;
 
 	std::string arg1 = sep->arg[1];
@@ -589,7 +589,7 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 		++ab_arg;
 	}
 	else if (!arg1.compare("current")) {
-		currentCheck = true;
+		current_check = true;
 	}
 	else if (arg1.compare("reset")) {
 		c->Message(
@@ -619,13 +619,13 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	int botCount = 0;
+	int bot_count = 0;
 	for (auto bot_iter : sbl) {
 		if (!bot_iter) {
 			continue;
 		}
 
-		if (currentCheck) {
+		if (current_check) {
 			Mob* follow_mob = entity_list.GetMob(bot_iter->GetFollowID());
 
 			c->Message(
@@ -640,15 +640,15 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 		}
 		else {
 			bot_iter->SetFollowDistance(bfd * bfd);
-			++botCount;
+			++bot_count;
 		}
 	}
 
-	if (currentCheck) {
+	if (current_check) {
 		return;
 	}
 
-	if (botCount == 1) {
+	if (bot_count == 1) {
 		Mob* follow_mob = entity_list.GetMob(sbl.front()->GetFollowID());
 
 		c->Message(
@@ -666,7 +666,7 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 			Chat::Green,
 			fmt::format(
 				"{} of your bots are now following at a distance of {}.",
-				botCount,
+				bot_count,
 				bfd
 			).c_str()
 		);
@@ -1170,16 +1170,16 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 	}
 
 	std::string silent_confirm = sep->arg[2];
-	bool silentTell = false;
+	bool silent_tell = false;
 
 	if (!silent_confirm.compare("silent")) {
-		silentTell = true;
+		silent_tell = true;
 	}
 
-	if (!silentTell && c->GetBotOption(Client::booSpawnMessageSay)) {
+	if (!silent_tell && c->GetBotOption(Client::booSpawnMessageSay)) {
 		Bot::BotGroupSay(my_bot, bot_spawn_message[message_index].c_str());
 	}
-	else if (!silentTell && c->GetBotOption(Client::booSpawnMessageTell)) {
+	else if (!silent_tell && c->GetBotOption(Client::booSpawnMessageTell)) {
 		my_bot->OwnerMessage(bot_spawn_message[message_index]);
 	}
 }
@@ -1330,7 +1330,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 
 	const int ab_mask = ActionableBots::ABM_Type1;
 
-	bool currentCheck = false;
+	bool current_check = false;
 	int ab_arg = 1;
 	uint32 value = 0;
 
@@ -1360,7 +1360,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 	}
 	else if (!arg1.compare("current")) {
 		++ab_arg;
-		currentCheck = true;
+		current_check = true;
 	}
 	else {
 		c->Message(
@@ -1395,7 +1395,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 			first_found = bot_iter;
 		}
 
-		if (currentCheck) {
+		if (current_check) {
 			c->Message(
 				Chat::Green,
 				fmt::format(
@@ -1436,7 +1436,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		++success_count;
 	}
 
-	if (currentCheck) {
+	if (current_check) {
 		return;
 	}
 
@@ -1482,7 +1482,7 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 	uint8 sml = RuleI(Bots, CasterStopMeleeLevel);
 	bool sync_sml = false;
 	bool reset_sml = false;
-	bool currentCheck = false;
+	bool current_check = false;
 
 	if (sep->IsNumber(1)) {
 		ab_arg = 2;
@@ -1498,7 +1498,7 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 	}
 	else if (!arg1.compare("current")) {
 		ab_arg = 2;
-		currentCheck = true;
+		current_check = true;
 	}
 	else if (!strcasecmp(sep->arg[1], "reset")) {
 		ab_arg = 2;
@@ -1553,7 +1553,7 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 			sml = my_bot->GetDefaultBotBaseSetting(BotBaseSettings::StopMeleeLevel);
 		}
 
-		if (currentCheck) {
+		if (current_check) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -1570,7 +1570,7 @@ void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 		}
 	}
 
-	if (!currentCheck) {
+	if (!current_check) {
 		if (success_count == 1 && first_found) {
 			c->Message(
 				Chat::White,

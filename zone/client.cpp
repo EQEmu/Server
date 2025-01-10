@@ -13089,50 +13089,50 @@ void Client::LoadDefaultBotSettings() {
 	}
 }
 
-int Client::GetDefaultBotSettings(uint8 settingType, uint16 botSetting) {
-	switch (settingType) {
+int Client::GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting) {
+	switch (setting_type) {
 		case BotSettingCategories::BaseSetting:
 			return false;
 		case BotSettingCategories::SpellHold:
-			return GetDefaultSpellHold(botSetting);
+			return GetDefaultSpellHold(bot_setting);
 		case BotSettingCategories::SpellDelay:
-			return GetDefaultSpellDelay(botSetting);
+			return GetDefaultSpellDelay(bot_setting);
 		case BotSettingCategories::SpellMinThreshold:
-			return GetDefaultSpellMinThreshold(botSetting);
+			return GetDefaultSpellMinThreshold(bot_setting);
 		case BotSettingCategories::SpellMaxThreshold:
-			return GetDefaultSpellMaxThreshold(botSetting);
+			return GetDefaultSpellMaxThreshold(bot_setting);
 	}
 }
 
-int Client::GetBotSetting(uint8 settingType, uint16 botSetting) {
-	switch (settingType) {
+int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
+	switch (setting_type) {
 		case BotSettingCategories::SpellHold:
-			return GetSpellHold(botSetting);
+			return GetSpellHold(bot_setting);
 		case BotSettingCategories::SpellDelay:
-			return GetSpellDelay(botSetting);
+			return GetSpellDelay(bot_setting);
 		case BotSettingCategories::SpellMinThreshold:
-			return GetSpellMinThreshold(botSetting);
+			return GetSpellMinThreshold(bot_setting);
 		case BotSettingCategories::SpellMaxThreshold:
-			return GetSpellMaxThreshold(botSetting);
+			return GetSpellMaxThreshold(bot_setting);
 	}
 }
 
-void Client::SetBotSetting(uint8 settingType, uint16 botSetting, uint32 settingValue) {
-	switch (settingType) {
+void Client::SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value) {
+	switch (setting_type) {
 		case BotSettingCategories::BaseSetting:
-			SetBaseSetting(botSetting, settingValue);
+			SetBaseSetting(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellHold:
-			SetSpellHold(botSetting, settingValue);
+			SetSpellHold(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellDelay:
-			SetSpellDelay(botSetting, settingValue);
+			SetSpellDelay(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellMinThreshold:
-			SetSpellMinThreshold(botSetting, settingValue);
+			SetSpellMinThreshold(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellMaxThreshold:
-			SetSpellMaxThreshold(botSetting, settingValue);
+			SetSpellMaxThreshold(bot_setting, setting_value);
 			break;
 	}
 }
@@ -13148,9 +13148,9 @@ std::string Client::SendCommandHelpWindow(
 	std::vector<std::string> options_one, std::vector<std::string> options_two, std::vector<std::string> options_three
 ) {
 
-	unsigned stringLength = 0;
-	unsigned currentPlace = 0;
-	uint16 maxLength = RuleI(Command, MaxHelpLineLength); //character length of a line before splitting in to multiple lines
+	unsigned string_length = 0;
+	unsigned current_place = 0;
+	uint16 max_length = RuleI(Command, MaxHelpLineLength); //character length of a line before splitting in to multiple lines
 	const std::string& description_color = RuleS(Command, DescriptionColor);
 	const std::string& description_header_color = RuleS(Command, DescriptionHeaderColor);
 	const std::string& alt_description_color = RuleS(Command, AltDescriptionColor);
@@ -13177,78 +13177,74 @@ std::string Client::SendCommandHelpWindow(
 
 
 
-	std::string fillerLine = "--------------------------------------------------------------------";
-	std::string fillerDia = DialogueWindow::TableRow(DialogueWindow::TableCell(fmt::format("{}", DialogueWindow::ColorMessage(filler_line_color, fillerLine))));
-	std::string breakLine = DialogueWindow::Break();
+	std::string filler_line = "--------------------------------------------------------------------";
+	std::string filler_dia = DialogueWindow::TableRow(DialogueWindow::TableCell(fmt::format("{}", DialogueWindow::ColorMessage(filler_line_color, filler_line))));
+	std::string break_line = DialogueWindow::Break();
 	std::string indent = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 	std::string bullet = "- ";
 	std::string popup_text = "";
 
 	/*
-	maxLength is how long you want lines to be before splitting them. This will look for the last space before the count and split there so words are not split mid sentence
-	Any SplitCommandHelpText can be be have the first string from a vector differ in color from the next strings by setting secondColor to true and assigning a color.
-	ex: SplitCommandHelpText(examples_one, example_color, maxLength, true, alt_example_color)
-	- This will make the first string from examples_one vector be the color of example_color and all following strings the color of alt_example_color
-	ex: SplitCommandHelpText(examples_one, example_color, maxLength)
-	- This will apply the color example_color to everything in examples_one vector
+	max_length is how long you want lines to be before splitting them. This will look for the last space before the count and split there so words are not split mid sentence
+	Any SplitCommandHelpText can have the first string from a vector differ in color from the next strings by setting an alternate color for that type in the rule.
 	*/
 
 	if (!description.empty()) {
 		popup_text += GetCommandHelpHeader(description_header_color, "[Description]");
-		popup_text += SplitCommandHelpText(description, description_color, maxLength, true, alt_description_color);
+		popup_text += SplitCommandHelpText(description, description_color, max_length, !alt_description_color.empty(), alt_description_color);
 	}
 
 	if (!notes.empty()) {
-		popup_text += breakLine;
-		popup_text += breakLine;
+		popup_text += break_line;
+		popup_text += break_line;
 		popup_text += GetCommandHelpHeader(note_header_color, "[Notes]");
-		popup_text += SplitCommandHelpText(notes, note_color, maxLength, true, alt_note_color);
+		popup_text += SplitCommandHelpText(notes, note_color, max_length, !alt_note_color.empty(), alt_note_color);
 	}
 
 	if (!example_format.empty()) {
-		popup_text += fillerDia;
+		popup_text += filler_dia;
 		popup_text += GetCommandHelpHeader(example_header_color, "[Examples]");
-		popup_text += SplitCommandHelpText(example_format, example_color, maxLength, true, alt_example_color);
+		popup_text += SplitCommandHelpText(example_format, example_color, max_length, !alt_example_color.empty(), alt_example_color);
 	}
 
 	if (!examples_one.empty()) {
-		popup_text += breakLine;
-		popup_text += breakLine;
-		popup_text += SplitCommandHelpText(examples_one, sub_example_color, maxLength, true, sub_alt_example_color);
+		popup_text += break_line;
+		popup_text += break_line;
+		popup_text += SplitCommandHelpText(examples_one, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
 	}
 
 	if (!examples_two.empty()) {
-		popup_text += SplitCommandHelpText(examples_two, sub_example_color, maxLength, true, sub_alt_example_color);
+		popup_text += SplitCommandHelpText(examples_two, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
 	}
 
 	if (!examples_three.empty()) {
-		popup_text += SplitCommandHelpText(examples_three, sub_example_color, maxLength, true, sub_alt_example_color);
+		popup_text += SplitCommandHelpText(examples_three, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
 	}
 
 	if (!options.empty()) {
-		popup_text += fillerDia;
+		popup_text += filler_dia;
 		popup_text += GetCommandHelpHeader(option_header_color, "[Options]");
-		popup_text += SplitCommandHelpText(options, option_color, maxLength, true, alt_option_color);
+		popup_text += SplitCommandHelpText(options, option_color, max_length, !alt_option_color.empty(), alt_option_color);
 	}
 
 	if (!options_one.empty()) {
-		popup_text += breakLine;
-		popup_text += breakLine;
-		popup_text += SplitCommandHelpText(options_one, sub_option_color, maxLength, true, sub_alt_option_color);
+		popup_text += break_line;
+		popup_text += break_line;
+		popup_text += SplitCommandHelpText(options_one, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
 	}
 
 	if (!options_two.empty()) {
-		popup_text += SplitCommandHelpText(options_two, sub_option_color, maxLength, true, sub_alt_option_color);
+		popup_text += SplitCommandHelpText(options_two, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
 	}
 
 	if (!options_three.empty()) {
-		popup_text += SplitCommandHelpText(options_three, secondary_header_color, maxLength, true, sub_alt_option_color);
+		popup_text += SplitCommandHelpText(options_three, secondary_header_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
 	}
 
 	if (!actionables.empty()) {
-		popup_text += fillerDia;
+		popup_text += filler_dia;
 		popup_text += GetCommandHelpHeader(actionable_header_color, "[Actionables]");
-		popup_text += SplitCommandHelpText(actionables, actionable_color, maxLength, true, alt_actionable_color);
+		popup_text += SplitCommandHelpText(actionables, actionable_color, max_length, !alt_actionable_color.empty(), alt_actionable_color);
 	}
 
 	popup_text = DialogueWindow::Table(popup_text);
@@ -13257,7 +13253,7 @@ std::string Client::SendCommandHelpWindow(
 }
 
 std::string Client::GetCommandHelpHeader(std::string color, std::string header) {
-	std::string returnText = DialogueWindow::TableRow(
+	std::string return_text = DialogueWindow::TableRow(
 		DialogueWindow::TableCell(
 			fmt::format(
 				"{}",
@@ -13266,58 +13262,58 @@ std::string Client::GetCommandHelpHeader(std::string color, std::string header) 
 		)
 	);
 
-	return returnText;
+	return return_text;
 }
 
-std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 maxLength, bool secondColor, std::string secondaryColor) {
-	std::string returnText;
+std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 max_length, bool second_color, std::string secondary_color) {
+	std::string return_text;
 
 	for (int i = 0; i < msg.size(); i++) {
 		std::vector<std::string> msg_split;
-		int stringLength = msg[i].length() + 1;
-		int endCount = 0;
-		int newCount = 0;
-		int splitCount = 0;
+		int string_length = msg[i].length() + 1;
+		int end_count = 0;
+		int new_count = 0;
+		int split_count = 0;
 
-		for (int x = 0; x < stringLength; x = endCount) {
-			endCount = std::min(int(stringLength), (int(x) + std::min(int(stringLength), int(maxLength))));
+		for (int x = 0; x < string_length; x = end_count) {
+			end_count = std::min(int(string_length), (int(x) + std::min(int(string_length), int(max_length))));
 
-			if ((stringLength - (x + 1)) > maxLength) {
-				for (int y = endCount; y >= x; --y) {
+			if ((string_length - (x + 1)) > max_length) {
+				for (int y = end_count; y >= x; --y) {
 					if (msg[i][y] == ' ') {
-							splitCount = y - x;
-							msg_split.emplace_back(msg[i].substr(x, splitCount));
-							endCount = y + 1;
+							split_count = y - x;
+							msg_split.emplace_back(msg[i].substr(x, split_count));
+							end_count = y + 1;
 
 							break;
 					}
 					
 					if (y == x) {
-						msg_split.emplace_back(msg[i].substr(x, maxLength));
+						msg_split.emplace_back(msg[i].substr(x, max_length));
 
 						break;
 					}
 				}
 			}
 			else {
-				msg_split.emplace_back(msg[i].substr(x, (stringLength - 1) - x));
+				msg_split.emplace_back(msg[i].substr(x, (string_length - 1) - x));
 
 				break;
 			}
 		}
 
 		for (const auto& s : msg_split) {
-			returnText += DialogueWindow::TableRow(
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(((secondColor && i == 0) ? color : secondaryColor), s))
+			return_text += DialogueWindow::TableRow(
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(((second_color && i == 0) ? color : secondary_color), s))
 			);
 		}
 	}
 
-	return returnText;
+	return return_text;
 }
 
-void Client::SendSpellTypePrompts(bool commandedTypes, bool clientOnlyTypes) {
-	if (clientOnlyTypes) {
+void Client::SendSpellTypePrompts(bool commanded_types, bool client_only_types) {
+	if (client_only_types) {
 		Message(
 			Chat::Yellow,
 			fmt::format(
@@ -13358,7 +13354,7 @@ void Client::SendSpellTypePrompts(bool commandedTypes, bool clientOnlyTypes) {
 		);
 	}
 
-	if (commandedTypes) {
+	if (commanded_types) {
 		Message(
 			Chat::Yellow,
 			fmt::format(

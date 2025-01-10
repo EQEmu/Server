@@ -896,23 +896,23 @@ const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellT
 const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong);
 const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
 
-bool IsBotSpellTypeDetrimental (uint16 spellType);
-bool IsBotSpellTypeBeneficial (uint16 spellType);
-bool IsBotSpellTypeOtherBeneficial(uint16 spellType);
-bool IsBotSpellTypeInnate (uint16 spellType);
-bool IsAEBotSpellType(uint16 spellType);
-bool IsGroupBotSpellType(uint16 spellType);
-bool IsGroupTargetOnlyBotSpellType(uint16 spellType);
-bool IsPetBotSpellType(uint16 spellType);
-bool IsClientBotSpellType(uint16 spellType);
-bool IsHealBotSpellType(uint16 spellType);
-bool SpellTypeRequiresLoS(uint16 spellType);
-bool SpellTypeRequiresTarget(uint16 spellType);
-bool SpellTypeRequiresAEChecks(uint16 spellType);
-bool IsCommandedSpellType(uint16 spellType);
-bool IsPullingSpellType(uint16 spellType);
-uint16 GetCorrectSpellType(uint16 spellType, uint16 spell_id);
-uint16 GetPetSpellType(uint16 spellType);
+bool IsBotSpellTypeDetrimental (uint16 spell_type);
+bool IsBotSpellTypeBeneficial (uint16 spell_type);
+bool IsBotSpellTypeOtherBeneficial(uint16 spell_type);
+bool IsBotSpellTypeInnate (uint16 spell_type);
+bool IsAEBotSpellType(uint16 spell_type);
+bool IsGroupBotSpellType(uint16 spell_type);
+bool IsGroupTargetOnlyBotSpellType(uint16 spell_type);
+bool IsPetBotSpellType(uint16 spell_type);
+bool IsClientBotSpellType(uint16 spell_type);
+bool IsHealBotSpellType(uint16 spell_type);
+bool SpellTypeRequiresLoS(uint16 spell_type);
+bool SpellTypeRequiresTarget(uint16 spell_type);
+bool SpellTypeRequiresAEChecks(uint16 spell_type);
+bool IsCommandedSpellType(uint16 spell_type);
+bool IsPullingSpellType(uint16 spell_type);
+uint16 GetCorrectSpellType(uint16 spell_type, uint16 spell_id);
+uint16 GetPetSpellType(uint16 spell_type);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only
@@ -1810,7 +1810,7 @@ bool IsEffectInSpell(uint16 spell_id, int effect_id);
 uint16 GetSpellTriggerSpellID(uint16 spell_id, int effect_id);
 bool IsBlankSpellEffect(uint16 spell_id, int effect_index);
 bool IsValidSpell(uint32 spell_id);
-bool IsValidSpellAndLoS(uint32 spell_id, bool hasLoS = true);
+bool IsValidSpellAndLoS(uint32 spell_id, bool has_los = true);
 bool IsSummonSpell(uint16 spell_id);
 bool IsDamageSpell(uint16 spell_id);
 bool IsAnyDamageSpell(uint16 spell_id);
@@ -1906,7 +1906,7 @@ int8 SpellEffectsCount(uint16 spell_id);
 bool IsLichSpell(uint16 spell_id);
 bool IsInstantHealSpell(uint32 spell_id);
 bool IsResurrectSpell(uint16 spell_id);
-bool RequiresStackCheck(uint16 spellType);
+bool RequiresStackCheck(uint16 spell_type);
 bool IsResistanceOnlySpell(uint16 spell_id);
 bool IsDamageShieldOnlySpell(uint16 spell_id);
 bool IsHateSpell(uint16 spell_id);
