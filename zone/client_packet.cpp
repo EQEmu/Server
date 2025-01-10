@@ -821,6 +821,10 @@ void Client::CompleteConnect()
 				CharacterID()
 			)
 		);
+
+		if (GetPetNameChanges()) {
+			InvokeChangePetName();
+		}
 	}
 
 	if(ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
@@ -977,10 +981,6 @@ void Client::CompleteConnect()
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
 		GoToBind();
 		return;
-	}
-
-	if (GetPetNameChanges()) {
-		InvokeChangePetName(false);
 	}
 }
 

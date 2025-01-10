@@ -3229,9 +3229,9 @@ perl::array Perl_Client_GetInventorySlots(Client* self)
 	return result;
 }
 
-void Perl_Client_ChangePetName(Client* self)
+bool Perl_Client_ChangePetName(Client* self)
 {
-	self->InvokeChangePetName();
+	return self->InvokeChangePetName();
 }
 
 void perl_register_client()
