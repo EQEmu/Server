@@ -3579,7 +3579,7 @@ void Lua_Client::ShowZoneShardMenu()
 void Lua_Client::ChangePetName()
 {
 	Lua_Safe_Call_Void();
-	self->GrantPetNameChange();
+	self->GrantPetNameChange(Class::Magician);
 }
 
 luabind::scope lua_register_client() {

@@ -38,6 +38,7 @@
 #ifndef WIN32
 #include <stdlib.h>
 #include "../common/unix.h"
+#include "npc.h"
 #endif
 
 
@@ -165,18 +166,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// 4 - Keep DB name
 	// 5 - `s ward
 
-	const std::vector<CharacterPetNameRepository::CharacterPetName>& vanity_name = CharacterPetNameRepository::GetWhere(
-		database,
-		fmt::format(
-			"`char_id` = '{}'",
-			IsClient() ? CastToClient()->CharacterID() : 0
-		)
-	);
-
-	if (!vanity_name.empty() && petname == nullptr) {
-		petname = vanity_name.front().name.c_str();
-	}
-
 	if (petname != nullptr) {
 		// Name was provided, use it.
 		strn0cpy(npc_type->name, petname, 64);
@@ -269,9 +258,45 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	//this takes ownership of the npc_type data
 	auto npc = new Pet(npc_type, this, (PetType)record.petcontrol, spell_id, record.petpower);
 
+	if (IsClient()) {
+		auto pn = CastToClient()->GetPetVanityName(npc->GetPetOriginClass());
+		if (!pn.empty()) {
+			npc->SetName(pn.c_str());
+			npc->TempName(pn.c_str());
+		}
 
-	npc->NamePetOnSpellID(spell_id, petname);
-
+		switch (npc->GetPetOriginClass()) {
+			case Class::Enchanter:
+				npc->ChangeLastName(fmt::format("{}'s Animation", GetCleanName()));
+				break;
+			case Class::Magician:
+				npc->ChangeLastName(fmt::format("{}'s Elemental Minion", GetCleanName()));
+				break;
+			case Class::Druid:
+				npc->ChangeLastName(fmt::format("{}'s Tiny Bear", GetCleanName()));
+				break;
+			case Class::ShadowKnight:
+			case Class::Necromancer:
+				npc->ChangeLastName(fmt::format("{}'s Undead Minion", GetCleanName()));
+				break;
+			case Class::Beastlord:
+				npc->ChangeLastName(fmt::format("{}'s Warder", GetCleanName()));
+				break;
+			case Class::Shaman:
+				npc->ChangeLastName(fmt::format("{}'s Spirit Companion", GetCleanName()));
+				break;
+			case Class::Wizard:
+			case Class::Cleric:
+				if (npc->GetPetType() == PetType::petFamiliar) {
+					npc->ChangeLastName(fmt::format("{}'s Familiar", GetCleanName()));
+				} else {
+					npc->ChangeLastName(fmt::format("{}'s Animated Weapon", GetCleanName()));
+				}
+				break;
+			default:
+				npc->ChangeLastName(fmt::format("{}'s Pet", GetCleanName()));
+		}
+	}
 
 	// Now that we have an actual object to interact with, load
 	// the base items for the pet. These are always loaded
@@ -375,409 +400,208 @@ void NPC::TryDepopTargetLockedPets(Mob* current_target) {
 	}
 }
 
-void NPC::NamePetOnSpellID(uint16 spell_id, const char* static_name) {
-	ValidatePetList();
-    Mob* owner = GetOwner();
-    if (!owner) {
-        return;
-    }
+std::string Mob::GenerateDruidPetName() {
+	std::vector<std::string> bearNames = {
+		"Tiny_Grizzle", "Snugglepaws", "Honey_Nibbles", "Bearly_There", "Cuddlycub", "Fuzzlet",
+		"Pint-Sized_Paws", "Mini_Growl", "Buttonbear", "Teacup_Teddie", "Beary_McBearface",
+		"Bearlock_Holmes", "Bearon_von_Growl", "Bearcules", "Winnie_the_Boo", "Grizzly_Adams",
+		"Bear_Grylls", "Bearfoot", "Bearth_Vader", "Bearin'_Square", "Paw_Bear",
+		"Bearzooka", "Bear_Hugz", "Bearister", "Gummy_Bearson", "Bearalicious",
+		"Robin_Hoodbear", "Bearthoven", "Sir_Growls-a-Lot", "Bearington",
+		"Honeybear_Hound", "Bearminator", "Bear_Necessities", "Grizz_Lee",
+		"Polar_Oppawsite", "Growlbert_Einstein", "Bearoness", "Bearrific",
+		"Bearcat", "Bearly_Legal", "Unbearlievable", "Teddy_Ruxbin", "Bear_Hugger",
+		"Bearoness_von_Snuggles", "Bearbie_Doll", "Clawdia_Pawlsen", "Grizzelda",
+		"Fuzz_Lightyear", "Pawdrey_Hepbear", "Furrari", "Bearbados_Slim", "Bearlin",
+		"Furrnando", "Growlberto", "Bearloaf", "Bearianna_Grande", "Bearon_the_Red",
+		"Clawrence_of_Arabia", "Paddingpaw", "Pawtrick_Swayze", "Bearami_Brown",
+		"Grizzabella", "Bearlentine", "Bearthday_Boy", "Paw_McCartney", "Clawdette",
+		"Bearon_Brando", "Beartholomew", "Bear_Hugington", "Fluff_Daddy", "Chewbearca",
+		"Growldemort", "Bearicane", "Bearlosaurus_Rex", "Bear-lenium_Falcon", "Bearborator",
+		"Bear_Fury", "Polar_Prowler", "Cuddle_Champion", "Snuggle_Monarch", "Honey_Whiskers",
+		"Growl_Mage", "Bear_Wizard", "Fuzzy_Duchess", "Bear_Sentinel", "Claw_Commander",
+		"Snuggle_Baron", "Bear_Prince", "Furry_Beast", "Growl_Titan", "Bear_Knight",
+		"Honey_Rider", "Bear_Admiral", "Cuddle_Legend", "Bear_Hero", "Snuggle_Duke",
+		"Bear_Czar", "Growl_Lord", "Furry_Tyrant", "Honey_Emperor", "Bear_Prowler",
+		"Claw_Pirate", "Bear_Paladin", "Fuzzy_Lord", "Growl_Baron", "Snuggle_Templar",
+		"Bear_General", "Honey_Duchess", "Bear_Flint", "Cuddle_Scout", "Furry_Marshal",
+		"Bear_Hurricane", "Polar_Hound", "Growly_Paw", "Bear_Shadow", "Snuggle_Beast",
+		"Bear_Overlord", "Honey_Baroness", "Furry_Bandit", "Bear_Pathfinder", "Paw_Explorer",
+		"Snuggle_Wizard", "Bear_Pioneer", "Growl_Scribe", "Polar_Squire", "Honey_Vanguard",
+		"Bear_Aurora", "Grizzly_Crusader", "Bear_Brigadier", "Fuzz_Sorcerer", "Claw_Illusionist",
+		"Bear_Vanguard", "Snuggle_Wanderer", "Fuzzy_Phoenix", "Bear_Bishop", "Growl_Warlord",
+		"Bear_Fiend", "Polar_Vizier", "Cuddle_Curator", "Furry_Avenger", "Snuggle_Harbinger",
+		"Bear_Warden", "Growl_Chancellor", "Bear_Fury", "Honey_Sorceress", "Bear_Treasure",
+		"Paw_Pioneer", "Bear_Sovereign", "Fuzz_Champion", "Bear_Voyager", "Claw_Saint",
+		"Bear_Princess", "Growl_Gladiator", "Bear_Monarch", "Snuggle_Baroness", "Polar_Ruler",
+		"Honey_Explorer", "Bear_Pathmaster", "Claw_Sentinel", "Bear_Guardian", "Fuzzy_Hero",
+		"Bear_Medic", "Polar_Watcher", "Snuggle_Warrior", "Bear_Blade", "Honey_Bard",
+		"Bear_Bard", "Growly_Leader", "Bear_Captain", "Cuddle_Ruler", "Polar_Marshal",
+		"Bear_Judge", "Snuggle_Whisperer", "Bear_Lightbringer", "Fuzzy_Aurora", "Growl_Vanguard",
+		"Claw_and_Effect", "Bear_to_Dream", "Honey_Fluff", "Fur_Real", "Pawfect_Buddy",
+		"Growly_McGraw", "Bear_Snapper", "Honey_Munchkin", "Bearly_Believable", "Claw_of_Paws",
+		"Polar_Express", "Bearhug_Brigade", "Fur_Majesty", "Honey_Pawseidon", "Bear_Scape",
+		"Snuggle_Overlord", "Growly_Knight", "Bearly_Magic", "Honey_Pawradise", "Furry_Captain",
+		"Bear_Horizons", "Growly_Treasure", "Bear_Panther", "Honey_Wonderpaw", "Claw_Voyager",
+		"Bear_Legend", "Growl_Drifter", "Honey_Cubcake", "Bear_Flare", "Snuggle_Fortress",
+		"Fuzzy_Brigadier", "Bear_Frontier", "Polar_Pioneer", "Claw_Barista", "Honey_Pawsitive",
+		"Bear_with_Me", "Fur_Eternity", "Growly_Pride", "Bearly_Bold", "Snuggle_Sentinel",
+		"Bear_Moonlight", "Claw_Flash", "Honey_Pawnder", "Bear_Savior", "Furry_Rogue",
+		"Paw_Brigadier", "Growly_Hero", "Snuggle_Scribe", "Honey_Frostbite", "Bearly_Pawsitive",
+		"Fuzzy_Hero", "Growlstorm", "Bear_Shadowfluff", "Honeycomb_Crusader", "Polar_Sentinel",
+		"Bearly_Brilliant", "Snuggle_Fox", "Bear_Dynamo", "Honey_Pawrtal", "Claw_Marauder",
+		"Bear_Flow", "Snuggle_Pal", "Growly_Mystic", "Honey_Lightbearer", "Bear_Fizzle",
+		"Polar_Pawprint", "Growly_Mayhem", "Bear_Prowler", "Honeybear_Claw", "Clawbear_Commander",
+		"Bear_Stormbear", "Furrious_Marshal", "Snuggle_Shield", "Honey_Glacier",
+		"Bear_Battlecry", "Paw_Strike", "Growly_Pawsson", "Snuggle_Cuddler", "Bear_Plum",
+		"Honey_Rosepaw", "Claw_Mark", "Bear_Courage", "Snuggle_Mistress", "Growly_Tigerpaw",
+		"Polar_Howler", "Bear_Fluffball", "Honey_Frostwing", "Snuggle_Bearkfast", "Bear_Virtue",
+		"Growly_Apex", "Honey_Sweetpaw", "Bearly_Noticeable", "Polar_Bravery", "Growl_Chieftain",
+		"Bear_Mountainpaw", "Snuggle_Merchant", "Honey_Peace", "Bearly_Fierce", "Clawful_Joker",
+		"Bear_Jokester", "Honey_Snowpaw", "Snuggle_Blast", "Bear_Sparkle", "Growly_Dragon",
+		"Honey_Raider", "Bearly_Popular", "Fuzzy_Skipper", "Bear_Shadowstrike", "Snuggle_Luminator",
+		"Honey_Pursuit", "Bear_Explorer", "Claw_Lord", "Growly_McClaw", "Polar_Furrow",
+		"Honey_Fuzzball", "Snuggle_Knight", "Bear_Wanderpaw", "Growl_Majestic", "Bearly_Twilight",
+		"Honey_Brightpaw", "Bear_Champion", "Snuggle_Diver", "Polar_Guard", "Growly_Scribe",
+		"Bearly_Marvelous", "Honey_Hopepaw", "Bear_Thunderfluff", "Furriest_Paw", "Snuggle_Delight",
+		"Bear_Pawlace", "Growl_Seeker", "Honey_Trailblazer", "Bearly_Tangible", "Clawful_Princess",
+		"Bear_Mystery", "Growl_Crusader", "Honey_Dreamer", "Snuggle_Harbinger", "Bear_Prophet",
+		"Polar_Stormbear", "Bear_Spiritbear", "Fuzzy_Sentinel", "Growly_Overseer", "Honey_Frostfluff",
+		"Bear_Rogue", "Snuggle_Fury", "Bearly_Roaring", "Growl_Commander", "Polar_Visionary",
+		"Bearly_Majestic", "Honey_Pawtroller", "Snuggle_Hopebear", "Fur_Keeper", "Growl_Lorekeeper",
+		"Bear_Honor", "Snuggle_Pawmaster", "Honey_Fluffington", "Bearly_Hopeful", "Growly_Custodian",
+		"Honey_Bearister", "Claw_Majesty", "Bearly_Hope", "Growly_Highness", "Polar_Whiskers",
+		"Honey_Pawssible", "Bear_Battlelord", "Snuggle_Gentleclaw", "Growly_Fangkeeper", "Bear_Willowpaw",
+		"Honey_Mysticpaw", "Furry_Leader", "Bear_Howler", "Growl_Fluffmaster", "Polar_Majesty"
+	};
 
-    std::vector<std::string> existing_pet_names;
-    for (auto pet : owner->GetAllPets()) {
-        existing_pet_names.push_back(pet->GetCleanName());
-    }
-
-	std::string tmp_lastname;
-	std::string tmp_name = (static_name == nullptr) ? "" : static_name;
-
-    auto getRandomBearName = [&]() -> std::string {
-        std::vector<std::string> bearNames = {
-            "Yogi", "Boo", "Pip", "Nugget", "Snick", "Pebble", "Fizz", "Munch", "Squirt", "Binky",
-            "Tiny Grizzle", "Snugglepaws", "Honey Nibbles", "Bearly There", "Cuddlycub", "Fuzzlet",
-            "Pint-Sized Paws", "Mini Growl", "Buttonbear", "Teacup Teddie",
-            "Coco", "Bubba", "Milo", "Teddy", "Biscuit", "Frodo", "Gizmo", "Fluffy", "Mochi", "Waffles",
-            "Bamboo", "Chomp", "Sprout", "Rolo", "Munchkin", "Pudding", "Pipsqueak", "Fuzzball", "Nibbles",
-            "Pickles", "Popcorn", "Ziggy", "Sparky", "Scooter", "Whiskers", "Snickers", "Wiggles",
-            "Bubbles", "Chubby", "Choco", "Snickerdoodle", "Cupcake", "Tootsie", "Doodle", "Muffin",
-            "Peanut", "Buttons", "Truffles", "Brownie", "Gingersnap", "Poppy", "Puff", "Smores",
-            "Marshmallow", "Cuddles", "Pumpkin", "Ruffles", "Tater", "Sprinkles", "Chewy", "Puffball",
-            "Cupcake", "Fudge", "Chester", "Cosmo", "Clover", "Dobby", "Squeaky", "Nibbler", "Tater Tot",
-            "Dumpling", "Wombat", "BoBo", "Churro", "Scooby", "Pudding", "Ducky", "Peaches", "Rascal",
-            "Smidge", "Bean", "Scruffy", "Gus", "Rugrat", "Hobbit", "Beary_McBearface", "Paddington",
-            "Bearlock Holmes", "Bearon von Growl", "Bearcules", "Winnie the Boo", "Grizzly Adams",
-            "Bear Grylls", "Bearfoot", "Bearth Vader", "Bearin' Square", "Paw Bear",
-            "Bearzooka", "Bear Hugz", "Bearister", "Gummy Bearson", "Bearalicious",
-            "Robin Hoodbear", "Bearthoven", "Sir Growls-a-Lot", "Bearington",
-            "Honeybear Hound", "Bearminator", "Bear Necessities", "Grizz Lee",
-            "Polar Oppawsite", "Growlbert Einstein", "Bearoness", "Bearrific",
-            "Bearcat", "Bearly Legal", "Unbearlievable", "Teddy Ruxbin", "Bear Hugger",
-            "Bearoness von Snuggles", "Bearbie Doll", "Clawdia Pawlsen", "Grizzelda",
-            "Fuzz Lightyear", "Pawdrey Hepbear", "Furrari", "Bearbados Slim", "Bearlin",
-            "Furrnando", "Growlberto", "Bearloaf", "Bearianna Grande", "Bearon the Red",
-            "Clawrence of Arabia", "Paddingpaw", "Pawtrick Swayze", "Bearami Brown",
-            "Grizzabella", "Bearlentine", "Bearthday Boy", "Paw McCartney", "Clawdette",
-            "Bearon Brando", "Beartholomew", "Bear Hugington", "Fluff Daddy", "Chewbearca",
-            "Growldemort", "Bearicane", "Bearlosaurus Rex", "Bear-lenium Falcon", "Bearborator"
-        };
-
-        // Check existing bucket names first
-        for (int i = 0; i < 10; i++) {
-            std::string bucket_name = fmt::format("bear_name_{}", i);
-            std::string ret_name = owner->GetBucket(bucket_name);
-            if (!ret_name.empty()) {
-                if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
-                    return ret_name;
-                }
-            }
-        }
-
-        // Generate a random bear name that is not already used
-        int max = bearNames.size() - 1;
-        std::string selected_name;
-        for (int i = 0; i < bearNames.size(); ++i) {
-            std::string random_name = bearNames[zone->random.Roll0(max)];
-            if (std::find(existing_pet_names.begin(), existing_pet_names.end(), random_name) == existing_pet_names.end()) {
-                selected_name = random_name;
-                break;
-            }
-        }
-
-        if (selected_name.empty()) {
-            return "Unnamed Bear"; // Fallback if all names are taken
-        }
-
-        // Set the selected name into the first available bucket
-        for (int i = 0; i < 10; i++) {
-            std::string bucket_name = fmt::format("bear_name_{}", i);
-            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
-            if (ret_name.empty()) {  // Found the first unused bucket slot
-				if (owner->IsClient()) {
-                	owner->SetBucket(bucket_name, selected_name);
-				}
-                break;
-            }
-        }
-
-        return selected_name;
-    };
-
-	auto getRandomSkeletonName = [&]() -> std::string {
-        std::vector<std::string> prefixes = {"Mor", "Skel", "Grim", "Varn", "Mar", "Karn", "Zor", "Gor", "Thal", "Tor", "Nar", "Thrax"};
-        std::vector<std::string> middles = {"ak", "or", "th", "ar", "al", "ro", "im", "uth", "on", "an", "en", "ol", "amun"};
-        std::vector<std::string> suffixes = {"rik", "thos", "nar", "grim", "thal", "ok", "ath", "ur", "mar", "oth", "ros", "ak", "dar"};
-
-        // Check existing bucket names first
-        for (int i = 1; i < 10; ++i) {
-            std::string bucket_name = fmt::format("skeleton_name_{}", i);
-            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
-            if (!ret_name.empty()) {
-                if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
-                    return ret_name;
-                }
-            }
-        }
-
-        // Generate a new skeleton name that is not already used
-        std::string selected_name;
-        do {
-            std::string random_prefix = prefixes[zone->random.Roll0(prefixes.size() - 1)];
-            std::string random_middle = middles[zone->random.Roll0(middles.size() - 1)];
-            std::string random_suffix = suffixes[zone->random.Roll0(suffixes.size() - 1)];
-            selected_name = random_prefix + random_middle + random_suffix;
-            selected_name[0] = toupper(selected_name[0]);  // Capitalize the first letter
-        } while (std::find(existing_pet_names.begin(), existing_pet_names.end(), selected_name) != existing_pet_names.end());
-
-        // Set the selected name into the first available bucket
-        for (int i = 1; i <= 100; ++i) {
-            std::string bucket_name = fmt::format("skeleton_name_{}", i);
-            if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-				if (owner->IsClient()) {
-                	owner->SetBucket(bucket_name, selected_name);
-				}
-                break;
-            }
-        }
-
-        return selected_name;
-    };
-
-	auto getRandomWarderName = [&]() -> std::string {
-        std::vector<std::string> prefixes = {
-            "Gnar", "Krag", "Bru", "Vor", "Thok", "Dra", "Gar", "Zhar", "Kro", "Skaar", "Fang", "Ruk", "Grim",
-            "Tharn", "Bar", "Krull", "Vorn", "Drak", "Krog", "Mar", "Groth", "Skorn", "Grak", "Harg",
-            "Ruk", "Narz", "Vul", "Krath", "Rorg", "Tark", "Bruk", "Grimz", "Thrak", "Brak", "Mor", "Drak", "Kill",
-            "Gnash", "Vrak", "Zur", "Grorn", "Koth", "Vorash", "Thrash", "Zorag", "Gruk", "Rak", "Vorn", "Goth"
-        };
-        std::vector<std::string> suffixes = {
-            "fang", "claw", "tusk", "bite", "maw", "roar", "rend", "gore", "gnash", "bark", "slash",
-            "snap", "rip", "tear", "thorn", "howl", "grunt", "wing", "quill", "tail", "fur",
-            "king", "snout", "scale", "jaw", "hide", "horn", "talon",
-            "hoof", "paw", "mane", "purr", "hiss", "sting", "snarl", "growl", "screech",
-            "coil", "lunge", "scowl", "chomp", "gnarl", "gash", "whip", "bristle", "creep",
-            "slink", "scratch", "gnaw", "rake", "squeal", "hiss", "snort",
-            "rasp", "tread", "bound", "lunge", "lash", "slither", "thrash",
-            "peck", "snip", "snatch",
-            "bite", "shred", "gouge", "flinch", "grunt", "pierce",
-            "clamp", "grind", "rake", "carve", "shred", "crunch",
-            "batter", "crush", "mash", "snub", "dozer"
-        };
-
-        // Check existing bucket names first
-        for (int i = 1; i <= 10; ++i) {
-            std::string bucket_name = fmt::format("warder_name_{}", i);
-            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
-            if (!ret_name.empty()) {
-                if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
-                    return ret_name;
-                }
-            }
-        }
-
-        // Generate a new warder name that is not already used
-        std::string selected_name;
-        do {
-            std::string random_prefix = prefixes[zone->random.Roll0(prefixes.size() - 1)];
-            std::string random_suffix = suffixes[zone->random.Roll0(suffixes.size() - 1)];
-            selected_name = random_prefix + random_suffix;
-            selected_name[0] = toupper(selected_name[0]);  // Capitalize the first letter
-        } while (std::find(existing_pet_names.begin(), existing_pet_names.end(), selected_name) != existing_pet_names.end());
-
-        // Set the selected name into the first available bucket
-        for (int i = 1; i <= 10; ++i) {
-            std::string bucket_name = fmt::format("warder_name_{}", i);
-            if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-				if (owner->IsClient()) {
-                	owner->SetBucket(bucket_name, selected_name);
-				}
-                break;
-            }
-        }
-
-        return selected_name;
-    };
-
-    auto getRandomSpiritName = [&]() -> std::string {
-        std::vector<std::string> prefixes = {
-            "Ancient", "Wise", "Shadow", "Mystic", "Spirit", "Ghost", "Phantom", "Ancestral", "Elder", "Sacred",
-            "Thunder", "Moon", "Frost", "Blood", "Night", "Storm", "Silent", "Echo", "Fire", "Earth", "Sky",
-            "Star", "Dark", "Silver", "Grim", "Fierce", "Wild", "Whisper", "Winter", "Steel", "Iron",
-            "Noble", "Proud", "Fierce", "Glimmer", "Ember", "Savage", "Brave", "Noble", "Shimmer",
-            "Golden", "Crimson", "Lone", "Eternal", "Wraith", "Stone"
-        };
-
-        std::vector<std::string> suffixes = {
-            "Wolf", "Lupus", "Fang", "Howl", "Prowl", "Claw", "Eye", "Breath", "Maw", "Snarl", "Fur", "Tail", "Howler",
-            "Bite", "Heart", "Shade", "Stalker", "Hunter", "Runner", "Roar", "Spirit", "Bane", "Fury",
-            "Warden", "Shroud", "Shadow", "Ripper", "Guardian", "Strider", "Nightshade", "Sentry",
-            "Whisper", "Fangblade", "Razorback", "Warg", "Sentinel", "Watcher", "Ghostwalker"
-        };
-
-        // Check existing bucket names first
-        for (int i = 1; i <= 10; ++i) {
-            std::string bucket_name = fmt::format("spirit_name_{}", i);
-            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
-            if (!ret_name.empty()) {
-                if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
-                    return ret_name;
-                }
-            }
-        }
-
-        // Generate a new spirit name that is not already used
-        std::string selected_name;
-        do {
-            std::string random_prefix = prefixes[zone->random.Roll0(prefixes.size() - 1)];
-            std::string random_suffix = suffixes[zone->random.Roll0(suffixes.size() - 1)];
-            selected_name = random_prefix + "_" + random_suffix;
-        } while (std::find(existing_pet_names.begin(), existing_pet_names.end(), selected_name) != existing_pet_names.end());
-
-        // Set the selected name into the first available bucket
-        for (int i = 1; i <= 10; ++i) {
-            std::string bucket_name = fmt::format("spirit_name_{}", i);
-            if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-				if (owner->IsClient()) {
-                	owner->SetBucket(bucket_name, selected_name);
-				}
-                break;
-            }
-        }
-
-        return selected_name;
-    };
-
-    auto handleElementalNaming = [&](const std::string& bucket_prefix) -> std::string {
-        std::string pet_name;
-        bool name_found = false;
-
-        // Check existing bucket names first
-        for (int i = 1; i <= 100; ++i) {
-            std::string bucket_name = fmt::format("{}_name_{}", bucket_prefix, i);
-			pet_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
-            if (!pet_name.empty()) {
-                if (std::find(existing_pet_names.begin(), existing_pet_names.end(), pet_name) == existing_pet_names.end()) {
-                    return pet_name;
-                }
-            }
-        }
-
-        // If no existing name was found, use the elemental's default name
-        if (!name_found) {
-            pet_name = GetCleanName();  // Keep the elemental's default name unique
-            for (int i = 1; i <= 100; ++i) {
-                std::string bucket_name = fmt::format("{}_name_{}", bucket_prefix, i);
-                if (owner->GetBucket(bucket_name).empty()) {  // Found the first unused bucket slot
-					if (owner->IsClient()) {
-                    	owner->SetBucket(bucket_name, pet_name);
-					}
-                    return pet_name;
-                }
-            }
-        }
-    };
-
-    auto getRandomSpectreName = [&]() -> std::string {
-        std::vector<std::string> prefixes = {"Shad", "Vel", "Mor", "Xyl", "Eld", "Zar", "Thar", "Lur", "Vor", "Dra", "Thrax", "Amun", "Grim"};
-        std::vector<std::string> middles = {"rax", "drim", "vath", "ris", "ros", "vok", "nis", "rok", "rath", "lor", "amun"};
-        std::vector<std::string> suffixes = {"thar", "is", "al", "ar", "os", "eth", "or", "ith", "as", "ok", "dar", "ra"};
-
-        // Check existing bucket names first
-        for (int i = 1; i <= 100; ++i) {
-            std::string bucket_name = fmt::format("spectre_name_{}", i);
-            std::string ret_name = owner->IsClient() ? owner->GetBucket(bucket_name) : "";
-            if (!ret_name.empty()) {
-                if (std::find(existing_pet_names.begin(), existing_pet_names.end(), ret_name) == existing_pet_names.end()) {
-                    return ret_name;
-                }
-            }
-        }
-
-        // Generate a new spectre name that is not already used
-        std::string selected_name;
-        do {
-            std::string random_prefix = prefixes[zone->random.Roll0(prefixes.size() - 1)];
-            std::string random_middle = middles[zone->random.Roll0(middles.size() - 1)];
-            std::string random_suffix = suffixes[zone->random.Roll0(suffixes.size() - 1)];
-            selected_name = random_prefix + random_middle + random_suffix;
-            selected_name[0] = toupper(selected_name[0]);  // Capitalize the first letter
-        } while (std::find(existing_pet_names.begin(), existing_pet_names.end(), selected_name) != existing_pet_names.end());
-
-        // Set the selected name into the first available bucket
-        for (int i = 1; i <= 100; ++i) {
-            std::string bucket_name = fmt::format("spectre_name_{}", i);
-            if (owner->GetBucket(bucket_name).empty()) {
-				if (owner->IsClient()) {
-                	owner->SetBucket(bucket_name, selected_name);
-				}
-                return selected_name;
-            }
-        }
-    };
-
-	switch (spell_id) {
-		// Enchanter Pets
-		case 285: case 681: case 295: case 680: case 682: case 683: case 684: case 685: case 686:
-		case 687: case 688: case 689: case 670: case 1723: case 3034: case 5505: case 10586:
-			tmp_lastname = fmt::format("{}'s Animation", owner->GetCleanName());
-			tmp_name 	 = (static_name == nullptr) ? spells[spell_id].name : static_name;
-			break;
-		// Beastlord Pets
-		case 2612: case 2633: case 2614: case 2616: case 2618: case 2621: case 2623:
-		case 2626: case 2627: case 2631: case 3457: case 3461: case 5531: case 5538:
-		case 10379:
-			tmp_lastname 	= fmt::format("{}'s Warder", owner->GetCleanName());
-			tmp_name 	 	= (static_name == nullptr) ? getRandomWarderName() : static_name;
-			// Resizing
-			switch(owner->GetRace()) {
-				case HUMAN:
-					size *= 1.00;
-				};
-			break;
-		// Shaman Pets
-		case 164: case 577: case 165: case 166: case 1574: case 3377: case 5389: case 9983:
-			tmp_lastname 	= fmt::format("{}'s Spirit", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? getRandomSpiritName() : static_name;
-			size			= size * 0.50;
-			break;
-		// Necromancer Skeletons
-		case 338: case 491: case 351: case 362: case 492: case 440: case 493: case 441:
-		case 494: case 442: case 495: case 443: case 1621: case 1622: case 33634:
-		case 33635: case 33636: case 33637: case 33638: case 33639: case 33640: case 33641:
-		case 33643: case 17786:
-			tmp_lastname 	= fmt::format("{}'s Skeleton", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? getRandomSkeletonName() : static_name;
-			break;
-		// Necromancer Spectres
-		case 1623: case 3304: case 3310: case 3314: case 5431: case 5438: case 10506: case 10561:
-			tmp_lastname = fmt::format("{}'s Spectre", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? getRandomSpectreName() : static_name;
-			break;
-		// Magician Pets
-		case 3317: case 317: case 400: case 404: case 396: case 499: case 572: case 576:
-		case 623: case 627: case 631: case 635: case 1674: case 1678: case 10695:
-			tmp_lastname = fmt::format("{}'s Air Elemental", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr)? handleElementalNaming("air_elemental") : static_name;
-			break;
-		case 3320: case 315: case 398: case 402: case 336: case 497: case 570: case 574:
-		case 621: case 625: case 629: case 633: case 1672: case 1676: case 5480: case 10708:
-			tmp_lastname = fmt::format("{}'s Water Elemental", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? handleElementalNaming("water_elemental") : static_name;
-			break;
-		case 3322: case 316: case 399: case 403: case 395: case 498: case 571: case 575:
-		case 622: case 626: case 630: case 634: case 1673: case 1677: case 5485: case 10719:
-			tmp_lastname = fmt::format("{}'s Fire Elemental", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? handleElementalNaming("fire_elemental") : static_name;
-			break;
-		case 3324: case 58: case 397: case 401: case 335: case 496: case 569: case 573:
-		case 620: case 624: case 628: case 632: case 1671: case 1675: case 5495: case 10753:
-			tmp_lastname = fmt::format("{}'s Earth Elemental", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? handleElementalNaming("earth_elemental") : static_name;
-			break;
-		case 1936:
-			tmp_lastname = fmt::format("{}'s Elemental Avatar", owner->GetCleanName());
-			tmp_name 	 = (static_name == nullptr)? handleElementalNaming("air_elemental") : static_name;
-			break;
-		case 1400: case 1402: case 1404: case 4888: case 10769:
-			tmp_lastname = fmt::format("{}'s Summoned Monster", owner->GetCleanName());
-			break;
-		// Druid
-		case 1475:
-			tmp_lastname 	= fmt::format("{}'s Tiny Bear", owner->GetCleanName());
-			tmp_name 	 	= (static_name == nullptr) ? getRandomBearName() : static_name;
-			size			= size * 0.50;
-			break;
-		// Cleric
-		case 1721: case 5256: case 11750: case 11751: case 11752:
-			tmp_lastname = fmt::format("{}'s Holy Hammer", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? fmt::format("{}`s Holy Hammer", owner->GetCleanName()) : static_name;
-			break;
-		// Wizard
-		case 1722: case 5460: case 10840:
-			tmp_lastname 	= fmt::format("{}'s Animated Sword", owner->GetCleanName());
-			tmp_name 		= (static_name == nullptr) ? fmt::format("{}`s {}", owner->GetCleanName(), spells[spell_id].name) : static_name;
-			break;
-	}
-
-	if (tmp_lastname.size() < sizeof(lastname)) {
-		strn0cpy(lastname, tmp_lastname.c_str(), sizeof(lastname));
-	}
-
-	if (!tmp_name.empty() && tmp_name.size() < sizeof(name)) {
-		strn0cpy(name, tmp_name.c_str(), sizeof(name));
-	}
-
-	// Replace spaces with underscores
-	for (char* p = name; *p; ++p) {
-		if (*p == ' ') {
-			*p = '_';
-		}
-	}
-
-	for (char* p = lastname; *p; ++p) {
-		if (*p == '\'') {
-			*p = '`';
-		}
-	}
+	return bearNames[zone->random.Roll0(bearNames.size()-1)];
 }
+
+std::string Mob::GenerateUndeadPetName() {
+    std::vector<std::string> prefixes = {
+        "Mor", "Skel", "Grim", "Varn", "Mar", "Karn", "Zor", "Gor", "Thal", "Tor", "Nar", "Thrax",
+        "Shad", "Vel", "Xyl", "Eld", "Zar", "Thar", "Lur", "Vor", "Dra", "Amun"
+    };
+
+    std::vector<std::string> middles = {
+        "ak", "or", "th", "ar", "al", "ro", "im", "uth", "on", "an", "en", "ol", "amun",
+        "rax", "drim", "vath", "ris", "ros", "vok", "nis", "rok", "rath", "lor", "", "", "", ""
+    };
+
+    std::vector<std::string> suffixes = {
+        "rik", "thos", "nar", "grim", "thal", "ok", "ath", "ur", "mar", "oth", "ros", "ak", "dar",
+        "thar", "is", "al", "ar", "os", "eth", "or", "ith", "as", "ra", "", "", "", ""
+    };
+
+    std::string name = prefixes[zone->random.Roll0(static_cast<int>(prefixes.size()))] +
+                       middles[zone->random.Roll0(static_cast<int>(middles.size()))] +
+                       suffixes[zone->random.Roll0(static_cast<int>(suffixes.size()))];
+
+    return name;
+}
+
+std::string Mob::GenerateElementalPetName() {
+    // Define name components with empty strings for shortening
+    std::vector<std::string> part1 = {"G", "J", "K", "L", "V", "X", "Z", "T", "N", "M", "R", "S"};
+    std::vector<std::string> part2 = {"", "ab", "ar", "as", "eb", "en", "ib", "ob", "on", "ul", "ix", "al"};
+    std::vector<std::string> part3 = {"", "an", "ar", "ek", "ob", "or", "us", "al", "is", "um"};
+    std::vector<std::string> part4 = {"er", "ab", "n", "tik", "eth", "os", "ar", "ir", "is"};
+
+    // Randomly select components
+    const std::string& first = part1[zone->random.Roll0(part1.size())];
+    const std::string& second = part2[zone->random.Roll0(part2.size())];
+    const std::string& third = part3[zone->random.Roll0(part3.size())];
+    const std::string& fourth = part4[zone->random.Roll0(part4.size())];
+
+    // Construct the final name
+    std::string name = first + second + third + fourth;
+
+    return name;
+}
+
+std::string Mob::GenerateBeastlordPetName() {
+    std::map<uint16_t, std::vector<std::string>> prefixes = {
+        {Race::Human, {"Prowl", "Claw", "Fang", "Swift", "Shadow", "Mane", "Stalk", "Hunter", "Stride", "Velvet",
+                       "Night", "Steel", "Strike", "Bold", "Fleet", "Track", "Glide", "Chase", "Pace", "Wind"}},
+        {Race::Erudite, {"Kob", "Snarl", "Growl", "Blood", "Fang", "Gnash", "Rend", "Dark", "Howl", "Lurk",
+                         "Shade", "Savage", "Whisper", "Veil", "Shroud", "Fury", "Bite", "Roar", "Ash", "Net"}},
+        {Race::WoodElf, {"Verd", "Green", "Leaf", "Glen", "Sylv", "Forest", "Lush", "Canopy", "Wild", "Briar",
+                         "Spring", "Meadow", "Moss", "Fern", "Blossom", "Dew", "Glade", "Thicket", "Twig", "Sap"}},
+        {Race::HighElf, {"Azure", "Sky", "Mist", "Blue", "Gale", "Wind", "Celest", "Cloud", "Breeze", "Rain",
+                         "Ray", "Glow", "Beam", "Auror", "Star", "Frost", "Shine", "Sun", "Zeph", "Lumin"}},
+        {Race::DarkElf, {"Night", "Shade", "Venom", "Spider", "Web", "Dus", "Dark", "Fang", "Shadow", "Silk",
+                         "Poison", "Gloom", "Twilight", "Abyss", "Dagger", "Grim", "Obsid", "Murk", "Rift", "Haze"}},
+        {Race::HalfElf, {"Flare", "Crimson", "Scarlet", "Ruby", "Red", "Flame", "Burn", "Spark", "Ember", "Blaze",
+                         "Cinder", "Gleam", "Radiant", "Inferno", "Ignis", "Fire", "Light", "Dawn", "Torch", "Ray"}},
+        {Race::Dwarf, {"Gob", "Rock", "Iron", "Stone", "Smash", "Forge", "Ore", "Granite", "Hammer", "Anvil",
+                       "Crush", "Might", "Hard", "Rough", "Bold", "Peak", "Mine", "Steel", "Grind", "Brawn"}},
+        {Race::Halfling, {"Slink", "Viper", "Serp", "Coil", "Hiss", "Slith", "Fang", "Venom", "Scale", "Rept",
+                          "Twist", "Loop", "Slide", "Slime", "Slink", "Wrap", "Shadow", "Tail", "Spine", "Crawl"}},
+        {Race::Troll, {"Croak", "Swamp", "Marsh", "Scale", "Snap", "River", "Mud", "Grim", "Bog", "Reek",
+                       "Creak", "Drip", "Mire", "Weed", "Rot", "Snag", "Tide", "Crust", "Filth", "Silt"}},
+        {Race::Ogre, {"Grizz", "Bear", "Bruin", "Growl", "Fur", "Mighty", "Tusker", "Grumble", "Rumble", "Boulder",
+                      "Fang", "Beast", "Mass", "Brute", "Tough", "Broad", "Heavy", "Thump", "Claw", "Shag"}},
+        {Race::Barbarian, {"Wolf", "Howl", "Prowl", "Moon", "Lup", "Snow", "Fang", "Frost", "Alpha", "Winter",
+                           "Pack", "Storm", "White", "Night", "Hunter", "Trail", "Ice", "Cold", "Tundra", "Steel"}},
+        {Race::Gnome, {"Junk", "Rust", "Bolt", "Gear", "Scrap", "Crank", "Cobb", "Tink", "Gadget", "Grind",
+                       "Sprock", "Screw", "Weld", "Nut", "Spark", "Churn", "Whirl", "Clink", "Tick", "Whisk"}},
+        {Race::Froglok, {"Spore", "Glow", "Mold", "Sprout", "Fung", "Shroom", "Cap", "Lumin", "Moss", "Puff",
+                         "Damp", "Myc", "Glare", "Slime", "Water", "Lagoon", "Lush", "Wet", "Marsh", "Trill"}},
+        {Race::Drakkin, {"Gold", "Aur", "Shin", "Gleam", "Drak", "Solar", "Dawn", "Flame", "Cinder", "Sun",
+                         "Bright", "Flash", "Fire", "Blaze", "Spark", "Infer", "Radiant", "Star", "Flare", "Lume"}},
+        {Race::VahShir, {"Stripe", "Tiger", "Claw", "Roa", "Fang", "Savage", "Wild", "Pred", "Stalk", "Hunter",
+                         "Prowl", "Rage", "Chase", "Leap", "Bound", "Jungle", "Pack", "Slash", "Growl", "Rush"}},
+        {Race::Iksar, {"Scale", "Wyrm", "Slink", "Slith", "Lash", "Crawl", "Spine", "Hiss", "Venom", "Rept",
+                       "Glide", "Drake", "Slime", "Spire", "Tail", "Drag", "Shade", "Quill", "Shadow", "Fang"}}
+    };
+
+	std::map<uint16_t, std::vector<std::string>> suffixes = {
+		{Race::Human, {"paw", "stalker", "runner", "prowl", "mane", "stride", "shadow", "step", "fang", "",
+					"dash", "mark", "pace", "hunt", "trail", "roam", "", "rush", "path", ""}},
+		{Race::Erudite, {"fang", "howl", "snap", "jaw", "shadow", "bite", "blood", "hunter", "lash", "",
+						"scar", "strike", "shade", "", "venom", "creep", "", "prowler", "", ""}},
+		{Race::WoodElf, {"wing", "leaf", "glen", "glade", "whisper", "shade", "tree", "branch", "bough", "",
+						"song", "root", "sap", "", "bark", "twig", "", "stem", "verdant", ""}},
+		{Race::HighElf, {"breeze", "cloud", "wind", "song", "ray", "light", "beam", "sky", "rain", "",
+						"mist", "shine", "gleam", "", "haze", "dawn", "", "flare", "aura", ""}},
+		{Race::DarkElf, {"fang", "silk", "shadow", "creep", "web", "strike", "shade", "gloom", "venom", "",
+						"shroud", "rift", "dusk", "", "scar", "", "night", "veil", "abyss", ""}},
+		{Race::HalfElf, {"flare", "wing", "burn", "spark", "scale", "dash", "flame", "singe", "ember", "",
+						"ray", "light", "gleam", "", "blaze", "fire", "", "torch", "inferno", ""}},
+		{Race::Dwarf, {"smash", "stone", "strike", "fist", "crag", "forge", "iron", "hammer", "boulder", "",
+					"peak", "ore", "cliff", "", "rock", "steel", "", "anvil", "grind", ""}},
+		{Race::Halfling, {"coil", "hiss", "venom", "slither", "scale", "serp", "strike", "slide", "lash", "",
+						"spine", "fang", "tail", "", "wrap", "loop", "", "shadow", "slime", ""}},
+		{Race::Troll, {"snap", "tooth", "scale", "clamp", "jaw", "bite", "bog", "swamp", "grim", "",
+					"mire", "rot", "weed", "", "silt", "mud", "", "creek", "snag", ""}},
+		{Race::Ogre, {"paw", "growl", "bite", "claw", "stalk", "shadow", "roar", "strike", "maw", "",
+					"crush", "rage", "bulk", "", "thump", "shag", "", "beast", "brute", ""}},
+		{Race::Barbarian, {"howl", "moon", "prowler", "hunter", "fang", "shadow", "snow", "frost", "alpha", "",
+						"lup", "storm", "trail", "", "tundra", "ice", "", "roam", "wolf", ""}},
+		{Race::Gnome, {"bot", "snap", "crank", "rivet", "clank", "weld", "cog", "bolt", "gear", "",
+					"grind", "churn", "whirl", "", "tick", "spark", "", "crash", "whir", ""}},
+		{Race::Froglok, {"spore", "bloom", "fungus", "cap", "puff", "shroom", "light", "sprout", "moss", "",
+						"glow", "damp", "slime", "", "marsh", "drip", "", "lagoon", "pond", ""}},
+		{Race::Drakkin, {"wing", "ray", "shine", "glow", "fire", "dawn", "flame", "scale", "gold", "",
+						"flare", "light", "star", "", "spark", "aura", "", "sun", "bright", ""}},
+		{Race::VahShir, {"stripe", "claw", "prowl", "stalker", "roar", "fang", "wild", "savage", "hunter", "",
+						"pounce", "leap", "slash", "", "growl", "rush", "", "bound", "pack", ""}},
+		{Race::Iksar, {"scale", "fang", "lash", "strike", "slink", "venom", "hiss", "shadow", "coil", "",
+					"crawl", "shade", "drake", "", "tail", "quill", "", "glide", "spire", ""}}
+	};
+
+    // Random fallback
+    std::vector<std::string> fallbackPrefixes = {"Shadow", "Dark", "Night", "Swift", "Fang", "Blood", "Venom", "Prowl", "Claw", "Savage"};
+    std::vector<std::string> fallbackSuffixes = {"stalker", "fang", "runner", "strike", "lash", "hunter", "shade", "prowler", "scar", ""};
+
+    uint16_t race = GetBaseRace();
+    const std::vector<std::string>& racePrefixes = prefixes.count(race) ? prefixes[race] : fallbackPrefixes;
+    const std::vector<std::string>& raceSuffixes = suffixes.count(race) ? suffixes[race] : fallbackSuffixes;
+
+    return racePrefixes[zone->random.Roll0(racePrefixes.size())] + raceSuffixes[zone->random.Roll0(raceSuffixes.size())];
+}
+
 
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I

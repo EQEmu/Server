@@ -3381,7 +3381,7 @@ perl::array Perl_Client_GetInventorySlots(Client* self)
 
 void Perl_Client_ChangePetName(Client* self)
 {
-	self->GrantPetNameChange();
+	self->GrantPetNameChange(Class::Magician);
 }
 
 void perl_register_client()

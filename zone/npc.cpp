@@ -2242,7 +2242,6 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			ns->spawn.bodytype = BodyType::NoTarget;
 		}
 
-		/*
 		if (
 			!IsCharmed() &&
 			swarm_owner->IsClient() &&
@@ -2253,7 +2252,6 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 				strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
 		}
-		*/
 
 		if (swarm_owner->IsBot()) {
 			SetPetOwnerBot(true);

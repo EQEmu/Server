@@ -310,10 +310,14 @@ public:
 	bool KeyRingCheck(uint32 item_id);
 	void KeyRingList();
 	bool IsPetNameChangeAllowed();
-	void GrantPetNameChange();
+	int8 GetPetNameChangeClass();
+	void GrantPetNameChange(uint8 class_id);
 	void ClearPetNameChange();
 	void InvokeChangePetName();
 	bool ChangePetName(char *new_name);
+	void DeletePetVanityName(int class_id);
+	void SetPetVanityName(std::string vanity_name, int class_id);
+	std::string GetPetVanityName(int class_id);
 	bool IsClient() const override { return true; }
 	bool IsOfClientBot() const override { return true; }
 	bool IsOfClientBotMerc() const override { return true; }

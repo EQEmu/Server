@@ -21,6 +21,7 @@ public:
 	struct CharacterPetName {
 		int32_t     char_id;
 		std::string name;
+		int8_t      class_id;
 	};
 
 	static std::string PrimaryKey()
@@ -33,6 +34,7 @@ public:
 		return {
 			"char_id",
 			"name",
+			"class_id",
 		};
 	}
 
@@ -41,6 +43,7 @@ public:
 		return {
 			"char_id",
 			"name",
+			"class_id",
 		};
 	}
 
@@ -81,8 +84,9 @@ public:
 	{
 		CharacterPetName e{};
 
-		e.char_id = 0;
-		e.name    = "";
+		e.char_id  = 0;
+		e.name     = "";
+		e.class_id = -1;
 
 		return e;
 	}
@@ -119,8 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetName e{};
 
-			e.char_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.name    = row[1] ? row[1] : "";
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name     = row[1] ? row[1] : "";
+			e.class_id = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
 
 			return e;
 		}
@@ -156,6 +161,7 @@ public:
 
 		v.push_back(columns[0] + " = " + std::to_string(e.char_id));
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.class_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -179,6 +185,7 @@ public:
 
 		v.push_back(std::to_string(e.char_id));
 		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.class_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -210,6 +217,7 @@ public:
 
 			v.push_back(std::to_string(e.char_id));
 			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.class_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -243,8 +251,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetName e{};
 
-			e.char_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.name    = row[1] ? row[1] : "";
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name     = row[1] ? row[1] : "";
+			e.class_id = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
 
 			all_entries.push_back(e);
 		}
@@ -269,8 +278,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetName e{};
 
-			e.char_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.name    = row[1] ? row[1] : "";
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name     = row[1] ? row[1] : "";
+			e.class_id = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
 
 			all_entries.push_back(e);
 		}
@@ -347,6 +357,7 @@ public:
 
 		v.push_back(std::to_string(e.char_id));
 		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.class_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -371,6 +382,7 @@ public:
 
 			v.push_back(std::to_string(e.char_id));
 			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.class_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

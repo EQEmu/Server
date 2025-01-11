@@ -5769,6 +5769,67 @@ void Client::KeyRingList()
 	}
 }
 
+void Client::DeletePetVanityName(int class_id) {
+	CharacterPetNameRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`char_id` = '{}' AND `class_id` = '{}'",
+			CharacterID(), class_id
+		)
+	);
+}
+
+void Client::SetPetVanityName(std::string vanity_name, int class_id) {
+    if (vanity_name.empty()) {
+        LogError("Vanity name cannot be empty.");
+        return;
+    }
+
+	CharacterPetNameRepository::ReplaceOne(
+		database,
+		{ static_cast<int>(CharacterID()), vanity_name, static_cast<int8_t>(class_id) }
+	);
+}
+
+std::string Client::GetPetVanityName(int class_id) {
+	const std::vector<CharacterPetNameRepository::CharacterPetName>& vanity_name = CharacterPetNameRepository::GetWhere(
+		database,
+		fmt::format(
+			"`char_id` = '{}' AND `class_id` = '{}'",
+			CharacterID(), class_id
+		)
+	);
+
+	if (!vanity_name.empty()) {
+		return vanity_name.front().name;
+	}
+
+	std::string new_name;
+
+	do {
+		switch (class_id) {
+			case Class::Magician:
+				new_name = GenerateElementalPetName();
+				break;
+			case Class::Beastlord:
+				new_name = GenerateBeastlordPetName();
+				break;
+			case Class::Druid:
+				new_name = GenerateDruidPetName();
+				break;
+			case Class::Necromancer:
+			case Class::ShadowKnight:
+				new_name = GenerateUndeadPetName();
+				break;
+			default:
+				new_name = "Default";
+		}
+	} while (!database.CheckNameFilter(new_name) || database.IsNameUsed(new_name));
+
+	SetPetVanityName(new_name, class_id);
+	return new_name;
+}
+
 bool Client::IsPetNameChangeAllowed() {
 	DataBucketKey k = GetScopedBucketKeys();
 	k.key = "PetNameChangesAllowed";
@@ -5781,6 +5842,18 @@ bool Client::IsPetNameChangeAllowed() {
 	return false;
 }
 
+int8 Client::GetPetNameChangeClass() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty() && Strings::IsNumber(b.value)) {
+		return Strings::ToUnsignedInt(b.value);
+	}
+
+	return -1;
+}
+
 void Client::InvokeChangePetName() {
 	if (!IsPetNameChangeAllowed()) {
 		return;
@@ -5791,10 +5864,10 @@ void Client::InvokeChangePetName() {
 	safe_delete(outapp);
 }
 
-void Client::GrantPetNameChange() {
+void Client::GrantPetNameChange(uint8 class_id) {
 	DataBucketKey k = GetScopedBucketKeys();
 	k.key = "PetNameChangesAllowed";
-	k.value = "true";
+	k.value = std::to_string(class_id);
 	DataBucket::SetData(k);
 
 	InvokeChangePetName();
@@ -5831,7 +5904,8 @@ bool Client::ChangePetName(char* new_name) {
 
 	CharacterPetNameRepository::ReplaceOne(database, {
 		.char_id = static_cast<int32_t>(CharacterID()),
-		.name = new_name
+		.name = new_name,
+		.class_id = GetPetNameChangeClass()
 	});
 
 
