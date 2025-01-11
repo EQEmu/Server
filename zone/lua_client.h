@@ -611,7 +611,6 @@ public:
 
 	int GetKillCount(int race_id);
 	bool CheckTitle(int title_set);
-	void ShowZoneShardMenu();
 	void ChangePetName();
 
 	Lua_Expedition  CreateExpedition(luabind::object expedition_info);

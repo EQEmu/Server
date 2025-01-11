@@ -1863,11 +1863,6 @@ void Perl_Client_ShowZoneShardMenu(Client* self) // @categories Script Utility
 	self->ShowZoneShardMenu();
 }
 
-void Perl_Client_ShowZoneShardMenu(Client* self) // @categories Script Utility
-{
-	self->ShowZoneShardMenu();
-}
-
 DynamicZoneLocation GetDynamicZoneLocationFromHash(perl::hash table)
 {
 	// dynamic zone helper method, defaults invalid/missing keys to 0

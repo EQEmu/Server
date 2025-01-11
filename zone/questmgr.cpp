@@ -199,7 +199,7 @@ void QuestManager::summonitem(uint32 itemid, int16 charges) {
 	initiator->SummonApocItem(itemid, charges);
 }
 
-void QuestManager::summonfixeditem(uint32 itemid, int16 charges) {	
+void QuestManager::summonfixeditem(uint32 itemid, int16 charges) {
 	QuestManagerCurrentQuestVars();
 	if(!initiator)
 		return;
@@ -3972,6 +3972,7 @@ uint32 QuestManager::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)
 		uint32 timestamp = zone->AddGlobalBuffTime(spell_id, add_duration);
 		return timestamp;
 	}
+	return 0;
 }
 
 

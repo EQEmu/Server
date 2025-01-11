@@ -12100,20 +12100,6 @@ void Client::SetWeaponAppearance(bool bow_visible) {
 	}
 }
 
-void Client::SetWeaponAppearance(bool bow_visible) {
-	if (!HasClass(Class::Ranger)) {
-		return;
-	}
-
-	if (bow_visible && m_inv.GetItem(EQ::invslot::slotRange) && m_inv.GetItem(EQ::invslot::slotRange)->GetItemType() == EQ::item::ItemTypeBow) {
-		SendTextureWC(EQ::textures::TextureSlot::weaponPrimary, 0);
-		SendTextureWC(EQ::textures::TextureSlot::weaponSecondary, GetWeaponMaterial(m_inv.GetItem(EQ::invslot::slotRange)));
-	} else {
-		SendTextureWC(EQ::textures::TextureSlot::weaponPrimary, GetEquipmentMaterial(EQ::textures::TextureSlot::weaponPrimary));
-		SendTextureWC(EQ::textures::TextureSlot::weaponSecondary, GetEquipmentMaterial(EQ::textures::TextureSlot::weaponSecondary));
-	}
-}
-
 void Client::SetGMStatus(int new_status) {
 	if (Admin() != new_status) {
 		database.UpdateGMStatus(AccountID(), new_status);
@@ -14649,56 +14635,6 @@ void Client::ClientToNpcAggroProcess()
 			npc_scan_count++;
 		}
 		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
-	}
-}
-void Client::ShowZoneShardMenu()
-{
-	auto z = GetZone(GetZoneID());
-	if (z && !z->shard_at_player_count) {
-		return;
-	}
-
-	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, GetZoneID());
-	LogZoning("Zone sharding results count [{}]", results.size());
-
-	if (results.empty()) {
-		Message(Chat::White, "No zone shards found.");
-		return;
-	}
-
-	if (!results.empty()) {
-		Message(Chat::White, "Available Zone Shards:");
-	}
-
-	int number = 1;
-	for (auto &e: results) {
-		std::string teleport = fmt::format(
-			"{}",
-			Saylink::Silent(
-				fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
-				"Teleport"
-			)
-		);
-
-		std::string yours;
-		if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
-			teleport = "Teleport";
-			yours = " (Yours)";
-		}
-
-		Message(
-			Chat::White, fmt::format(
-				" --> [{}] #{} {} ({}) [{}/{}] players {}",
-				teleport,
-				number,
-				z->long_name,
-				e.instance_id,
-				e.player_count,
-				z->shard_at_player_count,
-				yours
-			).c_str()
-		);
-		number++;
 	}
 }
 
