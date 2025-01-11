@@ -295,7 +295,7 @@ public:
 	void SendBazaarDone(uint32 trader_id);
 	void SendBulkBazaarTraders();
 	void SendBulkBazaarBuyers();
-	void DoBazaarInspect(const BazaarInspect_Struct &in);
+	void DoBazaarInspect(BazaarInspect_Struct &in);
 	void SendBazaarDeliveryCosts();
 	static std::string DetermineMoneyString(uint64 copper);
 

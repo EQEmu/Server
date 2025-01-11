@@ -3926,16 +3926,36 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 							out->action = AddTraderToBazaarWindow;
 							if (c.second->GetTraderCount() <
 								EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit) {
+								if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
+									if (out->zone_id == Zones::BAZAAR &&
+										out->zone_instance_id == c.second->GetInstanceID()) {
+										c.second->IncrementTraderCount();
+										c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+									}
+								}
+								else {
 									c.second->IncrementTraderCount();
 									c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+								}
 							}
-
 							break;
 						}
 						case TraderOff: {
 							out->action = RemoveTraderFromBazaarWindow;
-							c.second->DecrementTraderCount();
-							c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+							if (c.second->GetTraderCount() <
+								EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit) {
+								if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
+									if (out->zone_id == Zones::BAZAAR &&
+										out->zone_instance_id == c.second->GetInstanceID()) {
+										c.second->DecrementTraderCount();
+										c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+									}
+								}
+								else {
+									c.second->DecrementTraderCount();
+									c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+								}
+							}
 							break;
 						}
 						default: {

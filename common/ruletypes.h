@@ -830,6 +830,7 @@ RULE_REAL(Bazaar, ParcelDeliveryCostMod, 0.20, "Cost of parcel delivery for a ba
 RULE_INT(Bazaar, VoucherDeliveryCost, 200, "Number of vouchers for direct delivery for a bazaar purchase. Default is 200 vouchers. RoF+ Only.")
 RULE_BOOL(Bazaar, EnableParcelDelivery, true, "Enable bazaar purchases via parcel delivery.  Default is True.")
 RULE_INT(Bazaar, MaxBuyerInventorySearchResults, 200, "Maximum number of search results when a Buyer searches the global item list. Default is 200. RoF+ Only.")
+RULE_BOOL(Bazaar, UseAlternateBazaarSearch, false, "Allows the bazaar search window to search across bazaar shards. Default is false.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mail)
