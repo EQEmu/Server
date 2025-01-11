@@ -229,7 +229,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		if (sep->IsNumber(1)) {
 			spell_type = atoi(sep->arg[1]);
 
-			if (spell_type < BotSpellTypes::START || (spell_type > BotSpellTypes::END && spell_type < BotSpellTypes::COMMANDED_START) || spell_type > BotSpellTypes::COMMANDED_END) {
+			if (!c->IsValidSpellType(spell_type)) {
 				c->Message(
 					Chat::Yellow,
 					fmt::format(
@@ -621,6 +621,10 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				tar ? tar->GetCleanName() : "your target"
 			).c_str()
 		);
+
+		if (!aa_type && !by_spell_id) {
+			helper_send_usage_required_bots(c, spell_type);
+		}
 	}
 	else {
 		c->Message(

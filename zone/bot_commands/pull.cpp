@@ -36,10 +36,15 @@ void bot_command_pull(Client *c, const Seperator *sep)
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
-	auto target_mob = ActionableTarget::VerifyEnemy(c, BCEnum::TT_Single);
-	if (!target_mob) {
+	auto target_mob = c->GetTarget();
 
+	if (
+		!target_mob ||
+		target_mob == c ||
+		!c->IsAttackAllowed(target_mob)
+	) {
 		c->Message(Chat::White, "Your current target is not attackable!");
+
 		return;
 	}
 

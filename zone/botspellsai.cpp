@@ -2821,6 +2821,63 @@ BotSpell Bot::GetBestBotSpellForNukeByBodyType(Bot* caster, uint8 body_type, uin
 	return result;
 }
 
+BotSpell Bot::GetBestBotSpellForRez(Bot* caster, Mob* target, uint16 spell_type) {
+	BotSpell result;
+
+	result.SpellId = 0;
+	result.SpellIndex = 0;
+	result.ManaCost = 0;
+
+	if (caster) {
+		std::list<BotSpell> bot_spell_list = GetBotSpellsForSpellEffect(caster, spell_type, SE_Revive);
+
+		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if (
+				IsResurrectSpell(bot_spell_list_itr->SpellId) &&
+				caster->CheckSpellRecastTimer(bot_spell_list_itr->SpellId)
+			) {
+				result.SpellId = bot_spell_list_itr->SpellId;
+				result.SpellIndex = bot_spell_list_itr->SpellIndex;
+				result.ManaCost = bot_spell_list_itr->ManaCost;
+
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+BotSpell Bot::GetBestBotSpellForCharm(Bot* caster, Mob* target, uint16 spell_type) {
+	BotSpell result;
+
+	result.SpellId = 0;
+	result.SpellIndex = 0;
+	result.ManaCost = 0;
+
+	if (caster) {
+		std::list<BotSpell> bot_spell_list = GetBotSpellsForSpellEffect(caster, spell_type, SE_Charm);
+
+		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if (
+				IsCharmSpell(bot_spell_list_itr->SpellId) &&
+				caster->CastChecks(bot_spell_list_itr->SpellId, target, spell_type)
+			) {
+				result.SpellId = bot_spell_list_itr->SpellId;
+				result.SpellIndex = bot_spell_list_itr->SpellIndex;
+				result.ManaCost = bot_spell_list_itr->ManaCost;
+
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+
 void Bot::CheckBotSpells() {
 	auto spell_list = BotSpellsEntriesRepository::All(content_db);
 	uint16 spell_id;
@@ -2902,13 +2959,13 @@ void Bot::CheckBotSpells() {
 
 		correct_type = GetCorrectSpellType(s.type, spell_id);
 		parent_type = GetParentSpellType(correct_type);
-		
+
 		if (RuleB(Bots, UseParentSpellTypeForChecks)) {
 			if (s.type == parent_type || s.type == correct_type) {
 				continue;
 			}
 		}
-		else { 
+		else {
 			if (IsPetBotSpellType(s.type)) {
 				correct_type = GetPetSpellType(correct_type);
 			}
@@ -2917,7 +2974,7 @@ void Bot::CheckBotSpells() {
 		if (correct_type == s.type) {
 			continue;
 		}
-		
+
 		if (correct_type == UINT16_MAX) {
 			LogBotSpellTypeChecks("{} [#{}] is incorrect. It is currently set as {} [#{}] but the correct type is unknown."
 				, GetSpellName(spell_id)
@@ -2949,58 +3006,51 @@ void Bot::CheckBotSpells() {
 	}
 }
 
-BotSpell Bot::GetBestBotSpellForRez(Bot* caster, Mob* target, uint16 spell_type) {
-	BotSpell result;
+void Bot::MapSpellTypeLevels() {
+	commanded_spells_min_level.clear();
 
-	result.SpellId = 0;
-	result.SpellIndex = 0;
-	result.ManaCost = 0;
+	auto start = std::min({ BotSpellTypes::START, BotSpellTypes::COMMANDED_START, BotSpellTypes::DISCIPLINE_START });
+	auto end = std::max({ BotSpellTypes::END, BotSpellTypes::COMMANDED_END, BotSpellTypes::DISCIPLINE_END });
 
-	if (caster) {
-		std::list<BotSpell> bot_spell_list = GetBotSpellsForSpellEffect(caster, spell_type, SE_Revive);
+	for (int i = start; i <= end; ++i) {
+		if (!Bot::IsValidSpellType(i)) {
+			continue;
+		}
 
-		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
-			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (
-				IsResurrectSpell(bot_spell_list_itr->SpellId) &&
-				caster->CheckSpellRecastTimer(bot_spell_list_itr->SpellId)
-			) {
-				result.SpellId = bot_spell_list_itr->SpellId;
-				result.SpellIndex = bot_spell_list_itr->SpellIndex;
-				result.ManaCost = bot_spell_list_itr->ManaCost;
-
-				break;
-			}
+		for (int x = Class::Warrior; x <= Class::Berserker; ++x) {
+			commanded_spells_min_level[i][x] = { UINT8_MAX, "" };
 		}
 	}
 
-	return result;
-}
+	auto spell_list = BotSpellsEntriesRepository::All(content_db);
 
-BotSpell Bot::GetBestBotSpellForCharm(Bot* caster, Mob* target, uint16 spell_type) {
-	BotSpell result;
+	for (const auto& s : spell_list) {
+		if (!IsValidSpell(s.spell_id)) {
+			LogBotSpellTypeChecks("{} is an invalid spell", s.spell_id);
+			continue;
+		}
 
-	result.SpellId = 0;
-	result.SpellIndex = 0;
-	result.ManaCost = 0;
+		uint16_t spell_type = s.type;
+		int32_t bot_class = s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX;
+		uint8_t min_level = s.minlevel;
 
-	if (caster) {
-		std::list<BotSpell> bot_spell_list = GetBotSpellsForSpellEffect(caster, spell_type, SE_Charm);
+		if (
+			!EQ::ValueWithin(bot_class, Class::Warrior, Class::Berserker) ||
+			!Bot::IsValidSpellType(spell_type)
+		) {
+			continue;
+		}
+		
+		auto& spell_info = commanded_spells_min_level[spell_type][bot_class];
 
-		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
-			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (
-				IsCharmSpell(bot_spell_list_itr->SpellId) &&
-				caster->CastChecks(bot_spell_list_itr->SpellId, target, spell_type)
-			) {
-				result.SpellId = bot_spell_list_itr->SpellId;
-				result.SpellIndex = bot_spell_list_itr->SpellIndex;
-				result.ManaCost = bot_spell_list_itr->ManaCost;
-
-				break;
-			}
+		if (min_level < spell_info.min_level) {
+			spell_info.min_level = min_level;
+			spell_info.description = StringFormat(
+				"%s [#%u]: Level %u",
+				GetClassIDName(bot_class),
+				bot_class,
+				min_level
+			);
 		}
 	}
-
-	return result;
 }

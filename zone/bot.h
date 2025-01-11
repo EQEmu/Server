@@ -609,6 +609,7 @@ public:
 	bool HasValidAETarget(Bot* caster, uint16 spell_id, uint16 spell_type, Mob* tar);
 
 	void CheckBotSpells();
+	void MapSpellTypeLevels();
 
 	[[nodiscard]] int GetMaxBuffSlots() const final { return EQ::spells::LONG_BUFFS; }
 	[[nodiscard]] int GetMaxSongSlots() const final { return EQ::spells::SHORT_BUFFS; }
@@ -951,6 +952,7 @@ public:
 	void SetBotTimers(std::vector<BotTimer_Struct> timers) { bot_timers = timers; }
 	std::vector<BotBlockedBuffs_Struct> GetBotBlockedBuffs() { return bot_blocked_buffs; }
 	void SetBotBlockedBuffs(std::vector<BotBlockedBuffs_Struct> blocked_buffs) { bot_blocked_buffs = blocked_buffs; }
+	const CommandedSpellTypesMinLevelMap& GetCommandedSpellTypesMinLevels() { return commanded_spells_min_level; }
 	uint32 GetLastZoneID() const { return _lastZoneId; }
 	int32 GetBaseAC() const { return _baseAC; }
 	int32 GetBaseATK() const { return _baseATK; }
@@ -1079,6 +1081,9 @@ protected:
 	std::vector<BotSpells_Struct> AIBot_spells;
 	std::vector<BotSpells_Struct> AIBot_spells_enforced;
 	std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>> AIBot_spells_by_type;
+
+	CommandedSpellTypesMinLevelMap commanded_spells_min_level;
+
 	std::vector<BotTimer_Struct> bot_timers;
 	std::vector<BotBlockedBuffs_Struct> bot_blocked_buffs;
 
