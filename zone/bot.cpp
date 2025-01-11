@@ -11198,7 +11198,10 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id) {
 	switch (spell_type) {
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::PetBuffs:
-			if (IsResistanceOnlySpell(spell_id) || IsDamageShieldOnlySpell(spell_id)) {
+			if (
+				IsResistanceOnlySpell(spell_id) || 
+				IsDamageShieldOnlySpell(spell_id)
+			) {
 				return false;
 			}
 
@@ -11218,13 +11221,19 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id) {
 
 			return false;
 		case BotSpellTypes::PBAENuke:
-			if (IsPBAENukeSpell(spell_id) && !IsStunSpell(spell_id)) {
+			if (
+				IsPBAENukeSpell(spell_id) && 
+				!IsStunSpell(spell_id)
+			) {
 				return true;
 			}
 
 			return false;
 		case BotSpellTypes::AERains:
-			if (IsAERainNukeSpell(spell_id) && !IsStunSpell(spell_id)) {
+			if (
+				IsAERainNukeSpell(spell_id) && 
+				!IsStunSpell(spell_id)
+			) {
 				return true;
 			}
 			return false;
@@ -11241,6 +11250,113 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id) {
 				return true;
 			}
 
+			return false;
+		case BotSpellTypes::Lull:
+			if (IsHarmonySpell(spell_id)) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::Teleport:
+			if (
+				IsBeneficialSpell(spell_id) && 
+				(
+					IsEffectInSpell(spell_id, SE_Teleport) || IsEffectInSpell(spell_id, SE_Translocate)
+				)
+			) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::Succor:
+			if (
+				IsBeneficialSpell(spell_id) && 
+				IsEffectInSpell(spell_id, SE_Succor)
+			) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::BindAffinity:
+			if (IsEffectInSpell(spell_id, SE_BindAffinity)) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::Identify:
+			if (IsEffectInSpell(spell_id, SE_Identify)) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::Levitate:
+			if (
+				IsBeneficialSpell(spell_id) && 
+				IsEffectInSpell(spell_id, SE_Levitate)
+			) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::Rune:
+			if (
+				IsEffectInSpell(spell_id, SE_AbsorbMagicAtt) || 
+				IsEffectInSpell(spell_id, SE_Rune)
+			) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::WaterBreathing:
+			if (IsEffectInSpell(spell_id, SE_WaterBreathing)) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::Size:
+			if (
+				IsBeneficialSpell(spell_id) && 
+				(
+					IsEffectInSpell(spell_id, SE_ModelSize) || 
+					IsEffectInSpell(spell_id, SE_ChangeHeight)
+				)
+			) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::Invisibility:
+			if (
+				IsEffectInSpell(spell_id, SE_SeeInvis) || 
+				IsInvisibleSpell(spell_id)
+			) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::MovementSpeed:
+			if (
+				IsBeneficialSpell(spell_id) && 
+				IsEffectInSpell(spell_id, SE_MovementSpeed)
+			) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::SendHome:
+			if (
+				IsBeneficialSpell(spell_id) && 
+				IsEffectInSpell(spell_id, SE_GateToHomeCity)
+			) {
+				return true;
+			}
+		
+			return false;
+		case BotSpellTypes::SummonCorpse:
+			if (IsEffectInSpell(spell_id, SE_SummonCorpse)) {
+				return true;
+			}
+		
 			return false;
 		default:
 			return true;
