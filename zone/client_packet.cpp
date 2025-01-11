@@ -68,6 +68,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/buyer_buy_lines_repository.h"
 #include "../common/repositories/account_ip_repository.h"
 #include "../common/repositories/account_kill_counts_repository.h"
+#include "../common/repositories/character_pet_name_repository.h"
 
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_stats_record_repository.h"
@@ -163,6 +164,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_CancelTrade] = &Client::Handle_OP_CancelTrade;
 	ConnectedOpcodes[OP_CastSpell] = &Client::Handle_OP_CastSpell;
 	ConnectedOpcodes[OP_ChannelMessage] = &Client::Handle_OP_ChannelMessage;
+	ConnectedOpcodes[OP_ChangePetName] = &Client::Handle_OP_ChangePetName;
 	ConnectedOpcodes[OP_ClearBlockedBuffs] = &Client::Handle_OP_ClearBlockedBuffs;
 	ConnectedOpcodes[OP_ClearNPCMarks] = &Client::Handle_OP_ClearNPCMarks;
 	ConnectedOpcodes[OP_ClearSurname] = &Client::Handle_OP_ClearSurname;
@@ -342,6 +344,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_PlayerStateAdd] = &Client::Handle_OP_PlayerStateAdd;
 	ConnectedOpcodes[OP_PlayerStateRemove] = &Client::Handle_OP_PlayerStateRemove;
 	ConnectedOpcodes[OP_PickPocket] = &Client::Handle_OP_PickPocket;
+	ConnectedOpcodes[OP_PickZone] = &Client::Handle_OP_PickZone;
 	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_PotionBelt] = &Client::Handle_OP_PotionBelt;
 	ConnectedOpcodes[OP_PurchaseLeadershipAA] = &Client::Handle_OP_PurchaseLeadershipAA;
@@ -834,6 +837,10 @@ void Client::CompleteConnect()
 				CharacterID()
 			)
 		);
+
+		if (IsPetNameChangeAllowed()) {
+			InvokeChangePetName();
+		}
 	}
 
 	if(ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
@@ -4654,6 +4661,30 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 	}
 
 	ChannelMessageReceived(cm->chan_num, cm->language, language_skill, cm->message, cm->targetname);
+	return;
+}
+
+void Client::Handle_OP_ChangePetName(const EQApplicationPacket *app) {
+	if (app->size != sizeof(ChangePetName_Struct)) {
+		LogError("Got OP_ChangePetName of incorrect size. Expected [{}], got [{}].", sizeof(ChangePetName_Struct), app->size);
+		return;
+	}
+
+	auto payload = (ChangePetName_Struct*)app->pBuffer;
+
+	if (!IsPetNameChangeAllowed()) {
+		payload->response_code = ChangePetNameResponse::NotEligible;
+		QueuePacket(app);
+		return;
+	}
+
+	if (ChangePetName(payload->new_pet_name)) {
+		payload->response_code = ChangePetNameResponse::Accepted;
+	} else {
+		payload->response_code = ChangePetNameResponse::Denied; // not actually needed but included here for completeness
+	}
+
+	QueuePacket(app);
 	return;
 }
 
@@ -12275,6 +12306,17 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 	}
 
 	SendPickPocketResponse(victim, 0, PickPocketFailed);
+}
+
+void Client::Handle_OP_PickZone(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(PickZone_Struct)) {
+		LogDebug("Size mismatch in OP_PickZone expected [{}] got [{}]", sizeof(PickZone_Struct), app->size);
+		DumpPacket(app);
+		return;
+	}
+
+	// handle
 }
 
 void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)

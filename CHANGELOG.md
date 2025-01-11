@@ -1,3 +1,68 @@
+## [22.61.0] 1/6/2025
+
+### Bots
+
+* Fix AA ranks to account for level ([#4567](https://github.com/EQEmu/Server/pull/4567)) @nytmyr 2024-12-07
+
+### Code
+
+* Convert Event Parses to Single Line ([#4569](https://github.com/EQEmu/Server/pull/4569)) @Kinglykrab 2024-12-12
+* Fix GM Flag Spell Restriction Bypasses ([#4571](https://github.com/EQEmu/Server/pull/4571)) @Kinglykrab 2025-01-06
+* Remove Unused Group Methods ([#4559](https://github.com/EQEmu/Server/pull/4559)) @Kinglykrab 2024-12-12
+
+### Commands
+
+* Add #find bot Subcommand ([#4563](https://github.com/EQEmu/Server/pull/4563)) @Kinglykrab 2024-12-12
+* Add #find ldon_theme Subcommand ([#4564](https://github.com/EQEmu/Server/pull/4564)) @Kinglykrab 2024-12-12
+* Fix #copycharacter ([#4582](https://github.com/EQEmu/Server/pull/4582)) @Akkadius 2025-01-06
+
+### Databuckets
+
+* Improved Reliability and Performance of Databuckets ([#4562](https://github.com/EQEmu/Server/pull/4562)) @Akkadius 2024-12-12
+
+### Feature
+
+* Enable bazaar window 'Find Trader' functionality ([#4560](https://github.com/EQEmu/Server/pull/4560)) @neckkola 2024-12-12
+
+### Filesystem
+
+* Path Manager Improvements ([#4557](https://github.com/EQEmu/Server/pull/4557)) @Akkadius 2025-01-06
+
+### Fixes
+
+* Allow Items in ROF2 to Stack to 32,767 ([#4556](https://github.com/EQEmu/Server/pull/4556)) @Kinglykrab 2024-12-12
+* Fix EVENT_COMBAT on NPC Death ([#4558](https://github.com/EQEmu/Server/pull/4558)) @Kinglykrab 2024-11-28
+* Guild Membership Update Fix ([#4581](https://github.com/EQEmu/Server/pull/4581)) @neckkola 2025-01-06
+* Guild creation to propagate across zones ([#4575](https://github.com/EQEmu/Server/pull/4575)) @neckkola 2025-01-06
+* Repair a EQEMUConfig Memory Leak ([#4584](https://github.com/EQEmu/Server/pull/4584)) @neckkola 2025-01-06
+* Repair a LoadNPCEmote MemoryLeak ([#4586](https://github.com/EQEmu/Server/pull/4586)) @neckkola 2025-01-06
+* Repair a memory leak in GuildsList ([#4585](https://github.com/EQEmu/Server/pull/4585)) @neckkola 2025-01-06
+* Resolve a client crash when logging in or zoning ([#4572](https://github.com/EQEmu/Server/pull/4572)) @neckkola 2024-12-14
+
+### Groups
+
+* Fix AmIMainAssist incorrectly checking for MainTankName ([#4565](https://github.com/EQEmu/Server/pull/4565)) @nytmyr 2024-12-04
+
+### Inventory
+
+* Add GetInventorySlots() Method ([#4566](https://github.com/EQEmu/Server/pull/4566)) @Kinglykrab 2025-01-06
+
+### Logs
+
+* Improve Crash log defaults ([#4579](https://github.com/EQEmu/Server/pull/4579)) @Akkadius 2025-01-06
+
+### Maps
+
+* Fix broken Map MMFS implementation ([#4576](https://github.com/EQEmu/Server/pull/4576)) @Akkadius 2025-01-06
+
+### Network
+
+* Prune / disconnect TCP connections gracefully ([#4574](https://github.com/EQEmu/Server/pull/4574)) @Akkadius 2025-01-06
+
+### Rules
+
+* Add rules for requiring custom files from client ([#4561](https://github.com/EQEmu/Server/pull/4561)) @knervous 2024-12-12
+
 ## [22.60.0] 11/25/2024
 
 ### Bazaar

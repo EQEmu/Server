@@ -5925,6 +5925,21 @@ struct ChangeSize_Struct
 /*16*/
 };
 
+struct ChangePetName_Struct {
+/*00*/ char new_pet_name[64];
+/*40*/ char pet_owner_name[64];
+/*80*/ int  response_code;
+};
+
+enum ChangePetNameResponse : int {
+    Denied = 0, 		// 5167 You have requested an invalid name or a Customer Service Representative has denied your name request.  Please try another name.
+    Accepted = 1, 		// 5976 Your request for a name change was successful.
+    Timeout = -3,		// 5979 You must wait longer before submitting another name request. Please try again in a few minutes.
+    NotEligible = -4, 	// 5980 Your character is not eligible for a name change.
+    Pending = -5,  		// 5193 You already have a name change pending.  Please wait until it is fully processed before attempting another name change.
+	Unhandled = -1
+};
+
 // New OpCode/Struct for SoD+
 struct GroupMakeLeader_Struct
 {
@@ -6544,6 +6559,26 @@ struct BazaarSearchMessaging_Struct {
 struct BuylineItemDetails_Struct {
 	uint64      item_cost;
 	uint32      item_quantity;
+};
+
+struct PickZoneEntry_Struct {
+	int16 zone_id;
+	int16 unknown;
+	int32 player_count;
+	int32 instance_id;
+};
+
+struct PickZoneWindow_Struct {
+	char                 padding000[64];
+	int64                session_id;
+	int8                 option_count;
+	char                 padding073[23];
+	PickZoneEntry_Struct entries[10];
+};
+
+struct PickZone_Struct {
+	int64 session_id;
+	int32 selection_id;
 };
 
 // Restore structure packing to default

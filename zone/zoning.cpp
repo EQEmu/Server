@@ -796,6 +796,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 		LogZoning("Zone sharding results count [{}]", results.size());
 
+		uint64_t shard_instance_duration = 3155760000;
+
 		for (auto &e: results) {
 			LogZoning(
 				"Zone sharding results [{}] ({}) instance_id [{}] player_count [{}]",
@@ -826,7 +828,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		if (!found_shard) {
 			uint16 new_instance_id = 0;
 			database.GetUnusedInstanceID(new_instance_id);
-			database.CreateInstance(new_instance_id, zoneID, zd->version, 3155760000);
+			database.CreateInstance(new_instance_id, zoneID, zd->version, shard_instance_duration);
 			database.AddClientToInstance(new_instance_id, CharacterID());
 			instance_id = new_instance_id;
 			LogZoning(

@@ -127,8 +127,8 @@ public:
 	void SetSpellRecastTimer(uint16 spell_id);
 	void SetSpellRecastTimer(uint16 spell_id, uint32 reuse_timer);
 
-	int CountAugmentEquippedByID(uint32 item_id);
-	int CountItemEquippedByID(uint32 item_id);
+	uint32 CountAugmentEquippedByID(uint32 item_id);
+	uint32 CountItemEquippedByID(uint32 item_id);
 	bool HasAugmentEquippedByID(uint32 item_id);
 	bool HasItemEquippedByID(uint32 item_id);
 	int GetHealAmount();

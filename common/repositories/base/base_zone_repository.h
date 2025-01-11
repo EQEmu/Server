@@ -611,6 +611,7 @@ public:
 			e.idle_when_empty           = row[97] ? static_cast<uint8_t>(strtoul(row[97], nullptr, 10)) : 1;
 			e.seconds_before_idle       = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 60;
 			e.shard_at_player_count     = row[99] ? static_cast<int32_t>(atoi(row[99])) : 0;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			return e;
 		}
@@ -743,6 +744,7 @@ public:
 		v.push_back(columns[97] + " = " + std::to_string(e.idle_when_empty));
 		v.push_back(columns[98] + " = " + std::to_string(e.seconds_before_idle));
 		v.push_back(columns[99] + " = " + std::to_string(e.shard_at_player_count));
+		v.push_back(columns[98] + " = " + std::to_string(e.shard_at_player_count));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1126,6 +1128,7 @@ public:
 			e.idle_when_empty           = row[97] ? static_cast<uint8_t>(strtoul(row[97], nullptr, 10)) : 1;
 			e.seconds_before_idle       = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 60;
 			e.shard_at_player_count     = row[99] ? static_cast<int32_t>(atoi(row[99])) : 0;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1250,6 +1253,7 @@ public:
 			e.idle_when_empty           = row[97] ? static_cast<uint8_t>(strtoul(row[97], nullptr, 10)) : 1;
 			e.seconds_before_idle       = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 60;
 			e.shard_at_player_count     = row[99] ? static_cast<int32_t>(atoi(row[99])) : 0;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			all_entries.push_back(e);
 		}

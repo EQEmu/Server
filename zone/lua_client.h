@@ -461,14 +461,14 @@ public:
 	void Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration);
 	void Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration, const char* button_name_one, const char* button_name_two);
 	void Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration, const char* button_name_one, const char* button_name_two, uint32 sound_controls);
-	int CountItem(uint32 item_id);
+	uint32 CountItem(uint32 item_id);
 	void RemoveItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity);
 	void SetGMStatus(int new_status);
 	int16 GetGMStatus();
 	void AddItem(luabind::object item_table);
-	int CountAugmentEquippedByID(uint32 item_id);
-	int CountItemEquippedByID(uint32 item_id);
+	uint32 CountAugmentEquippedByID(uint32 item_id);
+	uint32 CountItemEquippedByID(uint32 item_id);
 	bool HasAugmentEquippedByID(uint32 item_id);
 	bool HasItemEquippedByID(uint32 item_id);
 	int GetHealAmount();
@@ -529,6 +529,7 @@ public:
 	void AreaTaunt();
 	void AreaTaunt(float range);
 	void AreaTaunt(float range, int bonus_hate);
+	luabind::object GetInventorySlots(lua_State* L);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
@@ -610,6 +611,8 @@ public:
 
 	int GetKillCount(int race_id);
 	bool CheckTitle(int title_set);
+	void ShowZoneShardMenu();
+	void ChangePetName();
 
 	Lua_Expedition  CreateExpedition(luabind::object expedition_info);
 	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players);

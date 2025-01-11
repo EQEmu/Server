@@ -90,6 +90,8 @@ public:
 	static std::vector<InstancePlayerCount> GetInstanceZonePlayerCounts(Database& db, int zone_id) {
 		std::vector<InstancePlayerCount> zone_player_counts;
 
+		uint64_t shard_instance_duration = 3155760000;
+
 		auto query = fmt::format(SQL(
 			SELECT
 				zone_id,
@@ -124,6 +126,7 @@ public:
 			zone_player_counts.push_back(e);
 		}
 
+		// duration 3155760000 is for shards explicitly
 		query = fmt::format(
 			SQL(
 				SELECT
@@ -138,13 +141,15 @@ public:
 				i.zone = c.zone_id
 				AND i.id = c.zone_instance
 				AND c.last_login >= UNIX_TIMESTAMP(NOW()) - 600
+				AND (i.start_time + i.duration >= UNIX_TIMESTAMP(NOW()) OR i.never_expires = 0)
+				AND i.duration = {}
 				WHERE
 				i.zone IS NOT NULL AND i.zone = {}
 				GROUP BY
 				i.id, i.zone, i.version
 				ORDER BY
 				i.id ASC;
-			), zone_id
+			), shard_instance_duration, zone_id
 		);
 
 		results = db.QueryDatabase(query);

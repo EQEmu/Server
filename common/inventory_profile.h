@@ -147,7 +147,7 @@ namespace EQ
 		bool HasItemEquippedByID(uint32 item_id);
 
 		// Check how many of a specific item the player has equipped by Item ID
-		int CountItemEquippedByID(uint32 item_id);
+		uint32 CountItemEquippedByID(uint32 item_id);
 
 		//Check if a player has any item or augment with a specific click effect ID equipped
 		bool IsClickEffectEquipped(uint32 spellid);
@@ -156,7 +156,7 @@ namespace EQ
 		bool HasAugmentEquippedByID(uint32 item_id);
 
 		// Check how many of a specific augment the player has equipped by Item ID
-		int CountAugmentEquippedByID(uint32 item_id);
+		uint32 CountAugmentEquippedByID(uint32 item_id);
 
 		// Get a list of augments from a specific slot ID
 		std::vector<uint32> GetAugmentIDsBySlotID(int16 slot_id);

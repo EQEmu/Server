@@ -75,11 +75,13 @@ extern volatile bool RunLoops;
 #include "../common/repositories/keyring_repository.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
 #include "../common/repositories/account_kill_counts_repository.h"
+#include "../common/repositories/character_pet_name_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
 #include "../common/zone_store.h"
 #include "../common/skill_caps.h"
+#include "client.h"
 
 
 extern QueryServ* QServ;
@@ -5765,6 +5767,80 @@ void Client::KeyRingList()
 			Message(Chat::LightBlue, item_string.c_str());
 		}
 	}
+}
+
+bool Client::IsPetNameChangeAllowed() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		return true;
+	}
+
+	return false;
+}
+
+void Client::InvokeChangePetName() {
+	if (!IsPetNameChangeAllowed()) {
+		return;
+	}
+
+	auto outapp = new EQApplicationPacket(OP_InvokeChangePetName, 0);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::GrantPetNameChange() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+	k.value = "true";
+	DataBucket::SetData(k);
+
+	InvokeChangePetName();
+}
+
+void Client::ClearPetNameChange() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	DataBucket::DeleteData(k);
+}
+
+bool Client::ChangePetName(char* new_name) {
+    if (!new_name || strlen(new_name) == 0) {
+        return false;
+    }
+
+    if (!IsPetNameChangeAllowed()) {
+        return false;
+    }
+
+    const char* cur_name = nullptr;
+    if (GetPet()) {
+        cur_name = GetPet()->GetName();
+
+        if (cur_name && strncmp(new_name, cur_name, strlen(new_name)) == 0) {
+            return false;
+        }
+    }
+
+    if (!database.CheckNameFilter(new_name) || database.IsNameUsed(new_name)) {
+        return false;
+    }
+
+	CharacterPetNameRepository::ReplaceOne(database, {
+		.char_id = static_cast<int32_t>(CharacterID()),
+		.name = new_name
+	});
+
+
+	if (GetPet()) {
+		GetPet()->TempName(new_name);
+	}
+
+	ClearPetNameChange();
+    return true;
 }
 
 bool Client::IsDiscovered(uint32 item_id) {
@@ -11849,27 +11925,15 @@ void Client::SendToInstance(std::string instance_type, std::string zone_short_na
 	MovePC(zone_id, instance_id, x, y, z, heading);
 }
 
-int Client::CountItem(uint32 item_id)
+uint32 Client::CountItem(uint32 item_id)
 {
-	int quantity = 0;
+	uint32 quantity = 0;
 	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invslot::GUILD_TRIBUTE_BEGIN, EQ::invslot::GUILD_TRIBUTE_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			item = GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				quantity += (item->IsStackable() ? item->GetCharges() : 1);
-			}
+
+	for (const int16& slot_id : GetInventorySlots()) {
+		item = GetInv().GetItem(slot_id);
+		if (item && item->GetID() == item_id) {
+			quantity += (item->IsStackable() ? item->GetCharges() : 1);
 		}
 	}
 
@@ -11886,30 +11950,26 @@ void Client::ResetItemCooldown(uint32 item_id)
 	int recast_type = item_d->RecastType;
 	bool found_item = false;
 
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			item = GetInv().GetItem(slot_id);
-			if (item) {
-				item_d = item->GetItem();
-				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {
-					item->SetRecastTimestamp(0);
-					DeleteItemRecastTimer(item_d->ID);
-					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
-					found_item = true;
-				}
+	for (const int16& slot_id : GetInventorySlots()) {
+		item = GetInv().GetItem(slot_id);
+		if (item) {
+			item_d = item->GetItem();
+			if (
+				item_d &&
+				item->GetID() == item_id ||
+				(
+					item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM &&
+					item_d->RecastType == recast_type
+				)
+			) {
+				item->SetRecastTimestamp(0);
+				DeleteItemRecastTimer(item_d->ID);
+				SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
+				found_item = true;
 			}
 		}
 	}
+
 	if (!found_item) {
 		DeleteItemRecastTimer(item_id); //We didn't find the item but we still want to remove the timer
 	}
@@ -11944,25 +12004,20 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 		final_time = total_time - current_time;
 	}
 
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			item = GetInv().GetItem(slot_id);
-			if (item) {
-				item_d = item->GetItem();
-				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {
-					item->SetRecastTimestamp(total_time);
-					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
-				}
+	for (const int16& slot_id : GetInventorySlots()) {
+		item = GetInv().GetItem(slot_id);
+		if (item) {
+			item_d = item->GetItem();
+			if (
+				item_d &&
+				item->GetID() == item_id ||
+				(
+					item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM &&
+					item_d->RecastType == recast_type
+				)
+			) {
+				item->SetRecastTimestamp(total_time);
+				SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
 			}
 		}
 	}
@@ -12005,41 +12060,43 @@ uint32 Client::GetItemCooldown(uint32 item_id)
 
 void Client::RemoveItem(uint32 item_id, uint32 quantity)
 {
+	uint32 removed_count = 0;
 	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invslot::GUILD_TRIBUTE_BEGIN, EQ::invslot::GUILD_TRIBUTE_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	int16 removed_count = 0;
-	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			if (removed_count == quantity) {
-				break;
-			}
 
-			item = GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				int16 charges = item->IsStackable() ? item->GetCharges() : 0;
-				int16 stack_size = std::max(charges, static_cast<int16>(1));
-				if ((removed_count + stack_size) <= quantity) {
-					removed_count += stack_size;
-					DeleteItemInInventory(slot_id, charges, true);
-				} else {
-					int16 amount_left = (quantity - removed_count);
-					if (amount_left > 0 && stack_size >= amount_left) {
-						removed_count += amount_left;
-						DeleteItemInInventory(slot_id, amount_left, true);
-					}
+	for (const int16& slot_id : GetInventorySlots()) {
+		if (removed_count == quantity) {
+			break;
+		}
+
+		item = GetInv().GetItem(slot_id);
+		if (item && item->GetID() == item_id) {
+			uint32 charges    = item->IsStackable() ? item->GetCharges() : 0;
+			uint32 stack_size = std::max(charges, static_cast<uint32>(1));
+			if ((removed_count + stack_size) <= quantity) {
+				removed_count += stack_size;
+				DeleteItemInInventory(slot_id, charges, true);
+			} else {
+				uint32 amount_left = (quantity - removed_count);
+				if (amount_left > 0 && stack_size >= amount_left) {
+					removed_count += amount_left;
+					DeleteItemInInventory(slot_id, amount_left, true);
 				}
 			}
 		}
+	}
+}
+
+void Client::SetWeaponAppearance(bool bow_visible) {
+	if (!HasClass(Class::Ranger)) {
+		return;
+	}
+
+	if (bow_visible && m_inv.GetItem(EQ::invslot::slotRange) && m_inv.GetItem(EQ::invslot::slotRange)->GetItemType() == EQ::item::ItemTypeBow) {
+		SendTextureWC(EQ::textures::TextureSlot::weaponPrimary, 0);
+		SendTextureWC(EQ::textures::TextureSlot::weaponSecondary, GetWeaponMaterial(m_inv.GetItem(EQ::invslot::slotRange)));
+	} else {
+		SendTextureWC(EQ::textures::TextureSlot::weaponPrimary, GetEquipmentMaterial(EQ::textures::TextureSlot::weaponPrimary));
+		SendTextureWC(EQ::textures::TextureSlot::weaponSecondary, GetEquipmentMaterial(EQ::textures::TextureSlot::weaponSecondary));
 	}
 }
 
@@ -14324,37 +14381,28 @@ uint16 Client::GetSkill(EQ::skills::SkillType skill_id) const
 void Client::RemoveItemBySerialNumber(uint32 serial_number, uint32 quantity)
 {
 	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invslot::GUILD_TRIBUTE_BEGIN, EQ::invslot::GUILD_TRIBUTE_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	int16 removed_count = 0;
-	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			if (removed_count == quantity) {
-				break;
-			}
 
-			item = GetInv().GetItem(slot_id);
-			if (item && item->GetSerialNumber() == serial_number) {
-				int16 charges = item->IsStackable() ? item->GetCharges() : 0;
-				int16 stack_size = std::max(charges, static_cast<int16>(1));
-				if ((removed_count + stack_size) <= quantity) {
-					removed_count += stack_size;
-					DeleteItemInInventory(slot_id, charges, true);
-				} else {
-					int16 amount_left = (quantity - removed_count);
-					if (amount_left > 0 && stack_size >= amount_left) {
-						removed_count += amount_left;
-						DeleteItemInInventory(slot_id, amount_left, true);
-					}
+	uint32 removed_count = 0;
+
+	const auto& slot_ids = GetInventorySlots();
+
+	for (const int16& slot_id : slot_ids) {
+		if (removed_count == quantity) {
+			break;
+		}
+
+		item = GetInv().GetItem(slot_id);
+		if (item && item->GetSerialNumber() == serial_number) {
+			uint32 charges    = item->IsStackable() ? item->GetCharges() : 0;
+			uint32 stack_size = std::max(charges, static_cast<uint32>(1));
+			if ((removed_count + stack_size) <= quantity) {
+				removed_count += stack_size;
+				DeleteItemInInventory(slot_id, charges, true);
+			} else {
+				uint32 amount_left = (quantity - removed_count);
+				if (amount_left > 0 && stack_size >= amount_left) {
+					removed_count += amount_left;
+					DeleteItemInInventory(slot_id, amount_left, true);
 				}
 			}
 		}
@@ -14691,4 +14739,77 @@ void Client::SetVisibility(Mob* mob, bool visible) {
 		true,
 		this
 	);
+}
+
+const std::vector<int16>& Client::GetInventorySlots()
+{
+	static const std::vector<std::pair<int16, int16>> slots = {
+		{EQ::invslot::POSSESSIONS_BEGIN,     EQ::invslot::POSSESSIONS_END},
+		{EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_END},
+		{EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END},
+		{EQ::invslot::BANK_BEGIN,            EQ::invslot::BANK_END},
+		{EQ::invbag::BANK_BAGS_BEGIN,        EQ::invbag::BANK_BAGS_END},
+		{EQ::invslot::SHARED_BANK_BEGIN,     EQ::invslot::SHARED_BANK_END},
+		{EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END},
+	};
+
+	static std::vector<int16> slot_ids;
+
+	if (slot_ids.empty()) {
+		for (const auto &[begin, end]: slots) {
+			for (int16 slot_id = begin; slot_id <= end; ++slot_id) {
+				slot_ids.emplace_back(slot_id);
+			}
+		}
+	}
+
+	return slot_ids;
+}
+
+void Client::ShowZoneShardMenu()
+{
+	auto z = GetZone(GetZoneID());
+	if (z && !z->shard_at_player_count) {
+		return;
+	}
+
+	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, GetZoneID());
+	LogZoning("Zone sharding results count [{}]", results.size());
+
+	if (results.empty()) {
+		Message(Chat::White, "No zone shards found.");
+		return;
+	}
+
+	if (!results.empty()) {
+		Message(Chat::White, "Available Zone Shards:");
+	}
+
+	int number = 1;
+	for (auto &e: results) {
+		std::string teleport_link = Saylink::Silent(
+			fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
+			"Teleport"
+		);
+
+		std::string yours;
+		if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
+			teleport_link = "Teleport";
+			yours         = " (Yours)";
+		}
+
+		Message(
+			Chat::White, fmt::format(
+				" --> [{}] #{} {} ({}) [{}/{}] players {}",
+				teleport_link,
+				number,
+				z->long_name,
+				e.instance_id,
+				e.player_count,
+				z->shard_at_player_count,
+				yours
+			).c_str()
+		);
+		number++;
+	}
 }

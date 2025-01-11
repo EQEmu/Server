@@ -145,7 +145,7 @@ EQ::ItemInstance* Perl_Bot_GetAugmentAt(Bot* self, int16 slot_id, uint8 augment_
 	return nullptr;
 }
 
-int Perl_Bot_CountAugmentEquippedByID(Bot* self, uint32 item_id)
+uint32 Perl_Bot_CountAugmentEquippedByID(Bot* self, uint32 item_id)
 {
 	return self->GetInv().CountAugmentEquippedByID(item_id);
 }
@@ -155,7 +155,7 @@ bool Perl_Bot_HasAugmentEquippedByID(Bot* self, uint32 item_id)
 	return self->GetInv().HasAugmentEquippedByID(item_id);
 }
 
-int Perl_Bot_CountItemEquippedByID(Bot* self, uint32 item_id)
+uint32 Perl_Bot_CountItemEquippedByID(Bot* self, uint32 item_id)
 {
 	return self->GetInv().CountItemEquippedByID(item_id);
 }
@@ -650,7 +650,7 @@ void perl_register_bot()
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool, bool))&Perl_Bot_ApplySpellRaid);
 	package.add("Camp", (void(*)(Bot*))&Perl_Bot_Camp);
-	package.add("Camp", (void(*)(Bot*, bool))&Perl_Bot_Camp);	
+	package.add("Camp", (void(*)(Bot*, bool))&Perl_Bot_Camp);
 	package.add("ClearDisciplineReuseTimer", (void(*)(Bot*))&Perl_Bot_ClearDisciplineReuseTimer);
 	package.add("ClearDisciplineReuseTimer", (void(*)(Bot*, uint16))&Perl_Bot_ClearDisciplineReuseTimer);
 	package.add("ClearItemReuseTimer", (void(*)(Bot*))&Perl_Bot_ClearItemReuseTimer);

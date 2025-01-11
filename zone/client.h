@@ -309,6 +309,11 @@ public:
 	void KeyRingAdd(uint32 item_id);
 	bool KeyRingCheck(uint32 item_id);
 	void KeyRingList();
+	bool IsPetNameChangeAllowed();
+	void GrantPetNameChange();
+	void ClearPetNameChange();
+	void InvokeChangePetName();
+	bool ChangePetName(char *new_name);
 	bool IsClient() const override { return true; }
 	bool IsOfClientBot() const override { return true; }
 	bool IsOfClientBotMerc() const override { return true; }
@@ -472,6 +477,7 @@ public:
 	inline EQ::InventoryProfile& GetInv() { return m_inv; }
 	inline const EQ::InventoryProfile& GetInv() const { return m_inv; }
 	inline std::vector<PetInfo>& GetPetsInfo() { return m_petinfomulti; }
+	const std::vector<int16>& GetInventorySlots();
 	inline PetInfo& GetSuspendedPetInfo() { return m_suspendedminion; }
 	inline void SetSuspendedPetInfo(PetInfo& info) { m_suspendedminion = info; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
@@ -1165,7 +1171,7 @@ public:
 	bool PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update = false);
 	void SendCursorBuffer();
 	void DeleteItemInInventory(int16 slot_id, int16 quantity = 0, bool client_update = false, bool update_db = true);
-	int CountItem(uint32 item_id);
+	uint32 CountItem(uint32 item_id);
 	void ResetItemCooldown(uint32 item_id);
 	void SetItemCooldown(uint32 item_id, bool use_saved_timer = false, uint32 in_seconds = 1);
 	uint32 GetItemCooldown(uint32 item_id);
@@ -2378,6 +2384,8 @@ public:
 	const std::string &GetMailKeyFull() const;
 	const std::string &GetMailKey() const;
 	void ShowZoneShardMenu();
+	void ShowZoneShardMenu();
+	void Handle_OP_ChangePetName(const EQApplicationPacket *app);
 };
 
 #endif

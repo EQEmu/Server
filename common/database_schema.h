@@ -63,6 +63,7 @@ namespace DatabaseSchema {
 			{"character_pet_buffs",            "char_id"},
 			{"character_pet_info",             "char_id"},
 			{"character_pet_inventory",        "char_id"},
+			{"character_pet_name",			   "char_id"},
 			{"character_peqzone_flags",        "id"},
 			{"character_potionbelt",           "id"},
 			{"character_skills",               "id"},

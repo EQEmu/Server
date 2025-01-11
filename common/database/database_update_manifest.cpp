@@ -5782,6 +5782,42 @@ CREATE INDEX idx_bot_expires ON data_buckets (bot_id, expires);
 ALTER TABLE `trader`
 	ADD COLUMN `char_zone_instance_id` INT NULL DEFAULT '0' AFTER `char_zone_id`;
 )"
+	},
+	ManifestEntry{
+		.version = 9287,
+		.description = "2024_11_26_bazaar_find_trader.sql",
+		.check       = "SHOW COLUMNS FROM `npc_types` LIKE 'walkspeed'",
+		.condition   = "missing",
+		.match       = "float",
+		.sql         = R"(
+ALTER TABLE `npc_types` MODIFY COLUMN `walkspeed` float NOT NULL DEFAULT 0;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9288,
+		.description = "2024_11_10_zone_player_partitioning.sql",
+		.check = "SHOW CREATE TABLE `zone`",
+		.condition = "missing",
+		.match = "shard_at_player_count",
+		.sql = R"(
+ALTER TABLE `zone`
+ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_idle`;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9289,
+		.description = "2025_01_10_create_pet_names_table.sql",
+		.check = "SHOW TABLES LIKE 'character_pet_name'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `character_pet_name` (
+    `char_id` INT(11) NOT NULL PRIMARY KEY,
+    `name` VARCHAR(64) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)",
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

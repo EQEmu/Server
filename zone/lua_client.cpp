@@ -2393,7 +2393,7 @@ void Lua_Client::SendToInstance(std::string instance_type, std::string zone_shor
 	self->SendToInstance(instance_type, zone_short_name, instance_version, x, y, z, heading, instance_identifier, duration);
 }
 
-int Lua_Client::CountItem(uint32 item_id) {
+uint32 Lua_Client::CountItem(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->CountItem(item_id);
 }
@@ -2586,7 +2586,7 @@ void Lua_Client::AddItem(luabind::object item_table) {
 	);
 }
 
-int Lua_Client::CountAugmentEquippedByID(uint32 item_id) {
+uint32 Lua_Client::CountAugmentEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->GetInv().CountAugmentEquippedByID(item_id);
 }
@@ -2596,7 +2596,7 @@ bool Lua_Client::HasAugmentEquippedByID(uint32 item_id) {
 	return self->GetInv().HasAugmentEquippedByID(item_id);
 }
 
-int Lua_Client::CountItemEquippedByID(uint32 item_id) {
+uint32 Lua_Client::CountItemEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->GetInv().CountItemEquippedByID(item_id);
 }
@@ -3548,15 +3548,38 @@ int Lua_Client::GetKillCount(int race_id)
 	return self->kill_counters[race_id];
 }
 
-void Lua_Client::ShowZoneShardMenu() {
-	Lua_Safe_Call_Void();
-	self->ShowZoneShardMenu();
-}
-
 bool Lua_Client::CheckTitle(int title_set)
 {
 	Lua_Safe_Call_Bool();
 	return self->CheckTitle(title_set);
+}
+
+luabind::object Lua_Client::GetInventorySlots(lua_State* L)
+{
+	auto lua_table = luabind::newtable(L);
+
+	if (d_) {
+		auto self  = reinterpret_cast<NativeType *>(d_);
+		int  index = 1;
+		for (const int16 &slot_id: self->GetInventorySlots()) {
+			lua_table[index] = slot_id;
+			index++;
+		}
+	}
+
+	return lua_table;
+}
+
+void Lua_Client::ShowZoneShardMenu()
+{
+	Lua_Safe_Call_Void();
+	self->ShowZoneShardMenu();
+}
+
+void Lua_Client::ChangePetName()
+{
+	Lua_Safe_Call_Void();
+	self->GrantPetNameChange();
 }
 
 luabind::scope lua_register_client() {
@@ -3629,6 +3652,7 @@ luabind::scope lua_register_client() {
 	.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)
 	.def("CashReward", &Lua_Client::CashReward)
 	.def("ChangeLastName", (void(Lua_Client::*)(std::string))&Lua_Client::ChangeLastName)
+	.def("ChangePetName", &Lua_Client::ChangePetName)
 	.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob,int))&Lua_Client::CheckIncreaseSkill)
@@ -3639,9 +3663,9 @@ luabind::scope lua_register_client() {
 	.def("ClearXTargets", (void(Lua_Client::*)(void))&Lua_Client::ClearXTargets)
 	.def("ClearZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearZoneFlag)
 	.def("Connected", (bool(Lua_Client::*)(void))&Lua_Client::Connected)
-	.def("CountAugmentEquippedByID", (int(Lua_Client::*)(uint32))&Lua_Client::CountAugmentEquippedByID)
-	.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
-	.def("CountItemEquippedByID", (int(Lua_Client::*)(uint32))&Lua_Client::CountItemEquippedByID)
+	.def("CountAugmentEquippedByID", (uint32(Lua_Client::*)(uint32))&Lua_Client::CountAugmentEquippedByID)
+	.def("CountItem", (uint32(Lua_Client::*)(uint32))&Lua_Client::CountItem)
+	.def("CountItemEquippedByID", (uint32(Lua_Client::*)(uint32))&Lua_Client::CountItemEquippedByID)
 	.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(luabind::object))&Lua_Client::CreateExpedition)
 	.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32))&Lua_Client::CreateExpedition)
 	.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32, bool))&Lua_Client::CreateExpedition)
@@ -3779,6 +3803,7 @@ luabind::scope lua_register_client() {
 	.def("GetInstrumentMod", (int(Lua_Client::*)(int))&Lua_Client::GetInstrumentMod)
 	.def("GetIntoxication", (int(Lua_Client::*)(void))&Lua_Client::GetIntoxication)
 	.def("GetInventory", (Lua_Inventory(Lua_Client::*)(void))&Lua_Client::GetInventory)
+	.def("GetInventorySlots", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetInventorySlots)
 	.def("GetInvulnerableEnvironmentDamage", (bool(Lua_Client::*)(void))&Lua_Client::GetInvulnerableEnvironmentDamage)
 	.def("GetItemIDAt", (int(Lua_Client::*)(int))&Lua_Client::GetItemIDAt)
 	.def("GetItemCooldown", (uint32(Lua_Client::*)(uint32))&Lua_Client::GetItemCooldown)
