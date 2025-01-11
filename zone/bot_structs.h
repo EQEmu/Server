@@ -127,6 +127,4 @@ struct BotSpellTypesByClass_Struct {
 	std::string description;
 };
 
-using CommandedSpellTypesMinLevelMap = std::map<int32_t, std::map<int32_t, BotSpellTypesByClass_Struct>>;
-
 #endif // BOT_STRUCTS
