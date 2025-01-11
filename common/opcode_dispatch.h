@@ -250,6 +250,7 @@ IN(OP_TraderBuy, TraderBuy_Struct);
 IN(OP_Trader, Trader_ShowItems_Struct);
 IN(OP_GMFind, GMSummon_Struct);
 IN(OP_PickPocket, PickPocket_Struct);
+IN(OP_PickZone, PickZone_Struct);
 IN(OP_Bind_Wound, BindWound_Struct);
 INr(OP_TrackTarget);
 INr(OP_Track);

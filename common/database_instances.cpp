@@ -114,7 +114,9 @@ bool Database::CheckInstanceExpired(uint16 instance_id)
 	timeval tv{};
 	gettimeofday(&tv, nullptr);
 
-	return (i.start_time + i.duration) <= tv.tv_sec;
+	// Use uint64_t for the addition to prevent overflow
+	uint64_t expiration_time = static_cast<uint64_t>(i.start_time) + static_cast<uint64_t>(i.duration);
+	return expiration_time <= tv.tv_sec;
 }
 
 bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration)
@@ -469,15 +471,13 @@ void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
 
 void Database::DeleteInstance(uint16 instance_id)
 {
+	// I'm not sure why this isn't in here but we should add it in a later change and make sure it's tested
+	// InstanceListRepository::DeleteWhere(*this, fmt::format("id = {}", instance_id));
 	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id = {}", instance_id));
-
 	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
-
 	SpawnConditionValuesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
-
 	DynamicZoneMembersRepository::DeleteByInstance(*this, instance_id);
 	DynamicZonesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
-
 	CharacterCorpsesRepository::BuryInstance(*this, instance_id);
 }
 

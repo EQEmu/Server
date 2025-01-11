@@ -3436,19 +3436,26 @@ void Lua_Client::AreaTaunt(float range, int bonus_hate)
 	entity_list.AETaunt(self, range, bonus_hate);
 }
 
-luabind::object Lua_Client::GetInventorySlots(lua_State* L) {
+luabind::object Lua_Client::GetInventorySlots(lua_State* L)
+{
 	auto lua_table = luabind::newtable(L);
 
 	if (d_) {
-		auto self = reinterpret_cast<NativeType*>(d_);
-		int index = 1;
-		for (const int16& slot_id : self->GetInventorySlots()) {
+		auto self  = reinterpret_cast<NativeType *>(d_);
+		int  index = 1;
+		for (const int16 &slot_id: self->GetInventorySlots()) {
 			lua_table[index] = slot_id;
 			index++;
 		}
 	}
 
 	return lua_table;
+}
+
+void Lua_Client::ShowZoneShardMenu()
+{
+	Lua_Safe_Call_Void();
+	self->ShowZoneShardMenu();
 }
 
 luabind::scope lua_register_client() {
@@ -3970,6 +3977,7 @@ luabind::scope lua_register_client() {
 	.def("SetTint", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetTint)
 	.def("SetTitleSuffix", (void(Lua_Client::*)(const char *))&Lua_Client::SetTitleSuffix)
 	.def("SetZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::SetZoneFlag)
+	.def("ShowZoneShardMenu", (void(Lua_Client::*)(void))&Lua_Client::ShowZoneShardMenu)
 	.def("Signal", (void(Lua_Client::*)(int))&Lua_Client::Signal)
 	.def("Sit", (void(Lua_Client::*)(void))&Lua_Client::Sit)
 	.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)
