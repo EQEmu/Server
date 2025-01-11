@@ -31,8 +31,6 @@
 
 /*
 TODO bot rewrite:
---have help option say first usable class level by spell list. Check existing options and update logic
---remove all hardcoded spell grabbing when above is done
 --add slotid option to invgive
 --command cleanup (move to new help window, make more descriptive)
 --Add quest methods for functions
