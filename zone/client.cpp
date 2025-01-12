@@ -5925,8 +5925,10 @@ bool Client::ChangePetName(char* new_name) {
 	});
 
 
-	if (GetPet()) {
-		GetPet()->TempName(new_name);
+	for (auto pet : GetAllPets()) {
+		if (pet->CastToNPC()->GetPetOriginClass() == GetPetNameChangeClass()) {
+			pet->TempName(new_name);
+		}
 	}
 
 	ClearPetNameChange();
