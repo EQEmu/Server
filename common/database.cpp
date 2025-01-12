@@ -856,7 +856,8 @@ bool Database::CheckNameFilter(const std::string& name, bool surname)
 	}
 
 	for (size_t i = 0; i < name.size(); i++) {
-		if (!isalpha(name[i])) {
+		//if (!isalpha(name[i]) && name[i] != '_' && name[i] != ' ') {
+		if (!isprint(name[i])) {
 			return false;
 		}
 	}

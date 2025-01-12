@@ -446,6 +446,8 @@ public:
 	std::string GenerateUndeadPetName();
 	std::string GenerateElementalPetName();
 	std::string GenerateBeastlordPetName();
+	std::string GenerateShamanPetName();
+	std::string GenerateEnchanterPetName();
 
 	//Bard
 	bool ApplyBardPulse(int32 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);

@@ -1311,7 +1311,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				break;
 			}
-			case SE_Familiar:
+			//case SE_Familiar:
 			case SE_SummonBSTPet:
 			case SE_NecPet:
 			case SE_SummonPet:
@@ -4618,6 +4618,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 			case SE_Familiar:
 			{
+				/*
 				Mob *mypet = GetPet();
 				if (mypet && mypet->IsFamiliar()) {
 					if(mypet->IsNPC()) {
@@ -4625,6 +4626,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 						mypet->CastToNPC()->Depop();
 					}
 				}
+				*/
 				break;
 			}
 

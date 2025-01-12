@@ -2247,7 +2247,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			swarm_owner->IsClient() &&
 			RuleB(Pets, ClientPetsUseOwnerNameInLastName)
 		) {
-			const auto& tmp_lastname = fmt::format("{}`s Pet", swarm_owner->GetName());
+			const auto& tmp_lastname = fmt::format("{}'s Pet", swarm_owner->GetName());
 			if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
 				strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
@@ -2265,6 +2265,48 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			const auto c = entity_list.GetClientByID(GetOwnerID());
 			if (c) {
 				SetPetOwnerClient(true);
+				if (RuleB(Pets, ClientPetsUseOwnerNameInLastName)) {
+					std::string tmp_lastname;
+
+					auto owner = GetOwner();
+
+					switch (GetPetOriginClass()) {
+						case Class::Enchanter:
+							tmp_lastname = fmt::format("{}'s Animation", owner->GetCleanName());
+							break;
+						case Class::Magician:
+							tmp_lastname = fmt::format("{}'s Elemental Minion", owner->GetCleanName());
+							break;
+						case Class::Druid:
+							tmp_lastname = fmt::format("{}'s Tiny Bear", owner->GetCleanName());
+							break;
+						case Class::ShadowKnight:
+						case Class::Necromancer:
+							tmp_lastname = fmt::format("{}'s Undead Minion", owner->GetCleanName());
+							break;
+						case Class::Beastlord:
+							tmp_lastname = fmt::format("{}'s Warder", owner->GetCleanName());
+							break;
+						case Class::Shaman:
+							tmp_lastname = fmt::format("{}'s Spirit Companion", owner->GetCleanName());
+							break;
+						case Class::Wizard:
+						case Class::Cleric:
+							if (GetPetType() == PetType::petFamiliar) {
+								tmp_lastname = fmt::format("{}'s Familiar", owner->GetCleanName());
+							} else {
+								tmp_lastname = fmt::format("{}'s Animated Weapon", owner->GetCleanName());
+							}
+							break;
+						default:
+							tmp_lastname = fmt::format("{}'s Pet", owner->GetCleanName());
+					}
+
+
+					if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
+						strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
+					}
+				}
 			} else {
 				Mob* owner = entity_list.GetMob(GetOwnerID());
 				if (owner) {
@@ -4314,6 +4356,8 @@ int NPC::GetPetOriginClass() {
 			return i;
 		}
 	}
+
+	return -1;
 }
 
 bool NPC::FacesTarget()

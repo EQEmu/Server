@@ -264,38 +264,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc->SetName(pn.c_str());
 			npc->TempName(pn.c_str());
 		}
-
-		switch (npc->GetPetOriginClass()) {
-			case Class::Enchanter:
-				npc->ChangeLastName(fmt::format("{}'s Animation", GetCleanName()));
-				break;
-			case Class::Magician:
-				npc->ChangeLastName(fmt::format("{}'s Elemental Minion", GetCleanName()));
-				break;
-			case Class::Druid:
-				npc->ChangeLastName(fmt::format("{}'s Tiny Bear", GetCleanName()));
-				break;
-			case Class::ShadowKnight:
-			case Class::Necromancer:
-				npc->ChangeLastName(fmt::format("{}'s Undead Minion", GetCleanName()));
-				break;
-			case Class::Beastlord:
-				npc->ChangeLastName(fmt::format("{}'s Warder", GetCleanName()));
-				break;
-			case Class::Shaman:
-				npc->ChangeLastName(fmt::format("{}'s Spirit Companion", GetCleanName()));
-				break;
-			case Class::Wizard:
-			case Class::Cleric:
-				if (npc->GetPetType() == PetType::petFamiliar) {
-					npc->ChangeLastName(fmt::format("{}'s Familiar", GetCleanName()));
-				} else {
-					npc->ChangeLastName(fmt::format("{}'s Animated Weapon", GetCleanName()));
-				}
-				break;
-			default:
-				npc->ChangeLastName(fmt::format("{}'s Pet", GetCleanName()));
-		}
 	}
 
 	// Now that we have an actual object to interact with, load
@@ -502,19 +470,16 @@ std::string Mob::GenerateUndeadPetName() {
 }
 
 std::string Mob::GenerateElementalPetName() {
-    // Define name components with empty strings for shortening
     std::vector<std::string> part1 = {"G", "J", "K", "L", "V", "X", "Z", "T", "N", "M", "R", "S"};
     std::vector<std::string> part2 = {"", "ab", "ar", "as", "eb", "en", "ib", "ob", "on", "ul", "ix", "al"};
     std::vector<std::string> part3 = {"", "an", "ar", "ek", "ob", "or", "us", "al", "is", "um"};
     std::vector<std::string> part4 = {"er", "ab", "n", "tik", "eth", "os", "ar", "ir", "is"};
 
-    // Randomly select components
     const std::string& first = part1[zone->random.Roll0(part1.size())];
     const std::string& second = part2[zone->random.Roll0(part2.size())];
     const std::string& third = part3[zone->random.Roll0(part3.size())];
     const std::string& fourth = part4[zone->random.Roll0(part4.size())];
 
-    // Construct the final name
     std::string name = first + second + third + fourth;
 
     return name;
@@ -602,6 +567,65 @@ std::string Mob::GenerateBeastlordPetName() {
     return racePrefixes[zone->random.Roll0(racePrefixes.size())] + raceSuffixes[zone->random.Roll0(raceSuffixes.size())];
 }
 
+std::string Mob::GenerateShamanPetName() {
+    static const std::vector<std::string> prefixes = {
+        "Spirit", "Ethereal", "Ghost", "Ancestor", "Shadow", "Phantom", "Mystic", "Spectral",
+        "Echo", "Soul", "Wraith", "Haunted", "Silent", "Wisdom", "Moon", "Pale", "Frost", "Dusk"
+    };
+
+    static const std::vector<std::string> middles = {
+        "Howl", "Fang", "Hunter", "Paw", "Prowler", "Alpha", "Wolf", "Pack", "Shade",
+        "Walker", "Guardian", "Sentinel", "Stalker", "Bound", "Claw", "Spirit", "Hound", "Watcher"
+    };
+
+    static const std::vector<std::string> suffixes = {
+        "", "of Echoes", "of Shadows", "of the Moon", "of Frost", "of Ancestors", "of Night",
+        "of Silence", "of Whispers", "of Spirits", "of the Hunt", "of Warding", "of the Pack",
+        "of the Alpha", "of Wisdom", "of the Ether", "of Dusk", "of Winter"
+    };
+
+    const std::string& prefix = prefixes[zone->random.Roll0(prefixes.size())];
+    const std::string& middle = middles[zone->random.Roll0(middles.size())];
+    const std::string& suffix = suffixes[zone->random.Roll0(suffixes.size())];
+
+    std::string name = prefix + " " + middle;
+    if (!suffix.empty()) {
+        name += " " + suffix;
+    }
+
+    return name;
+}
+
+std::string Mob::GenerateEnchanterPetName() {
+    static const std::vector<std::string> enchanterAnimationNames = {
+        "Phantom_Fencer", "Spectral_Blade", "Haunting_Slasher", "Ghostly_Swordsman",
+        "Ethereal_Duelist", "Shadow_Slicer", "Arcane_Prowler", "Wraith_Cutlass",
+        "Runed_Slicer", "Spellbound_Fencer", "Floating_Blade", "Void_Saber",
+        "Mystic_Flurry", "Enigma_Slasher", "Hexed_Swordsman", "Wraith_Slasher",
+        "Charmed_Duelist", "Telekinetic_Flurry", "Spectral_Saber", "Spirit_Blade",
+        "Haunted_Dagger", "Cursed_Sword", "Hexblade", "Void_Cutter", "Soulbound_Flurry",
+        "Runed_Edge", "Ethereal_Cleaver", "Shrouded_Strike", "Invisible_Slasher",
+        "Silent_Cutlass", "Phantom_Dagger", "Spirit_Cleaver", "Arcane_Saber",
+
+        "Stabby_McStabface", "Floaty_Bois", "Slashy_McSlashface", "Pokey_McPokerson",
+        "Cutty_McCutface", "Blade_Boi", "Bonky_Buddy", "Bouncy_Slasher", "Clangy_McClang",
+        "Whirly_McWhirlerson", "Spin_to_Win", "Pokey_McFloaty", "Swingy_Boi",
+        "Boop_Stick", "Spooky_Slasher", "Whacky_Floater", "The_Floating_Brigade",
+
+        "Dancing_Swords", "Floating_Fury", "Invisible_Blade", "Cursed_Edge",
+        "Runed_Strike", "Ethereal_Shiv", "Void_Whisper", "Arcane_Warrior",
+        "Phantom_Flurry", "Spectral_Strike", "Silent_Blade", "Enchanted_Edge",
+        "Shrouded_Cleaver", "Illusory_Striker", "Ghostblade", "Mystic_Slicer",
+
+        "Clanging_Specter", "Twilight_Blade", "Bound_Slicer", "Ethereal_Warrior",
+        "Spirit_Slicer", "Haunted_Slasher", "Runic_Whirlwind", "Shimmering_Saber",
+        "Floating_Strike", "Shadow_Blade", "Poltergeist_Slasher", "Void_Sentinel",
+        "Phantom_Striker", "Glowing_Cleaver", "Haunting_Shiv"
+    };
+
+    // Return a random name from the static list
+    return enchanterAnimationNames[zone->random.Roll0(enchanterAnimationNames.size())];
+}
 
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I

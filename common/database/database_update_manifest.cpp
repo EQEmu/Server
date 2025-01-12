@@ -5815,7 +5815,8 @@ ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_
 		.sql = R"(
 CREATE TABLE `character_pet_name` (
     `char_id` INT(11) NOT NULL PRIMARY KEY,
-    `name` VARCHAR(64) NOT NULL
+	`class_id` INT(11) NOT NULL PRIMARY KEY,
+    `name` VARCHAR(64) NOT NULL,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 )",
 	}

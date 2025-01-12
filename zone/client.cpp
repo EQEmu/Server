@@ -5800,9 +5800,14 @@ std::string Client::GetPetVanityName(int class_id) {
 		)
 	);
 
+	LogDebug("Checking for vanity name");
+
 	if (!vanity_name.empty()) {
+		LogDebug("Got Vanity name");
 		return vanity_name.front().name;
 	}
+
+	LogDebug("Generating Vanity Name");
 
 	std::string new_name;
 
@@ -5821,9 +5826,20 @@ std::string Client::GetPetVanityName(int class_id) {
 			case Class::ShadowKnight:
 				new_name = GenerateUndeadPetName();
 				break;
+			case Class::Enchanter:
+				new_name = GenerateEnchanterPetName();
+				break;
+			case Class::Shaman:
+				new_name = GenerateShamanPetName();
+				break;
+			case Class::Wizard:
+			case Class::Cleric:
+				new_name = fmt::format("{}'s Animated Weapon", GetCleanName());
+				break;
 			default:
-				new_name = "Default";
+				new_name = fmt::format("{}'s Pet", GetCleanName());
 		}
+		LogDebug("Checking if [{}] is valid", new_name);
 	} while (!database.CheckNameFilter(new_name) || database.IsNameUsed(new_name));
 
 	SetPetVanityName(new_name, class_id);
