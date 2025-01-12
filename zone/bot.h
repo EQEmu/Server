@@ -281,7 +281,7 @@ public:
 	void SetLevel(uint8 in_level, bool command = false) override;
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) override;
 	bool Process() override;
-	void FinishTrade(Client* client, BotTradeType trade_type);
+	void FinishTrade(Client* client, BotTradeType trade_type, int16 chosen_slot = INVALID_INDEX);
 	bool Save() override;
 	void Depop();
 	void CalcBotStats(bool showtext = true);
@@ -1068,7 +1068,7 @@ protected:
 	void BotMeditate(bool is_sitting);
 	bool CheckBotDoubleAttack(bool triple_attack = false);
 	bool CheckTripleAttack();
-	void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);
+	void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client, int16 chosen_slot = INVALID_INDEX);
 	bool AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = nullptr) override;
 
 	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }

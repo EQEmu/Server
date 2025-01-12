@@ -4142,7 +4142,7 @@ bool Bot::AddBotToGroup(Bot* bot, Group* group) {
 }
 
 // Completes a trade with a client bot owner
-void Bot::FinishTrade(Client* client, BotTradeType trade_type)
+void Bot::FinishTrade(Client* client, BotTradeType trade_type, int16 chosen_slot)
 {
 	if (
 		!client ||
@@ -4166,7 +4166,7 @@ void Bot::FinishTrade(Client* client, BotTradeType trade_type)
 	else if (trade_type == BotTradeClientNoDropNoTrade) {
 		// Items being traded are found on the Client's cursor slot, slot id 30. This item can be either a single item or it can be a bag.
 		// If it is a bag, then we have to search for items in slots 331 thru 340
-		PerformTradeWithClient(EQ::invslot::slotCursor, EQ::invslot::slotCursor, client);
+		PerformTradeWithClient(EQ::invslot::slotCursor, EQ::invslot::slotCursor, client, chosen_slot);
 
 		// TODO: Add logic here to test if the item in SLOT_CURSOR is a container type, if it is then we need to call the following:
 		// PerformTradeWithClient(331, 340, client);
@@ -4174,7 +4174,7 @@ void Bot::FinishTrade(Client* client, BotTradeType trade_type)
 }
 
 // Perfoms the actual trade action with a client bot owner
-void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client)
+void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client, int16 chosen_slot)
 {
 	using namespace EQ;
 
@@ -4194,14 +4194,16 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		ClientReturn(ItemInstance* item, int16 from) : return_item_instance(item), from_bot_slot(from) { }
 	};
 
-	static const int16 bot_equip_order[invslot::EQUIPMENT_COUNT] = {
-		invslot::slotCharm,			invslot::slotEar1,			invslot::slotHead,			invslot::slotFace,
-		invslot::slotEar2,			invslot::slotNeck,			invslot::slotShoulders,		invslot::slotArms,
-		invslot::slotBack,			invslot::slotWrist1,		invslot::slotWrist2,		invslot::slotRange,
-		invslot::slotHands,			invslot::slotPrimary,		invslot::slotSecondary,		invslot::slotFinger1,
-		invslot::slotFinger2,		invslot::slotChest,			invslot::slotLegs,			invslot::slotFeet,
-		invslot::slotWaist,			invslot::slotPowerSource,	invslot::slotAmmo
-	};
+	std::vector<int16> bot_equip_order;
+
+	if (chosen_slot != INVALID_INDEX) {
+		bot_equip_order.emplace_back(chosen_slot);
+	}
+	else {
+		for (int16 i = 0; i < invslot::EQUIPMENT_COUNT; ++i) {
+			bot_equip_order.push_back(i);
+		}
+	}
 
 	enum { stageStackable = 0, stageEmpty, stageReplaceable };
 

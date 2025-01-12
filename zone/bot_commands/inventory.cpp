@@ -25,7 +25,7 @@ void bot_command_inventory_give(Client* c, const Seperator* sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} ([actionable: target | byname] ([actionable_name]))",
+				"Usage: {} ([actionable: target | byname] ([actionable_name])) [optional: slot ID]",
 				sep->arg[0]
 			).c_str()
 		);
@@ -33,19 +33,45 @@ void bot_command_inventory_give(Client* c, const Seperator* sep)
 	}
 
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
+	int ab_arg = 1;
+	int slot_arg = 1;
+	int16 chosen_slot = INVALID_INDEX;
+	bool byname = false;
+
+	std::string byname_arg = sep->arg[ab_arg];
+
+	if (!byname_arg.compare("byname")) {
+		byname = true;
+		slot_arg = ab_arg + 2;
+	}
+
+	if (sep->IsNumber(slot_arg)) {
+		chosen_slot = atoi(sep->arg[slot_arg]);
+
+		if (!byname) {
+			++ab_arg;
+		}
+
+		if (!EQ::ValueWithin(chosen_slot, EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END)) {
+			c->Message(Chat::Yellow, "Please enter a valid inventory slot.");
+
+			return;
+		}		
+	}
 
 	std::vector<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[ab_arg + 1]) == ActionableBots::ABT_None) {
 		return;
 	}
 
 	auto my_bot = sbl.front();
 	if (!my_bot) {
-		c->Message(Chat::White, "ActionableBots returned 'nullptr'");
+		c->Message(Chat::Yellow, "ActionableBots returned 'nullptr'");
+
 		return;
 	}
 
-	my_bot->FinishTrade(c, Bot::BotTradeClientNoDropNoTrade);
+	my_bot->FinishTrade(c, Bot::BotTradeClientNoDropNoTrade, chosen_slot);
 }
 
 void bot_command_inventory_list(Client* c, const Seperator* sep)
