@@ -48,15 +48,15 @@ void bot_command_inventory_give(Client* c, const Seperator* sep)
 	if (sep->IsNumber(slot_arg)) {
 		chosen_slot = atoi(sep->arg[slot_arg]);
 
-		if (!byname) {
-			++ab_arg;
-		}
-
-		if (!EQ::ValueWithin(chosen_slot, EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END)) {
+		if (!EQ::ValueWithin(chosen_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
 			c->Message(Chat::Yellow, "Please enter a valid inventory slot.");
 
 			return;
-		}		
+		}
+
+		if (!byname) {
+			++ab_arg;
+		}	
 	}
 
 	std::vector<Bot*> sbl;
