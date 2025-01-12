@@ -1087,7 +1087,6 @@ RULE_REAL(Custom,  	ItemExtraSpellAmtBardFactor, 			0.10, "Factor to multiple ru
 RULE_BOOL(Custom,   MultipleTwoHandedProcs,					false, "Allow two-handed weapons to proc multiple procs (such as augments)")
 RULE_INT(Custom,   	DevastatingFrenzyRateModifier, 			0, "Subtract this value from the chance for Devastating Frenzy to trigger")
 RULE_REAL(Custom,   DevastatingFrenzyDamageMultiplier, 		1.0, "Apply this multiplier for each 20% missing hp from target whenever Devastating Frenzy triggers")
-RULE_BOOL(Custom,   FrenzyScaleOnWeapon, 					true, "Add weapon damage to frenzy, and delay to frenzy reuse")
 RULE_BOOL(Custom,   ExcludeTempPetsFromProcChanceSPA,       false, "Enable this rule to prevent SE_ProcChance from affecting procs that spawn temporary pets")
 RULE_BOOL(Custom, 	AttuneItemOnClick,						false, "Forcibly items  on click")
 RULE_BOOL(Custom,   BypassProcStackConflicts, 				false, "Force stack conflicts for SPA SE_WeaponProc to be ignored")
@@ -1112,6 +1111,9 @@ RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit r
 
 RULE_BOOL(Custom,   UseHasteForMeleeSkills, 				true, "Use Haste stat for activated melee skills")
 RULE_REAL(Custom, 	PetWeaponTuningMult, 					0.5, "Value added to weapon ratio for pet weapon usage")
+
+// Melee Attack Scaling
+RULE_REAL(Custom,	ScaleFrenzyOnWeaponAmount, 				1.0, "Value to multiply weapon damage on frenzy base damage by. 0 to disable")
 
 RULE_INT(Custom, ServerAuthKey, 0, "Value used to verify patch serial number")
 
