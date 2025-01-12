@@ -3379,9 +3379,9 @@ perl::array Perl_Client_GetInventorySlots(Client* self)
 	return result;
 }
 
-void Perl_Client_ChangePetName(Client* self)
+void Perl_Client_ChangePetName(Client* self, int class_id)
 {
-	self->GrantPetNameChange(Class::Magician);
+	self->GrantPetNameChange(class_id);
 }
 
 void perl_register_client()
@@ -3456,7 +3456,7 @@ void perl_register_client()
 	package.add("CanHaveSkill", &Perl_Client_CanHaveSkill);
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
-	package.add("ChangePetName", &Perl_Client_ChangePetName);
+	package.add("ChangePetName", (void(*)(Client*, int))&Perl_Client_ChangePetName);
 	package.add("CharacterID", &Perl_Client_CharacterID);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
