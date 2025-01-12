@@ -31,7 +31,6 @@
 
 /*
 TODO bot rewrite:
---add slotid option to invgive
 --command cleanup (move to new help window, make more descriptive)
 --Add quest methods for functions
 */
