@@ -4904,7 +4904,8 @@ void Client::Handle_OP_CAuth(const EQApplicationPacket *app) {
 	if (RuleB(Custom, ServerAuthStats)) {
 		AuthResponse_Struct *buf = (AuthResponse_Struct *)app->pBuffer;
 
-		uint32 private_key = Strings::ToUnsignedInt(DataBucket::GetData("cauth_key"), 0);
+		uint32 private_key = RuleI(Custom, ServerAuthKey);
+
 		if (private_key == 0) {
 			return;
 		}
