@@ -839,7 +839,7 @@ void Client::CompleteConnect()
 		);
 
 		if (IsPetNameChangeAllowed()) {
-			InvokeChangePetName();
+			InvokeChangePetNameNag();
 		}
 	}
 

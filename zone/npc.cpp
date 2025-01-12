@@ -2247,7 +2247,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			swarm_owner->IsClient() &&
 			RuleB(Pets, ClientPetsUseOwnerNameInLastName)
 		) {
-			const auto& tmp_lastname = fmt::format("{}'s Pet", swarm_owner->GetName());
+			const auto& tmp_lastname = fmt::format("{}'s Minion", swarm_owner->GetName());
 			if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
 				strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
@@ -2299,7 +2299,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 							}
 							break;
 						default:
-							tmp_lastname = fmt::format("{}'s Pet", owner->GetCleanName());
+							tmp_lastname = fmt::format("{}'s Minion", owner->GetCleanName());
 					}
 
 

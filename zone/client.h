@@ -314,6 +314,7 @@ public:
 	void GrantPetNameChange(uint8 class_id);
 	void ClearPetNameChange();
 	void InvokeChangePetName();
+	void InvokeChangePetNameNag();
 	bool ChangePetName(char *new_name);
 	void DeletePetVanityName(int class_id);
 	void SetPetVanityName(std::string vanity_name, int class_id);

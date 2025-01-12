@@ -5785,10 +5785,12 @@ void Client::SetPetVanityName(std::string vanity_name, int class_id) {
         return;
     }
 
+	LogDebug("Setting Vanity Name for class [{}], name [{}]", class_id, vanity_name);
 	CharacterPetNameRepository::ReplaceOne(
 		database,
 		{ static_cast<int>(CharacterID()), vanity_name, static_cast<int8_t>(class_id) }
 	);
+	LogDebug("Completed");
 }
 
 std::string Client::GetPetVanityName(int class_id) {
@@ -5832,15 +5834,10 @@ std::string Client::GetPetVanityName(int class_id) {
 			case Class::Shaman:
 				new_name = GenerateShamanPetName();
 				break;
-			case Class::Wizard:
-			case Class::Cleric:
-				new_name = fmt::format("{}'s Animated Weapon", GetCleanName());
-				break;
 			default:
 				new_name = fmt::format("{}'s Pet", GetCleanName());
 		}
-		LogDebug("Checking if [{}] is valid", new_name);
-	} while (!database.CheckNameFilter(new_name) || database.IsNameUsed(new_name));
+	} while (database.CheckNameFilter(new_name) || database.IsNameUsed(new_name));
 
 	SetPetVanityName(new_name, class_id);
 	return new_name;
@@ -5871,6 +5868,16 @@ int8 Client::GetPetNameChangeClass() {
 }
 
 void Client::InvokeChangePetName() {
+	if (!IsPetNameChangeAllowed()) {
+		return;
+	}
+
+	auto outapp = new EQApplicationPacket(OP_InvokeChangePetNameImmediate, 0);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::InvokeChangePetNameNag() {
 	if (!IsPetNameChangeAllowed()) {
 		return;
 	}
