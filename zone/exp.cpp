@@ -619,7 +619,10 @@ float Client::GetItemStatValue(EQ::ItemData* item) {
 	return_value += item->HP   / 10.0f;
 	return_value += item->Mana / 10.0f;
 
-	return_value += item->Damage - (item->Delay / 2);
+	if (item->Delay > 0) {
+		float dps = static_cast<float>(item->Damage) / static_cast<float>(item->Delay);
+		return_value += dps * 10.0f;
+	}
 
 	return_value += item->AStr;
 	return_value += item->ASta;
@@ -648,8 +651,8 @@ float Client::GetItemStatValue(EQ::ItemData* item) {
 	return_value += 2 * item->HeroicDR;
 	return_value += 2 * item->HeroicPR;
 
-	return_value += 2 * item->HealAmt;
-	return_value += 2 * item->SpellDmg;
+	return_value += 5 * item->HealAmt;
+	return_value += 5 * item->SpellDmg;
 
 	if (item->Click.Effect > 0) return_value  += 25;
 	if (item->Worn.Effect  > 0)  return_value += 25;

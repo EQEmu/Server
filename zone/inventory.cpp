@@ -2054,6 +2054,25 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	EQ::ItemInstance* src_inst = m_inv.GetItem(src_slot_id);
 	EQ::ItemInstance* dst_inst = m_inv.GetItem(dst_slot_id);
 
+	// Check for Moving into Unattuner\Combine bag for cost feedback
+	if ((dst_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && dst_slot_id <= EQ::invbag::GENERAL_BAGS_END) ||
+		(dst_slot_id >= EQ::invbag::BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::BANK_BAGS_END) ||
+		(dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
+	{
+		EQ::ItemInstance* bag;
+		bag = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(dst_slot_id));
+		if (bag && src_inst) {
+			switch (bag->GetID()) {
+				case 4041: // Combinerator
+					LogDebug("Moved Item into Combinerator [{}], Value [{}]", src_inst->GetItem()->Name, GetItemStatValue(src_inst->GetItem()));
+				break;
+				case 52024: // Unattuner
+					LogDebug("Moved Item into Unattuner [{}], Value [{}]", src_inst->GetItem()->Name, GetItemStatValue(src_inst->GetItem()));
+				break;
+			}
+		}
+	}
+
 	if (src_inst){
 		LogInventory("Src slot [{}] has item [{}] ([{}]) with [{}] charges in it", src_slot_id, src_inst->GetItem()->Name, src_inst->GetItem()->ID, src_inst->GetCharges());
 		srcitemid = src_inst->GetItem()->ID;
