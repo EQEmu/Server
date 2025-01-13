@@ -616,8 +616,8 @@ float Client::GetItemStatValue(EQ::ItemData* item) {
 		return 5.0f;
 	}
 
-	return_value += item->HP   / 10.0f;
-	return_value += item->Mana / 10.0f;
+	return_value += item->HP   / 5.0f;
+	return_value += item->Mana / 5.0f;
 
 	if (item->Delay > 0) {
 		float dps = static_cast<float>(item->Damage) / static_cast<float>(item->Delay);
@@ -657,6 +657,14 @@ float Client::GetItemStatValue(EQ::ItemData* item) {
 	if (item->Click.Effect > 0) return_value  += 25;
 	if (item->Worn.Effect  > 0)  return_value += 25;
 	if (item->Focus.Effect > 0) return_value  += 25;
+
+	if (item->ItemType == EQ::item::ItemTypeAugmentation) {
+		return_value *= 5;
+	}
+
+	if (item->BagSlots > 0) {
+		return_value = item->BagSlots * item->BagWR * item->BagSize;
+	}
 
 	return_value = std::max(1.0f, return_value);
 
