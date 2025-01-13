@@ -599,10 +599,10 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk, bool is_riposte
 			reuse_time++;
 		}
 
-		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
-			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
-			max_dmg = max_dmg + static_cast<int>((3 * weapon_damage) * (GetLevel() / 70.0f));
-			min_dmg = min_dmg + static_cast<int>((3 * weapon_damage) * (GetLevel() / 70.0f));
+		if (RuleR(Custom, FrenzyScaleOnWeaponAmount) > 0) {
+			int weapon_damage = GetWeaponDamage(GetTarget(), GetInv().GetItem(EQ::invslot::slotPrimary)) + GetWeaponDamage(GetTarget(), GetInv().GetItem(EQ::invslot::slotSecondary));
+			max_dmg = max_dmg + static_cast<int>((RuleR(Custom, FrenzyScaleOnWeaponAmount) * weapon_damage) * (GetLevel() / 70.0f));
+			min_dmg = min_dmg + static_cast<int>((RuleR(Custom, FrenzyScaleOnWeaponAmount) * weapon_damage) * (GetLevel() / 70.0f));
 		}
 
 		int animType = (GetRace() == Race::Iksar || GetRace() == Race::Human) ? animRoundKick : animHand2Hand;
@@ -639,8 +639,6 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk, bool is_riposte
 
 		return;
 	}
-
-	const uint8 class_id = GetClass();
 
 	// Warrior, Ranger, Monk, Beastlord, and Berserker can kick always
 	const uint32 allowed_kick_classes = RuleI(Combat, ExtraAllowedKickClassesBitmask);
@@ -800,44 +798,78 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 		min_dmg = npc->GetMinDamage();
 	}
 
+	int extra_feet = 0;
+	int extra_hand = 0;
+
+	if (IsClient()) {
+		auto item_quality = [](const EQ::ItemInstance* item) -> int {
+			if (!item) {
+				return 0;
+			}
+			const auto item_data = item->GetItem();
+			int statSum = item_data->HeroicAgi +
+						  item_data->HeroicDex +
+						  item_data->HeroicStr +
+						  item_data->HeroicSta +
+						  item_data->AAgi +
+						  item_data->ADex +
+						  item_data->AStr +
+						  item_data->ASta +
+						  item_data->AC;
+
+			return statSum;
+		};
+
+		const auto feet = GetInv().GetItem(EQ::invslot::slotFeet);
+		const auto hand = GetInv().GetItem(EQ::invslot::slotHands);
+
+		extra_feet = item_quality(feet) * RuleR(Custom, MonkScaleOnHandFeetQuality);
+		extra_hand = item_quality(hand) * RuleR(Custom, MonkScaleOnHandFeetQuality);
+	}
+
 	switch (unchecked_type) {
 	case EQ::skills::SkillFlyingKick:
 		skill_type = EQ::skills::SkillFlyingKick;
-		max_dmg = GetBaseSkillDamage(skill_type);
-		min_dmg = 0; // revamped FK formula is missing the min mod?
+		max_dmg = GetBaseSkillDamage(skill_type) + extra_feet;
+		min_dmg += extra_feet;
 		DoAnim(animFlyingKick, 0, false);
 		reuse = FlyingKickReuseTime;
 		break;
 	case EQ::skills::SkillDragonPunch:
 		skill_type = EQ::skills::SkillDragonPunch;
-		max_dmg = GetBaseSkillDamage(skill_type);
+		max_dmg = GetBaseSkillDamage(skill_type) + extra_hand;
+		min_dmg += extra_hand;
 		itemslot = EQ::invslot::slotHands;
 		DoAnim(animTailRake, 0, false);
 		reuse = TailRakeReuseTime;
 		break;
 	case EQ::skills::SkillEagleStrike:
 		skill_type = EQ::skills::SkillEagleStrike;
-		max_dmg = GetBaseSkillDamage(skill_type);
+		max_dmg = GetBaseSkillDamage(skill_type) + extra_hand;
+		min_dmg += extra_hand;
 		itemslot = EQ::invslot::slotHands;
 		DoAnim(animEagleStrike, 0, false);
 		reuse = EagleStrikeReuseTime;
 		break;
 	case EQ::skills::SkillTigerClaw:
 		skill_type = EQ::skills::SkillTigerClaw;
-		max_dmg = GetBaseSkillDamage(skill_type);
+		max_dmg = GetBaseSkillDamage(skill_type) + extra_hand;
+		min_dmg += extra_hand;
 		itemslot = EQ::invslot::slotHands;
 		DoAnim(animTigerClaw, 0, false);
 		reuse = TigerClawReuseTime;
 		break;
 	case EQ::skills::SkillRoundKick:
 		skill_type = EQ::skills::SkillRoundKick;
-		max_dmg = GetBaseSkillDamage(skill_type);
+		max_dmg = GetBaseSkillDamage(skill_type) + extra_feet;
+		min_dmg += extra_feet;
 		DoAnim(animRoundKick, 0, false);
 		reuse = RoundKickReuseTime;
 		break;
 	case EQ::skills::SkillKick:
 		skill_type = EQ::skills::SkillKick;
-		max_dmg = GetBaseSkillDamage(skill_type);
+		max_dmg = GetBaseSkillDamage(skill_type) + extra_feet;
+		min_dmg += extra_feet;
 		DoAnim(animKick, 0, false);
 		reuse = KickReuseTime;
 		break;
@@ -864,6 +896,12 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 	// aggro should never be negative else it does massive aggro
 	if (ht < 0)	{
 		ht = 0;
+	}
+
+	if (RuleR(Custom, MonkScaleOnWeaponAmount) > 0) {
+		int weapon_damage = GetWeaponDamage(GetTarget(), GetInv().GetItem(EQ::invslot::slotPrimary)) + GetWeaponDamage(GetTarget(), GetInv().GetItem(EQ::invslot::slotSecondary));
+		max_dmg = max_dmg + static_cast<int>((RuleR(Custom, MonkScaleOnWeaponAmount) * weapon_damage) * (GetLevel() / 70.0f));
+		min_dmg = min_dmg + static_cast<int>((RuleR(Custom, MonkScaleOnWeaponAmount) * weapon_damage) * (GetLevel() / 70.0f));
 	}
 
 	DoSpecialAttackDamage(other, skill_type, max_dmg, min_dmg, ht, reuse);
