@@ -2055,79 +2055,81 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	EQ::ItemInstance* dst_inst = m_inv.GetItem(dst_slot_id);
 
 	// Check for Moving into Unattuner\Combine bag for cost feedback
-	if ((dst_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && dst_slot_id <= EQ::invbag::GENERAL_BAGS_END) ||
-		(dst_slot_id >= EQ::invbag::BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::BANK_BAGS_END) ||
-		(dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
-	{
-		EQ::ItemInstance* bag;
-		bag = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(dst_slot_id));
-		if (bag && src_inst) {
-			EQ::SayLinkEngine linker;
-			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-			linker.SetItemInst(src_inst);
+	if (RuleB(Custom, UseCustomUnattuneCombine)) {
+		if ((dst_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && dst_slot_id <= EQ::invbag::GENERAL_BAGS_END) ||
+			(dst_slot_id >= EQ::invbag::BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::BANK_BAGS_END) ||
+			(dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
+		{
+			EQ::ItemInstance* bag;
+			bag = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(dst_slot_id));
+			if (bag && src_inst) {
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+				linker.SetItemInst(src_inst);
 
-			switch (bag->GetID()) {
-				case 4041: { // Combinerator
-					int first_item_id = -1;
-					bool combineable = true;
-					int bag_slot = EQ::InventoryProfile::CalcBagIdx(dst_slot_id);
+				switch (bag->GetID()) {
+					case 4041: { // Combinerator
+						int first_item_id = -1;
+						bool combineable = true;
+						int bag_slot = EQ::InventoryProfile::CalcBagIdx(dst_slot_id);
 
-					for (int i = 0; i < 4; ++i) {
-						if (i == bag_slot) {
-							continue; // Skip the slot we are about to fill
-						}
-						auto item = bag->GetItem(i);
-						if (!item) {
-							combineable = false;
-							break;
+						for (int i = 0; i < 4; ++i) {
+							if (i == bag_slot) {
+								continue; // Skip the slot we are about to fill
+							}
+							auto item = bag->GetItem(i);
+							if (!item) {
+								combineable = false;
+								break;
+							}
+
+							if (first_item_id == -1) {
+								first_item_id = item->GetID();
+							} else if (item->GetID() != first_item_id) {
+								combineable = false;
+								break;
+							}
 						}
 
-						if (first_item_id == -1) {
-							first_item_id = item->GetID();
-						} else if (item->GetID() != first_item_id) {
-							combineable = false;
-							break;
+						// Check if src_inst matches the first item ID
+						if (combineable && src_inst) {
+							if (first_item_id == -1) {
+								first_item_id = src_inst->GetID();
+							} else if (src_inst->GetID() != first_item_id) {
+								combineable = false;
+							}
 						}
+
+						if (combineable) {
+							const auto next_upgrade = database.GetItem(src_inst->GetID() + 1000000);
+							if (!next_upgrade) {
+								LogDebug("Unable to find upgrade item [{}]", src_inst->GetID() + 1000000);
+								break;
+							}
+
+							linker.SetLinkType(EQ::saylink::SayLinkItemData);
+							linker.SetItemData(src_inst->GetItem());
+							auto cur_itm_lnk = linker.GenerateLink();
+
+							linker.SetItemData(next_upgrade);
+							auto new_itm_lnk = linker.GenerateLink();
+
+							const int item_value = GetItemStatValue(next_upgrade) * RuleI(Custom, CombineCostMultiplier);
+							Message(Chat::Yellow, fmt::format("Combining your set of [{}] into one [{}] will consume {}pp.", cur_itm_lnk, new_itm_lnk, Strings::Commify(item_value)).c_str());
+						}
+						break;
 					}
-
-					// Check if src_inst matches the first item ID
-					if (combineable && src_inst) {
-						if (first_item_id == -1) {
-							first_item_id = src_inst->GetID();
-						} else if (src_inst->GetID() != first_item_id) {
-							combineable = false;
+					case 52024: // Unattuner
+						if (src_inst->GetItem()->Attuneable) {
+							if (!src_inst->IsAttuned()) {
+								Message(Chat::Yellow, fmt::format("Your [{}] is not yet attuned, and so it cannot be unattuned.", linker.GenerateLink()).c_str());
+							} else {
+								const int item_value = GetItemStatValue(src_inst->GetItem()) * RuleI(Custom, UnattuneCostMultiplier);
+								Message(Chat::Yellow, fmt::format("Unattuning your [{}] will consume {}pp.", linker.GenerateLink(), Strings::Commify(item_value)).c_str());
+							}
 						}
-					}
-
-					if (combineable) {
-						const auto next_upgrade = database.GetItem(src_inst->GetID() + 1000000);
-						if (!next_upgrade) {
-							LogDebug("Unable to find upgrade item [{}]", src_inst->GetID() + 1000000);
-							break;
-						}
-
-						linker.SetLinkType(EQ::saylink::SayLinkItemData);
-						linker.SetItemData(src_inst->GetItem());
-						auto cur_itm_lnk = linker.GenerateLink();
-
-						linker.SetItemData(next_upgrade);
-						auto new_itm_lnk = linker.GenerateLink();
-
-						const int item_value = GetItemStatValue(next_upgrade) * RuleI(Custom, CombineCostMultiplier);
-						Message(Chat::Yellow, fmt::format("Combining your set of [{}] into one [{}] will consume {}pp.", cur_itm_lnk, new_itm_lnk, Strings::Commify(item_value)).c_str());
-					}
 					break;
 				}
-				case 52024: // Unattuner
-					if (src_inst->GetItem()->Attuneable) {
-						if (!src_inst->IsAttuned()) {
-							Message(Chat::Yellow, fmt::format("Your [{}] is not yet attuned, and so it cannot be unattuned.", linker.GenerateLink()).c_str());
-						} else {
-							const int item_value = GetItemStatValue(src_inst->GetItem()) * RuleI(Custom, UnattuneCostMultiplier);
-							Message(Chat::Yellow, fmt::format("Unattuning your [{}] will consume {}pp.", linker.GenerateLink(), Strings::Commify(item_value)).c_str());
-						}
-					}
-				break;
 			}
 		}
 	}

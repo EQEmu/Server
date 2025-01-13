@@ -394,10 +394,18 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 			linker.SetItemInst(inst);
 			int cost = user->GetItemStatValue(inst->GetItem()) * 1000 * RuleI(Custom, UnattuneCostMultiplier);
-			if (user->TakeMoneyFromPP(cost, true)) {
-				user->Message(Chat::Yellow, fmt::format("You spend {}pp to unattune your [{}].", Strings::Commify(cost/1000),linker.GenerateLink()).c_str());
+			if (!RuleB(Custom, UseCustomUnattuneCombine) || user->TakeMoneyFromPP(cost, true)) {
 				inst->SetAttuned(false);
-				user->EjectItemFromSlot(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0));
+
+				if (RuleB(Custom, UseCustomUnattuneCombine)) {
+					user->Message(Chat::Yellow, fmt::format("You spend {}pp to unattune your [{}].", Strings::Commify(cost/1000),linker.GenerateLink()).c_str());
+					user->EjectItemFromSlot(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0));
+				} else {
+					user->PushItemOnCursor(*inst, true);
+					container->Clear();
+					user->DeleteItemInInventory(in_combine->container_slot, 0, true);
+				}
+
 				auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 				user->QueuePacket(outapp);
 				safe_delete(outapp);
@@ -452,16 +460,24 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 					linker.SetItemData(new_item);
 					auto new_itm_lnk = linker.GenerateLink();
 
-					if (!user->TakeMoneyFromPP(cost, true)) {
-						user->Message(Chat::Yellow, fmt::format("You do not have enough money to combine your set of [{}].", cur_itm_lnk).c_str());
-						return;
+					if (RuleB(Custom, UseCustomUnattuneCombine)) {
+						if (!user->TakeMoneyFromPP(cost, true)) {
+							user->Message(Chat::Yellow, fmt::format("You do not have enough money to combine your set of [{}].", cur_itm_lnk).c_str());
+							return;
+						}
+
+						user->Message(Chat::Yellow, fmt::format("You spend {}pp to combine your set of [{}] into one [{}].", Strings::Commify(cost/1000), cur_itm_lnk, new_itm_lnk).c_str());
 					}
 
-					user->Message(Chat::Yellow, fmt::format("You spend {}pp to combine your set of [{}] into one [{}].", Strings::Commify(cost/1000), cur_itm_lnk, new_itm_lnk).c_str());
-
 					user->SummonItem(new_item->ID, new_item->MaxCharges);
-					for (int i = 0; i < 4; ++i) {
-						user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot,i), 0, true);
+
+					if (RuleB(Custom, UseCustomUnattuneCombine)) {
+						for (int i = 0; i < 4; ++i) {
+							user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot,i), 0, true);
+						}
+					} else {
+						container->Clear();
+						user->DeleteItemInInventory(in_combine->container_slot, 0, true);
 					}
 
 					auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
