@@ -390,23 +390,27 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	if (container->GetItem() && container->GetItem()->BagType == EQ::item::BagTypeUnattuner) {
 		EQ::ItemInstance* inst = container->GetItem(0);
 		if (inst && inst->IsAttuned() && inst->GetItem()->NoDrop) { // Future Me: inst->GetItem()->NoDrop is opposite of what you expect
-			inst->SetAttuned(false);
-			user->PushItemOnCursor(*inst, true);
-
-			container->Clear();
-			user->DeleteItemInInventory(in_combine->container_slot, 0, true);
-
-			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
-			user->QueuePacket(outapp);
-			safe_delete(outapp);
-			return;
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+			linker.SetItemInst(inst);
+			int cost = user->GetItemStatValue(inst->GetItem()) * 1000 * RuleI(Custom, UnattuneCostMultiplier);
+			if (user->TakeMoneyFromPP(cost, true)) {
+				user->Message(Chat::Yellow, fmt::format("You spend {}pp to unattune your [{}].", Strings::Commify(cost/1000),linker.GenerateLink()).c_str());
+				inst->SetAttuned(false);
+				user->EjectItemFromSlot(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0));
+				auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+				user->QueuePacket(outapp);
+				safe_delete(outapp);
+				return;
+			} else {
+				user->Message(Chat::Yellow, fmt::format("You do not have enough money to unattune your [{}]", linker.GenerateLink()).c_str());
+			}
 		}
 	}
 
 	if (container->GetItem() && container->GetItem()->ID == 4041) {
 		auto first_item = container->GetItem(0);
-
-		if (first_item && first_item->GetItemType()) {
+		if (first_item) {
 			int aug_id = first_item->GetID();
 
 			// Check if all items in the container match the ID of the first item
@@ -431,16 +435,34 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 			if (all_same) {
 				auto new_item = database.GetItem(aug_id + 1000000);
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemData);
+
 				if (new_item) {
 					if (user->CheckLoreConflict(new_item)) {
 						user->Message(Chat::Red, "This combine would result in a disallowed LORE item. Aborting...");
 						return;
 					}
 
-					container->Clear();
+					int cost = user->GetItemStatValue(new_item) * 1000 * RuleI(Custom, CombineCostMultiplier);
+
+					linker.SetItemData(first_item->GetItem());
+					auto cur_itm_lnk = linker.GenerateLink();
+
+					linker.SetItemData(new_item);
+					auto new_itm_lnk = linker.GenerateLink();
+
+					if (!user->TakeMoneyFromPP(cost, true)) {
+						user->Message(Chat::Yellow, fmt::format("You do not have enough money to combine your set of [{}].", cur_itm_lnk).c_str());
+						return;
+					}
+
+					user->Message(Chat::Yellow, fmt::format("You spend {}pp to combine your set of [{}] into one [{}].", Strings::Commify(cost/1000), cur_itm_lnk, new_itm_lnk).c_str());
 
 					user->SummonItem(new_item->ID, new_item->MaxCharges);
-					user->DeleteItemInInventory(in_combine->container_slot, 0, true);
+					for (int i = 0; i < 4; ++i) {
+						user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot,i), 0, true);
+					}
 
 					auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 					user->QueuePacket(outapp);

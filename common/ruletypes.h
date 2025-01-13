@@ -1115,6 +1115,10 @@ RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit r
 RULE_BOOL(Custom,   UseHasteForMeleeSkills, 				true, "Use Haste stat for activated melee skills")
 RULE_REAL(Custom, 	PetWeaponTuningMult, 					0.5, "Value added to weapon ratio for pet weapon usage")
 
+RULE_BOOL(Custom,	UseCustomUnattuneCombine,				false, "Use plat-based unattuner and combiner")
+RULE_INT(Custom,	UnattuneCostMultiplier,					25, "Multiply this number by item_value to get cost in platinum to unattune")
+RULE_INT(Custom,	CombineCostMultiplier,					25, "Multiply this number by item_value to get cost in platinum to combine")
+
 RULE_INT(Custom, ServerAuthKey, 0, "Value used to verify patch serial number")
 
 // Seasonal
