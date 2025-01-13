@@ -82,18 +82,6 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				}
 			}
 
-			if (RuleR(Custom, ScaleFrenzyOnWeaponAmount) > 0) {
-				int weapon_damage = 0;
-
-				auto primary = GetInv().GetItem(EQ::invslot::slotPrimary);
-				auto secondary = GetInv().GetItem(EQ::invslot::slotSecondary);
-
-				weapon_damage += primary ? GetWeaponDamage(GetTarget(), primary) : 0;
-				weapon_damage += secondary ? GetWeaponDamage(GetTarget(), secondary) : 0;
-
-				base += static_cast<int>(weapon_damage * (GetLevel() / 70.0f) * RuleR(Custom, ScaleFrenzyOnWeaponAmount));
-			}
-
 			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
 				base *= std::abs(GetSkillDmgAmt(skill) / 100);
 			}
@@ -609,6 +597,12 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk, bool is_riposte
 
 		if (RuleB(Custom, ServerAuthStats)) {
 			reuse_time++;
+		}
+
+		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
+			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
+			max_dmg = max_dmg + static_cast<int>((3 * weapon_damage) * (GetLevel() / 70.0f));
+			min_dmg = min_dmg + static_cast<int>((3 * weapon_damage) * (GetLevel() / 70.0f));
 		}
 
 		int animType = (GetRace() == Race::Iksar || GetRace() == Race::Human) ? animRoundKick : animHand2Hand;
