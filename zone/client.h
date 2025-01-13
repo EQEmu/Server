@@ -1225,6 +1225,10 @@ public:
 	void SetTrader(bool status) { trader = status; }
 	uint16 GetTraderID() { return trader_id; }
 	void SetTraderID(uint16 id) { trader_id = id; }
+	void SetNoOfTraders(uint32 no) { m_no_traders = no; }
+	uint32 GetNoOfTraders() { return m_no_traders; }
+	void IncrementNoOfTraders() { m_no_traders += 1; }
+	void DecrementNoOfTraders() { m_no_traders > 0 ? m_no_traders -= 1 : m_no_traders = 0; }
 
 	void SendBulkStatsUpdate();
 	void SendHPStats();
@@ -2083,6 +2087,7 @@ private:
 	uint8 firstlogon;
 	uint32 mercid; // current merc
 	uint8 mercSlot; // selected merc slot
+	uint32                                                         m_no_traders{};
 	uint32                                                         m_buyer_id;
 	uint32                                                         m_barter_time;
 	int32                                                          m_parcel_platinum;

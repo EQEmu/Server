@@ -3922,21 +3922,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			auto            in = (TraderMessaging_Struct *) pack->pBuffer;
 			for (auto const &c: entity_list.GetClientList()) {
 				if (c.second->ClientVersion() >= EQ::versions::ClientVersion::RoF2) {
-					auto outapp    = new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct));
-					auto out       = (BecomeTrader_Struct *) outapp->pBuffer;
-					switch (in->action) {
-						case TraderOn: {
-							out->action = AddTraderToBazaarWindow;
-							break;
-						}
-						case TraderOff: {
-							out->action = RemoveTraderFromBazaarWindow;
-							break;
-						}
-						default: {
-							out->action = 0;
-						}
-					}
+					auto outapp           = new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct));
+					auto out              = (BecomeTrader_Struct *) outapp->pBuffer;
 
 					out->entity_id        = in->entity_id;
 					out->zone_id          = in->zone_id;
@@ -3944,7 +3931,29 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					out->trader_id        = in->trader_id;
 					strn0cpy(out->trader_name, in->trader_name, sizeof(out->trader_name));
 
-					c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+					switch (in->action) {
+						case TraderOn: {
+							out->action = AddTraderToBazaarWindow;
+							if (c.second->GetNoOfTraders() <
+								EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit) {
+									c.second->IncrementNoOfTraders();
+									c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+							}
+
+							break;
+						}
+						case TraderOff: {
+							out->action = RemoveTraderFromBazaarWindow;
+							c.second->DecrementNoOfTraders();
+							c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+							break;
+						}
+						default: {
+							out->action = 0;
+							c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+						}
+					}
+
 					safe_delete(outapp);
 				}
 				if (zone && zone->GetZoneID() == Zones::BAZAAR && in->instance_id == zone->GetInstanceID()) {
