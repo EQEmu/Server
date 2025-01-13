@@ -1797,6 +1797,7 @@ void Client::SendBarterWelcome()
 
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 {
+
 	auto results = Bazaar::GetSearchResults(database, search_criteria, GetZoneID(), GetInstanceID());
 	if (results.empty()) {
 		SendBazaarDone(GetID());
@@ -3221,9 +3222,25 @@ void Client::SendBulkBazaarTraders()
 
 	auto results = TraderRepository::GetDistinctTraders(
 		database,
-		GetInstanceID(),
-		EQ::constants::StaticLookup(ClientVersion())->BazaarTraderLimit
+		GetInstanceID()
 	);
+
+	auto shards = CharacterDataRepository::GetInstanceZonePlayerCounts(database, Zones::BAZAAR);
+	for (auto const &shard : shards) {
+		if (shard.instance_id == GetInstanceID() || shard.player_count == 0) {
+			continue;
+		}
+
+		TraderRepository::DistinctTraders_Struct t{};
+		t.entity_id        = 0;
+		t.trader_id        = TraderRepository::TRADER_CONVERT_ID + shard.instance_id;
+		t.trader_name      = fmt::format("Bazaar Shard {}", shard.instance_id);
+		t.zone_id          = Zones::BAZAAR;
+		t.zone_instance_id = shard.instance_id;
+		results.count += 1;
+		results.name_length += t.trader_name.length() + 1;
+		results.traders.push_back(t);
+	}
 
 	SetNoOfTraders(results.count);
 

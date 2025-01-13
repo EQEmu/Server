@@ -15529,6 +15529,16 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 	// Client has elected to buy an item from a Trader
 	//
 	auto in     = (TraderBuy_Struct *) app->pBuffer;
+
+	if (in->trader_id > TraderRepository::TRADER_CONVERT_ID) {
+		auto trader = TraderRepository::GetTraderByInstanceAndSerialnumber(
+			database, in->trader_id - TraderRepository::TRADER_CONVERT_ID, in->serial_number
+		);
+
+		in->trader_id = trader.trader_id;
+		strn0cpy(in->seller_name, trader.trader_name.c_str(), sizeof(in->seller_name));
+	}
+
 	auto trader = entity_list.GetClientByID(in->trader_id);
 
 	switch (in->method) {
