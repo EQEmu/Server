@@ -37,38 +37,29 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 	switch (skill) {
 		case EQ::skills::SkillDragonPunch:
 		case EQ::skills::SkillEagleStrike:
-		case EQ::skills::SkillTigerClaw: {
-			float skill_bonus = skill_level / 9.0f;
-			float ac_bonus    = 0.0f;
-
-			auto inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotHands);
-			if (inst) {
-				ac_bonus = inst->GetItemArmorClass(true) / RuleR(Custom, ScaleMonkKickACDivisor);
+		case EQ::skills::SkillTigerClaw:
+			if (skill_level >= 25) {
+				base++;
 			}
 
-			if (RuleR(Custom, ScaleMonkAttacksOnWeapons) > 0) {
-				int weapon_damage = 0;
-
-				auto primary = GetInv().GetItem(EQ::invslot::slotPrimary);
-				auto secondary = GetInv().GetItem(EQ::invslot::slotSecondary);
-
-				weapon_damage += primary ? GetWeaponDamage(GetTarget(), primary) : 0;
-				weapon_damage += secondary ? GetWeaponDamage(GetTarget(), secondary) : 0;
-
-				base += static_cast<int>(weapon_damage * (GetLevel() / 70.0f) * RuleR(Custom, ScaleMonkAttacksOnWeapons));
+			if (skill_level >= 75) {
+				base++;
 			}
 
-			if (ac_bonus > skill_bonus) {
-				ac_bonus = skill_bonus;
+			if (skill_level >= 125) {
+				base++;
+			}
+
+			if (skill_level >= 175) {
+				base++;
 			}
 
 			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
-				return static_cast<int>(base + ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
+				base *= std::abs(GetSkillDmgAmt(skill) / 100);
 			}
 
-			return static_cast<int>(base + ac_bonus + skill_bonus);
-		}
-		case EQ::skills::SkillFrenzy: {
+			return base;
+		case EQ::skills::SkillFrenzy:
 			if (IsClient() && CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary)) {
 				if (GetLevel() > 15) {
 					base += GetLevel() - 15;
@@ -108,28 +99,35 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 			}
 
 			return base;
-		}
-		case EQ::skills::SkillKick:
-		case EQ::skills::SkillFlyingKick:
-		case EQ::skills::SkillRoundKick: {
+		case EQ::skills::SkillFlyingKick: {
 			float skill_bonus = skill_level / 9.0f;
 			float ac_bonus    = 0.0f;
 			if (IsClient()) {
 				auto inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotFeet);
 				if (inst) {
-					ac_bonus = inst->GetItemArmorClass(true) / RuleR(Custom, ScaleMonkKickACDivisor);
+					ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 				}
+			}
 
-				if (RuleR(Custom, ScaleMonkAttacksOnWeapons) > 0) {
-					int weapon_damage = 0;
+			if (ac_bonus > skill_bonus) {
+				ac_bonus = skill_bonus;
+			}
 
-					auto primary = GetInv().GetItem(EQ::invslot::slotPrimary);
-					auto secondary = GetInv().GetItem(EQ::invslot::slotSecondary);
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
+				return static_cast<int>(ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
+			}
 
-					weapon_damage += primary ? GetWeaponDamage(GetTarget(), primary) : 0;
-					weapon_damage += secondary ? GetWeaponDamage(GetTarget(), secondary) : 0;
-
-					base += static_cast<int>(weapon_damage * (GetLevel() / 70.0f) * RuleR(Custom, ScaleMonkAttacksOnWeapons));
+			return static_cast<int>(ac_bonus + skill_bonus);
+		}
+		case EQ::skills::SkillKick:
+		case EQ::skills::SkillRoundKick: {
+			// there is some base *= 4 case in here?
+			float skill_bonus = skill_level / 10.0f;
+			float ac_bonus    = 0.0f;
+			if (IsClient()) {
+				auto inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotFeet);
+				if (inst) {
+					ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 				}
 			}
 
@@ -142,10 +140,10 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 			}
 
 			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
-				return static_cast<int>(base + ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
+				return static_cast<int>(ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
 			}
 
-			return static_cast<int>(base + ac_bonus + skill_bonus);
+			return static_cast<int>(ac_bonus + skill_bonus);
 		}
 		case EQ::skills::SkillBash: {
 			float                  skill_bonus = skill_level / 10.0f;

@@ -1114,9 +1114,6 @@ RULE_REAL(Custom, 	PetWeaponTuningMult, 					0.5, "Value added to weapon ratio f
 
 // Melee Attack Scaling
 RULE_REAL(Custom,	ScaleFrenzyOnWeaponAmount, 				1.0, "Value to multiply weapon damage on frenzy base damage by. 0 to disable")
-RULE_REAL(Custom,   ScaleMonkKickACDivisor,					25.0, "Value to divide monk Feet AC by in order to arrive at raw damage added to attack. The smaller this value, the more AC adds to damage.")
-RULE_REAL(Custom,   ScaleMonkStrikeACDivisor,				25.0, "Value to divide monk Hands AC by in order to arrive at raw damage added to attack. The smaller this value, the more AC adds to damage.")
-RULE_REAL(Custom,   ScaleMonkAttacksOnWeapons, 				0.0, "Number to multiply sum of monk weapon damage as it is added to Kick & Strike damage. 0 to Disable")
 
 RULE_INT(Custom, ServerAuthKey, 0, "Value used to verify patch serial number")
 
