@@ -616,7 +616,7 @@ void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item)
 	l.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
 	l.item_charges = charges;
 
-	AddLootDrop(item, l, true);
+	AddLootDropFixed(item, l, true);
 }
 
 void NPC::AddItem(
@@ -641,7 +641,7 @@ void NPC::AddItem(
 	l.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
 	l.item_charges = charges;
 
-	AddLootDrop(
+	AddLootDropFixed(
 		item,
 		l,
 		true,

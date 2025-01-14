@@ -2564,7 +2564,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				auto lde = LootdropEntriesRepository::NewNpcEntity();
 				lde.equip_item   = 0;
 				lde.item_charges = i.item->GetCharges();
-				AddLootDrop(i.item->GetItem(), lde, true);
+				AddLootDropFixed(i.item->GetItem(), lde, true);
 			}
 		}
 	}
