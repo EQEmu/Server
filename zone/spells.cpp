@@ -3220,7 +3220,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		}
 	}
 
-	if ((RuleB(Custom, BypassProcStackConflicts) || RuleB(Custom, BypassDSStackConflicts) || RuleB(Custom, BypassMulticlassStackConflict))) {
+	if (RuleB(Custom, BypassMulticlassStackConflict)) {
 		auto checkClassOverlap = [&](int spellid1, int spellid2) -> bool {
 			// Automatically reject if the spell IDs are the same
 			if (spellid1 == spellid2) {
