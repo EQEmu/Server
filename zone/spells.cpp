@@ -3260,18 +3260,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				return 0;
 			}
 		}
-
-		if (RuleB(Custom, BypassProcStackConflicts) && IsEffectInSpell(spellid1, SE_WeaponProc) && IsEffectInSpell(spellid2, SE_WeaponProc) && spellid1 != spellid2) {
-			if (!checkClassOverlap(spellid1, spellid2)) {
-				return 0;
-			}
-		}
-
-		if (RuleB(Custom, BypassDSStackConflicts) && IsEffectInSpell(spellid1, SE_DamageShield) && IsEffectInSpell(spellid2, SE_DamageShield) && spellid1 != spellid2) {
-			if (!checkClassOverlap(spellid1, spellid2)) {
-				return 0;
-			}
-		}
 	}
 
 	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SE_CompleteHeal)) {

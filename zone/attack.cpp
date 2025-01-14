@@ -6037,8 +6037,6 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 		}
 	}
 
-	//damage_bonus_mod = std::max(damage_bonus_mod, -RuleI(Custom, MaximumMeleeMitigationEffects));
-
 	damage += damage * damage_bonus_mod / 100;
 }
 
