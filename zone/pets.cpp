@@ -472,8 +472,8 @@ std::string Mob::GenerateUndeadPetName() {
 std::string Mob::GenerateElementalPetName() {
     std::vector<std::string> part1 = {"G", "J", "K", "L", "V", "X", "Z", "T", "N", "M", "R", "S"};
     std::vector<std::string> part2 = {"", "ab", "ar", "as", "eb", "en", "ib", "ob", "on", "ul", "ix", "al"};
-    std::vector<std::string> part3 = {"", "an", "ar", "ek", "ob", "or", "us", "al", "is", "um"};
-    std::vector<std::string> part4 = {"er", "ab", "n", "tik", "eth", "os", "ar", "ir", "is"};
+    std::vector<std::string> part3 = {"an", "ar", "ek", "ob", "or", "us", "al", "is", "um"};
+    std::vector<std::string> part4 = {"er", "ab", "an", "tik", "eth", "os", "ar", "ir", "is"};
 
     const std::string& first = part1[zone->random.Roll0(part1.size())];
     const std::string& second = part2[zone->random.Roll0(part2.size())];
