@@ -50,6 +50,7 @@
 #include "../common/repositories/raid_members_repository.h"
 #include "../common/repositories/reports_repository.h"
 #include "../common/repositories/variables_repository.h"
+#include "../common/repositories/character_pet_name_repository.h"
 #include "../common/events/player_event_logs.h"
 
 // Disgrace: for windows compile
@@ -310,6 +311,12 @@ bool Database::ReserveName(uint32 account_id, const std::string& name)
 
 	if (!n.empty()) {
 		LogInfo("Account [{}] requested name [{}] but name is already taken by an NPC", account_id, name);
+		return false;
+	}
+
+	const auto& p = CharacterPetNameRepository::GetWhere(*this, where_filter);
+	if (!p.empty()) {
+		LogInfo("Account [{}] requested name [{}] but name is already taken by an Pet", account_id, name);
 		return false;
 	}
 

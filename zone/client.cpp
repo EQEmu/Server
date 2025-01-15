@@ -70,11 +70,13 @@ extern volatile bool RunLoops;
 #include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/keyring_repository.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
+#include "../common/repositories/character_pet_name_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
 #include "../common/zone_store.h"
 #include "../common/skill_caps.h"
+#include "client.h"
 
 
 extern QueryServ* QServ;
@@ -4389,6 +4391,82 @@ void Client::KeyRingList()
 			Message(Chat::LightBlue, item_string.c_str());
 		}
 	}
+}
+
+bool Client::IsPetNameChangeAllowed() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		return true;
+	}
+
+	return false;
+}
+
+void Client::InvokeChangePetName(bool immediate) {
+    if (!IsPetNameChangeAllowed()) {
+        return;
+    }
+
+    auto packet_op = immediate ? OP_InvokeChangePetNameImmediate : OP_InvokeChangePetName;
+
+    auto outapp = new EQApplicationPacket(packet_op, 0);
+    QueuePacket(outapp);
+    safe_delete(outapp);
+}
+
+void Client::GrantPetNameChange() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+	k.value = "true";
+	DataBucket::SetData(k);
+
+	InvokeChangePetName(true);
+}
+
+void Client::ClearPetNameChange() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	DataBucket::DeleteData(k);
+}
+
+bool Client::ChangePetName(char* new_name) {
+    if (!new_name || strlen(new_name) == 0) {
+        return false;
+    }
+
+    if (!IsPetNameChangeAllowed()) {
+        return false;
+    }
+
+    const char* cur_name = nullptr;
+    if (GetPet()) {
+        cur_name = GetPet()->GetName();
+
+        if (cur_name && strncmp(new_name, cur_name, strlen(new_name)) == 0) {
+            return false;
+        }
+    }
+
+    if (!database.CheckNameFilter(new_name) || database.IsNameUsed(new_name)) {
+        return false;
+    }
+
+	CharacterPetNameRepository::ReplaceOne(database, {
+		.char_id = static_cast<int32_t>(CharacterID()),
+		.name = new_name
+	});
+
+
+	if (GetPet()) {
+		GetPet()->TempName(new_name);
+	}
+
+	ClearPetNameChange();
+    return true;
 }
 
 bool Client::IsDiscovered(uint32 item_id) {
