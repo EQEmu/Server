@@ -5813,7 +5813,12 @@ std::string Client::GetPetVanityName(int class_id) {
 
 	std::string new_name;
 
+	int i = 0;
 	do {
+		i++;
+		if (i > 10) {
+			break;
+		}
 		switch (class_id) {
 			case Class::Magician:
 				new_name = GenerateElementalPetName();
@@ -5837,7 +5842,7 @@ std::string Client::GetPetVanityName(int class_id) {
 			default:
 				new_name = fmt::format("{}'s Pet", GetCleanName());
 		}
-	} while (database.CheckNameFilter(new_name) || database.IsNameUsed(new_name));
+	} while (database.IsNameUsed(new_name));
 
 	SetPetVanityName(new_name, class_id);
 	return new_name;
