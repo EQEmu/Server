@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseGuildPermissionsRepository {
 public:
 	struct GuildPermissions {
@@ -127,10 +128,10 @@ public:
 		if (results.RowCount() == 1) {
 			GuildPermissions e{};
 
-			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.perm_id    = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
-			e.guild_id   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
-			e.permission = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.perm_id    = static_cast<int32_t>(atoi(row[1]));
+			e.guild_id   = static_cast<int32_t>(atoi(row[2]));
+			e.permission = static_cast<int32_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -258,10 +259,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GuildPermissions e{};
 
-			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.perm_id    = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
-			e.guild_id   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
-			e.permission = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.perm_id    = static_cast<int32_t>(atoi(row[1]));
+			e.guild_id   = static_cast<int32_t>(atoi(row[2]));
+			e.permission = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +287,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GuildPermissions e{};
 
-			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.perm_id    = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
-			e.guild_id   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
-			e.permission = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.perm_id    = static_cast<int32_t>(atoi(row[1]));
+			e.guild_id   = static_cast<int32_t>(atoi(row[2]));
+			e.permission = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
