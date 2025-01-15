@@ -52,7 +52,7 @@ Bazaar::GetSearchResults(
 		);
 	}
 	else if (search.trader_id > 0) {
-		if (search.trader_id > TraderRepository::TRADER_CONVERT_ID) {
+		if (search.trader_id >= TraderRepository::TRADER_CONVERT_ID) {
 			convert = true;
 			search_criteria_trader.append(fmt::format(
 				" AND trader.char_zone_id = {} AND trader.char_zone_instance_id = {}",

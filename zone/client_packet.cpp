@@ -16030,7 +16030,7 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 	//
 	auto in     = (TraderBuy_Struct *) app->pBuffer;
 
-	if (in->trader_id > TraderRepository::TRADER_CONVERT_ID) {
+	if (in->trader_id >= TraderRepository::TRADER_CONVERT_ID) {
 		auto trader = TraderRepository::GetTraderByInstanceAndSerialnumber(
 			database, in->trader_id - TraderRepository::TRADER_CONVERT_ID, in->serial_number
 		);
