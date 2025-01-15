@@ -148,7 +148,6 @@ public:
 		int32_t     faction_amount;
 		uint8_t     keeps_sold_items;
 		uint8_t     is_parcel_merchant;
-		uint8_t     multiquest_enabled;
 	};
 
 	static std::string PrimaryKey()
@@ -288,7 +287,6 @@ public:
 			"faction_amount",
 			"keeps_sold_items",
 			"is_parcel_merchant",
-			"multiquest_enabled",
 		};
 	}
 
@@ -424,7 +422,6 @@ public:
 			"faction_amount",
 			"keeps_sold_items",
 			"is_parcel_merchant",
-			"multiquest_enabled",
 		};
 	}
 
@@ -594,7 +591,6 @@ public:
 		e.faction_amount         = 0;
 		e.keeps_sold_items       = 1;
 		e.is_parcel_merchant     = 0;
-		e.multiquest_enabled     = 0;
 
 		return e;
 	}
@@ -760,7 +756,6 @@ public:
 			e.faction_amount         = row[126] ? static_cast<int32_t>(atoi(row[126])) : 0;
 			e.keeps_sold_items       = row[127] ? static_cast<uint8_t>(strtoul(row[127], nullptr, 10)) : 1;
 			e.is_parcel_merchant     = row[128] ? static_cast<uint8_t>(strtoul(row[128], nullptr, 10)) : 0;
-			e.multiquest_enabled     = row[129] ? static_cast<uint8_t>(strtoul(row[129], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -922,7 +917,6 @@ public:
 		v.push_back(columns[126] + " = " + std::to_string(e.faction_amount));
 		v.push_back(columns[127] + " = " + std::to_string(e.keeps_sold_items));
 		v.push_back(columns[128] + " = " + std::to_string(e.is_parcel_merchant));
-		v.push_back(columns[129] + " = " + std::to_string(e.multiquest_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1073,7 +1067,6 @@ public:
 		v.push_back(std::to_string(e.faction_amount));
 		v.push_back(std::to_string(e.keeps_sold_items));
 		v.push_back(std::to_string(e.is_parcel_merchant));
-		v.push_back(std::to_string(e.multiquest_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1232,7 +1225,6 @@ public:
 			v.push_back(std::to_string(e.faction_amount));
 			v.push_back(std::to_string(e.keeps_sold_items));
 			v.push_back(std::to_string(e.is_parcel_merchant));
-			v.push_back(std::to_string(e.multiquest_enabled));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1395,7 +1387,6 @@ public:
 			e.faction_amount         = row[126] ? static_cast<int32_t>(atoi(row[126])) : 0;
 			e.keeps_sold_items       = row[127] ? static_cast<uint8_t>(strtoul(row[127], nullptr, 10)) : 1;
 			e.is_parcel_merchant     = row[128] ? static_cast<uint8_t>(strtoul(row[128], nullptr, 10)) : 0;
-			e.multiquest_enabled     = row[129] ? static_cast<uint8_t>(strtoul(row[129], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1549,7 +1540,6 @@ public:
 			e.faction_amount         = row[126] ? static_cast<int32_t>(atoi(row[126])) : 0;
 			e.keeps_sold_items       = row[127] ? static_cast<uint8_t>(strtoul(row[127], nullptr, 10)) : 1;
 			e.is_parcel_merchant     = row[128] ? static_cast<uint8_t>(strtoul(row[128], nullptr, 10)) : 0;
-			e.multiquest_enabled     = row[129] ? static_cast<uint8_t>(strtoul(row[129], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1753,7 +1743,6 @@ public:
 		v.push_back(std::to_string(e.faction_amount));
 		v.push_back(std::to_string(e.keeps_sold_items));
 		v.push_back(std::to_string(e.is_parcel_merchant));
-		v.push_back(std::to_string(e.multiquest_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1905,7 +1894,6 @@ public:
 			v.push_back(std::to_string(e.faction_amount));
 			v.push_back(std::to_string(e.keeps_sold_items));
 			v.push_back(std::to_string(e.is_parcel_merchant));
-			v.push_back(std::to_string(e.multiquest_enabled));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
