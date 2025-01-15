@@ -823,7 +823,7 @@ void Client::CompleteConnect()
 		);
 
 		if (IsPetNameChangeAllowed()) {
-			InvokeChangePetName();
+			InvokeChangePetName(false);
 		}
 	}
 
@@ -4583,7 +4583,6 @@ void Client::Handle_OP_ChangePetName(const EQApplicationPacket *app) {
 	}
 
 	QueuePacket(app);
-	return;
 }
 
 void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket *app)

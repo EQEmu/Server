@@ -309,7 +309,7 @@ public:
 	bool IsPetNameChangeAllowed();
 	void GrantPetNameChange();
 	void ClearPetNameChange();
-	void InvokeChangePetName();
+	void InvokeChangePetName(bool immediate = true);
 	bool ChangePetName(char *new_name);
 	bool IsClient() const override { return true; }
 	bool IsOfClientBot() const override { return true; }

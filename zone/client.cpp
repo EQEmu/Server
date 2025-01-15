@@ -4405,14 +4405,16 @@ bool Client::IsPetNameChangeAllowed() {
 	return false;
 }
 
-void Client::InvokeChangePetName() {
-	if (!IsPetNameChangeAllowed()) {
-		return;
-	}
+void Client::InvokeChangePetName(bool immediate) {
+    if (!IsPetNameChangeAllowed()) {
+        return;
+    }
 
-	auto outapp = new EQApplicationPacket(OP_InvokeChangePetName, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+    auto packet_op = immediate ? OP_InvokeChangePetNameImmediate : OP_InvokeChangePetName;
+
+    auto outapp = new EQApplicationPacket(packet_op, 0);
+    QueuePacket(outapp);
+    safe_delete(outapp);
 }
 
 void Client::GrantPetNameChange() {
@@ -4421,7 +4423,7 @@ void Client::GrantPetNameChange() {
 	k.value = "true";
 	DataBucket::SetData(k);
 
-	InvokeChangePetName();
+	InvokeChangePetName(true);
 }
 
 void Client::ClearPetNameChange() {

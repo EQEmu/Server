@@ -165,16 +165,12 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// 4 - Keep DB name
 	// 5 - `s ward
 
-	const std::vector<CharacterPetNameRepository::CharacterPetName>& vanity_name = CharacterPetNameRepository::GetWhere(
-		database,
-		fmt::format(
-			"`char_id` = '{}'",
-			IsClient() ? CastToClient()->CharacterID() : 0
-		)
-	);
+	if (IsClient() && petname == nullptr) {
+		const auto vanity_name = CharacterPetNameRepository::FindOne(database, CastToClient()->CharacterID());
 
-	if (!vanity_name.empty() && petname == nullptr) {
-		petname = vanity_name.front().name.c_str();
+		if (!vanity_name.name.empty() && vanity_name.name != "") {
+			petname = vanity_name.name.c_str();
+		}
 	}
 
 	if (petname != nullptr) {
