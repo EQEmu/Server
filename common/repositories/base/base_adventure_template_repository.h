@@ -51,7 +51,7 @@ public:
 		float       graveyard_x;
 		float       graveyard_y;
 		float       graveyard_z;
-		float       graveyard_radius;
+		std::string graveyard_radius;
 	};
 
 	static std::string PrimaryKey()
