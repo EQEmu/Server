@@ -12339,6 +12339,11 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	 */
 	std::string response;
 	switch (popup_response->popupid) {
+		case POPUPID_AUTOBAG_SELL_1:
+		case POPUPID_AUTOBAG_SELL_2:
+			DoAutoSellBags(popup_response->popupid);
+			return;
+			break;
 		case POPUPID_REPLACE_SPELLWINDOW:
 			DeleteItemInInventory(Strings::ToInt(GetEntityVariable("slot_id")), 1, true);
 			MemorizeSpellFromItem(Strings::ToInt(GetEntityVariable("spell_id")));
@@ -15021,8 +15026,6 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		action = MerchantActions::Close;
 	}
 
-	ProcessAutoSellBags();
-
 	auto outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(MerchantClick_Struct));
 	auto mco    = (MerchantClick_Struct *) outapp->pBuffer;
 
@@ -15044,6 +15047,9 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 	else {
 		mco->rate = 1 / buy_cost_mod;
 	}
+
+	SendTargetCommand(tmp->GetID());
+	ProcessAutoSellBags(tmp, mco->rate);
 
 	outapp->priority = 6;
 	QueuePacket(outapp);

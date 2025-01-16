@@ -5511,12 +5511,55 @@ void Client::SetHoTT(uint32 mobid) {
 	safe_delete(outapp);
 }
 
-#include <unordered_map>
+void Client::DoAutoSellBags(int type) {
+    auto merchant = GetTarget();
+    if (!merchant || !merchant->IsNPC() || merchant->GetClass() != Class::Merchant) {
+        Message(Chat::Red, "Unable to find merchant to complete this transaction.");
+        return;
+    }
 
-void Client::ProcessAutoSellBags() {
-    std::unordered_map<int, int> items; // Map of item_id to quantity
+    for (int general_slot = EQ::invslot::GENERAL_BEGIN; general_slot <= EQ::invslot::GENERAL_END; ++general_slot) {
+        auto bag_inst = m_inv.GetItem(general_slot);
+        if (!bag_inst || !bag_inst->IsClassBag() || bag_inst->GetID() != 500028) {
+            continue;
+        }
 
-    // Process inventory and populate the items map
+        for (int bag_slot = 0; bag_slot < bag_inst->GetItem()->BagSlots; ++bag_slot) {
+            auto itm_inst = m_inv.GetItem(general_slot, bag_slot);
+            if (!itm_inst || !itm_inst->GetItem()->NoDrop || itm_inst->IsAttuned() || itm_inst->GetItem()->Price == 0) {
+                continue;
+            }
+
+            int quantity_to_sell = itm_inst->IsStackable() ? itm_inst->GetCharges() : 1;
+            if (type == POPUPID_AUTOBAG_SELL_2 && itm_inst->IsStackable() && quantity_to_sell > 1) {
+                quantity_to_sell -= 1;  // Leave one item in the stack
+            }
+
+            if (quantity_to_sell <= 0) {
+                continue;
+            }
+
+            Merchant_Purchase_Struct mps;
+            mps.npcid = merchant->GetID();
+            mps.quantity = quantity_to_sell;
+            mps.itemslot = m_inv.CalcSlotId(general_slot, bag_slot);
+            mps.price = itm_inst->GetItem()->Price;
+
+            uint32 packet_size = sizeof(Merchant_Purchase_Struct);
+            auto* packet = new EQApplicationPacket(OP_ShopPlayerSell, packet_size);
+            memcpy(packet->pBuffer, &mps, packet_size);
+
+            Handle_OP_ShopPlayerSell(packet);
+
+            safe_delete(packet);
+        }
+    }
+}
+
+void Client::ProcessAutoSellBags(Mob* merchant, float rate) {
+    if (!merchant) { return; }
+    std::unordered_map<int, int> items;
+
     for (int general_slot = EQ::invslot::GENERAL_BEGIN; general_slot <= EQ::invslot::GENERAL_END; ++general_slot) {
         auto bag_inst = m_inv.GetItem(general_slot);
         if (!bag_inst || !bag_inst->IsClassBag() || bag_inst->GetID() != 500028) {
@@ -5530,66 +5573,114 @@ void Client::ProcessAutoSellBags() {
             }
 
             int qty = itm_inst->IsStackable() ? itm_inst->GetCharges() : 1;
-            items[itm_inst->GetItem()->ID] += qty; // Aggregate quantities by item_id
+            items[itm_inst->GetItem()->ID] += qty;
         }
     }
 
-    // Build the output string
-    std::string output_str = "Would you like to sell the following items?<br><table>";
+    // Step 1: Calculate values for each row
+    std::vector<std::tuple<int, int, uint32>> sorted_items;
 
-    // Add header row with fixed-width padding using printable characters
+    for (const auto& [item_id, qty] : items) {
+        const auto* item = database.GetItem(item_id);
+        if (!item) { continue; }
+
+        uint32 item_value = static_cast<uint32>(item->Price * qty) * Client::CalcPriceMod(merchant, true);
+        if (!RuleB(Merchant, UseClassicPriceMod)) {
+            item_value *= RuleR(Merchant, BuyCostMod);
+        }
+        item_value += 0.5;
+
+        sorted_items.emplace_back(item_id, qty, item_value);
+    }
+
+    // Step 2: Sort by total row value (descending)
+    std::sort(sorted_items.begin(), sorted_items.end(), [](const auto& a, const auto& b) {
+        return std::get<2>(a) > std::get<2>(b);
+    });
+
+    // Step 3: Render the table
+    std::string output_str = "Would you like to sell the following items?<br><br><table>";
     output_str += fmt::format(
         "<tr>"
-        "<td><c \"#FFFF00\">{}</c></td>"  // Item Name column padded with dots
-        "<td><c \"#FFFF00\">{}</c></td>"   // Quantity column padded with dots
-        "<td><c \"#FFFF00\">{}</c></td>"   // Value column padded with dots
+        "<td><c \"#FFFF00\">{}</c></td>"  // Item Name column
+        "<td><c \"#FFFF00\">{}</c></td>"  // Quantity column
+        "<td><c \"#FFFF00\">{}</c></td>"  // Value column
         "</tr>",
-		"--------------Item Name--------------",
-        "-Quantity-",
-        "----Value (pp)----"
+        "----------------------------Item Name---------------------------",
+        "--Quantity--",
+        "---Value (pp.gp.sp.cp)---"
     );
 
     int total_qty = 0;
     int total_value = 0;
 
-    // Iterate over the map and calculate total values
-    for (const auto& [item_id, qty] : items) {
-        const auto* item = database.GetItem(item_id); // Look up the item by ID
-        if (!item) {
-            continue; // Skip invalid items
+    for (const auto& [item_id, qty, row_value] : sorted_items) {
+        const auto* item = database.GetItem(item_id);
+        if (!item) { continue; }
+
+        total_qty += qty;
+        total_value += row_value;
+
+        int platinum = row_value / 1000;
+        int remainder = row_value % 1000;
+        int gold = remainder / 100;
+        remainder %= 100;
+        int silver = remainder / 10;
+        int copper = remainder % 10;
+
+        std::string color_string = "CCCCCC";
+        if (GetItemStatValue(item) > 1.0) {
+            color_string = "00FF00";
+        }
+        if (item->ID >= 2000000 && item->ID < 3000000) {
+            color_string = "FF8000";
+        }
+        if (item->ID >= 1000000 && item->ID < 2000000) {
+            color_string = "007BFF";
+        }
+        if (Strings::Contains(std::string(item->Name), "Glamour-Stone")) {
+            color_string = "008080";
         }
 
-        int item_value = item->Price / 1000 * qty * CalcPriceMod();
-        total_qty += qty;
-        total_value += item_value;
-
-        // Add the item row without padding
         output_str += fmt::format(
             "<tr>"
-            "<td><c \"#CCCCCC\">{}</c></td>"
+            "<td><c \"#{}\">{}</c></td>"
             "<td><c \"#00FF00\">{}</c></td>"
-            "<td><c \"#FFD700\">{}pp</c></td>"
+            "<td><c \"#FFD700\">{}p {}g {}s {}c</c></td>"
             "</tr>",
-            item->Name, // Item name
-            Strings::Commify(qty),        // Quantity
-            Strings::Commify(item_value)  // Total value
+            color_string,
+            item->Name,
+            Strings::Commify(qty),
+            platinum, gold, silver, copper
         );
     }
 
-    // Add summary row without fixed-width padding
-    output_str += fmt::format(
-        "<tr>"
-        "<td><c \"#FFFFFF\">{}</c></td>"
-        "<td><c \"#00FF00\">{}</c></td>"
-        "<td><c \"#FFD700\">{}pp</c></td>"
-        "</tr>",
-        "Total", Strings::Commify(total_qty), Strings::Commify(total_value)
-    );
+    int total_platinum = total_value / 1000;
+    int total_remainder = total_value % 1000;
+    int total_gold = total_remainder / 100;
+    total_remainder %= 100;
+    int total_silver = total_remainder / 10;
+    int total_copper = total_remainder % 10;
+
+	output_str += "<tr><td> </td><td> </td><td> </td></tr>";
+
+	output_str += "<tr><td>----------------------------------------------------------------</td><td>-----------</td><td>----------------------</td></tr>";
+
+	output_str += fmt::format(
+		"<tr>"
+		"<td><b>{}</b></td>"
+		"<td><b>{}</b></td>"
+		"<td><b>{}p {}g {}s {}c</b></td>"
+		"</tr>",
+		"Total",
+		Strings::Commify(total_qty),
+		total_platinum, total_gold, total_silver, total_copper
+	);
 
     output_str += "</table>";
 
     // Send the popup to the client
-    SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Cancel");
+    SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Keep One Per Stack");
 }
 
 

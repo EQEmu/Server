@@ -227,6 +227,8 @@ const uint32      POPUPID_DIAWIND_ONE            = 99999;
 const uint32      POPUPID_DIAWIND_TWO            = 100000;
 const uint32      POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
 const uint32      POPUPID_REPLACE_SPELLWINDOW    = 1000001;
+const uint32      POPUPID_AUTOBAG_SELL_1		 = 0xFFFFFBA6;
+const uint32 	  POPUPID_AUTOBAG_SELL_2		 = 0xFFFFFBA7;
 
 struct ClientReward
 {
@@ -292,7 +294,8 @@ public:
 	void TraderShowItems();
 	void Trader_CustomerBrowsing(Client *Customer);
 
-	void ProcessAutoSellBags();
+	void ProcessAutoSellBags(Mob* merchant, float rate);
+	void DoAutoSellBags(int type);
 
 	void TraderEndTrader();
 	void TraderPriceUpdate(const EQApplicationPacket *app);
@@ -731,7 +734,7 @@ public:
 	void SetEbonCrystals(uint32 value);
 	void SendCrystalCounts();
 
-	float GetItemStatValue(EQ::ItemData* item);
+	float GetItemStatValue(const EQ::ItemData* item);
 
 	float GetBaseExpValueForKill(int conlevel, int tier, EQ::ItemInstance* upgrade_item);
 

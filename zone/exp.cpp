@@ -605,7 +605,7 @@ void Client::EjectItemFromSlot(int16 slot_id) {
 	}
 }
 
-float Client::GetItemStatValue(EQ::ItemData* item) {
+float Client::GetItemStatValue(const EQ::ItemData* item) {
 	if (!item) {
 		return 0.0f;
 	}

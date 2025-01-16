@@ -1114,10 +1114,13 @@ RULE_BOOL(Custom,	UseCustomUnattuneCombine,				false, "Use plat-based unattuner 
 RULE_INT(Custom,	UnattuneCostMultiplier,					25, "Multiply this number by item_value to get cost in platinum to unattune")
 RULE_INT(Custom,	CombineCostMultiplier,					25, "Multiply this number by item_value to get cost in platinum to combine")
 
-RULE_INT(Custom, ServerAuthKey, 0, "Value used to verify patch serial number")
+RULE_INT(Custom, 	ServerAuthKey, 							0, "Value used to verify patch serial number")
+RULE_INT(Custom,	AutoSellBagID, 							0, "ItemID of Auto-Sell Bag")
 
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
+
+
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY
