@@ -13770,7 +13770,6 @@ void Client::SendPath(Mob* target)
 
 
 	if (
-		!RuleB(Pathing, Find) &&
 		RuleB(Bazaar, EnableWarpToTrader) &&
 		target->IsClient() &&
 		(
