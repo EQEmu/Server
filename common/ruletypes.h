@@ -1115,7 +1115,8 @@ RULE_INT(Custom,	UnattuneCostMultiplier,					25, "Multiply this number by item_v
 RULE_INT(Custom,	CombineCostMultiplier,					25, "Multiply this number by item_value to get cost in platinum to combine")
 
 RULE_INT(Custom, 	ServerAuthKey, 							0, "Value used to verify patch serial number")
-RULE_INT(Custom,	AutoSellBagID, 							0, "ItemID of Auto-Sell Bag")
+RULE_STRING(Custom,	AutoSellBagIDs, 						"", "ItemID of Auto-Sell Bag")
+RULE_STRING(Custom,	StackOnlyBags, 							"", "ItemIDs of bags that only allow stackable items")
 
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")

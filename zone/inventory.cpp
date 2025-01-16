@@ -2054,14 +2054,22 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	EQ::ItemInstance* src_inst = m_inv.GetItem(src_slot_id);
 	EQ::ItemInstance* dst_inst = m_inv.GetItem(dst_slot_id);
 
-	// Check for Moving into Unattuner\Combine bag for cost feedback
-	if (RuleB(Custom, UseCustomUnattuneCombine)) {
-		if ((dst_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && dst_slot_id <= EQ::invbag::GENERAL_BAGS_END) ||
-			(dst_slot_id >= EQ::invbag::BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::BANK_BAGS_END) ||
-			(dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
-		{
-			EQ::ItemInstance* bag;
-			bag = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(dst_slot_id));
+	if ((dst_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && dst_slot_id <= EQ::invbag::GENERAL_BAGS_END) ||
+		(dst_slot_id >= EQ::invbag::BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::BANK_BAGS_END) ||
+		(dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
+	{
+		const auto bag = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(dst_slot_id));
+
+		if (bag && src_inst && !src_inst->IsStackable()) {
+			const auto& allowed_bags = Strings::Split(RuleS(Custom, StackOnlyBags), ",");
+			const std::string bag_id_str = std::to_string(bag->GetID());
+			if (std::find(allowed_bags.begin(), allowed_bags.end(), bag_id_str) != allowed_bags.end()) {
+				Message(Chat::System, "This bag only allows stackable items.");
+				return false;
+			}
+		}
+
+		if (RuleB(Custom, UseCustomUnattuneCombine)) {
 			if (bag && src_inst) {
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
@@ -2658,7 +2666,9 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	// resync the 'from' and 'to' slots on an as-needed basis
 	// Not as effective as the full process, but less intrusive to gameplay
 	LogInventory("Inventory desyncronization. (charname: [{}], source: [{}], destination: [{}])", GetName(), move_slots->from_slot, move_slots->to_slot);
-	Message(Chat::Yellow, "Inventory Desyncronization detected: Resending slot data...");
+	if (GetGM()) {
+		Message(Chat::Yellow, "Inventory Desyncronization detected: Resending slot data...");
+	}
 
 	if (move_slots->from_slot >= EQ::invslot::EQUIPMENT_BEGIN && move_slots->from_slot <= EQ::invbag::CURSOR_BAG_END) {
 		int16 resync_slot = (EQ::InventoryProfile::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : EQ::InventoryProfile::CalcSlotId(move_slots->from_slot);

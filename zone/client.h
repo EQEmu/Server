@@ -294,8 +294,8 @@ public:
 	void TraderShowItems();
 	void Trader_CustomerBrowsing(Client *Customer);
 
-	void ProcessAutoSellBags(Mob* merchant, float rate);
-	void DoAutoSellBags(int type);
+	void ProcessAutoSellBags(Mob* merchant);
+	void DoAutoSellBags(const int type);
 
 	void TraderEndTrader();
 	void TraderPriceUpdate(const EQApplicationPacket *app);

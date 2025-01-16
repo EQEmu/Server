@@ -15049,7 +15049,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 	}
 
 	SendTargetCommand(tmp->GetID());
-	ProcessAutoSellBags(tmp, mco->rate);
+	ProcessAutoSellBags(tmp);
 
 	outapp->priority = 6;
 	QueuePacket(outapp);
