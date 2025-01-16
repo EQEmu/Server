@@ -3720,27 +3720,30 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_Rune:
-
-				if (new_bonus->MeleeRune[SBIndex::RUNE_AMOUNT] && (new_bonus->MeleeRune[SBIndex::RUNE_BUFFSLOT] > buffslot)){
+				if (new_bonus->MeleeRune[SBIndex::RUNE_AMOUNT] && (new_bonus->MeleeRune[SBIndex::RUNE_BUFFSLOT] > buffslot || IsBardSong(new_bonus->MeleeRune[SBIndex::RUNE_SPELLID]))){
 
 					new_bonus->MeleeRune[SBIndex::RUNE_AMOUNT]   = effect_value;
 					new_bonus->MeleeRune[SBIndex::RUNE_BUFFSLOT] = buffslot;
+					new_bonus->MeleeRune[SBIndex::RUNE_SPELLID]  = spell_id;
 				}
 				else if (!new_bonus->MeleeRune[SBIndex::RUNE_AMOUNT]){
 					new_bonus->MeleeRune[SBIndex::RUNE_AMOUNT]   = effect_value;
 					new_bonus->MeleeRune[SBIndex::RUNE_BUFFSLOT] = buffslot;
+					new_bonus->MeleeRune[SBIndex::RUNE_SPELLID]  = spell_id;
 				}
 
 				break;
 
 			case SE_AbsorbMagicAtt:
-				if (new_bonus->AbsorbMagicAtt[SBIndex::RUNE_AMOUNT] && (new_bonus->AbsorbMagicAtt[SBIndex::RUNE_BUFFSLOT] > buffslot)){
+				if (new_bonus->AbsorbMagicAtt[SBIndex::RUNE_AMOUNT] && (new_bonus->AbsorbMagicAtt[SBIndex::RUNE_BUFFSLOT] > buffslot || IsBardSong(new_bonus->AbsorbMagicAtt[SBIndex::RUNE_SPELLID]))){
 					new_bonus->AbsorbMagicAtt[SBIndex::RUNE_AMOUNT]   = effect_value;
 					new_bonus->AbsorbMagicAtt[SBIndex::RUNE_BUFFSLOT] = buffslot;
+					new_bonus->AbsorbMagicAtt[SBIndex::RUNE_SPELLID]  = spell_id;
 				}
 				else if (!new_bonus->AbsorbMagicAtt[SBIndex::RUNE_AMOUNT]){
 					new_bonus->AbsorbMagicAtt[SBIndex::RUNE_AMOUNT]   = effect_value;
 					new_bonus->AbsorbMagicAtt[SBIndex::RUNE_BUFFSLOT] = buffslot;
+					new_bonus->AbsorbMagicAtt[SBIndex::RUNE_SPELLID]  = spell_id;
 				}
 				break;
 

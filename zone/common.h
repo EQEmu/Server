@@ -462,8 +462,8 @@ struct StatBonuses {
 	int32	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buff slot
 	int8	Root[2];							// The lowest buff slot a root can be found. [0] = Bool if has root [1] = buff slot
 	int32	FrenziedDevastation;				// base1= AArank(used) base2= chance increase spell criticals + all DD spells 2x mana.
-	uint32	AbsorbMagicAtt[2];					// 0 = magic rune value 1 = buff slot
-	uint32	MeleeRune[2];						// 0 = rune value 1 = buff slot
+	uint32	AbsorbMagicAtt[3];					// 0 = magic rune value 1 = buff slot 2 = spell id
+	uint32	MeleeRune[3];						// 0 = rune value 1 = buff slot 2 = spell id
 	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
 	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
 	int32	AlterNPCLevel;						// amount of lvls +/-
@@ -627,6 +627,7 @@ namespace SBIndex {
 	constexpr uint16 ROOT_BUFFSLOT                          = 1; // SPA 99
 	constexpr uint16 RUNE_AMOUNT                            = 0; // SPA 55
 	constexpr uint16 RUNE_BUFFSLOT                          = 1; // SPA 78
+	constexpr uint16 RUNE_SPELLID                           = 2; // SPA 55,78
 	constexpr uint16 POSITION_BACK							= 0; // SPA 503-506
 	constexpr uint16 POSITION_FRONT							= 1; // SPA 503-506
 	constexpr uint16 PET_RAMPAGE_CHANCE                     = 0; // SPA 464,465
