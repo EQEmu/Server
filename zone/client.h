@@ -292,6 +292,8 @@ public:
 	void TraderShowItems();
 	void Trader_CustomerBrowsing(Client *Customer);
 
+	void ProcessAutoSellBags();
+
 	void TraderEndTrader();
 	void TraderPriceUpdate(const EQApplicationPacket *app);
 	void SendBazaarDone(uint32 trader_id);

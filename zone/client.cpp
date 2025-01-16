@@ -5481,6 +5481,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
 	return;
 }
+
 void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQ::ItemData* item){
 	auto outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
 	sPickPocket_Struct *pick_out = (sPickPocket_Struct *)outapp->pBuffer;
@@ -5509,6 +5510,88 @@ void Client::SetHoTT(uint32 mobid) {
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
+
+#include <unordered_map>
+
+void Client::ProcessAutoSellBags() {
+    std::unordered_map<int, int> items; // Map of item_id to quantity
+
+    // Process inventory and populate the items map
+    for (int general_slot = EQ::invslot::GENERAL_BEGIN; general_slot <= EQ::invslot::GENERAL_END; ++general_slot) {
+        auto bag_inst = m_inv.GetItem(general_slot);
+        if (!bag_inst || !bag_inst->IsClassBag() || bag_inst->GetID() != 500028) {
+            continue;
+        }
+
+        for (int bag_slot = 0; bag_slot < bag_inst->GetItem()->BagSlots; ++bag_slot) {
+            auto itm_inst = m_inv.GetItem(general_slot, bag_slot);
+            if (!itm_inst || !itm_inst->GetItem()->NoDrop || itm_inst->IsAttuned() || itm_inst->GetItem()->Price == 0) {
+                continue;
+            }
+
+            int qty = itm_inst->IsStackable() ? itm_inst->GetCharges() : 1;
+            items[itm_inst->GetItem()->ID] += qty; // Aggregate quantities by item_id
+        }
+    }
+
+    // Build the output string
+    std::string output_str = "Would you like to sell the following items?<br><table>";
+
+    // Add header row with fixed-width padding using printable characters
+    output_str += fmt::format(
+        "<tr>"
+        "<td><c \"#FFFF00\">{}</c></td>"  // Item Name column padded with dots
+        "<td><c \"#FFFF00\">{}</c></td>"   // Quantity column padded with dots
+        "<td><c \"#FFFF00\">{}</c></td>"   // Value column padded with dots
+        "</tr>",
+		"--------------Item Name--------------",
+        "-Quantity-",
+        "----Value (pp)----"
+    );
+
+    int total_qty = 0;
+    int total_value = 0;
+
+    // Iterate over the map and calculate total values
+    for (const auto& [item_id, qty] : items) {
+        const auto* item = database.GetItem(item_id); // Look up the item by ID
+        if (!item) {
+            continue; // Skip invalid items
+        }
+
+        int item_value = item->Price / 1000 * qty * CalcPriceMod();
+        total_qty += qty;
+        total_value += item_value;
+
+        // Add the item row without padding
+        output_str += fmt::format(
+            "<tr>"
+            "<td><c \"#CCCCCC\">{}</c></td>"
+            "<td><c \"#00FF00\">{}</c></td>"
+            "<td><c \"#FFD700\">{}pp</c></td>"
+            "</tr>",
+            item->Name, // Item name
+            Strings::Commify(qty),        // Quantity
+            Strings::Commify(item_value)  // Total value
+        );
+    }
+
+    // Add summary row without fixed-width padding
+    output_str += fmt::format(
+        "<tr>"
+        "<td><c \"#FFFFFF\">{}</c></td>"
+        "<td><c \"#00FF00\">{}</c></td>"
+        "<td><c \"#FFD700\">{}pp</c></td>"
+        "</tr>",
+        "Total", Strings::Commify(total_qty), Strings::Commify(total_value)
+    );
+
+    output_str += "</table>";
+
+    // Send the popup to the client
+    SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Cancel");
+}
+
 
 void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration)
 {

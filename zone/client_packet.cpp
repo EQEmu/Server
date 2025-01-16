@@ -14988,6 +14988,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 
 		QueuePacket(outapp);
 		safe_delete(outapp);
+
 		return;
 	}
 
@@ -15019,6 +15020,8 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		tmp->SayString(zone->random.Int(MERCHANT_CLOSED_ONE, MERCHANT_CLOSED_THREE));
 		action = MerchantActions::Close;
 	}
+
+	ProcessAutoSellBags();
 
 	auto outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(MerchantClick_Struct));
 	auto mco    = (MerchantClick_Struct *) outapp->pBuffer;
@@ -15052,7 +15055,6 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 			SendBulkParcels();
 		}
 	}
-
 	return;
 }
 
