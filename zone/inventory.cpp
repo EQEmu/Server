@@ -2068,6 +2068,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				linker.SetItemInst(src_inst);
 
 				switch (bag->GetID()) {
+					case 9207:
 					case 4041: { // Combinerator
 						int first_item_id = -1;
 						bool combineable = true;
