@@ -9650,7 +9650,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast.
 				Can not click while casting other items.
 			*/
-			if (HasClass(Class::Bard) && IsCasting() && casting_spell_slot < CastingSlot::MaxGems && !RuleB(Custom, MulticlassingEnabled))
+			if (HasClass(Class::Bard) && IsCasting() && casting_spell_slot < CastingSlot::MaxGems && (!RuleB(Custom, MulticlassingEnabled) || IsBardSong(casting_spell_id)))
 			{
 				is_casting_bard_song = true;
 			}
@@ -9811,7 +9811,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						}
 
 
-						if (HasClass(Class::Bard) && !(RuleB(Custom, MulticlassingEnabled))) {
+						if (HasClass(Class::Bard) && (item->CastTime == 0 || !(RuleB(Custom, MulticlassingEnabled)))) {
 							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
 
@@ -9878,7 +9878,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 							CommonBreakInvisible(); // client can't do this for us :(
 						}
 
-						if (HasClass(Class::Bard) && !(RuleB(Custom, MulticlassingEnabled))) {
+						if (HasClass(Class::Bard) && (item->CastTime == 0 || !(RuleB(Custom, MulticlassingEnabled)))) {
 							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
 
