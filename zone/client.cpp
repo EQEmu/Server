@@ -5621,6 +5621,8 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 		const auto* item = database.GetItem(item_id);
 		if (!item) { continue; }
 
+		row_count++;
+
 		total_qty += qty;
 		total_value += row_value;
 
