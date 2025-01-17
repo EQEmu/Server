@@ -3212,15 +3212,16 @@ void Client::SendBulkBazaarTraders()
 		return;
 	}
 
-	auto results = TraderRepository::GetDistinctTraders(
-		database,
-		GetInstanceID()
-	);
+	TraderRepository::BulkTraders_Struct results{};
+	if (GetZoneID() == Zones::BAZAAR) {
+		results = TraderRepository::GetDistinctTraders(database, GetInstanceID());
+	}
 
 	uint32 number = 1;
 	auto   shards = CharacterDataRepository::GetInstanceZonePlayerCounts(database, Zones::BAZAAR);
 	for (auto const &shard: shards) {
-		if (shard.instance_id != GetInstanceID()) {
+		if (GetZoneID() != Zones::BAZAAR || (GetZoneID() == Zones::BAZAAR && GetInstanceID() != shard.instance_id)) {
+
 			TraderRepository::DistinctTraders_Struct t{};
 			t.entity_id        = 0;
 			t.trader_id        = TraderRepository::TRADER_CONVERT_ID + shard.instance_id;
@@ -3613,7 +3614,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	parcel_out.from_name  = tbs->seller_name;
 	parcel_out.note       = "Delivered from a Bazaar Purchase";
 	parcel_out.sent_date  = time(nullptr);
-	parcel_out.quantity   = buy_item->IsStackable() ? tbs->quantity : buy_item->GetCharges();
+	parcel_out.quantity   = tbs->quantity;
 	parcel_out.item_id    = buy_item->GetItem()->ID;
 	parcel_out.aug_slot_1 = buy_item->GetAugmentItemID(0);
 	parcel_out.aug_slot_2 = buy_item->GetAugmentItemID(1);
