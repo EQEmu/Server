@@ -5611,24 +5611,10 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
         sorted_items.emplace_back(item_id, qty, item_value);
     }
 
-    std::sort(sorted_items.begin(), sorted_items.end(), [](const auto& a, const auto& b) {
-        return std::get<2>(a) > std::get<2>(b);
-    });
+	int total_qty = 0;
+	int total_value = 0;
 
-    std::string output_str = "Would you like to sell the following items?<br><br><table>";
-    output_str += fmt::format(
-        "<tr>"
-        "<td><c \"#FFFF00\">{}</c></td>"
-        "<td><c \"#FFFF00\">{}</c></td>"
-        "<td><c \"#FFFF00\">{}</c></td>"
-        "</tr>",
-        "----------------------------Item Name---------------------------",
-        "--Quantity--",
-        "---Value (pp.gp.sp.cp)---"
-    );
-
-    int total_qty = 0;
-    int total_value = 0;
+	std::string item_list;
 
 	for (const auto& [item_id, qty, row_value] : sorted_items) {
 		const auto* item = database.GetItem(item_id);
@@ -5637,36 +5623,25 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 		total_qty += qty;
 		total_value += row_value;
 
-		const int platinum = row_value / 1000;
-		const int gold = (row_value % 1000) / 100;
-		const int silver = (row_value % 100) / 10;
-		const int copper = row_value % 10;
-
-		std::string color_string = "CCCCCC";
+		std::string color_string = "CCCCCC"; // Default rarity color
 		if (GetItemStatValue(item) > 1.0) {
-			color_string = "00FF00";
+			color_string = "00FF00"; // High value
 		}
 		if (item->ID >= 2000000 && item->ID < 3000000) {
-			color_string = "FF8000";
+			color_string = "FF8000"; // Rare
 		}
 		if (item->ID >= 1000000 && item->ID < 2000000) {
-			color_string = "007BFF";
+			color_string = "007BFF"; // Special
 		}
 		if (Strings::Contains(std::string(item->Name), "Glamour-Stone")) {
-			color_string = "008080";
+			color_string = "008080"; // Unique
 		}
 
-		output_str += fmt::format(
-			"<tr>"
-			"<td><c \"#{}\">{}</c></td>"
-			"<td><c \"#00FF00\">{}</c></td>"
-			"<td><c \"#FFD700\">{}p {}g {}s {}c</c></td>"
-			"</tr>",
-			color_string,
-			item->Name,
-			Strings::Commify(qty),
-			platinum, gold, silver, copper
-		);
+		if (qty > 1) {
+			item_list += fmt::format("<c \"#{}\">{} x{}</c><br>", color_string, item->Name, Strings::Commify(qty));
+		} else {
+			item_list += fmt::format("<c \"#{}\">{}</c><br>", color_string, item->Name);
+		}
 	}
 
 	const int total_platinum = total_value / 1000;
@@ -5674,23 +5649,17 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 	const int total_silver = (total_value % 100) / 10;
 	const int total_copper = total_value % 10;
 
-	output_str += "<tr><td> </td><td> </td><td> </td></tr>";
-	output_str += "<tr><td>----------------------------------------------------------------</td><td>-----------</td><td>----------------------</td></tr>";
-
-	output_str += fmt::format(
-		"<tr>"
-		"<td><b>{}</b></td>"
-		"<td><b>{}</b></td>"
-		"<td><b>{}p {}g {}s {}c</b></td>"
-		"</tr>",
-		"Total",
-		Strings::Commify(total_qty),
+	std::string output_str = fmt::format(
+		"The following items will be sold for a total of <c \"#FFFF00\">{}p {}g {}s {}c</c><br>",
 		total_platinum, total_gold, total_silver, total_copper
 	);
 
-    output_str += "</table>";
+	output_str += "<c \"#FF0000\">WARNING: There will be no refunds or reimbursements for ANY mistakenly sold items.</c><br><br>";
 
-    SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Keep One Per Stack");
+	output_str += item_list;
+
+	SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Leave One per Stackable");
+
 }
 
 void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration)
