@@ -5613,6 +5613,7 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 
 	int total_qty = 0;
 	int total_value = 0;
+	int row_count = 0;
 
 	std::string item_list;
 
@@ -5623,24 +5624,29 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 		total_qty += qty;
 		total_value += row_value;
 
-		std::string color_string = "CCCCCC"; // Default rarity color
+		std::string color_string = "CCCCCC";
 		if (GetItemStatValue(item) > 1.0) {
-			color_string = "00FF00"; // High value
+			color_string = "00FF00";
 		}
 		if (item->ID >= 2000000 && item->ID < 3000000) {
-			color_string = "FF8000"; // Rare
+			color_string = "FF8000";
 		}
 		if (item->ID >= 1000000 && item->ID < 2000000) {
-			color_string = "007BFF"; // Special
+			color_string = "007BFF";
 		}
 		if (Strings::Contains(std::string(item->Name), "Glamour-Stone")) {
-			color_string = "008080"; // Unique
+			color_string = "008080";
 		}
 
 		if (qty > 1) {
 			item_list += fmt::format("<c \"#{}\">{} x{}</c><br>", color_string, item->Name, Strings::Commify(qty));
 		} else {
 			item_list += fmt::format("<c \"#{}\">{}</c><br>", color_string, item->Name);
+		}
+
+		if (row_count >= 90) {
+			item_list += fmt::format("... Too Many Items, abbreviating list.");
+			break;
 		}
 	}
 
