@@ -76,6 +76,9 @@ public:
 		EQ::InventoryProfile *p_inventory_profile
 	);
 
+	uint32 GetAccountExpansions();
+	uint32 GetCharacterExpansions();
+
 private:
 
 	uint32	ip;

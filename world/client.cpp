@@ -218,16 +218,18 @@ void Client::SendEnterWorld(std::string name)
 
 void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
-	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
+	auto e      = (ExpansionInfo_Struct*) outapp->pBuffer;
 
 	if (RuleI(World, CharacterSelectExpansionSettings) != -1) {
-		eis->Expansions = RuleI(World, CharacterSelectExpansionSettings);
-	}
-	else if (RuleB(World, UseClientBasedExpansionSettings)) {
-		eis->Expansions = EQ::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
-	}
-	else {
-		eis->Expansions = RuleI(World, ExpansionSettings);
+		e->Expansions = RuleI(World, CharacterSelectExpansionSettings);
+	} else if (RuleB(World, UseAccountBasedExpansionSettings)) {
+		e->Expansions = GetAccountExpansions();
+	} else if (RuleB(World, UseCharacterBasedExpansionSettings)) {
+		e->Expansions = GetCharacterExpansions();
+	} else if (RuleB(World, UseClientBasedExpansionSettings)) {
+		e->Expansions = EQ::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
+	} else {
+		e->Expansions = RuleI(World, ExpansionSettings);
 	}
 
 	QueuePacket(outapp);
@@ -2512,4 +2514,18 @@ void Client::SendUnsupportedClientPacket(const std::string& message)
 	e->Enabled     = 0;
 
 	QueuePacket(&packet);
+}
+
+uint32 Client::GetAccountExpansions()
+{
+	auto a = AccountRepository::FindOne(database, GetAccountID());
+
+	return a.id ? a.expansions : RuleI(World, ExpansionSettings);
+}
+
+uint32 Client::GetCharacterExpansions()
+{
+	auto c = CharacterDataRepository::FindOne(database, GetCharID());
+
+	return c.id ? c.expansions : RuleI(World, ExpansionSettings);
 }

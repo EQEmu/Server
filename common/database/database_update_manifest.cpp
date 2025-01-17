@@ -5805,6 +5805,20 @@ ALTER TABLE `zone`
 ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_idle`;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9289,
+		.description = "2025_01_17_account_character_expansion_flag.sql",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'expansion'",
+		.condition = "missing",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `account`
+ADD COLUMN `expansion` int(11) NOT NULL DEFAULT -1 AFTER `suspendeduntil`;
+
+ALTER TABLE `character_data`
+ADD COLUMN `expansion` int(11) NOT NULL DEFAULT -1 AFTER `aa_points_old`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

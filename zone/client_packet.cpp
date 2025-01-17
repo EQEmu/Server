@@ -16836,10 +16836,13 @@ void Client::RecordStats()
 
 void Client::ReloadExpansionProfileSetting()
 {
-	if (RuleB(World, UseClientBasedExpansionSettings)) {
+	if (RuleB(World, UseAccountBasedExpansionSettings)) {
+		m_pp.expansions = GetAccountExpansions();
+	} else if (RuleB(World, UseCharacterBasedExpansionSettings)) {
+		m_pp.expansions = GetCharacterExpansions();
+	} else if (RuleB(World, UseClientBasedExpansionSettings)) {
 		m_pp.expansions = EQ::expansions::ConvertClientVersionToExpansionsMask(ClientVersion());
-	}
-	else {
+	} else {
 		m_pp.expansions = RuleI(World, ExpansionSettings);
 	}
 }

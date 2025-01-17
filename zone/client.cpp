@@ -59,6 +59,7 @@ extern volatile bool RunLoops;
 #include "cheat_manager.h"
 #include "lua_parser.h"
 
+#include "../common/repositories/account_repository.h"
 #include "../common/repositories/character_alternate_abilities_repository.h"
 #include "../common/repositories/account_flags_repository.h"
 #include "../common/repositories/bug_reports_repository.h"
@@ -296,6 +297,12 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 		SetClientMaxLevel(GetCharMaxLevelFromQGlobal());
 	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
 		SetClientMaxLevel(GetCharMaxLevelFromBucket());
+	} else if (
+		RuleB(World, UseAccountBasedExpansionSettings) ||
+		RuleB(World, UseCharacterBasedExpansionSettings)
+	) {
+		const uint8 expansion_max_level = Expansion::GetExpansionMaxLevel(Expansion::GetHighestExpansion(m_pp.expansions));
+		SetClientMaxLevel(expansion_max_level);
 	}
 
 	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
@@ -13105,4 +13112,18 @@ void Client::ShowZoneShardMenu()
 		);
 		number++;
 	}
+}
+
+uint32 Client::GetAccountExpansions()
+{
+	auto a = AccountRepository::FindOne(database, AccountID());
+
+	return a.id ? a.expansions : RuleI(World, ExpansionSettings);
+}
+
+uint32 Client::GetCharacterExpansions()
+{
+	auto c = CharacterDataRepository::FindOne(database, CharacterID());
+
+	return c.id ? c.expansions : RuleI(World, ExpansionSettings);
 }

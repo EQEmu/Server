@@ -451,3 +451,30 @@ bool LDoNTheme::IsValid(uint32 theme_id)
 {
 	return ldon_theme_names.find(theme_id) != ldon_theme_names.end();
 }
+
+EQ::expansions::Expansion Expansion::GetHighestExpansion(uint32 expansion_bitmask)
+{
+	for (
+		auto e = expansion_max_levels.rbegin();
+		e != expansion_max_levels.rend();
+		++e
+	) {
+		const uint32 current_expansion_bitmask = EQ::expansions::ConvertExpansionToExpansionBit(e->first);
+
+		if (expansion_bitmask & current_expansion_bitmask) {
+			return e->first;
+		}
+	}
+
+	return EQ::expansions::Expansion::EverQuest;
+}
+
+uint8 Expansion::GetExpansionMaxLevel(EQ::expansions::Expansion expansion)
+{
+	return IsValid(expansion) ? expansion_max_levels[expansion] : RuleI(Character, MaxLevel);
+}
+
+bool Expansion::IsValid(EQ::expansions::Expansion expansion)
+{
+	return expansion_max_levels.find(expansion) != expansion_max_levels.end();
+}

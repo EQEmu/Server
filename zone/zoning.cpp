@@ -353,7 +353,22 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		bool meets_zone_expansion_check = false;
 
 		auto z = zone_store.GetZoneWithFallback(ZoneID(target_zone_name), 0);
-		if (z->expansion <= content_service.GetCurrentExpansion() || z->bypass_expansion_check) {
+		if (
+			!RuleB(World, UseAccountBasedExpansionSettings) &&
+			!RuleB(World, UseCharacterBasedExpansionSettings) &&
+			(
+				z->expansion <= content_service.GetCurrentExpansion() ||
+				z->bypass_expansion_check
+			)
+		) {
+			meets_zone_expansion_check = true;
+		} else if (
+			(
+				RuleB(World, UseAccountBasedExpansionSettings) ||
+				RuleB(World, UseCharacterBasedExpansionSettings)
+			) &&
+			GetPP().expansions & EQ::expansions::ConvertExpansionToExpansionBit(static_cast<EQ::expansions::Expansion>(z->expansion))
+		) {
 			meets_zone_expansion_check = true;
 		}
 
