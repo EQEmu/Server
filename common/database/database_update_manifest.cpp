@@ -5814,10 +5814,10 @@ ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_
 		.match = "",
 		.sql = R"(
 ALTER TABLE `account`
-ADD COLUMN `expansion` int(11) NOT NULL DEFAULT -1 AFTER `suspendeduntil`;
+ADD COLUMN `expansions` int(11) NOT NULL DEFAULT -1 AFTER `suspendeduntil`;
 
 ALTER TABLE `character_data`
-ADD COLUMN `expansion` int(11) NOT NULL DEFAULT -1 AFTER `aa_points_old`;
+ADD COLUMN `expansions` int(11) NOT NULL DEFAULT -1 AFTER `aa_points_old`;
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
