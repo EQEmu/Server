@@ -3458,6 +3458,12 @@ void Lua_Client::ShowZoneShardMenu()
 	self->ShowZoneShardMenu();
 }
 
+void Lua_Client::SetAAEXPPercentage(uint8 percentage)
+{
+	Lua_Safe_Call_Void();
+	self->SetAAEXPPercentage(percentage);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3890,6 +3896,7 @@ luabind::scope lua_register_client() {
 	.def("SetAAEXPModifier", (void(Lua_Client::*)(float))&Lua_Client::SetAAEXPModifier)
 	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,float))&Lua_Client::SetAAEXPModifier)
 	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,float,int16))&Lua_Client::SetAAEXPModifier)
+	.def("SetAAEXPPercentage", (void(Lua_Client::*)(uint8))&Lua_Client::SetAAEXPPercentage)
 	.def("SetAAPoints", (void(Lua_Client::*)(int))&Lua_Client::SetAAPoints)
 	.def("SetAATitle", (void(Lua_Client::*)(std::string))&Lua_Client::SetAATitle)
 	.def("SetAATitle", (void(Lua_Client::*)(std::string,bool))&Lua_Client::SetAATitle)
