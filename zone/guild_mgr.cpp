@@ -1199,7 +1199,7 @@ bool GuildBankManager::DeleteItem(uint32 guild_id, uint16 area, uint16 slot_id, 
 	}
 
 	// delete the item
-	if (item->quantity == quantity) {
+	if (item->quantity == quantity || (item->quantity < 0 && quantity == 1)) {
 		SendGuildBankItemUpdate(item->guild_id, item->slot, item->area, false, c);
 		GuildBankRepository::DeleteOne(database, item->id);
 
