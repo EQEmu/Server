@@ -5538,7 +5538,7 @@ void Client::DoAutoSellBags(const int type) {
             }
 
             int quantity_to_sell = itm_inst->IsStackable() ? itm_inst->GetCharges() : 1;
-            if (type == POPUPID_AUTOBAG_SELL_2 && itm_inst->IsStackable() && quantity_to_sell > 1) {
+            if (type == POPUPID_AUTOBAG_SELL_2 && itm_inst->IsStackable()) {
                 quantity_to_sell -= 1;
             }
 

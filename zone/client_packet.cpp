@@ -1027,6 +1027,12 @@ void Client::CompleteConnect()
 	SetWeaponAppearance(true);
 
 	ApplyGlobalBuffs();
+
+	if (zone->GetZoneID() != Zones::BAZAAR && m_inv.HasItem(17899,1,invWherePersonal) >= 0) {
+		Message(Chat::System, "Trader's Satchels may not leave the Bazaar.");
+		const auto safe = zone_store.GetZoneSafeCoordinates(Zones::BAZAAR);
+		MovePC(Zones::BAZAAR, safe.x, safe.y, safe.z, safe.w);
+	}
 }
 
 // connecting opcode handlers
