@@ -1550,21 +1550,22 @@ static void BazaarAuditTrail(const char *seller, const char *buyer, const char *
 
 void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplicationPacket *app)
 {
-	if (!Trader) {
-		return;
-	}
-
-	if (!Trader->IsTrader()) {
-		TradeRequestFailed(app);
-		return;
-	}
-
 	auto in                          = (TraderBuy_Struct *) app->pBuffer;
 	auto outapp                      = std::make_unique<EQApplicationPacket>(OP_Trader, sizeof(TraderBuy_Struct));
 	auto outtbs                      = (TraderBuy_Struct *) outapp->pBuffer;
 	outtbs->item_id                  = tbs->item_id;
 	const EQ::ItemInstance *buy_item = nullptr;
 	uint32 item_id                   = 0;
+
+	if (!Trader) {
+		return;
+	}
+
+	if (!Trader->IsTrader()) {
+		in->sub_action = Failed;
+		TradeRequestFailed(app);
+		return;
+	}
 
 	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 		tbs->item_id = Strings::ToUnsignedBigInt(tbs->serial_number);
@@ -1574,6 +1575,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 
 	if (!buy_item) {
 		LogTrading("Unable to find item id <red>[{}] item_sn <red>[{}] on trader", tbs->item_id, tbs->serial_number);
+		in->sub_action   = Failed;
 		TradeRequestFailed(app);
 		return;
 	}
@@ -3216,21 +3218,20 @@ void Client::SendBulkBazaarTraders()
 	);
 
 	uint32 number = 1;
-	auto shards = CharacterDataRepository::GetInstanceZonePlayerCounts(database, Zones::BAZAAR);
-	for (auto const &shard : shards) {
-		if (shard.instance_id == GetInstanceID() || shard.player_count == 0) {
-			continue;
+	auto   shards = CharacterDataRepository::GetInstanceZonePlayerCounts(database, Zones::BAZAAR);
+	for (auto const &shard: shards) {
+		if (shard.instance_id != GetInstanceID()) {
+			TraderRepository::DistinctTraders_Struct t{};
+			t.entity_id        = 0;
+			t.trader_id        = TraderRepository::TRADER_CONVERT_ID + shard.instance_id;
+			t.trader_name      = fmt::format("Bazaar Shard {}", number);
+			t.zone_id          = Zones::BAZAAR;
+			t.zone_instance_id = shard.instance_id;
+			results.count += 1;
+			results.name_length += t.trader_name.length() + 1;
+			results.traders.push_back(t);
 		}
 
-		TraderRepository::DistinctTraders_Struct t{};
-		t.entity_id        = 0;
-		t.trader_id        = TraderRepository::TRADER_CONVERT_ID + shard.instance_id;
-		t.trader_name      = fmt::format("Bazaar Shard {}", number);
-		t.zone_id          = Zones::BAZAAR;
-		t.zone_instance_id = shard.instance_id;
-		results.count += 1;
-		results.name_length += t.trader_name.length() + 1;
-		results.traders.push_back(t);
 		number++;
 	}
 
@@ -3257,8 +3258,18 @@ void Client::SendBulkBazaarTraders()
 	QueuePacket(outapp.get());
 }
 
-void Client::DoBazaarInspect(const BazaarInspect_Struct &in)
+void Client::DoBazaarInspect(BazaarInspect_Struct &in)
 {
+	if (in.trader_id >= TraderRepository::TRADER_CONVERT_ID) {
+		auto trader = TraderRepository::GetTraderByInstanceAndSerialnumber(
+			database,
+			in.trader_id - TraderRepository::TRADER_CONVERT_ID,
+			fmt::format("{}", in.serial_number).c_str()
+		);
+
+		in.trader_id = trader.trader_id;
+	}
+
 	auto items = TraderRepository::GetWhere(
 		database, fmt::format("`char_id` = '{}' AND `item_sn` = '{}'", in.trader_id, in.serial_number)
 	);

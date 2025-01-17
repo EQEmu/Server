@@ -50,8 +50,8 @@ public:
 			"SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
 			"FROM trader AS t "
 			"JOIN character_data AS c ON t.char_id = c.id "
-			//"ORDER BY t.char_zone_instance_id = {} DESC;",
-			"WHERE t.char_zone_instance_id = {};",
+			"WHERE t.char_zone_instance_id = {} "
+			"ORDER BY t.char_zone_instance_id ASC;",
 			char_zone_instance_id)
 		);
 

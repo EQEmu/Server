@@ -3933,9 +3933,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					switch (in->action) {
 						case TraderOn: {
-							out->action = AddTraderToBazaarWindow;
 							if (c.second->GetNoOfTraders() <
-								EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit) {
+									EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit &&
+								out->zone_id == Zones::BAZAAR &&
+								out->zone_instance_id == c.second->GetInstanceID()) {
+									out->action = AddTraderToBazaarWindow;
 									c.second->IncrementNoOfTraders();
 									c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
 							}
@@ -3943,9 +3945,14 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 							break;
 						}
 						case TraderOff: {
-							out->action = RemoveTraderFromBazaarWindow;
-							c.second->DecrementNoOfTraders();
-							c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+							if (c.second->GetNoOfTraders() <
+									EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit &&
+								out->zone_id == Zones::BAZAAR &&
+								out->zone_instance_id == c.second->GetInstanceID()) {
+									out->action = RemoveTraderFromBazaarWindow;
+									c.second->DecrementNoOfTraders();
+									c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+							}
 							break;
 						}
 						default: {
