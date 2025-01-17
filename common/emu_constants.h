@@ -788,4 +788,34 @@ namespace BookType {
 	constexpr uint8 ItemInfo = 2;
 }
 
+static std::map<EQ::expansions::Expansion, uint8> expansion_max_levels = {
+	{ EQ::expansions::Expansion::EverQuest, 50 },
+	{ EQ::expansions::Expansion::RoK,       60 },
+	{ EQ::expansions::Expansion::SoV,       60 },
+	{ EQ::expansions::Expansion::SoL,       60 },
+	{ EQ::expansions::Expansion::PoP,       65 },
+	{ EQ::expansions::Expansion::LoY,       65 },
+	{ EQ::expansions::Expansion::LDoN,      65 },
+	{ EQ::expansions::Expansion::GoD,       65 },
+	{ EQ::expansions::Expansion::OoW,       70 },
+	{ EQ::expansions::Expansion::DoN,       70 },
+	{ EQ::expansions::Expansion::DoD,       70 },
+	{ EQ::expansions::Expansion::PoR,       70 },
+	{ EQ::expansions::Expansion::TSS,       75 },
+	{ EQ::expansions::Expansion::TBS,       75 },
+	{ EQ::expansions::Expansion::SoF,       80 },
+	{ EQ::expansions::Expansion::SoD,       85 },
+	{ EQ::expansions::Expansion::UF,        85 },
+	{ EQ::expansions::Expansion::HoT,       90 },
+	{ EQ::expansions::Expansion::VoA,       95 },
+	{ EQ::expansions::Expansion::RoF,       100 },
+	{ EQ::expansions::Expansion::CotF,      100 },
+};
+
+namespace Expansion {
+	EQ::expansions::Expansion GetHighestExpansion(uint32 expansion_bitmask);
+	uint8 GetExpansionMaxLevel(EQ::expansions::Expansion expansion);
+	bool IsValid(EQ::expansions::Expansion expansion);
+}
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

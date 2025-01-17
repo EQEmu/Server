@@ -38,6 +38,7 @@ public:
 		int8_t      hideme;
 		uint8_t     rulesflag;
 		time_t      suspendeduntil;
+		int32_t     expansions;
 		uint32_t    time_creation;
 		std::string ban_reason;
 		std::string suspend_reason;
@@ -73,6 +74,7 @@ public:
 			"hideme",
 			"rulesflag",
 			"suspendeduntil",
+			"expansions",
 			"time_creation",
 			"ban_reason",
 			"suspend_reason",
@@ -104,6 +106,7 @@ public:
 			"hideme",
 			"rulesflag",
 			"UNIX_TIMESTAMP(suspendeduntil)",
+			"expansions",
 			"time_creation",
 			"ban_reason",
 			"suspend_reason",
@@ -169,6 +172,7 @@ public:
 		e.hideme              = 0;
 		e.rulesflag           = 0;
 		e.suspendeduntil      = 0;
+		e.expansions          = -1;
 		e.time_creation       = 0;
 		e.ban_reason          = "";
 		e.suspend_reason      = "";
@@ -230,12 +234,13 @@ public:
 			e.hideme              = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
 			e.rulesflag           = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
 			e.suspendeduntil      = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
-			e.time_creation       = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
-			e.ban_reason          = row[20] ? row[20] : "";
-			e.suspend_reason      = row[21] ? row[21] : "";
-			e.crc_eqgame          = row[22] ? row[22] : "";
-			e.crc_skillcaps       = row[23] ? row[23] : "";
-			e.crc_basedata        = row[24] ? row[24] : "";
+			e.expansions          = row[19] ? static_cast<int32_t>(atoi(row[19])) : -1;
+			e.time_creation       = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.ban_reason          = row[21] ? row[21] : "";
+			e.suspend_reason      = row[22] ? row[22] : "";
+			e.crc_eqgame          = row[23] ? row[23] : "";
+			e.crc_skillcaps       = row[24] ? row[24] : "";
+			e.crc_basedata        = row[25] ? row[25] : "";
 
 			return e;
 		}
@@ -287,12 +292,13 @@ public:
 		v.push_back(columns[16] + " = " + std::to_string(e.hideme));
 		v.push_back(columns[17] + " = " + std::to_string(e.rulesflag));
 		v.push_back(columns[18] + " = FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
-		v.push_back(columns[19] + " = " + std::to_string(e.time_creation));
-		v.push_back(columns[20] + " = '" + Strings::Escape(e.ban_reason) + "'");
-		v.push_back(columns[21] + " = '" + Strings::Escape(e.suspend_reason) + "'");
-		v.push_back(columns[22] + " = '" + Strings::Escape(e.crc_eqgame) + "'");
-		v.push_back(columns[23] + " = '" + Strings::Escape(e.crc_skillcaps) + "'");
-		v.push_back(columns[24] + " = '" + Strings::Escape(e.crc_basedata) + "'");
+		v.push_back(columns[19] + " = " + std::to_string(e.expansions));
+		v.push_back(columns[20] + " = " + std::to_string(e.time_creation));
+		v.push_back(columns[21] + " = '" + Strings::Escape(e.ban_reason) + "'");
+		v.push_back(columns[22] + " = '" + Strings::Escape(e.suspend_reason) + "'");
+		v.push_back(columns[23] + " = '" + Strings::Escape(e.crc_eqgame) + "'");
+		v.push_back(columns[24] + " = '" + Strings::Escape(e.crc_skillcaps) + "'");
+		v.push_back(columns[25] + " = '" + Strings::Escape(e.crc_basedata) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -333,6 +339,7 @@ public:
 		v.push_back(std::to_string(e.hideme));
 		v.push_back(std::to_string(e.rulesflag));
 		v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+		v.push_back(std::to_string(e.expansions));
 		v.push_back(std::to_string(e.time_creation));
 		v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
 		v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
@@ -387,6 +394,7 @@ public:
 			v.push_back(std::to_string(e.hideme));
 			v.push_back(std::to_string(e.rulesflag));
 			v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+			v.push_back(std::to_string(e.expansions));
 			v.push_back(std::to_string(e.time_creation));
 			v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
 			v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
@@ -445,12 +453,13 @@ public:
 			e.hideme              = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
 			e.rulesflag           = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
 			e.suspendeduntil      = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
-			e.time_creation       = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
-			e.ban_reason          = row[20] ? row[20] : "";
-			e.suspend_reason      = row[21] ? row[21] : "";
-			e.crc_eqgame          = row[22] ? row[22] : "";
-			e.crc_skillcaps       = row[23] ? row[23] : "";
-			e.crc_basedata        = row[24] ? row[24] : "";
+			e.expansions          = row[19] ? static_cast<int32_t>(atoi(row[19])) : -1;
+			e.time_creation       = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.ban_reason          = row[21] ? row[21] : "";
+			e.suspend_reason      = row[22] ? row[22] : "";
+			e.crc_eqgame          = row[23] ? row[23] : "";
+			e.crc_skillcaps       = row[24] ? row[24] : "";
+			e.crc_basedata        = row[25] ? row[25] : "";
 
 			all_entries.push_back(e);
 		}
@@ -494,12 +503,13 @@ public:
 			e.hideme              = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
 			e.rulesflag           = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
 			e.suspendeduntil      = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
-			e.time_creation       = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
-			e.ban_reason          = row[20] ? row[20] : "";
-			e.suspend_reason      = row[21] ? row[21] : "";
-			e.crc_eqgame          = row[22] ? row[22] : "";
-			e.crc_skillcaps       = row[23] ? row[23] : "";
-			e.crc_basedata        = row[24] ? row[24] : "";
+			e.expansions          = row[19] ? static_cast<int32_t>(atoi(row[19])) : -1;
+			e.time_creation       = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.ban_reason          = row[21] ? row[21] : "";
+			e.suspend_reason      = row[22] ? row[22] : "";
+			e.crc_eqgame          = row[23] ? row[23] : "";
+			e.crc_skillcaps       = row[24] ? row[24] : "";
+			e.crc_basedata        = row[25] ? row[25] : "";
 
 			all_entries.push_back(e);
 		}
@@ -593,6 +603,7 @@ public:
 		v.push_back(std::to_string(e.hideme));
 		v.push_back(std::to_string(e.rulesflag));
 		v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+		v.push_back(std::to_string(e.expansions));
 		v.push_back(std::to_string(e.time_creation));
 		v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
 		v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
@@ -640,6 +651,7 @@ public:
 			v.push_back(std::to_string(e.hideme));
 			v.push_back(std::to_string(e.rulesflag));
 			v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+			v.push_back(std::to_string(e.expansions));
 			v.push_back(std::to_string(e.time_creation));
 			v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
 			v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");

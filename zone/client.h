@@ -473,6 +473,9 @@ public:
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 	void ReloadExpansionProfileSetting();
 
+	uint32 GetAccountExpansions();
+	uint32 GetCharacterExpansions();
+
 	void SetPetCommandState(int button, int state);
 
 	bool AutoAttackEnabled() const { return auto_attack; }
