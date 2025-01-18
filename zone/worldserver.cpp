@@ -3924,9 +3924,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					switch (in->action) {
 						case TraderOn: {
 							out->action = AddTraderToBazaarWindow;
-							if (c.second->GetNoOfTraders() <
+							if (c.second->GetTraderCount() <
 								EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit) {
-									c.second->IncrementNoOfTraders();
+									c.second->IncrementTraderCount();
 									c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
 							}
 
@@ -3934,7 +3934,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						}
 						case TraderOff: {
 							out->action = RemoveTraderFromBazaarWindow;
-							c.second->DecrementNoOfTraders();
+							c.second->DecrementTraderCount();
 							c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
 							break;
 						}

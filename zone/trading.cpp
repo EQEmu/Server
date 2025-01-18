@@ -3225,7 +3225,7 @@ void Client::SendBulkBazaarTraders()
 		EQ::constants::StaticLookup(ClientVersion())->BazaarTraderLimit
 	);
 
-	SetNoOfTraders(results.count);
+	SetTraderCount(results.count);
 
 	auto  p_size  = 4 + 12 * results.count + results.name_length;
 	auto  buffer  = std::make_unique<char[]>(p_size);
