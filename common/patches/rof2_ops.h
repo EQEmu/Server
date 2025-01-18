@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -91,6 +91,7 @@ E(OP_InspectBuffs)
 E(OP_InspectRequest)
 E(OP_ItemLinkResponse)
 E(OP_ItemPacket)
+E(OP_ItemPreviewRequest)
 E(OP_ItemVerifyReply)
 E(OP_LeadershipExpUpdate)
 E(OP_LogServer)
