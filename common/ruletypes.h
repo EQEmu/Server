@@ -895,6 +895,10 @@ RULE_INT(Bots, CampTimer, 25, "Number of seconds after /camp has begun before bo
 RULE_BOOL(Bots, SendClassRaceOnHelp, true, "If enabled a reminder of how to check class/race IDs will be sent when using compatible commands.")
 RULE_BOOL(Bots, AllowCrossGroupRaidAssist, true, "If enabled bots will autodefend group or raid members set as main assist.")
 RULE_BOOL(Bots, AllowBotBlockedBuffs, true, "If enabled, you can create blocked buffs for each bot and for their pets.")
+RULE_STRING(Bots, ZonesWithSpawnLimits, "", "Comma-delimited list of zones where different bot spawn limits apply. This is the max a zone allows.")
+RULE_STRING(Bots, ZoneSpawnLimits, "", "Comma-delimited list of spawn limits for zones.")
+RULE_STRING(Bots, ZonesWithForcedSpawnLimits, "", "Comma-delimited list of zones where bot spawn limits are forced. This will take priority over any other type of spawn limits.")
+RULE_STRING(Bots, ZoneForcedSpawnLimits, "", "Comma-delimited list of forced spawn limits for zones.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)
