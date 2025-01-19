@@ -20,7 +20,7 @@ class BaseCharacterEvolvingItemsRepository {
 public:
 	struct CharacterEvolvingItems {
 		uint64_t id;
-		uint32_t char_id;
+		uint32_t character_id;
 		uint32_t item_id;
 		uint8_t  activated;
 		uint8_t  equipped;
@@ -39,7 +39,7 @@ public:
 	{
 		return {
 			"id",
-			"char_id",
+			"character_id",
 			"item_id",
 			"activated",
 			"equipped",
@@ -54,7 +54,7 @@ public:
 	{
 		return {
 			"id",
-			"char_id",
+			"character_id",
 			"item_id",
 			"activated",
 			"equipped",
@@ -103,7 +103,7 @@ public:
 		CharacterEvolvingItems e{};
 
 		e.id             = 0;
-		e.char_id        = 0;
+		e.character_id   = 0;
 		e.item_id        = 0;
 		e.activated      = 0;
 		e.equipped       = 0;
@@ -148,7 +148,7 @@ public:
 			CharacterEvolvingItems e{};
 
 			e.id             = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.character_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equipped       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
@@ -189,7 +189,7 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.character_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.activated));
 		v.push_back(columns[4] + " = " + std::to_string(e.equipped));
@@ -219,7 +219,7 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.character_id));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.activated));
 		v.push_back(std::to_string(e.equipped));
@@ -257,7 +257,7 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.character_id));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.activated));
 			v.push_back(std::to_string(e.equipped));
@@ -299,7 +299,7 @@ public:
 			CharacterEvolvingItems e{};
 
 			e.id             = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.character_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equipped       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
@@ -332,7 +332,7 @@ public:
 			CharacterEvolvingItems e{};
 
 			e.id             = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.character_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.activated      = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.equipped       = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
@@ -415,7 +415,7 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.character_id));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.activated));
 		v.push_back(std::to_string(e.equipped));
@@ -446,7 +446,7 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.character_id));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.activated));
 			v.push_back(std::to_string(e.equipped));

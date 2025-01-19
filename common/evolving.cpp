@@ -66,7 +66,7 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 	if (!inst.GetEvolveUniqueID()) {
 		auto e = CharacterEvolvingItemsRepository::NewEntity();
 
-		e.char_id       = char_id;
+		e.character_id  = char_id;
 		e.item_id       = inst.GetID();
 		e.equipped      = inst.GetEvolveEquipped();
 		e.final_item_id = evolving_items_manager.GetFinalItemID(inst);
@@ -75,7 +75,7 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 		e.id   = r.id;
 
 		inst.SetEvolveUniqueID(e.id);
-		inst.SetEvolveCharID(e.char_id);
+		inst.SetEvolveCharID(e.character_id);
 		inst.SetEvolveItemID(e.item_id);
 		inst.SetEvolveFinalItemID(e.final_item_id);
 

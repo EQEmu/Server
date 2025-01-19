@@ -318,7 +318,7 @@ namespace EQ
 		bool             GetEvolveEquipped() const { return m_evolving_details.equipped ? true : false; }
 		double           GetEvolveProgression() const { return m_evolving_details.progression; }
 		uint64           GetEvolveUniqueID() const { return m_evolving_details.id; }
-		uint32           GetEvolveCharID() const { return m_evolving_details.char_id; }
+		uint32           GetEvolveCharID() const { return m_evolving_details.character_id; }
 		uint32           GetEvolveItemID() const { return m_evolving_details.item_id; }
 		uint32           GetEvolveLoreID() const { if (GetItem()) { return GetItem()->EvolvingID; } return false; }
 		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
@@ -328,7 +328,7 @@ namespace EQ
 		void             SetEvolveActivated(const bool in) const { m_evolving_details.activated = in; }
 		void             SetEvolveProgression(const double in) const { m_evolving_details.progression = in; }
 		void             SetEvolveUniqueID(const uint64 in) const { m_evolving_details.id = in; }
-		void             SetEvolveCharID(const uint32 in) const { m_evolving_details.char_id = in; }
+		void             SetEvolveCharID(const uint32 in) const { m_evolving_details.character_id = in; }
 		void             SetEvolveItemID(const uint32 in) const { m_evolving_details.item_id = in; }
 		void             SetEvolveCurrentAmount(const uint64 in) const { m_evolving_details.current_amount = in; }
 		void             SetEvolveAddToCurrentAmount(const uint64 in) const { m_evolving_details.current_amount += in; }

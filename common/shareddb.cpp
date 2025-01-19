@@ -811,17 +811,17 @@ bool SharedDatabase::GetInventory(Client *c)
 			if (t == std::end(e_results)) {
 				auto e = CharacterEvolvingItemsRepository::NewEntity();
 
-				e.char_id       = char_id;
+				e.character_id  = char_id;
 				e.item_id       = item_id;
 				e.equipped      = inst->GetEvolveEquipped();
 				e.final_item_id = evolving_items_manager.GetFinalItemID(*inst);
 
 				auto r = CharacterEvolvingItemsRepository::InsertOne(*this, e);
-				e.id   = r.id;
+				e.id = r.id;
 				e_results.push_back(e);
 
 				inst->SetEvolveUniqueID(e.id);
-				inst->SetEvolveCharID(e.char_id);
+				inst->SetEvolveCharID(e.character_id);
 				inst->SetEvolveItemID(e.item_id);
 				inst->SetEvolveActivated(e.activated);
 				inst->SetEvolveEquipped(e.equipped);
@@ -831,7 +831,7 @@ bool SharedDatabase::GetInventory(Client *c)
 			}
 			else {
 				inst->SetEvolveUniqueID(t->id);
-				inst->SetEvolveCharID(t->char_id);
+				inst->SetEvolveCharID(t->character_id);
 				inst->SetEvolveItemID(t->item_id);
 				inst->SetEvolveActivated(t->activated);
 				inst->SetEvolveEquipped(t->equipped);

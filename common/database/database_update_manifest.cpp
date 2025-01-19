@@ -5815,7 +5815,7 @@ ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_
 		.sql         = R"(
 CREATE TABLE `character_evolving_items` (
 	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`char_id` INT(10) UNSIGNED NULL DEFAULT '0',
+	`character_id` INT(10) UNSIGNED NULL DEFAULT '0',
 	`item_id` INT(10) UNSIGNED NULL DEFAULT '0',
 	`activated` TINYINT(1) UNSIGNED NULL DEFAULT '0',
 	`equipped` TINYINT(3) UNSIGNED NULL DEFAULT '0',

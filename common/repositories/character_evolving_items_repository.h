@@ -86,15 +86,15 @@ public:
 		return e;
 	}
 
-	static bool UpdateCharID(Database& db, const uint64 id, const uint32 to_char_id)
+	static bool UpdateCharID(Database &db, const uint64 id, const uint32 to_char_id)
 	{
 		auto e = FindOne(db, id);
 		if (e.id == 0) {
 			return false;
 		}
 
-		e.char_id    = to_char_id;
-		e.deleted_at = 0;
+		e.character_id = to_char_id;
+		e.deleted_at   = 0;
 		return UpdateOne(db, e);
 	}
 };
