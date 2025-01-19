@@ -510,6 +510,7 @@ public:
 	void AreaTaunt(float range);
 	void AreaTaunt(float range, int bonus_hate);
 	luabind::object GetInventorySlots(lua_State* L);
+	void SetAAEXPPercentage(uint8 percentage);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

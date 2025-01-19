@@ -692,6 +692,8 @@ public:
 	void SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version = -1);
 	void SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version = -1);
 
+	void SetAAEXPPercentage(uint8 percentage);
+
 	bool UpdateLDoNPoints(uint32 theme_id, int points);
 	void SetLDoNPoints(uint32 theme_id, uint32 points);
 	void SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
