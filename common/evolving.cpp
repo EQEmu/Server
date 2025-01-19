@@ -188,12 +188,12 @@ uint64 EvolvingItemsManager::GetTotalEarnedXP(const EQ::ItemInstance &inst)
 	return xp;
 }
 
-EvolveGetNextItem_Struct EvolvingItemsManager::GetNextItemByXP(const EQ::ItemInstance &inst_in, const int64 in_xp)
+EvolveGetNextItem EvolvingItemsManager::GetNextItemByXP(const EQ::ItemInstance &inst_in, const int64 in_xp)
 {
-	EvolveGetNextItem_Struct ets{};
-	const auto evolve_items   = GetEvolveIDItems(inst_in.GetEvolveLoreID());
-	uint32 max_transfer_level = 0;
-	int64 xp                  = in_xp;
+	EvolveGetNextItem ets{};
+	const auto        evolve_items   = GetEvolveIDItems(inst_in.GetEvolveLoreID());
+	uint32            max_transfer_level = 0;
+	int64             xp                  = in_xp;
 
 	for (auto const &e: evolve_items) {
 		if (e.item_evolve_level < inst_in.GetEvolveLvl()) {
@@ -229,12 +229,12 @@ EvolveGetNextItem_Struct EvolvingItemsManager::GetNextItemByXP(const EQ::ItemIns
 	return ets;
 }
 
-EvolveTransfer_Struct EvolvingItemsManager::DetermineTransferResults(
+EvolveTransfer EvolvingItemsManager::DetermineTransferResults(
 	const EQ::ItemInstance &inst_from,
 	const EQ::ItemInstance &inst_to
 )
 {
-	EvolveTransfer_Struct ets{};
+	EvolveTransfer ets{};
 
 	auto evolving_details_inst_from = evolving_items_manager.GetEvolveItemDetails(inst_from.GetID());
 	auto evolving_details_inst_to   = evolving_items_manager.GetEvolveItemDetails(inst_to.GetID());

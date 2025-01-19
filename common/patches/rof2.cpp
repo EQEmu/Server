@@ -1359,9 +1359,9 @@ namespace RoF2
 
 		switch (action) {
 			case EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS: {
-				auto emu = reinterpret_cast<EvolveItemMessaging_Struct *>(in->pBuffer);
+				auto emu = reinterpret_cast<EvolveItemMessaging *>(in->pBuffer);
 
-				EvolveXPWindowSend_Struct e{};
+				EvolveXPWindowSend           e{};
 				EQ::Util::MemoryStreamReader ss(emu->serialized_data, in->size - sizeof(emu->action));
 				cereal::BinaryInputArchive ar(ss);
 				ar(e);

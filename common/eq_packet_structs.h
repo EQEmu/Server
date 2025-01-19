@@ -6460,7 +6460,7 @@ struct PickZone_Struct {
 	int32 selection_id;
 };
 
-struct EvolveItemToggle_Struct {
+struct EvolveItemToggle {
 	uint32 action;
 	uint32 unknown_004;
 	uint64 unique_id;
@@ -6468,31 +6468,31 @@ struct EvolveItemToggle_Struct {
 	uint32 activated;
 };
 
-struct EvolveXPWindowReceive_Struct {
+struct EvolveXPWindowReceive {
 	uint32 action;
 	uint32 unknown_004;
 	uint64 item1_unique_id;
 	uint64 item2_unique_id;
 };
 
-struct EvolveItemMessaging_Struct {
+struct EvolveItemMessaging {
 	uint32 action;
 	char   serialized_data[];
 };
 
-struct EvolveXPWindowSend_Struct {
-	/*000*/	uint32 action;
-	/*004*/	uint64 item1_unique_id;
-	/*012*/	uint64 item2_unique_id;
-	/*020*/	uint32 compatibility;
-	/*024*/	uint32 max_transfer_level;
-	/*028*/	uint8  item1_present;
-	/*029*/ uint8  item2_present;
-	/*030*/ std::string   serialize_item_1;
-	/*034*/ std::string   serialize_item_2;
+struct EvolveXPWindowSend {
+	/*000*/    uint32   action;
+	/*004*/    uint64   item1_unique_id;
+	/*012*/    uint64   item2_unique_id;
+	/*020*/    uint32   compatibility;
+	/*024*/    uint32   max_transfer_level;
+	/*028*/    uint8    item1_present;
+	/*029*/ uint8       item2_present;
+	/*030*/ std::string serialize_item_1;
+	/*034*/ std::string serialize_item_2;
 
 	template<class Archive>
-	void serialize(Archive& archive)
+	void serialize(Archive &archive)
 	{
 		archive(
 			CEREAL_NVP(action),
@@ -6508,7 +6508,7 @@ struct EvolveXPWindowSend_Struct {
 	}
 };
 
-struct EvolveTransfer_Struct {
+struct EvolveTransfer {
 	uint32 item_from_id;
 	uint32 item_from_current_amount;
 	uint32 item_to_id;
@@ -6517,12 +6517,13 @@ struct EvolveTransfer_Struct {
 	uint32 max_transfer_level;
 };
 
-struct EvolveGetNextItem_Struct {
+struct EvolveGetNextItem {
 	uint32 new_item_id;
 	uint64 new_current_amount;
 	uint64 from_current_amount;
 	uint32 max_transfer_level;
 };
+
 // Restore structure packing to default
 #pragma pack()
 

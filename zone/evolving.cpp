@@ -32,7 +32,7 @@ extern WorldServer worldserver;
 
 void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 {
-	const auto in   = reinterpret_cast<EvolveItemToggle_Struct *>(app->pBuffer);
+	const auto in   = reinterpret_cast<EvolveItemToggle *>(app->pBuffer);
 	auto       item = CharacterEvolvingItemsRepository::FindOne(database, in->unique_id);
 
 	LogEvolveItemDetail(
@@ -59,8 +59,8 @@ void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 
 void Client::SendEvolvingPacket(const int8 action, const CharacterEvolvingItemsRepository::CharacterEvolvingItems &item)
 {
-	auto       out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
-	const auto data = reinterpret_cast<EvolveItemToggle_Struct *>(out->pBuffer);
+	auto       out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle));
+	const auto data = reinterpret_cast<EvolveItemToggle *>(out->pBuffer);
 
 	LogEvolveItemDetail(
 		"Character ID <green>[{}] requested info for evolving item with unique id <yellow>[{}] status <yellow>[{}] "
@@ -242,7 +242,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 
 void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket *app)
 {
-	const auto in        = reinterpret_cast<EvolveItemToggle_Struct *>(app->pBuffer);
+	const auto in        = reinterpret_cast<EvolveItemToggle *>(app->pBuffer);
 
 	const uint32 item_id = static_cast<uint32>(in->unique_id & 0xFFFFFFFF);
 	if (item_id == 0) {
@@ -305,8 +305,8 @@ bool Client::DoEvolveCheckProgression(const EQ::ItemInstance &inst)
 
 void Client::SendEvolveXPTransferWindow()
 {
-	auto       out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle_Struct));
-	const auto data = reinterpret_cast<EvolveItemToggle_Struct *>(out->pBuffer);
+	auto       out  = std::make_unique<EQApplicationPacket>(OP_EvolveItem, sizeof(EvolveItemToggle));
+	const auto data = reinterpret_cast<EvolveItemToggle *>(out->pBuffer);
 
 	data->action    = 1;
 
@@ -315,7 +315,7 @@ void Client::SendEvolveXPTransferWindow()
 
 void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 {
-	const auto in = reinterpret_cast<EvolveXPWindowReceive_Struct *>(app->pBuffer);
+	const auto in = reinterpret_cast<EvolveXPWindowReceive *>(app->pBuffer);
 
 	const auto item_1_slot =
 		GetInv().HasEvolvingItem(in->item1_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
@@ -358,7 +358,7 @@ void Client::SendEvolveXPWindowDetails(const EQApplicationPacket *app)
 
 void Client::DoEvolveTransferXP(const EQApplicationPacket *app)
 {
-	const auto in = reinterpret_cast<EvolveXPWindowReceive_Struct *>(app->pBuffer);
+	const auto in = reinterpret_cast<EvolveXPWindowReceive *>(app->pBuffer);
 
 	const auto item_1_slot =
 		GetInv().HasEvolvingItem(in->item1_unique_id, 1, invWherePersonal | invWhereWorn | invWhereCursor);
@@ -442,7 +442,7 @@ void Client::SendEvolveTransferResults(
 	std::stringstream           ss;
 	cereal::BinaryOutputArchive ar(ss);
 
-	EvolveXPWindowSend_Struct e{};
+	EvolveXPWindowSend e{};
 	e.action             = EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS;
 	e.compatibility      = compatibility;
 	e.item1_unique_id    = inst_from.GetEvolveUniqueID();
@@ -457,10 +457,10 @@ void Client::SendEvolveTransferResults(
 		ar(e);
 	}
 
-	uint32 packet_size = sizeof(EvolveItemMessaging_Struct) + ss.str().length();
+	uint32 packet_size = sizeof(EvolveItemMessaging) + ss.str().length();
 
 	std::unique_ptr<EQApplicationPacket> out(new EQApplicationPacket(OP_EvolveItem, packet_size));
-	const auto                           data = reinterpret_cast<EvolveItemMessaging_Struct *>(out->pBuffer);
+	const auto                           data = reinterpret_cast<EvolveItemMessaging *>(out->pBuffer);
 
 	data->action                              = EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS;
 	memcpy(data->serialized_data, ss.str().data(), ss.str().length());
