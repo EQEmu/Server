@@ -17,6 +17,7 @@ SET(zone_sources
     botspellsai.cpp
     cheat_manager.cpp
     client.cpp
+    client_evolving.cpp
     client_bot.cpp
     client_mods.cpp
     client_packet.cpp
@@ -34,7 +35,6 @@ SET(zone_sources
     embperl.cpp
     encounter.cpp
     entity.cpp
-    evolving.cpp
     exp.cpp
     expedition.cpp
     expedition_database.cpp

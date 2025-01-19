@@ -1,10 +1,7 @@
 #include "../common/evolving.h"
 
-#include "../common/eq_constants.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/global_define.h"
-#include "../common/repositories/character_evolving_items_repository.h"
-#include "../common/rulesys.h"
 
 #include "client.h"
 #include "string_ids.h"
