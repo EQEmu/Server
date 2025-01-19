@@ -10748,12 +10748,11 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 			InterrogateInventory(this, true, false, true, error);
 	}
 
-	if (GetInv().GetItem(mi->to_slot)) {
-		CharacterEvolvingItemsRepository::UpdateOne(database, GetInv().GetItem(mi->to_slot)->GetEvolvingDetails());
-	}
-
-	if (GetInv().GetItem(mi->from_slot)) {
-		CharacterEvolvingItemsRepository::UpdateOne(database, GetInv().GetItem(mi->from_slot)->GetEvolvingDetails());
+	for (int slot : {mi->to_slot, mi->from_slot}) {
+		auto item = GetInv().GetItem(slot);
+		if (item && item->IsEvolving()) {
+			CharacterEvolvingItemsRepository::UpdateOne(database, item->GetEvolvingDetails());
+		}
 	}
 }
 
