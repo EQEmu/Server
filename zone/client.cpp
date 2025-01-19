@@ -13123,8 +13123,3 @@ void Client::SetAAEXPPercentage(uint8 percentage)
 	SendAlternateAdvancementStats();
 	SendAlternateAdvancementTable();
 }
-
-std::map<uint32, CharacterEvolvingItemsRepository::CharacterEvolvingItems>* Client::GetEvolvingItems()
-{
-	return &m_evolving_items;
-}
