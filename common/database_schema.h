@@ -51,7 +51,7 @@ namespace DatabaseSchema {
 			{"character_enabledtasks",         "charid"},
 			{"character_expedition_lockouts",  "character_id"},
 			{"character_exp_modifiers",        "character_id"},
-			{"character_evolving_items",       "char_id"},
+			{"character_evolving_items",       "character_id"},
 			{"character_inspect_messages",     "id"},
 			{"character_instance_safereturns", "character_id"},
 			{"character_item_recast",          "id"},
