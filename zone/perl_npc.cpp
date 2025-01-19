@@ -796,6 +796,85 @@ void Perl_NPC_DescribeSpecialAbilities(NPC* self, Client* c)
 	self->DescribeSpecialAbilities(c);
 }
 
+bool Perl_NPC_IsMultiQuestEnabled(NPC* self)
+{
+	return self->IsMultiQuestEnabled();
+}
+
+void Perl_NPC_MultiQuestEnable(NPC* self)
+{
+	self->MultiQuestEnable();
+}
+
+bool Perl_NPC_CheckHandin(
+	NPC* self,
+	Client* c,
+	perl::reference handin_ref,
+	perl::reference required_ref,
+	perl::array items_ref
+)
+{
+	perl::hash handin   = handin_ref;
+	perl::hash required = required_ref;
+
+	std::map<std::string, uint32>   handin_map;
+	std::map<std::string, uint32>   required_map;
+	std::vector<EQ::ItemInstance *> items;
+
+	for (auto e: handin) {
+		if (!e.first) {
+			continue;
+		}
+
+		if (Strings::EqualFold(e.first, "0")) {
+			continue;
+		}
+
+		LogNpcHandinDetail("Handin key [{}] value [{}]", e.first, handin.at(e.first).c_str());
+
+		const uint32 count = static_cast<uint32>(handin.at(e.first));
+		handin_map[e.first] = count;
+	}
+
+	for (auto e: required) {
+		if (!e.first) {
+			continue;
+		}
+
+		if (Strings::EqualFold(e.first, "0")) {
+			continue;
+		}
+
+		LogNpcHandinDetail("Required key [{}] value [{}]", e.first, required.at(e.first).c_str());
+
+		const uint32 count = static_cast<uint32>(required.at(e.first));
+		required_map[e.first] = count;
+	}
+
+	for (auto e : items_ref) {
+		EQ::ItemInstance* i = static_cast<EQ::ItemInstance*>(e);
+		if (!i) {
+			continue;
+		}
+
+		items.emplace_back(i);
+
+		LogNpcHandinDetail(
+			"Item instance [{}] ({}) UUID ({}) added to handin list",
+			i->GetItem()->Name,
+			i->GetItem()->ID,
+			i->GetSerialNumber()
+		);
+	}
+
+	return self->CheckHandin(c, handin_map, required_map, items);
+}
+
+void Perl_NPC_ReturnHandinItems(NPC *self, Client* c)
+{
+	self->ReturnHandinItems(c);
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -827,6 +906,7 @@ void perl_register_npc()
 	package.add("CalculateNewWaypoint", &Perl_NPC_CalculateNewWaypoint);
 	package.add("ChangeLastName", &Perl_NPC_ChangeLastName);
 	package.add("CheckNPCFactionAlly", &Perl_NPC_CheckNPCFactionAlly);
+	package.add("CheckHandin", &Perl_NPC_CheckHandin);
 	package.add("ClearItemList", &Perl_NPC_ClearLootItems);
 	package.add("ClearLastName", &Perl_NPC_ClearLastName);
 	package.add("CountItem", &Perl_NPC_CountItem);
@@ -892,7 +972,8 @@ void perl_register_npc()
 	package.add("IsGuarding", &Perl_NPC_IsGuarding);
 	package.add("IsLDoNLocked", &Perl_NPC_IsLDoNLocked);
 	package.add("IsLDoNTrapped", &Perl_NPC_IsLDoNTrapped);
-	package.add("IsLDoNTrapDetected", &Perl_NPC_IsLDoNTrapDetected);;
+	package.add("IsLDoNTrapDetected", &Perl_NPC_IsLDoNTrapDetected);
+	package.add("IsMultiQuestEnabled", &Perl_NPC_IsMultiQuestEnabled);
 	package.add("IsOnHatelist", &Perl_NPC_IsOnHatelist);
 	package.add("IsRaidTarget", &Perl_NPC_IsRaidTarget);
 	package.add("IsRareSpawn", &Perl_NPC_IsRareSpawn);
@@ -904,6 +985,7 @@ void perl_register_npc()
 	package.add("MoveTo", (void(*)(NPC*, float, float, float))&Perl_NPC_MoveTo);
 	package.add("MoveTo", (void(*)(NPC*, float, float, float, float))&Perl_NPC_MoveTo);
 	package.add("MoveTo", (void(*)(NPC*, float, float, float, float, bool))&Perl_NPC_MoveTo);
+	package.add("MultiQuestEnable", &Perl_NPC_MultiQuestEnable);
 	package.add("NextGuardPosition", &Perl_NPC_NextGuardPosition);
 	package.add("PauseWandering", &Perl_NPC_PauseWandering);
 	package.add("PickPocket", &Perl_NPC_PickPocket);
@@ -920,6 +1002,7 @@ void perl_register_npc()
 	package.add("RemoveMeleeProc", &Perl_NPC_RemoveMeleeProc);
 	package.add("RemoveRangedProc", &Perl_NPC_RemoveRangedProc);
 	package.add("ResumeWandering", &Perl_NPC_ResumeWandering);
+	package.add("ReturnHandinItems", &Perl_NPC_ReturnHandinItems);
 	package.add("SaveGuardSpot", (void(*)(NPC*))&Perl_NPC_SaveGuardSpot);
 	package.add("SaveGuardSpot", (void(*)(NPC*, bool))&Perl_NPC_SaveGuardSpot);
 	package.add("SaveGuardSpot", (void(*)(NPC*, float, float, float, float))&Perl_NPC_SaveGuardSpot);

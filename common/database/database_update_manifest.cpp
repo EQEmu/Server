@@ -5805,6 +5805,18 @@ ALTER TABLE `zone`
 ADD COLUMN `shard_at_player_count` int(11) NULL DEFAULT 0 AFTER `seconds_before_idle`;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9289,
+		.description = "2024_10_15_npc_types_multiquest_enabled.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'multiquest_enabled'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_types`
+ADD COLUMN `multiquest_enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `is_parcel_merchant`;
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
