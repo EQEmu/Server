@@ -9206,34 +9206,34 @@ uint8 Mob::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
 }
 
 void Mob::SetSpellHold(uint16 spell_type, bool hold_status) {
-	_spellSettings[spell_type].hold = hold_status;
+	m_bot_spell_settings[spell_type].hold = hold_status;
 }
 
 void Mob::SetSpellDelay(uint16 spell_type, uint16 delay_value) {
-	_spellSettings[spell_type].delay = delay_value;
+	m_bot_spell_settings[spell_type].delay = delay_value;
 }
 
 void Mob::SetSpellMinThreshold(uint16 spell_type, uint8 threshold_value) {
-	_spellSettings[spell_type].minThreshold = threshold_value;
+	m_bot_spell_settings[spell_type].minThreshold = threshold_value;
 }
 
 void Mob::SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value) {
-	_spellSettings[spell_type].maxThreshold = threshold_value;
+	m_bot_spell_settings[spell_type].maxThreshold = threshold_value;
 }
 
 void Mob::SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) {
-	_spellSettings[spell_type].recastTimer.Start(recast_time);
+	m_bot_spell_settings[spell_type].recastTimer.Start(recast_time);
 }
 
 void Mob::StartBotSpellTimers() {
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-		_spellSettings[i].recastTimer.Start();
+		m_bot_spell_settings[i].recastTimer.Start();
 	}
 }
 
 void Mob::DisableBotSpellTimers() {
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-		_spellSettings[i].recastTimer.Disable();
+		m_bot_spell_settings[i].recastTimer.Disable();
 	}
 }
 

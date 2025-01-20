@@ -10176,7 +10176,7 @@ int Bot::GetDefaultBotBaseSetting(uint16 bot_setting, uint8 stance) {
 
 
 void Bot::LoadDefaultBotSettings() {
-	_spellSettings.clear();
+	m_bot_spell_settings.clear();
 
 	uint8 bot_stance = GetBotStance();
 
@@ -10207,7 +10207,7 @@ void Bot::LoadDefaultBotSettings() {
 		t.AEOrGroupTargetCount					= GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance);
 		t.recastTimer.Start();
 
-		_spellSettings.push_back(t);
+		m_bot_spell_settings.push_back(t);
 
 		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}] - [{} [#{}] stance]'", GetCleanName(), t.name, t.shortName, t.spellType, Stance::GetName(bot_stance), bot_stance);
 		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellHold(i, bot_stance), GetDefaultSpellDelay(i, bot_stance), GetDefaultSpellMinThreshold(i, bot_stance), GetDefaultSpellMaxThreshold(i, bot_stance));
@@ -10276,11 +10276,11 @@ BotSpell Bot::GetSpellByHealType(uint16 spell_type, Mob* tar) {
 uint16 Bot::GetSpellTypePriority(uint16 spell_type, uint8 priority_type) {
 	switch (priority_type) {
 		case BotPriorityCategories::Idle:
-			return _spellSettings[spell_type].idlePriority;
+			return m_bot_spell_settings[spell_type].idlePriority;
 		case BotPriorityCategories::Engaged:
-			return _spellSettings[spell_type].engagedPriority;
+			return m_bot_spell_settings[spell_type].engagedPriority;
 		case BotPriorityCategories::Pursue:
-			return _spellSettings[spell_type].pursuePriority;
+			return m_bot_spell_settings[spell_type].pursuePriority;
 		default:
 			return 0;
 	}
@@ -10736,13 +10736,13 @@ uint16 Bot::GetDefaultSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint8 sta
 void Bot::SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 priority) {
 	switch (priority_type) {
 		case BotPriorityCategories::Idle:
-			_spellSettings[spell_type].idlePriority = priority;
+			m_bot_spell_settings[spell_type].idlePriority = priority;
 			break;
 		case BotPriorityCategories::Engaged:
-			_spellSettings[spell_type].engagedPriority = priority;
+			m_bot_spell_settings[spell_type].engagedPriority = priority;
 			break;
 		case BotPriorityCategories::Pursue:
-			_spellSettings[spell_type].pursuePriority = priority;
+			m_bot_spell_settings[spell_type].pursuePriority = priority;
 			break;
 		default:
 			return;
@@ -10750,31 +10750,31 @@ void Bot::SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 pr
 }
 
 void Bot::SetSpellTypeResistLimit(uint16 spell_type, uint16 resist_limit) {
-	_spellSettings[spell_type].resistLimit = resist_limit;
+	m_bot_spell_settings[spell_type].resistLimit = resist_limit;
 }
 
 void Bot::SetSpellTypeAggroCheck(uint16 spell_type, bool aggro_check) {
-	_spellSettings[spell_type].aggroCheck = aggro_check;
+	m_bot_spell_settings[spell_type].aggroCheck = aggro_check;
 }
 
 void Bot::SetSpellTypeMinManaLimit(uint16 spell_type, uint8 mana_limit) {
-	_spellSettings[spell_type].minManaPct = mana_limit;
+	m_bot_spell_settings[spell_type].minManaPct = mana_limit;
 }
 
 void Bot::SetSpellTypeMaxManaLimit(uint16 spell_type, uint8 mana_limit) {
-	_spellSettings[spell_type].maxManaPct = mana_limit;
+	m_bot_spell_settings[spell_type].maxManaPct = mana_limit;
 }
 
 void Bot::SetSpellTypeMinHPLimit(uint16 spell_type, uint8 hp_limit) {
-	_spellSettings[spell_type].minHPPct = hp_limit;
+	m_bot_spell_settings[spell_type].minHPPct = hp_limit;
 }
 
 void Bot::SetSpellTypeMaxHPLimit(uint16 spell_type, uint8 hp_limit) {
-	_spellSettings[spell_type].maxHPPct = hp_limit;
+	m_bot_spell_settings[spell_type].maxHPPct = hp_limit;
 }
 
 void Bot::SetSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint16 target_count) {
-	_spellSettings[spell_type].AEOrGroupTargetCount = target_count;
+	m_bot_spell_settings[spell_type].AEOrGroupTargetCount = target_count;
 }
 
 std::list<BotSpellTypeOrder> Bot::GetSpellTypesPrioritized(uint8 priority_type) {

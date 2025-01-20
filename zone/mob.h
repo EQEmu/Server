@@ -230,7 +230,7 @@ public:
 	// Bot attack flag
 	Timer bot_attack_flag_timer;
 
-	std::vector<BotSpellSettings_Struct> _spellSettings;
+	std::vector<BotSpellSettings_Struct> m_bot_spell_settings;
 
 	//Somewhat sorted: needs documenting!
 
@@ -430,7 +430,7 @@ public:
 
 	virtual bool IsImmuneToBotSpell(uint16 spell_id, Mob* caster);
 
-	inline bool SpellTypeRecastCheck(uint16 spellType) { return (IsClient() ? true : _spellSettings[spellType].recastTimer.GetRemainingTime() > 0 ? false : true); }
+	inline bool SpellTypeRecastCheck(uint16 spellType) { return (IsClient() ? true : m_bot_spell_settings[spellType].recastTimer.GetRemainingTime() > 0 ? false : true); }
 
 	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool no_clients = false, bool no_bots = false, bool no_pets = false);
 
@@ -453,16 +453,16 @@ public:
 	uint8 GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint8 GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
 
-	inline bool GetSpellHold(uint16 spell_type) const { return _spellSettings[spell_type].hold; }
+	inline bool GetSpellHold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].hold; }
 	void SetSpellHold(uint16 spell_type, bool hold_status);
-	inline uint16 GetSpellDelay(uint16 spell_type) const { return _spellSettings[spell_type].delay; }
+	inline uint16 GetSpellDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
 	void SetSpellDelay(uint16 spell_type, uint16 delay_value);
-	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return _spellSettings[spell_type].minThreshold; }
+	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].minThreshold; }
 	void SetSpellMinThreshold(uint16 spell_type, uint8 threshold_value);
-	inline uint8 GetSpellMaxThreshold(uint16 spell_type) const { return _spellSettings[spell_type].maxThreshold; }
+	inline uint8 GetSpellMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].maxThreshold; }
 	void SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value);
 
-	inline uint16 GetSpellTypeRecastTimer(uint16 spell_type) { return _spellSettings[spell_type].recastTimer.GetRemainingTime(); }
+	inline uint16 GetSpellTypeRecastTimer(uint16 spell_type) { return m_bot_spell_settings[spell_type].recastTimer.GetRemainingTime(); }
 	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time);
 
 	uint8 GetHPRatioForSpellType(uint16 spell_type, Mob* tar);

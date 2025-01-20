@@ -13113,7 +13113,7 @@ void Client::ShowZoneShardMenu()
 }
 
 void Client::LoadDefaultBotSettings() {
-	_spellSettings.clear();
+	m_bot_spell_settings.clear();
 
 	// Only illusion block supported currently
 	SetBotSetting(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
@@ -13130,7 +13130,7 @@ void Client::LoadDefaultBotSettings() {
 		t.minThreshold = GetDefaultSpellMinThreshold(i);
 		t.maxThreshold = GetDefaultSpellMaxThreshold(i);
 
-		_spellSettings.push_back(t);
+		m_bot_spell_settings.push_back(t);
 
 		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}]'", GetCleanName(), t.name, t.shortName, t.spellType);
 		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellHold(i), GetDefaultSpellDelay(i), GetDefaultSpellMinThreshold(i), GetDefaultSpellMaxThreshold(i));
