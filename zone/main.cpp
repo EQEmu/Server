@@ -52,7 +52,7 @@
 #include "task_manager.h"
 #include "quest_parser_collection.h"
 #include "embparser.h"
-#include "../common/evolving.h"
+#include "../common/evolving_items.h"
 #include "lua_parser.h"
 #include "questmgr.h"
 #include "npc_scale_manager.h"

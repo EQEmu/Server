@@ -30,7 +30,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/evolving.h"
+#include "../common/evolving_items.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <string.h>

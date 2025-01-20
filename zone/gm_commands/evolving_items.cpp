@@ -1,6 +1,6 @@
 #include "../client.h"
 #include "../command.h"
-#include "../../common/evolving.h"
+#include "../../common/evolving_items.h"
 
 void command_evolvingitems(Client *c, const Seperator *sep)
 {

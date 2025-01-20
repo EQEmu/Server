@@ -25,7 +25,7 @@
 #include "rulesys.h"
 #include "shareddb.h"
 #include "strings.h"
-#include "evolving.h"
+#include "evolving_items.h"
 
 //#include "../common/light_source.h"
 

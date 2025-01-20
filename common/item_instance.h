@@ -23,7 +23,7 @@
 
 #ifndef COMMON_ITEM_INSTANCE_H
 #define COMMON_ITEM_INSTANCE_H
-#include "evolving.h"
+#include "evolving_items.h"
 
 
 class ItemParse;			// Parses item packets

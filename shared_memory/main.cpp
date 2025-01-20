@@ -33,7 +33,7 @@
 #include "../common/zone_store.h"
 #include "../common/path_manager.h"
 #include "../common/events/player_event_logs.h"
-#include "../common/evolving.h"
+#include "../common/evolving_items.h"
 
 EQEmuLogSys          LogSys;
 WorldContentService  content_service;

@@ -25,7 +25,7 @@
 #include "zonedb.h"
 #include "../common/events/player_event_logs.h"
 #include "bot.h"
-#include "../common/evolving.h"
+#include "../common/evolving_items.h"
 #include "../common/repositories/character_corpse_items_repository.h"
 
 extern WorldServer worldserver;

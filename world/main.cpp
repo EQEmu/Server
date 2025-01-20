@@ -46,7 +46,7 @@
 #include "client.h"
 #include "worlddb.h"
 #include "wguild_mgr.h"
-#include "../common/evolving.h"
+#include "../common/evolving_items.h"
 
 #ifdef _WINDOWS
 #include <process.h>

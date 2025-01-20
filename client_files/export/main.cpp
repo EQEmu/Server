@@ -36,7 +36,7 @@
 #include "../../common/file.h"
 #include "../../common/events/player_event_logs.h"
 #include "../../common/skill_caps.h"
-#include "../../common/evolving.h"
+#include "../../common/evolving_items.h"
 
 EQEmuLogSys          LogSys;
 WorldContentService  content_service;

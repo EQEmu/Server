@@ -37,7 +37,7 @@
 #include "strings.h"
 #include "eqemu_config.h"
 #include "data_verification.h"
-#include "evolving.h"
+#include "evolving_items.h"
 #include "repositories/criteria/content_filter_criteria.h"
 #include "repositories/account_repository.h"
 #include "repositories/faction_association_repository.h"
