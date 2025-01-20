@@ -1179,6 +1179,7 @@ public:
 	inline void SetPetOwnerClient(bool b) { pet_owner_client = b; }
 	inline bool IsPetOwnerNPC() const { return pet_owner_npc; }
 	inline void SetPetOwnerNPC(bool b) { pet_owner_npc = b; }
+	inline bool IsPetOwnerOfClientBot() const { return pet_owner_bot || pet_owner_client; }
 	inline bool IsTempPet() const { return _IsTempPet; }
 	inline void SetTempPet(bool value) { _IsTempPet = value; }
 	inline bool IsHorse() { return is_horse; }

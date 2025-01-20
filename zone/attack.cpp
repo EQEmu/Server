@@ -2641,7 +2641,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-	if (give_exp && give_exp->IsTempPet() && (give_exp->IsPetOwnerClient() || give_exp->IsPetOwnerBot())) {
+	if (give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerOfClientBot()) {
 		if (give_exp->IsNPC() && give_exp->CastToNPC()->GetSwarmOwner()) {
 			Mob* temp_owner = entity_list.GetMobID(give_exp->CastToNPC()->GetSwarmOwner());
 			if (temp_owner) {

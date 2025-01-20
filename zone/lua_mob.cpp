@@ -3268,6 +3268,12 @@ bool Lua_Mob::IsPetOwnerNPC()
 	return self->IsPetOwnerNPC();
 }
 
+bool Lua_Mob::IsPetOwnerOfClientBot()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsPetOwnerOfClientBot();
+}
+
 bool Lua_Mob::IsDestructibleObject()
 {
 	Lua_Safe_Call_Bool();
@@ -3902,8 +3908,9 @@ luabind::scope lua_register_mob() {
 	.def("IsPausedTimer", &Lua_Mob::IsPausedTimer)
 	.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
 	.def("IsPetOwnerBot", &Lua_Mob::IsPetOwnerBot)
-	.def("IsPetOwnerClient", &Lua_Mob::IsPetOwnerClient)
+	.def("IsPetOwnerClient", &Lua_Mob::IsPetOwnerClient)	
 	.def("IsPetOwnerNPC", &Lua_Mob::IsPetOwnerNPC)
+	.def("IsPetOwnerOfClientBot", &Lua_Mob::IsPetOwnerOfClientBot)
 	.def("IsPureMeleeClass", &Lua_Mob::IsPureMeleeClass)
 	.def("IsRoamer", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRoamer)
 	.def("IsRooted", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRooted)
