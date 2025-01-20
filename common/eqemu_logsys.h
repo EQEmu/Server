@@ -250,11 +250,7 @@ namespace Logs {
 		"XTargets",
 		"EvolveItem"
 		"Bot Settings",
-		"Bot Pre Checks",
-		"Bot Hold Checks",
-		"Bot Delay Checks",
-		"Bot Threshold Checks",
-		"Bot Spell Type Checks",
+		"Bot Spell Checks",
 		"Test Debug"
 	};
 }
