@@ -80,7 +80,6 @@ extern PetitionList petition_list;
 extern EntityList entity_list;
 typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
 
-
 //Use a map for connecting opcodes since it dosent get used a lot and is sparse
 std::map<uint32, ClientPacketProc> ConnectingOpcodes;
 //Use a static array for connected, for speed
@@ -208,6 +207,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Emote] = &Client::Handle_OP_Emote;
 	ConnectedOpcodes[OP_EndLootRequest] = &Client::Handle_OP_EndLootRequest;
 	ConnectedOpcodes[OP_EnvDamage] = &Client::Handle_OP_EnvDamage;
+	ConnectedOpcodes[OP_EvolveItem] = &Client::Handle_OP_EvolveItem;
 	ConnectedOpcodes[OP_FaceChange] = &Client::Handle_OP_FaceChange;
 	ConnectedOpcodes[OP_FeignDeath] = &Client::Handle_OP_FeignDeath;
 	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
@@ -283,6 +283,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_ItemLinkResponse] = &Client::Handle_OP_ItemLinkResponse;
 	ConnectedOpcodes[OP_ItemName] = &Client::Handle_OP_ItemName;
 	ConnectedOpcodes[OP_ItemPreview] = &Client::Handle_OP_ItemPreview;
+	ConnectedOpcodes[OP_ItemPreviewRequest] = &Client::Handle_OP_ItemPreviewRequest;
 	ConnectedOpcodes[OP_ItemVerifyRequest] = &Client::Handle_OP_ItemVerifyRequest;
 	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_Jump] = &Client::Handle_OP_Jump;
@@ -1313,7 +1314,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	// set to full support in case they're a gm with items in disabled expansion slots...but, have their gm flag off...
 	// item loss will occur when they use the 'empty' slots, if this is not done
 	m_inv.SetGMInventory(true);
-	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
+	loaditems = database.GetInventory(this); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
 	database.LoadCharacterMaterialColor(cid, &m_pp); /* Load Character Material */
@@ -1873,8 +1874,9 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		PurchaseAlternateAdvancementRank(action->ability);
 	}
 	else if (action->action == aaActionDisableEXP) { //Turn Off AA Exp
-		if (m_epp.perAA > 0)
+		if (m_epp.perAA > 0) {
 			MessageString(Chat::White, AA_OFF);
+		}
 
 		m_epp.perAA = 0;
 		SendAlternateAdvancementStats();
@@ -9309,6 +9311,30 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 		return;
 }
 
+void Client::Handle_OP_ItemPreviewRequest(const EQApplicationPacket* app)
+{
+	VERIFY_PACKET_LENGTH(OP_ItemPreviewRequest, app, ItemPreview_Struct);
+	auto ips  = (ItemPreview_Struct*) app->pBuffer;
+	const EQ::ItemData* item = database.GetItem(ips->itemid);
+
+	if (item) {
+		EQ::ItemInstance* inst = database.CreateItem(item);
+		if (inst) {
+			std::string packet = inst->Serialize(-1);
+			auto        outapp = new EQApplicationPacket(OP_ItemPreviewRequest, packet.length());
+			memcpy(outapp->pBuffer, packet.c_str(), packet.length());
+
+#if EQDEBUG >= 9
+			DumpPacket(outapp);
+#endif
+
+			QueuePacket(outapp);
+			safe_delete(outapp);
+			safe_delete(inst);
+		}
+	}
+}
+
 void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
 	using EQ::spells::CastingSlot;
@@ -10757,7 +10783,12 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 			InterrogateInventory(this, true, false, true, error);
 	}
 
-	return;
+	for (int slot : {mi->to_slot, mi->from_slot}) {
+		auto item = GetInv().GetItem(slot);
+		if (item && item->IsEvolving()) {
+			CharacterEvolvingItemsRepository::UpdateOne(database, item->GetEvolvingDetails());
+		}
+	}
 }
 
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
@@ -15540,6 +15571,26 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 	// Client has elected to buy an item from a Trader
 	//
 	auto in     = (TraderBuy_Struct *) app->pBuffer;
+
+	if (RuleB(Bazaar, UseAlternateBazaarSearch) && in->trader_id >= TraderRepository::TRADER_CONVERT_ID) {
+		auto trader = TraderRepository::GetTraderByInstanceAndSerialnumber(
+			database,
+			in->trader_id - TraderRepository::TRADER_CONVERT_ID,
+			in->serial_number
+		);
+
+		if (!trader.trader_id) {
+			LogTrading("Unable to convert trader id for {} and serial number {}.  Trader Buy aborted.",
+				in->trader_id - TraderRepository::TRADER_CONVERT_ID,
+				in->serial_number
+			);
+			return;
+		}
+
+		in->trader_id = trader.trader_id;
+		strn0cpy(in->seller_name, trader.trader_name.c_str(), sizeof(in->seller_name));
+	}
+
 	auto trader = entity_list.GetClientByID(in->trader_id);
 
 	switch (in->method) {
@@ -17174,4 +17225,38 @@ void Client::Handle_OP_ShopRetrieveParcel(const EQApplicationPacket *app)
 
     auto parcel_in = (ParcelRetrieve_Struct *)app->pBuffer;
     DoParcelRetrieve(*parcel_in);
+}
+
+void Client::Handle_OP_EvolveItem(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(EvolveItemToggle)) {
+		LogError(
+			"Received Handle_OP_EvolveItem packet. Expected size {}, received size {}.",
+			sizeof(EvolveItemToggle),
+			app->size
+		);
+		return;
+	}
+
+	auto in = reinterpret_cast<EvolveItemToggle *>(app->pBuffer);
+
+	switch (in->action) {
+		case EvolvingItems::Actions::UPDATE_ITEMS: {
+			DoEvolveItemToggle(app);
+			break;
+		}
+		case EvolvingItems::Actions::FINAL_RESULT: {
+			DoEvolveItemDisplayFinalResult(app);
+			break;
+		}
+		case EvolvingItems::Actions::TRANSFER_XP: {
+			DoEvolveTransferXP(app);
+			break;
+		}
+		case EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS: {
+			SendEvolveXPWindowDetails(app);
+		}
+		default: {
+		}
+	}
 }

@@ -371,6 +371,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
+								inst->TransferOwnership(database, other->CharacterID());
 								LogTrading("Container [{}] ([{}]) successfully transferred, deleting from trade slot", inst->GetItem()->Name, inst->GetItem()->ID);
 								if (qs_log) {
 									auto detail = new PlayerLogTradeItemsEntry_Struct;
@@ -482,6 +483,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						if (other->PutItemInInventory(partial_slot, *partial_inst, true)) {
 							LogTrading("Partial stack [{}] ([{}]) successfully transferred, deleting [{}] charges from trade slot",
 								inst->GetItem()->Name, inst->GetItem()->ID, (old_charges - inst->GetCharges()));
+							inst->TransferOwnership(database, other->CharacterID());
 							if (qs_log) {
 								auto detail = new PlayerLogTradeItemsEntry_Struct;
 
@@ -589,6 +591,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
+								inst->TransferOwnership(database, other->CharacterID());
 								LogTrading("Item [{}] ([{}]) successfully transferred, deleting from trade slot", inst->GetItem()->Name, inst->GetItem()->ID);
 								if (qs_log) {
 									auto detail = new PlayerLogTradeItemsEntry_Struct;
@@ -3219,11 +3222,44 @@ void Client::SendBulkBazaarTraders()
 		return;
 	}
 
-	auto results = TraderRepository::GetDistinctTraders(
-		database,
-		GetInstanceID(),
-		EQ::constants::StaticLookup(ClientVersion())->BazaarTraderLimit
-	);
+	TraderRepository::BulkTraders_Struct results{};
+
+	if (RuleB(Bazaar, UseAlternateBazaarSearch))
+	{
+		if (GetZoneID() == Zones::BAZAAR) {
+			results = TraderRepository::GetDistinctTraders(database, GetInstanceID());
+		}
+
+		uint32 number = 1;
+		auto   shards = CharacterDataRepository::GetInstanceZonePlayerCounts(database, Zones::BAZAAR);
+		for (auto const &shard: shards) {
+			if (GetZoneID() != Zones::BAZAAR || (GetZoneID() == Zones::BAZAAR && GetInstanceID() != shard.instance_id)) {
+
+				TraderRepository::DistinctTraders_Struct t{};
+				t.entity_id        = 0;
+				t.trader_id        = TraderRepository::TRADER_CONVERT_ID + shard.instance_id;
+				t.trader_name      = fmt::format("Bazaar Shard {}", number);
+				t.zone_id          = Zones::BAZAAR;
+				t.zone_instance_id = shard.instance_id;
+				results.count += 1;
+				results.name_length += t.trader_name.length() + 1;
+				results.traders.push_back(t);
+			}
+
+			number++;
+		}
+	}
+	else {
+		results = TraderRepository::GetDistinctTraders(
+			database,
+			GetInstanceID(),
+			EQ::constants::StaticLookup(ClientVersion())->BazaarTraderLimit
+		);
+	}
+
+	SetTraderCount(results.count);
+
+	SetTraderCount(results.count);
 
 	auto  p_size  = 4 + 12 * results.count + results.name_length;
 	auto  buffer  = std::make_unique<char[]>(p_size);
@@ -3246,8 +3282,28 @@ void Client::SendBulkBazaarTraders()
 	QueuePacket(outapp.get());
 }
 
-void Client::DoBazaarInspect(const BazaarInspect_Struct &in)
+void Client::DoBazaarInspect(BazaarInspect_Struct &in)
 {
+	if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
+		if (in.trader_id >= TraderRepository::TRADER_CONVERT_ID) {
+			auto trader = TraderRepository::GetTraderByInstanceAndSerialnumber(
+				database,
+				in.trader_id - TraderRepository::TRADER_CONVERT_ID,
+				fmt::format("{}", in.serial_number).c_str()
+			);
+
+			if (!trader.trader_id) {
+				LogTrading("Unable to convert trader id for {} and serial number {}.  Trader Buy aborted.",
+					in.trader_id - TraderRepository::TRADER_CONVERT_ID,
+					in.serial_number
+				);
+				return;
+			}
+
+			in.trader_id = trader.trader_id;
+		}
+	}
+
 	auto items = TraderRepository::GetWhere(
 		database, fmt::format("`char_id` = '{}' AND `item_sn` = '{}'", in.trader_id, in.serial_number)
 	);

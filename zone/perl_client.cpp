@@ -3229,6 +3229,11 @@ perl::array Perl_Client_GetInventorySlots(Client* self)
 	return result;
 }
 
+void Perl_Client_SetAAEXPPercentage(Client* self, uint8 percentage)
+{
+	self->SetAAEXPPercentage(percentage);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3657,6 +3662,7 @@ void perl_register_client()
 	package.add("SetAAEXPModifier", (void(*)(Client*, float))&Perl_Client_SetAAEXPModifier);
 	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, float))&Perl_Client_SetAAEXPModifier);
 	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, float, int16))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPPercentage", &Perl_Client_SetAAEXPPercentage);
 	package.add("SetAAPoints", &Perl_Client_SetAAPoints);
 	package.add("SetAATitle", (void(*)(Client*, std::string))&Perl_Client_SetAATitle);
 	package.add("SetAATitle", (void(*)(Client*, std::string, bool))&Perl_Client_SetAATitle);

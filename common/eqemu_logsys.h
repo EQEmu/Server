@@ -142,6 +142,7 @@ namespace Logs {
 		EqTime,
 		Corpses,
 		XTargets,
+		EvolveItem,
 		BotSettings,
 		BotPreChecks,
 		BotHoldChecks,
@@ -250,6 +251,7 @@ namespace Logs {
 		"EqTime",
 		"Corpses",
 		"XTargets",
+		"EvolveItem"
 		"Bot Settings",
 		"Bot Pre Checks",
 		"Bot Hold Checks",

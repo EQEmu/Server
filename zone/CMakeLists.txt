@@ -17,6 +17,7 @@ SET(zone_sources
     botspellsai.cpp
     cheat_manager.cpp
     client.cpp
+    client_evolving_items.cpp
     client_bot.cpp
     client_mods.cpp
     client_packet.cpp

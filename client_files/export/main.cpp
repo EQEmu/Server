@@ -36,12 +36,14 @@
 #include "../../common/file.h"
 #include "../../common/events/player_event_logs.h"
 #include "../../common/skill_caps.h"
+#include "../../common/evolving_items.h"
 
-EQEmuLogSys         LogSys;
-WorldContentService content_service;
-ZoneStore           zone_store;
-PathManager         path;
-PlayerEventLogs     player_event_logs;
+EQEmuLogSys          LogSys;
+WorldContentService  content_service;
+ZoneStore            zone_store;
+PathManager          path;
+PlayerEventLogs      player_event_logs;
+EvolvingItemsManager evolving_items_manager;
 
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);

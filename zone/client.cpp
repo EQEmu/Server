@@ -13419,3 +13419,20 @@ void Client::SendSpellTypePrompts(bool commanded_types, bool client_only_types) 
 
 	return;
 }
+
+void Client::SetAAEXPPercentage(uint8 percentage)
+{
+	const uint32 before_percentage = m_epp.perAA;
+
+	if (before_percentage > 0 && percentage == 0) {
+		MessageString(Chat::White, AA_OFF);
+	}
+	else if (before_percentage == 0 && percentage > 0) {
+		MessageString(Chat::White, AA_ON);
+	}
+
+	m_epp.perAA = EQ::Clamp(static_cast<int>(percentage), 0, 100);
+
+	SendAlternateAdvancementStats();
+	SendAlternateAdvancementTable();
+}
