@@ -9419,7 +9419,7 @@ void Mob::ClearDataBucketCache()
 	}
 }
 
-bool Mob::IsInGroupOrRaid(Mob *other, bool same_raid_group) {
+bool Mob::IsInGroupOrRaid(Mob* other, bool same_raid_group) {
 	if (!other || !IsOfClientBotMerc() || !other->IsOfClientBotMerc()) {
 		return false;
 	}
@@ -9428,64 +9428,37 @@ bool Mob::IsInGroupOrRaid(Mob *other, bool same_raid_group) {
 		return true;
 	}
 
-	Raid* raid = nullptr;
-
-	if (IsBot()) {
-		raid = CastToBot()->GetStoredRaid();
-	}
-	else {
-		if (IsRaidGrouped()) {
-			raid = GetRaid();
-		}
-	}
-
-	if (IsRaidGrouped()) {
-		if (!raid) {
-			return false;
-		}
-	}
+	Raid* raid = IsBot() ? CastToBot()->GetStoredRaid() : (IsRaidGrouped() ? GetRaid() : nullptr);
 
 	if (raid) {
 		if (!other->IsRaidGrouped()) {
 			return false;
 		}
 
-		Raid* other_raid = nullptr;
-
-		if (other->IsBot()) {
-			other_raid = other->CastToBot()->GetStoredRaid();
-		}
-		else {
-			other_raid = other->GetRaid();
-		}
+		Raid* other_raid = other->IsBot() ? other->CastToBot()->GetStoredRaid() : other->GetRaid();
 
 		if (!other_raid) {
 			return false;
 		}
 
 		auto raid_group = raid->GetGroup(GetCleanName());
-		auto raid_other_group = other_raid->GetGroup(other->GetCleanName());
+		auto other_raid_group = other_raid->GetGroup(other->GetCleanName());
 
-		if (raid_group == RAID_GROUPLESS || raid_other_group == RAID_GROUPLESS || (same_raid_group && raid_group != raid_other_group)) {
+		if (
+			raid_group == RAID_GROUPLESS || 
+			other_raid_group == RAID_GROUPLESS ||
+			(same_raid_group && raid_group != other_raid_group)
+		) {
 			return false;
 		}
 
 		return true;
 	}
-	else {
-		auto* group = GetGroup();
-		auto* group_other = other->GetGroup();
 
-		if (group) {
-			if (!group_other || group != group_other) {
-				return false;
-			}
+	Group* group = GetGroup();
+	Group* other_group = other->GetGroup();
 
-			return true;
-		}
-	}
-
-	return false;
+	return group && group == other_group;
 }
 
 bool Mob::DoLosChecks(Mob* who, Mob* other) {
