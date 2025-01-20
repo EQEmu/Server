@@ -2105,6 +2105,33 @@ namespace RoF2
         }
     }
 
+	ENCODE(OP_ItemPreviewRequest)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		uchar* in_buf = in->pBuffer;
+
+		auto int_item = (EQ::InternalSerializedItem_Struct*) in_buf;
+
+		EQ::OutBuffer           buf;
+		EQ::OutBuffer::pos_type last_pos = buf.tellp();
+
+		SerializeItem(buf, (const EQ::ItemInstance*) int_item->inst, int_item->slot_id, 0, ItemPacketInvalid);
+		if (buf.tellp() == last_pos) {
+			LogNetcode("RoF2::ENCODE(OP_ItemPreviewRequest) Serialization failed");
+			safe_delete_array(in_buf);
+			safe_delete(in);
+			return;
+		}
+
+		in->size    = buf.size();
+		in->pBuffer = buf.detach();
+
+		safe_delete_array(in_buf);
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_ItemVerifyReply)
 	{
 		ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
@@ -6857,12 +6884,13 @@ namespace RoF2
 		iqbs.Heirloom = 0;
 		iqbs.Placeable = 0;
 		iqbs.unknown28 = -1;
+		iqbs.unknown29 = packet_type == ItemPacketInvalid ? 0xFF : 0;
 		iqbs.unknown30 = -1;
 		iqbs.NoZone = 0;
 		iqbs.NoGround = 0;
 		iqbs.unknown37a = 0;	// (guessed position) New to RoF2
 		iqbs.unknown38 = 0;
-		iqbs.unknown39 = 1;
+		iqbs.unknown39 = packet_type == ItemPacketInvalid ? 0 : 1;;
 
 		ob.write((const char*)&iqbs, sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
 
