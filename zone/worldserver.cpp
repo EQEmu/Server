@@ -3942,7 +3942,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						}
 						case TraderOff: {
 							out->action = RemoveTraderFromBazaarWindow;
-							if (c.second->GetTraderCount() <
+							if (c.second->GetTraderCount() <=
 								EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit) {
 								if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
 									if (out->zone_id == Zones::BAZAAR &&
