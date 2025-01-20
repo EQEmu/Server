@@ -2,19 +2,19 @@
 
 void bot_command_appearance(Client *c, const Seperator *sep)
 {
-
-	std::list<const char*> subcommand_list;
-	subcommand_list.push_back("botbeardcolor");
-	subcommand_list.push_back("botbeardstyle");
-	subcommand_list.push_back("botdetails");
-	subcommand_list.push_back("botdyearmor");
-	subcommand_list.push_back("boteyes");
-	subcommand_list.push_back("botface");
-	subcommand_list.push_back("bothaircolor");
-	subcommand_list.push_back("bothairstyle");
-	subcommand_list.push_back("botheritage");
-	subcommand_list.push_back("bottattoo");
-	subcommand_list.push_back("botwoad");
+	std::vector<const char*> subcommand_list = {
+		"botbeardcolor",
+		"botbeardstyle",
+		"botdetails",
+		"botdyearmor",
+		"boteyes",
+		"botface",
+		"bothaircolor",
+		"bothairstyle",
+		"botheritage",
+		"bottattoo",
+		"botwoad"
+	};
 
 	if (helper_command_alias_fail(c, "bot_command_appearance", sep->arg[0], "botappearance"))
 		return;
@@ -45,11 +45,11 @@ void bot_command_beard_color(Client *c, const Seperator *sep)
 
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (my_bot->GetGender() != Gender::Male && my_bot->GetRace() != DWARF)
-		fail_type = BCEnum::AFT_GenderRace;
+		fail_type = AFT_GenderRace;
 	else if (!PlayerAppearance::IsValidBeardColor(my_bot->GetRace(), my_bot->GetGender(), uvalue))
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	else
 		my_bot->SetBeardColor(uvalue);
 
@@ -82,11 +82,11 @@ void bot_command_beard_style(Client *c, const Seperator *sep)
 
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (my_bot->GetGender() != Gender::Male && my_bot->GetRace() != DWARF)
-		fail_type = BCEnum::AFT_GenderRace;
+		fail_type = AFT_GenderRace;
 	else if (!PlayerAppearance::IsValidBeard(my_bot->GetRace(), my_bot->GetGender(), uvalue))
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	else
 		my_bot->SetBeard(uvalue);
 
@@ -121,11 +121,11 @@ void bot_command_details(Client *c, const Seperator *sep)
 
 	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
-		fail_type = BCEnum::AFT_Race;
+		fail_type = AFT_Race;
 	else if (!PlayerAppearance::IsValidDetail(my_bot->GetRace(), my_bot->GetGender(), uvalue))
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	else
 		my_bot->SetDrakkinDetails(uvalue);
 
@@ -158,7 +158,7 @@ void bot_command_dye_armor(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} [Material Slot] [Red: 0-255] [Green: 0-255] [Blue: 0-255] ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))",
+				"Usage: {} [Material Slot] [Red: 0-255] [Green: 0-255] [Blue: 0-255] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))",
 				sep->arg[0]
 			).c_str()
 		);
@@ -214,7 +214,7 @@ void bot_command_dye_armor(Client *c, const Seperator *sep)
 
 	uint32 rgb_value = ((uint32)red_value << 16) | ((uint32)green_value << 8) | ((uint32)blue_value);
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	auto ab_type = ActionableBots::PopulateSBL(c, sep->arg[5], sbl, ab_mask);
 	if (ab_type == ActionableBots::ABT_None) {
 		return;
@@ -280,9 +280,9 @@ void bot_command_eyes(Client *c, const Seperator *sep)
 	//else if (!arg2.compare("right"))
 	//	eye_bias = 2;
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (!PlayerAppearance::IsValidEyeColor(my_bot->GetRace(), my_bot->GetGender(), uvalue)) {
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	}
 	else {
 		//if (eye_bias == 1) {
@@ -327,9 +327,9 @@ void bot_command_face(Client *c, const Seperator *sep)
 
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (!PlayerAppearance::IsValidFace(my_bot->GetRace(), my_bot->GetGender(), uvalue)) {
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	}
 	else {
 		uint8 old_woad = 0;
@@ -367,9 +367,9 @@ void bot_command_hair_color(Client *c, const Seperator *sep)
 
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (!PlayerAppearance::IsValidHairColor(my_bot->GetRace(), my_bot->GetGender(), uvalue))
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	else
 		my_bot->SetHairColor(uvalue);
 
@@ -402,9 +402,9 @@ void bot_command_hairstyle(Client *c, const Seperator *sep)
 
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (!PlayerAppearance::IsValidHair(my_bot->GetRace(), my_bot->GetGender(), uvalue))
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	else
 		my_bot->SetHairStyle(uvalue);
 
@@ -439,11 +439,11 @@ void bot_command_heritage(Client *c, const Seperator *sep)
 
 	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
-		fail_type = BCEnum::AFT_Race;
+		fail_type = AFT_Race;
 	else if (!PlayerAppearance::IsValidHeritage(my_bot->GetRace(), my_bot->GetGender(), uvalue))
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	else
 		my_bot->SetDrakkinHeritage(uvalue);
 
@@ -478,11 +478,11 @@ void bot_command_tattoo(Client *c, const Seperator *sep)
 
 	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
-		fail_type = BCEnum::AFT_Race;
+		fail_type = AFT_Race;
 	else if (!PlayerAppearance::IsValidTattoo(my_bot->GetRace(), my_bot->GetGender(), uvalue))
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	else
 		my_bot->SetDrakkinTattoo(uvalue);
 
@@ -515,12 +515,12 @@ void bot_command_woad(Client *c, const Seperator *sep)
 
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
-	auto fail_type = BCEnum::AFT_None;
+	auto fail_type = AFT_None;
 	if (my_bot->GetRace() != BARBARIAN) {
-		fail_type = BCEnum::AFT_Race;
+		fail_type = AFT_Race;
 	}
 	else if (!PlayerAppearance::IsValidWoad(my_bot->GetRace(), my_bot->GetGender(), uvalue)) {
-		fail_type = BCEnum::AFT_Value;
+		fail_type = AFT_Value;
 	}
 	else {
 		uint8 old_face = (my_bot->GetLuclinFace() % 10);

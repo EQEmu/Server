@@ -11,7 +11,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
 	float pick_lock_value = 0.0f;

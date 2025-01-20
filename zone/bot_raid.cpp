@@ -142,7 +142,7 @@ void Raid::HandleOfflineBots(uint32 owner) {
 	}
 }
 
-uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8& need_healed, uint8 hpr, bool includePets, Raid* raid) {
+uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8& need_healed, uint8 hpr, bool include_pets, Raid* raid) {
 
 	if (raid) {
 		uint32 r_group = raid->GetGroup(GetName());
@@ -153,7 +153,7 @@ uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8& need_healed, uint8 hpr, bool
 					need_healed++;
 				}
 
-				if (includePets && m.member->GetPet() && m.member->GetPet()->GetHPRatio() <= hpr) {
+				if (include_pets && m.member->GetPet() && m.member->GetPet()->GetHPRatio() <= hpr) {
 					need_healed++;
 				}
 			}
@@ -176,13 +176,7 @@ void Bot::ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite) {
 		// If the Bot Owner is in our raid we need to be able to invite their Bots
 	}
 	else if (invitee->IsBot() && (invitee->CastToBot()->GetBotOwnerCharacterID() != invitor->CharacterID())) {
-		invitor->Message(
-			Chat::Red,
-			fmt::format(
-				"{} is not your Bot. You can only invite your own Bots, or Bots that belong to a Raid member.",
-				invitee->GetCleanName()
-			).c_str()
-		);
+		invitor->Message(Chat::Red, "%s's owner needs to be in your raid to be able to invite them.", invitee->GetCleanName());
 		return;
 	}
 
@@ -257,10 +251,6 @@ void Bot::CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* 
 		} else {
 			raid->AddBot(b);
 		}
-
-		if (new_raid) {
-			invitee->SetFollowID(invitor->GetID());
-		}
 	}
 }
 
@@ -323,7 +313,9 @@ void Client::SpawnRaidBotsOnConnect(Raid* raid) {
 
 					if (bot) {
 						bot->SetRaidGrouped(true);
+						bot->SetStoredRaid(raid);
 						bot->p_raid_instance = raid;
+						bot->SetVerifiedRaid(false);
 					}
 				}
 			}

@@ -11,6 +11,7 @@ void bot_command_apply_poison(Client* c, const Seperator* sep)
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
 		c->Message(Chat::White, "usage: <rogue_bot_target> %s", sep->arg[0]);
+		c->Message(Chat::White, "note: Applies cursor-held poison to a rogue bot's weapon");
 		return;
 	}
 

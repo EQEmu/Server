@@ -854,6 +854,46 @@
         OutF(LogSys, Logs::Detail, Logs::XTargets, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogBotSettings(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotSettings))\
+        OutF(LogSys, Logs::General, Logs::BotSettings, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotSettingsDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotSettings))\
+        OutF(LogSys, Logs::Detail, Logs::BotSettings, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotSpellChecks(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotSpellChecks))\
+        OutF(LogSys, Logs::General, Logs::BotSpellChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotSpellChecksDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotSpellChecks))\
+        OutF(LogSys, Logs::Detail, Logs::BotSpellChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotSpellTypeChecks(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotSpellTypeChecks))\
+        OutF(LogSys, Logs::General, Logs::BotSpellTypeChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotSpellTypeChecksDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotSpellTypeChecks))\
+        OutF(LogSys, Logs::Detail, Logs::BotSpellTypeChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogTestDebug(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::TestDebug))\
+        OutF(LogSys, Logs::General, Logs::TestDebug, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogTestDebugDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::TestDebug))\
+        OutF(LogSys, Logs::Detail, Logs::TestDebug, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.IsLogEnabled(debug_level, log_category))\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

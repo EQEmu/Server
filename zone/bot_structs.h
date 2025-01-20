@@ -81,6 +81,24 @@ struct BotSpells_Struct {
 	uint8		bucket_comparison;
 };
 
+struct BotSpells_Struct_wIndex {
+	uint32		index;			//index of AIBot_spells
+	uint32		type;			// 0 = never, must be one (and only one) of the defined values
+	int16		spellid;			// <= 0 = no spell
+	int16		manacost;		// -1 = use spdat, -2 = no cast time
+	uint32		time_cancast;	// when we can cast this spell next
+	int32		recast_delay;
+	int16		priority;
+	int16		resist_adjust;
+	uint8		minlevel;
+	uint8		maxlevel;
+	int16		min_hp;			// >0 won't cast if HP is below
+	int16		max_hp;			// >0 won't cast if HP is above
+	std::string	bucket_name;
+	std::string	bucket_value;
+	uint8		bucket_comparison;
+};
+
 struct BotTimer_Struct {
 	uint32		timer_id;
 	uint32		timer_value;
@@ -90,6 +108,23 @@ struct BotTimer_Struct {
 	uint16		spell_id;
 	bool		is_item;
 	uint32		item_id;
+};
+
+struct BotSpellTypeOrder {
+	uint16		spellType;
+	uint16		priority;
+};
+
+struct BotBlockedBuffs_Struct {
+	uint32_t	bot_id;
+	uint32_t	spell_id;
+	uint8_t		blocked;
+	uint8_t		blocked_pet;
+};
+
+struct BotSpellTypesByClass_Struct {
+	uint8_t min_level			= 255;
+	std::string description;
 };
 
 #endif // BOT_STRUCTS

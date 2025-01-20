@@ -51,6 +51,7 @@ extern volatile bool RunLoops;
 #include "water_map.h"
 #include "bot_command.h"
 #include "string_ids.h"
+#include "dialogue_window.h"
 
 #include "guild_mgr.h"
 #include "quest_parser_collection.h"
@@ -147,6 +148,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 ),
 	hpupdate_timer(2000),
 	camp_timer(29000),
+	bot_camp_timer((RuleI(Bots, CampTimer) * 1000)),
 	process_timer(100),
 	consume_food_timer(CONSUMPTION_TIMER),
 	zoneinpacket_timer(1000),
@@ -251,6 +253,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	fishing_timer.Disable();
 	dead_timer.Disable();
 	camp_timer.Disable();
+	bot_camp_timer.Disable();
 	autosave_timer.Disable();
 	GetMercTimer()->Disable();
 	instalog = false;
@@ -774,6 +777,8 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
 	database.SaveCharacterEXPModifier(this);
+
+	database.botdb.SaveBotSettings(this);
 
 	return true;
 }
@@ -5871,7 +5876,7 @@ void Client::SuspendMinion(int value)
 			{
 				m_suspendedminion.SpellID = SpellID;
 
-				m_suspendedminion.HP = CurrentPet->GetHP();;
+				m_suspendedminion.HP = CurrentPet->GetHP();
 
 				m_suspendedminion.Mana = CurrentPet->GetMana();
 				m_suspendedminion.petpower = CurrentPet->GetPetPower();
@@ -12854,11 +12859,11 @@ void Client::AddMoneyToPPWithOverflow(uint64 copper, bool update_client)
 	SaveCurrency();
 
 	LogDebug("Client::AddMoneyToPPWithOverflow() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]",
-			 GetName(),
-			 m_pp.platinum,
-			 m_pp.gold,
-			 m_pp.silver,
-			 m_pp.copper
+		GetName(),
+		m_pp.platinum,
+		m_pp.gold,
+		m_pp.silver,
+		m_pp.copper
 	);
 }
 
@@ -13014,8 +13019,8 @@ void Client::ClientToNpcAggroProcess()
 {
 	if (zone->CanDoCombat() && !GetFeigned() && m_client_npc_aggro_scan_timer.Check()) {
 		int npc_scan_count = 0;
-		for (auto &close_mob: GetCloseMobList()) {
-			Mob *mob = close_mob.second;
+		for (auto& close_mob : GetCloseMobList()) {
+			Mob* mob = close_mob.second;
 			if (!mob) {
 				continue;
 			}
@@ -13105,6 +13110,314 @@ void Client::ShowZoneShardMenu()
 		);
 		number++;
 	}
+}
+
+void Client::LoadDefaultBotSettings() {
+	m_bot_spell_settings.clear();
+
+	// Only illusion block supported currently
+	SetBotSetting(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
+	LogBotSettingsDetail("{} says, 'Setting default {} [{}] to [{}]'", GetCleanName(), CastToBot()->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock), BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
+
+	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
+		BotSpellSettings_Struct t;
+
+		t.spellType = i;
+		t.shortName = GetSpellTypeShortNameByID(i);
+		t.name = GetSpellTypeNameByID(i);
+		t.hold = GetDefaultSpellHold(i);
+		t.delay = GetDefaultSpellDelay(i);
+		t.minThreshold = GetDefaultSpellMinThreshold(i);
+		t.maxThreshold = GetDefaultSpellMaxThreshold(i);
+
+		m_bot_spell_settings.push_back(t);
+
+		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}]'", GetCleanName(), t.name, t.shortName, t.spellType);
+		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellHold(i), GetDefaultSpellDelay(i), GetDefaultSpellMinThreshold(i), GetDefaultSpellMaxThreshold(i));
+	}
+}
+
+int Client::GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting) {
+	switch (setting_type) {
+		case BotSettingCategories::BaseSetting:
+			return false;
+		case BotSettingCategories::SpellHold:
+			return GetDefaultSpellHold(bot_setting);
+		case BotSettingCategories::SpellDelay:
+			return GetDefaultSpellDelay(bot_setting);
+		case BotSettingCategories::SpellMinThreshold:
+			return GetDefaultSpellMinThreshold(bot_setting);
+		case BotSettingCategories::SpellMaxThreshold:
+			return GetDefaultSpellMaxThreshold(bot_setting);
+	}
+}
+
+int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
+	switch (setting_type) {
+		case BotSettingCategories::SpellHold:
+			return GetSpellHold(bot_setting);
+		case BotSettingCategories::SpellDelay:
+			return GetSpellDelay(bot_setting);
+		case BotSettingCategories::SpellMinThreshold:
+			return GetSpellMinThreshold(bot_setting);
+		case BotSettingCategories::SpellMaxThreshold:
+			return GetSpellMaxThreshold(bot_setting);
+	}
+}
+
+void Client::SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value) {
+	switch (setting_type) {
+		case BotSettingCategories::BaseSetting:
+			SetBaseSetting(bot_setting, setting_value);
+			break;
+		case BotSettingCategories::SpellHold:
+			SetSpellHold(bot_setting, setting_value);
+			break;
+		case BotSettingCategories::SpellDelay:
+			SetSpellDelay(bot_setting, setting_value);
+			break;
+		case BotSettingCategories::SpellMinThreshold:
+			SetSpellMinThreshold(bot_setting, setting_value);
+			break;
+		case BotSettingCategories::SpellMaxThreshold:
+			SetSpellMaxThreshold(bot_setting, setting_value);
+			break;
+	}
+}
+
+std::string Client::SendCommandHelpWindow(
+	Client* c,
+	std::vector<std::string> description,
+	std::vector<std::string> notes,
+	std::vector<std::string> example_format,
+	std::vector<std::string> examples_one, std::vector<std::string> examples_two, std::vector<std::string> examples_three,
+	std::vector<std::string> actionables,
+	std::vector<std::string> options,
+	std::vector<std::string> options_one, std::vector<std::string> options_two, std::vector<std::string> options_three
+) {
+
+	unsigned string_length = 0;
+	unsigned current_place = 0;
+	uint16 max_length = RuleI(Command, MaxHelpLineLength); //character length of a line before splitting in to multiple lines
+	const std::string& description_color = RuleS(Command, DescriptionColor);
+	const std::string& description_header_color = RuleS(Command, DescriptionHeaderColor);
+	const std::string& alt_description_color = RuleS(Command, AltDescriptionColor);
+	const std::string& note_color = RuleS(Command, NoteColor);
+	const std::string& note_header_color = RuleS(Command, NoteHeaderColor);
+	const std::string& alt_note_color = RuleS(Command, AltNoteColor);
+	const std::string& example_color = RuleS(Command, ExampleColor);
+	const std::string& example_header_color = RuleS(Command, ExampleHeaderColor);
+	const std::string& sub_example_color = RuleS(Command, SubExampleColor);
+	const std::string& alt_example_color = RuleS(Command, AltExampleColor);
+	const std::string& sub_alt_example_color = RuleS(Command, SubAltExampleColor);
+	const std::string& option_color = RuleS(Command, OptionColor);
+	const std::string& option_header_color = RuleS(Command, OptionHeaderColor);
+	const std::string& sub_option_color = RuleS(Command, SubOptionColor);
+	const std::string& alt_option_color = RuleS(Command, AltOptionColor);
+	const std::string& sub_alt_option_color = RuleS(Command, SubAltOptionColor);
+	const std::string& actionable_color = RuleS(Command, ActionableColor);
+	const std::string& actionable_header_color = RuleS(Command, ActionableHeaderColor);
+	const std::string& alt_actionable_color = RuleS(Command, AltActionableColor);
+	const std::string& header_color = RuleS(Command, HeaderColor);
+	const std::string& secondary_header_color = RuleS(Command, SecondaryHeaderColor);
+	const std::string& alt_header_color = RuleS(Command, AltHeaderColor);
+	const std::string& filler_line_color = RuleS(Command, FillerLineColor);
+
+
+
+	std::string filler_line = "--------------------------------------------------------------------";
+	std::string filler_dia = DialogueWindow::TableRow(DialogueWindow::TableCell(fmt::format("{}", DialogueWindow::ColorMessage(filler_line_color, filler_line))));
+	std::string break_line = DialogueWindow::Break();
+	std::string indent = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	std::string bullet = "- ";
+	std::string popup_text = "";
+
+	/*
+	max_length is how long you want lines to be before splitting them. This will look for the last space before the count and split there so words are not split mid sentence
+	Any SplitCommandHelpText can have the first string from a vector differ in color from the next strings by setting an alternate color for that type in the rule.
+	*/
+
+	if (!description.empty()) {
+		popup_text += GetCommandHelpHeader(description_header_color, "[Description]");
+		popup_text += SplitCommandHelpText(description, description_color, max_length, !alt_description_color.empty(), alt_description_color);
+	}
+
+	if (!notes.empty()) {
+		popup_text += break_line;
+		popup_text += break_line;
+		popup_text += GetCommandHelpHeader(note_header_color, "[Notes]");
+		popup_text += SplitCommandHelpText(notes, note_color, max_length, !alt_note_color.empty(), alt_note_color);
+	}
+
+	if (!example_format.empty()) {
+		popup_text += filler_dia;
+		popup_text += GetCommandHelpHeader(example_header_color, "[Examples]");
+		popup_text += SplitCommandHelpText(example_format, example_color, max_length, !alt_example_color.empty(), alt_example_color);
+	}
+
+	if (!examples_one.empty()) {
+		popup_text += break_line;
+		popup_text += break_line;
+		popup_text += SplitCommandHelpText(examples_one, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
+	}
+
+	if (!examples_two.empty()) {
+		popup_text += SplitCommandHelpText(examples_two, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
+	}
+
+	if (!examples_three.empty()) {
+		popup_text += SplitCommandHelpText(examples_three, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
+	}
+
+	if (!options.empty()) {
+		popup_text += filler_dia;
+		popup_text += GetCommandHelpHeader(option_header_color, "[Options]");
+		popup_text += SplitCommandHelpText(options, option_color, max_length, !alt_option_color.empty(), alt_option_color);
+	}
+
+	if (!options_one.empty()) {
+		popup_text += break_line;
+		popup_text += break_line;
+		popup_text += SplitCommandHelpText(options_one, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
+	}
+
+	if (!options_two.empty()) {
+		popup_text += SplitCommandHelpText(options_two, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
+	}
+
+	if (!options_three.empty()) {
+		popup_text += SplitCommandHelpText(options_three, secondary_header_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
+	}
+
+	if (!actionables.empty()) {
+		popup_text += filler_dia;
+		popup_text += GetCommandHelpHeader(actionable_header_color, "[Actionables]");
+		popup_text += SplitCommandHelpText(actionables, actionable_color, max_length, !alt_actionable_color.empty(), alt_actionable_color);
+	}
+
+	popup_text = DialogueWindow::Table(popup_text);
+
+	return popup_text;
+}
+
+std::string Client::GetCommandHelpHeader(std::string color, std::string header) {
+	std::string return_text = DialogueWindow::TableRow(
+		DialogueWindow::TableCell(
+			fmt::format(
+				"{}",
+				DialogueWindow::ColorMessage(color, header)
+			)
+		)
+	);
+
+	return return_text;
+}
+
+std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 max_length, bool second_color, std::string secondary_color) {
+	std::string return_text;
+
+	for (int i = 0; i < msg.size(); i++) {
+		std::vector<std::string> msg_split;
+		int string_length = msg[i].length() + 1;
+		int end_count = 0;
+		int new_count = 0;
+		int split_count = 0;
+
+		for (int x = 0; x < string_length; x = end_count) {
+			end_count = std::min(int(string_length), (int(x) + std::min(int(string_length), int(max_length))));
+
+			if ((string_length - (x + 1)) > max_length) {
+				for (int y = end_count; y >= x; --y) {
+					if (msg[i][y] == ' ') {
+							split_count = y - x;
+							msg_split.emplace_back(msg[i].substr(x, split_count));
+							end_count = y + 1;
+
+							break;
+					}
+					
+					if (y == x) {
+						msg_split.emplace_back(msg[i].substr(x, max_length));
+
+						break;
+					}
+				}
+			}
+			else {
+				msg_split.emplace_back(msg[i].substr(x, (string_length - 1) - x));
+
+				break;
+			}
+		}
+
+		for (const auto& s : msg_split) {
+			return_text += DialogueWindow::TableRow(
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(((second_color && i == 0) ? color : secondary_color), s))
+			);
+		}
+	}
+
+	return return_text;
+}
+
+void Client::SendSpellTypePrompts(bool commanded_types, bool client_only_types) {
+	if (client_only_types) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view spell types by {} or {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids client"), "ID"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames client"), "Shortname"
+				)
+			).c_str()
+		);
+	}
+	else {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view spell types by {}, {}, {} or by {}, {}, {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids 0-19"), "ID 0-19"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypeids 20-39"), "20-39"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypeids 40+"), "40+"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 0-19"), "Shortname 0-19"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 20-39"), "20-39"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 40+"), "40+"
+				)
+			).c_str()
+		);
+	}
+
+	if (commanded_types) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view commanded spell types by {} or {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids commanded"), "ID"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames commanded"), "Shortname"
+				)
+			).c_str()
+		);
+	}
+
+	return;
 }
 
 void Client::SetAAEXPPercentage(uint8 percentage)

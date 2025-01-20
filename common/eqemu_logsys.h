@@ -143,6 +143,10 @@ namespace Logs {
 		Corpses,
 		XTargets,
 		EvolveItem,
+		BotSettings,
+		BotSpellChecks,
+		BotSpellTypeChecks,
+		TestDebug,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -244,7 +248,11 @@ namespace Logs {
 		"EqTime",
 		"Corpses",
 		"XTargets",
-		"EvolveItem"
+		"EvolveItem",
+		"Bot Settings",
+		"Bot Spell Checks",
+		"Bot Spell Type Checks",
+		"Test Debug"
 	};
 }
 

@@ -131,6 +131,8 @@ static std::map<uint8, std::string> class_names = {
 #define ARMOR_TYPE_LAST ARMOR_TYPE_PLATE
 #define ARMOR_TYPE_COUNT 5
 
+#define BOT_CLASS_BASE_ID_PREFIX 3000
+
 
 const char* GetClassIDName(uint8 class_id, uint8 level = 0);
 

@@ -382,12 +382,13 @@ Lua_Bot Lua_EntityList::GetBotByName(std::string bot_name) {
 Lua_Bot_List Lua_EntityList::GetBotList() {
 	Lua_Safe_Call_Class(Lua_Bot_List);
 	Lua_Bot_List ret;
-	auto &bot_list = self->GetBotList();
 
-	if (bot_list.size()) {
-		for (auto bot : bot_list) {
-			ret.entries.emplace_back(Lua_Bot(bot));
-		}
+	auto &current_bot_list = self->GetBotList();
+	auto it = current_bot_list.begin();
+
+	while (it != current_bot_list.end()) {
+		ret.entries.emplace_back(it->second);
+		++it;
 	}
 
 	return ret;

@@ -1246,7 +1246,12 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 			return 0;
 		}
 
-		if (!weapon_item->IsClassEquipable(GetClass())) {
+		if (!weapon_item->IsClassEquipable(GetClass()) &&
+			(
+				!IsBot() ||
+				(IsBot() && !RuleB(Bots, AllowBotEquipAnyClassGear))
+				)
+			) {
 			return 0;
 		}
 
@@ -2619,19 +2624,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		bool owner_in_group = false;
 
 		if (
+			give_exp->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP)) ||
 			(
-				give_exp->HasGroup() &&
-				give_exp->GetGroup()->IsGroupMember(give_exp->GetUltimateOwner())
-			) ||
-			(
-				give_exp->IsPet() &&
-				(
-					give_exp->GetOwner()->IsClient() ||
-					(
-						give_exp->GetOwner()->HasGroup() &&
-						give_exp->GetOwner()->GetGroup()->IsGroupMember(give_exp->GetOwner()->GetUltimateOwner())
-					)
-				)
+				give_exp->IsPet() && 
+				give_exp->GetOwner() && 
+				give_exp->GetOwner()->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP))
 			)
 		) {
 			owner_in_group = true;
@@ -2639,12 +2636,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		give_exp = give_exp->GetUltimateOwner();
 
-		if (!RuleB(Bots, BotGroupXP) && !owner_in_group) {
+		if (!owner_in_group) {
 			give_exp = nullptr;
 		}
 	}
 
-	if (give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerClient()) {
+	if (give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerOfClientBot()) {
 		if (give_exp->IsNPC() && give_exp->CastToNPC()->GetSwarmOwner()) {
 			Mob* temp_owner = entity_list.GetMobID(give_exp->CastToNPC()->GetSwarmOwner());
 			if (temp_owner) {
@@ -6441,8 +6438,10 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		}
 		else {
 			int ass = TryAssassinate(defender, hit.skill);
-			if (ass > 0)
+
+			if (ass > 0) {
 				hit.damage_done = ass;
+			}
 		}
 	}
 	else if (hit.skill == EQ::skills::SkillFrenzy && GetClass() == Class::Berserker && GetLevel() > 50) {

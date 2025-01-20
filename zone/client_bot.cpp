@@ -19,6 +19,10 @@ uint32 Client::GetBotCreationLimit(uint8 class_id)
 {
 	uint32 bot_creation_limit = RuleI(Bots, CreationLimit);
 
+	if (Admin() >= RuleI(Bots, MinStatusToBypassCreateLimit)) {
+		return RuleI(Bots, StatusCreateLimit);
+	}
+
 	const auto bucket_name = fmt::format(
 		"bot_creation_limit{}",
 		(
@@ -67,6 +71,10 @@ int Client::GetBotSpawnLimit(uint8 class_id)
 {
 	int bot_spawn_limit = RuleI(Bots, SpawnLimit);
 
+	if (Admin() >= RuleI(Bots, MinStatusToBypassSpawnLimit)) {
+		return RuleI(Bots, MinStatusToBypassSpawnLimit);
+	}
+
 	const auto bucket_name = fmt::format(
 		"bot_spawn_limit{}",
 		(
@@ -80,9 +88,21 @@ int Client::GetBotSpawnLimit(uint8 class_id)
 	);
 
 	auto bucket_value = GetBucket(bucket_name);
+
+	if (class_id && !bot_spawn_limit && bucket_value.empty()) {
+		const auto new_bucket_name = "bot_spawn_limit";
+
+		bucket_value = GetBucket(new_bucket_name);
+
+		if (!bucket_value.empty() && Strings::IsNumber(bucket_value)) {
+			bot_spawn_limit = Strings::ToInt(bucket_value);
+
+			return bot_spawn_limit;
+		}
+	}
+
 	if (!bucket_value.empty() && Strings::IsNumber(bucket_value)) {
 		bot_spawn_limit = Strings::ToInt(bucket_value);
-		return bot_spawn_limit;
 	}
 
 	if (RuleB(Bots, QuestableSpawnLimit)) {
@@ -93,12 +113,59 @@ int Client::GetBotSpawnLimit(uint8 class_id)
 		);
 
 		auto results = database.QueryDatabase(query); // use 'database' for non-bot table calls
+
 		if (!results.Success() || !results.RowCount()) {
 			return bot_spawn_limit;
 		}
 
 		auto row = results.begin();
 		bot_spawn_limit = Strings::ToInt(row[0]);
+	}
+
+	const auto& zones_list = Strings::Split(RuleS(Bots, ZonesWithSpawnLimits), ",");
+	const auto& zones_limits_list = Strings::Split(RuleS(Bots, ZoneSpawnLimits), ",");
+	int i = 0;
+
+	for (const auto& result : zones_list) {
+		try {
+			if (
+				std::stoul(result) == zone->GetZoneID() &&
+				std::stoul(zones_limits_list[i]) < bot_spawn_limit
+			) {
+				bot_spawn_limit = std::stoul(zones_limits_list[i]);
+
+				break;
+			}
+
+			++i;
+		}
+
+		catch (const std::exception& e) {
+			LogInfo("Invalid entry in Rule VegasScaling:SpecialScalingZones or SpecialScalingZonesVersions: [{}]", e.what());
+		}
+	}
+
+	const auto& zones_forced_list = Strings::Split(RuleS(Bots, ZonesWithForcedSpawnLimits), ",");
+	const auto& zones_forced_limits_list = Strings::Split(RuleS(Bots, ZoneForcedSpawnLimits), ",");
+	i = 0;
+
+	for (const auto& result : zones_forced_list) {
+		try {
+			if (
+				std::stoul(result) == zone->GetZoneID() &&
+				std::stoul(zones_forced_limits_list[i]) != bot_spawn_limit
+			) {
+				bot_spawn_limit = std::stoul(zones_forced_limits_list[i]);
+
+				break;
+			}
+
+			++i;
+		}
+
+		catch (const std::exception& e) {
+			LogInfo("Invalid entry in Rule VegasScaling:SpecialScalingZones or SpecialScalingZonesVersions: [{}]", e.what());
+		}
 	}
 
 	return bot_spawn_limit;

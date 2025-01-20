@@ -64,13 +64,6 @@ public:
 		int16_t     poison;
 		int16_t     disease;
 		int16_t     corruption;
-		uint32_t    show_helm;
-		uint32_t    follow_distance;
-		uint8_t     stop_melee_level;
-		int32_t     expansion_bitmask;
-		uint8_t     enforce_spell_settings;
-		uint8_t     archery_setting;
-		uint32_t    caster_range;
 	};
 
 	static std::string PrimaryKey()
@@ -126,13 +119,6 @@ public:
 			"poison",
 			"disease",
 			"corruption",
-			"show_helm",
-			"follow_distance",
-			"stop_melee_level",
-			"expansion_bitmask",
-			"enforce_spell_settings",
-			"archery_setting",
-			"caster_range",
 		};
 	}
 
@@ -184,13 +170,6 @@ public:
 			"poison",
 			"disease",
 			"corruption",
-			"show_helm",
-			"follow_distance",
-			"stop_melee_level",
-			"expansion_bitmask",
-			"enforce_spell_settings",
-			"archery_setting",
-			"caster_range",
 		};
 	}
 
@@ -276,13 +255,7 @@ public:
 		e.poison                 = 0;
 		e.disease                = 0;
 		e.corruption             = 0;
-		e.show_helm              = 0;
-		e.follow_distance        = 200;
-		e.stop_melee_level       = 255;
-		e.expansion_bitmask      = -1;
-		e.enforce_spell_settings = 0;
-		e.archery_setting        = 0;
-		e.caster_range           = 300;
+
 
 		return e;
 	}
@@ -364,13 +337,6 @@ public:
 			e.poison                 = row[42] ? static_cast<int16_t>(atoi(row[42])) : 0;
 			e.disease                = row[43] ? static_cast<int16_t>(atoi(row[43])) : 0;
 			e.corruption             = row[44] ? static_cast<int16_t>(atoi(row[44])) : 0;
-			e.show_helm              = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
-			e.follow_distance        = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 200;
-			e.stop_melee_level       = row[47] ? static_cast<uint8_t>(strtoul(row[47], nullptr, 10)) : 255;
-			e.expansion_bitmask      = row[48] ? static_cast<int32_t>(atoi(row[48])) : -1;
-			e.enforce_spell_settings = row[49] ? static_cast<uint8_t>(strtoul(row[49], nullptr, 10)) : 0;
-			e.archery_setting        = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
-			e.caster_range           = row[51] ? static_cast<uint32_t>(strtoul(row[51], nullptr, 10)) : 300;
 
 			return e;
 		}
@@ -383,14 +349,25 @@ public:
 		int bot_data_id
 	)
 	{
-		auto results = db.QueryDatabase(
-			fmt::format(
+		std::string query;
+
+		if (RuleB(Bots, BotSoftDeletes)) {
+			query = fmt::format(
+				"UPDATE {} SET name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64) WHERE {} = {}",
+				TableName(),
+				PrimaryKey(),
+				bot_data_id
+			);
+		}
+		else {
+			query = fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
 				bot_data_id
-			)
-		);
+			);
+		}
+		auto results = db.QueryDatabase(query);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
@@ -448,13 +425,6 @@ public:
 		v.push_back(columns[42] + " = " + std::to_string(e.poison));
 		v.push_back(columns[43] + " = " + std::to_string(e.disease));
 		v.push_back(columns[44] + " = " + std::to_string(e.corruption));
-		v.push_back(columns[45] + " = " + std::to_string(e.show_helm));
-		v.push_back(columns[46] + " = " + std::to_string(e.follow_distance));
-		v.push_back(columns[47] + " = " + std::to_string(e.stop_melee_level));
-		v.push_back(columns[48] + " = " + std::to_string(e.expansion_bitmask));
-		v.push_back(columns[49] + " = " + std::to_string(e.enforce_spell_settings));
-		v.push_back(columns[50] + " = " + std::to_string(e.archery_setting));
-		v.push_back(columns[51] + " = " + std::to_string(e.caster_range));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -521,13 +491,6 @@ public:
 		v.push_back(std::to_string(e.poison));
 		v.push_back(std::to_string(e.disease));
 		v.push_back(std::to_string(e.corruption));
-		v.push_back(std::to_string(e.show_helm));
-		v.push_back(std::to_string(e.follow_distance));
-		v.push_back(std::to_string(e.stop_melee_level));
-		v.push_back(std::to_string(e.expansion_bitmask));
-		v.push_back(std::to_string(e.enforce_spell_settings));
-		v.push_back(std::to_string(e.archery_setting));
-		v.push_back(std::to_string(e.caster_range));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -602,13 +565,6 @@ public:
 			v.push_back(std::to_string(e.poison));
 			v.push_back(std::to_string(e.disease));
 			v.push_back(std::to_string(e.corruption));
-			v.push_back(std::to_string(e.show_helm));
-			v.push_back(std::to_string(e.follow_distance));
-			v.push_back(std::to_string(e.stop_melee_level));
-			v.push_back(std::to_string(e.expansion_bitmask));
-			v.push_back(std::to_string(e.enforce_spell_settings));
-			v.push_back(std::to_string(e.archery_setting));
-			v.push_back(std::to_string(e.caster_range));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -687,13 +643,6 @@ public:
 			e.poison                 = row[42] ? static_cast<int16_t>(atoi(row[42])) : 0;
 			e.disease                = row[43] ? static_cast<int16_t>(atoi(row[43])) : 0;
 			e.corruption             = row[44] ? static_cast<int16_t>(atoi(row[44])) : 0;
-			e.show_helm              = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
-			e.follow_distance        = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 200;
-			e.stop_melee_level       = row[47] ? static_cast<uint8_t>(strtoul(row[47], nullptr, 10)) : 255;
-			e.expansion_bitmask      = row[48] ? static_cast<int32_t>(atoi(row[48])) : -1;
-			e.enforce_spell_settings = row[49] ? static_cast<uint8_t>(strtoul(row[49], nullptr, 10)) : 0;
-			e.archery_setting        = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
-			e.caster_range           = row[51] ? static_cast<uint32_t>(strtoul(row[51], nullptr, 10)) : 300;
 
 			all_entries.push_back(e);
 		}
@@ -763,13 +712,6 @@ public:
 			e.poison                 = row[42] ? static_cast<int16_t>(atoi(row[42])) : 0;
 			e.disease                = row[43] ? static_cast<int16_t>(atoi(row[43])) : 0;
 			e.corruption             = row[44] ? static_cast<int16_t>(atoi(row[44])) : 0;
-			e.show_helm              = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
-			e.follow_distance        = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 200;
-			e.stop_melee_level       = row[47] ? static_cast<uint8_t>(strtoul(row[47], nullptr, 10)) : 255;
-			e.expansion_bitmask      = row[48] ? static_cast<int32_t>(atoi(row[48])) : -1;
-			e.enforce_spell_settings = row[49] ? static_cast<uint8_t>(strtoul(row[49], nullptr, 10)) : 0;
-			e.archery_setting        = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
-			e.caster_range           = row[51] ? static_cast<uint32_t>(strtoul(row[51], nullptr, 10)) : 300;
 
 			all_entries.push_back(e);
 		}
@@ -889,13 +831,6 @@ public:
 		v.push_back(std::to_string(e.poison));
 		v.push_back(std::to_string(e.disease));
 		v.push_back(std::to_string(e.corruption));
-		v.push_back(std::to_string(e.show_helm));
-		v.push_back(std::to_string(e.follow_distance));
-		v.push_back(std::to_string(e.stop_melee_level));
-		v.push_back(std::to_string(e.expansion_bitmask));
-		v.push_back(std::to_string(e.enforce_spell_settings));
-		v.push_back(std::to_string(e.archery_setting));
-		v.push_back(std::to_string(e.caster_range));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -963,13 +898,6 @@ public:
 			v.push_back(std::to_string(e.poison));
 			v.push_back(std::to_string(e.disease));
 			v.push_back(std::to_string(e.corruption));
-			v.push_back(std::to_string(e.show_helm));
-			v.push_back(std::to_string(e.follow_distance));
-			v.push_back(std::to_string(e.stop_melee_level));
-			v.push_back(std::to_string(e.expansion_bitmask));
-			v.push_back(std::to_string(e.enforce_spell_settings));
-			v.push_back(std::to_string(e.archery_setting));
-			v.push_back(std::to_string(e.caster_range));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

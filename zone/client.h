@@ -1258,6 +1258,21 @@ public:
 	PendingTranslocate_Struct PendingTranslocateData;
 	void SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
+	// Help Window
+	std::string SendCommandHelpWindow(
+		Client* c,
+		std::vector<std::string> description,
+		std::vector<std::string> notes,
+		std::vector<std::string> example_format,
+		std::vector<std::string> examples_one, std::vector<std::string> examples_two, std::vector<std::string> examples_three,
+		std::vector<std::string> actionables,
+		std::vector<std::string> options,
+		std::vector<std::string> options_one, std::vector<std::string> options_two, std::vector<std::string> options_three
+	);
+	std::string GetCommandHelpHeader(std::string color, std::string header);
+	std::string SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 maxLength, bool secondColor = false, std::string secondaryColor = "");
+	void SendSpellTypePrompts(bool commandedTypes = false, bool clientOnlyTypes = false);
+
 	// Task System Methods
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
@@ -2045,6 +2060,7 @@ private:
 	PTimerList p_timers; //persistent timers
 	Timer hpupdate_timer;
 	Timer camp_timer;
+	Timer bot_camp_timer;
 	Timer process_timer;
 	Timer consume_food_timer;
 	Timer zoneinpacket_timer;
@@ -2228,6 +2244,8 @@ public:
 
 	bool GetBotPulling() { return m_bot_pulling; }
 	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
+	uint32 GetAssistee() { return _assistee; }
+	void SetAssistee(uint32 id = 0) { _assistee = id; }
 
 	bool GetBotPrecombat() { return m_bot_precombat; }
 	void SetBotPrecombat(bool flag = true) { m_bot_precombat = flag; }
@@ -2242,10 +2260,29 @@ public:
 	void CampAllBots(uint8 class_id = Class::None);
 	void SpawnRaidBotsOnConnect(Raid* raid);
 
+	void LoadDefaultBotSettings();
+	int GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting);
+	int GetBotSetting(uint8 setting_type, uint16 bot_setting);
+	void SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value);	
+
 private:
 	bool bot_owner_options[_booCount];
 	bool m_bot_pulling;
 	bool m_bot_precombat;
+
+	uint8 fast_heal_threshold;
+	uint8 heal_threshold;
+	uint8 complete_heal_threshold;
+	uint8 hot_heal_threshold;
+	uint32 fast_heal_delay;
+	uint32 heal_delay;
+	uint32 complete_heal_delay;
+	uint32 hot_heal_delay;
+	uint32 cure_delay;
+	uint8 cure_min_threshold;
+	uint8 cure_threshold;
+	bool illusion_block;
+	uint32 _assistee;
 
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();

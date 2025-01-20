@@ -745,10 +745,27 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();
 	Mob *our_owner = GetOwner();
-	if(target_owner && target_owner == this)
+	Mob* target_ultimate_owner = target->GetUltimateOwner();
+	Mob* our_ultimate_owner = GetUltimateOwner();
+
+	if (target_owner && target_owner == this) {
 		return false;
-	else if(our_owner && our_owner == target)
+	}
+	else if (
+		IsBot() && target_ultimate_owner && 
+		(
+			(target_ultimate_owner == our_ultimate_owner) ||
+			(target_ultimate_owner->IsOfClientBot())
+		)
+	) {
 		return false;
+	}
+	else if (our_owner && our_owner == target) {
+		return false;
+	}
+	else if (IsBot() && our_ultimate_owner && our_ultimate_owner == target) {
+		return false;
+	}
 
 	// invalidate for swarm pets for later on if their owner is a corpse
 	if (IsNPC() && CastToNPC()->GetSwarmInfo() && our_owner &&
@@ -1278,6 +1295,39 @@ bool Mob::CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarge
 	return zone->zonemap->CheckLoS(posWatcher, posTarget);
 }
 
+bool Mob::CheckPositioningLosFN(Mob* other, float posX, float posY, float posZ) {
+	if (zone->zonemap == nullptr) {
+		//not sure what the best return is on error
+		//should make this a database variable, but im lazy today
+#ifdef LOS_DEFAULT_CAN_SEE
+		return(true);
+#else
+		return(false);
+#endif
+	}
+
+	if (!other) {
+		return(true);
+	}
+	glm::vec3 myloc;
+	glm::vec3 oloc;
+
+#define LOS_DEFAULT_HEIGHT 6.0f
+
+	oloc.x = other->GetX();
+	oloc.y = other->GetY();
+	oloc.z = other->GetZ() + (other->GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : other->GetSize()) / 2 * SEE_POSITION;
+
+	myloc.x = posX;
+	myloc.y = posY;
+	myloc.z = posZ + (GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : GetSize()) / 2 * HEAD_POSITION;
+
+#if LOSDEBUG>=5
+	LogDebug("LOS from ([{}], [{}], [{}]) to ([{}], [{}], [{}]) sizes: ([{}], [{}])", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
+#endif
+	return zone->zonemap->CheckLoS(myloc, oloc);
+}
+
 //offensive spell aggro
 int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool is_proc)
 {
@@ -1658,4 +1708,3 @@ void Mob::RogueEvade(Mob *other)
 
 	return;
 }
-

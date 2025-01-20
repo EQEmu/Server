@@ -102,6 +102,7 @@ void command_guild(Client *c, const Seperator *sep);
 void command_help(Client *c, const Seperator *sep);
 void command_hotfix(Client *c, const Seperator *sep);
 void command_hp(Client *c, const Seperator *sep);
+void command_illusion_block(Client* c, const Seperator* sep);
 void command_instance(Client *c, const Seperator *sep);
 void command_interrogateinv(Client *c, const Seperator *sep);
 void command_interrupt(Client *c, const Seperator *sep);
@@ -172,6 +173,10 @@ void command_shutdown(Client *c, const Seperator *sep);
 void command_spawn(Client *c, const Seperator *sep);
 void command_spawneditmass(Client *c, const Seperator *sep);
 void command_spawnfix(Client *c, const Seperator *sep);
+void command_spell_delays(Client* c, const Seperator* sep);
+//void command_spell_holds(Client* c, const Seperator* sep); //currently unusued
+void command_spell_max_thresholds(Client* c, const Seperator* sep);
+void command_spell_min_thresholds(Client* c, const Seperator* sep);
 void command_stun(Client *c, const Seperator *sep);
 void command_summon(Client *c, const Seperator *sep);
 void command_summonburiedplayercorpse(Client *c, const Seperator *sep);

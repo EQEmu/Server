@@ -574,8 +574,9 @@ public:
 	bool IsFamiliar();
 	bool IsTargetLockPet();
 	bool IsPetOwnerBot();
-	bool IsPetOwnerClient();
+	bool IsPetOwnerClient();	
 	bool IsPetOwnerNPC();
+	bool IsPetOwnerOfClientBot();
 	bool IsDestructibleObject();
 	bool IsBoat();
 	bool IsControllableBoat();

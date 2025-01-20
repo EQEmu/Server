@@ -2,28 +2,28 @@
 
 void bot_command_heal_rotation(Client *c, const Seperator *sep)
 {
-
-	std::list<const char*> subcommand_list;
-	subcommand_list.push_back("healrotationadaptivetargeting");
-	subcommand_list.push_back("healrotationaddmember");
-	subcommand_list.push_back("healrotationaddtarget");
-	subcommand_list.push_back("healrotationadjustcritical");
-	subcommand_list.push_back("healrotationadjustsafe");
-	subcommand_list.push_back("healrotationcastoverride");
-	subcommand_list.push_back("healrotationchangeinterval");
-	subcommand_list.push_back("healrotationclearhot");
-	subcommand_list.push_back("healrotationcleartargets");
-	subcommand_list.push_back("healrotationcreate");
-	subcommand_list.push_back("healrotationdelete");
-	subcommand_list.push_back("healrotationfastheals");
-	subcommand_list.push_back("healrotationlist");
-	subcommand_list.push_back("healrotationremovemember");
-	subcommand_list.push_back("healrotationremovetarget");
-	subcommand_list.push_back("healrotationresetlimits");
-	subcommand_list.push_back("healrotationsave");
-	subcommand_list.push_back("healrotationsethot");
-	subcommand_list.push_back("healrotationstart");
-	subcommand_list.push_back("healrotationstop");
+	std::vector<const char*> subcommand_list = {
+		"healrotationadaptivetargeting",
+		"healrotationaddmember",
+		"healrotationaddtarget",
+		"healrotationadjustcritical",
+		"healrotationadjustsafe",
+		"healrotationcastoverride",
+		"healrotationchangeinterval",
+		"healrotationclearhot",
+		"healrotationcleartargets",
+		"healrotationcreate",
+		"healrotationdelete",
+		"healrotationfastheals",
+		"healrotationlist",
+		"healrotationremovemember",
+		"healrotationremovetarget",
+		"healrotationresetlimits",
+		"healrotationsave",
+		"healrotationsethot",
+		"healrotationstart",
+		"healrotationstop"
+	};
 
 	if (helper_command_alias_fail(c, "bot_command_heal_rotation", sep->arg[0], "healrotation"))
 		return;
@@ -63,7 +63,7 @@ void bot_command_heal_rotation_adaptive_targeting(Client* c, const Seperator* se
 
 	std::string adaptive_targeting_arg;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (!sbl.empty()) {
 		adaptive_targeting_arg = sep->arg[2];
@@ -123,7 +123,7 @@ void bot_command_heal_rotation_add_member(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		c->Message(Chat::White, "You must [name] a new member as a bot that you own to use this command");
@@ -191,7 +191,7 @@ void bot_command_heal_rotation_add_target(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[2]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -283,7 +283,7 @@ void bot_command_heal_rotation_adjust_critical(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[3]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -383,7 +383,7 @@ void bot_command_heal_rotation_adjust_safe(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[3]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -460,7 +460,7 @@ void bot_command_heal_rotation_casting_override(Client* c, const Seperator* sep)
 
 	std::string casting_override_arg;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (!sbl.empty()) {
 		casting_override_arg = sep->arg[2];
@@ -534,7 +534,7 @@ void bot_command_heal_rotation_change_interval(Client* c, const Seperator* sep)
 
 	std::string change_interval_arg;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (!sbl.empty()) {
 		change_interval_arg = sep->arg[2];
@@ -603,7 +603,7 @@ void bot_command_heal_rotation_clear_hot(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -649,7 +649,7 @@ void bot_command_heal_rotation_clear_targets(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -703,7 +703,7 @@ void bot_command_heal_rotation_create(Client* c, const Seperator* sep)
 	std::string adaptive_targeting_arg;
 	std::string casting_override_arg;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (!sbl.empty()) {
 		interval_arg           = sep->arg[2];
@@ -858,7 +858,7 @@ void bot_command_heal_rotation_delete(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[name_arg]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -896,7 +896,7 @@ void bot_command_heal_rotation_fast_heals(Client* c, const Seperator* sep)
 
 	std::string fast_heals_arg;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (!sbl.empty()) {
 		fast_heals_arg = sep->arg[2];
@@ -956,7 +956,7 @@ void bot_command_heal_rotation_list(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -1076,7 +1076,7 @@ void bot_command_heal_rotation_remove_member(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -1123,7 +1123,7 @@ void bot_command_heal_rotation_remove_target(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[2]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -1181,7 +1181,7 @@ void bot_command_heal_rotation_reset_limits(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -1223,7 +1223,7 @@ void bot_command_heal_rotation_save(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -1272,7 +1272,7 @@ void bot_command_heal_rotation_set_hot(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[2]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -1337,7 +1337,7 @@ void bot_command_heal_rotation_start(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
@@ -1384,7 +1384,7 @@ void bot_command_heal_rotation_stop(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);

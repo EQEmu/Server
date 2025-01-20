@@ -892,7 +892,7 @@ void perl_register_npc()
 	package.add("IsGuarding", &Perl_NPC_IsGuarding);
 	package.add("IsLDoNLocked", &Perl_NPC_IsLDoNLocked);
 	package.add("IsLDoNTrapped", &Perl_NPC_IsLDoNTrapped);
-	package.add("IsLDoNTrapDetected", &Perl_NPC_IsLDoNTrapDetected);;
+	package.add("IsLDoNTrapDetected", &Perl_NPC_IsLDoNTrapDetected);
 	package.add("IsOnHatelist", &Perl_NPC_IsOnHatelist);
 	package.add("IsRaidTarget", &Perl_NPC_IsRaidTarget);
 	package.add("IsRareSpawn", &Perl_NPC_IsRareSpawn);
