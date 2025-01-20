@@ -4292,8 +4292,13 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 		OnDisconnect(true);
 		return;
 	}
+
 	camp_timer.Start(29000, true);
-	bot_camp_timer.Start((RuleI(Bots, CampTimer) * 1000), true);
+
+	if (RuleB(Bots, Enabled)) {
+		bot_camp_timer.Start((RuleI(Bots, CampTimer) * 1000), true);
+	}
+
 	return;
 }
 
