@@ -7410,17 +7410,17 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 	}
 }
 
-std::vector<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID) {
+std::vector<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 bot_owner_character_id) {
 	std::vector<Bot*> client_bot_list;
 
-	if (botOwnerCharacterID <= 0) {
+	if (bot_owner_character_id <= 0) {
 		return client_bot_list;
 	}
 
 	auto it = bot_list.begin();
 
 	while (it != bot_list.end()) {
-		if (it->second->GetOwner() && it->second->GetBotOwnerCharacterID() == botOwnerCharacterID) {
+		if (it->second->GetOwner() && it->second->GetBotOwnerCharacterID() == bot_owner_character_id) {
 			client_bot_list.push_back(it->second);
 		}
 		++it;
