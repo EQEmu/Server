@@ -8693,43 +8693,28 @@ void Mob::CheckScanCloseMobsMovingTimer()
 std::vector<Mob*> Mob::GatherSpellTargets(bool entire_raid, Mob* target, bool no_clients, bool no_bots, bool no_pets) {
 	std::vector<Mob*> valid_spell_targets;
 
-	if (IsRaidGrouped()) {
-		Raid* raid = nullptr;
+	auto is_valid_target = [no_clients, no_bots](Mob* member) {
+		return member &&
+			((member->IsClient() && !no_clients) || (member->IsBot() && !no_bots));
+		};
 
-		if (IsBot()) {
-			raid = CastToBot()->GetStoredRaid();
-		}
-		else {
-			raid = GetRaid();
-		}
+	if (IsRaidGrouped()) {
+		Raid* raid = IsBot() ? CastToBot()->GetStoredRaid() : GetRaid();
 
 		if (raid) {
 			if (entire_raid) {
 				for (const auto& m : raid->members) {
-					if (m.member && m.group_number != RAID_GROUPLESS && ((m.member->IsClient() && !no_clients) || (m.member->IsBot() && !no_bots))) {
+					if (is_valid_target(m.member) && m.group_number != RAID_GROUPLESS) {
 						valid_spell_targets.emplace_back(m.member);
 					}
 				}
 			}
 			else {
-				std::vector<RaidMember> raid_group;
-
-				if (target) {
-					raid_group = raid->GetRaidGroupMembers(raid->GetGroup(target->GetName()));
-				}
-				else {
-					raid_group = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
-				}
+				auto group_name = target ? raid->GetGroup(target->GetName()) : raid->GetGroup(GetName());
+				auto raid_group = raid->GetRaidGroupMembers(group_name);
 
 				for (const auto& m : raid_group) {
-					if (
-						m.member && 
-						m.group_number != RAID_GROUPLESS && 
-						(
-							(m.member->IsClient() && !no_clients) || 
-							(m.member->IsBot() && !no_bots)
-						)
-					) {
+					if (is_valid_target(m.member) && m.group_number != RAID_GROUPLESS) {
 						valid_spell_targets.emplace_back(m.member);
 					}
 				}
@@ -8741,7 +8726,7 @@ std::vector<Mob*> Mob::GatherSpellTargets(bool entire_raid, Mob* target, bool no
 
 		if (group) {
 			for (const auto& m : group->members) {
-				if (m && ((m->IsClient() && !no_clients) || (m->IsBot() && !no_bots))) {
+				if (is_valid_target(m)) {
 					valid_spell_targets.emplace_back(m);
 				}
 			}
