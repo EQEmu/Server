@@ -248,9 +248,10 @@ namespace Logs {
 		"EqTime",
 		"Corpses",
 		"XTargets",
-		"EvolveItem"
+		"EvolveItem",
 		"Bot Settings",
 		"Bot Spell Checks",
+		"Bot Spell Type Checks",
 		"Test Debug"
 	};
 }
