@@ -371,6 +371,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
+								inst->TransferOwnership(database, other->CharacterID());
 								LogTrading("Container [{}] ([{}]) successfully transferred, deleting from trade slot", inst->GetItem()->Name, inst->GetItem()->ID);
 								if (qs_log) {
 									auto detail = new PlayerLogTradeItemsEntry_Struct;
@@ -482,6 +483,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						if (other->PutItemInInventory(partial_slot, *partial_inst, true)) {
 							LogTrading("Partial stack [{}] ([{}]) successfully transferred, deleting [{}] charges from trade slot",
 								inst->GetItem()->Name, inst->GetItem()->ID, (old_charges - inst->GetCharges()));
+							inst->TransferOwnership(database, other->CharacterID());
 							if (qs_log) {
 								auto detail = new PlayerLogTradeItemsEntry_Struct;
 
@@ -589,6 +591,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
+								inst->TransferOwnership(database, other->CharacterID());
 								LogTrading("Item [{}] ([{}]) successfully transferred, deleting from trade slot", inst->GetItem()->Name, inst->GetItem()->ID);
 								if (qs_log) {
 									auto detail = new PlayerLogTradeItemsEntry_Struct;

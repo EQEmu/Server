@@ -1114,4 +1114,5 @@ enum ExpSource
 namespace DoorType {
 	constexpr uint32 BuyerStall = 155;
 }
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

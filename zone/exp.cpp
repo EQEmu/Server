@@ -497,7 +497,7 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 	add_exp = GetEXP() + add_exp;
 }
 
-void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, bool resexp) {
+void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, bool resexp, NPC* npc) {
 	if (!IsEXPEnabled()) {
 		return;
 	}
@@ -574,10 +574,10 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	// Now update our character's normal and AA xp
-	SetEXP(exp_source, exp, aaexp, resexp);
+	SetEXP(exp_source, exp, aaexp, resexp, npc);
 }
 
-void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
+void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool isrezzexp, NPC* npc) {
 	uint64 current_exp = GetEXP();
 	uint64 current_aa_exp = GetAAXP();
 	uint64 total_current_exp = current_exp + current_aa_exp;
@@ -677,6 +677,7 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 				}
 			}
 		}
+		ProcessEvolvingItem(exp_gained, npc);
 	} else if(total_add_exp < total_current_exp) { //only loss message if you lose exp, no message if you gained/lost nothing.
 		uint64 exp_lost = current_exp - set_exp;
 		float exp_percent = (float)((float)exp_lost / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())))*(float)100;
@@ -1205,7 +1206,7 @@ void Group::SplitExp(ExpSource exp_source, const uint64 exp, Mob* other) {
 			if (diff >= max_diff) {
 				const uint64 tmp  = (m->GetLevel() + 3) * (m->GetLevel() + 3) * 75 * 35 / 10;
 				const uint64 tmp2 = group_experience / member_count;
-				m->CastToClient()->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level);
+				m->CastToClient()->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level, false, other->CastToNPC());
 			}
 		}
 	}
@@ -1256,7 +1257,7 @@ void Raid::SplitExp(ExpSource exp_source, const uint64 exp, Mob* other) {
 			if (diff >= max_diff) {
 				const uint64 tmp  = (m.member->GetLevel() + 3) * (m.member->GetLevel() + 3) * 75 * 35 / 10;
 				const uint64 tmp2 = (raid_experience / member_modifier) + 1;
-				m.member->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level);
+				m.member->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level, false, other->CastToNPC());
 			}
 		}
 	}
