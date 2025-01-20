@@ -31,6 +31,7 @@ Bazaar::GetSearchResults(
 		char_zone_instance_id
 	);
 
+	bool        convert = false;
 	std::string search_criteria_trader("TRUE ");
 
 	if (search.search_scope == NonRoFBazaarSearchScope) {
@@ -51,8 +52,24 @@ Bazaar::GetSearchResults(
 		);
 	}
 	else if (search.trader_id > 0) {
-		search_criteria_trader.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
+		if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
+			if (search.trader_id >= TraderRepository::TRADER_CONVERT_ID) {
+				convert = true;
+				search_criteria_trader.append(fmt::format(
+					" AND trader.char_zone_id = {} AND trader.char_zone_instance_id = {}",
+					Zones::BAZAAR,
+					search.trader_id - TraderRepository::TRADER_CONVERT_ID)
+				);
+			}
+			else {
+				search_criteria_trader.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
+			}
+		}
+		else {
+			search_criteria_trader.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
+		}
 	}
+
 	if (search.min_cost != 0) {
 		search_criteria_trader.append(fmt::format(" AND trader.item_cost >= {}", search.min_cost * 1000));
 	}
@@ -355,6 +372,12 @@ Bazaar::GetSearchResults(
 		}
 
 		LogTradingDetail("Found item [{}] meeting search criteria.", r.item_name);
+		if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
+			if (convert || (r.trader_zone_id == Zones::BAZAAR && r.trader_zone_instance_id != char_zone_instance_id)) {
+				r.trader_id = TraderRepository::TRADER_CONVERT_ID + r.trader_zone_instance_id;
+			}
+		}
+
 		all_entries.push_back(r);
 	}
 
