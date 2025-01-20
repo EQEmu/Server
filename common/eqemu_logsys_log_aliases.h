@@ -864,44 +864,14 @@
         OutF(LogSys, Logs::Detail, Logs::BotSettings, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogBotPreChecks(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::BotPreChecks))\
-        OutF(LogSys, Logs::General, Logs::BotPreChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+#define LogBotSpellChecks(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotSpellChecks))\
+        OutF(LogSys, Logs::General, Logs::BotSpellChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogBotPreChecksDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotPreChecks))\
-        OutF(LogSys, Logs::Detail, Logs::BotPreChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogBotHoldChecks(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::BotHoldChecks))\
-        OutF(LogSys, Logs::General, Logs::BotHoldChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogBotHoldChecksDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotHoldChecks))\
-        OutF(LogSys, Logs::Detail, Logs::BotHoldChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogBotDelayChecks(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::BotDelayChecks))\
-        OutF(LogSys, Logs::General, Logs::BotDelayChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogBotDelayChecksDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotDelayChecks))\
-        OutF(LogSys, Logs::Detail, Logs::BotDelayChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogBotThresholdChecks(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::BotThresholdChecks))\
-        OutF(LogSys, Logs::General, Logs::BotThresholdChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogBotThresholdChecksDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotThresholdChecks))\
-        OutF(LogSys, Logs::Detail, Logs::BotThresholdChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+#define LogBotSpellChecksDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotSpellChecks))\
+        OutF(LogSys, Logs::Detail, Logs::BotSpellChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogBotSpellTypeChecks(message, ...) do {\

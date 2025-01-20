@@ -26,7 +26,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 		return false;
 	}
 
-	LogBotPreChecksDetail("{} says, 'Attempting {} AICastSpell on {}.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
+	LogBotSpellChecksDetail("{} says, 'Attempting {} AICastSpell on {}.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 
 	if (
 		!AI_HasSpells() ||
@@ -623,7 +623,7 @@ bool Bot::AI_PursueCastCheck() {
 	if (GetTarget() && AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Pursue autocast check triggered: [{}]", GetCleanName());
-		LogBotPreChecksDetail("{} says, 'AI_PursueCastCheck started.'", GetCleanName());
+		LogBotSpellChecksDetail("{} says, 'AI_PursueCastCheck started.'", GetCleanName());
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -636,7 +636,7 @@ bool Bot::AI_PursueCastCheck() {
 
 		for (auto& current_cast : cast_order) {
 			if (current_cast.priority == 0) {
-				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
+				LogBotSpellChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
 				continue;
 			}
 
@@ -681,7 +681,7 @@ bool Bot::AI_IdleCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Non-Engaged autocast check triggered: [{}]", GetCleanName());
-		LogBotPreChecksDetail("{} says, 'AI_IdleCastCheck started.'", GetCleanName());
+		LogBotSpellChecksDetail("{} says, 'AI_IdleCastCheck started.'", GetCleanName());
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -704,7 +704,7 @@ bool Bot::AI_IdleCastCheck() {
 
 		for (auto& current_cast : cast_order) {
 			if (current_cast.priority == 0) {
-				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
+				LogBotSpellChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
 				continue;
 			}
 
@@ -759,7 +759,7 @@ bool Bot::AI_EngagedCastCheck() {
 	if (GetTarget() && AIautocastspell_timer->Check(false)) {
 
 		LogAIDetail("Bot Engaged autocast check triggered: [{}]", GetCleanName());
-		LogBotPreChecksDetail("{} says, 'AI_EngagedCastCheck started.'", GetCleanName());
+		LogBotSpellChecksDetail("{} says, 'AI_EngagedCastCheck started.'", GetCleanName());
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -772,7 +772,7 @@ bool Bot::AI_EngagedCastCheck() {
 
 		for (auto& current_cast : cast_order) {
 			if (current_cast.priority == 0) {
-				LogBotPreChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
+				LogBotSpellChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
 				continue;
 			}
 

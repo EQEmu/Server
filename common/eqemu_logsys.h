@@ -144,10 +144,7 @@ namespace Logs {
 		XTargets,
 		EvolveItem,
 		BotSettings,
-		BotPreChecks,
-		BotHoldChecks,
-		BotDelayChecks,
-		BotThresholdChecks,
+		BotSpellChecks,
 		BotSpellTypeChecks,
 		TestDebug,
 		MaxCategoryID /* Don't Remove this */
