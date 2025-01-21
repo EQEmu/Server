@@ -64,7 +64,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 	bot_spell.SpellIndex = 0;
 	bot_spell.ManaCost = 0;
 
-	if (SpellTypeRequiresLoS(spell_type) && tar != this) {
+	if (BotSpellTypeRequiresLoS(spell_type) && tar != this) {
 		SetHasLoS(DoLosChecks(this, tar));
 	}
 	else {
@@ -644,7 +644,7 @@ bool Bot::AI_PursueCastCheck() {
 				continue;
 			}
 
-			if (IsCommandedSpellType(current_cast.spellType)) { // Unsupported by AI currently.
+			if (IsCommandedBotSpellType(current_cast.spellType)) { // Unsupported by AI currently.
 				continue;
 			}
 
@@ -716,7 +716,7 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
-			if (IsCommandedSpellType(current_cast.spellType)) { // Unsupported by AI currently.
+			if (IsCommandedBotSpellType(current_cast.spellType)) { // Unsupported by AI currently.
 				continue;
 			}
 
@@ -780,7 +780,7 @@ bool Bot::AI_EngagedCastCheck() {
 				continue;
 			}
 
-			if (IsCommandedSpellType(current_cast.spellType)) { // Unsupported by AI currently.
+			if (IsCommandedBotSpellType(current_cast.spellType)) { // Unsupported by AI currently.
 				continue;
 			}
 
@@ -1071,7 +1071,7 @@ std::vector<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* cas
 					caster->IsCommandedSpell() ||
 					!AE ||
 					(
-						SpellTypeRequiresAEChecks(spell_type) && 
+						BotSpellTypeRequiresAEChecks(spell_type) && 
 						caster->HasValidAETarget(caster, bot_spell_list[i].spellid, spell_type, tar)
 					)
 				) {
@@ -2957,7 +2957,7 @@ void Bot::CheckBotSpells() {
 			}
 		}
 
-		correct_type = GetCorrectSpellType(s.type, spell_id);
+		correct_type = GetCorrectBotSpellType(s.type, spell_id);
 		parent_type = GetParentSpellType(correct_type);
 
 		if (RuleB(Bots, UseParentSpellTypeForChecks)) {
@@ -2967,7 +2967,7 @@ void Bot::CheckBotSpells() {
 		}
 		else {
 			if (IsPetBotSpellType(s.type)) {
-				correct_type = GetPetSpellType(correct_type);
+				correct_type = GetPetBotSpellType(correct_type);
 			}
 		}
 

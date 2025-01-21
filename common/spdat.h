@@ -896,6 +896,7 @@ const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellT
 const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong);
 const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
 
+// Bot related functions
 bool IsBotSpellTypeDetrimental (uint16 spell_type);
 bool IsBotSpellTypeBeneficial (uint16 spell_type);
 bool IsBotSpellTypeOtherBeneficial(uint16 spell_type);
@@ -906,13 +907,13 @@ bool IsGroupTargetOnlyBotSpellType(uint16 spell_type);
 bool IsPetBotSpellType(uint16 spell_type);
 bool IsClientBotSpellType(uint16 spell_type);
 bool IsHealBotSpellType(uint16 spell_type);
-bool SpellTypeRequiresLoS(uint16 spell_type);
-bool SpellTypeRequiresTarget(uint16 spell_type);
-bool SpellTypeRequiresAEChecks(uint16 spell_type);
-bool IsCommandedSpellType(uint16 spell_type);
-bool IsPullingSpellType(uint16 spell_type);
-uint16 GetCorrectSpellType(uint16 spell_type, uint16 spell_id);
-uint16 GetPetSpellType(uint16 spell_type);
+bool BotSpellTypeRequiresLoS(uint16 spell_type);
+bool BotSpellTypeRequiresTarget(uint16 spell_type);
+bool BotSpellTypeRequiresAEChecks(uint16 spell_type);
+bool IsCommandedBotSpellType(uint16 spell_type);
+bool IsPullingBotSpellType(uint16 spell_type);
+uint16 GetCorrectBotSpellType(uint16 spell_type, uint16 spell_id);
+uint16 GetPetBotSpellType(uint16 spell_type);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only

@@ -509,7 +509,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		Mob* new_tar = tar;
 
 		if (!aa_type && !by_spell_id) {
-			if (!SpellTypeRequiresTarget(spell_type)) {
+			if (!BotSpellTypeRequiresTarget(spell_type)) {
 				new_tar = bot_iter;
 			}
 

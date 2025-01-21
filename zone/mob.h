@@ -470,7 +470,7 @@ public:
 	uint8 GetUltimateSpellMinThreshold(uint16 spell_type, Mob* tar);
 	uint8 GetUltimateSpellMaxThreshold(uint16 spell_type, Mob* tar);
 
-	uint16 GetPetSpellType(uint16 spell_type);
+	uint16 GetPetBotSpellType(uint16 spell_type);
 
 	void DisableBotSpellTimers();
 	void StartBotSpellTimers();	

@@ -618,7 +618,7 @@ bool Mob::GetUltimateSpellHold(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->GetSpellHold(GetPetSpellType(spell_type));
+		return tar->GetOwner()->GetSpellHold(GetPetBotSpellType(spell_type));
 	}
 
 	return GetSpellHold(spell_type);
@@ -630,7 +630,7 @@ uint16 Mob::GetUltimateSpellDelay(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->GetSpellDelay(GetPetSpellType(spell_type));
+		return tar->GetOwner()->GetSpellDelay(GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
@@ -646,7 +646,7 @@ bool Mob::GetUltimateSpellDelayCheck(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->SpellTypeRecastCheck(GetPetSpellType(spell_type));
+		return tar->GetOwner()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
@@ -662,7 +662,7 @@ uint8 Mob::GetUltimateSpellMinThreshold(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->GetSpellMinThreshold(GetPetSpellType(spell_type));
+		return tar->GetOwner()->GetSpellMinThreshold(GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
@@ -678,7 +678,7 @@ uint8 Mob::GetUltimateSpellMaxThreshold(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->GetOwner()->GetSpellMaxThreshold(GetPetSpellType(spell_type));
+		return tar->GetOwner()->GetSpellMaxThreshold(GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
@@ -688,7 +688,7 @@ uint8 Mob::GetUltimateSpellMaxThreshold(uint16 spell_type, Mob* tar) {
 	return GetSpellMaxThreshold(spell_type);
 }
 
-uint16 Mob::GetPetSpellType(uint16 spell_type) {
+uint16 Mob::GetPetBotSpellType(uint16 spell_type) {
 	switch (spell_type) {
 		case BotSpellTypes::VeryFastHeals:
 			return BotSpellTypes::PetVeryFastHeals;

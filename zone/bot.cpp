@@ -9329,7 +9329,7 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
 		return false;
 	}
 
-	if (IsPullingSpell() && IsPullingSpellType(spell_type)) { //Skip remaining checks for commanded
+	if (IsPullingSpell() && IsPullingBotSpellType(spell_type)) { //Skip remaining checks for commanded
 		return true;
 	}
 
@@ -9472,7 +9472,7 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 		return false;
 	}
 
-	if (SpellTypeRequiresTarget(spell_type) && !tar) {
+	if (BotSpellTypeRequiresTarget(spell_type) && !tar) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast due to CastChecks !tar.'", GetCleanName());
 		return false;
 	}
