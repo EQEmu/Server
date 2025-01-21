@@ -416,7 +416,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 
-	if (container->GetItem() && container->GetItem()->ID == 4041) {
+	if (container->GetItem() && (container->GetItem()->ID == 4041 || container->GetItem()->ID == 9207)) {
 		auto first_item = container->GetItem(0);
 		if (first_item) {
 			int aug_id = first_item->GetID();

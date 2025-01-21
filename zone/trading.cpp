@@ -3405,6 +3405,7 @@ void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPack
 		return;
 	} else {
 		SetAlternateCurrencyValue(1, available_vouchers - RuleI(Bazaar, VoucherDeliveryCost));
+		SendAltCurrencies();
 		PushItemOnCursor(*buy_item, true);
 	}
 
