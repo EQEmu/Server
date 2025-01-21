@@ -122,7 +122,7 @@ bool Client::Process() {
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
 		if (!IsMoving() && m_position_update_timer.Check()) {
-			CastToClient()->BroadcastPositionUpdate();
+			BroadcastPositionUpdate();
 		}
 
 		if (mana_timer.Check())
