@@ -513,6 +513,7 @@ public:
 	void SetAAEXPPercentage(uint8 percentage);
 
 	// account data buckets
+	void SetAccountBucket(std::string bucket_name, std::string bucket_value);
 	void SetAccountBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
 	void DeleteAccountBucket(std::string bucket_name);
 	std::string GetAccountBucket(std::string bucket_name);

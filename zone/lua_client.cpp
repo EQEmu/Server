@@ -3464,6 +3464,12 @@ void Lua_Client::SetAAEXPPercentage(uint8 percentage)
 	self->SetAAEXPPercentage(percentage);
 }
 
+void Lua_Client::SetAccountBucket(std::string bucket_name, std::string bucket_value)
+{
+	Lua_Safe_Call_Void();
+	self->SetAccountBucket(bucket_name, bucket_value);
+}
+
 void Lua_Client::SetAccountBucket(std::string bucket_name, std::string bucket_value, std::string expiration)
 {
 	Lua_Safe_Call_Void();
