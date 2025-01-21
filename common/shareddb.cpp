@@ -1527,7 +1527,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				item.HP = 0;
 			}
 
-			if (!item.Stackable && item.Slots == 0 && item.MaxCharges <= 0 && item.ItemClass = EQ::item::ItemClassCommon) {
+			if (!item.Stackable && item.Slots == 0 && item.MaxCharges <= 0 && item.ItemClass == EQ::item::ItemClassCommon) {
 				item.Stackable = true;
 			}
 
