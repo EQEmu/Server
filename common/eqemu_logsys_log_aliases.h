@@ -861,7 +861,17 @@
 
 #define LogPositionUpdateDetail(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::Detail, Logs::PositionUpdate))\
-        OutF(LogSys, Logs::Detail, Logs::PositionUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+        OutF(LogSys, Logs::Detail, Logs::PositionUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__); \
+} while (0)
+
+#define LogKSM(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::KSM))\
+        OutF(LogSys, Logs::General, Logs::KSM, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogKSMDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::KSM))\
+        OutF(LogSys, Logs::Detail, Logs::KSM, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\
