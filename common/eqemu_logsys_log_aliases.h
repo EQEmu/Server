@@ -854,6 +854,16 @@
         OutF(LogSys, Logs::Detail, Logs::XTargets, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogPositionUpdate(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::PositionUpdate))\
+        OutF(LogSys, Logs::General, Logs::PositionUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPositionUpdateDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::PositionUpdate))\
+        OutF(LogSys, Logs::Detail, Logs::PositionUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.IsLogEnabled(debug_level, log_category))\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

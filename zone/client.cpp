@@ -12948,7 +12948,7 @@ void Client::CheckSendBulkClientPositionUpdate()
 	);
 
 	if (IsMoving() && is_ready_to_update) {
-		LogAIScanClose("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
+		LogPositionUpdate("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
 
 		auto &mob_movement_manager = MobMovementManager::Get();
 
@@ -12971,7 +12971,7 @@ void Client::CheckSendBulkClientPositionUpdate()
 			// if we have seen this mob before, and it hasn't moved, skip it
 			if (m_last_seen_mob_position.contains(mob->GetID())) {
 				if (m_last_seen_mob_position[mob->GetID()] == mob->GetPosition()) {
-					LogAIScanCloseDetail(
+					LogPositionUpdate(
 						"Mob [{}] has already been sent to client [{}] at this position, skipping",
 						mob->GetCleanName(),
 						GetCleanName()
