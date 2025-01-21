@@ -160,7 +160,7 @@ Client::Client() : Mob(
 				   endupkeep_timer(1000),
 				   autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
 				   m_client_npc_aggro_scan_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
-				   m_client_zone_wide_full_position_update_timer(5 * 60 * 1000),
+				   m_client_bulk_npc_pos_update_timer(60 * 1000),
 				   tribute_timer(Tribute_duration),
 				   proximity_timer(ClientProximity_interval),
 				   TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),

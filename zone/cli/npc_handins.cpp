@@ -14,6 +14,7 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 	}
 
 	uint32 break_length = 50;
+	int failed_count = 0;
 
 	RegisterExecutablePlatform(EQEmuExePlatform::ExePlatformZoneSidecar);
 
@@ -462,6 +463,7 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 
 			auto result = npc->CheckHandin(c, hand_ins, required, items);
 			if (result != test_case.handin_check_result) {
+				failed_count++;
 				LogError("FAIL [{}]", test_case.description);
 				// print out the hand-ins
 				LogError("Hand-ins >");
@@ -500,5 +502,13 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 				std::cout << std::endl;
 			}
 		}
+	}
+
+	if (failed_count > 0) {
+		LogError("Failed [{}] tests", failed_count);
+		std::exit(1);
+	}
+	else {
+		LogInfo("All tests passed");
 	}
 }
