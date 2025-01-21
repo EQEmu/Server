@@ -144,6 +144,7 @@ namespace Logs {
 		XTargets,
 		EvolveItem,
 		PositionUpdate,
+		KSM,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -246,7 +247,8 @@ namespace Logs {
 		"Corpses",
 		"XTargets",
 		"EvolveItem",
-		"PositionUpdate"
+		"PositionUpdate",
+		"KSM" // Kernel Samepage Merging
 	};
 }
 
