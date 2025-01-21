@@ -157,7 +157,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	endupkeep_timer(1000),
 	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
 	m_client_npc_aggro_scan_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
-	m_client_zone_wide_full_position_update_timer(5 * 60 * 1000),
+	m_client_bulk_npc_pos_update_timer(60 * 1000),
 	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
 	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
@@ -12939,17 +12939,18 @@ void Client::SendTopLevelInventory()
 	}
 }
 
-void Client::CheckSendBulkClientPositionUpdate()
+void Client::CheckSendBulkNpcPositions()
 {
 	float distance_moved                      = DistanceNoZ(m_last_position_before_bulk_update, GetPosition());
-	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetNpcUpdateRange();
+	float update_range                        = zone->GetNpcUpdateRange();
+	bool  moved_far_enough_before_bulk_update = distance_moved >= update_range;
 	bool  is_ready_to_update                  = (
-		m_client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
+		m_client_bulk_npc_pos_update_timer.Check() || moved_far_enough_before_bulk_update
 	);
 
-	if (IsMoving() && is_ready_to_update) {
-		LogPositionUpdate("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
-
+	int updated_count = 0;
+	int skipped_count = 0;
+	if (is_ready_to_update) {
 		auto &mob_movement_manager = MobMovementManager::Get();
 
 		for (auto &e: entity_list.GetMobList()) {
@@ -12971,11 +12972,12 @@ void Client::CheckSendBulkClientPositionUpdate()
 			// if we have seen this mob before, and it hasn't moved, skip it
 			if (m_last_seen_mob_position.contains(mob->GetID())) {
 				if (m_last_seen_mob_position[mob->GetID()] == mob->GetPosition()) {
-					LogPositionUpdate(
+					LogPositionUpdateDetail(
 						"Mob [{}] has already been sent to client [{}] at this position, skipping",
 						mob->GetCleanName(),
 						GetCleanName()
 					);
+					skipped_count++;
 					continue;
 				}
 			}
@@ -12990,7 +12992,18 @@ void Client::CheckSendBulkClientPositionUpdate()
 				ClientRangeAny,
 				this
 			);
+
+			updated_count++;
 		}
+
+		LogPositionUpdate(
+			"[{}] Sent [{}] bulk updated NPC positions, skipped [{}] distance_moved [{}] update_range [{}]",
+			GetCleanName(),
+			updated_count,
+			skipped_count,
+			distance_moved,
+			update_range
+		);
 
 		m_last_position_before_bulk_update = GetPosition();
 	}
