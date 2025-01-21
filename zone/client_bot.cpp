@@ -15,8 +15,7 @@ void Client::SetBotOption(BotOwnerOption boo, bool flag) {
 	}
 }
 
-uint32 Client::GetBotCreationLimit(uint8 class_id)
-{
+uint32 Client::GetBotCreationLimit(uint8 class_id) {
 	uint32 bot_creation_limit = RuleI(Bots, CreationLimit);
 
 	if (Admin() >= RuleI(Bots, MinStatusToBypassCreateLimit)) {
@@ -43,8 +42,7 @@ uint32 Client::GetBotCreationLimit(uint8 class_id)
 	return bot_creation_limit;
 }
 
-int Client::GetBotRequiredLevel(uint8 class_id)
-{
+int Client::GetBotRequiredLevel(uint8 class_id) {
 	int bot_character_level = RuleI(Bots, BotCharacterLevel);
 
 	const auto bucket_name = fmt::format(
@@ -67,8 +65,7 @@ int Client::GetBotRequiredLevel(uint8 class_id)
 	return bot_character_level;
 }
 
-int Client::GetBotSpawnLimit(uint8 class_id)
-{
+int Client::GetBotSpawnLimit(uint8 class_id) {
 	int bot_spawn_limit = RuleI(Bots, SpawnLimit);
 
 	if (Admin() >= RuleI(Bots, MinStatusToBypassSpawnLimit)) {
@@ -171,8 +168,7 @@ int Client::GetBotSpawnLimit(uint8 class_id)
 	return bot_spawn_limit;
 }
 
-void Client::SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id)
-{
+void Client::SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id) {
 	const auto bucket_name = fmt::format(
 		"bot_creation_limit{}",
 		(
@@ -188,8 +184,7 @@ void Client::SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id)
 	SetBucket(bucket_name, std::to_string(new_creation_limit));
 }
 
-void Client::SetBotRequiredLevel(int new_required_level, uint8 class_id)
-{
+void Client::SetBotRequiredLevel(int new_required_level, uint8 class_id) {
 	const auto bucket_name = fmt::format(
 		"bot_required_level{}",
 		(
@@ -205,8 +200,7 @@ void Client::SetBotRequiredLevel(int new_required_level, uint8 class_id)
 	SetBucket(bucket_name, std::to_string(new_required_level));
 }
 
-void Client::SetBotSpawnLimit(int new_spawn_limit, uint8 class_id)
-{
+void Client::SetBotSpawnLimit(int new_spawn_limit, uint8 class_id) {
 	const auto bucket_name = fmt::format(
 		"bot_spawn_limit{}",
 		(
@@ -222,7 +216,139 @@ void Client::SetBotSpawnLimit(int new_spawn_limit, uint8 class_id)
 	SetBucket(bucket_name, std::to_string(new_spawn_limit));
 }
 
-void Client::CampAllBots(uint8 class_id)
-{
+void Client::CampAllBots(uint8 class_id) {
 	Bot::BotOrderCampAll(this, class_id);
+}
+
+void Client::LoadDefaultBotSettings() {
+	m_bot_spell_settings.clear();
+
+	// Only illusion block supported currently
+	SetBotSetting(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
+	LogBotSettingsDetail("{} says, 'Setting default {} [{}] to [{}]'", GetCleanName(), CastToBot()->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock), BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
+
+	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
+		BotSpellSettings_Struct t;
+
+		t.spellType = i;
+		t.shortName = GetSpellTypeShortNameByID(i);
+		t.name = GetSpellTypeNameByID(i);
+		t.hold = GetDefaultSpellHold(i);
+		t.delay = GetDefaultSpellDelay(i);
+		t.minThreshold = GetDefaultSpellMinThreshold(i);
+		t.maxThreshold = GetDefaultSpellMaxThreshold(i);
+
+		m_bot_spell_settings.push_back(t);
+
+		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}]'", GetCleanName(), t.name, t.shortName, t.spellType);
+		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellHold(i), GetDefaultSpellDelay(i), GetDefaultSpellMinThreshold(i), GetDefaultSpellMaxThreshold(i));
+	}
+}
+
+int Client::GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting) {
+	switch (setting_type) {
+		case BotSettingCategories::BaseSetting:
+			return false;
+		case BotSettingCategories::SpellHold:
+			return GetDefaultSpellHold(bot_setting);
+		case BotSettingCategories::SpellDelay:
+			return GetDefaultSpellDelay(bot_setting);
+		case BotSettingCategories::SpellMinThreshold:
+			return GetDefaultSpellMinThreshold(bot_setting);
+		case BotSettingCategories::SpellMaxThreshold:
+			return GetDefaultSpellMaxThreshold(bot_setting);
+	}
+}
+
+int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
+	switch (setting_type) {
+		case BotSettingCategories::SpellHold:
+			return GetSpellHold(bot_setting);
+		case BotSettingCategories::SpellDelay:
+			return GetSpellDelay(bot_setting);
+		case BotSettingCategories::SpellMinThreshold:
+			return GetSpellMinThreshold(bot_setting);
+		case BotSettingCategories::SpellMaxThreshold:
+			return GetSpellMaxThreshold(bot_setting);
+	}
+}
+
+void Client::SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value) {
+	switch (setting_type) {
+		case BotSettingCategories::BaseSetting:
+			SetBaseSetting(bot_setting, setting_value);
+			break;
+		case BotSettingCategories::SpellHold:
+			SetSpellHold(bot_setting, setting_value);
+			break;
+		case BotSettingCategories::SpellDelay:
+			SetSpellDelay(bot_setting, setting_value);
+			break;
+		case BotSettingCategories::SpellMinThreshold:
+			SetSpellMinThreshold(bot_setting, setting_value);
+			break;
+		case BotSettingCategories::SpellMaxThreshold:
+			SetSpellMaxThreshold(bot_setting, setting_value);
+			break;
+	}
+}
+
+void Client::SendSpellTypePrompts(bool commanded_types, bool client_only_types) {
+	if (client_only_types) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view spell types by {} or {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids client"), "ID"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames client"), "Shortname"
+				)
+			).c_str()
+		);
+	}
+	else {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view spell types by {}, {}, {} or by {}, {}, {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids 0-19"), "ID 0-19"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypeids 20-39"), "20-39"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypeids 40+"), "40+"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 0-19"), "Shortname 0-19"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 20-39"), "20-39"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames 40+"), "40+"
+				)
+			).c_str()
+		);
+	}
+
+	if (commanded_types) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You can view commanded spell types by {} or {}.",
+				Saylink::Silent(
+					fmt::format("^spelltypeids commanded"), "ID"
+				),
+				Saylink::Silent(
+					fmt::format("^spelltypenames commanded"), "Shortname"
+				)
+			).c_str()
+		);
+	}
+
+	return;
 }
