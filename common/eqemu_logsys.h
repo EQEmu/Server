@@ -143,7 +143,6 @@ namespace Logs {
 		Corpses,
 		XTargets,
 		EvolveItem,
-		Visibility,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -245,8 +244,7 @@ namespace Logs {
 		"EqTime",
 		"Corpses",
 		"XTargets",
-		"EvolveItem",
-		"Visibility"
+		"EvolveItem"
 	};
 }
 

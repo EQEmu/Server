@@ -4127,10 +4127,6 @@ void Mob::SendAppearancePacket(
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	auto* a = (SpawnAppearance_Struct*)outapp->pBuffer;
 
-	if (type == AppearanceType::Invisibility && value != Invisibility::GMInvis) {
-		m_invisibility_state = value;
-	}
-
 	a->spawn_id  = GetID();
 	a->type      = type;
 	a->parameter = value;

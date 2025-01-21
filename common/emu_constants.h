@@ -457,11 +457,10 @@ enum ServerLockType : int {
 	Unlock
 };
 
-enum Invisibility : uint16 {
+enum Invisibility : uint8 {
 	Visible,
 	Invisible,
-	Special = 255,
-	GMInvis = 3001
+	Special = 255
 };
 
 enum AugmentActions : int {
