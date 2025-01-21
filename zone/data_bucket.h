@@ -12,20 +12,23 @@ struct DataBucketKey {
 	std::string key;
 	std::string value;
 	std::string expires;
-	int64_t     character_id;
-	int64_t     npc_id;
-	int64_t     bot_id;
+	int64_t     account_id = 0;
+	int64_t     character_id = 0;
+	int64_t     npc_id = 0;
+	int64_t     bot_id = 0;
 };
 
 namespace DataBucketLoadType {
 	enum Type : uint8 {
 		Bot,
+		Account,
 		Client,
 		MaxType
 	};
 
 	static const std::string Name[Type::MaxType] = {
 		"Bot",
+		"Account",
 		"Client",
 	};
 }

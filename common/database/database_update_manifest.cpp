@@ -6301,7 +6301,24 @@ ALTER TABLE zone DROP COLUMN IF EXISTS npc_update_range;
 ALTER TABLE zone DROP COLUMN IF EXISTS max_movement_update_range;
 ALTER TABLE `zone` ADD COLUMN `client_update_range` int(11) NOT NULL DEFAULT 600 AFTER `npc_max_aggro_dist`;
 )",
-		.content_schema_update = true
+		.content_schema_update = true,
+	},
+	ManifestEntry{
+		.version = 9292,
+		.description = "2025_01_21_data_buckets_account_id",
+		.check       = "SHOW COLUMNS FROM `data_buckets` LIKE 'account_id'",
+		.condition   = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `data_buckets`
+ADD COLUMN `account_id` bigint(11) NULL DEFAULT 0 AFTER `expires`,
+DROP INDEX `keys`,
+ADD UNIQUE INDEX `keys` (`key`, `character_id`, `npc_id`, `bot_id`, `account_id`) USING BTREE;
+
+-- Add the INDEX for character_id and key
+ALTER TABLE `data_buckets` ADD KEY `idx_account_id_key` (`account_id`, `key`);
+)",
+		.content_schema_update = false
 	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

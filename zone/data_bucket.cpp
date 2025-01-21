@@ -16,6 +16,7 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 		.key = bucket_key,
 		.value = bucket_value,
 		.expires = expires_time,
+		.account_id = 0,
 		.character_id = 0,
 		.npc_id = 0,
 		.bot_id = 0
@@ -36,6 +37,9 @@ void DataBucket::SetData(const DataBucketKey &k)
 	// add scoping to bucket
 	if (k.character_id > 0) {
 		b.character_id = k.character_id;
+	}
+	else if (k.account_id > 0) {
+		b.account_id = k.account_id;
 	}
 	else if (k.npc_id > 0) {
 		b.npc_id = k.npc_id;
@@ -95,9 +99,10 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, bool ignore_misses_cache)
 {
 	LogDataBuckets(
-		"Getting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
+		"Getting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}]",
 		k.key,
 		k.bot_id,
+		k.account_id,
 		k.character_id,
 		k.npc_id
 	);
@@ -151,6 +156,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 					.key_ = k.key,
 					.value = "",
 					.expires = 0,
+					.account_id = k.account_id,
 					.character_id = k.character_id,
 					.npc_id = k.npc_id,
 					.bot_id = k.bot_id
@@ -158,8 +164,9 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 			);
 
 			LogDataBuckets(
-				"Key [{}] not found in database, adding to cache as a miss character_id [{}] npc_id [{}] bot_id [{}] cache size before [{}] after [{}]",
+				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] cache size before [{}] after [{}]",
 				k.key,
+				k.account_id,
 				k.character_id,
 				k.npc_id,
 				k.bot_id,
@@ -216,8 +223,6 @@ bool DataBucket::DeleteData(const std::string &bucket_key)
 // GetDataBuckets bulk loads all data buckets for a mob
 bool DataBucket::GetDataBuckets(Mob *mob)
 {
-	DataBucketLoadType::Type t{};
-
 	const uint32 id = mob->GetMobTypeIdentifier();
 
 	if (!id) {
@@ -225,13 +230,12 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 	}
 
 	if (mob->IsBot()) {
-		t = DataBucketLoadType::Bot;
+		BulkLoadEntitiesToCache(DataBucketLoadType::Bot, {id});
 	}
 	else if (mob->IsClient()) {
-		t = DataBucketLoadType::Client;
+		BulkLoadEntitiesToCache(DataBucketLoadType::Account, {id});
+		BulkLoadEntitiesToCache(DataBucketLoadType::Client, {id});
 	}
-
-	BulkLoadEntitiesToCache(t, {id});
 
 	return true;
 }
@@ -254,9 +258,10 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 		);
 
 		LogDataBuckets(
-			"Deleting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}] cache size before [{}] after [{}]",
+			"Deleting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}] cache size before [{}] after [{}]",
 			k.key,
 			k.bot_id,
+			k.account_id,
 			k.character_id,
 			k.npc_id,
 			size_before,
@@ -277,9 +282,10 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 {
 	LogDataBuckets(
-		"Getting bucket expiration key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
+		"Getting bucket expiration key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}]",
 		k.key,
 		k.bot_id,
+		k.account_id,
 		k.character_id,
 		k.npc_id
 	);
@@ -295,9 +301,10 @@ std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 {
 	LogDataBuckets(
-		"Getting bucket remaining key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
+		"Getting bucket remaining key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}]",
 		k.key,
 		k.bot_id,
+		k.account_id,
 		k.character_id,
 		k.npc_id
 	);
@@ -318,6 +325,13 @@ std::string DataBucket::GetScopedDbFilters(const DataBucketKey &k)
 	}
 	else {
 		query.emplace_back("character_id = 0");
+	}
+
+	if (k.account_id > 0) {
+		query.emplace_back(fmt::format("account_id = {}", k.account_id));
+	}
+	else {
+		query.emplace_back("account_id = 0");
 	}
 
 	if (k.npc_id > 0) {
@@ -346,6 +360,7 @@ bool DataBucket::CheckBucketMatch(const DataBucketsRepository::DataBuckets &dbe,
 	return (
 		dbe.key_ == k.key &&
 		dbe.bot_id == k.bot_id &&
+		dbe.account_id == k.account_id &&
 		dbe.character_id == k.character_id &&
 		dbe.npc_id == k.npc_id
 	);
@@ -363,6 +378,9 @@ void DataBucket::BulkLoadEntitiesToCache(DataBucketLoadType::Type t, std::vector
 		for (const auto &e: g_data_bucket_cache) {
 			if (t == DataBucketLoadType::Bot) {
 				has_cache = e.bot_id == ids[0];
+			}
+			else if (t == DataBucketLoadType::Account) {
+				has_cache = e.account_id == ids[0];
 			}
 			else if (t == DataBucketLoadType::Client) {
 				has_cache = e.character_id == ids[0];
@@ -383,6 +401,9 @@ void DataBucket::BulkLoadEntitiesToCache(DataBucketLoadType::Type t, std::vector
 			break;
 		case DataBucketLoadType::Client:
 			column = "character_id";
+			break;
+		case DataBucketLoadType::Account:
+			column = "account_id";
 			break;
 		default:
 			LogError("Incorrect LoadType [{}]", static_cast<int>(t));
@@ -442,6 +463,7 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id)
 			[&](DataBucketsRepository::DataBuckets &e) {
 				return (
 					(type == DataBucketLoadType::Bot && e.bot_id == id) ||
+					(type == DataBucketLoadType::Account && e.account_id == id) ||
 					(type == DataBucketLoadType::Client && e.character_id == id)
 				);
 			}
@@ -481,6 +503,7 @@ void DataBucket::DeleteFromMissesCache(DataBucketsRepository::DataBuckets e)
 			g_data_bucket_cache.end(),
 			[&](DataBucketsRepository::DataBuckets &ce) {
 				return ce.id == 0 && ce.key_ == e.key_ &&
+					   ce.account_id == e.account_id &&
 					   ce.character_id == e.character_id &&
 					   ce.npc_id == e.npc_id &&
 					   ce.bot_id == e.bot_id;
@@ -516,6 +539,8 @@ void DataBucket::DeleteFromCache(uint64 id, DataBucketLoadType::Type type)
 						return e.bot_id == id;
 					case DataBucketLoadType::Client:
 						return e.character_id == id;
+					case DataBucketLoadType::Account:
+						return e.account_id == id;
 					default:
 						return false;
 				}
@@ -539,7 +564,7 @@ void DataBucket::DeleteFromCache(uint64 id, DataBucketLoadType::Type type)
 // npcs (ids) can be in multiple zones so we can't cache locally to the zone
 bool DataBucket::CanCache(const DataBucketKey &key)
 {
-	if (key.character_id > 0 || key.bot_id > 0) {
+	if (key.character_id > 0 || key.account_id > 0 || key.bot_id > 0) {
 		return true;
 	}
 
