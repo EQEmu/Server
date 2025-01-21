@@ -5,6 +5,8 @@
 #include "worldserver.h"
 #include <ctime>
 #include <cctype>
+#include "../common/json/json.hpp"
+using json = nlohmann::json;
 
 extern WorldServer worldserver;
 
@@ -61,6 +63,50 @@ void DataBucket::SetData(const DataBucketKey &k)
 	b.expires = expires_time_unix;
 	b.value   = k.value;
 
+	// Check for nested keys (keys with dots)
+	// Check for nested keys (keys with dots)
+	if (k.key.find('.') != std::string::npos) {
+		// Retrieve existing JSON or create a new one
+		std::string existing_value = r.id > 0 ? r.value : "{}";
+		json json_value = json::object();
+
+		try {
+			json_value = json::parse(existing_value);
+		} catch (json::parse_error &e) {
+			LogError("Failed to parse JSON for key [{}]: {}", k.key, e.what());
+			json_value = json::object(); // Reset to an empty object on error
+		}
+
+		// Recursively merge new key-value pair into the JSON object
+		auto nested_keys = Strings::Split(k.key, '.');
+		json *current = &json_value;
+
+		for (size_t i = 0; i < nested_keys.size(); ++i) {
+			const std::string &key_part = nested_keys[i];
+			if (i == nested_keys.size() - 1) {
+				// Set the value at the final key
+				(*current)[key_part] = k.value;
+			} else {
+				// Traverse or create nested objects
+				if (!current->contains(key_part)) {
+					(*current)[key_part] = json::object();
+				} else if (!(*current)[key_part].is_object()) {
+					// If key exists but is not an object, reset to object to avoid conflicts
+					(*current)[key_part] = json::object();
+				}
+				current = &(*current)[key_part];
+			}
+		}
+
+		// Serialize JSON back to string
+		b.value = json_value.dump();
+		b.key_ = nested_keys.front(); // Top-level key
+	} else {
+		// For non-nested keys, just set the value
+		b.value = k.value;
+		b.key_ = k.key;
+	}
+
 	if (bucket_id) {
 
 		// update the cache if it exists
@@ -76,7 +122,6 @@ void DataBucket::SetData(const DataBucketKey &k)
 		DataBucketsRepository::UpdateOne(database, b);
 	}
 	else {
-		b.key_ = k.key;
 		b = DataBucketsRepository::InsertOne(database, b);
 
 		// add to cache if it doesn't exist
@@ -98,24 +143,47 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 // the only place we should be ignoring the misses cache is on the initial read during SetData
 DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, bool ignore_misses_cache)
 {
+	DataBucketKey k_ = k; // copy the key so we can modify it
+	if (k_.key.find('.') != std::string::npos) {
+		k_.key = Strings::Split(k_.key, '.').front();
+	}
+
 	LogDataBuckets(
 		"Getting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}]",
-		k.key,
-		k.bot_id,
-		k.account_id,
-		k.character_id,
-		k.npc_id
+		k_.key,
+		k_.bot_id,
+		k_.account_id,
+		k_.character_id,
+		k_.npc_id
 	);
 
-	bool can_cache = CanCache(k);
+//	// Check for nested keys
+//	if (k.key.find('.') != std::string::npos) {
+//		// Retrieve the JSON object
+//		std::string existing_value = k.key.substr(0, k.key.find('.'));
+//		if (existing_value.empty()) {
+//			return {};
+//		}
+//
+//		// Parse JSON and fetch nested value
+//		json json_value = json::parse(existing_value);
+//		std::string nested_key = k.key.substr(k.key.find('.') + 1);
+//
+//		if (json_value.contains(nested_key)) {
+//			return json_value[nested_key].get<std::string>();
+//		}
+//		return {};
+//	}
+
+	bool can_cache = CanCache(k_);
 
 	// check the cache first if we can cache
 	if (can_cache) {
 		for (const auto &e: g_data_bucket_cache) {
-			if (CheckBucketMatch(e, k)) {
+			if (CheckBucketMatch(e, k_)) {
 				if (e.expires > 0 && e.expires < std::time(nullptr)) {
 					LogDataBuckets("Attempted to read expired key [{}] removing from cache", e.key_);
-					DeleteData(k);
+					DeleteData(k_);
 					return DataBucketsRepository::NewEntity();
 				}
 
@@ -135,8 +203,8 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		database,
 		fmt::format(
 			"{} `key` = '{}' LIMIT 1",
-			DataBucket::GetScopedDbFilters(k),
-			k.key
+			DataBucket::GetScopedDbFilters(k_),
+			k_.key
 		)
 	);
 
@@ -153,23 +221,23 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 			g_data_bucket_cache.emplace_back(
 				DataBucketsRepository::DataBuckets{
 					.id = 0,
-					.key_ = k.key,
+					.key_ = k_.key,
 					.value = "",
 					.expires = 0,
-					.account_id = k.account_id,
-					.character_id = k.character_id,
-					.npc_id = k.npc_id,
-					.bot_id = k.bot_id
+					.account_id = k_.account_id,
+					.character_id = k_.character_id,
+					.npc_id = k_.npc_id,
+					.bot_id = k_.bot_id
 				}
 			);
 
 			LogDataBuckets(
 				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] cache size before [{}] after [{}]",
-				k.key,
-				k.account_id,
-				k.character_id,
-				k.npc_id,
-				k.bot_id,
+				k_.key,
+				k_.account_id,
+				k_.character_id,
+				k_.npc_id,
+				k_.bot_id,
 				size_before,
 				g_data_bucket_cache.size()
 			);
@@ -182,7 +250,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 
 	// if the entry has expired, delete it
 	if (bucket.expires > 0 && bucket.expires < (long long) std::time(nullptr)) {
-		DeleteData(k);
+		DeleteData(k_);
 		return {};
 	}
 
