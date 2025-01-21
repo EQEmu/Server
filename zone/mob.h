@@ -428,14 +428,12 @@ public:
 	virtual bool CheckSpellLevelRestriction(Mob *caster, uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 
+	// Bot functions
+	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
 	virtual bool IsImmuneToBotSpell(uint16 spell_id, Mob* caster);
-
-	inline bool SpellTypeRecastCheck(uint16 spellType) { return (IsClient() ? true : m_bot_spell_settings[spellType].recastTimer.GetRemainingTime() > 0 ? false : true); }
-
 	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool no_clients = false, bool no_bots = false, bool no_pets = false);
-
+	inline bool SpellTypeRecastCheck(uint16 spellType) { return (IsClient () ? true : m_bot_spell_settings [spellType].recastTimer.GetRemainingTime () > 0 ? false : true); }
 	uint16 GetSpellTypeIDByShortName(std::string spellType_string);
-
 	bool IsValidBotSpellCategory(uint8 setting_type);
 	std::string GetBotSpellCategoryName(uint8 setting_type);
 	uint16 GetBotSpellCategoryIDByShortName(std::string setting_string);
@@ -940,7 +938,7 @@ public:
 	void ShowStats(Client* client);
 	void ShowBuffs(Client* c);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc = true);
-	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
+	
 	virtual int GetKillExpMod() const { return 100; }
 
 	// aura functions

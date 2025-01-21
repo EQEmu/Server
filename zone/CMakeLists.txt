@@ -98,6 +98,7 @@ SET(zone_sources
     mob.cpp
     mob_ai.cpp
     mob_appearance.cpp
+    mob_bot.cpp
     mob_movement_manager.cpp
     mob_info.cpp
     npc.cpp
