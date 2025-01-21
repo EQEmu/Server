@@ -985,14 +985,15 @@ RaycastMesh * createRaycastMesh(RmUint32 vcount,		// The number of vertices in t
 	KSM::CheckPageAlignment(m->mNodes);
 	KSM::CheckPageAlignment(m->mVertices);
 
-	// Log the memory usage
-	LogInfo("Memory Usage Report:");
-	LogInfo("  Vertices: {:.2f} MB", vertex_size / (1024.0 * 1024.0));
-	LogInfo("  Indices:  {:.2f} MB", index_size / (1024.0 * 1024.0));
-	LogInfo("  BVH Nodes: {:.2f} MB", bvh_node_size / (1024.0 * 1024.0));
-	LogInfo("  BVH Leaves: {:.2f} MB", bvh_leaf_size / (1024.0 * 1024.0));
-	LogInfo("  BVH Total: {:.2f} MB", bvh_size / (1024.0 * 1024.0));
-	LogInfo("  Total Memory: {:.2f} MB", total_size / (1024.0 * 1024.0));
+	LogInfo(
+		"Map Raycast Memory Usage | Vertices [{:.2f}] MB Indices [{:.2f}] MB BVH Nodes [{:.2f}] MB BVH Leaves [{:.2f}] MB BVH Total [{:.2f}] MB",
+		vertex_size / (1024.0 * 1024.0),
+		index_size / (1024.0 * 1024.0),
+		bvh_node_size / (1024.0 * 1024.0),
+		bvh_leaf_size / (1024.0 * 1024.0),
+		bvh_size / (1024.0 * 1024.0)
+	);
+	LogInfo("Total Raycast Memory [{:.2f}] MB", total_size / (1024.0 * 1024.0));
 
 	return static_cast< RaycastMesh * >(m);
 }
