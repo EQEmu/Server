@@ -3234,6 +3234,11 @@ void Perl_Client_SetAAEXPPercentage(Client* self, uint8 percentage)
 	self->SetAAEXPPercentage(percentage);
 }
 
+void Perl_Client_SetAccountBucket(Client* self, std::string bucket_name, std::string bucket_value)
+{
+	self->SetAccountBucket(bucket_name, bucket_value);
+}
+
 void Perl_Client_SetAccountBucket(Client* self, std::string bucket_name, std::string bucket_value, std::string expiration = "")
 {
 	self->SetAccountBucket(bucket_name, bucket_value, expiration);
@@ -3697,7 +3702,8 @@ void perl_register_client()
 	package.add("SetAATitle", (void(*)(Client*, std::string, bool))&Perl_Client_SetAATitle);
 	package.add("SetAFK", &Perl_Client_SetAFK);
 	package.add("SetAccountFlag", &Perl_Client_SetAccountFlag);
-	package.add("SetAccountBucket", &Perl_Client_SetAccountBucket);
+	package.add("SetAccountBucket", (void(*)(Client*, std::string, std::string))&Perl_Client_SetAccountBucket);
+	package.add("SetAccountBucket", (void(*)(Client*, std::string, std::string, std::string))&Perl_Client_SetAccountBucket);
 	package.add("SetAlternateCurrencyValue", &Perl_Client_SetAlternateCurrencyValue);
 	package.add("SetAnon", &Perl_Client_SetAnon);
 	package.add("SetAutoLoginCharacterName", (bool(*)(Client*))&Perl_Client_SetAutoLoginCharacterName);
