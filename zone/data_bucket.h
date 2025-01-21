@@ -63,6 +63,8 @@ public:
 	static void ClearCache();
 	static void DeleteFromCache(uint64 id, DataBucketLoadType::Type type);
 	static bool CanCache(const DataBucketKey &key);
+	static DataBucketsRepository::DataBuckets
+	ExtractNestedValue(const DataBucketsRepository::DataBuckets &bucket, const std::string &full_key);
 };
 
 #endif //EQEMU_DATABUCKET_H

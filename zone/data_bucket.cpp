@@ -141,14 +141,54 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 	return GetData(DataBucketKey{.key = bucket_key}).value;
 }
 
+DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
+	const DataBucketsRepository::DataBuckets &bucket,
+	const std::string &full_key)
+{
+	auto nested_keys = Strings::Split(full_key, '.');
+	json json_value;
+
+	try {
+		json_value = json::parse(bucket.value); // Parse the JSON
+	} catch (json::parse_error &ex) {
+		LogError("Failed to parse JSON for key [{}]: {}", bucket.key_, ex.what());
+		return DataBucketsRepository::NewEntity(); // Return empty entity on parse error
+	}
+
+	// Start from the top-level key (e.g., "progression")
+	json *current = &json_value;
+
+	// Traverse the JSON structure
+	for (const auto &key_part: nested_keys) {
+		LogDataBuckets("Looking for key part [{}] in JSON", key_part);
+
+		if (!current->contains(key_part)) {
+			LogDataBuckets("Key part [{}] not found in JSON for [{}]", key_part, full_key);
+			return DataBucketsRepository::NewEntity();
+		}
+
+		current = &(*current)[key_part];
+	}
+
+	// Create a new entity with the extracted value
+	DataBucketsRepository::DataBuckets result = bucket; // Copy the original bucket
+	result.value = current->is_string() ? current->get<std::string>() : current->dump();
+	return result;
+}
+
+
+
 // GetData fetches bucket data from the database or cache if it exists
 // if the bucket doesn't exist, it will be added to the cache as a miss
 // if ignore_misses_cache is true, the bucket will not be added to the cache as a miss
 // the only place we should be ignoring the misses cache is on the initial read during SetData
 DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, bool ignore_misses_cache)
 {
-	DataBucketKey k_ = k; // copy the key so we can modify it
-	if (k_.key.find('.') != std::string::npos) {
+	DataBucketKey k_ = k; // Copy the key so we can modify it
+	bool is_nested_key = k_.key.find('.') != std::string::npos;
+
+	// Extract the top-level key for nested keys
+	if (is_nested_key) {
 		k_.key = Strings::Split(k_.key, '.').front();
 	}
 
@@ -161,29 +201,11 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		k_.npc_id
 	);
 
-//	// Check for nested keys
-//	if (k.key.find('.') != std::string::npos) {
-//		// Retrieve the JSON object
-//		std::string existing_value = k.key.substr(0, k.key.find('.'));
-//		if (existing_value.empty()) {
-//			return {};
-//		}
-//
-//		// Parse JSON and fetch nested value
-//		json json_value = json::parse(existing_value);
-//		std::string nested_key = k.key.substr(k.key.find('.') + 1);
-//
-//		if (json_value.contains(nested_key)) {
-//			return json_value[nested_key].get<std::string>();
-//		}
-//		return {};
-//	}
-
 	bool can_cache = CanCache(k_);
 
-	// check the cache first if we can cache
+	// Attempt to retrieve the value from the cache
 	if (can_cache) {
-		for (const auto &e: g_data_bucket_cache) {
+		for (const auto &e : g_data_bucket_cache) {
 			if (CheckBucketMatch(e, k_)) {
 				if (e.expires > 0 && e.expires < std::time(nullptr)) {
 					LogDataBuckets("Attempted to read expired key [{}] removing from cache", e.key_);
@@ -191,37 +213,32 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 					return DataBucketsRepository::NewEntity();
 				}
 
-				// this is a bucket miss, return empty entity
-				// we still cache bucket misses, so we don't have to hit the database
-				if (e.id == 0) {
-					return DataBucketsRepository::NewEntity();
+				LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
+
+				if (is_nested_key) {
+					return ExtractNestedValue(e, k.key);
 				}
 
-				LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
 				return e;
 			}
 		}
 	}
 
+	// Fetch the value from the database
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
-			"{} `key` = '{}' LIMIT 1",
+			" {} `key` = '{}' LIMIT 1",
 			DataBucket::GetScopedDbFilters(k_),
 			k_.key
 		)
 	);
 
 	if (r.empty()) {
-
-		// if we're ignoring the misses cache, don't add to the cache
-		// the only place this is ignored is during the initial read of SetData
-		bool add_to_misses_cache = !ignore_misses_cache && can_cache;
-		if (add_to_misses_cache) {
+		// Handle cache misses
+		if (!ignore_misses_cache && can_cache) {
 			size_t size_before = g_data_bucket_cache.size();
 
-			// cache bucket misses, so we don't have to hit the database
-			// when scripts try to read a bucket that doesn't exist
 			g_data_bucket_cache.emplace_back(
 				DataBucketsRepository::DataBuckets{
 					.id = 0,
@@ -236,7 +253,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 			);
 
 			LogDataBuckets(
-				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] cache size before [{}] after [{}]",
+				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}], npc_id [{}], bot_id [{}], cache size before [{}], after [{}]",
 				k_.key,
 				k_.account_id,
 				k_.character_id,
@@ -247,22 +264,21 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 			);
 		}
 
-		return {};
+		return DataBucketsRepository::NewEntity();
 	}
 
 	auto bucket = r.front();
 
-	// if the entry has expired, delete it
-	if (bucket.expires > 0 && bucket.expires < (long long) std::time(nullptr)) {
+	// If the entry has expired, delete it
+	if (bucket.expires > 0 && bucket.expires < static_cast<long long>(std::time(nullptr))) {
 		DeleteData(k_);
-		return {};
+		return DataBucketsRepository::NewEntity();
 	}
 
-	// add to cache if it doesn't exist
+	// Add the value to the cache if it doesn't exist
 	if (can_cache) {
 		bool has_cache = false;
-
-		for (auto &e: g_data_bucket_cache) {
+		for (const auto &e : g_data_bucket_cache) {
 			if (e.id == bucket.id) {
 				has_cache = true;
 				break;
@@ -272,6 +288,11 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		if (!has_cache) {
 			g_data_bucket_cache.emplace_back(bucket);
 		}
+	}
+
+	// Handle nested key extraction
+	if (is_nested_key) {
+		return ExtractNestedValue(bucket, k.key);
 	}
 
 	return bucket;
