@@ -8627,7 +8627,3 @@ void Mob::ClearDataBucketCache()
 		DataBucket::DeleteFromCache(id, t);
 	}
 }
-
-float Mob::GetUpdateRange() {
-	return IsClient() ? zone->GetMaxClientUpdateRange() : zone->GetMaxNpcUpdateRange();
-}

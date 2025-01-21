@@ -1733,7 +1733,7 @@ void EntityList::QueueCloseClients(
 	}
 
 	if (distance <= 0) {
-		distance = zone->GetMaxClientUpdateRange();
+		distance = zone->GetClientUpdateRange();
 	}
 
 	float distance_squared = distance * distance;
@@ -2939,7 +2939,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 
 	g_scan_bench_timer.reset();
 
-	float scan_range = std::max(zone->GetMaxNpcUpdateRange(), zone->GetMaxClientUpdateRange());
+	float scan_range = RuleI(Range, MobCloseScanDistance);
 
 	// Reserve memory in m_close_mobs to avoid frequent re-allocations if not already reserved.
 	// Assuming mob_list.size() as an upper bound for reservation.
@@ -5761,7 +5761,7 @@ void EntityList::ReloadMerchants() {
  */
 std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float distance)
 {
-	if (distance <= zone->GetMaxNpcUpdateRange()) {
+	if (distance <= RuleI(Range, MobCloseScanDistance)) {
 		return mob->m_close_mobs;
 	}
 

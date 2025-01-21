@@ -1492,7 +1492,6 @@ public:
 
 	std::unordered_map<uint16, Mob *> &GetCloseMobList(float distance = 0.0f);
 	void CheckScanCloseMobsMovingTimer();
-	float GetUpdateRange();
 
 	void ClearDataBucketCache();
 

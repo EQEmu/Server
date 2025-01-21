@@ -12942,7 +12942,7 @@ void Client::SendTopLevelInventory()
 void Client::CheckSendBulkClientPositionUpdate()
 {
 	float distance_moved                      = DistanceNoZ(m_last_position_before_bulk_update, GetPosition());
-	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetMaxNpcUpdateRange();
+	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetNpcUpdateRange();
 	bool  is_ready_to_update                  = (
 		m_client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
 	);
@@ -13155,7 +13155,7 @@ void Client::BroadcastPositionUpdate()
 	spu->delta_heading = FloatToEQ10(0);
 	spu->animation     = 0;
 
-	entity_list.QueueCloseClients(this, &outapp, true, zone->GetMaxClientUpdateRange());
+	entity_list.QueueCloseClients(this, &outapp, true, zone->GetClientUpdateRange());
 
 	Group *g = GetGroup();
 	if (g) {

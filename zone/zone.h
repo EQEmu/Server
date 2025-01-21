@@ -414,8 +414,8 @@ public:
 		SendDiscordMessage(webhook_id, message_prefix + Discord::FormatDiscordMessage(log_category, message));
 	};
 
-	double GetMaxNpcUpdateRange() const { return m_npc_update_range; }
-	double GetMaxClientUpdateRange() const { return m_client_update_range; }
+	double GetNpcUpdateRange() const { return m_npc_update_range; }
+	double GetClientUpdateRange() const { return m_client_update_range; }
 
 	void SetIsHotzone(bool is_hotzone);
 
