@@ -176,8 +176,6 @@ DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
 	return result;
 }
 
-
-
 // GetData fetches bucket data from the database or cache if it exists
 // if the bucket doesn't exist, it will be added to the cache as a miss
 // if ignore_misses_cache is true, the bucket will not be added to the cache as a miss
