@@ -1717,15 +1717,6 @@ void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *a
 	}
 }
 
-/**
- * @param sender
- * @param app
- * @param ignore_sender
- * @param distance
- * @param skipped_mob
- * @param is_ack_required
- * @param filter
- */
 void EntityList::QueueCloseClients(
 	Mob *sender,
 	const EQApplicationPacket *app,
@@ -1742,7 +1733,7 @@ void EntityList::QueueCloseClients(
 	}
 
 	if (distance <= 0) {
-		distance = 600;
+		distance = zone->GetClientUpdateRange();
 	}
 
 	float distance_squared = distance * distance;
@@ -2878,6 +2869,8 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 		);
 
 		it->second->m_close_mobs.erase(entity_id);
+		it->second->m_last_seen_mob_position.erase(entity_id);
+
 		++it;
 	}
 
@@ -2931,6 +2924,9 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
 // All of the above makes a tremendous impact on the bottom line of cpu cycle performance because we run an order of magnitude
 // less checks by focusing our hot path logic down to a very small subset of relevant entities instead of looping an entire
 // entity list (zone wide)
+
+BenchTimer g_scan_bench_timer;
+
 void EntityList::ScanCloseMobs(Mob *scanning_mob)
 {
 	if (!scanning_mob) {
@@ -2941,7 +2937,9 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 		return;
 	}
 
-	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
+	g_scan_bench_timer.reset();
+
+	float scan_range = RuleI(Range, MobCloseScanDistance);
 
 	// Reserve memory in m_close_mobs to avoid frequent re-allocations if not already reserved.
 	// Assuming mob_list.size() as an upper bound for reservation.
@@ -2957,7 +2955,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 			continue;
 		}
 
-		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
+		float distance = Distance(scanning_mob->GetPosition(), mob->GetPosition());
 		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
 			// add mob to scanning_mob's close list and vice versa
 			// check if the mob is already in the close mobs list before inserting
@@ -2969,10 +2967,11 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 	}
 
 	LogAIScanClose(
-		"[{}] Scanning close list > list_size [{}] moving [{}]",
+		"[{}] Scanning close list > list_size [{}] moving [{}] elapsed [{}] us",
 		scanning_mob->GetCleanName(),
 		scanning_mob->m_close_mobs.size(),
-		scanning_mob->IsMoving() ? "true" : "false"
+		scanning_mob->IsMoving() ? "true" : "false",
+		g_scan_bench_timer.elapsedMicroseconds()
 	);
 }
 
@@ -5759,10 +5758,6 @@ void EntityList::ReloadMerchants() {
  * then we return the full list
  *
  * See comments @EntityList::ScanCloseMobs for system explanation
- *
- * @param mob
- * @param distance
- * @return
  */
 std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float distance)
 {

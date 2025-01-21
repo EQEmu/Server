@@ -6289,7 +6289,20 @@ INSERT INTO `items_evolving_details` VALUES
 
 )",
 		.content_schema_update = true
-	}
+	},
+	ManifestEntry{
+		.version = 9291,
+		.description = "2025_01_21_add_remove_zone_fields",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'client_update_range'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE zone DROP COLUMN IF EXISTS npc_update_range;
+ALTER TABLE zone DROP COLUMN IF EXISTS max_movement_update_range;
+ALTER TABLE `zone` ADD COLUMN `client_update_range` int(11) NOT NULL DEFAULT 600 AFTER `npc_max_aggro_dist`;
+)",
+		.content_schema_update = true
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

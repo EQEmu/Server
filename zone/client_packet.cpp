@@ -971,6 +971,16 @@ void Client::CompleteConnect()
 	RecordStats();
 	AutoGrantAAPoints();
 
+	// set initial position for mob tracking
+	m_last_seen_mob_position.reserve(entity_list.GetMobList().size());
+	for (auto& mob : entity_list.GetMobList()) {
+		if (!mob.second->IsNPC()) {
+			continue;
+		}
+
+		m_last_seen_mob_position[mob.second->GetID()] = mob.second->GetPosition();
+	}
+
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
@@ -4956,7 +4966,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		CheckScanCloseMobsMovingTimer();
 	}
 
-	CheckSendBulkClientPositionUpdate();
+	CheckSendBulkNpcPositions();
 
 	int32 new_animation = ppu->animation;
 

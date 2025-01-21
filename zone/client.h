@@ -2087,12 +2087,13 @@ private:
 	Timer m_client_npc_aggro_scan_timer;
 	void CheckClientToNpcAggroTimer();
 	void ClientToNpcAggroProcess();
+	void BroadcastPositionUpdate();
 
 	// bulk position updates
 	glm::vec4 m_last_position_before_bulk_update;
-	Timer     m_client_zone_wide_full_position_update_timer;
+	Timer     m_client_bulk_npc_pos_update_timer;
 	Timer     m_position_update_timer;
-	void CheckSendBulkClientPositionUpdate();
+	void      CheckSendBulkNpcPositions();
 
 	void BulkSendInventoryItems();
 

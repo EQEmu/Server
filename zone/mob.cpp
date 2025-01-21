@@ -129,6 +129,7 @@ Mob::Mob(
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
 	m_scan_close_mobs_timer(6000),
+	m_see_close_mobs_timer(1000),
 	m_mob_check_moving_timer(1000),
 	bot_attack_flag_timer(10000)
 {
@@ -8612,15 +8613,15 @@ std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
 void Mob::ClearDataBucketCache()
 {
 	if (IsOfClientBot()) {
-		uint64 id = 0;
+		uint64                   id = 0;
 		DataBucketLoadType::Type t{};
 		if (IsBot()) {
 			id = CastToBot()->GetBotID();
-			t = DataBucketLoadType::Bot;
+			t  = DataBucketLoadType::Bot;
 		}
 		else if (IsClient()) {
 			id = CastToClient()->CharacterID();
-			t = DataBucketLoadType::Client;
+			t  = DataBucketLoadType::Client;
 		}
 
 		DataBucket::DeleteFromCache(id, t);

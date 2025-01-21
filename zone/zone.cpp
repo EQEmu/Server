@@ -1091,7 +1091,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 
 	mMovementManager = &MobMovementManager::Get();
 
-	SetNpcPositionUpdateDistance(0);
 	SetQuestHotReloadQueued(false);
 }
 
@@ -1374,17 +1373,17 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	newzone_data.suspend_buffs             = z->suspendbuffs;
 
 	// local attributes
-	can_bind                  = z->canbind != 0;
-	is_city                   = z->canbind == 2;
-	can_combat                = z->cancombat != 0;
-	can_levitate              = z->canlevitate != 0;
-	can_castoutdoor           = z->castoutdoor != 0;
-	is_hotzone                = z->hotzone != 0;
-	max_movement_update_range = z->max_movement_update_range;
-	default_ruleset           = z->ruleset;
-	allow_mercs               = true;
-	m_graveyard_id            = z->graveyard_id;
-	m_max_clients             = z->maxclients;
+	can_bind              = z->canbind != 0;
+	is_city               = z->canbind == 2;
+	can_combat            = z->cancombat != 0;
+	can_levitate          = z->canlevitate != 0;
+	can_castoutdoor       = z->castoutdoor != 0;
+	is_hotzone            = z->hotzone != 0;
+	m_client_update_range = z->client_update_range;
+	default_ruleset       = z->ruleset;
+	allow_mercs           = true;
+	m_graveyard_id        = z->graveyard_id;
+	m_max_clients         = z->maxclients;
 
 	SetIdleWhenEmpty(z->idle_when_empty);
 	SetSecondsBeforeIdle(z->seconds_before_idle);
@@ -1537,10 +1536,6 @@ bool Zone::Process() {
 
 		if (adv_data && !did_adventure_actions) {
 			DoAdventureActions();
-		}
-
-		if (GetNpcPositionUpdateDistance() == 0) {
-			CalculateNpcUpdateDistanceSpread();
 		}
 	}
 
@@ -2733,62 +2728,6 @@ void Zone::SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp) {
 	}
 	if (m_last_ucss_update < update_timestamp)
 		m_ucss_available = ucss_available;
-}
-
-int Zone::GetNpcPositionUpdateDistance() const
-{
-	return npc_position_update_distance;
-}
-
-void Zone::SetNpcPositionUpdateDistance(int in_npc_position_update_distance)
-{
-	Zone::npc_position_update_distance = in_npc_position_update_distance;
-}
-
-void Zone::CalculateNpcUpdateDistanceSpread()
-{
-	float max_x = 0;
-	float max_y = 0;
-	float min_x = 0;
-	float min_y = 0;
-
-	auto &mob_list = entity_list.GetMobList();
-
-	for (auto &it : mob_list) {
-		Mob *entity = it.second;
-		if (!entity->IsNPC()) {
-			continue;
-		}
-
-		if (entity->GetX() <= min_x) {
-			min_x = entity->GetX();
-		}
-
-		if (entity->GetY() <= min_y) {
-			min_y = entity->GetY();
-		}
-
-		if (entity->GetX() >= max_x) {
-			max_x = entity->GetX();
-		}
-
-		if (entity->GetY() >= max_y) {
-			max_y = entity->GetY();
-		}
-	}
-
-	int x_spread        = int(std::abs(max_x - min_x));
-	int y_spread        = int(std::abs(max_y - min_y));
-	int combined_spread = int(std::abs((x_spread + y_spread) / 2));
-	int update_distance = EQ::ClampLower(int(combined_spread / 4), int(zone->GetMaxMovementUpdateRange()));
-
-	SetNpcPositionUpdateDistance(update_distance);
-
-	Log(Logs::General, Logs::Debug,
-		"NPC update spread distance set to [%i] combined_spread [%i]",
-		update_distance,
-		combined_spread
-	);
 }
 
 bool Zone::IsQuestHotReloadQueued() const
