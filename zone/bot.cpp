@@ -11975,42 +11975,23 @@ uint16 Bot::GetSpellByAA(int id, AA::Rank*& rank) {
 	return spell_id;
 }
 
-void Bot::SetBotBlockedBuff(uint16 spell_id, bool block) {
+void Bot::SetBotBlockedBuff(uint16 spell_id, bool block)
+{
 	if (!IsValidSpell(spell_id)) {
 		OwnerMessage("Failed to set blocked buff.");
-
 		return;
 	}
 
-	if (!bot_blocked_buffs.empty()) {
-		bool found = false;
+	auto it = std::find_if(
+		bot_blocked_buffs.begin(), bot_blocked_buffs.end(),
+		[spell_id](const BotBlockedBuffs_Struct& buff) { return buff.spell_id == spell_id; }
+	);
 
-		for (int i = 0; i < bot_blocked_buffs.size(); i++) {
-			if (bot_blocked_buffs[i].spell_id != spell_id) {
-				continue;
-			}
-
-			bot_blocked_buffs[i].blocked = block;
-			found = true;
-		}
-
-		if (!found) {
-			BotBlockedBuffs_Struct t;
-
-			t.spell_id = spell_id;
-			t.blocked = block;
-
-			bot_blocked_buffs.push_back(t);
-		}
+	if (it != bot_blocked_buffs.end()) {
+		it->blocked = block;
 	}
 	else {
-
-		BotBlockedBuffs_Struct t;
-
-		t.spell_id = spell_id;
-		t.blocked = block;
-
-		bot_blocked_buffs.push_back(t);
+		bot_blocked_buffs.push_back({ GetBotID(), spell_id, block });
 	}
 
 	CleanBotBlockedBuffs();
@@ -12041,41 +12022,23 @@ bool Bot::IsBlockedBuff(int32 spell_id)
 	return result;
 }
 
-void Bot::SetBotBlockedPetBuff(uint16 spell_id, bool block) {
+void Bot::SetBotBlockedPetBuff(uint16 spell_id, bool block)
+{
 	if (!IsValidSpell(spell_id)) {
 		OwnerMessage("Failed to set blocked pet buff.");
-
 		return;
 	}
 
-	if (!bot_blocked_buffs.empty()) {
-		bool found = false;
+	auto it = std::find_if(
+		bot_blocked_buffs.begin(), bot_blocked_buffs.end(),
+		[spell_id](const BotBlockedBuffs_Struct& buff) { return buff.spell_id == spell_id; }
+	);
 
-		for (int i = 0; i < bot_blocked_buffs.size(); i++) {
-			if (bot_blocked_buffs[i].spell_id != spell_id) {
-				continue;
-			}
-
-			bot_blocked_buffs[i].blocked_pet = block;
-			found = true;
-		}
-
-		if (!found) {
-			BotBlockedBuffs_Struct t;
-
-			t.spell_id = spell_id;
-			t.blocked_pet = block;
-
-			bot_blocked_buffs.push_back(t);
-		}
+	if (it != bot_blocked_buffs.end()) {
+		it->blocked_pet = block;
 	}
 	else {
-		BotBlockedBuffs_Struct t;
-
-		t.spell_id = spell_id;
-		t.blocked_pet = block;
-
-		bot_blocked_buffs.push_back(t);
+		bot_blocked_buffs.push_back({ GetBotID(), spell_id, false, block });
 	}
 
 	CleanBotBlockedBuffs();
