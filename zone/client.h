@@ -363,6 +363,7 @@ public:
 	void TradeRequestFailed(const EQApplicationPacket* app);
 	void BuyTraderItem(TraderBuy_Struct* tbs, Client* trader, const EQApplicationPacket* app);
 	void BuyTraderItemOutsideBazaar(TraderBuy_Struct* tbs, const EQApplicationPacket* app);
+	void BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPacket* app);
 	void FinishTrade(
 		Mob *with,
 		bool finalizer = false,
