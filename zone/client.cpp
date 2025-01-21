@@ -5533,7 +5533,7 @@ void Client::DoAutoSellBags(const int type) {
 
         for (int bag_slot = 0; bag_slot < bag_inst->GetItem()->BagSlots; ++bag_slot) {
             const auto* const itm_inst = m_inv.GetItem(general_slot, bag_slot);
-            if (!itm_inst || !itm_inst->GetItem()->NoDrop || itm_inst->IsAttuned() || itm_inst->GetItem()->Price == 0) {
+            if (!itm_inst || !itm_inst->GetItem()->NoDrop || itm_inst->IsAttuned() || itm_inst->GetItem()->Price == 0 || itm_inst->GetAugmentItemID(5)) {
                 continue;
             }
 

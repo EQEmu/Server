@@ -668,8 +668,6 @@ float Client::GetItemStatValue(const EQ::ItemData* item) {
 
 	return_value = std::max(1.0f, return_value);
 
-	LogDebug("EXPVAL: [{}]", return_value);
-
 	return return_value;
 }
 

@@ -1526,6 +1526,55 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			if (item.HP < 0) {
 				item.HP = 0;
 			}
+
+			if (!item.Stackable && item.Slots == 0) {
+				item.Stackable = true;
+			}
+
+			if (item.Stackable && item.StackSize < 1000) {
+				item.StackSize = 1000;
+			}
+
+			if (item.Price == 0) {
+				float return_value = 0.0f;
+
+				return_value += item.HP / 5.0f;
+				return_value += item.Mana / 5.0f;
+
+				if (item.Delay > 0) {
+					float dps = static_cast<float>(item.Damage) / static_cast<float>(item.Delay);
+					return_value += dps * 10.0f;
+				}
+
+				return_value += item.AStr + item.ASta + item.ADex + item.AAgi + item.AInt + item.AWis;
+				return_value += item.MR + item.FR + item.CR + item.DR + item.PR;
+
+				return_value += 2 * item.HeroicStr + 2 * item.HeroicSta + 2 * item.HeroicAgi +
+								2 * item.HeroicDex + 2 * item.HeroicWis + 2 * item.HeroicInt + 2 * item.HeroicCha;
+
+				return_value += 2 * item.HeroicMR + 2 * item.HeroicFR + 2 * item.HeroicCR +
+								2 * item.HeroicDR + 2 * item.HeroicPR;
+
+				return_value += 5 * item.HealAmt + 5 * item.SpellDmg;
+
+				if (item.Click.Effect > 0) return_value += 25;
+				if (item.Worn.Effect > 0) return_value += 25;
+				if (item.Focus.Effect > 0) return_value += 25;
+
+				if (item.ItemType == EQ::item::ItemTypeAugmentation) {
+					return_value *= 5;
+				}
+
+				if (item.BagSlots > 0) {
+					return_value = item.BagSlots * item.BagWR * item.BagSize;
+				}
+
+				return_value *= 100;
+
+				return_value = std::max(1.0f, return_value);
+
+				item.Price = return_value;
+			}
 		}
 
 		if (RuleB(Custom, AttuneOnExp) && item.ItemType == EQ::item::ItemTypeAugmentation) {

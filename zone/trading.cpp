@@ -3394,21 +3394,6 @@ void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPack
 		return;
 	}
 
-	int available_vouchers = GetAlternateCurrencyValue(1);
-
-	if (available_vouchers < RuleI(Bazaar, VoucherDeliveryCost)) {
-		Message(Chat::Red, "You do not have enough vouchers to complete this purchase.");
-		in->method     = BazaarByDirectToInventory;
-		in->sub_action = InsufficientFunds;
-		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
-		TradeRequestFailed(app);
-		return;
-	} else {
-		SetAlternateCurrencyValue(1, available_vouchers - RuleI(Bazaar, VoucherDeliveryCost));
-		SendAltCurrencies();
-		PushItemOnCursor(*buy_item, true);
-	}
-
 	LogTrading(
 		"Name: <green>[{}] IsStackable: <green>[{}] Requested Quantity: <green>[{}] Charges on Item <green>[{}]",
 		buy_item->GetItem()->Name,
@@ -3431,7 +3416,24 @@ void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPack
 		}
 	}
 
+	buy_item->SetCharges(tbs->quantity);
+
 	LogTrading("Actual quantity that will be traded is <green>[{}]", tbs->quantity);
+
+	int available_vouchers = GetAlternateCurrencyValue(1);
+
+	if (available_vouchers < RuleI(Bazaar, VoucherDeliveryCost)) {
+		Message(Chat::Red, "You do not have enough vouchers to complete this purchase.");
+		in->method     = BazaarByDirectToInventory;
+		in->sub_action = InsufficientFunds;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
+		TradeRequestFailed(app);
+		return;
+	} else {
+		SetAlternateCurrencyValue(1, available_vouchers - RuleI(Bazaar, VoucherDeliveryCost));
+		SendAltCurrencies();
+		PushItemOnCursor(*buy_item, true);
+	}
 
 	if (trader_item.item_charges <= static_cast<int32>(tbs->quantity) || !buy_item->IsStackable()) {
 		TraderRepository::DeleteOne(database, trader_item.id);
