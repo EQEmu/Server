@@ -29,41 +29,45 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 
 void DataBucket::SetData(const DataBucketKey &k)
 {
+	DataBucketKey k_ = k; // copy the key so we can modify it
+	if (k_.key.find('.') != std::string::npos) {
+		k_.key = Strings::Split(k_.key, '.').front();
+	}
+
 	auto b = DataBucketsRepository::NewEntity();
-	auto r = GetData(k, true);
+	auto r = GetData(k_, true);
 	// if we have an entry, use it
 	if (r.id > 0) {
 		b = r;
 	}
 
 	// add scoping to bucket
-	if (k.character_id > 0) {
-		b.character_id = k.character_id;
+	if (k_.character_id > 0) {
+		b.character_id = k_.character_id;
 	}
 	else if (k.account_id > 0) {
-		b.account_id = k.account_id;
+		b.account_id = k_.account_id;
 	}
-	else if (k.npc_id > 0) {
-		b.npc_id = k.npc_id;
+	else if (k_.npc_id > 0) {
+		b.npc_id = k_.npc_id;
 	}
-	else if (k.bot_id > 0) {
-		b.bot_id = k.bot_id;
+	else if (k_.bot_id > 0) {
+		b.bot_id = k_.bot_id;
 	}
 
 	const uint64 bucket_id         = b.id;
 	int64        expires_time_unix = 0;
 
-	if (!k.expires.empty()) {
-		expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::ToInt(k.expires);
-		if (isalpha(k.expires[0]) || isalpha(k.expires[k.expires.length() - 1])) {
-			expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::TimeToSeconds(k.expires);
+	if (!k_.expires.empty()) {
+		expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::ToInt(k_.expires);
+		if (isalpha(k_.expires[0]) || isalpha(k_.expires[k_.expires.length() - 1])) {
+			expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::TimeToSeconds(k_.expires);
 		}
 	}
 
 	b.expires = expires_time_unix;
-	b.value   = k.value;
+	b.value   = k_.value;
 
-	// Check for nested keys (keys with dots)
 	// Check for nested keys (keys with dots)
 	if (k.key.find('.') != std::string::npos) {
 		// Retrieve existing JSON or create a new one
@@ -100,19 +104,19 @@ void DataBucket::SetData(const DataBucketKey &k)
 
 		// Serialize JSON back to string
 		b.value = json_value.dump();
-		b.key_ = nested_keys.front(); // Top-level key
+		b.key_ = nested_keys.front(); // Use the top-level key
 	} else {
 		// For non-nested keys, just set the value
-		b.value = k.value;
-		b.key_ = k.key;
+		b.value = k_.value;
+		b.key_ = k_.key;
 	}
 
 	if (bucket_id) {
 
 		// update the cache if it exists
-		if (CanCache(k)) {
+		if (CanCache(k_)) {
 			for (auto &e: g_data_bucket_cache) {
-				if (CheckBucketMatch(e, k)) {
+				if (CheckBucketMatch(e, k_)) {
 					e = b;
 					break;
 				}
@@ -125,7 +129,7 @@ void DataBucket::SetData(const DataBucketKey &k)
 		b = DataBucketsRepository::InsertOne(database, b);
 
 		// add to cache if it doesn't exist
-		if (CanCache(k) && !ExistsInCache(b)) {
+		if (CanCache(k_) && !ExistsInCache(b)) {
 			DeleteFromMissesCache(b);
 			g_data_bucket_cache.emplace_back(b);
 		}

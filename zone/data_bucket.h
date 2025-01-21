@@ -45,7 +45,7 @@ public:
 	static bool GetDataBuckets(Mob *mob);
 
 	// scoped bucket methods
-	static void SetData(const DataBucketKey &k);
+	static void SetData(const DataBucketKey &k_);
 	static bool DeleteData(const DataBucketKey &k);
 	static DataBucketsRepository::DataBuckets GetData(const DataBucketKey &k, bool ignore_misses_cache = false);
 	static std::string GetDataExpires(const DataBucketKey &k);
