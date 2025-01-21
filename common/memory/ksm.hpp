@@ -41,11 +41,7 @@ public:
 	}
 
 	void deallocate(T* p, std::size_t) noexcept {
-#ifdef _WIN32
-		_aligned_free(p);
-#else
 		free(p);
-#endif
 	}
 
 private:
@@ -81,13 +77,7 @@ namespace KSM {
     }
 
     inline void* AllocatePageAligned(size_t size) {
-        size_t alignment = 4096; // Default page size for Windows
-        void* aligned_ptr = _aligned_malloc(size, alignment);
-        if (!aligned_ptr) {
-            std::cerr << "Failed to allocate page-aligned memory on Windows." << std::endl;
-        }
-        std::memset(aligned_ptr, 0, size);
-        return aligned_ptr;
+        return memset(malloc(size), 0, size);
     }
 
     inline void MarkMemoryForKSM(void* start, size_t size) {
