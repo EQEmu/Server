@@ -111,7 +111,6 @@ public:
 		int32_t     fast_regen_mana;
 		int32_t     fast_regen_endurance;
 		int32_t     npc_max_aggro_dist;
-		uint32_t    npc_update_range;
 		uint32_t    client_update_range;
 		int32_t     underworld_teleport_index;
 		int32_t     lava_damage;
@@ -119,7 +118,6 @@ public:
 		uint8_t     idle_when_empty;
 		uint32_t    seconds_before_idle;
 		int32_t     shard_at_player_count;
-		int32_t     max_movement_update_range;
 	};
 
 	static std::string PrimaryKey()
@@ -222,7 +220,6 @@ public:
 			"fast_regen_mana",
 			"fast_regen_endurance",
 			"npc_max_aggro_dist",
-			"npc_update_range",
 			"client_update_range",
 			"underworld_teleport_index",
 			"lava_damage",
@@ -230,7 +227,6 @@ public:
 			"idle_when_empty",
 			"seconds_before_idle",
 			"shard_at_player_count",
-			"max_movement_update_range",
 		};
 	}
 
@@ -329,7 +325,6 @@ public:
 			"fast_regen_mana",
 			"fast_regen_endurance",
 			"npc_max_aggro_dist",
-			"npc_update_range",
 			"client_update_range",
 			"underworld_teleport_index",
 			"lava_damage",
@@ -337,7 +332,6 @@ public:
 			"idle_when_empty",
 			"seconds_before_idle",
 			"shard_at_player_count",
-			"max_movement_update_range",
 		};
 	}
 
@@ -470,7 +464,6 @@ public:
 		e.fast_regen_mana           = 180;
 		e.fast_regen_endurance      = 180;
 		e.npc_max_aggro_dist        = 600;
-		e.npc_update_range          = 600;
 		e.client_update_range       = 600;
 		e.underworld_teleport_index = 0;
 		e.lava_damage               = 50;
@@ -478,7 +471,6 @@ public:
 		e.idle_when_empty           = 1;
 		e.seconds_before_idle       = 60;
 		e.shard_at_player_count     = 0;
-		e.max_movement_update_range = 600;
 
 		return e;
 	}
@@ -607,15 +599,13 @@ public:
 			e.fast_regen_mana           = row[89] ? static_cast<int32_t>(atoi(row[89])) : 180;
 			e.fast_regen_endurance      = row[90] ? static_cast<int32_t>(atoi(row[90])) : 180;
 			e.npc_max_aggro_dist        = row[91] ? static_cast<int32_t>(atoi(row[91])) : 600;
-			e.npc_update_range          = row[92] ? static_cast<uint32_t>(strtoul(row[92], nullptr, 10)) : 600;
-			e.client_update_range       = row[93] ? static_cast<uint32_t>(strtoul(row[93], nullptr, 10)) : 600;
-			e.underworld_teleport_index = row[94] ? static_cast<int32_t>(atoi(row[94])) : 0;
-			e.lava_damage               = row[95] ? static_cast<int32_t>(atoi(row[95])) : 50;
-			e.min_lava_damage           = row[96] ? static_cast<int32_t>(atoi(row[96])) : 10;
-			e.idle_when_empty           = row[97] ? static_cast<uint8_t>(strtoul(row[97], nullptr, 10)) : 1;
-			e.seconds_before_idle       = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 60;
-			e.shard_at_player_count     = row[99] ? static_cast<int32_t>(atoi(row[99])) : 0;
-			e.max_movement_update_range = row[100] ? static_cast<int32_t>(atoi(row[100])) : 600;
+			e.client_update_range       = row[92] ? static_cast<uint32_t>(strtoul(row[92], nullptr, 10)) : 600;
+			e.underworld_teleport_index = row[93] ? static_cast<int32_t>(atoi(row[93])) : 0;
+			e.lava_damage               = row[94] ? static_cast<int32_t>(atoi(row[94])) : 50;
+			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
+			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
+			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			return e;
 		}
@@ -740,15 +730,13 @@ public:
 		v.push_back(columns[89] + " = " + std::to_string(e.fast_regen_mana));
 		v.push_back(columns[90] + " = " + std::to_string(e.fast_regen_endurance));
 		v.push_back(columns[91] + " = " + std::to_string(e.npc_max_aggro_dist));
-		v.push_back(columns[92] + " = " + std::to_string(e.npc_update_range));
-		v.push_back(columns[93] + " = " + std::to_string(e.client_update_range));
-		v.push_back(columns[94] + " = " + std::to_string(e.underworld_teleport_index));
-		v.push_back(columns[95] + " = " + std::to_string(e.lava_damage));
-		v.push_back(columns[96] + " = " + std::to_string(e.min_lava_damage));
-		v.push_back(columns[97] + " = " + std::to_string(e.idle_when_empty));
-		v.push_back(columns[98] + " = " + std::to_string(e.seconds_before_idle));
-		v.push_back(columns[99] + " = " + std::to_string(e.shard_at_player_count));
-		v.push_back(columns[100] + " = " + std::to_string(e.max_movement_update_range));
+		v.push_back(columns[92] + " = " + std::to_string(e.client_update_range));
+		v.push_back(columns[93] + " = " + std::to_string(e.underworld_teleport_index));
+		v.push_back(columns[94] + " = " + std::to_string(e.lava_damage));
+		v.push_back(columns[95] + " = " + std::to_string(e.min_lava_damage));
+		v.push_back(columns[96] + " = " + std::to_string(e.idle_when_empty));
+		v.push_back(columns[97] + " = " + std::to_string(e.seconds_before_idle));
+		v.push_back(columns[98] + " = " + std::to_string(e.shard_at_player_count));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -862,7 +850,6 @@ public:
 		v.push_back(std::to_string(e.fast_regen_mana));
 		v.push_back(std::to_string(e.fast_regen_endurance));
 		v.push_back(std::to_string(e.npc_max_aggro_dist));
-		v.push_back(std::to_string(e.npc_update_range));
 		v.push_back(std::to_string(e.client_update_range));
 		v.push_back(std::to_string(e.underworld_teleport_index));
 		v.push_back(std::to_string(e.lava_damage));
@@ -870,7 +857,6 @@ public:
 		v.push_back(std::to_string(e.idle_when_empty));
 		v.push_back(std::to_string(e.seconds_before_idle));
 		v.push_back(std::to_string(e.shard_at_player_count));
-		v.push_back(std::to_string(e.max_movement_update_range));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -992,7 +978,6 @@ public:
 			v.push_back(std::to_string(e.fast_regen_mana));
 			v.push_back(std::to_string(e.fast_regen_endurance));
 			v.push_back(std::to_string(e.npc_max_aggro_dist));
-			v.push_back(std::to_string(e.npc_update_range));
 			v.push_back(std::to_string(e.client_update_range));
 			v.push_back(std::to_string(e.underworld_teleport_index));
 			v.push_back(std::to_string(e.lava_damage));
@@ -1000,7 +985,6 @@ public:
 			v.push_back(std::to_string(e.idle_when_empty));
 			v.push_back(std::to_string(e.seconds_before_idle));
 			v.push_back(std::to_string(e.shard_at_player_count));
-			v.push_back(std::to_string(e.max_movement_update_range));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1126,15 +1110,13 @@ public:
 			e.fast_regen_mana           = row[89] ? static_cast<int32_t>(atoi(row[89])) : 180;
 			e.fast_regen_endurance      = row[90] ? static_cast<int32_t>(atoi(row[90])) : 180;
 			e.npc_max_aggro_dist        = row[91] ? static_cast<int32_t>(atoi(row[91])) : 600;
-			e.npc_update_range          = row[92] ? static_cast<uint32_t>(strtoul(row[92], nullptr, 10)) : 600;
-			e.client_update_range       = row[93] ? static_cast<uint32_t>(strtoul(row[93], nullptr, 10)) : 600;
-			e.underworld_teleport_index = row[94] ? static_cast<int32_t>(atoi(row[94])) : 0;
-			e.lava_damage               = row[95] ? static_cast<int32_t>(atoi(row[95])) : 50;
-			e.min_lava_damage           = row[96] ? static_cast<int32_t>(atoi(row[96])) : 10;
-			e.idle_when_empty           = row[97] ? static_cast<uint8_t>(strtoul(row[97], nullptr, 10)) : 1;
-			e.seconds_before_idle       = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 60;
-			e.shard_at_player_count     = row[99] ? static_cast<int32_t>(atoi(row[99])) : 0;
-			e.max_movement_update_range = row[100] ? static_cast<int32_t>(atoi(row[100])) : 600;
+			e.client_update_range       = row[92] ? static_cast<uint32_t>(strtoul(row[92], nullptr, 10)) : 600;
+			e.underworld_teleport_index = row[93] ? static_cast<int32_t>(atoi(row[93])) : 0;
+			e.lava_damage               = row[94] ? static_cast<int32_t>(atoi(row[94])) : 50;
+			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
+			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
+			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1251,15 +1233,13 @@ public:
 			e.fast_regen_mana           = row[89] ? static_cast<int32_t>(atoi(row[89])) : 180;
 			e.fast_regen_endurance      = row[90] ? static_cast<int32_t>(atoi(row[90])) : 180;
 			e.npc_max_aggro_dist        = row[91] ? static_cast<int32_t>(atoi(row[91])) : 600;
-			e.npc_update_range          = row[92] ? static_cast<uint32_t>(strtoul(row[92], nullptr, 10)) : 600;
-			e.client_update_range       = row[93] ? static_cast<uint32_t>(strtoul(row[93], nullptr, 10)) : 600;
-			e.underworld_teleport_index = row[94] ? static_cast<int32_t>(atoi(row[94])) : 0;
-			e.lava_damage               = row[95] ? static_cast<int32_t>(atoi(row[95])) : 50;
-			e.min_lava_damage           = row[96] ? static_cast<int32_t>(atoi(row[96])) : 10;
-			e.idle_when_empty           = row[97] ? static_cast<uint8_t>(strtoul(row[97], nullptr, 10)) : 1;
-			e.seconds_before_idle       = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 60;
-			e.shard_at_player_count     = row[99] ? static_cast<int32_t>(atoi(row[99])) : 0;
-			e.max_movement_update_range = row[100] ? static_cast<int32_t>(atoi(row[100])) : 600;
+			e.client_update_range       = row[92] ? static_cast<uint32_t>(strtoul(row[92], nullptr, 10)) : 600;
+			e.underworld_teleport_index = row[93] ? static_cast<int32_t>(atoi(row[93])) : 0;
+			e.lava_damage               = row[94] ? static_cast<int32_t>(atoi(row[94])) : 50;
+			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
+			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
+			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
+			e.shard_at_player_count     = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1426,7 +1406,6 @@ public:
 		v.push_back(std::to_string(e.fast_regen_mana));
 		v.push_back(std::to_string(e.fast_regen_endurance));
 		v.push_back(std::to_string(e.npc_max_aggro_dist));
-		v.push_back(std::to_string(e.npc_update_range));
 		v.push_back(std::to_string(e.client_update_range));
 		v.push_back(std::to_string(e.underworld_teleport_index));
 		v.push_back(std::to_string(e.lava_damage));
@@ -1434,7 +1413,6 @@ public:
 		v.push_back(std::to_string(e.idle_when_empty));
 		v.push_back(std::to_string(e.seconds_before_idle));
 		v.push_back(std::to_string(e.shard_at_player_count));
-		v.push_back(std::to_string(e.max_movement_update_range));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1549,7 +1527,6 @@ public:
 			v.push_back(std::to_string(e.fast_regen_mana));
 			v.push_back(std::to_string(e.fast_regen_endurance));
 			v.push_back(std::to_string(e.npc_max_aggro_dist));
-			v.push_back(std::to_string(e.npc_update_range));
 			v.push_back(std::to_string(e.client_update_range));
 			v.push_back(std::to_string(e.underworld_teleport_index));
 			v.push_back(std::to_string(e.lava_damage));
@@ -1557,7 +1534,6 @@ public:
 			v.push_back(std::to_string(e.idle_when_empty));
 			v.push_back(std::to_string(e.seconds_before_idle));
 			v.push_back(std::to_string(e.shard_at_player_count));
-			v.push_back(std::to_string(e.max_movement_update_range));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

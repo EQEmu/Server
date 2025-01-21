@@ -868,7 +868,7 @@ void MobMovementManager::SendCommandToClients(
 	}
 	else {
 		float short_range = RuleR(Pathing, ShortMovementUpdateRange);
-		float long_range  = zone->GetNpcUpdateRange();
+		float long_range  = RuleI(Range, MobCloseScanDistance);
 
 		for (auto &c : _impl->Clients) {
 			if (single_client && c != single_client) {

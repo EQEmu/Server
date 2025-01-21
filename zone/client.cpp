@@ -12942,7 +12942,7 @@ void Client::SendTopLevelInventory()
 void Client::CheckSendBulkNpcPositions()
 {
 	float distance_moved                      = DistanceNoZ(m_last_position_before_bulk_update, GetPosition());
-	float update_range                        = zone->GetNpcUpdateRange();
+	float update_range                        = RuleI(Range, MobCloseScanDistance);
 	bool  moved_far_enough_before_bulk_update = distance_moved >= update_range;
 	bool  is_ready_to_update                  = (
 		m_client_bulk_npc_pos_update_timer.Check() || moved_far_enough_before_bulk_update

@@ -676,12 +676,6 @@ int ZoneStore::GetZoneNPCMaximumAggroDistance(uint32 zone_id, int version)
 	return z ? z->npc_max_aggro_dist : DEFAULT_ZONE_MAX_AGGRO_DISTANCE;
 }
 
-uint32 ZoneStore::GetZoneMaximumMovementUpdateRange(uint32 zone_id, int version)
-{
-	const auto& z = GetZoneVersionWithFallback(zone_id, version);
-	return z ? z->npc_update_range : DEFAULT_ZONE_MAX_MOVEMENT_UPDATE_RANGE;
-}
-
 int8 ZoneStore::GetZoneMinimumExpansion(uint32 zone_id, int version)
 {
 	const auto& z = GetZoneVersionWithFallback(zone_id, version);
