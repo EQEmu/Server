@@ -971,7 +971,15 @@ void Client::CompleteConnect()
 	RecordStats();
 	AutoGrantAAPoints();
 
+	// set initial position for mob tracking
 	m_last_seen_mob_position.reserve(entity_list.GetMobList().size());
+	for (auto& mob : entity_list.GetMobList()) {
+		if (!mob.second->IsNPC()) {
+			continue;
+		}
+
+		m_last_seen_mob_position[mob.second->GetID()] = mob.second->GetPosition();
+	}
 
 	// enforce some rules..
 	if (!CanEnterZone()) {
