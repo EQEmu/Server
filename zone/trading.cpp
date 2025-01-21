@@ -3574,7 +3574,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	uint32 total_cost = tbs->price * tbs->quantity;
 	float  parceL_delivery_cost_mod = zone->GetZoneID() == Zones::BAZAAR ? 0.0f : RuleR(Bazaar, ParcelDeliveryCostMod);
 	uint32 fee        = static_cast<uint32>(std::round((uint32) total_cost * parceL_delivery_cost_mod));
-	if (!TakeMoneyFromPP(total_cost + fee), true) {
+	if (!TakeMoneyFromPP(total_cost + fee, true)) {
 		RecordPlayerEventLog(
 			PlayerEvent::POSSIBLE_HACK,
 			PlayerEvent::PossibleHackEvent{
