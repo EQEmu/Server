@@ -1829,6 +1829,13 @@ public:
 	void SendEvolveXPTransferWindow();
 	void SendEvolveTransferResults(const EQ::ItemInstance &inst_from, const EQ::ItemInstance &inst_to, const EQ::ItemInstance &inst_from_new, const EQ::ItemInstance &inst_to_new, const uint32 compatibility, const uint32 max_transfer_level);
 
+	// Account buckets
+	std::string GetAccountBucket(std::string bucket_name);
+	void SetAccountBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
+	void DeleteAccountBucket(std::string bucket_name);
+	std::string GetAccountBucketExpires(std::string bucket_name);
+	std::string GetAccountBucketRemaining(std::string bucket_name);
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);

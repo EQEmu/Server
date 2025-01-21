@@ -402,6 +402,7 @@ Client::~Client() {
 
 	mMovementManager->RemoveClient(this);
 
+	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Account, AccountID());
 	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Client, CharacterID());
 
 	if (RuleB(Bots, Enabled)) {
@@ -13172,10 +13173,57 @@ void Client::BroadcastPositionUpdate()
 
 	Group *g = GetGroup();
 	if (g) {
-		for (auto & m : g->members) {
+		for (auto &m: g->members) {
 			if (m && m->IsClient() && m != this) {
 				m->CastToClient()->QueuePacket(&outapp);
 			}
 		}
 	}
+}
+
+std::string Client::GetAccountBucket(std::string bucket_name)
+{
+	DataBucketKey k = {};
+	k.account_id   = AccountID();
+	k.key          = bucket_name;
+
+	return DataBucket::GetData(k).value;
+}
+
+void Client::SetAccountBucket(std::string bucket_name, std::string bucket_value, std::string expiration)
+{
+	DataBucketKey k = {};
+	k.account_id   = AccountID();
+	k.key          = bucket_name;
+	k.expires      = expiration;
+	k.value        = bucket_value;
+
+	DataBucket::SetData(k);
+}
+
+void Client::DeleteAccountBucket(std::string bucket_name)
+{
+	DataBucketKey k = {};
+	k.account_id   = AccountID();
+	k.key          = bucket_name;
+
+	DataBucket::DeleteData(k);
+}
+
+std::string Client::GetAccountBucketExpires(std::string bucket_name)
+{
+	DataBucketKey k = {};
+	k.account_id   = AccountID();
+	k.key          = bucket_name;
+
+	return DataBucket::GetDataExpires(k);
+}
+
+std::string Client::GetAccountBucketRemaining(std::string bucket_name)
+{
+	DataBucketKey k = {};
+	k.account_id   = AccountID();
+	k.key          = bucket_name;
+
+	return DataBucket::GetDataRemaining(k);
 }

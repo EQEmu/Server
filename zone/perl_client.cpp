@@ -3234,6 +3234,36 @@ void Perl_Client_SetAAEXPPercentage(Client* self, uint8 percentage)
 	self->SetAAEXPPercentage(percentage);
 }
 
+void Perl_Client_SetAccountBucket(Client* self, std::string bucket_name, std::string bucket_value)
+{
+	self->SetAccountBucket(bucket_name, bucket_value);
+}
+
+void Perl_Client_SetAccountBucket(Client* self, std::string bucket_name, std::string bucket_value, std::string expiration = "")
+{
+	self->SetAccountBucket(bucket_name, bucket_value, expiration);
+}
+
+void Perl_Client_DeleteAccountBucket(Client* self, std::string bucket_name)
+{
+	self->DeleteAccountBucket(bucket_name);
+}
+
+std::string Perl_Client_GetAccountBucket(Client* self, std::string bucket_name)
+{
+	return self->GetAccountBucket(bucket_name);
+}
+
+std::string Perl_Client_GetAccountBucketExpires(Client* self, std::string bucket_name)
+{
+	return self->GetAccountBucketExpires(bucket_name);
+}
+
+std::string Perl_Client_GetAccountBucketRemaining(Client* self, std::string bucket_name)
+{
+	return self->GetAccountBucketRemaining(bucket_name);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3325,6 +3355,7 @@ void perl_register_client()
 	package.add("CreateTaskDynamicZone", &Perl_Client_CreateTaskDynamicZone);
 	package.add("DecreaseByID", &Perl_Client_DecreaseByID);
 	package.add("DescribeSpecialAbilities", &Perl_Client_DescribeSpecialAbilities);
+	package.add("DeleteAccountBucket", &Perl_Client_DeleteAccountBucket);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16, bool))&Perl_Client_DeleteItemInInventory);
@@ -3362,6 +3393,9 @@ void perl_register_client()
 	package.add("GetAAPoints", &Perl_Client_GetAAPoints);
 	package.add("GetAFK", &Perl_Client_GetAFK);
 	package.add("GetAccountAge", &Perl_Client_GetAccountAge);
+	package.add("GetAccountBucket", &Perl_Client_GetAccountBucket);
+	package.add("GetAccountBucketExpires", &Perl_Client_GetAccountBucketExpires);
+	package.add("GetGetAccountBucketRemaining", &Perl_Client_GetAccountBucketRemaining);
 	package.add("GetAccountFlag", &Perl_Client_GetAccountFlag);
 	package.add("GetAccountFlags", &Perl_Client_GetAccountFlags);
 	package.add("GetAggroCount", &Perl_Client_GetAggroCount);
@@ -3668,6 +3702,8 @@ void perl_register_client()
 	package.add("SetAATitle", (void(*)(Client*, std::string, bool))&Perl_Client_SetAATitle);
 	package.add("SetAFK", &Perl_Client_SetAFK);
 	package.add("SetAccountFlag", &Perl_Client_SetAccountFlag);
+	package.add("SetAccountBucket", (void(*)(Client*, std::string, std::string))&Perl_Client_SetAccountBucket);
+	package.add("SetAccountBucket", (void(*)(Client*, std::string, std::string, std::string))&Perl_Client_SetAccountBucket);
 	package.add("SetAlternateCurrencyValue", &Perl_Client_SetAlternateCurrencyValue);
 	package.add("SetAnon", &Perl_Client_SetAnon);
 	package.add("SetAutoLoginCharacterName", (bool(*)(Client*))&Perl_Client_SetAutoLoginCharacterName);
