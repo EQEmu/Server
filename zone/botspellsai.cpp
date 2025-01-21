@@ -648,7 +648,7 @@ bool Bot::AI_PursueCastCheck() {
 				continue;
 			}
 
-			if (AIBot_spells_by_type[current_cast.spellType].empty()) {
+			if (AIBot_spells_by_type[current_cast.spellType].empty() && AIBot_spells_by_type[GetParentSpellType(current_cast.spellType)].empty()) {
 				continue;
 			}
 
@@ -724,7 +724,7 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
-			if (AIBot_spells_by_type[current_cast.spellType].empty()) {
+			if (AIBot_spells_by_type[current_cast.spellType].empty() && AIBot_spells_by_type[GetParentSpellType(current_cast.spellType)].empty()) {
 				continue;
 			}
 
@@ -784,7 +784,7 @@ bool Bot::AI_EngagedCastCheck() {
 				continue;
 			}
 
-			if (AIBot_spells_by_type[current_cast.spellType].empty()) {
+			if (AIBot_spells_by_type[current_cast.spellType].empty() && AIBot_spells_by_type[GetParentSpellType(current_cast.spellType)].empty()) {
 				continue;
 			}
 
