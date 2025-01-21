@@ -115,6 +115,7 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 	std::string arg2 = sep->arg[2];
 	int ab_arg = 2;
 	bool current_check = false;
+	bool list_check = false;
 	uint16 spell_type = 0;
 	uint32 type_value = 0;
 
@@ -131,6 +132,10 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 	else {
 		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
 			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		}
+		else if (!arg1.compare("list")) {
+			++ab_arg;
+			list_check = true;
 		}
 		else {
 			c->Message(
@@ -150,8 +155,8 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 	if (sep->IsNumber(2)) {
 		type_value = atoi(sep->arg[2]);
 		++ab_arg;
-		if (type_value < 0 || type_value > 100) {
-			c->Message(Chat::Yellow, "You must enter a value between 0-100.");
+		if (EQ::ValueWithin(type_value, BotSpellTypes::START, BotSpellTypes::END)) {
+			c->Message(Chat::Yellow, "You must enter a value between {} and {}.", BotSpellTypes::START, BotSpellTypes::END);
 
 			return;
 		}
@@ -160,7 +165,7 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 		++ab_arg;
 		current_check = true;
 	}
-	else {
+	else if (!list_check) {
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
@@ -209,6 +214,31 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 					my_bot->GetSpellTypePriority(spell_type, BotPriorityCategories::Engaged)
 				).c_str()
 			);
+		}
+		else if (list_check) {
+			auto cast_order = my_bot->GetSpellTypesPrioritized(BotPriorityCategories::Engaged);
+
+			for (auto& current_cast : cast_order) {
+				c->Message(
+					Chat::Green,
+					fmt::format(
+						"{} says, 'My [{}] engaged cast priority for is currently [{}].'",
+						my_bot->GetCleanName(),
+						c->GetSpellTypeNameByID(current_cast.spellType),
+						(current_cast.priority == 0 ? "disabled (0)" : std::to_string(current_cast.priority))
+					).c_str()
+				);
+			}
+
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} says, 'Anything not listed is currently disabled (0).'",
+					my_bot->GetCleanName()
+				).c_str()
+			);
+
+			return;
 		}
 		else {
 			my_bot->SetSpellTypePriority(spell_type, BotPriorityCategories::Engaged, type_value);
