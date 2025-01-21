@@ -10954,7 +10954,7 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 		tar = this;
 	}
 
-	if ((IsCharmSpell(spell_id) || IsPetSpell(spell_id) && HasPet())) {
+	if ((IsCharmSpell(spell_id) || (IsPetSpell(spell_id) && HasPet()))) {
 		return false;
 	}
 
@@ -10963,19 +10963,16 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 	}
 
 	if (IsBeneficialSpell(spell_id)) {
-		if (
+		bool invalid_beneficial_target =
 			(tar->IsNPC() && !tar->GetOwner()) ||
 			(tar->GetOwner() && tar->GetOwner()->IsOfClientBot() && !GetBotOwner()->IsInGroupOrRaid(tar->GetOwner())) ||
-			(tar->IsOfClientBot() && !GetBotOwner()->IsInGroupOrRaid(tar))
-		) {
-			GetBotOwner()->Message(
-				Chat::Yellow, 
-				fmt::format(
-					"[{}] is an invalid target. Only players or their pet in your group or raid are eligible targets."
-					, tar->GetCleanName()
-				).c_str()
-			);
+			(tar->IsOfClientBot() && !GetBotOwner()->IsInGroupOrRaid(tar));
 
+		if (invalid_beneficial_target) {
+			GetBotOwner()->Message(
+				Chat::Yellow,
+				fmt::format("[{}] is an invalid target. Only players or their pet in your group or raid are eligible targets.", tar->GetCleanName()).c_str()
+			);
 			return false;
 		}
 	}
@@ -10983,32 +10980,17 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 	if (IsDetrimentalSpell(spell_id) && (!GetBotOwner()->IsAttackAllowed(tar) || !IsAttackAllowed(tar))) {
 		GetBotOwner()->Message(
 			Chat::Yellow,
-			fmt::format(
-				"{} says, 'I cannot attack [{}]'.", 
-				GetCleanName(), 
-				tar->GetCleanName()
-			).c_str()
+			fmt::format("{} says, 'I cannot attack [{}]'.", GetCleanName(), tar->GetCleanName()).c_str()
 		);
-
 		return false;
 	}
 
-	if (!is_disc) {
-		if (!CheckSpellRecastTimer(spell_id)) {
-			return false;
-		}
+	if (!is_disc && !CheckSpellRecastTimer(spell_id)) {
+		return false;
 	}
 
-	if (
-		!IsInGroupOrRaid(tar, true) &&
-		(
-			!RuleB(Bots, EnableBotTGB) ||
-			(
-				IsGroupSpell(spell_id) &&
-				!IsTGBCompatibleSpell(spell_id)
-			)
-		)
-	) {
+	if (!IsInGroupOrRaid(tar, true) &&
+		(!RuleB(Bots, EnableBotTGB) || (IsGroupSpell(spell_id) && !IsTGBCompatibleSpell(spell_id)))) {
 		return false;
 	}
 
@@ -11018,13 +11000,9 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 
 	if (!CastChecks(spell_id, tar, UINT16_MAX)) {
 		GetBotOwner()->Message(
-			Chat::Red, 
-			fmt::format(
-				"{} says, 'Ability failed to cast. This could be due to this to any number of things: range, mana, immune, target type, etc.'",
-				GetBotOwner()->GetCleanName()
-			).c_str()
+			Chat::Red,
+			fmt::format("{} says, 'Ability failed to cast. This could be due to range, mana, immune, target type, etc.'", GetBotOwner()->GetCleanName()).c_str()
 		);
-
 		return false;
 	}
 
@@ -11038,62 +11016,35 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 				tar->GetCleanName()
 			).c_str()
 		);
-
 		InterruptSpell();
 	}
 
-	if (CastSpell(spell_id, tar->GetID())) {
-		BotGroupSay(
-			this,
-			fmt::format(
-				"Casting {} on {}.",
-				GetSpellName(spell_id),
-				(tar == this ? "myself" : tar->GetCleanName())
-			).c_str()
-		);
-
-		int timer_duration = 0;
-
-		if (!is_disc) {
-			timer_duration = CalcBuffDuration(tar, this, spell_id);
-
-			if (timer_duration) {
-				timer_duration = GetActSpellDuration(spell_id, timer_duration);
-			}
-
-			if (timer_duration < 0) {
-				timer_duration = 0;
-			}
-		}
-		else {
-			if (spell.recast_time > 0) {
-				timer_duration = spell.recast_time / 1000;
-				auto focus = GetFocusEffect(focusReduceRecastTime, spell_id);
-
-				if (focus > timer_duration) {
-					timer_duration = 0;
-				}
-				else {
-					timer_duration -= focus;
-				}
-			}
-
-			if (timer_duration > 0) {
-				timer_duration = timer_duration * 1000;
-			}
-		}
-
-		if (!is_disc) {
-			SetSpellRecastTimer(spell_id, timer_duration);
-		}
-		else {
-			SetDisciplineReuseTimer(spell_id, timer_duration);
-		}
-
-		return true;
+	if (!CastSpell(spell_id, tar->GetID())) {
+		return false;
 	}
 
-	return false;
+	BotGroupSay(
+		this,
+		fmt::format(
+			"Casting {} on {}.",
+			GetSpellName(spell_id),
+			(tar == this ? "myself" : tar->GetCleanName())
+		).c_str()
+	);
+
+	int timer_duration = 0;
+
+	if (!is_disc) {
+		timer_duration = CalcBuffDuration(tar, this, spell_id);
+		timer_duration = std::max(0, GetActSpellDuration(spell_id, timer_duration));
+		SetSpellRecastTimer(spell_id, timer_duration);
+	}
+	else if (spell.recast_time > 0) {
+		timer_duration = std::max(0, int(spell.recast_time / 1000 - GetFocusEffect(focusReduceRecastTime, spell_id)));
+		SetDisciplineReuseTimer(spell_id, timer_duration * 1000);
+	}
+
+	return true;
 }
 
 uint16 Bot::GetParentSpellType(uint16 spell_type) {
