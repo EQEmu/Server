@@ -658,6 +658,8 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		PutItemInInventory(to_slot, *inst, true);
 	}
 
+	m_external_handin_items_returned.emplace_back(inst->GetItem()->ID);
+
 	safe_delete(inst);
 
 	// discover item and any augments

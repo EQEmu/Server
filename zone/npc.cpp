@@ -4727,13 +4727,31 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 		handin_money.platinum = m_hand_in.original_money.platinum;
 	}
 
+	// if scripts have their own implementation of returning items instead of
+	// going through return_items, this guards against returning items twice (duplicate items)
+	bool external_returned_items = c->GetExternalHandinItemsReturned().size() > 0;
+	bool returned_items_already = false;
+	for (auto &handin_item: m_hand_in.items) {
+		for (auto &i: c->GetExternalHandinItemsReturned()) {
+			auto item = database.GetItem(i);
+			if (item && std::to_string(item->ID) == handin_item.item_id) {
+				LogNpcHandin(" -- External quest methods already returned item [{}] ({})", item->Name, item->ID);
+				returned_items_already = true;
+			}
+		}
+	}
+
+	if (returned_items_already) {
+		LogNpcHandin("External quest methods returned items, not returning items to player via ReturnHandinItems");
+	}
+
 	bool returned_handin = false;
 	m_hand_in.items.erase(
 		std::remove_if(
 			m_hand_in.items.begin(),
 			m_hand_in.items.end(),
 			[&](HandinEntry &i) {
-				if (i.item && i.item->GetItem() && !i.is_multiquest_item) {
+				if (i.item && i.item->GetItem() && !i.is_multiquest_item && !returned_items_already) {
 					return_items.emplace_back(
 						PlayerEvent::HandinEntry{
 							.item_id = i.item->GetID(),

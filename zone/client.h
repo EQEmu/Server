@@ -1869,6 +1869,7 @@ public:
 	uint32 GetBandolierItemID(uint8 bandolier_slot, uint8 slot_id);
 	std::string GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id);
 
+	// External handin tracking
 	// this is used to prevent things like quest::givecash and AddMoneyToPP
 	// from double giving money back to players in scripts when return_items
 	// also gives money back to players
@@ -1881,8 +1882,10 @@ public:
 	};
 private:
 	ExternalHandinMoneyReturned m_external_handin_money_returned = {};
+	std::vector<uint32_t>       m_external_handin_items_returned = {};
 public:
 	ExternalHandinMoneyReturned GetExternalHandinMoneyReturned() { return m_external_handin_money_returned; }
+	std::vector<uint32_t> GetExternalHandinItemsReturned() { return m_external_handin_items_returned; }
 
 protected:
 	friend class Mob;

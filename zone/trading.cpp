@@ -859,6 +859,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 
 		m_external_handin_money_returned = {};
+		m_external_handin_items_returned = {};
 		bool has_aggro = tradingWith->CheckAggro(this);
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE) && !has_aggro) {
 			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
