@@ -29,15 +29,15 @@ curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_co
 
 ldd ./bin/zone
 
-# shellcheck disable=SC2164
-cd /drone/src/
-
 echo "Waiting for MariaDB to be ready..."
 while ! mysqladmin ping -uroot -peqemu -hlocalhost --silent; do
     sleep 1
 done
 
 ./bin/zone tests:npc-handins
+
+# shellcheck disable=SC2164
+cd /drone/src/
 
 chmod +x ./utils/scripts/build/should-release/should-release
 ./utils/scripts/build/should-release/should-release || exit
