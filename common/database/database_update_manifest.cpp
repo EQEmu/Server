@@ -6358,7 +6358,7 @@ ADD COLUMN `ornament_hero_model` int(11) NOT NULL AFTER `ornament_idfile`,
 ADD COLUMN `guid` bigint(20) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_hero_model`,
 ADD PRIMARY KEY (`account_id`, `slot_id`);
 )"
-	}
+	},
 	ManifestEntry{
 		.version = 9295,
 		.description = "2024_10_24_inventory_changes.sql",
