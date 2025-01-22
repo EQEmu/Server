@@ -25,6 +25,7 @@
 #include "zonedb.h"
 #include "../common/events/player_event_logs.h"
 #include "bot.h"
+#include "../common/evolving_items.h"
 #include "../common/repositories/character_corpse_items_repository.h"
 
 extern WorldServer worldserver;
@@ -1262,7 +1263,11 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 	}
 	// end QS code
 
-	bool isDeleted = m_inv.DeleteItem(slot_id, quantity);
+	uint64 evolve_id = m_inv[slot_id]->GetEvolveUniqueID();
+	bool   isDeleted = m_inv.DeleteItem(slot_id, quantity);
+	if (isDeleted && evolve_id && (slot_id > EQ::invslot::TRADE_END || slot_id < EQ::invslot::TRADE_BEGIN)) {
+		CharacterEvolvingItemsRepository::SoftDelete(database, evolve_id);
+	}
 
 	const EQ::ItemInstance* inst = nullptr;
 	if (slot_id == EQ::invslot::slotCursor) {
@@ -1314,6 +1319,8 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 bool Client::PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update)
 {
 	LogInventory("Putting item [{}] ([{}]) on the cursor", inst.GetItem()->Name, inst.GetItem()->ID);
+
+	evolving_items_manager.DoLootChecks(CharacterID(), EQ::invslot::slotCursor, inst);
 	m_inv.PushCursor(inst);
 
 	if (client_update) {
@@ -1334,9 +1341,9 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 	if (slot_id == EQ::invslot::slotCursor) { // don't trust macros before conditional statements...
 		return PushItemOnCursor(inst, client_update);
 	}
-	else {
-		m_inv.PutItem(slot_id, inst);
-	}
+
+	evolving_items_manager.DoLootChecks(CharacterID(), slot_id, inst);
+	m_inv.PutItem(slot_id, inst);
 
 	if (client_update)
 	{
@@ -1344,15 +1351,16 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 		SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id));
 	}
 
+	CalcBonuses();
+
 	if (slot_id == EQ::invslot::slotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		return database.SaveCursor(CharacterID(), s, e);
 	}
-	else {
-		return database.SaveInventory(CharacterID(), &inst, slot_id);
-	}
 
-	CalcBonuses();
+	return database.SaveInventory(CharacterID(), &inst, slot_id);
+
+	//CalcBonuses(); // this never fires??
 	// a lot of wasted checks and calls coded above...
 }
 
@@ -1361,6 +1369,8 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 	LogInventory("Putting loot item [{}] ([{}]) into slot [{}]", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
 
 	bool cursor_empty = m_inv.CursorEmpty();
+
+	evolving_items_manager.DoLootChecks(CharacterID(), slot_id, inst);
 
 	if (slot_id == EQ::invslot::slotCursor) {
 		m_inv.PushCursor(inst);

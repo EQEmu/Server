@@ -122,11 +122,7 @@ bool Client::Process() {
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
 		if (!IsMoving() && m_position_update_timer.Check()) {
-			if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
-				CastToClient()->BroadcastPositionUpdate();
-			} else {
-				SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
-			}
+			BroadcastPositionUpdate();
 		}
 
 		if (mana_timer.Check())
@@ -307,10 +303,6 @@ bool Client::Process() {
 
 		if (m_scan_close_mobs_timer.Check()) {
 			entity_list.ScanCloseMobs(this);
-		}
-
-		if (RuleB(Zone, EnableEntityClipping) && m_see_close_mobs_timer.Check() && RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
-			entity_list.UpdateVisibility(this);
 		}
 
 		if (RuleB(Inventory, LazyLoadBank)) {

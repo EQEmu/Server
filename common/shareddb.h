@@ -28,6 +28,8 @@
 #include "fixed_memory_variable_hash_set.h"
 #include "say_link.h"
 #include "repositories/command_subsettings_repository.h"
+#include "repositories/items_evolving_details_repository.h"
+#include "../common/repositories/character_evolving_items_repository.h"
 
 #include <list>
 #include <map>
@@ -129,7 +131,7 @@ public:
 	bool GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is_charid);
 	int32 GetSharedPlatinum(uint32 account_id);
 	bool SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
-	bool GetInventory(uint32 char_id, EQ::InventoryProfile *inv);
+	bool GetInventory(Client* c);
 	bool GetInventory(uint32 account_id, char *name, EQ::InventoryProfile *inv); // deprecated
 	std::map<uint32, uint32> GetItemRecastTimestamps(uint32 char_id);
 	uint32 GetItemRecastTimestamp(uint32 char_id, uint32 recast_type);

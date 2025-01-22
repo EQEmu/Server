@@ -762,7 +762,6 @@ public:
 			throw std::bad_alloc();
 		}
 		mNodeCount = 0;
-		std::cout << "Checking page alignment for mNodes" << std::endl;
 		KSM::CheckPageAlignment(mNodes);
 
 		mVertices = static_cast<RmReal*>(KSM::AllocatePageAligned(sizeof(RmReal) * 3 * vcount));
@@ -983,20 +982,18 @@ RaycastMesh * createRaycastMesh(RmUint32 vcount,		// The number of vertices in t
 	size_t bvh_size = bvh_node_size + bvh_leaf_size; // Total BVH size
 	size_t total_size = vertex_size + index_size + bvh_size;
 
-	std::cout << "Checking page alignment for m->mNodes" << std::endl;
 	KSM::CheckPageAlignment(m->mNodes);
-	std::cout << "Checking page alignment for m->mVertices" << std::endl;
 	KSM::CheckPageAlignment(m->mVertices);
 
-	// Log the memory usage
-	LogInfo("Memory Usage Report:");
-	LogInfo("  Vertices: {:.2f} MB", vertex_size / (1024.0 * 1024.0));
-	LogInfo("  Indices:  {:.2f} MB", index_size / (1024.0 * 1024.0));
-	LogInfo("  BVH Nodes: {:.2f} MB", bvh_node_size / (1024.0 * 1024.0));
-	LogInfo("  BVH Leaves: {:.2f} MB", bvh_leaf_size / (1024.0 * 1024.0));
-	LogInfo("  BVH Total: {:.2f} MB", bvh_size / (1024.0 * 1024.0));
-	LogInfo("  Total Memory: {:.2f} MB", total_size / (1024.0 * 1024.0));
-
+	LogInfo(
+		"Map Raycast Memory Usage | Vertices [{:.2f}] MB Indices [{:.2f}] MB BVH Nodes [{:.2f}] MB BVH Leaves [{:.2f}] MB BVH Total [{:.2f}] MB",
+		vertex_size / (1024.0 * 1024.0),
+		index_size / (1024.0 * 1024.0),
+		bvh_node_size / (1024.0 * 1024.0),
+		bvh_leaf_size / (1024.0 * 1024.0),
+		bvh_size / (1024.0 * 1024.0)
+	);
+	LogInfo("Total Raycast Memory [{:.2f}] MB", total_size / (1024.0 * 1024.0));
 
 	return static_cast< RaycastMesh * >(m);
 }

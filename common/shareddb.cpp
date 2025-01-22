@@ -43,11 +43,13 @@
 #include "spdat.h"
 #include "eqemu_config.h"
 #include "data_verification.h"
+#include "evolving_items.h"
 #include "repositories/criteria/content_filter_criteria.h"
 #include "repositories/account_repository.h"
 #include "repositories/faction_association_repository.h"
 #include "repositories/starting_items_repository.h"
 #include "path_manager.h"
+#include "../zone/client.h"
 #include "repositories/loottable_repository.h"
 #include "repositories/character_item_recast_repository.h"
 #include "repositories/character_corpses_repository.h"
@@ -781,15 +783,23 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 
 	return true;
 }
-
 // Overloaded: Retrieve character inventory based on character id (zone entry)
-bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
+//bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
+bool SharedDatabase::GetInventory(Client *c)
 {
-	if (!char_id || !inv)
+	if (!c) {
 		return false;
+	}
+
+	uint32                char_id = c->CharacterID();
+	EQ::InventoryProfile &inv     = c->GetInv();
 
 	// Retrieve character inventory
-	auto results = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}' ORDER BY `slotid`;", char_id));
+	auto results   = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}' ORDER BY `slotid`", char_id));
+	auto e_results = CharacterEvolvingItemsRepository::GetWhere(
+		*this, fmt::format("`character_id` = '{}' AND `deleted_at` IS NULL", char_id)
+	);
+
 	if (results.empty()) {
 		LogError("Error loading inventory for char_id {} from the database.", char_id);
 		return false;
@@ -803,8 +813,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 
 	const auto timestamps = GetItemRecastTimestamps(char_id);
 	auto cv_conflict      = false;
-	const auto pmask      = inv->GetLookup()->PossessionsBitmask;
-	const auto bank_size  = inv->GetLookup()->InventoryTypeSize.Bank;
+	const auto pmask      = inv.GetLookup()->PossessionsBitmask;
+	const auto bank_size  = inv.GetLookup()->InventoryTypeSize.Bank;
 
 	std::vector<InventoryRepository::Inventory> queue{};
 	for (auto &row: results) {
@@ -920,11 +930,55 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			}
 		}
 
-		//RunGenerateCallback(inst);
+		if (item->EvolvingItem) {
+			if (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END) {
+				inst->SetEvolveEquipped(true);
+			}
+
+			auto t = std::ranges::find_if(
+				e_results.cbegin(),
+				e_results.cend(),
+				[&](const CharacterEvolvingItemsRepository::CharacterEvolvingItems &x) {
+					return x.item_id == item_id;
+				}
+			);
+
+			if (t == std::end(e_results)) {
+				auto e = CharacterEvolvingItemsRepository::NewEntity();
+
+				e.character_id  = char_id;
+				e.item_id       = item_id;
+				e.equipped      = inst->GetEvolveEquipped();
+				e.final_item_id = evolving_items_manager.GetFinalItemID(*inst);
+
+				auto r = CharacterEvolvingItemsRepository::InsertOne(*this, e);
+				e.id = r.id;
+				e_results.push_back(e);
+
+				inst->SetEvolveUniqueID(e.id);
+				inst->SetEvolveCharID(e.character_id);
+				inst->SetEvolveItemID(e.item_id);
+				inst->SetEvolveActivated(e.activated);
+				inst->SetEvolveEquipped(e.equipped);
+				inst->SetEvolveCurrentAmount(e.current_amount);
+				inst->CalculateEvolveProgression();
+				inst->SetEvolveFinalItemID(e.final_item_id);
+			}
+			else {
+				inst->SetEvolveUniqueID(t->id);
+				inst->SetEvolveCharID(t->character_id);
+				inst->SetEvolveItemID(t->item_id);
+				inst->SetEvolveActivated(t->activated);
+				inst->SetEvolveEquipped(t->equipped);
+				inst->SetEvolveCurrentAmount(t->current_amount);
+				inst->CalculateEvolveProgression();
+				inst->SetEvolveFinalItemID(t->final_item_id);
+			}
+		}
 
 		int16 put_slot_id;
 		if (slot_id > (EQ::invbag::TRADE_BAGS_END)) {
-			put_slot_id = inv->PushCursor(*inst);
+			put_slot_id = inv.PushCursor(*inst);
 		}
 
 		/*
@@ -936,12 +990,12 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 				item_id,
 				slot_id
 			);
-			put_slot_id = inv->PushCursor(*inst);
+			put_slot_id = inv.PushCursor(*inst);
 		}
 		*/
 
 		else {
-			put_slot_id = inv->PutItem(slot_id, *inst);
+			put_slot_id = inv.PutItem(slot_id, *inst);
 		}
 
 		row.guid = inst->GetSerialNumber();
@@ -966,8 +1020,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			"ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 			char_name,
 			char_id,
-			EQ::versions::MobVersionName(inv->InventoryVersion()),
-			(inv->GMInventory() ? "true" : "false")
+			EQ::versions::MobVersionName(inv.InventoryVersion()),
+			(inv.GMInventory() ? "true" : "false")
 		);
 	}
 
@@ -978,7 +1032,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 	EQ::ItemInstance::ClearGUIDMap();
 
 	// Retrieve shared inventory
-	return GetSharedBank(char_id, inv, true);
+	return GetSharedBank(char_id, &inv, true);
 }
 
 // Overloaded: Retrieve character inventory based on account_id and character name (char select)

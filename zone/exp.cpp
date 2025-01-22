@@ -520,20 +520,6 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 	add_exp = GetEXP() + add_exp;
 }
 
-int Client::GetItemTier(EQ::ItemData* item) {
-	if (item->ID <= 1000000) {
-		return 0;
-	}
-	else if (item->ID <= 2000000) {
-		return 1;
-	}
-	else if (item->ID <= 3000000) {
-		return 2;
-	}
-
-	return 0;
-};
-
 bool Client::ConsumeItemOnCursor() {
 	auto pow_item = m_inv.GetItem(EQ::invslot::slotPowerSource);
 	auto cur_item = m_inv.GetCursorItem();
@@ -552,8 +538,8 @@ bool Client::ConsumeItemOnCursor() {
 		return false;
 	}
 
-	int pow_item_tier = GetItemTier(pow_item->GetItem());
-	int cur_item_tier = GetItemTier(cur_item->GetItem());
+	int pow_item_tier = pow_item->GetItemTier();
+	int cur_item_tier = cur_item->GetItemTier();
 
 	float item_experience = Strings::ToFloat(pow_item->GetCustomData("Exp"), 0.0f);
 	float added_experience = 0.0f;
@@ -882,7 +868,7 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 	return true;
 }
 
-void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, bool resexp) {
+void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, bool resexp, NPC* npc) {
 	if (!IsEXPEnabled()) {
 		return;
 	}
@@ -993,10 +979,10 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	// Now update our character's normal and AA xp
-	SetEXP(exp_source, exp, aaexp, resexp);
+	SetEXP(exp_source, exp, aaexp, resexp, npc);
 }
 
-void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
+void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool isrezzexp, NPC* npc) {
 	uint64 current_exp = GetEXP();
 	uint64 current_aa_exp = GetAAXP();
 	uint64 total_current_exp = current_exp + current_aa_exp;
@@ -1104,6 +1090,7 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 				}
 			}
 		}
+		ProcessEvolvingItem(exp_gained, npc);
 	}
 	else if(total_add_exp < total_current_exp){ //only loss message if you lose exp, no message if you gained/lost nothing.
 		uint64 exp_lost = current_exp - set_exp;
@@ -1628,7 +1615,7 @@ void Group::SplitExp(ExpSource exp_source, const uint64 exp, Mob* other) {
 			if (diff >= max_diff) {
 				const uint64 tmp  = (m->GetLevel() + 3) * (m->GetLevel() + 3) * 75 * 35 / 10;
 				const uint64 tmp2 = group_experience / member_count;
-				m->CastToClient()->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level);
+				m->CastToClient()->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level, false, other->CastToNPC());
 			}
 		}
 	}
@@ -1679,7 +1666,7 @@ void Raid::SplitExp(ExpSource exp_source, const uint64 exp, Mob* other) {
 			if (diff >= max_diff) {
 				const uint64 tmp  = (m.member->GetLevel() + 3) * (m.member->GetLevel() + 3) * 75 * 35 / 10;
 				const uint64 tmp2 = (raid_experience / member_modifier) + 1;
-				m.member->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level);
+				m.member->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level, false, other->CastToNPC());
 			}
 		}
 	}

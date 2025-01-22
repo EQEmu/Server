@@ -5668,16 +5668,6 @@ int Perl__GetZoneNPCMaximumAggroDistance(uint32 zone_id, int version)
 	return zone_store.GetZoneNPCMaximumAggroDistance(zone_id, version);
 }
 
-uint32 Perl__GetZoneMaximumMovementUpdateRange(uint32 zone_id)
-{
-	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id);
-}
-
-uint32 Perl__GetZoneMaximumMovementUpdateRange(uint32 zone_id, int version)
-{
-	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id, version);
-}
-
 int8 Perl__GetZoneMinimumExpansion(uint32 zone_id)
 {
 	return zone_store.GetZoneMinimumExpansion(zone_id);
@@ -6137,8 +6127,6 @@ void perl_register_quest()
 	package.add("GetZoneMaximumExpansion", (int8(*)(uint32, int))&Perl__GetZoneMaximumExpansion);
 	package.add("GetZoneMaximumLevel", (uint8(*)(uint32))&Perl__GetZoneMaximumLevel);
 	package.add("GetZoneMaximumLevel", (uint8(*)(uint32, int))&Perl__GetZoneMaximumLevel);
-	package.add("GetZoneMaximumMovementUpdateRange", (uint32(*)(uint32))&Perl__GetZoneMaximumMovementUpdateRange);
-	package.add("GetZoneMaximumMovementUpdateRange", (uint32(*)(uint32, int))&Perl__GetZoneMaximumMovementUpdateRange);
 	package.add("GetZoneMaximumPlayers", (int(*)(uint32))&Perl__GetZoneMaximumPlayers);
 	package.add("GetZoneMaximumPlayers", (int(*)(uint32, int))&Perl__GetZoneMaximumPlayers);
 	package.add("GetZoneMinimumClip", (float(*)(uint32))&Perl__GetZoneMinimumClip);

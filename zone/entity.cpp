@@ -1746,7 +1746,7 @@ void EntityList::QueueCloseClients(
 	}
 
 	if (distance <= 0) {
-		distance = zone->GetMaxClientUpdateRange();
+		distance = zone->GetClientUpdateRange();
 	}
 
 	float distance_squared = distance * distance;
@@ -2882,7 +2882,6 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 		);
 
 		it->second->m_close_mobs.erase(entity_id);
-		it->second->m_can_see_mob.erase(entity_id);
 		it->second->m_last_seen_mob_position.erase(entity_id);
 
 		++it;
@@ -2953,7 +2952,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 
 	g_scan_bench_timer.reset();
 
-	float scan_range = std::max(zone->GetMaxNpcUpdateRange(), zone->GetMaxClientUpdateRange());
+	float scan_range = RuleI(Range, MobCloseScanDistance);
 
 	// Reserve memory in m_close_mobs to avoid frequent re-allocations if not already reserved.
 	// Assuming mob_list.size() as an upper bound for reservation.
@@ -2988,59 +2987,6 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 		scanning_mob->m_close_mobs.size(),
 		scanning_mob->IsMoving() ? "true" : "false",
 		g_scan_bench_timer.elapsedMicroseconds()
-	);
-}
-
-BenchTimer g_vis_bench_timer;
-#define STATE_HIDDEN (-1)
-#define STATE_VISIBLE 1
-
-void EntityList::UpdateVisibility(Mob *scanning_mob) {
-	if (!scanning_mob) {
-		return;
-	}
-
-	g_vis_bench_timer.reset();
-
-	// Ensure sufficient capacity in the visibility map
-	if (scanning_mob->m_can_see_mob.bucket_count() < scanning_mob->m_close_mobs.size()) {
-		scanning_mob->m_can_see_mob.reserve(scanning_mob->m_close_mobs.size());
-	}
-
-	// Iterate through all mobs in the zone
-	for (auto &e: mob_list) {
-		auto mob = e.second;
-		if (!mob || mob == scanning_mob) { continue; }
-
-		// Update scanning_mob's visibility of mob
-		auto   it_scanning_visible = scanning_mob->m_can_see_mob.find(mob->GetID());
-		int8_t scanning_visibility = (it_scanning_visible != scanning_mob->m_can_see_mob.end())
-			? it_scanning_visible->second : 0;
-
-		if (scanning_mob->CalculateDistance(mob) <= mob->GetUpdateRange()) {
-			if (scanning_visibility != STATE_VISIBLE) { // Become visible
-				if (scanning_mob->IsClient()) {
-					scanning_mob->CastToClient()->SetVisibility(mob, true);
-				}
-				scanning_mob->m_can_see_mob[mob->GetID()] = STATE_VISIBLE;
-			}
-		}
-		else {
-			if (scanning_visibility != STATE_HIDDEN) { // Become invisible
-				if (scanning_mob->IsClient()) {
-					scanning_mob->CastToClient()->SetVisibility(mob, false);
-				}
-				scanning_mob->m_can_see_mob[mob->GetID()] = STATE_HIDDEN;
-			}
-		}
-	}
-
-	LogVisibility(
-		"[{}] Visibility > list_size [{}] moving [{}] elapsed [{}] us",
-		scanning_mob->GetCleanName(),
-		scanning_mob->m_can_see_mob.size(),
-		scanning_mob->IsMoving() ? "true" : "false",
-		g_vis_bench_timer.elapsedMicroseconds()
 	);
 }
 
@@ -5849,7 +5795,7 @@ void EntityList::ReloadMerchants() {
  */
 std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float distance)
 {
-	if (distance <= zone->GetMaxNpcUpdateRange()) {
+	if (distance <= RuleI(Range, MobCloseScanDistance)) {
 		return mob->m_close_mobs;
 	}
 

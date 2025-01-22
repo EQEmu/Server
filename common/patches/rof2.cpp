@@ -1350,6 +1350,58 @@ namespace RoF2
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
+	ENCODE(OP_EvolveItem)
+	{
+		EQApplicationPacket *in = *p;
+		*p                      = nullptr;
+
+		auto action = *reinterpret_cast<uint32 *>(in->pBuffer);
+
+		switch (action) {
+			case EvolvingItems::Actions::TRANSFER_WINDOW_DETAILS: {
+				auto emu = reinterpret_cast<EvolveItemMessaging *>(in->pBuffer);
+
+				EvolveXPWindowSend           e{};
+				EQ::Util::MemoryStreamReader ss(emu->serialized_data, in->size - sizeof(emu->action));
+				cereal::BinaryInputArchive ar(ss);
+				ar(e);
+
+				auto item_1 = static_cast<const EQ::ItemInstance *>(reinterpret_cast<EQ::InternalSerializedItem_Struct
+					*>(e.serialize_item_1.data())->inst);
+				auto item_2 = static_cast<const EQ::ItemInstance *>(reinterpret_cast<EQ::InternalSerializedItem_Struct
+					*>(e.serialize_item_2.data())->inst);
+
+				EQ::OutBuffer ob;
+
+				SerializeItem(ob, item_1, 0, 0, ItemPacketMerchant);
+				SerializeItem(ob, item_2, 0, 0, ItemPacketMerchant);
+
+				auto out = std::make_unique<EQApplicationPacket>(
+					OP_EvolveItem,
+					sizeof(EvolveXPWindowSendDetails_Struct) + ob.size()
+				);
+				auto data = reinterpret_cast<EvolveXPWindowSendDetails_Struct *>(out->pBuffer);
+
+				data->action             = e.action;
+				data->compatibility      = e.compatibility;
+				data->max_transfer_level = e.max_transfer_level;
+				data->item1_unique_id    = e.item1_unique_id;
+				data->item2_unique_id    = e.item2_unique_id;
+				data->item1_present      = e.item1_present;
+				data->item2_present      = e.item2_present;
+
+				memcpy(data->serialize_data, ob.str().data(), ob.size());
+				dest->QueuePacket(out.get());
+				safe_delete(in);
+				break;
+			}
+			default: {
+				dest->FastQueuePacket(&in);
+				break;
+			}
+		}
+	}
+
 	ENCODE(OP_ExpansionInfo)
 	{
 		ENCODE_LENGTH_EXACT(ExpansionInfo_Struct);
@@ -2052,6 +2104,33 @@ namespace RoF2
             }
         }
     }
+
+	ENCODE(OP_ItemPreviewRequest)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		uchar* in_buf = in->pBuffer;
+
+		auto int_item = (EQ::InternalSerializedItem_Struct*) in_buf;
+
+		EQ::OutBuffer           buf;
+		EQ::OutBuffer::pos_type last_pos = buf.tellp();
+
+		SerializeItem(buf, (const EQ::ItemInstance*) int_item->inst, int_item->slot_id, 0, ItemPacketInvalid);
+		if (buf.tellp() == last_pos) {
+			LogNetcode("RoF2::ENCODE(OP_ItemPreviewRequest) Serialization failed");
+			safe_delete_array(in_buf);
+			safe_delete(in);
+			return;
+		}
+
+		in->size    = buf.size();
+		in->pBuffer = buf.detach();
+
+		safe_delete_array(in_buf);
+		dest->FastQueuePacket(&in, ack_req);
+	}
 
 	ENCODE(OP_ItemVerifyReply)
 	{
@@ -6405,6 +6484,11 @@ namespace RoF2
 		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
 		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
 		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
+		if (item->EvolvingItem) {
+			hdr.instance_id    = inst->GetEvolveUniqueID() & 0xFFFFFFFF; //lower dword
+			hdr.parcel_item_id = inst->GetEvolveUniqueID() >> 32;        //upper dword
+		}
+
 		hdr.last_cast_time = inst->GetRecastTimestamp();
 		hdr.charges        = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254)
 			? 0xFFFFFFFF
@@ -6418,18 +6502,15 @@ namespace RoF2
 		ob.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
 		if (item->EvolvingItem > 0) {
-			RoF2::structs::EvolvingItem evotop;
+			RoF2::structs::EvolvingItem_Struct evotop;
 
-			evotop.unknown001 = 0;
-			evotop.unknown002 = 0;
-			evotop.unknown003 = 0;
-			evotop.unknown004 = 0;
-			evotop.evoLevel = item->EvolvingLevel;
-			evotop.progress = 0;
-			evotop.Activated = 1;
-			evotop.evomaxlevel = item->EvolvingMax;
+			evotop.final_item_id    = inst->GetEvolveFinalItemID();
+			evotop.evolve_level     = item->EvolvingLevel;
+			evotop.progress         = inst->GetEvolveProgression();
+			evotop.activated        = inst->GetEvolveActivated();
+			evotop.evolve_max_level = item->EvolvingMax;
 
-			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));
+			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem_Struct));
 		}
 
 		/**
@@ -6803,12 +6884,13 @@ namespace RoF2
 		iqbs.Heirloom = 0;
 		iqbs.Placeable = 0;
 		iqbs.unknown28 = -1;
+		iqbs.unknown29 = packet_type == ItemPacketInvalid ? 0xFF : 0;
 		iqbs.unknown30 = -1;
 		iqbs.NoZone = 0;
 		iqbs.NoGround = 0;
 		iqbs.unknown37a = 0;	// (guessed position) New to RoF2
 		iqbs.unknown38 = 0;
-		iqbs.unknown39 = 1;
+		iqbs.unknown39 = packet_type == ItemPacketInvalid ? 0 : 1;;
 
 		ob.write((const char*)&iqbs, sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
 

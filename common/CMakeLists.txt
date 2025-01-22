@@ -39,6 +39,7 @@ SET(common_sources
     event_sub.cpp
     events/player_event_logs.cpp
     events/player_event_discord_formatter.cpp
+    evolving_items.cpp
     expedition_lockout_timer.cpp
     extprofile.cpp
     discord/discord_manager.cpp
@@ -173,6 +174,7 @@ SET(repositories
     repositories/base/base_character_currency_repository.h
     repositories/base/base_character_data_repository.h
     repositories/base/base_character_disciplines_repository.h
+    repositories/base/base_character_evolving_items_repository.h
     repositories/base/base_character_expedition_lockouts_repository.h
     repositories/base/base_character_exp_modifiers_repository.h
     repositories/base/base_character_inspect_messages_repository.h
@@ -241,6 +243,7 @@ SET(repositories
     repositories/base/base_inventory_snapshots_repository.h
     repositories/base/base_ip_exemptions_repository.h
     repositories/base/base_items_repository.h
+    repositories/base/base_items_evolving_details_repository.h
     repositories/base/base_ldon_trap_entries_repository.h
     repositories/base/base_ldon_trap_templates_repository.h
     repositories/base/base_level_exp_mods_repository.h
@@ -356,6 +359,7 @@ SET(repositories
     repositories/character_currency_repository.h
     repositories/character_data_repository.h
     repositories/character_disciplines_repository.h
+    repositories/character_evolving_items_repository.h
     repositories/character_expedition_lockouts_repository.h
     repositories/character_exp_modifiers_repository.h
     repositories/character_inspect_messages_repository.h
@@ -424,6 +428,7 @@ SET(repositories
     repositories/inventory_snapshots_repository.h
     repositories/ip_exemptions_repository.h
     repositories/items_repository.h
+    repositories/items_evolving_details_repository.h
     repositories/ldon_trap_entries_repository.h
     repositories/ldon_trap_templates_repository.h
     repositories/level_exp_mods_repository.h
@@ -556,6 +561,7 @@ SET(common_headers
     events/player_event_discord_formatter.h
     events/player_events.h
     event_sub.h
+    evolving_items.h
     expedition_lockout_timer.h
     extprofile.h
     faction.h

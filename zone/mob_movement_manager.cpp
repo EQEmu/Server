@@ -883,15 +883,24 @@ void MobMovementManager::SendCommandToClients(
 				_impl->Stats.TotalSentPosition++;
 			}
 
-			c->QueuePacket(&outapp, false);
-			if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
-				c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
+			if (c->m_last_seen_mob_position.contains(mob->GetID())) {
+				if (c->m_last_seen_mob_position[mob->GetID()] == mob->GetPosition() && anim == 0) {
+					LogPositionUpdate(
+						"Mob [{}] has already been sent to client [{}] at this position, skipping",
+						mob->GetCleanName(),
+						c->GetCleanName()
+					);
+					continue;
+				}
 			}
+
+			c->QueuePacket(&outapp, false);
+			c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
 		}
 	}
 	else {
 		float short_range = RuleR(Pathing, ShortMovementUpdateRange);
-		float long_range  = zone->GetMaxNpcUpdateRange();
+		float long_range  = RuleI(Range, MobCloseScanDistance);
 
 		for (auto &c : _impl->Clients) {
 			if (single_client && c != single_client) {
@@ -936,10 +945,19 @@ void MobMovementManager::SendCommandToClients(
 					_impl->Stats.TotalSentPosition++;
 				}
 
-				c->QueuePacket(&outapp, false);
-				if (RuleB(Zone, AkkadiusTempPerformanceFeatureFlag)) {
-					c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
+				if (c->m_last_seen_mob_position.contains(mob->GetID())) {
+					if (c->m_last_seen_mob_position[mob->GetID()] == mob->GetPosition() && anim == 0) {
+						LogPositionUpdate(
+							"Mob [{}] has already been sent to client [{}] at this position, skipping",
+							mob->GetCleanName(),
+							c->GetCleanName()
+						);
+						continue;
+					}
 				}
+
+				c->QueuePacket(&outapp, false);
+				c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
 			}
 		}
 	}

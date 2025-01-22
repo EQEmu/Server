@@ -3933,25 +3933,38 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					switch (in->action) {
 						case TraderOn: {
-							if (c.second->GetNoOfTraders() <
-									EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit &&
-								out->zone_id == Zones::BAZAAR &&
-								out->zone_instance_id == c.second->GetInstanceID()) {
-									out->action = AddTraderToBazaarWindow;
-									c.second->IncrementNoOfTraders();
+							out->action = AddTraderToBazaarWindow;
+							if (c.second->GetTraderCount() <
+								EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit) {
+								if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
+									if (out->zone_id == Zones::BAZAAR &&
+										out->zone_instance_id == c.second->GetInstanceID()) {
+										c.second->IncrementTraderCount();
+										c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+									}
+								}
+								else {
+									c.second->IncrementTraderCount();
 									c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+								}
 							}
-
 							break;
 						}
 						case TraderOff: {
-							if (c.second->GetNoOfTraders() <
-									EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit &&
-								out->zone_id == Zones::BAZAAR &&
-								out->zone_instance_id == c.second->GetInstanceID()) {
-									out->action = RemoveTraderFromBazaarWindow;
-									c.second->DecrementNoOfTraders();
+							out->action = RemoveTraderFromBazaarWindow;
+							if (c.second->GetTraderCount() <=
+								EQ::constants::StaticLookup(c.second->ClientVersion())->BazaarTraderLimit) {
+								if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
+									if (out->zone_id == Zones::BAZAAR &&
+										out->zone_instance_id == c.second->GetInstanceID()) {
+										c.second->DecrementTraderCount();
+										c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+									}
+								}
+								else {
+									c.second->DecrementTraderCount();
 									c.second->QueuePacket(outapp, true, Mob::CLIENT_CONNECTED);
+								}
 							}
 							break;
 						}
