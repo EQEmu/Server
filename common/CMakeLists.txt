@@ -99,6 +99,7 @@ SET(common_sources
     json/json.hpp
     json/jsoncpp.cpp
     zone_store.cpp
+    memory/ksm.hpp
     net/console_server.cpp
     net/console_server_connection.cpp
     net/crc32.cpp

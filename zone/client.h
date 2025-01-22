@@ -320,6 +320,11 @@ public:
 	void KeyRingAdd(uint32 item_id);
 	bool KeyRingCheck(uint32 item_id);
 	void KeyRingList();
+	bool IsPetNameChangeAllowed();
+	void GrantPetNameChange();
+	void ClearPetNameChange();
+	void InvokeChangePetName(bool immediate = true);
+	bool ChangePetName(std::string new_name);
 	bool IsClient() const override { return true; }
 	bool IsOfClientBot() const override { return true; }
 	bool IsOfClientBotMerc() const override { return true; }
@@ -1848,6 +1853,13 @@ public:
 	void SendEvolveXPTransferWindow();
 	void SendEvolveTransferResults(const EQ::ItemInstance &inst_from, const EQ::ItemInstance &inst_to, const EQ::ItemInstance &inst_from_new, const EQ::ItemInstance &inst_to_new, const uint32 compatibility, const uint32 max_transfer_level);
 
+	// Account buckets
+	std::string GetAccountBucket(std::string bucket_name);
+	void SetAccountBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
+	void DeleteAccountBucket(std::string bucket_name);
+	std::string GetAccountBucketExpires(std::string bucket_name);
+	std::string GetAccountBucketRemaining(std::string bucket_name);
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
@@ -2107,12 +2119,13 @@ private:
 	Timer m_client_npc_aggro_scan_timer;
 	void CheckClientToNpcAggroTimer();
 	void ClientToNpcAggroProcess();
+	void BroadcastPositionUpdate();
 
 	// bulk position updates
 	glm::vec4 m_last_position_before_bulk_update;
-	Timer     m_client_zone_wide_full_position_update_timer;
+	Timer     m_client_bulk_npc_pos_update_timer;
 	Timer     m_position_update_timer;
-	void CheckSendBulkClientPositionUpdate();
+	void      CheckSendBulkNpcPositions();
 
 	void BulkSendInventoryItems();
 
@@ -2300,6 +2313,7 @@ public:
 	const std::string &GetMailKeyFull() const;
 	const std::string &GetMailKey() const;
 	void ShowZoneShardMenu();
+	void Handle_OP_ChangePetName(const EQApplicationPacket *app);
 };
 
 #endif

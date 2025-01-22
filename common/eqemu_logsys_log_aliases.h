@@ -854,6 +854,26 @@
         OutF(LogSys, Logs::Detail, Logs::XTargets, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogPositionUpdate(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::PositionUpdate))\
+        OutF(LogSys, Logs::General, Logs::PositionUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPositionUpdateDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::PositionUpdate))\
+        OutF(LogSys, Logs::Detail, Logs::PositionUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__); \
+} while (0)
+
+#define LogKSM(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::KSM))\
+        OutF(LogSys, Logs::General, Logs::KSM, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogKSMDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::KSM))\
+        OutF(LogSys, Logs::Detail, Logs::KSM, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define LogBotSettings(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::BotSettings))\
         OutF(LogSys, Logs::General, Logs::BotSettings, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

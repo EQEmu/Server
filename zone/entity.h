@@ -630,8 +630,6 @@ private:
 
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
 
-		void ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mobs, Mob* scanning_mob);
-
 		void GetBotList(std::list<Bot*> &b_list);
 	private:
 		std::unordered_map<uint16, Bot*> bot_list;

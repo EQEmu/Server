@@ -9,72 +9,38 @@
  * @docs https://docs.eqemu.io/developer/repositories
  */
 
-#ifndef EQEMU_BASE_DATA_BUCKETS_REPOSITORY_H
-#define EQEMU_BASE_DATA_BUCKETS_REPOSITORY_H
+#ifndef EQEMU_BASE_CHARACTER_PET_NAME_REPOSITORY_H
+#define EQEMU_BASE_CHARACTER_PET_NAME_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-#include <cereal/cereal.hpp>
-class BaseDataBucketsRepository {
-public:
-	struct DataBuckets {
-		uint64_t    id;
-		std::string key_;
-		std::string value;
-		uint32_t    expires;
-		int64_t     account_id;
-		int64_t     character_id;
-		int64_t     npc_id;
-		int64_t     bot_id;
 
-		// cereal
-		template<class Archive>
-		void serialize(Archive &ar)
-		{
-			ar(
-				CEREAL_NVP(id),
-				CEREAL_NVP(key_),
-				CEREAL_NVP(value),
-				CEREAL_NVP(expires),
-				CEREAL_NVP(account_id),
-				CEREAL_NVP(character_id),
-				CEREAL_NVP(npc_id),
-				CEREAL_NVP(bot_id)
-			);
-		}
+class BaseCharacterPetNameRepository {
+public:
+	struct CharacterPetName {
+		int32_t     character_id;
+		std::string name;
 	};
 
 	static std::string PrimaryKey()
 	{
-		return std::string("id");
+		return std::string("character_id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"id",
-			"`key`",
-			"value",
-			"expires",
-			"account_id",
 			"character_id",
-			"npc_id",
-			"bot_id",
+			"name",
 		};
 	}
 
 	static std::vector<std::string> SelectColumns()
 	{
 		return {
-			"id",
-			"`key`",
-			"value",
-			"expires",
-			"account_id",
 			"character_id",
-			"npc_id",
-			"bot_id",
+			"name",
 		};
 	}
 
@@ -90,7 +56,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("data_buckets");
+		return std::string("character_pet_name");
 	}
 
 	static std::string BaseSelect()
@@ -111,39 +77,33 @@ public:
 		);
 	}
 
-	static DataBuckets NewEntity()
+	static CharacterPetName NewEntity()
 	{
-		DataBuckets e{};
+		CharacterPetName e{};
 
-		e.id           = 0;
-		e.key_         = "";
-		e.value        = "";
-		e.expires      = 0;
-		e.account_id   = 0;
 		e.character_id = 0;
-		e.npc_id       = 0;
-		e.bot_id       = 0;
+		e.name         = "";
 
 		return e;
 	}
 
-	static DataBuckets GetDataBuckets(
-		const std::vector<DataBuckets> &data_bucketss,
-		int data_buckets_id
+	static CharacterPetName GetCharacterPetName(
+		const std::vector<CharacterPetName> &character_pet_names,
+		int character_pet_name_id
 	)
 	{
-		for (auto &data_buckets : data_bucketss) {
-			if (data_buckets.id == data_buckets_id) {
-				return data_buckets;
+		for (auto &character_pet_name : character_pet_names) {
+			if (character_pet_name.character_id == character_pet_name_id) {
+				return character_pet_name;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static DataBuckets FindOne(
+	static CharacterPetName FindOne(
 		Database& db,
-		int data_buckets_id
+		int character_pet_name_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -151,22 +111,16 @@ public:
 				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
 				PrimaryKey(),
-				data_buckets_id
+				character_pet_name_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			DataBuckets e{};
+			CharacterPetName e{};
 
-			e.id           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.key_         = row[1] ? row[1] : "";
-			e.value        = row[2] ? row[2] : "";
-			e.expires      = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.account_id   = row[4] ? strtoll(row[4], nullptr, 10) : 0;
-			e.character_id = row[5] ? strtoll(row[5], nullptr, 10) : 0;
-			e.npc_id       = row[6] ? strtoll(row[6], nullptr, 10) : 0;
-			e.bot_id       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.character_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name         = row[1] ? row[1] : "";
 
 			return e;
 		}
@@ -176,7 +130,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int data_buckets_id
+		int character_pet_name_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -184,7 +138,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				data_buckets_id
+				character_pet_name_id
 			)
 		);
 
@@ -193,20 +147,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		const DataBuckets &e
+		const CharacterPetName &e
 	)
 	{
 		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		v.push_back(columns[1] + " = '" + Strings::Escape(e.key_) + "'");
-		v.push_back(columns[2] + " = '" + Strings::Escape(e.value) + "'");
-		v.push_back(columns[3] + " = " + std::to_string(e.expires));
-		v.push_back(columns[4] + " = " + std::to_string(e.account_id));
-		v.push_back(columns[5] + " = " + std::to_string(e.character_id));
-		v.push_back(columns[6] + " = " + std::to_string(e.npc_id));
-		v.push_back(columns[7] + " = " + std::to_string(e.bot_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -214,28 +163,22 @@ public:
 				TableName(),
 				Strings::Implode(", ", v),
 				PrimaryKey(),
-				e.id
+				e.character_id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static DataBuckets InsertOne(
+	static CharacterPetName InsertOne(
 		Database& db,
-		DataBuckets e
+		CharacterPetName e
 	)
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.id));
-		v.push_back("'" + Strings::Escape(e.key_) + "'");
-		v.push_back("'" + Strings::Escape(e.value) + "'");
-		v.push_back(std::to_string(e.expires));
-		v.push_back(std::to_string(e.account_id));
 		v.push_back(std::to_string(e.character_id));
-		v.push_back(std::to_string(e.npc_id));
-		v.push_back(std::to_string(e.bot_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -246,7 +189,7 @@ public:
 		);
 
 		if (results.Success()) {
-			e.id = results.LastInsertedID();
+			e.character_id = results.LastInsertedID();
 			return e;
 		}
 
@@ -257,7 +200,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		const std::vector<DataBuckets> &entries
+		const std::vector<CharacterPetName> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -265,14 +208,8 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.id));
-			v.push_back("'" + Strings::Escape(e.key_) + "'");
-			v.push_back("'" + Strings::Escape(e.value) + "'");
-			v.push_back(std::to_string(e.expires));
-			v.push_back(std::to_string(e.account_id));
 			v.push_back(std::to_string(e.character_id));
-			v.push_back(std::to_string(e.npc_id));
-			v.push_back(std::to_string(e.bot_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -290,9 +227,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<DataBuckets> All(Database& db)
+	static std::vector<CharacterPetName> All(Database& db)
 	{
-		std::vector<DataBuckets> all_entries;
+		std::vector<CharacterPetName> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -304,16 +241,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DataBuckets e{};
+			CharacterPetName e{};
 
-			e.id           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.key_         = row[1] ? row[1] : "";
-			e.value        = row[2] ? row[2] : "";
-			e.expires      = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.account_id   = row[4] ? strtoll(row[4], nullptr, 10) : 0;
-			e.character_id = row[5] ? strtoll(row[5], nullptr, 10) : 0;
-			e.npc_id       = row[6] ? strtoll(row[6], nullptr, 10) : 0;
-			e.bot_id       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.character_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name         = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);
 		}
@@ -321,9 +252,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<DataBuckets> GetWhere(Database& db, const std::string &where_filter)
+	static std::vector<CharacterPetName> GetWhere(Database& db, const std::string &where_filter)
 	{
-		std::vector<DataBuckets> all_entries;
+		std::vector<CharacterPetName> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -336,16 +267,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DataBuckets e{};
+			CharacterPetName e{};
 
-			e.id           = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.key_         = row[1] ? row[1] : "";
-			e.value        = row[2] ? row[2] : "";
-			e.expires      = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.account_id   = row[4] ? strtoll(row[4], nullptr, 10) : 0;
-			e.character_id = row[5] ? strtoll(row[5], nullptr, 10) : 0;
-			e.npc_id       = row[6] ? strtoll(row[6], nullptr, 10) : 0;
-			e.bot_id       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.character_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name         = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);
 		}
@@ -415,19 +340,13 @@ public:
 
 	static int ReplaceOne(
 		Database& db,
-		const DataBuckets &e
+		const CharacterPetName &e
 	)
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.id));
-		v.push_back("'" + Strings::Escape(e.key_) + "'");
-		v.push_back("'" + Strings::Escape(e.value) + "'");
-		v.push_back(std::to_string(e.expires));
-		v.push_back(std::to_string(e.account_id));
 		v.push_back(std::to_string(e.character_id));
-		v.push_back(std::to_string(e.npc_id));
-		v.push_back(std::to_string(e.bot_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -442,7 +361,7 @@ public:
 
 	static int ReplaceMany(
 		Database& db,
-		const std::vector<DataBuckets> &entries
+		const std::vector<CharacterPetName> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -450,14 +369,8 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.id));
-			v.push_back("'" + Strings::Escape(e.key_) + "'");
-			v.push_back("'" + Strings::Escape(e.value) + "'");
-			v.push_back(std::to_string(e.expires));
-			v.push_back(std::to_string(e.account_id));
 			v.push_back(std::to_string(e.character_id));
-			v.push_back(std::to_string(e.npc_id));
-			v.push_back(std::to_string(e.bot_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -476,4 +389,4 @@ public:
 	}
 };
 
-#endif //EQEMU_BASE_DATA_BUCKETS_REPOSITORY_H
+#endif //EQEMU_BASE_CHARACTER_PET_NAME_REPOSITORY_H

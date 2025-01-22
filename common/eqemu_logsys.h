@@ -143,6 +143,8 @@ namespace Logs {
 		Corpses,
 		XTargets,
 		EvolveItem,
+		PositionUpdate,
+		KSM,
 		BotSettings,
 		BotSpellChecks,
 		BotSpellTypeChecks,
@@ -249,6 +251,8 @@ namespace Logs {
 		"Corpses",
 		"XTargets",
 		"EvolveItem",
+		"PositionUpdate",
+		"KSM" // Kernel Samepage Merging
 		"Bot Settings",
 		"Bot Spell Checks",
 		"Bot Spell Type Checks",

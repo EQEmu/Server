@@ -4668,16 +4668,6 @@ int lua_get_zone_npc_maximum_aggro_distance(uint32 zone_id, int version)
 	return zone_store.GetZoneNPCMaximumAggroDistance(zone_id, version);
 }
 
-uint32 lua_get_zone_maximum_movement_update_range(uint32 zone_id)
-{
-	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id);
-}
-
-uint32 lua_get_zone_maximum_movement_update_range(uint32 zone_id, int version)
-{
-	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id, version);
-}
-
 int8 lua_get_zone_minimum_expansion(uint32 zone_id)
 {
 	return zone_store.GetZoneMinimumExpansion(zone_id);
@@ -6287,8 +6277,6 @@ luabind::scope lua_register_general() {
 		luabind::def("get_zone_fast_regen_endurance", (int(*)(uint32,int))&lua_get_zone_fast_regen_endurance),
 		luabind::def("get_zone_npc_maximum_aggro_distance", (int(*)(uint32))&lua_get_zone_npc_maximum_aggro_distance),
 		luabind::def("get_zone_npc_maximum_aggro_distance", (int(*)(uint32,int))&lua_get_zone_npc_maximum_aggro_distance),
-		luabind::def("get_zone_npc_maximum_movement_update_range", (uint32(*)(uint32))&lua_get_zone_maximum_movement_update_range),
-		luabind::def("get_zone_npc_maximum_movement_update_range", (uint32(*)(uint32,int))&lua_get_zone_maximum_movement_update_range),
 		luabind::def("get_zone_minimum_expansion", (int8(*)(uint32))&lua_get_zone_minimum_expansion),
 		luabind::def("get_zone_minimum_expansion", (int8(*)(uint32,int))&lua_get_zone_minimum_expansion),
 		luabind::def("get_zone_maximum_expansion", (int8(*)(uint32))&lua_get_zone_maximum_expansion),

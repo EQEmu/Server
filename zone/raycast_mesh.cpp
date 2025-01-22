@@ -1,4 +1,6 @@
 #include "raycast_mesh.h"
+#include "../common/memory/ksm.hpp"
+#include "../common/eqemu_logsys.h"
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -9,7 +11,7 @@
 // This code snippet allows you to create an axis aligned bounding volume tree for a triangle mesh so that you can do
 // high-speed raycasting.
 //
-// There are much better implementations of this available on the internet.  In particular I recommend that you use 
+// There are much better implementations of this available on the internet.  In particular I recommend that you use
 // OPCODE written by Pierre Terdiman.
 // @see: http://www.codercorner.com/Opcode.htm
 //
@@ -17,7 +19,7 @@
 //
 // I am providing this code snippet for the use case where you *only* want to do quick and dirty optimized raycasting.
 // I have not done performance testing between this version and OPCODE; so I don't know how much slower it is.  However,
-// anytime you switch to using a spatial data structure for raycasting, you increase your performance by orders and orders 
+// anytime you switch to using a spatial data structure for raycasting, you increase your performance by orders and orders
 // of magnitude; so this implementation should work fine for simple tools and utilities.
 //
 // It also serves as a nice sample for people who are trying to learn the algorithm of how to implement AABB trees.
@@ -32,14 +34,14 @@
 //
 // The official source can be found at:  http://code.google.com/p/raycastmesh/
 //
-// 
+//
 
 #pragma warning(disable:4100)
 
 namespace RAYCAST_MESH
 {
 
-typedef std::vector< RmUint32 > TriVector;
+typedef std::vector<RmUint32, PageAlignedAllocator<RmUint32>> TriVector;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -365,7 +367,7 @@ public:
 	{
 		RmUint32 ret = 0;
 
-		if ( p[0] < mMin[0] ) 
+		if ( p[0] < mMin[0] )
 		{
 			ret|=CC_MINX;
 		}
@@ -374,7 +376,7 @@ public:
 			ret|=CC_MAXX;
 		}
 
-		if ( p[1] < mMin[1] ) 
+		if ( p[1] < mMin[1] )
 		{
 			ret|=CC_MINY;
 		}
@@ -383,7 +385,7 @@ public:
 			ret|=CC_MAXY;
 		}
 
-		if ( p[2] < mMin[2] ) 
+		if ( p[2] < mMin[2] )
 		{
 			ret|=CC_MINZ;
 		}
@@ -514,7 +516,7 @@ public:
 			// the width of the longest axis is less than the minimum axis size then...
 			// we create the leaf node and copy the triangles into the leaf node triangle array.
 			if ( count < minLeafSize || depth >= maxDepth || laxis < minAxisSize )
-			{ 
+			{
 				// Copy the triangle indices into the leaf triangles array
 				mLeafTriangleIndex = leafTriangles.size(); // assign the array start location for these leaf triangles.
 				leafTriangles.push_back(count);
@@ -542,7 +544,7 @@ public:
 				// and another array that includes all triangles which intersect the 'right' half of the bounding volume node.
 				for (auto i = triangles.begin(); i != triangles.end(); ++i) {
 
-					RmUint32 tri = (*i); 
+					RmUint32 tri = (*i);
 
 					{
 						RmUint32 i1 = indices[tri*3+0];
@@ -590,7 +592,7 @@ public:
 				{
 					leftBounds.clamp(b1); // we have to clamp the bounding volume so it stays inside the parent volume.
 					mLeft = callback->getNode();	// get a new AABB node
-					new ( mLeft ) NodeAABB(leftBounds);		// initialize it to default constructor values.  
+					new ( mLeft ) NodeAABB(leftBounds);		// initialize it to default constructor values.
 					// Then recursively split this node.
 					mLeft->split(leftTriangles,vcount,vertices,tcount,indices,depth+1,maxDepth,minLeafSize,minAxisSize,callback,leafTriangles);
 				}
@@ -662,7 +664,7 @@ public:
 			RmReal nd = nearestDistance;
 			if ( !intersectLineSegmentAABB(mBounds.mMin,mBounds.mMax,from,dir,nd,sect) )
 			{
-				return;	
+				return;
 			}
 			if ( mLeafTriangleIndex != TRI_EOF )
 			{
@@ -754,28 +756,60 @@ public:
 		{
 			mMaxNodeCount+=pow2Table[i];
 		}
-		mNodes = new NodeAABB[mMaxNodeCount];
+		// Allocate page-aligned memory
+		mNodes = static_cast<NodeAABB*>(KSM::AllocatePageAligned(sizeof(NodeAABB) * mMaxNodeCount));
+		if (!mNodes) {
+			throw std::bad_alloc();
+		}
 		mNodeCount = 0;
+		KSM::CheckPageAlignment(mNodes);
+
+		mVertices = static_cast<RmReal*>(KSM::AllocatePageAligned(sizeof(RmReal) * 3 * vcount));
+		if (!mVertices) {
+			throw std::bad_alloc();
+		}
+		std::memcpy(mVertices, vertices, sizeof(RmReal) * 3 * vcount);
 		mVcount = vcount;
-		mVertices = (RmReal *)::malloc(sizeof(RmReal)*3*vcount);
-		memcpy(mVertices,vertices,sizeof(RmReal)*3*vcount);
+
+		mIndices = static_cast<RmUint32*>(KSM::AllocatePageAligned(sizeof(RmUint32) * 3 * tcount));
+		if (!mIndices) {
+			throw std::bad_alloc();
+		}
+		std::memcpy(mIndices, indices, sizeof(RmUint32) * 3 * tcount);
 		mTcount = tcount;
-		mIndices = (RmUint32 *)::malloc(sizeof(RmUint32)*tcount*3);
-		memcpy(mIndices,indices,sizeof(RmUint32)*tcount*3);
-		mRaycastTriangles = (RmUint32 *)::malloc(tcount*sizeof(RmUint32));
-		memset(mRaycastTriangles,0,tcount*sizeof(RmUint32));
+
+		mRaycastTriangles = static_cast<RmUint32*>(KSM::AllocatePageAligned(sizeof(RmUint32) * tcount));
+		if (!mRaycastTriangles) {
+			throw std::bad_alloc();
+		}
+		std::memset(mRaycastTriangles, 0, sizeof(RmUint32) * tcount);
+
+		mFaceNormals = static_cast<RmReal*>(KSM::AllocatePageAligned(sizeof(RmReal) * 3 * tcount));
+		if (!mFaceNormals) {
+			throw std::bad_alloc();
+		}
+		std::memset(mFaceNormals, 0, sizeof(RmReal) * 3 * tcount);
+
+		// Mark memory as mergeable for KSM
+		KSM::MarkMemoryForKSM(mVertices, sizeof(RmReal) * 3 * vcount);
+		KSM::MarkMemoryForKSM(mIndices, sizeof(RmUint32) * 3 * tcount);
+		KSM::MarkMemoryForKSM(mRaycastTriangles, sizeof(RmUint32) * tcount);
+		KSM::MarkMemoryForKSM(mFaceNormals, sizeof(RmReal) * 3 * tcount);
+
 		mRoot = getNode();
 		mFaceNormals = NULL;
 		new ( mRoot ) NodeAABB(mVcount,mVertices,mTcount,mIndices,maxDepth,minLeafSize,minAxisSize,this,mLeafTriangles);
+
+		KSM::MarkMemoryForKSM(mLeafTriangles.data(), mLeafTriangles.size() * sizeof(RmUint32));
 	}
 
 	~MyRaycastMesh(void)
 	{
-		delete []mNodes;
-		::free(mVertices);
-		::free(mIndices);
-		::free(mFaceNormals);
-		::free(mRaycastTriangles);
+		if (mNodes) { free(mNodes); }
+		if (mVertices) { free(mVertices); }
+		if (mIndices) { free(mIndices); }
+		if (mRaycastTriangles) { free(mRaycastTriangles); }
+		if (mFaceNormals) { free(mFaceNormals); }
 	}
 
 	virtual bool raycast(const RmReal *from,const RmReal *to,RmReal *hitLocation,RmReal *hitNormal,RmReal *hitDistance)
@@ -812,7 +846,7 @@ public:
 		return mRoot->mBounds.mMax;
 	}
 
-	virtual NodeAABB * getNode(void) 
+	virtual NodeAABB * getNode(void)
 	{
 		assert( mNodeCount < mMaxNodeCount );
 		NodeAABB *ret = &mNodes[mNodeCount];
@@ -820,7 +854,7 @@ public:
 		return ret;
 	}
 
-	virtual void getFaceNormal(RmUint32 tri,RmReal *faceNormal) 
+	virtual void getFaceNormal(RmUint32 tri,RmReal *faceNormal)
 	{
 		if ( mFaceNormals == NULL )
 		{
@@ -938,6 +972,29 @@ RaycastMesh * createRaycastMesh(RmUint32 vcount,		// The number of vertices in t
 								)
 {
 	auto m = new MyRaycastMesh(vcount, vertices, tcount, indices, maxDepth, minLeafSize, minAxisSize);
+
+	// Calculate memory usage
+	size_t vertex_size = vcount * sizeof(RmReal) * 3;     // Each vertex has 3 floats
+	size_t index_size = tcount * 3 * sizeof(RmUint32);    // Each triangle has 3 indices
+	size_t bvh_node_size = m->mNodeCount * sizeof(NodeAABB); // BVH Node memory usage
+	size_t bvh_leaf_size = m->mLeafTriangles.size() * sizeof(RmUint32); // BVH leaf triangles
+
+	size_t bvh_size = bvh_node_size + bvh_leaf_size; // Total BVH size
+	size_t total_size = vertex_size + index_size + bvh_size;
+
+	KSM::CheckPageAlignment(m->mNodes);
+	KSM::CheckPageAlignment(m->mVertices);
+
+	LogInfo(
+		"Map Raycast Memory Usage | Vertices [{:.2f}] MB Indices [{:.2f}] MB BVH Nodes [{:.2f}] MB BVH Leaves [{:.2f}] MB BVH Total [{:.2f}] MB",
+		vertex_size / (1024.0 * 1024.0),
+		index_size / (1024.0 * 1024.0),
+		bvh_node_size / (1024.0 * 1024.0),
+		bvh_leaf_size / (1024.0 * 1024.0),
+		bvh_size / (1024.0 * 1024.0)
+	);
+	LogInfo("Total Raycast Memory [{:.2f}] MB", total_size / (1024.0 * 1024.0));
+
 	return static_cast< RaycastMesh * >(m);
 }
 
@@ -984,12 +1041,12 @@ MyRaycastMesh::MyRaycastMesh(std::vector<char>& rm_buffer)
 		return;
 
 	char* buf = rm_buffer.data();
-	
+
 	chunk_size = sizeof(RmUint32);
 	memcpy(&mVcount, buf, chunk_size);
 	buf += chunk_size;
 	bytes_read += chunk_size;
-	
+
 	chunk_size = (sizeof(RmReal) * (3 * mVcount));
 	mVertices = (RmReal *)::malloc(chunk_size);
 	memcpy(mVertices, buf, chunk_size);
@@ -1037,7 +1094,7 @@ MyRaycastMesh::MyRaycastMesh(std::vector<char>& rm_buffer)
 		buf += chunk_size;
 		bytes_read += chunk_size;
 	}
-	
+
 	chunk_size = sizeof(RmUint32);
 	memcpy(&mNodeCount, buf, chunk_size);
 	buf += chunk_size;
@@ -1071,7 +1128,7 @@ MyRaycastMesh::MyRaycastMesh(std::vector<char>& rm_buffer)
 			mNodes[index].mLeft = &mNodes[lNodeIndex];
 		buf += chunk_size;
 		bytes_read += chunk_size;
-		
+
 		RmUint32 rNodeIndex;
 		chunk_size = sizeof(RmUint32);
 		memcpy(&rNodeIndex, buf, chunk_size);
@@ -1106,7 +1163,7 @@ MyRaycastMesh::MyRaycastMesh(std::vector<char>& rm_buffer)
 void MyRaycastMesh::serialize(std::vector<char>& rm_buffer)
 {
 	rm_buffer.clear();
-	
+
 	size_t rm_buffer_size_ = 0;
 
 	rm_buffer_size_ += sizeof(RmUint32); // mVcount

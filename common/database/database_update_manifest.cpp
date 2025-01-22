@@ -6289,7 +6289,50 @@ INSERT INTO `items_evolving_details` VALUES
 
 )",
 		.content_schema_update = true
-	}
+	},
+	ManifestEntry{
+		.version = 9291,
+		.description = "2025_01_21_add_remove_zone_fields",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'client_update_range'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE zone DROP COLUMN IF EXISTS npc_update_range;
+ALTER TABLE zone DROP COLUMN IF EXISTS max_movement_update_range;
+ALTER TABLE `zone` ADD COLUMN `client_update_range` int(11) NOT NULL DEFAULT 600 AFTER `npc_max_aggro_dist`;
+)",
+		.content_schema_update = true,
+	},
+	ManifestEntry{
+		.version = 9292,
+		.description = "2025_01_21_data_buckets_account_id",
+		.check       = "SHOW COLUMNS FROM `data_buckets` LIKE 'account_id'",
+		.condition   = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `data_buckets`
+ADD COLUMN `account_id` bigint(11) NULL DEFAULT 0 AFTER `expires`,
+DROP INDEX `keys`,
+ADD UNIQUE INDEX `keys` (`key`, `character_id`, `npc_id`, `bot_id`, `account_id`) USING BTREE;
+
+-- Add the INDEX for character_id and key
+ALTER TABLE `data_buckets` ADD KEY `idx_account_id_key` (`account_id`, `key`);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9293,
+		.description = "2025_01_10_create_pet_names_table.sql",
+		.check = "SHOW TABLES LIKE 'character_pet_name'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `character_pet_name` (
+    `character_id` INT(11) NOT NULL PRIMARY KEY,
+    `name` VARCHAR(64) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)",
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

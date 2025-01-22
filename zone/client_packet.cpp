@@ -66,6 +66,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/guild_tributes_repository.h"
 #include "../common/repositories/buyer_buy_lines_repository.h"
+#include "../common/repositories/character_pet_name_repository.h"
 
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_stats_record_repository.h"
@@ -160,6 +161,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_CancelTrade] = &Client::Handle_OP_CancelTrade;
 	ConnectedOpcodes[OP_CastSpell] = &Client::Handle_OP_CastSpell;
 	ConnectedOpcodes[OP_ChannelMessage] = &Client::Handle_OP_ChannelMessage;
+	ConnectedOpcodes[OP_ChangePetName] = &Client::Handle_OP_ChangePetName;
 	ConnectedOpcodes[OP_ClearBlockedBuffs] = &Client::Handle_OP_ClearBlockedBuffs;
 	ConnectedOpcodes[OP_ClearNPCMarks] = &Client::Handle_OP_ClearNPCMarks;
 	ConnectedOpcodes[OP_ClearSurname] = &Client::Handle_OP_ClearSurname;
@@ -824,6 +826,10 @@ void Client::CompleteConnect()
 				CharacterID()
 			)
 		);
+
+		if (IsPetNameChangeAllowed()) {
+			InvokeChangePetName(false);
+		}
 	}
 
 	if(ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
@@ -974,6 +980,16 @@ void Client::CompleteConnect()
 
 	RecordStats();
 	AutoGrantAAPoints();
+
+	// set initial position for mob tracking
+	m_last_seen_mob_position.reserve(entity_list.GetMobList().size());
+	for (auto& mob : entity_list.GetMobList()) {
+		if (!mob.second->IsNPC()) {
+			continue;
+		}
+
+		m_last_seen_mob_position[mob.second->GetID()] = mob.second->GetPosition();
+	}
 
 	// enforce some rules..
 	if (!CanEnterZone()) {
@@ -4573,6 +4589,27 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 	return;
 }
 
+void Client::Handle_OP_ChangePetName(const EQApplicationPacket *app) {
+	if (app->size != sizeof(ChangePetName_Struct)) {
+		LogError("Got OP_ChangePetName of incorrect size. Expected [{}], got [{}].", sizeof(ChangePetName_Struct), app->size);
+		return;
+	}
+
+	auto p = (ChangePetName_Struct *) app->pBuffer;
+	if (!IsPetNameChangeAllowed()) {
+		p->response_code = ChangePetNameResponse::NotEligible;
+		QueuePacket(app);
+		return;
+	}
+
+	p->response_code = ChangePetNameResponse::Denied;
+	if (ChangePetName(p->new_pet_name)) {
+		p->response_code = ChangePetNameResponse::Accepted;
+	}
+
+	QueuePacket(app);
+}
+
 void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket *app)
 {
 	if (!RuleB(Spells, EnableBlockedBuffs))
@@ -4971,7 +5008,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		CheckScanCloseMobsMovingTimer();
 	}
 
-	CheckSendBulkClientPositionUpdate();
+	CheckSendBulkNpcPositions();
 
 	int32 new_animation = ppu->animation;
 

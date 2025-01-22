@@ -156,9 +156,6 @@ public:
 	bool SaveZoneCFG();
 	bool DoesAlternateCurrencyExist(uint32 currency_id);
 
-	int GetNpcPositionUpdateDistance() const;
-	void SetNpcPositionUpdateDistance(int in_npc_position_update_distance);
-
 	char *adv_data;
 
 	const char *GetSpellBlockedMessage(uint32 spell_id, const glm::vec3 &location);
@@ -417,7 +414,7 @@ public:
 		SendDiscordMessage(webhook_id, message_prefix + Discord::FormatDiscordMessage(log_category, message));
 	};
 
-	double GetMaxMovementUpdateRange() const { return max_movement_update_range; }
+	double GetClientUpdateRange() const { return m_client_update_range; }
 
 	void SetIsHotzone(bool is_hotzone);
 
@@ -469,7 +466,7 @@ private:
 	bool      staticzone;
 	bool      zone_has_current_time;
 	bool      quest_hot_reload_queued;
-	double    max_movement_update_range;
+	double    m_client_update_range;
 	char      *long_name;
 	char      *map_name;
 	char      *short_name;
