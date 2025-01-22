@@ -24,11 +24,11 @@ void WorldserverCLI::DatabaseDump(int argc, char **argv, argh::parser &cmd, std:
 		"--compress"
 	};
 
-	EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
-
 	if (cmd[{"-h", "--help"}]) {
 		return;
 	}
+
+	EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 	auto s        = new DatabaseDumpService();
 	bool dump_all = cmd[{"-a", "--all"}];
