@@ -42,8 +42,10 @@ mkdir logs
 ln -s ./quests/lua_modules ./lua_modules
 ln -s ./quests/plugins ./plugins
 
-ls -lsh ./lua_modules
+ls -lsh ./lua_modules/
+ls -lsh ./lua_modules/*
 ls -lsh ./plugins
+ls -lsh ./plugins/*
 
 ./bin/world database:updates --skip-backup
 ./bin/zone tests:npc-handins
