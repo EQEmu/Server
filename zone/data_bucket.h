@@ -47,7 +47,7 @@ public:
 	// scoped bucket methods
 	static void SetData(const DataBucketKey &k_);
 	static bool DeleteData(const DataBucketKey &k);
-	static DataBucketsRepository::DataBuckets GetData(const DataBucketKey &k, bool ignore_misses_cache = false);
+	static DataBucketsRepository::DataBuckets GetData(const DataBucketKey &k_, bool ignore_misses_cache = false);
 	static std::string GetDataExpires(const DataBucketKey &k);
 	static std::string GetDataRemaining(const DataBucketKey &k);
 	static std::string GetScopedDbFilters(const DataBucketKey &k);

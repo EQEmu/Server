@@ -176,41 +176,41 @@ DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
 // if the bucket doesn't exist, it will be added to the cache as a miss
 // if ignore_misses_cache is true, the bucket will not be added to the cache as a miss
 // the only place we should be ignoring the misses cache is on the initial read during SetData
-DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, bool ignore_misses_cache)
+DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, bool ignore_misses_cache)
 {
-	DataBucketKey k_ = k; // Copy the key so we can modify it
-	bool is_nested_key = k_.key.find('.') != std::string::npos;
+	DataBucketKey k             = k_; // Copy the key so we can modify it
+	bool          is_nested_key = k.key.find('.') != std::string::npos;
 
 	// Extract the top-level key for nested keys
 	if (is_nested_key) {
-		k_.key = Strings::Split(k_.key, '.').front();
+		k.key = Strings::Split(k.key, '.').front();
 	}
 
 	LogDataBuckets(
 		"Getting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}]",
-		k_.key,
-		k_.bot_id,
-		k_.account_id,
-		k_.character_id,
-		k_.npc_id
+		k.key,
+		k.bot_id,
+		k.account_id,
+		k.character_id,
+		k.npc_id
 	);
 
-	bool can_cache = CanCache(k_);
+	bool can_cache = CanCache(k);
 
 	// Attempt to retrieve the value from the cache
 	if (can_cache) {
 		for (const auto &e : g_data_bucket_cache) {
-			if (CheckBucketMatch(e, k_)) {
+			if (CheckBucketMatch(e, k)) {
 				if (e.expires > 0 && e.expires < std::time(nullptr)) {
 					LogDataBuckets("Attempted to read expired key [{}] removing from cache", e.key_);
-					DeleteData(k_);
+					DeleteData(k);
 					return DataBucketsRepository::NewEntity();
 				}
 
 				LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
 
 				if (is_nested_key) {
-					return ExtractNestedValue(e, k.key);
+					return ExtractNestedValue(e, k_.key);
 				}
 
 				return e;
@@ -223,8 +223,8 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		database,
 		fmt::format(
 			" {} `key` = '{}' LIMIT 1",
-			DataBucket::GetScopedDbFilters(k_),
-			k_.key
+			DataBucket::GetScopedDbFilters(k),
+			k.key
 		)
 	);
 
@@ -236,23 +236,23 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 			g_data_bucket_cache.emplace_back(
 				DataBucketsRepository::DataBuckets{
 					.id = 0,
-					.key_ = k_.key,
+					.key_ = k.key,
 					.value = "",
 					.expires = 0,
-					.account_id = k_.account_id,
-					.character_id = k_.character_id,
-					.npc_id = k_.npc_id,
-					.bot_id = k_.bot_id
+					.account_id = k.account_id,
+					.character_id = k.character_id,
+					.npc_id = k.npc_id,
+					.bot_id = k.bot_id
 				}
 			);
 
 			LogDataBuckets(
 				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}], npc_id [{}], bot_id [{}], cache size before [{}], after [{}]",
-				k_.key,
-				k_.account_id,
-				k_.character_id,
-				k_.npc_id,
-				k_.bot_id,
+				k.key,
+				k.account_id,
+				k.character_id,
+				k.npc_id,
+				k.bot_id,
 				size_before,
 				g_data_bucket_cache.size()
 			);
@@ -265,7 +265,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 
 	// If the entry has expired, delete it
 	if (bucket.expires > 0 && bucket.expires < static_cast<long long>(std::time(nullptr))) {
-		DeleteData(k_);
+		DeleteData(k);
 		return DataBucketsRepository::NewEntity();
 	}
 
@@ -286,7 +286,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 
 	// Handle nested key extraction
 	if (is_nested_key) {
-		return ExtractNestedValue(bucket, k.key);
+		return ExtractNestedValue(bucket, k_.key);
 	}
 
 	return bucket;
