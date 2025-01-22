@@ -19,7 +19,7 @@
 class BaseBotSettingsRepository {
 public:
 	struct BotSettings {
-		uint32_t    char_id;
+		uint32_t    character_id;
 		uint32_t    bot_id;
 		uint8_t     stance;
 		uint16_t    setting_id;
@@ -31,13 +31,13 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("char_id");
+		return std::string("character_id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"char_id",
+			"character_id",
 			"bot_id",
 			"stance",
 			"setting_id",
@@ -51,7 +51,7 @@ public:
 	static std::vector<std::string> SelectColumns()
 	{
 		return {
-			"char_id",
+			"character_id",
 			"bot_id",
 			"stance",
 			"setting_id",
@@ -99,7 +99,7 @@ public:
 	{
 		BotSettings e{};
 
-		e.char_id       = 0;
+		e.character_id	= 0;
 		e.bot_id        = 0;
 		e.stance        = 0;
 		e.setting_id    = 0;
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &bot_settings : bot_settingss) {
-			if (bot_settings.char_id == bot_settings_id) {
+			if (bot_settings.character_id == bot_settings_id) {
 				return bot_settings;
 			}
 		}
@@ -143,7 +143,7 @@ public:
 		if (results.RowCount() == 1) {
 			BotSettings e{};
 
-			e.char_id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id	= row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.bot_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.stance        = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.setting_id    = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -184,7 +184,7 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.character_id));
 		v.push_back(columns[1] + " = " + std::to_string(e.bot_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.stance));
 		v.push_back(columns[3] + " = " + std::to_string(e.setting_id));
@@ -199,7 +199,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", v),
 				PrimaryKey(),
-				e.char_id
+				e.character_id
 			)
 		);
 
@@ -213,7 +213,7 @@ public:
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.character_id));
 		v.push_back(std::to_string(e.bot_id));
 		v.push_back(std::to_string(e.stance));
 		v.push_back(std::to_string(e.setting_id));
@@ -231,7 +231,7 @@ public:
 		);
 
 		if (results.Success()) {
-			e.char_id = results.LastInsertedID();
+			e.character_id = results.LastInsertedID();
 			return e;
 		}
 
@@ -250,7 +250,7 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.character_id));
 			v.push_back(std::to_string(e.bot_id));
 			v.push_back(std::to_string(e.stance));
 			v.push_back(std::to_string(e.setting_id));
@@ -291,7 +291,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotSettings e{};
 
-			e.char_id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id	= row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.bot_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.stance        = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.setting_id    = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -323,7 +323,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotSettings e{};
 
-			e.char_id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id	= row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.bot_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.stance        = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.setting_id    = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -405,7 +405,7 @@ public:
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.character_id));
 		v.push_back(std::to_string(e.bot_id));
 		v.push_back(std::to_string(e.stance));
 		v.push_back(std::to_string(e.setting_id));
@@ -435,7 +435,7 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.character_id));
 			v.push_back(std::to_string(e.bot_id));
 			v.push_back(std::to_string(e.stance));
 			v.push_back(std::to_string(e.setting_id));

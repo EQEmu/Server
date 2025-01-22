@@ -2220,7 +2220,7 @@ bool BotDatabase::LoadBotSettings(Mob* m)
 	std::string query = "";
 
 	if (m->IsClient()) {
-		query = fmt::format("`char_id` = {} AND `stance` = {}", mob_id, stance_id);
+		query = fmt::format("`character_id` = {} AND `stance` = {}", mob_id, stance_id);
 	}
 	else {
 		query = fmt::format("`bot_id` = {} AND `stance` = {}", mob_id, stance_id);
@@ -2274,7 +2274,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 	}
 	
 	uint32 bot_id = (m->IsBot() ? m->CastToBot()->GetBotID() : 0);
-	uint32 char_id = (m->IsClient() ? m->CastToClient()->CharacterID() : 0);
+	uint32 character_id = (m->IsClient() ? m->CastToClient()->CharacterID() : 0);
 	uint8 stance_id = (m->IsBot() ? m->CastToBot()->GetBotStance() : 0);
 
 	if (stance_id == Stance::Passive) {
@@ -2285,7 +2285,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 	std::string query = "";
 	
 	if (m->IsClient()) {
-		query = fmt::format("`char_id` = {} AND `stance` = {}", char_id, stance_id);
+		query = fmt::format("`character_id` = {} AND `stance` = {}", character_id, stance_id);
 	} 
 	else {
 		query = fmt::format("`bot_id` = {} AND `stance` = {}", bot_id, stance_id);
@@ -2301,7 +2301,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 		for (uint16 i = BotBaseSettings::START_ALL; i <= BotBaseSettings::END; ++i) {
 			if (m->CastToBot()->GetBotBaseSetting(i) != m->CastToBot()->GetDefaultBotBaseSetting(i, bot_stance)) {
 				auto e = BotSettingsRepository::BotSettings{
-					.char_id					= char_id,
+					.character_id				= character_id,
 					.bot_id						= bot_id,
 					.stance						= stance_id,
 					.setting_id					= static_cast<uint16_t>(i),
@@ -2321,7 +2321,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 			for (uint16 x = BotSpellTypes::START; x <= BotSpellTypes::END; ++x) {
 				if (m->CastToBot()->GetSetting(i, x) != m->CastToBot()->GetDefaultSetting(i, x, bot_stance)) {
 					auto e = BotSettingsRepository::BotSettings{
-						.char_id				= char_id,
+						.character_id			= character_id,
 						.bot_id					= bot_id,
 						.stance					= stance_id,
 						.setting_id				= static_cast<uint16_t>(x),
@@ -2342,7 +2342,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 	if (m->IsClient()) {
 		if (m->CastToClient()->GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock) != m->GetIllusionBlock()) { // Only illusion block supported
 			auto e = BotSettingsRepository::BotSettings{
-						.char_id				= char_id,
+						.character_id			= character_id,
 						.bot_id					= bot_id,
 						.stance					= stance_id,
 						.setting_id				= static_cast<uint16_t>(BotBaseSettings::IllusionBlock),
@@ -2362,7 +2362,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 				LogBotSettings("{} says, 'Checking {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), m->GetBotSpellCategoryName(i), m->CastToBot()->GetSpellTypeNameByID(x), x, m->CastToClient()->GetBotSetting(i, x), m->CastToClient()->GetDefaultBotSettings(i, x));
 				if (m->CastToClient()->GetBotSetting(i, x) != m->CastToClient()->GetDefaultBotSettings(i, x)) {
 					auto e = BotSettingsRepository::BotSettings{
-						.char_id				= char_id,
+						.character_id			= character_id,
 						.bot_id					= bot_id,
 						.stance					= stance_id,
 						.setting_id				= static_cast<uint16_t>(x),

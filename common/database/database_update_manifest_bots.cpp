@@ -171,7 +171,7 @@ CHANGE COLUMN `spellid` `spell_id` smallint(5) UNSIGNED NOT NULL DEFAULT 0 AFTER
 		.match = "",
 		.sql = R"(
 CREATE TABLE `bot_settings` (
-	`char_id` INT(10) UNSIGNED NOT NULL,
+	`character_id` INT(10) UNSIGNED NOT NULL,
 	`bot_id` INT(10) UNSIGNED NOT NULL,
 	`stance` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 	`setting_id` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
@@ -179,7 +179,7 @@ CREATE TABLE `bot_settings` (
 	`value` INT(10) UNSIGNED NOT NULL,
 	`category_name` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
 	`setting_name` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
-	PRIMARY KEY (`char_id`, `bot_id`, `stance`, `setting_id`, `setting_type`) USING BTREE
+	PRIMARY KEY (`character_id`, `bot_id`, `stance`, `setting_id`, `setting_type`) USING BTREE
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
