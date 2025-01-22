@@ -18,9 +18,7 @@ void bot_command_distance_ranged(Client* c, const Seperator* sep)
 			"- Casters will never go closer than their maximum melee range.",
 			"- Throwing bots will never get closer than the minimum value for ranged to work, or beyond the range of their items."
 		};
-		p.example_format = {
-			fmt::format("{} [value] [actionable]", sep->arg[0])
-		};
+		p.example_format = { fmt::format("{} [value] [actionable]", sep->arg[0]) };
 		p.examples_one = {
 			"To set Wizards to a range of 100:",
 			fmt::format(

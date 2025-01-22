@@ -19,20 +19,11 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 		{
 			"- You can put a spell type ID or shortname after any option except [all], [misc] and [spellsettings] to restore that specifc spell type only"
 		};
-		p.example_format =
-		{
-			fmt::format(
-				"{} [from] [to] [option]"
-				, sep->arg[0]
-			)
-		};
+		p.example_format = { fmt::format("{} [from] [to] [option]", sep->arg[0]) };
 		p.examples_one =
 		{
 			"To copy all settings from BotA to BotB:",
-			fmt::format(
-				"{} BotA BotB all",
-				sep->arg[0]
-			)
+			fmt::format("{} BotA BotB all", sep->arg[0])
 		};
 		p.examples_two =
 		{

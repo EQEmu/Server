@@ -17,8 +17,9 @@ void bot_command_sit_hp_percent(Client* c, const Seperator* sep)
 		{
 			"To set Clerics to sit at 45% HP:",
 			fmt::format(
-				"{} 45 byclass 2",
-				sep->arg[0]
+				"{} 45 byclass {}",
+				sep->arg[0],
+				Class::Cleric
 			)
 		};
 		p.examples_two = 

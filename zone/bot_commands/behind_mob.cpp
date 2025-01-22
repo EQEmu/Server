@@ -12,18 +12,19 @@ void bot_command_behind_mob(Client* c, const Seperator* sep)
 		BotCommandHelpParams p;
 
 		p.description = { "Toggles whether or not bots will stay behind the mob during combat." };
-		p.example_format = { 
-			fmt::format("{} [value] [actionable]", sep->arg[0]) 
-		};
-		p.examples_one = { 
+		p.example_format = { fmt::format("{} [value] [actionable]", sep->arg[0]) };
+		p.examples_one = 
+		{ 
 			"To set Monks to stay behind the mob:", 
-			fmt::format("{} 1 byclass 7", sep->arg[0]) 
+			fmt::format("{} 1 byclass {}", sep->arg[0], Class::Monk) 
 		};
-		p.examples_two = { 
+		p.examples_two = 
+		{ 
 			"To force all bots to stay behind mobs:", 
 			fmt::format("{} 1 spawned", sep->arg[0]) 
 		};
-		p.examples_three = { 
+		p.examples_three = 
+		{ 
 			"To check the behind mob status of all bots:", 
 			fmt::format("{} current spawned", sep->arg[0]) 
 		};

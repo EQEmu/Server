@@ -19,27 +19,23 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 		};
 		p.example_format =
 		{
-			fmt::format(
-				"{} [Type Shortname] [value] [actionable]"
-				, sep->arg[0]
-			),
-			fmt::format(
-				"{} [Type ID] [value] [actionable]"
-				, sep->arg[0]
-			)
+			fmt::format("{} [Type Shortname] [value] [actionable]", sep->arg[0]),
+			fmt::format("{} [Type ID] [value] [actionable]", sep->arg[0])
 		};
 		p.examples_one =
 		{
 			"To set all Shaman to cast slows first:",
 			fmt::format(
-				"{} {} 1 byclass 10",
+				"{} {} 1 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Slow)
+				c->GetSpellTypeShortNameByID(BotSpellTypes::Slow),
+				Class::Shaman
 			),
 			fmt::format(
-				"{} {} 1 byclass 10",
+				"{} {} 1 byclass {}",
 				sep->arg[0],
-				BotSpellTypes::Slow
+				BotSpellTypes::Slow,
+				Class::Shaman
 			)
 		};
 		p.examples_two =

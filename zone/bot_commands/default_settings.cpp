@@ -13,16 +13,14 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 
 		p.description = { "Restores a bot's setting(s) to defaults" };
 		p.notes = { "- You can put a spell type ID or shortname after any option except [all], [misc] and [spellsettings] to restore that specifc spell type only"};
-		p.example_format =
-		{
-			fmt::format("{} [option] [actionable]", sep->arg[0])
-		};
+		p.example_format = { fmt::format("{} [option] [actionable]", sep->arg[0]) };
 		p.examples_one =
 		{
 			"To restore delays for Clerics:",
 			fmt::format(
-				"{} delays byclass 2",
-				sep->arg[0]
+				"{} delays byclass {}",
+				sep->arg[0],
+				Class::Cleric
 			)
 		};
 		p.examples_two =

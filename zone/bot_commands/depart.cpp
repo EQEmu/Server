@@ -21,8 +21,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 		p.examples_one =
 		{
 			"To tell everyone to list their portable locations:",
-			fmt::format(
-				"{} list spawned",
+			fmt::format("{} list spawned",
 				sep->arg[0]
 			)
 		};

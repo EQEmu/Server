@@ -19,27 +19,23 @@ void bot_command_spell_idle_priority(Client* c, const Seperator* sep)
 		};
 		p.example_format =
 		{
-			fmt::format(
-				"{} [Type Shortname] [value] [actionable]"
-				, sep->arg[0]
-			),
-			fmt::format(
-				"{} [Type ID] [value] [actionable]"
-				, sep->arg[0]
-			)
+			fmt::format("{} [Type Shortname] [value] [actionable]", sep->arg[0]),
+			fmt::format("{} [Type ID] [value] [actionable]", sep->arg[0])
 		};
 		p.examples_one =
 		{
 			"To set all Clerics to cast fast heals third:",
 			fmt::format(
-				"{} {} 3 byclass 2",
+				"{} {} 3 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::FastHeals)
+				c->GetSpellTypeShortNameByID(BotSpellTypes::FastHeals),
+				Class::Cleric
 			),
 			fmt::format(
-				"{} {} 3 byclass 2",
+				"{} {} 3 byclass {}",
 				sep->arg[0],
-				BotSpellTypes::FastHeals
+				BotSpellTypes::FastHeals,
+				Class::Cleric
 			)
 		};
 		p.examples_two =

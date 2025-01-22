@@ -15,14 +15,8 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 		p.notes = { "- All pet types are based off the pet owner's setting when a pet is the target" };
 		p.example_format =
 		{
-			fmt::format(
-				"{} [Type Shortname] [value] [actionable]"
-				, sep->arg[0]
-			),
-			fmt::format(
-				"{} [Type ID] [value] [actionable]"
-				, sep->arg[0]
-			)
+			fmt::format("{} [Type Shortname] [value] [actionable]", sep->arg[0]),
+			fmt::format("{} [Type ID] [value] [actionable]", sep->arg[0])
 		};
 		p.examples_one =
 		{ 

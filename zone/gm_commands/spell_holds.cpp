@@ -21,12 +21,12 @@ void command_spell_holds(Client *c, const Seperator *sep)
 			p.example_format =
 			{
 				fmt::format(
-					"{} [Type Shortname] [value]"
-					, sep->arg[0]
+					"{} [Type Shortname] [value]", 
+					sep->arg[0]
 				),
 				fmt::format(
-					"{} [Type ID] [value]"
-					, sep->arg[0]
+					"{} [Type ID] [value]",
+					sep->arg[0]
 				)
 			};
 			p.examples_one =

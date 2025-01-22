@@ -19,14 +19,8 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 		};
 		p.example_format =
 		{
-			fmt::format(
-				"{} [Type Shortname] [value] [actionable]"
-				, sep->arg[0]
-			),
-			fmt::format(
-				"{} [Type ID] [value] [actionable]"
-				, sep->arg[0]
-			)
+			fmt::format("{} [Type Shortname] [value] [actionable]", sep->arg[0]),
+			fmt::format("{} [Type ID] [value] [actionable]", sep->arg[0])
 		};
 		p.examples_one =
 		{
@@ -46,14 +40,16 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 		{
 			"To set all Shaman to not cast cures:",
 			fmt::format(
-				"{} {} 0 byclass 10",
+				"{} {} 0 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Cure)
+				c->GetSpellTypeShortNameByID(BotSpellTypes::Cure),
+				Class::Shaman
 			),
 			fmt::format(
-				"{} {} 0 byclass 10",
+				"{} {} 0 byclass {}",
 				sep->arg[0],
-				BotSpellTypes::Cure
+				BotSpellTypes::Cure,
+				Class::Shaman
 			)
 		};
 		p.examples_three =

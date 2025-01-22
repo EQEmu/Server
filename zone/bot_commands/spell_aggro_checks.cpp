@@ -14,14 +14,8 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 		p.description = { "Toggles whether or not bots will cast a spell type if they think it will get them aggro." };
 		p.example_format =
 		{
-			fmt::format(
-				"{} [Type Shortname] [value] [actionable]"
-				, sep->arg[0]
-			),
-			fmt::format(
-				"{} [Type ID] [value] [actionable]"
-				, sep->arg[0]
-			)
+			fmt::format("{} [Type Shortname] [value] [actionable]", sep->arg[0]),
+			fmt::format("{} [Type ID] [value] [actionable]", sep->arg[0])
 		};
 		p.examples_one =
 		{
@@ -41,14 +35,16 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 		{
 			"To set Shadowknights to ignore aggro checks on snares:",
 			fmt::format(
-				"{} {} 0 byclass 5",
+				"{} {} 0 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Snare)
+				c->GetSpellTypeShortNameByID(BotSpellTypes::Snare),
+				Class::ShadowKnight
 			),
 			fmt::format(
-				"{} {} 0 byclass 5",
+				"{} {} 0 byclass {}",
 				sep->arg[0],
-				BotSpellTypes::Snare
+				BotSpellTypes::Snare,
+				Class::ShadowKnight
 			)
 		};
 		p.examples_three =

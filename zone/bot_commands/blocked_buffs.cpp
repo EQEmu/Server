@@ -19,18 +19,19 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 
 		p.description = { "Allows you to set, view and wipe blocked buffs for the selected bots." };
 		p.notes = { "- You can 'set' spells to be blocked, 'remove' spells from the blocked list, 'list' the current blocked spells or 'wipe' the entire list." };
-		p.example_format = { 
-			fmt::format("{} [add [ID] | remove [ID] | list | wipe] [actionable, default: target]", sep->arg[0]) 
-		};
-		p.examples_one = { 
+		p.example_format = { fmt::format("{} [add [ID] | remove [ID] | list | wipe] [actionable, default: target]", sep->arg[0]) };
+		p.examples_one = 
+		{ 
 			"To add Courage(Spell ID #202) to the targeted bot's blocked list:", 
 			fmt::format("{} add 202", sep->arg[0]) 
 		};
-		p.examples_two = { 
+		p.examples_two = 
+		{ 
 			"To view the targeted bot's blocked buff list:", 
 			fmt::format("{} list", sep->arg[0]) 
 		};
-		p.examples_three = { 
+		p.examples_three = 
+		{ 
 			"To wipe all Warriors bots' blocked buff list:", 
 			fmt::format( "{} wipe byclass {}", sep->arg[0], Class::Warrior) 
 		};
@@ -243,13 +244,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 			"- You can 'set' spells to be blocked, 'remove' spells from the blocked list, 'list' the current blocked spells or 'wipe' the entire list.",
 			"- This controls whether or not any pet the selected bot(s) own will prevent certain beneficial buffs from landing on them."
 		};
-		p.example_format =
-		{
-			fmt::format(
-				"{} [add [ID] | remove [ID] | list | wipe] [actionable, default: target]"
-				, sep->arg[0]
-			)
-		};
+		p.example_format = { fmt::format("{} [add [ID] | remove [ID] | list | wipe] [actionable, default: target]", sep->arg[0]) };
 		p.examples_one =
 		{
 			"To add Courage (Spell ID #202) to the targeted bot's blocked list:",

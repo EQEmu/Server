@@ -17,8 +17,9 @@ void bot_command_sit_in_combat(Client* c, const Seperator* sep)
 		{
 			"To set Clerics to sit in combat:",
 			fmt::format(
-				"{} 1 byclass 2",
-				sep->arg[0]
+				"{} 1 byclass {}",
+				sep->arg[0],
+				Class::Cleric
 			)
 		};
 		p.examples_two = 

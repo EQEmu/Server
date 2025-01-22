@@ -16,10 +16,7 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 			"Tells applicable bots to use the specified disciplines."
 		};
 		p.notes = { "Aside from Lay On Hands and Harm Touch, you will need to know the spell ID of the discipline to tell a bot to attempt to use it." };
-		p.example_format =
-		{
-			fmt::format("{} [aggressive | defensive | spell ID]  [actionable, default: spawned]", sep->arg[0])
-		};
+		p.example_format = { fmt::format("{} [aggressive | defensive | spell ID]  [actionable, default: spawned]", sep->arg[0]) };
 		p.examples_one =
 		{
 			"To tell all bots to use an aggressive discipline:",

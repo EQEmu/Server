@@ -486,9 +486,7 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 			fmt::format("[Default]: {}", RuleI(Bots, MaxFollowDistance)),
 			fmt::format("- You must use a value between 1 and {}.", RuleI(Bots, MaxFollowDistance))
 		};
-		p.example_format = { 
-			fmt::format("{} [reset]/[set [value]] [actionable]", sep->arg[0]) 
-		};
+		p.example_format = { fmt::format("{} [reset]/[set [value]] [actionable]", sep->arg[0]) };
 		p.examples_one = { 
 			"To set all bots to follow at a distance of 25:", 
 			fmt::format("{} set 25 spawned", sep->arg[0]) 
@@ -1157,7 +1155,8 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		BotCommandHelpParams p;
 
 		p.description = { "Change a bot's stance to control the way it behaves." };
-		p.notes = {
+		p.notes = 
+		{
 			"- <b>Changing a stance will reset all settings to match that stance type.</b>",
 			"- Any changes made will only save to that stance for future use.",
 			fmt::format(
@@ -1221,15 +1220,10 @@ void bot_command_stance(Client *c, const Seperator *sep)
 				Stance::AEBurn
 			)
 		};
-
-		p.example_format = { 
-			fmt::format( "{} [current | value: {}-{}]", 
-				sep->arg[0],
-				Stance::Passive,
-				Stance::AEBurn
-			)
-		};
-		p.examples_one = { 
+		p.example_format = 
+		{ fmt::format( "{} [current | value]", sep->arg[0]) };
+		p.examples_one = 
+		{ 
 			"To set all bots to BurnAE:", 
 			fmt::format("{} {} spawned {}",
 				sep->arg[0],
@@ -1237,7 +1231,8 @@ void bot_command_stance(Client *c, const Seperator *sep)
 				Class::ShadowKnight
 			)
 		};
-		p.examples_two = { 
+		p.examples_two = 
+		{ 
 			"To set all Shadowknights to Aggressive:", 
 			fmt::format("{} {} byclass {}",
 				sep->arg[0],

@@ -21,14 +21,8 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep)
 		};
 		p.example_format =
 		{
-			fmt::format(
-				"{} [Type Shortname] [value] [actionable]"
-				, sep->arg[0]
-			),
-			fmt::format(
-				"{} [Type ID] [value] [actionable]"
-				, sep->arg[0]
-			)
+			fmt::format("{} [Type Shortname] [value] [actionable]", sep->arg[0]),
+			fmt::format("{} [Type ID] [value] [actionable]", sep->arg[0])
 		};
 		p.examples_one =
 		{
@@ -48,14 +42,16 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep)
 		{
 			"To set all Druids to stop casting DoTs at 15%:",
 			fmt::format(
-				"{} {} 15 byclass 6",
+				"{} {} 15 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::DOT)
+				c->GetSpellTypeShortNameByID(BotSpellTypes::DOT),
+				Class::Druid
 			),
 			fmt::format(
-				"{} {} 15 byclass 6",
+				"{} {} 15 byclass {}",
 				sep->arg[0],
-				BotSpellTypes::DOT
+				BotSpellTypes::DOT,
+				Class::Druid
 			)
 		};
 		p.examples_three =
