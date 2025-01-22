@@ -34,6 +34,12 @@ while ! mysqladmin ping -uroot -peqemu -hlocalhost --silent; do
     sleep 1
 done
 
+mkdir maps
+mkdir lua_modules
+mkdir logs
+mkdir quests
+mkdir plugins
+
 ./bin/world database:updates --skip-backup
 ./bin/zone tests:npc-handins
 
