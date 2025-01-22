@@ -34,6 +34,7 @@ while ! mysqladmin ping -uroot -peqemu -hlocalhost --silent; do
     sleep 1
 done
 
+./bin/world database:updates --skip-backup
 ./bin/zone tests:npc-handins
 
 # shellcheck disable=SC2164
