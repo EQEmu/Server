@@ -27,49 +27,50 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 	DataBucket::SetData(k);
 }
 
-void DataBucket::SetData(const DataBucketKey &k)
+void DataBucket::SetData(const DataBucketKey &k_)
 {
-	DataBucketKey k_ = k; // copy the key so we can modify it
-	if (k_.key.find('.') != std::string::npos) {
-		k_.key = Strings::Split(k_.key, '.').front();
+	DataBucketKey k = k_; // copy the key so we can modify it
+	if (k.key.find('.') != std::string::npos) {
+		k.key = Strings::Split(k.key, '.').front();
 	}
 
 	auto b = DataBucketsRepository::NewEntity();
-	auto r = GetData(k_, true);
+	auto r = GetData(k, true);
 	// if we have an entry, use it
 	if (r.id > 0) {
 		b = r;
 	}
 
 	// add scoping to bucket
-	if (k_.character_id > 0) {
-		b.character_id = k_.character_id;
+	if (k.character_id > 0) {
+		b.character_id = k.character_id;
 	}
 	else if (k.account_id > 0) {
-		b.account_id = k_.account_id;
+		b.account_id = k.account_id;
 	}
-	else if (k_.npc_id > 0) {
-		b.npc_id = k_.npc_id;
+	else if (k.npc_id > 0) {
+		b.npc_id = k.npc_id;
 	}
-	else if (k_.bot_id > 0) {
-		b.bot_id = k_.bot_id;
+	else if (k.bot_id > 0) {
+		b.bot_id = k.bot_id;
 	}
 
 	const uint64 bucket_id         = b.id;
 	int64        expires_time_unix = 0;
 
-	if (!k_.expires.empty()) {
-		expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::ToInt(k_.expires);
-		if (isalpha(k_.expires[0]) || isalpha(k_.expires[k_.expires.length() - 1])) {
-			expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::TimeToSeconds(k_.expires);
+	if (!k.expires.empty()) {
+		expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::ToInt(k.expires);
+		if (isalpha(k.expires[0]) || isalpha(k.expires[k.expires.length() - 1])) {
+			expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::TimeToSeconds(k.expires);
 		}
 	}
 
 	b.expires = expires_time_unix;
-	b.value   = k_.value;
+	b.value   = k.value;
+	b.key_    = k.key;
 
 	// Check for nested keys (keys with dots)
-	if (k.key.find('.') != std::string::npos) {
+	if (k_.key.find('.') != std::string::npos) {
 		// Retrieve existing JSON or create a new one
 		std::string existing_value = r.id > 0 ? r.value : "{}";
 		json json_value = json::object();
@@ -77,19 +78,19 @@ void DataBucket::SetData(const DataBucketKey &k)
 		try {
 			json_value = json::parse(existing_value);
 		} catch (json::parse_error &e) {
-			LogError("Failed to parse JSON for key [{}]: {}", k.key, e.what());
+			LogError("Failed to parse JSON for key [{}]: {}", k_.key, e.what());
 			json_value = json::object(); // Reset to an empty object on error
 		}
 
 		// Recursively merge new key-value pair into the JSON object
-		auto nested_keys = Strings::Split(k.key, '.');
+		auto nested_keys = Strings::Split(k_.key, '.');
 		json *current = &json_value;
 
 		for (size_t i = 0; i < nested_keys.size(); ++i) {
 			const std::string &key_part = nested_keys[i];
 			if (i == nested_keys.size() - 1) {
 				// Set the value at the final key
-				(*current)[key_part] = k.value;
+				(*current)[key_part] = k_.value;
 			} else {
 				// Traverse or create nested objects
 				if (!current->contains(key_part)) {
@@ -105,18 +106,13 @@ void DataBucket::SetData(const DataBucketKey &k)
 		// Serialize JSON back to string
 		b.value = json_value.dump();
 		b.key_ = nested_keys.front(); // Use the top-level key
-	} else {
-		// For non-nested keys, just set the value
-		b.value = k_.value;
-		b.key_ = k_.key;
 	}
 
 	if (bucket_id) {
-
 		// update the cache if it exists
-		if (CanCache(k_)) {
+		if (CanCache(k)) {
 			for (auto &e: g_data_bucket_cache) {
-				if (CheckBucketMatch(e, k_)) {
+				if (CheckBucketMatch(e, k)) {
 					e = b;
 					break;
 				}
@@ -129,7 +125,7 @@ void DataBucket::SetData(const DataBucketKey &k)
 		b = DataBucketsRepository::InsertOne(database, b);
 
 		// add to cache if it doesn't exist
-		if (CanCache(k_) && !ExistsInCache(b)) {
+		if (CanCache(k) && !ExistsInCache(b)) {
 			DeleteFromMissesCache(b);
 			g_data_bucket_cache.emplace_back(b);
 		}
