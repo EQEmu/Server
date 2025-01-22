@@ -252,7 +252,7 @@ namespace Logs {
 		"XTargets",
 		"EvolveItem",
 		"PositionUpdate",
-		"KSM" // Kernel Samepage Merging
+		"KSM", // Kernel Samepage Merging
 		"Bot Settings",
 		"Bot Spell Checks",
 		"Bot Spell Type Checks",
