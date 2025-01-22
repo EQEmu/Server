@@ -4454,11 +4454,13 @@ bool Client::ChangePetName(std::string new_name) {
 		return false;
 	}
 
-	CharacterPetNameRepository::ReplaceOne(database, {
-		.char_id = static_cast<int32_t>(CharacterID()),
-		.name = new_name
-	});
-
+	CharacterPetNameRepository::ReplaceOne(
+		database,
+		CharacterPetNameRepository::CharacterPetName{
+			.character_id = static_cast<int32_t>(CharacterID()),
+			.name = new_name
+		}
+	);
 
 	if (GetPet()) {
 		GetPet()->TempName(new_name.c_str());
