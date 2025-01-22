@@ -5,6 +5,9 @@ set -ex
 sudo chown eqemu:eqemu /drone/src/ * -R
 sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
 
+chmod +x ./utils/scripts/build/source-db-build.sh
+utils/scripts/build/source-db-build.sh &
+
 git submodule init && git submodule update
 
 perl utils/scripts/build/tag-version.pl
@@ -28,6 +31,13 @@ ldd ./bin/zone
 
 # shellcheck disable=SC2164
 cd /drone/src/
+
+echo "Waiting for MariaDB to be ready..."
+while ! mysqladmin ping -uroot -peqemu -hlocalhost --silent; do
+    sleep 1
+done
+
+./bin/zone tests:npc-handins
 
 chmod +x ./utils/scripts/build/should-release/should-release
 ./utils/scripts/build/should-release/should-release || exit
