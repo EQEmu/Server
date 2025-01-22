@@ -769,8 +769,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				if (!tradingWith->IsMoving()) {
 					tradingWith->FaceTarget(this);
 				}
-
-				EVENT_ITEM_ScriptStopReturn();
 			}
 		}
 

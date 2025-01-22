@@ -1102,7 +1102,6 @@ public:
 
 	// Item methods
 	void UseAugmentContainer(int container_slot);
-	void EVENT_ITEM_ScriptStopReturn();
 	uint32 NukeItem(uint32 itemnum, uint8 where_to_check =
 			(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
 	void SetTint(int16 slot_id, uint32 color);
