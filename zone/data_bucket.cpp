@@ -248,7 +248,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 			);
 
 			LogDataBuckets(
-				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}], npc_id [{}], bot_id [{}], cache size before [{}], after [{}]",
+				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] cache size before [{}] after [{}]",
 				k.key,
 				k.account_id,
 				k.character_id,
