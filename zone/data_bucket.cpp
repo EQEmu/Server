@@ -1,14 +1,15 @@
 #include "data_bucket.h"
-#include "entity.h"
 #include "zonedb.h"
 #include "mob.h"
 #include "worldserver.h"
 #include <ctime>
 #include <cctype>
 #include "../common/json/json.hpp"
+
 using json = nlohmann::json;
 
 extern WorldServer worldserver;
+const std::string  NESTED_KEY_DELIMITER = ".";
 
 std::vector<DataBucketsRepository::DataBuckets> g_data_bucket_cache = {};
 
@@ -30,8 +31,8 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 void DataBucket::SetData(const DataBucketKey &k_)
 {
 	DataBucketKey k = k_; // copy the key so we can modify it
-	if (k.key.find('.') != std::string::npos) {
-		k.key = Strings::Split(k.key, '.').front();
+	if (k.key.find(NESTED_KEY_DELIMITER) != std::string::npos) {
+		k.key = Strings::Split(k.key, NESTED_KEY_DELIMITER).front();
 	}
 
 	auto b = DataBucketsRepository::NewEntity();
@@ -70,7 +71,7 @@ void DataBucket::SetData(const DataBucketKey &k_)
 	b.key_    = k.key;
 
 	// Check for nested keys (keys with dots)
-	if (k_.key.find('.') != std::string::npos) {
+	if (k_.key.find(NESTED_KEY_DELIMITER) != std::string::npos) {
 		// Retrieve existing JSON or create a new one
 		std::string existing_value = r.id > 0 ? r.value : "{}";
 		json json_value = json::object();
@@ -83,7 +84,7 @@ void DataBucket::SetData(const DataBucketKey &k_)
 		}
 
 		// Recursively merge new key-value pair into the JSON object
-		auto nested_keys = Strings::Split(k_.key, '.');
+		auto nested_keys = Strings::Split(k_.key, NESTED_KEY_DELIMITER);
 		json *current = &json_value;
 
 		for (size_t i = 0; i < nested_keys.size(); ++i) {
@@ -141,7 +142,7 @@ DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
 	const DataBucketsRepository::DataBuckets &bucket,
 	const std::string &full_key)
 {
-	auto nested_keys = Strings::Split(full_key, '.');
+	auto nested_keys = Strings::Split(full_key, NESTED_KEY_DELIMITER);
 	json json_value;
 
 	try {
@@ -180,11 +181,11 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 {
 	DataBucketKey k = k_; // Copy the key so we can modify it
 
-	bool is_nested_key = k.key.find('.') != std::string::npos;
+	bool is_nested_key = k.key.find(NESTED_KEY_DELIMITER) != std::string::npos;
 
 	// Extract the top-level key for nested keys
 	if (is_nested_key) {
-		k.key = Strings::Split(k.key, '.').front();
+		k.key = Strings::Split(k.key, NESTED_KEY_DELIMITER).front();
 	}
 
 	LogDataBuckets(
