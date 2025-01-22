@@ -5826,12 +5826,12 @@ struct ChangePetName_Struct {
 };
 
 enum ChangePetNameResponse : int {
-    Denied = 0, 		// 5167 You have requested an invalid name or a Customer Service Representative has denied your name request.  Please try another name.
-    Accepted = 1, 		// 5976 Your request for a name change was successful.
-    Timeout = -3,		// 5979 You must wait longer before submitting another name request. Please try again in a few minutes.
-    NotEligible = -4, 	// 5980 Your character is not eligible for a name change.
-    Pending = -5,  		// 5193 You already have a name change pending.  Please wait until it is fully processed before attempting another name change.
-    Unhandled = -1
+	Denied      = 0,        // 5167 You have requested an invalid name or a Customer Service Representative has denied your name request.  Please try another name.
+	Accepted    = 1,        // 5976 Your request for a name change was successful.
+	Timeout     = -3,        // 5979 You must wait longer before submitting another name request. Please try again in a few minutes.
+	NotEligible = -4,    // 5980 Your character is not eligible for a name change.
+	Pending     = -5,        // 5193 You already have a name change pending.  Please wait until it is fully processed before attempting another name change.
+	Unhandled   = -1
 };
 
 // New OpCode/Struct for SoD+

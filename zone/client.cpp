@@ -4433,7 +4433,8 @@ void Client::ClearPetNameChange() {
 	DataBucket::DeleteData(k);
 }
 
-bool Client::ChangePetName(std::string new_name) {
+bool Client::ChangePetName(std::string new_name)
+{
 	if (new_name.empty()) {
 		return false;
 	}
@@ -4442,12 +4443,13 @@ bool Client::ChangePetName(std::string new_name) {
 		return false;
 	}
 
-	if (GetPet()) {
-		std::string cur_name = GetPet()->GetName();
+	auto pet = GetPet();
+	if (!pet) {
+		return false;
+	}
 
-		if (cur_name == new_name) {
-			return false;
-		}
+	if (pet->GetName() == new_name) {
+		return false;
 	}
 
 	if (!database.CheckNameFilter(new_name) || database.IsNameUsed(new_name)) {
@@ -4462,9 +4464,7 @@ bool Client::ChangePetName(std::string new_name) {
 		}
 	);
 
-	if (GetPet()) {
-		GetPet()->TempName(new_name.c_str());
-	}
+	pet->TempName(new_name.c_str());
 
 	ClearPetNameChange();
 	return true;

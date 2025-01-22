@@ -4580,18 +4580,16 @@ void Client::Handle_OP_ChangePetName(const EQApplicationPacket *app) {
 		return;
 	}
 
-	auto payload = (ChangePetName_Struct*)app->pBuffer;
-
+	auto p = (ChangePetName_Struct *) app->pBuffer;
 	if (!IsPetNameChangeAllowed()) {
-		payload->response_code = ChangePetNameResponse::NotEligible;
+		p->response_code = ChangePetNameResponse::NotEligible;
 		QueuePacket(app);
 		return;
 	}
 
-	if (ChangePetName(payload->new_pet_name)) {
-		payload->response_code = ChangePetNameResponse::Accepted;
-	} else {
-		payload->response_code = ChangePetNameResponse::Denied; // not actually needed but included here for completeness
+	p->response_code = ChangePetNameResponse::Denied;
+	if (ChangePetName(p->new_pet_name)) {
+		p->response_code = ChangePetNameResponse::Accepted;
 	}
 
 	QueuePacket(app);
