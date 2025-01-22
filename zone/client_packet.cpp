@@ -2824,6 +2824,8 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 	AltCurrencyReclaim_Struct *reclaim = (AltCurrencyReclaim_Struct*)app->pBuffer;
 	uint32 item_id = zone->GetCurrencyItemID(reclaim->currency_id);
 
+	LogDebug("currency_id: [{}] item_id: [{}]", reclaim->currency_id, item_id);
+
 	if (!item_id) {
 		return;
 	}
@@ -2871,6 +2873,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, CharacterID(), event_desc);
 		}
 	}
+	SendAlternateCurrencyValues();
 }
 
 void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)

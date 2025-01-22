@@ -249,7 +249,7 @@ namespace Logs {
 		"XTargets",
 		"EvolveItem",
 		"PositionUpdate",
-		"KSM" // Kernel Samepage Merging,
+		"KSM",
 		"NpcHandin"
 	};
 }
