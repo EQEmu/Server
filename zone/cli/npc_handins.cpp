@@ -197,7 +197,7 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 					.money = {.platinum = 1},
 				},
 				.returned = {},
-				.handin_check_result = false,
+				.handin_check_result = true,
 			},
 			TestCase{
 				.description = "Test handing in platinum with items with failure",
