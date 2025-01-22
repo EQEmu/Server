@@ -197,6 +197,19 @@ struct RespawnOption
 	float heading;
 };
 
+struct BotCommandHelpParams {
+	std::vector<std::string> description = {};
+	std::vector<std::string> notes = {};
+	std::vector<std::string> example_format = {};
+	std::vector<std::string> examples_one = {};
+	std::vector<std::string> examples_two = {};
+	std::vector<std::string> examples_three = {};
+	std::vector<std::string> actionables = {};
+	std::vector<std::string> options = {};
+	std::vector<std::string> options_one = {};
+	std::vector<std::string> options_two = {};
+	std::vector<std::string> options_three = {};
+};
 
 // do not ask what all these mean because I have no idea!
 // named from the client's CEverQuest::GetInnateDesc, they're missing some
@@ -1259,16 +1272,7 @@ public:
 	void SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
 	// Help Window
-	std::string SendCommandHelpWindow(
-		Client* c,
-		std::vector<std::string> description,
-		std::vector<std::string> notes,
-		std::vector<std::string> example_format,
-		std::vector<std::string> examples_one, std::vector<std::string> examples_two, std::vector<std::string> examples_three,
-		std::vector<std::string> actionables,
-		std::vector<std::string> options,
-		std::vector<std::string> options_one, std::vector<std::string> options_two, std::vector<std::string> options_three
-	);
+	std::string SendBotCommandHelpWindow(const BotCommandHelpParams& params);
 	std::string GetCommandHelpHeader(std::string color, std::string header);
 	std::string SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 maxLength, bool secondColor = false, std::string secondaryColor = "");
 	void SendSpellTypePrompts(bool commandedTypes = false, bool clientOnlyTypes = false);

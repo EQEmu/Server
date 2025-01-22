@@ -3,18 +3,16 @@
 void bot_command_spell_max_hp_pct(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_spell_max_hp_pct", sep->arg[0], "spellmaxhppct")) {
+		c->Message(Chat::White, "note: Controls at what health percentage a bot will start casting different spell types.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Controls at what health percentage a bot will start casting different spell types"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes = { };
-
-		std::vector<std::string> example_format =
+		p.description = { "Controls at what health percentage a bot will start casting different spell types." };
+		p.example_format =
 		{
 			fmt::format(
 				"{} [Type Shortname] [value] [actionable]"
@@ -25,9 +23,9 @@ void bot_command_spell_max_hp_pct(Client* c, const Seperator* sep)
 				, sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
-			"To set all bots to start snaring when their health is at or below 100% HP:",
+			"To set all bots to allow snaring when their health is at or below 100% HP:",
 			fmt::format(
 				"{} {} 100 spawned",
 				sep->arg[0],
@@ -39,9 +37,9 @@ void bot_command_spell_max_hp_pct(Client* c, const Seperator* sep)
 				BotSpellTypes::Snare
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
-			"To set BotA to start casting fast heals at 30% HP:",
+			"To set BotA to allow casting of fast heals at 30% HP:",
 			fmt::format(
 				"{} {} 30 byname BotA",
 				sep->arg[0],
@@ -53,7 +51,7 @@ void bot_command_spell_max_hp_pct(Client* c, const Seperator* sep)
 				BotSpellTypes::FastHeals
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To check the current Stun max HP percent on all bots:",
 			fmt::format(
@@ -67,28 +65,9 @@ void bot_command_spell_max_hp_pct(Client* c, const Seperator* sep)
 				BotSpellTypes::Stun
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

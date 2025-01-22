@@ -3,63 +3,43 @@
 void bot_command_sit_mana_percent(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_sit_mana_percent", sep->arg[0], "sitmanapercent")) {
+		c->Message(Chat::White, "note: Mana % threshold when bots will sit in combat if allowed.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Mana % threshold when bots will sit in combat if allowed."
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes = { };
-
-		std::vector<std::string> example_format =
+		p.description = { "Mana % threshold when bots will sit in combat if allowed." };
+		p.example_format = { fmt::format("{} [value] [actionable]", sep->arg[0]) };
+		p.examples_one =
 		{
-			fmt::format(
-				"{} [value] [actionable]"
-				, sep->arg[0]
-			)
-		};
-		std::vector<std::string> examples_one =
-		{
-			"To set Clerics to sit at 45% mana:",
+			"To set Clerics to sit at 45% Mana:",
 			fmt::format(
 				"{} 45 byclass 2",
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_two = { };
-		std::vector<std::string> examples_three =
+		p.examples_two =
 		{
-			"To check the mana threshold for all bots:",
+			"To set all bots to sit at 50% Mana:",
+			fmt::format(
+				"{} 50 spawned",
+				sep->arg[0]
+			)
+		};
+		p.examples_three =
+		{
+			"To check the Mana threshold for all bots:",
 			fmt::format(
 				"{} current spawned",
 				sep->arg[0]
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

@@ -3,16 +3,70 @@
 void bot_command_distance_ranged(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_distance_ranged", sep->arg[0], "distanceranged")) {
+		c->Message(Chat::White, "note: Sets the distance bots will attempt to stay away from their target to cast or use ranged items.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
+		BotCommandHelpParams p;
+
+		p.description = { "Sets the distance bots will attempt to stay away from their target to cast or use ranged items." };
+		p.notes = 
+		{ 
+			"- Bots will stay between half the value of the setting and the current value. IE, if set to 60, bots will stay between 30 and 60.",
+			"- Casters will never go closer than their maximum melee range.",
+			"- Throwing bots will never get closer than the minimum value for ranged to work, or beyond the range of their items."
+		};
+		p.example_format = {
+			fmt::format("{} [value] [actionable]", sep->arg[0])
+		};
+		p.examples_one = {
+			"To set Wizards to a range of 100:",
+			fmt::format(
+				"{} 100 byclass {}",
+				sep->arg[0],
+				Class::Wizard
+			)
+		};
+		p.examples_two = {
+			"To set Rangers to a range of 175:",
+			fmt::format(
+				"{} 175 byclass {}",
+				sep->arg[0],
+				Class::Ranger
+			)
+		};
+		p.examples_three = {
+			"To view the current setting of all bots:",
+			fmt::format(
+				"{} current spawned",
+				sep->arg[0]
+			)
+		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
+
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
+		popup_text = DialogueWindow::Table(popup_text);
+
+		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+
+		if (RuleB(Bots, SendClassRaceOnHelp)) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Use {} for information about race/class IDs.",
+					Saylink::Silent("^classracelist")
+				).c_str()
+			);
+		}
+
+		return;
 		c->Message(Chat::White, "usage: %s [current | value: 0 - 300] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(Chat::White, "note: Use [current] to check the current setting.");
 		c->Message(Chat::White, "note: Set the value to the minimum distance you want your bot to try to remain from its target.");
 		c->Message(Chat::White, "note: If they are too far for a spell, it will be skipped.");
 		c->Message(Chat::White, "note: This is set to (90) units by default.");
-		return;
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;

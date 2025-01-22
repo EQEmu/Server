@@ -3,22 +3,21 @@
 void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_spell_pursue_priority", sep->arg[0], "spellpursuepriority")) {
+		c->Message(Chat::White, "note: Sets the order of spell casts when the mob is fleeing in combat by spell type.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Sets the order of spell casts when the mob is fleeing in combat by spell type"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes =
+		p.description = { "Sets the order of spell casts when the mob is fleeing in combat by spell type." };
+		p.notes =
 		{
 			"- Setting a spell type to 0 will prevent that type from being cast.",
 			"- If 2 or more are set to the same priority they will sort by spell type ID."
 		};
-
-		std::vector<std::string> example_format =
+		p.example_format =
 		{
 			fmt::format(
 				"{} [Type Shortname] [value] [actionable]"
@@ -29,7 +28,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 				, sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
 			"To set all bots to cast nukes first:",
 			fmt::format(
@@ -43,7 +42,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 				BotSpellTypes::FastHeals
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To set all Shaman to not cast cures:",
 			fmt::format(
@@ -57,7 +56,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 				BotSpellTypes::Cure
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To check the current pursue priority of buffs on all bots:",
 			fmt::format(
@@ -71,28 +70,9 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 				BotSpellTypes::Buff
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

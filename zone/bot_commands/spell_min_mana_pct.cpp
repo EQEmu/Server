@@ -3,18 +3,16 @@
 void bot_command_spell_min_mana_pct(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_spell_min_mana_pct", sep->arg[0], "spellminmanapct")) {
+		c->Message(Chat::White, "note: Controls at what mana percentage a bot will stop casting different spell types.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Controls at what mana percentage a bot will stop casting different spell types"
-		};
-
-		std::vector<std::string> notes = { };
-
-		std::vector<std::string> example_format =
+		BotCommandHelpParams p;
+		
+		p.description = { "Controls at what mana percentage a bot will stop casting different spell types." };
+		p.example_format =
 		{
 			fmt::format(
 				"{} [Type Shortname] [value] [actionable]"
@@ -25,7 +23,7 @@ void bot_command_spell_min_mana_pct(Client* c, const Seperator* sep)
 				, sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
 			"To set all bots to stop snaring when their mana is below 10% HP:",
 			fmt::format(
@@ -39,7 +37,7 @@ void bot_command_spell_min_mana_pct(Client* c, const Seperator* sep)
 				BotSpellTypes::Snare
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To set BotA to stop casting fast heals at 30% mana:",
 			fmt::format(
@@ -53,7 +51,7 @@ void bot_command_spell_min_mana_pct(Client* c, const Seperator* sep)
 				BotSpellTypes::FastHeals
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To check the current Stun min mana percent on all bots:",
 			fmt::format(
@@ -67,28 +65,9 @@ void bot_command_spell_min_mana_pct(Client* c, const Seperator* sep)
 				BotSpellTypes::Stun
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

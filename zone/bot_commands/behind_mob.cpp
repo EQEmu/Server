@@ -3,67 +3,36 @@
 void bot_command_behind_mob(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_behind_mob", sep->arg[0], "behindmob")) {
+		c->Message(Chat::White, "note: Toggles whether or not bots will stay behind the mob during combat.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"-Toggles whether or not bots will stay behind the mob during combat."
+		BotCommandHelpParams p;
+
+		p.description = { "Toggles whether or not bots will stay behind the mob during combat." };
+		p.example_format = { 
+			fmt::format("{} [value] [actionable]", sep->arg[0]) 
 		};
-
-		std::vector<std::string> notes = { };
-
-		std::vector<std::string> example_format =
-		{
-			fmt::format(
-				"{} [value] [actionable]"
-				, sep->arg[0]
-			)
+		p.examples_one = { 
+			"To set Monks to stay behind the mob:", 
+			fmt::format("{} 1 byclass 7", sep->arg[0]) 
 		};
-
-		std::vector<std::string> examples_one =
-		{
-			"To set Monks to stay behind the mob:",
-			fmt::format(
-				"{} 1 byclass 7",
-				sep->arg[0]
-			)
+		p.examples_two = { 
+			"To force all bots to stay behind mobs:", 
+			fmt::format("{} 1 spawned", sep->arg[0]) 
 		};
-		std::vector<std::string> examples_two = { };
-		std::vector<std::string> examples_three =
-		{
-			"To check the behind mob status for all bots:",
-			fmt::format(
-				"{} current spawned",
-				sep->arg[0]
-			)
+		p.examples_three = { 
+			"To check the behind mob status of all bots:", 
+			fmt::format("{} current spawned", sep->arg[0]) 
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
-		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+		c->SendPopupToClient(sep->arg[0], popup_text.c_str());		
 
 		if (RuleB(Bots, SendClassRaceOnHelp)) {
 			c->Message(

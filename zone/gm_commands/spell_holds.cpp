@@ -11,17 +11,14 @@ void command_spell_holds(Client *c, const Seperator *sep)
 		const bool is_help = !strcasecmp(sep->arg[1], "help");
 
 		if (is_help) {
-			std::vector<std::string> description =
-			{
-				"Toggles whether or not bots can cast certain spell types on you"
-			};
+			BotCommandHelpParams p;
 
-			std::vector<std::string> notes =
+			p.description = { "Toggles whether or not bots can cast certain spell types on you" };
+			p.notes =
 			{
 				"- All pet types are control your how your pet will be affected"
 			};
-
-			std::vector<std::string> example_format =
+			p.example_format =
 			{
 				fmt::format(
 					"{} [Type Shortname] [value]"
@@ -32,7 +29,7 @@ void command_spell_holds(Client *c, const Seperator *sep)
 					, sep->arg[0]
 				)
 			};
-			std::vector<std::string> examples_one =
+			p.examples_one =
 			{
 				"To set DoTs to be held:",
 				fmt::format(
@@ -46,7 +43,7 @@ void command_spell_holds(Client *c, const Seperator *sep)
 					BotSpellTypes::DOT
 				)
 			};
-			std::vector<std::string> examples_two =
+			p.examples_two =
 			{
 				"To check your current DoT settings:",
 				fmt::format(
@@ -60,26 +57,8 @@ void command_spell_holds(Client *c, const Seperator *sep)
 					BotSpellTypes::DOT
 				)
 			};
-			std::vector<std::string> examples_three = { };
 
-			std::vector<std::string> actionables = { };
-
-			std::vector<std::string> options = { };
-			std::vector<std::string> options_one = { };
-			std::vector<std::string> options_two = { };
-			std::vector<std::string> options_three = { };
-
-			std::string popup_text = c->SendCommandHelpWindow(
-				c,
-				description,
-				notes,
-				example_format,
-				examples_one, examples_two, examples_three,
-				actionables,
-				options,
-				options_one, options_two, options_three
-			);
-
+			std::string popup_text = c->SendBotCommandHelpWindow(p);
 			popup_text = DialogueWindow::Table(popup_text);
 
 			c->SendPopupToClient(sep->arg[0], popup_text.c_str());

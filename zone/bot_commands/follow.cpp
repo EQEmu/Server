@@ -3,28 +3,18 @@
 void bot_command_follow(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_follow", sep->arg[0], "follow")) {
+		c->Message(Chat::White, "note: Sets bots of your choosing to follow your target, view their current following state or reset their following state.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Sets bots of your choosing to follow your target, view their current following state or reset their following state."
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes =
-		{
-			"- You can only follow players, bots or mercenaries belonging to your group or raid."
-		};
-
-		std::vector<std::string> example_format =
-		{
-			fmt::format(
-				"{} [optional] [actionable]"
-				, sep->arg[0]
-			)
-		};
-		std::vector<std::string> examples_one =
+		p.description = { "Sets bots of your choosing to follow your target, view their current following state or reset their following state." };
+		p.notes = { "- You can only follow players, bots or mercenaries belonging to your group or raid." };
+		p.example_format = { fmt::format("{} [optional] [actionable]", sep->arg[0]) };
+		p.examples_one =
 		{
 			"To set all Clerics to follow your target:",
 			fmt::format(
@@ -33,7 +23,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 				Class::Cleric
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To check the current state of all bots:",
 			fmt::format(
@@ -41,7 +31,7 @@ void bot_command_follow(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To reset all bots:",
 			fmt::format(
@@ -49,28 +39,9 @@ void bot_command_follow(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

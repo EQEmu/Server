@@ -3,25 +3,17 @@
 void bot_command_taunt(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_taunt", sep->arg[0], "taunt")) {
+		c->Message(Chat::White, "note: TAllows you to turn on/off the taunting state of your bots and/or their pets.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Allows you to turn on/off the taunting state of your bots and/or their pets"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes = { };
-
-		std::vector<std::string> example_format =
-		{
-			fmt::format(
-				"{} [on / off / pet] [optional: pet]  [actionable, default: target]"
-				, sep->arg[0]
-			)
-		};
-		std::vector<std::string> examples_one =
+		p.description = { "Allows you to turn on/off the taunting state of your bots and/or their pets." };
+		p.example_format = { fmt::format("{} [on / off / pet] [optional: pet]  [actionable, default: target]", sep->arg[0]) };
+		p.examples_one =
 		{
 			"To turn off taunt on all bots:",
 			fmt::format(
@@ -29,7 +21,7 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To turn on taunt on all bots' pets:",
 			fmt::format(
@@ -37,7 +29,7 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To turn on taunt for all ShadowKnights:",
 			fmt::format(
@@ -46,28 +38,9 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 				Class::ShadowKnight
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

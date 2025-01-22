@@ -3,28 +3,21 @@
 void bot_command_default_settings(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_default_settings", sep->arg[0], "defaultsettings")) {
+		c->Message(Chat::White, "note: Restores a bot's setting(s) to defaults.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Restores a bot's setting(s) to defaults"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes =
-		{ 
-			"- You can put a spell type ID or shortname after any option except [all], [misc] and [spellsettings] to restore that specifc spell type only"
-		};
-
-		std::vector<std::string> example_format =
+		p.description = { "Restores a bot's setting(s) to defaults" };
+		p.notes = { "- You can put a spell type ID or shortname after any option except [all], [misc] and [spellsettings] to restore that specifc spell type only"};
+		p.example_format =
 		{
-			fmt::format(
-				"{} [option] [actionable]"
-				, sep->arg[0]
-			)
+			fmt::format("{} [option] [actionable]", sep->arg[0])
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
 			"To restore delays for Clerics:",
 			fmt::format(
@@ -32,7 +25,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To restore only Snare delays for BotA:",
 			fmt::format(
@@ -46,48 +39,25 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				BotSpellTypes::Snare
 			)
 		};
-		std::vector<std::string> examples_three = { };
-
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options =
-		{ 
-			"all, misc, spellsettings, spelltypesettings, holds, delays, minthresholds, maxthresholds minmanapct, maxmanapct, minhppct, maxhppct, idlepriority, engagedpriority, pursuepriority, aggrocheck, targetcounts"
-		};
-		std::vector<std::string> options_one =
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
+		p.options = { "all, misc, spellsettings, spelltypesettings, holds, delays, minthresholds, maxthresholds minmanapct, maxmanapct, minhppct, maxhppct, idlepriority, engagedpriority, pursuepriority, aggrocheck, targetcounts" };
+		p.options_one =
 		{
 			"[spellsettings] will restore ^spellsettings options",
 			"[spelltypesettings] restores all spell type settings",
 			"[all] restores all settings"
 		};
-		std::vector<std::string> options_two =
+		p.options_two =
 		{
 			"[misc] restores all miscellaneous options such as:",
 			"- ^showhelm, ^followd, ^stopmeleelevel",
 			"- ^enforcespellsettings, ^bottoggleranged, ^petsettype",
 			"- ^behindmob, ^distanceranged, ^illusionblock",
 			"- ^sitincombat, ^sithppercent and ^sitmanapercent",
-
 		};
-		std::vector<std::string> options_three = 
-		{ 
-			"The remaining options restore that specific type"
-		};
+		p.options_three = { "The remaining options restore that specific type" };
 
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

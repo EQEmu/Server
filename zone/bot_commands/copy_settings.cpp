@@ -3,28 +3,30 @@
 void bot_command_copy_settings(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_copy_settings", sep->arg[0], "copysettings")) {
+		c->Message(Chat::White, "note: Copies settings from one bot to another.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Copies settings from one bot to another bot"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes =
+		p.description =
+		{
+			"Copies settings from one bot to another."
+		};
+		p.notes =
 		{
 			"- You can put a spell type ID or shortname after any option except [all], [misc] and [spellsettings] to restore that specifc spell type only"
 		};
-
-		std::vector<std::string> example_format =
+		p.example_format =
 		{
 			fmt::format(
 				"{} [from] [to] [option]"
 				, sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
 			"To copy all settings from BotA to BotB:",
 			fmt::format(
@@ -32,7 +34,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To copy only Nuke spelltypesettings from BotA to BotB:",
 			fmt::format(
@@ -46,45 +48,22 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 		};
-		std::vector<std::string> examples_three = { };
-
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options =
-		{
-			"[all], [misc], [spellsettings], [spelltypesettings], [spellholds], [spelldelays], [spellminthresholds], [spellmaxthresholds], [spellminmanapct], [spellmaxmanapct], [spellminhppct], [spellmaxhppct], [spellidlepriority], [spellengagedpriority], [spellpursuepriority], [spellaggrochecks], [spelltargetcounts], [sithppercent], [sitmanapercent], [blockedbuffs], [blockedpetbuffs]"
-		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
+		p.options = { "[all], [misc], [spellsettings], [spelltypesettings], [spellholds], [spelldelays], [spellminthresholds], [spellmaxthresholds], [spellminmanapct], [spellmaxmanapct], [spellminhppct], [spellmaxhppct], [spellidlepriority], [spellengagedpriority], [spellpursuepriority], [spellaggrochecks], [spelltargetcounts], [sithppercent], [sitmanapercent], [blockedbuffs], [blockedpetbuffs]" };
 		std::vector<std::string> options_one =
 		{
 			"[spellsettings] will copy ^spellsettings options",
 			"[spelltypesettings] copies all spell type settings",
-			"[all] copies all settings"
+			"[all] copies all settings" 
 		};
 		std::vector<std::string> options_two =
 		{
 			"[misc] copies all miscellaneous options such as:",
-			"- ^showhelm, ^followd, ^stopmeleelevel, ^enforcespellsettings, ^bottoggleranged, ^petsettype, ^behindmob, ^distanceranged, ^illusionblock, ^sitincombat, ^sithppercent, ^sitmanapercent, ^blockedbuffs, ^blockedpetbuffs",
-
+			"- ^showhelm, ^followd, ^stopmeleelevel, ^enforcespellsettings, ^bottoggleranged, ^petsettype, ^behindmob, ^distanceranged, ^illusionblock, ^sitincombat, ^sithppercent, ^sitmanapercent, ^blockedbuffs, ^blockedpetbuffs"
 		};
-		std::vector<std::string> options_three =
-		{
-			"The remaining options copy that specific type"
-		};
+		std::vector<std::string> options_three = { "The remaining options copy that specific type" };
 
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

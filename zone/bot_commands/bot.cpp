@@ -472,82 +472,43 @@ void bot_command_delete(Client *c, const Seperator *sep)
 void bot_command_follow_distance(Client *c, const Seperator *sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_follow_distance", sep->arg[0], "botfollowdistance")) {
+		c->Message(Chat::White, "note: Sets or resets the follow distance of the selected bots.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Sets or resets the follow distance of the selected bots."
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes =
+		p.description = { "Sets or resets the follow distance of the selected bots." };
+		p.notes =
 		{
-			fmt::format(
-				"[Default]: {}",
-				RuleI(Bots, MaxFollowDistance)
-			),
-
-			fmt::format(
-				"- You must use a value between 1 and {}.",
-				RuleI(Bots, MaxFollowDistance)
-			)
+			fmt::format("[Default]: {}", RuleI(Bots, MaxFollowDistance)),
+			fmt::format("- You must use a value between 1 and {}.", RuleI(Bots, MaxFollowDistance))
 		};
-
-		std::vector<std::string> example_format =
-		{
-			fmt::format(
-				"{} [reset]/[set [value]] [actionable]"
-				, sep->arg[0]
-			)
+		p.example_format = { 
+			fmt::format("{} [reset]/[set [value]] [actionable]", sep->arg[0]) 
 		};
-		std::vector<std::string> examples_one =
-		{
-			"To set all bots to follow at a distance of 25:",
-			fmt::format(
-				"{} set 25 spawned",
-				sep->arg[0]
-			)
+		p.examples_one = { 
+			"To set all bots to follow at a distance of 25:", 
+			fmt::format("{} set 25 spawned", sep->arg[0]) 
 		};
-		std::vector<std::string> examples_two =
-		{
-			"To check the curret following distance of all bots:",
-			fmt::format(
-				"{} current spawned",
-				sep->arg[0]
-			)
+		p.examples_two = { 
+			"To check the curret following distance of all bots:", 
+			fmt::format("{} current spawned", sep->arg[0]) 
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To reset the following distance of all Wizards:",
 			fmt::format(
 				"{} reset byclass {}",
 				sep->arg[0],
 				Class::Wizard
-			)
+			) 
 		};
-
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
+		
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
@@ -1187,17 +1148,16 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 void bot_command_stance(Client *c, const Seperator *sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_stance", sep->arg[0], "botstance")) {
+		c->Message(Chat::White, "note: Change a bot's stance to control the way it behaves.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Change a bot's stance to control the way it behaves."
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes =
-		{
+		p.description = { "Change a bot's stance to control the way it behaves." };
+		p.notes = {
 			"- <b>Changing a stance will reset all settings to match that stance type.</b>",
 			"- Any changes made will only save to that stance for future use.",
 			fmt::format(
@@ -1225,102 +1185,74 @@ void bot_command_stance(Client *c, const Seperator *sep)
 				Stance::AEBurn
 			),
 			"<br>",
-				fmt::format(
-					"- {} (#{}) [Default] - Overall balance and casts most spell types by default.",
-					Stance::GetName(Stance::Balanced),
-					Stance::Balanced
-			),
-				fmt::format(
-					"- {} (#{}) - Idle. Does not cast or engage in combat.",
-					Stance::GetName(Stance::Passive),
-					Stance::Passive
-			),
-				fmt::format(
-					"- {} (#{}) - More mana and aggro efficient (SKs will still cast hate line). Longer delays between detrimental spells, thresholds adjusted to cast less often.",
-					Stance::GetName(Stance::Efficient),
-					Stance::Efficient
-			),
-				fmt::format(
-					"- {} (#{}) - Much more aggressive in their cast times and thresholds. More DPS, debuffs and slow but a higher risk of snagging aggro.",
-					Stance::GetName(Stance::Aggressive),
-					Stance::Aggressive
+			fmt::format(
+				"- {} (#{}) [Default] - Overall balance and casts most spell types by default.",
+				Stance::GetName(Stance::Balanced),
+				Stance::Balanced
 			),
 			fmt::format(
-					"- {} (#{}) - Support role. Most offensive spell types are disabled. Focused on heals, cures, CC, debuffs and slows.",
-					Stance::GetName(Stance::Assist),
-					Stance::Assist
+				"- {} (#{}) - Idle. Does not cast or engage in combat.",
+				Stance::GetName(Stance::Passive),
+				Stance::Passive
 			),
 			fmt::format(
-					"- {} (#{}) - Murder. Doesn't care about aggro, just wants to kill. DPS Machine.",
-					Stance::GetName(Stance::Burn),
-					Stance::Burn
+				"- {} (#{}) - More mana and aggro efficient (SKs will still cast hate line). Longer delays between detrimental spells, thresholds adjusted to cast less often.",
+				Stance::GetName(Stance::Efficient),
+				Stance::Efficient
 			),
 			fmt::format(
-					"- {} (#{}) - Murder EVERYTHING. Doesn't care about aggro, casts AEs. Everything must die ASAP.",
-					Stance::GetName(Stance::AEBurn),
-					Stance::AEBurn
+				"- {} (#{}) - Much more aggressive in their cast times and thresholds. More DPS, debuffs and slow but a higher risk of snagging aggro.",
+				Stance::GetName(Stance::Aggressive),
+				Stance::Aggressive
+			),
+			fmt::format(
+				"- {} (#{}) - Support role. Most offensive spell types are disabled. Focused on heals, cures, CC, debuffs and slows.",
+				Stance::GetName(Stance::Assist),
+				Stance::Assist
+			),
+			fmt::format(
+				"- {} (#{}) - Murder. Doesn't care about aggro, just wants to kill. DPS Machine.",
+				Stance::GetName(Stance::Burn),
+				Stance::Burn
+			),
+			fmt::format(
+				"- {} (#{}) - Murder EVERYTHING. Doesn't care about aggro, casts AEs. Everything must die ASAP.",
+				Stance::GetName(Stance::AEBurn),
+				Stance::AEBurn
 			)
 		};
 
-		std::vector<std::string> example_format =
-		{
-			fmt::format(
-				"{} [current | value: {}-{}]", 
+		p.example_format = { 
+			fmt::format( "{} [current | value: {}-{}]", 
 				sep->arg[0],
 				Stance::Passive,
 				Stance::AEBurn
 			)
 		};
-		std::vector<std::string> examples_one =
-		{
-			"To set all bots to BurnAE:",
-			fmt::format(
-				"{} {} spawned {}",
+		p.examples_one = { 
+			"To set all bots to BurnAE:", 
+			fmt::format("{} {} spawned {}",
 				sep->arg[0],
 				Stance::Aggressive,
 				Class::ShadowKnight
 			)
 		};
-		std::vector<std::string> examples_two =
-		{
-			"To set all Shadowknights to Aggressive:",
-			fmt::format(
-				"{} {} byclass {}",
+		p.examples_two = { 
+			"To set all Shadowknights to Aggressive:", 
+			fmt::format("{} {} byclass {}",
 				sep->arg[0],
 				Stance::Aggressive,
 				Class::ShadowKnight
 			)
 		};
-		std::vector<std::string> examples_three =
-		{
-			"To check the current stances of all bots:",
-			fmt::format(
-				"{} current spawned",
-				sep->arg[0]
-			)
+		p.examples_three = { 
+			"To check the current stances of all bots:", 
+			fmt::format("{} current spawned", sep->arg[0]) 
 		};
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

@@ -3,25 +3,24 @@
 void bot_command_discipline(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_discipline", sep->arg[0], "discipline")) {
+		c->Message(Chat::White, "note: Tells applicable bots to use the specified disciplines.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Tells applicable bots to use the specified disciplines"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes = { };
-
-		std::vector<std::string> example_format =
+		p.description =
 		{
-			fmt::format(
-				"{} [aggressive | defensive | spell ID]  [actionable, default: spawned]"
-				, sep->arg[0]
-			)
+			"Tells applicable bots to use the specified disciplines."
 		};
-		std::vector<std::string> examples_one =
+		p.notes = { "Aside from Lay On Hands and Harm Touch, you will need to know the spell ID of the discipline to tell a bot to attempt to use it." };
+		p.example_format =
+		{
+			fmt::format("{} [aggressive | defensive | spell ID]  [actionable, default: spawned]", sep->arg[0])
+		};
+		p.examples_one =
 		{
 			"To tell all bots to use an aggressive discipline:",
 			fmt::format(
@@ -29,7 +28,7 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To tell Warrior bots to use a defensive discipline:",
 			fmt::format(
@@ -38,7 +37,7 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 				Class::Warrior
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To tell all bots to use their Fearless discipline:",
 			fmt::format(
@@ -46,28 +45,9 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

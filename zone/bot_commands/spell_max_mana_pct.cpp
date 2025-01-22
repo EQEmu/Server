@@ -3,18 +3,16 @@
 void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_spell_max_mana_pct", sep->arg[0], "spellmaxmanapct")) {
+		c->Message(Chat::White, "note: Controls at what mana percentage a bot will stop casting different spell types.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Controls at what mana percentage a bot will stop casting different spell types"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes = { };
-
-		std::vector<std::string> example_format =
+		p.description = { "Controls at what mana percentage a bot will stop casting different spell types." };
+		p.example_format =
 		{
 			fmt::format(
 				"{} [Type Shortname] [value] [actionable]"
@@ -25,9 +23,9 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 				, sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
-			"To set all bots to start snaring when their mana is at or below 100% HP:",
+			"To set all bots to allow snaring when their mana is at or below 100% HP:",
 			fmt::format(
 				"{} {} 10 spawned",
 				sep->arg[0],
@@ -39,21 +37,21 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 				BotSpellTypes::Snare
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
-			"To set BotA to start casting fast heals at 30% mana:",
+			"To set BotA to allow casting of fast heals at 90% mana:",
 			fmt::format(
-				"{} {} 30 byname BotA",
+				"{} {} 90 byname BotA",
 				sep->arg[0],
 				c->GetSpellTypeShortNameByID(BotSpellTypes::FastHeals)
 			),
 			fmt::format(
-				"{} {} 30 byname BotA",
+				"{} {} 90 byname BotA",
 				sep->arg[0],
 				BotSpellTypes::FastHeals
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To check the current Stun max mana percent on all bots:",
 			fmt::format(
@@ -67,28 +65,9 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 				BotSpellTypes::Stun
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

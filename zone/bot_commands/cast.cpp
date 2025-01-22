@@ -2,13 +2,17 @@
 
 void bot_command_cast(Client* c, const Seperator* sep)
 {
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Commands bots to force cast a specific spell type, ignoring all settings (holds, delays, thresholds, etc)"
-		};
+	if (helper_command_alias_fail(c, "bot_command_cast", sep->arg[0], "cast")) {
+		c->Message(Chat::White, "note: Commands bots to force cast a specific spell type, ignoring all settings (holds, delays, thresholds, etc).");
 
-		std::vector<std::string> notes =
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		BotCommandHelpParams p;
+
+		p.description = { "Commands bots to force cast a specific spell type, ignoring all settings (holds, delays, thresholds, etc)." };
+		p.notes =
 		{
 			"- This will interrupt any spell currently being cast by bots told to use the command",
 			"- Bots will still check to see if they have the spell in their spell list, whether the target is immune, spell is allowed and all other sanity checks for spells",
@@ -19,19 +23,12 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				, sep->arg[0]
 			)
 		};
-
-		std::vector<std::string> example_format =
+		p.example_format =
 		{
-			fmt::format(
-				"{} [Type Shortname] [actionable, default: spawned]"
-				, sep->arg[0]
-			),
-			fmt::format(
-				"{} [Type ID] [actionable, default: spawned]"
-				, sep->arg[0]
-			)
+			fmt::format("{} [Type Shortname] [actionable, default: spawned]", sep->arg[0]),
+			fmt::format("{} [Type ID] [actionable, default: spawned]", sep->arg[0])
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
 			"To tell everyone to Nuke the target:",
 			fmt::format(
@@ -45,7 +42,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				BotSpellTypes::Nuke
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To tell Skbot to Harm Touch the target:",
 			fmt::format(
@@ -57,7 +54,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To tell all bots to try to cast spell #93 (Burst of Flame)",
 			fmt::format(
@@ -65,28 +62,10 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
 
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { }; 
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
@@ -609,7 +588,12 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		type = "Forced";
 	}
 	else {
-		type = c->GetSpellTypeNameByID(spell_type);
+		if (sub_type == UINT16_MAX) {
+			type = c->GetSpellTypeNameByID(spell_type);
+		}
+		else {
+			type = c->GetSubTypeNameByID(sub_type);
+		}
 	}
 
 	if (!is_success) {

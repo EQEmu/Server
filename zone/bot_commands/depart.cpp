@@ -2,26 +2,23 @@
 
 void bot_command_depart(Client* c, const Seperator* sep)
 {
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Tells bots to list their port locations or port to a specific location"
-		};
+	if (helper_command_alias_fail(c, "bot_command_depart", sep->arg[0], "depart")) {
+		c->Message(Chat::White, "note: Tells bots to list their port locations or port to a specific location.");
 
-		std::vector<std::string> notes =
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		BotCommandHelpParams p;
+
+		p.description = { "Tells bots to list their port locations or port to a specific location." };
+		p.notes =
 		{
 			"- This will interrupt any spell currently being cast by bots told to use the command.",
 			"- Bots will still check to see if they have the spell in their spell list, whether the target is immune, spell is allowed and all other sanity checks for spells"
 		};
-
-		std::vector<std::string> example_format =
-		{
-			fmt::format(
-				"{} [list | zone shortname] [optional: single | group | ae] [actionable, default: spawned]"
-				, sep->arg[0]
-			)
-		};
-		std::vector<std::string> examples_one =
+		p.example_format = { fmt::format("{} [list | zone shortname] [optional: single | group | ae] [actionable, default: spawned]", sep->arg[0]) };
+		p.examples_one =
 		{
 			"To tell everyone to list their portable locations:",
 			fmt::format(
@@ -29,7 +26,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To tell all bots to port to Nexus:",
 			fmt::format(
@@ -37,7 +34,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To tell Druidbot to single target port to Butcher:",
 			fmt::format(
@@ -45,28 +42,9 @@ void bot_command_depart(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

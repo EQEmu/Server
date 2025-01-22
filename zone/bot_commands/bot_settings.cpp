@@ -19,7 +19,6 @@ void bot_command_bot_settings(Client* c, const Seperator* sep)
 		"sithppercent",
 		"sitincombat",
 		"sitmanapercent",
-		"sithppercent",
 		"spellaggrocheck",
 		"spelldelays",
 		"spellengagedpriority",

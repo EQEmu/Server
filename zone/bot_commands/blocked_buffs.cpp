@@ -8,72 +8,35 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 		return;
 	}
 
+	if (helper_command_alias_fail(c, "bot_command_blocked_buffs", sep->arg[0], "blockedbuffs")) {
+		c->Message(Chat::White, "note: Allows you to set, view and wipe blocked buffs for the selected bots.");
+
+		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Allows you to set, view and wipe blocked buffs for the selected bots"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes =
-		{
-			"- You can 'set' spells to be blocked, 'remove' spells from the blocked list, 'list' the current blocked spells or 'wipe' the entire list."
+		p.description = { "Allows you to set, view and wipe blocked buffs for the selected bots." };
+		p.notes = { "- You can 'set' spells to be blocked, 'remove' spells from the blocked list, 'list' the current blocked spells or 'wipe' the entire list." };
+		p.example_format = { 
+			fmt::format("{} [add [ID] | remove [ID] | list | wipe] [actionable, default: target]", sep->arg[0]) 
 		};
+		p.examples_one = { 
+			"To add Courage(Spell ID #202) to the targeted bot's blocked list:", 
+			fmt::format("{} add 202", sep->arg[0]) 
+		};
+		p.examples_two = { 
+			"To view the targeted bot's blocked buff list:", 
+			fmt::format("{} list", sep->arg[0]) 
+		};
+		p.examples_three = { 
+			"To wipe all Warriors bots' blocked buff list:", 
+			fmt::format( "{} wipe byclass {}", sep->arg[0], Class::Warrior) 
+		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> example_format =
-		{
-			fmt::format(
-				"{} [add [ID] | remove [ID] | list | wipe] [actionable, default: target]"
-				, sep->arg[0]
-			)
-		};
-		std::vector<std::string> examples_one =
-		{
-			"To add Courage (Spell ID #202) to the targeted bot's blocked list:",
-			fmt::format(
-				"{} add 202",
-				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
-			)
-		};
-		std::vector<std::string> examples_two =
-		{
-			"To view the targeted bot's blocked buff list:",
-			fmt::format(
-				"{} list",
-				sep->arg[0]
-			)
-		};
-		std::vector<std::string> examples_three =
-		{
-			"To wipe all Warriors bots' blocked buff list:",
-			fmt::format(
-				"{} wipe byclass {}",
-				sep->arg[0],
-				Class::Warrior
-			)
-		};
-
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
@@ -265,26 +228,29 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 		return;
 	}
 
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Allows you to set, view and wipe blocked pet buffs for the selected bots"
-		};
+	if (helper_command_alias_fail(c, "bot_command_blocked_pet_buffs", sep->arg[0], "blockedpetbuffs")) {
+		c->Message(Chat::White, "note: Allows you to set, view and wipe blocked pet buffs for the selected bots.");
 
-		std::vector<std::string> notes =
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		BotCommandHelpParams p;
+
+		p.description = { "Allows you to set, view and wipe blocked pet buffs for the selected bots." };
+		p.notes =
 		{
 			"- You can 'set' spells to be blocked, 'remove' spells from the blocked list, 'list' the current blocked spells or 'wipe' the entire list.",
-			"- This controls whether or not any pet the selected bot(s) own will prevent certain buffs from being cast."
+			"- This controls whether or not any pet the selected bot(s) own will prevent certain beneficial buffs from landing on them."
 		};
-
-		std::vector<std::string> example_format =
+		p.example_format =
 		{
 			fmt::format(
 				"{} [add [ID] | remove [ID] | list | wipe] [actionable, default: target]"
 				, sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
 			"To add Courage (Spell ID #202) to the targeted bot's blocked list:",
 			fmt::format(
@@ -293,7 +259,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To view the targeted bot's blocked buff list:",
 			fmt::format(
@@ -301,7 +267,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 				sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To wipe all Warriors bots' blocked buff list:",
 			fmt::format(
@@ -310,28 +276,9 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 				Class::Warrior
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

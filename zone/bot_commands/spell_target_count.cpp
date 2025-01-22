@@ -3,18 +3,16 @@
 void bot_command_spell_target_count(Client* c, const Seperator* sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_spell_target_count", sep->arg[0], "spelltargetcount")) {
+		c->Message(Chat::White, "note: Decides how many eligible targets are required for an AE or group spell to cast by spell type.");
+
 		return;
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::vector<std::string> description =
-		{
-			"Decides how many eligible targets are required for an AE or group spell to cast by spell type"
-		};
+		BotCommandHelpParams p;
 
-		std::vector<std::string> notes = { };
-
-		std::vector<std::string> example_format =
+		p.description = { "Decides how many eligible targets are required for an AE or group spell to cast by spell type." };
+		p.example_format =
 		{
 			fmt::format(
 				"{} [Type Shortname] [value] [actionable]"
@@ -25,7 +23,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 				, sep->arg[0]
 			)
 		};
-		std::vector<std::string> examples_one =
+		p.examples_one =
 		{
 			"To set all bots to AEMez with 5 or more targets:",
 			fmt::format(
@@ -39,7 +37,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 				BotSpellTypes::AEMez
 			)
 		};
-		std::vector<std::string> examples_two =
+		p.examples_two =
 		{
 			"To set Wizards to require 5 targets for AENukes:",
 			fmt::format(
@@ -53,7 +51,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 				BotSpellTypes::AENukes
 			)
 		};
-		std::vector<std::string> examples_three =
+		p.examples_three =
 		{
 			"To check the current AESlow count on all bots:",
 			fmt::format(
@@ -67,28 +65,9 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 				BotSpellTypes::AESlow
 			)
 		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
 
-		std::vector<std::string> actionables =
-		{
-			"target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned"
-		};
-
-		std::vector<std::string> options = { };
-		std::vector<std::string> options_one = { };
-		std::vector<std::string> options_two = { };
-		std::vector<std::string> options_three = { };
-
-		std::string popup_text = c->SendCommandHelpWindow(
-			c,
-			description,
-			notes,
-			example_format,
-			examples_one, examples_two, examples_three,
-			actionables,
-			options,
-			options_one, options_two, options_three
-		);
-
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());

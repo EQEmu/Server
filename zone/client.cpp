@@ -13112,20 +13112,10 @@ void Client::ShowZoneShardMenu()
 	}
 }
 
-std::string Client::SendCommandHelpWindow(
-	Client* c,
-	std::vector<std::string> description,
-	std::vector<std::string> notes,
-	std::vector<std::string> example_format,
-	std::vector<std::string> examples_one, std::vector<std::string> examples_two, std::vector<std::string> examples_three,
-	std::vector<std::string> actionables,
-	std::vector<std::string> options,
-	std::vector<std::string> options_one, std::vector<std::string> options_two, std::vector<std::string> options_three
-) {
-
+std::string Client::SendBotCommandHelpWindow(const BotCommandHelpParams& params) {
 	unsigned string_length = 0;
 	unsigned current_place = 0;
-	uint16 max_length = RuleI(Command, MaxHelpLineLength); //character length of a line before splitting in to multiple lines
+	uint16 max_length = RuleI(Command, MaxHelpLineLength); // Line length before splitting
 	const std::string& description_color = RuleS(Command, DescriptionColor);
 	const std::string& description_header_color = RuleS(Command, DescriptionHeaderColor);
 	const std::string& alt_description_color = RuleS(Command, AltDescriptionColor);
@@ -13145,81 +13135,66 @@ std::string Client::SendCommandHelpWindow(
 	const std::string& actionable_color = RuleS(Command, ActionableColor);
 	const std::string& actionable_header_color = RuleS(Command, ActionableHeaderColor);
 	const std::string& alt_actionable_color = RuleS(Command, AltActionableColor);
-	const std::string& header_color = RuleS(Command, HeaderColor);
-	const std::string& secondary_header_color = RuleS(Command, SecondaryHeaderColor);
-	const std::string& alt_header_color = RuleS(Command, AltHeaderColor);
 	const std::string& filler_line_color = RuleS(Command, FillerLineColor);
-
-
 
 	std::string filler_line = "--------------------------------------------------------------------";
 	std::string filler_dia = DialogueWindow::TableRow(DialogueWindow::TableCell(fmt::format("{}", DialogueWindow::ColorMessage(filler_line_color, filler_line))));
 	std::string break_line = DialogueWindow::Break();
-	std::string indent = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-	std::string bullet = "- ";
-	std::string popup_text = "";
+	std::string popup_text;
 
-	/*
-	max_length is how long you want lines to be before splitting them. This will look for the last space before the count and split there so words are not split mid sentence
-	Any SplitCommandHelpText can have the first string from a vector differ in color from the next strings by setting an alternate color for that type in the rule.
-	*/
-
-	if (!description.empty()) {
+	if (!params.description.empty()) {
 		popup_text += GetCommandHelpHeader(description_header_color, "[Description]");
-		popup_text += SplitCommandHelpText(description, description_color, max_length, !alt_description_color.empty(), alt_description_color);
+		popup_text += SplitCommandHelpText(params.description, description_color, max_length, !alt_description_color.empty(), alt_description_color);
 	}
 
-	if (!notes.empty()) {
-		popup_text += break_line;
-		popup_text += break_line;
+	if (!params.notes.empty()) {
+		popup_text += break_line + break_line;
 		popup_text += GetCommandHelpHeader(note_header_color, "[Notes]");
-		popup_text += SplitCommandHelpText(notes, note_color, max_length, !alt_note_color.empty(), alt_note_color);
+		popup_text += SplitCommandHelpText(params.notes, note_color, max_length, !alt_note_color.empty(), alt_note_color);
 	}
 
-	if (!example_format.empty()) {
+	if (!params.example_format.empty()) {
 		popup_text += filler_dia;
 		popup_text += GetCommandHelpHeader(example_header_color, "[Examples]");
-		popup_text += SplitCommandHelpText(example_format, example_color, max_length, !alt_example_color.empty(), alt_example_color);
+		popup_text += SplitCommandHelpText(params.example_format, example_color, max_length, !alt_example_color.empty(), alt_example_color);
 	}
 
-	if (!examples_one.empty()) {
-		popup_text += break_line;
-		popup_text += break_line;
-		popup_text += SplitCommandHelpText(examples_one, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
+	if (!params.examples_one.empty()) {
+		popup_text += break_line + break_line;
+		popup_text += SplitCommandHelpText(params.examples_one, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
 	}
 
-	if (!examples_two.empty()) {
-		popup_text += SplitCommandHelpText(examples_two, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
+	if (!params.examples_two.empty()) {
+		popup_text += SplitCommandHelpText(params.examples_two, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
 	}
 
-	if (!examples_three.empty()) {
-		popup_text += SplitCommandHelpText(examples_three, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
+	if (!params.examples_three.empty()) {
+		popup_text += SplitCommandHelpText(params.examples_three, sub_example_color, max_length, !sub_alt_example_color.empty(), sub_alt_example_color);
 	}
 
-	if (!options.empty()) {
+	if (!params.options.empty()) {
 		popup_text += filler_dia;
 		popup_text += GetCommandHelpHeader(option_header_color, "[Options]");
-		popup_text += SplitCommandHelpText(options, option_color, max_length, !alt_option_color.empty(), alt_option_color);
+		popup_text += SplitCommandHelpText(params.options, option_color, max_length, !alt_option_color.empty(), alt_option_color);
 	}
 
-	if (!options_one.empty()) {
-		popup_text += break_line;
-		popup_text += break_line;
-		popup_text += SplitCommandHelpText(options_one, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
+	if (!params.options_one.empty()) {
+		popup_text += break_line + break_line;
+		popup_text += SplitCommandHelpText(params.options_one, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
 	}
 
-	if (!options_two.empty()) {
-		popup_text += SplitCommandHelpText(options_two, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
+	if (!params.options_two.empty()) {
+		popup_text += SplitCommandHelpText(params.options_two, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
 	}
 
-	if (!options_three.empty()) {
-		popup_text += SplitCommandHelpText(options_three, secondary_header_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
+	if (!params.options_three.empty()) {
+		popup_text += SplitCommandHelpText(params.options_three, sub_option_color, max_length, !sub_alt_option_color.empty(), sub_alt_option_color);
 	}
 
-	if (!actionables.empty()) {
+	if (!params.actionables.empty()) {
 		popup_text += filler_dia;
 		popup_text += GetCommandHelpHeader(actionable_header_color, "[Actionables]");
-		popup_text += SplitCommandHelpText(actionables, actionable_color, max_length, !alt_actionable_color.empty(), alt_actionable_color);
+		popup_text += SplitCommandHelpText(params.actionables, actionable_color, max_length, !alt_actionable_color.empty(), alt_actionable_color);
 	}
 
 	popup_text = DialogueWindow::Table(popup_text);
