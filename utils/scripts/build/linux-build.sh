@@ -34,8 +34,10 @@ while ! mysqladmin ping -uroot -peqemu -hlocalhost --silent; do
     sleep 1
 done
 
+echo "# Cloning quests repository"
 git -C ./quests pull 2> /dev/null || git clone https://github.com/ProjectEQ/projecteqquests.git quests
 
+# remove this eventually
 cd ./quests && git checkout akkadius/item-handin-overhaul && cd ..
 
 mkdir maps
@@ -44,7 +46,13 @@ mkdir logs
 ln -s ./quests/lua_modules ./lua_modules
 ln -s ./quests/plugins ./plugins
 
+echo "# Running world database updates"
 ./bin/world database:updates --skip-backup
+
+echo "# Running shared_memory"
+./bin/shared_memory
+
+echo "# Running NPC hand-in tests"
 ./bin/zone tests:npc-handins
 
 # shellcheck disable=SC2164
