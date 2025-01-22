@@ -16165,13 +16165,7 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 					   in->quantity,
 					   in->serial_number
 			);
-			Message(
-				Chat::Yellow,
-				"Direct inventory delivey is not yet implemented.  Please visit the vendor directly or purchase via parcel delivery."
-			);
-			in->method     = BazaarByDirectToInventory;
-			in->sub_action = Failed;
-			TradeRequestFailed(app);
+			BuyTraderItemVoucher(in, app);
 			break;
 		}
 	}
