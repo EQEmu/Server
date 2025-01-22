@@ -34,11 +34,14 @@ while ! mysqladmin ping -uroot -peqemu -hlocalhost --silent; do
     sleep 1
 done
 
+git -C ./quests pull 2> /dev/null || git clone https://github.com/ProjectEQ/projecteqquests.git quests
+
 mkdir maps
 mkdir lua_modules
 mkdir logs
-mkdir quests
-mkdir plugins
+
+ln -s ./quests/lua_modules ./lua_modules
+ln -s ./quests/plugins ./plugins
 
 ./bin/world database:updates --skip-backup
 ./bin/zone tests:npc-handins
