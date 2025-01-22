@@ -4,12 +4,17 @@ void WorldserverCLI::DatabaseUpdates(int argc, char **argv, argh::parser &cmd, s
 {
 	description = "Runs database updates manually";
 
+	std::vector<std::string> options   = {
+		"--skip-backup",
+	};
+
 	if (cmd[{"-h", "--help"}]) {
 		return;
 	}
 
 	DatabaseUpdate update;
 	update.SetDatabase(&database)
+		->SetSkipBackup(cmd[{"--skip-backup"}] )
 		->SetContentDatabase(&content_db)
 		->CheckDbUpdates();
 }

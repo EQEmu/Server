@@ -29,12 +29,15 @@ public:
 
 	DatabaseUpdate *SetDatabase(Database *db);
 	DatabaseUpdate *SetContentDatabase(Database *db);
+	DatabaseUpdate *SetSkipBackup(bool skip);
 	bool HasPendingUpdates();
 private:
+	bool m_skip_backup = false;
 	Database *m_database;
 	Database *m_content_database;
 	static bool CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b);
 	void InjectBotsVersionColumn();
+
 };
 
 #endif //EQEMU_DATABASE_UPDATE_H
