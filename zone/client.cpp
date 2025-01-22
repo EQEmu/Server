@@ -66,6 +66,7 @@ extern volatile bool RunLoops;
 #include "../common/repositories/character_spells_repository.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/character_data_repository.h"
+#include "../common/repositories/character_pet_name_repository.h"
 #include "../common/repositories/discovered_items_repository.h"
 #include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/keyring_repository.h"
@@ -1828,7 +1829,7 @@ void Client::FriendsWho(char *FriendsString) {
 		Message(0, "Error: World server disconnected");
 	else {
 		auto pack =
-		    new ServerPacket(ServerOP_FriendsWho, sizeof(ServerFriendsWho_Struct) + strlen(FriendsString));
+			new ServerPacket(ServerOP_FriendsWho, sizeof(ServerFriendsWho_Struct) + strlen(FriendsString));
 		ServerFriendsWho_Struct* FriendsWho = (ServerFriendsWho_Struct*) pack->pBuffer;
 		FriendsWho->FromID = GetID();
 		strcpy(FriendsWho->FromName, GetName());
@@ -2209,7 +2210,7 @@ void Client::Stand() {
 }
 
 void Client::Sit() {
-    SetAppearance(eaSitting, false);
+	SetAppearance(eaSitting, false);
 }
 
 void Client::ChangeLastName(std::string last_name) {
@@ -4392,6 +4393,83 @@ void Client::KeyRingList()
 	}
 }
 
+bool Client::IsPetNameChangeAllowed() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		return true;
+	}
+
+	return false;
+}
+
+void Client::InvokeChangePetName(bool immediate) {
+	if (!IsPetNameChangeAllowed()) {
+		return;
+	}
+
+	auto packet_op = immediate ? OP_InvokeChangePetNameImmediate : OP_InvokeChangePetName;
+
+	auto outapp = new EQApplicationPacket(packet_op, 0);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::GrantPetNameChange() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+	k.value = "true";
+	DataBucket::SetData(k);
+
+	InvokeChangePetName(true);
+}
+
+void Client::ClearPetNameChange() {
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "PetNameChangesAllowed";
+
+	DataBucket::DeleteData(k);
+}
+
+bool Client::ChangePetName(std::string new_name)
+{
+	if (new_name.empty()) {
+		return false;
+	}
+
+	if (!IsPetNameChangeAllowed()) {
+		return false;
+	}
+
+	auto pet = GetPet();
+	if (!pet) {
+		return false;
+	}
+
+	if (pet->GetName() == new_name) {
+		return false;
+	}
+
+	if (!database.CheckNameFilter(new_name) || database.IsNameUsed(new_name)) {
+		return false;
+	}
+
+	CharacterPetNameRepository::ReplaceOne(
+		database,
+		CharacterPetNameRepository::CharacterPetName{
+			.character_id = static_cast<int32_t>(CharacterID()),
+			.name = new_name
+		}
+	);
+
+	pet->TempName(new_name.c_str());
+
+	ClearPetNameChange();
+	return true;
+}
+
 bool Client::IsDiscovered(uint32 item_id) {
 	const auto& l = DiscoveredItemsRepository::GetWhere(
 		database,
@@ -5628,13 +5706,13 @@ bool Client::TryReward(uint32 claim_id)
 
 	if (amt == 1) {
 		query = StringFormat("DELETE FROM account_rewards "
-				     "WHERE account_id = %i AND reward_id = %i",
-				     AccountID(), claim_id);
+					 "WHERE account_id = %i AND reward_id = %i",
+					 AccountID(), claim_id);
 		auto results = database.QueryDatabase(query);
 	} else {
 		query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
-				     "WHERE account_id = %i AND reward_id = %i",
-				     AccountID(), claim_id);
+					 "WHERE account_id = %i AND reward_id = %i",
+					 AccountID(), claim_id);
 		auto results = database.QueryDatabase(query);
 	}
 
@@ -8367,7 +8445,7 @@ int Client::GetQuiverHaste(int delay)
 	for (int r = EQ::invslot::GENERAL_BEGIN; r <= EQ::invslot::GENERAL_END; r++) {
 		pi = GetInv().GetItem(r);
 		if (pi && pi->IsClassBag() && pi->GetItem()->BagType == EQ::item::BagTypeQuiver &&
-		    pi->GetItem()->BagWR > 0)
+			pi->GetItem()->BagWR > 0)
 			break;
 		if (r == EQ::invslot::GENERAL_END)
 			// we will get here if we don't find a valid quiver
@@ -9841,7 +9919,7 @@ const ExpeditionLockoutTimer* Client::GetExpeditionLockout(
 	for (const auto& expedition_lockout : m_expedition_lockouts)
 	{
 		if ((include_expired || !expedition_lockout.IsExpired()) &&
-		    expedition_lockout.IsSameLockout(expedition_name, event_name))
+			expedition_lockout.IsSameLockout(expedition_name, event_name))
 		{
 			return &expedition_lockout;
 		}
@@ -9856,7 +9934,7 @@ std::vector<ExpeditionLockoutTimer> Client::GetExpeditionLockouts(
 	for (const auto& lockout : m_expedition_lockouts)
 	{
 		if ((include_expired || !lockout.IsExpired()) &&
-		    lockout.GetExpeditionName() == expedition_name)
+			lockout.GetExpeditionName() == expedition_name)
 		{
 			lockouts.emplace_back(lockout);
 		}

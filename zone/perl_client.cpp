@@ -3229,6 +3229,11 @@ perl::array Perl_Client_GetInventorySlots(Client* self)
 	return result;
 }
 
+void Perl_Client_GrantPetNameChange(Client* self)
+{
+	self->GrantPetNameChange();
+}
+
 void Perl_Client_SetAAEXPPercentage(Client* self, uint8 percentage)
 {
 	self->SetAAEXPPercentage(percentage);
@@ -3335,6 +3340,7 @@ void perl_register_client()
 	package.add("CanHaveSkill", &Perl_Client_CanHaveSkill);
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
+	package.add("GrantPetNameChange", &Perl_Client_GrantPetNameChange);
 	package.add("CharacterID", &Perl_Client_CharacterID);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);

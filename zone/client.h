@@ -307,6 +307,11 @@ public:
 	void KeyRingAdd(uint32 item_id);
 	bool KeyRingCheck(uint32 item_id);
 	void KeyRingList();
+	bool IsPetNameChangeAllowed();
+	void GrantPetNameChange();
+	void ClearPetNameChange();
+	void InvokeChangePetName(bool immediate = true);
+	bool ChangePetName(std::string new_name);
 	bool IsClient() const override { return true; }
 	bool IsOfClientBot() const override { return true; }
 	bool IsOfClientBotMerc() const override { return true; }
@@ -2267,6 +2272,7 @@ public:
 	const std::string &GetMailKeyFull() const;
 	const std::string &GetMailKey() const;
 	void ShowZoneShardMenu();
+	void Handle_OP_ChangePetName(const EQApplicationPacket *app);
 };
 
 #endif

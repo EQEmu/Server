@@ -6320,6 +6320,19 @@ ALTER TABLE `data_buckets` ADD KEY `idx_account_id_key` (`account_id`, `key`);
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9293,
+		.description = "2025_01_10_create_pet_names_table.sql",
+		.check = "SHOW TABLES LIKE 'character_pet_name'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `character_pet_name` (
+    `character_id` INT(11) NOT NULL PRIMARY KEY,
+    `name` VARCHAR(64) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)",
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
