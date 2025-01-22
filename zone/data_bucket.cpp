@@ -178,8 +178,9 @@ DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
 // the only place we should be ignoring the misses cache is on the initial read during SetData
 DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, bool ignore_misses_cache)
 {
-	DataBucketKey k             = k_; // Copy the key so we can modify it
-	bool          is_nested_key = k.key.find('.') != std::string::npos;
+	DataBucketKey k = k_; // Copy the key so we can modify it
+
+	bool is_nested_key = k.key.find('.') != std::string::npos;
 
 	// Extract the top-level key for nested keys
 	if (is_nested_key) {
