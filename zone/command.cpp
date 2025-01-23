@@ -148,7 +148,7 @@ int command_init(void)
 		command_add("help", "[Search Criteria] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
 		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix, equiv to load_shared_memory followed by apply_shared_memory", AccountStatus::GMImpossible, command_hotfix) ||
 		command_add("hp", "Refresh your HP bar from the server.", AccountStatus::Player, command_hp) ||
-		command_add("illusionblock", "Controls whether or not illusion effects will land on you when cast by other players or bots", AccountStatus::Player, command_illusion_block) ||
+		command_add("illusionblock", "Controls whether or not illusion effects will land on you when cast by other players or bots", AccountStatus::Guide, command_illusion_block) ||
 		command_add("instance", "Modify Instances", AccountStatus::GMMgmt, command_instance) ||
 		command_add("interrogateinv", "use [help] argument for available options", AccountStatus::Player, command_interrogateinv) ||
 		command_add("interrupt", "[Message ID] [Color] - Interrupt your casting. Arguments are optional.", AccountStatus::Guide, command_interrupt) ||
