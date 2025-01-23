@@ -198,17 +198,17 @@ struct RespawnOption
 };
 
 struct BotCommandHelpParams {
-	std::vector<std::string> description = {};
-	std::vector<std::string> notes = {};
-	std::vector<std::string> example_format = {};
-	std::vector<std::string> examples_one = {};
-	std::vector<std::string> examples_two = {};
-	std::vector<std::string> examples_three = {};
-	std::vector<std::string> actionables = {};
-	std::vector<std::string> options = {};
-	std::vector<std::string> options_one = {};
-	std::vector<std::string> options_two = {};
-	std::vector<std::string> options_three = {};
+    std::vector<std::string> description       = {};
+    std::vector<std::string> notes             = {};
+    std::vector<std::string> example_format    = {};
+    std::vector<std::string> examples_one      = {};
+    std::vector<std::string> examples_two      = {};
+    std::vector<std::string> examples_three    = {};
+    std::vector<std::string> actionables       = {};
+    std::vector<std::string> options           = {};
+    std::vector<std::string> options_one       = {};
+    std::vector<std::string> options_two       = {};
+    std::vector<std::string> options_three     = {};
 };
 
 // do not ask what all these mean because I have no idea!

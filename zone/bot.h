@@ -48,12 +48,12 @@ extern WorldServer worldserver;
 
 constexpr int NegativeItemReuse = -1; // Unlinked timer for items
 
-constexpr uint8 SumWater = 1;
-constexpr uint8 SumFire = 2;
-constexpr uint8 SumAir = 3;
-constexpr uint8 SumEarth = 4;
-constexpr uint8 MonsterSum = 5;
-constexpr uint8 SumMageMultiElement = 6;
+constexpr uint8 SumWater               = 1;
+constexpr uint8 SumFire                = 2;
+constexpr uint8 SumAir                 = 3;
+constexpr uint8 SumEarth               = 4;
+constexpr uint8 MonsterSum             = 5;
+constexpr uint8 SumMageMultiElement    = 6;
 
 // nHSND	negative Healer/Slower/Nuker/Doter
 // pH		positive Healer
@@ -119,21 +119,21 @@ namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
 };
 
 static std::map<uint8, std::string> botSpellCategory_names = {
-	{ BotSettingCategories::BaseSetting,					"BaseSetting" },
-	{ BotSettingCategories::SpellHold,						"SpellHolds" },
-	{ BotSettingCategories::SpellDelay,						"SpellDelays" },
-	{ BotSettingCategories::SpellMinThreshold,				"SpellMinThresholds" },
-	{ BotSettingCategories::SpellMaxThreshold,				"SpellMaxThresholds" },
-	{ BotSettingCategories::SpellTypeAggroCheck,			"SpellAggroChecks" },
-	{ BotSettingCategories::SpellTypeMinManaPct,			"SpellMinManaPct" },
-	{ BotSettingCategories::SpellTypeMaxManaPct,			"SpellMaxManaPct" },
-	{ BotSettingCategories::SpellTypeMinHPPct,				"SpellMinHPPct" },
-	{ BotSettingCategories::SpellTypeMaxHPPct,				"SpellMaxHPPct" },
-	{ BotSettingCategories::SpellTypeIdlePriority,			"SpellIdlePriority" },
-	{ BotSettingCategories::SpellTypeEngagedPriority,		"SpellEngagedPriority" },
-	{ BotSettingCategories::SpellTypePursuePriority,		"SpellPursuePriority" },
-	{ BotSettingCategories::SpellTypeAEOrGroupTargetCount,	"SpellTargetCounts" },
-	{ BotSettingCategories::SpellTypeRecastDelay,			"SpellRecastDelay" }
+	{ BotSettingCategories::BaseSetting,                   "BaseSetting" },
+	{ BotSettingCategories::SpellHold,                     "SpellHolds" },
+	{ BotSettingCategories::SpellDelay,                    "SpellDelays" },
+	{ BotSettingCategories::SpellMinThreshold,             "SpellMinThresholds" },
+	{ BotSettingCategories::SpellMaxThreshold,             "SpellMaxThresholds" },
+	{ BotSettingCategories::SpellTypeAggroCheck,           "SpellAggroChecks" },
+	{ BotSettingCategories::SpellTypeMinManaPct,           "SpellMinManaPct" },
+	{ BotSettingCategories::SpellTypeMaxManaPct,           "SpellMaxManaPct" },
+	{ BotSettingCategories::SpellTypeMinHPPct,             "SpellMinHPPct" },
+	{ BotSettingCategories::SpellTypeMaxHPPct,             "SpellMaxHPPct" },
+	{ BotSettingCategories::SpellTypeIdlePriority,         "SpellIdlePriority" },
+	{ BotSettingCategories::SpellTypeEngagedPriority,      "SpellEngagedPriority" },
+	{ BotSettingCategories::SpellTypePursuePriority,       "SpellPursuePriority" },
+	{ BotSettingCategories::SpellTypeAEOrGroupTargetCount, "SpellTargetCounts" },
+	{ BotSettingCategories::SpellTypeRecastDelay,          "SpellRecastDelay" }
 };
 
 namespace BotPriorityCategories { // Update GetBotSpellCategoryName as needed
