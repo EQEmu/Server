@@ -2144,6 +2144,11 @@ void Bot::AI_Process()
 			SetVerifiedRaid(true);
 		}
 
+		if (mana_timer.Check() || send_hp_update_timer.Check()) {
+			LogTestDebug("{} is sending a hp/mana update", GetCleanName());
+			raid->SendHPManaEndPacketsFrom(this);
+		}
+
 		r_group = raid->GetGroup(GetName());
 	}
 
