@@ -142,8 +142,10 @@ namespace Logs {
 		EqTime,
 		Corpses,
 		XTargets,
+		EvolveItem,
+		PositionUpdate,
+		KSM,
 		NpcHandin,
-		Visibility,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -245,8 +247,10 @@ namespace Logs {
 		"EqTime",
 		"Corpses",
 		"XTargets",
-		"NpcHandin",
-		"Visibility"
+		"EvolveItem",
+		"PositionUpdate",
+		"KSM",
+		"NpcHandin"
 	};
 }
 

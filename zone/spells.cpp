@@ -7714,15 +7714,17 @@ void Mob::SetHP(int64 hp)
 
 void Mob::DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec)
 {
-	NPC             *node = nullptr;
+	NPC *node = nullptr;
+
 	for (const auto &n: entity_list.GetNPCList()) {
-		if (n.second->GetCleanName() == node_name) {
+		if (n.second->GetEntityVariable("node_parent_id") == std::to_string(GetID())) {
 			node = n.second;
 			break;
 		}
 	}
 	if (!node) {
 		node = NPC::SpawnNodeNPC(node_name, "", GetPosition());
+		node->SetEntityVariable("node_parent_id", std::to_string(GetID()));
 	}
 }
 

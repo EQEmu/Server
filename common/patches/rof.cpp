@@ -5188,7 +5188,14 @@ namespace RoF
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
 
-		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
+		strn0cpy(
+			hdr.unknown000,
+			fmt::format(
+				"{:016}\0",
+				packet_type == ItemPacketInvalid ? 0 : inst->GetSerialNumber()
+			).c_str(),
+			sizeof(hdr.unknown000)
+		);
 
 		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
 		hdr.unknown004 = 0;

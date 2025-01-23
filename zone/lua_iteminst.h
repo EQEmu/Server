@@ -77,7 +77,6 @@ public:
 	void SetExp(uint32 exp);
 	void AddExp(uint32 exp);
 	int8 GetMaxEvolveLvl();
-	uint32 GetKillsNeeded(uint8 current_level);
 	Lua_ItemInst Clone();
 	void SetTimer(std::string name, uint32 time);
 	void StopTimer(std::string name);
@@ -92,6 +91,21 @@ public:
 	void ItemSay(const char* text, uint8 language_id);
 	luabind::object GetAugmentIDs(lua_State* L);
 	std::string GetItemLink();
+	void AddEvolveAmount(uint64 amount);
+	uint32 GetAugmentEvolveUniqueID(uint8 slot_id);
+	bool GetEvolveActivated();
+	uint64 GetEvolveAmount();
+	uint32 GetEvolveCharacterID();
+	bool GetEvolveEquipped();
+	uint32 GetEvolveFinalItemID();
+	uint32 GetEvolveItemID();
+	int8 GetEvolveLevel();
+	uint32 GetEvolveLoreID();
+	float GetEvolveProgression();
+	uint64 GetEvolveUniqueID();
+	bool IsEvolving();
+	void SetEvolveAmount(uint64 amount);
+	void SetEvolveProgression(float amount);
 
 private:
 	bool cloned_;

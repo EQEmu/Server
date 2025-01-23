@@ -1,6 +1,7 @@
 #ifndef EQEMU_KSM_HPP
 #define EQEMU_KSM_HPP
 
+#include "../eqemu_logsys.h"
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -52,7 +53,7 @@ private:
 		GetSystemInfo(&sysInfo);
 		return sysInfo.dwPageSize; // Page size in bytes
 #else
-		return static_cast<size_t>(sysconf(_SC_PAGESIZE)); // POSIX page size
+		return static_cast<size_t>(sysconf(_SC_PAGESIZE));
 #endif
 	};
 };
@@ -73,7 +74,6 @@ namespace KSM {
 #ifdef _WIN32
 	// Windows-specific placeholder functions (no-op)
     inline void CheckPageAlignment(void* ptr) {
-        std::cout << "Page alignment check not supported on Windows: " << ptr << "\n";
     }
 
     inline void* AllocatePageAligned(size_t size) {
@@ -98,9 +98,9 @@ namespace KSM {
 	inline void CheckPageAlignment(void* ptr) {
 		size_t page_size = sysconf(_SC_PAGESIZE);
 		if (reinterpret_cast<uintptr_t>(ptr) % page_size == 0) {
-			std::cout << "Memory is page-aligned: " << ptr << "\n";
+			LogKSMDetail("Memory is page-aligned [{}]", ptr);
 		} else {
-			std::cout << "Memory is NOT page-aligned: " << ptr << "\n";
+			LogKSMDetail("Memory is NOT page-aligned [{}]", ptr);
 		}
 	}
 
@@ -108,7 +108,7 @@ namespace KSM {
 		size_t page_size = sysconf(_SC_PAGESIZE);
 		void* aligned_ptr = nullptr;
 		if (posix_memalign(&aligned_ptr, page_size, size) != 0) {
-			std::cerr << "Failed to allocate page-aligned memory on Linux." << std::endl;
+			LogKSM("Failed to allocate page-aligned memory on Linux. page_size [{}] size [{}] bytes", page_size, size);
 		}
 		std::memset(aligned_ptr, 0, size);
 		return aligned_ptr;
@@ -116,7 +116,7 @@ namespace KSM {
 
 	inline void MarkMemoryForKSM(void* start, size_t size) {
 		if (madvise(start, size, MADV_MERGEABLE) == 0) {
-			std::cout << "Marked memory for KSM | start: " << start << ", size: " << size << " bytes\n";
+			LogKSM("Marked memory for KSM | start [{}] size [{}] bytes", start, size);
 		} else {
 			perror("madvise failed");
 		}
@@ -125,13 +125,13 @@ namespace KSM {
 	inline void AlignHeapToPageBoundary() {
 		size_t page_size = sysconf(_SC_PAGESIZE);
 		if (page_size == 0) {
-			std::cerr << "Error: Failed to retrieve page size." << std::endl;
+			LogKSM("Failed to retrieve page size SC_PAGESIZE [{}]", page_size);
 			return;
 		}
 
 		void* current_break = sbrk(0);
 		if (current_break == (void*)-1) {
-			std::cerr << "Error: Failed to retrieve the current program break." << std::endl;
+			LogKSM("Failed to retrieve the current program break");
 			return;
 		}
 
@@ -141,12 +141,12 @@ namespace KSM {
 		if (misalignment != 0) {
 			size_t adjustment = page_size - misalignment;
 			if (sbrk(adjustment) == (void*)-1) {
-				std::cerr << "Error: Failed to align heap to page boundary." << std::endl;
+				LogKSM("Failed to align heap to page boundary. adjustment [{}] bytes", adjustment);
 				return;
 			}
 		}
 
-		std::cout << "Heap aligned to next page boundary. Current break: " << sbrk(0) << std::endl;
+		LogKSMDetail("Heap aligned to next page boundary. Current break [{}]", sbrk(0));
 	}
 
 	inline void* MarkHeapStart() {
@@ -176,7 +176,6 @@ namespace KSM {
 	template <typename T>
 	inline void PageAlignVectorAligned(std::vector<T, PageAlignedAllocator<T>>& vec) {
 		if (vec.empty()) {
-			std::cerr << "Vector is empty, no need to align.\n";
 			return;
 		}
 
@@ -205,9 +204,9 @@ namespace KSM {
 				throw std::runtime_error("Failed to align vector memory to page boundaries.");
 			}
 
-			std::cout << "Vector reallocated to ensure page alignment.\n";
+			LogKSMDetail("Vector reallocated to ensure page alignment. start [{}] size [{}] bytes", start, size);
 		} else {
-			std::cout << "Vector is already page-aligned.\n";
+			LogKSMDetail("Vector is already page-aligned. start [{}] size [{}] bytes", start, size);
 		}
 
 #ifndef _WIN32

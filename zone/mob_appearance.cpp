@@ -214,7 +214,7 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 			if (inst) {
 				const auto augment = inst->GetOrnamentationAugment();
 				if (augment) {
-					item = augment->GetItem();
+					auto item = augment->GetItem();
 					if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
 						equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
 					}
@@ -233,7 +233,7 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 			if (inst) {
 				const auto augment = inst->GetOrnamentationAugment();
 				if (augment) {
-					item = augment->GetItem();
+					auto item = augment->GetItem();
 					if (item) {
 						equipment_material = item->Material;
 					}
@@ -271,7 +271,7 @@ uint32 Mob::GetWeaponMaterial(EQ::ItemInstance* inst) const
 	if (item) {
 		const auto augment = inst->GetOrnamentationAugment();
 		if (augment) {
-			item = augment->GetItem();
+			auto item = augment->GetItem();
 			if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
 				equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
 			}
@@ -341,7 +341,7 @@ uint32 Mob::GetHerosForgeModel(uint8 material_slot) const
 					const auto augment = inst->GetOrnamentationAugment();
 
 					if (augment) {
-						item              = augment->GetItem();
+						auto item         = augment->GetItem();
 						heros_forge_model = item->HerosForgeModel;
 					} else if (inst->GetOrnamentHeroModel()) {
 						heros_forge_model = inst->GetOrnamentHeroModel();

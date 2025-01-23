@@ -128,6 +128,7 @@ int command_init(void)
 		command_add("enablerecipe", "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("entityvariable", "[clear|delete|set|view] - Modify entity variables for yourself or your target", AccountStatus::GMAdmin, command_entityvariable) ||
 		command_add("exptoggle", "[Toggle] - Toggle your or your target's experience gain.", AccountStatus::QuestTroupe, command_exptoggle) ||
+		command_add("evolve", "Evolving Item manipulation commands. Use argument help for more info.", AccountStatus::Steward, command_evolvingitems) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
 		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
 		command_add("feature", "Change your or your target's feature's temporarily", AccountStatus::QuestTroupe, command_feature) ||
@@ -832,6 +833,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/entityvariable.cpp"
 #include "gm_commands/exptoggle.cpp"
 #include "gm_commands/faction.cpp"
+#include "gm_commands/evolving_items.cpp"
 #include "gm_commands/feature.cpp"
 #include "gm_commands/find.cpp"
 #include "gm_commands/fish.cpp"

@@ -404,7 +404,7 @@ public:
 	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
 	void	SendZoneSpawns(Client*);
 	void	SendZonePVPUpdates(Client *);
-	void	SendZoneSeasonalUpdates(Client *);	
+	void	SendZoneSeasonalUpdates(Client *);
 	void	SendZoneSpawnsBulk(Client* client);
 	void	Save();
 	void	SendZoneCorpses(Client*);
@@ -572,7 +572,6 @@ public:
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
 	void ScanCloseMobs(Mob *scanning_mob);
-	void UpdateVisibility(Mob *scanning_mob);
 	void UpdateKnownPositions(Mob *scanning_mob);
 
 	void GetTrapInfo(Client* c);

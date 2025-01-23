@@ -11,12 +11,12 @@ void WorldserverCLI::CopyCharacter(int argc, char **argv, argh::parser &cmd, std
 		"destination_account_name"
 	};
 	std::vector<std::string> options   = {};
-
-	EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
-
+	
 	if (cmd[{"-h", "--help"}]) {
 		return;
 	}
+
+	EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 	std::string source_character_name      = cmd(2).str();
 	std::string destination_character_name = cmd(3).str();

@@ -46,6 +46,7 @@
 #include "client.h"
 #include "worlddb.h"
 #include "wguild_mgr.h"
+#include "../common/evolving_items.h"
 
 #ifdef _WINDOWS
 #include <process.h>
@@ -111,6 +112,7 @@ WorldContentService content_service;
 WebInterfaceList    web_interface;
 PathManager         path;
 PlayerEventLogs     player_event_logs;
+EvolvingItemsManager evolving_items_manager;
 
 void CatchSignal(int sig_num);
 

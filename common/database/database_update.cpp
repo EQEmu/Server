@@ -169,7 +169,10 @@ bool DatabaseUpdate::UpdateManifest(
 		LogSys.EnableMySQLErrorLogs();
 		LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 
-		if (!missing_migrations.empty()) {
+		if (!missing_migrations.empty() && m_skip_backup) {
+			LogInfo("Skipping database backup");
+		}
+		else if (!missing_migrations.empty()) {
 			LogInfo("Automatically backing up database before applying updates");
 			LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 			auto s = DatabaseDumpService();
@@ -267,6 +270,13 @@ DatabaseUpdate *DatabaseUpdate::SetDatabase(Database *db)
 DatabaseUpdate *DatabaseUpdate::SetContentDatabase(Database *db)
 {
 	m_content_database = db;
+
+	return this;
+}
+
+DatabaseUpdate *DatabaseUpdate::SetSkipBackup(bool skip)
+{
+	m_skip_backup = skip;
 
 	return this;
 }

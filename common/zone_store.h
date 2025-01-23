@@ -94,7 +94,6 @@ public:
 	int GetZoneFastRegenMana(uint32 zone_id, int version = 0);
 	int GetZoneFastRegenEndurance(uint32 zone_id, int version = 0);
 	int GetZoneNPCMaximumAggroDistance(uint32 zone_id, int version = 0);
-	uint32 GetZoneMaximumMovementUpdateRange(uint32 zone_id, int version = 0);
 	int8 GetZoneMinimumExpansion(uint32 zone_id, int version = 0);
 	int8 GetZoneMaximumExpansion(uint32 zone_id, int version = 0);
 	const std::string GetZoneContentFlags(uint32 zone_id, int version = 0);

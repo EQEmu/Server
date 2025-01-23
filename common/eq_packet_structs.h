@@ -5932,12 +5932,12 @@ struct ChangePetName_Struct {
 };
 
 enum ChangePetNameResponse : int {
-    Denied = 0, 		// 5167 You have requested an invalid name or a Customer Service Representative has denied your name request.  Please try another name.
-    Accepted = 1, 		// 5976 Your request for a name change was successful.
-    Timeout = -3,		// 5979 You must wait longer before submitting another name request. Please try again in a few minutes.
-    NotEligible = -4, 	// 5980 Your character is not eligible for a name change.
-    Pending = -5,  		// 5193 You already have a name change pending.  Please wait until it is fully processed before attempting another name change.
-	Unhandled = -1
+	Denied      = 0,        // 5167 You have requested an invalid name or a Customer Service Representative has denied your name request.  Please try another name.
+	Accepted    = 1,        // 5976 Your request for a name change was successful.
+	Timeout     = -3,        // 5979 You must wait longer before submitting another name request. Please try again in a few minutes.
+	NotEligible = -4,    // 5980 Your character is not eligible for a name change.
+	Pending     = -5,        // 5193 You already have a name change pending.  Please wait until it is fully processed before attempting another name change.
+	Unhandled   = -1
 };
 
 // New OpCode/Struct for SoD+
@@ -6579,6 +6579,70 @@ struct PickZoneWindow_Struct {
 struct PickZone_Struct {
 	int64 session_id;
 	int32 selection_id;
+};
+
+struct EvolveItemToggle {
+	uint32 action;
+	uint32 unknown_004;
+	uint64 unique_id;
+	uint32 percentage;
+	uint32 activated;
+};
+
+struct EvolveXPWindowReceive {
+	uint32 action;
+	uint32 unknown_004;
+	uint64 item1_unique_id;
+	uint64 item2_unique_id;
+};
+
+struct EvolveItemMessaging {
+	uint32 action;
+	char   serialized_data[];
+};
+
+struct EvolveXPWindowSend {
+	/*000*/    uint32   action;
+	/*004*/    uint64   item1_unique_id;
+	/*012*/    uint64   item2_unique_id;
+	/*020*/    uint32   compatibility;
+	/*024*/    uint32   max_transfer_level;
+	/*028*/    uint8    item1_present;
+	/*029*/ uint8       item2_present;
+	/*030*/ std::string serialize_item_1;
+	/*034*/ std::string serialize_item_2;
+
+	template<class Archive>
+	void serialize(Archive &archive)
+	{
+		archive(
+			CEREAL_NVP(action),
+			CEREAL_NVP(item1_unique_id),
+			CEREAL_NVP(item2_unique_id),
+			CEREAL_NVP(compatibility),
+			CEREAL_NVP(max_transfer_level),
+			CEREAL_NVP(item1_present),
+			CEREAL_NVP(item2_present),
+			CEREAL_NVP(serialize_item_1),
+			CEREAL_NVP(serialize_item_2)
+		);
+	}
+};
+
+struct EvolveTransfer {
+	uint32 item_from_id;
+	uint32 item_from_current_amount;
+	uint32 item_to_id;
+	uint32 item_to_current_amount;
+	uint32 compatibility;
+	uint32 max_transfer_level;
+};
+
+struct EvolveGetNextItem {
+	uint32 new_item_id;
+	uint64 new_current_amount;
+	uint64 from_current_amount;
+	uint32 max_transfer_level;
 };
 
 // Restore structure packing to default

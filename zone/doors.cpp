@@ -30,6 +30,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "../common/evolving_items.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <string.h>
@@ -610,6 +611,12 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 			}
 		}
 	}
+
+	/*Commented out until it can be understood what this is for
+	if (GetOpenType() == 40 && GetZone(GetDoorZone(),0)) {
+		sender->SendEvolveXPTransferWindow();
+	}
+	*/
 }
 
 void Doors::Open(Mob *sender, bool alt_mode)

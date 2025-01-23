@@ -23,6 +23,7 @@
 
 #ifndef COMMON_ITEM_INSTANCE_H
 #define COMMON_ITEM_INSTANCE_H
+#include "evolving_items.h"
 
 
 class ItemParse;			// Parses item packets
@@ -34,6 +35,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/bodytypes.h"
 #include "../common/deity.h"
 #include "../common/memory_buffer.h"
+#include "../common/repositories/character_evolving_items_repository.h"
 
 #include <map>
 #include <cstring>
@@ -147,9 +149,6 @@ namespace EQ
 		bool UpdateOrnamentationInfo();
 		static bool CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll = false);
 
-		// Dynamic Item Stuff
-		ItemData* GetMutableItem();
-		const bool IsItemDynamic() const;
 		const int  GetItemTier() const;
 		const int  GetBaseID() const;
 		const int  GetOriginalID() const;
@@ -159,8 +158,8 @@ namespace EQ
 
 
 		// Has attack/delay?
-		bool IsWeapon() const;
-		bool IsAmmo() const;
+		const bool IsWeapon() const;
+		const bool IsAmmo() const;
 		const void SetID(uint32 id) {  if (m_item) { const_cast<ItemData*>(m_item)->ID = id; } }
 		const void SetComment(const std::string& comment) {
 			if (m_item) {
@@ -170,12 +169,12 @@ namespace EQ
 			}
 		}
 
-		bool HasProc() const;
+		const bool HasProc() const;
 
 		// Accessors
 		const uint32 GetID() const { return ((m_item) ? m_item->ID : 0); }
 		const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : 0); }
-		ItemData* GetItem() const;
+		const ItemData* GetItem() const;
 		const ItemData* GetUnscaledItem() const;
 
 		const uint8 GetItemType() const { return m_item ? m_item->ItemType : 255; } // Return 255 so you know there's no valid item
@@ -226,13 +225,9 @@ namespace EQ
 		bool IsDroppable(bool recurse = true) const;
 
 		bool IsScaling() const				{ return m_scaling; }
-		bool IsEvolving() const				{ return (m_evolveLvl >= 1); }
 		uint32 GetExp() const				{ return m_exp; }
 		void SetExp(uint32 exp)				{ m_exp = exp; }
 		void AddExp(uint32 exp)				{ m_exp += exp; }
-		bool IsActivated()					{ return m_activated; }
-		void SetActivated(bool activated)	{ m_activated = activated; }
-		int8 GetEvolveLvl() const			{ return m_evolveLvl; }
 		void SetScaling(bool v)				{ m_scaling = v; }
 		uint32 GetOrnamentationIcon() const							{ return m_ornamenticon; }
 		void SetOrnamentIcon(uint32 ornament_icon)					{ m_ornamenticon = ornament_icon; }
@@ -247,9 +242,6 @@ namespace EQ
 
 		void Initialize(SharedDatabase *db = nullptr);
 		void ScaleItem();
-		bool EvolveOnAllKills() const;
-		int8 GetMaxEvolveLvl() const;
-		uint32 GetKillsNeeded(uint8 currentlevel);
 
 		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
 		void Serialize(OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
@@ -257,8 +249,9 @@ namespace EQ
 		inline int32 GetSerialNumber() const { return m_SerialNumber; }
 		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
 
-		std::map<std::string, ::Timer>& GetTimers() { return m_timers; }
+		std::map<std::string, ::Timer>& GetTimers() const { return m_timers; }
 		void SetTimer(std::string name, uint32 time);
+		void SetTimer(std::string name, uint32 time) const;
 		void StopTimer(std::string name);
 		void ClearTimers();
 
@@ -334,6 +327,34 @@ namespace EQ
 		static void AddGUIDToMap(uint64 existing_serial_number);
 		static void ClearGUIDMap();
 
+		// evolving items stuff
+		CharacterEvolvingItemsRepository::CharacterEvolvingItems &GetEvolvingDetails() const { return m_evolving_details; }
+
+		int8             GetEvolveLvl() const { if (GetItem()) { return GetItem()->EvolvingLevel; } return false; }
+		bool             IsEvolving() const { if (GetItem()) { return GetItem()->EvolvingItem; } return false; }
+		int8             GetMaxEvolveLvl() const { if (GetItem()) { return GetItem()->EvolvingMax; } return false; }
+		bool             GetEvolveActivated() const { return m_evolving_details.activated ? true : false; }
+		bool             GetEvolveEquipped() const { return m_evolving_details.equipped ? true : false; }
+		double           GetEvolveProgression() const { return m_evolving_details.progression; }
+		uint64           GetEvolveUniqueID() const { return m_evolving_details.id; }
+		uint32           GetEvolveCharID() const { return m_evolving_details.character_id; }
+		uint32           GetEvolveItemID() const { return m_evolving_details.item_id; }
+		uint32           GetEvolveLoreID() const { if (GetItem()) { return GetItem()->EvolvingID; } return false; }
+		uint64           GetEvolveCurrentAmount() const { return m_evolving_details.current_amount; }
+		uint32           GetEvolveFinalItemID() const { return m_evolving_details.final_item_id; }
+		uint32           GetAugmentEvolveUniqueID(uint8 augment_index) const;
+		void             SetEvolveEquipped(const bool in) const;
+		void             SetEvolveActivated(const bool in) const { m_evolving_details.activated = in; }
+		void             SetEvolveProgression(const double in) const { m_evolving_details.progression = in; }
+		void             SetEvolveUniqueID(const uint64 in) const { m_evolving_details.id = in; }
+		void             SetEvolveCharID(const uint32 in) const { m_evolving_details.character_id = in; }
+		void             SetEvolveItemID(const uint32 in) const { m_evolving_details.item_id = in; }
+		void             SetEvolveCurrentAmount(const uint64 in) const { m_evolving_details.current_amount = in; }
+		void             SetEvolveAddToCurrentAmount(const uint64 in) const { m_evolving_details.current_amount += in; }
+		void             SetEvolveFinalItemID(const uint32 in) const { m_evolving_details.final_item_id = in; }
+		bool             TransferOwnership(Database& db, const uint32 to_char_id) const;
+		void             CalculateEvolveProgression() const { m_evolving_details.progression = evolving_items_manager.CalculateProgression(GetEvolveCurrentAmount(), GetID()); }
+
 	protected:
 		//////////////////////////
 		// Protected Members
@@ -345,48 +366,32 @@ namespace EQ
 
 		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
 
-		ItemInstTypes		m_use_type {ItemInstNormal};	// Usage type for item
-		ItemData*		    m_item {nullptr};		// Ptr to item data
-		int16				m_charges {0};	// # of charges for chargeable items
-		uint32				m_price {0};	// Bazaar /trader price
-		uint32				m_color {0};
-		uint32				m_merchantslot {0};
-		int16				m_currentslot {0};
-		bool				m_attuned {false};
-		int32				m_merchantcount {1}; //number avaliable on the merchant, -1=unlimited
-		int32				m_SerialNumber {0};	// Unique identifier for this instance of an item. Needed for Bazaar.
-		uint32				m_exp {0};
-		int8				m_evolveLvl {0};
-		bool				m_activated {false};
-		ItemData*			m_scaledItem {nullptr};
-		::EvolveInfo*		m_evolveInfo {nullptr};
-		bool				m_scaling {false};
-		uint32				m_ornamenticon {0};
-		uint32				m_ornamentidfile {0};
-		uint32				m_new_id_file {0};
-		uint32				m_ornament_hero_model {0};
-		uint32				m_recast_timestamp {0};
-		int                 m_task_delivered_count {0};
+		ItemInstTypes    m_use_type{ItemInstNormal};// Usage type for item
+		const ItemData * m_item{nullptr};           // Ptr to item data
+		int16            m_charges{0};              // # of charges for chargeable items
+		uint32           m_price{0};                // Bazaar /trader price
+		uint32           m_color{0};
+		uint32           m_merchantslot{0};
+		int16            m_currentslot{0};
+		bool             m_attuned{false};
+		int32            m_merchantcount{1};//number avaliable on the merchant, -1=unlimited
+		int32            m_SerialNumber{0}; // Unique identifier for this instance of an item. Needed for Bazaar.
+		uint32           m_exp{0};
+		int8             m_evolveLvl{0};
+		ItemData *       m_scaledItem{nullptr};
+		bool             m_scaling{false};
+		uint32           m_ornamenticon{0};
+		uint32           m_ornamentidfile{0};
+		uint32           m_new_id_file{0};
+		uint32           m_ornament_hero_model{0};
+		uint32           m_recast_timestamp{0};
+		int              m_task_delivered_count{0};
+		mutable CharacterEvolvingItemsRepository::CharacterEvolvingItems  m_evolving_details{};
 
 		// Items inside of this item (augs or contents) {};
-		std::map<uint8, ItemInstance*>		m_contents {}; // Zero-based index: min=0, max=9
-		std::map<std::string, std::string>	m_custom_data {};
-		std::map<std::string, ::Timer>		m_timers {};
+		std::map<uint8, ItemInstance*>         m_contents {}; // Zero-based index: min=0, max=9
+		std::map<std::string, std::string>     m_custom_data {};
+		mutable std::map<std::string, ::Timer> m_timers {};
 	};
 }
-
-class EvolveInfo {
-public:
-	friend class EQ::ItemInstance;
-	//temporary
-	uint16				LvlKills[9];
-	uint32				FirstItem;
-	uint8				MaxLvl;
-	bool				AllKills;
-
-	EvolveInfo();
-	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);
-	~EvolveInfo();
-};
-
 #endif /*COMMON_ITEM_INSTANCE_H*/

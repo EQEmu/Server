@@ -255,11 +255,6 @@ int8 Lua_ItemInst::GetMaxEvolveLvl() {
 	return self->GetMaxEvolveLvl();
 }
 
-uint32 Lua_ItemInst::GetKillsNeeded(uint8 current_level) {
-	Lua_Safe_Call_Int();
-	return self->GetKillsNeeded(current_level);
-}
-
 Lua_ItemInst Lua_ItemInst::Clone() {
 	Lua_Safe_Call_Class(Lua_ItemInst);
 	return Lua_ItemInst(self->Clone(), true);
@@ -354,6 +349,96 @@ std::string Lua_ItemInst::GetItemLink()
 	return linker.GenerateLink();
 }
 
+void Lua_ItemInst::AddEvolveAmount(uint64 amount)
+{
+	Lua_Safe_Call_Void();
+	self->SetEvolveAddToCurrentAmount(amount);
+}
+
+uint32 Lua_ItemInst::GetAugmentEvolveUniqueID(uint8 slot_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetAugmentEvolveUniqueID(slot_id);
+}
+
+bool Lua_ItemInst::GetEvolveActivated()
+{
+	Lua_Safe_Call_Bool();
+	return self->GetEvolveActivated();
+}
+
+uint64 Lua_ItemInst::GetEvolveAmount()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEvolveCurrentAmount();
+}
+
+uint32 Lua_ItemInst::GetEvolveCharacterID()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEvolveCharID();
+}
+
+bool Lua_ItemInst::GetEvolveEquipped()
+{
+	Lua_Safe_Call_Bool();
+	return self->GetEvolveEquipped();
+}
+
+uint32 Lua_ItemInst::GetEvolveFinalItemID()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEvolveFinalItemID();
+}
+
+uint32 Lua_ItemInst::GetEvolveItemID()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEvolveItemID();
+}
+
+int8 Lua_ItemInst::GetEvolveLevel()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEvolveLvl();
+}
+
+uint32 Lua_ItemInst::GetEvolveLoreID()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEvolveLoreID();
+}
+
+float Lua_ItemInst::GetEvolveProgression()
+{
+	Lua_Safe_Call_Real();
+	return self->GetEvolveProgression();
+}
+
+uint64 Lua_ItemInst::GetEvolveUniqueID()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEvolveUniqueID();
+}
+
+bool Lua_ItemInst::IsEvolving()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsEvolving();
+}
+
+void Lua_ItemInst::SetEvolveAmount(uint64 amount)
+{
+	Lua_Safe_Call_Void();
+	self->SetEvolveCurrentAmount(amount);
+}
+
+void Lua_ItemInst::SetEvolveProgression(float amount)
+{
+	Lua_Safe_Call_Void();
+	self->SetEvolveProgression(amount);
+}
+
 luabind::scope lua_register_iteminst() {
 	return luabind::class_<Lua_ItemInst>("ItemInst")
 	.def(luabind::constructor<>())
@@ -362,12 +447,14 @@ luabind::scope lua_register_iteminst() {
 	.property("null", &Lua_ItemInst::Null)
 	.property("valid", &Lua_ItemInst::Valid)
 	.def("AddExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::AddExp)
+	.def("AddEvolveAmount", (void(Lua_ItemInst::*)(uint64))&Lua_ItemInst::AddEvolveAmount)
 	.def("ClearTimers", (void(Lua_ItemInst::*)(void))&Lua_ItemInst::ClearTimers)
 	.def("Clone", (Lua_ItemInst(Lua_ItemInst::*)(void))&Lua_ItemInst::Clone)
 	.def("ContainsAugmentByID", (bool(Lua_ItemInst::*)(uint32))&Lua_ItemInst::ContainsAugmentByID)
 	.def("CountAugmentByID", (int(Lua_ItemInst::*)(uint32))&Lua_ItemInst::CountAugmentByID)
 	.def("DeleteCustomData", (void(Lua_ItemInst::*)(const std::string &))&Lua_ItemInst::DeleteCustomData)
 	.def("GetAugment", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetAugment)
+	.def("GetAugmentEvolveUniqueID", (uint32(Lua_ItemInst::*)(uint8))&Lua_ItemInst::GetAugmentEvolveUniqueID)
 	.def("GetAugmentIDs", (luabind::object(Lua_ItemInst::*)(lua_State*))&Lua_ItemInst::GetAugmentIDs)
 	.def("GetAugmentItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetAugmentItemID)
 	.def("GetAugmentType", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetAugmentType)
@@ -376,13 +463,22 @@ luabind::scope lua_register_iteminst() {
 	.def("GetCustomData", (std::string(Lua_ItemInst::*)(const std::string &))&Lua_ItemInst::GetCustomData)
 	.def("GetCustomDataString", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetCustomDataString)
 	.def("GetExp", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetExp)
+	.def("GetEvolveActivated", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveActivated)
+	.def("GetEvolveAmount", (uint64(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveAmount)
+	.def("GetEvolveCharacterID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveCharacterID)
+	.def("GetEvolveEquipped", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveEquipped)
+	.def("GetEvolveFinalItemID", (uint64(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveFinalItemID)
+	.def("GetEvolveItemID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveItemID)
+	.def("GetEvolveLevel", (int8(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveLevel)
+	.def("GetEvolveLoreID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveLoreID)
+	.def("GetEvolveProgression", (float(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveProgression)
+	.def("GetEvolveUniqueID", (uint64(Lua_ItemInst::*)(void))&Lua_ItemInst::GetEvolveUniqueID)
 	.def("GetID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetID)
 	.def("GetItem", (Lua_Item(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItem)
 	.def("GetItem", (Lua_ItemInst(Lua_ItemInst::*)(uint8))&Lua_ItemInst::GetItem)
 	.def("GetItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItemID)
 	.def("GetItemLink", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItemLink)
 	.def("GetItemScriptID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItemScriptID)
-	.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded)
 	.def("GetMaxEvolveLvl", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetMaxEvolveLvl)
 	.def("GetName", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetName)
 	.def("GetSerialNumber", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetSerialNumber)
@@ -396,6 +492,7 @@ luabind::scope lua_register_iteminst() {
 	.def("IsAugmented", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAugmented)
 	.def("IsEquipable", (bool(Lua_ItemInst::*)(int16))&Lua_ItemInst::IsEquipable)
 	.def("IsEquipable", (bool(Lua_ItemInst::*)(uint16,uint16))&Lua_ItemInst::IsEquipable)
+	.def("IsEvolving", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsEvolving)
 	.def("IsExpendable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsExpendable)
 	.def("IsInstNoDrop", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsInstNoDrop)
 	.def("IsStackable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsStackable)
@@ -411,6 +508,8 @@ luabind::scope lua_register_iteminst() {
 	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,float))&Lua_ItemInst::SetCustomData)
 	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,int))&Lua_ItemInst::SetCustomData)
 	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,const std::string&))&Lua_ItemInst::SetCustomData)
+	.def("SetEvolveAmount", (void(Lua_ItemInst::*)(uint64))&Lua_ItemInst::SetEvolveAmount)
+	.def("SetEvolveProgression", (void(Lua_ItemInst::*)(float))&Lua_ItemInst::SetEvolveProgression)
 	.def("SetExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetExp)
 	.def("SetInstNoDrop", (void(Lua_ItemInst::*)(bool))&Lua_ItemInst::SetInstNoDrop)
 	.def("SetPrice", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetPrice)

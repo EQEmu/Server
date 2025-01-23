@@ -52,11 +52,7 @@
 #include "../common/repositories/zone_repository.h"
 
 #include "../common/repositories/trader_repository.h"
-
-#if defined(WIN32)
-#include <shlwapi.h>
-#pragma comment (lib, "Shlwapi.lib")
-#endif
+#include "../common/repositories/character_evolving_items_repository.h"
 
 #include <ctime>
 #include <iostream>

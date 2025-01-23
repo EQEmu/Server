@@ -25,6 +25,7 @@
 #include "rulesys.h"
 #include "shareddb.h"
 #include "strings.h"
+#include "evolving_items.h"
 
 //#include "../common/light_source.h"
 
@@ -76,6 +77,10 @@ EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 		m_color = m_item->Color;
 	}
 
+	if (IsEvolving()) {
+		SetTimer("evolve", RuleI(EvolvingItems, DelayUponEquipping));
+	}
+
 	m_SerialNumber  = GetNextItemInstSerialNumber();
 }
 
@@ -93,6 +98,10 @@ EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges
 		m_color = m_item->Color;
 	} else {
 		m_color = 0;
+	}
+
+	if (IsEvolving()) {
+		SetTimer("evolve", RuleI(EvolvingItems, DelayUponEquipping));
 	}
 
 	m_SerialNumber  = GetNextItemInstSerialNumber();
@@ -146,7 +155,6 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 
 	m_exp       = copy.m_exp;
 	m_evolveLvl = copy.m_evolveLvl;
-	m_activated = copy.m_activated;
 
 	if (copy.m_scaledItem) {
 		m_scaledItem = new ItemData(*copy.m_scaledItem);
@@ -154,12 +162,7 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 		m_scaledItem = nullptr;
 	}
 
-	if (copy.m_evolveInfo) {
-		m_evolveInfo = new EvolveInfo(*copy.m_evolveInfo);
-	} else {
-		m_evolveInfo = nullptr;
-	}
-
+	m_evolving_details    = copy.m_evolving_details;
 	m_scaling             = copy.m_scaling;
 	m_ornamenticon        = copy.m_ornamenticon;
 	m_ornamentidfile      = copy.m_ornamentidfile;
@@ -174,7 +177,6 @@ EQ::ItemInstance::~ItemInstance()
 	Clear();
 	safe_delete(m_item);
 	safe_delete(m_scaledItem);
-	safe_delete(m_evolveInfo);
 }
 
 // Query item type
@@ -763,7 +765,7 @@ int EQ::ItemInstance::CountAugmentByID(uint32 item_id)
 }
 
 // Has attack/delay?
-bool EQ::ItemInstance::IsWeapon() const
+const bool EQ::ItemInstance::IsWeapon() const
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
@@ -774,9 +776,9 @@ bool EQ::ItemInstance::IsWeapon() const
 		return ((m_item->Damage != 0) && (m_item->Delay != 0));
 }
 
-bool EQ::ItemInstance::HasProc() const
+const bool EQ::ItemInstance::HasProc() const
 {
-	EQ::ItemData* weapon = GetItem();
+	const EQ::ItemData* weapon = GetItem();
 
 	if (weapon && weapon->Proc.Type == EQ::item::ItemEffectCombatProc) {
 		return true;
@@ -798,7 +800,7 @@ bool EQ::ItemInstance::HasProc() const
 	return false;
 }
 
-bool EQ::ItemInstance::IsAmmo() const
+const bool EQ::ItemInstance::IsAmmo() const
 {
 	if (!m_item)
 		return false;
@@ -814,7 +816,7 @@ bool EQ::ItemInstance::IsAmmo() const
 
 }
 
-EQ::ItemData* EQ::ItemInstance::GetItem() const
+const EQ::ItemData* EQ::ItemInstance::GetItem() const
 {
 	if (!m_item)
 		return nullptr;
@@ -823,25 +825,6 @@ EQ::ItemData* EQ::ItemInstance::GetItem() const
 		return m_scaledItem;
 
 	return m_item;
-}
-
-EQ::ItemData* EQ::ItemInstance::GetMutableItem()
-{
-	if (!m_item)
-		return nullptr;
-
-	if (m_scaledItem)
-		return m_scaledItem;
-
-	return m_item;
-}
-
-const bool EQ::ItemInstance::IsItemDynamic() const
-{
-	if (!m_item)
-		return false;
-
-	return !GetCustomData("original_id").empty();
 }
 
 // Returns the original ID of a dynamic item
@@ -872,8 +855,6 @@ const int EQ::ItemInstance::GetItemTier() const
 }
 
 EQ::ItemInstance* EQ::ItemInstance::GetUpgrade(SharedDatabase &database) {
-	// TODO - expand for Affixes, perhaps for newly created Artifacts.
-
 	auto new_item = database.CreateItem(GetOriginalID() + 1000000);
 
 	if (new_item) {
@@ -1122,29 +1103,6 @@ void EQ::ItemInstance::ScaleItem() {
 	m_scaledItem->Clairvoyance = (uint32)((float)m_item->Clairvoyance*Mult);
 
 	m_scaledItem->CharmFileID = 0;	// this stops the client from trying to scale the item itself.
-}
-
-bool EQ::ItemInstance::EvolveOnAllKills() const {
-	return (m_evolveInfo && m_evolveInfo->AllKills);
-}
-
-int8 EQ::ItemInstance::GetMaxEvolveLvl() const {
-	if (m_evolveInfo)
-		return m_evolveInfo->MaxLvl;
-	else
-		return 0;
-}
-
-uint32 EQ::ItemInstance::GetKillsNeeded(uint8 currentlevel) {
-	uint32 kills = -1;	// default to -1 (max uint32 value) because this value is usually divided by, so we don't want to ever return zero.
-	if (m_evolveInfo)
-		if (currentlevel != m_evolveInfo->MaxLvl)
-			kills = m_evolveInfo->LvlKills[currentlevel - 1];
-
-	if (kills == 0)
-		kills = -1;
-
-	return kills;
 }
 
 void EQ::ItemInstance::SetTimer(std::string name, uint32 time) {
@@ -2057,28 +2015,54 @@ void EQ::ItemInstance::ClearGUIDMap()
 {
 	guids.clear();
 }
-//
-// class EvolveInfo
-//
-EvolveInfo::EvolveInfo() {
-	// nothing here yet
+
+bool EQ::ItemInstance::TransferOwnership(Database &db, const uint32 to_char_id) const
+{
+	if (!to_char_id || !IsEvolving()) {
+		return false;
+	}
+
+	SetEvolveCharID(to_char_id);
+	CharacterEvolvingItemsRepository::UpdateCharID(db, GetEvolveUniqueID(), to_char_id);
+	return true;
 }
 
-EvolveInfo::EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10) {
-	FirstItem = first;
-	MaxLvl = max;
-	AllKills = allkills;
-	LvlKills[0] = L2;
-	LvlKills[1] = L3;
-	LvlKills[2] = L4;
-	LvlKills[3] = L5;
-	LvlKills[4] = L6;
-	LvlKills[5] = L7;
-	LvlKills[6] = L8;
-	LvlKills[7] = L9;
-	LvlKills[8] = L10;
+uint32 EQ::ItemInstance::GetAugmentEvolveUniqueID(uint8 augment_index) const
+{
+	if (!m_item || !m_item->IsClassCommon()) {
+		return 0;
+	}
+
+	const auto item = GetItem(augment_index);
+	if (item) {
+		return item->GetEvolveUniqueID();
+	}
+
+	return 0;
 }
 
-EvolveInfo::~EvolveInfo() {
+void EQ::ItemInstance::SetTimer(std::string name, uint32 time) const{
+	Timer t(time);
+	t.Start(time, false);
+	m_timers[name] = t;
+}
 
+void EQ::ItemInstance::SetEvolveEquipped(const bool in) const
+{
+	if (!IsEvolving()) {
+		return;
+	}
+
+	m_evolving_details.equipped = in;
+	if (in && !GetTimers().contains("evolve")) {
+		SetTimer("evolve", RuleI(EvolvingItems, DelayUponEquipping));
+		return;
+	}
+
+	if (in) {
+		GetTimers().at("evolve").SetTimer(RuleI(EvolvingItems, DelayUponEquipping));
+		return;
+	}
+
+	GetTimers().at("evolve").Disable();
 }

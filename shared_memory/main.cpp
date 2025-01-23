@@ -33,12 +33,14 @@
 #include "../common/zone_store.h"
 #include "../common/path_manager.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/evolving_items.h"
 
-EQEmuLogSys         LogSys;
-WorldContentService content_service;
-ZoneStore           zone_store;
-PathManager         path;
-PlayerEventLogs     player_event_logs;
+EQEmuLogSys          LogSys;
+WorldContentService  content_service;
+ZoneStore            zone_store;
+PathManager          path;
+PlayerEventLogs      player_event_logs;
+EvolvingItemsManager evolving_items_manager;
 
 #ifdef _WINDOWS
 #include <direct.h>

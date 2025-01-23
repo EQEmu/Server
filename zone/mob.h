@@ -202,7 +202,6 @@ public:
 	void DisplayInfo(Mob *mob);
 
 	std::unordered_map<uint16, Mob *>  m_close_mobs;
-	std::unordered_map<int, int8>      m_can_see_mob;
 	std::unordered_map<int, glm::vec4> m_last_seen_mob_position;
 	Timer                              m_scan_close_mobs_timer;
 	Timer                              m_see_close_mobs_timer;
@@ -1545,8 +1544,6 @@ public:
 	void RemoveGlobalBuffs();
 	void ApplyGlobalBuff(uint32 spell_id, uint32 duration, time_t current_time = 0);
 	void CheckScanCloseMobsMovingTimer();
-	float GetUpdateRange();
-
 
 	uint16 focused_pet_id;
 

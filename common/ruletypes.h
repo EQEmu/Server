@@ -374,9 +374,6 @@ RULE_BOOL(Zone, AllowCrossZoneSpellsOnBots, false, "Set to true to allow cross z
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnMercs, false, "Set to true to allow cross zone spells (cast/remove) to affect mercenaries")
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross zone spells (cast/remove) to affect pets")
 RULE_BOOL(Zone, ZoneShardQuestMenuOnly, false, "Set to true if you only want quests to show the zone shard menu")
-RULE_BOOL(Zone, AkkadiusTempDataBucketsChangeFlag, true, "Set to true to allow the AkkadiusTempDataBucketsFlagChange to be used for zone specific data")
-RULE_BOOL(Zone, AkkadiusTempPerformanceFeatureFlag, true, "Enable or disable the Akkadius Temp Performance Feature Flag")
-RULE_BOOL(Zone, EnableEntityClipping, true, "Enable or disable visual entity clipping server side")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
@@ -841,6 +838,7 @@ RULE_REAL(Bazaar, ParcelDeliveryCostMod, 0.20, "Cost of parcel delivery for a ba
 RULE_INT(Bazaar, VoucherDeliveryCost, 200, "Number of vouchers for direct delivery for a bazaar purchase. Default is 200 vouchers. RoF+ Only.")
 RULE_BOOL(Bazaar, EnableParcelDelivery, true, "Enable bazaar purchases via parcel delivery.  Default is True.")
 RULE_INT(Bazaar, MaxBuyerInventorySearchResults, 200, "Maximum number of search results when a Buyer searches the global item list. Default is 200. RoF+ Only.")
+RULE_BOOL(Bazaar, UseAlternateBazaarSearch, false, "Allows the bazaar search window to search across bazaar shards. Default is false.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mail)
@@ -1047,6 +1045,13 @@ RULE_BOOL(Parcel, EnablePruning, false, "Enable the automatic pruning of sent pa
 RULE_INT(Parcel, ParcelDeliveryDelay, 30000, "Sets the time that a player must wait between sending parcels.")
 RULE_INT(Parcel, ParcelMaxItems, 50, "The maximum number of parcels a player is allowed to have in their mailbox.")
 RULE_INT(Parcel, ParcelPruneDelay, 30, "The number of days after which a parcel is deleted. Items are lost!")
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(EvolvingItems)
+RULE_REAL(EvolvingItems, PercentOfSoloExperience, 0.1, "Percentage of solo experience allocated to evolving items that require experience.")
+RULE_REAL(EvolvingItems, PercentOfGroupExperience, 0.1, "Percentage of group experience allocated to evolving items that require experience.")
+RULE_REAL(EvolvingItems, PercentOfRaidExperience, 0.1, "Percentage of solo experience allocated to evolving items that require experience.")
+RULE_INT(EvolvingItems, DelayUponEquipping, 30000, "Delay in ms before an evolving item will earn rewards after equipping.  Default is 30000ms or 30s.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Custom)

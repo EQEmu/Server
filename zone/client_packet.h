@@ -115,6 +115,7 @@
 	void Handle_OP_Emote(const EQApplicationPacket *app);
 	void Handle_OP_EndLootRequest(const EQApplicationPacket *app);
 	void Handle_OP_EnvDamage(const EQApplicationPacket *app);
+	void Handle_OP_EvolveItem(const EQApplicationPacket *app);
 	void Handle_OP_FaceChange(const EQApplicationPacket *app);
 	void Handle_OP_FeignDeath(const EQApplicationPacket *app);
 	void Handle_OP_FindPersonRequest(const EQApplicationPacket *app);
@@ -189,6 +190,7 @@
 	void Handle_OP_ItemLinkResponse(const EQApplicationPacket *app);
 	void Handle_OP_ItemName(const EQApplicationPacket *app);
 	void Handle_OP_ItemPreview(const EQApplicationPacket *app);
+	void Handle_OP_ItemPreviewRequest(const EQApplicationPacket *app);
 	void Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app);
 	void Handle_OP_Jump(const EQApplicationPacket *app);
 	void Handle_OP_KeyRing(const EQApplicationPacket *app);

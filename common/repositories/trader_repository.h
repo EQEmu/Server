@@ -41,7 +41,11 @@ public:
 		int32 char_zone_instance_id
 	);
 
-	static BulkTraders_Struct GetDistinctTraders(Database &db, uint32 char_zone_instance_id)
+	static BulkTraders_Struct GetDistinctTraders(
+		Database &db,
+		uint32 char_zone_instance_id,
+		uint32 max_results = std::numeric_limits<uint32>::max()
+		)
 	{
 		BulkTraders_Struct                  all_entries{};
 		std::vector<DistinctTraders_Struct> distinct_traders;
@@ -51,8 +55,10 @@ public:
 			"FROM trader AS t "
 			"JOIN character_data AS c ON t.char_id = c.id "
 			"WHERE t.char_zone_instance_id = {} "
-			"ORDER BY t.char_zone_instance_id ASC;",
-			char_zone_instance_id)
+			"ORDER BY t.char_zone_instance_id ASC "
+			"LIMIT {}",
+			char_zone_instance_id,
+			max_results)
 		);
 
 		distinct_traders.reserve(results.RowCount());
@@ -229,7 +235,11 @@ public:
 		return DeleteWhere(db, fmt::format("`id` IN({})", Strings::Implode(",", delete_ids)));
 	}
 
-	static DistinctTraders_Struct GetTraderByInstanceAndSerialnumber(Database &db, uint32 instance_id, const char* serial_number)
+	static DistinctTraders_Struct GetTraderByInstanceAndSerialnumber(
+		Database &db,
+		uint32 instance_id,
+		const char *serial_number
+		)
 	{
 		DistinctTraders_Struct trader{};
 
@@ -242,16 +252,16 @@ public:
 			serial_number
 		);
 
-		auto        results = db.QueryDatabase(query);
+		auto results = db.QueryDatabase(query);
 
 		if (results.RowCount() == 0) {
 			return trader;
 		}
 
-		auto        row     = results.begin();
-		std::string name    = row[2];
-		trader.trader_id    = Strings::ToUnsignedInt(row[1]);
-		trader.trader_name  = row[2];
+		auto        row    = results.begin();
+		std::string name   = row[2];
+		trader.trader_id   = Strings::ToUnsignedInt(row[1]);
+		trader.trader_name = row[2] ? row[2] : "";
 
 		return trader;
 	}
