@@ -4912,7 +4912,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	}
 
 	if (RuleB(Custom, MulticlassingEnabled)) {
-		if (buffs[slot].spellid = bardsong) {
+		if (buffs[slot].spellid == bardsong) {
 			ZeroBardPulseVars();
 		}
 	}
