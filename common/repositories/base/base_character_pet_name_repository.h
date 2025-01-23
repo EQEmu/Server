@@ -19,20 +19,20 @@
 class BaseCharacterPetNameRepository {
 public:
 	struct CharacterPetName {
-		int32_t     char_id;
+		int32_t     character_id;
 		std::string name;
 		int8_t      class_id;
 	};
 
 	static std::string PrimaryKey()
 	{
-		return std::string("char_id");
+		return std::string("character_id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"char_id",
+			"character_id",
 			"name",
 			"class_id",
 		};
@@ -41,7 +41,7 @@ public:
 	static std::vector<std::string> SelectColumns()
 	{
 		return {
-			"char_id",
+			"character_id",
 			"name",
 			"class_id",
 		};
@@ -84,7 +84,7 @@ public:
 	{
 		CharacterPetName e{};
 
-		e.char_id  = 0;
+		e.character_id  = 0;
 		e.name     = "";
 		e.class_id = -1;
 
@@ -97,7 +97,7 @@ public:
 	)
 	{
 		for (auto &character_pet_name : character_pet_names) {
-			if (character_pet_name.char_id == character_pet_name_id) {
+			if (character_pet_name.character_id == character_pet_name_id) {
 				return character_pet_name;
 			}
 		}
@@ -123,7 +123,7 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetName e{};
 
-			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.character_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name     = row[1] ? row[1] : "";
 			e.class_id = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
 
@@ -159,7 +159,7 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.character_id));
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
 		v.push_back(columns[2] + " = " + std::to_string(e.class_id));
 
@@ -169,7 +169,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", v),
 				PrimaryKey(),
-				e.char_id
+				e.character_id
 			)
 		);
 
@@ -183,7 +183,7 @@ public:
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.character_id));
 		v.push_back("'" + Strings::Escape(e.name) + "'");
 		v.push_back(std::to_string(e.class_id));
 
@@ -196,7 +196,7 @@ public:
 		);
 
 		if (results.Success()) {
-			e.char_id = results.LastInsertedID();
+			e.character_id = results.LastInsertedID();
 			return e;
 		}
 
@@ -215,7 +215,7 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.character_id));
 			v.push_back("'" + Strings::Escape(e.name) + "'");
 			v.push_back(std::to_string(e.class_id));
 
@@ -251,7 +251,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetName e{};
 
-			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.character_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name     = row[1] ? row[1] : "";
 			e.class_id = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
 
@@ -278,7 +278,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetName e{};
 
-			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.character_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name     = row[1] ? row[1] : "";
 			e.class_id = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
 
@@ -355,7 +355,7 @@ public:
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.character_id));
 		v.push_back("'" + Strings::Escape(e.name) + "'");
 		v.push_back(std::to_string(e.class_id));
 
@@ -380,7 +380,7 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.character_id));
 			v.push_back("'" + Strings::Escape(e.name) + "'");
 			v.push_back(std::to_string(e.class_id));
 
