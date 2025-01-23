@@ -93,26 +93,25 @@ struct AppearanceStruct {
 	uint8  texture          = UINT8_MAX;
 };
 
-struct BotSpellSettings_Struct
-{
-	uint16					spellType;							// type ID of bot category
-	std::string 			shortName;							// type short name of bot category
-	std::string 			name;								// type name of bot category
-	bool					hold;								// 0 = allow spell type, 1 = hold spell type
-	uint16					delay;								// delay between casts of spell type, 1ms-60,000ms
-	uint8					minThreshold;						// minimum target health threshold to allow casting of spell type
-	uint8					maxThreshold;						// maximum target health threshold to allow casting of spell type
-	uint16					resistLimit;						// resist limit to skip spell type
-	bool					aggroCheck;							// whether or not to check for possible aggro before casting
-	uint8					minManaPct;							// lower mana percentage limit to allow spell cast
-	uint8					maxManaPct;							// upper mana percentage limit to allow spell cast
-	uint8					minHPPct;							// lower HP percentage limit to allow spell cast
-	uint8					maxHPPct;							// upper HP percentage limit to allow spell cast
-	uint16					idlePriority;						// idle priority of the spell type
-	uint16					engagedPriority;					// engaged priority of the spell type
-	uint16					pursuePriority;						// pursue priority of the spell type
-	uint16					AEOrGroupTargetCount;				// require target count to cast an AE or Group spell type
-	Timer					recastTimer;						// recast timer based off delay
+struct BotSpellSettings_Struct {
+	uint16				spellType;                 // type ID of bot category
+	std::string			shortName;                 // type short name of bot category
+	std::string			name;                      // type name of bot category
+	bool				hold;                      // 0 = allow spell type, 1 = hold spell type
+	uint16				delay;                     // delay between casts of spell type, 1ms-60,000ms
+	uint8				minThreshold;              // minimum target health threshold to allow casting of spell type
+	uint8				maxThreshold;              // maximum target health threshold to allow casting of spell type
+	uint16				resistLimit;               // resist limit to skip spell type
+	bool				aggroCheck;                // whether or not to check for possible aggro before casting
+	uint8				minManaPct;                // lower mana percentage limit to allow spell cast
+	uint8				maxManaPct;                // upper mana percentage limit to allow spell cast
+	uint8				minHPPct;                  // lower HP percentage limit to allow spell cast
+	uint8				maxHPPct;                  // upper HP percentage limit to allow spell cast
+	uint16				idlePriority;              // idle priority of the spell type
+	uint16				engagedPriority;           // engaged priority of the spell type
+	uint16				pursuePriority;            // pursue priority of the spell type
+	uint16				AEOrGroupTargetCount;      // require target count to cast an AE or Group spell type
+	Timer				recastTimer;               // recast timer based off delay
 };
 
 class DataBucketKey;

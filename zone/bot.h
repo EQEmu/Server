@@ -94,28 +94,28 @@ enum BotCastingChanceConditional : uint8
 };
 
 namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
-	constexpr uint8 BaseSetting							= 0;
-	constexpr uint8 SpellHold							= 1;
-	constexpr uint8 SpellDelay							= 2;
-	constexpr uint8 SpellMinThreshold					= 3;
-	constexpr uint8 SpellMaxThreshold					= 4;
-	constexpr uint8 SpellTypeAggroCheck					= 5;
-	constexpr uint8 SpellTypeMinManaPct					= 6;
-	constexpr uint8 SpellTypeMaxManaPct					= 7;
-	constexpr uint8 SpellTypeMinHPPct					= 8;
-	constexpr uint8 SpellTypeMaxHPPct					= 9;	
-	constexpr uint8 SpellTypeIdlePriority				= 10;
-	constexpr uint8 SpellTypeEngagedPriority			= 11;
-	constexpr uint8 SpellTypePursuePriority				= 12;
-	constexpr uint8 SpellTypeAEOrGroupTargetCount		= 13;
-	constexpr uint8 SpellTypeRecastDelay				= 14;
+	constexpr uint8 BaseSetting                       = 0;
+	constexpr uint8 SpellHold                         = 1;
+	constexpr uint8 SpellDelay                        = 2;
+	constexpr uint8 SpellMinThreshold                 = 3;
+	constexpr uint8 SpellMaxThreshold                 = 4;
+	constexpr uint8 SpellTypeAggroCheck               = 5;
+	constexpr uint8 SpellTypeMinManaPct               = 6;
+	constexpr uint8 SpellTypeMaxManaPct               = 7;
+	constexpr uint8 SpellTypeMinHPPct                 = 8;
+	constexpr uint8 SpellTypeMaxHPPct                 = 9;	
+	constexpr uint8 SpellTypeIdlePriority             = 10;
+	constexpr uint8 SpellTypeEngagedPriority          = 11;
+	constexpr uint8 SpellTypePursuePriority           = 12;
+	constexpr uint8 SpellTypeAEOrGroupTargetCount     = 13;
+	constexpr uint8 SpellTypeRecastDelay              = 14;
 
-	constexpr uint16 START								= BotSettingCategories::BaseSetting;
-	constexpr uint16 START_NO_BASE						= BotSettingCategories::SpellHold;
-	constexpr uint16 START_CLIENT						= BotSettingCategories::SpellHold;
-	constexpr uint16 END_CLIENT							= BotSettingCategories::SpellMaxThreshold;
-	constexpr uint16 END								= BotSettingCategories::SpellTypeAEOrGroupTargetCount;
-	constexpr uint16 END_FULL							= BotSettingCategories::SpellTypeRecastDelay;
+	constexpr uint16 START                            = BotSettingCategories::BaseSetting;
+	constexpr uint16 START_NO_BASE                    = BotSettingCategories::SpellHold;
+	constexpr uint16 START_CLIENT                     = BotSettingCategories::SpellHold;
+	constexpr uint16 END_CLIENT                       = BotSettingCategories::SpellMaxThreshold;
+	constexpr uint16 END                              = BotSettingCategories::SpellTypeAEOrGroupTargetCount;
+	constexpr uint16 END_FULL                         = BotSettingCategories::SpellTypeRecastDelay;
 };
 
 static std::map<uint8, std::string> botSpellCategory_names = {
@@ -137,81 +137,81 @@ static std::map<uint8, std::string> botSpellCategory_names = {
 };
 
 namespace BotPriorityCategories { // Update GetBotSpellCategoryName as needed
-	constexpr uint8 Idle						= 0;
-	constexpr uint8 Engaged						= 1;
-	constexpr uint8 Pursue						= 2;
+	constexpr uint8 Idle                              = 0;
+	constexpr uint8 Engaged                           = 1;
+	constexpr uint8 Pursue                            = 2;
 
-	constexpr uint16 START						= BotPriorityCategories::Idle;
-	constexpr uint16 END						= BotPriorityCategories::Pursue; // Increment as needed
+	constexpr uint16 START                            = BotPriorityCategories::Idle;
+	constexpr uint16 END                              = BotPriorityCategories::Pursue; // Increment as needed
 };
 
 namespace BotBaseSettings {
-	constexpr uint16 ExpansionBitmask			= 0;
-	constexpr uint16 ShowHelm					= 1;
-	constexpr uint16 FollowDistance				= 2;
-	constexpr uint16 StopMeleeLevel				= 3;	
-	constexpr uint16 EnforceSpellSettings		= 4;
-	constexpr uint16 RangedSetting				= 5;
-	constexpr uint16 PetSetTypeSetting			= 6;
-	constexpr uint16 BehindMob					= 7;
-	constexpr uint16 DistanceRanged				= 8;
-	constexpr uint16 IllusionBlock				= 9;
-	constexpr uint16 MaxMeleeRange				= 10;
-	constexpr uint16 MedInCombat				= 11;
-	constexpr uint16 SitHPPct					= 12;
-	constexpr uint16 SitManaPct					= 13;
+	constexpr uint16 ExpansionBitmask                 = 0;
+	constexpr uint16 ShowHelm                         = 1;
+	constexpr uint16 FollowDistance                   = 2;
+	constexpr uint16 StopMeleeLevel                   = 3;	
+	constexpr uint16 EnforceSpellSettings             = 4;
+	constexpr uint16 RangedSetting                    = 5;
+	constexpr uint16 PetSetTypeSetting                = 6;
+	constexpr uint16 BehindMob                        = 7;
+	constexpr uint16 DistanceRanged                   = 8;
+	constexpr uint16 IllusionBlock                    = 9;
+	constexpr uint16 MaxMeleeRange                    = 10;
+	constexpr uint16 MedInCombat                      = 11;
+	constexpr uint16 SitHPPct                         = 12;
+	constexpr uint16 SitManaPct                       = 13;
 
-	constexpr uint16 START_ALL					= ExpansionBitmask;
-	constexpr uint16 START						= BotBaseSettings::ShowHelm; // Everything above this cannot be copied, changed or viewed by players
-	constexpr uint16 END						= BotBaseSettings::SitManaPct; // Increment as needed
+	constexpr uint16 START_ALL                        = ExpansionBitmask;
+	constexpr uint16 START                            = BotBaseSettings::ShowHelm; // Everything above this cannot be copied, changed or viewed by players
+	constexpr uint16 END                              = BotBaseSettings::SitManaPct; // Increment as needed
 };
 
 static std::map<uint16, std::string> botBaseSettings_names = {
-	{ BotBaseSettings::ExpansionBitmask,		"ExpansionBitmask" },
-	{ BotBaseSettings::ShowHelm,				"ShowHelm" },
-	{ BotBaseSettings::FollowDistance,			"FollowDistance" },
-	{ BotBaseSettings::StopMeleeLevel,			"StopMeleeLevel" },
-	{ BotBaseSettings::EnforceSpellSettings,	"EnforceSpellSettings" },
-	{ BotBaseSettings::RangedSetting,			"RangedSetting" },
-	{ BotBaseSettings::PetSetTypeSetting,		"PetSetTypeSetting" },
-	{ BotBaseSettings::BehindMob,				"BehindMob" },
-	{ BotBaseSettings::DistanceRanged,			"DistanceRanged" },
-	{ BotBaseSettings::IllusionBlock,			"IllusionBlock" },
-	{ BotBaseSettings::MaxMeleeRange,			"MaxMeleeRange" },
-	{ BotBaseSettings::MedInCombat,				"MedInCombat" },
-	{ BotBaseSettings::SitHPPct,				"SitHPPct" },
-	{ BotBaseSettings::SitManaPct,				"SitManaPct" }
+	{ BotBaseSettings::ExpansionBitmask,             "ExpansionBitmask" },
+	{ BotBaseSettings::ShowHelm,                     "ShowHelm" },
+	{ BotBaseSettings::FollowDistance,               "FollowDistance" },
+	{ BotBaseSettings::StopMeleeLevel,               "StopMeleeLevel" },
+	{ BotBaseSettings::EnforceSpellSettings,         "EnforceSpellSettings" },
+	{ BotBaseSettings::RangedSetting,                "RangedSetting" },
+	{ BotBaseSettings::PetSetTypeSetting,            "PetSetTypeSetting" },
+	{ BotBaseSettings::BehindMob,                    "BehindMob" },
+	{ BotBaseSettings::DistanceRanged,               "DistanceRanged" },
+	{ BotBaseSettings::IllusionBlock,                "IllusionBlock" },
+	{ BotBaseSettings::MaxMeleeRange,                "MaxMeleeRange" },
+	{ BotBaseSettings::MedInCombat,                  "MedInCombat" },
+	{ BotBaseSettings::SitHPPct,                     "SitHPPct" },
+	{ BotBaseSettings::SitManaPct,                   "SitManaPct" }
 };
 
 namespace CommandedSubTypes {
-	constexpr uint16 SingleTarget				= 1;
-	constexpr uint16 GroupTarget				= 2;
-	constexpr uint16 AETarget					= 3;
-	constexpr uint16 SeeInvis					= 4;
-	constexpr uint16 Invis						= 5;
-	constexpr uint16 InvisUndead				= 6;
-	constexpr uint16 InvisAnimals				= 7;
-	constexpr uint16 Shrink						= 8;
-	constexpr uint16 Grow						= 9;
-	constexpr uint16 Selo						= 10;
+	constexpr uint16 SingleTarget       = 1;
+	constexpr uint16 GroupTarget        = 2;
+	constexpr uint16 AETarget           = 3;
+	constexpr uint16 SeeInvis           = 4;
+	constexpr uint16 Invis              = 5;
+	constexpr uint16 InvisUndead        = 6;
+	constexpr uint16 InvisAnimals       = 7;
+	constexpr uint16 Shrink             = 8;
+	constexpr uint16 Grow               = 9;
+	constexpr uint16 Selo               = 10;
 
-	constexpr uint16 START						= CommandedSubTypes::SingleTarget;
-	constexpr uint16 END						= CommandedSubTypes::Selo;
+	constexpr uint16 START              = CommandedSubTypes::SingleTarget;
+	constexpr uint16 END                = CommandedSubTypes::Selo;
 };
-
 
 static std::map<uint16, std::string> botSubType_names = {
-	{ CommandedSubTypes::SingleTarget,		"SingleTarget" },
-	{ CommandedSubTypes::GroupTarget,		"GroupTarget" },
-	{ CommandedSubTypes::AETarget,			"AETarget" },
-	{ CommandedSubTypes::SeeInvis,			"SeeInvis" },
-	{ CommandedSubTypes::Invis,				"Invis" },
-	{ CommandedSubTypes::InvisUndead,		"InvisUndead" },
-	{ CommandedSubTypes::InvisAnimals,		"InvisAnimals" },
-	{ CommandedSubTypes::Shrink,			"Shrink" },
-	{ CommandedSubTypes::Grow,				"Grow" },
-	{ CommandedSubTypes::Selo,				"Selo" }
+	{ CommandedSubTypes::SingleTarget,              "SingleTarget" },
+	{ CommandedSubTypes::GroupTarget,               "GroupTarget" },
+	{ CommandedSubTypes::AETarget,                  "AETarget" },
+	{ CommandedSubTypes::SeeInvis,                  "SeeInvis" },
+	{ CommandedSubTypes::Invis,                     "Invis" },
+	{ CommandedSubTypes::InvisUndead,               "InvisUndead" },
+	{ CommandedSubTypes::InvisAnimals,              "InvisAnimals" },
+	{ CommandedSubTypes::Shrink,                    "Shrink" },
+	{ CommandedSubTypes::Grow,                      "Grow" },
+	{ CommandedSubTypes::Selo,                      "Selo" }
 };
+
 class Bot : public NPC {
 	friend class Mob;
 public:
