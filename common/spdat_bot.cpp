@@ -385,12 +385,6 @@ bool IsCommandedBotSpellType(uint16 spell_type) {
 		case BotSpellTypes::MovementSpeed:
 		case BotSpellTypes::SendHome:
 		case BotSpellTypes::SummonCorpse:
-		//case BotSpellTypes::Cure:
-		//case BotSpellTypes::GroupCures:
-		//case BotSpellTypes::DamageShields:
-		//case BotSpellTypes::PetDamageShields:
-		//case BotSpellTypes::ResistBuffs:
-		//case BotSpellTypes::PetResistBuffs:
 			return true;
 		default:
 			return false;
@@ -684,7 +678,6 @@ uint16 GetCorrectBotSpellType(uint16 spell_type, uint16 spell_id) {
 			}
 		}
 	}
-
 
 	return correct_type;
 }

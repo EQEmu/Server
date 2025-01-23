@@ -1338,35 +1338,35 @@ public:
 	virtual int			GetStuckBehavior() const { return 0; }
 
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
-	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
-	inline uint32		DontGroupHealMeBefore() const { return pDontGroupHealMeBefore; }
-	inline uint32		DontGroupHoTHealMeBefore() const { return pDontGroupHoTHealMeBefore; }
-	inline uint32		DontRegularHealMeBefore() const { return pDontRegularHealMeBefore; }
-	inline uint32		DontVeryFastHealMeBefore() const { return pDontVeryFastHealMeBefore; }
-	inline uint32		DontFastHealMeBefore() const { return pDontFastHealMeBefore; }
-	inline uint32		DontCompleteHealMeBefore() const { return pDontCompleteHealMeBefore; }
-	inline uint32		DontGroupCompleteHealMeBefore() const { return pDontGroupCompleteHealMeBefore; }
-	inline uint32		DontHotHealMeBefore() const { return pDontHotHealMeBefore; }
-	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
-	inline uint32		DontDotMeBefore() const { return pDontDotMeBefore; }
-	inline uint32		DontRootMeBefore() const { return pDontRootMeBefore; }
-	inline uint32		DontSnareMeBefore() const { return pDontSnareMeBefore; }
-	inline uint32		DontCureMeBefore() const { return pDontCureMeBefore; }
+	inline uint32		DontHealMeBefore() const { return m_dont_heal_me_before; }
+	inline uint32		DontGroupHealMeBefore() const { return m_dont_group_heal_me_before; }
+	inline uint32		DontGroupHoTHealMeBefore() const { return m_dont_group_hot_heal_me_before; }
+	inline uint32		DontRegularHealMeBefore() const { return m_dont_regular_heal_me_before; }
+	inline uint32		DontVeryFastHealMeBefore() const { return m_dont_very_fast_heal_me_before; }
+	inline uint32		DontFastHealMeBefore() const { return m_dont_fast_heal_me_before; }
+	inline uint32		DontCompleteHealMeBefore() const { return m_dont_complete_heal_me_before; }
+	inline uint32		DontGroupCompleteHealMeBefore() const { return m_dont_group_complete_heal_me_before; }
+	inline uint32		DontHotHealMeBefore() const { return m_dont_hot_heal_me_before; }
+	inline uint32		DontBuffMeBefore() const { return m_dont_buff_me_before; }
+	inline uint32		DontDotMeBefore() const { return m_dont_dot_me_before; }
+	inline uint32		DontRootMeBefore() const { return m_dont_root_me_before; }
+	inline uint32		DontSnareMeBefore() const { return m_dont_snare_me_before; }
+	inline uint32		DontCureMeBefore() const { return m_dont_cure_me_before; }
 	
-	void				SetDontRootMeBefore(uint32 time) { pDontRootMeBefore = time; }
-	void				SetDontHealMeBefore(uint32 time) { pDontHealMeBefore = time; }
-	void				SetDontGroupHealMeBefore(uint32 time) { pDontGroupHealMeBefore = time; }
-	void				SetDontGroupHoTHealMeBefore(uint32 time) { pDontGroupHoTHealMeBefore = time; }
-	void				SetDontRegularHealMeBefore(uint32 time) { pDontRegularHealMeBefore = time; }
-	void				SetDontVeryFastHealMeBefore(uint32 time) { pDontVeryFastHealMeBefore = time; }
-	void				SetDontFastHealMeBefore(uint32 time) { pDontFastHealMeBefore = time; }
-	void				SetDontCompleteHealMeBefore(uint32 time) { pDontCompleteHealMeBefore = time; }
-	void				SetDontGroupCompleteHealMeBefore(uint32 time) { pDontGroupCompleteHealMeBefore = time; }
-	void				SetDontHotHealMeBefore(uint32 time) { pDontHotHealMeBefore = time; }
-	void				SetDontBuffMeBefore(uint32 time) { pDontBuffMeBefore = time; }
-	void				SetDontDotMeBefore(uint32 time) { pDontDotMeBefore = time; }
-	void				SetDontSnareMeBefore(uint32 time) { pDontSnareMeBefore = time; }
-	void				SetDontCureMeBefore(uint32 time) { pDontCureMeBefore = time; }
+	void				SetDontRootMeBefore(uint32 time) { m_dont_root_me_before = time; }
+	void				SetDontHealMeBefore(uint32 time) { m_dont_heal_me_before = time; }
+	void				SetDontGroupHealMeBefore(uint32 time) { m_dont_group_heal_me_before = time; }
+	void				SetDontGroupHoTHealMeBefore(uint32 time) { m_dont_group_hot_heal_me_before = time; }
+	void				SetDontRegularHealMeBefore(uint32 time) { m_dont_regular_heal_me_before = time; }
+	void				SetDontVeryFastHealMeBefore(uint32 time) { m_dont_very_fast_heal_me_before = time; }
+	void				SetDontFastHealMeBefore(uint32 time) { m_dont_fast_heal_me_before = time; }
+	void				SetDontCompleteHealMeBefore(uint32 time) { m_dont_complete_heal_me_before = time; }
+	void				SetDontGroupCompleteHealMeBefore(uint32 time) { m_dont_group_complete_heal_me_before = time; }
+	void				SetDontHotHealMeBefore(uint32 time) { m_dont_hot_heal_me_before = time; }
+	void				SetDontBuffMeBefore(uint32 time) { m_dont_buff_me_before = time; }
+	void				SetDontDotMeBefore(uint32 time) { m_dont_dot_me_before = time; }
+	void				SetDontSnareMeBefore(uint32 time) { m_dont_snare_me_before = time; }
+	void				SetDontCureMeBefore(uint32 time) { m_dont_cure_me_before = time; }
 
 	// calculate interruption of spell via movement of mob
 	void SaveSpellLoc() { m_SpellLocation = glm::vec3(m_Position); }
@@ -1961,20 +1961,20 @@ protected:
 
 	bool pause_timer_complete;
 	bool DistractedFromGrid;
-	uint32 pDontHealMeBefore;
-	uint32 pDontGroupHealMeBefore;
-	uint32 pDontGroupHoTHealMeBefore;
-	uint32 pDontRegularHealMeBefore;
-	uint32 pDontVeryFastHealMeBefore;
-	uint32 pDontFastHealMeBefore;
-	uint32 pDontCompleteHealMeBefore;
-	uint32 pDontGroupCompleteHealMeBefore;
-	uint32 pDontHotHealMeBefore;
-	uint32 pDontBuffMeBefore;
-	uint32 pDontDotMeBefore;
-	uint32 pDontRootMeBefore;
-	uint32 pDontSnareMeBefore;
-	uint32 pDontCureMeBefore;
+	uint32 m_dont_heal_me_before;
+	uint32 m_dont_group_heal_me_before;
+	uint32 m_dont_group_hot_heal_me_before;
+	uint32 m_dont_regular_heal_me_before;
+	uint32 m_dont_very_fast_heal_me_before;
+	uint32 m_dont_fast_heal_me_before;
+	uint32 m_dont_complete_heal_me_before;
+	uint32 m_dont_group_complete_heal_me_before;
+	uint32 m_dont_hot_heal_me_before;
+	uint32 m_dont_buff_me_before;
+	uint32 m_dont_dot_me_before;
+	uint32 m_dont_root_me_before;
+	uint32 m_dont_snare_me_before;
+	uint32 m_dont_cure_me_before;
 
 	// hp event
 	int nexthpevent;

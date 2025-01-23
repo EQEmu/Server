@@ -2148,14 +2148,6 @@ void Bot::AI_Process()
 		}
 
 		r_group = raid->GetGroup(GetName());
-	
-		//if (mana_timer.Check(false)) {
-		//	raid->SendHPManaEndPacketsFrom(this);
-		//}
-		//
-		//if (send_hp_update_timer.Check(false)) {
-		//	raid->SendHPManaEndPacketsFrom(this);
-		//}
 	}
 
 	auto bot_group = GetGroup();
@@ -2842,35 +2834,51 @@ void Bot::DoAttackRounds(Mob* target, int hand) {
 			Attack(target, hand, false, false);
 
 			if (hand == EQ::invslot::slotPrimary) {
+				bool is_two_hander = HasTwoHanderEquipped();
 
-				if (HasTwoHanderEquipped()) {
-					auto extraattackchance = aabonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] + spellbonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] +
-						itembonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE];
-					if (extraattackchance && zone->random.Roll(extraattackchance)) {
-						auto extraattackamt = std::max({ aabonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS], spellbonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS], itembonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS] });
-						for (int i = 0; i < extraattackamt; i++) {
-							Attack(target, hand, false, false);
-						}
-					}
-				}
-				else {
-					auto extraattackchance_primary = aabonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] + spellbonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] +
-						itembonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE];
-					if (extraattackchance_primary && zone->random.Roll(extraattackchance_primary)) {
-						auto extraattackamt_primary = std::max({ aabonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS], spellbonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS], itembonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS] });
-						for (int i = 0; i < extraattackamt_primary; i++) {
-							Attack(target, hand, false, false);
-						}
+				auto extra_attack_chance = is_two_hander
+					? aabonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] +
+					spellbonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] +
+					itembonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE]
+					: aabonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] +
+					spellbonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE] +
+					itembonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_CHANCE];
+
+				int extra_attack_amt_aas = is_two_hander
+					? aabonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS]
+					: aabonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS];
+
+				int extra_attack_amt_spells = is_two_hander
+					? spellbonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS]
+					: spellbonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS];
+
+				int extra_attack_amt_items = is_two_hander
+					? itembonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_NUM_ATKS]
+					: itembonuses.ExtraAttackChancePrimary[SBIndex::EXTRA_ATTACK_NUM_ATKS];
+
+				int extra_attack_amt = std::max({ extra_attack_amt_aas, extra_attack_amt_spells, extra_attack_amt_items });
+
+				if (extra_attack_chance && zone->random.Roll(extra_attack_chance)) {
+					for (int i = 0; i < extra_attack_amt; i++) {
+						Attack(target, hand, false, false);
 					}
 				}
 			}
 
 			if (hand == EQ::invslot::slotSecondary) {
-				auto extraattackchance_secondary = aabonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] + spellbonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] +
+				auto extra_attack_chance_secondary =
+					aabonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] +
+					spellbonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] +
 					itembonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE];
-				if (extraattackchance_secondary && zone->random.Roll(extraattackchance_secondary)) {
-					auto extraattackamt_secondary = std::max({ aabonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS], spellbonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS], itembonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] });
-					for (int i = 0; i < extraattackamt_secondary; i++) {
+
+				if (extra_attack_chance_secondary && zone->random.Roll(extra_attack_chance_secondary)) {
+					auto extra_attack_amt_secondary = std::max({
+						aabonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS],
+						spellbonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS],
+						itembonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS]
+					});
+
+					for (int i = 0; i < extra_attack_amt_secondary; i++) {
 						Attack(target, hand, false, false);
 					}
 				}
@@ -3650,20 +3658,21 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		m_ping_timer.Start(8000);
 		m_auto_save_timer.Start(RuleI(Bots, AutosaveIntervalSeconds) * 1000);
 
-		pDontHealMeBefore = 0;
-		pDontGroupHealMeBefore = 0;
-		pDontGroupHoTHealMeBefore = 0;
-		pDontBuffMeBefore = Timer::GetCurrentTime() + 400;
-		pDontDotMeBefore = 0;
-		pDontRootMeBefore = 0;
-		pDontSnareMeBefore = 0;
-		pDontCureMeBefore = 0;
-		pDontRegularHealMeBefore = 0;
-		pDontVeryFastHealMeBefore = 0;
-		pDontFastHealMeBefore = 0;
-		pDontCompleteHealMeBefore = 0;
-		pDontGroupCompleteHealMeBefore = 0;
-		pDontHotHealMeBefore = 0;
+		m_dont_heal_me_before                = 0;
+		m_dont_regular_heal_me_before        = 0;
+		m_dont_very_fast_heal_me_before      = 0;
+		m_dont_fast_heal_me_before           = 0;
+		m_dont_complete_heal_me_before       = 0;
+		m_dont_hot_heal_me_before            = 0;
+		m_dont_group_heal_me_before          = 0;
+		m_dont_group_hot_heal_me_before      = 0;
+		m_dont_group_complete_heal_me_before = 0;
+		m_dont_buff_me_before                = Timer::GetCurrentTime() + 400;
+		m_dont_dot_me_before                 = 0;
+		m_dont_root_me_before                = 0;
+		m_dont_snare_me_before               = 0;
+		m_dont_cure_me_before                = 0;
+		
 
 		// there is something askew with spawn struct appearance fields...
 		// I re-enabled this until I can sort it out
@@ -4404,18 +4413,19 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 					event_trade.push_back(ClientTrade(trade_instance, trade_index));
 					continue;
 				}
-				else {
-					client->Message(
-						Chat::Yellow,
-						fmt::format(
-							"{} is too small of a stack, you need atleast {}, the trade has been cancelled!",
-							item_link,
-							RuleI(Bots, StackSizeMin)
-						).c_str()
-					);
-					client->ResetTrade();
-					return;
-				}
+
+				client->Message(
+					Chat::Yellow,
+					fmt::format(
+						"{} is too small of a stack, you need atleast {}, the trade has been cancelled!",
+						item_link,
+						RuleI(Bots, StackSizeMin)
+					).c_str()
+				);
+				client->ResetTrade();
+
+				return;
+
 			}
 		}
 		else if (
@@ -5407,34 +5417,35 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		case Class::Cleric:
 		case Class::ShadowKnight:
 		case Class::Paladin:
-				if (
-					(GetBaseRace() == OGRE || GetBaseRace() == TROLL || GetBaseRace() == BARBARIAN) ||
+			{
+				bool is_large_race = (
+					GetBaseRace() == OGRE ||
+					GetBaseRace() == TROLL ||
+					GetBaseRace() == BARBARIAN
+					);
+				bool has_bash_skill = GetSkill(EQ::skills::SkillBash) > 0;
+				bool has_shield_in_secondary =
+					m_inv.GetItem(EQ::invslot::slotSecondary) &&
+					m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield;
+				bool has_two_hander_with_aa =
+					m_inv.GetItem(EQ::invslot::slotPrimary) &&
+					m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() &&
+					GetAA(aa2HandBash) >= 1;
+				bool can_bash =
+					is_large_race ||
 					(
-						GetSkill(EQ::skills::SkillBash) &&
+						has_bash_skill &&
 						(
-							(
-								m_inv.GetItem(EQ::invslot::slotSecondary) && 
-								m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield
-							) 
-							|| 
-							(
-								m_inv.GetItem(EQ::invslot::slotPrimary) && 
-								m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && 
-								GetAA(aa2HandBash) >= 1
+							has_shield_in_secondary || has_two_hander_with_aa
 							)
-						)
-					)
-				) {
+						);
+
+				if (can_bash) {
 					skill_to_use = EQ::skills::SkillBash;
-
-					break;
-				}
-
-				if (GetSkill(EQ::skills::SkillKick)) {
-					skill_to_use = EQ::skills::SkillKick;
 				}
 
 				break;
+			}
 		case Class::Ranger:
 		case Class::Beastlord:
 			if (GetSkill(EQ::skills::SkillKick)) {
@@ -5496,16 +5507,21 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		// bards can do riposte frenzy for some reason
 		if (!IsRiposte && GetClass() == Class::Berserker) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
-			if (zone->random.Roll0(450) < chance)
+
+			if (zone->random.Roll0(450) < chance) {
 				AtkRounds++;
-			if (zone->random.Roll0(450) < chance)
+			}
+
+			if (zone->random.Roll0(450) < chance) {
 				AtkRounds++;
+			}
 		}
 
 		while (AtkRounds > 0) {
 			if (GetTarget() != this && TargetValidation(GetTarget())) {
 				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, dmg, 0, dmg, HasteMod);
 			}
+
 			AtkRounds--;
 		}
 
@@ -5899,13 +5915,6 @@ bool Bot::CastSpell(
 				LogSpellsDetail("Spell casting canceled: not able to cast now. Valid? [{}] casting [{}] waiting? [{}] spellend? [{}] stunned? [{}] feared? [{}] mezed? [{}] silenced? [{}]",
 					IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced()
 				);
-				//if (IsSilenced() && !IsDiscipline(spell_id)) {
-				//	MessageString(Chat::White, SILENCED_STRING);
-				//}
-				//
-				//if (IsAmnesiad() && IsDiscipline(spell_id)) {
-				//	MessageString(Chat::White, MELEE_SILENCE);
-				//}
 
 				if (casting_spell_id) {
 					AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
@@ -6755,56 +6764,45 @@ int64 Bot::CalcHPRegen() {
 }
 
 int64 Bot::CalcManaRegen() {
-	uint8 level = GetLevel();
-	uint8 botclass = GetClass();
-	int32 regen = 0;
+    uint8 level = GetLevel();
+    uint8 bot_class = GetClass();
 
-	if (GetClass() == Class::Bard) {
-		if (IsSitting()) {
-			BuffFadeBySitModifier();
-			regen = 2;
-			regen += (itembonuses.ManaRegen + aabonuses.ManaRegen);
-		}
-		else {
-			regen = 1;
-			regen += (itembonuses.ManaRegen + aabonuses.ManaRegen);
-		}
-	}
-	else {
-		if (IsSitting()) {
-			BuffFadeBySitModifier();
-			if (GetArchetype() != Archetype::Melee) {
-				regen = ((((GetSkill(EQ::skills::SkillMeditate) / 10) + (level - (level / 4))) / 4) + 4);
-				regen += (spellbonuses.ManaRegen + itembonuses.ManaRegen);
-			}
-			else
-				regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
-		}
-		else
-			regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
+    // Default values
+    int32 regen = 2; // Default regen for non-sitting state
+    float mana_regen_rate = std::max(0.0f, RuleR(Bots, ManaRegen));
 
-		if (IsHeroicINTCasterClass(GetClass())) {
-			regen += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
-		}
-		else if (IsHeroicWISCasterClass(GetClass())) {
-			regen += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
-		}
-		else {
-			regen = 0;
-		}
+    if (bot_class == Class::Bard) {
+        regen = IsSitting() ? 2 : 1;
 
-		regen += aabonuses.ManaRegen;
-		regen = ((regen * RuleI(Character, ManaRegenMultiplier)) / 100);
-		float mana_regen_rate = RuleR(Bots, ManaRegen);
+        if (IsSitting()) {
+            BuffFadeBySitModifier();
+        }
 
-		if (mana_regen_rate < 0.0f) {
-			mana_regen_rate = 0.0f;
-		}
+        regen += itembonuses.ManaRegen + aabonuses.ManaRegen;
 
-		regen = (regen * mana_regen_rate);
-	}
+        return regen;
+    }
 
-	return regen;
+    if (IsSitting()) {
+        BuffFadeBySitModifier();
+
+        if (GetArchetype() != Archetype::Melee) {
+            regen = (((GetSkill(EQ::skills::SkillMeditate) / 10) + (level - (level / 4))) / 4) + 4;
+        }
+    }
+
+    regen += spellbonuses.ManaRegen + itembonuses.ManaRegen;
+
+    if (IsHeroicINTCasterClass(bot_class)) {
+        regen += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+    } else if (IsHeroicWISCasterClass(bot_class)) {
+        regen += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
+    }
+
+    regen += aabonuses.ManaRegen;
+    regen = (regen * RuleI(Character, ManaRegenMultiplier)) / 100;
+
+    return static_cast<int32>(regen * mana_regen_rate);
 }
 
 uint64 Bot::GetClassHPFactor() {
@@ -10222,43 +10220,49 @@ bool Bot::IsValidTargetType(uint16 spell_id, int target_type, uint8 body_type) {
 }
 
 bool Bot::IsMobEngagedByAnyone(Mob* tar) {
-	if (!tar) {
-		return false;
-	}
+    if (!tar) {
+        return false;
+    }
 
-	for (Mob* m : GetSpellTargetList()) {
-		if (m->GetTarget() == tar) {
-			if (
-				m->IsBot() && 
-				m->IsEngaged() && 
+    for (Mob* m : GetSpellTargetList()) {
+        if (m->GetTarget() != tar) {
+            continue;
+        }
+
+        bool bot_is_engaged = m->IsBot() && m->IsEngaged();
+        bool bot_melee_or_casting = 
+			bot_is_engaged && 
+            (
+				!m->CastToBot()->IsBotNonSpellFighter() ||
 				(
-					!m->CastToBot()->IsBotNonSpellFighter() || 
-					(
-						m->GetLevel() >= m->CastToBot()->GetStopMeleeLevel() && 
-						!m->IsCasting()
-					)
+					m->GetLevel() >= m->CastToBot()->GetStopMeleeLevel() && 
+					!m->IsCasting()
 				)
-			) {
-				return true;
-			}
+			);
 
-			if (m->IsCasting() && SpellBreaksMez(m->CastingSpellID())) {
-				return true;
-			}
+        if (bot_melee_or_casting) {
+            return true;
+        }
 
-			if (
-				m->IsClient() && 
-				(
-					m->CastToClient()->AutoAttackEnabled() || 
-					m->CastToClient()->AutoFireEnabled()
-				)
-			) {
-				return true;
-			}
-		}
-	}
+        if (
+			m->IsCasting() && 
+			SpellBreaksMez(m->CastingSpellID())
+		) {
+            return true;
+        }
 
-	return false;
+        if (
+			m->IsClient() && 
+			(
+				m->CastToClient()->AutoAttackEnabled() || 
+				m->CastToClient()->AutoFireEnabled()
+			)
+		) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool Bot::IsValidMezTarget(Mob* owner, Mob* npc, uint16 spell_id) {
@@ -10904,13 +10908,7 @@ uint16 Bot::GetDefaultSpellTypePursuePriority(uint16 spell_type, uint8 bot_class
 }
 
 uint16 Bot::GetDefaultSpellTypeResistLimit(uint16 spell_type, uint8 stance) {
-
-	if (!IsBotSpellTypeBeneficial(spell_type)) {
-		return RuleI(Bots, SpellResistLimit);
-	}
-	else {
-		return 0;
-	}
+	return IsBotSpellTypeBeneficial(spell_type) ? 0 : RuleI(Bots, SpellResistLimit);
 }
 
 bool Bot::GetDefaultSpellTypeAggroCheck(uint16 spell_type, uint8 stance) {

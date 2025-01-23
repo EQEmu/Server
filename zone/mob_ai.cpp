@@ -393,12 +393,12 @@ void Mob::AI_Init()
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
 
-	pDontHealMeBefore = 0;
-	pDontBuffMeBefore = Timer::GetCurrentTime() + 400;
-	pDontDotMeBefore = 0;
-	pDontRootMeBefore = 0;
-	pDontSnareMeBefore = 0;
-	pDontCureMeBefore = 0;
+	m_dont_heal_me_before  = 0;
+	m_dont_buff_me_before  = Timer::GetCurrentTime() + 400;
+	m_dont_dot_me_before   = 0;
+	m_dont_root_me_before  = 0;
+	m_dont_snare_me_before = 0;
+	m_dont_cure_me_before  = 0;
 }
 
 void NPC::AI_Init()
