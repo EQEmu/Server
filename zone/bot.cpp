@@ -1823,24 +1823,21 @@ void Bot::SpellProcess() {
 }
 
 void Bot::BotMeditate(bool is_sitting) {
-    if (
-        GetManaRatio() < GetSitManaPct() ||
-        (GetHPRatio() < GetSitHPPct() && GetLevel() < GetStopMeleeLevel())
-    ) {
-        if (
-            (
-                !IsEngaged() ||
-                (IsEngaged() && GetMedInCombat() && !HasTargetReflection())
-            ) &&
-            !is_sitting
-        ) {
-            Sit();
-        }
-    } else {
-        if (is_sitting) {
-            Stand();
-        }
-    }
+	bool needs_to_med =
+		(!IsEngaged() && (GetManaRatio() < 100 || GetHPRatio() < 100)) ||
+		(GetMedInCombat() && !HasTargetReflection() &&
+			(
+				GetManaRatio() < GetSitManaPct() ||
+				(GetHPRatio() < GetSitHPPct() && GetLevel() >= GetStopMeleeLevel())
+			)
+		);
+
+	if (needs_to_med && !is_sitting) {
+		Sit();
+	}
+	else if (!needs_to_med && is_sitting) {
+		Stand();
+	}
 }
 
 bool Bot::BotRangedAttack(Mob* other, bool can_double_attack) {
