@@ -6080,7 +6080,7 @@ bool Client::ChangePetName(std::string new_name) {
     }
 
 	CharacterPetNameRepository::ReplaceOne(database, {
-		.char_id = static_cast<int32_t>(CharacterID()),
+		.character_id = static_cast<int32_t>(CharacterID()),
 		.name = new_name,
 		.class_id = GetPetNameChangeClass()
 	});
