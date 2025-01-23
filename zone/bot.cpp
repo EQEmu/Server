@@ -9919,7 +9919,7 @@ bool Bot::CanCastSpellType(uint16 spell_type, uint16 spell_id, Mob* tar) {
 					case Archetype::Caster:
 						if (
 							tar->IsBot() && 
-							(tar->GetLevel() > tar->CastToBot()->GetStopMeleeLevel()) &&
+							(tar->GetLevel() >= tar->CastToBot()->GetStopMeleeLevel()) &&
 							(
 								IsEffectInSpell(spell_id, SE_AttackSpeed) || 
 								IsEffectInSpell(spell_id, SE_ReverseDS)
@@ -9983,7 +9983,7 @@ bool Bot::CanCastSpellType(uint16 spell_type, uint16 spell_id, Mob* tar) {
 					case Archetype::Caster:
 						if (
 							tar->IsBot() && 
-							(tar->GetLevel() > tar->CastToBot()->GetStopMeleeLevel()) &&
+							(tar->GetLevel() >= tar->CastToBot()->GetStopMeleeLevel()) &&
 							(
 								IsEffectInSpell(spell_id, SE_AttackSpeed) || 
 								IsEffectInSpell(spell_id, SE_ReverseDS)
