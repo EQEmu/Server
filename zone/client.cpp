@@ -5933,7 +5933,7 @@ void Client::DeletePetVanityName(int class_id) {
 	CharacterPetNameRepository::DeleteWhere(
 		database,
 		fmt::format(
-			"`char_id` = '{}' AND `class_id` = '{}'",
+			"`character_id` = '{}' AND `class_id` = '{}'",
 			CharacterID(), class_id
 		)
 	);
@@ -5955,7 +5955,7 @@ std::string Client::GetPetVanityName(int class_id) {
 	const std::vector<CharacterPetNameRepository::CharacterPetName>& vanity_name = CharacterPetNameRepository::GetWhere(
 		database,
 		fmt::format(
-			"`char_id` = '{}' AND `class_id` = '{}'",
+			"`character_id` = '{}' AND `class_id` = '{}'",
 			CharacterID(), class_id
 		)
 	);

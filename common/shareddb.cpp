@@ -1630,6 +1630,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				return_value = std::max(1.0f, return_value);
 
 				item.Price = return_value;
+				item.SellRate = 2.0f;
+			}
+
+			if (item.SellRate <= 1.0f) {
+				item.SellRate = 2.0f;
 			}
 		}
 
