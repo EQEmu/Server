@@ -1625,7 +1625,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 					return_value = item.BagSlots * item.BagWR * item.BagSize;
 				}
 
-				return_value *= 100;
+				return_value *= 50;
 
 				return_value = std::max(1.0f, return_value);
 
