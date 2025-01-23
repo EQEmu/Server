@@ -48,15 +48,15 @@ public:
 
 	bool LoadTitles();
 
-	EQApplicationPacket *MakeTitlesPacket(Client *client);
+	EQApplicationPacket* MakeTitlesPacket(Client* c);
 	std::string GetPrefix(int title_id);
 	std::string GetSuffix(int title_id);
-	bool IsClientEligibleForTitle(Client *client, TitleEntry title);
+	const std::vector<TitleEntry>& GetEligibleTitles(Client* c);
 	bool IsNewAATitleAvailable(int aa_points, int class_id);
 	bool IsNewTradeSkillTitleAvailable(int skill_id, int skill_value);
-	void CreateNewPlayerTitle(Client *client, std::string title);
-	void CreateNewPlayerSuffix(Client *client, std::string suffix);
-	bool HasTitle(Client* client, uint32 title_id);
+	void CreateNewPlayerTitle(Client* c, std::string title);
+	void CreateNewPlayerSuffix(Client* c, std::string suffix);
+	bool HasTitle(Client* c, uint32 title_id);
 	inline const std::vector<TitleEntry>& GetTitles() { return titles; }
 
 protected:
