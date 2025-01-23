@@ -1112,7 +1112,7 @@ private:
 	unsigned int RestRegenMana;
 	unsigned int RestRegenEndurance;
 	Timer rest_timer;
-	Timer ping_timer;
+	Timer m_ping_timer;
 	int32	base_end;
 	int32	cur_end;
 	int32	max_end;
@@ -1121,7 +1121,7 @@ private:
 	Timer m_rogue_evade_timer; // Rogue evade timer
 	Timer m_monk_evade_timer; // Monk evade FD timer
 	Timer m_auto_defend_timer;
-	Timer auto_save_timer;
+	Timer m_auto_save_timer;
 
 	Timer m_combat_jitter_timer;
 	bool m_combat_jitter_flag;

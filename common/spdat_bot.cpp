@@ -419,6 +419,10 @@ bool IsPullingBotSpellType(uint16 spell_type) {
 }
 
 uint16 GetCorrectBotSpellType(uint16 spell_type, uint16 spell_id) {
+	if (!IsValidSpell(spell_id)) {
+		return UINT16_MAX;
+	}
+
 	uint16 correct_type = UINT16_MAX;
 	SPDat_Spell_Struct spell = spells[spell_id];
 	std::string teleport_zone = spell.teleport_zone;

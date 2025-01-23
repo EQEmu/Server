@@ -1295,8 +1295,8 @@ bool Mob::CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarge
 	return zone->zonemap->CheckLoS(posWatcher, posTarget);
 }
 
-bool Mob::CheckPositioningLosFN(Mob* other, float posX, float posY, float posZ) {
-	if (zone->zonemap == nullptr) {
+bool Mob::CheckPositioningLosFN(Mob* other, float x, float y, float z) {
+	if (!zone->zonemap) {
 		//not sure what the best return is on error
 		//should make this a database variable, but im lazy today
 #ifdef LOS_DEFAULT_CAN_SEE
@@ -1318,9 +1318,9 @@ bool Mob::CheckPositioningLosFN(Mob* other, float posX, float posY, float posZ) 
 	oloc.y = other->GetY();
 	oloc.z = other->GetZ() + (other->GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : other->GetSize()) / 2 * SEE_POSITION;
 
-	myloc.x = posX;
-	myloc.y = posY;
-	myloc.z = posZ + (GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : GetSize()) / 2 * HEAD_POSITION;
+	myloc.x = x;
+	myloc.y = y;
+	myloc.z = z + (GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : GetSize()) / 2 * HEAD_POSITION;
 
 #if LOSDEBUG>=5
 	LogDebug("LOS from ([{}], [{}], [{}]) to ([{}], [{}], [{}]) sizes: ([{}], [{}])", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);

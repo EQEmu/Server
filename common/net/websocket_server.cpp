@@ -25,7 +25,7 @@ struct MethodHandlerEntry
 struct EQ::Net::WebsocketServer::Impl
 {
 	std::unique_ptr<TCPServer> server;
-	std::unique_ptr<EQ::Timer> ping_timer;
+	std::unique_ptr<EQ::Timer> m_ping_timer;
 	std::map<std::shared_ptr<websocket_connection>, std::unique_ptr<WebsocketServerConnection>> connections;
 	std::map<std::string, MethodHandlerEntry> methods;
 	websocket_server ws_server;
@@ -54,7 +54,7 @@ EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
 		return websocketpp::lib::error_code();
 	});
 
-	_impl->ping_timer = std::make_unique<EQ::Timer>(5000, true, [this](EQ::Timer *t) {
+	_impl->m_ping_timer = std::make_unique<EQ::Timer>(5000, true, [this](EQ::Timer *t) {
 		auto iter = _impl->connections.begin();
 
 		while (iter != _impl->connections.end()) {

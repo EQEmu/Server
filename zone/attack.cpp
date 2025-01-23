@@ -1250,8 +1250,8 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 			(
 				!IsBot() ||
 				(IsBot() && !RuleB(Bots, AllowBotEquipAnyClassGear))
-				)
-			) {
+			)
+		) {
 			return 0;
 		}
 
