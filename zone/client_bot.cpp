@@ -298,7 +298,7 @@ void Client::SendSpellTypePrompts(bool commanded_types, bool client_only_types) 
 		Message(
 			Chat::Yellow,
 			fmt::format(
-				"You can view spell types by {} or {}.",
+				"You can view client spell types by {} or {}.",
 				Saylink::Silent(
 					fmt::format("^spelltypeids client"), "ID"
 				),

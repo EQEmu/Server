@@ -1,7 +1,6 @@
 #include "../bot_command.h"
 
-void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
-{
+void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 	if (helper_command_alias_fail(c, "bot_command_spell_max_thresholds", sep->arg[0], "spellmaxthresholds")) {
 		c->Message(Chat::White, "note: Controls at what target HP % the bot will start casting different spell types.");
 
@@ -14,6 +13,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 		p.description = { "Controls at what target HP % the bot will start casting different spell types." };
 		p.notes =
 		{
+			"- Targeting yourself for this command will allow you to control your own settings for how bots cast on you",
 			"- All pet types are based off the pet's owner's setting",
 			"- Any remaining types use the owner's setting when a pet is the target",
 			"- All Heals, Cures, Buffs (DS and resists included) are based off the target's setting, not the caster",
@@ -21,8 +21,8 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 		};
 		p.example_format =
 		{
-			fmt::format("{} [Type Shortname] [value] [actionable]", sep->arg[0]),
-			fmt::format("{} [Type ID] [value] [actionable]", sep->arg[0])
+			fmt::format("{} [Type Shortname] [value] [actionable, default: target]", sep->arg[0]),
+			fmt::format("{} [Type ID] [value] [actionable, default: target]", sep->arg[0])
 		};
 		p.examples_one =
 		{
@@ -73,6 +73,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 
 		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
 		c->SendSpellTypePrompts();
+		c->SendSpellTypePrompts(false, true);
 
 		if (RuleB(Bots, SendClassRaceOnHelp)) {
 			c->Message(
@@ -93,13 +94,26 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 	bool current_check = false;
 	uint16 spell_type = 0;
 	uint32 type_value = 0;
+	Mob* target = c->GetTarget();
+	bool clientSetting = (target && target == c);
 
-	// String/Int type checks
 	if (sep->IsNumber(1)) {
 		spell_type = atoi(sep->arg[1]);
 
-		if (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END) {
-			c->Message(Chat::Yellow, "You must choose a valid spell type. Spell types range from %i to %i", BotSpellTypes::START, BotSpellTypes::END);
+		if (
+			(clientSetting && !IsClientBotSpellType(spell_type)) ||
+			(!clientSetting && (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END))
+		) {
+			c->Message(
+				Chat::Yellow,
+				clientSetting ? "Invalid spell type for clients." : "You must choose a valid spell type. Spell types range from %i to %i",
+				BotSpellTypes::START,
+				BotSpellTypes::END
+			);
+
+			if (clientSetting) {
+				c->SendSpellTypePrompts(false, true);
+			}
 
 			return;
 		}
@@ -107,6 +121,11 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 	else {
 		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
 			spell_type = c->GetSpellTypeIDByShortName(arg1);
+
+			if (clientSetting && !IsClientBotSpellType(spell_type)) {
+				c->Message(Chat::Yellow, "Invalid spell type for clients.");
+				c->SendSpellTypePrompts(false, true);
+			}
 		}
 		else {
 			c->Message(
@@ -151,66 +170,103 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep)
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type1;
-	std::string class_race_arg = sep->arg[ab_arg];
-	bool class_race_check = false;
-	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
-		class_race_check = true;
+	std::string actionable_arg = sep->arg[ab_arg];
+
+	if (actionable_arg.empty()) {
+		actionable_arg = "target";
 	}
 
-	std::vector<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
-		return;
+	if (!clientSetting) {
+
+		std::string class_race_arg = sep->arg[ab_arg];
+		bool class_race_check = false;
+
+		if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
+			class_race_check = true;
+		}
+
+		std::vector<Bot*> sbl;
+
+		if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
+			return;
+		}
+
+		sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
+
+		Bot* first_found = nullptr;
+		int success_count = 0;
+
+		for (auto my_bot : sbl) {
+			if (my_bot->BotPassiveCheck()) {
+				continue;
+			}
+
+			if (!first_found) {
+				first_found = my_bot;
+			}
+
+			if (current_check) {
+				c->Message(
+					Chat::Green,
+					fmt::format(
+						"{} says, 'My [{}] maximum threshold is currently [{}%%].'",
+						my_bot->GetCleanName(),
+						c->GetSpellTypeNameByID(spell_type),
+						my_bot->GetSpellMaxThreshold(spell_type)
+					).c_str()
+				);
+			}
+			else {
+				my_bot->SetSpellMaxThreshold(spell_type, type_value);
+				++success_count;
+			}
+		}
+
+		if (!current_check) {
+			if (success_count == 1 && first_found) {
+				c->Message(
+					Chat::Green,
+					fmt::format(
+						"{} says, 'My [{}] maximum threshold was set to [{}%%].'",
+						first_found->GetCleanName(),
+						c->GetSpellTypeNameByID(spell_type),
+						first_found->GetSpellMaxThreshold(spell_type)
+					).c_str()
+				);
+			}
+			else {
+				c->Message(
+					Chat::Green,
+					fmt::format(
+						"{} of your bots set their [{}] maximum threshold to [{}%%].",
+						success_count,
+						c->GetSpellTypeNameByID(spell_type),
+						type_value
+					).c_str()
+				);
+			}
+		}
 	}
-
-	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
-
-	Bot* first_found = nullptr;
-	int success_count = 0;
-	for (auto my_bot : sbl) {
-		if (my_bot->BotPassiveCheck()) {
-			continue;
-		}
-
-		if (!first_found) {
-			first_found = my_bot;
-		}
-
+	else {
 		if (current_check) {
 			c->Message(
 				Chat::Green,
 				fmt::format(
-					"{} says, 'My [{}] maximum threshold is currently [{}%%].'",
-					my_bot->GetCleanName(),
+					"Your [{}] maximum threshold is currently [{}%%].",
 					c->GetSpellTypeNameByID(spell_type),
-					my_bot->GetSpellMaxThreshold(spell_type)
+					c->GetSpellMaxThreshold(spell_type)
 				).c_str()
 			);
 		}
 		else {
-			my_bot->SetSpellMaxThreshold(spell_type, type_value);
-			++success_count;
-		}
-	}
-	if (!current_check) {
-		if (success_count == 1 && first_found) {
+			c->SetSpellMaxThreshold(spell_type, type_value);
+
 			c->Message(
 				Chat::Green,
 				fmt::format(
-					"{} says, 'My [{}] maximum threshold was set to [{}%%].'",
-					first_found->GetCleanName(),
+					"Your [{}] maximum threshold was set to [{}%%].",
 					c->GetSpellTypeNameByID(spell_type),
-					first_found->GetSpellMaxThreshold(spell_type)
-				).c_str()
-			);
-		}
-		else {
-			c->Message(
-				Chat::Green,
-				fmt::format(
-					"{} of your bots set their [{}] maximum threshold to [{}%%].",
-					success_count,
-					c->GetSpellTypeNameByID(spell_type),
-					type_value
+					c->GetSpellMaxThreshold(spell_type)
 				).c_str()
 			);
 		}
