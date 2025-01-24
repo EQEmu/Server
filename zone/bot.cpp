@@ -2291,12 +2291,17 @@ void Bot::AI_Process()
 		bool  behind_mob = BehindMob(tar, GetX(), GetY());
 		uint8 stop_melee_level = GetStopMeleeLevel();
 		tar_distance = sqrt(tar_distance); // sqrt this for future calculations
+		// Item variables
+		const EQ::ItemInstance* p_item = GetBotItem(EQ::invslot::slotPrimary);
+		const EQ::ItemInstance* s_item = GetBotItem(EQ::invslot::slotSecondary);
 
 		CombatRangeInput input = {
 			.target = tar,
 			.target_distance = tar_distance,
 			.behind_mob = behind_mob,
-			.stop_melee_level = stop_melee_level
+			.stop_melee_level = stop_melee_level,
+			.p_item = p_item,
+			.s_item = s_item
 		};
 
 		CombatRangeOutput o = EvaluateCombatRange(input);
@@ -2306,10 +2311,6 @@ void Bot::AI_Process()
 		float melee_distance_min = o.melee_distance_min;
 		float melee_distance     = o.melee_distance;
 		float melee_distance_max = o.melee_distance_max;
-
-		// Item variables
-		const EQ::ItemInstance* p_item = GetBotItem(EQ::invslot::slotPrimary);
-		const EQ::ItemInstance* s_item = GetBotItem(EQ::invslot::slotSecondary);
 
 // PULLING FLAG (ACTIONABLE RANGE)
 
@@ -3088,8 +3089,8 @@ CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
 
 	if (!RuleB(Bots, UseFlatNormalMeleeRange)) {
 
-		bool is_two_hander = input.p_item && input.p_item->GetItem()->IsType2HWeapon();
-		bool is_shield = input.s_item && input.s_item->GetItem()->IsTypeShield();
+		bool is_two_hander      = input.p_item && input.p_item->GetItem()->IsType2HWeapon();
+		bool is_shield          = input.s_item && input.s_item->GetItem()->IsTypeShield();
 		bool is_backstab_weapon = input.p_item && input.p_item->GetItemBackstabDamage();
 
 		switch (GetClass()) {
