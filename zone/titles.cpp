@@ -43,6 +43,7 @@ EQApplicationPacket* TitleManager::MakeTitlesPacket(Client* c)
 
 	auto outapp = new EQApplicationPacket(OP_SendTitleList, length);
 	char* buffer = (char*) outapp->pBuffer;
+
 	VARSTRUCT_ENCODE_TYPE(uint32, buffer, eligible_titles.size());
 
 	for (const auto& t : eligible_titles) {
