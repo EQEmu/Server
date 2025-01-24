@@ -941,7 +941,6 @@ public:
 	// use this one instead
 	void MemSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnmemSpell(int slot, bool update_client = true);
-	void UnmemSpells(const std::vector<int>& slot_ids, bool update_client = true);
 	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll(bool update_client = true);
 	int FindEmptyMemSlot();

@@ -1512,16 +1512,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	if (SPDAT_RECORDS > 0) {
-		std::vector<int> unmem_slot_ids = {};
-
-		for (int slot_id = 0; slot_id < EQ::spells::SPELL_GEM_COUNT; slot_id++) {
-			if (m_pp.mem_spells[slot_id] >= (uint32)SPDAT_RECORDS) {
-				unmem_slot_ids.emplace_back(slot_id);
-			}
-		}
-
-		if (!unmem_slot_ids.empty()) {
-			UnmemSpells(unmem_slot_ids, false);
+		for (uint32 z = 0; z < EQ::spells::SPELL_GEM_COUNT; z++) {
+			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
+				UnmemSpell(z, false);
 		}
 
 		database.LoadBuffs(this);

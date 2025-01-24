@@ -2,6 +2,7 @@
 #include "../common/strings.h"
 #include "../common/misc_functions.h"
 #include "../common/repositories/player_titlesets_repository.h"
+#include "../common/repositories/titles_repository.h"
 
 #include "client.h"
 #include "mob.h"
@@ -24,7 +25,26 @@ bool TitleManager::LoadTitles()
 		return false;
 	}
 
-	titles = l;
+	for (const auto& e : l) {
+		titles.emplace_back(
+			TitleEntry{
+				.title_id = static_cast<int>(e.id),
+				.skill_id = e.skill_id,
+				.min_skill_value = e.min_skill_value,
+				.max_skill_value = e.max_skill_value,
+				.min_aa_points = e.max_aa_points,
+				.max_aa_points = e.max_aa_points,
+				.class_id = e.class_,
+				.gender_id = e.gender,
+				.character_id = e.char_id,
+				.status = e.status,
+				.item_id = e.item_id,
+				.prefix = e.prefix,
+				.suffix = e.suffix,
+				.titleset = e.title_set
+			}
+		);
+	}
 
 	LogInfo("Loaded [{}] Title{}", Strings::Commify(l.size()), l.size() != 1 ? "s" : "");
 
@@ -45,10 +65,10 @@ EQApplicationPacket* TitleManager::MakeTitlesPacket(Client* c)
 	char * buffer = (char*) outapp->pBuffer;
 	VARSTRUCT_ENCODE_TYPE(uint32, buffer, eligible_titles.size());
 
-	for (const auto& t : eligible_titles) {
-		VARSTRUCT_ENCODE_TYPE(uint32, buffer, t.id);
-		VARSTRUCT_ENCODE_STRING(buffer, t.prefix.c_str());
-		VARSTRUCT_ENCODE_STRING(buffer, t.suffix.c_str());
+	for (const auto& available_title : eligible_titles) {
+		VARSTRUCT_ENCODE_TYPE(uint32, buffer, available_title.title_id);
+		VARSTRUCT_ENCODE_STRING(buffer, available_title.prefix.c_str());
+		VARSTRUCT_ENCODE_STRING(buffer, available_title.suffix.c_str());
 	}
 
 	return outapp;
@@ -63,8 +83,8 @@ std::string TitleManager::GetPrefix(int title_id)
 	auto e = std::find_if(
 		titles.begin(),
 		titles.end(),
-		[title_id](const auto& t) {
-			return t.id == title_id;
+		[title_id](const auto& title) {
+			return title.title_id == title_id;
 		}
 	);
 
@@ -80,8 +100,8 @@ std::string TitleManager::GetSuffix(int title_id)
 	auto e = std::find_if(
 		titles.begin(),
 		titles.end(),
-		[title_id](const auto& t) {
-			return t.id == title_id;
+		[title_id](const auto& title) {
+			return title.title_id == title_id;
 		}
 	);
 
@@ -99,15 +119,15 @@ bool TitleManager::HasTitle(Client* c, uint32 title_id)
 	return std::any_of(
 		eligible_titles.begin(),
 		eligible_titles.end(),
-		[title_id](const auto& t) {
-			return t.id == title_id;
+		[title_id](const auto& e) {
+			return e.title_id == title_id;
 		}
 	);
 }
 
-const std::vector<TitlesRepository::Titles>& TitleManager::GetEligibleTitles(Client* c)
+const std::vector<TitleEntry>& TitleManager::GetEligibleTitles(Client* c)
 {
-	std::vector<TitlesRepository::Titles> eligible_titles = {};
+	std::vector<TitleEntry> eligible_titles = {};
 	if (!c) {
 		return eligible_titles;
 	}
@@ -120,66 +140,66 @@ const std::vector<TitlesRepository::Titles>& TitleManager::GetEligibleTitles(Cli
 		)
 	);
 
-	for (const auto& t : titles) {
-		if (t.char_id >= 0 && c->CharacterID() != static_cast<uint32>(t.char_id)) {
+	for (const auto& e : titles) {
+		if (e.character_id >= 0 && c->CharacterID() != static_cast<uint32>(e.character_id)) {
 			continue;
 		}
 
-		if (t.status >= 0 && c->Admin() < t.status) {
+		if (e.status >= 0 && c->Admin() < e.status) {
 			continue;
 		}
 
-		if (t.gender >= Gender::Male && c->GetBaseGender() != t.gender) {
+		if (e.gender_id >= Gender::Male && c->GetBaseGender() != e.gender_id) {
 			continue;
 		}
 
-		if (t.class_ >= Class::None && c->GetBaseClass() != t.class_) {
+		if (e.class_id >= Class::None && c->GetBaseClass() != e.class_id) {
 			continue;
 		}
 
-		if (t.min_aa_points >= 0 && c->GetSpentAA() < t.min_aa_points) {
+		if (e.min_aa_points >= 0 && c->GetSpentAA() < e.min_aa_points) {
 			continue;
 		}
 
-		if (t.max_aa_points >= 0 && c->GetSpentAA() > t.max_aa_points) {
+		if (e.max_aa_points >= 0 && c->GetSpentAA() > e.max_aa_points) {
 			continue;
 		}
 
-		if (t.skill_id >= 0) {
-			auto skill_id = static_cast<EQ::skills::SkillType>(t.skill_id);
+		if (e.skill_id >= 0) {
+			auto skill_id = static_cast<EQ::skills::SkillType>(e.skill_id);
 			if (
-				t.min_skill_value >= 0 &&
-				c->GetRawSkill(skill_id) < static_cast<uint32>(t.min_skill_value)
+				e.min_skill_value >= 0 &&
+				c->GetRawSkill(skill_id) < static_cast<uint32>(e.min_skill_value)
 			) {
 				continue;
 			}
 
 			if (
-				t.max_skill_value >= 0 &&
-				c->GetRawSkill(skill_id) > static_cast<uint32>(t.max_skill_value)
+				e.max_skill_value >= 0 &&
+				c->GetRawSkill(skill_id) > static_cast<uint32>(e.max_skill_value)
 			) {
 				continue;
 			}
 		}
 
-		if (t.item_id >= 1 && c->GetInv().HasItem(t.item_id) == INVALID_INDEX) {
+		if (e.item_id >= 1 && c->GetInv().HasItem(e.item_id) == INVALID_INDEX) {
 			continue;
 		}
 
 		if (
-			t.title_set > 0 &&
+			e.titleset > 0 &&
 			!std::any_of(
 				player_title_sets.begin(),
 				player_title_sets.end(),
-				[t](const auto& e) {
-					return e.title_set == t.title_set;
+				[](const auto& e) {
+					return e.title_set == e.title_set;
 				}
 			)
 		) {
 			continue;
 		}
 
-		eligible_titles.emplace_back(t);
+		eligible_titles.emplace_back(e);
 	}
 
 	return eligible_titles;
@@ -190,10 +210,10 @@ bool TitleManager::IsNewAATitleAvailable(int aa_points, int class_id)
 	return std::any_of(
 		titles.begin(),
 		titles.end(),
-		[class_id, aa_points](const auto& t) {
+		[class_id, aa_points](const auto& title) {
 			return (
-				(t.class_ == -1 || t.class_ == class_id) &&
-				t.min_aa_points == aa_points
+				(title.class_id == -1 || title.class_id == class_id) &&
+				title.min_aa_points == aa_points
 			);
 		}
 	);
@@ -204,8 +224,8 @@ bool TitleManager::IsNewTradeSkillTitleAvailable(int skill_id, int skill_value)
 	return std::any_of(
 		titles.begin(),
 		titles.end(),
-		[skill_id, skill_value](const auto& t) {
-			return t.skill_id == skill_id && t.min_skill_value == skill_value;
+		[skill_id, skill_value](const auto& title) {
+			return title.skill_id == skill_id && title.min_skill_value == skill_value;
 		}
 	);
 }
@@ -344,13 +364,13 @@ void Client::RemoveTitle(int title_set)
 		return;
 	}
 
-	for (const auto& t : title_manager.GetTitles()) {
-		if (t.title_set == title_set) {
-			if (std::string(m_pp.title) == t.prefix) {
+	for (const auto& title : title_manager.GetTitles()) {
+		if (title.titleset == title_set) {
+			if (std::string(m_pp.title) == title.prefix) {
 				SetAATitle("");
 			}
 
-			if (std::string(m_pp.suffix) == t.suffix) {
+			if (std::string(m_pp.suffix) == title.suffix) {
 				SetTitleSuffix("");
 			}
 

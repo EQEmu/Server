@@ -79,7 +79,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/spell_buckets_repository.h"
-#include "../common/repositories/character_memmed_spells_repository.h"
 
 #include "data_bucket.h"
 #include "quest_parser_collection.h"
@@ -5932,28 +5931,6 @@ void Client::UnmemSpell(int slot, bool update_client)
 	m_pp.mem_spells[slot] = UINT32_MAX;
 }
 
-void Client::UnmemSpells(const std::vector<int>& slot_ids, bool update_client)
-{
-	for (const int& slot_id : slot_ids) {
-		LogSpells("Spell [{}] forgotten from slot [{}]", m_pp.mem_spells[slot_id], slot_id);
-
-		if (update_client) {
-			MemorizeSpell(slot_id, m_pp.mem_spells[slot_id], memSpellForget);
-		}
-
-		m_pp.mem_spells[slot_id] = std::numeric_limits<uint32>::max();
-	}
-
-	CharacterMemmedSpellsRepository::DeleteWhere(
-		database,
-		fmt::format(
-			"`char_id` = {} AND `slot_id` IN ({})",
-			CharacterID(),
-			Strings::Join(slot_ids, ", ")
-		)
-	);
-}
-
 void Client::UnmemSpellBySpellID(int32 spell_id)
 {
 	auto spell_gem = FindMemmedSpellBySpellID(spell_id);
@@ -5966,15 +5943,11 @@ void Client::UnmemSpellBySpellID(int32 spell_id)
 
 void Client::UnmemSpellAll(bool update_client)
 {
-	std::vector<int> unmem_slot_ids = {};
-
-	for (int gem = 0; gem < EQ::spells::SPELL_GEM_COUNT; gem++) {
-		if (IsValidSpell(m_pp.mem_spells[gem])) {
-			unmem_slot_ids.emplace_back(gem);
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem])) {
+			UnmemSpell(spell_gem, update_client);
 		}
 	}
-
-	UnmemSpells(unmem_slot_ids, update_client);
 }
 
 uint32 Client::GetSpellIDByBookSlot(int book_slot) {
