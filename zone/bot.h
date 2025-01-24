@@ -212,6 +212,22 @@ static std::map<uint16, std::string> botSubType_names = {
 	{ CommandedSubTypes::Selo,                      "Selo" }
 };
 
+struct CombatRangeInput {
+	Mob*                    target;
+	float                   target_distance;
+	bool                    behind_mob;
+	uint8                   stop_melee_level;
+	const EQ::ItemInstance* p_item;
+	const EQ::ItemInstance* s_item;
+};
+
+struct CombatRangeOutput {
+	bool  at_combat_range		= false;
+	float melee_distance_min	= 0.0f;
+	float melee_distance		= 0.0f;
+	float melee_distance_max	= 0.0f;
+};
+
 class Bot : public NPC {
 	friend class Mob;
 public:
