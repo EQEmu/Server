@@ -1547,6 +1547,8 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// THJ Custom Stuff
 		if (RuleB(Custom, UseTHJItemMutations)) {
+			bool skip = false;
+
 			char modifiedName[64];
 			strn0cpy(modifiedName, item.Name, sizeof(modifiedName));
 
@@ -1589,29 +1591,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				item.SellRate = 1.0f;
 			}
 
-			switch (item.ID % 1000000) {
-				case 69010:
-				case 69011:
-				case 69012:
-				case 69013:
-				case 69014:
-				case 69015:
-				case 69016:
-				case 69017:
-				case 69018:
-				case 69019:
-				case 69020:
-				case 69021:
-				case 69022:
-				case 69023:
-				case 68809:
-				case 59998:
-					continue;
-				default:
-					break;
+			if (!item.NoRent || !item.NoDrop || item.SummonedFlag) {
+				skip = true;
 			}
 
-			if (item.Price == 0 && item.ID % 1000000 != 150000 && !item.NoRent) {
+			if (!skip && item.Price == 0 && item.ID % 1000000 != 150000) {
 				float return_value = 0.0f;
 
 				return_value += item.HP / 5.0f;

@@ -831,7 +831,7 @@ const bool EQ::ItemInstance::CanBeVendored() const
 {
 	const auto itm = GetItem();
 
-	if (!itm->NoDrop || !itm->NoRent) {
+	if (!itm->NoDrop || !itm->NoRent || itm->SummonedFlag) {
 		return false;
 	}
 
