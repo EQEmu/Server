@@ -3252,11 +3252,11 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				if (!new_aug) { // Shouldn't get the OP code without the augment on the user's cursor, but maybe it's h4x.
 					LogError("AugmentItem OpCode with 'Insert' or 'Swap' action received, but no augment on client's cursor");
 					Message(Chat::Red, "Error: No augment found on cursor for inserting.");
-					return;
+					break;
 				} else {
 					if (!RuleB(Inventory, AllowMultipleOfSameAugment) && tobe_auged->ContainsAugmentByID(new_aug->GetID())) {
 						Message(Chat::Red, "Error: Cannot put multiple of the same augment in an item.");
-						return;
+						break;
 					}
 
 					if (
@@ -3340,7 +3340,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 									in_augment->augment_index
 								).c_str()
 							);
-							return;
+							break;
 						}
 
 						item_one_to_push = tobe_auged->Clone();
@@ -3412,7 +3412,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					}
 				} else {
 					Message(Chat::Red, "Error: Could not find augmentation to remove at index %i. Aborting.", in_augment->augment_index);
-					return;
+					break;
 				}
 
 				old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
@@ -3445,7 +3445,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					if (!PutItemInInventory(EQ::invslot::slotCursor, *item_two_to_push, true)) {
 						LogError("Problem returning augment to player's cursor after safe removal");
 						Message(Chat::Yellow, "Error: Failed to return augment after removal from item!");
-						return;
+						break;
 					}
 				}
 				break;
@@ -3490,7 +3490,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							in_augment->augment_index
 						).c_str()
 					);
-					return;
+					break;
 				}
 
 				tobe_auged->DeleteAugment(in_augment->augment_index);
@@ -3511,6 +3511,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				if (material != EQ::textures::materialInvalid) {
 					SendWearChange(material);
 				}
+
 				break;
 			default: // Unknown
 				LogInventory(
@@ -3524,9 +3525,13 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				);
 				break;
 		}
+		Message(Chat::White, "We did it captain");
+		safe_delete(item_one_to_push);
+		safe_delete(item_two_to_push);
 	} else {
 		Object::HandleAugmentation(this, in_augment, m_tradeskill_object); // Delegate to tradeskill object to perform combine
 	}
+
 	return;
 }
 
