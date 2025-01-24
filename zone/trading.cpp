@@ -3602,7 +3602,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	out_data->id                      = trader_item.id;
 	strn0cpy(out_data->trader_buy_struct.buyer_name, GetCleanName(), sizeof(out_data->trader_buy_struct.buyer_name));
 
-	worldserver.SendPacket(out_server.release());
+	worldserver.SendPacket(out_server.get());
 }
 
 void Client::SetBuyerWelcomeMessage(const char *welcome_message)
