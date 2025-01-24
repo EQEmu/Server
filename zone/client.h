@@ -1175,7 +1175,7 @@ public:
 	void Escape(); //keep or quest function
 	void DisenchantSummonedBags(bool client_update = true);
 	void RemoveNoRent(bool client_update = true);
-	void RemoveDuplicateLore(bool client_update = true);
+	void RemoveDuplicateLore();
 	void MoveSlotNotAllowed(bool client_update = true);
 	virtual bool RangedAttack(Mob* other, bool CanDoubleAttack = false);
 	virtual void ThrowingAttack(Mob* other, bool CanDoubleAttack = false);
