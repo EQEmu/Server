@@ -1006,36 +1006,13 @@ public:
 	bool ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_distance);
 	void BotPullerProcess(Client* bot_owner, Raid* raid);
 
-
-	// Movement Methods
-	void CalcMeleeDistances(
-		const Mob* tar,
-		const EQ::ItemInstance* const& p_item,
-		const EQ::ItemInstance* const& s_item,
-		bool behind_mob,
-		bool backstab_weapon,
-		float& melee_distance_min,
-		float& melee_distance,
-		float& melee_distance_max,
-		uint8 stop_melee_level
-	);
-
 	// Combat Checks
+	CombatRangeOutput EvaluateCombatRange(const CombatRangeInput& input);
+
 	void SetBerserkState();
 	bool CheckIfCasting(float fm_distance);
 	void HealRotationChecks();
-	void CheckCombatRange(
-		Mob* tar, 
-		float tar_distance, 
-		bool& at_combat_range, 
-		bool behind_mob, 
-		const EQ::ItemInstance*& p_item, 
-		const EQ::ItemInstance*& s_item,
-		float& melee_distance_min,
-		float& melee_distance,
-		float& melee_distance_max,
-		uint8 stop_melee_level
-		);
+
 	bool GetCombatJitterFlag() { return m_combat_jitter_flag; }
 	void SetCombatJitterFlag(bool flag = true) { m_combat_jitter_flag = flag; }
 	bool GetCombatOutOfRangeJitterFlag() { return m_combat_out_of_range_jitter_flag; }

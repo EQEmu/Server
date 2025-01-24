@@ -2287,19 +2287,29 @@ void Bot::AI_Process()
 		}
 
 // COMBAT RANGE CALCS
-
-		bool at_combat_range = false;
-		bool behind_mob = BehindMob(tar, GetX(), GetY());
-		bool front_mob = InFrontMob(tar, GetX(), GetY());
+		bool  front_mob = InFrontMob(tar, GetX(), GetY());
+		bool  behind_mob = BehindMob(tar, GetX(), GetY());
 		uint8 stop_melee_level = GetStopMeleeLevel();
-		const EQ::ItemInstance* p_item;
-		const EQ::ItemInstance* s_item;
-		float melee_distance_min = 0.0f;
-		float melee_distance_max = 0.0f;
-		float melee_distance = 0.0f;
-		tar_distance = sqrt(tar_distance);
+		tar_distance = sqrt(tar_distance); // sqrt this for future calculations
 
-		CheckCombatRange(tar, tar_distance, at_combat_range, behind_mob, p_item, s_item, melee_distance_min, melee_distance, melee_distance_max, stop_melee_level);
+		CombatRangeInput input = {
+			.target = tar,
+			.target_distance = tar_distance,
+			.behind_mob = behind_mob,
+			.stop_melee_level = stop_melee_level
+		};
+
+		CombatRangeOutput o = EvaluateCombatRange(input);
+
+		// Combat range variables
+		bool  at_combat_range    = o.at_combat_range;
+		float melee_distance_min = o.melee_distance_min;
+		float melee_distance     = o.melee_distance;
+		float melee_distance_max = o.melee_distance_max;
+
+		// Item variables
+		const EQ::ItemInstance* p_item = GetBotItem(EQ::invslot::slotPrimary);
+		const EQ::ItemInstance* s_item = GetBotItem(EQ::invslot::slotSecondary);
 
 // PULLING FLAG (ACTIONABLE RANGE)
 
@@ -3021,31 +3031,11 @@ bool Bot::TryEvade(Mob* tar) {
 	return false;
 }
 
-void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& at_combat_range, bool behind_mob, const EQ::ItemInstance*& p_item, const EQ::ItemInstance*& s_item, float& melee_distance_min, float& melee_distance, float& melee_distance_max, uint8 stop_melee_level) {
-	at_combat_range = false;
+CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
+	CombatRangeOutput o;
 
-	p_item = GetBotItem(EQ::invslot::slotPrimary);
-	s_item = GetBotItem(EQ::invslot::slotSecondary);
-
-	bool backstab_weapon = false;
-
-	if (GetBehindMob()) {
-		if (GetClass() == Class::Rogue) {
-			backstab_weapon = p_item && p_item->GetItemBackstabDamage();
-		}
-	}
-
-	// Calculate melee distances
-	CalcMeleeDistances(tar, p_item, s_item, backstab_weapon, behind_mob, melee_distance_min, melee_distance, melee_distance_max, stop_melee_level);
-
-	if (tar_distance <= melee_distance) {
-		at_combat_range = true;
-	}
-}
-
-void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_item, const EQ::ItemInstance* const& s_item, bool backstab_weapon, bool behind_mob, float& melee_distance_min, float& melee_distance, float& melee_distance_max, uint8 stop_melee_level) {
 	float size_mod = GetSize();
-	float other_size_mod = tar->GetSize();
+	float other_size_mod = input.target->GetSize();
 
 	// For races with a fixed size
 	if (GetRace() == Race::LavaDragon || GetRace() == Race::Wurm || GetRace() == Race::GhostDragon) {
@@ -3056,7 +3046,7 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 	}
 
 	// For races with a fixed size
-	if (tar->GetRace() == Race::LavaDragon || tar->GetRace() == Race::Wurm || tar->GetRace() == Race::GhostDragon) {
+	if (input.target->GetRace() == Race::LavaDragon || input.target->GetRace() == Race::Wurm || input.target->GetRace() == Race::GhostDragon) {
 		other_size_mod = 60.0f;
 	}
 	else if (other_size_mod < 6.0f) {
@@ -3077,12 +3067,12 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 		size_mod *= (size_mod * 4.0f);
 	}
 
-	if (tar->GetRace() == Race::VeliousDragon)		// Lord Vyemm and other velious dragons
+	if (input.target->GetRace() == Race::VeliousDragon)		// Lord Vyemm and other velious dragons
 	{
 		size_mod *= 1.75;
 	}
 
-	if (tar->GetRace() == Race::DragonSkeleton)		// Dracoliche in Fear.  Skeletal Dragon
+	if (input.target->GetRace() == Race::DragonSkeleton)		// Dracoliche in Fear.  Skeletal Dragon
 	{
 		size_mod *= 2.25;
 	}
@@ -3094,86 +3084,82 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 		size_mod = (size_mod / 7.0f);
 	}
 
-	melee_distance_max = size_mod;
+	o.melee_distance_max = size_mod;
 
 	if (!RuleB(Bots, UseFlatNormalMeleeRange)) {
+
+		bool is_two_hander = input.p_item && input.p_item->GetItem()->IsType2HWeapon();
+		bool is_shield = input.s_item && input.s_item->GetItem()->IsTypeShield();
+		bool is_backstab_weapon = input.p_item && input.p_item->GetItemBackstabDamage();
+
 		switch (GetClass()) {
 			case Class::Warrior:
 			case Class::Paladin:
 			case Class::ShadowKnight:
-				if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-					melee_distance = melee_distance_max * 0.45f;
-				}
-				else if ((s_item && s_item->GetItem()->IsTypeShield()) || (!p_item && !s_item)) {
-					melee_distance = melee_distance_max * 0.35f;
-				}
-				else {
-					melee_distance = melee_distance_max * 0.40f;
-				}
+				o.melee_distance = (
+					is_two_hander ? o.melee_distance_max * 0.45f
+					: is_shield ? o.melee_distance_max * 0.35f
+					: o.melee_distance_max * 0.40f
+					);
+
 				break;
 			case Class::Necromancer:
 			case Class::Wizard:
 			case Class::Magician:
 			case Class::Enchanter:
-				if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-					melee_distance = melee_distance_max * 0.95f;
-				}
-				else {
-					melee_distance = melee_distance_max * 0.75f;
-				}
+				o.melee_distance = (
+					is_two_hander ? o.melee_distance_max * 0.95f
+					: o.melee_distance_max * 0.75f
+					);
+
 				break;
 			case Class::Rogue:
-				if (behind_mob && backstab_weapon) {
-					if (p_item->GetItem()->IsType2HWeapon()) {
-						melee_distance = melee_distance_max * 0.30f;
-					}
-					else {
-						melee_distance = melee_distance_max * 0.25f;
-					}
-					break;
-				}
-				// Fall-through
+				o.melee_distance = (
+					input.behind_mob && is_backstab_weapon
+					? o.melee_distance_max * 0.35f
+					: o.melee_distance_max * 0.50f
+					);
+
+				break;
 			default:
-				if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-					melee_distance = melee_distance_max * 0.70f;
-				}
-				else {
-					melee_distance = melee_distance_max * 0.50f;
-				}
+				o.melee_distance = (
+					is_two_hander ? o.melee_distance_max * 0.70f
+					: o.melee_distance_max * 0.50f
+					);
 
 				break;
 		}
 
-		melee_distance = sqrt(melee_distance);
-		melee_distance_max = sqrt(melee_distance_max);
+		o.melee_distance = sqrt(o.melee_distance);
+		o.melee_distance_max = sqrt(o.melee_distance_max);
 	}
 	else {
-		melee_distance_max = sqrt(melee_distance_max);
-		melee_distance = melee_distance_max * RuleR(Bots, NormalMeleeRangeDistance);
+		o.melee_distance_max = sqrt(o.melee_distance_max);
+		o.melee_distance = o.melee_distance_max * RuleR(Bots, NormalMeleeRangeDistance);
 	}
 
-	if (melee_distance > RuleR(Bots, MaxDistanceForMelee)) {
-		melee_distance = RuleR(Bots, MaxDistanceForMelee);
+	if (o.melee_distance > RuleR(Bots, MaxDistanceForMelee)) {
+		o.melee_distance = RuleR(Bots, MaxDistanceForMelee);
 	}
 
-	melee_distance_min = melee_distance * RuleR(Bots, PercentMinMeleeDistance);
+	o.melee_distance_min = o.melee_distance * RuleR(Bots, PercentMinMeleeDistance);
 
 	if (IsTaunting()) {
-		melee_distance_min = melee_distance * RuleR(Bots, PercentTauntMinMeleeDistance);
-		melee_distance = melee_distance * RuleR(Bots, TauntNormalMeleeRangeDistance);
+		o.melee_distance_min = o.melee_distance * RuleR(Bots, PercentTauntMinMeleeDistance);
+		o.melee_distance = o.melee_distance * RuleR(Bots, TauntNormalMeleeRangeDistance);
 	}
 
-	bool is_stop_melee_level = GetLevel() >= stop_melee_level;
+	bool is_stop_melee_level = GetLevel() >= input.stop_melee_level;
 
 	if (!IsTaunting() && !IsBotRanged() && !is_stop_melee_level && GetMaxMeleeRange()) {
-		melee_distance_min = melee_distance_max * RuleR(Bots, PercentMinMaxMeleeRangeDistance);
-		melee_distance = melee_distance_max * RuleR(Bots, PercentMaxMeleeRangeDistance);		
+		o.melee_distance_min = o.melee_distance_max * RuleR(Bots, PercentMinMaxMeleeRangeDistance);
+		o.melee_distance = o.melee_distance_max * RuleR(Bots, PercentMaxMeleeRangeDistance);
 	}
 
 	if (is_stop_melee_level && !IsBotRanged()) {
 		float desired_range = GetBotDistanceRanged();
-		melee_distance_min = std::max(melee_distance, (desired_range / 2));
-		melee_distance = std::max((melee_distance + 1), desired_range);
+		o.melee_distance_min = std::max(o.melee_distance, (desired_range / 2));
+		o.melee_distance = std::max((o.melee_distance + 1), desired_range);
 	}
 
 	if (IsBotRanged()) {
@@ -3181,9 +3167,13 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 		float max_distance = GetBotRangedValue();
 		float desired_range = GetBotDistanceRanged();
 		max_distance = (max_distance == 0 ? desired_range : max_distance); // stay ranged if set to ranged even if items/ammo aren't correct
-		melee_distance_min = std::max(min_distance, (desired_range / 2));
-		melee_distance = std::min(max_distance, desired_range);
+		o.melee_distance_min = std::max(min_distance, (desired_range / 2));
+		o.melee_distance = std::min(max_distance, desired_range);
 	}
+
+	o.at_combat_range = (input.target_distance <= o.melee_distance);
+
+	return o;
 }
 
 bool Bot::IsValidTarget(
