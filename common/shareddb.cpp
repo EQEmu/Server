@@ -1581,14 +1581,34 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				item.HP = 0;
 			}
 
-			/*
-			if (!item.Stackable && item.Slots == 0 && item.MaxCharges <= 0 && item.ItemClass == EQ::item::ItemClassCommon) {
-				item.Stackable = true;
-			}
-			*/
-
 			if (item.Stackable && item.StackSize < 100) {
 				item.StackSize = 1000;
+			}
+
+			if (item.SellRate < 1.0f) {
+				item.SellRate = 1.0f;
+			}
+
+			switch (item.ID % 1000000) {
+				case 69010:
+				case 69011:
+				case 69012:
+				case 69013:
+				case 69014:
+				case 69015:
+				case 69016:
+				case 69017:
+				case 69018:
+				case 69019:
+				case 69020:
+				case 69021:
+				case 69022:
+				case 69023:
+				case 68809:
+				case 59998:
+					continue;
+				default:
+					break;
 			}
 
 			if (item.Price == 0 && item.ID % 1000000 != 150000 && !item.NoRent) {
@@ -1613,9 +1633,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 				return_value += 5 * item.HealAmt + 5 * item.SpellDmg;
 
-				if (item.Click.Effect > 0) return_value += 25;
-				if (item.Worn.Effect > 0) return_value += 25;
-				if (item.Focus.Effect > 0) return_value += 25;
+				if (return_value > 0.0f) {
+					if (item.Click.Effect > 0) return_value += 25;
+					if (item.Worn.Effect > 0) return_value += 25;
+					if (item.Focus.Effect > 0) return_value += 25;
+				}
 
 				if (item.ItemType == EQ::item::ItemTypeAugmentation) {
 					return_value *= 5;
@@ -1630,10 +1652,6 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				return_value = std::max(1.0f, return_value);
 
 				item.Price = return_value;
-				item.SellRate = 2.0f;
-			}
-
-			if (item.SellRate <= 1.0f) {
 				item.SellRate = 2.0f;
 			}
 		}
