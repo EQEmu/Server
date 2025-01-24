@@ -3180,6 +3180,7 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 		float min_distance = RuleI(Combat, MinRangedAttackDist);
 		float max_distance = GetBotRangedValue();
 		float desired_range = GetBotDistanceRanged();
+		max_distance = (max_distance == 0 ? desired_range : max_distance); // stay ranged if set to ranged even if items/ammo aren't correct
 		melee_distance_min = std::max(min_distance, (desired_range / 2));
 		melee_distance = std::min(max_distance, desired_range);
 	}
