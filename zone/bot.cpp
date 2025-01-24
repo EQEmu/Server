@@ -3101,7 +3101,7 @@ CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
 					is_two_hander ? o.melee_distance_max * 0.45f
 					: is_shield ? o.melee_distance_max * 0.35f
 					: o.melee_distance_max * 0.40f
-					);
+				);
 
 				break;
 			case Class::Necromancer:
@@ -3111,7 +3111,7 @@ CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
 				o.melee_distance = (
 					is_two_hander ? o.melee_distance_max * 0.95f
 					: o.melee_distance_max * 0.75f
-					);
+				);
 
 				break;
 			case Class::Rogue:
@@ -3119,14 +3119,14 @@ CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
 					input.behind_mob && is_backstab_weapon
 					? o.melee_distance_max * 0.35f
 					: o.melee_distance_max * 0.50f
-					);
+				);
 
 				break;
 			default:
 				o.melee_distance = (
 					is_two_hander ? o.melee_distance_max * 0.70f
 					: o.melee_distance_max * 0.50f
-					);
+				);
 
 				break;
 		}
@@ -3159,8 +3159,8 @@ CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
 
 	if (is_stop_melee_level && !IsBotRanged()) {
 		float desired_range = GetBotDistanceRanged();
-		o.melee_distance_min = std::max(o.melee_distance, (desired_range / 2));
-		o.melee_distance = std::max((o.melee_distance + 1), desired_range);
+			o.melee_distance_min = std::max(o.melee_distance, (desired_range / 2));
+			o.melee_distance = std::max((o.melee_distance + 1), desired_range);
 	}
 
 	if (IsBotRanged()) {
@@ -3168,8 +3168,8 @@ CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
 		float max_distance = GetBotRangedValue();
 		float desired_range = GetBotDistanceRanged();
 		max_distance = (max_distance == 0 ? desired_range : max_distance); // stay ranged if set to ranged even if items/ammo aren't correct
-		o.melee_distance_min = std::max(min_distance, (desired_range / 2));
-		o.melee_distance = std::min(max_distance, desired_range);
+			o.melee_distance_min = std::max(min_distance, (desired_range / 2));
+			o.melee_distance = std::min(max_distance, desired_range);
 	}
 
 	o.at_combat_range = (input.target_distance <= o.melee_distance);
