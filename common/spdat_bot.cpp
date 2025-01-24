@@ -644,37 +644,37 @@ uint16 GetCorrectBotSpellType(uint16 spell_type, uint16 spell_id) {
 				else if (IsRegularGroupHealSpell(spell_id)) {
 					correct_type = BotSpellTypes::GroupHeals;
 				}
+
+				return correct_type;
 			}
-			else {
-				if (IsVeryFastHealSpell(spell_id)) {
-					correct_type = BotSpellTypes::VeryFastHeals;
-				}
-				else if (IsFastHealSpell(spell_id)) {
-					correct_type = BotSpellTypes::FastHeals;
-				}
-				else if (IsCompleteHealSpell(spell_id)) {
-					correct_type = BotSpellTypes::CompleteHeal;
-				}
-				else if (IsHealOverTimeSpell(spell_id)) {
-					correct_type = BotSpellTypes::HoTHeals;
-				}
-				else if (IsRegularSingleTargetHealSpell(spell_id)) {
-					correct_type = BotSpellTypes::RegularHeal;
-				}
-				else if (IsRegularPetHealSpell(spell_id)) {
-					correct_type = BotSpellTypes::RegularHeal;
-				}
+
+			if (IsVeryFastHealSpell(spell_id)) {
+				correct_type = BotSpellTypes::VeryFastHeals;
+			}
+			else if (IsFastHealSpell(spell_id)) {
+				correct_type = BotSpellTypes::FastHeals;
+			}
+			else if (IsCompleteHealSpell(spell_id)) {
+				correct_type = BotSpellTypes::CompleteHeal;
+			}
+			else if (IsHealOverTimeSpell(spell_id)) {
+				correct_type = BotSpellTypes::HoTHeals;
+			}
+			else if (IsRegularSingleTargetHealSpell(spell_id)) {
+				correct_type = BotSpellTypes::RegularHeal;
+			}
+			else if (IsRegularPetHealSpell(spell_id)) {
+				correct_type = BotSpellTypes::RegularHeal;
 			}
 		}
 		else if (IsAnyBuffSpell(spell_id)) {
+			correct_type = BotSpellTypes::Buff;
+
 			if (IsResistanceOnlySpell(spell_id)) {
 				correct_type = BotSpellTypes::ResistBuffs;
 			}
 			else if (IsDamageShieldOnlySpell(spell_id)) {
 				correct_type = BotSpellTypes::DamageShields;
-			}
-			else {
-				correct_type = BotSpellTypes::Buff;
 			}
 		}
 	}
