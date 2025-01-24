@@ -517,6 +517,7 @@ public:
 	void SetSpellTargetList(std::vector<Mob*> spell_target_list) { _spellTargetList = spell_target_list; }
 	std::vector<Mob*> GetGroupSpellTargetList() { return _groupSpellTargetList; }
 	void SetGroupSpellTargetList(std::vector<Mob*> spell_target_list) { _groupSpellTargetList = spell_target_list; }
+	std::vector<Mob*> GetBuffTargets(Mob* spellTarget);
 	Raid* GetStoredRaid() { return _storedRaid; }
 	void SetStoredRaid(Raid* stored_raid) { _storedRaid = stored_raid; }
 	bool GetVerifiedRaid() { return _verifiedRaid; }

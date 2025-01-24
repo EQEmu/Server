@@ -6216,16 +6216,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 		}
 
 		if (!noGroupSpell) {
-			std::vector<Mob*> v;
-
-			if (RuleB(Bots, RaidBuffing)) {
-				v = GetSpellTargetList();
-			}
-			else {
-				v = GatherSpellTargets(false, spellTarget);
-			}
-
-			for (Mob* m : v) {
+			for (Mob* m : GetBuffTargets(spellTarget)) {
 				if (IsEffectInSpell(thespell, SE_AbsorbMagicAtt) || IsEffectInSpell(thespell, SE_Rune)) {
 					for (int i = 0; i < m->GetMaxTotalSlots(); i++) {
 						uint32 buff_count = m->GetMaxTotalSlots();
@@ -6252,7 +6243,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 					SpellOnTarget(thespell, m->GetPet());
 				}
 
-				SetMana(GetMana() - (GetActSpellCost(thespell, spells[thespell].mana) * (v.size() - 1)));
+				SetMana(GetMana() - (GetActSpellCost(thespell, spells[thespell].mana) * (GetBuffTargets(spellTarget).size() - 1)));
 			}
 		}
 
@@ -6282,16 +6273,7 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spel
 		}
 
 		if (spellTarget->IsOfClientBotMerc()) {
-			std::vector<Mob*> v;
-
-			if (RuleB(Bots, RaidBuffing)) {
-				v = GetSpellTargetList();
-			}
-			else {
-				v = GatherSpellTargets(false, spellTarget);
-			}
-
-			for (Mob* m : v) {
+			for (Mob* m : GetBuffTargets(spellTarget)) {
 				if (m == this && spellTarget != this) {
 					continue;
 				}
@@ -10048,17 +10030,9 @@ bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) {
 		return true;
 	}
 
-	std::vector<Mob*> v;
 	uint16 target_id = tar->GetID();
 
-	if (RuleB(Bots, CrossRaidBuffingAndHealing)) {
-		v = GetSpellTargetList();
-	}
-	else {
-		v = GetGroupSpellTargetList();
-	}
-
-	for (Mob* m : v) {
+	for (Mob* m : GetSpellTargetList()) {
 		if (
 			m->IsBot() && 
 			m->IsCasting() && 
@@ -12380,4 +12354,12 @@ void Bot::AssignBotSpellsToTypes(std::vector<BotSpells_Struct>& AIBot_spells, st
 
 		AIBot_spells_by_type[spell.type].emplace_back(spell_with_index);
 	}
+}
+
+std::vector<Mob*> Bot::GetBuffTargets(Mob* spellTarget) {
+	if (RuleB(Bots, RaidBuffing)) {
+		return GetSpellTargetList();
+	}
+
+	return GatherSpellTargets(false, spellTarget);
 }
