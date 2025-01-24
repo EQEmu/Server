@@ -3525,7 +3525,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				);
 				break;
 		}
-		Message(Chat::White, "We did it captain");
 		safe_delete(item_one_to_push);
 		safe_delete(item_two_to_push);
 	} else {
