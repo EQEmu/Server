@@ -10886,6 +10886,7 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 						InterrogateInventory(this, true, false, true, error);
 					}
 				}
+				safe_delete(mi);
 			}
 		// This is the swap.
 		// Client behavior is just to move stacks without combining them
