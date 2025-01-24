@@ -687,6 +687,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot)
 		LootItem *item = *cur;
 		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
 			m_loot_items.erase(cur);
+			safe_delete(item);
 			UpdateEquipmentLight();
 			if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
 			return;
@@ -694,6 +695,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot)
 		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
 			if (item->charges <= quantity) {
 				m_loot_items.erase(cur);
+				safe_delete(item);
 				UpdateEquipmentLight();
 				if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
 			}
