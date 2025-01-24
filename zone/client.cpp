@@ -5533,7 +5533,7 @@ void Client::DoAutoSellBags(const int type) {
 
         for (int bag_slot = 0; bag_slot < bag_inst->GetItem()->BagSlots; ++bag_slot) {
             const auto* const itm_inst = m_inv.GetItem(general_slot, bag_slot);
-            if (!itm_inst || !itm_inst->GetItem()->NoDrop || itm_inst->IsAttuned() || itm_inst->GetItem()->Price == 0 || itm_inst->GetAugmentItemID(5) || !itm_inst->GetItem()->NoRent) {
+            if (!itm_inst || !itm_inst->CanBeVendored()) {
                 continue;
             }
 
@@ -5583,7 +5583,7 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 
         for (int bag_slot = 0; bag_slot < bag_inst->GetItem()->BagSlots; ++bag_slot) {
             const auto* const itm_inst = m_inv.GetItem(general_slot, bag_slot);
-            if (!itm_inst || !itm_inst->GetItem()->NoDrop || itm_inst->IsAttuned() || itm_inst->GetItem()->Price == 0) {
+            if (!itm_inst || !itm_inst->CanBeVendored()) {
                 continue;
             }
 
@@ -5667,7 +5667,6 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 	output_str += item_list;
 
 	SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Leave One per Stackable");
-
 }
 
 void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration)

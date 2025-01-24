@@ -170,6 +170,7 @@ namespace EQ
 		}
 
 		const bool HasProc() const;
+		const bool CanBeVendored() const;
 
 		// Accessors
 		const uint32 GetID() const { return ((m_item) ? m_item->ID : 0); }

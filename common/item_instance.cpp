@@ -827,6 +827,35 @@ const EQ::ItemData* EQ::ItemInstance::GetItem() const
 	return m_item;
 }
 
+const bool EQ::ItemInstance::CanBeVendored() const
+{
+	const auto itm = GetItem();
+
+	if (!itm->NoDrop || !itm->NoRent) {
+		return false;
+	}
+
+	if (IsAttuned()) {
+		return false;
+	}
+
+	if (itm->Price == 0) {
+		return false;
+	}
+
+	if (GetAugmentItemID(0) ||
+		GetAugmentItemID(1) ||
+		GetAugmentItemID(2) ||
+		GetAugmentItemID(3) ||
+		GetAugmentItemID(4) ||
+		GetAugmentItemID(5)
+		) {
+		return false;
+	}
+
+	return true;
+}
+
 // Returns the original ID of a dynamic item
 const int EQ::ItemInstance::GetOriginalID() const
 {
