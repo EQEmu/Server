@@ -584,33 +584,34 @@ uint32 Bot::GetBotRangedValue() {
 		ammo_item = ammo_inst->GetItem();
 	}
 
+	bool has_ammo = ammo_item;
+
+	if (!range_item || !has_ammo) {
+		return 0;
+	}
+
 	// Bow requires arrows
 	if (
-		range_item && 
 		range_item->ItemType == EQ::item::ItemTypeBow && 
-		(
-			!ammo_item || 
-			ammo_item->ItemType != EQ::item::ItemTypeArrow
-		)
+		ammo_item->ItemType != EQ::item::ItemTypeArrow
 	) {
 		return 0;
 	}
 
 	// Throwing items
 	if (
-		range_item && 
-		(
-			range_item->ItemType == EQ::item::ItemTypeSmallThrowing || 
-			range_item->ItemType == EQ::item::ItemTypeLargeThrowing
-		)
+		range_item->ItemType == EQ::item::ItemTypeSmallThrowing ||
+		range_item->ItemType == EQ::item::ItemTypeLargeThrowing
 	) {
-		return range_item->Range;
+		if (range_item->ID == ammo_item->ID) {
+			return range_item->Range;
+		}
+
+		return 0; // mismatched throwing
 	}
 
 	// Bows and arrows
 	if (
-		range_item && 
-		ammo_item && 
 		range_item->ItemType == EQ::item::ItemTypeBow && 
 		ammo_item->ItemType == EQ::item::ItemTypeArrow
 	) {
@@ -1903,43 +1904,42 @@ bool Bot::BotRangedAttack(Mob* other, bool can_double_attack) {
 	}
 
 	// Bow requires arrows
-	if (
-		!ammo ||
+	// Check if ammo is invalid
+	bool is_invalid_ammo = !ammo;
+
+	// Check if ranged weapon type is invalid
+	bool is_invalid_ranged_weapon_type = ranged_weapon &&
+		(ranged_weapon->ItemType != EQ::item::ItemTypeBow &&
+			ranged_weapon->ItemType != EQ::item::ItemTypeSmallThrowing &&
+			ranged_weapon->ItemType != EQ::item::ItemTypeLargeThrowing);
+
+	  // Check if bow has the wrong ammo
+	bool is_bow_with_invalid_ammo = ranged_weapon &&
+		(ranged_weapon->ItemType == EQ::item::ItemTypeBow && 
+			(!ammo || ammo->ItemType != EQ::item::ItemTypeArrow));
+
+	// Check if throwing weapon has insufficient charges
+	bool is_throwing_weapon_with_insufficient_ammo = ranged_weapon &&
+		(ranged_weapon->ItemType == EQ::item::ItemTypeSmallThrowing || ranged_weapon->ItemType == EQ::item::ItemTypeLargeThrowing) &&
 		(
-			ranged_weapon &&
+			!ammo_item || ammo_item->GetCharges() < 1 || // Not enough ammo
 			(
-				(
-					ranged_weapon->ItemType != EQ::item::ItemTypeBow &&
-					ranged_weapon->ItemType != EQ::item::ItemTypeSmallThrowing &&
-					ranged_weapon->ItemType != EQ::item::ItemTypeLargeThrowing) ||
-				(
-					ranged_weapon->ItemType == EQ::item::ItemTypeBow &&
-					(ammo->ItemType != EQ::item::ItemTypeArrow)
-				) ||
-				(
-					(
-						ranged_weapon->ItemType == EQ::item::ItemTypeSmallThrowing ||
-						ranged_weapon->ItemType == EQ::item::ItemTypeLargeThrowing
-					) &&
-					ammo_item->GetCharges() < 1 ||
-					(
-						(
-							RuleI(Bots, StackSizeMin) != -1 &&
-							ranged_item->GetCharges() != ranged_weapon->StackSize
-						) ||
-					ranged_item->GetCharges() < RuleI(Bots, StackSizeMin)
-					)
-				)
+				(RuleI(Bots, StackSizeMin) != -1 && ranged_item->GetCharges() != ranged_weapon->StackSize) || // Invalid stack size
+				ranged_item->GetCharges() < RuleI(Bots, StackSizeMin) // Charges below minimum
 			)
-		)
-	) {
+		);
+
+	// Final ranged weapon validity check
+	bool is_invalid_ranged_weapon = is_invalid_ranged_weapon_type || is_bow_with_invalid_ammo || is_throwing_weapon_with_insufficient_ammo;
+
+	// Final condition
+	if (is_invalid_ammo || is_invalid_ranged_weapon) {
 		if (!ammo || ammo_item->GetCharges() < 1) {
 			if (!GetCombatRoundForAlerts()) {
 				SetCombatRoundForAlerts();
-				BotGroupSay(this, "I do not have enough any ammo!");
+				BotGroupSay(this, "I do not have any ammo!");
 			}
 		}
-
 		return false;
 	}
 
@@ -1955,26 +1955,22 @@ bool Bot::BotRangedAttack(Mob* other, bool can_double_attack) {
 
 	SendItemAnimation(other, ammo, (ranged_weapon->ItemType == EQ::item::ItemTypeBow ? EQ::skills::SkillArchery : EQ::skills::SkillThrowing));
 	if (ranged_weapon->ItemType == EQ::item::ItemTypeBow) {
-		DoArcheryAttackDmg(other, ranged_item, ammo_item); // watch
-		//EndlessQuiver AA base1 = 100% Chance to avoid consumption arrow.
-		int ChanceAvoidConsume = aabonuses.ConsumeProjectile + itembonuses.ConsumeProjectile + spellbonuses.ConsumeProjectile;
+		DoArcheryAttackDmg(other, ranged_item, ammo_item);
 
-		// Consume Ammo, unless Ammo Consumption is disabled or player has Endless Quiver
+		int chance_avoid_consume = aabonuses.ConsumeProjectile + itembonuses.ConsumeProjectile + spellbonuses.ConsumeProjectile;
 		bool consumes_ammo = RuleB(Bots, BotArcheryConsumesAmmo);
-		if (
-			consumes_ammo &&
-			(
-				ranged_weapon->ExpendableArrow ||
-				!ChanceAvoidConsume ||
-				(ChanceAvoidConsume < 100 && zone->random.Int(0, 99) > ChanceAvoidConsume)
-				)
-		) {
-			ammo_item->SetCharges((ammo_item->GetCharges() - 1));
+		bool is_expendable_arrow = ranged_weapon->ExpendableArrow;
+		bool no_chance_to_avoid = chance_avoid_consume == 0;
+		bool failed_avoid_check = chance_avoid_consume < 100 && zone->random.Int(0, 99) > chance_avoid_consume;
+		bool should_consume_ammo = consumes_ammo && (is_expendable_arrow || no_chance_to_avoid || failed_avoid_check);
+
+		if (should_consume_ammo) {
+			ammo_item->SetCharges(ammo_item->GetCharges() - 1);
 			LogCombatDetail("Consumed Archery Ammo from slot {}.", EQ::invslot::slotAmmo);
 
 			if (ammo_item->GetCharges() < 1) {
 				RemoveBotItemBySlot(EQ::invslot::slotAmmo);
-				BotRemoveEquipItem(EQ::invslot::slotAmmo);			
+				BotRemoveEquipItem(EQ::invslot::slotAmmo);
 			}
 		}
 		else if (!consumes_ammo) {
