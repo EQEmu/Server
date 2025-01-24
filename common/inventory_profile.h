@@ -218,6 +218,8 @@ namespace EQ
 		std::map<int16, ItemInstance*>& GetPersonal() { return m_inv; }
 		int16 HasEvolvingItem(uint64 evolve_unique_id, uint8 quantity, uint8 where);
 
+		inline int16 PushItem(int16 slot_id, ItemInstance* inst) { return _PutItem(slot_id, inst); }
+
 	protected:
 		///////////////////////////////
 		// Protected Methods
