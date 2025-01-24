@@ -875,7 +875,7 @@ void Client::BulkSendInventoryItems()
 		RemoveNoRent(false);
 	}
 
-	RemoveDuplicateLore(false);
+	RemoveDuplicateLore();
 	MoveSlotNotAllowed(false);
 
 	EQ::OutBuffer ob;
