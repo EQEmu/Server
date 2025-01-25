@@ -805,6 +805,9 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot)
 	end = m_loot_items.end();
 	for(; cur != end; ++cur) {
 		LootItem *item = *cur;
+		if (!item) {
+			continue;
+		}
 		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
 			m_loot_items.erase(cur);
 			safe_delete(item);
