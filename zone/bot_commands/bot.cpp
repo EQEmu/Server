@@ -1596,31 +1596,95 @@ void bot_command_summon(Client *c, const Seperator *sep)
 void bot_command_toggle_ranged(Client *c, const Seperator *sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_toggle_ranged", sep->arg[0], "bottoggleranged")) {
+		c->Message(Chat::White, "note: Toggles a ranged bot between melee and ranged weapon use.");
+
 		return;
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
-		c->Message(Chat::White, "note: Toggles a ranged bot between melee and ranged weapon use"); 
+		BotCommandHelpParams p;
+
+		p.description = { "Toggles a ranged bot between melee and ranged weapon use." };
+		p.example_format = { fmt::format("{} [value] [actionable]", sep->arg[0]) };
+		p.examples_one =
+		{
+			"To set BotA to use their ranged:",
+			fmt::format(
+				"{} 1 byname BotA",
+				sep->arg[0]
+			)
+		};
+		p.examples_two =
+		{
+			"To set all ranger bots to ranged:",
+			fmt::format(
+				"{} 1 byclass {}",
+				sep->arg[0],
+				Class::Ranger
+			)
+		};
+		p.examples_two =
+		{
+			"To check the ranged status of all bots:",
+			fmt::format(
+				"{} current spawned",
+				sep->arg[0],
+				Class::Ranger
+			)
+		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
+
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
+		popup_text = DialogueWindow::Table(popup_text);
+
+		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+
+		if (RuleB(Bots, SendClassRaceOnHelp)) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Use {} for information about race/class IDs.",
+					Saylink::Silent("^classracelist")
+				).c_str()
+			);
+		}
+
 		return;
 	}
 	
-	const int ab_mask = ActionableBots::ABM_Type1;
-
 	std::string arg1 = sep->arg[1];
 
-	bool ranged_state = false;
-	bool toggle_ranged = true;
 	int ab_arg = 1;
-	if (!arg1.compare("on")) {
-		ranged_state = true;
-		toggle_ranged = false;
+	bool current_check = false;
+	uint32 type_value = 0;
+
+	if (sep->IsNumber(1)) {
+		type_value = atoi(sep->arg[1]);
 		++ab_arg;
+		if (type_value < 0 || type_value > 1) {
+			c->Message(Chat::Yellow, "You must enter either 0 for disabled or 1 for enabled.");
+
+			return;
+		}
 	}
-	else if (!arg1.compare("off")) {
-		toggle_ranged = false;
+	else if (!arg1.compare("current")) {
 		++ab_arg;
+		current_check = true;
+	}
+	else {
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Incorrect argument, use {} for information regarding this command.",
+				Saylink::Silent(
+					fmt::format("{} help", sep->arg[0])
+				)
+			).c_str()
+		);
+
+		return;
 	}
 
+	const int ab_mask = ActionableBots::ABM_Type1;
 	std::string class_race_arg = sep->arg[ab_arg];
 	bool class_race_check = false;
 
@@ -1629,93 +1693,231 @@ void bot_command_toggle_ranged(Client *c, const Seperator *sep)
 	}
 
 	std::vector<Bot*> sbl;
-
 	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
-	for (auto bot_iter : sbl) {
-		if (!bot_iter) {
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
+
+	Bot* first_found = nullptr;
+	int success_count = 0;
+	for (auto my_bot : sbl) {
+		if (my_bot->BotPassiveCheck()) {
 			continue;
 		}
 
-		if (bot_iter->GetBotRangedValue() < RuleI(Combat, MinRangedAttackDist)) {
-			c->Message(Chat::Yellow, "%s does not have proper weapons or ammo to be at range.", bot_iter->GetCleanName());
-			continue;
-		}
-
-		if (toggle_ranged) {
-			bot_iter->SetBotRangedSetting(!bot_iter->IsBotRanged());
+		if (current_check) {
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} says, 'I {} currently ranged.'",
+					my_bot->GetCleanName(),
+					my_bot->IsBotRanged() ? "am" : "am no longer"
+				).c_str()
+			);
 		}
 		else {
-			bot_iter->SetBotRangedSetting(ranged_state);
-		}
+			if (my_bot->GetBotRangedValue() < RuleI(Combat, MinRangedAttackDist)) {
+				c->Message(Chat::Yellow, "%s does not have proper weapons or ammo to be at range.", my_bot->GetCleanName());
+				continue;
+			}
 
-		bot_iter->ChangeBotRangedWeapons(bot_iter->IsBotRanged());
+			if (!first_found) {
+				first_found = my_bot;
+			}
+
+			my_bot->SetBotRangedSetting(type_value);
+			my_bot->ChangeBotRangedWeapons(my_bot->IsBotRanged());
+			++success_count;
+		}
+	}
+
+	if (!current_check) {
+		if (success_count == 1 && first_found) {
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} says, 'I {} ranged.'",
+					first_found->GetCleanName(),
+					first_found->GetIllusionBlock() ? "am now" : "am no longer"
+				).c_str()
+			);
+		}
+		else {
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} of your bots {} ranged.",
+					success_count,
+					type_value ? "are now" : "are no longer"
+				).c_str()
+			);
+		}
 	}
 }
 
 void bot_command_toggle_helm(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_toggle_helm", sep->arg[0], "bottogglehelm"))
-		return;
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
+	if (helper_command_alias_fail(c, "bot_command_toggle_helm", sep->arg[0], "bottogglehelm")) {
+		c->Message(Chat::White, "note: Toggles whether or not bots will show their helm.");
+
 		return;
 	}
-	const int ab_mask = ActionableBots::ABM_NoFilter;
 
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		BotCommandHelpParams p;
+
+		p.description = { "Toggles whether or not bots will show their helm." };
+		p.example_format = { fmt::format("{} [value] [actionable]", sep->arg[0]) };
+		p.examples_one =
+		{
+			"To set BotA to show their helm:",
+			fmt::format(
+				"{} 1 byname BotA",
+				sep->arg[0]
+			)
+		};
+		p.examples_two =
+		{
+			"To set all bots to show their helm:",
+			fmt::format(
+				"{} 1 spawned",
+				sep->arg[0]
+			)
+		};
+		p.examples_three =
+		{
+			"To check the toggle helm status of all bots:",
+			fmt::format(
+				"{} current spawned",
+				sep->arg[0]
+			)
+		};
+		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
+
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
+		popup_text = DialogueWindow::Table(popup_text);
+
+		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+
+		if (RuleB(Bots, SendClassRaceOnHelp)) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Use {} for information about race/class IDs.",
+					Saylink::Silent("^classracelist")
+				).c_str()
+			);
+		}
+
+		return;
+	}
+	
 	std::string arg1 = sep->arg[1];
 
-	bool helm_state = false;
-	bool toggle_helm = true;
 	int ab_arg = 1;
-	if (!arg1.compare("on")) {
-		helm_state = true;
-		toggle_helm = false;
+	bool current_check = false;
+	uint32 type_value = 0;
+
+	if (sep->IsNumber(1)) {
+		type_value = atoi(sep->arg[1]);
 		++ab_arg;
+		if (type_value < 0 || type_value > 1) {
+			c->Message(Chat::Yellow, "You must enter either 0 for disabled or 1 for enabled.");
+
+			return;
+		}
 	}
-	else if (!arg1.compare("off")) {
-		toggle_helm = false;
+	else if (!arg1.compare("current")) {
 		++ab_arg;
+		current_check = true;
+	}
+	else {
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Incorrect argument, use {} for information regarding this command.",
+				Saylink::Silent(
+					fmt::format("{} help", sep->arg[0])
+				)
+			).c_str()
+		);
+
+		return;
+	}
+
+	const int ab_mask = ActionableBots::ABM_Type1;
+	std::string class_race_arg = sep->arg[ab_arg];
+	bool class_race_check = false;
+
+	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
+		class_race_check = true;
 	}
 
 	std::vector<Bot*> sbl;
-	auto ab_type = ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[(ab_arg + 1)]);
-	if (ab_type == ActionableBots::ABT_None)
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
+	}
 
-	int bot_count = 0;
-	for (auto bot_iter : sbl) {
-		if (!bot_iter)
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
+
+	Bot* first_found = nullptr;
+	int success_count = 0;
+	for (auto my_bot : sbl) {
+		if (my_bot->BotPassiveCheck()) {
 			continue;
+		}
 
-		if (toggle_helm)
-			bot_iter->SetShowHelm(!bot_iter->GetShowHelm());
-		else
-			bot_iter->SetShowHelm(helm_state);
+		if (!first_found) {
+			first_found = my_bot;
+		}
 
-		if (ab_type != ActionableBots::ABT_All) {
+		if (current_check) {
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} says, 'I {} show my helm.'",
+					my_bot->GetCleanName(),
+					my_bot->GetShowHelm() ? "will" : "will not"
+				).c_str()
+			);
+		}
+		else {
+			my_bot->SetShowHelm(type_value);
 
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-			SpawnAppearance_Struct* saptr = (SpawnAppearance_Struct*)outapp->pBuffer;
-			saptr->spawn_id = bot_iter->GetID();
+			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+			SpawnAppearance_Struct* saptr = (SpawnAppearance_Struct*) outapp->pBuffer;
+			saptr->spawn_id = my_bot->GetID();
 			saptr->type = AppearanceType::ShowHelm;
-			saptr->parameter = bot_iter->GetShowHelm();
+			saptr->parameter = my_bot->GetShowHelm();
 
-			entity_list.QueueClients(bot_iter, outapp);
+			entity_list.QueueClients(my_bot, outapp, true);
 			safe_delete(outapp);
 
-			//helper_bot_appearance_form_update(bot_iter);
+			++success_count;
 		}
-		++bot_count;
 	}
-
-	if (ab_type == ActionableBots::ABT_All) {
-		c->Message(Chat::White, "%s all of your bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"));
-	}
-	else {
-		c->Message(Chat::White, "%s %i of your spawned bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"), bot_count);
+	if (!current_check) {
+		if (success_count == 1 && first_found) {
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} says, 'I {} show my helm.'",
+					first_found->GetCleanName(),
+					first_found->GetIllusionBlock() ? "will now" : "will no longer"
+				).c_str()
+			);
+		}
+		else {
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"{} of your bots {} show their helm.",
+					success_count,
+					type_value ? "will now" : "will no longer"
+				).c_str()
+			);
+		}
 	}
 
 	// Notes:

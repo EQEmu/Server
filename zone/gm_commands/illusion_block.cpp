@@ -4,10 +4,32 @@ void command_illusion_block(Client* c, const Seperator* sep)
 {
 	int arguments = sep->argnum;
 	if (!arguments || !strcasecmp(sep->arg[1], "help")) {
-		c->Message(Chat::White, "usage: #illusionblock [help | current | value].");
-		c->Message(Chat::White, "note: Used to control whether or not illusion effects will land on you.");
-		c->Message(Chat::White, "note: A value of 0 is disabled (Allow Illusions), 1 is enabled (Block Illusions).");
-		c->Message(Chat::White, "note: Use [current] to check the current setting.");
+		BotCommandHelpParams p;
+
+		p.description = { "Toggles whether or not you will block the illusion effects of spells cast by players or bots." };
+		p.example_format = { fmt::format("{} [value]", sep->arg[0]) };
+		p.examples_one =
+		{
+			"To enable illusion block:",
+			fmt::format(
+				"{} 1",
+				sep->arg[0]
+			)
+		};
+		p.examples_two =
+		{
+			"To disable illusion block:",
+			fmt::format(
+				"{} 0",
+				sep->arg[0]
+			)
+		};
+
+		std::string popup_text = c->SendBotCommandHelpWindow(p);
+		popup_text = DialogueWindow::Table(popup_text);
+
+		c->SendPopupToClient(sep->arg[0], popup_text.c_str());
+
 		return;
 	}
 

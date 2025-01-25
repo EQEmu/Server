@@ -54,7 +54,6 @@ void bot_command_illusion_block(Client* c, const Seperator* sep)
 			);
 		}
 
-
 		return;
 	}
 
@@ -94,6 +93,7 @@ void bot_command_illusion_block(Client* c, const Seperator* sep)
 	const int ab_mask = ActionableBots::ABM_Type1;
 	std::string class_race_arg = sep->arg[ab_arg];
 	bool class_race_check = false;
+
 	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
 		class_race_check = true;
 	}
@@ -131,6 +131,7 @@ void bot_command_illusion_block(Client* c, const Seperator* sep)
 			++success_count;
 		}
 	}
+
 	if (!current_check) {
 		if (success_count == 1 && first_found) {
 			c->Message(
