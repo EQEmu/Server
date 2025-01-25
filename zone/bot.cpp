@@ -31,7 +31,7 @@
 
 /*
 TODO bot rewrite:
---go through IsPetOwnerClient checks for pets
+--move togglehelm and bottoggleranged to new window format
 --command cleanup (move to new help window, make more descriptive)
 --Add quest methods for functions
 */

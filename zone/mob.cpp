@@ -4891,7 +4891,7 @@ bool Mob::HateSummon() {
 			} else {
 				bool target_is_client_pet = (
 					target->IsPet() &&
-					target->IsPetOwnerClient()
+					target->IsPetOwnerOfClientBot()
 				);
 				bool set_new_guard_spot = !(IsNPC() && target_is_client_pet);
 

@@ -2811,7 +2811,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				const uint32 con_level = give_exp->GetLevelCon(GetLevel());
 
 				if (con_level != ConsiderColor::Gray) {
-					if (!GetOwner() || (GetOwner() && !GetOwner()->IsClient())) {
+					if (!GetOwner() || (GetOwner() && !GetOwner()->IsOfClientBot())) {
 						give_exp_client->AddEXP(ExpSource::Kill, final_exp, con_level, false, this);
 
 						if (
@@ -6486,7 +6486,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		int mod = GetSpecialAbilityParam(SpecialAbility::Rampage, 2);
 		if (mod > 0)
 			spec_mod = mod;
-		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+		if ((IsPet() || IsTempPet()) && IsPetOwnerOfClientBot()) {
 			//SE_PC_Pet_Rampage SPA 464 on pet, damage modifier
 			int spell_mod = spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD];
 			if (spell_mod > spec_mod)
@@ -6497,7 +6497,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		int mod = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 2);
 		if (mod > 0)
 			spec_mod = mod;
-		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+		if ((IsPet() || IsTempPet()) && IsPetOwnerOfClientBot()) {
 			//SE_PC_Pet_AE_Rampage SPA 465 on pet, damage modifier
 			int spell_mod = spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD];
 			if (spell_mod > spec_mod)
@@ -6929,7 +6929,7 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool ram
 		Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 		if (CanThisClassDoubleAttack() && CheckDoubleAttack()) {
 			Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
-			if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+			if ((IsPet() || IsTempPet()) && IsPetOwnerOfClientBot()) {
 				int chance = spellbonuses.PC_Pet_Flurry + itembonuses.PC_Pet_Flurry + aabonuses.PC_Pet_Flurry;
 				if (chance && zone->random.Roll(chance)) {
 					Flurry(nullptr);
@@ -6990,7 +6990,7 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool ramp
 			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack() && !rampage) {
 				Attack(target, EQ::invslot::slotSecondary, false, false, false, opts);
 
-				if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+				if ((IsPet() || IsTempPet()) && IsPetOwnerOfClientBot()) {
 					int chance = spellbonuses.PC_Pet_Flurry + itembonuses.PC_Pet_Flurry + aabonuses.PC_Pet_Flurry;
 					if (chance && zone->random.Roll(chance)) {
 						Flurry(nullptr);

@@ -8807,10 +8807,10 @@ void Client::ProcessAggroMeter()
 
 	// probably should have PVP rules ...
 	if (cur_tar && cur_tar != this) {
-		if (cur_tar->IsNPC() && !cur_tar->IsPetOwnerClient() && cur_tar->GetID() != m_aggrometer.get_target_id()) {
+		if (cur_tar->IsNPC() && !cur_tar->IsPetOwnerOfClientBot() && cur_tar->GetID() != m_aggrometer.get_target_id()) {
 			m_aggrometer.set_target_id(cur_tar->GetID());
 			send_targetinfo = true;
-		} else if ((cur_tar->IsPetOwnerClient() || cur_tar->IsClient()) && cur_tar->GetTarget() && cur_tar->GetTarget()->GetID() != m_aggrometer.get_target_id()) {
+		} else if ((cur_tar->IsPetOwnerOfClientBot() || cur_tar->IsClient()) && cur_tar->GetTarget() && cur_tar->GetTarget()->GetID() != m_aggrometer.get_target_id()) {
 			m_aggrometer.set_target_id(cur_tar->GetTarget()->GetID());
 			send_targetinfo = true;
 		}

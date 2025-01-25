@@ -2708,7 +2708,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 				// it can affect up to 7 people if the targeted group is not our own
 
 				// Allow pets who cast group spells to affect the group.
-				if (spell_target->IsPetOwnerClient() && IsPetOwnerClient()) {
+				if (spell_target->IsPetOwnerOfClientBot() && IsPetOwnerOfClientBot()) {
 					Mob* owner =  spell_target->GetOwner();
 
 					if (owner) {
@@ -5389,7 +5389,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	// JULY 24, 2002 changes
 	int level = GetLevel();
-	if (RuleB(Spells,July242002PetResists) && IsPetOwnerClient() && caster->IsNPC() && !caster->IsPetOwnerClient()) {
+	if (RuleB(Spells,July242002PetResists) && IsPetOwnerOfClientBot() && caster->IsNPC() && !caster->IsPetOwnerOfClientBot()) {
 		auto owner = GetOwner();
 		if (owner != nullptr) {
 			target_resist = std::max(target_resist, owner->GetResist(resist_type));
@@ -7029,7 +7029,7 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 	float b = (GetY() * dX - dY * GetX()) / (dX - GetX());
 
 	while (iter != targets_in_range.end()) {
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient())) ||
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerOfClientBot())) ||
 			(*iter)->BehindMob(this, (*iter)->GetX(), (*iter)->GetY())) {
 			++iter;
 			continue;
@@ -7113,7 +7113,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 	auto iter = targets_in_range.begin();
 
 	while (iter != targets_in_range.end()) {
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))) {
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerOfClientBot()))) {
 			++iter;
 			continue;
 		}

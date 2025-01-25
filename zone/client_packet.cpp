@@ -15230,7 +15230,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket *app)
 			GetTarget()->IsTargeted(1);
 			return;
 		}
-		else if (GetTarget()->IsPetOwnerClient())
+		else if (GetTarget()->IsPetOwnerOfClientBot())
 		{
 			GetTarget()->IsTargeted(1);
 			return;

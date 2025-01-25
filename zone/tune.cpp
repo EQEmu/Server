@@ -1556,7 +1556,7 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 		int mod = GetSpecialAbilityParam(SpecialAbility::Rampage, 2);
 		if (mod > 0)
 			spec_mod = mod;
-		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+		if ((IsPet() || IsTempPet()) && IsPetOwnerOfClientBot()) {
 			//SE_PC_Pet_Rampage SPA 464 on pet, damage modifier
 			int spell_mod = spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD];
 			if (spell_mod > spec_mod)
@@ -1567,7 +1567,7 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 		int mod = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 2);
 		if (mod > 0)
 			spec_mod = mod;
-		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+		if ((IsPet() || IsTempPet()) && IsPetOwnerOfClientBot()) {
 			//SE_PC_Pet_AE_Rampage SPA 465 on pet, damage modifier
 			int spell_mod = spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD];
 			if (spell_mod > spec_mod)
