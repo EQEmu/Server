@@ -16163,7 +16163,27 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 				TradeRequestFailed(app);
 				return;
 			}
-			trader = entity_list.GetClientByCharID(in->trader_id);
+
+			if (RuleI(Custom, EnableSeasonalCharacters)) {
+				DataBucketKey db_key = {};
+				db_key.character_id = database.GetCharacterID(in->seller_name);
+				db_key.key = "SeasonalCharacter";
+
+				bool dst_seasonal = (Strings::ToInt(DataBucket::GetData(db_key).value) == RuleI(Custom,EnableSeasonalCharacters));
+				if (dst_seasonal != IsSeasonal()) {
+						SendParcelIconStatus();
+						Message(
+						Chat::Yellow,
+						"You may not purchase from this trader, because they are not a member of the same Season as you are."
+					);
+					in->method     = BazaarByParcel;
+					in->sub_action = Failed;
+					TradeRequestFailed(app);
+					return;
+				}
+			}
+
+
 			LogTrading("Buy item by direct inventory delivery <green>[{}] item_id <green>[{}] quantity <green>[{}] "
 					   "serial_number <green>[{}]",
 					   in->trader_id,
@@ -16171,6 +16191,7 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 					   in->quantity,
 					   in->serial_number
 			);
+
 			BuyTraderItemVoucher(in, app);
 			break;
 		}

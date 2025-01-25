@@ -3366,7 +3366,8 @@ std::string Client::DetermineMoneyString(uint64 cp)
 	return fmt::format("{}", money);
 }
 
-void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPacket* app) {
+void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPacket* app)
+{
 	auto in          = (TraderBuy_Struct *) app->pBuffer;
 	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number, tbs->trader_id);
 	if (!trader_item.id) {
@@ -3413,7 +3414,7 @@ void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPack
 				   trader_item.item_id,
 				   trader_item.item_sn
 		);
-		in->method     = BazaarByParcel;
+		in->method     = BazaarByDirectToInventory;
 		in->sub_action = Failed;
 		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
 		TradeRequestFailed(app);
@@ -3455,11 +3456,33 @@ void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPack
 		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
 		TradeRequestFailed(app);
 		return;
-	} else {
-		SetAlternateCurrencyValue(1, available_vouchers - RuleI(Bazaar, VoucherDeliveryCost));
-		SendAltCurrencies();
-		PushItemOnCursor(*buy_item, true);
 	}
+
+	uint32 total_cost = tbs->price * tbs->quantity;
+
+	if (!TakeMoneyFromPP(total_cost)) {
+		RecordPlayerEventLog(
+			PlayerEvent::POSSIBLE_HACK,
+			PlayerEvent::PossibleHackEvent{
+				.message = fmt::format(
+					"{} attempted to buy {} in bazaar but did not have enough money.",
+					GetCleanName(),
+					buy_item->GetItem()->Name
+				)
+			}
+		);
+		in->method     = BazaarByDirectToInventory;
+		in->sub_action = InsufficientFunds;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
+		TradeRequestFailed(app);
+		return;
+	}
+
+	Message(Chat::Red, fmt::format("You used {} voucher(s) for the direct item delivery.", RuleI(Bazaar, VoucherDeliveryCost)).c_str());
+	SetAlternateCurrencyValue(1, available_vouchers - RuleI(Bazaar, VoucherDeliveryCost));
+
+	PushItemOnCursor(*buy_item, true);
+	ReturnTraderReq(app, tbs->quantity, buy_item->GetID());
 
 	if (trader_item.item_charges <= static_cast<int32>(tbs->quantity) || !buy_item->IsStackable()) {
 		TraderRepository::DeleteOne(database, trader_item.id);
@@ -3624,7 +3647,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	Message(Chat::Red, fmt::format("You paid {} for the parcel delivery.", DetermineMoneyString(fee)).c_str());
 	LogTrading("Customer <green>[{}] Paid: <green>[{}] in Copper", CharacterID(), total_cost);
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+		if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
 		auto e = PlayerEvent::TraderPurchaseEvent{
 			.item_id              = buy_item->GetID(),
 			.item_name            = buy_item->GetItem()->Name,
