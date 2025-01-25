@@ -31,8 +31,7 @@
 
 /*
 TODO bot rewrite:
---move togglehelm and bottoggleranged to new window format
---command cleanup (move to new help window, make more descriptive)
+--command cleanup remaining commands (move to new help window, make more descriptive)
 --Add quest methods for functions
 */
 
