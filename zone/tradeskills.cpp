@@ -419,7 +419,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// Mystical Attuning Apparatus
 	if (container->GetItem() && container->GetItem()->ID == 9209) {
 		EQ::ItemInstance* inst = container->GetItem(0);
-		if (inst && !inst->IsAttuned()) {
+		if (inst && !inst->IsAttuned() && inst->GetItem()->NoDrop) {
 			inst->SetAttuned(true);
 
 			EQ::SayLinkEngine linker;
@@ -429,6 +429,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			user->Message(Chat::Yellow, fmt::format("Your [{}] has been ATTUNED!", linker.GenerateLink()).c_str());
 			user->EjectItemFromSlot(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0));
 		}
+		return;
 	}
 
 	if (container->GetItem() && (container->GetItem()->ID == 4041 || container->GetItem()->ID == 9207)) {
