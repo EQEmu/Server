@@ -1588,10 +1588,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			}
 
 			if (item.SellRate < 1.0f) {
-				item.SellRate = 1.0f;
+				item.SellRate = 1.1f;
 			}
 
 			if (!item.NoRent || !item.NoDrop || item.SummonedFlag) {
+				item.SellRate = 1.5f;
 				skip = true;
 			}
 
