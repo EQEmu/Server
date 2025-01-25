@@ -853,7 +853,7 @@ int64 Mob::TuneNPCAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_
 	TuneDoAttack(other, my_hit, nullptr, no_avoid, no_hit_chance, ac_override, add_ac, avoidance_override, accuracy_override, add_avoidance, add_accuracy);
 
 	LogCombat("Final damage against [{}]: [{}]", other->GetName(), my_hit.damage_done);
-	if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
+	if (other->IsClient() && IsPet() && GetOwner()->IsOfClientBot()) {
 		//pets do half damage to clients in pvp
 		my_hit.damage_done /= 2;
 		if (my_hit.damage_done < 1)
