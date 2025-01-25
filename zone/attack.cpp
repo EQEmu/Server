@@ -2398,7 +2398,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		LogCombat("Final damage against [{}]: [{}]", other->GetName(), my_hit.damage_done);
 
-		if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
+		if (other->IsClient() && IsPet() && GetOwner()->IsOfClientBot()) {
 			//pets do half damage to clients in pvp
 			my_hit.damage_done /= 2;
 			if (my_hit.damage_done < 1) {
