@@ -1584,7 +1584,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			}
 
 			if (item.Stackable && item.StackSize < 100) {
-				item.StackSize = 1000;
+				item.StackSize = 100;
 			}
 
 			if (item.SellRate <= 1.0f) {
