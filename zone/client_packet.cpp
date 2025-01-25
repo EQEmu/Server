@@ -14786,6 +14786,11 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		return;
 	}
 
+	if (item->SummonedFlag) {
+		Message(Chat::MerchantExchange, "%s tells you, 'It looks like that item has no value'");
+		return;
+	}
+
 	uint32 cost_quantity = mp->quantity;
 	if (inst->IsCharged())
 		uint32 cost_quantity = 1;
