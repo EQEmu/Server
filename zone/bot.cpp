@@ -11766,7 +11766,13 @@ bool Bot::HasValidAETarget(Bot* caster, uint16 spell_id, uint16 spell_type, Mob*
 				break;
 		}
 
-		if (!m->IsNPC() || (!IsCommandedSpell() && !m->CastToNPC()->IsOnHatelist(caster->GetOwner()))) {
+		if (
+			!m->IsNPC() || 
+			(
+				!IsCommandedSpell() && 
+				!m->CastToNPC()->IsOnHatelist(caster->GetOwner())
+			)
+		) {
 			continue;
 		}
 
@@ -11783,7 +11789,11 @@ bool Bot::HasValidAETarget(Bot* caster, uint16 spell_id, uint16 spell_type, Mob*
 			}
 		}
 		else {
-			if (!tar || spell_range < Distance(caster->GetPosition(), tar->GetPosition()) || !DoLosChecks(this, m)) {
+			if (
+				!tar || 
+				spell_range < Distance(caster->GetPosition(), tar->GetPosition()) || 
+				!DoLosChecks(m)
+			) {
 				continue;
 			}
 
