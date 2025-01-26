@@ -18,7 +18,12 @@ void bot_command_attack(Client *c, const Seperator *sep)
 
 	if (!target_mob) {
 
-		c->Message(Chat::White, "You must <target> an enemy to use this command");
+		c->Message(Chat::Yellow, "You must <target> an enemy to use this command");
+		return;
+	}
+	
+	if (!c->DoLosChecks(target_mob)) {
+		c->Message(Chat::Red, "You must have Line of Sight to use this command.");
 		return;
 	}
 
@@ -71,7 +76,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 		);
 	} else {
 		c->Message(
-			Chat::White,
+			Chat::PetResponse,
 			fmt::format(
 				"{} of your bots are attacking {}.",
 				sbl.size(),

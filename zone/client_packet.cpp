@@ -11091,10 +11091,17 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	case PET_ATTACK: {
 		if (!target)
 			break;
+
+		if (!DoLosChecks(target)) {
+			mypet->SayString(this, NOT_LEGAL_TARGET);
+			break;
+		}
+
 		if (target->IsMezzed()) {
 			MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), target->GetCleanName());
 			break;
 		}
+
 		if (mypet->IsFeared())
 			break; //prevent pet from attacking stuff while feared
 
@@ -11149,8 +11156,15 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared())
 			break; //prevent pet from attacking stuff while feared
 
-		if (!GetTarget())
+		if (!GetTarget()) {
 			break;
+		}
+
+		if (!DoLosChecks(GetTarget())) {
+			mypet->SayString(this, NOT_LEGAL_TARGET);
+			break;
+		}
+
 		if (GetTarget()->IsMezzed()) {
 			MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
 			break;

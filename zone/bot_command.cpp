@@ -803,7 +803,7 @@ void helper_send_usage_required_bots(Client *bot_owner, uint16 spell_type)
 	auto& spell_map = bot->GetCommandedSpellTypesMinLevels();
 
 	if (spell_map.empty()) {
-		bot_owner->Message(Chat::Yellow, "No bots are capable of casting this spell type"); //deleteme
+		bot_owner->Message(Chat::Yellow, "No bots are capable of casting this spell type");
 		return;
 	}
 

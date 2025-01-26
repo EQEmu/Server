@@ -65,7 +65,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 	bot_spell.ManaCost = 0;
 
 	if (BotSpellTypeRequiresLoS(spell_type) && tar != this) {
-		SetHasLoS(DoLosChecks(this, tar));
+		SetHasLoS(DoLosChecks(tar));
 	}
 	else {
 		SetHasLoS(true);

@@ -2272,7 +2272,6 @@ void Bot::AI_Process()
 
 		// This causes conflicts with default pet handler (bounces between targets)
 		if (NOT_PULLING_BOT && HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
 			// We don't add to hate list here because it's assumed to already be on the list
 			GetPet()->SetTarget(tar);
 		}
@@ -2316,7 +2315,7 @@ void Bot::AI_Process()
 		if (GetPullingFlag()) {
 			if (!TargetValidation(tar)) { return; }
 
-			if (!DoLosChecks(this, tar)) {
+			if (!DoLosChecks(tar)) {
 				return;
 			}
 
@@ -3196,7 +3195,7 @@ bool Bot::IsValidTarget(
 		(!Charmed() && tar->GetUltimateOwner()->IsOfClientBotMerc()) ||
 		lo_distance > leash_distance ||
 		tar_distance > leash_distance ||
-		(!GetAttackingFlag() && !CheckLosCheat(this, tar) && !CheckLosCheat(leash_owner, tar)) ||
+		(!GetAttackingFlag() && !CheckLosCheat(tar) && !leash_owner->CheckLosCheat(tar)) ||
 		!IsAttackAllowed(tar)
 	) {
 		invalid_target_state = true;
@@ -9382,6 +9381,10 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 	bool is_casting_bard_song = false;
 	Mob* tar = (GetOwner()->GetTarget() ? GetOwner()->GetTarget() : this);
 
+	if (!DoLosChecks(tar)) {
+		return;
+	}
+
 	if (IsCasting()) {
 		InterruptSpell();
 	}
@@ -10252,7 +10255,7 @@ bool Bot::IsValidMezTarget(Mob* owner, Mob* npc, uint16 spell_id) {
 		return false;
 	}
 
-	if (!DoLosChecks(this, npc)) {
+	if (!DoLosChecks(npc)) {
 		return false;
 	}
 
@@ -11084,7 +11087,7 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 		tar = this;
 	}
 
-	if (!DoLosChecks(this, tar)) {
+	if (!DoLosChecks(tar)) {
 		return false;
 	}
 
@@ -11219,7 +11222,7 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 		return false;
 	}
 
-	if (!DoLosChecks(this, tar)) {
+	if (!DoLosChecks(tar)) {
 		return false;
 	}
 
@@ -11712,7 +11715,7 @@ bool Bot::HasRequiredLoSForPositioning(Mob* tar) {
 		return true;
 	}
 
-	if (RequiresLoSForPositioning() && !DoLosChecks(this, tar)) {
+	if (RequiresLoSForPositioning() && !DoLosChecks(tar)) {
 		return false;
 	}
 

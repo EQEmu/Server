@@ -48,6 +48,12 @@ void bot_command_pull(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if (!c->DoLosChecks(target_mob)) {
+		c->Message(Chat::Red, "You must have Line of Sight to use this command.");
+
+		return;
+	}
+
 	if (target_mob->IsNPC() && target_mob->GetHateList().size()) {
 
 		c->Message(Chat::White, "Your current target is already engaged!");
@@ -55,8 +61,8 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	}
 
 	Bot* bot_puller = nullptr;
-	for (auto bot_iter : sbl) {
 
+	for (auto bot_iter : sbl) {
 		if (bot_iter->GetAppearance() == eaDead || bot_iter->GetBotStance() == Stance::Passive) {
 			continue;
 		}

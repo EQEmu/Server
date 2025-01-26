@@ -47,8 +47,19 @@ void bot_command_click_item(Client* c, const Seperator* sep)
 
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
+	Mob* tar = c->GetTarget();
+
 	for (auto my_bot : sbl) {
 		if (my_bot->BotPassiveCheck()) {
+			continue;
+		}
+
+		if (
+			tar &&
+			tar != c &&
+			tar->GetOwner() != c &&
+			!c->DoLosChecks(tar)
+		) {
 			continue;
 		}
 
