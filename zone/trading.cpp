@@ -1800,7 +1800,14 @@ void Client::SendBarterWelcome()
 
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 {
-	auto results = Bazaar::GetSearchResults(database, search_criteria, GetZoneID(), GetInstanceID());
+	std::vector<BazaarSearchResultsFromDB_Struct> results{};
+	if (RuleB(Bazaar, UseNewBazaarSearch)) {
+		results = Bazaar::GetSearchResultsNew(database, content_db, search_criteria, GetZoneID(), GetInstanceID());
+	}
+	else {
+		results = Bazaar::GetSearchResults(database, search_criteria, GetZoneID(), GetInstanceID());
+	}
+
 	if (results.empty()) {
 		SendBazaarDone(GetID());
 		return;
