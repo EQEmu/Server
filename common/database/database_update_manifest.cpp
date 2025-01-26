@@ -6364,7 +6364,7 @@ CREATE INDEX idx_item_type_skill ON items (itemtype, skillmodtype);
 	},
 	ManifestEntry{
 		.version = 9295,
-		.description = "2025_01_26_create_pet_names_table.sql",
+		.description = "2025_01_26_trader_table_bazaar_search_indexes.sql",
 		.check = "SHOW CREATE TABLE `trader`",
 		.condition = "missing",
 		.match = "idx_trader_item",
@@ -6376,7 +6376,7 @@ CREATE INDEX idx_trader_item_sn ON trader (item_sn);
 CREATE INDEX idx_trader_item_cost ON trader (item_cost);
 CREATE INDEX idx_trader_active_transaction ON trader (active_transaction);
 )",
-		.content_schema_update = true
+		.content_schema_update = false
 	},
 
 // -- template; copy/paste this when you need to create a new entry
