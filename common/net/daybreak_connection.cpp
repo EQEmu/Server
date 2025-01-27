@@ -64,7 +64,7 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		rc = uv_udp_recv_start(&m_socket,
 			[](uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
 				int current_buffer_index = buffer_index.fetch_add(1) % NUM_STATIC_BUFFERS;
-				std::cout << "recv current_buffer_index: " << current_buffer_index << " current_thread_id: " << std::this_thread::get_id() << std::endl;
+//				std::cout << "recv current_buffer_index: " << current_buffer_index << " current_thread_id: " << std::this_thread::get_id() << std::endl;
 				char* buffer = static_buffers[current_buffer_index];
 				// clear the buffer
 				memset(buffer, 0, 512);
@@ -78,7 +78,7 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 				return;
 			}
 
-			std::cout << "recv nread: " << nread << " current_thread_id: " << std::this_thread::get_id() << std::endl;
+//			std::cout << "recv nread: " << nread << " current_thread_id: " << std::this_thread::get_id() << std::endl;
 
 			char endpoint[16];
 			uv_ip4_name((const sockaddr_in*)addr, endpoint, 16);
@@ -538,7 +538,7 @@ void EQ::Net::DaybreakConnection::AddToQueue(int stream, uint16_t seq, const Pac
 	auto iter = s->packet_queue.find(seq);
 
 	if (s->packet_queue.bucket_count() < seq) {
-		std::cout << "Resizing packet queue to " << seq << std::endl;
+//		std::cout << "Resizing packet queue to " << seq << std::endl;
 		s->packet_queue.reserve(seq);
 	}
 
@@ -1333,7 +1333,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 
 	// Select the next static buffer in a round-robin manner
 	int current_buffer_index = buffer_index.fetch_add(1) % NUM_STATIC_BUFFERS;
-	std::cout << "current_buffer_index: " << current_buffer_index << " current_thread_id: " << std::this_thread::get_id() << std::endl;
+//	std::cout << "current_buffer_index: " << current_buffer_index << " current_thread_id: " << std::this_thread::get_id() << std::endl;
 	char* buffer = static_buffers[current_buffer_index];
 	// clear the buffer
 	memset(buffer, 0, 512);
