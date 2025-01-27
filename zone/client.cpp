@@ -780,7 +780,9 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveCharacterEXPModifier(this);
 
-	database.botdb.SaveBotSettings(this);
+	if (RuleB(Bots, Enabled)) {
+		database.botdb.SaveBotSettings(this);
+	}
 
 	return true;
 }
