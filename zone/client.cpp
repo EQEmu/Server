@@ -13555,9 +13555,9 @@ void Client::SendMerchantEnd()
 	MerchantSession = 0;
 
 	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
-        DoParcelCancel();
-        SetEngagedWithParcelMerchant(false);
-    }
+		DoParcelCancel();
+		SetEngagedWithParcelMerchant(false);
+	}
 
 	EQApplicationPacket empty(OP_ShopEndConfirm);
 	QueuePacket(&empty);
