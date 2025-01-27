@@ -500,10 +500,9 @@ void EQ::Net::DaybreakConnection::ProcessQueue()
 				break;
 			}
 
-			auto packet = iter->second;
+			auto &packet = iter->second;
 			stream->packet_queue.erase(iter);
 			ProcessDecodedPacket(*packet);
-			delete packet;
 		}
 	}
 }
@@ -513,9 +512,8 @@ void EQ::Net::DaybreakConnection::RemoveFromQueue(int stream, uint16_t seq)
 	auto s = &m_streams[stream];
 	auto iter = s->packet_queue.find(seq);
 	if (iter != s->packet_queue.end()) {
-		auto packet = iter->second;
+		auto &packet = iter->second;
 		s->packet_queue.erase(iter);
-		delete packet;
 	}
 }
 
@@ -527,7 +525,7 @@ void EQ::Net::DaybreakConnection::AddToQueue(int stream, uint16_t seq, const Pac
 		DynamicPacket *out = new DynamicPacket();
 		out->PutPacket(0, p);
 
-		s->packet_queue.emplace(std::make_pair(seq, out));
+		s->packet_queue.emplace(std::make_pair(seq, std::unique_ptr<Packet>(out)));
 	}
 }
 

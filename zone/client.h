@@ -352,7 +352,6 @@ public:
 					const char *message9 = nullptr);
 	void Tell_StringID(uint32 string_id, const char *who, const char *message);
 	void SendColoredText(uint32 color, std::string message);
-	void SendBazaarResults(uint32 trader_id, uint32 in_class, uint32 in_race, uint32 item_stat, uint32 item_slot, uint32 item_type, char item_name[64], uint32 min_price, uint32 max_price);
 	void SendTraderItem(uint32 item_id,uint16 quantity, TraderRepository::Trader &trader);
 	void DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria);
 	uint16 FindTraderItem(int32 SerialNumber,uint16 Quantity);
@@ -1188,7 +1187,7 @@ public:
 	void Escape(); //keep or quest function
 	void DisenchantSummonedBags(bool client_update = true);
 	void RemoveNoRent(bool client_update = true);
-	void RemoveDuplicateLore(bool client_update = true);
+	void RemoveDuplicateLore();
 	void MoveSlotNotAllowed(bool client_update = true);
 	virtual bool RangedAttack(Mob* other, bool CanDoubleAttack = false);
 	virtual void ThrowingAttack(Mob* other, bool CanDoubleAttack = false);

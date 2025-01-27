@@ -1,3 +1,68 @@
+## [22.62.0] 1/26/2025
+
+### Bazaar
+
+* Improve Bazaar Search Performance ([#4615](https://github.com/EQEmu/Server/pull/4615)) @neckkola 2025-01-27
+
+### CLI
+
+* Add --skip-backup to world database:updates ([#4605](https://github.com/EQEmu/Server/pull/4605)) @Akkadius 2025-01-22
+
+### Database
+
+* Change npc_types walkspeed to be of type float ([#4589](https://github.com/EQEmu/Server/pull/4589)) @Akkadius 2025-01-07
+
+### Databuckets
+
+* Add Account Scoped Databuckets ([#4603](https://github.com/EQEmu/Server/pull/4603)) @Akkadius 2025-01-21
+* Implement Nested Databuckets ([#4604](https://github.com/EQEmu/Server/pull/4604)) @Akkadius 2025-01-27
+
+### Feature
+
+* Add Alternate Bazaar Search Approach ([#4600](https://github.com/EQEmu/Server/pull/4600)) @neckkola 2025-01-20
+* Add Support for Item Previews ([#4599](https://github.com/EQEmu/Server/pull/4599)) @Kinglykrab 2025-01-20
+* Evolving Item Support for RoF2 ([#4496](https://github.com/EQEmu/Server/pull/4496)) @neckkola 2025-01-20
+* Implement Custom Pet Names ([#4594](https://github.com/EQEmu/Server/pull/4594)) @catapultam-habeo 2025-01-22
+
+### Fixes
+
+* Add Bazaar BulkSendTrader Limit for RoF2 ([#4590](https://github.com/EQEmu/Server/pull/4590)) @neckkola 2025-01-08
+* CLI help menu from parsing correctly in World  @Akkadius 2025-01-22
+* Delete later in RemoveItem second case  @Akkadius 2025-01-25
+* Fix query error in character_evolving_items  @Akkadius 2025-01-21
+* Repair a memory leak in #summonitem ([#4591](https://github.com/EQEmu/Server/pull/4591)) @neckkola 2025-01-08
+* Repair an incorrect safe_delete call memory leak. ([#4588](https://github.com/EQEmu/Server/pull/4588)) @neckkola 2025-01-07
+* Repair levers opening the Evolving XP Transfer Window ([#4607](https://github.com/EQEmu/Server/pull/4607)) @neckkola 2025-01-23
+* Update a few Bazaar RoF2 routines for memory leaks ([#4592](https://github.com/EQEmu/Server/pull/4592)) @neckkola 2025-01-08
+* Update database version to match manifest  @Akkadius 2025-01-21
+* Update trader add/remove packets to limits for RoF2 ([#4595](https://github.com/EQEmu/Server/pull/4595)) @neckkola 2025-01-19
+
+### Linux
+
+* Implement KSM Kernel Samepage Merging with Maps ([#4601](https://github.com/EQEmu/Server/pull/4601)) @Akkadius 2025-01-21
+
+### Memory Leak
+
+* Change raw pointer to unique_ptr to avoid potential leak in dbg stream ([#4616](https://github.com/EQEmu/Server/pull/4616)) @KimLS 2025-01-27
+* Fix leak in BuyTraderItemOutsideBazaar ([#4609](https://github.com/EQEmu/Server/pull/4609)) @Akkadius 2025-01-24
+* Fix leak in Client::RemoveDuplicateLore ([#4614](https://github.com/EQEmu/Server/pull/4614)) @Akkadius 2025-01-24
+* Fix leak in NPC::RemoveItem ([#4611](https://github.com/EQEmu/Server/pull/4611)) @Akkadius 2025-01-24
+* Fix leak in QuestManager::varlink ([#4610](https://github.com/EQEmu/Server/pull/4610)) @Akkadius 2025-01-24
+* Fix leaks in Client::Handle_OP_AugmentItem ([#4612](https://github.com/EQEmu/Server/pull/4612)) @Akkadius 2025-01-24
+* Fix memory leak in Client::Handle_OP_MoveMultipleItems ([#4613](https://github.com/EQEmu/Server/pull/4613)) @Akkadius 2025-01-24
+
+### Performance
+
+* Client / NPC Position Update Optimizations ([#4602](https://github.com/EQEmu/Server/pull/4602)) @Akkadius 2025-01-21
+
+### Quest API
+
+* Add SetAAEXPPercentage to Perl/Lua ([#4597](https://github.com/EQEmu/Server/pull/4597)) @Kinglykrab 2025-01-19
+
+### Zone
+
+* Implement zone player count sharding ([#4536](https://github.com/EQEmu/Server/pull/4536)) @Akkadius 2025-01-08
+
 ## [22.61.0] 1/6/2025
 
 ### Bots
