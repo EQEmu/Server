@@ -7,6 +7,8 @@
 #include <zlib.h>
 #include <fmt/format.h>
 #include <sstream>
+#include <atomic>
+#include <thread>
 
 EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager()
 {
@@ -53,22 +55,34 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		uv_ip4_addr("0.0.0.0", m_options.port, &recv_addr);
 		int rc = uv_udp_bind(&m_socket, (const struct sockaddr *)&recv_addr, UV_UDP_REUSEADDR);
 
-		static char static_buffer[65536];
+		static const int NUM_STATIC_BUFFERS = 5000;
+		static char static_buffers[NUM_STATIC_BUFFERS][512]; // Array of static buffers
+		static std::atomic<int> buffer_index(0); // Atomic to track the current buffer index
+
+		// Select the next static buffer in a round-robin manner
 
 		rc = uv_udp_recv_start(&m_socket,
 			[](uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
-			buf->base = static_buffer;
-			buf->len = sizeof(static_buffer); // Ensure it matches the buffer size
-		},
+				int current_buffer_index = buffer_index.fetch_add(1) % NUM_STATIC_BUFFERS;
+				std::cout << "recv current_buffer_index: " << current_buffer_index << " current_thread_id: " << std::this_thread::get_id() << std::endl;
+				char* buffer = static_buffers[current_buffer_index];
+				// clear the buffer
+				memset(buffer, 0, 512);
+
+				buf->base = buffer;
+				buf->len = suggested_size;
+			},
 			[](uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags) {
 			DaybreakConnectionManager *c = (DaybreakConnectionManager*)handle->data;
 			if (nread < 0 || addr == nullptr) {
 				return;
 			}
 
-			static char endpoint[16];
+			std::cout << "recv nread: " << nread << " current_thread_id: " << std::this_thread::get_id() << std::endl;
+
+			char endpoint[16];
 			uv_ip4_name((const sockaddr_in*)addr, endpoint, 16);
-			static auto port = ntohs(((const sockaddr_in*)addr)->sin_port);
+			auto port = ntohs(((const sockaddr_in*)addr)->sin_port);
 			c->ProcessPacket(endpoint, port, buf->base, nread);
 		});
 
@@ -1313,8 +1327,19 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 
 	m_last_send = Clock::now();
 
+	static const int NUM_STATIC_BUFFERS = 5000;
+	static char static_buffers[NUM_STATIC_BUFFERS][512]; // Array of static buffers
+	static std::atomic<int> buffer_index(0); // Atomic to track the current buffer index
+
+	// Select the next static buffer in a round-robin manner
+	int current_buffer_index = buffer_index.fetch_add(1) % NUM_STATIC_BUFFERS;
+	std::cout << "current_buffer_index: " << current_buffer_index << " current_thread_id: " << std::this_thread::get_id() << std::endl;
+	char* buffer = static_buffers[current_buffer_index];
+	// clear the buffer
+	memset(buffer, 0, 512);
+
 	auto send_func = [](uv_udp_send_t* req, int status) {
-		delete[](char*)req->data;
+//		delete[](char*)req->data;
 		delete req;
 	};
 
@@ -1352,15 +1377,14 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 		uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 		uv_buf_t send_buffers[1];
 
-		char *data = new char[out.Length()];
-		memcpy(data, out.Data(), out.Length());
-		send_buffers[0] = uv_buf_init(data, out.Length());
-		send_req->data = send_buffers[0].base;
+		memcpy(buffer, out.Data(), out.Length());
+		send_buffers[0] = uv_buf_init(buffer, out.Length());
+//		send_req->data = send_buffers[0].base;
 
 		m_stats.sent_bytes += out.Length();
 		m_stats.sent_packets++;
 		if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
-			delete[](char*)send_req->data;
+//			delete[](char*)send_req->data;
 			delete send_req;
 			return;
 		}
@@ -1376,16 +1400,15 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 	uv_buf_t send_buffers[1];
 
-	char *data = new char[p.Length()];
-	memcpy(data, p.Data(), p.Length());
-	send_buffers[0] = uv_buf_init(data, p.Length());
-	send_req->data = send_buffers[0].base;
+	memcpy(buffer, p.Data(), p.Length());
+	send_buffers[0] = uv_buf_init(buffer, p.Length());
+//	send_req->data = send_buffers[0].base;
 
 	m_stats.sent_bytes += p.Length();
 	m_stats.sent_packets++;
 
 	if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
-		delete[](char*)send_req->data;
+//		delete[](char*)send_req->data;
 		delete send_req;
 		return;
 	}
