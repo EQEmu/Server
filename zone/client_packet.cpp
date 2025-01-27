@@ -13952,14 +13952,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ShopEnd(const EQApplicationPacket *app)
 {
-    if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
-        DoParcelCancel();
-        SetEngagedWithParcelMerchant(false);
-    }
-
-	EQApplicationPacket empty(OP_ShopEndConfirm);
-	QueuePacket(&empty);
-	return;
+	SendMerchantEnd();
 }
 
 void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
@@ -13980,14 +13973,16 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	bool tmpmer_used = false;
 	Mob* tmp = entity_list.GetMob(mp->npcid);
 
-	if (tmp == 0 || !tmp->IsNPC() || tmp->GetClass() != Class::Merchant)
+	if (
+		tmp == 0 ||
+		!tmp->IsNPC() ||
+		tmp->GetClass() != Class::Merchant ||
+		mp->quantity < 1 ||
+		DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2
+	) {
+		SendMerchantEnd();
 		return;
-
-	if (mp->quantity < 1) return;
-
-	//you have to be somewhat close to them to be properly using them
-	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
-		return;
+	}
 
 	merchantid = tmp->CastToNPC()->MerchantType;
 
@@ -14021,36 +14016,34 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			}
 		}
 	}
+
 	item = database.GetItem(item_id);
+
 	if (!item) {
 		//error finding item, client didnt get the update packet for whatever reason, roleplay a tad
-		Message(Chat::Yellow, "%s tells you 'Sorry, that item is for display purposes only.' as they take the item off the shelf.", tmp->GetCleanName());
-		auto delitempacket = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
-		Merchant_DelItem_Struct* delitem = (Merchant_DelItem_Struct*)delitempacket->pBuffer;
-		delitem->itemslot = mp->itemslot;
-		delitem->npcid = mp->npcid;
-		delitem->playerid = mp->playerid;
-		delitempacket->priority = 6;
-		entity_list.QueueCloseClients(tmp, delitempacket); //que for anyone that could be using the merchant so they see the update
-		safe_delete(delitempacket);
+		MessageString(Chat::White, ALREADY_SOLD);
+		entity_list.SendMerchantInventory(tmp, mp->itemslot, true);
+		SendMerchantEnd();
 		return;
 	}
-	if (CheckLoreConflict(item))
-	{
-		Message(Chat::Yellow, "You can only have one of a lore item.");
+
+	if (CheckLoreConflict(item)) {
+		MessageString(Chat::White, DUPE_LORE_MERCHANT,tmp->GetCleanName(),item->Name);
 		return;
 	}
-	if (tmpmer_used && (mp->quantity > prevcharges || item->MaxCharges > 1))
-	{
-		if (prevcharges > item->MaxCharges && item->MaxCharges > 1)
+
+	if (tmpmer_used && (mp->quantity > prevcharges || item->MaxCharges > 1)) {
+		if (prevcharges > item->MaxCharges && item->MaxCharges > 1) {
 			mp->quantity = item->MaxCharges;
-		else
+		} else {
 			mp->quantity = prevcharges;
+		}
 	}
 
 	// Item's stackable, but the quantity they want to buy exceeds the max stackable quantity.
-	if (item->Stackable && mp->quantity > item->StackSize)
+	if (item->Stackable && mp->quantity > item->StackSize) {
 		mp->quantity = item->StackSize;
+	}
 
 	auto outapp = new EQApplicationPacket(OP_ShopPlayerBuy, sizeof(Merchant_Sell_Struct));
 	Merchant_Sell_Struct* mpo = (Merchant_Sell_Struct*)outapp->pBuffer;
@@ -14061,10 +14054,11 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	int16 freeslotid = INVALID_INDEX;
 	int16 charges = 0;
-	if (item->Stackable || tmpmer_used)
+	if (item->Stackable || tmpmer_used) {
 		charges = mp->quantity;
-	else if ( item->MaxCharges >= 1)
+	} else if ( item->MaxCharges >= 1) {
 		charges = item->MaxCharges;
+	}
 
 	EQ::ItemInstance* inst = database.CreateItem(item, charges);
 
@@ -14079,23 +14073,24 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		single_price *= Client::CalcPriceMod(tmp, false);
 	}
 
-	if (item->MaxCharges > 1)
+	if (item->MaxCharges > 1) {
 		mpo->price = single_price;
-	else
+	} else {
 		mpo->price = single_price * mp->quantity;
+	}
 
-	if (mpo->price < 0)
-	{
+	if (mpo->price < 0)	{
+		MessageString(Chat::White, ALREADY_SOLD);
 		safe_delete(outapp);
 		safe_delete(inst);
+		SendMerchantEnd();
 		return;
 	}
 
 	// this area needs some work..two inventory insertion check failure points
 	// below do not return player's money..is this the intended behavior?
 
-	if (!TakeMoneyFromPP(mpo->price))
-	{
+	if (!TakeMoneyFromPP(mpo->price)) {
 		auto message = fmt::format(
 			"Vendor Cheat attempted to buy qty [{}] of item_id [{}] item_name[{}] that cost [{}] copper but only has platinum [{}] gold [{}] silver [{}] copper [{}]",
 			mpo->quantity,
@@ -14115,8 +14110,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	bool stacked = TryStacking(inst);
-	if (!stacked)
+
+	if (!stacked) {
 		freeslotid = m_inv.FindFreeSlot(false, true, item->Size);
+	}
 
 	// shouldn't we be reimbursing if these two fail?
 
@@ -14130,8 +14127,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		}
 	}
 
-	if (!stacked && freeslotid == INVALID_INDEX)
-	{
+	if (!stacked && freeslotid == INVALID_INDEX) {
 		Message(Chat::Red, "You do not have room for any more items.");
 		safe_delete(outapp);
 		safe_delete(inst);
@@ -14142,11 +14138,12 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if (!stacked && inst) {
 		PutItemInInventory(freeslotid, *inst);
 		SendItemPacket(freeslotid, inst, ItemPacketTrade);
-	}
-	else if (!stacked) {
+	} else if (!stacked) {
 		LogError("OP_ShopPlayerBuy: item->ItemClass Unknown! Type: [{}]", item->ItemClass);
 	}
+
 	QueuePacket(outapp);
+
 	if (inst && tmpmer_used) {
 		int32 new_charges = prevcharges - mp->quantity;
 		zone->SaveTempItem(merchantid, tmp->GetNPCTypeID(), item_id, new_charges);
@@ -14159,8 +14156,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			delitempacket->priority = 6;
 			entity_list.QueueClients(tmp, delitempacket); //que for anyone that could be using the merchant so they see the update
 			safe_delete(delitempacket);
-		}
-		else {
+		} else {
 			// Update the charges/quantity in the merchant window
 			inst->SetCharges(new_charges);
 			inst->SetPrice(single_price);
@@ -14219,6 +14215,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	safe_delete(inst);
 	safe_delete(outapp);
 }
+
 void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Merchant_Purchase_Struct)) {
@@ -14522,6 +14519,8 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 
 	if (action == MerchantActions::Open) {
 		BulkSendMerchantInventory(merchant_id, tmp->GetNPCTypeID());
+		MerchantSession = tmp->GetID();
+
 		if ((tabs_to_display & Parcel) == Parcel) {
 			SendBulkParcels();
 		}

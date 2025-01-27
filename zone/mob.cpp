@@ -492,6 +492,7 @@ Mob::Mob(
 
 	m_AllowBeneficial = false;
 	m_DisableMelee    = false;
+	MerchantSession = 0;
 
 	for (int i = 0; i < EQ::skills::HIGHEST_SKILL + 2; i++) {
 		SkillDmgTaken_Mod[i] = 0;

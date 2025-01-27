@@ -5950,3 +5950,57 @@ std::vector<NPC*> EntityList::GetExcludedNPCsByIDs(std::vector<uint32> npc_ids)
 
 	return v;
 }
+
+void EntityList::SendMerchantEnd(Mob* merchant)
+{
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		Client *c = it->second;
+
+		if (!c) {
+			continue;
+		}
+
+		if(c->GetMerchantSession() == merchant->GetID()) {
+			c->SendMerchantEnd();
+		}
+		++it;
+	}
+
+	return;
+}
+
+void EntityList::SendMerchantInventory(Mob* merchant, int32 slotid, bool isdelete)
+{
+
+	if(!merchant || !merchant->IsNPC()) {
+		return;
+	}
+
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		Client *c = it->second;
+
+		if (!c) {
+			continue;
+		}
+
+		if(c->GetMerchantSession() == merchant->GetID()) {
+			if(!isdelete) {
+				c->BulkSendMerchantInventory(merchant->CastToNPC()->MerchantType, merchant->GetNPCTypeID());
+			} else {
+				auto delitempacket = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
+				Merchant_DelItem_Struct* delitem = (Merchant_DelItem_Struct*)delitempacket->pBuffer;
+				delitem->itemslot = slotid;
+				delitem->npcid = merchant->GetID();
+				delitem->playerid = c->GetID();
+				delitempacket->priority = 6;
+				c->QueuePacket(delitempacket);
+				safe_delete(delitempacket);
+			}
+		}
+		++it;
+	}
+
+	return;
+}

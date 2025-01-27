@@ -1387,6 +1387,9 @@ public:
 	std::string GetRacePlural();
 	std::string GetClassPlural();
 
+	void SetMerchantSession(uint16 value) { MerchantSession = value; }
+	uint16 GetMerchantSession() { return MerchantSession; }
+
 	//Command #Tune functions
 	void TuneGetStats(Mob* defender, Mob *attacker);
 	void TuneGetACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int atk_override = 0, int Msg = 0);
@@ -1919,6 +1922,8 @@ protected:
 	bool m_can_open_doors;
 
 	MobMovementManager *mMovementManager;
+
+	uint16 MerchantSession;
 
 private:
 	Mob* target;
