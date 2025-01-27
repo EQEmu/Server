@@ -125,7 +125,7 @@ Mob::Mob(
 	tmHidden(-1),
 	mitigation_ac(0),
 	m_specialattacks(eSpecialAttacks::None),
-	attack_anim_timer(500),
+	attack_anim_timer(100),
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
 	m_scan_close_mobs_timer(6000),
@@ -3540,24 +3540,21 @@ void Mob::DoAnim(const int animation_id, int animation_speed, bool ackreq, eqFil
 		return;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-	auto *a  = (Animation_Struct *) outapp->pBuffer;
-
+	static EQApplicationPacket p(OP_Animation, sizeof(Animation_Struct));
+	auto a = (Animation_Struct*) p.pBuffer;
 	a->spawnid = GetID();
 	a->action  = animation_id;
 	a->speed   = animation_speed ? animation_speed : 10;
 
 	entity_list.QueueCloseClients(
 		this, /* Sender */
-		outapp, /* Packet */
+		&p, /* Packet */
 		false, /* Ignore Sender */
 		RuleI(Range, Anims),
 		0, /* Skip this mob */
 		ackreq, /* Packet ACK */
 		filter /* eqFilterType filter */
 	);
-
-	safe_delete(outapp);
 }
 
 void Mob::ShowBuffs(Client* c) {
