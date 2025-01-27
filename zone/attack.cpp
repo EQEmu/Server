@@ -2559,16 +2559,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	const uint8 killed_level = GetLevel();
 
 	if (GetClass() == Class::LDoNTreasure) { // open chest
-		auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-
-		auto a = (Animation_Struct*) outapp->pBuffer;
-
+		static EQApplicationPacket p(OP_Animation, sizeof(Animation_Struct));
+		auto a = (Animation_Struct*) p.pBuffer;
 		a->spawnid = GetID();
 		a->action  = 0x0F;
 		a->speed   = 10;
-
-		entity_list.QueueCloseClients(this, outapp);
-		safe_delete(outapp);
+		entity_list.QueueCloseClients(this, &p);
 	}
 
 	auto app = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
