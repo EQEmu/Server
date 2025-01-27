@@ -148,7 +148,6 @@ namespace Logs {
 		BotSettings,
 		BotSpellChecks,
 		BotSpellTypeChecks,
-		TestDebug,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -255,8 +254,7 @@ namespace Logs {
 		"KSM", // Kernel Samepage Merging
 		"Bot Settings",
 		"Bot Spell Checks",
-		"Bot Spell Type Checks",
-		"Test Debug"
+		"Bot Spell Type Checks"
 	};
 }
 
