@@ -595,6 +595,16 @@ bool NPC::Process()
 		spun_timer.Disable();
 	}
 
+	// If mobs are under the world, move them back to spawn point.
+	if (!IsEngaged() && IsTrackable()) {
+		if (GetZ() <= zone->newzone_data.underworld) {
+			if (respawn2) {
+				Teleport(glm::vec3(respawn2->GetX(), respawn2->GetY(), respawn2->GetZ()));
+				SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
+			}
+		}
+	}
+
 	SpellProcess();
 
 	if (swarm_timer.Check()) {

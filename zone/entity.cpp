@@ -5963,3 +5963,20 @@ std::vector<NPC*> EntityList::GetExcludedNPCsByIDs(std::vector<uint32> npc_ids)
 
 	return v;
 }
+
+void EntityList::GetUnderworldMobs(Client* c) {
+	float underworld = zone->newzone_data.underworld;
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		NPC* mob = it->second->CastToNPC();
+		if (mob->IsTrackable()) {
+			if (mob->GetZ() <= underworld) {
+				c->Message(Chat::White, "%s was under the world at %f %f %f. Resetting to spawn point at %f %f %f.",
+					mob->GetCleanName(), mob->GetX(), mob->GetY(), mob->GetZ(), mob->respawn2->GetX(), mob->respawn2->GetY(), mob->respawn2->GetZ());
+				mob->Teleport(glm::vec3(mob->respawn2->GetX(), mob->respawn2->GetY(), mob->respawn2->GetZ()));
+				mob->SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
+			}
+		}
+		++it;
+	}
+}

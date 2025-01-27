@@ -230,6 +230,7 @@ int command_init(void)
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_traindisc) ||
 		command_add("tune", "Calculate statistical values related to combat.", AccountStatus::GMAdmin, command_tune) ||
 		command_add("undye", "Remove dye from all of your or your target's armor slots", AccountStatus::GMAdmin, command_undye) ||
+		command_add("underworld", "- Show all mobs under the world", AccountStatus::GMAreas, command_underworld) ||
 		command_add("unmemspell", "[Spell ID] - Unmemorize a Spell by ID for you or your target", AccountStatus::Guide, command_unmemspell) ||
 		command_add("unmemspells", " Unmemorize all spells for you or your target", AccountStatus::Guide, command_unmemspells) ||
 		command_add("unscribespell", "[Spell ID] - Unscribe a spell from your or your target's spell book by Spell ID", AccountStatus::GMCoder, command_unscribespell) ||
@@ -923,6 +924,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/task.cpp"
 #include "gm_commands/traindisc.cpp"
 #include "gm_commands/tune.cpp"
+#include "gm_commands/underworld.cpp"
 #include "gm_commands/undye.cpp"
 #include "gm_commands/unmemspell.cpp"
 #include "gm_commands/unmemspells.cpp"

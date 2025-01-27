@@ -578,6 +578,8 @@ public:
 
 	int MovePlayerCorpsesToGraveyard(bool force_move_from_instance = false);
 
+	void GetUnderworldMobs(Client* c);
+
 protected:
 	friend class Zone;
 	void	Depop(bool StartSpawnTimer = false);
