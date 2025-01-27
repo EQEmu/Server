@@ -7717,28 +7717,26 @@ bool Mob::CanRaceEquipItem(uint32 item_id)
 
 void Mob::SendAddPlayerState(PlayerState new_state)
 {
-	auto app = new EQApplicationPacket(OP_PlayerStateAdd, sizeof(PlayerState_Struct));
-	auto ps = (PlayerState_Struct *)app->pBuffer;
+	static EQApplicationPacket p(OP_PlayerStateAdd, sizeof(PlayerState_Struct));
+	auto                       b = (PlayerState_Struct *) p.pBuffer;
 
-	ps->spawn_id = GetID();
-	ps->state = static_cast<uint32>(new_state);
+	b->spawn_id = GetID();
+	b->state    = static_cast<uint32>(new_state);
 
-	AddPlayerState(ps->state);
-	entity_list.QueueClients(nullptr, app);
-	safe_delete(app);
+	AddPlayerState(b->state);
+	entity_list.QueueClients(nullptr, &p);
 }
 
 void Mob::SendRemovePlayerState(PlayerState old_state)
 {
-	auto app = new EQApplicationPacket(OP_PlayerStateRemove, sizeof(PlayerState_Struct));
-	auto ps = (PlayerState_Struct *)app->pBuffer;
+	static EQApplicationPacket p(OP_PlayerStateRemove, sizeof(PlayerState_Struct));
+	auto                       b = (PlayerState_Struct *) p.pBuffer;
 
-	ps->spawn_id = GetID();
-	ps->state = static_cast<uint32>(old_state);
+	b->spawn_id = GetID();
+	b->state    = static_cast<uint32>(old_state);
 
-	RemovePlayerState(ps->state);
-	entity_list.QueueClients(nullptr, app);
-	safe_delete(app);
+	RemovePlayerState(b->state);
+	entity_list.QueueClients(nullptr, &p);
 }
 
 int32 Mob::GetMeleeMitigation() {
