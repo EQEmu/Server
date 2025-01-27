@@ -1043,7 +1043,7 @@ void EQ::Net::DaybreakConnection::Decompress(Packet &p, size_t offset, size_t le
 
 	static uint8_t new_buffer[4096];
 	uint8_t *buffer = (uint8_t*)p.Data() + offset;
-	uint32_t new_length = 0;
+	static uint32_t new_length = 0;
 
 	if (buffer[0] == 0x5a) {
 		new_length = Inflate(buffer + 1, (uint32_t)length - 1, new_buffer, 4096);
@@ -1062,9 +1062,9 @@ void EQ::Net::DaybreakConnection::Decompress(Packet &p, size_t offset, size_t le
 
 void EQ::Net::DaybreakConnection::Compress(Packet &p, size_t offset, size_t length)
 {
-	uint8_t new_buffer[2048] = { 0 };
+	static uint8_t new_buffer[2048] = { 0 };
 	uint8_t *buffer = (uint8_t*)p.Data() + offset;
-	uint32_t new_length = 0;
+	static uint32_t new_length = 0;
 	bool send_uncompressed = true;
 
 	if (length > 30) {
@@ -1205,7 +1205,7 @@ void EQ::Net::DaybreakConnection::UpdateDataBudget(double budget_add)
 
 void EQ::Net::DaybreakConnection::SendAck(int stream_id, uint16_t seq)
 {
-	DaybreakReliableHeader ack;
+	static DaybreakReliableHeader ack = {};
 	ack.zero = 0;
 	ack.opcode = OP_Ack + stream_id;
 	ack.sequence = HostToNetwork(seq);
@@ -1218,7 +1218,7 @@ void EQ::Net::DaybreakConnection::SendAck(int stream_id, uint16_t seq)
 
 void EQ::Net::DaybreakConnection::SendOutOfOrderAck(int stream_id, uint16_t seq)
 {
-	DaybreakReliableHeader ack;
+	static DaybreakReliableHeader ack = {};
 	ack.zero = 0;
 	ack.opcode = OP_OutOfOrderAck + stream_id;
 	ack.sequence = HostToNetwork(seq);
@@ -1231,7 +1231,7 @@ void EQ::Net::DaybreakConnection::SendOutOfOrderAck(int stream_id, uint16_t seq)
 
 void EQ::Net::DaybreakConnection::SendDisconnect()
 {
-	DaybreakDisconnect disconnect;
+	static DaybreakDisconnect disconnect = {};
 	disconnect.zero = 0;
 	disconnect.opcode = OP_SessionDisconnect;
 	disconnect.connect_code = HostToNetwork(m_connect_code);
@@ -1266,7 +1266,7 @@ void EQ::Net::DaybreakConnection::InternalBufferedSend(Packet &p)
 
 void EQ::Net::DaybreakConnection::SendConnect()
 {
-	DaybreakConnect connect;
+	static DaybreakConnect connect = {};
 	connect.zero = 0;
 	connect.opcode = OP_SessionRequest;
 	connect.protocol_version = HostToNetwork(3U);
@@ -1281,7 +1281,7 @@ void EQ::Net::DaybreakConnection::SendConnect()
 
 void EQ::Net::DaybreakConnection::SendKeepAlive()
 {
-	DaybreakHeader keep_alive;
+	static DaybreakHeader keep_alive = {};
 	keep_alive.zero = 0;
 	keep_alive.opcode = OP_KeepAlive;
 
@@ -1465,14 +1465,14 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 	}
 	else {
 		DynamicPacket packet;
-		DaybreakReliableHeader header;
+		static DaybreakReliableHeader header = {};
 		header.zero = 0;
 		header.opcode = OP_Packet + stream_id;
 		header.sequence = HostToNetwork(stream->sequence_out);
 		packet.PutSerialize(0, header);
 		packet.PutPacket(DaybreakReliableHeader::size(), p);
 
-		DaybreakSentPacket sent;
+		static DaybreakSentPacket sent = {};
 		sent.packet.PutPacket(0, packet);
 		sent.last_sent = Clock::now();
 		sent.first_sent = Clock::now();
