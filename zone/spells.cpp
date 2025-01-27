@@ -4062,13 +4062,22 @@ bool Mob::SpellOnTarget(
 		return false;
 	}
 
+	bool client_blocked_buffs = 
+		RuleB(Spells, EnableBlockedBuffs) &&
+		(
+			spelltar->IsClient() ||
+			(spelltar->IsPet() && spelltar->IsPetOwnerClient())
+		);
+
+	bool bot_blocked_buffs = 
+		RuleB(Bots, AllowBotBlockedBuffs) && 
+		(
+			spelltar->IsBot() || 
+			(spelltar->IsPet() && spelltar->IsPetOwnerBot())
+		);
+
 	// now check if the spell is allowed to land
-	if (
-		(RuleB(Spells, EnableBlockedBuffs) && spelltar->IsClient()) ||
-		(RuleB(Spells, EnableBlockedBuffs) && spelltar->IsPet() && spelltar->GetOwner() && spelltar->GetOwner()->IsClient()) ||
-		(RuleB(Bots, AllowBotBlockedBuffs) && spelltar->IsBot()) ||
-		(RuleB(Bots, AllowBotBlockedBuffs) && spelltar->IsPet() && spelltar->GetOwner() && spelltar->GetOwner()->IsBot())
-	) {
+	if (client_blocked_buffs || bot_blocked_buffs) {
 		// We return true here since the caster's client should act like normal
 		if (spelltar->IsBlockedBuff(spell_id)) {
 			LogSpells(
