@@ -11,6 +11,27 @@
 #include <queue>
 #include <list>
 
+class BufferPool {
+public:
+	// Allocate a buffer from the pool or create a new one
+	uv_buf_t AllocateBuffer(size_t size) {
+		if (!pool.empty()) {
+			auto buf = std::move(pool.back());
+			pool.pop_back();
+			return uv_buf_init(buf.release(), size);
+		}
+		return uv_buf_init(new char[size], size);
+	}
+
+	// Return a buffer to the pool for reuse
+	void ReleaseBuffer(char* buffer) {
+		pool.emplace_back(buffer);
+	}
+
+private:
+	std::vector<std::unique_ptr<char[]>> pool; // Pool of reusable buffers
+};
+
 namespace EQ
 {
 	namespace Net
@@ -201,7 +222,7 @@ namespace EQ
 
 				uint16_t sequence_in;
 				uint16_t sequence_out;
-				std::map<uint16_t, Packet*> packet_queue;
+				std::unordered_map<uint16_t, std::unique_ptr<Packet>> packet_queue;
 
 				DynamicPacket fragment_packet;
 				uint32_t fragment_current_bytes;
@@ -317,6 +338,35 @@ namespace EQ
 		private:
 			void Attach(uv_loop_t *loop);
 			void Detach();
+
+			static void AllocCallback(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
+				auto* manager = static_cast<DaybreakConnectionManager*>(handle->data);
+				*buf = manager->buffer_pool.AllocateBuffer(suggested_size); // Use buffer pool
+			}
+
+			static void RecvCallback(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags) {
+				auto* manager = static_cast<DaybreakConnectionManager*>(handle->data);
+
+				if (nread < 0 || addr == nullptr) {
+					manager->buffer_pool.ReleaseBuffer(buf->base); // Return buffer to pool
+					return;
+				}
+
+				// Get endpoint details
+				char endpoint[16];
+				uv_ip4_name((const sockaddr_in*)addr, endpoint, sizeof(endpoint));
+				auto port = ntohs(((const sockaddr_in*)addr)->sin_port);
+
+				std::cout << "Received " << nread << " bytes from " << endpoint << ":" << port << std::endl;
+
+				// Process the packet
+				manager->ProcessPacket(endpoint, port, buf->base, nread);
+
+				// Release buffer back to the pool
+				manager->buffer_pool.ReleaseBuffer(buf->base);
+			}
+
+			BufferPool buffer_pool;
 
 			EQ::Random m_rand;
 			uv_timer_t m_timer;

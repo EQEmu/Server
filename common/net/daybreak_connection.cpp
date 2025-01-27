@@ -53,25 +53,7 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		uv_ip4_addr("0.0.0.0", m_options.port, &recv_addr);
 		int rc = uv_udp_bind(&m_socket, (const struct sockaddr *)&recv_addr, UV_UDP_REUSEADDR);
 
-		rc = uv_udp_recv_start(&m_socket,
-			[](uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
-			buf->base = new char[suggested_size];
-			memset(buf->base, 0, suggested_size);
-			buf->len = suggested_size;
-		},
-			[](uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags) {
-			DaybreakConnectionManager *c = (DaybreakConnectionManager*)handle->data;
-			if (nread < 0 || addr == nullptr) {
-				delete[] buf->base;
-				return;
-			}
-
-			char endpoint[16];
-			uv_ip4_name((const sockaddr_in*)addr, endpoint, 16);
-			auto port = ntohs(((const sockaddr_in*)addr)->sin_port);
-			c->ProcessPacket(endpoint, port, buf->base, nread);
-			delete[] buf->base;
-		});
+		rc = uv_udp_recv_start(&m_socket, AllocCallback, RecvCallback);
 
 		m_attached = loop;
 	}
@@ -523,6 +505,12 @@ void EQ::Net::DaybreakConnection::AddToQueue(int stream, uint16_t seq, const Pac
 {
 	auto s = &m_streams[stream];
 	auto iter = s->packet_queue.find(seq);
+
+	if (s->packet_queue.bucket_count() < seq) {
+		std::cout << "Resizing packet queue to " << seq << std::endl;
+		s->packet_queue.reserve(seq);
+	}
+
 	if (iter == s->packet_queue.end()) {
 		DynamicPacket *out = new DynamicPacket();
 		out->PutPacket(0, p);
@@ -1207,7 +1195,7 @@ void EQ::Net::DaybreakConnection::UpdateDataBudget(double budget_add)
 
 void EQ::Net::DaybreakConnection::SendAck(int stream_id, uint16_t seq)
 {
-	DaybreakReliableHeader ack;
+	static DaybreakReliableHeader ack = {};
 	ack.zero = 0;
 	ack.opcode = OP_Ack + stream_id;
 	ack.sequence = HostToNetwork(seq);
