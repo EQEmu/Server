@@ -1510,8 +1510,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		LogError("Error loading AA points for [{}]", GetName());
 	}
 
-	/* Load Bots */
-
 	LoadDefaultBotSettings();
 
 	database.botdb.LoadBotSettings(this);
