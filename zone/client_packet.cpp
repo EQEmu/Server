@@ -4842,11 +4842,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			auto boat_delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
 			cmob->SetDelta(boat_delta);
 
-			auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-			PlayerPositionUpdateServer_Struct *ppus = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
+			static EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+			auto *ppus = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
 			cmob->MakeSpawnUpdate(ppus);
-			entity_list.QueueCloseClients(cmob, outapp, true, 300, this, false);
-			safe_delete(outapp);
+			entity_list.QueueCloseClients(cmob, &outapp, true, 300, this, false);
 
 			/* Update the boat's position on the server, without sending an update */
 			cmob->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading));
@@ -5020,15 +5019,15 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		m_Position.w = new_heading;
 
 		/* Broadcast update to other clients */
-		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-		PlayerPositionUpdateServer_Struct *position_update = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
+		static EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+		PlayerPositionUpdateServer_Struct *position_update = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
 
 		MakeSpawnUpdate(position_update);
 
 		if (gm_hide_me) {
-			entity_list.QueueClientsStatus(this, outapp, true, Admin(), AccountStatus::Max);
+			entity_list.QueueClientsStatus(this, &outapp, true, Admin(), AccountStatus::Max);
 		} else {
-			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
+			entity_list.QueueCloseClients(this, &outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
 		}
 
 
@@ -5037,12 +5036,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		Raid *raid = GetRaid();
 
 		if (raid) {
-			raid->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
+			raid->QueueClients(this, &outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		} else if (group) {
-			group->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
+			group->QueueClients(this, &outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		}
-
-		safe_delete(outapp);
 	}
 
 	if (zone->watermap) {
@@ -16747,13 +16744,12 @@ bool Client::CanTradeFVNoDropItem()
 
 void Client::SendMobPositions()
 {
-	auto      p  = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	auto      *s = (PlayerPositionUpdateServer_Struct *) p->pBuffer;
+	static EQApplicationPacket p(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	auto      *s = (PlayerPositionUpdateServer_Struct *) p.pBuffer;
 	for (auto &m: entity_list.GetMobList()) {
 		m.second->MakeSpawnUpdate(s);
-		QueuePacket(p, false);
+		QueuePacket(&p, false);
 	}
-	safe_delete(p);
 }
 
 struct RecordKillCheck {

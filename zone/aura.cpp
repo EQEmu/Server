@@ -735,21 +735,22 @@ bool Aura::Process()
 
 	if (movement_type == AuraMovement::Follow && GetPosition() != owner->GetPosition() && movement_timer.Check()) {
 		m_Position = owner->GetPosition();
-		auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-		auto spu = (PlayerPositionUpdateServer_Struct *) app->pBuffer;
+
+		static EQApplicationPacket packet(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+		auto                       spu = (PlayerPositionUpdateServer_Struct *) packet.pBuffer;
+
 		MakeSpawnUpdate(spu);
 		auto it = spawned_for.begin();
 		while (it != spawned_for.end()) {
 			auto client = entity_list.GetClientByID(*it);
 			if (client) {
-				client->QueuePacket(app);
+				client->QueuePacket(&packet);
 				++it;
 			}
 			else {
 				it = spawned_for.erase(it);
 			}
 		}
-		safe_delete(app);
 	}
 	// TODO: waypoints?
 
