@@ -53,7 +53,24 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		uv_ip4_addr("0.0.0.0", m_options.port, &recv_addr);
 		int rc = uv_udp_bind(&m_socket, (const struct sockaddr *)&recv_addr, UV_UDP_REUSEADDR);
 
-		rc = uv_udp_recv_start(&m_socket, AllocCallback, RecvCallback);
+		static char static_buffer[65536];
+
+		rc = uv_udp_recv_start(&m_socket,
+			[](uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
+			buf->base = static_buffer;
+			buf->len = sizeof(static_buffer); // Ensure it matches the buffer size
+		},
+			[](uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags) {
+			DaybreakConnectionManager *c = (DaybreakConnectionManager*)handle->data;
+			if (nread < 0 || addr == nullptr) {
+				return;
+			}
+
+			static char endpoint[16];
+			uv_ip4_name((const sockaddr_in*)addr, endpoint, 16);
+			static auto port = ntohs(((const sockaddr_in*)addr)->sin_port);
+			c->ProcessPacket(endpoint, port, buf->base, nread);
+		});
 
 		m_attached = loop;
 	}
