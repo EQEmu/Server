@@ -154,7 +154,7 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 			bot_iter->SetBotBlockedBuff(spell_id, false);
 		}
 		else if (list) {
-			std::vector<BotBlockedBuffs_Struct> blocked_buffs = bot_iter->GetBotBlockedBuffs();
+			std::vector<BotBlockedBuffs> blocked_buffs = bot_iter->GetBotBlockedBuffs();
 			bool found = false;
 
 			if (!blocked_buffs.empty()) {
@@ -391,7 +391,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 			bot_iter->SetBotBlockedPetBuff(spell_id, false);
 		}
 		else if (list) {
-			std::vector<BotBlockedBuffs_Struct> blocked_buffs = bot_iter->GetBotBlockedBuffs();
+			std::vector<BotBlockedBuffs> blocked_buffs = bot_iter->GetBotBlockedBuffs();
 			bool found = false;
 
 			if (!blocked_buffs.empty()) {

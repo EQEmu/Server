@@ -800,9 +800,9 @@ bool BotDatabase::LoadTimers(Bot* b)
 		)
 	);
 
-	std::vector<BotTimer_Struct> v;
+	std::vector<BotTimer> v;
 
-	BotTimer_Struct t{ };
+	BotTimer t{ };
 
 	for (const auto& e : l) {
 		if (e.timer_value < (Timer::GetCurrentTime() + e.recast_time)) {
@@ -836,7 +836,7 @@ bool BotDatabase::SaveTimers(Bot* b)
 		return false;
 	}
 
-	std::vector<BotTimer_Struct> v = b->GetBotTimers();
+	std::vector<BotTimer> v = b->GetBotTimers();
 
 	if (v.empty()) {
 		return true;
@@ -2422,9 +2422,9 @@ bool BotDatabase::LoadBotBlockedBuffs(Bot* b)
 		)
 	);
 
-	std::vector<BotBlockedBuffs_Struct> v;
+	std::vector<BotBlockedBuffs> v;
 
-	BotBlockedBuffs_Struct t{ };
+	BotBlockedBuffs t{ };
 
 	for (const auto& e : l) {
 		t.spell_id				= e.spell_id;
@@ -2451,7 +2451,7 @@ bool BotDatabase::SaveBotBlockedBuffs(Bot* b)
 		return false;
 	}
 
-	std::vector<BotBlockedBuffs_Struct> v = b->GetBotBlockedBuffs();
+	std::vector<BotBlockedBuffs> v = b->GetBotBlockedBuffs();
 
 	if (v.empty()) {
 		return true;

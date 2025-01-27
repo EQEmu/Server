@@ -8807,7 +8807,7 @@ void Bot::SetSpellRecastTimer(uint16 spell_id, int32 recast_delay) {
 	}
 
 	if (CheckSpellRecastTimer(spell_id)) {
-		BotTimer_Struct t;
+		BotTimer t;
 
 		t.timer_id    = spells[spell_id].timer_id;
 		t.timer_value = (Timer::GetCurrentTime() + recast_delay);
@@ -8913,7 +8913,7 @@ void Bot::SetDisciplineReuseTimer(uint16 spell_id, int32 reuse_timer)
 	}
 
 	if (CheckDisciplineReuseTimer(spell_id)) {
-		BotTimer_Struct t;
+		BotTimer t;
 
 		t.timer_id    = spells[spell_id].timer_id;
 		t.timer_value = (Timer::GetCurrentTime() + reuse_timer);
@@ -9010,7 +9010,7 @@ void Bot::SetItemReuseTimer(uint32 item_id, uint32 reuse_timer)
 	}
 
 	if (CheckItemReuseTimer(item_id)) {
-		BotTimer_Struct t;
+		BotTimer t;
 
 		t.timer_id    = (item->RecastType == NegativeItemReuse ? item->ID : item->RecastType);
 		t.timer_value = (
@@ -10476,7 +10476,7 @@ void Bot::LoadDefaultBotSettings() {
 	}	
 
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-		BotSpellSettings_Struct t;
+		BotSpellSettings t;
 
 		t.spellType								= i;
 		t.shortName								= GetSpellTypeShortNameByID(i);
@@ -12035,7 +12035,7 @@ void Bot::CopyBotBlockedBuffs(Bot* to) {
 
 	to->ClearBotBlockedBuffs();
 
-	std::vector<BotBlockedBuffs_Struct> blocked_buffs = GetBotBlockedBuffs();
+	std::vector<BotBlockedBuffs> blocked_buffs = GetBotBlockedBuffs();
 
 	if (!blocked_buffs.empty()) {
 		for (auto& blocked_buff : blocked_buffs) {
@@ -12051,7 +12051,7 @@ void Bot::CopyBotBlockedPetBuffs(Bot* to) {
 
 	to->ClearBotBlockedBuffs();
 
-	std::vector<BotBlockedBuffs_Struct> blocked_buffs = GetBotBlockedBuffs();
+	std::vector<BotBlockedBuffs> blocked_buffs = GetBotBlockedBuffs();
 
 	if (!blocked_buffs.empty()) {
 		for (auto& blocked_buff : blocked_buffs) {
@@ -12225,7 +12225,7 @@ void Bot::SetBotBlockedBuff(uint16 spell_id, bool block)
 
 	auto it = std::find_if(
 		bot_blocked_buffs.begin(), bot_blocked_buffs.end(),
-		[spell_id](const BotBlockedBuffs_Struct& buff) { return buff.spell_id == spell_id; }
+		[spell_id](const BotBlockedBuffs& buff) { return buff.spell_id == spell_id; }
 	);
 
 	if (it != bot_blocked_buffs.end()) {
@@ -12272,7 +12272,7 @@ void Bot::SetBotBlockedPetBuff(uint16 spell_id, bool block)
 
 	auto it = std::find_if(
 		bot_blocked_buffs.begin(), bot_blocked_buffs.end(),
-		[spell_id](const BotBlockedBuffs_Struct& buff) { return buff.spell_id == spell_id; }
+		[spell_id](const BotBlockedBuffs& buff) { return buff.spell_id == spell_id; }
 	);
 
 	if (it != bot_blocked_buffs.end()) {

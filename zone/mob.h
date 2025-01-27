@@ -93,7 +93,7 @@ struct AppearanceStruct {
 	uint8  texture          = UINT8_MAX;
 };
 
-struct BotSpellSettings_Struct {
+struct BotSpellSettings {
 	uint16				spellType;                 // type ID of bot category
 	std::string			shortName;                 // type short name of bot category
 	std::string			name;                      // type name of bot category
@@ -231,7 +231,7 @@ public:
 	// Bot attack flag
 	Timer bot_attack_flag_timer;
 
-	std::vector<BotSpellSettings_Struct> m_bot_spell_settings;
+	std::vector<BotSpellSettings> m_bot_spell_settings;
 
 	//Somewhat sorted: needs documenting!
 

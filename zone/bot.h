@@ -965,11 +965,11 @@ public:
 
 	// New accessors for BotDatabase access
 	bool DeleteBot();
-	std::vector<BotTimer_Struct> GetBotTimers() { return bot_timers; }
-	void SetBotTimers(std::vector<BotTimer_Struct> timers) { bot_timers = timers; }
-	std::vector<BotBlockedBuffs_Struct> GetBotBlockedBuffs() { return bot_blocked_buffs; }
-	void SetBotBlockedBuffs(std::vector<BotBlockedBuffs_Struct> blocked_buffs) { bot_blocked_buffs = blocked_buffs; }
-	const std::map<int32_t, std::map<int32_t, BotSpellTypesByClass_Struct>>& GetCommandedSpellTypesMinLevels() { return commanded_spells_min_level; }
+	std::vector<BotTimer> GetBotTimers() { return bot_timers; }
+	void SetBotTimers(std::vector<BotTimer> timers) { bot_timers = timers; }
+	std::vector<BotBlockedBuffs> GetBotBlockedBuffs() { return bot_blocked_buffs; }
+	void SetBotBlockedBuffs(std::vector<BotBlockedBuffs> blocked_buffs) { bot_blocked_buffs = blocked_buffs; }
+	const std::map<int32_t, std::map<int32_t, BotSpellTypesByClass>>& GetCommandedSpellTypesMinLevels() { return commanded_spells_min_level; }
 	uint32 GetLastZoneID() const { return _lastZoneId; }
 	int32 GetBaseAC() const { return _baseAC; }
 	int32 GetBaseATK() const { return _baseATK; }
@@ -1076,10 +1076,10 @@ protected:
 	std::vector<BotSpells_Struct> AIBot_spells_enforced;
 	std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>> AIBot_spells_by_type;
 
-	std::map<int32_t, std::map<int32_t, BotSpellTypesByClass_Struct>> commanded_spells_min_level;
+	std::map<int32_t, std::map<int32_t, BotSpellTypesByClass>> commanded_spells_min_level;
 
-	std::vector<BotTimer_Struct> bot_timers;
-	std::vector<BotBlockedBuffs_Struct> bot_blocked_buffs;
+	std::vector<BotTimer> bot_timers;
+	std::vector<BotBlockedBuffs> bot_blocked_buffs;
 
 private:
 	// Class Members

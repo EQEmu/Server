@@ -99,7 +99,7 @@ struct BotSpells_Struct_wIndex {
 	uint8		bucket_comparison;
 };
 
-struct BotTimer_Struct {
+struct BotTimer {
 	uint32		timer_id;
 	uint32		timer_value;
 	uint32		recast_time;
@@ -115,14 +115,14 @@ struct BotSpellTypeOrder {
 	uint16		priority;
 };
 
-struct BotBlockedBuffs_Struct {
+struct BotBlockedBuffs {
 	uint32_t	bot_id;
 	uint32_t	spell_id;
 	uint8_t		blocked;
 	uint8_t		blocked_pet;
 };
 
-struct BotSpellTypesByClass_Struct {
+struct BotSpellTypesByClass {
 	uint8_t min_level			= 255;
 	std::string description;
 };

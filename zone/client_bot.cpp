@@ -228,7 +228,7 @@ void Client::LoadDefaultBotSettings() {
 	LogBotSettingsDetail("{} says, 'Setting default {} [{}] to [{}]'", GetCleanName(), CastToBot()->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock), BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
 
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-		BotSpellSettings_Struct t;
+		BotSpellSettings t;
 
 		t.spellType = i;
 		t.shortName = GetSpellTypeShortNameByID(i);
