@@ -11,7 +11,7 @@
 #include <queue>
 #include <list>
 
-class BufferPool {
+class UdpReceiveBufferPool {
 public:
 	// Allocate a buffer from the pool or create a new one
 	uv_buf_t AllocateBuffer(size_t size) {
@@ -30,7 +30,45 @@ public:
 
 private:
 	std::vector<std::unique_ptr<char[]>> pool; // Pool of reusable buffers
+	std::vector<uv_udp_send_t*> send_req_pool;            // Pool of reusable uv_udp_send_t objects
 };
+
+class BufferPool {
+public:
+	char* Allocate(size_t size) {
+		std::lock_guard<std::mutex> lock(mutex_);
+		if (!pool_.empty()) {
+			char* buffer = pool_.back();
+			pool_.pop_back();
+			allocated_.insert(buffer);
+			std::cout << "[ALLOCATE] Reusing buffer: " << static_cast<void*>(buffer) << std::endl;
+			return buffer;
+		}
+		char* buffer = new char[size];
+		allocated_.insert(buffer);
+		std::cout << "[ALLOCATE] New buffer: " << static_cast<void*>(buffer) << std::endl;
+		return buffer;
+	}
+
+	void Release(char* buffer) {
+		std::lock_guard<std::mutex> lock(mutex_);
+		if (allocated_.find(buffer) == allocated_.end()) {
+			std::cerr << "[ERROR] Attempt to release unallocated or already released buffer: "
+					  << static_cast<void*>(buffer) << std::endl;
+			return;
+		}
+		allocated_.erase(buffer);
+		pool_.push_back(buffer);
+		std::cout << "[RELEASE] Buffer released: " << static_cast<void*>(buffer) << std::endl;
+	}
+
+private:
+	std::vector<char*> pool_;
+	std::unordered_set<char*> allocated_;
+	std::mutex mutex_;
+};
+
+
 
 namespace EQ
 {
@@ -366,7 +404,8 @@ namespace EQ
 				manager->buffer_pool.ReleaseBuffer(buf->base);
 			}
 
-			BufferPool buffer_pool;
+			UdpReceiveBufferPool buffer_pool;
+			BufferPool send_buffer_pool;
 
 			EQ::Random m_rand;
 			uv_timer_t m_timer;
