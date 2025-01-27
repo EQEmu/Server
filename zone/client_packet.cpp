@@ -1510,9 +1510,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		LogError("Error loading AA points for [{}]", GetName());
 	}
 
-	LoadDefaultBotSettings();
-
-	database.botdb.LoadBotSettings(this);
+	if (RuleB(Bots, Enabled)) {
+		LoadDefaultBotSettings();
+		database.botdb.LoadBotSettings(this);
+	}
 
 	if (SPDAT_RECORDS > 0) {
 		for (uint32 z = 0; z < EQ::spells::SPELL_GEM_COUNT; z++) {
