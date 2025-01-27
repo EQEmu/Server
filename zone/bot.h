@@ -304,7 +304,7 @@ public:
 	uint16 BotGetSpells(int spellslot) { return AIBot_spells[spellslot].spellid; }
 	uint32 BotGetSpellType(int spellslot) { return AIBot_spells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIBot_spells[spellslot].priority; }
-	std::vector<BotSpells_Struct_wIndex> BotGetSpellsByType(uint16 spell_type);
+	std::vector<BotSpells_wIndex> BotGetSpellsByType(uint16 spell_type);
 	float GetProcChances(float ProcBonus, uint16 hand) override;
 	int GetHandToHandDamage(void) override;
 	bool TryFinishingBlow(Mob *defender, int64 &damage) override;
@@ -540,7 +540,7 @@ public:
 	void SetVerifiedRaid(bool status) { _verifiedRaid = status; }
 	uint16 GetTempSpellType() { return _tempSpellType; }
 	void SetTempSpellType(uint16 spell_type) { _tempSpellType = spell_type; }
-	void AssignBotSpellsToTypes(std::vector<BotSpells_Struct>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>>& AIBot_spells_by_type);
+	void AssignBotSpellsToTypes(std::vector<BotSpells>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_wIndex>>& AIBot_spells_by_type);
 	bool IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id);
 	bool DoResistCheck(Mob* target, uint16 spell_id, int32 resist_limit);
 	bool DoResistCheckBySpellType(Mob* tar, uint16 spell_id, uint16 spell_type);
@@ -1072,9 +1072,9 @@ protected:
 	void SetGroupDoter(bool flag = true) { m_CastingRoles.GroupDoter = flag; }
 	std::deque<int> bot_signal_q;
 
-	std::vector<BotSpells_Struct> AIBot_spells;
-	std::vector<BotSpells_Struct> AIBot_spells_enforced;
-	std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>> AIBot_spells_by_type;
+	std::vector<BotSpells> AIBot_spells;
+	std::vector<BotSpells> AIBot_spells_enforced;
+	std::unordered_map<uint16, std::vector<BotSpells_wIndex>> AIBot_spells_by_type;
 
 	std::map<int32_t, std::map<int32_t, BotSpellTypesByClass>> commanded_spells_min_level;
 

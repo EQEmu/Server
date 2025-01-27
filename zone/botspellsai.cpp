@@ -907,7 +907,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* caster, uint16 spell_ty
 	}
 
 	if (caster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
+		std::vector<BotSpells_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
 
 		for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(bot_spell_list[i].spellid, caster->HasLoS())) {
@@ -945,7 +945,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* caster, ui
 	}
 
 	if (caster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
+		std::vector<BotSpells_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
 
 		for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(bot_spell_list[i].spellid, caster->HasLoS())) {
@@ -986,7 +986,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* caster, uint16 spell_type)
 	}
 
 	if (caster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
+		std::vector<BotSpells_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
 
 		for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(bot_spell_list[i].spellid, caster->HasLoS())) {
@@ -1015,7 +1015,7 @@ std::vector<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* cas
 	std::vector<BotSpell_wPriority> result;
 
 	if (caster && caster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
+		std::vector<BotSpells_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
 
 		for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(bot_spell_list[i].spellid, caster->HasLoS())) {
@@ -1104,7 +1104,7 @@ BotSpell Bot::GetFirstBotSpellBySpellType(Bot* caster, uint16 spell_type) {
 	result.ManaCost = 0;
 
 	if (caster && caster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
+		std::vector<BotSpells_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
 
 		for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(bot_spell_list[i].spellid, caster->HasLoS())) {
@@ -1212,7 +1212,7 @@ BotSpell Bot::GetBestBotSpellForPercentageHeal(Bot* caster, Mob* tar, uint16 spe
 	result.ManaCost = 0;
 
 	if (caster && caster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
+		std::vector<BotSpells_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
 		for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 			if (!IsValidSpell(bot_spell_list[i].spellid)) {
 				continue;
@@ -1932,7 +1932,7 @@ BotSpell Bot::GetDebuffBotSpell(Bot* caster, Mob *tar, uint16 spell_type) {
 		return result;
 
 	if (caster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
+		std::vector<BotSpells_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
 
 		for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(bot_spell_list[i].spellid, caster->HasLoS())) {
@@ -1978,7 +1978,7 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* caster, Mob *tar, uint16 spell
 	bool needs_disease_resist_debuff = (tar->GetDR() + level_mod) > 100;
 
 	if (caster->AI_HasSpells()) {
-		std::vector<BotSpells_Struct_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
+		std::vector<BotSpells_wIndex> bot_spell_list = caster->BotGetSpellsByType(spell_type);
 
 		for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 			if (!IsValidSpellAndLoS(bot_spell_list[i].spellid, caster->HasLoS())) {
@@ -2437,7 +2437,7 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 		}
 	}
 
-	std::sort(AIBot_spells.begin(), AIBot_spells.end(), [](const BotSpells_Struct& a, const BotSpells_Struct& b) {
+	std::sort(AIBot_spells.begin(), AIBot_spells.end(), [](const BotSpells& a, const BotSpells& b) {
 		return a.priority > b.priority;
 	});
 
@@ -2604,7 +2604,7 @@ void Bot::AddSpellToBotList(
 	}
 
 	HasAISpell = true;
-	BotSpells_Struct t;
+	BotSpells t;
 
 	t.priority          = in_priority;
 	t.spellid           = in_spell_id;
@@ -2650,7 +2650,7 @@ void Bot::AddSpellToBotEnforceList(
 	}
 
 	HasAISpell = true;
-	BotSpells_Struct t;
+	BotSpells t;
 
 	t.priority			= iPriority;
 	t.spellid			= iSpellID;

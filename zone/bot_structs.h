@@ -64,7 +64,7 @@ struct BotSpellSetting {
 	bool   is_enabled = true;
 };
 
-struct BotSpells_Struct {
+struct BotSpells {
 	uint32		type;			// 0 = never, must be one (and only one) of the defined values
 	int16		spellid;			// <= 0 = no spell
 	int16		manacost;		// -1 = use spdat, -2 = no cast time
@@ -81,7 +81,7 @@ struct BotSpells_Struct {
 	uint8		bucket_comparison;
 };
 
-struct BotSpells_Struct_wIndex {
+struct BotSpells_wIndex {
 	uint32		index;			//index of AIBot_spells
 	uint32		type;			// 0 = never, must be one (and only one) of the defined values
 	int16		spellid;			// <= 0 = no spell

@@ -12329,7 +12329,7 @@ void Bot::CleanBotBlockedBuffs()
 	}
 }
 
-std::vector<BotSpells_Struct_wIndex> Bot::BotGetSpellsByType(uint16 spell_type) {
+std::vector<BotSpells_wIndex> Bot::BotGetSpellsByType(uint16 spell_type) {
 	if (AIBot_spells_by_type[spell_type].empty()) {
 		spell_type = GetParentSpellType(spell_type);
 	}
@@ -12337,7 +12337,7 @@ std::vector<BotSpells_Struct_wIndex> Bot::BotGetSpellsByType(uint16 spell_type) 
 	return AIBot_spells_by_type[spell_type];
 }
 
-void Bot::AssignBotSpellsToTypes(std::vector<BotSpells_Struct>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_Struct_wIndex>>& AIBot_spells_by_type) {
+void Bot::AssignBotSpellsToTypes(std::vector<BotSpells>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_wIndex>>& AIBot_spells_by_type) {
 	AIBot_spells_by_type.clear();
 
 	for (size_t i = 0; i < AIBot_spells.size(); ++i) {
@@ -12347,7 +12347,7 @@ void Bot::AssignBotSpellsToTypes(std::vector<BotSpells_Struct>& AIBot_spells, st
 			continue;
 		}
 
-		BotSpells_Struct_wIndex spell_with_index{
+		BotSpells_wIndex spell_with_index{
 			static_cast<uint32>(i),
 			spell.type,
 			spell.spellid,
