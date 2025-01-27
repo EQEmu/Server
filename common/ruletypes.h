@@ -1141,6 +1141,7 @@ RULE_BOOL(Items, DisablePotionBelt, false, "Enable this to disable Potion Belt I
 RULE_BOOL(Items, DisableSpellFocusEffects, false, "Enable this to disable Spell Focus Effects on Items")
 RULE_BOOL(Items, SummonItemAllowInvisibleAugments, false, "Enable this to allow augments to be put in invisible augment slots of items in Client::SummonItem")
 RULE_BOOL(Items, AugmentItemAllowInvisibleAugments, false, "Enable this to allow augments to be put in invisible augment slots by players")
+RULE_BOOL(Items, AlwaysReturnHandins, true, "Enable this to always return handins to the player")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Parcel)

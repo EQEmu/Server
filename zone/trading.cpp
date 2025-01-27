@@ -891,8 +891,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				handin_npc->CheckHandin(this, handin, {}, items);
 			}
 
-			handin_npc->ReturnHandinItems(this);
-			LogNpcHandin("ReturnHandinItems() called for NPC [{}]", handin_npc->GetNPCTypeID());
+			if (RuleB(Items, AlwaysReturnHandins)) {
+				handin_npc->ReturnHandinItems(this);
+				LogNpcHandin("ReturnHandinItems called for NPC [{}]", handin_npc->GetNPCTypeID());
+			}
 		}
 
 		handin_npc->ResetHandin();
