@@ -55,7 +55,7 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		uv_ip4_addr("0.0.0.0", m_options.port, &recv_addr);
 		int rc = uv_udp_bind(&m_socket, (const struct sockaddr *)&recv_addr, UV_UDP_REUSEADDR);
 
-		static const int NUM_STATIC_BUFFERS = 5000;
+		static const int NUM_STATIC_BUFFERS = 10000;
 		static char static_buffers[NUM_STATIC_BUFFERS][512]; // Array of static buffers
 		static std::atomic<int> buffer_index(0); // Atomic to track the current buffer index
 
@@ -1327,7 +1327,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 
 	m_last_send = Clock::now();
 
-	static const int NUM_STATIC_BUFFERS = 5000;
+	static const int NUM_STATIC_BUFFERS = 10000;
 	static char static_buffers[NUM_STATIC_BUFFERS][512]; // Array of static buffers
 	static std::atomic<int> buffer_index(0); // Atomic to track the current buffer index
 
