@@ -5319,15 +5319,12 @@ void EntityList::SendFindableNPCList(Client *c)
 		return;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
-
-	FindableNPC_Struct *fnpcs = (FindableNPC_Struct *)outapp->pBuffer;
-
-	fnpcs->Unknown109 = 0x16;
-	fnpcs->Unknown110 = 0x06;
-	fnpcs->Unknown111 = 0x24;
-
-	fnpcs->Action = 0;
+	static EQApplicationPacket p(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
+	auto b = (FindableNPC_Struct*) p.pBuffer;
+	b->Unknown109 = 0x16;
+	b->Unknown110 = 0x06;
+	b->Unknown111 = 0x24;
+	b->Action = 0;
 
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
@@ -5335,50 +5332,47 @@ void EntityList::SendFindableNPCList(Client *c)
 			NPC *n = it->second;
 
 			if (n->IsFindable()) {
-				fnpcs->EntityID = n->GetID();
-				strn0cpy(fnpcs->Name, n->GetCleanName(), sizeof(fnpcs->Name));
-				strn0cpy(fnpcs->LastName, n->GetLastName(), sizeof(fnpcs->LastName));
-				fnpcs->Race = n->GetRace();
-				fnpcs->Class = n->GetClass();
+				b->EntityID = n->GetID();
+				strn0cpy(b->Name, n->GetCleanName(), sizeof(b->Name));
+				strn0cpy(b->LastName, n->GetLastName(), sizeof(b->LastName));
+				b->Race = n->GetRace();
+				b->Class = n->GetClass();
 
-				c->QueuePacket(outapp);
+				c->QueuePacket(&p);
 			}
 		}
 		++it;
 	}
-	safe_delete(outapp);
 }
 
 void EntityList::UpdateFindableNPCState(NPC *n, bool Remove)
 {
-	if (!n || !n->IsFindable())
+	if (!n || !n->IsFindable()) {
 		return;
+	}
 
-	auto outapp = new EQApplicationPacket(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
+	static EQApplicationPacket p(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
+	auto                       b = (FindableNPC_Struct *) p.pBuffer;
+	b->Unknown109 = 0x16;
+	b->Unknown110 = 0x06;
+	b->Unknown111 = 0x24;
 
-	FindableNPC_Struct *fnpcs = (FindableNPC_Struct *)outapp->pBuffer;
-
-	fnpcs->Unknown109 = 0x16;
-	fnpcs->Unknown110 = 0x06;
-	fnpcs->Unknown111 = 0x24;
-
-	fnpcs->Action = Remove ? 1: 0;
-	fnpcs->EntityID = n->GetID();
-	strn0cpy(fnpcs->Name, n->GetCleanName(), sizeof(fnpcs->Name));
-	strn0cpy(fnpcs->LastName, n->GetLastName(), sizeof(fnpcs->LastName));
-	fnpcs->Race = n->GetRace();
-	fnpcs->Class = n->GetClass();
+	b->Action   = Remove ? 1 : 0;
+	b->EntityID = n->GetID();
+	strn0cpy(b->Name, n->GetCleanName(), sizeof(b->Name));
+	strn0cpy(b->LastName, n->GetLastName(), sizeof(b->LastName));
+	b->Race  = n->GetRace();
+	b->Class = n->GetClass();
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *c = it->second;
-		if (c && (c->ClientVersion() >= EQ::versions::ClientVersion::SoD))
-			c->QueuePacket(outapp);
+		if (c && (c->ClientVersion() >= EQ::versions::ClientVersion::SoD)) {
+			c->QueuePacket(&p);
+		}
 
 		++it;
 	}
-
-	safe_delete(outapp);
 }
 
 void EntityList::HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode)
