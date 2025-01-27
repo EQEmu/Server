@@ -953,9 +953,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						auto action_packet =
 						    new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
 						Action_Struct* action = (Action_Struct*) action_packet->pBuffer;
-						auto message_packet =
-						    new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
-						CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
+
+						static EQApplicationPacket p(OP_Damage, sizeof(CombatDamage_Struct));
+						auto                       cd = (CombatDamage_Struct *) p.pBuffer;
 
 						action->target = GetID();
 						action->source = caster ? caster->GetID() : GetID();
@@ -978,16 +978,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							caster->CastToClient()->QueuePacket(action_packet);
 						}
 
-						CastToClient()->QueuePacket(message_packet);
+						CastToClient()->QueuePacket(&p);
 
 						if (caster && caster->IsClient() && caster != this) {
-							caster->CastToClient()->QueuePacket(message_packet);
+							caster->CastToClient()->QueuePacket(&p);
 						}
 
 						CastToClient()->SetBindPoint(spells[spell_id].base_value[i] - 1);
 						Save();
 						safe_delete(action_packet);
-						safe_delete(message_packet);
 					} else {
 						if (!zone->CanBind()) {
 							MessageString(Chat::SpellFailure, CANNOT_BIND);
@@ -1002,9 +1001,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								auto action_packet = new EQApplicationPacket(
 								    OP_Action, sizeof(Action_Struct));
 								Action_Struct* action = (Action_Struct*) action_packet->pBuffer;
-								auto message_packet = new EQApplicationPacket(
-								    OP_Damage, sizeof(CombatDamage_Struct));
-								CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
+
+								static EQApplicationPacket p(OP_Damage, sizeof(CombatDamage_Struct));
+								auto                       cd = (CombatDamage_Struct *) p.pBuffer;
 
 								action->target = GetID();
 								action->source = caster ? caster->GetID() : GetID();
@@ -1027,24 +1026,23 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 									caster->CastToClient()->QueuePacket(action_packet);
 								}
 
-								CastToClient()->QueuePacket(message_packet);
+								CastToClient()->QueuePacket(&p);
 
 								if (caster->IsClient() && caster != this) {
-									caster->CastToClient()->QueuePacket(message_packet);
+									caster->CastToClient()->QueuePacket(&p);
 								}
 
 								CastToClient()->SetBindPoint(spells[spell_id].base_value[i] - 1);
 								Save();
 								safe_delete(action_packet);
-								safe_delete(message_packet);
 							}
 						} else {
 							auto action_packet =
 							    new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
 							Action_Struct* action = (Action_Struct*) action_packet->pBuffer;
-							auto message_packet = new EQApplicationPacket(
-							    OP_Damage, sizeof(CombatDamage_Struct));
-							CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
+
+							static EQApplicationPacket p(OP_Damage, sizeof(CombatDamage_Struct));
+							auto                       cd = (CombatDamage_Struct *) p.pBuffer;
 
 							action->target = GetID();
 							action->source = caster ? caster->GetID() : GetID();
@@ -1067,16 +1065,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								caster->CastToClient()->QueuePacket(action_packet);
 							}
 
-							CastToClient()->QueuePacket(message_packet);
+							CastToClient()->QueuePacket(&p);
 
 							if (caster->IsClient() && caster != this) {
-								caster->CastToClient()->QueuePacket(message_packet);
+								caster->CastToClient()->QueuePacket(&p);
 							}
 
 							CastToClient()->SetBindPoint(spells[spell_id].base_value[i] - 1);
 							Save();
 							safe_delete(action_packet);
-							safe_delete(message_packet);
 						}
 					}
 				}
