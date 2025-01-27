@@ -433,7 +433,7 @@ public:
 	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
 	virtual bool IsImmuneToBotSpell(uint16 spell_id, Mob* caster);
 	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool no_clients = false, bool no_bots = false, bool no_pets = false);
-	inline bool SpellTypeRecastCheck(uint16 spellType) { return (IsClient () ? true : m_bot_spell_settings [spellType].recastTimer.GetRemainingTime () > 0 ? false : true); }
+	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recastTimer.GetRemainingTime(); }
 	uint16 GetSpellTypeIDByShortName(std::string spellType_string);
 	bool IsValidBotSpellCategory(uint8 setting_type);
 	std::string GetBotSpellCategoryName(uint8 setting_type);

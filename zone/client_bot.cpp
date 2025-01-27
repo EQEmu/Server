@@ -237,6 +237,7 @@ void Client::LoadDefaultBotSettings() {
 		t.delay = GetDefaultSpellDelay(i);
 		t.minThreshold = GetDefaultSpellMinThreshold(i);
 		t.maxThreshold = GetDefaultSpellMaxThreshold(i);
+		t.recastTimer.Start();
 
 		m_bot_spell_settings.push_back(t);
 
