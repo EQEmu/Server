@@ -1522,16 +1522,12 @@ void Mob::SendHPUpdate(bool force_update_all)
 				last_hp
 			);
 
-			auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-			auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
-
-			hp_packet_client->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
-			hp_packet_client->spawn_id = GetID();
-			hp_packet_client->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
-
-			CastToClient()->QueuePacket(client_packet);
-
-			safe_delete(client_packet);
+			static EQApplicationPacket p(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+			auto b = (SpawnHPUpdate_Struct*) p.pBuffer;
+			b->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
+			b->spawn_id = GetID();
+			b->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
+			CastToClient()->QueuePacket(&p);
 
 			ResetHPUpdateTimer();
 
