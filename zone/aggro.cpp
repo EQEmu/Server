@@ -745,8 +745,8 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();
 	Mob *our_owner = GetOwner();
-	Mob* target_ultimate_owner = target->GetUltimateOwner();
-	Mob* our_ultimate_owner = GetUltimateOwner();
+	Mob* target_ultimate_owner = (target->IsBot() ? target->CastToBot()->GetBotOwner() : target->GetUltimateOwner());
+	Mob* our_ultimate_owner = (IsBot() ? CastToBot()->GetBotOwner() : GetUltimateOwner());
 
 	if (target_owner && target_owner == this) {
 		return false;
