@@ -3840,41 +3840,56 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 		if (!IsValidSpell(curbuf.spellid))
 		{
 			// if we haven't found a free slot, this is the first one so save it
-			if(firstfree == -2)
+			if (firstfree == -2) {
 				firstfree = i;
+			}
+
 			continue;
 		}
 
-		if (IsBot() && (GetClass() == Class::Bard) && curbuf.spellid == spellid && curbuf.ticsremaining == 0 && curbuf.casterid == GetID()) {
+		if (
+			IsBot() && 
+			GetClass() == Class::Bard && 
+			curbuf.spellid == spellid && 
+			curbuf.ticsremaining == 0 && 
+			curbuf.casterid == GetID()
+		) {
 			LogAI("Bard check for song, spell [{}] has [{}] ticks remaining.", spellid, curbuf.ticsremaining);
 			firstfree = i;
-			return firstfree;
 		}
 		else {
-			if (curbuf.spellid == spellid)
+			if (curbuf.spellid == spellid) {
 				return(-1);	//do not recast a buff we already have on, we recast fast enough that we dont need to refresh our buffs
+			}
 		}
+
 		// there's a buff in this slot
 		ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spellid, caster_level, nullptr, nullptr, i);
-		if(ret == 1) {
+
+		if (ret == 1) {
 			// should overwrite current slot
-			if(iFailIfOverwrite) {
+			if (iFailIfOverwrite) {
 				LogAIDetail("Buff [{}] would overwrite [{}] in slot [{}], reporting stack failure", spellid, curbuf.spellid, i);
 				return(-1);
 			}
-			if(firstfree == -2)
-				firstfree = i;
-		}
-		if(ret == -1) {
 
+			if (firstfree == -2) {
+				firstfree = i;
+			}
+		}
+
+		if(ret == -1) {
 			LogAIDetail("Buff [{}] would conflict with [{}] in slot [{}], reporting stack failure", spellid, curbuf.spellid, i);
 			return -1;	// stop the spell, can't stack it
 		}
+
 		if (ret == 2) { //ResurrectionEffectBlock handling to move potential overwrites to a new buff slock while keeping Res Sickness
 			LogAIDetail("Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}], but ResurrectionEffectBlock is set to 2. Attempting to move [{}] to an empty buff slot.",
 				spellid, curbuf.spellid, i, curbuf.casterlevel, spellid);
+
 			for (int x = 0; x < buff_count; x++) {
 				const Buffs_Struct& curbuf = buffs[x];
+
 				if (IsValidSpell(curbuf.spellid)) {
 					continue;
 				}
