@@ -10,6 +10,7 @@
 #include <map>
 #include <queue>
 #include <list>
+#include <set>
 
 namespace EQ
 {
@@ -317,6 +318,8 @@ namespace EQ
 		private:
 			void Attach(uv_loop_t *loop);
 			void Detach();
+
+			Timestamp m_last_resend_check;
 
 			EQ::Random m_rand;
 			uv_timer_t m_timer;
