@@ -44,7 +44,12 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 			DaybreakConnectionManager *c = (DaybreakConnectionManager*)handle->data;
 			c->UpdateDataBudget();
 			c->Process();
-			c->ProcessResend();
+			auto now = Clock::now();
+			if (std::chrono::duration_cast<std::chrono::milliseconds>(now - c->m_last_resend_check).count() > c->m_resend_check_interval) {
+				c->ProcessResend();
+				c->m_last_resend_check = now;
+				return;
+			}
 		}, update_rate, update_rate);
 
 		uv_udp_init(loop, &m_socket);
@@ -1112,55 +1117,21 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	auto s = &m_streams[stream];
 
 	// Get a reference resend delay (assume first packet represents the typical case)
+	size_t reference_resend_delay = 0;
 	if (!s->sent_packets.empty()) {
+		reference_resend_delay = s->sent_packets.begin()->second.resend_delay;
+
 		// Check if the first packet has timed out
-		auto &first_packet = s->sent_packets.begin()->second;
-		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - first_packet.first_sent).count();
-
-		// make sure that the first_packet in the list first_sent time is within the resend_delay and now
-		// if it is not, then we need to resend all packets in the list
-		if (time_since_first_sent <= first_packet.resend_delay && !m_acked_since_last_resend) {
-			LogNetcodeDetail(
-				"Not resending packets for stream [{}] time since first sent [{}] resend delay [{}] m_acked_since_last_resend [{}]",
-				stream,
-				time_since_first_sent,
-				first_packet.resend_delay,
-				m_acked_since_last_resend
-			);
-			return;
-		}
-
+		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - s->sent_packets.begin()->second.first_sent).count();
 		if (time_since_first_sent >= m_owner->m_options.resend_timeout) {
 			Close();
 			return;
 		}
 	}
 
-	if (LogSys.IsLogEnabled(Logs::Detail, Logs::Netcode)) {
-		size_t    total_size = 0;
-		for (auto &e: s->sent_packets) {
-			total_size += e.second.packet.Length();
-		}
-
-		LogNetcodeDetail(
-			"Resending packets for stream [{}] packet count [{}] total packet size [{}] m_acked_since_last_resend [{}]",
-			stream,
-			s->sent_packets.size(),
-			total_size,
-			m_acked_since_last_resend
-		);
-	}
-
 	for (auto &e: s->sent_packets) {
 		if (m_resend_packets_sent >= MAX_CLIENT_RECV_PACKETS_PER_WINDOW ||
 			m_resend_bytes_sent >= MAX_CLIENT_RECV_BYTES_PER_WINDOW) {
-			LogNetcodeDetail(
-				"Stopping resend because we hit thresholds m_resend_packets_sent [{}] max [{}] m_resend_bytes_sent [{}] max [{}]",
-				m_resend_packets_sent,
-				MAX_CLIENT_RECV_PACKETS_PER_WINDOW,
-				m_resend_bytes_sent,
-				MAX_CLIENT_RECV_BYTES_PER_WINDOW
-			);
 			break;
 		}
 
@@ -1192,8 +1163,6 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			m_owner->m_options.resend_delay_max
 		);
 	}
-
-	m_acked_since_last_resend = false;
 }
 
 void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
@@ -1214,7 +1183,6 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
 			iter = s->sent_packets.erase(iter);
-			m_acked_since_last_resend = true;
 		}
 		else {
 			++iter;

@@ -184,7 +184,6 @@ namespace EQ
 			// resend tracking
 			size_t m_resend_packets_sent = 0;
 			size_t m_resend_bytes_sent = 0;
-			bool m_acked_since_last_resend = false;
 
 			struct DaybreakSentPacket
 			{
@@ -322,6 +321,10 @@ namespace EQ
 		private:
 			void Attach(uv_loop_t *loop);
 			void Detach();
+
+			// resend
+			Timestamp m_last_resend_check;
+			int m_resend_check_interval = 50;
 
 			EQ::Random m_rand;
 			uv_timer_t m_timer;
