@@ -1278,7 +1278,7 @@ public:
 	// Help Window
 	std::string SendBotCommandHelpWindow(const BotCommandHelpParams& params);
 	std::string GetCommandHelpHeader(std::string color, std::string header);
-	std::string SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 maxLength, bool secondColor = false, std::string secondaryColor = "");
+	std::string SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 maxLength);
 	void SendSpellTypePrompts(bool commandedTypes = false, bool clientOnlyTypes = false);
 
 	// Task System Methods
