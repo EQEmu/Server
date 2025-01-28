@@ -6335,6 +6335,51 @@ CREATE TABLE `character_pet_name` (
 	},
 	ManifestEntry{
 		.version = 9294,
+		.description = "2025_01_26_items_table_bazaar_search_indexes.sql",
+		.check = "SHOW CREATE TABLE `items`",
+		.condition = "missing",
+		.match = "idx_slots_reclevel",
+		.sql = R"(
+-- indexes for the `items` table
+CREATE INDEX idx_slots_reclevel ON items (slots, reclevel);
+CREATE INDEX idx_itemclass_itemtype ON items (itemclass, itemtype);
+CREATE INDEX idx_augment_slots ON items (
+    augslot1type,
+    augslot2type,
+    augslot3type,
+    augslot4type,
+    augslot5type,
+    augslot6type
+);
+CREATE INDEX idx_races_classes ON items (races, classes);
+
+-- common stat fields
+CREATE INDEX idx_item_ac ON items (ac);
+CREATE INDEX idx_item_hp ON items (hp);
+CREATE INDEX idx_item_mana ON items (mana);
+CREATE INDEX idx_item_reclevel ON items (reclevel);
+CREATE INDEX idx_item_type_skill ON items (itemtype, skillmodtype);
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9295,
+		.description = "2025_01_26_trader_table_bazaar_search_indexes.sql",
+		.check = "SHOW CREATE TABLE `trader`",
+		.condition = "missing",
+		.match = "idx_trader_item",
+		.sql = R"(
+-- indexes for the `trader` table
+CREATE INDEX idx_trader_item ON trader (item_id, item_cost);
+CREATE INDEX idx_trader_char ON trader (char_id, char_zone_id, char_zone_instance_id);
+CREATE INDEX idx_trader_item_sn ON trader (item_sn);
+CREATE INDEX idx_trader_item_cost ON trader (item_cost);
+CREATE INDEX idx_trader_active_transaction ON trader (active_transaction);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9296,
 		.description = "2024_01_22_sharedbank_guid_primary_key.sql",
 		.check = "SHOW COLUMN FROM `sharedbank` LIKE 'guid'",
 		.condition = "empty",
@@ -6360,7 +6405,7 @@ ADD PRIMARY KEY (`account_id`, `slot_id`);
 )"
 	},
 	ManifestEntry{
-		.version = 9295,
+		.version = 9297,
 		.description = "2024_10_24_inventory_changes.sql",
 		.check = "SHOW COLUMN FROM `inventory` LIKE 'charid'",
 		.condition = "empty",
@@ -6380,7 +6425,6 @@ CHANGE COLUMN `ornamenticon` `ornament_icon` int(11) UNSIGNED NOT NULL DEFAULT 0
 CHANGE COLUMN `ornamentidfile` `ornament_idfile` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_icon`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`character_id`, `slot_id`) USING BTREE;
-
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 251) + 4010) WHERE `slot_id` BETWEEN 251 AND 260; -- Bag 1
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 261) + 4210) WHERE `slot_id` BETWEEN 261 AND 270; -- Bag 2
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 271) + 4410) WHERE `slot_id` BETWEEN 271 AND 280; -- Bag 3
@@ -6421,7 +6465,7 @@ UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id`
 )"
 	},
 	ManifestEntry{
-		.version = 9296,
+		.version = 9298,
 		.description = "2024_10_24_merchantlist_temp_uncap.sql",
 		.check = "SHOW CREATE TABLE `merchantlist_temp`",
 		.condition = "contains",
@@ -6431,6 +6475,7 @@ ALTER TABLE `merchantlist_temp`
 MODIFY COLUMN `slot` int UNSIGNED NOT NULL DEFAULT 0 AFTER `npcid`;
 )"
 	}
+
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
