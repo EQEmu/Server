@@ -10766,6 +10766,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		return;
 	}
 
+	BenchTimer bench;
+
 	MoveItem_Struct* mi = (MoveItem_Struct*) app->pBuffer;
 	if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id)) {
 		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQ::invslot::GENERAL_END || mi->from_slot > 39) &&
@@ -10786,6 +10788,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
+	database.TransactionBegin();
+
 	if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
 		SwapItemResync(mi);
 
@@ -10802,6 +10806,10 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 			CharacterEvolvingItemsRepository::UpdateOne(database, item->GetEvolvingDetails());
 		}
 	}
+
+	database.TransactionCommit();
+
+	LogInventory("OP_MoveItem took [{}] ms", bench.elapsedMilliseconds());
 }
 
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
