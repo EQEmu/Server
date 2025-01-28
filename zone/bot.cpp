@@ -9644,16 +9644,15 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 		return false;
 	}
 
-	if (
-		spells[spell_id].target_type == ST_Self && 
-		tar != this &&
-		(
-			spell_type != BotSpellTypes::SummonCorpse || 
-			RuleB(Bots, AllowCommandedSummonCorpse)
-		)
-	) {
-		LogBotSpellChecksDetail("{} says, 'Cancelling cast of {} on {} due to ST_Self.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName());
-		return false;
+	if (spells[spell_id].target_type == ST_Self && tar != this) {
+		if (spell_type == BotSpellTypes::SummonCorpse && RuleB(Bots, AllowCommandedSummonCorpse)) {
+			// Don't cancel (Summon Corpse is allowed)
+		}
+		else {
+			LogBotSpellChecksDetail("{} says, 'Cancelling cast of {} on {} due to ST_Self.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName());
+
+			return false;
+		}
 	}
 
 	if (
