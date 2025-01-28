@@ -294,24 +294,30 @@ bool Client::Process() {
 				}
 			}
 
-			if (m_lazy_load_bank && m_lazy_load_sent_bank_slots <= EQ::invslot::SHARED_BANK_END) {
-				const EQ::ItemInstance *inst = nullptr;
+			int lazy_load_bank_slots = 0;
+			for (int i = 0; i < 5000; i++) {
+				if (m_lazy_load_bank && m_lazy_load_sent_bank_slots <= EQ::invslot::SHARED_BANK_END) {
+					const EQ::ItemInstance *inst = nullptr;
 
-				// Jump the gaps
-				if (m_lazy_load_sent_bank_slots < EQ::invslot::BANK_BEGIN) {
-					m_lazy_load_sent_bank_slots = EQ::invslot::BANK_BEGIN;
-				}
-				else if (m_lazy_load_sent_bank_slots > EQ::invslot::BANK_END &&
-						 m_lazy_load_sent_bank_slots < EQ::invslot::SHARED_BANK_BEGIN) {
-					m_lazy_load_sent_bank_slots = EQ::invslot::SHARED_BANK_BEGIN;
-				}
-				else {
-					m_lazy_load_sent_bank_slots++;
-				}
+					// Jump the gaps
+					if (m_lazy_load_sent_bank_slots < EQ::invslot::BANK_BEGIN) {
+						m_lazy_load_sent_bank_slots = EQ::invslot::BANK_BEGIN;
+					}
+					else if (m_lazy_load_sent_bank_slots > EQ::invslot::BANK_END &&
+							 m_lazy_load_sent_bank_slots < EQ::invslot::SHARED_BANK_BEGIN) {
+						m_lazy_load_sent_bank_slots = EQ::invslot::SHARED_BANK_BEGIN;
+					}
+					else {
+						m_lazy_load_sent_bank_slots++;
+					}
 
-				inst = m_inv[m_lazy_load_sent_bank_slots];
-				if (inst) {
-					SendItemPacket(m_lazy_load_sent_bank_slots, inst, ItemPacketType::ItemPacketTrade);
+					inst = m_inv[m_lazy_load_sent_bank_slots];
+					if (inst) {
+						SendItemPacket(m_lazy_load_sent_bank_slots, inst, ItemPacketType::ItemPacketTrade);
+						lazy_load_bank_slots++;
+					}
+				} else {
+					break;
 				}
 			}
 		}
