@@ -44,7 +44,12 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 			DaybreakConnectionManager *c = (DaybreakConnectionManager*)handle->data;
 			c->UpdateDataBudget();
 			c->Process();
-			c->ProcessResend();
+			auto now = Clock::now();
+			if (std::chrono::duration_cast<std::chrono::milliseconds>(now - c->m_last_resend_check).count() > c->m_resend_check_interval) {
+				c->ProcessResend();
+				c->m_last_resend_check = now;
+				return;
+			}
 		}, update_rate, update_rate);
 
 		uv_udp_init(loop, &m_socket);
@@ -1115,7 +1120,9 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	if (!s->sent_packets.empty()) {
 		// Check if the first packet has timed out
 		auto &first_packet = s->sent_packets.begin()->second;
-		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - first_packet.first_sent).count();
+		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(
+			now - first_packet.first_sent
+		).count();
 
 		// make sure that the first_packet in the list first_sent time is within the resend_delay and now
 		// if it is not, then we need to resend all packets in the list
@@ -1127,11 +1134,6 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				first_packet.resend_delay,
 				m_acked_since_last_resend
 			);
-			return;
-		}
-
-		if (time_since_first_sent >= m_owner->m_options.resend_timeout) {
-			Close();
 			return;
 		}
 	}
