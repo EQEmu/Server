@@ -202,7 +202,7 @@ namespace EQ
 
 				uint16_t sequence_in;
 				uint16_t sequence_out;
-				std::unordered_map<uint16_t, std::unique_ptr<Packet>> packet_queue;
+				std::unordered_map<uint16_t, Packet*> packet_queue;
 
 				DynamicPacket fragment_packet;
 				uint32_t fragment_current_bytes;
