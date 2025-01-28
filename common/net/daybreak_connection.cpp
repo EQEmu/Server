@@ -337,10 +337,20 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
 	m_outgoing_budget = owner->m_options.outgoing_data_rate;
+	m_streams = new DaybreakStream*[4];
+	m_streams[0] = nullptr;
+	m_streams[1] = nullptr;
+	m_streams[2] = nullptr;
+	m_streams[3] = nullptr;
 }
 
 EQ::Net::DaybreakConnection::~DaybreakConnection()
 {
+	for (int i = 0; i < 4; ++i) {
+		if (m_streams[i] != nullptr) {
+			delete m_streams[i];
+		}
+	}
 }
 
 void EQ::Net::DaybreakConnection::Close()

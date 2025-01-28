@@ -190,15 +190,16 @@ namespace EQ
 				size_t resend_delay;
 			};
 
-			struct DaybreakStream
+			class DaybreakStream
 			{
+			public:
 				DaybreakStream() {
 					sequence_in = 0;
 					sequence_out = 0;
 					fragment_current_bytes = 0;
 					fragment_total_bytes = 0;
 				}
-
+			//private:
 				uint16_t sequence_in;
 				uint16_t sequence_out;
 				std::map<uint16_t, Packet*> packet_queue;
@@ -210,7 +211,7 @@ namespace EQ
 				std::map<uint16_t, DaybreakSentPacket> sent_packets;
 			};
 
-			DaybreakStream* m_streams[4];
+			DaybreakStream** m_streams;
 			std::weak_ptr<DaybreakConnection> m_self;
 
 			void Process();
