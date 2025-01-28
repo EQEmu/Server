@@ -2260,8 +2260,8 @@ public:
 
 	bool GetBotPulling() { return m_bot_pulling; }
 	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
-	uint32 GetAssistee() { return _assistee; }
-	void SetAssistee(uint32 id = 0) { _assistee = id; }
+	uint32 GetAssistee() { return bot_assistee; }
+	void SetAssistee(uint32 id = 0) { bot_assistee = id; }
 
 	bool GetBotPrecombat() { return m_bot_precombat; }
 	void SetBotPrecombat(bool flag = true) { m_bot_precombat = flag; }
@@ -2286,7 +2286,7 @@ private:
 	bool m_bot_pulling;
 	bool m_bot_precombat;
 
-	uint32 _assistee;
+	uint32 bot_assistee;
 
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
