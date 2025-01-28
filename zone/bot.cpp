@@ -31,6 +31,8 @@
 
 /*
 TODO bot rewrite:
+--fix ^cast summoncorpse
+--implement spell type option to ^defaultsettings lile ^copysettings
 --command cleanup remaining commands (move to new help window, make more descriptive)
 --Add quest methods for functions
 */
