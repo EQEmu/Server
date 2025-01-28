@@ -1117,10 +1117,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	auto s = &m_streams[stream];
 
 	// Get a reference resend delay (assume first packet represents the typical case)
-	size_t reference_resend_delay = 0;
 	if (!s->sent_packets.empty()) {
-		reference_resend_delay = s->sent_packets.begin()->second.resend_delay;
-
 		// Check if the first packet has timed out
 		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - s->sent_packets.begin()->second.first_sent).count();
 		if (time_since_first_sent >= m_owner->m_options.resend_timeout) {
