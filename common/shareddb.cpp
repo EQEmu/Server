@@ -671,7 +671,7 @@ bool SharedDatabase::GetInventory(Client *c)
 	EQ::InventoryProfile &inv     = c->GetInv();
 
 	// Retrieve character inventory
-	auto results   = InventoryRepository::GetWhere(*this, fmt::format("`charid` = '{}' ORDER BY `slotid`", char_id));
+	auto results   = InventoryRepository::GetWhere(*this, fmt::format("`character_id` = '{}' ORDER BY `slot_id`", char_id));
 	auto e_results = CharacterEvolvingItemsRepository::GetWhere(
 		*this, fmt::format("`character_id` = '{}' AND `deleted_at` IS NULL", char_id)
 	);
