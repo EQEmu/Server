@@ -210,7 +210,7 @@ namespace EQ
 				std::map<uint16_t, DaybreakSentPacket> sent_packets;
 			};
 
-			DaybreakStream m_streams[4];
+			DaybreakStream* m_streams[4];
 			std::weak_ptr<DaybreakConnection> m_self;
 
 			void Process();
