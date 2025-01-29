@@ -353,6 +353,12 @@ uint16 Mob::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
 		case BotSpellTypes::HoTHeals:
 		case BotSpellTypes::PetHoTHeals:
 			return 22000;
+		case BotSpellTypes::Cure:
+			return 2000;
+		case BotSpellTypes::GroupCures:
+			return 3000;
+		case BotSpellTypes::PetCures:
+			return 5000;
 		case BotSpellTypes::AEDoT:
 		case BotSpellTypes::DOT:
 			switch (stance) {
