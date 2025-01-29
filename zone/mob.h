@@ -872,8 +872,8 @@ public:
 	static bool CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarget, float sizeTarget);
 	virtual bool CheckWaterLoS(Mob* m);
 	bool CheckPositioningLosFN(Mob* other, float posX, float posY, float posZ);
-	bool CheckLosCheat(Mob* other);
-	bool CheckLosCheatExempt(Mob* other);
+	bool CheckLosCheat(Mob* other); //door skipping checks for LoS
+	bool CheckLosCheatExempt(Mob* other); //exemptions to bypass los
 	bool DoLosChecks(Mob* other);
 	bool TargetValidation(Mob* other);
 	inline void SetLastLosState(bool value) { last_los_check = value; }
