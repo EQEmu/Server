@@ -31,7 +31,6 @@
 
 /*
 TODO bot rewrite:
---implement spell type option to ^defaultsettings like ^copysettings, cleanup and add all options.
 --command cleanup remaining commands (move to new help window, make more descriptive)
 --Add quest methods for functions
 */

@@ -39,20 +39,32 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 		};
+		p.examples_three =
+		{
+			"To copy only spellsettings from BotA to BotB:",
+			fmt::format(
+				"{} BotA BotB spellsettings",
+				sep->arg[0]
+			),
+			fmt::format(
+				"{} BotA BotB spellsettings",
+				sep->arg[0]
+			),
+		};
 		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
-		p.options = { "[all], [misc], [spellsettings], [spelltypesettings], [spellholds], [spelldelays], [spellminthresholds], [spellmaxthresholds], [spellminmanapct], [spellmaxmanapct], [spellminhppct], [spellmaxhppct], [spellidlepriority], [spellengagedpriority], [spellpursuepriority], [spellaggrochecks], [spelltargetcounts], [sithppercent], [sitmanapercent], [blockedbuffs], [blockedpetbuffs]" };
-		std::vector<std::string> options_one =
+		p.options = { "all, misc, spellsettings, spelltypesettings, holds, delays, minthresholds, maxthresholds, minmanapct, maxmanapct, minhppct, maxhppct, idlepriority, engagedpriority, pursuepriority, aggrochecks, targetcounts, blockedbuffs, blockedpetbuffs" };
+		p.options_one =
 		{
 			"[spellsettings] will copy ^spellsettings options",
 			"[spelltypesettings] copies all spell type settings",
 			"[all] copies all settings" 
 		};
-		std::vector<std::string> options_two =
+		p.options_two =
 		{
 			"[misc] copies all miscellaneous options such as:",
 			"- ^showhelm, ^followd, ^stopmeleelevel, ^enforcespellsettings, ^bottoggleranged, ^petsettype, ^behindmob, ^distanceranged, ^illusionblock, ^sitincombat, ^sithppercent, ^sitmanapercent, ^blockedbuffs, ^blockedpetbuffs"
 		};
-		std::vector<std::string> options_three = { "The remaining options copy that specific type" };
+		p.options_three = { "The remaining options copy that specific type" };
 
 		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
@@ -73,8 +85,8 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::string arg1 = sep->arg[1];
-
+	int spell_type_arg_int = 4;
+	std::string spell_type_arg = sep->arg[spell_type_arg_int];
 	int ab_arg = 2;
 	bool valid_option = false;
 	uint16 spell_type = UINT16_MAX;
@@ -83,34 +95,59 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 	{
 		"all",
 		"misc",
-		"spellsettings",
-		"spelltypesettings",
-		"spellholds",
-		"spelldelays",
-		"spellminthresholds",
-		"spellmaxthresholds",
-		"spellminmanapct",
-		"spellmaxmanapct",
-		"spellminhppct",
-		"spellmaxhppct",
-		"spellidlepriority",
+		"spellsettings", 
+		"spelltypesettings", 
+		"spellholds", 
+		"spelldelays", 
+		"spellminthresholds", 
+		"spellmaxthresholds", 
+		"spellminmanapct", 
+		"spellmaxmanapct", 
+		"spellminhppct", 
+		"spellmaxhppct", 
+		"spellidlepriority", 
 		"spellengagedpriority",
-		"spellpursuepriority",
-		"spellaggrochecks",
-		"spelltargetcounts",
-		"blockedbuffs",
+		"spellpursuepriority", 
+		"spellaggrochecks", 
+		"spelltargetcounts", 
+		"blockedbuffs", 
 		"blockedpetbuffs"
 	};
 
-	if (sep->IsNumber(4)) {
-		spell_type = atoi(sep->arg[4]);
-	}
-	else {
-		spell_type = c->GetSpellTypeIDByShortName(sep->arg[4]);
-	}
+	if (sep->IsNumber(spell_type_arg_int)) {
+		spell_type = atoi(sep->arg[spell_type_arg_int]);
 
-	if (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END) {
-		spell_type = UINT16_MAX;
+		if (!c->IsValidSpellType(spell_type)) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"You must choose a valid spell type. Use {} for information regarding this command.",
+					Saylink::Silent(
+						fmt::format("{} help", sep->arg[0])
+					)
+				).c_str()
+			);
+
+			return;
+		}
+	}
+	else if (!spell_type_arg.empty()) {
+		if (c->GetSpellTypeIDByShortName(spell_type_arg) != UINT16_MAX) {
+			spell_type = c->GetSpellTypeIDByShortName(spell_type_arg);
+		}
+		else {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"You must choose a valid spell type. Use {} for information regarding this command.",
+					Saylink::Silent(
+						fmt::format("{} help", sep->arg[0])
+					)
+				).c_str()
+			);
+
+			return;
+		}
 	}
 
 	for (int i = 0; i < options.size(); i++) {
