@@ -1339,14 +1339,6 @@ public:
 
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return m_dont_heal_me_before; }
-	inline uint32		DontGroupHealMeBefore() const { return m_dont_group_heal_me_before; }
-	inline uint32		DontGroupHoTHealMeBefore() const { return m_dont_group_hot_heal_me_before; }
-	inline uint32		DontRegularHealMeBefore() const { return m_dont_regular_heal_me_before; }
-	inline uint32		DontVeryFastHealMeBefore() const { return m_dont_very_fast_heal_me_before; }
-	inline uint32		DontFastHealMeBefore() const { return m_dont_fast_heal_me_before; }
-	inline uint32		DontCompleteHealMeBefore() const { return m_dont_complete_heal_me_before; }
-	inline uint32		DontGroupCompleteHealMeBefore() const { return m_dont_group_complete_heal_me_before; }
-	inline uint32		DontHotHealMeBefore() const { return m_dont_hot_heal_me_before; }
 	inline uint32		DontBuffMeBefore() const { return m_dont_buff_me_before; }
 	inline uint32		DontDotMeBefore() const { return m_dont_dot_me_before; }
 	inline uint32		DontRootMeBefore() const { return m_dont_root_me_before; }
@@ -1355,14 +1347,6 @@ public:
 	
 	void				SetDontRootMeBefore(uint32 time) { m_dont_root_me_before = time; }
 	void				SetDontHealMeBefore(uint32 time) { m_dont_heal_me_before = time; }
-	void				SetDontGroupHealMeBefore(uint32 time) { m_dont_group_heal_me_before = time; }
-	void				SetDontGroupHoTHealMeBefore(uint32 time) { m_dont_group_hot_heal_me_before = time; }
-	void				SetDontRegularHealMeBefore(uint32 time) { m_dont_regular_heal_me_before = time; }
-	void				SetDontVeryFastHealMeBefore(uint32 time) { m_dont_very_fast_heal_me_before = time; }
-	void				SetDontFastHealMeBefore(uint32 time) { m_dont_fast_heal_me_before = time; }
-	void				SetDontCompleteHealMeBefore(uint32 time) { m_dont_complete_heal_me_before = time; }
-	void				SetDontGroupCompleteHealMeBefore(uint32 time) { m_dont_group_complete_heal_me_before = time; }
-	void				SetDontHotHealMeBefore(uint32 time) { m_dont_hot_heal_me_before = time; }
 	void				SetDontBuffMeBefore(uint32 time) { m_dont_buff_me_before = time; }
 	void				SetDontDotMeBefore(uint32 time) { m_dont_dot_me_before = time; }
 	void				SetDontSnareMeBefore(uint32 time) { m_dont_snare_me_before = time; }
