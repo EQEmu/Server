@@ -133,6 +133,38 @@ namespace EQ
 			uint64_t bytes_before_encode;
 		};
 
+		//Refactoring this stuff
+		struct DaybreakSentPacket
+		{
+			DynamicPacket packet;
+			Timestamp last_sent;
+			Timestamp first_sent;
+			size_t times_resent;
+			size_t resend_delay;
+		};
+
+		class DaybreakReliableStream
+		{
+		public:
+			DaybreakReliableStream() {
+				sequence_in = 0;
+				sequence_out = 0;
+				fragment_current_bytes = 0;
+				fragment_total_bytes = 0;
+			}
+			//private:
+
+			uint16_t sequence_in;
+			uint16_t sequence_out;
+			std::map<uint16_t, Packet*> packet_queue;
+
+			DynamicPacket fragment_packet;
+			uint32_t fragment_current_bytes;
+			uint32_t fragment_total_bytes;
+
+			std::map<uint16_t, DaybreakSentPacket> sent_packets;
+		};
+
 		class DaybreakConnectionManager;
 		class DaybreakConnection;
 		class DaybreakConnection
@@ -181,37 +213,7 @@ namespace EQ
 			Timestamp m_close_time;
 			double m_outgoing_budget;
 
-			struct DaybreakSentPacket
-			{
-				DynamicPacket packet;
-				Timestamp last_sent;
-				Timestamp first_sent;
-				size_t times_resent;
-				size_t resend_delay;
-			};
-
-			class DaybreakStream
-			{
-			public:
-				DaybreakStream() {
-					sequence_in = 0;
-					sequence_out = 0;
-					fragment_current_bytes = 0;
-					fragment_total_bytes = 0;
-				}
-			//private:
-				uint16_t sequence_in;
-				uint16_t sequence_out;
-				std::map<uint16_t, Packet*> packet_queue;
-
-				DynamicPacket fragment_packet;
-				uint32_t fragment_current_bytes;
-				uint32_t fragment_total_bytes;
-
-				std::map<uint16_t, DaybreakSentPacket> sent_packets;
-			};
-
-			DaybreakStream** m_streams;
+			std::unique_ptr<DaybreakReliableStream> m_streams[4];
 			std::weak_ptr<DaybreakConnection> m_self;
 
 			void Process();
@@ -273,6 +275,14 @@ namespace EQ
 				resend_timeout = 30000;
 				connection_close_time = 2000;
 				outgoing_data_rate = 0.0;
+				//this is emperically based on what the client seems to set for theirs
+				//this is the max number of packets that can be sent/recv per channel before acks come in
+				//we'll use this to preallocate some buffers
+				max_outgoing_packets_per_channel = 400;
+				max_incoming_packets_per_channel = 400;
+
+				//This is the max size of a packet that can be sent or received
+				max_total_packet_size = 1024 * 1024 * 16;
 			}
 
 			size_t max_packet_size;
@@ -296,6 +306,9 @@ namespace EQ
 			DaybreakEncodeType encode_passes[2];
 			int port;
 			double outgoing_data_rate;
+			int max_outgoing_packets_per_channel;
+			int max_incoming_packets_per_channel;
+			int max_total_packet_size;
 		};
 
 		class DaybreakConnectionManager

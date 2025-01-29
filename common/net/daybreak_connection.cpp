@@ -337,20 +337,10 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
 	m_outgoing_budget = owner->m_options.outgoing_data_rate;
-	m_streams = new DaybreakStream*[4];
-	m_streams[0] = nullptr;
-	m_streams[1] = nullptr;
-	m_streams[2] = nullptr;
-	m_streams[3] = nullptr;
 }
 
 EQ::Net::DaybreakConnection::~DaybreakConnection()
 {
-	for (int i = 0; i < 4; ++i) {
-		if (m_streams[i] != nullptr) {
-			delete m_streams[i];
-		}
-	}
 }
 
 void EQ::Net::DaybreakConnection::Close()
@@ -505,7 +495,7 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 void EQ::Net::DaybreakConnection::ProcessQueue()
 {
 	for (int i = 0; i < 4; ++i) {
-		auto stream = m_streams[i];
+		auto &stream = m_streams[i];
 		for (;;) {
 			if (stream == nullptr)
 				break;
@@ -525,7 +515,7 @@ void EQ::Net::DaybreakConnection::ProcessQueue()
 
 void EQ::Net::DaybreakConnection::RemoveFromQueue(int stream, uint16_t seq)
 {
-	auto s = m_streams[stream];
+	auto &s = m_streams[stream];
 	if (s == nullptr) {
 		return;
 	}
@@ -540,7 +530,7 @@ void EQ::Net::DaybreakConnection::RemoveFromQueue(int stream, uint16_t seq)
 
 void EQ::Net::DaybreakConnection::AddToQueue(int stream, uint16_t seq, const Packet &p)
 {
-	auto s = m_streams[stream];
+	auto &s = m_streams[stream];
 	if (s == nullptr) {
 		return;
 	}
@@ -699,10 +689,9 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				auto header = p.GetSerialize<DaybreakReliableHeader>(0);
 				auto sequence = NetworkToHost(header.sequence);
 				auto stream_id = header.opcode - OP_Packet;
-				auto stream = m_streams[stream_id];
+				auto &stream = m_streams[stream_id];
 				if (stream == nullptr) {
-					stream = new DaybreakStream();
-					m_streams[stream_id] = stream;
+					stream.reset(new DaybreakReliableStream());
 				}
 
 				auto order = CompareSequence(stream->sequence_in, sequence);
@@ -732,10 +721,9 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				auto header = p.GetSerialize<DaybreakReliableHeader>(0);
 				auto sequence = NetworkToHost(header.sequence);
 				auto stream_id = header.opcode - OP_Fragment;
-				auto stream = m_streams[stream_id];
+				auto &stream = m_streams[stream_id];
 				if (stream == nullptr) {
-					stream = new DaybreakStream();
-					m_streams[stream_id] = stream;
+					stream.reset(new DaybreakReliableStream());
 				}
 
 				auto order = CompareSequence(stream->sequence_in, sequence);
@@ -1130,7 +1118,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 
 	auto resends = 0;
 	auto now = Clock::now();
-	auto s = m_streams[stream];
+	auto &s = m_streams[stream];
 	if (s == nullptr) {
 		return;
 	}
@@ -1196,7 +1184,7 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 {
 
 	auto now = Clock::now();
-	auto s = m_streams[stream];
+	auto &s = m_streams[stream];
 	if (s == nullptr) {
 		return;
 	}
@@ -1224,7 +1212,7 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 {
 	auto now = Clock::now();
-	auto s = m_streams[stream];
+	auto &s = m_streams[stream];
 	if (s == nullptr) {
 		return;
 	}
@@ -1444,10 +1432,9 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 		return;
 	}
 
-	auto stream = m_streams[stream_id];
+	auto &stream = m_streams[stream_id];
 	if (stream == nullptr) {
-		stream = new DaybreakStream();
-		m_streams[stream_id] = stream;
+		stream.reset(new DaybreakReliableStream());
 	}
 
 	auto max_raw_size = m_max_packet_size - m_crc_bytes - DaybreakReliableHeader::size() - 1; // -1 for compress flag
