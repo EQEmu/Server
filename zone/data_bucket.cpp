@@ -1,12 +1,15 @@
 #include "data_bucket.h"
-#include "entity.h"
 #include "zonedb.h"
 #include "mob.h"
 #include "worldserver.h"
 #include <ctime>
 #include <cctype>
+#include "../common/json/json.hpp"
+
+using json = nlohmann::json;
 
 extern WorldServer worldserver;
+const std::string  NESTED_KEY_DELIMITER = ".";
 
 std::vector<DataBucketsRepository::DataBuckets> g_data_bucket_cache = {};
 
@@ -25,8 +28,13 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 	DataBucket::SetData(k);
 }
 
-void DataBucket::SetData(const DataBucketKey &k)
+void DataBucket::SetData(const DataBucketKey &k_)
 {
+	DataBucketKey k = k_; // copy the key so we can modify it
+	if (k.key.find(NESTED_KEY_DELIMITER) != std::string::npos) {
+		k.key = Strings::Split(k.key, NESTED_KEY_DELIMITER).front();
+	}
+
 	auto b = DataBucketsRepository::NewEntity();
 	auto r = GetData(k, true);
 	// if we have an entry, use it
@@ -60,9 +68,48 @@ void DataBucket::SetData(const DataBucketKey &k)
 
 	b.expires = expires_time_unix;
 	b.value   = k.value;
+	b.key_    = k.key;
+
+	// Check for nested keys (keys with dots)
+	if (k_.key.find(NESTED_KEY_DELIMITER) != std::string::npos) {
+		// Retrieve existing JSON or create a new one
+		std::string existing_value = r.id > 0 ? r.value : "{}";
+		json json_value = json::object();
+
+		try {
+			json_value = json::parse(existing_value);
+		} catch (json::parse_error &e) {
+			LogError("Failed to parse JSON for key [{}]: {}", k_.key, e.what());
+			json_value = json::object(); // Reset to an empty object on error
+		}
+
+		// Recursively merge new key-value pair into the JSON object
+		auto nested_keys = Strings::Split(k_.key, NESTED_KEY_DELIMITER);
+		json *current = &json_value;
+
+		for (size_t i = 0; i < nested_keys.size(); ++i) {
+			const std::string &key_part = nested_keys[i];
+			if (i == nested_keys.size() - 1) {
+				// Set the value at the final key
+				(*current)[key_part] = k_.value;
+			} else {
+				// Traverse or create nested objects
+				if (!current->contains(key_part)) {
+					(*current)[key_part] = json::object();
+				} else if (!(*current)[key_part].is_object()) {
+					// If key exists but is not an object, reset to object to avoid conflicts
+					(*current)[key_part] = json::object();
+				}
+				current = &(*current)[key_part];
+			}
+		}
+
+		// Serialize JSON back to string
+		b.value = json_value.dump();
+		b.key_ = nested_keys.front(); // Use the top-level key
+	}
 
 	if (bucket_id) {
-
 		// update the cache if it exists
 		if (CanCache(k)) {
 			for (auto &e: g_data_bucket_cache) {
@@ -76,7 +123,6 @@ void DataBucket::SetData(const DataBucketKey &k)
 		DataBucketsRepository::UpdateOne(database, b);
 	}
 	else {
-		b.key_ = k.key;
 		b = DataBucketsRepository::InsertOne(database, b);
 
 		// add to cache if it doesn't exist
@@ -92,12 +138,56 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 	return GetData(DataBucketKey{.key = bucket_key}).value;
 }
 
+DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
+	const DataBucketsRepository::DataBuckets &bucket,
+	const std::string &full_key)
+{
+	auto nested_keys = Strings::Split(full_key, NESTED_KEY_DELIMITER);
+	json json_value;
+
+	try {
+		json_value = json::parse(bucket.value); // Parse the JSON
+	} catch (json::parse_error &ex) {
+		LogError("Failed to parse JSON for key [{}]: {}", bucket.key_, ex.what());
+		return DataBucketsRepository::NewEntity(); // Return empty entity on parse error
+	}
+
+	// Start from the top-level key (e.g., "progression")
+	json *current = &json_value;
+
+	// Traverse the JSON structure
+	for (const auto &key_part: nested_keys) {
+		LogDataBuckets("Looking for key part [{}] in JSON", key_part);
+
+		if (!current->contains(key_part)) {
+			LogDataBuckets("Key part [{}] not found in JSON for [{}]", key_part, full_key);
+			return DataBucketsRepository::NewEntity();
+		}
+
+		current = &(*current)[key_part];
+	}
+
+	// Create a new entity with the extracted value
+	DataBucketsRepository::DataBuckets result = bucket; // Copy the original bucket
+	result.value = current->is_string() ? current->get<std::string>() : current->dump();
+	return result;
+}
+
 // GetData fetches bucket data from the database or cache if it exists
 // if the bucket doesn't exist, it will be added to the cache as a miss
 // if ignore_misses_cache is true, the bucket will not be added to the cache as a miss
 // the only place we should be ignoring the misses cache is on the initial read during SetData
-DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, bool ignore_misses_cache)
+DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, bool ignore_misses_cache)
 {
+	DataBucketKey k = k_; // Copy the key so we can modify it
+
+	bool is_nested_key = k.key.find(NESTED_KEY_DELIMITER) != std::string::npos;
+
+	// Extract the top-level key for nested keys
+	if (is_nested_key) {
+		k.key = Strings::Split(k.key, NESTED_KEY_DELIMITER).front();
+	}
+
 	LogDataBuckets(
 		"Getting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}]",
 		k.key,
@@ -109,9 +199,9 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 
 	bool can_cache = CanCache(k);
 
-	// check the cache first if we can cache
+	// Attempt to retrieve the value from the cache
 	if (can_cache) {
-		for (const auto &e: g_data_bucket_cache) {
+		for (const auto &e : g_data_bucket_cache) {
 			if (CheckBucketMatch(e, k)) {
 				if (e.expires > 0 && e.expires < std::time(nullptr)) {
 					LogDataBuckets("Attempted to read expired key [{}] removing from cache", e.key_);
@@ -119,37 +209,32 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 					return DataBucketsRepository::NewEntity();
 				}
 
-				// this is a bucket miss, return empty entity
-				// we still cache bucket misses, so we don't have to hit the database
-				if (e.id == 0) {
-					return DataBucketsRepository::NewEntity();
+				LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
+
+				if (is_nested_key) {
+					return ExtractNestedValue(e, k_.key);
 				}
 
-				LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
 				return e;
 			}
 		}
 	}
 
+	// Fetch the value from the database
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
-			"{} `key` = '{}' LIMIT 1",
+			" {} `key` = '{}' LIMIT 1",
 			DataBucket::GetScopedDbFilters(k),
 			k.key
 		)
 	);
 
 	if (r.empty()) {
-
-		// if we're ignoring the misses cache, don't add to the cache
-		// the only place this is ignored is during the initial read of SetData
-		bool add_to_misses_cache = !ignore_misses_cache && can_cache;
-		if (add_to_misses_cache) {
+		// Handle cache misses
+		if (!ignore_misses_cache && can_cache) {
 			size_t size_before = g_data_bucket_cache.size();
 
-			// cache bucket misses, so we don't have to hit the database
-			// when scripts try to read a bucket that doesn't exist
 			g_data_bucket_cache.emplace_back(
 				DataBucketsRepository::DataBuckets{
 					.id = 0,
@@ -175,22 +260,21 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 			);
 		}
 
-		return {};
+		return DataBucketsRepository::NewEntity();
 	}
 
 	auto bucket = r.front();
 
-	// if the entry has expired, delete it
-	if (bucket.expires > 0 && bucket.expires < (long long) std::time(nullptr)) {
+	// If the entry has expired, delete it
+	if (bucket.expires > 0 && bucket.expires < static_cast<long long>(std::time(nullptr))) {
 		DeleteData(k);
-		return {};
+		return DataBucketsRepository::NewEntity();
 	}
 
-	// add to cache if it doesn't exist
+	// Add the value to the cache if it doesn't exist
 	if (can_cache) {
 		bool has_cache = false;
-
-		for (auto &e: g_data_bucket_cache) {
+		for (const auto &e : g_data_bucket_cache) {
 			if (e.id == bucket.id) {
 				has_cache = true;
 				break;
@@ -200,6 +284,11 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 		if (!has_cache) {
 			g_data_bucket_cache.emplace_back(bucket);
 		}
+	}
+
+	// Handle nested key extraction
+	if (is_nested_key) {
+		return ExtractNestedValue(bucket, k_.key);
 	}
 
 	return bucket;

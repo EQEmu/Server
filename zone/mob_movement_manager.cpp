@@ -856,8 +856,8 @@ void MobMovementManager::SendCommandToClients(
 		return;
 	}
 
-	EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	auto                *spu = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
+	static EQApplicationPacket p(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	auto                       *spu = (PlayerPositionUpdateServer_Struct *) p.pBuffer;
 
 	FillCommandStruct(spu, mob, delta_x, delta_y, delta_z, delta_heading, anim);
 
@@ -894,7 +894,7 @@ void MobMovementManager::SendCommandToClients(
 				}
 			}
 
-			c->QueuePacket(&outapp, false);
+			c->QueuePacket(&p, false);
 			c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
 		}
 	}
@@ -956,7 +956,7 @@ void MobMovementManager::SendCommandToClients(
 					}
 				}
 
-				c->QueuePacket(&outapp, false);
+				c->QueuePacket(&p, false);
 				c->m_last_seen_mob_position[mob->GetID()] = mob->GetPosition();
 			}
 		}

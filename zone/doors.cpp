@@ -612,11 +612,9 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 		}
 	}
 
-	/*Commented out until it can be understood what this is for
-	if (GetOpenType() == 40 && GetZone(GetDoorZone(),0)) {
+	if (GetOpenType() == 40 && sender->GetZoneID() == Zones::CORATHUS) {
 		sender->SendEvolveXPTransferWindow();
 	}
-	*/
 }
 
 void Doors::Open(Mob *sender, bool alt_mode)

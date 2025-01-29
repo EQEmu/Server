@@ -4796,8 +4796,8 @@ bool Mob::SpellOnTarget(
 		}
 	}
 
-	message_packet = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
-	CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
+	static EQApplicationPacket p(OP_Damage, sizeof(CombatDamage_Struct));
+	auto                       cd = (CombatDamage_Struct *) p.pBuffer;
 	cd->target = action->target;
 	cd->source = action->source;
 	cd->type = action->type;
@@ -4815,7 +4815,7 @@ bool Mob::SpellOnTarget(
 	) {
 		entity_list.QueueCloseClients(
 			spelltar, /* Sender */
-			message_packet, /* Packet */
+			&p, /* Packet */
 			false, /* Ignore Sender */
 			RuleI(Range, SpellMessages),
 			0, /* Skip this mob */
@@ -4825,7 +4825,6 @@ bool Mob::SpellOnTarget(
 	}
 
 	safe_delete(action_packet);
-	safe_delete(message_packet);
 
 	/*
 		Bug: When an HP buff with a heal effect is applied for first time, the heal portion of the effect heals the client and
