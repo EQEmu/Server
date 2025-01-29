@@ -102,13 +102,17 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 
 		if (
 			(clientSetting && !IsClientBotSpellType(spell_type)) ||
-			(!clientSetting && (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END))
+			(!clientSetting && !EQ::ValueWithin(spell_type, BotSpellTypes::START, BotSpellTypes::END))
 		) {
 			c->Message(
 				Chat::Yellow,
-				clientSetting ? "Invalid spell type for clients." : "You must choose a valid spell type. Spell types range from %i to %i",
-				BotSpellTypes::START,
-				BotSpellTypes::END
+				fmt::format(
+					"{}. Use {} for information regarding this command.",
+					(!clientSetting ? "You must choose a valid spell type" : "You must choose a valid client spell type"),
+					Saylink::Silent(
+						fmt::format("{} help", sep->arg[0])
+					)
+				).c_str()
 			);
 
 			if (clientSetting) {

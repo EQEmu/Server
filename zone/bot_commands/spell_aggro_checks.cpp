@@ -94,8 +94,16 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 	if (sep->IsNumber(1)) {
 		spell_type = atoi(sep->arg[1]);
 
-		if (spell_type < BotSpellTypes::START || spell_type > BotSpellTypes::END) {
-			c->Message(Chat::Yellow, "You must choose a valid spell type. Spell types range from %i to %i", BotSpellTypes::START, BotSpellTypes::END);
+		if (!EQ::ValueWithin(spell_type, BotSpellTypes::START, BotSpellTypes::END)) {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"You must choose a valid spell type. Use {} for information regarding this command.",
+					Saylink::Silent(
+						fmt::format("{} help", sep->arg[0])
+					)
+				).c_str()
+			);
 
 			return;
 		}
