@@ -94,24 +94,24 @@ struct AppearanceStruct {
 };
 
 struct BotSpellSettings {
-	uint16				spellType;                 // type ID of bot category
-	std::string			shortName;                 // type short name of bot category
-	std::string			name;                      // type name of bot category
-	bool				hold;                      // 0 = allow spell type, 1 = hold spell type
-	uint16				delay;                     // delay between casts of spell type, 1ms-60,000ms
-	uint8				minThreshold;              // minimum target health threshold to allow casting of spell type
-	uint8				maxThreshold;              // maximum target health threshold to allow casting of spell type
-	uint16				resistLimit;               // resist limit to skip spell type
-	bool				aggroCheck;                // whether or not to check for possible aggro before casting
-	uint8				minManaPct;                // lower mana percentage limit to allow spell cast
-	uint8				maxManaPct;                // upper mana percentage limit to allow spell cast
-	uint8				minHPPct;                  // lower HP percentage limit to allow spell cast
-	uint8				maxHPPct;                  // upper HP percentage limit to allow spell cast
-	uint16				idlePriority;              // idle priority of the spell type
-	uint16				engagedPriority;           // engaged priority of the spell type
-	uint16				pursuePriority;            // pursue priority of the spell type
-	uint16				AEOrGroupTargetCount;      // require target count to cast an AE or Group spell type
-	Timer				recastTimer;               // recast timer based off delay
+	uint16      spell_type;                 // type ID of bot category
+	std::string short_name;                 // type short name of bot category
+	std::string name;                       // type name of bot category
+	bool        hold;                       // 0 = allow spell type, 1 = hold spell type
+	uint16      delay;                      // delay between casts of spell type, 1ms-60,000ms
+	uint8       min_threshold;              // minimum target health threshold to allow casting of spell type
+	uint8       max_threshold;              // maximum target health threshold to allow casting of spell type
+	uint16      resist_limit;               // resist limit to skip spell type
+	bool        aggro_check;                // whether or not to check for possible aggro before casting
+	uint8       min_mana_pct;               // lower mana percentage limit to allow spell cast
+	uint8       max_mana_pct;               // upper mana percentage limit to allow spell cast
+	uint8       min_hp_pct;                 // lower HP percentage limit to allow spell cast
+	uint8       max_hp_pct;                 // upper HP percentage limit to allow spell cast
+	uint16      idle_priority;              // idle priority of the spell type
+	uint16      engaged_priority;           // engaged priority of the spell type
+	uint16      pursue_priority;            // pursue priority of the spell type
+	uint16      ae_or_group_target_count;   // require target count to cast an AE or Group spell type
+	Timer       recast_timer;               // recast timer based off delay
 };
 
 class DataBucketKey;
@@ -433,7 +433,7 @@ public:
 	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
 	virtual bool IsImmuneToBotSpell(uint16 spell_id, Mob* caster);
 	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool no_clients = false, bool no_bots = false, bool no_pets = false);
-	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recastTimer.GetRemainingTime(); }
+	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
 	uint16 GetSpellTypeIDByShortName(std::string spellType_string);
 	bool IsValidBotSpellCategory(uint8 setting_type);
 	std::string GetBotSpellCategoryName(uint8 setting_type);
@@ -456,12 +456,12 @@ public:
 	void SetSpellHold(uint16 spell_type, bool hold_status);
 	inline uint16 GetSpellDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
 	void SetSpellDelay(uint16 spell_type, uint16 delay_value);
-	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].minThreshold; }
+	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
 	void SetSpellMinThreshold(uint16 spell_type, uint8 threshold_value);
-	inline uint8 GetSpellMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].maxThreshold; }
+	inline uint8 GetSpellMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_threshold; }
 	void SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value);
 
-	inline uint16 GetSpellTypeRecastTimer(uint16 spell_type) { return m_bot_spell_settings[spell_type].recastTimer.GetRemainingTime(); }
+	inline uint16 GetSpellTypeRecastTimer(uint16 spell_type) { return m_bot_spell_settings[spell_type].recast_timer.GetRemainingTime(); }
 	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time);
 
 	uint8 GetHPRatioForSpellType(uint16 spell_type, Mob* tar);

@@ -230,18 +230,18 @@ void Client::LoadDefaultBotSettings() {
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
 		BotSpellSettings t;
 
-		t.spellType = i;
-		t.shortName = GetSpellTypeShortNameByID(i);
-		t.name = GetSpellTypeNameByID(i);
-		t.hold = GetDefaultSpellHold(i);
-		t.delay = GetDefaultSpellDelay(i);
-		t.minThreshold = GetDefaultSpellMinThreshold(i);
-		t.maxThreshold = GetDefaultSpellMaxThreshold(i);
-		t.recastTimer.Start();
+		t.spell_type    = i;
+		t.short_name    = GetSpellTypeShortNameByID(i);
+		t.name          = GetSpellTypeNameByID(i);
+		t.hold          = GetDefaultSpellHold(i);
+		t.delay         = GetDefaultSpellDelay(i);
+		t.min_threshold = GetDefaultSpellMinThreshold(i);
+		t.max_threshold = GetDefaultSpellMaxThreshold(i);
+		t.recast_timer.Start();
 
 		m_bot_spell_settings.push_back(t);
 
-		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}]'", GetCleanName(), t.name, t.shortName, t.spellType);
+		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}]'", GetCleanName(), t.name, t.short_name, t.spell_type);
 		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellHold(i), GetDefaultSpellDelay(i), GetDefaultSpellMinThreshold(i), GetDefaultSpellMaxThreshold(i));
 	}
 }

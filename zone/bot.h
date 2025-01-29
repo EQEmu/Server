@@ -581,19 +581,19 @@ public:
 	int GetSetting(uint16 setting_category, uint16 setting_type);
 	uint16 GetSpellTypePriority(uint16 spell_type, uint8 priority_type);
 	void SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 priority);
-	inline uint16 GetSpellTypeResistLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].resistLimit; }
+	inline uint16 GetSpellTypeResistLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].resist_limit; }
 	void SetSpellTypeResistLimit(uint16 spell_type, uint16 resist_limit);
-	inline bool GetSpellTypeAggroCheck(uint16 spell_type) const { return m_bot_spell_settings[spell_type].aggroCheck; }
+	inline bool GetSpellTypeAggroCheck(uint16 spell_type) const { return m_bot_spell_settings[spell_type].aggro_check; }
 	void SetSpellTypeAggroCheck(uint16 spell_type, bool aggro_check);
-	inline uint8 GetSpellTypeMinManaLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].minManaPct; }
-	inline uint8 GetSpellTypeMaxManaLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].maxManaPct; }
+	inline uint8 GetSpellTypeMinManaLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_mana_pct; }
+	inline uint8 GetSpellTypeMaxManaLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_mana_pct; }
 	void SetSpellTypeMinManaLimit(uint16 spell_type, uint8 mana_limit);
 	void SetSpellTypeMaxManaLimit(uint16 spell_type, uint8 mana_limit);
-	inline uint8 GetSpellTypeMinHPLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].minHPPct; }
-	inline uint8 GetSpellTypeMaxHPLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].maxHPPct; }
+	inline uint8 GetSpellTypeMinHPLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_hp_pct; }
+	inline uint8 GetSpellTypeMaxHPLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_hp_pct; }
 	void SetSpellTypeMinHPLimit(uint16 spell_type, uint8 hp_limit);
 	void SetSpellTypeMaxHPLimit(uint16 spell_type, uint8 hp_limit);
-	inline uint16 GetSpellTypeAEOrGroupTargetCount(uint16 spell_type) const { return m_bot_spell_settings[spell_type].AEOrGroupTargetCount; }
+	inline uint16 GetSpellTypeAEOrGroupTargetCount(uint16 spell_type) const { return m_bot_spell_settings[spell_type].ae_or_group_target_count; }
 	void SetSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint16 target_count);
 	bool BotPassiveCheck();
 
