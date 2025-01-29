@@ -13229,6 +13229,8 @@ std::string Client::SendBotCommandHelpWindow(const BotCommandHelpParams& params)
 	const std::string& description_color_secondary = "dark_orange";
 	const std::string& example_color = "goldenrod";	
 	const std::string& example_color_secondary = "slate_blue";
+	const std::string& option_color = "light_grey";
+	const std::string& option_color_secondary = "slate_blue";
 	const std::string& filler_line_color = "dark_grey";
 
 	std::string filler_line = "--------------------------------------------------------------------";
@@ -13237,57 +13239,57 @@ std::string Client::SendBotCommandHelpWindow(const BotCommandHelpParams& params)
 	std::string popup_text;
 
 	if (!params.description.empty()) {
-		popup_text += GetCommandHelpHeader(header_color, "[Description]");
+		popup_text += GetCommandHelpHeader("[Description]", header_color);
 		popup_text += SplitCommandHelpText(params.description, description_color, max_length);
 	}
 
 	if (!params.notes.empty()) {
 		popup_text += break_line + break_line;
-		popup_text += GetCommandHelpHeader(header_color, "[Notes]");
+		popup_text += GetCommandHelpHeader("[Notes]", header_color);
 		popup_text += SplitCommandHelpText(params.notes, description_color_secondary, max_length);
 	}
 
 	if (!params.example_format.empty()) {
 		popup_text += filler_dia;
-		popup_text += GetCommandHelpHeader(header_color, "[Examples]");
+		popup_text += GetCommandHelpHeader("[Examples]", header_color);
 		popup_text += SplitCommandHelpText(params.example_format, example_color, max_length);
 	}
 
 	if (!params.examples_one.empty()) {
 		popup_text += break_line + break_line;
-		popup_text += SplitCommandHelpText(params.examples_one, example_color_secondary, max_length);
+		popup_text += SplitCommandHelpText(params.examples_one, example_color, max_length, example_color_secondary);
 	}
 
 	if (!params.examples_two.empty()) {
-		popup_text += SplitCommandHelpText(params.examples_two, example_color_secondary, max_length);
+		popup_text += SplitCommandHelpText(params.examples_two, example_color, max_length, example_color_secondary);
 	}
 
 	if (!params.examples_three.empty()) {
-		popup_text += SplitCommandHelpText(params.examples_three, example_color_secondary, max_length);
+		popup_text += SplitCommandHelpText(params.examples_three, example_color, max_length, example_color_secondary);
 	}
 
 	if (!params.options.empty()) {
 		popup_text += filler_dia;
-		popup_text += GetCommandHelpHeader(header_color, "[Options]");
-		popup_text += SplitCommandHelpText(params.options, description_color, max_length);
+		popup_text += GetCommandHelpHeader("[Options]", header_color);
+		popup_text += SplitCommandHelpText(params.options, option_color, max_length);
 	}
 
 	if (!params.options_one.empty()) {
 		popup_text += break_line + break_line;
-		popup_text += SplitCommandHelpText(params.options_one, description_color, max_length);
+		popup_text += SplitCommandHelpText(params.options_one, option_color_secondary, max_length);
 	}
 
 	if (!params.options_two.empty()) {
-		popup_text += SplitCommandHelpText(params.options_two, description_color, max_length);
+		popup_text += SplitCommandHelpText(params.options_two, option_color_secondary, max_length);
 	}
 
 	if (!params.options_three.empty()) {
-		popup_text += SplitCommandHelpText(params.options_three, description_color, max_length);
+		popup_text += SplitCommandHelpText(params.options_three, option_color_secondary, max_length);
 	}
 
 	if (!params.actionables.empty()) {
 		popup_text += filler_dia;
-		popup_text += GetCommandHelpHeader(header_color, "[Actionables]");
+		popup_text += GetCommandHelpHeader("[Actionables]", header_color);
 		popup_text += SplitCommandHelpText(params.actionables, description_color, max_length);
 	}
 
@@ -13296,12 +13298,12 @@ std::string Client::SendBotCommandHelpWindow(const BotCommandHelpParams& params)
 	return popup_text;
 }
 
-std::string Client::GetCommandHelpHeader(std::string color, std::string header) {
+std::string Client::GetCommandHelpHeader(std::string msg, std::string color) {
 	std::string return_text = DialogueWindow::TableRow(
 		DialogueWindow::TableCell(
 			fmt::format(
 				"{}",
-				DialogueWindow::ColorMessage(color, header)
+				DialogueWindow::ColorMessage(color, msg)
 			)
 		)
 	);
@@ -13309,7 +13311,7 @@ std::string Client::GetCommandHelpHeader(std::string color, std::string header) 
 	return return_text;
 }
 
-std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 max_length) {
+std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 max_length, std::string secondary_color) {
 	std::string return_text;
 
 	for (int i = 0; i < msg.size(); i++) {
@@ -13348,7 +13350,7 @@ std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::stri
 
 		for (const auto& s : msg_split) {
 			return_text += DialogueWindow::TableRow(
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(color, s))
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(((!secondary_color.empty() && i== 0) ? secondary_color : color), s))
 			);
 		}
 	}
