@@ -9790,6 +9790,10 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 	if (
 		spells[spell_id].target_type != ST_Self && 
 		IsBeneficialSpell(spell_id) && 
+		!IsAnyHealSpell(spell_id) &&
+		!IsCureSpell(spell_id) &&
+		!IsHealOverTimeSpell(spell_id) &&
+		!IsGroupHealOverTimeSpell(spell_id) &&
 		IsTargetAlreadyReceivingSpell(tar, spell_id)
 	) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsTargetAlreadyReceivingSpell.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName());
