@@ -1335,6 +1335,8 @@ void EQ::Net::DaybreakConnection::SendKeepAlive()
 	InternalSend(p);
 }
 
+DynamicRingBuffer send_ring_buffer;
+
 void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 {
 	if (m_owner->m_options.outgoing_data_rate > 0.0) {
@@ -1342,21 +1344,37 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 		if (new_budget <= 0.0) {
 			m_stats.dropped_datarate_packets++;
 			return;
-		}
-		else {
+		} else {
 			m_outgoing_budget = new_budget;
 		}
 	}
 
 	m_last_send = Clock::now();
 
+	// Lambda function to release buffer back to ring buffer after sending
 	auto send_func = [](uv_udp_send_t* req, int status) {
-		delete[](char*)req->data;
+		size_t buffer_index = reinterpret_cast<size_t>(req->data);
+		send_ring_buffer.releaseBuffer(buffer_index);  // Return buffer to pool
 		delete req;
 	};
 
-	if (PacketCanBeEncoded(p)) {
+	// Try to acquire a buffer from the ring buffer
+	auto buffer_opt = send_ring_buffer.acquireBuffer();
+	if (!buffer_opt) {
+		m_stats.dropped_datarate_packets++;  // Drop packet if no buffer is available
+		return;
+	}
 
+	size_t buffer_index = buffer_opt->first;
+	char* data = buffer_opt->second;
+
+	uv_udp_send_t* send_req = new uv_udp_send_t;
+	memset(send_req, 0, sizeof(*send_req));
+	sockaddr_in send_addr;
+	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
+	uv_buf_t send_buffers[1];
+
+	if (PacketCanBeEncoded(p)) {
 		m_stats.bytes_before_encode += p.Length();
 
 		DynamicPacket out;
@@ -1364,69 +1382,47 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 
 		for (int i = 0; i < 2; ++i) {
 			switch (m_encode_passes[i]) {
-			case EncodeCompression:
-				if (out.GetInt8(0) == 0)
-					Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
-				else
-					Compress(out, 1, out.Length() - 1);
-				break;
-			case EncodeXOR:
-				if (out.GetInt8(0) == 0)
-					Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
-				else
-					Encode(out, 1, out.Length() - 1);
-				break;
-			default:
-				break;
+				case EncodeCompression:
+					if (out.GetInt8(0) == 0)
+						Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					else
+						Compress(out, 1, out.Length() - 1);
+					break;
+				case EncodeXOR:
+					if (out.GetInt8(0) == 0)
+						Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					else
+						Encode(out, 1, out.Length() - 1);
+					break;
+				default:
+					break;
 			}
 		}
 
 		AppendCRC(out);
-
-		uv_udp_send_t *send_req = new uv_udp_send_t;
-		memset(send_req, 0, sizeof(*send_req));
-		sockaddr_in send_addr;
-		uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
-		uv_buf_t send_buffers[1];
-
-		char *data = new char[out.Length()];
-		memcpy(data, out.Data(), out.Length());
+		memcpy(data, out.Data(), out.Length());  // Copy encoded data into buffer
 		send_buffers[0] = uv_buf_init(data, out.Length());
-		send_req->data = send_buffers[0].base;
+		send_req->data = reinterpret_cast<void*>(buffer_index);  // Store buffer index
+	} else {
+		m_stats.bytes_before_encode += p.Length();
 
-		m_stats.sent_bytes += out.Length();
-		m_stats.sent_packets++;
-		if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
-			delete[](char*)send_req->data;
-			delete send_req;
-			return;
-		}
-
-		uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
-		return;
+		memcpy(data, p.Data(), p.Length());  // Copy raw packet data
+		send_buffers[0] = uv_buf_init(data, p.Length());
+		send_req->data = reinterpret_cast<void*>(buffer_index);
 	}
-
-	m_stats.bytes_before_encode += p.Length();
-
-	uv_udp_send_t *send_req = new uv_udp_send_t;
-	sockaddr_in send_addr;
-	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
-	uv_buf_t send_buffers[1];
-
-	char *data = new char[p.Length()];
-	memcpy(data, p.Data(), p.Length());
-	send_buffers[0] = uv_buf_init(data, p.Length());
-	send_req->data = send_buffers[0].base;
 
 	m_stats.sent_bytes += p.Length();
 	m_stats.sent_packets++;
 
-	if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
-		delete[](char*)send_req->data;
+	// Simulated packet loss: Drop packet if condition is met
+	if (m_owner->m_options.simulated_out_packet_loss &&
+		m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
+		send_ring_buffer.releaseBuffer(buffer_index);  // Release buffer since packet is dropped
 		delete send_req;
 		return;
 	}
 
+	// Send the packet
 	uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
 }
 
