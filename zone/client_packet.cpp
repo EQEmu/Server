@@ -14784,7 +14784,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	}
 
 	if (item->SummonedFlag) {
-		Message(Chat::MerchantExchange, "%s tells you, 'It looks like that item has no value'");
+		Message(Chat::MerchantExchange, "%s tells you, 'It looks like that item has no value'", vendor->GetCleanName());
 		return;
 	}
 

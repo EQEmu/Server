@@ -5570,6 +5570,8 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 
     const auto& allowed_bags = Strings::Split(RuleS(Custom, AutoSellBagIDs), ",");
 
+    LogDebug("Check 1");
+
     for (int general_slot = EQ::invslot::GENERAL_BEGIN; general_slot <= EQ::invslot::GENERAL_END; ++general_slot) {
         const auto* const bag_inst = m_inv.GetItem(general_slot);
         if (!bag_inst || !bag_inst->IsClassBag()) {
@@ -5596,7 +5598,11 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
         return;
     }
 
-    std::vector<std::tuple<int, int, uint32>> sorted_items;
+    std::vector<std::tuple<int, int, uint32, float>> sorted_items;
+    int total_qty = 0;
+    int total_value = 0;
+
+    LogDebug("Check 2");
 
     for (const auto& [item_id, qty] : items) {
         const auto* item = database.GetItem(item_id);
@@ -5608,66 +5614,92 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
         }
         item_value += 0.5;
 
-        sorted_items.emplace_back(item_id, qty, item_value);
+        float gearscore = GetItemStatValue(item);
+        sorted_items.emplace_back(item_id, qty, item_value, gearscore);
+
+        total_qty += qty;
+        total_value += item_value;
     }
 
-	int total_qty = 0;
-	int total_value = 0;
-	int row_count = 0;
+    std::sort(sorted_items.begin(), sorted_items.end(), [](const auto& a, const auto& b) {
+        if (std::get<3>(a) != std::get<3>(b)) {
+            return std::get<3>(a) > std::get<3>(b); // Higher gearscore first
+        }
+        return std::get<2>(a) > std::get<2>(b); // Higher value first when gearscore is equal
+    });
 
-	std::string item_list;
+    int row_count = 0;
+    LogDebug("Check 3");
 
-	for (const auto& [item_id, qty, row_value] : sorted_items) {
-		const auto* item = database.GetItem(item_id);
-		if (!item) { continue; }
+    const size_t max_popup_size = 4096;
+    std::string item_list;
+    size_t estimated_size = 0;
+    bool truncated = false;
 
-		row_count++;
+    const int total_platinum = total_value / 1000;
+    const int total_gold = (total_value % 1000) / 100;
+    const int total_silver = (total_value % 100) / 10;
+    const int total_copper = total_value % 10;
 
-		total_qty += qty;
-		total_value += row_value;
+    std::string output_str = fmt::format(
+        "The following items will be sold for a total of <c \"#FFFF00\">{}p {}g {}s {}c</c><br>"
+        "<c \"#FF0000\">WARNING: There will be no refunds or reimbursements for ANY mistakenly sold items.</c><br><br>",
+        total_platinum, total_gold, total_silver, total_copper
+    );
 
-		std::string color_string = "CCCCCC";
-		if (GetItemStatValue(item) > 1.0) {
-			color_string = "00FF00";
-		}
-		if (item->ID >= 2000000 && item->ID < 3000000) {
-			color_string = "FF8000";
-		}
-		if (item->ID >= 1000000 && item->ID < 2000000) {
-			color_string = "007BFF";
-		}
-		if (Strings::Contains(std::string(item->Name), "Glamour-Stone")) {
-			color_string = "008080";
-		}
+    estimated_size = output_str.size();
 
-		if (qty > 1) {
-			item_list += fmt::format("<c \"#{}\">{} x{}</c><br>", color_string, item->Name, Strings::Commify(qty));
-		} else {
-			item_list += fmt::format("<c \"#{}\">{}</c><br>", color_string, item->Name);
-		}
+    for (const auto& [item_id, qty, row_value, gearscore] : sorted_items) {
+        const auto* item = database.GetItem(item_id);
+        if (!item) { continue; }
 
-		if (row_count >= 90) {
-			item_list += fmt::format("... Too Many Items, abbreviating list.");
-			break;
-		}
-	}
+        row_count++;
 
-	const int total_platinum = total_value / 1000;
-	const int total_gold = (total_value % 1000) / 100;
-	const int total_silver = (total_value % 100) / 10;
-	const int total_copper = total_value % 10;
+        std::string color_string = "CCCCCC"; // Default white for standard items
 
-	std::string output_str = fmt::format(
-		"The following items will be sold for a total of <c \"#FFFF00\">{}p {}g {}s {}c</c><br>",
-		total_platinum, total_gold, total_silver, total_copper
-	);
+        if (gearscore > 1.0) {
+            color_string = "00FF00"; // Green for high-stat items
+        }
+        if (item_id >= 2000000) {
+            color_string = "FF8000"; // Orange for 2M+ item IDs
+        }
+        if (item_id >= 1000000 && item_id < 2000000) {
+            color_string = "007BFF"; // Blue for 1M+ item IDs
+        }
+        if (Strings::Contains(std::string(item->Name), "Glamour-Stone")) {
+            color_string = "008080"; // Teal for Glamour-Stone (highest priority)
+        }
 
-	output_str += "<c \"#FF0000\">WARNING: There will be no refunds or reimbursements for ANY mistakenly sold items.</c><br><br>";
+        std::string item_entry = (qty > 1)
+            ? fmt::format("<c \"#{}\">{} x{}</c><br>", color_string, item->Name, Strings::Commify(qty))
+            : fmt::format("<c \"#{}\">{}</c><br>", color_string, item->Name);
 
-	output_str += item_list;
+        if (estimated_size + item_entry.size() > max_popup_size - 100) {
+            item_list += "... Too Many Items, abbreviating list.<br>";
+            truncated = true;
+            break;
+        }
 
-	SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Leave One per Stackable");
+        item_list += item_entry;
+        estimated_size += item_entry.size();
+
+        if (row_count >= 100) {
+            item_list += "... Too Many Items, abbreviating list.<br>";
+            truncated = true;
+            break;
+        }
+    }
+
+    output_str += item_list;
+
+    if (output_str.size() > max_popup_size) {
+        output_str = output_str.substr(0, max_popup_size - 100) + "...<br><c \"#FF0000\">Output truncated.</c><br>";
+    }
+
+    LogDebug("Output Size[{}] Output: [{}]", output_str.size(), output_str);
+    SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Leave One per Stackable");
 }
+
 
 void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration)
 {
