@@ -5570,8 +5570,6 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
 
     const auto& allowed_bags = Strings::Split(RuleS(Custom, AutoSellBagIDs), ",");
 
-    LogDebug("Check 1");
-
     for (int general_slot = EQ::invslot::GENERAL_BEGIN; general_slot <= EQ::invslot::GENERAL_END; ++general_slot) {
         const auto* const bag_inst = m_inv.GetItem(general_slot);
         if (!bag_inst || !bag_inst->IsClassBag()) {
@@ -5602,8 +5600,6 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
     int total_qty = 0;
     int total_value = 0;
 
-    LogDebug("Check 2");
-
     for (const auto& [item_id, qty] : items) {
         const auto* item = database.GetItem(item_id);
         if (!item) { continue; }
@@ -5629,7 +5625,6 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
     });
 
     int row_count = 0;
-    LogDebug("Check 3");
 
     const size_t max_popup_size = 4096;
     std::string item_list;
@@ -5696,7 +5691,6 @@ void Client::ProcessAutoSellBags(Mob* merchant) {
         output_str = output_str.substr(0, max_popup_size - 100) + "...<br><c \"#FF0000\">Output truncated.</c><br>";
     }
 
-    LogDebug("Output Size[{}] Output: [{}]", output_str.size(), output_str);
     SendFullPopup("", output_str.c_str(), 0xFFFFFBA6, 0xFFFFFBA7, 2, 0, "Sell All", "Leave One per Stackable");
 }
 
