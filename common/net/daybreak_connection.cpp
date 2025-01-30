@@ -104,7 +104,6 @@ private:
 	}
 };
 
-
 #include <vector>
 #include <atomic>
 #include <memory>
@@ -129,7 +128,7 @@ public:
 	}
 
 	// Try to acquire a buffer slot, returns nullptr if all are locked.
-	std::optional<std::pair<size_t, char*>> acquireBuffer() {
+	std::optional<std::pair<size_t, char*>> acquire() {
 		size_t current_capacity = capacity.load(std::memory_order_acquire);
 
 		for (size_t i = 0; i < current_capacity; ++i) {
@@ -146,9 +145,9 @@ public:
 	}
 
 	// Release a buffer slot by index
-	void releaseBuffer(size_t index) {
+	void release(size_t index) {
 		if (index >= capacity.load(std::memory_order_acquire)) {
-			std::cerr << "Error: releaseBuffer() called with invalid index: " << index << std::endl;
+			std::cerr << "Error: release() called with invalid index: " << index << std::endl;
 			return;
 		}
 
@@ -216,7 +215,8 @@ private:
 	}
 };
 
-
+DynamicRingBuffer send_ring_buffer;
+SendReqPool send_req_pool;
 
 EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager()
 {
@@ -1545,9 +1545,6 @@ void EQ::Net::DaybreakConnection::SendKeepAlive()
 	InternalSend(p);
 }
 
-DynamicRingBuffer send_ring_buffer;
-SendReqPool send_req_pool;
-
 void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 	if (m_owner->m_options.outgoing_data_rate > 0.0) {
 		auto new_budget = m_outgoing_budget - (p.Length() / 1024.0);
@@ -1562,7 +1559,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 	m_last_send = Clock::now();
 
 	// Try to acquire a buffer from the ring buffer
-	auto buffer_opt = send_ring_buffer.acquireBuffer();
+	auto buffer_opt = send_ring_buffer.acquire();
 	if (!buffer_opt) {
 		m_stats.dropped_datarate_packets++;  // Drop packet if no buffer is available
 		return;
@@ -1574,7 +1571,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 	// Try to acquire a uv_udp_send_t and its EmbeddedContext from SendReqPool
 	auto send_req_pair = send_req_pool.acquire();
 	if (!send_req_pair) {
-		send_ring_buffer.releaseBuffer(buffer_index);
+		send_ring_buffer.release(buffer_index);
 		m_stats.dropped_datarate_packets++;
 		return;
 	}
@@ -1589,7 +1586,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 	ctx->pool = &send_req_pool;
 	send_req->data = ctx;
 
-	sockaddr_in send_addr;
+	sockaddr_in send_addr{};
 	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 	uv_buf_t send_buffers[1];
 
@@ -1600,19 +1597,23 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 		DynamicPacket out;
 		out.PutPacket(0, p);
 
-		for (int i = 0; i < 2; ++i) {
-			switch (m_encode_passes[i]) {
+		for (auto &m_encode_passe: m_encode_passes) {
+			switch (m_encode_passe) {
 				case EncodeCompression:
-					if (out.GetInt8(0) == 0)
+					if (out.GetInt8(0) == 0) {
 						Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
-					else
+					}
+					else {
 						Compress(out, 1, out.Length() - 1);
+					}
 					break;
 				case EncodeXOR:
-					if (out.GetInt8(0) == 0)
+					if (out.GetInt8(0) == 0) {
 						Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
-					else
+					}
+					else {
 						Encode(out, 1, out.Length() - 1);
+					}
 					break;
 				default:
 					break;
@@ -1634,7 +1635,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 	if (m_owner->m_options.simulated_out_packet_loss &&
 		m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
 		std::cerr << "Simulated packet loss. Dropping packet." << std::endl;
-		send_ring_buffer.releaseBuffer(buffer_index);
+		send_ring_buffer.release(buffer_index);
 		send_req_pool.release(send_req);
 		return;
 	}
@@ -1660,14 +1661,14 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 			}
 
 			// Release resources safely
-			send_ring_buffer.releaseBuffer(ctx->buffer_index);
+			send_ring_buffer.release(ctx->buffer_index);
 			ctx->pool->release(req);
 		});
 
 	// If uv_udp_send() fails immediately, release resources manually
 	if (send_result < 0) {
 		std::cerr << "uv_udp_send() failed: " << uv_strerror(send_result) << std::endl;
-		send_ring_buffer.releaseBuffer(buffer_index);
+		send_ring_buffer.release(buffer_index);
 		send_req_pool.release(send_req);
 	}
 }
