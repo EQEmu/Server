@@ -12656,7 +12656,7 @@ void Bot::AssignBotSpellsToTypes(std::vector<BotSpells>& AIBot_spells, std::unor
 	}
 }
 
-std::vector<Mob*> Bot::GatherSpellTargets(bool entire_raid, Mob* target, bool no_clients, bool no_bots, bool no_pets) {
+std::vector<Mob*> Bot::GatherSpellTargets(bool entire_raid, Mob* target, bool no_clients, bool no_bots) {
 	std::vector<Mob*> valid_spell_targets;
 
 	auto is_valid_target = [no_clients, no_bots](Mob* member) {
