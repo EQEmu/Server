@@ -2564,16 +2564,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	const uint8 killed_level = GetLevel();
 
 	if (GetClass() == Class::LDoNTreasure) { // open chest
-		auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-
-		auto a = (Animation_Struct*) outapp->pBuffer;
-
+		static EQApplicationPacket p(OP_Animation, sizeof(Animation_Struct));
+		auto a = (Animation_Struct*) p.pBuffer;
 		a->spawnid = GetID();
 		a->action  = 0x0F;
 		a->speed   = 10;
-
-		entity_list.QueueCloseClients(this, outapp);
-		safe_delete(outapp);
+		entity_list.QueueCloseClients(this, &p);
 	}
 
 	auto app = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
@@ -3412,15 +3408,15 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 
 		attacker->Damage(this, -DS, spellid, EQ::skills::SkillAbjuration/*hackish*/, false);
 		//we can assume there is a spell now
-		auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
-		CombatDamage_Struct* cds = (CombatDamage_Struct*)outapp->pBuffer;
-		cds->target = attacker->GetID();
-		cds->source = GetID();
-		cds->type = spellbonuses.DamageShieldType;
-		cds->spellid = 0x0;
-		cds->damage = DS;
-		entity_list.QueueCloseClients(this, outapp);
-		safe_delete(outapp);
+
+		static EQApplicationPacket p(OP_Damage, sizeof(CombatDamage_Struct));
+		auto                       b = (CombatDamage_Struct *) p.pBuffer;
+		b->target  = attacker->GetID();
+		b->source  = GetID();
+		b->type    = spellbonuses.DamageShieldType;
+		b->spellid = 0x0;
+		b->damage  = DS;
+		entity_list.QueueCloseClients(this, &p);
 	}
 	else if (DS > 0 && !spell_ds) {
 		//we are healing the attacker...
@@ -4537,8 +4533,8 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		//send damage packet...
 	if (!iBuffTic) { //buff ticks do not send damage, instead they just call SendHPUpdate(), which is done above
-		auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
-		CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
+		static EQApplicationPacket p(OP_Damage, sizeof(CombatDamage_Struct));
+		auto                       a = (CombatDamage_Struct *) p.pBuffer;
 		a->target = GetID();
 
 		if (!attacker) {
@@ -4619,7 +4615,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					if (!FromDamageShield) {
 						entity_list.QueueCloseClients(
 							attacker, /* Sender */
-							outapp, /* packet */
+							&p, /* packet */
 							false, /* Skip Sender */
 							((IsValidSpell(spell_id)) ? RuleI(Range, SpellMessages) : RuleI(Range, DamageMessages)),
 							0, /* don't skip anyone on spell */
@@ -4693,11 +4689,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						filter = FilterMyMisses;
 
 					if (attacker->IsClient()) {
-						attacker->CastToClient()->QueuePacket(outapp, true, CLIENT_CONNECTED, filter);
+						attacker->CastToClient()->QueuePacket(&p, true, CLIENT_CONNECTED, filter);
 					} else {
 						entity_list.QueueCloseClients(
 							attacker, /* Sender */
-							outapp, /* packet */
+							&p, /* packet */
 							false, /* Skip Sender */
 							(
 								IsValidSpell(spell_id) ?
@@ -4752,7 +4748,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				a->type = DamageTypeSpell;
 				entity_list.QueueCloseClients(
 					this, /* Sender */
-					outapp, /* packet */
+					&p, /* packet */
 					false, /* Skip Sender */
 					range, /* distance packet travels at the speed of sound */
 					0, /* don't skip anyone on spell */
@@ -4763,7 +4759,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			else {
 				//I dont think any filters apply to damage affecting us
 				if (IsClient()) {
-					CastToClient()->QueuePacket(outapp);
+					CastToClient()->QueuePacket(&p);
 				}
 
 				// Send normal message to observers
@@ -4773,7 +4769,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				if (!owner || (owner && !owner->IsClient())) {
 					entity_list.QueueCloseClients(
 						this, /* Sender */
-						outapp, /* packet */
+						&p, /* packet */
 						true, /* Skip Sender */
 						range, /* distance packet travels at the speed of sound */
 						(IsValidSpell(spell_id) && skill_used != EQ::skills::SkillTigerClaw) ? 0 : skip,
@@ -4783,8 +4779,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				}
 			}
 		}
-
-		safe_delete(outapp);
 	}
 	else {
 		//else, it is a buff tic...

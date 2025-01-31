@@ -125,7 +125,7 @@ Mob::Mob(
 	tmHidden(-1),
 	mitigation_ac(0),
 	m_specialattacks(eSpecialAttacks::None),
-	attack_anim_timer(500),
+	attack_anim_timer(100),
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
 	m_scan_close_mobs_timer(6000),
@@ -1522,16 +1522,12 @@ void Mob::SendHPUpdate(bool force_update_all)
 				last_hp
 			);
 
-			auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-			auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
-
-			hp_packet_client->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
-			hp_packet_client->spawn_id = GetID();
-			hp_packet_client->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
-
-			CastToClient()->QueuePacket(client_packet);
-
-			safe_delete(client_packet);
+			static EQApplicationPacket p(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+			auto b = (SpawnHPUpdate_Struct*) p.pBuffer;
+			b->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
+			b->spawn_id = GetID();
+			b->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
+			CastToClient()->QueuePacket(&p);
 
 			ResetHPUpdateTimer();
 
@@ -3545,24 +3541,21 @@ void Mob::DoAnim(const int animation_id, int animation_speed, bool ackreq, eqFil
 		return;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-	auto *a  = (Animation_Struct *) outapp->pBuffer;
-
+	static EQApplicationPacket p(OP_Animation, sizeof(Animation_Struct));
+	auto a = (Animation_Struct*) p.pBuffer;
 	a->spawnid = GetID();
 	a->action  = animation_id;
 	a->speed   = animation_speed ? animation_speed : 10;
 
 	entity_list.QueueCloseClients(
 		this, /* Sender */
-		outapp, /* Packet */
+		&p, /* Packet */
 		false, /* Ignore Sender */
 		RuleI(Range, Anims),
 		0, /* Skip this mob */
 		ackreq, /* Packet ACK */
 		filter /* eqFilterType filter */
 	);
-
-	safe_delete(outapp);
 }
 
 void Mob::ShowBuffs(Client* c) {
@@ -7725,28 +7718,26 @@ bool Mob::CanRaceEquipItem(uint32 item_id)
 
 void Mob::SendAddPlayerState(PlayerState new_state)
 {
-	auto app = new EQApplicationPacket(OP_PlayerStateAdd, sizeof(PlayerState_Struct));
-	auto ps = (PlayerState_Struct *)app->pBuffer;
+	static EQApplicationPacket p(OP_PlayerStateAdd, sizeof(PlayerState_Struct));
+	auto                       b = (PlayerState_Struct *) p.pBuffer;
 
-	ps->spawn_id = GetID();
-	ps->state = static_cast<uint32>(new_state);
+	b->spawn_id = GetID();
+	b->state    = static_cast<uint32>(new_state);
 
-	AddPlayerState(ps->state);
-	entity_list.QueueClients(nullptr, app);
-	safe_delete(app);
+	AddPlayerState(b->state);
+	entity_list.QueueClients(nullptr, &p);
 }
 
 void Mob::SendRemovePlayerState(PlayerState old_state)
 {
-	auto app = new EQApplicationPacket(OP_PlayerStateRemove, sizeof(PlayerState_Struct));
-	auto ps = (PlayerState_Struct *)app->pBuffer;
+	static EQApplicationPacket p(OP_PlayerStateRemove, sizeof(PlayerState_Struct));
+	auto                       b = (PlayerState_Struct *) p.pBuffer;
 
-	ps->spawn_id = GetID();
-	ps->state = static_cast<uint32>(old_state);
+	b->spawn_id = GetID();
+	b->state    = static_cast<uint32>(old_state);
 
-	RemovePlayerState(ps->state);
-	entity_list.QueueClients(nullptr, app);
-	safe_delete(app);
+	RemovePlayerState(b->state);
+	entity_list.QueueClients(nullptr, &p);
 }
 
 int32 Mob::GetMeleeMitigation() {
