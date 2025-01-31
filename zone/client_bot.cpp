@@ -375,7 +375,7 @@ uint16 Client::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
 		case BotSpellTypes::PetCures:
 			return 5000;
 		default:
-			return 1;
+			return 100;
 	}
 }
 

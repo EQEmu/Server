@@ -153,8 +153,8 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 	if (sep->IsNumber(2)) {
 		type_value = atoi(sep->arg[2]);
 		++ab_arg;
-		if (type_value < 1 || type_value > 60000) {
-			c->Message(Chat::Yellow, "You must enter a value between 1-60000 (1ms to 60s).");
+		if (type_value < 100 || type_value > 60000) {
+			c->Message(Chat::Yellow, "You must enter a value between 100-60000 (100ms to 60s).");
 
 			return;
 		}

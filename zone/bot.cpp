@@ -12860,7 +12860,7 @@ uint16 Bot::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
 			switch (stance) {
 				case Stance::AEBurn:
 				case Stance::Burn:
-					return 1;
+					return 100;
 				case Stance::Aggressive:
 					return 2000;
 				case Stance::Efficient:
@@ -12883,7 +12883,7 @@ uint16 Bot::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
 			switch (stance) {
 				case Stance::AEBurn:
 				case Stance::Burn:
-					return 1;
+					return 100;
 				case Stance::Aggressive:
 					return 3000;
 				case Stance::Efficient:
@@ -12898,7 +12898,7 @@ uint16 Bot::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
 		case BotSpellTypes::AEFear:
 			return 15000;
 		default:
-			return 1;
+			return 100;
 	}
 }
 
