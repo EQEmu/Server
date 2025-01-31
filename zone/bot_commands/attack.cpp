@@ -67,8 +67,8 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	}
 
 	if (attacker_count == 1 && first_attacker) {
-		Bot::RaidGroupSay(
-			first_attacker,
+		c->Message(
+			Chat::Green,
 			fmt::format(
 				"Attacking {}.",
 				target_mob->GetCleanName()
@@ -76,7 +76,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 		);
 	} else {
 		c->Message(
-			Chat::PetResponse,
+			Chat::Green,
 			fmt::format(
 				"{} of your bots are attacking {}.",
 				sbl.size(),
