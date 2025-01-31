@@ -115,8 +115,6 @@ namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
 	constexpr uint16 START_NO_BASE                    = BotSettingCategories::SpellHold;
 	constexpr uint16 START_CLIENT                     = BotSettingCategories::SpellDelay;
 	constexpr uint16 END_CLIENT                       = BotSettingCategories::SpellMaxThreshold;
-	constexpr uint16 END                              = BotSettingCategories::SpellTypeAEOrGroupTargetCount;
-	constexpr uint16 END_FULL                         = BotSettingCategories::SpellTypeRecastDelay;
 	constexpr uint16 END                              = BotSettingCategories::SpellTypeAnnounceCast;
 };
 
