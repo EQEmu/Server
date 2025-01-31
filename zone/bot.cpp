@@ -12989,6 +12989,20 @@ uint8 Bot::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
 			}
 		case BotSpellTypes::GroupHeals:
 		case BotSpellTypes::RegularHeal:
+			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellHold(BotSpellTypes::InCombatBuff))) {
+				return 60;
+			}
+
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 70;
+				case Stance::Efficient:
+					return 50;
+				default:
+					return 60;
+			}
 		case BotSpellTypes::PetRegularHeals:
 			switch (stance) {
 				case Stance::AEBurn:
@@ -13002,6 +13016,20 @@ uint8 Bot::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
 			}
 		case BotSpellTypes::CompleteHeal:
 		case BotSpellTypes::GroupCompleteHeals:
+			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellHold(BotSpellTypes::InCombatBuff))) {
+				return 55;
+			}
+
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 90;
+				case Stance::Efficient:
+					return 65;
+				default:
+					return 80;
+			}
 		case BotSpellTypes::PetCompleteHeals:
 			switch (stance) {
 				case Stance::AEBurn:
@@ -13047,8 +13075,8 @@ uint8 Bot::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
 		case BotSpellTypes::GroupHoTHeals:
 		case BotSpellTypes::HoTHeals:
 		case BotSpellTypes::PetHoTHeals:
-			if (bot_class == Class::Necromancer || bot_class == Class::Shaman) {
-				return 60;
+			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellHold(BotSpellTypes::InCombatBuff))) {
+				return 70;
 			}
 			else {
 				switch (stance) {

@@ -403,12 +403,17 @@ uint8 Client::GetDefaultSpellMaxThreshold(uint16 spell_type) {
 		case BotSpellTypes::CompleteHeal:
 		case BotSpellTypes::GroupCompleteHeals:
 		case BotSpellTypes::PetCompleteHeals:
-			return 80;
+			if (client_class == Class::Necromancer || client_class == Class::Shaman) {
+				return 55;
+			}
+			else {
+				return 80;
+			}
 		case BotSpellTypes::GroupHoTHeals:
 		case BotSpellTypes::HoTHeals:
 		case BotSpellTypes::PetHoTHeals:
 			if (client_class == Class::Necromancer || client_class == Class::Shaman) {
-				return 60;
+				return 70;
 			}
 			else {
 				return 90;
