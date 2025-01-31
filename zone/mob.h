@@ -977,7 +977,7 @@ public:
 	bool PassCharismaCheck(Mob* caster, uint16 spell_id);
 	bool TryDeathSave();
 	bool TryDivineSave();
-	void TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id);
+	void TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id, bool check_whitelist);
 	bool TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc_spellid);
 	bool TrySpellTrigger(Mob *target, uint32 spell_id, int effect);
 	void TryTriggerOnCastRequirement();

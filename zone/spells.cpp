@@ -1838,7 +1838,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			}
 		}
 
-		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id, false);
 
 	} else {
 		LogDebug("Spell was not eligible for Sympathetic Procs");
@@ -2678,7 +2678,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 						LogDebug("Adding Extra Pet Target: [{}]", pet->GetCleanName());
 						LogDebug("Setting Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
 						SetEntityVariable("SympProcTargetOverride", std::to_string(pet->GetID()));
-						TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+						TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id, false);
 					}
 					DeleteEntityVariable("SympProcTargetOverride");
 				}

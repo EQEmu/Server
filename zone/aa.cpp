@@ -1560,6 +1560,8 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 				return;
 			}
 
+			TryTriggerOnCastFocusEffect(focusTriggerOnCast, rank->spell, true);
+
 			p_timers.Start(spell_type + pTimerAAStart, timer_duration);
 		}
 		else {
