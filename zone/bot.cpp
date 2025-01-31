@@ -10553,11 +10553,13 @@ void Bot::SetBotSpellRecastTimer(uint16 spell_type, Mob* tar, bool precast) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		if (tar->IsClient()) {
-			tar->GetOwner()->CastToClient()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
+		Mob* owner = tar->GetOwner();
+
+		if (owner->IsClient()) {
+			owner->CastToClient()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
 		}
 		else {
-			tar->GetOwner()->CastToBot()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
+			owner->CastToBot()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
 		}
 	}
 	else if (IsBotSpellTypeOtherBeneficial(spell_type)) {
@@ -13088,7 +13090,9 @@ uint16 Bot::GetUltimateSpellDelay(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->IsClient() ? tar->GetOwner()->CastToClient()->GetSpellDelay(GetPetBotSpellType(spell_type)) : tar->GetOwner()->CastToBot()->GetSpellDelay(GetPetBotSpellType(spell_type));
+		Mob* owner = tar->GetOwner();
+
+		return owner->IsClient() ? owner->CastToClient()->GetSpellDelay(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellDelay(GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
@@ -13104,7 +13108,9 @@ bool Bot::GetUltimateSpellDelayCheck(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->IsClient() ? tar->GetOwner()->CastToClient()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type)) : tar->GetOwner()->CastToBot()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type));
+		Mob* owner = tar->GetOwner();
+
+		return owner->IsClient() ? owner->CastToClient()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type)) : owner->CastToBot()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
@@ -13120,7 +13126,9 @@ uint8 Bot::GetUltimateSpellMinThreshold(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->IsClient() ? tar->GetOwner()->CastToClient()->GetSpellMinThreshold(GetPetBotSpellType(spell_type)) : tar->GetOwner()->CastToBot()->GetSpellMinThreshold(GetPetBotSpellType(spell_type));
+		Mob* owner = tar->GetOwner();
+
+		return owner->IsClient() ? owner->CastToClient()->GetSpellMinThreshold(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellMinThreshold(GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
@@ -13136,7 +13144,9 @@ uint8 Bot::GetUltimateSpellMaxThreshold(uint16 spell_type, Mob* tar) {
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		return tar->IsClient() ? tar->GetOwner()->CastToClient()->GetSpellMaxThreshold(GetPetBotSpellType(spell_type)) : tar->GetOwner()->CastToBot()->GetSpellMaxThreshold(GetPetBotSpellType(spell_type));
+		Mob* owner = tar->GetOwner();
+
+		return owner->IsClient() ? owner->CastToClient()->GetSpellMaxThreshold(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellMaxThreshold(GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
