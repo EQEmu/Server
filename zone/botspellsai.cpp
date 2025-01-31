@@ -254,10 +254,6 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 				SetCastedSpellType(spell_type);
 			}
 
-			if (!GetSpellTypeAnnounceCast(spell_type)) {
-				return true;
-			}
-
 			RaidGroupSay(
 				this,
 				fmt::format(
@@ -305,10 +301,6 @@ bool Bot::BotCastMez(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 				SetCastedSpellType(spell_type);
 			}
 
-			if (!GetSpellTypeAnnounceCast(spell_type)) {
-				return true;
-			}
-
 			RaidGroupSay(
 				this,
 				fmt::format(
@@ -352,10 +344,6 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 				}
 			}
 
-			if (!GetSpellTypeAnnounceCast(spell_type)) {
-				return true;
-			}
-
 			RaidGroupSay(
 				this,
 				fmt::format(
@@ -367,10 +355,6 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 		else {
 			if (!IsCommandedSpell()) {
 				SetBotSpellRecastTimer(spell_type, tar, true);
-			}
-
-			if (!GetSpellTypeAnnounceCast(spell_type)) {
-				return true;
 			}
 
 			RaidGroupSay(
@@ -426,10 +410,6 @@ bool Bot::BotCastPet(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 		SetCastedSpellType(spell_type);
-
-		if (!GetSpellTypeAnnounceCast(spell_type)) {
-			return true;
-		}
 
 		RaidGroupSay(
 			this,
@@ -487,10 +467,6 @@ bool Bot::BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 			if (AIDoSpellCast(s.SpellIndex, tar, s.ManaCost)) {
 				SetCastedSpellType(spell_type);
 
-				if (!GetSpellTypeAnnounceCast(spell_type)) {
-					return true;
-				}
-
 				RaidGroupSay(
 					this,
 					fmt::format(
@@ -508,10 +484,6 @@ bool Bot::BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 	else {
 		if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 			SetCastedSpellType(spell_type);
-
-			if (!GetSpellTypeAnnounceCast(spell_type)) {
-				return true;
-			}
 
 			RaidGroupSay(
 				this,
@@ -549,10 +521,6 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 				}
 			}
 
-			if (!GetSpellTypeAnnounceCast(spell_type)) {
-				return true;
-			}
-
 			RaidGroupSay(
 				this,
 				fmt::format(
@@ -568,10 +536,6 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 				if (!IsCommandedSpell()) {
 					SetBotSpellRecastTimer(spell_type, tar, true);
 				}
-			}
-
-			if (!GetSpellTypeAnnounceCast(spell_type)) {
-				return true;
 			}
 
 			RaidGroupSay(
