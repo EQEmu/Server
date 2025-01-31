@@ -47,7 +47,7 @@ void bot_command_hold(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.size() == 1) {
-		Bot::BotGroupSay(
+		Bot::RaidGroupSay(
 			sbl.front(),
 			fmt::format(
 				"{}olding my attacks.",

@@ -47,7 +47,7 @@ void bot_command_guard(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.size() == 1) {
-		Bot::BotGroupSay(
+		Bot::RaidGroupSay(
 			sbl.front(),
 			fmt::format(
 				"{}uarding this position.",

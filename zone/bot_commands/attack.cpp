@@ -67,7 +67,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	}
 
 	if (attacker_count == 1 && first_attacker) {
-		Bot::BotGroupSay(
+		Bot::RaidGroupSay(
 			first_attacker,
 			fmt::format(
 				"Attacking {}.",

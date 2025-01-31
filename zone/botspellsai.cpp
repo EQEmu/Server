@@ -231,7 +231,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 		}
 
 		if (IsCommandedSpell() && IsCasting()) {
-			BotGroupSay(
+			RaidGroupSay(
 				this,
 				fmt::format(
 					"Interrupting {}. I have been commanded to try to cast a [{}] spell, {} on {}.",
@@ -258,7 +258,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 			}
 
 			if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-				BotGroupSay(
+				RaidGroupSay(
 					this,
 					fmt::format(
 						"Casting {} [{}] on {}.",
@@ -306,7 +306,7 @@ bool Bot::BotCastMez(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 				SetCastedSpellType(spell_type);
 			}
 
-			BotGroupSay(
+			RaidGroupSay(
 				this,
 				fmt::format(
 					"Casting {} [{}] on {}.",
@@ -342,7 +342,7 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 		if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
 			if (IsGroupSpell(bot_spell.SpellId)) {
-				BotGroupSay(
+				RaidGroupSay(
 					this,
 					fmt::format(
 						"Curing the group with {}.",
@@ -359,7 +359,7 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 				}
 			}
 			else {
-				BotGroupSay(
+				RaidGroupSay(
 					this,
 					fmt::format(
 						"Curing {} with {}.",
@@ -417,7 +417,7 @@ bool Bot::BotCastPet(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 		SetCastedSpellType(spell_type);
-		BotGroupSay(
+		RaidGroupSay(
 			this,
 			fmt::format(
 				"Summoning a pet [{}].",
@@ -474,7 +474,7 @@ bool Bot::BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 				SetCastedSpellType(spell_type);
 
 				if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-					BotGroupSay(
+					RaidGroupSay(
 						this,
 						fmt::format(
 							"Casting {} [{}] on {}.",
@@ -494,7 +494,7 @@ bool Bot::BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 			SetCastedSpellType(spell_type);
 
 			if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-				BotGroupSay(
+				RaidGroupSay(
 					this,
 					fmt::format(
 						"Casting {} [{}] on {}.",
@@ -522,7 +522,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 		if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
 			if (IsGroupSpell(bot_spell.SpellId)) {
-				BotGroupSay(
+				RaidGroupSay(
 					this,
 					fmt::format(
 						"Healing the group with {} [{}].",
@@ -543,7 +543,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 
 			}
 			else {
-				BotGroupSay(
+				RaidGroupSay(
 					this,
 					fmt::format(
 						"Healing {} with {} [{}].",
@@ -882,7 +882,7 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 	}
 
 	if (castedSpell) {
-		BotGroupSay(
+		RaidGroupSay(
 			this,
 			fmt::format(
 				"Casting {} on {}, please stay in range!",

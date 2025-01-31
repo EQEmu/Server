@@ -175,7 +175,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 					}
 				}
 
-				Bot::BotGroupSay(
+				Bot::RaidGroupSay(
 					bot_iter,
 					fmt::format(
 						"I can port you to {}.",
@@ -211,7 +211,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 			}
 
 			if (bot_iter->IsCommandedSpell() && bot_iter->IsCasting()) {
-				Bot::BotGroupSay(
+				Bot::RaidGroupSay(
 					bot_iter,
 					fmt::format(
 						"Interrupting {}. I have been commanded to try to cast a [{}] spell, {} on {}.",
@@ -234,7 +234,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 				}
 
 				if (bot_iter->GetClass() != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-					Bot::BotGroupSay(
+					Bot::RaidGroupSay(
 						bot_iter,
 						fmt::format(
 							"Casting {} [{}] on {}.",

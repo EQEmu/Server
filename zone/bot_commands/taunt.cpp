@@ -130,7 +130,7 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 
 			bot_iter->SetTaunting(taunt_state);
 
-			Bot::BotGroupSay(
+			Bot::RaidGroupSay(
 				bot_iter,
 				fmt::format(
 					"I am {} taunting.",
@@ -154,7 +154,7 @@ void bot_command_taunt(Client* c, const Seperator* sep)
 
 			bot_iter->GetPet()->CastToNPC()->SetTaunting(taunt_state);
 
-			Bot::BotGroupSay(
+			Bot::RaidGroupSay(
 				bot_iter,
 				fmt::format(
 					"My Pet is {} taunting.",

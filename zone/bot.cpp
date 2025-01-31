@@ -624,14 +624,14 @@ void Bot::ChangeBotRangedWeapons(bool isRanged) {
 		BotAddEquipItem(EQ::invslot::slotPrimary, GetBotItemBySlot(EQ::invslot::slotPrimary));
 		BotAddEquipItem(EQ::invslot::slotSecondary, GetBotItemBySlot(EQ::invslot::slotSecondary));
 		SetAttackTimer();
-		BotGroupSay(this, "My blade is ready");
+		RaidGroupSay(this, "My blade is ready");
 	} else {
 		BotRemoveEquipItem(EQ::invslot::slotPrimary);
 		BotRemoveEquipItem(EQ::invslot::slotSecondary);
 		BotAddEquipItem(EQ::invslot::slotAmmo, GetBotItemBySlot(EQ::invslot::slotAmmo));
 		BotAddEquipItem(EQ::invslot::slotSecondary, GetBotItemBySlot(EQ::invslot::slotRange));
 		SetAttackTimer();
-		BotGroupSay(this, "My blades are sheathed");
+		RaidGroupSay(this, "My blades are sheathed");
 	}
 }
 
@@ -1935,7 +1935,7 @@ bool Bot::BotRangedAttack(Mob* other, bool can_double_attack) {
 		if (!ammo || ammo_item->GetCharges() < 1) {
 			if (!GetCombatRoundForAlerts()) {
 				SetCombatRoundForAlerts();
-				BotGroupSay(this, "I do not have any ammo!");
+				RaidGroupSay(this, "I do not have any ammo!");
 			}
 		}
 		return false;
@@ -2967,11 +2967,11 @@ bool Bot::TryEvade(Mob* tar) {
 				}
 
 				if (zone->random.Int(0, 260) < (int)GetSkill(EQ::skills::SkillHide)) {
-					BotGroupSay(this, "I have momentarily ducked away from the main combat.");
+					RaidGroupSay(this, "I have momentarily ducked away from the main combat.");
 					RogueEvade(tar);
 				}
 				else {
-					BotGroupSay(this, "My attempts at ducking clear of combat fail.");
+					RaidGroupSay(this, "My attempts at ducking clear of combat fail.");
 				}
 
 				//SendAppearancePacket(AT_Invis, Invisibility::Visible);
@@ -3010,11 +3010,11 @@ bool Bot::TryEvade(Mob* tar) {
 
 				if (zone->random.Real(0, 160) > totalfeign) {
 					//SendAppearancePacket(AT_Anim, ANIM_DEATH);
-					BotGroupSay(this, "I have fallen to the ground.");
+					RaidGroupSay(this, "I have fallen to the ground.");
 					SetFeigned(false);
 				}
 				else {
-					BotGroupSay(this, "I have successfully feigned my death.");
+					RaidGroupSay(this, "I have successfully feigned my death.");
 					SetFeigned(true);
 					//SendAppearancePacket(AT_Anim, ANIM_DEATH);
 				}
@@ -3544,7 +3544,7 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 				const auto msg = fmt::format("Pulling {}.", pull_target->GetCleanName());
 				raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
 			} else {
-				BotGroupSay(
+				RaidGroupSay(
 					this,
 					fmt::format(
 						"Pulling {}.",
@@ -5319,7 +5319,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 	if (IsTaunting() && target->IsNPC() && taunt_time) {
 		if (GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this) {
-			BotGroupSay(
+			RaidGroupSay(
 				this,
 				fmt::format(
 					"Taunting {}.",
@@ -6255,7 +6255,7 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spel
 	bool isMainGroupMGB = false;
 
 	if (isMainGroupMGB && (GetClass() != Class::Bard)) {
-		BotGroupSay(
+		RaidGroupSay(
 			this,
 			fmt::format(
 				"Casting {} as a Mass Group Buff.",
@@ -7906,7 +7906,7 @@ void Bot::SetDefaultBotStance() {
 	_botStance = GetClass() == Class::Warrior ? Stance::Aggressive : Stance::Balanced;
 }
 
-void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
+void Bot::RaidGroupSay(Mob* speaker, const char* msg, ...) {
 	char buf[1000];
 	va_list ap;
 	va_start(ap, msg);
@@ -7962,7 +7962,7 @@ void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
 
 bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 	if (!IsValidSpell(spell_id)) {
-		BotGroupSay(this, "Not a valid spell.");
+		RaidGroupSay(this, "Not a valid spell.");
 		return false;
 	}
 
@@ -9390,7 +9390,7 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 
 	SetIsUsingItemClick(true);
 
-	BotGroupSay(
+	RaidGroupSay(
 		this,
 		fmt::format(
 			"Attempting to cast [{}] on {}.",
@@ -11264,7 +11264,7 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 
 
 		if (IsCasting()) {
-			BotGroupSay(
+			RaidGroupSay(
 				this,
 				fmt::format(
 					"Interrupting {}. I have been commanded to try to cast an AA - {} on {}.",
@@ -11278,7 +11278,7 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 		}
 
 		if (CastSpell(spell_id, tar->GetID())) {
-			BotGroupSay(
+			RaidGroupSay(
 				this,
 				fmt::format(
 					"Casting an AA - {} on {}.",
@@ -11381,7 +11381,7 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 	}
 
 	if (IsCasting()) {
-		BotGroupSay(
+		RaidGroupSay(
 			this,
 			fmt::format(
 				"Interrupting {}. I have been commanded to try to cast {} on {}.",
@@ -11397,7 +11397,7 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 		return false;
 	}
 
-	BotGroupSay(
+	RaidGroupSay(
 		this,
 		fmt::format(
 			"Casting {} on {}.",

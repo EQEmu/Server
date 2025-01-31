@@ -46,7 +46,7 @@ public:
 	Lua_Mob GetOwner();
 	int16 HasBotItem(uint32 item_id);
 	void OwnerMessage(std::string message);
-	void BotGroupSay(const char* message);
+	void RaidGroupSay(const char* message);
 	bool ReloadBotDataBuckets();
 	bool ReloadBotOwnerDataBuckets();
 	bool ReloadBotSpells();
