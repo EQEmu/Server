@@ -879,7 +879,6 @@ RULE_INT(Bots, MinStatusToBypassSpawnLimit, 100, "Minimum status to bypass spawn
 RULE_INT(Bots, MinStatusBypassSpawnLimit, 120, "Spawn limit with status bypass. Default 120.")
 RULE_INT(Bots, MinStatusToBypassCreateLimit, 100, "Minimum status to bypass create limit. Default 100.")
 RULE_INT(Bots, MinStatusBypassCreateLimit, 120, "Create limit with status bypass. Default 120.")
-RULE_BOOL(Bots, BardsAnnounceCasts, false, "This determines whether or not Bard bots will announce that they're casting songs (Buffs, Heals, Nukes, Slows, etc.) they will always announce Mez.")
 RULE_BOOL(Bots, EnableBotTGB, true, "If enabled bots will cast group buffs as TGB.")
 RULE_BOOL(Bots, DoResponseAnimations, true, "If enabled bots will do animations to certain responses or commands.")
 RULE_INT(Bots, DefaultFollowDistance, 20, "Default 20. Distance a bot will follow behind.")
