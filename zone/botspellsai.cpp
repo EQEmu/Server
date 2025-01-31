@@ -257,17 +257,19 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 				SetCastedSpellType(spell_type);
 			}
 
-			if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-				RaidGroupSay(
-					this,
-					fmt::format(
-						"Casting {} [{}] on {}.",
-						GetSpellName(s.SpellId),
-						GetSpellTypeNameByID(spell_type),
-						(tar == this ? "myself" : tar->GetCleanName())
-					).c_str()
-				);
+			if (!GetSpellTypeAnnounceCast(spell_type)) {
+				return true;
 			}
+
+			RaidGroupSay(
+				this,
+				fmt::format(
+					"Casting {} [{}] on {}.",
+					GetSpellName(s.SpellId),
+					GetSpellTypeNameByID(spell_type),
+					(tar == this ? "myself" : tar->GetCleanName())
+				).c_str()
+			);
 
 			return true;
 		}
@@ -306,6 +308,10 @@ bool Bot::BotCastMez(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 				SetCastedSpellType(spell_type);
 			}
 
+			if (!GetSpellTypeAnnounceCast(spell_type)) {
+				return true;
+			}
+
 			RaidGroupSay(
 				this,
 				fmt::format(
@@ -340,41 +346,47 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 	}
 
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
-		if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-			if (IsGroupSpell(bot_spell.SpellId)) {
-				RaidGroupSay(
-					this,
-					fmt::format(
-						"Curing the group with {}.",
-						GetSpellName(bot_spell.SpellId)
-					).c_str()
-				);
-
+		if (IsGroupSpell(bot_spell.SpellId)) {
+			if (!IsCommandedSpell()) {
 				const std::vector<Mob*> v = GatherSpellTargets(false, tar);
 
-				if (!IsCommandedSpell()) {
-					for (Mob* m : v) {
-						SetBotSpellRecastTimer(spell_type, m, true);
-					}
+				for (Mob* m : v) {
+					SetBotSpellRecastTimer(spell_type, m, true);
 				}
 			}
-			else {
-				RaidGroupSay(
-					this,
-					fmt::format(
-						"Curing {} with {}.",
-						(tar == this ? "myself" : tar->GetCleanName()),
-						GetSpellName(bot_spell.SpellId)
-					).c_str()
-				);
 
-				if (!IsCommandedSpell()) {
-					SetBotSpellRecastTimer(spell_type, tar, true);
-				}
-
+			if (!GetSpellTypeAnnounceCast(spell_type)) {
 				return true;
 			}
+
+			RaidGroupSay(
+				this,
+				fmt::format(
+					"Curing the group with {}.",
+					GetSpellName(bot_spell.SpellId)
+				).c_str()
+			);
 		}
+		else {
+			if (!IsCommandedSpell()) {
+				SetBotSpellRecastTimer(spell_type, tar, true);
+			}
+
+			if (!GetSpellTypeAnnounceCast(spell_type)) {
+				return true;
+			}
+
+			RaidGroupSay(
+				this,
+				fmt::format(
+					"Curing {} with {}.",
+					(tar == this ? "myself" : tar->GetCleanName()),
+					GetSpellName(bot_spell.SpellId)
+				).c_str()
+			);
+		}
+
+		return true;
 	}
 
 	return false;
@@ -417,6 +429,11 @@ bool Bot::BotCastPet(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 		SetCastedSpellType(spell_type);
+
+		if (!GetSpellTypeAnnounceCast(spell_type)) {
+			return true;
+		}
+
 		RaidGroupSay(
 			this,
 			fmt::format(
@@ -473,17 +490,19 @@ bool Bot::BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 			if (AIDoSpellCast(s.SpellIndex, tar, s.ManaCost)) {
 				SetCastedSpellType(spell_type);
 
-				if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-					RaidGroupSay(
-						this,
-						fmt::format(
-							"Casting {} [{}] on {}.",
-							GetSpellName(s.SpellId),
-							GetSpellTypeNameByID(spell_type),
-							tar->GetCleanName()
-						).c_str()
-					);
+				if (!GetSpellTypeAnnounceCast(spell_type)) {
+					return true;
 				}
+
+				RaidGroupSay(
+					this,
+					fmt::format(
+						"Casting {} [{}] on {}.",
+						GetSpellName(s.SpellId),
+						GetSpellTypeNameByID(spell_type),
+						tar->GetCleanName()
+					).c_str()
+				);
 
 				return true;
 			}
@@ -493,17 +512,19 @@ bool Bot::BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 		if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 			SetCastedSpellType(spell_type);
 
-			if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-				RaidGroupSay(
-					this,
-					fmt::format(
-						"Casting {} [{}] on {}.",
-						GetSpellName(bot_spell.SpellId),
-						GetSpellTypeNameByID(spell_type),
-						tar->GetCleanName()
-					).c_str()
-				);
+			if (!GetSpellTypeAnnounceCast(spell_type)) {
+				return true;
 			}
+
+			RaidGroupSay(
+				this,
+				fmt::format(
+					"Casting {} [{}] on {}.",
+					GetSpellName(bot_spell.SpellId),
+					GetSpellTypeNameByID(spell_type),
+					tar->GetCleanName()
+				).c_str()
+			);
 
 			return true;
 		}
@@ -520,45 +541,51 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 	}
 
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
-		if (bot_class != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-			if (IsGroupSpell(bot_spell.SpellId)) {
-				RaidGroupSay(
-					this,
-					fmt::format(
-						"Healing the group with {} [{}].",
-						GetSpellName(bot_spell.SpellId),
-						GetSpellTypeNameByID(spell_type)
-					).c_str()
-				);
-
-				if (bot_class != Class::Bard) {
+		if (IsGroupSpell(bot_spell.SpellId)) {
+			if (bot_class != Class::Bard) {
+				if (!IsCommandedSpell()) {
 					const std::vector<Mob*> v = GatherSpellTargets(false, tar);
 
-					if (!IsCommandedSpell()) {
-						for (Mob* m : v) {
-							SetBotSpellRecastTimer(spell_type, m, true);
-						}
-					}
-				}
-
-			}
-			else {
-				RaidGroupSay(
-					this,
-					fmt::format(
-						"Healing {} with {} [{}].",
-						(tar == this ? "myself" : tar->GetCleanName()), 
-						GetSpellName(bot_spell.SpellId), 
-						GetSpellTypeNameByID(spell_type)
-					).c_str()
-				);
-
-				if (bot_class != Class::Bard) {
-					if (!IsCommandedSpell()) {
-						SetBotSpellRecastTimer(spell_type, tar, true);
+					for (Mob* m : v) {
+						SetBotSpellRecastTimer(spell_type, m, true);
 					}
 				}
 			}
+
+			if (!GetSpellTypeAnnounceCast(spell_type)) {
+				return true;
+			}
+
+			RaidGroupSay(
+				this,
+				fmt::format(
+					"Healing the group with {} [{}].",
+					GetSpellName(bot_spell.SpellId),
+					GetSpellTypeNameByID(spell_type)
+				).c_str()
+			);
+
+		}
+		else {
+			if (bot_class != Class::Bard) {
+				if (!IsCommandedSpell()) {
+					SetBotSpellRecastTimer(spell_type, tar, true);
+				}
+			}
+
+			if (!GetSpellTypeAnnounceCast(spell_type)) {
+				return true;
+			}
+
+			RaidGroupSay(
+				this,
+				fmt::format(
+					"Healing {} with {} [{}].",
+					(tar == this ? "myself" : tar->GetCleanName()),
+					GetSpellName(bot_spell.SpellId),
+					GetSpellTypeNameByID(spell_type)
+				).c_str()
+			);
 		}
 
 		return true;

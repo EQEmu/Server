@@ -52,7 +52,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 			),
 		};
 		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
-		p.options = { "all, misc, spellsettings, spelltypesettings, spellholds, spelldelays, spellminthresholds, spellmaxthresholds, spellminmanapct, spellmaxmanapct, spellminhppct, spellmaxhppct, spellidlepriority, spellengagedpriority, spellpursuepriority, spellaggrochecks, spelltargetcounts, spellresistlimits, blockedbuffs, blockedpetbuffs" };
+		p.options = { "all, misc, spellsettings, spelltypesettings, spellholds, spelldelays, spellminthresholds, spellmaxthresholds, spellminmanapct, spellmaxmanapct, spellminhppct, spellmaxhppct, spellidlepriority, spellengagedpriority, spellpursuepriority, spellaggrochecks, spelltargetcounts, spellresistlimits, spellannouncecasts, blockedbuffs, blockedpetbuffs" };
 		p.options_one =
 		{
 			"[spellsettings] will copy ^spellsettings options",
@@ -111,6 +111,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 		"spellaggrochecks", 
 		"spelltargetcounts",
 		"spellresistlimits",
+		"spellannouncecasts",
 		"blockedbuffs", 
 		"blockedpetbuffs"
 	};
@@ -255,14 +256,16 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 				from->CopySettings(to, BotSettingCategories::SpellMinThreshold, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, spell_type);
+				from->CopySettings(to, BotSettingCategories::SpellTypeResistLimit, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, spell_type);
-				from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spell_type);
+				from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spell_type);				
 				from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, spell_type);
+				from->CopySettings(to, BotSettingCategories::SpellTypeAnnounceCast, spell_type);
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
@@ -271,14 +274,16 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 					from->CopySettings(to, BotSettingCategories::SpellMinThreshold, i);
 					from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeResistLimit, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, i);
-					from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, i);					
 					from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeAnnounceCast, i);
 				}
 			}
 
@@ -299,14 +304,16 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 				from->CopySettings(to, BotSettingCategories::SpellMinThreshold, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, spell_type);
+				from->CopySettings(to, BotSettingCategories::SpellTypeResistLimit, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeMaxHPPct, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeIdlePriority, spell_type);
 				from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, spell_type);
-				from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spell_type);
+				from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, spell_type);				
 				from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, spell_type);
+				from->CopySettings(to, BotSettingCategories::SpellTypeAnnounceCast, spell_type);
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
@@ -315,6 +322,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 					from->CopySettings(to, BotSettingCategories::SpellMinThreshold, i);
 					from->CopySettings(to, BotSettingCategories::SpellMaxThreshold, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeAggroCheck, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeResistLimit, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeMinManaPct, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeMaxManaPct, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeMinHPPct, i);
@@ -323,6 +331,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 					from->CopySettings(to, BotSettingCategories::SpellTypeEngagedPriority, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypePursuePriority, i);
 					from->CopySettings(to, BotSettingCategories::SpellTypeAEOrGroupTargetCount, i);
+					from->CopySettings(to, BotSettingCategories::SpellTypeAnnounceCast, i);
 				}
 			}
 

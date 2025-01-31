@@ -129,6 +129,7 @@ struct BotSpellSettings {
 	uint16      engaged_priority;           // engaged priority of the spell type
 	uint16      pursue_priority;            // pursue priority of the spell type
 	uint16      ae_or_group_target_count;   // require target count to cast an AE or Group spell type
+	uint16      announce_cast;              // announce when casting a certain spell type
 	Timer       recast_timer;               // recast timer based off delay
 };
 

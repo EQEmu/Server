@@ -7915,6 +7915,7 @@ void Bot::RaidGroupSay(Mob* speaker, const char* msg, ...) {
 
 	if (speaker->IsRaidGrouped()) {
 		Raid* r = speaker->CastToBot()->GetStoredRaid();
+
 		if (r) {
 			for (const auto& m : r->members) {
 				if (m.member && !m.is_bot) {
@@ -7932,6 +7933,7 @@ void Bot::RaidGroupSay(Mob* speaker, const char* msg, ...) {
 	}
 	else if (speaker->HasGroup()) {
 		Group* g = speaker->GetGroup();
+
 		if (g) {
 			for (auto& m : g->members) {
 				if (m && !m->IsBot()) {
@@ -7948,7 +7950,6 @@ void Bot::RaidGroupSay(Mob* speaker, const char* msg, ...) {
 		}
 	}
 	else {
-		//speaker->Say("%s", buf);
 		speaker->GetOwner()->FilteredMessageString(
 			speaker,
 			Chat::PetResponse,
@@ -10324,6 +10325,9 @@ void Bot::SetBotSetting(uint8 setting_type, uint16 bot_setting, int setting_valu
 		case BotSettingCategories::SpellTypeAEOrGroupTargetCount:
 			SetSpellTypeAEOrGroupTargetCount(bot_setting, setting_value);
 			break;
+		case BotSettingCategories::SpellTypeAnnounceCast:
+			SetSpellTypeAnnounceCast(bot_setting, setting_value);
+			break;
 	}
 }
 
@@ -10515,6 +10519,7 @@ void Bot::LoadDefaultBotSettings() {
 			bot_stance
 		);
 		t.ae_or_group_target_count = GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance);
+		t.announce_cast            = GetDefaultSpellTypeAnnounceCast(i, bot_stance);
 		t.recast_timer.Start();
 
 		m_bot_spell_settings.push_back(t);
@@ -10522,7 +10527,8 @@ void Bot::LoadDefaultBotSettings() {
 		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}] - [{} [#{}] stance]'", GetCleanName(), t.name, t.short_name, t.spell_type, Stance::GetName(bot_stance), bot_stance);
 		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellHold(i, bot_stance), GetDefaultSpellDelay(i, bot_stance), GetDefaultSpellMinThreshold(i, bot_stance), GetDefaultSpellMaxThreshold(i, bot_stance));
 		LogBotSettingsDetail("{} says, 'AggroCheck = [{}] | MinManaPCT = [{}\%] | MaxManaPCT = [{}\%] | MinHPPCT = [{}\% | MaxHPPCT = [{}\%]'", GetCleanName(), GetDefaultSpellTypeAggroCheck(i, bot_stance), GetDefaultSpellTypeMinManaLimit(i, bot_stance), GetDefaultSpellTypeMaxManaLimit(i, bot_stance), GetDefaultSpellTypeMinHPLimit(i, bot_stance), GetDefaultSpellTypeMaxHPLimit(i, bot_stance));
-		LogBotSettingsDetail("{} says, 'IdlePriority = [{}] | EngagedPriority = [{}] | PursuePriority = [{}] | ae_or_group_target_count = [{}]'", GetCleanName(), GetDefaultSpellTypeIdlePriority(i, GetClass(), bot_stance), GetDefaultSpellTypeEngagedPriority(i, GetClass(), bot_stance), GetDefaultSpellTypePursuePriority(i, GetClass(), bot_stance), GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance));
+		LogBotSettingsDetail("{} says, 'IdlePriority = [{}] | EngagedPriority = [{}] | PursuePriority = [{}]'", GetCleanName(), GetDefaultSpellTypeIdlePriority(i, GetClass(), bot_stance), GetDefaultSpellTypeEngagedPriority(i, GetClass(), bot_stance), GetDefaultSpellTypePursuePriority(i, GetClass(), bot_stance));
+		LogBotSettingsDetail("{} says, 'TargetCount = [{}] | AnnounceCast = [{}]'", GetCleanName(), GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance), GetDefaultSpellTypeAnnounceCast(i, bot_stance));
 	}
 }
 
@@ -10638,6 +10644,8 @@ int Bot::GetDefaultSetting(uint16 setting_category, uint16 setting_type, uint8 s
 			return GetDefaultSpellTypePriority(setting_type, BotPriorityCategories::Pursue, GetClass(), stance);
 		case BotSettingCategories::SpellTypeAEOrGroupTargetCount:
 			return GetDefaultSpellTypeAEOrGroupTargetCount(setting_type, stance);
+		case BotSettingCategories::SpellTypeAnnounceCast:
+			return GetDefaultSpellTypeAnnounceCast(setting_type, stance);
 		default:
 			break;
 	}
@@ -10675,6 +10683,8 @@ int Bot::GetSetting(uint16 setting_category, uint16 setting_type) {
 			return GetSpellTypePriority(setting_type, BotPriorityCategories::Pursue);
 		case BotSettingCategories::SpellTypeAEOrGroupTargetCount:
 			return GetSpellTypeAEOrGroupTargetCount(setting_type);
+		case BotSettingCategories::SpellTypeAnnounceCast:
+			return GetSpellTypeAnnounceCast(setting_type);
 		default:
 			break;
 	}
@@ -11121,6 +11131,29 @@ uint16 Bot::GetDefaultSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint8 sta
 	}
 
 	return 1;
+}
+
+uint16 Bot::GetDefaultSpellTypeAnnounceCast(uint16 spell_type, uint8 stance) {
+	switch (GetClass()) {
+		case Class::Bard:
+			switch (spell_type) {
+				case BotSpellTypes::Mez:
+				case BotSpellTypes::AEMez:
+				case BotSpellTypes::Cure:
+				case BotSpellTypes::GroupCures:
+				case BotSpellTypes::PetCures:
+				case BotSpellTypes::Charm:
+					return 1;
+				default: 
+					return 0;
+			}
+
+			return 1;
+		default:
+			return 1;
+	}
+
+	return 1; 
 }
 
 bool Bot::GetUltimateSpellHold(uint16 spell_type, Mob* tar) {
@@ -12113,6 +12146,17 @@ void Bot::CopySettings(Bot* to, uint8 setting_type, uint16 spell_type) {
 			}
 
 			break;
+		case BotSettingCategories::SpellTypeResistLimit:
+			if (spell_type != UINT16_MAX) {
+				to->SetSpellTypeResistLimit(spell_type, GetSpellTypeResistLimit(spell_type));
+			}
+			else {
+				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
+					to->SetSpellTypeResistLimit(i, GetSpellTypeResistLimit(i));
+				}
+			}
+
+			break;
 		case BotSettingCategories::SpellTypeMinManaPct:
 			if (spell_type != UINT16_MAX) {
 				to->SetSpellTypeMinManaLimit(spell_type, GetSpellTypeMinManaLimit(spell_type));
@@ -12197,6 +12241,17 @@ void Bot::CopySettings(Bot* to, uint8 setting_type, uint16 spell_type) {
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
 					to->SetSpellTypeAEOrGroupTargetCount(i, GetSpellTypeAEOrGroupTargetCount(i));
+				}
+			}
+
+			break;
+		case BotSettingCategories::SpellTypeAnnounceCast:
+			if (spell_type != UINT16_MAX) {
+				to->SetSpellTypeAnnounceCast(spell_type, GetSpellTypeAnnounceCast(spell_type));
+			}
+			else {
+				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
+					to->SetSpellTypeAnnounceCast(i, GetSpellTypeAnnounceCast(i));
 				}
 			}
 
@@ -12723,11 +12778,11 @@ uint16 Bot::GetSpellTypeIDByShortName(std::string spell_type_string) {
 }
 
 bool Bot::IsValidBotSpellCategory(uint8 setting_type) {
-	return EQ::ValueWithin(setting_type, BotSettingCategories::START, BotSettingCategories::END_FULL);
+	return EQ::ValueWithin(setting_type, BotSettingCategories::START, BotSettingCategories::END);
 }
 
 std::string Bot::GetBotSpellCategoryName(uint8 setting_type) {
-	return Bot::IsValidBotBaseSetting(setting_type) ? botSpellCategory_names[setting_type] : "UNKNOWN CATEGORY";
+	return Bot::IsValidBotSpellCategory(setting_type) ? botSpellCategory_names[setting_type] : "UNKNOWN CATEGORY";
 }
 
 uint16 Bot::GetBotSpellCategoryIDByShortName(std::string setting_string) {

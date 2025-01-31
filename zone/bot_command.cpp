@@ -180,6 +180,7 @@ int bot_command_init(void)
 		bot_command_add("sitincombat", "Toggles whether or a not a bot will attempt to med or sit to heal in combat", AccountStatus::Player, bot_command_sit_in_combat) ||
 		bot_command_add("sitmanapercent", "Mana threshold for a bot to start sitting in combat if allowed", AccountStatus::Player, bot_command_sit_mana_percent) ||
 		bot_command_add("spellaggrochecks", "Toggles whether or not bots will cast a spell type if they think it will get them aggro", AccountStatus::Player, bot_command_spell_aggro_checks) ||
+		bot_command_add("spellannouncecasts", "Turn on or off cast announcements by spell type", AccountStatus::Player, bot_command_spell_announce_cast) ||
 		bot_command_add("spellengagedpriority", "Controls the order of casts by spell type when engaged in combat", AccountStatus::Player, bot_command_spell_engaged_priority) ||
 		bot_command_add("spelldelays", "Controls the delay between casts for a specific spell type", AccountStatus::Player, bot_command_spell_delays) ||
 		bot_command_add("spellholds", "Controls whether a bot holds the specified spell type or not", AccountStatus::Player, bot_command_spell_holds) ||
@@ -959,6 +960,7 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 #include "bot_commands/sit_mana_percent.cpp"
 #include "bot_commands/spell.cpp"
 #include "bot_commands/spell_aggro_checks.cpp"
+#include "bot_commands/spell_announce_cast.cpp"
 #include "bot_commands/spell_delays.cpp"
 #include "bot_commands/spell_engaged_priority.cpp"
 #include "bot_commands/spell_holds.cpp"

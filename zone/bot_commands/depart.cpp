@@ -233,17 +233,15 @@ void bot_command_depart(Client* c, const Seperator* sep)
 					bot_iter->SetCastedSpellType(BotSpellTypes::Teleport);
 				}
 
-				if (bot_iter->GetClass() != Class::Bard || RuleB(Bots, BardsAnnounceCasts)) {
-					Bot::RaidGroupSay(
-						bot_iter,
-						fmt::format(
-							"Casting {} [{}] on {}.",
-							GetSpellName(itr->SpellId),
-							bot_iter->GetSpellTypeNameByID(BotSpellTypes::Teleport),
-							(tar == bot_iter ? "myself" : tar->GetCleanName())
-						).c_str()
-					);
-				}
+				Bot::RaidGroupSay(
+					bot_iter,
+					fmt::format(
+						"Casting {} [{}] on {}.",
+						GetSpellName(itr->SpellId),
+						bot_iter->GetSpellTypeNameByID(BotSpellTypes::Teleport),
+						(tar == bot_iter ? "myself" : tar->GetCleanName())
+					).c_str()
+				);
 
 				is_success = true;
 			}

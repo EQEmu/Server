@@ -109,7 +109,7 @@ namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
 	constexpr uint8 SpellTypeEngagedPriority          = 12;
 	constexpr uint8 SpellTypePursuePriority           = 13;
 	constexpr uint8 SpellTypeAEOrGroupTargetCount     = 14;
-	constexpr uint8 SpellTypeRecastDelay              = 15;
+	constexpr uint8 SpellTypeAnnounceCast             = 15;
 
 	constexpr uint16 START                            = BotSettingCategories::BaseSetting;
 	constexpr uint16 START_NO_BASE                    = BotSettingCategories::SpellHold;
@@ -117,6 +117,7 @@ namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
 	constexpr uint16 END_CLIENT                       = BotSettingCategories::SpellMaxThreshold;
 	constexpr uint16 END                              = BotSettingCategories::SpellTypeAEOrGroupTargetCount;
 	constexpr uint16 END_FULL                         = BotSettingCategories::SpellTypeRecastDelay;
+	constexpr uint16 END                              = BotSettingCategories::SpellTypeAnnounceCast;
 };
 
 static std::map<uint8, std::string> botSpellCategory_names = {
@@ -135,7 +136,7 @@ static std::map<uint8, std::string> botSpellCategory_names = {
 	{ BotSettingCategories::SpellTypeEngagedPriority,      "SpellEngagedPriority" },
 	{ BotSettingCategories::SpellTypePursuePriority,       "SpellPursuePriority" },
 	{ BotSettingCategories::SpellTypeAEOrGroupTargetCount, "SpellTargetCounts" },
-	{ BotSettingCategories::SpellTypeRecastDelay,          "SpellRecastDelay" }
+	{ BotSettingCategories::SpellTypeAnnounceCast,         "SpellAnnounceCasts" }
 };
 
 namespace BotPriorityCategories { // Update GetBotSpellCategoryName as needed
@@ -582,6 +583,7 @@ public:
 	uint8 GetDefaultSpellTypeMaxManaLimit(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint8 GetDefaultSpellTypeMinHPLimit(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint8 GetDefaultSpellTypeMaxHPLimit(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeAnnounceCast(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint16 GetDefaultSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint8 stance = Stance::Balanced);
 
 	static bool IsValidBotBaseSetting(uint16 setting_type);
@@ -627,6 +629,8 @@ public:
 	inline void SetSpellTypeMaxHPLimit(uint16 spell_type, uint8 value) { m_bot_spell_settings[spell_type].max_hp_pct = value; }
 	inline uint16 GetSpellTypeAEOrGroupTargetCount(uint16 spell_type) const { return m_bot_spell_settings[spell_type].ae_or_group_target_count; }
 	inline void SetSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint16 value) { m_bot_spell_settings[spell_type].ae_or_group_target_count = value; }
+	inline uint16 GetSpellTypeAnnounceCast(uint16 spell_type) const { return m_bot_spell_settings[spell_type].announce_cast; }
+	inline void SetSpellTypeAnnounceCast(uint16 spell_type, uint16 value) { m_bot_spell_settings[spell_type].announce_cast = value; }
 	inline uint16 GetSpellDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
 	inline void SetSpellDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
 	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
@@ -671,7 +675,7 @@ public:
 	inline uint16 GetCastedSpellType() const { return _castedSpellType; }
 	void SetCastedSpellType(uint16 spell_type);
 	bool IsValidSpellTypeSubType(uint16 spell_type, uint16 sub_type, uint16 spell_id);
-	bool IsValidBotSpellCategory(uint8 setting_type);
+	static bool IsValidBotSpellCategory(uint8 setting_type);
 	static std::string GetBotSpellCategoryName(uint8 setting_type);
 	static uint16 GetBotSpellCategoryIDByShortName(std::string setting_string);
 	void AssignBotSpellsToTypes(std::vector<BotSpells>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_wIndex>>& AIBot_spells_by_type);

@@ -1084,6 +1084,7 @@ void bot_command_sit_hp_percent(Client* c, const Seperator* sep);
 void bot_command_sit_in_combat(Client* c, const Seperator* sep);
 void bot_command_sit_mana_percent(Client* c, const Seperator* sep);
 void bot_command_spell_aggro_checks(Client* c, const Seperator* sep);
+void bot_command_spell_announce_cast(Client* c, const Seperator* sep);
 void bot_command_spell_delays(Client* c, const Seperator* sep);
 void bot_command_spell_engaged_priority(Client* c, const Seperator* sep);
 void bot_command_spell_holds(Client* c, const Seperator* sep);

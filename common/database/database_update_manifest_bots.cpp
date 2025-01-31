@@ -274,6 +274,7 @@ UPDATE `bot_command_settings` SET `aliases`= 'resistlimits' WHERE `bot_command`=
 UPDATE `bot_command_settings` SET `aliases`= 'targetcount' WHERE `bot_command`='spelltargetcount';
 UPDATE `bot_command_settings` SET `aliases`= 'disc' WHERE `bot_command`='discipline';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|vc') ELSE 'vc' END WHERE `bot_command`='viewcombos' AND `aliases` NOT LIKE '%vc%';
+UPDATE `bot_command_settings` SET `aliases`= 'announcecasts' WHERE `bot_command`='spellannouncecasts';
 )"
 	},
 	ManifestEntry{
