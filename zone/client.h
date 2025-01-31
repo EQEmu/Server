@@ -2283,9 +2283,9 @@ public:
 	int GetBotSetting(uint8 setting_type, uint16 bot_setting);
 	void SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value);
 
-	uint16 GetDefaultSpellDelay(uint16 spell_type, uint8 stance = Stance::Balanced);
-	uint8 GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
-	uint8 GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);	
+	uint16 GetDefaultSpellDelay(uint16 spell_type);
+	uint8 GetDefaultSpellMinThreshold(uint16 spell_type);
+	uint8 GetDefaultSpellMaxThreshold(uint16 spell_type);	
 	inline uint16 GetSpellDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
 	inline void SetSpellDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
 	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }

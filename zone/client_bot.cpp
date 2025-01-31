@@ -348,7 +348,7 @@ void Client::SendSpellTypePrompts(bool commanded_types, bool client_only_types) 
 	return;
 }
 
-uint16 Client::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
+uint16 Client::GetDefaultSpellDelay(uint16 spell_type) {
 	switch (spell_type) {
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
@@ -379,83 +379,39 @@ uint16 Client::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
 	}
 }
 
-uint8 Client::GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance) {
+uint8 Client::GetDefaultSpellMinThreshold(uint16 spell_type) {
 	switch (spell_type) {
 		default:
 			return 0;
 	}
 }
 
-uint8 Client::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
-	uint8 bot_class = GetClass();
+uint8 Client::GetDefaultSpellMaxThreshold(uint16 spell_type) {
+	uint8 client_class = GetClass();
 
 	switch (spell_type) {
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
-			switch (stance) {
-				case Stance::AEBurn:
-				case Stance::Burn:
-				case Stance::Aggressive:
-					return 40;
-				case Stance::Efficient:
-				default:
-					return 25;
-			}
+			return 25;
 		case BotSpellTypes::FastHeals:
 		case BotSpellTypes::PetFastHeals:
-			switch (stance) {
-				case Stance::AEBurn:
-				case Stance::Burn:
-				case Stance::Aggressive:
-					return 55;
-				case Stance::Efficient:
-					return 35;
-				default:
-					return 40;
-			}
+			return 40;
 		case BotSpellTypes::GroupHeals:
 		case BotSpellTypes::RegularHeal:
 		case BotSpellTypes::PetRegularHeals:
-			switch (stance) {
-				case Stance::AEBurn:
-				case Stance::Burn:
-				case Stance::Aggressive:
-					return 70;
-				case Stance::Efficient:
-					return 50;
-				default:
-					return 60;
-			}
+			return 60;
 		case BotSpellTypes::CompleteHeal:
 		case BotSpellTypes::GroupCompleteHeals:
 		case BotSpellTypes::PetCompleteHeals:
-			switch (stance) {
-				case Stance::AEBurn:
-				case Stance::Burn:
-				case Stance::Aggressive:
-					return 90;
-				case Stance::Efficient:
-					return 65;
-				default:
-					return 80;
-			}
+			return 80;
 		case BotSpellTypes::GroupHoTHeals:
 		case BotSpellTypes::HoTHeals:
 		case BotSpellTypes::PetHoTHeals:
-			if (bot_class == Class::Necromancer || bot_class == Class::Shaman) {
+			if (client_class == Class::Necromancer || client_class == Class::Shaman) {
 				return 60;
 			}
 			else {
-				switch (stance) {
-					case Stance::AEBurn:
-					case Stance::Burn:
-					case Stance::Aggressive:
-						return 95;
-					case Stance::Efficient:
-						return 80;
-					default:
-						return 90;
-				}
+				return 90;
 			}
 		case BotSpellTypes::Buff:
 		case BotSpellTypes::Cure:
