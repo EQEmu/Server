@@ -20,6 +20,7 @@
 #define BOT_STRUCTS
 
 #include "../common/types.h"
+#include "../common/timer.h"
 
 #include <sstream>
 
