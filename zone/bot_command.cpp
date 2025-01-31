@@ -190,6 +190,7 @@ int bot_command_init(void)
 		bot_command_add("spellminhppct", "Controls at what HP percent a bot will start casting different spell types", AccountStatus::Player, bot_command_spell_min_hp_pct) ||		
 		bot_command_add("spellminmanapct", "Controls at what mana percent a bot will start casting different spell types", AccountStatus::Player, bot_command_spell_min_mana_pct) ||
 		bot_command_add("spellminthresholds", "Controls the maximum target HP threshold for a spell to be cast for a specific type", AccountStatus::Player, bot_command_spell_min_thresholds) ||		
+		bot_command_add("spellresistlimits", "Controls the resist limits for bots to cast spells on their target", AccountStatus::Player, bot_command_spell_resist_limits) ||
 		bot_command_add("spellpursuepriority", "Controls the order of casts by spell type when pursuing in combat", AccountStatus::Player, bot_command_spell_pursue_priority) ||				
 		bot_command_add("spelltargetcount", "Sets the required target amount for group/AE spells by spell type", AccountStatus::Player, bot_command_spell_target_count) ||
 		bot_command_add("spellinfo", "Opens a dialogue window with spell info", AccountStatus::Player, bot_spell_info_dialogue_window) ||
@@ -969,6 +970,7 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 #include "bot_commands/spell_min_mana_pct.cpp"
 #include "bot_commands/spell_min_thresholds.cpp"
 #include "bot_commands/spell_pursue_priority.cpp"
+#include "bot_commands/spell_resist_limits.cpp"
 #include "bot_commands/spell_target_count.cpp"
 #include "bot_commands/spelltypes.cpp"
 #include "bot_commands/summon.cpp"

@@ -10295,6 +10295,9 @@ void Bot::SetBotSetting(uint8 setting_type, uint16 bot_setting, int setting_valu
 		case BotSettingCategories::SpellMaxThreshold:
 			SetSpellMaxThreshold(bot_setting, setting_value);
 			break;
+		case BotSettingCategories::SpellTypeResistLimit:
+			SetSpellTypeResistLimit(bot_setting, setting_value);
+			break;
 		case BotSettingCategories::SpellTypeAggroCheck:
 			SetSpellTypeAggroCheck(bot_setting, setting_value);
 			break;
@@ -10606,6 +10609,8 @@ int Bot::GetDefaultSetting(uint16 setting_category, uint16 setting_type, uint8 s
 			return GetDefaultSpellMinThreshold(setting_type, stance);
 		case BotSettingCategories::SpellMaxThreshold:
 			return GetDefaultSpellMaxThreshold(setting_type, stance);
+		case BotSettingCategories::SpellTypeResistLimit:
+			return GetDefaultSpellTypeResistLimit(setting_type, stance);
 		case BotSettingCategories::SpellTypeAggroCheck:
 			return GetDefaultSpellTypeAggroCheck(setting_type, stance);
 		case BotSettingCategories::SpellTypeMinManaPct:
@@ -10641,6 +10646,8 @@ int Bot::GetSetting(uint16 setting_category, uint16 setting_type) {
 			return GetSpellMinThreshold(setting_type);
 		case BotSettingCategories::SpellMaxThreshold:
 			return GetSpellMaxThreshold(setting_type);
+		case BotSettingCategories::SpellTypeResistLimit:
+			return GetSpellTypeResistLimit(setting_type);
 		case BotSettingCategories::SpellTypeAggroCheck:
 			return GetSpellTypeAggroCheck(setting_type);
 		case BotSettingCategories::SpellTypeMinManaPct:

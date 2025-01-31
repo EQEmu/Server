@@ -270,6 +270,7 @@ UPDATE `bot_command_settings` SET `aliases`= 'minhp' WHERE `bot_command`='spellm
 UPDATE `bot_command_settings` SET `aliases`= 'minmana' WHERE `bot_command`='spellminmanapct';
 UPDATE `bot_command_settings` SET `aliases`= 'minthresholds' WHERE `bot_command`='spellminthresholds';
 UPDATE `bot_command_settings` SET `aliases`= 'pursuepriority' WHERE `bot_command`='spellpursuepriority';
+UPDATE `bot_command_settings` SET `aliases`= 'resistlimits' WHERE `bot_command`='spellresistlimits';
 UPDATE `bot_command_settings` SET `aliases`= 'targetcount' WHERE `bot_command`='spelltargetcount';
 UPDATE `bot_command_settings` SET `aliases`= 'disc' WHERE `bot_command`='discipline';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|vc') ELSE 'vc' END WHERE `bot_command`='viewcombos' AND `aliases` NOT LIKE '%vc%';

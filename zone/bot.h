@@ -99,16 +99,17 @@ namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
 	constexpr uint8 SpellDelay                        = 2;
 	constexpr uint8 SpellMinThreshold                 = 3;
 	constexpr uint8 SpellMaxThreshold                 = 4;
-	constexpr uint8 SpellTypeAggroCheck               = 5;
-	constexpr uint8 SpellTypeMinManaPct               = 6;
-	constexpr uint8 SpellTypeMaxManaPct               = 7;
-	constexpr uint8 SpellTypeMinHPPct                 = 8;
-	constexpr uint8 SpellTypeMaxHPPct                 = 9;	
-	constexpr uint8 SpellTypeIdlePriority             = 10;
-	constexpr uint8 SpellTypeEngagedPriority          = 11;
-	constexpr uint8 SpellTypePursuePriority           = 12;
-	constexpr uint8 SpellTypeAEOrGroupTargetCount     = 13;
-	constexpr uint8 SpellTypeRecastDelay              = 14;
+	constexpr uint8 SpellTypeResistLimit              = 5;
+	constexpr uint8 SpellTypeAggroCheck               = 6;
+	constexpr uint8 SpellTypeMinManaPct               = 7;
+	constexpr uint8 SpellTypeMaxManaPct               = 8;
+	constexpr uint8 SpellTypeMinHPPct                 = 9;
+	constexpr uint8 SpellTypeMaxHPPct                 = 10;	
+	constexpr uint8 SpellTypeIdlePriority             = 11;
+	constexpr uint8 SpellTypeEngagedPriority          = 12;
+	constexpr uint8 SpellTypePursuePriority           = 13;
+	constexpr uint8 SpellTypeAEOrGroupTargetCount     = 14;
+	constexpr uint8 SpellTypeRecastDelay              = 15;
 
 	constexpr uint16 START                            = BotSettingCategories::BaseSetting;
 	constexpr uint16 START_NO_BASE                    = BotSettingCategories::SpellHold;
@@ -124,6 +125,7 @@ static std::map<uint8, std::string> botSpellCategory_names = {
 	{ BotSettingCategories::SpellDelay,                    "SpellDelays" },
 	{ BotSettingCategories::SpellMinThreshold,             "SpellMinThresholds" },
 	{ BotSettingCategories::SpellMaxThreshold,             "SpellMaxThresholds" },
+	{ BotSettingCategories::SpellTypeResistLimit,          "SpellResistLimit" },
 	{ BotSettingCategories::SpellTypeAggroCheck,           "SpellAggroChecks" },
 	{ BotSettingCategories::SpellTypeMinManaPct,           "SpellMinManaPct" },
 	{ BotSettingCategories::SpellTypeMaxManaPct,           "SpellMaxManaPct" },
