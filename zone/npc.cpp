@@ -555,7 +555,7 @@ void NPC::SetTarget(Mob* mob) {
 
 	// either normal pet and owner is client or charmed pet and owner is client
 	Mob *owner = nullptr;
-	if (IsPet() && IsPetOwnerOfClientBot()) {
+	if (IsPet() && IsPetOwnerClient()) {
 		owner = GetOwner();
 	} else if (IsCharmed()) {
 		owner = GetOwner();

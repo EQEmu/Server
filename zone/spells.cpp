@@ -2722,8 +2722,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 							SpellOnTarget(spell_id, this);
 						}
 					}
-				} else if (spell_target->IsRaidGrouped() && spell_target->IsClient()) {
-					Raid *target_raid = entity_list.GetRaidByClient(spell_target->CastToClient());
+				} else if (spell_target->IsRaidGrouped() && spell_target->IsOfClientBot()) {
+					Raid *target_raid = (IsClient() ? entity_list.GetRaidByClient(spell_target->CastToClient()) : entity_list.GetRaidByBot(spell_target->CastToBot()));
 					uint32 gid = 0xFFFFFFFF;
 					if (target_raid) {
 						gid = target_raid->GetGroup(spell_target->GetName());
