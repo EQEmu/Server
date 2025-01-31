@@ -218,12 +218,12 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 						"{} says, 'My [{}] minimum threshold is currently [{}%%].'",
 						my_bot->GetCleanName(),
 						Bot::GetSpellTypeNameByID(spell_type),
-						my_bot->GetSpellMinThreshold(spell_type)
+						my_bot->GetSpellTypeMinThreshold(spell_type)
 					).c_str()
 				);
 			}
 			else {
-				my_bot->SetSpellMinThreshold(spell_type, type_value);
+				my_bot->SetSpellTypeMinThreshold(spell_type, type_value);
 				++success_count;
 			}
 		}
@@ -236,7 +236,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 						"{} says, 'My [{}] minimum threshold was set to [{}%%].'",
 						first_found->GetCleanName(),
 						Bot::GetSpellTypeNameByID(spell_type),
-						first_found->GetSpellMinThreshold(spell_type)
+						first_found->GetSpellTypeMinThreshold(spell_type)
 					).c_str()
 				);
 			}
@@ -260,19 +260,19 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 				fmt::format(
 					"Your [{}] minimum threshold is currently [{}%%].",
 					Bot::GetSpellTypeNameByID(spell_type),
-					c->GetSpellMinThreshold(spell_type)
+					c->GetSpellTypeMinThreshold(spell_type)
 				).c_str()
 			);
 		}
 		else {
-			c->SetSpellMinThreshold(spell_type, type_value);
+			c->SetSpellTypeMinThreshold(spell_type, type_value);
 
 			c->Message(
 				Chat::Green,
 				fmt::format(
 					"Your [{}] minimum threshold was set to [{}%%].",
 					Bot::GetSpellTypeNameByID(spell_type),
-					c->GetSpellMinThreshold(spell_type)
+					c->GetSpellTypeMinThreshold(spell_type)
 				).c_str()
 			);
 		}

@@ -157,12 +157,12 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 					"{} says, 'My [{}] spell hold is currently [{}].'",
 					my_bot->GetCleanName(),
 					Bot::GetSpellTypeNameByID(spell_type),
-					my_bot->GetSpellHold(spell_type) ? "enabled" : "disabled"
+					my_bot->GetSpellTypeHold(spell_type) ? "enabled" : "disabled"
 				).c_str()
 			);
 		}
 		else {
-			my_bot->SetSpellHold(spell_type, type_value);
+			my_bot->SetSpellTypeHold(spell_type, type_value);
 			++success_count;
 		}
 	}
@@ -174,7 +174,7 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 					"{} says, 'My [{}] spell hold was [{}].'",
 					first_found->GetCleanName(),
 					Bot::GetSpellTypeNameByID(spell_type),
-					first_found->GetSpellHold(spell_type) ? "enabled" : "disabled"
+					first_found->GetSpellTypeHold(spell_type) ? "enabled" : "disabled"
 				).c_str()
 			);
 		}

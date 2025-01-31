@@ -216,12 +216,12 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 						"{} says, 'My [{}] maximum threshold is currently [{}%%].'",
 						my_bot->GetCleanName(),
 						Bot::GetSpellTypeNameByID(spell_type),
-						my_bot->GetSpellMaxThreshold(spell_type)
+						my_bot->GetSpellTypeMaxThreshold(spell_type)
 					).c_str()
 				);
 			}
 			else {
-				my_bot->SetSpellMaxThreshold(spell_type, type_value);
+				my_bot->SetSpellTypeMaxThreshold(spell_type, type_value);
 				++success_count;
 			}
 		}
@@ -234,7 +234,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 						"{} says, 'My [{}] maximum threshold was set to [{}%%].'",
 						first_found->GetCleanName(),
 						Bot::GetSpellTypeNameByID(spell_type),
-						first_found->GetSpellMaxThreshold(spell_type)
+						first_found->GetSpellTypeMaxThreshold(spell_type)
 					).c_str()
 				);
 			}
@@ -258,19 +258,19 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 				fmt::format(
 					"Your [{}] maximum threshold is currently [{}%%].",
 					Bot::GetSpellTypeNameByID(spell_type),
-					c->GetSpellMaxThreshold(spell_type)
+					c->GetSpellTypeMaxThreshold(spell_type)
 				).c_str()
 			);
 		}
 		else {
-			c->SetSpellMaxThreshold(spell_type, type_value);
+			c->SetSpellTypeMaxThreshold(spell_type, type_value);
 
 			c->Message(
 				Chat::Green,
 				fmt::format(
 					"Your [{}] maximum threshold was set to [{}%%].",
 					Bot::GetSpellTypeNameByID(spell_type),
-					c->GetSpellMaxThreshold(spell_type)
+					c->GetSpellTypeMaxThreshold(spell_type)
 				).c_str()
 			);
 		}

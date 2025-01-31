@@ -2283,15 +2283,15 @@ public:
 	int GetBotSetting(uint8 setting_type, uint16 bot_setting);
 	void SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value);
 
-	uint16 GetDefaultSpellDelay(uint16 spell_type);
-	uint8 GetDefaultSpellMinThreshold(uint16 spell_type);
-	uint8 GetDefaultSpellMaxThreshold(uint16 spell_type);	
-	inline uint16 GetSpellDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
-	inline void SetSpellDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
-	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
-	inline void SetSpellMinThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].min_threshold = threshold_value; }		
-	inline uint8 GetSpellMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_threshold; }
-	inline void SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].max_threshold = threshold_value; }	
+	uint16 GetDefaultSpellTypeDelay(uint16 spell_type);
+	uint8 GetDefaultSpellTypeMinThreshold(uint16 spell_type);
+	uint8 GetDefaultSpellTypeMaxThreshold(uint16 spell_type);
+	inline uint16 GetSpellTypeDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
+	inline void SetSpellTypeDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
+	inline uint8 GetSpellTypeMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
+	inline void SetSpellTypeMinThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].min_threshold = threshold_value; }
+	inline uint8 GetSpellTypeMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_threshold; }
+	inline void SetSpellTypeMaxThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].max_threshold = threshold_value; }
 	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
 	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
 

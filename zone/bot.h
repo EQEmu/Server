@@ -570,7 +570,7 @@ public:
 	void LoadDefaultBotSettings();
 	int GetDefaultSetting(uint16 setting_category, uint16 setting_type, uint8 stance = Stance::Balanced);
 	int GetDefaultBotBaseSetting(uint16 bot_setting, uint8 stance = Stance::Balanced);
-	bool GetDefaultSpellHold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	bool GetDefaultSpellTypeHold(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint16 GetDefaultSpellTypePriority(uint16 spell_type, uint8 priority_type, uint8 bot_class, uint8 stance = Stance::Balanced);
 	uint16 GetDefaultSpellTypeIdlePriority(uint16 spell_type, uint8 bot_class, uint8 stance = Stance::Balanced);
 	uint16 GetDefaultSpellTypeEngagedPriority(uint16 spell_type, uint8 bot_class, uint8 stance = Stance::Balanced);
@@ -607,9 +607,6 @@ public:
 	void SetBotBlockedBuffs(std::vector<BotBlockedBuffs> blocked_buffs) { bot_blocked_buffs = blocked_buffs; }
 
 	void SetBotSpellRecastTimer(uint16 spell_type, Mob* spelltar, bool pre_cast = false);
-	inline bool GetSpellHold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].hold; }
-	inline void SetSpellHold(uint16 spell_type, bool value) { m_bot_spell_settings[spell_type].hold = value; }
-	bool GetUltimateSpellHold(uint16 spell_type, Mob* tar);
 	uint16 GetSpellTypePriority(uint16 spell_type, uint8 priority_type);
 	void SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 priority);
 	inline uint16 GetSpellTypeResistLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].resist_limit; }
@@ -629,23 +626,26 @@ public:
 	inline void SetSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint16 value) { m_bot_spell_settings[spell_type].ae_or_group_target_count = value; }
 	inline uint16 GetSpellTypeAnnounceCast(uint16 spell_type) const { return m_bot_spell_settings[spell_type].announce_cast; }
 	inline void SetSpellTypeAnnounceCast(uint16 spell_type, uint16 value) { m_bot_spell_settings[spell_type].announce_cast = value; }
-	inline uint16 GetSpellDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
-	inline void SetSpellDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
-	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
-	inline void SetSpellMinThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].min_threshold = threshold_value; }
-	inline uint8 GetSpellMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_threshold; }
-	inline void SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].max_threshold = threshold_value; }
+	inline bool GetSpellTypeHold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].hold; }
+	inline void SetSpellTypeHold(uint16 spell_type, bool value) { m_bot_spell_settings[spell_type].hold = value; }
+	inline uint16 GetSpellTypeDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
+	inline void SetSpellTypeDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
+	inline uint8 GetSpellTypeMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
+	inline void SetSpellTypeMinThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].min_threshold = threshold_value; }
+	inline uint8 GetSpellTypeMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_threshold; }
+	inline void SetSpellTypeMaxThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].max_threshold = threshold_value; }
 	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
 	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
 	inline bool SpellTypeAIDelayCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].ai_delay.GetRemainingTime(); }
 	void SetSpellTypeAITimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].ai_delay.Start(recast_time); }
-	uint16 GetDefaultSpellDelay(uint16 spell_type, uint8 stance = Stance::Balanced);
-	uint8 GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
-	uint8 GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
-	uint16 GetUltimateSpellDelay(uint16 spell_type, Mob* tar);
-	bool GetUltimateSpellDelayCheck(uint16 spell_type, Mob* tar);
-	uint8 GetUltimateSpellMinThreshold(uint16 spell_type, Mob* tar);
-	uint8 GetUltimateSpellMaxThreshold(uint16 spell_type, Mob* tar);
+	bool GetUltimateSpellTypeHold(uint16 spell_type, Mob* tar);
+	uint16 GetDefaultSpellTypeDelay(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint16 GetUltimateSpellTypeDelay(uint16 spell_type, Mob* tar);
+	bool GetUltimateSpellTypeDelayCheck(uint16 spell_type, Mob* tar);
+	uint8 GetUltimateSpellTypeMinThreshold(uint16 spell_type, Mob* tar);
+	uint8 GetUltimateSpellTypeMaxThreshold(uint16 spell_type, Mob* tar);
 	void SetIllusionBlock(bool value) { _illusionBlock = value; }
 	bool GetIllusionBlock() const { return _illusionBlock; }
 	bool GetShowHelm() const { return _showHelm; }

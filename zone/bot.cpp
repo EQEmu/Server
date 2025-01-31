@@ -2928,7 +2928,7 @@ bool Bot::TryFacingTarget(Mob* tar) {
 
 
 bool Bot::TryEvade(Mob* tar) {
-	if (GetSpellHold(BotSpellTypes::Escape)) {
+	if (GetSpellTypeHold(BotSpellTypes::Escape)) {
 		return false;
 	}
 
@@ -7856,7 +7856,11 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	}
 
 	if (tar->IsBot()) {
-		if (tar->GetHPRatio() > GetUltimateSpellMinThreshold(BotSpellTypes::HateRedux, tar) && tar->GetHPRatio() < GetUltimateSpellMaxThreshold(BotSpellTypes::HateRedux, tar)) {
+		if (tar->GetHPRatio() > GetUltimateSpellTypeMinThreshold(BotSpellTypes::HateRedux, tar) && tar->GetHPRatio() <
+																									   GetUltimateSpellTypeMaxThreshold(
+																										   BotSpellTypes::HateRedux,
+																										   tar
+																									   )) {
 			return true;
 		}
 	}
@@ -9433,11 +9437,11 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
 
 	LogBotSpellChecksDetail("{} says, 'Running [{}] PreChecks on [{}].'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 
-	if (GetUltimateSpellHold(spell_type, tar)) {
+	if (GetUltimateSpellTypeHold(spell_type, tar)) {
 		if (!IsCommandedSpell()) {
 			SetSpellTypeAITimer(spell_type, RuleI(Bots, AICastSpellTypeHeldDelay));
 		}
-		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellHold.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
+		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellTypeHold.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 		return false;
 	}
 
@@ -9464,8 +9468,8 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
 		return false;
 	}
 
-	if (!GetUltimateSpellDelayCheck(spell_type, tar)) {
-		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellDelayCheck.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
+	if (!GetUltimateSpellTypeDelayCheck(spell_type, tar)) {
+		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellTypeDelayCheck.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 		return false;
 	}
 
@@ -9475,10 +9479,10 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
 			return true;
 		default:
 			if (
-				GetHPRatioForSpellType(spell_type, tar) < GetUltimateSpellMinThreshold(spell_type, tar) || 
-				GetHPRatioForSpellType(spell_type, tar) > GetUltimateSpellMaxThreshold(spell_type, tar)
+				GetHPRatioForSpellType(spell_type, tar) < GetUltimateSpellTypeMinThreshold(spell_type, tar) ||
+					GetHPRatioForSpellType(spell_type, tar) > GetUltimateSpellTypeMaxThreshold(spell_type, tar)
 			) {
-				LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellMinThreshold or GetUltimateSpellMaxThreshold.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
+				LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellTypeMinThreshold or GetUltimateSpellTypeMaxThreshold.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 				return false;
 			}
 	}
@@ -10287,16 +10291,16 @@ void Bot::SetBotSetting(uint8 setting_type, uint16 bot_setting, int setting_valu
 			SetBotBaseSetting(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellHold:
-			SetSpellHold(bot_setting, setting_value);
+			SetSpellTypeHold(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellDelay:
-			SetSpellDelay(bot_setting, setting_value);
+			SetSpellTypeDelay(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellMinThreshold:
-			SetSpellMinThreshold(bot_setting, setting_value);
+			SetSpellTypeMinThreshold(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellMaxThreshold:
-			SetSpellMaxThreshold(bot_setting, setting_value);
+			SetSpellTypeMaxThreshold(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellTypeResistLimit:
 			SetSpellTypeResistLimit(bot_setting, setting_value);
@@ -10493,10 +10497,10 @@ void Bot::LoadDefaultBotSettings() {
 		t.spell_type               = i;
 		t.short_name               = GetSpellTypeShortNameByID(i);
 		t.name                     = GetSpellTypeNameByID(i);
-		t.hold                     = GetDefaultSpellHold(i, bot_stance);
-		t.delay                    = GetDefaultSpellDelay(i, bot_stance);
-		t.min_threshold            = GetDefaultSpellMinThreshold(i, bot_stance);
-		t.max_threshold            = GetDefaultSpellMaxThreshold(i, bot_stance);
+		t.hold                     = GetDefaultSpellTypeHold(i, bot_stance);
+		t.delay                    = GetDefaultSpellTypeDelay(i, bot_stance);
+		t.min_threshold            = GetDefaultSpellTypeMinThreshold(i, bot_stance);
+		t.max_threshold            = GetDefaultSpellTypeMaxThreshold(i, bot_stance);
 		t.resist_limit             = GetDefaultSpellTypeResistLimit(i, bot_stance);
 		t.aggro_check              = GetDefaultSpellTypeAggroCheck(i, bot_stance);
 		t.min_mana_pct             = GetDefaultSpellTypeMinManaLimit(i, bot_stance);
@@ -10529,7 +10533,11 @@ void Bot::LoadDefaultBotSettings() {
 		m_bot_spell_settings.push_back(t);
 
 		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}] - [{} [#{}] stance]'", GetCleanName(), t.name, t.short_name, t.spell_type, Stance::GetName(bot_stance), bot_stance);
-		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellHold(i, bot_stance), GetDefaultSpellDelay(i, bot_stance), GetDefaultSpellMinThreshold(i, bot_stance), GetDefaultSpellMaxThreshold(i, bot_stance));
+		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(),
+							 GetDefaultSpellTypeHold(i, bot_stance),
+							 GetDefaultSpellTypeDelay(i, bot_stance),
+							 GetDefaultSpellTypeMinThreshold(i, bot_stance),
+							 GetDefaultSpellTypeMaxThreshold(i, bot_stance));
 		LogBotSettingsDetail("{} says, 'AggroCheck = [{}] | MinManaPCT = [{}\%] | MaxManaPCT = [{}\%] | MinHPPCT = [{}\% | MaxHPPCT = [{}\%]'", GetCleanName(), GetDefaultSpellTypeAggroCheck(i, bot_stance), GetDefaultSpellTypeMinManaLimit(i, bot_stance), GetDefaultSpellTypeMaxManaLimit(i, bot_stance), GetDefaultSpellTypeMinHPLimit(i, bot_stance), GetDefaultSpellTypeMaxHPLimit(i, bot_stance));
 		LogBotSettingsDetail("{} says, 'IdlePriority = [{}] | EngagedPriority = [{}] | PursuePriority = [{}]'", GetCleanName(), GetDefaultSpellTypeIdlePriority(i, GetClass(), bot_stance), GetDefaultSpellTypeEngagedPriority(i, GetClass(), bot_stance), GetDefaultSpellTypePursuePriority(i, GetClass(), bot_stance));
 		LogBotSettingsDetail("{} says, 'TargetCount = [{}] | AnnounceCast = [{}]'", GetCleanName(), GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance), GetDefaultSpellTypeAnnounceCast(i, bot_stance));
@@ -10560,22 +10568,22 @@ void Bot::SetBotSpellRecastTimer(uint16 spell_type, Mob* tar, bool precast) {
 		Mob* owner = tar->GetOwner();
 
 		if (owner->IsClient()) {
-			owner->CastToClient()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
+			owner->CastToClient()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellTypeDelay(spell_type, tar) + added_delay));
 		}
 		else {
-			owner->CastToBot()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
+			owner->CastToBot()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellTypeDelay(spell_type, tar) + added_delay));
 		}
 	}
 	else if (IsBotSpellTypeOtherBeneficial(spell_type)) {
 		if (tar->IsClient()) {
-			tar->CastToClient()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
+			tar->CastToClient()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellTypeDelay(spell_type, tar) + added_delay));
 		}
 		else {
-			tar->CastToBot()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
+			tar->CastToBot()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellTypeDelay(spell_type, tar) + added_delay));
 		}
 	}
 	else {
-		SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellDelay(spell_type, tar) + added_delay));
+		SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellTypeDelay(spell_type, tar) + added_delay));
 	}
 }
 
@@ -10623,13 +10631,13 @@ int Bot::GetDefaultSetting(uint16 setting_category, uint16 setting_type, uint8 s
 		case BotSettingCategories::BaseSetting:
 			return GetDefaultBotBaseSetting(setting_type, stance);
 		case BotSettingCategories::SpellHold:
-			return GetDefaultSpellHold(setting_type, stance);
+			return GetDefaultSpellTypeHold(setting_type, stance);
 		case BotSettingCategories::SpellDelay:
-			return GetDefaultSpellDelay(setting_type, stance);
+			return GetDefaultSpellTypeDelay(setting_type, stance);
 		case BotSettingCategories::SpellMinThreshold:
-			return GetDefaultSpellMinThreshold(setting_type, stance);
+			return GetDefaultSpellTypeMinThreshold(setting_type, stance);
 		case BotSettingCategories::SpellMaxThreshold:
-			return GetDefaultSpellMaxThreshold(setting_type, stance);
+			return GetDefaultSpellTypeMaxThreshold(setting_type, stance);
 		case BotSettingCategories::SpellTypeResistLimit:
 			return GetDefaultSpellTypeResistLimit(setting_type, stance);
 		case BotSettingCategories::SpellTypeAggroCheck:
@@ -10662,13 +10670,13 @@ int Bot::GetSetting(uint16 setting_category, uint16 setting_type) {
 		case BotSettingCategories::BaseSetting:
 			return GetBotBaseSetting(setting_type);
 		case BotSettingCategories::SpellHold:
-			return GetSpellHold(setting_type);
+			return GetSpellTypeHold(setting_type);
 		case BotSettingCategories::SpellDelay:
-			return GetSpellDelay(setting_type);
+			return GetSpellTypeDelay(setting_type);
 		case BotSettingCategories::SpellMinThreshold:
-			return GetSpellMinThreshold(setting_type);
+			return GetSpellTypeMinThreshold(setting_type);
 		case BotSettingCategories::SpellMaxThreshold:
-			return GetSpellMaxThreshold(setting_type);
+			return GetSpellTypeMaxThreshold(setting_type);
 		case BotSettingCategories::SpellTypeResistLimit:
 			return GetSpellTypeResistLimit(setting_type);
 		case BotSettingCategories::SpellTypeAggroCheck:
@@ -10696,7 +10704,7 @@ int Bot::GetSetting(uint16 setting_category, uint16 setting_type) {
 	}
 }
 
-bool Bot::GetDefaultSpellHold(uint16 spell_type, uint8 stance) {
+bool Bot::GetDefaultSpellTypeHold(uint16 spell_type, uint8 stance) {
 	uint8 bot_class = GetClass();
 
 	switch (spell_type) {
@@ -11162,16 +11170,16 @@ uint16 Bot::GetDefaultSpellTypeAnnounceCast(uint16 spell_type, uint8 stance) {
 	return 1; 
 }
 
-bool Bot::GetUltimateSpellHold(uint16 spell_type, Mob* tar) {
+bool Bot::GetUltimateSpellTypeHold(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return GetSpellHold(spell_type);
+		return GetSpellTypeHold(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->IsPetOwnerBot()) {
-		return tar->GetOwner()->CastToBot()->GetSpellHold(GetPetBotSpellType(spell_type));
+		return tar->GetOwner()->CastToBot()->GetSpellTypeHold(GetPetBotSpellType(spell_type));
 	}
 
-	return GetSpellHold(spell_type);
+	return GetSpellTypeHold(spell_type);
 }
 
 void Bot::SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 priority) {
@@ -11974,7 +11982,7 @@ bool Bot::RequiresLoSForPositioning() {
 	}
 
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-		if (IsBotSpellTypeDetrimental(i) && !GetSpellHold(i)) {
+		if (IsBotSpellTypeDetrimental(i) && !GetSpellTypeHold(i)) {
 			return true;
 		}
 	}
@@ -12100,44 +12108,44 @@ void Bot::CopySettings(Bot* to, uint8 setting_type, uint16 spell_type) {
 			break;
 		case BotSettingCategories::SpellHold:
 			if (spell_type != UINT16_MAX) {
-				to->SetSpellHold(spell_type, GetSpellHold(spell_type));
+				to->SetSpellTypeHold(spell_type, GetSpellTypeHold(spell_type));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellHold(i, GetSpellHold(i));
+					to->SetSpellTypeHold(i, GetSpellTypeHold(i));
 				}
 			}
 
 			break;
 		case BotSettingCategories::SpellDelay:
 			if (spell_type != UINT16_MAX) {
-				to->SetSpellDelay(spell_type, GetSpellDelay(spell_type));
+				to->SetSpellTypeDelay(spell_type, GetSpellTypeDelay(spell_type));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellDelay(i, GetSpellDelay(i));
+					to->SetSpellTypeDelay(i, GetSpellTypeDelay(i));
 				}
 			}
 
 			break;
 		case BotSettingCategories::SpellMinThreshold:
 			if (spell_type != UINT16_MAX) {
-				to->SetSpellMinThreshold(spell_type, GetSpellMinThreshold(spell_type));
+				to->SetSpellTypeMinThreshold(spell_type, GetSpellTypeMinThreshold(spell_type));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellMinThreshold(i, GetSpellMinThreshold(i));
+					to->SetSpellTypeMinThreshold(i, GetSpellTypeMinThreshold(i));
 				}
 			}
 
 			break;
 		case BotSettingCategories::SpellMaxThreshold:
 			if (spell_type != UINT16_MAX) {
-				to->SetSpellMaxThreshold(spell_type, GetSpellMaxThreshold(spell_type));
+				to->SetSpellTypeMaxThreshold(spell_type, GetSpellTypeMaxThreshold(spell_type));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellMaxThreshold(i, GetSpellMaxThreshold(i));
+					to->SetSpellTypeMaxThreshold(i, GetSpellTypeMaxThreshold(i));
 				}
 			}
 
@@ -12836,7 +12844,7 @@ std::string Bot::GetSubTypeNameByID(uint16 sub_type) {
 	return IsValidBotSpellType(sub_type) ? botSubType_names[sub_type] : "UNKNOWN SUBTYPE";
 }
 
-uint16 Bot::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
+uint16 Bot::GetDefaultSpellTypeDelay(uint16 spell_type, uint8 stance) {
 	switch (spell_type) {
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
@@ -12909,7 +12917,7 @@ uint16 Bot::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
 	}
 }
 
-uint8 Bot::GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance) {
+uint8 Bot::GetDefaultSpellTypeMinThreshold(uint16 spell_type, uint8 stance) {
 	switch (spell_type) {
 		case BotSpellTypes::AEDebuff:
 		case BotSpellTypes::Debuff:
@@ -12957,7 +12965,7 @@ uint8 Bot::GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance) {
 	}
 }
 
-uint8 Bot::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
+uint8 Bot::GetDefaultSpellTypeMaxThreshold(uint16 spell_type, uint8 stance) {
 	uint8 bot_class = GetClass();
 
 	switch (spell_type) {
@@ -12989,7 +12997,7 @@ uint8 Bot::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
 			}
 		case BotSpellTypes::GroupHeals:
 		case BotSpellTypes::RegularHeal:
-			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellHold(BotSpellTypes::InCombatBuff))) {
+			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellTypeHold(BotSpellTypes::InCombatBuff))) {
 				return 60;
 			}
 
@@ -13016,7 +13024,7 @@ uint8 Bot::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
 			}
 		case BotSpellTypes::CompleteHeal:
 		case BotSpellTypes::GroupCompleteHeals:
-			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellHold(BotSpellTypes::InCombatBuff))) {
+			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellTypeHold(BotSpellTypes::InCombatBuff))) {
 				return 55;
 			}
 
@@ -13075,7 +13083,7 @@ uint8 Bot::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
 		case BotSpellTypes::GroupHoTHeals:
 		case BotSpellTypes::HoTHeals:
 		case BotSpellTypes::PetHoTHeals:
-			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellHold(BotSpellTypes::InCombatBuff))) {
+			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellTypeHold(BotSpellTypes::InCombatBuff))) {
 				return 70;
 			}
 			else {
@@ -13117,25 +13125,28 @@ uint8 Bot::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
 	}
 }
 
-uint16 Bot::GetUltimateSpellDelay(uint16 spell_type, Mob* tar) {
+uint16 Bot::GetUltimateSpellTypeDelay(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return GetSpellDelay(spell_type);
+		return GetSpellTypeDelay(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
 		Mob* owner = tar->GetOwner();
 
-		return owner->IsClient() ? owner->CastToClient()->GetSpellDelay(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellDelay(GetPetBotSpellType(spell_type));
+		return owner->IsClient() ? owner->CastToClient()->GetSpellTypeDelay(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellTypeDelay(
+			GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
-		return tar->IsClient() ? tar->CastToClient()->GetSpellDelay(spell_type) : tar->CastToBot()->GetSpellDelay(spell_type);
+		return tar->IsClient() ? tar->CastToClient()->GetSpellTypeDelay(spell_type) : tar->CastToBot()->GetSpellTypeDelay(
+			spell_type
+		);
 	}
 
-	return GetSpellDelay(spell_type);
+	return GetSpellTypeDelay(spell_type);
 }
 
-bool Bot::GetUltimateSpellDelayCheck(uint16 spell_type, Mob* tar) {
+bool Bot::GetUltimateSpellTypeDelayCheck(uint16 spell_type, Mob* tar) {
 	if (!tar) {
 		return SpellTypeRecastCheck(spell_type);
 	}
@@ -13153,40 +13164,46 @@ bool Bot::GetUltimateSpellDelayCheck(uint16 spell_type, Mob* tar) {
 	return SpellTypeRecastCheck(spell_type);
 }
 
-uint8 Bot::GetUltimateSpellMinThreshold(uint16 spell_type, Mob* tar) {
+uint8 Bot::GetUltimateSpellTypeMinThreshold(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return GetSpellMinThreshold(spell_type);
+		return GetSpellTypeMinThreshold(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
 		Mob* owner = tar->GetOwner();
 
-		return owner->IsClient() ? owner->CastToClient()->GetSpellMinThreshold(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellMinThreshold(GetPetBotSpellType(spell_type));
+		return owner->IsClient() ? owner->CastToClient()->GetSpellTypeMinThreshold(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellTypeMinThreshold(
+			GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
-		return tar->IsClient() ? tar->CastToClient()->GetSpellMinThreshold(spell_type) : tar->CastToBot()->GetSpellMinThreshold(spell_type);
+		return tar->IsClient() ? tar->CastToClient()->GetSpellTypeMinThreshold(spell_type) : tar->CastToBot()->GetSpellTypeMinThreshold(
+			spell_type
+		);
 	}
 
-	return GetSpellMinThreshold(spell_type);
+	return GetSpellTypeMinThreshold(spell_type);
 }
 
-uint8 Bot::GetUltimateSpellMaxThreshold(uint16 spell_type, Mob* tar) {
+uint8 Bot::GetUltimateSpellTypeMaxThreshold(uint16 spell_type, Mob* tar) {
 	if (!tar) {
-		return GetSpellMaxThreshold(spell_type);
+		return GetSpellTypeMaxThreshold(spell_type);
 	}
 
 	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
 		Mob* owner = tar->GetOwner();
 
-		return owner->IsClient() ? owner->CastToClient()->GetSpellMaxThreshold(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellMaxThreshold(GetPetBotSpellType(spell_type));
+		return owner->IsClient() ? owner->CastToClient()->GetSpellTypeMaxThreshold(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellTypeMaxThreshold(
+			GetPetBotSpellType(spell_type));
 	}
 
 	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
-		return tar->IsClient() ? tar->CastToClient()->GetSpellMaxThreshold(spell_type) : tar->CastToBot()->GetSpellMaxThreshold(spell_type);
+		return tar->IsClient() ? tar->CastToClient()->GetSpellTypeMaxThreshold(spell_type) : tar->CastToBot()->GetSpellTypeMaxThreshold(
+			spell_type
+		);
 	}
 
-	return GetSpellMaxThreshold(spell_type);
+	return GetSpellTypeMaxThreshold(spell_type);
 }
 
 bool Bot::IsImmuneToBotSpell(uint16 spell_id, Mob* caster) {

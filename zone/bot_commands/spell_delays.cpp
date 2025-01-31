@@ -220,12 +220,12 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 						"{} says, 'My [{}] spell delay is currently [{}] seconds.'",
 						my_bot->GetCleanName(),
 						Bot::GetSpellTypeNameByID(spell_type),
-						my_bot->GetSpellDelay(spell_type) / 1000.00
+						my_bot->GetSpellTypeDelay(spell_type) / 1000.00
 					).c_str()
 				);
 			}
 			else {
-				my_bot->SetSpellDelay(spell_type, type_value);
+				my_bot->SetSpellTypeDelay(spell_type, type_value);
 				++success_count;
 			}
 		}
@@ -238,7 +238,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 						"{} says, 'My [{}] spell delay was set to [{}] seconds.'",
 						first_found->GetCleanName(),
 						Bot::GetSpellTypeNameByID(spell_type),
-						first_found->GetSpellDelay(spell_type) / 1000.00
+						first_found->GetSpellTypeDelay(spell_type) / 1000.00
 					).c_str()
 				);
 			}
@@ -262,19 +262,19 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 				fmt::format(
 					"Your [{}] spell delay is currently [{}] seconds.",
 					Bot::GetSpellTypeNameByID(spell_type),
-					c->GetSpellDelay(spell_type) / 1000.00
+					c->GetSpellTypeDelay(spell_type) / 1000.00
 				).c_str()
 			);
 		}
 		else {
-			c->SetSpellDelay(spell_type, type_value);
+			c->SetSpellTypeDelay(spell_type, type_value);
 
 			c->Message(
 				Chat::Green,
 				fmt::format(
 					"Your [{}] spell delay was set to [{}] seconds.",
 					Bot::GetSpellTypeNameByID(spell_type),
-					c->GetSpellDelay(spell_type) / 1000.00
+					c->GetSpellTypeDelay(spell_type) / 1000.00
 				).c_str()
 			);
 		}

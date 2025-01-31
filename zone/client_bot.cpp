@@ -233,15 +233,17 @@ void Client::LoadDefaultBotSettings() {
 		t.spell_type    = i;
 		t.short_name    = Bot::GetSpellTypeShortNameByID(i);
 		t.name          = Bot::GetSpellTypeNameByID(i);
-		t.delay         = GetDefaultSpellDelay(i);
-		t.min_threshold = GetDefaultSpellMinThreshold(i);
-		t.max_threshold = GetDefaultSpellMaxThreshold(i);
+		t.delay         = GetDefaultSpellTypeDelay(i);
+		t.min_threshold = GetDefaultSpellTypeMinThreshold(i);
+		t.max_threshold = GetDefaultSpellTypeMaxThreshold(i);
 		t.recast_timer.Start();
 
 		m_bot_spell_settings.push_back(t);
 
 		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}]'", GetCleanName(), t.name, t.short_name, t.spell_type);
-		LogBotSettingsDetail("{} says, 'Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellDelay(i), GetDefaultSpellMinThreshold(i), GetDefaultSpellMaxThreshold(i));
+		LogBotSettingsDetail("{} says, 'Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(),
+							 GetDefaultSpellTypeDelay(i),
+							 GetDefaultSpellTypeMinThreshold(i), GetDefaultSpellTypeMaxThreshold(i));
 	}
 }
 
@@ -250,11 +252,11 @@ int Client::GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting) {
 		case BotSettingCategories::BaseSetting:
 			return false; // only setting supported currently is illusion block
 		case BotSettingCategories::SpellDelay:
-			return GetDefaultSpellDelay(bot_setting);
+			return GetDefaultSpellTypeDelay(bot_setting);
 		case BotSettingCategories::SpellMinThreshold:
-			return GetDefaultSpellMinThreshold(bot_setting);
+			return GetDefaultSpellTypeMinThreshold(bot_setting);
 		case BotSettingCategories::SpellMaxThreshold:
-			return GetDefaultSpellMaxThreshold(bot_setting);
+			return GetDefaultSpellTypeMaxThreshold(bot_setting);
 	}
 }
 
@@ -263,11 +265,11 @@ int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
 		case BotSettingCategories::BaseSetting:
 			return GetIllusionBlock(); // only setting supported currently
 		case BotSettingCategories::SpellDelay:
-			return GetSpellDelay(bot_setting);
+			return GetSpellTypeDelay(bot_setting);
 		case BotSettingCategories::SpellMinThreshold:
-			return GetSpellMinThreshold(bot_setting);
+			return GetSpellTypeMinThreshold(bot_setting);
 		case BotSettingCategories::SpellMaxThreshold:
-			return GetSpellMaxThreshold(bot_setting);
+			return GetSpellTypeMaxThreshold(bot_setting);
 	}
 }
 
@@ -277,13 +279,13 @@ void Client::SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 settin
 			SetIllusionBlock(setting_value); // only setting supported currently
 			break;
 		case BotSettingCategories::SpellDelay:
-			SetSpellDelay(bot_setting, setting_value);
+			SetSpellTypeDelay(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellMinThreshold:
-			SetSpellMinThreshold(bot_setting, setting_value);
+			SetSpellTypeMinThreshold(bot_setting, setting_value);
 			break;
 		case BotSettingCategories::SpellMaxThreshold:
-			SetSpellMaxThreshold(bot_setting, setting_value);
+			SetSpellTypeMaxThreshold(bot_setting, setting_value);
 			break;
 	}
 }
@@ -348,7 +350,7 @@ void Client::SendSpellTypePrompts(bool commanded_types, bool client_only_types) 
 	return;
 }
 
-uint16 Client::GetDefaultSpellDelay(uint16 spell_type) {
+uint16 Client::GetDefaultSpellTypeDelay(uint16 spell_type) {
 	switch (spell_type) {
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
@@ -379,14 +381,14 @@ uint16 Client::GetDefaultSpellDelay(uint16 spell_type) {
 	}
 }
 
-uint8 Client::GetDefaultSpellMinThreshold(uint16 spell_type) {
+uint8 Client::GetDefaultSpellTypeMinThreshold(uint16 spell_type) {
 	switch (spell_type) {
 		default:
 			return 0;
 	}
 }
 
-uint8 Client::GetDefaultSpellMaxThreshold(uint16 spell_type) {
+uint8 Client::GetDefaultSpellTypeMaxThreshold(uint16 spell_type) {
 	uint8 client_class = GetClass();
 
 	switch (spell_type) {

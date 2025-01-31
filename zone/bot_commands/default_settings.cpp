@@ -219,10 +219,14 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		}
 		else if (!strcasecmp(sep->arg[1], "spelltypesettings")) {
 			if (spell_type != UINT16_MAX) {
-				my_bot->SetSpellHold(spell_type, my_bot->GetDefaultSpellHold(spell_type, bot_stance));
-				my_bot->SetSpellDelay(spell_type, my_bot->GetDefaultSpellDelay(spell_type, bot_stance));
-				my_bot->SetSpellMinThreshold(spell_type, my_bot->GetDefaultSpellMinThreshold(spell_type, bot_stance));
-				my_bot->SetSpellMaxThreshold(spell_type, my_bot->GetDefaultSpellMaxThreshold(spell_type, bot_stance));
+				my_bot->SetSpellTypeHold(spell_type, my_bot->GetDefaultSpellTypeHold(spell_type, bot_stance));
+				my_bot->SetSpellTypeDelay(spell_type, my_bot->GetDefaultSpellTypeDelay(spell_type, bot_stance));
+				my_bot->SetSpellTypeMinThreshold(
+					spell_type,
+					my_bot->GetDefaultSpellTypeMinThreshold(spell_type, bot_stance));
+				my_bot->SetSpellTypeMaxThreshold(
+					spell_type,
+					my_bot->GetDefaultSpellTypeMaxThreshold(spell_type, bot_stance));
 				my_bot->SetSpellTypeAggroCheck(spell_type, my_bot->GetDefaultSpellTypeAggroCheck(spell_type, bot_stance));
 				my_bot->SetSpellTypeResistLimit(spell_type, my_bot->GetDefaultSpellTypeResistLimit(spell_type, bot_stance));
 				my_bot->SetSpellTypeMinManaLimit(spell_type, my_bot->GetDefaultSpellTypeMinManaLimit(spell_type, bot_stance));
@@ -237,10 +241,10 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					my_bot->SetSpellHold(i, my_bot->GetDefaultSpellHold(i, bot_stance));
-					my_bot->SetSpellDelay(i, my_bot->GetDefaultSpellDelay(i, bot_stance));
-					my_bot->SetSpellMinThreshold(i, my_bot->GetDefaultSpellMinThreshold(i, bot_stance));
-					my_bot->SetSpellMaxThreshold(i, my_bot->GetDefaultSpellMaxThreshold(i, bot_stance));
+					my_bot->SetSpellTypeHold(i, my_bot->GetDefaultSpellTypeHold(i, bot_stance));
+					my_bot->SetSpellTypeDelay(i, my_bot->GetDefaultSpellTypeDelay(i, bot_stance));
+					my_bot->SetSpellTypeMinThreshold(i, my_bot->GetDefaultSpellTypeMinThreshold(i, bot_stance));
+					my_bot->SetSpellTypeMaxThreshold(i, my_bot->GetDefaultSpellTypeMaxThreshold(i, bot_stance));
 					my_bot->SetSpellTypeAggroCheck(i, my_bot->GetDefaultSpellTypeAggroCheck(i, bot_stance));
 					my_bot->SetSpellTypeResistLimit(i, my_bot->GetDefaultSpellTypeResistLimit(i, bot_stance));
 					my_bot->SetSpellTypeMinManaLimit(i, my_bot->GetDefaultSpellTypeMinManaLimit(i, bot_stance));
@@ -263,10 +267,10 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 			}
 
 			for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-				my_bot->SetSpellHold(i, my_bot->GetDefaultSpellHold(i, bot_stance));
-				my_bot->SetSpellDelay(i, my_bot->GetDefaultSpellDelay(i, bot_stance));
-				my_bot->SetSpellMinThreshold(i, my_bot->GetDefaultSpellMinThreshold(i, bot_stance));
-				my_bot->SetSpellMaxThreshold(i, my_bot->GetDefaultSpellMaxThreshold(i, bot_stance));
+				my_bot->SetSpellTypeHold(i, my_bot->GetDefaultSpellTypeHold(i, bot_stance));
+				my_bot->SetSpellTypeDelay(i, my_bot->GetDefaultSpellTypeDelay(i, bot_stance));
+				my_bot->SetSpellTypeMinThreshold(i, my_bot->GetDefaultSpellTypeMinThreshold(i, bot_stance));
+				my_bot->SetSpellTypeMaxThreshold(i, my_bot->GetDefaultSpellTypeMaxThreshold(i, bot_stance));
 				my_bot->SetSpellTypeAggroCheck(i, my_bot->GetDefaultSpellTypeAggroCheck(i, bot_stance));
 				my_bot->SetSpellTypeResistLimit(i, my_bot->GetDefaultSpellTypeResistLimit(i, bot_stance));
 				my_bot->SetSpellTypeMinManaLimit(i, my_bot->GetDefaultSpellTypeMinManaLimit(i, bot_stance));
@@ -288,11 +292,11 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		}
 		else if (!strcasecmp(sep->arg[1], "holds")) {
 			if (spell_type != UINT16_MAX) {
-				my_bot->SetSpellHold(spell_type, my_bot->GetDefaultSpellHold(spell_type, bot_stance));
+				my_bot->SetSpellTypeHold(spell_type, my_bot->GetDefaultSpellTypeHold(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					my_bot->SetSpellHold(i, my_bot->GetDefaultSpellHold(i, bot_stance));
+					my_bot->SetSpellTypeHold(i, my_bot->GetDefaultSpellTypeHold(i, bot_stance));
 				}
 			}
 
@@ -300,11 +304,11 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		}
 		else if (!strcasecmp(sep->arg[1], "delays")) {
 			if (spell_type != UINT16_MAX) {
-				my_bot->SetSpellDelay(spell_type, my_bot->GetDefaultSpellDelay(spell_type, bot_stance));
+				my_bot->SetSpellTypeDelay(spell_type, my_bot->GetDefaultSpellTypeDelay(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					my_bot->SetSpellDelay(i, my_bot->GetDefaultSpellDelay(i, bot_stance));
+					my_bot->SetSpellTypeDelay(i, my_bot->GetDefaultSpellTypeDelay(i, bot_stance));
 				}
 			}
 
@@ -312,11 +316,13 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		}
 		else if (!strcasecmp(sep->arg[1], "minthresholds")) {
 			if (spell_type != UINT16_MAX) {
-				my_bot->SetSpellMinThreshold(spell_type, my_bot->GetDefaultSpellMinThreshold(spell_type, bot_stance));
+				my_bot->SetSpellTypeMinThreshold(
+					spell_type,
+					my_bot->GetDefaultSpellTypeMinThreshold(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					my_bot->SetSpellMinThreshold(i, my_bot->GetDefaultSpellMinThreshold(i, bot_stance));
+					my_bot->SetSpellTypeMinThreshold(i, my_bot->GetDefaultSpellTypeMinThreshold(i, bot_stance));
 				}
 			}
 
@@ -324,11 +330,13 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		}
 		else if (!strcasecmp(sep->arg[1], "maxthresholds")) {
 			if (spell_type != UINT16_MAX) {
-				my_bot->SetSpellMaxThreshold(spell_type, my_bot->GetDefaultSpellMaxThreshold(spell_type, bot_stance));
+				my_bot->SetSpellTypeMaxThreshold(
+					spell_type,
+					my_bot->GetDefaultSpellTypeMaxThreshold(spell_type, bot_stance));
 			}
 			else {
 				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					my_bot->SetSpellMaxThreshold(i, my_bot->GetDefaultSpellMaxThreshold(i, bot_stance));
+					my_bot->SetSpellTypeMaxThreshold(i, my_bot->GetDefaultSpellTypeMaxThreshold(i, bot_stance));
 				}
 			}
 
