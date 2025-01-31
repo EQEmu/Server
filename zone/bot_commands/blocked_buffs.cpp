@@ -164,10 +164,11 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 						c->Message(
 							Chat::Yellow,
 							fmt::format(
-								"{} says, '{} [#{}] is currently blocked.'",
+								"{} says, '{} [#{}] is currently blocked. [{}]'",
 								bot_iter->GetCleanName(),
 								spells[blocked_buff.spell_id].name,
-								blocked_buff.spell_id
+								blocked_buff.spell_id,
+								Saylink::Silent(fmt::format("^blockedbuffs remove {}", blocked_buff.spell_id),"Remove")
 							).c_str()
 						);
 					}
@@ -401,10 +402,11 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 						c->Message(
 							Chat::Yellow,
 							fmt::format(
-								"{} says, '{} [#{}] is currently blocked for my pet.'",
+								"{} says, '{} [#{}] is currently blocked for my pet. [{}]'",
 								bot_iter->GetCleanName(),
 								spells[blocked_buff.spell_id].name,
-								blocked_buff.spell_id
+								blocked_buff.spell_id,
+								Saylink::Silent(fmt::format("^blockedpetbuffs remove {}", blocked_buff.spell_id), "Remove")
 							).c_str()
 						);
 					}
