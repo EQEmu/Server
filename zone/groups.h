@@ -69,7 +69,7 @@ public:
 	void	GetMemberList(std::list<Mob*>& member_list, bool clear_list = true);
 	void	GetClientList(std::list<Client*>& client_list, bool clear_list = true);
 	void	GetBotList(std::list<Bot*>& bot_list, bool clear_list = true);
-	void	GetRawBotList(std::list<uint32>& bot_list, bool clear_list = true);
+	std::list<uint32> GetRawBotList();
 	bool	IsGroupMember(Mob* c);
 	bool	IsGroupMember(const char* name);
 	bool	Process();

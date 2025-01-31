@@ -1017,11 +1017,9 @@ void Group::GetBotList(std::list<Bot*>& bot_list, bool clear_list)
 	}
 }
 
-void Group::GetRawBotList(std::list<uint32>& bot_list, bool clear_list)
+std::list<uint32> Group::GetRawBotList()
 {
-	if (clear_list) {
-		bot_list.clear();
-	}
+	std::list<uint32> bot_list;
 
 	const auto& l = GroupIdRepository::GetWhere(
 		database,
@@ -1032,10 +1030,12 @@ void Group::GetRawBotList(std::list<uint32>& bot_list, bool clear_list)
 	);
 
 	for (const auto& e : l) {
-		if (e.bot_id) {			
+		if (e.bot_id) {
 			bot_list.push_back(e.bot_id);
 		}
 	}
+
+	return bot_list;
 }
 
 bool Group::Process() {
@@ -1263,8 +1263,7 @@ void Client::LeaveGroup() {
 		}
 
 		if (RuleB(Bots, Enabled)) {
-			std::list<uint32> sbl;
-			g->GetRawBotList(sbl);
+			std::list<uint32> sbl = g->GetRawBotList();
 
 			for (auto botID : sbl) {
 				auto b = entity_list.GetBotByBotID(botID);
@@ -2618,8 +2617,7 @@ void Group::AddToGroup(AddToGroupRequest r)
 }
 
 void Group::RemoveClientsBots(Client* c) {
-	std::list<uint32> sbl;
-	GetRawBotList(sbl);
+	std::list<uint32> sbl = GetRawBotList();
 
 	for (auto botID : sbl) {
 		auto b = entity_list.GetBotByBotID(botID);
