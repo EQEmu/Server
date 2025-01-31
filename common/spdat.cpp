@@ -2824,6 +2824,34 @@ bool IsResurrectSpell(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_Revive);
 }
 
+bool IsResistanceBuffSpell(uint16 spell_id) {
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	const auto& spell = spells[spell_id];
+
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (IsBlankSpellEffect(spell_id, i)) {
+			continue;
+		}
+
+		if (
+			spell.effect_id[i] == SE_ResistFire ||
+			spell.effect_id[i] == SE_ResistCold ||
+			spell.effect_id[i] == SE_ResistPoison ||
+			spell.effect_id[i] == SE_ResistDisease ||
+			spell.effect_id[i] == SE_ResistMagic ||
+			spell.effect_id[i] == SE_ResistCorruption ||
+			spell.effect_id[i] == SE_ResistAll
+		) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool IsResistanceOnlySpell(uint16 spell_id) {
 	if (!IsValidSpell(spell_id)) {
 		return false;
@@ -2868,6 +2896,35 @@ bool IsDamageShieldOnlySpell(uint16 spell_id) {
 
 		if (
 			spell.effect_id[i] != SE_DamageShield
+		) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool IsDamageShieldAndResistSpell(uint16 spell_id) {
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	const auto& spell = spells[spell_id];
+
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (IsBlankSpellEffect(spell_id, i)) {
+			continue;
+		}
+
+		if (
+			spell.effect_id[i] != SE_DamageShield &&
+			spell.effect_id[i] != SE_ResistFire &&
+			spell.effect_id[i] != SE_ResistCold &&
+			spell.effect_id[i] != SE_ResistPoison &&
+			spell.effect_id[i] != SE_ResistDisease &&
+			spell.effect_id[i] != SE_ResistMagic &&
+			spell.effect_id[i] != SE_ResistCorruption &&
+			spell.effect_id[i] != SE_ResistAll
 		) {
 			return false;
 		}

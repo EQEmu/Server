@@ -11572,7 +11572,8 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id) {
 		case BotSpellTypes::PetBuffs:
 			if (
 				IsResistanceOnlySpell(spell_id) || 
-				IsDamageShieldOnlySpell(spell_id)
+				IsDamageShieldOnlySpell(spell_id) ||
+				IsDamageShieldAndResistSpell(spell_id)
 			) {
 				return false;
 			}
@@ -11580,14 +11581,14 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id) {
 			return true;
 		case BotSpellTypes::ResistBuffs:
 		case BotSpellTypes::PetResistBuffs:
-			if (IsResistanceOnlySpell(spell_id)) {
+			if (IsResistanceBuffSpell(spell_id)) {
 				return true;
 			}
 			
 			return false;
 		case BotSpellTypes::DamageShields:
 		case BotSpellTypes::PetDamageShields:
-			if (IsDamageShieldOnlySpell(spell_id)) {
+			if (IsEffectInSpell(spell_id, SE_DamageShield)) {
 				return true;
 			}
 

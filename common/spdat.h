@@ -1908,8 +1908,10 @@ bool IsLichSpell(uint16 spell_id);
 bool IsInstantHealSpell(uint32 spell_id);
 bool IsResurrectSpell(uint16 spell_id);
 bool RequiresStackCheck(uint16 spell_type);
+bool IsResistanceBuffSpell(uint16 spell_id);
 bool IsResistanceOnlySpell(uint16 spell_id);
 bool IsDamageShieldOnlySpell(uint16 spell_id);
+bool IsDamageShieldAndResistSpell(uint16 spell_id);
 bool IsHateSpell(uint16 spell_id);
 
 #endif

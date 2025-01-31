@@ -32,10 +32,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 		!AI_HasSpells() ||
 		(spell_type == BotSpellTypes::Pet && tar != this) ||
 		(IsPetBotSpellType(spell_type) && !tar->IsPet()) ||
-		(spell_type == BotSpellTypes::Buff && tar->IsPet()) ||
-		(spell_type == BotSpellTypes::InCombatBuffSong && tar->IsPet()) ||
-		(spell_type == BotSpellTypes::OutOfCombatBuffSong && tar->IsPet()) ||
-		(spell_type == BotSpellTypes::PreCombatBuffSong && tar->IsPet()) ||
+		(!IsPetBotSpellType(spell_type) && tar->IsPet()) ||
 		(!RuleB(Bots, AllowBuffingHealingFamiliars) && tar->IsFamiliar()) ||
 		(tar->IsPet() && tar->IsCharmed() && spell_type == BotSpellTypes::PetBuffs && !RuleB(Bots, AllowCharmedPetBuffs)) ||
 		(tar->IsPet() && tar->IsCharmed() && spell_type == BotSpellTypes::PetCures && !RuleB(Bots, AllowCharmedPetCures)) ||
