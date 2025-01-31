@@ -1199,11 +1199,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			{
 				//Attempt to remove up to base amount of detrimental effects (excluding charm, fear, resurrection, and revival sickness).
 				int purify_count = spells[spell_id].base_value[i];
-				if (purify_count > GetMaxTotalSlots()) {
-					purify_count = GetMaxTotalSlots();
-				}
 
-				for(int slot = 0; slot < purify_count; slot++) {
+				for(int slot = 0; slot < GetMaxTotalSlots() && purify_count > 0; slot++) {
 					if (IsValidSpell(buffs[slot].spellid) && IsDetrimentalSpell(buffs[slot].spellid)){
 
 						if (!IsEffectInSpell(buffs[slot].spellid, SE_Charm) &&
@@ -1215,6 +1212,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							buffs[slot].spellid != SPELL_REVIVAL_SICKNESS)
 						{
 							BuffFadeBySlot(slot);
+							purify_count--;
 						}
 					}
 				}
