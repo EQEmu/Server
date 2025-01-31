@@ -9434,6 +9434,9 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
 	LogBotSpellChecksDetail("{} says, 'Running [{}] PreChecks on [{}].'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 
 	if (GetUltimateSpellHold(spell_type, tar)) {
+		if (!IsCommandedSpell()) {
+			SetSpellTypeAITimer(spell_type, RuleI(Bots, AICastSpellTypeHeldDelay));
+		}
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellHold.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 		return false;
 	}
@@ -10521,6 +10524,7 @@ void Bot::LoadDefaultBotSettings() {
 		t.ae_or_group_target_count = GetDefaultSpellTypeAEOrGroupTargetCount(i, bot_stance);
 		t.announce_cast            = GetDefaultSpellTypeAnnounceCast(i, bot_stance);
 		t.recast_timer.Start();
+		t.ai_delay.Start();
 
 		m_bot_spell_settings.push_back(t);
 

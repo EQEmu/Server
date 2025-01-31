@@ -663,6 +663,7 @@ bool Bot::AI_PursueCastCheck() {
 
 		for (auto& current_cast : cast_order) {
 			if (current_cast.priority == 0) {
+				SetSpellTypeAITimer(current_cast.spellType, RuleI(Bots, AICastSpellTypeHeldDelay));
 				LogBotSpellChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
 				continue;
 			}
@@ -679,11 +680,17 @@ bool Bot::AI_PursueCastCheck() {
 				continue;
 			}
 
+			if (!SpellTypeAIDelayCheck(current_cast.spellType)) {
+				continue;
+			}
+
 			result = AttemptAICastSpell(current_cast.spellType, nullptr);
 
 			if (!result && IsBotSpellTypeBeneficial(current_cast.spellType)) {
 				result = AttemptCloseBeneficialSpells(current_cast.spellType);
 			}
+
+			SetSpellTypeAITimer(current_cast.spellType, RuleI(Bots, AICastSpellTypeDelay));
 
 			if (result) {
 				break;
@@ -731,6 +738,7 @@ bool Bot::AI_IdleCastCheck() {
 
 		for (auto& current_cast : cast_order) {
 			if (current_cast.priority == 0) {
+				SetSpellTypeAITimer(current_cast.spellType, RuleI(Bots, AICastSpellTypeHeldDelay));
 				LogBotSpellChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
 				continue;
 			}
@@ -755,6 +763,10 @@ bool Bot::AI_IdleCastCheck() {
 				continue;
 			}
 
+			if (!SpellTypeAIDelayCheck(current_cast.spellType)) {
+				continue;
+			}
+
 			result = AttemptAICastSpell(current_cast.spellType, nullptr);
 
 			if (result) {
@@ -762,6 +774,8 @@ bool Bot::AI_IdleCastCheck() {
 			}
 
 			result = AttemptCloseBeneficialSpells(current_cast.spellType);
+
+			SetSpellTypeAITimer(current_cast.spellType, RuleI(Bots, AICastSpellTypeDelay));
 
 			if (result) {
 				break;
@@ -799,6 +813,7 @@ bool Bot::AI_EngagedCastCheck() {
 
 		for (auto& current_cast : cast_order) {
 			if (current_cast.priority == 0) {
+				SetSpellTypeAITimer(current_cast.spellType, RuleI(Bots, AICastSpellTypeHeldDelay));
 				LogBotSpellChecksDetail("{} says, '[{}] is priority 0, skipping.'", GetCleanName(), GetSpellTypeNameByID(current_cast.spellType));
 				continue;
 			}
@@ -815,7 +830,13 @@ bool Bot::AI_EngagedCastCheck() {
 				continue;
 			}
 
+			if (!SpellTypeAIDelayCheck(current_cast.spellType)) {
+				continue;
+			}
+
 			result = AttemptAICastSpell(current_cast.spellType, nullptr);
+
+			SetSpellTypeAITimer(current_cast.spellType, RuleI(Bots, AICastSpellTypeDelay));
 
 			if (!result && IsBotSpellTypeBeneficial(current_cast.spellType)) {
 				result = AttemptCloseBeneficialSpells(current_cast.spellType);

@@ -898,6 +898,8 @@ RULE_STRING(Bots, ZonesWithSpawnLimits, "", "Comma-delimited list of zones where
 RULE_STRING(Bots, ZoneSpawnLimits, "", "Comma-delimited list of spawn limits for zones.")
 RULE_STRING(Bots, ZonesWithForcedSpawnLimits, "", "Comma-delimited list of zones where bot spawn limits are forced. This will take priority over any other type of spawn limits.")
 RULE_STRING(Bots, ZoneForcedSpawnLimits, "", "Comma-delimited list of forced spawn limits for zones.")
+RULE_INT(Bots, AICastSpellTypeDelay, 100, "Delay in milliseconds between AI cast attempts for each spell type. Default 100ms")
+RULE_INT(Bots, AICastSpellTypeHeldDelay, 2500, "Delay in milliseconds between AI cast attempts for each spell type that is held or disabled. Default 2500ms (2.5s)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)

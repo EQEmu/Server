@@ -637,6 +637,8 @@ public:
 	inline void SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].max_threshold = threshold_value; }
 	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
 	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
+	inline bool SpellTypeAIDelayCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].ai_delay.GetRemainingTime(); }
+	void SetSpellTypeAITimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].ai_delay.Start(recast_time); }
 	uint16 GetDefaultSpellDelay(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint8 GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint8 GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
