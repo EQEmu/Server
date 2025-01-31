@@ -30,7 +30,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} 99 spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Snare)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Snare)
 			),
 			fmt::format(
 				"{} {} 99 spawned",
@@ -44,7 +44,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} 99 byname Enchbot",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Debuff)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Debuff)
 			),
 			fmt::format(
 				"{} {} 99 byname Enchbot",
@@ -58,7 +58,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} current spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 			fmt::format(
 				"{} {} current spawned",
@@ -123,8 +123,8 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 		}
 	}
 	else {
-		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 
 			if (clientSetting && !IsClientBotSpellType(spell_type)) {
 				c->Message(Chat::Yellow, "Invalid spell type for clients.");
@@ -215,7 +215,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} says, 'My [{}] maximum threshold is currently [{}%%].'",
 						my_bot->GetCleanName(),
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						my_bot->GetSpellMaxThreshold(spell_type)
 					).c_str()
 				);
@@ -233,7 +233,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} says, 'My [{}] maximum threshold was set to [{}%%].'",
 						first_found->GetCleanName(),
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						first_found->GetSpellMaxThreshold(spell_type)
 					).c_str()
 				);
@@ -244,7 +244,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} of your bots set their [{}] maximum threshold to [{}%%].",
 						success_count,
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						type_value
 					).c_str()
 				);
@@ -257,7 +257,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 				Chat::Green,
 				fmt::format(
 					"Your [{}] maximum threshold is currently [{}%%].",
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					c->GetSpellMaxThreshold(spell_type)
 				).c_str()
 			);
@@ -269,7 +269,7 @@ void bot_command_spell_max_thresholds(Client* c, const Seperator* sep) {
 				Chat::Green,
 				fmt::format(
 					"Your [{}] maximum threshold was set to [{}%%].",
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					c->GetSpellMaxThreshold(spell_type)
 				).c_str()
 			);

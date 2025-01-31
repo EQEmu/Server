@@ -30,7 +30,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} 8000 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::DOT),
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::DOT),
 				Class::Necromancer
 			),
 			fmt::format(
@@ -46,7 +46,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} 2500 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::FastHeals),
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::FastHeals),
 				Class::Warrior
 			),
 			fmt::format(
@@ -62,7 +62,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} current spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 			fmt::format(
 				"{} {} current spawned",
@@ -127,8 +127,8 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 		}
 	}
 	else {
-		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 
 			if (clientSetting && !IsClientBotSpellType(spell_type)) {
 				c->Message(Chat::Yellow, "Invalid spell type for clients.");
@@ -219,7 +219,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} says, 'My [{}] spell delay is currently [{}] seconds.'",
 						my_bot->GetCleanName(),
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						my_bot->GetSpellDelay(spell_type) / 1000.00
 					).c_str()
 				);
@@ -237,7 +237,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} says, 'My [{}] spell delay was set to [{}] seconds.'",
 						first_found->GetCleanName(),
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						first_found->GetSpellDelay(spell_type) / 1000.00
 					).c_str()
 				);
@@ -248,7 +248,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} of your bots set their [{}] spell delay to [{}] seconds.",
 						success_count,
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						type_value / 1000.00
 					).c_str()
 				);
@@ -261,7 +261,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 				Chat::Green,
 				fmt::format(
 					"Your [{}] spell delay is currently [{}] seconds.",
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					c->GetSpellDelay(spell_type) / 1000.00
 				).c_str()
 			);
@@ -273,7 +273,7 @@ void bot_command_spell_delays(Client* c, const Seperator* sep) {
 				Chat::Green,
 				fmt::format(
 					"Your [{}] spell delay was set to [{}] seconds.",
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					c->GetSpellDelay(spell_type) / 1000.00
 				).c_str()
 			);

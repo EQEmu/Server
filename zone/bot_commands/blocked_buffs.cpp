@@ -251,7 +251,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} add 202",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			)
 		};
 		p.examples_two =

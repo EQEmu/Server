@@ -23,7 +23,7 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} 10 spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Snare)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Snare)
 			),
 			fmt::format(
 				"{} {} 10 spawned",
@@ -37,7 +37,7 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} 90 byname BotA",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::FastHeals)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::FastHeals)
 			),
 			fmt::format(
 				"{} {} 90 byname BotA",
@@ -51,7 +51,7 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} current spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Stun)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Stun)
 			),
 			fmt::format(
 				"{} {} current spawned",
@@ -98,8 +98,8 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 		}
 	}
 	else {
-		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 		}
 		else {
 			c->Message(
@@ -174,7 +174,7 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] maximum mana is currently [{}%%].'",
 					my_bot->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					my_bot->GetSpellTypeMaxManaLimit(spell_type)
 				).c_str()
 			);
@@ -191,7 +191,7 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] maximum mana was set to [{}%%].'",
 					first_found->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					first_found->GetSpellTypeMaxManaLimit(spell_type)
 				).c_str()
 			);
@@ -202,7 +202,7 @@ void bot_command_spell_max_mana_pct(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots set their [{}] maximum mana to [{}%%].",
 					success_count,
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					type_value
 				).c_str()
 			);

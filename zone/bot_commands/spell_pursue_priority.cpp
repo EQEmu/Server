@@ -28,7 +28,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} 1 spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 			fmt::format(
 				"{} {} 1 spawned",
@@ -42,7 +42,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} 0 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Cure),
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Cure),
 				Class::Shaman
 			),
 			fmt::format(
@@ -58,7 +58,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} current spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Buff)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Buff)
 			),
 			fmt::format(
 				"{} {} current spawned",
@@ -106,8 +106,8 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 		}
 	}
 	else {
-		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 		}
 		else if (!arg1.compare("list")) {
 			++ab_arg;
@@ -186,7 +186,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] pursue cast priority is currently [{}].'",
 					my_bot->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					my_bot->GetSpellTypePriority(spell_type, BotPriorityCategories::Pursue)
 				).c_str()
 			);
@@ -200,7 +200,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 					fmt::format(
 						"{} says, 'My [{}] pursue cast priority for is currently [{}].'",
 						my_bot->GetCleanName(),
-						c->GetSpellTypeNameByID(current_cast.spellType),
+						Bot::GetSpellTypeNameByID(current_cast.spellType),
 						(current_cast.priority == 0 ? "disabled (0)" : std::to_string(current_cast.priority))
 					).c_str()
 				);
@@ -228,7 +228,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] pursue cast priority was set to [{}].'",
 					first_found->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					first_found->GetSpellTypePriority(spell_type, BotPriorityCategories::Pursue)
 				).c_str()
 			);
@@ -239,7 +239,7 @@ void bot_command_spell_pursue_priority(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots set their [{}] pursue cast priority to [{}].",
 					success_count,
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					type_value
 				).c_str()
 			);

@@ -24,7 +24,7 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} 1 spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::DOT)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::DOT)
 			),
 			fmt::format(
 				"{} {} 1 spawned",
@@ -38,7 +38,7 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} current spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::DOT)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::DOT)
 			),
 			fmt::format(
 				"{} {} current spawned",
@@ -85,8 +85,8 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 		}
 	}
 	else {
-		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 		}
 		else {
 			c->Message(
@@ -156,7 +156,7 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] spell hold is currently [{}].'",
 					my_bot->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					my_bot->GetSpellHold(spell_type) ? "enabled" : "disabled"
 				).c_str()
 			);
@@ -173,7 +173,7 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] spell hold was [{}].'",
 					first_found->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					first_found->GetSpellHold(spell_type) ? "enabled" : "disabled"
 				).c_str()
 			);
@@ -185,7 +185,7 @@ void bot_command_spell_holds(Client* c, const Seperator* sep)
 					"{} of your bots [{}] their [{}] spell hold.",
 					success_count,
 					type_value ? "enabled" : "disabled",
-					c->GetSpellTypeNameByID(spell_type)
+					Bot::GetSpellTypeNameByID(spell_type)
 				).c_str()
 			);
 		}

@@ -907,9 +907,9 @@ void SendSpellTypeWindow(Client* c, const Seperator* sep) {
 		}
 
 		popup_text += DialogueWindow::TableRow(
-			DialogueWindow::TableCell(DialogueWindow::ColorMessage(forest_green, c->GetSpellTypeNameByID(i)))
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(forest_green, Bot::GetSpellTypeNameByID(i)))
 			+
-			DialogueWindow::TableCell((!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(slate_blue, std::to_string(i)) : DialogueWindow::ColorMessage(slate_blue, c->GetSpellTypeShortNameByID(i))))
+			DialogueWindow::TableCell((!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(slate_blue, std::to_string(i)) : DialogueWindow::ColorMessage(slate_blue, Bot::GetSpellTypeShortNameByID(i))))
 		);
 	}
 

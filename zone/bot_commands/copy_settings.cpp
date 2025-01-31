@@ -19,7 +19,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 		{
 			"- You can put a spell type ID or shortname after any option except [all], [misc] and [spellsettings] to restore that specifc spell type only"
 		};
-		p.example_format = { fmt::format("{} [from] [to] [option]", sep->arg[0]) };
+		p.example_format = { fmt::format("{} [from] [to] [option] [optional: spelltype id/short name]", sep->arg[0]) };
 		p.examples_one =
 		{
 			"To copy all settings from BotA to BotB:",
@@ -31,12 +31,12 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} BotA BotB spelltypesettings {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 			fmt::format(
 				"{} BotA BotB spelltypesettings {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 		};
 		p.examples_three =
@@ -52,7 +52,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 			),
 		};
 		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
-		p.options = { "all, misc, spellsettings, spelltypesettings, holds, delays, minthresholds, maxthresholds, minmanapct, maxmanapct, minhppct, maxhppct, idlepriority, engagedpriority, pursuepriority, aggrochecks, targetcounts, blockedbuffs, blockedpetbuffs" };
+		p.options = { "all, misc, spellsettings, spelltypesettings, spellholds, spelldelays, spellminthresholds, spellmaxthresholds, spellminmanapct, spellmaxmanapct, spellminhppct, spellmaxhppct, spellidlepriority, spellengagedpriority, spellpursuepriority, spellaggrochecks, spelltargetcounts, spellresistlimits, blockedbuffs, blockedpetbuffs" };
 		p.options_one =
 		{
 			"[spellsettings] will copy ^spellsettings options",
@@ -109,7 +109,8 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 		"spellengagedpriority",
 		"spellpursuepriority", 
 		"spellaggrochecks", 
-		"spelltargetcounts", 
+		"spelltargetcounts",
+		"spellresistlimits",
 		"blockedbuffs", 
 		"blockedpetbuffs"
 	};
@@ -117,7 +118,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 	if (sep->IsNumber(spell_type_arg_int)) {
 		spell_type = atoi(sep->arg[spell_type_arg_int]);
 
-		if (!c->IsValidSpellType(spell_type)) {
+		if (!Bot::IsValidBotSpellType(spell_type)) {
 			c->Message(
 				Chat::Yellow,
 				fmt::format(
@@ -132,8 +133,8 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 		}
 	}
 	else if (!spell_type_arg.empty()) {
-		if (c->GetSpellTypeIDByShortName(spell_type_arg) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(spell_type_arg);
+		if (Bot::GetSpellTypeIDByShortName(spell_type_arg) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(spell_type_arg);
 		}
 		else {
 			c->Message(
@@ -152,7 +153,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 
 	for (int i = 0; i < options.size(); i++) {
 		if (sep->arg[3] == options[i]) {
-			setting_type = c->GetBotSpellCategoryIDByShortName(sep->arg[3]);
+			setting_type = Bot::GetBotSpellCategoryIDByShortName(sep->arg[3]);
 			valid_option = true;
 			break;
 		}
@@ -236,7 +237,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 			}
 		}
 
-		output = from->GetBotSpellCategoryName(setting_type);
+		output = Bot::GetBotSpellCategoryName(setting_type);
 	}
 	else {
 		if (!strcasecmp(sep->arg[3], "misc")) {
@@ -355,7 +356,7 @@ void bot_command_copy_settings(Client* c, const Seperator* sep)
 			(
 				spell_type != UINT16_MAX ?
 				fmt::format(" [{}] ",
-					c->GetSpellTypeNameByID(spell_type)
+					Bot::GetSpellTypeNameByID(spell_type)
 				)
 				: " "
 			),

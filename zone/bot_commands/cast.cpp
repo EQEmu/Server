@@ -34,7 +34,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 			fmt::format(
 				"{} {}",
@@ -208,7 +208,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 		if (sep->IsNumber(1)) {
 			spell_type = atoi(sep->arg[1]);
 
-			if (!c->IsValidSpellType(spell_type)) {
+			if (!Bot::IsValidBotSpellType(spell_type)) {
 				c->Message(
 					Chat::Yellow,
 					fmt::format(
@@ -223,8 +223,8 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			}
 		}
 		else {
-			if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-				spell_type = c->GetSpellTypeIDByShortName(arg1);
+			if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+				spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 			}
 			else {
 				c->Message(
@@ -347,7 +347,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				fmt::format(
 					"[{}] is an invalid target. {} requires a pet to be targeted.",
 					tar->GetCleanName(),
-					tar->GetSpellTypeNameByID(spell_type)
+					Bot::GetSpellTypeNameByID(spell_type)
 				).c_str()
 			);
 
@@ -589,10 +589,10 @@ void bot_command_cast(Client* c, const Seperator* sep)
 	}
 	else {
 		if (sub_type == UINT16_MAX) {
-			type = c->GetSpellTypeNameByID(spell_type);
+			type = Bot::GetSpellTypeNameByID(spell_type);
 		}
 		else {
-			type = c->GetSubTypeNameByID(sub_type);
+			type = Bot::GetSubTypeNameByID(sub_type);
 		}
 	}
 

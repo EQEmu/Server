@@ -110,6 +110,27 @@ struct BotTimer {
 	uint32		item_id;
 };
 
+struct BotSpellSettings {
+	uint16      spell_type;                 // type ID of bot category
+	std::string short_name;                 // type short name of bot category
+	std::string name;                       // type name of bot category
+	bool        hold;                       // 0 = allow spell type, 1 = hold spell type
+	uint16      delay;                      // delay between casts of spell type, 1ms-60,000ms
+	uint8       min_threshold;              // minimum target health threshold to allow casting of spell type
+	uint8       max_threshold;              // maximum target health threshold to allow casting of spell type
+	uint16      resist_limit;               // resist limit to skip spell type
+	bool        aggro_check;                // whether or not to check for possible aggro before casting
+	uint8       min_mana_pct;               // lower mana percentage limit to allow spell cast
+	uint8       max_mana_pct;               // upper mana percentage limit to allow spell cast
+	uint8       min_hp_pct;                 // lower HP percentage limit to allow spell cast
+	uint8       max_hp_pct;                 // upper HP percentage limit to allow spell cast
+	uint16      idle_priority;              // idle priority of the spell type
+	uint16      engaged_priority;           // engaged priority of the spell type
+	uint16      pursue_priority;            // pursue priority of the spell type
+	uint16      ae_or_group_target_count;   // require target count to cast an AE or Group spell type
+	Timer       recast_timer;               // recast timer based off delay
+};
+
 struct BotSpellTypeOrder {
 	uint16		spellType;
 	uint16		priority;

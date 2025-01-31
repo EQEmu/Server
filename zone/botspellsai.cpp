@@ -3013,7 +3013,7 @@ void Bot::MapSpellTypeLevels() {
 	auto end = std::max({ BotSpellTypes::END, BotSpellTypes::COMMANDED_END, BotSpellTypes::DISCIPLINE_END });
 
 	for (int i = start; i <= end; ++i) {
-		if (!Bot::IsValidSpellType(i)) {
+		if (!Bot::IsValidBotSpellType(i)) {
 			continue;
 		}
 
@@ -3036,7 +3036,7 @@ void Bot::MapSpellTypeLevels() {
 
 		if (
 			!EQ::ValueWithin(bot_class, Class::Warrior, Class::Berserker) ||
-			!Bot::IsValidSpellType(spell_type)
+			!Bot::IsValidBotSpellType(spell_type)
 		) {
 			continue;
 		}

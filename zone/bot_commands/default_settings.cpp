@@ -13,7 +13,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 
 		p.description = { "Restores a bot's setting(s) to defaults" };
 		p.notes = { "- You can put a spell type ID or shortname after any option except [all], [misc] and [spellsettings] to restore that specifc spell type only"};
-		p.example_format = { fmt::format("{} [option] [actionable]", sep->arg[0]) };
+		p.example_format = { fmt::format("{} [option] [optional: spelltype id/short name] [actionable]", sep->arg[0]) };
 		p.examples_one =
 		{
 			"To restore delays for Clerics:",
@@ -29,7 +29,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} delays {} byname BotA",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Snare)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Snare)
 			),
 			fmt::format(
 				"{} delays {} byname BotA",
@@ -38,7 +38,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 			)
 		};
 		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
-		p.options = { "all, misc, spellsettings, spelltypesettings, spellholds, spelldelays, spellminthresholds, spellmaxthresholds, spellminmanapct, spellmaxmanapct, spellminhppct, spellmaxhppct, spellidlepriority, spellengagedpriority, spellpursuepriority, spellaggrocheck, spelltargetcounts" };
+		p.options = { "all, misc, spellsettings, spelltypesettings, spellholds, spelldelays, spellminthresholds, spellmaxthresholds, spellminmanapct, spellmaxmanapct, spellminhppct, spellmaxhppct, spellidlepriority, spellengagedpriority, spellpursuepriority, spellaggrocheck, spelltargetcounts, spellresistlimits" };
 		p.options_one =
 		{
 			"[spellsettings] will restore ^spellsettings options",
@@ -99,7 +99,8 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		"spellengagedpriority",
 		"spellpursuepriority",
 		"spellaggrochecks",
-		"spelltargetcounts"
+		"spelltargetcounts",
+		"spellresistlimits"
 	};
 
 	if (sep->IsNumber(spell_type_arg_int)) {
@@ -122,8 +123,8 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 		++ab_arg;
 	}
 	else if (!spell_type_arg.empty()) {
-		if (c->GetSpellTypeIDByShortName(spell_type_arg) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(spell_type_arg);
+		if (Bot::GetSpellTypeIDByShortName(spell_type_arg) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(spell_type_arg);
 		}
 		else {
 			c->Message(
@@ -143,7 +144,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 
 	for (int i = 0; i < options.size(); i++) {
 		if (sep->arg[1] == options[i]) {
-			setting_type = c->GetBotSpellCategoryIDByShortName(sep->arg[1]);
+			setting_type = Bot::GetBotSpellCategoryIDByShortName(sep->arg[1]);
 			valid_option = true;
 
 			break;
@@ -202,7 +203,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				}
 			}
 
-			output = (spell_type != UINT16_MAX ? c->GetSpellTypeNameByID(spell_type) : "");
+			output = (spell_type != UINT16_MAX ? Bot::GetSpellTypeNameByID(spell_type) : "");
 			output += sep->arg[3];
 		}
 		else if (!strcasecmp(sep->arg[1], "misc")) {
@@ -448,7 +449,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				(
 					spell_type != UINT16_MAX ?
 					fmt::format("My [{}] ",
-						c->GetSpellTypeNameByID(spell_type)
+						Bot::GetSpellTypeNameByID(spell_type)
 					)
 					: "My "
 				),
@@ -465,7 +466,7 @@ void bot_command_default_settings(Client* c, const Seperator* sep)
 				(
 					spell_type != UINT16_MAX ?
 					fmt::format(" [{}] ",
-						c->GetSpellTypeNameByID(spell_type)
+						Bot::GetSpellTypeNameByID(spell_type)
 					)
 					: " "
 				),

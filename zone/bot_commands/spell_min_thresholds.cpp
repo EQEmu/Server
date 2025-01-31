@@ -30,7 +30,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} 10 spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Debuff)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Debuff)
 			),
 			fmt::format(
 				"{} {} 10 spawned",
@@ -44,7 +44,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} 15 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::DOT),
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::DOT),
 				Class::Druid
 			),
 			fmt::format(
@@ -60,7 +60,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 			fmt::format(
 				"{} {} current spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::FastHeals)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::FastHeals)
 			),
 			fmt::format(
 				"{} {} current spawned",
@@ -125,8 +125,8 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 		}
 	}
 	else {
-		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 
 			if (clientSetting && !IsClientBotSpellType(spell_type)) {
 				c->Message(Chat::Yellow, "Invalid spell type for clients.");
@@ -217,7 +217,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} says, 'My [{}] minimum threshold is currently [{}%%].'",
 						my_bot->GetCleanName(),
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						my_bot->GetSpellMinThreshold(spell_type)
 					).c_str()
 				);
@@ -235,7 +235,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} says, 'My [{}] minimum threshold was set to [{}%%].'",
 						first_found->GetCleanName(),
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						first_found->GetSpellMinThreshold(spell_type)
 					).c_str()
 				);
@@ -246,7 +246,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 					fmt::format(
 						"{} of your bots set their [{}] minimum threshold to [{}%%].",
 						success_count,
-						c->GetSpellTypeNameByID(spell_type),
+						Bot::GetSpellTypeNameByID(spell_type),
 						type_value
 					).c_str()
 				);
@@ -259,7 +259,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 				Chat::Green,
 				fmt::format(
 					"Your [{}] minimum threshold is currently [{}%%].",
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					c->GetSpellMinThreshold(spell_type)
 				).c_str()
 			);
@@ -271,7 +271,7 @@ void bot_command_spell_min_thresholds(Client* c, const Seperator* sep) {
 				Chat::Green,
 				fmt::format(
 					"Your [{}] minimum threshold was set to [{}%%].",
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					c->GetSpellMinThreshold(spell_type)
 				).c_str()
 			);

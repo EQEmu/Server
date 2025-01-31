@@ -231,9 +231,8 @@ void Client::LoadDefaultBotSettings() {
 		BotSpellSettings t;
 
 		t.spell_type    = i;
-		t.short_name    = GetSpellTypeShortNameByID(i);
-		t.name          = GetSpellTypeNameByID(i);
-		t.hold          = GetDefaultSpellHold(i);
+		t.short_name    = Bot::GetSpellTypeShortNameByID(i);
+		t.name          = Bot::GetSpellTypeNameByID(i);
 		t.delay         = GetDefaultSpellDelay(i);
 		t.min_threshold = GetDefaultSpellMinThreshold(i);
 		t.max_threshold = GetDefaultSpellMaxThreshold(i);
@@ -242,16 +241,14 @@ void Client::LoadDefaultBotSettings() {
 		m_bot_spell_settings.push_back(t);
 
 		LogBotSettingsDetail("{} says, 'Setting defaults for {} ({}) [#{}]'", GetCleanName(), t.name, t.short_name, t.spell_type);
-		LogBotSettingsDetail("{} says, 'Hold = [{}] | Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellHold(i), GetDefaultSpellDelay(i), GetDefaultSpellMinThreshold(i), GetDefaultSpellMaxThreshold(i));
+		LogBotSettingsDetail("{} says, 'Delay = [{}ms] | MinThreshold = [{}\%] | MaxThreshold = [{}\%]'", GetCleanName(), GetDefaultSpellDelay(i), GetDefaultSpellMinThreshold(i), GetDefaultSpellMaxThreshold(i));
 	}
 }
 
 int Client::GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting) {
 	switch (setting_type) {
 		case BotSettingCategories::BaseSetting:
-			return false;
-		case BotSettingCategories::SpellHold:
-			return GetDefaultSpellHold(bot_setting);
+			return false; // only setting supported currently is illusion block
 		case BotSettingCategories::SpellDelay:
 			return GetDefaultSpellDelay(bot_setting);
 		case BotSettingCategories::SpellMinThreshold:
@@ -263,8 +260,8 @@ int Client::GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting) {
 
 int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
 	switch (setting_type) {
-		case BotSettingCategories::SpellHold:
-			return GetSpellHold(bot_setting);
+		case BotSettingCategories::BaseSetting:
+			return GetIllusionBlock(); // only setting supported currently
 		case BotSettingCategories::SpellDelay:
 			return GetSpellDelay(bot_setting);
 		case BotSettingCategories::SpellMinThreshold:
@@ -277,10 +274,7 @@ int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
 void Client::SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value) {
 	switch (setting_type) {
 		case BotSettingCategories::BaseSetting:
-			SetBaseSetting(bot_setting, setting_value);
-			break;
-		case BotSettingCategories::SpellHold:
-			SetSpellHold(bot_setting, setting_value);
+			SetIllusionBlock(setting_value); // only setting supported currently
 			break;
 		case BotSettingCategories::SpellDelay:
 			SetSpellDelay(bot_setting, setting_value);
@@ -352,4 +346,126 @@ void Client::SendSpellTypePrompts(bool commanded_types, bool client_only_types) 
 	}
 
 	return;
+}
+
+uint16 Client::GetDefaultSpellDelay(uint16 spell_type, uint8 stance) {
+	switch (spell_type) {
+		case BotSpellTypes::VeryFastHeals:
+		case BotSpellTypes::PetVeryFastHeals:
+			return 1500;
+		case BotSpellTypes::FastHeals:
+		case BotSpellTypes::PetFastHeals:
+			return 2500;
+		case BotSpellTypes::GroupHeals:
+		case BotSpellTypes::RegularHeal:
+		case BotSpellTypes::PetRegularHeals:
+			return 4000;
+		case BotSpellTypes::CompleteHeal:
+		case BotSpellTypes::GroupCompleteHeals:
+		case BotSpellTypes::PetCompleteHeals:
+			return 8000;
+		case BotSpellTypes::GroupHoTHeals:
+		case BotSpellTypes::HoTHeals:
+		case BotSpellTypes::PetHoTHeals:
+			return 22000;
+		case BotSpellTypes::Cure:
+			return 2000;
+		case BotSpellTypes::GroupCures:
+			return 3000;
+		case BotSpellTypes::PetCures:
+			return 5000;
+		default:
+			return 1;
+	}
+}
+
+uint8 Client::GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance) {
+	switch (spell_type) {
+		default:
+			return 0;
+	}
+}
+
+uint8 Client::GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance) {
+	uint8 bot_class = GetClass();
+
+	switch (spell_type) {
+		case BotSpellTypes::VeryFastHeals:
+		case BotSpellTypes::PetVeryFastHeals:
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 40;
+				case Stance::Efficient:
+				default:
+					return 25;
+			}
+		case BotSpellTypes::FastHeals:
+		case BotSpellTypes::PetFastHeals:
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 55;
+				case Stance::Efficient:
+					return 35;
+				default:
+					return 40;
+			}
+		case BotSpellTypes::GroupHeals:
+		case BotSpellTypes::RegularHeal:
+		case BotSpellTypes::PetRegularHeals:
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 70;
+				case Stance::Efficient:
+					return 50;
+				default:
+					return 60;
+			}
+		case BotSpellTypes::CompleteHeal:
+		case BotSpellTypes::GroupCompleteHeals:
+		case BotSpellTypes::PetCompleteHeals:
+			switch (stance) {
+				case Stance::AEBurn:
+				case Stance::Burn:
+				case Stance::Aggressive:
+					return 90;
+				case Stance::Efficient:
+					return 65;
+				default:
+					return 80;
+			}
+		case BotSpellTypes::GroupHoTHeals:
+		case BotSpellTypes::HoTHeals:
+		case BotSpellTypes::PetHoTHeals:
+			if (bot_class == Class::Necromancer || bot_class == Class::Shaman) {
+				return 60;
+			}
+			else {
+				switch (stance) {
+					case Stance::AEBurn:
+					case Stance::Burn:
+					case Stance::Aggressive:
+						return 95;
+					case Stance::Efficient:
+						return 80;
+					default:
+						return 90;
+				}
+			}
+		case BotSpellTypes::Buff:
+		case BotSpellTypes::Cure:
+		case BotSpellTypes::GroupCures:
+		case BotSpellTypes::PetCures:
+		case BotSpellTypes::PetBuffs:
+		case BotSpellTypes::PetDamageShields:
+		case BotSpellTypes::PetResistBuffs:
+		case BotSpellTypes::ResistBuffs:
+		default:
+			return 100;
+	}
 }

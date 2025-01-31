@@ -1739,7 +1739,7 @@ void bot_command_toggle_ranged(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} says, 'I {} ranged.'",
 					first_found->GetCleanName(),
-					first_found->GetIllusionBlock() ? "am now" : "am no longer"
+					first_found->IsBotRanged() ? "am now" : "am no longer"
 				).c_str()
 			);
 		}
@@ -1904,7 +1904,7 @@ void bot_command_toggle_helm(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} says, 'I {} show my helm.'",
 					first_found->GetCleanName(),
-					first_found->GetIllusionBlock() ? "will now" : "will no longer"
+					first_found->GetShowHelm() ? "will now" : "will no longer"
 				).c_str()
 			);
 		}

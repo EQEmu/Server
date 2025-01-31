@@ -37,17 +37,17 @@ void command_illusion_block(Client* c, const Seperator* sep)
 		int set_status = atoi(sep->arg[1]);
 		if (set_status == 0 || set_status == 1) {
 			c->SetIllusionBlock(set_status);
-			c->Message(Chat::White, "Your Illusion Block has been %s.", (set_status ? "enabled" : "disabled"));
+			c->Message(Chat::Green, "Your Illusion Block has been %s.", (set_status ? "enabled" : "disabled"));
 		}
 		else {
-			c->Message(Chat::White, "You must enter 0 for disabled or 1 for enabled.");
+			c->Message(Chat::Yellow, "You must enter 0 for disabled or 1 for enabled.");
 			return;
 		}
 	}
 	else if (!strcasecmp(sep->arg[1], "current")) {
-		c->Message(Chat::White, "You're currently %s illusions.", (c->GetIllusionBlock() ? "blocking" : "allowing"));
+		c->Message(Chat::Green, "You're currently %s illusions.", (c->GetIllusionBlock() ? "blocking" : "allowing"));
 	}
 	else {
-		c->Message(Chat::White, "Incorrect argument, use %s help for a list of options.", sep->arg[0]);
+		c->Message(Chat::Yellow , "Incorrect argument, use %s help for a list of options.", sep->arg[0]);
 	}
 }

@@ -23,7 +23,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} 5 spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::AEMez)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::AEMez)
 			),
 			fmt::format(
 				"{} {} 5 spawned",
@@ -35,14 +35,16 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 		{
 			"To set Wizards to require 5 targets for AENukes:",
 			fmt::format(
-				"{} {} 3 byname BotA",
+				"{} {} byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::AENukes)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::AENukes),
+				Class::Wizard
 			),
 			fmt::format(
-				"{} {} 3 byname BotA",
+				"{} {} byclass {}",
 				sep->arg[0],
-				BotSpellTypes::AENukes
+				BotSpellTypes::AENukes,
+				Class::Wizard
 			)
 		};
 		p.examples_three =
@@ -51,7 +53,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} current spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::AESlow)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::AESlow)
 			),
 			fmt::format(
 				"{} {} current spawned",
@@ -98,8 +100,8 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 		}
 	}
 	else {
-		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 		}
 		else {
 			c->Message(
@@ -119,6 +121,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 	if (sep->IsNumber(2)) {
 		type_value = atoi(sep->arg[2]);
 		++ab_arg;
+
 		if (type_value < 1 || type_value > 100) {
 			c->Message(Chat::Yellow, "You must enter a value between 1-100.");
 
@@ -174,7 +177,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] target count is currently [{}].'",
 					my_bot->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					my_bot->GetSpellTypeAEOrGroupTargetCount(spell_type)
 				).c_str()
 			);
@@ -191,7 +194,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] target count was set to [{}].'",
 					first_found->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					first_found->GetSpellTypeAEOrGroupTargetCount(spell_type)
 				).c_str()
 			);
@@ -202,7 +205,7 @@ void bot_command_spell_target_count(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots set their [{}] target count to [{}].",
 					success_count,
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					type_value
 				).c_str()
 			);

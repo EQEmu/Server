@@ -23,7 +23,7 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} 1 spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Nuke)
 			),
 			fmt::format(
 				"{} {} 1 spawned",
@@ -37,7 +37,7 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} 0 byclass {}",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::Snare),
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Snare),
 				Class::ShadowKnight
 			),
 			fmt::format(
@@ -53,7 +53,7 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 			fmt::format(
 				"{} {} current spawned",
 				sep->arg[0],
-				c->GetSpellTypeShortNameByID(BotSpellTypes::DOT)
+				Bot::GetSpellTypeShortNameByID(BotSpellTypes::DOT)
 			),
 			fmt::format(
 				"{} {} current spawned",
@@ -109,8 +109,8 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 		}
 	}
 	else {
-		if (c->GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = c->GetSpellTypeIDByShortName(arg1);
+		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 		}
 		else {
 			c->Message(
@@ -185,7 +185,7 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] aggro check is currently [{}].'",
 					my_bot->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					my_bot->GetSpellTypeAggroCheck(spell_type) ? "enabled" : "disabled"
 				).c_str()
 			);
@@ -202,7 +202,7 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} says, 'My [{}] aggro check was [{}].'",
 					first_found->GetCleanName(),
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					first_found->GetSpellTypeAggroCheck(spell_type) ? "enabled" : "disabled"
 				).c_str()
 			);
@@ -213,7 +213,7 @@ void bot_command_spell_aggro_checks(Client* c, const Seperator* sep)
 				fmt::format(
 					"{} of your bots [{}] their [{}] aggro check.",
 					success_count,
-					c->GetSpellTypeNameByID(spell_type),
+					Bot::GetSpellTypeNameByID(spell_type),
 					type_value ? "enabled" : "disabled"
 				).c_str()
 			);

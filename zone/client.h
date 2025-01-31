@@ -74,6 +74,8 @@ namespace EQ
 #include "../common/repositories/buyer_buy_lines_repository.h"
 #include "../common/repositories/character_evolving_items_repository.h"
 
+#include "bot_structs.h"
+
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
 	// we are required to undefine these to use min and max from <algorithm>
@@ -2279,14 +2281,30 @@ public:
 	void LoadDefaultBotSettings();
 	int GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting);
 	int GetBotSetting(uint8 setting_type, uint16 bot_setting);
-	void SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value);	
+	void SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value);
+
+	uint16 GetDefaultSpellDelay(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);	
+	inline uint16 GetSpellDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
+	inline void SetSpellDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
+	inline uint8 GetSpellMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
+	inline void SetSpellMinThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].min_threshold = threshold_value; }		
+	inline uint8 GetSpellMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_threshold; }
+	inline void SetSpellMaxThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].max_threshold = threshold_value; }	
+	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
+	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
+
+	void SetIllusionBlock(bool value) { _illusionBlock = value; }
+	bool GetIllusionBlock() const { return _illusionBlock; }
 
 private:
 	bool bot_owner_options[_booCount];
 	bool m_bot_pulling;
 	bool m_bot_precombat;
-
 	uint32 bot_assistee;
+	std::vector<BotSpellSettings> m_bot_spell_settings;
+	bool _illusionBlock;
 
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
