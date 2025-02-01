@@ -312,9 +312,12 @@ Bazaar::GetSearchResults(
 		r.item_stat               = item_results.at(t.trader.item_id).stats;
 
 		if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
-			if (convert || (r.trader_zone_id == Zones::BAZAAR && r.trader_zone_instance_id != char_zone_instance_id)) {
+			if (convert ||
+				char_zone_id != Zones::BAZAAR ||
+				(char_zone_id == Zones::BAZAAR && r.trader_zone_instance_id != char_zone_instance_id)
+				) {
 				r.trader_id = TraderRepository::TRADER_CONVERT_ID + r.trader_zone_instance_id;
-			}
+				}
 		}
 
 		all_entries.push_back(r);
