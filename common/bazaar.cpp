@@ -300,7 +300,7 @@ Bazaar::GetSearchResults(
 		r.serial_number           = t.trader.item_sn;
 		r.cost                    = t.trader.item_cost;
 		r.slot_id                 = t.trader.slot_id;
-		r.sum_charges             = t.trader.item_charges;
+		r.charges                 = t.trader.item_charges;
 		r.stackable               = item_results.at(t.trader.item_id).stackable;
 		r.icon_id                 = item_results.at(t.trader.item_id).icon;
 		r.trader_zone_id          = t.trader.char_zone_id;
