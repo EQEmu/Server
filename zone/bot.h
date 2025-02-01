@@ -560,10 +560,10 @@ public:
 
 	// Movement checks
 	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
-	std::vector<Mob*> GetSpellTargetList() { return _spellTargetList; }
-	void SetSpellTargetList(std::vector<Mob*> spell_target_list) { _spellTargetList = spell_target_list; }
-	std::vector<Mob*> GetGroupSpellTargetList() { return _groupSpellTargetList; }
-	void SetGroupSpellTargetList(std::vector<Mob*> spell_target_list) { _groupSpellTargetList = spell_target_list; }
+	std::vector<Mob*> GetSpellTargetList();
+	void SetSpellTargetList(std::vector<Mob*> spell_target_list) { _spell_target_list = spell_target_list; }
+	std::vector<Mob*> GetGroupSpellTargetList() { return _group_spell_target_list; }
+	void SetGroupSpellTargetList(std::vector<Mob*> spell_target_list) { _group_spell_target_list = spell_target_list; }
 	std::vector<Mob*> GetBuffTargets(Mob* spellTarget);
 
 	// Bot settings
@@ -1215,8 +1215,8 @@ private:
 	
 	bool _illusionBlock;
 	std::vector<BotSpellSettings> m_bot_spell_settings;
-	std::vector<Mob*> _spellTargetList;
-	std::vector<Mob*> _groupSpellTargetList;
+	std::vector<Mob*> _spell_target_list;
+	std::vector<Mob*> _group_spell_target_list;
 	Raid* _storedRaid;
 	bool _verifiedRaid;
 	uint16 _tempSpellType;

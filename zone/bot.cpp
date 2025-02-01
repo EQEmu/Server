@@ -114,8 +114,8 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	GenerateBaseStats();
 	bot_timers.clear();
 	bot_blocked_buffs.clear();
-	_spellTargetList.clear();
-	_groupSpellTargetList.clear();
+	_spell_target_list.clear();
+	_group_spell_target_list.clear();
 	SetStoredRaid(nullptr);
 	SetVerifiedRaid(false);
 	p_raid_instance = nullptr;
@@ -269,8 +269,8 @@ Bot::Bot(
 		database.botdb.LoadBotBlockedBuffs(this);
 	}
 
-	_spellTargetList.clear();
-	_groupSpellTargetList.clear();
+	_spell_target_list.clear();
+	_group_spell_target_list.clear();
 	SetStoredRaid(nullptr);
 	SetVerifiedRaid(false);
 	p_raid_instance = nullptr;
@@ -2197,10 +2197,8 @@ void Bot::AI_Process()
 		return;
 	}
 
-	std::vector<Mob*> spell_target_list = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
-	SetSpellTargetList(spell_target_list);
-	std::vector<Mob*> group_spell_target_list = GatherSpellTargets();
-	SetGroupSpellTargetList(group_spell_target_list);
+	_spell_target_list.clear();
+	_group_spell_target_list.clear();
 	SetTempSpellType(UINT16_MAX);
 
 // HEAL ROTATION CASTING CHECKS
@@ -2215,8 +2213,6 @@ void Bot::AI_Process()
 
 //ALT COMBAT (ACQUIRE HATE)
 	glm::vec3 Goal(0, 0, 0);
-
-
 
 	// We have aggro to choose from
 	if (IsEngaged()) {
@@ -13311,4 +13307,13 @@ bool Bot::IsImmuneToBotSpell(uint16 spell_id, Mob* caster) {
 	}
 
 	return false;
+}
+
+std::vector<Mob*> Bot::GetSpellTargetList() {
+	if (_spell_target_list.empty()) {
+		std::vector<Mob*> spell_target_list = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
+		SetSpellTargetList(spell_target_list);
+	}
+
+	return _spell_target_list;
 }
