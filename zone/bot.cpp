@@ -7912,7 +7912,6 @@ void Bot::SetDefaultBotStance() {
 
 void Bot::RaidGroupSay(Mob* speaker, const char* msg, ...) {
 	if (
-		speaker->CastToBot()->GetTempSpellType() &&
 		speaker->CastToBot()->GetTempSpellType() != UINT16_MAX &&
 		!speaker->CastToBot()->GetSpellTypeAnnounceCast(speaker->CastToBot()->GetTempSpellType())
 	) {
