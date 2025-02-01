@@ -6378,6 +6378,19 @@ CREATE INDEX idx_trader_active_transaction ON trader (active_transaction);
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9296,
+		.description = "2025_02_01_trader_table_listing_date.sql",
+		.check = "SHOW CREATE TABLE `trader`",
+		.condition = "missing",
+		.match = "listing_date",
+		.sql = R"(
+ALTER TABLE `trader`
+	ADD COLUMN `listing_date` DATETIME NULL DEFAULT NULL AFTER `active_transaction`,
+	ADD INDEX `idx_trader_listing_date` (`listing_date`);
+)",
+		.content_schema_update = false
+	}
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
