@@ -3144,9 +3144,6 @@ static bool CopyBagContents(EQ::ItemInstance* new_bag, const EQ::ItemInstance* o
 }
 
 bool Client::CanSummonItem(int item_id) {
-
-	if (HasClass(Class::Magician)) { return true; }
-
 	for(int book_index = 0; book_index < EQ::spells::SPELLBOOK_SIZE; book_index++) {
 		auto spell_id = m_pp.spell_book[book_index];
 		if (!IsValidSpell(spell_id)) { continue; }
