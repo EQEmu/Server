@@ -15081,14 +15081,13 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		mco->rate = 1 / buy_cost_mod;
 	}
 
-	SendTargetCommand(tmp->GetID());
-	ProcessAutoSellBags(tmp);
-
 	outapp->priority = 6;
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
 	if (action == MerchantActions::Open) {
+		SendTargetCommand(tmp->GetID());
+		ProcessAutoSellBags(tmp);
 		BulkSendMerchantInventory(merchant_id, tmp->GetNPCTypeID());
 		if ((tabs_to_display & Parcel) == Parcel) {
 			SendBulkParcels();
