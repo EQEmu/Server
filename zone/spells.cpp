@@ -3638,7 +3638,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 					if (caster->IsBot() && RuleB(Bots, BotsUseLiveBlockedMessage) && caster->GetClass() != Class::Bard) {
 						caster->GetOwner()->Message(
-							Chat::Red,
+							Chat::SpellFailure,
 							fmt::format(
 								"{}'s {} did not take hold on {}. (Blocked by {}.)",
 								caster->GetCleanName(),
