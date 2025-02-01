@@ -173,6 +173,10 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		version = RuleI(Custom, FarmingInstanceTemplateVersion);
 	}
 
+	if (RuleI(Custom, EventInstanceVersion) == version) {
+		version = RuleI(Custom, EventInstanceTemplateVersion);
+	}
+
 	std::string query = fmt::format(
 		SQL(
 			SELECT

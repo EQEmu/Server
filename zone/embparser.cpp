@@ -206,6 +206,7 @@ const char* QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AA_LOSS",
 	"EVENT_SPELL_BLOCKED",
 	"EVENT_READ_ITEM",
+	"EVENT_PREPARE_SPAWN",
 
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",

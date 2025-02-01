@@ -187,7 +187,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_entity_variable_update",
 	"event_aa_loss",
 	"event_spell_blocked",
-	"event_read_item"
+	"event_read_item",
+	"prepare_spawn",
 };
 
 extern Zone *zone;

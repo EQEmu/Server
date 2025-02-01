@@ -1692,6 +1692,10 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		version = RuleI(Custom, FarmingInstanceTemplateVersion);
 	}
 
+	if (RuleI(Custom, EventInstanceVersion) == version) {
+		version = RuleI(Custom, EventInstanceTemplateVersion);
+	}
+
 	if (bulk_load) {
 		LogDebug("Performing bulk NPC Types load");
 

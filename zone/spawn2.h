@@ -33,7 +33,7 @@ public:
 		float x, float y, float z, float heading,
 		uint32 respawn, uint32 variance,
 		uint32 timeleft = 0, uint32 grid = 0, bool in_path_when_zone_idle=false,
-		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding);
+		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding, bool in_disable_loot=false);
 	~Spawn2();
 
 	void	LoadGrid(int start_wp = 0);
@@ -70,6 +70,7 @@ public:
 	Timer	GetTimer() { return timer; }
 	void	SetTimer(uint32 duration) { timer.Start(duration); }
 	uint32  GetKillCount() { return killcount; }
+	bool    LootEnabled() const { return !disable_loot; }
 protected:
 	friend class Zone;
 	Timer	timer;
@@ -95,6 +96,7 @@ private:
 	EmuAppearance anim;
 	bool IsDespawned;
 	uint32  killcount;
+	bool    disable_loot;
 };
 
 class SpawnCondition {
