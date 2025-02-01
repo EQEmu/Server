@@ -14951,51 +14951,111 @@ const std::vector<int16>& Client::GetInventorySlots()
 	return slot_ids;
 }
 
+bool Client::IsHubZone(uint32 zone_id) const {
+
+	if(!RuleB(Custom, MulticlassingEnabled)) {
+		return false;
+	}
+
+	Seperator sep(RuleS(Custom, HubZones).c_str(), ',');
+	for(int i = 0; i <= sep.argnum; i++) {
+		if(sep.IsNumber(i) && Strings::ToInt(sep.arg[i]) == zone_id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void Client::ShowZoneShardMenu()
 {
-	auto z = GetZone(GetZoneID());
-	if (z && !z->shard_at_player_count) {
+	uint32 zone_id = GetZoneID();
+
+	auto z = GetZone(zone_id);
+	if(!z) {
+		LogZoning("No zone found for ID [{}]", zone_id);
 		return;
 	}
 
-	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, GetZoneID());
-	LogZoning("Zone sharding results count [{}]", results.size());
-
-	if (results.empty()) {
-		Message(Chat::White, "No zone shards found.");
+	bool in_hub = IsHubZone(zone_id);
+	if (!z->shard_at_player_count && !in_hub) {
 		return;
 	}
 
-	if (!results.empty()) {
-		Message(Chat::White, "Available Zone Shards:");
-	}
-
-	int number = 1;
-	for (auto &e: results) {
-		std::string teleport_link = Saylink::Silent(
-			fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
-			"Teleport"
-		);
-
-		std::string yours;
-		if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
-			teleport_link = "Teleport";
-			yours         = " (Yours)";
+	auto display_zone = [this](uint32 zone_id, const char * title = "Available Zone Shards:") {
+		auto z = GetZone(zone_id);
+		if(!z) {
+			LogZoning("No zone found for ID [{}].", zone_id);
+			return;
 		}
 
-		Message(
-			Chat::White, fmt::format(
-				" --> [{}] #{} {} ({}) [{}/{}] players {}",
-				teleport_link,
-				number,
-				z->long_name,
-				e.instance_id,
-				e.player_count,
-				z->shard_at_player_count,
-				yours
-			).c_str()
-		);
-		number++;
+		auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, zone_id);
+		LogZoning("Zone sharding results count [{}]", results.size());
+
+		if (results.empty()) {
+			Message(Chat::White, "No zone shards found.");
+			return;
+		}
+
+		Message(Chat::White, title);
+
+		int number = 1;
+		for (auto &e: results) {
+			std::string teleport_link = Saylink::Silent(
+				fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
+				"Teleport"
+			);
+
+			std::string yours;
+			if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
+				teleport_link = "Teleport";
+				yours         = " (Yours)";
+			}
+
+			if(z->shard_at_player_count) {
+				Message(
+					Chat::White, fmt::format(
+						" --> [{}] #{} {} ({}) [{}/{}] players {}",
+						teleport_link,
+						number,
+						z->long_name,
+						e.instance_id,
+						e.player_count,
+						z->shard_at_player_count,
+						yours
+					).c_str()
+				);
+			} else {
+				Message(
+					Chat::White, fmt::format(
+						" --> [{}] #{} {} ({}) {}",
+						teleport_link,
+						number,
+						z->long_name,
+						e.instance_id,
+						yours
+					).c_str()
+				);
+			}
+			number++;
+		}
+	};
+
+	if(!in_hub) {
+		display_zone(zone_id);
+		return;
+	}
+
+	Seperator sep(RuleS(Custom, HubZones).c_str(), ',');
+	for(int i = 0; i <= sep.argnum; i++) {
+		if(sep.IsNumber(i)) {
+			int hub_zone_id = Strings::ToInt(sep.arg[i]);
+			if(hub_zone_id == zone_id) {
+				display_zone(hub_zone_id);
+			} else {
+				display_zone(hub_zone_id, "Additional Hub Zones:");
+			}
+		}
 	}
 }
 

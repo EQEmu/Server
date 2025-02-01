@@ -247,6 +247,7 @@ int command_init(void)
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", AccountStatus::GMLeadAdmin, command_zonebootup) ||
 		command_add("zoneinstance", "[Instance ID] [X] [Y] [Z] - Teleport to specified Instance by ID (coordinates are optional)", AccountStatus::Guide, command_zone_instance) ||
 		command_add("zoneshard", "[zone] [instance_id] - Teleport explicitly to a zone shard", AccountStatus::Player, command_zone_shard) ||
+		command_add("zoneshardnew", "[zone] [duration (secs)] - Spawn a new zone shard", AccountStatus::GMLeadAdmin, command_zone_shard_new) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", AccountStatus::GMLeadAdmin, command_zoneshutdown) ||
 		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave) ||
 		command_add("disable_seasonal", "Remove a character from seasonal event.", AccountStatus::Player, command_disable_seasonal) ||

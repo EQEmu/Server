@@ -44,8 +44,11 @@ void command_zone_shard(Client *c, const Seperator *sep)
 		}
 	}
 
+	bool char_in_hub = c->IsHubZone(c->GetZoneID());
+	bool tar_is_hub = c->IsHubZone(zone_id);
+
 	auto z = GetZone(zone_id);
-	if (z && z->shard_at_player_count == 0) {
+	if (z && z->shard_at_player_count == 0 && !tar_is_hub) {
 		c->Message(Chat::White, "Zone does not have sharding enabled.");
 		return;
 	}
@@ -61,17 +64,20 @@ void command_zone_shard(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (zone_id != c->GetZoneID()) {
+	// Are we moving between instances of the same zone or between hubs?
+	if (zone_id != c->GetZoneID() && (!tar_is_hub || !char_in_hub)) {
 		c->Message(Chat::White, "You must request a shard change from the zone you are currently in.");
 		return;
 	}
 
+	// Are there even instances to move between?  (Hubs may not have instances so skip this check if they're in a hub)
 	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, c->GetZoneID());
-	if (results.size() <= 1) {
+	if (!char_in_hub && results.size() <= 1) {
 		c->Message(Chat::White, "No shards found.");
 		return;
 	}
 
+	LogZoning("Zoneshard move request to zone [{}] instance [{}]", zone_id, instance_id);
 	if (instance_id > 0) {
 		if (!database.CheckInstanceExists(instance_id)) {
 			c->Message(
@@ -124,14 +130,86 @@ void command_zone_shard(Client *c, const Seperator *sep)
 		}
 	}
 
-	c->MovePC(
+	// Moving between versions of same zone = preserve location
+	if(zone_id == c->GetZoneID()) {
+		c->MovePC(
+			zone_id,
+			instance_id,
+			c->GetX(),
+			c->GetY(),
+			c->GetZ(),
+			c->GetHeading(),
+			0,
+			ZoneSolicited
+		);
+	} else {
+		// Simulates accepting the magic map popup in:
+		// https://github.com/The-Heroes-Journey-EQEMU/quests/blob/main/ecommons/player.pl
+		c->SetEntityVariable("magic_map_attune", fmt::format("{} {}", z->short_name, instance_id));
+		parse->EventPlayer(EVENT_POPUP_RESPONSE, c, std::to_string(1460), 0);
+	}
+}
+
+void command_zone_shard_new(Client *c, const Seperator *sep)
+{
+	if(sep->argnum < 1) {
+		c->Message(Chat::White, fmt::format("Missing zone short_name or id argument").c_str());
+		return;
+	}
+
+	std::string zone_input = sep->arg[1];
+	uint32      zone_id    = 0;
+
+	// if input is id
+	if (Strings::IsNumber(zone_input)) {
+		zone_id = Strings::ToInt(zone_input);
+
+		// validate
+		if (zone_id != 0 && !GetZone(zone_id)) {
+			c->Message(Chat::White, fmt::format("Could not find zone by id [{}]", zone_id).c_str());
+			return;
+		}
+	}
+	else {
+		// validate
+		if (!zone_store.GetZone(zone_input)) {
+			c->Message(Chat::White, fmt::format("Could not find zone by short_name [{}]", zone_input).c_str());
+			return;
+		}
+
+		// validate we got id
+		zone_id = ZoneID(zone_input);
+		if (zone_id == 0) {
+			c->Message(Chat::White, fmt::format("Could not find zone id by short_name [{}]", zone_input).c_str());
+			return;
+		}
+	}
+
+	uint64_t shard_instance_duration = 3155760000;
+	if(sep->argnum >= 2 && Strings::IsNumber(sep->arg[2])) {
+		shard_instance_duration = Strings::ToInt(sep->arg[2]);
+	}
+
+	if(zone_id == 0) {
+		c->Message(Chat::White, fmt::format("Did not find valid zone id").c_str());
+		return;
+	}
+
+	auto z = GetZone(zone_id);
+	if(!z) {
+		c->Message(Chat::White, fmt::format("No zone found for id [{}]", zone_id).c_str());
+		return;
+	}
+
+	uint16 new_instance_id = 0;
+	database.GetUnusedInstanceID(new_instance_id);
+	database.CreateInstance(new_instance_id, zone_id, z->version, shard_instance_duration);
+	LogZoning(
+		"GM [{}] creating new sharded zone > instance_id [{}] zone [{}] ({}) duration [{}]",
+		c->GetCleanName(),
+		new_instance_id,
+		ZoneName(zone_id) ? ZoneName(zone_id) : "Unknown",
 		zone_id,
-		instance_id,
-		c->GetX(),
-		c->GetY(),
-		c->GetZ(),
-		c->GetHeading(),
-		0,
-		ZoneSolicited
+		shard_instance_duration
 	);
 }

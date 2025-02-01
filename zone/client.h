@@ -806,6 +806,7 @@ public:
 	inline const int32 GetInstanceID() const { return zone->GetInstanceID(); }
 	void SetZoning(bool in) { bZoning = in; }
 	bool IsZoning() { return bZoning; }
+	bool IsHubZone(uint32 zone_id) const;
 
 	void ShowSpells(Client* c, ShowSpellType show_spell_type);
 

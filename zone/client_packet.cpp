@@ -982,7 +982,7 @@ void Client::CompleteConnect()
 	}
 
 	auto z = GetZone(GetZoneID(), GetInstanceVersion());
-	if (z && z->shard_at_player_count > 0 && !RuleB(Zone, ZoneShardQuestMenuOnly)) {
+	if (z && (z->shard_at_player_count > 0 || IsHubZone(GetZoneID())) && !RuleB(Zone, ZoneShardQuestMenuOnly)) {
 		ShowZoneShardMenu();
 	}
 
