@@ -1,3 +1,19 @@
+## [22.62.2] 2/1/2025
+
+### Fixes
+
+* Add price change check to the Bazaar Search Window purchase mechanics ([#4632](https://github.com/EQEmu/Server/pull/4632)) @neckkola 2025-02-01
+* NewBazaar Search Consumables ([#4631](https://github.com/EQEmu/Server/pull/4631)) @neckkola 2025-02-01
+* Update the shard bazaar search feature ([#4630](https://github.com/EQEmu/Server/pull/4630)) @neckkola 2025-02-01
+
+### Memory Leak
+
+* Revert " Change raw pointer to unique_ptr to avoid potential leak in dbg stream " ([#4616](https://github.com/EQEmu/Server/pull/4616)) @Akkadius 2025-01-27
+
+### Performance
+
+* Significantly Improve Client Network Resends ([#4629](https://github.com/EQEmu/Server/pull/4629)) @Akkadius 2025-02-01
+
 ## [22.62.1] 1/27/2025
 
 ### Memory Leak
