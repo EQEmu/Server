@@ -1680,36 +1680,36 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 	Trader->AddMoneyToPP(copper, silver, gold, platinum, true);
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
-        auto e = PlayerEvent::TraderPurchaseEvent{
-            .item_id              = buy_item->GetID(),
-            .item_name            = buy_item->GetItem()->Name,
-            .trader_id            = Trader->CharacterID(),
-            .trader_name          = Trader->GetCleanName(),
-            .price                = tbs->price,
-        	.quantity             = outtbs->quantity,
-            .charges              = buy_item->GetCharges(),
-            .total_cost           = (tbs->price * outtbs->quantity),
-            .player_money_balance = GetCarriedMoney(),
-        };
+		auto e = PlayerEvent::TraderPurchaseEvent{
+			.item_id              = buy_item->GetID(),
+			.item_name            = buy_item->GetItem()->Name,
+			.trader_id            = Trader->CharacterID(),
+			.trader_name          = Trader->GetCleanName(),
+			.price                = tbs->price,
+			.quantity             = outtbs->quantity,
+			.charges              = buy_item->GetCharges(),
+			.total_cost           = (tbs->price * outtbs->quantity),
+			.player_money_balance = GetCarriedMoney(),
+		};
 
-        RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
-    }
+		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
+	}
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
-        auto e = PlayerEvent::TraderSellEvent{
-            .item_id              = buy_item->GetID(),
-            .item_name            = buy_item->GetItem()->Name,
-            .buyer_id             = CharacterID(),
-            .buyer_name           = GetCleanName(),
-            .price                = tbs->price,
-        	.quantity             = outtbs->quantity,
-            .charges              = buy_item->GetCharges(),
-            .total_cost           = (tbs->price * outtbs->quantity),
-            .player_money_balance = Trader->GetCarriedMoney(),
-        };
+		auto e = PlayerEvent::TraderSellEvent{
+			.item_id              = buy_item->GetID(),
+			.item_name            = buy_item->GetItem()->Name,
+			.buyer_id             = CharacterID(),
+			.buyer_name           = GetCleanName(),
+			.price                = tbs->price,
+			.quantity             = outtbs->quantity,
+			.charges              = buy_item->GetCharges(),
+			.total_cost           = (tbs->price * outtbs->quantity),
+			.player_money_balance = Trader->GetCarriedMoney(),
+		};
 
-        RecordPlayerEventLogWithClient(Trader, PlayerEvent::TRADER_SELL, e);
-    }
+		RecordPlayerEventLogWithClient(Trader, PlayerEvent::TRADER_SELL, e);
+	}
 
 	LogTrading("Trader Received: [{}] Platinum, [{}] Gold, [{}] Silver, [{}] Copper", platinum, gold, silver, copper);
     ReturnTraderReq(app, outtbs->quantity, item_id);
