@@ -6,9 +6,6 @@
 
 extern LoginServer server;
 
-/**
- * @param worldserver_connection
- */
 WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> worldserver_connection)
 {
 	m_connection           = worldserver_connection;
@@ -17,9 +14,9 @@ WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> wo
 	m_server_status        = 0;
 	m_server_id            = 0;
 	m_server_list_type_id  = 0;
-	m_server_process_type  = 0;
-	m_is_server_authorized = false;
-	m_is_server_trusted    = false;
+	m_server_process_type          = 0;
+	m_is_server_authorized_to_list = false;
+	m_is_server_trusted            = false;
 	m_is_server_logged_in  = false;
 
 	worldserver_connection->OnMessage(
@@ -62,15 +59,11 @@ void WorldServer::Reset()
 	m_players_online       = 0;
 	m_server_status        = 0;
 	m_server_list_type_id  = 0;
-	m_server_process_type  = 0;
-	m_is_server_authorized = false;
-	m_is_server_logged_in  = false;
+	m_server_process_type          = 0;
+	m_is_server_authorized_to_list = false;
+	m_is_server_logged_in          = false;
 }
 
-/**
- * @param opcode
- * @param packet
- */
 void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
@@ -80,7 +73,7 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 		packet.ToString()
 	);
 
-	if (packet.Length() < sizeof(ServerNewLSInfo_Struct)) {
+	if (packet.Length() < sizeof(LoginserverNewWorldRequest)) {
 		LogError(
 			"Received application packet from server that had opcode ServerOP_NewLSInfo, "
 			"but was too small. Discarded to avoid buffer overrun"
@@ -89,7 +82,7 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 		return;
 	}
 
-	auto *info = (ServerNewLSInfo_Struct *) packet.Data();
+	auto *info = (LoginserverNewWorldRequest *) packet.Data();
 
 	// if for whatever reason the world server is not sending an address, use the local address it sends
 	std::string remote_ip_addr = info->remote_ip_address;
@@ -109,13 +102,9 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 		info->server_process_type
 	);
 
-	Handle_NewLSInfo(info);
+	HandleNewWorldserver(info);
 }
 
-/**
- * @param opcode
- * @param packet
- */
 void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
@@ -125,7 +114,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 		packet.ToString()
 	);
 
-	if (packet.Length() < sizeof(ServerLSStatus_Struct)) {
+	if (packet.Length() < sizeof(LoginserverWorldStatusUpdate)) {
 		LogError(
 			"Received application packet from server that had opcode ServerOP_LSStatus, but was too small. Discarded to avoid buffer overrun"
 		);
@@ -133,7 +122,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 		return;
 	}
 
-	auto *ls_status = (ServerLSStatus_Struct *) packet.Data();
+	auto *ls_status = (LoginserverWorldStatusUpdate *) packet.Data();
 
 	LogDebug(
 		"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
@@ -143,13 +132,9 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 		ls_status->num_zones
 	);
 
-	Handle_LSStatus(ls_status);
+	HandleWorldserverStatusUpdate(ls_status);
 }
 
-/**
- * @param opcode
- * @param packet
- */
 void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
@@ -185,15 +170,15 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		);
 
 		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
-		per->base_header.sequence = client->GetPlaySequence();
-		per->server_number        = client->GetPlayServerID();
+		per->base_header.sequence = client->GetCurrentPlaySequence();
+		per->server_number        = client->GetSelectedPlayServerID();
 
 		if (r->response > 0) {
 			per->base_reply.success = true;
 			SendClientAuth(
 				client->GetConnection()->GetRemoteAddr(),
 				client->GetAccountName(),
-				client->GetKey(),
+				client->GetLoginKey(),
 				client->GetAccountID(),
 				client->GetLoginServerName()
 			);
@@ -242,10 +227,6 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 	}
 }
 
-/**
- * @param opcode
- * @param packet
- */
 void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
@@ -284,13 +265,13 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		);
 
 		auto *r = (PlayEverquestResponse_Struct *) outapp->pBuffer;
-		r->base_header.sequence = c->GetPlaySequence();
-		r->server_number        = c->GetPlayServerID();
+		r->base_header.sequence = c->GetCurrentPlaySequence();
+		r->server_number        = c->GetSelectedPlayServerID();
 
 		LogDebug(
 			"Found sequence and play of [{0}] [{1}]",
-			c->GetPlaySequence(),
-			c->GetPlayServerID()
+			c->GetCurrentPlaySequence(),
+			c->GetSelectedPlayServerID()
 		);
 
 		LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
@@ -300,7 +281,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 			SendClientAuth(
 				c->GetConnection()->GetRemoteAddr(),
 				c->GetAccountName(),
-				c->GetKey(),
+				c->GetLoginKey(),
 				c->GetAccountID(),
 				c->GetLoginServerName()
 			);
@@ -349,10 +330,6 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	}
 }
 
-/**
- * @param opcode
- * @param packet
- */
 void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
@@ -399,32 +376,32 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 /**
  * When a worldserver first messages the loginserver telling them who they are
  *
- * @param new_world_server_info_packet
+ * @param r
  */
-void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info_packet)
+void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *r)
 {
 	if (IsServerLoggedIn()) {
-		LogError("WorldServer::Handle_NewLSInfo called but the login server was already marked as logged in, aborting");
+		LogError("WorldServer::HandleNewWorldserver called but the login server was already marked as logged in, aborting");
 		return;
 	}
 
-	if (!HandleNewLoginserverInfoValidation(new_world_server_info_packet)) {
-		LogError("WorldServer::Handle_NewLSInfo failed validation rules");
+	if (!HandleNewLoginserverInfoValidation(r)) {
+		LogError("WorldServer::HandleNewWorldserver failed validation rules");
 		return;
 	}
 
-	SanitizeWorldServerName(new_world_server_info_packet->server_long_name);
+	SanitizeWorldServerName(r->server_long_name);
 
-	SetAccountPassword(new_world_server_info_packet->account_password)
-		->SetLongName(new_world_server_info_packet->server_long_name)
-		->SetShortName(new_world_server_info_packet->server_short_name)
-		->SetLocalIp(new_world_server_info_packet->local_ip_address)
-		->SetRemoteIp(new_world_server_info_packet->remote_ip_address)
-		->SetVersion(new_world_server_info_packet->server_version)
-		->SetProtocol(new_world_server_info_packet->protocol_version)
-		->SetServerProcessType(new_world_server_info_packet->server_process_type)
+	SetAccountPassword(r->account_password)
+		->SetLongName(r->server_long_name)
+		->SetShortName(r->server_short_name)
+		->SetLocalIp(r->local_ip_address)
+		->SetRemoteIp(r->remote_ip_address)
+		->SetVersion(r->server_version)
+		->SetProtocol(r->protocol_version)
+		->SetServerProcessType(r->server_process_type)
 		->SetIsServerLoggedIn(true)
-		->SetAccountName(new_world_server_info_packet->account_name);
+		->SetAccountName(r->account_name);
 
 	if (server.options.IsRejectingDuplicateServers()) {
 		if (server.server_manager->ServerExists(GetServerLongName(), GetServerShortName(), this)) {
@@ -503,6 +480,13 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		}
 	}
 
+	LogInfo(
+		"World registration id [{}] for server [{}] ip_address [{}]",
+		GetServerId(),
+		GetServerLongName(),
+		GetRemoteIp()
+	);
+
 	server.db->UpdateWorldRegistration(
 		GetServerId(),
 		GetServerLongName(),
@@ -510,29 +494,19 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 	);
 
 	WorldServer::FormatWorldServerName(
-		new_world_server_info_packet->server_long_name,
+		r->server_long_name,
 		world_registration.server_list_type
 	);
-	SetLongName(new_world_server_info_packet->server_long_name);
+	SetLongName(r->server_long_name);
 }
 
-/**
- * @param server_login_status
- */
-void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *server_login_status)
+void WorldServer::HandleWorldserverStatusUpdate(LoginserverWorldStatusUpdate *u)
 {
-	SetPlayersOnline(server_login_status->num_players);
-	SetZonesBooted(server_login_status->num_zones);
-	SetServerStatus(server_login_status->status);
+	m_players_online = u->num_players;
+	m_zones_booted   = u->num_zones;
+	m_server_status  = u->status;
 }
 
-/**
- * @param ip
- * @param account
- * @param key
- * @param account_id
- * @param loginserver_name
- */
 void WorldServer::SendClientAuth(
 	std::string ip,
 	std::string account,
@@ -610,42 +584,38 @@ constexpr static int MAX_SERVER_REMOTE_ADDRESS_LENGTH = 125;
 constexpr static int MAX_SERVER_VERSION_LENGTH        = 64;
 constexpr static int MAX_SERVER_PROTOCOL_VERSION      = 25;
 
-/**
- * @param new_world_server_info_packet
- * @return
- */
 bool WorldServer::HandleNewLoginserverInfoValidation(
-	ServerNewLSInfo_Struct *new_world_server_info_packet
+	LoginserverNewWorldRequest *new_world_server_info_packet
 )
 {
 	if (strlen(new_world_server_info_packet->account_name) >= MAX_ACCOUNT_NAME_LENGTH) {
-		LogError("Handle_NewLSInfo error [account_name] was too long | max [{0}]", MAX_ACCOUNT_NAME_LENGTH);
+		LogError("HandleNewWorldserver error [account_name] was too long | max [{0}]", MAX_ACCOUNT_NAME_LENGTH);
 		return false;
 	}
 	else if (strlen(new_world_server_info_packet->account_password) >= MAX_ACCOUNT_PASSWORD_LENGTH) {
-		LogError("Handle_NewLSInfo error [account_password] was too long | max [{0}]", MAX_ACCOUNT_PASSWORD_LENGTH);
+		LogError("HandleNewWorldserver error [account_password] was too long | max [{0}]", MAX_ACCOUNT_PASSWORD_LENGTH);
 		return false;
 	}
 	else if (strlen(new_world_server_info_packet->server_long_name) >= MAX_SERVER_LONG_NAME_LENGTH) {
-		LogError("Handle_NewLSInfo error [server_long_name] was too long | max [{0}]", MAX_SERVER_LONG_NAME_LENGTH);
+		LogError("HandleNewWorldserver error [server_long_name] was too long | max [{0}]", MAX_SERVER_LONG_NAME_LENGTH);
 		return false;
 	}
 	else if (strlen(new_world_server_info_packet->server_short_name) >= MAX_SERVER_SHORT_NAME_LENGTH) {
-		LogError("Handle_NewLSInfo error [server_short_name] was too long | max [{0}]", MAX_SERVER_SHORT_NAME_LENGTH);
+		LogError("HandleNewWorldserver error [server_short_name] was too long | max [{0}]", MAX_SERVER_SHORT_NAME_LENGTH);
 		return false;
 	}
 	else if (strlen(new_world_server_info_packet->server_version) >= MAX_SERVER_VERSION_LENGTH) {
-		LogError("Handle_NewLSInfo error [server_version] was too long | max [{0}]", MAX_SERVER_VERSION_LENGTH);
+		LogError("HandleNewWorldserver error [server_version] was too long | max [{0}]", MAX_SERVER_VERSION_LENGTH);
 		return false;
 	}
 	else if (strlen(new_world_server_info_packet->protocol_version) >= MAX_SERVER_PROTOCOL_VERSION) {
-		LogError("Handle_NewLSInfo error [protocol_version] was too long | max [{0}]", MAX_SERVER_PROTOCOL_VERSION);
+		LogError("HandleNewWorldserver error [protocol_version] was too long | max [{0}]", MAX_SERVER_PROTOCOL_VERSION);
 		return false;
 	}
 
 	if (strlen(new_world_server_info_packet->local_ip_address) <= MAX_SERVER_LOCAL_ADDRESS_LENGTH) {
 		if (strlen(new_world_server_info_packet->local_ip_address) == 0) {
-			LogError("Handle_NewLSInfo error, local address was null, defaulting to localhost");
+			LogError("HandleNewWorldserver error, local address was null, defaulting to localhost");
 			SetLocalIp("127.0.0.1");
 		}
 		else {
@@ -653,7 +623,7 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 		}
 	}
 	else {
-		LogError("Handle_NewLSInfo error, local address was too long | max [{0}]", MAX_SERVER_LOCAL_ADDRESS_LENGTH);
+		LogError("HandleNewWorldserver error, local address was too long | max [{0}]", MAX_SERVER_LOCAL_ADDRESS_LENGTH);
 		return false;
 	}
 
@@ -674,7 +644,7 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 		SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
 		LogWarning(
-			"Handle_NewLSInfo remote address was too long, defaulting to stream address [{0}]",
+			"HandleNewWorldserver remote address was too long, defaulting to stream address [{0}]",
 			m_remote_ip_address
 		);
 	}
@@ -682,10 +652,6 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 	return true;
 }
 
-/**
- * @param world_registration
- * @return
- */
 bool WorldServer::HandleNewLoginserverRegisteredOnly(
 	Database::DbWorldRegistration &world_registration
 )
@@ -772,10 +738,6 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 	return true;
 }
 
-/**
- * @param world_registration
- * @return
- */
 bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 	Database::DbWorldRegistration &world_registration
 )
@@ -808,7 +770,8 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 				SetIsServerLoggedIn(true);
 
 				LogInfo(
-					"Server long_name [{0}] short_name [{1}] successfully logged in",
+					"Server [{}] long_name [{}] short_name [{}] successfully logged in",
+					world_registration.server_id,
 					GetServerLongName(),
 					GetServerShortName()
 				);
@@ -849,7 +812,8 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 	}
 	else {
 		LogInfo(
-			"Server [{0}] ({1}) is not registered but unregistered servers are allowed",
+			"Server ID [{}] [{}] ({}) is not registered but unregistered servers are allowed",
+			world_registration.server_id,
 			GetServerLongName(),
 			GetServerShortName()
 		);
@@ -889,13 +853,6 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 	return true;
 }
 
-/**
- * @param world_admin_id
- * @param world_admin_username
- * @param world_admin_password
- * @param world_admin_password_hash
- * @return
- */
 bool WorldServer::ValidateWorldServerAdminLogin(
 	int world_admin_id,
 	const std::string &world_admin_username,
@@ -1026,10 +983,6 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_lo
 	out.WriteUInt32(GetPlayersOnline());
 }
 
-/**
- * @param in_server_list_id
- * @return
- */
 WorldServer *WorldServer::SetServerListTypeId(unsigned int in_server_list_id)
 {
 	m_server_list_type_id = in_server_list_id;
@@ -1037,17 +990,11 @@ WorldServer *WorldServer::SetServerListTypeId(unsigned int in_server_list_id)
 	return this;
 }
 
-/**
- * @return
- */
 const std::string &WorldServer::GetServerDescription() const
 {
 	return m_server_description;
 }
 
-/**
- * @param in_server_description
- */
 WorldServer *WorldServer::SetServerDescription(const std::string &in_server_description)
 {
 	WorldServer::m_server_description = in_server_description;
@@ -1055,12 +1002,9 @@ WorldServer *WorldServer::SetServerDescription(const std::string &in_server_desc
 	return this;
 }
 
-/**
- * @return
- */
 bool WorldServer::IsServerAuthorized() const
 {
-	return m_is_server_authorized;
+	return m_is_server_authorized_to_list;
 }
 
 /**
@@ -1068,7 +1012,7 @@ bool WorldServer::IsServerAuthorized() const
  */
 WorldServer *WorldServer::SetIsServerAuthorized(bool in_is_server_authorized)
 {
-	WorldServer::m_is_server_authorized = in_is_server_authorized;
+	WorldServer::m_is_server_authorized_to_list = in_is_server_authorized;
 
 	return this;
 }
@@ -1105,36 +1049,6 @@ bool WorldServer::IsServerTrusted() const
 WorldServer *WorldServer::SetIsServerTrusted(bool in_is_server_trusted)
 {
 	WorldServer::m_is_server_trusted = in_is_server_trusted;
-
-	return this;
-}
-
-/**
- * @param in_zones_booted
- */
-WorldServer *WorldServer::SetZonesBooted(unsigned int in_zones_booted)
-{
-	WorldServer::m_zones_booted = in_zones_booted;
-
-	return this;
-}
-
-/**
- * @param in_players_online
- */
-WorldServer *WorldServer::SetPlayersOnline(unsigned int in_players_online)
-{
-	WorldServer::m_players_online = in_players_online;
-
-	return this;
-}
-
-/**
- * @param in_server_status
- */
-WorldServer *WorldServer::SetServerStatus(int in_server_status)
-{
-	WorldServer::m_server_status = in_server_status;
 
 	return this;
 }

@@ -89,7 +89,7 @@ std::unique_ptr<EQApplicationPacket> ServerManager::CreateServerListPacket(Clien
 
 	for (const auto& world_server : m_world_servers)
 	{
-		if (world_server->IsAuthorized()) {
+		if (world_server->IsAuthorizedToList()) {
 			++server_count;
 		}
 	}
@@ -112,7 +112,7 @@ std::unique_ptr<EQApplicationPacket> ServerManager::CreateServerListPacket(Clien
 
 	for (const auto& world_server : m_world_servers)
 	{
-		if (!world_server->IsAuthorized()) {
+		if (!world_server->IsAuthorizedToList()) {
 			LogDebug(
 				"ServerManager::CreateServerListPacket | Server [{}] via IP [{}] is not authorized to be listed",
 				world_server->GetServerLongName(),

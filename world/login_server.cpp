@@ -609,11 +609,11 @@ void LoginServer::SendInfo()
 
 	auto pack = new ServerPacket;
 	pack->opcode  = ServerOP_NewLSInfo;
-	pack->size    = sizeof(ServerNewLSInfo_Struct);
+	pack->size    = sizeof(LoginserverNewWorldRequest);
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
 
-	auto *l = (ServerNewLSInfo_Struct *) pack->pBuffer;
+	auto *l = (LoginserverNewWorldRequest *) pack->pBuffer;
 	strcpy(l->protocol_version, EQEMU_PROTOCOL_VERSION);
 	strcpy(l->server_version, LOGIN_VERSION);
 	strcpy(l->server_long_name, Config->LongName.c_str());
@@ -657,10 +657,10 @@ void LoginServer::SendStatus()
 
 	auto pack = new ServerPacket;
 	pack->opcode  = ServerOP_LSStatus;
-	pack->size    = sizeof(ServerLSStatus_Struct);
+	pack->size    = sizeof(LoginserverWorldStatusUpdate);
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
-	auto loginserver_status = (ServerLSStatus_Struct *) pack->pBuffer;
+	auto loginserver_status = (LoginserverWorldStatusUpdate *) pack->pBuffer;
 
 	if (WorldConfig::get()->Locked) {
 		loginserver_status->status = -2;

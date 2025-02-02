@@ -14,12 +14,12 @@ extern LoginServer server;
  */
 Client::Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v)
 {
-	m_connection       = c;
-	m_client_version   = v;
-	m_client_status    = cs_not_sent_session_ready;
-	m_account_id       = 0;
-	m_play_server_id   = 0;
-	m_play_sequence_id = 0;
+	m_connection              = c;
+	m_client_version          = v;
+	m_client_status           = cs_not_sent_session_ready;
+	m_account_id              = 0;
+	m_selected_play_server_id = 0;
+	m_play_sequence_id        = 0;
 }
 
 bool Client::Process()
@@ -43,7 +43,7 @@ bool Client::Process()
 
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
-				LogInfo("Session ready received from client account {}", GetClientDescription());
+				LogInfo("Session ready received from client account {}", GetClientLoggingDescription());
 				Handle_SessionReady((const char *) app->pBuffer, app->Size());
 				break;
 			}
@@ -53,7 +53,7 @@ bool Client::Process()
 					break;
 				}
 
-				LogInfo("Login received from client {}", GetClientDescription());
+				LogInfo("Login received from client {}", GetClientLoggingDescription());
 
 				Handle_Login((const char *) app->pBuffer, app->Size());
 				break;
@@ -64,7 +64,7 @@ bool Client::Process()
 					break;
 				}
 
-				LogInfo("Server list request received from client {}", GetClientDescription());
+				LogInfo("Server list request received from client {}", GetClientLoggingDescription());
 
 				SendServerListPacket(*(uint32_t *) app->pBuffer);
 				break;
@@ -75,7 +75,7 @@ bool Client::Process()
 					break;
 				}
 
-				Handle_Play((const char *) app->pBuffer);
+				SendPlayToWorld((const char *) app->pBuffer);
 				break;
 			}
 		}
@@ -111,7 +111,7 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	 * The packets are identical between the two versions
 	 */
 	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply_Struct));
-	auto buf = reinterpret_cast<LoginHandShakeReply_Struct*>(outapp->pBuffer);
+	auto buf     = reinterpret_cast<LoginHandShakeReply_Struct *>(outapp->pBuffer);
 	buf->base_header.sequence    = 0x02;
 	buf->base_reply.success      = true;
 	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
@@ -135,7 +135,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 	// login user/pass are variable length after unencrypted opcode and base message header (size includes opcode)
 	constexpr int header_size = sizeof(uint16_t) + sizeof(LoginBaseMessage_Struct);
-	int data_size = size - header_size;
+	int           data_size   = size - header_size;
 
 	if (size <= header_size) {
 		LogError("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
@@ -209,7 +209,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 			// health checks
 			if (ProcessHealthCheck(user)) {
-				DoFailedLogin();
+				SendFailedLogin();
 				return;
 			}
 
@@ -222,7 +222,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			ParseAccountString(user, user, db_loginserver);
 
 			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
-				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
+				result = VerifyAndUpdateLoginHash(user, db_loginserver, cred, db_account_password_hash);
 
 #ifdef LSPX
 				// if user updated their password on the login server, update it here by validating their credentials with the login server
@@ -271,16 +271,11 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			user
 		);
 
-		DoFailedLogin();
+		SendFailedLogin();
 	}
 }
 
-/**
- * Sends a packet to the requested server to see if the client is allowed or not
- *
- * @param data
- */
-void Client::Handle_Play(const char *data)
+void Client::SendPlayToWorld(const char *data)
 {
 	if (m_client_status != cs_logged_in) {
 		LogError("Client sent a play request when they were not logged in, discarding");
@@ -292,21 +287,18 @@ void Client::Handle_Play(const char *data)
 	auto       sequence_in  = (unsigned int) play->base_header.sequence;
 
 	LogInfo(
-		"[Handle_Play] Play received from client [{}] server number [{}] sequence [{}]",
+		"[SendPlayToWorld] Play received from client [{}] server number [{}] sequence [{}]",
 		GetAccountName(),
 		server_id_in,
 		sequence_in
 	);
 
-	m_play_server_id   = (unsigned int) play->server_number;
-	m_play_sequence_id = sequence_in;
-	m_play_server_id   = server_id_in;
+	m_selected_play_server_id = (unsigned int) play->server_number;
+	m_play_sequence_id        = sequence_in;
+	m_selected_play_server_id = server_id_in;
 	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
 }
 
-/**
- * @param seq
- */
 void Client::SendServerListPacket(uint32 seq)
 {
 	auto app = server.server_manager->CreateServerListPacket(this, seq);
@@ -316,11 +308,11 @@ void Client::SendServerListPacket(uint32 seq)
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
-	LogInfo("Sending play response for {}", GetClientDescription());
+	LogInfo("Sending play response for {}", GetClientLoggingDescription());
 	m_connection->QueuePacket(outapp);
 }
 
-void Client::GenerateKey()
+void Client::GenerateRandomLoginKey()
 {
 	m_key.clear();
 	int count = 0;
@@ -339,11 +331,6 @@ void Client::GenerateKey()
 	}
 }
 
-/**
- * @param user
- * @param pass
- * @param loginserver
- */
 void Client::AttemptLoginAccountCreation(
 	const std::string &user,
 	const std::string &pass,
@@ -385,10 +372,10 @@ void Client::AttemptLoginAccountCreation(
 		return;
 	}
 
-	DoFailedLogin();
+	SendFailedLogin();
 }
 
-void Client::DoFailedLogin()
+void Client::SendFailedLogin()
 {
 	m_stored_user.clear();
 	m_stored_pass.clear();
@@ -404,12 +391,12 @@ void Client::DoFailedLogin()
 	login_reply.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
 	char encrypted_buffer[80] = {0};
-	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
+	auto rc                   = eqcrypt_block((const char *) &login_reply, sizeof(login_reply), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block for failed login");
 	}
 
-	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	constexpr int       outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
 	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
 	outapp.WriteData(&base_header, sizeof(base_header));
 	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
@@ -418,16 +405,7 @@ void Client::DoFailedLogin()
 	m_client_status = cs_failed_to_login;
 }
 
-/**
- * Verifies a login hash, will also attempt to update a login hash if needed
- *
- * @param account_username
- * @param source_loginserver
- * @param account_password
- * @param password_hash
- * @return
- */
-bool Client::VerifyLoginHash(
+bool Client::VerifyAndUpdateLoginHash(
 	const std::string &account_username,
 	const std::string &source_loginserver,
 	const std::string &account_password,
@@ -500,13 +478,8 @@ bool Client::VerifyLoginHash(
 	return false;
 }
 
-/**
- * @param in_account_name
- * @param db_account_id
- * @param db_loginserver
- */
 void Client::DoSuccessfulLogin(
-	const std::string& in_account_name,
+	const std::string &in_account_name,
 	int db_account_id,
 	const std::string &db_loginserver
 )
@@ -520,7 +493,7 @@ void Client::DoSuccessfulLogin(
 	in.s_addr = m_connection->GetRemoteIP();
 
 	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
-	GenerateKey();
+	GenerateRandomLoginKey();
 
 	m_account_id       = db_account_id;
 	m_account_name     = in_account_name;
@@ -554,13 +527,13 @@ void Client::DoSuccessfulLogin(
 	SendExpansionPacketData(login_reply);
 
 	char encrypted_buffer[80] = {0};
-	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
+	auto rc                   = eqcrypt_block((const char *) &login_reply, sizeof(login_reply), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block");
 	}
 
 	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
+	auto          outapp  = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
 	outapp->WriteData(&base_header, sizeof(base_header));
 	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
@@ -569,19 +542,21 @@ void Client::DoSuccessfulLogin(
 	m_client_status = cs_logged_in;
 }
 
-void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
+void Client::SendExpansionPacketData(PlayerLoginReply_Struct &plrs)
 {
 	SerializeBuffer buf;
 	//from eqlsstr_us.txt id of each expansion, excluding 'Everquest'
-	int ExpansionLookup[20] = { 3007, 3008, 3009, 3010,	3012,
-								3014, 3031, 3033, 3036, 3040,
-								3045, 3046, 3047, 3514, 3516,
-								3518, 3520, 3522, 3524 };
+	int             ExpansionLookup[20] = {
+		3007, 3008, 3009, 3010, 3012,
+		3014, 3031, 3033, 3036, 3040,
+		3045, 3046, 3047, 3514, 3516,
+		3518, 3520, 3522, 3524
+	};
 
 
 	if (server.options.IsDisplayExpansions()) {
 
-		int32_t expansion = server.options.GetMaxExpansions();
+		int32_t expansion       = server.options.GetMaxExpansions();
 		int32_t owned_expansion = (expansion << 1) | 1;
 
 		if (m_client_version == cv_sod) {
@@ -593,15 +568,14 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 			buf.WriteInt32(19); //number of expansions to include in packet
 
 			//generate expansion data
-			for (int i = 0; i < 19; i++)
-			{
-				buf.WriteInt32(i);													//sequenctial number
-				buf.WriteInt32((expansion & (1 << i)) == (1 << i) ? 0x01 : 0x00);	//1 own 0 not own
+			for (int i = 0; i < 19; i++) {
+				buf.WriteInt32(i);                                                    //sequenctial number
+				buf.WriteInt32((expansion & (1 << i)) == (1 << i) ? 0x01 : 0x00);    //1 own 0 not own
 				buf.WriteInt8(0x00);
-				buf.WriteInt32(ExpansionLookup[i]);									//from eqlsstr_us.txt
-				buf.WriteInt32(0x179E);												//from eqlsstr_us.txt for buttons/order
-				buf.WriteInt32(0xFFFFFFFF);											//end identification
-				buf.WriteInt8(0x0);													//force order window to appear 1 appear 0 not appear
+				buf.WriteInt32(ExpansionLookup[i]);                                    //from eqlsstr_us.txt
+				buf.WriteInt32(0x179E);                                                //from eqlsstr_us.txt for buttons/order
+				buf.WriteInt32(0xFFFFFFFF);                                            //end identification
+				buf.WriteInt8(0x0);                                                    //force order window to appear 1 appear 0 not appear
 				buf.WriteInt8(0x0);
 				buf.WriteInt32(0x0000);
 				buf.WriteInt32(0x0000);
@@ -612,15 +586,12 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 			m_connection->QueuePacket(out.get());
 
 		}
-		else if (m_client_version == cv_titanium)
-		{
-			if (expansion >= EQ::expansions::bitPoR)
-			{
+		else if (m_client_version == cv_titanium) {
+			if (expansion >= EQ::expansions::bitPoR) {
 				// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
 				plrs.offer_min_days = ((EQ::expansions::bitDoD << 2) | 1) - 2;
 			}
-			else
-			{
+			else {
 				plrs.offer_min_days = owned_expansion;
 			}
 			// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
@@ -631,28 +602,19 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 
 }
 
-/**
- * @param username
- * @param password
- */
 void Client::CreateLocalAccount(const std::string &username, const std::string &password)
 {
 	auto         mode  = server.options.GetEncryptionMode();
 	auto         hash  = eqcrypt_hash(username, password, mode);
 	unsigned int db_id = 0;
 	if (!server.db->CreateLoginData(username, hash, "local", db_id)) {
-		DoFailedLogin();
+		SendFailedLogin();
 	}
 	else {
 		DoSuccessfulLogin(username, db_id, "local");
 	}
 }
 
-/**
- * @param in_account_name
- * @param in_account_password
- * @param loginserver_account_id
- */
 void Client::CreateEQEmuAccount(
 	const std::string &in_account_name,
 	const std::string &in_account_password,
@@ -668,7 +630,7 @@ void Client::CreateEQEmuAccount(
 	}
 
 	if (!server.db->CreateLoginDataWithID(in_account_name, hash, "eqemu", loginserver_account_id)) {
-		DoFailedLogin();
+		SendFailedLogin();
 	}
 	else {
 		DoSuccessfulLogin(in_account_name, loginserver_account_id, "eqemu");
@@ -684,7 +646,7 @@ bool Client::ProcessHealthCheck(std::string username)
 	return false;
 }
 
-std::string Client::GetClientDescription()
+std::string Client::GetClientLoggingDescription()
 {
 	in_addr in{};
 	in.s_addr = GetConnection()->GetRemoteIP();

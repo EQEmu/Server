@@ -646,7 +646,7 @@ struct ServerLSInfo_Struct {
 	uint8	servertype; // 0=world, 1=chat, 2=login, 3=MeshLogin
 };
 
-struct ServerNewLSInfo_Struct {
+struct LoginserverNewWorldRequest {
 	char	server_long_name[201]; // name the worldserver wants
 	char	server_short_name[50]; // shortname the worldserver wants
 	char	remote_ip_address[125];			// DNS address of the server
@@ -667,7 +667,7 @@ struct ServerLSAccountUpdate_Struct {			// for updating info on login server
 	char	user_email[101]; // player account email address
 };
 
-struct ServerLSStatus_Struct {
+struct LoginserverWorldStatusUpdate {
 	int32 status;
 	int32 num_players;
 	int32 num_zones;
