@@ -8,7 +8,7 @@
 
 extern LoginServer server;
 
-Database::Database(
+LoginDatabase::LoginDatabase(
 	std::string user,
 	std::string pass,
 	std::string host,
@@ -36,14 +36,14 @@ Database::Database(
 	}
 }
 
-Database::~Database()
+LoginDatabase::~LoginDatabase()
 {
 	if (m_database) {
 		mysql_close(m_database);
 	}
 }
 
-bool Database::GetLoginDataFromAccountInfo(
+bool LoginDatabase::GetLoginDataFromAccountInfo(
 	const std::string &name,
 	const std::string &loginserver,
 	std::string &password,
@@ -86,7 +86,7 @@ bool Database::GetLoginDataFromAccountInfo(
 	return true;
 }
 
-bool Database::GetLoginTokenDataFromToken(
+bool LoginDatabase::GetLoginTokenDataFromToken(
 	const std::string &token,
 	const std::string &ip,
 	unsigned int &db_account_id,
@@ -115,7 +115,7 @@ bool Database::GetLoginTokenDataFromToken(
 	return false;
 }
 
-unsigned int Database::GetFreeID(const std::string &loginserver)
+unsigned int LoginDatabase::GetFreeID(const std::string &loginserver)
 {
 	auto query = fmt::format(
 		"SELECT IFNULL(MAX(id), 0) + 1 FROM login_accounts WHERE source_loginserver = '{}'",
@@ -132,7 +132,7 @@ unsigned int Database::GetFreeID(const std::string &loginserver)
 	return Strings::ToUnsignedInt(row[0]);
 }
 
-bool Database::CreateLoginData(
+bool LoginDatabase::CreateLoginData(
 	const std::string &name,
 	const std::string &password,
 	const std::string &loginserver,
@@ -145,7 +145,7 @@ bool Database::CreateLoginData(
 	return CreateLoginDataWithID(name, password, loginserver, free_id);
 }
 
-uint32 Database::CreateLoginAccount(
+uint32 LoginDatabase::CreateLoginAccount(
 	const std::string &name,
 	const std::string &password,
 	const std::string &loginserver,
@@ -173,7 +173,7 @@ uint32 Database::CreateLoginAccount(
 	return (results.Success() ? free_id : 0);
 }
 
-bool Database::CreateLoginDataWithID(
+bool LoginDatabase::CreateLoginDataWithID(
 	const std::string &in_account_name,
 	const std::string &in_account_password,
 	const std::string &loginserver,
@@ -198,7 +198,7 @@ bool Database::CreateLoginDataWithID(
 	return results.Success();
 }
 
-bool Database::DoesLoginServerAccountExist(
+bool LoginDatabase::DoesLoginServerAccountExist(
 	const std::string &name,
 	const std::string &password,
 	const std::string &loginserver,
@@ -223,7 +223,7 @@ bool Database::DoesLoginServerAccountExist(
 	return true;
 }
 
-void Database::UpdateLoginserverAccountPasswordHash(
+void LoginDatabase::UpdateLoginserverAccountPasswordHash(
 	const std::string &name,
 	const std::string &loginserver,
 	const std::string &hash
@@ -246,7 +246,7 @@ void Database::UpdateLoginserverAccountPasswordHash(
 	QueryDatabase(query);
 }
 
-Database::DbWorldRegistration Database::GetWorldRegistration(
+LoginDatabase::DbWorldRegistration LoginDatabase::GetWorldRegistration(
 	const std::string &short_name,
 	const std::string &long_name,
 	uint32 login_world_server_admin_id
@@ -270,7 +270,7 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 		login_world_server_admin_id
 	);
 
-	Database::DbWorldRegistration r{};
+	LoginDatabase::DbWorldRegistration r{};
 
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowCount() != 1) {
@@ -306,7 +306,7 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 	return r;
 }
 
-void Database::UpdateLSAccountData(unsigned int id, std::string ip_address)
+void LoginDatabase::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
 	auto query = fmt::format(
 		"UPDATE login_accounts SET last_ip_address = '{}', last_login_date = NOW() where id = {}",
@@ -317,7 +317,7 @@ void Database::UpdateLSAccountData(unsigned int id, std::string ip_address)
 	QueryDatabase(query);
 }
 
-void Database::UpdateLSAccountInfo(
+void LoginDatabase::UpdateLSAccountInfo(
 	unsigned int id,
 	std::string name,
 	std::string password,
@@ -336,7 +336,7 @@ void Database::UpdateLSAccountInfo(
 	QueryDatabase(query);
 }
 
-void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
+void LoginDatabase::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
 	auto query = fmt::format(
 		"UPDATE login_world_servers SET last_login_date = NOW(), last_ip_address = '{}', long_name = '{}' WHERE id = {}",
@@ -348,7 +348,7 @@ void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, s
 	QueryDatabase(query);
 }
 
-bool Database::UpdateLoginWorldAdminAccountPassword(
+bool LoginDatabase::UpdateLoginWorldAdminAccountPassword(
 	unsigned int id,
 	const std::string &admin_account_password_hash
 )
@@ -364,7 +364,7 @@ bool Database::UpdateLoginWorldAdminAccountPassword(
 	return results.Success();
 }
 
-bool Database::UpdateLoginWorldAdminAccountPasswordByUsername(
+bool LoginDatabase::UpdateLoginWorldAdminAccountPasswordByUsername(
 	const std::string &admin_account_username,
 	const std::string &admin_account_password_hash
 )
@@ -380,7 +380,7 @@ bool Database::UpdateLoginWorldAdminAccountPasswordByUsername(
 	return results.Success();
 }
 
-bool Database::CreateWorldRegistration(
+bool LoginDatabase::CreateWorldRegistration(
 	std::string server_long_name,
 	std::string server_short_name,
 	std::string server_remote_ip,
@@ -420,7 +420,7 @@ bool Database::CreateWorldRegistration(
 	return true;
 }
 
-std::string Database::CreateLoginserverApiToken(
+std::string LoginDatabase::CreateLoginserverApiToken(
 	bool write_mode,
 	bool read_mode
 )
@@ -441,12 +441,12 @@ std::string Database::CreateLoginserverApiToken(
 	return token;
 }
 
-MySQLRequestResult Database::GetLoginserverApiTokens()
+MySQLRequestResult LoginDatabase::GetLoginserverApiTokens()
 {
 	return QueryDatabase("SELECT token, can_write, can_read FROM login_api_tokens");
 }
 
-uint32 Database::CreateLoginserverWorldAdminAccount(
+uint32 LoginDatabase::CreateLoginserverWorldAdminAccount(
 	const std::string &account_name,
 	const std::string &account_password,
 	const std::string &first_name,
@@ -472,7 +472,7 @@ uint32 Database::CreateLoginserverWorldAdminAccount(
 	return (results.Success() ? results.LastInsertedID() : 0);
 }
 
-bool Database::DoesLoginserverWorldAdminAccountExist(
+bool LoginDatabase::DoesLoginserverWorldAdminAccountExist(
 	const std::string &account_name
 )
 {
@@ -486,7 +486,7 @@ bool Database::DoesLoginserverWorldAdminAccountExist(
 	return (results.RowCount() == 1);
 }
 
-Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &account_name)
+LoginDatabase::DbLoginServerAdmin LoginDatabase::GetLoginServerAdmin(const std::string &account_name)
 {
 	auto query = fmt::format(
 		"SELECT id, account_name, account_password, first_name, last_name, email, registration_date, registration_ip_address"
@@ -496,7 +496,7 @@ Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &ac
 
 	auto results = QueryDatabase(query);
 
-	Database::DbLoginServerAdmin r{};
+	LoginDatabase::DbLoginServerAdmin r{};
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
 		r.loaded                  = true;
@@ -513,7 +513,7 @@ Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &ac
 	return r;
 }
 
-Database::DbLoginServerAccount Database::GetLoginServerAccountByAccountName(
+LoginDatabase::DbLoginServerAccount LoginDatabase::GetLoginServerAccountByAccountName(
 	const std::string &account_name,
 	const std::string &source_loginserver
 )
@@ -528,7 +528,7 @@ Database::DbLoginServerAccount Database::GetLoginServerAccountByAccountName(
 
 	auto results = QueryDatabase(query);
 
-	Database::DbLoginServerAccount r{};
+	LoginDatabase::DbLoginServerAccount r{};
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
 		r.loaded             = true;

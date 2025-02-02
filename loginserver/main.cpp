@@ -12,16 +12,22 @@
 #include "loginserver_command_handler.h"
 #include "../common/strings.h"
 #include "../common/path_manager.h"
+#include "../common/database.h"
+#include "../common/events/player_event_logs.h"
+#include "../common/zone_store.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>
 #include <sstream>
 #include <thread>
 
-LoginServer server;
-EQEmuLogSys LogSys;
-bool        run_server = true;
-PathManager path;
+LoginServer     server;
+EQEmuLogSys     LogSys;
+bool            run_server = true;
+PathManager     path;
+Database        database;
+PlayerEventLogs player_event_logs;
+ZoneStore       zone_store;
 
 void ResolveAddresses();
 void CatchSignal(int sig_num)
@@ -32,7 +38,7 @@ void LoadDatabaseConnection()
 {
 	LogInfo("MySQL Database Init");
 
-	server.db = new Database(
+	server.db = new LoginDatabase(
 		server.config.GetVariableString("database", "user", "root"),
 		server.config.GetVariableString("database", "password", ""),
 		server.config.GetVariableString("database", "host", "localhost"),
@@ -40,6 +46,16 @@ void LoadDatabaseConnection()
 		server.config.GetVariableString("database", "db", "peq")
 	);
 
+	if (!database.Connect(
+		server.config.GetVariableString("database", "host", "localhost"),
+		server.config.GetVariableString("database", "user", "root"),
+		server.config.GetVariableString("database", "password", ""),
+		server.config.GetVariableString("database", "db", "peq"),
+		server.config.GetVariableInt("database", "port", 3306)
+	)) {
+		LogError("Cannot continue without a database connection");
+		std::exit(1);
+	}
 }
 
 void LoadServerConfig()
@@ -204,7 +220,7 @@ int main(int argc, char **argv)
 	LoadDatabaseConnection();
 
 	if (argc == 1) {
-		LogSys.SetDatabase(server.db)
+		LogSys.SetDatabase(&database)
 			->SetLogPath("logs")
 			->LoadLogDatabaseSettings()
 			->StartFileLogs();

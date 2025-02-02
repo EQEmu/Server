@@ -407,7 +407,7 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 	 * with a world short_name
 	 */
 	if (!m_account_name.empty() && !m_account_password.empty()) {
-		Database::DbLoginServerAdmin admin = server.db->GetLoginServerAdmin(m_account_name);
+		LoginDatabase::DbLoginServerAdmin admin = server.db->GetLoginServerAdmin(m_account_name);
 
 		if (admin.loaded) {
 			LogDebug(
@@ -436,7 +436,7 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 		}
 	}
 
-	Database::DbWorldRegistration
+	LoginDatabase::DbWorldRegistration
 		r = server.db->GetWorldRegistration(
 		m_server_short_name,
 		m_server_long_name,
@@ -637,7 +637,7 @@ bool WorldServer::HandleNewWorldserverValidation(
 }
 
 bool WorldServer::HandleNewLoginserverRegisteredOnly(
-	Database::DbWorldRegistration &r
+	LoginDatabase::DbWorldRegistration &r
 )
 {
 	if (!m_account_name.empty() && !m_account_password.empty()) {
@@ -721,7 +721,7 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 }
 
 bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
-	Database::DbWorldRegistration &r
+	LoginDatabase::DbWorldRegistration &r
 )
 {
 	if (r.loaded) {
@@ -805,7 +805,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			return true;
 		}
 
-		Database::DbLoginServerAdmin login_server_admin = server.db->GetLoginServerAdmin(m_account_name);
+		LoginDatabase::DbLoginServerAdmin login_server_admin = server.db->GetLoginServerAdmin(m_account_name);
 
 		uint32 server_admin_id = 0;
 		if (login_server_admin.loaded) {

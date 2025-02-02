@@ -187,7 +187,7 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Database::DbLoginServerAccount
+				LoginDatabase::DbLoginServerAccount
 					login_server_account = server.db->GetLoginServerAccountByAccountName(
 					username
 				);
@@ -235,7 +235,7 @@ namespace LoginserverWebserver {
 
 				std::string source_loginserver = "eqemu";
 
-				Database::DbLoginServerAccount
+				LoginDatabase::DbLoginServerAccount
 					login_server_account = server.db->GetLoginServerAccountByAccountName(
 					username,
 					source_loginserver

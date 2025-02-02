@@ -9,12 +9,12 @@
 #include <stdlib.h>
 #include <mysql.h>
 
-class Database : public DBcore {
+class LoginDatabase : public DBcore {
 public:
 
-	Database() { m_database = nullptr; }
-	Database(std::string user, std::string pass, std::string host, std::string port, std::string name);
-	~Database();
+	LoginDatabase() { m_database = nullptr; }
+	LoginDatabase(std::string user, std::string pass, std::string host, std::string port, std::string name);
+	~LoginDatabase();
 
 	bool GetLoginDataFromAccountInfo(
 		const std::string &name,
@@ -72,7 +72,7 @@ public:
 		uint32      server_admin_id;
 	};
 
-	Database::DbWorldRegistration GetWorldRegistration(
+	LoginDatabase::DbWorldRegistration GetWorldRegistration(
 		const std::string &short_name,
 		const std::string &long_name,
 		uint32 login_world_server_admin_id
@@ -113,7 +113,7 @@ public:
 		std::string registration_ip_address;
 	};
 
-	Database::DbLoginServerAdmin GetLoginServerAdmin(const std::string &account_name);
+	LoginDatabase::DbLoginServerAdmin GetLoginServerAdmin(const std::string &account_name);
 
 	struct DbLoginServerAccount {
 		bool        loaded = false;
@@ -128,7 +128,7 @@ public:
 		std::string updated_at;
 	};
 
-	Database::DbLoginServerAccount GetLoginServerAccountByAccountName(
+	LoginDatabase::DbLoginServerAccount GetLoginServerAccountByAccountName(
 		const std::string &account_name,
 		const std::string &source_loginserver = "local"
 	);

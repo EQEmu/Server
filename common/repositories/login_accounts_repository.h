@@ -4,47 +4,67 @@
 #include "../database.h"
 #include "../strings.h"
 #include "base/base_login_accounts_repository.h"
+#include "../../loginserver/login_types.h"
 
-class LoginAccountsRepository: public BaseLoginAccountsRepository {
+class LoginAccountsRepository : public BaseLoginAccountsRepository {
 public:
+	static int64 GetFreeID(Database &db, const std::string &loginserver)
+	{
+		auto query = fmt::format(
+			"SELECT IFNULL(MAX(id), 0) + 1 FROM login_accounts WHERE source_loginserver = '{}'",
+			Strings::Escape(loginserver)
+		);
 
-    /**
-     * This file was auto generated and can be modified and extended upon
-     *
-     * Base repository methods are automatically
-     * generated in the "base" version of this repository. The base repository
-     * is immutable and to be left untouched, while methods in this class
-     * are used as extension methods for more specific persistence-layer
-     * accessors or mutators.
-     *
-     * Base Methods (Subject to be expanded upon in time)
-     *
-     * Note: Not all tables are designed appropriately to fit functionality with all base methods
-     *
-     * InsertOne
-     * UpdateOne
-     * DeleteOne
-     * FindOne
-     * GetWhere(std::string where_filter)
-     * DeleteWhere(std::string where_filter)
-     * InsertMany
-     * All
-     *
-     * Example custom methods in a repository
-     *
-     * LoginAccountsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * LoginAccountsRepository::GetWhereNeverExpires()
-     * LoginAccountsRepository::GetWhereXAndY()
-     * LoginAccountsRepository::DeleteWhereXAndY()
-     *
-     * Most of the above could be covered by base methods, but if you as a developer
-     * find yourself re-using logic for other parts of the code, its best to just make a
-     * method that can be re-used easily elsewhere especially if it can use a base repository
-     * method and encapsulate filters there
-     */
+		auto results = db.QueryDatabase(query);
+		if (!results.Success() || results.RowCount() != 1) {
+			return 0;
+		}
 
-	// Custom extended repository methods here
+		auto row = results.begin();
 
+		return Strings::ToUnsignedInt(row[0]);
+	}
+
+	static LoginAccountsRepository::LoginAccounts SaveAccountFromContext(
+		Database &db,
+		LoginAccountContext c
+	)
+	{
+		auto a = LoginAccountsRepository::NewEntity();
+		a.id				 = GetFreeID(db, c.source_loginserver);
+		a.account_name       = c.username;
+		a.account_password   = c.encrypted_password;
+		a.account_email      = !c.email.empty() ? c.email : "local_creation";
+		a.source_loginserver = c.source_loginserver;
+		a.last_ip_address    = "127.0.0.1";
+		a.last_login_date    = std::time(nullptr);
+		a.created_at         = std::time(nullptr);
+		LoginAccountsRepository::InsertOne(db, a);
+
+		return GetAccountFromContext(db, c).id > 0 ? a : NewEntity();
+	}
+
+	static LoginAccountsRepository::LoginAccounts GetAccountFromContext(
+		Database &db,
+		LoginAccountContext c
+	)
+	{
+		auto results = LoginAccountsRepository::GetWhere(
+			db,
+			fmt::format(
+				"account_name = '{}' AND source_loginserver = '{}'",
+				c.username,
+				c.source_loginserver
+			)
+		);
+
+		auto e = LoginAccountsRepository::NewEntity();
+		if (results.size() == 1) {
+			e = results.front();
+		}
+
+		return e;
+	}
 };
 
 #endif //EQEMU_LOGIN_ACCOUNTS_REPOSITORY_H

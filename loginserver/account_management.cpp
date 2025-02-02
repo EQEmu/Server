@@ -1,57 +1,45 @@
 #include "account_management.h"
 #include "login_server.h"
 #include "../common/event/task_scheduler.h"
-#include "../common/event/event_loop.h"
-#include "../common/net/dns.h"
-#include "../common/strings.h"
+#include "../common/repositories/login_accounts_repository.h"
 
-extern LoginServer       server;
 EQ::Event::TaskScheduler task_runner;
 
 int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 {
-	auto mode = server.options.GetEncryptionMode();
-	auto hash = eqcrypt_hash(c.username, c.password, mode);
+	auto e = EncryptPasswordFromContext(c);
 
 	LogInfo(
 		"Attempting to create local login account for user [{}] encryption algorithm [{}] ({})",
 		c.username,
-		GetEncryptionByModeId(mode),
-		mode
+		e.mode_name,
+		e.mode
 	);
 
-	unsigned int db_id = 0;
-	if (server.db->DoesLoginServerAccountExist(c.username, hash, c.source_loginserver, 1)) {
+	if (LoginAccountsRepository::GetAccountFromContext(database, c).id > 0) {
 		LogWarning(
-			"Attempting to create local login account for user [{}] login [{}] but already exists!",
-			c.username,
-			c.source_loginserver
+			"Attempting to create local login account for user [{}] but already exists!",
+			c.username
 		);
 
 		return -1;
 	}
 
-	uint32 created_account_id = 0;
-	if (c.login_account_id > 0) {
-		created_account_id = server.db->CreateLoginDataWithID(c.username, hash, c.source_loginserver, c.login_account_id);
-	}
-	else {
-		created_account_id = server.db->CreateLoginAccount(c.username, hash, c.source_loginserver, c.email);
-	}
-
-	if (created_account_id > 0) {
+	c.encrypted_password = e.password;
+	auto a = LoginAccountsRepository::SaveAccountFromContext(database, c);
+	if (a.id > 0) {
 		LogInfo(
 			"Account creation success for user [{}] encryption algorithm [{}] ({}) id: [{}]",
-			c.username,
-			GetEncryptionByModeId(mode),
-			mode,
-			created_account_id
+			a.account_name,
+			e.mode_name,
+			e.mode,
+			a.id
 		);
 
-		return (int32) created_account_id;
+		return (int32) a.id;
 	}
 
-	LogError("Failed to create local login account for user [{}]!", c.username);
+	LogError("Failed to create local login account for user [{}] !", c.username);
 
 	return 0;
 }
@@ -113,7 +101,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
 
-	Database::DbLoginServerAccount
+	LoginDatabase::DbLoginServerAccount
 		login_server_admin = server.db->GetLoginServerAccountByAccountName(
 		c.username,
 		c.source_loginserver
@@ -159,7 +147,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
 
-	Database::DbLoginServerAccount
+	LoginDatabase::DbLoginServerAccount
 		login_server_account = server.db->GetLoginServerAccountByAccountName(
 		c.username,
 		c.source_loginserver

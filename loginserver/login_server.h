@@ -13,20 +13,20 @@
 /**
  * Login server struct, Contains every variable for the server that needs to exist outside the scope of main()
  */
-struct LoginServer
-{
+struct LoginServer {
 public:
 
-	LoginServer() : db(nullptr), server_manager(nullptr) {
+	LoginServer() : db(nullptr), server_manager(nullptr)
+	{
 
 	}
 
 	EQ::JsonConfigFile                 config;
-	Database                           *db;
+	LoginDatabase                      *db;
 	LoginserverWebserver::TokenManager *token_manager{};
-	Options            options;
-	WorldServerManager *server_manager;
-	ClientManager      *client_manager{};
+	Options                            options;
+	WorldServerManager                 *server_manager;
+	ClientManager                      *client_manager{};
 };
 
 #endif
