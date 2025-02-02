@@ -2173,47 +2173,25 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_Group:
 		case ST_GroupNoPets:
 		{
-			if (
-				IsClient() && CastToClient()->TGB() &&
-				IsTGBCompatibleSpell(spell_id) &&
-				(slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB))
-			) {
-				if (
-					!target ||
-					target->IsCorpse() ||
-					(
-						target->IsNPC() &&
-						!(target->GetOwner() && target->GetOwner()->IsClient())
-					)
-				) {
-					spell_target = this;
-				}
-				else {
+			spell_target = this; // Default to self
+
+			bool tgb_enabled = (IsClient() && CastToClient()->TGB()) ||
+							   (IsBot() && RuleB(Bots, EnableBotTGB));
+			bool tgb_compatible = IsTGBCompatibleSpell(spell_id);
+			bool item_tgb_allowed = (slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB));
+
+			if (tgb_enabled && tgb_compatible && item_tgb_allowed) {
+				bool valid_target = target && !target->IsCorpse() &&
+									(!target->IsNPC() ||
+									(target->GetOwner() && target->GetOwner()->IsOfClientBot()));
+
+				if (valid_target) {
 					spell_target = target;
 				}
 			}
-			else if (
-				IsBot() && RuleB(Bots, EnableBotTGB)  &&
-				IsTGBCompatibleSpell(spell_id) &&
-				(slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB))
-			) {
-				if (
-					!spell_target ||
-					spell_target->IsCorpse() ||
-					(
-						spell_target->IsNPC() && 
-						!(spell_target->GetOwner() && spell_target->GetOwner()->IsOfClientBot())
-					)
-				) {
-					spell_target = this;
-				}
-			}
-			else {
-				spell_target = this;
-			}
 
-			if (spell_target && spell_target->IsPet() && spells[spell_id].target_type == ST_GroupNoPets){
-				MessageString(Chat::Red,NO_CAST_ON_PET);
+			if (spell_target && spell_target->IsPet() && spells[spell_id].target_type == ST_GroupNoPets) {
+				MessageString(Chat::Red, NO_CAST_ON_PET);
 				return false;
 			}
 
