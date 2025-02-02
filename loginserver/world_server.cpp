@@ -149,15 +149,15 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		return;
 	}
 
-	auto *r = (UsertoWorldResponseLegacy_Struct *) packet.Data();
+	auto *res = (UsertoWorldResponseLegacy_Struct *) packet.Data();
 
-	LogDebug("Trying to find client with user id of [{0}]", r->lsaccountid);
-	Client *client = server.client_manager->GetClient(r->lsaccountid, "eqemu");
-	if (client) {
+	LogDebug("Trying to find client with user id of [{0}]", res->lsaccountid);
+	Client *c = server.client_manager->GetClient(res->lsaccountid, "eqemu");
+	if (c) {
 		LogDebug(
 			"Found client with user id of [{0}] and account name of [{1}]",
-			r->lsaccountid,
-			client->GetAccountName()
+			res->lsaccountid,
+			c->GetAccountName()
 		);
 
 		auto *outapp = new EQApplicationPacket(
@@ -165,60 +165,60 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 			sizeof(PlayEverquestResponse)
 		);
 
-		auto *per = (PlayEverquestResponse *) outapp->pBuffer;
-		per->base_header.sequence = client->GetCurrentPlaySequence();
-		per->server_number        = client->GetSelectedPlayServerID();
+		auto *play = (PlayEverquestResponse *) outapp->pBuffer;
+		play->base_header.sequence = c->GetCurrentPlaySequence();
+		play->server_number        = c->GetSelectedPlayServerID();
 
-		if (r->response > 0) {
-			per->base_reply.success = true;
+		if (res->response > 0) {
+			play->base_reply.success = true;
 			SendClientAuthToWorld(
-				client->GetConnection()->GetRemoteAddr(),
-				client->GetAccountName(),
-				client->GetLoginKey(),
-				client->GetAccountID(),
-				client->GetLoginServerName()
+				c->GetConnection()->GetRemoteAddr(),
+				c->GetAccountName(),
+				c->GetLoginKey(),
+				c->GetAccountID(),
+				c->GetLoginServerName()
 			);
 		}
 
-		switch (r->response) {
+		switch (res->response) {
 			case UserToWorldStatusSuccess:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
+				play->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_SERVER_UNAVAILABLE;
+				play->base_reply.error_str_id = LS::ErrStr::ERROR_SERVER_UNAVAILABLE;
 				break;
 			case UserToWorldStatusSuspended:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_SUSPENDED;
+				play->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_SUSPENDED;
 				break;
 			case UserToWorldStatusBanned:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_BANNED;
+				play->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_BANNED;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_WORLD_MAX_CAPACITY;
+				play->base_reply.error_str_id = LS::ErrStr::ERROR_WORLD_MAX_CAPACITY;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACTIVE_CHARACTER;
+				play->base_reply.error_str_id = LS::ErrStr::ERROR_ACTIVE_CHARACTER;
 				break;
 			default:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_UNKNOWN;
+				play->base_reply.error_str_id = LS::ErrStr::ERROR_UNKNOWN;
 				break;
 		}
 
 		LogDebug(
 			"Sending play response: allowed [{0}] sequence [{1}] server number [{2}] message [{3}]",
-			per->base_reply.success,
-			per->base_header.sequence,
-			per->server_number,
-			per->base_reply.error_str_id
+			play->base_reply.success,
+			play->base_header.sequence,
+			play->server_number,
+			play->base_reply.error_str_id
 		);
 
-		client->SendPlayResponse(outapp);
+		c->SendPlayResponse(outapp);
 		delete outapp;
 	}
 	else {
 		LogError(
 			"Received User-To-World Response for [{0}] but could not find the client referenced!",
-			r->lsaccountid
+			res->lsaccountid
 		);
 	}
 }
@@ -335,7 +335,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 		packet.ToString()
 	);
 
-	if (packet.Length() < sizeof(ServerLSAccountUpdate_Struct)) {
+	if (packet.Length() < sizeof(LoginserverAccountUpdate)) {
 		LogError(
 			"Received application packet from server that had opcode ServerLSAccountUpdate_Struct, "
 			"but was too small. Discarded to avoid buffer overrun"
@@ -346,25 +346,15 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 
 	LogDebug("ServerOP_LSAccountUpdate packet received from [{0}]", m_server_short_name);
 
-	auto *loginserver_update = (ServerLSAccountUpdate_Struct *) packet.Data();
+	auto *r = (LoginserverAccountUpdate *) packet.Data();
 	if (m_is_server_trusted) {
-		LogDebug("ServerOP_LSAccountUpdate update processed for: [{0}]", loginserver_update->useraccount);
-		std::string name;
-		std::string password;
-		std::string email;
-
-		name.assign(loginserver_update->useraccount);
-		password.assign(loginserver_update->userpassword);
-
-		if (loginserver_update->user_email[0] != '\0') {
-			email.assign(loginserver_update->user_email);
-		}
+		LogDebug("ServerOP_LSAccountUpdate update processed for: [{0}]", r->user_account_name);
 
 		server.db->UpdateLSAccountInfo(
-			loginserver_update->useraccountid,
-			name,
-			password,
-			email
+			r->user_account_id,
+			r->user_account_name,
+			r->user_account_password,
+			r->user_email
 		);
 	}
 }
