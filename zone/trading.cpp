@@ -1464,7 +1464,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 			.player_money_balance = GetCarriedMoney(),
 		};
 
-        RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
+		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
 	}
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
