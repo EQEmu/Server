@@ -7402,16 +7402,19 @@ bool Bot::AttemptCloseBeneficialSpells(uint16 spell_type) {
 	bool result = false;
 	Mob* tar = nullptr;
 
-	for (Mob* m : GetSpellTargetList()) {
+	for (Mob* m : GetSpellTargetList(RuleB(Bots, CrossRaidBuffingAndHealing))) {
 		tar = m;
 
 		if (!tar) {
 			continue;
 		}
 
-		if (IsGroupTargetOnlyBotSpellType(spell_type)) {
+		if (RuleB(Bots, CrossRaidBuffingAndHealing) && IsGroupTargetOnlyBotSpellType(spell_type)) {
 			Raid* raid = GetStoredRaid();
-			if (raid && (raid->GetGroup(GetName()) == raid->GetGroup(tar->GetName()))) {
+
+			if (raid &&
+				(raid->GetGroup(GetName()) == raid->GetGroup(tar->GetName()))
+			) {
 				continue;
 			}
 		}
@@ -7419,24 +7422,26 @@ bool Bot::AttemptCloseBeneficialSpells(uint16 spell_type) {
 		result = AttemptAICastSpell(spell_type, tar);
 
 		if (!result) {
-			if (
-				tar->HasPet() && 
-				(
-					!m->GetPet()->IsFamiliar() || 
-					RuleB(Bots, AllowBuffingHealingFamiliars)
-				)
-			) {
-				tar = m->GetPet();
+			if (tar->HasPet()) {
+				Mob* pet = m->GetPet();
 
-				if (!tar) {
-					continue;
+				if (!pet->IsFamiliar() || RuleB(Bots, AllowBuffingHealingFamiliars)) {
+					tar = pet;
+
+					if (!tar) {
+						continue;
+					}
+
+					if (tar->IsOfClientBot() ||
+						(
+							tar->IsPet() &&
+							tar->GetOwner() &&
+							tar->GetOwner()->IsOfClientBot()
+						)
+					) {
+						result = AttemptAICastSpell(spell_type, tar);
+					}
 				}
-
-				if (!tar->IsOfClientBot() && !(tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot())) {
-					continue;
-				}
-
-				result = AttemptAICastSpell(spell_type, tar);
 			}
 		}
 		
@@ -7679,29 +7684,21 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 	return;
 }
 
-uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool include_pets, Raid* raid) {
+uint8 Bot::GetNumberNeedingHealedInGroup(Mob* tar, uint16 spell_type, uint16 spell_id, float range) {
+	if (!tar->IsBot()) {
+		return 0;
+	}
 
-	uint8 need_healed = 0;
-	if (HasGroup()) {
+	uint8 count = 0;
+	auto target_list = tar->IsClient() ? tar->CastToBot()->GatherSpellTargets() : tar->CastToBot()->GetSpellTargetList();
 
-		auto group_members = GetGroup();
-		if (group_members) {
-
-			for (auto member : group_members->members) {
-				if (member && !member->qglobal) {
-
-					if (member->GetHPRatio() <= hpr) {
-						need_healed++;
-					}
-
-					if (include_pets && member->GetPet() && !member->GetPet()->IsFamiliar() && member->GetPet()->GetHPRatio() <= hpr) {
-						need_healed++;
-					}
-				}
-			}
+	for (Mob* m : target_list) {
+		if (tar->CalculateDistance(m) < range && CastChecks(spell_id, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
+			++count;
 		}
 	}
-	return GetNumberNeedingHealedInRaidGroup(need_healed, hpr, include_pets, raid);
+
+	return count;
 }
 
 int Bot::GetRawACNoShield(int &shield_ac) {
@@ -10049,25 +10046,22 @@ bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id) {
 
 	uint16 target_id = tar->GetID();
 
-	for (Mob* m : GetSpellTargetList()) {
+	for (Mob* m : GetSpellTargetList(RuleB(Bots, CrossRaidBuffingAndHealing))) {
 		if (
 			m->IsBot() && 
 			m->IsCasting() && 
 			m->CastToBot()->casting_spell_targetid && 
 			m->CastingSpellID() == spell_id
 		) {
-			if (RuleB(Bots, CrossRaidBuffingAndHealing) && IsGroupSpell(spell_id)) {
-				std::vector<Mob*> t = GatherSpellTargets(false, tar);
+			if (m->CastToBot()->casting_spell_targetid == target_id) {
+				return true;
+			}
 
-				for (Mob* x : t) {
+			if (!RuleB(Bots, CrossRaidBuffingAndHealing) && IsGroupSpell(spell_id)) {
+				for (Mob* x : GatherSpellTargets(false, tar)) {
 					if (x->GetID() == m->CastToBot()->casting_spell_targetid) {
 						return true;
 					}
-				}
-			}
-			else {
-				if (m->CastToBot()->casting_spell_targetid == target_id) {
-					return true;
 				}
 			}
 		}
@@ -10203,7 +10197,7 @@ bool Bot::IsMobEngagedByAnyone(Mob* tar) {
         return false;
     }
 
-    for (Mob* m : GetSpellTargetList()) {
+    for (Mob* m : GetSpellTargetList(true)) {
         if (m->GetTarget() != tar) {
             continue;
         }
@@ -12726,7 +12720,7 @@ std::vector<Mob*> Bot::GatherSpellTargets(bool entire_raid, Mob* target, bool no
 
 std::vector<Mob*> Bot::GetBuffTargets(Mob* spellTarget) {
 	if (RuleB(Bots, RaidBuffing)) {
-		return GetSpellTargetList();
+		return GetSpellTargetList(true);
 	}
 
 	return GatherSpellTargets(false, spellTarget);
@@ -13310,11 +13304,13 @@ bool Bot::IsImmuneToBotSpell(uint16 spell_id, Mob* caster) {
 	return false;
 }
 
-std::vector<Mob*> Bot::GetSpellTargetList() {
-	if (_spell_target_list.empty()) {
-		std::vector<Mob*> spell_target_list = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
-		SetSpellTargetList(spell_target_list);
+std::vector<Mob*> Bot::GetSpellTargetList(bool entire_raid) {
+	if (entire_raid && _spell_target_list.empty()) {
+		_spell_target_list = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
+	}
+	else if (!entire_raid && _group_spell_target_list.empty()) {
+		_group_spell_target_list = GatherSpellTargets();
 	}
 
-	return _spell_target_list;
+	return entire_raid ? _spell_target_list : _group_spell_target_list;
 }

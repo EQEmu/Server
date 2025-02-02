@@ -133,26 +133,6 @@ void Raid::HandleOfflineBots(uint32 owner) {
 	}
 }
 
-uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8& need_healed, uint8 hpr, bool include_pets, Raid* raid) {
-
-	if (raid) {
-		uint32 r_group = raid->GetGroup(GetName());
-
-		for (auto& m: raid->GetRaidGroupMembers(r_group)) {
-			if (m.member && !m.member->qglobal) {
-				if (m.member->GetHPRatio() <= hpr) {
-					need_healed++;
-				}
-
-				if (include_pets && m.member->GetPet() && m.member->GetPet()->GetHPRatio() <= hpr) {
-					need_healed++;
-				}
-			}
-		}
-	}
-	return need_healed;
-}
-
 void Bot::ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite) {
 
 	if (!invitee || !invitor) {

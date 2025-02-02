@@ -364,8 +364,7 @@ public:
 	bool GetIsUsingItemClick() { return is_using_item_click; }
 	void SetIsUsingItemClick(bool flag = true) { is_using_item_click = flag; }
 	bool UseDiscipline(uint32 spell_id, uint32 target);
-	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool include_pets, Raid* raid);
-	uint8 GetNumberNeedingHealedInRaidGroup(uint8& need_healed, uint8 hpr, bool include_pets, Raid* raid);
+	uint8 GetNumberNeedingHealedInGroup(Mob* tar, uint16 spell_type, uint16 spell_id, float range);
 	bool GetNeedsCured(Mob *tar);
 	bool GetNeedsHateRedux(Mob *tar);
 	bool HasOrMayGetAggro(bool SitAggro, uint32 spell_id = 0);
@@ -560,7 +559,7 @@ public:
 
 	// Movement checks
 	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
-	std::vector<Mob*> GetSpellTargetList();
+	std::vector<Mob*> GetSpellTargetList(bool entire_raid = false);
 	void SetSpellTargetList(std::vector<Mob*> spell_target_list) { _spell_target_list = spell_target_list; }
 	std::vector<Mob*> GetGroupSpellTargetList() { return _group_spell_target_list; }
 	void SetGroupSpellTargetList(std::vector<Mob*> spell_target_list) { _group_spell_target_list = spell_target_list; }

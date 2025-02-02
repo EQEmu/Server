@@ -337,9 +337,7 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 		if (IsGroupSpell(bot_spell.SpellId)) {
 			if (!IsCommandedSpell()) {
-				const std::vector<Mob*> v = GatherSpellTargets(false, tar);
-
-				for (Mob* m : v) {
+				for (Mob* m : GatherSpellTargets(false, tar)) {
 					SetBotSpellRecastTimer(spell_type, m, true);
 				}
 			}
@@ -513,9 +511,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 		if (IsGroupSpell(bot_spell.SpellId)) {
 			if (bot_class != Class::Bard) {
 				if (!IsCommandedSpell()) {
-					const std::vector<Mob*> v = GatherSpellTargets(false, tar);
-
-					for (Mob* m : v) {
+					for (Mob* m : GatherSpellTargets(false, tar)) {
 						SetBotSpellRecastTimer(spell_type, m, true);
 					}
 				}
@@ -1309,15 +1305,11 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* caster, Mob* tar, uint16 spell_ty
 
 		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsRegularGroupHealSpell(bot_spell_list_itr->SpellId)) {
-				if (!caster->IsCommandedSpell()) {
-					target_count = 0;
+			if (IsGroupHealOverTimeSpell(bot_spell_list_itr->SpellId)) {
+				uint16 spell_id = bot_spell_list_itr->SpellId;
 
-					for (Mob* m : caster->GetSpellTargetList()) {
-						if (caster->IsValidSpellRange(bot_spell_list_itr->SpellId, m) && caster->CastChecks(bot_spell_list_itr->SpellId, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
-							++target_count;
-						}
-					}
+				if (!caster->IsCommandedSpell() && caster->IsValidSpellRange(spell_id, tar)) {
+					target_count = caster->GetNumberNeedingHealedInGroup(tar, spell_type, spell_id, caster->GetAOERange(spell_id));
 
 					if (target_count < caster->GetSpellTypeAEOrGroupTargetCount(spell_type)) {
 						continue;
@@ -1351,14 +1343,10 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* caster, Mob* tar, uint16 
 		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if (IsGroupHealOverTimeSpell(bot_spell_list_itr->SpellId)) {
-				if (!caster->IsCommandedSpell()) {
-					target_count = 0;
+				uint16 spell_id = bot_spell_list_itr->SpellId;
 
-					for (Mob* m : caster->GetSpellTargetList()) {
-						if (caster->IsValidSpellRange(bot_spell_list_itr->SpellId, m) && caster->CastChecks(bot_spell_list_itr->SpellId, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
-							++target_count;
-						}
-					}
+				if (!caster->IsCommandedSpell() && caster->IsValidSpellRange(spell_id, tar)) {
+					target_count = caster->GetNumberNeedingHealedInGroup(tar, spell_type, spell_id, caster->GetAOERange(spell_id));
 
 					if (target_count < caster->GetSpellTypeAEOrGroupTargetCount(spell_type)) {
 						continue;
@@ -1389,17 +1377,13 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* caster, Mob* tar, uint16 
 		
 		int target_count = 0;
 
-		for(std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
+		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsGroupCompleteHealSpell(bot_spell_list_itr->SpellId)) {
-				if (!caster->IsCommandedSpell()) {
-					target_count = 0;
+			if (IsGroupHealOverTimeSpell(bot_spell_list_itr->SpellId)) {
+				uint16 spell_id = bot_spell_list_itr->SpellId;
 
-					for (Mob* m : caster->GetSpellTargetList()) {
-						if (caster->IsValidSpellRange(bot_spell_list_itr->SpellId, m) && caster->CastChecks(bot_spell_list_itr->SpellId, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
-							++target_count;
-						}
-					}
+				if (!caster->IsCommandedSpell() && caster->IsValidSpellRange(spell_id, tar)) {
+					target_count = caster->GetNumberNeedingHealedInGroup(tar, spell_type, spell_id, caster->GetAOERange(spell_id));
 
 					if (target_count < caster->GetSpellTypeAEOrGroupTargetCount(spell_type)) {
 						continue;
@@ -2045,13 +2029,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* caster, Mob* tar, uint16 spell_type) {
 					continue;
 				}
 
-				for (Mob* m : caster->GetSpellTargetList()) {
-					if (IsGroupBotSpellType(spell_type)) {
-						if (!caster->IsInGroupOrRaid(m, true)) {
-							continue;
-						}
-					}
-
+				for (Mob* m : (IsGroupBotSpellType(spell_type) ? caster->GetSpellTargetList() : caster->GetSpellTargetList(true))) {
 					if (caster->GetNeedsCured(m)) {
 						if (caster->CastChecks(itr->SpellId, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
 							if (m->FindType(SE_PoisonCounter)) {
