@@ -1919,14 +1919,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // single target spells
 		case ST_Self:
 		{
-			if (
-				!(
-					IsBot() && 
-					IsEffectInSpell(spell_id, SE_SummonCorpse) && 
-					RuleB(Bots, AllowCommandedSummonCorpse)
-				)
-			) { // summon corpse spells are self only, bots need a fallthrough to summon corpses
-				spell_target = this;
+			bool bot_can_summon_corpse = IsBot() &&
+				IsEffectInSpell(spell_id, SE_SummonCorpse) &&
+				RuleB(Bots, AllowCommandedSummonCorpse);
+
+			if (!bot_can_summon_corpse) {
+				spell_target = this; // Summon corpse spells are self-only; bots need a fallthrough
 			}
 
 			CastAction = SingleTarget;
