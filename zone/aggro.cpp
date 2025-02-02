@@ -743,28 +743,29 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	}
 
 	// can't damage own pet (applies to everthing)
-	Mob *target_owner = target->GetOwner();
-	Mob *our_owner = GetOwner();
-	Mob* target_ultimate_owner = (target->IsBot() ? target->CastToBot()->GetBotOwner() : target->GetUltimateOwner());
-	Mob* our_ultimate_owner = (IsBot() ? CastToBot()->GetBotOwner() : GetUltimateOwner());
+	Mob* target_owner = target->GetOwner();
+	Mob* our_owner = GetOwner();
 
-	if (target_owner && target_owner == this) {
+	// Self-owner check
+	if (target_owner == this || our_owner == target) {
 		return false;
 	}
-	else if (
-		IsBot() && target_ultimate_owner && 
-		(
-			(target_ultimate_owner == our_ultimate_owner) ||
-			(target_ultimate_owner->IsOfClientBot())
-		)
-	) {
-		return false;
-	}
-	else if (our_owner && our_owner == target) {
-		return false;
-	}
-	else if (IsBot() && our_ultimate_owner && our_ultimate_owner == target) {
-		return false;
+
+	// Bot-specific logic
+	if (IsBot()) {
+		Mob* target_ultimate_owner = target->IsBot() ? target->CastToBot()->GetBotOwner() : target->GetUltimateOwner();
+		Mob* our_ultimate_owner = CastToBot()->GetBotOwner();
+
+		if (target_ultimate_owner) {
+			if (target_ultimate_owner == our_ultimate_owner || target_ultimate_owner->IsOfClientBot()) {
+				return false;
+			}
+		}
+
+		// Bots should not attack their ultimate owner
+		if (our_ultimate_owner == target) {
+			return false;
+		}
 	}
 
 	// invalidate for swarm pets for later on if their owner is a corpse
