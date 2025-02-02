@@ -9753,7 +9753,8 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 			RequiresStackCheck(spell_type) || 
 			(
 				!RequiresStackCheck(spell_type) && 
-				CalcBuffDuration(this, tar, spell_id) != 0)
+				CalcBuffDuration(this, tar, spell_id) != 0
+			)
 		)
 		&& 
 		tar->CanBuffStack(spell_id, GetLevel(), true) < 0
