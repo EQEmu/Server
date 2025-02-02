@@ -2073,23 +2073,21 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		}
 		case ST_Pet:
 		{
-			if (
-				!(
-					IsBot() &&
-					spell_target &&
-					spell_target->GetOwner() != this &&
-					RuleB(Bots, CanCastPetOnlyOnOthersPets)
-				)
-			) {
+			bool bot_casting_on_other_pet = IsBot() &&
+				spell_target &&
+				spell_target->GetOwner() != this &&
+				RuleB(Bots, CanCastPetOnlyOnOthersPets);
 
+			if (!bot_casting_on_other_pet) {
 				spell_target = GetPet();
 			}
-			if(!spell_target)
-			{
+
+			if (!spell_target) {
 				LogSpells("Spell [{}] canceled: invalid target (no pet)", spell_id);
-				MessageString(Chat::Red,NO_PET);
-				return false;	// can't cast these unless we have a target
+				MessageString(Chat::Red, NO_PET);
+				return false; // Can't cast these unless we have a target
 			}
+
 			CastAction = SingleTarget;
 			break;
 		}
