@@ -1091,70 +1091,109 @@ void EQ::Net::DaybreakConnection::ProcessResend()
 	}
 }
 
+// observed client receive window is 300 packets, 140KB
+constexpr size_t MAX_CLIENT_RECV_PACKETS_PER_WINDOW = 300;
+constexpr size_t MAX_CLIENT_RECV_BYTES_PER_WINDOW   = 140 * 1024;
+
 void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 {
 	if (m_status == DbProtocolStatus::StatusDisconnected) {
 		return;
 	}
 
-	auto resends = 0;
-	auto now = Clock::now();
-	auto s = &m_streams[stream];
-	for (auto &entry : s->sent_packets) {
-		auto time_since_last_send = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.last_sent);
-		if (entry.second.times_resent == 0) {
-			if ((size_t)time_since_last_send.count() > entry.second.resend_delay) {
-				auto &p = entry.second.packet;
-				if (p.Length() >= DaybreakHeader::size()) {
-					if (p.GetInt8(0) == 0 && p.GetInt8(1) >= OP_Fragment && p.GetInt8(1) <= OP_Fragment4) {
-						m_stats.resent_fragments++;
-					}
-					else {
-						m_stats.resent_full++;
-					}
-				}
-				else {
-					m_stats.resent_full++;
-				}
-				m_stats.resent_packets++;
+	if (m_streams[stream].sent_packets.empty()) {
+		return;
+	}
 
-				InternalBufferedSend(p);
-				entry.second.last_sent = now;
-				entry.second.times_resent++;
-				entry.second.resend_delay = EQ::Clamp(entry.second.resend_delay * 2, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
-				resends++;
+	m_resend_packets_sent = 0;
+	m_resend_bytes_sent = 0;
+
+	auto now = Clock::now(); // Current time
+	auto s = &m_streams[stream];
+
+	// Get a reference resend delay (assume first packet represents the typical case)
+	if (!s->sent_packets.empty()) {
+		// Check if the first packet has timed out
+		auto &first_packet = s->sent_packets.begin()->second;
+		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - first_packet.first_sent).count();
+
+		// make sure that the first_packet in the list first_sent time is within the resend_delay and now
+		// if it is not, then we need to resend all packets in the list
+		if (time_since_first_sent <= first_packet.resend_delay && !m_acked_since_last_resend) {
+			LogNetcodeDetail(
+				"Not resending packets for stream [{}] time since first sent [{}] resend delay [{}] m_acked_since_last_resend [{}]",
+				stream,
+				time_since_first_sent,
+				first_packet.resend_delay,
+				m_acked_since_last_resend
+			);
+			return;
+		}
+
+		if (time_since_first_sent >= m_owner->m_options.resend_timeout) {
+			Close();
+			return;
+		}
+	}
+
+	if (LogSys.IsLogEnabled(Logs::Detail, Logs::Netcode)) {
+		size_t    total_size = 0;
+		for (auto &e: s->sent_packets) {
+			total_size += e.second.packet.Length();
+		}
+
+		LogNetcodeDetail(
+			"Resending packets for stream [{}] packet count [{}] total packet size [{}] m_acked_since_last_resend [{}]",
+			stream,
+			s->sent_packets.size(),
+			total_size,
+			m_acked_since_last_resend
+		);
+	}
+
+	for (auto &e: s->sent_packets) {
+		if (m_resend_packets_sent >= MAX_CLIENT_RECV_PACKETS_PER_WINDOW ||
+			m_resend_bytes_sent >= MAX_CLIENT_RECV_BYTES_PER_WINDOW) {
+			LogNetcodeDetail(
+				"Stopping resend because we hit thresholds m_resend_packets_sent [{}] max [{}] m_resend_bytes_sent [{}] max [{}]",
+				m_resend_packets_sent,
+				MAX_CLIENT_RECV_PACKETS_PER_WINDOW,
+				m_resend_bytes_sent,
+				MAX_CLIENT_RECV_BYTES_PER_WINDOW
+			);
+			break;
+		}
+
+		auto &sp = e.second;
+		auto &p  = sp.packet;
+		if (p.Length() >= DaybreakHeader::size()) {
+			if (p.GetInt8(0) == 0 && p.GetInt8(1) >= OP_Fragment && p.GetInt8(1) <= OP_Fragment4) {
+				m_stats.resent_fragments++;
+			}
+			else {
+				m_stats.resent_full++;
 			}
 		}
 		else {
-			auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.first_sent);
-			if (time_since_first_sent.count() >= m_owner->m_options.resend_timeout) {
-				Close();
-				return;
-			}
-
-			if ((size_t)time_since_last_send.count() > entry.second.resend_delay) {
-				auto &p = entry.second.packet;
-				if (p.Length() >= DaybreakHeader::size()) {
-					if (p.GetInt8(0) == 0 && p.GetInt8(1) >= OP_Fragment && p.GetInt8(1) <= OP_Fragment4) {
-						m_stats.resent_fragments++;
-					}
-					else {
-						m_stats.resent_full++;
-					}
-				}
-				else {
-					m_stats.resent_full++;
-				}
-				m_stats.resent_packets++;
-
-				InternalBufferedSend(p);
-				entry.second.last_sent = now;
-				entry.second.times_resent++;
-				entry.second.resend_delay = EQ::Clamp(entry.second.resend_delay * 2, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
-				resends++;
-			}
+			m_stats.resent_full++;
 		}
+		m_stats.resent_packets++;
+
+		// Resend the packet
+		InternalBufferedSend(p);
+
+		m_resend_packets_sent++;
+		m_resend_bytes_sent += p.Length();
+		sp.last_sent = now;
+		sp.times_resent++;
+		sp.resend_delay = EQ::Clamp(
+			sp.resend_delay * 2,
+			m_owner->m_options.resend_delay_min,
+			m_owner->m_options.resend_delay_max
+		);
 	}
+
+	m_acked_since_last_resend = false;
 }
 
 void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
@@ -1175,6 +1214,7 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
 			iter = s->sent_packets.erase(iter);
+			m_acked_since_last_resend = true;
 		}
 		else {
 			++iter;

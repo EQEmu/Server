@@ -130,7 +130,8 @@ public:
 		}
 
 		for (auto &i: items) {
-			i.item_cost = new_price;
+			i.item_cost    = new_price;
+			i.listing_date = time(nullptr);
 		}
 
 		return ReplaceMany(db, items);
@@ -178,6 +179,7 @@ public:
 
 		auto m = trader_item[0];
 		m.item_charges = quantity;
+		m.listing_date = time(nullptr);
 
 		return UpdateOne(db, m);
 	}
@@ -221,6 +223,7 @@ public:
 		}
 
 		e.active_transaction = status == true ? 1 : 0;
+		e.listing_date       = time(nullptr);
 
 		return UpdateOne(db, e);
 	}
