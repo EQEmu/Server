@@ -13,31 +13,9 @@ class Database : public DBcore {
 public:
 
 	Database() { m_database = nullptr; }
-
-	/**
-	 * Constructor, tries to set our database to connect to the supplied options.
-	 *
-	 * @param user
-	 * @param pass
-	 * @param host
-	 * @param port
-	 * @param name
-	 */
 	Database(std::string user, std::string pass, std::string host, std::string port, std::string name);
-
-	/**
-	 * Destructor, frees our database if needed.
-	 */
 	~Database();
 
-	/**
-	 * Retrieves the login data (password hash and account id) from the account name provided needed for client login procedure.
-	 * @param name
-	 * @param loginserver
-	 * @param password
-	 * @param id
-	 * @return
-	 */
 	bool GetLoginDataFromAccountInfo(
 		const std::string &name,
 		const std::string &loginserver,
@@ -45,14 +23,6 @@ public:
 		unsigned int &id
 	);
 
-	/**
-	 * @param token
-	 * @param ip
-	 * @param db_account_id
-	 * @param db_loginserver
-	 * @param user
-	 * @return
-	 */
 	bool GetLoginTokenDataFromToken(
 		const std::string &token,
 		const std::string &ip,
@@ -61,19 +31,8 @@ public:
 		std::string &user
 	);
 
-	/**
-	 * @param loginserver
-	 * @return
-	 */
 	unsigned int GetFreeID(const std::string &loginserver);
 
-	/**
-	 * @param name
-	 * @param password
-	 * @param loginserver
-	 * @param id
-	 * @return
-	 */
 	bool CreateLoginData(
 		const std::string &name,
 		const std::string &password,
@@ -81,13 +40,6 @@ public:
 		unsigned int &id
 	);
 
-	/**
-	 * @param in_account_name
-	 * @param in_account_password
-	 * @param loginserver
-	 * @param id
-	 * @return
-	 */
 	bool CreateLoginDataWithID(
 		const std::string &in_account_name,
 		const std::string &in_account_password,
@@ -95,23 +47,12 @@ public:
 		unsigned int id
 	);
 
-	/**
-	 * @param name
-	 * @param loginserver
-	 * @param hash
-	 */
 	void UpdateLoginserverAccountPasswordHash(
 		const std::string &name,
 		const std::string &loginserver,
-		const std::string &hash);
+		const std::string &hash
+	);
 
-	/**
-	 * @param name
-	 * @param password
-	 * @param loginserver
-	 * @param id
-	 * @return
-	 */
 	bool DoesLoginServerAccountExist(
 		const std::string &name,
 		const std::string &password,
@@ -128,52 +69,17 @@ public:
 		std::string server_list_description;
 		std::string server_admin_account_name;
 		std::string server_admin_account_password;
-		uint32 server_admin_id;
+		uint32      server_admin_id;
 	};
 
-	/**
-	 * Retrieves the world registration from the long and short names provided
-	 * Needed for world login procedure
-	 * Returns true if the record was found, false otherwise
-	 *
-	 * @param short_name
-	 * @param long_name
-	 * @param login_world_server_admin_id
-	 * @return
-	 */
 	Database::DbWorldRegistration GetWorldRegistration(
 		const std::string &short_name,
 		const std::string &long_name,
 		uint32 login_world_server_admin_id
 	);
-
-	/**
-	 * @param id
-	 * @param ip_address
-	 */
 	void UpdateLSAccountData(unsigned int id, std::string ip_address);
-
-	/**
-	 * @param id
-	 * @param name
-	 * @param password
-	 * @param email
-	 */
 	void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email);
-
-	/**
-	 * @param id
-	 * @param long_name
-	 * @param ip_address
-	 */
 	void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
-
-	/**
-	 * @param server_long_name
-	 * @param server_short_name
-	 * @param id
-	 * @return
-	 */
 	bool CreateWorldRegistration(
 		std::string server_long_name,
 		std::string server_short_name,
@@ -181,24 +87,9 @@ public:
 		unsigned int &id,
 		unsigned int &server_admin_id
 	);
-
-	/**
-	 * @param write_mode
-	 * @param read_mode
-	 * @return
-	 */
 	std::string CreateLoginserverApiToken(bool write_mode, bool read_mode);
 	MySQLRequestResult GetLoginserverApiTokens();
 
-	/**
-	 * @param account_name
-	 * @param account_password
-	 * @param first_name
-	 * @param last_name
-	 * @param email
-	 * @param ip_address
-	 * @return
-	 */
 	uint32 CreateLoginserverWorldAdminAccount(
 		const std::string &account_name,
 		const std::string &account_password,
@@ -208,10 +99,6 @@ public:
 		const std::string &ip_address
 	);
 
-	/**
-	 * @param account_name
-	 * @return
-	 */
 	bool DoesLoginserverWorldAdminAccountExist(const std::string &account_name);
 
 	struct DbLoginServerAdmin {
@@ -246,31 +133,16 @@ public:
 		const std::string &source_loginserver = "local"
 	);
 
-	/**
-	 * @param id
-	 * @param admin_account_password_hash
-	 */
 	bool UpdateLoginWorldAdminAccountPassword(
 		unsigned int id,
-		const std::string& admin_account_password_hash
+		const std::string &admin_account_password_hash
 	);
 
-	/**
-	 * @param admin_account_username
-	 * @param admin_account_password_hash
-	 */
 	bool UpdateLoginWorldAdminAccountPasswordByUsername(
 		const std::string &admin_account_username,
 		const std::string &admin_account_password_hash
 	);
 
-	/**
-	 * @param name
-	 * @param password
-	 * @param loginserver
-	 * @param email
-	 * @return
-	 */
 	uint32 CreateLoginAccount(
 		const std::string &name,
 		const std::string &password,

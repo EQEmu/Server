@@ -363,7 +363,8 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 {
 	if (m_is_server_logged_in) {
 		LogError(
-			"WorldServer::HandleNewWorldserver called but the login server was already marked as logged in, aborting");
+			"Login server was already marked as logged in, aborting"
+		);
 		return;
 	}
 

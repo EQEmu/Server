@@ -8,15 +8,6 @@
 
 extern LoginServer server;
 
-/**
- * Initial connect
- *
- * @param user
- * @param pass
- * @param host
- * @param port
- * @param name
- */
 Database::Database(
 	std::string user,
 	std::string pass,
@@ -45,9 +36,6 @@ Database::Database(
 	}
 }
 
-/**
- * Deconstructor
- */
 Database::~Database()
 {
 	if (m_database) {
@@ -55,13 +43,6 @@ Database::~Database()
 	}
 }
 
-/**
- * @param name
- * @param loginserver
- * @param password
- * @param id
- * @return
- */
 bool Database::GetLoginDataFromAccountInfo(
 	const std::string &name,
 	const std::string &loginserver,
@@ -105,14 +86,6 @@ bool Database::GetLoginDataFromAccountInfo(
 	return true;
 }
 
-/**
- * @param token
- * @param ip
- * @param db_account_id
- * @param db_loginserver
- * @param user
- * @return
- */
 bool Database::GetLoginTokenDataFromToken(
 	const std::string &token,
 	const std::string &ip,
@@ -135,17 +108,13 @@ bool Database::GetLoginTokenDataFromToken(
 		db_loginserver = row[0];
 		user = row[1];
 		db_account_id = Strings::ToUnsignedInt(row[2]);
-		
+
 		return true;
 	}
 
 	return false;
 }
 
-/**
- * @param loginserver
- * @return
- */
 unsigned int Database::GetFreeID(const std::string &loginserver)
 {
 	auto query = fmt::format(
@@ -163,13 +132,6 @@ unsigned int Database::GetFreeID(const std::string &loginserver)
 	return Strings::ToUnsignedInt(row[0]);
 }
 
-/**
- * @param name
- * @param password
- * @param loginserver
- * @param id
- * @return
- */
 bool Database::CreateLoginData(
 	const std::string &name,
 	const std::string &password,
@@ -183,13 +145,6 @@ bool Database::CreateLoginData(
 	return CreateLoginDataWithID(name, password, loginserver, free_id);
 }
 
-/**
- * @param name
- * @param password
- * @param loginserver
- * @param email
- * @return
- */
 uint32 Database::CreateLoginAccount(
 	const std::string &name,
 	const std::string &password,
@@ -218,13 +173,6 @@ uint32 Database::CreateLoginAccount(
 	return (results.Success() ? free_id : 0);
 }
 
-/**
- * @param in_account_name
- * @param in_account_password
- * @param loginserver
- * @param id
- * @return
- */
 bool Database::CreateLoginDataWithID(
 	const std::string &in_account_name,
 	const std::string &in_account_password,
@@ -250,13 +198,6 @@ bool Database::CreateLoginDataWithID(
 	return results.Success();
 }
 
-/**
- * @param name
- * @param password
- * @param loginserver
- * @param id
- * @return
- */
 bool Database::DoesLoginServerAccountExist(
 	const std::string &name,
 	const std::string &password,
@@ -282,11 +223,6 @@ bool Database::DoesLoginServerAccountExist(
 	return true;
 }
 
-/**
- * @param name
- * @param loginserver
- * @param hash
- */
 void Database::UpdateLoginserverAccountPasswordHash(
 	const std::string &name,
 	const std::string &loginserver,
@@ -310,12 +246,6 @@ void Database::UpdateLoginserverAccountPasswordHash(
 	QueryDatabase(query);
 }
 
-/**
- * @param short_name
- * @param long_name
- * @param login_world_server_admin_id
- * @return
- */
 Database::DbWorldRegistration Database::GetWorldRegistration(
 	const std::string &short_name,
 	const std::string &long_name,
@@ -376,10 +306,6 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 	return r;
 }
 
-/**
- * @param id
- * @param ip_address
- */
 void Database::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
 	auto query = fmt::format(
@@ -391,12 +317,6 @@ void Database::UpdateLSAccountData(unsigned int id, std::string ip_address)
 	QueryDatabase(query);
 }
 
-/**
- * @param id
- * @param name
- * @param password
- * @param email
- */
 void Database::UpdateLSAccountInfo(
 	unsigned int id,
 	std::string name,
@@ -416,11 +336,6 @@ void Database::UpdateLSAccountInfo(
 	QueryDatabase(query);
 }
 
-/**
- * @param id
- * @param long_name
- * @param ip_address
- */
 void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
 	auto query = fmt::format(
@@ -433,10 +348,6 @@ void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, s
 	QueryDatabase(query);
 }
 
-/**
- * @param id
- * @param admin_account_password_hash
- */
 bool Database::UpdateLoginWorldAdminAccountPassword(
 	unsigned int id,
 	const std::string &admin_account_password_hash
@@ -453,11 +364,6 @@ bool Database::UpdateLoginWorldAdminAccountPassword(
 	return results.Success();
 }
 
-/**
- *
- * @param admin_account_username
- * @param admin_account_password_hash
- */
 bool Database::UpdateLoginWorldAdminAccountPasswordByUsername(
 	const std::string &admin_account_username,
 	const std::string &admin_account_password_hash
@@ -474,12 +380,6 @@ bool Database::UpdateLoginWorldAdminAccountPasswordByUsername(
 	return results.Success();
 }
 
-/**
- * @param server_long_name
- * @param server_short_name
- * @param id
- * @return
- */
 bool Database::CreateWorldRegistration(
 	std::string server_long_name,
 	std::string server_short_name,
@@ -520,12 +420,6 @@ bool Database::CreateWorldRegistration(
 	return true;
 }
 
-/**
- * @param long_name
- * @param short_name
- * @param id
- * @return
- */
 std::string Database::CreateLoginserverApiToken(
 	bool write_mode,
 	bool read_mode
@@ -547,26 +441,11 @@ std::string Database::CreateLoginserverApiToken(
 	return token;
 }
 
-/**
- * @param long_name
- * @param short_name
- * @param id
- * @return
- */
 MySQLRequestResult Database::GetLoginserverApiTokens()
 {
 	return QueryDatabase("SELECT token, can_write, can_read FROM login_api_tokens");
 }
 
-/**
- * @param account_name
- * @param account_password
- * @param first_name
- * @param last_name
- * @param email
- * @param ip_address
- * @return
- */
 uint32 Database::CreateLoginserverWorldAdminAccount(
 	const std::string &account_name,
 	const std::string &account_password,
@@ -593,10 +472,6 @@ uint32 Database::CreateLoginserverWorldAdminAccount(
 	return (results.Success() ? results.LastInsertedID() : 0);
 }
 
-/**
- * @param account_name
- * @return
- */
 bool Database::DoesLoginserverWorldAdminAccountExist(
 	const std::string &account_name
 )
@@ -611,10 +486,6 @@ bool Database::DoesLoginserverWorldAdminAccountExist(
 	return (results.RowCount() == 1);
 }
 
-/**
- * @param account_name
- * @return
- */
 Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &account_name)
 {
 	auto query = fmt::format(
@@ -642,10 +513,6 @@ Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &ac
 	return r;
 }
 
-/**
- * @param account_name
- * @return
- */
 Database::DbLoginServerAccount Database::GetLoginServerAccountByAccountName(
 	const std::string &account_name,
 	const std::string &source_loginserver
