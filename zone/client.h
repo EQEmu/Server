@@ -2299,7 +2299,7 @@ public:
 	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
 
 	void SetIllusionBlock(bool value) { _illusionBlock = value; }
-	bool GetIllusionBlock() const { return _illusionBlock; }
+	bool GetIllusionBlock() const override { return _illusionBlock; }
 
 private:
 	bool bot_owner_options[_booCount];

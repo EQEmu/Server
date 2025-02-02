@@ -647,7 +647,7 @@ public:
 	uint8 GetUltimateSpellTypeMinThreshold(uint16 spell_type, Mob* tar);
 	uint8 GetUltimateSpellTypeMaxThreshold(uint16 spell_type, Mob* tar);
 	void SetIllusionBlock(bool value) { _illusionBlock = value; }
-	bool GetIllusionBlock() const { return _illusionBlock; }
+	bool GetIllusionBlock() const override { return _illusionBlock; }
 	bool GetShowHelm() const { return _showHelm; }
 	void SetShowHelm(bool show_helm) { _showHelm = show_helm; }
 	bool GetBehindMob() const { return _behindMobStatus; }

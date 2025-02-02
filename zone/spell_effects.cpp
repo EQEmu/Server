@@ -1481,7 +1481,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Illusion: race %d", effect_value);
 #endif
 				if (caster && caster->IsOfClientBot()) {
-					auto target = IsClient() ? CastToClient() : CastToBot();
+					Mob* target = IsClient() ? static_cast<Mob*>(CastToClient()) : static_cast<Mob*>(CastToBot());
 
 					if (target && target->GetIllusionBlock()) {
 						break;
@@ -1498,7 +1498,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Illusion Copy");
 #endif
 				if (caster && caster->IsOfClientBot()) {
-					auto target = IsClient() ? CastToClient() : CastToBot();
+					Mob* target = IsClient() ? static_cast<Mob*>(CastToClient()) : static_cast<Mob*>(CastToBot());
 
 					if (target && target->GetIllusionBlock()) {
 						break;
