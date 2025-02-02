@@ -727,19 +727,15 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		}
 	}
 	else if (IsBot()) {
-		const EQ::ItemInstance* inst = CastToBot()->GetBotItem(EQ::invslot::slotPrimary);
-		const EQ::ItemData* botpiercer = nullptr;
+		auto bot = CastToBot();
+		auto inst = bot->GetBotItem(EQ::invslot::slotPrimary);
+		auto bot_piercer = inst ? inst->GetItem() : nullptr;
 
-		if (inst) {
-			botpiercer = inst->GetItem();
-		}
-
-		if (!botpiercer || (botpiercer->ItemType != EQ::item::ItemType1HPiercing)) {
-			if (!CastToBot()->GetCombatRoundForAlerts()) {
-				CastToBot()->SetCombatRoundForAlerts();
-				CastToBot()->RaidGroupSay(this, "I can't backstab with this weapon!");
+		if (!bot_piercer || bot_piercer->ItemType != EQ::item::ItemType1HPiercing) {
+			if (!bot->GetCombatRoundForAlerts()) {
+				bot->SetCombatRoundForAlerts();
+				bot->RaidGroupSay(this, "I can't backstab with this weapon!");
 			}
-
 			return;
 		}
 	}
