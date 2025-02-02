@@ -2537,12 +2537,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 
 	//range check our target, if we have one and it is not us
 	float range = spells[spell_id].range + GetRangeDistTargetSizeMod(spell_target);
-	if (
-		(
-			(IsClient() && CastToClient()->TGB()) || (IsBot() && RuleB(Bots, EnableBotTGB))
-		) &&
-		IsTGBCompatibleSpell(spell_id) && IsGroupSpell(spell_id)
-	) {
+	bool can_use_tgb = (IsClient() && CastToClient()->TGB()) || (IsBot() && RuleB(Bots, EnableBotTGB));
+	bool is_tgb_compatible = IsTGBCompatibleSpell(spell_id);
+	bool is_group_spell = IsGroupSpell(spell_id);
+
+	if (can_use_tgb && is_tgb_compatible && is_group_spell) {
 		range = spells[spell_id].aoe_range;
 	}
 
