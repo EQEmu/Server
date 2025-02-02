@@ -2278,24 +2278,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 					}
 					else if(IsBot())
 					{
-						if(IsGrouped())
-						{
-							group_id_caster = GetGroup()->GetID();
-						}
-						else if(IsRaidGrouped())
-						{
-							if(GetOwner())
-								group_id_caster = (GetRaid()->GetGroup(GetOwner()->CastToClient()) == 0xFFFF) ? 0 : (GetRaid()->GetGroup(GetOwner()->CastToClient()) + 1);
-						}
-						if (IsGrouped())
-						{
-							if (Group* group = GetGroup()) {
+						if (IsGrouped()) {
+							if (auto group = GetGroup()) {
 								group_id_caster = group->GetID();
 							}
-						}
-						else if (IsRaidGrouped())
-						{
-							if (Raid* raid = GetRaid()) {
+						} else if (IsRaidGrouped()) {
+							if (auto raid = GetRaid()) {
 								uint32 group_id = raid->GetGroup(GetName());
 								group_id_caster = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
 							}
