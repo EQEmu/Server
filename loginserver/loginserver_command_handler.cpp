@@ -9,11 +9,6 @@
 extern LoginServer server;
 
 namespace LoginserverCommandHandler {
-
-	/**
-	 * @param argc
-	 * @param argv
-	 */
 	void CommandHandler(int argc, char **argv)
 	{
 		if (argc == 1) { return; }
@@ -22,14 +17,7 @@ namespace LoginserverCommandHandler {
 		cmd.parse(argc, argv, argh::parser::PREFER_PARAM_FOR_UNREG_OPTION);
 		EQEmuCommand::DisplayDebug(cmd);
 
-		/**
-		 * Declare command mapping
-		 */
 		auto function_map = EQEmuCommand::function_map;
-
-		/**
-		 * Register commands
-		 */
 		function_map["login-user:check-credentials"]          = &LoginserverCommandHandler::CheckLoginserverUserCredentials;
 		function_map["login-user:check-external-credentials"] = &LoginserverCommandHandler::CheckExternalLoginserverUserCredentials;
 		function_map["login-user:create"]                     = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
@@ -43,12 +31,6 @@ namespace LoginserverCommandHandler {
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void CreateLoginserverApiToken(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Creates Loginserver API Token";
@@ -79,12 +61,6 @@ namespace LoginserverCommandHandler {
 		}
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void ListLoginserverApiTokens(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Lists Loginserver API Tokens";
@@ -106,12 +82,6 @@ namespace LoginserverCommandHandler {
 		}
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Creates Local Loginserver Account";
@@ -138,12 +108,6 @@ namespace LoginserverCommandHandler {
 		AccountManagement::CreateLoginServerAccount(c);
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void CreateLoginserverWorldAdminAccount(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Creates Loginserver World Administrator Account";
@@ -168,12 +132,6 @@ namespace LoginserverCommandHandler {
 		);
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void CheckLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Check user login credentials";
@@ -199,12 +157,6 @@ namespace LoginserverCommandHandler {
 		LogInfo("Credentials were {}", res != 0 ? "accepted" : "not accepted");
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void UpdateLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Change user login credentials";
@@ -227,12 +179,6 @@ namespace LoginserverCommandHandler {
 		AccountManagement::UpdateLoginserverUserCredentials(c);
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void CheckExternalLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Check user external login credentials";
@@ -257,12 +203,6 @@ namespace LoginserverCommandHandler {
 		LogInfo("Credentials were {}", res ? "accepted" : "not accepted");
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void UpdateLoginserverWorldAdminAccountPassword(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Update world admin account password";
@@ -285,12 +225,6 @@ namespace LoginserverCommandHandler {
 		AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(c);
 	}
 
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
 	void HealthCheckLogin(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Checks login health using a test user";
