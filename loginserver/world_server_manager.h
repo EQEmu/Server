@@ -19,7 +19,7 @@ public:
 		const std::string &client_loginserver
 	);
 	std::unique_ptr<EQApplicationPacket> CreateServerListPacket(Client *client, uint32 sequence);
-	bool DoesServerExist(const std::string &server_long_name, const std::string &server_short_name, WorldServer *ignore = nullptr);
+	bool DoesServerExist(const std::string &s, const std::string &server_short_name, WorldServer *ignore = nullptr);
 	void DestroyServerByName(std::string s, std::string server_short_name, WorldServer *ignore = nullptr);
 	const std::list<std::unique_ptr<WorldServer>> &GetWorldServers() const;
 

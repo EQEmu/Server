@@ -29,19 +29,19 @@ namespace LoginserverWebserver {
 
 				Json::Value response;
 				auto        iter = server.server_manager->GetWorldServers().begin();
-				while (iter != server.server_manager->GetWorldServers().end()) {
+				for (const auto& s : server.server_manager->GetWorldServers()) {
 					Json::Value row;
-					row["server_long_name"]    = (*iter)->GetServerLongName();
-					row["server_short_name"]   = (*iter)->GetServerShortName();
-					row["server_list_type_id"] = (*iter)->GetServerListID();
-					row["server_status"]       = (*iter)->GetStatus();
-					row["zones_booted"]        = (*iter)->GetZonesBooted();
-					row["local_ip"]            = (*iter)->GetLocalIP();
-					row["remote_ip"]           = (*iter)->GetRemoteIP();
-					row["players_online"]      = (*iter)->GetPlayersOnline();
-					row["world_id"]            = (*iter)->GetServerId();
+					row["server_long_name"]    = s->GetServerLongName();
+					row["server_short_name"]   = s->GetServerShortName();
+					row["server_list_type_id"] = s->GetServerListID();
+					row["server_status"]       = s->GetStatus();
+					row["zones_booted"]        = s->GetZonesBooted();
+					row["local_ip"]            = s->GetLocalIP();
+					row["remote_ip"]           = s->GetRemoteIP();
+					row["players_online"]      = s->GetPlayersOnline();
+					row["world_id"]            = s->GetServerId();
+
 					response.append(row);
-					++iter;
 				}
 
 				LoginserverWebserver::SendResponse(response, res);
@@ -54,10 +54,10 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
-				std::string username     = request_body.get("username", "").asString();
-				std::string password     = request_body.get("password", "").asString();
-				std::string email        = request_body.get("email", "").asString();
+				Json::Value req      = LoginserverWebserver::ParseRequestBody(request);
+				std::string username = req.get("username", "").asString();
+				std::string password = req.get("password", "").asString();
+				std::string email    = req.get("email", "").asString();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
@@ -67,7 +67,12 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				int32 account_created_id = AccountManagement::CreateLoginServerAccount(username, password, email);
+				LoginAccountContext c;
+				c.username = username;
+				c.password = password;
+				c.email    = email;
+
+				int32 account_created_id = AccountManagement::CreateLoginServerAccount(c);
 				if (account_created_id > 0) {
 					response["message"]            = "Account created successfully!";
 					response["data"]["account_id"] = account_created_id;
@@ -91,11 +96,11 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Json::Value request_body     = LoginserverWebserver::ParseRequestBody(request);
-				std::string username         = request_body.get("username", "").asString();
-				std::string password         = request_body.get("password", "").asString();
-				std::string email            = request_body.get("email", "").asString();
-				uint32      login_account_id = request_body.get("login_account_id", "").asInt();
+				Json::Value req              = LoginserverWebserver::ParseRequestBody(request);
+				std::string username         = req.get("username", "").asString();
+				std::string password         = req.get("password", "").asString();
+				std::string email            = req.get("email", "").asString();
+				uint32      login_account_id = req.get("login_account_id", "").asInt();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
@@ -105,14 +110,14 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				std::string source_loginserver = "eqemu";
-				int32       account_created_id = AccountManagement::CreateLoginServerAccount(
-					username,
-					password,
-					email,
-					source_loginserver,
-					login_account_id
-				);
+				LoginAccountContext c;
+				c.username           = username;
+				c.password           = password;
+				c.email              = email;
+				c.source_loginserver = "eqemu";
+				c.login_account_id   = login_account_id;
+
+				int32 account_created_id = AccountManagement::CreateLoginServerAccount(c);
 
 				if (account_created_id > 0) {
 					response["message"]            = "Account created successfully!";
@@ -137,9 +142,9 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
-				std::string username     = request_body.get("username", "").asString();
-				std::string password     = request_body.get("password", "").asString();
+				Json::Value req      = LoginserverWebserver::ParseRequestBody(request);
+				std::string username = req.get("username", "").asString();
+				std::string password = req.get("password", "").asString();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
@@ -173,9 +178,9 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
-				std::string username     = request_body.get("username", "").asString();
-				std::string password     = request_body.get("password", "").asString();
+				Json::Value req      = LoginserverWebserver::ParseRequestBody(request);
+				std::string username = req.get("username", "").asString();
+				std::string password = req.get("password", "").asString();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
@@ -221,9 +226,9 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
-				std::string username     = request_body.get("username", "").asString();
-				std::string password     = request_body.get("password", "").asString();
+				Json::Value req      = LoginserverWebserver::ParseRequestBody(request);
+				std::string username = req.get("username", "").asString();
+				std::string password = req.get("password", "").asString();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
@@ -269,9 +274,9 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
-				std::string username     = request_body.get("username", "").asString();
-				std::string password     = request_body.get("password", "").asString();
+				Json::Value req      = LoginserverWebserver::ParseRequestBody(request);
+				std::string username = req.get("username", "").asString();
+				std::string password = req.get("password", "").asString();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {

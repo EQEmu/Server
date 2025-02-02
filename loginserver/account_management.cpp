@@ -8,55 +8,41 @@
 extern LoginServer       server;
 EQ::Event::TaskScheduler task_runner;
 
-/**
- * @param username
- * @param password
- * @param email
- * @param source_loginserver
- * @param login_account_id
- * @return
- */
-int32 AccountManagement::CreateLoginServerAccount(
-	std::string username,
-	std::string password,
-	std::string email,
-	const std::string &source_loginserver,
-	uint32 login_account_id
-)
+int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
-	auto hash = eqcrypt_hash(username, password, mode);
+	auto hash = eqcrypt_hash(c.username, c.password, mode);
 
 	LogInfo(
 		"Attempting to create local login account for user [{0}] encryption algorithm [{1}] ({2})",
-		username,
+		c.username,
 		GetEncryptionByModeId(mode),
 		mode
 	);
 
 	unsigned int db_id = 0;
-	if (server.db->DoesLoginServerAccountExist(username, hash, source_loginserver, 1)) {
+	if (server.db->DoesLoginServerAccountExist(c.username, hash, c.source_loginserver, 1)) {
 		LogWarning(
 			"Attempting to create local login account for user [{0}] login [{1}] but already exists!",
-			username,
-			source_loginserver
+			c.username,
+			c.source_loginserver
 		);
 
 		return -1;
 	}
 
 	uint32 created_account_id = 0;
-	if (login_account_id > 0) {
-		created_account_id = server.db->CreateLoginDataWithID(username, hash, source_loginserver, login_account_id);
+	if (c.login_account_id > 0) {
+		created_account_id = server.db->CreateLoginDataWithID(c.username, hash, c.source_loginserver, c.login_account_id);
 	}
 	else {
-		created_account_id = server.db->CreateLoginAccount(username, hash, source_loginserver, email);
+		created_account_id = server.db->CreateLoginAccount(c.username, hash, c.source_loginserver, c.email);
 	}
 
 	if (created_account_id > 0) {
 		LogInfo(
 			"Account creation success for user [{0}] encryption algorithm [{1}] ({2}) id: [{3}]",
-			username,
+			c.username,
 			GetEncryptionByModeId(mode),
 			mode,
 			created_account_id
@@ -65,17 +51,11 @@ int32 AccountManagement::CreateLoginServerAccount(
 		return (int32) created_account_id;
 	}
 
-	LogError("Failed to create local login account for user [{0}]!", username);
+	LogError("Failed to create local login account for user [{0}]!", c.username);
 
 	return 0;
 }
 
-/**
- * @param username
- * @param password
- * @param email
- * @return
- */
 bool AccountManagement::CreateLoginserverWorldAdminAccount(
 	const std::string &username,
 	const std::string &password,
@@ -129,11 +109,6 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 	return false;
 }
 
-/**
- * @param in_account_username
- * @param in_account_password
- * @return
- */
 uint32 AccountManagement::CheckLoginserverUserCredentials(
 	const std::string &in_account_username,
 	const std::string &in_account_password,
@@ -184,12 +159,6 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 	return login_server_admin.id;
 }
 
-
-/**
- * @param in_account_username
- * @param in_account_password
- * @return
- */
 bool AccountManagement::UpdateLoginserverUserCredentials(
 	const std::string &in_account_username,
 	const std::string &in_account_password,
@@ -233,10 +202,6 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 	return true;
 }
 
-/**
- * @param in_account_username
- * @param in_account_password
- */
 bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
 	const std::string &in_account_username,
 	const std::string &in_account_password
@@ -262,11 +227,6 @@ bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
 
 constexpr int REQUEST_TIMEOUT_MS = 1500;
 
-/**
- * @param in_account_username
- * @param in_account_password
- * @return
- */
 uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 	const std::string &in_account_username,
 	const std::string &in_account_password

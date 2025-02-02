@@ -130,11 +130,12 @@ namespace LoginserverCommandHandler {
 
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
-		AccountManagement::CreateLoginServerAccount(
-			cmd(2).str(),
-			cmd(3).str(),
-			cmd("--email").str()
-		);
+		LoginAccountContext c;
+		c.username = cmd(2).str();
+		c.password = cmd(3).str();
+		c.email    = cmd("--email").str();
+
+		AccountManagement::CreateLoginServerAccount(c);
 	}
 
 	/**

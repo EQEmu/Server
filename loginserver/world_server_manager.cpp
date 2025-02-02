@@ -177,10 +177,10 @@ bool WorldServerManager::DoesServerExist(
 )
 {
 	return std::any_of(
-		m_world_servers.begin(), m_world_servers.end(), [&](const std::unique_ptr<WorldServer> &server) {
-			return server.get() != ignore &&
-				   server->GetServerLongName() == server_long_name &&
-				   server->GetServerShortName() == server_short_name;
+		m_world_servers.begin(), m_world_servers.end(), [&](const std::unique_ptr<WorldServer> &s) {
+			return s.get() != ignore &&
+				   s->GetServerLongName() == server_long_name &&
+				   s->GetServerShortName() == server_short_name;
 		}
 	);
 }

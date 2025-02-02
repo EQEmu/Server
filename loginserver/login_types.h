@@ -95,6 +95,14 @@ enum LSClientStatus {
 	cs_logged_in
 };
 
+struct LoginAccountContext {
+	std::string username;
+	std::string password;
+	std::string email;
+	std::string source_loginserver = "local";
+	uint32      login_account_id   = 0;
+};
+
 namespace LS {
 	namespace ServerStatusFlags {
 		enum eServerStatusFlags {
