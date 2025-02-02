@@ -296,7 +296,7 @@ void Client::SendPlayToWorld(const char *data)
 	m_selected_play_server_id = (unsigned int) play->server_number;
 	m_play_sequence_id        = sequence_in;
 	m_selected_play_server_id = server_id_in;
-	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
+	server.server_manager->SendUserLoginToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
 }
 
 void Client::SendServerListPacket(uint32 seq)

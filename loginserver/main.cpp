@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 	 * create server manager
 	 */
 	LogInfo("Server Manager Init");
-	server.server_manager = new ServerManager();
+	server.server_manager = new WorldServerManager();
 	if (!server.server_manager) {
 		LogError("Server Manager Failed to Start");
 		LogInfo("Database System Shutdown");

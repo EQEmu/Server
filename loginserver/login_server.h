@@ -6,7 +6,7 @@
 #include "database.h"
 #include "encryption.h"
 #include "options.h"
-#include "server_manager.h"
+#include "world_server_manager.h"
 #include "client_manager.h"
 #include "loginserver_webserver.h"
 
@@ -24,9 +24,9 @@ public:
 	EQ::JsonConfigFile                 config;
 	Database                           *db;
 	LoginserverWebserver::TokenManager *token_manager{};
-	Options                            options;
-	ServerManager                      *server_manager;
-	ClientManager                      *client_manager{};
+	Options            options;
+	WorldServerManager *server_manager;
+	ClientManager      *client_manager{};
 };
 
 #endif

@@ -1,5 +1,5 @@
 #include "loginserver_webserver.h"
-#include "server_manager.h"
+#include "world_server_manager.h"
 #include "login_server.h"
 #include "../common/json/json.h"
 #include "../common/strings.h"
@@ -28,8 +28,8 @@ namespace LoginserverWebserver {
 				}
 
 				Json::Value response;
-				auto        iter = server.server_manager->getWorldServers().begin();
-				while (iter != server.server_manager->getWorldServers().end()) {
+				auto        iter = server.server_manager->GetWorldServers().begin();
+				while (iter != server.server_manager->GetWorldServers().end()) {
 					Json::Value row;
 					row["server_long_name"]    = (*iter)->GetServerLongName();
 					row["server_short_name"]   = (*iter)->GetServerShortName();
@@ -301,7 +301,7 @@ namespace LoginserverWebserver {
 		api.Get(
 			"/probes/healthcheck", [](const httplib::Request &request, httplib::Response &res) {
 				Json::Value response;
-				uint32 login_response = AccountManagement::HealthCheckUserLogin();
+				uint32      login_response = AccountManagement::HealthCheckUserLogin();
 
 				response["status"] = login_response;
 				if (login_response == 0) {
@@ -439,7 +439,7 @@ namespace LoginserverWebserver {
 
 		LoginserverWebserver::TokenManager::token_data user_token{};
 
-		for (const auto &header : request.headers) {
+		for (const auto &header: request.headers) {
 			auto header_key   = header.first;
 			auto header_value = header.second;
 			if (header_key == "Authorization") {
