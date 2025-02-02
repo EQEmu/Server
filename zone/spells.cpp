@@ -2172,14 +2172,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			spell_target = this; // Default to self
 
 			bool tgb_enabled = (IsClient() && CastToClient()->TGB()) ||
-							   (IsBot() && RuleB(Bots, EnableBotTGB));
+				(IsBot() && RuleB(Bots, EnableBotTGB));
 			bool tgb_compatible = IsTGBCompatibleSpell(spell_id);
 			bool item_tgb_allowed = (slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB));
 
 			if (tgb_enabled && tgb_compatible && item_tgb_allowed) {
 				bool valid_target = target && !target->IsCorpse() &&
-									(!target->IsNPC() ||
-									(target->GetOwner() && target->GetOwner()->IsOfClientBot()));
+					(!target->IsNPC() ||
+					(target->GetOwner() && target->GetOwner()->IsOfClientBot()));
 
 				if (valid_target) {
 					spell_target = target;
