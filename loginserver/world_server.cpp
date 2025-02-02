@@ -166,10 +166,10 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 
 		auto *outapp = new EQApplicationPacket(
 			OP_PlayEverquestResponse,
-			sizeof(PlayEverquestResponse_Struct)
+			sizeof(PlayEverquestResponse)
 		);
 
-		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
+		auto *per = (PlayEverquestResponse *) outapp->pBuffer;
 		per->base_header.sequence = client->GetCurrentPlaySequence();
 		per->server_number        = client->GetSelectedPlayServerID();
 
@@ -261,10 +261,10 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 
 		auto *outapp = new EQApplicationPacket(
 			OP_PlayEverquestResponse,
-			sizeof(PlayEverquestResponse_Struct)
+			sizeof(PlayEverquestResponse)
 		);
 
-		auto *r = (PlayEverquestResponse_Struct *) outapp->pBuffer;
+		auto *r = (PlayEverquestResponse *) outapp->pBuffer;
 		r->base_header.sequence = c->GetCurrentPlaySequence();
 		r->server_number        = c->GetSelectedPlayServerID();
 

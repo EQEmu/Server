@@ -70,7 +70,7 @@ bool Client::Process()
 				break;
 			}
 			case OP_PlayEverquestRequest: {
-				if (app->Size() < sizeof(PlayEverquestRequest_Struct)) {
+				if (app->Size() < sizeof(PlayEverquestRequest)) {
 					LogError("Play received but it is too small, discarding");
 					break;
 				}
@@ -110,8 +110,8 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	/**
 	 * The packets are identical between the two versions
 	 */
-	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply_Struct));
-	auto buf     = reinterpret_cast<LoginHandShakeReply_Struct *>(outapp->pBuffer);
+	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply));
+	auto buf     = reinterpret_cast<LoginHandShakeReply *>(outapp->pBuffer);
 	buf->base_header.sequence    = 0x02;
 	buf->base_reply.success      = true;
 	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
@@ -134,7 +134,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 
 	// login user/pass are variable length after unencrypted opcode and base message header (size includes opcode)
-	constexpr int header_size = sizeof(uint16_t) + sizeof(LoginBaseMessage_Struct);
+	constexpr int header_size = sizeof(uint16_t) + sizeof(LoginBaseMessage);
 	int           data_size   = size - header_size;
 
 	if (size <= header_size) {
@@ -168,7 +168,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 
 	// data starts at base message header (opcode not included)
-	auto r = eqcrypt_block(data + sizeof(LoginBaseMessage_Struct), data_size, &outbuffer[0], 0);
+	auto r = eqcrypt_block(data + sizeof(LoginBaseMessage), data_size, &outbuffer[0], 0);
 	if (r == nullptr) {
 		LogError("Failed to decrypt eqcrypt block");
 		return;
@@ -183,7 +183,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 
 	// only need to copy the base header for reply options, ignore login info
-	memcpy(&m_llrs, data, sizeof(LoginBaseMessage_Struct));
+	memcpy(&m_llrs, data, sizeof(LoginBaseMessage));
 
 	bool result = false;
 	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
@@ -282,7 +282,7 @@ void Client::SendPlayToWorld(const char *data)
 		return;
 	}
 
-	const auto *play        = (const PlayEverquestRequest_Struct *) data;
+	const auto *play        = (const PlayEverquestRequest *) data;
 	auto       server_id_in = (unsigned int) play->server_number;
 	auto       sequence_in  = (unsigned int) play->base_header.sequence;
 
@@ -381,12 +381,12 @@ void Client::SendFailedLogin()
 	m_stored_pass.clear();
 
 	// unencrypted
-	LoginBaseMessage_Struct base_header{};
+	LoginBaseMessage base_header{};
 	base_header.sequence     = m_llrs.sequence; // login (3)
 	base_header.encrypt_type = m_llrs.encrypt_type;
 
 	// encrypted
-	PlayerLoginReply_Struct login_reply{};
+	PlayerLoginReply login_reply{};
 	login_reply.base_reply.success      = false;
 	login_reply.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
@@ -396,7 +396,7 @@ void Client::SendFailedLogin()
 		LogDebug("Failed to encrypt eqcrypt block for failed login");
 	}
 
-	constexpr int       outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	constexpr int       outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
 	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
 	outapp.WriteData(&base_header, sizeof(base_header));
 	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
@@ -500,14 +500,14 @@ void Client::DoSuccessfulLogin(
 	m_loginserver_name = db_loginserver;
 
 	// unencrypted
-	LoginBaseMessage_Struct base_header{};
+	LoginBaseMessage base_header{};
 	base_header.sequence     = m_llrs.sequence;
 	base_header.compressed   = false;
 	base_header.encrypt_type = m_llrs.encrypt_type;
 	base_header.unk3         = m_llrs.unk3;
 
 	// not serializing any of the variable length strings so just use struct directly
-	PlayerLoginReply_Struct login_reply{};
+	PlayerLoginReply login_reply{};
 	login_reply.base_reply.success         = true;
 	login_reply.base_reply.error_str_id    = 101; // No Error
 	login_reply.unk1                       = 0;
@@ -532,7 +532,7 @@ void Client::DoSuccessfulLogin(
 		LogDebug("Failed to encrypt eqcrypt block");
 	}
 
-	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	constexpr int outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
 	auto          outapp  = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
 	outapp->WriteData(&base_header, sizeof(base_header));
 	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
@@ -542,7 +542,7 @@ void Client::DoSuccessfulLogin(
 	m_client_status = cs_logged_in;
 }
 
-void Client::SendExpansionPacketData(PlayerLoginReply_Struct &plrs)
+void Client::SendExpansionPacketData(PlayerLoginReply &plrs)
 {
 	SerializeBuffer buf;
 	//from eqlsstr_us.txt id of each expansion, excluding 'Everquest'

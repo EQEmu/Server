@@ -31,7 +31,7 @@ public:
 	* Live, as of July 2021 uses a similar but slightly different seperate data packet
 	*
 	*/
-	void SendExpansionPacketData(PlayerLoginReply_Struct& plrs);
+	void SendExpansionPacketData(PlayerLoginReply& plrs);
 	void SendPlayToWorld(const char *data);
 	void SendServerListPacket(uint32 seq);
 	void SendPlayResponse(EQApplicationPacket *outapp);
@@ -79,8 +79,8 @@ private:
 	std::string  m_key;
 
 	std::unique_ptr<EQ::Net::DaybreakConnectionManager> m_login_connection_manager;
-	std::shared_ptr<EQ::Net::DaybreakConnection>        m_login_connection;
-	LoginBaseMessage_Struct                             m_llrs;
+	std::shared_ptr<EQ::Net::DaybreakConnection> m_login_connection;
+	LoginBaseMessage                             m_llrs;
 
 	std::string m_stored_user;
 	std::string m_stored_pass;
