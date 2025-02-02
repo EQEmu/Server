@@ -13,9 +13,6 @@ namespace LoginserverWebserver {
 	constexpr static int HTTP_RESPONSE_BAD_REQUEST  = 400;
 	constexpr static int HTTP_RESPONSE_UNAUTHORIZED = 401;
 
-	/**
-	 * @param api
-	 */
 	void RegisterRoutes(httplib::Server &api)
 	{
 		server.token_manager = new LoginserverWebserver::TokenManager;
@@ -219,7 +216,6 @@ namespace LoginserverWebserver {
 			}
 		);
 
-
 		api.Post(
 			"/v1/account/credentials/update/external", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
@@ -322,10 +318,6 @@ namespace LoginserverWebserver {
 		);
 	}
 
-	/**
-	 * @param payload
-	 * @param res
-	 */
 	void SendResponse(const Json::Value &payload, httplib::Response &res)
 	{
 		if (res.get_header_value("response_set") == "true") {
@@ -347,10 +339,6 @@ namespace LoginserverWebserver {
 		res.set_content(response_payload.str(), "application/json");
 	}
 
-	/**
-	 * @param payload
-	 * @param res
-	 */
 	Json::Value ParseRequestBody(const httplib::Request &request)
 	{
 		Json::Value request_body;
@@ -369,10 +357,6 @@ namespace LoginserverWebserver {
 		return request_body;
 	}
 
-	/**
-	 * @param request
-	 * @param res
-	 */
 	bool LoginserverWebserver::TokenManager::AuthCanRead(const httplib::Request &request, httplib::Response &res)
 	{
 		LoginserverWebserver::TokenManager::token_data
@@ -400,10 +384,6 @@ namespace LoginserverWebserver {
 		return true;
 	}
 
-	/**
-	 * @param request
-	 * @param res
-	 */
 	bool LoginserverWebserver::TokenManager::AuthCanWrite(const httplib::Request &request, httplib::Response &res)
 	{
 		LoginserverWebserver::TokenManager::token_data
@@ -431,10 +411,6 @@ namespace LoginserverWebserver {
 		return true;
 	}
 
-	/**
-	 * @param request
-	 * @return
-	 */
 	LoginserverWebserver::TokenManager::token_data
 	LoginserverWebserver::TokenManager::CheckApiAuthorizationHeaders(
 		const httplib::Request &request
@@ -475,9 +451,6 @@ namespace LoginserverWebserver {
 		return user_token;
 	}
 
-	/**
-	 * Loads API Tokens
-	 */
 	void TokenManager::LoadApiTokens()
 	{
 		auto      results     = server.db->GetLoginserverApiTokens();
@@ -508,10 +481,6 @@ namespace LoginserverWebserver {
 		LogInfo("Loaded [{}] API token(s)", token_count);
 	}
 
-	/**
-	 * @param token
-	 * @return
-	 */
 	bool TokenManager::TokenExists(const std::string &token)
 	{
 		auto it = server.token_manager->loaded_api_tokens.find(token);
@@ -519,10 +488,6 @@ namespace LoginserverWebserver {
 		return !(it == server.token_manager->loaded_api_tokens.end());
 	}
 
-	/**
-	 * @param token
-	 * @return
-	 */
 	LoginserverWebserver::TokenManager::token_data TokenManager::GetToken(
 		const std::string &token
 	)
