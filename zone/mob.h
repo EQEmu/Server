@@ -862,7 +862,7 @@ public:
 	void ShowStats(Client* client);
 	void ShowBuffs(Client* c);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc = true);
-	
+
 	virtual int GetKillExpMod() const { return 100; }
 
 	// aura functions
@@ -1260,20 +1260,20 @@ public:
 	float				GetFixedZ(const glm::vec3 &destination, int32 z_find_offset = 5);
 	virtual int			GetStuckBehavior() const { return 0; }
 
-	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
-	inline uint32		DontHealMeBefore() const { return m_dont_heal_me_before; }
-	inline uint32		DontBuffMeBefore() const { return m_dont_buff_me_before; }
-	inline uint32		DontDotMeBefore() const { return m_dont_dot_me_before; }
-	inline uint32		DontRootMeBefore() const { return m_dont_root_me_before; }
-	inline uint32		DontSnareMeBefore() const { return m_dont_snare_me_before; }
-	inline uint32		DontCureMeBefore() const { return m_dont_cure_me_before; }
-	
-	void				SetDontRootMeBefore(uint32 time) { m_dont_root_me_before = time; }
-	void				SetDontHealMeBefore(uint32 time) { m_dont_heal_me_before = time; }
-	void				SetDontBuffMeBefore(uint32 time) { m_dont_buff_me_before = time; }
-	void				SetDontDotMeBefore(uint32 time) { m_dont_dot_me_before = time; }
-	void				SetDontSnareMeBefore(uint32 time) { m_dont_snare_me_before = time; }
-	void				SetDontCureMeBefore(uint32 time) { m_dont_cure_me_before = time; }
+	void NPCSpecialAttacks(const char *parse, int permtag, bool reset = true, bool remove = false);
+	inline uint32 DontHealMeBefore() const { return m_dont_heal_me_before; }
+	inline uint32 DontBuffMeBefore() const { return m_dont_buff_me_before; }
+	inline uint32 DontDotMeBefore() const { return m_dont_dot_me_before; }
+	inline uint32 DontRootMeBefore() const { return m_dont_root_me_before; }
+	inline uint32 DontSnareMeBefore() const { return m_dont_snare_me_before; }
+	inline uint32 DontCureMeBefore() const { return m_dont_cure_me_before; }
+
+	void SetDontRootMeBefore(uint32 time) { m_dont_root_me_before = time; }
+	void SetDontHealMeBefore(uint32 time) { m_dont_heal_me_before = time; }
+	void SetDontBuffMeBefore(uint32 time) { m_dont_buff_me_before = time; }
+	void SetDontDotMeBefore(uint32 time) { m_dont_dot_me_before = time; }
+	void SetDontSnareMeBefore(uint32 time) { m_dont_snare_me_before = time; }
+	void SetDontCureMeBefore(uint32 time) { m_dont_cure_me_before = time; }
 
 	// calculate interruption of spell via movement of mob
 	void SaveSpellLoc() { m_SpellLocation = glm::vec3(m_Position); }
