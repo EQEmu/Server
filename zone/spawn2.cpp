@@ -285,7 +285,7 @@ bool Spawn2::Process() {
 		if (parse->HasQuestSub(npcid, EVENT_PREPARE_SPAWN)) {
 			int allow_spawn = parse->EventNPC(EVENT_PREPARE_SPAWN, npc, nullptr, "", 0);
 			if(allow_spawn < 0) {
-				return;
+				return true;
 			}
 		}
 
