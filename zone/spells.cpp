@@ -1257,12 +1257,11 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	bool bard_song_mode = false; //has the bard song gone to auto repeat mode
 
 	if (IsBot()) {
-		CastToBot()->SetCastedSpellType(UINT16_MAX);
-	}
+		auto bot = CastToBot();
+		bot->SetCastedSpellType(UINT16_MAX);
 
-	if (IsBot() && IsValidSpell(spellid)) {
-		if (CastToBot()->CheckSpellRecastTimer(spellid)) {
-			CastToBot()->ClearSpellRecastTimer(spellid);
+		if (IsValidSpell(spellid) && bot->CheckSpellRecastTimer(spellid)) {
+			bot->ClearSpellRecastTimer(spellid);
 		}
 	}
 
