@@ -42,7 +42,7 @@ public:
 	unsigned int GetZonesBooted() const { return m_zones_booted; }
 	unsigned int GetPlayersOnline() const { return m_players_online; }
 
-	void HandleNewWorldserver(LoginserverNewWorldRequest *r);
+	void HandleNewWorldserver(LoginserverNewWorldRequest *req);
 	void HandleWorldserverStatusUpdate(LoginserverWorldStatusUpdate *u);
 	bool HandleNewWorldserverValidation(LoginserverNewWorldRequest *r);
 

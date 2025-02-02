@@ -68,41 +68,37 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 {
 	LogNetcode(
 		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
-		opcode,
-		packet.Length(),
-		packet.ToString()
+		opcode, packet.Length(), packet.ToString()
 	);
 
 	if (packet.Length() < sizeof(LoginserverNewWorldRequest)) {
 		LogError(
-			"Received application packet from server that had opcode ServerOP_NewLSInfo, "
-			"but was too small. Discarded to avoid buffer overrun"
+			"Received application packet with opcode ServerOP_NewLSInfo, but it was too small. Discarded to avoid buffer overrun."
 		);
-
 		return;
 	}
 
-	auto *info = (LoginserverNewWorldRequest *) packet.Data();
+	auto *r = (LoginserverNewWorldRequest *) packet.Data();
 
-	// if for whatever reason the world server is not sending an address, use the local address it sends
-	std::string remote_ip_addr = info->remote_ip_address;
-	std::string local_ip_addr  = info->local_ip_address;
-	if (remote_ip_addr.empty() && !local_ip_addr.empty() && local_ip_addr != "127.0.0.1") {
-		strcpy(info->remote_ip_address, local_ip_addr.c_str());
+	// If remote IP is missing, use local IP unless it's 127.0.0.1
+	if (r->remote_ip_address[0] == '\0' && r->local_ip_address[0] != '\0' &&
+		strcmp(r->local_ip_address, "127.0.0.1") != 0) {
+		strncpy(r->remote_ip_address, r->local_ip_address, sizeof(r->remote_ip_address) - 1);
+		r->remote_ip_address[sizeof(r->remote_ip_address) - 1] = '\0'; // Ensure null termination
 	}
 
 	LogInfo(
-		"New World Server Info | name [{0}] shortname [{1}] remote_address [{2}] local_address [{3}] account [{4}] password [{5}] server_type [{6}]",
-		info->server_long_name,
-		info->server_short_name,
-		info->remote_ip_address,
-		info->local_ip_address,
-		info->account_name,
-		info->account_password,
-		info->server_process_type
+		"New World Server Info | name [{}] shortname [{}] remote_address [{}] local_address [{}] account [{}] password [{}] server_type [{}]",
+		r->server_long_name,
+		r->server_short_name,
+		r->remote_ip_address,
+		r->local_ip_address,
+		r->account_name,
+		r->account_password,
+		r->server_process_type
 	);
 
-	HandleNewWorldserver(info);
+	HandleNewWorldserver(r);
 }
 
 void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet)
@@ -373,7 +369,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 	}
 }
 
-void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *r)
+void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 {
 	if (m_is_server_logged_in) {
 		LogError(
@@ -381,22 +377,22 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *r)
 		return;
 	}
 
-	if (!HandleNewWorldserverValidation(r)) {
+	if (!HandleNewWorldserverValidation(req)) {
 		LogError("WorldServer::HandleNewWorldserver failed validation rules");
 		return;
 	}
 
-	SanitizeWorldServerName(r->server_long_name);
+	SanitizeWorldServerName(req->server_long_name);
 
-	m_server_long_name    = r->server_long_name;
-	m_server_short_name   = r->server_short_name;
-	m_account_password    = r->account_password;
-	m_account_name        = r->account_name;
-	m_local_ip            = r->local_ip_address;
-	m_remote_ip_address   = r->remote_ip_address;
-	m_server_version      = r->server_version;
-	m_protocol            = r->protocol_version;
-	m_server_process_type = r->server_process_type;
+	m_server_long_name    = req->server_long_name;
+	m_server_short_name   = req->server_short_name;
+	m_account_password    = req->account_password;
+	m_account_name        = req->account_name;
+	m_local_ip            = req->local_ip_address;
+	m_remote_ip_address   = req->remote_ip_address;
+	m_server_version      = req->server_version;
+	m_protocol            = req->protocol_version;
+	m_server_process_type = req->server_process_type;
 	m_is_server_logged_in = true;
 
 	if (server.options.IsRejectingDuplicateServers()) {
@@ -420,30 +416,29 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *r)
 	 * with a world short_name
 	 */
 	if (!m_account_name.empty() && !m_account_password.empty()) {
-		Database::DbLoginServerAdmin
-			login_server_admin = server.db->GetLoginServerAdmin(m_account_name);
+		Database::DbLoginServerAdmin admin = server.db->GetLoginServerAdmin(m_account_name);
 
-		if (login_server_admin.loaded) {
+		if (admin.loaded) {
 			LogDebug(
 				"Attempting to authenticate world admin... [{0}] ({1}) against worldserver [{2}]",
 				m_account_name,
-				login_server_admin.id,
+				admin.id,
 				m_server_short_name
 			);
 
 			if (WorldServer::ValidateWorldServerAdminLogin(
-				login_server_admin.id,
+				admin.id,
 				m_account_name,
 				m_account_password,
-				login_server_admin.account_password
+				admin.account_password
 			)) {
 				LogDebug(
 					"Authenticating world admin... [{0}] ({1}) success! World ({2})",
 					m_account_name,
-					login_server_admin.id,
+					admin.id,
 					m_server_short_name
 				);
-				world_server_admin_id = login_server_admin.id;
+				world_server_admin_id = admin.id;
 
 				m_is_server_authorized_to_list = true;
 			}
@@ -451,14 +446,14 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *r)
 	}
 
 	Database::DbWorldRegistration
-		world_registration = server.db->GetWorldRegistration(
+		r = server.db->GetWorldRegistration(
 		m_server_short_name,
 		m_server_long_name,
 		world_server_admin_id
 	);
 
 	if (!server.options.IsUnregisteredAllowed()) {
-		if (!HandleNewLoginserverRegisteredOnly(world_registration)) {
+		if (!HandleNewLoginserverRegisteredOnly(r)) {
 			LogError(
 				"WorldServer::HandleNewLoginserverRegisteredOnly checks failed with server [{0}]",
 				m_server_long_name
@@ -467,7 +462,7 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *r)
 		}
 	}
 	else {
-		if (!HandleNewLoginserverInfoUnregisteredAllowed(world_registration)) {
+		if (!HandleNewLoginserverInfoUnregisteredAllowed(r)) {
 			LogError(
 				"WorldServer::HandleNewLoginserverInfoUnregisteredAllowed checks failed with server [{0}]",
 				m_server_long_name
@@ -490,11 +485,11 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *r)
 	);
 
 	WorldServer::FormatWorldServerName(
-		r->server_long_name,
-		world_registration.server_list_type
+		req->server_long_name,
+		r.server_list_type
 	);
 
-	m_server_long_name = r->server_long_name;
+	m_server_long_name = req->server_long_name;
 }
 
 void WorldServer::HandleWorldserverStatusUpdate(LoginserverWorldStatusUpdate *u)
