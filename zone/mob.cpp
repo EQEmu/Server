@@ -4663,30 +4663,22 @@ bool Mob::CanThisClassDoubleAttack(void) const
 	}
 }
 
-bool Mob::CanThisClassTripleAttack() const
-{
+bool Mob::CanThisClassTripleAttack() const {
 	if (!IsOfClientBot()) {
-		return false; // When they added the real triple attack skill, mobs lost the ability to triple
-	} else {
-		if (RuleB(Combat, ClassicTripleAttack)) {
-			return (
-				GetLevel() >= 60 &&
-				(
-					GetClass() == Class::Warrior ||
-					GetClass() == Class::Ranger ||
-					GetClass() == Class::Monk ||
-					GetClass() == Class::Berserker
-				)
-			);
-		} else {
-			if (IsClient()) {
-				return CastToClient()->HasSkill(EQ::skills::SkillTripleAttack);
-			}
-			else {
-				return GetSkill(EQ::skills::SkillTripleAttack) > 0;
-			}
-		}
+		return false; // Mobs lost the ability to triple attack when the real skill was added
 	}
+
+	if (RuleB(Combat, ClassicTripleAttack)) {
+		return GetLevel() >= 60 && (
+			GetClass() == Class::Warrior ||
+			GetClass() == Class::Ranger ||
+			GetClass() == Class::Monk ||
+			GetClass() == Class::Berserker
+		);
+	}
+
+	return IsClient() ? CastToClient()->HasSkill(EQ::skills::SkillTripleAttack)
+		: GetSkill(EQ::skills::SkillTripleAttack) > 0;
 }
 
 bool Mob::CanThisClassParry(void) const
