@@ -1690,8 +1690,10 @@ void Mob::StopMoving()
 void Mob::StopMoving(float new_heading)
 {
 	if (IsBot()) {
-		CastToBot()->SetCombatJitterFlag(false);
-		CastToBot()->SetCombatOutOfRangeJitterFlag(false);
+		auto bot = CastToBot();
+
+		bot->SetCombatJitterFlag(false);
+		bot->SetCombatOutOfRangeJitterFlag(false);
 	}
 
 	StopNavigation();
