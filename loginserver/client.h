@@ -10,28 +10,19 @@
 #include "login_types.h"
 #include <memory>
 
-/**
- * Client class, controls a single client and it's connection to the login server
- */
 class Client {
 public:
 	Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v);
 	~Client() {}
 	bool Process();
-	void Handle_SessionReady(const char *data, unsigned int size);
+	void HandleSessionReady(const char *data, unsigned int size);
+	void HandleLogin(const char *data, unsigned int size);
 
-	// Verifies login and send a reply
-	void Handle_Login(const char *data, unsigned int size);
-
-	/**
-	* Sends the expansion data packet
-	*
-	* Titanium uses the encrypted data block to contact the expansion (You own xxx:) and the max expansions (of yyy)
-	* Rof uses a seperate data packet specifically for the expansion data
-	* Live, as of July 2021 uses a similar but slightly different seperate data packet
-	*
-	*/
-	void SendExpansionPacketData(PlayerLoginReply& plrs);
+	// Sends the expansion data packet
+	// Titanium uses the encrypted data block to contact the expansion (You own xxx:) and the max expansions (of yyy)
+	// Rof uses a separate data packet specifically for the expansion data
+	// Live, as of July 2021 uses a similar but slightly different seperate data packet
+	void SendExpansionPacketData(PlayerLoginReply &plrs);
 	void SendPlayToWorld(const char *data);
 	void SendServerListPacket(uint32 seq);
 	void SendPlayResponse(EQApplicationPacket *outapp);
@@ -66,24 +57,21 @@ public:
 	);
 
 private:
-	EQ::Random                         m_random;
-	std::shared_ptr<EQStreamInterface> m_connection;
-	LSClientVersion                    m_client_version;
-	LSClientStatus                     m_client_status;
-
-	std::string  m_account_name;
-	unsigned int m_account_id;
-	std::string  m_loginserver_name;
-	unsigned int m_selected_play_server_id;
-	unsigned int m_play_sequence_id;
-	std::string  m_key;
-
+	EQ::Random                                          m_random;
+	std::shared_ptr<EQStreamInterface>                  m_connection;
+	LSClientVersion                                     m_client_version;
+	LSClientStatus                                      m_client_status;
+	std::string                                         m_account_name;
+	unsigned int                                        m_account_id;
+	std::string                                         m_loginserver_name;
+	unsigned int                                        m_selected_play_server_id;
+	unsigned int                                        m_play_sequence_id;
+	std::string                                         m_key;
 	std::unique_ptr<EQ::Net::DaybreakConnectionManager> m_login_connection_manager;
-	std::shared_ptr<EQ::Net::DaybreakConnection> m_login_connection;
-	LoginBaseMessage                             m_llrs;
-
-	std::string m_stored_user;
-	std::string m_stored_pass;
+	std::shared_ptr<EQ::Net::DaybreakConnection>        m_login_connection;
+	LoginBaseMessage                                    m_login_base_message;
+	std::string                                         m_stored_username;
+	std::string                                         m_stored_password;
 	static bool ProcessHealthCheck(std::string username);
 };
 

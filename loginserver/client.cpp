@@ -8,10 +8,6 @@
 
 extern LoginServer server;
 
-/**
- * @param c
- * @param v
- */
 Client::Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v)
 {
 	m_connection              = c;
@@ -44,7 +40,7 @@ bool Client::Process()
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
 				LogInfo("Session ready received from client account {}", GetClientLoggingDescription());
-				Handle_SessionReady((const char *) app->pBuffer, app->Size());
+				HandleSessionReady((const char *) app->pBuffer, app->Size());
 				break;
 			}
 			case OP_Login: {
@@ -55,7 +51,7 @@ bool Client::Process()
 
 				LogInfo("Login received from client {}", GetClientLoggingDescription());
 
-				Handle_Login((const char *) app->pBuffer, app->Size());
+				HandleLogin((const char *) app->pBuffer, app->Size());
 				break;
 			}
 			case OP_ServerListRequest: {
@@ -93,7 +89,7 @@ bool Client::Process()
  * @param data
  * @param size
  */
-void Client::Handle_SessionReady(const char *data, unsigned int size)
+void Client::HandleSessionReady(const char *data, unsigned int size)
 {
 	if (m_client_status != cs_not_sent_session_ready) {
 		LogError("Session ready received again after already being received");
@@ -126,7 +122,7 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
  * @param data
  * @param size
  */
-void Client::Handle_Login(const char *data, unsigned int size)
+void Client::HandleLogin(const char *data, unsigned int size)
 {
 	if (m_client_status != cs_waiting_for_login) {
 		LogError("Login received after already having logged in");
@@ -183,7 +179,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 
 	// only need to copy the base header for reply options, ignore login info
-	memcpy(&m_llrs, data, sizeof(LoginBaseMessage));
+	memcpy(&m_login_base_message, data, sizeof(LoginBaseMessage));
 
 	bool result = false;
 	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
@@ -377,13 +373,13 @@ void Client::AttemptLoginAccountCreation(
 
 void Client::SendFailedLogin()
 {
-	m_stored_user.clear();
-	m_stored_pass.clear();
+	m_stored_username.clear();
+	m_stored_password.clear();
 
 	// unencrypted
 	LoginBaseMessage base_header{};
-	base_header.sequence     = m_llrs.sequence; // login (3)
-	base_header.encrypt_type = m_llrs.encrypt_type;
+	base_header.sequence     = m_login_base_message.sequence; // login (3)
+	base_header.encrypt_type = m_login_base_message.encrypt_type;
 
 	// encrypted
 	PlayerLoginReply login_reply{};
@@ -484,8 +480,8 @@ void Client::DoSuccessfulLogin(
 	const std::string &db_loginserver
 )
 {
-	m_stored_user.clear();
-	m_stored_pass.clear();
+	m_stored_username.clear();
+	m_stored_password.clear();
 
 	server.client_manager->RemoveExistingClient(db_account_id, db_loginserver);
 
@@ -501,10 +497,10 @@ void Client::DoSuccessfulLogin(
 
 	// unencrypted
 	LoginBaseMessage base_header{};
-	base_header.sequence     = m_llrs.sequence;
+	base_header.sequence     = m_login_base_message.sequence;
 	base_header.compressed   = false;
-	base_header.encrypt_type = m_llrs.encrypt_type;
-	base_header.unk3         = m_llrs.unk3;
+	base_header.encrypt_type = m_login_base_message.encrypt_type;
+	base_header.unk3         = m_login_base_message.unk3;
 
 	// not serializing any of the variable length strings so just use struct directly
 	PlayerLoginReply login_reply{};
