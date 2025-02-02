@@ -3289,6 +3289,21 @@ std::string Perl_Client_GetBandolierItemName(Client* self, uint8 bandolier_slot,
 	return self->GetBandolierItemName(bandolier_slot, slot_id);
 }
 
+uint32 Perl_Client_GetPotionBeltItemIcon(Client* self, uint8 slot_id)
+{
+	return self->GetPotionBeltItemIcon(slot_id);
+}
+
+uint32 Perl_Client_GetPotionBeltItemID(Client* self, uint8 slot_id)
+{
+	return self->GetPotionBeltItemID(slot_id);
+}
+
+std::string Perl_Client_GetPotionBeltItemName(Client* self, uint8 slot_id)
+{
+	return self->GetPotionBeltItemName(slot_id);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3534,6 +3549,9 @@ void perl_register_client()
 	package.add("GetMemmedSpells", &Perl_Client_GetMemmedSpells);
 	package.add("GetModCharacterFactionLevel", &Perl_Client_GetModCharacterFactionLevel);
 	package.add("GetMoney", &Perl_Client_GetMoney);
+	package.add("GetPotionBeltItemIcon", &Perl_Client_GetPotionBeltItemIcon);
+	package.add("GetPotionBeltItemID", &Perl_Client_GetPotionBeltItemID);
+	package.add("GetPotionBeltItemName", &Perl_Client_GetPotionBeltItemName);
 	package.add("GetPVP", &Perl_Client_GetPVP);
 	package.add("GetPVPPoints", &Perl_Client_GetPVPPoints);
 	package.add("GetRaceAbbreviation", &Perl_Client_GetRaceAbbreviation);
