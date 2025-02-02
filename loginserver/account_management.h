@@ -18,28 +18,10 @@ public:
 		const std::string &ip_address = ""
 	);
 
-	static uint32 CheckLoginserverUserCredentials(
-		const std::string &in_account_username,
-		const std::string &in_account_password,
-		const std::string &source_loginserver = "local"
-	);
-
-	static bool UpdateLoginserverUserCredentials(
-		const std::string &in_account_username,
-		const std::string &in_account_password,
-		const std::string &source_loginserver = "local"
-	);
-
-	static uint32 CheckExternalLoginserverUserCredentials(
-		const std::string &in_account_username,
-		const std::string &in_account_password
-	);
-
-	static bool UpdateLoginserverWorldAdminAccountPasswordByName(
-		const std::string &in_account_username,
-		const std::string &in_account_password
-	);
-
+	static uint32 CheckLoginserverUserCredentials(LoginAccountContext c);
+	static bool UpdateLoginserverUserCredentials(LoginAccountContext c);
+	static uint32 CheckExternalLoginserverUserCredentials(LoginAccountContext c);
+	static bool UpdateLoginserverWorldAdminAccountPasswordByName(LoginAccountContext c);
 	static uint32 HealthCheckUserLogin();
 };
 

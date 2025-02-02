@@ -103,6 +103,8 @@ struct LoginAccountContext {
 	uint32      login_account_id   = 0;
 };
 
+
+
 namespace LS {
 	namespace ServerStatusFlags {
 		enum eServerStatusFlags {

@@ -109,33 +109,29 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 	return false;
 }
 
-uint32 AccountManagement::CheckLoginserverUserCredentials(
-	const std::string &in_account_username,
-	const std::string &in_account_password,
-	const std::string &source_loginserver
-)
+uint32 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
 
 	Database::DbLoginServerAccount
 		login_server_admin = server.db->GetLoginServerAccountByAccountName(
-		in_account_username,
-		source_loginserver
+		c.username,
+		c.source_loginserver
 	);
 
 	if (!login_server_admin.loaded) {
 		LogError(
 			"account [{}] source_loginserver [{}] not found!",
-			in_account_username,
-			source_loginserver
+			c.username,
+			c.source_loginserver
 		);
 
 		return false;
 	}
 
 	bool validated_credentials = eqcrypt_verify_hash(
-		in_account_username,
-		in_account_password,
+		c.username,
+		c.password,
 		login_server_admin.account_password,
 		mode
 	);
@@ -143,8 +139,8 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 	if (!validated_credentials) {
 		LogError(
 			"account [{}] source_loginserver [{}] invalid credentials!",
-			in_account_username,
-			source_loginserver
+			c.username,
+			c.source_loginserver
 		);
 
 		return 0;
@@ -152,73 +148,70 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 
 	LogInfo(
 		"account [{}] source_loginserver [{}] credentials validated success!",
-		in_account_username,
-		source_loginserver
+		c.username,
+		c.source_loginserver
 	);
 
 	return login_server_admin.id;
 }
 
-bool AccountManagement::UpdateLoginserverUserCredentials(
-	const std::string &in_account_username,
-	const std::string &in_account_password,
-	const std::string &source_loginserver
-)
+bool AccountManagement::UpdateLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
 
 	Database::DbLoginServerAccount
 		login_server_account = server.db->GetLoginServerAccountByAccountName(
-		in_account_username,
-		source_loginserver
+		c.username,
+		c.source_loginserver
 	);
 
 	if (!login_server_account.loaded) {
 		LogError(
 			"account [{}] source_loginserver [{}] not found!",
-			in_account_username,
-			source_loginserver
+			c.username,
+			c.source_loginserver
 		);
 
 		return false;
 	}
 
 	server.db->UpdateLoginserverAccountPasswordHash(
-		in_account_username,
-		source_loginserver,
+		c.username,
+		c.source_loginserver,
 		eqcrypt_hash(
-			in_account_username,
-			in_account_password,
+			c.username,
+			c.password,
 			mode
 		)
 	);
 
 	LogInfo(
 		"account [{}] source_loginserver [{}] credentials updated!",
-		in_account_username,
-		source_loginserver
+		c.username,
+		c.source_loginserver
 	);
 
 	return true;
 }
 
-bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
-	const std::string &in_account_username,
-	const std::string &in_account_password
-)
+bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
-	auto hash = eqcrypt_hash(in_account_username, in_account_password, mode);
+	auto hash = eqcrypt_hash(
+		c.username,
+		c.password,
+		mode
+	);
 
 	bool updated_account = server.db->UpdateLoginWorldAdminAccountPasswordByUsername(
-		in_account_username,
+		c.username,
 		hash
 	);
 
 	LogInfo(
 		"[{}] account_name [{}] status [{}]",
 		__func__,
-		in_account_username,
+		c.username,
 		(updated_account ? "success" : "failed")
 	);
 
@@ -227,10 +220,7 @@ bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
 
 constexpr int REQUEST_TIMEOUT_MS = 1500;
 
-uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
-	const std::string &in_account_username,
-	const std::string &in_account_password
-)
+uint32 AccountManagement::CheckExternalLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto res = task_runner.Enqueue(
 		[&]() -> uint32 {
@@ -238,11 +228,11 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 			uint32 ret     = 0;
 
 			EQ::Net::DaybreakConnectionManager           mgr;
-			std::shared_ptr<EQ::Net::DaybreakConnection> c;
+			std::shared_ptr<EQ::Net::DaybreakConnection> conn;
 
 			mgr.OnNewConnection(
 				[&](std::shared_ptr<EQ::Net::DaybreakConnection> connection) {
-					c = connection;
+					conn = connection;
 				}
 			);
 
@@ -256,7 +246,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 						EQ::Net::DynamicPacket p;
 						p.PutUInt16(0, 1); //OP_SessionReady
 						p.PutUInt32(2, 2);
-						c->QueuePacket(p);
+						conn->QueuePacket(p);
 					}
 					else if (EQ::Net::StatusDisconnected == to) {
 						running = false;
@@ -270,13 +260,12 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 					switch (opcode) {
 						case 0x0017: //OP_ChatMessage
 						{
-							size_t buffer_len =
-									   in_account_username.length() + in_account_password.length() + 2;
+							size_t buffer_len = c.username.length() + c.password.length() + 2;
 
 							std::unique_ptr<char[]> buffer(new char[buffer_len]);
 
-							strcpy(&buffer[0], in_account_username.c_str());
-							strcpy(&buffer[in_account_username.length() + 1], in_account_password.c_str());
+							strcpy(&buffer[0], c.username.c_str());
+							strcpy(&buffer[c.username.length() + 1], c.password.c_str());
 
 							size_t encrypted_len = buffer_len;
 
@@ -290,11 +279,11 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 							p.PutUInt32(2, 3);
 
 							eqcrypt_block(&buffer[0], buffer_len, (char *) p.Data() + 12, true);
-							c->QueuePacket(p);
+							conn->QueuePacket(p);
 							break;
 						}
 						case 0x0018: {
-							auto encrypt_size                    = p.Length() - 12;
+							auto encrypt_size = p.Length() - 12;
 							if (encrypt_size % 8 > 0) {
 								encrypt_size = (encrypt_size / 8) * 8;
 							}

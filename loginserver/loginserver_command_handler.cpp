@@ -190,10 +190,11 @@ namespace LoginserverCommandHandler {
 
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
-		auto res = AccountManagement::CheckLoginserverUserCredentials(
-			cmd(2).str(),
-			cmd(3).str()
-		);
+		LoginAccountContext c;
+		c.username = cmd(2).str();
+		c.password = cmd(3).str();
+
+		auto res = AccountManagement::CheckLoginserverUserCredentials(c);
 
 		LogInfo("Credentials were {}", res != 0 ? "accepted" : "not accepted");
 	}
@@ -220,10 +221,10 @@ namespace LoginserverCommandHandler {
 
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
-		AccountManagement::UpdateLoginserverUserCredentials(
-			cmd(2).str(),
-			cmd(3).str()
-		);
+		LoginAccountContext c;
+		c.username = cmd(2).str();
+		c.password = cmd(3).str();
+		AccountManagement::UpdateLoginserverUserCredentials(c);
 	}
 
 	/**
@@ -248,10 +249,10 @@ namespace LoginserverCommandHandler {
 
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
-		auto res = AccountManagement::CheckExternalLoginserverUserCredentials(
-			cmd(2).str(),
-			cmd(3).str()
-		);
+		LoginAccountContext c;
+		c.username = cmd(2).str();
+		c.password = cmd(3).str();
+		auto res = AccountManagement::CheckExternalLoginserverUserCredentials(c);
 
 		LogInfo("Credentials were {}", res ? "accepted" : "not accepted");
 	}
@@ -278,10 +279,10 @@ namespace LoginserverCommandHandler {
 
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
-		AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
-			cmd(2).str(),
-			cmd(3).str()
-		);
+		LoginAccountContext c;
+		c.username = cmd(2).str();
+		c.password = cmd(3).str();
+		AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(c);
 	}
 
 	/**

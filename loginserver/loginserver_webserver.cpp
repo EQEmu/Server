@@ -154,11 +154,11 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				uint32 login_account_id = AccountManagement::CheckLoginserverUserCredentials(
-					username,
-					password
-				);
+				LoginAccountContext c;
+				c.username = username;
+				c.password = password;
 
+				uint32 login_account_id = AccountManagement::CheckLoginserverUserCredentials(c);
 				if (login_account_id > 0) {
 					response["message"]            = "Credentials valid!";
 					response["data"]["account_id"] = login_account_id;
@@ -202,12 +202,12 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				bool credentials_valid = AccountManagement::UpdateLoginserverUserCredentials(
-					username,
-					password
-				);
+				LoginAccountContext c;
+				c.username = username;
+				c.password = password;
 
-				if (credentials_valid) {
+				bool success = AccountManagement::UpdateLoginserverUserCredentials(c);
+				if (success) {
 					response["message"] = "Loginserver account credentials updated!";
 				}
 				else {
@@ -251,13 +251,13 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				bool credentials_valid = AccountManagement::UpdateLoginserverUserCredentials(
-					username,
-					password,
-					source_loginserver
-				);
+				LoginAccountContext c;
+				c.username           = username;
+				c.password           = password;
+				c.source_loginserver = source_loginserver;
 
-				if (credentials_valid) {
+				bool success = AccountManagement::UpdateLoginserverUserCredentials(c);
+				if (success) {
 					response["message"] = "Loginserver account credentials updated!";
 				}
 				else {
@@ -285,10 +285,10 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(
-					username,
-					password
-				);
+				LoginAccountContext c;
+				c.username           = username;
+				c.password           = password;
+				uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
 
 				if (account_id > 0) {
 					response["message"]            = "Credentials valid!";
