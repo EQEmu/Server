@@ -795,8 +795,9 @@ namespace PlayerEvent {
 		uint32      trader_id;
 		std::string trader_name;
 		uint32      price;
-		uint32      charges;
-		uint32      total_cost;
+		uint32      quantity;
+		int32       charges;
+		uint64      total_cost;
 		uint64      player_money_balance;
 
 
@@ -810,6 +811,7 @@ namespace PlayerEvent {
 				CEREAL_NVP(trader_id),
 				CEREAL_NVP(trader_name),
 				CEREAL_NVP(price),
+				CEREAL_NVP(quantity),
 				CEREAL_NVP(charges),
 				CEREAL_NVP(total_cost),
 				CEREAL_NVP(player_money_balance)
@@ -823,8 +825,9 @@ namespace PlayerEvent {
 		uint32      buyer_id;
 		std::string buyer_name;
 		uint32      price;
-		uint32      charges;
-		uint32      total_cost;
+		uint32      quantity;
+		int32       charges;
+		uint64      total_cost;
 		uint64      player_money_balance;
 
 
@@ -838,6 +841,7 @@ namespace PlayerEvent {
 				CEREAL_NVP(buyer_id),
 				CEREAL_NVP(buyer_name),
 				CEREAL_NVP(price),
+				CEREAL_NVP(quantity),
 				CEREAL_NVP(charges),
 				CEREAL_NVP(total_cost),
 				CEREAL_NVP(player_money_balance)
@@ -1027,6 +1031,7 @@ namespace PlayerEvent {
 	struct ParcelSend {
 		uint32      item_id;
 		uint32      quantity;
+		int32       charges;
 		std::string from_player_name;
 		std::string to_player_name;
 		uint32      sent_date;
@@ -1044,6 +1049,7 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(quantity),
+				CEREAL_NVP(charges),
 				CEREAL_NVP(from_player_name),
 				CEREAL_NVP(to_player_name),
 				CEREAL_NVP(sent_date),

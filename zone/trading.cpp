@@ -1686,7 +1686,8 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
             .trader_id            = Trader->CharacterID(),
             .trader_name          = Trader->GetCleanName(),
             .price                = tbs->price,
-            .charges              = outtbs->quantity,
+        	.quantity             = outtbs->quantity,
+            .charges              = buy_item->GetCharges(),
             .total_cost           = (tbs->price * outtbs->quantity),
             .player_money_balance = GetCarriedMoney(),
         };
@@ -1701,7 +1702,8 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
             .buyer_id             = CharacterID(),
             .buyer_name           = GetCleanName(),
             .price                = tbs->price,
-            .charges              = outtbs->quantity,
+        	.quantity             = outtbs->quantity,
+            .charges              = buy_item->GetCharges(),
             .total_cost           = (tbs->price * outtbs->quantity),
             .player_money_balance = Trader->GetCarriedMoney(),
         };
@@ -3603,23 +3605,24 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	);
 
 	// Determine the actual quantity for the purchase
+	int32 charges = static_cast<int32>(tbs->quantity);
 	if (!buy_item->IsStackable()) {
-		tbs->quantity = 1;
-	}
-	else {
-		int32 item_charges = buy_item->GetCharges();
-		if (item_charges <= 0) {
-			tbs->quantity = 1;
+		if (buy_item->GetCharges() <= 0) {
+			charges = 1;
 		}
-		else if (static_cast<uint32>(item_charges) < tbs->quantity) {
-			tbs->quantity = item_charges;
+		else {
+			charges = buy_item->GetCharges();
 		}
 	}
 
-	LogTrading("Actual quantity that will be traded is <green>[{}]", tbs->quantity);
+	LogTrading(
+		"Actual quantity that will be traded is <green>[{}] {}",
+		tbs->quantity,
+		buy_item->GetCharges() ? fmt::format("with {} charges", buy_item->GetCharges()) : ""
+	);
 
-	uint64 total_transaction_value = static_cast<uint64>(tbs->price) * static_cast<uint64>(tbs->quantity);
-	if (total_transaction_value > MAX_TRANSACTION_VALUE) {
+	uint64 total_cost = static_cast<uint64>(tbs->price) * static_cast<uint64>(tbs->quantity);
+	if (total_cost > MAX_TRANSACTION_VALUE) {
 		Message(
 			Chat::Red,
 			"That would exceed the single transaction limit of %u platinum.",
@@ -3630,10 +3633,8 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		return;
 	}
 
-	uint32 total_cost = tbs->price * tbs->quantity;
-	float  parceL_delivery_cost_mod = zone->GetZoneID() == Zones::BAZAAR ? 0.0f : RuleR(Bazaar, ParcelDeliveryCostMod);
-	uint32 fee        = static_cast<uint32>(std::round((uint32) total_cost * parceL_delivery_cost_mod));
-	if (!TakeMoneyFromPP(total_cost + fee)) {
+	uint64 fee         = std::round(total_cost * RuleR(Bazaar, ParcelDeliveryCostMod));
+	if (!TakeMoneyFromPPWithOverFlow(total_cost + fee, false)) {
 		RecordPlayerEventLog(
 			PlayerEvent::POSSIBLE_HACK,
 			PlayerEvent::PossibleHackEvent{
@@ -3661,7 +3662,8 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 			.trader_id            = tbs->trader_id,
 			.trader_name          = tbs->seller_name,
 			.price                = tbs->price,
-			.charges              = tbs->quantity,
+			.quantity             = tbs->quantity,
+			.charges              = buy_item->IsStackable() ? 1 : charges,
 			.total_cost           = total_cost,
 			.player_money_balance = GetCarriedMoney(),
 		};
@@ -3673,7 +3675,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	parcel_out.from_name  = tbs->seller_name;
 	parcel_out.note       = "Delivered from a Bazaar Purchase";
 	parcel_out.sent_date  = time(nullptr);
-	parcel_out.quantity   = tbs->quantity;
+	parcel_out.quantity   = charges;
 	parcel_out.item_id    = buy_item->GetItem()->ID;
 	parcel_out.aug_slot_1 = buy_item->GetAugmentItemID(0);
 	parcel_out.aug_slot_2 = buy_item->GetAugmentItemID(1);
@@ -3713,7 +3715,8 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		e.aug_slot_4       = parcel_out.aug_slot_4;
 		e.aug_slot_5       = parcel_out.aug_slot_5;
 		e.aug_slot_6       = parcel_out.aug_slot_6;
-		e.quantity         = parcel_out.quantity;
+		e.quantity         = tbs->quantity;
+		e.charges          = buy_item->IsStackable() ? 1 : charges;
 		e.sent_date        = parcel_out.sent_date;
 
 		RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
@@ -3756,6 +3759,8 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	strn0cpy(out_data->trader_buy_struct.buyer_name, GetCleanName(), sizeof(out_data->trader_buy_struct.buyer_name));
 
 	worldserver.SendPacket(out_server.get());
+
+	SendMoneyUpdate();
 }
 
 void Client::SetBuyerWelcomeMessage(const char *welcome_message)
