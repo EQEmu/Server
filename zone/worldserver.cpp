@@ -4002,21 +4002,23 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			TraderRepository::UpdateActiveTransaction(database, in->id, false);
 
+			auto item = trader_pc->FindTraderItemBySerialNumber(item_sn);
+
 			if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
-				auto buy_item = trader_pc->FindTraderItemBySerialNumber(item_sn);
-				auto e        = PlayerEvent::TraderSellEvent{
-					.item_id              = in->trader_buy_struct.item_id,
-					.augment_1_id         = buy_item->GetAugmentItemID(0),
-					.augment_2_id         = buy_item->GetAugmentItemID(1),
-					.augment_3_id         = buy_item->GetAugmentItemID(2),
-					.augment_4_id         = buy_item->GetAugmentItemID(3),
-					.augment_5_id         = buy_item->GetAugmentItemID(4),
-					.augment_6_id         = buy_item->GetAugmentItemID(5),
+				auto e = PlayerEvent::TraderSellEvent{
+					.item_id              = item ? item->GetID() : 0,
+					.augment_1_id         = item->GetAugmentItemID(0),
+					.augment_2_id         = item->GetAugmentItemID(1),
+					.augment_3_id         = item->GetAugmentItemID(2),
+					.augment_4_id         = item->GetAugmentItemID(3),
+					.augment_5_id         = item->GetAugmentItemID(4),
+					.augment_6_id         = item->GetAugmentItemID(5),
 					.item_name            = in->trader_buy_struct.item_name,
 					.buyer_id             = in->buyer_id,
 					.buyer_name           = in->trader_buy_struct.buyer_name,
 					.price                = in->trader_buy_struct.price,
-					.charges              = in->trader_buy_struct.quantity,
+					.quantity             = in->trader_buy_struct.quantity,
+					.charges              = item ? item->IsStackable() ? 1 : item->GetCharges() : 0,
 					.total_cost           = (in->trader_buy_struct.price * in->trader_buy_struct.quantity),
 					.player_money_balance = trader_pc->GetCarriedMoney(),
 				};
