@@ -134,13 +134,13 @@ void Client::HandleLogin(const char *data, unsigned int size)
 	int           data_size   = size - header_size;
 
 	if (size <= header_size) {
-		LogError("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
+		LogError("Login received packet of size: {}, this would cause a buffer overflow, discarding", size);
 
 		return;
 	}
 
 	if (data_size % 8 != 0) {
-		LogError("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
+		LogError("Login received packet of size: {}, this would cause a block corruption, discarding", size);
 
 		return;
 	}
@@ -210,7 +210,7 @@ void Client::HandleLogin(const char *data, unsigned int size)
 			}
 
 			LogInfo(
-				"Attempting password based login [{0}] login [{1}]",
+				"Attempting password based login [{}] login [{}]",
 				user,
 				db_loginserver
 			);
@@ -237,7 +237,7 @@ void Client::HandleLogin(const char *data, unsigned int size)
 				}
 #endif
 
-				LogDebug("Success [{0}]", (result ? "true" : "false"));
+				LogDebug("Success [{}]", (result ? "true" : "false"));
 			}
 			else {
 				m_client_status = cs_creating_account;
@@ -253,7 +253,7 @@ void Client::HandleLogin(const char *data, unsigned int size)
 	 */
 	if (result) {
 		LogInfo(
-			"login [{0}] user [{1}] Login succeeded",
+			"login [{}] user [{}] Login succeeded",
 			db_loginserver,
 			user
 		);
@@ -262,7 +262,7 @@ void Client::HandleLogin(const char *data, unsigned int size)
 	}
 	else {
 		LogInfo(
-			"login [{0}] user [{1}] Login failed",
+			"login [{}] user [{}] Login failed",
 			db_loginserver,
 			user
 		);
@@ -337,7 +337,7 @@ void Client::AttemptLoginAccountCreation(
 
 #ifdef LSPX
 	if (loginserver == "eqemu") {
-		LogInfo("Attempting login account creation via '{0}'", loginserver);
+		LogInfo("Attempting login account creation via '{}'", loginserver);
 
 		if (!server.options.CanAutoLinkAccounts()) {
 			LogInfo("CanAutoLinkAccounts disabled - sending failed login");
@@ -363,7 +363,7 @@ void Client::AttemptLoginAccountCreation(
 #endif
 
 	if (server.options.CanAutoCreateAccounts() && loginserver == "local") {
-		LogInfo("CanAutoCreateAccounts enabled, attempting to creating account [{0}]", user);
+		LogInfo("CanAutoCreateAccounts enabled, attempting to creating account [{}]", user);
 		CreateLocalAccount(user, pass);
 		return;
 	}

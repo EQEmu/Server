@@ -28,11 +28,11 @@ Database::Database(
 		errbuf
 	)
 		) {
-		LogError("Failed to connect to database: Error: [{0}]", errbuf);
+		LogError("Failed to connect to database: Error: [{}]", errbuf);
 		exit(1);
 	}
 	else {
-		LogInfo("Using database [{0}] at [{1}:{2}]", name, host, port);
+		LogInfo("Using database [{}] at [{}:{}]", name, host, port);
 	}
 }
 
@@ -51,7 +51,7 @@ bool Database::GetLoginDataFromAccountInfo(
 )
 {
 	auto query = fmt::format(
-		"SELECT id, account_password FROM login_accounts WHERE account_name = '{0}' AND source_loginserver = '{1}' LIMIT 1",
+		"SELECT id, account_password FROM login_accounts WHERE account_name = '{}' AND source_loginserver = '{}' LIMIT 1",
 		Strings::Escape(name),
 		Strings::Escape(loginserver)
 	);
@@ -60,7 +60,7 @@ bool Database::GetLoginDataFromAccountInfo(
 
 	if (results.RowCount() != 1) {
 		LogDebug(
-			"Could not find account for name [{0}] login [{1}]",
+			"Could not find account for name [{}] login [{}]",
 			name,
 			loginserver
 		);
@@ -78,7 +78,7 @@ bool Database::GetLoginDataFromAccountInfo(
 	password = row[1];
 
 	LogDebug(
-		"Found account for name [{0}] login [{1}]",
+		"Found account for name [{}] login [{}]",
 		name,
 		loginserver
 	);
@@ -95,7 +95,7 @@ bool Database::GetLoginTokenDataFromToken(
 )
 {
 	auto query = fmt::format("SELECT login_server, username, account_id FROM login_tickets WHERE expires > NOW()"
-		" AND id='{0}' AND ip_address='{1}' LIMIT 1",
+		" AND id='{}' AND ip_address='{}' LIMIT 1",
 		Strings::Escape(token),
 		Strings::Escape(ip));
 
@@ -118,7 +118,7 @@ bool Database::GetLoginTokenDataFromToken(
 unsigned int Database::GetFreeID(const std::string &loginserver)
 {
 	auto query = fmt::format(
-		"SELECT IFNULL(MAX(id), 0) + 1 FROM login_accounts WHERE source_loginserver = '{0}'",
+		"SELECT IFNULL(MAX(id), 0) + 1 FROM login_accounts WHERE source_loginserver = '{}'",
 		Strings::Escape(loginserver)
 	);
 
@@ -160,7 +160,7 @@ uint32 Database::CreateLoginAccount(
 
 	auto query = fmt::format(
 		"INSERT INTO login_accounts (id, source_loginserver, account_name, account_password, account_email, last_login_date, last_ip_address, created_at) "
-		"VALUES ({0}, '{1}', '{2}', '{3}', '{4}', NOW(), '127.0.0.1', NOW())",
+		"VALUES ({}, '{}', '{}', '{}', '{}', NOW(), '127.0.0.1', NOW())",
 		free_id,
 		Strings::Escape(loginserver),
 		Strings::Escape(name),
@@ -186,7 +186,7 @@ bool Database::CreateLoginDataWithID(
 
 	auto query = fmt::format(
 		"INSERT INTO login_accounts (id, source_loginserver, account_name, account_password, account_email, last_login_date, last_ip_address, created_at) "
-		"VALUES ({0}, '{1}', '{2}', '{3}', 'local_creation', NOW(), '127.0.0.1', NOW())",
+		"VALUES ({}, '{}', '{}', '{}', 'local_creation', NOW(), '127.0.0.1', NOW())",
 		id,
 		Strings::Escape(loginserver),
 		Strings::Escape(in_account_name),
@@ -210,7 +210,7 @@ bool Database::DoesLoginServerAccountExist(
 	}
 
 	auto query = fmt::format(
-		"SELECT account_name FROM login_accounts WHERE account_name = '{0}' AND source_loginserver = '{1}'",
+		"SELECT account_name FROM login_accounts WHERE account_name = '{}' AND source_loginserver = '{}'",
 		Strings::Escape(name),
 		Strings::Escape(loginserver)
 	);
@@ -230,14 +230,14 @@ void Database::UpdateLoginserverAccountPasswordHash(
 )
 {
 	LogDebug(
-		"name [{0}] loginserver [{1}] hash [{2}]",
+		"name [{}] loginserver [{}] hash [{}]",
 		name,
 		loginserver,
 		hash
 	);
 
 	auto query = fmt::format(
-		"UPDATE login_accounts SET account_password = '{0}' WHERE account_name = '{1}' AND source_loginserver = '{2}'",
+		"UPDATE login_accounts SET account_password = '{}' WHERE account_name = '{}' AND source_loginserver = '{}'",
 		hash,
 		Strings::Escape(name),
 		Strings::Escape(loginserver)
@@ -292,7 +292,7 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 	}
 
 	auto world_registration_query = fmt::format(
-		"SELECT account_name, account_password FROM login_server_admins WHERE id = {0} LIMIT 1",
+		"SELECT account_name, account_password FROM login_server_admins WHERE id = {} LIMIT 1",
 		r.server_admin_id
 	);
 
@@ -309,7 +309,7 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 void Database::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
 	auto query = fmt::format(
-		"UPDATE login_accounts SET last_ip_address = '{0}', last_login_date = NOW() where id = {1}",
+		"UPDATE login_accounts SET last_ip_address = '{}', last_login_date = NOW() where id = {}",
 		ip_address,
 		id
 	);
@@ -325,8 +325,8 @@ void Database::UpdateLSAccountInfo(
 )
 {
 	auto query = fmt::format(
-		"REPLACE login_accounts SET id = {0}, account_name = '{1}', account_password = sha('{2}'), "
-		"account_email = '{3}', last_ip_address = '0.0.0.0', last_login_date = now()",
+		"REPLACE login_accounts SET id = {}, account_name = '{}', account_password = sha('{}'), "
+		"account_email = '{}', last_ip_address = '0.0.0.0', last_login_date = now()",
 		id,
 		Strings::Escape(name),
 		Strings::Escape(password),
@@ -339,7 +339,7 @@ void Database::UpdateLSAccountInfo(
 void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
 	auto query = fmt::format(
-		"UPDATE login_world_servers SET last_login_date = NOW(), last_ip_address = '{0}', long_name = '{1}' WHERE id = {2}",
+		"UPDATE login_world_servers SET last_login_date = NOW(), last_ip_address = '{}', long_name = '{}' WHERE id = {}",
 		ip_address,
 		Strings::Escape(long_name),
 		id
@@ -397,8 +397,8 @@ bool Database::CreateWorldRegistration(
 
 	id = Strings::ToUnsignedInt(row[0]);
 	auto insert_query = fmt::format(
-		"INSERT INTO login_world_servers SET id = {0}, long_name = '{1}', short_name = '{2}', last_ip_address = '{3}', \n"
-		"login_server_list_type_id = 3, login_server_admin_id = {4}, is_server_trusted = 0, tag_description = ''",
+		"INSERT INTO login_world_servers SET id = {}, long_name = '{}', short_name = '{}', last_ip_address = '{}', \n"
+		"login_server_list_type_id = 3, login_server_admin_id = {}, is_server_trusted = 0, tag_description = ''",
 		id,
 		Strings::Escape(server_long_name),
 		Strings::Escape(server_short_name),
@@ -409,7 +409,7 @@ bool Database::CreateWorldRegistration(
 	auto insert_results = QueryDatabase(insert_query);
 	if (!insert_results.Success()) {
 		LogError(
-			"Failed to register world server {0} - {1}",
+			"Failed to register world server {} - {}",
 			server_long_name,
 			server_short_name
 		);
@@ -427,7 +427,7 @@ std::string Database::CreateLoginserverApiToken(
 {
 	std::string token = EQ::Util::UUID::Generate().ToString();
 	auto        query = fmt::format(
-		"INSERT INTO login_api_tokens (token, can_write, can_read, created_at) VALUES ('{0}', {1}, {2}, NOW())",
+		"INSERT INTO login_api_tokens (token, can_write, can_read, created_at) VALUES ('{}', {}, {}, NOW())",
 		token,
 		(write_mode ? "1" : "0"),
 		(read_mode ? "1" : "0")
@@ -458,7 +458,7 @@ uint32 Database::CreateLoginserverWorldAdminAccount(
 	auto query = fmt::format(
 		"INSERT INTO login_server_admins (account_name, account_password, first_name, last_name, email, registration_date, "
 		"registration_ip_address) "
-		"VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', NOW(), '{5}')",
+		"VALUES ('{}', '{}', '{}', '{}', '{}', NOW(), '{}')",
 		Strings::Escape(account_name),
 		Strings::Escape(account_password),
 		Strings::Escape(first_name),
@@ -477,7 +477,7 @@ bool Database::DoesLoginserverWorldAdminAccountExist(
 )
 {
 	auto query = fmt::format(
-		"SELECT account_name FROM login_server_admins WHERE account_name = '{0}' LIMIT 1",
+		"SELECT account_name FROM login_server_admins WHERE account_name = '{}' LIMIT 1",
 		Strings::Escape(account_name)
 	);
 
@@ -490,7 +490,7 @@ Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &ac
 {
 	auto query = fmt::format(
 		"SELECT id, account_name, account_password, first_name, last_name, email, registration_date, registration_ip_address"
-		" FROM login_server_admins WHERE account_name = '{0}' LIMIT 1",
+		" FROM login_server_admins WHERE account_name = '{}' LIMIT 1",
 		Strings::Escape(account_name)
 	);
 
@@ -521,7 +521,7 @@ Database::DbLoginServerAccount Database::GetLoginServerAccountByAccountName(
 	auto query = fmt::format(
 		"SELECT id, account_name, account_password, account_email, source_loginserver, last_ip_address, last_login_date, "
 		"created_at, updated_at"
-		" FROM login_accounts WHERE account_name = '{0}' and source_loginserver = '{1}' LIMIT 1",
+		" FROM login_accounts WHERE account_name = '{}' and source_loginserver = '{}' LIMIT 1",
 		Strings::Escape(account_name),
 		Strings::Escape(source_loginserver)
 	);

@@ -14,7 +14,7 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 	auto hash = eqcrypt_hash(c.username, c.password, mode);
 
 	LogInfo(
-		"Attempting to create local login account for user [{0}] encryption algorithm [{1}] ({2})",
+		"Attempting to create local login account for user [{}] encryption algorithm [{}] ({})",
 		c.username,
 		GetEncryptionByModeId(mode),
 		mode
@@ -23,7 +23,7 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 	unsigned int db_id = 0;
 	if (server.db->DoesLoginServerAccountExist(c.username, hash, c.source_loginserver, 1)) {
 		LogWarning(
-			"Attempting to create local login account for user [{0}] login [{1}] but already exists!",
+			"Attempting to create local login account for user [{}] login [{}] but already exists!",
 			c.username,
 			c.source_loginserver
 		);
@@ -41,7 +41,7 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 
 	if (created_account_id > 0) {
 		LogInfo(
-			"Account creation success for user [{0}] encryption algorithm [{1}] ({2}) id: [{3}]",
+			"Account creation success for user [{}] encryption algorithm [{}] ({}) id: [{}]",
 			c.username,
 			GetEncryptionByModeId(mode),
 			mode,
@@ -51,7 +51,7 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 		return (int32) created_account_id;
 	}
 
-	LogError("Failed to create local login account for user [{0}]!", c.username);
+	LogError("Failed to create local login account for user [{}]!", c.username);
 
 	return 0;
 }
@@ -69,7 +69,7 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 	auto hash = eqcrypt_hash(username, password, mode);
 
 	LogInfo(
-		"Attempting to create world admin account | username [{0}] encryption algorithm [{1}] ({2})",
+		"Attempting to create world admin account | username [{}] encryption algorithm [{}] ({})",
 		username,
 		GetEncryptionByModeId(mode),
 		mode
@@ -77,7 +77,7 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 
 	if (server.db->DoesLoginserverWorldAdminAccountExist(username)) {
 		LogWarning(
-			"Attempting to create world admin account for user [{0}] but already exists!",
+			"Attempting to create world admin account for user [{}] but already exists!",
 			username
 		);
 
@@ -95,7 +95,7 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 
 	if (created_world_admin_id > 0) {
 		LogInfo(
-			"Account creation success for user [{0}] encryption algorithm [{1}] ({2}) new admin id [{3}]",
+			"Account creation success for user [{}] encryption algorithm [{}] ({}) new admin id [{}]",
 			username,
 			GetEncryptionByModeId(mode),
 			mode,
@@ -104,7 +104,7 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 		return true;
 	}
 
-	LogError("Failed to create world admin account account for user [{0}]!", username);
+	LogError("Failed to create world admin account account for user [{}]!", username);
 
 	return false;
 }
@@ -125,7 +125,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 
 	if (!login_server_admin.loaded) {
 		LogError(
-			"account [{0}] source_loginserver [{1}] not found!",
+			"account [{}] source_loginserver [{}] not found!",
 			in_account_username,
 			source_loginserver
 		);
@@ -142,7 +142,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 
 	if (!validated_credentials) {
 		LogError(
-			"account [{0}] source_loginserver [{1}] invalid credentials!",
+			"account [{}] source_loginserver [{}] invalid credentials!",
 			in_account_username,
 			source_loginserver
 		);
@@ -151,7 +151,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 	}
 
 	LogInfo(
-		"account [{0}] source_loginserver [{1}] credentials validated success!",
+		"account [{}] source_loginserver [{}] credentials validated success!",
 		in_account_username,
 		source_loginserver
 	);
@@ -175,7 +175,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 
 	if (!login_server_account.loaded) {
 		LogError(
-			"account [{0}] source_loginserver [{1}] not found!",
+			"account [{}] source_loginserver [{}] not found!",
 			in_account_username,
 			source_loginserver
 		);
@@ -194,7 +194,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 	);
 
 	LogInfo(
-		"account [{0}] source_loginserver [{1}] credentials updated!",
+		"account [{}] source_loginserver [{}] credentials updated!",
 		in_account_username,
 		source_loginserver
 	);

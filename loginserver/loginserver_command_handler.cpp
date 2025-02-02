@@ -69,13 +69,13 @@ namespace LoginserverCommandHandler {
 		bool can_write = cmd[{"-w", "--write"}];
 
 		if (!can_read || !can_write) {
-			LogInfo("[{0}] --read or --write must be set or both!", __func__);
+			LogInfo("[{}] --read or --write must be set or both!", __func__);
 			exit(1);
 		}
 
 		std::string token = server.db->CreateLoginserverApiToken(can_write, can_read);
 		if (!token.empty()) {
-			LogInfo("[{0}] Created Loginserver API token [{1}]", __func__, token);
+			LogInfo("[{}] Created Loginserver API token [{}]", __func__, token);
 		}
 	}
 
@@ -98,7 +98,7 @@ namespace LoginserverCommandHandler {
 
 		for (auto &it : server.token_manager->loaded_api_tokens) {
 			LogInfo(
-				"token [{0}] can_write [{1}] can_read [{2}]",
+				"token [{}] can_write [{}] can_read [{}]",
 				it.second.token,
 				it.second.can_write,
 				it.second.can_read
@@ -195,7 +195,7 @@ namespace LoginserverCommandHandler {
 			cmd(3).str()
 		);
 
-		LogInfo("Credentials were {0}", res != 0 ? "accepted" : "not accepted");
+		LogInfo("Credentials were {}", res != 0 ? "accepted" : "not accepted");
 	}
 
 	/**
@@ -253,7 +253,7 @@ namespace LoginserverCommandHandler {
 			cmd(3).str()
 		);
 
-		LogInfo("Credentials were {0}", res ? "accepted" : "not accepted");
+		LogInfo("Credentials were {}", res ? "accepted" : "not accepted");
 	}
 
 	/**

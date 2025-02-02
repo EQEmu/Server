@@ -103,7 +103,7 @@ ClientManager::ClientManager()
 
 	if (!m_titanium_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
-			"ClientManager fatal error: couldn't load opcodes for Titanium file [{0}]",
+			"ClientManager fatal error: couldn't load opcodes for Titanium file [{}]",
 			server.config.GetVariableString("client_configuration", "titanium_opcodes", "login_opcodes.conf")
 		);
 
@@ -113,7 +113,7 @@ ClientManager::ClientManager()
 	m_titanium_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New Titanium client connection from [{0}:{1}]",
+				"New Titanium client connection from [{}:{}]",
 				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
@@ -140,7 +140,7 @@ ClientManager::ClientManager()
 
 	if (!m_sod_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
-			"ClientManager fatal error: couldn't load opcodes for SoD file {0}",
+			"ClientManager fatal error: couldn't load opcodes for SoD file {}",
 			server.config.GetVariableString("client_configuration", "sod_opcodes", "login_opcodes.conf").c_str()
 		);
 
@@ -150,7 +150,7 @@ ClientManager::ClientManager()
 	m_sod_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New SoD+ client connection from [{0}:{1}]",
+				"New SoD+ client connection from [{}:{}]",
 				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
@@ -178,7 +178,7 @@ ClientManager::ClientManager()
 
 	if (!m_larion_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
-			"ClientManager fatal error: couldn't load opcodes for Larion file [{0}]",
+			"ClientManager fatal error: couldn't load opcodes for Larion file [{}]",
 			server.config.GetVariableString("client_configuration", "larion_opcodes", "login_opcodes.conf")
 		);
 
@@ -188,7 +188,7 @@ ClientManager::ClientManager()
 	m_larion_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New Larion client connection from [{0}:{1}]",
+				"New Larion client connection from [{}:{}]",
 				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);

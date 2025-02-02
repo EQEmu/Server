@@ -151,7 +151,7 @@ void start_web_server()
 	Sleep(1);
 
 	int web_api_port = server.config.GetVariableInt("web_api", "port", 6000);
-	LogInfo("Webserver API now listening on port [{0}]", web_api_port);
+	LogInfo("Webserver API now listening on port [{}]", web_api_port);
 
 	httplib::Server api;
 
@@ -265,28 +265,28 @@ int main(int argc, char **argv)
 		web_api_thread.detach();
 	}
 
-	LogInfo("[Config] [Account] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
-	LogInfo("[Config] [ClientConfiguration] DisplayExpansions [{0}]", server.options.IsDisplayExpansions());
-	LogInfo("[Config] [ClientConfiguration] MaxExpansions [{0}]", server.options.GetMaxExpansions());
+	LogInfo("[Config] [Account] CanAutoCreateAccounts [{}]", server.options.CanAutoCreateAccounts());
+	LogInfo("[Config] [ClientConfiguration] DisplayExpansions [{}]", server.options.IsDisplayExpansions());
+	LogInfo("[Config] [ClientConfiguration] MaxExpansions [{}]", server.options.GetMaxExpansions());
 
 #ifdef LSPX
-	LogInfo("[Config] [Account] CanAutoLinkAccounts [{0}]", server.options.CanAutoLinkAccounts());
+	LogInfo("[Config] [Account] CanAutoLinkAccounts [{}]", server.options.CanAutoLinkAccounts());
 #endif
-	LogInfo("[Config] [WorldServer] IsRejectingDuplicateServers [{0}]", server.options.IsRejectingDuplicateServers());
-	LogInfo("[Config] [WorldServer] IsUnregisteredAllowed [{0}]", server.options.IsUnregisteredAllowed());
-	LogInfo("[Config] [WorldServer] ShowPlayerCount [{0}]", server.options.IsShowPlayerCountEnabled());
+	LogInfo("[Config] [WorldServer] IsRejectingDuplicateServers [{}]", server.options.IsRejectingDuplicateServers());
+	LogInfo("[Config] [WorldServer] IsUnregisteredAllowed [{}]", server.options.IsUnregisteredAllowed());
+	LogInfo("[Config] [WorldServer] ShowPlayerCount [{}]", server.options.IsShowPlayerCountEnabled());
 	LogInfo(
-		"[Config] [WorldServer] DevAndTestServersListBottom [{0}]",
+		"[Config] [WorldServer] DevAndTestServersListBottom [{}]",
 		server.options.IsWorldDevTestServersListBottom()
 	);
 	LogInfo(
-		"[Config] [WorldServer] SpecialCharactersStartListBottom [{0}]",
+		"[Config] [WorldServer] SpecialCharactersStartListBottom [{}]",
 		server.options.IsWorldSpecialCharacterStartListBottom()
 	);
-	LogInfo("[Config] [Security] GetEncryptionMode [{0}]", server.options.GetEncryptionMode());
-	LogInfo("[Config] [Security] IsTokenLoginAllowed [{0}]", server.options.IsTokenLoginAllowed());
-	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());
-	LogInfo("[Config] [Security] IsUpdatingInsecurePasswords [{0}]", server.options.IsUpdatingInsecurePasswords());
+	LogInfo("[Config] [Security] GetEncryptionMode [{}]", server.options.GetEncryptionMode());
+	LogInfo("[Config] [Security] IsTokenLoginAllowed [{}]", server.options.IsTokenLoginAllowed());
+	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{}]", server.options.IsPasswordLoginAllowed());
+	LogInfo("[Config] [Security] IsUpdatingInsecurePasswords [{}]", server.options.IsUpdatingInsecurePasswords());
 
 	Timer keepalive(INTERSERVER_TIMER); // does auto-reconnect
 

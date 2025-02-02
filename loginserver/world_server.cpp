@@ -121,7 +121,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 	auto *ls_status = (LoginserverWorldStatusUpdate *) packet.Data();
 
 	LogDebug(
-		"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
+		"World Server Status Update Received | Server [{}] Status [{}] Players [{}] Zones [{}]",
 		m_server_long_name,
 		ls_status->status,
 		ls_status->num_players,
@@ -151,11 +151,11 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 
 	auto *res = (UsertoWorldResponseLegacy_Struct *) packet.Data();
 
-	LogDebug("Trying to find client with user id of [{0}]", res->lsaccountid);
+	LogDebug("Trying to find client with user id of [{}]", res->lsaccountid);
 	Client *c = server.client_manager->GetClient(res->lsaccountid, "eqemu");
 	if (c) {
 		LogDebug(
-			"Found client with user id of [{0}] and account name of [{1}]",
+			"Found client with user id of [{}] and account name of [{}]",
 			res->lsaccountid,
 			c->GetAccountName()
 		);
@@ -205,7 +205,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		}
 
 		LogDebug(
-			"Sending play response: allowed [{0}] sequence [{1}] server number [{2}] message [{3}]",
+			"Sending play response: allowed [{}] sequence [{}] server number [{}] message [{}]",
 			play->base_reply.success,
 			play->base_header.sequence,
 			play->server_number,
@@ -217,7 +217,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 	}
 	else {
 		LogError(
-			"Received User-To-World Response for [{0}] but could not find the client referenced!",
+			"Received User-To-World Response for [{}] but could not find the client referenced!",
 			res->lsaccountid
 		);
 	}
@@ -242,7 +242,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	}
 
 	auto user_to_world_response = (UsertoWorldResponse_Struct *) packet.Data();
-	LogDebug("Trying to find client with user id of [{0}]", user_to_world_response->lsaccountid);
+	LogDebug("Trying to find client with user id of [{}]", user_to_world_response->lsaccountid);
 
 	Client *c = server.client_manager->GetClient(
 		user_to_world_response->lsaccountid,
@@ -250,7 +250,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	);
 
 	if (c) {
-		LogDebug("Found client with user id of [{0}] and account name of {1}",
+		LogDebug("Found client with user id of [{}] and account name of {}",
 				 user_to_world_response->lsaccountid,
 				 c->GetAccountName().c_str()
 		);
@@ -265,12 +265,12 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		r->server_number        = c->GetSelectedPlayServerID();
 
 		LogDebug(
-			"Found sequence and play of [{0}] [{1}]",
+			"Found sequence and play of [{}] [{}]",
 			c->GetCurrentPlaySequence(),
 			c->GetSelectedPlayServerID()
 		);
 
-		LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
+		LogDebug("[Size: [{}]] {}", outapp->size, DumpPacketToString(outapp));
 
 		if (user_to_world_response->response > 0) {
 			r->base_reply.success = true;
@@ -308,7 +308,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		}
 
 		LogDebug(
-			"Sending play response with following data, allowed [{0}], sequence {1}, server number {2}, message {3}",
+			"Sending play response with following data, allowed [{}], sequence {}, server number {}, message {}",
 			r->base_reply.success,
 			r->base_header.sequence,
 			r->server_number,
@@ -320,7 +320,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	}
 	else {
 		LogError(
-			"Received User-To-World Response for [{0}] but could not find the client referenced!.",
+			"Received User-To-World Response for [{}] but could not find the client referenced!.",
 			user_to_world_response->lsaccountid
 		);
 	}
@@ -344,11 +344,11 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 		return;
 	}
 
-	LogDebug("ServerOP_LSAccountUpdate packet received from [{0}]", m_server_short_name);
+	LogDebug("ServerOP_LSAccountUpdate packet received from [{}]", m_server_short_name);
 
 	auto *r = (LoginserverAccountUpdate *) packet.Data();
 	if (m_is_server_trusted) {
-		LogDebug("ServerOP_LSAccountUpdate update processed for: [{0}]", r->user_account_name);
+		LogDebug("ServerOP_LSAccountUpdate update processed for: [{}]", r->user_account_name);
 
 		server.db->UpdateLSAccountInfo(
 			r->user_account_id,
@@ -411,7 +411,7 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 
 		if (admin.loaded) {
 			LogDebug(
-				"Attempting to authenticate world admin... [{0}] ({1}) against worldserver [{2}]",
+				"Attempting to authenticate world admin... [{}] ({}) against worldserver [{}]",
 				m_account_name,
 				admin.id,
 				m_server_short_name
@@ -424,7 +424,7 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 				admin.account_password
 			)) {
 				LogDebug(
-					"Authenticating world admin... [{0}] ({1}) success! World ({2})",
+					"Authenticating world admin... [{}] ({}) success! World ({})",
 					m_account_name,
 					admin.id,
 					m_server_short_name
@@ -446,7 +446,7 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 	if (!server.options.IsUnregisteredAllowed()) {
 		if (!HandleNewLoginserverRegisteredOnly(r)) {
 			LogError(
-				"WorldServer::HandleNewLoginserverRegisteredOnly checks failed with server [{0}]",
+				"WorldServer::HandleNewLoginserverRegisteredOnly checks failed with server [{}]",
 				m_server_long_name
 			);
 			return;
@@ -455,7 +455,7 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 	else {
 		if (!HandleNewLoginserverInfoUnregisteredAllowed(r)) {
 			LogError(
-				"WorldServer::HandleNewLoginserverInfoUnregisteredAllowed checks failed with server [{0}]",
+				"WorldServer::HandleNewLoginserverInfoUnregisteredAllowed checks failed with server [{}]",
 				m_server_long_name
 			);
 			return;
@@ -518,7 +518,7 @@ void WorldServer::SendClientAuthToWorld(
 		a.is_client_from_local_network = 1;
 	}
 	else if (IpUtil::IsIpInPrivateRfc1918(client_address)) {
-		LogInfo("Client is authenticating from a local address [{0}]", client_address);
+		LogInfo("Client is authenticating from a local address [{}]", client_address);
 		a.is_client_from_local_network = 1;
 	}
 	else {
@@ -529,14 +529,14 @@ void WorldServer::SendClientAuthToWorld(
 	ip_addr.s_addr = a.ip;
 
 	LogInfo(
-		"Client authentication response: world_address [{0}] client_address [{1}]",
+		"Client authentication response: world_address [{}] client_address [{}]",
 		world_address,
 		client_address
 	);
 
 	LogInfo(
-		"Sending Client Authentication Response ls_account_id [{0}] ls_name [{1}] name [{2}] key [{3}] ls_admin [{4}] "
-		"world_admin [{5}] ip [{6}] local [{7}]",
+		"Sending Client Authentication Response ls_account_id [{}] ls_name [{}] name [{}] key [{}] ls_admin [{}] "
+		"world_admin [{}] ip [{}] local [{}]",
 		a.loginserver_account_id,
 		a.loginserver_name,
 		a.account_name,
@@ -572,28 +572,28 @@ bool WorldServer::HandleNewWorldserverValidation(
 )
 {
 	if (strlen(r->account_name) >= MAX_ACCOUNT_NAME_LENGTH) {
-		LogError("HandleNewWorldserver error [account_name] was too long | max [{0}]", MAX_ACCOUNT_NAME_LENGTH);
+		LogError("HandleNewWorldserver error [account_name] was too long | max [{}]", MAX_ACCOUNT_NAME_LENGTH);
 		return false;
 	}
 	else if (strlen(r->account_password) >= MAX_ACCOUNT_PASSWORD_LENGTH) {
-		LogError("HandleNewWorldserver error [account_password] was too long | max [{0}]", MAX_ACCOUNT_PASSWORD_LENGTH);
+		LogError("HandleNewWorldserver error [account_password] was too long | max [{}]", MAX_ACCOUNT_PASSWORD_LENGTH);
 		return false;
 	}
 	else if (strlen(r->server_long_name) >= MAX_SERVER_LONG_NAME_LENGTH) {
-		LogError("HandleNewWorldserver error [server_long_name] was too long | max [{0}]", MAX_SERVER_LONG_NAME_LENGTH);
+		LogError("HandleNewWorldserver error [server_long_name] was too long | max [{}]", MAX_SERVER_LONG_NAME_LENGTH);
 		return false;
 	}
 	else if (strlen(r->server_short_name) >= MAX_SERVER_SHORT_NAME_LENGTH) {
-		LogError("HandleNewWorldserver error [server_short_name] was too long | max [{0}]",
+		LogError("HandleNewWorldserver error [server_short_name] was too long | max [{}]",
 				 MAX_SERVER_SHORT_NAME_LENGTH);
 		return false;
 	}
 	else if (strlen(r->server_version) >= MAX_SERVER_VERSION_LENGTH) {
-		LogError("HandleNewWorldserver error [server_version] was too long | max [{0}]", MAX_SERVER_VERSION_LENGTH);
+		LogError("HandleNewWorldserver error [server_version] was too long | max [{}]", MAX_SERVER_VERSION_LENGTH);
 		return false;
 	}
 	else if (strlen(r->protocol_version) >= MAX_SERVER_PROTOCOL_VERSION) {
-		LogError("HandleNewWorldserver error [protocol_version] was too long | max [{0}]", MAX_SERVER_PROTOCOL_VERSION);
+		LogError("HandleNewWorldserver error [protocol_version] was too long | max [{}]", MAX_SERVER_PROTOCOL_VERSION);
 		return false;
 	}
 
@@ -607,7 +607,7 @@ bool WorldServer::HandleNewWorldserverValidation(
 		}
 	}
 	else {
-		LogError("HandleNewWorldserver error, local address was too long | max [{0}]", MAX_SERVER_LOCAL_ADDRESS_LENGTH);
+		LogError("HandleNewWorldserver error, local address was too long | max [{}]", MAX_SERVER_LOCAL_ADDRESS_LENGTH);
 		return false;
 	}
 
@@ -616,7 +616,7 @@ bool WorldServer::HandleNewWorldserverValidation(
 			m_remote_ip_address = GetConnection()->Handle()->RemoteIP();
 
 			LogWarning(
-				"Remote address was null, defaulting to stream address [{0}]",
+				"Remote address was null, defaulting to stream address [{}]",
 				m_remote_ip_address
 			);
 		}
@@ -628,7 +628,7 @@ bool WorldServer::HandleNewWorldserverValidation(
 		m_remote_ip_address = GetConnection()->Handle()->RemoteIP();
 
 		LogWarning(
-			"HandleNewWorldserver remote address was too long, defaulting to stream address [{0}]",
+			"HandleNewWorldserver remote address was too long, defaulting to stream address [{}]",
 			m_remote_ip_address
 		);
 	}
@@ -666,7 +666,7 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 				m_is_server_authorized_to_list = true;
 
 				LogInfo(
-					"Server long_name [{0}] short_name [{1}] successfully logged into account that had no user/password requirement",
+					"Server long_name [{}] short_name [{}] successfully logged into account that had no user/password requirement",
 					m_server_long_name,
 					m_server_short_name
 				);
@@ -675,7 +675,7 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 				m_is_server_authorized_to_list = true;
 
 				LogInfo(
-					"Server long_name [{0}] short_name [{1}] successfully logged in",
+					"Server long_name [{}] short_name [{}] successfully logged in",
 					m_server_long_name,
 					m_server_short_name
 				);
@@ -688,7 +688,7 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 			}
 			else {
 				LogInfo(
-					"Server long_name [{0}] short_name [{1}] attempted to log in but account and password did not "
+					"Server long_name [{}] short_name [{}] attempted to log in but account and password did not "
 					"match the entry in the database, and only registered servers are allowed",
 					m_server_long_name,
 					m_server_short_name
@@ -699,7 +699,7 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 		}
 		else {
 			LogInfo(
-				"Server long_name [{0}] short_name [{1}] attempted to log in but database couldn't find an entry and only registered servers are allowed",
+				"Server long_name [{}] short_name [{}] attempted to log in but database couldn't find an entry and only registered servers are allowed",
 				m_server_long_name,
 				m_server_short_name
 			);
@@ -709,7 +709,7 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 	}
 	else {
 		LogInfo(
-			"Server long_name [{0}] short_name [{1}] did not attempt to log in but only registered servers are allowed",
+			"Server long_name [{}] short_name [{}] did not attempt to log in but only registered servers are allowed",
 			m_server_long_name,
 			m_server_short_name
 		);
@@ -766,7 +766,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			else {
 				// server is authorized to be on the loginserver list but didn't pass login check
 				LogInfo(
-					"Server long_name [{0}] short_name [{1}] attempted to log in but account and password did not match the entry in the database. Unregistered still allowed",
+					"Server long_name [{}] short_name [{}] attempted to log in but account and password did not match the entry in the database. Unregistered still allowed",
 					m_server_long_name,
 					m_server_short_name
 				);
@@ -777,14 +777,14 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			// server is authorized to be on the loginserver list but didn't pass login check
 			if (!m_account_name.empty() || !m_account_password.empty()) {
 				LogInfo(
-					"Server [{0}] [{1}] did not login but this server required a password to login",
+					"Server [{}] [{}] did not login but this server required a password to login",
 					m_server_long_name,
 					m_server_short_name
 				);
 			}
 			else {
 				LogInfo(
-					"Server [{0}] [{1}] did not login but unregistered servers are allowed",
+					"Server [{}] [{}] did not login but unregistered servers are allowed",
 					m_server_long_name,
 					m_server_short_name
 				);

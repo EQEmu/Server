@@ -389,7 +389,7 @@ namespace LoginserverWebserver {
 			res.set_header("response_set", "true");
 
 			LogWarning(
-				"AuthCanRead access failure remote_address [{0}] user_agent [{1}]",
+				"AuthCanRead access failure remote_address [{}] user_agent [{}]",
 				user_token.remote_address,
 				user_token.user_agent
 			);
@@ -420,7 +420,7 @@ namespace LoginserverWebserver {
 			res.set_header("response_set", "true");
 
 			LogWarning(
-				"AuthCanWrite access failure remote_address [{0}] user_agent [{1}]",
+				"AuthCanWrite access failure remote_address [{}] user_agent [{}]",
 				user_token.remote_address,
 				user_token.user_agent
 			);
@@ -465,7 +465,7 @@ namespace LoginserverWebserver {
 		}
 
 		LogDebug(
-			"Authentication Request | remote_address [{0}] user_agent [{1}] authorization_key [{2}] request_path [{3}]",
+			"Authentication Request | remote_address [{}] user_agent [{}] authorization_key [{}] request_path [{}]",
 			user_token.remote_address,
 			user_token.user_agent,
 			authorization_key,
@@ -489,7 +489,7 @@ namespace LoginserverWebserver {
 			token_data.can_read  = Strings::ToInt(row[2]) > 0;
 
 			LogDebug(
-				"Inserting api token to internal list [{0}] write {1} read {2}",
+				"Inserting api token to internal list [{}] write {} read {}",
 				token_data.token,
 				token_data.can_read,
 				token_data.can_write

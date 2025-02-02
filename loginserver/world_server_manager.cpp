@@ -83,7 +83,7 @@ std::unique_ptr<EQApplicationPacket> WorldServerManager::CreateServerListPacket(
 	in.s_addr = client->GetConnection()->GetRemoteIP();
 	std::string client_ip = inet_ntoa(in);
 
-	LogDebug("ServerManager::CreateServerListPacket via client address [{0}]", client_ip);
+	LogDebug("ServerManager::CreateServerListPacket via client address [{}]", client_ip);
 
 	for (const auto &world_server: m_world_servers) {
 		if (world_server->IsAuthorizedToList()) {
