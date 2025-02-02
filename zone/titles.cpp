@@ -24,7 +24,9 @@ bool TitleManager::LoadTitles()
 		return false;
 	}
 
-	titles = l;
+	for (const auto& e : l) {
+		titles.push_back(e);
+	}
 
 	LogInfo("Loaded [{}] Title{}", Strings::Commify(l.size()), l.size() != 1 ? "s" : "");
 
@@ -33,9 +35,9 @@ bool TitleManager::LoadTitles()
 
 EQApplicationPacket* TitleManager::MakeTitlesPacket(Client* c)
 {
-	uint32 length = 4;
-
 	const auto& eligible_titles = GetEligibleTitles(c);
+
+	uint32 length = 4;
 
 	for (const auto& e : eligible_titles) {
 		length += e.prefix.length() + e.suffix.length() + 6;
@@ -121,7 +123,7 @@ const std::vector<TitlesRepository::Titles>& TitleManager::GetEligibleTitles(Cli
 		)
 	);
 
-	for (const auto& t : titles) {
+	for (auto t : titles) {
 		if (t.char_id >= 0 && c->CharacterID() != static_cast<uint32>(t.char_id)) {
 			continue;
 		}
@@ -180,8 +182,12 @@ const std::vector<TitlesRepository::Titles>& TitleManager::GetEligibleTitles(Cli
 			continue;
 		}
 
+		LogError("Emplacing | t.id [{}] t.prefix [{}] t.suffix [{}]", t.id, t.prefix, t.suffix);
+
 		eligible_titles.emplace_back(t);
 	}
+
+	LogError("eligible_titles size [{}]", eligible_titles.size());
 
 	return eligible_titles;
 }
