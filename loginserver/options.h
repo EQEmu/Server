@@ -17,7 +17,6 @@ public:
 		max_expansions_mask(0),
 		encryption_mode(5),
 		reject_duplicate_servers(false),
-		allow_password_login(true),
 		allow_token_login(false),
 		auto_create_accounts(false) {}
 
@@ -62,9 +61,6 @@ public:
 	inline void AllowTokenLogin(bool b) { allow_token_login = b; }
 	inline bool IsTokenLoginAllowed() const { return allow_token_login; }
 
-	inline void AllowPasswordLogin(bool b) { allow_password_login = b; }
-	inline bool IsPasswordLoginAllowed() const { return allow_password_login; }
-
 	inline void AutoCreateAccounts(bool b) { auto_create_accounts = b; }
 	inline bool CanAutoCreateAccounts() const { return auto_create_accounts; }
 
@@ -107,7 +103,6 @@ private:
 	bool        world_dev_test_servers_list_bottom;
 	bool        world_special_character_start_list_bottom;
 	bool        allow_token_login;
-	bool        allow_password_login;
 	bool        show_player_count;
 	bool        auto_create_accounts;
 	bool        auto_link_accounts;

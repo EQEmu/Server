@@ -16,13 +16,6 @@ public:
 	LoginDatabase(std::string user, std::string pass, std::string host, std::string port, std::string name);
 	~LoginDatabase();
 
-	bool GetLoginDataFromAccountInfo(
-		const std::string &name,
-		const std::string &loginserver,
-		std::string &password,
-		unsigned int &id
-	);
-
 	bool GetLoginTokenDataFromToken(
 		const std::string &token,
 		const std::string &ip,

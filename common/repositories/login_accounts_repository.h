@@ -4,29 +4,11 @@
 #include "../database.h"
 #include "../strings.h"
 #include "base/base_login_accounts_repository.h"
+#include "../../loginserver/encryption.h"
 #include "../../loginserver/login_types.h"
 
 class LoginAccountsRepository : public BaseLoginAccountsRepository {
 public:
-	struct EncryptionResult {
-		std::string password;
-		int         mode = 0;
-		std::string mode_name;
-	};
-
-	static EncryptionResult EncryptPasswordFromContext(LoginAccountContext c)
-	{
-		EncryptionResult r;
-		r.password  = eqcrypt_hash(
-			c.username,
-			c.password,
-			server.options.GetEncryptionMode()
-		);
-		r.mode      = server.options.GetEncryptionMode();
-		r.mode_name = GetEncryptionByModeId(r.mode);
-		return r;
-	}
-
 	static int64 GetFreeID(Database &db, const std::string &loginserver)
 	{
 		auto query = fmt::format(

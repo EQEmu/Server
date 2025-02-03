@@ -2,6 +2,7 @@
 
 #include <string>
 #include "../common/types.h"
+#include "login_types.h"
 
 enum EncryptionMode {
 	EncryptionModeMD5            = 1,
@@ -30,3 +31,31 @@ std::string GetEncryptionByModeId(uint32 mode);
 const char *eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char *buffer_out, bool enc);
 std::string eqcrypt_hash(const std::string &username, const std::string &password, int mode);
 bool eqcrypt_verify_hash(const std::string &username, const std::string &password, const std::string &pwhash, int mode);
+
+static int g_encryption_mode = 0;
+
+namespace Encryption {
+	inline void SetEncryptionMode(int mode)
+	{
+		g_encryption_mode = mode;
+	}
+}
+
+struct EncryptionResult {
+	std::string password;
+	int         mode = 0;
+	std::string mode_name;
+};
+
+static EncryptionResult EncryptPasswordFromContext(LoginAccountContext c)
+{
+	EncryptionResult r;
+	r.password  = eqcrypt_hash(
+		c.username,
+		c.password,
+		g_encryption_mode
+	);
+	r.mode      = g_encryption_mode;
+	r.mode_name = GetEncryptionByModeId(r.mode);
+	return r;
+}

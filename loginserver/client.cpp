@@ -1,11 +1,7 @@
 #include "client.h"
 #include "login_server.h"
-#include "../common/misc_functions.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/strings.h"
 #include "encryption.h"
 #include "account_management.h"
-#include "../common/repositories/login_accounts_repository.h"
 
 extern LoginServer server;
 
@@ -84,12 +80,6 @@ bool Client::Process()
 	return true;
 }
 
-/**
- * Sends our reply to session ready packet
- *
- * @param data
- * @param size
- */
 void Client::HandleSessionReady(const char *data, unsigned int size)
 {
 	if (m_client_status != cs_not_sent_session_ready) {
@@ -104,9 +94,6 @@ void Client::HandleSessionReady(const char *data, unsigned int size)
 
 	m_client_status = cs_waiting_for_login;
 
-	/**
-	 * The packets are identical between the two versions
-	 */
 	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply));
 	auto buf     = reinterpret_cast<LoginHandShakeReply *>(outapp->pBuffer);
 	buf->base_header.sequence    = 0x02;
@@ -117,12 +104,6 @@ void Client::HandleSessionReady(const char *data, unsigned int size)
 	delete outapp;
 }
 
-/**
- * Verifies login and send a reply
- *
- * @param data
- * @param size
- */
 void Client::HandleLogin(const char *data, unsigned int size)
 {
 	if (m_client_status != cs_waiting_for_login) {
@@ -146,8 +127,6 @@ void Client::HandleLogin(const char *data, unsigned int size)
 		return;
 	}
 
-	char *login_packet_buffer = nullptr;
-
 	unsigned int db_account_id = 0;
 
 	std::string db_loginserver = "local";
@@ -155,17 +134,15 @@ void Client::HandleLogin(const char *data, unsigned int size)
 		db_loginserver = "eqemu";
 	}
 
-	std::string db_account_password_hash;
-
 	std::string outbuffer;
 	outbuffer.resize(data_size);
-	if (outbuffer.length() == 0) {
+	if (outbuffer.empty()) {
 		LogError("Corrupt buffer sent to server, no length");
 		return;
 	}
 
 	// data starts at base message header (opcode not included)
-	auto r = eqcrypt_block(data + sizeof(LoginBaseMessage), data_size, &outbuffer[0], 0);
+	auto r = eqcrypt_block(data + sizeof(LoginBaseMessage), data_size, &outbuffer[0], false);
 	if (r == nullptr) {
 		LogError("Failed to decrypt eqcrypt block");
 		return;
@@ -179,101 +156,93 @@ void Client::HandleLogin(const char *data, unsigned int size)
 		return;
 	}
 
+	std::cout << "User: " << user << std::endl;
+
 	// only need to copy the base header for reply options, ignore login info
 	memcpy(&m_login_base_message, data, sizeof(LoginBaseMessage));
 
-	bool result = false;
-	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
+	std::cout << "Seq: " << m_login_base_message.sequence << std::endl;
+	std::cout << "compressed: " << m_login_base_message.compressed << std::endl;
+	std::cout << "encrypt_type: " << m_login_base_message.encrypt_type << std::endl;
+	std::cout << "unk3: " << m_login_base_message.unk3 << std::endl;
+
+	bool login_success = false;
+	bool token_login   = outbuffer[0] == 0 && outbuffer[1] == 0;
+	if (token_login) {
 		if (server.options.IsTokenLoginAllowed()) {
-			cred   = (&outbuffer[2 + user.length()]);
-			result = server.db->GetLoginTokenDataFromToken(
+			cred          = (&outbuffer[2 + user.length()]);
+			login_success = server.db->GetLoginTokenDataFromToken(
 				cred,
 				m_connection->GetRemoteAddr(),
 				db_account_id,
 				db_loginserver,
 				user
 			);
+
+//			login_success ? DoSuccessfulLogin(user, db_account_id, db_loginserver) : SendFailedLogin();
+			SendFailedLogin();
 		}
+
+		return;
 	}
-	else {
-		if (server.options.IsPasswordLoginAllowed()) {
-			cred            = (&outbuffer[1 + user.length()]);
-			auto components = Strings::Split(user, ':');
-			if (components.size() == 2) {
-				db_loginserver = components[0];
-				user           = components[1];
-			}
 
-			// health checks
-			if (ProcessHealthCheck(user)) {
-				SendFailedLogin();
-				return;
-			}
+	// normal login
+	cred = (&outbuffer[1 + user.length()]);
+	auto components = Strings::Split(user, ':');
+	if (components.size() == 2) {
+		db_loginserver = components[0];
+		user           = components[1];
+	}
 
-			LogInfo(
-				"Attempting password based login [{}] login [{}]",
-				user,
-				db_loginserver
-			);
+	// health checks
+	if (ProcessHealthCheck(user)) {
+		SendFailedLogin();
+		return;
+	}
 
-			ParseAccountString(user, user, db_loginserver);
+	LogInfo(
+		"Attempting password based login [{}] login [{}]",
+		user,
+		db_loginserver
+	);
 
-			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
-				result = VerifyAndUpdateLoginHash(user, db_loginserver, cred, db_account_password_hash);
+	ParseAccountString(user, user, db_loginserver);
+
+	LoginAccountContext c = {};
+	c.username           = user;
+	c.password           = cred;
+	c.source_loginserver = db_loginserver;
+
+	auto a = LoginAccountsRepository::GetAccountFromContext(database, c);
+	if (a.id > 0) {
+		login_success = VerifyAndUpdateLoginHash(c, a);
 
 #ifdef LSPX
-				// if user updated their password on the login server, update it here by validating their credentials with the login server
-				if (!result && db_loginserver == "eqemu") {
-					LoginAccountContext c;
-					c.username           = user;
-					c.password           = cred;
-
-					uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
-					if (account_id > 0) {
-						auto encryption_mode = server.options.GetEncryptionMode();
-						server.db->UpdateLoginserverAccountPasswordHash(
-							user,
-							db_loginserver,
-							eqcrypt_hash(user, cred, encryption_mode)
-						);
-						LogInfo("Updating eqemu account [{}] password hash", account_id);
-						result = true;
-					}
-				}
-#endif
-
-				LogDebug("Success [{}]", (result ? "true" : "false"));
-			}
-			else {
-				m_client_status = cs_creating_account;
-				AttemptLoginAccountCreation(user, cred, db_loginserver);
-
+		// if user updated their password on the login server, update it here by validating their credentials with the login server
+		if (!login_success && db_loginserver == "eqemu") {
+			uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
+			if (account_id > 0) {
+				auto encryption_mode = server.options.GetEncryptionMode();
+				server.db->UpdateLoginserverAccountPasswordHash(
+					user,
+					db_loginserver,
+					eqcrypt_hash(user, cred, encryption_mode)
+				);
+				LogInfo("Updating eqemu account [{}] password hash", account_id);
+				DoSuccessfulLogin(a);
 				return;
 			}
 		}
+#endif
+
+		LogDebug("Success [{}]", (login_success ? "true" : "false"));
+		DoSuccessfulLogin(a);
+		return;
 	}
 
-	/**
-	 * Login accepted
-	 */
-	if (result) {
-		LogInfo(
-			"login [{}] user [{}] Login succeeded",
-			db_loginserver,
-			user
-		);
-
-		DoSuccessfulLogin(user, db_account_id, db_loginserver);
-	}
-	else {
-		LogInfo(
-			"login [{}] user [{}] Login failed",
-			db_loginserver,
-			user
-		);
-
-		SendFailedLogin();
-	}
+	// if we are here, the account does not exist
+	m_client_status = cs_creating_account;
+	AttemptLoginAccountCreation(user, cred, db_loginserver);
 }
 
 void Client::SendPlayToWorld(const char *data)
@@ -361,7 +330,7 @@ void Client::AttemptLoginAccountCreation(
 			LogInfo("Found and creating eqemu account [{}]", account_id);
 			auto a = LoginAccountsRepository::CreateAccountFromContext(database, c);
 			if (a.id > 0) {
-				DoSuccessfulLogin(c.username, c.login_account_id, c.source_loginserver);
+				DoSuccessfulLogin(a);
 				return;
 			}
 		}
@@ -375,7 +344,7 @@ void Client::AttemptLoginAccountCreation(
 		LogInfo("CanAutoCreateAccounts enabled, attempting to crate account [{}]", user);
 		auto a = LoginAccountsRepository::CreateAccountFromContext(database, c);
 		if (a.id > 0) {
-			DoSuccessfulLogin(c.username, c.login_account_id, c.source_loginserver);
+			DoSuccessfulLogin(a);
 			return;
 		}
 
@@ -415,15 +384,10 @@ void Client::SendFailedLogin()
 	m_client_status = cs_failed_to_login;
 }
 
-bool Client::VerifyAndUpdateLoginHash(
-	const std::string &account_username,
-	const std::string &source_loginserver,
-	const std::string &account_password,
-	const std::string &password_hash
-)
+bool Client::VerifyAndUpdateLoginHash(LoginAccountContext c, const LoginAccountsRepository::LoginAccounts &a)
 {
 	auto encryption_mode = server.options.GetEncryptionMode();
-	if (eqcrypt_verify_hash(account_username, account_password, password_hash, encryption_mode)) {
+	if (eqcrypt_verify_hash(a.account_name, c.password, a.account_password, encryption_mode)) {
 		return true;
 	}
 
@@ -432,15 +396,15 @@ bool Client::VerifyAndUpdateLoginHash(
 	}
 
 	uint32 insecure_source_encryption_mode = 0;
-	auto verify_encryption_mode = [&](int start, int end) {
+	auto   verify_encryption_mode          = [&](int start, int end) {
 		for (int i = start; i <= end; ++i) {
-			if (i != encryption_mode && eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
+			if (i != encryption_mode && eqcrypt_verify_hash(a.account_name, c.password, a.account_password, i)) {
 				insecure_source_encryption_mode = i;
 			}
 		}
 	};
 
-	switch (password_hash.length()) {
+	switch (a.account_password.length()) {
 		case CryptoHash::md5_hash_length:
 			verify_encryption_mode(EncryptionModeMD5, EncryptionModeMD5Triple);
 			break;
@@ -459,8 +423,8 @@ bool Client::VerifyAndUpdateLoginHash(
 	if (insecure_source_encryption_mode > 0) {
 		LogInfo(
 			"Updated insecure password user [{}] loginserver [{}] from mode [{}] ({}) to mode [{}] ({})",
-			account_username,
-			source_loginserver,
+			c.username,
+			c.source_loginserver,
 			GetEncryptionByModeId(insecure_source_encryption_mode),
 			insecure_source_encryption_mode,
 			GetEncryptionByModeId(encryption_mode),
@@ -468,11 +432,11 @@ bool Client::VerifyAndUpdateLoginHash(
 		);
 
 		server.db->UpdateLoginserverAccountPasswordHash(
-			account_username,
-			source_loginserver,
+			c.username,
+			c.source_loginserver,
 			eqcrypt_hash(
-				account_username,
-				account_password,
+				c.username,
+				c.password,
 				encryption_mode
 			)
 		);
@@ -483,26 +447,35 @@ bool Client::VerifyAndUpdateLoginHash(
 	return false;
 }
 
-void Client::DoSuccessfulLogin(
-	const std::string &in_account_name,
-	int db_account_id,
-	const std::string &db_loginserver
-)
+void Client::DoSuccessfulLogin(const LoginAccountsRepository::LoginAccounts &a)
 {
 	m_stored_username.clear();
 	m_stored_password.clear();
 
-	server.client_manager->RemoveExistingClient(db_account_id, db_loginserver);
+	// uint32_t    id;
+	//		std::string account_name;
+	//		std::string account_password;
+	//		std::string account_email;
+	//		std::string source_loginserver;
+
+	LogInfo(
+		"Successful login for user id [{}] account name [{}] login server [{}]",
+		a.id,
+		a.account_name,
+		a.source_loginserver
+	);
+
+	server.client_manager->RemoveExistingClient(a.id, a.source_loginserver);
 
 	in_addr in{};
 	in.s_addr = m_connection->GetRemoteIP();
 
-	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
+	server.db->UpdateLSAccountData(a.id, std::string(inet_ntoa(in)));
 	GenerateRandomLoginKey();
 
-	m_account_id       = db_account_id;
-	m_account_name     = in_account_name;
-	m_loginserver_name = db_loginserver;
+	m_account_id       = a.id;
+	m_account_name     = a.account_name;
+	m_loginserver_name = a.source_loginserver;
 
 	// unencrypted
 	LoginBaseMessage base_header{};
@@ -517,7 +490,7 @@ void Client::DoSuccessfulLogin(
 	login_reply.base_reply.error_str_id    = 101; // No Error
 	login_reply.unk1                       = 0;
 	login_reply.unk2                       = 0;
-	login_reply.lsid                       = db_account_id;
+	login_reply.lsid                       = a.id;
 	login_reply.failed_attempts            = 0;
 	login_reply.show_player_count          = server.options.IsShowPlayerCountEnabled();
 	login_reply.offer_min_days             = 99;
@@ -527,6 +500,8 @@ void Client::DoSuccessfulLogin(
 	login_reply.web_offer_min_days         = 99;
 	login_reply.web_offer_min_views        = -1;
 	login_reply.web_offer_cooldown_minutes = 0;
+	login_reply.username[0] = 1;
+	login_reply.unknown[0] = 1;
 	memcpy(login_reply.key, m_key.c_str(), m_key.size());
 
 	SendExpansionPacketData(login_reply);

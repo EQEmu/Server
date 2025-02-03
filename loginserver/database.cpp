@@ -43,49 +43,6 @@ LoginDatabase::~LoginDatabase()
 	}
 }
 
-bool LoginDatabase::GetLoginDataFromAccountInfo(
-	const std::string &name,
-	const std::string &loginserver,
-	std::string &password,
-	unsigned int &id
-)
-{
-	auto query = fmt::format(
-		"SELECT id, account_password FROM login_accounts WHERE account_name = '{}' AND source_loginserver = '{}' LIMIT 1",
-		Strings::Escape(name),
-		Strings::Escape(loginserver)
-	);
-
-	auto results = QueryDatabase(query);
-
-	if (results.RowCount() != 1) {
-		LogDebug(
-			"Could not find account for name [{}] login [{}]",
-			name,
-			loginserver
-		);
-
-		return false;
-	}
-
-	if (!results.Success()) {
-		return false;
-	}
-
-	auto row = results.begin();
-
-	id       = Strings::ToUnsignedInt(row[0]);
-	password = row[1];
-
-	LogDebug(
-		"Found account for name [{}] login [{}]",
-		name,
-		loginserver
-	);
-
-	return true;
-}
-
 bool LoginDatabase::GetLoginTokenDataFromToken(
 	const std::string &token,
 	const std::string &ip,

@@ -8,6 +8,7 @@
 #include "../common/net/dns.h"
 #include "../common/net/daybreak_connection.h"
 #include "login_types.h"
+#include "../common/repositories/login_accounts_repository.h"
 #include <memory>
 
 class Client {
@@ -41,14 +42,9 @@ public:
 
 	void SendFailedLogin();
 
-	bool VerifyAndUpdateLoginHash(
-		const std::string &account_username,
-		const std::string &source_loginserver,
-		const std::string &account_password,
-		const std::string &password_hash
-	);
+	bool VerifyAndUpdateLoginHash(LoginAccountContext c, const LoginAccountsRepository::LoginAccounts& a);
 
-	void DoSuccessfulLogin(const std::string &in_account_name, int db_account_id, const std::string &db_loginserver);
+	void DoSuccessfulLogin(const LoginAccountsRepository::LoginAccounts& a);
 
 private:
 	EQ::Random                                          m_random;
