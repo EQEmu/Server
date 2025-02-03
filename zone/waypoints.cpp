@@ -206,6 +206,9 @@ void NPC::PauseWandering(int pausetime)
 
 void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 {    // makes mob walk to specified location
+	if (!AI_walking_timer) {
+		return;
+	}
 	if (IsNPC() && GetGrid() != 0) {    // he is on a grid
 		if (GetGrid() < 0) {    // currently stopped by a quest command
 			SetGrid(0 - GetGrid());    // get him moving again
