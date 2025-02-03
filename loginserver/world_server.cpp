@@ -380,53 +380,25 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 	m_server_process_type = req->server_process_type;
 	m_is_server_logged_in = true;
 
-	if (server.options.IsRejectingDuplicateServers()) {
-		if (server.server_manager->DoesServerExist(m_server_long_name, m_server_short_name, this)) {
-			LogError("World tried to login but there already exists a server that has that name");
+	// Handle Duplicate Servers
+	if (server.server_manager->DoesServerExist(m_server_long_name, m_server_short_name, this)) {
+		if (server.options.IsRejectingDuplicateServers()) {
+			LogError("World tried to login but a server with that name already exists");
 			return;
 		}
-	}
-	else {
-		if (server.server_manager->DoesServerExist(m_server_long_name, m_server_short_name, this)) {
-			LogInfo("World tried to login but there already exists a server that has that name, destroying [{}]",
-					m_server_long_name);
-			server.server_manager->DestroyServerByName(m_server_long_name, m_server_short_name, this);
-		}
+		LogInfo("World tried to login but a server with that name already exists, destroying [{}]", m_server_long_name);
+		server.server_manager->DestroyServerByName(m_server_long_name, m_server_short_name, this);
 	}
 
 	uint32 world_server_admin_id = 0;
 
-	/**
-	 * If our world is trying to authenticate, let's try and pull the owner first to try associating
-	 * with a world short_name
-	 */
+	// Handle Admin Authentication
 	if (!m_account_name.empty() && !m_account_password.empty()) {
 		LoginDatabase::DbLoginServerAdmin admin = server.db->GetLoginServerAdmin(m_account_name);
-
-		if (admin.loaded) {
-			LogDebug(
-				"Attempting to authenticate world admin... [{}] ({}) against worldserver [{}]",
-				m_account_name,
-				admin.id,
-				m_server_short_name
-			);
-
-			if (WorldServer::ValidateWorldServerAdminLogin(
-				admin.id,
-				m_account_name,
-				m_account_password,
-				admin.account_password
-			)) {
-				LogDebug(
-					"Authenticating world admin... [{}] ({}) success! World ({})",
-					m_account_name,
-					admin.id,
-					m_server_short_name
-				);
-				world_server_admin_id = admin.id;
-
-				m_is_server_authorized_to_list = true;
-			}
+		if (admin.loaded && WorldServer::ValidateWorldServerAdminLogin(admin.id, m_account_name, m_account_password, admin.account_password)) {
+			LogDebug("Authenticated world admin [{}] ({}) for world [{}]", m_account_name, admin.id, m_server_short_name);
+			world_server_admin_id = admin.id;
+			m_is_server_authorized_to_list = true;
 		}
 	}
 
@@ -437,22 +409,41 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 		world_server_admin_id
 	);
 
-	if (!server.options.IsUnregisteredAllowed()) {
-		if (!HandleNewLoginserverRegisteredOnly(r)) {
-			LogError(
-				"WorldServer::HandleNewLoginserverRegisteredOnly checks failed with server [{}]",
-				m_server_long_name
-			);
+	if (!r.loaded) {
+		if (!server.options.IsUnregisteredAllowed()) {
+			LogError("WorldServer [{}] is not registered, and unregistered servers are not allowed", m_server_long_name);
 			return;
 		}
-	}
-	else {
-		if (!HandleNewLoginserverInfoUnregisteredAllowed(r)) {
-			LogError(
-				"WorldServer::HandleNewLoginserverInfoUnregisteredAllowed checks failed with server [{}]",
-				m_server_long_name
-			);
+
+		LogInfo("Server [{}] is not registered, handling as unregistered", m_server_long_name);
+		m_is_server_authorized_to_list = true;
+
+		uint32 server_admin_id = 0;
+		if (!m_account_name.empty() && !m_account_password.empty()) {
+			LoginDatabase::DbLoginServerAdmin admin = server.db->GetLoginServerAdmin(m_account_name);
+			if (admin.loaded && WorldServer::ValidateWorldServerAdminLogin(admin.id, m_account_name, m_account_password, admin.account_password)) {
+				server_admin_id = admin.id;
+			}
+		}
+
+		if (!server.db->CreateWorldRegistration(m_server_long_name, m_server_short_name, m_remote_ip_address, m_server_id, server_admin_id)) {
+			LogError("Failed to auto-register world server [{}]", m_server_long_name);
 			return;
+		}
+	} else {
+		m_server_description = r.server_description;
+		m_server_id = r.server_id;
+		m_is_server_trusted = r.is_server_trusted;
+		m_server_list_type_id = r.server_list_type;
+		m_is_server_authorized_to_list = true;
+
+		if (!r.server_admin_account_name.empty() && !r.server_admin_account_password.empty()) {
+			if (r.server_admin_account_name != m_account_name ||
+				!WorldServer::ValidateWorldServerAdminLogin(r.server_admin_id, m_account_name, m_account_password, r.server_admin_account_password)) {
+				LogError("Server [{}] attempted to log in but account/password did not match the registered entry", m_server_long_name);
+				return;
+			}
+			LogInfo("Server [{}] successfully authenticated", m_server_long_name);
 		}
 	}
 
@@ -622,204 +613,6 @@ bool WorldServer::HandleNewWorldserverValidation(LoginserverNewWorldRequest *r)
 	return true;
 }
 
-bool WorldServer::HandleNewLoginserverRegisteredOnly(
-	LoginDatabase::DbWorldRegistration &r
-)
-{
-	if (!m_account_name.empty() && !m_account_password.empty()) {
-		if (r.loaded) {
-			bool does_world_server_not_require_authentication = (
-				r.server_admin_account_name.empty() ||
-				r.server_admin_account_password.empty()
-			);
-
-			bool does_world_server_pass_authentication_check = (
-				r.server_admin_account_name == m_account_name &&
-				WorldServer::ValidateWorldServerAdminLogin(
-					r.server_admin_id,
-					m_account_name,
-					m_account_password,
-					r.server_admin_account_password
-				)
-			);
-
-			m_server_description  = r.server_description;
-			m_server_id           = r.server_id;
-			m_is_server_trusted   = r.is_server_trusted;
-			m_server_list_type_id = r.server_list_type;
-
-			if (does_world_server_not_require_authentication) {
-				m_is_server_authorized_to_list = true;
-
-				LogInfo(
-					"Server long_name [{}] short_name [{}] successfully logged into account that had no user/password requirement",
-					m_server_long_name,
-					m_server_short_name
-				);
-			}
-			else if (does_world_server_pass_authentication_check) {
-				m_is_server_authorized_to_list = true;
-
-				LogInfo(
-					"Server long_name [{}] short_name [{}] successfully logged in",
-					m_server_long_name,
-					m_server_short_name
-				);
-
-				if (m_is_server_trusted) {
-					LogDebug("WorldServer::HandleNewLoginserverRegisteredOnly | ServerOP_LSAccountUpdate sent to world");
-					EQ::Net::DynamicPacket outapp;
-					m_connection->Send(ServerOP_LSAccountUpdate, outapp);
-				}
-			}
-			else {
-				LogInfo(
-					"Server long_name [{}] short_name [{}] attempted to log in but account and password did not "
-					"match the entry in the database, and only registered servers are allowed",
-					m_server_long_name,
-					m_server_short_name
-				);
-
-				return false;
-			}
-		}
-		else {
-			LogInfo(
-				"Server long_name [{}] short_name [{}] attempted to log in but database couldn't find an entry and only registered servers are allowed",
-				m_server_long_name,
-				m_server_short_name
-			);
-
-			return false;
-		}
-	}
-	else {
-		LogInfo(
-			"Server long_name [{}] short_name [{}] did not attempt to log in but only registered servers are allowed",
-			m_server_long_name,
-			m_server_short_name
-		);
-
-		return false;
-	}
-
-	return true;
-}
-
-bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
-	LoginDatabase::DbWorldRegistration &r
-)
-{
-	if (r.loaded) {
-		m_server_description           = r.server_description;
-		m_server_id                    = r.server_id;
-		m_is_server_trusted            = r.is_server_trusted;
-		m_server_list_type_id          = r.server_list_type;
-		m_is_server_authorized_to_list = true;
-
-		bool does_world_server_pass_authentication_check = (
-			r.server_admin_account_name == m_account_name &&
-			WorldServer::ValidateWorldServerAdminLogin(
-				r.server_admin_id,
-				m_account_name,
-				m_account_password,
-				r.server_admin_account_password
-			)
-		);
-
-		bool does_world_server_have_non_empty_credentials = (
-			!m_account_name.empty() &&
-			!m_account_password.empty()
-		);
-
-		if (does_world_server_have_non_empty_credentials) {
-			if (does_world_server_pass_authentication_check) {
-				m_is_server_logged_in = true;
-
-				LogInfo(
-					"Server [{}] long_name [{}] short_name [{}] successfully logged in",
-					r.server_id,
-					m_server_long_name,
-					m_server_short_name
-				);
-
-				if (m_is_server_trusted) {
-					LogDebug("WorldServer::HandleNewLoginserverRegisteredOnly | ServerOP_LSAccountUpdate sent to world");
-					EQ::Net::DynamicPacket outapp;
-					m_connection->Send(ServerOP_LSAccountUpdate, outapp);
-				}
-			}
-			else {
-				// server is authorized to be on the loginserver list but didn't pass login check
-				LogInfo(
-					"Server long_name [{}] short_name [{}] attempted to log in but account and password did not match the entry in the database. Unregistered still allowed",
-					m_server_long_name,
-					m_server_short_name
-				);
-			}
-		}
-		else {
-
-			// server is authorized to be on the loginserver list but didn't pass login check
-			if (!m_account_name.empty() || !m_account_password.empty()) {
-				LogInfo(
-					"Server [{}] [{}] did not login but this server required a password to login",
-					m_server_long_name,
-					m_server_short_name
-				);
-			}
-			else {
-				LogInfo(
-					"Server [{}] [{}] did not login but unregistered servers are allowed",
-					m_server_long_name,
-					m_server_short_name
-				);
-			}
-		}
-	}
-	else {
-		LogInfo(
-			"Server ID [{}] [{}] ({}) is not registered but unregistered servers are allowed",
-			r.server_id,
-			m_server_long_name,
-			m_server_short_name
-		);
-
-		m_is_server_authorized_to_list = true;
-
-		if (r.loaded) {
-			return true;
-		}
-
-		LoginDatabase::DbLoginServerAdmin login_server_admin = server.db->GetLoginServerAdmin(m_account_name);
-
-		uint32 server_admin_id = 0;
-		if (login_server_admin.loaded) {
-			if (WorldServer::ValidateWorldServerAdminLogin(
-				login_server_admin.id,
-				m_account_name,
-				m_account_password,
-				login_server_admin.account_password
-			)) {
-				server_admin_id = login_server_admin.id;
-			}
-		}
-
-		// Auto create a registration
-		if (!server.db->CreateWorldRegistration(
-			m_server_long_name,
-			m_server_short_name,
-			m_remote_ip_address,
-			m_server_id,
-			server_admin_id
-		)) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
 bool WorldServer::ValidateWorldServerAdminLogin(
 	int world_admin_id,
 	const std::string &world_admin_username,
@@ -858,7 +651,6 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 			break;
 	}
 
-	// ✅ If an insecure mode was found, rehash and update it
 	if (insecure_source_encryption_mode > 0) {
 		LogInfo(
 			"Updated insecure world_admin_username [{}] from mode [{}] ({}) to mode [{}] ({})",

@@ -56,9 +56,6 @@ public:
 		const std::string &world_admin_password_hash
 	);
 
-	bool HandleNewLoginserverRegisteredOnly(LoginDatabase::DbWorldRegistration &r);
-	bool HandleNewLoginserverInfoUnregisteredAllowed(LoginDatabase::DbWorldRegistration &r);
-
 	void SerializeForClientServerList(class SerializeBuffer &out, bool use_local_ip, LSClientVersion version) const;
 
 private:
