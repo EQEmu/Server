@@ -7,15 +7,6 @@ EQ::Event::TaskScheduler task_runner;
 
 int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 {
-	auto e = EncryptPasswordFromContext(c);
-
-	LogInfo(
-		"Attempting to create local login account for user [{}] encryption algorithm [{}] ({})",
-		c.username,
-		e.mode_name,
-		e.mode
-	);
-
 	if (LoginAccountsRepository::GetAccountFromContext(database, c).id > 0) {
 		LogWarning(
 			"Attempting to create local login account for user [{}] but already exists!",
@@ -25,17 +16,8 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 		return -1;
 	}
 
-	c.encrypted_password = e.password;
-	auto a = LoginAccountsRepository::SaveAccountFromContext(database, c);
+	auto a = LoginAccountsRepository::CreateAccountFromContext(database, c);
 	if (a.id > 0) {
-		LogInfo(
-			"Account creation success for user [{}] encryption algorithm [{}] ({}) id: [{}]",
-			a.account_name,
-			e.mode_name,
-			e.mode,
-			a.id
-		);
-
 		return (int32) a.id;
 	}
 

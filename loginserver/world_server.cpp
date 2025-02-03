@@ -845,65 +845,62 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	if (eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, encryption_mode)) {
 		return true;
 	}
-	else {
-		if (server.options.IsUpdatingInsecurePasswords()) {
-			if (encryption_mode < EncryptionModeArgon2) {
-				encryption_mode = EncryptionModeArgon2;
-			}
 
-			uint32 insecure_source_encryption_mode = 0;
-			if (world_admin_password_hash.length() == CryptoHash::md5_hash_length) {
-				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
-						LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
-			else if (world_admin_password_hash.length() == CryptoHash::sha1_hash_length &&
-					 insecure_source_encryption_mode == 0) {
-				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
-						LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
-			else if (world_admin_password_hash.length() == CryptoHash::sha512_hash_length &&
-					 insecure_source_encryption_mode == 0) {
-				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
-						LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
+	if (encryption_mode < EncryptionModeArgon2) {
+		encryption_mode = EncryptionModeArgon2;
+	}
 
-			if (insecure_source_encryption_mode > 0) {
-				LogInfo(
-					"[{}] Updated insecure world_admin_username [{}] from mode [{}] ({}) to mode [{}] ({})",
-					__func__,
-					world_admin_username,
-					GetEncryptionByModeId(insecure_source_encryption_mode),
-					insecure_source_encryption_mode,
-					GetEncryptionByModeId(encryption_mode),
-					encryption_mode
-				);
-
-				std::string new_password_hash = eqcrypt_hash(
-					world_admin_username,
-					world_admin_password,
-					encryption_mode
-				);
-
-				server.db->UpdateLoginWorldAdminAccountPassword(world_admin_id, new_password_hash);
-
-				return true;
+	uint32 insecure_source_encryption_mode = 0;
+	if (world_admin_password_hash.length() == CryptoHash::md5_hash_length) {
+		for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
+			if (i != encryption_mode &&
+				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
+				LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+				insecure_source_encryption_mode = i;
 			}
 		}
+	}
+	else if (world_admin_password_hash.length() == CryptoHash::sha1_hash_length &&
+			 insecure_source_encryption_mode == 0) {
+		for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
+			if (i != encryption_mode &&
+				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
+				LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+				insecure_source_encryption_mode = i;
+			}
+		}
+	}
+	else if (world_admin_password_hash.length() == CryptoHash::sha512_hash_length &&
+			 insecure_source_encryption_mode == 0) {
+		for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
+			if (i != encryption_mode &&
+				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
+				LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+				insecure_source_encryption_mode = i;
+			}
+		}
+	}
+
+	if (insecure_source_encryption_mode > 0) {
+		LogInfo(
+			"[{}] Updated insecure world_admin_username [{}] from mode [{}] ({}) to mode [{}] ({})",
+			__func__,
+			world_admin_username,
+			GetEncryptionByModeId(insecure_source_encryption_mode),
+			insecure_source_encryption_mode,
+			GetEncryptionByModeId(encryption_mode),
+			encryption_mode
+		);
+
+		std::string new_password_hash = eqcrypt_hash(
+			world_admin_username,
+			world_admin_password,
+			encryption_mode
+		);
+
+		server.db->UpdateLoginWorldAdminAccountPassword(world_admin_id, new_password_hash);
+
+		return true;
 	}
 
 	return false;

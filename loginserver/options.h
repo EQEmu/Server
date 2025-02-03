@@ -77,9 +77,6 @@ public:
 	inline void DefaultLoginServerName(const std::string& v) { default_loginserver_name = v; }
 	inline std::string GetDefaultLoginServerName() const { return default_loginserver_name; }
 
-	inline void UpdateInsecurePasswords(bool b) { update_insecure_passwords = b; }
-	inline bool IsUpdatingInsecurePasswords() const { return update_insecure_passwords; }
-
 	inline bool IsShowPlayerCountEnabled() const
 	{
 		return show_player_count;

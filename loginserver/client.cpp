@@ -5,6 +5,7 @@
 #include "../common/strings.h"
 #include "encryption.h"
 #include "account_management.h"
+#include "../common/repositories/login_accounts_repository.h"
 
 extern LoginServer server;
 
@@ -223,7 +224,11 @@ void Client::HandleLogin(const char *data, unsigned int size)
 #ifdef LSPX
 				// if user updated their password on the login server, update it here by validating their credentials with the login server
 				if (!result && db_loginserver == "eqemu") {
-					uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(user, cred);
+					LoginAccountContext c;
+					c.username           = user;
+					c.password           = cred;
+
+					uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
 					if (account_id > 0) {
 						auto encryption_mode = server.options.GetEncryptionMode();
 						server.db->UpdateLoginserverAccountPasswordHash(
@@ -335,36 +340,45 @@ void Client::AttemptLoginAccountCreation(
 {
 	LogInfo("user [{}] loginserver [{}]", user, loginserver);
 
+	LoginAccountContext c;
+	c.username           = user;
+	c.password           = pass;
+	c.source_loginserver = loginserver;
+
 #ifdef LSPX
 	if (loginserver == "eqemu") {
 		LogInfo("Attempting login account creation via '{}'", loginserver);
 
 		if (!server.options.CanAutoLinkAccounts()) {
 			LogInfo("CanAutoLinkAccounts disabled - sending failed login");
-			DoFailedLogin();
+			SendFailedLogin();
 			return;
 		}
 
-
-		uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(
-			user,
-			pass
-		);
-
+		uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
+		c.login_account_id = account_id;
 		if (account_id > 0) {
 			LogInfo("Found and creating eqemu account [{}]", account_id);
-			CreateEQEmuAccount(user, pass, account_id);
-			return;
+			auto a = LoginAccountsRepository::CreateAccountFromContext(database, c);
+			if (a.id > 0) {
+				DoSuccessfulLogin(c.username, c.login_account_id, c.source_loginserver);
+				return;
+			}
 		}
 
-		DoFailedLogin();
+		SendFailedLogin();
 		return;
 	}
 #endif
 
 	if (server.options.CanAutoCreateAccounts() && loginserver == "local") {
-		LogInfo("CanAutoCreateAccounts enabled, attempting to creating account [{}]", user);
-		CreateLocalAccount(user, pass);
+		LogInfo("CanAutoCreateAccounts enabled, attempting to crate account [{}]", user);
+		auto a = LoginAccountsRepository::CreateAccountFromContext(database, c);
+		if (a.id > 0) {
+			DoSuccessfulLogin(c.username, c.login_account_id, c.source_loginserver);
+			return;
+		}
+
 		return;
 	}
 
@@ -412,63 +426,58 @@ bool Client::VerifyAndUpdateLoginHash(
 	if (eqcrypt_verify_hash(account_username, account_password, password_hash, encryption_mode)) {
 		return true;
 	}
-	else {
-		if (server.options.IsUpdatingInsecurePasswords()) {
-			if (encryption_mode < EncryptionModeArgon2) {
-				encryption_mode = EncryptionModeArgon2;
-			}
 
-			uint32 insecure_source_encryption_mode = 0;
-			if (password_hash.length() == CryptoHash::md5_hash_length) {
-				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
-			else if (password_hash.length() == CryptoHash::sha1_hash_length && insecure_source_encryption_mode == 0) {
-				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
-			else if (password_hash.length() == CryptoHash::sha512_hash_length && insecure_source_encryption_mode == 0) {
-				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
+	if (encryption_mode < EncryptionModeArgon2) {
+		encryption_mode = EncryptionModeArgon2;
+	}
 
-			if (insecure_source_encryption_mode > 0) {
-				LogInfo(
-					"[{}] Updated insecure password user [{}] loginserver [{}] from mode [{}] ({}) to mode [{}] ({})",
-					__func__,
-					account_username,
-					source_loginserver,
-					GetEncryptionByModeId(insecure_source_encryption_mode),
-					insecure_source_encryption_mode,
-					GetEncryptionByModeId(encryption_mode),
-					encryption_mode
-				);
-
-				server.db->UpdateLoginserverAccountPasswordHash(
-					account_username,
-					source_loginserver,
-					eqcrypt_hash(
-						account_username,
-						account_password,
-						encryption_mode
-					)
-				);
-
-				return true;
+	uint32 insecure_source_encryption_mode = 0;
+	auto verify_encryption_mode = [&](int start, int end) {
+		for (int i = start; i <= end; ++i) {
+			if (i != encryption_mode && eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
+				insecure_source_encryption_mode = i;
 			}
 		}
+	};
+
+	switch (password_hash.length()) {
+		case CryptoHash::md5_hash_length:
+			verify_encryption_mode(EncryptionModeMD5, EncryptionModeMD5Triple);
+			break;
+		case CryptoHash::sha1_hash_length:
+			if (insecure_source_encryption_mode == 0) {
+				verify_encryption_mode(EncryptionModeSHA, EncryptionModeSHATriple);
+			}
+			break;
+		case CryptoHash::sha512_hash_length:
+			if (insecure_source_encryption_mode == 0) {
+				verify_encryption_mode(EncryptionModeSHA512, EncryptionModeSHA512Triple);
+			}
+			break;
+	}
+
+	if (insecure_source_encryption_mode > 0) {
+		LogInfo(
+			"Updated insecure password user [{}] loginserver [{}] from mode [{}] ({}) to mode [{}] ({})",
+			account_username,
+			source_loginserver,
+			GetEncryptionByModeId(insecure_source_encryption_mode),
+			insecure_source_encryption_mode,
+			GetEncryptionByModeId(encryption_mode),
+			encryption_mode
+		);
+
+		server.db->UpdateLoginserverAccountPasswordHash(
+			account_username,
+			source_loginserver,
+			eqcrypt_hash(
+				account_username,
+				account_password,
+				encryption_mode
+			)
+		);
+
+		return true;
 	}
 
 	return false;
@@ -596,50 +605,6 @@ void Client::SendExpansionPacketData(PlayerLoginReply &plrs)
 
 	}
 
-}
-
-void Client::CreateLocalAccount(const std::string &username, const std::string &password)
-{
-	auto         mode  = server.options.GetEncryptionMode();
-	auto         hash  = eqcrypt_hash(username, password, mode);
-	unsigned int db_id = 0;
-	if (!server.db->CreateLoginData(username, hash, "local", db_id)) {
-		SendFailedLogin();
-	}
-	else {
-		DoSuccessfulLogin(username, db_id, "local");
-	}
-}
-
-void Client::CreateEQEmuAccount(
-	const std::string &in_account_name,
-	const std::string &in_account_password,
-	unsigned int loginserver_account_id
-)
-{
-	auto mode = server.options.GetEncryptionMode();
-	auto hash = eqcrypt_hash(in_account_name, in_account_password, mode);
-
-	if (server.db->DoesLoginServerAccountExist(in_account_name, hash, "eqemu", loginserver_account_id)) {
-		DoSuccessfulLogin(in_account_name, loginserver_account_id, "eqemu");
-		return;
-	}
-
-	if (!server.db->CreateLoginDataWithID(in_account_name, hash, "eqemu", loginserver_account_id)) {
-		SendFailedLogin();
-	}
-	else {
-		DoSuccessfulLogin(in_account_name, loginserver_account_id, "eqemu");
-	}
-}
-
-bool Client::ProcessHealthCheck(std::string username)
-{
-	if (username == "healthcheckuser") {
-		return true;
-	}
-
-	return false;
 }
 
 std::string Client::GetClientLoggingDescription()

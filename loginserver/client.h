@@ -49,12 +49,6 @@ public:
 	);
 
 	void DoSuccessfulLogin(const std::string &in_account_name, int db_account_id, const std::string &db_loginserver);
-	void CreateLocalAccount(const std::string &username, const std::string &password);
-	void CreateEQEmuAccount(
-		const std::string &in_account_name,
-		const std::string &in_account_password,
-		unsigned int loginserver_account_id
-	);
 
 private:
 	EQ::Random                                          m_random;
@@ -72,7 +66,9 @@ private:
 	LoginBaseMessage                                    m_login_base_message;
 	std::string                                         m_stored_username;
 	std::string                                         m_stored_password;
-	static bool ProcessHealthCheck(std::string username);
+	static bool ProcessHealthCheck(std::string username) {
+		return username == "healthcheckuser";
+	}
 };
 
 #endif

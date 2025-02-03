@@ -8,6 +8,25 @@
 
 class LoginAccountsRepository : public BaseLoginAccountsRepository {
 public:
+	struct EncryptionResult {
+		std::string password;
+		int         mode = 0;
+		std::string mode_name;
+	};
+
+	static EncryptionResult EncryptPasswordFromContext(LoginAccountContext c)
+	{
+		EncryptionResult r;
+		r.password  = eqcrypt_hash(
+			c.username,
+			c.password,
+			server.options.GetEncryptionMode()
+		);
+		r.mode      = server.options.GetEncryptionMode();
+		r.mode_name = GetEncryptionByModeId(r.mode);
+		return r;
+	}
+
 	static int64 GetFreeID(Database &db, const std::string &loginserver)
 	{
 		auto query = fmt::format(
@@ -25,15 +44,20 @@ public:
 		return Strings::ToUnsignedInt(row[0]);
 	}
 
-	static LoginAccountsRepository::LoginAccounts SaveAccountFromContext(
+	static LoginAccountsRepository::LoginAccounts CreateAccountFromContext(
 		Database &db,
 		LoginAccountContext c
 	)
 	{
 		auto a = LoginAccountsRepository::NewEntity();
-		a.id				 = GetFreeID(db, c.source_loginserver);
+
+		if (!c.password_is_encrypted) {
+			auto e = EncryptPasswordFromContext(c);
+			a.account_password = e.password;
+		}
+
+		a.id				 = c.login_account_id > 0 ? c.login_account_id : GetFreeID(db, c.source_loginserver);
 		a.account_name       = c.username;
-		a.account_password   = c.encrypted_password;
 		a.account_email      = !c.email.empty() ? c.email : "local_creation";
 		a.source_loginserver = c.source_loginserver;
 		a.last_ip_address    = "127.0.0.1";
@@ -49,14 +73,20 @@ public:
 		LoginAccountContext c
 	)
 	{
-		auto results = LoginAccountsRepository::GetWhere(
-			db,
-			fmt::format(
-				"account_name = '{}' AND source_loginserver = '{}'",
-				c.username,
-				c.source_loginserver
-			)
+		std::string where = fmt::format(
+			"account_name = '{}' AND source_loginserver = '{}'",
+			c.username,
+			c.source_loginserver
 		);
+
+		if (!c.email.empty()) {
+			where += fmt::format(" AND account_email = '{}'", c.email);
+		}
+		if (c.login_account_id > 0) {
+			where += fmt::format(" AND id = {}", c.login_account_id);
+		}
+
+		auto results = LoginAccountsRepository::GetWhere(db, where);
 
 		auto e = LoginAccountsRepository::NewEntity();
 		if (results.size() == 1) {

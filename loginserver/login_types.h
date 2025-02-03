@@ -101,7 +101,7 @@ struct LoginAccountContext {
 	std::string email;
 	std::string source_loginserver = "local";
 	uint32      login_account_id   = 0;
-	std::string encrypted_password;
+	bool        password_is_encrypted;
 };
 
 namespace LS {

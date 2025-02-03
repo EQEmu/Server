@@ -153,13 +153,6 @@ void LoadServerConfig()
 
 	server.options.AllowTokenLogin(server.config.GetVariableBool("security", "allow_token_login", false));
 	server.options.AllowPasswordLogin(server.config.GetVariableBool("security", "allow_password_login", true));
-	server.options.UpdateInsecurePasswords(
-		server.config.GetVariableBool(
-			"security",
-			"update_insecure_passwords",
-			true
-		)
-	);
 }
 
 void start_web_server()
@@ -302,7 +295,6 @@ int main(int argc, char **argv)
 	LogInfo("[Config] [Security] GetEncryptionMode [{}]", server.options.GetEncryptionMode());
 	LogInfo("[Config] [Security] IsTokenLoginAllowed [{}]", server.options.IsTokenLoginAllowed());
 	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{}]", server.options.IsPasswordLoginAllowed());
-	LogInfo("[Config] [Security] IsUpdatingInsecurePasswords [{}]", server.options.IsUpdatingInsecurePasswords());
 
 	Timer keepalive(INTERSERVER_TIMER); // does auto-reconnect
 
