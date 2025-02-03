@@ -32,7 +32,7 @@ EQEmuLogSys            LogSys;
 PathManager            path;
 ZoneStore              zone_store;
 PlayerEventLogs        player_event_logs;
-ZSList                 zoneserver_list;
+ZSList                 zs_list;
 uint32                 numzones = 0;
 
 void CatchSignal(int sig_num)
@@ -113,10 +113,10 @@ int main()
 	server_connection->Listen(server_opts);
 	LogInfo("Server (TCP) listener started on port [{}]", Config->QSPort);
 
-	server_connection->OnConnectionIdentified(
-		"Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-			numzones++;
-			zoneserver_list.Add(new ZoneServer(connection, console.get()));
+		server_connection->OnConnectionIdentified(
+			"Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+				numzones++;
+				zs_list.Add(new ZoneServer(connection, console.get()));
 
 			LogInfo(
 				"New Zone Server connection from [{}] at [{}:{}] zone_count [{}]",
@@ -128,18 +128,19 @@ int main()
 		}
 	);
 
-	server_connection->OnConnectionRemoved(
-		"Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-			numzones--;
-			zoneserver_list.Remove(connection->GetUUID());
+		server_connection->OnConnectionRemoved(
+			"Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+				numzones--;
+				zs_list.Remove(connection->GetUUID());
 
-			LogInfo(
-				"Removed Zone Server connection from [{}] total zone_count [{}]",
-				connection->GetUUID(),
-				numzones
-			);
-		}
-	);
+				LogInfo(
+					"Removed Zone Server connection from [{}] total zone_count [{}]",
+					connection->GetUUID(),
+					numzones
+				);
+			}
+		);
+
 
 	/* Initial Connection to Worldserver */
 	worldserver = new WorldServer;
@@ -165,6 +166,18 @@ int main()
 
 		if (player_event_process_timer.Check()) {
 			std::jthread player_event_thread(&PlayerEventLogs::Process, &player_event_logs);
+		}
+
+		for (auto const& z:zs_list.GetZsList()) {
+			if (z->GetKeepAliveTimer()->Check()) {
+				LogInfo(
+					"Removed Zone Server connection from [{}] total zone_count [{}]",
+					z->GetUUID(),
+					numzones
+				);
+				numzones--;
+				zs_list.Remove(z->GetUUID());
+			}
 		}
 	};
 

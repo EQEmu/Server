@@ -4,6 +4,7 @@
 
 void ZSList::Add(ZoneServer* zoneserver) {
 	zone_server_list.emplace_back(std::unique_ptr<ZoneServer>(zoneserver));
+	zoneserver->SetIsZoneConnected(true);
 }
 
 void ZSList::Remove(const std::string &uuid)

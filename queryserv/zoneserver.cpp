@@ -8,7 +8,8 @@ ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> in_c
 	: tcpc(in_connection) {
 
 	tcpc->OnMessage(std::bind(&ZoneServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	console = in_console;
+	console    = in_console;
+	keep_alive = std::make_unique<Timer>(5123);
 }
 
 ZoneServer::~ZoneServer()
@@ -22,7 +23,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 	switch (opcode) {
 		case ServerOP_KeepAlive: {
-			SendPacket(pack);
+			SendKeepAlive();
+
+			LogInfo("ServerOP_KeepAlive Received.  Remaining Time {}.  Check? {}", keep_alive->GetRemainingTime(), keep_alive->Check());
+			keep_alive->Start(5000);
+			LogInfo("ServerOP_KeepAlive Received2.  Remaining Time {}", keep_alive->GetRemainingTime());
 			break;
 		}
 		case ServerOP_PlayerEvent: {
@@ -45,4 +50,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 	}
+}
+
+void ZoneServer::SendKeepAlive()
+{
+	ServerPacket pack(ServerOP_KeepAlive, 0);
+	SendPacket(&pack);
 }

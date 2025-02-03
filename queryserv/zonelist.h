@@ -12,6 +12,7 @@ class ZoneServer;
 
 class ZSList {
 public:
+	std::list<std::unique_ptr<ZoneServer>> &GetZsList() { return zone_server_list; }
 	void Add(ZoneServer *zoneserver);
 	void Remove(const std::string &uuid);
 

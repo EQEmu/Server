@@ -39,12 +39,14 @@ public:
 	void SendQuery(std::string Query);
 	void Connect();
 	bool SendPacket(ServerPacket *pack);
+	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 
 private:
 	void OnKeepAlive(EQ::Timer *t);
 
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
 	std::unique_ptr<EQ::Timer>                 m_keepalive;
+	bool                                       is_qs_connected{ false };
 };
 
 class QueryServConnection
