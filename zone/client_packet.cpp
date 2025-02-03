@@ -11093,7 +11093,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (!target)
 			break;
 
-		if (CheckLosCheat(target) && !DoLosChecks(target)) {
+		if (RuleB(Map, CheckForLoSCheat) && (!DoLosChecks(target) || !CheckLosCheat(target))) {
 			mypet->SayString(this, NOT_LEGAL_TARGET);
 			break;
 		}
@@ -11107,10 +11107,8 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break; //prevent pet from attacking stuff while feared
 
 		if (!mypet->IsAttackAllowed(target)) {
-			if (CheckLosCheat(target) && !DoLosChecks(target)) {
-				mypet->SayString(this, NOT_LEGAL_TARGET);
-				break;
-			}
+			mypet->SayString(this, NOT_LEGAL_TARGET);
+			break;
 		}
 
 		// default range is 200, takes Z into account
@@ -11163,7 +11161,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		}
 
-		if (CheckLosCheat(GetTarget()) && !DoLosChecks(GetTarget())) {
+		if (RuleB(Map, CheckForLoSCheat) && (!DoLosChecks(GetTarget()) || !CheckLosCheat(GetTarget()))) {
 			mypet->SayString(this, NOT_LEGAL_TARGET);
 			break;
 		}
@@ -11174,10 +11172,8 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 
 		if (!mypet->IsAttackAllowed(GetTarget())) {
-			if (CheckLosCheat(GetTarget()) && !DoLosChecks(GetTarget())) {
-				mypet->SayString(this, NOT_LEGAL_TARGET);
-				break;
-			}
+			mypet->SayString(this, NOT_LEGAL_TARGET);
+			break;
 		}
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
