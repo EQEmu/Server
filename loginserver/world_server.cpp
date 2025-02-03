@@ -855,7 +855,7 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 		for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
 			if (i != encryption_mode &&
 				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
-				LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+				LogDebug("Checking for [{}] world admin", GetEncryptionByModeId(i));
 				insecure_source_encryption_mode = i;
 			}
 		}
@@ -865,7 +865,7 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 		for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
 			if (i != encryption_mode &&
 				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
-				LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+				LogDebug("Checking for [{}] world admin", GetEncryptionByModeId(i));
 				insecure_source_encryption_mode = i;
 			}
 		}
@@ -875,7 +875,7 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 		for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
 			if (i != encryption_mode &&
 				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
-				LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+				LogDebug("Checking for [{}] world admin", GetEncryptionByModeId(i));
 				insecure_source_encryption_mode = i;
 			}
 		}
@@ -883,8 +883,7 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 
 	if (insecure_source_encryption_mode > 0) {
 		LogInfo(
-			"[{}] Updated insecure world_admin_username [{}] from mode [{}] ({}) to mode [{}] ({})",
-			__func__,
+			"Updated insecure world_admin_username [{}] from mode [{}] ({}) to mode [{}] ({})",
 			world_admin_username,
 			GetEncryptionByModeId(insecure_source_encryption_mode),
 			insecure_source_encryption_mode,

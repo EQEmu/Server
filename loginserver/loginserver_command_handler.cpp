@@ -51,13 +51,13 @@ namespace LoginserverCommandHandler {
 		bool can_write = cmd[{"-w", "--write"}];
 
 		if (!can_read || !can_write) {
-			LogInfo("[{}] --read or --write must be set or both!", __func__);
+			LogInfo("--read or --write must be set or both!");
 			exit(1);
 		}
 
 		std::string token = server.db->CreateLoginserverApiToken(can_write, can_read);
 		if (!token.empty()) {
-			LogInfo("[{}] Created Loginserver API token [{}]", __func__, token);
+			LogInfo("Created Loginserver API token [{}]", token);
 		}
 	}
 

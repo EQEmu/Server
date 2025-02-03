@@ -127,15 +127,8 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
 
 bool AccountManagement::UpdateLoginserverUserCredentials(LoginAccountContext c)
 {
-	auto mode = server.options.GetEncryptionMode();
-
-	LoginDatabase::DbLoginServerAccount
-		login_server_account = server.db->GetLoginServerAccountByAccountName(
-		c.username,
-		c.source_loginserver
-	);
-
-	if (!login_server_account.loaded) {
+	auto a = LoginAccountsRepository::GetAccountFromContext(database, c);
+	if (!a.id) {
 		LogError(
 			"account [{}] source_loginserver [{}] not found!",
 			c.username,
@@ -145,15 +138,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(LoginAccountContext c)
 		return false;
 	}
 
-	server.db->UpdateLoginserverAccountPasswordHash(
-		c.username,
-		c.source_loginserver,
-		eqcrypt_hash(
-			c.username,
-			c.password,
-			mode
-		)
-	);
+	LoginAccountsRepository::UpdateAccountPassword(database, a, c.password);
 
 	LogInfo(
 		"account [{}] source_loginserver [{}] credentials updated!",
@@ -179,8 +164,7 @@ bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(LoginAc
 	);
 
 	LogInfo(
-		"[{}] account_name [{}] status [{}]",
-		__func__,
+		"account_name [{}] status [{}]",
 		c.username,
 		(updated_account ? "success" : "failed")
 	);
