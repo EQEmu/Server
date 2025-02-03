@@ -1666,11 +1666,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			m_pp.abilitySlotRefresh = 0;
 	}
 
-#ifdef _EQDEBUG
-	printf("Dumping inventory on load:\n");
-	m_inv.dumpEntireInventory();
-#endif
-
 	/* Reset to max so they dont drown on zone in if its underwater */
 	m_pp.air_remaining = 60;
 	/* Check for PVP Zone status*/
@@ -10762,8 +10757,7 @@ void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)
 
 void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 {
-	if (!CharacterID())
-	{
+	if (!CharacterID()) {
 		return;
 	}
 
@@ -10772,57 +10766,38 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
-	if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
-	{
-		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQ::invslot::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
-		{
-			const EQ::ItemInstance *itm_from = GetInv().GetItem(mi->from_slot);
-			const EQ::ItemInstance *itm_to = GetInv().GetItem(mi->to_slot);
-			auto message = fmt::format("Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
+	BenchTimer bench;
+
+	MoveItem_Struct* mi = (MoveItem_Struct*) app->pBuffer;
+	if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id)) {
+		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQ::invslot::GENERAL_END || mi->from_slot > 39) &&
+			IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
+			const EQ::ItemInstance* itm_from = GetInv().GetItem(mi->from_slot);
+			const EQ::ItemInstance* itm_to   = GetInv().GetItem(mi->to_slot);
+			auto message = fmt::format(
+				"Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
 				mi->from_slot,
 				itm_from ? itm_from->GetID() : 0,
 				mi->to_slot,
 				itm_to ? itm_to->GetID() : 0,
-				casting_spell_id);
-			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+				casting_spell_id
+			);
+			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
 			Kick("Inventory desync"); // Kick client to prevent client and server from getting out-of-sync inventory slots
 			return;
 		}
 	}
 
-	// Illegal bagslot usage checks. Currently, user only receives a message if this check is triggered.
-	bool mi_hack = false;
-
-	if (mi->from_slot >= EQ::invbag::GENERAL_BAGS_BEGIN && mi->from_slot <= EQ::invbag::CURSOR_BAG_END) {
-		if (mi->from_slot >= EQ::invbag::CURSOR_BAG_BEGIN) { mi_hack = true; }
-		else {
-			int16 from_parent = m_inv.CalcSlotId(mi->from_slot);
-			if (!m_inv[from_parent]) { mi_hack = true; }
-			else if (!m_inv[from_parent]->IsClassBag()) { mi_hack = true; }
-			else if (m_inv.CalcBagIdx(mi->from_slot) >= m_inv[from_parent]->GetItem()->BagSlots) { mi_hack = true; }
-		}
-	}
-
-	if (mi->to_slot >= EQ::invbag::GENERAL_BAGS_BEGIN && mi->to_slot <= EQ::invbag::CURSOR_BAG_END) {
-		if (mi->to_slot >= EQ::invbag::CURSOR_BAG_BEGIN) { mi_hack = true; }
-		else {
-			int16 to_parent = m_inv.CalcSlotId(mi->to_slot);
-			if (!m_inv[to_parent]) { mi_hack = true; }
-			else if (!m_inv[to_parent]->IsClassBag()) { mi_hack = true; }
-			else if (m_inv.CalcBagIdx(mi->to_slot) >= m_inv[to_parent]->GetItem()->BagSlots) { mi_hack = true; }
-		}
-	}
-
-	if (mi_hack) { Message(Chat::Yellow, "Caution: Illegal use of inaccessible bag slots!"); }
+	database.TransactionBegin();
 
 	if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
 		SwapItemResync(mi);
 
 		bool error = false;
 		InterrogateInventory(this, false, true, false, error, false);
-		if (error)
+		if (error) {
 			InterrogateInventory(this, true, false, true, error);
+		}
 	}
 
 	for (int slot : {mi->to_slot, mi->from_slot}) {
@@ -10831,6 +10806,10 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 			CharacterEvolvingItemsRepository::UpdateOne(database, item->GetEvolvingDetails());
 		}
 	}
+
+	database.TransactionCommit();
+
+	LogInventory("OP_MoveItem took [{}] ms", bench.elapsedMilliseconds());
 }
 
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
