@@ -11,6 +11,7 @@ struct ManifestEntry {
 	std::string match{};       // match field that is not always used, but works in conjunction with "condition" values [missing|match|contains]
 	std::string sql{};         // the SQL DDL that gets ran when the condition is true
 	bool        content_schema_update{}; // if true, this migration is a content schema update and should be ran against the content database
+	bool        force_interactive; // if true, this migration will always be run interactively
 };
 
 struct DatabaseVersion {

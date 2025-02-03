@@ -6415,7 +6415,9 @@ ADD COLUMN `ornament_idfile` int(11) UNSIGNED NOT NULL AFTER `ornament_icon`,
 ADD COLUMN `ornament_hero_model` int(11) NOT NULL AFTER `ornament_idfile`,
 ADD COLUMN `guid` bigint(20) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_hero_model`,
 ADD PRIMARY KEY (`account_id`, `slot_id`);
-)"
+)",
+		.content_schema_update = false,
+		.force_interactive = true
 	},
 	ManifestEntry{
 		.version = 9298,
@@ -6475,7 +6477,8 @@ UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2251) + 10610) WHERE `slot_id` 
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2261) + 10810) WHERE `slot_id` BETWEEN 2261 AND 2270; -- Bank Bag 24
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2540; -- Shared Bank Bag 1
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id` BETWEEN 2541 AND 2550; -- Shared Bank Bag 2
-)"
+)",
+		.content_schema_update = false
 	},
 	ManifestEntry{
 		.version = 9299,
@@ -6486,7 +6489,8 @@ UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id`
 		.sql = R"(
 ALTER TABLE `merchantlist_temp`
 MODIFY COLUMN `slot` int UNSIGNED NOT NULL DEFAULT 0 AFTER `npcid`;
-)"
+)",
+		.content_schema_update = false
 	}
 
 // -- template; copy/paste this when you need to create a new entry
