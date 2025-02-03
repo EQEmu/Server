@@ -405,6 +405,7 @@ public:
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(Mob *caster, uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
+
 	virtual float GetAOERange(uint16 spell_id);
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
@@ -513,6 +514,7 @@ public:
 	void ApplySpellBuff(int spell_id, int duration = 0, int level_override = -1);
 	int GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier);
 	int GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier);
+	virtual bool GetIllusionBlock() const { return false; }
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }
@@ -707,6 +709,7 @@ public:
 	virtual bool HasGroup() = 0;
 	virtual Raid* GetRaid() = 0;
 	virtual Group* GetGroup() = 0;
+	bool IsInGroupOrRaid(Mob* other, bool same_raid_group = false);
 
 	//Faction
 	virtual inline int32 GetPrimaryFaction() const { return 0; }
@@ -793,6 +796,10 @@ public:
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
 	static bool CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarget, float sizeTarget);
 	virtual bool CheckWaterLoS(Mob* m);
+	bool CheckPositioningLosFN(Mob* other, float posX, float posY, float posZ);
+	bool CheckLosCheat(Mob* other); //door skipping checks for LoS
+	bool CheckLosCheatExempt(Mob* other); //exemptions to bypass los
+	bool DoLosChecks(Mob* other);
 	inline void SetLastLosState(bool value) { last_los_check = value; }
 	inline bool CheckLastLosState() const { return last_los_check; }
 	std::string GetMobDescription();
@@ -856,6 +863,7 @@ public:
 	void ShowStats(Client* client);
 	void ShowBuffs(Client* c);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc = true);
+
 	virtual int GetKillExpMod() const { return 100; }
 
 	// aura functions
@@ -1094,6 +1102,7 @@ public:
 	inline void SetPetOwnerClient(bool b) { pet_owner_client = b; }
 	inline bool IsPetOwnerNPC() const { return pet_owner_npc; }
 	inline void SetPetOwnerNPC(bool b) { pet_owner_npc = b; }
+	inline bool IsPetOwnerOfClientBot() const { return pet_owner_bot || pet_owner_client; }
 	inline bool IsTempPet() const { return _IsTempPet; }
 	inline void SetTempPet(bool value) { _IsTempPet = value; }
 	inline bool IsHorse() { return is_horse; }
@@ -1252,19 +1261,20 @@ public:
 	float				GetFixedZ(const glm::vec3 &destination, int32 z_find_offset = 5);
 	virtual int			GetStuckBehavior() const { return 0; }
 
-	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
-	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
-	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
-	inline uint32		DontDotMeBefore() const { return pDontDotMeBefore; }
-	inline uint32		DontRootMeBefore() const { return pDontRootMeBefore; }
-	inline uint32		DontSnareMeBefore() const { return pDontSnareMeBefore; }
-	inline uint32		DontCureMeBefore() const { return pDontCureMeBefore; }
-	void				SetDontRootMeBefore(uint32 time) { pDontRootMeBefore = time; }
-	void				SetDontHealMeBefore(uint32 time) { pDontHealMeBefore = time; }
-	void				SetDontBuffMeBefore(uint32 time) { pDontBuffMeBefore = time; }
-	void				SetDontDotMeBefore(uint32 time) { pDontDotMeBefore = time; }
-	void				SetDontSnareMeBefore(uint32 time) { pDontSnareMeBefore = time; }
-	void				SetDontCureMeBefore(uint32 time) { pDontCureMeBefore = time; }
+	void NPCSpecialAttacks(const char *parse, int permtag, bool reset = true, bool remove = false);
+	inline uint32 DontHealMeBefore() const { return m_dont_heal_me_before; }
+	inline uint32 DontBuffMeBefore() const { return m_dont_buff_me_before; }
+	inline uint32 DontDotMeBefore() const { return m_dont_dot_me_before; }
+	inline uint32 DontRootMeBefore() const { return m_dont_root_me_before; }
+	inline uint32 DontSnareMeBefore() const { return m_dont_snare_me_before; }
+	inline uint32 DontCureMeBefore() const { return m_dont_cure_me_before; }
+
+	void SetDontRootMeBefore(uint32 time) { m_dont_root_me_before = time; }
+	void SetDontHealMeBefore(uint32 time) { m_dont_heal_me_before = time; }
+	void SetDontBuffMeBefore(uint32 time) { m_dont_buff_me_before = time; }
+	void SetDontDotMeBefore(uint32 time) { m_dont_dot_me_before = time; }
+	void SetDontSnareMeBefore(uint32 time) { m_dont_snare_me_before = time; }
+	void SetDontCureMeBefore(uint32 time) { m_dont_cure_me_before = time; }
 
 	// calculate interruption of spell via movement of mob
 	void SaveSpellLoc() { m_SpellLocation = glm::vec3(m_Position); }
@@ -1859,12 +1869,12 @@ protected:
 
 	bool pause_timer_complete;
 	bool DistractedFromGrid;
-	uint32 pDontHealMeBefore;
-	uint32 pDontBuffMeBefore;
-	uint32 pDontDotMeBefore;
-	uint32 pDontRootMeBefore;
-	uint32 pDontSnareMeBefore;
-	uint32 pDontCureMeBefore;
+	uint32 m_dont_heal_me_before;
+	uint32 m_dont_buff_me_before;
+	uint32 m_dont_dot_me_before;
+	uint32 m_dont_root_me_before;
+	uint32 m_dont_snare_me_before;
+	uint32 m_dont_cure_me_before;
 
 	// hp event
 	int nexthpevent;

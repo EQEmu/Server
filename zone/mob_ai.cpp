@@ -139,7 +139,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 						if (
 							(spells[AIspells[i].spellid].target_type == ST_Target || tar == this)
 							&& tar->DontHealMeBefore() < Timer::GetCurrentTime()
-							&& !(tar->IsPet() && tar->GetOwner()->IsClient())	//no buffing PC's pets
+							&& !(tar->IsPet() && tar->GetOwner()->IsOfClientBot())	//no buffing PC's pets
 							) {
 
 							auto hp_ratio = tar->GetIntHPRatio();
@@ -180,7 +180,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 							&& tar->DontBuffMeBefore() < Timer::GetCurrentTime()
 							&& !tar->IsImmuneToSpell(AIspells[i].spellid, this)
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
-							&& !(tar->IsPet() && tar->GetOwner()->IsClient() && this != tar)	//no buffing PC's pets, but they can buff themself
+							&& !(tar->IsPet() && tar->GetOwner()->IsOfClientBot() && this != tar)	//no buffing PC's pets, but they can buff themself
 							)
 						{
 							if(!checked_los) {
@@ -393,12 +393,12 @@ void Mob::AI_Init()
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
 
-	pDontHealMeBefore = 0;
-	pDontBuffMeBefore = Timer::GetCurrentTime() + 400;
-	pDontDotMeBefore = 0;
-	pDontRootMeBefore = 0;
-	pDontSnareMeBefore = 0;
-	pDontCureMeBefore = 0;
+	m_dont_heal_me_before  = 0;
+	m_dont_buff_me_before  = Timer::GetCurrentTime() + 400;
+	m_dont_dot_me_before   = 0;
+	m_dont_root_me_before  = 0;
+	m_dont_snare_me_before = 0;
+	m_dont_cure_me_before  = 0;
 }
 
 void NPC::AI_Init()
@@ -1219,7 +1219,7 @@ void Mob::AI_Process() {
 
 
 					//SE_PC_Pet_Rampage SPA 464 on pet, chance modifier
-					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+					if ((IsPet() || IsTempPet()) && IsPetOwnerOfClientBot()) {
 						int chance = spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
 						if (chance && zone->random.Roll(chance)) {
 							Rampage(nullptr);
@@ -1262,7 +1262,7 @@ void Mob::AI_Process() {
 					}
 
 					//SE_PC_Pet_Rampage SPA 465 on pet, chance modifier
-					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+					if ((IsPet() || IsTempPet()) && IsPetOwnerOfClientBot()) {
 						int chance = spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
 						if (chance && zone->random.Roll(chance)) {
 							Rampage(nullptr);
@@ -1945,8 +1945,8 @@ void Mob::StartEnrage()
 		return;
 	}
 
-	if(RuleB(NPC, LiveLikeEnrage) && !((IsPet() && !IsCharmed() && GetOwner() && GetOwner()->IsClient()) ||
-		(CastToNPC()->GetSwarmOwner() && entity_list.GetMob(CastToNPC()->GetSwarmOwner())->IsClient()))) {
+	if(RuleB(NPC, LiveLikeEnrage) && !((IsPet() && !IsCharmed() && GetOwner() && GetOwner()->IsOfClientBot()) ||
+		(CastToNPC()->GetSwarmOwner() && entity_list.GetMob(CastToNPC()->GetSwarmOwner())->IsOfClientBot()))) {
 		return;
 	}
 

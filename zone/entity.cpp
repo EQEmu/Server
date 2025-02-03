@@ -1891,13 +1891,13 @@ Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* ex
 
 	for (const auto& b : bot_list) {
 		if (
-			b != exclude_bot &&
+			b.second != exclude_bot &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(b->GetPosition()), location) <= distance_squared
-			)
+				DistanceSquared(static_cast<glm::vec3>(b.second->GetPosition()), location) <= distance_squared
+				)
 		) {
-			bots_in_range.push_back(b);
+			bots_in_range.push_back(b.second);
 		}
 	}
 
@@ -2224,44 +2224,37 @@ Raid* EntityList::GetRaidByClient(Client* client)
 }
 Raid* EntityList::GetRaidByBotName(const char* name)
 {
-	std::list<RaidMember> rm;
-	auto GetMembersWithNames = [&rm](Raid const* r) -> std::list<RaidMember> {
-		for (const auto& m : r->members) {
-			if (strlen(m.member_name) > 0)
-				rm.push_back(m);
-		}
-		return rm;
-	};
-
 	for (const auto& r : raid_list) {
-		for (const auto& m : GetMembersWithNames(r)) {
-			if (strcmp(m.member_name, name) == 0) {
+		for (const auto& m : r->members) {
+			if (m.is_bot && strcmp(m.member_name, name) == 0) {
 				return r;
 			}
 		}
 	}
+	
 	return nullptr;
 }
 
-Raid* EntityList::GetRaidByBot(const Bot* bot)
+Raid* EntityList::GetRaidByBot(Bot* bot)
 {
-	std::list<RaidMember> rm;
-	auto GetMembersWhoAreBots = [&rm](Raid* r) -> std::list<RaidMember> {
-		for (auto const& m : r->members) {
-			if (m.is_bot) {
-				rm.push_back(m);
-			}
-		}
-		return rm;
-	};
-
-	for (const auto& r : raid_list) {
-		for (const auto& m : GetMembersWhoAreBots(r)) {
-			if (m.member->CastToBot() == bot) {
-				return r;
-			}
-		}
+	if (bot->p_raid_instance) {
+		return bot->p_raid_instance;
 	}
+
+	std::list<Raid*>::iterator iterator;
+	iterator = raid_list.begin();
+
+	while (iterator != raid_list.end()) {
+		for (const auto& member : (*iterator)->members) {
+			if (member.member && member.is_bot && member.member->CastToBot() == bot) {
+				bot->p_raid_instance = *iterator;
+				return *iterator;
+			}
+		}
+
+		++iterator;
+	}
+
 	return nullptr;
 }
 
@@ -2951,6 +2944,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
+
 		if (mob->GetID() <= 0) {
 			continue;
 		}
@@ -5136,9 +5130,10 @@ void EntityList::GetClientList(std::list<Client *> &c_list)
 void EntityList::GetBotList(std::list<Bot *> &b_list)
 {
 	b_list.clear();
-
-	for (const auto& b : bot_list) {
-		b_list.push_back(b);
+	auto it = bot_list.begin();
+	while (it != bot_list.end()) {
+		b_list.push_back(it->second);
+		++it;
 	}
 }
 
@@ -5150,14 +5145,13 @@ std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id, uint
 		return client_bot_list;
 	}
 
-	for (const auto& b : bot_list) {
-		if (
-			b->GetOwner() &&
-			b->GetBotOwnerCharacterID() == character_id &&
-			(!class_id || b->GetClass() == class_id)
-		) {
-			client_bot_list.push_back(b);
+	auto it = bot_list.begin();
+
+	while (it != bot_list.end()) {
+		if (it->second->GetOwner() && it->second->GetBotOwnerCharacterID() == character_id && (!class_id || it->second->GetClass() == class_id)) {
+			client_bot_list.push_back(it->second);
 		}
+		++it;
 	}
 
 	return client_bot_list;
@@ -5171,14 +5165,13 @@ std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name, u
 		return client_bot_list;
 	}
 
-	for (const auto& b : bot_list) {
-		if (
-			b->GetOwner() &&
-			Strings::ToLower(b->GetOwner()->GetCleanName()) == Strings::ToLower(client_name) &&
-			(!class_id || b->GetClass() == class_id)
-		) {
-			client_bot_list.push_back(b);
+	auto it = bot_list.begin();
+
+	while (it != bot_list.end()) {
+		if (it->second->GetOwner() && Strings::ToLower(it->second->GetOwner()->GetCleanName()) == Strings::ToLower(client_name) && (!class_id || it->second->GetClass() == class_id)) {
+			client_bot_list.push_back(it->second);
 		}
+		++it;
 	}
 
 	return client_bot_list;
@@ -5550,7 +5543,7 @@ Mob *EntityList::GetClosestMobByBodyType(Mob *sender, uint8 BodyType, bool skip_
 			continue;
 
 		// Do not detect client pets
-		if (skip_client_pets && CurrentMob->IsPet() && CurrentMob->IsPetOwnerClient())
+		if (skip_client_pets && CurrentMob->IsPet() && CurrentMob->IsPetOwnerOfClientBot())
 			continue;
 
 		CurrentDistance = ((CurrentMob->GetY() - sender->GetY()) * (CurrentMob->GetY() - sender->GetY())) +

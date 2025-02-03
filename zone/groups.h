@@ -69,6 +69,7 @@ public:
 	void	GetMemberList(std::list<Mob*>& member_list, bool clear_list = true);
 	void	GetClientList(std::list<Client*>& client_list, bool clear_list = true);
 	void	GetBotList(std::list<Bot*>& bot_list, bool clear_list = true);
+	std::list<uint32> GetRawBotList();
 	bool	IsGroupMember(Mob* c);
 	bool	IsGroupMember(const char* name);
 	bool	Process();
@@ -106,7 +107,7 @@ public:
 	void	UpdateGroupAAs();
 	void	SaveGroupLeaderAA();
 	void	MarkNPC(Mob* Target, int Number);
-	int8	GetNumberNeedingHealedInGroup(int8 hpr, bool includePets);
+	int8	GetNumberNeedingHealedInGroup(int8 hpr, bool include_pets);
 	void	DelegateMainTank(const char *NewMainAssistName, uint8 toggle = 0);
 	void	DelegateMainAssist(const char *NewMainAssistName, uint8 toggle = 0);
 	void	DelegatePuller(const char *NewMainAssistName, uint8 toggle = 0);
@@ -153,6 +154,7 @@ public:
 	void	AddToGroup(AddToGroupRequest r);
 	void	AddToGroup(Mob* m);
 	static void	RemoveFromGroup(Mob* m);
+	void RemoveClientsBots(Client* c);
 
 	void SetGroupMentor(int percent, char *name);
 	void ClearGroupMentor();

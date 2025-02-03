@@ -7,21 +7,50 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::White, "usage: <enemy_target> %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
-	int ab_mask = ActionableBots::ABM_OwnerGroup; // existing behavior - need to add c->IsGrouped() check and modify code if different behavior is desired
 
-	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, "ownergroup", sbl, ab_mask) == ActionableBots::ABT_None) {
+	const int ab_mask = ActionableBots::ABM_Type1;
+
+	std::string arg1 = sep->arg[1];
+	int ab_arg = 1;
+	std::string actionable_arg = sep->arg[ab_arg];
+
+	if (actionable_arg.empty()) {
+		actionable_arg = "spawned";
+	}
+
+	std::string class_race_arg = sep->arg[ab_arg];
+	bool class_race_check = false;
+
+	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
+		class_race_check = true;
+	}
+
+	std::vector<Bot*> sbl;
+
+	if (ActionableBots::PopulateSBL(c, actionable_arg, sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
-	sbl.remove(nullptr);
 
-	auto target_mob = ActionableTarget::VerifyEnemy(c, BCEnum::TT_Single);
-	if (!target_mob) {
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
+	auto target_mob = c->GetTarget();
+
+	if (
+		!target_mob ||
+		target_mob == c ||
+		!c->IsAttackAllowed(target_mob)
+	) {
 		c->Message(Chat::White, "Your current target is not attackable!");
+
+		return;
+	}
+
+	if (!c->DoLosChecks(target_mob)) {
+		c->Message(Chat::Red, "You must have Line of Sight to use this command.");
+
 		return;
 	}
 
@@ -32,8 +61,8 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	}
 
 	Bot* bot_puller = nullptr;
-	for (auto bot_iter : sbl) {
 
+	for (auto bot_iter : sbl) {
 		if (bot_iter->GetAppearance() == eaDead || bot_iter->GetBotStance() == Stance::Passive) {
 			continue;
 		}

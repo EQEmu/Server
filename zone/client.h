@@ -74,6 +74,8 @@ namespace EQ
 #include "../common/repositories/buyer_buy_lines_repository.h"
 #include "../common/repositories/character_evolving_items_repository.h"
 
+#include "bot_structs.h"
+
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
 	// we are required to undefine these to use min and max from <algorithm>
@@ -197,6 +199,19 @@ struct RespawnOption
 	float heading;
 };
 
+struct BotCommandHelpParams {
+    std::vector<std::string> description       = {};
+    std::vector<std::string> notes             = {};
+    std::vector<std::string> example_format    = {};
+    std::vector<std::string> examples_one      = {};
+    std::vector<std::string> examples_two      = {};
+    std::vector<std::string> examples_three    = {};
+    std::vector<std::string> actionables       = {};
+    std::vector<std::string> options           = {};
+    std::vector<std::string> options_one       = {};
+    std::vector<std::string> options_two       = {};
+    std::vector<std::string> options_three     = {};
+};
 
 // do not ask what all these mean because I have no idea!
 // named from the client's CEverQuest::GetInnateDesc, they're missing some
@@ -1264,6 +1279,12 @@ public:
 	PendingTranslocate_Struct PendingTranslocateData;
 	void SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
+	// Help Window
+	std::string SendBotCommandHelpWindow(const BotCommandHelpParams& params);
+	std::string GetCommandHelpHeader(std::string msg, std::string color);
+	std::string SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 max_length, std::string secondary_color = "");
+	void SendSpellTypePrompts(bool commanded_types = false, bool client_only_types = false);
+
 	// Task System Methods
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
@@ -2059,6 +2080,7 @@ private:
 	PTimerList p_timers; //persistent timers
 	Timer hpupdate_timer;
 	Timer camp_timer;
+	Timer bot_camp_timer;
 	Timer process_timer;
 	Timer consume_food_timer;
 	Timer zoneinpacket_timer;
@@ -2243,6 +2265,8 @@ public:
 
 	bool GetBotPulling() { return m_bot_pulling; }
 	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
+	uint32 GetAssistee() { return bot_assistee; }
+	void SetAssistee(uint32 id = 0) { bot_assistee = id; }
 
 	bool GetBotPrecombat() { return m_bot_precombat; }
 	void SetBotPrecombat(bool flag = true) { m_bot_precombat = flag; }
@@ -2257,10 +2281,33 @@ public:
 	void CampAllBots(uint8 class_id = Class::None);
 	void SpawnRaidBotsOnConnect(Raid* raid);
 
+	void LoadDefaultBotSettings();
+	int GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting);
+	int GetBotSetting(uint8 setting_type, uint16 bot_setting);
+	void SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value);
+
+	uint16 GetDefaultSpellTypeDelay(uint16 spell_type);
+	uint8 GetDefaultSpellTypeMinThreshold(uint16 spell_type);
+	uint8 GetDefaultSpellTypeMaxThreshold(uint16 spell_type);
+	inline uint16 GetSpellTypeDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
+	inline void SetSpellTypeDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
+	inline uint8 GetSpellTypeMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
+	inline void SetSpellTypeMinThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].min_threshold = threshold_value; }
+	inline uint8 GetSpellTypeMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_threshold; }
+	inline void SetSpellTypeMaxThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].max_threshold = threshold_value; }
+	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
+	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
+
+	void SetIllusionBlock(bool value) { _illusionBlock = value; }
+	bool GetIllusionBlock() const override { return _illusionBlock; }
+
 private:
 	bool bot_owner_options[_booCount];
 	bool m_bot_pulling;
 	bool m_bot_precombat;
+	uint32 bot_assistee;
+	std::vector<BotSpellSettings> m_bot_spell_settings;
+	bool _illusionBlock;
 
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();

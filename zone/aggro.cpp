@@ -743,12 +743,30 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	}
 
 	// can't damage own pet (applies to everthing)
-	Mob *target_owner = target->GetOwner();
-	Mob *our_owner = GetOwner();
-	if(target_owner && target_owner == this)
+	Mob* target_owner = target->GetOwner();
+	Mob* our_owner = GetOwner();
+
+	// Self-owner check
+	if (target_owner == this || our_owner == target) {
 		return false;
-	else if(our_owner && our_owner == target)
-		return false;
+	}
+
+	// Bot-specific logic
+	if (IsBot()) {
+		Mob* target_ultimate_owner = target->IsBot() ? target->CastToBot()->GetBotOwner() : target->GetUltimateOwner();
+		Mob* our_ultimate_owner = CastToBot()->GetBotOwner();
+
+		if (target_ultimate_owner) {
+			if (target_ultimate_owner == our_ultimate_owner || target_ultimate_owner->IsOfClientBot()) {
+				return false;
+			}
+		}
+
+		// Bots should not attack their ultimate owner
+		if (our_ultimate_owner == target) {
+			return false;
+		}
+	}
 
 	// invalidate for swarm pets for later on if their owner is a corpse
 	if (IsNPC() && CastToNPC()->GetSwarmInfo() && our_owner &&
@@ -1278,6 +1296,39 @@ bool Mob::CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarge
 	return zone->zonemap->CheckLoS(posWatcher, posTarget);
 }
 
+bool Mob::CheckPositioningLosFN(Mob* other, float x, float y, float z) {
+	if (!zone->zonemap) {
+		//not sure what the best return is on error
+		//should make this a database variable, but im lazy today
+#ifdef LOS_DEFAULT_CAN_SEE
+		return(true);
+#else
+		return(false);
+#endif
+	}
+
+	if (!other) {
+		return(true);
+	}
+	glm::vec3 myloc;
+	glm::vec3 oloc;
+
+#define LOS_DEFAULT_HEIGHT 6.0f
+
+	oloc.x = other->GetX();
+	oloc.y = other->GetY();
+	oloc.z = other->GetZ() + (other->GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : other->GetSize()) / 2 * SEE_POSITION;
+
+	myloc.x = x;
+	myloc.y = y;
+	myloc.z = z + (GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : GetSize()) / 2 * HEAD_POSITION;
+
+#if LOSDEBUG>=5
+	LogDebug("LOS from ([{}], [{}], [{}]) to ([{}], [{}], [{}]) sizes: ([{}], [{}])", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
+#endif
+	return zone->zonemap->CheckLoS(myloc, oloc);
+}
+
 //offensive spell aggro
 int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool is_proc)
 {
@@ -1658,4 +1709,3 @@ void Mob::RogueEvade(Mob *other)
 
 	return;
 }
-

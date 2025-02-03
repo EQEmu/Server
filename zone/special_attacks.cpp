@@ -25,6 +25,7 @@
 #include "string_ids.h"
 #include "lua_parser.h"
 #include "npc.h"
+#include "bot.h"
 
 #include <string.h>
 
@@ -709,17 +710,32 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 }
 
 void Mob::TryBackstab(Mob *other, int ReuseTime) {
-	if(!other)
+	if (!other) {
 		return;
+	}
 
 	bool bIsBehind = false;
 	bool bCanFrontalBS = false;
 
 	//make sure we have a proper weapon if we are a client.
-	if(IsClient()) {
+	if (IsClient()) {
 		const EQ::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+
 		if (!wpn || (wpn->GetItem()->ItemType != EQ::item::ItemType1HPiercing)){
 			MessageString(Chat::Red, BACKSTAB_WEAPON);
+			return;
+		}
+	}
+	else if (IsBot()) {
+		auto bot = CastToBot();
+		auto inst = bot->GetBotItem(EQ::invslot::slotPrimary);
+		auto bot_piercer = inst ? inst->GetItem() : nullptr;
+
+		if (!bot_piercer || bot_piercer->ItemType != EQ::item::ItemType1HPiercing) {
+			if (!bot->GetCombatRoundForAlerts()) {
+				bot->SetCombatRoundForAlerts();
+				bot->RaidGroupSay(this, "I can't backstab with this weapon!");
+			}
 			return;
 		}
 	}
@@ -727,36 +743,41 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 	//Live AA - Triple Backstab
 	int tripleChance = itembonuses.TripleBackstab + spellbonuses.TripleBackstab + aabonuses.TripleBackstab;
 
-	if (BehindMob(other, GetX(), GetY()))
+	if (BehindMob(other, GetX(), GetY())) {
 		bIsBehind = true;
-
+	}
 	else {
 		//Live AA - Seized Opportunity
 		int FrontalBSChance = itembonuses.FrontalBackstabChance + spellbonuses.FrontalBackstabChance + aabonuses.FrontalBackstabChance;
 
-		if (FrontalBSChance && zone->random.Roll(FrontalBSChance))
+		if (FrontalBSChance && zone->random.Roll(FrontalBSChance)) {
 			bCanFrontalBS = true;
+		}
 	}
 
 	if (bIsBehind || bCanFrontalBS || (IsNPC() && CanFacestab())) { // Player is behind other OR can do Frontal Backstab
-		if (bCanFrontalBS && IsClient()) // I don't think there is any message ...
-			CastToClient()->Message(Chat::White,"Your fierce attack is executed with such grace, your target did not see it coming!");
+		if (bCanFrontalBS && IsClient()) { // I don't think there is any message ...
+			CastToClient()->Message(Chat::White, "Your fierce attack is executed with such grace, your target did not see it coming!");
+		}
 
 		RogueBackstab(other,false,ReuseTime);
+
 		if (level >= RuleI(Combat, DoubleBackstabLevelRequirement)) {
 			// TODO: 55-59 doesn't appear to match just checking double attack, 60+ does though
-			if(IsClient() && CastToClient()->CheckDoubleAttack())
-			{
-				if(other->GetHP() > 0)
-					RogueBackstab(other,false,ReuseTime);
+			if(IsOfClientBot() && CastToClient()->CheckDoubleAttack()) {
+				if (other->GetHP() > 0) {
+					RogueBackstab(other, false, ReuseTime);
+				}
 
-				if (tripleChance && other->GetHP() > 0 && zone->random.Roll(tripleChance))
-					RogueBackstab(other,false,ReuseTime);
+				if (tripleChance && other->GetHP() > 0 && zone->random.Roll(tripleChance)) {
+					RogueBackstab(other, false, ReuseTime);
+				}
 			}
 		}
 
-		if(IsClient())
+		if (IsClient()) {
 			CastToClient()->CheckIncreaseSkill(EQ::skills::SkillBackstab, other, 10);
+		}
 
 	}
 	//Live AA - Chaotic Backstab
@@ -766,14 +787,20 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		//we can stab from any angle, we do min damage though.
 		// chaotic backstab can't double etc Seized can, but that's because it's a chance to do normal BS
 		// Live actually added SPA 473 which grants chance to double here when they revamped chaotic/seized
+
 		RogueBackstab(other, true, ReuseTime);
-		if(IsClient())
+
+		if (IsClient()) {
 			CastToClient()->CheckIncreaseSkill(EQ::skills::SkillBackstab, other, 10);
+		}
+
 		m_specialattacks = eSpecialAttacks::None;
 
 		int double_bs_front = aabonuses.Double_Backstab_Front + itembonuses.Double_Backstab_Front + spellbonuses.Double_Backstab_Front;
-		if (double_bs_front && other->GetHP() > 0 && zone->random.Roll(double_bs_front))
+
+		if (double_bs_front && other->GetHP() > 0 && zone->random.Roll(double_bs_front)) {
 			RogueBackstab(other, false, ReuseTime);
+		}
 	}
 	else { //We do a single regular attack if we attack from the front without chaotic stab
 		Attack(other, EQ::invslot::slotPrimary);
@@ -790,10 +817,25 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 	// make sure we can hit (bane, magical, etc)
 	if (IsClient()) {
-		const EQ::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
-		if (!GetWeaponDamage(other, wpn))
+		const EQ::ItemInstance* wpn = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+
+		if (!GetWeaponDamage(other, wpn)) {
 			return;
-	} else if (!GetWeaponDamage(other, (const EQ::ItemData*)nullptr)){
+		}
+	}
+	else if (IsBot()) {
+		EQ::ItemInstance* botweaponInst = CastToBot()->GetBotItem(EQ::invslot::slotPrimary);
+
+		if (botweaponInst) {
+			if (!GetWeaponDamage(other, botweaponInst)) {
+				return;
+			}
+		}
+		else if (!GetWeaponDamage(other, (const EQ::ItemData*)nullptr)) {
+			return;
+		}
+	}
+	else if (!GetWeaponDamage(other, (const EQ::ItemData*)nullptr)) {
 		return;
 	}
 
@@ -2408,7 +2450,7 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 	// Only works on YOUR target.
 	if (
 		defender &&
-		!defender->IsClient() &&
+		!defender->IsOfClientBot() &&
 		skillInUse == EQ::skills::SkillArchery &&
 		GetTarget() == defender &&
 		(defender->GetBodyType() == BodyType::Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids)) &&
@@ -2421,7 +2463,7 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 		if (HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)) {
 			int chance = GetDEX();
 			chance = 100 * chance / (chance + 3500);
-			if (IsClient() || IsBot()) {
+			if (IsOfClientBot()) {
 				chance += GetHeroicDEX() / 25;
 			}
 			chance *= 10;
@@ -2445,7 +2487,7 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 {
 	if (
 		defender &&
-		!defender->IsClient() &&
+		!defender->IsOfClientBot() &&
 		GetLevel() >= RuleI(Combat, AssassinateLevelRequirement) &&
 		(skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing) &&
 		(defender->GetBodyType() == BodyType::Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids)) &&
@@ -2454,7 +2496,7 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 		int chance = GetDEX();
 		if (skillInUse == EQ::skills::SkillBackstab) {
 			chance = 100 * chance / (chance + 3500);
-			if (IsClient() || IsBot()) {
+			if (IsOfClientBot()) {
 				chance += GetHeroicDEX();
 			}
 			chance *= 10;
