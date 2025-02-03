@@ -6363,20 +6363,7 @@ CREATE INDEX idx_item_type_skill ON items (itemtype, skillmodtype);
 		.content_schema_update = true
 	},
 	ManifestEntry{
-		.version = 9296,
-		.description = "2025_02_01_trader_table_listing_date.sql",
-		.check = "SHOW CREATE TABLE `trader`",
-		.condition = "missing",
-		.match = "listing_date",
-		.sql = R"(
-ALTER TABLE `trader`
-	ADD COLUMN `listing_date` DATETIME NULL DEFAULT NULL AFTER `active_transaction`,
-	ADD INDEX `idx_trader_listing_date` (`listing_date`);
-)",
-		.content_schema_update = false
-	},
-	ManifestEntry{
-		.version = 9297,
+		.version = 9295,
 		.description = "2025_01_26_trader_table_bazaar_search_indexes.sql",
 		.check = "SHOW CREATE TABLE `trader`",
 		.condition = "missing",
@@ -6392,7 +6379,20 @@ CREATE INDEX idx_trader_active_transaction ON trader (active_transaction);
 		.content_schema_update = false
 	},
 	ManifestEntry{
-		.version = 9298,
+		.version = 9296,
+		.description = "2025_02_01_trader_table_listing_date.sql",
+		.check = "SHOW CREATE TABLE `trader`",
+		.condition = "missing",
+		.match = "listing_date",
+		.sql = R"(
+ALTER TABLE `trader`
+	ADD COLUMN `listing_date` DATETIME NULL DEFAULT NULL AFTER `active_transaction`,
+	ADD INDEX `idx_trader_listing_date` (`listing_date`);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9297,
 		.description = "2024_01_22_sharedbank_guid_primary_key.sql",
 		.check = "SHOW COLUMN FROM `sharedbank` LIKE 'guid'",
 		.condition = "empty",
@@ -6418,7 +6418,7 @@ ADD PRIMARY KEY (`account_id`, `slot_id`);
 )"
 	},
 	ManifestEntry{
-		.version = 9299,
+		.version = 9298,
 		.description = "2024_10_24_inventory_changes.sql",
 		.check = "SHOW COLUMN FROM `inventory` LIKE 'charid'",
 		.condition = "empty",
@@ -6478,7 +6478,7 @@ UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id`
 )"
 	},
 	ManifestEntry{
-		.version = 9300,
+		.version = 9299,
 		.description = "2024_10_24_merchantlist_temp_uncap.sql",
 		.check = "SHOW CREATE TABLE `merchantlist_temp`",
 		.condition = "contains",
