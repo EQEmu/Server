@@ -1249,7 +1249,7 @@ namespace PlayerEvent {
 				CEREAL_NVP(item_name),
 				CEREAL_NVP(level),
 				CEREAL_NVP(progression)
-			)
+			);
 		}
 	};
 
