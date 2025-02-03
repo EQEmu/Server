@@ -238,6 +238,10 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 		}
 	}
 
+	if (IsPet()) {
+		chance = std::min(chance, RuleI(Custom, PetMaximumSpellCritChance));
+	}
+
 	//Crtical Hit Calculation pathway
 	if (chance > 0 || (IsOfClientBot() && (HasClass(Class::Wizard)) && GetLevel() >= RuleI(Spells, WizCritLevel))) {
 		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
@@ -251,7 +255,6 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 			chance = spells[spell_id].override_crit_chance;
 		}
 
-		LogDebug("Critical Chance: [{}]", chance);
 		if (zone->random.Roll(chance)) {
 			Critical = true;
 			ratio += GetSharedSpellCritDmgIncrease();
@@ -278,6 +281,10 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 
 		if (IsClient() && IsHarmTouchSpell(spell_id)) {
 			ratio += RuleI(Spells, HarmTouchCritRatio); //Default is zero
+		}
+
+		if (IsPet() && RuleI(Custom, PetMaximumSpellCritRatio)) {
+			ratio = std::min(ratio, RuleI(Custom, PetMaximumSpellCritRatio));
 		}
 
 		if (Critical) {

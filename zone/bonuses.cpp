@@ -1155,7 +1155,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->songModCap += base_value;
 			break;
 		case SE_PetCriticalHit:
-			newbon->PetCriticalHit += base_value;
+			newbon->PetCriticalHit = std::min(base_value + newbon->PetCriticalHit, RuleI(Custom, PetCriticalAACap));
 			break;
 		case SE_PetAvoidance:
 			newbon->PetAvoidance += base_value;
@@ -1228,7 +1228,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->FlurryChance += base_value;
 			break;
 		case SE_PetFlurry:
-			newbon->PetFlurry += base_value;
+			newbon->PetFlurry = std::min(base_value + newbon->PetFlurry, RuleI(Custom, PetFlurryAACap));
 			break;
 		case SE_BardSongRange:
 			newbon->SongRange += base_value;

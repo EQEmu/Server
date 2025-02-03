@@ -1114,8 +1114,8 @@ RULE_BOOL(Custom,	GroupIncentiveProgram,					false, "Enable GroupIncentiveProgra
 RULE_BOOL(Custom, 	UseAAEXPVeterancy,						false, "Use max AA on any character in account for value of AA:ModernAAScalingAALimit if it is higher")
 RULE_REAL(Custom,	CastedSpellCritBonusRatio, 				1.0, "Multiply casted (Not procs) spells crit ratio by this value")
 RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit ratio by this value")
-RULE_STRING(Custom,     HubZones, 					"151,22", "Hub zones to display in #zoneshard output")
-RULE_STRING(Custom,	AA339Whitelist,						"16121,16122,16123,16675,16676,16677,30887,30888,30889,aa545", "List of spell/aa ids with trigger on cast effects that will trigger off AA abilities")
+RULE_STRING(Custom, HubZones, 								"151,22", "Hub zones to display in #zoneshard output")
+RULE_STRING(Custom,	AA339Whitelist,							"16121,16122,16123,16675,16676,16677,30887,30888,30889,aa545", "List of spell/aa ids with trigger on cast effects that will trigger off AA abilities")
 
 RULE_BOOL(Custom,   UseHasteForMeleeSkills, 				true, "Use Haste stat for activated melee skills")
 RULE_REAL(Custom, 	PetWeaponTuningMult, 					0.5, "Value added to weapon ratio for pet weapon usage")
@@ -1127,6 +1127,12 @@ RULE_INT(Custom,	CombineCostMultiplier,					25, "Multiply this number by item_va
 RULE_INT(Custom, 	ServerAuthKey, 							0, "Value used to verify patch serial number")
 RULE_STRING(Custom,	AutoSellBagIDs, 						"500030,500031", "ItemID of Auto-Sell Bag")
 RULE_STRING(Custom,	StackOnlyBags, 							"", "ItemIDs of bags that only allow stackable items")
+
+RULE_INT(Custom, 	PetProcRateCap,							100, "Maximum item (weapon & aug) proc rate bonus available to pets, 0 to disable.")
+RULE_INT(Custom,    PetFlurryAACap,							75,	 "Maximum amount of SE_PetFlurry which can be applied by an AA, 100 to disable")
+RULE_INT(Custom,    PetCriticalAACap,						75,	 "Maximum amount of SE_PetCriticalHit which can be applied by an AA, 100 to disable")
+RULE_INT(Custom, 	PetMaximumSpellCritRatio,				300, "Maximum spell critical ratio which can be applied to pets, 0 to disable. (300 is 3x damage)")
+RULE_INT(Custom, 	PetMaximumSpellCritChance,				75,  "Maximum spell critical chance which can be applied to pets, 100 to disable.")
 
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
