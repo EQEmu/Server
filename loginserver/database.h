@@ -24,35 +24,6 @@ public:
 		std::string &user
 	);
 
-	unsigned int GetFreeID(const std::string &loginserver);
-
-	bool CreateLoginData(
-		const std::string &name,
-		const std::string &password,
-		const std::string &loginserver,
-		unsigned int &id
-	);
-
-	bool CreateLoginDataWithID(
-		const std::string &in_account_name,
-		const std::string &in_account_password,
-		const std::string &loginserver,
-		unsigned int id
-	);
-
-	void UpdateLoginserverAccountPasswordHash(
-		const std::string &name,
-		const std::string &loginserver,
-		const std::string &hash
-	);
-
-	bool DoesLoginServerAccountExist(
-		const std::string &name,
-		const std::string &password,
-		const std::string &loginserver,
-		unsigned int id
-	);
-
 	struct DbWorldRegistration {
 		bool        loaded            = false;
 		int32       server_id         = 0;
@@ -134,13 +105,6 @@ public:
 	bool UpdateLoginWorldAdminAccountPasswordByUsername(
 		const std::string &admin_account_username,
 		const std::string &admin_account_password_hash
-	);
-
-	uint32 CreateLoginAccount(
-		const std::string &name,
-		const std::string &password,
-		const std::string &loginserver = "local",
-		const std::string &email = "local_creation"
 	);
 
 protected:
