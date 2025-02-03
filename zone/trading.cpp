@@ -1080,6 +1080,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 			trader_item.item_id               = inst->GetID();
 			trader_item.item_sn               = in->serial_number[i];
 			trader_item.slot_id               = i;
+			trader_item.listing_date          = time(nullptr);
 			if (inst->IsAugmented()) {
 				auto augs              = inst->GetAugmentIDs();
 				trader_item.aug_slot_1 = augs.at(0);
@@ -1775,7 +1776,13 @@ void Client::SendBarterWelcome()
 
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 {
-	auto results = Bazaar::GetSearchResults(database, search_criteria, GetZoneID(), GetInstanceID());
+	std::vector<BazaarSearchResultsFromDB_Struct> results = Bazaar::GetSearchResults(
+		database,
+		content_db,
+		search_criteria,
+		GetZoneID(),
+		GetInstanceID()
+	);
 	if (results.empty()) {
 		SendBazaarDone(GetID());
 		return;
@@ -1796,8 +1803,7 @@ void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 		}
 	}
 
-
-
+	SetTraderTransactionDate();
 	std::stringstream           ss{};
 	cereal::BinaryOutputArchive ar(ss);
 	ar(results);
@@ -3096,6 +3102,7 @@ void Client::TraderPriceUpdate(const EQApplicationPacket *app)
 				trader_item.item_cost             = tpus->NewPrice;
 				trader_item.item_id               = newgis->items[i];
 				trader_item.item_sn               = newgis->serial_number[i];
+				trader_item.listing_date          = time(nullptr);
 				if (item_detail->IsAugmented()) {
 					auto augs              = item_detail->GetAugmentIDs();
 					trader_item.aug_slot_1 = augs.at(0);
@@ -3370,7 +3377,7 @@ void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPack
 {
 	auto in          = (TraderBuy_Struct *) app->pBuffer;
 	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number, tbs->trader_id);
-	if (!trader_item.id) {
+	if (!trader_item.id || GetTraderTransactionDate() < trader_item.listing_date) {
 		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
 				   "<red>[{}] The Traders data was outdated.",
 				   tbs->trader_id,
@@ -3521,7 +3528,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 {
 	auto in          = (TraderBuy_Struct *) app->pBuffer;
 	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number, tbs->trader_id);
-	if (!trader_item.id) {
+	if (!trader_item.id || GetTraderTransactionDate() < trader_item.listing_date) {
 		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
 				   "<red>[{}] The Traders data was outdated.",
 				   tbs->trader_id,

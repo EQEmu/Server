@@ -1235,6 +1235,8 @@ public:
 	uint32 GetTraderCount() { return m_trader_count; }
 	void IncrementTraderCount() { m_trader_count += 1; }
 	void DecrementTraderCount() { m_trader_count > 0 ? m_trader_count -= 1 : m_trader_count = 0; }
+	void SetTraderTransactionDate() { m_trader_transaction_date = time(nullptr); }
+	time_t GetTraderTransactionDate() { return m_trader_transaction_date; }
 
 	void SendBulkStatsUpdate();
 	void SendHPStats();
@@ -2107,6 +2109,7 @@ private:
 	uint8 firstlogon;
 	uint32 mercid; // current merc
 	uint8 mercSlot; // selected merc slot
+	time_t                                                         m_trader_transaction_date;
 	uint32                                                         m_trader_count{};
 	uint32                                                         m_buyer_id;
 	uint32                                                         m_barter_time;

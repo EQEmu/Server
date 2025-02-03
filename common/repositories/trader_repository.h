@@ -28,6 +28,11 @@ public:
 		std::vector<DistinctTraders_Struct> traders{};
 	};
 
+	struct BazaarTraderSearch_Struct {
+		Trader trader;
+		std::string trader_name;
+	};
+
 	struct WelcomeData_Struct {
 		uint32 count_of_traders;
 		uint32 count_of_items;
@@ -125,7 +130,8 @@ public:
 		}
 
 		for (auto &i: items) {
-			i.item_cost = new_price;
+			i.item_cost    = new_price;
+			i.listing_date = time(nullptr);
 		}
 
 		return ReplaceMany(db, items);
@@ -173,6 +179,7 @@ public:
 
 		auto m = trader_item[0];
 		m.item_charges = quantity;
+		m.listing_date = time(nullptr);
 
 		return UpdateOne(db, m);
 	}
@@ -216,6 +223,7 @@ public:
 		}
 
 		e.active_transaction = status == true ? 1 : 0;
+		e.listing_date       = time(nullptr);
 
 		return UpdateOne(db, e);
 	}
@@ -264,6 +272,54 @@ public:
 		trader.trader_name = row[2] ? row[2] : "";
 
 		return trader;
+	}
+
+	static std::vector<BazaarTraderSearch_Struct> GetBazaarTraderDetails(
+		Database &db,
+		std::string &search_criteria_trader
+		)
+	{
+		std::vector<BazaarTraderSearch_Struct> all_entries{};
+
+		auto query = fmt::format(
+			"SELECT trader.*, c.`name` FROM `trader` INNER JOIN character_data AS c ON trader.char_id = c.id "
+			"WHERE {} ORDER BY trader.char_id ASC",
+			search_criteria_trader
+		);
+
+		auto results = db.QueryDatabase(query);
+
+		if (results.RowCount() == 0) {
+			return all_entries;
+		}
+
+		all_entries.reserve(results.RowCount());
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			BazaarTraderSearch_Struct e{};
+
+			e.trader.id                    = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.trader.char_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.trader.item_id               = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.trader.aug_slot_1            = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.trader.aug_slot_2            = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.trader.aug_slot_3            = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.trader.aug_slot_4            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.trader.aug_slot_5            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.trader.aug_slot_6            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.trader.item_sn               = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.trader.item_charges          = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.trader.item_cost             = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.trader.slot_id               = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.trader.char_entity_id        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.trader.char_zone_id          = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.trader.char_zone_instance_id = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.trader.active_transaction    = row[16] ? static_cast<uint8_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.trader_name                  = row[17] ? row[17] : std::string("");
+
+			all_entries.push_back(e);
+		}
+
+		return all_entries;
 	}
 };
 

@@ -25,7 +25,7 @@
 
 // Build variables
 // these get injected during the build pipeline
-#define CURRENT_VERSION "22.62.1-dev" // always append -dev to the current version for custom-builds
+#define CURRENT_VERSION "22.62.2-dev" // always append -dev to the current version for custom-builds
 #define LOGIN_VERSION "0.8.0"
 #define COMPILE_DATE    __DATE__
 #define COMPILE_TIME    __TIME__
@@ -42,7 +42,7 @@
  * Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt
  */
 
-#define CURRENT_BINARY_DATABASE_VERSION 9293
+#define CURRENT_BINARY_DATABASE_VERSION 9296
 #define CURRENT_BINARY_BOTS_DATABASE_VERSION 9045
 
 #endif

@@ -6333,6 +6333,65 @@ CREATE TABLE `character_pet_name` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 )",
 	},
+	ManifestEntry{
+		.version = 9294,
+		.description = "2025_01_26_items_table_bazaar_search_indexes.sql",
+		.check = "SHOW CREATE TABLE `items`",
+		.condition = "missing",
+		.match = "idx_slots_reclevel",
+		.sql = R"(
+-- indexes for the `items` table
+CREATE INDEX idx_slots_reclevel ON items (slots, reclevel);
+CREATE INDEX idx_itemclass_itemtype ON items (itemclass, itemtype);
+CREATE INDEX idx_augment_slots ON items (
+    augslot1type,
+    augslot2type,
+    augslot3type,
+    augslot4type,
+    augslot5type,
+    augslot6type
+);
+CREATE INDEX idx_races_classes ON items (races, classes);
+
+-- common stat fields
+CREATE INDEX idx_item_ac ON items (ac);
+CREATE INDEX idx_item_hp ON items (hp);
+CREATE INDEX idx_item_mana ON items (mana);
+CREATE INDEX idx_item_reclevel ON items (reclevel);
+CREATE INDEX idx_item_type_skill ON items (itemtype, skillmodtype);
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9295,
+		.description = "2025_01_26_trader_table_bazaar_search_indexes.sql",
+		.check = "SHOW CREATE TABLE `trader`",
+		.condition = "missing",
+		.match = "idx_trader_item",
+		.sql = R"(
+-- indexes for the `trader` table
+CREATE INDEX idx_trader_item ON trader (item_id, item_cost);
+CREATE INDEX idx_trader_char ON trader (char_id, char_zone_id, char_zone_instance_id);
+CREATE INDEX idx_trader_item_sn ON trader (item_sn);
+CREATE INDEX idx_trader_item_cost ON trader (item_cost);
+CREATE INDEX idx_trader_active_transaction ON trader (active_transaction);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9296,
+		.description = "2025_02_01_trader_table_listing_date.sql",
+		.check = "SHOW CREATE TABLE `trader`",
+		.condition = "missing",
+		.match = "listing_date",
+		.sql = R"(
+ALTER TABLE `trader`
+	ADD COLUMN `listing_date` DATETIME NULL DEFAULT NULL AFTER `active_transaction`,
+	ADD INDEX `idx_trader_listing_date` (`listing_date`);
+)",
+		.content_schema_update = false
+	}
+
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
