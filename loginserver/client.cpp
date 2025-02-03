@@ -382,7 +382,8 @@ bool Client::VerifyAndUpdateLoginHash(LoginAccountContext c, const LoginAccounts
 	}
 
 	uint32 insecure_source_encryption_mode = 0;
-	auto   verify_encryption_mode          = [&](int start, int end) {
+
+	auto verify_encryption_mode = [&](int start, int end) {
 		for (int i = start; i <= end; ++i) {
 			if (i != encryption_mode && eqcrypt_verify_hash(a.account_name, c.password, a.account_password, i)) {
 				insecure_source_encryption_mode = i;
@@ -499,13 +500,13 @@ void Client::SendExpansionPacketData(PlayerLoginReply &plrs)
 {
 	SerializeBuffer buf;
 	//from eqlsstr_us.txt id of each expansion, excluding 'Everquest'
-	int             ExpansionLookup[20] = {
+
+	int ExpansionLookup[20] = {
 		3007, 3008, 3009, 3010, 3012,
 		3014, 3031, 3033, 3036, 3040,
 		3045, 3046, 3047, 3514, 3516,
 		3518, 3520, 3522, 3524
 	};
-
 
 	if (server.options.IsDisplayExpansions()) {
 
@@ -550,9 +551,7 @@ void Client::SendExpansionPacketData(PlayerLoginReply &plrs)
 			// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
 			plrs.web_offer_min_views = ((EQ::expansions::bitDoD << 2) | 1) - 2;
 		}
-
 	}
-
 }
 
 std::string Client::GetClientLoggingDescription()

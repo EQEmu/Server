@@ -5,7 +5,7 @@
 #include "../common/strings.h"
 
 extern LoginServer server;
-extern Database database;
+extern Database    database;
 
 WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> worldserver_connection)
 {
@@ -242,18 +242,19 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		return;
 	}
 
-	auto user_to_world_response = (UsertoWorldResponse_Struct *) packet.Data();
-	LogDebug("Trying to find client with user id of [{}]", user_to_world_response->lsaccountid);
+	auto res = (UsertoWorldResponse_Struct *) packet.Data();
+	LogDebug("Trying to find client with user id of [{}]", res->lsaccountid);
 
 	Client *c = server.client_manager->GetClient(
-		user_to_world_response->lsaccountid,
-		user_to_world_response->login
+		res->lsaccountid,
+		res->login
 	);
 
 	if (c) {
-		LogDebug("Found client with user id of [{}] and account name of {}",
-				 user_to_world_response->lsaccountid,
-				 c->GetAccountName().c_str()
+		LogDebug(
+			"Found client with user id of [{}] and account name of {}",
+			res->lsaccountid,
+			c->GetAccountName().c_str()
 		);
 
 		auto *outapp = new EQApplicationPacket(
@@ -273,7 +274,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 
 		LogDebug("[Size: [{}]] {}", outapp->size, DumpPacketToString(outapp));
 
-		if (user_to_world_response->response > 0) {
+		if (res->response > 0) {
 			r->base_reply.success = true;
 			SendClientAuthToWorld(
 				c->GetConnection()->GetRemoteAddr(),
@@ -284,7 +285,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 			);
 		}
 
-		switch (user_to_world_response->response) {
+		switch (res->response) {
 			case UserToWorldStatusSuccess:
 				r->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
 				break;
@@ -322,7 +323,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	else {
 		LogError(
 			"Received User-To-World Response for [{}] but could not find the client referenced!.",
-			user_to_world_response->lsaccountid
+			res->lsaccountid
 		);
 	}
 }
@@ -844,9 +845,9 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	const std::string &world_admin_username,
 	const std::string &world_admin_password,
 	const std::string &world_admin_password_hash
-)
-{
+) {
 	auto encryption_mode = server.options.GetEncryptionMode();
+
 	if (eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, encryption_mode)) {
 		return true;
 	}
@@ -856,36 +857,28 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	}
 
 	uint32 insecure_source_encryption_mode = 0;
-	if (world_admin_password_hash.length() == CryptoHash::md5_hash_length) {
-		for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
-			if (i != encryption_mode &&
-				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
+	auto verify_encryption = [&](int start, int end) {
+		for (int i = start; i <= end; ++i) {
+			if (i != encryption_mode && eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
 				LogDebug("Checking for [{}] world admin", GetEncryptionByModeId(i));
 				insecure_source_encryption_mode = i;
 			}
 		}
-	}
-	else if (world_admin_password_hash.length() == CryptoHash::sha1_hash_length &&
-			 insecure_source_encryption_mode == 0) {
-		for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
-			if (i != encryption_mode &&
-				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
-				LogDebug("Checking for [{}] world admin", GetEncryptionByModeId(i));
-				insecure_source_encryption_mode = i;
-			}
-		}
-	}
-	else if (world_admin_password_hash.length() == CryptoHash::sha512_hash_length &&
-			 insecure_source_encryption_mode == 0) {
-		for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
-			if (i != encryption_mode &&
-				eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
-				LogDebug("Checking for [{}] world admin", GetEncryptionByModeId(i));
-				insecure_source_encryption_mode = i;
-			}
-		}
+	};
+
+	switch (world_admin_password_hash.length()) {
+		case CryptoHash::md5_hash_length:
+			verify_encryption(EncryptionModeMD5, EncryptionModeMD5Triple);
+			break;
+		case CryptoHash::sha1_hash_length:
+			verify_encryption(EncryptionModeSHA, EncryptionModeSHATriple);
+			break;
+		case CryptoHash::sha512_hash_length:
+			verify_encryption(EncryptionModeSHA512, EncryptionModeSHA512Triple);
+			break;
 	}
 
+	// ✅ If an insecure mode was found, rehash and update it
 	if (insecure_source_encryption_mode > 0) {
 		LogInfo(
 			"Updated insecure world_admin_username [{}] from mode [{}] ({}) to mode [{}] ({})",
@@ -896,14 +889,8 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 			encryption_mode
 		);
 
-		std::string new_password_hash = eqcrypt_hash(
-			world_admin_username,
-			world_admin_password,
-			encryption_mode
-		);
-
+		std::string new_password_hash = eqcrypt_hash(world_admin_username, world_admin_password, encryption_mode);
 		server.db->UpdateLoginWorldAdminAccountPassword(world_admin_id, new_password_hash);
-
 		return true;
 	}
 

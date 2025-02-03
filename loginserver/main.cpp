@@ -29,7 +29,6 @@ Database        database;
 PlayerEventLogs player_event_logs;
 ZoneStore       zone_store;
 
-void ResolveAddresses();
 void CatchSignal(int sig_num)
 {
 }
@@ -65,9 +64,6 @@ void LoadServerConfig()
 	);
 	LogInfo("Config System Init");
 
-	/**
-	 * Worldservers
-	 */
 	server.options.RejectDuplicateServers(
 		server.config.GetVariableBool(
 			"worldservers",
@@ -98,25 +94,21 @@ void LoadServerConfig()
 		)
 	);
 
-	/**
-	 * Expansion Display Settings
-	 */
 	server.options.DisplayExpansions(
 		server.config.GetVariableBool(
 			"client_configuration",
 			"display_expansions",
 			false
-		)); //disable by default
+		)
+	);
 	server.options.MaxExpansions(
 		server.config.GetVariableInt(
 			"client_configuration",
 			"max_expansions_mask",
 			67108863
-		)); //enable display of all expansions
+		)
+	);
 
-	/**
-	 * Account
-	 */
 	server.options.AutoCreateAccounts(server.config.GetVariableBool("account", "auto_create_accounts", true));
 
 	if (std::getenv("LSPX")) {
@@ -129,9 +121,6 @@ void LoadServerConfig()
 		);
 	}
 
-	/**
-	 * Default Loginserver Name (Don't change)
-	 */
 	server.options.DefaultLoginServerName(
 		server.config.GetVariableString(
 			"general",
@@ -139,10 +128,6 @@ void LoadServerConfig()
 			"local"
 		)
 	);
-
-	/**
-	 * Security
-	 */
 
 #ifdef ENABLE_SECURITY
 	server.options.EncryptionMode(server.config.GetVariableInt("security", "mode", 13));
@@ -187,9 +172,7 @@ int main(int argc, char **argv)
 
 	path.LoadPaths();
 
-	/**
-	 * Command handler
-	 */
+	// command handler
 	if (argc > 1) {
 		LogSys.SilenceConsoleLogging();
 
@@ -204,10 +187,6 @@ int main(int argc, char **argv)
 	}
 
 	LoadServerConfig();
-
-	/**
-	 * mysql connect
-	 */
 	LoadDatabaseConnection();
 
 	if (argc == 1) {
@@ -217,18 +196,12 @@ int main(int argc, char **argv)
 			->StartFileLogs();
 	}
 
-	/**
-	 * make sure our database got created okay, otherwise cleanup and exit
-	 */
 	if (!server.db) {
 		LogError("Database Initialization Failure");
 		LogInfo("Log System Shutdown");
 		return 1;
 	}
 
-	/**
-	 * create server manager
-	 */
 	LogInfo("Server Manager Init");
 	server.server_manager = new WorldServerManager();
 	if (!server.server_manager) {
@@ -238,9 +211,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	/**
-	 * create client manager
-	 */
 	LogInfo("Client Manager Init");
 	server.client_manager = new ClientManager();
 	if (!server.client_manager) {
@@ -263,9 +233,6 @@ int main(int argc, char **argv)
 
 	LogInfo("Server Started");
 
-	/**
-	 * Web API
-	 */
 	bool web_api_enabled = server.config.GetVariableBool("web_api", "enabled", true);
 	if (web_api_enabled) {
 		std::thread web_api_thread(start_web_server);

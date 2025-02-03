@@ -4,7 +4,6 @@
 extern LoginServer server;
 extern bool        run_server;
 
-#include "../common/eqemu_logsys.h"
 #include "../common/misc.h"
 #include "../common/path_manager.h"
 #include "../common/file.h"
