@@ -8669,6 +8669,7 @@ bool Mob::DoLosChecks(Mob* other) {
 		if (CheckLosCheatExempt(other)) {
 			return true;
 		}
+
 		return false;
 	}
 

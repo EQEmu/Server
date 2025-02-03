@@ -2617,22 +2617,23 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	}
 
 	if (give_exp && give_exp->HasOwner()) {
-		bool owner_in_group = false;
+		auto owner = give_exp->GetOwner();
 
-		if (
-			give_exp->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP)) ||
-			(
-				give_exp->IsPet() && 
-				give_exp->GetOwner() && 
-				give_exp->GetOwner()->IsInGroupOrRaid(give_exp->GetUltimateOwner(), RuleB(Bots, SameRaidGroupForXP))
-			)
-		) {
-			owner_in_group = true;
+		if (owner) {
+			Mob* ulimate_owner = give_exp->GetUltimateOwner();
+			bool pet_owner_is_client = give_exp->IsPet() && owner->IsClient();
+			bool pet_owner_is_bot = give_exp->IsPet() && owner->IsBot();
+			bool owner_is_client = owner->IsClient();
+			
+			bool is_in_same_group_or_raid = (
+				pet_owner_is_client ||
+				(pet_owner_is_bot && owner->IsInGroupOrRaid(ulimate_owner, RuleB(Bots, SameRaidGroupForXP))) ||
+				(owner_is_client && give_exp->IsInGroupOrRaid(ulimate_owner, RuleB(Bots, SameRaidGroupForXP)))
+			);
+
+			give_exp = (is_in_same_group_or_raid ? give_exp->GetUltimateOwner() : nullptr);
 		}
-
-		give_exp = give_exp->GetUltimateOwner();
-
-		if (!owner_in_group) {
+		else {
 			give_exp = nullptr;
 		}
 	}
