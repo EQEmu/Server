@@ -387,6 +387,9 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 	a.last_name               = last_name;
 	a.email                   = email;
 	a.registration_ip_address = ip_address;
+	a.registration_date       = std::time(nullptr);
+
+	a = LoginServerAdminsRepository::InsertOne(database, a);
 
 	if (a.id > 0) {
 		LogInfo(
@@ -399,7 +402,7 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 		return true;
 	}
 
-	LogError("Failed to create world admin account account for user [{}]!", username);
+	LogError("Failed to create world admin account account for user [{}] !", username);
 
 	return false;
 }
