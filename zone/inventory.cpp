@@ -181,10 +181,6 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
-	EVENT_ITEM_ScriptStopReturn();
-
-	// TODO: update calling methods and script apis to handle a failure return
-
 	const EQ::ItemData* item = database.GetItem(item_id);
 
 	// make sure the item exists
@@ -657,6 +653,8 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	} else {
 		PutItemInInventory(to_slot, *inst, true);
 	}
+
+	m_external_handin_items_returned.emplace_back(inst->GetItem()->ID);
 
 	safe_delete(inst);
 
@@ -3181,8 +3179,13 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 // Send an item packet (including all subitems of the item)
 void Client::SendItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPacketType packet_type)
 {
-	if (!inst)
+	if (!inst) {
 		return;
+	}
+
+	if (!eqs) {
+		return;
+	}
 
 	if (packet_type != ItemPacketMerchant) {
 		if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {

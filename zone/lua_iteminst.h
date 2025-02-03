@@ -86,6 +86,7 @@ public:
 	int GetTaskDeliveredCount();
 	int RemoveTaskDeliveredItems();
 	std::string GetName();
+	int GetSerialNumber();
 	void ItemSay(const char* text);
 	void ItemSay(const char* text, uint8 language_id);
 	luabind::object GetAugmentIDs(lua_State* L);

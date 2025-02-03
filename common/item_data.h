@@ -550,6 +550,7 @@ namespace EQ
 		bool IsType1HWeapon() const;
 		bool IsType2HWeapon() const;
 		bool IsTypeShield() const;
+		bool IsPetUsable() const;
 		bool IsQuestItem() const;
 
 		static bool CheckLoreConflict(const ItemData* l_item, const ItemData* r_item);

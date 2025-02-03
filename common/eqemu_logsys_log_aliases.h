@@ -904,6 +904,16 @@
         OutF(LogSys, Logs::Detail, Logs::BotSpellTypeChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogNpcHandin(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::NpcHandin))\
+        OutF(LogSys, Logs::General, Logs::NpcHandin, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogNpcHandinDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::NpcHandin))\
+        OutF(LogSys, Logs::Detail, Logs::NpcHandin, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.IsLogEnabled(debug_level, log_category))\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

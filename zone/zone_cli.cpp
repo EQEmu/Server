@@ -12,6 +12,11 @@ bool ZoneCLI::RanSidecarCommand(int argc, char **argv)
 	return argc > 1 && (strstr(argv[1], "sidecar:") != nullptr);
 }
 
+bool ZoneCLI::RanTestCommand(int argc, char **argv)
+{
+	return argc > 1 && (strstr(argv[1], "tests:") != nullptr);
+}
+
 void ZoneCLI::CommandHandler(int argc, char **argv)
 {
 	if (argc == 1) { return; }
@@ -25,8 +30,10 @@ void ZoneCLI::CommandHandler(int argc, char **argv)
 
 	// Register commands
 	function_map["sidecar:serve-http"] = &ZoneCLI::SidecarServeHttp;
+	function_map["tests:npc-handins"] = &ZoneCLI::NpcHandins;
 
 	EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 }
 
 #include "cli/sidecar_serve_http.cpp"
+#include "cli/npc_handins.cpp"

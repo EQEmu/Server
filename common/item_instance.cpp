@@ -1785,6 +1785,18 @@ std::vector<uint32> EQ::ItemInstance::GetAugmentIDs() const
 	return augments;
 }
 
+std::vector<std::string> EQ::ItemInstance::GetAugmentNames() const
+{
+	std::vector<std::string> augment_names;
+
+	for (uint8 slot_id = invaug::SOCKET_BEGIN; slot_id <= invaug::SOCKET_END; slot_id++) {
+		const auto augment = GetAugment(slot_id);
+		augment_names.push_back(augment ? augment->GetItem()->Name : "None");
+	}
+
+	return augment_names;
+}
+
 int EQ::ItemInstance::GetItemRegen(bool augments) const
 {
 	int        stat = 0;

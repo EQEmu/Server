@@ -5,6 +5,9 @@ set -ex
 sudo chown eqemu:eqemu /drone/src/ * -R
 sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
 
+chmod +x ./utils/scripts/build/source-db-build.sh
+utils/scripts/build/source-db-build.sh &
+
 git submodule init && git submodule update
 
 perl utils/scripts/build/tag-version.pl
@@ -19,12 +22,38 @@ mkdir -p build && cd build && \
       -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O1 -g -Wno-everything" \
       -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
       -G 'Unix Makefiles' \
-      .. && make -j$((`nproc`-4))
+      .. && make -j$((`nproc`-12))
 
 curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
 ./bin/tests
 
 ldd ./bin/zone
+
+echo "Waiting for MariaDB to be ready..."
+while ! mysqladmin ping -uroot -peqemu -hlocalhost --silent; do
+    sleep 1
+done
+
+echo "# Cloning quests repository"
+git -C ./quests pull 2> /dev/null || git clone https://github.com/ProjectEQ/projecteqquests.git quests
+
+# remove this eventually
+cd ./quests && git checkout akkadius/item-handin-overhaul && cd ..
+
+mkdir maps
+mkdir logs
+
+ln -s ./quests/lua_modules ./lua_modules
+ln -s ./quests/plugins ./plugins
+
+echo "# Running world database updates"
+FORCE_INTERACTIVE=1 ./bin/world database:updates --skip-backup --force
+
+echo "# Running shared_memory"
+./bin/shared_memory
+
+echo "# Running NPC hand-in tests"
+./bin/zone tests:npc-handins
 
 # shellcheck disable=SC2164
 cd /drone/src/

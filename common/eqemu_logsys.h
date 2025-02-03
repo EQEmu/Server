@@ -148,6 +148,7 @@ namespace Logs {
 		BotSettings,
 		BotSpellChecks,
 		BotSpellTypeChecks,
+		NpcHandin,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -254,7 +255,8 @@ namespace Logs {
 		"KSM", // Kernel Samepage Merging
 		"Bot Settings",
 		"Bot Spell Checks",
-		"Bot Spell Type Checks"
+		"Bot Spell Type Checks",
+		"NpcHandin"
 	};
 }
 

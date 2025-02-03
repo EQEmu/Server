@@ -2515,6 +2515,17 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		return false;
 	}
 
+	if (IsMultiQuestEnabled()) {
+		for (auto &i: m_hand_in.items) {
+			if (i.is_multiquest_item && i.item->GetItem()->NoDrop != 0) {
+				auto lde = LootdropEntriesRepository::NewNpcEntity();
+				lde.equip_item   = 0;
+				lde.item_charges = i.item->GetCharges();
+				AddLootDrop(i.item->GetItem(), lde, true);
+			}
+		}
+	}
+
 	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
 		char val1[20] = { 0 };
 

@@ -714,6 +714,18 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 				h.charges > 1 ? fmt::format(" Charges: {}", h.charges) : "",
 				h.attuned ? " (Attuned)" : ""
 			);
+
+			for (int i = 0; i < h.augment_ids.size(); i++) {
+				if (!Strings::EqualFold(h.augment_names[i], "None")) {
+					const uint8 slot_id = (i + 1);
+					handin_items_info += fmt::format(
+						"Augment {}: {} ({})\n",
+						slot_id,
+						h.augment_names[i],
+						h.augment_ids[i]
+					);
+				}
+			}
 		}
 	}
 
@@ -727,6 +739,18 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 				r.charges > 1 ? fmt::format(" Charges: {}", r.charges) : "",
 				r.attuned ? " (Attuned)" : ""
 			);
+
+			for (int i = 0; i < r.augment_ids.size(); i++) {
+				if (!Strings::EqualFold(r.augment_names[i], "None")) {
+					const uint8 slot_id = (i + 1);
+					return_items_info += fmt::format(
+						"Augment {}: {} ({})\n",
+						slot_id,
+						r.augment_names[i],
+						r.augment_ids[i]
+					);
+				}
+			}
 		}
 	}
 
