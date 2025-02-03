@@ -57,12 +57,12 @@ public:
 	{
 		std::string where = fmt::format(
 			"account_name = '{}' AND source_loginserver = '{}'",
-			c.username,
-			c.source_loginserver
+			Strings::Escape(c.username),
+			Strings::Escape(c.source_loginserver)
 		);
 
 		if (!c.email.empty()) {
-			where += fmt::format(" AND account_email = '{}'", c.email);
+			where += fmt::format(" AND account_email = '{}'", Strings::Escape(c.email));
 		}
 		if (c.login_account_id > 0) {
 			where += fmt::format(" AND id = {}", c.login_account_id);
