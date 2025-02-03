@@ -153,6 +153,7 @@ namespace DatabaseSchema {
 			"discovered_items",
 			"faction_values",
 			"friends",
+			"global_buffs",
 			"guild_bank",
 			"guild_members",
 			"guild_permissions",
