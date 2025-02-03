@@ -12,12 +12,12 @@ extern Database database;
 
 class AccountManagement {
 public:
-	static int32 CreateLoginServerAccount(LoginAccountContext c);
-	static uint32 CheckLoginserverUserCredentials(LoginAccountContext c);
+	static uint64 CreateLoginServerAccount(LoginAccountContext c);
+	static uint64 CheckLoginserverUserCredentials(LoginAccountContext c);
 	static bool UpdateLoginserverUserCredentials(LoginAccountContext c);
-	static uint32 CheckExternalLoginserverUserCredentials(LoginAccountContext c);
+	static uint64 CheckExternalLoginserverUserCredentials(LoginAccountContext c);
 	static bool UpdateLoginserverWorldAdminAccountPasswordByName(LoginAccountContext c);
-	static uint32 HealthCheckUserLogin();
+	static uint64 HealthCheckUserLogin();
 
 	static bool CreateLoginserverWorldAdminAccount(
 		const std::string &username,

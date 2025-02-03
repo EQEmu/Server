@@ -5,7 +5,7 @@
 
 EQ::Event::TaskScheduler task_runner;
 
-int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
+uint64 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 {
 	if (LoginAccountsRepository::GetAccountFromContext(database, c).id > 0) {
 		LogWarning(
@@ -18,7 +18,7 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 
 	auto a = LoginAccountsRepository::CreateAccountFromContext(database, c);
 	if (a.id > 0) {
-		return (int32) a.id;
+		return (int64) a.id;
 	}
 
 	LogError("Failed to create local login account for user [{}] !", c.username);
@@ -26,7 +26,7 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 	return 0;
 }
 
-uint32 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
+uint64 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
 	auto a    = LoginAccountsRepository::GetAccountFromContext(database, c);
@@ -117,7 +117,7 @@ bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(LoginAc
 
 constexpr int REQUEST_TIMEOUT_MS = 1500;
 
-uint32 AccountManagement::CheckExternalLoginserverUserCredentials(LoginAccountContext c)
+uint64 AccountManagement::CheckExternalLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto res = task_runner.Enqueue(
 		[&]() -> uint32 {
@@ -240,15 +240,15 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(LoginAccountCo
 	return res.get();
 }
 
-uint32 AccountManagement::HealthCheckUserLogin()
+uint64 AccountManagement::HealthCheckUserLogin()
 {
 	std::string in_account_username = "healthcheckuser";
 	std::string in_account_password = "healthcheckpassword";
 
 	auto res = task_runner.Enqueue(
-		[&]() -> uint32 {
+		[&]() -> uint64 {
 			bool   running = true;
-			uint32 ret     = 0;
+			uint64 ret     = 0;
 
 			EQ::Net::DaybreakConnectionManager           mgr;
 			std::shared_ptr<EQ::Net::DaybreakConnection> c;
