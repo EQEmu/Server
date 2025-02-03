@@ -143,10 +143,16 @@ void command_zone_shard(Client *c, const Seperator *sep)
 			ZoneSolicited
 		);
 	} else {
-		// Simulates accepting the magic map popup in:
-		// https://github.com/The-Heroes-Journey-EQEMU/quests/blob/main/ecommons/player.pl
-		c->SetEntityVariable("magic_map_attune", fmt::format("{} {}", z->short_name, instance_id));
-		parse->EventPlayer(EVENT_POPUP_RESPONSE, c, std::to_string(1460), 0);
+		switch (zone_id) {
+			case Zones::ECOMMONS:
+				c->MovePC(zone_id, instance_id, -356, -1603, 3, 0, 0, ZoneSolicited);
+				break;
+			case Zones::BAZAAR:
+				c->MovePC(zone_id, instance_id, 105, -175, -15, 65, 0, ZoneSolicited);
+			default: {
+				c->MovePC(zone_id, instance_id, 0.0, 0.0, 0.0, 0.0, 0, ZoneToSafeCoords);
+			}
+		}
 	}
 }
 
