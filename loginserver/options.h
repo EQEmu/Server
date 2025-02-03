@@ -64,9 +64,6 @@ public:
 	inline void AutoCreateAccounts(bool b) { auto_create_accounts = b; }
 	inline bool CanAutoCreateAccounts() const { return auto_create_accounts; }
 
-	inline void AutoLinkAccounts(bool b) { auto_link_accounts = b; }
-	inline bool CanAutoLinkAccounts() const { return auto_link_accounts; }
-
 	inline void EQEmuLoginServerAddress(const std::string& v) { eqemu_loginserver_address = v; }
 	inline std::string GetEQEmuLoginServerAddress() const { return eqemu_loginserver_address; }
 
@@ -105,8 +102,6 @@ private:
 	bool        allow_token_login;
 	bool        show_player_count;
 	bool        auto_create_accounts;
-	bool        auto_link_accounts;
-	bool        update_insecure_passwords;
 	int         encryption_mode;
 	int         max_expansions_mask;
 	std::string eqemu_loginserver_address;

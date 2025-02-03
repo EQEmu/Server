@@ -38,7 +38,7 @@ public:
 	LSClientVersion GetClientVersion() const { return m_client_version; }
 	std::shared_ptr<EQStreamInterface> GetConnection() { return m_connection; }
 
-	void AttemptLoginAccountCreation(const std::string &user, const std::string &pass, const std::string &loginserver);
+	void AttemptLoginAccountCreation(LoginAccountContext c);
 
 	void SendFailedLogin();
 

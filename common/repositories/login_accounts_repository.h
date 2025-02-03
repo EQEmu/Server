@@ -77,6 +77,17 @@ public:
 
 		return e;
 	}
+
+	static int UpdateAccountPassword(Database &db, LoginAccounts a, std::string password)
+	{
+		LoginAccountContext c;
+		c.username = a.account_name;
+		c.password = password;
+		auto e = EncryptPasswordFromContext(c);
+		a.account_password = e.password;
+
+		return LoginAccountsRepository::UpdateOne(db, a);
+	}
 };
 
 #endif //EQEMU_LOGIN_ACCOUNTS_REPOSITORY_H

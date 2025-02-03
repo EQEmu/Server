@@ -118,17 +118,16 @@ void LoadServerConfig()
 	 * Account
 	 */
 	server.options.AutoCreateAccounts(server.config.GetVariableBool("account", "auto_create_accounts", true));
-	server.options.AutoLinkAccounts(server.config.GetVariableBool("account", "auto_link_accounts", false));
 
-#ifdef LSPX
-	server.options.EQEmuLoginServerAddress(
-		server.config.GetVariableString(
-			"general",
-			"eqemu_loginserver_address",
-			"login.eqemulator.net:5999"
-		)
-	);
-#endif
+	if (std::getenv("LSPX")) {
+		server.options.EQEmuLoginServerAddress(
+			server.config.GetVariableString(
+				"general",
+				"eqemu_loginserver_address",
+				"login.eqemulator.net:5999"
+			)
+		);
+	}
 
 	/**
 	 * Default Loginserver Name (Don't change)
@@ -277,9 +276,10 @@ int main(int argc, char **argv)
 	LogInfo("[Config] [ClientConfiguration] DisplayExpansions [{}]", server.options.IsDisplayExpansions());
 	LogInfo("[Config] [ClientConfiguration] MaxExpansions [{}]", server.options.GetMaxExpansions());
 
-#ifdef LSPX
-	LogInfo("[Config] [Account] CanAutoLinkAccounts [{}]", server.options.CanAutoLinkAccounts());
-#endif
+	if (std::getenv("LSPX")) {
+		LogInfo("[Config] [Account] LSPX [on]");
+	}
+
 	LogInfo("[Config] [WorldServer] IsRejectingDuplicateServers [{}]", server.options.IsRejectingDuplicateServers());
 	LogInfo("[Config] [WorldServer] IsUnregisteredAllowed [{}]", server.options.IsUnregisteredAllowed());
 	LogInfo("[Config] [WorldServer] ShowPlayerCount [{}]", server.options.IsShowPlayerCountEnabled());
@@ -293,8 +293,6 @@ int main(int argc, char **argv)
 	);
 	LogInfo("[Config] [Security] GetEncryptionMode [{}]", server.options.GetEncryptionMode());
 	LogInfo("[Config] [Security] IsTokenLoginAllowed [{}]", server.options.IsTokenLoginAllowed());
-
-	Encryption::SetEncryptionMode(server.options.GetEncryptionMode());
 
 	Timer keepalive(INTERSERVER_TIMER); // does auto-reconnect
 
