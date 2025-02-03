@@ -2627,8 +2627,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			
 			bool is_in_same_group_or_raid = (
 				pet_owner_is_client ||
-				(pet_owner_is_bot && owner->IsInGroupOrRaid(ulimate_owner, RuleB(Bots, SameRaidGroupForXP))) ||
-				(owner_is_client && give_exp->IsInGroupOrRaid(ulimate_owner, RuleB(Bots, SameRaidGroupForXP)))
+				(pet_owner_is_bot && owner->IsInGroupOrRaid(ulimate_owner)) ||
+				(owner_is_client && give_exp->IsInGroupOrRaid(ulimate_owner))
 			);
 
 			give_exp = (is_in_same_group_or_raid ? give_exp->GetUltimateOwner() : nullptr);
