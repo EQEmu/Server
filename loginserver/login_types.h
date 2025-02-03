@@ -95,6 +95,25 @@ enum LSClientStatus {
 	cs_logged_in
 };
 
+struct LoginWorldContext {
+	std::string long_name;
+	std::string short_name;
+	std::string password;
+	std::string password_hash;
+	int64       admin_id = 0;
+};
+
+struct LoginWorldAdminAccountContext {
+	int64 id;
+	std::string username;
+	std::string password;
+	std::string password_hash;
+	std::string email;
+	std::string first_name;
+	std::string last_name;
+	std::string ip_address;
+};
+
 struct LoginAccountContext {
 	std::string username;
 	std::string password;

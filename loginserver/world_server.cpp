@@ -3,6 +3,8 @@
 #include "login_types.h"
 #include "../common/ip_util.h"
 #include "../common/strings.h"
+#include "../common/repositories/login_world_servers_repository.h"
+#include "../common/repositories/login_server_admins_repository.h"
 
 extern LoginServer server;
 extern Database    database;
@@ -390,61 +392,76 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 		server.server_manager->DestroyServerByName(m_server_long_name, m_server_short_name, this);
 	}
 
-	uint32 world_server_admin_id = 0;
+	LoginWorldContext c;
+	c.long_name  = m_server_long_name;
+	c.short_name = m_server_short_name;
+
+	LoginServerAdminsRepository::LoginServerAdmins admin;
 
 	// Handle Admin Authentication
 	if (!m_account_name.empty() && !m_account_password.empty()) {
-		LoginDatabase::DbLoginServerAdmin admin = server.db->GetLoginServerAdmin(m_account_name);
-		if (admin.loaded && WorldServer::ValidateWorldServerAdminLogin(admin.id, m_account_name, m_account_password, admin.account_password)) {
-			LogDebug("Authenticated world admin [{}] ({}) for world [{}]", m_account_name, admin.id, m_server_short_name);
-			world_server_admin_id = admin.id;
+		admin = LoginServerAdminsRepository::GetByName(database, m_account_name);
+
+		LoginWorldAdminAccountContext ac;
+		ac.id            = admin.id;
+		ac.username      = m_account_name;
+		ac.password      = m_account_password;
+		ac.password_hash = admin.account_password;
+
+		if (admin.id && WorldServer::ValidateWorldServerAdminLogin(ac, admin)) {
+			LogDebug(
+				"Authenticated world admin [{}] ({}) for world [{}]",
+				m_account_name,
+				admin.id,
+				m_server_short_name
+			);
+			c.admin_id = admin.id;
 			m_is_server_authorized_to_list = true;
 		}
 	}
 
-	LoginDatabase::DbWorldRegistration
-		r = server.db->GetWorldRegistration(
-		m_server_short_name,
-		m_server_long_name,
-		world_server_admin_id
-	);
-
-	if (!r.loaded) {
+	auto world = LoginWorldServersRepository::GetFromWorldContext(database, c);
+	if (!world.id) {
 		if (!server.options.IsUnregisteredAllowed()) {
-			LogError("WorldServer [{}] is not registered, and unregistered servers are not allowed", m_server_long_name);
+			LogError("WorldServer [{}] is not registered, and unregistered servers are not allowed",
+					 m_server_long_name);
 			return;
 		}
 
 		LogInfo("Server [{}] is not registered, handling as unregistered", m_server_long_name);
 		m_is_server_authorized_to_list = true;
 
-		uint32 server_admin_id = 0;
-		if (!m_account_name.empty() && !m_account_password.empty()) {
-			LoginDatabase::DbLoginServerAdmin admin = server.db->GetLoginServerAdmin(m_account_name);
-			if (admin.loaded && WorldServer::ValidateWorldServerAdminLogin(admin.id, m_account_name, m_account_password, admin.account_password)) {
-				server_admin_id = admin.id;
-			}
-		}
-
-		if (!server.db->CreateWorldRegistration(m_server_long_name, m_server_short_name, m_remote_ip_address, m_server_id, server_admin_id)) {
+		auto w = LoginWorldServersRepository::NewEntity();
+		w.long_name                 = m_server_long_name;
+		w.short_name                = m_server_short_name;
+		w.last_ip_address           = m_remote_ip_address;
+		w.login_server_list_type_id = 3;
+		w.last_login_date           = std::time(nullptr);
+		auto created = LoginWorldServersRepository::InsertOne(database, w);
+		if (!created.id) {
 			LogError("Failed to auto-register world server [{}]", m_server_long_name);
 			return;
 		}
-	} else {
-		m_server_description = r.server_description;
-		m_server_id = r.server_id;
-		m_is_server_trusted = r.is_server_trusted;
-		m_server_list_type_id = r.server_list_type;
+
+		LogInfo(
+			"Auto-registered world server [{}] with ID [{}]",
+			m_server_long_name,
+			created.id
+		);
+	}
+	else {
+		m_server_description           = world.tag_description;
+		m_server_id                    = world.id;
+		m_is_server_trusted            = world.is_server_trusted;
+		m_server_list_type_id          = world.login_server_list_type_id;
 		m_is_server_authorized_to_list = true;
 
-		if (!r.server_admin_account_name.empty() && !r.server_admin_account_password.empty()) {
-			if (r.server_admin_account_name != m_account_name ||
-				!WorldServer::ValidateWorldServerAdminLogin(r.server_admin_id, m_account_name, m_account_password, r.server_admin_account_password)) {
-				LogError("Server [{}] attempted to log in but account/password did not match the registered entry", m_server_long_name);
-				return;
-			}
-			LogInfo("Server [{}] successfully authenticated", m_server_long_name);
-		}
+		LogInfo(
+			"Server ID [{}] long_name [{}] short_name [{}] successfully authenticated",
+			world.id,
+			world.long_name,
+			world.short_name
+		);
 	}
 
 	LogInfo(
@@ -454,15 +471,14 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 		m_remote_ip_address
 	);
 
-	server.db->UpdateWorldRegistration(
-		m_server_id,
-		m_server_long_name,
-		m_remote_ip_address
-	);
+	// Update the last login date and IP address
+	world.last_login_date = std::time(nullptr);
+	world.last_ip_address = m_remote_ip_address;
+	LoginWorldServersRepository::UpdateOne(database, world);
 
 	WorldServer::FormatWorldServerName(
 		req->server_long_name,
-		r.server_list_type
+		m_server_list_type_id
 	);
 
 	m_server_long_name = req->server_long_name;
@@ -614,14 +630,12 @@ bool WorldServer::HandleNewWorldserverValidation(LoginserverNewWorldRequest *r)
 }
 
 bool WorldServer::ValidateWorldServerAdminLogin(
-	int world_admin_id,
-	const std::string &world_admin_username,
-	const std::string &world_admin_password,
-	const std::string &world_admin_password_hash
-) {
+	LoginWorldAdminAccountContext &c,
+	LoginServerAdminsRepository::LoginServerAdmins &admin
+)
+{
 	auto encryption_mode = server.options.GetEncryptionMode();
-
-	if (eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, encryption_mode)) {
+	if (eqcrypt_verify_hash(c.username, c.password, c.password_hash, encryption_mode)) {
 		return true;
 	}
 
@@ -630,16 +644,16 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	}
 
 	uint32 insecure_source_encryption_mode = 0;
-	auto verify_encryption = [&](int start, int end) {
+	auto   verify_encryption               = [&](int start, int end) {
 		for (int i = start; i <= end; ++i) {
-			if (i != encryption_mode && eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
+			if (i != encryption_mode && eqcrypt_verify_hash(c.username, c.password, c.password_hash, i)) {
 				LogDebug("Checking for [{}] world admin", GetEncryptionByModeId(i));
 				insecure_source_encryption_mode = i;
 			}
 		}
 	};
 
-	switch (world_admin_password_hash.length()) {
+	switch (c.password_hash.length()) {
 		case CryptoHash::md5_hash_length:
 			verify_encryption(EncryptionModeMD5, EncryptionModeMD5Triple);
 			break;
@@ -654,15 +668,16 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	if (insecure_source_encryption_mode > 0) {
 		LogInfo(
 			"Updated insecure world_admin_username [{}] from mode [{}] ({}) to mode [{}] ({})",
-			world_admin_username,
+			c.username,
 			GetEncryptionByModeId(insecure_source_encryption_mode),
 			insecure_source_encryption_mode,
 			GetEncryptionByModeId(encryption_mode),
 			encryption_mode
 		);
 
-		std::string new_password_hash = eqcrypt_hash(world_admin_username, world_admin_password, encryption_mode);
-		server.db->UpdateLoginWorldAdminAccountPassword(world_admin_id, new_password_hash);
+		admin.account_password = eqcrypt_hash(c.username, c.password, encryption_mode);
+		LoginServerAdminsRepository::UpdateOne(database, admin);
+
 		return true;
 	}
 

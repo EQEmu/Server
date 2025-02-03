@@ -4,7 +4,6 @@ SET(eqlogin_sources
 	account_management.cpp
 	client.cpp
 	client_manager.cpp
-	database.cpp
 	encryption.cpp
 	loginserver_command_handler.cpp
 	loginserver_webserver.cpp
@@ -17,7 +16,6 @@ SET(eqlogin_headers
 	account_management.h
 	client.h
 	client_manager.h
-	database.h
 	encryption.h
 	loginserver_command_handler.h
 	loginserver_webserver.h

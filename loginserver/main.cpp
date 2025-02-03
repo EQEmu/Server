@@ -37,14 +37,6 @@ void LoadDatabaseConnection()
 {
 	LogInfo("MySQL Database Init");
 
-	server.db = new LoginDatabase(
-		server.config.GetVariableString("database", "user", "root"),
-		server.config.GetVariableString("database", "password", ""),
-		server.config.GetVariableString("database", "host", "localhost"),
-		server.config.GetVariableString("database", "port", "3306"),
-		server.config.GetVariableString("database", "db", "peq")
-	);
-
 	if (!database.Connect(
 		server.config.GetVariableString("database", "host", "localhost"),
 		server.config.GetVariableString("database", "user", "root"),
@@ -196,18 +188,11 @@ int main(int argc, char **argv)
 			->StartFileLogs();
 	}
 
-	if (!server.db) {
-		LogError("Database Initialization Failure");
-		LogInfo("Log System Shutdown");
-		return 1;
-	}
-
 	LogInfo("Server Manager Init");
 	server.server_manager = new WorldServerManager();
 	if (!server.server_manager) {
 		LogError("Server Manager Failed to Start");
 		LogInfo("Database System Shutdown");
-		delete server.db;
 		return 1;
 	}
 
@@ -219,7 +204,6 @@ int main(int argc, char **argv)
 		delete server.server_manager;
 
 		LogInfo("Database System Shutdown");
-		delete server.db;
 		return 1;
 	}
 
@@ -268,7 +252,7 @@ int main(int argc, char **argv)
 
 		if (keepalive.Check()) {
 			keepalive.Start();
-			server.db->ping();
+			database.ping();
 		}
 
 		if (!run_server) {
@@ -291,9 +275,6 @@ int main(int argc, char **argv)
 
 	LogInfo("Server Manager Shutdown");
 	delete server.server_manager;
-
-	LogInfo("Database System Shutdown");
-	delete server.db;
 
 	return 0;
 }

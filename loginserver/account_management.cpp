@@ -29,7 +29,7 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 uint32 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
-	auto a = LoginAccountsRepository::GetAccountFromContext(database, c);
+	auto a    = LoginAccountsRepository::GetAccountFromContext(database, c);
 	if (!a.id) {
 		LogError(
 			"account [{}] source_loginserver [{}] not found!",
@@ -93,10 +93,18 @@ bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(LoginAc
 		mode
 	);
 
-	bool updated_account = server.db->UpdateLoginWorldAdminAccountPasswordByUsername(
-		c.username,
-		hash
-	);
+	auto a = LoginServerAdminsRepository::GetByName(database, c.username);
+	if (!a.id) {
+		LogError(
+			"account_name [{}] not found!",
+			c.username
+		);
+
+		return false;
+	}
+
+	a.account_password = hash;
+	auto updated_account = LoginServerAdminsRepository::UpdateOne(database, a);
 
 	LogInfo(
 		"account_name [{}] status [{}]",
@@ -299,7 +307,7 @@ uint32 AccountManagement::HealthCheckUserLogin()
 							break;
 						}
 						case 0x0018: {
-							auto encrypt_size                    = p.Length() - 12;
+							auto encrypt_size = p.Length() - 12;
 							if (encrypt_size % 8 > 0) {
 								encrypt_size = (encrypt_size / 8) * 8;
 							}
@@ -325,11 +333,11 @@ uint32 AccountManagement::HealthCheckUserLogin()
 			mgr.Connect("127.0.0.1", 5999);
 
 			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-			auto &loop = EQ::EventLoop::Get();
+			auto                                  &loop = EQ::EventLoop::Get();
 			while (running) {
 				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > 2000) {
-					ret = 0;
+					ret     = 0;
 					running = false;
 				}
 
@@ -362,7 +370,8 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 		mode
 	);
 
-	if (server.db->DoesLoginserverWorldAdminAccountExist(username)) {
+	auto a = LoginServerAdminsRepository::GetByName(database, username);
+	if (a.id > 0) {
 		LogWarning(
 			"Attempting to create world admin account for user [{}] but already exists!",
 			username
@@ -371,22 +380,21 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 		return false;
 	}
 
-	uint32 created_world_admin_id = server.db->CreateLoginserverWorldAdminAccount(
-		username,
-		hash,
-		first_name,
-		last_name,
-		email,
-		ip_address
-	);
+	a = LoginServerAdminsRepository::NewEntity();
+	a.account_name            = username;
+	a.account_password        = hash;
+	a.first_name              = first_name;
+	a.last_name               = last_name;
+	a.email                   = email;
+	a.registration_ip_address = ip_address;
 
-	if (created_world_admin_id > 0) {
+	if (a.id > 0) {
 		LogInfo(
 			"Account creation success for user [{}] encryption algorithm [{}] ({}) new admin id [{}]",
 			username,
 			GetEncryptionByModeId(mode),
 			mode,
-			created_world_admin_id
+			a.id
 		);
 		return true;
 	}

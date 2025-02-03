@@ -171,14 +171,8 @@ void Client::HandleLogin(const char *data, unsigned int size)
 	if (token_login) {
 		if (server.options.IsTokenLoginAllowed()) {
 			cred          = (&outbuffer[2 + user.length()]);
-			login_success = server.db->GetLoginTokenDataFromToken(
-				cred,
-				m_connection->GetRemoteAddr(),
-				db_account_id,
-				db_loginserver,
-				user
-			);
-
+			// todo: implement token login
+			// SELECT login_server, username, account_id FROM login_tickets WHERE expires > NOW() AND id='{}' AND ip_address='{}' LIMIT 1
 //			login_success ? DoSuccessfulLogin(user, db_account_id, db_loginserver) : SendFailedLogin();
 			SendFailedLogin();
 		}

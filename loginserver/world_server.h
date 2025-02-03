@@ -5,10 +5,10 @@
 #include "../common/net/servertalk_server_connection.h"
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
-#include "database.h"
 #include "../common/event/timer.h"
 #include "login_types.h"
 #include "client.h"
+#include "../common/repositories/login_server_admins_repository.h"
 #include <string>
 #include <memory>
 
@@ -46,16 +46,11 @@ public:
 	void HandleNewWorldserver(LoginserverNewWorldRequest *req);
 	void HandleWorldserverStatusUpdate(LoginserverWorldStatusUpdate *u);
 	bool HandleNewWorldserverValidation(LoginserverNewWorldRequest *r);
-
 	void SendClientAuthToWorld(Client *c);
-
 	static bool ValidateWorldServerAdminLogin(
-		int world_admin_id,
-		const std::string &world_admin_username,
-		const std::string &world_admin_password,
-		const std::string &world_admin_password_hash
+		LoginWorldAdminAccountContext &c,
+		LoginServerAdminsRepository::LoginServerAdmins &admin
 	);
-
 	void SerializeForClientServerList(class SerializeBuffer &out, bool use_local_ip, LSClientVersion version) const;
 
 private:
@@ -74,10 +69,10 @@ private:
 	unsigned int m_server_id;
 	unsigned int m_server_list_type_id;
 	unsigned int m_server_process_type;
-	std::string m_server_description;
-	std::string m_server_long_name;
-	std::string m_server_short_name;
-	std::string m_account_name;
+	std::string  m_server_description;
+	std::string  m_server_long_name;
+	std::string  m_server_short_name;
+	std::string  m_account_name;
 	std::string  m_account_password;
 	std::string  m_remote_ip_address;
 	std::string  m_local_ip;
