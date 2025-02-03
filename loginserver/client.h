@@ -44,7 +44,7 @@ public:
 
 	bool VerifyAndUpdateLoginHash(LoginAccountContext c, const LoginAccountsRepository::LoginAccounts& a);
 
-	void DoSuccessfulLogin(const LoginAccountsRepository::LoginAccounts& a);
+	void DoSuccessfulLogin(LoginAccountsRepository::LoginAccounts& a);
 
 private:
 	EQ::Random                                          m_random;

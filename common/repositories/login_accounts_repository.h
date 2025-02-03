@@ -78,7 +78,7 @@ public:
 		return e;
 	}
 
-	static int UpdateAccountPassword(Database &db, LoginAccounts a, std::string password)
+	static LoginAccounts UpdateAccountPassword(Database &db, LoginAccounts a, std::string password)
 	{
 		LoginAccountContext c;
 		c.username = a.account_name;
@@ -86,7 +86,9 @@ public:
 		auto e = EncryptPasswordFromContext(c);
 		a.account_password = e.password;
 
-		return LoginAccountsRepository::UpdateOne(db, a);
+		int success = LoginAccountsRepository::UpdateOne(db, a);
+
+		return success ? a : NewEntity();
 	}
 };
 

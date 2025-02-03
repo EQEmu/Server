@@ -5,6 +5,7 @@
 #include "../common/strings.h"
 
 extern LoginServer server;
+extern Database database;
 
 WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> worldserver_connection)
 {
@@ -350,12 +351,16 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 	if (m_is_server_trusted) {
 		LogDebug("ServerOP_LSAccountUpdate update processed for: [{}]", r->user_account_name);
 
-		server.db->UpdateLSAccountInfo(
-			r->user_account_id,
-			r->user_account_name,
-			r->user_account_password,
-			r->user_email
-		);
+		LoginAccountContext c{};
+		c.username           = r->user_account_name;
+		c.source_loginserver = "local";
+		auto a = LoginAccountsRepository::GetAccountFromContext(database, c);
+		if (a.id > 0) {
+			a.account_email    = r->user_email;
+			a.account_password = r->user_account_password;
+			a.last_ip_address  = "0.0.0.0";
+			LoginAccountsRepository::UpdateOne(database, a);
+		}
 	}
 }
 

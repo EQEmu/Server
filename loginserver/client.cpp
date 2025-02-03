@@ -223,19 +223,20 @@ void Client::HandleLogin(const char *data, unsigned int size)
 			uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
 			LogInfo("LSPX | External login account id [{}]", account_id);
 			if (account_id > 0) {
-				if (!LoginAccountsRepository::UpdateAccountPassword(database, a, cred)) {
+				auto updated_account = LoginAccountsRepository::UpdateAccountPassword(database, a, cred);
+				if (!updated_account.id) {
 					LogError("Failed to update eqemu account [{}] password hash", account_id);
 					SendFailedLogin();
 					return;
 				}
 
 				LogInfo("Updating eqemu account [{}] password hash", account_id);
-				DoSuccessfulLogin(a);
+				DoSuccessfulLogin(updated_account);
 				return;
 			}
 		}
 
-		LogDebug("Success [{}]", (login_success ? "true" : "false"));
+		LogInfo("Successful login [{}]", (login_success ? "true" : "false"));
 		login_success ? DoSuccessfulLogin(a) : SendFailedLogin();
 		return;
 	}
@@ -345,24 +346,24 @@ void Client::SendFailedLogin()
 	m_stored_password.clear();
 
 	// unencrypted
-	LoginBaseMessage base_header{};
-	base_header.sequence     = m_login_base_message.sequence; // login (3)
-	base_header.encrypt_type = m_login_base_message.encrypt_type;
+	LoginBaseMessage h{};
+	h.sequence     = m_login_base_message.sequence; // login (3)
+	h.encrypt_type = m_login_base_message.encrypt_type;
 
 	// encrypted
-	PlayerLoginReply login_reply{};
-	login_reply.base_reply.success      = false;
-	login_reply.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
+	PlayerLoginReply r{};
+	r.base_reply.success      = false;
+	r.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
 	char encrypted_buffer[80] = {0};
-	auto rc                   = eqcrypt_block((const char *) &login_reply, sizeof(login_reply), encrypted_buffer, 1);
+	auto rc                   = eqcrypt_block((const char *) &r, sizeof(r), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block for failed login");
 	}
 
 	constexpr int       outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
 	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
-	outapp.WriteData(&base_header, sizeof(base_header));
+	outapp.WriteData(&h, sizeof(h));
 	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
 	m_connection->QueuePacket(&outapp);
@@ -424,16 +425,10 @@ bool Client::VerifyAndUpdateLoginHash(LoginAccountContext c, const LoginAccounts
 	return false;
 }
 
-void Client::DoSuccessfulLogin(const LoginAccountsRepository::LoginAccounts &a)
+void Client::DoSuccessfulLogin(LoginAccountsRepository::LoginAccounts &a)
 {
 	m_stored_username.clear();
 	m_stored_password.clear();
-
-	// uint32_t    id;
-	//		std::string account_name;
-	//		std::string account_password;
-	//		std::string account_email;
-	//		std::string source_loginserver;
 
 	LogInfo(
 		"Successful login for user id [{}] account name [{}] login server [{}]",
@@ -447,7 +442,9 @@ void Client::DoSuccessfulLogin(const LoginAccountsRepository::LoginAccounts &a)
 	in_addr in{};
 	in.s_addr = m_connection->GetRemoteIP();
 
-	server.db->UpdateLSAccountData(a.id, std::string(inet_ntoa(in)));
+	a.last_ip_address = std::string(inet_ntoa(in));
+	LoginAccountsRepository::UpdateOne(database, a);
+
 	GenerateRandomLoginKey();
 
 	m_account_id       = a.id;
@@ -462,27 +459,28 @@ void Client::DoSuccessfulLogin(const LoginAccountsRepository::LoginAccounts &a)
 	h.unk3         = m_login_base_message.unk3;
 
 	// not serializing any of the variable length strings so just use struct directly
-	PlayerLoginReply lr{};
-	lr.base_reply.success         = true;
-	lr.base_reply.error_str_id    = 101; // No Error
-	lr.unk1                       = 0;
-	lr.unk2                       = 0;
-	lr.lsid                       = a.id;
-	lr.failed_attempts            = 0;
-	lr.show_player_count          = server.options.IsShowPlayerCountEnabled();
-	lr.offer_min_days             = 99;
-	lr.offer_min_views            = -1;
-	lr.offer_cooldown_minutes     = 0;
-	lr.web_offer_number           = 0;
-	lr.web_offer_min_days         = 99;
-	lr.web_offer_min_views        = -1;
-	lr.web_offer_cooldown_minutes = 0;
-	memcpy(lr.key, m_key.c_str(), m_key.size());
+	PlayerLoginReply r{};
+	r.base_reply.success         = true;
+	r.base_reply.error_str_id    = 101; // No Error
+	r.unk1                       = 0;
+	r.unk2                       = 0;
+	r.lsid                       = a.id;
+	r.failed_attempts            = 0;
+	r.show_player_count          = server.options.IsShowPlayerCountEnabled();
+	r.offer_min_days             = 99;
+	r.offer_min_views            = -1;
+	r.offer_cooldown_minutes     = 0;
+	r.web_offer_number           = 0;
+	r.web_offer_min_days         = 99;
+	r.web_offer_min_views        = -1;
+	r.web_offer_cooldown_minutes = 0;
+	memcpy(r.key, m_key.c_str(), m_key.size());
 
-	SendExpansionPacketData(lr);
+	SendExpansionPacketData(r);
 
 	char encrypted_buffer[80] = {0};
-	auto rc                   = eqcrypt_block((const char *) &lr, sizeof(lr), encrypted_buffer, 1);
+
+	auto rc = eqcrypt_block((const char *) &r, sizeof(r), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block");
 	}

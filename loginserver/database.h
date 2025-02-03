@@ -41,8 +41,6 @@ public:
 		const std::string &long_name,
 		uint32 login_world_server_admin_id
 	);
-	void UpdateLSAccountData(unsigned int id, std::string ip_address);
-	void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email);
 	void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
 	bool CreateWorldRegistration(
 		std::string server_long_name,

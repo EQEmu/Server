@@ -132,36 +132,6 @@ LoginDatabase::DbWorldRegistration LoginDatabase::GetWorldRegistration(
 	return r;
 }
 
-void LoginDatabase::UpdateLSAccountData(unsigned int id, std::string ip_address)
-{
-	auto query = fmt::format(
-		"UPDATE login_accounts SET last_ip_address = '{}', last_login_date = NOW() where id = {}",
-		ip_address,
-		id
-	);
-
-	QueryDatabase(query);
-}
-
-void LoginDatabase::UpdateLSAccountInfo(
-	unsigned int id,
-	std::string name,
-	std::string password,
-	std::string email
-)
-{
-	auto query = fmt::format(
-		"REPLACE login_accounts SET id = {}, account_name = '{}', account_password = sha('{}'), "
-		"account_email = '{}', last_ip_address = '0.0.0.0', last_login_date = now()",
-		id,
-		Strings::Escape(name),
-		Strings::Escape(password),
-		Strings::Escape(email)
-	);
-
-	QueryDatabase(query);
-}
-
 void LoginDatabase::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
 	auto query = fmt::format(
