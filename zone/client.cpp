@@ -13450,3 +13450,48 @@ std::string Client::GetAccountBucketRemaining(std::string bucket_name)
 
 	return DataBucket::GetDataRemaining(k);
 }
+
+std::string Client::GetBandolierName(uint8 bandolier_slot)
+{
+	if (!EQ::ValueWithin(bandolier_slot, 0, 3)) {
+		return std::string();
+	}
+
+	return GetPP().bandoliers[bandolier_slot].Name;
+}
+
+uint32 Client::GetBandolierItemIcon(uint8 bandolier_slot, uint8 slot_id)
+{
+	if (
+		!EQ::ValueWithin(bandolier_slot, 0, 3) ||
+		!EQ::ValueWithin(slot_id, 0, 3)
+	) {
+		return 0;
+	}
+
+	return GetPP().bandoliers[bandolier_slot].Items[slot_id].Icon;
+}
+
+uint32 Client::GetBandolierItemID(uint8 bandolier_slot, uint8 slot_id)
+{
+	if (
+		!EQ::ValueWithin(bandolier_slot, 0, 3) ||
+		!EQ::ValueWithin(slot_id, 0, 3)
+	) {
+		return 0;
+	}
+
+	return GetPP().bandoliers[bandolier_slot].Items[slot_id].ID;
+}
+
+std::string Client::GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id)
+{
+	if (
+		!EQ::ValueWithin(bandolier_slot, 0, 3) ||
+		!EQ::ValueWithin(slot_id, 0, 3)
+	) {
+		return std::string();
+	}
+
+	return GetPP().bandoliers[bandolier_slot].Items[slot_id].Name;
+}
