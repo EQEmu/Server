@@ -6374,7 +6374,7 @@ ALTER TABLE `trader`
 	ADD INDEX `idx_trader_listing_date` (`listing_date`);
 )",
 		.content_schema_update = false
-	}
+	},
 	ManifestEntry{
 		.version = 9297,
 		.description = "2025_01_26_trader_table_bazaar_search_indexes.sql",
