@@ -47,7 +47,7 @@ ln -s ./quests/lua_modules ./lua_modules
 ln -s ./quests/plugins ./plugins
 
 echo "# Running world database updates"
-./bin/world database:updates --skip-backup
+FORCE_INTERACTIVE=1 ./bin/world database:updates --skip-backup --force
 
 echo "# Running shared_memory"
 ./bin/shared_memory
