@@ -92,11 +92,6 @@ public:
 		std::string updated_at;
 	};
 
-	LoginDatabase::DbLoginServerAccount GetLoginServerAccountByAccountName(
-		const std::string &account_name,
-		const std::string &source_loginserver = "local"
-	);
-
 	bool UpdateLoginWorldAdminAccountPassword(
 		unsigned int id,
 		const std::string &admin_account_password_hash

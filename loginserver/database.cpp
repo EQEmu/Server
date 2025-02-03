@@ -338,36 +338,3 @@ LoginDatabase::DbLoginServerAdmin LoginDatabase::GetLoginServerAdmin(const std::
 
 	return r;
 }
-
-LoginDatabase::DbLoginServerAccount LoginDatabase::GetLoginServerAccountByAccountName(
-	const std::string &account_name,
-	const std::string &source_loginserver
-)
-{
-	auto query = fmt::format(
-		"SELECT id, account_name, account_password, account_email, source_loginserver, last_ip_address, last_login_date, "
-		"created_at, updated_at"
-		" FROM login_accounts WHERE account_name = '{}' and source_loginserver = '{}' LIMIT 1",
-		Strings::Escape(account_name),
-		Strings::Escape(source_loginserver)
-	);
-
-	auto results = QueryDatabase(query);
-
-	LoginDatabase::DbLoginServerAccount r{};
-	if (results.RowCount() == 1) {
-		auto row = results.begin();
-		r.loaded             = true;
-		r.id                 = Strings::ToUnsignedInt(row[0]);
-		r.account_name       = row[1];
-		r.account_password   = row[2];
-		r.account_email      = row[3];
-		r.source_loginserver = row[4];
-		r.last_ip_address    = row[5];
-		r.last_login_date    = row[6];
-		r.created_at         = row[7];
-		r.updated_at         = row[8];
-	}
-
-	return r;
-}

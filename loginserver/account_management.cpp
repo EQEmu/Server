@@ -82,30 +82,18 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 uint32 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
-
-	LoginDatabase::DbLoginServerAccount
-		login_server_admin = server.db->GetLoginServerAccountByAccountName(
-		c.username,
-		c.source_loginserver
-	);
-
-	if (!login_server_admin.loaded) {
+	auto a = LoginAccountsRepository::GetAccountFromContext(database, c);
+	if (!a.id) {
 		LogError(
 			"account [{}] source_loginserver [{}] not found!",
 			c.username,
 			c.source_loginserver
 		);
 
-		return false;
+		return 0;
 	}
 
-	bool validated_credentials = eqcrypt_verify_hash(
-		c.username,
-		c.password,
-		login_server_admin.account_password,
-		mode
-	);
-
+	bool validated_credentials = eqcrypt_verify_hash(c.username, c.password, a.account_password, mode);
 	if (!validated_credentials) {
 		LogError(
 			"account [{}] source_loginserver [{}] invalid credentials!",
@@ -122,7 +110,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
 		c.source_loginserver
 	);
 
-	return login_server_admin.id;
+	return a.id;
 }
 
 bool AccountManagement::UpdateLoginserverUserCredentials(LoginAccountContext c)

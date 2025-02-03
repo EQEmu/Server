@@ -187,21 +187,17 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				LoginDatabase::DbLoginServerAccount
-					login_server_account = server.db->GetLoginServerAccountByAccountName(
-					username
-				);
+				LoginAccountContext c;
+				c.username = username;
+				c.password = password;
 
-				if (!login_server_account.loaded) {
+				auto a = LoginAccountsRepository::GetAccountFromContext(database, c);
+				if (!a.id) {
 					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Failed to find associated loginserver account!";
 					LoginserverWebserver::SendResponse(response, res);
 					return;
 				}
-
-				LoginAccountContext c;
-				c.username = username;
-				c.password = password;
 
 				bool success = AccountManagement::UpdateLoginserverUserCredentials(c);
 				if (success) {
@@ -235,22 +231,17 @@ namespace LoginserverWebserver {
 
 				std::string source_loginserver = "eqemu";
 
-				LoginDatabase::DbLoginServerAccount
-					login_server_account = server.db->GetLoginServerAccountByAccountName(
-					username,
-					source_loginserver
-				);
-
-				if (!login_server_account.loaded) {
-					response["error"] = "Failed to find associated loginserver account!";
-					LoginserverWebserver::SendResponse(response, res);
-					return;
-				}
-
 				LoginAccountContext c;
 				c.username           = username;
 				c.password           = password;
 				c.source_loginserver = source_loginserver;
+
+				auto a = LoginAccountsRepository::GetAccountFromContext(database, c);
+				if (!a.id) {
+					response["error"] = "Failed to find associated loginserver account!";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
 
 				bool success = AccountManagement::UpdateLoginserverUserCredentials(c);
 				if (success) {
