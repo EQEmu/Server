@@ -38,7 +38,7 @@ public:
 			a.account_password = e.password;
 		}
 
-		a.id				 = c.login_account_id > 0 ? c.login_account_id : GetFreeID(db, c.source_loginserver);
+		a.id                 = c.login_account_id > 0 ? c.login_account_id : GetFreeID(db, c.source_loginserver);
 		a.account_name       = c.username;
 		a.account_email      = !c.email.empty() ? c.email : "local_creation";
 		a.source_loginserver = c.source_loginserver;
