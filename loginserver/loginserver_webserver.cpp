@@ -4,6 +4,7 @@
 #include "../common/json/json.h"
 #include "../common/strings.h"
 #include "account_management.h"
+#include "../common/repositories/login_api_tokens_repository.h"
 
 extern LoginServer server;
 
@@ -24,9 +25,9 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Json::Value response;
-				auto        iter = server.server_manager->GetWorldServers().begin();
-				for (const auto& s : server.server_manager->GetWorldServers()) {
+				Json::Value     response;
+				auto            iter = server.server_manager->GetWorldServers().begin();
+				for (const auto &s: server.server_manager->GetWorldServers()) {
 					Json::Value row;
 					row["server_long_name"]    = s->GetServerLongName();
 					row["server_short_name"]   = s->GetServerShortName();
@@ -273,8 +274,8 @@ namespace LoginserverWebserver {
 				}
 
 				LoginAccountContext c;
-				c.username           = username;
-				c.password           = password;
+				c.username = username;
+				c.password = password;
 				uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
 
 				if (account_id > 0) {
@@ -350,7 +351,7 @@ namespace LoginserverWebserver {
 
 	bool LoginserverWebserver::TokenManager::AuthCanRead(const httplib::Request &request, httplib::Response &res)
 	{
-		LoginserverWebserver::TokenManager::token_data
+		LoginserverWebserver::TokenManager::Token
 			user_token = LoginserverWebserver::TokenManager::CheckApiAuthorizationHeaders(request);
 
 		if (!user_token.can_read) {
@@ -377,7 +378,7 @@ namespace LoginserverWebserver {
 
 	bool LoginserverWebserver::TokenManager::AuthCanWrite(const httplib::Request &request, httplib::Response &res)
 	{
-		LoginserverWebserver::TokenManager::token_data
+		LoginserverWebserver::TokenManager::Token
 			user_token = LoginserverWebserver::TokenManager::CheckApiAuthorizationHeaders(request);
 
 		if (!user_token.can_write) {
@@ -402,14 +403,14 @@ namespace LoginserverWebserver {
 		return true;
 	}
 
-	LoginserverWebserver::TokenManager::token_data
+	LoginserverWebserver::TokenManager::Token
 	LoginserverWebserver::TokenManager::CheckApiAuthorizationHeaders(
 		const httplib::Request &request
 	)
 	{
 		std::string authorization_key;
 
-		LoginserverWebserver::TokenManager::token_data user_token{};
+		LoginserverWebserver::TokenManager::Token user_token{};
 
 		for (const auto &header: request.headers) {
 			auto header_key   = header.first;
@@ -444,28 +445,16 @@ namespace LoginserverWebserver {
 
 	void TokenManager::LoadApiTokens()
 	{
-		auto      results     = server.db->GetLoginserverApiTokens();
-		int       token_count = 0;
-		for (auto row         = results.begin(); row != results.end(); ++row) {
-			LoginserverWebserver::TokenManager::token_data token_data;
-			token_data.token     = row[0];
-			token_data.can_write = Strings::ToInt(row[1]) > 0;
-			token_data.can_read  = Strings::ToInt(row[2]) > 0;
+		int token_count = 0;
 
-			LogDebug(
-				"Inserting api token to internal list [{}] write {} read {}",
-				token_data.token,
-				token_data.can_read,
-				token_data.can_write
-			);
+		for (auto &t: LoginApiTokensRepository::GetWhere(database, "TRUE ORDER BY id ASC")) {
+			LoginserverWebserver::TokenManager::Token td;
+			td.id        = t.id;
+			td.token     = t.token;
+			td.can_write = t.can_write;
+			td.can_read  = t.can_read;
 
-			server.token_manager->loaded_api_tokens.emplace(
-				std::make_pair(
-					token_data.token,
-					token_data
-				)
-			);
-
+			server.token_manager->loaded_api_tokens.emplace(std::make_pair(td.token, td));
 			token_count++;
 		}
 
@@ -479,7 +468,7 @@ namespace LoginserverWebserver {
 		return !(it == server.token_manager->loaded_api_tokens.end());
 	}
 
-	LoginserverWebserver::TokenManager::token_data TokenManager::GetToken(
+	LoginserverWebserver::TokenManager::Token TokenManager::GetToken(
 		const std::string &token
 	)
 	{

@@ -5,6 +5,7 @@
 #include "login_server.h"
 #include "loginserver_webserver.h"
 #include "account_management.h"
+#include "../common/repositories/login_api_tokens_repository.h"
 
 extern LoginServer server;
 
@@ -55,9 +56,15 @@ namespace LoginserverCommandHandler {
 			exit(1);
 		}
 
-		std::string token = server.db->CreateLoginserverApiToken(can_write, can_read);
-		if (!token.empty()) {
-			LogInfo("Created Loginserver API token [{}]", token);
+		auto t = LoginApiTokensRepository::NewEntity();
+		t.can_read   = can_read;
+		t.can_write  = can_write;
+		t.token      = EQ::Util::UUID::Generate().ToString();
+		t.created_at = std::time(nullptr);
+
+		auto created = LoginApiTokensRepository::InsertOne(database, t);
+		if (created.id) {
+			LogInfo("Created Loginserver API token [{}] [{}]", created.id, created.token);
 		}
 	}
 
@@ -72,9 +79,10 @@ namespace LoginserverCommandHandler {
 		server.token_manager = new LoginserverWebserver::TokenManager;
 		server.token_manager->LoadApiTokens();
 
-		for (auto &it : server.token_manager->loaded_api_tokens) {
+		for (auto &it: server.token_manager->loaded_api_tokens) {
 			LogInfo(
-				"token [{}] can_write [{}] can_read [{}]",
+				"token id [{}] [{}] can_write [{}] can_read [{}]",
+				it.second.id,
 				it.second.token,
 				it.second.can_write,
 				it.second.can_read

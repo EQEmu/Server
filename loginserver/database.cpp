@@ -216,32 +216,6 @@ bool LoginDatabase::CreateWorldRegistration(
 	return true;
 }
 
-std::string LoginDatabase::CreateLoginserverApiToken(
-	bool write_mode,
-	bool read_mode
-)
-{
-	std::string token = EQ::Util::UUID::Generate().ToString();
-	auto        query = fmt::format(
-		"INSERT INTO login_api_tokens (token, can_write, can_read, created_at) VALUES ('{}', {}, {}, NOW())",
-		token,
-		(write_mode ? "1" : "0"),
-		(read_mode ? "1" : "0")
-	);
-
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return "";
-	}
-
-	return token;
-}
-
-MySQLRequestResult LoginDatabase::GetLoginserverApiTokens()
-{
-	return QueryDatabase("SELECT token, can_write, can_read FROM login_api_tokens");
-}
-
 uint32 LoginDatabase::CreateLoginserverWorldAdminAccount(
 	const std::string &account_name,
 	const std::string &account_password,

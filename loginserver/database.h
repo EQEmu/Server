@@ -49,8 +49,6 @@ public:
 		unsigned int &id,
 		unsigned int &server_admin_id
 	);
-	std::string CreateLoginserverApiToken(bool write_mode, bool read_mode);
-	MySQLRequestResult GetLoginserverApiTokens();
 
 	uint32 CreateLoginserverWorldAdminAccount(
 		const std::string &account_name,

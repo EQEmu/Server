@@ -12,7 +12,8 @@ namespace LoginserverWebserver {
 	public:
 		TokenManager() = default;
 
-		struct token_data {
+		struct Token {
+			int id;
 			std::string token;
 			bool can_read;
 			bool can_write;
@@ -20,12 +21,12 @@ namespace LoginserverWebserver {
 			std::string remote_address;
 		};
 
-		std::map<std::string, token_data> loaded_api_tokens{};
+		std::map<std::string, Token> loaded_api_tokens{};
 
 		void LoadApiTokens();
 		static bool TokenExists(const std::string &token);
-		token_data GetToken(const std::string &token);
-		static token_data CheckApiAuthorizationHeaders(const httplib::Request &request);
+		Token GetToken(const std::string &token);
+		static Token CheckApiAuthorizationHeaders(const httplib::Request &request);
 		static bool AuthCanRead(const httplib::Request &request, httplib::Response &res);
 		static bool AuthCanWrite(const httplib::Request &request, httplib::Response &res);
 	};
