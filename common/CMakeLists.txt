@@ -89,6 +89,7 @@ SET(common_sources
     skills.cpp
     skill_caps.cpp
     spdat.cpp
+    spdat_bot.cpp
     strings.cpp
     struct_strategy.cpp
     textures.cpp

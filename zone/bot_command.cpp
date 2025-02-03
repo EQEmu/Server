@@ -64,1168 +64,6 @@ extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern TaskManager *task_manager;
 
-bcst_map                               bot_command_spells;
-bcst_required_bot_classes_map          required_bots_map;
-bcst_required_bot_classes_map_by_class required_bots_map_by_class;
-
-class BCSpells
-{
-public:
-	static void Load() {
-		bot_command_spells.clear();
-		bcst_levels_map bot_levels_map;
-
-		for (int i = BCEnum::SpellTypeFirst; i <= BCEnum::SpellTypeLast; ++i) {
-			bot_command_spells[static_cast<BCEnum::SpType>(i)];
-			bot_levels_map[static_cast<BCEnum::SpType>(i)];
-		}
-
-		for (int spell_id = 2; spell_id < SPDAT_RECORDS; ++spell_id) {
-			if (!IsValidSpell(spell_id)) {
-				continue;
-			}
-
-			if (spells[spell_id].player_1[0] == '\0') {
-				continue;
-			}
-
-			if (
-				spells[spell_id].target_type != ST_Target &&
-				spells[spell_id].cast_restriction != 0
-				) {
-				continue;
-			}
-
-			auto target_type = BCEnum::TT_None;
-			switch (spells[spell_id].target_type) {
-				case ST_GroupTeleport:
-					target_type = BCEnum::TT_GroupV1;
-					break;
-				case ST_AECaster:
-					// Disabled until bot code works correctly
-					//target_type = BCEnum::TT_AECaster;
-					break;
-				case ST_AEBard:
-					// Disabled until bot code works correctly
-					//target_type = BCEnum::TT_AEBard;
-					break;
-				case ST_Target:
-					switch (spells[spell_id].cast_restriction) {
-						case 0:
-							target_type = BCEnum::TT_Single;
-							break;
-						case 104:
-							target_type = BCEnum::TT_Animal;
-							break;
-						case 105:
-							target_type = BCEnum::TT_Plant;
-							break;
-						case 118:
-							target_type = BCEnum::TT_Summoned;
-							break;
-						case 120:
-							target_type = BCEnum::TT_Undead;
-							break;
-						default:
-							break;
-					}
-					break;
-				case ST_Self:
-					target_type = BCEnum::TT_Self;
-					break;
-				case ST_AETarget:
-					// Disabled until bot code works correctly
-					//target_type = BCEnum::TT_AETarget;
-					break;
-				case ST_Animal:
-					target_type = BCEnum::TT_Animal;
-					break;
-				case ST_Undead:
-					target_type = BCEnum::TT_Undead;
-					break;
-				case ST_Summoned:
-					target_type = BCEnum::TT_Summoned;
-					break;
-				case ST_Corpse:
-					target_type = BCEnum::TT_Corpse;
-					break;
-				case ST_Plant:
-					target_type = BCEnum::TT_Plant;
-					break;
-				case ST_Group:
-					target_type = BCEnum::TT_GroupV2;
-					break;
-				default:
-					break;
-			}
-			if (target_type == BCEnum::TT_None)
-				continue;
-
-			uint8 class_levels[16] = {0};
-			bool player_spell = false;
-			for (int class_type = Class::Warrior; class_type <= Class::Berserker; ++class_type) {
-				int class_index = CLASSIDTOINDEX(class_type);
-				if (spells[spell_id].classes[class_index] == 0 ||
-					spells[spell_id].classes[class_index] > HARD_LEVEL_CAP) {
-					continue;
-					}
-
-				class_levels[class_index] = spells[spell_id].classes[class_index];
-				player_spell = true;
-			}
-			if (!player_spell)
-				continue;
-
-			STBaseEntry* entry_prototype = nullptr;
-			while (true) {
-				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(1)]) {
-					case SE_BindAffinity:
-						entry_prototype = new STBaseEntry(BCEnum::SpT_BindAffinity);
-						break;
-					case SE_Charm:
-						if (spells[spell_id].spell_affect_index != 12)
-							break;
-						entry_prototype = new STCharmEntry();
-						if (spells[spell_id].resist_difficulty <= -1000)
-							entry_prototype->SafeCastToCharm()->dire = true;
-						break;
-					case SE_Teleport:
-						entry_prototype = new STDepartEntry;
-						entry_prototype->SafeCastToDepart()->single = !BCSpells::IsGroupType(target_type);
-						break;
-					case SE_Succor:
-						if (!strcmp(spells[spell_id].teleport_zone, "same")) {
-							entry_prototype = new STEscapeEntry;
-						} else {
-							entry_prototype = new STDepartEntry;
-							entry_prototype->SafeCastToDepart()->single = !BCSpells::IsGroupType(target_type);
-						}
-						break;
-					case SE_Translocate:
-						if (spells[spell_id].teleport_zone[0] == '\0') {
-							entry_prototype = new STSendHomeEntry();
-							entry_prototype->SafeCastToSendHome()->group = BCSpells::IsGroupType(target_type);
-						} else {
-							entry_prototype = new STDepartEntry;
-							entry_prototype->SafeCastToDepart()->single = !BCSpells::IsGroupType(target_type);
-						}
-						break;
-					case SE_ModelSize:
-						if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 100) {
-							entry_prototype = new STSizeEntry;
-							entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Enlarge;
-						} else if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 0 &&
-								   spells[spell_id].base_value[EFFECTIDTOINDEX(1)] < 100) {
-							entry_prototype = new STSizeEntry;
-							entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Reduce;
-						}
-						break;
-					case SE_Identify:
-						entry_prototype = new STBaseEntry(BCEnum::SpT_Identify);
-						break;
-					case SE_Invisibility:
-						if (spells[spell_id].spell_affect_index != 9)
-							break;
-						entry_prototype = new STInvisibilityEntry;
-						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Living;
-						break;
-					case SE_SeeInvis:
-						if (spells[spell_id].spell_affect_index != 5)
-							break;
-						entry_prototype = new STInvisibilityEntry;
-						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_See;
-						break;
-					case SE_InvisVsUndead:
-						if (spells[spell_id].spell_affect_index != 9)
-							break;
-						entry_prototype = new STInvisibilityEntry;
-						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Undead;
-						break;
-					case SE_InvisVsAnimals:
-						if (spells[spell_id].spell_affect_index != 9)
-							break;
-						entry_prototype = new STInvisibilityEntry;
-						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Animal;
-						break;
-					case SE_Mez:
-						if (spells[spell_id].effect_id[EFFECTIDTOINDEX(1)] != 31)
-							break;
-						entry_prototype = new STBaseEntry(BCEnum::SpT_Mesmerize);
-						break;
-					case SE_Revive:
-						if (spells[spell_id].spell_affect_index != 1)
-							break;
-						entry_prototype = new STResurrectEntry();
-						entry_prototype->SafeCastToResurrect()->aoe = BCSpells::IsCasterCentered(target_type);
-						break;
-					case SE_Rune:
-						if (spells[spell_id].spell_affect_index != 2)
-							break;
-						entry_prototype = new STBaseEntry(BCEnum::SpT_Rune);
-						break;
-					case SE_SummonCorpse:
-						entry_prototype = new STBaseEntry(BCEnum::SpT_SummonCorpse);
-						break;
-					case SE_WaterBreathing:
-						entry_prototype = new STBaseEntry(BCEnum::SpT_WaterBreathing);
-						break;
-					default:
-						break;
-				}
-				if (entry_prototype)
-					break;
-
-				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(2)]) {
-					case SE_Succor:
-						entry_prototype = new STEscapeEntry;
-						std::string is_lesser = spells[spell_id].name;
-						if (is_lesser.find("Lesser") != std::string::npos)
-							entry_prototype->SafeCastToEscape()->lesser = true;
-						break;
-				}
-				if (entry_prototype)
-					break;
-
-				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(3)]) {
-					case SE_Lull:
-						entry_prototype = new STBaseEntry(BCEnum::SpT_Lull);
-						break;
-					case SE_Levitate: // needs more criteria
-						entry_prototype = new STBaseEntry(BCEnum::SpT_Levitation);
-						break;
-					default:
-						break;
-				}
-				if (entry_prototype)
-					break;
-
-				while (spells[spell_id].type_description_id == 27) {
-					if (!spells[spell_id].good_effect)
-						break;
-					if (spells[spell_id].skill != EQ::skills::SkillOffense &&
-						spells[spell_id].skill != EQ::skills::SkillDefense)
-						break;
-
-					entry_prototype = new STStanceEntry();
-					if (spells[spell_id].skill == EQ::skills::SkillOffense)
-						entry_prototype->SafeCastToStance()->stance_type = BCEnum::StT_Aggressive;
-					else
-						entry_prototype->SafeCastToStance()->stance_type = BCEnum::StT_Defensive;
-
-					break;
-				}
-				if (entry_prototype)
-					break;
-
-				switch (spells[spell_id].spell_affect_index) {
-					case 1: {
-						bool valid_spell = false;
-						entry_prototype = new STCureEntry;
-
-						for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
-							int effect_index = EFFECTIDTOINDEX(i);
-							if (spells[spell_id].effect_id[effect_index] != SE_Blind &&
-								spells[spell_id].base_value[effect_index] >= 0)
-								continue;
-							else if (spells[spell_id].effect_id[effect_index] == SE_Blind &&
-									 !spells[spell_id].good_effect)
-								continue;
-
-							switch (spells[spell_id].effect_id[effect_index]) {
-								case SE_Blind:
-									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
-										BCEnum::AT_Blindness)] += spells[spell_id].base_value[effect_index];
-									break;
-								case SE_DiseaseCounter:
-									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
-										BCEnum::AT_Disease)] += spells[spell_id].base_value[effect_index];
-									break;
-								case SE_PoisonCounter:
-									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
-										BCEnum::AT_Poison)] += spells[spell_id].base_value[effect_index];
-									break;
-								case SE_CurseCounter:
-									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
-										BCEnum::AT_Curse)] += spells[spell_id].base_value[effect_index];
-									break;
-								case SE_CorruptionCounter:
-									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
-										BCEnum::AT_Corruption)] += spells[spell_id].base_value[effect_index];
-									break;
-								default:
-									continue;
-							}
-							entry_prototype->SafeCastToCure()->cure_total += spells[spell_id].base_value[effect_index];
-							valid_spell = true;
-						}
-						if (!valid_spell) {
-							safe_delete(entry_prototype);
-							entry_prototype = nullptr;
-						}
-
-						break;
-					}
-					case 2: {
-						bool valid_spell = false;
-						entry_prototype = new STResistanceEntry;
-
-						for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
-							int effect_index = EFFECTIDTOINDEX(i);
-							if (spells[spell_id].max_value[effect_index] <= 0)
-								continue;
-
-							switch (spells[spell_id].effect_id[effect_index]) {
-								case SE_ResistFire:
-									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Fire)] += spells[spell_id].max_value[effect_index];
-									break;
-								case SE_ResistCold:
-									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Cold)] += spells[spell_id].max_value[effect_index];
-									break;
-								case SE_ResistPoison:
-									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Poison)] += spells[spell_id].max_value[effect_index];
-									break;
-								case SE_ResistDisease:
-									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Disease)] += spells[spell_id].max_value[effect_index];
-									break;
-								case SE_ResistMagic:
-									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Magic)] += spells[spell_id].max_value[effect_index];
-									break;
-								case SE_ResistCorruption:
-									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Corruption)] += spells[spell_id].max_value[effect_index];
-									break;
-								default:
-									continue;
-							}
-							entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].max_value[effect_index];
-							valid_spell = true;
-						}
-						if (!valid_spell) {
-							safe_delete(entry_prototype);
-							entry_prototype = nullptr;
-						}
-
-						break;
-					}
-					case 7:
-					case 10:
-						if (spells[spell_id].effect_description_id != 65)
-							break;
-						if (IsEffectInSpell(spell_id, SE_NegateIfCombat))
-							break;
-						entry_prototype = new STMovementSpeedEntry();
-						entry_prototype->SafeCastToMovementSpeed()->group = BCSpells::IsGroupType(target_type);
-						break;
-					default:
-						break;
-				}
-				if (entry_prototype)
-					break;
-
-				break;
-			}
-			if (!entry_prototype)
-				continue;
-
-			if (target_type == BCEnum::TT_Self && (entry_prototype->BCST() != BCEnum::SpT_Stance &&
-												   entry_prototype->BCST() != BCEnum::SpT_SummonCorpse)) {
-#ifdef BCSTSPELLDUMP
-				LogError("DELETING entry_prototype (primary clause) - name: [{}], target_type: [{}], BCST: [{}]",
-					spells[spell_id].name, BCEnum::TargetTypeEnumToString(target_type).c_str(), BCEnum::SpellTypeEnumToString(entry_prototype->BCST()).c_str());
-#endif
-				safe_delete(entry_prototype);
-				continue;
-			}
-			if (entry_prototype->BCST() == BCEnum::SpT_Stance && target_type != BCEnum::TT_Self) {
-#ifdef BCSTSPELLDUMP
-				LogError("DELETING entry_prototype (secondary clause) - name: [{}], BCST: [{}], target_type: [{}]",
-					spells[spell_id].name, BCEnum::SpellTypeEnumToString(entry_prototype->BCST()).c_str(), BCEnum::TargetTypeEnumToString(target_type).c_str());
-#endif
-				safe_delete(entry_prototype);
-				continue;
-			}
-
-			assert(entry_prototype->BCST() != BCEnum::SpT_None);
-
-			entry_prototype->spell_id = spell_id;
-			entry_prototype->target_type = target_type;
-
-			bcst_levels& bot_levels = bot_levels_map[entry_prototype->BCST()];
-			for (int class_type = Class::Warrior; class_type <= Class::Berserker; ++class_type) {
-				int class_index = CLASSIDTOINDEX(class_type);
-				if (!class_levels[class_index])
-					continue;
-
-				STBaseEntry* spell_entry = nullptr;
-				switch (entry_prototype->BCST()) {
-					case BCEnum::SpT_Charm:
-						if (entry_prototype->IsCharm())
-							spell_entry = new STCharmEntry(entry_prototype->SafeCastToCharm());
-						break;
-					case BCEnum::SpT_Cure:
-						if (entry_prototype->IsCure())
-							spell_entry = new STCureEntry(entry_prototype->SafeCastToCure());
-						break;
-					case BCEnum::SpT_Depart:
-						if (entry_prototype->IsDepart())
-							spell_entry = new STDepartEntry(entry_prototype->SafeCastToDepart());
-						break;
-					case BCEnum::SpT_Escape:
-						if (entry_prototype->IsEscape())
-							spell_entry = new STEscapeEntry(entry_prototype->SafeCastToEscape());
-						break;
-					case BCEnum::SpT_Invisibility:
-						if (entry_prototype->IsInvisibility())
-							spell_entry = new STInvisibilityEntry(entry_prototype->SafeCastToInvisibility());
-						break;
-					case BCEnum::SpT_MovementSpeed:
-						if (entry_prototype->IsMovementSpeed())
-							spell_entry = new STMovementSpeedEntry(entry_prototype->SafeCastToMovementSpeed());
-						break;
-					case BCEnum::SpT_Resistance:
-						if (entry_prototype->IsResistance())
-							spell_entry = new STResistanceEntry(entry_prototype->SafeCastToResistance());
-						break;
-					case BCEnum::SpT_Resurrect:
-						if (entry_prototype->IsResurrect())
-							spell_entry = new STResurrectEntry(entry_prototype->SafeCastToResurrect());
-						break;
-					case BCEnum::SpT_SendHome:
-						if (entry_prototype->IsSendHome())
-							spell_entry = new STSendHomeEntry(entry_prototype->SafeCastToSendHome());
-						break;
-					case BCEnum::SpT_Size:
-						if (entry_prototype->IsSize())
-							spell_entry = new STSizeEntry(entry_prototype->SafeCastToSize());
-						break;
-					case BCEnum::SpT_Stance:
-						if (entry_prototype->IsStance())
-							spell_entry = new STStanceEntry(entry_prototype->SafeCastToStance());
-						break;
-					default:
-						spell_entry = new STBaseEntry(entry_prototype);
-						break;
-				}
-
-				assert(spell_entry);
-
-				spell_entry->caster_class = class_type;
-				spell_entry->spell_level = class_levels[class_index];
-
-				bot_command_spells[spell_entry->BCST()].push_back(spell_entry);
-
-				if (bot_levels.find(class_type) == bot_levels.end() ||
-					bot_levels[class_type] > class_levels[class_index])
-					bot_levels[class_type] = class_levels[class_index];
-			}
-
-			delete(entry_prototype);
-		}
-
-		remove_inactive();
-		order_all();
-		load_teleport_zone_names();
-		build_strings(bot_levels_map);
-		status_report();
-
-#ifdef BCSTSPELLDUMP
-		spell_dump();
-#endif
-	}
-
-	static void Unload() {
-		for (auto map_iter : bot_command_spells) {
-			if (map_iter.second.empty())
-				continue;
-			for (auto list_iter: map_iter.second) {
-			safe_delete(list_iter);
-			}
-			map_iter.second.clear();
-		}
-		bot_command_spells.clear();
-		required_bots_map.clear();
-		required_bots_map_by_class.clear();
-	}
-
-	static bool IsCasterCentered(BCEnum::TType target_type) {
-		switch (target_type) {
-			case BCEnum::TT_AECaster:
-			case BCEnum::TT_AEBard:
-				return true;
-			default:
-				return false;
-		}
-	}
-
-	static bool IsGroupType(BCEnum::TType target_type) {
-		switch (target_type) {
-			case BCEnum::TT_GroupV1:
-			case BCEnum::TT_GroupV2:
-				return true;
-			default:
-				return false;
-		}
-	}
-private:
-	static void remove_inactive() {
-		if (bot_command_spells.empty())
-			return;
-
-		for (auto map_iter = bot_command_spells.begin(); map_iter != bot_command_spells.end(); ++map_iter) {
-			if (map_iter->second.empty())
-				continue;
-
-			bcst_list* spells_list = &map_iter->second;
-			bcst_list* removed_spells_list = new bcst_list;
-
-			spells_list->remove(nullptr);
-			spells_list->remove_if([removed_spells_list](STBaseEntry* l) {
-				if (l->spell_id < 2 || l->spell_id >= SPDAT_RECORDS || strlen(spells[l->spell_id].name) < 3) {
-					removed_spells_list->push_back(l);
-					return true;
-				}
-				else {
-					return false;
-				}
-			});
-
-			for (auto del_iter: *removed_spells_list)
-			{
-				safe_delete(del_iter);
-			}
-			removed_spells_list->clear();
-
-			if (RuleI(Bots, CommandSpellRank) == 1) {
-				spells_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (spells[l->spell_id].spell_group < spells[r->spell_id].spell_group)
-						return true;
-					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class < r->caster_class)
-						return true;
-					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank)
-						return true;
-
-					return false;
-				});
-				spells_list->unique([removed_spells_list](STBaseEntry* l, STBaseEntry* r) {
-					std::string r_name = spells[r->spell_id].name;
-					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank) {
-						removed_spells_list->push_back(r);
-						return true;
-					}
-
-					return false;
-				});
-
-				for (auto del_iter: *removed_spells_list) {
-					safe_delete(del_iter);
-				}
-				removed_spells_list->clear();
-			}
-
-			if (RuleI(Bots, CommandSpellRank) == 2) {
-				spells_list->remove_if([removed_spells_list](STBaseEntry* l) {
-					std::string l_name = spells[l->spell_id].name;
-					if (spells[l->spell_id].rank == 10) {
-						removed_spells_list->push_back(l);
-						return true;
-					}
-					if (l_name.find("III") == (l_name.size() - 3)) {
-						removed_spells_list->push_back(l);
-						return true;
-					}
-					if (l_name.find("III ") == (l_name.size() - 4)) {
-						removed_spells_list->push_back(l);
-						return true;
-					}
-
-					return false;
-				});
-
-				for (auto del_iter: *removed_spells_list) {
-					safe_delete(del_iter);
-				}
-				removed_spells_list->clear();
-			}
-
-			// needs rework
-			if (RuleI(Bots, CommandSpellRank) == 2 || RuleI(Bots, CommandSpellRank) == 3) {
-				spells_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (spells[l->spell_id].spell_group < spells[r->spell_id].spell_group)
-						return true;
-					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class < r->caster_class)
-						return true;
-					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank)
-						return true;
-
-					return false;
-				});
-				spells_list->unique([removed_spells_list](STBaseEntry* l, STBaseEntry* r) {
-					std::string l_name = spells[l->spell_id].name;
-					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank) {
-						removed_spells_list->push_back(r);
-						return true;
-					}
-
-					return false;
-				});
-
-				for (auto del_iter: *removed_spells_list) {
-					safe_delete(del_iter);
-				}
-				removed_spells_list->clear();
-			}
-
-			safe_delete(removed_spells_list);
-		}
-	}
-
-	static void order_all() {
-		// Example of a macro'd lambda using anonymous property dereference:
-		// #define XXX(p) ([](const <_Ty>* l, const <_Ty>* r) { return (l->p < r->p); })
-
-
-#define LT_STBASE(l, r, p) (l->p < r->p)
-#define LT_STCHARM(l, r, p) (l->SafeCastToCharm()->p < r->SafeCastToCharm()->p)
-#define LT_STCURE(l, r, p) (l->SafeCastToCure()->p < r->SafeCastToCure()->p)
-#define LT_STCURE_VAL_ID(l, r, p, ctid) (l->SafeCastToCure()->p[AILMENTIDTOINDEX(ctid)] < r->SafeCastToCure()->p[AILMENTIDTOINDEX(ctid)])
-#define LT_STDEPART(l, r, p) (l->SafeCastToDepart()->p < r->SafeCastToDepart()->p)
-#define LT_STESCAPE(l, r, p) (l->SafeCastToEscape()->p < r->SafeCastToEscape()->p)
-#define LT_STINVISIBILITY(l, r, p) (l->SafeCastToInvisibility()->p < r->SafeCastToInvisibility()->p)
-#define LT_STRESISTANCE(l, r, p) (l->SafeCastToResistance()->p < r->SafeCastToResistance()->p)
-#define LT_STRESISTANCE_VAL_ID(l, r, p, rtid) (l->SafeCastToResistance()->p[RESISTANCEIDTOINDEX(rtid)] < r->SafeCastToResistance()->p[RESISTANCEIDTOINDEX(rtid))
-#define LT_STSTANCE(l, r, p) (l->SafeCastToStance()->p < r->SafeCastToStance()->p)
-#define LT_SPELLS(l, r, p) (spells[l->spell_id].p < spells[r->spell_id].p)
-#define LT_SPELLS_EFFECT_ID(l, r, p, eid) (spells[l->spell_id].p[EFFECTIDTOINDEX(eid)] < spells[r->spell_id].p[EFFECTIDTOINDEX(eid)])
-#define LT_SPELLS_STR(l, r, s) (strcasecmp(spells[l->spell_id].s, spells[r->spell_id].s) < 0)
-
-#define EQ_STBASE(l, r, p) (l->p == r->p)
-#define EQ_STCHARM(l, r, p) (l->SafeCastToCharm()->p == r->SafeCastToCharm()->p)
-#define EQ_STCURE(l, r, p) (l->SafeCastToCure()->p == r->SafeCastToCure()->p)
-#define EQ_STCURE_VAL_ID(l, r, p, ctid) (l->SafeCastToCure()->p[AILMENTIDTOINDEX(ctid)] == r->SafeCastToCure()->p[AILMENTIDTOINDEX(ctid)])
-#define EQ_STDEPART(l, r, p) (l->SafeCastToDepart()->p == r->SafeCastToDepart()->p)
-#define EQ_STESCAPE(l, r, p) (l->SafeCastToEscape()->p == r->SafeCastToEscape()->p)
-#define EQ_STINVISIBILITY(l, r, p) (l->SafeCastToInvisibility()->p == r->SafeCastToInvisibility()->p)
-#define EQ_STRESISTANCE(l, r, p) (l->SafeCastToResistance()->p == r->SafeCastToResistance()->p)
-#define EQ_STRESISTANCE_VAL_ID(l, r, p, rtid) (l->SafeCastToResistance()->p[RESISTANCEIDTOINDEX(rtid)] == r->SafeCastToResistance()->p[RESISTANCEIDTOINDEX(rtid))
-#define EQ_STSTANCE(l, r, p) (l->SafeCastToStance()->p == r->SafeCastToStance()->p)
-#define EQ_SPELLS(l, r, p) (spells[l->spell_id].p == spells[r->spell_id].p)
-#define EQ_SPELLS_EFFECT_ID(l, r, p, eid) (spells[l->spell_id].p[EFFECTIDTOINDEX(eid)] == spells[r->spell_id].p[EFFECTIDTOINDEX(eid)])
-#define EQ_SPELLS_STR(l, r, s) (strcasecmp(spells[l->spell_id].s, spells[r->spell_id].s) == 0)
-
-#define GT_STBASE(l, r, p) (l->p > r->p)
-#define GT_STCHARM(l, r, p) (l->SafeCastToCharm()->p > r->SafeCastToCharm()->p)
-#define GT_STCURE(l, r, p) (l->SafeCastToCure()->p > r->SafeCastToCure()->p)
-#define GT_STCURE_VAL_ID(l, r, p, ctid) (l->SafeCastToCure()->p[AILMENTIDTOINDEX(ctid)] > r->SafeCastToCure()->p[AILMENTIDTOINDEX(ctid)])
-#define GT_STDEPART(l, r, p) (l->SafeCastToDepart()->p > r->SafeCastToDepart()->p)
-#define GT_STESCAPE(l, r, p) (l->SafeCastToEscape()->p > r->SafeCastToEscape()->p)
-#define GT_STINVISIBILITY(l, r, p) (l->SafeCastToInvisibility()->p > r->SafeCastToInvisibility()->p)
-#define GT_STRESISTANCE(l, r, p) (l->SafeCastToResistance()->p > r->SafeCastToResistance()->p)
-#define GT_STRESISTANCE_VAL_ID(l, r, p, rtid) (l->SafeCastToResistance()->p[RESISTANCEIDTOINDEX(rtid)] > r->SafeCastToResistance()->p[RESISTANCEIDTOINDEX(rtid))
-#define GT_STSTANCE(l, r, p) (l->SafeCastToStance()->p > r->SafeCastToStance()->p)
-#define GT_SPELLS(l, r, p) (spells[l->spell_id].p > spells[r->spell_id].p)
-#define GT_SPELLS_EFFECT_ID(l, r, p, eid) (spells[l->spell_id].p[EFFECTIDTOINDEX(eid)] > spells[r->spell_id].p[EFFECTIDTOINDEX(eid)])
-#define GT_SPELLS_STR(l, r, s) (strcasecmp(spells[l->spell_id].s, spells[r->spell_id].s) > 0)
-
-
-		for (auto map_iter = bot_command_spells.begin(); map_iter != bot_command_spells.end(); ++map_iter) {
-			if (map_iter->second.size() < 2)
-				continue;
-
-			auto spell_type = map_iter->first;
-			bcst_list* spell_list = &map_iter->second;
-			switch (spell_type) {
-			case BCEnum::SpT_BindAffinity:
-				if (RuleB(Bots, PreferNoManaCommandSpells)) {
-					spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-						if (LT_SPELLS(l, r, mana))
-							return true;
-						if (EQ_SPELLS(l, r, mana) && LT_STBASE(l, r, target_type))
-							return true;
-						if (EQ_SPELLS(l, r, mana) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
-							return true;
-						if (EQ_SPELLS(l, r, mana) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-							return true;
-
-						return false;
-					});
-				}
-				else {
-					spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-						if (LT_STBASE(l, r, target_type))
-							return true;
-						if (EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
-							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-							return true;
-
-						return false;
-					});
-				}
-				continue;
-			case BCEnum::SpT_Charm:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_SPELLS(l, r, resist_difficulty))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Cure: // per-use sorting in command handler
-				spell_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (l->spell_id < r->spell_id)
-						return true;
-					if (l->spell_id == r->spell_id && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Depart:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, caster_class))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, caster_class) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, caster_class) && EQ_STBASE(l, r, spell_level) && LT_SPELLS_STR(l, r, name))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Escape:
-				spell_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (LT_STESCAPE(l, r, lesser))
-						return true;
-					if (EQ_STESCAPE(l, r, lesser) && LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STESCAPE(l, r, lesser) && EQ_STBASE(l, r, target_type) && GT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STESCAPE(l, r, lesser) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Identify:
-				if (RuleB(Bots, PreferNoManaCommandSpells)) {
-					spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-						if (LT_SPELLS(l, r, mana))
-							return true;
-						if (EQ_SPELLS(l, r, mana) && LT_STBASE(l, r, target_type))
-							return true;
-						if (EQ_SPELLS(l, r, mana) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
-							return true;
-						if (EQ_SPELLS(l, r, mana) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-							return true;
-
-						return false;
-					});
-				}
-				else {
-					spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-						if (LT_STBASE(l, r, target_type))
-							return true;
-						if (EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
-							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-							return true;
-
-						return false;
-					});
-				}
-				continue;
-			case BCEnum::SpT_Invisibility:
-				spell_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (LT_STINVISIBILITY(l, r, invis_type))
-						return true;
-					if (EQ_STINVISIBILITY(l, r, invis_type) && LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STINVISIBILITY(l, r, invis_type) && EQ_STBASE(l, r, target_type) && GT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STINVISIBILITY(l, r, invis_type) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Levitation:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && LT_SPELLS(l, r, zone_type))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zone_type) && GT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zone_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Lull:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_SPELLS(l, r, resist_difficulty))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 3))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 3) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 3) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Mesmerize:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS(l, r, resist_difficulty))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && GT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_MovementSpeed:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base_value, 2))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 2) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 2) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Resistance: // per-use sorting in command handler
-				spell_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (l->spell_id < r->spell_id)
-						return true;
-					if (l->spell_id == r->spell_id && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Resurrect:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
-						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Rune:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_SendHome:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && GT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Size:
-				spell_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (LT_STBASE(l, r, target_type))
-						return true;
-
-					auto l_size_type = l->SafeCastToSize()->size_type;
-					auto r_size_type = r->SafeCastToSize()->size_type;
-					if (l_size_type < r_size_type)
-						return true;
-					if (l_size_type == BCEnum::SzT_Enlarge && r_size_type == BCEnum::SzT_Enlarge) {
-						if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
-							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && GT_STBASE(l, r, spell_level))
-							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-							return true;
-					}
-					if (l_size_type == BCEnum::SzT_Reduce && r_size_type == BCEnum::SzT_Reduce) {
-						if (EQ_STBASE(l, r, target_type) && LT_SPELLS_EFFECT_ID(l, r, base_value, 1))
-							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && GT_STBASE(l, r, spell_level))
-							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-							return true;
-					}
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_Stance:
-				spell_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (LT_STSTANCE(l, r, stance_type))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_SummonCorpse:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
-						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && EQ_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			case BCEnum::SpT_WaterBreathing:
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && GT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
-
-					return false;
-				});
-				continue;
-			default:
-				continue;
-			}
-		}
-	}
-
-	static void load_teleport_zone_names() {
-		auto depart_list = &bot_command_spells[BCEnum::SpT_Depart];
-		if (depart_list->empty())
-			return;
-
-		std::string query = "SELECT `short_name`, `long_name` FROM `zone` WHERE '' NOT IN (`short_name`, `long_name`)";
-		auto results = content_db.QueryDatabase(query);
-		if (!results.Success()) {
-			LogError("load_teleport_zone_names() - Error in zone names query: [{}]", results.ErrorMessage().c_str());
-			return;
-		}
-
-		std::map<std::string, std::string> zone_names;
-		for (auto row = results.begin(); row != results.end(); ++row)
-			zone_names[row[0]] = row[1];
-
-		for (auto list_iter = depart_list->begin(); list_iter != depart_list->end();) {
-			auto test_iter = zone_names.find(spells[(*list_iter)->spell_id].teleport_zone);
-			if (test_iter == zone_names.end()) {
-				list_iter = depart_list->erase(list_iter);
-				continue;
-			}
-
-			(*list_iter)->SafeCastToDepart()->long_name = test_iter->second;
-			++list_iter;
-		}
-
-	}
-
-	static void build_strings(bcst_levels_map& bot_levels_map) {
-		for (int i = BCEnum::SpellTypeFirst; i <= BCEnum::SpellTypeLast; ++i)
-			helper_bots_string(static_cast<BCEnum::SpType>(i), bot_levels_map[static_cast<BCEnum::SpType>(i)]);
-	}
-
-	static void status_report() {
-		LogCommands("load_bot_command_spells(): - 'RuleI(Bots, CommandSpellRank)' set to [{}]", RuleI(Bots, CommandSpellRank));
-		if (bot_command_spells.empty()) {
-			LogError("load_bot_command_spells() - 'bot_command_spells' is empty");
-			return;
-		}
-
-		for (int i = BCEnum::SpellTypeFirst; i <= BCEnum::SpellTypeLast; ++i)
-			LogCommands("load_bot_command_spells(): - [{}] returned [{}] spell entries",
-				BCEnum::SpellTypeEnumToString(static_cast<BCEnum::SpType>(i)).c_str(), bot_command_spells[static_cast<BCEnum::SpType>(i)].size());
-	}
-
-	static void helper_bots_string(BCEnum::SpType type_index, bcst_levels& bot_levels) {
-		for (int i = Class::Warrior; i <= Class::Berserker; ++i)
-			required_bots_map_by_class[type_index][i] = "Unavailable...";
-
-		if (bot_levels.empty()) {
-			required_bots_map[type_index] = "This command is currently unavailable...";
-			return;
-		}
-
-		required_bots_map[type_index] = "";
-
-		auto map_size = bot_levels.size();
-		while (bot_levels.size()) {
-			bcst_levels::iterator test_iter = bot_levels.begin();
-			for (bcst_levels::iterator levels_iter = bot_levels.begin(); levels_iter != bot_levels.end(); ++levels_iter) {
-				if (levels_iter->second < test_iter->second)
-					test_iter = levels_iter;
-				if (strcasecmp(GetClassIDName(levels_iter->first), GetClassIDName(test_iter->first)) < 0 && levels_iter->second <= test_iter->second)
-					test_iter = levels_iter;
-			}
-
-			std::string bot_segment;
-			if (bot_levels.size() == map_size)
-				bot_segment = "%s(%u)";
-			else if (bot_levels.size() > 1)
-				bot_segment = ", %s(%u)";
-			else
-				bot_segment = " or %s(%u)";
-
-			required_bots_map[type_index].append(StringFormat(bot_segment.c_str(), GetClassIDName(test_iter->first), test_iter->second));
-			required_bots_map_by_class[type_index][test_iter->first] = StringFormat("%s(%u)", GetClassIDName(test_iter->first), test_iter->second);
-			bot_levels.erase(test_iter);
-		}
-	}
-
-#ifdef BCSTSPELLDUMP
-	static void spell_dump() {
-		std::ofstream spell_dump;
-		spell_dump.open(StringFormat("bcs_dump/spell_dump_%i.txt", getpid()), std::ios_base::app | std::ios_base::out);
-
-		if (bot_command_spells.empty()) {
-			spell_dump << "BCSpells::spell_dump() - 'bot_command_spells' map is empty.\n";
-			spell_dump.close();
-			return;
-		}
-
-		int entry_count = 0;
-		for (int i = BCEnum::SpellTypeFirst; i <= BCEnum::SpellTypeLast; ++i) {
-			auto bcst_id = static_cast<BCEnum::SpType>(i);
-			spell_dump << StringFormat("BCSpells::spell_dump(): - '%s' returned %u spells:\n",
-				BCEnum::SpellTypeEnumToString(bcst_id).c_str(), bot_command_spells[bcst_id].size());
-
-			bcst_list& map_entry = bot_command_spells[bcst_id];
-			for (auto list_iter = map_entry.begin(); list_iter != map_entry.end(); ++list_iter) {
-				STBaseEntry* list_entry = *list_iter;
-				int spell_id = list_entry->spell_id;
-				spell_dump << StringFormat("\"%20s\" tt:%02u/cc:%02u/cl:%03u",
-					((strlen(spells[spell_id].name) > 20) ? (std::string(spells[spell_id].name).substr(0, 20).c_str()) : (spells[spell_id].name)),
-					list_entry->target_type,
-					list_entry->caster_class,
-					list_entry->spell_level
-				);
-
-				spell_dump << StringFormat(" /mn:%05u/RD:%06i/zt:%02i/d#:%06i/td#:%05i/ed#:%05i/SAI:%03u",
-					spells[spell_id].mana,
-					spells[spell_id].resist_difficulty,
-					spells[spell_id].zone_type,
-					spells[spell_id].description_id,
-					spells[spell_id].type_description_id,
-					spells[spell_id].effect_description_id,
-					spells[spell_id].spell_affect_index
-				);
-
-				for (int i = EffectIDFirst; i <= 3/*EffectIDLast*/; ++i) {
-					int effect_index = EFFECTIDTOINDEX(i);
-					spell_dump << StringFormat(" /e%02i:%04i/b%02i:%06i/m%02i:%06i",
-						i, spells[spell_id].effect_id[effect_index], i, spells[spell_id].base_value[effect_index], i, spells[spell_id].max_value[effect_index]);
-				}
-
-				switch (list_entry->BCST()) {
-				case BCEnum::SpT_Charm:
-					spell_dump << StringFormat(" /d:%c", ((list_entry->SafeCastToCharm()->dire) ? ('T') : ('F')));
-					break;
-				case BCEnum::SpT_Cure:
-					spell_dump << ' ';
-					for (int i = 0; i < BCEnum::AilmentTypeCount; ++i) {
-						spell_dump << StringFormat("/cv%02i:%03i", i, list_entry->SafeCastToCure()->cure_value[i]);
-					}
-					break;
-				case BCEnum::SpT_Depart: {
-					std::string long_name = list_entry->SafeCastToDepart()->long_name.c_str();
-					spell_dump << StringFormat(" /ln:%20s", ((long_name.size() > 20) ? (long_name.substr(0, 20).c_str()) : (long_name.c_str())));
-					break;
-				}
-				case BCEnum::SpT_Escape:
-					spell_dump << StringFormat(" /l:%c", ((list_entry->SafeCastToEscape()->lesser) ? ('T') : ('F')));
-					break;
-				case BCEnum::SpT_Invisibility:
-					spell_dump << StringFormat(" /it:%02i", list_entry->SafeCastToInvisibility()->invis_type);
-					break;
-				case BCEnum::SpT_MovementSpeed:
-					spell_dump << StringFormat(" /g:%c", ((list_entry->SafeCastToMovementSpeed()->group) ? ('T') : ('F')));
-					break;
-				case BCEnum::SpT_Resistance:
-					spell_dump << ' ';
-					for (int i = 0; i < BCEnum::ResistanceTypeCount; ++i) {
-						spell_dump << StringFormat("/rv%02i:%03i", i, list_entry->SafeCastToResistance()->resist_value[i]);
-					}
-					break;
-				case BCEnum::SpT_Resurrect:
-					spell_dump << StringFormat(" /aoe:%c", ((list_entry->SafeCastToResurrect()->aoe) ? ('T') : ('F')));
-					break;
-				case BCEnum::SpT_SendHome:
-					spell_dump << StringFormat(" /g:%c", ((list_entry->SafeCastToSendHome()->group) ? ('T') : ('F')));
-					break;
-				case BCEnum::SpT_Size:
-					spell_dump << StringFormat(" /st:%02i", list_entry->SafeCastToSize()->size_type);
-					break;
-				case BCEnum::SpT_Stance:
-					spell_dump << StringFormat(" /st:%02i", list_entry->SafeCastToStance()->stance_type);
-					break;
-				default:
-					break;
-				}
-
-				spell_dump << "\n";
-				++entry_count;
-			}
-
-			spell_dump << StringFormat("required_bots_map[%s] = \"%s\"\n",
-				BCEnum::SpellTypeEnumToString(static_cast<BCEnum::SpType>(i)).c_str(), required_bots_map[static_cast<BCEnum::SpType>(i)].c_str());
-
-			spell_dump << "\n";
-		}
-
-		spell_dump << StringFormat("Total bcs entry count: %i\n", entry_count);
-		spell_dump.close();
-	}
-#endif
-};
-
 int bot_command_count;
 
 int (*bot_command_dispatch)(Client *,char const *) = bot_command_not_avail;
@@ -1237,7 +75,7 @@ LinkedList<BotCommandRecord *> cleanup_bot_command_list;
 
 int bot_command_not_avail(Client *c, const char *message)
 {
-	c->Message(Chat::White, "Bot commands not available.");
+	c->Message(Chat::Yellow, "Bot commands not available.");
 	return -1;
 }
 
@@ -1247,11 +85,11 @@ int bot_command_init(void)
 
 	if (
 		bot_command_add("actionable", "Lists actionable command arguments and use descriptions", AccountStatus::Player, bot_command_actionable) ||
-		bot_command_add("aggressive", "Orders a bot to use a aggressive discipline", AccountStatus::Player, bot_command_aggressive) ||
 		bot_command_add("applypoison", "Applies cursor-held poison to a rogue bot's weapon", AccountStatus::Player, bot_command_apply_poison) ||
-		bot_command_add("applypotion", "Applies cursor-held potion to a bot's effects", AccountStatus::Player, bot_command_apply_potion) ||
 		bot_command_add("attack", "Orders bots to attack a designated target", AccountStatus::Player, bot_command_attack) ||
-		bot_command_add("bindaffinity", "Orders a bot to attempt an affinity binding", AccountStatus::Player, bot_command_bind_affinity) ||
+		bot_command_add("behindmob", "Toggles whether or not your bot tries to stay behind a mob", AccountStatus::Player, bot_command_behind_mob) ||
+		bot_command_add("blockedbuffs", "Set, view and clear blocked buffs for the selected bot(s)", AccountStatus::Player, bot_command_blocked_buffs) ||
+		bot_command_add("blockedpetbuffs", "Set, view and clear blocked pet buffs for the selected bot(s)", AccountStatus::Player, bot_command_blocked_pet_buffs) ||
 		bot_command_add("bot", "Lists the available bot management [subcommands]", AccountStatus::Player, bot_command_bot) ||
 		bot_command_add("botappearance", "Lists the available bot appearance [subcommands]", AccountStatus::Player, bot_command_appearance) ||
 		bot_command_add("botbeardcolor", "Changes the beard color of a bot", AccountStatus::Player, bot_command_beard_color) ||
@@ -1270,8 +108,8 @@ int bot_command_init(void)
 		bot_command_add("botheritage", "Changes the Drakkin heritage of a bot", AccountStatus::Player, bot_command_heritage) ||
 		bot_command_add("botinspectmessage", "Changes the inspect message of a bot", AccountStatus::Player, bot_command_inspect_message) ||
 		bot_command_add("botlist", "Lists the bots that you own", AccountStatus::Player, bot_command_list_bots) ||
-		bot_command_add("botoutofcombat", "Toggles your bot between standard and out-of-combat spell/skill use - if any specialized behaviors exist", AccountStatus::Player, bot_command_out_of_combat) ||
 		bot_command_add("botreport", "Orders a bot to report its readiness", AccountStatus::Player, bot_command_report) ||
+		bot_command_add("botsettings", "Lists settings related to spell types and bot combat", AccountStatus::Player, bot_command_bot_settings) ||
 		bot_command_add("botspawn", "Spawns a created bot", AccountStatus::Player, bot_command_spawn) ||
 		bot_command_add("botstance", "Changes the stance of a bot", AccountStatus::Player, bot_command_stance) ||
 		bot_command_add("botstopmeleelevel", "Sets the level a caster or spell-casting fighter bot will stop melee combat", AccountStatus::Player, bot_command_stop_melee_level) ||
@@ -1279,20 +117,20 @@ int bot_command_init(void)
 		bot_command_add("botsummon", "Summons bot(s) to your location", AccountStatus::Player, bot_command_summon) ||
 		bot_command_add("botsurname", "Sets a bots surname (last name)", AccountStatus::Player, bot_command_surname) ||
 		bot_command_add("bottattoo", "Changes the Drakkin tattoo of a bot", AccountStatus::Player, bot_command_tattoo) ||
-		bot_command_add("bottogglearcher", "Toggles a archer bot between melee and ranged weapon use", AccountStatus::Player, bot_command_toggle_archer) ||
 		bot_command_add("bottogglehelm", "Toggles the helm visibility of a bot between shown and hidden", AccountStatus::Player, bot_command_toggle_helm) ||
+		bot_command_add("bottoggleranged", "Toggles a ranged bot between melee and ranged weapon use", AccountStatus::Player, bot_command_toggle_ranged) ||
 		bot_command_add("bottitle", "Sets a bots title", AccountStatus::Player, bot_command_title) ||
 		bot_command_add("botupdate", "Updates a bot to reflect any level changes that you have experienced", AccountStatus::Player, bot_command_update) ||
 		bot_command_add("botwoad", "Changes the Barbarian woad of a bot", AccountStatus::Player, bot_command_woad) ||
-		bot_command_add("casterrange", "Controls the range casters will try to stay away from a mob (if too far, they will skip spells that are out-of-range)", AccountStatus::Player, bot_command_caster_range) ||
-		bot_command_add("charm", "Attempts to have a bot charm your target", AccountStatus::Player, bot_command_charm) ||
-		bot_command_add("circle", "Orders a Druid bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_circle) ||
+		bot_command_add("cast", "Tells the first found specified bot to cast the given spell type", AccountStatus::Player, bot_command_cast) ||
+		bot_command_add("discipline", "Uses aggressive/defensive disciplines or can specify spell ID", AccountStatus::Player, bot_command_discipline) ||
+		bot_command_add("distanceranged", "Controls the range casters and ranged will try to stay away from a mob", AccountStatus::Player, bot_command_distance_ranged) ||
+		bot_command_add("classracelist", "Lists the classes and races and their appropriate IDs", AccountStatus::Player, bot_command_class_race_list) ||
 		bot_command_add("clickitem", "Orders your targeted bot to click the item in the provided inventory slot.", AccountStatus::Player, bot_command_click_item) ||
-		bot_command_add("cure", "Orders a bot to remove any ailments", AccountStatus::Player, bot_command_cure) ||
-		bot_command_add("defensive", "Orders a bot to use a defensive discipline", AccountStatus::Player, bot_command_defensive) ||
+		bot_command_add("copysettings", "Copies settings from one bot to another", AccountStatus::Player, bot_command_copy_settings) ||
+		bot_command_add("defaultsettings", "Restores a bot back to default settings", AccountStatus::Player, bot_command_default_settings) ||
 		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_depart) ||
 		bot_command_add("enforcespellsettings", "Toggles your Bot to cast only spells in their spell settings list.", AccountStatus::Player, bot_command_enforce_spell_list) ||
-		bot_command_add("escape", "Orders a bot to send a target group to a safe location within the zone", AccountStatus::Player, bot_command_escape) ||
 		bot_command_add("findaliases", "Find available aliases for a bot command", AccountStatus::Player, bot_command_find_aliases) ||
 		bot_command_add("follow", "Orders bots to follow a designated target (option 'chain' auto-links eligible spawned bots)", AccountStatus::Player, bot_command_follow) ||
 		bot_command_add("guard", "Orders bots to guard their current positions", AccountStatus::Player, bot_command_guard) ||
@@ -1319,18 +157,14 @@ int bot_command_init(void)
 		bot_command_add("healrotationstop", "Stops a heal rotation", AccountStatus::Player, bot_command_heal_rotation_stop) ||
 		bot_command_add("help", "List available commands and their description - specify partial command as argument to search", AccountStatus::Player, bot_command_help) ||
 		bot_command_add("hold", "Prevents a bot from attacking until released", AccountStatus::Player, bot_command_hold) ||
-		bot_command_add("identify", "Orders a bot to cast an item identification spell", AccountStatus::Player, bot_command_identify) ||
+		bot_command_add("illusionblock", "Control whether or not illusion effects will land on the bot if casted by another player or bot", AccountStatus::Player, bot_command_illusion_block) ||
 		bot_command_add("inventory", "Lists the available bot inventory [subcommands]", AccountStatus::Player, bot_command_inventory) ||
 		bot_command_add("inventorygive", "Gives the item on your cursor to a bot", AccountStatus::Player, bot_command_inventory_give) ||
 		bot_command_add("inventorylist", "Lists all items in a bot's inventory", AccountStatus::Player, bot_command_inventory_list) ||
 		bot_command_add("inventoryremove", "Removes an item from a bot's inventory", AccountStatus::Player, bot_command_inventory_remove) ||
 		bot_command_add("inventorywindow", "Displays all items in a bot's inventory in a pop-up window", AccountStatus::Player, bot_command_inventory_window) ||
-		bot_command_add("invisibility", "Orders a bot to cast a cloak of invisibility, or allow them to be seen", AccountStatus::Player, bot_command_invisibility) ||
 		bot_command_add("itemuse", "Elicits a report from spawned bots that can use the item on your cursor (option 'empty' yields only empty slots)", AccountStatus::Player, bot_command_item_use) ||
-		bot_command_add("levitation", "Orders a bot to cast a levitation spell", AccountStatus::Player, bot_command_levitation) ||
-		bot_command_add("lull", "Orders a bot to cast a pacification spell", AccountStatus::Player, bot_command_lull) ||
-		bot_command_add("mesmerize", "Orders a bot to cast a mesmerization spell", AccountStatus::Player, bot_command_mesmerize) ||
-		bot_command_add("movementspeed", "Orders a bot to cast a movement speed enhancement spell", AccountStatus::Player, bot_command_movement_speed) ||
+		bot_command_add("maxmeleerange", "Toggles whether your bot is at max melee range or not. This will disable all special abilities, including taunt.", AccountStatus::Player, bot_command_max_melee_range) ||		
 		bot_command_add("owneroption", "Sets options available to bot owners", AccountStatus::Player, bot_command_owner_option) ||
 		bot_command_add("pet", "Lists the available bot pet [subcommands]", AccountStatus::Player, bot_command_pet) ||
 		bot_command_add("petgetlost", "Orders a bot to remove its summoned pet", AccountStatus::Player, bot_command_pet_get_lost) ||
@@ -1339,14 +173,27 @@ int bot_command_init(void)
 		bot_command_add("picklock", "Orders a capable bot to pick the lock of the closest door", AccountStatus::Player, bot_command_pick_lock) ||
 		bot_command_add("pickpocket", "Orders a capable bot to pickpocket a NPC", AccountStatus::Player, bot_command_pickpocket) ||
 		bot_command_add("precombat", "Sets flag used to determine pre-combat behavior", AccountStatus::Player, bot_command_precombat) ||
-		bot_command_add("portal", "Orders a Wizard bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_portal) ||
 		bot_command_add("pull", "Orders a designated bot to 'pull' an enemy", AccountStatus::Player, bot_command_pull) ||
 		bot_command_add("release", "Releases a suspended bot's AI processing (with hate list wipe)", AccountStatus::Player, bot_command_release) ||
-		bot_command_add("resistance", "Orders a bot to cast a specified resistance buff", AccountStatus::Player, bot_command_resistance) ||
-		bot_command_add("resurrect", "Orders a bot to resurrect a player's (players') corpse(s)", AccountStatus::Player, bot_command_resurrect) ||
-		bot_command_add("rune", "Orders a bot to cast a rune of protection", AccountStatus::Player, bot_command_rune) ||
-		bot_command_add("sendhome", "Orders a bot to open a magical doorway home", AccountStatus::Player, bot_command_send_home) ||
-		bot_command_add("size", "Orders a bot to change a player's size", AccountStatus::Player, bot_command_size) ||
+		bot_command_add("setassistee", "Sets your target to be the person your bots assist. Bots will always assist you before others", AccountStatus::Player, bot_command_set_assistee) ||
+		bot_command_add("sithppercent", "HP threshold for a bot to start sitting in combat if allowed", AccountStatus::Player, bot_command_sit_hp_percent) ||
+		bot_command_add("sitincombat", "Toggles whether or a not a bot will attempt to med or sit to heal in combat", AccountStatus::Player, bot_command_sit_in_combat) ||
+		bot_command_add("sitmanapercent", "Mana threshold for a bot to start sitting in combat if allowed", AccountStatus::Player, bot_command_sit_mana_percent) ||
+		bot_command_add("spellaggrochecks", "Toggles whether or not bots will cast a spell type if they think it will get them aggro", AccountStatus::Player, bot_command_spell_aggro_checks) ||
+		bot_command_add("spellannouncecasts", "Turn on or off cast announcements by spell type", AccountStatus::Player, bot_command_spell_announce_cast) ||
+		bot_command_add("spellengagedpriority", "Controls the order of casts by spell type when engaged in combat", AccountStatus::Player, bot_command_spell_engaged_priority) ||
+		bot_command_add("spelldelays", "Controls the delay between casts for a specific spell type", AccountStatus::Player, bot_command_spell_delays) ||
+		bot_command_add("spellholds", "Controls whether a bot holds the specified spell type or not", AccountStatus::Player, bot_command_spell_holds) ||
+		bot_command_add("spellidlepriority", "Controls the order of casts by spell type when out of combat", AccountStatus::Player, bot_command_spell_idle_priority) ||
+		bot_command_add("spellmaxhppct", "Controls at what HP percent a bot will stop casting different spell types", AccountStatus::Player, bot_command_spell_max_hp_pct) ||
+		bot_command_add("spellmaxmanapct", "Controls at what mana percent a bot will stop casting different spell types", AccountStatus::Player, bot_command_spell_max_mana_pct) ||
+		bot_command_add("spellmaxthresholds", "Controls the minimum target HP threshold for a spell to be cast for a specific type", AccountStatus::Player, bot_command_spell_max_thresholds) ||
+		bot_command_add("spellminhppct", "Controls at what HP percent a bot will start casting different spell types", AccountStatus::Player, bot_command_spell_min_hp_pct) ||		
+		bot_command_add("spellminmanapct", "Controls at what mana percent a bot will start casting different spell types", AccountStatus::Player, bot_command_spell_min_mana_pct) ||
+		bot_command_add("spellminthresholds", "Controls the maximum target HP threshold for a spell to be cast for a specific type", AccountStatus::Player, bot_command_spell_min_thresholds) ||		
+		bot_command_add("spellresistlimits", "Controls the resist limits for bots to cast spells on their target", AccountStatus::Player, bot_command_spell_resist_limits) ||
+		bot_command_add("spellpursuepriority", "Controls the order of casts by spell type when pursuing in combat", AccountStatus::Player, bot_command_spell_pursue_priority) ||				
+		bot_command_add("spelltargetcount", "Sets the required target amount for group/AE spells by spell type", AccountStatus::Player, bot_command_spell_target_count) ||
 		bot_command_add("spellinfo", "Opens a dialogue window with spell info", AccountStatus::Player, bot_spell_info_dialogue_window) ||
 		bot_command_add("spells", "Lists all Spells learned by the Bot.", AccountStatus::Player, bot_command_spell_list) ||
 		bot_command_add("spellsettings", "Lists a bot's spell setting entries", AccountStatus::Player, bot_command_spell_settings_list) ||
@@ -1354,13 +201,13 @@ int bot_command_init(void)
 		bot_command_add("spellsettingsdelete", "Delete a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_delete) ||
 		bot_command_add("spellsettingstoggle", "Toggle a bot spell use", AccountStatus::Player, bot_command_spell_settings_toggle) ||
 		bot_command_add("spellsettingsupdate", "Update a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_update) ||
-		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) ||
+		bot_command_add("spelltypeids", "Lists spelltypes by ID", AccountStatus::Player, bot_command_spelltype_ids) ||
+		bot_command_add("spelltypenames", "Lists spelltypes by shortname", AccountStatus::Player, bot_command_spelltype_names) ||
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", AccountStatus::Player, bot_command_suspend) ||
 		bot_command_add("taunt", "Toggles taunt use by a bot", AccountStatus::Player, bot_command_taunt) ||
 		bot_command_add("timer", "Checks or clears timers of the chosen type.", AccountStatus::GMMgmt, bot_command_timer) ||
 		bot_command_add("track", "Orders a capable bot to track enemies", AccountStatus::Player, bot_command_track) ||
-		bot_command_add("viewcombos", "Views bot race class combinations", AccountStatus::Player, bot_command_view_combos) ||
-		bot_command_add("waterbreathing", "Orders a bot to cast a water breathing spell", AccountStatus::Player, bot_command_water_breathing)
+		bot_command_add("viewcombos", "Views bot race class combinations", AccountStatus::Player, bot_command_view_combos)
 	) {
 		bot_command_deinit();
 		return -1;
@@ -1458,8 +305,6 @@ int bot_command_init(void)
 
 	bot_command_dispatch = bot_command_real_dispatch;
 
-	BCSpells::Load();
-
 	return bot_command_count;
 }
 
@@ -1470,8 +315,6 @@ void bot_command_deinit(void)
 
 	bot_command_dispatch = bot_command_not_avail;
 	bot_command_count = 0;
-
-	BCSpells::Unload();
 }
 
 int bot_command_add(std::string bot_command_name, const char *desc, int access, BotCmdFuncPtr function)
@@ -1520,7 +363,7 @@ int bot_command_real_dispatch(Client *c, const char *message)
 
 	BotCommandRecord *cur = bot_command_list[cstr];
 	if(c->Admin() < cur->access){
-		c->Message(Chat::White, "Your access level is not high enough to use this bot command.");
+		c->Message(Chat::Yellow, "Your access level is not high enough to use this bot command.");
 		return(-1);
 	}
 
@@ -1545,18 +388,18 @@ int bot_command_real_dispatch(Client *c, const char *message)
 
 }
 
-bool helper_bot_appearance_fail(Client *bot_owner, Bot *my_bot, BCEnum::AFType fail_type, const char* type_desc)
+bool helper_bot_appearance_fail(Client *bot_owner, Bot *my_bot, uint8 fail_type, const char* type_desc)
 {
 	switch (fail_type) {
-	case BCEnum::AFT_Value:
-		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid value for this command", type_desc, my_bot->GetCleanName());
-		return true;
-	case BCEnum::AFT_GenderRace:
-		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid bot gender and/or race for this command", type_desc, my_bot->GetCleanName());
-		return true;
-	case BCEnum::AFT_Race:
-		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid bot race for this command", type_desc, my_bot->GetCleanName());
-		return true;
+		case AFT_Value:
+			bot_owner->Message(Chat::Yellow, "Failed to change '%s' for %s due to invalid value for this command", type_desc, my_bot->GetCleanName());
+			return true;
+		case AFT_GenderRace:
+			bot_owner->Message(Chat::Yellow, "Failed to change '%s' for %s due to invalid bot gender and/or race for this command", type_desc, my_bot->GetCleanName());
+			return true;
+		case AFT_Race:
+			bot_owner->Message(Chat::Yellow, "Failed to change '%s' for %s due to invalid bot race for this command", type_desc, my_bot->GetCleanName());
+			return true;
 	default:
 		return false;
 	}
@@ -1567,7 +410,7 @@ void helper_bot_appearance_form_final(Client *bot_owner, Bot *my_bot)
 	if (!MyBots::IsMyBot(bot_owner, my_bot))
 		return;
 	if (!my_bot->Save()) {
-		bot_owner->Message(Chat::White, "Failed to save appearance change for %s due to unknown cause...", my_bot->GetCleanName());
+		bot_owner->Message(Chat::Yellow, "Failed to save appearance change for %s due to unknown cause...", my_bot->GetCleanName());
 		return;
 	}
 
@@ -1611,35 +454,29 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 
 	if (!Bot::IsValidName(bot_name)) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
-				"'{}' is an invalid name. You may only use characters 'A-Z' or 'a-z'. Mixed case {} allowed.",
+				"'{}' is an invalid name. You may only use characters 'A-Z' or 'a-z' and it must be between 4 and 15 characters with no spaces. Mixed case {} allowed.",
 				bot_name, RuleB(Bots, AllowCamelCaseNames) ? "is" : "is not"
 			).c_str()
 		);
+
 		return bot_id;
 	}
 
 	bool available_flag = false;
-	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to query name availability for '{}'.",
-				bot_name
-			).c_str()
-		);
-		return bot_id;
-	}
+
+	!database.botdb.QueryNameAvailablity(bot_name, available_flag);
 
 	if (!available_flag) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
-				"The name '{}' is already being used. Please choose a different name",
+				"The name '{}' is already being used or prohibited. Please choose a different name",
 				bot_name
 			).c_str()
 		);
+
 		return bot_id;
 	}
 
@@ -1648,7 +485,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		const std::string bot_class_name = GetClassIDName(bot_class);
 
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"{} {} is an invalid race-class combination, would you like to {} proper combinations for {}?",
 				bot_race_name,
@@ -1684,7 +521,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	uint32 bot_count = 0;
 	uint32 bot_class_count = 0;
 	if (!database.botdb.QueryBotCount(bot_owner->CharacterID(), bot_class, bot_count, bot_class_count)) {
-		bot_owner->Message(Chat::White, "Failed to query bot count.");
+		bot_owner->Message(Chat::Yellow, "Failed to query bot count.");
 		return bot_id;
 	}
 
@@ -1701,7 +538,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			message = "You cannot create any bots.";
 		}
 
-		bot_owner->Message(Chat::White, message.c_str());
+		bot_owner->Message(Chat::Yellow, message.c_str());
 		return bot_id;
 	}
 
@@ -1722,7 +559,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			);
 		}
 
-		bot_owner->Message(Chat::White, message.c_str());
+		bot_owner->Message(Chat::Yellow, message.c_str());
 		return bot_id;
 	}
 
@@ -1733,7 +570,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		bot_owner->GetLevel() < bot_character_level
 	) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"You must be level {} to use bots.",
 				bot_character_level
@@ -1749,7 +586,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		bot_owner->GetLevel() < bot_character_level_class
 	) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"You must be level {} to use {} bots.",
 				bot_character_level_class,
@@ -1764,7 +601,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"Failed to create '{}' due to unknown cause.",
 				my_bot->GetCleanName()
@@ -1806,47 +643,13 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	return bot_id;
 }
 
-void helper_bot_out_of_combat(Client *bot_owner, Bot *my_bot)
-{
-	if (!bot_owner || !my_bot)
-		return;
-
-	switch (my_bot->GetClass()) {
-	case Class::Warrior:
-	case Class::Cleric:
-	case Class::Paladin:
-	case Class::Ranger:
-	case Class::ShadowKnight:
-	case Class::Druid:
-	case Class::Monk:
-		bot_owner->Message(Chat::White, "%s has no out-of-combat behavior defined", my_bot->GetCleanName());
-		break;
-	case Class::Bard:
-		bot_owner->Message(Chat::White, "%s will %s use out-of-combat behavior for bard songs", my_bot->GetCleanName(), ((my_bot->GetAltOutOfCombatBehavior()) ? ("now") : ("no longer")));
-		break;
-	case Class::Rogue:
-	case Class::Shaman:
-	case Class::Necromancer:
-	case Class::Wizard:
-	case Class::Magician:
-	case Class::Enchanter:
-	case Class::Beastlord:
-	case Class::Berserker:
-		bot_owner->Message(Chat::White, "%s has no out-of-combat behavior defined", my_bot->GetCleanName());
-		break;
-	default:
-		break;
-		bot_owner->Message(Chat::White, "Undefined bot class for %s", my_bot->GetCleanName());
-	}
-}
-
 int helper_bot_follow_option_chain(Client* bot_owner)
 {
 	if (!bot_owner) {
 		return 0;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(bot_owner, sbl);
 	if (sbl.empty()) {
 		return 0;
@@ -1909,30 +712,10 @@ int helper_bot_follow_option_chain(Client* bot_owner)
 	return chain_follow_count;
 }
 
-bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id, bool annouce_cast, uint32* dont_root_before)
-{
-	if (!casting_bot || !target_mob)
-		return false;
-
-	casting_bot->InterruptSpell();
-	if (annouce_cast) {
-		Bot::BotGroupSay(
-			casting_bot,
-			fmt::format(
-				"Attempting to cast {} on {}.",
-				spells[spell_id].name,
-				target_mob->GetCleanName()
-			).c_str()
-		);
-	}
-
-	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQ::spells::CastingSlot::Gem2, -1, -1, dont_root_before);
-}
-
 bool helper_command_disabled(Client* bot_owner, bool rule_value, const char* command)
 {
 	if (!rule_value) {
-		bot_owner->Message(Chat::White, "Bot command %s is not enabled on this server.", command);
+		bot_owner->Message(Chat::Yellow, "Bot command %s is not enabled on this server.", command);
 		return true;
 	}
 
@@ -1943,109 +726,11 @@ bool helper_command_alias_fail(Client *bot_owner, const char* command_handler, c
 {
 	auto alias_iter = bot_command_aliases.find(&alias[1]);
 	if (alias_iter == bot_command_aliases.end() || alias_iter->second.compare(command)) {
-		bot_owner->Message(Chat::White, "Undefined linker usage in %s (%s)", command_handler, &alias[1]);
+		bot_owner->Message(Chat::Yellow, "Undefined linker usage in %s (%s)", command_handler, &alias[1]);
 		return true;
 	}
 
 	return false;
-}
-
-void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_bot, bcst_list* local_list, bool single_flag)
-{
-	if (!bot_owner) {
-		return;
-	}
-
-	if (!MyBots::IsMyBot(bot_owner, druid_bot)) {
-		druid_bot = nullptr;
-	}
-
-	if (!MyBots::IsMyBot(bot_owner, wizard_bot)) {
-		wizard_bot = nullptr;
-	}
-
-	if (!druid_bot && !wizard_bot) {
-		bot_owner->Message(Chat::White, "No bots are capable of performing this action");
-		return;
-	}
-
-	if (!local_list) {
-		bot_owner->Message(Chat::White, "There are no destinations you can be taken to.");
-		return;
-	}
-
-	auto destination_count = 0;
-	auto destination_number = 1;
-	for (auto list_iter : *local_list) {
-		auto local_entry = list_iter->SafeCastToDepart();
-		if (!local_entry) {
-			continue;
-		}
-
-		if (
-			druid_bot &&
-			druid_bot->GetClass() == local_entry->caster_class &&
-			druid_bot->GetLevel() >= local_entry->spell_level
-		) {
-			if (local_entry->single != single_flag) {
-				continue;
-			}
-
-			druid_bot->OwnerMessage(
-				fmt::format(
-					"Destination {} | {} | {}",
-					destination_number,
-					local_entry->long_name,
-					Saylink::Silent(
-						fmt::format(
-							"^circle {}{}",
-							spells[local_entry->spell_id].teleport_zone,
-							single_flag ? " single" : ""
-						),
-						"Goto"
-					)
-				)
-			);
-
-			destination_count++;
-			destination_number++;
-			continue;
-		}
-
-		if (
-			wizard_bot &&
-			wizard_bot->GetClass() == local_entry->caster_class &&
-			wizard_bot->GetLevel() >= local_entry->spell_level
-		) {
-			if (local_entry->single != single_flag) {
-				continue;
-			}
-
-			wizard_bot->OwnerMessage(
-				fmt::format(
-					"Destination {} | {} | {}",
-					destination_number,
-					local_entry->long_name,
-					Saylink::Silent(
-						fmt::format(
-							"^portal {}{}",
-							spells[local_entry->spell_id].teleport_zone,
-							single_flag ? " single" : ""
-						),
-						"Goto"
-					)
-				)
-			);
-
-			destination_count++;
-			destination_number++;
-			continue;
-		}
-	}
-
-	if (!destination_count) {
-		bot_owner->Message(Chat::White, "There are no destinations you can be taken to.");
-	}
 }
 
 bool helper_is_help_or_usage(const char* arg)
@@ -2063,14 +748,14 @@ bool helper_no_available_bots(Client *bot_owner, Bot *my_bot)
 	if (!bot_owner)
 		return true;
 	if (!my_bot) {
-		bot_owner->Message(Chat::White, "No bots are capable of performing this action");
+		bot_owner->Message(Chat::Yellow, "No bots are capable of performing this action");
 		return true;
 	}
 
 	return false;
 }
 
-void helper_send_available_subcommands(Client *bot_owner, const char* command_simile, const std::list<const char*>& subcommand_list)
+void helper_send_available_subcommands(Client* bot_owner, const char* command_simile, std::vector<const char*> subcommand_list)
 {
 	bot_owner->Message(Chat::White, "Available %s management subcommands:", command_simile);
 
@@ -2085,8 +770,11 @@ void helper_send_available_subcommands(Client *bot_owner, const char* command_si
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
-				"^{} - {}",
-				subcommand_iter,
+				"{} - {}",
+				Saylink::Silent(
+					fmt::format("^{} help", subcommand_iter),
+					fmt::format("^{}", subcommand_iter)
+				),
 				find_iter != bot_command_list.end() ? find_iter->second->desc : "No Description"
 			).c_str()
 		);
@@ -2097,64 +785,167 @@ void helper_send_available_subcommands(Client *bot_owner, const char* command_si
 	bot_owner->Message(Chat::White, "%d bot subcommand%s listed.", bot_subcommands_shown, bot_subcommands_shown != 1 ? "s" : "");
 }
 
-void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class)
+void helper_send_usage_required_bots(Client *bot_owner, uint16 spell_type)
 {
-	bot_owner->Message(Chat::White, "requires one of the following bot classes:");
-	if (bot_class)
-		bot_owner->Message(Chat::White, "%s", required_bots_map_by_class[spell_type][bot_class].c_str());
-	else
-		bot_owner->Message(Chat::White, "%s", required_bots_map[spell_type].c_str());
-}
-
-bool helper_spell_check_fail(STBaseEntry* local_entry)
-{
-	if (!local_entry)
-		return true;
-	if (spells[local_entry->spell_id].zone_type && zone->GetZoneType() && !(spells[local_entry->spell_id].zone_type & zone->GetZoneType()))
-		return true;
-
-	return false;
-}
-
-bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type)
-{
-	if (!spell_list || spell_list->empty()) {
-		bot_owner->Message(Chat::White, "%s", required_bots_map[spell_type].c_str());
-		return true;
+	if (!bot_owner) {
+		return;
 	}
 
-	return false;
+	auto sbl = entity_list.GetBotListByCharacterID(bot_owner->CharacterID());
+	Bot* bot = nullptr;
+
+	for (const auto& b : sbl) {
+		if (b) {
+			bot = b;
+
+			break;
+		}
+	}
+
+	auto& spell_map = bot->GetCommandedSpellTypesMinLevels();
+
+	if (spell_map.empty()) {
+		bot_owner->Message(Chat::Yellow, "No bots are capable of casting this spell type");
+		return;
+	}
+
+	bool found = false;
+	std::string description;
+
+	for (int i = Class::Warrior; i <= Class::Berserker; ++i) {
+		auto spell_type_itr = spell_map.find(spell_type);
+		auto class_itr = spell_type_itr->second.find(i);
+		const auto& spell_info = class_itr->second;
+			
+		if (spell_info.min_level < UINT8_MAX) {
+			found = true;
+
+			if (!description.empty()) {
+				description.append(", ");
+			}
+			else {
+				bot_owner->Message(Chat::Yellow, "Required bots to cast: Class [Class ID]: [Level]");
+			}
+
+			description.append(spell_info.description);
+		}
+	}
+
+	if (!found || description.empty()) {
+		bot_owner->Message(Chat::Yellow, "No bots are capable of casting this spell type");
+
+		return;
+	}
+
+	bot_owner->Message(Chat::Green, "%s", description.c_str());
+}
+
+void SendSpellTypeWindow(Client* c, const Seperator* sep) {
+	std::string arg0 = sep->arg[0];
+	std::string arg1 = sep->arg[1];
+
+	uint8 min_count = 0;
+	uint8 max_count = 0;
+	bool client_only = false;
+
+	if (BotSpellTypes::END <= 19) {
+		min_count = BotSpellTypes::START;
+		max_count = BotSpellTypes::END;
+	}
+	else if (!arg1.compare("0-19")) {
+		min_count = BotSpellTypes::START;
+		max_count = 19;
+	}
+	else if (!arg1.compare("20-39")) {
+		min_count = std::min(static_cast<uint8_t>(20), static_cast<uint8_t>(BotSpellTypes::END));
+		max_count = std::min(static_cast<uint8_t>(39), static_cast<uint8_t>(BotSpellTypes::END));
+	}
+	else if (!arg1.compare("40+")) {
+		min_count = std::min(static_cast<uint8_t>(40), static_cast<uint8_t>(BotSpellTypes::END));
+		max_count = BotSpellTypes::END;
+	}
+	else if (!arg1.compare("commanded")) {
+		min_count = BotSpellTypes::COMMANDED_START;
+		max_count = BotSpellTypes::COMMANDED_END;
+	}
+	else if (!arg1.compare("client")) {
+		min_count = BotSpellTypes::START;
+		max_count = BotSpellTypes::END;
+		client_only = true;
+	}
+	else {
+		c->Message(Chat::Yellow, "You must choose a valid range option");
+
+		return;
+	}
+
+	const std::string& indian_red = "indian_red";
+	const std::string& gold = "gold";
+	const std::string& slate_blue = "slate_blue";
+	const std::string& forest_green = "forest_green";
+	const std::string& goldenrod = "goldenrod";
+
+	std::string filler_line = "-----------";
+	std::string spell_type_field = "Spell Type";
+	std::string id_field = "ID";
+	std::string shortname_field = "Short Name";
+
+	std::string popup_text = DialogueWindow::TableRow(
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(goldenrod, spell_type_field))
+		+
+		DialogueWindow::TableCell((!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(goldenrod, id_field) : DialogueWindow::ColorMessage(goldenrod, shortname_field)))
+	);
+
+	popup_text += DialogueWindow::TableRow(
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(gold, filler_line))
+		+
+		DialogueWindow::TableCell(DialogueWindow::ColorMessage(gold, filler_line))
+	);
+
+	for (int i = min_count; i <= max_count; ++i) {
+		if (client_only && !IsClientBotSpellType(i)) {
+			continue;
+		}
+
+		popup_text += DialogueWindow::TableRow(
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(forest_green, Bot::GetSpellTypeNameByID(i)))
+			+
+			DialogueWindow::TableCell((!arg0.compare("^spelltypeids") ? DialogueWindow::ColorMessage(slate_blue, std::to_string(i)) : DialogueWindow::ColorMessage(slate_blue, Bot::GetSpellTypeShortNameByID(i))))
+		);
+	}
+
+	popup_text = DialogueWindow::Table(popup_text);
+
+	c->SendPopupToClient("Spell Types", popup_text.c_str());
 }
 
 #include "bot_commands/actionable.cpp"
-#include "bot_commands/aggressive.cpp"
 #include "bot_commands/appearance.cpp"
 #include "bot_commands/apply_poison.cpp"
 #include "bot_commands/apply_potion.cpp"
 #include "bot_commands/attack.cpp"
-#include "bot_commands/bind_affinity.cpp"
+#include "bot_commands/behind_mob.cpp"
+#include "bot_commands/blocked_buffs.cpp"
 #include "bot_commands/bot.cpp"
-#include "bot_commands/caster_range.cpp"
-#include "bot_commands/charm.cpp"
+#include "bot_commands/bot_settings.cpp"
+#include "bot_commands/cast.cpp"
+#include "bot_commands/class_race_list.cpp"
 #include "bot_commands/click_item.cpp"
-#include "bot_commands/cure.cpp"
-#include "bot_commands/defensive.cpp"
+#include "bot_commands/copy_settings.cpp"
+#include "bot_commands/default_settings.cpp"
 #include "bot_commands/depart.cpp"
-#include "bot_commands/escape.cpp"
+#include "bot_commands/discipline.cpp"
+#include "bot_commands/distance_ranged.cpp"
 #include "bot_commands/find_aliases.cpp"
 #include "bot_commands/follow.cpp"
 #include "bot_commands/guard.cpp"
 #include "bot_commands/heal_rotation.cpp"
 #include "bot_commands/help.cpp"
 #include "bot_commands/hold.cpp"
-#include "bot_commands/identify.cpp"
+#include "bot_commands/illusion_block.cpp"
 #include "bot_commands/inventory.cpp"
-#include "bot_commands/invisibility.cpp"
 #include "bot_commands/item_use.cpp"
-#include "bot_commands/levitation.cpp"
-#include "bot_commands/lull.cpp"
-#include "bot_commands/mesmerize.cpp"
-#include "bot_commands/movement_speed.cpp"
+#include "bot_commands/max_melee_range.cpp"
 #include "bot_commands/name.cpp"
 #include "bot_commands/owner_option.cpp"
 #include "bot_commands/pet.cpp"
@@ -2163,18 +954,30 @@ bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::Sp
 #include "bot_commands/precombat.cpp"
 #include "bot_commands/pull.cpp"
 #include "bot_commands/release.cpp"
-#include "bot_commands/resistance.cpp"
-#include "bot_commands/resurrect.cpp"
-#include "bot_commands/rune.cpp"
-#include "bot_commands/send_home.cpp"
-#include "bot_commands/size.cpp"
+#include "bot_commands/set_assistee.cpp"
+#include "bot_commands/sit_hp_percent.cpp"
+#include "bot_commands/sit_in_combat.cpp"
+#include "bot_commands/sit_mana_percent.cpp"
 #include "bot_commands/spell.cpp"
+#include "bot_commands/spell_aggro_checks.cpp"
+#include "bot_commands/spell_announce_cast.cpp"
+#include "bot_commands/spell_delays.cpp"
+#include "bot_commands/spell_engaged_priority.cpp"
+#include "bot_commands/spell_holds.cpp"
+#include "bot_commands/spell_idle_priority.cpp"
+#include "bot_commands/spell_max_hp_pct.cpp"
+#include "bot_commands/spell_max_mana_pct.cpp"
+#include "bot_commands/spell_max_thresholds.cpp"
+#include "bot_commands/spell_min_hp_pct.cpp"
+#include "bot_commands/spell_min_mana_pct.cpp"
+#include "bot_commands/spell_min_thresholds.cpp"
+#include "bot_commands/spell_pursue_priority.cpp"
+#include "bot_commands/spell_resist_limits.cpp"
+#include "bot_commands/spell_target_count.cpp"
+#include "bot_commands/spelltypes.cpp"
 #include "bot_commands/summon.cpp"
-#include "bot_commands/summon_corpse.cpp"
 #include "bot_commands/suspend.cpp"
 #include "bot_commands/taunt.cpp"
-#include "bot_commands/teleport.cpp"
 #include "bot_commands/timer.cpp"
 #include "bot_commands/track.cpp"
 #include "bot_commands/view_combos.cpp"
-#include "bot_commands/water_breathing.cpp"

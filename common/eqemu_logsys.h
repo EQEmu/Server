@@ -145,6 +145,9 @@ namespace Logs {
 		EvolveItem,
 		PositionUpdate,
 		KSM,
+		BotSettings,
+		BotSpellChecks,
+		BotSpellTypeChecks,
 		NpcHandin,
 		MaxCategoryID /* Don't Remove this */
 	};
@@ -250,6 +253,9 @@ namespace Logs {
 		"EvolveItem",
 		"PositionUpdate",
 		"KSM",
+		"Bot Settings",
+		"Bot Spell Checks",
+		"Bot Spell Type Checks",
 		"NpcHandin"
 	};
 }

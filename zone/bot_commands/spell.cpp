@@ -503,7 +503,7 @@ void bot_spell_info_dialogue_window(Client* c, const Seperator *sep)
 	auto results = database.QueryDatabase(
 		fmt::format(
 			"SELECT value FROM db_str WHERE id = {} and type = 6 LIMIT 1",
-			spells[spell_id].effect_description_id
+			spells[spell_id].description_id
 		)
 	);
 
@@ -557,7 +557,7 @@ void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 	}
 
 	bool enforce_state = (sep->argnum > 0) ? Strings::ToBool(sep->arg[1]) : !my_bot->GetBotEnforceSpellSetting();
-	my_bot->SetBotEnforceSpellSetting(enforce_state, true);
+	my_bot->SetBotEnforceSpellSetting(enforce_state);
 
 	c->Message(
 		Chat::White,

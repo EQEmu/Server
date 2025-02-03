@@ -819,7 +819,7 @@ int32 Client::CalcSTR()
 
 int32 Client::CalcSTA()
 {
-	int32 val = m_pp.STA + itembonuses.STA + spellbonuses.STA + CalcAlcoholPhysicalEffect();;
+	int32 val = m_pp.STA + itembonuses.STA + spellbonuses.STA + CalcAlcoholPhysicalEffect();
 	int32 mod = aabonuses.STA;
 	STA = val + mod;
 	if (STA < 1) {
@@ -834,7 +834,7 @@ int32 Client::CalcSTA()
 
 int32 Client::CalcAGI()
 {
-	int32 val = m_pp.AGI + itembonuses.AGI + spellbonuses.AGI - CalcAlcoholPhysicalEffect();;
+	int32 val = m_pp.AGI + itembonuses.AGI + spellbonuses.AGI - CalcAlcoholPhysicalEffect();
 	int32 mod = aabonuses.AGI;
 	int32 str = GetSTR();
 	//Encumbered penalty
@@ -859,7 +859,7 @@ int32 Client::CalcAGI()
 
 int32 Client::CalcDEX()
 {
-	int32 val = m_pp.DEX + itembonuses.DEX + spellbonuses.DEX - CalcAlcoholPhysicalEffect();;
+	int32 val = m_pp.DEX + itembonuses.DEX + spellbonuses.DEX - CalcAlcoholPhysicalEffect();
 	int32 mod = aabonuses.DEX;
 	DEX = val + mod;
 	if (DEX < 1) {

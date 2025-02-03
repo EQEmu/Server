@@ -421,7 +421,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_TributeUpdate] = &Client::Handle_OP_TributeUpdate;
 	ConnectedOpcodes[OP_VetClaimRequest] = &Client::Handle_OP_VetClaimRequest;
 	ConnectedOpcodes[OP_VoiceMacroIn] = &Client::Handle_OP_VoiceMacroIn;
-	ConnectedOpcodes[OP_UpdateAura] = &Client::Handle_OP_UpdateAura;;
+	ConnectedOpcodes[OP_UpdateAura] = &Client::Handle_OP_UpdateAura;
 	ConnectedOpcodes[OP_WearChange] = &Client::Handle_OP_WearChange;
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;
@@ -686,6 +686,10 @@ void Client::CompleteConnect()
 		for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
 			switch (spell.effect_id[x1]) {
 			case SE_Illusion: {
+				if (GetIllusionBlock()) {
+					break;
+				}
+
 				if (buffs[j1].persistant_buff) {
 					Mob *caster = entity_list.GetMobID(buffs[j1].casterid);
 					ApplySpellEffectIllusion(spell.id, caster, j1, spell.base_value[x1], spell.limit_value[x1], spell.max_value[x1]);
@@ -1558,6 +1562,11 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		LogError("Error loading AA points for [{}]", GetName());
 	}
 
+	if (RuleB(Bots, Enabled)) {
+		LoadDefaultBotSettings();
+		database.botdb.LoadBotSettings(this);
+	}
+
 	if (SPDAT_RECORDS > 0) {
 		for (uint32 z = 0; z < EQ::spells::SPELL_GEM_COUNT; z++) {
 			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
@@ -1654,7 +1663,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		LFG = false;
 	}
 
-	/* Load Bots */
 	if (RuleB(Bots, Enabled)) {
 		database.botdb.LoadOwnerOptions(this);
 		// TODO: mod below function for loading spawned botgroups
@@ -4405,14 +4413,12 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (zone->GetZoneID() == Zones::BAZAAR) {
-		camp_timer.Start(5000, true);
-		return;
-	} else {
-		LogDebug("Zone ID: [{}]", zone->GetZoneID());
+	camp_timer.Start(29000, true);
+
+	if (RuleB(Bots, Enabled)) {
+		bot_camp_timer.Start((RuleI(Bots, CampTimer) * 1000), true);
 	}
 
-	camp_timer.Start(29000, true);
 	return;
 }
 
@@ -15224,6 +15230,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			SetFeigned(false);
 			BindWound(this, false, true);
 			camp_timer.Disable();
+			bot_camp_timer.Disable();
 		}
 		else if (sa->parameter == Animation::Sitting) {
 			SetAppearance(eaSitting);
@@ -15688,7 +15695,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket *app)
 			GetTarget()->IsTargeted(1);
 			return;
 		}
-		else if (GetTarget()->IsPetOwnerClient())
+		else if (GetTarget()->IsPetOwnerOfClientBot())
 		{
 			GetTarget()->IsTargeted(1);
 			return;

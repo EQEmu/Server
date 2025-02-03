@@ -3755,7 +3755,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 			&& mob != attacker
 			&& mob->GetPrimaryFaction() != 0
 			&& !mob->IsEngaged()
-			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsClient()))
+			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsOfClientBot()))
 			) {
 
 			/**

@@ -53,6 +53,7 @@ extern volatile bool RunLoops;
 #include "water_map.h"
 #include "bot_command.h"
 #include "string_ids.h"
+#include "dialogue_window.h"
 
 #include "guild_mgr.h"
 #include "quest_parser_collection.h"
@@ -466,6 +467,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 ),
 	hpupdate_timer(2000),
 	camp_timer(29000),
+	bot_camp_timer((RuleI(Bots, CampTimer) * 1000)),
 	process_timer(100),
 	consume_food_timer(CONSUMPTION_TIMER),
 	zoneinpacket_timer(1000),
@@ -573,6 +575,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	fishing_timer.Disable();
 	dead_timer.Disable();
 	camp_timer.Disable();
+	bot_camp_timer.Disable();
 	autosave_timer.Disable();
 	GetMercTimer()->Disable();
 	instalog = false;
@@ -1146,6 +1149,10 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
 	database.SaveCharacterEXPModifier(this);
+
+	if (RuleB(Bots, Enabled)) {
+		database.botdb.SaveBotSettings(this);
+	}
 
 	return true;
 }
@@ -10540,10 +10547,10 @@ void Client::ProcessAggroMeter()
 
 	// probably should have PVP rules ...
 	if (cur_tar && cur_tar != this) {
-		if (cur_tar->IsNPC() && !cur_tar->IsPetOwnerClient() && cur_tar->GetID() != m_aggrometer.get_target_id()) {
+		if (cur_tar->IsNPC() && !cur_tar->IsPetOwnerOfClientBot() && cur_tar->GetID() != m_aggrometer.get_target_id()) {
 			m_aggrometer.set_target_id(cur_tar->GetID());
 			send_targetinfo = true;
-		} else if ((cur_tar->IsPetOwnerClient() || cur_tar->IsClient()) && cur_tar->GetTarget() && cur_tar->GetTarget()->GetID() != m_aggrometer.get_target_id()) {
+		} else if ((cur_tar->IsPetOwnerOfClientBot() || cur_tar->IsClient()) && cur_tar->GetTarget() && cur_tar->GetTarget()->GetID() != m_aggrometer.get_target_id()) {
 			m_aggrometer.set_target_id(cur_tar->GetTarget()->GetID());
 			send_targetinfo = true;
 		}
@@ -14396,11 +14403,11 @@ void Client::AddMoneyToPPWithOverflow(uint64 copper, bool update_client)
 	};
 
 	LogDebug("Client::AddMoneyToPPWithOverflow() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]",
-			 GetName(),
-			 m_pp.platinum,
-			 m_pp.gold,
-			 m_pp.silver,
-			 m_pp.copper
+		GetName(),
+		m_pp.platinum,
+		m_pp.gold,
+		m_pp.silver,
+		m_pp.copper
 	);
 }
 
@@ -14534,8 +14541,8 @@ void Client::ClientToNpcAggroProcess()
 {
 	if (zone->CanDoCombat() && !GetFeigned() && m_client_npc_aggro_scan_timer.Check()) {
 		int npc_scan_count = 0;
-		for (auto &close_mob: GetCloseMobList()) {
-			Mob *mob = close_mob.second;
+		for (auto& close_mob : GetCloseMobList()) {
+			Mob* mob = close_mob.second;
 			if (!mob) {
 				continue;
 			}
@@ -14685,6 +14692,71 @@ void Client::ShowZoneShardMenu()
 			}
 		}
 	}
+}
+
+std::string Client::SendBotCommandHelpWindow(const BotCommandHelpParams& params) {
+	std::string popup_text;
+	return popup_text;
+}
+
+std::string Client::GetCommandHelpHeader(std::string msg, std::string color) {
+	std::string return_text = DialogueWindow::TableRow(
+		DialogueWindow::TableCell(
+			fmt::format(
+				"{}",
+				DialogueWindow::ColorMessage(color, msg)
+			)
+		)
+	);
+
+	return return_text;
+}
+
+std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 max_length, std::string secondary_color) {
+	std::string return_text;
+
+	for (int i = 0; i < msg.size(); i++) {
+		std::vector<std::string> msg_split;
+		int string_length = msg[i].length() + 1;
+		int end_count = 0;
+		int new_count = 0;
+		int split_count = 0;
+
+		for (int x = 0; x < string_length; x = end_count) {
+			end_count = std::min(int(string_length), (int(x) + std::min(int(string_length), int(max_length))));
+
+			if ((string_length - (x + 1)) > max_length) {
+				for (int y = end_count; y >= x; --y) {
+					if (msg[i][y] == ' ') {
+							split_count = y - x;
+							msg_split.emplace_back(msg[i].substr(x, split_count));
+							end_count = y + 1;
+
+							break;
+					}
+
+					if (y == x) {
+						msg_split.emplace_back(msg[i].substr(x, max_length));
+
+						break;
+					}
+				}
+			}
+			else {
+				msg_split.emplace_back(msg[i].substr(x, (string_length - 1) - x));
+
+				break;
+			}
+		}
+
+		for (const auto& s : msg_split) {
+			return_text += DialogueWindow::TableRow(
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(((!secondary_color.empty() && i== 0) ? secondary_color : color), s))
+			);
+		}
+	}
+
+	return return_text;
 }
 
 void Client::SetAAEXPPercentage(uint8 percentage)

@@ -3404,6 +3404,11 @@ bool Perl_Mob_IsPetOwnerNPC(Mob* self)
 	return self->IsPetOwnerNPC();
 }
 
+bool Perl_Mob_IsPetOwnerOfClientBot(Mob* self)
+{
+	return self->IsPetOwnerOfClientBot();
+}
+
 bool Perl_Mob_IsDestructibleObject(Mob* self)
 {
 	return self->IsDestructibleObject();
@@ -4003,6 +4008,7 @@ void perl_register_mob()
 	package.add("IsPetOwnerBot", &Perl_Mob_IsPetOwnerBot);
 	package.add("IsPetOwnerClient", &Perl_Mob_IsPetOwnerClient);
 	package.add("IsPetOwnerNPC", &Perl_Mob_IsPetOwnerNPC);
+	package.add("IsPetOwnerOfClientBot", &Perl_Mob_IsPetOwnerOfClientBot);
 	package.add("IsPlayerCorpse", &Perl_Mob_IsPlayerCorpse);
 	package.add("IsPureMeleeClass", &Perl_Mob_IsPureMeleeClass);
 	package.add("IsRoamer", &Perl_Mob_IsRoamer);

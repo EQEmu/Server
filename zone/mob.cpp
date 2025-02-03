@@ -1679,6 +1679,13 @@ void Mob::StopMoving()
 
 void Mob::StopMoving(float new_heading)
 {
+	if (IsBot()) {
+		auto bot = CastToBot();
+
+		bot->SetCombatJitterFlag(false);
+		bot->SetCombatOutOfRangeJitterFlag(false);
+	}
+
 	StopNavigation();
 	RotateTo(new_heading);
 
@@ -4950,7 +4957,7 @@ bool Mob::HateSummon() {
 			} else {
 				bool target_is_client_pet = (
 					target->IsPet() &&
-					target->IsPetOwnerClient()
+					target->IsPetOwnerOfClientBot()
 				);
 				bool set_new_guard_spot = !(IsNPC() && target_is_client_pet);
 				entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName());
@@ -6106,18 +6113,17 @@ int32 Mob::GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining, 
 bool Mob::IsTargetedFocusEffect(int focus_type) {
 
 	switch (focus_type) {
-	case focusSpellVulnerability:
-	case focusFcSpellDamagePctIncomingPC:
-	case focusFcDamageAmtIncoming:
-	case focusFcSpellDamageAmtIncomingPC:
-	case focusFcCastSpellOnLand:
-	case focusFcHealAmtIncoming:
-	case focusFcHealPctCritIncoming:
-	case focusFcHealPctIncoming:
-		return true;
-	default:
-		return false;
-
+		case focusSpellVulnerability:
+		case focusFcSpellDamagePctIncomingPC:
+		case focusFcDamageAmtIncoming:
+		case focusFcSpellDamageAmtIncomingPC:
+		case focusFcCastSpellOnLand:
+		case focusFcHealAmtIncoming:
+		case focusFcHealPctCritIncoming:
+		case focusFcHealPctIncoming:
+			return true;
+		default:
+			return false;
 	}
 }
 
@@ -7253,56 +7259,56 @@ void Mob::SlowMitigation(Mob* caster)
 EQ::skills::SkillType Mob::GetSkillByItemType(int ItemType)
 {
 	switch (ItemType) {
-	case EQ::item::ItemType1HSlash:
-		return EQ::skills::Skill1HSlashing;
-	case EQ::item::ItemType2HSlash:
-		return EQ::skills::Skill2HSlashing;
-	case EQ::item::ItemType1HPiercing:
-		return EQ::skills::Skill1HPiercing;
-	case EQ::item::ItemType1HBlunt:
-		return EQ::skills::Skill1HBlunt;
-	case EQ::item::ItemType2HBlunt:
-		return EQ::skills::Skill2HBlunt;
-	case EQ::item::ItemType2HPiercing:
-		if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
+		case EQ::item::ItemType1HSlash:
+			return EQ::skills::Skill1HSlashing;
+		case EQ::item::ItemType2HSlash:
+			return EQ::skills::Skill2HSlashing;
+		case EQ::item::ItemType1HPiercing:
 			return EQ::skills::Skill1HPiercing;
-		else
-			return EQ::skills::Skill2HPiercing;
-	case EQ::item::ItemTypeBow:
-		return EQ::skills::SkillArchery;
-	case EQ::item::ItemTypeLargeThrowing:
-	case EQ::item::ItemTypeSmallThrowing:
-		return EQ::skills::SkillThrowing;
-	case EQ::item::ItemTypeMartial:
-		return EQ::skills::SkillHandtoHand;
-	default:
-		return EQ::skills::SkillHandtoHand;
+		case EQ::item::ItemType1HBlunt:
+			return EQ::skills::Skill1HBlunt;
+		case EQ::item::ItemType2HBlunt:
+			return EQ::skills::Skill2HBlunt;
+		case EQ::item::ItemType2HPiercing:
+			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
+				return EQ::skills::Skill1HPiercing;
+			else
+				return EQ::skills::Skill2HPiercing;
+		case EQ::item::ItemTypeBow:
+			return EQ::skills::SkillArchery;
+		case EQ::item::ItemTypeLargeThrowing:
+		case EQ::item::ItemTypeSmallThrowing:
+			return EQ::skills::SkillThrowing;
+		case EQ::item::ItemTypeMartial:
+			return EQ::skills::SkillHandtoHand;
+		default:
+			return EQ::skills::SkillHandtoHand;
 	}
  }
 
 uint8 Mob::GetItemTypeBySkill(EQ::skills::SkillType skill)
 {
 	switch (skill) {
-	case EQ::skills::SkillThrowing:
-		return EQ::item::ItemTypeSmallThrowing;
-	case EQ::skills::SkillArchery:
-		return EQ::item::ItemTypeArrow;
-	case EQ::skills::Skill1HSlashing:
-		return EQ::item::ItemType1HSlash;
-	case EQ::skills::Skill2HSlashing:
-		return EQ::item::ItemType2HSlash;
-	case EQ::skills::Skill1HPiercing:
-		return EQ::item::ItemType1HPiercing;
-	case EQ::skills::Skill2HPiercing: // watch for undesired client behavior
-		return EQ::item::ItemType2HPiercing;
-	case EQ::skills::Skill1HBlunt:
-		return EQ::item::ItemType1HBlunt;
-	case EQ::skills::Skill2HBlunt:
-		return EQ::item::ItemType2HBlunt;
-	case EQ::skills::SkillHandtoHand:
-		return EQ::item::ItemTypeMartial;
-	default:
-		return EQ::item::ItemTypeMartial;
+		case EQ::skills::SkillThrowing:
+			return EQ::item::ItemTypeSmallThrowing;
+		case EQ::skills::SkillArchery:
+			return EQ::item::ItemTypeArrow;
+		case EQ::skills::Skill1HSlashing:
+			return EQ::item::ItemType1HSlash;
+		case EQ::skills::Skill2HSlashing:
+			return EQ::item::ItemType2HSlash;
+		case EQ::skills::Skill1HPiercing:
+			return EQ::item::ItemType1HPiercing;
+		case EQ::skills::Skill2HPiercing: // watch for undesired client behavior
+			return EQ::item::ItemType2HPiercing;
+		case EQ::skills::Skill1HBlunt:
+			return EQ::item::ItemType1HBlunt;
+		case EQ::skills::Skill2HBlunt:
+			return EQ::item::ItemType2HBlunt;
+		case EQ::skills::SkillHandtoHand:
+			return EQ::item::ItemTypeMartial;
+		default:
+			return EQ::item::ItemTypeMartial;
 	}
  }
 
@@ -8666,8 +8672,9 @@ bool Mob::HasBotAttackFlag(Mob* tar) {
 	return false;
 }
 
+
 const uint16 scan_close_mobs_timer_moving = 6000; // 6 seconds
-const uint16 scan_close_mobs_timer_idle   = 60000; // 60 seconds
+const uint16 scan_close_mobs_timer_idle = 60000; // 60 seconds
 
 // If the moving timer triggers, lets see if we are moving or idle to restart the appropriate dynamic timer
 void Mob::CheckScanCloseMobsMovingTimer()
@@ -8696,7 +8703,7 @@ void Mob::CheckScanCloseMobsMovingTimer()
 	}
 }
 
-std::unordered_map<uint16, Mob *> &Mob::GetCloseMobList(float distance)
+std::unordered_map<uint16, Mob*>& Mob::GetCloseMobList(float distance)
 {
 	return entity_list.GetCloseMobList(this, distance);
 }
@@ -8787,6 +8794,133 @@ void Mob::ClearDataBucketCache()
 
 		DataBucket::DeleteFromCache(id, t);
 	}
+}
+
+bool Mob::IsInGroupOrRaid(Mob* other, bool same_raid_group) {
+	if (!other || !IsOfClientBotMerc() || !other->IsOfClientBotMerc()) {
+		return false;
+	}
+
+	if (this == other) {
+		return true;
+	}
+
+	Raid* raid = IsBot() ? CastToBot()->GetStoredRaid() : (IsRaidGrouped() ? GetRaid() : nullptr);
+
+	if (raid) {
+		if (!other->IsRaidGrouped()) {
+			return false;
+		}
+
+		Raid* other_raid = other->IsBot() ? other->CastToBot()->GetStoredRaid() : other->GetRaid();
+
+		if (!other_raid) {
+			return false;
+		}
+
+		auto raid_group = raid->GetGroup(GetCleanName());
+		auto other_raid_group = other_raid->GetGroup(other->GetCleanName());
+
+		if (
+			raid_group == RAID_GROUPLESS ||
+			other_raid_group == RAID_GROUPLESS ||
+			(same_raid_group && raid_group != other_raid_group)
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	Group* group = GetGroup();
+	Group* other_group = other->GetGroup();
+
+	return group && group == other_group;
+}
+
+bool Mob::DoLosChecks(Mob* other) {
+	if (!CheckLosFN(other) || !CheckWaterLoS(other)) {
+		if (CheckLosCheatExempt(other)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	if (!CheckLosCheat(other)) {
+		return false;
+	}
+
+	return true;
+}
+
+bool Mob::CheckLosCheat(Mob* other) {
+	if (RuleB(Map, CheckForLoSCheat)) {
+		for (auto itr : entity_list.GetDoorsList()) {
+			Doors* d = itr.second;
+
+			if (
+				!d->IsDoorOpen() &&
+				(
+					d->GetKeyItem() ||
+					d->GetLockpick() ||
+					d->IsDoorOpen() ||
+					d->IsDoorBlacklisted() ||
+					d->GetNoKeyring() != 0 ||
+					d->GetDoorParam() > 0
+				)
+			) {
+				// If the door is a trigger door, check if the trigger door is open
+				if (d->GetTriggerDoorID() > 0) {
+					auto td = entity_list.GetDoorsByDoorID(d->GetTriggerDoorID());
+
+					if (td) {
+						if (Strings::RemoveNumbers(d->GetDoorName()) != Strings::RemoveNumbers(td->GetDoorName())) {
+							continue;
+						}
+					}
+				}
+
+				if (DistanceNoZ(GetPosition(), d->GetPosition()) <= 50) {
+					auto who_to_door = DistanceNoZ(GetPosition(), d->GetPosition());
+					auto other_to_door = DistanceNoZ(other->GetPosition(), d->GetPosition());
+					auto who_to_other = DistanceNoZ(GetPosition(), other->GetPosition());
+					auto distance_difference = who_to_other - (who_to_door + other_to_door);
+
+					if (distance_difference >= (-1 * RuleR(Maps, RangeCheckForLoSCheat)) && distance_difference <= RuleR(Maps, RangeCheckForLoSCheat)) {
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool Mob::CheckLosCheatExempt(Mob* other)
+{
+	if (RuleB(Map, EnableLoSCheatExemptions)) {
+		/* This is an exmaple of how to configure exemptions for LoS checks.
+		glm::vec4 exempt_check_who;
+		glm::vec4 exempt_check_other;
+
+		switch (zone->GetZoneID()) {
+			case POEARTHB:
+				exempt_check_who.x = 2051; exempt_check_who.y = 407; exempt_check_who.z = -219; //Middle of councilman spawns
+				//exempt_check_other.x = 1455; exempt_check_other.y = 415; exempt_check_other.z = -242;
+				//check to be sure the player and the target are outside of the councilman area
+				//if the player is inside the cove they cannot be higher than the ceiling (no exploiting from uptop)
+				if (GetZ() <= -171 && other->GetZ() <= -171 && DistanceNoZ(other->GetPosition(), exempt_check_who) <= 800 && DistanceNoZ(GetPosition(), exempt_check_who) <= 800) {
+					return true;
+				}
+			default:
+				return false;
+		}
+		*/
+	}
+
+	return false;
 }
 
 bool Mob::IsGuildmaster() const {

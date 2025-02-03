@@ -203,6 +203,12 @@ bool Client::Process() {
 			return false; //delete client
 		}
 
+		if (RuleB(Bots, Enabled)) {
+			if (bot_camp_timer.Check()) {
+				CampAllBots();
+			}
+		}
+
 		if (camp_timer.Check()) {
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid) {

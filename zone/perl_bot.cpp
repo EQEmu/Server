@@ -425,11 +425,6 @@ void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask)
 	self->SetExpansionBitmask(expansion_bitmask);
 }
 
-void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask, bool save)
-{
-	self->SetExpansionBitmask(expansion_bitmask, save);
-}
-
 void Perl_Bot_SetSpellDuration(Bot* self, int spell_id)
 {
 	self->SetSpellDuration(spell_id);
@@ -620,6 +615,11 @@ void Perl_Bot_DeleteBot(Bot* self) // @categories Script Utility
 	self->DeleteBot();
 }
 
+void Perl_Bot_RaidGroupSay(Bot* self, const char* message) // @categories Script Utility
+{
+	self->RaidGroupSay(self, message);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -649,6 +649,7 @@ void perl_register_bot()
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int))&Perl_Bot_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool, bool))&Perl_Bot_ApplySpellRaid);
+	package.add("RaidGroupSay", &Perl_Bot_RaidGroupSay);
 	package.add("Camp", (void(*)(Bot*))&Perl_Bot_Camp);
 	package.add("Camp", (void(*)(Bot*, bool))&Perl_Bot_Camp);
 	package.add("ClearDisciplineReuseTimer", (void(*)(Bot*))&Perl_Bot_ClearDisciplineReuseTimer);
@@ -716,7 +717,6 @@ void perl_register_bot()
 	package.add("SendPayload", (void(*)(Bot*, int, std::string))&Perl_Bot_SendPayload);
 	package.add("SendSpellAnim", &Perl_Bot_SendSpellAnim);
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int))&Perl_Bot_SetExpansionBitmask);
-	package.add("SetExpansionBitmask", (void(*)(Bot*, int, bool))&Perl_Bot_SetExpansionBitmask);
 	package.add("SetDisciplineReuseTimer", (void(*)(Bot*, uint16))&Perl_Bot_SetDisciplineReuseTimer);
 	package.add("SetDisciplineReuseTimer", (void(*)(Bot*, uint16, uint32))&Perl_Bot_SetDisciplineReuseTimer);
 	package.add("SetItemReuseTimer", (void(*)(Bot*, uint32))&Perl_Bot_SetItemReuseTimer);

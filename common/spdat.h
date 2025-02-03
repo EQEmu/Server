@@ -214,6 +214,10 @@
 #define SPELL_BLOODTHIRST 8476
 #define SPELL_AMPLIFICATION 2603
 #define SPELL_DIVINE_REZ 2738
+#define SPELL_NATURES_RECOVERY 2520
+#define SPELL_ADRENALINE_SWELL 14445
+#define SPELL_ADRENALINE_SWELL_RK2 14446
+#define SPELL_ADRENALINE_SWELL_RK3 14447
 
 // discipline IDs.
 #define DISC_UNHOLY_AURA 4520
@@ -624,37 +628,293 @@ enum ProcType
 
 enum SpellTypes : uint32
 {
-	SpellType_Nuke = (1 << 0),
-	SpellType_Heal = (1 << 1),
-	SpellType_Root = (1 << 2),
-	SpellType_Buff = (1 << 3),
-	SpellType_Escape = (1 << 4),
-	SpellType_Pet = (1 << 5),
-	SpellType_Lifetap = (1 << 6),
-	SpellType_Snare = (1 << 7),
-	SpellType_DOT = (1 << 8),
-	SpellType_Dispel = (1 << 9),
-	SpellType_InCombatBuff = (1 << 10),
-	SpellType_Mez = (1 << 11),
-	SpellType_Charm = (1 << 12),
-	SpellType_Slow = (1 << 13),
-	SpellType_Debuff = (1 << 14),
-	SpellType_Cure = (1 << 15),
-	SpellType_Resurrect = (1 << 16),
-	SpellType_HateRedux = (1 << 17),
-	SpellType_InCombatBuffSong = (1 << 18), // bard in-combat group/ae buffs
-	SpellType_OutOfCombatBuffSong = (1 << 19), // bard out-of-combat group/ae buffs
-	SpellType_PreCombatBuff = (1 << 20),
-	SpellType_PreCombatBuffSong = (1 << 21)
+	SpellType_Nuke                   = (1 << 0),
+	SpellType_Heal                   = (1 << 1),
+	SpellType_Root                   = (1 << 2),
+	SpellType_Buff                   = (1 << 3),
+	SpellType_Escape                 = (1 << 4),
+	SpellType_Pet                    = (1 << 5),
+	SpellType_Lifetap                = (1 << 6),
+	SpellType_Snare                  = (1 << 7),
+	SpellType_DOT                    = (1 << 8),
+	SpellType_Dispel                 = (1 << 9),
+	SpellType_InCombatBuff           = (1 << 10),
+	SpellType_Mez                    = (1 << 11),
+	SpellType_Charm                  = (1 << 12),
+	SpellType_Slow                   = (1 << 13),
+	SpellType_Debuff                 = (1 << 14),
+	SpellType_Cure                   = (1 << 15),
+	SpellType_Resurrect              = (1 << 16),
+	SpellType_HateRedux              = (1 << 17),
+	SpellType_InCombatBuffSong       = (1 << 18), // bard in-combat group/ae buffs
+	SpellType_OutOfCombatBuffSong    = (1 << 19), // bard out-of-combat group/ae buffs
+	SpellType_PreCombatBuff          = (1 << 20),
+	SpellType_PreCombatBuffSong      = (1 << 21)
 };
 
-const uint32 SPELL_TYPE_MIN = (SpellType_Nuke << 1) - 1;
-const uint32 SPELL_TYPE_MAX = (SpellType_PreCombatBuffSong << 1) - 1;
-const uint32 SPELL_TYPE_ANY = 0xFFFFFFFF;
+namespace BotSpellTypes
+{
+	constexpr uint16	Nuke                       = 0;
+	constexpr uint16	RegularHeal                = 1;
+	constexpr uint16	Root                       = 2;
+	constexpr uint16	Buff                       = 3;
+	constexpr uint16	Escape                     = 4;
+	constexpr uint16	Pet                        = 5;
+	constexpr uint16	Lifetap                    = 6;
+	constexpr uint16	Snare                      = 7;
+	constexpr uint16	DOT                        = 8;
+	constexpr uint16	Dispel                     = 9;
+	constexpr uint16	InCombatBuff               = 10;
+	constexpr uint16	Mez                        = 11;
+	constexpr uint16	Charm                      = 12;
+	constexpr uint16	Slow                       = 13;
+	constexpr uint16	Debuff                     = 14;
+	constexpr uint16	Cure                       = 15;
+	constexpr uint16	Resurrect                  = 16;
+	constexpr uint16	HateRedux                  = 17;
+	constexpr uint16	InCombatBuffSong           = 18;
+	constexpr uint16	OutOfCombatBuffSong        = 19;
+	constexpr uint16	PreCombatBuff              = 20;
+	constexpr uint16	PreCombatBuffSong          = 21;
+	constexpr uint16	Fear                       = 22;
+	constexpr uint16	Stun                       = 23;
+	constexpr uint16	HateLine                   = 24;
+	constexpr uint16	GroupCures                 = 25;
+	constexpr uint16	CompleteHeal               = 26;
+	constexpr uint16	FastHeals                  = 27;
+	constexpr uint16	VeryFastHeals              = 28;
+	constexpr uint16	GroupHeals                 = 29;
+	constexpr uint16	GroupCompleteHeals         = 30;
+	constexpr uint16	GroupHoTHeals              = 31;
+	constexpr uint16	HoTHeals                   = 32;
+	constexpr uint16	AENukes                    = 33;
+	constexpr uint16	AERains                    = 34;
+	constexpr uint16	AEMez                      = 35;
+	constexpr uint16	AEStun                     = 36;
+	constexpr uint16	AEDebuff                   = 37;
+	constexpr uint16	AESlow                     = 38;
+	constexpr uint16	AESnare                    = 39;
+	constexpr uint16	AEFear                     = 40;
+	constexpr uint16	AEDispel                   = 41;
+	constexpr uint16	AERoot                     = 42;
+	constexpr uint16	AEDoT                      = 43;
+	constexpr uint16	AELifetap                  = 44;
+	constexpr uint16	AEHateLine                 = 45;
+	constexpr uint16	PBAENuke                   = 46;
+	constexpr uint16	PetBuffs                   = 47;
+	constexpr uint16	PetRegularHeals            = 48;
+	constexpr uint16	PetCompleteHeals           = 49;
+	constexpr uint16	PetFastHeals               = 50;
+	constexpr uint16	PetVeryFastHeals           = 51;
+	constexpr uint16	PetHoTHeals                = 52;
+	constexpr uint16	PetCures                   = 53;
+	constexpr uint16	DamageShields              = 54;
+	constexpr uint16	ResistBuffs                = 55;
+	constexpr uint16	PetDamageShields           = 56;
+	constexpr uint16	PetResistBuffs             = 57;
+
+	// Command Spell Types
+	constexpr uint16	Teleport                   = 100; // this is handled by ^depart so uses other logic
+	constexpr uint16	Lull                       = 101;
+	constexpr uint16	Succor                     = 102;
+	constexpr uint16	BindAffinity               = 103;
+	constexpr uint16	Identify                   = 104;
+	constexpr uint16	Levitate                   = 105;
+	constexpr uint16	Rune                       = 106;
+	constexpr uint16	WaterBreathing             = 107;
+	constexpr uint16	Size                       = 108;
+	constexpr uint16	Invisibility               = 109;
+	constexpr uint16	MovementSpeed              = 110;
+	constexpr uint16	SendHome                   = 111;
+	constexpr uint16	SummonCorpse               = 112;
+	constexpr uint16	AELull                     = 113;
+
+	// Discipline Types
+	constexpr uint16	Discipline                 = 200;
+	constexpr uint16	DiscAggressive             = 201;
+	constexpr uint16	DiscDefensive              = 202;
+	constexpr uint16	DiscUtility                = 203;
+
+	constexpr uint16	START                      = BotSpellTypes::Nuke;              // Do not remove or change this
+	constexpr uint16	END                        = BotSpellTypes::PetResistBuffs;   // Do not remove this, increment as needed
+	constexpr uint16	COMMANDED_START            = BotSpellTypes::Lull;             // Do not remove or change this
+	constexpr uint16	COMMANDED_END              = BotSpellTypes::AELull;           // Do not remove this, increment as needed
+	constexpr uint16	DISCIPLINE_START           = BotSpellTypes::Discipline;       // Do not remove or change this
+	constexpr uint16	DISCIPLINE_END             = BotSpellTypes::DiscUtility;      // Do not remove this, increment as needed
+}
+
+static std::map<uint16, std::string> spellType_names = {
+	{ BotSpellTypes::Nuke,                     "Nuke" },
+	{ BotSpellTypes::RegularHeal,              "Regular Heal" },
+	{ BotSpellTypes::Root,                     "Root" },
+	{ BotSpellTypes::Buff,                     "Buff" },
+	{ BotSpellTypes::Escape,                   "Escape" },
+	{ BotSpellTypes::Pet,                      "Pet" },
+	{ BotSpellTypes::Lifetap,                  "Lifetap" },
+	{ BotSpellTypes::Snare,                    "Snare" },
+	{ BotSpellTypes::DOT,                      "DoT" },
+	{ BotSpellTypes::Dispel,                   "Dispel" },
+	{ BotSpellTypes::InCombatBuff,             "In-Combat Buff" },
+	{ BotSpellTypes::Mez,                      "Mez" },
+	{ BotSpellTypes::Charm,                    "Charm" },
+	{ BotSpellTypes::Slow,                     "Slow" },
+	{ BotSpellTypes::Debuff,                   "Debuff" },
+	{ BotSpellTypes::Cure,                     "Cure" },
+	{ BotSpellTypes::GroupCures,               "Group Cure" },
+	{ BotSpellTypes::PetCures,                 "Pet Cure" },
+	{ BotSpellTypes::Resurrect,                "Resurrect" },
+	{ BotSpellTypes::HateRedux,                "Hate Reduction" },
+	{ BotSpellTypes::InCombatBuffSong,         "In-Combat Buff Song" },
+	{ BotSpellTypes::OutOfCombatBuffSong,      "Out-of-Combat Buff Song" },
+	{ BotSpellTypes::PreCombatBuff,            "Pre-Combat Buff" },
+	{ BotSpellTypes::PreCombatBuffSong,        "Pre-Combat Buff Song" },
+	{ BotSpellTypes::Fear,                     "Fear" },
+	{ BotSpellTypes::Stun,                     "Stun" },
+	{ BotSpellTypes::CompleteHeal,             "Complete Heal" },
+	{ BotSpellTypes::FastHeals,                "Fast Heal" },
+	{ BotSpellTypes::VeryFastHeals,            "Very Fast Heal" },
+	{ BotSpellTypes::GroupHeals,               "Group Heal" },
+	{ BotSpellTypes::GroupCompleteHeals,       "Group Complete Heal" },
+	{ BotSpellTypes::GroupHoTHeals,            "Group HoT Heal" },
+	{ BotSpellTypes::HoTHeals,                 "HoT Heal" },
+	{ BotSpellTypes::AENukes,                  "AE Nuke" },
+	{ BotSpellTypes::AERains,                  "AE Rain" },
+	{ BotSpellTypes::AEMez,                    "AE Mez" },
+	{ BotSpellTypes::AEStun,                   "AE Stun" },
+	{ BotSpellTypes::AEDebuff,                 "AE Debuff" },
+	{ BotSpellTypes::AESlow,                   "AE Slow" },
+	{ BotSpellTypes::AESnare,                  "AE Snare" },
+	{ BotSpellTypes::AEFear,                   "AE Fear" },
+	{ BotSpellTypes::AEDispel,                 "AE Dispel" },
+	{ BotSpellTypes::AERoot,                   "AE Root" },
+	{ BotSpellTypes::AEDoT,                    "AE DoT" },
+	{ BotSpellTypes::AELifetap,                "AE Lifetap" },
+	{ BotSpellTypes::PBAENuke,                 "PBAE Nuke" },
+	{ BotSpellTypes::PetBuffs,                 "Pet Buff" },
+	{ BotSpellTypes::PetRegularHeals,          "Pet Regular Heal" },
+	{ BotSpellTypes::PetCompleteHeals,         "Pet Complete Heal" },
+	{ BotSpellTypes::PetFastHeals,             "Pet Fast Heal" },
+	{ BotSpellTypes::PetVeryFastHeals,         "Pet Very Fast Heal" },
+	{ BotSpellTypes::PetHoTHeals,              "Pet HoT Heal" },
+	{ BotSpellTypes::DamageShields,            "Damage Shield" },
+	{ BotSpellTypes::ResistBuffs,              "Resist Buff" },
+	{ BotSpellTypes::PetDamageShields,         "Pet Damage Shield" },
+	{ BotSpellTypes::PetResistBuffs,           "Pet Resist Buff" },
+	{ BotSpellTypes::HateLine,                 "Hate Line" },
+	{ BotSpellTypes::AEHateLine,               "AE Hate Line" },
+	{ BotSpellTypes::Lull,                     "Lull" },
+	{ BotSpellTypes::Teleport,                 "Teleport" },
+	{ BotSpellTypes::Succor,                   "Succor" },
+	{ BotSpellTypes::BindAffinity,             "Bind Affinity" },
+	{ BotSpellTypes::Identify,                 "Identify" },
+	{ BotSpellTypes::Levitate,                 "Levitate" },
+	{ BotSpellTypes::Rune,                     "Rune" },
+	{ BotSpellTypes::WaterBreathing,           "Water Breathing" },
+	{ BotSpellTypes::Size,                     "Size" },
+	{ BotSpellTypes::Invisibility,             "Invisibility" },
+	{ BotSpellTypes::MovementSpeed,            "Movement Speed" },
+	{ BotSpellTypes::SendHome,                 "Send Home" },
+	{ BotSpellTypes::SummonCorpse,             "Summon Corpse" },
+	{ BotSpellTypes::AELull,                   "AE Lull" }
+};
+
+static std::map<uint16, std::string> spellType_shortNames = {
+	{ BotSpellTypes::Nuke,                     "nukes" },
+	{ BotSpellTypes::RegularHeal,              "regularheals" },
+	{ BotSpellTypes::Root,                     "roots" },
+	{ BotSpellTypes::Buff,                     "buffs" },
+	{ BotSpellTypes::Escape,                   "escapes" },
+	{ BotSpellTypes::Pet,                      "pets" },
+	{ BotSpellTypes::Lifetap,                  "lifetaps" },
+	{ BotSpellTypes::Snare,                    "snares" },
+	{ BotSpellTypes::DOT,                      "dots" },
+	{ BotSpellTypes::Dispel,                   "dispels" },
+	{ BotSpellTypes::InCombatBuff,             "incombatbuffs" },
+	{ BotSpellTypes::Mez,                      "mez" },
+	{ BotSpellTypes::Charm,                    "charms" },
+	{ BotSpellTypes::Slow,                     "slows" },
+	{ BotSpellTypes::Debuff,                   "debuffs" },
+	{ BotSpellTypes::Cure,                     "cures" },
+	{ BotSpellTypes::GroupCures,               "groupcures" },
+	{ BotSpellTypes::PetCures,                 "petcures" },
+	{ BotSpellTypes::Resurrect,                "resurrects" },
+	{ BotSpellTypes::HateRedux,                "hateredux" },
+	{ BotSpellTypes::InCombatBuffSong,         "incombatbuffsongs" },
+	{ BotSpellTypes::OutOfCombatBuffSong,      "outofcombatbuffsongs" },
+	{ BotSpellTypes::PreCombatBuff,            "precombatbuffs" },
+	{ BotSpellTypes::PreCombatBuffSong,        "precombatbuffsongs" },
+	{ BotSpellTypes::Fear,                     "fears" },
+	{ BotSpellTypes::Stun,                     "stuns" },
+	{ BotSpellTypes::CompleteHeal,             "completeheals" },
+	{ BotSpellTypes::FastHeals,                "fastheals" },
+	{ BotSpellTypes::VeryFastHeals,            "veryfastheals" },
+	{ BotSpellTypes::GroupHeals,               "groupheals" },
+	{ BotSpellTypes::GroupCompleteHeals,       "groupcompleteheals" },
+	{ BotSpellTypes::GroupHoTHeals,            "grouphotheals" },
+	{ BotSpellTypes::HoTHeals,                 "hotheals" },
+	{ BotSpellTypes::AENukes,                  "aenukes" },
+	{ BotSpellTypes::AERains,                  "aerains" },
+	{ BotSpellTypes::AEMez,                    "aemez" },
+	{ BotSpellTypes::AEStun,                   "aestuns" },
+	{ BotSpellTypes::AEDebuff,                 "aedebuffs" },
+	{ BotSpellTypes::AESlow,                   "aeslows" },
+	{ BotSpellTypes::AESnare,                  "aesnares" },
+	{ BotSpellTypes::AEFear,                   "aefears" },
+	{ BotSpellTypes::AEDispel,                 "aedispels" },
+	{ BotSpellTypes::AERoot,                   "aeroots" },
+	{ BotSpellTypes::AEDoT,                    "aedots" },
+	{ BotSpellTypes::AELifetap,                "aelifetaps" },
+	{ BotSpellTypes::PBAENuke,                 "pbaenukes" },
+	{ BotSpellTypes::PetBuffs,                 "petbuffs" },
+	{ BotSpellTypes::PetRegularHeals,          "petregularheals" },
+	{ BotSpellTypes::PetCompleteHeals,         "petcompleteheals" },
+	{ BotSpellTypes::PetFastHeals,             "petfastheals" },
+	{ BotSpellTypes::PetVeryFastHeals,         "petveryfastheals" },
+	{ BotSpellTypes::PetHoTHeals,              "pethotheals" },
+	{ BotSpellTypes::DamageShields,            "damageshields" },
+	{ BotSpellTypes::ResistBuffs,              "resistbuffs" },
+	{ BotSpellTypes::PetDamageShields,         "petdamageshields" },
+	{ BotSpellTypes::PetResistBuffs,           "petresistbuffs" },
+	{ BotSpellTypes::HateLine,                 "hatelines" },
+	{ BotSpellTypes::AEHateLine,               "aehatelines" },
+	{ BotSpellTypes::Lull,                     "lull" },
+	{ BotSpellTypes::Teleport,                 "teleport" },
+	{ BotSpellTypes::Succor,                   "succor" },
+	{ BotSpellTypes::BindAffinity,             "bindaffinity" },
+	{ BotSpellTypes::Identify,                 "identify" },
+	{ BotSpellTypes::Levitate,                 "levitate" },
+	{ BotSpellTypes::Rune,                     "rune" },
+	{ BotSpellTypes::WaterBreathing,           "waterbreathing" },
+	{ BotSpellTypes::Size,                     "size" },
+	{ BotSpellTypes::Invisibility,             "invisibility" },
+	{ BotSpellTypes::MovementSpeed,            "movementspeed" },
+	{ BotSpellTypes::SendHome,                 "sendhome" },
+	{ BotSpellTypes::SummonCorpse,             "summoncorpse" },
+	{ BotSpellTypes::AELull,                   "aelull" }
+};
 
 const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow);
 const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong);
 const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
+
+// Bot related functions
+bool IsBotSpellTypeDetrimental (uint16 spell_type);
+bool IsBotSpellTypeBeneficial (uint16 spell_type);
+bool IsBotSpellTypeOtherBeneficial(uint16 spell_type);
+bool IsBotSpellTypeInnate (uint16 spell_type);
+bool IsAEBotSpellType(uint16 spell_type);
+bool IsGroupBotSpellType(uint16 spell_type);
+bool IsGroupTargetOnlyBotSpellType(uint16 spell_type);
+bool IsPetBotSpellType(uint16 spell_type);
+bool IsClientBotSpellType(uint16 spell_type);
+bool IsHealBotSpellType(uint16 spell_type);
+bool BotSpellTypeRequiresLoS(uint16 spell_type);
+bool BotSpellTypeRequiresTarget(uint16 spell_type);
+bool BotSpellTypeRequiresAEChecks(uint16 spell_type);
+bool IsCommandedBotSpellType(uint16 spell_type);
+bool IsPullingBotSpellType(uint16 spell_type);
+uint16 GetCorrectBotSpellType(uint16 spell_type, uint16 spell_id);
+uint16 GetPetBotSpellType(uint16 spell_type);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only
@@ -1504,6 +1764,7 @@ bool IsTargetableAESpell(uint16 spell_id);
 bool IsSacrificeSpell(uint16 spell_id);
 bool IsLifetapSpell(uint16 spell_id);
 bool IsMesmerizeSpell(uint16 spell_id);
+bool SpellBreaksMez(uint16 spell_id);
 bool IsStunSpell(uint16 spell_id);
 bool IsSlowSpell(uint16 spell_id);
 bool IsHasteSpell(uint16 spell_id);
@@ -1537,6 +1798,11 @@ bool IsPureNukeSpell(uint16 spell_id);
 bool IsAENukeSpell(uint16 spell_id);
 bool IsPBAENukeSpell(uint16 spell_id);
 bool IsAERainNukeSpell(uint16 spell_id);
+bool IsAnyNukeOrStunSpell(uint16 spell_id);
+bool IsAnyAESpell(uint16 spell_id);
+bool IsAESpell(uint16 spell_id);
+bool IsPBAESpell(uint16 spell_id);
+bool IsAERainSpell(uint16 spell_id);
 bool IsPartialResistableSpell(uint16 spell_id);
 bool IsResistableSpell(uint16 spell_id);
 bool IsGroupSpell(uint16 spell_id);
@@ -1546,8 +1812,11 @@ bool IsEffectInSpell(uint16 spell_id, int effect_id);
 uint16 GetSpellTriggerSpellID(uint16 spell_id, int effect_id);
 bool IsBlankSpellEffect(uint16 spell_id, int effect_index);
 bool IsValidSpell(uint32 spell_id);
+bool IsValidSpellAndLoS(uint32 spell_id, bool has_los = true);
 bool IsSummonSpell(uint16 spell_id);
 bool IsDamageSpell(uint16 spell_id);
+bool IsAnyDamageSpell(uint16 spell_id);
+bool IsDamageOverTimeSpell(uint16 spell_i);
 bool IsFearSpell(uint16 spell_id);
 bool IsCureSpell(uint16 spell_id);
 bool IsHarmTouchSpell(uint16 spell_id);
@@ -1588,10 +1857,16 @@ bool IsCompleteHealSpell(uint16 spell_id);
 bool IsFastHealSpell(uint16 spell_id);
 bool IsVeryFastHealSpell(uint16 spell_id);
 bool IsRegularSingleTargetHealSpell(uint16 spell_id);
+bool IsRegularPetHealSpell(uint16 spell_id);
 bool IsRegularGroupHealSpell(uint16 spell_id);
 bool IsGroupCompleteHealSpell(uint16 spell_id);
 bool IsGroupHealOverTimeSpell(uint16 spell_id);
+bool IsAnyHealSpell(uint16 spell_id);
+bool IsAnyBuffSpell(uint16 spell_id);
+bool IsDispelSpell(uint16 spell_id);
+bool IsEscapeSpell(uint16 spell_id);
 bool IsDebuffSpell(uint16 spell_id);
+bool IsHateReduxSpell(uint16 spell_id);
 bool IsResistDebuffSpell(uint16 spell_id);
 bool IsSelfConversionSpell(uint16 spell_id);
 bool IsBuffSpell(uint16 spell_id);
@@ -1632,5 +1907,15 @@ bool IsAegolismSpell(uint16 spell_id);
 bool AegolismStackingIsSymbolSpell(uint16 spell_id);
 bool AegolismStackingIsArmorClassSpell(uint16 spell_id);
 bool IsDisciplineTome(const EQ::ItemData* item);
+int8 SpellEffectsCount(uint16 spell_id);
+bool IsLichSpell(uint16 spell_id);
+bool IsInstantHealSpell(uint32 spell_id);
+bool IsResurrectSpell(uint16 spell_id);
+bool RequiresStackCheck(uint16 spell_type);
+bool IsResistanceBuffSpell(uint16 spell_id);
+bool IsResistanceOnlySpell(uint16 spell_id);
+bool IsDamageShieldOnlySpell(uint16 spell_id);
+bool IsDamageShieldAndResistSpell(uint16 spell_id);
+bool IsHateSpell(uint16 spell_id);
 
 #endif

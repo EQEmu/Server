@@ -13,7 +13,7 @@ void bot_command_track(Client *c, const Seperator *sep)
 
 	std::string tracking_scope = sep->arg[1];
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
 	uint16 class_mask = (player_class_bitmasks[Class::Ranger] | player_class_bitmasks[Class::Druid] | player_class_bitmasks[Class::Bard]);
@@ -67,6 +67,6 @@ void bot_command_track(Client *c, const Seperator *sep)
 	}
 
 	my_bot->InterruptSpell();
-	Bot::BotGroupSay(my_bot, tracking_msg.c_str());
+	Bot::RaidGroupSay(my_bot, tracking_msg.c_str());
 	entity_list.ShowSpawnWindow(c, (c->GetLevel() * base_distance), track_named);
 }

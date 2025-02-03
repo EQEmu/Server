@@ -2,12 +2,12 @@
 
 void bot_command_inventory(Client *c, const Seperator *sep)
 {
-
-	std::list<const char*> subcommand_list;
-	subcommand_list.push_back("inventorygive");
-	subcommand_list.push_back("inventorylist");
-	subcommand_list.push_back("inventoryremove");
-	subcommand_list.push_back("inventorywindow");
+	std::vector<const char*> subcommand_list = {
+		"inventorygive",
+		"inventorylist",
+		"inventoryremove",
+		"inventorywindow"
+	};
 
 	if (helper_command_alias_fail(c, "bot_command_inventory", sep->arg[0], "inventory"))
 		return;
@@ -25,7 +25,7 @@ void bot_command_inventory_give(Client* c, const Seperator* sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} ([actionable: target | byname] ([actionable_name]))",
+				"Usage: {} ([actionable: target | byname] ([actionable_name])) [optional: slot ID]",
 				sep->arg[0]
 			).c_str()
 		);
@@ -33,19 +33,45 @@ void bot_command_inventory_give(Client* c, const Seperator* sep)
 	}
 
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
+	int ab_arg = 1;
+	int slot_arg = 1;
+	int16 chosen_slot = INVALID_INDEX;
+	bool byname = false;
 
-	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
+	std::string byname_arg = sep->arg[ab_arg];
+
+	if (!byname_arg.compare("byname")) {
+		byname = true;
+		slot_arg = ab_arg + 2;
+	}
+
+	if (sep->IsNumber(slot_arg)) {
+		chosen_slot = atoi(sep->arg[slot_arg]);
+
+		if (!EQ::ValueWithin(chosen_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
+			c->Message(Chat::Yellow, "Please enter a valid inventory slot.");
+
+			return;
+		}
+
+		if (!byname) {
+			++ab_arg;
+		}	
+	}
+
+	std::vector<Bot*> sbl;
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[ab_arg + 1]) == ActionableBots::ABT_None) {
 		return;
 	}
 
 	auto my_bot = sbl.front();
 	if (!my_bot) {
-		c->Message(Chat::White, "ActionableBots returned 'nullptr'");
+		c->Message(Chat::Yellow, "ActionableBots returned 'nullptr'");
+
 		return;
 	}
 
-	my_bot->FinishTrade(c, Bot::BotTradeClientNoDropNoTrade);
+	my_bot->FinishTrade(c, Bot::BotTradeClientNoDropNoTrade, chosen_slot);
 }
 
 void bot_command_inventory_list(Client* c, const Seperator* sep)
@@ -67,7 +93,7 @@ void bot_command_inventory_list(Client* c, const Seperator* sep)
 
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -168,7 +194,7 @@ void bot_command_inventory_remove(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[2], sbl, ab_mask, sep->arg[3]) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -217,9 +243,18 @@ void bot_command_inventory_remove(Client* c, const Seperator* sep)
 	}
 
 	const auto* itm = inst->GetItem();
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+	linker.SetItemInst(inst);
 
 	if (inst && itm && c->CheckLoreConflict(itm)) {
-		c->MessageString(Chat::White, PICK_LORE);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You cannot pick up {} because it is a lore item you already possess.",
+				linker.GenerateLink()
+			).c_str()
+		);
 		return;
 	}
 
@@ -233,7 +268,13 @@ void bot_command_inventory_remove(Client* c, const Seperator* sep)
 			continue;
 		}
 
-		c->MessageString(Chat::White, PICK_LORE);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You cannot pick up {} because it is a lore item you already possess.",
+				linker.GenerateLink()
+			).c_str()
+		);
 		return;
 	}
 
@@ -247,7 +288,7 @@ void bot_command_inventory_remove(Client* c, const Seperator* sep)
 			slot_id == EQ::invslot::slotRange ||
 			slot_id == EQ::invslot::slotAmmo
 			) {
-			my_bot->SetBotArcherySetting(false, true);
+			my_bot->SetBotRangedSetting(false);
 		}
 
 		my_bot->RemoveBotItemBySlot(slot_id);
@@ -296,7 +337,7 @@ void bot_command_inventory_window(Client* c, const Seperator* sep)
 
 	int ab_mask = ActionableBots::ABM_Target;
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
 		return;
 	}

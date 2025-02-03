@@ -37,17 +37,23 @@
 
 #include <sstream>
 
-constexpr uint32 BOT_FOLLOW_DISTANCE_DEFAULT = 184; // as DSq value (~13.565 units)
-constexpr uint32 BOT_FOLLOW_DISTANCE_DEFAULT_MAX = 2500; // as DSq value (50 units)
-
 constexpr uint32 BOT_KEEP_ALIVE_INTERVAL = 5000; // 5 seconds
+
+constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MIN = 1500; // 1.5 seconds
+constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MAX = 3000; // 3 seconds
 
 constexpr uint32 MAG_EPIC_1_0 = 28034;
 
 extern WorldServer worldserver;
 
-constexpr int BotAISpellRange = 100; // TODO: Write a method that calcs what the bot's spell range is based on spell, equipment, AA, whatever and replace this
 constexpr int NegativeItemReuse = -1; // Unlinked timer for items
+
+constexpr uint8 SumWater               = 1;
+constexpr uint8 SumFire                = 2;
+constexpr uint8 SumAir                 = 3;
+constexpr uint8 SumEarth               = 4;
+constexpr uint8 MonsterSum             = 5;
+constexpr uint8 SumMageMultiElement    = 6;
 
 // nHSND	negative Healer/Slower/Nuker/Doter
 // pH		positive Healer
@@ -87,6 +93,141 @@ enum BotCastingChanceConditional : uint8
 	cntHSND = 16
 };
 
+namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
+	constexpr uint8 BaseSetting                       = 0;
+	constexpr uint8 SpellHold                         = 1;
+	constexpr uint8 SpellDelay                        = 2;
+	constexpr uint8 SpellMinThreshold                 = 3;
+	constexpr uint8 SpellMaxThreshold                 = 4;
+	constexpr uint8 SpellTypeResistLimit              = 5;
+	constexpr uint8 SpellTypeAggroCheck               = 6;
+	constexpr uint8 SpellTypeMinManaPct               = 7;
+	constexpr uint8 SpellTypeMaxManaPct               = 8;
+	constexpr uint8 SpellTypeMinHPPct                 = 9;
+	constexpr uint8 SpellTypeMaxHPPct                 = 10;	
+	constexpr uint8 SpellTypeIdlePriority             = 11;
+	constexpr uint8 SpellTypeEngagedPriority          = 12;
+	constexpr uint8 SpellTypePursuePriority           = 13;
+	constexpr uint8 SpellTypeAEOrGroupTargetCount     = 14;
+	constexpr uint8 SpellTypeAnnounceCast             = 15;
+
+	constexpr uint16 START                            = BotSettingCategories::BaseSetting;
+	constexpr uint16 START_NO_BASE                    = BotSettingCategories::SpellHold;
+	constexpr uint16 START_CLIENT                     = BotSettingCategories::SpellDelay;
+	constexpr uint16 END_CLIENT                       = BotSettingCategories::SpellMaxThreshold;
+	constexpr uint16 END                              = BotSettingCategories::SpellTypeAnnounceCast;
+};
+
+static std::map<uint8, std::string> botSpellCategory_names = {
+	{ BotSettingCategories::BaseSetting,                   "BaseSetting" },
+	{ BotSettingCategories::SpellHold,                     "SpellHolds" },
+	{ BotSettingCategories::SpellDelay,                    "SpellDelays" },
+	{ BotSettingCategories::SpellMinThreshold,             "SpellMinThresholds" },
+	{ BotSettingCategories::SpellMaxThreshold,             "SpellMaxThresholds" },
+	{ BotSettingCategories::SpellTypeResistLimit,          "SpellResistLimit" },
+	{ BotSettingCategories::SpellTypeAggroCheck,           "SpellAggroChecks" },
+	{ BotSettingCategories::SpellTypeMinManaPct,           "SpellMinManaPct" },
+	{ BotSettingCategories::SpellTypeMaxManaPct,           "SpellMaxManaPct" },
+	{ BotSettingCategories::SpellTypeMinHPPct,             "SpellMinHPPct" },
+	{ BotSettingCategories::SpellTypeMaxHPPct,             "SpellMaxHPPct" },
+	{ BotSettingCategories::SpellTypeIdlePriority,         "SpellIdlePriority" },
+	{ BotSettingCategories::SpellTypeEngagedPriority,      "SpellEngagedPriority" },
+	{ BotSettingCategories::SpellTypePursuePriority,       "SpellPursuePriority" },
+	{ BotSettingCategories::SpellTypeAEOrGroupTargetCount, "SpellTargetCounts" },
+	{ BotSettingCategories::SpellTypeAnnounceCast,         "SpellAnnounceCasts" }
+};
+
+namespace BotPriorityCategories { // Update GetBotSpellCategoryName as needed
+	constexpr uint8 Idle                              = 0;
+	constexpr uint8 Engaged                           = 1;
+	constexpr uint8 Pursue                            = 2;
+
+	constexpr uint16 START                            = BotPriorityCategories::Idle;
+	constexpr uint16 END                              = BotPriorityCategories::Pursue; // Increment as needed
+};
+
+namespace BotBaseSettings {
+	constexpr uint16 ExpansionBitmask                 = 0;
+	constexpr uint16 ShowHelm                         = 1;
+	constexpr uint16 FollowDistance                   = 2;
+	constexpr uint16 StopMeleeLevel                   = 3;	
+	constexpr uint16 EnforceSpellSettings             = 4;
+	constexpr uint16 RangedSetting                    = 5;
+	constexpr uint16 PetSetTypeSetting                = 6;
+	constexpr uint16 BehindMob                        = 7;
+	constexpr uint16 DistanceRanged                   = 8;
+	constexpr uint16 IllusionBlock                    = 9;
+	constexpr uint16 MaxMeleeRange                    = 10;
+	constexpr uint16 MedInCombat                      = 11;
+	constexpr uint16 SitHPPct                         = 12;
+	constexpr uint16 SitManaPct                       = 13;
+
+	constexpr uint16 START_ALL                        = ExpansionBitmask;
+	constexpr uint16 START                            = BotBaseSettings::ShowHelm; // Everything above this cannot be copied, changed or viewed by players
+	constexpr uint16 END                              = BotBaseSettings::SitManaPct; // Increment as needed
+};
+
+static std::map<uint16, std::string> botBaseSettings_names = {
+	{ BotBaseSettings::ExpansionBitmask,             "ExpansionBitmask" },
+	{ BotBaseSettings::ShowHelm,                     "ShowHelm" },
+	{ BotBaseSettings::FollowDistance,               "FollowDistance" },
+	{ BotBaseSettings::StopMeleeLevel,               "StopMeleeLevel" },
+	{ BotBaseSettings::EnforceSpellSettings,         "EnforceSpellSettings" },
+	{ BotBaseSettings::RangedSetting,                "RangedSetting" },
+	{ BotBaseSettings::PetSetTypeSetting,            "PetSetTypeSetting" },
+	{ BotBaseSettings::BehindMob,                    "BehindMob" },
+	{ BotBaseSettings::DistanceRanged,               "DistanceRanged" },
+	{ BotBaseSettings::IllusionBlock,                "IllusionBlock" },
+	{ BotBaseSettings::MaxMeleeRange,                "MaxMeleeRange" },
+	{ BotBaseSettings::MedInCombat,                  "MedInCombat" },
+	{ BotBaseSettings::SitHPPct,                     "SitHPPct" },
+	{ BotBaseSettings::SitManaPct,                   "SitManaPct" }
+};
+
+namespace CommandedSubTypes {
+	constexpr uint16 SingleTarget       = 1;
+	constexpr uint16 GroupTarget        = 2;
+	constexpr uint16 AETarget           = 3;
+	constexpr uint16 SeeInvis           = 4;
+	constexpr uint16 Invis              = 5;
+	constexpr uint16 InvisUndead        = 6;
+	constexpr uint16 InvisAnimals       = 7;
+	constexpr uint16 Shrink             = 8;
+	constexpr uint16 Grow               = 9;
+	constexpr uint16 Selo               = 10;
+
+	constexpr uint16 START              = CommandedSubTypes::SingleTarget;
+	constexpr uint16 END                = CommandedSubTypes::Selo;
+};
+
+static std::map<uint16, std::string> botSubType_names = {
+	{ CommandedSubTypes::SingleTarget,              "SingleTarget" },
+	{ CommandedSubTypes::GroupTarget,               "GroupTarget" },
+	{ CommandedSubTypes::AETarget,                  "AETarget" },
+	{ CommandedSubTypes::SeeInvis,                  "SeeInvis" },
+	{ CommandedSubTypes::Invis,                     "Invis" },
+	{ CommandedSubTypes::InvisUndead,               "InvisUndead" },
+	{ CommandedSubTypes::InvisAnimals,              "InvisAnimals" },
+	{ CommandedSubTypes::Shrink,                    "Shrink" },
+	{ CommandedSubTypes::Grow,                      "Grow" },
+	{ CommandedSubTypes::Selo,                      "Selo" }
+};
+
+struct CombatRangeInput {
+	Mob*                    target;
+	float                   target_distance;
+	bool                    behind_mob;
+	uint8                   stop_melee_level;
+	const EQ::ItemInstance* p_item;
+	const EQ::ItemInstance* s_item;
+};
+
+struct CombatRangeOutput {
+	bool  at_combat_range		= false;
+	float melee_distance_min	= 0.0f;
+	float melee_distance		= 0.0f;
+	float melee_distance_max	= 0.0f;
+};
 
 class Bot : public NPC {
 	friend class Mob;
@@ -128,7 +269,7 @@ public:
 
 	// Class Constructors
 	Bot(NPCType *npcTypeData, Client* botOwner);
-	Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData, int32 expansion_bitmask);
+	Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData);
 
 	//abstract virtual override function implementations requird by base abstract class
 	bool Death(Mob* killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by = KilledByTypes::Killed_NPC, bool is_buff_tic = false) override;
@@ -157,13 +298,14 @@ public:
 	void SetLevel(uint8 in_level, bool command = false) override;
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) override;
 	bool Process() override;
-	void FinishTrade(Client* client, BotTradeType trade_type);
+	void FinishTrade(Client* client, BotTradeType trade_type, int16 chosen_slot = INVALID_INDEX);
 	bool Save() override;
 	void Depop();
 	void CalcBotStats(bool showtext = true);
 	uint16 BotGetSpells(int spellslot) { return AIBot_spells[spellslot].spellid; }
 	uint32 BotGetSpellType(int spellslot) { return AIBot_spells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIBot_spells[spellslot].priority; }
+	std::vector<BotSpells_wIndex> BotGetSpellsByType(uint16 spell_type);
 	float GetProcChances(float ProcBonus, uint16 hand) override;
 	int GetHandToHandDamage(void) override;
 	bool TryFinishingBlow(Mob *defender, int64 &damage) override;
@@ -177,9 +319,6 @@ public:
 	inline	uint16	MaxSkill(EQ::skills::SkillType skillid) { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr) override;
 	void DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance = false);
-	void TryBackstab(Mob *other,int ReuseTime = 10) override;
-	void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10) override;
-	void RogueAssassinate(Mob* other) override;
 	void DoClassAttacks(Mob *target, bool IsRiposte=false);
 	void CalcBonuses() override;
 
@@ -199,8 +338,8 @@ public:
 	void Camp(bool save_to_database = true);
 	void SetTarget(Mob* mob) override;
 	void Zone();
-	bool IsArcheryRange(Mob* target);
-	void ChangeBotArcherWeapons(bool isArcher);
+	bool IsAtRange(Mob* target);
+	void ChangeBotRangedWeapons(bool is_ranged);
 	void Sit();
 	void Stand();
 	bool IsSitting() const override;
@@ -216,6 +355,7 @@ public:
 	void SetHoldFlag(bool flag = true) { m_hold_flag = flag; }
 	bool GetAttackFlag() const { return m_attack_flag; }
 	void SetAttackFlag(bool flag = true) { m_attack_flag = flag; }
+	bool GetCombatRoundForAlerts() const { return m_combat_round_alert_flag; }
 	bool GetAttackingFlag() const { return m_attacking_flag; }
 	bool GetPullFlag() const { return m_pull_flag; }
 	void SetPullFlag(bool flag = true) { m_pull_flag = flag; }
@@ -224,11 +364,10 @@ public:
 	bool GetIsUsingItemClick() { return is_using_item_click; }
 	void SetIsUsingItemClick(bool flag = true) { is_using_item_click = flag; }
 	bool UseDiscipline(uint32 spell_id, uint32 target);
-	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets, Raid* raid);
-	uint8 GetNumberNeedingHealedInRaidGroup(uint8& need_healed, uint8 hpr, bool includePets, Raid* raid);
+	uint8 GetNumberNeedingHealedInGroup(Mob* tar, uint16 spell_type, uint16 spell_id, float range);
 	bool GetNeedsCured(Mob *tar);
 	bool GetNeedsHateRedux(Mob *tar);
-	bool HasOrMayGetAggro();
+	bool HasOrMayGetAggro(bool SitAggro, uint32 spell_id = 0);
 	void SetDefaultBotStance();
 	void SetSurname(std::string_view bot_surname);
 	void SetTitle(std::string_view bot_title);
@@ -327,19 +466,26 @@ public:
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 
 	// AI Methods
-	bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
+	bool AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_target_type = UINT16_MAX, uint16 sub_type = UINT16_MAX);
+	bool AttemptAICastSpell(uint16 spell_type, Mob* tar = nullptr);
+	bool AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank);
+	bool AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc = false);
+	bool AttemptCloseBeneficialSpells(uint16 spell_type);
 	bool AI_EngagedCastCheck() override;
 	bool AI_PursueCastCheck() override;
 	bool AI_IdleCastCheck() override;
 	bool AIHealRotation(Mob* tar, bool useFastHeals);
 	bool GetPauseAI() const { return _pauseAI; }
 	void SetPauseAI(bool pause_flag) { _pauseAI = pause_flag; }
-	uint8 GetStopMeleeLevel() const { return _stopMeleeLevel; }
-	void SetStopMeleeLevel(uint8 level);
+	bool IsCommandedSpell() const { return _commandedSpell; }
+	void SetCommandedSpell(bool value) { _commandedSpell = value;  }
+	bool IsPullingSpell() const { return _pullingSpell; }
+	void SetPullingSpell(bool value) { _pullingSpell = value; }
+	
 	void SetGuardMode();
 	void SetHoldMode();
-	uint32 GetBotCasterRange() const { return m_bot_caster_range; }
-	bool IsValidSpellRange(uint16 spell_id, Mob const* tar);
+
+	bool IsValidSpellRange(uint16 spell_id, Mob* tar);
 
 	// Bot AI Methods
 	void AI_Bot_Init();
@@ -377,6 +523,169 @@ public:
 	inline bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override
 			{ return Mob::Attack(other, Hand, FromRiposte, IsStrikethrough, IsFromSpell, opts); }
+	void DoAttackRounds(Mob* target, int hand);
+
+	bool BotPassiveCheck();
+	Raid* GetStoredRaid() { return _storedRaid; }
+	void SetStoredRaid(Raid* stored_raid) { _storedRaid = stored_raid; }
+	bool GetVerifiedRaid() { return _verifiedRaid; }
+	void SetVerifiedRaid(bool status) { _verifiedRaid = status; }
+	uint16 GetTempSpellType() { return _tempSpellType; }
+	void SetTempSpellType(uint16 spell_type) { _tempSpellType = spell_type; }
+	bool IsMobEngagedByAnyone(Mob* tar);
+	void SetBotTimers(std::vector<BotTimer> timers) { bot_timers = timers; }
+
+	// Targeting
+	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool no_clients = false, bool no_bots = false);
+	bool HasValidAETarget(Bot* caster, uint16 spell_id, uint16 spell_type, Mob* tar);
+	void SetHasLoS(bool has_los) { _hasLoS = has_los; }
+	bool HasLoS() const { return _hasLoS; }
+	bool IsValidMezTarget(Mob* owner, Mob* npc, uint16 spell_id);
+
+	// Cast checks
+	bool PrecastChecks(Mob* tar, uint16 spell_type);	
+	bool CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool prechecks = false, bool ae_check = false);
+	bool IsImmuneToBotSpell(uint16 spell_id, Mob* caster);
+	bool CanCastSpellType(uint16 spell_type, uint16 spell_id, Mob* tar);
+	bool BotHasEnoughMana(uint16 spell_id);
+	bool IsTargetAlreadyReceivingSpell(Mob* tar, uint16 spell_id);
+	bool DoResistCheck(Mob* target, uint16 spell_id, int32 resist_limit);
+	bool DoResistCheckBySpellType(Mob* tar, uint16 spell_id, uint16 spell_type);
+	bool IsValidTargetType(uint16 spell_id, int target_type, uint8 body_type);
+
+	// Spell checks
+	static bool IsValidBotSpellType(uint16 spell_type);
+	uint16 GetPetBotSpellType(uint16 spell_type);
+
+	// Movement checks
+	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
+	std::vector<Mob*> GetSpellTargetList(bool entire_raid = false);
+	void SetSpellTargetList(std::vector<Mob*> spell_target_list) { _spell_target_list = spell_target_list; }
+	std::vector<Mob*> GetGroupSpellTargetList() { return _group_spell_target_list; }
+	void SetGroupSpellTargetList(std::vector<Mob*> spell_target_list) { _group_spell_target_list = spell_target_list; }
+	std::vector<Mob*> GetBuffTargets(Mob* spellTarget);
+
+	// Bot settings
+	void LoadDefaultBotSettings();
+	int GetDefaultSetting(uint16 setting_category, uint16 setting_type, uint8 stance = Stance::Balanced);
+	int GetDefaultBotBaseSetting(uint16 bot_setting, uint8 stance = Stance::Balanced);
+	bool GetDefaultSpellTypeHold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypePriority(uint16 spell_type, uint8 priority_type, uint8 bot_class, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeIdlePriority(uint16 spell_type, uint8 bot_class, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeEngagedPriority(uint16 spell_type, uint8 bot_class, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypePursuePriority(uint16 spell_type, uint8 bot_class, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeResistLimit(uint16 spell_type, uint8 stance = Stance::Balanced);
+	bool GetDefaultSpellTypeAggroCheck(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMinManaLimit(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMaxManaLimit(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMinHPLimit(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMaxHPLimit(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeAnnounceCast(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint16 GetDefaultSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint8 stance = Stance::Balanced);
+
+	static bool IsValidBotBaseSetting(uint16 setting_type);
+	static std::string GetBotSettingCategoryName(uint16 setting_type);
+	uint16 GetBaseSettingIDByShortName(std::string setting_string);
+	int GetBotBaseSetting(uint16 bot_setting);
+	void SetBotBaseSetting(uint16 bot_setting, int setting_value);
+	int GetSetting(uint16 setting_category, uint16 setting_type);
+	void SetBotSetting(uint8 setting_type, uint16 bot_setting, int setting_value);
+	void CopySettings(Bot* to, uint8 setting_type, uint16 spell_type = UINT16_MAX);
+	void CopyBotSpellSettings(Bot* to);
+	void ResetBotSpellSettings();
+
+	void CopyBotBlockedBuffs(Bot* to);
+	void CopyBotBlockedPetBuffs(Bot* to);	
+	void CleanBotBlockedBuffs();
+	void ClearBotBlockedBuffs() { bot_blocked_buffs.clear(); }
+	bool IsBlockedBuff(int32 spell_id) override;
+	bool IsBlockedPetBuff(int32 spell_id) override;
+	void SetBotBlockedBuff(uint16 spell_id, bool block);
+	void SetBotBlockedPetBuff(uint16 spell_id, bool block);
+	std::vector<BotBlockedBuffs> GetBotBlockedBuffs() { return bot_blocked_buffs; }
+	void SetBotBlockedBuffs(std::vector<BotBlockedBuffs> blocked_buffs) { bot_blocked_buffs = blocked_buffs; }
+
+	void SetBotSpellRecastTimer(uint16 spell_type, Mob* spelltar, bool pre_cast = false);
+	uint16 GetSpellTypePriority(uint16 spell_type, uint8 priority_type);
+	void SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 priority);
+	inline uint16 GetSpellTypeResistLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].resist_limit; }
+	inline void SetSpellTypeResistLimit(uint16 spell_type, uint16 value) { m_bot_spell_settings[spell_type].resist_limit = value; }
+	inline bool GetSpellTypeAggroCheck(uint16 spell_type) const { return m_bot_spell_settings[spell_type].aggro_check; }
+	inline void SetSpellTypeAggroCheck(uint16 spell_type, bool value) { m_bot_spell_settings[spell_type].aggro_check = value; }
+	uint8 GetHPRatioForSpellType(uint16 spell_type, Mob* tar);
+	inline uint8 GetSpellTypeMinManaLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_mana_pct; }
+	inline uint8 GetSpellTypeMaxManaLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_mana_pct; }
+	inline void SetSpellTypeMinManaLimit(uint16 spell_type, uint8 value) { m_bot_spell_settings[spell_type].min_mana_pct = value; }
+	inline void SetSpellTypeMaxManaLimit(uint16 spell_type, uint8 value) { m_bot_spell_settings[spell_type].max_mana_pct = value; }
+	inline uint8 GetSpellTypeMinHPLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_hp_pct; }
+	inline uint8 GetSpellTypeMaxHPLimit(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_hp_pct; }
+	inline void SetSpellTypeMinHPLimit(uint16 spell_type, uint8 value) { m_bot_spell_settings[spell_type].min_hp_pct = value; }
+	inline void SetSpellTypeMaxHPLimit(uint16 spell_type, uint8 value) { m_bot_spell_settings[spell_type].max_hp_pct = value; }
+	inline uint16 GetSpellTypeAEOrGroupTargetCount(uint16 spell_type) const { return m_bot_spell_settings[spell_type].ae_or_group_target_count; }
+	inline void SetSpellTypeAEOrGroupTargetCount(uint16 spell_type, uint16 value) { m_bot_spell_settings[spell_type].ae_or_group_target_count = value; }
+	inline uint16 GetSpellTypeAnnounceCast(uint16 spell_type) const { return m_bot_spell_settings[spell_type].announce_cast; }
+	inline void SetSpellTypeAnnounceCast(uint16 spell_type, uint16 value) { m_bot_spell_settings[spell_type].announce_cast = value; }
+	inline bool GetSpellTypeHold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].hold; }
+	inline void SetSpellTypeHold(uint16 spell_type, bool value) { m_bot_spell_settings[spell_type].hold = value; }
+	inline uint16 GetSpellTypeDelay(uint16 spell_type) const { return m_bot_spell_settings[spell_type].delay; }
+	inline void SetSpellTypeDelay(uint16 spell_type, uint16 delay_value) { m_bot_spell_settings[spell_type].delay = delay_value; }
+	inline uint8 GetSpellTypeMinThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].min_threshold; }
+	inline void SetSpellTypeMinThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].min_threshold = threshold_value; }
+	inline uint8 GetSpellTypeMaxThreshold(uint16 spell_type) const { return m_bot_spell_settings[spell_type].max_threshold; }
+	inline void SetSpellTypeMaxThreshold(uint16 spell_type, uint8 threshold_value) { m_bot_spell_settings[spell_type].max_threshold = threshold_value; }
+	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
+	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
+	inline bool SpellTypeAIDelayCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].ai_delay.GetRemainingTime(); }
+	void SetSpellTypeAITimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].ai_delay.Start(recast_time); }
+	bool GetUltimateSpellTypeHold(uint16 spell_type, Mob* tar);
+	uint16 GetDefaultSpellTypeDelay(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint8 GetDefaultSpellTypeMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
+	uint16 GetUltimateSpellTypeDelay(uint16 spell_type, Mob* tar);
+	bool GetUltimateSpellTypeDelayCheck(uint16 spell_type, Mob* tar);
+	uint8 GetUltimateSpellTypeMinThreshold(uint16 spell_type, Mob* tar);
+	uint8 GetUltimateSpellTypeMaxThreshold(uint16 spell_type, Mob* tar);
+	void SetIllusionBlock(bool value) { _illusionBlock = value; }
+	bool GetIllusionBlock() const override { return _illusionBlock; }
+	bool GetShowHelm() const { return _showHelm; }
+	void SetShowHelm(bool show_helm) { _showHelm = show_helm; }
+	bool GetBehindMob() const { return _behindMobStatus; }
+	void SetBehindMob(bool value) { _behindMobStatus = value; }
+	bool GetMaxMeleeRange() const { return _maxMeleeRangeStatus; }
+	void SetMaxMeleeRange(bool value) { _maxMeleeRangeStatus = value; }	
+	uint8 GetStopMeleeLevel() const { return _stopMeleeLevel; }
+	void SetStopMeleeLevel(uint8 level) { _stopMeleeLevel = level; }
+	uint32 GetBotDistanceRanged() const { return _distanceRanged; }
+	void SetBotDistanceRanged(uint32 distance) { _distanceRanged = distance; }
+	bool GetMedInCombat() const { return _medInCombat; }
+	void SetMedInCombat(bool value) { _medInCombat = value; }
+	uint8 GetSitHPPct() const { return _SitHPPct; }
+	void SetSitHPPct(uint8 value) { _SitHPPct = value; }
+	uint8 GetSitManaPct() const { return _SitManaPct; }
+	void SetSitManaPct(uint8 value) { _SitManaPct = value; }
+
+	// Spell lists
+	void CheckBotSpells();
+	void MapSpellTypeLevels();
+	const std::map<int32_t, std::map<int32_t, BotSpellTypesByClass>>& GetCommandedSpellTypesMinLevels() { return commanded_spells_min_level; }
+	std::list<BotSpellTypeOrder> GetSpellTypesPrioritized(uint8 priority_type);
+	uint16 GetParentSpellType(uint16 spell_type);
+	bool IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id);
+	inline uint16 GetCastedSpellType() const { return _castedSpellType; }
+	void SetCastedSpellType(uint16 spell_type);
+	bool IsValidSpellTypeSubType(uint16 spell_type, uint16 sub_type, uint16 spell_id);
+	static bool IsValidBotSpellCategory(uint8 setting_type);
+	static std::string GetBotSpellCategoryName(uint8 setting_type);
+	static uint16 GetBotSpellCategoryIDByShortName(std::string setting_string);
+	void AssignBotSpellsToTypes(std::vector<BotSpells>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_wIndex>>& AIBot_spells_by_type);
+	uint16 GetSpellByAA(int id, AA::Rank*& rank);
+
+	// Spell Type
+	static uint16 GetSpellTypeIDByShortName(std::string spellType_string);
+	static std::string GetSpellTypeNameByID(uint16 spell_type);
+	static std::string GetSpellTypeShortNameByID(uint16 spell_type);
+	bool IsValidSubType(uint16 sub_type);
+	static std::string GetSubTypeNameByID(uint16 sub_type);
 
 	[[nodiscard]] int GetMaxBuffSlots() const final { return EQ::spells::LONG_BUFFS; }
 	[[nodiscard]] int GetMaxSongSlots() const final { return EQ::spells::SHORT_BUFFS; }
@@ -423,33 +732,36 @@ public:
 	ProcessBotGroupAdd(Group* group, Raid* raid, Client* client = nullptr, bool new_raid = false, bool initial = false);
 
 
-	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
-	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
-	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
-	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
+	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* caster, uint16 spell_type, int spell_effect);
+	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* caster, uint16 spell_type, int spell_effect, SpellTargetType target_type);
+	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* caster, uint16 spell_type);
+	static std::vector<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* caster, uint16 spell_type, Mob* tar, bool AE = false, uint16 sub_target_type = UINT16_MAX, uint16 sub_type = UINT16_MAX);
 
-	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType);
-	static BotSpell GetBestBotSpellForFastHeal(Bot* botCaster);
-	static BotSpell GetBestBotSpellForHealOverTime(Bot* botCaster);
-	static BotSpell GetBestBotSpellForPercentageHeal(Bot* botCaster);
-	static BotSpell GetBestBotSpellForRegularSingleTargetHeal(Bot* botCaster);
-	static BotSpell GetFirstBotSpellForSingleTargetHeal(Bot* botCaster);
-	static BotSpell GetBestBotSpellForGroupHealOverTime(Bot* botCaster);
-	static BotSpell GetBestBotSpellForGroupCompleteHeal(Bot* botCaster);
-	static BotSpell GetBestBotSpellForGroupHeal(Bot* botCaster);
-	static BotSpell GetBestBotSpellForMagicBasedSlow(Bot* botCaster);
-	static BotSpell GetBestBotSpellForDiseaseBasedSlow(Bot* botCaster);
+	static BotSpell GetFirstBotSpellBySpellType(Bot* caster, uint16 spell_type);
+	BotSpell GetSpellByHealType(uint16 spell_type, Mob* tar);
+	static BotSpell GetBestBotSpellForVeryFastHeal(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
+	static BotSpell GetBestBotSpellForFastHeal(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
+	static BotSpell GetBestBotSpellForHealOverTime(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
+	static BotSpell GetBestBotSpellForPercentageHeal(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
+	static BotSpell GetBestBotSpellForRegularSingleTargetHeal(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
+	static BotSpell GetFirstBotSpellForSingleTargetHeal(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
+	static BotSpell GetBestBotSpellForGroupHealOverTime(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
+	static BotSpell GetBestBotSpellForGroupCompleteHeal(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
+	static BotSpell GetBestBotSpellForGroupHeal(Bot* caster, Mob* tar, uint16 spell_type = BotSpellTypes::RegularHeal);
 
-	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell);
-	static BotSpell GetBestBotSpellForMez(Bot* botCaster);
-	static BotSpell GetBestBotMagicianPetSpell(Bot* botCaster);
-	static std::string GetBotMagicianPetType(Bot* botCaster);
-	static BotSpell GetBestBotSpellForNukeByTargetType(Bot* botCaster, SpellTargetType targetType);
-	static BotSpell GetBestBotSpellForStunByTargetType(Bot* botCaster, SpellTargetType targetType);
-	static BotSpell GetBestBotWizardNukeSpellByTargetResists(Bot* botCaster, Mob* target);
-	static BotSpell GetDebuffBotSpell(Bot* botCaster, Mob* target);
-	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target);
-	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
+	static Mob* GetFirstIncomingMobToMez(Bot* caster, int16 spell_id, uint16 spell_type, bool AE);
+	static BotSpell GetBestBotSpellForMez(Bot* caster, uint16 spell_type = BotSpellTypes::Mez);
+	static BotSpell GetBestBotMagicianPetSpell(Bot* caster, uint16 spell_type = BotSpellTypes::Pet);
+	static std::string GetBotMagicianPetType(Bot* caster);
+	static BotSpell GetBestBotSpellForNukeByTargetType(Bot* caster, SpellTargetType target_type, uint16 spell_type, bool AE = false, Mob* tar = nullptr);
+	static BotSpell GetBestBotSpellForStunByTargetType(Bot* caster, SpellTargetType target_type, uint16 spell_type, bool AE = false, Mob* tar = nullptr);
+	static BotSpell GetBestBotWizardNukeSpellByTargetResists(Bot* caster, Mob* target, uint16 spell_type);
+	static BotSpell GetDebuffBotSpell(Bot* caster, Mob* target, uint16 spell_type);
+	static BotSpell GetBestBotSpellForCure(Bot* caster, Mob* target, uint16 spell_type);
+	static BotSpell GetBestBotSpellForResistDebuff(Bot* caster, Mob* target, uint16 spell_type);
+	static BotSpell GetBestBotSpellForNukeByBodyType(Bot* caster, uint8 body_type, uint16 spell_type, bool AE = false, Mob* tar = nullptr);
+	static BotSpell GetBestBotSpellForRez(Bot* caster, Mob* target, uint16 spell_type);
+	static BotSpell GetBestBotSpellForCharm(Bot* caster, Mob* target, uint16 spell_type);
 
 	static NPCType *CreateDefaultNPCTypeStructForBot(
 		const std::string& botName,
@@ -465,19 +777,18 @@ public:
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
 	static bool RemoveBotFromGroup(Bot* bot, Group* group);
-	static void BotGroupSay(Mob *speaker, const char *msg, ...);
+	static void RaidGroupSay(Mob *speaker, const char *msg, ...);
 
 	// "GET" Class Methods
 	uint32 GetBotID() const { return _botID; }
 	uint32 GetBotOwnerCharacterID() const { return _botOwnerCharacterID; }
 	uint32 GetBotSpellID() const { return npc_spells_id; }
 	Mob* GetBotOwner() { return this->_botOwner; }
-	uint32 GetBotArcheryRange();
+	uint32 GetBotRangedValue();
 	EQ::ItemInstance* GetBotItem(uint16 slot_id);
 	bool GetSpawnStatus() { return _spawnStatus; }
 	uint8 GetPetChooserID() { return _petChooserID; }
-	bool IsPetChooser() { return _petChooser; }
-	bool IsBotArcher() { return m_bot_archery_setting; }
+	bool IsBotRanged() { return _botRangedSetting; }
 	bool IsBotCharmer() { return _botCharmer; }
 	bool IsBot() const override { return true; }
 	bool IsOfClientBot() const override { return true; }
@@ -485,9 +796,7 @@ public:
 
 	bool GetRangerAutoWeaponSelect() { return _rangerAutoWeaponSelect; }
 	uint8 GetBotStance() { return _botStance; }
-	uint8 GetChanceToCastBySpellType(uint32 spellType);
-	bool GetBotEnforceSpellSetting() { return m_enforce_spell_settings; }
-	float GetBotCasterMaxRange(float melee_distance_max);
+	uint8 GetChanceToCastBySpellType(uint16 spell_type);
 	bool IsGroupHealer() const { return m_CastingRoles.GroupHealer; }
 	bool IsGroupSlower() const { return m_CastingRoles.GroupSlower; }
 	bool IsGroupNuker() const { return m_CastingRoles.GroupNuker; }
@@ -527,8 +836,6 @@ public:
 
 	std::shared_ptr<HealRotation>* MemberOfHealRotation() { return &m_member_of_heal_rotation; }
 
-	bool GetAltOutOfCombatBehavior() const { return _altoutofcombatbehavior;}
-	bool GetShowHelm() const { return _showhelm; }
 	inline int32	GetSTR()	const override { return STR; }
 	inline int32	GetSTA()	const override { return STA; }
 	inline int32	GetDEX()	const override { return DEX; }
@@ -584,7 +891,8 @@ public:
 	inline const InspectMessage_Struct& GetInspectMessage() const { return _botInspectMessage; }
 
 	// "Quest API" Methods
-	bool HasBotSpellEntry(uint16 spellid);
+	bool HasBotSpellEntry(uint16 spell_id);
+	bool CanUseBotSpell(uint16 spell_id);
 	void ApplySpell(int spell_id, int duration = 0, int level = -1, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
 	void BreakInvis();
 	void Escape();
@@ -600,13 +908,11 @@ public:
 	void SetBotSpellID(uint32 newSpellID);
 	void SetSpawnStatus(bool spawnStatus) { _spawnStatus = spawnStatus; }
 	void SetPetChooserID(uint8 id) { _petChooserID = id; }
-	void SetBotArcherySetting(bool bot_archer_setting, bool save = false);
+	void SetBotRangedSetting(bool value) { _botRangedSetting = value; }
 	void SetBotCharmer(bool c) { _botCharmer = c; }
-	void SetPetChooser(bool p) { _petChooser = p; }
 	void SetBotOwner(Mob* botOwner) { this->_botOwner = botOwner; }
 	void SetRangerAutoWeaponSelect(bool enable) { GetClass() == Class::Ranger ? _rangerAutoWeaponSelect = enable : _rangerAutoWeaponSelect = false; }
 	void SetBotStance(uint8 stance_id) { _botStance = Stance::IsValid(stance_id) ? stance_id : Stance::Passive; }
-	void SetBotCasterRange(uint32 bot_caster_range) { m_bot_caster_range = bot_caster_range; }
 	uint32 GetSpellRecastTimer(uint16 spell_id = 0);
 	bool CheckSpellRecastTimer(uint16 spell_id = 0);
 	uint32 GetSpellRecastRemainingTime(uint16 spell_id = 0);
@@ -624,8 +930,6 @@ public:
 	void ClearSpellRecastTimer(uint16 spell_id = 0);
 	uint32 GetItemReuseRemainingTime(uint32 item_id = 0);
 	void ClearExpiredTimers();
-	void SetAltOutOfCombatBehavior(bool behavior_flag) { _altoutofcombatbehavior = behavior_flag;}
-	void SetShowHelm(bool showhelm) { _showhelm = showhelm; }
 	void SetBeardColor(uint8 value) { beardcolor = value; }
 	void SetBeard(uint8 value) { beard = value; }
 	void SetEyeColor1(uint8 value) { eyecolor1 = value; }
@@ -639,7 +943,7 @@ public:
 	bool DyeArmor(int16 slot_id, uint32 rgb, bool all_flag = false, bool save_flag = true);
 
 	int GetExpansionBitmask();
-	void SetExpansionBitmask(int expansion_bitmask, bool save = true);
+	void SetExpansionBitmask(int expansionBitmask);
 
 	void ListBotSpells(uint8 min_level);
 
@@ -651,14 +955,11 @@ public:
 	void ListBotSpellSettings();
 	void LoadBotSpellSettings();
 	bool UpdateBotSpellSetting(uint16 spell_id, BotSpellSetting* bs);
-	void SetBotEnforceSpellSetting(bool enforcespellsettings, bool save = false);
-	bool GetBotEnforceSpellSetting() const { return m_enforce_spell_settings; }
+	void SetBotEnforceSpellSetting(bool enforceSpellSettings);
+	bool GetBotEnforceSpellSetting() { return _enforceSpellSettings; }
 
 	// Class Destructors
 	~Bot() override;
-
-	// Publicized protected functions
-	void BotRangedAttack(Mob* other);
 
 	// Publicized private functions
 	static NPCType *FillNPCTypeStruct(
@@ -722,8 +1023,7 @@ public:
 
 	// New accessors for BotDatabase access
 	bool DeleteBot();
-	std::vector<BotTimer_Struct> GetBotTimers() { return bot_timers; }
-	void SetBotTimers(std::vector<BotTimer_Struct> timers) { bot_timers = timers; }
+	std::vector<BotTimer> GetBotTimers() { return bot_timers; }
 	uint32 GetLastZoneID() const { return _lastZoneId; }
 	int32 GetBaseAC() const { return _baseAC; }
 	int32 GetBaseATK() const { return _baseATK; }
@@ -750,24 +1050,11 @@ public:
 
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND];
 
-	bool BotCastMez(Mob* tar, uint8 botLevel, bool checked_los, BotSpell& botSpell, Raid* raid);
-	bool BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, Raid* raid);
-	bool BotCastRoot(Mob* tar, uint8 botLevel, uint32 iSpellTypes, BotSpell& botSpell, const bool& checked_los);
-	bool BotCastBuff(Mob* tar, uint8 botLevel, uint8 botClass);
-	bool BotCastEscape(Mob*& tar, uint8 botClass, BotSpell& botSpell, uint32 iSpellTypes);
-	bool BotCastNuke(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, const bool& checked_los);
-	bool BotCastDispel(Mob* tar, BotSpell& botSpell, uint32 iSpellTypes, const bool& checked_los);
-	bool BotCastPet(Mob* tar, uint8 botClass, BotSpell& botSpell);
-	bool BotCastCombatBuff(Mob* tar, uint8 botLevel, uint8 botClass);
-	bool BotCastLifetap(Mob* tar, uint8 botLevel, BotSpell& botSpell, const bool& checked_los, uint32 iSpellTypes);
-	bool BotCastSnare(Mob* tar, uint8 botLevel, BotSpell& botSpell, const bool& checked_los, uint32 iSpellTypes);
-	bool BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, const bool& checked_los);
-	bool BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, const bool& checked_los, Raid* raid);
-	bool BotCastDebuff(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool checked_los);
-	bool BotCastCure(Mob* tar, uint8 botClass, BotSpell& botSpell, Raid* raid);
-	bool BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpell);
-	bool BotCastCombatSong(Mob* tar, uint8 botLevel);
-	bool BotCastSong(Mob* tar, uint8 botLevel);
+	bool BotCastMez(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spell_type);
+	bool BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spell_type);
+	bool BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spell_type);
+	bool BotCastPet(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spell_type);
+	bool BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spell_type);
 
 	bool CheckIfIncapacitated();
 	bool IsAIProcessValid(const Client* bot_owner, const Group* bot_group, const Raid* raid);
@@ -785,51 +1072,52 @@ public:
 		Mob* tar,
 		float tar_distance
 	);
+	bool TargetValidation(Mob* other);
 
 	bool PullingFlagChecks(Client* bot_owner);
-	bool ReturningFlagChecks(Client* bot_owner, float fm_distance);
+	bool ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_distance);
 	void BotPullerProcess(Client* bot_owner, Raid* raid);
 
-
-	// Movement Methods
-	void CalcMeleeDistances(
-		const Mob* tar,
-		const EQ::ItemInstance* const& p_item,
-		const EQ::ItemInstance* const& s_item,
-		bool behind_mob,
-		bool backstab_weapon,
-		float& melee_distance_max,
-		float& melee_distance
-	) const;
-
 	// Combat Checks
+	CombatRangeOutput EvaluateCombatRange(const CombatRangeInput& input);
+
 	void SetBerserkState();
 	bool CheckIfCasting(float fm_distance);
 	void HealRotationChecks();
-	void CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, const EQ::ItemInstance*& p_item, const EQ::ItemInstance*& s_item);
+
+	bool GetCombatJitterFlag() { return m_combat_jitter_flag; }
+	void SetCombatJitterFlag(bool flag = true) { m_combat_jitter_flag = flag; }
+	bool GetCombatOutOfRangeJitterFlag() { return m_combat_out_of_range_jitter_flag; }
+	void SetCombatOutOfRangeJitterFlag(bool flag = true) { m_combat_out_of_range_jitter_flag = flag; }
+	void SetCombatJitter();
+	void SetCombatOutOfRangeJitter();
+	void DoCombatPositioning(Mob* tar, glm::vec3 Goal, bool stop_melee_level, float tar_distance, float melee_distance_min, float melee_distance, float melee_distance_max, bool behind_mob, bool front_mob);
+	void DoFaceCheckWithJitter(Mob* tar);
+	void DoFaceCheckNoJitter(Mob* tar);
+	void RunToGoalWithJitter(glm::vec3 Goal);
+	bool RequiresLoSForPositioning();
+	bool HasRequiredLoSForPositioning(Mob* tar);
 
 	// Try Combat Methods
 	bool TryEvade(Mob* tar);
 	bool TryFacingTarget(Mob* tar);
-	bool TryRangedAttack(Mob* tar);
-	bool TryClassAttacks(Mob* tar);
-	bool TryPrimaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* p_item);
-	bool TrySecondaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* s_item);
 	bool TryPursueTarget(float leash_distance, glm::vec3& Goal);
 	bool TryMeditate();
 	bool TryAutoDefend(Client* bot_owner, float leash_distance);
 	bool TryIdleChecks(float fm_distance);
 	bool TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, glm::vec3& Goal);
 	bool TryBardMovementCasts();
-	void SetRangerCombatWeapon(bool atArcheryRange);
+	bool BotRangedAttack(Mob* other, bool can_double_attack = false);
+	bool CheckDoubleRangedAttack();
 
 	// Public "Refactor" Methods
-	static bool CheckSpawnConditions(Client* c);
+	static bool CheckCampSpawnConditions(Client* c);
 
 protected:
-	void BotMeditate(bool isSitting);
-	bool CheckBotDoubleAttack(bool Triple = false);
-	void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);
+	void BotMeditate(bool is_sitting);
+	bool CheckBotDoubleAttack(bool triple_attack = false);
+	bool CheckTripleAttack();
+	void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client, int16 chosen_slot = INVALID_INDEX);
 	bool AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = nullptr) override;
 
 	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }
@@ -839,9 +1127,14 @@ protected:
 	void SetGroupDoter(bool flag = true) { m_CastingRoles.GroupDoter = flag; }
 	std::deque<int> bot_signal_q;
 
-	std::vector<BotSpells_Struct> AIBot_spells;
-	std::vector<BotSpells_Struct> AIBot_spells_enforced;
-	std::vector<BotTimer_Struct> bot_timers;
+	std::vector<BotSpells> AIBot_spells;
+	std::vector<BotSpells> AIBot_spells_enforced;
+	std::unordered_map<uint16, std::vector<BotSpells_wIndex>> AIBot_spells_by_type;
+
+	std::map<int32_t, std::map<int32_t, BotSpellTypesByClass>> commanded_spells_min_level;
+
+	std::vector<BotTimer> bot_timers;
+	std::vector<BotBlockedBuffs> bot_blocked_buffs;
 
 private:
 	// Class Members
@@ -849,9 +1142,7 @@ private:
 	uint32 _botOwnerCharacterID;
 	bool _spawnStatus;
 	Mob* _botOwner;
-	bool m_bot_archery_setting;
 	bool _botCharmer;
-	bool _petChooser;
 	uint8 _petChooserID;
 	bool berserk;
 	EQ::InventoryProfile m_inv;
@@ -870,25 +1161,32 @@ private:
 	unsigned int RestRegenMana;
 	unsigned int RestRegenEndurance;
 	Timer rest_timer;
-	Timer ping_timer;
+	Timer m_ping_timer;
 	int32	base_end;
 	int32	cur_end;
 	int32	max_end;
 	int32	end_regen;
 
-	Timer m_evade_timer; // can be moved to pTimers at some point
+	Timer m_rogue_evade_timer; // Rogue evade timer
+	Timer m_monk_evade_timer; // Monk evade FD timer
 	Timer m_auto_defend_timer;
-	Timer auto_save_timer;
+	Timer m_auto_save_timer;
+
+	Timer m_combat_jitter_timer;
+	bool m_combat_jitter_flag;
+	bool m_combat_out_of_range_jitter_flag;
+
 	bool m_dirtyautohaters;
 	bool m_guard_flag;
 	bool m_hold_flag;
 	bool m_attack_flag;
+	bool m_combat_round_alert_flag;
 	bool m_attacking_flag;
 	bool m_pull_flag;
 	bool m_pulling_flag;
 	bool m_returning_flag;
 	bool is_using_item_click;
-	uint32 m_bot_caster_range;
+
 	BotCastingRoles m_CastingRoles;
 
 	std::map<uint16, BotSpellSetting> bot_spell_settings;
@@ -896,12 +1194,31 @@ private:
 	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
 
 	InspectMessage_Struct _botInspectMessage;
-	bool _altoutofcombatbehavior;
-	bool _showhelm;
 	bool _pauseAI;
+
+	int _expansionBitmask;
+	bool _enforceSpellSettings;
+	bool _showHelm;
+	bool _botRangedSetting;
 	uint8 _stopMeleeLevel;
-	int m_expansion_bitmask;
-	bool m_enforce_spell_settings;
+	uint32 _distanceRanged;
+	bool _behindMobStatus;
+	bool _maxMeleeRangeStatus;
+	bool _medInCombat;
+	uint8 _SitHPPct;
+	uint8 _SitManaPct;
+	uint16 _castedSpellType;
+	bool _hasLoS;
+	bool _commandedSpell;
+	bool _pullingSpell;
+	
+	bool _illusionBlock;
+	std::vector<BotSpellSettings> m_bot_spell_settings;
+	std::vector<Mob*> _spell_target_list;
+	std::vector<Mob*> _group_spell_target_list;
+	Raid* _storedRaid;
+	bool _verifiedRaid;
+	uint16 _tempSpellType;
 
 	// Private "base stats" Members
 	int32 _baseMR;
@@ -930,6 +1247,7 @@ private:
 	int32 GenerateBaseManaPoints();
 	void GenerateSpecialAttacks();
 	void SetBotID(uint32 botID);
+	void SetCombatRoundForAlerts(bool flag = true) { m_combat_round_alert_flag = flag; }
 	void SetAttackingFlag(bool flag = true) { m_attacking_flag = flag; }
 	void SetPullingFlag(bool flag = true) { m_pulling_flag = flag; }
 	void SetReturningFlag(bool flag = true) { m_returning_flag = flag; }
@@ -948,6 +1266,6 @@ private:
 	int32 CalcItemATKCap() final;
 };
 
-bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);
+bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 spell_id);
 
 #endif // BOT_H

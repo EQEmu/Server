@@ -15,7 +15,7 @@ void bot_command_pickpocket(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::list<Bot *> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
 	// Check for capable rogue

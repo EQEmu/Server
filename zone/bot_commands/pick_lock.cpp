@@ -11,7 +11,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
 	float pick_lock_value = 0.0f;
@@ -24,7 +24,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 	Bot* my_bot = sbl.front();
 
 	my_bot->InterruptSpell();
-	Bot::BotGroupSay(my_bot, "Attempting to pick the lock.");
+	Bot::RaidGroupSay(my_bot, "Attempting to pick the lock.");
 
 	std::list<Doors*> door_list;
 	entity_list.GetDoorsList(door_list);
@@ -51,7 +51,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 			++open_count;
 		}
 		else {
-			Bot::BotGroupSay(my_bot, "I am not skilled enough for this lock.");
+			Bot::RaidGroupSay(my_bot, "I am not skilled enough for this lock.");
 		}
 	}
 	c->Message(Chat::White, "%i door%s attempted - %i door%s successful", door_count, ((door_count != 1) ? ("s") : ("")), open_count, ((open_count != 1) ? ("s") : ("")));

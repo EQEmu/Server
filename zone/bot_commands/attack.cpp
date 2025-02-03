@@ -5,17 +5,25 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_attack", sep->arg[0], "attack")) {
 		return;
 	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::White, "usage: <enemy_target> %s [actionable: byname | ownergroup | ownerraid | namesgroup | healrotation | byclass | byrace | default: spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s [actionable: byname | ownergroup | ownerraid | namesgroup | healrotation | mmr | byclass | byrace | default: spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "note: Orders bots to attack a designated target");
 		return;
 	}
-	const int ab_mask = ActionableBots::ABM_Type2;
 
+	const int ab_mask = ActionableBots::ABM_Type2;
 	Mob* target_mob = ActionableTarget::AsSingle_ByAttackable(c);
+
 	if (!target_mob) {
 
-		c->Message(Chat::White, "You must <target> an enemy to use this command");
+		c->Message(Chat::Yellow, "You must <target> an enemy to use this command");
+		return;
+	}
+	
+	if (!c->DoLosChecks(target_mob)) {
+		c->Message(Chat::Red, "You must have Line of Sight to use this command.");
 		return;
 	}
 
@@ -26,11 +34,13 @@ void bot_command_attack(Client *c, const Seperator *sep)
 
 	std::string class_race_arg(sep->arg[1]);
 	bool class_race_check = false;
+
 	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
 		class_race_check = true;
 	}
 
-	std::list<Bot*> sbl;
+	std::vector<Bot*> sbl;
+
 	if (ActionableBots::PopulateSBL(c, ab_arg.c_str(), sbl, ab_mask, !class_race_check ? sep->arg[2] : nullptr, class_race_check ? atoi(sep->arg[2]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
@@ -42,7 +52,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 
 	size_t attacker_count = 0;
 	Bot *first_attacker = nullptr;
-	sbl.remove(nullptr);
+	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 	for (auto bot_iter : sbl) {
 
 		if (bot_iter->GetAppearance() != eaDead && bot_iter->GetBotStance() != Stance::Passive) {
@@ -57,8 +67,8 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	}
 
 	if (attacker_count == 1 && first_attacker) {
-		Bot::BotGroupSay(
-			first_attacker,
+		c->Message(
+			Chat::Green,
 			fmt::format(
 				"Attacking {}.",
 				target_mob->GetCleanName()
@@ -66,7 +76,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 		);
 	} else {
 		c->Message(
-			Chat::White,
+			Chat::Green,
 			fmt::format(
 				"{} of your bots are attacking {}.",
 				sbl.size(),

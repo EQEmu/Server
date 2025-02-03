@@ -81,7 +81,7 @@ void Aura::ProcessOnAllFriendlies(Mob *owner)
 		if (!mob) {
 			continue;
 		}
-		if (mob->IsClient() || mob->IsPetOwnerClient() || mob->IsMerc() || mob->IsBot()) {
+		if (mob->IsOfClientBotMerc() || mob->IsPetOwnerOfClientBot()) {
 			auto it = casted_on.find(mob->GetID());
 
 			if (it != casted_on.end()) { // we are already on the list, let's check for removal
@@ -131,7 +131,7 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 	std::set<int> delayed_remove;
 	bool          is_buff   = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 
-	if (owner->IsRaidGrouped() && owner->IsClient()) { // currently raids are just client, but safety check
+	if (owner->IsRaidGrouped() && owner->IsOfClientBot()) { // currently raids are just client, but safety check
 		auto raid = owner->GetRaid();
 		if (raid == nullptr) { // well shit
 			owner->RemoveAura(GetID(), false, true);
@@ -198,17 +198,17 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			auto it  = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
 				// verify still good!
-				if (mob->IsClient()) {
+				if (mob->IsOfClientBot()) {
 					if (!verify_raid_client(mob->CastToClient())) {
 						delayed_remove.insert(mob->GetID());
 					}
 				}
-				else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner()) {
+				else if (mob->IsPet() && mob->IsPetOwnerOfClientBot() && mob->GetOwner()) {
 					if (!verify_raid_client_pet(mob)) {
 						delayed_remove.insert(mob->GetID());
 					}
 				}
-				else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+				else if (mob->IsNPC() && mob->IsPetOwnerOfClientBot()) {
 					auto npc = mob->CastToNPC();
 					if (!verify_raid_client_swarm(npc)) {
 						delayed_remove.insert(mob->GetID());
@@ -216,19 +216,19 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 				}
 			}
 			else { // we're not on it!
-				if (mob->IsClient() && verify_raid_client(mob->CastToClient())) {
+				if (mob->IsOfClientBot() && verify_raid_client(mob->CastToClient())) {
 					casted_on.insert(mob->GetID());
 					if (is_buff) {
 						SpellFinished(spell_id, mob);
 					}
 				}
-				else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner() && verify_raid_client_pet(mob)) {
+				else if (mob->IsPet() && mob->IsPetOwnerOfClientBot() && mob->GetOwner() && verify_raid_client_pet(mob)) {
 					casted_on.insert(mob->GetID());
 					if (is_buff) {
 						SpellFinished(spell_id, mob);
 					}
 				}
-				else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+				else if (mob->IsNPC() && mob->IsPetOwnerOfClientBot()) {
 					auto npc = mob->CastToNPC();
 					if (verify_raid_client_swarm(npc)) {
 						casted_on.insert(mob->GetID());
@@ -376,7 +376,7 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 	auto          group_member = owner->GetOwnerOrSelf();
 
 	if (group_member->IsRaidGrouped() &&
-		group_member->IsClient()) { // currently raids are just client, but safety check
+		group_member->IsOfClientBot()) { // currently raids are just client, but safety check
 		auto raid = group_member->GetRaid();
 		if (raid == nullptr) { // well shit
 			owner->RemoveAura(GetID(), false, true);
@@ -428,12 +428,12 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 			auto it  = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
 				// verify still good!
-				if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner()) {
+				if (mob->IsPet() && mob->IsPetOwnerOfClientBot() && mob->GetOwner()) {
 					if (!verify_raid_client_pet(mob)) {
 						delayed_remove.insert(mob->GetID());
 					}
 				}
-				else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+				else if (mob->IsNPC() && mob->IsPetOwnerOfClientBot()) {
 					auto npc = mob->CastToNPC();
 					if (!verify_raid_client_swarm(npc)) {
 						delayed_remove.insert(mob->GetID());
@@ -441,16 +441,16 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 				}
 			}
 			else { // we're not on it!
-				if (mob->IsClient()) {
+				if (mob->IsOfClientBot()) {
 					continue; // never hit client
 				}
-				else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner() && verify_raid_client_pet(mob)) {
+				else if (mob->IsPet() && mob->IsPetOwnerOfClientBot() && mob->GetOwner() && verify_raid_client_pet(mob)) {
 					casted_on.insert(mob->GetID());
 					if (is_buff) {
 						SpellFinished(spell_id, mob);
 					}
 				}
-				else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+				else if (mob->IsNPC() && mob->IsPetOwnerOfClientBot()) {
 					auto npc = mob->CastToNPC();
 					if (verify_raid_client_swarm(npc)) {
 						casted_on.insert(mob->GetID());
@@ -499,7 +499,7 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 				}
 			}
 			else { // not on, check if we should be!
-				if (mob->IsClient()) {
+				if (mob->IsOfClientBot()) {
 					continue;
 				}
 				else if (mob->IsPet() && verify_group_pet(mob)) {
@@ -690,7 +690,7 @@ void Aura::ProcessSpawns()
 			continue;
 		}
 
-		if (!e.second->IsClient()) {
+		if (!e.second->IsOfClientBot()) {
 			continue;
 		}
 
@@ -801,7 +801,7 @@ bool Aura::ShouldISpawnFor(Client *c)
 		return true;
 	}
 
-	if (owner->IsRaidGrouped() && owner->IsClient()) {
+	if (owner->IsRaidGrouped() && owner->IsOfClientBot()) {
 		auto raid = owner->GetRaid();
 		if (raid == nullptr) {
 			return false;

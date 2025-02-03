@@ -74,20 +74,22 @@ void command_list(Client *c, const Seperator *sep)
 	if (is_bots) {
 		const auto& l = entity_list.GetBotList();
 
-		for (const auto& e: l) {
+		for (const auto& e : l) {
+			Bot* entity = e.second;
+
 			entity_count++;
 
-			const std::string& entity_name = Strings::ToLower(e->GetName());
+			const std::string& entity_name = Strings::ToLower(entity->GetName());
 			if (!search_string.empty() && !Strings::Contains(entity_name, search_string)) {
 				continue;
 			}
 
 			unique_entities.emplace_back(
 				UniqueEntity{
-					.entity_id = e->GetID(),
-					.entity_name = e->GetName(),
-					.unique_id = e->GetBotID(),
-					.position = e->GetPosition()
+					.entity_id = entity->GetID(),
+					.entity_name = entity->GetName(),
+					.unique_id = entity->GetBotID(),
+					.position = entity->GetPosition()
 				}
 			);
 
