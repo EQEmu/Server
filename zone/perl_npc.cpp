@@ -314,18 +314,21 @@ void Perl_NPC_PauseWandering(NPC* self, int pause_time) // @categories Script Ut
 
 void Perl_NPC_MoveTo(NPC* self, float x, float y, float z) // @categories Script Utility
 {
+	if (!self) { return; }
 	auto position = glm::vec4(x, y, z, 0);
 	self->MoveTo(position, false);
 }
 
 void Perl_NPC_MoveTo(NPC* self, float x, float y, float z, float h) // @categories Script Utility
 {
+	if (!self) { return; }
 	auto position = glm::vec4(x, y, z, h);
 	self->MoveTo(position, false);
 }
 
 void Perl_NPC_MoveTo(NPC* self, float x, float y, float z, float h, bool save) // @categories Script Utility
 {
+	if (!self) { return; }
 	auto position = glm::vec4(x, y, z, h);
 	self->MoveTo(position, save);
 }
