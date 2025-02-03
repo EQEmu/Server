@@ -6505,7 +6505,7 @@ ADD COLUMN `multiquest_enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `is
 		.content_schema_update = true
 	},
 	ManifestEntry{
-		.version = 9289,
+		.version = 9301,
 		.description = "2024_10_08_add_detail_player_event_logging.sql",
 		.check       = "SHOW COLUMNS FROM `player_event_log_settings` LIKE 'etl_enabled'",
 		.condition   = "empty",
