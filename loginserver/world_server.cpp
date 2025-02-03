@@ -172,13 +172,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 
 		if (res->response > 0) {
 			play->base_reply.success = true;
-			SendClientAuthToWorld(
-				c->GetConnection()->GetRemoteAddr(),
-				c->GetAccountName(),
-				c->GetLoginKey(),
-				c->GetAccountID(),
-				c->GetLoginServerName()
-			);
+			SendClientAuthToWorld(c);
 		}
 
 		switch (res->response) {
@@ -276,13 +270,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 
 		if (res->response > 0) {
 			r->base_reply.success = true;
-			SendClientAuthToWorld(
-				c->GetConnection()->GetRemoteAddr(),
-				c->GetAccountName(),
-				c->GetLoginKey(),
-				c->GetAccountID(),
-				c->GetLoginServerName()
-			);
+			SendClientAuthToWorld(c);
 		}
 
 		switch (res->response) {
@@ -496,28 +484,22 @@ void WorldServer::HandleWorldserverStatusUpdate(LoginserverWorldStatusUpdate *u)
 	m_server_status  = u->status;
 }
 
-void WorldServer::SendClientAuthToWorld(
-	std::string ip,
-	std::string account,
-	std::string key,
-	unsigned int account_id,
-	const std::string &loginserver_name
-)
+void WorldServer::SendClientAuthToWorld(Client *c)
 {
 	EQ::Net::DynamicPacket outapp;
 	ClientAuth_Struct      a{};
 
-	a.loginserver_account_id = account_id;
+	a.loginserver_account_id = c->GetAccountID();
 
-	strncpy(a.account_name, account.c_str(), 30);
-	strncpy(a.key, key.c_str(), 30);
+	strncpy(a.account_name, c->GetAccountName().c_str(), 30);
+	strncpy(a.key, c->GetLoginKey().c_str(), 30);
 
 	a.lsadmin        = 0;
 	a.is_world_admin = 0;
-	a.ip             = inet_addr(ip.c_str());
-	strncpy(a.loginserver_name, &loginserver_name[0], 64);
+	a.ip             = inet_addr(c->GetConnection()->GetRemoteAddr().c_str());
+	strncpy(a.loginserver_name, &c->GetLoginServerName()[0], 64);
 
-	const std::string &client_address(ip);
+	const std::string &client_address(c->GetConnection()->GetRemoteAddr());
 	std::string       world_address(m_connection->Handle()->RemoteIP());
 
 	if (client_address == world_address) {
@@ -573,9 +555,7 @@ constexpr static int MAX_SERVER_REMOTE_ADDRESS_LENGTH = 125;
 constexpr static int MAX_SERVER_VERSION_LENGTH        = 64;
 constexpr static int MAX_SERVER_PROTOCOL_VERSION      = 25;
 
-bool WorldServer::HandleNewWorldserverValidation(
-	LoginserverNewWorldRequest *r
-)
+bool WorldServer::HandleNewWorldserverValidation(LoginserverNewWorldRequest *r)
 {
 	if (strlen(r->account_name) >= MAX_ACCOUNT_NAME_LENGTH) {
 		LogError("HandleNewWorldserver error [account_name] was too long | max [{}]", MAX_ACCOUNT_NAME_LENGTH);

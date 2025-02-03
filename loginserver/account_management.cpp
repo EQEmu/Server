@@ -26,59 +26,6 @@ int32 AccountManagement::CreateLoginServerAccount(LoginAccountContext c)
 	return 0;
 }
 
-bool AccountManagement::CreateLoginserverWorldAdminAccount(
-	const std::string &username,
-	const std::string &password,
-	const std::string &email,
-	const std::string &first_name,
-	const std::string &last_name,
-	const std::string &ip_address
-)
-{
-	auto mode = server.options.GetEncryptionMode();
-	auto hash = eqcrypt_hash(username, password, mode);
-
-	LogInfo(
-		"Attempting to create world admin account | username [{}] encryption algorithm [{}] ({})",
-		username,
-		GetEncryptionByModeId(mode),
-		mode
-	);
-
-	if (server.db->DoesLoginserverWorldAdminAccountExist(username)) {
-		LogWarning(
-			"Attempting to create world admin account for user [{}] but already exists!",
-			username
-		);
-
-		return false;
-	}
-
-	uint32 created_world_admin_id = server.db->CreateLoginserverWorldAdminAccount(
-		username,
-		hash,
-		first_name,
-		last_name,
-		email,
-		ip_address
-	);
-
-	if (created_world_admin_id > 0) {
-		LogInfo(
-			"Account creation success for user [{}] encryption algorithm [{}] ({}) new admin id [{}]",
-			username,
-			GetEncryptionByModeId(mode),
-			mode,
-			created_world_admin_id
-		);
-		return true;
-	}
-
-	LogError("Failed to create world admin account account for user [{}]!", username);
-
-	return false;
-}
-
 uint32 AccountManagement::CheckLoginserverUserCredentials(LoginAccountContext c)
 {
 	auto mode = server.options.GetEncryptionMode();
@@ -394,4 +341,57 @@ uint32 AccountManagement::HealthCheckUserLogin()
 	);
 
 	return res.get();
+}
+
+bool AccountManagement::CreateLoginserverWorldAdminAccount(
+	const std::string &username,
+	const std::string &password,
+	const std::string &email,
+	const std::string &first_name,
+	const std::string &last_name,
+	const std::string &ip_address
+)
+{
+	auto mode = server.options.GetEncryptionMode();
+	auto hash = eqcrypt_hash(username, password, mode);
+
+	LogInfo(
+		"Attempting to create world admin account | username [{}] encryption algorithm [{}] ({})",
+		username,
+		GetEncryptionByModeId(mode),
+		mode
+	);
+
+	if (server.db->DoesLoginserverWorldAdminAccountExist(username)) {
+		LogWarning(
+			"Attempting to create world admin account for user [{}] but already exists!",
+			username
+		);
+
+		return false;
+	}
+
+	uint32 created_world_admin_id = server.db->CreateLoginserverWorldAdminAccount(
+		username,
+		hash,
+		first_name,
+		last_name,
+		email,
+		ip_address
+	);
+
+	if (created_world_admin_id > 0) {
+		LogInfo(
+			"Account creation success for user [{}] encryption algorithm [{}] ({}) new admin id [{}]",
+			username,
+			GetEncryptionByModeId(mode),
+			mode,
+			created_world_admin_id
+		);
+		return true;
+	}
+
+	LogError("Failed to create world admin account account for user [{}]!", username);
+
+	return false;
 }

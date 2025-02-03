@@ -39,11 +39,8 @@ public:
 	std::shared_ptr<EQStreamInterface> GetConnection() { return m_connection; }
 
 	void AttemptLoginAccountCreation(LoginAccountContext c);
-
 	void SendFailedLogin();
-
 	bool VerifyAndUpdateLoginHash(LoginAccountContext c, const LoginAccountsRepository::LoginAccounts& a);
-
 	void DoSuccessfulLogin(LoginAccountsRepository::LoginAccounts& a);
 
 private:

@@ -8,6 +8,7 @@
 #include "database.h"
 #include "../common/event/timer.h"
 #include "login_types.h"
+#include "client.h"
 #include <string>
 #include <memory>
 
@@ -46,13 +47,7 @@ public:
 	void HandleWorldserverStatusUpdate(LoginserverWorldStatusUpdate *u);
 	bool HandleNewWorldserverValidation(LoginserverNewWorldRequest *r);
 
-	void SendClientAuthToWorld(
-		std::string ip,
-		std::string account,
-		std::string key,
-		unsigned int account_id,
-		const std::string &loginserver_name
-	);
+	void SendClientAuthToWorld(Client *c);
 
 	static bool ValidateWorldServerAdminLogin(
 		int world_admin_id,
