@@ -1134,9 +1134,10 @@ RULE_INT(Custom,    PetCriticalAACap,						75,	 "Maximum amount of SE_PetCritica
 RULE_INT(Custom, 	PetMaximumSpellCritRatio,				300, "Maximum spell critical ratio which can be applied to pets, 0 to disable. (300 is 3x damage)")
 RULE_INT(Custom, 	PetMaximumSpellCritChance,				75,  "Maximum spell critical chance which can be applied to pets, 100 to disable.")
 
+RULE_BOOL(Custom,   AdditiveBackstabDamage,					true, "Backstab damage functions as extra damage rather than a replacement of normal damage.")
+
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
-
 
 RULE_CATEGORY_END()
 

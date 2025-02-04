@@ -172,9 +172,13 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 			if (IsClient()) {
 				auto *inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
 				if (inst && inst->GetItem()) {
-					base = inst->GetItemBackstabDamage(true);
-					if (!inst->GetItemBackstabDamage()) {
-						base += inst->GetItemWeaponDamage(true);
+					if (RuleB(Custom, AdditiveBackstabDamage)) {
+						base = inst->GetItemWeaponDamage(true) + inst->GetItemBackstabDamage(true);
+					} else {
+						base = inst->GetItemBackstabDamage(true);
+						if (!inst->GetItemBackstabDamage()) {
+							base += inst->GetItemWeaponDamage(true);
+						}
 					}
 
 					if (target) {
