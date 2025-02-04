@@ -63,8 +63,8 @@ namespace PlayerEvent {
 		PARCEL_RETRIEVE,
 		PARCEL_DELETE,
 		BARTER_TRANSACTION,
-		EVOLVE_ITEM,
 		SPEECH,
+		EVOLVE_ITEM,
 		MAX // dont remove
 	};
 
@@ -128,8 +128,8 @@ namespace PlayerEvent {
 		"Parcel Item Retrieved",
 		"Parcel Prune Routine",
 		"Barter Transaction",
-		"Evolve Item Update",
-		"Player Speech"
+		"Player Speech",
+		"Evolve Item Update"
 	};
 
 	// Generic struct used by all events

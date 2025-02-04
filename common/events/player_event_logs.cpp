@@ -1020,8 +1020,6 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 			);
 		}
 	}
-
-	LoadEtlIds();
 }
 
 void PlayerEventLogs::ReloadSettings()
