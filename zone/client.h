@@ -1832,6 +1832,29 @@ public:
 
 	Raid *p_raid_instance;
 
+	inline uint32 GetPotionBeltItemIcon(uint8 slot_id)
+	{
+		return EQ::ValueWithin(
+			slot_id,
+			0,
+			EQ::profile::POTION_BELT_SIZE - 1
+		) ? m_pp.potionbelt.Items[slot_id].Icon : 0;
+	};
+
+	inline uint32 GetPotionBeltItemID(uint8 slot_id)
+	{
+		return EQ::ValueWithin(slot_id, 0, EQ::profile::POTION_BELT_SIZE - 1) ? m_pp.potionbelt.Items[slot_id].ID : 0;
+	};
+	
+	inline std::string GetPotionBeltItemName(uint8 slot_id)
+	{
+		return EQ::ValueWithin(
+			slot_id,
+			0,
+			EQ::profile::POTION_BELT_SIZE - 1
+		) ? m_pp.potionbelt.Items[slot_id].Name : 0;
+	};
+
 	void ShowDevToolsMenu();
 	CheatManager cheat_manager;
 
