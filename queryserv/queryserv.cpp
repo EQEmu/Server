@@ -23,17 +23,17 @@
 
 volatile bool RunLoops = true;
 
-QSDatabase             database;
-LFGuildManager         lfguildmanager;
-std::string            WorldShortName;
+QSDatabase            database;
+LFGuildManager        lfguildmanager;
+std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
-EQEmuLogSys            LogSys;
-PathManager            path;
-ZoneStore              zone_store;
-PlayerEventLogs        player_event_logs;
-ZSList                 zs_list;
-uint32                 numzones = 0;
+EQEmuLogSys           LogSys;
+PathManager           path;
+ZoneStore             zone_store;
+PlayerEventLogs       player_event_logs;
+ZSList                zs_list;
+uint32                numzones     = 0;
 
 void CatchSignal(int sig_num)
 {
@@ -107,16 +107,16 @@ int main()
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	EQ::Net::ServertalkServerOptions        server_opts;
 	auto                                    server_connection = std::make_unique<EQ::Net::ServertalkServer>();
-	server_opts.port                                          = Config->QSPort;
-	server_opts.ipv6                                          = false;
-	server_opts.credentials                                   = Config->SharedKey;
+	server_opts.port        = Config->QSPort;
+	server_opts.ipv6        = false;
+	server_opts.credentials = Config->SharedKey;
 	server_connection->Listen(server_opts);
 	LogInfo("Server (TCP) listener started on port [{}]", Config->QSPort);
 
-		server_connection->OnConnectionIdentified(
-			"Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-				numzones++;
-				zs_list.Add(new ZoneServer(connection, console.get()));
+	server_connection->OnConnectionIdentified(
+		"Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+			numzones++;
+			zs_list.Add(new ZoneServer(connection, console.get()));
 
 			LogInfo(
 				"New Zone Server connection from [{}] at [{}:{}] zone_count [{}]",
@@ -128,19 +128,18 @@ int main()
 		}
 	);
 
-		server_connection->OnConnectionRemoved(
-			"Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-				numzones--;
-				zs_list.Remove(connection->GetUUID());
+	server_connection->OnConnectionRemoved(
+		"Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+			numzones--;
+			zs_list.Remove(connection->GetUUID());
 
-				LogInfo(
-					"Removed Zone Server connection from [{}] total zone_count [{}]",
-					connection->GetUUID(),
-					numzones
-				);
-			}
-		);
-
+			LogInfo(
+				"Removed Zone Server connection from [{}] total zone_count [{}]",
+				connection->GetUUID(),
+				numzones
+			);
+		}
+	);
 
 	/* Initial Connection to Worldserver */
 	worldserver = new WorldServer;
@@ -152,7 +151,7 @@ int main()
 	Timer player_event_process_timer(1000);
 	player_event_logs.SetDatabase(&database)->Init();
 
-	auto loop_fn = [&](EQ::Timer* t) {
+	auto loop_fn = [&](EQ::Timer *t) {
 		Timer::SetCurrentTime();
 
 		if (!RunLoops) {
@@ -166,18 +165,6 @@ int main()
 
 		if (player_event_process_timer.Check()) {
 			std::jthread player_event_thread(&PlayerEventLogs::Process, &player_event_logs);
-		}
-
-		for (auto const& z:zs_list.GetZsList()) {
-			if (z->GetKeepAliveTimer()->Check()) {
-				LogInfo(
-					"Removed Zone Server connection from [{}] total zone_count [{}]",
-					z->GetUUID(),
-					numzones
-				);
-				numzones--;
-				zs_list.Remove(z->GetUUID());
-			}
 		}
 	};
 

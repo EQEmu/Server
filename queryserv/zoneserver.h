@@ -17,17 +17,14 @@ public:
 	ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> in_connection, EQ::Net::ConsoleServer *in_console);
 	~ZoneServer();
 	void SendPacket(ServerPacket *pack) { tcpc->SendPacket(pack); }
-	void		SendKeepAlive();
 	void        SetIsZoneConnected(bool in) { is_zone_connected = in; }
 	bool        GetIsZoneConnected() { return is_zone_connected; }
-	std::unique_ptr<Timer> &GetKeepAliveTimer() { return keep_alive; }
 	void        HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 
 	std::string         GetUUID() const { return tcpc->GetUUID(); }
 
 	private:
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> tcpc{};
-	std::unique_ptr<Timer> keep_alive{};
 	bool is_zone_connected = false;
 
 	EQ::Net::ConsoleServer *console;

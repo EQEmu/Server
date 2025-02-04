@@ -983,7 +983,7 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 				if (it != repository_deleters.end()) {
 					total_deleted_count += it->second(condition);
 				} else {
-					LogError("Non-Implemented ETL Event Type <red>[{}]", static_cast<uint32>(m_settings[event_type_id].id));
+					LogError("Non-Implemented ETL Event Type [{}]", static_cast<uint32>(m_settings[event_type_id].id));
 				}
 			}
 		}
