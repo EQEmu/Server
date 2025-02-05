@@ -432,7 +432,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 	flush_queue(PlayerEventKilledRaidNpcRepository::InsertMany, etl_queues.killed_raid_npc);
 	flush_queue(PlayerEventAaPurchaseRepository::InsertMany, etl_queues.aa_purchase);
 
-	LogPlayerEventsDetail(
+	LogPlayerEvents(
 		"Processing batch player event log queue of [{}] took [{}]",
 		m_record_batch_queue.size(),
 		benchmark.elapsed()
@@ -895,7 +895,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		default: {
-			LogInfo(
+			LogPlayerEventsDetail(
 				"Player event [{}] ({}) Discord formatter not implemented",
 				e.player_event_log.event_type_name,
 				e.player_event_log.event_type_id
