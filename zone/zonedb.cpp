@@ -1358,7 +1358,7 @@ bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
 		"FROM"
 		" `inventory` "
 		"WHERE"
-		" `char_id` = %u",
+		" `character_id` = %u",
 		time_index,
 		character_id
 	);
@@ -1512,13 +1512,13 @@ void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id,
 		"JOIN"
 		" `inventory` b "
 		"USING"
-		" (`slotid`, `itemid`) "
+		" (`slot_id`, `item_id`) "
 		"WHERE"
 		" a.`time_index` = %u "
 		"AND"
 		" a.`charid` = %u "
 		"AND"
-		" b.`charid` = %u"
+		" b.`character_id` = %u"
 		")",
 		timestamp,
 		character_id,
@@ -1543,7 +1543,7 @@ void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id,
 		"FROM"
 		" `inventory` "
 		"WHERE"
-		" `charid` = %u "
+		" `character_id` = %u "
 		"AND"
 		" `slotid` NOT IN "
 		"("
@@ -1560,7 +1560,7 @@ void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id,
 		"AND"
 		" b.`charid` = %u "
 		"AND"
-		" a.`charid` = %u"
+		" a.`character_id` = %u"
 		")",
 		character_id,
 		timestamp,
@@ -1589,7 +1589,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 		"FROM"
 		" `inventory` "
 		"WHERE"
-		" `charid` = %u",
+		" `character_id` = %u",
 		character_id
 	);
 	auto results = database.QueryDatabase(query);
@@ -1600,7 +1600,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 		"INSERT "
 		"INTO"
 		" `inventory` "
-		"(`char_id`,"
+		"(`character_id`,"
 		" `slot_id`,"
 		" `item_id`,"
 		" `charges`,"
