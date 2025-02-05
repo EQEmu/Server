@@ -14519,7 +14519,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 
 	if (action == MerchantActions::Open) {
 		BulkSendMerchantInventory(merchant_id, tmp->GetNPCTypeID());
-		MerchantSession = tmp->GetID();
+		SetMerchantSessionEntityID(tmp->GetID());
 
 		if ((tabs_to_display & Parcel) == Parcel) {
 			SendBulkParcels();

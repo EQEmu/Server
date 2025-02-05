@@ -5953,53 +5953,49 @@ std::vector<NPC*> EntityList::GetExcludedNPCsByIDs(std::vector<uint32> npc_ids)
 
 void EntityList::SendMerchantEnd(Mob* merchant)
 {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c = it->second;
+	for (const auto& e : client_list) {
+		Client* c = e.second;
 
 		if (!c) {
 			continue;
 		}
 
-		if(c->GetMerchantSession() == merchant->GetID()) {
+		if (c->GetMerchantSessionEntityID() == merchant->GetID()) {
 			c->SendMerchantEnd();
 		}
-		++it;
 	}
-
-	return;
 }
 
-void EntityList::SendMerchantInventory(Mob* merchant, int32 slotid, bool isdelete)
+void EntityList::SendMerchantInventory(Mob* m, int32 slot_id, bool is_delete)
 {
-
-	if(!merchant || !merchant->IsNPC()) {
+	if (!m || !m->IsNPC()) {
 		return;
 	}
 
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c = it->second;
+	for (const auto& e : client_list) {
+		Client* c = e.second;
 
 		if (!c) {
 			continue;
 		}
 
-		if(c->GetMerchantSession() == merchant->GetID()) {
-			if(!isdelete) {
-				c->BulkSendMerchantInventory(merchant->CastToNPC()->MerchantType, merchant->GetNPCTypeID());
+		if (c->GetMerchantSessionEntityID() == m->GetID()) {
+			if (!is_delete) {
+				c->BulkSendMerchantInventory(m->CastToNPC()->MerchantType, m->GetNPCTypeID());
 			} else {
-				auto delitempacket = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
-				Merchant_DelItem_Struct* delitem = (Merchant_DelItem_Struct*)delitempacket->pBuffer;
-				delitem->itemslot = slotid;
-				delitem->npcid = merchant->GetID();
-				delitem->playerid = c->GetID();
-				delitempacket->priority = 6;
-				c->QueuePacket(delitempacket);
-				safe_delete(delitempacket);
+				auto app = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
+				auto d   = (Merchant_DelItem_Struct*)app->pBuffer;
+
+				d->itemslot   = slot_id;
+				d->npcid      = m->GetID();
+				d->playerid   = c->GetID();
+
+				app->priority = 6;
+
+				c->QueuePacket(app);
+				safe_delete(app);
 			}
 		}
-		++it;
 	}
 
 	return;

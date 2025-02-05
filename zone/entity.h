@@ -579,7 +579,7 @@ public:
 	int MovePlayerCorpsesToGraveyard(bool force_move_from_instance = false);
 
 	void SendMerchantEnd(Mob* merchant);
-	void SendMerchantInventory(Mob* merchant, int32 slotid = -1, bool isdelete = false);
+	void SendMerchantInventory(Mob* m, int32 slot_id = -1, bool is_delete = false);
 
 protected:
 	friend class Zone;

@@ -13552,7 +13552,7 @@ std::string Client::GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id)
 
 void Client::SendMerchantEnd()
 {
-	MerchantSession = 0;
+	SetMerchantSessionEntityID(0);
 
 	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
 		DoParcelCancel();

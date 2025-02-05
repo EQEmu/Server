@@ -1387,8 +1387,8 @@ public:
 	std::string GetRacePlural();
 	std::string GetClassPlural();
 
-	void SetMerchantSession(uint16 value) { MerchantSession = value; }
-	uint16 GetMerchantSession() { return MerchantSession; }
+	inline void SetMerchantSessionEntityID(uint16 value) { m_merchant_session_entity_id = value; }
+	inline uint16 GetMerchantSessionEntityID() { return m_merchant_session_entity_id; }
 
 	//Command #Tune functions
 	void TuneGetStats(Mob* defender, Mob *attacker);
@@ -1923,7 +1923,7 @@ protected:
 
 	MobMovementManager *mMovementManager;
 
-	uint16 MerchantSession;
+	uint16 m_merchant_session_entity_id;
 
 private:
 	Mob* target;
