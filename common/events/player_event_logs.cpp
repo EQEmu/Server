@@ -189,7 +189,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 	};
 
 	// Helper to assign ETL table ID
-	auto AssignEtlId = [&](
+	auto                                                                                                          AssignEtlId      = [&](
 		PlayerEventLogsRepository::PlayerEventLogs &r,
 		PlayerEvent::EventType type
 	) {
@@ -400,9 +400,10 @@ void PlayerEventLogs::ProcessBatchQueue()
 			auto it = event_processors.find(static_cast<PlayerEvent::EventType>(r.event_type_id));
 			if (it != event_processors.end()) {
 				it->second(r);  // Call the appropriate lambda
+				r.event_data = "{}"; // Clear event data
 			}
 			else {
-				LogError("Non-Implemented ETL routing <red>[{}]", r.event_type_id);
+				LogError("Non-Implemented ETL routing [{}]", r.event_type_id);
 			}
 		}
 	}
@@ -924,65 +925,76 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 	LogPlayerEvents("Running truncation");
 
 	// Map of repository-specific deletion functions
-	std::unordered_map<PlayerEvent::EventType, std::function<uint32(const std::string&)>> repository_deleters = {
-		{PlayerEvent::LOOT_ITEM, [&](const std::string& condition) {
+	std::unordered_map<PlayerEvent::EventType, std::function<uint32(const std::string &)>> repository_deleters = {
+		{
+			PlayerEvent::LOOT_ITEM,         [&](const std::string &condition) {
 			return PlayerEventLootItemsRepository::DeleteWhere(*m_database, condition);
 		}},
-		{PlayerEvent::MERCHANT_SELL, [&](const std::string& condition) {
+		{
+			PlayerEvent::MERCHANT_SELL,     [&](const std::string &condition) {
 			return PlayerEventMerchantSellRepository::DeleteWhere(*m_database, condition);
 		}},
-		{PlayerEvent::MERCHANT_PURCHASE, [&](const std::string& condition) {
+		{
+			PlayerEvent::MERCHANT_PURCHASE, [&](const std::string &condition) {
 			return PlayerEventMerchantPurchaseRepository::DeleteWhere(*m_database, condition);
 		}},
-		{PlayerEvent::NPC_HANDIN, [&](const std::string& condition) {
+		{
+			PlayerEvent::NPC_HANDIN,        [&](const std::string &condition) {
 			uint32 deleted_count = PlayerEventNpcHandinRepository::DeleteWhere(*m_database, condition);
 			deleted_count += PlayerEventNpcHandinEntriesRepository::DeleteWhere(*m_database, condition);
 			return deleted_count;
 		}},
-		{PlayerEvent::TRADE, [&](const std::string& condition) {
+		{
+			PlayerEvent::TRADE,             [&](const std::string &condition) {
 			uint32 deleted_count = PlayerEventTradeRepository::DeleteWhere(*m_database, condition);
 			deleted_count += PlayerEventTradeEntriesRepository::DeleteWhere(*m_database, condition);
 			return deleted_count;
 		}},
-		{PlayerEvent::SPEECH, [&](const std::string& condition) {
+		{
+			PlayerEvent::SPEECH,            [&](const std::string &condition) {
 			return PlayerEventSpeechRepository::DeleteWhere(*m_database, condition);
 		}},
-		{PlayerEvent::KILLED_NPC, [&](const std::string& condition) {
+		{
+			PlayerEvent::KILLED_NPC,        [&](const std::string &condition) {
 			return PlayerEventKilledNpcRepository::DeleteWhere(*m_database, condition);
 		}},
-		{PlayerEvent::KILLED_NAMED_NPC, [&](const std::string& condition) {
+		{
+			PlayerEvent::KILLED_NAMED_NPC,  [&](const std::string &condition) {
 			return PlayerEventKilledNamedNpcRepository::DeleteWhere(*m_database, condition);
 		}},
-		{PlayerEvent::KILLED_RAID_NPC, [&](const std::string& condition) {
+		{
+			PlayerEvent::KILLED_RAID_NPC,   [&](const std::string &condition) {
 			return PlayerEventKilledRaidNpcRepository::DeleteWhere(*m_database, condition);
 		}},
-		{PlayerEvent::AA_PURCHASE, [&](const std::string& condition) {
+		{
+			PlayerEvent::AA_PURCHASE,       [&](const std::string &condition) {
 			return PlayerEventAaPurchaseRepository::DeleteWhere(*m_database, condition);
 		}}
 	};
 
 	// Group event types by retention interval
 	std::unordered_map<int, std::vector<int>> retention_groups;
-	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
+	for (int                                  i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
 			retention_groups[m_settings[i].retention_days].push_back(i);
 		}
 	}
 
-	for (const auto& [retention_days, event_types] : retention_groups) {
+	for (const auto &[retention_days, event_types]: retention_groups) {
 		std::string condition = fmt::format(
 			"created_at < (NOW() - INTERVAL {} DAY)",
 			retention_days
 		);
 
 		// Handle ETL deletions for each event type in the group
-		uint32 total_deleted_count = 0;
-		for (int event_type_id : event_types) {
+		uint32   total_deleted_count = 0;
+		for (int event_type_id: event_types) {
 			if (m_settings[event_type_id].etl_enabled) {
 				auto it = repository_deleters.find(static_cast<PlayerEvent::EventType>(m_settings[event_type_id].id));
 				if (it != repository_deleters.end()) {
 					total_deleted_count += it->second(condition);
-				} else {
+				}
+				else {
 					LogError("Non-Implemented ETL Event Type [{}]", static_cast<uint32>(m_settings[event_type_id].id));
 				}
 			}
