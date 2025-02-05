@@ -526,6 +526,7 @@ public:
 	void DoAttackRounds(Mob* target, int hand);
 
 	bool BotPassiveCheck();
+	bool ValidStateCheck(Mob* other, bool same_raid_group = false);
 	Raid* GetStoredRaid() { return _storedRaid; }
 	void SetStoredRaid(Raid* stored_raid) { _storedRaid = stored_raid; }
 	bool GetVerifiedRaid() { return _verifiedRaid; }

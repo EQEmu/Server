@@ -12380,6 +12380,23 @@ bool Bot::BotPassiveCheck() {
 	return false;
 }
 
+bool Bot::ValidStateCheck(Mob* other, bool same_raid_group) {
+	if (
+		GetBotStance() == Stance::Passive ||
+		GetHoldFlag() ||
+		GetAppearance() == eaDead ||
+		IsFeared() ||
+		IsSilenced() ||
+		IsAmnesiad() ||
+		GetHP() < 0 ||
+		!IsInGroupOrRaid(other, same_raid_group)
+	) {
+		return false;
+	}
+
+	return true;
+}
+
 bool Bot::IsValidSpellTypeSubType(uint16 spell_type, uint16 sub_type, uint16 spell_id) {
 	if (sub_type == UINT16_MAX) {
 		return true;
