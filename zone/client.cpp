@@ -13505,6 +13505,20 @@ std::string Client::GetAccountBucketRemaining(std::string bucket_name)
 	return DataBucket::GetDataRemaining(k);
 }
 
+void Client::SendMerchantEnd()
+{
+	SetMerchantSessionEntityID(0);
+
+	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
+		DoParcelCancel();
+		SetEngagedWithParcelMerchant(false);
+	}
+
+	EQApplicationPacket empty(OP_ShopEndConfirm);
+	QueuePacket(&empty);
+	return;
+}
+
 std::string Client::GetBandolierName(uint8 bandolier_slot)
 {
 	if (!EQ::ValueWithin(bandolier_slot, 0, 3)) {
