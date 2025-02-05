@@ -6422,8 +6422,8 @@ ADD PRIMARY KEY (`account_id`, `slot_id`);
 	ManifestEntry{
 		.version = 9298,
 		.description = "2024_10_24_inventory_changes.sql",
-		.check = "SHOW COLUMN FROM `inventory` LIKE 'charid'",
-		.condition = "empty",
+		.check = "SHOW COLUMNS FROM `inventory` LIKE 'character_id'",
+		.condition = "missing",
 		.match = "",
 		.sql = R"(
 ALTER TABLE `inventory`
@@ -6450,6 +6450,8 @@ UPDATE `inventory` SET `slot_id` = ((`slot_id` - 311) + 5210) WHERE `slot_id` BE
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 321) + 5410) WHERE `slot_id` BETWEEN 321 AND 330; -- Bag 8
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 331) + 5610) WHERE `slot_id` BETWEEN 331 AND 340; -- Bag 9
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 341) + 5810) WHERE `slot_id` BETWEEN 341 AND 350; -- Bag 10
+UPDATE `inventory` SET `slot_id` = ((`slot_id` - 8000) + 6010) WHERE `slot_id` BETWEEN 8000 AND 8199; -- Cursor Overflow
+DELETE FROM `inventory` WHERE `slot_id` BETWEEN 8200 AND 8999; -- Extreme Cursor Overflow
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 351) + 6010) WHERE `slot_id` BETWEEN 351 AND 360; -- Cursor Bag
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2031) + 6210) WHERE `slot_id` BETWEEN 2031 AND 2040; -- Bank Bag 1
 UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2041) + 6410) WHERE `slot_id` BETWEEN 2041 AND 2050; -- Bank Bag 2
