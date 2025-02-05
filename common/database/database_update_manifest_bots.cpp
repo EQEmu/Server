@@ -104,7 +104,7 @@ ALTER TABLE `bot_timers`
 	DROP PRIMARY KEY;
 ALTER TABLE `bot_timers`
 	ADD PRIMARY KEY (`bot_id`, `timer_id`, `spell_id`, `item_id`);
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9042,
@@ -123,7 +123,7 @@ ALTER TABLE `bot_pets` DROP FOREIGN KEY `FK_bot_pets_1`;
 ALTER TABLE `bot_pet_buffs` DROP FOREIGN KEY `FK_bot_pet_buffs_1`;
 ALTER TABLE `bot_pet_inventories` DROP FOREIGN KEY `FK_bot_pet_inventories_1`;
 ALTER TABLE `bot_stances` DROP FOREIGN KEY `FK_bot_stances_1`;
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9043,
@@ -139,7 +139,7 @@ ADD COLUMN `augment_three` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_tw
 ADD COLUMN `augment_four` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_three`,
 ADD COLUMN `augment_five` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_four`,
 ADD COLUMN `augment_six` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`;
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9044,
@@ -150,7 +150,7 @@ ADD COLUMN `augment_six` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five
 		.sql = R"(
 ALTER TABLE `bot_data`
 ADD COLUMN `extra_haste` mediumint(8) NOT NULL DEFAULT 0 AFTER `wis`;
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9045,
@@ -161,7 +161,7 @@ ADD COLUMN `extra_haste` mediumint(8) NOT NULL DEFAULT 0 AFTER `wis`;
 		.sql = R"(
 ALTER TABLE `bot_spells_entries`
 CHANGE COLUMN `spellid` `spell_id` smallint(5) UNSIGNED NOT NULL DEFAULT 0 AFTER `npc_spells_id`;
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9046,
@@ -291,12 +291,12 @@ UPDATE `bot_command_settings` SET `aliases`= 'targetcount' WHERE `bot_command`='
 UPDATE `bot_command_settings` SET `aliases`= 'disc' WHERE `bot_command`='discipline';
 UPDATE `bot_command_settings` SET `aliases`= CASE WHEN LENGTH(`aliases`) > 0 THEN CONCAT(`aliases`, '|vc') ELSE 'vc' END WHERE `bot_command`='viewcombos' AND `aliases` NOT LIKE '%vc%';
 UPDATE `bot_command_settings` SET `aliases`= 'announcecasts' WHERE `bot_command`='spellannouncecasts';
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9047,
 		.description = "2024_05_18_bot_update_spell_types.sql",
-		.check = "SELECT * FROM `bot_spells_entries` WHERE `type` > 21",
+		.check = "SELECT * FROM `bot_spells_entries` WHERE `type` >= 1024",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -322,7 +322,7 @@ UPDATE `bot_spells_entries` SET `type` = 18 WHERE `type` = 262144;
 UPDATE `bot_spells_entries` SET `type` = 19 WHERE `type` = 524288;
 UPDATE `bot_spells_entries` SET `type` = 20 WHERE `type` = 1048576;
 UPDATE `bot_spells_entries` SET `type` = 21 WHERE `type` = 2097152;
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9048,
@@ -348,164 +348,163 @@ AND (
 	s.`effectid11` = 23 OR
 	s.`effectid12` = 23
 	);
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9049,
 		.description = "2024_05_18_correct_bot_spell_entries_types.sql",
-		.check = "SELECT * FROM `bot_spells_entries` where `npc_spells_id` = 3002 AND `spell_id` = 14312",
-		.condition = "empty",
+		.check = "SELECT * FROM bot_spells_entries WHERE `spell_id` = 14312 AND `npc_spells_id` != 3002",
+		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
 -- Class fixes
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spell_id` = 14312;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spell_id` = 14313;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3002 WHERE b.`spell_id` = 14314;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spell_id` = 15186;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spell_id` = 15187;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3005 WHERE b.`spell_id` = 15188;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14446;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14447;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14467;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14468;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14469;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3003 WHERE b.`spell_id` = 14955;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3003 WHERE b.`spell_id` = 14956;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14387;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14388;
-UPDATE bot_spells_entries b SET b.`npc_spells_id` = 3006 WHERE b.`spell_id` = 14389;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3002 WHERE `spell_id` = 14312 AND `npc_spells_id` != 3002;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3002 WHERE `spell_id` = 14313 AND `npc_spells_id` != 3002;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3002 WHERE `spell_id` = 14314 AND `npc_spells_id` != 3002;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3003 WHERE `spell_id` = 14955 AND `npc_spells_id` != 3003;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3003 WHERE `spell_id` = 14956 AND `npc_spells_id` != 3003;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3005 WHERE `spell_id` = 15186 AND `npc_spells_id` != 3005;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3005 WHERE `spell_id` = 15187 AND `npc_spells_id` != 3005;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3005 WHERE `spell_id` = 15188 AND `npc_spells_id` != 3005;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3006 WHERE `spell_id` = 14446 AND `npc_spells_id` != 3006;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3006 WHERE `spell_id` = 14447 AND `npc_spells_id` != 3006;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3006 WHERE `spell_id` = 14467 AND `npc_spells_id` != 3006;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3006 WHERE `spell_id` = 14468 AND `npc_spells_id` != 3006;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3006 WHERE `spell_id` = 14469 AND `npc_spells_id` != 3006;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3006 WHERE `spell_id` = 14387 AND `npc_spells_id` != 3006;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3006 WHERE `spell_id` = 14388 AND `npc_spells_id` != 3006;
+UPDATE bot_spells_entries SET `npc_spells_id` = 3006 WHERE `spell_id` = 14389 AND `npc_spells_id` != 3006;
 
 -- Minlevel fixes
-UPDATE bot_spells_entries SET `minlevel` = 34 WHERE `spell_id` = 1445 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 2 WHERE `spell_id` = 229 AND `npc_spells_id` = 3011;
-UPDATE bot_spells_entries SET `minlevel` = 13 WHERE `spell_id` = 333 AND `npc_spells_id` = 3013;
-UPDATE bot_spells_entries SET `minlevel` = 29 WHERE `spell_id` = 106 AND `npc_spells_id` = 3013;
-UPDATE bot_spells_entries SET `minlevel` = 38 WHERE `spell_id` = 754 AND `npc_spells_id` = 3010;
-UPDATE bot_spells_entries SET `minlevel` = 58 WHERE `spell_id` = 2589 AND `npc_spells_id` = 3003;
-UPDATE bot_spells_entries SET `minlevel` = 67 WHERE `spell_id` = 5305 AND `npc_spells_id` = 3004;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14267 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14268 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14269 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 23 WHERE `spell_id` = 738 AND `npc_spells_id` = 3008;
-UPDATE bot_spells_entries SET `minlevel` = 51 WHERE `spell_id` = 1751 AND `npc_spells_id` = 3008;
-UPDATE bot_spells_entries SET `minlevel` = 7 WHERE `spell_id` = 734 AND `npc_spells_id` = 3008;
-UPDATE bot_spells_entries SET `minlevel` = 5 WHERE `spell_id` = 717 AND `npc_spells_id` = 3008;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 15186 AND `npc_spells_id` = 3005;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 15187 AND `npc_spells_id` = 3005;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 15188 AND `npc_spells_id` = 3005;
-UPDATE bot_spells_entries SET `minlevel` = 80 WHERE `spell_id` = 14446 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 80 WHERE `spell_id` = 14447 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14467 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14468 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 79 WHERE `spell_id` = 14469 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14955 AND `npc_spells_id` = 3003;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14956 AND `npc_spells_id` = 3003;
-UPDATE bot_spells_entries SET `minlevel` = 78 WHERE `spell_id` = 14387 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14388 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14389 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14312 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14313 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `minlevel` = 77 WHERE `spell_id` = 14314 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes2 WHERE b.`spell_id` = 1445 AND b.`npc_spells_id` = 3002 AND b.`minlevel` != s.classes2 AND s.classes2 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes2 WHERE b.`spell_id` = 14267 AND b.`npc_spells_id` = 3002 AND b.`minlevel` != s.classes2 AND s.classes2 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes2 WHERE b.`spell_id` = 14268 AND b.`npc_spells_id` = 3002 AND b.`minlevel` != s.classes2 AND s.classes2 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes2 WHERE b.`spell_id` = 14269 AND b.`npc_spells_id` = 3002 AND b.`minlevel` != s.classes2 AND s.classes2 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes2 WHERE b.`spell_id` = 14312 AND b.`npc_spells_id` = 3002 AND b.`minlevel` != s.classes2 AND s.classes2 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes2 WHERE b.`spell_id` = 14313 AND b.`npc_spells_id` = 3002 AND b.`minlevel` != s.classes2 AND s.classes2 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes2 WHERE b.`spell_id` = 14314 AND b.`npc_spells_id` = 3002 AND b.`minlevel` != s.classes2 AND s.classes2 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes3 WHERE b.`spell_id` = 2589 AND b.`npc_spells_id` = 3003 AND b.`minlevel` != s.classes3 AND s.classes3 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes3 WHERE b.`spell_id` = 14955 AND b.`npc_spells_id` = 3003 AND b.`minlevel` != s.classes3 AND s.classes3 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes3 WHERE b.`spell_id` = 14956 AND b.`npc_spells_id` = 3003 AND b.`minlevel` != s.classes3 AND s.classes3 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes4 WHERE b.`spell_id` = 5305 AND b.`npc_spells_id` = 3004 AND b.`minlevel` != s.classes4 AND s.classes4 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes5 WHERE b.`spell_id` = 15186 AND b.`npc_spells_id` = 3005 AND b.`minlevel` != s.classes5 AND s.classes5 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes5 WHERE b.`spell_id` = 15187 AND b.`npc_spells_id` = 3005 AND b.`minlevel` != s.classes5 AND s.classes5 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes5 WHERE b.`spell_id` = 15188 AND b.`npc_spells_id` = 3005 AND b.`minlevel` != s.classes5 AND s.classes5 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes6 WHERE b.`spell_id` = 14387 AND b.`npc_spells_id` = 3006 AND b.`minlevel` != s.classes6 AND s.classes6 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes6 WHERE b.`spell_id` = 14388 AND b.`npc_spells_id` = 3006 AND b.`minlevel` != s.classes6 AND s.classes6 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes6 WHERE b.`spell_id` = 14389 AND b.`npc_spells_id` = 3006 AND b.`minlevel` != s.classes6 AND s.classes6 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes6 WHERE b.`spell_id` = 14446 AND b.`npc_spells_id` = 3006 AND b.`minlevel` != s.classes6 AND s.classes6 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes6 WHERE b.`spell_id` = 14447 AND b.`npc_spells_id` = 3006 AND b.`minlevel` != s.classes6 AND s.classes6 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes6 WHERE b.`spell_id` = 14467 AND b.`npc_spells_id` = 3006 AND b.`minlevel` != s.classes6 AND s.classes6 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes6 WHERE b.`spell_id` = 14468 AND b.`npc_spells_id` = 3006 AND b.`minlevel` != s.classes6 AND s.classes6 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes6 WHERE b.`spell_id` = 14469 AND b.`npc_spells_id` = 3006 AND b.`minlevel` != s.classes6 AND s.classes6 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes8 WHERE b.`spell_id` = 717 AND b.`npc_spells_id` = 3008 AND b.`minlevel` != s.classes8 AND s.classes8 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes8 WHERE b.`spell_id` = 734 AND b.`npc_spells_id` = 3008 AND b.`minlevel` != s.classes8 AND s.classes8 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes8 WHERE b.`spell_id` = 738 AND b.`npc_spells_id` = 3008 AND b.`minlevel` != s.classes8 AND s.classes8 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes8 WHERE b.`spell_id` = 1751 AND b.`npc_spells_id` = 3008 AND b.`minlevel` != s.classes8 AND s.classes8 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes10 WHERE b.`spell_id` = 754 AND b.`npc_spells_id` = 3010 AND b.`minlevel` != s.classes10 AND s.classes10 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes11 WHERE b.`spell_id` = 229 AND b.`npc_spells_id` = 3011 AND b.`minlevel` != s.classes11 AND s.classes11 < 254;
+UPDATE bot_spells_entries b, spells_new s SET b.`minlevel` = s.classes13 WHERE b.`spell_id` = 333 AND b.`npc_spells_id` = 3013 AND b.`minlevel` != s.classes13 AND s.classes13 < 254;
 
 -- Maxlevel fixes
-UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14267 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14268 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14269 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14446 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14447 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14467 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14468 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14469 AND `npc_spells_id` = 3006;
-UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14312 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14313 AND `npc_spells_id` = 3002;
-UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14314 AND `npc_spells_id` = 3002;
+UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14267 AND `npc_spells_id` = 3002 AND `maxlevel` < 83;
+UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14268 AND `npc_spells_id` = 3002 AND `maxlevel` < 83;
+UPDATE bot_spells_entries SET `maxlevel` = 83 WHERE `spell_id` = 14269 AND `npc_spells_id` = 3002 AND `maxlevel` < 83;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14446 AND `npc_spells_id` = 3006 AND `maxlevel` < 84;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14447 AND `npc_spells_id` = 3006 AND `maxlevel` < 84;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14467 AND `npc_spells_id` = 3006 AND `maxlevel` < 84;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14468 AND `npc_spells_id` = 3006 AND `maxlevel` < 84;
+UPDATE bot_spells_entries SET `maxlevel` = 84 WHERE `spell_id` = 14469 AND `npc_spells_id` = 3006 AND `maxlevel` < 84;
+UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14312 AND `npc_spells_id` = 3002 AND `maxlevel` < 81;
+UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14313 AND `npc_spells_id` = 3002 AND `maxlevel` < 81;
+UPDATE bot_spells_entries SET `maxlevel` = 81 WHERE `spell_id` = 14314 AND `npc_spells_id` = 3002 AND `maxlevel` < 81;
 
 -- Type fixes
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 201;
-UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 752;
-UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 2117;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2542;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2544;
+
+UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14267;
+UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14268;
+UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14269;
+UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 1576;
+UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 5416;
+UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 14446;
+UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 14447;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 4074;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 8008;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14467;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14468;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14469;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14388;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14389;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 15187;
+UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 15188;
+UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 10436;
+UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14312;
+UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14313;
+UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14314;
 UPDATE bot_spells_entries SET `type` = 6 WHERE `spell_id` = 2115;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1403;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1405;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 195;
 UPDATE bot_spells_entries SET `type` = 9 WHERE `spell_id` = 289;
 UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 294;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 302;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 521;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 185;
 UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 450;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 186;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 4074;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 195;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 1712;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 521;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1403;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1405;
 UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 1703;
-UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 3229;
 UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 3345;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 5348;
 UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 5509;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6826;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18392;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18393;
+UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18394;
+UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 14955;
+UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 14956;
+UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 15186;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 185;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 186;
 UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 270;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 281;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 302;
 UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 505;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 526;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 110;
 UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 506;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 162;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 111;
 UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 507;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 527;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 163;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 112;
 UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 1588;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 1712;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2542;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2544;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2634;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2942;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 3462;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 4900;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6826;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6827;
+UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6828;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 110;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 111;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 112;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 162;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 163;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 201;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 281;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 370;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 526;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 527;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1437;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1436;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1573;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1592;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1577;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1578;
-UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 1576;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 2571;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 3386;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 3387;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 4900;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 3395;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 5394;
 UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 5392;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6827;
-UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 5416;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1437;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 1436;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 5348;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 8008;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 2571;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 370;
+UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 14387;
+UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 752;
 UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 1741;
 UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 1296;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 270;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2634;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 2942;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 3462;
-UPDATE bot_spells_entries SET `type` = 13 WHERE `spell_id` = 6828;
-UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14312;
-UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14313;
-UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 14314;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18392;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18393;
-UPDATE bot_spells_entries SET `type` = 8 WHERE `spell_id` = 18394;
-UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 15186;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 15187;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 15188;
-UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 14446;
-UPDATE bot_spells_entries SET `type` = 1 WHERE `spell_id` = 14447;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14467;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14468;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14469;
-UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14267;
-UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14268;
-UPDATE bot_spells_entries SET `type` = 0 WHERE `spell_id` = 14269;
-UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 14955;
-UPDATE bot_spells_entries SET `type` = 10 WHERE `spell_id` = 14956;
-UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 14387;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14388;
-UPDATE bot_spells_entries SET `type` = 3 WHERE `spell_id` = 14389;
-UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 10436;
+UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 2117;
+UPDATE bot_spells_entries SET `type` = 17 WHERE `spell_id` = 3229;
 
 -- UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 3440; -- Ro's Illumination [#3440] from DoT [#8] to Debuff [#14] [Should be 0]
 -- UPDATE bot_spells_entries SET `type` = 14 WHERE `spell_id` = 303; -- Whirl till you hurl [#303] from Nuke [#0] to Debuff [#14] [Should be 0]
@@ -524,7 +523,7 @@ UPDATE bot_spells_entries SET `type` = 4 WHERE `spell_id` = 10436;
 -- UPDATE bot_spells_entries SET `type` = 7 WHERE `spell_id` = 1751; -- Largo's Assonant Binding [#1751] from Slow [#13] to Snare [#7]
 -- UPDATE bot_spells_entries SET `type` = 7 WHERE `spell_id` = 738; -- Selo's Consonant Chain [#738] from Slow [#13] to Snare [#7]
 
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9050,
@@ -1093,7 +1092,7 @@ WHERE NOT EXISTS
 (SELECT *
 FROM spells_new
 WHERE bot_spells_entries.spell_id = spells_new.id);
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9051,
@@ -1198,15 +1197,15 @@ WHERE NOT EXISTS
 (SELECT *
 FROM spells_new
 WHERE bot_spells_entries.spell_id = spells_new.id);
-)"
+)",
 	},
-ManifestEntry{
-	.version = 9052,
-	.description = "2024_12_15_bot_blocked_buffs.sql",
-	.check = "SHOW TABLES LIKE 'bot_blocked_buffs'",
-	.condition = "empty",
-	.match = "",
-	.sql = R"(
+	ManifestEntry{
+		.version = 9052,
+		.description = "2024_12_15_bot_blocked_buffs.sql",
+		.check = "SHOW TABLES LIKE 'bot_blocked_buffs'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
 CREATE TABLE `bot_blocked_buffs` (
 	`bot_id` INT(11) UNSIGNED NOT NULL,
 	`spell_id` INT(11) UNSIGNED NOT NULL,
@@ -1217,7 +1216,7 @@ CREATE TABLE `bot_blocked_buffs` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9053,
@@ -1808,7 +1807,7 @@ WHERE NOT EXISTS
 (SELECT *
 FROM spells_new
 WHERE bot_spells_entries.spell_id = spells_new.id);
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9054,
@@ -2122,7 +2121,7 @@ WHERE NOT EXISTS
 (SELECT *
 FROM spells_new
 WHERE bot_spells_entries.spell_id = spells_new.id);
-)"
+)",
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
