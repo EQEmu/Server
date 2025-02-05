@@ -134,14 +134,7 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 		}
 
 		if (spell_id == UINT16_MAX) { // Aggressive/Defensive type
-			std::vector<BotSpells_wIndex> bot_spell_list;
-
-			if (aggressive) {
-				bot_spell_list = bot_iter->BotGetSpellsByType(BotSpellTypes::DiscAggressive);
-			}
-			else if (defensive) {
-				bot_spell_list = bot_iter->BotGetSpellsByType(BotSpellTypes::DiscDefensive);
-			}
+			const std::vector<BotSpells_wIndex>& bot_spell_list = bot_iter->BotGetSpellsByType(aggressive ? BotSpellTypes::DiscAggressive : BotSpellTypes::DiscDefensive);
 
 			for (int i = bot_spell_list.size() - 1; i >= 0; i--) {
 				if (!IsValidSpell(bot_spell_list[i].spellid)) {
