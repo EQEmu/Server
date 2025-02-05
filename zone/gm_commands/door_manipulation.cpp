@@ -35,6 +35,26 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		);
 	}
 
+	if (arg1 == "drawbox") {
+		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
+
+		if (door) {
+			uint16 door_size = 15;
+			float door_depth = 5.0f;
+
+			if (sep->IsNumber(2) && atof(sep->arg[2]) > 0) {
+				door_size = atof(sep->arg[2]);
+			}
+
+			if (sep->IsNumber(3) && atof(sep->arg[3]) > 0) {
+				door_depth = atof(sep->arg[3]);
+			}
+
+
+			door->IsDoorBetween(c->GetPosition(), (c->GetTarget() ? c->GetTarget()->GetPosition() : c->GetPosition()), door_size, door_depth, true);
+		}
+	}
+
 	// edit menu
 	if (arg1 == "edit") {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
@@ -544,6 +564,13 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#door setinvertstate [0|1] | Sets selected door invert state");
 		c->Message(Chat::White, "#door setincline <incline> | Sets selected door incline");
 		c->Message(Chat::White, "#door opentype <opentype> | Sets selected door opentype");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} <door_size> <door_depth> | Draws a box for the door, default size = 15, depth = 5 if none defined",
+				Saylink::Silent("#door drawbox")
+			).c_str()
+		);
 		c->Message(
 			Chat::White,
 			fmt::format(

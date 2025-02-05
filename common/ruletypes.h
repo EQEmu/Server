@@ -291,6 +291,7 @@ RULE_BOOL(Pets, ClientPetsUseOwnerNameInLastName, true, "Disable this to keep cl
 RULE_BOOL(Pets, CanTakeNoDrop, false, "Setting whether anyone can give no-drop items to pets")
 RULE_INT(Pets, PetTauntRange, 150, "Range at which a pet will taunt targets.")
 RULE_BOOL(Pets, AlwaysAllowPetRename, false, "Enable this option to allow /changepetname to work without enabling a pet name change via scripts.")
+RULE_BOOL(Pets, PetsRequireLoS, false, "Whether or not pets require line of sight to be told to attack their target")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(GM)
@@ -390,9 +391,10 @@ RULE_BOOL(Map, MobZVisualDebug, false, "Displays spell effects determining wheth
 RULE_BOOL(Map, MobPathingVisualDebug, false, "Displays nodes in pathing points in realtime to help with visual debugging")
 RULE_REAL(Map, FixPathingZMaxDeltaSendTo, 20, "At runtime in SendTo: maximum change in Z to allow the BestZ code to apply")
 RULE_INT(Map, FindBestZHeightAdjust, 1, "Adds this to the current Z before seeking the best Z position")
-RULE_BOOL(Map, CheckForLoSCheat, false, "Runs predefined zone checks to check for LoS cheating through doors and such.")
-RULE_BOOL(Map, EnableLoSCheatExemptions, false, "Enables exemptions for the LoS Cheat check.")
-RULE_REAL(Map, RangeCheckForLoSCheat, 20.0, "Default 20.0. Range to check if one is within range of a door.")
+RULE_BOOL(Map, CheckForDoorLoSCheat, true, "Runs LoS checks to prevent cheating through doors.")
+RULE_BOOL(Map, EnableLoSCheatExemptions, false, "Enables exemptions for the LoS Cheat check. Must modify source to create these.")
+RULE_REAL(Map, RangeCheckForDoorLoSCheat, 250.0, "Default 250.0. Range to check if a door is blocking LoS from the target.")
+RULE_STRING(Map, ZonesToCheckDoorCheat, "89,103", "Zones that will check for the door LoS cheat. You can leave it blank to disable, 'all' to check all zones or use a comma-delimited list of zones. Default Sebilis & Chardok")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Pathing)
@@ -845,7 +847,7 @@ RULE_BOOL(Bots, AllowCastAAs, true, "If enabled, players can use ^cast aa to cas
 RULE_BOOL(Bots, AllowMagicianEpicPet, false, "If enabled, magician bots can summon their epic pets following the rules AllowMagicianEpicPetLevel")
 RULE_INT(Bots, AllowMagicianEpicPetLevel, 50, "If AllowMagicianEpicPet is enabled, bots can start using their epic pets at this level")
 RULE_INT(Bots, RequiredMagicianEpicPetItemID, 28034, "If AllowMagicianEpicPet is enabled and this is set, bots will be required to have this item ID equipped to cast their epic. Takes in to account AllowMagicianEpicPetLevel as well. Set to 0 to disable requirement")
-RULE_STRING(Bots, EpicPetSpellName, "", "'teleport_zone' in the spell to be cast for epic pets. This must be in their spell list to cast.")
+RULE_STRING(Bots, EpicPetSpellName, "", "'teleport_zone' in the spell to be cast for epic pets. This must be in their usable spell list to cast. Empty uses Manifest Elements - 'SumMageMultiElement'")
 RULE_INT(Bots, ReclaimEnergySpellID, 331, "Spell ID for reclaim energy when using ^petsettype. Default 331")
 RULE_BOOL(Bots, UseSpellPulling, true, "If enabled bots will use a spell to pull when within range. Uses PullSpellID.")
 RULE_INT(Bots, PullSpellID, 5225, "Default 5225 - Throw Stone. Spell that will be cast to pull by bots")
@@ -903,6 +905,7 @@ RULE_STRING(Bots, ZonesWithForcedSpawnLimits, "", "Comma-delimited list of zones
 RULE_STRING(Bots, ZoneForcedSpawnLimits, "", "Comma-delimited list of forced spawn limits for zones.")
 RULE_INT(Bots, AICastSpellTypeDelay, 100, "Delay in milliseconds between AI cast attempts for each spell type. Default 100ms")
 RULE_INT(Bots, AICastSpellTypeHeldDelay, 2500, "Delay in milliseconds between AI cast attempts for each spell type that is held or disabled. Default 2500ms (2.5s)")
+RULE_BOOL(Bots, BotsRequireLoS, true, "Whether or not bots require line of sight to be told to attack their target")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)

@@ -11066,7 +11066,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (!target)
 			break;
 
-		if (RuleB(Map, CheckForLoSCheat) && (!DoLosChecks(target) || !CheckLosCheat(target))) {
+		if (RuleB(Pets, PetsRequireLoS) && !DoLosChecks(target)) {
 			mypet->SayString(this, NOT_LEGAL_TARGET);
 			break;
 		}
@@ -11134,7 +11134,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		}
 
-		if (RuleB(Map, CheckForLoSCheat) && (!DoLosChecks(GetTarget()) || !CheckLosCheat(GetTarget()))) {
+		if (RuleB(Pets, PetsRequireLoS) && !DoLosChecks(GetTarget())) {
 			mypet->SayString(this, NOT_LEGAL_TARGET);
 			break;
 		}

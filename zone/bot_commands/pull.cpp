@@ -48,7 +48,7 @@ void bot_command_pull(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!c->DoLosChecks(target_mob)) {
+	if (RuleB(Bots, BotsRequireLoS) && !c->DoLosChecks(target_mob)) {
 		c->Message(Chat::Red, "You must have Line of Sight to use this command.");
 
 		return;
