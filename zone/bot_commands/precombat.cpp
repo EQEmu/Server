@@ -18,7 +18,7 @@ void bot_command_precombat(Client* c, const Seperator* sep)
 		return;
 	}
 
-	if (!c->DoLosChecks(c->GetTarget())) {
+	if (RuleB(Bots, BotsRequireLoS) && !c->DoLosChecks(c->GetTarget())) {
 		c->Message(Chat::Red, "You must have Line of Sight to use this command.");
 
 		return;
