@@ -3,6 +3,9 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/repositories/player_event_logs_repository.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/discord/discord_manager.h"
+
+extern DiscordManager discord_manager;
 
 ZoneServer::ZoneServer(
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> in_connection,
@@ -34,10 +37,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			player_event_logs.AddToQueue(n.player_event_log);
 
-			// if discord enabled for event, ship to UCS to process
-			// if (player_event_logs.IsEventDiscordEnabled(n.player_event_log.event_type_id)) {
-			// 	UCSLink.SendPacket(pack);
-			// }
+			discord_manager.QueuePlayerEventMessage(n);
 			break;
 		}
 		default: {

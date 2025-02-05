@@ -22,7 +22,7 @@
 
 extern WorldServer           worldserver;
 extern const queryservconfig *Config;
-extern QSDatabase            database;
+extern QSDatabase            qs_database;
 extern LFGuildManager        lfguildmanager;
 
 WorldServer::WorldServer()
@@ -72,20 +72,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		case 0: {
 			break;
 		}
-		case ServerOP_PlayerEvent: {
-			auto                         n = PlayerEvent::PlayerEventContainer{};
-			auto                         s = (ServerSendPlayerEvent_Struct *) p.Data();
-			EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
-			cereal::BinaryInputArchive   archive(ss);
-			archive(n);
-
-			player_event_logs.AddToQueue(n.player_event_log);
-
-			break;
-		}
-		case ServerOP_KeepAlive: {
-			ServerPacket pack(ServerOP_KeepAlive, 0);
-			SendPacket(&pack);
+		case ServerOP_ReloadLogs: {
+			LogSys.LoadLogDatabaseSettings();
+			player_event_logs.ReloadSettings();
 			break;
 		}
 		case ServerOP_QueryServGeneric: {
@@ -135,7 +124,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			pack.opcode  = opcode;
 			pack.size    = (uint32) p.Length();
 
-			database.GeneralQueryReceive(&pack);
+			qs_database.GeneralQueryReceive(&pack);
 			pack.pBuffer = nullptr;
 			break;
 		}

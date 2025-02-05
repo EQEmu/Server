@@ -20,10 +20,12 @@
 #include "../common/net/console_server.h"
 #include "../queryserv/zonelist.h"
 #include "../queryserv/zoneserver.h"
+#include "../common/discord/discord_manager.h"
 
 volatile bool RunLoops = true;
 
-QSDatabase            database;
+QSDatabase            qs_database;
+Database              database;
 LFGuildManager        lfguildmanager;
 std::string           WorldShortName;
 const queryservconfig *Config;
@@ -34,6 +36,7 @@ ZoneStore             zone_store;
 PlayerEventLogs       player_event_logs;
 ZSList                zs_list;
 uint32                numzones     = 0;
+DiscordManager        discord_manager;
 
 void CatchSignal(int sig_num)
 {
@@ -61,12 +64,22 @@ int main()
 	LogInfo("Connecting to MySQL");
 
 	/* MySQL Connection */
-	if (!database.Connect(
+	if (!qs_database.Connect(
 		Config->QSDatabaseHost.c_str(),
 		Config->QSDatabaseUsername.c_str(),
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort
+	)) {
+		LogInfo("Cannot continue without a qs database connection");
+		return 1;
+	}
+	if (!database.Connect(
+		Config->DatabaseHost.c_str(),
+		Config->DatabaseUsername.c_str(),
+		Config->DatabasePassword.c_str(),
+		Config->DatabaseDB.c_str(),
+		Config->DatabasePort
 	)) {
 		LogInfo("Cannot continue without a database connection");
 		return 1;
@@ -89,14 +102,14 @@ int main()
 	//rules:
 	{
 		std::string tmp;
-		if (database.GetVariable("RuleSet", tmp)) {
+		if (qs_database.GetVariable("RuleSet", tmp)) {
 			LogInfo("Loading rule set [{}]", tmp.c_str());
-			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
+			if (!RuleManager::Instance()->LoadRules(&qs_database, tmp.c_str(), false)) {
 				LogError("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
 			}
 		}
 		else {
-			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
+			if (!RuleManager::Instance()->LoadRules(&qs_database, "default", false)) {
 				LogInfo("No rule set configured, using default rules");
 			}
 		}
@@ -149,7 +162,7 @@ int main()
 	lfguildmanager.LoadDatabase();
 
 	Timer player_event_process_timer(1000);
-	player_event_logs.SetDatabase(&database)->Init();
+	player_event_logs.SetDatabase(&qs_database)->Init();
 
 	auto loop_fn = [&](EQ::Timer *t) {
 		Timer::SetCurrentTime();

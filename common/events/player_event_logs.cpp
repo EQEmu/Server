@@ -175,7 +175,6 @@ void PlayerEventLogs::ProcessBatchQueue()
 					etl_queues.merchant_purchase.reserve(count);
 					break;
 				default:
-					LogPlayerEvents("Unknown event type [{}]", type);
 					break;
 			}
 		}
