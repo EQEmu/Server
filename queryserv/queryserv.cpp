@@ -102,14 +102,14 @@ int main()
 	//rules:
 	{
 		std::string tmp;
-		if (qs_database.GetVariable("RuleSet", tmp)) {
+		if (database.GetVariable("RuleSet", tmp)) {
 			LogInfo("Loading rule set [{}]", tmp.c_str());
-			if (!RuleManager::Instance()->LoadRules(&qs_database, tmp.c_str(), false)) {
+			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
 				LogError("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
 			}
 		}
 		else {
-			if (!RuleManager::Instance()->LoadRules(&qs_database, "default", false)) {
+			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				LogInfo("No rule set configured, using default rules");
 			}
 		}

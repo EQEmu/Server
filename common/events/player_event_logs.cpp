@@ -921,7 +921,7 @@ void PlayerEventLogs::Process()
 
 void PlayerEventLogs::ProcessRetentionTruncation()
 {
-	LogPlayerEvents("Running truncation");
+	LogPlayerEventsDetail("Running truncation");
 
 	// Map of repository-specific deletion functions
 	std::unordered_map<PlayerEvent::EventType, std::function<uint32(const std::string &)>> repository_deleters = {
