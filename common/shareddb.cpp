@@ -1554,20 +1554,6 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		if (RuleB(Custom, UseTHJItemMutations)) {
 			bool skip = false;
 
-			char modifiedName[64];
-			strn0cpy(modifiedName, item.Name, sizeof(modifiedName));
-
-			if (strncmp(row[ItemField::name], "Rose Colored ", 13) == 0) {
-				snprintf(modifiedName, sizeof(modifiedName), "%s (Enchanted)", row[ItemField::name] + 13);
-			}
-			else if (strncmp(row[ItemField::name], "Apocryphal ", 11) == 0) {
-				snprintf(modifiedName, sizeof(modifiedName), "%s (Legendary)", row[ItemField::name] + 11);
-			}
-
-			if (modifiedName[0] != '\0') {
-				strn0cpy(item.Name, modifiedName, sizeof(item.Name));
-			}
-
 			if (item.Click.Effect == 524 && item.CastTime == 0 && item.CastTime_ == 0 && item.RecastDelay == 0) {
 				item.RecastDelay = 5;
 				item.RecastType = -1;
