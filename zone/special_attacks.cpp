@@ -734,7 +734,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		if (!bot_piercer || bot_piercer->ItemType != EQ::item::ItemType1HPiercing) {
 			if (!bot->GetCombatRoundForAlerts()) {
 				bot->SetCombatRoundForAlerts();
-				bot->RaidGroupSay(this, "I can't backstab with this weapon!");
+				bot->RaidGroupSay("I can't backstab with this weapon!");
 			}
 			return;
 		}

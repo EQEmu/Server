@@ -777,7 +777,7 @@ public:
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
 	static bool RemoveBotFromGroup(Bot* bot, Group* group);
-	static void RaidGroupSay(Mob *speaker, const char *msg, ...);
+	void RaidGroupSay(const char *msg, ...);
 
 	// "GET" Class Methods
 	uint32 GetBotID() const { return _botID; }

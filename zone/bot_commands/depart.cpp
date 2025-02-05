@@ -175,8 +175,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 					}
 				}
 
-				Bot::RaidGroupSay(
-					bot_iter,
+				bot_iter->RaidGroupSay(
 					fmt::format(
 						"I can port you to {}.",
 						Saylink::Silent(
@@ -211,8 +210,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 			}
 
 			if (bot_iter->IsCommandedSpell() && bot_iter->IsCasting()) {
-				Bot::RaidGroupSay(
-					bot_iter,
+				bot_iter->RaidGroupSay(
 					fmt::format(
 						"Interrupting {}. I have been commanded to try to cast a [{}] spell, {} on {}.",
 						bot_iter->CastingSpellID() ? spells[bot_iter->CastingSpellID()].name : "my spell",
@@ -233,8 +231,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 					bot_iter->SetCastedSpellType(BotSpellTypes::Teleport);
 				}
 
-				Bot::RaidGroupSay(
-					bot_iter,
+				bot_iter->RaidGroupSay(
 					fmt::format(
 						"Casting {} [{}] on {}.",
 						GetSpellName(itr->SpellId),

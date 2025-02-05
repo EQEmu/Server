@@ -626,14 +626,14 @@ void Bot::ChangeBotRangedWeapons(bool isRanged) {
 		BotAddEquipItem(EQ::invslot::slotPrimary, GetBotItemBySlot(EQ::invslot::slotPrimary));
 		BotAddEquipItem(EQ::invslot::slotSecondary, GetBotItemBySlot(EQ::invslot::slotSecondary));
 		SetAttackTimer();
-		RaidGroupSay(this, "My blade is ready");
+		RaidGroupSay("My blade is ready");
 	} else {
 		BotRemoveEquipItem(EQ::invslot::slotPrimary);
 		BotRemoveEquipItem(EQ::invslot::slotSecondary);
 		BotAddEquipItem(EQ::invslot::slotAmmo, GetBotItemBySlot(EQ::invslot::slotAmmo));
 		BotAddEquipItem(EQ::invslot::slotSecondary, GetBotItemBySlot(EQ::invslot::slotRange));
 		SetAttackTimer();
-		RaidGroupSay(this, "My blades are sheathed");
+		RaidGroupSay("My blades are sheathed");
 	}
 }
 
@@ -1937,7 +1937,7 @@ bool Bot::BotRangedAttack(Mob* other, bool can_double_attack) {
 		if (!ammo || ammo_item->GetCharges() < 1) {
 			if (!GetCombatRoundForAlerts()) {
 				SetCombatRoundForAlerts();
-				RaidGroupSay(this, "I do not have any ammo!");
+				RaidGroupSay("I do not have any ammo!");
 			}
 		}
 		return false;
@@ -2965,11 +2965,11 @@ bool Bot::TryEvade(Mob* tar) {
 				}
 
 				if (zone->random.Int(0, 260) < (int)GetSkill(EQ::skills::SkillHide)) {
-					RaidGroupSay(this, "I have momentarily ducked away from the main combat.");
+					RaidGroupSay("I have momentarily ducked away from the main combat.");
 					RogueEvade(tar);
 				}
 				else {
-					RaidGroupSay(this, "My attempts at ducking clear of combat fail.");
+					RaidGroupSay("My attempts at ducking clear of combat fail.");
 				}
 
 				//SendAppearancePacket(AT_Invis, Invisibility::Visible);
@@ -3008,11 +3008,11 @@ bool Bot::TryEvade(Mob* tar) {
 
 				if (zone->random.Real(0, 160) > totalfeign) {
 					//SendAppearancePacket(AT_Anim, ANIM_DEATH);
-					RaidGroupSay(this, "I have fallen to the ground.");
+					RaidGroupSay("I have fallen to the ground.");
 					SetFeigned(false);
 				}
 				else {
-					RaidGroupSay(this, "I have successfully feigned my death.");
+					RaidGroupSay("I have successfully feigned my death.");
 					SetFeigned(true);
 					//SendAppearancePacket(AT_Anim, ANIM_DEATH);
 				}
@@ -3543,7 +3543,6 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 				raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
 			} else {
 				RaidGroupSay(
-					this,
 					fmt::format(
 						"Pulling {}.",
 						pull_target->GetCleanName()
@@ -5318,7 +5317,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	if (IsTaunting() && target->IsNPC() && taunt_time) {
 		if (GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this) {
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Taunting {}.",
 					target->GetCleanName()
@@ -6254,7 +6252,6 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spel
 
 	if (isMainGroupMGB && (GetClass() != Class::Bard)) {
 		RaidGroupSay(
-			this,
 			fmt::format(
 				"Casting {} as a Mass Group Buff.",
 				spells[spell_id].name
@@ -7905,10 +7902,10 @@ void Bot::SetDefaultBotStance() {
 	_botStance = GetClass() == Class::Warrior ? Stance::Aggressive : Stance::Balanced;
 }
 
-void Bot::RaidGroupSay(Mob* speaker, const char* msg, ...) {
+void Bot::RaidGroupSay(const char* msg, ...) {
 	if (
-		speaker->CastToBot()->GetTempSpellType() != UINT16_MAX &&
-		!speaker->CastToBot()->GetSpellTypeAnnounceCast(speaker->CastToBot()->GetTempSpellType())
+		GetTempSpellType() != UINT16_MAX &&
+		!GetSpellTypeAnnounceCast(GetTempSpellType())
 	) {
 		return;
 	}
@@ -7919,57 +7916,32 @@ void Bot::RaidGroupSay(Mob* speaker, const char* msg, ...) {
 	vsnprintf(buf, 1000, msg, ap);
 	va_end(ap);
 
-	if (speaker->IsRaidGrouped()) {
-		Raid* r = speaker->CastToBot()->GetStoredRaid();
+	if (IsRaidGrouped()) {
+		Raid* r = GetStoredRaid() ? GetStoredRaid() : GetRaid();
 
 		if (r) {
 			for (const auto& m : r->members) {
-				if (m.member && !m.is_bot) {
-					m.member->FilteredMessageString(
-						speaker,
-						Chat::PetResponse,
-						FilterSocials,
-						GENERIC_SAY,
-						speaker->GetCleanName(),
-						buf
-					);
+				if (m.member && m.member->IsClient()) {
+					m.member->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
 				}
 			}
 		}
 	}
-	else if (speaker->HasGroup()) {
-		Group* g = speaker->GetGroup();
-
-		if (g) {
-			for (auto& m : g->members) {
-				if (m && !m->IsBot()) {
-					m->FilteredMessageString(
-						speaker,
-						Chat::PetResponse,
-						FilterSocials,
-						GENERIC_SAY,
-						speaker->GetCleanName(),
-						buf
-					);
+	else if (HasGroup()) {
+			for (auto& m : GetGroup()->members) {
+				if (m && m->IsClient()) {
+					m->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
 				}
 			}
-		}
 	}
-	else {
-		speaker->GetOwner()->FilteredMessageString(
-			speaker,
-			Chat::PetResponse,
-			FilterSocials,
-			GENERIC_SAY,
-			speaker->GetCleanName(),
-			buf
-		);
+	else if (GetOwner()) {
+		GetOwner()->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
 	}
 }
 
 bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 	if (!IsValidSpell(spell_id)) {
-		RaidGroupSay(this, "Not a valid spell.");
+		RaidGroupSay("Not a valid spell.");
 		return false;
 	}
 
@@ -9398,7 +9370,6 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 	SetIsUsingItemClick(true);
 
 	RaidGroupSay(
-		this,
 		fmt::format(
 			"Attempting to cast [{}] on {}.",
 			spells[item->Click.Effect].name,
@@ -11312,7 +11283,6 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 
 		if (IsCasting()) {
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Interrupting {}. I have been commanded to try to cast an AA - {} on {}.",
 					CastingSpellID() ? spells[CastingSpellID()].name : "my spell",
@@ -11326,7 +11296,6 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 
 		if (CastSpell(spell_id, tar->GetID())) {
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Casting an AA - {} on {}.",
 					GetSpellName(spell_id),
@@ -11429,7 +11398,6 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 
 	if (IsCasting()) {
 		RaidGroupSay(
-			this,
 			fmt::format(
 				"Interrupting {}. I have been commanded to try to cast {} on {}.",
 				CastingSpellID() ? spells[CastingSpellID()].name : "my spell",
@@ -11445,7 +11413,6 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 	}
 
 	RaidGroupSay(
-		this,
 		fmt::format(
 			"Casting {} on {}.",
 			GetSpellName(spell_id),
