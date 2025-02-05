@@ -1554,23 +1554,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		if (RuleB(Custom, UseTHJItemMutations)) {
 			bool skip = false;
 
-			if (item.Click.Effect == 524 && item.CastTime == 0 && item.CastTime_ == 0 && item.RecastDelay == 0) {
-				item.RecastDelay = 5;
-				item.RecastType = -1;
-			}
-
-			if (item.ID % 1000000 == 5798  || // Hammer of Souls
-			    item.ID % 1000000 == 5800  || // Hammer of Judgment
-				item.ID % 1000000 == 6307  || // Hammer of Wrath
-				item.ID % 1000000 == 6309  || // Hammer of Striking
-				item.ID % 1000000 == 6313  || // Hammer of Requital
-				item.ID % 1000000 == 15996 || // Hammer of Divinity
-				item.ID % 1000000 == 29365) { // Hammer of Damnation
-				item.NoDrop = !item.NoDrop;
-				item.Attuneable = 0;
-			}
-
-			if (item.HP < 0) {
+			if (item.ID > 999999 && item.HP < 0) {
 				item.HP = 0;
 			}
 
@@ -1632,7 +1616,8 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			}
 		}
 
-		if (RuleB(Custom, AttuneOnExp) && item.ItemType == EQ::item::ItemTypeAugmentation) {
+		// REMOVE THIS WHEN WE FIX ATTUNEABLE AUGMENTS
+		if (item.ItemType == EQ::item::ItemTypeAugmentation) {
 			item.Attuneable = 0;
 		}
 
