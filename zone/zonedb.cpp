@@ -1358,7 +1358,7 @@ bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
 		"FROM"
 		" `inventory` "
 		"WHERE"
-		" `char_id` = %u",
+		" `character_id` = %u",
 		time_index,
 		character_id
 	);
@@ -1600,7 +1600,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 		"INSERT "
 		"INTO"
 		" `inventory` "
-		"(`char_id`,"
+		"(`character_id`,"
 		" `slot_id`,"
 		" `item_id`,"
 		" `charges`,"
