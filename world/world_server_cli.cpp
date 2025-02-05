@@ -34,6 +34,7 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 	function_map["test:repository2"]            = &WorldserverCLI::TestRepository2;
 	function_map["test:db-concurrency"]         = &WorldserverCLI::TestDatabaseConcurrency;
 	function_map["test:string-benchmark"]       = &WorldserverCLI::TestStringBenchmarkCommand;
+	function_map["etl:settings"]                = &WorldserverCLI::EtlGetSettings;
 
 	EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 }
@@ -56,3 +57,4 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 #include "cli/test_repository_2.cpp"
 #include "cli/test_string_benchmark.cpp"
 #include "cli/version.cpp"
+#include "cli/etl_get_settings.cpp"

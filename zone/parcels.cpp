@@ -27,6 +27,7 @@
 #include "../common/ruletypes.h"
 
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 void Client::SendBulkParcels()
 {
@@ -461,12 +462,12 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
-				e.aug_slot_1       = parcel_out.aug_slot_1;
-				e.aug_slot_2       = parcel_out.aug_slot_2;
-				e.aug_slot_3       = parcel_out.aug_slot_3;
-				e.aug_slot_4       = parcel_out.aug_slot_4;
-				e.aug_slot_5       = parcel_out.aug_slot_5;
-				e.aug_slot_6       = parcel_out.aug_slot_6;
+				e.augment_1_id     = parcel_out.aug_slot_1;
+				e.augment_2_id     = parcel_out.aug_slot_2;
+				e.augment_3_id     = parcel_out.aug_slot_3;
+				e.augment_4_id     = parcel_out.aug_slot_4;
+				e.augment_5_id     = parcel_out.aug_slot_5;
+				e.augment_6_id     = parcel_out.aug_slot_6;
 				e.quantity         = parcel_out.quantity;
 				e.sent_date        = parcel_out.sent_date;
 
@@ -477,12 +478,12 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 						e.from_player_name = parcel_out.from_name;
 						e.to_player_name   = send_to_client.at(0).character_name;
 						e.item_id          = i.item_id;
-						e.aug_slot_1       = i.aug_slot_1;
-						e.aug_slot_2       = i.aug_slot_2;
-						e.aug_slot_3       = i.aug_slot_3;
-						e.aug_slot_4       = i.aug_slot_4;
-						e.aug_slot_5       = i.aug_slot_5;
-						e.aug_slot_6       = i.aug_slot_6;
+						e.augment_1_id     = i.aug_slot_1;
+						e.augment_2_id     = i.aug_slot_2;
+						e.augment_3_id     = i.aug_slot_3;
+						e.augment_4_id     = i.aug_slot_4;
+						e.augment_5_id     = i.aug_slot_5;
+						e.augment_6_id     = i.aug_slot_6;
 						e.quantity         = i.quantity;
 						e.sent_date        = parcel_out.sent_date;
 						RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
@@ -775,12 +776,12 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 							PlayerEvent::ParcelRetrieve e{};
 							e.from_player_name = p->second.from_name;
 							e.item_id          = p->second.item_id;
-							e.aug_slot_1       = p->second.aug_slot_1;
-							e.aug_slot_2       = p->second.aug_slot_2;
-							e.aug_slot_3       = p->second.aug_slot_3;
-							e.aug_slot_4       = p->second.aug_slot_4;
-							e.aug_slot_5       = p->second.aug_slot_5;
-							e.aug_slot_6       = p->second.aug_slot_6;
+							e.augment_1_id     = p->second.aug_slot_1;
+							e.augment_2_id     = p->second.aug_slot_2;
+							e.augment_3_id     = p->second.aug_slot_3;
+							e.augment_4_id     = p->second.aug_slot_4;
+							e.augment_5_id     = p->second.aug_slot_5;
+							e.augment_6_id     = p->second.aug_slot_6;
 							e.quantity         = p->second.quantity;
 							e.sent_date        = p->second.sent_date;
 							RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
@@ -788,12 +789,12 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 							for (auto const &i:results) {
 								e.from_player_name = p->second.from_name;
 								e.item_id          = i.item_id;
-								e.aug_slot_1       = i.aug_slot_1;
-								e.aug_slot_2       = i.aug_slot_2;
-								e.aug_slot_3       = i.aug_slot_3;
-								e.aug_slot_4       = i.aug_slot_4;
-								e.aug_slot_5       = i.aug_slot_5;
-								e.aug_slot_6       = i.aug_slot_6;
+								e.augment_1_id     = i.aug_slot_1;
+								e.augment_2_id     = i.aug_slot_2;
+								e.augment_3_id     = i.aug_slot_3;
+								e.augment_4_id     = i.aug_slot_4;
+								e.augment_5_id     = i.aug_slot_5;
+								e.augment_6_id     = i.aug_slot_6;
 								e.quantity         = i.quantity;
 								e.sent_date        = p->second.sent_date;
 								RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);

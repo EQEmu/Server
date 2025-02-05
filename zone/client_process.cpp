@@ -703,12 +703,6 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		if (r) {
 			r->MemberZoned(this);
 		}
-
-		/* QS: PlayerLogConnectDisconnect */
-		if (RuleB(QueryServ, PlayerLogConnectDisconnect)) {
-			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", GetZoneID(), GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Connect_State, CharacterID(), event_desc);
-		}
 	}
 
 	if (!bZoning) {

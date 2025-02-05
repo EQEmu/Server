@@ -1,37 +1,62 @@
 #ifndef QUERYSERV_ZONE_H
 #define QUERYSERV_ZONE_H
 
+#include "../common/net/servertalk_server.h"
+#include "../common/net/servertalk_client_connection.h"
+#include "../common/event/timer.h"
+#include "../common/rulesys.h"
+#include "../common/eqemu_logsys.h"
 
-/*
-	enum PlayerGenericLogEventTypes
-	These Enums are for the generic logging table that are not complex and require more advanced logic
-*/
+class QueryServ {
+public:
+	QueryServ();
+	~QueryServ();
+	void SendQuery(std::string Query);
+	void Connect();
+	inline void Disconnect() {
+		if (m_connection) {
+			m_connection->Handle()->Disconnect();
+			m_connection.reset();
+		}
+	}
+	bool SendPacket(ServerPacket *pack);
+	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 
-enum PlayerGenericLogEventTypes {
-	Player_Log_Quest = 1,
-	Player_Log_Zoning,
-	Player_Log_Deaths,
-	Player_Log_Connect_State,
-	Player_Log_Levels,
-	Player_Log_Keyring_Addition,
-	Player_Log_QGlobal_Update,
-	Player_Log_Task_Updates,
-	Player_Log_AA_Purchases,
-	Player_Log_Trade_Skill_Events,
-	Player_Log_Issued_Commands,
-	Player_Log_Money_Transactions,
-	Player_Log_Alternate_Currency_Transactions,
-	Player_Log_Guild_Tribute_Item_Donation,
-	Player_Log_Guild_Tribute_Plat_Donation
+	bool HasConnection() const
+	{
+		return m_connection && m_connection->Handle() && m_connection->Handle()->IsConnected();
+	}
+
+	inline void CheckForConnectState() {
+		if (RuleB(Logging, PlayerEventsQSProcess)) {
+			if (!m_connection) {
+				Connect();
+				LogInfo("Starting QueryServ connection");
+			}
+		} else {
+			if (HasConnection()) {
+				Disconnect();
+				LogInfo("Stopping QueryServ connection");
+			}
+		}
+	}
+
+private:
+	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
+	bool                                       m_is_qs_connected = false;
 };
 
-
-class QueryServ{
-	public:
-		QueryServ();
-		~QueryServ();
-		void SendQuery(std::string Query);
-		void PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
+class QueryServConnection {
+public:
+	QueryServConnection();
+	void AddConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection);
+	void RemoveConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection);
+	void HandleGenericMessage(uint16_t opcode, EQ::Net::Packet &p);
+	void HandleLFGuildUpdateMessage(uint16_t opcode, EQ::Net::Packet &p);
+	bool SendPacket(ServerPacket *pack);
+private:
+	std::map<std::string, std::shared_ptr<EQ::Net::ServertalkServerConnection>> m_streams;
+	std::unique_ptr<EQ::Timer>                                                  m_keepalive;
 };
 
 #endif /* QUERYSERV_ZONE_H */

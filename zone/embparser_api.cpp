@@ -2430,11 +2430,6 @@ void Perl__qs_send_query(std::string query)
 	QServ->SendQuery(std::move(query));
 }
 
-void Perl__qs_player_event(int char_id, std::string message)
-{
-	QServ->PlayerLogEvent(Player_Log_Quest, char_id, message);
-}
-
 void Perl__log(int category, const char* message)
 {
 	if (category < Logs::None || category >= Logs::MaxCategoryID)
@@ -6768,7 +6763,6 @@ void perl_register_quest()
 	package.add("popuptablerow", &Perl__popuptablerow);
 	package.add("processmobswhilezoneempty", &Perl__processmobswhilezoneempty);
 	package.add("pvp", &Perl__pvp);
-	package.add("qs_player_event", &Perl__qs_player_event);
 	package.add("qs_send_query", &Perl__qs_send_query);
 	package.add("rain", &Perl__rain);
 	package.add("rebind", (void(*)(int, float, float, float))&Perl__rebind);

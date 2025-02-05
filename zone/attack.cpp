@@ -2163,14 +2163,6 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 		GoToDeath();
 	}
 
-	/* QS: PlayerLogDeaths */
-	if (RuleB(QueryServ, PlayerLogDeaths)) {
-		const char * killer_name = "";
-		if (killer_mob && killer_mob->GetCleanName()) { killer_name = killer_mob->GetCleanName(); }
-		std::string event_desc = StringFormat("Died in zoneid:%i instid:%i by '%s', spellid:%i, damage:%i", GetZoneID(), GetInstanceID(), killer_name, spell, damage);
-		QServ->PlayerLogEvent(Player_Log_Deaths, CharacterID(), event_desc);
-	}
-
 	if (player_event_logs.IsEventEnabled(PlayerEvent::DEATH)) {
 		auto e = PlayerEvent::DeathEvent{
 			.killer_id = killer_mob ? static_cast<uint32>(killer_mob->GetID()) : static_cast<uint32>(0),
@@ -2723,37 +2715,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 					player_count++;
 				}
 			}
-
-			// QueryServ Logging - Raid Kills
-			if (RuleB(QueryServ, PlayerLogNPCKills)) {
-				auto pack = new ServerPacket(
-					ServerOP_QSPlayerLogNPCKills,
-					sizeof(QSPlayerLogNPCKill_Struct) +
-					(sizeof(QSPlayerLogNPCKillsPlayers_Struct) * player_count)
-				);
-
-				player_count = 0;
-
-				auto QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
-
-				QS->s1.NPCID  = GetNPCTypeID();
-				QS->s1.ZoneID = GetZoneID();
-				QS->s1.Type   = 2; // Raid Fight
-
-				for (const auto& m : killer_raid->members) {
-					if (m.is_bot) {
-						continue;
-					}
-
-					if (m.member && m.member->IsClient()) {
-						QS->Chars[player_count].char_id = m.member->CastToClient()->CharacterID();
-						player_count++;
-					}
-				}
-
-				worldserver.SendPacket(pack);
-				safe_delete(pack);
-			}
 		} else if (give_exp_client->IsGrouped() && killer_group) {
 			if (!is_ldon_treasure && MerchantType == 0) {
 					killer_group->SplitExp(ExpSource::Kill, final_exp, this);
@@ -2787,33 +2748,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 					player_count++;
 				}
 			}
-
-			// QueryServ Logging - Group Kills
-			if (RuleB(QueryServ, PlayerLogNPCKills)) {
-				auto pack = new ServerPacket(
-					ServerOP_QSPlayerLogNPCKills,
-					sizeof(QSPlayerLogNPCKill_Struct) +
-					(sizeof(QSPlayerLogNPCKillsPlayers_Struct) * player_count)
-				);
-
-				player_count = 0;
-
-				auto QS = (QSPlayerLogNPCKill_Struct*) pack->pBuffer;
-
-				QS->s1.NPCID  = GetNPCTypeID();
-				QS->s1.ZoneID = GetZoneID();
-				QS->s1.Type   = 1; // Group Fight
-
-				for (const auto& m : killer_group->members) {
-					if (m && m->IsClient()) {
-						QS->Chars[player_count].char_id = m->CastToClient()->CharacterID();
-						player_count++;
-					}
-				}
-
-				worldserver.SendPacket(pack);
-				safe_delete(pack);
-			}
 		} else {
 			if (!is_ldon_treasure && !MerchantType) {
 				const uint32 con_level = give_exp->GetLevelCon(GetLevel());
@@ -2844,28 +2778,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 					give_exp_client->GetDeity()
 				);
 			}
-
-			// QueryServ Logging - Solo
-			if (RuleB(QueryServ, PlayerLogNPCKills)) {
-				auto pack = new ServerPacket(
-					ServerOP_QSPlayerLogNPCKills,
-					sizeof(QSPlayerLogNPCKill_Struct) +
-					(sizeof(QSPlayerLogNPCKillsPlayers_Struct) * 1)
-				);
-
-				auto QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
-
-				QS->s1.NPCID         = GetNPCTypeID();
-				QS->s1.ZoneID        = GetZoneID();
-				QS->s1.Type          = 0; // Solo Fight
-				QS->Chars[0].char_id = give_exp_client->CharacterID();
-
-				player_count++;
-
-				worldserver.SendPacket(pack); // Send Packet to World
-				safe_delete(pack);
-			}
-			// End QueryServ Logging
 		}
 	}
 

@@ -1768,12 +1768,6 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 	}
 
 	InsertQuestGlobal(qgCharid, qgNpcid, qgZoneid, varname, newvalue, QGVarDuration(duration));
-
-	/* QS: PlayerLogQGlobalUpdate */
-	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator){
-		std::string event_desc = StringFormat("Update :: qglobal:%s to qvalue:%s zoneid:%i instid:%i", varname, newvalue, initiator->GetZoneID(), initiator->GetInstanceID());
-		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
-	}
 }
 
 /* Inserts global variable into quest_globals table */
@@ -1859,12 +1853,6 @@ void QuestManager::delglobal(const char *varname) {
 		qgCharid=initiator->CharacterID();
 	else
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
-
-	/* QS: PlayerLogQGlobalUpdate */
-	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator){
-		std::string event_desc = StringFormat("Deleted :: qglobal:%s zoneid:%i instid:%i", varname, initiator->GetZoneID(), initiator->GetInstanceID());
-		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
-	}
 
     std::string query = StringFormat("DELETE FROM quest_globals "
                                     "WHERE name = '%s' "

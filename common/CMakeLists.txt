@@ -282,8 +282,20 @@ SET(repositories
     repositories/base/base_pets_equipmentset_repository.h
     repositories/base/base_pets_equipmentset_entries_repository.h
     repositories/base/base_player_titlesets_repository.h
+    repositories/base/base_player_event_aa_purchase_repository.h
+    repositories/base/base_player_event_killed_npc_repository.h
+    repositories/base/base_player_event_killed_named_npc_repository.h
+    repositories/base/base_player_event_killed_raid_npc_repository.h
     repositories/base/base_player_event_log_settings_repository.h
     repositories/base/base_player_event_logs_repository.h
+    repositories/base/base_player_event_loot_items_repository.h
+    repositories/base/base_player_event_merchant_purchase_repository.h
+    repositories/base/base_player_event_merchant_sell_repository.h
+    repositories/base/base_player_event_npc_handin_repository.h
+    repositories/base/base_player_event_npc_handin_entries_repository.h
+    repositories/base/base_player_event_speech_repository.h
+    repositories/base/base_player_event_trade_repository.h
+    repositories/base/base_player_event_trade_entries_repository.h
     repositories/base/base_quest_globals_repository.h
     repositories/base/base_raid_details_repository.h
     repositories/base/base_raid_members_repository.h
@@ -467,8 +479,20 @@ SET(repositories
     repositories/pets_equipmentset_repository.h
     repositories/pets_equipmentset_entries_repository.h
     repositories/player_titlesets_repository.h
+    repositories/player_event_aa_purchase_repository.h
+    repositories/player_event_killed_npc_repository.h
+    repositories/player_event_killed_named_npc_repository.h
+    repositories/player_event_killed_raid_npc_repository.h
     repositories/player_event_log_settings_repository.h
     repositories/player_event_logs_repository.h
+    repositories/player_event_loot_items_repository.h
+    repositories/player_event_merchant_purchase_repository.h
+    repositories/player_event_merchant_sell_repository.h
+    repositories/player_event_npc_handin_repository.h
+    repositories/player_event_npc_handin_entries_repository.h
+    repositories/player_event_speech_repository.h
+    repositories/player_event_trade_repository.h
+    repositories/player_event_trade_entries_repository.h
     repositories/quest_globals_repository.h
     repositories/raid_details_repository.h
     repositories/raid_members_repository.h

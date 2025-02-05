@@ -31,15 +31,17 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/ground_spawns_repository.h"
 #include "../common/repositories/object_repository.h"
+#include "queryserv.h"
 
 
 const char DEFAULT_OBJECT_NAME[] = "IT63_ACTORDEF";
 const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";
 
 
-extern Zone* zone;
-extern EntityList entity_list;
+extern Zone       *zone;
+extern EntityList  entity_list;
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 // Loading object from database
 Object::Object(
@@ -660,8 +662,6 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			if (cursor_delete) {    // delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
 				sender->DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
 			}
-
-			sender->DropItemQS(m_inst, true);
 
 			if (!m_ground_spawn) {
 				safe_delete(m_inst);
