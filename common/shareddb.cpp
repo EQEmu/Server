@@ -312,31 +312,36 @@ SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 	return MailKeys{};
 }
 
-bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
+bool SharedDatabase::SaveCursor(
+	uint32 char_id,
+	std::list<EQ::ItemInstance*>::const_iterator& start,
+	std::list<EQ::ItemInstance*>::const_iterator& end
+)
 {
-	const int LIMBO_OFFSET = EQ::invbag::TRADE_BAGS_END + 1;
+	const int deleted = InventoryRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`character_id` = {} AND (`slot_id` = {} OR `slot_id` BETWEEN {} AND {})",
+			char_id,
+			EQ::invslot::slotCursor,
+			EQ::invbag::CURSOR_BAG_BEGIN,
+			EQ::invbag::CURSOR_BAG_END
+		)
+	);
 
-	// Delete cursor items
-	const std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
-	                                       "AND ((slotid >= %i AND slotid <= %i) "
-	                                       "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
-	                                       char_id, LIMBO_OFFSET, LIMBO_OFFSET + 999, EQ::invslot::slotCursor,
-	                                       EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
-	const auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
-        return false;
-    }
+	int16 i = EQ::invbag::CURSOR_BAG_BEGIN;
+	for (auto& it = start; it != end; ++it, i++) {
+		// shouldn't be anything in the queue that indexes this high
+		if (i > EQ::invbag::CURSOR_BAG_END) {
+			break;
+		}
 
-    int i = LIMBO_OFFSET;
-    for(auto& it = start; it != end; ++it, i++) {
-		if (i > LIMBO_OFFSET + 999) { break; } // shouldn't be anything in the queue that indexes this high
-		const EQ::ItemInstance *inst = *it;
-		const int16 use_slot = (i == LIMBO_OFFSET) ? EQ::invslot::slotCursor : i;
+		const EQ::ItemInstance* inst = *it;
+		const int16 use_slot = i == EQ::invbag::CURSOR_BAG_BEGIN ? EQ::invslot::slotCursor : i;
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
 		}
-    }
+	}
 
 	return true;
 }
