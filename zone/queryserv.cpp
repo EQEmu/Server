@@ -29,14 +29,16 @@ void QueryServ::Connect()
 {
 	m_connection = std::make_unique<EQ::Net::ServertalkClient>(Config->QSHost, Config->QSPort, false, "Zone", Config->SharedKey);
 	m_connection->OnMessage(std::bind(&QueryServ::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnConnect([this](EQ::Net::ServertalkClient *client) {
+		m_is_qs_connected = true;
+		LogInfo("Query Server connection established to [{}] [{}]", client->Handle()->RemoteIP(), client->Handle()->RemotePort());
+	});
 
-	m_is_qs_connected = true;
 	LogInfo(
 		"New Query Server connection to [{}:{}]",
 		Config->QSHost,
 		Config->QSPort
 	);
-
 }
 
 bool QueryServ::SendPacket(ServerPacket *pack)
