@@ -23,6 +23,9 @@ namespace EQ
 			bool Connected() const { return m_connecting != true; }
 
 			std::shared_ptr<EQ::Net::TCPConnection> Handle() { return m_connection; }
+
+			const std::unique_ptr<EQ::Timer> &GetTimer() const { return m_timer; }
+
 		private:
 			void Connect();
 			void ProcessData(EQ::Net::TCPConnection *c, const unsigned char *data, size_t length);

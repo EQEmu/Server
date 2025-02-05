@@ -483,7 +483,7 @@ int main(int argc, char **argv)
 	LogInfo("Loading quests");
 	parse->ReloadQuests();
 
-	QServ->Connect();
+	QServ->CheckForConnectState();
 
 	worldserver.Connect();
 	worldserver.SetScheduler(&event_scheduler);
@@ -633,9 +633,10 @@ int main(int argc, char **argv)
 				if (quest_timers.Check()) {
 					quest_manager.Process();
 				}
-
 			}
 		}
+
+		QServ->CheckForConnectState();
 
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();

@@ -4,6 +4,8 @@
 #include "../common/net/servertalk_server.h"
 #include "../common/net/servertalk_client_connection.h"
 #include "../common/event/timer.h"
+#include "../common/rulesys.h"
+#include "../common/eqemu_logsys.h"
 
 class QueryServ {
 public:
@@ -11,8 +13,33 @@ public:
 	~QueryServ();
 	void SendQuery(std::string Query);
 	void Connect();
+	inline void Disconnect() {
+		if (m_connection) {
+			m_connection->Handle()->Disconnect();
+			m_connection.reset();
+		}
+	}
 	bool SendPacket(ServerPacket *pack);
 	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
+
+	bool HasConnection() const
+	{
+		return m_connection && m_connection->Handle() && m_connection->Handle()->IsConnected();
+	}
+
+	inline void CheckForConnectState() {
+		if (RuleB(Logging, PlayerEventsQSProcess)) {
+			if (!m_connection) {
+				Connect();
+				LogInfo("Starting QueryServ connection");
+			}
+		} else {
+			if (HasConnection()) {
+				Disconnect();
+				LogInfo("Stopping QueryServ connection");
+			}
+		}
+	}
 
 private:
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
