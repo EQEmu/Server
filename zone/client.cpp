@@ -4705,6 +4705,10 @@ void Client::KeyRingList()
 }
 
 bool Client::IsPetNameChangeAllowed() {
+	if (RuleB(Pets, AlwaysAllowPetRename)) {
+		return true;
+	}
+
 	DataBucketKey k = GetScopedBucketKeys();
 	k.key = "PetNameChangesAllowed";
 
@@ -13277,7 +13281,7 @@ std::string Client::SendBotCommandHelpWindow(const BotCommandHelpParams& params)
 	const std::string& header_color = "indian_red";
 	const std::string& description_color = "light_grey";
 	const std::string& description_color_secondary = "dark_orange";
-	const std::string& example_color = "goldenrod";	
+	const std::string& example_color = "goldenrod";
 	const std::string& example_color_secondary = "slate_blue";
 	const std::string& option_color = "light_grey";
 	const std::string& option_color_secondary = "slate_blue";
@@ -13383,7 +13387,7 @@ std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::stri
 
 							break;
 					}
-					
+
 					if (y == x) {
 						msg_split.emplace_back(msg[i].substr(x, max_length));
 

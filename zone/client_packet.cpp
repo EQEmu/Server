@@ -821,7 +821,7 @@ void Client::CompleteConnect()
 			)
 		);
 
-		if (IsPetNameChangeAllowed()) {
+		if (IsPetNameChangeAllowed() && !RuleB(Pets, AlwaysAllowPetRename)) {
 			InvokeChangePetName(false);
 		}
 	}

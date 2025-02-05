@@ -287,6 +287,7 @@ RULE_BOOL(Pets, LivelikeBreakCharmOnInvis, true, "Default: true will break charm
 RULE_BOOL(Pets, ClientPetsUseOwnerNameInLastName, true, "Disable this to keep client pet's last names from being owner_name's pet")
 RULE_BOOL(Pets, CanTakeNoDrop, false, "Setting whether anyone can give no-drop items to pets")
 RULE_INT(Pets, PetTauntRange, 150, "Range at which a pet will taunt targets.")
+RULE_BOOL(Pets, AlwaysAllowPetRename, false, "Enable this option to allow /changepetname to work without enabling a pet name change via scripts.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(GM)
