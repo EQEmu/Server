@@ -56,8 +56,6 @@ void bot_command_camp(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint16 camp_count;
-
 	for (auto bot_iter : sbl) {
 		bot_iter->Camp();
 	}
