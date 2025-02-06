@@ -918,7 +918,7 @@ luabind::scope lua_register_packet_opcodes() {
 		luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote)),
 		luabind::value("Fling", static_cast<int>(OP_Fling)),
 		luabind::value("PickZoneWindow", static_cast<int>(OP_PickZoneWindow)),
-		luabind::value("TradeSkillRecipeItemInfo", static_cast<int>(OP_TradeSkillRecipeItemInfo))
+		luabind::value("TradeSkillRecipeInspect", static_cast<int>(OP_TradeSkillRecipeInspect))
 	)];
 }
 

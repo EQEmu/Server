@@ -4283,7 +4283,7 @@ struct NewCombine_Struct {
 /*04*/
 };
 
-struct TradeSkillRecipeItemInfo_Struct {
+struct TradeSkillRecipeInspect_Struct {
 	uint32 recipe_id;
 	uint32 padding[17]; // unknown
 };

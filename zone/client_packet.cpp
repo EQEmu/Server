@@ -409,7 +409,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_TradeRequestAck] = &Client::Handle_OP_TradeRequestAck;
 	ConnectedOpcodes[OP_TraderShop] = &Client::Handle_OP_TraderShop;
 	ConnectedOpcodes[OP_TradeSkillCombine] = &Client::Handle_OP_TradeSkillCombine;
-	ConnectedOpcodes[OP_TradeSkillRecipeItemInfo] = &Client::Handle_OP_TradeSkillRecipeItemInfo;
+	ConnectedOpcodes[OP_TradeSkillRecipeInspect] = &Client::Handle_OP_TradeSkillRecipeInspect;
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
 	ConnectedOpcodes[OP_TributeItem] = &Client::Handle_OP_TributeItem;
 	ConnectedOpcodes[OP_TributeMoney] = &Client::Handle_OP_TributeMoney;
@@ -15646,18 +15646,18 @@ void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_TradeSkillRecipeItemInfo(const EQApplicationPacket* app)
+void Client::Handle_OP_TradeSkillRecipeInspect(const EQApplicationPacket* app)
 {
-	if (app->size != sizeof(TradeSkillRecipeItemInfo_Struct)) {
+	if (app->size != sizeof(TradeSkillRecipeInspect_Struct)) {
 		LogError(
-			"Invalid size for TradeSkillRecipeItemInfo_Struct: Expected: [{}], Got: [{}]",
-			sizeof(TradeSkillRecipeItemInfo_Struct),
+			"Invalid size for TradeSkillRecipeInspect_Struct: Expected: [{}], Got: [{}]",
+			sizeof(TradeSkillRecipeInspect_Struct),
 			app->size
 		);
 		return;
 	}
 
-	auto s = (TradeSkillRecipeItemInfo_Struct*) app->pBuffer;
+	auto s = (TradeSkillRecipeInspect_Struct*) app->pBuffer;
 
 	const auto& v = TradeskillRecipeEntriesRepository::GetWhere(
 		database,
