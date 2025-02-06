@@ -321,7 +321,7 @@ bool SharedDatabase::SaveCursor(
 	const int deleted = InventoryRepository::DeleteWhere(
 		*this,
 		fmt::format(
-			"`char_id` = {} AND (`slot_id` = {} OR `slot_id` BETWEEN {} AND {})",
+			"`charid` = {} AND (`slotid` = {} OR `slotid` BETWEEN {} AND {})",
 			char_id,
 			EQ::invslot::slotCursor,
 			EQ::invbag::CURSOR_BAG_BEGIN,
