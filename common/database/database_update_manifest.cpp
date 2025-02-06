@@ -6480,7 +6480,8 @@ UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2261) + 10810) WHERE `slot_id` 
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2540; -- Shared Bank Bag 1
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id` BETWEEN 2541 AND 2550; -- Shared Bank Bag 2
 )",
-		.content_schema_update = false
+		.content_schema_update = false,
+		.force_interactive = true
 	},
 	ManifestEntry{
 		.version = 9299,
