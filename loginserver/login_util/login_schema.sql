@@ -33,10 +33,6 @@ CREATE TABLE `login_server_list_types` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-INSERT INTO `login_server_list_types` (`id`, `description`) VALUES ('1', 'Legends'),
-('2', 'Preferred'),
-('3', 'Standard');
-
 DROP TABLE IF EXISTS `login_world_servers`;
 CREATE TABLE `login_world_servers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
