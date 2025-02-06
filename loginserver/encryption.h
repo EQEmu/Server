@@ -2,6 +2,9 @@
 
 #include <string>
 #include "../common/types.h"
+#include "login_types.h"
+#include "../common/eqemu_logsys.h"
+#include "../common/strings.h"
 
 enum EncryptionMode {
 	EncryptionModeMD5            = 1,
@@ -26,11 +29,34 @@ namespace CryptoHash {
 	const int sha512_hash_length = 128;
 }
 
-/**
- * @param mode
- * @return
- */
 std::string GetEncryptionByModeId(uint32 mode);
 const char *eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char *buffer_out, bool enc);
 std::string eqcrypt_hash(const std::string &username, const std::string &password, int mode);
 bool eqcrypt_verify_hash(const std::string &username, const std::string &password, const std::string &pwhash, int mode);
+
+struct EncryptionResult {
+	std::string password;
+	int         mode = 0;
+	std::string mode_name;
+};
+
+static EncryptionResult EncryptPasswordFromContext(LoginAccountContext c, int mode = EncryptionModeSCrypt)
+{
+	if (mode == 0) {
+		LogError("Encryption mode not set!");
+		return {};
+	}
+
+	EncryptionResult r;
+	r.password  = eqcrypt_hash(
+		c.username,
+		c.password,
+		mode
+	);
+	r.mode      = mode;
+	r.mode_name = GetEncryptionByModeId(r.mode);
+
+	LogInfo("Encrypted password for user [{}] using mode [{}] ({})", c.username, r.mode_name, r.mode);
+
+	return r;
+}

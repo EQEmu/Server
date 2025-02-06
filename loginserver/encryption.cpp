@@ -21,10 +21,6 @@
 
 #endif
 
-/**
- * @param mode
- * @return
- */
 std::string GetEncryptionByModeId(uint32 mode)
 {
 	switch (mode) {
@@ -61,13 +57,6 @@ std::string GetEncryptionByModeId(uint32 mode)
 	}
 }
 
-/**
- * @param buffer_in
- * @param buffer_in_sz
- * @param buffer_out
- * @param enc
- * @return
- */
 const char *eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char *buffer_out, bool enc)
 {
 #ifdef EQEMU_USE_MBEDTLS
@@ -113,7 +102,7 @@ const char *eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char *buff
 		unsigned char iv[8];
 		memset(&key, 0, MBEDTLS_DES_KEY_SIZE);
 		memset(&iv, 0, 8);
-	
+
 		mbedtls_des_context context;
 		mbedtls_des_setkey_dec(&context, key);
 		mbedtls_des_crypt_cbc(&context, MBEDTLS_DES_DECRYPT, buffer_in_sz, iv, (const unsigned char*)buffer_in, (unsigned char*)buffer_out);
@@ -123,23 +112,19 @@ const char *eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char *buff
 #ifdef EQEMU_USE_OPENSSL
 	DES_key_schedule k;
 	DES_cblock v;
-	
+
 	memset(&k, 0, sizeof(DES_key_schedule));
 	memset(&v, 0, sizeof(DES_cblock));
-	
+
 	if (!enc && buffer_in_sz && buffer_in_sz % 8 != 0) {
 		return nullptr;
 	}
-	
+
 	DES_ncbc_encrypt((const unsigned char*)buffer_in, (unsigned char*)buffer_out, (long)buffer_in_sz, &k, &v, enc);
 #endif
 	return buffer_out;
 }
 
-/**
- * @param msg
- * @return
- */
 std::string eqcrypt_md5(const std::string &msg)
 {
 	std::string ret;
@@ -174,10 +159,6 @@ std::string eqcrypt_md5(const std::string &msg)
 	return ret;
 }
 
-/**
- * @param msg
- * @return
- */
 std::string eqcrypt_sha1(const std::string &msg)
 {
 	std::string ret;
@@ -212,10 +193,6 @@ std::string eqcrypt_sha1(const std::string &msg)
 	return ret;
 }
 
-/**
- * @param msg
- * @return
- */
 std::string eqcrypt_sha512(const std::string &msg)
 {
 	std::string ret;
@@ -252,10 +229,6 @@ std::string eqcrypt_sha512(const std::string &msg)
 
 #ifdef ENABLE_SECURITY
 
-/**
- * @param msg
- * @return
- */
 std::string eqcrypt_argon2(const std::string &msg)
 {
 	char        buffer[crypto_pwhash_STRBYTES] = {0};
@@ -275,10 +248,6 @@ std::string eqcrypt_argon2(const std::string &msg)
 	return ret;
 }
 
-/**
- * @param msg
- * @return
- */
 std::string eqcrypt_scrypt(const std::string &msg)
 {
 	char        buffer[crypto_pwhash_scryptsalsa208sha256_STRBYTES] = {0};
@@ -300,12 +269,6 @@ std::string eqcrypt_scrypt(const std::string &msg)
 
 #endif
 
-/**
- * @param username
- * @param password
- * @param mode
- * @return
- */
 std::string eqcrypt_hash(const std::string &username, const std::string &password, int mode)
 {
 	switch (mode) {
@@ -346,13 +309,6 @@ std::string eqcrypt_hash(const std::string &username, const std::string &passwor
 	}
 }
 
-/**
- * @param username
- * @param password
- * @param pwhash
- * @param mode
- * @return
- */
 bool eqcrypt_verify_hash(const std::string &username, const std::string &password, const std::string &pwhash, int mode)
 {
 	switch (mode) {
