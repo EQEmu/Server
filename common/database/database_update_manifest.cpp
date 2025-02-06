@@ -6423,7 +6423,7 @@ ADD PRIMARY KEY (`account_id`, `slot_id`);
 		.version = 9298,
 		.description = "2024_10_24_inventory_changes.sql",
 		.check = "SHOW COLUMNS FROM `inventory` LIKE 'character_id'",
-		.condition = "missing",
+		.condition = "empty",
 		.match = "",
 		.sql = R"(
 ALTER TABLE `inventory`
