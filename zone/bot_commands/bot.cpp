@@ -56,15 +56,12 @@ void bot_command_camp(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint16 camp_count;
-
 	for (auto bot_iter : sbl) {
 		bot_iter->Camp();
-		++camp_count;
 	}
 
-	if (camp_count) {
-		c->Message(Chat::White, "%i of your bots have been camped.", camp_count);
+	if (!sbl.empty()) {
+		c->Message(Chat::White, fmt::format("{} of your bots have been camped.", sbl.size()).c_str());
 	}
 }
 
