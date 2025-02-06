@@ -56,7 +56,7 @@ echo "# Running shared_memory"
 echo "# Running NPC hand-in tests"
 ./bin/zone tests:npc-handins | tee test_output.log
 
-if grep -q "Error" test_output.log; then
+if grep -E -q "QueryErr|Error" test_output.log; then
     echo "Error found in test output! Failing build."
     exit 1
 fi
