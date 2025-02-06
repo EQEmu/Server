@@ -11,7 +11,7 @@ public:
 		std::string where = fmt::format(
 			"short_name = '{}' AND long_name = '{}'",
 			Strings::Escape(c.short_name),
-			Strings::Escape(c.short_name)
+			Strings::Escape(c.long_name)
 		);
 
 		if (c.admin_id > 0) {

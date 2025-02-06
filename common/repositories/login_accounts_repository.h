@@ -68,6 +68,8 @@ public:
 			where += fmt::format(" AND id = {}", c.login_account_id);
 		}
 
+		where += " LIMIT 1";
+
 		auto results = LoginAccountsRepository::GetWhere(db, where);
 
 		auto e = LoginAccountsRepository::NewEntity();
