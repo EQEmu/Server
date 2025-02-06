@@ -1218,7 +1218,7 @@ private:
 	std::vector<Mob*> _group_spell_target_list;
 	Raid* _storedRaid;
 	bool _verifiedRaid;
-	uint16 _tempSpellType;
+	uint16 _tempSpellType; // this is used to check the spell type being cast against ^spellannouncecasts status
 
 	// Private "base stats" Members
 	int32 _baseMR;

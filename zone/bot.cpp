@@ -106,6 +106,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 
 	LoadDefaultBotSettings();
 	SetCastedSpellType(UINT16_MAX);
+	SetTempSpellType(UINT16_MAX);
 	SetCommandedSpell(false);
 	SetPullingSpell(false);
 
@@ -189,6 +190,7 @@ Bot::Bot(
 	SetSpawnStatus(false);
 	SetBotCharmer(false);
 	SetCastedSpellType(UINT16_MAX);
+	SetTempSpellType(UINT16_MAX);
 	SetCommandedSpell(false);
 	SetPullingSpell(false);
 
@@ -3669,10 +3671,6 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			}
 		}
 
-		if (IsBotRanged()) {
-			ChangeBotRangedWeapons(true);
-		}
-
 		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
 			// Safety Check to confirm we have a valid raid
 			auto owner = GetBotOwner();
@@ -3704,6 +3702,10 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		if (RuleB(Bots, RunSpellTypeChecksOnSpawn)) {
 			OwnerMessage("Running SpellType checks. There may be some spells that are mislabeled as incorrect. Use this as a loose guideline.");
 			CheckBotSpells(); //This runs through a serious of checks and outputs any spells that are set to the wrong spell type in the database
+		}
+
+		if (IsBotRanged()) {
+			ChangeBotRangedWeapons(true);
 		}
 
 		return true;
