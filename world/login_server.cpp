@@ -651,7 +651,7 @@ void LoginServer::SendInfo()
 void LoginServer::SendStatus()
 {
 	if (m_client == nullptr && m_legacy_client == nullptr) {
-		LogDebug("No client to send status to loginserver");
+		LogDebugDetail("No client to send status to loginserver");
 		return;
 	}
 
