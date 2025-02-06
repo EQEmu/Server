@@ -54,7 +54,12 @@ echo "# Running shared_memory"
 ./bin/shared_memory
 
 echo "# Running NPC hand-in tests"
-./bin/zone tests:npc-handins || { echo "NPC hand-in tests failed!"; exit 1; }
+./bin/zone tests:npc-handins | tee test_output.log
+
+if grep -q "Error" test_output.log; then
+    echo "Error found in test output! Failing build."
+    exit 1
+fi
 
 # shellcheck disable=SC2164
 cd /drone/src/
