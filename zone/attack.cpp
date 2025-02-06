@@ -1748,8 +1748,6 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
 	///////////////////////////////////////////////////////////
-	LogDebug("SPA185 Total At time of attack: [{}], skill: [{}]", GetMeleeDamageMod_SE(my_hit.skill), my_hit.skill);
-
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 
 	if (CastToClient()->IsDead() || (IsBot() && GetAppearance() == eaDead)) {

@@ -2807,13 +2807,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_DamageModifier:
 			{
 				// Bad data or unsupported new skill
-				if (limit_value > EQ::skills::HIGHEST_SKILL)
+				if (limit_value > EQ::skills::HIGHEST_SKILL) {
 					break;
+				}
+
 				int skill = limit_value == ALL_SKILLS ? EQ::skills::HIGHEST_SKILL + 1 : limit_value;
-				if (effect_value < 0 && new_bonus->DamageModifier[skill] > effect_value)
-					new_bonus->DamageModifier[skill] = effect_value;
-				else if (effect_value > 0 && new_bonus->DamageModifier[skill] < effect_value)
-					new_bonus->DamageModifier[skill] = effect_value;
+
+				new_bonus->DamageModifier[skill] = std::min(effect_value + new_bonus->DamageModifier[skill], RuleI(Custom, SE_DamageModifierMaxCumulativeValue));
+
 				break;
 			}
 
