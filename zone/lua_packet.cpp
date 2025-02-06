@@ -917,7 +917,8 @@ luabind::scope lua_register_packet_opcodes() {
 		luabind::value("ClientTimeStamp", static_cast<int>(OP_ClientTimeStamp)),
 		luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote)),
 		luabind::value("Fling", static_cast<int>(OP_Fling)),
-		luabind::value("PickZoneWindow", static_cast<int>(OP_PickZoneWindow))
+		luabind::value("PickZoneWindow", static_cast<int>(OP_PickZoneWindow)),
+		luabind::value("TradeSkillRecipeInspect", static_cast<int>(OP_TradeSkillRecipeInspect))
 	)];
 }
 

@@ -3935,6 +3935,11 @@ struct NewCombine_Struct
 /*24*/
 };
 
+struct TradeSkillRecipeInspect_Struct {
+	uint32 recipe_id;
+	uint32 padding[17];
+};
+
 
 //client requesting favorite recipies
 struct TradeskillFavorites_Struct {
@@ -4736,7 +4741,7 @@ struct ItemSerializationHeader
     /*036*/ uint32 merchant_slot;  // 1 if not a merchant item
     /*040*/ uint32 scaled_value;   // 0
     /*044*/ uint32 instance_id;    // unique instance id if not merchant item, else is merchant slot
-    /*048*/ uint32 parcel_item_id; 
+    /*048*/ uint32 parcel_item_id;
     /*052*/ uint32 last_cast_time; // Unix Time from PP of last cast for this recast type if recast delay > 0
     /*056*/ uint32 charges;        // Total Charges an item has (-1 for unlimited)
     /*060*/ uint32 inst_nodrop;    // 1 if the item is no drop (attuned items)

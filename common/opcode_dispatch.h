@@ -197,6 +197,7 @@ IN(OP_RecipeDetails, uint32);
 //there is also a complicated OP_RecipeDetails reply struct OUT
 IN(OP_RecipeAutoCombine, RecipeAutoCombine_Struct);
 IN(OP_TradeSkillCombine, NewCombine_Struct);
+IN(OP_TradeSkillRecipeInspect, TradeSkillRecipeInspect_Struct);
 IN(OP_ItemName, ItemNamePacket_Struct);
 IN(OP_AugmentItem, AugmentItem_Struct);
 IN(OP_ClickDoor, ClickDoor_Struct);
