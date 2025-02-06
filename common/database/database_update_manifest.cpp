@@ -6394,7 +6394,7 @@ ALTER TABLE `trader`
 	ManifestEntry{
 		.version = 9297,
 		.description = "2024_01_22_sharedbank_guid_primary_key.sql",
-		.check = "SHOW COLUMN FROM `sharedbank` LIKE 'guid'",
+		.check = "SHOW COLUMNS FROM `sharedbank` LIKE 'guid'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -6423,7 +6423,7 @@ ADD PRIMARY KEY (`account_id`, `slot_id`);
 		.version = 9298,
 		.description = "2024_10_24_inventory_changes.sql",
 		.check = "SHOW COLUMNS FROM `inventory` LIKE 'character_id'",
-		.condition = "missing",
+		.condition = "empty",
 		.match = "",
 		.sql = R"(
 ALTER TABLE `inventory`
@@ -6480,7 +6480,8 @@ UPDATE `inventory` SET `slot_id` = ((`slot_id` - 2261) + 10810) WHERE `slot_id` 
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id` BETWEEN 2531 AND 2540; -- Shared Bank Bag 1
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id` BETWEEN 2541 AND 2550; -- Shared Bank Bag 2
 )",
-		.content_schema_update = false
+		.content_schema_update = false,
+		.force_interactive = true
 	},
 	ManifestEntry{
 		.version = 9299,

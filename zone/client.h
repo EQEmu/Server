@@ -1828,6 +1828,8 @@ public:
 
 	uint32 trapid; //ID of trap player has triggered. This is cleared when the player leaves the trap's radius, or it despawns.
 
+	void SendMerchantEnd();
+
 	Raid *p_raid_instance;
 
 	inline uint32 GetPotionBeltItemIcon(uint8 slot_id)

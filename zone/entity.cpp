@@ -5950,3 +5950,53 @@ std::vector<NPC*> EntityList::GetExcludedNPCsByIDs(std::vector<uint32> npc_ids)
 
 	return v;
 }
+
+void EntityList::SendMerchantEnd(Mob* merchant)
+{
+	for (const auto& e : client_list) {
+		Client* c = e.second;
+
+		if (!c) {
+			continue;
+		}
+
+		if (c->GetMerchantSessionEntityID() == merchant->GetID()) {
+			c->SendMerchantEnd();
+		}
+	}
+}
+
+void EntityList::SendMerchantInventory(Mob* m, int32 slot_id, bool is_delete)
+{
+	if (!m || !m->IsNPC()) {
+		return;
+	}
+
+	for (const auto& e : client_list) {
+		Client* c = e.second;
+
+		if (!c) {
+			continue;
+		}
+
+		if (c->GetMerchantSessionEntityID() == m->GetID()) {
+			if (!is_delete) {
+				c->BulkSendMerchantInventory(m->CastToNPC()->MerchantType, m->GetNPCTypeID());
+			} else {
+				auto app = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
+				auto d   = (Merchant_DelItem_Struct*)app->pBuffer;
+
+				d->itemslot   = slot_id;
+				d->npcid      = m->GetID();
+				d->playerid   = c->GetID();
+
+				app->priority = 6;
+
+				c->QueuePacket(app);
+				safe_delete(app);
+			}
+		}
+	}
+
+	return;
+}
