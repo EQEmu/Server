@@ -1254,6 +1254,30 @@ int lua_get_zone_instance_version() {
 	return zone->GetInstanceVersion();
 }
 
+bool lua_is_static_instance() {
+	if(!zone) {
+		return false;
+	}
+
+	return zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion);
+}
+
+bool lua_is_farming_instance() {
+	if(!zone) {
+		return false;
+	}
+
+	return zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion);
+}
+
+bool lua_is_event_instance() {
+	if(!zone) {
+		return false;
+	}
+
+	return zone->GetInstanceVersion() == RuleI(Custom, EventInstanceVersion);
+}
+
 luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instance_id) {
 	luabind::adl::object ret = luabind::newtable(L);
 
@@ -6063,6 +6087,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_zone_short_name_by_id", &lua_get_zone_short_name_by_id),
 		luabind::def("get_zone_instance_id", &lua_get_zone_instance_id),
 		luabind::def("get_zone_instance_version", &lua_get_zone_instance_version),
+		luabind::def("is_static_instance", &lua_is_static_instance),
+		luabind::def("is_farming_instance", &lua_is_farming_instance),
+		luabind::def("is_event_instance", &lua_is_event_instance),
 		luabind::def("get_zone_weather", &lua_get_zone_weather),
 		luabind::def("get_zone_time", &lua_get_zone_time),
 		luabind::def("add_area", &lua_add_area),

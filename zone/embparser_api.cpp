@@ -1551,6 +1551,11 @@ int Perl__GetInstanceID(const char* zone_name, uint16 version)
 	return quest_manager.GetInstanceID(zone_name, version);
 }
 
+bool Perl__IsStaticInstance()
+{
+	return zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion);
+}
+
 uint8 Perl__GetInstanceVersionByID(uint16 instance_id)
 {
 	return database.GetInstanceVersion(instance_id);
@@ -6048,6 +6053,7 @@ void perl_register_quest()
 	package.add("GetBotRaceByID", &Perl__GetBotRaceByID);
 	package.add("GetCharactersInInstance", &Perl__GetCharactersInInstance);
 	package.add("GetInstanceID", &Perl__GetInstanceID);
+	package.add("IsStaticInstance", &Perl__IsStaticInstance);
 	package.add("GetInstanceIDByCharID", &Perl__GetInstanceIDByCharID);
 	package.add("GetInstanceIDs", &Perl__GetInstanceIDs);
 	package.add("GetInstanceIDsByCharID", &Perl__GetInstanceIDsByCharID);
