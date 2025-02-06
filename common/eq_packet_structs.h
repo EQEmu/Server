@@ -4389,6 +4389,10 @@ struct NewCombine_Struct {
 /*04*/
 };
 
+struct TradeSkillRecipeItemInfo_Struct {
+	uint32 recipe_id;
+	uint32 padding[17]; // unknown
+};
 
 //client requesting favorite recipies
 struct TradeskillFavorites_Struct {

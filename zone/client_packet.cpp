@@ -69,6 +69,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/account_ip_repository.h"
 #include "../common/repositories/account_kill_counts_repository.h"
 #include "../common/repositories/character_pet_name_repository.h"
+#include "../common/repositories/tradeskill_recipe_entries_repository.h"
 
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_stats_record_repository.h"
@@ -411,6 +412,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_TradeRequestAck] = &Client::Handle_OP_TradeRequestAck;
 	ConnectedOpcodes[OP_TraderShop] = &Client::Handle_OP_TraderShop;
 	ConnectedOpcodes[OP_TradeSkillCombine] = &Client::Handle_OP_TradeSkillCombine;
+	ConnectedOpcodes[OP_TradeSkillRecipeItemInfo] = &Client::Handle_OP_TradeSkillRecipeItemInfo;
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
 	ConnectedOpcodes[OP_TributeItem] = &Client::Handle_OP_TributeItem;
 	ConnectedOpcodes[OP_TributeMoney] = &Client::Handle_OP_TributeMoney;
@@ -16367,6 +16369,40 @@ void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket *app)
 	NewCombine_Struct* in_combine = (NewCombine_Struct*)app->pBuffer;
 	Object::HandleCombine(this, in_combine, m_tradeskill_object);
 	return;
+}
+
+void Client::Handle_OP_TradeSkillRecipeItemInfo(const EQApplicationPacket* app)
+{
+	if (app->size != sizeof(TradeSkillRecipeItemInfo_Struct)) {
+		LogError(
+			"Invalid size for TradeSkillRecipeItemInfo_Struct: Expected: [{}], Got: [{}]",
+			sizeof(TradeSkillRecipeItemInfo_Struct),
+			app->size
+		);
+		return;
+	}
+
+	auto s = (TradeSkillRecipeItemInfo_Struct*) app->pBuffer;
+
+	const auto& v = TradeskillRecipeEntriesRepository::GetWhere(
+		database,
+		fmt::format(
+			"`recipe_id` = {} AND `componentcount` = 0 AND `successcount` > 0 LIMIT 1",
+			s->recipe_id
+		)
+	);
+
+	if (v.empty()) {
+		return;
+	}
+
+	const uint32 item_id = v.front().item_id;
+
+	auto inst = database.CreateItem(item_id);
+	if (inst) {
+		SendItemPacket(0, inst, ItemPacketViewLink);
+		safe_delete(inst);
+	}
 }
 
 void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
