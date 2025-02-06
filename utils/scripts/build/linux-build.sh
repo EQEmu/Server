@@ -43,6 +43,10 @@ mkdir logs
 ln -s ./quests/lua_modules ./lua_modules
 ln -s ./quests/plugins ./plugins
 
+while [ ! -f /tmp/import-done ]; do
+    sleep 1  # Wait for 1 second before checking again
+done
+
 echo "# Running world database updates"
 FORCE_INTERACTIVE=1 ./bin/world database:updates --skip-backup --force
 

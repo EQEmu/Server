@@ -88,3 +88,5 @@ rm -rf /tmp/db/
 rm -rf ${COMBINED_DIR}
 
 echo "Database import complete!"
+
+touch /tmp/import-done
