@@ -9,7 +9,7 @@ class LoginServerAdminsRepository : public BaseLoginServerAdminsRepository {
 public:
 	static LoginServerAdmins GetByName(Database &db, std::string account_name)
 	{
-		auto admins = LoginServerAdminsRepository::GetWhere(
+		auto admins = GetWhere(
 			db,
 			fmt::format(
 				"account_name = '{}' LIMIT 1",
