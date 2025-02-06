@@ -435,7 +435,7 @@ void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 		w.long_name                 = m_server_long_name;
 		w.short_name                = m_server_short_name;
 		w.last_ip_address           = m_remote_ip_address;
-		w.login_server_list_type_id = 3;
+		w.login_server_list_type_id = LS::ServerType::Standard;
 		w.last_login_date           = std::time(nullptr);
 		auto created = LoginWorldServersRepository::InsertOne(database, w);
 		if (!created.id) {
