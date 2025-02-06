@@ -329,17 +329,21 @@ bool SharedDatabase::SaveCursor(
 		)
 	);
 
-	int16 i = EQ::invbag::CURSOR_BAG_BEGIN;
+	int16 i = EQ::invslot::slotCursor;
 	for (auto& it = start; it != end; ++it, i++) {
 		// shouldn't be anything in the queue that indexes this high
 		if (i > EQ::invbag::CURSOR_BAG_END) {
 			break;
 		}
 
-		const EQ::ItemInstance* inst = *it;
-		const int16 use_slot = i == EQ::invbag::CURSOR_BAG_BEGIN ? EQ::invslot::slotCursor : i;
+		const EQ::ItemInstance* inst   = *it;
+		const int16           use_slot = i == EQ::invslot::slotCursor ? EQ::invslot::slotCursor : i;
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
+		}
+
+		if (i == EQ::invslot::slotCursor) {
+			i = EQ::invbag::CURSOR_BAG_BEGIN;
 		}
 	}
 
