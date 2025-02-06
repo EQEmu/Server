@@ -54,7 +54,7 @@ echo "# Running shared_memory"
 ./bin/shared_memory
 
 echo "# Running NPC hand-in tests"
-./bin/zone tests:npc-handins
+./bin/zone tests:npc-handins || { echo "NPC hand-in tests failed!"; exit 1; }
 
 # shellcheck disable=SC2164
 cd /drone/src/
