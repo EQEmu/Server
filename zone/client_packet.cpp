@@ -15650,7 +15650,7 @@ void Client::Handle_OP_TradeSkillRecipeInspect(const EQApplicationPacket* app)
 {
 	if (app->size != sizeof(TradeSkillRecipeInspect_Struct)) {
 		LogError(
-			"Invalid size for TradeSkillRecipeInspect_Struct: Expected: [{}], Got: [{}]",
+			"Invalid size for TradeSkillRecipeInspect_Struct: Expected: [{}] Got: [{}]",
 			sizeof(TradeSkillRecipeInspect_Struct),
 			app->size
 		);
