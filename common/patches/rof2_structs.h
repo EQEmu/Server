@@ -3935,8 +3935,9 @@ struct NewCombine_Struct
 /*24*/
 };
 
-struct TradeSkillRecipeItemInfo_Struct {
+struct TradeSkillRecipeInspect_Struct {
 	uint32 recipe_id;
+	uint32 padding[17];
 };
 
 
