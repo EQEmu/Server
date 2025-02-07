@@ -3200,30 +3200,14 @@ uint32 Zone::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)
 
 void Zone::ApplyGlobalBuffs()
 {
-	time_t cur_time = Timer::GetTimeSeconds();
-
-	auto all_global_buffs = database.GetGlobalBuffs();
-	std::vector<Mob*> mobs_to_buff;
-
-	for (auto& e : entity_list.GetClientList()) {
-		if (e.second && e.second->IsClient())
-		{
-			auto pets_owned = e.second->GetAllPets();
-			for (auto& client_pet : pets_owned)
-			{
-				mobs_to_buff.push_back(client_pet);
-			}
-
-			mobs_to_buff.push_back(e.second);
-		}
-	}
-
-	for (auto& buff: all_global_buffs)
-	{
-		for (auto& mob : mobs_to_buff)
-		{
-			mob->ApplyGlobalBuff(buff.second.spell_id, buff.second.duration, cur_time);
-		}
+	for (auto &e: entity_list.GetClientList()) {
+		int timer = (int) Mob::RandomTimer(1000, 60000);
+		e.second->GetGlobalBuffTimer()->Start(timer);
+		e.second->Message(
+			Chat::Yellow,
+			"Your senses are tingling. (Global buffs being applied to you in %s)",
+			Strings::ToLower(Strings::SecondsToTime(timer, true)).c_str()
+		);
 	}
 }
 

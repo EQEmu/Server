@@ -1550,6 +1550,8 @@ public:
 	void ClearDataBucketCache();
 	bool IsGuildmaster() const;
 
+	Timer* GetGlobalBuffTimer() { return &m_global_buff_timer; }
+
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
@@ -1968,6 +1970,8 @@ protected:
 	MobMovementManager *mMovementManager;
 
 	bool m_invisibility_state = 0;
+
+	Timer m_global_buff_timer;
 
 private:
 	Mob* target;
