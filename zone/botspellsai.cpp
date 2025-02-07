@@ -1305,7 +1305,7 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* caster, Mob* tar, uint16 spell_ty
 
 		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsGroupHealOverTimeSpell(bot_spell_list_itr->SpellId)) {
+			if (IsRegularGroupHealSpell(bot_spell_list_itr->SpellId)) {
 				uint16 spell_id = bot_spell_list_itr->SpellId;
 
 				if (!caster->IsCommandedSpell() && caster->IsValidSpellRange(spell_id, tar)) {
@@ -1379,7 +1379,7 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* caster, Mob* tar, uint16 
 
 		for (std::list<BotSpell>::iterator bot_spell_list_itr = bot_spell_list.begin(); bot_spell_list_itr != bot_spell_list.end(); ++bot_spell_list_itr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsGroupHealOverTimeSpell(bot_spell_list_itr->SpellId)) {
+			if (IsGroupCompleteHealSpell(bot_spell_list_itr->SpellId)) {
 				uint16 spell_id = bot_spell_list_itr->SpellId;
 
 				if (!caster->IsCommandedSpell() && caster->IsValidSpellRange(spell_id, tar)) {
