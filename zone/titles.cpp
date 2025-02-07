@@ -37,13 +37,13 @@ EQApplicationPacket* TitleManager::MakeTitlesPacket(Client* c)
 {
 	const auto& eligible_titles = GetEligibleTitles(c);
 
-	uint32 length = 4;
+	uint32 total_length = 4;
 
 	for (const auto& e : eligible_titles) {
-		length += e.prefix.length() + e.suffix.length() + 6;
+		total_length += e.prefix.length() + e.suffix.length() + 6;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_SendTitleList, length);
+	auto outapp = new EQApplicationPacket(OP_SendTitleList, total_length);
 	char* buffer = (char*) outapp->pBuffer;
 
 	VARSTRUCT_ENCODE_TYPE(uint32, buffer, eligible_titles.size());
@@ -108,7 +108,7 @@ bool TitleManager::HasTitle(Client* c, uint32 title_id)
 	);
 }
 
-const std::vector<TitlesRepository::Titles>& TitleManager::GetEligibleTitles(Client* c)
+std::vector<TitlesRepository::Titles> TitleManager::GetEligibleTitles(Client* c)
 {
 	std::vector<TitlesRepository::Titles> eligible_titles = {};
 	if (!c) {
@@ -182,12 +182,8 @@ const std::vector<TitlesRepository::Titles>& TitleManager::GetEligibleTitles(Cli
 			continue;
 		}
 
-		LogError("Emplacing | t.id [{}] t.prefix [{}] t.suffix [{}]", t.id, t.prefix, t.suffix);
-
 		eligible_titles.emplace_back(t);
 	}
-
-	LogError("eligible_titles size [{}]", eligible_titles.size());
 
 	return eligible_titles;
 }

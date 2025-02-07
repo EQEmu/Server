@@ -17,7 +17,7 @@ public:
 	EQApplicationPacket* MakeTitlesPacket(Client* c);
 	std::string GetPrefix(int title_set);
 	std::string GetSuffix(int title_set);
-	const std::vector<TitlesRepository::Titles>& GetEligibleTitles(Client* c);
+	std::vector<TitlesRepository::Titles> GetEligibleTitles(Client* c);
 	bool IsNewAATitleAvailable(int aa_points, int class_id);
 	bool IsNewTradeSkillTitleAvailable(int t, int skill_value);
 	void CreateNewPlayerTitle(Client* c, std::string title);
