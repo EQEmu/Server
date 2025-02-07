@@ -3632,8 +3632,12 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 
 	if (rev_ds < 0) {
 		LogCombat("Applying Reverse Damage Shield of value [{}] to [{}]", rev_ds, attacker->GetName());
-		attacker->Damage(this, -rev_ds, rev_ds_spell_id, EQ::skills::SkillAbjuration/*hackish*/, false); //"this" (us) will get the hate, etc. not sure how this works on Live, but it'll works for now, and tanks will love us for this
-																											//do we need to send a damage packet here also?
+
+		// attacker->Damage(this, -rev_ds, rev_ds_spell_id, EQ::skills::SkillAbjuration/*hackish*/, false); //"this" (us) will get the hate, etc. not sure how this works on Live, but it'll works for now, and tanks will love us for this
+		// 																									//do we need to send a damage packet here also?
+
+		attacker->HealDamage(rev_ds, this, rev_ds_spell_id);
+		attacker->Message(Chat::DamageShield, "You feel rejuvenated by the Mark.");
 	}
 }
 
