@@ -596,6 +596,7 @@ public:
 	);
 	Handin ReturnHandinItems(Client *c);
 	void ResetHandin();
+	void ResetMultiQuest();
 	bool HasProcessedHandinReturn() { return m_has_processed_handin_return; }
 	bool HandinStarted() { return m_handin_started; }
 
@@ -749,6 +750,8 @@ protected:
 	// items can be decremented from this as each successful
 	// check is ran in scripts, the remainder is what is returned
 	Handin m_hand_in = {};
+public:
+	const Handin GetHandin() { return m_hand_in; }
 
 private:
 	uint32              m_loottable_id;

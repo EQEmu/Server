@@ -4431,6 +4431,17 @@ bool NPC::CheckHandin(
 	// remove items from the hand-in bucket that were used to fulfill the requirement
 	std::vector<HandinEntry> items_to_remove;
 
+	// multi-quest
+	if (IsMultiQuestEnabled()) {
+		for (auto &h_item: h.items) {
+			for (const auto &r_item: r.items) {
+				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
+					h_item.is_multiquest_item = true;
+				}
+			}
+		}
+	}
+
 	// check if the hand-in items fulfill the requirement
 	bool items_met = true;
 	if (!handin_items.empty() && !r.items.empty()) {
@@ -4448,7 +4459,10 @@ bool NPC::CheckHandin(
 
 				if (id_match) {
 					uint32 used_count = std::min(remaining_requirement, h_item.count);
-					h_item.count -= used_count;
+					// If the item is a multi-quest item, we don't want to consume it for the hand-in bucket
+					if (!IsMultiQuestEnabled()) {
+						h_item.count -= used_count;
+					}
 					remaining_requirement -= used_count;
 
 					LogNpcHandinDetail(
@@ -4498,17 +4512,6 @@ bool NPC::CheckHandin(
 	}
 
 	requirement_met = money_met && items_met;
-
-	// multi-quest
-	if (IsMultiQuestEnabled()) {
-		for (auto &h_item: h.items) {
-			for (const auto &r_item: r.items) {
-				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
-					h_item.is_multiquest_item = true;
-				}
-			}
-		}
-	}
 
 	// in-case we trigger CheckHand-in multiple times, only set these once
 	if (!m_handin_started) {
@@ -4690,6 +4693,11 @@ bool NPC::CheckHandin(
 		}
 	}
 
+	// when we meet requirements under multi-quest, we want to reset the hand-in bucket
+	if (requirement_met && IsMultiQuestEnabled()) {
+		ResetMultiQuest();
+	}
+
 	return requirement_met;
 }
 
@@ -4817,6 +4825,12 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 		return_money.silver   = m_hand_in.money.silver;
 		return_money.gold     = m_hand_in.money.gold;
 		return_money.platinum = m_hand_in.money.platinum;
+
+		// if multi-quest and we returned money, reset the hand-in bucket
+		if (IsMultiQuestEnabled()) {
+			m_hand_in.money = {};
+			m_hand_in.original_money = {};
+		}
 	}
 
 	if (money_returned_via_external_quest_methods) {
@@ -4872,6 +4886,7 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 
 void NPC::ResetHandin()
 {
+	LogNpcHandin("Resetting hand-in bucket for [{}]", GetCleanName());
 	m_has_processed_handin_return = false;
 	m_handin_started              = false;
 	if (!IsMultiQuestEnabled()) {
@@ -4881,4 +4896,13 @@ void NPC::ResetHandin()
 
 		m_hand_in = {};
 	}
+}
+
+void NPC::ResetMultiQuest() {
+	LogNpcHandin("Resetting multi-quest hand-in bucket for [{}]", GetCleanName());
+	for (auto &i: m_hand_in.original_items) {
+		safe_delete(i.item);
+	}
+
+	m_hand_in = {};
 }
