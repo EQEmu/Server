@@ -7684,15 +7684,15 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 }
 
 uint8 Bot::GetNumberNeedingHealedInGroup(Mob* tar, uint16 spell_type, uint16 spell_id, float range) {
-	if (!tar->IsBot()) {
+	if (!tar) {
 		return 0;
 	}
 
 	uint8 count = 0;
-	auto target_list = tar->IsClient() ? tar->CastToBot()->GatherSpellTargets() : tar->CastToBot()->GetSpellTargetList();
+	auto target_list = tar->IsClient() ? GatherSpellTargets(false, tar) : tar->CastToBot()->GetSpellTargetList();
 
 	for (Mob* m : target_list) {
-		if (tar->CalculateDistance(m) < range && CastChecks(spell_id, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
+		if (m && tar->CalculateDistance(m) < range && CastChecks(spell_id, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
 			++count;
 		}
 	}
@@ -11146,11 +11146,14 @@ bool Bot::GetUltimateSpellTypeHold(uint16 spell_type, Mob* tar) {
 		return GetSpellTypeHold(spell_type);
 	}
 
-	if (tar->IsPet() && tar->GetOwner() && tar->IsPetOwnerBot()) {
-		return tar->GetOwner()->CastToBot()->GetSpellTypeHold(GetPetBotSpellType(spell_type));
-	}
+	Mob* owner = tar->IsPet() ? tar->GetOwner() : nullptr;
+	Bot* bot_owner = (owner && owner->IsBot())
+		? owner->CastToBot()
+		: nullptr;
 
-	return GetSpellTypeHold(spell_type);
+	return bot_owner
+		? bot_owner->GetSpellTypeHold(GetPetBotSpellType(spell_type))
+		: GetSpellTypeHold(spell_type);
 }
 
 void Bot::SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 priority) {
