@@ -13489,10 +13489,11 @@ void Client::Handle_OP_RequestDuel(const EQApplicationPacket *app)
 void Client::Handle_OP_RequestTitles(const EQApplicationPacket *app)
 {
 
-	EQApplicationPacket *outapp = title_manager.MakeTitlesPacket(this);
+	auto outapp = title_manager.MakeTitlesPacket(this);
 
-	if (outapp != nullptr)
+	if (outapp) {
 		FastQueuePacket(&outapp);
+	}
 }
 
 void Client::Handle_OP_RespawnWindow(const EQApplicationPacket *app)
