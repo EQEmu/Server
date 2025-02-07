@@ -5078,7 +5078,7 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 		acthealed = amount;
 	}
 
-	if (true || acthealed >= (GetMaxHP() / 100.0f)) {
+	if (acthealed) {
 		if (caster && IsValidSpell(spell_id)) {
 			eqFilterType filter = caster->IsClient() ? FilterPCSpells : FilterNPCSpells;
 			if (caster->GetOwner() && filter == FilterNPCSpells) {

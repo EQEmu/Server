@@ -2240,6 +2240,10 @@ void NPC::DoClassAttacks(Mob *target) {
 
 void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 {
+	if (skill == EQ::skills::SkillBash && (!m_inv.GetItem(EQ::invslot::slotSecondary) || m_inv.GetItem(EQ::invslot::slotSecondary)->GetItemType() != EQ::item::ItemTypeShield)) {
+		return;
+	}
+
 	CombatAbility_Struct* ca_atk = new CombatAbility_Struct;
 
 	ca_atk->m_atk = 100;
