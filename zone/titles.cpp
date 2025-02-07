@@ -67,7 +67,7 @@ std::string TitleManager::GetPrefix(int title_set)
 		titles.begin(),
 		titles.end(),
 		[title_set](const auto& t) {
-			return t.id == title_set;
+			return t.title_set == title_set;
 		}
 	);
 
@@ -84,7 +84,7 @@ std::string TitleManager::GetSuffix(int title_set)
 		titles.begin(),
 		titles.end(),
 		[title_set](const auto& t) {
-			return t.id == title_set;
+			return t.title_set == title_set;
 		}
 	);
 
