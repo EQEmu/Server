@@ -47,8 +47,7 @@ void bot_command_guard(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.size() == 1) {
-		Bot::RaidGroupSay(
-			sbl.front(),
+		sbl.front()->RaidGroupSay(
 			fmt::format(
 				"{}uarding this position.",
 				clear ? "No longer g" : "G"
