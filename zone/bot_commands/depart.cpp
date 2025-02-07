@@ -141,11 +141,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 	std::map<std::string, std::pair<uint8_t, uint8_t>> list_zones;
 
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->IsInGroupOrRaid(tar, !single)) {
-			continue;
-		}
-
-		if (bot_iter->GetBotStance() == Stance::Passive || bot_iter->GetHoldFlag() || bot_iter->GetAppearance() == eaDead || bot_iter->IsFeared() || bot_iter->IsSilenced() || bot_iter->IsAmnesiad() || bot_iter->GetHP() < 0) {
+		if (!bot_iter->ValidStateCheck(c)) {
 			continue;
 		}
 
