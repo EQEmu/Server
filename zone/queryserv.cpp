@@ -56,7 +56,6 @@ bool QueryServ::SendPacket(ServerPacket *pack)
 		return true;
 	}
 
-	LogInfo("SendPacket request with QS Server Offline.");
 	return false;
 }
 
