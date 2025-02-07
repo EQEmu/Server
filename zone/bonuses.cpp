@@ -1489,6 +1489,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			switch (skill) // Only some skills will be supported here. 'Skill Attacks'. 1HB can never be supported without database work
 			{
 				case EQ::skills::SkillKick:
+				case EQ::skills::SkillBash:
 				case EQ::skills::SkillFlyingKick:
 				case EQ::skills::SkillRoundKick:
 				case EQ::skills::SkillDragonPunch:
