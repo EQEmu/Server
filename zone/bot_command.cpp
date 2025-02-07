@@ -808,7 +808,16 @@ void helper_send_usage_required_bots(Client *bot_owner, uint16 spell_type)
 
 	for (int i = Class::Warrior; i <= Class::Berserker; ++i) {
 		auto spell_type_itr = spell_map.find(spell_type);
-		auto class_itr = spell_type_itr->second.find(i);
+
+		if (spell_type_itr == spell_map.end() || spell_type_itr->second.empty()) {
+			spell_type_itr = spell_map.find(GetParentSpellType(spell_type));
+
+			if (spell_type_itr == spell_map.end()) {
+				static const std::vector<BotSpells_wIndex> empty;
+
+				return;
+			}
+		}
 		const auto& spell_info = class_itr->second;
 			
 		if (spell_info.min_level < UINT8_MAX) {
