@@ -12631,12 +12631,20 @@ void Bot::CleanBotBlockedBuffs()
 	}
 }
 
-std::vector<BotSpells_wIndex> Bot::BotGetSpellsByType(uint16 spell_type) {
-	if (AIBot_spells_by_type[spell_type].empty()) {
-		spell_type = GetParentSpellType(spell_type);
+const std::vector<BotSpells_wIndex>& Bot::BotGetSpellsByType(uint16 spell_type) const {
+	auto it = AIBot_spells_by_type.find(spell_type);
+
+	if (it == AIBot_spells_by_type.end() || it->second.empty()) {
+		it = AIBot_spells_by_type.find(GetParentSpellType(spell_type));
+
+		if (it == AIBot_spells_by_type.end()) {
+			static const std::vector<BotSpells_wIndex> empty;
+
+			return empty;
+		}
 	}
 
-	return AIBot_spells_by_type[spell_type];
+	return it->second;
 }
 
 void Bot::AssignBotSpellsToTypes(std::vector<BotSpells>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_wIndex>>& AIBot_spells_by_type) {
