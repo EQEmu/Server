@@ -2056,19 +2056,19 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 0: {
 				mod2a_name = "Avoidance";
 				mod2b_name = "Combat Effects";
-				mod2a_cap  = RuleI(Character, ItemAvoidanceCap);
-				mod2b_cap  = RuleI(Character, ItemCombatEffectsCap);
+				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAvoidanceCap));
+				mod2b_cap  = Strings::Commify(RuleI(Character, ItemCombatEffectsCap));
 
 				if (IsBot()) {
-					mod2a = CastToBot()->GetAvoidance();
+					mod2a = Strings::Commify(CastToBot()->GetAvoidance());
 				} else if (IsClient()) {
-					mod2a = CastToClient()->GetAvoidance();
+					mod2a = Strings::Commify(CastToClient()->GetAvoidance());
 				}
 
 				if (IsBot()) {
-					mod2b = CastToBot()->GetCombatEffects();
+					mod2b = Strings::Commify(CastToBot()->GetCombatEffects());
 				} else if (IsClient()) {
-					mod2b = CastToClient()->GetCombatEffects();
+					mod2b = Strings::Commify(CastToClient()->GetCombatEffects());
 				}
 
 				break;
@@ -2076,19 +2076,19 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 1: {
 				mod2a_name = "Accuracy";
 				mod2b_name = "Strikethrough";
-				mod2a_cap  = RuleI(Character, ItemAccuracyCap);
-				mod2b_cap  = RuleI(Character, ItemStrikethroughCap);
+				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAccuracyCap));
+				mod2b_cap  = Strings::Commify(RuleI(Character, ItemStrikethroughCap));
 
 				if (IsBot()) {
-					mod2a = CastToBot()->GetAccuracy();
+					mod2a = Strings::Commify(CastToBot()->GetAccuracy());
 				} else if (IsClient()) {
-					mod2a = CastToClient()->GetAccuracy();
+					mod2a = Strings::Commify(CastToClient()->GetAccuracy());
 				}
 
 				if (IsBot()) {
-					mod2b = CastToBot()->GetStrikeThrough();
+					mod2b = Strings::Commify(CastToBot()->GetStrikeThrough());
 				} else if (IsClient()) {
-					mod2b = CastToClient()->GetStrikeThrough();
+					mod2b = Strings::Commify(CastToClient()->GetStrikeThrough());
 				}
 
 				break;
@@ -2096,20 +2096,20 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 2: {
 				mod2a_name = "Shielding";
 				mod2b_name = "Spell Shielding";
-				mod2a_cap  = RuleI(Character, ItemShieldingCap);
-				mod2b_cap  = RuleI(Character, ItemSpellShieldingCap);
+				mod2a_cap  = Strings::Commify(RuleI(Character, ItemShieldingCap));
+				mod2b_cap  = Strings::Commify(RuleI(Character, ItemSpellShieldingCap));
 
 				if (IsBot()) {
-					mod2a = CastToBot()->GetShielding();
+					mod2a = Strings::Commify(CastToBot()->GetShielding());
 				} else if (IsClient()) {
-					mod2a = CastToClient()->GetShielding();
+					mod2a = Strings::Commify(CastToClient()->GetShielding());
 				}
 
 
 				if (IsBot()) {
-					mod2b = CastToBot()->GetSpellShield();
+					mod2b = Strings::Commify(CastToBot()->GetSpellShield());
 				} else if (IsClient()) {
-					mod2b = CastToClient()->GetSpellShield();
+					mod2b = Strings::Commify(CastToClient()->GetSpellShield());
 				}
 
 				break;
@@ -2117,19 +2117,19 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 3: {
 				mod2a_name = "Stun Resist";
 				mod2b_name = "DOT Shielding";
-				mod2a_cap  = RuleI(Character, ItemStunResistCap);
-				mod2b_cap  = RuleI(Character, ItemDoTShieldingCap);
+				mod2a_cap  = Strings::Commify(RuleI(Character, ItemStunResistCap));
+				mod2b_cap  = Strings::Commify(RuleI(Character, ItemDoTShieldingCap));
 
 				if (IsBot()) {
-					mod2a = CastToBot()->GetStunResist();
+					mod2a = Strings::Commify(CastToBot()->GetStunResist());
 				} else if (IsClient()) {
-					mod2a = CastToClient()->GetStunResist();
+					mod2a = Strings::Commify(CastToClient()->GetStunResist());
 				}
 
 				if (IsBot()) {
-					mod2b = CastToBot()->GetDoTShield();
+					mod2b = Strings::Commify(CastToBot()->GetDoTShield());
 				} else if (IsClient()) {
-					mod2b = CastToClient()->GetDoTShield();
+					mod2b = Strings::Commify(CastToClient()->GetDoTShield());
 				}
 
 				break;
@@ -2141,16 +2141,16 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				fmt::format(
 					"{}: {} / {}",
 					mod2a_name,
-					Strings::Commify(mod2a),
-					Strings::Commify(mod2a_cap)
+					mod2a,
+					mod2a_cap
 				)
 			) +
 			DialogueWindow::TableCell(
 				fmt::format(
 					"{}: {} / {}",
 					mod2b_name,
-					Strings::Commify(mod2b),
-					Strings::Commify(mod2b_cap)
+					mod2b,
+					mod2b_cap
 				)
 			)
 		);
