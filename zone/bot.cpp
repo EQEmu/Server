@@ -11174,24 +11174,17 @@ void Bot::SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 pr
 
 std::list<BotSpellTypeOrder> Bot::GetSpellTypesPrioritized(uint8 priority_type) {
 	std::list<BotSpellTypeOrder> cast_order;
-	std::list<BotSpellTypeOrder> temp_cast_order;
-
+	
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; i++) {
 		BotSpellTypeOrder typeSettings = {
 			.spellType = i,
 			.priority = GetSpellTypePriority(i, priority_type)
 		};
 
-		cast_order.emplace_back(typeSettings);
-	}
-
-	for (auto& currentType : cast_order) {
-		if (currentType.priority != 0) {
-			temp_cast_order.emplace_back(currentType);
+		if (typeSettings.priority != 0) {
+			cast_order.emplace_back(typeSettings);
 		}
 	}
-
-	cast_order = temp_cast_order;
 
 	if (cast_order.size() > 1) {
 		cast_order.sort(
