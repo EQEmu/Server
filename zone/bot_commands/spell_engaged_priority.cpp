@@ -24,6 +24,14 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 		};
 		p.examples_one =
 		{
+			"To list your targeted bot's priorities:",
+			fmt::format(
+				"{} list",
+				sep->arg[0]
+			)
+		};
+		p.examples_two =
+		{
 			"To set all Shaman to cast slows first:",
 			fmt::format(
 				"{} {} 1 byclass {}",
@@ -36,20 +44,6 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 				sep->arg[0],
 				BotSpellTypes::Slow,
 				Class::Shaman
-			)
-		};
-		p.examples_two =
-		{
-			"To set all bots to not cast snares:",
-			fmt::format(
-				"{} {} 0 spawned",
-				sep->arg[0],
-				Bot::GetSpellTypeShortNameByID(BotSpellTypes::Snare)
-			),
-			fmt::format(
-				"{} {} 0 spawned",
-				sep->arg[0],
-				BotSpellTypes::Snare
 			)
 		};
 		p.examples_three =
@@ -94,6 +88,7 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 	bool list_check = false;
 	uint16 spell_type = 0;
 	uint32 type_value = 0;
+	int ab_mask = ActionableBots::ABM_Type1;
 
 	// String/Int type checks
 	if (sep->IsNumber(1)) {
@@ -106,12 +101,22 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 		}
 	}
 	else {
-		if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
-			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
-		}
-		else if (!arg1.compare("list")) {
+		if (!arg1.compare("list")) {
 			++ab_arg;
 			list_check = true;
+			ab_mask = ActionableBots::ABM_Target;
+
+			if (
+				!c->GetTarget() ||
+				!c->GetTarget()->IsBot() ||
+				c->GetTarget()->GetOwner() != c
+			) {
+				c->Message(Chat::Yellow, "You must target your own bot to list priorities.");
+				return;
+			}
+		}
+		else if (Bot::GetSpellTypeIDByShortName(arg1) != UINT16_MAX) {
+			spell_type = Bot::GetSpellTypeIDByShortName(arg1);
 		}
 		else {
 			c->Message(
@@ -131,8 +136,8 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 	if (sep->IsNumber(2)) {
 		type_value = atoi(sep->arg[2]);
 		++ab_arg;
-		if (EQ::ValueWithin(type_value, BotSpellTypes::START, BotSpellTypes::END)) {
-			c->Message(Chat::Yellow, "You must enter a value between {} and {}.", BotSpellTypes::START, BotSpellTypes::END);
+		if (!EQ::ValueWithin(type_value, BotSpellTypes::START, BotSpellTypes::END)) {
+			c->Message(Chat::Yellow, "You must enter a value between %u and %u.", BotSpellTypes::START, BotSpellTypes::END);
 
 			return;
 		}
@@ -155,7 +160,6 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 		return;
 	}
 
-	const int ab_mask = ActionableBots::ABM_Type1;
 	std::string class_race_arg = sep->arg[ab_arg];
 	bool class_race_check = false;
 	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
@@ -194,25 +198,28 @@ void bot_command_spell_engaged_priority(Client* c, const Seperator* sep)
 		else if (list_check) {
 			auto cast_order = my_bot->GetSpellTypesPrioritized(BotPriorityCategories::Engaged);
 
+			BotCommandHelpParams p;
+			p.description = {
+				"Anything not listed is currently disabled (0)",
+				"----------",
+				"Spell Type - Priority"
+			};
+			p.notes       = { };
+
 			for (auto& current_cast : cast_order) {
-				c->Message(
-					Chat::Green,
+				p.notes.push_back(
 					fmt::format(
-						"{} says, 'My [{}] engaged cast priority for is currently [{}].'",
-						my_bot->GetCleanName(),
+						"{}s - {}",
 						Bot::GetSpellTypeNameByID(current_cast.spellType),
 						(current_cast.priority == 0 ? "disabled (0)" : std::to_string(current_cast.priority))
 					).c_str()
 				);
 			}
 
-			c->Message(
-				Chat::Green,
-				fmt::format(
-					"{} says, 'Anything not listed is currently disabled (0).'",
-					my_bot->GetCleanName()
-				).c_str()
-			);
+			std::string popup_text = c->SendBotCommandHelpWindow(p);
+			popup_text = DialogueWindow::Table(popup_text);
+
+			c->SendPopupToClient(sep->arg[0], popup_text.c_str());
 
 			return;
 		}
