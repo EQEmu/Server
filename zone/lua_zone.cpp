@@ -145,6 +145,12 @@ std::string Lua_Zone::GetFlagNeeded()
 	return zone_store.GetZoneFlagNeeded(self->GetZoneID(), self->GetInstanceVersion());
 }
 
+uint8 Lua_Zone::GetFogBlue()
+{
+	Lua_Safe_Call_Int();
+	return zone_store.GetZoneFogBlue(self->GetZoneID(), 0, self->GetInstanceVersion());
+}
+
 uint8 Lua_Zone::GetFogBlue(uint8 slot)
 {
 	Lua_Safe_Call_Int();
@@ -157,10 +163,22 @@ float Lua_Zone::GetFogDensity()
 	return zone_store.GetZoneFogDensity(self->GetZoneID(), self->GetInstanceVersion());
 }
 
+uint8 Lua_Zone::GetFogGreen()
+{
+	Lua_Safe_Call_Int();
+	return zone_store.GetZoneFogGreen(self->GetZoneID(), 0, self->GetInstanceVersion());
+}
+
 uint8 Lua_Zone::GetFogGreen(uint8 slot)
 {
 	Lua_Safe_Call_Int();
 	return zone_store.GetZoneFogGreen(self->GetZoneID(), slot, self->GetInstanceVersion());
+}
+
+float Lua_Zone::GetFogMaximumClip()
+{
+	Lua_Safe_Call_Real();
+	return zone_store.GetZoneFogMaximumClip(self->GetZoneID(), 0, self->GetInstanceVersion());
 }
 
 float Lua_Zone::GetFogMaximumClip(uint8 slot)
@@ -169,10 +187,22 @@ float Lua_Zone::GetFogMaximumClip(uint8 slot)
 	return zone_store.GetZoneFogMaximumClip(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
+float Lua_Zone::GetFogMinimumClip()
+{
+	Lua_Safe_Call_Real();
+	return zone_store.GetZoneFogMinimumClip(self->GetZoneID(), 0, self->GetInstanceVersion());
+}
+
 float Lua_Zone::GetFogMinimumClip(uint8 slot)
 {
 	Lua_Safe_Call_Real();
 	return zone_store.GetZoneFogMinimumClip(self->GetZoneID(), slot, self->GetInstanceVersion());
+}
+
+uint8 Lua_Zone::GetFogRed()
+{
+	Lua_Safe_Call_Int();
+	return zone_store.GetZoneFogRed(self->GetZoneID(), 0, self->GetInstanceVersion());
 }
 
 uint8 Lua_Zone::GetFogRed(uint8 slot)
@@ -331,10 +361,22 @@ int8 Lua_Zone::GetPEQZone()
 	return zone_store.GetZonePEQZone(self->GetZoneID(), self->GetInstanceVersion());
 }
 
+int Lua_Zone::GetRainChance()
+{
+	Lua_Safe_Call_Int();
+	return zone_store.GetZoneRainChance(self->GetZoneID(), 0, self->GetInstanceVersion());
+}
+
 int Lua_Zone::GetRainChance(uint8 slot)
 {
 	Lua_Safe_Call_Int();
 	return zone_store.GetZoneRainChance(self->GetZoneID(), slot, self->GetInstanceVersion());
+}
+
+int Lua_Zone::GetRainDuration()
+{
+	Lua_Safe_Call_Int();
+	return zone_store.GetZoneRainDuration(self->GetZoneID(), 0, self->GetInstanceVersion());
 }
 
 int Lua_Zone::GetRainDuration(uint8 slot)
@@ -403,10 +445,22 @@ int8 Lua_Zone::GetSkyLock()
 	return zone_store.GetZoneSkyLock(self->GetZoneID(), self->GetInstanceVersion());
 }
 
+int Lua_Zone::GetSnowChance()
+{
+	Lua_Safe_Call_Int();
+	return zone_store.GetZoneSnowChance(self->GetZoneID(), 0, self->GetInstanceVersion());
+}
+
 int Lua_Zone::GetSnowChance(uint8 slot)
 {
 	Lua_Safe_Call_Int();
 	return zone_store.GetZoneSnowChance(self->GetZoneID(), slot, self->GetInstanceVersion());
+}
+
+int Lua_Zone::GetSnowDuration()
+{
+	Lua_Safe_Call_Int();
+	return zone_store.GetZoneSnowDuration(self->GetZoneID(), 0, self->GetInstanceVersion());
 }
 
 int Lua_Zone::GetSnowDuration(uint8 slot)
@@ -657,12 +711,17 @@ luabind::scope lua_register_zone() {
 	.def("GetFastRegenMana", &Lua_Zone::GetFastRegenMana)
 	.def("GetFileName", &Lua_Zone::GetFileName)
 	.def("GetFlagNeeded", &Lua_Zone::GetFlagNeeded)
-	.def("GetFogBlue", &Lua_Zone::GetFogBlue)
+	.def("GetFogBlue", (uint8(Lua_Zone::*)(void))&Lua_Zone::GetFogBlue)
+	.def("GetFogBlue", (uint8(Lua_Zone::*)(uint8))&Lua_Zone::GetFogBlue)
 	.def("GetFogDensity", &Lua_Zone::GetFogDensity)
-	.def("GetFogGreen", &Lua_Zone::GetFogGreen)
-	.def("GetFogMaximumClip", &Lua_Zone::GetFogMaximumClip)
-	.def("GetFogMinimumClip", &Lua_Zone::GetFogMinimumClip)
-	.def("GetFogRed", &Lua_Zone::GetFogRed)
+	.def("GetFogGreen", (uint8(Lua_Zone::*)(void))&Lua_Zone::GetFogGreen)
+	.def("GetFogGreen", (uint8(Lua_Zone::*)(uint8))&Lua_Zone::GetFogGreen)
+	.def("GetFogMaximumClip", (float(Lua_Zone::*)(void))&Lua_Zone::GetFogMaximumClip)
+	.def("GetFogMaximumClip", (float(Lua_Zone::*)(uint8))&Lua_Zone::GetFogMaximumClip)
+	.def("GetFogMinimumClip", (float(Lua_Zone::*)(void))&Lua_Zone::GetFogMinimumClip)
+	.def("GetFogMinimumClip", (float(Lua_Zone::*)(uint8))&Lua_Zone::GetFogMinimumClip)
+	.def("GetFogRed", (uint8(Lua_Zone::*)(void))&Lua_Zone::GetFogRed)
+	.def("GetFogRed", (uint8(Lua_Zone::*)(uint8))&Lua_Zone::GetFogRed)
 	.def("GetGraveyardHeading", &Lua_Zone::GetGraveyardHeading)
 	.def("GetGraveyardID", &Lua_Zone::GetGraveyardID)
 	.def("GetGraveyardX", &Lua_Zone::GetGraveyardX)
@@ -688,8 +747,10 @@ luabind::scope lua_register_zone() {
 	.def("GetNote", &Lua_Zone::GetNote)
 	.def("GetNPCMaximumAggroDistance", &Lua_Zone::GetNPCMaximumAggroDistance)
 	.def("GetPEQZone", &Lua_Zone::GetPEQZone)
-	.def("GetRainChance", &Lua_Zone::GetRainChance)
-	.def("GetRainDuration", &Lua_Zone::GetRainDuration)
+	.def("GetRainChance", (int(Lua_Zone::*)(void))&Lua_Zone::GetRainChance)
+	.def("GetRainChance", (int(Lua_Zone::*)(uint8))&Lua_Zone::GetRainChance)
+	.def("GetRainDuration", (int(Lua_Zone::*)(void))&Lua_Zone::GetRainDuration)
+	.def("GetRainDuration", (int(Lua_Zone::*)(uint8))&Lua_Zone::GetRainDuration)
 	.def("GetRuleSet", &Lua_Zone::GetRuleSet)
 	.def("GetSafeHeading", &Lua_Zone::GetSafeHeading)
 	.def("GetSafeX", &Lua_Zone::GetSafeX)
@@ -700,8 +761,10 @@ luabind::scope lua_register_zone() {
 	.def("GetShutdownDelay", &Lua_Zone::GetShutdownDelay)
 	.def("GetSky", &Lua_Zone::GetSky)
 	.def("GetSkyLock", &Lua_Zone::GetSkyLock)
-	.def("GetSnowChance", &Lua_Zone::GetSnowChance)
-	.def("GetSnowDuration", &Lua_Zone::GetSnowDuration)
+	.def("GetSnowChance", (int(Lua_Zone::*)(void))&Lua_Zone::GetSnowChance)
+	.def("GetSnowChance", (int(Lua_Zone::*)(uint8))&Lua_Zone::GetSnowChance)
+	.def("GetSnowDuration", (int(Lua_Zone::*)(void))&Lua_Zone::GetSnowDuration)
+	.def("GetSnowDuration", (int(Lua_Zone::*)(uint8))&Lua_Zone::GetSnowDuration)
 	.def("GetTimeType", &Lua_Zone::GetTimeType)
 	.def("GetTimeZone", &Lua_Zone::GetTimeZone)
 	.def("GetZoneDescription", &Lua_Zone::GetZoneDescription)
