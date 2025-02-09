@@ -8415,19 +8415,47 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 			}
 		}
 
-		swarm_pet_npc->RemoveSpellFromNPCList(673);
-		swarm_pet_npc->RemoveSpellFromNPCList(1698);
-		swarm_pet_npc->RemoveSpellFromNPCList(3349);
+		swarm_pet_npc->SetEntityVariable("class_bitmask", std::to_string(GetClassesBits()));
 
 		auto memmed_spells = GetMemmedSpells();
 		for (int i = 0; i < memmed_spells.size(); i++) {
 			int spell = memmed_spells[i];
-			if (!IsValidSpell(spell)) {
+			if (!IsValidSpell(spell) || IsBeneficialSpell(spell)) {
 				continue;
 			}
 
+			bool spell_type = 0;
+
 			if (IsDamageSpell(spell)) {
-				swarm_pet_npc->AddSpellToNPCList(0, spell, SpellType_Nuke, -1, -1, 0, 0, 0);
+				spell_type = SpellType_Nuke;
+			}
+
+			if (IsLifetapSpell(spell)) {
+				spell_type = SpellType_Lifetap;
+			}
+
+			if (IsSlowSpell(spell)) {
+				spell_type = SpellType_Slow;
+			}
+
+			if (IsDebuffSpell(spell)) {
+				spell_type = SpellType_Debuff;
+			}
+
+			if (IsEffectInSpell(spell, SE_CurrentHP) && spells[spell].buff_duration > 0) {
+				spell_type = SpellType_DOT;
+			}
+
+			if (!spell_type && IsEffectInSpell(SE_MovementSpeed, spell)) {
+				spell_type = SpellType_Snare;
+			}
+
+			if (IsEffectInSpell(SE_CancelMagic, spell)) {
+				spell_type = SpellType_Dispel;
+			}
+
+			if (spell_type && spell) {
+				swarm_pet_npc->AddSpellToNPCList(i, spell, spell_type, -1, spells[spell].recast_time, 0, 0, 0);
 			}
 		}
 
