@@ -8424,7 +8424,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 				continue;
 			}
 
-			bool spell_type = 0;
+			int spell_type = 0;
 
 			if (IsDamageSpell(spell)) {
 				spell_type = SpellType_Nuke;
