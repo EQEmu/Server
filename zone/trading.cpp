@@ -1654,9 +1654,6 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 	}
 	else {
 		outtbs->price = total_cost;
-	}
-
-	LogDebug("Total_Cost: [{}]", total_cost);
 
 	if (!TakeMoneyFromPP(total_cost)) {
         RecordPlayerEventLog(
@@ -3634,8 +3631,6 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		TradeRequestFailed(app);
 		return;
 	}
-
-	LogDebug("Total_Cost: [{}]", total_cost);
 
 	uint64 fee         = std::round(total_cost * (zone->GetZoneID() == Zones::BAZAAR ? 0.0f : RuleR(Bazaar, ParcelDeliveryCostMod)));
 	if (!TakeMoneyFromPP(total_cost + fee, false)) {
