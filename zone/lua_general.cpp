@@ -18,6 +18,7 @@
 #include "lua_entity_list.h"
 #include "lua_expedition.h"
 #include "lua_spell.h"
+#include "lua_zone.h"
 #include "quest_parser_collection.h"
 #include "questmgr.h"
 #include "qglobals.h"
@@ -28,6 +29,7 @@
 #include "dialogue_window.h"
 #include "../common/events/player_event_logs.h"
 #include "worldserver.h"
+#include "zone.h"
 
 struct Events { };
 struct Factions { };
@@ -5635,6 +5637,11 @@ void lua_spawn_grid(uint32 npc_id, float x, float y, float z, float heading, flo
 	quest_manager.SpawnGrid(npc_id, glm::vec4(x, y, z, heading), spacing, spawn_count);
 }
 
+Lua_Zone lua_get_zone()
+{
+	return Lua_Zone(zone);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6442,6 +6449,7 @@ luabind::scope lua_register_general() {
 		luabind::def("are_tasks_completed", &lua_are_tasks_completed),
 		luabind::def("spawn_circle", &lua_spawn_circle),
 		luabind::def("spawn_grid", &lua_spawn_grid),
+		luabind::def("get_zone", &lua_get_zone),
 		/*
 			Cross Zone
 		*/
