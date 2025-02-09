@@ -8430,6 +8430,14 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 				spell_type = SpellType_Nuke;
 			}
 
+			if (IsRegularGroupHealSpell(spell)) {
+				spell_type = SpellType_Heal;
+			}
+
+			if (IsGroupHealOverTimeSpell(spell)) {
+				spell_type = SpellType_Heal;
+			}
+
 			if (IsLifetapSpell(spell)) {
 				spell_type = SpellType_Lifetap;
 			}
