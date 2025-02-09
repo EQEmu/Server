@@ -393,6 +393,21 @@ void Client::GoFish(bool guarantee, bool use_bait)
 						RecordPlayerEventLog(PlayerEvent::FISH_SUCCESS, e);
 					}
 
+					if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(inst->GetItem()->ID)) {
+						if (!GetGM()) {
+							DiscoverItem(inst->GetItem()->ID);
+						} else {
+							const std::string& item_link = database.CreateItemLink(inst->GetItem()->ID);
+							Message(
+								Chat::White,
+								fmt::format(
+									"Your GM flag prevents {} from being added to discovered items.",
+									item_link
+								).c_str()
+							);
+						}
+					}
+
 					if (parse->PlayerHasQuestSub(EVENT_FISH_SUCCESS)) {
 						std::vector<std::any> args = {inst};
 						parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
@@ -529,6 +544,21 @@ void Client::ForageItem(bool guarantee) {
 						.item_name    = inst->GetItem()->Name,
 					};
 					RecordPlayerEventLog(PlayerEvent::FORAGE_SUCCESS, e);
+				}
+
+				if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(inst->GetItem()->ID)) {
+					if (!GetGM()) {
+						DiscoverItem(inst->GetItem()->ID);
+					} else {
+						const std::string& item_link = database.CreateItemLink(inst->GetItem()->ID);
+						Message(
+							Chat::White,
+							fmt::format(
+								"Your GM flag prevents {} from being added to discovered items.",
+								item_link
+							).c_str()
+						);
+					}
 				}
 
 				if (parse->PlayerHasQuestSub(EVENT_FORAGE_SUCCESS)) {

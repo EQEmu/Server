@@ -643,8 +643,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			sender->PutItemInInventory(EQ::invslot::slotCursor, *m_inst, false);
 			sender->SendItemPacket(EQ::invslot::slotCursor, m_inst, ItemPacketTrade);
 
-			// Could be an undiscovered ground_spawn
-			if (m_ground_spawn && RuleB(Character, EnableDiscoveredItems) && !sender->IsDiscovered(item->ID)) {
+			if (RuleB(Character, EnableDiscoveredItems) && !sender->IsDiscovered(item->ID)) {
 				if (!sender->GetGM()) {
 					sender->DiscoverItem(item->ID);
 				} else {
