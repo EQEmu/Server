@@ -1827,7 +1827,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	// we're done casting, now try to apply the spell
 	bool spell_success = SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true);
-	if (slot <= CastingSlot::MaxGems && slot >= CastingSlot::Gem1) {
+	if (slot <= CastingSlot::MaxGems && slot >= CastingSlot::Gem1 || !IsClient()) {
 		if (target && !target->IsMezzed()) {
 			if(IsOfClientBotMerc()) {
 				TrySympatheticProc(target, spell_id);

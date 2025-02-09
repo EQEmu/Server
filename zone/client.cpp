@@ -8383,7 +8383,59 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		//we allocated a new NPC type object, give the NPC ownership of that memory
 		swarm_pet_npc->GiveNPCTypeData(npc_type_copy);
 
+		// Do aggro enhancements
+		swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
+
+		// Give Client's Buffs to the pet
+		//auto buffs = GetBuffs();
+		for (int buff_idx = 0; buff_idx < GetMaxTotalSlots(); buff_idx++) {
+			if (!IsValidSpell(buffs[buff_idx].spellid)) {
+				continue;
+			}
+			swarm_pet_npc->ApplySpellBuff(buffs[buff_idx].spellid, buffs[buff_idx].ticsremaining);
+		}
+
+		for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id < EQ::invslot::slotWaist; slot_id++) {
+			auto item_inst = GetInv().GetItem(slot_id);
+			if (item_inst) {
+				auto aug0 = item_inst->GetAugment(0);
+				auto aug1 = item_inst->GetAugment(1);
+				auto aug2 = item_inst->GetAugment(2);
+				auto aug3 = item_inst->GetAugment(3);
+				auto aug4 = item_inst->GetAugment(4);
+				auto aug5 = item_inst->GetAugment(5);
+
+				swarm_pet_npc->AddItemFixed(item_inst->GetID(), 1,	true,
+									        aug0 != nullptr ? aug0->GetID() : 0,
+											aug1 != nullptr ? aug1->GetID() : 0,
+											aug2 != nullptr ? aug2->GetID() : 0,
+											aug3 != nullptr ? aug3->GetID() : 0,
+											aug4 != nullptr ? aug4->GetID() : 0,
+											aug5 != nullptr ? aug5->GetID() : 0);
+			}
+		}
+
+		swarm_pet_npc->RemoveSpellFromNPCList(673);
+		swarm_pet_npc->RemoveSpellFromNPCList(1698);
+		swarm_pet_npc->RemoveSpellFromNPCList(3349);
+
+		auto memmed_spells = GetMemmedSpells();
+		for (int i = 0; i < memmed_spells.size(); i++) {
+			int spell = memmed_spells[i];
+			if (!IsValidSpell(spell)) {
+				continue;
+			}
+
+			if (IsDamageSpell(spell)) {
+				swarm_pet_npc->AddSpellToNPCList(0, spell, SpellType_Nuke, -1, -1, 0, 0, 0);
+			}
+		}
+
+		// Create the NPC
 		entity_list.AddNPC(swarm_pet_npc);
+
+		swarm_pet_npc->CalcBonuses();
+
 		summon_count--;
 	}
 

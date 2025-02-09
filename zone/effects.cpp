@@ -51,7 +51,7 @@ int Mob::GetSharedSpellDamage() {
 		return ret_val;
 	}
 
-	return 0;
+	return itembonuses.SpellDmg;
 }
 
 int Mob::GetSharedHealAmount() {
@@ -66,7 +66,7 @@ int Mob::GetSharedHealAmount() {
 		return ret_val;
 	}
 
-	return 0;
+	return itembonuses.HealAmt;
 }
 
 int Mob::GetSharedCriticalSpellChance() {
@@ -86,7 +86,7 @@ int Mob::GetSharedCriticalSpellChance() {
 		return ret_val;
 	}
 
-	return 0;
+	return base_chance;
 }
 
 int Mob::GetSharedSpellCritDmgIncrease() {
@@ -104,7 +104,7 @@ int Mob::GetSharedSpellCritDmgIncrease() {
 		return ret_val;
 	}
 
-	return 0;
+	return base_chance;
 }
 
 int Mob::GetSharedSpellCritDmgIncNoStack() {
@@ -122,7 +122,7 @@ int Mob::GetSharedSpellCritDmgIncNoStack() {
 		return ret_val;
 	}
 
-	return 0;
+	return base_chance;
 }
 
 int Mob::GetSharedCriticalDoTChance() {
@@ -140,7 +140,7 @@ int Mob::GetSharedCriticalDoTChance() {
 		return ret_val;
 	}
 
-	return 0;
+	return base_chance;
 }
 
 int Mob::GetSharedDotCritDmgIncrease() {
@@ -158,7 +158,7 @@ int Mob::GetSharedDotCritDmgIncrease() {
 		return ret_val;
 	}
 
-	return 0;
+	return base_chance;
 }
 
 int Mob::GetSharedCriticalHealChance() {
@@ -176,7 +176,7 @@ int Mob::GetSharedCriticalHealChance() {
 		return ret_val;
 	}
 
-	return 0;
+	return base_chance;
 }
 
 int Mob::GetSharedCriticalHealOverTime() {
@@ -194,7 +194,7 @@ int Mob::GetSharedCriticalHealOverTime() {
 		return ret_val;
 	}
 
-	return 0;
+	return base_chance;
 }
 
 int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
@@ -565,6 +565,7 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 
 int64 Mob::GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_spell_dmg)
 {
+	LogDebug("Check: [{}], [{}], [{}]", spell_id, extra_spell_amt, base_spell_dmg);
 	if (RuleB(Spells, FlatItemExtraSpellAmt)) {
 		if (RuleB(Spells, ItemExtraSpellAmtCalcAsPercent)) {
 			return std::abs(base_spell_dmg) * extra_spell_amt / 100;
