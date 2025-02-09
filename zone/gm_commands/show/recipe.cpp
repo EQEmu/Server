@@ -13,12 +13,12 @@ void ShowRecipe(Client *c, const Seperator *sep)
 	const uint16 recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 
 	const auto& re = TradeskillRecipeEntriesRepository::GetWhere(
-		database,
+		content_db,
 		fmt::format("recipe_id = {} ORDER BY id ASC", recipe_id)
 	);
 
 	const auto& r = TradeskillRecipeRepository::GetWhere(
-		database,
+		content_db,
 		fmt::format("id = {}", recipe_id)
 	);
 
