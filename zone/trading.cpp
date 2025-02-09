@@ -1962,8 +1962,8 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 				}
 
 				uint64 total_cost = (uint64) sell_line.item_cost * (uint64) sell_line.seller_quantity;
-				AddMoneyToPPWithOverflow(total_cost, false);
-				buyer->TakeMoneyFromPPWithOverFlow(total_cost, false);
+				AddMoneyToPP(total_cost, false);
+				buyer->TakeMoneyFromPP(total_cost, false);
 
 				if (player_event_logs.IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
 					PlayerEvent::BarterTransaction e{};
@@ -2934,7 +2934,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	}
 
 	uint64 fee         = std::round(total_cost * RuleR(Bazaar, ParcelDeliveryCostMod));
-	if (!TakeMoneyFromPPWithOverFlow(total_cost + fee, false)) {
+	if (!TakeMoneyFromPP(total_cost + fee, false)) {
 		RecordPlayerEventLog(
 			PlayerEvent::POSSIBLE_HACK,
 			PlayerEvent::PossibleHackEvent{

@@ -879,11 +879,9 @@ public:
 	void QuestReadBook(const char* text, uint8 type);
 	void SendMoneyUpdate();
 	bool TakeMoneyFromPP(uint64 copper, bool update_client = false);
-	bool TakeMoneyFromPPWithOverFlow(uint64 copper, bool update_client);
 	bool TakePlatinum(uint32 platinum, bool update_client = false);
 	void AddMoneyToPP(uint64 copper, bool update_client = false);
 	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client = false);
-	void AddMoneyToPPWithOverflow(uint64 copper, bool update_client);
 	void AddPlatinum(uint32 platinu, bool update_client = false);
 	bool HasMoney(uint64 copper);
 	uint64 GetCarriedMoney();

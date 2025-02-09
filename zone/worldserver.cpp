@@ -4123,7 +4123,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 										 sell_line.seller_quantity,
 										 sell_line.item_name,
 										 buyer->GetCleanName());
-								buyer->AddMoneyToPPWithOverflow(total_cost, true);
+								buyer->AddMoneyToPP(total_cost, true);
 								buyer->RemoveItem(sell_line.item_id, sell_line.seller_quantity);
 
 								buyer->Message(
@@ -4222,7 +4222,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					if (inst->IsStackable()) {
 						if (!buyer->PutItemInInventoryWithStacking(inst.get())) {
 							buyer->Message(Chat::Red, "Error putting item in your inventory.");
-							buyer->AddMoneyToPPWithOverflow(total_cost, true);
+							buyer->AddMoneyToPP(total_cost, true);
 							in->action     = Barter_FailedTransaction;
 							in->sub_action = Barter_FailedBuyerChecks;
 							worldserver.SendPacket(pack);
@@ -4234,7 +4234,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 							inst->SetCharges(1);
 							if (!buyer->PutItemInInventoryWithStacking(inst.get())) {
 								buyer->Message(Chat::Red, "Error putting item in your inventory.");
-								buyer->AddMoneyToPPWithOverflow(total_cost, true);
+								buyer->AddMoneyToPP(total_cost, true);
 								in->action     = Barter_FailedTransaction;
 								in->sub_action = Barter_FailedBuyerChecks;
 								worldserver.SendPacket(pack);
@@ -4243,7 +4243,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						}
 					}
 
-					if (!buyer->TakeMoneyFromPPWithOverFlow(total_cost, false)) {
+					if (!buyer->TakeMoneyFromPP(total_cost, false)) {
 						in->action     = Barter_FailedTransaction;
 						in->sub_action = Barter_FailedBuyerChecks;
 						worldserver.SendPacket(pack);
@@ -4308,7 +4308,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					uint64 total_cost = (uint64) sell_line.item_cost * (uint64) sell_line.seller_quantity;
 					seller->RemoveItem(in->buy_item_id, in->seller_quantity);
-					seller->AddMoneyToPPWithOverflow(total_cost, false);
+					seller->AddMoneyToPP(total_cost, false);
 					seller->SendBarterBuyerClientMessage(
 						sell_line,
 						Barter_SellerTransactionComplete,
