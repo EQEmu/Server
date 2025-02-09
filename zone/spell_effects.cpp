@@ -1411,6 +1411,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						filter = FilterPetSpells;
 					}
 
+					if (IsBardSong(spell_id)) {
+						filter = FilterBardSongs;
+					}
+
 					auto caster_name = (filter == FilterPetSpells)
 						? fmt::format("{} (Owner: {})", caster->GetCleanName(), caster->GetOwner()->GetCleanName())
 						: caster->GetCleanName();
