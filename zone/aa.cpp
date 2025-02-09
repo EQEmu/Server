@@ -1803,6 +1803,11 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 			return true;
 		}
 
+		// Fury of Magic for the Hybrids
+		if (a->id == 215 && GetClassesBits() & 16412 && rank->id <= 772) {
+			return true;
+		}
+
 		if (!(IsClient() && ((a->classes >> 1) & this->CastToClient()->GetClassesBits()))) {
 			return false;
 		}
