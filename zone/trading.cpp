@@ -1654,6 +1654,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 	}
 	else {
 		outtbs->price = total_cost;
+	}
 
 	if (!TakeMoneyFromPP(total_cost)) {
         RecordPlayerEventLog(
