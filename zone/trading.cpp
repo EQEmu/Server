@@ -1656,6 +1656,8 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 		outtbs->price = total_cost;
 	}
 
+	LogDebug("Total_Cost: [{}]", total_cost);
+
 	if (!TakeMoneyFromPP(total_cost)) {
         RecordPlayerEventLog(
             PlayerEvent::POSSIBLE_HACK,
@@ -3633,8 +3635,10 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		return;
 	}
 
+	LogDebug("Total_Cost: [{}]", total_cost);
+
 	uint64 fee         = std::round(total_cost * (zone->GetZoneID() == Zones::BAZAAR ? 0.0f : RuleR(Bazaar, ParcelDeliveryCostMod)));
-	if (!TakeMoneyFromPPWithOverFlow(total_cost + fee, false)) {
+	if (!TakeMoneyFromPP(total_cost + fee, false)) {
 		RecordPlayerEventLog(
 			PlayerEvent::POSSIBLE_HACK,
 			PlayerEvent::PossibleHackEvent{

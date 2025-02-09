@@ -14781,56 +14781,7 @@ void Client::AddMoneyToPPWithOverflow(uint64 copper, bool update_client)
 
 bool Client::TakeMoneyFromPPWithOverFlow(uint64 copper, bool update_client)
 {
-	int32 remove_pp = copper / 1000;
-	int32 remove_gp = (copper - remove_pp * 1000) / 100;
-	int32 remove_sp = (copper - remove_pp * 1000 - remove_gp * 100) / 10;
-	int32 remove_cp = copper - remove_pp * 1000 - remove_gp * 100 - remove_sp * 10;
-
-	uint64 current_money = GetCarriedMoney();
-
-	if (copper > current_money) {
-		return false; //client does not have enough money on them
-	}
-
-	m_pp.copper -= remove_cp;
-	if (m_pp.copper < 0) {
-		m_pp.silver -= 1;
-		m_pp.copper = m_pp.copper + 10;
-		if (m_pp.copper >= 10) {
-			m_pp.silver += m_pp.copper / 10;
-			m_pp.copper = m_pp.copper % 10;
-		}
-	}
-
-	m_pp.silver -= remove_sp;
-	if (m_pp.silver < 0) {
-		m_pp.gold -= 1;
-		m_pp.silver = m_pp.silver + 10;
-		if (m_pp.silver >= 10) {
-			m_pp.gold += m_pp.silver / 10;
-			m_pp.silver = m_pp.silver % 10;
-		}
-	}
-
-	m_pp.gold -= remove_gp;
-	if (m_pp.gold < 0) {
-		m_pp.platinum -= 1;
-		m_pp.gold = m_pp.gold + 10;
-		if (m_pp.gold >= 10) {
-			m_pp.platinum += m_pp.gold / 10;
-			m_pp.gold = m_pp.gold % 10;
-		}
-	}
-
-	m_pp.platinum -= remove_pp;
-
-	if (update_client) {
-		SendMoneyUpdate();
-	}
-
-	SaveCurrency();
-	RecalcWeight();
-	return true;
+	return TakeMoneyFromPP(copper, update_client);
 }
 
 void Client::SendTopLevelInventory()
