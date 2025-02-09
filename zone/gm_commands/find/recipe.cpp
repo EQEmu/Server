@@ -10,7 +10,7 @@ void FindRecipe(Client *c, const Seperator *sep)
 		const auto recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 
 		const auto& l = TradeskillRecipeRepository::GetWhere(
-			database,
+			content_db,
 			fmt::format("id = {}", recipe_id)
 		);
 
@@ -56,7 +56,7 @@ void FindRecipe(Client *c, const Seperator *sep)
 	auto found_count = 0;
 
 	const auto& l = TradeskillRecipeRepository::GetWhere(
-		database,
+		content_db,
 		fmt::format(
 			"LOWER(`name`) LIKE '%%{}%%' ORDER BY `id` ASC",
 			search_criteria
