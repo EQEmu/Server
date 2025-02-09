@@ -241,6 +241,8 @@ public:
 
 	std::unordered_map<uint32, EXPModifier> exp_modifiers;
 
+	std::vector<uint32> discovered_items;
+
 	time_t weather_timer;
 	Timer  spawn2_timer;
 	Timer  hot_reload_timer;

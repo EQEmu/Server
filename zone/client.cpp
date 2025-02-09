@@ -4785,17 +4785,31 @@ bool Client::ChangePetName(std::string new_name)
 	return true;
 }
 
-bool Client::IsDiscovered(uint32 item_id) {
-	const auto& l = DiscoveredItemsRepository::GetWhere(
-		database,
-		fmt::format(
-			"item_id = {}",
+bool Client::IsDiscovered(uint32 item_id)
+{
+	if (
+		std::find(
+			zone->discovered_items.begin(),
+			zone->discovered_items.end(),
 			item_id
-		)
-	);
-	if (l.empty()) {
+		) != zone->discovered_items.end()
+	) {
+		return true;
+	}
+
+	if (
+		DiscoveredItemsRepository::GetWhere(
+			database,
+			fmt::format(
+				"`item_id` = {} LIMIT 1",
+				item_id
+			)
+		).empty()
+	) {
 		return false;
 	}
+
+	zone->discovered_items.emplace_back(item_id);
 
 	return true;
 }
