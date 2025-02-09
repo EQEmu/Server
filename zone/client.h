@@ -1830,6 +1830,8 @@ public:
 
 	void SendMerchantEnd();
 
+	void CheckItemDiscoverability(uint32 item_id);
+
 	Raid *p_raid_instance;
 
 	inline uint32 GetPotionBeltItemIcon(uint8 slot_id)
@@ -1845,7 +1847,7 @@ public:
 	{
 		return EQ::ValueWithin(slot_id, 0, EQ::profile::POTION_BELT_SIZE - 1) ? m_pp.potionbelt.Items[slot_id].ID : 0;
 	};
-	
+
 	inline std::string GetPotionBeltItemName(uint8 slot_id)
 	{
 		return EQ::ValueWithin(

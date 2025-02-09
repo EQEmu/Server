@@ -264,20 +264,7 @@ bool Client::DoEvolveCheckProgression(const EQ::ItemInstance &inst)
 		return false;
 	}
 
-	if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(new_inst->GetItem()->ID)) {
-		if (!GetGM()) {
-			DiscoverItem(new_inst->GetItem()->ID);
-		} else {
-			const std::string& item_link = database.CreateItemLink(new_inst->GetItem()->ID);
-			Message(
-				Chat::White,
-				fmt::format(
-					"Your GM flag prevents {} from being added to discovered items.",
-					item_link
-				).c_str()
-			);
-		}
-	}
+	CheckItemDiscoverability(new_inst->GetID());
 
 	PlayerEvent::EvolveItem e{};
 
