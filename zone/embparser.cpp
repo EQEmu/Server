@@ -59,6 +59,7 @@ void perl_register_bot();
 void perl_register_buff();
 void perl_register_merc();
 void perl_register_database();
+void perl_register_zone();
 #endif // EMBPERL_XS_CLASSES
 #endif // EMBPERL_XS
 
@@ -1187,6 +1188,7 @@ void PerlembParser::MapFunctions()
 	perl_register_buff();
 	perl_register_merc();
 	perl_register_database();
+	perl_register_zone();
 #endif // EMBPERL_XS_CLASSES
 }
 
@@ -1579,6 +1581,7 @@ void PerlembParser::ExportZoneVariables(std::string& package_name)
 		ExportVar(package_name.c_str(), "instanceversion", zone->GetInstanceVersion());
 		TimeOfDay_Struct eqTime{ };
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eqTime);
+		ExportVar(package_name.c_str(), "zone", "Zone", zone);
 		ExportVar(package_name.c_str(), "zonehour", eqTime.hour - 1);
 		ExportVar(package_name.c_str(), "zoneid", zone->GetZoneID());
 		ExportVar(package_name.c_str(), "zoneln", zone->GetLongName());
