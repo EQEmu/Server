@@ -2148,20 +2148,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	if (item->MaxCharges != 0)
 		charges = item->MaxCharges;
 
-	if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(item->ID)) {
-		if (!GetGM()) {
-			DiscoverItem(item->ID);
-		} else {
-			const std::string& item_link = database.CreateItemLink(item->ID);
-			Message(
-				Chat::White,
-				fmt::format(
-					"Your GM flag prevents {} from being added to discovered items.",
-					item_link
-				).c_str()
-			);
-		}
-	}
+	CheckItemDiscoverability(item->ID);
 
 	EQ::ItemInstance *inst = database.CreateItem(item, charges);
 	if (!AutoPutLootInInventory(*inst, true, true))
@@ -2708,20 +2695,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
 		}
 
-		if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(item->ID)) {
-			if (!GetGM()) {
-				DiscoverItem(item->ID);
-			} else {
-				const std::string& item_link = database.CreateItemLink(item->ID);
-				Message(
-					Chat::White,
-					fmt::format(
-						"Your GM flag prevents {} from being added to discovered items.",
-						item_link
-					).c_str()
-				);
-			}
-		}
+		CheckItemDiscoverability(item->ID);
 
 		EQ::ItemInstance *inst = database.CreateItem(item, charges);
 		if (!AutoPutLootInInventory(*inst, true, true))
@@ -14200,20 +14174,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		parse->EventPlayer(EVENT_MERCHANT_BUY, this, export_string, 0);
 	}
 
-	if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(item_id)) {
-		if (!GetGM()) {
-			DiscoverItem(item_id);
-		} else {
-			const std::string& item_link = database.CreateItemLink(item_id);
-			Message(
-				Chat::White,
-				fmt::format(
-					"Your GM flag prevents {} from being added to discovered items.",
-					item_link
-				).c_str()
-			);
-		}
-	}
+	CheckItemDiscoverability(item_id);
 
 	safe_delete(inst);
 	safe_delete(outapp);

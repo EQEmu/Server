@@ -1623,21 +1623,8 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		// safe to ACK now
 		c->QueuePacket(app);
 
-		if (!IsPlayerCorpse()) {
-			if (RuleB(Character, EnableDiscoveredItems) && c && !c->IsDiscovered(inst->GetItem()->ID)) {
-				if (!c->GetGM()) {
-					c->DiscoverItem(inst->GetItem()->ID);
-				} else {
-					const std::string& item_link = database.CreateItemLink(inst->GetItem()->ID);
-					c->Message(
-						Chat::White,
-						fmt::format(
-							"Your GM flag prevents {} from being added to discovered items.",
-							item_link
-						).c_str()
-					);
-				}
-			}
+		if (!IsPlayerCorpse() && c) {
+			c->CheckItemDiscoverability(inst->GetID());
 		}
 
 		if (zone->adv_data) {

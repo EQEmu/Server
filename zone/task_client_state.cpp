@@ -1026,6 +1026,7 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 			if (item_id > 0) {
 				std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item_id, charges));
 				if (inst && inst->GetItem()) {
+					c->CheckItemDiscoverability(item_id);
 					bool stacked = c->TryStacking(inst.get());
 					if (!stacked) {
 						int16_t slot = c->GetInv().FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size);

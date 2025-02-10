@@ -393,6 +393,8 @@ void Client::GoFish(bool guarantee, bool use_bait)
 						RecordPlayerEventLog(PlayerEvent::FISH_SUCCESS, e);
 					}
 
+					CheckItemDiscoverability(inst->GetID());
+
 					if (parse->PlayerHasQuestSub(EVENT_FISH_SUCCESS)) {
 						std::vector<std::any> args = {inst};
 						parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
@@ -530,6 +532,8 @@ void Client::ForageItem(bool guarantee) {
 					};
 					RecordPlayerEventLog(PlayerEvent::FORAGE_SUCCESS, e);
 				}
+
+				CheckItemDiscoverability(inst->GetID());
 
 				if (parse->PlayerHasQuestSub(EVENT_FORAGE_SUCCESS)) {
 					std::vector<std::any> args = { inst };

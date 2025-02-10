@@ -643,21 +643,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			sender->PutItemInInventory(EQ::invslot::slotCursor, *m_inst, false);
 			sender->SendItemPacket(EQ::invslot::slotCursor, m_inst, ItemPacketTrade);
 
-			// Could be an undiscovered ground_spawn
-			if (m_ground_spawn && RuleB(Character, EnableDiscoveredItems) && !sender->IsDiscovered(item->ID)) {
-				if (!sender->GetGM()) {
-					sender->DiscoverItem(item->ID);
-				} else {
-					const std::string& item_link = database.CreateItemLink(item->ID);
-					sender->Message(
-						Chat::White,
-						fmt::format(
-							"Your GM flag prevents {} from being added to discovered items.",
-							item_link
-						).c_str()
-					);
-				}
-			}
+			sender->CheckItemDiscoverability(m_inst->GetID());
 
 			if (cursor_delete) {    // delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
 				sender->DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
