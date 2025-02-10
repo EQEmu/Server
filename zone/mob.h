@@ -1289,6 +1289,7 @@ public:
 	void SetLooting(uint16 val) { entity_id_being_looted = val; }
 
 	bool CheckWillAggro(Mob *mob);
+	bool IsPetAggroExempt(Mob *pet_owner);
 
 	void InstillDoubt(Mob *who);
 	bool Charmed() const { return type_of_pet == petCharmed; }
