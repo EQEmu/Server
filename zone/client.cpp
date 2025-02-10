@@ -8424,7 +8424,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		auto memmed_spells = GetMemmedSpells();
 		for (int i = 0; i < memmed_spells.size(); i++) {
 			int spell = memmed_spells[i];
-			if (!IsValidSpell(spell) || IsBeneficialSpell(spell)) {
+			if (!IsValidSpell(spell) || IsBeneficialSpell(spell) || !spells[spell].aoe_range < 1 || !spells[spell].aoe_max_targets < 1) {
 				continue;
 			}
 
