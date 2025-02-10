@@ -8463,6 +8463,12 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 			}
 		}
 
+		for (int spell : swarm_pet_npc->GetNPCSpellList()) {
+			if (IsCharmSpell(spell) || IsFearSpell(spell) || IsBlindSpell(spell)) {
+				swarm_pet_npc->RemoveSpellFromNPCList(spell);
+			}
+		}
+
 		// Create the NPC
 		entity_list.AddNPC(swarm_pet_npc);
 

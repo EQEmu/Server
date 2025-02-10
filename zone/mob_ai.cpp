@@ -2718,6 +2718,20 @@ void NPC::RemoveSpellEffectFromNPCList(uint16 iSpellEffectID, bool apply_bonus)
 	}
 }
 
+std::vector<int> NPC::GetNPCSpellList() {
+    std::vector<int> spell_list;
+
+    spell_list.reserve(AIspells.size());
+
+    for (const auto& spell : AIspells) {
+        if (IsValidSpell(spell.spellid)) {
+            spell_list.push_back(spell.spellid);
+        }
+    }
+
+    return spell_list;
+}
+
 bool NPC::HasAISpellEffect(uint16 spell_effect_id)
 {
 	for (const auto& spell_effect : AIspellsEffects) {
