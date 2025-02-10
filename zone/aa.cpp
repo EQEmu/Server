@@ -1804,7 +1804,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 		}
 
 		// Restrict Fury of Magic rank 6+ to only be available to Pure Casters
-		if (rank->base_ability->first_rank_id == aaFuryofMagic && rank->id > 772) {
+		if (rank->base_ability->first_rank_id == aaFuryofMagic && rank->id > 772 && rank->id <= 4751) {
 			return (GetClassesBits() & 15906);
 		}
 
