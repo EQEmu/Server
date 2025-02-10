@@ -561,6 +561,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 	m_epp->expended_aa           = e.e_expended_aa_spent;
 	m_epp->last_invsnapshot_time = e.e_last_invsnapshot;
 	m_epp->next_invsnapshot_time = m_epp->last_invsnapshot_time + (RuleI(Character, InvSnapshotMinIntervalM) * 60);
+	m_epp->illusion_block        = e.illusion_block;
 
 	return true;
 }
@@ -1158,6 +1159,7 @@ bool ZoneDatabase::SaveCharacterData(
 	e.e_expended_aa_spent     = m_epp->expended_aa;
 	e.e_last_invsnapshot      = m_epp->last_invsnapshot_time;
 	e.mailkey                 = c->GetMailKeyFull();
+	e.illusion_block          = m_epp->illusion_block;
 
 	const int replaced = CharacterDataRepository::ReplaceOne(database, e);
 

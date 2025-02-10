@@ -52,7 +52,7 @@ struct ExtendedProfile_Struct {
 	uint32				mercSuspendedTime; /* Not Used */
 	bool				mercIsSuspended; /* Not Used */
 	uint32				mercTimerRemaining; /* Not Used */
-	uint8				mercGender; /* Not Used */
+	uint8				illusion_block; /* Used */
 	int32				mercState; /* Not Used */
 	uint32				last_invsnapshot_time; /* Used */
 	uint32				next_invsnapshot_time; /* Used */
