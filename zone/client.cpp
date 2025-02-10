@@ -13597,3 +13597,18 @@ void Client::CheckItemDiscoverability(uint32 item_id)
 
 	DiscoverItem(item_id);
 }
+
+void Client::SetIllusionBlock(bool value, bool save) {
+	_illusion_block = value;
+
+	if (save) {
+		auto e = CharacterDataRepository::FindOne(database, CharacterID());
+		if (!e.id) {
+			return;
+		}
+
+		e.illusion_block = value;
+
+		CharacterDataRepository::UpdateOne(database, e);
+	}
+}

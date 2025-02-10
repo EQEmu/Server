@@ -6757,6 +6757,16 @@ ENGINE=InnoDB
 		.sql = R"(
 ALTER TABLE `character_data`
 	ADD COLUMN `illusion_block` TINYINT(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `deleted_at`;
+
+UPDATE `command_settings`
+SET `aliases`=
+	CASE
+	WHEN LENGTH(`aliases`) > 0
+		THEN CONCAT(`aliases`, '|ib')
+	ELSE 'ib'
+END
+WHERE `command`='illusionblock'
+AND `aliases` NOT LIKE '%ib%';
 )",
 	}
 // -- template; copy/paste this when you need to create a new entry
