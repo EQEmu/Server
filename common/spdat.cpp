@@ -822,9 +822,7 @@ bool IsGroupSpell(uint16 spell_id)
 	return (
 		spell.target_type == ST_AEBard ||
 		spell.target_type == ST_Group ||
-		spell.target_type == ST_GroupTeleport ||
-		spell.target_type == ST_GroupNoPets ||
-		spell.target_type == ST_GroupClientAndPet
+		spell.target_type == ST_GroupTeleport
 	);
 }
 
