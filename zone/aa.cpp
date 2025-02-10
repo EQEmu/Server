@@ -1803,9 +1803,9 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 			return true;
 		}
 
-		// Fury of Magic for the Hybrids
-		if (a->id == 215 && GetClassesBits() & 16412 && rank->id <= 772) {
-			return true;
+		// Restrict Fury of Magic rank 6+ to only be available to Pure Casters
+		if (a->id == 215 && rank->id > 772) {
+			return (GetClassesBits() & 15906);
 		}
 
 		if (!(IsClient() && ((a->classes >> 1) & this->CastToClient()->GetClassesBits()))) {
