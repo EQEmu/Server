@@ -39,8 +39,8 @@ void command_illusion_block(Client* c, const Seperator* sep)
 
 	if (sep->IsNumber(1)) {
 		int set_status = atoi(sep->arg[1]);
-		if (set_status == 0 || set_status == 1) {
-			c->SetIllusionBlock(set_status, true);
+		if (EQ::ValueWithin(set_status, 0, 1)) {
+			c->SetIllusionBlock(set_status);
 			c->Message(Chat::Green, "Your Illusion Block has been %s.", (set_status ? "enabled" : "disabled"));
 		}
 		else {
