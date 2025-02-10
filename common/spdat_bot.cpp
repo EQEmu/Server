@@ -90,7 +90,7 @@ bool IsBotSpellTypeBeneficial(uint16 spell_type) {
 	return false;
 }
 
-bool IsBotSpellTypeOtherBeneficial(uint16 spell_type) {
+bool BotSpellTypeUsesTargetSettings(uint16 spell_type) {
 	switch (spell_type) {
 		case BotSpellTypes::RegularHeal:
 		case BotSpellTypes::CompleteHeal:

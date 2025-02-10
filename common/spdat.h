@@ -900,7 +900,7 @@ const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellTyp
 // Bot related functions
 bool IsBotSpellTypeDetrimental (uint16 spell_type);
 bool IsBotSpellTypeBeneficial (uint16 spell_type);
-bool IsBotSpellTypeOtherBeneficial(uint16 spell_type);
+bool BotSpellTypeUsesTargetSettings(uint16 spell_type);
 bool IsBotSpellTypeInnate (uint16 spell_type);
 bool IsAEBotSpellType(uint16 spell_type);
 bool IsGroupBotSpellType(uint16 spell_type);
