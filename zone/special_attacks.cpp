@@ -239,14 +239,18 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	if (who->GetInvul() || who->GetSpecialAbility(SpecialAbility::MeleeImmunity))
 		my_hit.damage_done = DMG_INVULNERABLE;
 
-	if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane) && skill != EQ::skills::SkillBackstab)
+	/*
+	if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane) && skill != EQ::skills::SkillBackstab && skill != EQ::skills::SkillFrenzy)
 		my_hit.damage_done = DMG_INVULNERABLE;
+	*/
 
 	int64 hate = my_hit.base_damage;
 	if (hate_override > -1)
 		hate = hate_override;
 
 	if (skill == EQ::skills::SkillBash) {
+		if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane)) { my_hit.damage_done = DMG_INVULNERABLE; }
+
 		if (IsClient()) {
 			EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 			if (item) {
@@ -270,6 +274,14 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 
 				my_hit.damage_done += val;
 			}
+
+			if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane)) {
+				item = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+
+				if (!who->CheckBaneDamage(item)) {
+					my_hit.damage_done = DMG_INVULNERABLE;
+				}
+			}
 		}
 	}
 
@@ -280,6 +292,44 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 				int val = item->GetItem()->AC;
 
 				my_hit.damage_done += val;
+			}
+
+			if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane)) {
+				item = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+
+				if (!who->CheckBaneDamage(item)) {
+					my_hit.damage_done = DMG_INVULNERABLE;
+				}
+			}
+		}
+	}
+
+	if (skill == EQ::skills::SkillFrenzy) {
+		if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane)) {
+			auto item = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+
+			if (!who->CheckBaneDamage(item)) {
+				my_hit.damage_done = DMG_INVULNERABLE;
+			}
+		}
+	}
+
+	if (skill == EQ::skills::SkillBackstab) {
+		if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane)) {
+			auto item = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+
+			if (!who->CheckBaneDamage(item)) {
+				my_hit.damage_done = DMG_INVULNERABLE;
+			}
+		}
+	}
+
+	if (skill == EQ::skills::SkillArchery || skill == EQ::skills::SkillThrowing) {
+		if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane)) {
+			auto item = CastToClient()->GetInv().GetItem(EQ::invslot::slotRange);
+
+			if (!who->CheckBaneDamage(item)) {
+				my_hit.damage_done = DMG_INVULNERABLE;
 			}
 		}
 	}
