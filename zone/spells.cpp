@@ -2689,7 +2689,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 				}
 
 				if (isproc) {
-					SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, true, level_override);
+					SpellOnTarget(spell_id, spell_target, RuleI(Custom, ProcReflectPercentage), true, resist_adjust, true, level_override);
 				} else {
 					if (spells[spell_id].target_type == ST_TargetOptional){
 						if (!TrySpellProjectile(spell_target, spell_id))

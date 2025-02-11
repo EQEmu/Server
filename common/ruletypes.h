@@ -1116,6 +1116,7 @@ RULE_REAL(Custom,	CastedSpellCritBonusRatio, 				1.0, "Multiply casted (Not proc
 RULE_REAL(Custom,	ProcSpellCritBonusRatio, 				1.0, "Multiply proc spells crit ratio by this value")
 RULE_STRING(Custom, HubZones, 								"151,22", "Hub zones to display in #zoneshard output")
 RULE_STRING(Custom,	AA339Whitelist,							"16121,16122,16123,16675,16676,16677,30887,30888,30889,aa545", "List of spell/aa ids with trigger on cast effects that will trigger off AA abilities")
+RULE_INT(Custom,    ProcReflectPercentage,					50, "The percentage of damage to be dealt if a damaging proc is reflected.")
 
 RULE_BOOL(Custom,   UseHasteForMeleeSkills, 				true, "Use Haste stat for activated melee skills")
 RULE_REAL(Custom, 	PetWeaponTuningMult, 					0.5, "Value added to weapon ratio for pet weapon usage")
