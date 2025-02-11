@@ -2332,6 +2332,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Silence");
 #endif
+				if (IsClient() && RuleI(Custom, SilenceImmunityTimerMultiplier)) {
+					auto c_ref = CastToClient();
+					int  duration = CalcBuffDuration(caster, this, spell_id) * 6; // time in seconds
+					if (c_ref->m_silence_immune_timer.GetDuration() && !c_ref->m_silence_immune_timer.Check(false)) {
+						Message(Chat::Skills, fmt::format("You are temporarily immune to the silence effect. ({} seconds remaining)", static_cast<int>(c_ref->m_silence_immune_timer.GetRemainingTime()/1000)).c_str());
+						break;
+					}
+					c_ref->m_silence_immune_timer.Start(duration * (RuleI(Custom, SilenceImmunityTimerMultiplier) + 1) * 1000);
+				}
 				Silence(true);
 				break;
 			}

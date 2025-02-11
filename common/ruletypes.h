@@ -1137,6 +1137,9 @@ RULE_INT(Custom, 	PetMaximumSpellCritChance,				75,  "Maximum spell critical cha
 RULE_BOOL(Custom,   AdditiveBackstabDamage,					true, "Backstab damage functions as extra damage rather than a replacement of normal damage.")
 RULE_INT(Custom, 	SE_DamageModifierMaxCumulativeValue, 	300, "Maximum cumulative which can be applied by SE_DamageModifier via spells")
 
+RULE_INT(Custom,   	StunImmunityTimerMultiplier,			3, "Multiplier for the amount of time a player should be immune to stun after being stunned.")
+RULE_INT(Custom,   	SilenceImmunityTimerMultiplier,			3, "Multiplier for the amount of time a player should be immune to silence after being silenced.")
+
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
 

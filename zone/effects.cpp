@@ -565,7 +565,6 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 
 int64 Mob::GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_spell_dmg)
 {
-	LogDebug("Check: [{}], [{}], [{}]", spell_id, extra_spell_amt, base_spell_dmg);
 	if (RuleB(Spells, FlatItemExtraSpellAmt)) {
 		if (RuleB(Spells, ItemExtraSpellAmtCalcAsPercent)) {
 			return std::abs(base_spell_dmg) * extra_spell_amt / 100;

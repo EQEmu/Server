@@ -5969,16 +5969,14 @@ void Mob::UnStun() {
 // Stuns "this"
 void Client::Stun(int duration)
 {
-	if (RuleB(Custom, TemporaryStunImmunity)) {
-		m_stun_immune_timer.Enable();
-		if (!m_stun_immune_timer.Check(false)) {
-			Message(Chat::Skills, fmt::format("You are temporarily immune to the stun effect.").c_str());
+	if (RuleI(Custom, StunImmunityTimerMultiplier)) {
+		if (m_stun_immune_timer.GetDuration() && !m_stun_immune_timer.Check(false)) {
+			Message(Chat::Skills, fmt::format("You are temporarily immune to the stun effect. ({} seconds remaining)", static_cast<int>(m_stun_immune_timer.GetRemainingTime()/1000)).c_str());
 			return;
 		}
 	}
 
-	m_stun_immune_timer.Start(duration * 3);
-
+	m_stun_immune_timer.Start(duration * (RuleI(Custom, StunImmunityTimerMultiplier) + 1));
 	Mob::Stun(duration);
 
 	auto outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));

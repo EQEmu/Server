@@ -195,7 +195,9 @@ Client::Client() : Mob(
 	tmSitting(0),
 	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
 	lazy_load_bank_check_timer(1000),
-	bandolier_throttle_timer(0)
+	bandolier_throttle_timer(0),
+	m_stun_immune_timer(0),
+	m_silence_immune_timer(0)
 {
 	eqs = nullptr;
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
@@ -502,7 +504,9 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	tmSitting(0),
 	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
 	lazy_load_bank_check_timer(1000),
-	bandolier_throttle_timer(0)
+	bandolier_throttle_timer(0),
+	m_stun_immune_timer(0),
+	m_silence_immune_timer(0)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);

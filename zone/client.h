@@ -2157,6 +2157,10 @@ public:
 	PetInfo m_petinfoextra[MAXPETS]; // Hacky.
 
 	int m_fancy_models = -1;
+
+	Timer m_stun_immune_timer;
+	Timer m_silence_immune_timer;
+
 private:
 
 	PlayerProfile_Struct m_pp;
@@ -2245,8 +2249,6 @@ private:
 	void CheckClientToNpcAggroTimer();
 	void ClientToNpcAggroProcess();
 	void BroadcastPositionUpdate();
-
-	Timer m_stun_immune_timer;
 
 	// bulk position updates
 	glm::vec4 m_last_position_before_bulk_update;
