@@ -199,7 +199,8 @@ ClientManager::ClientManager()
 	);
 }
 
-ClientManager::~ClientManager() {
+ClientManager::~ClientManager()
+{
 	delete m_titanium_stream;
 	delete m_titanium_ops;
 	delete m_sod_stream;
@@ -210,53 +211,49 @@ void ClientManager::Process()
 {
 	ProcessDisconnect();
 
-	m_clients.erase(
-		std::remove_if(
-			m_clients.begin(), m_clients.end(),
-			[](Client *c) {
-				if (!c->Process()) {
-					LogWarning("Client had a fatal error and had to be removed from the login");
-					delete c;
-					return true;
-				}
-				return false;
-			}
-		),
-		m_clients.end());
+	for (auto it = m_clients.begin(); it != m_clients.end();) {
+		Client *c = *it;
+		if (!c->Process()) {
+			LogWarning("Client had a fatal error and had to be removed from the login");
+			delete c;
+			it = m_clients.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
 }
 
 void ClientManager::ProcessDisconnect()
 {
-	m_clients.erase(
-		std::remove_if(
-			m_clients.begin(), m_clients.end(),
-			[](Client *c) {
-				if (c->GetConnection()->CheckState(CLOSED)) {
-					LogInfo("Client disconnected from the server, removing client");
-					delete c;
-					return true;
-				}
-				return false;
-			}
-		),
-		m_clients.end());
+	auto it = m_clients.begin();
+	while (it != m_clients.end()) {
+		Client *c = *it;
+		if (c->GetConnection()->CheckState(CLOSED)) {
+			LogInfo("Client disconnected from the server, removing client");
+			delete c;
+			it = m_clients.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
 }
 
 void ClientManager::RemoveExistingClient(unsigned int account_id, const std::string &loginserver)
 {
-	m_clients.erase(
-		std::remove_if(
-			m_clients.begin(), m_clients.end(),
-			[&](Client *c) {
-				if (c->GetAccountID() == account_id && c->GetLoginServerName() == loginserver) {
-					LogInfo("Client attempting to log in existing client already logged in, removing existing client");
-					delete c;
-					return true;
-				}
-				return false;
-			}
-		),
-		m_clients.end());
+	auto it = m_clients.begin();
+	while (it != m_clients.end()) {
+		Client *c = *it;
+		if (c->GetAccountID() == account_id && c->GetLoginServerName() == loginserver) {
+			LogInfo("Client attempting to log in existing client already logged in, removing existing client");
+			delete c;
+			it = m_clients.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
 }
 
 Client *ClientManager::GetClient(unsigned int account_id, const std::string &loginserver)
