@@ -2346,7 +2346,7 @@ public:
 	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
 	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
 
-	void SetIllusionBlock(bool value, bool save = false);
+	void SetIllusionBlock(bool value) { _illusion_block = value; }
 	bool GetIllusionBlock() const override { return _illusion_block; }
 
 private:
