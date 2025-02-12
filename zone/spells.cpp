@@ -2686,7 +2686,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 						}
 					}
 				} else if (spell_target->IsRaidGrouped() && spell_target->IsOfClientBot()) {
-					Raid *target_raid = (IsClient() ? entity_list.GetRaidByClient(spell_target->CastToClient()) : entity_list.GetRaidByBot(spell_target->CastToBot()));
+					Raid *target_raid = entity_list.GetRaidByClient(spell_target->CastToClient());
+					if (IsBot()) {
+						target_raid = entity_list.GetRaidByBot(spell_target->CastToBot());
+					}
+
 					uint32 gid = 0xFFFFFFFF;
 					if (target_raid) {
 						gid = target_raid->GetGroup(spell_target->GetName());
@@ -3809,10 +3813,10 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 		}
 
 		if (
-			IsBot() && 
-			GetClass() == Class::Bard && 
-			curbuf.spellid == spellid && 
-			curbuf.ticsremaining == 0 && 
+			IsBot() &&
+			GetClass() == Class::Bard &&
+			curbuf.spellid == spellid &&
+			curbuf.ticsremaining == 0 &&
 			curbuf.casterid == GetID()
 		) {
 			LogAI("Bard check for song, spell [{}] has [{}] ticks remaining.", spellid, curbuf.ticsremaining);
@@ -4038,17 +4042,17 @@ bool Mob::SpellOnTarget(
 		return false;
 	}
 
-	bool client_blocked_buffs = 
+	bool client_blocked_buffs =
 		RuleB(Spells, EnableBlockedBuffs) &&
 		(
 			spelltar->IsClient() ||
 			(spelltar->IsPet() && spelltar->IsPetOwnerClient())
 		);
 
-	bool bot_blocked_buffs = 
-		RuleB(Bots, AllowBotBlockedBuffs) && 
+	bool bot_blocked_buffs =
+		RuleB(Bots, AllowBotBlockedBuffs) &&
 		(
-			spelltar->IsBot() || 
+			spelltar->IsBot() ||
 			(spelltar->IsPet() && spelltar->IsPetOwnerBot())
 		);
 
