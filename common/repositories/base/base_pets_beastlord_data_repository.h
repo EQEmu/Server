@@ -144,6 +144,7 @@ public:
 			e.texture       = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.helm_texture  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.gender        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 2;
+			e.size_modifier = row[5] ? (strtof(row[5], nullptr) > 0.0f ? strtof(row[5], nullptr) : 1) : 1;
 			e.face          = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
 
 			return e;
@@ -287,6 +288,7 @@ public:
 			e.texture       = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.helm_texture  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.gender        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 2;
+			e.size_modifier = row[5] ? (strtof(row[5], nullptr) > 0.0f ? strtof(row[5], nullptr) : 1) : 1;
 			e.face          = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
@@ -317,6 +319,7 @@ public:
 			e.texture       = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.helm_texture  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.gender        = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 2;
+			e.size_modifier = row[5] ? (strtof(row[5], nullptr) > 0.0f ? strtof(row[5], nullptr) : 1) : 1;
 			e.face          = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
