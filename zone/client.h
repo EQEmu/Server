@@ -2346,8 +2346,8 @@ public:
 	inline bool SpellTypeRecastCheck(uint16 spellType) { return !m_bot_spell_settings[spellType].recast_timer.GetRemainingTime(); }
 	void SetSpellTypeRecastTimer(uint16 spell_type, uint32 recast_time) { m_bot_spell_settings[spell_type].recast_timer.Start(recast_time); }
 
-	void SetIllusionBlock(bool value) { _illusionBlock = value; }
-	bool GetIllusionBlock() const override { return _illusionBlock; }
+	void SetIllusionBlock(bool value) { _illusion_block = value; }
+	bool GetIllusionBlock() const override { return _illusion_block; }
 
 private:
 	bool bot_owner_options[_booCount];
@@ -2355,7 +2355,7 @@ private:
 	bool m_bot_precombat;
 	uint32 bot_assistee;
 	std::vector<BotSpellSettings> m_bot_spell_settings;
-	bool _illusionBlock;
+	bool _illusion_block;
 
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
