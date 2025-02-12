@@ -859,9 +859,9 @@ void NPC::Depop(bool start_spawn_timer) {
 
 bool NPC::SpawnZoneController()
 {
-
-	if (!RuleB(Zone, UseZoneController))
+	if (!RuleB(Zone, UseZoneController)) {
 		return false;
+	}
 
 	auto npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
