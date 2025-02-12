@@ -6759,13 +6759,15 @@ ALTER TABLE `character_data`
 	ADD COLUMN `illusion_block` TINYINT(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `deleted_at`;
 
 UPDATE `command_settings`
-SET `aliases`=
-	CASE
-	WHEN LENGTH(`aliases`) > 0
-		THEN CONCAT(`aliases`, '|ib')
-	ELSE 'ib'
-END
-WHERE `command`='illusionblock'
+SET `aliases` =
+    CASE
+        WHEN LENGTH(`aliases`) > 0 AND `aliases` NOT LIKE '%|ib%'
+            THEN CONCAT(`aliases`, '|ib')
+        WHEN LENGTH(`aliases`) = 0
+            THEN 'ib'
+        ELSE `aliases`
+    END
+WHERE `command` = 'illusionblock'
 AND `aliases` NOT LIKE '%ib%';
 )",
 	}
