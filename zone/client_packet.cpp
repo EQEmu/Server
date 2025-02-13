@@ -7586,17 +7586,20 @@ void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 {
 	if (!GuildBanks) {
+		GuildBankAck();
 		return;
 	}
 
 	if (zone->GetZoneID() != Zones::GUILDHALL) {
 		Message(Chat::Red, "The Guild Bank is not available in this zone.");
+		GuildBankAck();
 		return;
 	}
 
 	if (app->size < sizeof(uint32)) {
 		LogError("Wrong size: OP_GuildBank, size=[{}], expected [{}]", app->size, sizeof(uint32));
 		DumpPacket(app);
+		GuildBankAck();
 		return;
 	}
 
@@ -7630,7 +7633,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		case GuildBankPromote: {
 			if (GuildBanks->IsAreaFull(GuildID(), GuildBankMainArea)) {
 				MessageString(Chat::Red, GUILD_BANK_FULL);
-				GuildBankDepositAck(true, sentAction);
+				GuildBankAck();
 				return;
 			}
 

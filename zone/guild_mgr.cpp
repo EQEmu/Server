@@ -688,15 +688,12 @@ GuildBankManager::~GuildBankManager()
 
 }
 
-bool GuildBankManager::Load(uint32 guild_id)
+void GuildBankManager::Load(uint32 guild_id)
 {
-	auto results =
-		GuildBankRepository::GetWhere(database, fmt::format("`guild_id` = '{}' ORDER BY `area`, `slot`", guild_id)
+	auto results = GuildBankRepository::GetWhere(
+		database,
+		fmt::format("`guild_id` = '{}' ORDER BY `area`, `slot`", guild_id)
 	);
-
-	if (results.empty()) {
-		return false;
-	}
 
 	auto bank          = std::make_shared<GuildBank>();
 	bank->guild_id     = guild_id;
@@ -717,7 +714,6 @@ bool GuildBankManager::Load(uint32 guild_id)
 	}
 
     banks.push_back(bank);
-	return true;
 }
 
 bool GuildBankManager::IsLoaded(uint32 guild_id)
@@ -1068,7 +1064,7 @@ std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uin
 			return nullptr;
 		}
 
-		std::unique_ptr<EQ::ItemInstance> inst_new(database.CreateItem(
+		inst.reset(database.CreateItem(
 			guild_bank->items.deposit_area[slot_id].item_id,
 			guild_bank->items.deposit_area[slot_id].quantity,
 			guild_bank->items.deposit_area[slot_id].augment_1_id,
@@ -1079,40 +1075,28 @@ std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uin
 			guild_bank->items.deposit_area[slot_id].augment_6_id)
 		);
 
-		if (!inst_new) {
+		if (!inst) {
 			return nullptr;
 		}
 
-		inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
-		if (quantity <= guild_bank->items.deposit_area[slot_id].quantity) {
-			inst_new->SetCharges(quantity);
+		if (!inst->IsStackable()) {
+			inst->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
 		}
-
-		// if (!inst_new->IsStackable()) {
-		// 	inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
-		// }
-		// else {
-		// }
-		// if (!inst_new->IsStackable()) {
-		// 	inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
-		// }
-		// else {
-		// 	if (quantity <= guild_bank->items.deposit_area[slot_id].quantity) {
-		// 		inst_new->SetCharges(quantity);
-		// 	}
-		// 	else {
-		// 		inst_new->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
-		// 	}
-		// }
-
-		inst = std::move(inst_new);
+		else {
+			if (quantity <= guild_bank->items.deposit_area[slot_id].quantity) {
+				inst->SetCharges(quantity);
+			}
+			else {
+				inst->SetCharges(guild_bank->items.deposit_area[slot_id].quantity);
+			}
+		}
 	}
 	else {
 		if (slot_id > guild_bank->items.main_area.size()) {
 			return nullptr;
 		}
 
-		std::unique_ptr<EQ::ItemInstance> inst_new(database.CreateItem(
+		inst.reset(database.CreateItem(
 			guild_bank->items.main_area[slot_id].item_id,
 			guild_bank->items.main_area[slot_id].quantity,
 			guild_bank->items.main_area[slot_id].augment_1_id,
@@ -1122,23 +1106,21 @@ std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uin
 			guild_bank->items.main_area[slot_id].augment_5_id,
 			guild_bank->items.main_area[slot_id].augment_6_id));
 
-		if (!inst_new) {
+		if (!inst) {
 			return nullptr;
 		}
 
-		if (!inst_new->IsStackable()) {
-			inst_new->SetCharges(guild_bank->items.main_area[slot_id].quantity);
+		if (!inst->IsStackable()) {
+			inst->SetCharges(guild_bank->items.main_area[slot_id].quantity);
 		}
 		else {
 			if (quantity <= guild_bank->items.main_area[slot_id].quantity) {
-				inst_new->SetCharges(quantity);
+				inst->SetCharges(quantity);
 			}
 			else {
-				inst_new->SetCharges(guild_bank->items.main_area[slot_id].quantity);
+				inst->SetCharges(guild_bank->items.main_area[slot_id].quantity);
 			}
 		}
-
-		inst = std::move(inst_new);
 	}
 
 	return inst;

@@ -16,30 +16,11 @@ extern PetitionList petition_list;
 #define PBUFFER 50
 #define MBUFFER 50
 
-//#define GUILD_BANK_MAIN_AREA_SIZE	200
-//#define GUILD_BANK_DEPOSIT_AREA_SIZE	20
-
 class Client;
 class ServerPacket;
 
-// struct GuildBankItem {
-// 	uint32      item_id;
-// 	uint32      augment_1_id;
-// 	uint32      augment_2_id;
-// 	uint32      augment_3_id;
-// 	uint32      augment_4_id;
-// 	uint32      augment_5_id;
-// 	uint32      augment_6_id;
-// 	int32       quantity;
-// 	uint8       permissions;
-// 	std::string donator;
-// 	std::string who_for;
-// };
-
 struct GuildBankItems
 {
-	//GuildBankItem	MainArea[GUILD_BANK_MAIN_AREA_SIZE];
-	//GuildBankItem	DepositArea[GUILD_BANK_DEPOSIT_AREA_SIZE];
 	std::map<int32, GuildBankRepository::GuildBank> main_area{};
 	std::map<int32, GuildBankRepository::GuildBank> deposit_area{};
 };
@@ -115,7 +96,7 @@ public:
 	void UpdateRankName(uint32 gid, uint32 rank, std::string rank_name);
 	void SendRankName(uint32 guild_id, uint32 rank, std::string rank_name);
 	void SendAllRankNames(uint32 guild_id, uint32 char_id);
-	BaseGuildManager::GuildInfo* GetGuildByGuildID(uint32 guild_id);
+	GuildInfo* GetGuildByGuildID(uint32 guild_id);
 	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation);
 
 protected:
@@ -152,7 +133,7 @@ public:
 
 private:
 	bool IsLoaded(uint32 GuildID);
-	bool Load(uint32 GuildID);
+	void Load(uint32 GuildID);
 	void UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
 
 	std::list<std::shared_ptr<GuildBank>> banks{};
