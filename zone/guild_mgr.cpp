@@ -1024,7 +1024,7 @@ int GuildBankManager::Promote(uint32 guild_id, int slot_id, Client* c)
 	GuildBankRepository::UpdateOne(database, new_item);
 
 	SendGuildBankItemUpdate(it_deposit->second.guild_id, it_deposit->second.slot, it_deposit->second.area, false, c);
-	it_deposit->second = std::move(GuildBankRepository::NewEntity());
+	it_deposit->second                         = std::move(GuildBankRepository::NewEntity());
 	guild_bank->items.main_area[new_item.slot] = new_item;
 	SendGuildBankItemUpdate(new_item.guild_id, new_item.slot, new_item.area, true, c);
 
@@ -1736,6 +1736,10 @@ void GuildBankManager::SendGuildBankItemUpdate(uint32 guild_id, int32 slot_id, u
 	}
 
 	const auto item_data = database.GetItem(item.item_id);
+
+	if (item_data && (item_data->MaxCharges > 0 || item_data->MaxCharges < 0)) {
+		item.quantity = 1;
+	}
 
 	GuildBankItemUpdate_Struct gbius{};
 	gbius.action      = GuildBankItemUpdate;
