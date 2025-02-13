@@ -209,6 +209,7 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 				case Race::Wrulon:
 				case Race::Phoenix:
 				case Race::Spider:
+				case Race::Worg:
 					return 0;
 			}
 			if (inst) {
