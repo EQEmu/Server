@@ -586,8 +586,12 @@ bool Client::Process() {
 
 			if (!sent_weapon) {
 				SetWeaponAppearance(HasClass(Class::Ranger));
-				SendArmorAppearance();
 				sent_weapon = true;
+
+				// Wow this is bad
+				for (uint8 slot_id = EQ::textures::armorFeet; slot_id <= EQ::textures::armorHead; ++slot_id) {
+					SendWearChange(slot_id);
+				}
 			}
 
 
