@@ -2165,6 +2165,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		for (const auto & ent : entity_list.GetNPCList()) {
 			auto mob = ent.second;
 			if (mob && mob->IsOnHatelist(GetOwner()) && mob->GetTarget() && mob->GetTarget()->GetID() == GetOwner()->GetID()) {
+				mob->AddToHateList(this, 100, 100);
 				Taunt(mob, true);
 			}
 		}

@@ -3388,11 +3388,27 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		return;
 	}
 
-	if (other->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
-		if (other->HasOwner()) {
-			AddToHateList(other->GetOwner(), 1, 0, iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
+	if (other->HasOwner()) {
+		if (other->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
+			int split_count = 1;
+
+			for (auto pet : other->GetOwner()->GetAllPets()) {
+				if (!pet->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
+					split_count++;
+				}
+			}
+
+			AddToHateList(other->GetOwner(), std::ceil(hate / split_count), std::ceil(damage / split_count),
+						iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
+
+			for (auto other_pet : other->GetOwner()->GetAllPets()) {
+				if (!other_pet->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
+					AddToHateList(other_pet, std::ceil(hate / split_count), std::ceil(damage / split_count),
+								iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
+				}
+			}
+			return;
 		}
-		return;
 	}
 
 	if (GetSpecialAbility(SpecialAbility::TunnelVision)) {

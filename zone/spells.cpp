@@ -3949,11 +3949,12 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 			continue;
 		}
 
-		if(curbuf.spellid == spellid)
+		if(curbuf.spellid == spellid && (curbuf.casterid == GetID() && IsStackableDOT(spellid))) {
 			return(-1);	//do not recast a buff we already have on, we recast fast enough that we dont need to refresh our buffs
+		}
 
 		// there's a buff in this slot
-		ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spellid, caster_level, nullptr, nullptr, i);
+		ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spellid, caster_level, entity_list.GetMob(curbuf.casterid), this, i);
 		if(ret == 1) {
 			// should overwrite current slot
 			if(iFailIfOverwrite) {
