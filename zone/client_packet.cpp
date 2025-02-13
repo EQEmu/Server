@@ -1034,6 +1034,7 @@ void Client::CompleteConnect()
 	}
 
 	SetWeaponAppearance(true);
+	SendArmorAppearance();
 
 	ApplyGlobalBuffs();
 
