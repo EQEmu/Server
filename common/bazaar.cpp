@@ -283,7 +283,7 @@ Bazaar::GetSearchResults(
 	);
 
 	if (item_results.empty()) {
-		LogError("Bazaar - No items found in bazaar search.");
+		LogTradingDetail("Bazaar - No items found in bazaar search.");
 		return all_entries;
 	}
 
