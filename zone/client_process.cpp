@@ -587,13 +587,12 @@ bool Client::Process() {
 			if (!sent_weapon) {
 				SetWeaponAppearance(HasClass(Class::Ranger));
 				sent_weapon = true;
-
-				// Wow this is bad
-				for (uint8 slot_id = EQ::textures::armorFeet; slot_id <= EQ::textures::armorHead; ++slot_id) {
-					SendWearChange(slot_id);
-				}
 			}
 
+			if (m_initial_wc.Check(false)) {
+				SendArmorAppearance();
+				m_initial_wc.Disable();
+			}
 
 			// If there are spellcasting bugs, look here first
 			if (!IsCasting()) {

@@ -197,7 +197,8 @@ Client::Client() : Mob(
 	lazy_load_bank_check_timer(1000),
 	bandolier_throttle_timer(0),
 	m_stun_immune_timer(0),
-	m_silence_immune_timer(0)
+	m_silence_immune_timer(0),
+	m_initial_wc(1000)
 {
 	eqs = nullptr;
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
@@ -506,7 +507,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	lazy_load_bank_check_timer(1000),
 	bandolier_throttle_timer(0),
 	m_stun_immune_timer(0),
-	m_silence_immune_timer(0)
+	m_silence_immune_timer(0),
+	m_initial_wc(1000)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);

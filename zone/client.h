@@ -2148,6 +2148,8 @@ private:
 	int sent_inventory;
 	bool sent_weapon;
 
+	Timer m_initial_wc;
+
 	// https://github.com/EQEmu/Server/pull/2479
 	bool m_lock_save_position = false;
 public:
