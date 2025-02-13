@@ -590,6 +590,7 @@ void NPC::AddLootDropFixed(
 		case Race::Wrulon:
 		case Race::Phoenix:
 		case Race::Spider:
+		case Race::Worg:
 			safe_delete(outapp);
 			safe_delete(inst);
 			return;
