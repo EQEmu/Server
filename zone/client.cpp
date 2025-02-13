@@ -8392,6 +8392,15 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		// Do aggro enhancements
 		swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
 
+		swarm_pet_npc->TempName(fmt::format("{}`s {} Doppelganger", GetCleanName(),
+												([](int count) {
+													constexpr const char* ordinals[] = {"First", "Second", "Third", "Fourth", "Fifth",
+																						"Sixth", "Seventh", "Eighth", "Ninth", "Tenth"};
+													return ordinals[std::min(count, 9)];
+												})(summon_count)
+											).c_str());
+
+
 		// Give Client's Buffs to the pet
 		//auto buffs = GetBuffs();
 		for (int buff_idx = 0; buff_idx < GetMaxTotalSlots(); buff_idx++) {
