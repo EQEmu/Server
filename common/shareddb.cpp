@@ -1639,6 +1639,13 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			break;
 		}
 	}
+
+	for (uint32 id = 0; id < hash.max_key(); ++id) {
+		if (hash.exists(id) && !hash.exists(id + 1000000)) {
+			auto item = hash.find(id);
+			item->Slots &= ~2097152;
+		}
+    }
 }
 
 EQ::ItemData *SharedDatabase::GetItem(uint32 id) const

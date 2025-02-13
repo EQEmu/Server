@@ -190,6 +190,22 @@ namespace EQ {
 		}
 
 		/*!
+			Retrieve pointer function. BE VERY CAREFUL HERE. PROBABLY DONT USE THIS
+		\param i Index to retrieve the value from
+		*/
+		value_type* find(const key_type& i) {
+			if(i >= offset_count_) {
+				return nullptr;
+			}
+
+			if(offsets_[i] == 0xFFFFFFFFU) {
+				return nullptr;
+			}
+
+			return &elements_[offsets_[i]];
+		}
+
+		/*!
 			Checks if there is a value at a certain index
 		\param i Index to check for a value
 		*/
