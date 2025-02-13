@@ -743,7 +743,7 @@ namespace BotSpellTypes
 	constexpr uint16	DISCIPLINE_END             = BotSpellTypes::DiscUtility;      // Do not remove this, increment as needed
 }
 
-static std::map<uint16, std::string> spellType_names = {
+static std::map<uint16, std::string> spell_type_names = {
 	{ BotSpellTypes::Nuke,                     "Nuke" },
 	{ BotSpellTypes::RegularHeal,              "Regular Heal" },
 	{ BotSpellTypes::Root,                     "Root" },
@@ -818,7 +818,7 @@ static std::map<uint16, std::string> spellType_names = {
 	{ BotSpellTypes::AELull,                   "AE Lull" }
 };
 
-static std::map<uint16, std::string> spellType_shortNames = {
+static std::map<uint16, std::string> spell_type_short_names = {
 	{ BotSpellTypes::Nuke,                     "nukes" },
 	{ BotSpellTypes::RegularHeal,              "regularheals" },
 	{ BotSpellTypes::Root,                     "roots" },

@@ -2249,7 +2249,7 @@ bool BotDatabase::LoadBotSettings(Mob* m)
 		else {
 			LogBotSettings("[{}] says, 'Loading {} [{}], {} [{}] - setting to [{}].",
 				m->GetCleanName(),
-				Bot::GetBotSpellCategoryName(e.setting_type),
+				Bot::GetBotSpellCategoryShortName(e.setting_type),
 				e.setting_type,
 				Bot::GetSpellTypeNameByID(e.setting_id),
 				e.setting_id,
@@ -2312,7 +2312,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 					.setting_id					= static_cast<uint16_t>(i),
 					.setting_type				= static_cast<uint8_t>(BotSettingCategories::BaseSetting),
 					.value						= static_cast<int32_t>(m->CastToBot()->GetBotBaseSetting(i)),
-					.category_name				= Bot::GetBotSpellCategoryName(BotSettingCategories::BaseSetting),
+					.category_name				= Bot::GetBotSpellCategoryShortName(BotSettingCategories::BaseSetting),
 					.setting_name				= Bot::GetBotSettingCategoryName(i)
 				};
 
@@ -2332,13 +2332,13 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 						.setting_id				= static_cast<uint16_t>(x),
 						.setting_type			= static_cast<uint8_t>(i),
 						.value					= m->CastToBot()->GetSetting(i, x),
-						.category_name			= Bot::GetBotSpellCategoryName(i),
+						.category_name			= Bot::GetBotSpellCategoryShortName(i),
 						.setting_name			= Bot::GetSpellTypeNameByID(x)
 					};
 
 					v.emplace_back(e);
 
-					LogBotSettings("{} says, 'Saving {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), Bot::GetBotSpellCategoryName(i), Bot::GetSpellTypeNameByID(x), x, e.value, m->CastToBot()->GetDefaultSetting(i, x, bot_stance));
+					LogBotSettings("{} says, 'Saving {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), Bot::GetBotSpellCategoryShortName(i), Bot::GetSpellTypeNameByID(x), x, e.value, m->CastToBot()->GetDefaultSetting(i, x, bot_stance));
 				}
 			}
 		}
@@ -2354,7 +2354,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 						.setting_id				= static_cast<uint16_t>(BotBaseSettings::IllusionBlock),
 						.setting_type			= static_cast<uint8_t>(BotSettingCategories::BaseSetting),
 						.value 					= m->CastToClient()->GetIllusionBlock(),
-						.category_name			= Bot::GetBotSpellCategoryName(BotSettingCategories::BaseSetting),
+						.category_name			= Bot::GetBotSpellCategoryShortName(BotSettingCategories::BaseSetting),
 						.setting_name			= Bot::GetBotSettingCategoryName(BotBaseSettings::IllusionBlock)
 			};
 
@@ -2366,7 +2366,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 
 		for (uint16 i = BotSettingCategories::START_CLIENT; i <= BotSettingCategories::END_CLIENT; ++i) {
 			for (uint16 x = BotSpellTypes::START; x <= BotSpellTypes::END; ++x) {
-				LogBotSettings("{} says, 'Checking {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), Bot::GetBotSpellCategoryName(i), Bot::GetSpellTypeNameByID(x), x, m->CastToClient()->GetBotSetting(i, x), m->CastToClient()->GetDefaultBotSettings(i, x));
+				LogBotSettings("{} says, 'Checking {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), Bot::GetBotSpellCategoryShortName(i), Bot::GetSpellTypeNameByID(x), x, m->CastToClient()->GetBotSetting(i, x), m->CastToClient()->GetDefaultBotSettings(i, x));
 				if (m->CastToClient()->GetBotSetting(i, x) != m->CastToClient()->GetDefaultBotSettings(i, x)) {
 					auto e = BotSettingsRepository::BotSettings{
 						.character_id			= character_id,
@@ -2375,13 +2375,13 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 						.setting_id				= static_cast<uint16_t>(x),
 						.setting_type			= static_cast<uint8_t>(i),
 						.value					= m->CastToClient()->GetBotSetting(i, x),
-						.category_name			= Bot::GetBotSpellCategoryName(i),
+						.category_name			= Bot::GetBotSpellCategoryShortName(i),
 						.setting_name			= Bot::GetSpellTypeNameByID(x)
 					};
 
 					v.emplace_back(e);
 
-					LogBotSettings("{} says, 'Saving {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), Bot::GetBotSpellCategoryName(i), Bot::GetSpellTypeNameByID(x), x, e.value, m->CastToClient()->GetDefaultBotSettings(i, x));
+					LogBotSettings("{} says, 'Saving {} {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), Bot::GetBotSpellCategoryShortName(i), Bot::GetSpellTypeNameByID(x), x, e.value, m->CastToClient()->GetDefaultBotSettings(i, x));
 				}
 			}
 		}

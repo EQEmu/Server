@@ -9,7 +9,7 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 	}
 
 	if (helper_command_alias_fail(c, "bot_command_blocked_buffs", sep->arg[0], "blockedbuffs")) {
-		c->Message(Chat::White, "note: Allows you to set, view and wipe blocked buffs for the selected bots.");
+		c->Message(Chat::White, "note: Allows you to set, view and wipe beneficial blocked buffs for the selected bots.");
 
 		return;
 	}
@@ -17,7 +17,7 @@ void bot_command_blocked_buffs(Client* c, const Seperator* sep)
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		BotCommandHelpParams p;
 
-		p.description = { "Allows you to set, view and wipe blocked buffs for the selected bots." };
+		p.description = { "Allows you to set, view and wipe beneficial blocked buffs for the selected bots." };
 		p.notes = { "- You can 'set' spells to be blocked, 'remove' spells from the blocked list, 'list' the current blocked spells or 'wipe' the entire list." };
 		p.example_format = { fmt::format("{} [add [ID] | remove [ID] | list | wipe] [actionable, default: target]", sep->arg[0]) };
 		p.examples_one = 
@@ -231,7 +231,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 	}
 
 	if (helper_command_alias_fail(c, "bot_command_blocked_pet_buffs", sep->arg[0], "blockedpetbuffs")) {
-		c->Message(Chat::White, "note: Allows you to set, view and wipe blocked pet buffs for the selected bots.");
+		c->Message(Chat::White, "note: Allows you to set, view and wipe beneficial blocked pet buffs for the selected bots.");
 
 		return;
 	}
@@ -239,7 +239,7 @@ void bot_command_blocked_pet_buffs(Client* c, const Seperator* sep)
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		BotCommandHelpParams p;
 
-		p.description = { "Allows you to set, view and wipe blocked pet buffs for the selected bots." };
+		p.description = { "Allows you to set, view and wipe beneficial blocked pet buffs for the selected bots." };
 		p.notes =
 		{
 			"- You can 'set' spells to be blocked, 'remove' spells from the blocked list, 'list' the current blocked spells or 'wipe' the entire list.",

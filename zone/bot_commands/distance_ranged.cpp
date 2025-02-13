@@ -16,7 +16,7 @@ void bot_command_distance_ranged(Client* c, const Seperator* sep)
 		{ 
 			"- Bots will stay between half the value of the setting and the current value. IE, if set to 60, bots will stay between 30 and 60.",
 			"- Casters will never go closer than their maximum melee range.",
-			"- Throwing bots will never get closer than the minimum value for ranged to work, or beyond the range of their items."
+			"- Archery & Throwing bots will never get closer than the minimum value for ranged to work, or beyond the range of their items."
 		};
 		p.example_format = { fmt::format("{} [value] [actionable]", sep->arg[0]) };
 		p.examples_one = {

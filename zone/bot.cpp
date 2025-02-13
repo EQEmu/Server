@@ -8353,12 +8353,13 @@ void Bot::ListBotSpells(uint8 min_level)
 			bot_owner->Message(
 				Chat::White,
 				fmt::format(
-					"Spell {} | Spell: {} | Add Spell: {}",
+					"Spell {} | Spell: {} (ID: {}) | Add Spell: {}",
 					spell_number,
 					Saylink::Silent(
 						fmt::format("^spellinfo {}", s.spellid),
 						spells[s.spellid].name
 					),
+					s.spellid,
 					Saylink::Silent(
 						fmt::format("^spellsettingsadd {} {} {} {}", s.spellid, s.priority, s.min_hp, s.max_hp), "Add")
 				).c_str()
@@ -12077,182 +12078,6 @@ bool Bot::HasValidAETarget(Bot* caster, uint16 spell_id, uint16 spell_type, Mob*
 	return true;
 }
 
-void Bot::CopySettings(Bot* to, uint8 setting_type, uint16 spell_type) {
-	switch (setting_type) {
-		case BotSettingCategories::BaseSetting:
-			for (uint16 i = BotBaseSettings::START; i <= BotBaseSettings::END; ++i) {
-				to->SetBotBaseSetting(i, GetBotBaseSetting(i));
-			}
-
-			break;
-		case BotSettingCategories::SpellHold:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeHold(spell_type, GetSpellTypeHold(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeHold(i, GetSpellTypeHold(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellDelay:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeDelay(spell_type, GetSpellTypeDelay(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeDelay(i, GetSpellTypeDelay(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellMinThreshold:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeMinThreshold(spell_type, GetSpellTypeMinThreshold(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeMinThreshold(i, GetSpellTypeMinThreshold(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellMaxThreshold:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeMaxThreshold(spell_type, GetSpellTypeMaxThreshold(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeMaxThreshold(i, GetSpellTypeMaxThreshold(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeAggroCheck:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeAggroCheck(spell_type, GetSpellTypeAggroCheck(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeAggroCheck(i, GetSpellTypeAggroCheck(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeResistLimit:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeResistLimit(spell_type, GetSpellTypeResistLimit(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeResistLimit(i, GetSpellTypeResistLimit(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeMinManaPct:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeMinManaLimit(spell_type, GetSpellTypeMinManaLimit(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeMinManaLimit(i, GetSpellTypeMinManaLimit(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeMaxManaPct:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeMaxManaLimit(spell_type, GetSpellTypeMaxManaLimit(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeMaxManaLimit(i, GetSpellTypeMaxManaLimit(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeMinHPPct:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeMinHPLimit(spell_type, GetSpellTypeMinHPLimit(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeMinHPLimit(i, GetSpellTypeMinHPLimit(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeMaxHPPct:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeMaxHPLimit(spell_type, GetSpellTypeMaxHPLimit(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeMaxHPLimit(i, GetSpellTypeMaxHPLimit(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeIdlePriority:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypePriority(spell_type, BotPriorityCategories::Idle, GetSpellTypePriority(spell_type, BotPriorityCategories::Idle));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypePriority(i, BotPriorityCategories::Idle, GetSpellTypePriority(i, BotPriorityCategories::Idle));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeEngagedPriority:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypePriority(spell_type, BotPriorityCategories::Engaged, GetSpellTypePriority(spell_type, BotPriorityCategories::Engaged));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypePriority(i, BotPriorityCategories::Engaged, GetSpellTypePriority(i, BotPriorityCategories::Engaged));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypePursuePriority:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypePriority(spell_type, BotPriorityCategories::Pursue, GetSpellTypePriority(spell_type, BotPriorityCategories::Pursue));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypePriority(i, BotPriorityCategories::Pursue, GetSpellTypePriority(i, BotPriorityCategories::Pursue));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeAEOrGroupTargetCount:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeAEOrGroupTargetCount(spell_type, GetSpellTypeAEOrGroupTargetCount(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeAEOrGroupTargetCount(i, GetSpellTypeAEOrGroupTargetCount(i));
-				}
-			}
-
-			break;
-		case BotSettingCategories::SpellTypeAnnounceCast:
-			if (spell_type != UINT16_MAX) {
-				to->SetSpellTypeAnnounceCast(spell_type, GetSpellTypeAnnounceCast(spell_type));
-			}
-			else {
-				for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
-					to->SetSpellTypeAnnounceCast(i, GetSpellTypeAnnounceCast(i));
-				}
-			}
-
-			break;
-	}
-}
-
 void Bot::CopyBotSpellSettings(Bot* to)
 {
 	if (!to) {
@@ -12801,12 +12626,16 @@ bool Bot::IsValidBotSpellCategory(uint8 setting_type) {
 }
 
 std::string Bot::GetBotSpellCategoryName(uint8 setting_type) {
-	return Bot::IsValidBotSpellCategory(setting_type) ? botSpellCategory_names[setting_type] : "UNKNOWN CATEGORY";
+	return Bot::IsValidBotSpellCategory(setting_type) ? bot_setting_category_names[setting_type] : "UNKNOWN CATEGORY";
+}
+
+std::string Bot::GetBotSpellCategoryShortName(uint8 setting_type) {
+	return Bot::IsValidBotSpellCategory(setting_type) ? bot_setting_category_short_names[setting_type] : "UNKNOWN CATEGORY";
 }
 
 uint16 Bot::GetBotSpellCategoryIDByShortName(std::string setting_string) {
 	for (int i = BotSettingCategories::START; i <= BotSettingCategories::END; ++i) {
-		if (!Strings::ToLower(setting_string).compare(Strings::ToLower(GetBotSpellCategoryName(i)))) {
+		if (!Strings::ToLower(setting_string).compare(Strings::ToLower(GetBotSpellCategoryShortName(i)))) {
 			return i;
 		}
 	}
@@ -12833,11 +12662,11 @@ uint16 Bot::GetBaseSettingIDByShortName(std::string setting_string) {
 }
 
 std::string Bot::GetSpellTypeShortNameByID(uint16 spell_type) {
-	return IsValidBotSpellType(spell_type) ? spellType_shortNames[spell_type] : "UNKNOWN SPELLTYPE";
+	return IsValidBotSpellType(spell_type) ? spell_type_short_names[spell_type] : "UNKNOWN SPELLTYPE";
 }
 
 std::string Bot::GetSpellTypeNameByID(uint16 spell_type) {
-	return IsValidBotSpellType(spell_type) ? spellType_names[spell_type] : "UNKNOWN SPELLTYPE";
+	return IsValidBotSpellType(spell_type) ? spell_type_names[spell_type] : "UNKNOWN SPELLTYPE";
 }
 
 bool Bot::IsValidSubType(uint16 sub_type) {

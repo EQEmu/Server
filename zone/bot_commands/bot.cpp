@@ -480,7 +480,7 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 		p.description = { "Sets or resets the follow distance of the selected bots." };
 		p.notes =
 		{
-			fmt::format("[Default]: {}", RuleI(Bots, MaxFollowDistance)),
+			fmt::format("[Default]: {}", RuleI(Bots, DefaultFollowDistance)),
 			fmt::format("- You must use a value between 1 and {}.", RuleI(Bots, MaxFollowDistance))
 		};
 		p.example_format = { fmt::format("{} [reset]/[set [value]] [actionable]", sep->arg[0]) };
@@ -1154,7 +1154,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		p.description = { "Change a bot's stance to control the way it behaves." };
 		p.notes = 
 		{
-			"- <b>Changing a stance will reset all settings to match that stance type.</b>",
+			"- Changing a stance will reset all settings to match that stance type.",
 			"- Any changes made will only save to that stance for future use.",
 			fmt::format(
 				"- {} (#{}) will tell Non-Warrior classes to taunt automatically.",
@@ -1182,14 +1182,14 @@ void bot_command_stance(Client *c, const Seperator *sep)
 			),
 			"<br>",
 			fmt::format(
-				"- {} (#{}) [Default] - Overall balance and casts most spell types by default.",
-				Stance::GetName(Stance::Balanced),
-				Stance::Balanced
-			),
-			fmt::format(
 				"- {} (#{}) - Idle. Does not cast or engage in combat.",
 				Stance::GetName(Stance::Passive),
 				Stance::Passive
+			),
+			fmt::format(
+				"- {} (#{}) [Default] - Overall balance and casts most spell types by default.",
+				Stance::GetName(Stance::Balanced),
+				Stance::Balanced
 			),
 			fmt::format(
 				"- {} (#{}) - More mana and aggro efficient (SKs will still cast hate line). Longer delays between detrimental spells, thresholds adjusted to cast less often.",

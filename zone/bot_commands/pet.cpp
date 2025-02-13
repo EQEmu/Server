@@ -106,6 +106,12 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 		BotCommandHelpParams p;
 
 		p.description = { "Allows you to change the type of pet Magician bots will cast." };
+		p.notes = {
+			fmt::format(
+				"- Epic pets are currently {} on this server.",
+				RuleB(Bots, AllowMagicianEpicPet) ? "allowed" : "not allowed"
+			)
+		};
 		p.example_format = { fmt::format("{} [current | water | fire | air | earth | monster | epic] [actionable, default: target]", sep->arg[0]) };
 		p.examples_one =
 		{

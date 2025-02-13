@@ -93,7 +93,7 @@ enum BotCastingChanceConditional : uint8
 	cntHSND = 16
 };
 
-namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
+namespace BotSettingCategories {
 	constexpr uint8 BaseSetting                       = 0;
 	constexpr uint8 SpellHold                         = 1;
 	constexpr uint8 SpellDelay                        = 2;
@@ -118,13 +118,32 @@ namespace BotSettingCategories { // Update GetBotSpellCategoryName as needed
 	constexpr uint16 END                              = BotSettingCategories::SpellTypeAnnounceCast;
 };
 
-static std::map<uint8, std::string> botSpellCategory_names = {
+static std::map<uint8, std::string> bot_setting_category_names = {
+	{ BotSettingCategories::BaseSetting,                   "Base Setting" },
+	{ BotSettingCategories::SpellHold,                     "Spell Holds" },
+	{ BotSettingCategories::SpellDelay,                    "Spell Delays" },
+	{ BotSettingCategories::SpellMinThreshold,             "Spell Minimum Thresholds" },
+	{ BotSettingCategories::SpellMaxThreshold,             "Spell Maximum Thresholds" },
+	{ BotSettingCategories::SpellTypeResistLimit,          "Spell Resist Limits" },
+	{ BotSettingCategories::SpellTypeAggroCheck,           "Spell Aggro Checks" },
+	{ BotSettingCategories::SpellTypeMinManaPct,           "Spell Min Mana Percent" },
+	{ BotSettingCategories::SpellTypeMaxManaPct,           "Spell Max Mana Percent" },
+	{ BotSettingCategories::SpellTypeMinHPPct,             "Spell Min HP Percent" },
+	{ BotSettingCategories::SpellTypeMaxHPPct,             "Spell Max HP Percent" },
+	{ BotSettingCategories::SpellTypeIdlePriority,         "Spell Idle Priority" },
+	{ BotSettingCategories::SpellTypeEngagedPriority,      "Spell Engaged Priority" },
+	{ BotSettingCategories::SpellTypePursuePriority,       "Spell Pursue Priority" },
+	{ BotSettingCategories::SpellTypeAEOrGroupTargetCount, "Spell Target Counts" },
+	{ BotSettingCategories::SpellTypeAnnounceCast,         "Spell Announce Casts" }
+};
+
+static std::map<uint8, std::string> bot_setting_category_short_names = {
 	{ BotSettingCategories::BaseSetting,                   "BaseSetting" },
 	{ BotSettingCategories::SpellHold,                     "SpellHolds" },
 	{ BotSettingCategories::SpellDelay,                    "SpellDelays" },
 	{ BotSettingCategories::SpellMinThreshold,             "SpellMinThresholds" },
 	{ BotSettingCategories::SpellMaxThreshold,             "SpellMaxThresholds" },
-	{ BotSettingCategories::SpellTypeResistLimit,          "SpellResistLimit" },
+	{ BotSettingCategories::SpellTypeResistLimit,          "SpellResistLimits" },
 	{ BotSettingCategories::SpellTypeAggroCheck,           "SpellAggroChecks" },
 	{ BotSettingCategories::SpellTypeMinManaPct,           "SpellMinManaPct" },
 	{ BotSettingCategories::SpellTypeMaxManaPct,           "SpellMaxManaPct" },
@@ -137,7 +156,7 @@ static std::map<uint8, std::string> botSpellCategory_names = {
 	{ BotSettingCategories::SpellTypeAnnounceCast,         "SpellAnnounceCasts" }
 };
 
-namespace BotPriorityCategories { // Update GetBotSpellCategoryName as needed
+namespace BotPriorityCategories {
 	constexpr uint8 Idle                              = 0;
 	constexpr uint8 Engaged                           = 1;
 	constexpr uint8 Pursue                            = 2;
@@ -591,7 +610,6 @@ public:
 	void SetBotBaseSetting(uint16 bot_setting, int setting_value);
 	int GetSetting(uint16 setting_category, uint16 setting_type);
 	void SetBotSetting(uint8 setting_type, uint16 bot_setting, int setting_value);
-	void CopySettings(Bot* to, uint8 setting_type, uint16 spell_type = UINT16_MAX);
 	void CopyBotSpellSettings(Bot* to);
 	void ResetBotSpellSettings();
 
@@ -677,6 +695,7 @@ public:
 	bool IsValidSpellTypeSubType(uint16 spell_type, uint16 sub_type, uint16 spell_id);
 	static bool IsValidBotSpellCategory(uint8 setting_type);
 	static std::string GetBotSpellCategoryName(uint8 setting_type);
+	static std::string GetBotSpellCategoryShortName(uint8 setting_type);
 	static uint16 GetBotSpellCategoryIDByShortName(std::string setting_string);
 	void AssignBotSpellsToTypes(std::vector<BotSpells>& AIBot_spells, std::unordered_map<uint16, std::vector<BotSpells_wIndex>>& AIBot_spells_by_type);
 	uint16 GetSpellByAA(int id, AA::Rank*& rank);
