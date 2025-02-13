@@ -585,7 +585,8 @@ bool Client::Process() {
 			BuffProcess();
 
 			if (!sent_weapon) {
-				SetWeaponAppearance(true);
+				SetWeaponAppearance(HasClass(Class::Ranger));
+				SendArmorAppearance();
 				sent_weapon = true;
 			}
 
