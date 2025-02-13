@@ -327,7 +327,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 							!tar->IsRooted()
 							&& (bInnates || zone->random.Roll(50))
 							&& tar->DontSnareMeBefore() < Timer::GetCurrentTime()
-							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
+							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0 && !tar->GetSpecialAbility(SpecialAbility::SnareImmunity)
 							) {
 							if(!checked_los) {
 								if(!CheckLosFN(tar))
