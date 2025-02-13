@@ -4340,7 +4340,13 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_IllusionCopy:
 			case SE_Illusion:
 			{
-				SendIllusionPacket(AppearanceStruct{});
+				SendIllusionPacket(
+					AppearanceStruct{
+						.gender_id = GetBaseGender(),
+						.race_id = GetBaseRace(),
+						.texture = 0
+					}
+				);
 				// The GetSize below works because the above setting race to zero sets size back.
 				SendAppearancePacket(AppearanceType::Size, GetSize());
 
