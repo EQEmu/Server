@@ -227,10 +227,12 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 						Mob * debuffee = GetHateRandom();
 						if (debuffee && manaR >= 10 && (bInnates || zone->random.Roll(70)) &&
 								debuffee->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0) {
-							if (!checked_los) {
-								if (!CheckLosFN(debuffee))
-									return false;
-								checked_los = true;
+							if (!CheckLosFN(debuffee)) { // Re-check LoS since this is a random target
+								continue; // We might succeed somewhere else here.
+							}
+
+							if (AIspells[i].type == SpellType_Slow && debuffee->GetSpecialAbility(SpecialAbility::SlowImmunity)) {
+								continue; // Don't try to cast slows on unslowables.
 							}
 							AIDoSpellCast(i, debuffee, mana_cost);
 							return true;
