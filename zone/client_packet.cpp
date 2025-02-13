@@ -7816,30 +7816,37 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				break;
 			}
 
-			if (gbwis->Quantity > 0) {
-				PushItemOnCursor(*inst.get());
-				SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketLimbo);
-				GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity, this);
-
-				if (player_event_logs.IsEventEnabled(PlayerEvent::GUILD_BANK_WITHDRAWAL)) {
-					PlayerEvent::GuildBankTransaction log{};
-					log.char_id  = CharacterID();
-					log.guild_id = GuildID();
-					log.item_id  = inst->GetID();
-					log.quantity = gbwis->Quantity;
-					if (inst->IsAugmented()) {
-						auto augs      = inst->GetAugmentIDs();
-						log.aug_slot_1 = augs.at(0);
-						log.aug_slot_2 = augs.at(1);
-						log.aug_slot_3 = augs.at(2);
-						log.aug_slot_4 = augs.at(3);
-						log.aug_slot_5 = augs.at(4);
-						log.aug_slot_6 = augs.at(5);
-					}
-
-					RecordPlayerEventLog(PlayerEvent::GUILD_BANK_WITHDRAWAL, log);
-				}
+			if (inst->GetCharges() > 0) {
+				gbwis->Quantity = inst->GetCharges();
 			}
+
+			if (inst->GetCharges() < 0) {
+				gbwis->Quantity = 1;
+			}
+
+			PushItemOnCursor(*inst.get());
+			SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketLimbo);
+			GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity, this);
+
+			if (player_event_logs.IsEventEnabled(PlayerEvent::GUILD_BANK_WITHDRAWAL)) {
+				PlayerEvent::GuildBankTransaction log{};
+				log.char_id  = CharacterID();
+				log.guild_id = GuildID();
+				log.item_id  = inst->GetID();
+				log.quantity = gbwis->Quantity;
+				if (inst->IsAugmented()) {
+					auto augs      = inst->GetAugmentIDs();
+					log.aug_slot_1 = augs.at(0);
+					log.aug_slot_2 = augs.at(1);
+					log.aug_slot_3 = augs.at(2);
+					log.aug_slot_4 = augs.at(3);
+					log.aug_slot_5 = augs.at(4);
+					log.aug_slot_6 = augs.at(5);
+				}
+
+				RecordPlayerEventLog(PlayerEvent::GUILD_BANK_WITHDRAWAL, log);
+			}
+
 			else {
 				Message(Chat::Red, "Unable to withdraw 0 quantity of %s", inst->GetItem()->Name);
 			}
