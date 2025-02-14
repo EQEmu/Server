@@ -1064,10 +1064,8 @@ std::vector<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* cas
 				if (
 					caster->IsCommandedSpell() ||
 					!AE ||
-					(
-						BotSpellTypeRequiresAEChecks(spell_type) && 
-						caster->HasValidAETarget(caster, bot_spell_list[i].spellid, spell_type, tar)
-					)
+					!BotSpellTypeRequiresAEChecks(spell_type) ||
+					caster->HasValidAETarget(caster, bot_spell_list[i].spellid, spell_type, tar)
 				) {
 					BotSpell_wPriority bot_spell;
 					bot_spell.SpellId = bot_spell_list[i].spellid;
@@ -1423,7 +1421,8 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* caster, int16 spell_id, uint16 spell_typ
 	Mob* result = nullptr;
 
 	if (caster && caster->GetOwner()) {
-		int spell_range = (!AE ? caster->GetActSpellRange(spell_id, spells[spell_id].range) : caster->GetActSpellRange(spell_id, spells[spell_id].aoe_range));
+		int spell_range = caster->GetActSpellRange(spell_id, spells[spell_id].range);
+		int spell_ae_range = caster->GetAOERange(spell_id);
 		int buff_count = 0;
 		NPC* npc = nullptr;
 
@@ -1454,7 +1453,7 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* caster, int16 spell_id, uint16 spell_typ
 					}
 
 					if (IsPBAESpell(spell_id)) {
-						if (spell_range < Distance(caster->GetPosition(), m->GetPosition())) {
+						if (spell_ae_range < Distance(caster->GetPosition(), m->GetPosition())) {
 							continue;							
 						}
 					}
@@ -2722,7 +2721,11 @@ bool Bot::IsValidSpellRange(uint16 spell_id, Mob* tar) {
 
 	float range = spells[spell_id].range + GetRangeDistTargetSizeMod(tar);
 
-	if (IsAnyAESpell(spell_id)) {			
+	if (
+		spells[spell_id].target_type != ST_AETargetHateList &&
+		!IsTargetableAESpell(spell_id) &&
+		IsAnyAESpell(spell_id)
+	) {
 		range = GetAOERange(spell_id);
 	}
 	
