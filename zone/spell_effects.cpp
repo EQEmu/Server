@@ -4340,9 +4340,14 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_IllusionCopy:
 			case SE_Illusion:
 			{
-				SendIllusionPacket(AppearanceStruct{});
-				// The GetSize below works because the above setting race to zero sets size back.
-				SendAppearancePacket(AppearanceType::Size, GetSize());
+				SendIllusionPacket(
+					AppearanceStruct{
+						.gender_id = GetBaseGender(),
+						.race_id = GetBaseRace(),
+						.size = GetDefaultRaceSize(GetBaseRace(), GetBaseGender()),
+						.texture = 0
+					}
+				);
 
 				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
 					SendWearChange(x);
