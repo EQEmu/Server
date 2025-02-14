@@ -11519,11 +11519,12 @@ uint16 Bot::GetParentSpellType(uint16 spell_type) {
 		case BotSpellTypes::AELull:
 		case BotSpellTypes::Lull:
 			return BotSpellTypes::Lull;
+		case BotSpellTypes::HateLine:
+		case BotSpellTypes::AEHateLine:
+			return BotSpellTypes::HateLine;
 		case BotSpellTypes::Charm:
 		case BotSpellTypes::Escape:
 		case BotSpellTypes::HateRedux:
-		case BotSpellTypes::HateLine:
-		case BotSpellTypes::AEHateLine:
 		case BotSpellTypes::InCombatBuff:
 		case BotSpellTypes::InCombatBuffSong:
 		case BotSpellTypes::OutOfCombatBuffSong:
