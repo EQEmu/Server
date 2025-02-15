@@ -9711,10 +9711,6 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 		return false;
 	}
 
-	if (IsCommandedSpell()) { //stop checks here for commanded spells
-		return true;
-	}
-
 	if (!IsValidTargetType(spell_id, GetSpellTargetType(spell_id), tar->GetBodyType())) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast of {} on {} due to IsValidTargetType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName());
 		return false;
@@ -9751,7 +9747,7 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 		return false;
 	}
 
-	if (spell_type == UINT16_MAX) { //AA/Forced cast checks, return here
+	if (IsCommandedSpell() || spell_type == UINT16_MAX) { //AA/Forced cast checks, return here
 		return true;
 	}
 
