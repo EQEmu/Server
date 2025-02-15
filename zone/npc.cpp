@@ -4272,11 +4272,13 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 		return false;
 	}
 
-	if (!IsPetOwnerClient()) {
+	if (!IsPetOwnerClient() && !IsCharmedPet()) {
 		return false;
 	}
 
-	const bool can_take_nodrop         = RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0;
+	const bool can_take_nodrop = (RuleB(Pets, CanTakeNoDrop) || inst->GetItem()->NoDrop != 0)
+								 || inst->GetItem()->NoRent == 0;
+
 	const bool is_charmed_with_attuned = IsCharmed() && inst->IsAttuned();
 
 	auto o = GetOwner() && GetOwner()->IsClient() ? GetOwner()->CastToClient() : nullptr;
@@ -4297,7 +4299,7 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 	for (const auto &c : checks) {
 		if (c.condition) {
 			if (o) {
-				o->Message(Chat::PetResponse, c.message.c_str());
+				o->Message(Chat::PetResponse, fmt::format("{} says '{}'", GetCleanName(), c.message).c_str());
 			}
 			return false;
 		}
