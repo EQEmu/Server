@@ -4299,7 +4299,7 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 	for (const auto &c : checks) {
 		if (c.condition) {
 			if (o) {
-				o->Message(Chat::PetResponse, fmt::format("[{}] says '{}'", GetCleanName(), c.message).c_str());
+				o->Message(Chat::PetResponse, fmt::format("{} says '{}'", GetCleanName(), c.message).c_str());
 			}
 			return false;
 		}
