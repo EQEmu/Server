@@ -57,7 +57,7 @@ void command_goto(Client *c, const Seperator *sep)
 			Strings::ToFloat(sep->arg[1]),
 			Strings::ToFloat(sep->arg[2]),
 			Strings::ToFloat(sep->arg[3]),
-			sep->arg[4] && Strings::IsFloat(sep->arg[4]) ? Strings::ToFloat(sep->arg[1]) : c->GetHeading()
+			sep->arg[4] && Strings::IsFloat(sep->arg[4]) ? Strings::ToFloat(sep->arg[4]) : c->GetHeading()
 		);
 		c->MovePC(
 			zone->GetZoneID(),
