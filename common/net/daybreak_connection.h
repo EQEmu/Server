@@ -11,19 +11,6 @@
 #include <queue>
 #include <list>
 
-#include <vector>
-#include <array>
-#include <atomic>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <iostream>
-
-#include <vector>
-#include <stack>
-#include <mutex>
-#include <memory>
-
 namespace EQ
 {
 	namespace Net
@@ -335,10 +322,6 @@ namespace EQ
 		private:
 			void Attach(uv_loop_t *loop);
 			void Detach();
-
-			// resend
-			Timestamp m_last_resend_check;
-			int m_resend_check_interval = 50;
 
 			EQ::Random m_rand;
 			uv_timer_t m_timer;
