@@ -93,7 +93,14 @@ bool IsTargetableAESpell(uint16 spell_id)
 		return false;
 	}
 
-	return spells[spell_id].target_type == ST_AETarget;
+	return (
+		spells[spell_id].target_type == ST_AETarget ||
+		spells[spell_id].target_type == ST_TargetAETap ||
+		spells[spell_id].target_type == ST_AETargetHateList ||
+		spells[spell_id].target_type == ST_TargetAENoPlayersPets ||
+		spells[spell_id].target_type == ST_UndeadAE ||
+		spells[spell_id].target_type == ST_SummonedAE
+	);
 }
 
 bool IsSacrificeSpell(uint16 spell_id)
@@ -675,17 +682,19 @@ bool IsAnyNukeOrStunSpell(uint16 spell_id) {
 }
 
 bool IsAnyAESpell(uint16 spell_id) {
-    return (
-        IsValidSpell(spell_id) &&
-        (
-            IsAEDurationSpell(spell_id) ||
-            IsAESpell(spell_id) ||
-            IsAERainNukeSpell(spell_id) ||
-            IsAERainSpell(spell_id) ||
-            IsPBAESpell(spell_id) ||
-            IsPBAENukeSpell(spell_id)
-        )
-    );
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	return (
+		IsTargetableAESpell(spell_id) ||
+		IsAESpell(spell_id) ||
+		IsPBAESpell(spell_id) ||
+		IsAEDurationSpell(spell_id) ||
+		IsAERainNukeSpell(spell_id) ||
+		IsAERainSpell(spell_id) ||
+		IsPBAENukeSpell(spell_id)
+	);
 }
 
 bool IsAESpell(uint16 spell_id)
@@ -740,8 +749,8 @@ bool IsPBAESpell(uint16 spell_id)
 
 	if (
 		spell.aoe_range > 0 &&
-		spell.target_type == ST_AECaster
-		) {
+		!IsTargetRequiredForSpell(spell_id)
+	) {
 		return true;
 	}
 
