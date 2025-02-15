@@ -1263,12 +1263,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 	if (sep->IsNumber(1)) {
 		++ab_arg;
 		value = atoi(sep->arg[1]);
-		if (
-			value < Stance::Passive || 
-			value > Stance::AEBurn ||
-			value == Stance::Reactive ||
-			value == Stance::Assist
-		) {
+		if (!Bot::IsValidBotStance(value)) {
 			c->Message(
 				Chat::Yellow,
 				fmt::format(

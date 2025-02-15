@@ -816,6 +816,7 @@ public:
 
 	bool GetRangerAutoWeaponSelect() { return _rangerAutoWeaponSelect; }
 	uint8 GetBotStance() { return _botStance; }
+	static bool IsValidBotStance(uint8 stance);
 	uint8 GetChanceToCastBySpellType(uint16 spell_type);
 	bool IsGroupHealer() const { return m_CastingRoles.GroupHealer; }
 	bool IsGroupSlower() const { return m_CastingRoles.GroupSlower; }
