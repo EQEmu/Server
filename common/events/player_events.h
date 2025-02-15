@@ -1286,12 +1286,12 @@ namespace PlayerEvent {
 		uint32 char_id;
 		uint32 guild_id;
 		uint32 item_id;
-		uint32 aug_slot_1;
-		uint32 aug_slot_2;
-		uint32 aug_slot_3;
-		uint32 aug_slot_4;
-		uint32 aug_slot_5;
-		uint32 aug_slot_6;
+		uint32 aug_slot_one;
+		uint32 aug_slot_two;
+		uint32 aug_slot_three;
+		uint32 aug_slot_four;
+		uint32 aug_slot_five;
+		uint32 aug_slot_six;
 		uint32 quantity;
 		uint32 permission;
 
@@ -1303,12 +1303,12 @@ namespace PlayerEvent {
 				CEREAL_NVP(char_id),
 				CEREAL_NVP(guild_id),
 				CEREAL_NVP(item_id),
-				CEREAL_NVP(aug_slot_1),
-				CEREAL_NVP(aug_slot_2),
-				CEREAL_NVP(aug_slot_3),
-				CEREAL_NVP(aug_slot_4),
-				CEREAL_NVP(aug_slot_5),
-				CEREAL_NVP(aug_slot_6),
+				CEREAL_NVP(aug_slot_one),
+				CEREAL_NVP(aug_slot_two),
+				CEREAL_NVP(aug_slot_three),
+				CEREAL_NVP(aug_slot_four),
+				CEREAL_NVP(aug_slot_five),
+				CEREAL_NVP(aug_slot_six),
 				CEREAL_NVP(quantity)
 				);
 		}

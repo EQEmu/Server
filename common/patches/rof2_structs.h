@@ -1968,19 +1968,19 @@ struct GuildBankItemUpdate_Struct
 	void Init(uint32 inAction, uint32 inUnknown004, uint16 inSlotID, uint16 inArea, uint16 inUnknown016, uint32 inItemID, uint32 inIcon, uint32 inQuantity,
 			uint32 inPermissions, uint32 inAllowMerge, bool inUseable)
 	{
-		action = inAction;
-		slot_id = inSlotID;
-		area = inArea;
-		display = inUnknown016;
-		item_id = inItemID;
-		icon_id = inIcon;
-		quantity = inQuantity;
-		permissions = inPermissions;
-		allow_merge = inAllowMerge;
-		is_useable = inUseable;
+		action       = inAction;
+		slot_id      = inSlotID;
+		area         = inArea;
+		display      = inUnknown016;
+		item_id      = inItemID;
+		icon_id      = inIcon;
+		quantity     = inQuantity;
+		permissions  = inPermissions;
+		allow_merge  = inAllowMerge;
+		is_useable   = inUseable;
 		item_name[0] = '\0';
-		donator[0] = '\0';
-		who_for[0] = '\0';
+		donator[0]   = '\0';
+		who_for[0]   = '\0';
 	};
 
 /*000*/	uint32	action;

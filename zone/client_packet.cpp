@@ -7650,13 +7650,13 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 						log.item_id  = inst->GetID();
 						log.quantity = inst->GetCharges();
 						if (inst->IsAugmented()) {
-							auto augs      = inst->GetAugmentIDs();
-							log.aug_slot_1 = augs.at(0);
-							log.aug_slot_2 = augs.at(1);
-							log.aug_slot_3 = augs.at(2);
-							log.aug_slot_4 = augs.at(3);
-							log.aug_slot_5 = augs.at(4);
-							log.aug_slot_6 = augs.at(5);
+							auto augs          = inst->GetAugmentIDs();
+							log.aug_slot_one   = augs.at(0);
+							log.aug_slot_two   = augs.at(1);
+							log.aug_slot_three = augs.at(2);
+							log.aug_slot_four  = augs.at(3);
+							log.aug_slot_five  = augs.at(4);
+							log.aug_slot_six   = augs.at(5);
 						}
 
 						RecordPlayerEventLog(PlayerEvent::GUILD_BANK_MOVE_TO_BANK_AREA, log);
@@ -7736,13 +7736,13 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			item.donator     = GetCleanName();
 			item.permissions = GuildBankBankerOnly;
 			if (cursor_item_inst->IsAugmented()) {
-				auto const augs   = cursor_item_inst->GetAugmentIDs();
-				item.augment_1_id = augs.at(0);
-				item.augment_2_id = augs.at(1);
-				item.augment_3_id = augs.at(2);
-				item.augment_4_id = augs.at(3);
-				item.augment_5_id = augs.at(4);
-				item.augment_6_id = augs.at(5);
+				auto const augs       = cursor_item_inst->GetAugmentIDs();
+				item.augment_one_id   = augs.at(0);
+				item.augment_two_id   = augs.at(1);
+				item.augment_three_id = augs.at(2);
+				item.augment_four_id  = augs.at(3);
+				item.augment_five_id  = augs.at(4);
+				item.augment_six_id   = augs.at(5);
 			}
 
 			if (GuildBanks->AddItem(item, this)) {
@@ -7751,16 +7751,16 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 				if (player_event_logs.IsEventEnabled(PlayerEvent::GUILD_BANK_DEPOSIT)) {
 					PlayerEvent::GuildBankTransaction log{};
-					log.char_id    = CharacterID();
-					log.guild_id   = GuildID();
-					log.item_id    = item.item_id;
-					log.quantity   = item.quantity;
-					log.aug_slot_1 = item.augment_1_id;
-					log.aug_slot_2 = item.augment_2_id;
-					log.aug_slot_3 = item.augment_3_id;
-					log.aug_slot_4 = item.augment_4_id;
-					log.aug_slot_5 = item.augment_5_id;
-					log.aug_slot_6 = item.augment_6_id;
+					log.char_id        = CharacterID();
+					log.guild_id       = GuildID();
+					log.item_id        = item.item_id;
+					log.quantity       = item.quantity;
+					log.aug_slot_one   = item.augment_one_id;
+					log.aug_slot_two   = item.augment_two_id;
+					log.aug_slot_three = item.augment_three_id;
+					log.aug_slot_four  = item.augment_four_id;
+					log.aug_slot_five  = item.augment_five_id;
+					log.aug_slot_six   = item.augment_six_id;
 
 					RecordPlayerEventLog(PlayerEvent::GUILD_BANK_DEPOSIT, log);
 				}
@@ -7835,13 +7835,13 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				log.item_id  = inst->GetID();
 				log.quantity = gbwis->Quantity;
 				if (inst->IsAugmented()) {
-					auto augs      = inst->GetAugmentIDs();
-					log.aug_slot_1 = augs.at(0);
-					log.aug_slot_2 = augs.at(1);
-					log.aug_slot_3 = augs.at(2);
-					log.aug_slot_4 = augs.at(3);
-					log.aug_slot_5 = augs.at(4);
-					log.aug_slot_6 = augs.at(5);
+					auto augs          = inst->GetAugmentIDs();
+					log.aug_slot_one   = augs.at(0);
+					log.aug_slot_two   = augs.at(1);
+					log.aug_slot_three = augs.at(2);
+					log.aug_slot_four  = augs.at(3);
+					log.aug_slot_five  = augs.at(4);
+					log.aug_slot_six   = augs.at(5);
 				}
 
 				RecordPlayerEventLog(PlayerEvent::GUILD_BANK_WITHDRAWAL, log);

@@ -1004,22 +1004,22 @@ int GuildBankManager::Promote(uint32 guild_id, int slot_id, Client* c)
 		return -1;
 	}
 
-	auto new_item         = GuildBankRepository::NewEntity();
-	new_item.id           = it_deposit->second.id;
-	new_item.guild_id     = it_deposit->second.guild_id;
-	new_item.area         = GuildBankMainArea;
-	new_item.slot         = NextFreeBankSlot(guild_id, GuildBankMainArea);
-	new_item.item_id      = it_deposit->second.item_id;
-	new_item.augment_1_id = it_deposit->second.augment_1_id;
-	new_item.augment_2_id = it_deposit->second.augment_2_id;
-	new_item.augment_3_id = it_deposit->second.augment_3_id;
-	new_item.augment_4_id = it_deposit->second.augment_4_id;
-	new_item.augment_5_id = it_deposit->second.augment_5_id;
-	new_item.augment_6_id = it_deposit->second.augment_6_id;
-	new_item.quantity     = it_deposit->second.quantity;
-	new_item.donator      = it_deposit->second.donator;
-	new_item.who_for      = it_deposit->second.who_for;
-	new_item.permissions  = it_deposit->second.permissions;
+	auto new_item             = GuildBankRepository::NewEntity();
+	new_item.id               = it_deposit->second.id;
+	new_item.guild_id         = it_deposit->second.guild_id;
+	new_item.area             = GuildBankMainArea;
+	new_item.slot             = NextFreeBankSlot(guild_id, GuildBankMainArea);
+	new_item.item_id          = it_deposit->second.item_id;
+	new_item.augment_one_id   = it_deposit->second.augment_one_id;
+	new_item.augment_two_id   = it_deposit->second.augment_two_id;
+	new_item.augment_three_id = it_deposit->second.augment_three_id;
+	new_item.augment_four_id  = it_deposit->second.augment_four_id;
+	new_item.augment_five_id  = it_deposit->second.augment_five_id;
+	new_item.augment_six_id   = it_deposit->second.augment_six_id;
+	new_item.quantity         = it_deposit->second.quantity;
+	new_item.donator          = it_deposit->second.donator;
+	new_item.who_for          = it_deposit->second.who_for;
+	new_item.permissions      = it_deposit->second.permissions;
 
 	GuildBankRepository::UpdateOne(database, new_item);
 
@@ -1067,12 +1067,12 @@ std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uin
 		inst.reset(database.CreateItem(
 			guild_bank->items.deposit_area[slot_id].item_id,
 			guild_bank->items.deposit_area[slot_id].quantity,
-			guild_bank->items.deposit_area[slot_id].augment_1_id,
-			guild_bank->items.deposit_area[slot_id].augment_2_id,
-			guild_bank->items.deposit_area[slot_id].augment_3_id,
-			guild_bank->items.deposit_area[slot_id].augment_4_id,
-			guild_bank->items.deposit_area[slot_id].augment_5_id,
-			guild_bank->items.deposit_area[slot_id].augment_6_id)
+			guild_bank->items.deposit_area[slot_id].augment_one_id,
+			guild_bank->items.deposit_area[slot_id].augment_two_id,
+			guild_bank->items.deposit_area[slot_id].augment_three_id,
+			guild_bank->items.deposit_area[slot_id].augment_four_id,
+			guild_bank->items.deposit_area[slot_id].augment_five_id,
+			guild_bank->items.deposit_area[slot_id].augment_six_id)
 		);
 
 		if (!inst) {
@@ -1099,12 +1099,13 @@ std::unique_ptr<EQ::ItemInstance> GuildBankManager::GetItem(uint32 guild_id, uin
 		inst.reset(database.CreateItem(
 			guild_bank->items.main_area[slot_id].item_id,
 			guild_bank->items.main_area[slot_id].quantity,
-			guild_bank->items.main_area[slot_id].augment_1_id,
-			guild_bank->items.main_area[slot_id].augment_2_id,
-			guild_bank->items.main_area[slot_id].augment_3_id,
-			guild_bank->items.main_area[slot_id].augment_4_id,
-			guild_bank->items.main_area[slot_id].augment_5_id,
-			guild_bank->items.main_area[slot_id].augment_6_id));
+			guild_bank->items.main_area[slot_id].augment_one_id,
+			guild_bank->items.main_area[slot_id].augment_two_id,
+			guild_bank->items.main_area[slot_id].augment_three_id,
+			guild_bank->items.main_area[slot_id].augment_four_id,
+			guild_bank->items.main_area[slot_id].augment_five_id,
+			guild_bank->items.main_area[slot_id].augment_six_id)
+		);
 
 		if (!inst) {
 			return nullptr;
