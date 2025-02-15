@@ -12,6 +12,12 @@ void bot_command_max_melee_range(Client* c, const Seperator* sep)
 		BotCommandHelpParams p;
 		
 		p.description = { "Toggles whether or not bots will stay at max melee range during combat."};
+		p.notes = {
+			fmt::format(
+				"- Bots {} use special abilities when set to max melee range (taunt, kick, bash, etc).",
+				RuleB(Bots, DisableSpecialAbilitiesAtMaxMelee) ? "will not" : "will"
+			)
+		};
 		p.example_format ={ fmt::format("{} [value] [actionable]", sep->arg[0]) };
 		p.examples_one =
 		{

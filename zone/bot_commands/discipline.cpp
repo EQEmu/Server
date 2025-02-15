@@ -209,10 +209,6 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 				continue;
 			}
 
-			if (spell.buff_duration_formula != 0 && spell.target_type == ST_Self && bot_iter->HasDiscBuff()) {
-				continue;
-			}
-
 			if (!tar || (spell.target_type == ST_Self && tar != bot_iter)) {
 				tar = bot_iter;
 			}
@@ -231,7 +227,7 @@ void bot_command_discipline(Client* c, const Seperator* sep)
 	}
 
 	if (!is_success) {
-		c->Message(Chat::Yellow, "No bots were selected.");
+		c->Message(Chat::Yellow, "No bots were capable of doing that. This could be because they don't have the ability or things like Line of Sight, range, endurance, etc.");
 	}
 	else {
 		if (aggressive || defensive) {

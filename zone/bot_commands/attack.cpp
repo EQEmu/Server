@@ -53,6 +53,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	size_t attacker_count = 0;
 	Bot *first_attacker = nullptr;
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
+
 	for (auto bot_iter : sbl) {
 		if (!bot_iter->ValidStateCheck(c)) {
 			continue;
