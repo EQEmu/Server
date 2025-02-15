@@ -852,7 +852,7 @@ void MobMovementManager::SendCommandToClients(
 			}
 
 			if (c->m_last_seen_mob_position.contains(mob->GetID())) {
-				if (c->m_last_seen_mob_position[mob->GetID()] == mob->GetPosition() && anim == 0) {
+				if (c->m_last_seen_mob_position[mob->GetID()] == mob->GetPosition() && anim == 0 && mob != c) {
 					LogPositionUpdate(
 						"Mob [{}] has already been sent to client [{}] at this position, skipping",
 						mob->GetCleanName(),
@@ -914,7 +914,7 @@ void MobMovementManager::SendCommandToClients(
 				}
 
 				if (c->m_last_seen_mob_position.contains(mob->GetID())) {
-					if (c->m_last_seen_mob_position[mob->GetID()] == mob->GetPosition() && anim == 0) {
+					if (c->m_last_seen_mob_position[mob->GetID()] == mob->GetPosition() && anim == 0 && mob != c) {
 						LogPositionUpdate(
 							"Mob [{}] has already been sent to client [{}] at this position, skipping",
 							mob->GetCleanName(),
