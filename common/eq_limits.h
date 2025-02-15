@@ -87,7 +87,7 @@ namespace EQ
 				int16 ViewMODPC,	ViewMODBank,		ViewMODSharedBank;
 				int16 ViewMODLimbo,	AltStorage,			Archived;
 				int16 Mail,			GuildTrophyTribute,	Krono;
-				int16 Other;
+				int16 GuildBankMain,GuildBankDeposit,   Other;
 
 				InventoryTypeSize_Struct(
 					int16 Possessions,	int16 Bank,					int16 SharedBank,
@@ -98,7 +98,7 @@ namespace EQ
 					int16 ViewMODPC,	int16 ViewMODBank,			int16 ViewMODSharedBank,
 					int16 ViewMODLimbo,	int16 AltStorage,			int16 Archived,
 					int16 Mail,			int16 GuildTrophyTribute,	int16 Krono,
-					int16 Other
+					int16 GuildBankMain,int16 GuildBankDeposit,     int16 Other
 				) :
 					Possessions(Possessions),	Bank(Bank),								SharedBank(SharedBank),
 					Trade(Trade),				World(World),							Limbo(Limbo),
@@ -108,7 +108,7 @@ namespace EQ
 					ViewMODPC(ViewMODPC),		ViewMODBank(ViewMODBank),				ViewMODSharedBank(ViewMODSharedBank),
 					ViewMODLimbo(ViewMODLimbo),	AltStorage(AltStorage),					Archived(Archived),
 					Mail(Mail),					GuildTrophyTribute(GuildTrophyTribute),	Krono(Krono),
-					Other(Other)
+					GuildBankMain(GuildBankMain), GuildBankDeposit(GuildBankDeposit),   Other(Other)
 				{ }
 			};
 

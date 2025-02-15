@@ -65,6 +65,9 @@ namespace PlayerEvent {
 		BARTER_TRANSACTION,
 		SPEECH,
 		EVOLVE_ITEM,
+		GUILD_BANK_DEPOSIT,
+		GUILD_BANK_WITHDRAWAL,
+		GUILD_BANK_MOVE_TO_BANK_AREA,
 		MAX // dont remove
 	};
 
@@ -130,6 +133,10 @@ namespace PlayerEvent {
 		"Barter Transaction",
 		"Player Speech",
 		"Evolve Item Update"
+		"Barter Transaction",
+		"Guild Bank Item Deposit",
+		"Guild Bank Item Withdrawal",
+		"Guild Bank Move From Deposit Area to Bank Area"
 	};
 
 	// Generic struct used by all events
@@ -1272,6 +1279,38 @@ namespace PlayerEvent {
 				CEREAL_NVP(type),
 				CEREAL_NVP(message)
 			);
+		}
+	};
+
+	struct GuildBankTransaction {
+		uint32 char_id;
+		uint32 guild_id;
+		uint32 item_id;
+		uint32 aug_slot_one;
+		uint32 aug_slot_two;
+		uint32 aug_slot_three;
+		uint32 aug_slot_four;
+		uint32 aug_slot_five;
+		uint32 aug_slot_six;
+		uint32 quantity;
+		uint32 permission;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(char_id),
+				CEREAL_NVP(guild_id),
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(aug_slot_one),
+				CEREAL_NVP(aug_slot_two),
+				CEREAL_NVP(aug_slot_three),
+				CEREAL_NVP(aug_slot_four),
+				CEREAL_NVP(aug_slot_five),
+				CEREAL_NVP(aug_slot_six),
+				CEREAL_NVP(quantity)
+				);
 		}
 	};
 }

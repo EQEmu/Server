@@ -19,17 +19,17 @@
 #ifndef EQ_PACKET_STRUCTS_H
 #define EQ_PACKET_STRUCTS_H
 
-#include "types.h"
+#include <list>
 #include <string.h>
 #include <string>
-#include <list>
 #include <time.h>
-#include "../common/version.h"
-#include "emu_constants.h"
-#include "textures.h"
 #include "../cereal/include/cereal/archives/binary.hpp"
 #include "../cereal/include/cereal/types/string.hpp"
 #include "../cereal/include/cereal/types/vector.hpp"
+#include "../common/version.h"
+#include "emu_constants.h"
+#include "textures.h"
+#include "types.h"
 
 static const uint32 BUFF_COUNT = 42;
 static const uint32 PET_BUFF_COUNT = 30;
@@ -5529,56 +5529,65 @@ struct GuildBankWithdrawItem_Struct
 
 struct GuildBankItemUpdate_Struct
 {
-	void Init(uint32 inAction, uint32 inUnknown004, uint16 inSlotID, uint16 inArea, uint16 inUnknown012, uint32 inItemID, uint32 inIcon, uint32 inQuantity,
-			uint32 inPermissions, uint32 inAllowMerge, bool inUseable)
+	void Init(
+		uint32 inAction,
+		uint32 inUnknown004,
+		uint16 inSlotID,
+		uint16 inArea,
+		uint16 inUnknown012,
+		uint32 inItemID,
+		uint32 inIcon,
+		uint32 inQuantity,
+		uint32 inPermissions,
+		uint32 inAllowMerge,
+		bool   inUseable)
 	{
-		Action = inAction;
-		Unknown004 = inUnknown004;
-		SlotID = inSlotID;
-		Area = inArea;
-		Unknown012 = inUnknown012;
-		ItemID = inItemID;
-		Icon = inIcon;
-		Quantity = inQuantity;
-		Permissions = inPermissions;
-		AllowMerge = inAllowMerge;
-		Useable = inUseable;
-		ItemName[0] = '\0';
-		Donator[0] = '\0';
-		WhoFor[0] = '\0';
+		action       = inAction;
+		unknown004   = inUnknown004;
+		slot_id      = inSlotID;
+		area         = inArea;
+		display      = inUnknown012;
+		item_id      = inItemID;
+		icon_id      = inIcon;
+		quantity     = inQuantity;
+		permissions  = inPermissions;
+		allow_merge  = inAllowMerge;
+		is_useable   = inUseable;
+		item_name[0] = '\0';
+		donator[0]   = '\0';
+		who_for[0]   = '\0';
 	};
 
-/*000*/	uint32	Action;
-/*004*/	uint32	Unknown004;
-/*008*/	uint16	SlotID;
-/*010*/	uint16	Area;
-/*012*/	uint32	Unknown012;
-/*016*/	uint32	ItemID;
-/*020*/	uint32	Icon;
-/*024*/	uint32	Quantity;
-/*028*/	uint32	Permissions;
-/*032*/	uint8	AllowMerge;
-/*033*/	uint8	Useable;	// Used in conjunction with the Public-if-useable permission.
-/*034*/	char	ItemName[64];
-/*098*/	char	Donator[64];
-/*162*/ char	WhoFor[64];
-/*226*/	uint16	Unknown226;
+/*000*/	uint32	action;
+/*004*/	uint32	unknown004;
+/*008*/	uint16	slot_id;
+/*010*/	uint16	area;
+/*012*/	uint32	display;
+/*016*/	uint32	item_id;
+/*020*/	uint32	icon_id;
+/*024*/	uint32	quantity;
+/*028*/	uint32	permissions;
+/*032*/	uint8	allow_merge;
+/*033*/	uint8	is_useable;	// Used in conjunction with the Public-if-useable permission.
+/*034*/	char	item_name[64];
+/*098*/	char	donator[64];
+/*162*/ char	who_for[64];
+/*226*/	uint16	unknown226;
 };
 
 // newer clients (RoF+) send a list that contains 240 entries
 // The packets don't actually use all 64 chars in the strings, but we'll just overallocate for these
-struct GuildBankItemListEntry_Struct
-{
-	uint8 vaild;
+struct GuildBankItemListEntry_Struct {
+	uint8  vaild;
 	uint32 permissions;
-	char whofor[64];
-	char donator[64];
+	char   whofor[64];
+	char   donator[64];
 	uint32 item_id;
 	uint32 item_icon;
 	uint32 quantity;
-	uint8 allow_merge; // 1 here for non-full stacks
-	uint8 usable;
-	char item_name[64];
+	uint8  allow_merge; // 1 here for non-full stacks
+	uint8  usable;
+	char   item_name[64];
 };
 
 struct GuildBankClear_Struct

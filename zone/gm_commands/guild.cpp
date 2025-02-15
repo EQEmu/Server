@@ -603,35 +603,73 @@ void command_guild(Client* c, const Seperator* sep)
 			auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
 			auto guild    = guild_mgr.GetGuildByGuildID(guild_id);
 
-			PlayerEvent::LootItemEvent e{};
-			e.charges      = -1;
-			e.corpse_name  = "Test Corpse Name";
-			e.item_id      = 123456789;
-			e.item_name    = "Test Item Name";
-			e.npc_id       = 987654321;
-			e.augment_1_id = 11;
-			e.augment_2_id = 0;
-			e.augment_3_id = 0;
-			e.augment_4_id = 44;
-			e.augment_5_id = 55;
-			e.augment_6_id = 66;
-
-			RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);
-
-			PlayerEvent::DestroyItemEvent e2{};
-			e2.charges     = -1;
-			e2.attuned     = true;
-			e.augment_1_id = 11;
-			e.augment_2_id = 0;
-			e.augment_3_id = 0;
-			e.augment_4_id = 44;
-			e.augment_5_id = 55;
-			e.augment_6_id = 66;
-			e2.item_id     = 123456789;
-			e2.item_name   = "Test Item Destroy Name";
-			e2.reason      = "Test Item Destroy Reason";
-
-			RecordPlayerEventLogWithClient(c, PlayerEvent::ITEM_DESTROY, e2);
+			// PlayerEvent::LootItemEvent e{};
+			// e.charges      = -1;
+			// e.corpse_name  = "Test Corpse Name";
+			// e.item_id      = 123456789;
+			// e.item_name    = "Test Item Name";
+			// e.npc_id       = 987654321;
+			// e.augment_1_id = 11;
+			// e.augment_2_id = 0;
+			// e.augment_3_id = 0;
+			// e.augment_4_id = 44;
+			// e.augment_5_id = 55;
+			// e.augment_6_id = 66;
+			//
+			// RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);
+			//
+			// PlayerEvent::DestroyItemEvent e2{};
+			// e2.charges     = -1;
+			// e2.attuned     = true;
+			// e.augment_1_id = 11;
+			// e.augment_2_id = 0;
+			// e.augment_3_id = 0;
+			// e.augment_4_id = 44;
+			// e.augment_5_id = 55;
+			// e.augment_6_id = 66;
+			// e2.item_id     = 123456789;
+			// e2.item_name   = "Test Item Destroy Name";
+			// e2.reason      = "Test Item Destroy Reason";
+			//
+			// RecordPlayerEventLogWithClient(c, PlayerEvent::ITEM_DESTROY, e2);
+			// auto id       = Strings::ToUnsignedInt(sep->arg[3]);
+			// //auto guild    = guild_mgr.GetGuildByGuildID(guild_id);
+			// // c->SendGuildMembersList();
+			// auto bank = GuildBanks->GetGuildBank(guild_id);
+			// if (id == 1) {
+			// 	for (auto &[key, item]: bank->items.main_area) {
+			// 		auto i = ItemsRepository::FindOne(content_db, item.item_id);
+			// 		c->Message(Chat::Yellow, fmt::format("key:{:02} item:{:05} Name:{:40} Qty:{:40} Slot:{}",
+			// 			key, item.item_id, i.Name, item.quantity, item.slot).c_str());
+			// 	}
+			// 	return;
+			// }
+			// if (id == 2) {
+			// 	for (auto &[key, item]: bank->items.deposit_area) {
+			// 		auto i = ItemsRepository::FindOne(content_db, item.item_id);
+			// 		c->Message(Chat::Yellow, fmt::format("key:{:02} item:{:05} Name:{} Qty:{:40} Slot:{}",
+			// 			key, item.item_id, i.Name, item.quantity, item.slot).c_str());
+			// 	}
+			// 	return;
+			// }
+			// if (id == 3) {
+			// 	for (auto &[key, item]: bank->items.main_area) {
+			// 		if (item.item_id == 30416) {
+			// 			auto i = ItemsRepository::FindOne(content_db, item.item_id);
+			// 			c->Message(Chat::Yellow, fmt::format("key:{:02} item:{:05} Name:{:40} Qty:{:40} Slot:{}",
+			// 				key, item.item_id, i.Name, item.quantity, item.slot).c_str());
+			// 		}
+			// 	}
+			// 	return;
+			// }
+			// if (id == 4) {
+			// 	c->Message(Chat::Yellow, "Guild Test 4");
+			// 	auto inst = database.CreateItem(30416, 30);
+			// 	database.UpdateInventorySlot(c->CharacterID(), inst, -1);
+			// 	safe_delete(inst);
+			//
+			// 	return;
+			// }
 		}
 	}
 }
