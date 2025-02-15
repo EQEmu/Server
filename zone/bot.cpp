@@ -9708,6 +9708,7 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 	}
 	//LogBotSpellChecksDetail("{} says, 'Doing CanCastSpellType checks of {} on {}.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName());
 	if (!CanCastSpellType(spell_type, spell_id, tar)) {
+		LogBotSpellChecksDetail("{} says, 'Cancelling cast of {} on {} due to CanCastSpellType.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName());
 		return false;
 	}
 
@@ -11994,7 +11995,7 @@ bool Bot::HasRequiredLoSForPositioning(Mob* tar) {
 
 bool Bot::HasValidAETarget(Bot* caster, uint16 spell_id, uint16 spell_type, Mob* tar) {
 	int spell_range = caster->GetActSpellRange(spell_id, spells[spell_id].range);
-	int spell_ae_range = caster->GetActSpellRange(spell_id, spells[spell_id].aoe_range);
+	int spell_ae_range = caster->GetAOERange(spell_id);
 	int target_count = 0;
 
 	for (auto& close_mob : caster->m_close_mobs) {
@@ -12005,6 +12006,18 @@ bool Bot::HasValidAETarget(Bot* caster, uint16 spell_id, uint16 spell_type, Mob*
 		}
 
 		switch (spell_type) {
+			case BotSpellTypes::AELull:
+				if (m->GetSpecialAbility(SpecialAbility::PacifyImmunity)) {
+					continue;
+				}
+
+				break;
+			case BotSpellTypes::AEMez:
+				if (m->GetSpecialAbility(SpecialAbility::MesmerizeImmunity)) {
+					continue;
+				}
+
+				break;
 			case BotSpellTypes::AEDispel:
 				if (m->GetSpecialAbility(SpecialAbility::DispellImmunity)) {
 					continue;
@@ -13134,11 +13147,9 @@ bool Bot::IsImmuneToBotSpell(uint16 spell_id, Mob* caster) {
 		(
 			IsEffectInSpell(spell_id, SE_Root) ||
 			IsEffectInSpell(spell_id, SE_MovementSpeed)
-			)
-		) {
-		if (GetSpecialAbility(SpecialAbility::SnareImmunity)) {
-			return true;
-		}
+		)
+	) {
+		return true;
 	}
 
 	if (IsLifetapSpell(spell_id)) {
