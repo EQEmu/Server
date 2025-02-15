@@ -8,6 +8,220 @@
 #include <fmt/format.h>
 #include <sstream>
 
+#include <optional>
+#include <atomic>
+#include <memory>
+
+class SendReqPool;
+
+struct EmbeddedContext {
+	size_t buffer_index;
+	SendReqPool* pool;
+};
+
+class SendReqPool {
+public:
+	explicit SendReqPool(size_t initial_capacity = 1600)
+		: capacity(initial_capacity), head(0) {
+		std::cout << "Initializing SendReqPool with capacity: " << capacity << std::endl;
+
+		pool.resize(capacity);
+		contexts.resize(capacity);
+		locks = std::make_unique<std::atomic_bool[]>(capacity);
+
+		for (size_t i = 0; i < capacity; ++i) {
+			pool[i] = std::make_unique<uv_udp_send_t>();
+			locks[i].store(false, std::memory_order_relaxed);
+		}
+
+		std::cout << "SendReqPool initialized successfully!" << std::endl;
+	}
+
+	// Try to acquire a send request, return nullptr if all are locked.
+	std::optional<std::pair<uv_udp_send_t*, EmbeddedContext*>> acquire() {
+		for (size_t i = 0; i < capacity; ++i) {
+			size_t index = (head.fetch_add(1, std::memory_order_relaxed) % capacity);
+			bool expected = false;
+			if (locks[index].compare_exchange_strong(expected, true)) {
+				return std::make_pair(pool[index].get(), &contexts[index]);
+			}
+		}
+
+		// If all requests are locked, grow the pool.
+		std::cout << "Growing SendReqPool from " << capacity << " to " << (capacity * 2) << std::endl;
+		grow();
+		return acquireAfterGrowth();
+	}
+
+	// Release a send request by pointer
+	void release(uv_udp_send_t* req) {
+		for (size_t i = 0; i < capacity; ++i) {
+			if (pool[i].get() == req) {
+				locks[i].store(false, std::memory_order_release);
+				return;
+			}
+		}
+		std::cerr << "Error: release() called with invalid send_req!" << std::endl;
+	}
+
+private:
+	std::vector<std::unique_ptr<uv_udp_send_t>> pool;
+	std::vector<EmbeddedContext> contexts;
+	std::unique_ptr<std::atomic_bool[]> locks;
+	size_t capacity;
+	std::atomic<size_t> head;
+	std::mutex grow_mutex;
+
+	void grow() {
+		std::lock_guard<std::mutex> lock(grow_mutex);  // Prevent concurrent growth
+
+		size_t new_capacity = capacity * 2;
+		std::cout << "Growing SendReqPool from " << capacity << " to " << new_capacity << std::endl;
+
+		pool.resize(new_capacity);
+		contexts.resize(new_capacity);
+
+		auto new_locks = std::make_unique<std::atomic_bool[]>(new_capacity);
+
+		for (size_t i = 0; i < capacity; ++i) {
+			new_locks[i].store(locks[i].load(std::memory_order_acquire));
+		}
+		for (size_t i = capacity; i < new_capacity; ++i) {
+			pool[i] = std::make_unique<uv_udp_send_t>();
+			new_locks[i].store(false, std::memory_order_relaxed);
+		}
+
+		locks = std::move(new_locks);
+		capacity = new_capacity;
+	}
+
+	// Prevent infinite recursion by retrying once after growth
+	std::optional<std::pair<uv_udp_send_t*, EmbeddedContext*>> acquireAfterGrowth() {
+		for (size_t i = 0; i < capacity; ++i) {
+			size_t index = (head.fetch_add(1, std::memory_order_relaxed) % capacity);
+			bool expected = false;
+			if (locks[index].compare_exchange_strong(expected, true)) {
+				return std::make_pair(pool[index].get(), &contexts[index]);
+			}
+		}
+		return std::nullopt;
+	}
+};
+
+#include <vector>
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <iostream>
+#include <optional>
+
+class DynamicRingBuffer {
+public:
+	explicit DynamicRingBuffer(size_t initial_capacity = 16)
+		: capacity(initial_capacity), head(0), tail(0) {
+		std::cout << "Initializing DynamicRingBuffer with capacity: " << capacity << std::endl;
+
+		buffer.resize(capacity);
+		locks = std::make_unique<std::atomic_bool[]>(capacity);
+
+		for (size_t i = 0; i < capacity; ++i) {
+			locks[i].store(false, std::memory_order_relaxed);
+		}
+
+		std::cout << "DynamicRingBuffer initialized successfully!" << std::endl;
+	}
+
+	// Try to acquire a buffer slot, returns nullptr if all are locked.
+	std::optional<std::pair<size_t, char*>> acquire() {
+		size_t current_capacity = capacity.load(std::memory_order_acquire);
+
+		for (size_t i = 0; i < current_capacity; ++i) {
+			size_t index = (head.fetch_add(1, std::memory_order_relaxed) % current_capacity);
+			bool expected = false;
+			if (locks[index].compare_exchange_strong(expected, true)) {
+				return std::make_pair(index, buffer[index].data());
+			}
+		}
+
+		std::cerr << "Warning: All buffers locked! Growing buffer." << std::endl;
+		grow();
+		return acquireBufferAfterGrowth();
+	}
+
+	// Release a buffer slot by index
+	void release(size_t index) {
+		if (index >= capacity.load(std::memory_order_acquire)) {
+			std::cerr << "Error: release() called with invalid index: " << index << std::endl;
+			return;
+		}
+
+		if (!locks[index].load(std::memory_order_acquire)) {
+			std::cerr << "Warning: Releasing buffer " << index << " that was already free!" << std::endl;
+			return;
+		}
+
+		std::cout << "Releasing buffer with index " << index << std::endl;
+		locks[index].store(false, std::memory_order_release);
+	}
+
+
+private:
+	std::vector<std::array<char, 512>> buffer;
+	std::unique_ptr<std::atomic_bool[]> locks;
+	std::atomic<size_t> capacity;
+	std::atomic<size_t> head, tail;
+	std::mutex grow_mutex;
+
+	void grow() {
+		std::lock_guard<std::mutex> lock(grow_mutex); // Prevent multiple threads from entering at the same time
+
+		size_t current_capacity = capacity.load(std::memory_order_acquire);
+		size_t new_capacity = current_capacity * 2;
+
+		// Double-check if another thread already grew the buffer while waiting for the lock
+		if (capacity.load(std::memory_order_acquire) != current_capacity) {
+			return;  // Another thread already resized, so exit
+		}
+
+		if (new_capacity > 4096) {  // Safety limit to prevent runaway growth
+			std::cerr << "Warning: Buffer is at maximum capacity! Cannot grow further." << std::endl;
+			return;
+		}
+
+		std::cout << "Growing buffer from " << current_capacity << " to " << new_capacity << std::endl;
+
+		buffer.resize(new_capacity);
+		auto new_locks = std::make_unique<std::atomic_bool[]>(new_capacity);
+
+		for (size_t i = 0; i < current_capacity; ++i) {
+			new_locks[i].store(locks[i].load(std::memory_order_acquire));
+		}
+		for (size_t i = current_capacity; i < new_capacity; ++i) {
+			new_locks[i].store(false, std::memory_order_relaxed);
+		}
+
+		locks = std::move(new_locks);
+		capacity.store(new_capacity, std::memory_order_release); // Ensure other threads see the new capacity
+	}
+
+	// Prevent infinite recursion by retrying once after growth
+	std::optional<std::pair<size_t, char*>> acquireBufferAfterGrowth() {
+		size_t current_capacity = capacity.load(std::memory_order_acquire);
+
+		for (size_t i = 0; i < current_capacity; ++i) {
+			size_t index = (head.fetch_add(1, std::memory_order_relaxed) % current_capacity);
+			bool expected = false;
+			if (locks[index].compare_exchange_strong(expected, true)) {
+				return std::make_pair(index, buffer[index].data());
+			}
+		}
+		return std::nullopt;
+	}
+};
+
+DynamicRingBuffer send_ring_buffer;
+SendReqPool send_req_pool;
+
 EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager()
 {
 	m_attached = nullptr;
@@ -1333,99 +1547,132 @@ void EQ::Net::DaybreakConnection::SendKeepAlive()
 	InternalSend(p);
 }
 
-void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
-{
+void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 	if (m_owner->m_options.outgoing_data_rate > 0.0) {
 		auto new_budget = m_outgoing_budget - (p.Length() / 1024.0);
 		if (new_budget <= 0.0) {
 			m_stats.dropped_datarate_packets++;
 			return;
-		}
-		else {
+		} else {
 			m_outgoing_budget = new_budget;
 		}
 	}
 
 	m_last_send = Clock::now();
 
-	auto send_func = [](uv_udp_send_t* req, int status) {
-		delete[](char*)req->data;
-		delete req;
-	};
+	// Try to acquire a buffer from the ring buffer
+	auto buffer_opt = send_ring_buffer.acquire();
+	if (!buffer_opt) {
+		m_stats.dropped_datarate_packets++;  // Drop packet if no buffer is available
+		return;
+	}
 
+	size_t buffer_index = buffer_opt->first;
+	char* data = buffer_opt->second;
+
+	// Try to acquire a uv_udp_send_t and its EmbeddedContext from SendReqPool
+	auto send_req_pair = send_req_pool.acquire();
+	if (!send_req_pair) {
+		send_ring_buffer.release(buffer_index);
+		m_stats.dropped_datarate_packets++;
+		return;
+	}
+
+	uv_udp_send_t* send_req = send_req_pair->first;
+	EmbeddedContext* ctx = send_req_pair->second;
+
+	memset(send_req, 0, sizeof(*send_req));
+
+	// Store context inside send_req->data for tracking in callback
+	ctx->buffer_index = buffer_index;
+	ctx->pool = &send_req_pool;
+	send_req->data = ctx;
+
+	sockaddr_in send_addr{};
+	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
+	uv_buf_t send_buffers[1];
+
+	// Handle packet encoding if required
 	if (PacketCanBeEncoded(p)) {
-
 		m_stats.bytes_before_encode += p.Length();
 
 		DynamicPacket out;
 		out.PutPacket(0, p);
 
-		for (int i = 0; i < 2; ++i) {
-			switch (m_encode_passes[i]) {
-			case EncodeCompression:
-				if (out.GetInt8(0) == 0)
-					Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
-				else
-					Compress(out, 1, out.Length() - 1);
-				break;
-			case EncodeXOR:
-				if (out.GetInt8(0) == 0)
-					Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
-				else
-					Encode(out, 1, out.Length() - 1);
-				break;
-			default:
-				break;
+		for (auto &m_encode_passe: m_encode_passes) {
+			switch (m_encode_passe) {
+				case EncodeCompression:
+					if (out.GetInt8(0) == 0) {
+						Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					}
+					else {
+						Compress(out, 1, out.Length() - 1);
+					}
+					break;
+				case EncodeXOR:
+					if (out.GetInt8(0) == 0) {
+						Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					}
+					else {
+						Encode(out, 1, out.Length() - 1);
+					}
+					break;
+				default:
+					break;
 			}
 		}
 
 		AppendCRC(out);
-
-		uv_udp_send_t *send_req = new uv_udp_send_t;
-		memset(send_req, 0, sizeof(*send_req));
-		sockaddr_in send_addr;
-		uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
-		uv_buf_t send_buffers[1];
-
-		char *data = new char[out.Length()];
 		memcpy(data, out.Data(), out.Length());
 		send_buffers[0] = uv_buf_init(data, out.Length());
-		send_req->data = send_buffers[0].base;
-
-		m_stats.sent_bytes += out.Length();
-		m_stats.sent_packets++;
-		if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
-			delete[](char*)send_req->data;
-			delete send_req;
-			return;
-		}
-
-		uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
-		return;
+	} else {
+		memcpy(data, p.Data(), p.Length());
+		send_buffers[0] = uv_buf_init(data, p.Length());
 	}
-
-	m_stats.bytes_before_encode += p.Length();
-
-	uv_udp_send_t *send_req = new uv_udp_send_t;
-	sockaddr_in send_addr;
-	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
-	uv_buf_t send_buffers[1];
-
-	char *data = new char[p.Length()];
-	memcpy(data, p.Data(), p.Length());
-	send_buffers[0] = uv_buf_init(data, p.Length());
-	send_req->data = send_buffers[0].base;
 
 	m_stats.sent_bytes += p.Length();
 	m_stats.sent_packets++;
 
-	if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
-		delete[](char*)send_req->data;
-		delete send_req;
+	// Simulated packet loss: Drop packet if condition is met
+	if (m_owner->m_options.simulated_out_packet_loss &&
+		m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
+		std::cerr << "Simulated packet loss. Dropping packet." << std::endl;
+		send_ring_buffer.release(buffer_index);
+		send_req_pool.release(send_req);
 		return;
 	}
 
-	uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
+	// Send the packet
+	int send_result = uv_udp_send(
+		send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr *) &send_addr,
+		[](uv_udp_send_t *req, int status) {
+			// Extract context safely
+			auto *ctx = static_cast<EmbeddedContext *>(req->data);
+			if (!ctx) {
+				std::cerr << "Error: send_req->data is null in callback!" << std::endl;
+				return;
+			}
+
+			// Debug logs
+			std::cout << "Callback invoked for send_req: " << req
+					  << " with status: " << status
+					  << " buffer_index: " << ctx->buffer_index << std::endl;
+
+			if (status < 0) {
+				std::cerr << "uv_udp_send failed: " << uv_strerror(status) << std::endl;
+			}
+
+			// Release resources safely
+			send_ring_buffer.release(ctx->buffer_index);
+			ctx->pool->release(req);
+		});
+
+	// If uv_udp_send() fails immediately, release resources manually
+	if (send_result < 0) {
+		std::cerr << "uv_udp_send() failed: " << uv_strerror(send_result) << std::endl;
+		send_ring_buffer.release(buffer_index);
+		send_req_pool.release(send_req);
+	}
 }
 
 void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, bool reliable)
