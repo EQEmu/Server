@@ -11,6 +11,7 @@
 #include <optional>
 #include <atomic>
 #include <memory>
+#include <array>
 
 class SendReqPool;
 
