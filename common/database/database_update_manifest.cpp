@@ -6803,12 +6803,12 @@ ALTER TABLE `guild_bank`
 	CHANGE COLUMN `itemid` `item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `slot`,
 	CHANGE COLUMN `whofor` `who_for` VARCHAR(64) NULL DEFAULT NULL COLLATE 'utf8_general_ci' AFTER `permissions`,
 	ADD COLUMN `augment_one_id` INT UNSIGNED NULL DEFAULT '0' AFTER `item_id`,
-	ADD COLUMN `augment_two_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_1_id`,
-	ADD COLUMN `augment_three_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_2_id`,
-	ADD COLUMN `augment_four_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_3_id`,
-	ADD COLUMN `augment_five_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_4_id`,
-	ADD COLUMN `augment_six_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_5_id`,
-	CHANGE COLUMN `qty` `quantity` INT(10) NOT NULL DEFAULT '0' AFTER `augment_6_id`;
+	ADD COLUMN `augment_two_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_one_id`,
+	ADD COLUMN `augment_three_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_two_id`,
+	ADD COLUMN `augment_four_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_three_id`,
+	ADD COLUMN `augment_five_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_four_id`,
+	ADD COLUMN `augment_six_id` INT UNSIGNED NULL DEFAULT '0' AFTER `augment_five_id`,
+	CHANGE COLUMN `qty` `quantity` INT(10) NOT NULL DEFAULT '0' AFTER `augment_six_id`;
 ALTER TABLE `guild_bank`
 	ADD INDEX `guild_id` (`guild_id`);
 )"
