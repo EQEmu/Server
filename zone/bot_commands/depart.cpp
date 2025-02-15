@@ -220,7 +220,7 @@ void bot_command_depart(Client* c, const Seperator* sep)
 			}
 
 			if (bot_iter->CastSpell(itr->SpellId, tar->GetID(), EQ::spells::CastingSlot::Gem2, -1, -1)) {
-				if (IsBotSpellTypeOtherBeneficial(BotSpellTypes::Teleport)) {
+				if (BotSpellTypeUsesTargetSettings(BotSpellTypes::Teleport)) {
 					bot_iter->SetCastedSpellType(UINT16_MAX);
 				}
 				else {
