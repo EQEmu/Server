@@ -752,12 +752,12 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 					PlayerEvent::ParcelRetrieve e{};
 					e.from_player_name = p->second.from_name;
 					e.item_id          = p->second.item_id;
-					e.aug_slot_1       = p->second.aug_slot_1;
-					e.aug_slot_2       = p->second.aug_slot_2;
-					e.aug_slot_3       = p->second.aug_slot_3;
-					e.aug_slot_4       = p->second.aug_slot_4;
-					e.aug_slot_5       = p->second.aug_slot_5;
-					e.aug_slot_6       = p->second.aug_slot_6;
+					e.augment_1_id     = p->second.aug_slot_1;
+					e.augment_2_id     = p->second.aug_slot_2;
+					e.augment_3_id     = p->second.aug_slot_3;
+					e.augment_4_id     = p->second.aug_slot_4;
+					e.augment_5_id     = p->second.aug_slot_5;
+					e.augment_6_id     = p->second.aug_slot_6;
 					e.quantity         = p->second.quantity;
 					e.sent_date        = p->second.sent_date;
 					RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
