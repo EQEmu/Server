@@ -161,7 +161,7 @@ public:
 			return;
 		}
 
-		std::cout << "Releasing buffer with index " << index << std::endl;
+//		std::cout << "Releasing buffer with index " << index << std::endl;
 		locks[index].store(false, std::memory_order_release);
 	}
 
@@ -1655,9 +1655,9 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 			}
 
 			// Debug logs
-			std::cout << "Callback invoked for send_req: " << req
-					  << " with status: " << status
-					  << " buffer_index: " << ctx->buffer_index << std::endl;
+//			std::cout << "Callback invoked for send_req: " << req
+//					  << " with status: " << status
+//					  << " buffer_index: " << ctx->buffer_index << std::endl;
 
 			if (status < 0) {
 				std::cerr << "uv_udp_send failed: " << uv_strerror(status) << std::endl;
