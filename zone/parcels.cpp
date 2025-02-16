@@ -632,7 +632,13 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 		return;
 	}
 
-	auto p = m_parcels.find(parcel_in.parcel_slot_id);
+	auto p = std::find_if(
+		m_parcels.begin(),
+		m_parcels.end(),
+		[&](const std::pair<uint32, CharacterParcelsRepository::CharacterParcels> &x) {
+			return x.first == parcel_in.parcel_slot_id && x.second.item_id == parcel_in.parcel_item_id;
+		}
+	);
 	if (p != m_parcels.end()) {
 		uint32 item_id       = parcel_in.parcel_item_id;
 		uint32 item_quantity = p->second.quantity;
@@ -656,25 +662,70 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 			p->second.aug_slot_6
 		)
 		);
+
 		if (!inst) {
 			SendParcelRetrieveAck();
 			return;
+		}
+
+		if (inst->IsStackable()) {
+			inst->SetCharges(item_quantity > 0 ? item_quantity : 1);
 		}
 
 		switch (parcel_in.parcel_item_id) {
 			case PARCEL_MONEY_ITEM_ID: {
 				AddMoneyToPP(p->second.quantity, true);
 				MessageString(
-					Chat::Yellow,
-					PARCEL_DELIVERED,
-					merchant->GetCleanName(),
-					"Money",
-					p->second.from_name.c_str()
+					Chat::Yellow, PARCEL_DELIVERED, merchant->GetCleanName(), "Money", p->second.from_name.c_str()
 				);
 				break;
 			}
 			default: {
-				auto free_id = GetInv().FindFreeSlot(false, false);
+				std::vector<CharacterParcelsContainersRepository::CharacterParcelsContainers> results{};
+				if (inst->IsClassBag() && inst->GetItem()->BagSlots > 0) {
+					auto contents = inst->GetContents();
+					results       = CharacterParcelsContainersRepository::GetWhere(
+						database, fmt::format("`parcels_id` = {}", p->second.id)
+					);
+					for (auto i: results) {
+						auto item = database.CreateItem(
+							i.item_id,
+							i.quantity,
+							i.aug_slot_1,
+							i.aug_slot_2,
+							i.aug_slot_3,
+							i.aug_slot_4,
+							i.aug_slot_5,
+							i.aug_slot_6
+						);
+
+						if (!item) {
+							SendParcelRetrieveAck();
+							return;
+						}
+
+						if (CheckLoreConflict(item->GetItem())) {
+							if (RuleB(Parcel, DeleteOnDuplicate)) {
+								MessageString(Chat::Yellow, PARCEL_DUPLICATE_DELETE, inst->GetItem()->Name);
+								continue;
+							}
+
+							MessageString(Chat::Yellow, DUP_LORE);
+							SendParcelRetrieveAck();
+							return;
+						}
+
+						contents->emplace(i.slot_id, item);
+					}
+				}
+
+				auto const free_id = GetInv().FindFirstFreeSlotThatFitsItemWithStacking(inst.get());
+				if (free_id == INVALID_INDEX) {
+					SendParcelRetrieveAck();
+					MessageString(Chat::White, PARCEL_INV_FULL, merchant->GetCleanName());
+					return;
+				}
+
 				if (CheckLoreConflict(inst->GetItem())) {
 					if (RuleB(Parcel, DeleteOnDuplicate)) {
 						MessageString(Chat::Yellow, PARCEL_DUPLICATE_DELETE, inst->GetItem()->Name);
@@ -685,108 +736,33 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 						return;
 					}
 				}
-				else if (inst->IsStackable()) {
-					inst->SetCharges(item_quantity);
-					if (TryStacking(inst.get(), ItemPacketTrade, true, false)) {
-						MessageString(
-							Chat::Yellow,
-							PARCEL_DELIVERED_2,
-							merchant->GetCleanName(),
-							std::to_string(item_quantity).c_str(),
-							inst->GetItem()->Name,
-							p->second.from_name.c_str()
-						);
-					}
-					else if (free_id != INVALID_INDEX) {
-						inst->SetCharges(item_quantity);
-						if (PutItemInInventory(free_id, *inst, true)) {
-							MessageString(
-								Chat::Yellow,
-								PARCEL_DELIVERED_2,
-								merchant->GetCleanName(),
-								std::to_string(item_quantity).c_str(),
-								inst->GetItem()->Name,
-								p->second.from_name.c_str()
-							);
-						}
-					}
-					else {
-						MessageString(Chat::Yellow, PARCEL_INV_FULL, merchant->GetCleanName());
-						SendParcelRetrieveAck();
-						return;
-					}
+
+				if (AutoPutLootInInventory(*inst.get(), false, true)) {
+					MessageString(
+						Chat::Yellow,
+						PARCEL_DELIVERED_2,
+						merchant->GetCleanName(),
+						std::to_string(item_quantity).c_str(),
+						inst->GetItem()->Name,
+						p->second.from_name.c_str()
+					);
 				}
-				else if (free_id != INVALID_INDEX) {
-					std::vector<CharacterParcelsContainersRepository::CharacterParcelsContainers> results{};
 
-					if (inst->IsClassBag() && inst->GetItem()->BagSlots > 0) {
-						results = CharacterParcelsContainersRepository::GetWhere(database, fmt::format("`parcels_id` = {}", p->second.id));
-						for (auto const &i : results) {
-							std::unique_ptr<EQ::ItemInstance> item(
-								database.CreateItem(
-									i.item_id,
-									i.quantity,
-									i.aug_slot_1,
-									i.aug_slot_2,
-									i.aug_slot_3,
-									i.aug_slot_4,
-									i.aug_slot_5,
-									i.aug_slot_6
-								)
-							);
-							if (CheckLoreConflict(item->GetItem())) {
-								Message(
-									Chat::Yellow,
-									fmt::format("Lore Item Found in Inventory: {}", item->GetItem()->Name).c_str());
-								MessageString(Chat::Yellow, DUP_LORE);
-								Message(Chat::Red, "Unable to retrieve parcel.");
-								SendParcelRetrieveAck();
-								return;
-							}
-						}
-					}
-					inst->SetCharges(item_quantity > 0 ? item_quantity : 1);
-					if (PutItemInInventory(free_id, *inst.get(), true)) {
-						if (inst->IsClassBag() && inst->GetItem()->BagSlots > 0) {
-							for (auto const &i: results) {
-								std::unique_ptr<EQ::ItemInstance> item(
-									database.CreateItem(
-										i.item_id,
-										i.quantity,
-										i.aug_slot_1,
-										i.aug_slot_2,
-										i.aug_slot_3,
-										i.aug_slot_4,
-										i.aug_slot_5,
-										i.aug_slot_6
-									)
-								);
-								auto bag_slot = EQ::InventoryProfile::CalcSlotId(free_id, i.slot_id);
-								PutItemInInventory(bag_slot, *item.get(), true);
-							}
-						}
-						MessageString(
-							Chat::Yellow,
-							PARCEL_DELIVERED,
-							merchant->GetCleanName(),
-							inst->GetItem()->Name,
-							p->second.from_name.c_str()
-						);
-						if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_RETRIEVE)) {
-							PlayerEvent::ParcelRetrieve e{};
-							e.from_player_name = p->second.from_name;
-							e.item_id          = p->second.item_id;
-							e.augment_1_id     = p->second.aug_slot_1;
-							e.augment_2_id     = p->second.aug_slot_2;
-							e.augment_3_id     = p->second.aug_slot_3;
-							e.augment_4_id     = p->second.aug_slot_4;
-							e.augment_5_id     = p->second.aug_slot_5;
-							e.augment_6_id     = p->second.aug_slot_6;
-							e.quantity         = p->second.quantity;
-							e.sent_date        = p->second.sent_date;
-							RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
+				if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_RETRIEVE)) {
+					PlayerEvent::ParcelRetrieve e{};
+					e.from_player_name = p->second.from_name;
+					e.item_id          = p->second.item_id;
+					e.augment_1_id     = p->second.aug_slot_1;
+					e.augment_2_id     = p->second.aug_slot_2;
+					e.augment_3_id     = p->second.aug_slot_3;
+					e.augment_4_id     = p->second.aug_slot_4;
+					e.augment_5_id     = p->second.aug_slot_5;
+					e.augment_6_id     = p->second.aug_slot_6;
+					e.quantity         = p->second.quantity;
+					e.sent_date        = p->second.sent_date;
+					RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
 
-							for (auto const &i:results) {
+					for (auto const &i:results) {
 								e.from_player_name = p->second.from_name;
 								e.item_id          = i.item_id;
 								e.augment_1_id     = i.aug_slot_1;
@@ -798,19 +774,9 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 								e.quantity         = i.quantity;
 								e.sent_date        = p->second.sent_date;
 								RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
-							}
-						}
+
+
 					}
-					else {
-						MessageString(Chat::Yellow, PARCEL_INV_FULL, merchant->GetCleanName());
-						SendParcelRetrieveAck();
-						return;
-					}
-				}
-				else {
-					MessageString(Chat::Yellow, PARCEL_INV_FULL, merchant->GetCleanName());
-					SendParcelRetrieveAck();
-					return;
 				}
 			}
 		}
@@ -819,6 +785,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 		SendParcelDelete(parcel_in);
 		m_parcels.erase(p);
 	}
+
 	SendParcelRetrieveAck();
 	SendParcelIconStatus();
 }
@@ -831,7 +798,6 @@ bool Client::DeleteParcel(uint32 parcel_id)
 		return false;
 	}
 
-	auto it = std::find_if(m_parcels.cbegin(), m_parcels.cend(), [&](const auto &x) { return x.second.id == parcel_id; });
 	SetParcelCount(GetParcelCount() - 1);
 
 	return true;

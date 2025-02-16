@@ -2028,3 +2028,57 @@ int16 EQ::InventoryProfile::_HasEvolvingItem(ItemInstQueue &iqueue, uint64 evolv
 
 	return INVALID_INDEX;
 }
+
+
+int16 EQ::InventoryProfile::FindFirstFreeSlotThatFitsItemWithStacking(ItemInstance *item_inst) const
+{
+	auto item_data = item_inst->GetItem();
+	if (!item_data) {
+		return INVALID_INDEX;
+	}
+
+	for (int16 i = invslot::GENERAL_BEGIN; i <= invslot::GENERAL_END; i++) {
+		auto const inv_item = GetItem(i);
+		if (!inv_item) {
+			// Found available slot in personal inventory
+			// Anything will fit here
+			return i;
+		}
+
+		if (item_data->IsClassBag() && item_inst->IsNoneEmptyContainer()) {
+			// If the inbound item is a bag with items, it cannot be stored within a bag
+			// Move to next potential slot
+			continue;
+		}
+
+		if (inv_item->GetID() == item_data->ID && item_data->Stackable) {
+			if (item_inst->GetCharges() + inv_item->GetCharges() <= item_data->StackSize) {
+				// Found a personal inventory slot that has room for a stackable addition
+				return i;
+			}
+		}
+
+		if (inv_item->IsClassBag() && CanItemFitInContainer(item_data, inv_item->GetItem())) {
+			int16 const base_slot_id = CalcSlotId(i, invbag::SLOT_BEGIN);
+			uint8 const bag_size     = inv_item->GetItem()->BagSlots;
+			uint8 const item_size    = item_data->Size;
+
+			for (uint8 bag_slot = invbag::SLOT_BEGIN; bag_slot < bag_size; bag_slot++) {
+				auto bag_item = GetItem(base_slot_id + bag_slot);
+				if (!bag_item) {
+					// Found available slot within bag that will hold inbound item
+					return base_slot_id + bag_slot;
+				}
+
+				if (bag_item && item_data->Stackable && bag_item->GetID() == item_data->ID) {
+					if (item_inst->GetCharges() + bag_item->GetCharges() <= item_data->StackSize) {
+						// Found a bag slot has room for a stackable addition
+						return base_slot_id + bag_slot;
+					}
+				}
+			}
+		}
+	}
+
+	return INVALID_INDEX;
+}
