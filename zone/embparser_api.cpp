@@ -27,9 +27,9 @@
 #include "../common/misc_functions.h"
 
 #include "dialogue_window.h"
+#include "dynamic_zone.h"
 #include "embperl.h"
 #include "entity.h"
-#include "expedition.h"
 #include "queryserv.h"
 #include "questmgr.h"
 #include "zone.h"
@@ -2779,45 +2779,45 @@ void Perl__SetContentFlag(std::string flag_name, bool enabled)
 	zone->ReloadContentFlags();
 }
 
-Expedition* Perl__get_expedition()
+DynamicZone* Perl__get_expedition()
 {
 	if (zone && zone->GetInstanceID() != 0)
 	{
-		return Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
+		return DynamicZone::FindExpeditionByZone(zone->GetZoneID(), zone->GetInstanceID());
 	}
 
 	return nullptr;
 }
 
-Expedition* Perl__get_expedition_by_char_id(uint32 char_id)
+DynamicZone* Perl__get_expedition_by_char_id(uint32 char_id)
 {
-	return Expedition::FindCachedExpeditionByCharacterID(char_id);
+	return DynamicZone::FindExpeditionByCharacter(char_id);
 }
 
-Expedition* Perl__get_expedition_by_dz_id(uint32 dz_id)
+DynamicZone* Perl__get_expedition_by_dz_id(uint32 dz_id)
 {
-	return Expedition::FindCachedExpeditionByDynamicZoneID(dz_id);
+	return DynamicZone::FindDynamicZoneByID(dz_id, DynamicZoneType::Expedition);
 }
 
-Expedition* Perl__get_expedition_by_zone_instance(uint32 zone_id, uint32 instance_id)
+DynamicZone* Perl__get_expedition_by_zone_instance(uint32 zone_id, uint32 instance_id)
 {
-	return Expedition::FindCachedExpeditionByZoneInstance(zone_id, instance_id);
+	return DynamicZone::FindExpeditionByZone(zone_id, instance_id);
 }
 
 perl::reference Perl__get_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name)
 {
 	perl::hash table;
 
-	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(char_id);
+	auto lockouts = DynamicZone::GetCharacterLockouts(char_id);
 
-	auto it = std::find_if(lockouts.begin(), lockouts.end(), [&](const ExpeditionLockoutTimer& lockout) {
-		return lockout.IsSameLockout(expedition_name, event_name);
+	auto it = std::find_if(lockouts.begin(), lockouts.end(), [&](const DzLockout& lockout) {
+		return lockout.IsSame(expedition_name, event_name);
 	});
 
 	if (it != lockouts.end())
 	{
 		table["remaining"] = it->GetSecondsRemaining();
-		table["uuid"] = it->GetExpeditionUUID();
+		table["uuid"] = it->UUID();
 	}
 
 	return perl::reference(table);
@@ -2827,23 +2827,23 @@ perl::reference Perl__get_expedition_lockouts_by_char_id(uint32 char_id)
 {
 	perl::hash table;
 
-	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(char_id);
+	auto lockouts = DynamicZone::GetCharacterLockouts(char_id);
 	for (const auto& lockout : lockouts)
 	{
-		if (!table.exists(lockout.GetExpeditionName()))
+		if (!table.exists(lockout.DzName()))
 		{
-			table[lockout.GetExpeditionName()] = perl::reference(perl::hash());
+			table[lockout.DzName()] = perl::reference(perl::hash());
 		}
 
-		perl::hash expedition_table = table[lockout.GetExpeditionName()];
-		if (!expedition_table.exists(lockout.GetEventName()))
+		perl::hash expedition_table = table[lockout.DzName()];
+		if (!expedition_table.exists(lockout.Event()))
 		{
-			expedition_table[lockout.GetEventName()] = perl::reference(perl::hash());
+			expedition_table[lockout.Event()] = perl::reference(perl::hash());
 		}
 
-		perl::hash event_table = expedition_table[lockout.GetEventName()];
+		perl::hash event_table = expedition_table[lockout.Event()];
 		event_table["remaining"] = lockout.GetSecondsRemaining();
-		event_table["uuid"] = lockout.GetExpeditionUUID();
+		event_table["uuid"] = lockout.UUID();
 	}
 
 	return perl::reference(table);
@@ -2853,18 +2853,18 @@ perl::reference Perl__get_expedition_lockouts_by_char_id(uint32 char_id, std::st
 {
 	perl::hash table;
 
-	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(char_id);
+	auto lockouts = DynamicZone::GetCharacterLockouts(char_id);
 	for (const auto& lockout : lockouts)
 	{
-		if (lockout.GetExpeditionName() == expedition_name)
+		if (lockout.DzName() == expedition_name)
 		{
-			if (!table.exists(lockout.GetEventName()))
+			if (!table.exists(lockout.Event()))
 			{
-				table[lockout.GetEventName()] = perl::reference(perl::hash());
+				table[lockout.Event()] = perl::reference(perl::hash());
 			}
-			perl::hash event_table = table[lockout.GetEventName()];
+			perl::hash event_table = table[lockout.Event()];
 			event_table["remaining"] = lockout.GetSecondsRemaining();
-			event_table["uuid"] = lockout.GetExpeditionUUID();
+			event_table["uuid"] = lockout.UUID();
 		}
 	}
 
@@ -2873,39 +2873,39 @@ perl::reference Perl__get_expedition_lockouts_by_char_id(uint32 char_id, std::st
 
 void Perl__add_expedition_lockout_all_clients(std::string expedition_name, std::string event_name, uint32 seconds)
 {
-	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds);
-	Expedition::AddLockoutClients(lockout);
+	auto lockout = DzLockout::Create(expedition_name, event_name, seconds);
+	DynamicZone::AddClientsLockout(lockout);
 }
 
 void Perl__add_expedition_lockout_all_clients(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid)
 {
-	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
-	Expedition::AddLockoutClients(lockout);
+	auto lockout = DzLockout::Create(expedition_name, event_name, seconds, uuid);
+	DynamicZone::AddClientsLockout(lockout);
 }
 
 void Perl__add_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name, uint32 seconds)
 {
-	Expedition::AddLockoutByCharacterID(char_id, expedition_name, event_name, seconds);
+	DynamicZone::AddCharacterLockout(char_id, expedition_name, event_name, seconds);
 }
 
 void Perl__add_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid)
 {
-	Expedition::AddLockoutByCharacterID(char_id, expedition_name, event_name, seconds, uuid);
+	DynamicZone::AddCharacterLockout(char_id, expedition_name, event_name, seconds, uuid);
 }
 
 void Perl__remove_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name)
 {
-	Expedition::RemoveLockoutsByCharacterID(char_id, expedition_name, event_name);
+	DynamicZone::RemoveCharacterLockouts(char_id, expedition_name, event_name);
 }
 
 void Perl__remove_all_expedition_lockouts_by_char_id(uint32 char_id)
 {
-	Expedition::RemoveLockoutsByCharacterID(char_id);
+	DynamicZone::RemoveCharacterLockouts(char_id);
 }
 
 void Perl__remove_all_expedition_lockouts_by_char_id(uint32 char_id, std::string expedition_name)
 {
-	Expedition::RemoveLockoutsByCharacterID(char_id, expedition_name);
+	DynamicZone::RemoveCharacterLockouts(char_id, expedition_name);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id)

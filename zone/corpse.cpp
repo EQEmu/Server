@@ -16,8 +16,8 @@
 #include "../common/say_link.h"
 
 #include "corpse.h"
+#include "dynamic_zone.h"
 #include "entity.h"
-#include "expedition.h"
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"

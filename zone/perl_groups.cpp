@@ -129,12 +129,12 @@ Client* Perl_Group_GetMember(Group* self, int member_index) // @categories Accou
 
 bool Perl_Group_DoesAnyMemberHaveExpeditionLockout(Group* self, std::string expedition_name, std::string event_name)
 {
-	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name);
+	return self->AnyMemberHasDzLockout(expedition_name, event_name);
 }
 
 bool Perl_Group_DoesAnyMemberHaveExpeditionLockout(Group* self, std::string expedition_name, std::string event_name, int max_check_count)
 {
-	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
+	return self->AnyMemberHasDzLockout(expedition_name, event_name); // max_check_count deprecated
 }
 
 uint32_t Perl_Group_GetLowestLevel(Group* self) // @categories Script Utility, Group

@@ -93,7 +93,6 @@ struct ZoneEXPModInfo {
 };
 
 class Client;
-class Expedition;
 class Map;
 class Mob;
 class WaterMap;
@@ -236,7 +235,6 @@ public:
 	std::vector<GridEntriesRepository::GridEntries> zone_grid_entries;
 
 	std::unordered_map<uint32, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
-	std::unordered_map<uint32, std::unique_ptr<Expedition>>  expedition_cache;
 	std::unordered_map<uint32, DynamicZoneTemplatesRepository::DynamicZoneTemplates> dz_template_cache;
 
 	std::unordered_map<uint32, EXPModifier> exp_modifiers;

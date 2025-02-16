@@ -1717,13 +1717,13 @@ void ClientList::SendCharacterMessageID(ClientListEntry* character,
 		return;
 	}
 
-	SerializeBuffer serialized_args;
+	SerializeBuffer argbuf;
 	for (const auto& arg : args)
 	{
-		serialized_args.WriteString(arg);
+		argbuf.WriteString(arg);
 	}
 
-	uint32_t args_size = static_cast<uint32_t>(serialized_args.size());
+	uint32_t args_size = static_cast<uint32_t>(argbuf.size());
 	uint32_t pack_size = sizeof(CZClientMessageString_Struct) + args_size;
 	auto pack = std::make_unique<ServerPacket>(ServerOP_CZClientMessageString, pack_size);
 	auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
@@ -1731,7 +1731,10 @@ void ClientList::SendCharacterMessageID(ClientListEntry* character,
 	buf->chat_type = chat_type;
 	strn0cpy(buf->client_name, character->name(), sizeof(buf->client_name));
 	buf->args_size = args_size;
-	memcpy(buf->args, serialized_args.buffer(), serialized_args.size());
+	if (argbuf.size() > 0)
+	{
+		memcpy(buf->args, argbuf.buffer(), argbuf.size());
+	}
 
 	character->Server()->SendPacket(pack.get());
 }

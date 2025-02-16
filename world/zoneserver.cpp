@@ -39,7 +39,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/zone_store.h"
 #include "dynamic_zone.h"
 #include "dynamic_zone_manager.h"
-#include "expedition_message.h"
 #include "shared_task_world_messaging.h"
 #include "../common/shared_tasks.h"
 #include "shared_task_manager.h"
@@ -1375,10 +1374,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_Consent:
 		case ServerOP_DepopAllPlayersCorpses:
 		case ServerOP_DepopPlayerCorpse:
-		case ServerOP_ExpeditionLockState:
-		case ServerOP_ExpeditionLockout:
-		case ServerOP_ExpeditionLockoutDuration:
-		case ServerOP_ExpeditionReplayOnJoin:
 		case ServerOP_GuildRankUpdate:
 		case ServerOP_ItemStatus:
 		case ServerOP_KickPlayer:
@@ -1532,16 +1527,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			SharedTaskWorldMessaging::HandleZoneMessage(pack);
 			break;
 		}
-		case ServerOP_ExpeditionCreate:
-		case ServerOP_ExpeditionDzAddPlayer:
-		case ServerOP_ExpeditionDzMakeLeader:
-		case ServerOP_ExpeditionCharacterLockout:
-		case ServerOP_ExpeditionSaveInvite:
-		case ServerOP_ExpeditionRequestInvite: {
-			ExpeditionMessage::HandleZoneMessage(pack);
-			break;
-		}
 		case ServerOP_DzCreated:
+		case ServerOP_DzAddPlayer:
+		case ServerOP_DzSaveInvite:
+		case ServerOP_DzRequestInvite:
+		case ServerOP_DzMakeLeader:
 		case ServerOP_DzAddRemoveMember:
 		case ServerOP_DzSwapMembers:
 		case ServerOP_DzRemoveAllMembers:
@@ -1552,8 +1542,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_DzSetZoneIn:
 		case ServerOP_DzSetSwitchID:
 		case ServerOP_DzMovePC:
+		case ServerOP_DzLock:
+		case ServerOP_DzReplayOnJoin:
+		case ServerOP_DzLockout:
+		case ServerOP_DzLockoutDuration:
+		case ServerOP_DzCharacterLockout:
 		case ServerOP_DzUpdateMemberStatus: {
-			DynamicZone::HandleZoneMessage(pack);
+			dynamic_zone_manager.HandleZoneMessage(pack);
 			break;
 		}
 		case ServerOP_GuildTributeUpdate: {

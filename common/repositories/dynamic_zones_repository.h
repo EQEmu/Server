@@ -70,6 +70,8 @@ public:
 		float    zone_in_z;
 		float    zone_in_heading;
 		int      has_zone_in;
+		int8_t   is_locked;
+		int8_t   add_replay;
 		int      zone;
 		int      version;
 		int      is_global;
@@ -105,6 +107,8 @@ public:
 				dynamic_zones.zone_in_z,
 				dynamic_zones.zone_in_heading,
 				dynamic_zones.has_zone_in,
+				dynamic_zones.is_locked,
+				dynamic_zones.add_replay,
 				instance_list.zone,
 				instance_list.version,
 				instance_list.is_global,
@@ -144,6 +148,8 @@ public:
 		entry.zone_in_z           = strtof(row[col++], nullptr);
 		entry.zone_in_heading     = strtof(row[col++], nullptr);
 		entry.has_zone_in         = strtol(row[col++], nullptr, 10) != 0;
+		entry.is_locked           = static_cast<int8_t>(strtol(row[col++], nullptr, 10));
+		entry.add_replay          = static_cast<int8_t>(strtol(row[col++], nullptr, 10));
 		// from instance_list
 		entry.zone                = strtol(row[col++], nullptr, 10);
 		entry.version             = strtol(row[col++], nullptr, 10);
@@ -241,6 +247,22 @@ public:
 			), TableName(), leader_id, PrimaryKey(), dz_id);
 
 			db.QueryDatabase(query);
+		}
+	}
+
+	static void UpdateLocked(Database& db, uint32_t dz_id, bool lock)
+	{
+		if (dz_id != 0)
+		{
+			db.QueryDatabase(fmt::format("UPDATE dynamic_zones SET is_locked = {} WHERE id = {}", lock, dz_id));
+		}
+	}
+
+	static void UpdateReplayOnJoin(Database& db, uint32_t dz_id, bool enabled)
+	{
+		if (dz_id != 0)
+		{
+			db.QueryDatabase(fmt::format("UPDATE dynamic_zones SET add_replay = {} WHERE id = {}", enabled, dz_id));
 		}
 	}
 
@@ -350,6 +372,59 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	struct CharacterDz
+	{
+		uint32_t    id;
+		std::string name;
+		uint32_t    dz_id;
+	};
+
+	// get character ids with possible active dz id by type
+	static std::vector<CharacterDz> GetCharactersWithDz(Database& db, const std::vector<std::string>& names, int type)
+	{
+		if (names.empty())
+		{
+			return {};
+		}
+
+		std::vector<CharacterDz> entries;
+		entries.reserve(names.size());
+
+		auto results = db.QueryDatabase(fmt::format(SQL(
+			SELECT
+				character_data.id,
+				character_data.name,
+				MAX(dynamic_zones.id)
+			FROM character_data
+				LEFT JOIN dynamic_zone_members
+					ON character_data.id = dynamic_zone_members.character_id
+				LEFT JOIN dynamic_zones
+					ON dynamic_zone_members.dynamic_zone_id = dynamic_zones.id
+					AND dynamic_zones.`type` = {0}
+			WHERE character_data.name IN ('{1}')
+			GROUP BY character_data.id
+			ORDER BY FIELD(character_data.name, '{1}')
+		),
+			type,
+			fmt::join(names, "','")
+		));
+
+		if (results.Success())
+		{
+			for (auto row = results.begin(); row != results.end(); ++row)
+			{
+				CharacterDz entry{};
+				entry.id    = std::strtoul(row[0], nullptr, 10);
+				entry.name  = row[1];
+				entry.dz_id = row[2] ? std::strtoul(row[2], nullptr, 10) : 0;
+
+				entries.push_back(std::move(entry));
+			}
+		}
+
+		return entries;
 	}
 };
 

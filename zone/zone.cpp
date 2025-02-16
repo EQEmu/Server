@@ -36,7 +36,7 @@
 #include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 
-#include "expedition.h"
+#include "dynamic_zone.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "npc.h"
@@ -1161,7 +1161,6 @@ bool Zone::Init(bool is_static) {
 
 	LoadDynamicZoneTemplates();
 	DynamicZone::CacheAllFromDatabase();
-	Expedition::CacheAllFromDatabase();
 
 	content_db.LoadGlobalLoot();
 
@@ -1622,7 +1621,7 @@ bool Zone::Process() {
 					if (minutes_warning > 0)
 					{
 						// expedition expire warnings are handled by world
-						auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
+						auto expedition = DynamicZone::FindExpeditionByZone(GetZoneID(), GetInstanceID());
 						if (!expedition)
 						{
 							entity_list.ExpeditionWarning(minutes_warning);

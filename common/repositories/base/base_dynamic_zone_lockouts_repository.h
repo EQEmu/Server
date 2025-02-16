@@ -9,20 +9,22 @@
  * @docs https://docs.eqemu.io/developer/repositories
  */
 
-#ifndef EQEMU_BASE_EXPEDITIONS_REPOSITORY_H
-#define EQEMU_BASE_EXPEDITIONS_REPOSITORY_H
+#ifndef EQEMU_BASE_DYNAMIC_ZONE_LOCKOUTS_REPOSITORY_H
+#define EQEMU_BASE_DYNAMIC_ZONE_LOCKOUTS_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
 
-class BaseExpeditionsRepository {
+class BaseDynamicZoneLockoutsRepository {
 public:
-	struct Expeditions {
-		uint32_t id;
-		uint32_t dynamic_zone_id;
-		uint8_t  add_replay_on_join;
-		uint8_t  is_locked;
+	struct DynamicZoneLockouts {
+		uint32_t    id;
+		uint32_t    dynamic_zone_id;
+		std::string event_name;
+		time_t      expire_time;
+		uint32_t    duration;
+		std::string from_expedition_uuid;
 	};
 
 	static std::string PrimaryKey()
@@ -35,8 +37,10 @@ public:
 		return {
 			"id",
 			"dynamic_zone_id",
-			"add_replay_on_join",
-			"is_locked",
+			"event_name",
+			"expire_time",
+			"duration",
+			"from_expedition_uuid",
 		};
 	}
 
@@ -45,8 +49,10 @@ public:
 		return {
 			"id",
 			"dynamic_zone_id",
-			"add_replay_on_join",
-			"is_locked",
+			"event_name",
+			"UNIX_TIMESTAMP(expire_time)",
+			"duration",
+			"from_expedition_uuid",
 		};
 	}
 
@@ -62,7 +68,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("expeditions");
+		return std::string("dynamic_zone_lockouts");
 	}
 
 	static std::string BaseSelect()
@@ -83,35 +89,37 @@ public:
 		);
 	}
 
-	static Expeditions NewEntity()
+	static DynamicZoneLockouts NewEntity()
 	{
-		Expeditions e{};
+		DynamicZoneLockouts e{};
 
-		e.id                 = 0;
-		e.dynamic_zone_id    = 0;
-		e.add_replay_on_join = 1;
-		e.is_locked          = 0;
+		e.id                   = 0;
+		e.dynamic_zone_id      = 0;
+		e.event_name           = "";
+		e.expire_time          = std::time(nullptr);
+		e.duration             = 0;
+		e.from_expedition_uuid = "";
 
 		return e;
 	}
 
-	static Expeditions GetExpeditions(
-		const std::vector<Expeditions> &expeditionss,
-		int expeditions_id
+	static DynamicZoneLockouts GetDynamicZoneLockouts(
+		const std::vector<DynamicZoneLockouts> &dynamic_zone_lockoutss,
+		int dynamic_zone_lockouts_id
 	)
 	{
-		for (auto &expeditions : expeditionss) {
-			if (expeditions.id == expeditions_id) {
-				return expeditions;
+		for (auto &dynamic_zone_lockouts : dynamic_zone_lockoutss) {
+			if (dynamic_zone_lockouts.id == dynamic_zone_lockouts_id) {
+				return dynamic_zone_lockouts;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static Expeditions FindOne(
+	static DynamicZoneLockouts FindOne(
 		Database& db,
-		int expeditions_id
+		int dynamic_zone_lockouts_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -119,18 +127,20 @@ public:
 				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
 				PrimaryKey(),
-				expeditions_id
+				dynamic_zone_lockouts_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Expeditions e{};
+			DynamicZoneLockouts e{};
 
-			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.dynamic_zone_id    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.add_replay_on_join = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 1;
-			e.is_locked          = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.id                   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.dynamic_zone_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.event_name           = row[2] ? row[2] : "";
+			e.expire_time          = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.duration             = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.from_expedition_uuid = row[5] ? row[5] : "";
 
 			return e;
 		}
@@ -140,7 +150,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int expeditions_id
+		int dynamic_zone_lockouts_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -148,7 +158,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				expeditions_id
+				dynamic_zone_lockouts_id
 			)
 		);
 
@@ -157,7 +167,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		const Expeditions &e
+		const DynamicZoneLockouts &e
 	)
 	{
 		std::vector<std::string> v;
@@ -165,8 +175,10 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[1] + " = " + std::to_string(e.dynamic_zone_id));
-		v.push_back(columns[2] + " = " + std::to_string(e.add_replay_on_join));
-		v.push_back(columns[3] + " = " + std::to_string(e.is_locked));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.event_name) + "'");
+		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back(columns[4] + " = " + std::to_string(e.duration));
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.from_expedition_uuid) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -181,17 +193,19 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static Expeditions InsertOne(
+	static DynamicZoneLockouts InsertOne(
 		Database& db,
-		Expeditions e
+		DynamicZoneLockouts e
 	)
 	{
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.dynamic_zone_id));
-		v.push_back(std::to_string(e.add_replay_on_join));
-		v.push_back(std::to_string(e.is_locked));
+		v.push_back("'" + Strings::Escape(e.event_name) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back(std::to_string(e.duration));
+		v.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -213,7 +227,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		const std::vector<Expeditions> &entries
+		const std::vector<DynamicZoneLockouts> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -223,8 +237,10 @@ public:
 
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.dynamic_zone_id));
-			v.push_back(std::to_string(e.add_replay_on_join));
-			v.push_back(std::to_string(e.is_locked));
+			v.push_back("'" + Strings::Escape(e.event_name) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back(std::to_string(e.duration));
+			v.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -242,9 +258,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Expeditions> All(Database& db)
+	static std::vector<DynamicZoneLockouts> All(Database& db)
 	{
-		std::vector<Expeditions> all_entries;
+		std::vector<DynamicZoneLockouts> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -256,12 +272,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Expeditions e{};
+			DynamicZoneLockouts e{};
 
-			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.dynamic_zone_id    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.add_replay_on_join = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 1;
-			e.is_locked          = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.id                   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.dynamic_zone_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.event_name           = row[2] ? row[2] : "";
+			e.expire_time          = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.duration             = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.from_expedition_uuid = row[5] ? row[5] : "";
 
 			all_entries.push_back(e);
 		}
@@ -269,9 +287,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Expeditions> GetWhere(Database& db, const std::string &where_filter)
+	static std::vector<DynamicZoneLockouts> GetWhere(Database& db, const std::string &where_filter)
 	{
-		std::vector<Expeditions> all_entries;
+		std::vector<DynamicZoneLockouts> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -284,12 +302,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Expeditions e{};
+			DynamicZoneLockouts e{};
 
-			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.dynamic_zone_id    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.add_replay_on_join = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 1;
-			e.is_locked          = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.id                   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.dynamic_zone_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.event_name           = row[2] ? row[2] : "";
+			e.expire_time          = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.duration             = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.from_expedition_uuid = row[5] ? row[5] : "";
 
 			all_entries.push_back(e);
 		}
@@ -359,15 +379,17 @@ public:
 
 	static int ReplaceOne(
 		Database& db,
-		const Expeditions &e
+		const DynamicZoneLockouts &e
 	)
 	{
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.dynamic_zone_id));
-		v.push_back(std::to_string(e.add_replay_on_join));
-		v.push_back(std::to_string(e.is_locked));
+		v.push_back("'" + Strings::Escape(e.event_name) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back(std::to_string(e.duration));
+		v.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -382,7 +404,7 @@ public:
 
 	static int ReplaceMany(
 		Database& db,
-		const std::vector<Expeditions> &entries
+		const std::vector<DynamicZoneLockouts> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -392,8 +414,10 @@ public:
 
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.dynamic_zone_id));
-			v.push_back(std::to_string(e.add_replay_on_join));
-			v.push_back(std::to_string(e.is_locked));
+			v.push_back("'" + Strings::Escape(e.event_name) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back(std::to_string(e.duration));
+			v.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -412,4 +436,4 @@ public:
 	}
 };
 
-#endif //EQEMU_BASE_EXPEDITIONS_REPOSITORY_H
+#endif //EQEMU_BASE_DYNAMIC_ZONE_LOCKOUTS_REPOSITORY_H

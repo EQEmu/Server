@@ -21,7 +21,7 @@
 #include "../common/rulesys.h"
 #include "../common/strings.h"
 
-#include "expedition.h"
+#include "dynamic_zone.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -495,13 +495,12 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	if(GetPet())
 		entity_list.RemoveFromHateLists(GetPet());
 
-	if (GetPendingExpeditionInviteID() != 0)
+	if (GetPendingDzInviteID() != 0)
 	{
 		// live re-invites if client zoned with a pending invite, save pending invite info in world
-		auto expedition = Expedition::FindCachedExpeditionByID(GetPendingExpeditionInviteID());
-		if (expedition)
+		if (auto dz = DynamicZone::FindDynamicZoneByID(GetPendingDzInviteID(), DynamicZoneType::Expedition))
 		{
-			expedition->SendWorldPendingInvite(m_pending_expedition_invite, GetName());
+			dz->SendWorldPendingInvite(m_dz_invite, GetName());
 		}
 	}
 

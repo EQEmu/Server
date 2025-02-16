@@ -21,8 +21,7 @@
 class Client;
 class EQApplicationPacket;
 class DynamicZone;
-class Expedition;
-class ExpeditionLockoutTimer;
+class DzLockout;
 class ExpeditionRequest;
 class Group;
 class NPC;
@@ -32,6 +31,7 @@ class Seperator;
 class ServerPacket;
 struct DynamicZoneLocation;
 enum WaterRegionType : int;
+enum class DynamicZoneMemberStatus;
 
 namespace EQ
 {
@@ -246,6 +246,13 @@ struct ClientReward
 {
 	uint32 id;
 	uint32 amount;
+};
+
+struct ExpeditionInvite
+{
+	uint32_t    dz_id;
+	std::string inviter_name;
+	std::string swap_name;
 };
 
 class Client : public Mob
@@ -1565,32 +1572,24 @@ public:
 		Client* client, const std::string& client_name, uint16_t chat_type,
 		uint32_t string_id, const std::initializer_list<std::string>& arguments = {});
 
-	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false);
-	void AddExpeditionLockoutDuration(const std::string& expedition_name,
-		const std::string& event_Name, int seconds, const std::string& uuid = {}, bool update_db = false);
-	void AddNewExpeditionLockout(const std::string& expedition_name,
-		const std::string& event_name, uint32_t duration, std::string uuid = {});
-	Expedition* CreateExpedition(DynamicZone& dz, bool disable_messages = false);
-	Expedition* CreateExpedition(const std::string& zone_name,
-		uint32 version, uint32 duration, const std::string& expedition_name,
-		uint32 min_players, uint32 max_players, bool disable_messages = false);
-	Expedition* CreateExpeditionFromTemplate(uint32_t dz_template_id);
-	Expedition* GetExpedition() const;
-	uint32 GetExpeditionID() const { return m_expedition_id; }
-	const ExpeditionLockoutTimer* GetExpeditionLockout(
-		const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
-	const std::vector<ExpeditionLockoutTimer>& GetExpeditionLockouts() const { return m_expedition_lockouts; };
-	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name, bool include_expired = false);
-	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite.expedition_id; }
-	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
-	bool IsInExpedition() const { return m_expedition_id != 0; }
-	void RemoveAllExpeditionLockouts(const std::string& expedition_name, bool update_db = false);
-	void RemoveExpeditionLockout(const std::string& expedition_name,
-		const std::string& event_name, bool update_db = false);
-	void RequestPendingExpeditionInvite();
-	void SendExpeditionLockoutTimers();
-	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
-	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }
+	void AddDzLockout(const DzLockout& lockout, bool update_db = false);
+	void AddDzLockout(const std::string& expedition, const std::string& event, uint32_t duration, std::string uuid = {});
+	void AddDzLockoutDuration(const DzLockout& lockout, int seconds, const std::string& uuid = {}, bool update_db = false);
+	DynamicZone* CreateExpedition(DynamicZone& dz, bool silent = false);
+	DynamicZone* CreateExpedition(uint32 zone_id, uint32 version, uint32 duration, const std::string& name, uint32 min_players, uint32 max_players, bool silent = false);
+	DynamicZone* CreateExpeditionFromTemplate(uint32_t dz_template_id);
+	DynamicZone* GetExpedition() const;
+	uint32 GetExpeditionID() const;
+	const DzLockout* GetDzLockout(const std::string& expedition, const std::string& event) const;
+	const std::vector<DzLockout>& GetDzLockouts() const { return m_dz_lockouts; };
+	std::vector<DzLockout> GetDzLockouts(const std::string& expedition);
+	uint32 GetPendingDzInviteID() const { return m_dz_invite.dz_id; }
+	void SetPendingDzInvite(const ExpeditionInvite& invite) { m_dz_invite = invite; }
+	void RequestPendingDzInvite() const;
+	bool HasDzLockout(const std::string& expedition, const std::string& event) const;
+	void RemoveDzLockouts(const std::string& expedition, bool update_db = false);
+	void RemoveDzLockout(const std::string& expedition, const std::string& event, bool update_db = false);
+	void SendDzLockoutTimers();
 	void DzListTimers();
 	void SetDzRemovalTimer(bool enable_timer);
 	void SendDzCompassUpdate();
@@ -2285,9 +2284,8 @@ private:
 
 	uint8 client_max_level;
 
-	uint32 m_expedition_id = 0;
-	ExpeditionInvite m_pending_expedition_invite { 0 };
-	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
+	ExpeditionInvite m_dz_invite = {};
+	std::vector<DzLockout> m_dz_lockouts;
 	glm::vec3 m_quest_compass;
 	bool m_has_quest_compass = false;
 	std::vector<uint32_t> m_dynamic_zone_ids;

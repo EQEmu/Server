@@ -1,11 +1,13 @@
 #include "dynamic_zone_base.h"
 #include "database.h"
 #include "eqemu_logsys.h"
-#include "repositories/instance_list_repository.h"
-#include "repositories/instance_list_player_repository.h"
 #include "rulesys.h"
 #include "servertalk.h"
 #include "util/uuid.h"
+#include "repositories/character_expedition_lockouts_repository.h"
+#include "repositories/dynamic_zone_lockouts_repository.h"
+#include "repositories/instance_list_repository.h"
+#include "repositories/instance_list_player_repository.h"
 
 DynamicZoneBase::DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& entry)
 {
@@ -93,13 +95,15 @@ void DynamicZoneBase::LoadRepositoryResult(DynamicZonesRepository::DynamicZoneIn
 	m_zonein.y           = dz_entry.zone_in_y;
 	m_zonein.z           = dz_entry.zone_in_z;
 	m_zonein.heading     = dz_entry.zone_in_heading;
-	m_has_zonein         = (dz_entry.has_zone_in != 0);
+	m_has_zonein         = dz_entry.has_zone_in != 0;
+	m_is_locked          = dz_entry.is_locked;
+	m_add_replay         = dz_entry.add_replay;
 	// instance_list portion
 	m_zone_id            = dz_entry.zone;
 	m_zone_version       = dz_entry.version;
 	m_start_time         = std::chrono::system_clock::from_time_t(dz_entry.start_time);
 	m_duration           = std::chrono::seconds(dz_entry.duration);
-	m_never_expires      = (dz_entry.never_expires != 0);
+	m_never_expires      = dz_entry.never_expires != 0;
 	m_expire_time        = m_start_time + m_duration;
 }
 
@@ -119,37 +123,40 @@ void DynamicZoneBase::AddMemberFromRepositoryResult(
 uint32_t DynamicZoneBase::SaveToDatabase()
 {
 	LogDynamicZonesDetail("Saving dz instance [{}] to database", m_instance_id);
-
-	if (m_instance_id != 0)
+	if (m_instance_id == 0)
 	{
-		auto insert_dz = DynamicZonesRepository::NewEntity();
-		insert_dz.uuid                = m_uuid;
-		insert_dz.name                = m_name;
-		insert_dz.leader_id           = m_leader.id;
-		insert_dz.min_players         = m_min_players;
-		insert_dz.max_players         = m_max_players;
-		insert_dz.instance_id         = m_instance_id,
-		insert_dz.type                = static_cast<int>(m_type);
-		insert_dz.dz_switch_id        = m_dz_switch_id;
-		insert_dz.compass_zone_id     = m_compass.zone_id;
-		insert_dz.compass_x           = m_compass.x;
-		insert_dz.compass_y           = m_compass.y;
-		insert_dz.compass_z           = m_compass.z;
-		insert_dz.safe_return_zone_id = m_safereturn.zone_id;
-		insert_dz.safe_return_x       = m_safereturn.x;
-		insert_dz.safe_return_y       = m_safereturn.y;
-		insert_dz.safe_return_z       = m_safereturn.z;
-		insert_dz.safe_return_heading = m_safereturn.heading;
-		insert_dz.zone_in_x           = m_zonein.x;
-		insert_dz.zone_in_y           = m_zonein.y;
-		insert_dz.zone_in_z           = m_zonein.z;
-		insert_dz.zone_in_heading     = m_zonein.heading;
-		insert_dz.has_zone_in         = m_has_zonein;
-
-		auto inserted_dz = DynamicZonesRepository::InsertOne(GetDatabase(), insert_dz);
-		return inserted_dz.id;
+		return 0;
 	}
-	return 0;
+
+	auto dz = DynamicZonesRepository::NewEntity();
+	dz.uuid                = m_uuid;
+	dz.name                = m_name;
+	dz.leader_id           = m_leader.id;
+	dz.min_players         = m_min_players;
+	dz.max_players         = m_max_players;
+	dz.instance_id         = static_cast<int32_t>(m_instance_id),
+	dz.type                = static_cast<uint8_t>(m_type);
+	dz.dz_switch_id        = m_dz_switch_id;
+	dz.compass_zone_id     = m_compass.zone_id;
+	dz.compass_x           = m_compass.x;
+	dz.compass_y           = m_compass.y;
+	dz.compass_z           = m_compass.z;
+	dz.safe_return_zone_id = m_safereturn.zone_id;
+	dz.safe_return_x       = m_safereturn.x;
+	dz.safe_return_y       = m_safereturn.y;
+	dz.safe_return_z       = m_safereturn.z;
+	dz.safe_return_heading = m_safereturn.heading;
+	dz.zone_in_x           = m_zonein.x;
+	dz.zone_in_y           = m_zonein.y;
+	dz.zone_in_z           = m_zonein.z;
+	dz.zone_in_heading     = m_zonein.heading;
+	dz.has_zone_in         = static_cast<uint8_t>(m_has_zonein);
+	dz.is_locked           = static_cast<int8_t>(m_is_locked);
+	dz.add_replay          = static_cast<int8_t>(m_add_replay);
+
+	dz = DynamicZonesRepository::InsertOne(GetDatabase(), std::move(dz));
+
+	return dz.id;
 }
 
 bool DynamicZoneBase::AddMember(const DynamicZoneMember& add_member)
@@ -196,10 +203,9 @@ bool DynamicZoneBase::RemoveMember(const DynamicZoneMember& remove_member)
 	return true;
 }
 
-bool DynamicZoneBase::SwapMember(
-	const DynamicZoneMember& add_member, const std::string& remove_char_name)
+bool DynamicZoneBase::SwapMember(const DynamicZoneMember& add_member, const std::string& remove_name)
 {
-	auto remove_member = GetMemberData(remove_char_name);
+	auto remove_member = GetMemberData(remove_name);
 	if (!add_member.IsValid() || !remove_member.IsValid())
 	{
 		return false;
@@ -230,9 +236,18 @@ void DynamicZoneBase::RemoveAllMembers()
 
 void DynamicZoneBase::SaveMembers(const std::vector<DynamicZoneMember>& members)
 {
+	if (members.empty())
+	{
+		return;
+	}
+
 	LogDynamicZonesDetail("Saving [{}] member(s) for dz [{}]", members.size(), m_id);
 
 	m_members = members;
+	if (m_members.size() > m_max_players)
+	{
+		m_members.resize(m_max_players);
+	}
 
 	// the lower level instance_list_players needs to be kept updated as well
 	std::vector<DynamicZoneMembersRepository::DynamicZoneMembers> insert_members;
@@ -242,12 +257,12 @@ void DynamicZoneBase::SaveMembers(const std::vector<DynamicZoneMember>& members)
 		DynamicZoneMembersRepository::DynamicZoneMembers member_entry{};
 		member_entry.dynamic_zone_id = m_id;
 		member_entry.character_id = member.id;
-		insert_members.emplace_back(member_entry);
+		insert_members.push_back(member_entry);
 
-		InstanceListPlayerRepository::InstanceListPlayer player_entry;
-		player_entry.id = static_cast<int>(m_instance_id);
-		player_entry.charid = static_cast<int>(member.id);
-		insert_players.emplace_back(player_entry);
+		InstanceListPlayerRepository::InstanceListPlayer player_entry{};
+		player_entry.id = m_instance_id;
+		player_entry.charid = member.id;
+		insert_players.push_back(player_entry);
 	}
 
 	DynamicZoneMembersRepository::InsertOrUpdateMany(GetDatabase(), insert_members);
@@ -336,6 +351,44 @@ void DynamicZoneBase::SetLeader(const DynamicZoneMember& new_leader, bool update
 	if (update_db)
 	{
 		DynamicZonesRepository::UpdateLeaderID(GetDatabase(), m_id, new_leader.id);
+	}
+}
+
+void DynamicZoneBase::SetLocked(bool lock, bool update_db, DzLockMsg lock_msg, uint32_t color)
+{
+	m_is_locked = lock;
+
+	if (update_db)
+	{
+		DynamicZonesRepository::UpdateLocked(GetDatabase(), m_id, lock);
+
+		ServerPacket pack(ServerOP_DzLock, sizeof(ServerDzLock_Struct));
+		auto buf = reinterpret_cast<ServerDzLock_Struct*>(pack.pBuffer);
+		buf->dz_id = GetID();
+		buf->sender_zone_id = GetCurrentZoneID();
+		buf->sender_instance_id = GetCurrentInstanceID();
+		buf->lock = m_is_locked;
+		buf->lock_msg = static_cast<uint8_t>(lock_msg);
+		buf->color = color;
+		SendServerPacket(&pack);
+	}
+}
+
+void DynamicZoneBase::SetReplayOnJoin(bool enabled, bool update_db)
+{
+	m_add_replay = enabled;
+
+	if (update_db)
+	{
+		DynamicZonesRepository::UpdateReplayOnJoin(GetDatabase(), m_id, enabled);
+
+		ServerPacket pack(ServerOP_DzReplayOnJoin, sizeof(ServerDzBool_Struct));
+		auto buf = reinterpret_cast<ServerDzBool_Struct*>(pack.pBuffer);
+		buf->dz_id = GetID();
+		buf->sender_zone_id = GetCurrentZoneID();
+		buf->sender_instance_id = GetCurrentInstanceID();
+		buf->enabled = enabled;
+		SendServerPacket(&pack);
 	}
 }
 
@@ -478,13 +531,13 @@ void DynamicZoneBase::RemoveInternalMember(uint32_t character_id)
 	), m_members.end());
 }
 
-bool DynamicZoneBase::HasMember(uint32_t character_id)
+bool DynamicZoneBase::HasMember(uint32_t character_id) const
 {
 	return std::any_of(m_members.begin(), m_members.end(),
 		[&](const DynamicZoneMember& member) { return member.id == character_id; });
 }
 
-bool DynamicZoneBase::HasMember(const std::string& character_name)
+bool DynamicZoneBase::HasMember(const std::string& character_name) const
 {
 	return std::any_of(m_members.begin(), m_members.end(),
 		[&](const DynamicZoneMember& member) {
@@ -590,35 +643,34 @@ std::string DynamicZoneBase::GetDynamicZoneTypeName(DynamicZoneType dz_type)
 	}
 }
 
-EQ::Net::DynamicPacket DynamicZoneBase::GetSerializedDzPacket()
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerPacket(uint16_t zone_id, uint16_t instance_id)
 {
-	EQ::Net::DynamicPacket dyn_pack;
-	dyn_pack.PutSerialize(0, *this);
+	std::ostringstream ss = GetSerialized();
+	std::string_view sv = ss.view();
 
-	LogDynamicZonesDetail("Serialized server dz size [{}]", dyn_pack.Length());
-	return dyn_pack;
-}
-
-std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzCreatePacket(
-	uint16_t origin_zone_id, uint16_t origin_instance_id)
-{
-	EQ::Net::DynamicPacket dyn_pack = GetSerializedDzPacket();
-
-	auto pack_size = sizeof(ServerDzCreateSerialized_Struct) + dyn_pack.Length();
+	auto pack_size = sizeof(ServerDzCreate_Struct) + sv.size();
 	auto pack = std::make_unique<ServerPacket>(ServerOP_DzCreated, static_cast<uint32_t>(pack_size));
-	auto buf = reinterpret_cast<ServerDzCreateSerialized_Struct*>(pack->pBuffer);
-	buf->origin_zone_id = origin_zone_id;
-	buf->origin_instance_id = origin_instance_id;
-	buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
-	memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
+	auto buf = reinterpret_cast<ServerDzCreate_Struct*>(pack->pBuffer);
+	buf->origin_zone_id = zone_id;
+	buf->origin_instance_id = instance_id;
+	buf->dz_id = GetID();
+	buf->cereal_size = static_cast<uint32_t>(sv.size());
+	memcpy(buf->cereal_data, sv.data(), sv.size());
 
 	return pack;
 }
 
-void DynamicZoneBase::LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size)
+std::ostringstream DynamicZoneBase::GetSerialized()
 {
-	LogDynamicZonesDetail("Deserializing server dz size [{}]", cereal_size);
-	EQ::Util::MemoryStreamReader ss(cereal_data, cereal_size);
+	std::ostringstream ss;
+	cereal::BinaryOutputArchive archive(ss);
+	archive(*this);
+	return ss;
+}
+
+void DynamicZoneBase::Unserialize(std::span<char> buf)
+{
+	EQ::Util::MemoryStreamReader ss(buf.data(), buf.size());
 	cereal::BinaryInputArchive archive(ss);
 	archive(*this);
 }
@@ -646,4 +698,181 @@ void DynamicZoneBase::LoadTemplate(const DynamicZoneTemplatesRepository::Dynamic
 	m_zonein.y           = dz_template.zone_in_y;
 	m_zonein.z           = dz_template.zone_in_z;
 	m_zonein.heading     = dz_template.zone_in_h;
+}
+
+std::vector<uint32_t> DynamicZoneBase::GetMemberIds()
+{
+	std::vector<uint32_t> ids;
+	ids.reserve(m_members.size());
+	for (const auto& member : m_members)
+	{
+		ids.push_back(member.id);
+	}
+	return ids;
+}
+
+bool DynamicZoneBase::HasLockout(const std::string& event)
+{
+	return std::ranges::any_of(m_lockouts, [&](const auto& l) { return l.IsEvent(event); });
+}
+
+bool DynamicZoneBase::HasReplayLockout()
+{
+	return HasLockout(DzLockout::ReplayTimer);
+}
+
+void DynamicZoneBase::AddLockout(const std::string& event, uint32_t seconds)
+{
+	auto lockout = DzLockout::Create(m_name, event, seconds, m_uuid);
+	AddLockout(lockout);
+}
+
+void DynamicZoneBase::AddLockout(const DzLockout& lockout, bool members_only)
+{
+	if (!members_only)
+	{
+		DynamicZoneLockoutsRepository::InsertLockouts(GetDatabase(), GetID(), { lockout });
+	}
+
+	CharacterExpeditionLockoutsRepository::InsertLockout(GetDatabase(), GetMemberIds(), lockout);
+
+	HandleLockoutUpdate(lockout, false, members_only);
+	SendServerPacket(CreateLockoutPacket(lockout, false, members_only).get());
+}
+
+void DynamicZoneBase::AddLockoutDuration(const std::string& event, int seconds, bool members_only)
+{
+	auto lockout = DzLockout::Create(m_name, event, std::max(0, seconds), m_uuid);
+
+	// lockout has unsigned duration, pass original seconds to support reducing existing timers
+	int secs = static_cast<int>(seconds * RuleR(Expedition, LockoutDurationMultiplier));
+	CharacterExpeditionLockoutsRepository::AddLockoutDuration(GetDatabase(), GetMemberIds(), lockout, secs);
+
+	HandleLockoutDuration(lockout, seconds, members_only, true);
+	SendServerPacket(CreateLockoutDurationPacket(lockout, seconds, members_only).get());
+}
+
+void DynamicZoneBase::UpdateLockoutDuration(const std::string& event, uint32_t seconds, bool members_only)
+{
+	// some live expeditions update existing lockout timers during progression
+	auto it = std::ranges::find_if(m_lockouts, [&](const auto& l) { return l.IsEvent(event); });
+	if (it != m_lockouts.end())
+	{
+		seconds = static_cast<uint32_t>(seconds * RuleR(Expedition, LockoutDurationMultiplier));
+		DzLockout lockout(m_uuid, m_name, event, it->GetStartTime() + seconds, seconds);
+		AddLockout(lockout, members_only);
+	}
+}
+
+void DynamicZoneBase::RemoveLockout(const std::string& event)
+{
+	DynamicZoneLockoutsRepository::DeleteWhere(GetDatabase(), fmt::format(
+		"dynamic_zone_id = {} AND event_name = '{}'", GetID(), Strings::Escape(event)));
+
+	CharacterExpeditionLockoutsRepository::DeleteWhere(GetDatabase(), fmt::format(
+		"character_id IN ({}) AND expedition_name = '{}' AND event_name = '{}'",
+		fmt::join(GetMemberIds(), ","), Strings::Escape(m_name), Strings::Escape(event)));
+
+	DzLockout lockout{m_uuid, m_name, event, 0, 0};
+	HandleLockoutUpdate(lockout, true, false);
+	SendServerPacket(CreateLockoutPacket(lockout, true).get());
+}
+
+void DynamicZoneBase::HandleLockoutUpdate(const DzLockout& lockout, bool remove, bool members_only)
+{
+	if (!members_only)
+	{
+		std::erase_if(m_lockouts, [&](const auto& l) { return l.IsEvent(lockout.Event()); });
+		if (!remove)
+		{
+			m_lockouts.push_back(lockout);
+		}
+	}
+}
+
+void DynamicZoneBase::HandleLockoutDuration(const DzLockout& lockout, int seconds, bool members_only, bool insert_db)
+{
+	if (!members_only)
+	{
+		auto it = std::ranges::find_if(m_lockouts, [&](const auto& l) { return l.IsEvent(lockout.Event()); });
+		if (it != m_lockouts.end())
+		{
+			it->AddLockoutTime(seconds);
+		}
+		else
+		{
+			it = m_lockouts.insert(m_lockouts.end(), lockout);
+		}
+
+		if (insert_db)
+		{
+			DynamicZoneLockoutsRepository::InsertLockouts(GetDatabase(), GetID(), { *it });
+		}
+	}
+}
+
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateLockoutPacket(const DzLockout& lockout, bool remove, bool members_only) const
+{
+	uint32_t pack_size = sizeof(ServerDzLockout_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzLockout, pack_size);
+	auto buf = reinterpret_cast<ServerDzLockout_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->expire_time = lockout.GetExpireTime();
+	buf->duration = lockout.GetDuration();
+	buf->sender_zone_id = GetCurrentZoneID();
+	buf->sender_instance_id = GetCurrentInstanceID();
+	buf->remove = remove;
+	buf->members_only = members_only;
+	strn0cpy(buf->event_name, lockout.Event().c_str(), sizeof(buf->event_name));
+	return pack;
+}
+
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateLockoutDurationPacket(const DzLockout& lockout, int seconds, bool members_only) const
+{
+	uint32_t pack_size = sizeof(ServerDzLockout_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzLockoutDuration, pack_size);
+	auto buf = reinterpret_cast<ServerDzLockout_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->expire_time = lockout.GetExpireTime();
+	buf->duration = lockout.GetDuration();
+	buf->sender_zone_id = GetCurrentZoneID();
+	buf->sender_instance_id = GetCurrentInstanceID();
+	buf->members_only = members_only;
+	buf->seconds = seconds;
+	strn0cpy(buf->event_name, lockout.Event().c_str(), sizeof(buf->event_name));
+	return pack;
+}
+
+void DynamicZoneBase::SyncCharacterLockouts(uint32_t char_id, std::vector<DzLockout>& lockouts)
+{
+	// adds missing event lockouts to client for this expedition and updates
+	// client timers that are both shorter and from another expedition
+	bool modified = false;
+
+	for (const auto& lockout : m_lockouts)
+	{
+		if (lockout.IsReplay() || lockout.IsExpired() || lockout.UUID() != m_uuid)
+		{
+			continue;
+		}
+
+		auto it = std::find_if(lockouts.begin(), lockouts.end(), [&](const DzLockout& l) { return l.IsSame(lockout); });
+		if (it == lockouts.end())
+		{
+			modified = true;
+			lockouts.push_back(lockout); // insert missing
+		}
+		else if (it->GetSecondsRemaining() < lockout.GetSecondsRemaining() && it->UUID() != m_uuid)
+		{
+			// only update lockout timer not uuid so loot event apis still work
+			modified = true;
+			it->SetDuration(lockout.GetDuration());
+			it->SetExpireTime(lockout.GetExpireTime());
+		}
+	}
+
+	if (modified)
+	{
+		CharacterExpeditionLockoutsRepository::InsertLockouts(GetDatabase(), char_id, lockouts);
+	}
 }

@@ -271,7 +271,7 @@ public:
 
 	void	QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required = true, bool ignore_sender = true, float distance = 0, bool group_only = true);
 
-	bool DoesAnyMemberHaveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, int max_check_count = 0);
+	bool AnyMemberHasDzLockout(const std::string& expedition, const std::string& event);
 
 	std::vector<RaidMember> GetMembers() const;
 	std::vector<RaidMember> GetRaidGroupMembers(uint32 gid);

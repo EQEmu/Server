@@ -139,12 +139,12 @@ Client* Perl_Raid_GetMember(Raid* self, int member_index) // @categories Raid
 
 bool Perl_Raid_DoesAnyMemberHaveExpeditionLockout(Raid* self, std::string expedition_name, std::string event_name)
 {
-	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name);
+	return self->AnyMemberHasDzLockout(expedition_name, event_name);
 }
 
 bool Perl_Raid_DoesAnyMemberHaveExpeditionLockout(Raid* self, std::string expedition_name, std::string event_name, int max_check_count)
 {
-	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
+	return self->AnyMemberHasDzLockout(expedition_name, event_name); // max_check_count deprecated
 }
 
 int Perl_Raid_GetGroupNumber(Raid* self, int member_index) {
