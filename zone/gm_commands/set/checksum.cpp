@@ -17,12 +17,8 @@ void SetChecksum(Client *c, const Seperator *sep)
 	database.SetVariable("crc_basedata", account.crc_basedata);
 
 	c->Message(Chat::White, "Attempting to reload Rules globally.");
-	auto pack = new ServerPacket(ServerOP_ReloadRules, 0);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
+	worldserver.SendReload(ServerReload::Type::Rules);
 
 	c->Message(Chat::White, "Attempting to reload Variables globally.");
-	pack = new ServerPacket(ServerOP_ReloadVariables, 0);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
+	worldserver.SendReload(ServerReload::Type::Variables);
 }

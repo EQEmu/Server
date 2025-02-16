@@ -462,10 +462,6 @@ bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_
 		)
 	);
 
-	if (l.empty()) {
-		return false;
-	}
-
 	for (const auto& e : l) {
 		if (e.group_) {
 			if (entity_list.IsTrapGroupSpawned(e.id, e.group_)) {

@@ -310,7 +310,6 @@ public:
 	void LoadVeteranRewards();
 	void LoadZoneDoors();
 	void ReloadStaticData();
-	void ReloadWorld(uint8 global_repop);
 	void RemoveAuth(const char *iCharName, const char *iLSKey);
 	void RemoveAuth(uint32 lsid);
 	void Repop(bool is_forced = false);
@@ -457,6 +456,8 @@ public:
 	void DeleteBucket(const std::string& bucket_name);
 	std::string GetBucketExpires(const std::string& bucket_name);
 	std::string GetBucketRemaining(const std::string& bucket_name);
+	inline void SetZoneServerId(uint32 id) { m_zone_server_id = id; }
+	inline uint32 GetZoneServerId() const { return m_zone_server_id; }
 
 private:
 	bool      allow_mercs;
@@ -521,6 +522,8 @@ private:
 
 	// Base Data
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
+
+	uint32_t m_zone_server_id = 0;
 };
 
 #endif

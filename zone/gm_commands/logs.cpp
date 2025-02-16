@@ -182,9 +182,7 @@ void command_logs(Client *c, const Seperator *sep)
 	}
 	else if (is_reload) {
 		c->Message(Chat::White, "Attempting to reload Log Settings globally.");
-		auto pack = new ServerPacket(ServerOP_ReloadLogs, 0);
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
+		worldserver.SendReload(ServerReload::Type::Logs);
 	}
 	else if (is_set && sep->IsNumber(3)) {
 		auto logs_set   = false;
