@@ -976,6 +976,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_TwoHandBash:
 			break;
+		case SE_PercentXPIncrease:
+		{
+			newbon->XPRateMod += effect_value;
+			break;
+		}
 		case SE_SetBreathLevel:
 			break;
 		case SE_RaiseStatCap:
@@ -2974,8 +2979,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_PercentXPIncrease:
 			{
-				if(new_bonus->XPRateMod < effect_value)
-					new_bonus->XPRateMod = effect_value;
+				new_bonus->XPRateMod += effect_value;
 				break;
 			}
 
