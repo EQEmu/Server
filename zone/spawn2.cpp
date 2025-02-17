@@ -651,8 +651,14 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 			entity_list.AddNPC(npc, true, true);
 
 			if (s.is_corpse) {
-				npc->SetQueuedToCorpse();
-				npc->SetCorpseDecayTime(s.decay_time);
+				auto decay_time = s.decay_at - std::time(nullptr);
+				if (decay_time > 0) {
+					npc->SetQueuedToCorpse();
+					npc->SetCorpseDecayTime((decay_time * 1000));
+				} else {
+					npc->Depop();
+					continue;
+				}
 			}
 		}
 
@@ -691,8 +697,6 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 				spawn_enabled,
 				(EmuAppearance) s.animation
 			);
-
-			spawn2_list.Insert(new_spawn);
 
 			spawn2_list.Insert(new_spawn);
 			new_spawn->Process();
