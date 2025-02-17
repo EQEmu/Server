@@ -6852,9 +6852,6 @@ DROP INDEX IF EXISTS `idx_npc_expires` ON `data_buckets`;
 DROP INDEX IF EXISTS `idx_bot_expires` ON `data_buckets`;
 DROP INDEX IF EXISTS `idx_account_id_key` ON `data_buckets`;
 
--- ✅ Create optimized unique index with `key` first
-CREATE UNIQUE INDEX `keys` ON data_buckets (`key`, character_id, npc_id, bot_id, account_id, zone_id, instance_id);
-
 -- Add zone_id, instance_id
 ALTER TABLE `data_buckets`
 	MODIFY COLUMN `npc_id` int(11) NOT NULL DEFAULT 0 AFTER `character_id`,
@@ -6867,6 +6864,9 @@ ALTER TABLE `data_buckets`
 	MODIFY COLUMN `character_id` bigint(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `account_id`,
 	MODIFY COLUMN `npc_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `character_id`,
 	MODIFY COLUMN `bot_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `npc_id`;
+
+-- ✅ Create optimized unique index with `key` first
+CREATE UNIQUE INDEX `keys` ON data_buckets (`key`, character_id, npc_id, bot_id, account_id, zone_id, instance_id);
 )",
 		.content_schema_update = false
 	},
