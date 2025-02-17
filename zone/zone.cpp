@@ -3187,4 +3187,16 @@ bool Zone::DoesAlternateCurrencyExist(uint32 currency_id)
 	);
 }
 
+void Zone::DisableRespawnTimers()
+{
+	LinkedListIterator<Spawn2*> e(spawn2_list);
+
+	e.Reset();
+
+	while (e.MoreElements()) {
+		e.GetData()->Disable();
+		e.Advance();
+	}
+}
+
 #include "zone_loot.cpp"
