@@ -451,6 +451,12 @@ public:
 	void LoadBaseData();
 	void ReloadBaseData();
 
+	// data buckets
+	std::string GetBucket(const std::string& bucket_name);
+	void SetBucket(const std::string& bucket_name, const std::string& bucket_value, const std::string& expiration = "");
+	void DeleteBucket(const std::string& bucket_name);
+	std::string GetBucketExpires(const std::string& bucket_name);
+	std::string GetBucketRemaining(const std::string& bucket_name);
 
 private:
 	bool      allow_mercs;

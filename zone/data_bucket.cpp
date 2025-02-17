@@ -19,10 +19,6 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 		.key = bucket_key,
 		.value = bucket_value,
 		.expires = expires_time,
-		.account_id = 0,
-		.character_id = 0,
-		.npc_id = 0,
-		.bot_id = 0
 	};
 
 	DataBucket::SetData(k);
@@ -54,6 +50,9 @@ void DataBucket::SetData(const DataBucketKey &k_)
 	}
 	else if (k.bot_id > 0) {
 		b.bot_id = k.bot_id;
+	} else if (k.zone_id > 0) {
+		b.zone_id = k.zone_id;
+		b.instance_id = k.instance_id;
 	}
 
 	const uint64 bucket_id         = b.id;
@@ -189,12 +188,14 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 	}
 
 	LogDataBuckets(
-		"Getting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}]",
+		"Getting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}] zone_id [{}] instance_id [{}]",
 		k.key,
 		k.bot_id,
 		k.account_id,
 		k.character_id,
-		k.npc_id
+		k.npc_id,
+		k.zone_id,
+		k.instance_id
 	);
 
 	bool can_cache = CanCache(k);
@@ -244,17 +245,21 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 					.account_id = k.account_id,
 					.character_id = k.character_id,
 					.npc_id = k.npc_id,
-					.bot_id = k.bot_id
+					.bot_id = k.bot_id,
+					.zone_id = k.zone_id,
+					.instance_id = k.instance_id
 				}
 			);
 
 			LogDataBuckets(
-				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] cache size before [{}] after [{}]",
+				"Key [{}] not found in database, adding to cache as a miss account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] zone_id [{}] instance_id [{}] cache size before [{}] after [{}]",
 				k.key,
 				k.account_id,
 				k.character_id,
 				k.npc_id,
 				k.bot_id,
+				k.zone_id,
+				k.instance_id,
 				size_before,
 				g_data_bucket_cache.size()
 			);
@@ -347,12 +352,15 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 		);
 
 		LogDataBuckets(
-			"Deleting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}] cache size before [{}] after [{}]",
+			"Deleting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] zone_id [{}] instance_id [{}] cache size before [{}] after [{}]",
 			k.key,
 			k.bot_id,
 			k.account_id,
 			k.character_id,
 			k.npc_id,
+			k.bot_id,
+			k.zone_id,
+			k.instance_id,
 			size_before,
 			g_data_bucket_cache.size()
 		);
@@ -390,12 +398,15 @@ std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 {
 	LogDataBuckets(
-		"Getting bucket remaining key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}]",
+		"Getting bucket remaining key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] zone_id [{}] instance_id [{}]",
 		k.key,
 		k.bot_id,
 		k.account_id,
 		k.character_id,
-		k.npc_id
+		k.npc_id,
+		k.bot_id,
+		k.zone_id,
+		k.instance_id
 	);
 
 	auto r = GetData(k);
@@ -408,39 +419,46 @@ std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 
 std::string DataBucket::GetScopedDbFilters(const DataBucketKey &k)
 {
-	std::vector<std::string> query = {};
+	std::vector<std::string> q = {};
 	if (k.character_id > 0) {
-		query.emplace_back(fmt::format("character_id = {}", k.character_id));
+		q.emplace_back(fmt::format("character_id = {}", k.character_id));
 	}
 	else {
-		query.emplace_back("character_id = 0");
+		q.emplace_back("character_id = 0");
 	}
 
 	if (k.account_id > 0) {
-		query.emplace_back(fmt::format("account_id = {}", k.account_id));
+		q.emplace_back(fmt::format("account_id = {}", k.account_id));
 	}
 	else {
-		query.emplace_back("account_id = 0");
+		q.emplace_back("account_id = 0");
 	}
 
 	if (k.npc_id > 0) {
-		query.emplace_back(fmt::format("npc_id = {}", k.npc_id));
+		q.emplace_back(fmt::format("npc_id = {}", k.npc_id));
 	}
 	else {
-		query.emplace_back("npc_id = 0");
+		q.emplace_back("npc_id = 0");
 	}
 
 	if (k.bot_id > 0) {
-		query.emplace_back(fmt::format("bot_id = {}", k.bot_id));
+		q.emplace_back(fmt::format("bot_id = {}", k.bot_id));
 	}
 	else {
-		query.emplace_back("bot_id = 0");
+		q.emplace_back("bot_id = 0");
+	}
+
+	if (k.zone_id > 0) {
+		q.emplace_back(fmt::format("zone_id = {} AND instance_id = {}", k.zone_id, k.instance_id));
+	}
+	else {
+		q.emplace_back("zone_id = 0 AND instance_id = 0");
 	}
 
 	return fmt::format(
 		"{} {}",
-		Strings::Join(query, " AND "),
-		!query.empty() ? "AND" : ""
+		Strings::Join(q, " AND "),
+		!q.empty() ? "AND" : ""
 	);
 }
 
@@ -451,7 +469,52 @@ bool DataBucket::CheckBucketMatch(const DataBucketsRepository::DataBuckets &dbe,
 		dbe.bot_id == k.bot_id &&
 		dbe.account_id == k.account_id &&
 		dbe.character_id == k.character_id &&
-		dbe.npc_id == k.npc_id
+		dbe.npc_id == k.npc_id &&
+		dbe.zone_id == k.zone_id &&
+		dbe.instance_id == k.instance_id
+	);
+}
+
+void DataBucket::LoadZoneCache(uint16 zone_id, uint16 instance_id)
+{
+	const auto &l = DataBucketsRepository::GetWhere(
+		database,
+		fmt::format(
+			"zone_id = {} AND instance_id = {} AND (`expires` > {} OR `expires` = 0)",
+			zone_id,
+			instance_id,
+			(long long) std::time(nullptr)
+		)
+	);
+
+	if (l.empty()) {
+		return;
+	}
+
+	LogDataBucketsDetail("cache size before [{}] l size [{}]", g_data_bucket_cache.size(), l.size());
+
+	uint32 added_count = 0;
+
+	for (const auto &e: l) {
+		if (!ExistsInCache(e)) {
+			added_count++;
+		}
+	}
+
+	for (const auto &e: l) {
+		if (!ExistsInCache(e)) {
+			LogDataBucketsDetail("bucket id [{}] bucket key [{}] bucket value [{}]", e.id, e.key_, e.value);
+
+			g_data_bucket_cache.emplace_back(e);
+		}
+	}
+
+	LogDataBucketsDetail("cache size after [{}]", g_data_bucket_cache.size());
+
+	LogDataBuckets(
+		"Loaded [{}] zone keys new cache size is [{}]",
+		l.size(),
+		g_data_bucket_cache.size()
 	);
 }
 
@@ -541,7 +604,7 @@ void DataBucket::BulkLoadEntitiesToCache(DataBucketLoadType::Type t, std::vector
 	);
 }
 
-void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id)
+void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id, uint32 secondary_id)
 {
 	size_t size_before = g_data_bucket_cache.size();
 
@@ -553,7 +616,11 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id)
 				return (
 					(type == DataBucketLoadType::Bot && e.bot_id == id) ||
 					(type == DataBucketLoadType::Account && e.account_id == id) ||
-					(type == DataBucketLoadType::Client && e.character_id == id)
+					(type == DataBucketLoadType::Client && e.character_id == id) ||
+					(type == DataBucketLoadType::Zone &&
+					 e.zone_id == id &&
+					 e.instance_id == secondary_id
+					)
 				);
 			}
 		),
@@ -595,7 +662,9 @@ void DataBucket::DeleteFromMissesCache(DataBucketsRepository::DataBuckets e)
 					   ce.account_id == e.account_id &&
 					   ce.character_id == e.character_id &&
 					   ce.npc_id == e.npc_id &&
-					   ce.bot_id == e.bot_id;
+					   ce.bot_id == e.bot_id &&
+					   ce.zone_id == e.zone_id &&
+					   ce.instance_id == e.instance_id;
 			}
 		),
 		g_data_bucket_cache.end()
@@ -647,13 +716,42 @@ void DataBucket::DeleteFromCache(uint64 id, DataBucketLoadType::Type type)
 	);
 }
 
+void DataBucket::DeleteZoneFromCache(uint16 zone_id, uint16 instance_id, DataBucketLoadType::Type type)
+{
+	size_t size_before = g_data_bucket_cache.size();
+
+	g_data_bucket_cache.erase(
+		std::remove_if(
+			g_data_bucket_cache.begin(),
+			g_data_bucket_cache.end(),
+			[&](DataBucketsRepository::DataBuckets &e) {
+				switch (type) {
+					case DataBucketLoadType::Zone:
+						return e.zone_id == zone_id && e.instance_id == instance_id;
+					default:
+						return false;
+				}
+			}
+		),
+		g_data_bucket_cache.end()
+	);
+
+	LogDataBuckets(
+		"Deleted zone [{}] instance [{}] from cache size before [{}] after [{}]",
+		zone_id,
+		instance_id,
+		size_before,
+		g_data_bucket_cache.size()
+	);
+}
+
 // CanCache returns whether a bucket can be cached or not
 // characters are only in one zone at a time so we can cache locally to the zone
 // bots (not implemented) are only in one zone at a time so we can cache locally to the zone
 // npcs (ids) can be in multiple zones so we can't cache locally to the zone
 bool DataBucket::CanCache(const DataBucketKey &key)
 {
-	if (key.character_id > 0 || key.account_id > 0 || key.bot_id > 0) {
+	if (key.character_id > 0 || key.account_id > 0 || key.bot_id > 0 || key.zone_id > 0) {
 		return true;
 	}
 

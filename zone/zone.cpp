@@ -172,6 +172,8 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	zone->RequestUCSServerStatus();
 	zone->StartShutdownTimer();
 
+	DataBucket::LoadZoneCache(iZoneID, iInstanceID);
+
 	/*
 	 * Set Logging
 	 */
@@ -931,6 +933,8 @@ void Zone::Shutdown(bool quiet)
 	entity_list.ClearAreas();
 	parse->ReloadQuests(true);
 	UpdateWindowTitle(nullptr);
+
+	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Zone, zone->GetZoneID(), zone->GetInstanceID());
 
 	LogSys.CloseFileLogs();
 
@@ -3185,6 +3189,58 @@ bool Zone::DoesAlternateCurrencyExist(uint32 currency_id)
 			return c.id == currency_id;
 		}
 	);
+}
+
+std::string Zone::GetBucket(const std::string& bucket_name)
+{
+	DataBucketKey k = {};
+	k.zone_id     = zoneid;
+	k.instance_id = instanceid;
+	k.key         = bucket_name;
+
+	return DataBucket::GetData(k).value;
+}
+
+void Zone::SetBucket(const std::string& bucket_name, const std::string& bucket_value, const std::string& expiration)
+{
+	DataBucketKey k = {};
+	k.zone_id     = zoneid;
+	k.instance_id = instanceid;
+	k.key         = bucket_name;
+	k.expires     = expiration;
+	k.value       = bucket_value;
+
+	DataBucket::SetData(k);
+}
+
+void Zone::DeleteBucket(const std::string& bucket_name)
+{
+	DataBucketKey k = {};
+	k.zone_id     = zoneid;
+	k.instance_id = instanceid;
+	k.key         = bucket_name;
+
+	DataBucket::DeleteData(k);
+}
+
+std::string Zone::GetBucketExpires(const std::string& bucket_name)
+{
+	DataBucketKey k = {};
+	k.zone_id     = zoneid;
+	k.instance_id = instanceid;
+	k.key         = bucket_name;
+
+	return DataBucket::GetDataExpires(k);
+}
+
+std::string Zone::GetBucketRemaining(const std::string& bucket_name)
+{
+	DataBucketKey k = {};
+	k.zone_id     = zoneid;
+	k.instance_id = instanceid;
+	k.key         = bucket_name;
+
+	return DataBucket::GetDataRemaining(k);
 }
 
 #include "zone_loot.cpp"
