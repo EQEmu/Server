@@ -6840,7 +6840,7 @@ RENAME TABLE `expedition_lockouts` TO `dynamic_zone_lockouts`;
 	},
 	ManifestEntry{
 		.version     = 9306,
-		.description = "2025_02_17_zone_state_spawns",
+		.description = "2025_02_17_zone_state_spawns.sql",
 		.check       = "SHOW TABLES LIKE 'zone_state_spawns'",
 		.condition   = "empty",
 		.match       = "",
