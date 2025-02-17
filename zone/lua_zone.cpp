@@ -67,7 +67,7 @@ void Lua_Zone::Despawn(uint32 spawngroup_id)
 	self->Despawn(spawngroup_id);
 }
 
-void Lua_Zone:DisableRespawnTimers()
+void Lua_Zone::DisableRespawnTimers()
 {
 	Lua_Safe_Call_Void();
 	self->DisableRespawnTimers();
