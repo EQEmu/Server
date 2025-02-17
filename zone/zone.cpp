@@ -879,6 +879,8 @@ void Zone::Shutdown(bool quiet)
 		return;
 	}
 
+	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Zone, zone->GetZoneID(), zone->GetInstanceID());
+
 	entity_list.StopMobAI();
 
 	std::map<uint32, NPCType *>::iterator itr;
@@ -933,8 +935,6 @@ void Zone::Shutdown(bool quiet)
 	entity_list.ClearAreas();
 	parse->ReloadQuests(true);
 	UpdateWindowTitle(nullptr);
-
-	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Zone, zone->GetZoneID(), zone->GetInstanceID());
 
 	LogSys.CloseFileLogs();
 
