@@ -617,10 +617,7 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id, u
 					(type == DataBucketLoadType::Bot && e.bot_id == id) ||
 					(type == DataBucketLoadType::Account && e.account_id == id) ||
 					(type == DataBucketLoadType::Client && e.character_id == id) ||
-					(type == DataBucketLoadType::Zone &&
-					 e.zone_id == id &&
-					 e.instance_id == secondary_id
-					)
+					(type == DataBucketLoadType::Zone && e.zone_id == id && e.instance_id == secondary_id)
 				);
 			}
 		),
