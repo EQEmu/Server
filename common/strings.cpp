@@ -912,3 +912,27 @@ std::string Strings::ZoneTime(const uint8 hours, const uint8 minutes)
 		hours >= 13 ? "PM" : "AM"
 	);
 }
+
+std::string Strings::Slugify(const std::string& input, const std::string& separator) {
+	std::string slug;
+	bool last_was_hyphen = false;
+
+	for (char c : input) {
+		if (std::isalnum(c)) {
+			slug += std::tolower(c);
+			last_was_hyphen = false;
+		} else if (c == ' ' || c == '_' || c == '-') {
+			if (!last_was_hyphen && !slug.empty()) {
+				slug += separator;
+				last_was_hyphen = true;
+			}
+		}
+	}
+
+	// Remove trailing hyphen if present
+	if (!slug.empty() && slug.back() == '-') {
+		slug.pop_back();
+	}
+
+	return slug;
+}

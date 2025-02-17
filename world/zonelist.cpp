@@ -28,10 +28,19 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/event_sub.h"
 #include "web_interface.h"
 #include "../common/zone_store.h"
+#include "../common/events/player_event_logs.h"
+#include "../common/patches/patches.h"
+#include "../common/skill_caps.h"
+#include "../common/content/world_content_service.h"
+#include "world_boot.h"
+#include "shared_task_manager.h"
+#include "dynamic_zone_manager.h"
+#include "ucs.h"
 
 extern uint32 numzones;
 extern EQ::Random emu_random;
 extern WebInterfaceList web_interface;
+extern SharedTaskManager shared_task_manager;
 volatile bool UCSServerAvailable_ = false;
 void CatchSignal(int sig_num);
 
@@ -860,4 +869,77 @@ bool ZSList::SendPacketToBootedZones(ServerPacket* pack)
 	}
 
 	return true;
+}
+
+void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
+{
+	static auto pack = ServerPacket(ServerOP_ServerReloadRequest, sizeof(ServerReload::Request));
+	auto        r    = (ServerReload::Request *) pack.pBuffer;
+
+	// Copy the packet data if it exists
+	if (packet) {
+		memcpy(pack.pBuffer, packet, sizeof(ServerReload::Request));
+	}
+
+	r->type                 = type;
+	r->requires_zone_booted = true;
+
+	LogInfo("Sending reload to all zones for type [{}]", ServerReload::GetName(type));
+
+	static const std::unordered_set<ServerReload::Type> no_zone_boot_required = {
+		ServerReload::Type::Opcodes,
+		ServerReload::Type::Rules,
+		ServerReload::Type::ContentFlags,
+		ServerReload::Type::Logs,
+		ServerReload::Type::Commands,
+		ServerReload::Type::PerlExportSettings,
+		ServerReload::Type::DataBucketsCache,
+		ServerReload::Type::WorldRepop
+	};
+
+	// Set requires_zone_booted flag before executing reload logic
+	if (no_zone_boot_required.contains(type)) {
+		r->requires_zone_booted = false;
+	}
+
+	// reload at the world level
+	if (type == ServerReload::Type::Opcodes) {
+		ReloadAllPatches();
+	} else if (type == ServerReload::Type::Rules) {
+		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
+	} else if (type == ServerReload::Type::SkillCaps) {
+		skill_caps.ReloadSkillCaps();
+	} else if (type == ServerReload::Type::ContentFlags) {
+		content_service.SetExpansionContext()->ReloadContentFlags();
+	} else if (type == ServerReload::Type::Logs) {
+		LogSys.LoadLogDatabaseSettings();
+		player_event_logs.ReloadSettings();
+		UCSLink.SendPacket(&pack);
+	} else if (type == ServerReload::Type::Tasks) {
+		shared_task_manager.LoadTaskData();
+	} else if (type == ServerReload::Type::DzTemplates) {
+		dynamic_zone_manager.LoadTemplates();
+	}
+
+	// Send the packet to all zones with staggered delays
+	// to prevent all zones from reloading at the same time
+	// and causing a massive spike in CPU usage
+	// This is especially important for large servers
+	// with many zones
+	// we reload 10 zones every second
+	int counter = 0;
+
+	for (auto &z: zone_server_list) {
+		bool is_local = r->zone_server_id != 0;
+
+		// if the zone reload is local to a specific zone
+		if (r->zone_server_id != 0 && r->zone_server_id != z->GetID()) {
+			continue;
+		}
+
+		// if the reload is local, we don't need to stagger the reloads
+		r->reload_at_unix = is_local ? 0 : (std::time(nullptr) + 1) + (counter / 10);
+		z->SendPacket(&pack);
+		++counter;
+	}
 }

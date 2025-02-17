@@ -50,6 +50,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../zone/data_bucket.h"
 #include "../common/repositories/guild_tributes_repository.h"
 #include "../common/skill_caps.h"
+#include "../common/server_reload_types.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -1366,11 +1367,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			QSLink.SendPacket(pack);
 			break;
 		}
-		case ServerOP_ReloadOpcodes: {
-			ReloadAllPatches();
-			zoneserver_list.SendPacket(pack);
-			break;
-		}
 		case ServerOP_CZDialogueWindow:
 		case ServerOP_CZLDoNUpdate:
 		case ServerOP_CZMarquee:
@@ -1398,31 +1394,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_RaidGroupSay:
 		case ServerOP_RaidSay:
 		case ServerOP_RefreshCensorship:
-		case ServerOP_ReloadAAData:
-		case ServerOP_ReloadAlternateCurrencies:
-		case ServerOP_ReloadBaseData:
-		case ServerOP_ReloadBlockedSpells:
-		case ServerOP_ReloadCommands:
-		case ServerOP_ReloadDoors:
-		case ServerOP_ReloadDataBucketsCache:
-		case ServerOP_ReloadFactions:
-		case ServerOP_ReloadGroundSpawns:
-		case ServerOP_ReloadLevelEXPMods:
-		case ServerOP_ReloadMerchants:
-		case ServerOP_ReloadNPCEmotes:
-		case ServerOP_ReloadNPCSpells:
-		case ServerOP_ReloadGlobalBuffs:
-		case ServerOP_ReloadObjects:
-		case ServerOP_ReloadPerlExportSettings:
-		case ServerOP_ReloadStaticZoneData:
-		case ServerOP_ReloadTitles:
-		case ServerOP_ReloadTraps:
-		case ServerOP_ReloadVariables:
-		case ServerOP_ReloadVeteranRewards:
-		case ServerOP_ReloadWorld:
-		case ServerOP_ReloadZonePoints:
-		case ServerOP_ReloadZoneData:
-		case ServerOP_ReloadLoot:
 		case ServerOP_RezzPlayerAccept:
 		case ServerOP_SpawnStatusChange:
 		case ServerOP_TraderMessaging:
@@ -1440,14 +1411,9 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendPacket(pack);
 			break;
 		}
-		case ServerOP_ReloadSkillCaps: {
-			zoneserver_list.SendPacket(pack);
-			skill_caps.ReloadSkillCaps();
-			break;
-		}
-		case ServerOP_ReloadRules: {
-			zoneserver_list.SendPacket(pack);
-			RuleManager::Instance()->LoadRules(&database, "default", true);
+		case ServerOP_ServerReloadRequest: {
+			auto o = (ServerReload::Request*) pack->pBuffer;
+			zoneserver_list.SendServerReload((ServerReload::Type) o->type, pack->pBuffer);
 			break;
 		}
 		case ServerOP_IsOwnerOnline: {
@@ -1473,28 +1439,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			if (zs) {
 				zs->SendPacket(pack);
 			}
-			break;
-		}
-		case ServerOP_ReloadContentFlags: {
-			zoneserver_list.SendPacket(pack);
-			content_service.SetExpansionContext()->ReloadContentFlags();
-			break;
-		}
-		case ServerOP_ReloadLogs: {
-			zoneserver_list.SendPacket(pack);
-			UCSLink.SendPacket(pack);
-			LogSys.LoadLogDatabaseSettings();
-			player_event_logs.ReloadSettings();
-			break;
-		}
-		case ServerOP_ReloadTasks: {
-			shared_task_manager.LoadTaskData();
-			zoneserver_list.SendPacket(pack);
-			break;
-		}
-		case ServerOP_ReloadDzTemplates: {
-			dynamic_zone_manager.LoadTemplates();
-			zoneserver_list.SendPacket(pack);
 			break;
 		}
 		case ServerOP_ChangeSharedMem: {

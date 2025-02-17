@@ -622,6 +622,7 @@ SET(common_headers
     server_event_scheduler.h
     serverinfo.h
     servertalk.h
+    server_reload_types.h
     shared_tasks.h
     shareddb.h
     skills.h

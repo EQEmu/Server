@@ -2623,52 +2623,6 @@ void Zone::LoadNPCEmotes(std::vector<NPC_Emote_Struct*>* v)
 
 }
 
-void Zone::ReloadWorld(uint8 global_repop)
-{
-	entity_list.ClearAreas();
-	parse->ReloadQuests();
-
-	if (global_repop) {
-		if (global_repop == ReloadWorld::ForceRepop) {
-			zone->ClearSpawnTimers();
-		}
-
-		zone->Repop();
-	}
-
-	worldserver.SendEmoteMessage(
-		0,
-		0,
-		AccountStatus::GMAdmin,
-		Chat::Yellow,
-		fmt::format(
-			"Quests reloaded {}for {}{}.",
-			(
-				global_repop ?
-				(
-					global_repop == ReloadWorld::Repop ?
-					"and repopped NPCs " :
-					"and forcefully repopped NPCs "
-				) :
-				""
-			),
-			fmt::format(
-				"{} ({})",
-				GetLongName(),
-				GetZoneID()
-			),
-			(
-				GetInstanceID() ?
-				fmt::format(
-					" (Instance ID {})",
-					GetInstanceID()
-				) :
-				""
-			)
-		).c_str()
-	);
-}
-
 void Zone::ClearSpawnTimers()
 {
 	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
@@ -2877,8 +2831,6 @@ std::string Zone::GetZoneDescription()
 
 void Zone::SendReloadMessage(std::string reload_type)
 {
-	LogInfo("Reloaded [{}]", reload_type);
-
 	worldserver.SendEmoteMessage(
 		0,
 		0,
@@ -3032,12 +2984,7 @@ bool Zone::CompareDataBucket(uint8 comparison_type, const std::string& bucket, c
 
 void Zone::ReloadContentFlags()
 {
-	auto pack = new ServerPacket(ServerOP_ReloadContentFlags, 0);
-	if (pack) {
-		worldserver.SendPacket(pack);
-	}
-
-	safe_delete(pack);
+	worldserver.SendReload(ServerReload::Type::ContentFlags);
 }
 
 void Zone::ClearEXPModifier(Client* c)
@@ -3180,9 +3127,7 @@ void Zone::SetEXPModifierByCharacterID(const uint32 character_id, float exp_modi
 
 void Zone::ReloadGlobalBuffs()
 {
-	auto pack = new ServerPacket(ServerOP_ReloadGlobalBuffs, 0);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
+	worldserver.SendReload(ServerReload::Type::GlobalBuffs);
 }
 
 uint32 Zone::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)

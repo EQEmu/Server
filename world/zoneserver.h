@@ -24,6 +24,7 @@
 #include "../common/timer.h"
 #include "../common/emu_constants.h"
 #include "console.h"
+#include "../common/server_reload_types.h"
 #include <string.h>
 #include <string>
 

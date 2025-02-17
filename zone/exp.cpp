@@ -701,7 +701,10 @@ float Client::GetBaseExpValueForKill(int conlevel, int target_tier, EQ::ItemInst
 	}
 
 	exp_value = exp_value * (database.LootBuffEnabled() ? 1.5 : 1);
-	exp_value = exp_value * (database.ExpBuffEnabled() ? 1.5 : 1);
+
+	float exp_boost = XPRate / 100;
+
+	exp_value = exp_value * exp_boost;
 
 	LogDebug("tier: [{}], norm_val: [{}], exp_value [{}], conlevel [{}]", target_tier, norm_val, exp_value, conlevel);
 

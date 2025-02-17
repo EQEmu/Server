@@ -243,9 +243,7 @@ void TitleManager::CreateNewPlayerTitle(Client *client, std::string title)
 		return;
 	}
 
-	auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
+	worldserver.SendReload(ServerReload::Type::Titles);
 }
 
 void TitleManager::CreateNewPlayerSuffix(Client *client, std::string suffix)
@@ -276,9 +274,7 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, std::string suffix)
 		return;
 	}
 
-	auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
+	worldserver.SendReload(ServerReload::Type::Titles);
 }
 
 void Client::SetAATitle(std::string title)

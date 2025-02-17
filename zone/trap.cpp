@@ -458,7 +458,6 @@ void EntityList::ClearTrapPointers()
 
 bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_version)
 {
-
 	if (RuleI(Custom, StaticInstanceVersion) == instance_version) {
 		instance_version = RuleI(Custom, StaticInstanceTemplateVersion);
 	}
@@ -480,10 +479,6 @@ bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_
 			ContentFilterCriteria::apply()
 		)
 	);
-
-	if (l.empty()) {
-		return false;
-	}
 
 	for (const auto& e : l) {
 		if (e.group_) {
