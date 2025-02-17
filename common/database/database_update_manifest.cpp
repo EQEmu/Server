@@ -6871,6 +6871,41 @@ CREATE INDEX idx_instance_id ON data_buckets (instance_id);
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version     = 9307,
+		.description = "2025_02_17_zone_state_spawns",
+		.check       = "SHOW TABLES LIKE 'zone_state_spawns'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+CREATE TABLE `zone_state_spawns` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `zone_id` int(11) unsigned DEFAULT NULL,
+  `instance_id` int(11) unsigned DEFAULT NULL,
+  `is_corpse` tinyint(11) DEFAULT 0,
+  `decay_at` datetime DEFAULT NULL,
+  `npc_id` int(10) unsigned DEFAULT NULL,
+  `spawn2_id` int(10) unsigned NOT NULL,
+  `spawngroup_id` int(10) unsigned NOT NULL,
+  `x` float NOT NULL,
+  `y` float NOT NULL,
+  `z` float NOT NULL,
+  `heading` float NOT NULL,
+  `respawn_time` int(10) unsigned NOT NULL,
+  `variance` int(10) unsigned NOT NULL,
+  `grid` int(10) unsigned DEFAULT 0,
+  `path_when_zone_idle` smallint(6) DEFAULT 0,
+  `condition_id` smallint(5) unsigned DEFAULT 0,
+  `condition_min_value` smallint(6) DEFAULT 0,
+  `enabled` smallint(6) DEFAULT 1,
+  `anim` smallint(5) unsigned DEFAULT 0,
+  `loot_data` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
