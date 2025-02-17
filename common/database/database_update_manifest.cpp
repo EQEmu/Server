@@ -6873,7 +6873,7 @@ CREATE INDEX idx_instance_id ON data_buckets (instance_id);
 	},
 	ManifestEntry{
 		.version     = 9307,
-		.description = "2025_02_17_zone_state_spawns",
+		.description = "2025_02_17_zone_state_spawns.sql",
 		.check       = "SHOW TABLES LIKE 'zone_state_spawns'",
 		.condition   = "empty",
 		.match       = "",
