@@ -56,6 +56,11 @@ void Perl_Zone_Despawn(Zone* self, uint32 spawngroup_id)
 	self->Despawn(spawngroup_id);
 }
 
+void Perl_Zone_DisableRespawnTimers(Zone* self)
+{
+	self->DisableRespawnTimers();
+}
+
 float Perl_Zone_GetAAEXPModifier(Zone* self, Client* c)
 {
 	return self->GetAAEXPModifier(c);
@@ -572,6 +577,7 @@ void perl_register_zone()
 	package.add("Depop", (void(*)(Zone*))&Perl_Zone_Depop);
 	package.add("Depop", (void(*)(Zone*, bool))&Perl_Zone_Depop);
 	package.add("Despawn", &Perl_Zone_Despawn);
+	package.add("DisableRespawnTimers", &Perl_Zone_DisableRespawnTimers);
 	package.add("GetAAEXPModifier", &Perl_Zone_GetAAEXPModifier);
 	package.add("GetAAEXPModifierByCharacterID", &Perl_Zone_GetAAEXPModifierByCharacterID);
 	package.add("GetBucket", &Perl_Zone_GetBucket);
