@@ -15,7 +15,7 @@ std::vector<DataBucketsRepository::DataBuckets> g_data_bucket_cache = {};
 
 void DataBucket::SetData(const std::string &bucket_key, const std::string &bucket_value, std::string expires_time)
 {
-	thread_local auto k = DataBucketKey{
+	auto k = DataBucketKey{
 		.key = bucket_key,
 		.value = bucket_value,
 		.expires = expires_time,
@@ -26,13 +26,13 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 
 void DataBucket::SetData(const DataBucketKey &k_)
 {
-	thread_local DataBucketKey k = k_; // copy the key so we can modify it
+	DataBucketKey k = k_; // copy the key so we can modify it
 	if (k.key.find(NESTED_KEY_DELIMITER) != std::string::npos) {
 		k.key = Strings::Split(k.key, NESTED_KEY_DELIMITER).front();
 	}
 
-	thread_local auto b = DataBucketsRepository::NewEntity();
-	thread_local auto r = GetData(k, true);
+	auto b = DataBucketsRepository::NewEntity();
+	auto r = GetData(k, true);
 	// if we have an entry, use it
 	if (r.id > 0) {
 		b = r;
@@ -178,7 +178,7 @@ DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
 // the only place we should be ignoring the misses cache is on the initial read during SetData
 DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, bool ignore_misses_cache)
 {
-	thread_local DataBucketKey k = k_; // Copy the key so we can modify it
+	DataBucketKey k = k_; // Copy the key so we can modify it
 
 	bool is_nested_key = k.key.find(NESTED_KEY_DELIMITER) != std::string::npos;
 
@@ -268,7 +268,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 		return DataBucketsRepository::NewEntity();
 	}
 
-	thread_local auto bucket = r.front();
+	auto bucket = r.front();
 
 	// If the entry has expired, delete it
 	if (bucket.expires > 0 && bucket.expires < static_cast<long long>(std::time(nullptr))) {
@@ -311,8 +311,7 @@ std::string DataBucket::GetDataRemaining(const std::string &bucket_key)
 
 bool DataBucket::DeleteData(const std::string &bucket_key)
 {
-	thread_local auto k = DataBucketKey{.key = bucket_key};
-	return DeleteData(k);
+	return DeleteData(DataBucketKey{.key = bucket_key});
 }
 
 // GetDataBuckets bulk loads all data buckets for a mob
