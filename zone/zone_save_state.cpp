@@ -167,7 +167,7 @@ void Zone::SaveZoneState()
 		s.anim                = 0;
 		s.created_at          = std::time(nullptr);
 		s.loot_data           = GetLootSerialized(n.second);
-		s.decay_time          = n.second->GetDecayTime();
+		s.decay_at            = std::time(nullptr) + (n.second->GetDecayTime() / 1000);
 
 		spawns.emplace_back(s);
 	}
