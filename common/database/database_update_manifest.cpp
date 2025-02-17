@@ -6847,10 +6847,8 @@ RENAME TABLE `expedition_lockouts` TO `dynamic_zone_lockouts`;
 		.sql = R"(
 -- ✅ Drop old indexes
 DROP INDEX IF EXISTS `keys` ON `data_buckets`;
-DROP INDEX IF EXISTS `idx_character_expires` ON `data_buckets`;
 DROP INDEX IF EXISTS `idx_npc_expires` ON `data_buckets`;
 DROP INDEX IF EXISTS `idx_bot_expires` ON `data_buckets`;
-DROP INDEX IF EXISTS `idx_account_id_key` ON `data_buckets`;
 
 -- Add zone_id, instance_id
 ALTER TABLE `data_buckets`
@@ -6867,6 +6865,9 @@ ALTER TABLE `data_buckets`
 
 -- ✅ Create optimized unique index with `key` first
 CREATE UNIQUE INDEX `keys` ON data_buckets (`key`, character_id, npc_id, bot_id, account_id, zone_id, instance_id);
+
+-- ✅ Create indexes for just instance_id (instance deletion)
+CREATE INDEX idx_instance_id ON data_buckets (instance_id);
 )",
 		.content_schema_update = false
 	},
