@@ -222,6 +222,7 @@ SET(repositories
     repositories/base/base_faction_list_repository.h
     repositories/base/base_faction_list_mod_repository.h
     repositories/base/base_faction_values_repository.h
+	repositories/base/base_find_location_repository.h
     repositories/base/base_fishing_repository.h
     repositories/base/base_forage_repository.h
     repositories/base/base_friends_repository.h
@@ -419,6 +420,7 @@ SET(repositories
     repositories/faction_list_repository.h
     repositories/faction_list_mod_repository.h
     repositories/faction_values_repository.h
+	repositories/find_location_repository.h
     repositories/fishing_repository.h
     repositories/forage_repository.h
     repositories/friends_repository.h
