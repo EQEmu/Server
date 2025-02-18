@@ -211,7 +211,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 
 				LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
 
-				if (is_nested_key) {
+				if (is_nested_key && !k_.key.empty()) {
 					return ExtractNestedValue(e, k_.key);
 				}
 
@@ -287,7 +287,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 	}
 
 	// Handle nested key extraction
-	if (is_nested_key) {
+	if (is_nested_key && !k_.key.empty()) {
 		return ExtractNestedValue(bucket, k_.key);
 	}
 
