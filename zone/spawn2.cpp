@@ -651,10 +651,10 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 			entity_list.AddNPC(npc, true, true);
 
 			if (s.is_corpse) {
-				auto decay_time = s.decay_at - std::time(nullptr);
+				auto decay_time = s.decay_in_seconds * 1000;
 				if (decay_time > 0) {
 					npc->SetQueuedToCorpse();
-					npc->SetCorpseDecayTime((decay_time * 1000));
+					npc->SetCorpseDecayTime(decay_time);
 				} else {
 					npc->Depop();
 					continue;
