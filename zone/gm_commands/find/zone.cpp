@@ -3,130 +3,141 @@
 
 void FindZone(Client *c, const Seperator *sep)
 {
-	std::string query = "SELECT zoneidnumber, short_name, long_name, version FROM zone WHERE ";
+    std::string query = "SELECT zoneidnumber, short_name, long_name, version FROM zone WHERE ";
 
-	const auto is_expansion_search  = !strcasecmp(sep->arg[2], "expansion");
-	const auto is_id_search         = Strings::IsNumber(sep->arg[2]);
-	const auto is_short_name_search = !is_expansion_search && !is_id_search;
+    const auto is_expansion_search  = !strcasecmp(sep->arg[2], "expansion");
+    const auto is_id_search         = Strings::IsNumber(sep->arg[2]);
+    const auto is_short_name_search = !is_expansion_search && !is_id_search;
 
-	std::string search_string;
-	std::string search_type;
+    std::string search_string;
+    std::string search_type;
 
-	if (is_expansion_search) {
-		query += fmt::format(
-			"expansion = {}",
-			Strings::ToInt(sep->arg[3])
-		);
+    if (is_expansion_search) {
+        int expansion_id = Strings::ToInt(sep->arg[3]);
 
-		search_string = Expansion::ExpansionName[Strings::ToInt(sep->arg[3])];
-		search_type   = "expansion";
-	} else if (is_id_search) {
-		query += fmt::format(
-			"zoneidnumber = {}",
-			Strings::ToUnsignedInt(sep->arg[2])
-		);
+        // Ensure expansion_id is within the valid range OR is 99 (test zones)
+        if ((expansion_id < 0 || expansion_id >= std::size(Expansion::ExpansionName)) && expansion_id != 99) {
+            c->Message(Chat::White, "Invalid expansion ID: %d. Please enter a value between 0 and %d, or 99.", 
+                       expansion_id, std::size(Expansion::ExpansionName) - 1);
+            return; // Exit gracefully
+        }
 
-		search_string = sep->arg[2];
-		search_type   = "ID";
-	} else if (is_short_name_search) {
-		query += fmt::format(
-			"LOWER(`long_name`) LIKE '%%{}%%' OR LOWER(`short_name`) LIKE '%%{}%%'",
-			Strings::Escape(Strings::ToLower(sep->argplus[2])),
-			Strings::Escape(Strings::ToLower(sep->argplus[2]))
-		);
+        query += fmt::format("expansion = {}", expansion_id);
 
-		search_string = sep->argplus[2];
-		search_type   = "name";
-	}
+        // Handle test expansion separately
+        if (expansion_id == 99) {
+            search_string = "Test Zones";
+        } else {
+            search_string = Expansion::ExpansionName[expansion_id];
+        }
 
-	query += " ORDER BY `zoneidnumber` ASC LIMIT 50";
+        search_type = "expansion";
+    } 
+    else if (is_id_search) {
+        query += fmt::format("zoneidnumber = {}", Strings::ToUnsignedInt(sep->arg[2]));
 
-	auto results = content_db.QueryDatabase(query);
-	if (!results.Success() || !results.RowCount()) {
-		c->Message(Chat::White, "No zones were found matching your search criteria.");
-		c->Message(Chat::White, query.c_str());
-		return;
-	}
+        search_string = sep->arg[2];
+        search_type   = "ID";
+    } 
+    else if (is_short_name_search) {
+        query += fmt::format(
+            "LOWER(`long_name`) LIKE '%%{}%%' OR LOWER(`short_name`) LIKE '%%{}%%'",
+            Strings::Escape(Strings::ToLower(sep->argplus[2])),
+            Strings::Escape(Strings::ToLower(sep->argplus[2]))
+        );
 
-	auto found_count = 0;
+        search_string = sep->argplus[2];
+        search_type   = "name";
+    }
 
-	for (auto row : results) {
-		const auto zone_id            = Strings::ToUnsignedInt(row[0]);
-		const std::string& short_name = row[1];
-		const std::string& long_name  = row[2];
-		const auto version            = Strings::ToInt(row[3]);
+    query += " ORDER BY `zoneidnumber` ASC LIMIT 50";
 
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{}{} {} ({}) (ID {}){}",
-				(
-					version == 0 ?
-					fmt::format(
-						"{} | ",
-						Saylink::Silent(
-							fmt::format(
-								"#zone {}",
-								short_name
-							),
-							"Zone"
-						)
-					) :
-					""
-				),
-				fmt::format(
-					"{} |",
-					Saylink::Silent(
-						fmt::format(
-							"#gmzone {} {}",
-							short_name,
-							version
-						),
-						"GM Zone"
-					)
-				),
-				long_name,
-				short_name,
-				zone_id,
-				(
-					version != 0 ?
-					fmt::format(
-						" (Version {})",
-						version
-					) :
-					""
-				)
-			).c_str()
-		);
+    auto results = content_db.QueryDatabase(query);
+    if (!results.Success() || !results.RowCount()) {
+        c->Message(Chat::White, "No zones were found matching your search criteria.");
+        c->Message(Chat::White, query.c_str());
+        return;
+    }
 
-		found_count++;
+    auto found_count = 0;
 
-		if (found_count == 50) {
-			break;
-		}
-	}
+    for (auto row : results) {
+        const auto zone_id            = Strings::ToUnsignedInt(row[0]);
+        const std::string& short_name = row[1];
+        const std::string& long_name  = row[2];
+        const auto version            = Strings::ToInt(row[3]);
 
-	if (found_count == 50) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"50 Zones found matching '{}' of '{}'.",
-				search_type,
-				search_string
-			).c_str()
-		);
+        c->Message(
+            Chat::White,
+            fmt::format(
+                "{}{} {} ({}) (ID {}){}",
+                (
+                    version == 0 ?
+                    fmt::format(
+                        "{} | ",
+                        Saylink::Silent(
+                            fmt::format(
+                                "#zone {}",
+                                short_name
+                            ),
+                            "Zone"
+                        )
+                    ) :
+                    ""
+                ),
+                fmt::format(
+                    "{} |",
+                    Saylink::Silent(
+                        fmt::format(
+                            "#gmzone {} {}",
+                            short_name,
+                            version
+                        ),
+                        "GM Zone"
+                    )
+                ),
+                long_name,
+                short_name,
+                zone_id,
+                (
+                    version != 0 ?
+                    fmt::format(
+                        " (Version {})",
+                        version
+                    ) :
+                    ""
+                )
+            ).c_str()
+        );
 
-		return;
-	}
+        found_count++;
 
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"{} Zone{} found matching '{}' of '{}'.",
-			found_count,
-			found_count != 1 ? "s" : "",
-			search_type,
-			search_string
-		).c_str()
-	);
+        if (found_count == 50) {
+            break;
+        }
+    }
+
+    if (found_count == 50) {
+        c->Message(
+            Chat::White,
+            fmt::format(
+                "50 Zones found matching '{}' of '{}'.",
+                search_type,
+                search_string
+            ).c_str()
+        );
+
+        return;
+    }
+
+    c->Message(
+        Chat::White,
+        fmt::format(
+            "{} Zone{} found matching '{}' of '{}'.",
+            found_count,
+            found_count != 1 ? "s" : "",
+            search_type,
+            search_string
+        ).c_str()
+    );
 }
