@@ -45,7 +45,7 @@ void FindZone(Client* c, const Seperator* sep)
 		search_string = sep->arg[2];
 		search_type   = "ID";
 	} else if (is_short_name_search) {
-		where_filter= fmt::format(
+		where_filter = fmt::format(
 			"LOWER(`long_name`) LIKE '%%{}%%' OR LOWER(`short_name`) LIKE '%%{}%%'",
 			Strings::Escape(Strings::ToLower(sep->argplus[2])),
 			Strings::Escape(Strings::ToLower(sep->argplus[2]))
