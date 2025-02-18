@@ -6883,7 +6883,7 @@ CREATE TABLE `zone_state_spawns` (
   `zone_id` int(11) unsigned DEFAULT NULL,
   `instance_id` int(11) unsigned DEFAULT NULL,
   `is_corpse` tinyint(11) DEFAULT 0,
-  `decay_at` datetime DEFAULT NULL,
+  `decay_in_seconds` int(11) DEFAULT 0,
   `npc_id` int(10) unsigned DEFAULT NULL,
   `spawn2_id` int(10) unsigned NOT NULL,
   `spawngroup_id` int(10) unsigned NOT NULL,

@@ -23,7 +23,7 @@ public:
 		uint32_t    zone_id;
 		uint32_t    instance_id;
 		int8_t      is_corpse;
-		time_t      decay_at;
+		int32_t     decay_in_seconds;
 		uint32_t    npc_id;
 		uint32_t    spawn2_id;
 		uint32_t    spawngroup_id;
@@ -55,7 +55,7 @@ public:
 			"zone_id",
 			"instance_id",
 			"is_corpse",
-			"decay_at",
+			"decay_in_seconds",
 			"npc_id",
 			"spawn2_id",
 			"spawngroup_id",
@@ -83,7 +83,7 @@ public:
 			"zone_id",
 			"instance_id",
 			"is_corpse",
-			"UNIX_TIMESTAMP(decay_at)",
+			"decay_in_seconds",
 			"npc_id",
 			"spawn2_id",
 			"spawngroup_id",
@@ -145,7 +145,7 @@ public:
 		e.zone_id             = 0;
 		e.instance_id         = 0;
 		e.is_corpse           = 0;
-		e.decay_at            = 0;
+		e.decay_in_seconds    = 0;
 		e.npc_id              = 0;
 		e.spawn2_id           = 0;
 		e.spawngroup_id       = 0;
@@ -203,7 +203,7 @@ public:
 			e.zone_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.instance_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.is_corpse           = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
-			e.decay_at            = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.decay_in_seconds    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.npc_id              = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.spawn2_id           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.spawngroup_id       = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
@@ -257,7 +257,7 @@ public:
 		v.push_back(columns[1] + " = " + std::to_string(e.zone_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.instance_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.is_corpse));
-		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.decay_at > 0 ? std::to_string(e.decay_at) : "null") + ")");
+		v.push_back(columns[4] + " = " + std::to_string(e.decay_in_seconds));
 		v.push_back(columns[5] + " = " + std::to_string(e.npc_id));
 		v.push_back(columns[6] + " = " + std::to_string(e.spawn2_id));
 		v.push_back(columns[7] + " = " + std::to_string(e.spawngroup_id));
@@ -300,7 +300,7 @@ public:
 		v.push_back(std::to_string(e.zone_id));
 		v.push_back(std::to_string(e.instance_id));
 		v.push_back(std::to_string(e.is_corpse));
-		v.push_back("FROM_UNIXTIME(" + (e.decay_at > 0 ? std::to_string(e.decay_at) : "null") + ")");
+		v.push_back(std::to_string(e.decay_in_seconds));
 		v.push_back(std::to_string(e.npc_id));
 		v.push_back(std::to_string(e.spawn2_id));
 		v.push_back(std::to_string(e.spawngroup_id));
@@ -351,7 +351,7 @@ public:
 			v.push_back(std::to_string(e.zone_id));
 			v.push_back(std::to_string(e.instance_id));
 			v.push_back(std::to_string(e.is_corpse));
-			v.push_back("FROM_UNIXTIME(" + (e.decay_at > 0 ? std::to_string(e.decay_at) : "null") + ")");
+			v.push_back(std::to_string(e.decay_in_seconds));
 			v.push_back(std::to_string(e.npc_id));
 			v.push_back(std::to_string(e.spawn2_id));
 			v.push_back(std::to_string(e.spawngroup_id));
@@ -406,7 +406,7 @@ public:
 			e.zone_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.instance_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.is_corpse           = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
-			e.decay_at            = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.decay_in_seconds    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.npc_id              = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.spawn2_id           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.spawngroup_id       = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
@@ -452,7 +452,7 @@ public:
 			e.zone_id             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.instance_id         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.is_corpse           = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
-			e.decay_at            = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.decay_in_seconds    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.npc_id              = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.spawn2_id           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.spawngroup_id       = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
@@ -548,7 +548,7 @@ public:
 		v.push_back(std::to_string(e.zone_id));
 		v.push_back(std::to_string(e.instance_id));
 		v.push_back(std::to_string(e.is_corpse));
-		v.push_back("FROM_UNIXTIME(" + (e.decay_at > 0 ? std::to_string(e.decay_at) : "null") + ")");
+		v.push_back(std::to_string(e.decay_in_seconds));
 		v.push_back(std::to_string(e.npc_id));
 		v.push_back(std::to_string(e.spawn2_id));
 		v.push_back(std::to_string(e.spawngroup_id));
@@ -592,7 +592,7 @@ public:
 			v.push_back(std::to_string(e.zone_id));
 			v.push_back(std::to_string(e.instance_id));
 			v.push_back(std::to_string(e.is_corpse));
-			v.push_back("FROM_UNIXTIME(" + (e.decay_at > 0 ? std::to_string(e.decay_at) : "null") + ")");
+			v.push_back(std::to_string(e.decay_in_seconds));
 			v.push_back(std::to_string(e.npc_id));
 			v.push_back(std::to_string(e.spawn2_id));
 			v.push_back(std::to_string(e.spawngroup_id));
