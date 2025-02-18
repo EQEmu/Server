@@ -3,44 +3,7 @@
 
 #include <list>
 #include <string>
-#include <cereal/cereal.hpp>
 #include "../common/types.h"
-
-struct LootEntryStateData {
-	uint32   item_id;
-	uint32_t lootdrop_id;
-
-	// cereal
-	template<class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(
-			CEREAL_NVP(item_id),
-			CEREAL_NVP(lootdrop_id)
-		);
-	}
-};
-
-struct LootStateData {
-	uint32                          copper   = 0;
-	uint32                          silver   = 0;
-	uint32                          gold     = 0;
-	uint32                          platinum = 0;
-	std::vector<LootEntryStateData> entries  = {};
-
-	// cereal
-	template<class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(
-			CEREAL_NVP(copper),
-			CEREAL_NVP(silver),
-			CEREAL_NVP(gold),
-			CEREAL_NVP(platinum),
-			CEREAL_NVP(entries)
-		);
-	}
-};
 
 struct LootItem {
 	uint32      item_id;
@@ -62,7 +25,7 @@ struct LootItem {
 	uint16      trivial_max_level;
 	uint16      npc_min_level;
 	uint16      npc_max_level;
-	uint32      lootdrop_id;
+	uint32      lootdrop_id; // required for zone state referencing
 };
 
 typedef std::list<LootItem*> LootItems;
