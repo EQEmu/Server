@@ -141,6 +141,14 @@ public:
 	void SetIsHotzone(bool is_hotzone);
 	void ShowZoneGlobalLoot(Lua_Client c);
 
+	// data buckets
+	void SetBucket(const std::string& bucket_name, const std::string& bucket_value);
+	void SetBucket(const std::string& bucket_name, const std::string& bucket_value, const std::string& expiration = "");
+	void DeleteBucket(const std::string& bucket_name);
+	std::string GetBucket(const std::string& bucket_name);
+	std::string GetBucketExpires(const std::string& bucket_name);
+	std::string GetBucketRemaining(const std::string& bucket_name);
+
 };
 
 #endif
