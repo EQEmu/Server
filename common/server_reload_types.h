@@ -67,7 +67,7 @@ namespace ServerReload {
 		"Objects",
 		"Opcodes",
 		"Perl Event Export Settings",
-		"Quests",
+		"Quest",
 		"Quests With Timer (Resets timer events)",
 		"Rules",
 		"Skill Caps",
