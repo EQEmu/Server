@@ -911,11 +911,7 @@ void ConsoleReloadWorld(
 )
 {
 	connection->SendLine("Reloading World...");
-	auto               pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
-	ReloadWorld_Struct *RW  = (ReloadWorld_Struct *) pack->pBuffer;
-	RW->global_repop = ReloadWorld::Repop;
-	zoneserver_list.SendPacket(pack);
-	safe_delete(pack);
+	zoneserver_list.SendServerReload(ServerReload::Type::WorldRepop, nullptr);
 }
 
 auto debounce_reload = std::chrono::system_clock::now();

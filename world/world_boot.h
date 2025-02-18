@@ -4,6 +4,7 @@
 #include <string>
 #include "../common/types.h"
 #include "../common/discord/discord.h"
+#include "ucs.h"
 
 extern UCSConnection UCSLink;
 

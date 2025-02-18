@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "database.h"
 #include "../common/discord/discord_manager.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/server_reload_types.h"
 
 #include <iostream>
 #include <string.h>
@@ -75,9 +76,13 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	{
 		break;
 	}
-	case ServerOP_ReloadLogs: {
-		LogSys.LoadLogDatabaseSettings();
-		player_event_logs.ReloadSettings();
+	case ServerOP_ServerReloadRequest: {
+		auto o = (ServerReload::Request*) pack->pBuffer;
+		if (o->type == ServerReload::Type::Logs) {
+			LogSys.LoadLogDatabaseSettings();
+			player_event_logs.ReloadSettings();
+		}
+
 		break;
 	}
 	case ServerOP_PlayerEvent: {

@@ -5,6 +5,7 @@
 #include "../common/eqtime.h"
 #include "../common/timer.h"
 #include "../common/event/timer.h"
+#include "../common/server_reload_types.h"
 #include <vector>
 #include <memory>
 #include <deque>
@@ -69,6 +70,7 @@ public:
 	ZoneServer* FindByZoneID(uint32 ZoneID);
 
 	const std::list<std::unique_ptr<ZoneServer>> &getZoneServerList() const;
+	void SendServerReload(ServerReload::Type type, uchar *packet = nullptr);
 
 private:
 	void OnTick(EQ::Timer *t);

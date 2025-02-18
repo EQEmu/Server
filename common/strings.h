@@ -186,6 +186,8 @@ public:
 		value = strtod(tmp_str.data(), nullptr);
 		return res;
 	}
+
+	static std::string Slugify(const std::string &input, const std::string &separator = "-");
 };
 
 const std::string StringFormat(const char *format, ...);
