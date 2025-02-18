@@ -81,14 +81,13 @@ void PlayerEventLogs::Init()
 	if (!settings_to_insert.empty()) {
 		PlayerEventLogSettingsRepository::ReplaceMany(*m_database, settings_to_insert);
 	}
-
-	LoadEtlIds();
-
+	
 	bool processing_in_world = !RuleB(Logging, PlayerEventsQSProcess) && IsWorld();
 	bool processing_in_qs    = RuleB(Logging, PlayerEventsQSProcess) && IsQueryServ();
 
 	// on initial boot process truncation
 	if (processing_in_world || processing_in_qs) {
+		LoadEtlIds();
 		ProcessRetentionTruncation();
 	}
 }
