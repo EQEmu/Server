@@ -3200,7 +3200,5 @@ bool Zone::DoesAlternateCurrencyExist(uint32 currency_id)
 	);
 }
 
-
-
 #include "zone_save_state.cpp"
 #include "zone_loot.cpp"

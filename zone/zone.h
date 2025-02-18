@@ -47,6 +47,8 @@
 #include "../common/repositories/lootdrop_entries_repository.h"
 #include "../common/repositories/base_data_repository.h"
 #include "../common/repositories/skill_caps_repository.h"
+#include "../common/repositories/zone_state_spawns_repository.h"
+#include "../common/repositories/spawn2_disabled_repository.h"
 
 struct EXPModifier
 {
@@ -452,6 +454,14 @@ public:
 	void LoadBaseData();
 	void ReloadBaseData();
 
+	// zone state
+	void LoadZoneState(
+		std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> spawn_states,
+		std::unordered_map<uint32, uint32> spawn_times,
+		std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
+	);
+	void SaveZoneState();
+	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 
 private:
 	bool      allow_mercs;
@@ -516,8 +526,6 @@ private:
 
 	// Base Data
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
-	void SaveZoneState();
-	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 };
 
 #endif
