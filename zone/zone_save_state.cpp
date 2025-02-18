@@ -180,7 +180,7 @@ void Zone::LoadZoneState(
 			GravityBehavior::Water
 		);
 
-		npc->AddLootStateData(s.loot_data);
+		AddLootStateData(npc, s.loot_data);
 
 //			npc->AddLootTable();
 //			if (npc->DropsGlobalLoot()) {
@@ -344,3 +344,39 @@ void Zone::ClearZoneState(uint32 zone_id, uint32 instance_id)
 		)
 	);
 }
+
+void Zone::AddLootStateData(NPC *npc, const std::string& loot_data)
+{
+	LootStateData     l{};
+	std::stringstream ss;
+	{
+		ss << loot_data;
+		cereal::JSONInputArchive ar(ss);
+		l.serialize(ar);
+	}
+
+	npc->AddLootCash(l.copper, l.silver, l.gold, l.platinum);
+
+	for (auto &e : l.entries) {
+		const auto *db_item = database.GetItem(e.item_id);
+		if (!db_item) {
+			continue;
+		}
+
+		const auto entries = GetLootdropEntries(e.lootdrop_id);
+		if (entries.empty()) {
+			continue;
+		}
+
+		LootdropEntriesRepository::LootdropEntries lootdrop_entry;
+		for (auto &le: entries) {
+			if (e.item_id == le.item_id) {
+				lootdrop_entry = le;
+				break;
+			}
+		}
+
+		npc->AddLootDrop(db_item, lootdrop_entry);
+	}
+}
+

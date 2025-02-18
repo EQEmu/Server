@@ -602,7 +602,6 @@ public:
 	bool HandinStarted() { return m_handin_started; }
 
 	// zone state save
-	void AddLootStateData(const std::string& loot_data);
 	inline void SetQueuedToCorpse() { m_queued_for_corpse = true; }
 	inline uint32_t SetCorpseDecayTime(uint32_t decay_time) { return m_corpse_decay_time = decay_time; }
 	inline bool IsQueuedForCorpse() { return m_queued_for_corpse; }

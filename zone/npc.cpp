@@ -4943,39 +4943,3 @@ void NPC::ResetMultiQuest() {
 
 	m_hand_in = {};
 }
-
-void NPC::AddLootStateData(const std::string& loot_data)
-{
-	LootStateData     l{};
-	std::stringstream ss;
-	{
-		ss << loot_data;
-		cereal::JSONInputArchive ar(ss);
-		l.serialize(ar);
-	}
-
-	AddLootCash(l.copper, l.silver, l.gold, l.platinum);
-
-	for (auto &e : l.entries) {
-		const auto *db_item = database.GetItem(e.item_id);
-		if (!db_item) {
-			continue;
-		}
-
-		const auto entries = zone->GetLootdropEntries(e.lootdrop_id);
-		if (entries.empty()) {
-			continue;
-		}
-
-		LootdropEntriesRepository::LootdropEntries lootdrop_entry;
-		for (auto &le: entries) {
-			if (e.item_id == le.item_id) {
-				lootdrop_entry = le;
-				break;
-			}
-		}
-
-		AddLootDrop(db_item, lootdrop_entry);
-	}
-}
-

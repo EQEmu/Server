@@ -272,7 +272,7 @@ bool Spawn2::Process() {
 		npcthis = npc;
 
 		if (!m_loot_state_data.empty()) {
-			npc->AddLootStateData(m_loot_state_data);
+			zone->AddLootStateData(npc, m_loot_state_data);
 		} else {
 			npc->AddLootTable();
 			if (npc->DropsGlobalLoot()) {

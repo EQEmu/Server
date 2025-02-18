@@ -471,6 +471,7 @@ public:
 	);
 	void SaveZoneState();
 	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
+	void AddLootStateData(NPC *npc, const std::string &loot_data);
 
 private:
 	bool      allow_mercs;
