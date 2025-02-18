@@ -37,6 +37,7 @@ public:
 	void Depop();
 	void Depop(bool start_spawn_timers);
 	void Despawn(uint32 spawngroup_id);
+	void DisableRespawnTimers();
 	float GetAAEXPModifier(Lua_Client c);
 	float GetAAEXPModifierByCharacterID(uint32 character_id);
 	std::string GetContentFlags();
