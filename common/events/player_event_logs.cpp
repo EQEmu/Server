@@ -402,7 +402,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 				r.event_data = "{}"; // Clear event data
 			}
 			else {
-				LogError("Non-Implemented ETL routing [{}]", r.event_type_id);
+				LogPlayerEventsDetail("Non-Implemented ETL routing [{}]", r.event_type_id);
 			}
 		}
 	}
