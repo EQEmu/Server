@@ -57,10 +57,7 @@ void FindZone(Client* c, const Seperator* sep)
 
 	where_filter += " ORDER BY `zoneidnumber` ASC LIMIT 50";
 
-	const auto& l = ZoneRepository::GetWhere(
-		content_db,
-		where_filter
-	);
+	const auto& l = ZoneRepository::GetWhere(content_db, where_filter);
 
 	if (l.empty()) {
 		c->Message(Chat::White, "No zones were found matching your search criteria.");
