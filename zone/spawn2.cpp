@@ -524,47 +524,50 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 			zone->GetInstanceID()
 		)
 	);
+
 	if (!spawn_states.empty()) {
 		zone->LoadZoneState(spawn_states, spawn_times, disabled_spawns);
-	} else {
-		for (auto &s: spawns) {
-			uint32 spawn_time_left = 0;
-			if (spawn_times.count(s.id) != 0) {
-				spawn_time_left = spawn_times[s.id];
-			}
+		return true;
+	}
 
-			// load from spawn2_disabled
-			bool spawn_enabled = true;
-
-
-			// check if spawn is disabled
-			for (auto &ds: disabled_spawns) {
-				if (ds.spawn2_id == s.id) {
-					spawn_enabled = !ds.disabled;
-				}
-			}
-
-			auto new_spawn = new Spawn2(
-				s.id,
-				s.spawngroupID,
-				s.x,
-				s.y,
-				s.z,
-				s.heading,
-				s.respawntime,
-				s.variance,
-				spawn_time_left,
-				s.pathgrid,
-				(bool) s.path_when_zone_idle,
-				s._condition,
-				(int16) s.cond_value,
-				spawn_enabled,
-				(EmuAppearance) s.animation
-			);
-
-			spawn2_list.Insert(new_spawn);
-			new_spawn->Process();
+	// normal spawn2 loading
+	for (auto &s: spawns) {
+		uint32 spawn_time_left = 0;
+		if (spawn_times.count(s.id) != 0) {
+			spawn_time_left = spawn_times[s.id];
 		}
+
+		// load from spawn2_disabled
+		bool spawn_enabled = true;
+
+
+		// check if spawn is disabled
+		for (auto &ds: disabled_spawns) {
+			if (ds.spawn2_id == s.id) {
+				spawn_enabled = !ds.disabled;
+			}
+		}
+
+		auto new_spawn = new Spawn2(
+			s.id,
+			s.spawngroupID,
+			s.x,
+			s.y,
+			s.z,
+			s.heading,
+			s.respawntime,
+			s.variance,
+			spawn_time_left,
+			s.pathgrid,
+			(bool) s.path_when_zone_idle,
+			s._condition,
+			(int16) s.cond_value,
+			spawn_enabled,
+			(EmuAppearance) s.animation
+		);
+
+		spawn2_list.Insert(new_spawn);
+		new_spawn->Process();
 	}
 
 	LogInfo("Loaded [{}] spawn2 entries", Strings::Commify(l.size()));
