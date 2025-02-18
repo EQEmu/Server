@@ -47,6 +47,8 @@
 #include "../common/repositories/lootdrop_entries_repository.h"
 #include "../common/repositories/base_data_repository.h"
 #include "../common/repositories/skill_caps_repository.h"
+#include "../common/repositories/zone_state_spawns_repository.h"
+#include "../common/repositories/spawn2_disabled_repository.h"
 
 struct EXPModifier
 {
@@ -460,6 +462,15 @@ public:
 	std::string GetBucketRemaining(const std::string& bucket_name);
 	inline void SetZoneServerId(uint32 id) { m_zone_server_id = id; }
 	inline uint32 GetZoneServerId() const { return m_zone_server_id; }
+
+	// zone state
+	void LoadZoneState(
+		std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> spawn_states,
+		std::unordered_map<uint32, uint32> spawn_times,
+		std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
+	);
+	void SaveZoneState();
+	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 
 private:
 	bool      allow_mercs;
