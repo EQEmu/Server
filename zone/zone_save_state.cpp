@@ -1,5 +1,6 @@
 #include <string>
 #include <cereal/archives/json.hpp>
+#include <cereal/types/map.hpp>
 #include "npc.h"
 #include "corpse.h"
 #include "zone.h"
@@ -96,6 +97,26 @@ inline std::string GetLootSerialized(Corpse *c)
 	}
 
 	return ss.str();
+}
+
+inline void LoadNPCEntityVariables(NPC *n, const std::string& entity_variables)
+{
+	std::map<std::string, std::string> deserialized_map;
+	try {
+		std::istringstream is(entity_variables);
+		{
+			cereal::JSONInputArchive archive(is);
+			archive(deserialized_map);
+		}
+	}
+	catch (const std::exception &e) {
+		LogWarning("Failed to load entity variables for NPC [{}]: {}", n->GetNPCTypeID(), e.what());
+		return;
+	}
+
+	for (const auto& [key, value] : deserialized_map) {
+		n->SetEntityVariable(key, value);
+	}
 }
 
 inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawn_states) {
@@ -227,6 +248,8 @@ void Zone::LoadZoneState(
 			npc->AssignWaypoints(s.grid);
 		}
 
+		LoadNPCEntityVariables(npc, s.entity_variables);
+
 		entity_list.AddNPC(npc, true, true);
 
 		if (s.is_corpse) {
@@ -241,6 +264,23 @@ void Zone::LoadZoneState(
 		}
 	}
 
+	// any NPC that is spawned by the spawn system
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (npc->GetSpawnGroupId() == 0) {
+			continue;
+		}
+
+		for (auto &s: spawn_states) {
+			bool is_same_npc =
+					 s.npc_id == npc->GetNPCTypeID() &&
+					 s.spawn2_id == npc->GetSpawnPointID() &&
+					 s.spawngroup_id == npc->GetSpawnGroupId();
+			if (is_same_npc) {
+				LoadNPCEntityVariables(npc, s.entity_variables);
+			}
+		}
+	}
 }
 
 void Zone::SaveZoneState()
@@ -285,9 +325,24 @@ void Zone::SaveZoneState()
 					 s.spawngroup_id == n.second->GetSpawnGroupId();
 			if (is_same_npc) {
 				s.loot_data = GetLootSerialized(n.second);
+
+				// entity variables
+				std::map<std::string, std::string> variables;
+				for (const auto &k : n.second->GetEntityVariables()) {
+					variables[k] = n.second->GetEntityVariable(k);
+				}
+
+				std::ostringstream os;
+				{
+					cereal::JSONOutputArchiveSingleLine archive(os);
+					archive(variables);
+				}
+
+				s.entity_variables	= os.str();
 			}
 		}
 
+		// everything below here is dynamically spawned
 		if (n.second->GetSpawnGroupId() > 0) {
 			continue;
 		}
