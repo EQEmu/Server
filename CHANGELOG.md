@@ -42,7 +42,7 @@
 ### Commands
 
 * Fix #goto not accepting proper heading ([#4685](https://github.com/EQEmu/Server/pull/4685)) @nytmyr 2025-02-15
-* [Hotfix] Fix Illusion Block ([#4666](https://github.com/EQEmu/Server/pull/4666)) @nytmyr 2025-02-12
+* Fix Illusion Block ([#4666](https://github.com/EQEmu/Server/pull/4666)) @nytmyr 2025-02-12
 
 ### Crash
 
@@ -76,8 +76,10 @@
 * Fix CI since hand-ins are merged  @Akkadius 2025-02-03
 * Fix Illusion Fade Texture Bug ([#4673](https://github.com/EQEmu/Server/pull/4673)) @Kinglykrab 2025-02-14
 * Fix Item Discovery ([#4663](https://github.com/EQEmu/Server/pull/4663)) @Kinglykrab 2025-02-10
+* Fix ST_GroupNoPets and ST_GroupClientAndPet ([#4667](https://github.com/EQEmu/Server/pull/4667)) @nytmyr 2025-02-10
 * Fix SendStatsWindow Mod2 Value Display ([#4658](https://github.com/EQEmu/Server/pull/4658)) @Kinglykrab 2025-02-07
 * Fix Tradeskill Queries ([#4661](https://github.com/EQEmu/Server/pull/4661)) @Kinglykrab 2025-02-09
+* Fix error in update manifest ([#4637](https://github.com/EQEmu/Server/pull/4637)) @nytmyr 2025-02-03
 * Fix issue with getting an unset nested databucket ([#4693](https://github.com/EQEmu/Server/pull/4693)) @Akkadius 2025-02-19
 * Fix non-error in player_event_logs ([#4695](https://github.com/EQEmu/Server/pull/4695)) @Akkadius 2025-02-18
 * GMMove Update Edge Case With Clients ([#4686](https://github.com/EQEmu/Server/pull/4686)) @Akkadius 2025-02-15
@@ -85,8 +87,6 @@
 * Parcel Delivery Updates ([#4688](https://github.com/EQEmu/Server/pull/4688)) @neckkola 2025-02-16
 * Prevent zone from loading ETL ID's on bootup ([#4696](https://github.com/EQEmu/Server/pull/4696)) @Akkadius 2025-02-18
 * Update pre big bag corpse slot_id's to support big bags ([#4679](https://github.com/EQEmu/Server/pull/4679)) @nytmyr 2025-02-15
-* [Bots] Fix error in update manifest ([#4637](https://github.com/EQEmu/Server/pull/4637)) @nytmyr 2025-02-03
-* [Spells] Fix ST_GroupNoPets and ST_GroupClientAndPet ([#4667](https://github.com/EQEmu/Server/pull/4667)) @nytmyr 2025-02-10
 
 ### Inventory
 
