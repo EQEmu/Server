@@ -42,6 +42,9 @@ public:
 		std::string loot_data;
 		std::string entity_variables;
 		std::string buffs;
+		int64_t     hp;
+		int64_t     mana;
+		int64_t     endurance;
 		time_t      created_at;
 	};
 
@@ -76,6 +79,9 @@ public:
 			"loot_data",
 			"entity_variables",
 			"buffs",
+			"hp",
+			"mana",
+			"endurance",
 			"created_at",
 		};
 	}
@@ -106,6 +112,9 @@ public:
 			"loot_data",
 			"entity_variables",
 			"buffs",
+			"hp",
+			"mana",
+			"endurance",
 			"UNIX_TIMESTAMP(created_at)",
 		};
 	}
@@ -170,6 +179,9 @@ public:
 		e.loot_data           = "";
 		e.entity_variables    = "";
 		e.buffs               = "";
+		e.hp                  = 0;
+		e.mana                = 0;
+		e.endurance           = 0;
 		e.created_at          = 0;
 
 		return e;
@@ -230,7 +242,10 @@ public:
 			e.loot_data           = row[20] ? row[20] : "";
 			e.entity_variables    = row[21] ? row[21] : "";
 			e.buffs               = row[22] ? row[22] : "";
-			e.created_at          = strtoll(row[23] ? row[23] : "-1", nullptr, 10);
+			e.hp                  = row[23] ? strtoll(row[23], nullptr, 10) : 0;
+			e.mana                = row[24] ? strtoll(row[24], nullptr, 10) : 0;
+			e.endurance           = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.created_at          = strtoll(row[26] ? row[26] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -286,7 +301,10 @@ public:
 		v.push_back(columns[20] + " = '" + Strings::Escape(e.loot_data) + "'");
 		v.push_back(columns[21] + " = '" + Strings::Escape(e.entity_variables) + "'");
 		v.push_back(columns[22] + " = '" + Strings::Escape(e.buffs) + "'");
-		v.push_back(columns[23] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[23] + " = " + std::to_string(e.hp));
+		v.push_back(columns[24] + " = " + std::to_string(e.mana));
+		v.push_back(columns[25] + " = " + std::to_string(e.endurance));
+		v.push_back(columns[26] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -331,6 +349,9 @@ public:
 		v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 		v.push_back("'" + Strings::Escape(e.entity_variables) + "'");
 		v.push_back("'" + Strings::Escape(e.buffs) + "'");
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.endurance));
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -384,6 +405,9 @@ public:
 			v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 			v.push_back("'" + Strings::Escape(e.entity_variables) + "'");
 			v.push_back("'" + Strings::Escape(e.buffs) + "'");
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.endurance));
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -441,7 +465,10 @@ public:
 			e.loot_data           = row[20] ? row[20] : "";
 			e.entity_variables    = row[21] ? row[21] : "";
 			e.buffs               = row[22] ? row[22] : "";
-			e.created_at          = strtoll(row[23] ? row[23] : "-1", nullptr, 10);
+			e.hp                  = row[23] ? strtoll(row[23], nullptr, 10) : 0;
+			e.mana                = row[24] ? strtoll(row[24], nullptr, 10) : 0;
+			e.endurance           = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.created_at          = strtoll(row[26] ? row[26] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -489,7 +516,10 @@ public:
 			e.loot_data           = row[20] ? row[20] : "";
 			e.entity_variables    = row[21] ? row[21] : "";
 			e.buffs               = row[22] ? row[22] : "";
-			e.created_at          = strtoll(row[23] ? row[23] : "-1", nullptr, 10);
+			e.hp                  = row[23] ? strtoll(row[23], nullptr, 10) : 0;
+			e.mana                = row[24] ? strtoll(row[24], nullptr, 10) : 0;
+			e.endurance           = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.created_at          = strtoll(row[26] ? row[26] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -587,6 +617,9 @@ public:
 		v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 		v.push_back("'" + Strings::Escape(e.entity_variables) + "'");
 		v.push_back("'" + Strings::Escape(e.buffs) + "'");
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.endurance));
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -633,6 +666,9 @@ public:
 			v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 			v.push_back("'" + Strings::Escape(e.entity_variables) + "'");
 			v.push_back("'" + Strings::Escape(e.buffs) + "'");
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.endurance));
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");

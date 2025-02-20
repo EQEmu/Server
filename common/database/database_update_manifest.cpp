@@ -6902,6 +6902,9 @@ CREATE TABLE `zone_state_spawns` (
   `loot_data` text DEFAULT NULL,
   `entity_variables` text DEFAULT NULL,
   `buffs` text DEFAULT NULL,
+  `hp` bigint(20) DEFAULT 0,
+  `mana` bigint(20) DEFAULT 0,
+  `endurance` bigint(20) DEFAULT 0,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4

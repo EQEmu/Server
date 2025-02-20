@@ -272,6 +272,10 @@ void Zone::LoadZoneState(
 		LoadNPCEntityVariables(npc, s.entity_variables);
 		LoadNPCBuffs(npc, s.buffs);
 
+		npc->SetHP(s.hp);
+		npc->SetMana(s.mana);
+		npc->SetEndurance(s.endurance);
+
 		entity_list.AddNPC(npc, true, true);
 
 		if (s.is_corpse) {
@@ -301,6 +305,10 @@ void Zone::LoadZoneState(
 			if (is_same_npc) {
 				LoadNPCEntityVariables(npc, s.entity_variables);
 				LoadNPCBuffs(npc, s.buffs);
+
+				npc->SetHP(s.hp);
+				npc->SetMana(s.mana);
+				npc->SetEndurance(s.endurance);
 			}
 		}
 	}
@@ -348,6 +356,9 @@ void Zone::SaveZoneState()
 					 s.spawngroup_id == n.second->GetSpawnGroupId();
 			if (is_same_npc) {
 				s.loot_data = GetLootSerialized(n.second);
+				s.hp        = n.second->GetHP();
+				s.mana      = n.second->GetMana();
+				s.endurance = n.second->GetEndurance();
 
 				// entity variables
 				std::map<std::string, std::string> variables;
@@ -426,6 +437,9 @@ void Zone::SaveZoneState()
 		s.anim                = 0;
 		s.created_at          = std::time(nullptr);
 		s.loot_data           = GetLootSerialized(n.second);
+		s.hp                  = n.second->GetHP();
+		s.mana                = n.second->GetMana();
+		s.endurance           = n.second->GetEndurance();
 
 		spawns.emplace_back(s);
 	}
