@@ -41,6 +41,7 @@ public:
 		uint16_t    anim;
 		std::string loot_data;
 		std::string entity_variables;
+		std::string buffs;
 		time_t      created_at;
 	};
 
@@ -74,6 +75,7 @@ public:
 			"anim",
 			"loot_data",
 			"entity_variables",
+			"buffs",
 			"created_at",
 		};
 	}
@@ -103,6 +105,7 @@ public:
 			"anim",
 			"loot_data",
 			"entity_variables",
+			"buffs",
 			"UNIX_TIMESTAMP(created_at)",
 		};
 	}
@@ -166,6 +169,7 @@ public:
 		e.anim                = 0;
 		e.loot_data           = "";
 		e.entity_variables    = "";
+		e.buffs               = "";
 		e.created_at          = 0;
 
 		return e;
@@ -225,7 +229,8 @@ public:
 			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
 			e.loot_data           = row[20] ? row[20] : "";
 			e.entity_variables    = row[21] ? row[21] : "";
-			e.created_at          = strtoll(row[22] ? row[22] : "-1", nullptr, 10);
+			e.buffs               = row[22] ? row[22] : "";
+			e.created_at          = strtoll(row[23] ? row[23] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -280,7 +285,8 @@ public:
 		v.push_back(columns[19] + " = " + std::to_string(e.anim));
 		v.push_back(columns[20] + " = '" + Strings::Escape(e.loot_data) + "'");
 		v.push_back(columns[21] + " = '" + Strings::Escape(e.entity_variables) + "'");
-		v.push_back(columns[22] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[22] + " = '" + Strings::Escape(e.buffs) + "'");
+		v.push_back(columns[23] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -324,6 +330,7 @@ public:
 		v.push_back(std::to_string(e.anim));
 		v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 		v.push_back("'" + Strings::Escape(e.entity_variables) + "'");
+		v.push_back("'" + Strings::Escape(e.buffs) + "'");
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -376,6 +383,7 @@ public:
 			v.push_back(std::to_string(e.anim));
 			v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 			v.push_back("'" + Strings::Escape(e.entity_variables) + "'");
+			v.push_back("'" + Strings::Escape(e.buffs) + "'");
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -432,7 +440,8 @@ public:
 			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
 			e.loot_data           = row[20] ? row[20] : "";
 			e.entity_variables    = row[21] ? row[21] : "";
-			e.created_at          = strtoll(row[22] ? row[22] : "-1", nullptr, 10);
+			e.buffs               = row[22] ? row[22] : "";
+			e.created_at          = strtoll(row[23] ? row[23] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -479,7 +488,8 @@ public:
 			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
 			e.loot_data           = row[20] ? row[20] : "";
 			e.entity_variables    = row[21] ? row[21] : "";
-			e.created_at          = strtoll(row[22] ? row[22] : "-1", nullptr, 10);
+			e.buffs               = row[22] ? row[22] : "";
+			e.created_at          = strtoll(row[23] ? row[23] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -576,6 +586,7 @@ public:
 		v.push_back(std::to_string(e.anim));
 		v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 		v.push_back("'" + Strings::Escape(e.entity_variables) + "'");
+		v.push_back("'" + Strings::Escape(e.buffs) + "'");
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -621,6 +632,7 @@ public:
 			v.push_back(std::to_string(e.anim));
 			v.push_back("'" + Strings::Escape(e.loot_data) + "'");
 			v.push_back("'" + Strings::Escape(e.entity_variables) + "'");
+			v.push_back("'" + Strings::Escape(e.buffs) + "'");
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");

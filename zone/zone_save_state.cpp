@@ -339,6 +339,19 @@ void Zone::SaveZoneState()
 				}
 
 				s.entity_variables	= os.str();
+
+				// buffs
+				auto buffs = n.second->GetBuffs();
+				if (!buffs) {
+					return;
+				}
+
+				uint32 max_slots = n.second->GetMaxBuffSlots();
+				for (int index = 0; index < max_slots; index++) {
+					if (buffs[index]) {
+
+					}
+				}
 			}
 		}
 
