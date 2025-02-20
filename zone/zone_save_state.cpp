@@ -119,6 +119,27 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string& entity_variables)
 	}
 }
 
+inline void LoadNPCBuffs(NPC *n, const std::string& buffs)
+{
+	std::vector<Buffs_Struct> valid_buffs;
+	try {
+		std::istringstream is(buffs);
+		{
+			cereal::JSONInputArchive archive(is);
+			archive(cereal::make_nvp("buffs", valid_buffs));
+		}
+	}
+	catch (const std::exception &e) {
+		LogWarning("Failed to load entity variables for NPC [{}]: {}", n->GetNPCTypeID(), e.what());
+		return;
+	}
+
+	for (const auto &b: valid_buffs) {
+		// int AddBuff(Mob *caster, const uint16 spell_id, int duration = 0, int32 level_override = -1, bool disable_buff_overwrite = false);
+		n->AddBuff(n, b.spellid, b.ticsremaining, b.casterlevel, false);
+	}
+}
+
 inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawn_states) {
 	LogInfo("Loading lootdrop ids for zone state spawns");
 
@@ -249,6 +270,7 @@ void Zone::LoadZoneState(
 		}
 
 		LoadNPCEntityVariables(npc, s.entity_variables);
+		LoadNPCBuffs(npc, s.buffs);
 
 		entity_list.AddNPC(npc, true, true);
 
@@ -278,6 +300,7 @@ void Zone::LoadZoneState(
 					 s.spawngroup_id == npc->GetSpawnGroupId();
 			if (is_same_npc) {
 				LoadNPCEntityVariables(npc, s.entity_variables);
+				LoadNPCBuffs(npc, s.buffs);
 			}
 		}
 	}
@@ -346,12 +369,27 @@ void Zone::SaveZoneState()
 					return;
 				}
 
+				std::vector<Buffs_Struct> valid_buffs;
 				uint32 max_slots = n.second->GetMaxBuffSlots();
 				for (int index = 0; index < max_slots; index++) {
-					if (buffs[index]) {
-
+					if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
+						valid_buffs.push_back(buffs[index]);
 					}
 				}
+
+				try {
+					os = std::ostringstream();
+					{
+						cereal::JSONOutputArchiveSingleLine archive(os);
+						archive(cereal::make_nvp("buffs", valid_buffs));
+					}
+				}
+				catch (const std::exception &e) {
+					LogError("Failed to serialize buffs for NPC [{}]: {}", n.second->GetNPCTypeID(), e.what());
+					return;
+				}
+
+				s.buffs = os.str();
 			}
 		}
 
