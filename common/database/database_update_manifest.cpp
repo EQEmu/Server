@@ -6793,7 +6793,7 @@ UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 341) + 5810)
 	ManifestEntry{
 		.version     = 9304,
 		.description = "2024_12_01_2024_update_guild_bank",
-		.check       = "SHOW COLUMNS FROM `guild_bank` LIKE 'augment_1_id'",
+		.check       = "SHOW COLUMNS FROM `guild_bank` LIKE 'augment_one_id'",
 		.condition   = "empty",
 		.match       = "",
 		.sql         = R"(
