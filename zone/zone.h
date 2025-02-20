@@ -538,8 +538,6 @@ private:
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
 
 	uint32_t m_zone_server_id = 0;
-	void SaveZoneState();
-	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 };
 
 #endif

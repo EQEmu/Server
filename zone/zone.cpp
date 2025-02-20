@@ -3214,16 +3214,5 @@ void Zone::DisableRespawnTimers()
 	}
 }
 
-inline std::string GetLootSerialized(NPC *npc)
-{
-	LootStateData ls         = {};
-	auto          loot_items = npc->GetLootItems(); // Assuming this returns a list of loot items
-	ls.copper   = npc->GetCopper();
-	ls.silver   = npc->GetSilver();
-	ls.gold     = npc->GetGold();
-	ls.platinum = npc->GetPlatinum();
-	ls.entries.reserve(loot_items.size());
-}
-
 #include "zone_save_state.cpp"
 #include "zone_loot.cpp"
