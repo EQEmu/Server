@@ -3197,7 +3197,7 @@ void Zone::DisableRespawnTimers()
 	e.Reset();
 
 	while (e.MoreElements()) {
-		e.GetData()->Disable();
+		e.GetData()->SetRespawnTimer(std::numeric_limits<uint32_t>::max());
 		e.Advance();
 	}
 }
