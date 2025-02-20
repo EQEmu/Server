@@ -4249,7 +4249,14 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 
 	if (GetGM())
 	{
-		OnDisconnect(true);
+		if (RuleB(Character, EnableHackedFastCampForGM))
+		{
+			camp_timer.Start(100, true);
+		}
+		else {
+			OnDisconnect(true);
+		}
+		
 		return;
 	}
 
