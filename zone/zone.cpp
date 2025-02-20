@@ -3190,4 +3190,16 @@ std::string Zone::GetBucketRemaining(const std::string& bucket_name)
 	return DataBucket::GetDataRemaining(k);
 }
 
+void Zone::DisableRespawnTimers()
+{
+	LinkedListIterator<Spawn2*> e(spawn2_list);
+
+	e.Reset();
+
+	while (e.MoreElements()) {
+		e.GetData()->SetRespawnTimer(std::numeric_limits<uint32_t>::max());
+		e.Advance();
+	}
+}
+
 #include "zone_loot.cpp"
