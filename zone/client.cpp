@@ -8419,7 +8419,32 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 			swarm_pet_npc->ApplySpellBuff(buffs[buff_idx].spellid, buffs[buff_idx].ticsremaining);
 		}
 
-		for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id < EQ::invslot::slotWaist; slot_id++) {
+		// Matches order that NPCs equip items in
+		std::vector<int> custom_order = {
+			EQ::invslot::slotPrimary,
+			EQ::invslot::slotSecondary,
+			EQ::invslot::slotRange,
+			EQ::invslot::slotCharm,
+			EQ::invslot::slotEar1,
+			EQ::invslot::slotHead,
+			EQ::invslot::slotFace,
+			EQ::invslot::slotEar2,
+			EQ::invslot::slotNeck,
+			EQ::invslot::slotShoulders,
+			EQ::invslot::slotArms,
+			EQ::invslot::slotBack,
+			EQ::invslot::slotWrist1,
+			EQ::invslot::slotWrist2,
+			EQ::invslot::slotHands,
+			EQ::invslot::slotFinger1,
+			EQ::invslot::slotFinger2,
+			EQ::invslot::slotChest,
+			EQ::invslot::slotLegs,
+			EQ::invslot::slotFeet,
+			EQ::invslot::slotWaist
+		};
+
+		for (int slot_id : custom_order) {
 			auto item_inst = GetInv().GetItem(slot_id);
 			if (item_inst) {
 				auto aug0 = item_inst->GetAugment(0);
