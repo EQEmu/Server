@@ -4905,24 +4905,3 @@ void NPC::ResetMultiQuest() {
 
 	m_hand_in = {};
 }
-
-Spawn2* NPC::GetSpawn()
-{
-	if (!zone || !zone->IsLoaded()) {
-		return nullptr;
-	}
-
-	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
-
-	iterator.Reset();
-
-	while (iterator.MoreElements()) {
-		if (iterator.GetData()->GetID() == GetSpawnPointID()) {
-			return iterator.GetData();
-		}
-
-		iterator.Advance();
-	}
-
-	return nullptr;
-}
