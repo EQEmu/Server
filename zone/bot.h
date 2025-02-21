@@ -1127,6 +1127,7 @@ public:
 	bool TryAutoDefend(Client* bot_owner, float leash_distance);
 	bool TryIdleChecks(float fm_distance);
 	bool TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, glm::vec3& Goal);
+	void DoOutOfCombatChecks(Client* bot_owner, Mob* follow_mob, glm::vec3& Goal, float leash_distance, float fm_distance);
 	bool TryBardMovementCasts();
 	bool BotRangedAttack(Mob* other, bool can_double_attack = false);
 	bool CheckDoubleRangedAttack();
