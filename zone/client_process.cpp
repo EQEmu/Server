@@ -777,7 +777,7 @@ void Client::BulkSendInventoryItems()
 	EQ::OutBuffer::pos_type last_pos = ob.tellp();
 
 	// Equipment items
-	for (int16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; slot_id++) {
+	for (int16 slot_id = EQ::invslot::POSSESSIONS_BEGIN; slot_id <= EQ::invslot::POSSESSIONS_END; slot_id++) {
 		const EQ::ItemInstance* inst = m_inv[slot_id];
 		if (!inst) {
 			continue;
