@@ -54,34 +54,33 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	Bot *first_attacker = nullptr;
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 	for (auto bot_iter : sbl) {
-
-		if (bot_iter->GetAppearance() != eaDead && bot_iter->GetBotStance() != Stance::Passive) {
-
-			if (!first_attacker) {
-				first_attacker = bot_iter;
-			}
-			++attacker_count;
-
-			bot_iter->SetAttackFlag();
+		if (!bot_iter->ValidStateCheck(c)) {
+			continue;
 		}
+
+		if (!first_attacker) {
+			first_attacker = bot_iter;
+		}
+
+		++attacker_count;
+
+		bot_iter->SetAttackFlag();
 	}
 
-	if (attacker_count == 1 && first_attacker) {
-		c->Message(
-			Chat::Green,
-			fmt::format(
-				"Attacking {}.",
-				target_mob->GetCleanName()
-			).c_str()
-		);
-	} else {
-		c->Message(
-			Chat::Green,
-			fmt::format(
-				"{} of your bots are attacking {}.",
-				sbl.size(),
-				target_mob->GetCleanName()
-			).c_str()
-		);
+	if (first_attacker) {
+		std::string message;
+
+		if (attacker_count == 1) {
+			message = fmt::format("Attacking {}.", target_mob->GetCleanName());
+		} else {
+			message = fmt::format("{} of your bots are attacking {}.", sbl.size(), target_mob->GetCleanName());
+		}
+
+		c->Message(Chat::Green, message.c_str());
 	}
+	else {
+		c->Message(Chat::Yellow,fmt::format("None of your bots are capable of attacking {}.", target_mob->GetCleanName()).c_str());
+	}
+
+	return;
 }
