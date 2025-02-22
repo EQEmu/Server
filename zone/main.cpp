@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 	set_exception_handler();
 
 	// silence logging if we ran a command
-	if (ZoneCLI::RanConsoleCommand(argc, argv)) {
+	if (ZoneCLI::RanConsoleCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv)) {
 		LogSys.SilenceConsoleLogging();
 	}
 
@@ -298,7 +298,7 @@ int main(int argc, char **argv)
 		EQ::InitializeDynamicLookups();
 	}
 
-	// command handler
+	// command handler (no sidecar or test commands)
 	if (ZoneCLI::RanConsoleCommand(argc, argv) && !(ZoneCLI::RanSidecarCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv))) {
 		LogSys.EnableConsoleLogging();
 		ZoneCLI::CommandHandler(argc, argv);
@@ -309,6 +309,10 @@ int main(int argc, char **argv)
 		->LoadLogDatabaseSettings()
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();
+
+	if (ZoneCLI::RanTestCommand(argc, argv)) {
+		LogSys.SilenceConsoleLogging();
+	}
 
 	player_event_logs.SetDatabase(&database)->Init();
 
@@ -491,6 +495,7 @@ int main(int argc, char **argv)
 	// sidecar command handler
 	if (ZoneCLI::RanConsoleCommand(argc, argv)
 		&& (ZoneCLI::RanSidecarCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv))) {
+		LogSys.EnableConsoleLogging();
 		ZoneCLI::CommandHandler(argc, argv);
 	}
 

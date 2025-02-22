@@ -22,6 +22,8 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 	LogInfo("Booting test zone for NPC handins");
 	LogInfo("{}", Strings::Repeat("-", break_length));
 
+	LogSys.SilenceConsoleLogging();
+
 	Zone::Bootup(ZoneID("qrg"), 0, false);
 	zone->StopShutdownTimer();
 
@@ -403,6 +405,8 @@ void ZoneCLI::NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &
 		std::map<std::string, uint32>         hand_ins;
 		std::map<std::string, uint32>         required;
 		std::vector<EQ::ItemInstance *> items;
+
+		LogSys.EnableConsoleLogging();
 
 		// turn this on to see debugging output
 		LogSys.log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;

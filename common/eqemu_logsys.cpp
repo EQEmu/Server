@@ -601,6 +601,8 @@ void EQEmuLogSys::SilenceConsoleLogging()
 		log_settings[log_index].is_category_enabled = 0;
 	}
 
+	log_settings[Logs::MySQLError].log_to_console = static_cast<uint8>(Logs::MySQLError);
+	log_settings[Logs::Error].log_to_console = static_cast<uint8>(Logs::Error);
 	log_settings[Logs::Crash].log_to_console = static_cast<uint8>(Logs::General);
 }
 
