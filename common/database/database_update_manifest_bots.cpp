@@ -176,7 +176,7 @@ CREATE TABLE `bot_settings` (
 	`stance` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 	`setting_id` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
 	`setting_type` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
-	`value` INT(10) UNSIGNED NOT NULL,
+	`value` BIGINT(19) NOT NULL DEFAULT '0',
 	`category_name` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
 	`setting_name` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
 	PRIMARY KEY (`character_id`, `bot_id`, `stance`, `setting_id`, `setting_type`) USING BTREE
@@ -190,38 +190,54 @@ JOIN rule_values rv
 WHERE rv.rule_name LIKE 'Bots:BotExpansionSettings'
 AND bd.expansion_bitmask != rv.rule_value;
 
-INSERT INTO bot_settings SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = `bot_id`) AS stance_id, 1, 0, `show_helm`, 'BaseSetting', 'ShowHelm' FROM bot_data WHERE `show_helm` != 1;
-INSERT INTO bot_settings SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = `bot_id`) AS stance_id, 2, 0, sqrt(`follow_distance`), 'BaseSetting', 'FollowDistance' FROM bot_data WHERE `follow_distance` != 184;
-
-INSERT INTO bot_settings 
-SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = `bot_id`) AS stance_id, 3, 0, `stop_melee_level`, 'BaseSetting', 'StopMeleeLevel'
-FROM (
-    SELECT `bot_id`, 
-           (CASE 
-               WHEN (`class` IN (2, 6, 10, 11, 12, 13, 14)) THEN 13
-               ELSE 255
-           END) AS `sml`,
-           `stop_melee_level`
-    FROM bot_data
-) AS `subquery`
-WHERE `sml` != `stop_melee_level`;
-
-INSERT INTO bot_settings SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = `bot_id`) AS stance_id, 4, 0, `enforce_spell_settings`, 'BaseSetting', 'EnforceSpellSettings' FROM bot_data WHERE `enforce_spell_settings` != 0;
-INSERT INTO bot_settings SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = `bot_id`) AS stance_id, 5, 0, `archery_setting`, 'BaseSetting', 'RangedSetting' FROM bot_data WHERE `archery_setting` != 0;
+INSERT INTO bot_settings
+SELECT 0, bd.bot_id, bs.stance_id, 1, 0, bd.show_helm, 'BaseSetting', 'ShowHelm'
+FROM bot_data bd
+INNER JOIN bot_stances bs ON bd.bot_id = bs.bot_id
+WHERE bd.show_helm != 1
+GROUP BY bd.bot_id;
 
 INSERT INTO bot_settings
-SELECT 0, `bot_id`, (SELECT bs.`stance_id` FROM bot_stances bs WHERE bs.`bot_id` = `bot_id`) AS stance_id, 8, 0, `caster_range`, 'BaseSetting', 'DistanceRanged'
-FROM (
-    SELECT `bot_id`, 
-           (CASE 
-               WHEN (`class` IN (1, 7, 19, 16)) THEN 0
-                WHEN `class` = 8 THEN 0
-               ELSE 90
-           END) AS `DistanceRanged`,
-           `caster_range`
-    FROM bot_data
-) AS `subquery`
-WHERE `DistanceRanged` != `caster_range`;
+SELECT 0, bd.bot_id, bs.stance_id, 2, 0, SQRT(bd.follow_distance), 'BaseSetting', 'FollowDistance'
+FROM bot_data bd
+INNER JOIN bot_stances bs ON bd.bot_id = bs.bot_id
+WHERE bd.follow_distance != 184
+GROUP BY bd.bot_id;
+
+INSERT INTO bot_settings 
+SELECT 0, bd.bot_id, bs.stance_id, 3, 0, bd.stop_melee_level, 'BaseSetting', 'StopMeleeLevel'
+FROM bot_data bd
+INNER JOIN bot_stances bs ON bd.bot_id = bs.bot_id
+WHERE (CASE 
+	WHEN bd.class IN (2, 6, 10, 11, 12, 13, 14) THEN 13
+   ELSE 255
+END) != bd.stop_melee_level
+GROUP BY bd.bot_id;
+
+INSERT INTO bot_settings
+SELECT 0, bd.bot_id, bs.stance_id, 4, 0, bd.enforce_spell_settings, 'BaseSetting', 'EnforceSpellSettings'
+FROM bot_data bd
+INNER JOIN bot_stances bs ON bd.bot_id = bs.bot_id
+WHERE bd.enforce_spell_settings != 0
+GROUP BY bd.bot_id;
+
+INSERT INTO bot_settings
+SELECT 0, bd.bot_id, bs.stance_id, 5, 0, bd.archery_setting, 'BaseSetting', 'RangedSetting'
+FROM bot_data bd
+INNER JOIN bot_stances bs ON bd.bot_id = bs.bot_id
+WHERE bd.archery_setting != 0
+GROUP BY bd.bot_id;
+
+INSERT INTO bot_settings
+SELECT 0, bd.bot_id, bs.stance_id, 8, 0, bd.caster_range, 'BaseSetting', 'DistanceRanged'
+FROM bot_data bd
+INNER JOIN bot_stances bs ON bd.bot_id = bs.bot_id
+WHERE (CASE
+   WHEN bd.class IN (1, 7, 9, 16) THEN 0
+   WHEN bd.class = 8 THEN 30
+   ELSE 90
+END) != bd.caster_range
+GROUP BY bd.bot_id;
 
 ALTER TABLE `bot_data`
 	DROP COLUMN `show_helm`;
@@ -1796,7 +1812,7 @@ WHERE bot_spells_entries.spell_id = spells_new.id);
 	},
 	ManifestEntry{
 		.version = 9054,
-		.description = "2024_12_29_discipline__subtypes_inserts.sql",
+		.description = "2024_12_29_discipline_subtypes_inserts.sql",
 		.check = "SELECT * FROM `bot_spells_entries` where `type` = 201",
 		.condition = "empty",
 		.match = "",
