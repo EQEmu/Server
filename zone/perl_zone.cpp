@@ -526,6 +526,36 @@ void Perl_Zone_ShowZoneGlobalLoot(Zone* self, Client* c)
 	self->ShowZoneGlobalLoot(c);
 }
 
+void Perl_Zone_SetBucket(Zone* self, const std::string bucket_name, const std::string bucket_value)
+{
+	self->SetBucket(bucket_name, bucket_value);
+}
+
+void Perl_Zone_SetBucket(Zone* self, const std::string bucket_name, const std::string bucket_value, const std::string expiration)
+{
+	self->SetBucket(bucket_name, bucket_value, expiration);
+}
+
+void Perl_Zone_DeleteBucket(Zone* self, const std::string bucket_name)
+{
+	self->DeleteBucket(bucket_name);
+}
+
+std::string Perl_Zone_GetBucket(Zone* self, const std::string bucket_name)
+{
+	return self->GetBucket(bucket_name);
+}
+
+std::string Perl_Zone_GetBucketExpires(Zone* self, const std::string bucket_name)
+{
+	return self->GetBucketExpires(bucket_name);
+}
+
+std::string Perl_Zone_GetBucketRemaining(Zone* self, const std::string bucket_name)
+{
+	return self->GetBucketRemaining(bucket_name);
+}
+
 void perl_register_zone()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -538,11 +568,15 @@ void perl_register_zone()
 	package.add("CanDoCombat", &Perl_Zone_CanDoCombat);
 	package.add("CanLevitate", &Perl_Zone_CanLevitate);
 	package.add("ClearSpawnTimers", &Perl_Zone_ClearSpawnTimers);
+	package.add("DeleteBucket", &Perl_Zone_DeleteBucket);
 	package.add("Depop", (void(*)(Zone*))&Perl_Zone_Depop);
 	package.add("Depop", (void(*)(Zone*, bool))&Perl_Zone_Depop);
 	package.add("Despawn", &Perl_Zone_Despawn);
 	package.add("GetAAEXPModifier", &Perl_Zone_GetAAEXPModifier);
 	package.add("GetAAEXPModifierByCharacterID", &Perl_Zone_GetAAEXPModifierByCharacterID);
+	package.add("GetBucket", &Perl_Zone_GetBucket);
+	package.add("GetBucketExpires", &Perl_Zone_GetBucketExpires);
+	package.add("GetBucketRemaining", &Perl_Zone_GetBucketRemaining);
 	package.add("GetContentFlags", &Perl_Zone_GetContentFlags);
 	package.add("GetContentFlagsDisabled", &Perl_Zone_GetContentFlagsDisabled);
 	package.add("GetExperienceMultiplier", &Perl_Zone_GetExperienceMultiplier);
@@ -638,6 +672,8 @@ void perl_register_zone()
 	package.add("Repop", (void(*)(Zone*, bool))&Perl_Zone_Repop);
 	package.add("SetAAEXPModifier", &Perl_Zone_SetAAEXPModifier);
 	package.add("SetAAEXPModifierByCharacterID", &Perl_Zone_SetAAEXPModifierByCharacterID);
+	package.add("SetBucket", (void(*)(Zone*, const std::string, const std::string))&Perl_Zone_SetBucket);
+	package.add("SetBucket", (void(*)(Zone*, const std::string, const std::string, const std::string))&Perl_Zone_SetBucket);
 	package.add("SetEXPModifier", &Perl_Zone_SetEXPModifier);
 	package.add("SetEXPModifierByCharacterID", &Perl_Zone_SetEXPModifierByCharacterID);
 	package.add("SetInstanceTimer", &Perl_Zone_SetInstanceTimer);

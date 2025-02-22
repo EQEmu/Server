@@ -12,10 +12,12 @@ struct DataBucketKey {
 	std::string key;
 	std::string value;
 	std::string expires;
-	int64_t     account_id = 0;
-	int64_t     character_id = 0;
-	int64_t     npc_id = 0;
-	int64_t     bot_id = 0;
+	uint64_t    account_id   = 0;
+	uint64_t    character_id = 0;
+	uint32_t    npc_id       = 0;
+	uint32_t    bot_id       = 0;
+	uint16_t    zone_id      = 0;
+	uint16_t    instance_id  = 0;
 };
 
 namespace DataBucketLoadType {
@@ -23,6 +25,7 @@ namespace DataBucketLoadType {
 		Bot,
 		Account,
 		Client,
+		Zone,
 		MaxType
 	};
 
@@ -30,6 +33,7 @@ namespace DataBucketLoadType {
 		"Bot",
 		"Account",
 		"Client",
+		"Zone"
 	};
 }
 
@@ -56,12 +60,14 @@ public:
 	static bool CheckBucketMatch(const DataBucketsRepository::DataBuckets &dbe, const DataBucketKey &k);
 	static bool ExistsInCache(const DataBucketsRepository::DataBuckets &entry);
 
+	static void LoadZoneCache(uint16 zone_id, uint16 instance_id);
 	static void BulkLoadEntitiesToCache(DataBucketLoadType::Type t, std::vector<uint32> ids);
-	static void DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id);
+	static void DeleteCachedBuckets(DataBucketLoadType::Type type, uint32 id, uint32 secondary_id = 0);
 
 	static void DeleteFromMissesCache(DataBucketsRepository::DataBuckets e);
 	static void ClearCache();
 	static void DeleteFromCache(uint64 id, DataBucketLoadType::Type type);
+	static void DeleteZoneFromCache(uint16 zone_id, uint16 instance_id, DataBucketLoadType::Type type);
 	static bool CanCache(const DataBucketKey &key);
 	static DataBucketsRepository::DataBuckets
 	ExtractNestedValue(const DataBucketsRepository::DataBuckets &bucket, const std::string &full_key);

@@ -6838,6 +6838,39 @@ DROP TABLE `expeditions`;
 RENAME TABLE `expedition_lockouts` TO `dynamic_zone_lockouts`;
 )"
 	},
+	ManifestEntry{
+		.version = 9306,
+		.description = "2025_02_16_data_buckets_zone_id_instance_id.sql",
+		.check       = "SHOW COLUMNS FROM `data_buckets` LIKE 'zone_id'",
+		.condition   = "empty",
+		.match = "",
+		.sql = R"(
+-- ✅ Drop old indexes
+DROP INDEX IF EXISTS `keys` ON `data_buckets`;
+DROP INDEX IF EXISTS `idx_npc_expires` ON `data_buckets`;
+DROP INDEX IF EXISTS `idx_bot_expires` ON `data_buckets`;
+
+-- Add zone_id, instance_id
+ALTER TABLE `data_buckets`
+	MODIFY COLUMN `npc_id` int(11) NOT NULL DEFAULT 0 AFTER `character_id`,
+	MODIFY COLUMN `bot_id` int(11) NOT NULL DEFAULT 0 AFTER `npc_id`,
+	ADD COLUMN `zone_id` smallint(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `bot_id`,
+	ADD COLUMN `instance_id` smallint(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `zone_id`;
+
+ALTER TABLE `data_buckets`
+	MODIFY COLUMN `account_id` bigint(11) UNSIGNED NULL DEFAULT 0 AFTER `expires`,
+	MODIFY COLUMN `character_id` bigint(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `account_id`,
+	MODIFY COLUMN `npc_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `character_id`,
+	MODIFY COLUMN `bot_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `npc_id`;
+
+-- ✅ Create optimized unique index with `key` first
+CREATE UNIQUE INDEX `keys` ON data_buckets (`key`, character_id, npc_id, bot_id, account_id, zone_id, instance_id);
+
+-- ✅ Create indexes for just instance_id (instance deletion)
+CREATE INDEX idx_instance_id ON data_buckets (instance_id);
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

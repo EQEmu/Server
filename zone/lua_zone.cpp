@@ -685,6 +685,42 @@ void Lua_Zone::ShowZoneGlobalLoot(Lua_Client c)
 	self->ShowZoneGlobalLoot(c);
 }
 
+void Lua_Zone::SetBucket(const std::string& bucket_name, const std::string& bucket_value)
+{
+	Lua_Safe_Call_Void();
+	self->SetBucket(bucket_name, bucket_value);
+}
+
+void Lua_Zone::SetBucket(const std::string& bucket_name, const std::string& bucket_value, const std::string& expiration)
+{
+	Lua_Safe_Call_Void();
+	self->SetBucket(bucket_name, bucket_value, expiration);
+}
+
+void Lua_Zone::DeleteBucket(const std::string& bucket_name)
+{
+	Lua_Safe_Call_Void();
+	self->DeleteBucket(bucket_name);
+}
+
+std::string Lua_Zone::GetBucket(const std::string& bucket_name)
+{
+	Lua_Safe_Call_String();
+	return self->GetBucket(bucket_name);
+}
+
+std::string Lua_Zone::GetBucketExpires(const std::string& bucket_name)
+{
+	Lua_Safe_Call_String();
+	return self->GetBucketExpires(bucket_name);
+}
+
+std::string Lua_Zone::GetBucketRemaining(const std::string& bucket_name)
+{
+	Lua_Safe_Call_String();
+	return self->GetBucketRemaining(bucket_name);
+}
+
 luabind::scope lua_register_zone() {
 	return luabind::class_<Lua_Zone>("Zone")
 	.def(luabind::constructor<>())
@@ -695,11 +731,15 @@ luabind::scope lua_register_zone() {
 	.def("CanDoCombat", &Lua_Zone::CanDoCombat)
 	.def("CanLevitate", &Lua_Zone::CanLevitate)
 	.def("ClearSpawnTimers", &Lua_Zone::ClearSpawnTimers)
+	.def("DeleteBucket", (void(Lua_Zone::*)(const std::string&))&Lua_Zone::DeleteBucket)
 	.def("Depop", (void(Lua_Zone::*)(void))&Lua_Zone::Depop)
 	.def("Depop", (void(Lua_Zone::*)(bool))&Lua_Zone::Depop)
 	.def("Despawn", &Lua_Zone::Despawn)
 	.def("GetAAEXPModifier", &Lua_Zone::GetAAEXPModifier)
 	.def("GetAAEXPModifierByCharacterID", &Lua_Zone::GetAAEXPModifierByCharacterID)
+	.def("GetBucket", (std::string(Lua_Zone::*)(const std::string&))&Lua_Zone::GetBucket)
+	.def("GetBucketExpires", (std::string(Lua_Zone::*)(const std::string&))&Lua_Zone::GetBucketExpires)
+	.def("GetBucketRemaining", (std::string(Lua_Zone::*)(const std::string&))&Lua_Zone::GetBucketRemaining)
 	.def("GetContentFlags", &Lua_Zone::GetContentFlags)
 	.def("GetContentFlagsDisabled", &Lua_Zone::GetContentFlagsDisabled)
 	.def("GetExperienceMultiplier", &Lua_Zone::GetExperienceMultiplier)
@@ -795,6 +835,8 @@ luabind::scope lua_register_zone() {
 	.def("Repop", (void(Lua_Zone::*)(bool))&Lua_Zone::Repop)
 	.def("SetAAEXPModifier", &Lua_Zone::SetAAEXPModifier)
 	.def("SetAAEXPModifierByCharacterID", &Lua_Zone::SetAAEXPModifierByCharacterID)
+	.def("SetBucket", (void(Lua_Zone::*)(const std::string&,const std::string&))&Lua_Zone::SetBucket)
+	.def("SetBucket", (void(Lua_Zone::*)(const std::string&,const std::string&,const std::string&))&Lua_Zone::SetBucket)
 	.def("SetEXPModifier", &Lua_Zone::SetEXPModifier)
 	.def("SetEXPModifierByCharacterID", &Lua_Zone::SetEXPModifierByCharacterID)
 	.def("SetInstanceTimer", &Lua_Zone::SetInstanceTimer)
