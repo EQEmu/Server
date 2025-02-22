@@ -11796,15 +11796,15 @@ void Bot::DoCombatPositioning(
 		}
 		else if (tar->IsRooted() && !IsTaunting()) { // Move non-taunters out of range - Above already checks if bot is targeted, otherwise they would stay
 			if (tar_distance <= melee_distance_max) {
-				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, (melee_distance_max + 1), (melee_distance_max * 2), false, IsTaunting())) {
+				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, (melee_distance_max + 1), (melee_distance_max * 2), GetBehindMob(), false)) {
 					RunToGoalWithJitter(Goal);
 
 					return;
 				}
 			}
 		}
-		else if (IsTaunting() && ((tar_distance < melee_distance_min) || !front_mob)) { // Back up any bots that are too close
-			if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, false, IsTaunting())) {
+		else if (tar_distance < melee_distance_min || (!front_mob && IsTaunting())) { // Back up any bots that are too close
+			if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, GetBehindMob(), (IsTaunting() || !GetBehindMob()))) {
 				RunToGoalWithJitter(Goal);
 
 				return;
@@ -11839,8 +11839,8 @@ void Bot::DoCombatPositioning(
 					}
 				}
 			}
-			else if (tar_distance < melee_distance_min || (GetBehindMob() && !behind_mob) || (IsTaunting() && !front_mob)|| !HasRequiredLoSForPositioning(tar)) { // Regular adjustment
-				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, GetBehindMob(), IsTaunting())) {
+			else if (tar_distance < melee_distance_min || (GetBehindMob() && !behind_mob) || (IsTaunting() && !front_mob) || !HasRequiredLoSForPositioning(tar)) { // Regular adjustment
+				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, GetBehindMob(), (IsTaunting() || !GetBehindMob()))) {
 					RunToGoalWithJitter(Goal);
 
 					return;
