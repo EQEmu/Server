@@ -366,8 +366,8 @@ Corpse::Corpse(Client *c, int32 rez_exp, KilledByTypes in_killed_by) : Mob(
 
 			if (iter != removed_list.end()) {
 				std::stringstream ss("");
-				ss << "DELETE FROM `inventory` WHERE `charid` = " << c->CharacterID();
-				ss << " AND `slotid` IN (" << (*iter);
+				ss << "DELETE FROM `inventory` WHERE `character_id` = " << c->CharacterID();
+				ss << " AND `slot_id` IN (" << (*iter);
 				++iter;
 
 				while (iter != removed_list.end()) {
