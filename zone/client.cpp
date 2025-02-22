@@ -14833,9 +14833,22 @@ std::string Client::GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id)
 	if (
 		!EQ::ValueWithin(bandolier_slot, 0, 3) ||
 		!EQ::ValueWithin(slot_id, 0, 3)
-	) {
+		) {
 		return std::string();
 	}
 
 	return GetPP().bandoliers[bandolier_slot].Items[slot_id].Name;
+}
+
+void Client::SendMerchantEnd()
+{
+	SetMerchantSessionEntityID(0);
+
+	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
+		DoParcelCancel();
+		SetEngagedWithParcelMerchant(false);
+	}
+
+	EQApplicationPacket empty(OP_ShopEndConfirm);
+	QueuePacket(&empty);
 }
