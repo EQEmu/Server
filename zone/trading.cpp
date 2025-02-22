@@ -549,10 +549,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					}
 				}
 
-				auto               with  = tradingWith->CastToNPC();
-				const EQ::ItemData *item = inst->GetItem();
-
-				if (with->IsPetOwnerClient() && with->CanPetTakeItem(inst)) {
+				auto               with   = tradingWith->CastToNPC();
+				const EQ::ItemData *item  = inst->GetItem();
+				const bool         is_pet = with->IsPetOwnerClient() || with->IsCharmedPet();
+				if (is_pet && with->CanPetTakeItem(inst)) {
 					// pets need to look inside bags and try to equip items found there
 					if (item->IsClassBag() && item->BagSlots > 0) {
 						// if an item inside the bag can't be given to the pet, keep the bag
