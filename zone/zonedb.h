@@ -216,9 +216,9 @@ struct ZoneSpellsBlocked {
 
 struct TraderCharges_Struct {
 	uint32 ItemID[EQ::invtype::BAZAAR_SIZE];
-	int32 SerialNumber[EQ::invtype::BAZAAR_SIZE];
+	int32  SerialNumber[EQ::invtype::BAZAAR_SIZE];
 	uint32 ItemCost[EQ::invtype::BAZAAR_SIZE];
-	int32 Charges[EQ::invtype::BAZAAR_SIZE];
+	int32  Charges[EQ::invtype::BAZAAR_SIZE];
 };
 
 const int MaxMercStanceID = 9;

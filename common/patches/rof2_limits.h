@@ -37,7 +37,7 @@ namespace RoF2
 
 		const bool AllowOverLevelEquipment = true;
 
-		const bool AllowEmptyBagInBag = true;
+		const bool AllowEmptyBagInBag    = true;
 		const bool AllowClickCastFromBag = true;
 
 	} /*inventory*/
@@ -77,39 +77,38 @@ namespace RoF2
 		} // namespace enum_
 		using namespace enum_;
 
-		/* one file to rule them all moved from titanium for ease of changing*/
-		const int16 POSSESSIONS_SIZE = 34;
-		const int16 BANK_SIZE = 24;
-		const int16 SHARED_BANK_SIZE = 2;
-		const int16 TRADE_SIZE = 8;
-		const int16 WORLD_SIZE = 10;
-		const int16 LIMBO_SIZE = 36;
-		const int16 TRIBUTE_SIZE = 5;
-		const int16 TROPHY_TRIBUTE_SIZE = 0;//unknown
-		const int16 GUILD_TRIBUTE_SIZE = 2;//unverified
-		const int16 MERCHANT_SIZE = 200;
-		const int16 DELETED_SIZE = 0;//unknown - "Recovery Tab"
-		const int16 CORPSE_SIZE = POSSESSIONS_SIZE;
-		const int16 BAZAAR_SIZE = 200;
-		const int16 INSPECT_SIZE = 23;
-		const int16 REAL_ESTATE_SIZE = 0;//unknown
-		const int16 VIEW_MOD_PC_SIZE = POSSESSIONS_SIZE;
-		const int16 VIEW_MOD_BANK_SIZE = BANK_SIZE;
+		const int16 POSSESSIONS_SIZE          = 34;
+		const int16 BANK_SIZE                 = 24;
+		const int16 SHARED_BANK_SIZE          = 2;
+		const int16 TRADE_SIZE                = 8;
+		const int16 WORLD_SIZE                = 10;
+		const int16 LIMBO_SIZE                = 36;
+		const int16 TRIBUTE_SIZE              = 5;
+		const int16 TROPHY_TRIBUTE_SIZE       = 0;//unknown
+		const int16 GUILD_TRIBUTE_SIZE        = 2;//unverified
+		const int16 MERCHANT_SIZE             = 500;
+		const int16 DELETED_SIZE              = 0;//unknown - "Recovery Tab"
+		const int16 CORPSE_SIZE               = POSSESSIONS_SIZE;
+		const int16 BAZAAR_SIZE               = 200;
+		const int16 INSPECT_SIZE              = 23;
+		const int16 REAL_ESTATE_SIZE          = 0;//unknown
+		const int16 VIEW_MOD_PC_SIZE          = POSSESSIONS_SIZE;
+		const int16 VIEW_MOD_BANK_SIZE        = BANK_SIZE;
 		const int16 VIEW_MOD_SHARED_BANK_SIZE = SHARED_BANK_SIZE;
-		const int16 VIEW_MOD_LIMBO_SIZE = LIMBO_SIZE;
-		const int16 ALT_STORAGE_SIZE = 0;//unknown - "Shroud Bank"
-		const int16 ARCHIVED_SIZE = 0;//unknown
-		const int16 MAIL_SIZE = 0;//unknown
+		const int16 VIEW_MOD_LIMBO_SIZE       = LIMBO_SIZE;
+		const int16 ALT_STORAGE_SIZE          = 0;//unknown - "Shroud Bank"
+		const int16 ARCHIVED_SIZE             = 0;//unknown
+		const int16 MAIL_SIZE                 = 0;//unknown
 		const int16 GUILD_TROPHY_TRIBUTE_SIZE = 0;//unknown
-		const int16 KRONO_SIZE = 0;//unknown
-		const int16 OTHER_SIZE = 0;//unknown
+		const int16 KRONO_SIZE                = 0;//unknown
+		const int16 OTHER_SIZE                = 0;//unknown
 
 		const int16 TRADE_NPC_SIZE = 4; // defined by implication
 
 		const int16 TYPE_INVALID = IINVALID;
-		const int16 TYPE_BEGIN = typePossessions;
-		const int16 TYPE_END = typeOther;
-		const int16 TYPE_COUNT = (TYPE_END - TYPE_BEGIN) + 1;
+		const int16 TYPE_BEGIN   = typePossessions;
+		const int16 TYPE_END     = typeOther;
+		const int16 TYPE_COUNT   = (TYPE_END - TYPE_BEGIN) + 1;
 
 		int16 GetInvTypeSize(int16 inv_type);
 		const char* GetInvTypeName(int16 inv_type);
@@ -165,55 +164,53 @@ namespace RoF2
 
 		/* one file to rule them all moved from titanium for ease of changing*/
 		const int16 SLOT_TRADESKILL_EXPERIMENT_COMBINE = 1000;
+		const int16 SLOT_INVALID                       = IINVALID;
+		const int16 SLOT_BEGIN                         = INULL;
 
-		const int16 SLOT_INVALID = IINVALID;
-		const int16 SLOT_BEGIN = INULL;
-
-		/* these values still match titanium */
 		const int16 BANK_BEGIN = 2000;
-		const int16 BANK_END = (BANK_BEGIN + invtype::BANK_SIZE) - 1;
+		const int16 BANK_END   = (BANK_BEGIN + invtype::BANK_SIZE) - 1;
 
 		const int16 SHARED_BANK_BEGIN = 2500;
-		const int16 SHARED_BANK_END = (SHARED_BANK_BEGIN + invtype::SHARED_BANK_SIZE) - 1;
+		const int16 SHARED_BANK_END   = (SHARED_BANK_BEGIN + invtype::SHARED_BANK_SIZE) - 1;
 
 		const int16 TRADE_BEGIN = 3000;
-		const int16 TRADE_END = (TRADE_BEGIN + invtype::TRADE_SIZE) - 1;
+		const int16 TRADE_END   = (TRADE_BEGIN + invtype::TRADE_SIZE) - 1;
 
 		const int16 TRADE_NPC_END = (TRADE_BEGIN + invtype::TRADE_NPC_SIZE) - 1; // defined by implication
 
 		const int16 WORLD_BEGIN = 4000;
-		const int16 WORLD_END = (WORLD_BEGIN + invtype::WORLD_SIZE) - 1;
+		const int16 WORLD_END   = (WORLD_BEGIN + invtype::WORLD_SIZE) - 1;
 
 		const int16 TRIBUTE_BEGIN = 400;
-		const int16 TRIBUTE_END = (TRIBUTE_BEGIN + invtype::TRIBUTE_SIZE) - 1;
+		const int16 TRIBUTE_END   = (TRIBUTE_BEGIN + invtype::TRIBUTE_SIZE) - 1;
 
 		const int16 GUILD_TRIBUTE_BEGIN = 450;
-		const int16 GUILD_TRIBUTE_END = (GUILD_TRIBUTE_BEGIN + invtype::GUILD_TRIBUTE_SIZE) - 1;
+		const int16 GUILD_TRIBUTE_END   = (GUILD_TRIBUTE_BEGIN + invtype::GUILD_TRIBUTE_SIZE) - 1;
 
 		const int16 POSSESSIONS_BEGIN = slotCharm;
-		const int16 POSSESSIONS_END = slotCursor;
+		const int16 POSSESSIONS_END   = slotCursor;
 		const int16 POSSESSIONS_COUNT = (POSSESSIONS_END - POSSESSIONS_BEGIN) + 1;
 
 		const int16 EQUIPMENT_BEGIN = slotCharm;
-		const int16 EQUIPMENT_END = slotAmmo;
+		const int16 EQUIPMENT_END   = slotAmmo;
 		const int16 EQUIPMENT_COUNT = (EQUIPMENT_END - EQUIPMENT_BEGIN) + 1;
 
 		const int16 GENERAL_BEGIN = slotGeneral1;
-		const int16 GENERAL_END = slotGeneral10;
+		const int16 GENERAL_END   = slotGeneral10;
 		const int16 GENERAL_COUNT = (GENERAL_END - GENERAL_BEGIN) + 1;
 
-		const int16 BONUS_BEGIN = invslot::slotCharm;
-		const int16 BONUS_STAT_END = invslot::slotWaist;
+		const int16 BONUS_BEGIN     = invslot::slotCharm;
+		const int16 BONUS_STAT_END  = invslot::slotWaist;
 		const int16 BONUS_SKILL_END = invslot::slotWaist;
 
 		const int16 CORPSE_BEGIN = invslot::slotGeneral1;
-		const int16 CORPSE_END = invslot::slotGeneral1 + invslot::slotCursor;
+		const int16 CORPSE_END   = invslot::slotGeneral1 + invslot::slotCursor;
 
-		const uint64 EQUIPMENT_BITMASK = 0x00000000007FFFFF;
-		const uint64 GENERAL_BITMASK = 0x00000001FF800000;
-		const uint64 CURSOR_BITMASK = 0x0000000200000000;
+		const uint64 EQUIPMENT_BITMASK   = 0x00000000007FFFFF;
+		const uint64 GENERAL_BITMASK     = 0x00000001FF800000;
+		const uint64 CURSOR_BITMASK      = 0x0000000200000000;
 		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 34-slot count (RoF+)
-		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 34)); // based on 34-slot count (RoF+)
+		const uint64 CORPSE_BITMASK      = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 34)); // based on 34-slot count (RoF+)
 
 
 		const char* GetInvPossessionsSlotName(int16 inv_slot);
@@ -224,16 +221,12 @@ namespace RoF2
 	namespace invbag {
 		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::RoF2; }
 
-		const int16 SLOT_INVALID = IINVALID;
-		const int16 SLOT_BEGIN = INULL;
-		const int16 SLOT_COUNT = 200; // there is where you change bag size
-		const int16 SLOT_END = SLOT_COUNT - 1;
+		const int16 SLOT_TRADESKILL_EXPERIMENT_COMBINE = 1000;
+		const int16 SLOT_INVALID                       = IINVALID;
+		const int16 SLOT_BEGIN                         = INULL;
+		const int16 SLOT_COUNT                         = 200;
+		const int16 SLOT_END                           = SLOT_COUNT - 1;
 
-		/* if you change slot count you will have to modify the locations below to fit the larger dimensions of bags */
-		/* only used values since calculations are being done in emu_constants */
-
-		// These are NOT actually used; slot boundries are being calculated in emu_constants.
-		// If you change bag slot maximum you will blow up existing inventories
 		const int16 GENERAL_BAGS_BEGIN = 251;
 
 		const int16 CURSOR_BAG_BEGIN = 351;
@@ -252,9 +245,9 @@ namespace RoF2
 		inline EQ::versions::ClientVersion GetInvAugRef() { return EQ::versions::ClientVersion::RoF2; }
 
 		const int16 SOCKET_INVALID = IINVALID;
-		const int16 SOCKET_BEGIN = INULL;
-		const int16 SOCKET_END = 5;
-		const int16 SOCKET_COUNT = 6;
+		const int16 SOCKET_BEGIN   = INULL;
+		const int16 SOCKET_END     = 5;
+		const int16 SOCKET_COUNT   = 6;
 
 		const char* GetInvAugIndexName(int16 aug_index);
 

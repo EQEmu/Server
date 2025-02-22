@@ -142,7 +142,6 @@ foreach my $table_to_generate (@tables) {
         "guild_bank",
         "inventory_versions",
         "raid_leaders",
-        "sharedbank",
         "trader_audit",
         "eqtime",
         "db_version",

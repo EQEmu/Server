@@ -845,7 +845,7 @@ LootItem *Corpse::GetItem(uint16 lootslot, LootItem **bag_item_data)
 
 		// convert above code to for loop
 		for (const auto &item: m_item_list) {
-			if (item->equip_slot >= bagstart && item->equip_slot < bagstart + RoF2::invbag::SLOT_COUNT) {
+			if (item->equip_slot >= bagstart && item->equip_slot < bagstart + EQ::invbag::SLOT_COUNT) {
 				bag_item_data[item->equip_slot - bagstart] = item;
 			}
 		}
@@ -982,7 +982,7 @@ bool Corpse::Process()
 		CheckIsOwnerOnline();
 	}
 
-	if (m_corpse_delay_timer.Check()) {		
+	if (m_corpse_delay_timer.Check()) {
 		if (!m_seasonal && !m_hardcore) {
 			for (int &allowed_looter: m_allowed_looters) {
 				allowed_looter = 0;
@@ -1473,9 +1473,9 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		return;
 	}
 
-	const EQ::ItemData *item 	  = nullptr;
-	EQ::ItemInstance   *inst 	  = nullptr;
-	LootItem           *item_data = nullptr, *bag_item_data[RoF2::invbag::SLOT_COUNT] = {};
+	const EQ::ItemData *item      = nullptr;
+	EQ::ItemInstance   *inst      = nullptr;
+	LootItem           *item_data = nullptr, *bag_item_data[EQ::invbag::SLOT_COUNT] = {};
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if (GetPlayerKillItem() > 1) {
