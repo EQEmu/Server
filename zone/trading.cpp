@@ -3069,6 +3069,157 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	SendMoneyUpdate();
 }
 
+void Client::BuyTraderItemVoucher(TraderBuy_Struct* tbs, const EQApplicationPacket* app)
+{
+	auto in          = (TraderBuy_Struct *) app->pBuffer;
+	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number, tbs->trader_id);
+	if (!trader_item.id || GetTraderTransactionDate() < trader_item.listing_date) {
+		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
+				   "<red>[{}] The Traders data was outdated.",
+				   tbs->trader_id,
+				   tbs->serial_number
+		);
+		in->method     = BazaarByDirectToInventory;
+		in->sub_action = DataOutDated;
+		TradeRequestFailed(app);
+		return;
+	}
+
+	if (trader_item.active_transaction) {
+		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
+				   "<red>[{}] The item is already within an active transaction.",
+				   tbs->trader_id,
+				   tbs->serial_number
+		);
+		in->method     = BazaarByDirectToInventory;
+		in->sub_action = DataOutDated;
+		TradeRequestFailed(app);
+		return;
+	}
+
+	TraderRepository::UpdateActiveTransaction(database, trader_item.id, true);
+
+	std::unique_ptr<EQ::ItemInstance> buy_item(
+		database.CreateItem(
+			trader_item.item_id,
+			trader_item.item_charges,
+			trader_item.aug_slot_1,
+			trader_item.aug_slot_2,
+			trader_item.aug_slot_3,
+			trader_item.aug_slot_4,
+			trader_item.aug_slot_5,
+			trader_item.aug_slot_6
+		)
+	);
+
+	if (!buy_item) {
+		LogTrading("Unable to find item id <red>[{}] item_sn <red>[{}] on trader",
+				   trader_item.item_id,
+				   trader_item.item_sn
+		);
+		in->method     = BazaarByDirectToInventory;
+		in->sub_action = Failed;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
+		TradeRequestFailed(app);
+		return;
+	}
+
+	LogTrading(
+		"Name: <green>[{}] IsStackable: <green>[{}] Requested Quantity: <green>[{}] Charges on Item <green>[{}]",
+		buy_item->GetItem()->Name,
+		buy_item->IsStackable(),
+		tbs->quantity,
+		buy_item->GetCharges()
+	);
+
+	// Determine the actual quantity for the purchase
+	if (!buy_item->IsStackable()) {
+		tbs->quantity = 1;
+	}
+	else {
+		int32 item_charges = buy_item->GetCharges();
+		if (item_charges <= 0) {
+			tbs->quantity = 1;
+		}
+		else if (static_cast<uint32>(item_charges) < tbs->quantity) {
+			tbs->quantity = item_charges;
+		}
+	}
+
+	buy_item->SetCharges(tbs->quantity);
+
+	LogTrading("Actual quantity that will be traded is <green>[{}]", tbs->quantity);
+
+	int available_vouchers = GetAlternateCurrencyValue(1);
+
+	if (available_vouchers < RuleI(Bazaar, VoucherDeliveryCost)) {
+		Message(Chat::Red, "You do not have enough vouchers to complete this purchase.");
+		in->method     = BazaarByDirectToInventory;
+		in->sub_action = InsufficientFunds;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
+		TradeRequestFailed(app);
+		return;
+	}
+
+	uint32 total_cost = tbs->price * tbs->quantity;
+
+	if (!TakeMoneyFromPP(total_cost)) {
+		RecordPlayerEventLog(
+			PlayerEvent::POSSIBLE_HACK,
+			PlayerEvent::PossibleHackEvent{
+				.message = fmt::format(
+					"{} attempted to buy {} in bazaar but did not have enough money.",
+					GetCleanName(),
+					buy_item->GetItem()->Name
+				)
+			}
+		);
+		in->method     = BazaarByDirectToInventory;
+		in->sub_action = InsufficientFunds;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
+		TradeRequestFailed(app);
+		return;
+	}
+
+	Message(Chat::Red, fmt::format("You used {} voucher(s) for the direct item delivery.", RuleI(Bazaar, VoucherDeliveryCost)).c_str());
+	SetAlternateCurrencyValue(1, available_vouchers - RuleI(Bazaar, VoucherDeliveryCost));
+
+	PushItemOnCursor(*buy_item, true);
+	ReturnTraderReq(app, tbs->quantity, buy_item->GetID());
+
+	if (trader_item.item_charges <= static_cast<int32>(tbs->quantity) || !buy_item->IsStackable()) {
+		TraderRepository::DeleteOne(database, trader_item.id);
+	} else {
+		TraderRepository::UpdateQuantity(
+			database,
+			trader_item.char_id,
+			trader_item.item_sn,
+			trader_item.item_charges - tbs->quantity
+		);
+	}
+
+	if (RuleB(Bazaar, AuditTrail)) {
+		BazaarAuditTrail(tbs->seller_name, GetName(), buy_item->GetItem()->Name, tbs->quantity, tbs->price, 0);
+	}
+
+	auto out_server = std::make_unique<ServerPacket>(ServerOP_BazaarPurchase, sizeof(BazaarPurchaseMessaging_Struct));
+	auto out_data   = (BazaarPurchaseMessaging_Struct *) out_server->pBuffer;
+
+	out_data->trader_buy_struct       = *tbs;
+	out_data->buyer_id                = CharacterID();
+	out_data->item_aug_1              = buy_item->GetAugmentItemID(0);
+	out_data->item_aug_2              = buy_item->GetAugmentItemID(1);
+	out_data->item_aug_3              = buy_item->GetAugmentItemID(2);
+	out_data->item_aug_4              = buy_item->GetAugmentItemID(3);
+	out_data->item_aug_5              = buy_item->GetAugmentItemID(4);
+	out_data->item_aug_6              = buy_item->GetAugmentItemID(5);
+	out_data->item_quantity_available = trader_item.item_charges;
+	out_data->id                      = trader_item.id;
+	strn0cpy(out_data->trader_buy_struct.buyer_name, GetCleanName(), sizeof(out_data->trader_buy_struct.buyer_name));
+
+	worldserver.SendPacket(out_server.release());
+}
+
 void Client::SetBuyerWelcomeMessage(const char *welcome_message)
 {
 	BuyerRepository::UpdateWelcomeMessage(database, CharacterID(), welcome_message);
