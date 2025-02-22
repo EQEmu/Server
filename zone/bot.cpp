@@ -2487,7 +2487,7 @@ void Bot::AI_Process()
 		if (!IsBotNonSpellFighter() && AI_HasSpells() && TryIdleChecks(fm_distance)) {
 			return;
 		}
-		if (!IsBotNonSpellFighter() && AI_HasSpells() && TryBardMovementCasts()) {
+		if (GetClass() == Class::Bard && AI_HasSpells() && TryBardMovementCasts()) {
 			return;
 		}
 	}

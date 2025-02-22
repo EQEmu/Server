@@ -809,7 +809,7 @@ public:
 	bool IsBotWISCaster() { return IsWISCasterClass(GetClass()); }
 	bool IsBotSpellFighter() { return IsSpellFighterClass(GetClass()); }
 	bool IsBotFighter() { return IsFighterClass(GetClass()); }
-	bool IsBotNonSpellFighter() { return IsNonSpellFighterClass(GetClass()); }
+	bool IsBotNonSpellFighter() { return (GetClass() == Class::Bard ? false : IsNonSpellFighterClass(GetClass())); }
 	uint8 GetBotClass() { return GetClass(); }
 	int GetRawACNoShield(int &shield_ac);
 
