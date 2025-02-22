@@ -1213,22 +1213,22 @@ namespace RoF
 		case 1: { // GuildBankItemUpdate
 			auto emu = (GuildBankItemUpdate_Struct *)in->pBuffer;
 			auto eq = (structs::GuildBankItemUpdate_Struct *)outapp->pBuffer;
-			eq->Action = 0;
-			OUT(Unknown004);
-			eq->Unknown08 = 0;
-			OUT(SlotID);
-			OUT(Area);
-			OUT(Unknown012);
-			OUT(ItemID);
-			OUT(Icon);
-			OUT(Quantity);
-			OUT(Permissions);
-			OUT(AllowMerge);
-			OUT(Useable);
-			OUT_str(ItemName);
-			OUT_str(Donator);
-			OUT_str(WhoFor);
-			OUT(Unknown226);
+			eq->action = 0;
+			OUT(unknown004);
+			eq->unknown008 = 0;
+			OUT(slot_id);
+			OUT(area);
+			OUT(display);
+			OUT(item_id);
+			OUT(icon_id);
+			OUT(quantity);
+			OUT(permissions);
+			OUT(allow_merge);
+			OUT(is_useable);
+			OUT_str(item_name);
+			OUT_str(donator);
+			OUT_str(who_for);
+			OUT(unknown226);
 			break;
 		}
 		default:

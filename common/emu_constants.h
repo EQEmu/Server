@@ -130,6 +130,8 @@ namespace EQ
 		using RoF2::invtype::MAIL_SIZE;
 		using RoF2::invtype::GUILD_TROPHY_TRIBUTE_SIZE;
 		using RoF2::invtype::KRONO_SIZE;
+		using RoF2::invtype::GUILD_BANK_MAIN_SIZE;
+		using RoF2::invtype::GUILD_BANK_DEPOSIT_SIZE;
 		using RoF2::invtype::OTHER_SIZE;
 
 		using RoF2::invtype::TRADE_NPC_SIZE;

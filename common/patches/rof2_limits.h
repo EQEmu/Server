@@ -101,6 +101,8 @@ namespace RoF2
 		const int16 MAIL_SIZE                 = 0;//unknown
 		const int16 GUILD_TROPHY_TRIBUTE_SIZE = 0;//unknown
 		const int16 KRONO_SIZE                = 0;//unknown
+		const int16 GUILD_BANK_MAIN_SIZE      = 200;
+		const int16 GUILD_BANK_DEPOSIT_SIZE   = 40;
 		const int16 OTHER_SIZE                = 0;//unknown
 
 		const int16 TRADE_NPC_SIZE = 4; // defined by implication
