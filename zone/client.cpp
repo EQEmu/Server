@@ -14364,66 +14364,6 @@ void Client::RemoveItemBySerialNumber(uint32 serial_number, uint32 quantity)
 	}
 }
 
-void Client::AddMoneyToPPWithOverflow(uint64 copper, bool update_client)
-{
-	//I noticed in the ROF2 client that the client auto updates the currency values using overflow
-	//Therefore, I created this method to ensure that the db matches and clients don't see 10 pp 5 gp
-	//becoming 9pp 15 gold with the current AddMoneyToPP method.
-
-	auto add_pp = copper / 1000;
-	auto add_gp = (copper - add_pp * 1000) / 100;
-	auto add_sp = (copper - add_pp * 1000 - add_gp * 100) / 10;
-	auto add_cp = copper - add_pp * 1000 - add_gp * 100 - add_sp * 10;
-
-	m_pp.copper += add_cp;
-	if (m_pp.copper >= 10) {
-		m_pp.silver += m_pp.copper / 10;
-		m_pp.copper = m_pp.copper % 10;
-	}
-
-	m_pp.silver += add_sp;
-	if (m_pp.silver >= 10) {
-		m_pp.gold += m_pp.silver / 10;
-		m_pp.silver = m_pp.silver % 10;
-	}
-
-	m_pp.gold += add_gp;
-	if (m_pp.gold >= 10) {
-		m_pp.platinum += m_pp.gold / 10;
-		m_pp.gold = m_pp.gold % 10;
-	}
-
-	m_pp.platinum += add_pp;
-
-	if (update_client) {
-		SendMoneyUpdate();
-	}
-
-	RecalcWeight();
-	SaveCurrency();
-
-	m_external_handin_money_returned = ExternalHandinMoneyReturned{
-		.copper = add_cp,
-		.silver = add_sp,
-		.gold = add_gp,
-		.platinum = add_pp,
-		.return_source = "AddMoneyToPPWithOverflow"
-	};
-
-	LogDebug("Client::AddMoneyToPPWithOverflow() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]",
-		GetName(),
-		m_pp.platinum,
-		m_pp.gold,
-		m_pp.silver,
-		m_pp.copper
-	);
-}
-
-bool Client::TakeMoneyFromPPWithOverFlow(uint64 copper, bool update_client)
-{
-	return TakeMoneyFromPP(copper, update_client);
-}
-
 void Client::SendTopLevelInventory()
 {
 	EQ::ItemInstance* inst = nullptr;

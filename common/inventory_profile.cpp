@@ -2232,6 +2232,7 @@ int16 EQ::InventoryProfile::_HasEvolvingItem(ItemInstQueue &iqueue, uint64 evolv
 	return INVALID_INDEX;
 }
 
+
 int16 EQ::InventoryProfile::FindFirstFreeSlotThatFitsItemWithStacking(ItemInstance *item_inst) const
 {
 	auto item_data = item_inst->GetItem();
@@ -2267,12 +2268,12 @@ int16 EQ::InventoryProfile::FindFirstFreeSlotThatFitsItemWithStacking(ItemInstan
 
 			for (uint8 bag_slot = invbag::SLOT_BEGIN; bag_slot < bag_size; bag_slot++) {
 				auto bag_item = GetItem(base_slot_id + bag_slot);
-				if (!bag_item && inv_item->GetItem()->BagSize >= item_size) {
+				if (!bag_item) {
 					// Found available slot within bag that will hold inbound item
 					return base_slot_id + bag_slot;
 				}
 
-				if (bag_item && bag_item->GetID() == item_data->ID && item_data->Stackable) {
+				if (bag_item && item_data->Stackable && bag_item->GetID() == item_data->ID) {
 					if (item_inst->GetCharges() + bag_item->GetCharges() <= item_data->StackSize) {
 						// Found a bag slot has room for a stackable addition
 						return base_slot_id + bag_slot;
