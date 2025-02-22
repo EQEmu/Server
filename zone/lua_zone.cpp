@@ -728,7 +728,7 @@ std::string Lua_Zone::GetBucketRemaining(const std::string& bucket_name)
 }
 
 luabind::scope lua_register_zone() {
-	return luabind::class_<Lua_Zone>("Zone")
+	return luabind::class_<Lua_Zone>("Zones")
 	.def(luabind::constructor<>())
 	.def("BuffTimersSuspended", &Lua_Zone::BuffTimersSuspended)
 	.def("BypassesExpansionCheck", &Lua_Zone::BypassesExpansionCheck)
