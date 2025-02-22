@@ -1,3 +1,13 @@
+## [23.0.1] 2/20/2025
+
+### Fixes
+
+* Player event ordering merge fix ([#4699](https://github.com/EQEmu/Server/pull/4699)) @Akkadius 2025-02-20
+
+### Quest API
+
+* Add DisableRespawnTimers to Perl and Lua ([#4691](https://github.com/EQEmu/Server/pull/4691)) @Kinglykrab 2025-02-20
+
 ## [23.0.0] 2/19/2025
 
 ### Bots
