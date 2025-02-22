@@ -405,17 +405,12 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return false;
 	}
 
-	Mob *pet_owner = mob->GetOwner();
-	if (
-		pet_owner &&
-		pet_owner->IsClient() &&
-		(
-			!RuleB(Aggro, AggroPlayerPets) ||
-			pet_owner->CastToClient()->GetGM() ||
-			mob->GetSpecialAbility(SpecialAbility::AggroImmunity)
-		)
-	) {
-		return false;
+	Mob* pet_owner = mob->GetOwner();
+
+	if (pet_owner && pet_owner->IsOfClientBot()) {
+		if (mob->IsPetAggroExempt(pet_owner)) {
+			return false;
+		}
 	}
 
 	if (IsNPC() && mob->IsNPC() && mob->GetSpecialAbility(SpecialAbility::NPCAggroImmunity)) {
@@ -578,6 +573,34 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	LogAggro("AlwaysAggroFlag: [{}]\n", AlwaysAggro());
 	LogAggro("Int: [{}]\n", GetINT());
 	LogAggro("Con: [{}]\n", GetLevelCon(mob->GetLevel()));
+
+	return false;
+}
+
+bool Mob::IsPetAggroExempt(Mob* pet_owner) {
+	if (!pet_owner) {
+		return false;
+	}
+
+	bool exempt_client_pet = pet_owner->IsClient() && !RuleB(Aggro, AggroPlayerPets);
+	bool exempt_bot_pet = pet_owner->IsBot() && !RuleB(Aggro, AggroBotPets);
+
+	if (exempt_client_pet || exempt_bot_pet) {
+		return true;
+	}
+
+	Mob* ultimate_owner = GetUltimateOwner();
+	Client* client_owner = (ultimate_owner && ultimate_owner->IsClient())
+		? ultimate_owner->CastToClient()
+		: nullptr;
+
+	if (client_owner && client_owner->GetGM()) {
+		return true;
+	}
+
+	if (GetSpecialAbility(SpecialAbility::AggroImmunity)) {
+		return true;
+	}
 
 	return false;
 }
