@@ -1,7 +1,9 @@
 #include "../client.h"
 #include "../worldserver.h"
+#include "../queryserv.h"
 
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 #include "../guild_mgr.h"
 #include "../doors.h"
@@ -600,7 +602,36 @@ void command_guild(Client* c, const Seperator* sep)
 		else {
 			auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
 			auto guild    = guild_mgr.GetGuildByGuildID(guild_id);
-			c->SendGuildMembersList();
+
+			PlayerEvent::LootItemEvent e{};
+			e.charges      = -1;
+			e.corpse_name  = "Test Corpse Name";
+			e.item_id      = 123456789;
+			e.item_name    = "Test Item Name";
+			e.npc_id       = 987654321;
+			e.augment_1_id = 11;
+			e.augment_2_id = 0;
+			e.augment_3_id = 0;
+			e.augment_4_id = 44;
+			e.augment_5_id = 55;
+			e.augment_6_id = 66;
+
+			RecordPlayerEventLogWithClient(c, PlayerEvent::LOOT_ITEM, e);
+
+			PlayerEvent::DestroyItemEvent e2{};
+			e2.charges     = -1;
+			e2.attuned     = true;
+			e.augment_1_id = 11;
+			e.augment_2_id = 0;
+			e.augment_3_id = 0;
+			e.augment_4_id = 44;
+			e.augment_5_id = 55;
+			e.augment_6_id = 66;
+			e2.item_id     = 123456789;
+			e2.item_name   = "Test Item Destroy Name";
+			e2.reason      = "Test Item Destroy Reason";
+
+			RecordPlayerEventLogWithClient(c, PlayerEvent::ITEM_DESTROY, e2);
 		}
 	}
 }

@@ -274,19 +274,8 @@
 #define ServerOP_WWSpell 0x4757
 #define ServerOP_WWTaskUpdate 0x4758
 
-/**
- * QueryServer
- */
-#define ServerOP_QSPlayerLogTrades 0x5000
-#define ServerOP_QSPlayerLogHandins 0x5001
-#define ServerOP_QSPlayerLogNPCKills 0x5002
-#define ServerOP_QSPlayerLogDeletes 0x5003
-#define ServerOP_QSPlayerLogMoves 0x5004
-#define ServerOP_QSPlayerLogMerchantTransactions 0x5005
-#define ServerOP_QSSendQuery 0x5006
-#define ServerOP_QSPlayerDropItem 0x5007
-
 // player events
+#define ServerOP_QSSendQuery		0x5000
 #define ServerOP_PlayerEvent 0x5100
 
 enum {
@@ -370,7 +359,6 @@ enum { QSG_LFGuild = 0 };
 enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_RequestPlayerInfo, QSG_LFGuild_UpdateGuildInfo, QSG_LFGuild_GuildMatches,
 	QSG_LFGuild_RequestGuildInfo };
 
-#define ServerOP_Speech			0x5500
 
 enum {
 	UserToWorldStatusWorldUnavail = 0,
@@ -1328,169 +1316,9 @@ struct ServerMailMessageHeader_Struct {
 	char message[0];
 };
 
-struct Server_Speech_Struct {
-	char	to[64];
-	char	from[64];
-	uint32	guilddbid;
-	int16	minstatus;
-	uint32	type;
-	char	message[0];
-};
-
-struct PlayerLogTradeItemsEntry_Struct {
-	uint32 from_character_id;
-	uint16 from_slot;
-	uint32 to_character_id;
-	uint16 to_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct PlayerLogTrade_Struct {
-	uint32                          character_1_id;
-	MoneyUpdate_Struct              character_1_money;
-	uint16                          character_1_item_count;
-	uint32                          character_2_id;
-	MoneyUpdate_Struct              character_2_money;
-	uint16                          character_2_item_count;
-	uint16                          _detail_count;
-	PlayerLogTradeItemsEntry_Struct item_entries[0];
-};
-
-struct QSDropItems_Struct {
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSPlayerDropItem_Struct {
-	uint32 char_id;
-	bool pickup; // 0 drop, 1 pickup
-	uint32 zone_id;
-	int x;
-	int y;
-	int z;
-	uint16	_detail_count;
-	QSDropItems_Struct items[0];
-};
-
-struct QSHandinItems_Struct {
-	char action_type[7]; // handin, return or reward
-	uint16 char_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSPlayerLogHandin_Struct {
-	uint32 quest_id;
-	uint32 char_id;
-	MoneyUpdate_Struct	char_money;
-	uint16 char_count;
-	uint32 npc_id;
-	MoneyUpdate_Struct	npc_money;
-	uint16 npc_count;
-	uint16 _detail_count;
-	QSHandinItems_Struct items[0];
-};
-
-struct QSPlayerLogNPCKillSub_Struct{
-	uint32 NPCID;
-	uint32 ZoneID;
-	uint32 Type;
-};
-
-struct QSPlayerLogNPCKillsPlayers_Struct{
-	uint32 char_id;
-};
-
-struct QSPlayerLogNPCKill_Struct{
-	QSPlayerLogNPCKillSub_Struct s1;
-	QSPlayerLogNPCKillsPlayers_Struct Chars[0];
-};
-
-struct QSDeleteItems_Struct {
-	uint16 char_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSPlayerLogDelete_Struct {
-	uint32 char_id;
-	uint16 stack_size; // '0' indicates full stack or non-stackable item move
-	uint16 char_count;
-	QSDeleteItems_Struct	items[0];
-};
-
-struct QSMoveItems_Struct {
-	uint16 from_slot;
-	uint16 to_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSPlayerLogMove_Struct {
-	uint32			char_id;
-	uint16			from_slot;
-	uint16			to_slot;
-	uint16			stack_size; // '0' indicates full stack or non-stackable item move
-	uint16			char_count;
-	bool			postaction;
-	QSMoveItems_Struct items[0];
-};
-
-struct QSTransactionItems_Struct {
-	uint16 char_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSMerchantLogTransaction_Struct {
-	uint32 zone_id;
-	uint32 merchant_id;
-	MoneyUpdate_Struct		merchant_money;
-	uint16 merchant_count;
-	uint32 char_id;
-	MoneyUpdate_Struct		char_money;
-	uint16 char_count;
-	QSTransactionItems_Struct items[0];
-};
-
 struct DiscordWebhookMessage_Struct {
 	uint32 webhook_id;
 	char message[2000];
-};
-
-struct QSGeneralQuery_Struct {
-	char QueryString[0];
 };
 
 struct CZClientMessageString_Struct {

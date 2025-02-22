@@ -1354,15 +1354,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			safe_delete(outapp);
 			break;
 		}
-		case ServerOP_Speech:
-		case ServerOP_QSSendQuery:
-		case ServerOP_QSPlayerLogDeletes:
-		case ServerOP_QSPlayerDropItem:
-		case ServerOP_QSPlayerLogHandins:
-		case ServerOP_QSPlayerLogMerchantTransactions:
-		case ServerOP_QSPlayerLogMoves:
-		case ServerOP_QSPlayerLogNPCKills:
-		case ServerOP_QSPlayerLogTrades:
 		case ServerOP_QueryServGeneric: {
 			QSLink.SendPacket(pack);
 			break;
@@ -1439,6 +1430,29 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			if (zs) {
 				zs->SendPacket(pack);
 			}
+			break;
+		}
+		case ServerOP_ReloadContentFlags: {
+			zoneserver_list.SendPacket(pack);
+			content_service.SetExpansionContext()->ReloadContentFlags();
+			break;
+		}
+		case ServerOP_ReloadLogs: {
+			zoneserver_list.SendPacket(pack);
+			QSLink.SendPacket(pack);
+			UCSLink.SendPacket(pack);
+			LogSys.LoadLogDatabaseSettings();
+			player_event_logs.ReloadSettings();
+			break;
+		}
+		case ServerOP_ReloadTasks: {
+			shared_task_manager.LoadTaskData();
+			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_ReloadDzTemplates: {
+			dynamic_zone_manager.LoadTemplates();
+			zoneserver_list.SendPacket(pack);
 			break;
 		}
 		case ServerOP_ChangeSharedMem: {

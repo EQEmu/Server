@@ -147,6 +147,8 @@ void EQEmuConfig::parse_config()
 	QSDatabaseUsername = _root["server"]["qsdatabase"].get("username", "eq").asString();
 	QSDatabasePassword = _root["server"]["qsdatabase"].get("password", "eq").asString();
 	QSDatabaseDB       = _root["server"]["qsdatabase"].get("db", "eq").asString();
+	QSHost             = _root["server"]["queryserver"].get("host", "localhost").asString();
+	QSPort             = Strings::ToUnsignedInt(_root["server"]["queryserver"].get("port", "9500").asString());
 
 	/**
 	 * Zones

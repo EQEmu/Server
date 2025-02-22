@@ -66,6 +66,7 @@
 #endif
 
 extern Zone* zone;
+extern QueryServ* QServ;
 extern volatile bool is_zone_loaded;
 extern EntityList entity_list;
 

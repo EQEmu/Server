@@ -10,10 +10,14 @@
 #include "worlddb.h"
 #include "wguild_mgr.h"
 #include "world_config.h"
+#include "ucs.h"
+#include "queryserv.h"
 
 extern ZSList            zoneserver_list;
 extern ClientList        client_list;
 extern WorldGuildManager guild_mgr;
+extern UCSConnection UCSLink;
+extern QueryServConnection QSLink;
 
 void callGetZoneList(Json::Value &response)
 {
@@ -137,14 +141,56 @@ void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::str
 
 	ServerPacket *pack = nullptr;
 
-	bool found_command = false;
+	bool      found_command = false;
+	for (auto &c: reload_types) {
+		if (command == c.command) {
+			if (c.command == "world") {
+				uint8 global_repop = ReloadWorld::NoRepop;
 
-	for (auto &t: ServerReload::GetTypes()) {
-		if (std::to_string(t) == command || Strings::ToLower(ServerReload::GetName(t)) == command) {
-			message(r, fmt::format("Reloading [{}] globally", ServerReload::GetName(t)));
-			zoneserver_list.SendServerReload(t, nullptr);
+				if (Strings::IsNumber(args[2])) {
+					global_repop = static_cast<uint8>(Strings::ToUnsignedInt(args[2]));
+
+					if (global_repop > ReloadWorld::ForceRepop) {
+						global_repop = ReloadWorld::ForceRepop;
+					}
+				}
+
+				message(
+					r,
+					fmt::format(
+						"Attempting to reload Quests {}worldwide.",
+						(
+							global_repop ?
+								(
+									global_repop == ReloadWorld::Repop ?
+										"and repop NPCs " :
+										"and forcefully repop NPCs "
+								) :
+								""
+						)
+					)
+				);
+
+				pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
+				auto RW = (ReloadWorld_Struct *) pack->pBuffer;
+				RW->global_repop = global_repop;
+			}
+			else {
+				pack = new ServerPacket(c.opcode, 0);
+				message(r, fmt::format("Reloading [{}] globally", c.desc));
+
+				if (c.opcode == ServerOP_ReloadLogs) {
+					LogSys.LoadLogDatabaseSettings();
+					QSLink.SendPacket(pack);
+					UCSLink.SendPacket(pack);
+				}
+				else if (c.opcode == ServerOP_ReloadRules) {
+					RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
+				}
+			}
+
+			found_command = true;
 		}
-		found_command = true;
 	}
 
 	if (!found_command) {

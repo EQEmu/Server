@@ -8,6 +8,7 @@
 #include "worldserver.h"
 
 extern WorldServer worldserver;
+extern QueryServ* QServ;
 
 void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 {

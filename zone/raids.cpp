@@ -33,9 +33,11 @@
 #include "bot.h"
 
 #include "worldserver.h"
+#include "queryserv.h"
 
-extern EntityList entity_list;
+extern EntityList  entity_list;
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 Raid::Raid(uint32 raidID)
 : GroupIDConsumer(raidID)

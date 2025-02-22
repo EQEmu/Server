@@ -60,17 +60,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/guild_tributes_repository.h"
 #include "../common/patches/patches.h"
 #include "../common/skill_caps.h"
-#include "../common/server_reload_types.h"
+#include "queryserv.h"
 
-extern EntityList entity_list;
-extern Zone* zone;
-extern volatile bool is_zone_loaded;
-extern void Shutdown();
-extern WorldServer worldserver;
-extern PetitionList petition_list;
-extern uint32 numclients;
-extern volatile bool RunLoops;
+extern EntityList             entity_list;
+extern Zone                  *zone;
+extern volatile bool          is_zone_loaded;
+extern void                   Shutdown();
+extern WorldServer            worldserver;
+extern PetitionList           petition_list;
+extern uint32                 numclients;
+extern volatile bool          RunLoops;
 extern QuestParserCollection *parse;
+extern QueryServ             *QServ;
 
 // QuestParserCollection *parse = 0;
 
@@ -3801,11 +3802,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			TraderRepository::UpdateActiveTransaction(database, in->id, false);
 
-			auto item = trader_pc->FindTraderItemBySerialNumber(item_sn);
-
 			if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
-				auto e = PlayerEvent::TraderSellEvent{
-					.item_id              = item ? item->GetID() : 0,
+				auto buy_item = trader_pc->FindTraderItemBySerialNumber(item_sn);
+				auto e        = PlayerEvent::TraderSellEvent{
+					.item_id              = in->trader_buy_struct.item_id,
+					.augment_1_id         = buy_item->GetAugmentItemID(0),
+					.augment_2_id         = buy_item->GetAugmentItemID(1),
+					.augment_3_id         = buy_item->GetAugmentItemID(2),
+					.augment_4_id         = buy_item->GetAugmentItemID(3),
+					.augment_5_id         = buy_item->GetAugmentItemID(4),
+					.augment_6_id         = buy_item->GetAugmentItemID(5),
 					.item_name            = in->trader_buy_struct.item_name,
 					.buyer_id             = in->buyer_id,
 					.buyer_name           = in->trader_buy_struct.buyer_name,
@@ -3815,7 +3821,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					.total_cost           = (in->trader_buy_struct.price * in->trader_buy_struct.quantity),
 					.player_money_balance = trader_pc->GetCarriedMoney(),
 				};
-
 				RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
 			}
 

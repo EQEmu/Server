@@ -25,10 +25,12 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/group_id_repository.h"
 #include "../common/repositories/group_leaders_repository.h"
+#include "queryserv.h"
 
 
-extern EntityList entity_list;
+extern EntityList  entity_list;
 extern WorldServer worldserver;
+extern QueryServ  *QServ;
 
 /*
 note about how groups work:

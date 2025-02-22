@@ -274,6 +274,8 @@ public:
 	void Encode(std::string &in);
 	void Decode(std::string &in);
 
+	uint64_t GetNextTableId(const std::string& table_name);
+
 private:
 	Mutex           Mvarcache;
 	VarCache_Struct varcache;

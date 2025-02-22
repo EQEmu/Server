@@ -914,17 +914,6 @@ int ClientTaskState::IncrementDoneCount(
 				parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, export_string, 0);
 			}
 		}
-		/* QS: PlayerLogTaskUpdates :: Update */
-		if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
-			std::string event_desc = StringFormat(
-				"Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i",
-				info->task_id,
-				info->activity[activity_id].activity_id,
-				info->activity[activity_id].done_count,
-				client->GetZoneID(),
-				client->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Task_Updates, client->CharacterID(), event_desc);
-		}
 
 		// If this task is now complete, the Completed tasks will have been
 		// updated in UnlockActivities. Send the completed task list to the
@@ -945,18 +934,6 @@ int ClientTaskState::IncrementDoneCount(
 					.done_count = static_cast<uint32>(info->activity[activity_id].done_count)
 				};
 				RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_COMPLETE, e);
-			}
-
-			/* QS: PlayerLogTaskUpdates :: Complete */
-			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
-				std::string event_desc = StringFormat(
-					"Task Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i",
-					info->task_id,
-					info->activity[activity_id].activity_id,
-					info->activity[activity_id].done_count,
-					client->GetZoneID(),
-					client->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Task_Updates, client->CharacterID(), event_desc);
 			}
 
 			client->SendTaskActivityComplete(info->task_id, 0, task_index, task_data->type, 0);
