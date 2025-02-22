@@ -2725,10 +2725,25 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 
 bool Bot::TryMeditate() {
 	if (!IsMoving() && !spellend_timer.Enabled()) {
-		if (IsEngaged() && HasOrMayGetAggro(IsSitting())) {
-			if (IsSitting()) {
-				Stand();
+		if (IsEngaged()) {
+			if (HasOrMayGetAggro(IsSitting())) {
+				if (IsSitting()) {
+					Stand();
+				}
+
 				return false;
+			}
+
+			for (auto mob : hate_list.GetHateList()) {
+				auto tar = mob->entity_on_hatelist;
+
+				if (tar) {
+					Mob* tar_target = tar->GetTarget();
+
+					if (tar_target && tar_target == this) {
+						return false;
+					}
+				}
 			}
 		}
 
@@ -2737,6 +2752,7 @@ bool Bot::TryMeditate() {
 		if (!(GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive))) {
 			SendAddPlayerState(PlayerState::Aggressive);
 		}
+
 		return true;
 	}
 
