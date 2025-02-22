@@ -22,7 +22,6 @@ public:
 	using DynamicZoneBase::DynamicZoneBase; // inherit base constructors
 
 	static DynamicZone* FindDynamicZoneByID(uint32_t dz_id);
-	static void HandleZoneMessage(ServerPacket* pack);
 
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
@@ -33,7 +32,7 @@ public:
 protected:
 	Database& GetDatabase() override;
 	void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed) override;
-	bool ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status) override;
+	bool ProcessMemberStatusChange(uint32_t character_id, DynamicZoneMemberStatus status) override;
 	bool SendServerPacket(ServerPacket* packet) override;
 
 private:

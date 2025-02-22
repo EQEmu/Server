@@ -6812,7 +6812,32 @@ ALTER TABLE `guild_bank`
 ALTER TABLE `guild_bank`
 	ADD INDEX `guild_id` (`guild_id`);
 )"
-	}
+	},
+	ManifestEntry{
+		.version = 9305,
+		.description = "2024_12_01_expedition_dz_merge.sql",
+		.check = "SHOW COLUMNS FROM `dynamic_zones` LIKE 'is_locked'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `dynamic_zones`
+	ADD COLUMN `is_locked` TINYINT NOT NULL DEFAULT '0' AFTER `has_zone_in`,
+	ADD COLUMN `add_replay` TINYINT NOT NULL DEFAULT '1' AFTER `is_locked`;
+
+ALTER TABLE `expedition_lockouts`
+	CHANGE COLUMN `expedition_id` `dynamic_zone_id` INT(10) UNSIGNED NOT NULL AFTER `id`,
+	DROP INDEX `expedition_id_event_name`,
+	ADD UNIQUE INDEX `dz_id_event_name` (`dynamic_zone_id`, `event_name`) USING BTREE;
+
+UPDATE expedition_lockouts lockouts
+	INNER JOIN expeditions ON lockouts.dynamic_zone_id = expeditions.id
+	SET lockouts.dynamic_zone_id = expeditions.dynamic_zone_id;
+
+DROP TABLE `expeditions`;
+
+RENAME TABLE `expedition_lockouts` TO `dynamic_zone_lockouts`;
+)"
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

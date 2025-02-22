@@ -20,7 +20,8 @@ public:
 
 	void CacheAllFromDatabase();
 	void CacheNewDynamicZone(ServerPacket* pack);
-	DynamicZone* CreateNew(DynamicZone& dz_request, const std::vector<DynamicZoneMember>& members);
+	DynamicZone* TryCreate(DynamicZone& dz_request, const std::vector<DynamicZoneMember>& members);
+	void HandleZoneMessage(ServerPacket* pack);
 	void LoadTemplates();
 	void Process();
 	void PurgeExpiredDynamicZones();

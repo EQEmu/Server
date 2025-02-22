@@ -26,7 +26,7 @@
 #include "../common/types.h"
 #include <string>
 
-class Expedition;
+class DynamicZone;
 class Lua_Client;
 struct lua_State;
 
@@ -41,16 +41,16 @@ namespace luabind {
 luabind::scope lua_register_expedition();
 luabind::scope lua_register_expedition_lock_messages();
 
-class Lua_Expedition : public Lua_Ptr<Expedition>
+class Lua_Expedition : public Lua_Ptr<DynamicZone>
 {
-	typedef Expedition NativeType;
+	typedef DynamicZone NativeType;
 public:
 	Lua_Expedition() : Lua_Ptr(nullptr) { }
-	Lua_Expedition(Expedition *d) : Lua_Ptr(d) { }
+	Lua_Expedition(DynamicZone* d) : Lua_Ptr(d) { }
 	virtual ~Lua_Expedition() { }
 
-	operator Expedition*() {
-		return reinterpret_cast<Expedition*>(GetLuaPtrData());
+	operator DynamicZone*() {
+		return reinterpret_cast<DynamicZone*>(GetLuaPtrData());
 	}
 
 	void            AddLockout(std::string event_name, uint32_t seconds);
@@ -59,7 +59,6 @@ public:
 	void            AddReplayLockout(uint32_t seconds);
 	void            AddReplayLockoutDuration(int seconds);
 	void            AddReplayLockoutDuration(int seconds, bool members_only);
-	uint32_t        GetDynamicZoneID();
 	uint32_t        GetID();
 	int             GetInstanceID();
 	std::string     GetLeaderName();

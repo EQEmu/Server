@@ -43,8 +43,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/data_verification.h"
 #include "../common/rdtsc.h"
 #include "data_bucket.h"
+#include "dynamic_zone.h"
 #include "event_codes.h"
-#include "expedition.h"
 #include "guild_mgr.h"
 #include "merc.h"
 #include "petitions.h"
@@ -1858,8 +1858,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	{
 		m_dynamic_zone_ids.emplace_back(entry.dynamic_zone_id);
 	}
-
-	m_expedition_id = ExpeditionsRepository::GetIDByMemberID(database, CharacterID());
 
 	auto dz = zone->GetDynamicZone();
 	if (dz && dz->GetSafeReturnLocation().zone_id != 0)
@@ -6260,8 +6258,8 @@ void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
 	}
 	else
 	{
-		// the only /dz command that sends an error message if no active expedition
-		Message(Chat::System, DZ_YOU_NOT_ASSIGNED);
+		// message string 8271 (not in emu clients) is the only /dz command that sends an error if no active expedition
+		Message(Chat::System, "You could not use this command because you are not currently assigned to a dynamic zone.");
 	}
 }
 
@@ -6294,14 +6292,14 @@ void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
 
 void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app)
 {
-	auto expedition = Expedition::FindCachedExpeditionByID(m_pending_expedition_invite.expedition_id);
-	std::string swap_remove_name = m_pending_expedition_invite.swap_remove_name;
-	m_pending_expedition_invite = { 0 }; // clear before re-validating
+	auto expedition = DynamicZone::FindDynamicZoneByID(m_dz_invite.dz_id);
+	std::string swap_name = m_dz_invite.swap_name;
+	m_dz_invite = {}; // clear before re-validating
 
 	if (expedition)
 	{
 		auto dzmsg = reinterpret_cast<ExpeditionInviteResponse_Struct*>(app->pBuffer);
-		expedition->DzInviteResponse(this, dzmsg->accepted, swap_remove_name);
+		expedition->DzInviteResponse(this, dzmsg->accepted, swap_name);
 	}
 }
 

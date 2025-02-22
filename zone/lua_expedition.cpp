@@ -1,7 +1,7 @@
 #ifdef LUA_EQEMU
 
 #include "lua_expedition.h"
-#include "expedition.h"
+#include "dynamic_zone.h"
 #include "../common/zone_store.h"
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
@@ -24,22 +24,17 @@ void Lua_Expedition::AddLockoutDuration(std::string event_name, int seconds, boo
 
 void Lua_Expedition::AddReplayLockout(uint32_t seconds) {
 	Lua_Safe_Call_Void();
-	self->AddReplayLockout(seconds);
+	self->AddLockout(DzLockout::ReplayTimer, seconds);
 }
 
 void Lua_Expedition::AddReplayLockoutDuration(int seconds) {
 	Lua_Safe_Call_Void();
-	self->AddReplayLockoutDuration(seconds);
+	self->AddLockoutDuration(DzLockout::ReplayTimer, seconds);
 }
 
 void Lua_Expedition::AddReplayLockoutDuration(int seconds, bool members_only) {
 	Lua_Safe_Call_Void();
-	self->AddReplayLockoutDuration(seconds, members_only);
-}
-
-uint32_t Lua_Expedition::GetDynamicZoneID() {
-	Lua_Safe_Call_Int();
-	return self->GetDynamicZoneID();
+	self->AddLockoutDuration(DzLockout::ReplayTimer, seconds, members_only);
 }
 
 uint32_t Lua_Expedition::GetID() {
@@ -49,7 +44,7 @@ uint32_t Lua_Expedition::GetID() {
 
 int Lua_Expedition::GetInstanceID() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone()->GetInstanceID();
+	return self->GetInstanceID();
 }
 
 std::string Lua_Expedition::GetLeaderName() {
@@ -63,10 +58,10 @@ luabind::object Lua_Expedition::GetLockouts(lua_State* L) {
 	if (d_)
 	{
 		auto self = reinterpret_cast<NativeType*>(d_);
-		auto lockouts = self->GetLockouts();
+		const auto& lockouts = self->GetLockouts();
 		for (const auto& lockout : lockouts)
 		{
-			lua_table[lockout.first] = lockout.second.GetSecondsRemaining();
+			lua_table[lockout.Event()] = lockout.GetSecondsRemaining();
 		}
 	}
 	return lua_table;
@@ -74,17 +69,17 @@ luabind::object Lua_Expedition::GetLockouts(lua_State* L) {
 
 std::string Lua_Expedition::GetLootEventByNPCTypeID(uint32_t npc_type_id) {
 	Lua_Safe_Call_String();
-	return self->GetLootEventByNPCTypeID(npc_type_id);
+	return self->GetLootEvent(npc_type_id, DzLootEvent::Type::NpcType);
 }
 
 std::string Lua_Expedition::GetLootEventBySpawnID(uint32_t spawn_id) {
 	Lua_Safe_Call_String();
-	return self->GetLootEventBySpawnID(spawn_id);
+	return self->GetLootEvent(spawn_id, DzLootEvent::Type::Entity);
 }
 
 uint32_t Lua_Expedition::GetMemberCount() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone()->GetMemberCount();
+	return self->GetMemberCount();
 }
 
 luabind::object Lua_Expedition::GetMembers(lua_State* L) {
@@ -93,7 +88,7 @@ luabind::object Lua_Expedition::GetMembers(lua_State* L) {
 	if (d_)
 	{
 		auto self = reinterpret_cast<NativeType*>(d_);
-		for (const auto& member : self->GetDynamicZone()->GetMembers())
+		for (const auto& member : self->GetMembers())
 		{
 			lua_table[member.name] = member.id;
 		}
@@ -108,27 +103,27 @@ std::string Lua_Expedition::GetName() {
 
 int Lua_Expedition::GetSecondsRemaining() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone()->GetSecondsRemaining();
+	return self->GetSecondsRemaining();
 }
 
 std::string Lua_Expedition::GetUUID() {
 	Lua_Safe_Call_String();
-	return self->GetDynamicZone()->GetUUID();
+	return self->GetUUID();
 }
 
 int Lua_Expedition::GetZoneID() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone()->GetZoneID();
+	return self->GetZoneID();
 }
 
 std::string Lua_Expedition::GetZoneName() {
 	Lua_Safe_Call_String();
-	return ZoneName(self->GetDynamicZone()->GetZoneID());
+	return ZoneName(self->GetZoneID());
 }
 
 int Lua_Expedition::GetZoneVersion() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone()->GetZoneVersion();
+	return self->GetZoneVersion();
 }
 
 bool Lua_Expedition::HasLockout(std::string event_name) {
@@ -148,7 +143,7 @@ bool Lua_Expedition::IsLocked() {
 
 void Lua_Expedition::RemoveCompass() {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone()->SetCompass(0, 0, 0, 0, true);
+	self->SetCompass(0, 0, 0, 0, true);
 }
 
 void Lua_Expedition::RemoveLockout(std::string event_name) {
@@ -158,69 +153,69 @@ void Lua_Expedition::RemoveLockout(std::string event_name) {
 
 void Lua_Expedition::SetCompass(uint32_t zone_id, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone()->SetCompass(zone_id, x, y, z, true);
+	self->SetCompass(zone_id, x, y, z, true);
 }
 
 void Lua_Expedition::SetCompass(std::string zone_name, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone()->SetCompass(ZoneID(zone_name), x, y, z, true);
+	self->SetCompass(ZoneID(zone_name), x, y, z, true);
 }
 
 void Lua_Expedition::SetLocked(bool lock_expedition) {
 	Lua_Safe_Call_Void();
-	self->SetLocked(lock_expedition, ExpeditionLockMessage::None, true);
+	self->SetLocked(lock_expedition, true);
 }
 
 void Lua_Expedition::SetLocked(bool lock_expedition, int lock_msg) {
 	Lua_Safe_Call_Void();
-	self->SetLocked(lock_expedition, static_cast<ExpeditionLockMessage>(lock_msg), true);
+	self->SetLocked(lock_expedition, true, static_cast<DzLockMsg>(lock_msg));
 }
 
 void Lua_Expedition::SetLocked(bool lock_expedition, int lock_msg, uint32_t msg_color) {
 	Lua_Safe_Call_Void();
-	self->SetLocked(lock_expedition, static_cast<ExpeditionLockMessage>(lock_msg), true, msg_color);
+	self->SetLocked(lock_expedition, true, static_cast<DzLockMsg>(lock_msg), msg_color);
 }
 
 void Lua_Expedition::SetLootEventByNPCTypeID(uint32_t npc_type_id, std::string event_name) {
 	Lua_Safe_Call_Void();
-	self->SetLootEventByNPCTypeID(npc_type_id, event_name);
+	self->SetLootEvent(npc_type_id, event_name, DzLootEvent::Type::NpcType);
 }
 
 void Lua_Expedition::SetLootEventBySpawnID(uint32_t spawn_id, std::string event_name) {
 	Lua_Safe_Call_Void();
-	self->SetLootEventBySpawnID(spawn_id, event_name);
+	self->SetLootEvent(spawn_id, event_name, DzLootEvent::Type::Entity);
 }
 
 void Lua_Expedition::SetReplayLockoutOnMemberJoin(bool enable) {
 	Lua_Safe_Call_Void();
-	self->SetReplayLockoutOnMemberJoin(enable, true);
+	self->SetReplayOnJoin(enable, true);
 }
 
 void Lua_Expedition::SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone()->SetSafeReturn(zone_id, x, y, z, heading, true);
+	self->SetSafeReturn(zone_id, x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSafeReturn(std::string zone_name, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone()->SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
+	self->SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSecondsRemaining(uint32_t seconds_remaining)
 {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone()->SetSecondsRemaining(seconds_remaining);
+	self->SetSecondsRemaining(seconds_remaining);
 }
 
 void Lua_Expedition::SetSwitchID(int dz_switch_id)
 {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone()->SetSwitchID(dz_switch_id, true);
+	self->SetSwitchID(dz_switch_id, true);
 }
 
 void Lua_Expedition::SetZoneInLocation(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone()->SetZoneInLocation(x, y, z, heading, true);
+	self->SetZoneInLocation(x, y, z, heading, true);
 }
 
 void Lua_Expedition::UpdateLockoutDuration(std::string event_name, uint32_t duration) {
@@ -244,7 +239,7 @@ luabind::scope lua_register_expedition() {
 	.def("AddReplayLockout", (void(Lua_Expedition::*)(uint32_t))&Lua_Expedition::AddReplayLockout)
 	.def("AddReplayLockoutDuration", (void(Lua_Expedition::*)(int))&Lua_Expedition::AddReplayLockoutDuration)
 	.def("AddReplayLockoutDuration", (void(Lua_Expedition::*)(int, bool))&Lua_Expedition::AddReplayLockoutDuration)
-	.def("GetDynamicZoneID", &Lua_Expedition::GetDynamicZoneID)
+	.def("GetDynamicZoneID", &Lua_Expedition::GetID)
 	.def("GetID", (uint32_t(Lua_Expedition::*)(void))&Lua_Expedition::GetID)
 	.def("GetInstanceID", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetInstanceID)
 	.def("GetLeaderName", (std::string(Lua_Expedition::*)(void))&Lua_Expedition::GetLeaderName)
@@ -282,12 +277,12 @@ luabind::scope lua_register_expedition() {
 }
 
 luabind::scope lua_register_expedition_lock_messages() {
-	return luabind::class_<ExpeditionLockMessage>("ExpeditionLockMessage")
+	return luabind::class_<DzLockMsg>("ExpeditionLockMessage")
 	.enum_("constants")
 	[(
-		luabind::value("None", static_cast<int>(ExpeditionLockMessage::None)),
-		luabind::value("Close", static_cast<int>(ExpeditionLockMessage::Close)),
-		luabind::value("Begin", static_cast<int>(ExpeditionLockMessage::Begin))
+		luabind::value("None", static_cast<int>(DzLockMsg::None)),
+		luabind::value("Close", static_cast<int>(DzLockMsg::Close)),
+		luabind::value("Begin", static_cast<int>(DzLockMsg::Begin))
 	)];
 }
 

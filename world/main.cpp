@@ -76,10 +76,10 @@
 #include "web_interface.h"
 #include "console.h"
 #include "dynamic_zone_manager.h"
-#include "expedition_database.h"
 
 #include "world_server_cli.h"
 #include "../common/content/world_content_service.h"
+#include "../common/repositories/character_expedition_lockouts_repository.h"
 #include "../common/repositories/character_task_timers_repository.h"
 #include "../common/zone_store.h"
 #include "world_event_scheduler.h"
@@ -449,7 +449,7 @@ int main(int argc, char **argv)
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
 			database.PurgeAllDeletedDataBuckets();
-			ExpeditionDatabase::PurgeExpiredCharacterLockouts();
+			CharacterExpeditionLockoutsRepository::DeleteWhere(database, "expire_time <= NOW()");
 			CharacterTaskTimersRepository::DeleteWhere(database, "expire_time <= NOW()");
 		}
 

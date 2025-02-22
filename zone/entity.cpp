@@ -5488,7 +5488,7 @@ void EntityList::ExpeditionWarning(uint32 minutes_left)
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		it->second->MessageString(Chat::Yellow, EXPEDITION_MIN_REMAIN, itoa((int)minutes_left));
+		it->second->MessageString(Chat::Yellow, DZ_MINUTES_REMAIN, itoa((int)minutes_left));
 		it->second->QueuePacket(outapp);
 		++it;
 	}

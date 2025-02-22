@@ -20,48 +20,30 @@
 
 #include "expedition_request.h"
 #include "client.h"
-#include "expedition.h"
 #include "groups.h"
 #include "raids.h"
 #include "string_ids.h"
 #include "../common/repositories/character_expedition_lockouts_repository.h"
 
-constexpr char SystemName[] = "expedition";
-
-// message string 8312 added in September 08 2020 Test patch (used by both dz and shared tasks)
-constexpr const char* CREATE_NOT_ALL_ADDED = "Not all players in your {} were added to the {}. The {} can take a maximum of {} players, and your {} has {}.";
-// message string 9265 (not in emu clients)
-constexpr const char* EXPEDITION_OTHER_BELONGS = "{} attempted to create an expedition but {} already belongs to one.";
-
-ExpeditionRequest::ExpeditionRequest(const DynamicZone& dz, bool disable_messages) :
-	m_expedition_name(dz.GetName()),
-	m_min_players(dz.GetMinPlayers()),
-	m_max_players(dz.GetMaxPlayers()),
-	m_disable_messages(disable_messages)
+ExpeditionRequest::ExpeditionRequest(const DynamicZone& dz, Client& client, bool silent)
+	: m_dz(&dz), m_requester(&client), m_silent(silent)
 {
 }
 
-bool ExpeditionRequest::Validate(Client* requester)
+bool ExpeditionRequest::Validate()
 {
-	m_requester = requester;
-	if (!m_requester)
-	{
-		return false;
-	}
-
 	// a message is sent to leader for every member that fails a requirement
 
 	BenchTimer benchmark;
 
 	bool requirements_met = false;
 
-	Raid* raid = m_requester->GetRaid();
-	Group* group = m_requester->GetGroup();
-	if (raid)
+	if (Raid* raid = m_requester->GetRaid())
 	{
+		m_is_raid = true;
 		requirements_met = CanRaidRequest(raid);
 	}
-	else if (group)
+	else if (Group* group = m_requester->GetGroup())
 	{
 		requirements_met = CanGroupRequest(group);
 	}
@@ -89,21 +71,15 @@ bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 	// expedition max. members are added up to the max ordered by group number.
 	auto raid_members = raid->GetMembers();
 
-	if (raid_members.size() > m_max_players)
+	if (raid_members.size() > m_dz->GetMaxPlayers())
 	{
-		// stable_sort not needed, order within a raid group may not be what is displayed
+		// leader first then raid group, order within a raid group may not be what is displayed
 		std::sort(raid_members.begin(), raid_members.end(),
 			[&](const RaidMember& lhs, const RaidMember& rhs) {
-				if (m_leader_name == lhs.member_name) { // leader always added first
-					return true;
-				} else if (m_leader_name == rhs.member_name) {
-					return false;
-				}
+				if (m_leader_name == lhs.member_name) { return true; }
+				if (m_leader_name == rhs.member_name) { return false; }
 				return lhs.group_number < rhs.group_number;
 			});
-
-		m_not_all_added_msg = fmt::format(CREATE_NOT_ALL_ADDED, "raid", SystemName,
-			SystemName, m_max_players, "raid", raid_members.size());
 	}
 
 	// live still performs conflict checks for all members even those beyond max
@@ -139,12 +115,6 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 		}
 	}
 
-	if (member_names.size() > m_max_players)
-	{
-		m_not_all_added_msg = fmt::format(CREATE_NOT_ALL_ADDED, "group", SystemName,
-			SystemName, m_max_players, "group", member_names.size());
-	}
-
 	return CanMembersJoin(member_names);
 }
 
@@ -172,7 +142,7 @@ bool ExpeditionRequest::CanMembersJoin(const std::vector<std::string>& member_na
 	return requirements_met;
 }
 
-bool ExpeditionRequest::SaveLeaderLockouts(const std::vector<ExpeditionLockoutTimer>& lockouts)
+bool ExpeditionRequest::SaveLeaderLockouts(const std::vector<DzLockout>& lockouts)
 {
 	bool has_replay_lockout = false;
 
@@ -180,9 +150,10 @@ bool ExpeditionRequest::SaveLeaderLockouts(const std::vector<ExpeditionLockoutTi
 	{
 		if (!lockout.IsExpired())
 		{
-			m_lockouts[lockout.GetEventName()] = lockout;
+			// db prevents duplicate event names
+			m_lockouts.push_back(lockout);
 
-			if (lockout.IsReplayTimer())
+			if (lockout.IsReplay())
 			{
 				has_replay_lockout = true;
 			}
@@ -195,7 +166,7 @@ bool ExpeditionRequest::SaveLeaderLockouts(const std::vector<ExpeditionLockoutTi
 bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>& member_names)
 {
 	// order of member_names is preserved by queries for use with max member truncation
-	auto entries = ExpeditionsRepository::GetCharactersWithExpedition(database, member_names);
+	auto entries = DynamicZonesRepository::GetCharactersWithDz(database, member_names, static_cast<int>(DynamicZoneType::Expedition));
 	if (entries.empty())
 	{
 		LogExpeditions("Failed to load members for expedition request");
@@ -205,10 +176,10 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 	bool is_solo = (member_names.size() == 1);
 	bool has_conflicts = false;
 
-	std::vector<uint32_t> character_ids;
+	std::vector<uint32_t> char_ids;
 	for (const auto& character : entries)
 	{
-		if (is_solo && character.expedition_id != 0)
+		if (is_solo && character.dz_id != 0)
 		{
 			// live doesn't bother checking replay lockout here
 			SendLeaderMemberInExpedition(character.name, is_solo);
@@ -216,43 +187,43 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 		}
 
 		m_members.emplace_back(character.id, character.name, DynamicZoneMemberStatus::Online);
-		character_ids.emplace_back(character.id);
+		char_ids.push_back(character.id);
 	}
 
-	auto member_lockouts = CharacterExpeditionLockoutsRepository::GetManyCharacterLockoutTimers(
-		database, character_ids, m_expedition_name, DZ_REPLAY_TIMER_NAME);
+	auto lockouts = CharacterExpeditionLockoutsRepository::GetLockouts(database, char_ids, m_dz->GetName());
 
 	// on live if leader has a replay lockout it never checks for event conflicts
-	bool leader_has_replay_lockout = false;
-	auto lockout_iter = member_lockouts.find(m_leader_id);
-	if (lockout_iter != member_lockouts.end())
+	bool leader_replay = false;
+	auto it = lockouts.find(m_leader_id);
+	if (it != lockouts.end())
 	{
-		leader_has_replay_lockout = SaveLeaderLockouts(lockout_iter->second);
+		leader_replay = SaveLeaderLockouts(it->second);
 	}
 
 	for (const auto& character : entries)
 	{
-		if (character.expedition_id != 0)
+		if (character.dz_id != 0)
 		{
 			has_conflicts = true;
 			SendLeaderMemberInExpedition(character.name, is_solo);
 		}
 
-		auto lockout_iter = member_lockouts.find(character.id);
-		if (lockout_iter != member_lockouts.end())
+		auto it = lockouts.find(character.id);
+		if (it != lockouts.end())
 		{
-			for (const auto& lockout : lockout_iter->second)
+			for (const auto& lockout : it->second)
 			{
 				if (!lockout.IsExpired())
 				{
+					auto is_event = [&](const auto& l) { return l.IsEvent(lockout.Event()); };
+
 					// replay timers were sorted by query so they show up before event conflicts
-					if (lockout.IsReplayTimer())
+					if (lockout.IsReplay())
 					{
 						has_conflicts = true;
 						SendLeaderMemberReplayLockout(character.name, lockout, is_solo);
 					}
-					else if (!leader_has_replay_lockout && character.id != m_leader_id &&
-					         m_lockouts.find(lockout.GetEventName()) == m_lockouts.end())
+					else if (!leader_replay && character.id != m_leader_id && std::ranges::none_of(m_lockouts, is_event))
 					{
 						// leader doesn't have this lockout
 						has_conflicts = true;
@@ -266,73 +237,60 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 	return has_conflicts;
 }
 
-void ExpeditionRequest::SendLeaderMessage(
-	uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& args)
+void ExpeditionRequest::SendLeaderMessage(uint16_t chat_type, uint32_t string_id, std::initializer_list<std::string> args)
 {
-	if (!m_disable_messages)
+	if (!m_silent)
 	{
 		Client::SendCrossZoneMessageString(m_leader, m_leader_name, chat_type, string_id, args);
 	}
 }
 
-void ExpeditionRequest::SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo)
+void ExpeditionRequest::SendLeaderMemberInExpedition(const std::string& name, bool is_solo)
 {
-	if (m_disable_messages)
+	if (m_silent)
 	{
 		return;
 	}
 
 	if (is_solo)
 	{
-		SendLeaderMessage(Chat::Red, EXPEDITION_YOU_BELONG);
+		SendLeaderMessage(Chat::Red, DZ_YOU_BELONG);
 	}
 	else if (m_requester)
 	{
-		std::string message = fmt::format(EXPEDITION_OTHER_BELONGS, m_requester->GetName(), member_name);
-		Client::SendCrossZoneMessage(m_leader, m_leader_name, Chat::Red, message);
+		// message string 9265 (not in emu clients)
+		Client::SendCrossZoneMessage(m_leader, m_leader_name, Chat::Red, fmt::format(
+			"{} attempted to create an expedition but {} already belongs to one.", m_requester->GetName(), name));
 	}
 }
 
-void ExpeditionRequest::SendLeaderMemberReplayLockout(
-	const std::string& member_name, const ExpeditionLockoutTimer& lockout, bool is_solo)
+void ExpeditionRequest::SendLeaderMemberReplayLockout(const std::string& name, const DzLockout& lockout, bool is_solo)
 {
-	if (m_disable_messages)
+	if (m_silent)
 	{
 		return;
 	}
 
-	auto time_remaining = lockout.GetDaysHoursMinutesRemaining();
+	auto time = lockout.GetTimeRemainingStrs();
 	if (is_solo)
 	{
-		SendLeaderMessage(Chat::Red, EXPEDITION_YOU_PLAYED_HERE, {
-			time_remaining.days, time_remaining.hours, time_remaining.mins
-		});
+		SendLeaderMessage(Chat::Red, DZ_REPLAY_YOU, { time.days, time.hours, time.mins });
 	}
 	else
 	{
-		SendLeaderMessage(Chat::Red, EXPEDITION_REPLAY_TIMER, {
-			member_name, time_remaining.days, time_remaining.hours, time_remaining.mins
-		});
+		SendLeaderMessage(Chat::Red, DZ_REPLAY_OTHER, { name, time.days, time.hours, time.mins });
 	}
 }
 
-void ExpeditionRequest::SendLeaderMemberEventLockout(
-	const std::string& member_name, const ExpeditionLockoutTimer& lockout)
+void ExpeditionRequest::SendLeaderMemberEventLockout(const std::string& name, const DzLockout& lockout)
 {
-	if (m_disable_messages)
+	if (m_silent)
 	{
 		return;
 	}
 
-	auto time_remaining = lockout.GetDaysHoursMinutesRemaining();
-	SendLeaderMessage(Chat::Red, EXPEDITION_EVENT_TIMER, {
-		member_name,
-		lockout.GetEventName(),
-		time_remaining.days,
-		time_remaining.hours,
-		time_remaining.mins,
-		lockout.GetEventName()
-	});
+	auto time = lockout.GetTimeRemainingStrs();
+	SendLeaderMessage(Chat::Red, DZ_EVENT_TIMER, { name, lockout.Event(), time.days, time.hours, time.mins });
 }
 
 bool ExpeditionRequest::IsPlayerCountValidated()
@@ -343,19 +301,14 @@ bool ExpeditionRequest::IsPlayerCountValidated()
 	auto bypass_status = RuleI(Expedition, MinStatusToBypassPlayerCountRequirements);
 	auto gm_bypass = (m_requester && m_requester->GetGM() && m_requester->Admin() >= bypass_status);
 
-	if (m_members.size() > m_max_players)
-	{
-		// members were sorted at start, truncate after conflict checks to act like live
-		m_members.resize(m_max_players);
-	}
-	else if (!gm_bypass && m_members.size() < m_min_players)
+	if (!gm_bypass && m_members.size() < m_dz->GetMinPlayers())
 	{
 		requirements_met = false;
 
-		SendLeaderMessage(Chat::System, REQUIRED_PLAYER_COUNT, {
+		SendLeaderMessage(Chat::System, DZ_PLAYER_COUNT, {
 			fmt::format_int(m_members.size()).str(),
-			fmt::format_int(m_min_players).str(),
-			fmt::format_int(m_max_players).str()
+			fmt::format_int(m_dz->GetMinPlayers()).str(),
+			fmt::format_int(m_dz->GetMaxPlayers()).str()
 		});
 	}
 
