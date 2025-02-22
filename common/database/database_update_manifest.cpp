@@ -6770,6 +6770,25 @@ SET `aliases` =
 WHERE `command` = 'illusionblock'
 AND `aliases` NOT LIKE '%ib%';
 )",
+	},
+	ManifestEntry{
+		.version = 9303,
+		.description = "2025_02_13_corpse_slot_fix.sql",
+		.check = "SELECT * FROM `character_corpse_items` WHERE `equip_slot` BETWEEN 251 AND 350",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 251) + 4010) WHERE `equip_slot` BETWEEN 251 AND 260; -- Bag 1
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 261) + 4210) WHERE `equip_slot` BETWEEN 261 AND 270; -- Bag 2
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 271) + 4410) WHERE `equip_slot` BETWEEN 271 AND 280; -- Bag 3
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 281) + 4610) WHERE `equip_slot` BETWEEN 281 AND 290; -- Bag 4
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 291) + 4810) WHERE `equip_slot` BETWEEN 291 AND 300; -- Bag 5
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 301) + 5010) WHERE `equip_slot` BETWEEN 301 AND 310; -- Bag 6
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 311) + 5210) WHERE `equip_slot` BETWEEN 311 AND 320; -- Bag 7
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 321) + 5410) WHERE `equip_slot` BETWEEN 321 AND 330; -- Bag 8
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 331) + 5610) WHERE `equip_slot` BETWEEN 331 AND 340; -- Bag 9
+UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 341) + 5810) WHERE `equip_slot` BETWEEN 341 AND 350; -- Bag 10
+)",
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
