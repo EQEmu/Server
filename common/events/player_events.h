@@ -132,8 +132,7 @@ namespace PlayerEvent {
 		"Parcel Prune Routine",
 		"Barter Transaction",
 		"Player Speech",
-		"Evolve Item Update"
-		"Barter Transaction",
+		"Evolve Item Update",
 		"Guild Bank Item Deposit",
 		"Guild Bank Item Withdrawal",
 		"Guild Bank Move From Deposit Area to Bank Area"
