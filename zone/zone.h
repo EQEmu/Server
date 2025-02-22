@@ -155,6 +155,7 @@ public:
 	bool Process();
 	bool SaveZoneCFG();
 	bool DoesAlternateCurrencyExist(uint32 currency_id);
+	void DisableRespawnTimers();
 
 	char *adv_data;
 

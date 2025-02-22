@@ -67,6 +67,12 @@ void Lua_Zone::Despawn(uint32 spawngroup_id)
 	self->Despawn(spawngroup_id);
 }
 
+void Lua_Zone::DisableRespawnTimers()
+{
+	Lua_Safe_Call_Void();
+	self->DisableRespawnTimers();
+}
+
 float Lua_Zone::GetAAEXPModifier(Lua_Client c)
 {
 	Lua_Safe_Call_Real();
@@ -735,6 +741,7 @@ luabind::scope lua_register_zone() {
 	.def("Depop", (void(Lua_Zone::*)(void))&Lua_Zone::Depop)
 	.def("Depop", (void(Lua_Zone::*)(bool))&Lua_Zone::Depop)
 	.def("Despawn", &Lua_Zone::Despawn)
+	.def("DisableRespawnTimers", &Lua_Zone::DisableRespawnTimers)
 	.def("GetAAEXPModifier", &Lua_Zone::GetAAEXPModifier)
 	.def("GetAAEXPModifierByCharacterID", &Lua_Zone::GetAAEXPModifierByCharacterID)
 	.def("GetBucket", (std::string(Lua_Zone::*)(const std::string&))&Lua_Zone::GetBucket)
