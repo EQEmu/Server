@@ -3244,7 +3244,11 @@ Mob* Bot::GetBotTarget(Client* bot_owner)
 }
 
 bool Bot::TargetValidation(Mob* other) {
-	if (!other || GetAppearance() == eaDead) {
+	if (GetAppearance() == eaDead || GetHP() < 0) {
+		return false;
+	}
+
+	if (!other || other->GetAppearance() == eaDead || other->GetHP() < 0) {
 		return false;
 	}
 
@@ -7650,15 +7654,21 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 }
 
 uint8 Bot::GetNumberNeedingHealedInGroup(Mob* tar, uint16 spell_type, uint16 spell_id, float range) {
-	if (!tar) {
+	if (!TargetValidation(tar)) {
 		return 0;
 	}
 
 	uint8 count = 0;
-	auto target_list = tar->IsClient() ? GatherSpellTargets(false, tar) : tar->CastToBot()->GetSpellTargetList();
+	std::vector<Mob*> target_list = tar->IsClient() ? GatherSpellTargets(false, tar) : tar->CastToBot()->GetSpellTargetList();
 
-	for (Mob* m : target_list) {
-		if (m && tar->CalculateDistance(m) < range && CastChecks(spell_id, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
+	for (auto* m : target_list) {
+		if (
+			m &&
+			entity_list.IsMobInZone(m) &&
+			TargetValidation(m) &&
+			tar->CalculateDistance(m) < range &&
+			CastChecks(spell_id, m, spell_type, true, IsGroupBotSpellType(spell_type))
+		) {
 			++count;
 		}
 	}
@@ -9369,7 +9379,7 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND] = { 0 };
 
 bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
-	if (!tar) {
+	if (!TargetValidation(tar)) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast due to PrecastChecks !tar.'", GetCleanName());
 		return false;
 	}
@@ -9391,24 +9401,18 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
 		return true;
 	}
 
-	if (
-		GetManaRatio() < GetSpellTypeMinManaLimit(spell_type) ||
-		GetManaRatio() > GetSpellTypeMaxManaLimit(spell_type)
-	) {
+	if (!EQ::ValueWithin(GetManaRatio(), GetSpellTypeMinManaLimit(spell_type), GetSpellTypeMaxManaLimit(spell_type))) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetSpellTypeMinManaLimit or GetSpellTypeMaxManaLimit.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 		return false;
 	}
 
-	if (
-		GetHPRatio() < GetSpellTypeMinHPLimit(spell_type) ||
-		GetHPRatio() > GetSpellTypeMaxHPLimit(spell_type)
-	) {
+	if (!EQ::ValueWithin(GetHPRatio(), GetSpellTypeMinHPLimit(spell_type), GetSpellTypeMaxHPLimit(spell_type))) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetSpellTypeMinHPLimit or GetSpellTypeMaxHPLimit.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 		return false;
 	}
 
-	if (!GetUltimateSpellTypeDelayCheck(spell_type, tar)) {
-		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellTypeDelayCheck.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
+	if (!GetUltimateSpellTypeRecastCheck(spell_type, tar)) {
+		LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellTypeRecastCheck.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 		return false;
 	}
 
@@ -9417,10 +9421,7 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
 		case BotSpellTypes::AEMez:
 			return true;
 		default:
-			if (
-				GetHPRatioForSpellType(spell_type, tar) < GetUltimateSpellTypeMinThreshold(spell_type, tar) ||
-					GetHPRatioForSpellType(spell_type, tar) > GetUltimateSpellTypeMaxThreshold(spell_type, tar)
-			) {
+			if (!EQ::ValueWithin(GetHPRatioForSpellType(spell_type, tar), GetUltimateSpellTypeMinThreshold(spell_type, tar), GetUltimateSpellTypeMaxThreshold(spell_type, tar))) {
 				LogBotSpellChecksDetail("{} says, 'Cancelling cast of [{}] on [{}] due to GetUltimateSpellTypeMinThreshold or GetUltimateSpellTypeMaxThreshold.'", GetCleanName(), GetSpellTypeNameByID(spell_type), tar->GetCleanName());
 				return false;
 			}
@@ -9431,7 +9432,7 @@ bool Bot::PrecastChecks(Mob* tar, uint16 spell_type) {
 
 bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool prechecks, bool ae_check) {
 	if (prechecks) {
-		if (!tar) {
+		if (!tar || tar->GetAppearance() == eaDead  || tar->GetHP() < 0) {
 			LogBotSpellChecksDetail("{} says, 'Cancelling cast due to CastChecks !tar.'", GetCleanName());
 			return false;
 		}
@@ -9582,7 +9583,7 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 
 	if (
 		BotSpellTypeRequiresTarget(spell_type) &&
-		!tar
+		!TargetValidation(tar)
 	) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast due to CastChecks !tar.'", GetCleanName());
 		return false;
@@ -10486,7 +10487,7 @@ void Bot::SetBotSpellRecastTimer(uint16 spell_type, Mob* tar, bool precast) {
 		return;
 	}
 
-	if (!precast && IsBotSpellTypeOtherBeneficial(spell_type)) {
+	if (!precast && BotSpellTypeUsesTargetSettings(spell_type)) {
 		return;
 	}
 
@@ -10511,7 +10512,7 @@ void Bot::SetBotSpellRecastTimer(uint16 spell_type, Mob* tar, bool precast) {
 			owner->CastToBot()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellTypeDelay(spell_type, tar) + added_delay));
 		}
 	}
-	else if (IsBotSpellTypeOtherBeneficial(spell_type)) {
+	else if (BotSpellTypeUsesTargetSettings(spell_type)) {
 		if (tar->IsClient()) {
 			tar->CastToClient()->SetSpellTypeRecastTimer(spell_type, (GetUltimateSpellTypeDelay(spell_type, tar) + added_delay));
 		}
@@ -10525,6 +10526,12 @@ void Bot::SetBotSpellRecastTimer(uint16 spell_type, Mob* tar, bool precast) {
 }
 
 BotSpell Bot::GetSpellByHealType(uint16 spell_type, Mob* tar) {
+	if (!TargetValidation(tar)) {
+		BotSpell result;
+
+		return result;
+	}
+
 	switch (spell_type) {
 		case BotSpellTypes::VeryFastHeals:
 		case BotSpellTypes::PetVeryFastHeals:
@@ -11108,7 +11115,7 @@ uint16 Bot::GetDefaultSpellTypeAnnounceCast(uint16 spell_type, uint8 stance) {
 }
 
 bool Bot::GetUltimateSpellTypeHold(uint16 spell_type, Mob* tar) {
-	if (!tar) {
+	if (!TargetValidation(tar)) {
 		return GetSpellTypeHold(spell_type);
 	}
 
@@ -12967,7 +12974,7 @@ uint8 Bot::GetDefaultSpellTypeMaxThreshold(uint16 spell_type, uint8 stance) {
 			}
 		case BotSpellTypes::GroupHeals:
 		case BotSpellTypes::RegularHeal:
-			if (bot_class == Class::Necromancer || (bot_class == Class::Shaman && !GetSpellTypeHold(BotSpellTypes::InCombatBuff))) {
+			if (bot_class == Class::Necromancer || bot_class == Class::Shaman) {
 				return 60;
 			}
 
@@ -13096,81 +13103,88 @@ uint8 Bot::GetDefaultSpellTypeMaxThreshold(uint16 spell_type, uint8 stance) {
 }
 
 uint16 Bot::GetUltimateSpellTypeDelay(uint16 spell_type, Mob* tar) {
-	if (!tar) {
+	if (!TargetValidation(tar)) {
 		return GetSpellTypeDelay(spell_type);
 	}
 
-	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		Mob* owner = tar->GetOwner();
+	Mob* owner = tar->IsPet() ? tar->GetOwner() : nullptr;
 
-		return owner->IsClient() ? owner->CastToClient()->GetSpellTypeDelay(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellTypeDelay(
-			GetPetBotSpellType(spell_type));
+	if (owner && owner->IsOfClientBot()) {
+		return owner->IsClient()
+			? owner->CastToClient()->GetSpellTypeDelay(GetPetBotSpellType(spell_type))
+			: owner->CastToBot()->GetSpellTypeDelay(GetPetBotSpellType(spell_type));
 	}
 
-	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
-		return tar->IsClient() ? tar->CastToClient()->GetSpellTypeDelay(spell_type) : tar->CastToBot()->GetSpellTypeDelay(
-			spell_type
-		);
+	if (BotSpellTypeUsesTargetSettings(spell_type) && tar->IsOfClientBot()) {
+		return tar->IsClient()
+			? tar->CastToClient()->GetSpellTypeDelay(spell_type)
+			: tar->CastToBot()->GetSpellTypeDelay(spell_type);
 	}
 
 	return GetSpellTypeDelay(spell_type);
 }
 
-bool Bot::GetUltimateSpellTypeDelayCheck(uint16 spell_type, Mob* tar) {
-	if (!tar) {
+bool Bot::GetUltimateSpellTypeRecastCheck(uint16 spell_type, Mob* tar) {
+	if (!TargetValidation(tar)) {
 		return SpellTypeRecastCheck(spell_type);
 	}
 
-	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		Mob* owner = tar->GetOwner();
+	Mob* owner = tar->IsPet() ? tar->GetOwner() : nullptr;
 
-		return owner->IsClient() ? owner->CastToClient()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type)) : owner->CastToBot()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type));
+	if (owner && owner->IsOfClientBot()) {
+		return owner->IsClient()
+			? owner->CastToClient()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type))
+			: owner->CastToBot()->SpellTypeRecastCheck(GetPetBotSpellType(spell_type));
 	}
 
-	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
-		return tar->IsClient() ? tar->CastToClient()->SpellTypeRecastCheck(spell_type) : tar->CastToBot()->SpellTypeRecastCheck(spell_type);
+	if (BotSpellTypeUsesTargetSettings(spell_type) && tar->IsOfClientBot()) {
+		return tar->IsClient()
+			? tar->CastToClient()->SpellTypeRecastCheck(spell_type)
+			: tar->CastToBot()->SpellTypeRecastCheck(spell_type);
 	}
 
 	return SpellTypeRecastCheck(spell_type);
 }
 
 uint8 Bot::GetUltimateSpellTypeMinThreshold(uint16 spell_type, Mob* tar) {
-	if (!tar) {
+	if (!TargetValidation(tar)) {
 		return GetSpellTypeMinThreshold(spell_type);
 	}
 
-	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		Mob* owner = tar->GetOwner();
+	Mob* owner = tar->IsPet() ? tar->GetOwner() : nullptr;
 
-		return owner->IsClient() ? owner->CastToClient()->GetSpellTypeMinThreshold(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellTypeMinThreshold(
-			GetPetBotSpellType(spell_type));
+	if (owner && owner->IsOfClientBot()) {
+		return owner->IsClient()
+			? owner->CastToClient()->GetSpellTypeMinThreshold(GetPetBotSpellType(spell_type))
+			: owner->CastToBot()->GetSpellTypeMinThreshold(GetPetBotSpellType(spell_type));
 	}
 
-	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
-		return tar->IsClient() ? tar->CastToClient()->GetSpellTypeMinThreshold(spell_type) : tar->CastToBot()->GetSpellTypeMinThreshold(
-			spell_type
-		);
+	if (BotSpellTypeUsesTargetSettings(spell_type) && tar->IsOfClientBot()) {
+		return tar->IsClient()
+			? tar->CastToClient()->GetSpellTypeMinThreshold(spell_type)
+			: tar->CastToBot()->GetSpellTypeMinThreshold(spell_type);
 	}
 
 	return GetSpellTypeMinThreshold(spell_type);
 }
 
 uint8 Bot::GetUltimateSpellTypeMaxThreshold(uint16 spell_type, Mob* tar) {
-	if (!tar) {
+	if (!TargetValidation(tar)) {
 		return GetSpellTypeMaxThreshold(spell_type);
 	}
 
-	if (tar->IsPet() && tar->GetOwner() && tar->GetOwner()->IsOfClientBot()) {
-		Mob* owner = tar->GetOwner();
+	Mob* owner = tar->IsPet() ? tar->GetOwner() : nullptr;
 
-		return owner->IsClient() ? owner->CastToClient()->GetSpellTypeMaxThreshold(GetPetBotSpellType(spell_type)) : owner->CastToBot()->GetSpellTypeMaxThreshold(
-			GetPetBotSpellType(spell_type));
+	if (owner && owner->IsOfClientBot()) {
+		return owner->IsClient()
+			? owner->CastToClient()->GetSpellTypeMaxThreshold(GetPetBotSpellType(spell_type))
+			: owner->CastToBot()->GetSpellTypeMaxThreshold(GetPetBotSpellType(spell_type));
 	}
 
-	if (IsBotSpellTypeOtherBeneficial(spell_type) && tar->IsOfClientBot()) {
-		return tar->IsClient() ? tar->CastToClient()->GetSpellTypeMaxThreshold(spell_type) : tar->CastToBot()->GetSpellTypeMaxThreshold(
-			spell_type
-		);
+	if (BotSpellTypeUsesTargetSettings(spell_type) && tar->IsOfClientBot()) {
+		return tar->IsClient()
+			? tar->CastToClient()->GetSpellTypeMaxThreshold(spell_type)
+			: tar->CastToBot()->GetSpellTypeMaxThreshold(spell_type);
 	}
 
 	return GetSpellTypeMaxThreshold(spell_type);

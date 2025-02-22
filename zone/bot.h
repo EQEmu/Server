@@ -643,7 +643,7 @@ public:
 	uint8 GetDefaultSpellTypeMinThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint8 GetDefaultSpellTypeMaxThreshold(uint16 spell_type, uint8 stance = Stance::Balanced);
 	uint16 GetUltimateSpellTypeDelay(uint16 spell_type, Mob* tar);
-	bool GetUltimateSpellTypeDelayCheck(uint16 spell_type, Mob* tar);
+	bool GetUltimateSpellTypeRecastCheck(uint16 spell_type, Mob* tar);
 	uint8 GetUltimateSpellTypeMinThreshold(uint16 spell_type, Mob* tar);
 	uint8 GetUltimateSpellTypeMaxThreshold(uint16 spell_type, Mob* tar);
 	void SetIllusionBlock(bool value) { _illusionBlock = value; }
