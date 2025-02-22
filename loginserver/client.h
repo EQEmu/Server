@@ -8,204 +8,60 @@
 #include "../common/net/dns.h"
 #include "../common/net/daybreak_connection.h"
 #include "login_types.h"
+#include "../common/repositories/login_accounts_repository.h"
 #include <memory>
 
-/**
- * Client class, controls a single client and it's connection to the login server
- */
 class Client {
 public:
-
-	/**
-	 * Constructor, sets our connection to c and version to v
-	 *
-	 * @param c
-	 * @param v
-	 */
 	Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v);
-
-	/**
-	 * Destructor
-	 */
 	~Client() {}
-
-	/**
-	 * Processes the client's connection and does various actions
-	 *
-	 * @return
-	 */
 	bool Process();
+	void HandleSessionReady(const char *data, unsigned int size);
+	void HandleLogin(const char *data, unsigned int size);
 
-	/**
-	 * Sends our reply to session ready packet
-	 *
-	 * @param data
-	 * @param size
-	 */
-	void Handle_SessionReady(const char *data, unsigned int size);
-
-	/**
-	 * Verifies login and send a reply
-	 *
-	 * @param data
-	 * @param size
-	 */
-	void Handle_Login(const char *data, unsigned int size);
-
-	/**
-	* Sends the expansion data packet
-	*
-	* Titanium uses the encrypted data block to contact the expansion (You own xxx:) and the max expansions (of yyy)
-	* Rof uses a seperate data packet specifically for the expansion data
-	* Live, as of July 2021 uses a similar but slightly different seperate data packet
-	*
-	* @param PlayerLoginReply_Struct
-	*
-	*/
-	void SendExpansionPacketData(PlayerLoginReply_Struct& plrs);
-
-	/**
-	 * Sends a packet to the requested server to see if the client is allowed or not
-	 *
-	 * @param data
-	 */
-	void Handle_Play(const char *data);
-
-	/**
-	 * Sends a server list packet to the client
-	 *
-	 * @param seq
-	 */
+	// Sends the expansion data packet
+	// Titanium uses the encrypted data block to contact the expansion (You own xxx:) and the max expansions (of yyy)
+	// Rof uses a separate data packet specifically for the expansion data
+	// Live, as of July 2021 uses a similar but slightly different seperate data packet
+	void SendExpansionPacketData(PlayerLoginReply &plrs);
+	void SendPlayToWorld(const char *data);
 	void SendServerListPacket(uint32 seq);
-
-	/**
-	 * Sends the input packet to the client and clears our play response states
-	 *
-	 * @param outapp
-	 */
 	void SendPlayResponse(EQApplicationPacket *outapp);
-
-	/**
-	 * Generates a random login key for the client during login
-	 */
-	void GenerateKey();
-
-	/**
-	 * Gets the account id of this client
-	 *
-	 * @return
-	 */
+	void GenerateRandomLoginKey();
 	unsigned int GetAccountID() const { return m_account_id; }
-
-	/**
-	 * Gets the loginserver name of this client
-	 *
-	 * @return
-	 */
 	std::string GetLoginServerName() const { return m_loginserver_name; }
-
-	/**
-	 * Gets the account name of this client
-	 *
-	 * @return
-	 */
 	std::string GetAccountName() const { return m_account_name; }
-
-	/**
-	 * Returns a description for the client for logging
-	 * @return std::string
-	 */
-	std::string GetClientDescription();
-
-	/**
-	 * Gets the key generated at login for this client
-	 *
-	 * @return
-	 */
-	std::string GetKey() const { return m_key; }
-
-	/**
-	 * Gets the server selected to be played on for this client
-	 *
-	 * @return
-	 */
-	unsigned int GetPlayServerID() const { return m_play_server_id; }
-
-	/**
-	 * Gets the play sequence state for this client
-	 *
-	 * @return
-	 */
-	unsigned int GetPlaySequence() const { return m_play_sequence_id; }
-
-	/**
-	 * Gets the client version
-	 *
-	 * @return
-	 */
+	std::string GetClientLoggingDescription();
+	std::string GetLoginKey() const { return m_key; }
+	unsigned int GetSelectedPlayServerID() const { return m_selected_play_server_id; }
+	unsigned int GetCurrentPlaySequence() const { return m_play_sequence_id; }
 	LSClientVersion GetClientVersion() const { return m_client_version; }
-
-	/**
-	 * Gets the connection for this client
-	 *
-	 * @return
-	 */
 	std::shared_ptr<EQStreamInterface> GetConnection() { return m_connection; }
 
-	/**
-	 * Attempts to create a login account
-	 *
-	 * @param user
-	 * @param pass
-	 * @param loginserver
-	 */
-	void AttemptLoginAccountCreation(const std::string &user, const std::string &pass, const std::string &loginserver);
-
-	/**
-	 * Does a failed login
-	 */
-	void DoFailedLogin();
-
-	/**
-	 * Verifies a login hash, will also attempt to update a login hash if needed
-	 *
-	 * @param account_username
-	 * @param source_loginserver
-	 * @param account_password
-	 * @param password_hash
-	 * @return
-	 */
-	bool VerifyLoginHash(
-		const std::string &account_username,
-		const std::string &source_loginserver,
-		const std::string &account_password,
-		const std::string &password_hash
-	);
-
-	void DoSuccessfulLogin(const std::string& in_account_name, int db_account_id, const std::string &db_loginserver);
-	void CreateLocalAccount(const std::string &username, const std::string &password);
-	void CreateEQEmuAccount(const std::string &in_account_name, const std::string &in_account_password, unsigned int loginserver_account_id);
+	void AttemptLoginAccountCreation(LoginAccountContext c);
+	void SendFailedLogin();
+	bool VerifyAndUpdateLoginHash(LoginAccountContext c, const LoginAccountsRepository::LoginAccounts& a);
+	void DoSuccessfulLogin(LoginAccountsRepository::LoginAccounts& a);
 
 private:
-	EQ::Random                         m_random;
-	std::shared_ptr<EQStreamInterface> m_connection;
-	LSClientVersion                    m_client_version;
-	LSClientStatus                     m_client_status;
-
-	std::string  m_account_name;
-	unsigned int m_account_id;
-	std::string  m_loginserver_name;
-	unsigned int m_play_server_id;
-	unsigned int m_play_sequence_id;
-	std::string  m_key;
-
+	EQ::Random                                          m_random;
+	std::shared_ptr<EQStreamInterface>                  m_connection;
+	LSClientVersion                                     m_client_version;
+	LSClientStatus                                      m_client_status;
+	std::string                                         m_account_name;
+	unsigned int                                        m_account_id;
+	std::string                                         m_loginserver_name;
+	unsigned int                                        m_selected_play_server_id;
+	unsigned int                                        m_play_sequence_id;
+	std::string                                         m_key;
 	std::unique_ptr<EQ::Net::DaybreakConnectionManager> m_login_connection_manager;
 	std::shared_ptr<EQ::Net::DaybreakConnection>        m_login_connection;
-	LoginBaseMessage_Struct                             m_llrs;
-
-	std::string m_stored_user;
-	std::string m_stored_pass;
-	static bool ProcessHealthCheck(std::string username);
+	LoginBaseMessage                                    m_login_base_message;
+	std::string                                         m_stored_username;
+	std::string                                         m_stored_password;
+	static bool ProcessHealthCheck(std::string username) {
+		return username == "healthcheckuser";
+	}
 };
 
 #endif

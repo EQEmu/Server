@@ -7,44 +7,27 @@
 
 class LoginWorldServersRepository: public BaseLoginWorldServersRepository {
 public:
+	static LoginWorldServers GetFromWorldContext(Database &db, LoginWorldContext c) {
+		std::string where = fmt::format(
+			"short_name = '{}' AND long_name = '{}'",
+			Strings::Escape(c.short_name),
+			Strings::Escape(c.long_name)
+		);
 
-    /**
-     * This file was auto generated and can be modified and extended upon
-     *
-     * Base repository methods are automatically
-     * generated in the "base" version of this repository. The base repository
-     * is immutable and to be left untouched, while methods in this class
-     * are used as extension methods for more specific persistence-layer
-     * accessors or mutators.
-     *
-     * Base Methods (Subject to be expanded upon in time)
-     *
-     * Note: Not all tables are designed appropriately to fit functionality with all base methods
-     *
-     * InsertOne
-     * UpdateOne
-     * DeleteOne
-     * FindOne
-     * GetWhere(std::string where_filter)
-     * DeleteWhere(std::string where_filter)
-     * InsertMany
-     * All
-     *
-     * Example custom methods in a repository
-     *
-     * LoginWorldServersRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * LoginWorldServersRepository::GetWhereNeverExpires()
-     * LoginWorldServersRepository::GetWhereXAndY()
-     * LoginWorldServersRepository::DeleteWhereXAndY()
-     *
-     * Most of the above could be covered by base methods, but if you as a developer
-     * find yourself re-using logic for other parts of the code, its best to just make a
-     * method that can be re-used easily elsewhere especially if it can use a base repository
-     * method and encapsulate filters there
-     */
+		if (c.admin_id > 0) {
+			where += fmt::format(" AND login_server_admin_id = {}", c.admin_id);
+		}
 
-	// Custom extended repository methods here
+		where += " LIMIT 1";
 
+		auto results = GetWhere(db, where);
+		auto e = NewEntity();
+		if (results.size() == 1) {
+			e = results.front();
+		}
+
+		return e;
+	}
 };
 
 #endif //EQEMU_LOGIN_WORLD_SERVERS_REPOSITORY_H

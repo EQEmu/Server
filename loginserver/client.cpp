@@ -1,25 +1,18 @@
 #include "client.h"
 #include "login_server.h"
-#include "../common/misc_functions.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/strings.h"
 #include "encryption.h"
 #include "account_management.h"
 
 extern LoginServer server;
 
-/**
- * @param c
- * @param v
- */
 Client::Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v)
 {
-	m_connection       = c;
-	m_client_version   = v;
-	m_client_status    = cs_not_sent_session_ready;
-	m_account_id       = 0;
-	m_play_server_id   = 0;
-	m_play_sequence_id = 0;
+	m_connection              = c;
+	m_client_version          = v;
+	m_client_status           = cs_not_sent_session_ready;
+	m_account_id              = 0;
+	m_selected_play_server_id = 0;
+	m_play_sequence_id        = 0;
 }
 
 bool Client::Process()
@@ -43,8 +36,8 @@ bool Client::Process()
 
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
-				LogInfo("Session ready received from client account {}", GetClientDescription());
-				Handle_SessionReady((const char *) app->pBuffer, app->Size());
+				LogInfo("Session ready received from client account {}", GetClientLoggingDescription());
+				HandleSessionReady((const char *) app->pBuffer, app->Size());
 				break;
 			}
 			case OP_Login: {
@@ -53,9 +46,9 @@ bool Client::Process()
 					break;
 				}
 
-				LogInfo("Login received from client {}", GetClientDescription());
+				LogInfo("Login received from client {}", GetClientLoggingDescription());
 
-				Handle_Login((const char *) app->pBuffer, app->Size());
+				HandleLogin((const char *) app->pBuffer, app->Size());
 				break;
 			}
 			case OP_ServerListRequest: {
@@ -64,18 +57,18 @@ bool Client::Process()
 					break;
 				}
 
-				LogInfo("Server list request received from client {}", GetClientDescription());
+				LogInfo("Server list request received from client {}", GetClientLoggingDescription());
 
 				SendServerListPacket(*(uint32_t *) app->pBuffer);
 				break;
 			}
 			case OP_PlayEverquestRequest: {
-				if (app->Size() < sizeof(PlayEverquestRequest_Struct)) {
+				if (app->Size() < sizeof(PlayEverquestRequest)) {
 					LogError("Play received but it is too small, discarding");
 					break;
 				}
 
-				Handle_Play((const char *) app->pBuffer);
+				SendPlayToWorld((const char *) app->pBuffer);
 				break;
 			}
 		}
@@ -87,13 +80,7 @@ bool Client::Process()
 	return true;
 }
 
-/**
- * Sends our reply to session ready packet
- *
- * @param data
- * @param size
- */
-void Client::Handle_SessionReady(const char *data, unsigned int size)
+void Client::HandleSessionReady(const char *data, unsigned int size)
 {
 	if (m_client_status != cs_not_sent_session_ready) {
 		LogError("Session ready received again after already being received");
@@ -107,11 +94,8 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 
 	m_client_status = cs_waiting_for_login;
 
-	/**
-	 * The packets are identical between the two versions
-	 */
-	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply_Struct));
-	auto buf = reinterpret_cast<LoginHandShakeReply_Struct*>(outapp->pBuffer);
+	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply));
+	auto buf     = reinterpret_cast<LoginHandShakeReply *>(outapp->pBuffer);
 	buf->base_header.sequence    = 0x02;
 	buf->base_reply.success      = true;
 	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
@@ -120,13 +104,7 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	delete outapp;
 }
 
-/**
- * Verifies login and send a reply
- *
- * @param data
- * @param size
- */
-void Client::Handle_Login(const char *data, unsigned int size)
+void Client::HandleLogin(const char *data, unsigned int size)
 {
 	if (m_client_status != cs_waiting_for_login) {
 		LogError("Login received after already having logged in");
@@ -134,41 +112,37 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 
 	// login user/pass are variable length after unencrypted opcode and base message header (size includes opcode)
-	constexpr int header_size = sizeof(uint16_t) + sizeof(LoginBaseMessage_Struct);
-	int data_size = size - header_size;
+	constexpr int header_size = sizeof(uint16_t) + sizeof(LoginBaseMessage);
+	int           data_size   = size - header_size;
 
 	if (size <= header_size) {
-		LogError("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
+		LogError("Login received packet of size: {}, this would cause a buffer overflow, discarding", size);
 
 		return;
 	}
 
 	if (data_size % 8 != 0) {
-		LogError("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
+		LogError("Login received packet of size: {}, this would cause a block corruption, discarding", size);
 
 		return;
 	}
 
-	char *login_packet_buffer = nullptr;
-
 	unsigned int db_account_id = 0;
 
 	std::string db_loginserver = "local";
-	if (server.options.CanAutoLinkAccounts()) {
+	if (std::getenv("LSPX")) {
 		db_loginserver = "eqemu";
 	}
 
-	std::string db_account_password_hash;
-
 	std::string outbuffer;
 	outbuffer.resize(data_size);
-	if (outbuffer.length() == 0) {
+	if (outbuffer.empty()) {
 		LogError("Corrupt buffer sent to server, no length");
 		return;
 	}
 
 	// data starts at base message header (opcode not included)
-	auto r = eqcrypt_block(data + sizeof(LoginBaseMessage_Struct), data_size, &outbuffer[0], 0);
+	auto r = eqcrypt_block(data + sizeof(LoginBaseMessage), data_size, &outbuffer[0], false);
 	if (r == nullptr) {
 		LogError("Failed to decrypt eqcrypt block");
 		return;
@@ -182,131 +156,114 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		return;
 	}
 
+//	std::cout << "User: " << user << std::endl;
+
 	// only need to copy the base header for reply options, ignore login info
-	memcpy(&m_llrs, data, sizeof(LoginBaseMessage_Struct));
+	memcpy(&m_login_base_message, data, sizeof(LoginBaseMessage));
 
-	bool result = false;
-	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
+//	std::cout << "Seq: " << m_login_base_message.sequence << std::endl;
+//	std::cout << "compressed: " << m_login_base_message.compressed << std::endl;
+//	std::cout << "encrypt_type: " << m_login_base_message.encrypt_type << std::endl;
+//	std::cout << "unk3: " << m_login_base_message.unk3 << std::endl;
+
+	bool login_success = false;
+	bool token_login   = outbuffer[0] == 0 && outbuffer[1] == 0;
+	if (token_login) {
 		if (server.options.IsTokenLoginAllowed()) {
-			cred   = (&outbuffer[2 + user.length()]);
-			result = server.db->GetLoginTokenDataFromToken(
-				cred,
-				m_connection->GetRemoteAddr(),
-				db_account_id,
-				db_loginserver,
-				user
-			);
+			cred          = (&outbuffer[2 + user.length()]);
+			// todo: implement token login
+			// SELECT login_server, username, account_id FROM login_tickets WHERE expires > NOW() AND id='{}' AND ip_address='{}' LIMIT 1
+//			login_success ? DoSuccessfulLogin(user, db_account_id, db_loginserver) : SendFailedLogin();
+			SendFailedLogin();
 		}
+
+		return;
 	}
-	else {
-		if (server.options.IsPasswordLoginAllowed()) {
-			cred            = (&outbuffer[1 + user.length()]);
-			auto components = Strings::Split(user, ':');
-			if (components.size() == 2) {
-				db_loginserver = components[0];
-				user           = components[1];
-			}
 
-			// health checks
-			if (ProcessHealthCheck(user)) {
-				DoFailedLogin();
-				return;
-			}
+	// normal login
+	cred = (&outbuffer[1 + user.length()]);
+	auto components = Strings::Split(user, ':');
+	if (components.size() == 2) {
+		db_loginserver = components[0];
+		user           = components[1];
+	}
 
-			LogInfo(
-				"Attempting password based login [{0}] login [{1}]",
-				user,
-				db_loginserver
-			);
+	// health checks
+	if (ProcessHealthCheck(user)) {
+		SendFailedLogin();
+		return;
+	}
 
-			ParseAccountString(user, user, db_loginserver);
+	LogInfo(
+		"Attempting password based login [{}] login [{}]",
+		user,
+		db_loginserver
+	);
 
-			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
-				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
+	ParseAccountString(user, user, db_loginserver);
 
-#ifdef LSPX
-				// if user updated their password on the login server, update it here by validating their credentials with the login server
-				if (!result && db_loginserver == "eqemu") {
-					uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(user, cred);
-					if (account_id > 0) {
-						auto encryption_mode = server.options.GetEncryptionMode();
-						server.db->UpdateLoginserverAccountPasswordHash(
-							user,
-							db_loginserver,
-							eqcrypt_hash(user, cred, encryption_mode)
-						);
-						LogInfo("Updating eqemu account [{}] password hash", account_id);
-						result = true;
-					}
+	LoginAccountContext c = {};
+	c.username           = user;
+	c.password           = cred;
+	c.source_loginserver = db_loginserver;
+
+	auto a = LoginAccountsRepository::GetAccountFromContext(database, c);
+	if (a.id > 0) {
+		login_success = VerifyAndUpdateLoginHash(c, a);
+
+		// if user updated their password on the login server, update it here by validating their credentials with the login server
+		if (std::getenv("LSPX") && !login_success && db_loginserver == "eqemu") {
+			LogInfo("LSPX | Attempting login account via [{}]", db_loginserver);
+			uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
+			LogInfo("LSPX | External login account id [{}]", account_id);
+			if (account_id > 0) {
+				auto updated_account = LoginAccountsRepository::UpdateAccountPassword(database, a, cred);
+				if (!updated_account.id) {
+					LogError("Failed to update eqemu account [{}] password hash", account_id);
+					SendFailedLogin();
+					return;
 				}
-#endif
 
-				LogDebug("Success [{0}]", (result ? "true" : "false"));
-			}
-			else {
-				m_client_status = cs_creating_account;
-				AttemptLoginAccountCreation(user, cred, db_loginserver);
-
+				LogInfo("Updating eqemu account [{}] password hash", account_id);
+				DoSuccessfulLogin(updated_account);
 				return;
 			}
 		}
+
+		LogInfo("Successful login [{}]", (login_success ? "true" : "false"));
+		login_success ? DoSuccessfulLogin(a) : SendFailedLogin();
+		return;
 	}
 
-	/**
-	 * Login accepted
-	 */
-	if (result) {
-		LogInfo(
-			"login [{0}] user [{1}] Login succeeded",
-			db_loginserver,
-			user
-		);
-
-		DoSuccessfulLogin(user, db_account_id, db_loginserver);
-	}
-	else {
-		LogInfo(
-			"login [{0}] user [{1}] Login failed",
-			db_loginserver,
-			user
-		);
-
-		DoFailedLogin();
-	}
+	// if we are here, the account does not exist
+	m_client_status = cs_creating_account;
+	AttemptLoginAccountCreation(c);
 }
 
-/**
- * Sends a packet to the requested server to see if the client is allowed or not
- *
- * @param data
- */
-void Client::Handle_Play(const char *data)
+void Client::SendPlayToWorld(const char *data)
 {
 	if (m_client_status != cs_logged_in) {
 		LogError("Client sent a play request when they were not logged in, discarding");
 		return;
 	}
 
-	const auto *play        = (const PlayEverquestRequest_Struct *) data;
+	const auto *play        = (const PlayEverquestRequest *) data;
 	auto       server_id_in = (unsigned int) play->server_number;
 	auto       sequence_in  = (unsigned int) play->base_header.sequence;
 
 	LogInfo(
-		"[Handle_Play] Play received from client [{}] server number [{}] sequence [{}]",
+		"[SendPlayToWorld] Play received from client [{}] server number [{}] sequence [{}]",
 		GetAccountName(),
 		server_id_in,
 		sequence_in
 	);
 
-	m_play_server_id   = (unsigned int) play->server_number;
-	m_play_sequence_id = sequence_in;
-	m_play_server_id   = server_id_in;
-	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
+	m_selected_play_server_id = (unsigned int) play->server_number;
+	m_play_sequence_id        = sequence_in;
+	m_selected_play_server_id = server_id_in;
+	server.server_manager->SendUserLoginToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
 }
 
-/**
- * @param seq
- */
 void Client::SendServerListPacket(uint32 seq)
 {
 	auto app = server.server_manager->CreateServerListPacket(this, seq);
@@ -316,11 +273,11 @@ void Client::SendServerListPacket(uint32 seq)
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
-	LogInfo("Sending play response for {}", GetClientDescription());
+	LogInfo("Sending play response for {}", GetClientLoggingDescription());
 	m_connection->QueuePacket(outapp);
 }
 
-void Client::GenerateKey()
+void Client::GenerateRandomLoginKey()
 {
 	m_key.clear();
 	int count = 0;
@@ -339,229 +296,193 @@ void Client::GenerateKey()
 	}
 }
 
-/**
- * @param user
- * @param pass
- * @param loginserver
- */
-void Client::AttemptLoginAccountCreation(
-	const std::string &user,
-	const std::string &pass,
-	const std::string &loginserver
-)
+void Client::AttemptLoginAccountCreation(LoginAccountContext c)
 {
-	LogInfo("user [{}] loginserver [{}]", user, loginserver);
+	LogInfo("user [{}] loginserver [{}]", c.username, c.source_loginserver);
 
-#ifdef LSPX
-	if (loginserver == "eqemu") {
-		LogInfo("Attempting login account creation via '{0}'", loginserver);
+	if (std::getenv("LSPX") && c.source_loginserver == "eqemu") {
+		LogInfo("LSPX | Attempting login account creation via [{}]", c.source_loginserver);
 
-		if (!server.options.CanAutoLinkAccounts()) {
-			LogInfo("CanAutoLinkAccounts disabled - sending failed login");
-			DoFailedLogin();
-			return;
-		}
-
-
-		uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(
-			user,
-			pass
-		);
-
+		uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(c);
+		c.login_account_id = account_id;
 		if (account_id > 0) {
-			LogInfo("Found and creating eqemu account [{}]", account_id);
-			CreateEQEmuAccount(user, pass, account_id);
+			LogInfo("LSPX | Found and creating eqemu account [{}]", account_id);
+			auto a = LoginAccountsRepository::CreateAccountFromContext(database, c);
+			if (a.id > 0) {
+				DoSuccessfulLogin(a);
+				return;
+			}
+		}
+
+		LogInfo("LSPX | External authentication failed for user [{}]", c.username);
+
+		SendFailedLogin();
+		return;
+	}
+
+	if (server.options.CanAutoCreateAccounts() && c.source_loginserver == "local") {
+		LogInfo("CanAutoCreateAccounts enabled, attempting to crate account [{}]", c.username);
+		auto a = LoginAccountsRepository::CreateAccountFromContext(database, c);
+		if (a.id > 0) {
+			DoSuccessfulLogin(a);
 			return;
 		}
 
-		DoFailedLogin();
-		return;
-	}
-#endif
-
-	if (server.options.CanAutoCreateAccounts() && loginserver == "local") {
-		LogInfo("CanAutoCreateAccounts enabled, attempting to creating account [{0}]", user);
-		CreateLocalAccount(user, pass);
 		return;
 	}
 
-	DoFailedLogin();
+	SendFailedLogin();
 }
 
-void Client::DoFailedLogin()
+void Client::SendFailedLogin()
 {
-	m_stored_user.clear();
-	m_stored_pass.clear();
+	m_stored_username.clear();
+	m_stored_password.clear();
 
 	// unencrypted
-	LoginBaseMessage_Struct base_header{};
-	base_header.sequence     = m_llrs.sequence; // login (3)
-	base_header.encrypt_type = m_llrs.encrypt_type;
+	LoginBaseMessage h{};
+	h.sequence     = m_login_base_message.sequence; // login (3)
+	h.encrypt_type = m_login_base_message.encrypt_type;
 
 	// encrypted
-	PlayerLoginReply_Struct login_reply{};
-	login_reply.base_reply.success      = false;
-	login_reply.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
+	PlayerLoginReply r{};
+	r.base_reply.success      = false;
+	r.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
 	char encrypted_buffer[80] = {0};
-	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
+	auto rc                   = eqcrypt_block((const char *) &r, sizeof(r), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block for failed login");
 	}
 
-	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	constexpr int       outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
 	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
-	outapp.WriteData(&base_header, sizeof(base_header));
+	outapp.WriteData(&h, sizeof(h));
 	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
 	m_connection->QueuePacket(&outapp);
 	m_client_status = cs_failed_to_login;
 }
 
-/**
- * Verifies a login hash, will also attempt to update a login hash if needed
- *
- * @param account_username
- * @param source_loginserver
- * @param account_password
- * @param password_hash
- * @return
- */
-bool Client::VerifyLoginHash(
-	const std::string &account_username,
-	const std::string &source_loginserver,
-	const std::string &account_password,
-	const std::string &password_hash
-)
+bool Client::VerifyAndUpdateLoginHash(LoginAccountContext c, const LoginAccountsRepository::LoginAccounts &a)
 {
 	auto encryption_mode = server.options.GetEncryptionMode();
-	if (eqcrypt_verify_hash(account_username, account_password, password_hash, encryption_mode)) {
+	if (eqcrypt_verify_hash(a.account_name, c.password, a.account_password, encryption_mode)) {
 		return true;
 	}
-	else {
-		if (server.options.IsUpdatingInsecurePasswords()) {
-			if (encryption_mode < EncryptionModeArgon2) {
-				encryption_mode = EncryptionModeArgon2;
-			}
 
-			uint32 insecure_source_encryption_mode = 0;
-			if (password_hash.length() == CryptoHash::md5_hash_length) {
-				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
-			else if (password_hash.length() == CryptoHash::sha1_hash_length && insecure_source_encryption_mode == 0) {
-				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
-			else if (password_hash.length() == CryptoHash::sha512_hash_length && insecure_source_encryption_mode == 0) {
-				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
-					if (i != encryption_mode &&
-						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						insecure_source_encryption_mode = i;
-					}
-				}
-			}
+	if (encryption_mode < EncryptionModeArgon2) {
+		encryption_mode = EncryptionModeArgon2;
+	}
 
-			if (insecure_source_encryption_mode > 0) {
-				LogInfo(
-					"[{}] Updated insecure password user [{}] loginserver [{}] from mode [{}] ({}) to mode [{}] ({})",
-					__func__,
-					account_username,
-					source_loginserver,
-					GetEncryptionByModeId(insecure_source_encryption_mode),
-					insecure_source_encryption_mode,
-					GetEncryptionByModeId(encryption_mode),
-					encryption_mode
-				);
+	uint32 insecure_source_encryption_mode = 0;
 
-				server.db->UpdateLoginserverAccountPasswordHash(
-					account_username,
-					source_loginserver,
-					eqcrypt_hash(
-						account_username,
-						account_password,
-						encryption_mode
-					)
-				);
-
-				return true;
+	auto verify_encryption_mode = [&](int start, int end) {
+		for (int i = start; i <= end; ++i) {
+			if (i != encryption_mode && eqcrypt_verify_hash(a.account_name, c.password, a.account_password, i)) {
+				insecure_source_encryption_mode = i;
 			}
 		}
+	};
+
+	switch (a.account_password.length()) {
+		case CryptoHash::md5_hash_length:
+			verify_encryption_mode(EncryptionModeMD5, EncryptionModeMD5Triple);
+			break;
+		case CryptoHash::sha1_hash_length:
+			if (insecure_source_encryption_mode == 0) {
+				verify_encryption_mode(EncryptionModeSHA, EncryptionModeSHATriple);
+			}
+			break;
+		case CryptoHash::sha512_hash_length:
+			if (insecure_source_encryption_mode == 0) {
+				verify_encryption_mode(EncryptionModeSHA512, EncryptionModeSHA512Triple);
+			}
+			break;
+	}
+
+	if (insecure_source_encryption_mode > 0) {
+		LogInfo(
+			"Updated insecure password user [{}] loginserver [{}] from mode [{}] ({}) to mode [{}] ({})",
+			c.username,
+			c.source_loginserver,
+			GetEncryptionByModeId(insecure_source_encryption_mode),
+			insecure_source_encryption_mode,
+			GetEncryptionByModeId(encryption_mode),
+			encryption_mode
+		);
+
+		LoginAccountsRepository::UpdateAccountPassword(database, a, c.password);
+
+		return true;
 	}
 
 	return false;
 }
 
-/**
- * @param in_account_name
- * @param db_account_id
- * @param db_loginserver
- */
-void Client::DoSuccessfulLogin(
-	const std::string& in_account_name,
-	int db_account_id,
-	const std::string &db_loginserver
-)
+void Client::DoSuccessfulLogin(LoginAccountsRepository::LoginAccounts &a)
 {
-	m_stored_user.clear();
-	m_stored_pass.clear();
+	m_stored_username.clear();
+	m_stored_password.clear();
 
-	server.client_manager->RemoveExistingClient(db_account_id, db_loginserver);
+	LogInfo(
+		"Successful login for user id [{}] account name [{}] login server [{}]",
+		a.id,
+		a.account_name,
+		a.source_loginserver
+	);
+
+	server.client_manager->RemoveExistingClient(a.id, a.source_loginserver);
 
 	in_addr in{};
 	in.s_addr = m_connection->GetRemoteIP();
 
-	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
-	GenerateKey();
+	a.last_ip_address = std::string(inet_ntoa(in));
+	LoginAccountsRepository::UpdateOne(database, a);
 
-	m_account_id       = db_account_id;
-	m_account_name     = in_account_name;
-	m_loginserver_name = db_loginserver;
+	GenerateRandomLoginKey();
+
+	m_account_id       = a.id;
+	m_account_name     = a.account_name;
+	m_loginserver_name = a.source_loginserver;
 
 	// unencrypted
-	LoginBaseMessage_Struct base_header{};
-	base_header.sequence     = m_llrs.sequence;
-	base_header.compressed   = false;
-	base_header.encrypt_type = m_llrs.encrypt_type;
-	base_header.unk3         = m_llrs.unk3;
+	LoginBaseMessage h{};
+	h.sequence     = m_login_base_message.sequence;
+	h.compressed   = false;
+	h.encrypt_type = m_login_base_message.encrypt_type;
+	h.unk3         = m_login_base_message.unk3;
 
 	// not serializing any of the variable length strings so just use struct directly
-	PlayerLoginReply_Struct login_reply{};
-	login_reply.base_reply.success         = true;
-	login_reply.base_reply.error_str_id    = 101; // No Error
-	login_reply.unk1                       = 0;
-	login_reply.unk2                       = 0;
-	login_reply.lsid                       = db_account_id;
-	login_reply.failed_attempts            = 0;
-	login_reply.show_player_count          = server.options.IsShowPlayerCountEnabled();
-	login_reply.offer_min_days             = 99;
-	login_reply.offer_min_views            = -1;
-	login_reply.offer_cooldown_minutes     = 0;
-	login_reply.web_offer_number           = 0;
-	login_reply.web_offer_min_days         = 99;
-	login_reply.web_offer_min_views        = -1;
-	login_reply.web_offer_cooldown_minutes = 0;
-	memcpy(login_reply.key, m_key.c_str(), m_key.size());
+	PlayerLoginReply r{};
+	r.base_reply.success         = true;
+	r.base_reply.error_str_id    = 101; // No Error
+	r.unk1                       = 0;
+	r.unk2                       = 0;
+	r.lsid                       = a.id;
+	r.failed_attempts            = 0;
+	r.show_player_count          = server.options.IsShowPlayerCountEnabled();
+	r.offer_min_days             = 99;
+	r.offer_min_views            = -1;
+	r.offer_cooldown_minutes     = 0;
+	r.web_offer_number           = 0;
+	r.web_offer_min_days         = 99;
+	r.web_offer_min_views        = -1;
+	r.web_offer_cooldown_minutes = 0;
+	memcpy(r.key, m_key.c_str(), m_key.size());
 
-	SendExpansionPacketData(login_reply);
+	SendExpansionPacketData(r);
 
 	char encrypted_buffer[80] = {0};
-	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
+
+	auto rc = eqcrypt_block((const char *) &r, sizeof(r), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block");
 	}
 
-	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
-	outapp->WriteData(&base_header, sizeof(base_header));
+	constexpr int outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
+	auto          outapp  = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
+	outapp->WriteData(&h, sizeof(h));
 	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
 	m_connection->QueuePacket(outapp.get());
@@ -569,19 +490,21 @@ void Client::DoSuccessfulLogin(
 	m_client_status = cs_logged_in;
 }
 
-void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
+void Client::SendExpansionPacketData(PlayerLoginReply &plrs)
 {
 	SerializeBuffer buf;
 	//from eqlsstr_us.txt id of each expansion, excluding 'Everquest'
-	int ExpansionLookup[20] = { 3007, 3008, 3009, 3010,	3012,
-								3014, 3031, 3033, 3036, 3040,
-								3045, 3046, 3047, 3514, 3516,
-								3518, 3520, 3522, 3524 };
 
+	int ExpansionLookup[20] = {
+		3007, 3008, 3009, 3010, 3012,
+		3014, 3031, 3033, 3036, 3040,
+		3045, 3046, 3047, 3514, 3516,
+		3518, 3520, 3522, 3524
+	};
 
 	if (server.options.IsDisplayExpansions()) {
 
-		int32_t expansion = server.options.GetMaxExpansions();
+		int32_t expansion       = server.options.GetMaxExpansions();
 		int32_t owned_expansion = (expansion << 1) | 1;
 
 		if (m_client_version == cv_sod) {
@@ -593,15 +516,14 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 			buf.WriteInt32(19); //number of expansions to include in packet
 
 			//generate expansion data
-			for (int i = 0; i < 19; i++)
-			{
-				buf.WriteInt32(i);													//sequenctial number
-				buf.WriteInt32((expansion & (1 << i)) == (1 << i) ? 0x01 : 0x00);	//1 own 0 not own
+			for (int i = 0; i < 19; i++) {
+				buf.WriteInt32(i);                                                    //sequenctial number
+				buf.WriteInt32((expansion & (1 << i)) == (1 << i) ? 0x01 : 0x00);    //1 own 0 not own
 				buf.WriteInt8(0x00);
-				buf.WriteInt32(ExpansionLookup[i]);									//from eqlsstr_us.txt
-				buf.WriteInt32(0x179E);												//from eqlsstr_us.txt for buttons/order
-				buf.WriteInt32(0xFFFFFFFF);											//end identification
-				buf.WriteInt8(0x0);													//force order window to appear 1 appear 0 not appear
+				buf.WriteInt32(ExpansionLookup[i]);                                    //from eqlsstr_us.txt
+				buf.WriteInt32(0x179E);                                                //from eqlsstr_us.txt for buttons/order
+				buf.WriteInt32(0xFFFFFFFF);                                            //end identification
+				buf.WriteInt8(0x0);                                                    //force order window to appear 1 appear 0 not appear
 				buf.WriteInt8(0x0);
 				buf.WriteInt32(0x0000);
 				buf.WriteInt32(0x0000);
@@ -612,79 +534,21 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 			m_connection->QueuePacket(out.get());
 
 		}
-		else if (m_client_version == cv_titanium)
-		{
-			if (expansion >= EQ::expansions::bitPoR)
-			{
+		else if (m_client_version == cv_titanium) {
+			if (expansion >= EQ::expansions::bitPoR) {
 				// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
 				plrs.offer_min_days = ((EQ::expansions::bitDoD << 2) | 1) - 2;
 			}
-			else
-			{
+			else {
 				plrs.offer_min_days = owned_expansion;
 			}
 			// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
 			plrs.web_offer_min_views = ((EQ::expansions::bitDoD << 2) | 1) - 2;
 		}
-
-	}
-
-}
-
-/**
- * @param username
- * @param password
- */
-void Client::CreateLocalAccount(const std::string &username, const std::string &password)
-{
-	auto         mode  = server.options.GetEncryptionMode();
-	auto         hash  = eqcrypt_hash(username, password, mode);
-	unsigned int db_id = 0;
-	if (!server.db->CreateLoginData(username, hash, "local", db_id)) {
-		DoFailedLogin();
-	}
-	else {
-		DoSuccessfulLogin(username, db_id, "local");
 	}
 }
 
-/**
- * @param in_account_name
- * @param in_account_password
- * @param loginserver_account_id
- */
-void Client::CreateEQEmuAccount(
-	const std::string &in_account_name,
-	const std::string &in_account_password,
-	unsigned int loginserver_account_id
-)
-{
-	auto mode = server.options.GetEncryptionMode();
-	auto hash = eqcrypt_hash(in_account_name, in_account_password, mode);
-
-	if (server.db->DoesLoginServerAccountExist(in_account_name, hash, "eqemu", loginserver_account_id)) {
-		DoSuccessfulLogin(in_account_name, loginserver_account_id, "eqemu");
-		return;
-	}
-
-	if (!server.db->CreateLoginDataWithID(in_account_name, hash, "eqemu", loginserver_account_id)) {
-		DoFailedLogin();
-	}
-	else {
-		DoSuccessfulLogin(in_account_name, loginserver_account_id, "eqemu");
-	}
-}
-
-bool Client::ProcessHealthCheck(std::string username)
-{
-	if (username == "healthcheckuser") {
-		return true;
-	}
-
-	return false;
-}
-
-std::string Client::GetClientDescription()
+std::string Client::GetClientLoggingDescription()
 {
 	in_addr in{};
 	in.s_addr = GetConnection()->GetRemoteIP();

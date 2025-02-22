@@ -123,7 +123,7 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 {
 	size_t current = 0;
 	size_t total = m_buffer.size();
-	constexpr size_t ls_info_size = sizeof(ServerNewLSInfo_Struct);
+	constexpr size_t ls_info_size = sizeof(LoginserverNewWorldRequest);
 
 	while (current < total) {
 		auto left = total - current;
@@ -138,7 +138,7 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 		//this creates a small edge case where the exact size of a
 		//packet from the modern protocol can't be "43061256"
 		//so in send we pad it one byte if that's the case
-		if (leg_opcode == ServerOP_NewLSInfo && leg_size == sizeof(ServerNewLSInfo_Struct)) {
+		if (leg_opcode == ServerOP_NewLSInfo && leg_size == sizeof(LoginserverNewWorldRequest)) {
 			m_legacy_mode = true;
 			m_identifier = "World";
 			m_parent->ConnectionIdentified(this);

@@ -14,14 +14,14 @@ void SetLoginserverInfo(Client *c, const Seperator *sep)
 	const std::string& email    = sep->arg[2];
 	const std::string& password = sep->arg[3];
 
-	auto pack = new ServerPacket(ServerOP_LSAccountUpdate, sizeof(ServerLSAccountUpdate_Struct));
+	auto pack = new ServerPacket(ServerOP_LSAccountUpdate, sizeof(LoginserverAccountUpdate));
 
-	auto s = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
+	auto s = (LoginserverAccountUpdate *) pack->pBuffer;
 
-	s->useraccountid = c->LSAccountID();
-	strn0cpy(s->useraccount, c->AccountName(), 30);
+	s->user_account_id = c->LSAccountID();
+	strn0cpy(s->user_account_name, c->AccountName(), 30);
 	strn0cpy(s->user_email, email.c_str(), 100);
-	strn0cpy(s->userpassword, password.c_str(), 50);
+	strn0cpy(s->user_account_password, password.c_str(), 50);
 
 	worldserver.SendPacket(pack);
 	safe_delete(pack);

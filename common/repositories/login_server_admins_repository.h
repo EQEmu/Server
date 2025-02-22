@@ -5,46 +5,24 @@
 #include "../strings.h"
 #include "base/base_login_server_admins_repository.h"
 
-class LoginServerAdminsRepository: public BaseLoginServerAdminsRepository {
+class LoginServerAdminsRepository : public BaseLoginServerAdminsRepository {
 public:
+	static LoginServerAdmins GetByName(Database &db, std::string account_name)
+	{
+		auto admins = GetWhere(
+			db,
+			fmt::format(
+				"account_name = '{}' LIMIT 1",
+				Strings::Escape(account_name)
+			)
+		);
 
-    /**
-     * This file was auto generated and can be modified and extended upon
-     *
-     * Base repository methods are automatically
-     * generated in the "base" version of this repository. The base repository
-     * is immutable and to be left untouched, while methods in this class
-     * are used as extension methods for more specific persistence-layer
-     * accessors or mutators.
-     *
-     * Base Methods (Subject to be expanded upon in time)
-     *
-     * Note: Not all tables are designed appropriately to fit functionality with all base methods
-     *
-     * InsertOne
-     * UpdateOne
-     * DeleteOne
-     * FindOne
-     * GetWhere(std::string where_filter)
-     * DeleteWhere(std::string where_filter)
-     * InsertMany
-     * All
-     *
-     * Example custom methods in a repository
-     *
-     * LoginServerAdminsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * LoginServerAdminsRepository::GetWhereNeverExpires()
-     * LoginServerAdminsRepository::GetWhereXAndY()
-     * LoginServerAdminsRepository::DeleteWhereXAndY()
-     *
-     * Most of the above could be covered by base methods, but if you as a developer
-     * find yourself re-using logic for other parts of the code, its best to just make a
-     * method that can be re-used easily elsewhere especially if it can use a base repository
-     * method and encapsulate filters there
-     */
+		if (admins.size() == 1) {
+			return admins.front();
+		}
 
-	// Custom extended repository methods here
-
+		return NewEntity();
+	}
 };
 
 #endif //EQEMU_LOGIN_SERVER_ADMINS_REPOSITORY_H
