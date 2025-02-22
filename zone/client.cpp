@@ -6023,6 +6023,10 @@ std::string Client::GetPetVanityName(int class_id) {
 }
 
 bool Client::IsPetNameChangeAllowed() {
+	if (RuleB(Pets, AlwaysAllowPetRename)) {
+		return true;
+	}
+
 	DataBucketKey k = GetScopedBucketKeys();
 	k.key = "PetNameChangesAllowed";
 
