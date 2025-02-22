@@ -1,3 +1,26 @@
+## [23.0.2] 2/21/2025
+
+### Bots
+
+* Add checks to ensure bots and pets do not engage on ^pull ([#4708](https://github.com/EQEmu/Server/pull/4708)) @nytmyr 2025-02-22
+* Improve positioning ([#4709](https://github.com/EQEmu/Server/pull/4709)) @nytmyr 2025-02-22
+* Prevent medding in combat if any mob has bot targeted ([#4707](https://github.com/EQEmu/Server/pull/4707)) @nytmyr 2025-02-22
+
+### Client Mod
+
+* Adds a hacked fast camp rule for GMs ([#4697](https://github.com/EQEmu/Server/pull/4697)) @KimLS 2025-02-20
+
+### Fixes
+
+* Fix Lua Zone ID Exports ([#4700](https://github.com/EQEmu/Server/pull/4700)) @Kinglykrab 2025-02-22
+* Fix bad Mob reference in QuestManager::resumetimer() ([#4710](https://github.com/EQEmu/Server/pull/4710)) @zimp-wow 2025-02-22
+* Fix cursor load on zone ([#4704](https://github.com/EQEmu/Server/pull/4704)) @nytmyr 2025-02-22
+* Fix infinite loop in QuestManager::stoptimer() ([#4703](https://github.com/EQEmu/Server/pull/4703)) @zimp-wow 2025-02-21
+
+### Quest API
+
+* Add GetSpawn() to Perl and Lua ([#4702](https://github.com/EQEmu/Server/pull/4702)) @Kinglykrab 2025-02-22
+
 ## [23.0.1] 2/20/2025
 
 ### Fixes
