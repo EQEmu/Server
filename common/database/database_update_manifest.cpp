@@ -6747,6 +6747,29 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 )"
+	},
+	ManifestEntry{
+		.version = 9302,
+		.description = "2025_02_09_illusion_block.sql",
+		.check = "SHOW COLUMNS FROM `character_data` LIKE 'illusion_block'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_data`
+	ADD COLUMN `illusion_block` TINYINT(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `deleted_at`;
+
+UPDATE `command_settings`
+SET `aliases` =
+    CASE
+        WHEN LENGTH(`aliases`) > 0 AND `aliases` NOT LIKE '%|ib%'
+            THEN CONCAT(`aliases`, '|ib')
+        WHEN LENGTH(`aliases`) = 0
+            THEN 'ib'
+        ELSE `aliases`
+    END
+WHERE `command` = 'illusionblock'
+AND `aliases` NOT LIKE '%ib%';
+)",
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

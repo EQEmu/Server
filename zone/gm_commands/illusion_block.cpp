@@ -7,6 +7,10 @@ void command_illusion_block(Client* c, const Seperator* sep)
 		BotCommandHelpParams p;
 
 		p.description = { "Toggles whether or not you will block the illusion effects of spells cast by players or bots." };
+		p.notes = {
+			"- This will still allow other portions of a spell to land on you.",
+			"- Spells cast by NPCs will ignore this setting and land as normal."
+		};
 		p.example_format = { fmt::format("{} [value]", sep->arg[0]) };
 		p.examples_one =
 		{
@@ -35,7 +39,7 @@ void command_illusion_block(Client* c, const Seperator* sep)
 
 	if (sep->IsNumber(1)) {
 		int set_status = atoi(sep->arg[1]);
-		if (set_status == 0 || set_status == 1) {
+		if (EQ::ValueWithin(set_status, 0, 1)) {
 			c->SetIllusionBlock(set_status);
 			c->Message(Chat::Green, "Your Illusion Block has been %s.", (set_status ? "enabled" : "disabled"));
 		}

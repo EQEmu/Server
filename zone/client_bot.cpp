@@ -223,9 +223,10 @@ void Client::CampAllBots(uint8 class_id) {
 void Client::LoadDefaultBotSettings() {
 	m_bot_spell_settings.clear();
 
-	// Only illusion block supported currently
+	/* No longer used, left as example.
 	SetBotSetting(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
 	LogBotSettingsDetail("{} says, 'Setting default {} [{}] to [{}]'", GetCleanName(), CastToBot()->GetBotSettingCategoryName(BotBaseSettings::IllusionBlock), BotBaseSettings::IllusionBlock, GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock));
+	*/
 
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; ++i) {
 		BotSpellSettings t;
@@ -263,7 +264,7 @@ int Client::GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting) {
 int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
 	switch (setting_type) {
 		case BotSettingCategories::BaseSetting:
-			return GetIllusionBlock(); // only setting supported currently
+			return 0; // unused currently
 		case BotSettingCategories::SpellDelay:
 			return GetSpellTypeDelay(bot_setting);
 		case BotSettingCategories::SpellMinThreshold:
@@ -276,8 +277,7 @@ int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
 void Client::SetBotSetting(uint8 setting_type, uint16 bot_setting, uint32 setting_value) {
 	switch (setting_type) {
 		case BotSettingCategories::BaseSetting:
-			SetIllusionBlock(setting_value); // only setting supported currently
-			break;
+			break; // unused currently
 		case BotSettingCategories::SpellDelay:
 			SetSpellTypeDelay(bot_setting, setting_value);
 			break;

@@ -2325,6 +2325,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 	}
 
 	if (m->IsClient()) {
+		/* Currently unused
 		if (m->CastToClient()->GetDefaultBotSettings(BotSettingCategories::BaseSetting, BotBaseSettings::IllusionBlock) != m->CastToClient()->GetIllusionBlock()) { // Only illusion block supported
 			auto e = BotSettingsRepository::BotSettings{
 						.character_id			= character_id,
@@ -2341,6 +2342,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 
 			LogBotSettings("{} says, 'Saving {} [{}] - set to [{}] default [{}].'", m->GetCleanName(), Bot::GetBotSettingCategoryName(BotBaseSettings::IllusionBlock), BotBaseSettings::IllusionBlock, e.value, m->CastToClient()->GetIllusionBlock());
 		}
+		*/
 
 		for (uint16 i = BotSettingCategories::START_CLIENT; i <= BotSettingCategories::END_CLIENT; ++i) {
 			for (uint16 x = BotSpellTypes::START; x <= BotSpellTypes::END; ++x) {
