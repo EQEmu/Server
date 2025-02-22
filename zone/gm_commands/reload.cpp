@@ -1,3 +1,11 @@
+#include <string>
+#include "../client.h"
+#include "../../common/strings.h"
+#include "../../common/server_reload_types.h"
+#include "../worldserver.h"
+
+extern WorldServer worldserver;
+
 void command_reload(Client *c, const Seperator *sep)
 {
 	std::string command   = sep->arg[0] ? sep->arg[0] : "";
