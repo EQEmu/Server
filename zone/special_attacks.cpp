@@ -26,6 +26,7 @@
 #include "lua_parser.h"
 #include "npc.h"
 #include "bot.h"
+#include "bot.h"
 
 #include <string.h>
 
@@ -994,6 +995,19 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 			return;
 		}
 	}
+	else if (IsBot()) {
+		auto bot = CastToBot();
+		auto inst = bot->GetBotItem(EQ::invslot::slotPrimary);
+		auto bot_piercer = inst ? inst->GetItem() : nullptr;
+
+		if (!bot_piercer || bot_piercer->ItemType != EQ::item::ItemType1HPiercing) {
+			if (!bot->GetCombatRoundForAlerts()) {
+				bot->SetCombatRoundForAlerts();
+				bot->RaidGroupSay(this, "I can't backstab with this weapon!");
+			}
+			return;
+		}
+	}
 
 	//Live AA - Triple Backstab
 	int tripleChance = itembonuses.TripleBackstab + spellbonuses.TripleBackstab + aabonuses.TripleBackstab;
@@ -1073,9 +1087,11 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 	// make sure we can hit (bane, magical, etc)
 	if (IsClient()) {
-		const EQ::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
-		if (!GetWeaponDamage(other, wpn))
+		const EQ::ItemInstance* wpn = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+
+		if (!GetWeaponDamage(other, wpn)) {
 			return;
+		}
 
 		base_damage = GetBaseSkillDamage(EQ::skills::SkillBackstab, other);
 

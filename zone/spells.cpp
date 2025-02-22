@@ -319,6 +319,29 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return false;
 	}
 
+	//Goal of Spells:UseSpellImpliedTargeting is to replicate the EQ2 feature where spells will 'pass through' invalid targets to target's target to try to find a valid target.
+	if (RuleB(Spells,UseSpellImpliedTargeting) && IsOfClientBot()) {
+		Mob* spell_target = entity_list.GetMobID(target_id);
+		if (spell_target) {
+			Mob* targets_target = spell_target->GetTarget();
+			if (targets_target) {
+				// If either this is beneficial and the target is not a player or player's pet or vis versa
+				if ((IsBeneficialSpell(spell_id) && (!(spell_target->IsOfClientBot() || (spell_target->HasOwner() && spell_target->GetOwner()->IsOfClientBot()))))
+					|| (IsDetrimentalSpell(spell_id) && (spell_target->IsOfClientBot() || (spell_target->HasOwner() && spell_target->GetOwner()->IsOfClientBot())))) {
+					//Check if the target's target is a valid target; we can use DoCastingChecksOnTarget() here because we can let it handle the failure as vanilla would
+					if (DoCastingChecksOnTarget(true, spell_id, targets_target)) {
+						target_id = targets_target->GetID();
+					}
+					else {
+						//Just return false here because we are going to fail the next check block anyway if we reach this point.
+						StopCastSpell(spell_id, send_spellbar_enable);
+						return false;
+					}
+				}
+			}
+		}
+	}
+
 	if (!DoCastingChecksOnCaster(spell_id, slot) ||
 		!DoCastingChecksZoneRestrictions(true, spell_id) ||
 		!DoCastingChecksOnTarget(true, spell_id, entity_list.GetMobID(target_id))) {
@@ -2194,7 +2217,10 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 				LogSpells("Spell [{}] canceled: invalid target (no pet)", spell_id);
 				MessageString(Chat::Red, NO_PET);
 				return false; // Can't cast these unless we have a target
+				MessageString(Chat::Red, NO_PET);
+				return false; // Can't cast these unless we have a target
 			}
+
 
 			CastAction = SingleTarget;
 			break;
@@ -2811,6 +2837,14 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 					}
 				}
 
+				if (spell_target->GetOwner()) {
+					Mob* owner =  spell_target->GetOwner();
+
+					if (owner) {
+						spell_target = owner;
+					}
+				}
+
 				if (spell_target->IsGrouped()) {
 					Group *target_group = entity_list.GetGroupByMob(spell_target);
 					if (target_group) {
@@ -2819,6 +2853,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 							SpellOnTarget(spell_id, this);
 						}
 					}
+				} else if (spell_target->IsRaidGrouped() && spell_target->IsOfClientBot()) {
+					Raid *target_raid = (IsClient() ? entity_list.GetRaidByClient(spell_target->CastToClient()) : entity_list.GetRaidByBot(spell_target->CastToBot()));
 				} else if (spell_target->IsRaidGrouped() && spell_target->IsOfClientBot()) {
 					Raid *target_raid = (IsClient() ? entity_list.GetRaidByClient(spell_target->CastToClient()) : entity_list.GetRaidByBot(spell_target->CastToBot()));
 					uint32 gid = 0xFFFFFFFF;
@@ -3804,6 +3840,19 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 							Chat::Red,
 							fmt::format(
 								"Your {} did not take hold on {}. (Blocked by {}.)",
+								spells[spell_id].name,
+								GetName(),
+								spells[curbuf.spellid].name
+							).c_str()
+						);
+					}
+
+					if (caster->IsBot() && RuleB(Bots, BotsUseLiveBlockedMessage) && caster->GetClass() != Class::Bard) {
+						caster->GetOwner()->Message(
+							Chat::SpellFailure,
+							fmt::format(
+								"{}'s {} did not take hold on {}. (Blocked by {}.)",
+								caster->GetCleanName(),
 								spells[spell_id].name,
 								GetName(),
 								spells[curbuf.spellid].name

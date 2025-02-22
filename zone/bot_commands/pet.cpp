@@ -17,15 +17,12 @@ void bot_command_pet(Client *c, const Seperator *sep)
 
 void bot_command_pet_get_lost(Client *c, const Seperator *sep)
 {
-	// Nuked by Catapultam!
 }
 
 void bot_command_pet_remove(Client *c, const Seperator *sep)
 {
-	// Nuked by Catapultam!
 }
 
 void bot_command_pet_set_type(Client *c, const Seperator *sep)
 {
-	// Nuked by Catapultam!
 }

@@ -54,6 +54,7 @@ extern volatile bool RunLoops;
 #include "bot_command.h"
 #include "string_ids.h"
 #include "dialogue_window.h"
+#include "dialogue_window.h"
 
 #include "guild_mgr.h"
 #include "quest_parser_collection.h"
@@ -14720,67 +14721,15 @@ void Client::ShowZoneShardMenu()
 }
 
 std::string Client::SendBotCommandHelpWindow(const BotCommandHelpParams& params) {
-	std::string popup_text;
-	return popup_text;
+	return "";
 }
 
 std::string Client::GetCommandHelpHeader(std::string msg, std::string color) {
-	std::string return_text = DialogueWindow::TableRow(
-		DialogueWindow::TableCell(
-			fmt::format(
-				"{}",
-				DialogueWindow::ColorMessage(color, msg)
-			)
-		)
-	);
-
-	return return_text;
+	return "";
 }
 
 std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 max_length, std::string secondary_color) {
 	std::string return_text;
-
-	for (int i = 0; i < msg.size(); i++) {
-		std::vector<std::string> msg_split;
-		int string_length = msg[i].length() + 1;
-		int end_count = 0;
-		int new_count = 0;
-		int split_count = 0;
-
-		for (int x = 0; x < string_length; x = end_count) {
-			end_count = std::min(int(string_length), (int(x) + std::min(int(string_length), int(max_length))));
-
-			if ((string_length - (x + 1)) > max_length) {
-				for (int y = end_count; y >= x; --y) {
-					if (msg[i][y] == ' ') {
-							split_count = y - x;
-							msg_split.emplace_back(msg[i].substr(x, split_count));
-							end_count = y + 1;
-
-							break;
-					}
-
-					if (y == x) {
-						msg_split.emplace_back(msg[i].substr(x, max_length));
-
-						break;
-					}
-				}
-			}
-			else {
-				msg_split.emplace_back(msg[i].substr(x, (string_length - 1) - x));
-
-				break;
-			}
-		}
-
-		for (const auto& s : msg_split) {
-			return_text += DialogueWindow::TableRow(
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(((!secondary_color.empty() && i== 0) ? secondary_color : color), s))
-			);
-		}
-	}
-
 	return return_text;
 }
 

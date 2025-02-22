@@ -6736,7 +6736,6 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		}
 		else {
 			int ass = TryAssassinate(defender, hit.skill);
-
 			if (ass > 0) {
 				hit.damage_done = ass;
 			}

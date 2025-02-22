@@ -141,6 +141,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 							(spells[AIspells[i].spellid].target_type == ST_Target || tar == this)
 							&& tar->DontHealMeBefore() < Timer::GetCurrentTime()
 							&& !(tar->IsPet() && tar->GetOwner()->IsOfClientBot())	//no buffing PC's pets
+							&& !(tar->IsPet() && tar->GetOwner()->IsOfClientBot())	//no buffing PC's pets
 							) {
 
 							auto hp_ratio = tar->GetIntHPRatio();

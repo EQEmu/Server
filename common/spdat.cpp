@@ -125,6 +125,7 @@ bool IsMesmerizeSpell(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_Mez);
 }
 
+
 bool SpellBreaksMez(uint16 spell_id)
 {
 	return (IsValidSpell(spell_id) && IsDetrimentalSpell(spell_id) && IsAnyDamageSpell(spell_id));
@@ -132,6 +133,7 @@ bool SpellBreaksMez(uint16 spell_id)
 
 bool IsStunSpell(uint16 spell_id)
 {
+	return (IsValidSpell(spell_id) && IsEffectInSpell(spell_id, SE_Stun) || IsEffectInSpell(spell_id, SE_SpinTarget));
 	return (IsValidSpell(spell_id) && IsEffectInSpell(spell_id, SE_Stun) || IsEffectInSpell(spell_id, SE_SpinTarget));
 }
 
@@ -159,6 +161,10 @@ bool IsSummonSpell(uint16 spell_id)
 
 bool IsDamageSpell(uint16 spell_id)
 {
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}

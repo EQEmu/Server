@@ -218,6 +218,10 @@
 #define SPELL_ADRENALINE_SWELL 14445
 #define SPELL_ADRENALINE_SWELL_RK2 14446
 #define SPELL_ADRENALINE_SWELL_RK3 14447
+#define SPELL_NATURES_RECOVERY 2520
+#define SPELL_ADRENALINE_SWELL 14445
+#define SPELL_ADRENALINE_SWELL_RK2 14446
+#define SPELL_ADRENALINE_SWELL_RK3 14447
 
 // discipline IDs.
 #define DISC_UNHOLY_AURA 4520
@@ -896,6 +900,25 @@ static std::map<uint16, std::string> spellType_shortNames = {
 const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow);
 const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong);
 const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
+
+// Bot related functions
+bool IsBotSpellTypeDetrimental (uint16 spell_type);
+bool IsBotSpellTypeBeneficial (uint16 spell_type);
+bool IsBotSpellTypeOtherBeneficial(uint16 spell_type);
+bool IsBotSpellTypeInnate (uint16 spell_type);
+bool IsAEBotSpellType(uint16 spell_type);
+bool IsGroupBotSpellType(uint16 spell_type);
+bool IsGroupTargetOnlyBotSpellType(uint16 spell_type);
+bool IsPetBotSpellType(uint16 spell_type);
+bool IsClientBotSpellType(uint16 spell_type);
+bool IsHealBotSpellType(uint16 spell_type);
+bool BotSpellTypeRequiresLoS(uint16 spell_type);
+bool BotSpellTypeRequiresTarget(uint16 spell_type);
+bool BotSpellTypeRequiresAEChecks(uint16 spell_type);
+bool IsCommandedBotSpellType(uint16 spell_type);
+bool IsPullingBotSpellType(uint16 spell_type);
+uint16 GetCorrectBotSpellType(uint16 spell_type, uint16 spell_id);
+uint16 GetPetBotSpellType(uint16 spell_type);
 
 // Bot related functions
 bool IsBotSpellTypeDetrimental (uint16 spell_type);

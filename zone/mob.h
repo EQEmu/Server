@@ -420,6 +420,7 @@ public:
 	virtual bool CheckSpellLevelRestriction(Mob *caster, uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 
+
 	virtual float GetAOERange(uint16 spell_id);
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);

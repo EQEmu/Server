@@ -422,6 +422,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_VetClaimRequest] = &Client::Handle_OP_VetClaimRequest;
 	ConnectedOpcodes[OP_VoiceMacroIn] = &Client::Handle_OP_VoiceMacroIn;
 	ConnectedOpcodes[OP_UpdateAura] = &Client::Handle_OP_UpdateAura;
+	ConnectedOpcodes[OP_UpdateAura] = &Client::Handle_OP_UpdateAura;
 	ConnectedOpcodes[OP_WearChange] = &Client::Handle_OP_WearChange;
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;

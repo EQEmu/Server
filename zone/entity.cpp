@@ -1893,33 +1893,7 @@ Client *EntityList::GetClientByLSID(uint32 iLSID)
 
 Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* exclude_bot)
 {
-	auto is_whole_zone = false;
-	if (location.x == 0.0f && location.y == 0.0f) {
-		is_whole_zone = true;
-	}
-
-	auto distance_squared = (distance * distance);
-
-	std::vector<Bot*> bots_in_range;
-
-	for (const auto& b : bot_list) {
-		if (
-			b.second != exclude_bot &&
-			(
-				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(b.second->GetPosition()), location) <= distance_squared
-				)
-		) {
-			bots_in_range.push_back(b.second);
-		}
-	}
-
-	if (bots_in_range.empty()) {
-		return nullptr;
-	}
-
-	return bots_in_range[zone->random.Int(0, bots_in_range.size() - 1)];
-
+	return nullptr;
 }
 
 Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, Client *exclude_client)
@@ -2235,39 +2209,14 @@ Raid* EntityList::GetRaidByClient(Client* client)
 
 	return nullptr;
 }
+
 Raid* EntityList::GetRaidByBotName(const char* name)
 {
-	for (const auto& r : raid_list) {
-		for (const auto& m : r->members) {
-			if (m.is_bot && strcmp(m.member_name, name) == 0) {
-				return r;
-			}
-		}
-	}
-
 	return nullptr;
 }
 
 Raid* EntityList::GetRaidByBot(Bot* bot)
 {
-	if (bot->p_raid_instance) {
-		return bot->p_raid_instance;
-	}
-
-	std::list<Raid*>::iterator iterator;
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		for (const auto& member : (*iterator)->members) {
-			if (member.member && member.is_bot && member.member->CastToBot() == bot) {
-				bot->p_raid_instance = *iterator;
-				return *iterator;
-			}
-		}
-
-		++iterator;
-	}
-
 	return nullptr;
 }
 
