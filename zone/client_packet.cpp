@@ -16150,7 +16150,7 @@ void Client::Handle_OP_TradeSkillRecipeInspect(const EQApplicationPacket* app)
 {
 	if (app->size != sizeof(TradeSkillRecipeInspect_Struct)) {
 		LogError(
-			"Invalid size for TradeSkillRecipeInspect_Struct: Expected: [{}], Got: [{}]",
+			"Invalid size for TradeSkillRecipeInspect_Struct: Expected: [{}] Got: [{}]",
 			sizeof(TradeSkillRecipeInspect_Struct),
 			app->size
 		);
@@ -16160,7 +16160,7 @@ void Client::Handle_OP_TradeSkillRecipeInspect(const EQApplicationPacket* app)
 	auto s = (TradeSkillRecipeInspect_Struct*) app->pBuffer;
 
 	const auto& v = TradeskillRecipeEntriesRepository::GetWhere(
-		content_db,
+		database,
 		fmt::format(
 			"`recipe_id` = {} AND `componentcount` = 0 AND `successcount` > 0 LIMIT 1",
 			s->recipe_id
