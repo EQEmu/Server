@@ -248,6 +248,7 @@ public:
 
 	uint16 GetWaypointMax() const { return wp_m; }
 	int32 GetGrid() const { return grid; }
+	Spawn2* GetSpawn() { return respawn2 ? respawn2 : nullptr; }
 	uint32 GetSpawnGroupId() const { return spawn_group_id; }
 	uint32 GetSpawnPointID() const;
 

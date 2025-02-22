@@ -875,6 +875,11 @@ void Perl_NPC_ReturnHandinItems(NPC *self, Client* c)
 	self->ReturnHandinItems(c);
 }
 
+Spawn2* Perl_NPC_GetSpawn(NPC* self)
+{
+	return self->GetSpawn();
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -953,6 +958,7 @@ void perl_register_npc()
 	package.add("GetSilver", &Perl_NPC_GetSilver);
 	package.add("GetSlowMitigation", &Perl_NPC_GetSlowMitigation);
 	package.add("GetSp2", &Perl_NPC_GetSp2);
+	package.add("GetSpawn", &Perl_NPC_GetSpawn);
 	package.add("GetSpawnKillCount", &Perl_NPC_GetSpawnKillCount);
 	package.add("GetSpawnPointH", &Perl_NPC_GetSpawnPointH);
 	package.add("GetSpawnPointID", &Perl_NPC_GetSpawnPointID);

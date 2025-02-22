@@ -2751,10 +2751,7 @@ void NPC::LevelScale() {
 
 uint32 NPC::GetSpawnPointID() const
 {
-	if (respawn2) {
-		return respawn2->GetID();
-	}
-	return 0;
+	return respawn2 ? respawn2->GetID() : 0;
 }
 
 void NPC::NPCSlotTexture(uint8 slot, uint32 texture)
