@@ -11244,7 +11244,13 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 		}
 
 		if (!CastChecks(spell_id, tar, UINT16_MAX)) {
-			GetBotOwner()->Message(Chat::Red, "%s says, 'Ability failed to cast. This could be due to this to any number of things: range, mana, immune, target type, etc.'", GetCleanName());
+			GetBotOwner()->Message(
+				Chat::Red,
+				fmt::format(
+					"{} says, 'Ability failed to cast. This could be due to any number of things: range, mana, line of sight, immune, target type, etc.'",
+					GetCleanName()
+				).c_str()
+			);
 
 			return false;
 		}
@@ -11281,7 +11287,13 @@ bool Bot::AttemptAACastSpell(Mob* tar, uint16 spell_id, AA::Rank* rank) {
 			SetSpellRecastTimer(spell_id, timer_duration);
 		}
 		else {
-			GetBotOwner()->Message(Chat::Red, "%s says, 'Ability failed to cast. This could be due to this to any number of things: range, mana, immune, target type, etc.'", GetCleanName());
+			GetBotOwner()->Message(
+				Chat::Red,
+				fmt::format(
+					"{} says, 'Ability failed to cast. This could be due to any number of things: range, mana, line of sight, immune, target type, etc.'",
+					GetCleanName()
+				).c_str()
+			);
 
 			return false;
 		}
@@ -11360,8 +11372,12 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 	if (!CastChecks(spell_id, tar, UINT16_MAX)) {
 		GetBotOwner()->Message(
 			Chat::Red,
-			fmt::format("{} says, 'Ability failed to cast. This could be due to range, mana, immune, target type, etc.'", GetBotOwner()->GetCleanName()).c_str()
+			fmt::format(
+				"{} says, 'Ability failed to cast. This could be due to any number of things: range, mana, line of sight, immune, target type, etc.'",
+				GetCleanName()
+			).c_str()
 		);
+
 		return false;
 	}
 
