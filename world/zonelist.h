@@ -70,6 +70,7 @@ public:
 	ZoneServer* FindByZoneID(uint32 ZoneID);
 
 	const std::list<std::unique_ptr<ZoneServer>> &getZoneServerList() const;
+	void SendServerReload(ServerReload::Type type, uchar *packet = nullptr);
 
 	void SendServerReload(ServerReload::Type type, uchar *packet = nullptr);
 private:

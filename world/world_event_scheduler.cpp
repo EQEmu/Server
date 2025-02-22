@@ -55,6 +55,7 @@ void WorldEventScheduler::Process(ZSList *zs_list)
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_RELOAD_WORLD) {
 					LogScheduler("Sending reload world event [{}]", e.event_data.c_str());
+
 					zs_list->SendServerReload(ServerReload::Type::WorldRepop, nullptr);
 				}
 			}

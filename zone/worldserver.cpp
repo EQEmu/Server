@@ -60,6 +60,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/guild_tributes_repository.h"
 #include "../common/patches/patches.h"
 #include "../common/skill_caps.h"
+#include "../common/server_reload_types.h"
 #include "queryserv.h"
 
 extern EntityList             entity_list;
@@ -80,7 +81,6 @@ WorldServer::WorldServer()
 	cur_groupid = 0;
 	last_groupid = 0;
 	oocmuted = false;
-
 	m_process_timer = std::make_unique<EQ::Timer>(1000, true, std::bind(&WorldServer::Process, this));
 }
 

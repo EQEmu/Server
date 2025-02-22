@@ -1427,29 +1427,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 			break;
 		}
-		case ServerOP_ReloadContentFlags: {
-			zoneserver_list.SendPacket(pack);
-			content_service.SetExpansionContext()->ReloadContentFlags();
-			break;
-		}
-		case ServerOP_ReloadLogs: {
-			zoneserver_list.SendPacket(pack);
-			QSLink.SendPacket(pack);
-			UCSLink.SendPacket(pack);
-			LogSys.LoadLogDatabaseSettings();
-			player_event_logs.ReloadSettings();
-			break;
-		}
-		case ServerOP_ReloadTasks: {
-			shared_task_manager.LoadTaskData();
-			zoneserver_list.SendPacket(pack);
-			break;
-		}
-		case ServerOP_ReloadDzTemplates: {
-			dynamic_zone_manager.LoadTemplates();
-			zoneserver_list.SendPacket(pack);
-			break;
-		}
 		case ServerOP_ChangeSharedMem: {
 			auto hotfix_name = std::string((char*) pack->pBuffer);
 

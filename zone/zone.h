@@ -463,6 +463,8 @@ public:
 	void DeleteBucket(const std::string& bucket_name);
 	std::string GetBucketExpires(const std::string& bucket_name);
 	std::string GetBucketRemaining(const std::string& bucket_name);
+	inline void SetZoneServerId(uint32 id) { m_zone_server_id = id; }
+	inline uint32 GetZoneServerId() const { return m_zone_server_id; }
 
 private:
 	bool      allow_mercs;

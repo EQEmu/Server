@@ -12,6 +12,7 @@
 #include "worldserver.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/server_reload_types.h"
 #include <iomanip>
 #include <iostream>
 #include <stdarg.h>
@@ -72,9 +73,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		case 0: {
 			break;
 		}
-		case ServerOP_ReloadLogs: {
-			LogSys.LoadLogDatabaseSettings();
-			player_event_logs.ReloadSettings();
+		case ServerOP_ServerReloadRequest: {
+			auto o = (ServerReload::Request*) p.Data();
+			if (o->type == ServerReload::Type::Logs) {
+				LogSys.LoadLogDatabaseSettings();
+				player_event_logs.ReloadSettings();
+			}
+
 			break;
 		}
 		case ServerOP_QueryServGeneric: {
