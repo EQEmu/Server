@@ -10728,6 +10728,7 @@ bool Bot::GetDefaultSpellTypeHold(uint16 spell_type, uint8 stance) {
 			switch (stance) {
 				case Stance::AEBurn:
 				case Stance::Burn:
+				case Stance::Assist:
 					return true;
 				default:
 					return false;
@@ -11007,31 +11008,36 @@ bool Bot::GetDefaultSpellTypeAggroCheck(uint16 spell_type, uint8 stance) {
 	switch (stance) {
 		case Stance::AEBurn:
 		case Stance::Burn:
+		case Stance::Aggressive:
 			return false;
 		default:
 			break;
 	}
 
 	switch (spell_type) {
-		case BotSpellTypes::Nuke:
-		case BotSpellTypes::Root:
-		case BotSpellTypes::Snare:
-		case BotSpellTypes::DOT:
-		case BotSpellTypes::Slow:
-		case BotSpellTypes::Debuff:
-		case BotSpellTypes::Fear:
-		case BotSpellTypes::Stun:
+		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::AEDispel:
+		case BotSpellTypes::AEDoT:
+		case BotSpellTypes::AEFear:
+		case BotSpellTypes::AEHateLine:
+		case BotSpellTypes::AELifetap:
 		case BotSpellTypes::AENukes:
 		case BotSpellTypes::AERains:
-		case BotSpellTypes::AEStun:
-		case BotSpellTypes::AEDebuff:
+		case BotSpellTypes::AERoot:
 		case BotSpellTypes::AESlow:
 		case BotSpellTypes::AESnare:
-		case BotSpellTypes::AEFear:
-		case BotSpellTypes::AEDispel:
-		case BotSpellTypes::AERoot:
-		case BotSpellTypes::AEDoT:
+		case BotSpellTypes::AEStun:
+		case BotSpellTypes::DOT:
+		case BotSpellTypes::Debuff:
+		case BotSpellTypes::Dispel:
+		case BotSpellTypes::Fear:
+		case BotSpellTypes::HateLine:
+		case BotSpellTypes::Nuke:
 		case BotSpellTypes::PBAENuke:
+		case BotSpellTypes::Root:
+		case BotSpellTypes::Slow:
+		case BotSpellTypes::Snare:
+		case BotSpellTypes::Stun:
 			return true;
 		default:
 			return false;
@@ -13125,4 +13131,21 @@ std::vector<Mob*> Bot::GetSpellTargetList(bool entire_raid) {
 	}
 
 	return entire_raid ? _spell_target_list : _group_spell_target_list;
+}
+
+bool Bot::IsValidBotStance(uint8 stance) {
+	switch (stance) {
+		case Stance::Passive:
+		case Stance::Balanced:
+		case Stance::Efficient:
+		case Stance::Aggressive:
+		case Stance::Assist:
+		case Stance::Burn:
+		case Stance::AEBurn:
+			return true;
+		default:
+			return false;
+	}
+
+	return false;
 }
