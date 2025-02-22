@@ -4023,12 +4023,14 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 			LogInventory("Char: [{}] adding item [{}] to slot [{}]", GetName(),BaseItem->Name, WeaponSlot);
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = BaseItem->ID;
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = BaseItem->Icon;
+			strncpy(m_pp.bandoliers[bs->Number].Items[BandolierSlot].Name, BaseItem->Name, sizeof(m_pp.bandoliers[bs->Number].Items[BandolierSlot].Name));
 			database.SaveCharacterBandolier(CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
 		}
 		else {
 			LogInventory("Char: [{}] no item in slot [{}]", GetName(), WeaponSlot);
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = 0;
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = 0;
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Name[0] = '\0';
 		}
 	}
 }

@@ -3427,6 +3427,26 @@ bool Perl_Client_IsPetNameChangeAllowed(Client* self) {
 	return self->IsPetNameChangeAllowed();
 }
 
+std::string Perl_Client_GetBandolierName(Client* self, uint8 bandolier_slot)
+{
+	return self->GetBandolierName(bandolier_slot);
+}
+
+uint32 Perl_Client_GetBandolierItemIcon(Client* self, uint8 bandolier_slot, uint8 slot_id)
+{
+	return self->GetBandolierItemIcon(bandolier_slot, slot_id);
+}
+
+uint32 Perl_Client_GetBandolierItemID(Client* self, uint8 bandolier_slot, uint8 slot_id)
+{
+	return self->GetBandolierItemID(bandolier_slot, slot_id);
+}
+
+std::string Perl_Client_GetBandolierItemName(Client* self, uint8 bandolier_slot, uint8 slot_id)
+{
+	return self->GetBandolierItemName(bandolier_slot, slot_id);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3573,6 +3593,10 @@ void perl_register_client()
 	package.add("GetAugmentIDAt", &Perl_Client_GetAugmentIDAt);
 	package.add("GetAugmentIDsBySlotID", &Perl_Client_GetAugmentIDsBySlotID);
 	package.add("GetAutoLoginCharacterName", &Perl_Client_GetAutoLoginCharacterName);
+	package.add("GetBandolierItemIcon", &Perl_Client_GetBandolierItemIcon);
+	package.add("GetBandolierItemID", &Perl_Client_GetBandolierItemID);
+	package.add("GetBandolierItemName", &Perl_Client_GetBandolierItemName);
+	package.add("GetBandolierName", &Perl_Client_GetBandolierName);
 	package.add("GetBaseAGI", &Perl_Client_GetBaseAGI);
 	package.add("GetBaseCHA", &Perl_Client_GetBaseCHA);
 	package.add("GetBaseDEX", &Perl_Client_GetBaseDEX);
