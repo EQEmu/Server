@@ -37,9 +37,6 @@ done
 echo "# Cloning quests repository"
 git -C ./quests pull 2> /dev/null || git clone https://github.com/ProjectEQ/projecteqquests.git quests
 
-# remove this eventually
-cd ./quests && git checkout akkadius/item-handin-overhaul && cd ..
-
 mkdir maps
 mkdir logs
 
