@@ -136,9 +136,9 @@ std::vector<TitlesRepository::Titles> TitleManager::GetEligibleTitles(Client* c)
 			continue;
 		}
 
-	if (title.class_id >= Class::None && !client->HasClass(title.class_id)) {
-		return false;
-	}
+		if (t.class_ >= Class::None && c->HasClass(t.class_)) {
+			continue;
+		}
 
 		if (t.min_aa_points >= 0 && c->GetSpentAA() < t.min_aa_points) {
 			continue;

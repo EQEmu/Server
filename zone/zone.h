@@ -455,8 +455,6 @@ public:
 	void LoadBaseData();
 	void ReloadBaseData();
 
-	inline void SetZoneServerId(uint32 id) { m_zone_server_id = id; }
-	inline uint32 GetZoneServerId() const { return m_zone_server_id; }
 	// data buckets
 	std::string GetBucket(const std::string& bucket_name);
 	void SetBucket(const std::string& bucket_name, const std::string& bucket_value, const std::string& expiration = "");
