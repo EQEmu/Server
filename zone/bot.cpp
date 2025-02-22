@@ -1835,6 +1835,7 @@ bool Bot::BotRangedAttack(Mob* other, bool can_double_attack) {
 
 	if (
 		!GetPullingFlag() &&
+		!GetReturningFlag() &&
 		(
 			(
 				GetBotStance() != Stance::Aggressive &&
@@ -2094,8 +2095,10 @@ void Bot::SetHoldMode() {
 void Bot::AI_Process()
 {
 
-#define PULLING_BOT (GetPullingFlag() || GetReturningFlag())
-#define NOT_PULLING_BOT (!GetPullingFlag() && !GetReturningFlag())
+#define PULLING_BOT (GetPullingFlag())
+#define NOT_PULLING_BOT (!GetPullingFlag())
+#define RETURNING_BOT (GetReturningFlag())
+#define NOT_RETURNING_BOT (!GetReturningFlag())
 #define GUARDING (GetGuardFlag())
 #define NOT_GUARDING (!GetGuardFlag())
 #define HOLDING (GetHoldFlag())
@@ -2203,7 +2206,7 @@ void Bot::AI_Process()
 
 // PULLING FLAG (TARGET VALIDATION)
 
-		if (GetPullingFlag()) {
+		if (PULLING_BOT) {
 			if (!PullingFlagChecks(bot_owner)) {
 				return;
 			}
@@ -2211,10 +2214,10 @@ void Bot::AI_Process()
 
 // RETURNING FLAG
 
-		if (GetReturningFlag()) {
-			ReturningFlagChecks(bot_owner, leash_owner, fm_distance);
-
-			return;
+		if (RETURNING_BOT) {
+			if (ReturningFlagChecks(bot_owner, leash_owner, fm_distance)) {
+				return;
+			}
 		}
 
 // DEFAULT (ACQUIRE TARGET)
@@ -2247,7 +2250,7 @@ void Bot::AI_Process()
 		}
 
 		// This causes conflicts with default pet handler (bounces between targets)
-		if (NOT_PULLING_BOT && HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+		if (NOT_PULLING_BOT && NOT_RETURNING_BOT && HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 			// We don't add to hate list here because it's assumed to already be on the list
 			GetPet()->SetTarget(tar);
 		}
@@ -2288,7 +2291,7 @@ void Bot::AI_Process()
 
 // PULLING FLAG (ACTIONABLE RANGE)
 
-		if (GetPullingFlag()) {
+		if (PULLING_BOT || RETURNING_BOT) {
 			if (!TargetValidation(tar)) { return; }
 
 			if (!DoLosChecks(tar)) {
@@ -2347,7 +2350,11 @@ void Bot::AI_Process()
 // ENGAGED AT COMBAT RANGE
 
 		// We can fight
-		if (at_combat_range) {
+		bool other_bot_pulling =
+			(bot_owner->GetBotPulling() && NOT_PULLING_BOT) &&
+			(bot_owner->GetBotPulling() && NOT_RETURNING_BOT);
+
+		if (!other_bot_pulling && at_combat_range) {
 			bool jitter_cooldown = false;
 
 			if (m_combat_jitter_timer.GetRemainingTime() > 1 && m_combat_jitter_timer.Enabled()) {
@@ -2438,60 +2445,20 @@ void Bot::AI_Process()
 
 // ENGAGED NOT AT COMBAT RANGE
 
-		else if (!TryPursueTarget(leash_distance, Goal)) {
+		else if (!other_bot_pulling && !TryPursueTarget(leash_distance, Goal)) {
 			return;
 		}
 
 // End not in combat range
-
-		TryMeditate();
-	}
-	else { // Out-of-combat behavior
-		SetAttackFlag(false);
-		SetCombatRoundForAlerts(false);
-		SetAttackingFlag(false);
-
-		if (!bot_owner->GetBotPulling()) {
-			SetPullingFlag(false);
-			SetReturningFlag(false);
-		}
-
-// AUTO DEFEND
-
-		if (TryAutoDefend(bot_owner, leash_distance) ) {
-			return;
-		}
-
-		SetTarget(nullptr);
-
-		if (
-			HasPet() &&
-			(
-				GetClass() != Class::Enchanter ||
-				GetPet()->GetPetType() != petAnimation ||
-				GetAA(aaAnimationEmpathy) >= 1
-			)
-		) {
+		if (bot_owner->GetBotPulling() && HasPet()) {
 			GetPet()->WipeHateList();
 			GetPet()->SetTarget(nullptr);
 		}
 
-		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)) {
-			SendRemovePlayerState(PlayerState::Aggressive);
-		}
-
-// OK TO IDLE
-
-		// Ok to idle
-		if (TryNonCombatMovementChecks(bot_owner, follow_mob, Goal)) {
-			return;
-		}
-		if (!IsBotNonSpellFighter() && AI_HasSpells() && TryIdleChecks(fm_distance)) {
-			return;
-		}
-		if (GetClass() == Class::Bard && AI_HasSpells() && TryBardMovementCasts()) {
-			return;
-		}
+		TryMeditate();
+	}
+	else { // Out-of-combat behavior
+		DoOutOfCombatChecks(bot_owner, follow_mob, Goal, leash_distance, fm_distance);
 	}
 }
 
@@ -2519,7 +2486,7 @@ bool Bot::TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, g
 
 		float destination_distance = DistanceSquared(GetPosition(), Goal);
 
-		if ((!bot_owner->GetBotPulling() || PULLING_BOT) && (destination_distance > GetFollowDistance())) {
+		if (destination_distance > GetFollowDistance()) {
 			if (!IsRooted()) {
 				if (rest_timer.Enabled()) {
 					rest_timer.Disable();
@@ -2559,7 +2526,54 @@ bool Bot::TryIdleChecks(float fm_distance) {
 
 		return true;
 	}
+
 	return false;
+}
+
+void Bot::DoOutOfCombatChecks(Client* bot_owner, Mob* follow_mob, glm::vec3& Goal, float leash_distance, float fm_distance) {
+	SetAttackFlag(false);
+	SetCombatRoundForAlerts(false);
+	SetAttackingFlag(false);
+
+	if (PULLING_BOT || RETURNING_BOT || !bot_owner->GetBotPulling()) {
+		SetPullingFlag(false);
+		SetReturningFlag(false);
+	}
+
+	if (TryAutoDefend(bot_owner, leash_distance) ) {
+		return;
+	}
+
+	SetTarget(nullptr);
+
+	if (
+		HasPet() &&
+		(
+			GetClass() != Class::Enchanter ||
+			GetPet()->GetPetType() != petAnimation ||
+			GetAA(aaAnimationEmpathy) >= 1
+		)
+	) {
+		GetPet()->WipeHateList();
+		GetPet()->SetTarget(nullptr);
+	}
+
+	if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)) {
+		SendRemovePlayerState(PlayerState::Aggressive);
+	}
+
+	// Ok to idle
+	if (TryNonCombatMovementChecks(bot_owner, follow_mob, Goal)) {
+		return;
+	}
+
+	if (!IsBotNonSpellFighter() && AI_HasSpells() && TryIdleChecks(fm_distance)) {
+		return;
+	}
+
+	if (GetClass() == Class::Bard && AI_HasSpells() && TryBardMovementCasts()) {
+		return;
+	}
 }
 
 // This is as close as I could get without modifying the aggro mechanics and making it an expensive process...
@@ -3209,7 +3223,7 @@ bool Bot::IsValidTarget(
 		SetCombatRoundForAlerts(false);
 		SetAttackingFlag(false);
 
-		if (PULLING_BOT) {
+		if (PULLING_BOT || RETURNING_BOT) {
 			SetPullingFlag(false);
 			SetReturningFlag(false);
 			bot_owner->SetBotPulling(false);
@@ -3242,7 +3256,7 @@ Mob* Bot::GetBotTarget(Client* bot_owner)
 		SetAttackFlag(false);
 		SetAttackingFlag(false);
 
-		if (PULLING_BOT) {
+		if (PULLING_BOT || RETURNING_BOT) {
 			// 'Flags' should only be set on the bot that is pulling
 			SetPullingFlag(false);
 			SetReturningFlag(false);
@@ -3272,22 +3286,32 @@ bool Bot::TargetValidation(Mob* other) {
 }
 
 bool Bot::ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_distance) {
+	auto engage_range = (GetBotDistanceRanged() < 30 ? 30 : GetBotDistanceRanged());
+
 	if (
-		(NOT_GUARDING && fm_distance <= GetFollowDistance()) ||
-		(GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())
+		(GetTarget() && Distance(GetPosition(), GetTarget()->GetPosition()) <= engage_range) &&
+			(
+				(NOT_GUARDING && fm_distance <= GetFollowDistance()) ||
+				(GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())
+			)
 	) { // Once we're back, clear blocking flags so everyone else can join in
+		WipeHateList();
+		SetTarget(nullptr);
+		SetPullingFlag(false);
 		SetReturningFlag(false);
 		bot_owner->SetBotPulling(false);
 
 		if (GetPet()) {
 			GetPet()->SetPetOrder(m_previous_pet_order);
+
+			if (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1) {
+				GetPet()->WipeHateList();
+				GetPet()->SetTarget(nullptr);
+			}
 		}
 
 		return false;
 	}
-
-	// Need to keep puller out of combat until they reach their 'return to' destination
-	WipeHateList();
 
 	if (!IsMoving()) {
 		glm::vec3 Goal(0, 0, 0);
@@ -3327,8 +3351,6 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		return false;
 	}
 	else if (GetTarget()->GetHateList().size()) {
-		WipeHateList();
-		SetTarget(nullptr);
 		SetPullingFlag(false);
 		SetReturningFlag();
 
@@ -3342,6 +3364,8 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		if (GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive)) {
 			SendRemovePlayerState(PlayerState::Aggressive);
 		}
+
+		return false;
 	}
 
 	return true;
@@ -3495,7 +3519,7 @@ Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint
 }
 
 void Bot::SetOwnerTarget(Client* bot_owner) {
-	if (GetPet() && PULLING_BOT) {
+	if (GetPet() && (PULLING_BOT || RETURNING_BOT)) {
 		GetPet()->SetPetOrder(m_previous_pet_order);
 	}
 
@@ -4938,7 +4962,7 @@ bool Bot::Death(Mob *killer_mob, int64 damage, uint16 spell_id, EQ::skills::Skil
 
 	LeaveHealRotationMemberPool();
 
-	if ((GetPullingFlag() || GetReturningFlag()) && my_owner && my_owner->IsClient()) {
+	if ((PULLING_BOT || RETURNING_BOT) && my_owner && my_owner->IsClient()) {
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
 
