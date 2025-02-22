@@ -1262,7 +1262,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 			item = database.GetItem(item_id);
 			if (item) {
-				SummonItem(item_id, itr->second);
+				CheckItemDiscoverability(itr->first);
+				SummonItem(itr->first, itr->second);
 				if (GetGroup()) {
 					entity_list.MessageGroup(this, true, Chat::Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
 				}
