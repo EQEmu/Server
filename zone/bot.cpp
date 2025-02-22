@@ -11867,7 +11867,7 @@ bool Bot::PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest,
 			temp_x = tar_x + zone->random.Real(-max_distance, max_distance);
 			temp_y = tar_y + zone->random.Real(-max_distance, max_distance);
 
-			temp_z_Position.x = temp_z;
+			temp_z_Position.x = temp_x;
 			temp_z_Position.y = temp_y;
 			temp_z_Position.z = temp_z;
 			best_z = GetFixedZ(temp_z_Position);
