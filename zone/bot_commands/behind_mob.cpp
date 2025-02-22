@@ -12,6 +12,7 @@ void bot_command_behind_mob(Client* c, const Seperator* sep)
 		BotCommandHelpParams p;
 
 		p.description = { "Toggles whether or not bots will stay behind the mob during combat." };
+		p.notes = { "- Bots that are taunting will remain in front of their target"};
 		p.example_format = { fmt::format("{} [value] [actionable]", sep->arg[0]) };
 		p.examples_one = 
 		{ 
@@ -84,6 +85,7 @@ void bot_command_behind_mob(Client* c, const Seperator* sep)
 	const int ab_mask = ActionableBots::ABM_Type1;
 	std::string class_race_arg = sep->arg[ab_arg];
 	bool class_race_check = false;
+
 	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
 		class_race_check = true;
 	}
