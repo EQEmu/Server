@@ -776,24 +776,8 @@ void Client::BulkSendInventoryItems()
 	EQ::OutBuffer ob;
 	EQ::OutBuffer::pos_type last_pos = ob.tellp();
 
-	// Equipment items
-	for (int16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; slot_id++) {
-		const EQ::ItemInstance* inst = m_inv[slot_id];
-		if (!inst) {
-			continue;
-		}
-
-		inst->Serialize(ob, slot_id);
-
-		if (ob.tellp() == last_pos) {
-			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
-		}
-
-		last_pos = ob.tellp();
-	}
-
-	// General items
-	for (int16 slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; slot_id++) {
+	// Possessions items
+	for (int16 slot_id = EQ::invslot::POSSESSIONS_BEGIN; slot_id <= EQ::invslot::POSSESSIONS_END; slot_id++) {
 		const EQ::ItemInstance* inst = m_inv[slot_id];
 		if (!inst) {
 			continue;
