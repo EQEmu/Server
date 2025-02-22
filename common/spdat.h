@@ -1929,7 +1929,6 @@ bool IsCastRestrictedSpell(uint16 spell_id);
 bool IsAegolismSpell(uint16 spell_id);
 bool AegolismStackingIsSymbolSpell(uint16 spell_id);
 bool AegolismStackingIsArmorClassSpell(uint16 spell_id);
-bool IsDisciplineTome(const EQ::ItemData* item);
 int8 SpellEffectsCount(uint16 spell_id);
 bool IsLichSpell(uint16 spell_id);
 bool IsInstantHealSpell(uint32 spell_id);
@@ -1940,5 +1939,6 @@ bool IsResistanceOnlySpell(uint16 spell_id);
 bool IsDamageShieldOnlySpell(uint16 spell_id);
 bool IsDamageShieldAndResistSpell(uint16 spell_id);
 bool IsHateSpell(uint16 spell_id);
+bool IsDisciplineTome(const EQ::ItemData* item);
 
 #endif

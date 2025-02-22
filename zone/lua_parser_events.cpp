@@ -111,7 +111,7 @@ void handle_npc_event_trade(
 	l_npc_o.push(L);
 	lua_setfield(L, -2, "self");
 
-	// set a reference to the client inside the trade object as well for plugins to process
+	// set a reference to the client inside of the trade object as well for plugins to process
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
 

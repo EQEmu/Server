@@ -192,7 +192,7 @@ bool DatabaseUpdate::UpdateManifest(
 			LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 		}
 
-		if (force_interactive) {
+		if (force_interactive && !std::getenv("FORCE_INTERACTIVE")) {
 			LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 			LogInfo("Some migrations require user input. Running interactively");
 			LogInfo("This is usually due to a major change that could cause data loss");

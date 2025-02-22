@@ -3771,6 +3771,7 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 	temporary_copper_two = temporary_copper / 10;
 	m_external_handin_money_returned.silver = temporary_copper_two;
 	new_value = m_pp.silver + temporary_copper_two;
+	m_external_handin_money_returned.silver = temporary_copper_two;
 
 	if (new_value < 0) {
 		m_pp.silver = 0;
@@ -3784,6 +3785,7 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 	temporary_copper_two = temporary_copper;
 	m_external_handin_money_returned.copper = temporary_copper_two;
 	new_value = m_pp.copper + temporary_copper_two;
+	m_external_handin_money_returned.copper = temporary_copper_two;
 
 	if (new_value < 0) {
 		m_pp.copper = 0;
@@ -3800,30 +3802,12 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 
 	SaveCurrency();
 
-	uint32 plat   = copper / 1000;
-	uint32 gold   = (copper - (plat * 1000)) / 100;
-	uint32 silver = (copper - (plat * 1000 + gold * 100)) / 10;
-	uint32 cp     = (copper - (plat * 1000 + gold * 100 + silver * 10));
-
 	m_external_handin_money_returned.return_source = "AddMoneyToPP";
 
 	LogDebug("Client::AddMoneyToPP() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 }
 
-void Client::EVENT_ITEM_ScriptStopReturn(){
-	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
-		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
-	*/
-	struct timeval read_time;
-	char buffer[50];
-	gettimeofday(&read_time, 0);
-	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
-	SetEntityVariable("Stop_Return", buffer);
-}
-
 void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client){
-	EVENT_ITEM_ScriptStopReturn();
-
 	int32 new_value = m_pp.platinum + platinum;
 	if (new_value >= 0 && new_value > m_pp.platinum) {
 		m_pp.platinum += platinum;

@@ -743,7 +743,7 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 			for (int i = 0; i < r.augment_ids.size(); i++) {
 				if (!Strings::EqualFold(r.augment_names[i], "None")) {
 					const uint8 slot_id = (i + 1);
-					handin_items_info += fmt::format(
+					return_items_info += fmt::format(
 						"Augment {}: {} ({})\n",
 						slot_id,
 						r.augment_names[i],

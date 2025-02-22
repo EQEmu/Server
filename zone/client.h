@@ -259,7 +259,7 @@ public:
 	#include "client_packet.h"
 
 	Client(EQStreamInterface * ieqs);
-	Client(); // mocking
+	Client(); // mocking / testing
 	~Client();
 
 	void ReconnectUCS();
@@ -1181,7 +1181,6 @@ public:
 
 	// Item methods
 	void UseAugmentContainer(int container_slot);
-	void EVENT_ITEM_ScriptStopReturn();
 	void ValidateAugments(EQ::ItemInstance* item);
 	uint32 NukeItem(uint32 itemnum, uint8 where_to_check =
 			(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
@@ -1208,8 +1207,8 @@ public:
 	void QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call = false);
 	void PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, LootItem** bag_item_data = 0);
 	bool AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn = false, bool try_cursor = true, LootItem** bag_item_data = 0);
-	bool SummonApocItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0, bool artifact_disco = true);
-	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0, bool artifact_disco = true);
+	bool SummonApocItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
+	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
 	bool ReturnItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
 	void SummonItemIntoInventory(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool is_attuned = false);
 	void SummonBaggedItems(uint32 bag_item_id, const std::vector<LootItem>& bag_items);
@@ -1971,6 +1970,12 @@ public:
 
 	std::map<int, int> kill_counters;
 
+	std::string GetBandolierName(uint8 bandolier_slot);
+	uint32 GetBandolierItemIcon(uint8 bandolier_slot, uint8 slot_id);
+	uint32 GetBandolierItemID(uint8 bandolier_slot, uint8 slot_id);
+	std::string GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id);
+
+	// External handin tracking
 	// this is used to prevent things like quest::givecash and AddMoneyToPP
 	// from double giving money back to players in scripts when return_items
 	// also gives money back to players
@@ -1983,13 +1988,10 @@ public:
 	};
 private:
 	ExternalHandinMoneyReturned m_external_handin_money_returned = {};
+	std::vector<uint32_t>       m_external_handin_items_returned = {};
 public:
 	ExternalHandinMoneyReturned GetExternalHandinMoneyReturned() { return m_external_handin_money_returned; }
-
-	std::string GetBandolierName(uint8 bandolier_slot);
-	uint32 GetBandolierItemIcon(uint8 bandolier_slot, uint8 slot_id);
-	uint32 GetBandolierItemID(uint8 bandolier_slot, uint8 slot_id);
-	std::string GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id);
+	std::vector<uint32_t> GetExternalHandinItemsReturned() { return m_external_handin_items_returned; }
 
 protected:
 	friend class Mob;

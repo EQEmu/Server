@@ -35,5 +35,5 @@ void ZoneCLI::CommandHandler(int argc, char **argv)
 	EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 }
 
-#include "cli/npc_handins.cpp"
 #include "cli/sidecar_serve_http.cpp"
+#include "cli/npc_handins.cpp"

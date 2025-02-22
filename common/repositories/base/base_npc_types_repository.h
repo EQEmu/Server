@@ -123,7 +123,7 @@ public:
 		int8_t      legtexture;
 		int8_t      feettexture;
 		int8_t      light;
-		int8_t      walkspeed;
+		float       walkspeed;
 		int32_t     peqid;
 		int8_t      unique_;
 		int8_t      fixed;
@@ -735,7 +735,7 @@ public:
 			e.legtexture             = row[101] ? static_cast<int8_t>(atoi(row[101])) : 0;
 			e.feettexture            = row[102] ? static_cast<int8_t>(atoi(row[102])) : 0;
 			e.light                  = row[103] ? static_cast<int8_t>(atoi(row[103])) : 0;
-			e.walkspeed              = row[104] ? static_cast<int8_t>(atoi(row[104])) : 0;
+			e.walkspeed              = row[104] ? strtof(row[104], nullptr) : 0;
 			e.peqid                  = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
 			e.unique_                = row[106] ? static_cast<int8_t>(atoi(row[106])) : 0;
 			e.fixed                  = row[107] ? static_cast<int8_t>(atoi(row[107])) : 0;
@@ -1370,7 +1370,7 @@ public:
 			e.legtexture             = row[101] ? static_cast<int8_t>(atoi(row[101])) : 0;
 			e.feettexture            = row[102] ? static_cast<int8_t>(atoi(row[102])) : 0;
 			e.light                  = row[103] ? static_cast<int8_t>(atoi(row[103])) : 0;
-			e.walkspeed              = row[104] ? static_cast<int8_t>(atoi(row[104])) : 0;
+			e.walkspeed              = row[104] ? strtof(row[104], nullptr) : 0;
 			e.peqid                  = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
 			e.unique_                = row[106] ? static_cast<int8_t>(atoi(row[106])) : 0;
 			e.fixed                  = row[107] ? static_cast<int8_t>(atoi(row[107])) : 0;
@@ -1524,7 +1524,7 @@ public:
 			e.legtexture             = row[101] ? static_cast<int8_t>(atoi(row[101])) : 0;
 			e.feettexture            = row[102] ? static_cast<int8_t>(atoi(row[102])) : 0;
 			e.light                  = row[103] ? static_cast<int8_t>(atoi(row[103])) : 0;
-			e.walkspeed              = row[104] ? static_cast<int8_t>(atoi(row[104])) : 0;
+			e.walkspeed              = row[104] ? strtof(row[104], nullptr) : 0;
 			e.peqid                  = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
 			e.unique_                = row[106] ? static_cast<int8_t>(atoi(row[106])) : 0;
 			e.fixed                  = row[107] ? static_cast<int8_t>(atoi(row[107])) : 0;

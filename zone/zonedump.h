@@ -155,7 +155,7 @@ struct NPCType
 	int             heroic_strikethrough;
 	bool            keeps_sold_items;
 	bool            is_parcel_merchant;
-	uint8           greed;
+	uint8			greed;
 	bool            multiquest_enabled;
 };
 

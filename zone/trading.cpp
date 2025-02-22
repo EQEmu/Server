@@ -370,7 +370,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						inst->GetItem()->NoDrop != 0 ||
 						CanTradeFVNoDropItem() ||
 						other == this
-					) {
+						) {
 						int16 free_slot = other->GetInv().FindFreeSlotForTradeItem(inst);
 
 						if (free_slot != INVALID_INDEX) {
@@ -485,8 +485,12 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						LogTrading("Transferring partial stack [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 						if (other->PutItemInInventory(partial_slot, *partial_inst, true)) {
-							LogTrading("Partial stack [{}] ([{}]) successfully transferred, deleting [{}] charges from trade slot",
-								inst->GetItem()->Name, inst->GetItem()->ID, (old_charges - inst->GetCharges()));
+							LogTrading(
+								"Partial stack [{}] ([{}]) successfully transferred, deleting [{}] charges from trade slot",
+								inst->GetItem()->Name,
+								inst->GetItem()->ID,
+								(old_charges - inst->GetCharges())
+							);
 							inst->TransferOwnership(database, other->CharacterID());
 							if (qs_log) {
 								auto detail = new PlayerLogTradeItemsEntry_Struct;
@@ -513,7 +517,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						}
 						else {
 							LogTrading("Transfer of partial stack [{}] ([{}]) to [{}] failed, returning [{}] charges to trade slot",
-								inst->GetItem()->Name, inst->GetItem()->ID, other->GetName(), (old_charges - inst->GetCharges()));
+									   inst->GetItem()->Name, inst->GetItem()->ID, other->GetName(), (old_charges - inst->GetCharges()));
 
 							inst->SetCharges(old_charges);
 							partial_inst->SetCharges(partial_charges);
@@ -765,8 +769,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				if (!tradingWith->IsMoving()) {
 					tradingWith->FaceTarget(this);
 				}
-
-				EVENT_ITEM_ScriptStopReturn();
 			}
 		}
 
@@ -855,6 +857,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 
 		m_external_handin_money_returned = {};
+		m_external_handin_items_returned = {};
 		bool has_aggro = tradingWith->CheckAggro(this);
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE) && !has_aggro) {
 			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
@@ -888,8 +891,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				handin_npc->CheckHandin(this, handin, {}, items);
 			}
 
-			handin_npc->ReturnHandinItems(this);
-			LogNpcHandin("ReturnHandinItems() called for NPC [{}]", handin_npc->GetNPCTypeID());
+			if (RuleB(Items, AlwaysReturnHandins)) {
+				handin_npc->ReturnHandinItems(this);
+				LogNpcHandin("ReturnHandinItems called for NPC [{}]", handin_npc->GetNPCTypeID());
+			}
 		}
 
 		handin_npc->ResetHandin();

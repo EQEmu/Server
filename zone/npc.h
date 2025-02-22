@@ -590,6 +590,7 @@ public:
 
 	void DoNpcToNpcAggroScan();
 
+	// hand-ins
 	bool CanPetTakeItem(const EQ::ItemInstance *inst);
 
 	struct HandinEntry {
@@ -627,7 +628,6 @@ public:
 	void ResetHandin();
 	bool HasProcessedHandinReturn() { return m_has_processed_handin_return; }
 	bool HandinStarted() { return m_handin_started; }
-
 
 protected:
 

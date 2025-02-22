@@ -1029,6 +1029,7 @@ luabind::scope lua_register_npc() {
 	.def("IsMultiQuestEnabled", (bool(Lua_NPC::*)(void))&Lua_NPC::IsMultiQuestEnabled)
 	.def("IsLDoNTrapped", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNTrapped)
 	.def("IsLDoNTrapDetected", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNTrapDetected)
+	.def("IsMultiQuestEnabled", (bool(Lua_NPC::*)(void))&Lua_NPC::IsMultiQuestEnabled)
 	.def("IsOnHatelist", (bool(Lua_NPC::*)(Lua_Mob))&Lua_NPC::IsOnHatelist)
 	.def("IsRaidTarget", (bool(Lua_NPC::*)(void))&Lua_NPC::IsRaidTarget)
 	.def("IsRareSpawn", (bool(Lua_NPC::*)(void))&Lua_NPC::IsRareSpawn)

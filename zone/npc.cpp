@@ -50,6 +50,7 @@
 #include "bot.h"
 #include "../common/skill_caps.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/events/player_event_logs.h"
 
 #include <stdio.h>
 #include <string>
@@ -4389,25 +4390,6 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 
 	auto o = GetOwner() && GetOwner()->IsClient() ? GetOwner()->CastToClient() : nullptr;
 
-	if (o) {
-		auto pet_bag = o->GetActivePetBag(GetPetOriginClass());
-
-		EQ::SayLinkEngine linker;
-		linker.SetLinkType(EQ::saylink::SayLinkItemData);
-
-		if (pet_bag) {
-			linker.SetItemData(pet_bag->GetItem());
-			o->Message(Chat::Yellow, "You must use [%s] to equip your pet.", linker.GenerateLink().c_str());
-			return false;
-		}
-
-		if (o->IsValidPetBag(inst->GetID())) {
-			linker.SetItemData(inst->GetItem());
-			o->Message(Chat::Yellow, "Your [%s] is used by placing items inside of it while in your inventory, not by trading it to your pet.", linker.GenerateLink().c_str());
-			return false;
-		}
-	}
-
 	struct Check {
 		bool condition;
 		std::string message;
@@ -4541,17 +4523,6 @@ bool NPC::CheckHandin(
 					 && h.money.silver == r.money.silver
 					 && h.money.copper == r.money.copper;
 
-	// items
-	bool normalize = true;
-	for (auto required_item : required) {
-		LogDebug("Checking required item first [{}] second[{}]", required_item.first, required_item.second);
-		int item_id = Strings::ToInt(required_item.first);
-		if (item_id > 1000000) {
-			normalize = false;
-			break;
-		}
-	}
-
 	// if we started the hand-in process, we want to use the hand-in items from the member variable hand-in bucket
 	auto &handin_items = !m_handin_started ? h.items : m_hand_in.items;
 
@@ -4582,8 +4553,7 @@ bool NPC::CheckHandin(
 				auto &h_item = handin_items[i];
 
 				// Check if the item IDs match (normalize if necessary)
-				bool id_match = (!normalize && h_item.item_id == r_item.item_id) ||
-								(normalize && (Strings::ToInt(h_item.item_id) % 1000000) == Strings::ToInt(r_item.item_id));
+				bool id_match = (h_item.item_id == r_item.item_id);
 
 				if (id_match) {
 					uint32 used_count = std::min(remaining_requirement, h_item.count);
@@ -4818,7 +4788,7 @@ bool NPC::CheckHandin(
 			m_hand_in.money.silver,
 			m_hand_in.money.copper
 		);
-		for (const auto &i: items_to_remove) {
+		for (const auto &i: m_hand_in.items) {
 			LogNpcHandin(
 				"{} Hand-in success, item [{}] ({}) count [{}]",
 				log_handin_prefix,
@@ -4828,7 +4798,6 @@ bool NPC::CheckHandin(
 			);
 		}
 	}
-	LogNpcHandin("");
 
 	return requirement_met;
 }
@@ -4868,13 +4837,31 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 		handin_money.platinum = m_hand_in.original_money.platinum;
 	}
 
+	// if scripts have their own implementation of returning items instead of
+	// going through return_items, this guards against returning items twice (duplicate items)
+	bool external_returned_items = c->GetExternalHandinItemsReturned().size() > 0;
+	bool returned_items_already = false;
+	for (auto &handin_item: m_hand_in.items) {
+		for (auto &i: c->GetExternalHandinItemsReturned()) {
+			auto item = database.GetItem(i);
+			if (item && std::to_string(item->ID) == handin_item.item_id) {
+				LogNpcHandin(" -- External quest methods already returned item [{}] ({})", item->Name, item->ID);
+				returned_items_already = true;
+			}
+		}
+	}
+
+	if (returned_items_already) {
+		LogNpcHandin("External quest methods returned items, not returning items to player via ReturnHandinItems");
+	}
+
 	bool returned_handin = false;
 	m_hand_in.items.erase(
 		std::remove_if(
 			m_hand_in.items.begin(),
 			m_hand_in.items.end(),
 			[&](HandinEntry &i) {
-				if (i.item && i.item->GetItem() && !i.is_multiquest_item) {
+				if (i.item && i.item->GetItem() && !i.is_multiquest_item && !returned_items_already) {
 					return_items.emplace_back(
 						PlayerEvent::HandinEntry{
 							.item_id = i.item->GetID(),

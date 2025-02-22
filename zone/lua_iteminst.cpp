@@ -300,12 +300,6 @@ std::string Lua_ItemInst::GetName() {
 	return self->GetItem()->Name;
 }
 
-int Lua_ItemInst::GetSerialNumber()
-{
-	Lua_Safe_Call_Int();
-	return self->GetSerialNumber();
-}
-
 void Lua_ItemInst::ItemSay(const char* text) // @categories Inventory and Items
 {
 	Lua_Safe_Call_Void();
@@ -437,6 +431,12 @@ void Lua_ItemInst::SetEvolveProgression(float amount)
 {
 	Lua_Safe_Call_Void();
 	self->SetEvolveProgression(amount);
+}
+
+int Lua_ItemInst::GetSerialNumber()
+{
+	Lua_Safe_Call_Int();
+	return self->GetSerialNumber();
 }
 
 luabind::scope lua_register_iteminst() {

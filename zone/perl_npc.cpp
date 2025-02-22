@@ -817,9 +817,9 @@ bool Perl_NPC_CheckHandin(
 	perl::hash handin   = handin_ref;
 	perl::hash required = required_ref;
 
-	std::map<std::string, uint32>        handin_map;
-	std::map<std::string, uint32>        required_map;
-	std::vector<EQ::ItemInstance*> items;
+	std::map<std::string, uint32>   handin_map;
+	std::map<std::string, uint32>   required_map;
+	std::vector<EQ::ItemInstance *> items;
 
 	for (auto e: handin) {
 		if (!e.first) {
@@ -853,7 +853,7 @@ bool Perl_NPC_CheckHandin(
 
 	for (auto e : items_ref) {
 		EQ::ItemInstance* i = static_cast<EQ::ItemInstance*>(e);
-		if (!i || !i->GetItem()) {
+		if (!i) {
 			continue;
 		}
 
@@ -985,6 +985,7 @@ void perl_register_npc()
 	package.add("MoveTo", (void(*)(NPC*, float, float, float))&Perl_NPC_MoveTo);
 	package.add("MoveTo", (void(*)(NPC*, float, float, float, float))&Perl_NPC_MoveTo);
 	package.add("MoveTo", (void(*)(NPC*, float, float, float, float, bool))&Perl_NPC_MoveTo);
+	package.add("MultiQuestEnable", &Perl_NPC_MultiQuestEnable);
 	package.add("NextGuardPosition", &Perl_NPC_NextGuardPosition);
 	package.add("PauseWandering", &Perl_NPC_PauseWandering);
 	package.add("PickPocket", &Perl_NPC_PickPocket);

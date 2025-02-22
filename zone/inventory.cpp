@@ -261,7 +261,7 @@ uint32 Mob::GetMaxItemUpgrade(uint32 item_id) {
 }
 
 
-bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model, bool artifact_disco) {
+bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
 	if (RuleB(Custom, DoItemUpgrades)) {
 		int original_id = item_id;
 
@@ -314,11 +314,11 @@ bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 a
 
 	}
 
-	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model, artifact_disco);
+	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model);
 }
 
 bool Client::ReturnItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
-	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model, false);
+	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model);
 }
 
 bool Client::CheckLoreConflict(const EQ::ItemData* item)
@@ -334,11 +334,7 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereSharedBank) != INVALID_INDEX);
 }
 
-bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model, bool artifact_disco) {
-	EVENT_ITEM_ScriptStopReturn();
-
-	// TODO: update calling methods and script apis to handle a failure return
-
+bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
 	const EQ::ItemData* item = database.GetItem(item_id);
 
 	// make sure the item exists
@@ -822,7 +818,19 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		PutItemInInventory(to_slot, *inst, true);
 	}
 
+	m_external_handin_items_returned.emplace_back(inst->GetItem()->ID);
+
 	safe_delete(inst);
+
+	// discover item and any augments
+	if (
+		RuleB(Character, EnableDiscoveredItems) &&
+		!GetGM() &&
+		!IsDiscovered(item_id)
+	) {
+		DiscoverItem(item_id);
+	}
+
 	return true;
 }
 
