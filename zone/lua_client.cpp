@@ -3648,6 +3648,24 @@ std::string Lua_Client::GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id
 	return self->GetBandolierItemName(bandolier_slot, slot_id);
 }
 
+uint32 Lua_Client::GetPotionBeltItemIcon(uint8 slot_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetPotionBeltItemIcon(slot_id);
+}
+
+uint32 Lua_Client::GetPotionBeltItemID(uint8 slot_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetPotionBeltItemID(slot_id);
+}
+
+std::string Lua_Client::GetPotionBeltItemName(uint8 slot_id)
+{
+	Lua_Safe_Call_String();
+	return self->GetPotionBeltItemName(slot_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3900,6 +3918,9 @@ luabind::scope lua_register_client() {
 	.def("GetNextAvailableDisciplineSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableDisciplineSlot)
 	.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(int))&Lua_Client::GetNextAvailableSpellBookSlot)
 	.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)
+	.def("GetPotionBeltItemIcon", (uint32(Lua_Client::*)(uint8))&Lua_Client::GetPotionBeltItemIcon)
+	.def("GetPotionBeltItemID", (uint32(Lua_Client::*)(uint8))&Lua_Client::GetPotionBeltItemID)
+	.def("GetPotionBeltItemName", (std::string(Lua_Client::*)(uint8))&Lua_Client::GetPotionBeltItemName)
 	.def("GetPVP", (bool(Lua_Client::*)(void))&Lua_Client::GetPVP)
 	.def("GetPVPPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetPVPPoints)
 	.def("GetRaceBitmask", (uint16(Lua_Client::*)(void))&Lua_Client::GetRaceBitmask)
