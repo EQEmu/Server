@@ -617,7 +617,7 @@ void Perl_Bot_DeleteBot(Bot* self) // @categories Script Utility
 
 void Perl_Bot_RaidGroupSay(Bot* self, const char* message) // @categories Script Utility
 {
-	self->RaidGroupSay(self, message);
+	self->RaidGroupSay(message);
 }
 
 void perl_register_bot()

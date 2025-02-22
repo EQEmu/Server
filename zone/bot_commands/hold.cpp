@@ -47,8 +47,7 @@ void bot_command_hold(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.size() == 1) {
-		Bot::RaidGroupSay(
-			sbl.front(),
+		sbl.front()->RaidGroupSay(
 			fmt::format(
 				"{}olding my attacks.",
 				clear ? "No longer h" : "H"

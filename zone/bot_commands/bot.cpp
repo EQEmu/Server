@@ -1133,7 +1133,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 	}
 
 	if (!silent_tell && c->GetBotOption(Client::booSpawnMessageSay)) {
-		Bot::RaidGroupSay(my_bot, bot_spawn_message[message_index].c_str());
+		my_bot->RaidGroupSay(bot_spawn_message[message_index].c_str());
 	}
 	else if (!silent_tell && c->GetBotOption(Client::booSpawnMessageTell)) {
 		my_bot->OwnerMessage(bot_spawn_message[message_index]);

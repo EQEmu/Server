@@ -502,7 +502,6 @@ void bot_command_cast(Client* c, const Seperator* sep)
 
 			if (IsBotSpellTypeDetrimental(spell_type) && !bot_iter->IsAttackAllowed(new_tar)) {
 				bot_iter->RaidGroupSay(
-					bot_iter,
 					fmt::format(
 						"I cannot attack [{}].",
 						new_tar->GetCleanName()

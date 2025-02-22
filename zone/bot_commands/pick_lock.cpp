@@ -24,7 +24,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 	Bot* my_bot = sbl.front();
 
 	my_bot->InterruptSpell();
-	Bot::RaidGroupSay(my_bot, "Attempting to pick the lock.");
+	my_bot->RaidGroupSay("Attempting to pick the lock.");
 
 	std::list<Doors*> door_list;
 	entity_list.GetDoorsList(door_list);
@@ -51,7 +51,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 			++open_count;
 		}
 		else {
-			Bot::RaidGroupSay(my_bot, "I am not skilled enough for this lock.");
+			my_bot->RaidGroupSay("I am not skilled enough for this lock.");
 		}
 	}
 	c->Message(Chat::White, "%i door%s attempted - %i door%s successful", door_count, ((door_count != 1) ? ("s") : ("")), open_count, ((open_count != 1) ? ("s") : ("")));

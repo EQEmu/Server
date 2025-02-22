@@ -229,7 +229,6 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 
 		if (IsCommandedSpell() && IsCasting()) {
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Interrupting {}. I have been commanded to try to cast a [{}] spell, {} on {}.",
 					CastingSpellID() ? spells[CastingSpellID()].name : "my spell",
@@ -255,7 +254,6 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 			}
 
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Casting {} [{}] on {}.",
 					GetSpellName(s.SpellId),
@@ -302,7 +300,6 @@ bool Bot::BotCastMez(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 			}
 
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Casting {} [{}] on {}.",
 					GetSpellName(s.SpellId),
@@ -343,7 +340,6 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 			}
 
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Curing the group with {}.",
 					GetSpellName(bot_spell.SpellId)
@@ -356,7 +352,6 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 			}
 
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Curing {} with {}.",
 					(tar == this ? "myself" : tar->GetCleanName()),
@@ -410,7 +405,6 @@ bool Bot::BotCastPet(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 		SetCastedSpellType(spell_type);
 
 		RaidGroupSay(
-			this,
 			fmt::format(
 				"Summoning a pet [{}].",
 				GetSpellName(bot_spell.SpellId)
@@ -466,7 +460,6 @@ bool Bot::BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 				SetCastedSpellType(spell_type);
 
 				RaidGroupSay(
-					this,
 					fmt::format(
 						"Casting {} [{}] on {}.",
 						GetSpellName(s.SpellId),
@@ -484,7 +477,6 @@ bool Bot::BotCastNuke(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 			SetCastedSpellType(spell_type);
 
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Casting {} [{}] on {}.",
 					GetSpellName(bot_spell.SpellId),
@@ -518,7 +510,6 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 			}
 
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Healing the group with {} [{}].",
 					GetSpellName(bot_spell.SpellId),
@@ -535,7 +526,6 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 			}
 
 			RaidGroupSay(
-				this,
 				fmt::format(
 					"Healing {} with {} [{}].",
 					(tar == this ? "myself" : tar->GetCleanName()),
@@ -888,7 +878,6 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 
 	if (castedSpell) {
 		RaidGroupSay(
-			this,
 			fmt::format(
 				"Casting {} on {}, please stay in range!",
 				spells[botSpell.SpellId].name,

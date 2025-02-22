@@ -661,7 +661,7 @@ void Lua_Bot::DeleteBot() {
 
 void Lua_Bot::RaidGroupSay(const char* message) {
 	Lua_Safe_Call_Void();
-	self->RaidGroupSay(self, message);
+	self->RaidGroupSay(message);
 }
 
 luabind::scope lua_register_bot() {
