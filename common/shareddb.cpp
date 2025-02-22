@@ -342,6 +342,10 @@ bool SharedDatabase::SaveCursor(
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
 		}
+
+		if (i == EQ::invslot::slotCursor) {
+			i = EQ::invbag::CURSOR_BAG_BEGIN;
+		}
 	}
 
 	return true;
