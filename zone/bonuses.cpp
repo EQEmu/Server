@@ -281,438 +281,229 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 		return;
 	}
 
-	if (!is_ammo_item) {
-		const auto recommended_level = is_augment ? recommended_level_override : inst->GetItemRecommendedLevel(true);
+	if (is_ammo_item) {
+		return;
+	}
 
-		if (IsNPC() || current_level >= recommended_level) {
-			b->HP += item->HP;
-			b->Mana += item->Mana;
-			b->Endurance += item->Endur;
+	const auto recommended_level = is_augment ? recommended_level_override : inst->GetItemRecommendedLevel(true);
+	const bool meets_recommended = (IsNPC() && RuleB(Items, NPCUseRecommendedLevels)) || current_level >= recommended_level;
 
-			b->AC += item->AC;
-			b->ATK += item->Attack;
+	auto CalcItemBonus = [&](int statValue) -> int {
+		return statValue ? (meets_recommended ? statValue : CalcRecommendedLevelBonus(current_level, recommended_level, statValue)) : 0;
+	};
 
-			b->STR += (item->AStr + item->HeroicStr);
-			b->STA += (item->ASta + item->HeroicSta);
-			b->DEX += (item->ADex + item->HeroicDex);
-			b->AGI += (item->AAgi + item->HeroicAgi);
-			b->INT += (item->AInt + item->HeroicInt);
-			b->WIS += (item->AWis + item->HeroicWis);
-			b->CHA += (item->ACha + item->HeroicCha);
+	auto CalcCappedItemBonus = [&](int currentStat, int bonus, int cap) -> int {
+		int calc_stat = currentStat + CalcItemBonus(bonus);
+		return IsOfClientBotMerc() ? std::min(cap, calc_stat) : calc_stat;
+	};
 
-			b->MR += (item->MR + item->HeroicMR);
-			b->FR += (item->FR + item->HeroicFR);
-			b->CR += (item->CR + item->HeroicCR);
-			b->PR += (item->PR + item->HeroicPR);
-			b->DR += (item->DR + item->HeroicDR);
-			b->Corrup += (item->SVCorruption + item->HeroicSVCorrup);
+	b->HP 			+= CalcItemBonus(item->HP);
+	b->Mana 	 	+= CalcItemBonus(item->Mana);
+	b->Endurance 	+= CalcItemBonus(item->Endur);
+	b->AC			+= CalcItemBonus(item->AC);
 
-			b->STRCapMod += item->HeroicStr;
-			b->STACapMod += item->HeroicSta;
-			b->DEXCapMod += item->HeroicDex;
-			b->AGICapMod += item->HeroicAgi;
-			b->INTCapMod += item->HeroicInt;
-			b->WISCapMod += item->HeroicWis;
-			b->CHACapMod += item->HeroicCha;
+	b->STR			+= CalcItemBonus(item->AStr + item->HeroicStr);
+	b->STA			+= CalcItemBonus(item->ASta + item->HeroicSta);
+	b->DEX			+= CalcItemBonus(item->ADex + item->HeroicDex);
+	b->AGI			+= CalcItemBonus(item->AAgi + item->HeroicAgi);
+	b->INT			+= CalcItemBonus(item->AInt + item->HeroicInt);
+	b->WIS			+= CalcItemBonus(item->AWis + item->HeroicWis);
+	b->CHA			+= CalcItemBonus(item->ACha + item->HeroicCha);
 
-			b->MRCapMod += item->HeroicMR;
-			b->CRCapMod += item->HeroicFR;
-			b->FRCapMod += item->HeroicCR;
-			b->PRCapMod += item->HeroicPR;
-			b->DRCapMod += item->HeroicDR;
-			b->CorrupCapMod += item->HeroicSVCorrup;
+	b->HeroicSTR	+= CalcItemBonus(item->HeroicStr);
+	b->HeroicSTA	+= CalcItemBonus(item->HeroicSta);
+	b->HeroicDEX	+= CalcItemBonus(item->HeroicDex);
+	b->HeroicAGI	+= CalcItemBonus(item->HeroicAgi);
+	b->HeroicINT	+= CalcItemBonus(item->HeroicInt);
+	b->HeroicWIS	+= CalcItemBonus(item->HeroicWis);
+	b->HeroicCHA	+= CalcItemBonus(item->HeroicCha);
 
-			b->HeroicSTR += item->HeroicStr;
-			b->HeroicSTA += item->HeroicSta;
-			b->HeroicDEX += item->HeroicDex;
-			b->HeroicAGI += item->HeroicAgi;
-			b->HeroicINT += item->HeroicInt;
-			b->HeroicWIS += item->HeroicWis;
-			b->HeroicCHA += item->HeroicCha;
+	b->STRCapMod	+= b->HeroicSTR;
+	b->STACapMod	+= b->HeroicSTA;
+	b->DEXCapMod	+= b->HeroicDEX;
+	b->AGICapMod	+= b->HeroicAGI;
+	b->INTCapMod	+= b->HeroicINT;
+	b->WISCapMod	+= b->HeroicWIS;
+	b->CHACapMod	+= b->HeroicCHA;
 
-			b->HeroicMR += item->HeroicMR;
-			b->HeroicFR += item->HeroicFR;
-			b->HeroicCR += item->HeroicCR;
-			b->HeroicPR += item->HeroicPR;
-			b->HeroicDR += item->HeroicDR;
-			b->HeroicCorrup += item->HeroicSVCorrup;
+	b->MR			+= CalcItemBonus(item->MR + item->HeroicMR);
+	b->FR			+= CalcItemBonus(item->FR + item->HeroicFR);
+	b->CR      		+= CalcItemBonus(item->CR + item->HeroicCR);
+	b->PR      		+= CalcItemBonus(item->PR + item->HeroicPR);
+	b->DR      		+= CalcItemBonus(item->DR + item->HeroicDR);
+	b->Corrup  		+= CalcItemBonus(item->SVCorruption + item->HeroicSVCorrup);
+
+	b->HeroicMR     += CalcItemBonus(item->HeroicMR);
+	b->HeroicFR     += CalcItemBonus(item->HeroicFR);
+	b->HeroicCR     += CalcItemBonus(item->HeroicCR);
+	b->HeroicPR     += CalcItemBonus(item->HeroicPR);
+	b->HeroicDR     += CalcItemBonus(item->HeroicDR);
+	b->HeroicCorrup += CalcItemBonus(item->HeroicSVCorrup);
+
+	b->MRCapMod     += b->HeroicMR;
+	b->FRCapMod     += b->HeroicFR;
+	b->CRCapMod     += b->HeroicCR;
+	b->PRCapMod     += b->HeroicPR;
+	b->DRCapMod     += b->HeroicDR;
+	b->CorrupCapMod += b->HeroicCorrup;
+
+	if (b->haste < item->Haste) {
+		b->haste = item->Haste;
+	}
+
+	b->HPRegen 		+= CalcItemBonus(item->Regen);
+	b->ManaRegen	+= CalcItemBonus(item->ManaRegen);
+	b->ManaRegen 	+= CalcItemBonus(item->EnduranceRegen);
+
+	// These have rule-configured caps.
+	b->ATK 				= CalcCappedItemBonus(b->ATK, item->Attack, RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap);
+	b->DamageShield		= CalcCappedItemBonus(b->DamageShield, item->DamageShield, RuleI(Character, ItemDamageShieldCap));
+	b->SpellShield		= CalcCappedItemBonus(b->SpellShield, item->SpellShield, RuleI(Character, ItemSpellShieldingCap));
+	b->MeleeMitigation 	= CalcCappedItemBonus(b->MeleeMitigation, item->Shielding, RuleI(Character, ItemShieldingCap));
+	b->StunResist		= CalcCappedItemBonus(b->StunResist, item->StunResist, RuleI(Character, ItemStunResistCap));
+	b->StrikeThrough	= CalcCappedItemBonus(b->StrikeThrough, item->StrikeThrough, RuleI(Character, ItemStrikethroughCap));
+	b->AvoidMeleeChance = CalcCappedItemBonus(b->AvoidMeleeChance, item->Avoidance, RuleI(Character, ItemAvoidanceCap));
+	b->HitChance		= CalcCappedItemBonus(b->HitChance, item->Accuracy, RuleI(Character, ItemAccuracyCap));
+	b->ProcChance		= CalcCappedItemBonus(b->ProcChance, item->CombatEffects, RuleI(Character, ItemCombatEffectsCap));
+	b->DoTShielding		= CalcCappedItemBonus(b->DoTShielding, item->DotShielding, RuleI(Character, ItemDoTShieldingCap));
+	b->HealAmt			= CalcCappedItemBonus(b->HealAmt, item->HealAmt, RuleI(Character, ItemHealAmtCap));
+	b->SpellDmg			= CalcCappedItemBonus(b->SpellDmg, item->SpellDmg, RuleI(Character, ItemSpellDmgCap));
+	b->Clairvoyance		= CalcCappedItemBonus(b->Clairvoyance, item->Clairvoyance, RuleI(Character, ItemClairvoyanceCap));
+	b->DSMitigation		= CalcCappedItemBonus(b->DSMitigation, item->DSMitigation, RuleI(Character, ItemDSMitigationCap));
+
+	if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
+		if (item->ExtraDmgSkill == ALL_SKILLS) {
+			for (const auto& skill_id : EQ::skills::GetExtraDamageSkills()) {
+				b->SkillDamageAmount[skill_id] = CalcCappedItemBonus(b->SkillDamageAmount[skill_id], item->ExtraDmgAmt, RuleI(Character, ItemExtraDmgCap));
+			}
 		} else {
-			b->HP += CalcRecommendedLevelBonus(current_level, recommended_level, item->HP);
-			b->Mana += CalcRecommendedLevelBonus(current_level, recommended_level, item->Mana);
-			b->Endurance += CalcRecommendedLevelBonus(current_level, recommended_level, item->Endur);
-
-			b->AC += CalcRecommendedLevelBonus(current_level, recommended_level, item->AC);
-			b->ATK += CalcRecommendedLevelBonus(current_level, recommended_level, item->Attack);
-
-			b->STR += CalcRecommendedLevelBonus(current_level, recommended_level, (item->AStr + item->HeroicStr));
-			b->STA += CalcRecommendedLevelBonus(current_level, recommended_level, (item->ASta + item->HeroicSta));
-			b->DEX += CalcRecommendedLevelBonus(current_level, recommended_level, (item->ADex + item->HeroicDex));
-			b->AGI += CalcRecommendedLevelBonus(current_level, recommended_level, (item->AAgi + item->HeroicAgi));
-			b->INT += CalcRecommendedLevelBonus(current_level, recommended_level, (item->AInt + item->HeroicInt));
-			b->WIS += CalcRecommendedLevelBonus(current_level, recommended_level, (item->AWis + item->HeroicWis));
-			b->CHA += CalcRecommendedLevelBonus(current_level, recommended_level, (item->ACha + item->HeroicCha));
-
-			b->MR += CalcRecommendedLevelBonus(current_level, recommended_level, (item->MR + item->HeroicMR));
-			b->FR += CalcRecommendedLevelBonus(current_level, recommended_level, (item->FR + item->HeroicFR));
-			b->CR += CalcRecommendedLevelBonus(current_level, recommended_level, (item->CR + item->HeroicCR));
-			b->PR += CalcRecommendedLevelBonus(current_level, recommended_level, (item->PR + item->HeroicPR));
-			b->DR += CalcRecommendedLevelBonus(current_level, recommended_level, (item->DR + item->HeroicDR));
-			b->Corrup += CalcRecommendedLevelBonus(current_level, recommended_level, (item->SVCorruption + item->HeroicSVCorrup));
-
-			b->STRCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicStr);
-			b->STACapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicSta);
-			b->DEXCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicDex);
-			b->AGICapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicAgi);
-			b->INTCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicInt);
-			b->WISCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicWis);
-			b->CHACapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicCha);
-
-			b->MRCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicMR);
-			b->CRCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicFR);
-			b->FRCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicCR);
-			b->PRCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicPR);
-			b->DRCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicDR);
-			b->CorrupCapMod += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicSVCorrup);
-
-			b->HeroicSTR += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicStr);
-			b->HeroicSTA += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicSta);
-			b->HeroicDEX += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicDex);
-			b->HeroicAGI += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicAgi);
-			b->HeroicINT += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicInt);
-			b->HeroicWIS += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicWis);
-			b->HeroicCHA += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicCha);
-
-			b->HeroicMR += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicMR);
-			b->HeroicFR += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicFR);
-			b->HeroicCR += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicCR);
-			b->HeroicPR += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicPR);
-			b->HeroicDR += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicDR);
-			b->HeroicCorrup += CalcRecommendedLevelBonus(current_level, recommended_level, item->HeroicSVCorrup);
+			b->SkillDamageAmount[item->ExtraDmgSkill] = CalcCappedItemBonus(b->SkillDamageAmount[item->ExtraDmgSkill], item->ExtraDmgAmt, RuleI(Character, ItemExtraDmgCap));
 		}
+	}
 
-		if (b->haste < item->Haste) {
-			b->haste = item->Haste;
+	if (item->Worn.Effect > 0 && item->Worn.Type == EQ::item::ItemEffectWorn) {
+		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, b, 0, item->Worn.Type);
+	}
+
+	if (item->Focus.Effect > 0 && item->Focus.Type == EQ::item::ItemEffectFocus) {
+		if (
+			IsOfClientBotMerc() ||
+			(IsNPC() && RuleB(Spells, NPC_UseFocusFromItems))
+		) {
+			ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, b, 0);
 		}
+	}
 
-		if (item->Regen != 0) {
-			b->HPRegen += item->Regen;
+	switch (item->BardType) {
+		case EQ::item::ItemTypeAllInstrumentTypes: { // (e.g. Singing Short Sword)
+			if (item->BardValue > b->singingMod) {
+				b->singingMod = item->BardValue;
+			}
+
+			if (item->BardValue > b->brassMod) {
+				b->brassMod = item->BardValue;
+			}
+
+			if (item->BardValue > b->stringedMod) {
+				b->stringedMod = item->BardValue;
+			}
+
+			if (item->BardValue > b->percussionMod) {
+				b->percussionMod = item->BardValue;
+			}
+
+			if (item->BardValue > b->windMod) {
+				b->windMod = item->BardValue;
+			}
+
+			break;
 		}
+		case EQ::item::ItemTypeSinging: {
+			if (item->BardValue > b->singingMod) {
+				b->singingMod = item->BardValue;
+			}
 
-		if (item->ManaRegen != 0) {
-			b->ManaRegen += item->ManaRegen;
+			break;
 		}
+		case EQ::item::ItemTypeWindInstrument: {
+			if (item->BardValue > b->windMod) {
+				b->windMod = item->BardValue;
+			}
 
-		if (item->EnduranceRegen != 0) {
-			b->EnduranceRegen += item->EnduranceRegen;
+			break;
 		}
+		case EQ::item::ItemTypeStringedInstrument: {
+			if (item->BardValue > b->stringedMod) {
+				b->stringedMod = item->BardValue;
+			}
 
-		if (item->Attack != 0) {
-			unsigned int cap = RuleI(Character, ItemATKCap);
-			cap += itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
+			break;
+		}
+		case EQ::item::ItemTypeBrassInstrument: {
+			if (item->BardValue > b->brassMod) {
+				b->brassMod = item->BardValue;
+			}
 
-			if (
-				IsOfClientBotMerc() &&
-				(b->ATK + item->Attack) > cap
+			break;
+		}
+		case EQ::item::ItemTypePercussionInstrument: {
+			if (item->BardValue > b->percussionMod) {
+				b->percussionMod = item->BardValue;
+			}
+
+			break;
+		}
+	}
+
+	if (item->SkillModValue != 0 && item->SkillModType <= EQ::skills::HIGHEST_SKILL) {
+		if (
+			(item->SkillModValue > 0 && b->skillmod[item->SkillModType] < item->SkillModValue) ||
+			(item->SkillModValue < 0 && b->skillmod[item->SkillModType] > item->SkillModValue)
 			) {
-				b->ATK = RuleI(Character, ItemATKCap);
-			} else {
-				b->ATK += item->Attack;
-			}
+			b->skillmod[item->SkillModType] = item->SkillModValue;
 		}
+	}
 
-		if (item->DamageShield != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->DamageShield + item->DamageShield) > RuleI(Character, ItemDamageShieldCap)
-			) {
-				b->DamageShield = RuleI(Character, ItemDamageShieldCap);
-			} else {
-				b->DamageShield += item->DamageShield;
-			}
+	if (item->FactionMod1) {
+		if (item->FactionAmt1 > 0 && item->FactionAmt1 > GetItemFactionBonus(item->FactionMod1)) {
+			AddItemFactionBonus(item->FactionMod1, item->FactionAmt1);
+		} else if (item->FactionAmt1 < 0 && item->FactionAmt1 < GetItemFactionBonus(item->FactionMod1)) {
+			AddItemFactionBonus(item->FactionMod1, item->FactionAmt1);
 		}
+	}
 
-		if (item->SpellShield != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->SpellShield + item->SpellShield) > RuleI(Character, ItemSpellShieldingCap)
-			) {
-				b->SpellShield = RuleI(Character, ItemSpellShieldingCap);
-			} else {
-				b->SpellShield += item->SpellShield;
-			}
+	if (item->FactionMod2) {
+		if (item->FactionAmt2 > 0 && item->FactionAmt2 > GetItemFactionBonus(item->FactionMod2)) {
+			AddItemFactionBonus(item->FactionMod2, item->FactionAmt2);
+		} else if (item->FactionAmt2 < 0 && item->FactionAmt2 < GetItemFactionBonus(item->FactionMod2)) {
+			AddItemFactionBonus(item->FactionMod2, item->FactionAmt2);
 		}
+	}
 
-		if (item->Shielding != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->MeleeMitigation + item->Shielding) > RuleI(Character, ItemShieldingCap)
-			) {
-				b->MeleeMitigation = RuleI(Character, ItemShieldingCap);
-			} else {
-				b->MeleeMitigation += item->Shielding;
-			}
+	if (item->FactionMod3) {
+		if (item->FactionAmt3 > 0 && item->FactionAmt3 > GetItemFactionBonus(item->FactionMod3)) {
+			AddItemFactionBonus(item->FactionMod3, item->FactionAmt3);
+		} else if (item->FactionAmt3 < 0 && item->FactionAmt3 < GetItemFactionBonus(item->FactionMod3)) {
+			AddItemFactionBonus(item->FactionMod3, item->FactionAmt3);
 		}
+	}
 
-		if (item->StunResist != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->StunResist + item->StunResist) > RuleI(Character, ItemStunResistCap)
-			) {
-				b->StunResist = RuleI(Character, ItemStunResistCap);
-			} else {
-				b->StunResist += item->StunResist;
-			}
+	if (item->FactionMod4) {
+		if (item->FactionAmt4 > 0 && item->FactionAmt4 > GetItemFactionBonus(item->FactionMod4)) {
+			AddItemFactionBonus(item->FactionMod4, item->FactionAmt4);
+		} else if (item->FactionAmt4 < 0 && item->FactionAmt4 < GetItemFactionBonus(item->FactionMod4)) {
+			AddItemFactionBonus(item->FactionMod4, item->FactionAmt4);
 		}
+	}
 
-		if (item->StrikeThrough != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->StrikeThrough + item->StrikeThrough) > RuleI(Character, ItemStrikethroughCap)
-			) {
-				b->StrikeThrough = RuleI(Character, ItemStrikethroughCap);
-			} else {
-				b->StrikeThrough += item->StrikeThrough;
+	if (!is_augment) {
+		for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
+			const auto* augment = inst->GetAugment(i);
+			if (!augment) {
+				continue;
 			}
-		}
 
-		if (item->Avoidance != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->AvoidMeleeChance + item->Avoidance) > RuleI(Character, ItemAvoidanceCap)
-			) {
-				b->AvoidMeleeChance = RuleI(Character, ItemAvoidanceCap);
-			} else {
-				b->AvoidMeleeChance += item->Avoidance;
-			}
-		}
-
-		if (item->Accuracy != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->HitChance + item->Accuracy) > RuleI(Character, ItemAccuracyCap)
-			) {
-				b->HitChance = RuleI(Character, ItemAccuracyCap);
-			} else {
-				b->HitChance += item->Accuracy;
-			}
-		}
-
-		if (item->CombatEffects != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->ProcChance + item->CombatEffects) > RuleI(Character, ItemCombatEffectsCap)
-			) {
-				b->ProcChance = RuleI(Character, ItemCombatEffectsCap);
-			} else {
-				b->ProcChance += item->CombatEffects;
-			}
-		}
-
-		if (item->DotShielding != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->DoTShielding + item->DotShielding) > RuleI(Character, ItemDoTShieldingCap)
-			) {
-				b->DoTShielding = RuleI(Character, ItemDoTShieldingCap);
-			} else {
-				b->DoTShielding += item->DotShielding;
-			}
-		}
-
-		if (item->HealAmt != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->HealAmt + item->HealAmt) > RuleI(Character, ItemHealAmtCap)
-			) {
-				b->HealAmt = RuleI(Character, ItemHealAmtCap);
-			} else {
-				b->HealAmt += item->HealAmt;
-			}
-		}
-
-		if (item->SpellDmg != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->SpellDmg + item->SpellDmg) > RuleI(Character, ItemSpellDmgCap)
-			) {
-				b->SpellDmg = RuleI(Character, ItemSpellDmgCap);
-			} else {
-				b->SpellDmg += item->SpellDmg;
-			}
-		}
-
-		if (item->Clairvoyance != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->Clairvoyance + item->Clairvoyance) > RuleI(Character, ItemClairvoyanceCap)
-			) {
-				b->Clairvoyance = RuleI(Character, ItemClairvoyanceCap);
-			} else {
-				b->Clairvoyance += item->Clairvoyance;
-			}
-		}
-
-		if (item->DSMitigation != 0) {
-			if (
-				IsOfClientBotMerc() &&
-				(b->DSMitigation + item->DSMitigation) > RuleI(Character, ItemDSMitigationCap)
-			) {
-				b->DSMitigation = RuleI(Character, ItemDSMitigationCap);
-			} else {
-				b->DSMitigation += item->DSMitigation;
-			}
-		}
-
-		if (item->Worn.Effect > 0 && item->Worn.Type == EQ::item::ItemEffectWorn) {
-			ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, b, 0, item->Worn.Type);
-		}
-
-		if (item->Focus.Effect > 0 && item->Focus.Type == EQ::item::ItemEffectFocus) {
-			if (
-				IsOfClientBotMerc() ||
-				(IsNPC() && RuleB(Spells, NPC_UseFocusFromItems))
-			) {
-				ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, b, 0);
-			}
-		}
-
-		switch (item->BardType) {
-			case EQ::item::ItemTypeAllInstrumentTypes: { // (e.g. Singing Short Sword)
-				if (item->BardValue > b->singingMod) {
-					b->singingMod = item->BardValue;
-				}
-
-				if (item->BardValue > b->brassMod) {
-					b->brassMod = item->BardValue;
-				}
-
-				if (item->BardValue > b->stringedMod) {
-					b->stringedMod = item->BardValue;
-				}
-
-				if (item->BardValue > b->percussionMod) {
-					b->percussionMod = item->BardValue;
-				}
-
-				if (item->BardValue > b->windMod) {
-					b->windMod = item->BardValue;
-				}
-
-				break;
-			}
-			case EQ::item::ItemTypeSinging: {
-				if (item->BardValue > b->singingMod) {
-					b->singingMod = item->BardValue;
-				}
-
-				break;
-			}
-			case EQ::item::ItemTypeWindInstrument: {
-				if (item->BardValue > b->windMod) {
-					b->windMod = item->BardValue;
-				}
-
-				break;
-			}
-			case EQ::item::ItemTypeStringedInstrument: {
-				if (item->BardValue > b->stringedMod) {
-					b->stringedMod = item->BardValue;
-				}
-
-				break;
-			}
-			case EQ::item::ItemTypeBrassInstrument: {
-				if (item->BardValue > b->brassMod) {
-					b->brassMod = item->BardValue;
-				}
-
-				break;
-			}
-			case EQ::item::ItemTypePercussionInstrument: {
-				if (item->BardValue > b->percussionMod) {
-					b->percussionMod = item->BardValue;
-				}
-
-				break;
-			}
-		}
-
-		if (item->SkillModValue != 0 && item->SkillModType <= EQ::skills::HIGHEST_SKILL) {
-			if (
-				(item->SkillModValue > 0 && b->skillmod[item->SkillModType] < item->SkillModValue) ||
-				(item->SkillModValue < 0 && b->skillmod[item->SkillModType] > item->SkillModValue)
-				) {
-				b->skillmod[item->SkillModType] = item->SkillModValue;
-			}
-		}
-
-		if (item->FactionMod1) {
-			if (item->FactionAmt1 > 0 && item->FactionAmt1 > GetItemFactionBonus(item->FactionMod1)) {
-				AddItemFactionBonus(item->FactionMod1, item->FactionAmt1);
-			} else if (item->FactionAmt1 < 0 && item->FactionAmt1 < GetItemFactionBonus(item->FactionMod1)) {
-				AddItemFactionBonus(item->FactionMod1, item->FactionAmt1);
-			}
-		}
-
-		if (item->FactionMod2) {
-			if (item->FactionAmt2 > 0 && item->FactionAmt2 > GetItemFactionBonus(item->FactionMod2)) {
-				AddItemFactionBonus(item->FactionMod2, item->FactionAmt2);
-			} else if (item->FactionAmt2 < 0 && item->FactionAmt2 < GetItemFactionBonus(item->FactionMod2)) {
-				AddItemFactionBonus(item->FactionMod2, item->FactionAmt2);
-			}
-		}
-
-		if (item->FactionMod3) {
-			if (item->FactionAmt3 > 0 && item->FactionAmt3 > GetItemFactionBonus(item->FactionMod3)) {
-				AddItemFactionBonus(item->FactionMod3, item->FactionAmt3);
-			} else if (item->FactionAmt3 < 0 && item->FactionAmt3 < GetItemFactionBonus(item->FactionMod3)) {
-				AddItemFactionBonus(item->FactionMod3, item->FactionAmt3);
-			}
-		}
-
-		if (item->FactionMod4) {
-			if (item->FactionAmt4 > 0 && item->FactionAmt4 > GetItemFactionBonus(item->FactionMod4)) {
-				AddItemFactionBonus(item->FactionMod4, item->FactionAmt4);
-			} else if (item->FactionAmt4 < 0 && item->FactionAmt4 < GetItemFactionBonus(item->FactionMod4)) {
-				AddItemFactionBonus(item->FactionMod4, item->FactionAmt4);
-			}
-		}
-
-		if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
-			if (item->ExtraDmgSkill == ALL_SKILLS) {
-				for (const auto& skill_id : EQ::skills::GetExtraDamageSkills()) {
-					if (
-						!IsNPC() &&
-						RuleI(Character, ItemExtraDmgCap) >= 0 &&
-						(b->SkillDamageAmount[skill_id] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
-					) {
-						b->SkillDamageAmount[skill_id] = RuleI(Character, ItemExtraDmgCap);
-					} else {
-						b->SkillDamageAmount[skill_id] += item->ExtraDmgAmt;
-					}
-				}
-			} else {
-				if (
-					!IsNPC() &&
-					RuleI(Character, ItemExtraDmgCap) >= 0 &&
-					(b->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
-				) {
-					b->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
-				} else {
-					b->SkillDamageAmount[item->ExtraDmgSkill] += item->ExtraDmgAmt;
-				}
-			}
-		}
-
-		if (!is_augment) {
-			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-				const auto* augment = inst->GetAugment(i);
-				if (!augment) {
-					continue;
-				}
-
-				AddItemBonuses(augment, b, true, false, recommended_level);
-			}
+			AddItemBonuses(augment, b, true, false, recommended_level);
 		}
 	}
 }
