@@ -1156,6 +1156,7 @@ RULE_BOOL(Items, DisableSpellFocusEffects, false, "Enable this to disable Spell 
 RULE_BOOL(Items, SummonItemAllowInvisibleAugments, false, "Enable this to allow augments to be put in invisible augment slots of items in Client::SummonItem")
 RULE_BOOL(Items, AugmentItemAllowInvisibleAugments, false, "Enable this to allow augments to be put in invisible augment slots by players")
 RULE_BOOL(Items, AlwaysReturnHandins, true, "Enable this to always return handins to the player")
+RULE_BOOL(Items, NPCUseRecommendedLevels, false, "Enable to have NPCs scale item stats by recommended levels")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Parcel)
