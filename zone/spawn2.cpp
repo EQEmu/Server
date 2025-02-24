@@ -512,13 +512,13 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 	// normal spawn2 loading
 	for (auto &s: spawns) {
-		// load from spawn2_disabled
-		bool spawn_enabled = true;
-
 		uint32 spawn_time_left = 0;
 		if (spawn_times.count(s.id) != 0) {
 			spawn_time_left = spawn_times[s.id];
 		}
+
+		// load from spawn2_disabled
+		bool spawn_enabled = true;
 
 		// check if spawn is disabled
 		for (auto &ds: disabled_spawns) {

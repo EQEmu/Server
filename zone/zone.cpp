@@ -1938,7 +1938,9 @@ void Zone::Repop(bool is_forced)
 
 	spawn_conditions.LoadSpawnConditions(short_name, instanceid);
 
-	ClearZoneState(zoneid, instanceid);
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		ClearZoneState(zoneid, instanceid);
+	}
 
 	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion())) {
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
