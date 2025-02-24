@@ -1305,6 +1305,8 @@ public:
 			return;
 		}
 
+		m_completed_shared_tasks.clear();
+
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			m_completed_shared_tasks.push_back(std::stoi(row[0]));
 		}
