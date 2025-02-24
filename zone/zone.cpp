@@ -3146,6 +3146,15 @@ uint32 Zone::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)
 	return new_timestamp;
 }
 
+uint32 Zone::GetGlobalBuffTime(uint32 spell_id)
+{
+	auto global_buff = GlobalBuffsRepository::FindOne(database, spell_id);
+	auto cur_time = Timer::GetTimeSeconds();
+	uint32 new_timestamp = std::max(static_cast<uint32>(global_buff.duration), cur_time);
+
+	return new_timestamp;
+}
+
 void Zone::ApplyGlobalBuffs()
 {
 	database.LoadGlobalBuffs();

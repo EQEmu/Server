@@ -6008,6 +6008,11 @@ uint32_t Perl__add_global_buff_time(uint32 spell_id, uint32 duration)
 	return quest_manager.AddGlobalBuffTime(spell_id, duration);
 }
 
+uint32_t Perl__get_global_buff_time(uint32 spell_id)
+{
+	return quest_manager.GetGlobalBuffTime(spell_id);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -7020,6 +7025,7 @@ void perl_register_quest()
 	*/
 	package.add("reload_global_buffs", &Perl__reload_global_buffs);
 	package.add("add_global_buff", (uint32_t(*)(uint32, uint32))&Perl__add_global_buff_time);
+	package.add("get_global_buff", (uint32_t(*)(uint32))&Perl__get_global_buff_time);
 
 }
 

@@ -284,6 +284,7 @@ public:
 	void ReloadGlobalBuffs();
 
 	uint32 AddGlobalBuffTime(uint32 spell_id, uint32 add_duration);
+	uint32 GetGlobalBuffTime(uint32 spell_id);
 
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);

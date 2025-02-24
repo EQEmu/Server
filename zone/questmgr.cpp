@@ -3975,6 +3975,13 @@ uint32 QuestManager::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)
 	return 0;
 }
 
+uint32 QuestManager::GetGlobalBuffTime(uint32 spell_id)
+{
+	if (zone && zone->IsLoaded()) {
+		return zone->GetGlobalBuffTime(spell_id);
+	}
+	return 0;
+}
 
 Client *QuestManager::GetInitiator() const {
 	if(!quests_running_.empty()) {
