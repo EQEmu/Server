@@ -3148,6 +3148,7 @@ uint32 Zone::AddGlobalBuffTime(uint32 spell_id, uint32 add_duration)
 
 void Zone::ApplyGlobalBuffs()
 {
+	database.LoadGlobalBuffs();
 	for (auto &e: entity_list.GetClientList()) {
 		int timer = (int) Mob::RandomTimer(1000, 60000);
 		e.second->GetGlobalBuffTimer()->Start(timer);
