@@ -887,7 +887,9 @@ void Zone::Shutdown(bool quiet)
 		c.second->WorldKick();
 	}
 
-	SaveZoneState();
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		SaveZoneState();
+	}
 
 	entity_list.StopMobAI();
 

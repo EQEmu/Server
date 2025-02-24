@@ -135,6 +135,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	  swarm_timer(100),
 	  m_corpse_queue_timer(1000),
 	  m_corpse_queue_shutoff_timer(30000),
+	  m_resumed_from_zone_suspend_shutoff_timer(30000),
 	  classattack_timer(1000),
 	  monkattack_timer(1000),
 	  knightattack_timer(1000),
@@ -643,6 +644,12 @@ bool NPC::Process()
 	if (m_corpse_queue_shutoff_timer.Check()) {
 		m_corpse_queue_timer.Disable();
 		m_corpse_queue_shutoff_timer.Disable();
+	}
+
+	// shuts off the temporary spawn protected state of the NPC
+	if (m_resumed_from_zone_suspend_shutoff_timer.Check()) {
+		m_resumed_from_zone_suspend_shutoff_timer.Disable();
+		SetResumedFromZoneSuspend(false);
 	}
 
 	if (tic_timer.Check()) {

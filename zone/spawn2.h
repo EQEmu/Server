@@ -74,7 +74,7 @@ public:
 	bool GetPathWhenZoneIdle() const { return path_when_zone_idle; }
 	int16 GetConditionMinValue() const { return condition_min_value; }
 	int16 GetAnimation () { return anim; }
-	void SetLootStateData(std::string loot_state_data) { m_loot_state_data = loot_state_data; }
+	inline NPC *GetNPC() const { return npcthis; }
 
 protected:
 	friend class Zone;
@@ -101,7 +101,6 @@ private:
 	EmuAppearance anim;
 	bool IsDespawned;
 	uint32  killcount;
-	std::string m_loot_state_data; // used to store loot state data for this spawn
 };
 
 class SpawnCondition {

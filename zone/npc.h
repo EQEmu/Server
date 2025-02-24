@@ -603,8 +603,10 @@ public:
 
 	// zone state save
 	inline void SetQueuedToCorpse() { m_queued_for_corpse = true; }
-	inline uint32_t SetCorpseDecayTime(uint32_t decay_time) { return m_corpse_decay_time = decay_time; }
 	inline bool IsQueuedForCorpse() { return m_queued_for_corpse; }
+	inline uint32_t SetCorpseDecayTime(uint32_t decay_time) { return m_corpse_decay_time = decay_time; }
+	inline void SetResumedFromZoneSuspend(bool state = true) { m_resumed_from_zone_suspend = state; }
+	inline bool IsResumedFromZoneSuspend() { return m_resumed_from_zone_suspend; }
 
 protected:
 
@@ -628,10 +630,12 @@ protected:
 	LootItems m_loot_items;
 
 	// zone state
+	bool m_resumed_from_zone_suspend = false;
 	bool m_queued_for_corpse = false;
 	uint32_t m_corpse_decay_time = 0;
 	Timer m_corpse_queue_timer;
 	Timer m_corpse_queue_shutoff_timer;
+	Timer m_resumed_from_zone_suspend_shutoff_timer;
 
 	std::list<NpcFactionEntriesRepository::NpcFactionEntries> faction_list;
 

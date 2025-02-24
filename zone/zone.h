@@ -464,14 +464,13 @@ public:
 	inline uint32 GetZoneServerId() const { return m_zone_server_id; }
 
 	// zone state
-	void LoadZoneState(
-		std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> spawn_states,
+	bool LoadZoneState(
 		std::unordered_map<uint32, uint32> spawn_times,
 		std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
 	);
 	void SaveZoneState();
 	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
-	void AddLootStateData(NPC *npc, const std::string &loot_data);
+	void LoadLootStateData(NPC *npc, const std::string &loot_data);
 
 private:
 	bool      allow_mercs;

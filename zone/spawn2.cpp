@@ -271,13 +271,9 @@ bool Spawn2::Process() {
 
 		npcthis = npc;
 
-		if (!m_loot_state_data.empty()) {
-			zone->AddLootStateData(npc, m_loot_state_data);
-		} else {
-			npc->AddLootTable();
-			if (npc->DropsGlobalLoot()) {
-				npc->CheckGlobalLootTables();
-			}
+		npc->AddLootTable();
+		if (npc->DropsGlobalLoot()) {
+			npc->CheckGlobalLootTables();
 		}
 
 		npc->SetSpawnGroupId(spawngroup_id_);
@@ -509,37 +505,20 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 	NPC::SpawnZoneController();
 
-	for (auto &s: spawns) {
-		uint32 spawn_time_left = 0;
-		if (spawn_times.count(s.id) != 0) {
-			spawn_time_left = spawn_times[s.id];
-		}
-	}
-
-	auto spawn_states = ZoneStateSpawnsRepository::GetWhere(
-		database,
-		fmt::format(
-			"zone_id = {} AND instance_id = {}",
-			zoneid,
-			zone->GetInstanceID()
-		)
-	);
-
-	if (!spawn_states.empty()) {
-		zone->LoadZoneState(spawn_states, spawn_times, disabled_spawns);
+	if (RuleB(Zone, StateSavingOnShutdown) && zone->LoadZoneState(spawn_times, disabled_spawns)) {
+		LogZoneState("Loaded zone state for zone [{}] instance_id [{}]", zone_name, zone->GetInstanceID());
 		return true;
 	}
 
 	// normal spawn2 loading
 	for (auto &s: spawns) {
+		// load from spawn2_disabled
+		bool spawn_enabled = true;
+
 		uint32 spawn_time_left = 0;
 		if (spawn_times.count(s.id) != 0) {
 			spawn_time_left = spawn_times[s.id];
 		}
-
-		// load from spawn2_disabled
-		bool spawn_enabled = true;
-
 
 		// check if spawn is disabled
 		for (auto &ds: disabled_spawns) {

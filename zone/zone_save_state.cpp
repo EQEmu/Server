@@ -10,6 +10,7 @@
 struct LootEntryStateData {
 	uint32   item_id;
 	uint32_t lootdrop_id;
+	uint16   charges = 0; // used in dynamically added loot (AddItem)
 
 	// cereal
 	template<class Archive>
@@ -17,7 +18,8 @@ struct LootEntryStateData {
 	{
 		ar(
 			CEREAL_NVP(item_id),
-			CEREAL_NVP(lootdrop_id)
+			CEREAL_NVP(lootdrop_id),
+			CEREAL_NVP(charges)
 		);
 	}
 };
@@ -58,6 +60,7 @@ inline std::string GetLootSerialized(NPC *npc)
 			LootEntryStateData{
 				.item_id = l->item_id,
 				.lootdrop_id = l->lootdrop_id,
+				.charges = l->charges,
 			}
 		);
 	}
@@ -176,12 +179,20 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 	return lootdrop_ids;
 }
 
-void Zone::LoadZoneState(
-	std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> spawn_states,
+bool Zone::LoadZoneState(
 	std::unordered_map<uint32, uint32> spawn_times,
 	std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
 )
 {
+	auto spawn_states = ZoneStateSpawnsRepository::GetWhere(
+		database,
+		fmt::format(
+			"zone_id = {} AND instance_id = {}",
+			zoneid,
+			zone->GetInstanceID()
+		)
+	);
+
 	LogInfo("Loading zone state spawns for zone [{}] spawns [{}]", GetShortName(), spawn_states.size());
 
 	std::vector<uint32_t> lootdrop_ids = GetLootdropIds(spawn_states);
@@ -232,11 +243,14 @@ void Zone::LoadZoneState(
 
 		if (spawn_time_left == 0) {
 			new_spawn->SetCurrentNPCID(s.npc_id);
-			new_spawn->SetLootStateData(s.loot_data);
 		}
 
 		spawn2_list.Insert(new_spawn);
 		new_spawn->Process();
+		auto n = new_spawn->GetNPC();
+		if (n) {
+			n->ClearLootItems();
+		}
 	}
 
 	// dynamic spawns, quest spawns, triggers etc.
@@ -258,7 +272,7 @@ void Zone::LoadZoneState(
 			GravityBehavior::Water
 		);
 
-		AddLootStateData(npc, s.loot_data);
+		LoadLootStateData(npc, s.loot_data);
 
 //			npc->AddLootTable();
 //			if (npc->DropsGlobalLoot()) {
@@ -276,6 +290,7 @@ void Zone::LoadZoneState(
 		npc->SetMana(s.mana);
 		npc->SetEndurance(s.endurance);
 		npc->SetCurrentWP(s.current_waypoint);
+		npc->SetResumedFromZoneSuspend(true);
 
 		entity_list.AddNPC(npc, true, true);
 
@@ -304,16 +319,19 @@ void Zone::LoadZoneState(
 					 s.spawn2_id == npc->GetSpawnPointID() &&
 					 s.spawngroup_id == npc->GetSpawnGroupId();
 			if (is_same_npc) {
+				LoadLootStateData(npc, s.loot_data);
 				LoadNPCEntityVariables(npc, s.entity_variables);
 				LoadNPCBuffs(npc, s.buffs);
-
 				npc->SetHP(s.hp);
 				npc->SetMana(s.mana);
 				npc->SetEndurance(s.endurance);
 				npc->SetCurrentWP(s.current_waypoint);
+				npc->SetResumedFromZoneSuspend(true);
 			}
 		}
 	}
+
+	return spawn_states.size() > 0;
 }
 
 void Zone::SaveZoneState()
@@ -506,7 +524,7 @@ void Zone::ClearZoneState(uint32 zone_id, uint32 instance_id)
 	);
 }
 
-void Zone::AddLootStateData(NPC *npc, const std::string& loot_data)
+void Zone::LoadLootStateData(NPC *npc, const std::string& loot_data)
 {
 	LootStateData     l{};
 	std::stringstream ss;
@@ -521,6 +539,12 @@ void Zone::AddLootStateData(NPC *npc, const std::string& loot_data)
 	for (auto &e : l.entries) {
 		const auto *db_item = database.GetItem(e.item_id);
 		if (!db_item) {
+			continue;
+		}
+
+		// dynamically added via AddItem
+		if (e.lootdrop_id == 0) {
+			npc->AddItem(e.item_id, e.charges);
 			continue;
 		}
 
@@ -539,5 +563,7 @@ void Zone::AddLootStateData(NPC *npc, const std::string& loot_data)
 
 		npc->AddLootDrop(db_item, lootdrop_entry);
 	}
+
+
 }
 
