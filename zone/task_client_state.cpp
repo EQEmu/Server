@@ -1578,7 +1578,7 @@ bool ClientTaskState::IsTaskCompleted(int task_id, Client *c)
 
 	if (c) {
 		for (auto &e: c->GetCompletedSharedTasks()) {
-			if (e.task_id == task_id) {
+			if (e == task_id) {
 				return true;
 			}
 		}

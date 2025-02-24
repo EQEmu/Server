@@ -75,7 +75,6 @@ namespace EQ
 #include "../common/repositories/character_evolving_items_repository.h"
 
 #include "bot_structs.h"
-#include "../common/repositories/completed_shared_tasks_repository.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -1292,17 +1291,25 @@ public:
 	// Task System Methods
 	inline void LoadClientSharedCompletedTasks()
 	{
-		m_completed_shared_tasks = CompletedSharedTasksRepository::GetWhere(
-			database,
-			fmt::format(
-				"character_id = {} GROUP BY task_id",
-				CharacterID()
-			)
-		);
+		std::string query = fmt::format(R"(
+			SELECT
+			cst.task_id,
+			FROM completed_shared_task_members cstm
+			JOIN completed_shared_tasks cst ON cstm.shared_task_id = cst.id
+			WHERE cstm.character_id = {}
+			GROUP BY cst.task_id;
+		)", CharacterID());
+
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			return;
+		}
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			m_completed_shared_tasks.push_back(std::stoi(row[0]));
+		}
 	};
-	inline std::vector<CompletedSharedTasksRepository::CompletedSharedTasks> GetCompletedSharedTasks() const {
-		return m_completed_shared_tasks;
-	};
+	inline std::vector<uint32_t> GetCompletedSharedTasks() const { return m_completed_shared_tasks; };
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
 	void SendTaskActivityComplete(int task_id, int activity_id, int task_index, TaskType task_type, int task_incomplete=1);
@@ -2307,7 +2314,7 @@ private:
 	bool m_has_quest_compass = false;
 	std::vector<uint32_t> m_dynamic_zone_ids;
 
-	std::vector<CompletedSharedTasksRepository::CompletedSharedTasks> m_completed_shared_tasks;
+	std::vector<uint32_t> m_completed_shared_tasks;
 
 public:
 	enum BotOwnerOption : size_t {
