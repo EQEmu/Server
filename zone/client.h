@@ -1293,7 +1293,7 @@ public:
 	{
 		std::string query = fmt::format(R"(
 			SELECT
-			cst.task_id,
+			cst.task_id
 			FROM completed_shared_task_members cstm
 			JOIN completed_shared_tasks cst ON cstm.shared_task_id = cst.id
 			WHERE cstm.character_id = {}
