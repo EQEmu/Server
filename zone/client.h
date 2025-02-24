@@ -75,6 +75,7 @@ namespace EQ
 #include "../common/repositories/character_evolving_items_repository.h"
 
 #include "bot_structs.h"
+#include "../common/repositories/completed_shared_tasks_repository.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -1289,6 +1290,19 @@ public:
 	void SendSpellTypePrompts(bool commanded_types = false, bool client_only_types = false);
 
 	// Task System Methods
+	inline void LoadClientSharedCompletedTasks()
+	{
+		m_completed_shared_tasks = CompletedSharedTasksRepository::GetWhere(
+			database,
+			fmt::format(
+				"character_id = {} GROUP BY task_id",
+				CharacterID()
+			)
+		);
+	};
+	inline std::vector<CompletedSharedTasksRepository::CompletedSharedTasks> GetCompletedSharedTasks() const {
+		return m_completed_shared_tasks;
+	};
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
 	void SendTaskActivityComplete(int task_id, int activity_id, int task_index, TaskType task_type, int task_incomplete=1);
@@ -1459,7 +1473,10 @@ public:
 	{
 		return (task_state ? task_state->EnabledTaskCount(task_set_id) : -1);
 	}
-	inline bool IsTaskCompleted(int task_id) { return (task_state ? task_state->IsTaskCompleted(task_id) : false); }
+	inline bool IsTaskCompleted(int task_id)
+	{
+		return (task_state ? task_state->IsTaskCompleted(task_id, this) : false);
+	}
 	inline bool AreTasksCompleted(std::vector<int> task_ids)
 	{
 		return (task_state ? task_state->AreTasksCompleted(task_ids) : false);
@@ -2289,6 +2306,8 @@ private:
 	glm::vec3 m_quest_compass;
 	bool m_has_quest_compass = false;
 	std::vector<uint32_t> m_dynamic_zone_ids;
+
+	std::vector<CompletedSharedTasksRepository::CompletedSharedTasks> m_completed_shared_tasks;
 
 public:
 	enum BotOwnerOption : size_t {
