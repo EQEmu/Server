@@ -289,7 +289,7 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 	const bool meets_recommended = (IsNPC() && !RuleB(Items, NPCUseRecommendedLevels)) || current_level >= recommended_level;
 
 	auto CalcItemBonus = [&](int statValue) -> int {
-		return statValue ? (meets_recommended ? statValue : CalcRecommendedLevelBonus(current_level, recommended_level, statValue)) : 0;
+		return meets_recommended ? statValue : CalcRecommendedLevelBonus(current_level, recommended_level, statValue);
 	};
 
 	auto CalcCappedItemBonus = [&](int currentStat, int bonus, int cap) -> int {
