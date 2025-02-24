@@ -62,7 +62,6 @@
 #else
 #include <stdlib.h>
 #include <pthread.h>
-#include <cereal/archives/json.hpp>
 
 #endif
 

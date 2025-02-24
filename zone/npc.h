@@ -630,12 +630,16 @@ protected:
 	LootItems m_loot_items;
 
 	// zone state
-	bool m_resumed_from_zone_suspend = false;
-	bool m_queued_for_corpse = false;
-	uint32_t m_corpse_decay_time = 0;
-	Timer m_corpse_queue_timer;
-	Timer m_corpse_queue_shutoff_timer;
-	Timer m_resumed_from_zone_suspend_shutoff_timer;
+	bool     m_resumed_from_zone_suspend  = false;
+	bool     m_queued_for_corpse          = false; // this is to check for corpse creation on zone state restore
+	uint32_t m_corpse_decay_time          = 0; // decay time set on zone state restore
+	Timer    m_corpse_queue_timer         = {}; // this is to check for corpse creation on zone state restore
+	Timer    m_corpse_queue_shutoff_timer = {};
+
+	// this is a 30-second timer that protects a NPC from having double assignment of loot
+	// this is to prevent a player from killing a NPC and then zoning out and back in to get loot again
+	// if loot was to be assigned via script again, this protects double assignment for 30 seconds
+	Timer m_resumed_from_zone_suspend_shutoff_timer = {};
 
 	std::list<NpcFactionEntriesRepository::NpcFactionEntries> faction_list;
 

@@ -250,6 +250,9 @@ bool Zone::LoadZoneState(
 		auto n = new_spawn->GetNPC();
 		if (n) {
 			n->ClearLootItems();
+			if (s.grid > 0) {
+				n->AssignWaypoints(s.grid, s.current_waypoint);
+			}
 		}
 	}
 
@@ -274,13 +277,8 @@ bool Zone::LoadZoneState(
 
 		LoadLootStateData(npc, s.loot_data);
 
-//			npc->AddLootTable();
-//			if (npc->DropsGlobalLoot()) {
-//				npc->CheckGlobalLootTables();
-//			}
-
 		if (s.grid) {
-			npc->AssignWaypoints(s.grid);
+			npc->AssignWaypoints(s.grid, s.current_waypoint);
 		}
 
 		LoadNPCEntityVariables(npc, s.entity_variables);
@@ -289,7 +287,6 @@ bool Zone::LoadZoneState(
 		npc->SetHP(s.hp);
 		npc->SetMana(s.mana);
 		npc->SetEndurance(s.endurance);
-		npc->SetCurrentWP(s.current_waypoint);
 		npc->SetResumedFromZoneSuspend(true);
 
 		entity_list.AddNPC(npc, true, true);
@@ -331,7 +328,7 @@ bool Zone::LoadZoneState(
 		}
 	}
 
-	return spawn_states.size() > 0;
+	return !spawn_states.empty();
 }
 
 void Zone::SaveZoneState()
