@@ -47,6 +47,8 @@
 #include "../common/repositories/lootdrop_entries_repository.h"
 #include "../common/repositories/base_data_repository.h"
 #include "../common/repositories/skill_caps_repository.h"
+#include "../common/repositories/zone_state_spawns_repository.h"
+#include "../common/repositories/spawn2_disabled_repository.h"
 
 struct EXPModifier
 {
@@ -104,7 +106,7 @@ class MobMovementManager;
 class Zone {
 public:
 	static bool Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static = false);
-	static void Shutdown(bool quiet = false);
+	void Shutdown(bool quiet = false);
 
 	Zone(uint32 in_zoneid, uint32 in_instanceid, const char *in_short_name);
 	~Zone();
@@ -438,6 +440,7 @@ public:
 	// loot
 	void LoadLootTable(const uint32 loottable_id);
 	void LoadLootTables(const std::vector<uint32> in_loottable_ids);
+	void LoadLootDrops(const std::vector<uint32> in_lootdrop_ids);
 	void ClearLootTables();
 	void ReloadLootTables();
 	LoottableRepository::Loottable *GetLootTable(const uint32 loottable_id);
@@ -459,6 +462,14 @@ public:
 	std::string GetBucketRemaining(const std::string& bucket_name);
 	inline void SetZoneServerId(uint32 id) { m_zone_server_id = id; }
 	inline uint32 GetZoneServerId() const { return m_zone_server_id; }
+
+	// zone state
+	bool LoadZoneState(
+		std::unordered_map<uint32, uint32> spawn_times,
+		std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
+	);
+	void SaveZoneState();
+	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 
 private:
 	bool      allow_mercs;

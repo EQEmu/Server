@@ -25,6 +25,7 @@ struct LootItem {
 	uint16      trivial_max_level;
 	uint16      npc_min_level;
 	uint16      npc_max_level;
+	uint32      lootdrop_id; // required for zone state referencing
 };
 
 typedef std::list<LootItem*> LootItems;

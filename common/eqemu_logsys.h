@@ -149,6 +149,7 @@ namespace Logs {
 		BotSpellChecks,
 		BotSpellTypeChecks,
 		NpcHandin,
+		ZoneState,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -256,7 +257,8 @@ namespace Logs {
 		"Bot Settings",
 		"Bot Spell Checks",
 		"Bot Spell Type Checks",
-		"NpcHandin"
+		"NpcHandin",
+		"ZoneState"
 	};
 }
 
