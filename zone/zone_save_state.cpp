@@ -560,7 +560,5 @@ void Zone::LoadLootStateData(NPC *npc, const std::string& loot_data)
 
 		npc->AddLootDrop(db_item, lootdrop_entry);
 	}
-
-
 }
 
