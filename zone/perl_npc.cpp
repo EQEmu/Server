@@ -808,7 +808,7 @@ void Perl_NPC_MultiQuestEnable(NPC* self)
 
 bool Perl_NPC_IsResumedFromZoneSuspend(NPC* self)
 {
-	self->IsResumedFromZoneSuspend();
+	return self->IsResumedFromZoneSuspend();
 }
 
 bool Perl_NPC_CheckHandin(
