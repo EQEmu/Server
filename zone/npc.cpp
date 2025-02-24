@@ -623,36 +623,39 @@ bool NPC::Process()
 	}
 
 	// zone state corpse creation timer
-	if (m_corpse_queue_timer.Check()) {
-		if (IsQueuedForCorpse()) {
-			LogInfo("NPC queued for corpse [{}] ({})", GetCleanName(), GetID());
-			auto decay_timer = m_corpse_decay_time;
-			uint16 corpse_id = GetID();
-			Death(this, GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
-			auto c = entity_list.GetCorpseByID(corpse_id);
-			if (c) {
-				c->UnLock();
-				c->SetDecayTimer(decay_timer);
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		// creates a corpse if the NPC is queued for corpse creation
+		if (m_corpse_queue_timer.Check()) {
+			if (IsQueuedForCorpse()) {
+				LogInfo("NPC queued for corpse [{}] ({})", GetCleanName(), GetID());
+				auto   decay_timer = m_corpse_decay_time;
+				uint16 corpse_id   = GetID();
+				Death(this, GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
+				auto c = entity_list.GetCorpseByID(corpse_id);
+				if (c) {
+					c->UnLock();
+					c->SetDecayTimer(decay_timer);
+				}
 			}
+			m_corpse_queue_timer.Disable();
+			m_corpse_queue_shutoff_timer.Disable();
 		}
-		m_corpse_queue_timer.Disable();
-		m_corpse_queue_shutoff_timer.Disable();
-	}
 
-	// shuts off the corpse queue timer if it is still running
-	if (m_corpse_queue_shutoff_timer.Check()) {
-		m_corpse_queue_timer.Disable();
-		m_corpse_queue_shutoff_timer.Disable();
-	}
+		// shuts off the corpse queue timer if it is still running
+		if (m_corpse_queue_shutoff_timer.Check()) {
+			m_corpse_queue_timer.Disable();
+			m_corpse_queue_shutoff_timer.Disable();
+		}
 
-	// shuts off the temporary spawn protected state of the NPC
-	if (m_resumed_from_zone_suspend_shutoff_timer.Check()) {
-		m_resumed_from_zone_suspend_shutoff_timer.Disable();
-		SetResumedFromZoneSuspend(false);
+		// shuts off the temporary spawn protected state of the NPC
+		if (m_resumed_from_zone_suspend_shutoff_timer.Check()) {
+			m_resumed_from_zone_suspend_shutoff_timer.Disable();
+			SetResumedFromZoneSuspend(false);
+		}
 	}
 
 	if (tic_timer.Check()) {
-		if (IsQueuedForCorpse()) {
+		if (RuleB(Zone, StateSavingOnShutdown) && IsQueuedForCorpse()) {
 			auto decay_timer = m_corpse_decay_time;
 			uint16 corpse_id = GetID();
 			Death(this, GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
