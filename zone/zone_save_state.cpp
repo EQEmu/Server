@@ -45,6 +45,47 @@ struct LootStateData {
 	}
 };
 
+inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
+{
+	LootStateData     l{};
+	std::stringstream ss;
+	{
+		ss << loot_data;
+		cereal::JSONInputArchive ar(ss);
+		l.serialize(ar);
+	}
+
+	npc->AddLootCash(l.copper, l.silver, l.gold, l.platinum);
+
+	for (auto &e: l.entries) {
+		const auto *db_item = database.GetItem(e.item_id);
+		if (!db_item) {
+			continue;
+		}
+
+		// dynamically added via AddItem
+		if (e.lootdrop_id == 0) {
+			npc->AddItem(e.item_id, e.charges);
+			continue;
+		}
+
+		const auto entries = zone->GetLootdropEntries(e.lootdrop_id);
+		if (entries.empty()) {
+			continue;
+		}
+
+		LootdropEntriesRepository::LootdropEntries lootdrop_entry;
+		for (auto                                  &le: entries) {
+			if (e.item_id == le.item_id) {
+				lootdrop_entry = le;
+				break;
+			}
+		}
+
+		npc->AddLootDrop(db_item, lootdrop_entry);
+	}
+}
+
 inline std::string GetLootSerialized(NPC *npc)
 {
 	LootStateData ls         = {};
@@ -102,7 +143,7 @@ inline std::string GetLootSerialized(Corpse *c)
 	return ss.str();
 }
 
-inline void LoadNPCEntityVariables(NPC *n, const std::string& entity_variables)
+inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 {
 	std::map<std::string, std::string> deserialized_map;
 	try {
@@ -117,12 +158,12 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string& entity_variables)
 		return;
 	}
 
-	for (const auto& [key, value] : deserialized_map) {
+	for (const auto &[key, value]: deserialized_map) {
 		n->SetEntityVariable(key, value);
 	}
 }
 
-inline void LoadNPCBuffs(NPC *n, const std::string& buffs)
+inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 {
 	std::vector<Buffs_Struct> valid_buffs;
 	try {
@@ -143,11 +184,12 @@ inline void LoadNPCBuffs(NPC *n, const std::string& buffs)
 	}
 }
 
-inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawn_states) {
+inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawn_states)
+{
 	LogInfo("Loading lootdrop ids for zone state spawns");
 
 	std::vector<uint32_t> lootdrop_ids;
-	for (auto &s: spawn_states) {
+	for (auto             &s: spawn_states) {
 		if (s.loot_data.empty()) {
 			continue;
 		}
@@ -179,6 +221,34 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 	return lootdrop_ids;
 }
 
+inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
+{
+	n->SetHP(s.hp);
+	n->SetMana(s.mana);
+	n->SetEndurance(s.endurance);
+
+	if (s.grid) {
+		n->AssignWaypoints(s.grid, s.current_waypoint);
+	}
+
+	LoadLootStateData(zone, n, s.loot_data);
+	LoadNPCEntityVariables(n, s.entity_variables);
+	LoadNPCBuffs(n, s.buffs);
+
+	if (s.is_corpse) {
+		auto decay_time = s.decay_in_seconds * 1000;
+		if (decay_time > 0) {
+			n->SetQueuedToCorpse();
+			n->SetCorpseDecayTime(decay_time);
+		}
+		else {
+			n->Depop();
+		}
+	}
+
+	n->SetResumedFromZoneSuspend(true);
+}
+
 bool Zone::LoadZoneState(
 	std::unordered_map<uint32, uint32> spawn_times,
 	std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
@@ -197,6 +267,10 @@ bool Zone::LoadZoneState(
 
 	std::vector<uint32_t> lootdrop_ids = GetLootdropIds(spawn_states);
 	zone->LoadLootDrops(lootdrop_ids);
+
+	// we have to load grids first otherwise setting grid/wp will not work
+	zone->initgrids_timer.Trigger();
+	zone->Process();
 
 	for (auto &s: spawn_states) {
 		if (s.spawngroup_id == 0) {
@@ -253,6 +327,15 @@ bool Zone::LoadZoneState(
 			if (s.grid > 0) {
 				n->AssignWaypoints(s.grid, s.current_waypoint);
 			}
+			LogInfo(
+				"Here [{}] s.grid [{}] wp [{}] x [{}] y [{}] z [{}]",
+				n->GetCleanName(),
+				s.grid,
+				s.current_waypoint,
+				s.x,
+				s.y,
+				s.z
+			);
 		}
 	}
 
@@ -275,32 +358,9 @@ bool Zone::LoadZoneState(
 			GravityBehavior::Water
 		);
 
-		LoadLootStateData(npc, s.loot_data);
-
-		if (s.grid) {
-			npc->AssignWaypoints(s.grid, s.current_waypoint);
-		}
-
-		LoadNPCEntityVariables(npc, s.entity_variables);
-		LoadNPCBuffs(npc, s.buffs);
-
-		npc->SetHP(s.hp);
-		npc->SetMana(s.mana);
-		npc->SetEndurance(s.endurance);
-		npc->SetResumedFromZoneSuspend(true);
-
 		entity_list.AddNPC(npc, true, true);
 
-		if (s.is_corpse) {
-			auto decay_time = s.decay_in_seconds * 1000;
-			if (decay_time > 0) {
-				npc->SetQueuedToCorpse();
-				npc->SetCorpseDecayTime(decay_time);
-			} else {
-				npc->Depop();
-				continue;
-			}
-		}
+		LoadNPCState(zone, npc, s);
 	}
 
 	// any NPC that is spawned by the spawn system
@@ -316,19 +376,71 @@ bool Zone::LoadZoneState(
 					 s.spawn2_id == npc->GetSpawnPointID() &&
 					 s.spawngroup_id == npc->GetSpawnGroupId();
 			if (is_same_npc) {
-				LoadLootStateData(npc, s.loot_data);
-				LoadNPCEntityVariables(npc, s.entity_variables);
-				LoadNPCBuffs(npc, s.buffs);
-				npc->SetHP(s.hp);
-				npc->SetMana(s.mana);
-				npc->SetEndurance(s.endurance);
-				npc->SetCurrentWP(s.current_waypoint);
-				npc->SetResumedFromZoneSuspend(true);
+				LoadNPCState(zone, npc, s);
 			}
 		}
 	}
 
 	return !spawn_states.empty();
+}
+
+inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
+{
+	// entity variables
+	std::map<std::string, std::string> variables;
+	for (const auto                    &k: n->GetEntityVariables()) {
+		variables[k] = n->GetEntityVariable(k);
+	}
+
+	std::ostringstream os;
+	{
+		cereal::JSONOutputArchiveSingleLine archive(os);
+		archive(variables);
+	}
+
+	s.entity_variables = os.str();
+
+	// buffs
+	auto buffs = n->GetBuffs();
+	if (!buffs) {
+		return;
+	}
+
+	std::vector<Buffs_Struct> valid_buffs;
+
+	for (int index = 0; index < n->GetMaxBuffSlots(); index++) {
+		if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
+			valid_buffs.push_back(buffs[index]);
+		}
+	}
+
+	try {
+		os = std::ostringstream();
+		{
+			cereal::JSONOutputArchiveSingleLine archive(os);
+			archive(cereal::make_nvp("buffs", valid_buffs));
+		}
+	}
+	catch (const std::exception &e) {
+		LogError("Failed to serialize buffs for NPC [{}]: {}", n->GetNPCTypeID(), e.what());
+		return;
+	}
+
+	s.buffs = os.str();
+
+	// rest
+	s.npc_id           = n->GetNPCTypeID();
+	s.loot_data        = GetLootSerialized(n);
+	s.hp               = n->GetHP();
+	s.mana             = n->GetMana();
+	s.endurance        = n->GetEndurance();
+	s.grid             = n->GetGrid();
+	s.current_waypoint = n->GetGrid() > 0 ? n->GetCWP() : 0;
+	s.x                = n->GetX();
+	s.y                = n->GetY();
+	s.z                = n->GetZ();
+	s.heading          = n->GetHeading();
+	s.created_at       = std::time(nullptr);
 }
 
 void Zone::SaveZoneState()
@@ -358,6 +470,12 @@ void Zone::SaveZoneState()
 		s.enabled             = sp->Enabled() ? 1 : 0;
 		s.anim                = sp->GetAnimation();
 		s.created_at          = std::time(nullptr);
+
+		auto n = sp->GetNPC();
+		if (n) {
+			SaveNPCState(n, s);
+		}
+
 		spawns.emplace_back(s);
 		iterator.Advance();
 	}
@@ -372,125 +490,46 @@ void Zone::SaveZoneState()
 					 s.spawn2_id == n.second->GetSpawnPointID() &&
 					 s.spawngroup_id == n.second->GetSpawnGroupId();
 			if (is_same_npc) {
-				s.loot_data = GetLootSerialized(n.second);
-				s.hp        = n.second->GetHP();
-				s.mana      = n.second->GetMana();
-				s.endurance = n.second->GetEndurance();
-
-				// entity variables
-				std::map<std::string, std::string> variables;
-				for (const auto &k : n.second->GetEntityVariables()) {
-					variables[k] = n.second->GetEntityVariable(k);
-				}
-
-				std::ostringstream os;
-				{
-					cereal::JSONOutputArchiveSingleLine archive(os);
-					archive(variables);
-				}
-
-				s.entity_variables = os.str();
-
-				// buffs
-				auto buffs = n.second->GetBuffs();
-				if (!buffs) {
-					return;
-				}
-
-				std::vector<Buffs_Struct> valid_buffs;
-				uint32 max_slots = n.second->GetMaxBuffSlots();
-				for (int index = 0; index < max_slots; index++) {
-					if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
-						valid_buffs.push_back(buffs[index]);
-					}
-				}
-
-				try {
-					os = std::ostringstream();
-					{
-						cereal::JSONOutputArchiveSingleLine archive(os);
-						archive(cereal::make_nvp("buffs", valid_buffs));
-					}
-				}
-				catch (const std::exception &e) {
-					LogError("Failed to serialize buffs for NPC [{}]: {}", n.second->GetNPCTypeID(), e.what());
-					return;
-				}
-
-				s.buffs = os.str();
-
-				s.current_waypoint = n.second->GetGrid() > 0 ? n.second->GetCWP() : 0;
+				SaveNPCState(n.second, s);
 			}
 		}
 
 		// everything below here is dynamically spawned
-		if (n.second->GetSpawnGroupId() > 0) {
-			continue;
-		}
-
-		if (n.second->GetNPCTypeID() < 100) {
-			continue;
-		}
-
-		if (n.second->HasOwner()) {
+		bool ignore_npcs =
+				 n.second->GetSpawnGroupId() > 0 ||
+				 n.second->GetNPCTypeID() < 100 ||
+				 n.second->HasOwner();
+		if (ignore_npcs) {
 			continue;
 		}
 
 		auto s = ZoneStateSpawnsRepository::NewEntity();
-		s.zone_id             = GetZoneID();
-		s.instance_id         = GetInstanceID();
-		s.npc_id              = n.second->GetNPCTypeID();
-		s.spawn2_id           = 0;
-		s.spawngroup_id       = 0;
-		s.x                   = n.second->GetX();
-		s.y                   = n.second->GetY();
-		s.z                   = n.second->GetZ();
-		s.heading             = n.second->GetHeading();
-		s.respawn_time        = 0;
-		s.variance            = 0;
-		s.grid                = n.second->GetGrid();
-		s.path_when_zone_idle = 0;
-		s.condition_id        = 0;
-		s.condition_min_value = 0;
-		s.enabled             = 1;
-		s.anim                = 0;
-		s.created_at          = std::time(nullptr);
-		s.loot_data           = GetLootSerialized(n.second);
-		s.hp                  = n.second->GetHP();
-		s.mana                = n.second->GetMana();
-		s.endurance           = n.second->GetEndurance();
-		s.current_waypoint	  = n.second->GetGrid() > 0 ? n.second->GetCWP() : 0;
+		s.zone_id     = GetZoneID();
+		s.instance_id = GetInstanceID();
+
+		SaveNPCState(n.second, s);
 
 		spawns.emplace_back(s);
 	}
 
+	// corpses
 	for (auto &n: entity_list.GetCorpseList()) {
 		if (!n.second->IsNPCCorpse()) {
 			continue;
 		}
 
 		auto s = ZoneStateSpawnsRepository::NewEntity();
-		s.zone_id             = GetZoneID();
-		s.instance_id         = GetInstanceID();
-		s.npc_id              = n.second->GetNPCTypeID();
-		s.is_corpse           = 1;
-		s.spawn2_id           = 0;
-		s.spawngroup_id       = 0;
-		s.x                   = n.second->GetX();
-		s.y                   = n.second->GetY();
-		s.z                   = n.second->GetZ();
-		s.heading             = n.second->GetHeading();
-		s.respawn_time        = 0;
-		s.variance            = 0;
-		s.grid                = 0;
-		s.path_when_zone_idle = 0;
-		s.condition_id        = 0;
-		s.condition_min_value = 0;
-		s.enabled             = 1;
-		s.anim                = 0;
-		s.created_at          = std::time(nullptr);
-		s.loot_data           = GetLootSerialized(n.second);
-		s.decay_in_seconds    = (int) (n.second->GetDecayTime() / 1000);
+		s.zone_id          = GetZoneID();
+		s.instance_id      = GetInstanceID();
+		s.npc_id           = n.second->GetNPCTypeID();
+		s.is_corpse        = 1;
+		s.x                = n.second->GetX();
+		s.y                = n.second->GetY();
+		s.z                = n.second->GetZ();
+		s.heading          = n.second->GetHeading();
+		s.created_at       = std::time(nullptr);
+		s.loot_data        = GetLootSerialized(n.second);
+		s.decay_in_seconds = (int) (n.second->GetDecayTime() / 1000);
 
 		spawns.emplace_back(s);
 	}
@@ -520,45 +559,3 @@ void Zone::ClearZoneState(uint32 zone_id, uint32 instance_id)
 		)
 	);
 }
-
-void Zone::LoadLootStateData(NPC *npc, const std::string& loot_data)
-{
-	LootStateData     l{};
-	std::stringstream ss;
-	{
-		ss << loot_data;
-		cereal::JSONInputArchive ar(ss);
-		l.serialize(ar);
-	}
-
-	npc->AddLootCash(l.copper, l.silver, l.gold, l.platinum);
-
-	for (auto &e : l.entries) {
-		const auto *db_item = database.GetItem(e.item_id);
-		if (!db_item) {
-			continue;
-		}
-
-		// dynamically added via AddItem
-		if (e.lootdrop_id == 0) {
-			npc->AddItem(e.item_id, e.charges);
-			continue;
-		}
-
-		const auto entries = GetLootdropEntries(e.lootdrop_id);
-		if (entries.empty()) {
-			continue;
-		}
-
-		LootdropEntriesRepository::LootdropEntries lootdrop_entry;
-		for (auto &le: entries) {
-			if (e.item_id == le.item_id) {
-				lootdrop_entry = le;
-				break;
-			}
-		}
-
-		npc->AddLootDrop(db_item, lootdrop_entry);
-	}
-}
-
