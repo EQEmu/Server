@@ -385,7 +385,7 @@ void Zone::LoadLootDrops(const std::vector<uint32> in_lootdrop_ids)
 		}
 	}
 
-	if (lootdrop_ids.size() > 1) {
+	if (!lootdrop_ids.empty()) {
 		LogInfo("Loaded [{}] lootdrops ({}s)", m_lootdrops.size(), std::to_string(timer.elapsed()));
 	}
 }
