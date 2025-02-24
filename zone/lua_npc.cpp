@@ -939,6 +939,12 @@ Lua_Spawn Lua_NPC::GetSpawn(lua_State* L)
 	return Lua_Spawn(self->GetSpawn());
 }
 
+bool Lua_NPC::IsResumedFromZoneSuspend()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsResumedFromZoneSuspend();
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -1040,6 +1046,7 @@ luabind::scope lua_register_npc() {
 	.def("IsOnHatelist", (bool(Lua_NPC::*)(Lua_Mob))&Lua_NPC::IsOnHatelist)
 	.def("IsRaidTarget", (bool(Lua_NPC::*)(void))&Lua_NPC::IsRaidTarget)
 	.def("IsRareSpawn", (bool(Lua_NPC::*)(void))&Lua_NPC::IsRareSpawn)
+	.def("IsResumedFromZoneSuspend",(bool(Lua_NPC::*)(void))&Lua_NPC::IsResumedFromZoneSuspend)
 	.def("IsTaunting", (bool(Lua_NPC::*)(void))&Lua_NPC::IsTaunting)
 	.def("IsUnderwaterOnly", (bool(Lua_NPC::*)(void))&Lua_NPC::IsUnderwaterOnly)
 	.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop)
