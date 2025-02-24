@@ -4689,6 +4689,9 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
 			break;
 
+		case ServerReload::Type::GlobalBuffs:
+			zone->ApplyGlobalBuffs();
+
 		default:
 			break;
 	}
