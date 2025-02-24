@@ -627,7 +627,6 @@ bool NPC::Process()
 		// creates a corpse if the NPC is queued for corpse creation
 		if (m_corpse_queue_timer.Check()) {
 			if (IsQueuedForCorpse()) {
-				LogInfo("NPC queued for corpse [{}] ({})", GetCleanName(), GetID());
 				auto   decay_timer = m_corpse_decay_time;
 				uint16 corpse_id   = GetID();
 				Death(this, GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
