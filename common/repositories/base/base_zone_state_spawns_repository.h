@@ -34,6 +34,7 @@ public:
 		uint32_t    respawn_time;
 		uint32_t    variance;
 		uint32_t    grid;
+		int32_t     current_waypoint;
 		int16_t     path_when_zone_idle;
 		uint16_t    condition_id;
 		int16_t     condition_min_value;
@@ -71,6 +72,7 @@ public:
 			"respawn_time",
 			"variance",
 			"grid",
+			"current_waypoint",
 			"path_when_zone_idle",
 			"condition_id",
 			"condition_min_value",
@@ -104,6 +106,7 @@ public:
 			"respawn_time",
 			"variance",
 			"grid",
+			"current_waypoint",
 			"path_when_zone_idle",
 			"condition_id",
 			"condition_min_value",
@@ -171,6 +174,7 @@ public:
 		e.respawn_time        = 0;
 		e.variance            = 0;
 		e.grid                = 0;
+		e.current_waypoint    = 0;
 		e.path_when_zone_idle = 0;
 		e.condition_id        = 0;
 		e.condition_min_value = 0;
@@ -234,18 +238,19 @@ public:
 			e.respawn_time        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.variance            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.grid                = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
-			e.condition_id        = row[16] ? static_cast<uint16_t>(strtoul(row[16], nullptr, 10)) : 0;
-			e.condition_min_value = row[17] ? static_cast<int16_t>(atoi(row[17])) : 0;
-			e.enabled             = row[18] ? static_cast<int16_t>(atoi(row[18])) : 1;
-			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
-			e.loot_data           = row[20] ? row[20] : "";
-			e.entity_variables    = row[21] ? row[21] : "";
-			e.buffs               = row[22] ? row[22] : "";
-			e.hp                  = row[23] ? strtoll(row[23], nullptr, 10) : 0;
-			e.mana                = row[24] ? strtoll(row[24], nullptr, 10) : 0;
-			e.endurance           = row[25] ? strtoll(row[25], nullptr, 10) : 0;
-			e.created_at          = strtoll(row[26] ? row[26] : "-1", nullptr, 10);
+			e.current_waypoint    = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.path_when_zone_idle = row[16] ? static_cast<int16_t>(atoi(row[16])) : 0;
+			e.condition_id        = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.condition_min_value = row[18] ? static_cast<int16_t>(atoi(row[18])) : 0;
+			e.enabled             = row[19] ? static_cast<int16_t>(atoi(row[19])) : 1;
+			e.anim                = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.loot_data           = row[21] ? row[21] : "";
+			e.entity_variables    = row[22] ? row[22] : "";
+			e.buffs               = row[23] ? row[23] : "";
+			e.hp                  = row[24] ? strtoll(row[24], nullptr, 10) : 0;
+			e.mana                = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.endurance           = row[26] ? strtoll(row[26], nullptr, 10) : 0;
+			e.created_at          = strtoll(row[27] ? row[27] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -293,18 +298,19 @@ public:
 		v.push_back(columns[12] + " = " + std::to_string(e.respawn_time));
 		v.push_back(columns[13] + " = " + std::to_string(e.variance));
 		v.push_back(columns[14] + " = " + std::to_string(e.grid));
-		v.push_back(columns[15] + " = " + std::to_string(e.path_when_zone_idle));
-		v.push_back(columns[16] + " = " + std::to_string(e.condition_id));
-		v.push_back(columns[17] + " = " + std::to_string(e.condition_min_value));
-		v.push_back(columns[18] + " = " + std::to_string(e.enabled));
-		v.push_back(columns[19] + " = " + std::to_string(e.anim));
-		v.push_back(columns[20] + " = '" + Strings::Escape(e.loot_data) + "'");
-		v.push_back(columns[21] + " = '" + Strings::Escape(e.entity_variables) + "'");
-		v.push_back(columns[22] + " = '" + Strings::Escape(e.buffs) + "'");
-		v.push_back(columns[23] + " = " + std::to_string(e.hp));
-		v.push_back(columns[24] + " = " + std::to_string(e.mana));
-		v.push_back(columns[25] + " = " + std::to_string(e.endurance));
-		v.push_back(columns[26] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[15] + " = " + std::to_string(e.current_waypoint));
+		v.push_back(columns[16] + " = " + std::to_string(e.path_when_zone_idle));
+		v.push_back(columns[17] + " = " + std::to_string(e.condition_id));
+		v.push_back(columns[18] + " = " + std::to_string(e.condition_min_value));
+		v.push_back(columns[19] + " = " + std::to_string(e.enabled));
+		v.push_back(columns[20] + " = " + std::to_string(e.anim));
+		v.push_back(columns[21] + " = '" + Strings::Escape(e.loot_data) + "'");
+		v.push_back(columns[22] + " = '" + Strings::Escape(e.entity_variables) + "'");
+		v.push_back(columns[23] + " = '" + Strings::Escape(e.buffs) + "'");
+		v.push_back(columns[24] + " = " + std::to_string(e.hp));
+		v.push_back(columns[25] + " = " + std::to_string(e.mana));
+		v.push_back(columns[26] + " = " + std::to_string(e.endurance));
+		v.push_back(columns[27] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -341,6 +347,7 @@ public:
 		v.push_back(std::to_string(e.respawn_time));
 		v.push_back(std::to_string(e.variance));
 		v.push_back(std::to_string(e.grid));
+		v.push_back(std::to_string(e.current_waypoint));
 		v.push_back(std::to_string(e.path_when_zone_idle));
 		v.push_back(std::to_string(e.condition_id));
 		v.push_back(std::to_string(e.condition_min_value));
@@ -397,6 +404,7 @@ public:
 			v.push_back(std::to_string(e.respawn_time));
 			v.push_back(std::to_string(e.variance));
 			v.push_back(std::to_string(e.grid));
+			v.push_back(std::to_string(e.current_waypoint));
 			v.push_back(std::to_string(e.path_when_zone_idle));
 			v.push_back(std::to_string(e.condition_id));
 			v.push_back(std::to_string(e.condition_min_value));
@@ -457,18 +465,19 @@ public:
 			e.respawn_time        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.variance            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.grid                = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
-			e.condition_id        = row[16] ? static_cast<uint16_t>(strtoul(row[16], nullptr, 10)) : 0;
-			e.condition_min_value = row[17] ? static_cast<int16_t>(atoi(row[17])) : 0;
-			e.enabled             = row[18] ? static_cast<int16_t>(atoi(row[18])) : 1;
-			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
-			e.loot_data           = row[20] ? row[20] : "";
-			e.entity_variables    = row[21] ? row[21] : "";
-			e.buffs               = row[22] ? row[22] : "";
-			e.hp                  = row[23] ? strtoll(row[23], nullptr, 10) : 0;
-			e.mana                = row[24] ? strtoll(row[24], nullptr, 10) : 0;
-			e.endurance           = row[25] ? strtoll(row[25], nullptr, 10) : 0;
-			e.created_at          = strtoll(row[26] ? row[26] : "-1", nullptr, 10);
+			e.current_waypoint    = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.path_when_zone_idle = row[16] ? static_cast<int16_t>(atoi(row[16])) : 0;
+			e.condition_id        = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.condition_min_value = row[18] ? static_cast<int16_t>(atoi(row[18])) : 0;
+			e.enabled             = row[19] ? static_cast<int16_t>(atoi(row[19])) : 1;
+			e.anim                = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.loot_data           = row[21] ? row[21] : "";
+			e.entity_variables    = row[22] ? row[22] : "";
+			e.buffs               = row[23] ? row[23] : "";
+			e.hp                  = row[24] ? strtoll(row[24], nullptr, 10) : 0;
+			e.mana                = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.endurance           = row[26] ? strtoll(row[26], nullptr, 10) : 0;
+			e.created_at          = strtoll(row[27] ? row[27] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -508,18 +517,19 @@ public:
 			e.respawn_time        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.variance            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.grid                = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.path_when_zone_idle = row[15] ? static_cast<int16_t>(atoi(row[15])) : 0;
-			e.condition_id        = row[16] ? static_cast<uint16_t>(strtoul(row[16], nullptr, 10)) : 0;
-			e.condition_min_value = row[17] ? static_cast<int16_t>(atoi(row[17])) : 0;
-			e.enabled             = row[18] ? static_cast<int16_t>(atoi(row[18])) : 1;
-			e.anim                = row[19] ? static_cast<uint16_t>(strtoul(row[19], nullptr, 10)) : 0;
-			e.loot_data           = row[20] ? row[20] : "";
-			e.entity_variables    = row[21] ? row[21] : "";
-			e.buffs               = row[22] ? row[22] : "";
-			e.hp                  = row[23] ? strtoll(row[23], nullptr, 10) : 0;
-			e.mana                = row[24] ? strtoll(row[24], nullptr, 10) : 0;
-			e.endurance           = row[25] ? strtoll(row[25], nullptr, 10) : 0;
-			e.created_at          = strtoll(row[26] ? row[26] : "-1", nullptr, 10);
+			e.current_waypoint    = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.path_when_zone_idle = row[16] ? static_cast<int16_t>(atoi(row[16])) : 0;
+			e.condition_id        = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.condition_min_value = row[18] ? static_cast<int16_t>(atoi(row[18])) : 0;
+			e.enabled             = row[19] ? static_cast<int16_t>(atoi(row[19])) : 1;
+			e.anim                = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.loot_data           = row[21] ? row[21] : "";
+			e.entity_variables    = row[22] ? row[22] : "";
+			e.buffs               = row[23] ? row[23] : "";
+			e.hp                  = row[24] ? strtoll(row[24], nullptr, 10) : 0;
+			e.mana                = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.endurance           = row[26] ? strtoll(row[26], nullptr, 10) : 0;
+			e.created_at          = strtoll(row[27] ? row[27] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -609,6 +619,7 @@ public:
 		v.push_back(std::to_string(e.respawn_time));
 		v.push_back(std::to_string(e.variance));
 		v.push_back(std::to_string(e.grid));
+		v.push_back(std::to_string(e.current_waypoint));
 		v.push_back(std::to_string(e.path_when_zone_idle));
 		v.push_back(std::to_string(e.condition_id));
 		v.push_back(std::to_string(e.condition_min_value));
@@ -658,6 +669,7 @@ public:
 			v.push_back(std::to_string(e.respawn_time));
 			v.push_back(std::to_string(e.variance));
 			v.push_back(std::to_string(e.grid));
+			v.push_back(std::to_string(e.current_waypoint));
 			v.push_back(std::to_string(e.path_when_zone_idle));
 			v.push_back(std::to_string(e.condition_id));
 			v.push_back(std::to_string(e.condition_min_value));

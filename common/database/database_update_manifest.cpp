@@ -6894,6 +6894,7 @@ CREATE TABLE `zone_state_spawns` (
   `respawn_time` int(10) unsigned NOT NULL,
   `variance` int(10) unsigned NOT NULL,
   `grid` int(10) unsigned DEFAULT 0,
+  `current_waypoint` int(11) DEFAULT 0,
   `path_when_zone_idle` smallint(6) DEFAULT 0,
   `condition_id` smallint(5) unsigned DEFAULT 0,
   `condition_min_value` smallint(6) DEFAULT 0,

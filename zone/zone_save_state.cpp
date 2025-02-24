@@ -275,6 +275,7 @@ void Zone::LoadZoneState(
 		npc->SetHP(s.hp);
 		npc->SetMana(s.mana);
 		npc->SetEndurance(s.endurance);
+		npc->SetCurrentWP(s.current_waypoint);
 
 		entity_list.AddNPC(npc, true, true);
 
@@ -309,6 +310,7 @@ void Zone::LoadZoneState(
 				npc->SetHP(s.hp);
 				npc->SetMana(s.mana);
 				npc->SetEndurance(s.endurance);
+				npc->SetCurrentWP(s.current_waypoint);
 			}
 		}
 	}
@@ -372,7 +374,7 @@ void Zone::SaveZoneState()
 					archive(variables);
 				}
 
-				s.entity_variables	= os.str();
+				s.entity_variables = os.str();
 
 				// buffs
 				auto buffs = n.second->GetBuffs();
@@ -401,6 +403,8 @@ void Zone::SaveZoneState()
 				}
 
 				s.buffs = os.str();
+
+				s.current_waypoint = n.second->GetGrid() > 0 ? n.second->GetCWP() : 0;
 			}
 		}
 
@@ -440,6 +444,7 @@ void Zone::SaveZoneState()
 		s.hp                  = n.second->GetHP();
 		s.mana                = n.second->GetMana();
 		s.endurance           = n.second->GetEndurance();
+		s.current_waypoint	  = n.second->GetGrid() > 0 ? n.second->GetCWP() : 0;
 
 		spawns.emplace_back(s);
 	}
