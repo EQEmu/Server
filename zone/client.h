@@ -1289,6 +1289,27 @@ public:
 	void SendSpellTypePrompts(bool commanded_types = false, bool client_only_types = false);
 
 	// Task System Methods
+	inline void LoadClientSharedCompletedTasks()
+	{
+		std::string query = fmt::format(R"(
+			SELECT
+			cst.task_id
+			FROM completed_shared_task_members cstm
+			JOIN completed_shared_tasks cst ON cstm.shared_task_id = cst.id
+			WHERE cstm.character_id = {}
+			GROUP BY cst.task_id;
+		)", CharacterID());
+
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			return;
+		}
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			m_completed_shared_tasks.push_back(std::stoi(row[0]));
+		}
+	};
+	inline std::vector<uint32_t> GetCompletedSharedTasks() const { return m_completed_shared_tasks; };
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
 	void SendTaskActivityComplete(int task_id, int activity_id, int task_index, TaskType task_type, int task_incomplete=1);
@@ -1459,7 +1480,10 @@ public:
 	{
 		return (task_state ? task_state->EnabledTaskCount(task_set_id) : -1);
 	}
-	inline bool IsTaskCompleted(int task_id) { return (task_state ? task_state->IsTaskCompleted(task_id) : false); }
+	inline bool IsTaskCompleted(int task_id)
+	{
+		return (task_state ? task_state->IsTaskCompleted(task_id, this) : false);
+	}
 	inline bool AreTasksCompleted(std::vector<int> task_ids)
 	{
 		return (task_state ? task_state->AreTasksCompleted(task_ids) : false);
@@ -2289,6 +2313,8 @@ private:
 	glm::vec3 m_quest_compass;
 	bool m_has_quest_compass = false;
 	std::vector<uint32_t> m_dynamic_zone_ids;
+
+	std::vector<uint32_t> m_completed_shared_tasks;
 
 public:
 	enum BotOwnerOption : size_t {
