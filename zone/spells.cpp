@@ -3135,6 +3135,17 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		}
 	}
 
+	const std::string& always_stack_str = RuleS(Spells, AlwaysStackSpells);
+	if (spellid1 != spellid2 && !always_stack_str.empty()) {
+		const auto& v = Strings::Split(always_stack_str, ",");
+		if (std::find(v.begin(), v.end(), std::to_string(spellid1)) != v.end()) {
+			return 0;
+		}
+		if (std::find(v.begin(), v.end(), std::to_string(spellid2)) != v.end()) {
+			return 0;
+		}
+	}
+
 	/*
 	One of these is a bard song and one isn't and they're both beneficial so they should stack.
 	*/
