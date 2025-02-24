@@ -154,7 +154,7 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 		}
 	}
 	catch (const std::exception &e) {
-		LogWarning("Failed to load entity variables for NPC [{}]: {}", n->GetNPCTypeID(), e.what());
+		LogZoneState("Failed to load entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
 		return;
 	}
 
@@ -174,7 +174,7 @@ inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 		}
 	}
 	catch (const std::exception &e) {
-		LogWarning("Failed to load entity variables for NPC [{}]: {}", n->GetNPCTypeID(), e.what());
+		LogZoneState("Failed to load entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
 		return;
 	}
 
@@ -204,7 +204,7 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 			}
 		}
 		catch (const std::exception &e) {
-			LogError("Failed to load loot state data for spawn2 [{}]: {}", s.id, e.what());
+			LogZoneState("Failed to load loot state data for spawn2 [{}] [{}]", s.id, e.what());
 			continue;
 		}
 
@@ -327,15 +327,6 @@ bool Zone::LoadZoneState(
 			if (s.grid > 0) {
 				n->AssignWaypoints(s.grid, s.current_waypoint);
 			}
-			LogInfo(
-				"Here [{}] s.grid [{}] wp [{}] x [{}] y [{}] z [{}]",
-				n->GetCleanName(),
-				s.grid,
-				s.current_waypoint,
-				s.x,
-				s.y,
-				s.z
-			);
 		}
 	}
 
@@ -346,8 +337,8 @@ bool Zone::LoadZoneState(
 		}
 
 		auto npc_type = content_db.LoadNPCTypesData(s.npc_id);
-		if (npc_type == nullptr) {
-			LogError("Failed to load NPC type data for npc_id [{}]", s.npc_id);
+		if (!npc_type) {
+			LogZoneState("Failed to load NPC type data for npc_id [{}]", s.npc_id);
 			continue;
 		}
 
@@ -422,7 +413,7 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 		}
 	}
 	catch (const std::exception &e) {
-		LogError("Failed to serialize buffs for NPC [{}]: {}", n->GetNPCTypeID(), e.what());
+		LogZoneState("Failed to serialize buffs for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
 		return;
 	}
 
@@ -482,18 +473,6 @@ void Zone::SaveZoneState()
 
 	// npcs that are not in the spawn2 list
 	for (auto &n: entity_list.GetNPCList()) {
-
-		// update loot data for existing spawns
-		for (auto &s: spawns) {
-			bool is_same_npc =
-					 s.npc_id == n.second->GetNPCTypeID() &&
-					 s.spawn2_id == n.second->GetSpawnPointID() &&
-					 s.spawngroup_id == n.second->GetSpawnGroupId();
-			if (is_same_npc) {
-				SaveNPCState(n.second, s);
-			}
-		}
-
 		// everything below here is dynamically spawned
 		bool ignore_npcs =
 				 n.second->GetSpawnGroupId() > 0 ||
