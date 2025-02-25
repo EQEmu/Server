@@ -1209,7 +1209,6 @@ RULE_REAL(Custom, 	PowerSourceItemTier2RateFloor,			0.1, "Smallest percentage it
 // General QoL and Customizations
 RULE_BOOL(Custom, 	UseDynamicItemDiscoveryTags, 			true, "Enable appfending Discovered By: items using the charmfile method")
 RULE_BOOL(Custom, 	TauntTogglesPetTanking, 				true, "Enable to let pets hold aggro while taunt is on")
-RULE_BOOL(Custom, 	LessStrictSpellStacking, 				true, "Don't check songs and buffs or detrimental and beneficial against each other for buff slot blocking")
 RULE_BOOL(Custom, 	EnablePetBags, 							true, "Enable 'Pet Bag' features")
 RULE_REAL(Custom,  	ItemExtraSpellAmtBardFactor, 			0.10, "Factor to multiple rune healamt bonus values by for bard songs")
 RULE_BOOL(Custom,   MultipleTwoHandedProcs,					false, "Allow two-handed weapons to proc multiple procs (such as augments)")

@@ -3297,42 +3297,35 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	}
 
 	if (RuleB(Custom, BypassMulticlassStackConflict)) {
-		auto checkClassOverlap = [&](int spellid1, int spellid2) -> bool {
-			// Automatically reject if the spell IDs are the same
+		auto check_class_overlap = [&](int spellid1, int spellid2) -> bool {
 			if (spellid1 == spellid2) {
 				return true;
 			}
 
-			bool allClassesAre255 = true;
+			unsigned int spell_mask1 = 0;
+			unsigned int spell_mask2 = 0;
 
-			for (int i = 0; i < Class::PLAYER_CLASS_COUNT; ++i) {
-				bool spell1Usable = (spells[spellid1].classes[i] > 0 && spells[spellid1].classes[i] < 255);
-				bool spell2Usable = (spells[spellid2].classes[i] > 0 && spells[spellid2].classes[i] < 255);
-
-				// Detect overlap if both spells can be used by the same class
-				if (spell1Usable && spell2Usable) {
-					return true; // Exit early if overlap is found
+			for (int class_id = Class::Warrior; class_id <= Class::Berserker; ++class_id) {
+				if (spells[spellid1].classes[class_id] <= RuleI(Character, MaxLevel)) {
+					spell_mask1 |= (1 << class_id);
 				}
-
-				// Check if both spells have 255 for this class index
-				if (spells[spellid1].classes[i] != 255 || spells[spellid2].classes[i] != 255) {
-					allClassesAre255 = false; // If any class isn't 255, flag it
+				if (spells[spellid2].classes[class_id] <= RuleI(Character, MaxLevel)) {
+					spell_mask2 |= (1 << class_id);
 				}
 			}
 
-			// Return true if all class indices for both spells are 255
-			return allClassesAre255;
+			return (spell_mask1 & spell_mask2) == 0;
 		};
 
 
-		auto isSameCaster = [&](Mob* caster1, Mob* caster2) {
+		auto is_same_caster = [&](Mob* caster1, Mob* caster2) {
             return (caster1 && caster2 && caster1->GetID() == caster2->GetID()) ||
                    (caster1 && caster1->GetID() == GetID()) ||
                    (caster2 && caster2->GetID() == GetID());
         };
 
 		if (RuleB(Custom, BypassMulticlassStackConflict)) {
-			if (!checkClassOverlap(spellid1, spellid2) && isSameCaster(caster1, caster2)) {
+			if (!check_class_overlap(spellid1, spellid2) && is_same_caster(caster1, caster2)) {
 				return 0;
 			}
 		}
@@ -3390,12 +3383,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			LogSpells("[{}] and [{}] are beneficial, and one is a bard song, no action needs to be taken", sp1.name, sp2.name);
 			return (0);
 		}
-	}
-
-	if (RuleB(Custom, LessStrictSpellStacking) && IsShortDurationBuff(spellid1) != IsShortDurationBuff(spellid2))
-	{
-		LogSpells("[{}] and [{}] have dissimilar shortbuffness, no action taken", sp1.name, sp2.name);
-		return (0);
 	}
 
 	if (RuleB(Custom, ClearRestingDetrimentalEffectsEnabled) && IsDetrimentalSpell(spellid1) != IsDetrimentalSpell(spellid2)) {
