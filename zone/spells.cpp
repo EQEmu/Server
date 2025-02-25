@@ -3306,14 +3306,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			unsigned int spell_mask2 = 0;
 
 			for (int class_id = 0; class_id < Class::PLAYER_CLASS_COUNT; class_id++) {
-				LogDebug("Checking Class -> {}", GetPlayerClassAbbreviation(class_id+1));
 				if (spells[spellid1].classes[class_id] <= RuleI(Character, MaxLevel)) {
 					spell_mask1 |= (1 << class_id);
 				}
 				if (spells[spellid2].classes[class_id] <= RuleI(Character, MaxLevel)) {
 					spell_mask2 |= (1 << class_id);
 				}
-				LogDebug("Caster-> [{}] Check 2 -> spell_id -> [{}], [{}] -> [{}], [{}]",caster1->GetCleanName(), spellid1,spellid2, spell_mask1, spell_mask2);
 			}
 
 			return (spell_mask1 & spell_mask2) != 0;
