@@ -4,6 +4,8 @@
 #include "../common/types.h"
 #include "../common/spdat.h"
 
+#include <cereal/cereal.hpp>
+
 #define	HIGHEST_RESIST 9 //Max resist type value
 #define MAX_SPELL_PROJECTILE 10 //Max amount of spell projectiles that can be active by a single mob.
 
@@ -272,6 +274,46 @@ struct Buffs_Struct {
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
+
+	// cereal
+	template<class Archive>
+	void serialize(Archive &ar)
+	{
+
+		std::string caster_name_str(caster_name);
+		if (Archive::is_saving::value) {
+			caster_name_str = std::string(caster_name);
+		}
+
+		ar(
+			CEREAL_NVP(spellid),
+			CEREAL_NVP(casterlevel),
+			CEREAL_NVP(casterid),
+			CEREAL_NVP(caster_name_str),
+			CEREAL_NVP(ticsremaining),
+			CEREAL_NVP(counters),
+			CEREAL_NVP(hit_number),
+			CEREAL_NVP(melee_rune),
+			CEREAL_NVP(magic_rune),
+			CEREAL_NVP(dot_rune),
+			CEREAL_NVP(caston_x),
+			CEREAL_NVP(caston_y),
+			CEREAL_NVP(caston_z),
+			CEREAL_NVP(ExtraDIChance),
+			CEREAL_NVP(RootBreakChance),
+			CEREAL_NVP(instrument_mod),
+			CEREAL_NVP(virus_spread_time),
+			CEREAL_NVP(persistant_buff),
+			CEREAL_NVP(client),
+			CEREAL_NVP(UpdateClient)
+		);
+
+		// Copy back into caster_name after deserialization
+		if (Archive::is_loading::value) {
+			strncpy(caster_name, caster_name_str.c_str(), sizeof(caster_name));
+			caster_name[sizeof(caster_name) - 1] = '\0'; // Ensure null termination
+		}
+	}
 };
 
 struct StatBonuses {

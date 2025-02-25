@@ -198,6 +198,7 @@ public:
 	);
 	void ReturnHandinItems(Lua_Client c);
 	Lua_Spawn GetSpawn(lua_State* L);
+	bool IsResumedFromZoneSuspend();
 };
 
 #endif
