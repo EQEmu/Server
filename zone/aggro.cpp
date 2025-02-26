@@ -725,7 +725,7 @@ std::list<Mob*> EntityList::GetHatedList(Mob *attacker, Mob *exclude, bool inc_g
 
 	// Return a list of how many mobs, within aggro range, hate *attacker
 	if (!attacker)
-		return result;	
+		return result;
 
 	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
 		NPC *mob = it->second;
