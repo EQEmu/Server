@@ -934,6 +934,10 @@ void Client::ReportConnectingState() {
 
 bool Client::SaveAA()
 {
+	if (aa_ranks.empty()) {
+		return true;
+	}
+
 	std::vector<CharacterAlternateAbilitiesRepository::CharacterAlternateAbilities> v;
 
 	uint32 aa_points_spent = 0;
@@ -965,7 +969,7 @@ bool Client::SaveAA()
 
 	m_pp.aapoints_spent = aa_points_spent + m_epp.expended_aa;
 
-	return !v.empty() ? CharacterAlternateAbilitiesRepository::ReplaceMany(database, v) : true;
+	return CharacterAlternateAbilitiesRepository::ReplaceMany(database, v);
 }
 
 void Client::RemoveExpendedAA(int aa_id)
