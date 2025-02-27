@@ -376,6 +376,7 @@ public:
 	bool botquest();
 	bool createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender);
 
+	bool handin(std::map<std::string, uint32> required);
 
 private:
 	std::stack<running_quest> quests_running_;

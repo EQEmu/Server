@@ -5973,6 +5973,28 @@ void Perl__SpawnGrid(uint32 npc_id, float x, float y, float z, float heading, fl
 	quest_manager.SpawnGrid(npc_id, glm::vec4(x, y, z, heading), spacing, spawn_count);
 }
 
+bool Perl__handin(perl::reference handin_ref)
+{
+	perl::hash handin = handin_ref;
+
+	std::map<std::string, uint32> handin_map;
+
+	for (auto e: handin) {
+		if (!e.first) {
+			continue;
+		}
+
+		if (Strings::EqualFold(e.first, "0")) {
+			continue;
+		}
+
+		const uint32 count = static_cast<uint32>(handin.at(e.first));
+		handin_map[e.first] = count;
+	}
+
+	return quest_manager.handin(handin_map);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6698,6 +6720,7 @@ void perl_register_quest()
 	package.add("gmsay", (void(*)(const char*, int, bool))&Perl__gmsay);
 	package.add("gmsay", (void(*)(const char*, int, bool, int))&Perl__gmsay);
 	package.add("gmsay", (void(*)(const char*, int, bool, int, int))&Perl__gmsay);
+	package.add("handin", &Perl__handin);
 	package.add("has_zone_flag", &Perl__has_zone_flag);
 	package.add("hasrecipelearned", &Perl__hasrecipelearned);
 	package.add("hastimer", &Perl__hastimer);

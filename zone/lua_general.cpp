@@ -5642,6 +5642,31 @@ Lua_Zone lua_get_zone()
 	return Lua_Zone(zone);
 }
 
+bool lua_handin(luabind::adl::object handin_table)
+{
+	std::map<std::string, uint32> handin_map;
+
+	for (luabind::iterator i(handin_table), end; i != end; i++) {
+		std::string key;
+		if (luabind::type(i.key()) == LUA_TSTRING) {
+			key = luabind::object_cast<std::string>(i.key());
+		}
+		else if (luabind::type(i.key()) == LUA_TNUMBER) {
+			key = fmt::format("{}", luabind::object_cast<int>(i.key()));
+		}
+		else {
+			LogError("Handin key type [{}] not supported", luabind::type(i.key()));
+		}
+
+		if (!key.empty()) {
+			handin_map[key] = luabind::object_cast<uint32>(handin_table[i.key()]);
+			LogNpcHandinDetail("Handin key [{}] value [{}]", key, handin_map[key]);
+		}
+	}
+
+	return quest_manager.handin(handin_map);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6450,6 +6475,7 @@ luabind::scope lua_register_general() {
 		luabind::def("spawn_circle", &lua_spawn_circle),
 		luabind::def("spawn_grid", &lua_spawn_grid),
 		luabind::def("get_zone", &lua_get_zone),
+		luabind::def("handin", &lua_handin),
 		/*
 			Cross Zone
 		*/
