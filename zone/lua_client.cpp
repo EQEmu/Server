@@ -1199,16 +1199,6 @@ void Lua_Client::SetStartZone(int zone_id, float x, float y, float z) {
 	self->SetStartZone(zone_id, x, y, z);
 }
 
-void Lua_Client::KeyRingAdd(uint32 item) {
-	Lua_Safe_Call_Void();
-	self->KeyRingAdd(item);
-}
-
-bool Lua_Client::KeyRingCheck(uint32 item) {
-	Lua_Safe_Call_Bool();
-	return self->KeyRingCheck(item);
-}
-
 void Lua_Client::AddPVPPoints(uint32 points) {
 	Lua_Safe_Call_Void();
 	self->AddPVPPoints(points);
@@ -3548,6 +3538,34 @@ std::string Lua_Client::GetPotionBeltItemName(uint8 slot_id)
 	return self->GetPotionBeltItemName(slot_id);
 }
 
+bool Lua_Client::KeyRingAdd(uint32 item) {
+	Lua_Safe_Call_Bool();
+	return self->KeyRingAdd(item);
+}
+
+bool Lua_Client::KeyRingCheck(uint32 item) {
+	Lua_Safe_Call_Bool();
+	return self->KeyRingCheck(item);
+}
+
+bool Lua_Client::KeyRingClear()
+{
+	Lua_Safe_Call_Bool();
+	return self->KeyRingClear();
+}
+
+void Lua_Client::KeyRingList()
+{
+	Lua_Safe_Call_Void();
+	self->KeyRingList();
+}
+
+bool Lua_Client::KeyRingRemove(uint32 item_id)
+{
+	Lua_Safe_Call_Bool();
+	return self->KeyRingRemove(item_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3869,8 +3887,11 @@ luabind::scope lua_register_client() {
 	.def("IsTaskActive", (bool(Lua_Client::*)(int))&Lua_Client::IsTaskActive)
 	.def("IsTaskActivityActive", (bool(Lua_Client::*)(int,int))&Lua_Client::IsTaskActivityActive)
 	.def("IsTaskCompleted", (bool(Lua_Client::*)(int))&Lua_Client::IsTaskCompleted)
-	.def("KeyRingAdd", (void(Lua_Client::*)(uint32))&Lua_Client::KeyRingAdd)
+	.def("KeyRingAdd", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingAdd)
 	.def("KeyRingCheck", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingCheck)
+	.def("KeyRingClear", (bool(Lua_Client::*)(void))&Lua_Client::KeyRingClear)
+	.def("KeyRingList", (void(Lua_Client::*)(void))&Lua_Client::KeyRingList)
+	.def("KeyRingRemove", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingRemove)
 	.def("Kick", (void(Lua_Client::*)(void))&Lua_Client::Kick)
 	.def("LearnDisciplines", (uint16(Lua_Client::*)(uint8,uint8))&Lua_Client::LearnDisciplines)
 	.def("LearnRecipe", (void(Lua_Client::*)(uint32))&Lua_Client::LearnRecipe)

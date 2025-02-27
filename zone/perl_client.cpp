@@ -1142,16 +1142,6 @@ void Perl_Client_SetStartZone(Client* self, uint32 zone_id, float x, float y, fl
 	self->SetStartZone(zone_id, x, y, z, heading);
 }
 
-void Perl_Client_KeyRingAdd(Client* self, uint32 item_id) // @categories Account and Character, Inventory and Items
-{
-	self->KeyRingAdd(item_id);
-}
-
-bool Perl_Client_KeyRingCheck(Client* self, uint32 item_id) // @categories Account and Character, Inventory and Items
-{
-	return self->KeyRingCheck(item_id);
-}
-
 void Perl_Client_AddPVPPoints(Client* self, uint32 points) // @categories Currency and Points
 {
 	self->AddPVPPoints(points);
@@ -3306,6 +3296,31 @@ std::string Perl_Client_GetPotionBeltItemName(Client* self, uint8 slot_id)
 	return self->GetPotionBeltItemName(slot_id);
 }
 
+bool Perl_Client_KeyRingAdd(Client* self, uint32 item_id) // @categories Account and Character, Inventory and Items
+{
+	return self->KeyRingAdd(item_id);
+}
+
+bool Perl_Client_KeyRingCheck(Client* self, uint32 item_id) // @categories Account and Character, Inventory and Items
+{
+	return self->KeyRingCheck(item_id);
+}
+
+bool Perl_Client_KeyRingClear(Client* self)
+{
+	return self->KeyRingClear();
+}
+
+void Perl_Client_KeyRingList(Client* self)
+{
+	self->KeyRingList();
+}
+
+bool Perl_Client_KeyRingRemove(Client* self, uint32 item_id)
+{
+	return self->KeyRingRemove(item_id);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3630,6 +3645,9 @@ void perl_register_client()
 	package.add("IsTaskCompleted", &Perl_Client_IsTaskCompleted);
 	package.add("KeyRingAdd", &Perl_Client_KeyRingAdd);
 	package.add("KeyRingCheck", &Perl_Client_KeyRingCheck);
+	package.add("KeyRingClear", &Perl_Client_KeyRingClear);
+	package.add("KeyRingList", &Perl_Client_KeyRingList);
+	package.add("KeyRingRemove", &Perl_Client_KeyRingRemove);
 	package.add("Kick", &Perl_Client_Kick);
 	package.add("LearnDisciplines", &Perl_Client_LearnDisciplines);
 	package.add("LearnRecipe", &Perl_Client_LearnRecipe);
