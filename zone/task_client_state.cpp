@@ -952,6 +952,8 @@ int ClientTaskState::IncrementDoneCount(
 
 				client->CancelTask(task_index, task_data->type);
 			}
+
+			client->LoadClientSharedCompletedTasks();
 		}
 	}
 	else {
@@ -1561,7 +1563,7 @@ int ClientTaskState::TaskTimeLeft(int task_id)
 	return -1;
 }
 
-bool ClientTaskState::IsTaskCompleted(int task_id)
+bool ClientTaskState::IsTaskCompleted(int task_id, Client *c)
 {
 	if (!RuleB(TaskSystem, RecordCompletedTasks)) {
 		return false;
@@ -1571,6 +1573,14 @@ bool ClientTaskState::IsTaskCompleted(int task_id)
 		LogTasks("Comparing completed task [{}] with [{}]", e.task_id, task_id);
 		if (e.task_id == task_id) {
 			return true;
+		}
+	}
+
+	if (c) {
+		for (auto &e: c->GetCompletedSharedTasks()) {
+			if (e == task_id) {
+				return true;
+			}
 		}
 	}
 
