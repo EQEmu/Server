@@ -685,11 +685,9 @@ public:
 
 	// Spell lists
 	void CheckBotSpells();
-	void MapSpellTypeLevels();
-	const std::map<int32_t, std::map<int32_t, BotSpellTypesByClass>>& GetCommandedSpellTypesMinLevels() { return commanded_spells_min_level; }
 	std::list<BotSpellTypeOrder> GetSpellTypesPrioritized(uint8 priority_type);
 	static uint16 GetParentSpellType(uint16 spell_type);
-	bool IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id);
+	static bool IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id);
 	inline uint16 GetCastedSpellType() const { return _castedSpellType; }
 	void SetCastedSpellType(uint16 spell_type);
 	bool IsValidSpellTypeSubType(uint16 spell_type, uint16 sub_type, uint16 spell_id);
@@ -1152,8 +1150,6 @@ protected:
 	std::vector<BotSpells> AIBot_spells;
 	std::vector<BotSpells> AIBot_spells_enforced;
 	std::unordered_map<uint16, std::vector<BotSpells_wIndex>> AIBot_spells_by_type;
-
-	std::map<int32_t, std::map<int32_t, BotSpellTypesByClass>> commanded_spells_min_level;
 
 	std::vector<BotTimer> bot_timers;
 	std::vector<BotBlockedBuffs> bot_blocked_buffs;
