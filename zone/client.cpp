@@ -965,6 +965,10 @@ bool Client::SaveAA()
 
 	m_pp.aapoints_spent = aa_points_spent + m_epp.expended_aa;
 
+	if (v.empty()) {
+		return true;
+	}
+
 	return CharacterAlternateAbilitiesRepository::ReplaceMany(database, v);
 }
 
