@@ -276,6 +276,11 @@ void NPC::AddLootDrop(
 	uint32 augment_six
 )
 {
+	if (m_resumed_from_zone_suspend) {
+		LogZoneState("NPC [{}] is resuming from zone suspend, skipping AddItem", GetCleanName());
+		return;
+	}
+
 	if (!item2) {
 		return;
 	}
@@ -500,6 +505,7 @@ void NPC::AddLootDrop(
 		parse->EventNPC(EVENT_LOOT_ADDED, this, nullptr, "", 0, &args);
 	}
 
+	item->lootdrop_id = loot_drop.lootdrop_id;
 	m_loot_items.push_back(item);
 
 	if (found) {

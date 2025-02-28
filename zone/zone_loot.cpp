@@ -300,3 +300,92 @@ std::vector<LootdropEntriesRepository::LootdropEntries> Zone::GetLootdropEntries
 	return entries;
 }
 
+void Zone::LoadLootDrops(const std::vector<uint32> in_lootdrop_ids)
+{
+	BenchTimer timer;
+
+	// copy lootdrop_ids
+	std::vector<uint32> lootdrop_ids = in_lootdrop_ids;
+
+	// check if lootdrop is already loaded
+	std::vector<uint32> loaded_drops = {};
+	for (const auto &e: lootdrop_ids) {
+		for (const auto &f: m_lootdrops) {
+			if (e == f.id) {
+				LogLootDetail("Lootdrop [{}] already loaded", e);
+				loaded_drops.push_back(e);
+			}
+		}
+	}
+
+	// remove loaded drops from lootdrop_ids
+	for (const auto &e: loaded_drops) {
+		lootdrop_ids.erase(
+			std::remove(
+				lootdrop_ids.begin(),
+				lootdrop_ids.end(),
+				e
+			),
+			lootdrop_ids.end()
+		);
+	}
+
+	if (lootdrop_ids.empty()) {
+		LogLootDetail("No lootdrops to load");
+		return;
+	}
+
+	auto lootdrops = LootdropRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"id IN ({})",
+			Strings::Join(lootdrop_ids, ",")
+		)
+	);
+
+	auto lootdrop_entries = LootdropEntriesRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"lootdrop_id IN ({})",
+			Strings::Join(lootdrop_ids, ",")
+		)
+	);
+
+	// emplace back drops to m_lootdrops if not exists
+	for (const auto &e: lootdrops) {
+		bool has_drop = false;
+
+		for (const auto &l: m_lootdrops) {
+			if (e.id == l.id) {
+				has_drop = true;
+				break;
+			}
+		}
+
+		bool has_entry = false;
+		if (!has_drop) {
+			// add lootdrop
+			m_lootdrops.emplace_back(e);
+
+			// add lootdrop entries
+			for (const auto &f: lootdrop_entries) {
+				if (e.id == f.lootdrop_id) {
+
+					// check if lootdrop entry already exists in memory
+					has_entry = false;
+					for (const auto &g: m_lootdrop_entries) {
+						if (f.lootdrop_id == g.lootdrop_id && f.item_id == g.item_id && f.multiplier == g.multiplier) {
+							has_entry = true;
+							break;
+						}
+					}
+
+				}
+			}
+		}
+	}
+
+	if (!lootdrop_ids.empty()) {
+		LogInfo("Loaded [{}] lootdrops ({}s)", m_lootdrops.size(), std::to_string(timer.elapsed()));
+	}
+}

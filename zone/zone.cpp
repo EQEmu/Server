@@ -64,6 +64,7 @@
 #include "../common/repositories/ldon_trap_templates_repository.h"
 #include "../common/repositories/respawn_times_repository.h"
 #include "../common/repositories/npc_emotes_repository.h"
+#include "../common/repositories/zone_state_spawns_repository.h"
 #include "../common/serverinfo.h"
 #include "../common/repositories/merc_stance_entries_repository.h"
 #include "../common/repositories/alternate_currency_repository.h"
@@ -880,57 +881,66 @@ void Zone::Shutdown(bool quiet)
 	}
 
 	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Zone, zone->GetZoneID(), zone->GetInstanceID());
+	// save and kick all clients
+	for (auto c : entity_list.GetClientList()) {
+		c.second->Save();
+		c.second->WorldKick();
+	}
+
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		SaveZoneState();
+	}
 
 	entity_list.StopMobAI();
 
 	std::map<uint32, NPCType *>::iterator itr;
-	while (!zone->npctable.empty()) {
-		itr = zone->npctable.begin();
+	while (!npctable.empty()) {
+		itr = npctable.begin();
 		delete itr->second;
 		itr->second = nullptr;
-		zone->npctable.erase(itr);
+		npctable.erase(itr);
 	}
 
-	while (!zone->merctable.empty()) {
-		itr = zone->merctable.begin();
+	while (!merctable.empty()) {
+		itr = merctable.begin();
 		delete itr->second;
 		itr->second = nullptr;
-		zone->merctable.erase(itr);
+		merctable.erase(itr);
 	}
 
-	zone->adventure_entry_list_flavor.clear();
+	adventure_entry_list_flavor.clear();
 
 	std::map<uint32, LDoNTrapTemplate *>::iterator itr4;
-	while (!zone->ldon_trap_list.empty()) {
-		itr4 = zone->ldon_trap_list.begin();
+	while (!ldon_trap_list.empty()) {
+		itr4 = ldon_trap_list.begin();
 		delete itr4->second;
 		itr4->second = nullptr;
-		zone->ldon_trap_list.erase(itr4);
+		ldon_trap_list.erase(itr4);
 	}
-	zone->ldon_trap_entry_list.clear();
+	ldon_trap_entry_list.clear();
 
 	LogInfo(
 		"Zone [{}] zone_id [{}] version [{}] instance_id [{}]",
-		zone->GetShortName(),
-		zone->GetZoneID(),
-		zone->GetInstanceVersion(),
-		zone->GetInstanceID()
+		GetShortName(),
+		GetZoneID(),
+		GetInstanceVersion(),
+		GetInstanceID()
 	);
 	petition_list.ClearPetitions();
-	zone->SetZoneHasCurrentTime(false);
+	SetZoneHasCurrentTime(false);
 	if (!quiet) {
 		LogInfo(
 			"Zone [{}] zone_id [{}] version [{}] instance_id [{}] Going to sleep",
-			zone->GetShortName(),
-			zone->GetZoneID(),
-			zone->GetInstanceVersion(),
-			zone->GetInstanceID()
+			GetShortName(),
+			GetZoneID(),
+			GetInstanceVersion(),
+			GetInstanceID()
 		);
 	}
 
 	is_zone_loaded = false;
 
-	zone->ResetAuth();
+	ResetAuth();
 	safe_delete(zone);
 	entity_list.ClearAreas();
 	parse->ReloadQuests(true);
@@ -1099,6 +1109,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 }
 
 Zone::~Zone() {
+	LogInfo("Zone destructor called for zone [{}]", short_name);
+
 	spawn2_list.Clear();
 	if (worldserver.Connected()) {
 		worldserver.SetZoneData(0);
@@ -1925,6 +1937,10 @@ void Zone::Repop(bool is_forced)
 	}
 
 	spawn_conditions.LoadSpawnConditions(short_name, instanceid);
+
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		ClearZoneState(zoneid, instanceid);
+	}
 
 	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion())) {
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
@@ -3192,7 +3208,7 @@ std::string Zone::GetBucketRemaining(const std::string& bucket_name)
 
 void Zone::DisableRespawnTimers()
 {
-	LinkedListIterator<Spawn2*> e(spawn2_list);
+	LinkedListIterator<Spawn2 *> e(spawn2_list);
 
 	e.Reset();
 
@@ -3202,4 +3218,5 @@ void Zone::DisableRespawnTimers()
 	}
 }
 
+#include "zone_save_state.cpp"
 #include "zone_loot.cpp"

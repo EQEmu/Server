@@ -806,6 +806,11 @@ void Perl_NPC_MultiQuestEnable(NPC* self)
 	self->MultiQuestEnable();
 }
 
+bool Perl_NPC_IsResumedFromZoneSuspend(NPC* self)
+{
+	return self->IsResumedFromZoneSuspend();
+}
+
 bool Perl_NPC_CheckHandin(
 	NPC* self,
 	Client* c,
@@ -983,6 +988,7 @@ void perl_register_npc()
 	package.add("IsOnHatelist", &Perl_NPC_IsOnHatelist);
 	package.add("IsRaidTarget", &Perl_NPC_IsRaidTarget);
 	package.add("IsRareSpawn", &Perl_NPC_IsRareSpawn);
+	package.add("IsResumedFromZoneSuspend", &Perl_NPC_IsResumedFromZoneSuspend);
 	package.add("IsTaunting", &Perl_NPC_IsTaunting);
 	package.add("IsUnderwaterOnly", (bool(*)(NPC*))&Perl_NPC_IsUnderwaterOnly);
 	package.add("MerchantCloseShop", &Perl_NPC_MerchantCloseShop);
