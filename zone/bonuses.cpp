@@ -255,15 +255,7 @@ void Mob::ProcessItemCaps()
 	}
 }
 
-void Mob::AddItemBonuses(
-	const EQ::ItemInstance *inst,
-	StatBonuses *b,
-	bool is_augment,
-	bool is_tribute,
-	int recommended_level_override,
-	bool is_ammo_item
-)
-{
+void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_augment, bool is_tribute, int recommended_level_override, bool is_ammo_item) {
 	if (!inst || !inst->IsClassCommon()) {
 		return;
 	}
@@ -272,7 +264,7 @@ void Mob::AddItemBonuses(
 		return;
 	}
 
-	const auto *item = inst->GetItem();
+	const auto* item = inst->GetItem();
 	if (!item) {
 		return;
 	}
@@ -294,8 +286,7 @@ void Mob::AddItemBonuses(
 	}
 
 	const auto recommended_level = is_augment ? recommended_level_override : inst->GetItemRecommendedLevel(true);
-	const bool meets_recommended =
-				   (IsNPC() && !RuleB(Items, NPCUseRecommendedLevels)) || current_level >= recommended_level;
+	const bool meets_recommended = (IsNPC() && !RuleB(Items, NPCUseRecommendedLevels)) || current_level >= recommended_level;
 
 	auto CalcItemBonus = [&](int statValue) -> int {
 		return meets_recommended ? statValue : CalcRecommendedLevelBonus(current_level, recommended_level, statValue);
@@ -361,45 +352,20 @@ void Mob::AddItemBonuses(
 	b->ManaRegen += CalcItemBonus(item->EnduranceRegen);
 
 	// These have rule-configured caps.
-	b->ATK              = CalcCappedItemBonus(
-		b->ATK,
-		item->Attack,
-		RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap
-	);
-	b->DamageShield     = CalcCappedItemBonus(
-		b->DamageShield,
-		item->DamageShield,
-		RuleI(Character, ItemDamageShieldCap));
-	b->SpellShield      = CalcCappedItemBonus(
-		b->SpellShield,
-		item->SpellShield,
-		RuleI(Character, ItemSpellShieldingCap));
+	b->ATK              = CalcCappedItemBonus(b->ATK, item->Attack, RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap);
+	b->DamageShield     = CalcCappedItemBonus(b->DamageShield, item->DamageShield, RuleI(Character, ItemDamageShieldCap));
+	b->SpellShield      = CalcCappedItemBonus(b->SpellShield, item->SpellShield, RuleI(Character, ItemSpellShieldingCap));
 	b->MeleeMitigation  = CalcCappedItemBonus(b->MeleeMitigation, item->Shielding, RuleI(Character, ItemShieldingCap));
 	b->StunResist       = CalcCappedItemBonus(b->StunResist, item->StunResist, RuleI(Character, ItemStunResistCap));
-	b->StrikeThrough    = CalcCappedItemBonus(
-		b->StrikeThrough,
-		item->StrikeThrough,
-		RuleI(Character, ItemStrikethroughCap));
+	b->StrikeThrough    = CalcCappedItemBonus(b->StrikeThrough, item->StrikeThrough, RuleI(Character, ItemStrikethroughCap));
 	b->AvoidMeleeChance = CalcCappedItemBonus(b->AvoidMeleeChance, item->Avoidance, RuleI(Character, ItemAvoidanceCap));
 	b->HitChance        = CalcCappedItemBonus(b->HitChance, item->Accuracy, RuleI(Character, ItemAccuracyCap));
-	b->ProcChance       = CalcCappedItemBonus(
-		b->ProcChance,
-		item->CombatEffects,
-		RuleI(Character, ItemCombatEffectsCap));
-	b->DoTShielding     = CalcCappedItemBonus(
-		b->DoTShielding,
-		item->DotShielding,
-		RuleI(Character, ItemDoTShieldingCap));
+	b->ProcChance       = CalcCappedItemBonus(b->ProcChance, item->CombatEffects, RuleI(Character, ItemCombatEffectsCap));
+	b->DoTShielding     = CalcCappedItemBonus(b->DoTShielding, item->DotShielding, RuleI(Character, ItemDoTShieldingCap));
 	b->HealAmt          = CalcCappedItemBonus(b->HealAmt, item->HealAmt, RuleI(Character, ItemHealAmtCap));
 	b->SpellDmg         = CalcCappedItemBonus(b->SpellDmg, item->SpellDmg, RuleI(Character, ItemSpellDmgCap));
-	b->Clairvoyance     = CalcCappedItemBonus(
-		b->Clairvoyance,
-		item->Clairvoyance,
-		RuleI(Character, ItemClairvoyanceCap));
-	b->DSMitigation     = CalcCappedItemBonus(
-		b->DSMitigation,
-		item->DSMitigation,
-		RuleI(Character, ItemDSMitigationCap));
+	b->Clairvoyance     = CalcCappedItemBonus(b->Clairvoyance, item->Clairvoyance, RuleI(Character, ItemClairvoyanceCap));
+	b->DSMitigation     = CalcCappedItemBonus(b->DSMitigation, item->DSMitigation, RuleI(Character, ItemDSMitigationCap));
 
 	if (b->haste < item->Haste) {
 		b->haste = item->Haste;
@@ -408,17 +374,10 @@ void Mob::AddItemBonuses(
 	if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
 		if (item->ExtraDmgSkill == ALL_SKILLS) {
 			for (const auto &skill_id: EQ::skills::GetExtraDamageSkills()) {
-				b->SkillDamageAmount[skill_id] = CalcCappedItemBonus(
-					b->SkillDamageAmount[skill_id],
-					item->ExtraDmgAmt,
-					RuleI(Character, ItemExtraDmgCap));
+				b->SkillDamageAmount[skill_id] = CalcCappedItemBonus(b->SkillDamageAmount[skill_id], item->ExtraDmgAmt, RuleI(Character, ItemExtraDmgCap));
 			}
-		}
-		else {
-			b->SkillDamageAmount[item->ExtraDmgSkill] = CalcCappedItemBonus(
-				b->SkillDamageAmount[item->ExtraDmgSkill],
-				item->ExtraDmgAmt,
-				RuleI(Character, ItemExtraDmgCap));
+		} else {
+			b->SkillDamageAmount[item->ExtraDmgSkill] = CalcCappedItemBonus(b->SkillDamageAmount[item->ExtraDmgSkill], item->ExtraDmgAmt, RuleI(Character, ItemExtraDmgCap));
 		}
 	}
 
@@ -430,7 +389,7 @@ void Mob::AddItemBonuses(
 		if (
 			IsOfClientBotMerc() ||
 			(IsNPC() && RuleB(Spells, NPC_UseFocusFromItems))
-			) {
+		) {
 			ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, b, 0);
 		}
 	}
@@ -508,8 +467,7 @@ void Mob::AddItemBonuses(
 	if (item->FactionMod1) {
 		if (item->FactionAmt1 > 0 && item->FactionAmt1 > GetItemFactionBonus(item->FactionMod1)) {
 			AddItemFactionBonus(item->FactionMod1, item->FactionAmt1);
-		}
-		else if (item->FactionAmt1 < 0 && item->FactionAmt1 < GetItemFactionBonus(item->FactionMod1)) {
+		} else if (item->FactionAmt1 < 0 && item->FactionAmt1 < GetItemFactionBonus(item->FactionMod1)) {
 			AddItemFactionBonus(item->FactionMod1, item->FactionAmt1);
 		}
 	}
@@ -517,8 +475,7 @@ void Mob::AddItemBonuses(
 	if (item->FactionMod2) {
 		if (item->FactionAmt2 > 0 && item->FactionAmt2 > GetItemFactionBonus(item->FactionMod2)) {
 			AddItemFactionBonus(item->FactionMod2, item->FactionAmt2);
-		}
-		else if (item->FactionAmt2 < 0 && item->FactionAmt2 < GetItemFactionBonus(item->FactionMod2)) {
+		} else if (item->FactionAmt2 < 0 && item->FactionAmt2 < GetItemFactionBonus(item->FactionMod2)) {
 			AddItemFactionBonus(item->FactionMod2, item->FactionAmt2);
 		}
 	}
@@ -526,8 +483,7 @@ void Mob::AddItemBonuses(
 	if (item->FactionMod3) {
 		if (item->FactionAmt3 > 0 && item->FactionAmt3 > GetItemFactionBonus(item->FactionMod3)) {
 			AddItemFactionBonus(item->FactionMod3, item->FactionAmt3);
-		}
-		else if (item->FactionAmt3 < 0 && item->FactionAmt3 < GetItemFactionBonus(item->FactionMod3)) {
+		} else if (item->FactionAmt3 < 0 && item->FactionAmt3 < GetItemFactionBonus(item->FactionMod3)) {
 			AddItemFactionBonus(item->FactionMod3, item->FactionAmt3);
 		}
 	}
@@ -535,15 +491,14 @@ void Mob::AddItemBonuses(
 	if (item->FactionMod4) {
 		if (item->FactionAmt4 > 0 && item->FactionAmt4 > GetItemFactionBonus(item->FactionMod4)) {
 			AddItemFactionBonus(item->FactionMod4, item->FactionAmt4);
-		}
-		else if (item->FactionAmt4 < 0 && item->FactionAmt4 < GetItemFactionBonus(item->FactionMod4)) {
+		} else if (item->FactionAmt4 < 0 && item->FactionAmt4 < GetItemFactionBonus(item->FactionMod4)) {
 			AddItemFactionBonus(item->FactionMod4, item->FactionAmt4);
 		}
 	}
 
 	if (!is_augment) {
 		for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-			const auto *augment = inst->GetAugment(i);
+			const auto* augment = inst->GetAugment(i);
 			if (!augment) {
 				continue;
 			}
