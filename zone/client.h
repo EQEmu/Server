@@ -327,8 +327,10 @@ public:
 //	void TraderPriceUpdate(const EQApplicationPacket *app);
 	uint8 WithCustomer(uint16 NewCustomer);
 	void KeyRingLoad();
-	void KeyRingAdd(uint32 item_id);
+	bool KeyRingAdd(uint32 item_id);
 	bool KeyRingCheck(uint32 item_id);
+	bool KeyRingClear();
+	bool KeyRingRemove(uint32 item_id);
 	void KeyRingList();
 	bool IsPetNameChangeAllowed();
 	void GrantPetNameChange();
@@ -2038,7 +2040,7 @@ private:
 	bool GuildBanker;
 	uint16 duel_target;
 	bool duelaccepted;
-	std::list<uint32> keyring;
+	std::vector<uint32> keyring;
 	bool tellsoff; // GM /toggle
 	bool gm_hide_me;
 	bool LFG;

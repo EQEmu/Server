@@ -313,8 +313,6 @@ public:
 	void SetStartZone(int zone_id, float x, float y);
 	void SetStartZone(int zone_id, float x, float y, float z);
 	void SetStartZone(int zone_id, float x, float y, float z, float heading);
-	void KeyRingAdd(uint32 item);
-	bool KeyRingCheck(uint32 item);
 	void AddPVPPoints(uint32 points);
 	void AddCrystals(uint32 radiant_count, uint32 ebon_count);
 	void SetEbonCrystals(uint32 value);
@@ -518,6 +516,11 @@ public:
 	uint32 GetPotionBeltItemIcon(uint8 slot_id);
 	uint32 GetPotionBeltItemID(uint8 slot_id);
 	std::string GetPotionBeltItemName(uint8 slot_id);
+	bool KeyRingAdd(uint32 item_id);
+	bool KeyRingCheck(uint32 item_id);
+	bool KeyRingClear();
+	void KeyRingList();
+	bool KeyRingRemove(uint32 item_id);
 
 	// account data buckets
 	void SetAccountBucket(std::string bucket_name, std::string bucket_value);
