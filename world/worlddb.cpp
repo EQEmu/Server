@@ -35,12 +35,6 @@ WorldDatabase content_db;
 extern std::vector<RaceClassAllocation> character_create_allocations;
 extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
-
-/**
- * @param account_id
- * @param out_app
- * @param client_version_bit
- */
 void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **out_app, uint32 client_version_bit)
 {
 	EQ::versions::ClientVersion
