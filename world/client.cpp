@@ -447,30 +447,30 @@ void Client::SendPostEnterWorld() {
 
 bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(LoginInfo_Struct)) {
+	if (app->size != sizeof(LoginInfo)) {
 		return false;
 	}
 
-	auto *login_info = (LoginInfo_Struct *) app->pBuffer;
+	auto *r = (LoginInfo *) app->pBuffer;
 
 	// Quagmire - max len for name is 18, pass 15
 	char name[19]     = {0};
 	char password[16] = {0};
-	strn0cpy(name, (char *) login_info->login_info, 18);
-	strn0cpy(password, (char *) &(login_info->login_info[strlen(name) + 1]), 15);
+	strn0cpy(name, (char *) r->login_info, 18);
+	strn0cpy(password, (char *) &(r->login_info[strlen(name) + 1]), 15);
 
-	LogDebug("Receiving Login Info Packet from Client | name [{0}] password [{1}]", name, password);
+	LogDebug("Receiving login info packet from client | name [{}] password [{}]", name, password);
 
 	if (strlen(password) <= 1) {
 		LogInfo("Login without a password");
 		return false;
 	}
 
-	is_player_zoning = (login_info->zoning == 1);
+	is_player_zoning = (r->zoning == 1);
 
 	uint32 id = Strings::ToInt(name);
 	if (id == 0) {
-		LogWarning("Receiving Login Info Packet from Client | account_id is 0 - disconnecting");
+		LogWarning("Receiving login info packet from client | account_id is 0 - disconnecting");
 		return false;
 	}
 
@@ -545,7 +545,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			if (!skip_char_info && !custom_files_key.empty() && cle->Admin() < RuleI(World, CustomFilesAdminLevel)) {
 				// Modified clients can utilize this unused block in login_info to send custom payloads on login
 				// which indicates they are using custom client files with the correct version, based on key payload.
-				const auto client_key = std::string(reinterpret_cast<char*>(login_info->unknown064));
+				const auto client_key = std::string(reinterpret_cast<char*>(r->unknown064));
 				if (custom_files_key != client_key) {
 					std::string message = fmt::format("Missing Files [{}]", RuleS(World, CustomFilesUrl) );
 					SendUnsupportedClientPacket(message);

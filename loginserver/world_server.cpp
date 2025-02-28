@@ -143,7 +143,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		packet.ToString()
 	);
 
-	if (packet.Length() < sizeof(UsertoWorldResponseLegacy_Struct)) {
+	if (packet.Length() < sizeof(UsertoWorldResponseLegacy)) {
 		LogError(
 			"Received application packet from server that had opcode ServerOP_UsertoWorldResp, "
 			"but was too small. Discarded to avoid buffer overrun"
@@ -152,7 +152,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		return;
 	}
 
-	auto *res = (UsertoWorldResponseLegacy_Struct *) packet.Data();
+	auto *res = (UsertoWorldResponseLegacy *) packet.Data();
 
 	LogDebug("Trying to find client with user id of [{}]", res->lsaccountid);
 	Client *c = server.client_manager->GetClient(res->lsaccountid, "eqemu");
@@ -229,7 +229,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		packet.ToString()
 	);
 
-	if (packet.Length() < sizeof(UsertoWorldResponse_Struct)) {
+	if (packet.Length() < sizeof(UsertoWorldResponse)) {
 		LogError(
 			"Received application packet from server that had opcode ServerOP_UsertoWorldResp, "
 			"but was too small. Discarded to avoid buffer overrun"
@@ -238,7 +238,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		return;
 	}
 
-	auto res = (UsertoWorldResponse_Struct *) packet.Data();
+	auto res = (UsertoWorldResponse *) packet.Data();
 	LogDebug("Trying to find client with user id of [{}]", res->lsaccountid);
 
 	Client *c = server.client_manager->GetClient(
@@ -494,7 +494,7 @@ void WorldServer::HandleWorldserverStatusUpdate(LoginserverWorldStatusUpdate *u)
 void WorldServer::SendClientAuthToWorld(Client *c)
 {
 	EQ::Net::DynamicPacket outapp;
-	ClientAuth_Struct      a{};
+	ClientAuth             a{};
 
 	a.loginserver_account_id = c->GetAccountID();
 
@@ -503,7 +503,7 @@ void WorldServer::SendClientAuthToWorld(Client *c)
 
 	a.lsadmin        = 0;
 	a.is_world_admin = 0;
-	a.ip             = inet_addr(c->GetConnection()->GetRemoteAddr().c_str());
+	a.ip_address     = inet_addr(c->GetConnection()->GetRemoteAddr().c_str());
 	strncpy(a.loginserver_name, &c->GetLoginServerName()[0], 64);
 
 	const std::string &client_address(c->GetConnection()->GetRemoteAddr());
@@ -521,7 +521,7 @@ void WorldServer::SendClientAuthToWorld(Client *c)
 	}
 
 	struct in_addr ip_addr{};
-	ip_addr.s_addr = a.ip;
+	ip_addr.s_addr = a.ip_address;
 
 	LogInfo(
 		"Client authentication response: world_address [{}] client_address [{}]",

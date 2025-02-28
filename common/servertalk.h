@@ -677,36 +677,53 @@ struct ServerLSPlayerZoneChange_Struct {
 	uint32 to; // 0 = world
 };
 
-struct ClientAuth_Struct {
+struct ClientAuth {
 	uint32 loginserver_account_id; // ID# in login server's db
-	char loginserver_name[64];
-	char account_name[30]; // username in login server's db
-	char key[30]; // the Key the client will present
-	uint8 lsadmin; // login server admin level
-	int16 is_world_admin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
-	uint32 ip;
-	uint8 is_client_from_local_network; // 1 if the client is from the local network
+	char   loginserver_name[64];
+	char   account_name[30]; // username in login server's db
+	char   key[30]; // the key the client will present
+	uint8  lsadmin; // login server admin level
+	int16  is_world_admin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	uint32 ip_address;
+	uint8  is_client_from_local_network; // 1 if the client is from the local network
 
-	template <class Archive>
+	template<class Archive>
 	void serialize(Archive &ar)
 	{
-		ar(loginserver_account_id, loginserver_name, account_name, key, lsadmin, is_world_admin, ip, is_client_from_local_network);
+		ar(
+			loginserver_account_id,
+			loginserver_name,
+			account_name,
+			key,
+			lsadmin,
+			is_world_admin,
+			ip_address,
+			is_client_from_local_network
+		);
 	}
 };
 
-struct ClientAuthLegacy_Struct {
+struct ClientAuthLegacy {
 	uint32 loginserver_account_id; // ID# in login server's db
-	char loginserver_account_name[30]; // username in login server's db
-	char key[30]; // the Key the client will present
-	uint8 loginserver_admin_level; // login server admin level
-	int16 is_world_admin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
-	uint32 ip;
-	uint8 is_client_from_local_network; // 1 if the client is from the local network
+	char   loginserver_account_name[30]; // username in login server's db
+	char   key[30]; // the key the client will present
+	uint8  loginserver_admin_level; // login server admin level
+	int16  is_world_admin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	uint32 ip_address;
+	uint8  is_client_from_local_network; // 1 if the client is from the local network
 
-	template <class Archive>
+	template<class Archive>
 	void serialize(Archive &ar)
 	{
-		ar(loginserver_account_id, loginserver_account_name, key, loginserver_admin_level, is_world_admin, ip, is_client_from_local_network);
+		ar(
+			loginserver_account_id,
+			loginserver_account_name,
+			key,
+			loginserver_admin_level,
+			is_world_admin,
+			ip_address,
+			is_client_from_local_network
+		);
 	}
 };
 
@@ -834,38 +851,38 @@ struct ServerSyncWorldList_Struct {
 	bool	placeholder;
 };
 
-struct UsertoWorldRequestLegacy_Struct {
-	uint32	lsaccountid;
-	uint32	worldid;
-	uint32	FromID;
-	uint32	ToID;
-	char	IPAddr[64];
-};
-
-struct UsertoWorldRequest_Struct {
-	uint32	lsaccountid;
-	uint32	worldid;
-	uint32	FromID;
-	uint32	ToID;
-	char	IPAddr[64];
-	char	login[64];
-};
-
-struct UsertoWorldResponseLegacy_Struct {
+struct UsertoWorldRequestLegacy {
 	uint32 lsaccountid;
 	uint32 worldid;
-	int8  response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
+	uint32 FromID;
+	uint32 ToID;
+	char   IPAddr[64];
+};
+
+struct UsertoWorldRequest {
+	uint32 lsaccountid;
+	uint32 worldid;
+	uint32 FromID; // appears to be unused today
+	uint32 ToID; // appears to be unused today
+	char   IPAddr[64];
+	char   login[64];
+};
+
+struct UsertoWorldResponseLegacy {
+	uint32 lsaccountid;
+	uint32 worldid;
+	int8   response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
 	uint32 FromID;
 	uint32 ToID;
 };
 
-struct UsertoWorldResponse_Struct {
+struct UsertoWorldResponse {
 	uint32 lsaccountid;
 	uint32 worldid;
-	int8  response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
-	uint32 FromID;
-	uint32 ToID;
-	char  login[64];
+	int8   response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
+	uint32 FromID; // appears to be unused today
+	uint32 ToID; // appears to be unused today
+	char   login[64];
 };
 
 // generic struct to be used for alot of simple zone->world questions

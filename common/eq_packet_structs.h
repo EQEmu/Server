@@ -47,7 +47,7 @@ static const uint32 ADVANCED_LORE_LENGTH = 8192;
 */
 #pragma pack(1)
 
-struct LoginInfo_Struct {
+struct LoginInfo {
 /*000*/	char	login_info[64];
 /*064*/	uint8	unknown064[124];
 /*188*/	uint8	zoning;			// 01 if zoning, 00 if not

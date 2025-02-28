@@ -25,7 +25,7 @@ void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet 
 			return;
 
 		if (opcode == ServerOP_UsertoWorldReq) {
-			auto req_in = (UsertoWorldRequest_Struct*)p.Data();
+			auto req_in = (UsertoWorldRequest*)p.Data();
 
 			EQ::Net::DynamicPacket req;
 			size_t i = 0;
@@ -45,7 +45,7 @@ void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet 
 		}
 
 		if (opcode == ServerOP_LSClientAuth) {
-			auto req_in = (ClientAuth_Struct*)p.Data();
+			auto req_in = (ClientAuth*)p.Data();
 
 			EQ::Net::DynamicPacket req;
 			size_t i = 0;
@@ -54,7 +54,7 @@ void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet 
 			req.PutData(i, req_in->key, 30); i += 30;
 			req.PutUInt8(i, req_in->lsadmin); i += 1;
 			req.PutUInt16(i, req_in->is_world_admin); i += 2;
-			req.PutUInt32(i, req_in->ip); i += 4;
+			req.PutUInt32(i, req_in->ip_address); i += 4;
 			req.PutUInt8(i, req_in->is_client_from_local_network); i += 1;
 
 			EQ::Net::DynamicPacket out;

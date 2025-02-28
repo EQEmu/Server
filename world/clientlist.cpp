@@ -331,8 +331,26 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 }
 
 
-void ClientList::CLEAdd(uint32 iLSID, const char *iLoginServerName, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local) {
-	auto tmp = new ClientListEntry(GetNextCLEID(), iLSID, iLoginServerName, iLoginName, iLoginKey, iWorldAdmin, ip, local);
+void ClientList::CLEAdd(
+	uint32 login_server_id,
+	const char *login_server_name,
+	const char *login_name,
+	const char *login_key,
+	int16 world_admin,
+	uint32 ip_address,
+	uint8 is_local
+)
+{
+	auto tmp = new ClientListEntry(
+		GetNextCLEID(),
+		login_server_id,
+		login_server_name,
+		login_name,
+		login_key,
+		world_admin,
+		ip_address,
+		is_local
+	);
 
 	clientlist.Append(tmp);
 }
@@ -457,19 +475,19 @@ void ClientList::CLEKeepAlive(uint32 numupdates, uint32* wid) {
 	}
 }
 
-ClientListEntry *ClientList::CheckAuth(uint32 iLSID, const char *iKey)
+ClientListEntry *ClientList::CheckAuth(uint32 loginserver_account_id, const char *key)
 {
 	LinkedListIterator<ClientListEntry *> iterator(clientlist);
 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
-		if (iterator.GetData()->CheckAuth(iLSID, iKey)) {
+		if (iterator.GetData()->CheckAuth(loginserver_account_id, key)) {
 			return iterator.GetData();
 		}
 		iterator.Advance();
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void ClientList::SendOnlineGuildMembers(uint32 FromID, uint32 GuildID)
