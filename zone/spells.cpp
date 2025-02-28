@@ -3135,13 +3135,13 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		}
 	}
 
-	const std::string& always_stack_str = RuleS(Spells, AlwaysStackSpells);
-	if (spellid1 != spellid2 && !always_stack_str.empty()) {
-		const auto& v = Strings::Split(always_stack_str, ",");
-		if (std::find(v.begin(), v.end(), std::to_string(spellid1)) != v.end()) {
+	const std::string& always_stack_spells = RuleS(Spells, AlwaysStackSpells);
+	if (spellid1 != spellid2 && !always_stack_spells.empty()) {
+		const auto& v = Strings::Split(always_stack_spells, ",");
+		if (Strings::Contains(v, std::to_string(spellid1))) {
 			return 0;
 		}
-		if (std::find(v.begin(), v.end(), std::to_string(spellid2)) != v.end()) {
+		if (Strings::Contains(v, std::to_string(spellid2))) {
 			return 0;
 		}
 	}
