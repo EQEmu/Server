@@ -300,15 +300,15 @@ bool ClientListEntry::CheckStale()
 bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_password)
 {
 	LogDebug(
-		"ls_account_id [{0}] key_password [{1}] plskey [{2}]",
+		"ls_account_id [{}] key_password [{}] key [{}]",
 		loginserver_account_id,
 		key_password,
 		m_key
 	);
-	if (m_login_server_id == loginserver_account_id && strncmp(m_key, key_password, 10) == 0) {
 
+	if (m_login_server_id == loginserver_account_id && strncmp(m_key, key_password, 10) == 0) {
 		LogDebug(
-			"ls_account_id [{0}] key_password [{1}] plskey [{2}] lsid [{3}] paccountid [{4}]",
+			"ls_account_id [{}] key_password [{}] m_key [{}] lsid [{}] m_account_id [{}]",
 			loginserver_account_id,
 			key_password,
 			m_key,
@@ -316,6 +316,7 @@ bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_p
 			m_account_id
 		);
 
+		// create account if it doesn't exist
 		if (m_account_id == 0 && LSID() > 0) {
 			int16 default_account_status = WorldConfig::get()->DefaultStatus;
 
@@ -328,8 +329,8 @@ bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_p
 			);
 
 			if (!m_account_id) {
-				LogInfo(
-					"Error adding local account for LS login: [{0}:{1}], duplicate name",
+				LogError(
+					"Error adding local account for LS login [{}] [{}], duplicate name",
 					m_source_loginserver,
 					m_login_account_name
 				);

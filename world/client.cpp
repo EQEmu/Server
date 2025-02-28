@@ -480,15 +480,15 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		LogClientLogin("Checking authentication id [{}] passed", id);
 		if (!is_player_zoning) {
 			// Track who is in and who is out of the game
-			char *inout= (char *) "";
+			std::string in_out;
 
-			if (cle->GetOnline() == CLE_Status::Never){
+			if (cle->GetOnline() == CLE_Status::Never) {
 				// Desktop -> Char Select
-				inout = (char *) "In";
+				in_out = "in";
 			}
 			else {
 				// Game -> Char Select
-				inout=(char *) "Out";
+				in_out = "out";
 			}
 
 			// Always at Char select at this point.
@@ -497,7 +497,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			// Could use a Logging Out Completely message somewhere.
 			cle->SetOnline(CLE_Status::CharSelect);
 
-			LogInfo("Account ({}) Logging({}) to character select :: LSID [{}] ", cle->AccountName(), inout, cle->LSID());
+			LogInfo("Account ({}) Logging ({}) to character select :: LSID [{}] ", cle->AccountName(), in_out, cle->LSID());
 		}
 		else {
 			cle->SetOnline();
@@ -1434,7 +1434,7 @@ void Client::EnterWorld(bool TryBootup) {
 	}
 	else {
 		if (TryBootup) {
-			LogInfo("Attempting autobootup of [{}] ([{}]:[{}])", zone_name, zone_id, instance_id);
+			LogInfo("Attempting autobootup of [{}] [{}] [{}]", zone_name, zone_id, instance_id);
 			autobootup_timeout.Start();
 			zone_waiting_for_bootup = zoneserver_list.TriggerBootup(zone_id, instance_id);
 			if (zone_waiting_for_bootup == 0) {
