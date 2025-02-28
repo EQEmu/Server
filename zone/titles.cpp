@@ -57,34 +57,34 @@ EQApplicationPacket* TitleManager::MakeTitlesPacket(Client* c)
 	return outapp;
 }
 
-std::string TitleManager::GetPrefix(int title_set)
+std::string TitleManager::GetPrefix(int title_id)
 {
-	if (!title_set) {
+	if (!title_id) {
 		return "";
 	}
 
 	auto e = std::find_if(
 		titles.begin(),
 		titles.end(),
-		[title_set](const auto& t) {
-			return t.title_set == title_set;
+		[title_id](const auto& t) {
+			return t.id == title_id;
 		}
 	);
 
 	return e != titles.end() ? e->prefix : "";
 }
 
-std::string TitleManager::GetSuffix(int title_set)
+std::string TitleManager::GetSuffix(int title_id)
 {
-	if (!title_set) {
+	if (!title_id) {
 		return "";
 	}
 
 	auto e = std::find_if(
 		titles.begin(),
 		titles.end(),
-		[title_set](const auto& t) {
-			return t.title_set == title_set;
+		[title_id](const auto& t) {
+			return t.id == title_id;
 		}
 	);
 

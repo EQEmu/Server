@@ -15,8 +15,8 @@ public:
 	bool LoadTitles();
 
 	EQApplicationPacket* MakeTitlesPacket(Client* c);
-	std::string GetPrefix(int title_set);
-	std::string GetSuffix(int title_set);
+	std::string GetPrefix(int title_id);
+	std::string GetSuffix(int title_id);
 	std::vector<TitlesRepository::Titles> GetEligibleTitles(Client* c);
 	bool IsNewAATitleAvailable(int aa_points, int class_id);
 	bool IsNewTradeSkillTitleAvailable(int t, int skill_value);
