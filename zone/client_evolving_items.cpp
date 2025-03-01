@@ -83,7 +83,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			continue;
 		}
 
-		if (inst->GetTimers().contains("evolve") && !inst->GetTimers().at("evolve").Check()) {
+		if (inst->GetTimers().contains("evolve") && !inst->GetTimers().at("evolve").Check(false)) {
 			LogEvolveItemDetail(
 				"CharacterID <green>[{}], item ID <yellow>[{}] timer not yet expired. <red>[{}] secs remaining.",
 				CharacterID(),
