@@ -6417,7 +6417,7 @@ ADD COLUMN `guid` bigint(20) UNSIGNED NOT NULL DEFAULT 0 AFTER `ornament_hero_mo
 ADD PRIMARY KEY (`account_id`, `slot_id`);
 )",
 		.content_schema_update = false,
-		.force_interactive = true
+		.force_interactive = false
 	},
 	ManifestEntry{
 		.version = 9298,
@@ -6481,7 +6481,7 @@ UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2531) + 11010) WHERE `slot_id`
 UPDATE `sharedbank` SET `slot_id` = ((`slot_id` - 2541) + 11210) WHERE `slot_id` BETWEEN 2541 AND 2550; -- Shared Bank Bag 2
 )",
 		.content_schema_update = false,
-		.force_interactive = true
+		.force_interactive = false
 	},
 	ManifestEntry{
 		.version = 9299,
