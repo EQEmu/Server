@@ -76,7 +76,7 @@ void PathManager::LoadPaths()
 	constexpr int path_width   = 0;
 	constexpr int break_length = 70;
 
-	std::cout << std::endl;
+	LogInfo("Loading server paths");
 	LogInfo("{}", Strings::Repeat("-", break_length));
 	for (const auto& [name, in_path] : paths) {
 		if (!in_path.empty()) {
