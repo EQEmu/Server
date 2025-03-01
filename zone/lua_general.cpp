@@ -468,7 +468,7 @@ void lua_set_sky(int sky) {
 }
 
 void lua_set_guild(int guild_id, int rank) {
-	quest_manager.setguild(guild_id, rank);
+	quest_manager.SetGuild(guild_id, rank);
 }
 
 void lua_create_guild(const char *name, const char *leader) {

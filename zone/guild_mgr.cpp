@@ -1317,42 +1317,6 @@ bool GuildBankManager::SplitStack(uint32 guild_id, uint16 slot_id, uint32 quanti
 	return true;
 }
 
-// void GuildBankManager::UpdateItemQuantity(uint32 guildID, uint16 area, uint16 slotID, uint32 quantity)
-// {
-// 	// Helper method for MergeStacks. Assuming all passed parameters are valid.
-// 	//
-// 	std::string query = StringFormat("UPDATE `guild_bank` SET `qty` = %i "
-//                                     "WHERE `guildid` = %i AND `area` = %i "
-//                                     "AND `slot` = %i LIMIT 1",
-//                                     quantity, guildID, area, slotID);
-//     auto results = database.QueryDatabase(query);
-// 	if(!results.Success()) {
-// 		return;
-// 	}
-//
-// }
-
-// bool GuildBankManager::AllowedToWithdraw(uint32 guild_id, uint16 area, uint16 slot_id, const char *name)
-// {
-// 	auto guild_bank = GetGuildBank(guild_id);
-// 	if (!guild_bank) {
-// 		return false;
-// 	}
-//
-// 	if (area != GuildBankMainArea) {
-// 		return false;
-// 	}
-//
-// 	auto item = &guild_bank->items.main_area[slot_id];
-// 	uint8 permissions = item->permissions;
-//
-// 	if (permissions == GuildBankBankerOnly) {
-// 		return false;
-// 	}
-//
-// 	return false;
-// }
-
 int32 GuildBankManager::NextFreeBankSlot(uint32 guild_id, uint32 area)
 {
 	auto guild_bank = GetGuildBank(guild_id);
@@ -1759,4 +1723,39 @@ void GuildBankManager::SendGuildBankItemUpdate(uint32 guild_id, int32 slot_id, u
 	strn0cpy(gbius.who_for, item.who_for.empty() ? "" : item.who_for.c_str(), sizeof(gbius.who_for));
 
 	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guild_id);
+}
+
+bool ZoneGuildManager::SetGuild(Client *client, uint32 guild_id, uint8 rank)
+{
+	if (!client || rank > GUILD_MAX_RANK || !GetGuildByGuildID(guild_id)) {
+		return false;
+	}
+
+	if (rank <= GUILD_RANK_NONE) {
+		rank = GUILD_RECRUIT;
+	}
+
+	const uint32 current_guild_id = client->GuildID();
+	if (current_guild_id == guild_id) {
+		return false;
+	}
+
+	if (current_guild_id != guild_id && current_guild_id != GUILD_NONE) {
+		guild_mgr.RemoveMember(client->GuildID(), client->CharacterID(), std::string(client->GetCleanName()));
+	}
+
+	client->SetGuildID(guild_id);
+	client->SetGuildRank(rank);
+	MemberAdd(
+		guild_id,
+		client->CharacterID(),
+		client->GetLevel(),
+		client->GetClass(),
+		rank,
+		client->GetZoneID(),
+		client->GetName()
+	);
+
+	client->SendGuildSpawnAppearance();
+	return true;
 }
