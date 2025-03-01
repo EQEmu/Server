@@ -104,41 +104,28 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 		);
 
 		auto sub_types = Strings::Split(sub_type, SUB_TYPE_DELIMITER);
+		auto has_sub_type = [&](int8 type) {
+			return Strings::Contains(sub_types, std::to_string(type));
+		};
+
 		switch (type) {
 			case EvolvingItems::Types::AMOUNT_OF_EXP: {
 				LogEvolveItemDetail("Type <green>[{}] Processing sub_type", type);
-				if (std::ranges::find(
-						sub_types.begin(), sub_types.end(), std::to_string(EvolvingItems::SubTypes::ALL_EXP)) !=
-						std::end(sub_types) ||
-					(std::ranges::find(
-						 sub_types.begin(), sub_types.end(), std::to_string(EvolvingItems::SubTypes::GROUP_EXP)) !=
-						 std::end(sub_types) &&
-					 IsGrouped())
-				) {
-					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
-					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100);
+
+				// Determine the evolve amount based on sub_type conditions
+				int evolve_amount = 0;
+
+				if (has_sub_type(EvolvingItems::SubTypes::ALL_EXP) ||
+					(has_sub_type(EvolvingItems::SubTypes::GROUP_EXP) && IsGrouped())) {
+					evolve_amount = exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100;
 				}
-				else if (
-					std::ranges::find(
-						sub_types.begin(), sub_types.end(), std::to_string(EvolvingItems::SubTypes::ALL_EXP)) !=
-						std::end(sub_types) ||
-					(std::ranges::find(
-						 sub_types.begin(), sub_types.end(), std::to_string(EvolvingItems::SubTypes::RAID_EXP)) !=
-						 std::end(sub_types) &&
-					 IsRaidGrouped())
-				) {
-					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
-					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100);
+				else if (has_sub_type(EvolvingItems::SubTypes::ALL_EXP) ||
+						 (has_sub_type(EvolvingItems::SubTypes::RAID_EXP) && IsRaidGrouped())) {
+					evolve_amount = exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100;
 				}
-				else if (
-					std::ranges::find(
-						sub_types.begin(), sub_types.end(), std::to_string(EvolvingItems::SubTypes::ALL_EXP)) !=
-						std::end(sub_types) ||
-					std::ranges::find(
-						sub_types.begin(), sub_types.end(), std::to_string(EvolvingItems::SubTypes::SOLO_EXP)) !=
-						std::end(sub_types)) {
-					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
-					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100);
+				else if (has_sub_type(EvolvingItems::SubTypes::ALL_EXP) ||
+						 has_sub_type(EvolvingItems::SubTypes::SOLO_EXP)) {
+					evolve_amount = exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100;
 				}
 
 				inst->CalculateEvolveProgression();
@@ -169,9 +156,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			case EvolvingItems::Types::SPECIFIC_MOB_RACE: {
 				LogEvolveItemDetail("Type <green>[{}] Processing sub type", type);
 				if (mob) {
-					if (std::ranges::find(sub_types.begin(), sub_types.end(), std::to_string(mob->GetRace())) !=
-						std::end(sub_types)
-					) {
+					if (has_sub_type(mob->GetRace())) {
 						LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
 						inst->SetEvolveAddToCurrentAmount(1);
 						inst->CalculateEvolveProgression();
@@ -207,9 +192,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			case EvolvingItems::Types::SPECIFIC_ZONE_ID: {
 				LogEvolveItemDetail("Type <green>[{}] Processing sub type", type);
 				if (mob) {
-					if (std::ranges::find(sub_types.begin(), sub_types.end(), std::to_string(mob->GetZoneID())) !=
-						std::end(sub_types)
-					) {
+					if (has_sub_type(mob->GetZoneID())) {
 						LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
 						inst->SetEvolveAddToCurrentAmount(1);
 						inst->CalculateEvolveProgression();
