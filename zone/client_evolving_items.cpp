@@ -8,7 +8,8 @@
 #include "worldserver.h"
 
 extern WorldServer worldserver;
-extern QueryServ* QServ;
+extern QueryServ*  QServ;
+const std::string  SUB_TYPE_DELIMITER = ".";
 
 void Client::DoEvolveItemToggle(const EQApplicationPacket *app)
 {
@@ -77,11 +78,12 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			"CharacterID <green>[{}] found equipped item ID <yellow>[{}]", CharacterID(), inst->GetID());
 		if (!inst->IsEvolving() || !inst->GetEvolveActivated()) {
 			LogEvolveItemDetail(
-				"CharacterID <green>[{}], item ID <yellow>[{}] not an evolving item.", CharacterID(), inst->GetID());
+				"CharacterID <green>[{}], item ID <yellow>[{}] not an evolving item.", CharacterID(), inst->GetID()
+			);
 			continue;
 		}
 
-		if (inst->GetTimers().contains("evolve") && !inst->GetTimers().at("evolve").Check()) {
+		if (inst->GetTimers().contains("evolve") && !inst->GetTimers().at("evolve").Check(false)) {
 			LogEvolveItemDetail(
 				"CharacterID <green>[{}], item ID <yellow>[{}] timer not yet expired. <red>[{}] secs remaining.",
 				CharacterID(),
@@ -98,32 +100,39 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			CharacterID(),
 			inst->GetID(),
 			type,
-			sub_type);
+			sub_type
+		);
+
+		auto sub_types = Strings::Split(sub_type, SUB_TYPE_DELIMITER);
+		auto has_sub_type = [&](uint32_t type) {
+			return Strings::Contains(sub_types, std::to_string(type));
+		};
 
 		switch (type) {
 			case EvolvingItems::Types::AMOUNT_OF_EXP: {
 				LogEvolveItemDetail("Type <green>[{}] Processing sub_type", type);
-				if (sub_type == EvolvingItems::SubTypes::ALL_EXP ||
-					(sub_type == EvolvingItems::SubTypes::GROUP_EXP && IsGrouped())) {
-					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
-					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100);
+
+				// Determine the evolve amount based on sub_type conditions
+				int evolve_amount = 0;
+
+				if (has_sub_type(EvolvingItems::SubTypes::ALL_EXP) ||
+					(has_sub_type(EvolvingItems::SubTypes::GROUP_EXP) && IsGrouped())) {
+					evolve_amount = exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100;
 				}
-				else if (
-					sub_type == EvolvingItems::SubTypes::ALL_EXP ||
-					(sub_type == EvolvingItems::SubTypes::RAID_EXP && IsRaidGrouped())) {
-					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
-					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100);
+				else if (has_sub_type(EvolvingItems::SubTypes::ALL_EXP) ||
+						 (has_sub_type(EvolvingItems::SubTypes::RAID_EXP) && IsRaidGrouped())) {
+					evolve_amount = exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100;
 				}
-				else if (
-					sub_type == EvolvingItems::SubTypes::ALL_EXP || sub_type == EvolvingItems::SubTypes::SOLO_EXP) {
-					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
-					inst->SetEvolveAddToCurrentAmount(exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100);
+				else if (has_sub_type(EvolvingItems::SubTypes::ALL_EXP) ||
+						 has_sub_type(EvolvingItems::SubTypes::SOLO_EXP)) {
+					evolve_amount = exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100;
 				}
 
 				inst->CalculateEvolveProgression();
 
 				auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(
-					database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression());
+					database, inst->GetEvolveUniqueID(), inst->GetEvolveCurrentAmount(), inst->GetEvolveProgression()
+				);
 				if (!e.id) {
 					break;
 				}
@@ -146,7 +155,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			}
 			case EvolvingItems::Types::SPECIFIC_MOB_RACE: {
 				LogEvolveItemDetail("Type <green>[{}] Processing sub type", type);
-				if (mob && mob->GetRace() == sub_type) {
+				if (mob && has_sub_type(mob->GetRace())) {
 					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
 					inst->SetEvolveAddToCurrentAmount(1);
 					inst->CalculateEvolveProgression();
@@ -155,7 +164,8 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 						database,
 						inst->GetEvolveUniqueID(),
 						inst->GetEvolveCurrentAmount(),
-						inst->GetEvolveProgression());
+						inst->GetEvolveProgression()
+					);
 					if (!e.id) {
 						break;
 					}
@@ -163,7 +173,8 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, e);
 
 					LogEvolveItem(
-						"Processing Complete for item id <green>[{1}] Type 3 Specific Mob Race - SubType <yellow>[{0}] "
+						"Processing Complete for item id <green>[{1}] Type 3 Specific Mob Race - SubType "
+						"<yellow>[{0}] "
 						"- Increased count by 1 for <green>[{1}]",
 						sub_type,
 						inst->GetID()
@@ -178,7 +189,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			}
 			case EvolvingItems::Types::SPECIFIC_ZONE_ID: {
 				LogEvolveItemDetail("Type <green>[{}] Processing sub type", type);
-				if (mob && mob->GetZoneID() == sub_type) {
+				if (mob && has_sub_type(mob->GetZoneID())) {
 					LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
 					inst->SetEvolveAddToCurrentAmount(1);
 					inst->CalculateEvolveProgression();
@@ -187,7 +198,8 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 						database,
 						inst->GetEvolveUniqueID(),
 						inst->GetEvolveCurrentAmount(),
-						inst->GetEvolveProgression());
+						inst->GetEvolveProgression()
+					);
 					if (!e.id) {
 						break;
 					}
@@ -195,11 +207,50 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, e);
 
 					LogEvolveItem(
-						"Processing Complete for item id <green>[{1}] Type 4 Specific Zone ID - SubType <yellow>[{0}] "
+						"Processing Complete for item id <green>[{1}] Type 4 Specific Zone ID - SubType "
+						"<yellow>[{0}] "
 						"- Increased count by 1 for <green>[{1}]",
 						sub_type,
 						inst->GetID()
 					);
+				}
+
+				if (inst->GetEvolveProgression() >= 100) {
+					queue.push_back(inst);
+				}
+
+				break;
+			}
+			case EvolvingItems::Types::NUMBER_OF_KILLS: {
+				LogEvolveItemDetail("Type <green>[{}] Processing sub type", type);
+				if (mob) {
+					if (mob->GetLevel() >= Strings::ToUnsignedInt(sub_types.front()) ||
+						Strings::ToUnsignedInt(sub_types.front()) == 0
+					) {
+						LogEvolveItemDetail("Sub_Type <green>[{}] Processing Item", sub_type);
+						inst->SetEvolveAddToCurrentAmount(1);
+						inst->CalculateEvolveProgression();
+
+						auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(
+							database,
+							inst->GetEvolveUniqueID(),
+							inst->GetEvolveCurrentAmount(),
+							inst->GetEvolveProgression()
+						);
+						if (!e.id) {
+							break;
+						}
+
+						SendEvolvingPacket(EvolvingItems::Actions::UPDATE_ITEMS, e);
+
+						LogEvolveItem(
+							"Processing Complete for item id <green>[{1}] Type 4 Specific Zone ID - SubType "
+							"<yellow>[{0}] "
+							"- Increased count by 1 for <green>[{1}]",
+							sub_type,
+							inst->GetID()
+						);
+					}
 				}
 
 				if (inst->GetEvolveProgression() >= 100) {

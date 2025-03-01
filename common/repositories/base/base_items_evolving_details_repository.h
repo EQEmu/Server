@@ -19,13 +19,13 @@
 class BaseItemsEvolvingDetailsRepository {
 public:
 	struct ItemsEvolvingDetails {
-		uint32_t id;
-		uint32_t item_evo_id;
-		uint32_t item_evolve_level;
-		uint32_t item_id;
-		uint32_t type;
-		uint32_t sub_type;
-		int64_t  required_amount;
+		uint32_t    id;
+		uint32_t    item_evo_id;
+		uint32_t    item_evolve_level;
+		uint32_t    item_id;
+		uint32_t    type;
+		std::string sub_type;
+		int64_t     required_amount;
 	};
 
 	static std::string PrimaryKey()
@@ -101,7 +101,7 @@ public:
 		e.item_evolve_level = 0;
 		e.item_id           = 0;
 		e.type              = 0;
-		e.sub_type          = 0;
+		e.sub_type          = "0";
 		e.required_amount   = 0;
 
 		return e;
@@ -144,7 +144,7 @@ public:
 			e.item_evolve_level = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id           = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.type              = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.sub_type          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.sub_type          = row[5] ? row[5] : "0";
 			e.required_amount   = row[6] ? strtoll(row[6], nullptr, 10) : 0;
 
 			return e;
@@ -183,7 +183,7 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.item_evolve_level));
 		v.push_back(columns[3] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[4] + " = " + std::to_string(e.type));
-		v.push_back(columns[5] + " = " + std::to_string(e.sub_type));
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.sub_type) + "'");
 		v.push_back(columns[6] + " = " + std::to_string(e.required_amount));
 
 		auto results = db.QueryDatabase(
@@ -211,7 +211,7 @@ public:
 		v.push_back(std::to_string(e.item_evolve_level));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.type));
-		v.push_back(std::to_string(e.sub_type));
+		v.push_back("'" + Strings::Escape(e.sub_type) + "'");
 		v.push_back(std::to_string(e.required_amount));
 
 		auto results = db.QueryDatabase(
@@ -247,7 +247,7 @@ public:
 			v.push_back(std::to_string(e.item_evolve_level));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.type));
-			v.push_back(std::to_string(e.sub_type));
+			v.push_back("'" + Strings::Escape(e.sub_type) + "'");
 			v.push_back(std::to_string(e.required_amount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -287,7 +287,7 @@ public:
 			e.item_evolve_level = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id           = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.type              = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.sub_type          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.sub_type          = row[5] ? row[5] : "0";
 			e.required_amount   = row[6] ? strtoll(row[6], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
@@ -318,7 +318,7 @@ public:
 			e.item_evolve_level = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id           = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.type              = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.sub_type          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.sub_type          = row[5] ? row[5] : "0";
 			e.required_amount   = row[6] ? strtoll(row[6], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
@@ -399,7 +399,7 @@ public:
 		v.push_back(std::to_string(e.item_evolve_level));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.type));
-		v.push_back(std::to_string(e.sub_type));
+		v.push_back("'" + Strings::Escape(e.sub_type) + "'");
 		v.push_back(std::to_string(e.required_amount));
 
 		auto results = db.QueryDatabase(
@@ -428,7 +428,7 @@ public:
 			v.push_back(std::to_string(e.item_evolve_level));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.type));
-			v.push_back(std::to_string(e.sub_type));
+			v.push_back("'" + Strings::Escape(e.sub_type) + "'");
 			v.push_back(std::to_string(e.required_amount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
