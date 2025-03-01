@@ -104,7 +104,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 		);
 
 		auto sub_types = Strings::Split(sub_type, SUB_TYPE_DELIMITER);
-		auto has_sub_type = [&](int8 type) {
+		auto has_sub_type = [&](uint32_t type) {
 			return Strings::Contains(sub_types, std::to_string(type));
 		};
 
