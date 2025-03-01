@@ -80,7 +80,7 @@ private:
 	std::string  m_server_version;
 	bool         m_is_server_authorized_to_list;
 	bool         m_is_server_logged_in;
-	bool         m_is_server_trusted;
+	bool         m_is_server_trusted; // this is primarily for worldserver being able to push updates to the loginserver
 
 	static void FormatWorldServerName(char *name, int8 server_list_type);
 };
