@@ -72,6 +72,7 @@ public:
 	void ListGuilds(Client *c, uint32 guild_id = 0) const;
 	void DescribeGuild(Client *c, uint32 guild_id) const;
 	bool IsActionABankAction(GuildAction action);
+	bool SetGuild(Client *client, uint32 guild_id, uint8 rank);
 
 	uint8 *MakeGuildMembers(uint32 guild_id, const char* prefix_name, uint32& length);
 	void  SendToWorldMemberLevelUpdate(uint32 guild_id, uint32 level, std::string player_name);
