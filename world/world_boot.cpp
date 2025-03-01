@@ -101,6 +101,12 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 		}
 	}
 
+	std::string arg1 = argv[1];
+	if (argc >= 2 && !Strings::Contains(arg1, ":")) {
+		std::cout << "Invalid command, use --help to see available commands" << std::endl;
+		return true;
+	}
+
 	return false;
 }
 
