@@ -596,7 +596,12 @@ void DatabaseDumpService::BuildCredentialsFile()
 void DatabaseDumpService::RemoveCredentialsFile()
 {
 	if (File::Exists(CREDENTIALS_FILE)) {
-		std::filesystem::remove(CREDENTIALS_FILE);
+		try {
+			std::filesystem::remove(CREDENTIALS_FILE);
+		}
+		catch (std::exception &e) {
+			LogError("std::filesystem::remove err [{}]", e.what());
+		}
 	}
 }
 
