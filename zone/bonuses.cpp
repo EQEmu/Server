@@ -349,7 +349,7 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 
 	b->HPRegen += CalcItemBonus(item->Regen);
 	b->ManaRegen += CalcItemBonus(item->ManaRegen);
-	b->ManaRegen += CalcItemBonus(item->EnduranceRegen);
+	b->EnduranceRegen= CalcItemBonus(item->EnduranceRegen);
 
 	// These have rule-configured caps.
 	b->ATK              = CalcCappedItemBonus(b->ATK, item->Attack, RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap);
