@@ -6924,6 +6924,20 @@ ALTER TABLE `items_evolving_details`
 )",
 		.content_schema_update = true
 	},
+	// this one got missed being added to PEQ dumps so adding it again so it gets added when folks take a new release
+	ManifestEntry{
+		.version = 9309,
+		.description = "2025_03_1_create_pet_names_table_if_not_exist.sql",
+		.check = "SHOW TABLES LIKE 'character_pet_name'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `character_pet_name` (
+    `character_id` INT(11) NOT NULL PRIMARY KEY,
+    `name` VARCHAR(64) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)",
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
