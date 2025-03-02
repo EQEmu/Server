@@ -139,6 +139,7 @@ namespace DatabaseSchema {
 			"character_pet_buffs",
 			"character_pet_info",
 			"character_pet_inventory",
+			"character_pet_name",
 			"character_peqzone_flags",
 			"character_potionbelt",
 			"character_skills",
