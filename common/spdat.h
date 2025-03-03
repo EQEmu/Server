@@ -1813,7 +1813,6 @@ bool IsEffectInSpell(uint16 spell_id, int effect_id);
 uint16 GetSpellTriggerSpellID(uint16 spell_id, int effect_id);
 bool IsBlankSpellEffect(uint16 spell_id, int effect_index);
 bool IsValidSpell(uint32 spell_id);
-bool IsValidSpellAndLoS(uint32 spell_id, bool has_los = true);
 bool IsSummonSpell(uint16 spell_id);
 bool IsDamageSpell(uint16 spell_id);
 bool IsAnyDamageSpell(uint16 spell_id);

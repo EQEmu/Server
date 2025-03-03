@@ -386,7 +386,7 @@ RULE_BOOL(Map, MobPathingVisualDebug, false, "Displays nodes in pathing points i
 RULE_REAL(Map, FixPathingZMaxDeltaSendTo, 20, "At runtime in SendTo: maximum change in Z to allow the BestZ code to apply")
 RULE_INT(Map, FindBestZHeightAdjust, 1, "Adds this to the current Z before seeking the best Z position")
 RULE_BOOL(Map, CheckForDoorLoSCheat, true, "Runs LoS checks to prevent cheating through doors.")
-RULE_BOOL(Map, EnableLoSCheatExemptions, true, "Enables exemptions for the LoS Cheat check. Must modify source to create these.")
+RULE_BOOL(Map, EnableLoSCheatExemptions, false, "Enables exemptions for the LoS Cheat check. Must modify source to create these.")
 RULE_REAL(Map, RangeCheckForDoorLoSCheat, 250.0, "Default 250.0. Range to check if a door is blocking LoS from the target.")
 RULE_STRING(Map, ZonesToCheckDoorCheat, "89,103", "Zones that will check for the door LoS cheat. You can leave it blank to disable, 'all' to check all zones or use a comma-delimited list of zones. Default Sebilis & Chardok")
 RULE_CATEGORY_END()

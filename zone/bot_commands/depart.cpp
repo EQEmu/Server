@@ -197,7 +197,11 @@ void bot_command_depart(Client* c, const Seperator* sep)
 
 			bot_iter->SetCommandedSpell(true);
 
-			if (!IsValidSpellAndLoS(itr->SpellId, bot_iter->HasLoS())) {
+			if (!IsValidSpell(itr->SpellId)) {
+				continue;
+			}
+
+			if (BotRequiresLoSToCast(BotSpellTypes::Teleport, itr->SpellId) && !bot_iter->HasLoS()) {
 				continue;
 			}
 

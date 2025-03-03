@@ -8741,23 +8741,19 @@ bool Mob::CheckDoorLoSCheat(Mob* other) {
 }
 
 bool Mob::CheckLosCheatExempt(Mob* other) {
-	/* This is an exmaple of how to configure exemptions for LoS checks.
 	glm::vec4 exempt_check_who;
 	glm::vec4 exempt_check_other;
 
 	switch (zone->GetZoneID()) {
-		case POEARTHB:
-			exempt_check_who.x = 2051; exempt_check_who.y = 407; exempt_check_who.z = -219; //Middle of councilman spawns
-			//exempt_check_other.x = 1455; exempt_check_other.y = 415; exempt_check_other.z = -242;
-			//check to be sure the player and the target are outside of the councilman area
-			//if the player is inside the cove they cannot be higher than the ceiling (no exploiting from uptop)
+		case Zones::POEARTHB:
+			exempt_check_who.x = 2053; exempt_check_who.y = 408; exempt_check_who.z = -219; //Middle of councilman spawns
+			//if the player is inside the cove they cannot be higher than the ceiling (no exploiting from uptop) --- 800 from center of council to furthest corner in cove
 			if (GetZ() <= -171 && other->GetZ() <= -171 && DistanceNoZ(other->GetPosition(), exempt_check_who) <= 800 && DistanceNoZ(GetPosition(), exempt_check_who) <= 800) {
 				return true;
 			}
 		default:
 			return false;
 	}
-	*/
 
 	return false;
 }
