@@ -4663,14 +4663,19 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 		case ServerReload::Type::WorldRepop:
 			entity_list.ClearAreas();
 			parse->ReloadQuests();
-			zone->Repop();
+			if (zone && zone->IsLoaded()) {
+				zone->Repop();
+			}
 			break;
 
 		case ServerReload::Type::WorldWithRespawn:
-			entity_list.ClearAreas();
 			parse->ReloadQuests();
-			zone->Repop();
-			zone->ClearSpawnTimers();
+			if (zone && zone->IsLoaded()) {
+				entity_list.ClearAreas();
+				zone->Repop();
+				zone->ClearSpawnTimers();
+			}
+
 			break;
 
 		case ServerReload::Type::ZonePoints:
