@@ -37,6 +37,7 @@ public:
 		int port
 	);
 	static bool IsIPAddress(const std::string &ip_address);
+	static bool IsPortInUse(const std::string& ip, int port);
 
 };
 
