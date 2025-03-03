@@ -375,6 +375,10 @@ void NPC::AddLootDrop(
 				if (item2->Slots & slots) {
 					if (equipment[i]) {
 						compitem = database.GetItem(equipment[i]);
+						if (!compitem) {
+							continue;
+						}
+
 						if (item2->AC > compitem->AC || (item2->AC == compitem->AC && item2->HP > compitem->HP)) {
 							// item would be an upgrade
 							// check if we're multi-slot, if yes then we have to keep
@@ -385,6 +389,9 @@ void NPC::AddLootDrop(
 							else {
 								// Unequip old item
 								auto *old_item = GetItem(i);
+								if (!old_item) {
+									continue;
+								}
 
 								old_item->equip_slot = EQ::invslot::SLOT_INVALID;
 
@@ -677,7 +684,7 @@ LootItem *NPC::GetItem(int slot_id)
 	end = m_loot_items.end();
 	for (; cur != end; ++cur) {
 		LootItem *item = *cur;
-		if (item->equip_slot == slot_id) {
+		if (item && item->equip_slot == slot_id) {
 			return item;
 		}
 	}
