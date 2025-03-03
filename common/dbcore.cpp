@@ -302,7 +302,9 @@ std::string DBcore::Escape(const std::string& s)
 
 void DBcore::SetMutex(Mutex *mutex)
 {
-	safe_delete(m_mutex);
+	if (m_mutex && m_mutex != mutex) {
+		safe_delete(m_mutex);
+	}
 
 	DBcore::m_mutex = mutex;
 }
