@@ -894,7 +894,8 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 		ServerReload::Type::Commands,
 		ServerReload::Type::PerlExportSettings,
 		ServerReload::Type::DataBucketsCache,
-		ServerReload::Type::WorldRepop
+		ServerReload::Type::WorldRepop,
+		ServerReload::Type::WorldWithRespawn
 	};
 
 	// Set requires_zone_booted flag before executing reload logic
