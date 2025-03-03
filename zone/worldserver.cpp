@@ -81,7 +81,6 @@ WorldServer::WorldServer()
 	cur_groupid = 0;
 	last_groupid = 0;
 	oocmuted = false;
-	m_process_timer = std::make_unique<EQ::Timer>(1000, true, std::bind(&WorldServer::Process, this));
 }
 
 WorldServer::~WorldServer() {
