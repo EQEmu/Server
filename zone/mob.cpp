@@ -8742,7 +8742,6 @@ bool Mob::CheckDoorLoSCheat(Mob* other) {
 
 bool Mob::CheckLosCheatExempt(Mob* other) {
 	glm::vec4 exempt_check_who;
-	glm::vec4 exempt_check_other;
 
 	switch (zone->GetZoneID()) {
 		case Zones::POEARTHB:
