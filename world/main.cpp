@@ -194,11 +194,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (IpUtil::IsPortInUse(Config->TelnetIP, Config->TelnetTCPPort)) {
-		LogError("Telnet port [{}] already in use", Config->TelnetTCPPort);
-		return 1;
-	}
-
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
 		LogInfo("Console (TCP) listener started on [{}:{}]", Config->TelnetIP, Config->TelnetTCPPort);
