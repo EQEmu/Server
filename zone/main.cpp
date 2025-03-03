@@ -599,7 +599,6 @@ int main(int argc, char **argv)
 
 		if (worldserver.Connected()) {
 			worldwasconnected = true;
-			worldserver.Process();
 		}
 		else {
 			if (worldwasconnected && is_zone_loaded) {

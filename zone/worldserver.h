@@ -81,6 +81,7 @@ private:
 	ZoneEventScheduler *m_zone_scheduler;
 
 	// server reload queue
+	std::unique_ptr<EQ::Timer>           m_process_timer;
 	std::mutex                           m_reload_mutex   = {};
 	std::map<int, ServerReload::Request> m_reload_queue   = {};
 public:
