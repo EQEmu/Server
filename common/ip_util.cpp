@@ -259,3 +259,76 @@ bool IpUtil::IsIPAddress(const std::string &ip_address)
 }
 
 
+#include <iostream>
+#ifdef _WIN32
+#include <winsock2.h>
+    #pragma comment(lib, "ws2_32.lib") // Link against Winsock library
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#endif
+
+#include <iostream>
+#include <string>
+#ifdef _WIN32
+#include <winsock2.h>
+    #include <ws2tcpip.h>  // For inet_pton
+    #pragma comment(lib, "ws2_32.lib") // Link against Winsock library
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>  // For inet_pton
+#include <unistd.h>
+#endif
+
+bool IpUtil::IsPortInUse(const std::string& ip, int port) {
+	bool in_use = false;
+
+#ifdef _WIN32
+	WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "WSAStartup failed\n";
+        return true; // Assume in use on failure
+    }
+#endif
+
+	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock < 0) {
+#ifdef _WIN32
+		WSACleanup();
+#endif
+		return true; // Assume in use on failure
+	}
+
+	sockaddr_in addr{};
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+
+	// Convert IP address from string to binary format
+	if (inet_pton(AF_INET, ip.c_str(), &addr.sin_addr) <= 0) {
+		std::cerr << "Invalid IP address format: " << ip << std::endl;
+#ifdef _WIN32
+		closesocket(sock);
+        WSACleanup();
+#else
+		close(sock);
+#endif
+		return true; // Assume in use on failure
+	}
+
+	if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+		in_use = true; // Bind failed, port is in use
+	}
+
+#ifdef _WIN32
+	closesocket(sock);
+    WSACleanup();
+#else
+	close(sock);
+#endif
+
+	return in_use;
+}

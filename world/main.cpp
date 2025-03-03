@@ -89,6 +89,7 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/skill_caps.h"
 #include "../common/repositories/character_parcels_repository.h"
+#include "../common/ip_util.h"
 
 SkillCaps           skill_caps;
 ZoneStore           zone_store;
@@ -187,6 +188,16 @@ int main(int argc, char **argv)
 	LogInfo("Loading launcher list");
 	launcher_list.LoadList();
 	zoneserver_list.Init();
+
+	if (IpUtil::IsPortInUse(Config->WorldIP, Config->WorldTCPPort)) {
+		LogError("World port [{}] already in use", Config->WorldTCPPort);
+		return 1;
+	}
+
+	if (IpUtil::IsPortInUse(Config->TelnetIP, Config->TelnetTCPPort)) {
+		LogError("Telnet port [{}] already in use", Config->TelnetTCPPort);
+		return 1;
+	}
 
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
