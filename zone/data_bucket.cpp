@@ -97,6 +97,14 @@ void DataBucket::SetData(const DataBucketKey &k_)
 		for (size_t i = 0; i < nested_keys.size(); ++i) {
 			const std::string &key_part = nested_keys[i];
 			if (i == nested_keys.size() - 1) {
+
+				// If the key already exists and is an object or array, prevent overwriting to avoid data loss
+				if (current->contains(key_part) &&
+					((*current)[key_part].is_object() || (*current)[key_part].is_array())) {
+					LogDataBuckets("Attempted to overwrite an existing object or array at key [{}] - skipping", k_.key);
+					return;
+				}
+
 				// Set the value at the final key
 				(*current)[key_part] = k_.value;
 			} else {
