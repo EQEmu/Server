@@ -141,9 +141,6 @@ void ZoneCLI::DataBuckets(int argc, char **argv, argh::parser &cmd, std::string 
 	value = client->GetBucket("complex.nested.obj2");
 	RunTest("Get nested key value", R"(data2)", value);
 
-	// Cleanup
-	delete client;
-
 	std::cout << "\n===========================================\n";
 	std::cout << "✅ All DataBucket Tests Completed!\n";
 	std::cout << "===========================================\n";
