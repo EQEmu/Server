@@ -3330,11 +3330,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						tobe_auged->UpdateOrnamentationInfo();
 
 						if (new_aug->GetItem()->Attuneable) {
-							if (!RuleB(Custom, AttuneOnExp)) {
-								new_aug->SetAttuned(true);
-							} else {
-								SendItemPacket(item_slot, tobe_auged, ItemPacketTrade);
-							}
+							new_aug->SetAttuned(true);
 						}
 
 						aug = tobe_auged->GetAugment(in_augment->augment_index);
@@ -4356,7 +4352,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 		else {
 			OnDisconnect(true);
 		}
-		
+
 		return;
 	}
 

@@ -2386,21 +2386,13 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		// Not dealing with charges - just do direct swap
 		if (src_inst && (dst_slot_id <= EQ::invslot::EQUIPMENT_END) && dst_slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
 			if (src_inst->GetItem()->Attuneable) {
-				if (!RuleB(Custom, AttuneOnExp)) {
-					src_inst->SetAttuned(true);
-				} else {
-					SendItemPacket(dst_slot_id, src_inst, ItemPacketTrade);
-				}
+				src_inst->SetAttuned(true);
 			}
 			if (src_inst->IsAugmented()) {
 				for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
 					if (src_inst->GetAugment(i)) {
 						if (src_inst->GetAugment(i)->GetItem()->Attuneable) {
-							if (!RuleB(Custom, AttuneOnExp)) {
-								src_inst->GetAugment(i)->SetAttuned(true);
-							} else {
-								SendItemPacket(dst_slot_id, src_inst, ItemPacketTrade);
-							}
+							src_inst->GetAugment(i)->SetAttuned(true);
 						}
 					}
 				}

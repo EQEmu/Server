@@ -7808,12 +7808,8 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 			return(false);
 		}
 	}
+
 	if (itm && (itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && inventory_slot > EQ::invslot::EQUIPMENT_END) {
-
-		if (itm->GetItem()->Classes & bitmask) {
-			AttuneThisClick(inventory_slot);
-		}
-
 		if (!(itm->GetItem()->Classes & bitmask && itm->IsAttuned())) {
 			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
 				std::string message = fmt::format(
