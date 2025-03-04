@@ -936,3 +936,11 @@ std::string Strings::Slugify(const std::string& input, const std::string& separa
 
 	return slug;
 }
+
+bool Strings::IsValidJson(const std::string &json)
+{
+	rapidjson::Document    doc;
+	rapidjson::ParseResult result = doc.Parse(json.c_str());
+
+	return result;
+}
