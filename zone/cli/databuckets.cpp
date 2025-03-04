@@ -61,12 +61,12 @@ void ZoneCLI::DataBuckets(int argc, char **argv, argh::parser &cmd, std::string 
 	RunTest("Nested Key Set/Get", R"({"test1":"value1","test2":"value2"})", value);
 
 	// 🧪 **Test 3: Prevent Overwriting Objects**
-//	client->DeleteBucket("nested");
-//	client->SetBucket("nested.test1", "value1");
-//	client->SetBucket("nested.test2", "value2");
-//	client->SetBucket("nested", "new_value");  // Should be **rejected**
-//	value = client->GetBucket("nested");
-//	RunTest("Prevent Overwriting Objects", R"({"test1":"value1","test2":"value2"})", value);
+	client->DeleteBucket("nested");
+	client->SetBucket("nested.test1.a", "value1");
+	client->SetBucket("nested.test2.a", "value2");
+	client->SetBucket("nested.test2", "new_value");  // Should be **rejected**
+	value = client->GetBucket("nested");
+	RunTest("Prevent Overwriting Objects", R"({"test1":{"a":"value1"},"test2":{"a":"value2"}})", value);
 
 	// 🧪 **Test 4: Deleting a Specific Nested Key**
 	client->DeleteBucket("nested");
@@ -112,12 +112,12 @@ void ZoneCLI::DataBuckets(int argc, char **argv, argh::parser &cmd, std::string 
 	RunTest("Delete Nested Key within JSON", R"({"key1":"value1"})", value);
 
 	// 🧪 **Test 11: Ensure Object Protection on Overwrite Attempt**
-//	client->DeleteBucket("complex");
-//	client->SetBucket("complex.nested.obj1", "data1");
-//	client->SetBucket("complex.nested.obj2", "data2");
-//	client->SetBucket("complex.nested", "overwrite_attempt"); // Should be rejected
-//	value = client->GetBucket("complex.nested");
-//	RunTest("Ensure Object Protection on Overwrite Attempt", R"({"obj1":"data1","obj2":"data2"})", value);
+	client->DeleteBucket("complex");
+	client->SetBucket("complex.nested.obj1", "data1");
+	client->SetBucket("complex.nested.obj2", "data2");
+	client->SetBucket("complex.nested", "overwrite_attempt"); // Should be rejected
+	value = client->GetBucket("complex");
+	RunTest("Ensure Object Protection on Overwrite Attempt", R"({"nested":{"obj1":"data1","obj2":"data2"}})", value);
 
 	// 🧪 **Test 12: Deleting Non-Existent Key Doesn't Break Existing Data**
 	client->DeleteBucket("complex");
@@ -126,6 +126,20 @@ void ZoneCLI::DataBuckets(int argc, char **argv, argh::parser &cmd, std::string 
 	client->DeleteBucket("does_not_exist");  // Should do nothing
 	value = client->GetBucket("complex");
 	RunTest("Deleting Non-Existent Key Doesn't Break Existing Data", R"({"nested":{"obj1":"data1","obj2":"data2"}})", value);
+
+	// 🧪 **Test 13: Get nested key value one level up **
+	client->DeleteBucket("complex");
+	client->SetBucket("complex.nested.obj1", "data1");
+	client->SetBucket("complex.nested.obj2", "data2");
+	value = client->GetBucket("complex.nested");
+	RunTest("Get nested key value", R"({"obj1":"data1","obj2":"data2"})", value);
+
+	// 🧪 **Test 13: Get nested key value deep **
+	client->DeleteBucket("complex");
+	client->SetBucket("complex.nested.obj1", "data1");
+	client->SetBucket("complex.nested.obj2", "data2");
+	value = client->GetBucket("complex.nested.obj2");
+	RunTest("Get nested key value", R"(data2)", value);
 
 	// Cleanup
 	delete client;

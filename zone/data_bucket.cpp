@@ -103,6 +103,8 @@ void DataBucket::SetData(const DataBucketKey &k_)
 
 			if (i == nested_keys.size() - 1) {
 
+				LogDataBucketsDetail("Setting key [{}] key_part [{}]", k.key, key_part);
+
 				// If the key already exists and is an object or array, prevent overwriting to avoid data loss
 				if (current->contains(key_part) &&
 					((*current)[key_part].is_object() || (*current)[key_part].is_array())) {
@@ -164,6 +166,8 @@ DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
 	const std::string &full_key)
 {
 	auto nested_keys = Strings::Split(full_key, NESTED_KEY_DELIMITER);
+	auto top_key = nested_keys.front();
+	nested_keys.erase(nested_keys.begin());
 	json json_value;
 
 	// Check if the JSON is valid
