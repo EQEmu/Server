@@ -240,6 +240,12 @@ void ZoneCLI::DataBuckets(int argc, char **argv, argh::parser &cmd, std::string 
 	value = client->GetBucket("deep_nested.level1.level2.level3.level4.level5");
 	RunTest("Deeply Nested Key Retrieval", "final_value", value);
 
+	// Setting a Key with an Expiration
+	client->SetBucket("nested_expire.test.test", "shouldnt_expire", "S1");
+	value = client->GetBucket("nested_expire");
+	std::this_thread::sleep_for(std::chrono::seconds(2));
+	RunTest("Setting a nested key with an expiration protection test", R"({"test":{"test":"shouldnt_expire"}})", value);
+
 	// Delete Deep Nested Key Keeps Parent**
 //	client->DeleteBucket("deep_nested");
 //	client->SetBucket("deep_nested.level1.level2.level3", R"({"key": "value"})");
