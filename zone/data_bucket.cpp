@@ -75,11 +75,14 @@ void DataBucket::SetData(const DataBucketKey &k_)
 		std::string existing_value = r.id > 0 ? r.value : "{}";
 		json json_value = json::object();
 
-		try {
-			json_value = json::parse(existing_value);
-		} catch (json::parse_error &e) {
-			LogDataBucketsDetail("Failed to parse JSON for key [{}]: {}", k_.key, e.what());
-			json_value = json::object(); // Reset to an empty object on error
+		// Check if the JSON is valid
+		if (Strings::IsValidJson(existing_value)) {
+			try {
+				json_value = json::parse(existing_value);
+			} catch (json::parse_error &e) {
+				LogDataBuckets("Failed to parse JSON for key [{}] [{}]", k_.key, e.what());
+				json_value = json::object(); // Reset to an empty object on error
+			}
 		}
 
 		// Recursively merge new key-value pair into the JSON object
@@ -144,10 +147,16 @@ DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
 	auto nested_keys = Strings::Split(full_key, NESTED_KEY_DELIMITER);
 	json json_value;
 
+	// Check if the JSON is valid
+	if (!Strings::IsValidJson(bucket.value)) {
+		LogDataBuckets("Invalid JSON for key [{}]", bucket.key_);
+		return DataBucketsRepository::NewEntity();
+	}
+
 	try {
 		json_value = json::parse(bucket.value); // Parse the JSON
 	} catch (json::parse_error &ex) {
-		LogDataBucketsDetail("Failed to parse JSON for key [{}]: {}", bucket.key_, ex.what());
+		LogDataBuckets("Failed to parse JSON for key [{}] [{}]", bucket.key_, ex.what());
 		return DataBucketsRepository::NewEntity(); // Return empty entity on parse error
 	}
 
