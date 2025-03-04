@@ -358,44 +358,99 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 
 bool DataBucket::DeleteData(const DataBucketKey &k)
 {
-	if (CanCache(k)) {
-		size_t size_before = g_data_bucket_cache.size();
+	bool is_nested_key = k.key.find(NESTED_KEY_DELIMITER) != std::string::npos;
 
-		// delete from cache where contents match
-		g_data_bucket_cache.erase(
-			std::remove_if(
-				g_data_bucket_cache.begin(),
-				g_data_bucket_cache.end(),
-				[&](DataBucketsRepository::DataBuckets &e) {
-					return CheckBucketMatch(e, k);
-				}
-			),
-			g_data_bucket_cache.end()
-		);
+	if (!is_nested_key) {
+		// Update cache
+		if (CanCache(k)) {
+			// delete from cache where contents match
+			g_data_bucket_cache.erase(
+				std::remove_if(
+					g_data_bucket_cache.begin(),
+					g_data_bucket_cache.end(),
+					[&](DataBucketsRepository::DataBuckets &e) {
+						return CheckBucketMatch(e, k);
+					}
+				),
+				g_data_bucket_cache.end()
+			);
+		}
 
-		LogDataBuckets(
-			"Deleting bucket key [{}] bot_id [{}] account_id [{}] character_id [{}] npc_id [{}] bot_id [{}] zone_id [{}] instance_id [{}] cache size before [{}] after [{}]",
-			k.key,
-			k.bot_id,
-			k.account_id,
-			k.character_id,
-			k.npc_id,
-			k.bot_id,
-			k.zone_id,
-			k.instance_id,
-			size_before,
-			g_data_bucket_cache.size()
+		// Regular key deletion, no nesting involved
+		return DataBucketsRepository::DeleteWhere(
+			database,
+			fmt::format("{} `key` = '{}'", DataBucket::GetScopedDbFilters(k), k.key)
 		);
 	}
 
-	return DataBucketsRepository::DeleteWhere(
-		database,
-		fmt::format(
-			"{} `key` = '{}'",
-			DataBucket::GetScopedDbFilters(k),
-			k.key
-		)
-	);
+	// If it's a nested key, retrieve the top-level JSON object
+	auto top_level_key = Strings::Split(k.key, NESTED_KEY_DELIMITER).front();
+	DataBucketKey top_level_k = k;
+	top_level_k.key = top_level_key;
+
+	auto r = GetData(top_level_k);
+	if (r.id == 0 || r.value.empty() || !Strings::IsValidJson(r.value)) {
+		LogDataBuckets("Attempted to delete nested key [{}] but parent key [{}] does not exist or is invalid JSON", k.key, top_level_key);
+		return false;
+	}
+
+	json json_value;
+	try {
+		json_value = json::parse(r.value);
+	} catch (json::parse_error &ex) {
+		LogDataBuckets("Failed to parse JSON for key [{}] [{}]", top_level_key, ex.what());
+		return false;
+	}
+
+	// Recursively remove the nested key
+	auto nested_keys = Strings::Split(k.key, NESTED_KEY_DELIMITER);
+	json *current = &json_value;
+
+	for (size_t i = 0; i < nested_keys.size(); ++i) {
+		const std::string &key_part = nested_keys[i];
+
+		if (i == nested_keys.size() - 1) {
+			// Last key in the hierarchy - delete it
+			if (current->contains(key_part)) {
+				current->erase(key_part);
+				LogDataBuckets("Deleted nested key [{}] from [{}]", key_part, k.key);
+			} else {
+				LogDataBuckets("Key [{}] not found in JSON - nothing to delete", k.key);
+				return false;
+			}
+		} else {
+			if (!current->contains(key_part) || !(*current)[key_part].is_object()) {
+				LogDataBuckets("Parent key [{}] does not exist or is not an object", key_part);
+				return false;
+			}
+			current = &(*current)[key_part];
+		}
+	}
+
+	// If the JSON object is now empty, delete the top-level key
+	if (json_value.empty()) {
+		LogDataBuckets("Top-level key [{}] is now empty, deleting entire entry", top_level_key);
+		return DataBucketsRepository::DeleteWhere(
+			database,
+			fmt::format("{} `key` = '{}'", DataBucket::GetScopedDbFilters(k), top_level_key)
+		);
+	}
+
+	// Otherwise, update the existing JSON without the deleted key
+	r.value = json_value.dump();
+	DataBucketsRepository::UpdateOne(database, r);
+
+	// Update cache
+	if (CanCache(k)) {
+		for (auto &e : g_data_bucket_cache) {
+			if (CheckBucketMatch(e, top_level_k)) {
+				e.value = r.value;
+				break;
+			}
+		}
+	}
+
+	return true;
 }
 
 std::string DataBucket::GetDataExpires(const DataBucketKey &k)
