@@ -306,7 +306,7 @@ int main(int argc, char **argv)
 
 	LogSys.SetDatabase(&database)
 		->SetLogPath(path.GetLogPath())
-		->LoadLogDatabaseSettings()
+		->LoadLogDatabaseSettings(ZoneCLI::RanTestCommand(argc, argv))
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();
 
