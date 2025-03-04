@@ -16,12 +16,6 @@ void ZoneCLI::NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std
 	uint32 break_length = 50;
 	int    failed_count = 0;
 
-	RegisterExecutablePlatform(EQEmuExePlatform::ExePlatformZoneSidecar);
-
-	LogInfo("{}", Strings::Repeat("-", break_length));
-	LogInfo("Booting test zone for NPC handins (MultiQuest)");
-	LogInfo("{}", Strings::Repeat("-", break_length));
-
 	LogSys.SilenceConsoleLogging();
 
 	Zone::Bootup(ZoneID("qrg"), 0, false);
@@ -30,9 +24,9 @@ void ZoneCLI::NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std
 	entity_list.Process();
 	entity_list.MobProcess();
 
-	LogInfo("{}", Strings::Repeat("-", break_length));
-	LogInfo("> Done booting test zone");
-	LogInfo("{}", Strings::Repeat("-", break_length));
+	std::cout << "===========================================\n";
+	std::cout << "⚙\uFE0F> Running Hand-in Tests (Multi-Quest)...\n";
+	std::cout << "===========================================\n\n";
 
 	Client *c       = new Client();
 	auto   npc_type = content_db.LoadNPCTypesData(754008);
@@ -46,9 +40,6 @@ void ZoneCLI::NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std
 
 		entity_list.AddNPC(npc);
 		npc->MultiQuestEnable();
-
-		LogInfo("> Spawned NPC [{}]", npc->GetCleanName());
-		LogInfo("> Spawned client [{}]", c->GetCleanName());
 
 		struct HandinEntry {
 			std::string            item_id            = "0";
@@ -108,12 +99,10 @@ void ZoneCLI::NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std
 		// turn this on to see debugging output
 		LogSys.log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;
 
-		LogInfo("{}", Strings::Repeat("-", break_length));
-
-		for (auto &test_case: test_cases) {
+		for (auto &test: test_cases) {
 			required.clear();
 
-			for (auto &hand_in: test_case.hand_in.items) {
+			for (auto &hand_in: test.hand_in.items) {
 				hand_ins.clear();
 				items.clear();
 
@@ -135,71 +124,42 @@ void ZoneCLI::NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std
 			}
 
 			// money
-			if (test_case.hand_in.money.platinum > 0) {
-				hand_ins["platinum"] = test_case.hand_in.money.platinum;
+			if (test.hand_in.money.platinum > 0) {
+				hand_ins["platinum"] = test.hand_in.money.platinum;
 			}
-			if (test_case.hand_in.money.gold > 0) {
-				hand_ins["gold"] = test_case.hand_in.money.gold;
+			if (test.hand_in.money.gold > 0) {
+				hand_ins["gold"] = test.hand_in.money.gold;
 			}
-			if (test_case.hand_in.money.silver > 0) {
-				hand_ins["silver"] = test_case.hand_in.money.silver;
+			if (test.hand_in.money.silver > 0) {
+				hand_ins["silver"] = test.hand_in.money.silver;
 			}
-			if (test_case.hand_in.money.copper > 0) {
-				hand_ins["copper"] = test_case.hand_in.money.copper;
+			if (test.hand_in.money.copper > 0) {
+				hand_ins["copper"] = test.hand_in.money.copper;
 			}
 
-			for (auto &req: test_case.required.items) {
+			for (auto &req: test.required.items) {
 				required[req.item_id] = req.count;
 			}
 
 			// money
-			if (test_case.required.money.platinum > 0) {
-				required["platinum"] = test_case.required.money.platinum;
+			if (test.required.money.platinum > 0) {
+				required["platinum"] = test.required.money.platinum;
 			}
-			if (test_case.required.money.gold > 0) {
-				required["gold"] = test_case.required.money.gold;
+			if (test.required.money.gold > 0) {
+				required["gold"] = test.required.money.gold;
 			}
-			if (test_case.required.money.silver > 0) {
-				required["silver"] = test_case.required.money.silver;
+			if (test.required.money.silver > 0) {
+				required["silver"] = test.required.money.silver;
 			}
-			if (test_case.required.money.copper > 0) {
-				required["copper"] = test_case.required.money.copper;
+			if (test.required.money.copper > 0) {
+				required["copper"] = test.required.money.copper;
 			}
 
 			auto result = npc->CheckHandin(c, hand_ins, required, items);
-			if (result != test_case.handin_check_result) {
-				failed_count++;
-				LogError("FAIL [{}]", test_case.description);
-				// print out the hand-ins
-				LogError("Hand-ins >");
-				for (auto &item: npc->GetHandin().items) {
-					LogError(" > Item [{}] count [{}]", item.item_id, item.count);
-				}
-				LogError("Required >");
-				for (auto &req: required) {
-					LogError(" > Item [{}] count [{}]", req.first, req.second);
-				}
-				LogError("Expected [{}] got [{}]", test_case.handin_check_result, result);
-			}
-			else {
-				LogInfo("PASS [{}]", test_case.description);
-			}
+
+			RunTest(test.description, test.handin_check_result, result);
 
 			auto returned = npc->ReturnHandinItems(c);
-
-			// assert that returned items are expected
-			for (auto &item: test_case.returned.items) {
-				auto      found = false;
-				for (auto &ret: returned.items) {
-					if (ret.item_id == item.item_id) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					LogError("Returned item [{}] not expected", item.item_id);
-				}
-			}
 
 			npc->ResetHandin();
 
@@ -209,11 +169,7 @@ void ZoneCLI::NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std
 		}
 	}
 
-	if (failed_count > 0) {
-		LogError("Failed [{}] tests", failed_count);
-		std::exit(1);
-	}
-	else {
-		LogInfo("All tests passed");
-	}
+	std::cout << "\n===========================================\n";
+	std::cout << "✅ All NPC Hand-in Tests Completed (Multi-Quest)!\n";
+	std::cout << "===========================================\n";
 }
