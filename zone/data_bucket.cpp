@@ -27,7 +27,8 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 void DataBucket::SetData(const DataBucketKey &k_)
 {
 	DataBucketKey k = k_; // copy the key so we can modify it
-	if (k.key.find(NESTED_KEY_DELIMITER) != std::string::npos) {
+	bool is_nested = k.key.find(NESTED_KEY_DELIMITER) != std::string::npos;
+	if (is_nested) {
 		k.key = Strings::Split(k.key, NESTED_KEY_DELIMITER).front();
 	}
 
@@ -62,6 +63,10 @@ void DataBucket::SetData(const DataBucketKey &k_)
 		expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::ToInt(k.expires);
 		if (isalpha(k.expires[0]) || isalpha(k.expires[k.expires.length() - 1])) {
 			expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::TimeToSeconds(k.expires);
+		}
+		if (is_nested) {
+			LogDataBuckets("Nested keys can't expire; set expiration on the parent key");
+			expires_time_unix = 0;
 		}
 	}
 
