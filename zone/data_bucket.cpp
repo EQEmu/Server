@@ -78,7 +78,7 @@ void DataBucket::SetData(const DataBucketKey &k_)
 		try {
 			json_value = json::parse(existing_value);
 		} catch (json::parse_error &e) {
-			LogError("Failed to parse JSON for key [{}]: {}", k_.key, e.what());
+			LogDataBucketsDetail("Failed to parse JSON for key [{}]: {}", k_.key, e.what());
 			json_value = json::object(); // Reset to an empty object on error
 		}
 
@@ -147,7 +147,7 @@ DataBucketsRepository::DataBuckets DataBucket::ExtractNestedValue(
 	try {
 		json_value = json::parse(bucket.value); // Parse the JSON
 	} catch (json::parse_error &ex) {
-		LogError("Failed to parse JSON for key [{}]: {}", bucket.key_, ex.what());
+		LogDataBucketsDetail("Failed to parse JSON for key [{}]: {}", bucket.key_, ex.what());
 		return DataBucketsRepository::NewEntity(); // Return empty entity on parse error
 	}
 
