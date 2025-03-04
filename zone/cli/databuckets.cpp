@@ -139,7 +139,66 @@ void ZoneCLI::DataBuckets(int argc, char **argv, argh::parser &cmd, std::string 
 	client->SetBucket("complex.nested.obj1", "data1");
 	client->SetBucket("complex.nested.obj2", "data2");
 	value = client->GetBucket("complex.nested.obj2");
-	RunTest("Get nested key value", R"(data2)", value);
+	RunTest("Get nested key value deep", R"(data2)", value);
+
+	/*** ADDITIONAL TEST CASES ***/
+
+	// 🧪 **Test 1: Retrieve Nested Key from Plain String**
+	client->DeleteBucket("plain_string");
+	client->SetBucket("plain_string", "some_value");
+	value = client->GetBucket("plain_string.nested");
+	RunTest("Retrieve Nested Key from Plain String", "", value);
+
+	// 🧪 **Test 2: Store and Retrieve JSON Array**
+	client->DeleteBucket("json_array");
+	client->SetBucket("json_array", R"(["item1", "item2"])");
+	value = client->GetBucket("json_array");
+	RunTest("Store and Retrieve JSON Array", R"(["item1", "item2"])", value);
+
+//	// 🧪 **Test 3: Prevent Overwriting Array with Object**
+//	client->DeleteBucket("json_array");
+//	client->SetBucket("json_array", R"(["item1", "item2"])");
+//	client->SetBucket("json_array.item", "new_value"); // Should be rejected
+//	value = client->GetBucket("json_array");
+//	RunTest("Prevent Overwriting Array with Object", R"(["item1", "item2"])", value);
+
+	// 🧪 **Test 4: Retrieve Non-Existent Nested Key**
+	client->DeleteBucket("nested_partial");
+	client->SetBucket("nested_partial.level1", R"({"exists": "yes"})");
+	value = client->GetBucket("nested_partial.level1.non_existent");
+	RunTest("Retrieve Non-Existent Nested Key", "", value);
+
+	// 🧪 **Test 5: Overwriting Parent Key Deletes Children**
+	client->DeleteBucket("nested_override");
+	client->SetBucket("nested_override.child", "data");
+	client->SetBucket("nested_override", "new_parent_value"); // Should remove `child`
+	value = client->GetBucket("nested_override");
+	RunTest("Overwriting Parent Key Deletes Children", "new_parent_value", value);
+
+	// 🧪 **Test 6: Store and Retrieve Empty JSON Object**
+	client->DeleteBucket("empty_json");
+	client->SetBucket("empty_json", R"({})");
+	value = client->GetBucket("empty_json");
+	RunTest("Store and Retrieve Empty JSON Object", R"({})", value);
+
+	// 🧪 **Test 7: Store and Retrieve JSON String**
+	client->DeleteBucket("json_string");
+	client->SetBucket("json_string", R"("this is a string")");
+	value = client->GetBucket("json_string");
+	RunTest("Store and Retrieve JSON String", R"("this is a string")", value);
+
+	// 🧪 **Test 8: Deeply Nested Key Retrieval**
+	client->DeleteBucket("deep_nested");
+	client->SetBucket("deep_nested.level1.level2.level3.level4.level5", "final_value");
+	value = client->GetBucket("deep_nested.level1.level2.level3.level4.level5");
+	RunTest("Deeply Nested Key Retrieval", "final_value", value);
+
+	// 🧪 **Test 9: Delete Deep Nested Key Keeps Parent**
+//	client->DeleteBucket("deep_nested");
+//	client->SetBucket("deep_nested.level1.level2.level3", R"({"key": "value"})");
+//	client->DeleteBucket("deep_nested.level1.level2.level3.key");
+//	value = client->GetBucket("deep_nested.level1.level2.level3");
+//	RunTest("Delete Deep Nested Key Keeps Parent", "{}", value);
 
 	std::cout << "\n===========================================\n";
 	std::cout << "✅ All DataBucket Tests Completed!\n";
