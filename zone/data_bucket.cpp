@@ -92,10 +92,15 @@ void DataBucket::SetData(const DataBucketKey &k_)
 
 		// Recursively merge new key-value pair into the JSON object
 		auto nested_keys = Strings::Split(k_.key, NESTED_KEY_DELIMITER);
+		auto top_key = nested_keys.front();
+		// remove the top-level key
+		nested_keys.erase(nested_keys.begin());
+
 		json *current = &json_value;
 
 		for (size_t i = 0; i < nested_keys.size(); ++i) {
 			const std::string &key_part = nested_keys[i];
+
 			if (i == nested_keys.size() - 1) {
 
 				// If the key already exists and is an object or array, prevent overwriting to avoid data loss
@@ -111,6 +116,7 @@ void DataBucket::SetData(const DataBucketKey &k_)
 				// Traverse or create nested objects
 				if (!current->contains(key_part)) {
 					(*current)[key_part] = json::object();
+					LogDataBucketsDetail("Creating nested root key [{}] key_part [{}]", k.key, key_part);
 				} else if (!(*current)[key_part].is_object()) {
 					// If key exists but is not an object, reset to object to avoid conflicts
 					(*current)[key_part] = json::object();
@@ -121,7 +127,7 @@ void DataBucket::SetData(const DataBucketKey &k_)
 
 		// Serialize JSON back to string
 		b.value = json_value.dump();
-		b.key_ = nested_keys.front(); // Use the top-level key
+		b.key_ = top_key; // Use the top-level key
 	}
 
 	if (bucket_id) {
@@ -404,6 +410,8 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 
 	// Recursively remove the nested key
 	auto nested_keys = Strings::Split(k.key, NESTED_KEY_DELIMITER);
+	auto top_key = nested_keys.front();
+	nested_keys.erase(nested_keys.begin());
 	json *current = &json_value;
 
 	for (size_t i = 0; i < nested_keys.size(); ++i) {
