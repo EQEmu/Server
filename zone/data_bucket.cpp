@@ -430,6 +430,21 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 	// If the JSON object is now empty, delete the top-level key
 	if (json_value.empty()) {
 		LogDataBuckets("Top-level key [{}] is now empty, deleting entire entry", top_level_key);
+
+		// delete cache
+		if (CanCache(k)) {
+			g_data_bucket_cache.erase(
+				std::remove_if(
+					g_data_bucket_cache.begin(),
+					g_data_bucket_cache.end(),
+					[&](DataBucketsRepository::DataBuckets &e) {
+						return CheckBucketMatch(e, top_level_k);
+					}
+				),
+				g_data_bucket_cache.end()
+			);
+		}
+
 		return DataBucketsRepository::DeleteWhere(
 			database,
 			fmt::format("{} `key` = '{}'", DataBucket::GetScopedDbFilters(k), top_level_key)
