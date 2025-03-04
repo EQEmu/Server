@@ -4369,13 +4369,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 
 		if (IsClient() && CastToClient()->sneaking && (spell_id && IsDetrimentalSpell(spell_id))) {
-			LogDebug("Fuck 1");
 			CastToClient()->sneaking = false;
 			SendAppearancePacket(AppearanceType::Sneak, 0);
 		}
 
 		if (attacker && attacker->IsClient() && attacker->CastToClient()->sneaking && (spell_id && IsDetrimentalSpell(spell_id))) {
-			LogDebug("Fuck 2");
 			attacker->CastToClient()->sneaking = false;
 			attacker->SendAppearancePacket(AppearanceType::Sneak, 0);
 		}

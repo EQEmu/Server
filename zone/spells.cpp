@@ -7750,23 +7750,6 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 	EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 	int bitmask = (CastToClient()->GetClassesBits());
 
-	auto AttuneThisClick = [&](uint32 inventory_slot) {
-		if (RuleB(Custom, AttuneItemOnClick) && !itm->IsAttuned()) {
-			if (itm->GetItem()->Classes & bitmask) {
-				itm->SetAttuned(true);
-
-				EQ::SayLinkEngine linker;
-				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-				linker.SetItemInst(itm);
-
-				Message(Chat::Experience, "Your [%s] has become attuned to you.", linker.GenerateLink().c_str());
-
-				database.UpdateInventorySlot(CastToClient()->CharacterID(), itm, inventory_slot);
-				CastToClient()->SendItemPacket(inventory_slot, itm, ItemPacketTrade);
-			}
-		}
-	};
-
 	if (itm && itm->GetItem()->Classes != 65535) {
 		if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && !(itm->GetItem()->Classes & bitmask)) {
 			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {

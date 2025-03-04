@@ -1217,7 +1217,6 @@ RULE_REAL(Custom,   FrenzyScaleOnWeaponAmount,				3.0, "Add weapon damage multip
 RULE_REAL(Custom,   MonkScaleOnWeaponAmount,				0.0, "Add weapon damage multiplied by this value to strikes & kicks")
 RULE_REAL(Custom,   MonkScaleOnHandFeetQuality,				0.0, "Add Damage to strikes and kicks based on hand and foot item quality")
 RULE_BOOL(Custom,   ExcludeTempPetsFromProcChanceSPA,       false, "Enable this rule to prevent SE_ProcChance from affecting procs that spawn temporary pets")
-RULE_BOOL(Custom, 	AttuneItemOnClick,						false, "Forcibly items  on click")
 RULE_BOOL(Custom,   BypassMulticlassStackConflict,			false, "Allow all of your class spells to stack")
 RULE_BOOL(Custom, 	ApplyPetAAToSwarm, 						true, "Apply 'Pet AAs' to Swarm Pets")
 RULE_INT(Custom, 	StaticInstanceVersion,					UINT8_MAX, "Instances with the version will load as StaticInstanceTemplateVersion and have respawns disabled")
