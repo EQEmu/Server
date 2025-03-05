@@ -690,11 +690,15 @@ void Aura::ProcessSpawns()
 			continue;
 		}
 
-		if (!e.second->IsOfClientBot()) {
+		if (!e.second->IsClient()) {
 			continue;
 		}
 
 		auto c = e.second->CastToClient();
+
+		if (!c) {
+			continue;
+		}
 
 		bool spawned = spawned_for.find(c->GetID()) != spawned_for.end();
 		if (ShouldISpawnFor(c)) {
