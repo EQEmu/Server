@@ -3615,6 +3615,7 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 void Bot::Depop() {
 	WipeHateList();
 	entity_list.RemoveFromHateLists(this);
+	RemoveAllAuras();
 
 	if (HasPet())
 		GetPet()->Depop();
