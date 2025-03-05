@@ -4928,15 +4928,20 @@ bool Mob::HateSummon() {
 	SetTarget(GetHateTop());
 	if(target)
 	{
+
+		if (RuleI(Combat, SummonImmunitySeconds) && target->IsClient()) {
+			auto si_timer = target->CastToClient()->GetSummonImmunityTimer();
+			if (si_timer->GetDuration() && !si_timer->Check(false)) {
+				return false;
+			}
+			si_timer->Start(RuleI(Combat, SummonImmunitySeconds) * 1000);
+		}
+
 		if(summon_level == 1) {
 
 			float summoner_zoff = GetZOffset();
 			float summoned_zoff = target->GetZOffset();
 			auto new_pos = m_Position;
-
-			// These are not needed because TryMoveAlong fixes Z, 'fixing it' twice here causes falling under world
-			//new_pos.z -= (summoner_zoff - summoned_zoff);
-			//new_pos.z = GetFixedZ(new_pos);
 
 			float angle = new_pos.w - target->GetHeading();
 			new_pos.w = target->GetHeading();
@@ -4945,14 +4950,14 @@ bool Mob::HateSummon() {
 			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
 
 			// original version of these just compares new_pos.z to the rule, which is not looking at the delta-z, just the absolute z
-			//if (zone->CanCastOutdoor() == 1 && std::abs(new_pos.z  - target->GetPosition().z) > RuleR(Range, MaxZSummonOffsetOutdoor))
-			//{
-			//	return false;
-			//}
-			//if (zone->CanCastOutdoor() == 0 && std::abs(new_pos.z  - target->GetPosition().z) > RuleR(Range, MaxZSummonOffsetIndoor))
-			//{
-			//	return false;
-			//}
+			if (zone->CanCastOutdoor() == 1 && std::abs(new_pos.z  - target->GetPosition().z) > RuleR(Range, MaxZSummonOffsetOutdoor))
+			{
+				return false;
+			}
+			if (zone->CanCastOutdoor() == 0 && std::abs(new_pos.z  - target->GetPosition().z) > RuleR(Range, MaxZSummonOffsetIndoor))
+			{
+				return false;
+			}
 
 			if (target->IsClient()) {
 				entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName());

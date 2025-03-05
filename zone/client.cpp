@@ -198,6 +198,7 @@ Client::Client() : Mob(
 	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
 	lazy_load_bank_check_timer(1000),
 	bandolier_throttle_timer(0),
+	m_summon_immunity_timer(0),
 	m_stun_immune_timer(0),
 	m_silence_immune_timer(0),
 	m_initial_wc(1000)
@@ -509,6 +510,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
 	lazy_load_bank_check_timer(1000),
 	bandolier_throttle_timer(0),
+	m_summon_immunity_timer(0),
 	m_stun_immune_timer(0),
 	m_silence_immune_timer(0),
 	m_initial_wc(1000)

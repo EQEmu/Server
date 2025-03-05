@@ -1884,6 +1884,7 @@ public:
 	void CheckMercSuspendTimer();
 	Timer* GetMercTimer() { return &merc_timer; };
 	Timer* GetPickLockTimer() { return &pick_lock_timer; };
+	Timer* GetSummonImmunityTimer() { return &m_summon_immunity_timer; };
 
 	void SendWebLink(const char* website);
 	void SendMarqueeMessage(uint32 type, std::string message, uint32 duration = 3000);
@@ -2319,6 +2320,7 @@ private:
 	Timer parcel_timer;	//Used to limit the number of parcels to one every 30 seconds (default).  Changable via rule.
 	Timer lazy_load_bank_check_timer;
 	Timer bandolier_throttle_timer;
+	Timer m_summon_immunity_timer;
 
 	bool m_lazy_load_bank            = false;
 	int  m_lazy_load_sent_bank_slots = 0;
