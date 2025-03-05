@@ -4933,20 +4933,27 @@ bool Mob::HateSummon() {
 			float summoner_zoff = GetZOffset();
 			float summoned_zoff = target->GetZOffset();
 			auto new_pos = m_Position;
-			new_pos.z -= (summoner_zoff - summoned_zoff);
-			new_pos.z = GetFixedZ(new_pos);
+
+			// These are not needed because TryMoveAlong fixes Z, 'fixing it' twice here causes falling under world
+			//new_pos.z -= (summoner_zoff - summoned_zoff);
+			//new_pos.z = GetFixedZ(new_pos);
+
 			float angle = new_pos.w - target->GetHeading();
 			new_pos.w = target->GetHeading();
 
 			// probably should be like half melee range, but we can't get melee range nicely because reasons :)
 			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
-			if (zone->CanCastOutdoor() == 1 && new_pos.z > RuleR(Range, MaxZSummonOffsetOutdoor))
-			{
-				return false;
-			}
-			if (zone->CanCastOutdoor() == 0 && new_pos.z > RuleR(Range, MaxZSummonOffsetIndoor)) {
-				return false;
-			}
+
+			// original version of these just compares new_pos.z to the rule, which is not looking at the delta-z, just the absolute z
+			//if (zone->CanCastOutdoor() == 1 && std::abs(new_pos.z  - target->GetPosition().z) > RuleR(Range, MaxZSummonOffsetOutdoor))
+			//{
+			//	return false;
+			//}
+			//if (zone->CanCastOutdoor() == 0 && std::abs(new_pos.z  - target->GetPosition().z) > RuleR(Range, MaxZSummonOffsetIndoor))
+			//{
+			//	return false;
+			//}
+
 			if (target->IsClient()) {
 				entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName());
 				target->CastToClient()->MovePC(
