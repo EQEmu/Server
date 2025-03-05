@@ -757,8 +757,6 @@ RULE_INT(Range, ClientPositionUpdates, 300, "Distance in which the own changed p
 RULE_INT(Range, CriticalDamage, 80, "The packet range in which critical hit messages are sent")
 RULE_INT(Range, MobCloseScanDistance, 600, "Close scan distance")
 RULE_INT(Range, MaxDistanceToClickDoors, 100, "Max distance that a client can click a door from (Client says 'You can't reach that' at roughly 25-50 for most doors)")
-RULE_REAL(Range,MaxZSummonOffsetIndoor, 10.00, "Maximum distance on Z Axis to which a player can be summoned indoors")
-RULE_REAL(Range,MaxZSummonOffsetOutdoor, 255.00, "Maximum distance on Z Axis to which a player can be summoned outdoors")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Bots)

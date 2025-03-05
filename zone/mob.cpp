@@ -4938,26 +4938,12 @@ bool Mob::HateSummon() {
 		}
 
 		if(summon_level == 1) {
-
-			float summoner_zoff = GetZOffset();
-			float summoned_zoff = target->GetZOffset();
 			auto new_pos = m_Position;
-
 			float angle = new_pos.w - target->GetHeading();
 			new_pos.w = target->GetHeading();
 
 			// probably should be like half melee range, but we can't get melee range nicely because reasons :)
 			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
-
-			// original version of these just compares new_pos.z to the rule, which is not looking at the delta-z, just the absolute z
-			if (zone->CanCastOutdoor() == 1 && std::abs(new_pos.z  - target->GetPosition().z) > RuleR(Range, MaxZSummonOffsetOutdoor))
-			{
-				return false;
-			}
-			if (zone->CanCastOutdoor() == 0 && std::abs(new_pos.z  - target->GetPosition().z) > RuleR(Range, MaxZSummonOffsetIndoor))
-			{
-				return false;
-			}
 
 			if (target->IsClient()) {
 				entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName());
