@@ -3314,6 +3314,10 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				}
 			}
 
+			if (spell_mask1 == spell_mask2) {
+				return true;
+			}
+
 			return (spell_mask1 & spell_mask2) != 0;
 		};
 
