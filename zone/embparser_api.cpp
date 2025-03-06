@@ -6013,6 +6013,28 @@ uint32_t Perl__get_global_buff_time(uint32 spell_id)
 	return quest_manager.GetGlobalBuffTime(spell_id);
 }
 
+bool Perl__handin(perl::reference handin_ref)
+{
+	perl::hash handin = handin_ref;
+
+	std::map<std::string, uint32> handin_map;
+
+	for (auto e: handin) {
+		if (!e.first) {
+			continue;
+		}
+
+		if (Strings::EqualFold(e.first, "0")) {
+			continue;
+		}
+
+		const uint32 count = static_cast<uint32>(handin.at(e.first));
+		handin_map[e.first] = count;
+	}
+
+	return quest_manager.handin(handin_map);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6740,6 +6762,7 @@ void perl_register_quest()
 	package.add("gmsay", (void(*)(const char*, int, bool))&Perl__gmsay);
 	package.add("gmsay", (void(*)(const char*, int, bool, int))&Perl__gmsay);
 	package.add("gmsay", (void(*)(const char*, int, bool, int, int))&Perl__gmsay);
+	package.add("handin", &Perl__handin);
 	package.add("has_zone_flag", &Perl__has_zone_flag);
 	package.add("hasrecipelearned", &Perl__hasrecipelearned);
 	package.add("hastimer", &Perl__hastimer);

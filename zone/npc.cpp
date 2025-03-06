@@ -4461,6 +4461,10 @@ bool NPC::CheckHandin(
 		h = m_hand_in;
 	}
 
+	if (IsMultiQuestEnabled()) {
+		LogNpcHandin("{} Multi-Quest hand-in enabled", log_handin_prefix);
+	}
+
 	std::vector<std::pair<const std::map<std::string, uint32>&, Handin&>> datasets = {};
 
 	// if we've already started the hand-in process, we don't want to re-process the hand-in data
@@ -4542,7 +4546,7 @@ bool NPC::CheckHandin(
 
 	// multi-quest
 	if (IsMultiQuestEnabled()) {
-		for (auto &h_item: h.items) {
+		for (auto &h_item: m_hand_in.items) {
 			for (const auto &r_item: r.items) {
 				if (h_item.item_id == r_item.item_id && h_item.count == r_item.count) {
 					h_item.is_multiquest_item = true;
@@ -4887,7 +4891,11 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 					}
 
 					c->PushItemOnCursor(*i.item, true);
-					LogNpcHandin("Hand-in failed, returning item [{}]", i.item->GetItem()->Name);
+					LogNpcHandin(
+						"Hand-in failed, returning item [{}] i.is_multiquest_item [{}]",
+						i.item->GetItem()->Name,
+						i.is_multiquest_item
+					);
 
 					returned_handin = true;
 					return true; // Mark this item for removal

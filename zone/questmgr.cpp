@@ -4651,3 +4651,18 @@ void QuestManager::SpawnGrid(uint32 npc_id, glm::vec4 position, float spacing, u
 		}
 	}
 }
+
+bool QuestManager::handin(std::map<std::string, uint32> required) {
+	QuestManagerCurrentQuestVars();
+	if (!owner || !initiator) {
+		LogQuests("QuestManager::handin called with nullptr owner. Probably syntax error in quest file");
+		return false;
+	}
+
+	if (owner && !owner->IsNPC()) {
+		LogQuests("QuestManager::handin called with non-NPC owner. Probably syntax error in quest file");
+		return false;
+	}
+
+	return owner->CastToNPC()->CheckHandin(initiator, {}, required, {});
+}

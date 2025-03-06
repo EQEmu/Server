@@ -618,15 +618,35 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			item_list.emplace_back(inst);
 		}
 
+		auto handin_npc = tradingWith->CastToNPC();
+
 		m_external_handin_money_returned = {};
 		m_external_handin_items_returned = {};
 		bool has_aggro = tradingWith->CheckAggro(this);
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE) && !has_aggro) {
+			// This CheckHandin call enables eq.handin and quest::handin to recognize the hand-in context.
+			// It initializes the first hand-in bucket, which is then reused for the EVENT_TRADE subroutine.
+			std::map<std::string, uint32> handin = {
+				{"copper",   trade->cp},
+				{"silver",   trade->sp},
+				{"gold",     trade->gp},
+				{"platinum", trade->pp}
+			};
+
+			for (EQ::ItemInstance *inst: items) {
+				if (!inst || !inst->GetItem()) {
+					continue;
+				}
+
+				std::string item_id = fmt::format("{}", inst->GetItem()->ID);
+				handin[item_id] += inst->GetCharges();
+			}
+
+			handin_npc->CheckHandin(this, handin, {}, items);
+
 			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 			LogNpcHandinDetail("EVENT_TRADE triggered for NPC [{}]", tradingWith->GetNPCTypeID());
 		}
-
-		auto handin_npc = tradingWith->CastToNPC();
 
 		// this is a catch-all return for items that weren't consumed by the EVENT_TRADE subroutine
 		// it's possible we have a quest NPC that doesn't have an EVENT_TRADE subroutine
