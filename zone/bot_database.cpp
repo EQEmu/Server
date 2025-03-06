@@ -36,6 +36,7 @@
 #include "../common/repositories/bot_pet_buffs_repository.h"
 #include "../common/repositories/bot_pet_inventories_repository.h"
 #include "../common/repositories/bot_spell_casting_chances_repository.h"
+#include "../common/repositories/bot_spells_entries_repository.h"
 #include "../common/repositories/bot_settings_repository.h"
 #include "../common/repositories/bot_stances_repository.h"
 #include "../common/repositories/bot_timers_repository.h"
@@ -2520,4 +2521,73 @@ bool BotDatabase::DeleteBotBlockedBuffs(const uint32 bot_id)
 	);
 
 	return true;
+}
+
+void BotDatabase::MapCommandedSpellTypeMinLevels() {
+	commanded_spell_type_min_levels.clear();
+
+	auto start = std::min({ BotSpellTypes::START, BotSpellTypes::COMMANDED_START, BotSpellTypes::DISCIPLINE_START });
+	auto end = std::max({ BotSpellTypes::END, BotSpellTypes::COMMANDED_END, BotSpellTypes::DISCIPLINE_END });
+
+	for (int i = start; i <= end; ++i) {
+		if (!Bot::IsValidBotSpellType(i)) {
+			continue;
+		}
+
+		for (int x = Class::Warrior; x <= Class::Berserker; ++x) {
+			commanded_spell_type_min_levels[i][x] = {UINT8_MAX, "" };
+		}
+	}
+
+	auto spell_list = BotSpellsEntriesRepository::All(content_db);
+
+	for (const auto& s : spell_list) {
+		if (!IsValidSpell(s.spell_id)) {
+			LogBotSpellTypeChecks("{} is an invalid spell", s.spell_id);
+			continue;
+		}
+
+		auto spell = spells[s.spell_id];
+
+		if (spell.target_type == ST_Self) {
+			continue;
+		}
+
+		int32_t bot_class = s.npc_spells_id - BOT_CLASS_BASE_ID_PREFIX;
+
+		if (
+			!EQ::ValueWithin(bot_class, Class::Warrior, Class::Berserker) ||
+			!Bot::IsValidBotSpellType(s.type)
+		) {
+			continue;
+		}
+
+		for (int i = start; i <= end; ++i) {
+			if (s.minlevel > commanded_spell_type_min_levels[i][bot_class].min_level) {
+				continue;
+			}
+
+			if (
+				i > BotSpellTypes::PARENT_TYPE_END &&
+				i != s.type &&
+				Bot::GetParentSpellType(i) != s.type
+			) {
+				continue;
+			}
+
+			if (!Bot::IsValidSpellTypeBySpellID(i, s.spell_id)) {
+				continue;
+			}
+
+			if (s.minlevel < commanded_spell_type_min_levels[i][bot_class].min_level) {
+				commanded_spell_type_min_levels[i][bot_class].min_level   = s.minlevel;
+				commanded_spell_type_min_levels[i][bot_class].description = StringFormat(
+					"%s [#%u] - Level %u",
+					GetClassIDName(bot_class),
+					bot_class,
+					s.minlevel
+				);
+			}
+		}
+	}
 }

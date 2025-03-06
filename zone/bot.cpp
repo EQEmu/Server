@@ -3741,8 +3741,6 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			}
 		}
 
-		MapSpellTypeLevels();
-
 		if (RuleB(Bots, RunSpellTypeChecksOnSpawn)) {
 			OwnerMessage("Running SpellType checks. There may be some spells that are mislabeled as incorrect. Use this as a loose guideline.");
 			CheckBotSpells(); //This runs through a series of checks and outputs any spells that are set to the wrong spell type in the database
