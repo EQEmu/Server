@@ -1453,7 +1453,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.flymode = 0;
 	}
 
-	if (IsNPC() && GetNPCTypeID() == ZONE_CONTROLLER_NPC_ID) {
+	if (IsZoneController()) {
 		ns->spawn.invis = 255; // gm invis
 	}
 
@@ -8351,7 +8351,7 @@ int Mob::DispatchZoneControllerEvent(
 		RuleB(Zone, UseZoneController) &&
 		(
 			!IsNPC() ||
-			(IsNPC() && GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID)
+			(IsNPC() && !IsZoneController())
 		)
 	) {
 		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
