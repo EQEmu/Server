@@ -2256,7 +2256,7 @@ void Bot::AI_Process()
 			SetAttackingFlag(false);
 		}
 
-		float tar_distance = DistanceSquared(m_Position, tar->GetPosition());
+		float tar_distance = DistanceSquaredNoZ(m_Position, tar->GetPosition());
 
 // TARGET VALIDATION
 		if (!IsValidTarget(bot_owner, leash_owner, lo_distance, leash_distance, tar, tar_distance)) {
@@ -2296,7 +2296,6 @@ void Bot::AI_Process()
 		CombatRangeInput input = {
 			.target = tar,
 			.target_distance = tar_distance,
-			.behind_mob = behind_mob,
 			.stop_melee_level = stop_melee_level,
 			.p_item = p_item,
 			.s_item = s_item
@@ -2368,6 +2367,16 @@ void Bot::AI_Process()
 			return;
 		}
 
+		if (
+			HasTargetReflection() &&
+			!IsTaunting() &&
+			!tar->IsFleeing() &&
+			!tar->IsFeared() &&
+			TryEvade(tar)
+		) {
+			return;
+		}
+
 // ENGAGED AT COMBAT RANGE
 
 		// We can fight
@@ -2434,7 +2443,11 @@ void Bot::AI_Process()
 				ranged_timer.Start();
 			}
 			else if (!IsBotRanged() && GetLevel() < stop_melee_level) {
-				if (!GetMaxMeleeRange() || !RuleB(Bots, DisableSpecialAbilitiesAtMaxMelee)) {
+				if (
+					IsTaunting() ||
+					!GetMaxMeleeRange() ||
+					!RuleB(Bots, DisableSpecialAbilitiesAtMaxMelee)
+				) {
 					DoClassAttacks(tar);
 				}
 
@@ -3065,7 +3078,7 @@ CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
 
 	// For races with a fixed size
 	if (GetRace() == Race::LavaDragon || GetRace() == Race::Wurm || GetRace() == Race::GhostDragon) {
-		// size_mod = 60.0f;
+		size_mod = 60.0f;
 	}
 	else if (size_mod < 6.0f) {
 		size_mod = 8.0f;
@@ -3110,91 +3123,39 @@ CombatRangeOutput Bot::EvaluateCombatRange(const CombatRangeInput& input) {
 		size_mod = (size_mod / 7.0f);
 	}
 
-	o.melee_distance_max = size_mod;
+	o.melee_distance_max        = sqrt(size_mod);
 
-	if (!RuleB(Bots, UseFlatNormalMeleeRange)) {
+	bool is_two_hander          = input.p_item && input.p_item->GetItem()->IsType2HWeapon();
+	bool is_shield              = input.s_item && input.s_item->GetItem()->IsTypeShield();
+	bool is_backstab_weapon     = input.p_item && input.p_item->GetItemBackstabDamage();
+	bool is_stop_melee_level    = GetLevel() >= input.stop_melee_level;
 
-		bool is_two_hander      = input.p_item && input.p_item->GetItem()->IsType2HWeapon();
-		bool is_shield          = input.s_item && input.s_item->GetItem()->IsTypeShield();
-		bool is_backstab_weapon = input.p_item && input.p_item->GetItemBackstabDamage();
-
-		switch (GetClass()) {
-			case Class::Warrior:
-			case Class::Paladin:
-			case Class::ShadowKnight:
-				o.melee_distance = (
-					is_two_hander ? o.melee_distance_max * 0.45f
-					: is_shield ? o.melee_distance_max * 0.35f
-					: o.melee_distance_max * 0.40f
-				);
-
-				break;
-			case Class::Necromancer:
-			case Class::Wizard:
-			case Class::Magician:
-			case Class::Enchanter:
-				o.melee_distance = (
-					is_two_hander ? o.melee_distance_max * 0.95f
-					: o.melee_distance_max * 0.75f
-				);
-
-				break;
-			case Class::Rogue:
-				o.melee_distance = (
-					input.behind_mob && is_backstab_weapon
-					? o.melee_distance_max * 0.35f
-					: o.melee_distance_max * 0.50f
-				);
-
-				break;
-			default:
-				o.melee_distance = (
-					is_two_hander ? o.melee_distance_max * 0.70f
-					: o.melee_distance_max * 0.50f
-				);
-
-				break;
-		}
-
-		o.melee_distance = sqrt(o.melee_distance);
-		o.melee_distance_max = sqrt(o.melee_distance_max);
+	if (IsTaunting()) { // Taunting bots
+		o.melee_distance_min    = o.melee_distance_max * RuleR(Bots, LowerTauntingMeleeDistanceMultiplier);
+		o.melee_distance        = o.melee_distance_max * RuleR(Bots, UpperTauntingMeleeDistanceMultiplier);
 	}
-	else {
-		o.melee_distance_max = sqrt(o.melee_distance_max);
-		o.melee_distance = o.melee_distance_max * RuleR(Bots, NormalMeleeRangeDistance);
+	else if (IsBotRanged()) { // Archers/Throwers
+		float min_distance      = RuleI(Combat, MinRangedAttackDist);
+		float max_distance      = GetBotRangedValue();
+		float desired_range     = GetBotDistanceRanged();
+
+		max_distance            = (max_distance == 0 ? desired_range : max_distance); // stay ranged even if items/ammo aren't correct
+		o.melee_distance_min    = std::max(min_distance, (desired_range / 2));
+		o.melee_distance        = std::min(max_distance, desired_range);
 	}
+	else if (is_stop_melee_level) { // Casters
+		float desired_range     = GetBotDistanceRanged();
 
-	if (o.melee_distance > RuleR(Bots, MaxDistanceForMelee)) {
-		o.melee_distance = RuleR(Bots, MaxDistanceForMelee);
+		o.melee_distance_min    = std::max(o.melee_distance_max, (desired_range / 2));
+		o.melee_distance        = std::max((o.melee_distance_max * 1.25f), desired_range);
 	}
-
-	o.melee_distance_min = o.melee_distance * RuleR(Bots, PercentMinMeleeDistance);
-
-	if (IsTaunting()) {
-		o.melee_distance_min = o.melee_distance * RuleR(Bots, PercentTauntMinMeleeDistance);
-		o.melee_distance = o.melee_distance * RuleR(Bots, TauntNormalMeleeRangeDistance);
+	else if (GetMaxMeleeRange()) { // Melee bots set to max melee range
+		o.melee_distance_min    = o.melee_distance_max * RuleR(Bots, LowerMaxMeleeRangeDistanceMultiplier);
+		o.melee_distance        = o.melee_distance_max * RuleR(Bots, UpperMaxMeleeRangeDistanceMultiplier);
 	}
-
-	bool is_stop_melee_level = GetLevel() >= input.stop_melee_level;
-
-	if (!IsTaunting() && !IsBotRanged() && !is_stop_melee_level && GetMaxMeleeRange()) {
-		o.melee_distance_min = o.melee_distance_max * RuleR(Bots, PercentMinMaxMeleeRangeDistance);
-		o.melee_distance = o.melee_distance_max * RuleR(Bots, PercentMaxMeleeRangeDistance);
-	}
-
-	if (is_stop_melee_level && !IsBotRanged()) {
-		float desired_range = GetBotDistanceRanged();
-			o.melee_distance_min = std::max(o.melee_distance, (desired_range / 2));
-			o.melee_distance = std::max((o.melee_distance + 1), desired_range);
-	}
-
-	if (IsBotRanged()) {
-		float min_distance = RuleI(Combat, MinRangedAttackDist);
-		float max_distance = GetBotRangedValue();
-		float desired_range = GetBotDistanceRanged();
-		max_distance = (max_distance == 0 ? desired_range : max_distance); // stay ranged if set to ranged even if items/ammo aren't correct
-			o.melee_distance_min = std::max(min_distance, (desired_range / 2));
-			o.melee_distance = std::min(max_distance, desired_range);
+	else { // Regular melee
+		o.melee_distance_min    = o.melee_distance_max * RuleR(Bots, LowerMeleeDistanceMultiplier);
+		o.melee_distance        = o.melee_distance_max * RuleR(Bots, UpperMeleeDistanceMultiplier);
 	}
 
 	o.at_combat_range = (input.target_distance <= o.melee_distance);
@@ -11846,21 +11807,19 @@ void Bot::DoCombatPositioning(
 	bool front_mob
 ) {
 	if (HasTargetReflection()) {
-		if (!IsTaunting() && !tar->IsFeared() && !tar->IsStunned()) {
-			if (TryEvade(tar)) {
-				return;
-			}
-		}
-		else if (tar->IsRooted() && !IsTaunting()) { // Move non-taunters out of range - Above already checks if bot is targeted, otherwise they would stay
+		if (tar->IsRooted() && !IsTaunting()) { // Move non-taunters out of range
 			if (tar_distance <= melee_distance_max) {
-				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, (melee_distance_max + 1), (melee_distance_max * 2), GetBehindMob(), false)) {
+				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, (melee_distance_max + 1), (melee_distance_max * 1.25f), GetBehindMob(), false)) {
 					RunToGoalWithJitter(Goal);
 
 					return;
 				}
 			}
 		}
-		else if (tar_distance < melee_distance_min || (!front_mob && IsTaunting())) { // Back up any bots that are too close
+		else if (
+			tar_distance < melee_distance_min ||
+			(!front_mob && IsTaunting())
+		) { // Back up any bots that are too close or if they're taunting and not in front of the mob
 			if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, GetBehindMob(), (IsTaunting() || !GetBehindMob()))) {
 				RunToGoalWithJitter(Goal);
 
@@ -11870,44 +11829,56 @@ void Bot::DoCombatPositioning(
 	}
 	else {
 		if (!tar->IsFeared()) {
-			if (IsTaunting()) { // Taunting adjustments
-				Mob* mob_tar = tar->GetTarget();
-
-				if (!mob_tar) {
-					DoFaceCheckNoJitter(tar);
-
-					return;
-				}
-
-				if (RuleB(Bots, TauntingBotsFollowTopHate)) { // If enabled, taunting bots will stick to top hate
-					if (Distance(m_Position, mob_tar->GetPosition()) > RuleI(Bots, DistanceTauntingBotsStickMainHate)) {
-						Goal = mob_tar->GetPosition();
-						RunToGoalWithJitter(Goal);
-
-						return;
-					}
-				}
-				else { // Otherwise, stick to any other bots that are taunting
-					if (mob_tar->IsBot() && mob_tar->CastToBot()->IsTaunting() && (Distance(m_Position, mob_tar->GetPosition()) > RuleI(Bots, DistanceTauntingBotsStickMainHate))) {
-						Goal = mob_tar->GetPosition();
-						RunToGoalWithJitter(Goal);
-
-						return;
-					}
-				}
-			}
-			else if (tar_distance < melee_distance_min || (GetBehindMob() && !behind_mob) || (IsTaunting() && !front_mob) || !HasRequiredLoSForPositioning(tar)) { // Regular adjustment
+			if (
+				tar_distance < melee_distance_min ||
+				(GetBehindMob() && !behind_mob) ||
+				(IsTaunting() && !front_mob) ||
+				!HasRequiredLoSForPositioning(tar)
+			) { // Regular adjustment
 				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, GetBehindMob(), (IsTaunting() || !GetBehindMob()))) {
 					RunToGoalWithJitter(Goal);
 
 					return;
 				}
 			}
-			else if (tar->IsEnraged() && !IsTaunting() && !stop_melee_level && !behind_mob) { // Move non-taunting melee bots behind target during enrage
+			else if (
+				tar->IsEnraged() &&
+				!IsTaunting() &&
+				!stop_melee_level &&
+				!behind_mob
+			) { // Move non-taunting melee bots behind target during enrage
 				if (PlotBotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance_min, melee_distance, true)) {
 					RunToGoalWithJitter(Goal);
 
 					return;
+				}
+			}
+
+			if (IsTaunting()) { // Taunting adjustments
+				Mob* mob_tar = tar->GetTarget();
+
+				if (mob_tar) {
+					if (
+						RuleB(Bots, TauntingBotsFollowTopHate) &&
+						(Distance(m_Position, mob_tar->GetPosition()) > RuleI(Bots, DistanceTauntingBotsStickMainHate))
+					) {  // If enabled, taunting bots will stick to top hate
+						Goal = mob_tar->GetPosition();
+						RunToGoalWithJitter(Goal);
+
+						return;
+					}
+					else { // Otherwise, stick to any other bots that are taunting
+						if (
+							mob_tar->IsBot() &&
+							mob_tar->CastToBot()->IsTaunting() &&
+							(Distance(m_Position, mob_tar->GetPosition()) > RuleI(Bots, DistanceTauntingBotsStickMainHate))
+						) {
+							Goal = mob_tar->GetPosition();
+							RunToGoalWithJitter(Goal);
+
+							return;
+						}
+					}
 				}
 			}
 		}
