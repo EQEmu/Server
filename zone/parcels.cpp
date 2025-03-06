@@ -58,7 +58,7 @@ void Client::SendBulkParcels()
 				p.second.aug_slot_6
 			));
 			if (inst) {
-				inst->SetCharges(p.second.quantity > 0 ? p.second.quantity : 1);
+				inst->SetCharges(p.second.quantity);
 				inst->SetMerchantCount(1);
 				inst->SetMerchantSlot(p.second.slot_id);
 				if (inst->IsStackable()) {
@@ -161,7 +161,7 @@ void Client::SendParcel(Parcel_Struct &parcel_in)
 			p.aug_slot_6
 		));
 		if (inst) {
-			inst->SetCharges(p.quantity > 0 ? p.quantity : 1);
+			inst->SetCharges(p.quantity);
 			inst->SetMerchantCount(1);
 			inst->SetMerchantSlot(p.slot_id);
 			if (inst->IsStackable()) {
@@ -272,6 +272,10 @@ void Client::SendParcelStatus()
 
 void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 {
+	if (IsCasting()) {
+		StopCasting();
+	}
+
 	auto send_to_client = CharacterParcelsRepository::GetParcelCountAndCharacterName(database, parcel_in->send_to);
 	auto merchant       = entity_list.GetMob(parcel_in->npc_id);
 	if (!merchant) {
@@ -382,7 +386,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				quantity = parcel_in->quantity;
 			}
 			else {
-				quantity = inst->GetCharges() > 0 ? inst->GetCharges() : parcel_in->quantity;
+				quantity = inst->GetCharges() >= 0 ? inst->GetCharges() : parcel_in->quantity;
 			}
 
 			CharacterParcelsRepository::CharacterParcels parcel_out{};
@@ -434,13 +438,13 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 						cpc.aug_slot_5 = augs.at(4);
 						cpc.aug_slot_6 = augs.at(5);
 					}
-					cpc.quantity   = kv.second->GetCharges() > 0 ? kv.second->GetCharges() : 1;
+					cpc.quantity   = kv.second->GetCharges() >= 0 ? kv.second->GetCharges() : 1;
 					all_entries.push_back(cpc);
 				}
 				CharacterParcelsContainersRepository::InsertMany(database, all_entries);
 			}
 
-			RemoveItemBySerialNumber(inst->GetSerialNumber(), parcel_out.quantity);
+			RemoveItemBySerialNumber(inst->GetSerialNumber(), parcel_out.quantity == 0 ? 1 : parcel_out.quantity);
 			std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopSendParcel));
 			QueuePacket(outapp.get());
 
@@ -642,9 +646,9 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 	if (p != m_parcels.end()) {
 		uint32 item_id       = parcel_in.parcel_item_id;
 		uint32 item_quantity = p->second.quantity;
-		if (!item_id || !item_quantity) {
+		if (!item_id) {
 			LogError(
-				"Attempt to retrieve parcel with erroneous item id or quantity for client character id {}.",
+				"Attempt to retrieve parcel with erroneous item id for client character id {}.",
 				CharacterID()
 			);
 			SendParcelRetrieveAck();
