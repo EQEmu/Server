@@ -8714,22 +8714,6 @@ bool Mob::CheckDoorLoSCheat(Mob* other) {
 					continue;
 				}
 
-				LogBotSpellTypeChecksDetail(
-					"Door #{} is being checked [{}]",
-					d->GetDoorID(),
-					(
-						Saylink::Silent(
-							fmt::format(
-								"#goto {} {} {} {}",
-								d->GetX(),
-								d->GetY(),
-								d->GetZ(),
-								d->GetHeading()
-							)
-						)
-					)
-				); //deleteme
-
 				if (d->IsDoorBetween(GetPosition(), other->GetPosition(), d->GetSize())) {
 					return false;
 				}
