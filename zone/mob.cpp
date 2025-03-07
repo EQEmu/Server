@@ -1439,6 +1439,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.flymode = 0;
 	}
 
+	if (IsZoneController()) {
+		ns->spawn.invis = 255; // gm invis
+	}
+
 	if (RuleB(Character, AllowCrossClassTrainers) && ForWho) {
 		if (ns->spawn.class_ >= Class::WarriorGM && ns->spawn.class_ <= Class::BerserkerGM) {
 			int trainer_class = Class::WarriorGM + (ForWho->GetClass() - 1);
@@ -8452,7 +8456,7 @@ int Mob::DispatchZoneControllerEvent(
 		RuleB(Zone, UseZoneController) &&
 		(
 			!IsNPC() ||
-			(IsNPC() && GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID)
+			(IsNPC() && !IsZoneController())
 		)
 	) {
 		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);

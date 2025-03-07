@@ -989,13 +989,14 @@ bool NPC::SpawnZoneController()
 
 	npc_type->findable  = 0;
 	npc_type->trackable = 0;
+	npc_type->untargetable = 1;
 
-	strcpy(npc_type->special_abilities, "12,1^13,1^14,1^15,1^16,1^17,1^19,1^22,1^24,1^25,1^28,1^31,1^35,1^39,1^42,1");
+	strcpy(npc_type->special_abilities, "1,1,3000,50^12,1^14,1^16,1^18,1^19,1^20,1^21,1^22,1^23,1^24,1^25,1^26,1^32,1^33,1^35,1^46,1^47,1^48,1^49,1^50,1^52,1^53,1^54,1^55,1^56,1^57,1");
 
 	glm::vec4 point;
-	point.x = 3000;
-	point.y = 1000;
-	point.z = 500;
+	point.x = 30000;
+	point.y = 10000;
+	point.z = -10000;
 
 	auto npc = new NPC(npc_type, nullptr, point, GravityBehavior::Flying);
 	npc->GiveNPCTypeData(npc_type);
