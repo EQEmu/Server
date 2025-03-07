@@ -731,37 +731,45 @@ void UpdateWindowTitle(char *iNewTitle)
 
 bool CheckForCompatibleQuestPlugins()
 {
-	const std::vector<std::string>& directories = { "lua_modules", "plugins" };
+	const std::vector<std::pair<std::string, bool *>> directories = {
+		{"lua_modules", nullptr},
+		{"plugins",     nullptr}
+	};
 
 	bool lua_found  = false;
 	bool perl_found = false;
 
-	for (const auto& directory : directories) {
-		for (const auto& file : fs::directory_iterator(path.GetServerPath() + "/" + directory)) {
-			if (file.is_regular_file()) {
-				auto f = file.path().string();
-				if (File::Exists(f)) {
-					auto r = File::GetContents(std::filesystem::path{ f }.string());
-					if (Strings::Contains(r.contents, "CheckHandin")) {
-						if (Strings::EqualFold(directory, "lua_modules")) {
-							lua_found = true;
-						} else if (Strings::EqualFold(directory, "plugins")) {
-							perl_found = true;
-						}
+	try {
+		for (const auto &[directory, flag]: directories) {
+			std::string dir_path = path.GetServerPath() + "/" + directory;
+			if (!File::Exists(dir_path)) { continue; }
 
-						if (lua_found && perl_found) {
-							return true;
-						}
-					}
+			for (const auto &file: fs::directory_iterator(dir_path)) {
+				if (!file.is_regular_file()) { continue; }
+
+				std::string file_path = file.path().string();
+				if (!File::Exists(file_path)) { continue; }
+
+				auto r = File::GetContents(file_path);
+				if (!Strings::Contains(r.contents, "CheckHandin")) { continue; }
+
+				if (directory == "lua_modules") {
+					lua_found = true;
 				}
+				else {
+					perl_found = true;
+				}
+
+				if (lua_found && perl_found) { return true; }
 			}
 		}
+	} catch (const fs::filesystem_error &ex) {
+		LogError("Failed to check for compatible quest plugins: {}", ex.what());
 	}
 
 	if (!lua_found) {
 		LogError("Failed to find CheckHandin in lua_modules");
 	}
-
 	if (!perl_found) {
 		LogError("Failed to find CheckHandin in plugins");
 	}
