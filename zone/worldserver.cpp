@@ -4500,13 +4500,6 @@ void WorldServer::QueueReload(ServerReload::Request r)
 	m_reload_mutex.lock();
 	int64_t reload_at = r.reload_at_unix - std::time(nullptr);
 
-	// If the reload is set to happen now, process it immediately versus queuing it
-	if (reload_at <= 0) {
-		ProcessReload(r);
-		m_reload_mutex.unlock();
-		return;
-	}
-
 	LogInfo(
 		"Queuing reload for [{}] ({}) to reload in [{}]",
 		ServerReload::GetName(r.type),
