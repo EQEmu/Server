@@ -91,6 +91,8 @@ void command_guild(Client* c, const Seperator* sep)
 			else {
 				auto guild_name = sep->argplus[3];
 				auto guild_id = guild_mgr.CreateGuild(sep->argplus[3], leader_id);
+				auto leader = entity_list.GetClientByCharID(leader_id);
+
 
 				LogGuilds(
 					"[{}]: Creating guild [{}] with leader [{}] with GM command. It was given id [{}]",
@@ -115,7 +117,7 @@ void command_guild(Client* c, const Seperator* sep)
 						).c_str()
 					);
 
-					if (!guild_mgr.SetGuild(leader_id, guild_id, GUILD_LEADER)) {
+					if (!guild_mgr.SetGuild(leader, guild_id, GUILD_LEADER)) {
 						c->Message(
 							Chat::White,
 							fmt::format(
@@ -268,6 +270,7 @@ void command_guild(Client* c, const Seperator* sep)
 				database.GetCharacterID(sep->arg[2])
 				);
 			auto character_name = database.GetCharNameByID(character_id);
+			auto client = entity_list.GetClientByCharID(character_id);
 			if (!character_id || character_name.empty()) {
 				c->Message(
 					Chat::White,
@@ -305,14 +308,14 @@ void command_guild(Client* c, const Seperator* sep)
 						"{} ({}) has {} put into {} ({}).",
 						character_name,
 						character_id,
-						guild_mgr.SetGuild(character_id, guild_id, GUILD_MEMBER) ? "been" : "failed to be",
+						guild_mgr.SetGuild(client, guild_id, GUILD_MEMBER) ? "been" : "failed to be",
 						guild_mgr.GetGuildNameByID(guild_id),
 						guild_id
 					).c_str()
 				);
 			}
 			else {
-				guild_mgr.SetGuild(character_id, GUILD_NONE, 0);
+				guild_mgr.SetGuild(client, GUILD_NONE, 0);
 				c->Message(
 					Chat::White,
 					fmt::format(

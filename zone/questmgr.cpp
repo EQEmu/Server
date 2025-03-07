@@ -1638,10 +1638,10 @@ void QuestManager::setsky(uint8 new_sky) {
 	safe_delete(outapp);
 }
 
-void QuestManager::setguild(uint32 new_guild_id, uint8 new_rank) {
+void QuestManager::SetGuild(uint32 new_guild_id, uint8 new_rank) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
-		guild_mgr.SetGuild(initiator->CharacterID(), new_guild_id, new_rank);
+		guild_mgr.SetGuild(initiator, new_guild_id, new_rank);
 	}
 }
 
@@ -1696,7 +1696,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 					gid
 				).c_str()
 			);
-			if (!guild_mgr.SetGuild(character_id, gid, GUILD_LEADER)) {
+			if (!guild_mgr.SetGuild(initiator, gid, GUILD_LEADER)) {
 				worldserver.SendEmoteMessage(
 					0,
 					0,

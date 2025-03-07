@@ -764,7 +764,7 @@ void Perl__setsky(uint8 new_sky)
 
 void Perl__setguild(uint32_t guild_id, uint8_t guild_rank_id)
 {
-	quest_manager.setguild(guild_id, guild_rank_id);
+	quest_manager.SetGuild(guild_id, guild_rank_id);
 }
 
 void Perl__createguild(const char* guild_name, const char* leader_name)
