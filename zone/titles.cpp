@@ -123,6 +123,10 @@ std::vector<TitlesRepository::Titles> TitleManager::GetEligibleTitles(Client* c)
 		)
 	);
 
+	// Sets to track unique prefixes and suffixes
+	std::set<std::string> used_prefixes;
+	std::set<std::string> used_suffixes;
+
 	for (auto t : titles) {
 		if (t.char_id >= 0 && c->CharacterID() != static_cast<uint32>(t.char_id)) {
 			continue;
@@ -136,8 +140,14 @@ std::vector<TitlesRepository::Titles> TitleManager::GetEligibleTitles(Client* c)
 			continue;
 		}
 
-		if (t.class_ >= Class::None && c->GetBaseClass() != t.class_) {
-			continue;
+		if (!RuleB(Custom, MulticlassingEnabled)) {
+			if (t.class_ >= Class::None && c->GetBaseClass() != t.class_) {
+				continue;
+			}
+		} else {
+			if (GetPlayerClassBit(t.class_) & c->GetClassesBits()) {
+				continue;
+			}
 		}
 
 		if (t.min_aa_points >= 0 && c->GetSpentAA() < t.min_aa_points) {
@@ -182,7 +192,28 @@ std::vector<TitlesRepository::Titles> TitleManager::GetEligibleTitles(Client* c)
 			continue;
 		}
 
-		eligible_titles.emplace_back(t);
+		// Check prefix uniqueness - clear it if already used
+		if (!t.prefix.empty()) {
+			if (used_prefixes.find(t.prefix) != used_prefixes.end()) {
+				t.prefix = "";
+			} else {
+				used_prefixes.insert(t.prefix);
+			}
+		}
+
+		// Check suffix uniqueness - clear it if already used
+		if (!t.suffix.empty()) {
+			if (used_suffixes.find(t.suffix) != used_suffixes.end()) {
+				t.suffix = "";
+			} else {
+				used_suffixes.insert(t.suffix);
+			}
+		}
+
+		// Only add if at least one field is non-empty
+		if (!t.prefix.empty() || !t.suffix.empty()) {
+			eligible_titles.emplace_back(t);
+		}
 	}
 
 	return eligible_titles;
