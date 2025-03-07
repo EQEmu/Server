@@ -279,7 +279,7 @@ public:
 	 */
 	void CloseFileLogs();
 	EQEmuLogSys *LoadLogSettingsDefaults();
-	EQEmuLogSys *LoadLogDatabaseSettings();
+	EQEmuLogSys *LoadLogDatabaseSettings(bool silent_load = false);
 
 	/**
 	 * @param directory_name
