@@ -321,13 +321,13 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 	b->HeroicWIS += CalcItemBonus(item->HeroicWis);
 	b->HeroicCHA += CalcItemBonus(item->HeroicCha);
 
-	b->STRCapMod += b->HeroicSTR;
-	b->STACapMod += b->HeroicSTA;
-	b->DEXCapMod += b->HeroicDEX;
-	b->AGICapMod += b->HeroicAGI;
-	b->INTCapMod += b->HeroicINT;
-	b->WISCapMod += b->HeroicWIS;
-	b->CHACapMod += b->HeroicCHA;
+	b->STRCapMod += item->HeroicSTR;
+	b->STACapMod += item->HeroicSTA;
+	b->DEXCapMod += item->HeroicDEX;
+	b->AGICapMod += item->HeroicAGI;
+	b->INTCapMod += item->HeroicINT;
+	b->WISCapMod += item->HeroicWIS;
+	b->CHACapMod += item->HeroicCHA;
 
 	b->MR += CalcItemBonus(item->MR + item->HeroicMR);
 	b->FR += CalcItemBonus(item->FR + item->HeroicFR);
@@ -343,12 +343,12 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 	b->HeroicDR += CalcItemBonus(item->HeroicDR);
 	b->HeroicCorrup += CalcItemBonus(item->HeroicSVCorrup);
 
-	b->MRCapMod += b->HeroicMR;
-	b->FRCapMod += b->HeroicFR;
-	b->CRCapMod += b->HeroicCR;
-	b->PRCapMod += b->HeroicPR;
-	b->DRCapMod += b->HeroicDR;
-	b->CorrupCapMod += b->HeroicCorrup;
+	b->MRCapMod += item->HeroicMR;
+	b->FRCapMod += item->HeroicFR;
+	b->CRCapMod += item->HeroicCR;
+	b->PRCapMod += item->HeroicPR;
+	b->DRCapMod += item->HeroicDR;
+	b->CorrupCapMod += item->HeroicCorrup;
 
 	b->HPRegen += CalcItemBonus(item->Regen);
 	b->ManaRegen += CalcItemBonus(item->ManaRegen);
