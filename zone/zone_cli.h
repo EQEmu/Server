@@ -11,6 +11,7 @@ public:
 	static bool RanConsoleCommand(int argc, char **argv);
 	static bool RanSidecarCommand(int argc, char **argv);
 	static bool RanTestCommand(int argc, char **argv);
+	static void DataBuckets(int argc, char **argv, argh::parser &cmd, std::string &description);
 	static void NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &description);
 	static void NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std::string &description);
 };

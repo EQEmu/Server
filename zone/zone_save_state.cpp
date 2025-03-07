@@ -45,18 +45,11 @@ struct LootStateData {
 	}
 };
 
-inline bool IsValidJson(const std::string& json) {
-	rapidjson::Document doc;
-	rapidjson::ParseResult result = doc.Parse(json.c_str());
-
-	return result;
-}
-
 inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
 {
 	LootStateData l{};
 
-	if (!IsValidJson(loot_data)) {
+	if (!Strings::IsValidJson(loot_data)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", npc->GetNPCTypeID());
 		return;
 	}
@@ -178,7 +171,7 @@ inline std::string GetLootSerialized(Corpse *c)
 
 inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 {
-	if (!IsValidJson(entity_variables)) {
+	if (!Strings::IsValidJson(entity_variables)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
 		return;
 	}
@@ -203,7 +196,7 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 
 inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 {
-	if (!IsValidJson(buffs)) {
+	if (!Strings::IsValidJson(buffs)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
 		return;
 	}

@@ -31,12 +31,14 @@ void ZoneCLI::CommandHandler(int argc, char **argv)
 	// Register commands
 	function_map["benchmark:databuckets"] = &ZoneCLI::BenchmarkDatabuckets;
 	function_map["sidecar:serve-http"] = &ZoneCLI::SidecarServeHttp;
+	function_map["tests:databuckets"] = &ZoneCLI::DataBuckets;
 	function_map["tests:npc-handins"] = &ZoneCLI::NpcHandins;
 	function_map["tests:npc-handins-multiquest"] = &ZoneCLI::NpcHandinsMultiQuest;
 
 	EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 }
 
+#include "cli/databuckets.cpp"
 #include "cli/benchmark_databuckets.cpp"
 #include "cli/sidecar_serve_http.cpp"
 #include "cli/npc_handins.cpp"
