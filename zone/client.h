@@ -404,6 +404,7 @@ public:
 	void LoadParcels();
 	std::map<uint32, CharacterParcelsRepository::CharacterParcels> GetParcels() { return m_parcels; }
 	int32 FindNextFreeParcelSlot(uint32 char_id);
+	int32 FindNextFreeParcelSlotUsingMemory();
 	void SendParcelIconStatus();
 
 	void SendBecomeTraderToWorld(Client *trader, BazaarTraderBarterActions action);
@@ -1900,7 +1901,7 @@ public:
 	void SendEvolvingPacket(int8 action, const CharacterEvolvingItemsRepository::CharacterEvolvingItems &item);
 	void DoEvolveItemToggle(const EQApplicationPacket* app);
 	void DoEvolveItemDisplayFinalResult(const EQApplicationPacket* app);
-	bool DoEvolveCheckProgression(const EQ::ItemInstance &inst);
+	bool DoEvolveCheckProgression(EQ::ItemInstance &inst);
 	void SendEvolveXPWindowDetails(const EQApplicationPacket* app);
 	void DoEvolveTransferXP(const EQApplicationPacket* app);
 	void SendEvolveXPTransferWindow();
