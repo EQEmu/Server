@@ -196,6 +196,8 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 
 inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 {
+	return; // disable for now
+
 	if (!Strings::IsValidJson(buffs)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
 		return;
@@ -415,7 +417,8 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 {
 	// entity variables
 	std::map<std::string, std::string> variables;
-	for (const auto                    &k: n->GetEntityVariables()) {
+
+	for (const auto &k: n->GetEntityVariables()) {
 		variables[k] = n->GetEntityVariable(k);
 	}
 
@@ -503,7 +506,7 @@ void Zone::SaveZoneState()
 		s.created_at          = std::time(nullptr);
 
 		auto n = sp->GetNPC();
-		if (n) {
+		if (n && entity_list.GetNPCByID(n->GetID())) {
 			SaveNPCState(n, s);
 		}
 
