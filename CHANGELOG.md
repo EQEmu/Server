@@ -1,3 +1,22 @@
+## [23.2.0] 3/3/2025
+
+### Crash
+
+* Database SetMutex crash fix ([#4741](https://github.com/EQEmu/Server/pull/4741)) @Akkadius 2025-03-03
+* Fix Aura process crash with bots ([#4743](https://github.com/EQEmu/Server/pull/4743)) @Akkadius 2025-03-03
+* Fix crash in add loot code path ([#4745](https://github.com/EQEmu/Server/pull/4745)) @Akkadius 2025-03-03
+* Fix world repop crash ([#4742](https://github.com/EQEmu/Server/pull/4742)) @Akkadius 2025-03-03
+* Potential crash fix in scan close mobs ([#4744](https://github.com/EQEmu/Server/pull/4744)) @Akkadius 2025-03-03
+
+### Fixes
+
+* Cleanup zone buckets on instance purge. ([#4739](https://github.com/EQEmu/Server/pull/4739)) @zimp-wow 2025-03-02
+* Fix an error causing Endurance Regen to not be applied by items. ([#4738](https://github.com/EQEmu/Server/pull/4738)) @catapultam-habeo 2025-03-02
+
+### World
+
+* Check if port in use to avoid double booting mistakes ([#4740](https://github.com/EQEmu/Server/pull/4740)) @Akkadius 2025-03-03
+
 ## [23.1.0] 3/1/2025
 
 ### Bots
