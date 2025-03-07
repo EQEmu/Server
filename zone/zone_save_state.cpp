@@ -47,12 +47,18 @@ struct LootStateData {
 
 inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
 {
-	LootStateData     l{};
-	std::stringstream ss;
-	{
-		ss << loot_data;
-		cereal::JSONInputArchive ar(ss);
-		l.serialize(ar);
+	LootStateData l{};
+
+	try {
+		std::stringstream ss;
+		{
+			ss << loot_data;
+			cereal::JSONInputArchive ar(ss);
+			l.serialize(ar);
+		}
+	} catch (const std::exception &e) {
+		LogZoneState("Failed to load loot state data for NPC [{}] [{}]", npc->GetNPCTypeID(), e.what());
+		return;
 	}
 
 	npc->AddLootCash(l.copper, l.silver, l.gold, l.platinum);
@@ -75,7 +81,8 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 		}
 
 		LootdropEntriesRepository::LootdropEntries lootdrop_entry;
-		for (auto                                  &le: entries) {
+
+		for (auto &le: entries) {
 			if (e.item_id == le.item_id) {
 				lootdrop_entry = le;
 				break;
@@ -106,13 +113,20 @@ inline std::string GetLootSerialized(NPC *npc)
 		);
 	}
 
-	std::stringstream ss;
-	{
-		cereal::JSONOutputArchiveSingleLine ar(ss);
-		ls.serialize(ar);
+	try {
+		std::stringstream ss;
+		{
+			cereal::JSONOutputArchiveSingleLine ar(ss);
+			ls.serialize(ar);
+		}
+
+		return ss.str();
+	} catch (const std::exception &e) {
+		LogZoneState("Failed to serialize loot data for NPC [{}] [{}]", npc->GetNPCTypeID(), e.what());
+		return "";
 	}
 
-	return ss.str();
+	return "";
 }
 
 inline std::string GetLootSerialized(Corpse *c)
@@ -134,13 +148,20 @@ inline std::string GetLootSerialized(Corpse *c)
 		);
 	}
 
-	std::stringstream ss;
-	{
-		cereal::JSONOutputArchiveSingleLine ar(ss);
-		ls.serialize(ar);
+	try {
+		std::stringstream ss;
+		{
+			cereal::JSONOutputArchiveSingleLine ar(ss);
+			ls.serialize(ar);
+		}
+
+		return ss.str();
+	} catch (const std::exception &e) {
+		LogZoneState("Failed to serialize loot data for Corpse [{}] [{}]", c->GetID(), e.what());
+		return "";
 	}
 
-	return ss.str();
+	return "";
 }
 
 inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
@@ -383,13 +404,18 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 		variables[k] = n->GetEntityVariable(k);
 	}
 
-	std::ostringstream os;
-	{
-		cereal::JSONOutputArchiveSingleLine archive(os);
-		archive(variables);
+	try {
+		std::ostringstream os;
+		{
+			cereal::JSONOutputArchiveSingleLine archive(os);
+			archive(variables);
+		}
+		s.entity_variables = os.str();
 	}
-
-	s.entity_variables = os.str();
+	catch (const std::exception &e) {
+		LogZoneState("Failed to serialize entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
+		return;
+	}
 
 	// buffs
 	auto buffs = n->GetBuffs();
@@ -406,18 +432,17 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 	}
 
 	try {
-		os = std::ostringstream();
+		std::ostringstream os = std::ostringstream();
 		{
 			cereal::JSONOutputArchiveSingleLine archive(os);
 			archive(cereal::make_nvp("buffs", valid_buffs));
 		}
+		s.buffs = os.str();
 	}
 	catch (const std::exception &e) {
 		LogZoneState("Failed to serialize buffs for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
 		return;
 	}
-
-	s.buffs = os.str();
 
 	// rest
 	s.npc_id           = n->GetNPCTypeID();
