@@ -322,26 +322,6 @@ void NPC::AddLootDropFixed(
 	uint32 augment_six
 )
 {
-	if (RuleB(Custom, DoItemUpgrades) && item2->ID <= 1000000 && !IsPet()) {
-		item2 = database.GetItem(DoUpgradeLoot(item2->ID));
-	}
-
-	AddLootDropFixed(item2, loot_drop, wear_change, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six);
-}
-
-//if itemlist is null, just send wear changes
-void NPC::AddLootDropFixed(
-	const EQ::ItemData *item2,
-	LootdropEntriesRepository::LootdropEntries loot_drop,
-	bool wear_change,
-	uint32 augment_one,
-	uint32 augment_two,
-	uint32 augment_three,
-	uint32 augment_four,
-	uint32 augment_five,
-	uint32 augment_six
-)
-{
 	if (m_resumed_from_zone_suspend) {
 		LogZoneState("NPC [{}] is resuming from zone suspend, skipping AddItem", GetCleanName());
 		return;
