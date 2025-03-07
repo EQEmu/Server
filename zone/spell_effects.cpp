@@ -1263,11 +1263,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_SummonItemIntoBag:
 			{
 				int item_id = spell.base_value[i];
+
+				const EQ::ItemData *item = database.GetItem(item_id);
+				if (!item) {
+					Message(Chat::Red, "Unable to summon item %d. Item not found.", spell.base_value[i]);
+					break;
+				}
 				if (RuleB(Custom, DoItemUpgrades)) {
 					item_id = GetMaxItemUpgrade(item_id);
 				}
 
-				const EQ::ItemData *item = database.GetItem(item_id);
 #ifdef SPELL_EFFECT_SPAM
 				const char *itemname = item ? item->Name : "*Unknown Item*";
 				snprintf(effect_desc, _EDLEN, "Summon Item In Bag: %s (id %d)", itemname, spell.base_value[i]);
