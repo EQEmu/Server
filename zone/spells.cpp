@@ -7811,6 +7811,7 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 				//MessageString(Chat::Red, MUST_EQUIP_ITEM);
 				Message(Chat::Red, "You cannot use this item unless it is either equipped or attuned.");
 			}
+			return (false);
 		}
 	}
 
