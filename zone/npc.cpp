@@ -4425,7 +4425,7 @@ bool NPC::CanPetTakeItem(const EQ::ItemInstance *inst)
 		return false;
 	}
 
-	if (!IsPetOwnerClient() && !IsCharmedPet()) {
+	if (!IsPetOwnerOfClientBot() && !IsCharmedPet()) {
 		return false;
 	}
 
