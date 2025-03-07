@@ -6938,6 +6938,18 @@ CREATE TABLE `character_pet_name` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 )",
 	},
+	ManifestEntry{
+		.version = 9310,
+		.description = "2025_03_7_expand_horse_def.sql",
+		.check = "SHOW COLUMNS FROM `horses` LIKE `helmtexture",
+		.condition = "missing",
+		.match = "TINYINT(2)",
+		.sql = R"(
+ALTER TABLE `horses`
+	ADD COLUMN `helmtexture` TINYINT(2) NOT NULL DEFAULT -1 AFTER `texture`;
+)",
+		.content_schema_update = true
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
