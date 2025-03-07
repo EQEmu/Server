@@ -285,7 +285,7 @@ bool Bot::BotCastMez(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spel
 			Mob* add_mob = GetFirstIncomingMobToMez(this, s.SpellId, spell_type, IsAEBotSpellType(spell_type));
 
 			if (!add_mob) {
-				return false;
+				continue;
 			}
 
 			tar = add_mob;
