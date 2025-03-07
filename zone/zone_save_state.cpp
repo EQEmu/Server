@@ -45,9 +45,21 @@ struct LootStateData {
 	}
 };
 
+inline bool IsValidJson(const std::string& json) {
+	rapidjson::Document doc;
+	rapidjson::ParseResult result = doc.Parse(json.c_str());
+
+	return result;
+}
+
 inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
 {
 	LootStateData l{};
+
+	if (!IsValidJson(loot_data)) {
+		LogZoneState("Invalid JSON data for NPC [{}]", npc->GetNPCTypeID());
+		return;
+	}
 
 	try {
 		std::stringstream ss;
@@ -166,6 +178,11 @@ inline std::string GetLootSerialized(Corpse *c)
 
 inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 {
+	if (!IsValidJson(entity_variables)) {
+		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
+		return;
+	}
+
 	std::map<std::string, std::string> deserialized_map;
 	try {
 		std::istringstream is(entity_variables);
@@ -186,6 +203,11 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 
 inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 {
+	if (!IsValidJson(buffs)) {
+		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
+		return;
+	}
+
 	std::vector<Buffs_Struct> valid_buffs;
 	try {
 		std::istringstream is(buffs);
