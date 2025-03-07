@@ -40,7 +40,7 @@ void ZoneCLI::DataBuckets(int argc, char **argv, argh::parser &cmd, std::string 
 	LogSys.EnableConsoleLogging();
 
 	std::cout << "===========================================\n";
-	std::cout << "Running DataBuckets Tests...\n";
+	std::cout << "⚙\uFE0F> Running DataBuckets Tests...\n";
 	std::cout << "===========================================\n\n";
 
 	Client *client = new Client();
