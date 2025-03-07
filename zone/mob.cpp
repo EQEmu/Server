@@ -531,6 +531,9 @@ Mob::Mob(
 
 Mob::~Mob()
 {
+	entity_list.RemoveMobFromCloseLists(this);
+	m_close_mobs.clear();
+
 	quest_manager.stopalltimers(this);
 
 	mMovementManager->RemoveMob(this);
@@ -570,10 +573,7 @@ Mob::~Mob()
 	entity_list.UnMarkNPC(GetID());
 	UninitializeBuffSlots();
 
-	entity_list.RemoveMobFromCloseLists(this);
 	entity_list.RemoveAuraFromMobs(this);
-
-	m_close_mobs.clear();
 
 	ClearDataBucketCache();
 
