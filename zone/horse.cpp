@@ -108,7 +108,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id)
 	n->npc_id       = 0;
 	n->loottable_id = 0;
 	n->texture      = e.texture;
-	n->helmtexture  = e.texture;
+	n->helmtexture  = e.helmtexture == -1 ? e.texture : e.helmtexture;
 	n->runspeed     = e.mountspeed;
 	n->light        = 0;
 	n->STR          = 75;
