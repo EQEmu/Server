@@ -939,7 +939,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 
 		int i = 0;
 
-		if (player_event_logs.IsEventEnabled(PlayerEvent::DROPPED_ITEM)) {
+		if (inst && player_event_logs.IsEventEnabled(PlayerEvent::DROPPED_ITEM)) {
 			auto e = PlayerEvent::DroppedItemEvent{
 				.item_id      = inst->GetID(),
 				.augment_1_id = inst->GetAugmentItemID(0),
@@ -1851,7 +1851,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 				DeleteItemInInventory(EQ::invslot::slotCursor, 0, true);
 
-				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
+				if (test_inst && player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
 					auto e = PlayerEvent::DestroyItemEvent{
 						.item_id      = test_inst->GetItem()->ID,
 						.item_name    = test_inst->GetItem()->Name,

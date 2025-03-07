@@ -3799,7 +3799,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			auto item = trader_pc->FindTraderItemBySerialNumber(item_sn);
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+			if (item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
 				auto e = PlayerEvent::TraderSellEvent{
 					.item_id              = item ? item->GetID() : 0,
 					.augment_1_id         = item->GetAugmentItemID(0),
