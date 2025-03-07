@@ -358,14 +358,12 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 void WorldServer::HandleNewWorldserver(LoginserverNewWorldRequest *req)
 {
 	if (m_is_server_logged_in) {
-		LogError(
-			"Login server was already marked as logged in, aborting"
-		);
+		LogInfo("Login server was already marked as logged in, returning");
 		return;
 	}
 
 	if (!HandleNewWorldserverValidation(req)) {
-		LogError("WorldServer::HandleNewWorldserver failed validation rules");
+		LogError("failed validation rules");
 		return;
 	}
 
