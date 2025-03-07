@@ -16,6 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#include <cereal/archives/json.hpp>
 #include "../common/global_define.h"
 #include "../common/strings.h"
 
@@ -34,6 +35,7 @@
 #include "../common/repositories/spawn2_repository.h"
 #include "../common/repositories/spawn2_disabled_repository.h"
 #include "../common/repositories/respawn_times_repository.h"
+#include "../common/repositories/zone_state_spawns_repository.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -86,9 +88,9 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	x = in_x;
 	y = in_y;
 	z = in_z;
-	heading = in_heading;
-	respawn_ = respawn;
-	variance_ = variance;
+	heading        = in_heading;
+	m_respawn_time = respawn;
+	variance_      = variance;
 	grid_ = grid;
 	path_when_zone_idle = in_path_when_zone_idle;
 	condition_id = in_cond_id;
@@ -96,6 +98,7 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	npcthis = nullptr;
 	enabled = in_enabled;
 	this->anim = anim;
+	currentnpcid = 0;
 	disable_loot = in_disable_loot;
 
 	if(timeleft == 0xFFFFFFFF) {
@@ -117,7 +120,7 @@ Spawn2::~Spawn2()
 
 uint32 Spawn2::resetTimer()
 {
-	uint32 rspawn = respawn_ * 1000;
+	uint32 rspawn = m_respawn_time * 1000;
 
 	if (variance_ != 0) {
 		int var_over_2 = (variance_ * 1000) / 2;
@@ -158,7 +161,6 @@ bool Spawn2::Process() {
 
 	//grab our spawn group
 	SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
-
 	if (NPCPointerValid() && (spawn_group && spawn_group->despawn == 0 || condition_id != 0)) {
 		return true;
 	}
@@ -198,7 +200,7 @@ bool Spawn2::Process() {
 		}
 
 		//have the spawn group pick an NPC for us
-		uint32 npcid = spawn_group->GetNPCType(condition_value);
+		uint32 npcid = currentnpcid && currentnpcid > 0 ? currentnpcid : spawn_group->GetNPCType(condition_value);
 		if (npcid == 0) {
 			LogSpawns("Spawn2 [{}]: Spawn group [{}] did not yeild an NPC! not spawning", spawn2_id, spawngroup_id_);
 
@@ -535,6 +537,12 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 	NPC::SpawnZoneController();
 
+	if (RuleB(Zone, StateSavingOnShutdown) && zone->LoadZoneState(spawn_times, disabled_spawns)) {
+		LogZoneState("Loaded zone state for zone [{}] instance_id [{}]", zone_name, zone->GetInstanceID());
+		return true;
+	}
+
+	// normal spawn2 loading
 	for (auto &s: spawns) {
 		uint32 spawn_time_left = 0;
 		if (spawn_times.count(s.id) != 0) {

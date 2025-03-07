@@ -352,6 +352,7 @@ namespace DatabaseSchema {
 			"shared_task_dynamic_zones",
 			"shared_task_members",
 			"shared_tasks",
+			"zone_state_spawns",
 		};
 	}
 
