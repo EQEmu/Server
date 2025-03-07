@@ -2212,6 +2212,14 @@ Raid* EntityList::GetRaidByClient(Client* client)
 
 Raid* EntityList::GetRaidByBotName(const char* name)
 {
+	for (const auto& r : raid_list) {
+		for (const auto& m : r->members) {
+			if (m.is_bot && strcmp(m.member_name, name) == 0) {
+				return r;
+			}
+		}
+	}
+
 	return nullptr;
 }
 
@@ -2895,8 +2903,7 @@ void EntityList::ScanCloseMobs(Mob *scanning_mob)
 	for (auto &e : mob_list) {
 		auto mob = e.second;
 
-		// Filter out mobs with invalid IDs
-		if (mob->GetID() <= 0) {
+		if (mob && mob->GetID() <= 0) {
 			continue;
 		}
 
