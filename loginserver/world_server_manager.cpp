@@ -154,9 +154,9 @@ void WorldServerManager::SendUserLoginToWorldRequest(
 
 	if (iter != m_world_servers.end()) {
 		EQ::Net::DynamicPacket outapp;
-		outapp.Resize(sizeof(UsertoWorldRequest_Struct));
+		outapp.Resize(sizeof(UsertoWorldRequest));
 
-		auto *r = reinterpret_cast<UsertoWorldRequest_Struct *>(outapp.Data());
+		auto *r = reinterpret_cast<UsertoWorldRequest *>(outapp.Data());
 		r->worldid     = server_id;
 		r->lsaccountid = client_account_id;
 		strncpy(r->login, client_loginserver.c_str(), 64);

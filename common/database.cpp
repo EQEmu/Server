@@ -245,7 +245,7 @@ uint32 Database::CreateAccount(
 		e.password = password;
 	}
 
-	LogInfo("Account Attempting to be created: [{}:{}] status: {}", loginserver, name, status);
+	LogInfo("Account attempting to be created loginserver [{}] name [{}] status [{}]", loginserver, name, status);
 
 	e = AccountRepository::InsertOne(*this, e);
 

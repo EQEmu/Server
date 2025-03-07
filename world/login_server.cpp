@@ -46,8 +46,8 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	const WorldConfig *Config = WorldConfig::get();
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
-	UsertoWorldRequestLegacy_Struct *utwr  = (UsertoWorldRequestLegacy_Struct *) p.Data();
-	uint32                          id     = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
+	UsertoWorldRequestLegacy *utwr = (UsertoWorldRequestLegacy *) p.Data();
+	uint32                   id    = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
 	int16                           status = database.GetAccountStatus(id);
 
 	LogDebug(
@@ -63,11 +63,11 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 
 	ServerPacket outpack;
 	outpack.opcode  = ServerOP_UsertoWorldRespLeg;
-	outpack.size    = sizeof(UsertoWorldResponseLegacy_Struct);
+	outpack.size    = sizeof(UsertoWorldResponseLegacy);
 	outpack.pBuffer = new uchar[outpack.size];
 	memset(outpack.pBuffer, 0, outpack.size);
 
-	UsertoWorldResponseLegacy_Struct *utwrs = (UsertoWorldResponseLegacy_Struct *) outpack.pBuffer;
+	UsertoWorldResponseLegacy *utwrs = (UsertoWorldResponseLegacy *) outpack.pBuffer;
 	utwrs->lsaccountid = utwr->lsaccountid;
 	utwrs->ToID        = utwr->FromID;
 	utwrs->worldid     = utwr->worldid;
@@ -126,8 +126,8 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 	const WorldConfig *Config = WorldConfig::get();
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
-	UsertoWorldRequest_Struct *utwr  = (UsertoWorldRequest_Struct *) p.Data();
-	uint32                    id     = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
+	UsertoWorldRequest *utwr = (UsertoWorldRequest *) p.Data();
+	uint32             id    = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
 	int16                     status = database.GetAccountStatus(id);
 
 	LogDebug(
@@ -143,11 +143,11 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 
 	ServerPacket outpack;
 	outpack.opcode  = ServerOP_UsertoWorldResp;
-	outpack.size    = sizeof(UsertoWorldResponse_Struct);
+	outpack.size    = sizeof(UsertoWorldResponse);
 	outpack.pBuffer = new uchar[outpack.size];
 	memset(outpack.pBuffer, 0, outpack.size);
 
-	UsertoWorldResponse_Struct *utwrs = (UsertoWorldResponse_Struct *) outpack.pBuffer;
+	UsertoWorldResponse *utwrs = (UsertoWorldResponse *) outpack.pBuffer;
 	utwrs->lsaccountid = utwr->lsaccountid;
 	utwrs->ToID        = utwr->FromID;
 	strn0cpy(utwrs->login, utwr->login, 64);
@@ -208,27 +208,27 @@ void LoginServer::ProcessLSClientAuthLegacy(uint16_t opcode, EQ::Net::Packet &p)
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	try {
-		auto client_authentication_request = p.GetSerialize<ClientAuthLegacy_Struct>(0);
+		auto r = p.GetSerialize<ClientAuthLegacy>(0);
 
 		LogDebug(
-			"Processing Loginserver Auth Legacy | account_id [{0}] account_name [{1}] key [{2}] admin [{3}] ip [{4}] "
-			"local_network [{5}]",
-			client_authentication_request.loginserver_account_id,
-			client_authentication_request.loginserver_account_name,
-			client_authentication_request.key,
-			client_authentication_request.is_world_admin,
-			client_authentication_request.ip,
-			client_authentication_request.is_client_from_local_network
+			"Processing Loginserver Auth Legacy | account_id [{}] account_name [{}] key [{}] admin [{}] ip [{}] "
+			"local_network [{}]",
+			r.loginserver_account_id,
+			r.loginserver_account_name,
+			r.key,
+			r.is_world_admin,
+			r.ip_address,
+			r.is_client_from_local_network
 		);
 
 		client_list.CLEAdd(
-			client_authentication_request.loginserver_account_id,
+			r.loginserver_account_id,
 			"eqemu",
-			client_authentication_request.loginserver_account_name,
-			client_authentication_request.key,
-			client_authentication_request.is_world_admin,
-			client_authentication_request.ip,
-			client_authentication_request.is_client_from_local_network
+			r.loginserver_account_name,
+			r.key,
+			r.is_world_admin,
+			r.ip_address,
+			r.is_client_from_local_network
 		);
 	}
 	catch (std::exception &ex) {
@@ -242,28 +242,28 @@ void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p)
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	try {
-		auto client_authentication_request = p.GetSerialize<ClientAuth_Struct>(0);
+		auto r = p.GetSerialize<ClientAuth>(0);
 
 		LogDebug(
-			"Processing Loginserver Auth | account_id [{0}] account_name [{1}] loginserver_name [{2}] key [{3}] "
-			"admin [{4}] ip [{5}] local_network [{6}]",
-			client_authentication_request.loginserver_account_id,
-			client_authentication_request.account_name,
-			client_authentication_request.loginserver_name,
-			client_authentication_request.key,
-			client_authentication_request.is_world_admin,
-			client_authentication_request.ip,
-			client_authentication_request.is_client_from_local_network
+			"Processing Loginserver Auth | account_id [{}] account_name [{}] loginserver_name [{}] key [{}] "
+			"admin [{}] ip [{}] local_network [{}]",
+			r.loginserver_account_id,
+			r.account_name,
+			r.loginserver_name,
+			r.key,
+			r.is_world_admin,
+			r.ip_address,
+			r.is_client_from_local_network
 		);
 
 		client_list.CLEAdd(
-			client_authentication_request.loginserver_account_id,
-			client_authentication_request.loginserver_name,
-			client_authentication_request.account_name,
-			client_authentication_request.key,
-			client_authentication_request.is_world_admin,
-			client_authentication_request.ip,
-			client_authentication_request.is_client_from_local_network
+			r.loginserver_account_id,
+			r.loginserver_name,
+			r.account_name,
+			r.key,
+			r.is_world_admin,
+			r.ip_address,
+			r.is_client_from_local_network
 		);
 	}
 	catch (std::exception &ex) {
