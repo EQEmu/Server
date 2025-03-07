@@ -166,6 +166,16 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// 4 - Keep DB name
 	// 5 - `s ward
 
+	const auto vanity_name = (IsClient() && !petname) ? CharacterPetNameRepository::FindOne(database, CastToClient()->CharacterID()) : CharacterPetNameRepository::CharacterPetName{};
+
+	if (
+		IsClient() &&
+		!petname &&
+		!vanity_name.name.empty()
+	) {
+		petname = vanity_name.name.c_str();
+	}
+
 	if (petname != nullptr) {
 		// Name was provided, use it.
 		strn0cpy(npc_type->name, petname, 64);
