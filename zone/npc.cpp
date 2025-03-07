@@ -4574,6 +4574,17 @@ bool NPC::CheckHandin(
 					 && h.money.silver == r.money.silver
 					 && h.money.copper == r.money.copper;
 
+	// items
+	bool normalize = true;
+	for (auto required_item : required) {
+		LogDebug("Checking required item first [{}] second[{}]", required_item.first, required_item.second);
+		int item_id = Strings::ToInt(required_item.first);
+		if (item_id > 1000000) {
+			normalize = false;
+			break;
+		}
+	}
+
 	// if we started the hand-in process, we want to use the hand-in items from the member variable hand-in bucket
 	auto &handin_items = !m_handin_started ? h.items : m_hand_in.items;
 
@@ -4615,7 +4626,8 @@ bool NPC::CheckHandin(
 				auto &h_item = handin_items[i];
 
 				// Check if the item IDs match (normalize if necessary)
-				bool id_match = (h_item.item_id == r_item.item_id);
+				bool id_match = (!normalize && h_item.item_id == r_item.item_id) ||
+								(normalize && (Strings::ToInt(h_item.item_id) % 1000000) == Strings::ToInt(r_item.item_id));
 
 				if (id_match) {
 					uint32 used_count = std::min(remaining_requirement, h_item.count);
