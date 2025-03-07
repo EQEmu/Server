@@ -101,6 +101,13 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 		}
 	}
 
+	// check if we ran a valid command, this whole CLI handler needs to be improved at a later time
+	std::string arg1 = argc >= 2 ? argv[1] : "";
+	if (argc >= 2 && !Strings::Contains(arg1, ":")) {
+		std::cout << "Invalid command, use --help to see available commands" << std::endl;
+		return true;
+	}
+
 	return false;
 }
 
