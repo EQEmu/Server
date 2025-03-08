@@ -44,6 +44,7 @@
 #include "zone_store.h"
 #include "../common/content/world_content_service.h"
 #include "stacktrace/backward.hpp"
+#include "../common/rulesys.h"
 
 ZoneStore::ZoneStore() = default;
 ZoneStore::~ZoneStore() = default;
@@ -195,6 +196,24 @@ uint32 ZoneStore::GetZoneIDByLongName(const std::string& zone_long_name)
  */
 ZoneRepository::Zone *ZoneStore::GetZone(uint32 zone_id, int version)
 {
+	if (RuleI(Custom, StaticInstanceVersion)) {
+		if (version == RuleI(Custom, StaticInstanceVersion)) {
+			version = RuleI(Custom, StaticInstanceTemplateVersion);
+		}
+	}
+
+	if (RuleI(Custom, FarmingInstanceVersion)) {
+		if (version == RuleI(Custom, FarmingInstanceVersion)) {
+			version = RuleI(Custom, FarmingInstanceTemplateVersion);
+		}
+	}
+
+	if (RuleI(Custom, EventInstanceVersion)) {
+		if (version == RuleI(Custom, EventInstanceVersion)) {
+			version = RuleI(Custom, EventInstanceTemplateVersion);
+		}
+	}
+
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
 			return &z;
@@ -242,6 +261,30 @@ const std::vector<ZoneRepository::Zone> &ZoneStore::GetZones() const
 // gets zone data by using explicit version and falling back to version 0 if not found
 ZoneRepository::Zone *ZoneStore::GetZoneWithFallback(uint32 zone_id, int version)
 {
+	if (RuleI(Custom, StaticInstanceVersion)) {
+		if (version == RuleI(Custom, StaticInstanceVersion)) {
+			version = RuleI(Custom, StaticInstanceTemplateVersion);
+		}
+	}
+
+	if (RuleI(Custom, FarmingInstanceVersion)) {
+		if (version == RuleI(Custom, FarmingInstanceVersion)) {
+			version = RuleI(Custom, FarmingInstanceTemplateVersion);
+		}
+	}
+
+	if (RuleI(Custom, EventInstanceVersion)) {
+		if (version == RuleI(Custom, EventInstanceVersion)) {
+			version = RuleI(Custom, EventInstanceTemplateVersion);
+		}
+	}
+
+	for (auto &z: m_zones) {
+		if (z.zoneidnumber == zone_id && z.version == version) {
+			return &z;
+		}
+	}
+
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
 			return &z;
