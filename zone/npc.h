@@ -633,6 +633,7 @@ public:
 			buffs[i].UpdateClient      = b.UpdateClient;
 			i++;
 		}
+		CalcBonuses();
 	}
 
 protected:
