@@ -2810,10 +2810,11 @@ void Client::SendBazaarDeliveryCosts()
 {
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_BazaarSearch, sizeof(BazaarDeliveryCost_Struct));
 	auto data   = (BazaarDeliveryCost_Struct *) outapp->pBuffer;
+	auto zones_list = Strings::Split(RuleS(Bazaar, ParcelDeliveryCostExemptZones), ",");
 
 	data->action                = DeliveryCostUpdate;
 	data->voucher_delivery_cost = RuleI(Bazaar, VoucherDeliveryCost);
-	data->parcel_deliver_cost   = RuleR(Bazaar, ParcelDeliveryCostMod);
+	data->parcel_deliver_cost   = Strings::Contains(zones_list, std::to_string(GetZoneID())) ? 0 : RuleR(Bazaar, ParcelDeliveryCostMod);
 
 	QueuePacket(outapp.get());
 }
@@ -2953,7 +2954,15 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		return;
 	}
 
-	uint64 fee         = (GetZoneID() == Zones::BAZAAR) ? 0: std::round(total_cost * RuleR(Bazaar, ParcelDeliveryCostMod));
+
+
+	uint64 fee         = std::round(total_cost * RuleR(Bazaar, ParcelDeliveryCostMod));
+
+	auto zones_list = Strings::Split(RuleS(Bazaar, ParcelDeliveryCostExemptZones), ",");
+	if (Strings::Contains(zones_list, std::to_string(GetZoneID())) ? 0 : RuleR(Bazaar, ParcelDeliveryCostMod)) {
+		fee = 0;
+	}
+
 	if (!TakeMoneyFromPP(total_cost + fee, false)) {
 		RecordPlayerEventLog(
 			PlayerEvent::POSSIBLE_HACK,
