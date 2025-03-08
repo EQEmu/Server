@@ -608,6 +608,33 @@ public:
 	inline void SetResumedFromZoneSuspend(bool state = true) { m_resumed_from_zone_suspend = state; }
 	inline bool IsResumedFromZoneSuspend() { return m_resumed_from_zone_suspend; }
 
+	inline void LoadBuffsFromState(std::vector<Buffs_Struct> in_buffs) {
+		int i = 0;
+		for (auto &b: in_buffs) {
+			buffs[i].spellid     = b.spellid;
+			buffs[i].casterlevel = b.casterlevel;
+			buffs[i].casterid    = b.casterid;
+			strncpy(buffs[i].caster_name, b.caster_name, 64);
+			buffs[i].ticsremaining     = b.ticsremaining;
+			buffs[i].counters          = b.counters;
+			buffs[i].hit_number        = b.hit_number;
+			buffs[i].melee_rune        = b.melee_rune;
+			buffs[i].magic_rune        = b.magic_rune;
+			buffs[i].dot_rune          = b.dot_rune;
+			buffs[i].caston_x          = b.caston_x;
+			buffs[i].caston_y          = b.caston_y;
+			buffs[i].caston_z          = b.caston_z;
+			buffs[i].ExtraDIChance     = b.ExtraDIChance;
+			buffs[i].RootBreakChance   = b.RootBreakChance;
+			buffs[i].instrument_mod    = b.instrument_mod;
+			buffs[i].virus_spread_time = b.virus_spread_time;
+			buffs[i].persistant_buff   = b.persistant_buff;
+			buffs[i].client            = b.client;
+			buffs[i].UpdateClient      = b.UpdateClient;
+			i++;
+		}
+	}
+
 protected:
 
 	void HandleRoambox();

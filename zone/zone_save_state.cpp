@@ -171,6 +171,10 @@ inline std::string GetLootSerialized(Corpse *c)
 
 inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 {
+	if (!RuleB(Zone, StateSaveEntityVariables)) {
+		return;
+	}
+
 	if (!Strings::IsValidJson(entity_variables)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
 		return;
@@ -196,6 +200,10 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 
 inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 {
+	if (!RuleB(Zone, StateSaveBuffs)) {
+		return;
+	}
+
 	if (!Strings::IsValidJson(buffs)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
 		return;
@@ -214,10 +222,7 @@ inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 		return;
 	}
 
-	for (const auto &b: valid_buffs) {
-		// int AddBuff(Mob *caster, const uint16 spell_id, int duration = 0, int32 level_override = -1, bool disable_buff_overwrite = false);
-		n->AddBuff(n, b.spellid, b.ticsremaining, b.casterlevel, false);
-	}
+	n->LoadBuffsFromState(valid_buffs);
 }
 
 inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawn_states)
@@ -225,7 +230,8 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 	LogInfo("Loading lootdrop ids for zone state spawns");
 
 	std::vector<uint32_t> lootdrop_ids;
-	for (auto             &s: spawn_states) {
+
+	for (auto &s: spawn_states) {
 		if (s.loot_data.empty()) {
 			continue;
 		}
@@ -415,7 +421,8 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 {
 	// entity variables
 	std::map<std::string, std::string> variables;
-	for (const auto                    &k: n->GetEntityVariables()) {
+
+	for (const auto &k: n->GetEntityVariables()) {
 		variables[k] = n->GetEntityVariable(k);
 	}
 
@@ -503,7 +510,7 @@ void Zone::SaveZoneState()
 		s.created_at          = std::time(nullptr);
 
 		auto n = sp->GetNPC();
-		if (n) {
+		if (n && entity_list.GetNPCByID(n->GetID())) {
 			SaveNPCState(n, s);
 		}
 
