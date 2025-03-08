@@ -200,7 +200,7 @@ bool Spawn2::Process() {
 		}
 
 		//have the spawn group pick an NPC for us
-		uint32 npcid = currentnpcid && currentnpcid > 0 ? currentnpcid : spawn_group->GetNPCType(condition_value);
+		uint32 npcid = (RuleB(Zone, StateSavingOnShutdown) && currentnpcid && currentnpcid > 0) ? currentnpcid : spawn_group->GetNPCType(condition_value);
 		if (npcid == 0) {
 			LogSpawns("Spawn2 [{}]: Spawn group [{}] did not yeild an NPC! not spawning", spawn2_id, spawngroup_id_);
 
