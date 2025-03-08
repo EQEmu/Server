@@ -223,6 +223,7 @@ inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 	}
 
 	n->LoadBuffsFromState(valid_buffs);
+	n->CalcBonuses();
 }
 
 inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawn_states)
