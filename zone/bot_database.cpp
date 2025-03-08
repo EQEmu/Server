@@ -2628,12 +2628,13 @@ void BotDatabase::CheckBotSpells() {
 		}
 
 		if (correct_type == UINT16_MAX) {
-				LogBotSpellTypeChecks("{} [#{}] is incorrect. It is currently set as {} [#{}] but the correct type is unknown.",
-				GetSpellName(spell_id),
-				spell_id,
-				Bot::GetSpellTypeNameByID(s.type),
-				s.type
-			);
+				LogBotSpellTypeChecks(
+					"{} [#{}] is incorrect. It is currently set as {} [#{}] but the correct type is unknown.",
+					GetSpellName(spell_id),
+					spell_id,
+					Bot::GetSpellTypeNameByID(s.type),
+					s.type
+				);
 		}
 		else {
 			LogBotSpellTypeChecks("{} [#{}] is incorrect. It is currently set as {} [#{}] and should be {} [#{}]",
