@@ -369,6 +369,7 @@ void Spawn2::LoadGrid(int start_wp) {
 void Spawn2::Reset() {
 	timer.Start(resetTimer());
 	npcthis = nullptr;
+	currentnpcid = 0;
 	LogSpawns("Spawn2 [{}]: Spawn reset, repop in [{}] ms", spawn2_id, timer.GetRemainingTime());
 }
 
@@ -376,6 +377,7 @@ void Spawn2::Depop() {
 	timer.Disable();
 	LogSpawns("Spawn2 [{}]: Spawn reset, repop disabled", spawn2_id);
 	npcthis = nullptr;
+	currentnpcid = 0;
 }
 
 void Spawn2::Repop(uint32 delay) {
@@ -387,6 +389,7 @@ void Spawn2::Repop(uint32 delay) {
 		timer.Start(delay);
 	}
 	npcthis = nullptr;
+	currentnpcid = 0;
 }
 
 void Spawn2::ForceDespawn()
@@ -405,12 +408,14 @@ void Spawn2::ForceDespawn()
 				npcthis->Depop(true);
 				IsDespawned = true;
 				npcthis = nullptr;
+				currentnpcid = 0;
 				return;
 			}
 			else
 			{
 				npcthis->Depop(false);
 				npcthis = nullptr;
+				currentnpcid = 0;
 			}
 		}
 	}
@@ -442,6 +447,7 @@ void Spawn2::DeathReset(bool realdeath)
 
 	//zero out our NPC since he is now gone
 	npcthis = nullptr;
+	currentnpcid = 0;
 
 	if(realdeath) { killcount++; }
 
@@ -692,6 +698,7 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 			LogSpawns("Spawn2 [{}]: Our npcthis is currently not null. The zone thinks it is [{}]. Forcing a depop", spawn2_id, npcthis->GetName());
 			npcthis->Depop(false);	//remove the current mob
 			npcthis = nullptr;
+			currentnpcid = 0;
 		}
 		if(new_state) { // only get repawn timer remaining when the SpawnCondition is enabled.
 			timer_remaining = database.GetSpawnTimeLeft(spawn2_id,zone->GetInstanceID());

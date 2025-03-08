@@ -71,7 +71,7 @@ void Client::SendEvolvingPacket(const int8 action, const CharacterEvolvingItemsR
 
 void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 {
-	std::vector<const EQ::ItemInstance *> queue{};
+	std::vector<EQ::ItemInstance *> queue{};
 
 	for (auto &[key, inst]: GetInv().GetWorn()) {
 		LogEvolveItemDetail(
@@ -298,7 +298,7 @@ void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket *app)
 	}
 }
 
-bool Client::DoEvolveCheckProgression(const EQ::ItemInstance &inst)
+bool Client::DoEvolveCheckProgression(EQ::ItemInstance &inst)
 {
 	if (inst.GetEvolveProgression() < 100 || inst.GetEvolveLvl() == inst.GetMaxEvolveLvl()) {
 		return false;
@@ -313,6 +313,48 @@ bool Client::DoEvolveCheckProgression(const EQ::ItemInstance &inst)
 
 	if (!new_inst) {
 		return false;
+	}
+
+	if (RuleB(EvolvingItems, EnableParcelMerchants) &&
+		!RuleB(EvolvingItems, DestroyAugmentsOnEvolve) &&
+		inst.IsAugmented()
+		) {
+		auto const                                                augs = inst.GetAugmentIDs();
+		std::vector<CharacterParcelsRepository::CharacterParcels> parcels;
+		for (auto const &item_id: augs) {
+			if (!item_id) {
+				continue;
+			}
+
+			CharacterParcelsRepository::CharacterParcels p{};
+			p.char_id   = CharacterID();
+			p.from_name = "Evolving Item Sub-System";
+			p.note      = fmt::format(
+			              "System automatically removed from {} which recently evolved.",
+			              inst.GetItem()->Name
+			              );
+			p.slot_id   = FindNextFreeParcelSlotUsingMemory();
+			p.sent_date = time(nullptr);
+			p.item_id   = item_id;
+			p.quantity  = 1;
+
+			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+				PlayerEvent::ParcelSend e{};
+				e.from_player_name = p.from_name;
+				e.to_player_name   = GetCleanName();
+				e.item_id          = p.item_id;
+				e.quantity         = 1;
+				e.sent_date        = p.sent_date;
+
+				RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
+			}
+
+			parcels.push_back(p);
+		}
+
+		CharacterParcelsRepository::InsertMany(database, parcels);
+		SendParcelStatus();
+		SendParcelIconStatus();
 	}
 
 	CheckItemDiscoverability(new_inst->GetID());
