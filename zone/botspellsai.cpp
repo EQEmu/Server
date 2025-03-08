@@ -41,7 +41,10 @@ bool Bot::AICastSpell(Mob* tar, uint8 chance, uint16 spell_type, uint16 sub_targ
 		return false;
 	}
 	
-	if (chance < 100 && zone->random.Int(0, 100) > chance) {
+	if (
+		!IsCommandedSpell() &&
+		zone->random.Int(0, 100) > chance
+	) {
 		return false;
 	}
 
@@ -1514,12 +1517,6 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* caster, int16 spell_id, uint16 spell_typ
 					continue;
 				}
 
-				if (zone->random.Int(1, 100) > RuleI(Bots, AEMezChance)) {
-					caster->SetSpellTypeRecastTimer(spell_type, RuleI(Bots, MezAEFailDelay));
-
-					return result;
-				}
-
 				result = npc;
 			}
 			else {
@@ -1529,12 +1526,6 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* caster, int16 spell_id, uint16 spell_typ
 
 				if (!caster->CastChecks(spell_id, npc, spell_type, true)) {
 					continue;
-				}
-
-				if (zone->random.Int(1, 100) > RuleI(Bots, MezChance)) {
-					caster->SetSpellTypeRecastTimer(spell_type, RuleI(Bots, MezFailDelay));
-
-					return result;
 				}
 
 				result = npc;
@@ -2119,7 +2110,6 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spell_type)
 		case BotSpellTypes::AERains:
 		case BotSpellTypes::AEStun:
 		case BotSpellTypes::AESnare:
-		case BotSpellTypes::AEMez:
 		case BotSpellTypes::AESlow:
 		case BotSpellTypes::AEDebuff:
 		case BotSpellTypes::AEFear:
@@ -2185,6 +2175,8 @@ uint8 Bot::GetChanceToCastBySpellType(uint16 spell_type)
 		case BotSpellTypes::PetVeryFastHeals:
 		case BotSpellTypes::PetHoTHeals:
 			return RuleI(Bots, PercentChanceToCastHeal);
+		case BotSpellTypes::AEMez:
+			return RuleI(Bots, PercentChanceToCastAEMez);
 		default:
 			return RuleI(Bots, PercentChanceToCastOtherType);
 	}
