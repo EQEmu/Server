@@ -202,7 +202,7 @@ bool Spawn2::Process() {
 		if (RuleB(Zone, StateSavingOnShutdown) && currentnpcid && currentnpcid > 0) {
 			npcid = currentnpcid;
 		} else {
-			spawn_group->GetNPCType(condition_value);
+			npcid = spawn_group->GetNPCType(condition_value);
 		}
 
 		if (npcid == 0) {
