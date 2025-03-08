@@ -888,6 +888,22 @@ void Client::AddParcel(CharacterParcelsRepository::CharacterParcels &parcel)
 			"Unable to send parcel at this time.  Please try again later."
 		);
 		SendParcelAck();
-		return;
 	}
+}
+
+int32 Client::FindNextFreeParcelSlotUsingMemory()
+{
+	auto const results = GetParcels();
+
+	if (results.empty()) {
+		return PARCEL_BEGIN_SLOT;
+	}
+
+	for (uint32 i = PARCEL_BEGIN_SLOT; i <= RuleI(Parcel, ParcelMaxItems); i++) {
+		if (!results.contains(i)) {
+			return i;
+		}
+	}
+
+	return INVALID_INDEX;
 }
