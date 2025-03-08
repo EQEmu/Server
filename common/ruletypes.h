@@ -376,6 +376,8 @@ RULE_BOOL(Zone, AllowCrossZoneSpellsOnBots, false, "Set to true to allow cross z
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnMercs, false, "Set to true to allow cross zone spells (cast/remove) to affect mercenaries")
 RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross zone spells (cast/remove) to affect pets")
 RULE_BOOL(Zone, ZoneShardQuestMenuOnly, false, "Set to true if you only want quests to show the zone shard menu")
+RULE_BOOL(Zone, StateSaveEntityVariables, true, "Set to true if you want buffs to be saved on shutdown")
+RULE_BOOL(Zone, StateSaveBuffs, true, "Set to true if you want buffs to be saved on shutdown")
 RULE_BOOL(Zone, StateSavingOnShutdown, true, "Set to true if you want zones to save state on shutdown (npcs, corpses, loot, entity variables, buffs etc.)")
 RULE_CATEGORY_END()
 
