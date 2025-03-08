@@ -481,7 +481,7 @@ void Database::DeleteInstance(uint16 instance_id)
 	CharacterCorpsesRepository::BuryInstance(*this, instance_id);
 	DataBucketsRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
 	if (RuleB(Zone, StateSavingOnShutdown)) {
-		ZoneStateSpawnsRepository::DeleteWhere(database, fmt::format("`instance_id` = {}", instance_id));
+		ZoneStateSpawnsRepository::DeleteWhere(*this, fmt::format("`instance_id` = {}", instance_id));
 	}
 }
 
@@ -567,7 +567,7 @@ void Database::PurgeExpiredInstances()
 	Spawn2DisabledRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
 	DataBucketsRepository::DeleteWhere(*this, fmt::format("instance_id != 0 and instance_id IN ({})", imploded_instance_ids));
 	if (RuleB(Zone, StateSavingOnShutdown)) {
-		ZoneStateSpawnsRepository::DeleteWhere(database, fmt::format("`instance_id` IN ({})", imploded_instance_ids));
+		ZoneStateSpawnsRepository::DeleteWhere(*this, fmt::format("`instance_id` IN ({})", imploded_instance_ids));
 	}
 }
 
