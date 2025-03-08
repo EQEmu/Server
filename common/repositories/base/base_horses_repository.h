@@ -24,6 +24,7 @@ public:
 		int16_t     race;
 		int8_t      gender;
 		int8_t      texture;
+		int8_t      helmtexture;
 		float       mountspeed;
 		std::string notes;
 	};
@@ -41,6 +42,7 @@ public:
 			"race",
 			"gender",
 			"texture",
+			"helmtexture",
 			"mountspeed",
 			"notes",
 		};
@@ -54,6 +56,7 @@ public:
 			"race",
 			"gender",
 			"texture",
+			"helmtexture",
 			"mountspeed",
 			"notes",
 		};
@@ -96,13 +99,14 @@ public:
 	{
 		Horses e{};
 
-		e.id         = 0;
-		e.filename   = "";
-		e.race       = 216;
-		e.gender     = 0;
-		e.texture    = 0;
-		e.mountspeed = 0.75;
-		e.notes      = "Notes";
+		e.id          = 0;
+		e.filename    = "";
+		e.race        = 216;
+		e.gender      = 0;
+		e.texture     = 0;
+		e.helmtexture = -1;
+		e.mountspeed  = 0.75;
+		e.notes       = "Notes";
 
 		return e;
 	}
@@ -139,13 +143,14 @@ public:
 		if (results.RowCount() == 1) {
 			Horses e{};
 
-			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.filename   = row[1] ? row[1] : "";
-			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
-			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
-			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
-			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
-			e.notes      = row[6] ? row[6] : "Notes";
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.filename    = row[1] ? row[1] : "";
+			e.race        = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender      = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture     = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.helmtexture = row[5] ? static_cast<int8_t>(atoi(row[5])) : -1;
+			e.mountspeed  = row[6] ? strtof(row[6], nullptr) : 0.75;
+			e.notes       = row[7] ? row[7] : "Notes";
 
 			return e;
 		}
@@ -183,8 +188,9 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.race));
 		v.push_back(columns[3] + " = " + std::to_string(e.gender));
 		v.push_back(columns[4] + " = " + std::to_string(e.texture));
-		v.push_back(columns[5] + " = " + std::to_string(e.mountspeed));
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.notes) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.helmtexture));
+		v.push_back(columns[6] + " = " + std::to_string(e.mountspeed));
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -211,6 +217,7 @@ public:
 		v.push_back(std::to_string(e.race));
 		v.push_back(std::to_string(e.gender));
 		v.push_back(std::to_string(e.texture));
+		v.push_back(std::to_string(e.helmtexture));
 		v.push_back(std::to_string(e.mountspeed));
 		v.push_back("'" + Strings::Escape(e.notes) + "'");
 
@@ -247,6 +254,7 @@ public:
 			v.push_back(std::to_string(e.race));
 			v.push_back(std::to_string(e.gender));
 			v.push_back(std::to_string(e.texture));
+			v.push_back(std::to_string(e.helmtexture));
 			v.push_back(std::to_string(e.mountspeed));
 			v.push_back("'" + Strings::Escape(e.notes) + "'");
 
@@ -282,13 +290,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses e{};
 
-			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.filename   = row[1] ? row[1] : "";
-			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
-			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
-			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
-			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
-			e.notes      = row[6] ? row[6] : "Notes";
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.filename    = row[1] ? row[1] : "";
+			e.race        = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender      = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture     = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.helmtexture = row[5] ? static_cast<int8_t>(atoi(row[5])) : -1;
+			e.mountspeed  = row[6] ? strtof(row[6], nullptr) : 0.75;
+			e.notes       = row[7] ? row[7] : "Notes";
 
 			all_entries.push_back(e);
 		}
@@ -313,13 +322,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses e{};
 
-			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.filename   = row[1] ? row[1] : "";
-			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
-			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
-			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
-			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
-			e.notes      = row[6] ? row[6] : "Notes";
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.filename    = row[1] ? row[1] : "";
+			e.race        = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender      = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture     = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.helmtexture = row[5] ? static_cast<int8_t>(atoi(row[5])) : -1;
+			e.mountspeed  = row[6] ? strtof(row[6], nullptr) : 0.75;
+			e.notes       = row[7] ? row[7] : "Notes";
 
 			all_entries.push_back(e);
 		}
@@ -399,6 +409,7 @@ public:
 		v.push_back(std::to_string(e.race));
 		v.push_back(std::to_string(e.gender));
 		v.push_back(std::to_string(e.texture));
+		v.push_back(std::to_string(e.helmtexture));
 		v.push_back(std::to_string(e.mountspeed));
 		v.push_back("'" + Strings::Escape(e.notes) + "'");
 
@@ -428,6 +439,7 @@ public:
 			v.push_back(std::to_string(e.race));
 			v.push_back(std::to_string(e.gender));
 			v.push_back(std::to_string(e.texture));
+			v.push_back(std::to_string(e.helmtexture));
 			v.push_back(std::to_string(e.mountspeed));
 			v.push_back("'" + Strings::Escape(e.notes) + "'");
 
