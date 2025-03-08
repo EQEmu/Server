@@ -353,7 +353,7 @@ bool Zone::LoadZoneState(
 			(bool) s.path_when_zone_idle,
 			s.condition_id,
 			s.condition_min_value,
-			spawn_enabled,
+			(s.enabled && spawn_enabled),
 			(EmuAppearance) s.anim
 		);
 
