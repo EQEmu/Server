@@ -6950,6 +6950,18 @@ ALTER TABLE `horses`
 )",
 		.content_schema_update = true
 	},
+	ManifestEntry{
+		.version = 9311,
+		.description = "2025_03_09_add_zone_state_is_zone_field.sql",
+		.check = "SHOW COLUMNS FROM `zone_state_spawns` LIKE `is_zone`",
+		.condition = "missing",
+		.match = "TINYINT(2)",
+		.sql = R"(
+ALTER TABLE `zone_state_spawns`
+	ADD COLUMN `is_zone` tinyint(2) NULL DEFAULT 0 AFTER `is_corpse`;
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

@@ -315,11 +315,7 @@ bool Zone::LoadZoneState(
 	zone->Process();
 
 	for (auto &s: spawn_states) {
-		if (s.spawngroup_id == 0) {
-			continue;
-		}
-
-		if (s.is_corpse) {
+		if (s.spawngroup_id == 0 || s.is_corpse || s.is_zone) {
 			continue;
 		}
 
@@ -374,7 +370,7 @@ bool Zone::LoadZoneState(
 
 	// dynamic spawns, quest spawns, triggers etc.
 	for (auto &s: spawn_states) {
-		if (s.spawngroup_id > 0) {
+		if (s.spawngroup_id > 0 || s.is_zone) {
 			continue;
 		}
 
