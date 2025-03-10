@@ -7,6 +7,7 @@
 #include "zoneserver.h"
 #include "../common/rulesys.h"
 #include "../common/repositories/dynamic_zone_lockouts_repository.h"
+#include <cereal/types/utility.hpp>
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
@@ -167,6 +168,33 @@ void DynamicZoneManager::LoadTemplates()
 	{
 		m_dz_templates[dz_template.id] = dz_template;
 	}
+}
+
+void DynamicZoneManager::SendBulkMemberStatuses(uint32_t zone_id, uint16_t inst_id)
+{
+	std::vector<std::pair<uint32_t, std::vector<DynamicZoneMember>>> dzs;
+	dzs.reserve(dynamic_zone_cache.size());
+
+	for (const auto& [dz_id, dz] : dynamic_zone_cache)
+	{
+		dzs.emplace_back(dz_id, dz->GetMembers());
+	}
+
+	std::ostringstream ss;
+	{
+		cereal::BinaryOutputArchive archive(ss);
+		archive(dzs);
+	}
+
+	std::string_view sv = ss.view();
+
+	size_t size = sizeof(ServerDzCerealData_Struct) + sv.size();
+	ServerPacket pack(ServerOP_DzGetBulkMemberStatuses, static_cast<uint32_t>(size));
+	auto buf = reinterpret_cast<ServerDzCerealData_Struct*>(pack.pBuffer);
+	buf->cereal_size = static_cast<uint32_t>(sv.size());
+	memcpy(buf->cereal_data, sv.data(), sv.size());
+
+	zoneserver_list.SendPacket(zone_id, inst_id, &pack);
 }
 
 void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
@@ -335,6 +363,15 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 		if (auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id))
 		{
 			dz->SendZoneMemberStatuses(buf->sender_zone_id, buf->sender_instance_id);
+		}
+		break;
+	}
+	case ServerOP_DzGetBulkMemberStatuses:
+	{
+		auto buf = reinterpret_cast<ServerDzCerealData_Struct*>(pack->pBuffer);
+		if (buf->zone_id != 0 && !dynamic_zone_cache.empty())
+		{
+			SendBulkMemberStatuses(buf->zone_id, buf->inst_id);
 		}
 		break;
 	}
