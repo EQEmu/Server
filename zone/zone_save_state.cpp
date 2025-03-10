@@ -520,6 +520,7 @@ void Zone::SaveZoneState()
 		bool ignore_npcs =
 				 n.second->GetSpawnGroupId() > 0 ||
 				 n.second->GetNPCTypeID() < 100 ||
+				 n.second->GetNPCTypeID() == 500 || // Trap::CreateHiddenTrigger
 				 n.second->IsAura() ||
 				 n.second->IsBot() ||
 				 n.second->IsMerc() ||
