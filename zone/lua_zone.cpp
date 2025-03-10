@@ -727,6 +727,52 @@ std::string Lua_Zone::GetBucketRemaining(const std::string& bucket_name)
 	return self->GetBucketRemaining(bucket_name);
 }
 
+void Lua_Zone::ClearZoneVariables()
+{
+	Lua_Safe_Call_Void();
+	self->ClearZoneVariables();
+}
+
+bool Lua_Zone::DeleteZoneVariable(const std::string& variable_name)
+{
+	Lua_Safe_Call_Bool();
+	return self->DeleteZoneVariable(variable_name);
+}
+
+std::string Lua_Zone::GetZoneVariable(const std::string& variable_name)
+{
+	Lua_Safe_Call_String();
+	return self->GetZoneVariable(variable_name);
+}
+
+luabind::object Lua_Zone::GetZoneVariables(lua_State* L)
+{
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetZoneVariables();
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+void Lua_Zone::SetZoneVariable(const std::string& variable_name, const std::string& variable_value)
+{
+	Lua_Safe_Call_Void();
+	self->SetZoneVariable(variable_name, variable_value);
+}
+
+bool Lua_Zone::ZoneVariableExists(const std::string& variable_name)
+{
+	Lua_Safe_Call_Bool();
+	return self->ZoneVariableExists(variable_name);
+}
+
 luabind::scope lua_register_zone() {
 	return luabind::class_<Lua_Zone>("Zones")
 	.def(luabind::constructor<>())
@@ -737,7 +783,9 @@ luabind::scope lua_register_zone() {
 	.def("CanDoCombat", &Lua_Zone::CanDoCombat)
 	.def("CanLevitate", &Lua_Zone::CanLevitate)
 	.def("ClearSpawnTimers", &Lua_Zone::ClearSpawnTimers)
+	.def("ClearZoneVariables", &Lua_Zone::ClearZoneVariables)
 	.def("DeleteBucket", (void(Lua_Zone::*)(const std::string&))&Lua_Zone::DeleteBucket)
+	.def("DeleteZoneVariable", &Lua_Zone::DeleteZoneVariable)
 	.def("Depop", (void(Lua_Zone::*)(void))&Lua_Zone::Depop)
 	.def("Depop", (void(Lua_Zone::*)(bool))&Lua_Zone::Depop)
 	.def("Despawn", &Lua_Zone::Despawn)
@@ -822,6 +870,8 @@ luabind::scope lua_register_zone() {
 	.def("GetWalkSpeed", &Lua_Zone::GetWalkSpeed)
 	.def("GetZoneZType", &Lua_Zone::GetZoneZType)
 	.def("GetZoneTotalBlockedSpells", &Lua_Zone::GetZoneTotalBlockedSpells)
+	.def("GetZoneVariable", &Lua_Zone::GetZoneVariable)
+	.def("GetZoneVariables", &Lua_Zone::GetZoneVariables)
 	.def("HasGraveyard", &Lua_Zone::HasGraveyard)
 	.def("HasMap", &Lua_Zone::HasMap)
 	.def("HasWaterMap", &Lua_Zone::HasWaterMap)
@@ -849,6 +899,8 @@ luabind::scope lua_register_zone() {
 	.def("SetInstanceTimer", &Lua_Zone::SetInstanceTimer)
 	.def("SetInstanceTimeRemaining", &Lua_Zone::SetInstanceTimeRemaining)
 	.def("SetIsHotzone", &Lua_Zone::SetIsHotzone)
-	.def("ShowZoneGlobalLoot", &Lua_Zone::ShowZoneGlobalLoot);
+	.def("SetZoneVariable", &Lua_Zone::SetZoneVariable)
+	.def("ShowZoneGlobalLoot", &Lua_Zone::ShowZoneGlobalLoot)
+	.def("ZoneVariableExists", &Lua_Zone::ZoneVariableExists);
 }
 

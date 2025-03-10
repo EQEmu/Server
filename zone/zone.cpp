@@ -3218,5 +3218,72 @@ void Zone::DisableRespawnTimers()
 	}
 }
 
+void Zone::ClearZoneVariables()
+{
+	m_zone_variables.clear();
+}
+
+bool Zone::DeleteZoneVariable(const std::string& variable_name)
+{
+	if (m_zone_variables.empty() || variable_name.empty()) {
+		return false;
+	}
+
+	auto v = m_zone_variables.find(variable_name);
+	if (v == m_zone_variables.end()) {
+		return false;
+	}
+
+	m_zone_variables.erase(v);
+
+	return true;
+}
+
+std::string Zone::GetZoneVariable(const std::string& variable_name)
+{
+	if (m_zone_variables.empty() || variable_name.empty()) {
+		return std::string();
+	}
+
+	const auto& v = m_zone_variables.find(variable_name);
+
+	return v != m_zone_variables.end() ? v->second : std::string();
+}
+
+std::vector<std::string> Zone::GetZoneVariables()
+{
+	std::vector<std::string> l;
+
+	if (m_zone_variables.empty()) {
+		return l;
+	}
+
+	l.reserve(m_zone_variables.size());
+
+	for (const auto& v : m_zone_variables) {
+		l.emplace_back(v.first);
+	}
+
+	return l;
+}
+
+void Zone::SetZoneVariable(const std::string& variable_name, const std::string& variable_value)
+{
+	if (variable_name.empty()) {
+		return;
+	}
+
+	m_zone_variables[variable_name] = variable_value;
+}
+
+bool Zone::ZoneVariableExists(const std::string& variable_name)
+{
+	if (m_zone_variables.empty() || variable_name.empty()) {
+		return false;
+	}
+
+	return m_zone_variables.find(variable_name) != m_zone_variables.end();
+}
+
 #include "zone_save_state.cpp"
 #include "zone_loot.cpp"
