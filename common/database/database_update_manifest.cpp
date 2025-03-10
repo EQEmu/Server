@@ -6941,7 +6941,7 @@ CREATE TABLE `character_pet_name` (
 	ManifestEntry{
 		.version = 9310,
 		.description = "2025_03_7_expand_horse_def.sql",
-		.check = "SHOW COLUMNS FROM `horses` LIKE `helmtexture",
+		.check = "SHOW COLUMNS FROM `horses` LIKE 'helmtexture'",
 		.condition = "missing",
 		.match = "TINYINT(2)",
 		.sql = R"(
