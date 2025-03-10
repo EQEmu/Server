@@ -3218,12 +3218,12 @@ void Zone::DisableRespawnTimers()
 	}
 }
 
-void Zone::ClearZoneVariables()
+void Zone::ClearVariables()
 {
 	m_zone_variables.clear();
 }
 
-bool Zone::DeleteZoneVariable(const std::string& variable_name)
+bool Zone::DeleteVariable(const std::string& variable_name)
 {
 	if (m_zone_variables.empty() || variable_name.empty()) {
 		return false;
@@ -3239,7 +3239,7 @@ bool Zone::DeleteZoneVariable(const std::string& variable_name)
 	return true;
 }
 
-std::string Zone::GetZoneVariable(const std::string& variable_name)
+std::string Zone::GetVariable(const std::string& variable_name)
 {
 	if (m_zone_variables.empty() || variable_name.empty()) {
 		return std::string();
@@ -3250,7 +3250,7 @@ std::string Zone::GetZoneVariable(const std::string& variable_name)
 	return v != m_zone_variables.end() ? v->second : std::string();
 }
 
-std::vector<std::string> Zone::GetZoneVariables()
+std::vector<std::string> Zone::GetVariables()
 {
 	std::vector<std::string> l;
 
@@ -3267,7 +3267,7 @@ std::vector<std::string> Zone::GetZoneVariables()
 	return l;
 }
 
-void Zone::SetZoneVariable(const std::string& variable_name, const std::string& variable_value)
+void Zone::SetVariable(const std::string& variable_name, const std::string& variable_value)
 {
 	if (variable_name.empty()) {
 		return;
@@ -3276,7 +3276,7 @@ void Zone::SetZoneVariable(const std::string& variable_name, const std::string& 
 	m_zone_variables[variable_name] = variable_value;
 }
 
-bool Zone::ZoneVariableExists(const std::string& variable_name)
+bool Zone::VariableExists(const std::string& variable_name)
 {
 	if (m_zone_variables.empty() || variable_name.empty()) {
 		return false;

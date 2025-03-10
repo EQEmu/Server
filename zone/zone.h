@@ -197,12 +197,12 @@ public:
 	int32 MobsAggroCount() { return aggroedmobs; }
 	DynamicZone *GetDynamicZone();
 
-	void ClearZoneVariables();
-	bool DeleteZoneVariable(const std::string& variable_name);
-	std::string GetZoneVariable(const std::string& variable_name);
-	std::vector<std::string> GetZoneVariables();
-	void SetZoneVariable(const std::string& variable_name, const std::string& variable_value);
-	bool ZoneVariableExists(const std::string& variable_name);
+	void ClearVariables();
+	bool DeleteVariable(const std::string& variable_name);
+	std::string GetVariable(const std::string& variable_name);
+	std::vector<std::string> GetVariables();
+	void SetVariable(const std::string& variable_name, const std::string& variable_value);
+	bool VariableExists(const std::string& variable_name);
 
 	IPathfinder                                   *pathing;
 	std::vector<NPC_Emote_Struct *>               npc_emote_list;
