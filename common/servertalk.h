@@ -196,6 +196,7 @@
 #define ServerOP_DzSaveInvite                 0x0466
 #define ServerOP_DzRequestInvite              0x0467
 #define ServerOP_DzMakeLeader                 0x0468
+#define ServerOP_DzGetBulkMemberStatuses      0x0469
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -1553,6 +1554,13 @@ struct ServerDzMemberStatuses_Struct {
 	uint32 dz_id;
 	uint32 count;
 	ServerDzMemberStatusEntry_Struct entries[0];
+};
+
+struct ServerDzCerealData_Struct {
+	uint16_t zone_id;
+	uint16_t inst_id;
+	uint32_t cereal_size;
+	char     cereal_data[1];
 };
 
 struct ServerDzMovePC_Struct {
