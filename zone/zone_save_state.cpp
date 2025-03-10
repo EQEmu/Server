@@ -321,11 +321,7 @@ bool Zone::LoadZoneState(
 	zone->Process();
 
 	for (auto &s: spawn_states) {
-		if (s.spawngroup_id == 0) {
-			continue;
-		}
-
-		if (s.is_corpse) {
+		if (s.spawngroup_id == 0 || s.is_corpse || s.is_zone) {
 			continue;
 		}
 
@@ -380,7 +376,7 @@ bool Zone::LoadZoneState(
 
 	// dynamic spawns, quest spawns, triggers etc.
 	for (auto &s: spawn_states) {
-		if (s.spawngroup_id > 0) {
+		if (s.spawngroup_id > 0 || s.is_zone) {
 			continue;
 		}
 
@@ -530,6 +526,7 @@ void Zone::SaveZoneState()
 		bool ignore_npcs =
 				 n.second->GetSpawnGroupId() > 0 ||
 				 n.second->GetNPCTypeID() < 100 ||
+				 n.second->GetNPCTypeID() == 500 || // Trap::CreateHiddenTrigger
 				 n.second->IsAura() ||
 				 n.second->IsBot() ||
 				 n.second->IsMerc() ||

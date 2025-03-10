@@ -6877,7 +6877,7 @@ CREATE TABLE `character_pet_name` (
 	ManifestEntry{
 		.version = 9310,
 		.description = "2025_03_7_expand_horse_def.sql",
-		.check = "SHOW COLUMNS FROM `horses` LIKE `helmtexture",
+		.check = "SHOW COLUMNS FROM `horses` LIKE 'helmtexture'",
 		.condition = "missing",
 		.match = "TINYINT(2)",
 		.sql = R"(
@@ -6885,6 +6885,18 @@ ALTER TABLE `horses`
 	ADD COLUMN `helmtexture` TINYINT(2) NOT NULL DEFAULT -1 AFTER `texture`;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9311,
+		.description = "2025_03_09_add_zone_state_is_zone_field.sql",
+		.check = "SHOW COLUMNS FROM `zone_state_spawns` LIKE 'is_zone'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `zone_state_spawns`
+	ADD COLUMN `is_zone` tinyint(11) NULL DEFAULT 0 AFTER `is_corpse`;
+)",
+		.content_schema_update = false
 	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
