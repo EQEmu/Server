@@ -141,6 +141,12 @@ public:
 	void SetInstanceTimeRemaining(uint32 time_remaining);
 	void SetIsHotzone(bool is_hotzone);
 	void ShowZoneGlobalLoot(Lua_Client c);
+	void ClearVariables();
+	bool DeleteVariable(const std::string& variable_name);
+	std::string GetVariable(const std::string& variable_name);
+	luabind::object GetVariables(lua_State* L);
+	void SetVariable(const std::string& variable_name, const std::string& variable_value);
+	bool VariableExists(const std::string& variable_name);
 
 	// data buckets
 	void SetBucket(const std::string& bucket_name, const std::string& bucket_value);

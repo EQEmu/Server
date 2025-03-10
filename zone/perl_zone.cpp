@@ -561,6 +561,43 @@ std::string Perl_Zone_GetBucketRemaining(Zone* self, const std::string bucket_na
 	return self->GetBucketRemaining(bucket_name);
 }
 
+void Perl_Zone_ClearVariables(Zone* self)
+{
+	self->ClearVariables();
+}
+
+bool Perl_Zone_DeleteVariable(Zone* self, const std::string variable_name)
+{
+	return self->DeleteVariable(variable_name);
+}
+
+std::string Perl_Zone_GetVariable(Zone* self, const std::string variable_name)
+{
+	return self->GetVariable(variable_name);
+}
+
+perl::array Perl_Zone_GetVariables(Zone* self)
+{
+	perl::array a;
+
+	const auto& l = self->GetVariables();
+	for (const auto& v : l) {
+		a.push_back(v);
+	}
+
+	return a;
+}
+
+void Perl_Zone_SetVariable(Zone* self, const std::string variable_name, const std::string variable_value)
+{
+	self->SetVariable(variable_name, variable_value);
+}
+
+bool Perl_Zone_VariableExists(Zone* self, const std::string variable_name)
+{
+	return self->VariableExists(variable_name);
+}
+
 void perl_register_zone()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -573,7 +610,9 @@ void perl_register_zone()
 	package.add("CanDoCombat", &Perl_Zone_CanDoCombat);
 	package.add("CanLevitate", &Perl_Zone_CanLevitate);
 	package.add("ClearSpawnTimers", &Perl_Zone_ClearSpawnTimers);
+	package.add("ClearVariables", &Perl_Zone_ClearVariables);
 	package.add("DeleteBucket", &Perl_Zone_DeleteBucket);
+	package.add("DeleteVariable", &Perl_Zone_DeleteVariable);
 	package.add("Depop", (void(*)(Zone*))&Perl_Zone_Depop);
 	package.add("Depop", (void(*)(Zone*, bool))&Perl_Zone_Depop);
 	package.add("Despawn", &Perl_Zone_Despawn);
@@ -655,6 +694,8 @@ void perl_register_zone()
 	package.add("GetZoneType", &Perl_Zone_GetZoneType);
 	package.add("GetUnderworld", &Perl_Zone_GetUnderworld);
 	package.add("GetUnderworldTeleportIndex", &Perl_Zone_GetUnderworldTeleportIndex);
+	package.add("GetVariable", &Perl_Zone_GetVariable);
+	package.add("GetVariables", &Perl_Zone_GetVariables);
 	package.add("GetWalkSpeed", &Perl_Zone_GetWalkSpeed);
 	package.add("GetZoneZType", &Perl_Zone_GetZoneZType);
 	package.add("GetZoneTotalBlockedSpells", &Perl_Zone_GetZoneTotalBlockedSpells);
@@ -685,7 +726,9 @@ void perl_register_zone()
 	package.add("SetInstanceTimer", &Perl_Zone_SetInstanceTimer);
 	package.add("SetInstanceTimeRemaining", &Perl_Zone_SetInstanceTimeRemaining);
 	package.add("SetIsHotzone", &Perl_Zone_SetIsHotzone);
+	package.add("SetVariable", &Perl_Zone_SetVariable);
 	package.add("ShowZoneGlobalLoot", &Perl_Zone_ShowZoneGlobalLoot);
+	package.add("VariableExists", &Perl_Zone_VariableExists);
 }
 
 #endif //EMBPERL_XS_CLASSES

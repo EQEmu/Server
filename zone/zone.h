@@ -197,6 +197,13 @@ public:
 	int32 MobsAggroCount() { return aggroedmobs; }
 	DynamicZone *GetDynamicZone();
 
+	void ClearVariables();
+	bool DeleteVariable(const std::string& variable_name);
+	std::string GetVariable(const std::string& variable_name);
+	std::vector<std::string> GetVariables();
+	void SetVariable(const std::string& variable_name, const std::string& variable_value);
+	bool VariableExists(const std::string& variable_name);
+
 	IPathfinder                                   *pathing;
 	std::vector<NPC_Emote_Struct *>               npc_emote_list;
 	LinkedList<Spawn2 *>                          spawn2_list;
@@ -243,6 +250,8 @@ public:
 	std::unordered_map<uint32, EXPModifier> exp_modifiers;
 
 	std::vector<uint32> discovered_items;
+
+	std::map<std::string, std::string> m_zone_variables;
 
 	time_t weather_timer;
 	Timer  spawn2_timer;
