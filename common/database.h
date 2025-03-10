@@ -103,6 +103,7 @@ public:
 	bool ReserveName(uint32 account_id, const std::string& name);
 	bool SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
 	bool UpdateName(const std::string& old_name, const std::string& new_name);
+	bool UpdateNameByID(const int character_id, const std::string& new_name);
 	bool CopyCharacter(
 		const std::string& source_character_name,
 		const std::string& destination_character_name,
@@ -116,6 +117,7 @@ public:
 	bool CheckGMIPs(const std::string& login_ip, uint32 account_id);
 	bool CheckNameFilter(const std::string& name, bool surname = false);
 	bool IsNameUsed(const std::string& name);
+	bool IsPetNameUsed(const std::string& name);
 
 	uint32 GetAccountIDByChar(const std::string& name, uint32* character_id = 0);
 	uint32 GetAccountIDByChar(uint32 character_id);
