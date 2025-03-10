@@ -525,6 +525,7 @@ void Zone::SaveZoneState()
 				 n.second->IsBot() ||
 				 n.second->IsMerc() ||
 				 n.second->IsTrap() ||
+				 n.second->GetSwarmOwner() ||
 				 n.second->IsPet();
 		if (ignore_npcs) {
 			continue;
