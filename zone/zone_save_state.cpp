@@ -621,6 +621,7 @@ void Zone::SaveZoneState()
 		ZoneStateSpawnsRepository::ZoneStateSpawns z{};
 		z.zone_id          = GetZoneID();
 		z.instance_id      = GetInstanceID();
+		z.is_zone          = 1;
 		z.entity_variables = GetZoneVariablesSerialized(this);
 
 		spawns.emplace_back(z);
