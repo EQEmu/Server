@@ -12,6 +12,7 @@ extern class DynamicZoneManager dynamic_zone_manager;
 class DynamicZone;
 struct DynamicZoneMember;
 class ServerPacket;
+struct ServerDzCerealData_Struct;
 
 class DynamicZoneManager
 {
@@ -30,6 +31,8 @@ public:
 	std::unordered_map<uint32_t, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
 
 private:
+	void SendBulkMemberStatuses(ServerDzCerealData_Struct& buf);
+
 	Timer m_process_throttle_timer{};
 	std::unordered_map<uint32_t, DynamicZoneTemplatesRepository::DynamicZoneTemplates> m_dz_templates;
 };

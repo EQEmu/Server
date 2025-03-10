@@ -7,6 +7,7 @@
 #include "zoneserver.h"
 #include "../common/rulesys.h"
 #include "../common/repositories/dynamic_zone_lockouts_repository.h"
+#include <cereal/types/utility.hpp>
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
@@ -166,6 +167,48 @@ void DynamicZoneManager::LoadTemplates()
 	for (const auto& dz_template : dz_templates)
 	{
 		m_dz_templates[dz_template.id] = dz_template;
+	}
+}
+
+void DynamicZoneManager::SendBulkMemberStatuses(ServerDzCerealData_Struct& inbuf)
+{
+	std::vector<uint32_t> dz_ids;
+	dz_ids.reserve(dynamic_zone_cache.size());
+
+	EQ::Util::MemoryStreamReader iss(inbuf.cereal_data, inbuf.cereal_size);
+	{
+		cereal::BinaryInputArchive archive(iss);
+		archive(dz_ids);
+	}
+
+	if (!dz_ids.empty())
+	{
+		std::vector<std::pair<uint32_t, std::vector<DynamicZoneMember>>> statuses;
+		statuses.reserve(dz_ids.size());
+
+		for (const auto& dz_id : dz_ids)
+		{
+			if (DynamicZone* dz = DynamicZone::FindDynamicZoneByID(dz_id))
+			{
+				statuses.emplace_back(dz_id, dz->GetMembers());
+			}
+		}
+
+		std::ostringstream oss;
+		{
+			cereal::BinaryOutputArchive archive(oss);
+			archive(statuses);
+		}
+
+		std::string_view sv = oss.view();
+
+		size_t size = sizeof(ServerDzCerealData_Struct) + sv.size();
+		ServerPacket pack(ServerOP_DzGetBulkMemberStatuses, static_cast<uint32_t>(size));
+		auto outbuf = reinterpret_cast<ServerDzCerealData_Struct*>(pack.pBuffer);
+		outbuf->cereal_size = static_cast<uint32_t>(sv.size());
+		memcpy(outbuf->cereal_data, sv.data(), sv.size());
+
+		zoneserver_list.SendPacket(inbuf.zone_id, inbuf.inst_id, &pack);
 	}
 }
 
@@ -335,6 +378,15 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 		if (auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id))
 		{
 			dz->SendZoneMemberStatuses(buf->sender_zone_id, buf->sender_instance_id);
+		}
+		break;
+	}
+	case ServerOP_DzGetBulkMemberStatuses:
+	{
+		auto buf = reinterpret_cast<ServerDzCerealData_Struct*>(pack->pBuffer);
+		if (buf->zone_id != 0)
+		{
+			SendBulkMemberStatuses(*buf);
 		}
 		break;
 	}
