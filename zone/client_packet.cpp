@@ -6789,13 +6789,8 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 			return;
 		}
 
-		p->response_code = ChangeFirstName(p->new_name) ? ChangeNameResponse::Accepted : ChangeNameResponse::Denied;
+		p->response_code = ChangeFirstName(p->new_name, "self_service") ? ChangeNameResponse::Accepted : ChangeNameResponse::Denied;
 		QueuePacket(app);
-
-		if (p->response_code == ChangeNameResponse::Accepted) {
-			Save();
-			SendRename(this, p->old_name, p->new_name);
-		}
 
 		return;
 	}

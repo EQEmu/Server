@@ -2549,6 +2549,7 @@ void Client::ChangeLastName(std::string last_name) {
 	safe_delete(outapp);
 }
 
+// Deprecated, this packet does not actually work in ROF2
 bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 {
 	if (!ChangeFirstName(in_firstname)) {
@@ -2576,8 +2577,6 @@ bool Client::ChangeFirstName(const char* in_firstname)
 	// check duplicate name
 	bool used_name = database.IsNameUsed((const char*) in_firstname) || database.IsPetNameUsed((const char*) in_firstname);
 	if (used_name || !database.CheckNameFilter((const char*) in_firstname, false)) {
-
-		LogDebug("result: [{}] [{}] [{}]", database.IsNameUsed((const char*) in_firstname), database.IsPetNameUsed((const char*) in_firstname), database.CheckNameFilter((const char*) in_firstname, false));
 		return false;
 	}
 
@@ -2585,11 +2584,18 @@ bool Client::ChangeFirstName(const char* in_firstname)
 	if(!database.UpdateNameByID(CharacterID(), in_firstname))
 		return false;
 
+	// Send Name Update to Clients
+	SendRename(this, GetName(), in_firstname);
+	SetName(in_firstname);
+
 	// update pp
 	memset(m_pp.name, 0, sizeof(m_pp.name));
 	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname);
 	strcpy(name, m_pp.name);
 	Save();
+
+	// Update the active char in account table
+	database.UpdateLiveChar(in_firstname, AccountID());
 
 	// finally, update the /who list
 	UpdateWho();
