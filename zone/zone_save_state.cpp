@@ -297,6 +297,55 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 	n->SetResumedFromZoneSuspend(true);
 }
 
+inline std::string GetZoneVariablesSerialized(Zone *z)
+{
+	std::map<std::string, std::string> variables;
+
+	for (const auto &k: z->GetVariables()) {
+		variables[k] = z->GetVariable(k);
+	}
+
+	try {
+		std::ostringstream os;
+		{
+			cereal::JSONOutputArchiveSingleLine archive(os);
+			archive(variables);
+		}
+		return os.str();
+	}
+	catch (const std::exception &e) {
+		LogZoneState("Failed to serialize variables for zone [{}]", e.what());
+		return "";
+	}
+
+	return "";
+}
+
+inline void LoadZoneVariables(Zone *z, const std::string &variables)
+{
+	if (!Strings::IsValidJson(variables)) {
+		LogZoneState("Invalid JSON data for zone [{}]", variables);
+		return;
+	}
+
+	std::map<std::string, std::string> deserialized_map;
+	try {
+		std::istringstream is(variables);
+		{
+			cereal::JSONInputArchive archive(is);
+			archive(deserialized_map);
+		}
+	}
+	catch (const std::exception &e) {
+		LogZoneState("Failed to load zone variables [{}]", e.what());
+		return;
+	}
+
+	for (const auto &[key, value]: deserialized_map) {
+		z->SetVariable(key, value);
+	}
+}
+
 bool Zone::LoadZoneState(
 	std::unordered_map<uint32, uint32> spawn_times,
 	std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
@@ -321,6 +370,11 @@ bool Zone::LoadZoneState(
 	zone->Process();
 
 	for (auto &s: spawn_states) {
+		if (s.is_zone) {
+			LoadZoneVariables(zone, s.entity_variables);
+			continue;
+		}
+
 		if (s.spawngroup_id == 0 || s.is_corpse || s.is_zone) {
 			continue;
 		}
@@ -566,6 +620,17 @@ void Zone::SaveZoneState()
 		s.decay_in_seconds = (int) (n.second->GetDecayTime() / 1000);
 
 		spawns.emplace_back(s);
+	}
+
+	// zone state variables
+	if (!GetVariables().empty()) {
+		ZoneStateSpawnsRepository::ZoneStateSpawns z{};
+		z.zone_id          = GetZoneID();
+		z.instance_id      = GetInstanceID();
+		z.is_zone          = 1;
+		z.entity_variables = GetZoneVariablesSerialized(this);
+
+		spawns.emplace_back(z);
 	}
 
 	ZoneStateSpawnsRepository::DeleteWhere(
