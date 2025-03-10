@@ -6953,12 +6953,12 @@ ALTER TABLE `horses`
 	ManifestEntry{
 		.version = 9311,
 		.description = "2025_03_09_add_zone_state_is_zone_field.sql",
-		.check = "SHOW COLUMNS FROM `zone_state_spawns` LIKE `is_zone`",
+		.check = "SHOW COLUMNS FROM `zone_state_spawns` LIKE 'is_zone'",
 		.condition = "missing",
-		.match = "TINYINT(2)",
+		.match = "TINYINT(11)",
 		.sql = R"(
 ALTER TABLE `zone_state_spawns`
-	ADD COLUMN `is_zone` tinyint(2) NULL DEFAULT 0 AFTER `is_corpse`;
+	ADD COLUMN `is_zone` tinyint(11) NULL DEFAULT 0 AFTER `is_corpse`;
 )",
 		.content_schema_update = false
 	},
