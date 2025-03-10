@@ -1,3 +1,59 @@
+## [23.3.0] 3/8/2025
+
+### Bots
+
+* Fix buffs not overwriting lesser buffs ([#4756](https://github.com/EQEmu/Server/pull/4756)) @nytmyr 2025-03-06
+* Fix taunting bots positioning ([#4754](https://github.com/EQEmu/Server/pull/4754)) @nytmyr 2025-03-06
+* Move commanded spell map to zone ([#4755](https://github.com/EQEmu/Server/pull/4755)) @nytmyr 2025-03-06
+
+### Code
+
+* Fix typo in GM tradeskill combine message ([#4762](https://github.com/EQEmu/Server/pull/4762)) @nytmyr 2025-03-08
+
+### Crash
+
+* Bot aura crash fix ([#4752](https://github.com/EQEmu/Server/pull/4752)) @nytmyr 2025-03-06
+
+### Databuckets
+
+* Nested Databuckets Protections and Improvements ([#4748](https://github.com/EQEmu/Server/pull/4748)) @Akkadius 2025-03-04
+
+### Feature
+
+* Add Rule for dealing with augments when an item evolves ([#4758](https://github.com/EQEmu/Server/pull/4758)) @neckkola 2025-03-08
+* Allow assigning Helm Texture independently of Body Texture for Horses ([#4759](https://github.com/EQEmu/Server/pull/4759)) @catapultam-habeo 2025-03-08
+
+### Fixes
+
+* Add crash checks for certain PlayerEventLogs ([#4761](https://github.com/EQEmu/Server/pull/4761)) @neckkola 2025-03-07
+* Correct incorrectly calculated stat caps with Heroic Stats ([#4760](https://github.com/EQEmu/Server/pull/4760)) @catapultam-habeo 2025-03-08
+* Fix sigabort crash from invalid JSON  @Akkadius 2025-03-03
+* Forgot to push up some changes for test output  @Akkadius 2025-03-04
+* Parcel Delivery Updates for two edge cases ([#4753](https://github.com/EQEmu/Server/pull/4753)) @neckkola 2025-03-06
+* Remove one port check in world  @Akkadius 2025-03-03
+* Zero out currentnpcid whenever spawn is reset. ([#4763](https://github.com/EQEmu/Server/pull/4763)) @zimp-wow 2025-03-08
+
+### Logging
+
+* Convert JSON Error to Data Buckets Logging Category ([#4747](https://github.com/EQEmu/Server/pull/4747)) @Kinglykrab 2025-03-04
+
+### Pets
+
+* Fix renamed pets loading as blank names ([#4751](https://github.com/EQEmu/Server/pull/4751)) @nytmyr 2025-03-05
+
+### Rules
+
+* Fix EvolvingItems:PercentOfRaidExperience Description ([#4757](https://github.com/EQEmu/Server/pull/4757)) @Kinglykrab 2025-03-07
+
+### Tests
+
+* Cleanup Hand-in Tests ([#4749](https://github.com/EQEmu/Server/pull/4749)) @Akkadius 2025-03-04
+
+### Zone
+
+* Make zone controller less likely to be visible, immune to all forms of combat ([#4750](https://github.com/EQEmu/Server/pull/4750)) @Akkadius 2025-03-06
+* State Save Improvements ([#4765](https://github.com/EQEmu/Server/pull/4765)) @Akkadius 2025-03-08
+
 ## [23.2.0] 3/3/2025
 
 ### Crash

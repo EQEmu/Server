@@ -229,7 +229,6 @@ inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 	}
 
 	n->LoadBuffsFromState(valid_buffs);
-	n->CalcBonuses();
 }
 
 inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawn_states)
@@ -531,7 +530,11 @@ void Zone::SaveZoneState()
 		bool ignore_npcs =
 				 n.second->GetSpawnGroupId() > 0 ||
 				 n.second->GetNPCTypeID() < 100 ||
-				 n.second->HasOwner();
+				 n.second->IsAura() ||
+				 n.second->IsBot() ||
+				 n.second->IsMerc() ||
+				 n.second->IsTrap() ||
+				 n.second->IsPet();
 		if (ignore_npcs) {
 			continue;
 		}

@@ -128,6 +128,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					evolve_amount = exp * RuleR(EvolvingItems, PercentOfSoloExperience) / 100;
 				}
 
+				inst->SetEvolveAddToCurrentAmount(evolve_amount);
 				inst->CalculateEvolveProgression();
 
 				auto e = CharacterEvolvingItemsRepository::SetCurrentAmountAndProgression(
