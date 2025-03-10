@@ -2551,21 +2551,9 @@ void Client::ChangeLastName(std::string last_name) {
 
 bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 {
-	// check duplicate name
-	bool used_name = database.IsNameUsed((const char*) in_firstname);
-	if (used_name) {
+	if (!ChangeFirstName(in_firstname)) {
 		return false;
 	}
-
-	// update character_
-	if(!database.UpdateName(GetName(), in_firstname))
-		return false;
-
-	// update pp
-	memset(m_pp.name, 0, sizeof(m_pp.name));
-	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname);
-	strcpy(name, m_pp.name);
-	Save();
 
 	// send name update packet
 	auto outapp = new EQApplicationPacket(OP_GMNameChange, sizeof(GMName_Struct));
@@ -2578,6 +2566,30 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 	gmn->unknown[2] = 1;
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
+
+	// success
+	return true;
+}
+
+bool Client::ChangeFirstName(const char* in_firstname)
+{
+	// check duplicate name
+	bool used_name = database.IsNameUsed((const char*) in_firstname) || database.IsPetNameUsed((const char*) in_firstname);
+	if (used_name || !database.CheckNameFilter((const char*) in_firstname, false)) {
+
+		LogDebug("result: [{}] [{}] [{}]", database.IsNameUsed((const char*) in_firstname), database.IsPetNameUsed((const char*) in_firstname), database.CheckNameFilter((const char*) in_firstname, false));
+		return false;
+	}
+
+	// update character_
+	if(!database.UpdateNameByID(CharacterID(), in_firstname))
+		return false;
+
+	// update pp
+	memset(m_pp.name, 0, sizeof(m_pp.name));
+	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname);
+	strcpy(name, m_pp.name);
+	Save();
 
 	// finally, update the /who list
 	UpdateWho();
@@ -4735,6 +4747,49 @@ bool Client::KeyRingRemove(uint32 item_id)
 			item_id
 		)
 	);
+}
+
+bool Client::IsNameChangeAllowed() {
+	if (RuleB(Character, AlwaysAllowNameChange)) {
+		return true;
+	}
+
+	auto k = GetScopedBucketKeys();
+	k.key = "NameChangesAllowed";
+
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		return true;
+	}
+
+	return false;
+}
+
+void Client::InvokeChangeNameWindow(bool immediate) {
+	if (!IsNameChangeAllowed()) {
+		return;
+	}
+
+	auto packet_op = immediate ? OP_InvokeNameChangeImmediate : OP_InvokeNameChangeLazy;
+
+	auto outapp = new EQApplicationPacket(packet_op, 0);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+bool Client::GrantNameChange() {
+	if (IsNameChangeAllowed() && !RuleB(Character, AlwaysAllowNameChange)) {
+		return false; // this was already allowed
+	}
+
+	auto k = GetScopedBucketKeys();
+	k.key = "NameChangesAllowed";
+	k.value = "allowed"; // potentially put a timestamp here
+	DataBucket::SetData(k);
+
+	InvokeChangeNameWindow(false);
+
+	return true;
 }
 
 bool Client::IsPetNameChangeAllowed() {

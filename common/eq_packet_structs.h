@@ -5832,19 +5832,26 @@ struct ChangeSize_Struct
 /*16*/
 };
 
+enum ChangeNameResponse : int {
+	Denied      = 0,  // 5167: "You have requested an invalid name or a Customer Service Representative has denied your name request. Please try another name."
+	Accepted    = 1,  // 5976: "Your request for a name change was successful."
+	Timeout     = -1, // 5977: "Your request for a name change has timed out. Please try again later."
+	ServerError = -2, // 5978: "The server had an error while processing your name request. Please try again later."
+	RateLimited = -3, // 5979: "You must wait longer before submitting another name request. Please try again in a few minutes."
+	Ineligible  = -4, // 5980: "Your character is not eligible for a name change."
+	Pending     = -5  // 5193: "You already have a name change pending. Please wait until it is fully processed before attempting another name change."
+};
+
+struct AltChangeName_Struct {
+/*00*/ char new_name[64];
+/*40*/ char old_name[64];
+/*80*/ int  response_code;
+};
+
 struct ChangePetName_Struct {
 /*00*/ char new_pet_name[64];
 /*40*/ char pet_owner_name[64];
 /*80*/ int  response_code;
-};
-
-enum ChangePetNameResponse : int {
-	Denied      = 0,        // 5167 You have requested an invalid name or a Customer Service Representative has denied your name request.  Please try another name.
-	Accepted    = 1,        // 5976 Your request for a name change was successful.
-	Timeout     = -3,        // 5979 You must wait longer before submitting another name request. Please try again in a few minutes.
-	NotEligible = -4,    // 5980 Your character is not eligible for a name change.
-	Pending     = -5,        // 5193 You already have a name change pending.  Please wait until it is fully processed before attempting another name change.
-	Unhandled   = -1
 };
 
 // New OpCode/Struct for SoD+
