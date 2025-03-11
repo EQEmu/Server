@@ -6845,6 +6845,8 @@ RENAME TABLE `expedition_lockouts` TO `dynamic_zone_lockouts`;
 		.condition   = "empty",
 		.match = "",
 		.sql = R"(
+DROP INDEX `keys` ON `data_buckets`;
+
 -- Add zone_id, instance_id
 ALTER TABLE `data_buckets`
 	MODIFY COLUMN `npc_id` int(11) NOT NULL DEFAULT 0 AFTER `character_id`,
