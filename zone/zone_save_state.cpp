@@ -49,6 +49,10 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 {
 	LootStateData l{};
 
+	if (loot_data.empty()) {
+		return;
+	}
+
 	if (!Strings::IsValidJson(loot_data)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", npc->GetNPCTypeID());
 		return;
@@ -175,6 +179,10 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 		return;
 	}
 
+	if (entity_variables.empty()) {
+		return;
+	}
+
 	if (!Strings::IsValidJson(entity_variables)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
 		return;
@@ -201,6 +209,10 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 {
 	if (!RuleB(Zone, StateSaveBuffs)) {
+		return;
+	}
+
+	if (buffs.empty()) {
 		return;
 	}
 
