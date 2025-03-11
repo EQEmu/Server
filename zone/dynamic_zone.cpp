@@ -25,6 +25,7 @@
 #include "worldserver.h"
 #include "../common/repositories/character_expedition_lockouts_repository.h"
 #include "../common/repositories/dynamic_zone_lockouts_repository.h"
+#include <cereal/types/utility.hpp>
 
 extern WorldServer worldserver;
 
@@ -162,12 +163,26 @@ void DynamicZone::CacheAllFromDatabase()
 			}
 		}
 
-		dz->UpdateMembers();
 		zone->dynamic_zone_cache.emplace(dz_id, std::move(dz));
+	}
+
+	if (!zone->dynamic_zone_cache.empty())
+	{
+		RequestMemberStatuses();
 	}
 
 	LogInfo("Loaded [{}] dynamic zone(s)", Strings::Commify(zone->dynamic_zone_cache.size()));
 	LogDynamicZones("Caching [{}] dynamic zone(s) took [{}s]", zone->dynamic_zone_cache.size(), bench.elapsed());
+}
+
+void DynamicZone::RequestMemberStatuses()
+{
+	ServerPacket pack(ServerOP_DzGetBulkMemberStatuses, sizeof(ServerDzCerealData_Struct));
+	auto buf = reinterpret_cast<ServerDzCerealData_Struct*>(pack.pBuffer);
+	buf->zone_id = static_cast<uint16_t>(zone->GetZoneID());
+	buf->inst_id = static_cast<uint16_t>(zone->GetInstanceID());
+
+	worldserver.SendPacket(&pack);
 }
 
 template <typename T>
@@ -846,6 +861,34 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 			}
 			dz->m_has_member_statuses = true;
 			dz->SendUpdatesToZoneMembers(false, true);
+		}
+		break;
+	}
+	case ServerOP_DzGetBulkMemberStatuses:
+	{
+		if (zone)
+		{
+			std::vector<std::pair<uint32_t, std::vector<DynamicZoneMember>>> dzs;
+			dzs.reserve(zone->dynamic_zone_cache.size());
+
+			auto buf = reinterpret_cast<ServerDzCerealData_Struct*>(pack->pBuffer);
+			EQ::Util::MemoryStreamReader ss(buf->cereal_data, buf->cereal_size);
+			{
+				cereal::BinaryInputArchive archive(ss);
+				archive(dzs);
+			}
+
+			for (const auto& [dz_id, members] : dzs)
+			{
+				if (auto dz = DynamicZone::FindDynamicZoneByID(dz_id))
+				{
+					for (const auto& member : members)
+					{
+						dz->SetInternalMemberStatus(member.id, member.status);
+					}
+					dz->m_has_member_statuses = true;
+				}
+			}
 		}
 		break;
 	}

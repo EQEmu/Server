@@ -92,13 +92,13 @@ public:
 	void SendMemberNameToZoneMembers(const std::string& char_name, bool remove);
 	void SendMemberStatusToZoneMembers(const DynamicZoneMember& member);
 	void SetLocked(bool lock, bool update_db = false, DzLockMsg lock_msg = DzLockMsg::None, uint32_t color = Chat::Yellow);
-	void UpdateMembers();
 
 	std::string GetLootEvent(uint32_t id, DzLootEvent::Type type) const;
 	void SetLootEvent(uint32_t id, const std::string& event, DzLootEvent::Type type);
 
 private:
 	static void StartAllClientRemovalTimers();
+	static void RequestMemberStatuses();
 
 	uint16_t GetCurrentInstanceID() const override;
 	uint16_t GetCurrentZoneID() const override;
@@ -125,6 +125,7 @@ private:
 	void SendWorldPlayerInvite(const std::string& inviter, const std::string& swap_name, const std::string& add_name, bool pending = false);
 	void SetUpdatedDuration(uint32_t seconds);
 	void TryAddClient(Client* add_client, const std::string& inviter, const std::string& swap_name, Client* leader = nullptr);
+	void UpdateMembers();
 
 	std::unique_ptr<EQApplicationPacket> CreateExpireWarningPacket(uint32_t minutes_remaining);
 	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);

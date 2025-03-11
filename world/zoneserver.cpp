@@ -1480,6 +1480,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_DzSwapMembers:
 		case ServerOP_DzRemoveAllMembers:
 		case ServerOP_DzGetMemberStatuses:
+		case ServerOP_DzGetBulkMemberStatuses:
 		case ServerOP_DzSetSecondsRemaining:
 		case ServerOP_DzSetCompass:
 		case ServerOP_DzSetSafeReturn:
