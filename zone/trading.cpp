@@ -2902,6 +2902,18 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		return;
 	}
 
+	if (buy_item->IsStackable() && !tbs->quantity) {
+		LogTrading("Attempted to buy 0-quantity of item [{}] with item_sn [{}]",
+			trader_item.item_id,
+			trader_item.item_sn
+		);
+		in->method     = BazaarByParcel;
+		in->sub_action = Failed;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
+		TradeRequestFailed(app);
+		return;
+	}
+
 	auto next_slot = FindNextFreeParcelSlot(CharacterID());
 	if (next_slot == INVALID_INDEX) {
 		LogTrading(
