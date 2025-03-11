@@ -356,6 +356,10 @@ bool Zone::LoadZoneState(
 
 	LogInfo("Loading zone state spawns for zone [{}] spawns [{}]", GetShortName(), spawn_states.size());
 
+	if (spawn_states.empty()) {
+		return false;
+	}
+
 	std::vector<uint32_t> lootdrop_ids = GetLootdropIds(spawn_states);
 	zone->LoadLootDrops(lootdrop_ids);
 
