@@ -643,15 +643,16 @@ void Zone::SaveZoneState()
 		)
 	);
 
-	int good_spawns = 0;
+	bool found_valid_spawn = false;
 	for (auto &s: spawns) {
 		if (s.hp == 0 && s.mana == 0 && s.endurance == 0 && s.loot_data.empty() && s.entity_variables.empty() && s.buffs.empty()) {
 			continue;
 		}
-		good_spawns++;
+		found_valid_spawn = true;
+		break;
 	}
 
-	if (!good_spawns) {
+	if (!found_valid_spawn) {
 		LogZoneState("All data was found to be invalid, potentially zone was saved before it had a chance to fully boot");
 		return;
 	}
