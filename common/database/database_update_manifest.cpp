@@ -6845,7 +6845,10 @@ RENAME TABLE `expedition_lockouts` TO `dynamic_zone_lockouts`;
 		.condition   = "empty",
 		.match = "",
 		.sql = R"(
-DROP INDEX `keys` ON `data_buckets`;
+-- Drop old indexes if exists
+DROP INDEX IF EXISTS `keys` ON `data_buckets`;
+DROP INDEX IF EXISTS `idx_npc_expires` ON `data_buckets`;
+DROP INDEX IF EXISTS `idx_bot_expires` ON `data_buckets`;
 
 -- Add zone_id, instance_id
 ALTER TABLE `data_buckets`
@@ -6966,7 +6969,12 @@ ALTER TABLE `zone_state_spawns`
 		.condition = "missing",
 		.match = "idx_zone_instance_expires",
 		.sql = R"(
+DROP INDEX IF EXISTS `idx_zone_instance_expires` ON `data_buckets`;
+DROP INDEX IF EXISTS `idx_character_expires` ON `data_buckets`;
+DROP INDEX IF EXISTS `idx_bot_expires` ON `data_buckets`;
 ALTER TABLE data_buckets ADD INDEX idx_zone_instance_expires (zone_id, instance_id, expires);
+ALTER TABLE data_buckets ADD INDEX idx_character_expires (character_id, expires);
+ALTER TABLE data_buckets ADD INDEX idx_bot_expires (bot_id, expires);
 )",
 	.content_schema_update = false
 	},
@@ -6978,6 +6986,7 @@ ALTER TABLE data_buckets ADD INDEX idx_zone_instance_expires (zone_id, instance_
 		.match = "idx_zone_instance",
 		.sql = R"(
 ALTER TABLE zone_state_spawns ADD INDEX idx_zone_instance (zone_id, instance_id);
+ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
 )",
 	.content_schema_update = false
 	},
