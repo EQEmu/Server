@@ -6845,7 +6845,7 @@ RENAME TABLE `expedition_lockouts` TO `dynamic_zone_lockouts`;
 		.condition   = "empty",
 		.match = "",
 		.sql = R"(
--- ✅ Drop old indexes
+-- Drop old indexes if exists
 DROP INDEX IF EXISTS `keys` ON `data_buckets`;
 DROP INDEX IF EXISTS `idx_npc_expires` ON `data_buckets`;
 DROP INDEX IF EXISTS `idx_bot_expires` ON `data_buckets`;
@@ -6863,10 +6863,10 @@ ALTER TABLE `data_buckets`
 	MODIFY COLUMN `npc_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `character_id`,
 	MODIFY COLUMN `bot_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `npc_id`;
 
--- ✅ Create optimized unique index with `key` first
+-- Create optimized unique index with `key` first
 CREATE UNIQUE INDEX `keys` ON data_buckets (`key`, character_id, npc_id, bot_id, account_id, zone_id, instance_id);
 
--- ✅ Create indexes for just instance_id (instance deletion)
+-- Create indexes for just instance_id (instance deletion)
 CREATE INDEX idx_instance_id ON data_buckets (instance_id);
 )",
 		.content_schema_update = false
@@ -6961,6 +6961,34 @@ ALTER TABLE `zone_state_spawns`
 	ADD COLUMN `is_zone` tinyint(11) NULL DEFAULT 0 AFTER `is_corpse`;
 )",
 		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9312,
+		.description = "2025_03_11_data_bucket_indexes.sql",
+		.check = "SHOW INDEX FROM data_buckets",
+		.condition = "missing",
+		.match = "idx_zone_instance_expires",
+		.sql = R"(
+DROP INDEX IF EXISTS `idx_zone_instance_expires` ON `data_buckets`;
+DROP INDEX IF EXISTS `idx_character_expires` ON `data_buckets`;
+DROP INDEX IF EXISTS `idx_bot_expires` ON `data_buckets`;
+ALTER TABLE data_buckets ADD INDEX idx_zone_instance_expires (zone_id, instance_id, expires);
+ALTER TABLE data_buckets ADD INDEX idx_character_expires (character_id, expires);
+ALTER TABLE data_buckets ADD INDEX idx_bot_expires (bot_id, expires);
+)",
+	.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9313,
+		.description = "2025_03_11_data_bucket_indexes.sql",
+		.check = "SHOW INDEX FROM zone_state_spawns",
+		.condition = "missing",
+		.match = "idx_zone_instance",
+		.sql = R"(
+ALTER TABLE zone_state_spawns ADD INDEX idx_zone_instance (zone_id, instance_id);
+ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
+)",
+	.content_schema_update = false
 	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
