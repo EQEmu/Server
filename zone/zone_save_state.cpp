@@ -643,6 +643,19 @@ void Zone::SaveZoneState()
 		)
 	);
 
+	int good_spawns = 0;
+	for (auto &s: spawns) {
+		if (s.hp == 0 && s.mana == 0 && s.endurance == 0 && s.loot_data.empty() && s.entity_variables.empty() && s.buffs.empty()) {
+			continue;
+		}
+		good_spawns++;
+	}
+
+	if (!good_spawns) {
+		LogZoneState("All data was found to be invalid, potentially zone was saved before it had a chance to fully boot");
+		return;
+	}
+
 	ZoneStateSpawnsRepository::InsertMany(database, spawns);
 
 	LogInfo("Saved [{}] zone state spawns", Strings::Commify(spawns.size()));
