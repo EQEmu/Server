@@ -607,10 +607,7 @@ public:
 
 	bool ReloadDataBuckets();
 	void ShowZoneShardMenu();
-
-	int GetKillCount(int race_id);
-	bool CheckTitle(int title_set);
-	void ChangePetName(int class_id);
+	void GrantPetNameChange();
 	bool ChangeName();
 
 	Lua_Expedition  CreateExpedition(luabind::object expedition_info);

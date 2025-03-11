@@ -3266,19 +3266,6 @@ bool Perl_Client_ChangeName(Client* self)
 	return self->GrantNameChange();
 }
 
-void Perl_Client_ChangePetName(Client* self, int class_id)
-{
-	self->GrantPetNameChange(class_id);
-}
-
-int Perl_Client_GetPetNameChangeClass(Client* self) {
-	return self->GetPetNameChangeClass();
-}
-
-bool Perl_Client_IsPetNameChangeAllowed(Client* self) {
-	return self->IsPetNameChangeAllowed();
-}
-
 std::string Perl_Client_GetBandolierName(Client* self, uint8 bandolier_slot)
 {
 	return self->GetBandolierName(bandolier_slot);
@@ -3410,10 +3397,8 @@ void perl_register_client()
 	package.add("CanHaveSkill", &Perl_Client_CanHaveSkill);
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
-	package.add("ChangePetName", (void(*)(Client*, int))&Perl_Client_ChangePetName);
+	package.add("GrantPetNameChange", &Perl_Client_GrantPetNameChange);
 	package.add("ChangeName", (bool(*)(Client*))&Perl_Client_ChangeName);
-	package.add("GetPetNameChangeClass", (int(*)(Client*))&Perl_Client_GetPetNameChangeClass);
-	package.add("IsPetNameChangeAllowed", (bool(*)(Client*))&Perl_Client_IsPetNameChangeAllowed);
 	package.add("CharacterID", &Perl_Client_CharacterID);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
