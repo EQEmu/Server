@@ -3410,7 +3410,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_DzRemoveAllMembers:
 	case ServerOP_DzDurationUpdate:
 	case ServerOP_DzGetMemberStatuses:
-	case ServerOP_DzGetBulkMemberStatuses:
 	case ServerOP_DzSetCompass:
 	case ServerOP_DzSetSafeReturn:
 	case ServerOP_DzSetZoneIn:
