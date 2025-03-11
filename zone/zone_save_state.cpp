@@ -236,6 +236,10 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 			continue;
 		}
 
+		if (!Strings::IsValidJson(s.loot_data)) {
+			continue;
+		}
+
 		LootStateData l{};
 		try {
 			std::stringstream ss;
