@@ -4260,7 +4260,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 		else {
 			OnDisconnect(true);
 		}
-		
+
 		return;
 	}
 
@@ -6789,7 +6789,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 			return;
 		}
 
-		p->response_code = ChangeFirstName(p->new_name, "self_service") ? ChangeNameResponse::Accepted : ChangeNameResponse::Denied;
+		p->response_code = ChangeFirstName(p->new_name) ? ChangeNameResponse::Accepted : ChangeNameResponse::Denied;
 		QueuePacket(app);
 
 		return;

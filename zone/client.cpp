@@ -2601,6 +2601,7 @@ bool Client::ChangeFirstName(const char* in_firstname)
 	UpdateWho();
 
 	// success
+	ClearNameChange();
 	return true;
 }
 
