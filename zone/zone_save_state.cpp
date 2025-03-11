@@ -360,7 +360,7 @@ bool Zone::LoadZoneState(
 		)
 	);
 
-	if (spawn_states.empty) {
+	if (spawn_states.empty()) {
 		// return early here.
 		return false;
 	}
