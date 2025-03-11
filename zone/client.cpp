@@ -4771,6 +4771,19 @@ bool Client::IsNameChangeAllowed() {
 	return false;
 }
 
+bool Client::ClearNameChange() {
+	if (!IsNameChangeAllowed()) {
+		return false;
+	}
+
+	auto k = GetScopedBucketKeys();
+	k.key = "NameChangesAllowed";
+
+	DataBucket::DeleteData(k);
+
+	return true;
+}
+
 void Client::InvokeChangeNameWindow(bool immediate) {
 	if (!IsNameChangeAllowed()) {
 		return;

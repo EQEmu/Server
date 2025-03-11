@@ -334,6 +334,7 @@ public:
 	void KeyRingList();
 	bool IsNameChangeAllowed();
 	void InvokeChangeNameWindow(bool immediate = true);
+	bool ClearNameChange();
 	bool GrantNameChange();
 	bool IsPetNameChangeAllowed();
 	void GrantPetNameChange();

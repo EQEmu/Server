@@ -3261,9 +3261,14 @@ std::string Perl_Client_GetAccountBucketRemaining(Client* self, std::string buck
 	return self->GetAccountBucketRemaining(bucket_name);
 }
 
-bool Perl_Client_ChangeName(Client* self)
+bool Perl_Client_GrantNameChange(Client* self)
 {
 	return self->GrantNameChange();
+}
+
+bool Perl_Client_IsNameChangeAllowed(Client* self)
+{
+	return self->IsNameChangeAllowed();
 }
 
 std::string Perl_Client_GetBandolierName(Client* self, uint8 bandolier_slot)
@@ -3398,7 +3403,8 @@ void perl_register_client()
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
 	package.add("GrantPetNameChange", &Perl_Client_GrantPetNameChange);
-	package.add("ChangeName", (bool(*)(Client*))&Perl_Client_ChangeName);
+	package.add("GrantNameChange", (bool(*)(Client*))&Perl_Client_GrantNameChange);
+	package.add("IsNameChangeAllowed", (bool(*)(Client*))&Perl_Client_IsNameChangeAllowed);
 	package.add("CharacterID", &Perl_Client_CharacterID);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
