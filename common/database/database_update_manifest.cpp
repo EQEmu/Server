@@ -6916,7 +6916,7 @@ ALTER TABLE data_buckets ADD INDEX idx_bot_expires (bot_id, expires);
 	},
 	ManifestEntry{
 		.version = 9313,
-		.description = "2025_03_11_data_bucket_indexes.sql",
+		.description = "2025_03_11_zone_state_spawns.sql",
 		.check = "SHOW INDEX FROM zone_state_spawns",
 		.condition = "missing",
 		.match = "idx_zone_instance",
