@@ -2959,7 +2959,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	uint64 fee         = std::round(total_cost * RuleR(Bazaar, ParcelDeliveryCostMod));
 
 	auto zones_list = Strings::Split(RuleS(Bazaar, ParcelDeliveryCostExemptZones), ",");
-	if (Strings::Contains(zones_list, std::to_string(GetZoneID())) ? 0 : RuleR(Bazaar, ParcelDeliveryCostMod)) {
+	if (Strings::Contains(zones_list, std::to_string(GetZoneID()))) {
 		fee = 0;
 	}
 
