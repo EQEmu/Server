@@ -887,7 +887,10 @@ void Zone::Shutdown(bool quiet)
 		c.second->WorldKick();
 	}
 
-	if (RuleB(Zone, StateSavingOnShutdown)) {
+	bool does_zone_have_entities =
+			 zone->IsLoaded() &&
+			 (!entity_list.GetNPCList().empty() || !entity_list.GetCorpseList().empty());
+	if (RuleB(Zone, StateSavingOnShutdown) && does_zone_have_entities) {
 		SaveZoneState();
 	}
 
