@@ -30,6 +30,8 @@ public:
 	std::unordered_map<uint32_t, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
 
 private:
+	void SendBulkMemberStatuses(uint32_t zone_id, uint16_t inst_id);
+
 	Timer m_process_throttle_timer{};
 	std::unordered_map<uint32_t, DynamicZoneTemplatesRepository::DynamicZoneTemplates> m_dz_templates;
 };
