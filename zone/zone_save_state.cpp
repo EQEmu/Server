@@ -476,44 +476,43 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 		variables[k] = n->GetEntityVariable(k);
 	}
 
-	try {
-		std::ostringstream os;
-		{
-			cereal::JSONOutputArchiveSingleLine archive(os);
-			archive(variables);
+	if (!variables.empty()) {
+		try {
+			std::ostringstream os;
+			{
+				cereal::JSONOutputArchiveSingleLine archive(os);
+				archive(variables);
+			}
+			s.entity_variables = os.str();
 		}
-		s.entity_variables = os.str();
-	}
-	catch (const std::exception &e) {
-		LogZoneState("Failed to serialize entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
-		return;
+		catch (const std::exception &e) {
+			LogZoneState("Failed to serialize entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
+		}
 	}
 
 	// buffs
 	auto buffs = n->GetBuffs();
-	if (!buffs) {
-		return;
-	}
-
-	std::vector<Buffs_Struct> valid_buffs;
-
-	for (int index = 0; index < n->GetMaxBuffSlots(); index++) {
-		if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
-			valid_buffs.push_back(buffs[index]);
+	if (buffs) {
+		std::vector<Buffs_Struct> valid_buffs;
+		for (int index = 0; index < n->GetMaxBuffSlots(); index++) {
+			if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
+				valid_buffs.push_back(buffs[index]);
+			}
 		}
-	}
 
-	try {
-		std::ostringstream os = std::ostringstream();
-		{
-			cereal::JSONOutputArchiveSingleLine archive(os);
-			archive(cereal::make_nvp("buffs", valid_buffs));
+		if (!valid_buffs.empty()) {
+			try {
+				std::ostringstream os = std::ostringstream();
+				{
+					cereal::JSONOutputArchiveSingleLine archive(os);
+					archive(cereal::make_nvp("buffs", valid_buffs));
+				}
+				s.buffs = os.str();
+			}
+			catch (const std::exception &e) {
+				LogZoneState("Failed to serialize buffs for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
+			}
 		}
-		s.buffs = os.str();
-	}
-	catch (const std::exception &e) {
-		LogZoneState("Failed to serialize buffs for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
-		return;
 	}
 
 	// rest
@@ -568,7 +567,7 @@ void Zone::SaveZoneState()
 		iterator.Advance();
 	}
 
-	// npcs that are not in the spawn2 list
+	// npc's that are not in the spawn2 list
 	for (auto &n: entity_list.GetNPCList()) {
 		// everything below here is dynamically spawned
 		bool ignore_npcs =
