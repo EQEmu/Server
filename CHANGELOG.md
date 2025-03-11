@@ -1,3 +1,13 @@
+## [23.3.2] 3/11/2025
+
+### DynamicZones
+
+* Bulk request dz member statuses on zone boot ([#4769](https://github.com/EQEmu/Server/pull/4769)) @hgtw 2025-03-11
+
+### Zone
+
+* Zone State Improvements (Continued) ([#4768](https://github.com/EQEmu/Server/pull/4768)) @Akkadius 2025-03-11
+
 ## [23.3.0] 3/8/2025
 
 ### Bots
