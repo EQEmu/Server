@@ -7,25 +7,24 @@
 
 class ZoneStateSpawnsRepository : public BaseZoneStateSpawnsRepository {
 public:
-	// Custom extended repository methods here
 	static void PurgeInvalidZoneStates(Database &database)
 	{
 		std::string query = R"(
-SELECT zone_id, instance_id
-FROM zone_state_spawns
-GROUP BY zone_id, instance_id
-HAVING COUNT(*) = SUM(
-    CASE
-        WHEN hp = 0
-         AND mana = 0
-         AND endurance = 0
-         AND (loot_data IS NULL OR loot_data = '')
-         AND (entity_variables IS NULL OR entity_variables = '')
-         AND (buffs IS NULL OR buffs = '')
-        THEN 1 ELSE 0
-    END
-);
-)";
+			SELECT zone_id, instance_id
+			FROM zone_state_spawns
+			GROUP BY zone_id, instance_id
+			HAVING COUNT(*) = SUM(
+				CASE
+					WHEN hp = 0
+					 AND mana = 0
+					 AND endurance = 0
+					 AND (loot_data IS NULL OR loot_data = '')
+					 AND (entity_variables IS NULL OR entity_variables = '')
+					 AND (buffs IS NULL OR buffs = '')
+					THEN 1 ELSE 0
+				END
+			);
+		)";
 
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
