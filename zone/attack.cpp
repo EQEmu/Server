@@ -2627,7 +2627,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			bool pet_owner_is_client = give_exp->IsPet() && owner->IsClient();
 			bool pet_owner_is_bot = give_exp->IsPet() && owner->IsBot();
 			bool owner_is_client = owner->IsClient();
-			
+
 			bool is_in_same_group_or_raid = (
 				pet_owner_is_client ||
 				(pet_owner_is_bot && owner->IsInGroupOrRaid(ulimate_owner)) ||
@@ -5678,6 +5678,10 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 				defender->aabonuses.MeleeMitigationEffect
 			);
 		}
+	}
+
+	if (RuleI(Combat, MaximumPetMitigationEffect) && GetOwner()) {
+		damage_bonus_mod = EQ::ClampLower(damage_bonus_mod, static_cast<int64>(-RuleI(Combat, MaximumPetMitigationEffect)));
 	}
 
 	damage += damage * damage_bonus_mod / 100;
