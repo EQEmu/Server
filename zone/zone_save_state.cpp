@@ -45,6 +45,24 @@ struct LootStateData {
 	}
 };
 
+// IsZoneStateValid checks if the zone state is valid
+// if these fields are all empty or zero value for an entire zone state, it's considered invalid
+inline bool IsZoneStateValid(std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawns)
+{
+	return std::any_of(
+		spawns.begin(), spawns.end(), [](const auto &s) {
+			return !(
+				s.hp == 0 &&
+				s.mana == 0 &&
+				s.endurance == 0 &&
+				s.loot_data.empty() &&
+				s.entity_variables.empty() &&
+				s.buffs.empty()
+			);
+		}
+	);
+}
+
 inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
 {
 	LootStateData l{};
@@ -376,6 +394,12 @@ bool Zone::LoadZoneState(
 		return false;
 	}
 
+	if (!IsZoneStateValid(spawn_states)) {
+		LogZoneState("Invalid zone state data for zone [{}]", GetShortName());
+		ClearZoneState(zoneid, zone->GetInstanceID());
+		return false;
+	}
+
 	std::vector<uint32_t> lootdrop_ids = GetLootdropIds(spawn_states);
 	zone->LoadLootDrops(lootdrop_ids);
 
@@ -655,17 +679,8 @@ void Zone::SaveZoneState()
 		)
 	);
 
-	bool found_valid_spawn = false;
-	for (auto &s: spawns) {
-		if (s.hp == 0 && s.mana == 0 && s.endurance == 0 && s.loot_data.empty() && s.entity_variables.empty() && s.buffs.empty()) {
-			continue;
-		}
-		found_valid_spawn = true;
-		break;
-	}
-
-	if (!found_valid_spawn) {
-		LogZoneState("All data was found to be invalid, potentially zone was saved before it had a chance to fully boot");
+	if (!IsZoneStateValid(spawns)) {
+		LogInfo("No valid zone state data to save");
 		return;
 	}
 
