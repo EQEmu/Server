@@ -80,7 +80,7 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 
 		// dynamically added via AddItem
 		if (e.lootdrop_id == 0) {
-			npc->AddItem(e.item_id, e.charges);
+			npc->AddItem(e.item_id, e.charges, true);
 			continue;
 		}
 
