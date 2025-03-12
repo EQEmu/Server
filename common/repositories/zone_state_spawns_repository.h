@@ -5,7 +5,7 @@
 #include "../strings.h"
 #include "base/base_zone_state_spawns_repository.h"
 
-class ZoneStateSpawnsRepository: public BaseZoneStateSpawnsRepository {
+class ZoneStateSpawnsRepository : public BaseZoneStateSpawnsRepository {
 public:
 	// Custom extended repository methods here
 	static void PurgeInvalidZoneStates(Database &database)
@@ -33,10 +33,10 @@ HAVING COUNT(*) = SUM(
 		}
 
 		for (auto row: results) {
-			uint32 zone_id     = std::stoul(row[0]);
+			uint32 zone_id = std::stoul(row[0]);
 			uint32 instance_id = std::stoul(row[1]);
 
-			ZoneStateSpawnsRepository::DeleteWhere(
+			int rows = ZoneStateSpawnsRepository::DeleteWhere(
 				database,
 				fmt::format(
 					"`zone_id` = {} AND `instance_id` = {}",
@@ -45,7 +45,36 @@ HAVING COUNT(*) = SUM(
 				)
 			);
 
-			LogInfo("Purged invalid zone state data for zone [{}] instance [{}]", zone_id, instance_id);
+			LogInfo(
+				"Purged invalid zone state data for zone [{}] instance [{}] rows [{}]",
+				zone_id,
+				instance_id,
+				Strings::Commify(rows)
+			);
+		}
+	}
+
+	static void PurgeOldZoneStates(Database &database)
+	{
+		int days = RuleI(Zone, StateSaveClearDays);
+
+		std::string query = fmt::format(
+			"DELETE FROM zone_state_spawns WHERE created_at < NOW() - INTERVAL {} DAY",
+			days
+		);
+
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			LogError("Failed to purge old zone state data older than {} days.", days);
+			return;
+		}
+
+		if (results.RowsAffected() > 0) {
+			LogInfo(
+				"Purged old zone state data older than days [{}] rows [{}]",
+				days,
+				Strings::Commify(results.RowsAffected())
+			);
 		}
 	}
 

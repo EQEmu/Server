@@ -413,7 +413,10 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	LogInfo("Cleaning up instance corpses");
 	database.CleanupInstanceCorpses();
 
-	ZoneStateSpawnsRepository::PurgeInvalidZoneStates(database);
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		ZoneStateSpawnsRepository::PurgeInvalidZoneStates(database);
+		ZoneStateSpawnsRepository::PurgeOldZoneStates(database);
+	}
 
 	return true;
 }
