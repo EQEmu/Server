@@ -6990,6 +6990,17 @@ ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
 )",
 	.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9314,
+		.description = "2025_03_12_zone_state_spawns_one_time_truncate.sql",
+		.check = "SELECT * FROM db_version WHERE version >= 9314",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+TRUNCATE TABLE zone_state_spawns;
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
