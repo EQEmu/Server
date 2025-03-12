@@ -67,7 +67,15 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 {
 	LootStateData l{};
 
+	// in the event that should never happen, we roll loot from the NPC's table
 	if (loot_data.empty()) {
+		LogZoneState("No loot state data found for NPC [{}], re-rolling", npc->GetNPCTypeID());
+		npc->ClearLootItems();
+		npc->AddLootTable();
+		if (npc->DropsGlobalLoot()) {
+			npc->CheckGlobalLootTables();
+		}
+
 		return;
 	}
 
@@ -462,7 +470,6 @@ bool Zone::LoadZoneState(
 		new_spawn->Process();
 		auto n = new_spawn->GetNPC();
 		if (n) {
-			n->ClearLootItems();
 			if (s.grid > 0) {
 				n->AssignWaypoints(s.grid, s.current_waypoint);
 			}

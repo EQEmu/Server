@@ -23,6 +23,11 @@ void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 		return;
 	}
 
+	if (m_resumed_from_zone_suspend) {
+		LogZoneState("NPC [{}] is resuming from zone suspend, skipping", GetCleanName());
+		return;
+	}
+
 	if (!is_global) {
 		m_loot_copper   = 0;
 		m_loot_silver   = 0;
@@ -277,7 +282,7 @@ void NPC::AddLootDrop(
 )
 {
 	if (m_resumed_from_zone_suspend) {
-		LogZoneState("NPC [{}] is resuming from zone suspend, skipping AddItem", GetCleanName());
+		LogZoneState("NPC [{}] is resuming from zone suspend, skipping", GetCleanName());
 		return;
 	}
 
