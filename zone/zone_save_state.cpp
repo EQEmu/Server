@@ -384,7 +384,7 @@ bool Zone::LoadZoneState(
 	auto spawn_states = ZoneStateSpawnsRepository::GetWhere(
 		database,
 		fmt::format(
-			"zone_id = {} AND instance_id = {}",
+			"zone_id = {} AND instance_id = {} ORDER BY spawn2_id",
 			zoneid,
 			zone->GetInstanceID()
 		)
