@@ -42,9 +42,9 @@ float Mob::GetActSpellRange(uint16 spell_id, float range)
 int Mob::GetSharedSpellDamage() {
 	int base = itembonuses.SpellDmg + spellbonuses.SpellDmg + aabonuses.SpellDmg;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedSpellDamage() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
@@ -52,9 +52,9 @@ int Mob::GetSharedSpellDamage() {
 int Mob::GetSharedHealAmount() {
 	int base = itembonuses.HealAmt + spellbonuses.HealAmt + aabonuses.HealAmt;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedHealAmount() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
@@ -64,9 +64,9 @@ int Mob::GetSharedCriticalSpellChance() {
 	base += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
 	base += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedCriticalSpellChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
@@ -74,9 +74,9 @@ int Mob::GetSharedCriticalSpellChance() {
 int Mob::GetSharedSpellCritDmgIncrease() {
 	int base = itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedSpellCritDmgIncrease() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
@@ -84,9 +84,9 @@ int Mob::GetSharedSpellCritDmgIncrease() {
 int Mob::GetSharedSpellCritDmgIncNoStack() {
 	int base = itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedSpellCritDmgIncNoStack() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
@@ -94,9 +94,9 @@ int Mob::GetSharedSpellCritDmgIncNoStack() {
 int Mob::GetSharedCriticalDoTChance() {
 	int base = itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedCriticalDoTChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
@@ -104,9 +104,9 @@ int Mob::GetSharedCriticalDoTChance() {
 int Mob::GetSharedDotCritDmgIncrease() {
 	int base = itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedDotCritDmgIncrease() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
@@ -114,9 +114,9 @@ int Mob::GetSharedDotCritDmgIncrease() {
 int Mob::GetSharedCriticalHealChance() {
 	int base = itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedCriticalHealChance() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
@@ -124,9 +124,9 @@ int Mob::GetSharedCriticalHealChance() {
 int Mob::GetSharedCriticalHealOverTime() {
 	int base = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
 
-	if (!IsNPC() || !(GetOwner() && CastToNPC()->GetSwarmOwner())) {
-		return base;
-	}
+    if (!IsNPC() || (!GetOwner() && !CastToNPC()->GetSwarmOwner())) {
+        return base;
+    }
 
 	return base + (GetOwner()->GetSharedCriticalHealOverTime() * RuleI(Spells, PetsScaleWithOwnerPercent) / 100);
 }
