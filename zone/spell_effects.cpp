@@ -3837,10 +3837,52 @@ snare has both of them negative, yet their range should work the same:
 	return result;
 }
 
+bool Mob::IsGroupSuspendableBuff(uint16 spell_id, Buffs_Struct buff) {
+	if (!RuleB(Custom, SuspendGroupBuffs)) {
+		return false;
+	}
+
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	if (!IsBeneficialSpell(spell_id)) {
+		return false;
+	}
+
+	if (!(IsClient() || GetOwnerID())) {
+		return false;
+	}
+
+	if (strlen(buff.caster_name) == 0) {
+		return false;
+	}
+
+	Client* caster = entity_list.GetClientByName(buff.caster_name);
+	Client* client = GetOwnerOrSelf()->CastToClient();
+
+	if (caster && client) {
+		if (caster == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(client))) {
+			if (GetSpellEffectIndex(spell_id, SE_DivineAura) == -1) {
+				if (caster->GetInv().IsClickEffectEquipped(spell_id)) {
+					return true;
+				} else if (caster->FindSpellBookSlotBySpellID(spell_id) >= 0 && !spells[spell_id].short_buff_box && !IsBardSong(spell_id)) {
+					return true;
+				} else if (suspendable_aa.find(spell_id) != suspendable_aa.end()) {
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
 
 void Mob::BuffProcess()
 {
 	int buff_count = GetMaxTotalSlots();
+
+	bool update_pet_owner = false;
 
 	for (int buffs_i = 0; buffs_i < buff_count; ++buffs_i)
 	{
@@ -3856,9 +3898,41 @@ void Mob::BuffProcess()
 			if (spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Permanent &&
 			    spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Aura &&
 				buffs[buffs_i].ticsremaining != PERMANENT_BUFF_DURATION) {
+
+
+				if (IsBardSong(buffs[buffs_i].spellid) && !IsEffectInSpell(buffs[buffs_i].spellid, SE_DivineAura)) {
+					Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
+					if (caster && caster == this) {
+						auto slot = caster->FindMemmedSpellBySpellID(buffs[buffs_i].spellid);
+						if (slot > -1 && buffs[buffs_i].ticsremaining == 1 && caster->IsLinkedSpellReuseTimerReady(spells[buffs[buffs_i].spellid].timer_id)) {
+							auto tt = spells[buffs[buffs_i].spellid].target_type;
+							if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
+								caster->ApplyBardPulse(buffs[buffs_i].spellid, this, (EQ::spells::CastingSlot)slot);
+							}
+						}
+					}
+				}
+
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
-					--buffs[buffs_i].ticsremaining;
+					bool suspended = IsGroupSuspendableBuff(buffs[buffs_i].spellid, buffs[buffs_i]);
+
+					if (!suspended || !RuleB(Custom, SuspendGroupBuffs)) {
+						--buffs[buffs_i].ticsremaining;
+					} else {
+						buffs[buffs_i].UpdateClient = true;
+
+						if (GetOwner() && GetOwner()->focused_pet_id == GetID()) {
+							update_pet_owner = true;
+						}
+
+						auto clients = entity_list.GetClientList();
+						for (auto c : clients) {
+							if (c.second->GetTarget() && c.second->GetTarget()->GetID() == GetID()) {
+								SendBuffsToClient(c.second);
+							}
+						}
+					}
 
 					if (buffs[buffs_i].ticsremaining < 0) {
 						LogSpells("Buff [{}] in slot [{}] has expired. Fading", buffs[buffs_i].spellid, buffs_i);
@@ -3875,18 +3949,20 @@ void Mob::BuffProcess()
 				}
 			}
 
-			if(IsClient())
-			{
-				if(buffs[buffs_i].UpdateClient == true)
-				{
-					CastToClient()->SendBuffDurationPacket(buffs[buffs_i], buffs_i);
-					// Hack to get UF to play nicer, RoF seems fine without it
-					if (CastToClient()->ClientVersion() == EQ::versions::ClientVersion::UF && buffs[buffs_i].hit_number > 0)
-						CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
-					buffs[buffs_i].UpdateClient = false;
-				}
-			}
+            if(IsClient())
+            {
+                if(buffs[buffs_i].UpdateClient == true)
+                {
+                    CastToClient()->SendBuffDurationPacket(buffs[buffs_i], buffs_i);
+                    CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
+                    buffs[buffs_i].UpdateClient = false;
+                }
+            }
 		}
+	}
+
+	if (update_pet_owner) {
+		SendPetBuffsToClient();
 	}
 }
 

@@ -983,6 +983,19 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+
+		// Make a guess as to if an AA should be suspended or not
+		if (RuleB(Custom, SuspendGroupBuffs) && IsValidSpell(aai->spell)) {
+			auto spell = spells[aai->spell];
+			auto duration = CalcBuffDuration_formula(GetLevel(), spell.buff_duration_formula, spell.buff_duration) * 6;
+			if (duration >= aai->spell_refresh) {
+				suspendable_aa.insert(aai->spell);
+				LogDebugDetail("Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
+			} else {
+				LogDebugDetail("NOT Adding [{}] to suspendable AA: [{}], [{}]", aai->spell, duration, aai->spell_refresh);
+			}
+		}
+
 }
 
 void Client::SendAlternateAdvancementStats() {
