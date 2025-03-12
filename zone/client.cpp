@@ -4805,8 +4805,6 @@ void Client::GrantNameChange() {
 	DataBucket::SetData(k);
 
 	InvokeChangeNameWindow(true);
-
-	return true;
 }
 
 bool Client::IsPetNameChangeAllowed() {
