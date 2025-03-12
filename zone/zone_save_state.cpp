@@ -307,7 +307,9 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 		n->AssignWaypoints(s.grid, s.current_waypoint);
 	}
 
+	n->SetResumedFromZoneSuspend(false);
 	LoadLootStateData(zone, n, s.loot_data);
+	n->SetResumedFromZoneSuspend(true);
 	LoadNPCEntityVariables(n, s.entity_variables);
 	LoadNPCBuffs(n, s.buffs);
 
@@ -453,6 +455,7 @@ bool Zone::LoadZoneState(
 
 		if (spawn_time_left == 0) {
 			new_spawn->SetCurrentNPCID(s.npc_id);
+			new_spawn->SetResumedFromZoneSuspend(true);
 		}
 
 		spawn2_list.Insert(new_spawn);
@@ -484,6 +487,8 @@ bool Zone::LoadZoneState(
 			glm::vec4(s.x, s.y, s.z, s.heading),
 			GravityBehavior::Water
 		);
+
+		npc->SetResumedFromZoneSuspend(true);
 
 		entity_list.AddNPC(npc, true, true);
 
