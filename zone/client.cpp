@@ -4797,17 +4797,14 @@ void Client::InvokeChangeNameWindow(bool immediate) {
 	safe_delete(outapp);
 }
 
-bool Client::GrantNameChange() {
-	if (IsNameChangeAllowed() && !RuleB(Character, AlwaysAllowNameChange)) {
-		return false; // this was already allowed
-	}
+void Client::GrantNameChange() {
 
 	auto k = GetScopedBucketKeys();
 	k.key = "NameChangesAllowed";
 	k.value = "allowed"; // potentially put a timestamp here
 	DataBucket::SetData(k);
 
-	InvokeChangeNameWindow(false);
+	InvokeChangeNameWindow(true);
 
 	return true;
 }

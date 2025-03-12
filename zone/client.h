@@ -335,7 +335,7 @@ public:
 	bool IsNameChangeAllowed();
 	void InvokeChangeNameWindow(bool immediate = true);
 	bool ClearNameChange();
-	bool GrantNameChange();
+	void GrantNameChange();
 	bool IsPetNameChangeAllowed();
 	void GrantPetNameChange();
 	void ClearPetNameChange();

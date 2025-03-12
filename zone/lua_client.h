@@ -609,7 +609,7 @@ public:
 	void ShowZoneShardMenu();
 	void GrantPetNameChange();
 
-	bool GrantNameChange();
+	void GrantNameChange();
 	bool IsNameChangeAllowed();
 	bool ClearNameChange();
 

@@ -3496,10 +3496,10 @@ std::string Lua_Client::GetAccountBucketRemaining(std::string bucket_name)
 	return self->GetAccountBucketRemaining(bucket_name);
 }
 
-bool Lua_Client::GrantNameChange()
+void Lua_Client::GrantNameChange()
 {
-	Lua_Safe_Call_Bool();
-	return self->GrantNameChange();
+	Lua_Safe_Call_Void();
+	self->GrantNameChange();
 }
 
 bool Lua_Client::IsNameChangeAllowed()

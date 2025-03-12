@@ -1296,7 +1296,7 @@ void QuestManager::rename(std::string name) {
 			initiator->Message(
 				Chat::White,
 				fmt::format(
-					"Successfully renamed to {}, kicking to character select.",
+					"Successfully renamed to {}.",
 					name
 				).c_str()
 			);
