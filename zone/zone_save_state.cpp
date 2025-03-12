@@ -45,9 +45,31 @@ struct LootStateData {
 	}
 };
 
+// IsZoneStateValid checks if the zone state is valid
+// if these fields are all empty or zero value for an entire zone state, it's considered invalid
+inline bool IsZoneStateValid(std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawns)
+{
+	return std::any_of(
+		spawns.begin(), spawns.end(), [](const auto &s) {
+			return !(
+				s.hp == 0 &&
+				s.mana == 0 &&
+				s.endurance == 0 &&
+				s.loot_data.empty() &&
+				s.entity_variables.empty() &&
+				s.buffs.empty()
+			);
+		}
+	);
+}
+
 inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
 {
 	LootStateData l{};
+
+	if (loot_data.empty()) {
+		return;
+	}
 
 	if (!Strings::IsValidJson(loot_data)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", npc->GetNPCTypeID());
@@ -82,7 +104,7 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 
 		// dynamically added via AddItem
 		if (e.lootdrop_id == 0) {
-			npc->AddItem(e.item_id, e.charges);
+			npc->AddItem(e.item_id, e.charges, true);
 			continue;
 		}
 
@@ -181,6 +203,10 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 		return;
 	}
 
+	if (entity_variables.empty()) {
+		return;
+	}
+
 	if (!Strings::IsValidJson(entity_variables)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
 		return;
@@ -207,6 +233,10 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 {
 	if (!RuleB(Zone, StateSaveBuffs)) {
+		return;
+	}
+
+	if (buffs.empty()) {
 		return;
 	}
 
@@ -283,7 +313,9 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 		n->AssignWaypoints(s.grid, s.current_waypoint);
 	}
 
+	n->SetResumedFromZoneSuspend(false);
 	LoadLootStateData(zone, n, s.loot_data);
+	n->SetResumedFromZoneSuspend(true);
 	LoadNPCEntityVariables(n, s.entity_variables);
 	LoadNPCBuffs(n, s.buffs);
 
@@ -375,6 +407,12 @@ bool Zone::LoadZoneState(
 		return false;
 	}
 
+	if (!IsZoneStateValid(spawn_states)) {
+		LogZoneState("Invalid zone state data for zone [{}]", GetShortName());
+		ClearZoneState(zoneid, zone->GetInstanceID());
+		return false;
+	}
+
 	std::vector<uint32_t> lootdrop_ids = GetLootdropIds(spawn_states);
 	zone->LoadLootDrops(lootdrop_ids);
 
@@ -428,6 +466,7 @@ bool Zone::LoadZoneState(
 
 		if (spawn_time_left == 0) {
 			new_spawn->SetCurrentNPCID(s.npc_id);
+			new_spawn->SetResumedFromZoneSuspend(true);
 		}
 
 		spawn2_list.Insert(new_spawn);
@@ -459,6 +498,8 @@ bool Zone::LoadZoneState(
 			glm::vec4(s.x, s.y, s.z, s.heading),
 			GravityBehavior::Water
 		);
+
+		npc->SetResumedFromZoneSuspend(true);
 
 		entity_list.AddNPC(npc, true, true);
 
@@ -654,17 +695,8 @@ void Zone::SaveZoneState()
 		)
 	);
 
-	bool found_valid_spawn = false;
-	for (auto &s: spawns) {
-		if (s.hp == 0 && s.mana == 0 && s.endurance == 0 && s.loot_data.empty() && s.entity_variables.empty() && s.buffs.empty()) {
-			continue;
-		}
-		found_valid_spawn = true;
-		break;
-	}
-
-	if (!found_valid_spawn) {
-		LogZoneState("All data was found to be invalid, potentially zone was saved before it had a chance to fully boot");
+	if (!IsZoneStateValid(spawns)) {
+		LogInfo("No valid zone state data to save");
 		return;
 	}
 

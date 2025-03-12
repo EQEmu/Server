@@ -303,6 +303,14 @@ bool IpUtil::IsPortInUse(const std::string& ip, int port) {
 		return true; // Assume in use on failure
 	}
 
+#ifdef _WIN32
+	int opt = 1;
+	setsockopt(sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (char*)&opt, sizeof(opt)); // Windows-specific
+#else
+	int opt = 1;
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)); // Linux/macOS
+#endif
+
 	sockaddr_in addr{};
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);

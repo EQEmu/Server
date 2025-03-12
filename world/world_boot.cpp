@@ -27,6 +27,7 @@
 #include "../common/zone_store.h"
 #include "../common/path_manager.h"
 #include "../common/database/database_update.h"
+#include "../common/repositories/zone_state_spawns_repository.h"
 
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
@@ -411,6 +412,11 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	LogInfo("Cleaning up instance corpses");
 	database.CleanupInstanceCorpses();
+
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		ZoneStateSpawnsRepository::PurgeInvalidZoneStates(database);
+		ZoneStateSpawnsRepository::PurgeOldZoneStates(database);
+	}
 
 	return true;
 }

@@ -378,6 +378,7 @@ RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross z
 RULE_BOOL(Zone, ZoneShardQuestMenuOnly, false, "Set to true if you only want quests to show the zone shard menu")
 RULE_BOOL(Zone, StateSaveEntityVariables, true, "Set to true if you want buffs to be saved on shutdown")
 RULE_BOOL(Zone, StateSaveBuffs, true, "Set to true if you want buffs to be saved on shutdown")
+RULE_INT(Zone, StateSaveClearDays, 7, "Clears state save data older than this many days")
 RULE_BOOL(Zone, StateSavingOnShutdown, true, "Set to true if you want zones to save state on shutdown (npcs, corpses, loot, entity variables, buffs etc.)")
 RULE_CATEGORY_END()
 

@@ -279,7 +279,9 @@ bool Spawn2::Process() {
 
 		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), GravityBehavior::Water);
 
-		if(!disable_loot) {
+		if (!disable_loot) {
+			npc->SetResumedFromZoneSuspend(IsResumedFromZoneSuspend());
+
 			npc->AddLootTable();
 			if (npc->DropsGlobalLoot()) {
 				npc->CheckGlobalLootTables();

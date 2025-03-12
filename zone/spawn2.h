@@ -75,6 +75,8 @@ public:
 	int16 GetConditionMinValue() const { return condition_min_value; }
 	int16 GetAnimation () { return anim; }
 	inline NPC *GetNPC() const { return npcthis; }
+	inline bool IsResumedFromZoneSuspend() const { return m_resumed_from_zone_suspend; }
+	inline void SetResumedFromZoneSuspend(bool resumed) { m_resumed_from_zone_suspend = resumed; }
 
 	bool    LootEnabled() const { return !disable_loot; }
 protected:
@@ -103,6 +105,7 @@ private:
 	bool IsDespawned;
 	uint32  killcount;
 	bool    disable_loot;
+	bool m_resumed_from_zone_suspend = false;
 };
 
 class SpawnCondition {
