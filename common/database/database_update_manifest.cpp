@@ -6980,7 +6980,7 @@ ALTER TABLE data_buckets ADD INDEX idx_bot_expires (bot_id, expires);
 	},
 	ManifestEntry{
 		.version = 9313,
-		.description = "2025_03_11_data_bucket_indexes.sql",
+		.description = "2025_03_11_zone_state_spawns.sql",
 		.check = "SHOW INDEX FROM zone_state_spawns",
 		.condition = "missing",
 		.match = "idx_zone_instance",
@@ -6989,6 +6989,17 @@ ALTER TABLE zone_state_spawns ADD INDEX idx_zone_instance (zone_id, instance_id)
 ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
 )",
 	.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9314,
+		.description = "2025_03_12_zone_state_spawns_one_time_truncate.sql",
+		.check = "SELECT * FROM db_version WHERE version >= 9314",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+TRUNCATE TABLE zone_state_spawns;
+)",
+		.content_schema_update = false
 	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

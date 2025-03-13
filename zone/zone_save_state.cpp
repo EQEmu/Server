@@ -45,9 +45,39 @@ struct LootStateData {
 	}
 };
 
+// IsZoneStateValid checks if the zone state is valid
+// if these fields are all empty or zero value for an entire zone state, it's considered invalid
+inline bool IsZoneStateValid(std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawns)
+{
+	return std::any_of(
+		spawns.begin(), spawns.end(), [](const auto &s) {
+			return !(
+				s.hp == 0 &&
+				s.mana == 0 &&
+				s.endurance == 0 &&
+				s.loot_data.empty() &&
+				s.entity_variables.empty() &&
+				s.buffs.empty()
+			);
+		}
+	);
+}
+
 inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
 {
 	LootStateData l{};
+
+	// in the event that should never happen, we roll loot from the NPC's table
+	if (loot_data.empty()) {
+		LogZoneState("No loot state data found for NPC [{}], re-rolling", npc->GetNPCTypeID());
+		npc->ClearLootItems();
+		npc->AddLootTable();
+		if (npc->DropsGlobalLoot()) {
+			npc->CheckGlobalLootTables();
+		}
+
+		return;
+	}
 
 	if (!Strings::IsValidJson(loot_data)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", npc->GetNPCTypeID());
@@ -66,6 +96,11 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 		return;
 	}
 
+	// reset
+	npc->RemoveLootCash();
+	npc->ClearLootItems();
+
+	// add loot
 	npc->AddLootCash(l.copper, l.silver, l.gold, l.platinum);
 
 	for (auto &e: l.entries) {
@@ -76,7 +111,7 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 
 		// dynamically added via AddItem
 		if (e.lootdrop_id == 0) {
-			npc->AddItem(e.item_id, e.charges);
+			npc->AddItem(e.item_id, e.charges, true);
 			continue;
 		}
 
@@ -175,6 +210,10 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 		return;
 	}
 
+	if (entity_variables.empty()) {
+		return;
+	}
+
 	if (!Strings::IsValidJson(entity_variables)) {
 		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
 		return;
@@ -201,6 +240,10 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 inline void LoadNPCBuffs(NPC *n, const std::string &buffs)
 {
 	if (!RuleB(Zone, StateSaveBuffs)) {
+		return;
+	}
+
+	if (buffs.empty()) {
 		return;
 	}
 
@@ -233,6 +276,10 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 
 	for (auto &s: spawn_states) {
 		if (s.loot_data.empty()) {
+			continue;
+		}
+
+		if (!Strings::IsValidJson(s.loot_data)) {
 			continue;
 		}
 
@@ -273,7 +320,9 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 		n->AssignWaypoints(s.grid, s.current_waypoint);
 	}
 
+	n->SetResumedFromZoneSuspend(false);
 	LoadLootStateData(zone, n, s.loot_data);
+	n->SetResumedFromZoneSuspend(true);
 	LoadNPCEntityVariables(n, s.entity_variables);
 	LoadNPCBuffs(n, s.buffs);
 
@@ -348,13 +397,23 @@ bool Zone::LoadZoneState(
 	auto spawn_states = ZoneStateSpawnsRepository::GetWhere(
 		database,
 		fmt::format(
-			"zone_id = {} AND instance_id = {}",
+			"zone_id = {} AND instance_id = {} ORDER BY spawn2_id",
 			zoneid,
 			zone->GetInstanceID()
 		)
 	);
 
 	LogInfo("Loading zone state spawns for zone [{}] spawns [{}]", GetShortName(), spawn_states.size());
+
+	if (spawn_states.empty()) {
+		return false;
+	}
+
+	if (!IsZoneStateValid(spawn_states)) {
+		LogZoneState("Invalid zone state data for zone [{}]", GetShortName());
+		ClearZoneState(zoneid, zone->GetInstanceID());
+		return false;
+	}
 
 	std::vector<uint32_t> lootdrop_ids = GetLootdropIds(spawn_states);
 	zone->LoadLootDrops(lootdrop_ids);
@@ -409,16 +468,14 @@ bool Zone::LoadZoneState(
 
 		if (spawn_time_left == 0) {
 			new_spawn->SetCurrentNPCID(s.npc_id);
+			new_spawn->SetResumedFromZoneSuspend(true);
 		}
 
 		spawn2_list.Insert(new_spawn);
 		new_spawn->Process();
 		auto n = new_spawn->GetNPC();
 		if (n) {
-			n->ClearLootItems();
-			if (s.grid > 0) {
-				n->AssignWaypoints(s.grid, s.current_waypoint);
-			}
+			LoadNPCState(zone, n, s);
 		}
 	}
 
@@ -440,6 +497,13 @@ bool Zone::LoadZoneState(
 			glm::vec4(s.x, s.y, s.z, s.heading),
 			GravityBehavior::Water
 		);
+
+		npc->SetResumedFromZoneSuspend(true);
+
+		// tag as corpse before we add to entity list to prevent quest triggers
+		if (s.is_corpse) {
+			npc->SetQueuedToCorpse();
+		}
 
 		entity_list.AddNPC(npc, true, true);
 
@@ -476,44 +540,43 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 		variables[k] = n->GetEntityVariable(k);
 	}
 
-	try {
-		std::ostringstream os;
-		{
-			cereal::JSONOutputArchiveSingleLine archive(os);
-			archive(variables);
+	if (!variables.empty()) {
+		try {
+			std::ostringstream os;
+			{
+				cereal::JSONOutputArchiveSingleLine archive(os);
+				archive(variables);
+			}
+			s.entity_variables = os.str();
 		}
-		s.entity_variables = os.str();
-	}
-	catch (const std::exception &e) {
-		LogZoneState("Failed to serialize entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
-		return;
+		catch (const std::exception &e) {
+			LogZoneState("Failed to serialize entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
+		}
 	}
 
 	// buffs
 	auto buffs = n->GetBuffs();
-	if (!buffs) {
-		return;
-	}
-
-	std::vector<Buffs_Struct> valid_buffs;
-
-	for (int index = 0; index < n->GetMaxBuffSlots(); index++) {
-		if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
-			valid_buffs.push_back(buffs[index]);
+	if (buffs) {
+		std::vector<Buffs_Struct> valid_buffs;
+		for (int index = 0; index < n->GetMaxBuffSlots(); index++) {
+			if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
+				valid_buffs.push_back(buffs[index]);
+			}
 		}
-	}
 
-	try {
-		std::ostringstream os = std::ostringstream();
-		{
-			cereal::JSONOutputArchiveSingleLine archive(os);
-			archive(cereal::make_nvp("buffs", valid_buffs));
+		if (!valid_buffs.empty()) {
+			try {
+				std::ostringstream os = std::ostringstream();
+				{
+					cereal::JSONOutputArchiveSingleLine archive(os);
+					archive(cereal::make_nvp("buffs", valid_buffs));
+				}
+				s.buffs = os.str();
+			}
+			catch (const std::exception &e) {
+				LogZoneState("Failed to serialize buffs for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
+			}
 		}
-		s.buffs = os.str();
-	}
-	catch (const std::exception &e) {
-		LogZoneState("Failed to serialize buffs for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
-		return;
 	}
 
 	// rest
@@ -568,7 +631,7 @@ void Zone::SaveZoneState()
 		iterator.Advance();
 	}
 
-	// npcs that are not in the spawn2 list
+	// npc's that are not in the spawn2 list
 	for (auto &n: entity_list.GetNPCList()) {
 		// everything below here is dynamically spawned
 		bool ignore_npcs =
@@ -635,6 +698,11 @@ void Zone::SaveZoneState()
 			GetInstanceID()
 		)
 	);
+
+	if (!IsZoneStateValid(spawns)) {
+		LogInfo("No valid zone state data to save");
+		return;
+	}
 
 	ZoneStateSpawnsRepository::InsertMany(database, spawns);
 

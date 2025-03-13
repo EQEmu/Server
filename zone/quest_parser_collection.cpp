@@ -435,10 +435,8 @@ int QuestParserCollection::EventNPC(
 	std::vector<std::any>* extra_pointers
 )
 {
-	if (npc->IsResumedFromZoneSuspend()) {
-		if (event_id == EVENT_DEATH_COMPLETE || event_id == EVENT_DEATH) {
-			return 0;
-		}
+	if (npc->IsResumedFromZoneSuspend() && npc->IsQueuedForCorpse()) {
+		return 0;
 	}
 
 	const int local_return   = EventNPCLocal(event_id, npc, init, data, extra_data, extra_pointers);

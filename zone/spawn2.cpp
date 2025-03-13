@@ -277,6 +277,9 @@ bool Spawn2::Process() {
 
 		npcthis = npc;
 
+		npc->SetResumedFromZoneSuspend(m_resumed_from_zone_suspend);
+		m_resumed_from_zone_suspend = false;
+
 		npc->AddLootTable();
 		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();

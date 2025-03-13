@@ -626,6 +626,9 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 
 	if (npc->GetLoottableID() > 0) {
 		menu_commands += "[" + Saylink::Silent("#npcloot show", "Loot") + "] ";
+		if (npc) {
+			menu_commands += fmt::format(" Item(s) ({}) ", npc->GetLootItems().size());
+		}
 	}
 
 	if (npc->IsProximitySet()) {
