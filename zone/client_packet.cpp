@@ -7653,7 +7653,11 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 						log.char_id  = CharacterID();
 						log.guild_id = GuildID();
 						log.item_id  = inst->GetID();
-						log.quantity = inst->GetCharges();
+						log.quantity = 1;
+						if (inst->GetCharges() > 0 || inst->IsStackable() || inst->GetItem()->MaxCharges > 0) {
+							log.quantity = inst->GetCharges();
+						}
+
 						if (inst->IsAugmented()) {
 							auto augs          = inst->GetAugmentIDs();
 							log.aug_slot_one   = augs.at(0);
@@ -7737,7 +7741,11 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			item.guild_id    = GuildID();
 			item.area        = GuildBankDepositArea;
 			item.item_id     = cursor_item->ID;
-			item.quantity    = cursor_item_inst->GetCharges();
+			item.quantity    = 1;
+			if (cursor_item_inst->GetCharges() > 0 || cursor_item_inst->IsStackable() || cursor_item->MaxCharges > 0) {
+				item.quantity = cursor_item_inst->GetCharges();
+			}
+
 			item.donator     = GetCleanName();
 			item.permissions = GuildBankBankerOnly;
 			if (cursor_item_inst->IsAugmented()) {
@@ -7821,12 +7829,9 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				break;
 			}
 
-			if (inst->GetCharges() > 0) {
+			gbwis->Quantity = 1;
+			if (inst->GetCharges() > 0 || inst->IsStackable() || inst->GetItem()->MaxCharges > 0) {
 				gbwis->Quantity = inst->GetCharges();
-			}
-
-			if (inst->GetCharges() < 0) {
-				gbwis->Quantity = 1;
 			}
 
 			PushItemOnCursor(*inst.get());
