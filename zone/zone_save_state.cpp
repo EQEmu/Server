@@ -68,7 +68,7 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 	LootStateData l{};
 
 	// in the event that should never happen, we roll loot from the NPC's table
-	if (loot_data.empty()) {
+	if (loot_data.empty() && zone->GetInstanceVersion() != RuleI(Custom, EventInstanceVersion)) {
 		LogZoneState("No loot state data found for NPC [{}], re-rolling", npc->GetNPCTypeID());
 		npc->ClearLootItems();
 		npc->AddLootTable();
