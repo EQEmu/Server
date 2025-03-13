@@ -96,6 +96,11 @@ inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data
 		return;
 	}
 
+	// reset
+	npc->RemoveLootCash();
+	npc->ClearLootItems();
+
+	// add loot
 	npc->AddLootCash(l.copper, l.silver, l.gold, l.platinum);
 
 	for (auto &e: l.entries) {
@@ -484,6 +489,7 @@ bool Zone::LoadZoneState(
 			if (s.grid > 0) {
 				n->AssignWaypoints(s.grid, s.current_waypoint);
 			}
+			LoadNPCState(zone, n, s);
 		}
 	}
 
