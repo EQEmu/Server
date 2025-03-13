@@ -208,12 +208,6 @@ ZoneRepository::Zone *ZoneStore::GetZone(uint32 zone_id, int version)
 		}
 	}
 
-	if (RuleI(Custom, EventInstanceVersion)) {
-		if (version == RuleI(Custom, EventInstanceVersion)) {
-			version = RuleI(Custom, EventInstanceTemplateVersion);
-		}
-	}
-
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
 			return &z;
@@ -270,12 +264,6 @@ ZoneRepository::Zone *ZoneStore::GetZoneWithFallback(uint32 zone_id, int version
 	if (RuleI(Custom, FarmingInstanceVersion)) {
 		if (version == RuleI(Custom, FarmingInstanceVersion)) {
 			version = RuleI(Custom, FarmingInstanceTemplateVersion);
-		}
-	}
-
-	if (RuleI(Custom, EventInstanceVersion)) {
-		if (version == RuleI(Custom, EventInstanceVersion)) {
-			version = RuleI(Custom, EventInstanceTemplateVersion);
 		}
 	}
 
