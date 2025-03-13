@@ -2146,10 +2146,6 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 		version = RuleI(Custom, FarmingInstanceTemplateVersion);
 	}
 
-	if (RuleI(Custom, EventInstanceVersion) == version) {
-		version = RuleI(Custom, EventInstanceTemplateVersion);
-	}
-
 	auto zone_points = ZonePointsRepository::GetWhere(content_db,
 		fmt::format(
 			"zone = '{}' AND (version = {} OR version = -1) {} ORDER BY number",

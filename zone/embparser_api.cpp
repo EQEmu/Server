@@ -1501,11 +1501,6 @@ void Perl__UpdateSpawnTimer(uint32 id, uint32 new_time)
 	quest_manager.UpdateSpawnTimer(id, new_time);
 }
 
-void Perl__UpdateSpawnTimer(uint32 id, uint32 new_time, uint32 instance_id)
-{
-	quest_manager.UpdateSpawnTimer(id, new_time, instance_id);
-}
-
 void Perl__MerchantSetItem(uint32 npc_id, uint32 item_id)
 {
 	quest_manager.MerchantSetItem(npc_id, item_id);
@@ -6947,8 +6942,7 @@ void perl_register_quest()
 	package.add("unique_spawn", (int(*)(int, int, int, float, float, float, float))&Perl__unique_spawn);
 	package.add("unscribespells", &Perl__unscribespells);
 	package.add("untraindiscs", &Perl__untraindiscs);
-	package.add("updatespawntimer", (void(*)(uint32, uint32))&Perl__UpdateSpawnTimer);
-	package.add("updatespawntimer", (void(*)(uint32, uint32, uint32))&Perl__UpdateSpawnTimer);
+	package.add("updatespawntimer", &Perl__UpdateSpawnTimer);
 	package.add("updatetaskactivity", (void(*)(int, int))&Perl__updatetaskactivity);
 	package.add("updatetaskactivity", (void(*)(int, int, int))&Perl__updatetaskactivity);
 	package.add("updatetaskactivity", (void(*)(int, int, int, bool))&Perl__updatetaskactivity);

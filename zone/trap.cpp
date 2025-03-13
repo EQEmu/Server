@@ -171,12 +171,9 @@ void Trap::Trigger(Mob* trigger)
 					auto randomOffset = glm::vec4(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
 					auto new_npc = new NPC(tmp, nullptr, spawnPosition, GravityBehavior::Flying);
-					if(zone->GetInstanceVersion() != RuleI(Custom, EventInstanceVersion)) {
-						new_npc->AddLootTable();
-						if (new_npc->DropsGlobalLoot()) {
-							new_npc->CheckGlobalLootTables();
-						}
-					}
+					new_npc->AddLootTable();
+					if (new_npc->DropsGlobalLoot())
+						new_npc->CheckGlobalLootTables();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
 				}
@@ -199,12 +196,9 @@ void Trap::Trigger(Mob* trigger)
 					auto randomOffset = glm::vec4(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
 					auto new_npc = new NPC(tmp, nullptr, spawnPosition, GravityBehavior::Flying);
-					if(zone->GetInstanceVersion() != RuleI(Custom, EventInstanceVersion)) {
-						new_npc->AddLootTable();
-						if (new_npc->DropsGlobalLoot()) {
-							new_npc->CheckGlobalLootTables();
-						}
-					}
+					new_npc->AddLootTable();
+					if (new_npc->DropsGlobalLoot())
+						new_npc->CheckGlobalLootTables();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
 				}
@@ -464,10 +458,6 @@ bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_
 
 	if (RuleI(Custom, FarmingInstanceVersion) == instance_version) {
 		instance_version = RuleI(Custom, FarmingInstanceTemplateVersion);
-	}
-
-	if (RuleI(Custom, EventInstanceVersion) == instance_version) {
-		instance_version = RuleI(Custom, EventInstanceTemplateVersion);
 	}
 
 	const auto& l = TrapsRepository::GetWhere(

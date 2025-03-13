@@ -33,7 +33,7 @@ public:
 		float x, float y, float z, float heading,
 		uint32 respawn, uint32 variance,
 		uint32 timeleft = 0, uint32 grid = 0, bool in_path_when_zone_idle=false,
-		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding, bool in_disable_loot=false);
+		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding);
 	~Spawn2();
 
 	void	LoadGrid(int start_wp = 0);
@@ -78,7 +78,6 @@ public:
 	inline bool IsResumedFromZoneSuspend() const { return m_resumed_from_zone_suspend; }
 	inline void SetResumedFromZoneSuspend(bool resumed) { m_resumed_from_zone_suspend = resumed; }
 
-	bool    LootEnabled() const { return !disable_loot; }
 protected:
 	friend class Zone;
 	Timer	timer;
@@ -104,7 +103,6 @@ private:
 	EmuAppearance anim;
 	bool IsDespawned;
 	uint32  killcount;
-	bool    disable_loot;
 	bool m_resumed_from_zone_suspend = false;
 };
 

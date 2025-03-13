@@ -878,10 +878,6 @@ void lua_update_spawn_timer(uint32 id, uint32 new_time) {
 	quest_manager.UpdateSpawnTimer(id, new_time);
 }
 
-void lua_update_spawn_timer(uint32 id, uint32 new_time, uint32 instance_id) {
-	quest_manager.UpdateSpawnTimer(id, new_time, instance_id);
-}
-
 void lua_merchant_set_item(uint32 npc_id, uint32 item_id) {
 	quest_manager.MerchantSetItem(npc_id, item_id);
 }
@@ -6032,8 +6028,7 @@ luabind::scope lua_register_general() {
 		luabind::def("count_item", &lua_count_item),
 		luabind::def("remove_item", (void(*)(uint32))&lua_remove_item),
 		luabind::def("remove_item", (void(*)(uint32,uint32))&lua_remove_item),
-		luabind::def("update_spawn_timer", (void(*)(uint32,uint32))&lua_update_spawn_timer),
-		luabind::def("update_spawn_timer", (void(*)(uint32,uint32,uint32))&lua_update_spawn_timer),
+		luabind::def("update_spawn_timer", &lua_update_spawn_timer),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_count_item", &lua_merchant_count_item),
@@ -6973,8 +6968,7 @@ luabind::scope lua_register_events() {
 			luabind::value("entity_variable_set", static_cast<int>(EVENT_ENTITY_VARIABLE_SET)),
 			luabind::value("entity_variable_update", static_cast<int>(EVENT_ENTITY_VARIABLE_UPDATE)),
 			luabind::value("aa_loss", static_cast<int>(EVENT_AA_LOSS)),
-			luabind::value("read", static_cast<int>(EVENT_READ_ITEM)),
-			luabind::value("prepare_spawn", static_cast<int>(EVENT_PREPARE_SPAWN))
+			luabind::value("read", static_cast<int>(EVENT_READ_ITEM))
 		)];
 }
 
