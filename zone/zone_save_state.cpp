@@ -508,6 +508,11 @@ bool Zone::LoadZoneState(
 
 		npc->SetResumedFromZoneSuspend(true);
 
+		// tag as corpse before we add to entity list to prevent quest triggers
+		if (s.is_corpse) {
+			npc->SetQueuedToCorpse();
+		}
+
 		entity_list.AddNPC(npc, true, true);
 
 		LoadNPCState(zone, npc, s);
