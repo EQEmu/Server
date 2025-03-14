@@ -312,9 +312,15 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 
 inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 {
-	n->SetHP(s.hp);
-	n->SetMana(s.mana);
-	n->SetEndurance(s.endurance);
+	if (s.hp > 0) {
+		n->SetHP(s.hp);
+	}
+	if (s.mana > 0) {
+		n->SetMana(s.mana);
+	}
+	if (s.endurance > 0) {
+		n->SetEndurance(s.endurance);
+	}
 
 	if (s.grid) {
 		n->AssignWaypoints(s.grid, s.current_waypoint);

@@ -1,3 +1,10 @@
+## [23.3.4] 3/14/2025
+
+### Fixes
+
+* Add check for simultaneous direct vendor and parcel Trader/Buyer Purchase ([#4778](https://github.com/EQEmu/Server/pull/4778)) @neckkola 2025-03-14
+* Fix for rare circumstance where NPC's would have 0 health on restore @Akkadius
+
 ## [23.3.3] 3/13/2025
 
 ### Database
