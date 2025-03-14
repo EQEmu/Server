@@ -22,6 +22,7 @@
 
 #include "client.h"
 #include "entity.h"
+#include "quest_parser_collection.h"
 #include "spawn2.h"
 #include "spawngroup.h"
 #include "worldserver.h"
@@ -79,7 +80,7 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	float in_x, float in_y, float in_z, float in_heading,
 	uint32 respawn, uint32 variance, uint32 timeleft, uint32 grid,
 	bool in_path_when_zone_idle, uint16 in_cond_id, int16 in_min_value,
-	bool in_enabled, EmuAppearance anim)
+	bool in_enabled, EmuAppearance anim, bool in_disable_private_loot, bool in_disable_global_loot)
 : timer(100000), killcount(0)
 {
 	spawn2_id = in_spawn2_id;
@@ -98,6 +99,8 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	enabled = in_enabled;
 	this->anim = anim;
 	currentnpcid = 0;
+	disable_private_loot = in_disable_private_loot;
+	disable_global_loot = in_disable_global_loot;
 
 	if(timeleft == 0xFFFFFFFF) {
 		//special disable timeleft
@@ -297,9 +300,13 @@ bool Spawn2::Process() {
 		npc->SetResumedFromZoneSuspend(m_resumed_from_zone_suspend);
 		m_resumed_from_zone_suspend = false;
 
-		npc->AddLootTable();
-		if (npc->DropsGlobalLoot()) {
-			npc->CheckGlobalLootTables();
+		if(!disable_private_loot) {
+			npc->AddLootTable();
+		}
+		if(!disable_global_loot) {
+			if (npc->DropsGlobalLoot()) {
+				npc->CheckGlobalLootTables();
+			}
 		}
 
 		npc->SetSpawnGroupId(spawngroup_id_);
@@ -480,6 +487,9 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	timeval tv{};
 	gettimeofday(&tv, nullptr);
 
+	auto quest_config = zone->GetQuestConfig();
+	version = quest_config->template_version;
+
 	/* Bulk Load NPC Types Data into the cache */
 	content_db.LoadNPCTypesData(0, true);
 
@@ -559,6 +569,22 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 			}
 		}
 
+		if (quest_config->max_respawn_seconds > 0) {
+			if (s.respawntime >= quest_config->max_respawn_seconds) {
+				spawn_enabled = false;
+			}
+		}
+
+		if (quest_config->disable_respawns) {
+			s.respawntime = 604800000; // arbitrary large number
+			s.variance = 0;
+		}
+
+		if (quest_config->default_respawn_seconds > 0) {
+			s.respawntime = quest_config->default_respawn_seconds;
+			s.variance = 0;
+		}
+
 		auto new_spawn = new Spawn2(
 			s.id,
 			s.spawngroupID,
@@ -574,7 +600,9 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 			s._condition,
 			(int16) s.cond_value,
 			spawn_enabled,
-			(EmuAppearance) s.animation
+			(EmuAppearance) s.animation,
+			quest_config->disable_private_loot,
+			quest_config->disable_global_loot
 		);
 
 		spawn2_list.Insert(new_spawn);

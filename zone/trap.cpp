@@ -171,9 +171,14 @@ void Trap::Trigger(Mob* trigger)
 					auto randomOffset = glm::vec4(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
 					auto new_npc = new NPC(tmp, nullptr, spawnPosition, GravityBehavior::Flying);
-					new_npc->AddLootTable();
-					if (new_npc->DropsGlobalLoot())
-						new_npc->CheckGlobalLootTables();
+					if(zone->GetQuestConfig()->disable_private_loot == false) {
+						new_npc->AddLootTable();
+					}
+					if(zone->GetQuestConfig()->disable_global_loot == false) {
+						if (new_npc->DropsGlobalLoot()) {
+							new_npc->CheckGlobalLootTables();
+						}
+					}
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
 				}
@@ -196,9 +201,14 @@ void Trap::Trigger(Mob* trigger)
 					auto randomOffset = glm::vec4(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
 					auto new_npc = new NPC(tmp, nullptr, spawnPosition, GravityBehavior::Flying);
-					new_npc->AddLootTable();
-					if (new_npc->DropsGlobalLoot())
-						new_npc->CheckGlobalLootTables();
+					if(zone->GetQuestConfig()->disable_private_loot == false) {
+						new_npc->AddLootTable();
+					}
+					if(zone->GetQuestConfig()->disable_global_loot == false) {
+						if (new_npc->DropsGlobalLoot()) {
+							new_npc->CheckGlobalLootTables();
+						}
+					}
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
 				}
@@ -452,6 +462,9 @@ void EntityList::ClearTrapPointers()
 
 bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_version)
 {
+	auto quest_config = zone->GetQuestConfig();
+	instance_version = quest_config->template_version;
+
 	const auto& l = TrapsRepository::GetWhere(
 		*this,
 		fmt::format(

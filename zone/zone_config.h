@@ -19,6 +19,7 @@
 #define __ZoneConfig_H
 
 #include "../common/eqemu_config.h"
+#include "../common/json/json.hpp"
 
 class ZoneConfig : public EQEmuConfig {
 	public:
@@ -59,5 +60,22 @@ class ZoneConfig : public EQEmuConfig {
 
 	void Dump() const;
 };
+
+namespace QuestZoneConfig {
+	struct Config {
+		std::string description = "";
+		int template_version = 0;
+		bool disable_respawns = false;
+		int max_respawn_seconds = 0;
+		int default_respawn_seconds = 0;
+		bool disable_global_loot = false;
+		bool disable_private_loot = false;
+	};
+
+	Config Default(uint32 instance_version);
+
+	// https://github.com/nlohmann/json?tab=readme-ov-file#basic-usage
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Config, description, template_version, disable_respawns, max_respawn_seconds, default_respawn_seconds, disable_global_loot, disable_private_loot)
+}
 
 #endif

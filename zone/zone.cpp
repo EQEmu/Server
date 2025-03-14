@@ -49,7 +49,6 @@
 #include "water_map.h"
 #include "worldserver.h"
 #include "zone.h"
-#include "zone_config.h"
 #include "mob_movement_manager.h"
 #include "npc_scale_manager.h"
 #include "../common/data_verification.h"
@@ -117,6 +116,12 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 		std::cerr << "Zone->Init failed" << std::endl;
 		worldserver.SetZoneData(0);
 		return false;
+	}
+
+	if(zone->GetInstanceVersion() != zone->GetQuestConfig()->template_version) {
+		zone_store.RegisterVersionAlias(iZoneID, zone->GetInstanceVersion(), zone->GetQuestConfig()->template_version);
+		int check = zone_store.GetVersionAlias(iZoneID, zone->GetInstanceVersion());
+		LogInfo("Zone version alias found: {} -> {}", zone->GetInstanceVersion(), check);
 	}
 
 	std::string tmp;
@@ -981,7 +986,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 {
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
-	instanceversion = database.GetInstanceVersion(instanceid);
 	pers_instance = false;
 	zonemap = nullptr;
 	watermap = nullptr;
@@ -1015,6 +1019,9 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	if (database.GetServerType() == 1) {
 		pvpzone = true;
 	}
+
+	instanceversion = database.GetInstanceVersion(instanceid);
+	quest_config = parse->LoadZoneConfig(instanceversion, in_short_name);
 
 	auto z = GetZoneVersionWithFallback(ZoneID(short_name), instanceversion);
 	if (z) {
@@ -2132,6 +2139,9 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 	zone_point_list->Clear();
 	zone->numzonepoints = 0;
 	zone->virtual_zone_point_list.clear();
+
+	auto zone_config = zone->GetQuestConfig();
+	version = zone_config->template_version;
 
 	auto zone_points = ZonePointsRepository::GetWhere(content_db,
 		fmt::format(

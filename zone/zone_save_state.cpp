@@ -28,13 +28,16 @@ inline bool IsZoneStateValid(std::vector<ZoneStateSpawnsRepository::ZoneStateSpa
 inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
 {
 	LootStateData l{};
+	auto quest_config = zone->GetQuestConfig();
 
 	// in the event that should never happen, we roll loot from the NPC's table
 	if (loot_data.empty()) {
 		LogZoneState("No loot state data found for NPC [{}], re-rolling", npc->GetNPCTypeID());
 		npc->ClearLootItems();
-		npc->AddLootTable();
-		if (npc->DropsGlobalLoot()) {
+		if (!quest_config->disable_private_loot) {
+			npc->AddLootTable();
+		}
+		if (!quest_config->disable_global_loot && npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();
 		}
 
@@ -412,6 +415,8 @@ bool Zone::LoadZoneState(
 	std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
 )
 {
+	auto quest_config = zone->GetQuestConfig();
+
 	auto spawn_states = ZoneStateSpawnsRepository::GetWhere(
 		database,
 		fmt::format(
@@ -512,7 +517,9 @@ bool Zone::LoadZoneState(
 			s.condition_id,
 			s.condition_min_value,
 			(s.enabled && spawn_enabled),
-			(EmuAppearance) s.anim
+			(EmuAppearance) s.anim,
+			quest_config->disable_private_loot,
+			quest_config->disable_global_loot
 		);
 
 		new_spawn->SetStoredLocation(glm::vec4(s.x, s.y, s.z, s.heading));

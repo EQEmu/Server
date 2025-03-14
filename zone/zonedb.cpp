@@ -1667,6 +1667,10 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 	std::string filter = fmt::format("id = {}", npc_type_id);
 
+	auto version = zone->GetInstanceVersion();
+	auto quest_config = zone->GetQuestConfig();
+	version = quest_config->template_version;
+
 	if (bulk_load) {
 		LogDebug("Performing bulk NPC Types load");
 
@@ -1679,7 +1683,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 				)
 			),
 			zone->GetShortName(),
-			zone->GetInstanceVersion()
+			version
 		);
 	}
 
