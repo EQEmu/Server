@@ -24,17 +24,13 @@ void SetName(Client *c, const Seperator *sep)
 				).c_str()
 			);
 
-			c->Message(Chat::White, "Sending player to char select.");
-
-			t->Kick("Name was changed");
-
 			return;
 		}
 
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Unable to rename {}. Check that the new name '{}' isn't already taken.",
+				"Unable to rename {}. Check that the new name '{}' isn't already taken (Including Pet Names), or isn't invalid",
 				old_name,
 				new_name
 			).c_str()
