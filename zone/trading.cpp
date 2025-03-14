@@ -1894,6 +1894,13 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 					break;
 				}
 
+				if (sell_line.purchase_method == BarterInBazaar && buyer->IsThereACustomer()) {
+					auto customer = entity_list.GetClientByID(buyer->GetCustomerID());
+					if (customer) {
+						customer->CancelBuyerTradeWindow();
+					}
+				}
+
 				if (!DoBarterBuyerChecks(sell_line)) {
 					return;
 				};
@@ -3824,4 +3831,19 @@ bool Client::DoBarterSellerChecks(BuyerLineSellItem_Struct &sell_line)
 	}
 
 	return true;
+}
+
+void Client::CancelBuyerTradeWindow()
+{
+	auto end_session = new EQApplicationPacket(OP_Barter, sizeof(BuyerRemoveItemFromMerchantWindow_Struct));
+	auto data        = reinterpret_cast<BuyerRemoveItemFromMerchantWindow_Struct *>(end_session->pBuffer);
+	data->action     = Barter_BuyerInspectBegin;
+
+	FastQueuePacket(&end_session);
+}
+
+void Client::CancelTraderTradeWindow()
+{
+	auto end_session = new EQApplicationPacket(OP_ShopEnd);
+	FastQueuePacket(&end_session);
 }
