@@ -195,6 +195,8 @@ uint32 ZoneStore::GetZoneIDByLongName(const std::string& zone_long_name)
  */
 ZoneRepository::Zone *ZoneStore::GetZone(uint32 zone_id, int version)
 {
+	version = GetVersionAlias(zone_id, version);
+
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
 			return &z;
@@ -242,6 +244,8 @@ const std::vector<ZoneRepository::Zone> &ZoneStore::GetZones() const
 // gets zone data by using explicit version and falling back to version 0 if not found
 ZoneRepository::Zone *ZoneStore::GetZoneWithFallback(uint32 zone_id, int version)
 {
+	version = GetVersionAlias(zone_id, version);
+
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
 			return &z;
@@ -728,4 +732,22 @@ uint32 ZoneStore::GetZoneSecondsBeforeIdle(uint32 zone_id, int version)
 {
 	const auto& z = GetZoneVersionWithFallback(zone_id, version);
 	return z ? z->seconds_before_idle : 60;
+}
+
+void ZoneStore::RegisterVersionAlias(uint32 zone_id, int old_version, int new_version)
+{
+	if (!m_zone_alt_versions.contains(zone_id)) {
+		m_zone_alt_versions[zone_id] = std::map<int, int>();
+	}
+
+	m_zone_alt_versions[zone_id][old_version] = new_version;
+}
+
+int ZoneStore::GetVersionAlias(uint32 zone_id, int old_version)
+{
+	if (m_zone_alt_versions.contains(zone_id) && m_zone_alt_versions[zone_id].contains(old_version)) {
+		return m_zone_alt_versions[zone_id][old_version];
+	}
+
+	return old_version;
 }
