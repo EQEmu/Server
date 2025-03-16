@@ -253,6 +253,37 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 	RunTest("State spawns are where we moved them to after restore", true, all_moved);
 
+	// test entity variables
+	std::map<std::string, std::string> test_entity_variables = {
+		{"test_entity_variable",  "test_entity_value"},
+		{"test_entity_variable2", "test_entity_value2"}
+	};
+
+	// Set entity variables
+	for (const auto &[key, value]: test_entity_variables) {
+		for (auto &e: entity_list.GetNPCList()) {
+			e.second->SetEntityVariable(key, value);
+		}
+	}
+
+	zone->Shutdown();
+	SetupStateZone();
+
+	// Check entity variables
+	bool missing_entity_variables = false;
+	for (const auto &[key, value]: test_entity_variables) {
+		for (auto &e: entity_list.GetNPCList()) {
+			if (e.second->GetEntityVariable(key) != value) {
+				missing_entity_variables = true;
+				break;
+			}
+		}
+	}
+
+	RunTest("Entity variables persist after shutdown/bootup", false, missing_entity_variables);
+
+
+
 
 
 //	zone->Repop();
