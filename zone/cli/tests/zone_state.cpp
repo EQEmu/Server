@@ -1,20 +1,24 @@
 extern Zone *zone;
 
-inline void ClearState() {
+inline void ClearState()
+{
 	ZoneStateSpawnsRepository::DeleteWhere(database, "zone_id = 32 and instance_id = 0");
 }
 
-inline std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> GetStateSpawns() {
+inline std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> GetStateSpawns()
+{
 	return ZoneStateSpawnsRepository::GetWhere(database, "zone_id = 32 and instance_id = 0");
 }
 
-inline void PrintZoneNpcs() {
-	for (auto &npc : entity_list.GetNPCList()) {
+inline void PrintZoneNpcs()
+{
+	for (auto &npc: entity_list.GetNPCList()) {
 		std::cout << npc.second->GetNPCTypeID() << " " << npc.second->GetCleanName() << std::endl;
 	}
 }
 
-inline void SetupStateZone() {
+inline void SetupStateZone()
+{
 	SetupZone("soldungb");
 	zone->Process();
 	// depop the zone controller
@@ -22,9 +26,10 @@ inline void SetupStateZone() {
 	entity_list.MobProcess(); // process the depop
 }
 
-inline int GetStateSpawnSpawn2Count() {
-	int count = 0;
-	for (auto &e : GetStateSpawns()) {
+inline int GetStateSpawnSpawn2Count()
+{
+	int       count = 0;
+	for (auto &e: GetStateSpawns()) {
 		if (e.spawn2_id > 0) {
 			count++;
 		}
@@ -62,11 +67,15 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 
 	entries = GetStateSpawns().size();
-	RunTest(fmt::format("State is the same after shutdown/bootup (2nd time), entries ({})", entries), true, entries > 0);
+	RunTest(
+		fmt::format("State is the same after shutdown/bootup (2nd time), entries ({})", entries),
+		true,
+		entries > 0
+	);
 
 	// need to compare the state spawns to the actual spawns
-	bool all_exist = true;
-	for (auto &state_spawn : GetStateSpawns()) {
+	bool      all_exist = true;
+	for (auto &state_spawn: GetStateSpawns()) {
 		auto npc = entity_list.GetNPCByNPCTypeID(state_spawn.npc_id);
 		if (!npc) {
 			all_exist = false;
@@ -89,37 +98,49 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 		GetStateSpawns().size() == entity_list.GetNPCList().size()
 	);
 
+	std::vector<std::pair<std::string, std::string>> test_variables = {
+		{"test_variable",  "test_value"},
+		{"test_variable2", "test_value2"}
+	};
 
-	zone->SetVariable("test_variable", "test_value");
-	zone->SetVariable("test_variable2", "test_value2");
+	// Set variables
+	for (const auto &[key, value]: test_variables) {
+		zone->SetVariable(key, value);
+		RunTest("Zone variable (" + key + ") set", value, zone->GetVariable(key));
+	}
 
-	RunTest("Zone variable set (test_variable)", "test_value", zone->GetVariable("test_variable"));
-	RunTest("Zone variable set (test_variable2)", "test_value2", zone->GetVariable("test_variable2"));
+	// Simulate shutdown and restart twice
+	for (int i = 1; i <= 2; ++i) {
+		zone->Shutdown();
+		SetupStateZone();
 
-	zone->Shutdown();
-	SetupStateZone();
+		for (const auto &[key, value]: test_variables) {
+			RunTest(
+				"Zone variable (" + key + ") persists after shutdown/bootup (" + std::to_string(i) + ")",
+				value,
+				zone->GetVariable(key)
+			);
+		}
+	}
 
-	RunTest("Zone variable persists after shutdown/bootup", "test_value", zone->GetVariable("test_variable"));
-	RunTest("Zone variable persists after shutdown/bootup", "test_value2", zone->GetVariable("test_variable2"));
-
-	zone->Shutdown();
-	SetupStateZone();
-
-	RunTest("Zone variable persists after shutdown/bootup (2nd time)", "test_value", zone->GetVariable("test_variable"));
-	RunTest("Zone variable persists after shutdown/bootup (2nd time)", "test_value2", zone->GetVariable("test_variable2"));
-
+	// Delete one variable
 	zone->DeleteVariable("test_variable");
 
 	RunTest("Zone variable (test_variable) delete is empty", "", zone->GetVariable("test_variable"));
-	RunTest("Zone variable (test_variable2) delete second one still exists", "test_value2", zone->GetVariable("test_variable2"));
+	RunTest(
+		"Zone variable (test_variable2) delete second one still exists",
+		"test_value2",
+		zone->GetVariable("test_variable2")
+	);
 
+	// Final shutdown and restart check
 	zone->Shutdown();
 	SetupStateZone();
 
-	RunTest("Zone variable (test_variable) still deleted after shutdown/bootup", "", zone->GetVariable("test_variable"));
-	RunTest("Zone variable (test_variable2) still exists after shutdown/bootup", "test_value2", zone->GetVariable("test_variable2"));
-
-	
+	for (const auto &[key, value]: test_variables) {
+		std::string expected_value = (key == "test_variable") ? "" : value;
+		RunTest("Zone variable (" + key + ") after shutdown/bootup", expected_value, zone->GetVariable(key));
+	}
 
 
 //	zone->Repop();
