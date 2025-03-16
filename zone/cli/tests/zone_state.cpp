@@ -206,8 +206,52 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 		}
 	}
 
-	RunTest("HP Restore | Ensure state matches data on the NPC object", 0, (int) hp_mismatch.size());
-	RunTest("Mana Restore | Ensure state matches data on the NPC object", 0, (int) mana_mismatch.size());
+	RunTest("HP Restore | Ensure restored state matches data on the NPC object", 0, (int) hp_mismatch.size());
+	RunTest("Mana Restore | Ensure restored state matches data on the NPC object", 0, (int) mana_mismatch.size());
+
+	// Test that state spawns are where we moved them to if we moved them, move them slightly in a predictable way so
+	// we can test for it after restore
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (!npc) {
+			continue;
+		}
+
+		// set all to -870	-1394	106.58 (nagafen area)
+		npc->SetPosition(-870, -1394, 106);
+	}
+
+	zone->Shutdown();
+	SetupStateZone();
+
+	bool all_moved = true;
+	for (auto &e: entity_list.GetNPCList()) {
+		for (auto &state: GetStateSpawns()) {
+			if (e.second->GetNPCTypeID() != state.npc_id) {
+				continue;
+			}
+
+			auto npc = e.second;
+			if (npc->GetSpawnGroupId() != state.spawngroup_id && npc->GetSpawn()->GetID() != state.spawn2_id) {
+				continue;
+			}
+
+			// z gets auto adjusted to the ground, so we dont need to check it
+			if (e.second->GetX() != state.x || e.second->GetY() != state.y) {
+				std::cout << "NPC ID: " << e.second->GetNPCTypeID() << " X: " << e.second->GetX() << " Y: " << e.second->GetY() << std::endl;
+				std::cout << "State ID " << state.npc_id << " X: " << state.x << " Y: " << state.y << std::endl;
+				std::cout << "-----------------------------------\n";
+				all_moved = false;
+				break;
+			} else {
+//				std::cout << "NPC ID: " << e.second->GetNPCTypeID() << " X: " << e.second->GetX() << " Y: " << e.second->GetY() << std::endl;
+//				std::cout << "State ID " << state.npc_id << " X: " << state.x << " Y: " << state.y << std::endl;
+//				std::cout << "-----------------------------------\n";
+			}
+		}
+	}
+
+	RunTest("State spawns are where we moved them to after restore", true, all_moved);
 
 
 
