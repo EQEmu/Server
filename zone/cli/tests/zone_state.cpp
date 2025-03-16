@@ -1,5 +1,7 @@
 extern Zone *zone;
 
+#include "../../common/repositories/npc_types_repository.h"
+
 inline void ClearState()
 {
 	ZoneStateSpawnsRepository::DeleteWhere(database, "zone_id = 32 and instance_id = 0");
@@ -141,6 +143,72 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 		std::string expected_value = (key == "test_variable") ? "" : value;
 		RunTest("Zone variable (" + key + ") after shutdown/bootup", expected_value, zone->GetVariable(key));
 	}
+
+	std::vector<uint32_t> ids = {};
+	for (auto &npc: entity_list.GetNPCList()) {
+		ids.push_back(npc.second->GetNPCTypeID());
+	}
+
+	auto npc_types = NpcTypesRepository::GetWhere(database, fmt::format(" id IN ({})", Strings::Join(ids, ",")));
+
+	// validate that hp / mana / end equal that of what's on the npc types row for all rows
+	// dont run tests in the loop, just collect the data
+	std::vector<std::pair<uint32_t, bool>> hp_mismatch = {};
+	std::vector<std::pair<uint32_t, bool>> mana_mismatch = {};
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		for (auto &npc_type: npc_types) {
+			if (npc->GetNPCTypeID() != npc_type.id) {
+				continue;
+			}
+
+			// we need to make sure the values are not 0 because of auto scaling
+			if (npc->GetHP() != npc_type.hp && npc_type.hp > 0) {
+				hp_mismatch.emplace_back(npc->GetNPCTypeID(), true);
+			}
+			if (npc->GetMana() != npc_type.mana && npc_type.mana > 0) {
+				mana_mismatch.emplace_back(npc->GetNPCTypeID(), true);
+			}
+		}
+	}
+
+	RunTest("HP Restore | Ensure default state matches data in npc_types row", 0, (int) hp_mismatch.size());
+	RunTest("Mana Restore | Ensure default state matches data in npc_types row", 0, (int) mana_mismatch.size());
+
+	// do damage to NPC's and make sure they restore to their original values
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		npc->SetHP(1);
+		npc->SetMana(1);
+	}
+
+	zone->Shutdown();
+	SetupStateZone();
+
+	hp_mismatch.clear();
+	mana_mismatch.clear();
+
+	// compare state values versus what's on the entity list NPC object
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		for (auto &state: GetStateSpawns()) {
+			if (npc->GetNPCTypeID() != state.npc_id) {
+				continue;
+			}
+
+			// we need to make sure the values are not 0 because of auto scaling
+			if (npc->GetHP() != state.hp && state.hp > 0) {
+				hp_mismatch.emplace_back(npc->GetNPCTypeID(), true);
+			}
+			if (npc->GetMana() != state.mana && state.mana > 0) {
+				mana_mismatch.emplace_back(npc->GetNPCTypeID(), true);
+			}
+		}
+	}
+
+	RunTest("HP Restore | Ensure state matches data on the NPC object", 0, (int) hp_mismatch.size());
+	RunTest("Mana Restore | Ensure state matches data on the NPC object", 0, (int) mana_mismatch.size());
+
 
 
 //	zone->Repop();
