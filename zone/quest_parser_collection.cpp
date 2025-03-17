@@ -940,7 +940,7 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 	Strings::FindReplace(npc_name, "`", "-");
 
 	const std::string& npc_id_and_name = fmt::format(
-		"{}_({})",
+		"{}_{}",
 		npc_name,
 		npc_id
 	);
