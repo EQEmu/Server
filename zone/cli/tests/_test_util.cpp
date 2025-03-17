@@ -43,6 +43,8 @@ extern Zone *zone;
 inline void SetupZone(std::string zone_short_name, uint32 instance_id = 0) {
 	LogSys.SilenceConsoleLogging();
 
+	LogSys.log_settings[Logs::ZoneState].log_to_console = std::getenv("DEBUG") ? 3 : 0;
+
 	// boot shell zone for testing
 	Zone::Bootup(ZoneID(zone_short_name), 0, false);
 	zone->StopShutdownTimer();

@@ -1,6 +1,7 @@
 extern Zone *zone;
 
 #include "../../common/repositories/npc_types_repository.h"
+#include "../../corpse.h"
 
 inline void ClearState()
 {
@@ -39,6 +40,41 @@ inline int GetStateSpawnSpawn2Count()
 	return count;
 }
 
+inline uint32_t SeedLootTable()
+{
+	const std::string table_name = "zone_state_test";
+
+	auto entries = LoottableRepository::GetWhere(database, fmt::format("name = '{}'", table_name));
+	if (!entries.empty()) {
+		zone->LoadLootTable(entries[0].id);
+		return entries[0].id;
+	}
+
+	// seed the loot table
+	auto loot_table = LoottableRepository::NewEntity();
+	loot_table.name = table_name;
+	auto inserted = LoottableRepository::InsertOne(database, loot_table);
+
+	auto loot_drop = LootdropRepository::NewEntity();
+	loot_drop.name = table_name;
+	auto inserted_loot_drop = LootdropRepository::InsertOne(database, loot_drop);
+
+	auto loot_table_entries = LoottableEntriesRepository::NewEntity();
+	loot_table_entries.lootdrop_id  = inserted_loot_drop.id;
+	loot_table_entries.loottable_id = inserted.id;
+	LoottableEntriesRepository::InsertOne(database, loot_table_entries);
+
+	auto loot_drop_entries = LootdropEntriesRepository::NewEntity();
+	loot_drop_entries.lootdrop_id = inserted_loot_drop.id;
+	loot_drop_entries.item_id     = 11621; // cloak of flames
+	loot_drop_entries.chance      = 100;
+	LootdropEntriesRepository::InsertOne(database, loot_drop_entries);
+
+	zone->LoadLootTable(inserted.id);
+
+	return inserted.id;
+}
+
 void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
 	if (cmd[{"-h", "--help"}]) {
@@ -47,6 +83,7 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 	ClearState(); // clean slate
 	SetupStateZone();
+	zone->Repop(true);
 
 	std::cout << "===========================================\n";
 	std::cout << "⚙\uFE0F> Running Zone State Tests... (soldungb)\n";
@@ -66,7 +103,6 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 	zone->Shutdown();
 	SetupStateZone();
-
 
 	entries = GetStateSpawns().size();
 	RunTest(
@@ -224,7 +260,8 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	zone->Shutdown();
 	SetupStateZone();
 
-	bool      all_moved = true;
+	bool all_moved = true;
+
 	for (auto &e: entity_list.GetNPCList()) {
 		for (auto &state: GetStateSpawns()) {
 			if (e.second->GetNPCTypeID() != state.npc_id) {
@@ -313,6 +350,136 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	}
 
 	RunTest("Buffs persist after shutdown/bootup", false, missing_buffs);
+
+	// loot
+	uint32_t table_id = SeedLootTable();
+
+	for (auto &e: entity_list.GetNPCList()) {
+		e.second->ClearLootItems();
+		e.second->SetResumedFromZoneSuspend(false);
+		e.second->AddLootTable(table_id);
+		e.second->SetResumedFromZoneSuspend(true);
+	}
+
+	bool missing_loot = false;
+
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (npc->GetNPCTypeID() == 0) {
+			continue;
+		}
+
+		// cloak of flames
+		if (npc->CountItem(11621) == 0) {
+			missing_loot = true;
+			break;
+		}
+	}
+
+	RunTest("Loot | Cloak of Flames added to all NPC's via Loottable before shutdown", false, missing_loot);
+
+	zone->Shutdown();
+	SetupStateZone();
+
+	missing_loot = false;
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (npc->GetNPCTypeID() == 0) {
+			continue;
+		}
+
+		// cloak of flames
+		if (npc->CountItem(11621) == 0) {
+			missing_loot = true;
+			break;
+		}
+	}
+
+	RunTest("Loot | Cloak of Flames added to all NPC's via Loottable after shutdown/bootup", false, missing_loot);
+
+	// make sure no duplicates are added
+	bool duplicates = false;
+
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (npc->GetNPCTypeID() == 0) {
+			continue;
+		}
+
+		if (npc->CountItem(11621) > 1) {
+			duplicates = true;
+			break;
+		}
+	}
+
+	RunTest("Loot | No duplicates added when adding item to NPC", false, duplicates);
+
+	// kill all NPC's
+	std::vector<NPC*> npcs_to_kill;
+
+	// Collect NPCs first
+	for (const auto& e : entity_list.GetNPCList()) {
+		if (e.second) {
+			npcs_to_kill.push_back(e.second);
+		}
+	}
+
+	// Now safely process them
+	for (auto* npc : npcs_to_kill) {
+		npc->SetQueuedToCorpse();
+		npc->Death(npc, npc->GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
+	}
+
+	// make sure all of the corpses have "Cloak of Flames"
+	bool missing_loot_corpse = false;
+	for (auto &e: entity_list.GetCorpseList()) {
+		auto corpse = e.second;
+		if (corpse->GetNPCTypeID() == 0) {
+			continue;
+		}
+
+		if (corpse->CountItem(11621) == 0) {
+			missing_loot_corpse = true;
+			break;
+		}
+	}
+
+	RunTest("Loot | Cloak of Flames added to all Corpse's via Loottable before shutdown/bootup", false, missing_loot_corpse);
+
+	zone->Shutdown();
+	SetupStateZone();
+
+	missing_loot_corpse = false;
+	for (auto &e: entity_list.GetCorpseList()) {
+		auto corpse = e.second;
+		if (corpse->GetNPCTypeID() == 0) {
+			continue;
+		}
+
+		if (corpse->CountItem(11621) == 0) {
+			missing_loot_corpse = true;
+			break;
+		}
+	}
+
+	RunTest("Loot | Cloak of Flames added to all Corpse's via Loottable after shutdown/bootup", false, missing_loot_corpse);
+
+	// make sure no duplicates are added
+	bool duplicates_corpse = false;
+	for (auto &e: entity_list.GetCorpseList()) {
+		auto corpse = e.second;
+		if (corpse->GetNPCTypeID() == 0) {
+			continue;
+		}
+
+		if (corpse->CountItem(11621) > 1) {
+			duplicates_corpse = true;
+			break;
+		}
+	}
+
+	RunTest("Loot | No duplicates added when adding item to Corpse", false, duplicates_corpse);
+
 
 //	ClearState();
 

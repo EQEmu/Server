@@ -3288,5 +3288,4 @@ bool Zone::VariableExists(const std::string& variable_name)
 	return m_zone_variables.find(variable_name) != m_zone_variables.end();
 }
 
-#include "zone_save_state.cpp"
 #include "zone_loot.cpp"
