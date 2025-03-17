@@ -2321,8 +2321,15 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 
 					switch (GetPetOriginClass()) {
 						case Class::Enchanter:
-							tmp_lastname = fmt::format("{}'s Animation", owner->GetCleanName());
+						{
+							if (IsCharmSpell(GetPetSpellID())) {
+								tmp_lastname = fmt::format("{}'s Thrall", owner->GetCleanName());
+							} else {
+								tmp_lastname = fmt::format("{}'s Animation", owner->GetCleanName());
+							}
+
 							break;
+						}
 						case Class::Magician:
 							tmp_lastname = fmt::format("{}'s Elemental Minion", owner->GetCleanName());
 							break;

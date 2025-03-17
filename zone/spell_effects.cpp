@@ -4273,6 +4273,9 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		case SE_Charm: {
 			if (IsClient() || IsPetOwnerClient()) {
 				int resist_mod = 10 * (buff.ticsinitial - buff.ticsremaining); // 10 resist mod for each tic of this buff endured.
+				if (IsPet()) {
+					resist_mod += itembonuses.MR - spellbonuses.MR;
+				}
 				float resist_check = ResistSpell(spells[buff.spellid].resist_type, buff.spellid, caster, true, spells[buff.spellid].resist_difficulty - resist_mod);
 
 				if (resist_check == 100) {
@@ -4679,6 +4682,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					CastToNPC()->ModifyStatsOnCharm(true);
 				}
 
+				strn0cpy(lastname, "", sizeof(lastname));
+
 				SendAppearancePacket(AppearanceType::Pet, 0, true, true);
 				Mob* owner = GetOwner();
 				SetOwnerID(0);
@@ -4694,6 +4699,18 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				{
 					owner->RemovePet(this);
 					owner->ValidatePetList();
+
+					auto outapp = new EQApplicationPacket;
+					auto outapp2 = new EQApplicationPacket;
+
+					CreateDespawnPacket(outapp, false);
+					CreateSpawnPacket(outapp2, this);
+
+					owner->CastToClient()->QueuePacket(outapp);
+					owner->CastToClient()->QueuePacket(outapp2);
+
+					safe_delete(outapp);
+					safe_delete(outapp2);
 				}
 
 				SetOwnerID(0);
