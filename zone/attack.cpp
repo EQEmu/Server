@@ -3300,9 +3300,9 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		if (other->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
 			if (other->GetOwner()->GetFeigned() || other->GetOwner()->HasAnInvisibilityEffect()) {
 				other->SetSpecialAbility(SpecialAbility::BeingAggroImmunity, 0);
+			} else {
+				AddToHateList(other->GetOwner(), 1, 1, iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
 			}
-
-			AddToHateList(other->GetOwner(), 1, 1, iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
 		} else {
 			if (!other->GetSpecialAbility(SpecialAbility::AllowedToTank) && (!other->GetOwner()->GetFeigned() && !other->GetOwner()->HasAnInvisibilityEffect())) {
 				other->SetSpecialAbility(SpecialAbility::BeingAggroImmunity, 1);
