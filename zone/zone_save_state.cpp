@@ -63,9 +63,39 @@ inline bool IsZoneStateValid(std::vector<ZoneStateSpawnsRepository::ZoneStateSpa
 	);
 }
 
+// IsZoneStateValid checks if the zone state is valid
+// if these fields are all empty or zero value for an entire zone state, it's considered invalid
+inline bool IsZoneStateValid(std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> &spawns)
+{
+	return std::any_of(
+		spawns.begin(), spawns.end(), [](const auto &s) {
+			return !(
+				s.hp == 0 &&
+				s.mana == 0 &&
+				s.endurance == 0 &&
+				s.loot_data.empty() &&
+				s.entity_variables.empty() &&
+				s.buffs.empty()
+			);
+		}
+	);
+}
+
 inline void LoadLootStateData(Zone *zone, NPC *npc, const std::string &loot_data)
 {
 	LootStateData l{};
+
+	// in the event that should never happen, we roll loot from the NPC's table
+	if (loot_data.empty()) {
+		LogZoneState("No loot state data found for NPC [{}], re-rolling", npc->GetNPCTypeID());
+		npc->ClearLootItems();
+		npc->AddLootTable();
+		if (npc->DropsGlobalLoot()) {
+			npc->CheckGlobalLootTables();
+		}
+
+		return;
+	}
 
 	// in the event that should never happen, we roll loot from the NPC's table
 	if (loot_data.empty()) {
@@ -492,9 +522,6 @@ bool Zone::LoadZoneState(
 		new_spawn->Process();
 		auto n = new_spawn->GetNPC();
 		if (n) {
-			if (s.grid > 0) {
-				n->AssignWaypoints(s.grid, s.current_waypoint);
-			}
 			LoadNPCState(zone, n, s);
 		}
 	}

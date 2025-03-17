@@ -3786,6 +3786,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				return;
 			}
 
+			if (trader_pc->IsThereACustomer()) {
+				auto customer = entity_list.GetClientByID(trader_pc->GetCustomerID());
+				if (customer) {
+					customer->CancelTraderTradeWindow();
+				}
+			}
+
 			auto item_sn = Strings::ToUnsignedBigInt(in->trader_buy_struct.serial_number);
 			auto outapp  = std::make_unique<EQApplicationPacket>(OP_Trader, sizeof(TraderBuy_Struct));
 			auto data    = (TraderBuy_Struct *) outapp->pBuffer;
@@ -3980,6 +3987,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						in->sub_action = Barter_BuyerCouldNotBeFound;
 						worldserver.SendPacket(pack);
 						return;
+					}
+					if (buyer->IsThereACustomer()) {
+						auto customer = entity_list.GetClientByID(buyer->GetCustomerID());
+						if (customer) {
+							customer->CancelBuyerTradeWindow();
+						}
 					}
 
 					BuyerLineSellItem_Struct sell_line{};

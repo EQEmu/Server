@@ -1,3 +1,28 @@
+## [23.3.4] 3/14/2025
+
+### Fixes
+
+* Add check for simultaneous direct vendor and parcel Trader/Buyer Purchase ([#4778](https://github.com/EQEmu/Server/pull/4778)) @neckkola 2025-03-14
+* Fix for rare circumstance where NPC's would have 0 health on restore @Akkadius
+
+## [23.3.3] 3/13/2025
+
+### Database
+
+* Add indexes for data_buckets and zone_state_spawns ([#4771](https://github.com/EQEmu/Server/pull/4771)) @Akkadius 2025-03-11
+
+### Fixes
+
+* Update GuildBank to correctly handle items with charges equal to zero ([#4774](https://github.com/EQEmu/Server/pull/4774)) @neckkola 2025-03-13
+
+### Networking
+
+* Fix "port in use" error ([#4772](https://github.com/EQEmu/Server/pull/4772)) @Akkadius 2025-03-12
+
+### Zone
+
+* Zone State Improvements Part 3 ([#4773](https://github.com/EQEmu/Server/pull/4773)) @Akkadius 2025-03-13
+
 ## [23.3.2] 3/11/2025
 
 ### DynamicZones

@@ -3557,8 +3557,16 @@ void Bot::Depop() {
 	entity_list.RemoveFromHateLists(this);
 	RemoveAllAuras();
 
-	if (HasPet())
-		GetPet()->Depop();
+	Mob* bot_pet = GetPet();
+	
+	if (bot_pet) {
+		if (bot_pet->Charmed()) {
+			bot_pet->BuffFadeByEffect(SE_Charm);
+		}
+		else {
+			bot_pet->Depop();
+		}
+	}
 
 	_botOwner = nullptr;
 	_botOwnerCharacterID = 0;
