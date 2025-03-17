@@ -5960,8 +5960,8 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 		}
 	}
 
-	if (RuleI(Combat, MaximumPetMitigationEffect) && defender->GetOwner() && defender->GetOwner()->IsPet()) {
-		damage_bonus_mod = EQ::ClampLower(damage_bonus_mod, static_cast<int64>(-RuleI(Combat, MaximumPetMitigationEffect)));
+	if (RuleI(Combat, MaximumPetMitigationEffect) && defender->GetOwner() && defender->GetOwner()->IsClient()) {
+		damage_bonus_mod = EQ::ClampLower(damage_bonus_mod, -RuleI(Combat, MaximumPetMitigationEffect));
 	}
 
 	damage += damage * damage_bonus_mod / 100;
