@@ -285,8 +285,6 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	RunTest("Entity variables persist after shutdown/bootup", false, missing_entity_variables);
 
 	// buffs
-
-	// Set buffs
 	for (auto &e: entity_list.GetNPCList()) {
 		auto npc = e.second;
 		if (npc->GetNPCTypeID() == 0) {
@@ -316,6 +314,7 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 	RunTest("Buffs persist after shutdown/bootup", false, missing_buffs);
 
+//	ClearState();
 
 //	zone->Repop();
 //	entries = GetStateSpawns().size();
