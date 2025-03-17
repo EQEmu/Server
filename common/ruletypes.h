@@ -663,6 +663,7 @@ RULE_INT(Combat, RoundKickBaseDamage, 5, "Round Kick base damage, default is 5")
 RULE_INT(Combat, ThrowingBaseDamage, 0, "Throwing base damage, default is 0")
 RULE_INT(Combat, TigerClawBaseDamage, 4, "Tiger Claw base damage, default is 4")
 RULE_INT(Combat, SummonImmunitySeconds, 0, "Seconds to make players immune to being summoned after being summoned; useful to prevent ping-pong summons")
+RULE_INT(Combat, MaximumPetMitigationEffect, 0, "Maximum amount which pets can have their damage reduced by SE_MeleeMitigation. Set to 0 to disable.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
