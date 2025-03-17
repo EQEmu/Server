@@ -310,7 +310,7 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 		auto decay_time = s.decay_in_seconds * 1000;
 		if (decay_time > 0) {
 			n->SetQueuedToCorpse();
-			n->SetCorpseDecayTime(decay_time);
+			entity_list.RestoreCorpse(n, decay_time);
 		}
 		else {
 			n->Depop();

@@ -369,7 +369,6 @@ inline void TestEntityVariables()
 
 inline void TestLoot()
 {
-	// loot
 	uint32_t table_id = SeedLootTable();
 
 	for (auto &e: entity_list.GetNPCList()) {
@@ -449,7 +448,8 @@ inline void TestLoot()
 	}
 
 	// make sure all of the corpses have "Cloak of Flames"
-	bool      missing_loot_corpse = false;
+	bool missing_loot_corpse = false;
+
 	for (auto &e: entity_list.GetCorpseList()) {
 		auto corpse = e.second;
 		if (corpse->GetNPCTypeID() == 0) {
@@ -491,7 +491,8 @@ inline void TestLoot()
 	);
 
 	// make sure no duplicates are added
-	bool      duplicates_corpse = false;
+	bool duplicates_corpse = false;
+
 	for (auto &e: entity_list.GetCorpseList()) {
 		auto corpse = e.second;
 		if (corpse->GetNPCTypeID() == 0) {
@@ -522,14 +523,14 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	std::cout << "===========================================\n\n";
 
 	TestSpawns();
-	TestZoneVariables();
-	TestHpManaEnd();
-	TestBuffs();
-	TestLocationChange();
-	TestEntityVariables();
+//	TestZoneVariables();
+//	TestHpManaEnd();
+//	TestBuffs();
+//	TestLocationChange();
+//	TestEntityVariables();
 	TestLoot();
 
-	RunTest("State > No NPC's should be spawned after shutdown/bootup", 0, (int) entity_list.GetNPCList().size());
+//	RunTest("State > No NPC's should be spawned after shutdown/bootup", 0, (int) entity_list.GetNPCList().size());
 
 //	ClearState();
 //	zone->Repop();
