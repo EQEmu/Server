@@ -145,7 +145,7 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	}
 
 	std::vector<uint32_t> ids = {};
-	for (auto &npc: entity_list.GetNPCList()) {
+	for (auto             &npc: entity_list.GetNPCList()) {
 		ids.push_back(npc.second->GetNPCTypeID());
 	}
 
@@ -153,10 +153,10 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 	// validate that hp / mana / end equal that of what's on the npc types row for all rows
 	// dont run tests in the loop, just collect the data
-	std::vector<std::pair<uint32_t, bool>> hp_mismatch = {};
+	std::vector<std::pair<uint32_t, bool>> hp_mismatch   = {};
 	std::vector<std::pair<uint32_t, bool>> mana_mismatch = {};
-	for (auto &e: entity_list.GetNPCList()) {
-		auto npc = e.second;
+	for (auto                              &e: entity_list.GetNPCList()) {
+		auto      npc = e.second;
 		for (auto &npc_type: npc_types) {
 			if (npc->GetNPCTypeID() != npc_type.id) {
 				continue;
@@ -190,7 +190,7 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 	// compare state values versus what's on the entity list NPC object
 	for (auto &e: entity_list.GetNPCList()) {
-		auto npc = e.second;
+		auto      npc = e.second;
 		for (auto &state: GetStateSpawns()) {
 			if (npc->GetNPCTypeID() != state.npc_id) {
 				continue;
@@ -224,7 +224,7 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	zone->Shutdown();
 	SetupStateZone();
 
-	bool all_moved = true;
+	bool      all_moved = true;
 	for (auto &e: entity_list.GetNPCList()) {
 		for (auto &state: GetStateSpawns()) {
 			if (e.second->GetNPCTypeID() != state.npc_id) {
@@ -238,12 +238,14 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 			// z gets auto adjusted to the ground, so we dont need to check it
 			if (e.second->GetX() != state.x || e.second->GetY() != state.y) {
-				std::cout << "NPC ID: " << e.second->GetNPCTypeID() << " X: " << e.second->GetX() << " Y: " << e.second->GetY() << std::endl;
+				std::cout << "NPC ID: " << e.second->GetNPCTypeID() << " X: " << e.second->GetX() << " Y: "
+						  << e.second->GetY() << std::endl;
 				std::cout << "State ID " << state.npc_id << " X: " << state.x << " Y: " << state.y << std::endl;
 				std::cout << "-----------------------------------\n";
 				all_moved = false;
 				break;
-			} else {
+			}
+			else {
 //				std::cout << "NPC ID: " << e.second->GetNPCTypeID() << " X: " << e.second->GetX() << " Y: " << e.second->GetY() << std::endl;
 //				std::cout << "State ID " << state.npc_id << " X: " << state.x << " Y: " << state.y << std::endl;
 //				std::cout << "-----------------------------------\n";
@@ -282,8 +284,37 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 
 	RunTest("Entity variables persist after shutdown/bootup", false, missing_entity_variables);
 
+	// buffs
 
+	// Set buffs
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (npc->GetNPCTypeID() == 0) {
+			continue;
+		}
 
+		npc->CastSpell(6824, npc->GetID(), (EQ::spells::CastingSlot) 0, 0, 0);
+	}
+
+	zone->Shutdown();
+	SetupStateZone();
+
+	// Check buffs
+	bool missing_buffs = false;
+
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (npc->GetNPCTypeID() == 0) {
+			continue;
+		}
+
+		if (!npc->FindBuff(6824)) {
+			missing_buffs = true;
+			break;
+		}
+	}
+
+	RunTest("Buffs persist after shutdown/bootup", false, missing_buffs);
 
 
 //	zone->Repop();
