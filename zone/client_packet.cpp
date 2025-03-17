@@ -3296,6 +3296,11 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						if (old_aug) { // An old augment was removed in order to be replaced with the new one (augment_action 2)
 							CalcBonuses();
 
+							if (old_aug->GetItem()->Attuneable) {
+								old_aug->SetAttuned(true);
+								SendItemPacket(EQ::invslot::slotCursor, old_aug, ItemPacketTrade);
+							}
+
 							std::vector<std::any> args;
 							args.push_back(old_aug);
 
@@ -3326,12 +3331,15 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							}
 						}
 
+						if (new_aug->GetItem()->Attuneable) {
+							LogDebug("Trying to attune augment");
+							new_aug->SetAttuned(true);
+
+							SendItemPacket(item_slot, tobe_auged, ItemPacketTrade);
+						}
+
 						tobe_auged->PutAugment(in_augment->augment_index, *new_aug);
 						tobe_auged->UpdateOrnamentationInfo();
-
-						if (new_aug->GetItem()->Attuneable) {
-							new_aug->SetAttuned(true);
-						}
 
 						aug = tobe_auged->GetAugment(in_augment->augment_index);
 						if (aug) {
@@ -3446,6 +3454,11 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 				old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
 				tobe_auged->UpdateOrnamentationInfo();
+
+				if (old_aug->GetItem()->Attuneable) {
+					old_aug->SetAttuned(true);
+					SendItemPacket(EQ::invslot::slotCursor, old_aug, ItemPacketTrade);
+				}
 
 				item_one_to_push = tobe_auged->Clone();
 				if (old_aug) {

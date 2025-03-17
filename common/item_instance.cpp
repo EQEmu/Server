@@ -685,8 +685,11 @@ void EQ::ItemInstance::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id
 	if (item_id == 0) { return; }
 	if (db == nullptr) { return; /* TODO: add log message for nullptr */ }
 
-	const ItemInstance* aug = db->CreateItem(item_id);
+	ItemInstance* aug = db->CreateItem(item_id);
 	if (aug) {
+		if (aug->GetItem()->Attuneable) {
+			aug->SetAttuned(true);
+		}
 		PutAugment(slot, *aug);
 		safe_delete(aug);
 	}

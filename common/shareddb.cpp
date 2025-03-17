@@ -1504,11 +1504,6 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			}
 		}
 
-		// REMOVE THIS WHEN WE FIX ATTUNEABLE AUGMENTS
-		if (item.ItemType == EQ::item::ItemTypeAugmentation) {
-			item.Attuneable = 0;
-		}
-
 		// Bard Instrument that isn't a weapon which fits in primary/secondary
 		if ((item.Slots & (8192 | 16384)) && (item.Classes & GetPlayerClassBit(Class::Bard)) && (item.Damage <= 0) && (item.BardValue > 0)) {
 			item.Slots |= 2048;
