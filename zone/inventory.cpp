@@ -1889,12 +1889,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 
 			bool has_duplicate_lore = false;
-			const char* conflicting_item_name = nullptr;
+			const EQ::ItemInstance* conflicting_item;
 
 			if (item_to_equip->GetItem()->LoreGroup == -1 &&
 				m_inv.HasItemEquippedByID(item_to_equip->GetID())) {
 				has_duplicate_lore = true;
-				conflicting_item_name = item_to_equip->GetItem()->Name;
+				conflicting_item = item_to_equip;
 			}
 
 			if (!has_duplicate_lore) {
@@ -1908,14 +1908,18 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 						augment->GetItem()->LoreGroup == -1 &&
 						m_inv.HasAugmentEquippedByID(augment->GetID())) {
 						has_duplicate_lore = true;
-						conflicting_item_name = augment->GetItem()->Name;
+						conflicting_item = augment;
 					}
 				}
 			}
 
 			if (has_duplicate_lore) {
-				Message(Chat::Loot, fmt::format("Duplicate LORE items ({}) cannot be equipped.",
-												conflicting_item_name ? conflicting_item_name : "Unknown").c_str());
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemData);
+				linker.SetItemData(conflicting_item->GetItem());
+
+				Message(Chat::Loot, fmt::format("Duplicate LORE item [{}] cannot be equipped.",
+												linker.GenerateLink()).c_str());
 				return false;
 			}
 		}

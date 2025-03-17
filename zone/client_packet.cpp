@@ -3277,7 +3277,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			case AugmentActions::Insert:
 			case AugmentActions::Swap:
 				new_aug = user_inv.GetItem(EQ::invslot::slotCursor);
-
 				if (!new_aug) { // Shouldn't get the OP code without the augment on the user's cursor, but maybe it's h4x.
 					LogError("AugmentItem OpCode with 'Insert' or 'Swap' action received, but no augment on client's cursor");
 					Message(Chat::Red, "Error: No augment found on cursor for inserting.");
@@ -3285,6 +3284,15 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				} else {
 					if (!RuleB(Inventory, AllowMultipleOfSameAugment) && tobe_auged->ContainsAugmentByID(new_aug->GetID())) {
 						Message(Chat::Red, "Error: Cannot put multiple of the same augment in an item.");
+						break;
+					}
+
+					if (RuleB(Custom, EnableLoreEquip) && EQ::ValueWithin(in_augment->container_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END) && m_inv.HasAugmentEquippedByID(new_aug->GetID())) {
+						EQ::SayLinkEngine linker;
+						linker.SetLinkType(EQ::saylink::SayLinkItemData);
+						linker.SetItemData(new_aug->GetItem());
+
+						Message(Chat::Loot, fmt::format("Duplicate LORE item [{}] cannot be equipped.", linker.GenerateLink()).c_str());
 						break;
 					}
 
