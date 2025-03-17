@@ -6781,6 +6781,14 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 			}
 		}
 
+		if ((spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet)) {
+			Mob* pet_target_override = entity_list.GetMob(GetSpellImpliedTargetID(proc_spellid,(GetTarget() ?  GetTarget()->GetID() : GetID())));
+			if (pet_target_override) {
+				proc_target = pet_target_override;
+				LogDebug("Sympathetic Proc found new target with Implied Targeting for pet spell: [{}]", new_target->GetCleanName());
+			}
+		}
+
 		if (proc_target) {
 			if (proc_target->GetID() == GetID() && IsDetrimentalSpell(spell_id)) {
 				LogSpells("Sympathetic Proc could not find a target");
