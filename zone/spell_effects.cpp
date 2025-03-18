@@ -4032,9 +4032,13 @@ void Mob::BuffProcess()
 
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
-					bool suspended = IsGroupSuspendableBuff(buffs[buffs_i].spellid, buffs[buffs_i]);
+					bool suspended = false;
 
-					if (!suspended || !RuleB(Custom, SuspendGroupBuffs)) {
+					if (RuleB(Custom, SuspendGroupBuffs)) {
+						suspended = IsGroupSuspendableBuff(buffs[buffs_i].spellid, buffs[buffs_i]);
+					}
+
+					if (!suspended) {
 						--buffs[buffs_i].ticsremaining;
 					} else {
 						buffs[buffs_i].UpdateClient = true;

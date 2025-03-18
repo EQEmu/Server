@@ -657,29 +657,60 @@ uint32 EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
 }
 
 bool EQ::InventoryProfile::IsClickEffectEquipped(uint32 spellid) {
+    auto checkSlotForEffect = [this, spellid](int slot_id) -> bool {
+        ItemInstance* item = GetItem(slot_id);
+        if (!item) { return false; }
 
-	bool has_equipped = false;
-	ItemInstance* item = nullptr;
-	ItemInstance* augment = nullptr;
-	EQ::item::ItemEffect_Struct eff;
+        // Check the item itself
+        if (item->GetItem()->Click.Effect == spellid) {
+            return true;
+        }
 
-	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		item = GetItem(slot_id);
-		if (!item) { continue; }
-		eff = item->GetItem()->Click;
-		if (eff.Effect == spellid) {
-			return true;
-		}
-		for (uint8 augment_slot = invaug::SOCKET_BEGIN; augment_slot <= invaug::SOCKET_END; ++augment_slot) {
-			augment = item->GetAugment(augment_slot);
-			if (!augment) { continue; }
-			eff = augment->GetItem()->Click;
-			if (eff.Effect == spellid) {
-				return true;
+        // Check all augments
+        for (uint8 augment_slot = invaug::SOCKET_BEGIN; augment_slot <= invaug::SOCKET_END; ++augment_slot) {
+            ItemInstance* augment = item->GetAugment(augment_slot);
+            if (!augment) { continue; }
+
+            if (augment->GetItem()->Click.Effect == spellid) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    // Check normal equipment slots
+    for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+        if (checkSlotForEffect(slot_id)) {
+            return true;
+        }
+    }
+
+    // Check extra slots from the rule
+    std::vector<std::string> extra_location_str = Strings::Split(RuleS(Custom, SuspendGroupBuffsExtra), ",");
+
+    if (extra_location_str.empty()) {
+		return false;
+	}
+
+	for (const auto& slot_str : extra_location_str) {
+		int bag_id = Strings::ToUnsignedInt(slot_str);
+		for (int slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
+			auto item = GetItem(slot_id);
+			if (!item || item->GetID() != bag_id) {
+				continue;
+			}
+
+			for (int in_bag_slot = 0; in_bag_slot < item->GetItem()->BagSlots; in_bag_slot++) {
+				if (checkSlotForEffect(CalcSlotId(slot_id, in_bag_slot))) {
+					return true;
+				}
 			}
 		}
 	}
-	return false;
+
+
+    return false;
 }
 
 //This function has a flaw in that it only returns the last stack that it looked at

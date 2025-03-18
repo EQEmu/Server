@@ -1189,6 +1189,7 @@ RULE_BOOL(Custom, 	UseDynamicAATimers, 					true, "Enable using dynamic AA timer
 
 // The Heroes Journey Options
 RULE_BOOL(Custom, 	SuspendGroupBuffs, 						true, 	"Enable this to cause self buffs and group's buffs to not tick down")
+RULE_STRING(Custom, SuspendGroupBuffsExtra,					"",		"Comma-seperated list of bags which also count as 'equipped' for purposes of buff suspending")
 RULE_BOOL(Custom, 	FadeNPCDebuffsOutofCombat, 				true, 	"Enable to to cause NPCs to lose all buffs automatically when combat ends")
 RULE_BOOL(Custom, 	UseTHJItemMutations, 					true, 	"Rename items according to THJ standards and apply other mutations")
 RULE_BOOL(Custom, 	ClearRestingDetrimentalEffectsEnabled, 	true, 	"Remove detrimental spell effects from self and pets when OOC regen engages")
