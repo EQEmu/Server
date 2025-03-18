@@ -3041,7 +3041,13 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	if (!other)
 		return;
 
+	if (other->IsDestroying())
+		return;
+
 	if (other == this)
+		return;
+
+	if (other->IsClient() && (other->CastToClient()->IsZoning() || other->CastToClient()->Connected() == false))
 		return;
 
 	if (other->IsTrap())
