@@ -7889,6 +7889,16 @@ void Mob::DispelMagic(Mob* caster, uint16 spell_id, int effect_value)
 			!IsDiscipline(buffs[slot].spellid)
 		) {
 			if (caster && TryDispel(caster->GetCasterLevel(spell_id), buffs[slot].casterlevel, effect_value)) {
+				if (RuleB(Custom, PlayerDispelCures)) {
+					bool caster_client = caster->IsClient() || (caster->GetOwner() && caster->GetOwner()->IsClient());
+					bool target_client = IsClient() || (GetOwner() && GetOwner()->IsClient());
+					bool eligible_spell = IsBeneficialSpell(buffs[slot].spellid) || IsPoisonCounterSpell(buffs[slot].spellid) || IsDiseaseCounterSpell(buffs[slot].spellid) || IsCurseCounterSpell(buffs[slot].spellid);
+
+					if (eligible_spell && caster_client && target_client) {
+						continue;
+					}
+				}
+
 				BuffFadeBySlot(slot);
 				break;
 			}

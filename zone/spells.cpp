@@ -176,6 +176,10 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			return target_id;
 		}
 
+		if (IsEffectInSpell(spell_id, SE_CancelMagic)) {
+			return target_id;
+		}
+
 		if (IsCharmSpell(spell_id)) {
 			return target_id;
 		}

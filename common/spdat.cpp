@@ -471,6 +471,11 @@ bool IsDiseaseCounterSpell(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_DiseaseCounter);
 }
 
+bool IsCurseCounterSpell(uint16 spell_id)
+{
+	return IsEffectInSpell(spell_id, SE_CurseCounter);
+}
+
 bool IsSummonItemSpell(uint16 spell_id)
 {
 	return IsEffectInSpell(spell_id, SE_SummonItem);

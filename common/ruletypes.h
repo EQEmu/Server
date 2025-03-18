@@ -1263,6 +1263,7 @@ RULE_INT(Custom,   	StunImmunityTimerMultiplier,			3, "Multiplier for the amount
 RULE_INT(Custom,   	SilenceImmunityTimerMultiplier,			3, "Multiplier for the amount of time a player should be immune to silence after being silenced.")
 
 RULE_BOOL(Custom,   EnableLoreEquip, 						false, "Enable to treat LORE tag as LORE-EQUIP for equippable items.")
+RULE_BOOL(Custom,   PlayerDispelCures, 						true, "Enable to treat player-cast SE_CancelMagic as a 'cure' for no-counter detrimentals")
 
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")

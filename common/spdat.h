@@ -1802,6 +1802,7 @@ bool IsInvulnerabilitySpell(uint16 spell_id);
 bool IsCompleteHealDurationSpell(uint16 spell_id);
 bool IsPoisonCounterSpell(uint16 spell_id);
 bool IsDiseaseCounterSpell(uint16 spell_id);
+bool IsCurseCounterSpell(uint16 spell_id);
 bool IsSummonItemSpell(uint16 spell_id);
 bool IsSummonSkeletonSpell(uint16 spell_id);
 bool IsSummonPetSpell(uint16 spell_id);
