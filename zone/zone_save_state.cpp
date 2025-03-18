@@ -204,7 +204,7 @@ inline std::string GetLootSerialized(Corpse *c)
 	return "";
 }
 
-inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
+void NPC::LoadEntityVariables(const std::string &entity_variables)
 {
 	if (!RuleB(Zone, StateSaveEntityVariables)) {
 		return;
@@ -215,7 +215,7 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 	}
 
 	if (!Strings::IsValidJson(entity_variables)) {
-		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
+		LogZoneState("Invalid JSON data for NPC [{}]", this->GetNPCTypeID());
 		return;
 	}
 
@@ -228,12 +228,12 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 		}
 	}
 	catch (const std::exception &e) {
-		LogZoneState("Failed to load entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
+		LogZoneState("Failed to load entity variables for NPC [{}] [{}]", this->GetNPCTypeID(), e.what());
 		return;
 	}
 
 	for (const auto &[key, value]: deserialized_map) {
-		n->SetEntityVariable(key, value);
+		this->SetEntityVariable(key, value);
 	}
 }
 
@@ -329,7 +329,6 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 	n->SetResumedFromZoneSuspend(false);
 	LoadLootStateData(zone, n, s.loot_data);
 	n->SetResumedFromZoneSuspend(true);
-	LoadNPCEntityVariables(n, s.entity_variables);
 	LoadNPCBuffs(n, s.buffs);
 
 	if (s.is_corpse) {
@@ -475,6 +474,7 @@ bool Zone::LoadZoneState(
 		if (spawn_time_left == 0) {
 			new_spawn->SetCurrentNPCID(s.npc_id);
 			new_spawn->SetResumedFromZoneSuspend(true);
+			new_spawn->SetSavedEntityVariables(s.entity_variables);
 		}
 
 		spawn2_list.Insert(new_spawn);

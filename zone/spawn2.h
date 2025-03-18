@@ -77,6 +77,7 @@ public:
 	inline NPC *GetNPC() const { return npcthis; }
 	inline bool IsResumedFromZoneSuspend() const { return m_resumed_from_zone_suspend; }
 	inline void SetResumedFromZoneSuspend(bool resumed) { m_resumed_from_zone_suspend = resumed; }
+	inline void SetSavedEntityVariables(std::string entity_variables) { m_saved_entity_variables = entity_variables; }
 
 protected:
 	friend class Zone;
@@ -104,6 +105,7 @@ private:
 	bool IsDespawned;
 	uint32  killcount;
 	bool m_resumed_from_zone_suspend = false;
+	std::string m_saved_entity_variables = "";
 };
 
 class SpawnCondition {

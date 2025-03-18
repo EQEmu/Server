@@ -280,6 +280,11 @@ bool Spawn2::Process() {
 		npc->SetResumedFromZoneSuspend(m_resumed_from_zone_suspend);
 		m_resumed_from_zone_suspend = false;
 
+		if (!m_saved_entity_variables.empty()) {
+			npc->LoadEntityVariables(m_saved_entity_variables);
+			m_saved_entity_variables = "";
+		}
+
 		npc->AddLootTable();
 		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();

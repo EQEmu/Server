@@ -607,6 +607,7 @@ public:
 	inline uint32_t SetCorpseDecayTime(uint32_t decay_time) { return m_corpse_decay_time = decay_time; }
 	inline void SetResumedFromZoneSuspend(bool state = true) { m_resumed_from_zone_suspend = state; }
 	inline bool IsResumedFromZoneSuspend() { return m_resumed_from_zone_suspend; }
+	void LoadEntityVariables(const std::string &entity_variables);
 
 	inline void LoadBuffsFromState(std::vector<Buffs_Struct> in_buffs) {
 		int i = 0;
