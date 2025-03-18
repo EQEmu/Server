@@ -1142,6 +1142,7 @@ public:
 	void ResetAA();
 	void ResetLeadershipAA();
 	void RefundAA();
+	void RefundUnusuableAA();
 	void SendClearLeadershipAA();
 	void SendClearPlayerAA();
 	inline uint32 GetAAXP() const { return m_pp.expAA; }

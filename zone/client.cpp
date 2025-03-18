@@ -14327,6 +14327,8 @@ bool Client::RemoveExtraClass(int class_id) {
 
     zone->LoadAlternateAdvancement();
 
+	RefundUnusuableAA();
+
     SendClearPlayerAA();
     SendAlternateAdvancementTable();
     SendAlternateAdvancementPoints();

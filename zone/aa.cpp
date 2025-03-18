@@ -881,6 +881,50 @@ void Client::RefundAA() {
 	SendAlternateAdvancementStats();
 }
 
+void Client::RefundUnusuableAA() {
+	int refunded = 0;
+
+	auto rank_value = aa_ranks.begin();
+	while (rank_value != aa_ranks.end()) {
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_value->first, rank_value->second.first);
+		auto ability      = ability_rank.first;
+		auto rank         = ability_rank.second;
+
+		if (!ability) {
+			++rank_value;
+			continue;
+		}
+
+		if (ability->charges > 0 && rank_value->second.second < 1) {
+			++rank_value;
+			continue;
+		}
+
+		if (ability->grant_only) {
+			++rank_value;
+			continue;
+		}
+
+		if (CanUseAlternateAdvancementRank(rank)) {
+			++rank_value;
+			continue;
+		}
+
+		refunded += rank->total_cost;
+		rank_value        = aa_ranks.erase(rank_value);
+	}
+
+	if (refunded > 0) {
+		m_pp.aapoints += refunded;
+		SaveAA();
+		Save();
+	}
+
+	SendAlternateAdvancementTable();
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+}
+
 SwarmPet::SwarmPet()
 {
 	target = 0;
