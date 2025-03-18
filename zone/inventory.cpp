@@ -67,6 +67,8 @@ void Client::ValidateAugments(EQ::ItemInstance* item) {
 						auto aug_link = linker.GenerateLink();
 
 						Message(Chat::Yellow, "INFO: Your augment [%s] was placed in an invalid slot, and has been moved into your bags.", aug_link.c_str());
+
+						Save();
 					}
 				}
 				change = true;
