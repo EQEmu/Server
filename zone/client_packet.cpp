@@ -3287,7 +3287,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						break;
 					}
 
-					if (RuleB(Custom, EnableLoreEquip) && EQ::ValueWithin(in_augment->container_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END) && m_inv.HasAugmentEquippedByID(new_aug->GetID())) {
+					if (RuleB(Custom, EnableLoreEquip) && EQ::ValueWithin(in_augment->container_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END) && new_aug->GetItem()->LoreGroup == -1 && m_inv.HasAugmentEquippedByID(new_aug->GetID())) {
 						EQ::SayLinkEngine linker;
 						linker.SetLinkType(EQ::saylink::SayLinkItemData);
 						linker.SetItemData(new_aug->GetItem());
