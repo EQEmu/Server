@@ -261,6 +261,14 @@ Bazaar::GetSearchResults(
 		where_criteria_items.append(fmt::format(" AND items.reclevel <= {}", search.max_level));
 	}
 
+	if (search.prestige == -1) {
+		where_criteria_items.append(" AND items.name LIKE 'Glamour - %'");
+	}
+
+	if (search.prestige == -2) {
+		where_criteria_items.append(" AND items.name NOT LIKE 'Glamour - %'");
+	}
+
 	std::vector<BazaarSearchResultsFromDB_Struct> all_entries;
 	std::vector<std::string>                      trader_items_ids{};
 
