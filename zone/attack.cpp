@@ -3757,12 +3757,12 @@ int64 Mob::ReduceDamage(int64 damage, bool from_damage_shield)
 					if (!TryFadeEffect(slot))
 						BuffFadeBySlot(slot, true);
 				}
-			}
 
-			if (spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] && (damage > spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT]))
-				damage -= spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT];
-			else
-				return DMG_RUNE;
+				if (spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] && (damage > spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT]))
+					damage -= spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT];
+				else
+					return DMG_RUNE;
+			}
 		}
 	}
 
