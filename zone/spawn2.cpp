@@ -277,6 +277,12 @@ bool Spawn2::Process() {
 
 		npcthis = npc;
 
+		if (!m_entity_variables.empty()) {
+			for (auto &var : m_entity_variables) {
+				npc->SetEntityVariable(var.first, var.second);
+			}
+		}
+
 		npc->SetResumedFromZoneSuspend(m_resumed_from_zone_suspend);
 		m_resumed_from_zone_suspend = false;
 

@@ -204,6 +204,33 @@ inline std::string GetLootSerialized(Corpse *c)
 	return "";
 }
 
+inline std::map<std::string, std::string> GetVariablesDeserialized(const std::string &entity_variables)
+{
+	std::map<std::string, std::string> deserialized_map;
+
+	if (entity_variables.empty()) {
+		return deserialized_map;
+	}
+
+	if (!Strings::IsValidJson(entity_variables)) {
+		LogZoneState("Invalid JSON data for entity variables");
+		return deserialized_map;
+	}
+
+	try {
+		std::stringstream ss;
+		{
+			ss << entity_variables;
+			cereal::JSONInputArchive ar(ss);
+			ar(deserialized_map);
+		}
+	} catch (const std::exception &e) {
+		LogZoneState("Failed to load entity variables [{}]", e.what());
+	}
+
+	return deserialized_map;
+}
+
 inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 {
 	if (!RuleB(Zone, StateSaveEntityVariables)) {
@@ -214,25 +241,7 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 		return;
 	}
 
-	if (!Strings::IsValidJson(entity_variables)) {
-		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
-		return;
-	}
-
-	std::map<std::string, std::string> deserialized_map;
-	try {
-		std::istringstream is(entity_variables);
-		{
-			cereal::JSONInputArchive archive(is);
-			archive(deserialized_map);
-		}
-	}
-	catch (const std::exception &e) {
-		LogZoneState("Failed to load entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
-		return;
-	}
-
-	for (const auto &[key, value]: deserialized_map) {
+	for (const auto &[key, value]: GetVariablesDeserialized(entity_variables)) {
 		n->SetEntityVariable(key, value);
 	}
 }
@@ -343,6 +352,8 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 		}
 	}
 
+	n->SetPosition(s.x, s.y, s.z);
+	n->SetHeading(s.heading);
 	n->SetResumedFromZoneSuspend(true);
 }
 
@@ -475,6 +486,7 @@ bool Zone::LoadZoneState(
 		if (spawn_time_left == 0) {
 			new_spawn->SetCurrentNPCID(s.npc_id);
 			new_spawn->SetResumedFromZoneSuspend(true);
+			new_spawn->SetEntityVariables(GetVariablesDeserialized(s.entity_variables));
 		}
 
 		spawn2_list.Insert(new_spawn);
