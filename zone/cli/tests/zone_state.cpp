@@ -2,6 +2,7 @@ extern Zone *zone;
 
 #include "../../common/repositories/npc_types_repository.h"
 #include "../../corpse.h"
+#include "../../../common/repositories/respawn_times_repository.h"
 
 inline void ClearState()
 {
@@ -11,6 +12,12 @@ inline void ClearState()
 inline std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> GetStateSpawns()
 {
 	return ZoneStateSpawnsRepository::GetWhere(database, "zone_id = 32 and instance_id = 0");
+}
+
+inline void PrintEntityCounts()
+{
+	std::cout << " NPC count: " << entity_list.GetNPCList().size() << std::endl;
+	std::cout << " Corpse count: " << entity_list.GetCorpseList().size() << std::endl;
 }
 
 inline void PrintZoneNpcs()
@@ -124,6 +131,65 @@ inline void TestSpawns()
 		true,
 		GetStateSpawns().size() == entity_list.GetNPCList().size()
 	);
+
+	// kill all NPC's
+	std::vector<NPC *> npcs_to_kill;
+
+	// Collect NPCs first
+	for (const auto &e: entity_list.GetNPCList()) {
+		if (e.second) {
+			npcs_to_kill.push_back(e.second);
+		}
+	}
+
+	// Now safely process them
+	for (auto *npc: npcs_to_kill) {
+		npc->SetQueuedToCorpse();
+		npc->Death(npc, npc->GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
+	}
+
+	bool condition = (int) entity_list.GetNPCList().size() == 0 && (int) entity_list.GetCorpseList().size() == 115;
+	RunTest("Spawns > All NPC's killed (0 NPCs) (115 Corpses)", true, condition);
+
+	std::vector<uint32_t> spawn2_ids = {};
+	for (auto             &e: GetStateSpawns()) {
+		if (e.spawn2_id > 0) {
+			spawn2_ids.push_back(e.spawn2_id);
+		}
+	}
+	auto                  times      = RespawnTimesRepository::GetWhere(
+		database,
+		fmt::format("id IN ({})", Strings::Join(spawn2_ids, ","))
+	);
+
+	for (auto &e: times) {
+		e.duration = 1;
+		e.start    = std::time(nullptr) + 1;
+	}
+	RespawnTimesRepository::ReplaceMany(database, times);
+
+	zone->Shutdown();
+	SetupStateZone();
+
+	condition = (int) entity_list.GetNPCList().size() == 0 && (int) entity_list.GetCorpseList().size() == 115;
+	if (!condition) {
+		PrintEntityCounts();
+	}
+	RunTest("Spawns > After restore (0 NPCs) (115 Corpses)", true, condition);
+
+	Timer::RollForward(5);
+
+	zone->Process();
+	entity_list.MobProcess();
+	entity_list.Process();
+
+	condition = (int) entity_list.GetNPCList().size() == 115 && (int) entity_list.GetCorpseList().size() == 115;
+	if (!condition) {
+		PrintEntityCounts();
+	}
+	RunTest("Spawns > After respawn (115 NPCs) (115 Corpses)", true, condition);
+
+
 }
 
 inline void TestZoneVariables()
@@ -528,7 +594,7 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 //	TestBuffs();
 //	TestLocationChange();
 //	TestEntityVariables();
-	TestLoot();
+//	TestLoot();
 
 //	RunTest("State > No NPC's should be spawned after shutdown/bootup", 0, (int) entity_list.GetNPCList().size());
 
