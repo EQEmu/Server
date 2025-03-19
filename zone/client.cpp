@@ -4762,7 +4762,7 @@ bool Client::IsNameChangeAllowed() {
 	}
 
 	auto k = GetScopedBucketKeys();
-	k.key = "NameChangesAllowed";
+	k.key = "name_change_allowed";
 
 	auto b = DataBucket::GetData(k);
 	if (!b.value.empty()) {
@@ -4778,7 +4778,7 @@ bool Client::ClearNameChange() {
 	}
 
 	auto k = GetScopedBucketKeys();
-	k.key = "NameChangesAllowed";
+	k.key = "name_change_allowed";
 
 	DataBucket::DeleteData(k);
 
@@ -4800,7 +4800,7 @@ void Client::InvokeChangeNameWindow(bool immediate) {
 void Client::GrantNameChange() {
 
 	auto k = GetScopedBucketKeys();
-	k.key = "NameChangesAllowed";
+	k.key = "name_change_allowed";
 	k.value = "allowed"; // potentially put a timestamp here
 	DataBucket::SetData(k);
 
