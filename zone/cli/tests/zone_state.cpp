@@ -84,7 +84,10 @@ inline uint32_t SeedLootTable()
 
 inline void TestSpawns()
 {
+	zone->Shutdown();
 	ClearState();
+	SetupStateZone();
+	zone->Repop(true);
 
 	RunTest("Spawns > Ensure no state spawns exist before shutdown", 0, (int) GetStateSpawns().size());
 
