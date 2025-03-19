@@ -3474,23 +3474,12 @@ void Client::ChangeLastName(std::string last_name) {
 	safe_delete(outapp);
 }
 
+// Deprecated, this packet does not actually work in ROF2
 bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 {
-	// check duplicate name
-	bool used_name = database.IsNameUsed((const char*) in_firstname);
-	if (used_name) {
+	if (!ChangeFirstName(in_firstname)) {
 		return false;
 	}
-
-	// update character_
-	if(!database.UpdateName(GetName(), in_firstname))
-		return false;
-
-	// update pp
-	memset(m_pp.name, 0, sizeof(m_pp.name));
-	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname);
-	strcpy(name, m_pp.name);
-	Save();
 
 	// send name update packet
 	auto outapp = new EQApplicationPacket(OP_GMNameChange, sizeof(GMName_Struct));
@@ -3504,10 +3493,40 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 
+	// success
+	return true;
+}
+
+bool Client::ChangeFirstName(const char* in_firstname)
+{
+	// check duplicate name
+	bool used_name = database.IsNameUsed((const char*) in_firstname) || database.IsPetNameUsed((const char*) in_firstname);
+	if (used_name || !database.CheckNameFilter((const char*) in_firstname, false)) {
+		return false;
+	}
+
+	// update character_
+	if(!database.UpdateNameByID(CharacterID(), in_firstname))
+		return false;
+
+	// Send Name Update to Clients
+	SendRename(this, GetName(), in_firstname);
+	SetName(in_firstname);
+
+	// update pp
+	memset(m_pp.name, 0, sizeof(m_pp.name));
+	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname);
+	strcpy(name, m_pp.name);
+	Save();
+
+	// Update the active char in account table
+	database.UpdateLiveChar(in_firstname, AccountID());
+
 	// finally, update the /who list
 	UpdateWho();
 
 	// success
+	ClearNameChange();
 	return true;
 }
 
@@ -6055,6 +6074,57 @@ bool Client::KeyRingRemove(uint32 item_id)
 			item_id
 		)
 	);
+}
+
+bool Client::IsNameChangeAllowed() {
+	if (RuleB(Character, AlwaysAllowNameChange)) {
+		return true;
+	}
+
+	auto k = GetScopedBucketKeys();
+	k.key = "NameChangesAllowed";
+
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Client::ClearNameChange() {
+	if (!IsNameChangeAllowed()) {
+		return false;
+	}
+
+	auto k = GetScopedBucketKeys();
+	k.key = "NameChangesAllowed";
+
+	DataBucket::DeleteData(k);
+
+	return true;
+}
+
+void Client::InvokeChangeNameWindow(bool immediate) {
+	if (!IsNameChangeAllowed()) {
+		return;
+	}
+
+	auto packet_op = immediate ? OP_InvokeNameChangeImmediate : OP_InvokeNameChangeLazy;
+
+	auto outapp = new EQApplicationPacket(packet_op, 0);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::GrantNameChange() {
+
+	auto k = GetScopedBucketKeys();
+	k.key = "NameChangesAllowed";
+	k.value = "allowed"; // potentially put a timestamp here
+	DataBucket::SetData(k);
+
+	InvokeChangeNameWindow(true);
 }
 
 bool Client::IsPetNameChangeAllowed() {
