@@ -513,8 +513,8 @@ public:
 	bool AutoAttackEnabled() const { return auto_attack; }
 	bool AutoFireEnabled() const { return auto_fire; }
 
-	bool ChangeFirstName(const char* in_firstname,const char* gmname);
-	bool ChangeFirstName(const char* in_firstname);
+	bool ChangeFirstName(const std::string in_firstname,const std::string gmname);
+	bool ChangeFirstName(const std::string in_firstname);
 
 	void Duck();
 	void Stand();
