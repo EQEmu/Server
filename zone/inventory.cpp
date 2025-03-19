@@ -1115,11 +1115,14 @@ void Client::SendCursorBuffer()
 	if (test_item == nullptr) { return; }
 
 	bool lore_pass = true;
-	if (test_item->LoreGroup == -1) {
-		lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
-	}
-	else if (test_item->LoreGroup != 0) {
-		lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+
+	if (!RuleB(Custom, EnableLoreEquip)) {
+		if (test_item->LoreGroup == -1) {
+			lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+		}
+		else if (test_item->LoreGroup != 0) {
+			lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+		}
 	}
 
 	if (!lore_pass) {
