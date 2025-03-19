@@ -204,6 +204,33 @@ inline std::string GetLootSerialized(Corpse *c)
 	return "";
 }
 
+inline std::map<std::string, std::string> GetVariablesDeserialized(const std::string &entity_variables)
+{
+	std::map<std::string, std::string> deserialized_map;
+
+	if (entity_variables.empty()) {
+		return deserialized_map;
+	}
+
+	if (!Strings::IsValidJson(entity_variables)) {
+		LogZoneState("Invalid JSON data for entity variables");
+		return deserialized_map;
+	}
+
+	try {
+		std::stringstream ss;
+		{
+			ss << entity_variables;
+			cereal::JSONInputArchive ar(ss);
+			ar(deserialized_map);
+		}
+	} catch (const std::exception &e) {
+		LogZoneState("Failed to load entity variables [{}]", e.what());
+	}
+
+	return deserialized_map;
+}
+
 inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 {
 	if (!RuleB(Zone, StateSaveEntityVariables)) {
@@ -214,25 +241,7 @@ inline void LoadNPCEntityVariables(NPC *n, const std::string &entity_variables)
 		return;
 	}
 
-	if (!Strings::IsValidJson(entity_variables)) {
-		LogZoneState("Invalid JSON data for NPC [{}]", n->GetNPCTypeID());
-		return;
-	}
-
-	std::map<std::string, std::string> deserialized_map;
-	try {
-		std::istringstream is(entity_variables);
-		{
-			cereal::JSONInputArchive archive(is);
-			archive(deserialized_map);
-		}
-	}
-	catch (const std::exception &e) {
-		LogZoneState("Failed to load entity variables for NPC [{}] [{}]", n->GetNPCTypeID(), e.what());
-		return;
-	}
-
-	for (const auto &[key, value]: deserialized_map) {
+	for (const auto &[key, value]: GetVariablesDeserialized(entity_variables)) {
 		n->SetEntityVariable(key, value);
 	}
 }
@@ -310,6 +319,11 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 	return lootdrop_ids;
 }
 
+inline void LoadNPCStatePreSpawn(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
+{
+	LoadNPCEntityVariables(n, s.entity_variables);
+}
+
 inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 {
 	if (s.hp > 0) {
@@ -329,7 +343,6 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 	n->SetResumedFromZoneSuspend(false);
 	LoadLootStateData(zone, n, s.loot_data);
 	n->SetResumedFromZoneSuspend(true);
-	LoadNPCEntityVariables(n, s.entity_variables);
 	LoadNPCBuffs(n, s.buffs);
 
 	if (s.is_corpse) {
@@ -477,6 +490,7 @@ bool Zone::LoadZoneState(
 		if (spawn_time_left == 0) {
 			new_spawn->SetCurrentNPCID(s.npc_id);
 			new_spawn->SetResumedFromZoneSuspend(true);
+			new_spawn->SetEntityVariables(GetVariablesDeserialized(s.entity_variables));
 		}
 
 		spawn2_list.Insert(new_spawn);
@@ -512,6 +526,8 @@ bool Zone::LoadZoneState(
 		if (s.is_corpse) {
 			npc->SetQueuedToCorpse();
 		}
+
+		LoadNPCStatePreSpawn(zone, npc, s);
 
 		entity_list.AddNPC(npc, true, true);
 
@@ -566,7 +582,7 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 	auto buffs = n->GetBuffs();
 	if (buffs) {
 		std::vector<Buffs_Struct> valid_buffs;
-		for (int index = 0; index < n->GetMaxBuffSlots(); index++) {
+		for (int                  index = 0; index < n->GetMaxBuffSlots(); index++) {
 			if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
 				valid_buffs.push_back(buffs[index]);
 			}
