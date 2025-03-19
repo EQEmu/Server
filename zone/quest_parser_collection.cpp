@@ -939,6 +939,12 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 
 	Strings::FindReplace(npc_name, "`", "-");
 
+	const std::string& npc_id_and_name = fmt::format(
+		"{}_{}",
+		npc_name,
+		npc_id
+	);
+
 	const std::string& global_path = fmt::format(
 		"{}/{}",
 		path.GetQuestsPath(),
@@ -959,13 +965,16 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 	);
 
 	std::vector<std::string> file_names = {
-		fmt::format("{}/{}", zone_versioned_path, npc_id), // Local versioned by NPC ID ./quests/zone/v0/10.ext
-		fmt::format("{}/{}", zone_versioned_path, npc_name), // Local versioned by NPC Name ./quests/zone/v0/npc.ext
+		fmt::format("{}/{}", zone_versioned_path, npc_id), // Local versioned by NPC ID (./quests/zone/v0/10.ext)
+		fmt::format("{}/{}", zone_versioned_path, npc_name), // Local versioned by NPC Name (./quests/zone/v0/name.ext)
+		fmt::format("{}/{}", zone_versioned_path, npc_id_and_name), // Local versioned by NPC ID and NPC Name (./quests/zone/v0/10_name.ext)
 		fmt::format("{}/{}", zone_path, npc_id), // Local by NPC ID
 		fmt::format("{}/{}", zone_path, npc_name), // Local by NPC Name
+		fmt::format("{}/{}", zone_path, npc_id_and_name), // Local by NPC ID and NPC Name
 		fmt::format("{}/{}", global_path, npc_id), // Global by NPC ID
 		fmt::format("{}/{}", global_path, npc_name), // Global by NPC ID
-		fmt::format("{}/default", zone_versioned_path), // Zone Default ./quests/zone/v0/default.ext
+		fmt::format("{}/{}", global_path, npc_id_and_name), // Global by NPC ID and NPC Name
+		fmt::format("{}/default", zone_versioned_path), // Zone Versioned Default (./quests/zone/v0/default.ext)
 		fmt::format("{}/default", zone_path), // Zone Default
 		fmt::format("{}/default", global_path), // Global Default
 	};
