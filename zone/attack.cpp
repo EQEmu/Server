@@ -3309,7 +3309,9 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 				if (num_pets > 1) {
 					int split_amt = hate / (num_pets - 1);
 					for (const auto pet : other_owner->GetAllPets()) {
-						AddToHateList(pet, split_amt, split_amt, iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
+						if (!pet->GetSpecialAbility(SpecialAbility::BeingAggroImmunity) && pet != other) {
+							AddToHateList(pet, split_amt, split_amt, iYellForHelp, bFrenzy, iBuffTic, spell_id, pet_command);
+						}
 					}
 				}
 			}
