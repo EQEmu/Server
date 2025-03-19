@@ -201,7 +201,7 @@ inline void TestSpawns()
 
 	for (auto &e: entity_list.GetNPCList()) {
 		auto n = e.second;
-		std::cout << n->GetLoottableID() << " " << n->GetLootItems().size() << " " << n->GetPlatinum() << std::endl;
+//		std::cout << n->GetLoottableID() << " " << n->GetLootItems().size() << " " << n->GetPlatinum() << std::endl;
 	}
 }
 
@@ -245,6 +245,10 @@ inline void TestZoneVariables()
 	// Final shutdown and restart check
 	zone->Shutdown();
 	SetupStateZone();
+
+	for (auto &v: zone->GetVariables()) {
+		std::cout << "key: " << v << " value: " << zone->GetVariable(v) << std::endl;
+	}
 
 	for (const auto &[key, value]: test_variables) {
 		std::string expected_value = (key == "test_variable") ? "" : value;
@@ -602,12 +606,12 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	std::cout << "===========================================\n\n";
 
 	TestSpawns();
-//	TestZoneVariables();
-//	TestHpManaEnd();
-//	TestBuffs();
-//	TestLocationChange();
-//	TestEntityVariables();
-//	TestLoot();
+	TestZoneVariables();
+	TestHpManaEnd();
+	TestBuffs();
+	TestLocationChange();
+	TestEntityVariables();
+	TestLoot();
 
 //	RunTest("State > No NPC's should be spawned after shutdown/bootup", 0, (int) entity_list.GetNPCList().size());
 
