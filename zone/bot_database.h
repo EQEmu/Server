@@ -130,6 +130,7 @@ public:
 	bool SaveBotSettings(Mob* m);
 	bool DeleteBotSettings(const uint32 bot_id);
 
+	void CheckBotSpells();
 	void MapCommandedSpellTypeMinLevels();
 	std::map<int32_t, std::map<int32_t, BotSpellTypesByClass>> GetCommandedSpellTypesMinLevels() { return commanded_spell_type_min_levels; }
 

@@ -835,7 +835,7 @@ RULE_INT(Bots, MinGroupCureTargets, 3, "Minimum number of targets in valid range
 RULE_INT(Bots, MinTargetsForAESpell, 3, "Minimum number of targets in valid range that are required for an AE spell to cast. Default 3.")
 RULE_INT(Bots, MinTargetsForGroupSpell, 3, "Minimum number of targets in valid range that are required for an group spell to cast. Default 3.")
 RULE_BOOL(Bots, AllowBuffingHealingFamiliars, false, "Determines if bots are allowed to buff and heal familiars. Default false.")
-RULE_BOOL(Bots, RunSpellTypeChecksOnSpawn, false, "This will run a serious of checks on spell types and output errors to LogBotSpellTypeChecks")
+RULE_BOOL(Bots, RunSpellTypeChecksOnBoot, false, "This will run a series of checks to find potential errors in your bot_spells_entries table on boot and output to LogBotSpellTypeChecks")
 RULE_BOOL(Bots, UseParentSpellTypeForChecks, true, "This will check only the parent instead of AE/Group/Pet types (ex: AENukes/AERains/PBAENukes fall under Nukes or PetBuffs fall under buffs) when RunSpellTypeChecksOnSpawn fires")
 RULE_BOOL(Bots, AllowForcedCastsBySpellID, true, "If enabled, players can use ^cast spellid # to cast a specific spell by ID that is in their spell list")
 RULE_BOOL(Bots, AllowCastAAs, true, "If enabled, players can use ^cast aa to cast a clickable AA")
