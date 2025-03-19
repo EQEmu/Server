@@ -821,7 +821,10 @@ bool Client::AddItemExperience(EQ::ItemInstance* item, int conlevel) {
 		if (PutItemInInventory(EQ::invslot::slotPowerSource, *upgrade_item, true)) {
 			SendSound();
 
-			linker.SetItemInst(upgrade_item);
+			EQ::SayLinkEngine linker2;
+			linker2.SetLinkType(EQ::saylink::SayLinkItemInst);
+			linker2.SetItemInst(upgrade_item);
+
 			auto upgrade_item_link = linker.GenerateLink().c_str();
 
 			Message(Chat::Experience, "Your [%s] has been upgraded into a [%s]!", item_link, upgrade_item_link);
