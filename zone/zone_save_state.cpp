@@ -337,6 +337,11 @@ inline std::vector<uint32_t> GetLootdropIds(const std::vector<ZoneStateSpawnsRep
 	return lootdrop_ids;
 }
 
+inline void LoadNPCStatePreSpawn(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
+{
+	LoadNPCEntityVariables(n, s.entity_variables);
+}
+
 inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 {
 	if (s.hp > 0) {
@@ -356,7 +361,6 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 	n->SetResumedFromZoneSuspend(false);
 	LoadLootStateData(zone, n, s.loot_data);
 	n->SetResumedFromZoneSuspend(true);
-	LoadNPCEntityVariables(n, s.entity_variables);
 	LoadNPCBuffs(n, s.buffs);
 
 	if (s.is_corpse) {
@@ -546,7 +550,7 @@ bool Zone::LoadZoneState(
 			npc->SetQueuedToCorpse();
 		}
 
-		LoadNPCEntityVariables(npc, s.entity_variables);
+		LoadNPCStatePreSpawn(zone, npc, s);
 
 		entity_list.AddNPC(npc, true, true);
 
@@ -601,7 +605,7 @@ inline void SaveNPCState(NPC *n, ZoneStateSpawnsRepository::ZoneStateSpawns &s)
 	auto buffs = n->GetBuffs();
 	if (buffs) {
 		std::vector<Buffs_Struct> valid_buffs;
-		for (int index = 0; index < n->GetMaxBuffSlots(); index++) {
+		for (int                  index = 0; index < n->GetMaxBuffSlots(); index++) {
 			if (buffs[index].spellid != 0 && buffs[index].spellid != 65535) {
 				valid_buffs.push_back(buffs[index]);
 			}

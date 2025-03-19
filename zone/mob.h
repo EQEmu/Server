@@ -1565,6 +1565,7 @@ public:
 
 	void ClearDataBucketCache();
 	bool IsGuildmaster() const;
+	bool IsDestroying() const { return m_destroying; }
 
 	Timer* GetGlobalBuffTimer() { return &m_global_buff_timer; }
 
@@ -1994,6 +1995,7 @@ private:
 	EQ::InventoryProfile m_inv;
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
 	bool m_manual_follow;
+	bool m_destroying;
 
 	void SetHeroicStrBonuses(StatBonuses* n);
 	void SetHeroicStaBonuses(StatBonuses* n);
