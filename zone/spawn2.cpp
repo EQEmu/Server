@@ -281,6 +281,7 @@ bool Spawn2::Process() {
 			for (auto &var : m_entity_variables) {
 				npc->SetEntityVariable(var.first, var.second);
 			}
+			m_entity_variables = {};
 		}
 
 		npc->SetResumedFromZoneSuspend(m_resumed_from_zone_suspend);
