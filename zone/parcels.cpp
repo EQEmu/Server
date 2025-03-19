@@ -766,16 +766,29 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 					}
 				}
 
-				if (AutoPutLootInInventory(*inst.get(), false, true)) {
-					MessageString(
-						Chat::Yellow,
-						PARCEL_DELIVERED_2,
-						merchant->GetCleanName(),
-						std::to_string(item_quantity).c_str(),
-						inst->GetItem()->Name,
-						p->second.from_name.c_str()
-					);
+				if (inst->GetItem()->Stackable) {
+					if (AutoPutLootInInventory(*inst.get(), false, true)) {
+						MessageString(
+							Chat::Yellow,
+							PARCEL_DELIVERED_2,
+							merchant->GetCleanName(),
+							std::to_string(item_quantity).c_str(),
+							inst->GetItem()->Name,
+							p->second.from_name.c_str()
+						);
+					}
+				} else {
+					if (AutoPutLootInInventory(*inst.get(), false, true)) {
+						MessageString(
+							Chat::Yellow,
+							PARCEL_DELIVERED,
+							merchant->GetCleanName(),
+							inst->GetItem()->Name,
+							p->second.from_name.c_str()
+						);
+					}
 				}
+
 
 				if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_RETRIEVE)) {
 					PlayerEvent::ParcelRetrieve e{};
