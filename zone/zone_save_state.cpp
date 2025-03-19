@@ -342,7 +342,9 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 			n->Depop();
 		}
 	}
-
+	
+	n->SetPosition(s.x, s.y, s.z);
+	n->SetHeading(s.heading);
 	n->SetResumedFromZoneSuspend(true);
 }
 
