@@ -84,6 +84,8 @@ inline uint32_t SeedLootTable()
 
 inline void TestSpawns()
 {
+	ClearState();
+
 	RunTest("Spawns > Ensure no state spawns exist before shutdown", 0, (int) GetStateSpawns().size());
 
 	zone->Shutdown();
@@ -245,10 +247,6 @@ inline void TestZoneVariables()
 	// Final shutdown and restart check
 	zone->Shutdown();
 	SetupStateZone();
-
-	for (auto &v: zone->GetVariables()) {
-		std::cout << "key: " << v << " value: " << zone->GetVariable(v) << std::endl;
-	}
 
 	for (const auto &[key, value]: test_variables) {
 		std::string expected_value = (key == "test_variable") ? "" : value;
@@ -605,13 +603,13 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	std::cout << "⚙\uFE0F> Running Zone State Tests... (soldungb)\n";
 	std::cout << "===========================================\n\n";
 
-	TestSpawns();
 	TestZoneVariables();
 	TestHpManaEnd();
 	TestBuffs();
 	TestLocationChange();
 	TestEntityVariables();
 	TestLoot();
+	TestSpawns();
 
 //	RunTest("State > No NPC's should be spawned after shutdown/bootup", 0, (int) entity_list.GetNPCList().size());
 
