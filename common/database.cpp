@@ -962,7 +962,7 @@ bool Database::UpdateNameByID(const int character_id, const std::string& new_nam
 	auto l = CharacterDataRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`id` = '{}'",
+			"`id` = {}",
 			character_id
 		)
 	);
