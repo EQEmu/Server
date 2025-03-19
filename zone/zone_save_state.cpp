@@ -689,6 +689,11 @@ void Zone::SaveZoneState()
 		return;
 	}
 
+	if (spawns.empty()) {
+		LogInfo("No zone state data to save");
+		return;
+	}
+
 	ZoneStateSpawnsRepository::InsertMany(database, spawns);
 
 	LogInfo("Saved [{}] zone state spawns", Strings::Commify(spawns.size()));

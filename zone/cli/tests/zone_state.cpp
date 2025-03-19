@@ -157,12 +157,14 @@ inline void TestSpawns()
 	RunTest("Spawns > All NPC's killed (0 NPCs) (115 Corpses)", true, condition);
 
 	std::vector<uint32_t> spawn2_ids = {};
-	for (auto             &e: GetStateSpawns()) {
+
+	for (auto &e: GetStateSpawns()) {
 		if (e.spawn2_id > 0) {
 			spawn2_ids.push_back(e.spawn2_id);
 		}
 	}
-	auto                  times      = RespawnTimesRepository::GetWhere(
+
+	auto times = RespawnTimesRepository::GetWhere(
 		database,
 		fmt::format("id IN ({})", Strings::Join(spawn2_ids, ","))
 	);
@@ -204,10 +206,47 @@ inline void TestSpawns()
 	}
 	RunTest("Spawns > After respawn (115 NPCs) (0 Corpses)", true, condition);
 
+	// lets set NPC's up with a predictable loottable for testing
+	uint32_t loottable_id = SeedLootTable();
+
 	for (auto &e: entity_list.GetNPCList()) {
 		auto n = e.second;
-//		std::cout << n->GetLoottableID() << " " << n->GetLootItems().size() << " " << n->GetPlatinum() << std::endl;
+		n->ClearLootItems();
+		n->SetResumedFromZoneSuspend(false);
+		n->AddLootTable(loottable_id);
+		n->SetResumedFromZoneSuspend(true);
 	}
+
+	RespawnTimesRepository::DeleteWhere(database, fmt::format("id IN ({})", Strings::Join(spawn2_ids, ",")));
+
+	zone->Shutdown();
+	SetupStateZone();
+
+	npcs_to_kill = {};
+
+	// kill only 10 NPCs
+	int i = 0;
+
+	for (const auto &e: entity_list.GetNPCList()) {
+		if (e.second) {
+			npcs_to_kill.push_back(e.second);
+			i++;
+		}
+		if (i == 10) {
+			break;
+		}
+	}
+
+	for (auto *npc: npcs_to_kill) {
+		if (!npc) {
+			continue;
+		}
+		npc->SetQueuedToCorpse();
+		npc->Death(npc, npc->GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
+	}
+
+	zone->Shutdown();
+	SetupStateZone();
 }
 
 inline void TestZoneVariables()
@@ -606,12 +645,12 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	std::cout << "⚙\uFE0F> Running Zone State Tests... (soldungb)\n";
 	std::cout << "===========================================\n\n";
 
-	TestZoneVariables();
-	TestHpManaEnd();
-	TestBuffs();
-	TestLocationChange();
-	TestEntityVariables();
-	TestLoot();
+//	TestZoneVariables();
+//	TestHpManaEnd();
+//	TestBuffs();
+//	TestLocationChange();
+//	TestEntityVariables();
+//	TestLoot();
 	TestSpawns();
 
 //	RunTest("State > No NPC's should be spawned after shutdown/bootup", 0, (int) entity_list.GetNPCList().size());

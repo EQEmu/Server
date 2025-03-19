@@ -44,6 +44,7 @@ inline void SetupZone(std::string zone_short_name, uint32 instance_id = 0) {
 	LogSys.SilenceConsoleLogging();
 
 	LogSys.log_settings[Logs::ZoneState].log_to_console = std::getenv("DEBUG") ? 3 : 0;
+	LogSys.log_settings[Logs::Info].log_to_console = std::getenv("DEBUG") ? 3 : 0;
 	LogSys.log_settings[Logs::Spawns].log_to_console = std::getenv("DEBUG") ? 3 : 0;
 
 	// boot shell zone for testing
