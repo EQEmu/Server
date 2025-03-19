@@ -2590,7 +2590,7 @@ bool Client::ChangeFirstName(const std::string in_firstname)
 
 	// update pp
 	memset(m_pp.name, 0, sizeof(m_pp.name));
-	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname);
+	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname.c_str());
 	strcpy(name, m_pp.name);
 	Save();
 
