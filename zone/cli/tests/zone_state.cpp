@@ -180,8 +180,6 @@ inline void TestSpawns()
 	Timer::RollForward(5);
 
 	zone->Process();
-	entity_list.MobProcess();
-	entity_list.Process();
 
 	condition = (int) entity_list.GetNPCList().size() == 115 && (int) entity_list.GetCorpseList().size() == 115;
 	if (!condition) {
@@ -189,7 +187,22 @@ inline void TestSpawns()
 	}
 	RunTest("Spawns > After respawn (115 NPCs) (115 Corpses)", true, condition);
 
+	for (auto &c: entity_list.GetCorpseList()) {
+		c.second->DepopNPCCorpse();
+	}
 
+	entity_list.CorpseProcess();
+
+	condition = (int) entity_list.GetNPCList().size() == 115 && (int) entity_list.GetCorpseList().size() == 0;
+	if (!condition) {
+		PrintEntityCounts();
+	}
+	RunTest("Spawns > After respawn (115 NPCs) (0 Corpses)", true, condition);
+
+	for (auto &e: entity_list.GetNPCList()) {
+		auto n = e.second;
+		std::cout << n->GetLoottableID() << " " << n->GetLootItems().size() << " " << n->GetPlatinum() << std::endl;
+	}
 }
 
 inline void TestZoneVariables()
