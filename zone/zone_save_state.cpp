@@ -523,6 +523,8 @@ bool Zone::LoadZoneState(
 			npc->SetQueuedToCorpse();
 		}
 
+		LoadNPCEntityVariables(n, s.entity_variables);
+
 		entity_list.AddNPC(npc, true, true);
 
 		LoadNPCState(zone, npc, s);
