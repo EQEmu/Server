@@ -131,7 +131,8 @@ Mob::Mob(
 	m_scan_close_mobs_timer(6000),
 	m_see_close_mobs_timer(1000),
 	m_mob_check_moving_timer(1000),
-	bot_attack_flag_timer(10000)
+	bot_attack_flag_timer(10000),
+	m_destroying(false)
 {
 	mMovementManager = &MobMovementManager::Get();
 	mMovementManager->AddMob(this);
@@ -531,6 +532,8 @@ Mob::Mob(
 
 Mob::~Mob()
 {
+	m_destroying = true;
+
 	entity_list.RemoveMobFromCloseLists(this);
 	m_close_mobs.clear();
 
