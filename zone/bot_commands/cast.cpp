@@ -546,7 +546,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 				tar = bot_iter;
 			}
 
-			bool los_required = bot_iter != tar && !IsAnyHealSpell(chosen_spell_id) && !IsPBAESpell(chosen_spell_id);
+			bool los_required = bot_iter != tar && BotSpellRequiresLoS(chosen_spell_id);
 			bot_iter->SetHasLoS(los_required ? bot_iter->DoLosChecks(new_tar) : true);
 
 			if (bot_iter->AttemptForcedCastSpell(tar, chosen_spell_id)) {

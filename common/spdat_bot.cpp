@@ -720,3 +720,11 @@ bool BotRequiresLoSToCast(uint16 spell_type, uint16 spell_id) {
 
 	return true;
 }
+
+bool BotSpellRequiresLoS(uint16 spell_id) {
+	if (IsAnyHealSpell(spell_id) || IsPBAESpell(spell_id)) {
+		return false;
+	}
+
+	return true;
+}
