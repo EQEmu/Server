@@ -630,15 +630,14 @@ public:
 
 	int GetKillCount(int race_id);
 	bool CheckTitle(int title_set);
-	void ChangePetName(int class_id);
 
 	void GrantNameChange();
 	bool IsNameChangeAllowed();
 	bool ClearNameChange();
 
-	void GrantNameChange();
-	bool IsNameChangeAllowed();
-	bool ClearNameChange();
+	void GrantPetNameChange(uint8 class_id);
+	bool IsPetNameChangeAllowed();
+	void ClearPetNameChange();
 
 	Lua_Expedition  CreateExpedition(luabind::object expedition_info);
 	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players);

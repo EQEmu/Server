@@ -3626,6 +3626,24 @@ bool Lua_Client::ClearNameChange()
 	return self->ClearNameChange();
 }
 
+void Lua_Client::GrantPetNameChange(uint8 class_id)
+{
+	Lua_Safe_Call_Void();
+	self->GrantPetNameChange(class_id);
+}
+
+bool Lua_Client::IsPetNameChangeAllowed()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsPetNameChangeAllowed();
+}
+
+void Lua_Client::ClearPetNameChange()
+{
+	Lua_Safe_Call_Void();
+	self->ClearPetNameChange();
+}
+
 std::string Lua_Client::GetBandolierName(uint8 bandolier_slot)
 {
 	Lua_Safe_Call_String();
