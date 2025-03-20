@@ -14,7 +14,7 @@ void SetName(Client *c, const Seperator *sep)
 		std::string new_name = sep->arg[2];
 		std::string old_name = t->GetCleanName();
 
-		if (t->ChangeFirstName(new_name.c_str(), c->GetCleanName())) {
+		if (t->ChangeFirstName(new_name, c->GetCleanName())) {
 			c->Message(
 				Chat::White,
 				fmt::format(

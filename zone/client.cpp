@@ -3475,7 +3475,7 @@ void Client::ChangeLastName(std::string last_name) {
 }
 
 // Deprecated, this packet does not actually work in ROF2
-bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
+bool Client::ChangeFirstName(const std::string in_firstname, const std::string gmname)
 {
 	if (!ChangeFirstName(in_firstname)) {
 		return false;
@@ -3484,9 +3484,9 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 	// send name update packet
 	auto outapp = new EQApplicationPacket(OP_GMNameChange, sizeof(GMName_Struct));
 	GMName_Struct* gmn=(GMName_Struct*)outapp->pBuffer;
-	strn0cpy(gmn->gmname,gmname,64);
+	strn0cpy(gmn->gmname,gmname.c_str(),64);
 	strn0cpy(gmn->oldname,GetName(),64);
-	strn0cpy(gmn->newname,in_firstname,64);
+	strn0cpy(gmn->newname,in_firstname.c_str(),64);
 	gmn->unknown[0] = 1;
 	gmn->unknown[1] = 1;
 	gmn->unknown[2] = 1;
@@ -3497,11 +3497,11 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 	return true;
 }
 
-bool Client::ChangeFirstName(const char* in_firstname)
+bool Client::ChangeFirstName(const std::string in_firstname)
 {
 	// check duplicate name
-	bool used_name = database.IsNameUsed((const char*) in_firstname) || database.IsPetNameUsed((const char*) in_firstname);
-	if (used_name || !database.CheckNameFilter((const char*) in_firstname, false)) {
+	bool used_name = database.IsNameUsed(in_firstname) || database.IsPetNameUsed(in_firstname);
+	if (used_name || !database.CheckNameFilter(in_firstname, false)) {
 		return false;
 	}
 
@@ -3510,12 +3510,12 @@ bool Client::ChangeFirstName(const char* in_firstname)
 		return false;
 
 	// Send Name Update to Clients
-	SendRename(this, GetName(), in_firstname);
-	SetName(in_firstname);
+	SendRename(this, GetName(), in_firstname.c_str());
+	SetName(in_firstname.c_str());
 
 	// update pp
 	memset(m_pp.name, 0, sizeof(m_pp.name));
-	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname);
+	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname.c_str());
 	strcpy(name, m_pp.name);
 	Save();
 
@@ -6082,7 +6082,7 @@ bool Client::IsNameChangeAllowed() {
 	}
 
 	auto k = GetScopedBucketKeys();
-	k.key = "NameChangesAllowed";
+	k.key = "name_change_allowed";
 
 	auto b = DataBucket::GetData(k);
 	if (!b.value.empty()) {
@@ -6098,7 +6098,7 @@ bool Client::ClearNameChange() {
 	}
 
 	auto k = GetScopedBucketKeys();
-	k.key = "NameChangesAllowed";
+	k.key = "name_change_allowed";
 
 	DataBucket::DeleteData(k);
 
@@ -6120,7 +6120,7 @@ void Client::InvokeChangeNameWindow(bool immediate) {
 void Client::GrantNameChange() {
 
 	auto k = GetScopedBucketKeys();
-	k.key = "NameChangesAllowed";
+	k.key = "name_change_allowed";
 	k.value = "allowed"; // potentially put a timestamp here
 	DataBucket::SetData(k);
 

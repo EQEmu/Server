@@ -683,7 +683,6 @@ public:
 	void SetSitManaPct(uint8 value) { _SitManaPct = value; }
 
 	// Spell lists
-	void CheckBotSpells();
 	std::list<BotSpellTypeOrder> GetSpellTypesPrioritized(uint8 priority_type);
 	static uint16 GetParentSpellType(uint16 spell_type);
 	static bool IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id);
