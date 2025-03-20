@@ -2497,16 +2497,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_AllInstrumentMod:
 			{
-				if(effect_value > new_bonus->singingMod)
-					new_bonus->singingMod += effect_value;
-				if(effect_value > new_bonus->brassMod)
-					new_bonus->brassMod += effect_value;
-				if(effect_value > new_bonus->percussionMod)
-					new_bonus->percussionMod += effect_value;
-				if(effect_value > new_bonus->windMod)
-					new_bonus->windMod += effect_value;
-				if(effect_value > new_bonus->stringedMod)
-					new_bonus->stringedMod += effect_value;
+				new_bonus->bardModExtra += effect_value;
 				break;
 			}
 

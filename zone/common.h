@@ -397,6 +397,8 @@ struct StatBonuses {
 	int32	hatemod;
 	int64	EnduranceReduction;
 
+	uint32 bardModExtra;
+
 	int32	StrikeThrough;						// PoP: Strike Through %
 	int32	MeleeMitigation;					//i = Shielding
 	int32	MeleeMitigationEffect;				//i = Spell Effect Melee Mitigation

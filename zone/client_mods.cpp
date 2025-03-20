@@ -1605,7 +1605,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 
 	LogSpells("Name [{}] spell [{}] mod [{}] modcap [{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 
-	return effectmod;
+	return effectmod + spellbonuses.bardModExtra + itembonuses.bardModExtra + aabonuses.bardModExtra;
 }
 
 void Client::CalcMaxEndurance()
