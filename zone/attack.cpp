@@ -6557,26 +6557,29 @@ int32 Mob::RuneAbsorb(int64 damage, uint16 type)
 			if ((active_rune || bard_rune) && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)) {
 				int melee_rune_left = buffs[slot].melee_rune;
 
-				LogCombat("Melee Rune - Slot [{}] SpellID [{}] Remaining [{}] Damage [{}]", slot, buffs[slot].spellid, melee_rune_left, damage);
+				if (bard_rune) {
+					damage -= melee_rune_left;
+				} else {
+					LogCombat("Melee Rune - Slot [{}] SpellID [{}] Remaining [{}] Damage [{}]", slot, buffs[slot].spellid, melee_rune_left, damage);
 
-				if (melee_rune_left > damage)
-				{
-					melee_rune_left -= damage;
-					buffs[slot].melee_rune = melee_rune_left;
-
-					return -6;
-				}
-				else
-				{
-					buffs[slot].melee_rune = 0;
-
-					if (melee_rune_left > 0) {
-						damage -= melee_rune_left;
-					}
-
-					if (!bard_rune && !TryFadeEffect(slot))
+					if (melee_rune_left > damage)
 					{
-						BuffFadeBySlot(slot);
+						melee_rune_left -= damage;
+						buffs[slot].melee_rune = melee_rune_left;
+
+						return -6;
+					}
+					else
+					{
+
+						if (melee_rune_left > 0) {
+							damage -= melee_rune_left;
+						}
+
+						if (!TryFadeEffect(slot))
+						{
+							BuffFadeBySlot(slot);
+						}
 					}
 				}
 			}
@@ -6590,27 +6593,30 @@ int32 Mob::RuneAbsorb(int64 damage, uint16 type)
 
 			if ((active_rune || bard_rune) && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)) {
 				int magic_rune_left = buffs[slot].magic_rune;
-				LogCombat("Magic Rune - Slot [{}] SpellID [{}] Remaining [{}] Damage [{}]", slot, buffs[slot].spellid, magic_rune_left, damage);
 
-				if (magic_rune_left > damage)
-				{
-					magic_rune_left -= damage;
-					buffs[slot].magic_rune = magic_rune_left;
+				if (bard_rune) {
+					damage -= magic_rune_left;
+				} else {
+					LogCombat("Magic Rune - Slot [{}] SpellID [{}] Remaining [{}] Damage [{}]", slot, buffs[slot].spellid, magic_rune_left, damage);
 
-					return 0;
-				}
-				else
-				{
-					buffs[slot].magic_rune = 0;
-
-					if (magic_rune_left > 0)
+					if (magic_rune_left > damage)
 					{
-						damage -= magic_rune_left;
+						magic_rune_left -= damage;
+						buffs[slot].magic_rune = magic_rune_left;
+
+						return 0;
 					}
-
-					if (!bard_rune && !TryFadeEffect(slot))
+					else
 					{
-						BuffFadeBySlot(slot);
+						if (magic_rune_left > 0)
+						{
+							damage -= magic_rune_left;
+						}
+
+						if (!TryFadeEffect(slot))
+						{
+							BuffFadeBySlot(slot);
+						}
 					}
 				}
 			}

@@ -1406,7 +1406,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (buffslot > -1) {
 					int bonus_value = caster->GetExtraSpellAmt(spell_id, caster->GetSharedHealAmount(), effect_value);
 					if (IsBardSong(spell_id) && bonus_value > 0) {
-						bonus_value = std::ceil(RuleR(Custom, ItemExtraSpellAmtBardFactor) * bonus_value);
+						bonus_value = 0;
 					}
 
 					buffs[buffslot].melee_rune = effect_value + bonus_value;
@@ -1451,7 +1451,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (effect_value > 0 && buffslot > -1) {
 					int bonus_value = caster->GetExtraSpellAmt(spell_id, caster->GetHealAmt(), effect_value);
 					if (IsBardSong(spell_id) && bonus_value > 0) {
-						bonus_value = std::ceil(RuleR(Custom, ItemExtraSpellAmtBardFactor) * bonus_value);
+						bonus_value = 0;
 					}
 
 					buffs[buffslot].magic_rune = effect_value + bonus_value;
@@ -1465,7 +1465,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (buffslot > -1) {
 					int bonus_value = caster->GetExtraSpellAmt(spell_id, caster->GetHealAmt(), effect_value);
 					if (IsBardSong(spell_id) && bonus_value > 0) {
-						bonus_value = std::ceil(RuleR(Custom, ItemExtraSpellAmtBardFactor) * bonus_value);
+						bonus_value = 0;
 					}
 
 					int eff_value = spells[spell_id].max_value[i];
@@ -1496,7 +1496,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (buffslot > -1) {
 					int bonus_value = caster->GetExtraSpellAmt(spell_id, caster->GetHealAmt(), effect_value);
 					if (IsBardSong(spell_id) && bonus_value > 0) {
-						bonus_value = std::ceil(RuleR(Custom, ItemExtraSpellAmtBardFactor) * bonus_value);
+						bonus_value = 0;
 					}
 
 					int eff_value = spells[spell_id].max_value[i];
@@ -1511,7 +1511,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (buffslot > -1) {
 					int bonus_value = caster->GetExtraSpellAmt(spell_id, caster->GetHealAmt(), effect_value);
 					if (IsBardSong(spell_id) && bonus_value > 0) {
-						bonus_value = std::ceil(RuleR(Custom, ItemExtraSpellAmtBardFactor) * bonus_value);
+						bonus_value = 0;
 					}
 
 					int eff_value = spells[spell_id].max_value[i];

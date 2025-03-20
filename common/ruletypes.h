@@ -1215,7 +1215,6 @@ RULE_REAL(Custom, 	PowerSourceItemTier2RateFloor,			0.1, "Smallest percentage it
 RULE_BOOL(Custom, 	UseDynamicItemDiscoveryTags, 			true, "Enable appfending Discovered By: items using the charmfile method")
 RULE_BOOL(Custom, 	TauntTogglesPetTanking, 				true, "Enable to let pets hold aggro while taunt is on")
 RULE_BOOL(Custom, 	EnablePetBags, 							true, "Enable 'Pet Bag' features")
-RULE_REAL(Custom,  	ItemExtraSpellAmtBardFactor, 			0.10, "Factor to multiple rune healamt bonus values by for bard songs")
 RULE_BOOL(Custom,   MultipleTwoHandedProcs,					false, "Allow two-handed weapons to proc multiple procs (such as augments)")
 RULE_INT(Custom,   	DevastatingFrenzyRateModifier, 			0, "Subtract this value from the chance for Devastating Frenzy to trigger")
 RULE_REAL(Custom,   DevastatingFrenzyDamageMultiplier, 		1.0, "Apply this multiplier for each 20% missing hp from target whenever Devastating Frenzy triggers")
