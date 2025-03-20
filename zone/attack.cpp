@@ -6556,6 +6556,7 @@ int32 Mob::RuneAbsorb(int64 damage, uint16 type)
 
 			if ((active_rune || bard_rune) && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)) {
 				int melee_rune_left = buffs[slot].melee_rune;
+
 				LogCombat("Melee Rune - Slot [{}] SpellID [{}] Remaining [{}] Damage [{}]", slot, buffs[slot].spellid, melee_rune_left, damage);
 
 				if (melee_rune_left > damage)
@@ -6567,11 +6568,16 @@ int32 Mob::RuneAbsorb(int64 damage, uint16 type)
 				}
 				else
 				{
-					if (melee_rune_left > 0)
+					buffs[slot].melee_rune = 0;
+
+					if (melee_rune_left > 0) {
 						damage -= melee_rune_left;
+					}
 
 					if (!bard_rune && !TryFadeEffect(slot))
+					{
 						BuffFadeBySlot(slot);
+					}
 				}
 			}
 		}
@@ -6595,11 +6601,17 @@ int32 Mob::RuneAbsorb(int64 damage, uint16 type)
 				}
 				else
 				{
+					buffs[slot].melee_rune = 0;
+
 					if (magic_rune_left > 0)
+					{
 						damage -= magic_rune_left;
+					}
 
 					if (!bard_rune && !TryFadeEffect(slot))
+					{
 						BuffFadeBySlot(slot);
+					}
 				}
 			}
 		}
