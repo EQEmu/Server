@@ -3496,6 +3496,24 @@ std::string Lua_Client::GetAccountBucketRemaining(std::string bucket_name)
 	return self->GetAccountBucketRemaining(bucket_name);
 }
 
+void Lua_Client::GrantNameChange()
+{
+	Lua_Safe_Call_Void();
+	self->GrantNameChange();
+}
+
+bool Lua_Client::IsNameChangeAllowed()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsNameChangeAllowed();
+}
+
+bool Lua_Client::ClearNameChange()
+{
+	Lua_Safe_Call_Bool();
+	return self->ClearNameChange();
+}
+
 std::string Lua_Client::GetBandolierName(uint8 bandolier_slot)
 {
 	Lua_Safe_Call_String();
@@ -3635,6 +3653,7 @@ luabind::scope lua_register_client() {
 	.def("CashReward", &Lua_Client::CashReward)
 	.def("ChangeLastName", (void(Lua_Client::*)(std::string))&Lua_Client::ChangeLastName)
 	.def("GrantPetNameChange", &Lua_Client::GrantPetNameChange)
+	.def("ClearNameChange", &Lua_Client::ClearNameChange)
 	.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob,int))&Lua_Client::CheckIncreaseSkill)
@@ -3851,6 +3870,7 @@ luabind::scope lua_register_client() {
 	.def("GrantAllAAPoints", (void(Lua_Client::*)(uint8,bool))&Lua_Client::GrantAllAAPoints)
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
+	.def("GrantNameChange", &Lua_Client::GrantNameChange)
 	.def("GuildID", (uint32(Lua_Client::*)(void))&Lua_Client::GuildID)
 	.def("GuildRank", (int(Lua_Client::*)(void))&Lua_Client::GuildRank)
 	.def("HasAugmentEquippedByID", (bool(Lua_Client::*)(uint32))&Lua_Client::HasAugmentEquippedByID)
@@ -3881,6 +3901,7 @@ luabind::scope lua_register_client() {
 	.def("IsInAGuild", (bool(Lua_Client::*)(void))&Lua_Client::IsInAGuild)
 	.def("IsLD", (bool(Lua_Client::*)(void))&Lua_Client::IsLD)
 	.def("IsMedding", (bool(Lua_Client::*)(void))&Lua_Client::IsMedding)
+	.def("IsNameChangeAllowed", &Lua_Client::IsNameChangeAllowed)
 	.def("IsRaidGrouped", (bool(Lua_Client::*)(void))&Lua_Client::IsRaidGrouped)
 	.def("IsSitting", (bool(Lua_Client::*)(void))&Lua_Client::IsSitting)
 	.def("IsStanding", (bool(Lua_Client::*)(void))&Lua_Client::IsStanding)

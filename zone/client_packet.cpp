@@ -826,6 +826,10 @@ void Client::CompleteConnect()
 		if (IsPetNameChangeAllowed() && !RuleB(Pets, AlwaysAllowPetRename)) {
 			InvokeChangePetName(false);
 		}
+
+		if (IsNameChangeAllowed() && !RuleB(Character, AlwaysAllowNameChange)) {
+			InvokeChangeNameWindow(false);
+		}
 	}
 
 	if(ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
@@ -4256,7 +4260,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 		else {
 			OnDisconnect(true);
 		}
-		
+
 		return;
 	}
 
@@ -4548,14 +4552,14 @@ void Client::Handle_OP_ChangePetName(const EQApplicationPacket *app) {
 
 	auto p = (ChangePetName_Struct *) app->pBuffer;
 	if (!IsPetNameChangeAllowed()) {
-		p->response_code = ChangePetNameResponse::NotEligible;
+		p->response_code = ChangeNameResponse::Ineligible;
 		QueuePacket(app);
 		return;
 	}
 
-	p->response_code = ChangePetNameResponse::Denied;
+	p->response_code = ChangeNameResponse::Denied;
 	if (ChangePetName(p->new_pet_name)) {
-		p->response_code = ChangePetNameResponse::Accepted;
+		p->response_code = ChangeNameResponse::Accepted;
 	}
 
 	QueuePacket(app);
@@ -6776,6 +6780,21 @@ void Client::Handle_OP_GMLastName(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 {
+	if (app->size == sizeof(AltChangeName_Struct)) {
+		auto p = (AltChangeName_Struct *) app->pBuffer;
+
+		if (!IsNameChangeAllowed()) {
+			p->response_code = ChangeNameResponse::Ineligible;
+			QueuePacket(app);
+			return;
+		}
+
+		p->response_code = ChangeFirstName(p->new_name) ? ChangeNameResponse::Accepted : ChangeNameResponse::Denied;
+		QueuePacket(app);
+
+		return;
+	}
+
 	if (app->size != sizeof(GMName_Struct)) {
 		LogError("Wrong size: OP_GMNameChange, size=[{}], expected [{}]", app->size, sizeof(GMName_Struct));
 		return;

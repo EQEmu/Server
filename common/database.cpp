@@ -955,6 +955,29 @@ bool Database::UpdateName(const std::string& old_name, const std::string& new_na
 	return CharacterDataRepository::UpdateOne(*this, e);
 }
 
+bool Database::UpdateNameByID(const int character_id, const std::string& new_name)
+{
+	LogInfo("Renaming [{}] to [{}]", character_id, new_name);
+
+	auto l = CharacterDataRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`id` = {}",
+			character_id
+		)
+	);
+
+	if (l.empty()) {
+		return false;
+	}
+
+	auto& e = l.front();
+
+	e.name = new_name;
+
+	return CharacterDataRepository::UpdateOne(*this, e);
+}
+
 bool Database::IsNameUsed(const std::string& name)
 {
 	if (RuleB(Bots, Enabled)) {
@@ -980,6 +1003,20 @@ bool Database::IsNameUsed(const std::string& name)
 	);
 
 	return !character_data.empty();
+}
+
+// Players cannot have the same name as a pet vanity name, or memory corruption occurs.
+bool Database::IsPetNameUsed(const std::string& name)
+{
+	const auto& pet_name_data = CharacterPetNameRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`name` = '{}'",
+			Strings::Escape(name)
+		)
+	);
+
+	return !pet_name_data.empty();
 }
 
 uint32 Database::GetServerType()

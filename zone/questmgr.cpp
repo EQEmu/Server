@@ -1310,15 +1310,14 @@ void QuestManager::rename(std::string name) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
 		std::string current_name = initiator->GetName();
-		if (initiator->ChangeFirstName(name.c_str(), current_name.c_str())) {
+		if (initiator->ChangeFirstName(name)) {
 			initiator->Message(
 				Chat::White,
 				fmt::format(
-					"Successfully renamed to {}, kicking to character select.",
+					"Successfully renamed to {}.",
 					name
 				).c_str()
 			);
-			initiator->Kick("Name was changed.");
 		} else {
 			initiator->Message(
 				Chat::Red,

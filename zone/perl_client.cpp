@@ -3261,6 +3261,21 @@ std::string Perl_Client_GetAccountBucketRemaining(Client* self, std::string buck
 	return self->GetAccountBucketRemaining(bucket_name);
 }
 
+void Perl_Client_GrantNameChange(Client* self)
+{
+	self->GrantNameChange();
+}
+
+bool Perl_Client_IsNameChangeAllowed(Client* self)
+{
+	return self->IsNameChangeAllowed();
+}
+
+bool Perl_Client_ClearNameChange(Client* self)
+{
+	return self->ClearNameChange();
+}
+
 std::string Perl_Client_GetBandolierName(Client* self, uint8 bandolier_slot)
 {
 	return self->GetBandolierName(bandolier_slot);
@@ -3393,6 +3408,7 @@ void perl_register_client()
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
 	package.add("GrantPetNameChange", &Perl_Client_GrantPetNameChange);
+	package.add("ClearNameChange", (bool(*)(Client*))&Perl_Client_ClearNameChange);
 	package.add("CharacterID", &Perl_Client_CharacterID);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
@@ -3607,6 +3623,7 @@ void perl_register_client()
 	package.add("GrantAllAAPoints", (void(*)(Client*, uint8, bool))&Perl_Client_GrantAllAAPoints);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int))&Perl_Client_GrantAlternateAdvancementAbility);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int, bool))&Perl_Client_GrantAlternateAdvancementAbility);
+	package.add("GrantNameChange", (void(*)(Client*))&Perl_Client_GrantNameChange);
 	package.add("GuildID", &Perl_Client_GuildID);
 	package.add("GuildRank", &Perl_Client_GuildRank);
 	package.add("HasAugmentEquippedByID", &Perl_Client_HasAugmentEquippedByID);
@@ -3637,6 +3654,7 @@ void perl_register_client()
 	package.add("IsInAGuild", &Perl_Client_IsInAGuild);
 	package.add("IsLD", &Perl_Client_IsLD);
 	package.add("IsMedding", &Perl_Client_IsMedding);
+	package.add("IsNameChangeAllowed", (bool(*)(Client*))&Perl_Client_IsNameChangeAllowed);
 	package.add("IsRaidGrouped", &Perl_Client_IsRaidGrouped);
 	package.add("IsSitting", &Perl_Client_IsSitting);
 	package.add("IsStanding", &Perl_Client_IsStanding);

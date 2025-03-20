@@ -14,7 +14,7 @@ void SetName(Client *c, const Seperator *sep)
 		std::string new_name = sep->arg[2];
 		std::string old_name = t->GetCleanName();
 
-		if (t->ChangeFirstName(new_name.c_str(), c->GetCleanName())) {
+		if (t->ChangeFirstName(new_name, c->GetCleanName())) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -24,17 +24,13 @@ void SetName(Client *c, const Seperator *sep)
 				).c_str()
 			);
 
-			c->Message(Chat::White, "Sending player to char select.");
-
-			t->Kick("Name was changed");
-
 			return;
 		}
 
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Unable to rename {}. Check that the new name '{}' isn't already taken.",
+				"Unable to rename {}. Check that the new name '{}' isn't already taken (Including Pet Names), or isn't invalid",
 				old_name,
 				new_name
 			).c_str()
