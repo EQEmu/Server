@@ -354,12 +354,12 @@ bool Client::Process() {
 			}
 		}
 
-		if (AutoFireEnabled()) {
+		if (AutoFireEnabled() && may_use_attacks) {
 			if (GetTarget() == this) {
 				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
 				auto_fire = false;
 			}
-			EQ::ItemInstance *ranged = GetInv().GetItem(EQ::invslot::slotRange);
+			EQ::ItemInstance* ranged = GetInv().GetItem(EQ::invslot::slotRange);
 			if (ranged) {
 				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQ::item::ItemTypeBow) {
 					if (ranged_timer.Check(false)) {
@@ -367,33 +367,58 @@ bool Client::Process() {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
-									if (RangedAttack(GetTarget()) && CheckDoubleRangedAttack()) {
-										RangedAttack(GetTarget(), true);
+									if (RangedAttack(GetTarget()) && (CheckDoubleRangedAttack() || (RuleB(Custom, RangedDoubleAndTripleAttack) && CanThisClassDoubleAttack() && CheckDoubleAttack()))) {
+										if (RangedAttack(GetTarget(), true) && RuleB(Custom, RangedDoubleAndTripleAttack) && CanThisClassTripleAttack() && CheckTripleAttack()) {
+											RangedAttack(GetTarget(), true);
+										}
 									}
-								} else {
+									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack()) {
+										CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
+									}
+									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack()) {
+										CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
+									}
+								}
+								else {
 									ranged_timer.Start();
 								}
-							} else {
+							}
+							else {
 								ranged_timer.Start();
 							}
-						} else {
+						}
+						else {
 							ranged_timer.Start();
 						}
 					}
-				} else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
+				}
+				else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
-									ThrowingAttack(GetTarget());
-								} else {
+									if (ThrowingAttack(GetTarget()) && (CheckDoubleRangedAttack() || (RuleB(Custom, RangedDoubleAndTripleAttack) && CanThisClassDoubleAttack() && CheckDoubleAttack()))) {
+										if (ThrowingAttack(GetTarget(), true) && RuleB(Custom, RangedDoubleAndTripleAttack) && CanThisClassTripleAttack() && CheckTripleAttack()) {
+											ThrowingAttack(GetTarget(), true);
+										}
+									}
+									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassDoubleAttack()) {
+										CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
+									}
+									if (RuleB(Custom, DoubleAttackSkillRanged) && CanThisClassTripleAttack()) {
+										CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
+									}
+								}
+								else {
 									ranged_timer.Start();
 								}
-							} else {
+							}
+							else {
 								ranged_timer.Start();
 							}
-						} else {
+						}
+						else {
 							ranged_timer.Start();
 						}
 					}
