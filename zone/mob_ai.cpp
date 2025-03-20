@@ -2157,6 +2157,10 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 				continue;
 			}
 
+			if (RuleB(Custom, ConditionalPetRampageImmunity) && m_target->GetOwner() && m_target->GetOwner()->IsClient() && m_target->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
+				continue;
+			}
+
 			if (m_target->IsCorpse()) {
 				LogAggroDetail("[{}] is on [{}]'s rampage list", m_target->GetCleanName(), GetCleanName());
 				RemoveFromRampageList(m_target, true);

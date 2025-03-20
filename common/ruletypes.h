@@ -1267,6 +1267,7 @@ RULE_INT(Custom,   	SilenceImmunityTimerMultiplier,			3, "Multiplier for the amo
 RULE_BOOL(Custom,   EnableLoreEquip, 						false, "Enable to treat LORE tag as LORE-EQUIP for equippable items.")
 RULE_BOOL(Custom,   PlayerDispelCures, 						true, "Enable to treat player-cast SE_CancelMagic as a 'cure' for no-counter detrimentals")
 RULE_BOOL(Custom, 	DisablePetGroupSpells,					false, "Enable to force group spells to be forced to 'self' spells when cast by pets")
+RULE_BOOL(Custom,   ConditionalPetRampageImmunity, 			false, "Enable to make pets which are not taunting immune to rampage")
 
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
