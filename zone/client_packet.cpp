@@ -3291,15 +3291,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						break;
 					}
 
-					if (RuleB(Custom, EnableLoreEquip) && EQ::ValueWithin(in_augment->container_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END) && m_inv.HasAugmentEquippedByID(new_aug->GetID())) {
-						EQ::SayLinkEngine linker;
-						linker.SetLinkType(EQ::saylink::SayLinkItemData);
-						linker.SetItemData(new_aug->GetItem());
-
-						Message(Chat::Loot, fmt::format("Duplicate LORE item [{}] cannot be equipped.", linker.GenerateLink()).c_str());
-						break;
-					}
-
 					if (
 						((tobe_auged->IsAugmentSlotAvailable(new_aug->GetAugmentType(), in_augment->augment_index)) != -1) &&
 						tobe_auged->AvailableWearSlot(new_aug->GetItem()->Slots)
