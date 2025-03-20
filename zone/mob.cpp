@@ -8695,7 +8695,7 @@ bool Mob::CheckDoorLoSCheat(Mob* other) {
 
 	const auto& v = Strings::Split(zones_to_check, ",");
 
-	if (zones_to_check == "all" || std::find(v.begin(), v.end(), std::to_string(zone->GetZoneID())) != v.end()) {
+	if (zones_to_check == "all" || Strings::Contains(v, std::to_string(zone->GetZoneID()))) {
 		for (auto itr: entity_list.GetDoorsList()) {
 			Doors *d = itr.second;
 
