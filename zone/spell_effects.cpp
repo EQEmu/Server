@@ -1751,6 +1751,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						for (const auto hater : caster->GetHateList()) {
 							auto mob = hater->entity_on_hatelist;
 							if (mob == this) {
+								int hate = caster->GetHateAmount(this);
+								caster->SetHateAmountOnEnt(this, hate - 1000);
 								continue;
 							}
 							valid_targets.push_back(mob);
