@@ -331,10 +331,6 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 	if (!item->LoreFlag) { return false; }
 	if (item->LoreGroup == 0) { return false; }
 
-	if (RuleB(Custom, EnableLoreEquip) && item->Slots) {
-		return false;
-	}
-
 	if (item->LoreGroup == -1) // Standard lore items; look everywhere except the shared bank, return the result
 		return (m_inv.HasItem(item->ID, 0, ~invWhereSharedBank) != INVALID_INDEX);
 
@@ -1878,26 +1874,6 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 		}
 		return true;
-	}
-
-	if (RuleB(Custom, EnableLoreEquip)) {
-		if (move_in->from_slot == EQ::invslot::slotCursor && EQ::ValueWithin(move_in->to_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
-			auto itm = m_inv.GetItem(move_in->from_slot) ? m_inv.GetItem(move_in->from_slot) : nullptr;
-
-			bool lore_flag = itm && itm->GetItem()->LoreGroup == -1 && m_inv.HasItem(itm->GetID(), 0, invWhereWorn) != INVALID_INDEX;
-
-			if (!lore_flag && itm) {
-				for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-					auto aug = itm->GetAugment(i);
-					lore_flag = aug && aug->GetItem()->LoreGroup == -1 && m_inv.HasItem(aug->GetID(), 0, invWhereWorn) != INVALID_INDEX;
-				}
-			}
-
-			if (lore_flag) {
-				MessageString(Chat::Loot, 290);
-				return false;
-			}
-		}
 	}
 
 	if (move_in->to_slot == (uint32)INVALID_INDEX) {

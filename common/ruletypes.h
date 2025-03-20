@@ -1263,8 +1263,6 @@ RULE_INT(Custom, 	SE_DamageModifierMaxCumulativeValue, 	300, "Maximum cumulative
 
 RULE_INT(Custom,   	StunImmunityTimerMultiplier,			3, "Multiplier for the amount of time a player should be immune to stun after being stunned.")
 RULE_INT(Custom,   	SilenceImmunityTimerMultiplier,			3, "Multiplier for the amount of time a player should be immune to silence after being silenced.")
-
-RULE_BOOL(Custom,   EnableLoreEquip, 						false, "Enable to treat LORE tag as LORE-EQUIP for equippable items.")
 RULE_BOOL(Custom,   PlayerDispelCures, 						true, "Enable to treat player-cast SE_CancelMagic as a 'cure' for no-counter detrimentals")
 RULE_BOOL(Custom, 	DisablePetGroupSpells,					false, "Enable to force group spells to be forced to 'self' spells when cast by pets")
 RULE_BOOL(Custom,   ConditionalPetRampageImmunity, 			false, "Enable to make pets which are not taunting immune to rampage")
