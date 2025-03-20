@@ -1476,16 +1476,9 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* caster, int16 spell_id, uint16 spell_typ
 			if (!caster->IsValidMezTarget(caster->GetOwner(), npc, spell_id)) {
 				continue;
 			}
-
-			if (is_pbae_spell) {
-				if (spell_ae_range < Distance(caster->GetPosition(), npc->GetPosition())) {
-					continue;
-				}
-			}
-			else {
-				if (spell_range < Distance(caster->GetPosition(), npc->GetPosition())) {
-					continue;
-				}
+			
+			if ((is_pbae_spell ? spell_ae_range : spell_range) < Distance(caster->GetPosition(), npc->GetPosition())) {
+				continue;
 			}
 
 			if (AE) {
