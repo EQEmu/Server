@@ -354,6 +354,16 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 		n->SetEndurance(s.endurance);
 	}
 
+	// if these are zero for some reason, we need to reset the max hp
+	if (!s.is_corpse) {
+		if (s.hp == 0 || n->GetHP() == 0) {
+			n->SetMaxHP();
+		}
+		if (s.mana == 0 || n->GetMana() == 0) {
+			n->RestoreMana();
+		}
+	}
+
 	if (s.grid) {
 		n->AssignWaypoints(s.grid, s.current_waypoint);
 	}
