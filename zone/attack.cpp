@@ -6601,7 +6601,7 @@ int32 Mob::RuneAbsorb(int64 damage, uint16 type)
 				}
 				else
 				{
-					buffs[slot].melee_rune = 0;
+					buffs[slot].magic_rune = 0;
 
 					if (magic_rune_left > 0)
 					{
