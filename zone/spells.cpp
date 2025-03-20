@@ -1616,7 +1616,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		// check for regain concentration
 		if
 		(
-			attacked_count > 0 ||
+			(attacked_count > 0  && !(RuleB(Custom, DontInterruptHealsByMelee) && IsAnyHealSpell(spell_id)))||
 			GetX() != GetSpellX() ||
 			GetY() != GetSpellY()
 		)
