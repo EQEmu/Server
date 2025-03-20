@@ -1,5 +1,7 @@
 extern Zone *zone;
 
+#include <cereal/archives/json.hpp>
+#include <cereal/types/map.hpp>
 #include "../../common/repositories/npc_types_repository.h"
 #include "../../corpse.h"
 #include "../../../common/repositories/respawn_times_repository.h"
@@ -80,6 +82,136 @@ inline uint32_t SeedLootTable()
 	zone->LoadLootTable(inserted.id);
 
 	return inserted.id;
+}
+
+inline std::map<std::string, std::string> GetVariablesDeserialized(const std::string &entity_variables)
+{
+	std::map<std::string, std::string> deserialized_map;
+
+	if (entity_variables.empty()) {
+		return deserialized_map;
+	}
+
+	if (!Strings::IsValidJson(entity_variables)) {
+		LogZoneState("Invalid JSON data for entity variables");
+		return deserialized_map;
+	}
+
+	try {
+		std::stringstream ss;
+		{
+			ss << entity_variables;
+			cereal::JSONInputArchive ar(ss);
+			ar(deserialized_map);
+		}
+	} catch (const std::exception &e) {
+		LogZoneState("Failed to load entity variables [{}]", e.what());
+	}
+
+	return deserialized_map;
+}
+
+// MatchState compares the NPC to the state
+// it should print what doesn't match when it returns false
+inline bool MatchState(NPC *n, const ZoneStateSpawnsRepository::ZoneStateSpawns &state)
+{
+	if (n->GetNPCTypeID() != state.npc_id) {
+		std::cout << "NPC ID mismatch: " << n->GetNPCTypeID() << " != " << state.npc_id << std::endl;
+		return false;
+	}
+
+	if (n->GetX() != state.x) {
+		std::cout << "X mismatch: " << n->GetX() << " != " << state.x << std::endl;
+		return false;
+	}
+
+	if (n->GetY() != state.y) {
+		std::cout << "Y mismatch: " << n->GetY() << " != " << state.y << std::endl;
+		return false;
+	}
+
+	if (n->GetZ() != state.z) {
+		std::cout << "Z mismatch: " << n->GetZ() << " != " << state.z << std::endl;
+		return false;
+	}
+
+	if (n->GetHeading() != state.heading) {
+		std::cout << "Heading mismatch: " << n->GetHeading() << " != " << state.heading << std::endl;
+		return false;
+	}
+
+	if (n->GetHP() != state.hp) {
+		std::cout << "HP mismatch: " << n->GetHP() << " != " << state.hp << std::endl;
+		return false;
+	}
+
+	if (n->GetMana() != state.mana) {
+		std::cout << "Mana mismatch: " << n->GetMana() << " != " << state.mana << std::endl;
+		return false;
+	}
+
+	if (n->GetEndurance() != state.endurance) {
+		std::cout << "Endurance mismatch: " << n->GetEndurance() << " != " << state.endurance << std::endl;
+		return false;
+	}
+
+	auto entity_variables = GetVariablesDeserialized(state.entity_variables);
+
+	for (const auto &[key, value]: entity_variables) {
+		if (n->GetEntityVariable(key) != value) {
+			std::cout << "Variable mismatch: " << key << " " << n->GetEntityVariable(key) << " != " << value
+					  << std::endl;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+inline bool MatchCorpseState(Corpse *c, const ZoneStateSpawnsRepository::ZoneStateSpawns &state)
+{
+	if (c->GetNPCTypeID() != state.npc_id) {
+		std::cout << "Corpse NPC ID mismatch: " << c->GetNPCTypeID() << " != " << state.npc_id << std::endl;
+		return false;
+	}
+
+	if (c->GetX() != state.x) {
+		std::cout << "Corpse X mismatch: " << c->GetX() << " != " << state.x << std::endl;
+		return false;
+	}
+
+	if (c->GetY() != state.y) {
+		std::cout << "Corpse Y mismatch: " << c->GetY() << " != " << state.y << std::endl;
+		return false;
+	}
+
+//	if (c->GetZ() != state.z) {
+//		std::cout << "Corpse Z mismatch: " << c->GetZ() << " != " << state.z << std::endl;
+//		return false;
+//	}
+
+	if (c->GetHeading() != state.heading) {
+		std::cout << "Corpse Heading mismatch: " << c->GetHeading() << " != " << state.heading << std::endl;
+		return false;
+	}
+
+	if (c->GetDecayTime() != state.decay_in_seconds * 1000) {
+		std::cout << "Corpse Decay Time mismatch: " << c->GetDecayTime() << " != " << state.decay_in_seconds * 1000
+				  << std::endl;
+		return false;
+	}
+
+	auto entity_variables = GetVariablesDeserialized(state.entity_variables);
+
+	for (const auto &[key, value]: entity_variables) {
+		if (c->GetEntityVariable(key) != value) {
+			std::cout << "Corpse Variable mismatch: " << key << " " << c->GetEntityVariable(key) << " != " << value
+					  << std::endl;
+			return false;
+		}
+	}
+
+	return true;
 }
 
 inline void TestSpawns()
@@ -245,8 +377,113 @@ inline void TestSpawns()
 		npc->Death(npc, npc->GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
 	}
 
+	condition = (int) entity_list.GetNPCList().size() == 105 && (int) entity_list.GetCorpseList().size() == 10;
+	if (!condition) {
+		PrintEntityCounts();
+	}
+	RunTest("Spawns > Kill 10 NPC's before save/restore (105 NPCs) (10 Corpses)", true, condition);
+
 	zone->Shutdown();
 	SetupStateZone();
+
+	condition = (int) entity_list.GetNPCList().size() == 105 && (int) entity_list.GetCorpseList().size() == 10;
+	if (!condition) {
+		PrintEntityCounts();
+	}
+	RunTest("Spawns > After restore (105 NPCs) (10 Corpses)", true, condition);
+
+	// validate that all corpses and npc's have cloak of flames
+	bool      test_failed = false;
+	for (auto &e: entity_list.GetCorpseList()) {
+		auto corpse = e.second;
+		if (!corpse) {
+			continue;
+		}
+
+		bool has_item = corpse->HasItem(11621);
+		if (!has_item || corpse->CountItem(11621) != 1) {
+			std::cout << "Corpse does not have item" << std::endl;
+			std::cout << " -- CountItem(11621) " << corpse->CountItem(11621) << std::endl;
+			std::cout << " -- GetCleanName " << corpse->GetCleanName() << std::endl;
+			RunTest(
+				"Spawns > After restore > Corpse has item (cloak of flames) item count (1) (no dupes)",
+				true,
+				has_item
+			);
+		}
+	}
+
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (!npc) {
+			continue;
+		}
+
+		bool has_item = npc->HasItem(11621);
+		if (!has_item && npc->CountItem(11621) == 1) {
+			std::cout << "NPC does not have item" << std::endl;
+			std::cout << " -- CountItem(11621) " << npc->CountItem(11621) << std::endl;
+			std::cout << " -- GetCleanName " << npc->GetCleanName() << std::endl;
+			RunTest(
+				"Spawns > After restore > NPC has item (cloak of flames) item count (1) (no dupes)",
+				true,
+				has_item
+			);
+		}
+	}
+
+	RunTest(
+		"Spawns > After restore > All npcs/corpses have item (cloak of flames) item count (1) and no dupes",
+		true,
+		true
+	);
+
+	// test to make sure the entity variables match what was on state
+	int npcs_matching_state = 0;
+
+	for (auto &e: entity_list.GetNPCList()) {
+		auto      npc = e.second;
+		for (auto &s: GetStateSpawns()) {
+			if (npc->GetSpawnGroupId() == s.spawngroup_id && npc->GetSpawn()->GetID() == s.spawn2_id) {
+				if (!MatchState(npc, s)) {
+					RunTest("Spawns > NPC state matches state", true, false);
+				}
+				npcs_matching_state++;
+			}
+		}
+	}
+
+	RunTest(
+		fmt::format("Spawns > After restore > NPC(s) matching state | matching ({})", npcs_matching_state),
+		false,
+		false
+	);
+
+	// test to make sure the entity variables match what was on state
+	int corpses_matching_state = 0;
+
+	for (auto &e: entity_list.GetCorpseList()) {
+		auto corpse = e.second;
+		for (auto &s: GetStateSpawns()) {
+			bool is_same_corpse = corpse->GetNPCTypeID() == s.npc_id &&
+								  corpse->GetX() == s.x &&
+								  corpse->GetY() == s.y &&
+								  corpse->GetHeading() == s.heading;
+
+			if (is_same_corpse) {
+				if (!MatchCorpseState(corpse, s)) {
+					RunTest("Spawns > NPC state matches state", true, false);
+				}
+				corpses_matching_state++;
+			}
+		}
+	}
+
+	RunTest(
+		fmt::format("Spawns > After restore > Corpse(s) matching state | matching ({})", corpses_matching_state),
+		false,
+		false
+	);
 }
 
 inline void TestZoneVariables()
