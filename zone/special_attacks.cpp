@@ -2179,6 +2179,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		if (GetOwner() && GetOwner()->IsClient())
 		SayString(GetOwner()->CastToClient(), Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), true);
+		target->AddToHateList(this, 250, 250);
 		for (const auto & ent : entity_list.GetNPCList()) {
 			auto mob = ent.second;
 			if (mob && mob->IsOnHatelist(GetOwner()) && mob->GetTarget() && mob->GetTarget()->GetID() == GetOwner()->GetID()) {

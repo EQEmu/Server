@@ -2057,6 +2057,16 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	if (isproc && IsNPC() && CastToNPC()->GetInnateProcSpellID() == spell_id)
 		targetType = ST_Target;
 
+	if (RuleB(Custom, DisablePetGroupSpells) && GetOwner() && GetOwner()->IsClient()) {
+		switch (targetType) {
+			case ST_Group:
+			case ST_GroupClientAndPet:
+			case ST_GroupNoPets:
+				targetType = ST_Self;
+				break;
+		}
+	}
+
 	switch (targetType)
 	{
 // single target spells
