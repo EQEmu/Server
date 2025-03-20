@@ -404,6 +404,7 @@ bool Zone::LoadZoneState(
 	zone->initgrids_timer.Trigger();
 	zone->Process();
 
+	int count = 0;
 	for (auto &s: spawn_states) {
 		if (s.is_zone) {
 			LoadZoneVariables(zone, s.entity_variables);
@@ -454,6 +455,8 @@ bool Zone::LoadZoneState(
 			new_spawn->SetEntityVariables(GetVariablesDeserialized(s.entity_variables));
 		}
 
+		count++;
+
 		spawn2_list.Insert(new_spawn);
 		new_spawn->Process();
 		auto n = new_spawn->GetNPC();
@@ -461,6 +464,8 @@ bool Zone::LoadZoneState(
 			LoadNPCState(zone, n, s);
 		}
 	}
+
+	std::cout << "Loaded " << count << " spawn2 entries" << std::endl;
 
 	// dynamic spawns, quest spawns, triggers etc.
 	for (auto &s: spawn_states) {
@@ -585,6 +590,7 @@ void Zone::SaveZoneState()
 	std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> spawns = {};
 	LinkedListIterator<Spawn2 *>                            iterator(spawn2_list);
 	iterator.Reset();
+	int count = 0;
 	while (iterator.MoreElements()) {
 		Spawn2 *sp = iterator.GetData();
 		auto   s   = ZoneStateSpawnsRepository::NewEntity();
@@ -614,7 +620,10 @@ void Zone::SaveZoneState()
 
 		spawns.emplace_back(s);
 		iterator.Advance();
+		count++;
 	}
+
+	std::cout << "Saved " << count << " spawns" << std::endl;
 
 	// npc's that are not in the spawn2 list
 	for (auto &n: entity_list.GetNPCList()) {
@@ -630,6 +639,12 @@ void Zone::SaveZoneState()
 				 n.second->GetSwarmOwner() ||
 				 n.second->IsPet();
 		if (ignore_npcs) {
+			if (n.second->GetSpawnGroupId() == 0) {
+				std::cout << "Ignoring NPC: " <<
+						  n.second->GetNPCTypeID() <<
+						  " name "
+						  << n.second->GetName() << std::endl;
+			}
 			continue;
 		}
 

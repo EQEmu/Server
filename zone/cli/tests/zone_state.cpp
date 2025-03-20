@@ -24,9 +24,13 @@ inline void PrintEntityCounts()
 
 inline void PrintZoneNpcs()
 {
+	int npc_count = 0;
 	for (auto &npc: entity_list.GetNPCList()) {
 		std::cout << npc.second->GetNPCTypeID() << " " << npc.second->GetCleanName() << std::endl;
+		npc_count++;
 	}
+
+	std::cout << "Total spawned NPCs: " << npc_count << std::endl;
 }
 
 inline void SetupStateZone()
@@ -220,6 +224,9 @@ inline void TestSpawns()
 	ClearState();
 	SetupStateZone();
 	zone->Repop(true);
+	entity_list.MobProcess();
+
+//	PrintZoneNpcs();
 
 	RunTest("Spawns > Ensure no state spawns exist before shutdown", 0, (int) GetStateSpawns().size());
 
@@ -315,6 +322,22 @@ inline void TestSpawns()
 		PrintEntityCounts();
 	}
 	RunTest("Spawns > After restore (0 NPCs) (115 Corpses)", true, condition);
+
+	for (auto &e: entity_list.GetCorpseList()) {
+		auto corpse = e.second;
+		for (auto &s: GetStateSpawns()) {
+			bool is_same_corpse = corpse->GetNPCTypeID() == s.npc_id &&
+								  corpse->GetX() == s.x &&
+								  corpse->GetY() == s.y &&
+								  corpse->GetHeading() == s.heading;
+
+			if (is_same_corpse) {
+				if (!MatchCorpseState(corpse, s)) {
+					RunTest("Spawns > Corpse state matches state", true, false);
+				}
+			}
+		}
+	}
 
 	Timer::RollForward(5);
 
@@ -472,7 +495,7 @@ inline void TestSpawns()
 
 			if (is_same_corpse) {
 				if (!MatchCorpseState(corpse, s)) {
-					RunTest("Spawns > NPC state matches state", true, false);
+					RunTest("Spawns > Corpse state matches state", true, false);
 				}
 				corpses_matching_state++;
 			}
@@ -484,6 +507,60 @@ inline void TestSpawns()
 		false,
 		false
 	);
+
+	entity_list.MobProcess();
+
+	zone->Process();
+	zone->ClearSpawnTimers();
+	entity_list.MobProcess();
+
+	Timer::RollForward(302401); // longest respawn time in zone
+	zone->Process();
+
+	for (auto &n : entity_list.GetNPCList()) {
+		auto npc = n.second;
+		if (!npc->GetSpawn()->GetID()) {
+			std::cout << "NPC " << npc->GetCleanName() << " has no spawn2_id" << std::endl;
+		}
+//		std::cout << "NPC " << npc->GetCleanName() << " has spawn2_id " << npc->GetSpawn()->GetID() << std::endl;
+
+	}
+	// track what npcs have the same spawn2_id
+	std::map<uint32_t, int> spawn2_id_counts = {};
+	for (auto &n : entity_list.GetNPCList()) {
+		auto npc = n.second;
+		if (npc->GetSpawn()->GetID() == 0) {
+			continue;
+		}
+		spawn2_id_counts[npc->GetSpawn()->GetID()]++;
+	}
+
+	// print
+	for (auto &e : spawn2_id_counts) {
+		if (spawn2_id_counts[ e.first] > 1) {
+			std::cout << "Spawn2 ID " << e.first << " count " << e.second << std::endl;
+			for (auto &n : entity_list.GetNPCList()) {
+				auto npc = n.second;
+				if (npc->GetSpawn()->GetID() == e.first) {
+					// print location
+					std::cout << "NPC " << npc->GetCleanName() << " at " << npc->GetX() << " " << npc->GetY() << " "
+							  << npc->GetZ() << std::endl;
+
+					std::cout << "Spawn " << npc->GetSpawn()->Enabled() << std::endl;
+
+				}
+			}
+		}
+	}
+
+	PrintEntityCounts();
+
+//	condition = (int) entity_list.GetNPCList().size() == 105 && (int) entity_list.GetCorpseList().size() == 10;
+//	if (!condition) {
+//		PrintEntityCounts();
+//		PrintZoneNpcs();
+//	}
+//	RunTest("Spawns > After respawn (105 NPCs) (10 Corpses)", true, condition);
 }
 
 inline void TestZoneVariables()
@@ -607,11 +684,13 @@ inline void TestHpManaEnd()
 	RunTest(
 		"HP/Mana/End Save/Restore > Ensure restored HP state matches data on the NPC object",
 		0,
-		(int) hp_mismatch.size());
+		(int) hp_mismatch.size()
+	);
 	RunTest(
 		"HP/Mana/End Save/Restore > Ensure restored Mana state matches data on the NPC object",
 		0,
-		(int) mana_mismatch.size());
+		(int) mana_mismatch.size()
+	);
 }
 
 inline void TestBuffs()
