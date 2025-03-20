@@ -24,7 +24,7 @@ inline void PrintEntityCounts()
 
 inline void PrintZoneNpcs()
 {
-	int npc_count = 0;
+	int       npc_count = 0;
 	for (auto &npc: entity_list.GetNPCList()) {
 		std::cout << npc.second->GetNPCTypeID() << " " << npc.second->GetCleanName() << std::endl;
 		npc_count++;
@@ -158,6 +158,66 @@ inline bool MatchState(NPC *n, const ZoneStateSpawnsRepository::ZoneStateSpawns 
 		std::cout << "Endurance mismatch: " << n->GetEndurance() << " != " << state.endurance << std::endl;
 		return false;
 	}
+
+	auto entity_variables = GetVariablesDeserialized(state.entity_variables);
+
+	for (const auto &[key, value]: entity_variables) {
+		if (n->GetEntityVariable(key) != value) {
+			std::cout << "Variable mismatch: " << key << " " << n->GetEntityVariable(key) << " != " << value
+					  << std::endl;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// MatchFreshlySpawnedState compares the NPC to the state
+// it should print what doesn't match when it returns false
+inline bool MatchFreshlySpawnedState(NPC *n, const ZoneStateSpawnsRepository::ZoneStateSpawns &state)
+{
+	auto npc_type = content_db.LoadNPCTypesData(n->GetNPCTypeID());
+	if (!npc_type) {
+		RunTest("NPC type does not exist", false, true);
+	}
+
+	if (n->GetX() != state.x) {
+		std::cout << "X mismatch: " << n->GetX() << " != " << state.x << std::endl;
+		return false;
+	}
+
+	if (n->GetY() != state.y) {
+		std::cout << "Y mismatch: " << n->GetY() << " != " << state.y << std::endl;
+		return false;
+	}
+
+//	if (n->GetZ() != state.z) {
+//		std::cout << "Z mismatch: " << n->GetZ() << " != " << state.z << std::endl;
+//		return false;
+//	}
+
+	if (n->GetHeading() != state.heading) {
+		std::cout << "Heading mismatch: " << n->GetHeading() << " != " << state.heading << std::endl;
+		return false;
+	}
+
+	if (n->GetHP() != npc_type->max_hp) {
+		std::cout << "HP mismatch: " << n->GetHP() << " != " << npc_type->max_hp << std::endl;
+		return false;
+	}
+
+	if (n->GetLoottableID() != npc_type->loottable_id) {
+		std::cout << "Loot table mismatch: " << n->GetLoottableID() << " != " << npc_type->loottable_id << std::endl;
+		return false;
+	}
+
+	// not loaded from database
+//	if (n->GetMana() != npc_type->Mana) {
+//		std::cout << "Mana mismatch: " << n->GetMana() << " != " << npc_type->Mana << std::endl;
+//		return false;
+//	}
+
+	// endurance not saved
 
 	auto entity_variables = GetVariablesDeserialized(state.entity_variables);
 
@@ -324,7 +384,7 @@ inline void TestSpawns()
 	RunTest("Spawns > After restore (0 NPCs) (115 Corpses)", true, condition);
 
 	for (auto &e: entity_list.GetCorpseList()) {
-		auto corpse = e.second;
+		auto      corpse = e.second;
 		for (auto &s: GetStateSpawns()) {
 			bool is_same_corpse = corpse->GetNPCTypeID() == s.npc_id &&
 								  corpse->GetX() == s.x &&
@@ -487,6 +547,7 @@ inline void TestSpawns()
 
 	for (auto &e: entity_list.GetCorpseList()) {
 		auto corpse = e.second;
+
 		for (auto &s: GetStateSpawns()) {
 			bool is_same_corpse = corpse->GetNPCTypeID() == s.npc_id &&
 								  corpse->GetX() == s.x &&
@@ -514,53 +575,66 @@ inline void TestSpawns()
 	zone->ClearSpawnTimers();
 	entity_list.MobProcess();
 
-	Timer::RollForward(302401); // longest respawn time in zone
-	zone->Process();
-
-	for (auto &n : entity_list.GetNPCList()) {
-		auto npc = n.second;
-		if (!npc->GetSpawn()->GetID()) {
-			std::cout << "NPC " << npc->GetCleanName() << " has no spawn2_id" << std::endl;
-		}
-//		std::cout << "NPC " << npc->GetCleanName() << " has spawn2_id " << npc->GetSpawn()->GetID() << std::endl;
-
-	}
-	// track what npcs have the same spawn2_id
-	std::map<uint32_t, int> spawn2_id_counts = {};
-	for (auto &n : entity_list.GetNPCList()) {
-		auto npc = n.second;
-		if (npc->GetSpawn()->GetID() == 0) {
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+		if (npc->GetSpawnGroupId() == 0) {
 			continue;
 		}
-		spawn2_id_counts[npc->GetSpawn()->GetID()]++;
+
+		npc->SetEntityVariable("previously_spawned", "true");
 	}
 
-	// print
-	for (auto &e : spawn2_id_counts) {
-		if (spawn2_id_counts[ e.first] > 1) {
-			std::cout << "Spawn2 ID " << e.first << " count " << e.second << std::endl;
-			for (auto &n : entity_list.GetNPCList()) {
-				auto npc = n.second;
-				if (npc->GetSpawn()->GetID() == e.first) {
-					// print location
-					std::cout << "NPC " << npc->GetCleanName() << " at " << npc->GetX() << " " << npc->GetY() << " "
-							  << npc->GetZ() << std::endl;
+	Timer::RollForward(302401); // longest respawn time in zone
+	zone->Process();
+	entity_list.MobProcess(); // processing depops
 
-					std::cout << "Spawn " << npc->GetSpawn()->Enabled() << std::endl;
+	condition = (int) entity_list.GetNPCList().size() == 115 && (int) entity_list.GetCorpseList().size() == 10;
+	if (!condition) {
+		PrintEntityCounts();
+		PrintZoneNpcs();
+	}
+	RunTest("Spawns > After respawn, ensure we have expected entity counts (115 NPCs) (10 Corpses)", true, condition);
 
+	entity_list.MobProcess(); // processing depops
+
+	npcs_matching_state = 0;
+	int dropped_items = 0;
+
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+
+		if (npc->GetEntityVariable("previously_spawned") != "true") {
+			for (auto &s: GetStateSpawns()) {
+				if (npc->GetSpawnGroupId() == s.spawngroup_id && npc->GetSpawn()->GetID() == s.spawn2_id &&
+					s.npc_id == 0) {
+					if (!MatchFreshlySpawnedState(npc, s)) {
+						RunTest("Spawns > NPC state matches state", true, false);
+					}
+
+					dropped_items += npc->GetLootList().size();
+					npcs_matching_state++;
 				}
 			}
 		}
 	}
 
-	PrintEntityCounts();
+	RunTest(
+		fmt::format(
+			"Spawns > After restore, after respawn (10 killed) > ensure NPC(s) match state | matching ({})",
+			npcs_matching_state
+		),
+		npcs_matching_state == 10,
+		true
+	);
 
-//	condition = (int) entity_list.GetNPCList().size() == 105 && (int) entity_list.GetCorpseList().size() == 10;
-//	if (!condition) {
-//		PrintEntityCounts();
-//		PrintZoneNpcs();
-//	}
-//	RunTest("Spawns > After respawn (105 NPCs) (10 Corpses)", true, condition);
+	RunTest(
+		fmt::format(
+			"Spawns > After restore, after respawn (10 killed) ensure NPC's have loot assigned | dropped items ({})",
+			dropped_items
+		),
+		dropped_items > 0,
+		true
+	);
 }
 
 inline void TestZoneVariables()
@@ -961,12 +1035,12 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	std::cout << "⚙\uFE0F> Running Zone State Tests... (soldungb)\n";
 	std::cout << "===========================================\n\n";
 
-//	TestZoneVariables();
-//	TestHpManaEnd();
-//	TestBuffs();
-//	TestLocationChange();
-//	TestEntityVariables();
-//	TestLoot();
+	TestZoneVariables();
+	TestHpManaEnd();
+	TestBuffs();
+	TestLocationChange();
+	TestEntityVariables();
+	TestLoot();
 	TestSpawns();
 
 //	RunTest("State > No NPC's should be spawned after shutdown/bootup", 0, (int) entity_list.GetNPCList().size());

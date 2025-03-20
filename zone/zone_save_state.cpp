@@ -465,8 +465,6 @@ bool Zone::LoadZoneState(
 		}
 	}
 
-	std::cout << "Loaded " << count << " spawn2 entries" << std::endl;
-
 	// dynamic spawns, quest spawns, triggers etc.
 	for (auto &s: spawn_states) {
 		if (s.spawngroup_id > 0 || s.is_zone) {
@@ -623,8 +621,6 @@ void Zone::SaveZoneState()
 		count++;
 	}
 
-	std::cout << "Saved " << count << " spawns" << std::endl;
-
 	// npc's that are not in the spawn2 list
 	for (auto &n: entity_list.GetNPCList()) {
 		// everything below here is dynamically spawned
@@ -640,10 +636,6 @@ void Zone::SaveZoneState()
 				 n.second->IsPet();
 		if (ignore_npcs) {
 			if (n.second->GetSpawnGroupId() == 0) {
-				std::cout << "Ignoring NPC: " <<
-						  n.second->GetNPCTypeID() <<
-						  " name "
-						  << n.second->GetName() << std::endl;
 			}
 			continue;
 		}
