@@ -1881,47 +1881,20 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	if (RuleB(Custom, EnableLoreEquip)) {
-		if (move_in->from_slot == EQ::invslot::slotCursor &&
-			EQ::ValueWithin(move_in->to_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
+		if (move_in->from_slot == EQ::invslot::slotCursor && EQ::ValueWithin(move_in->to_slot, EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END)) {
+			auto itm = m_inv.GetItem(move_in->from_slot) ? m_inv.GetItem(move_in->from_slot) : nullptr;
 
-			const EQ::ItemInstance* item_to_equip = m_inv.GetItem(move_in->from_slot);
+			bool lore_flag = itm && itm->GetItem()->LoreGroup == -1 && m_inv.HasItem(itm->GetID(), 0, invWhereWorn) != INVALID_INDEX;
 
-			if (!item_to_equip) {
-				return true;
-			}
-
-			bool has_duplicate_lore = false;
-			const EQ::ItemInstance* conflicting_item;
-
-			if (item_to_equip->GetItem()->LoreGroup == -1 &&
-				m_inv.HasItemEquippedByID(item_to_equip->GetID())) {
-				has_duplicate_lore = true;
-				conflicting_item = item_to_equip;
-			}
-
-			if (!has_duplicate_lore) {
-				for (int socket_index = EQ::invaug::SOCKET_BEGIN;
-					 socket_index <= EQ::invaug::SOCKET_END && !has_duplicate_lore;
-					 socket_index++) {
-
-					const EQ::ItemInstance* augment = item_to_equip->GetAugment(socket_index);
-
-					if (augment &&
-						augment->GetItem()->LoreGroup == -1 &&
-						m_inv.HasAugmentEquippedByID(augment->GetID())) {
-						has_duplicate_lore = true;
-						conflicting_item = augment;
-					}
+			if (!lore_flag && itm) {
+				for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
+					auto aug = itm->GetAugment(i);
+					lore_flag = aug && aug->GetItem()->LoreGroup == -1 && m_inv.HasItem(aug->GetID(), 0, invWhereWorn) != INVALID_INDEX;
 				}
 			}
 
-			if (has_duplicate_lore) {
-				EQ::SayLinkEngine linker;
-				linker.SetLinkType(EQ::saylink::SayLinkItemData);
-				linker.SetItemData(conflicting_item->GetItem());
-
-				Message(Chat::Loot, fmt::format("Duplicate LORE item [{}] cannot be equipped.",
-												linker.GenerateLink()).c_str());
+			if (lore_flag) {
+				MessageString(Chat::Loot, 290);
 				return false;
 			}
 		}
@@ -2731,8 +2704,6 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		}
 		else { Message(Chat::Red, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 	}
-
-	SendWearChangeAndLighting(EQ::textures::LastTexture);
 }
 
 void Client::DyeArmor(EQ::TintProfile* dye){
