@@ -1267,6 +1267,7 @@ RULE_BOOL(Custom,   PlayerDispelCures, 						true, "Enable to treat player-cast 
 RULE_BOOL(Custom, 	DisablePetGroupSpells,					false, "Enable to force group spells to be forced to 'self' spells when cast by pets")
 RULE_BOOL(Custom,   ConditionalPetRampageImmunity, 			false, "Enable to make pets which are not taunting immune to rampage")
 RULE_BOOL(Custom, 	DontInterruptHealsByMelee, 				false, "Enable to prevent direct heal spells from being interrupted by melee attacks")
+RULE_BOOL(Custom,	AlternateMobFDBehavior,					true, "Enable to cause mob FD effects to randomly pick a new target")
 
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")

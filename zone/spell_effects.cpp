@@ -1746,13 +1746,36 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					break;
 
 				if(IsClient()) {
-					CastToClient()->SetHorseId(0); // dismount if have horse
+					if (RuleB(Custom, AlternateMobFDBehavior) && caster->IsNPC()) {
+						std::vector<Mob*> valid_targets;
+						for (const auto hater : caster->GetHateList()) {
+							auto mob = hater->entity_on_hatelist;
+							if (mob == this) {
+								continue;
+							}
+							valid_targets.push_back(mob);
+						}
 
-					if (zone->random.Int(0, 99) > spells[spell_id].base_value[i]) {
-						SetFeigned(false);
-						entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
-					} else {
-						SetFeigned(true);
+
+						if (!valid_targets.empty()) {
+							int random_index = zone->random.Int(0, valid_targets.size() - 1);
+							Mob* random_target = valid_targets[random_index];
+							if (!random_target) {
+								break;
+							}
+
+							random_target->Taunt(caster->CastToNPC(), true, 100, false, 1000);
+							HateSummon();
+						}
+					}else {
+						CastToClient()->SetHorseId(0); // dismount if have horse
+
+						if (zone->random.Int(0, 99) > spells[spell_id].base_value[i]) {
+							SetFeigned(false);
+							entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
+						} else {
+							SetFeigned(true);
+						}
 					}
 				}
 				break;
