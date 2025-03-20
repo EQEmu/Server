@@ -11446,10 +11446,6 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, uint16 spell_id, bool is_disc) {
 		return false;
 	}
 
-	if (!HasLoS() && !DoLosChecks(tar)) {
-		return false;
-	}
-
 	if (!CastChecks(spell_id, tar, UINT16_MAX)) {
 		GetBotOwner()->Message(
 			Chat::Red,
