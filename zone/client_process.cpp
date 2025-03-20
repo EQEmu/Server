@@ -1008,7 +1008,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			continue;
 		}
 
-		if (!(ml.classes_required & (1 << (GetClass() - 1)))) {
+		if (!(ml.classes_required & GetClassesBits())) {
 			continue;
 		}
 
