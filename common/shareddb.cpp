@@ -2073,13 +2073,6 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 					sp[tempid].target_type = ST_Target;
 				}
 
-				if (sp[tempid].cast_time > 3000) {
-					if (sp[tempid].effect_id[0] == 0 && sp[tempid].buff_duration == 0 && sp[tempid].base_value[0] < 0) {
-						sp[tempid].recast_time += (sp[tempid].cast_time - 3000);
-						sp[tempid].cast_time = 3000;
-					}
-				}
-
 			} else {
 				int eligible_class_count = 0;
 				int eligible_class_id = -1;
