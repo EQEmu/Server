@@ -1903,13 +1903,13 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 
 				if (!DoBarterBuyerChecks(sell_line)) {
 					return;
-				};
+				}
 
 				if (!DoBarterSellerChecks(sell_line)) {
 					return;
-				};
+				}
 
-				BuyerRepository::UpdateTransactionDate(database, sell_line.buyer_id, time(nullptr));
+				BuyerRepository::UpdateTransactionDate(database, buyer->CharacterID(), time(nullptr));
 
 				if (!FindNumberOfFreeInventorySlotsWithSizeCheck(sell_line.trade_items)) {
 					LogTradingDetail("Seller {} has insufficient inventory space for {} compensation items.",
@@ -2025,9 +2025,14 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 			}
 			case BarterOutsideBazaar: {
 				bool seller_error = false;
-				auto buyer_time   = BuyerRepository::GetTransactionDate(database, sell_line.buyer_id);
+				//auto buyer_time   = BuyerRepository::GetTransactionDate(database, sell_line.buyer_id);
+				auto results = BuyerRepository::GetWhere(database, fmt::format("`char_id` = '{}' LIMIT 1;", sell_line.buyer_id));
+				if (results.empty()) {
+					return;
+				}
 
-				if (buyer_time > GetBarterTime()) {
+				auto buyer = results.front();
+				if (buyer.transaction_date > GetBarterTime()) {
 					SendBarterBuyerClientMessage(
 						sell_line,
 						Barter_SellerTransactionComplete,
@@ -2080,18 +2085,22 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 
 				auto data = (BuyerMessaging_Struct *) server_packet->pBuffer;
 
-				data->action           = Barter_SellItem;
-				data->buyer_entity_id  = sell_line.buyer_entity_id;
-				data->buyer_id         = sell_line.buyer_id;
-				data->seller_entity_id = GetID();
-				data->buy_item_id      = sell_line.item_id;
-				data->buy_item_qty     = sell_line.item_quantity;
-				data->buy_item_cost    = sell_line.item_cost;
-				data->buy_item_icon    = sell_line.item_icon;
-				data->zone_id          = GetZoneID();
-				data->slot             = sell_line.slot;
-				data->seller_quantity  = sell_line.seller_quantity;
-				data->purchase_method  = sell_line.purchase_method;
+				data->action                  = Barter_SellItem;
+				data->buyer_char_id           = buyer.char_id;
+				data->buyer_entity_id         = buyer.char_entity_id;
+				data->buyer_zone_id           = buyer.char_zone_id;
+				data->buyer_zone_instance_id  = buyer.char_zone_instance_id;
+				data->seller_char_id          = CharacterID();
+				data->seller_entity_id        = GetID();
+				data->seller_zone_id          = GetZoneID();
+				data->seller_zone_instance_id = GetInstanceID();
+				data->buy_item_id             = sell_line.item_id;
+				data->buy_item_qty            = sell_line.item_quantity;
+				data->buy_item_cost           = sell_line.item_cost;
+				data->buy_item_icon           = sell_line.item_icon;
+				data->slot                    = sell_line.slot;
+				data->seller_quantity         = sell_line.seller_quantity;
+				data->purchase_method         = sell_line.purchase_method;
 				strn0cpy(data->item_name, sell_line.item_name, sizeof(data->item_name));
 				strn0cpy(data->buyer_name, sell_line.buyer_name.c_str(), sizeof(data->buyer_name));
 				strn0cpy(data->seller_name, GetCleanName(), sizeof(data->seller_name));
@@ -3578,8 +3587,8 @@ void Client::SendBuyerToBarterWindow(Client *buyer, uint32 action)
 	auto data          = (BuyerMessaging_Struct *) server_packet->pBuffer;
 
 	data->action          = action;
-	data->zone_id         = buyer->GetZoneID();
-	data->buyer_id        = buyer->GetBuyerID();
+	data->buyer_zone_id   = buyer->GetZoneID();
+	data->buyer_char_id   = buyer->GetBuyerID();
 	data->buyer_entity_id = buyer->GetID();
 	strn0cpy(data->buyer_name, buyer->GetCleanName(), sizeof(data->buyer_name));
 
@@ -3882,6 +3891,23 @@ bool Client::DoBarterBuyerChecks(BuyerLineSellItem_Struct &sell_line)
 		}
 		SendBarterBuyerClientMessage(sell_line, Barter_SellerTransactionComplete, Barter_Failure, Barter_DataOutOfDate);
 		return false;
+	}
+
+	std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(sell_line.item_id, sell_line.seller_quantity));
+	if (buyer->GetInv().FindFirstFreeSlotThatFitsItemWithStacking(inst.get()) == INVALID_INDEX) {
+		LogTradingDetail(
+			"Seller attempting to sell item <green>[{}] to buyer <green>[{}] though buyer has no inventory space for item",
+			sell_line.item_name,
+			buyer->GetCleanName()
+		);
+		buyer->Message(
+			Chat::Red,
+			fmt::format(
+				"{} wanted to sell you {} however you no longer have inventory space available",
+				sell_line.seller_name,
+				sell_line.item_name
+			).c_str());
+		buyer_error = true;
 	}
 
 	for (auto const &ti: sell_line.trade_items) {

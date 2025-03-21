@@ -3314,16 +3314,20 @@ struct BuyerGeneric_Struct {
 struct BuyerMessaging_Struct {
 	uint32 action;
 	uint32 sub_action;
-	uint32 zone_id;
-	uint32 buyer_id;
+	uint32 buyer_char_id;
 	uint32 buyer_entity_id;
 	char   buyer_name[64];
+	uint32 buyer_zone_id;
+	uint32 buyer_zone_instance_id;
 	uint32 buy_item_id;
 	uint32 buy_item_qty;
 	uint64 buy_item_cost;
 	uint32 buy_item_icon;
+	uint32 seller_char_id;
 	uint32 seller_entity_id;
 	char   seller_name[64];
+	uint32 seller_zone_id;
+	uint32 seller_zone_instance_id;
 	char   item_name[64];
 	uint32 slot;
 	uint32 seller_quantity;

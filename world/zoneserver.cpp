@@ -1694,10 +1694,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			switch (in->action) {
 				case Barter_AddToBarterWindow:
 				case Barter_RemoveFromBarterWindow: {
-					if (in->buyer_id <= 0) {
+					if (in->buyer_char_id <= 0) {
 						LogTrading("World Message <red>[{}] received with invalid buyer_id <red>[{}]",
 								   "ServerOP_BecomeBuyer",
-								   in->buyer_id
+								   in->buyer_char_id
 						);
 						return;
 					}
@@ -1706,20 +1706,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					break;
 				}
 				case Barter_SellItem: {
-					auto buyer = client_list.FindCharacter(in->buyer_name);
-					if (buyer) {
-						zoneserver_list.SendPacket(buyer->zone(), buyer->instance(), pack);
-					}
-
+					zoneserver_list.SendPacket(in->buyer_zone_id, in->buyer_zone_instance_id, pack);
 					break;
 				}
 				case Barter_FailedTransaction:
 				case Barter_BuyerTransactionComplete: {
-					auto seller = client_list.FindCharacter(in->seller_name);
-					if (seller) {
-						zoneserver_list.SendPacket(seller->zone(), seller->instance(), pack);
-					}
-
+					zoneserver_list.SendPacket(in->seller_zone_id, in->seller_zone_instance_id, pack);
 					break;
 				}
 				default:

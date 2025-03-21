@@ -3847,8 +3847,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					emu->action          = Barter_AddToBarterWindow;
 					emu->buyer_entity_id = in->buyer_entity_id;
-					emu->buyer_id        = in->buyer_id;
-					emu->zone_id         = in->zone_id;
+					emu->buyer_id        = in->buyer_char_id;
+					emu->zone_id         = in->buyer_zone_id;
 					strn0cpy(emu->buyer_name, in->buyer_name, sizeof(emu->buyer_name));
 
 					entity_list.QueueClients(nullptr, outapp.get());
@@ -3863,15 +3863,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					auto emu    = (BuyerRemoveBuyerFromBarterWindow_Struct *) outapp->pBuffer;
 
 					emu->action   = Barter_RemoveFromBarterWindow;
-					emu->buyer_id = in->buyer_id;
+					emu->buyer_id = in->buyer_char_id;
 
 					entity_list.QueueClients(nullptr, outapp.get());
 
 					break;
 				}
 				case Barter_FailedTransaction: {
-					auto seller = entity_list.GetClientByID(in->seller_entity_id);
-					auto buyer  = entity_list.GetClientByID(in->buyer_entity_id);
+					auto seller = entity_list.GetClientByCharID(in->seller_char_id);
+					auto buyer  = entity_list.GetClientByCharID(in->buyer_char_id);
 
 					BuyerLineSellItem_Struct sell_line{};
 					sell_line.item_id         = in->buy_item_id;
@@ -3981,7 +3981,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					break;
 				}
 				case Barter_SellItem: {
-					auto buyer = entity_list.GetClientByID(in->buyer_entity_id);
+					auto buyer = entity_list.GetClientByCharID(in->buyer_char_id);
 					if (!buyer) {
 						in->action     = Barter_FailedTransaction;
 						in->sub_action = Barter_BuyerCouldNotBeFound;
@@ -4090,7 +4090,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					break;
 				}
 				case Barter_BuyerTransactionComplete: {
-					auto seller = entity_list.GetClientByID(in->seller_entity_id);
+					auto seller = entity_list.GetClientByCharID(in->seller_char_id);
 					if (!seller) {
 						in->action     = Barter_FailedTransaction;
 						in->sub_action = Barter_SellerCouldNotBeFound;
