@@ -1620,6 +1620,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		}
 
 		if (component_count != Strings::ToInt(row[1])) {
+			LogTradeskills("Abort: Component Count: [{}] Expected [{}] for ItemID [{}]", component_count, Strings::ToInt(row[1]), Strings::ToInt(row[0]));
 			return false;
 		}
 	}
