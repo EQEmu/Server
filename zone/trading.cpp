@@ -3721,6 +3721,23 @@ bool Client::DoBarterBuyerChecks(BuyerLineSellItem_Struct &sell_line)
 		return false;
 	}
 
+	std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(sell_line.item_id, sell_line.seller_quantity));
+	if (buyer->GetInv().FindFirstFreeSlotThatFitsItemWithStacking(inst.get()) == INVALID_INDEX) {
+		LogTradingDetail(
+			"Seller attempting to sell item <green>[{}] to buyer <green>[{}] though buyer has no inventory space for item",
+			sell_line.item_name,
+			buyer->GetCleanName()
+		);
+		buyer->Message(
+			Chat::Red,
+			fmt::format(
+				"{} wanted to sell you {} however you no longer have inventory space available",
+				sell_line.seller_name,
+				sell_line.item_name
+			).c_str());
+		buyer_error = true;
+	}
+
 	for (auto const &ti: sell_line.trade_items) {
 		auto ti_slot_id = buyer->GetInv().HasItem(
 			ti.item_id,

@@ -3981,7 +3981,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					break;
 				}
 				case Barter_SellItem: {
-					auto buyer = entity_list.GetClientByID(in->buyer_entity_id);
+					auto buyer = entity_list.GetClientByCharID(in->buyer_char_id);
 					if (!buyer) {
 						in->action     = Barter_FailedTransaction;
 						in->sub_action = Barter_BuyerCouldNotBeFound;
@@ -4090,7 +4090,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					break;
 				}
 				case Barter_BuyerTransactionComplete: {
-					auto seller = entity_list.GetClientByID(in->seller_entity_id);
+					auto seller = entity_list.GetClientByCharID(in->seller_char_id);
 					if (!seller) {
 						in->action     = Barter_FailedTransaction;
 						in->sub_action = Barter_SellerCouldNotBeFound;
