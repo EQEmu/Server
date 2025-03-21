@@ -8604,7 +8604,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 			}
 
 			if (spell_type && spell) {
-				swarm_pet_npc->AddSpellToNPCList(IsDamageOverTimeSpell(spell_id) ? 0 : i, spell, spell_type, -1, IsDamageOverTimeSpell(spell_id) ? 100000 : (spells[spell].recast_time + spells[spell].recovery_time) / 1000, 0, 0, 0);
+				swarm_pet_npc->AddSpellToNPCList(0, spell, spell_type, -1, (spells[spell].recast_time + spells[spell].recovery_time) / 1000, 0, 0, 0);
 			}
 		}
 
