@@ -562,7 +562,9 @@ bool Bot::AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	// Allow bots to cast buff spells even if they are out of mana
 	if (
 		RuleB(Bots, FinishBuffing) &&
-		manaCost > hasMana && AIBot_spells[i].type == BotSpellTypes::Buff
+		manaCost > hasMana &&
+		!IsEngaged() &&
+		IsBotBuffSpellType(AIBot_spells[i].type)
 	) {
 		SetMana(manaCost);
 	}

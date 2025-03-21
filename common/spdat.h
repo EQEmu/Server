@@ -900,8 +900,8 @@ const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellTy
 const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
 
 // Bot related functions
-bool IsBotSpellTypeDetrimental (uint16 spell_type);
-bool IsBotSpellTypeBeneficial (uint16 spell_type);
+bool IsBotSpellTypeDetrimental(uint16 spell_type);
+bool IsBotSpellTypeBeneficial(uint16 spell_type);
 bool BotSpellTypeUsesTargetSettings(uint16 spell_type);
 bool IsBotSpellTypeInnate (uint16 spell_type);
 bool IsAEBotSpellType(uint16 spell_type);
@@ -917,6 +917,7 @@ bool IsCommandedBotSpellType(uint16 spell_type);
 bool IsPullingBotSpellType(uint16 spell_type);
 uint16 GetCorrectBotSpellType(uint16 spell_type, uint16 spell_id);
 uint16 GetPetBotSpellType(uint16 spell_type);
+bool IsBotBuffSpellType(uint16 spell_type);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only
