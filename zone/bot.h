@@ -235,7 +235,7 @@ static std::map<uint16, std::string> botSubType_names = {
 struct CombatRangeInput {
 	Mob*                    target;
 	float                   target_distance;
-	uint8                   stop_melee_level;
+	bool                    stop_melee_level;
 	const EQ::ItemInstance* p_item;
 	const EQ::ItemInstance* s_item;
 };
