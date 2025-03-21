@@ -236,13 +236,12 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			safe_delete(outapp);
 			database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
 		} else { // Delete items in our inventory container...
-			for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++) {
+			for (uint8 i = EQ::invbag::SLOT_BEGIN; i <= EQ::invbag::SLOT_END; i++) {
 				const EQ::ItemInstance* inst = container->GetItem(i);
 				if (inst) {
 					user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_augment->container_slot, i), 0, true);
 				}
 			}
-
 			container->Clear(); // Explicitly mark container as cleared.
 		}
 	}
@@ -1433,20 +1432,22 @@ bool ZoneDatabase::GetTradeRecipe(
 			return false;
 		}
 
-		const auto item = database.GetItem(inst->GetItem()->OriginalID % 1000000);
+
+
+		const auto item = database.GetItem(inst->GetItem()->ID);
 		if (!item) {
-			LogTradeskills("item [{}] not found!", inst->GetItem()->OriginalID % 1000000);
+			LogTradeskills("item [{}] not found!", inst->GetItem()->ID);
 			continue;
 		}
 
 		if (first) {
-			buf2 += fmt::format("{}", (item->OriginalID % 1000000));
+			buf2 += fmt::format("{}", (item->ID));
 			first = false;
 		} else {
-			buf2 += fmt::format(", {}", (item->OriginalID % 1000000));
+			buf2 += fmt::format(", {}", (item->ID));
 		}
 
-		sum += (item->OriginalID % 1000000);
+		sum += (item->ID);
 		count++;
 
 		LogTradeskills(
@@ -1584,10 +1585,13 @@ bool ZoneDatabase::GetTradeRecipe(
 		return GetTradeRecipe(recipe_id, c_type, some_id, c, spec);
 	}
 
+	auto container_itm = database.GetItem(some_id);
+	int container_size = container ? container->GetItem()->BagSlots : EQ::invtype::WORLD_SIZE;
+
 	for (auto row : results) {
 		int component_count = 0;
 
-		for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < EQ::invtype::WORLD_SIZE; slot_id++) {
+		for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < container_size; slot_id++) {
 			const auto inst = container->GetItem(slot_id);
 			if (!inst) {
 				continue;
@@ -1598,12 +1602,12 @@ bool ZoneDatabase::GetTradeRecipe(
 				return false;
 			}
 
-			const auto item = database.GetItem(inst->GetItem()->OriginalID % 1000000);
+			const auto item = database.GetItem(inst->GetItem()->ID);
 			if (!item) {
 				continue;
 			}
 
-			if ((item->OriginalID % 1000000) == Strings::ToUnsignedInt(row[0])) {
+			if ((item->ID) == Strings::ToUnsignedInt(row[0])) {
 				component_count++;
 			}
 
