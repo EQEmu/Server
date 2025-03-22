@@ -31,6 +31,7 @@ void ZoneCLI::CommandHandler(int argc, char **argv)
 	// Register commands
 	function_map["benchmark:databuckets"] = &ZoneCLI::BenchmarkDatabuckets;
 	function_map["sidecar:serve-http"] = &ZoneCLI::SidecarServeHttp;
+	function_map["instances:purge-expired"] = &ZoneCLI::PurgeExpiredInstances;
 	function_map["tests:databuckets"] = &ZoneCLI::DataBuckets;
 	function_map["tests:npc-handins"] = &ZoneCLI::NpcHandins;
 	function_map["tests:npc-handins-multiquest"] = &ZoneCLI::NpcHandinsMultiQuest;
@@ -43,3 +44,4 @@ void ZoneCLI::CommandHandler(int argc, char **argv)
 #include "cli/sidecar_serve_http.cpp"
 #include "cli/npc_handins.cpp"
 #include "cli/npc_handins_multiquest.cpp"
+#include "cli/purge_expired_instances.cpp"

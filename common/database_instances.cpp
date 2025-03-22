@@ -537,14 +537,9 @@ void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &ch
 
 void Database::PurgeExpiredInstances()
 {
-	/**
-	 * Delay purging by a day so that we can continue using adjacent free instance id's
-	 * from the table without risking the chance we immediately re-allocate a zone that freshly expired but
-	 * has not been fully de-allocated
-	 */
 	auto l = InstanceListRepository::GetWhere(
 		*this,
-		"(start_time + duration) <= (UNIX_TIMESTAMP() - 86400) AND never_expires = 0"
+		"(start_time + duration) <= (UNIX_TIMESTAMP()) AND never_expires = 0"
 	);
 	if (l.empty()) {
 		return;
@@ -557,7 +552,7 @@ void Database::PurgeExpiredInstances()
 
 	const auto imploded_instance_ids = Strings::Implode(",", instance_ids);
 
-	InstanceListRepository::DeleteWhere(*this, fmt::format("id IN ({})", imploded_instance_ids));
+	auto affected = InstanceListRepository::DeleteWhere(*this, fmt::format("id IN ({})", imploded_instance_ids));
 	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id IN ({})", imploded_instance_ids));
 	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
 	SpawnConditionValuesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
@@ -569,6 +564,8 @@ void Database::PurgeExpiredInstances()
 	if (RuleB(Zone, StateSavingOnShutdown)) {
 		ZoneStateSpawnsRepository::DeleteWhere(*this, fmt::format("`instance_id` IN ({})", imploded_instance_ids));
 	}
+
+	LogInfo("Purged [{}] expired instances.", affected);
 }
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
