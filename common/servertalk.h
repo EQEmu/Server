@@ -229,10 +229,12 @@
 #define ServerOP_LSPlayerJoinWorld	0x3007
 #define ServerOP_LSPlayerZoneChange	0x3008
 
-#define	ServerOP_UsertoWorldReqLeg	0xAB00
-#define	ServerOP_UsertoWorldRespLeg	0xAB01
-#define	ServerOP_UsertoWorldReq		0xAB02
-#define	ServerOP_UsertoWorldResp	0xAB03
+#define ServerOP_UsertoWorldReqLeg                0xAB00
+#define ServerOP_UsertoWorldRespLeg               0xAB01
+#define ServerOP_UsertoWorldReq                   0xAB02
+#define ServerOP_UsertoWorldResp                  0xAB03
+#define ServerOP_UsertoWorldCancelOfflineRequest  0xAB04
+#define ServerOP_UsertoWorldCancelOfflineResponse 0xAB05
 
 #define ServerOP_LauncherConnectInfo	0x3000
 #define ServerOP_LauncherZoneRequest	0x3001
@@ -359,12 +361,13 @@ enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_
 
 
 enum {
-	UserToWorldStatusWorldUnavail = 0,
-	UserToWorldStatusSuccess = 1,
-	UserToWorldStatusSuspended = -1,
-	UserToWorldStatusBanned = -2,
-	UserToWorldStatusWorldAtCapacity = -3,
-	UserToWorldStatusAlreadyOnline = -4
+	UserToWorldStatusWorldUnavail        = 0,
+	UserToWorldStatusSuccess             = 1,
+	UserToWorldStatusSuspended           = -1,
+	UserToWorldStatusBanned              = -2,
+	UserToWorldStatusWorldAtCapacity     = -3,
+	UserToWorldStatusAlreadyOnline       = -4,
+	UserToWorldStatusOffilineTraderBuyer = -5
 };
 
 enum {
@@ -566,6 +569,9 @@ struct ServerClientList_Struct {
 	uint8	LFGToLevel;
 	bool	LFGMatchFilter;
 	char	LFGComments[64];
+	bool    trader;
+	bool    buyer;
+	bool    offline;
 };
 
 struct ServerClientListKeepAlive_Struct {
@@ -1029,6 +1035,7 @@ struct ServerGuildMemberUpdate_Struct {
 	char   member_name[64];
 	uint32 zone_id;
 	uint32 last_seen;
+	uint32 offline_mode;
 };
 
 struct ServerGuildPermissionUpdate_Struct {

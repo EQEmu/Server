@@ -62,6 +62,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/skill_caps.h"
 #include "../common/server_reload_types.h"
 #include "queryserv.h"
+#include "../common/repositories/account_repository.h"
+#include "../common/repositories/character_offline_transactions_repository.h"
 
 extern EntityList             entity_list;
 extern Zone                  *zone;
@@ -3878,8 +3880,21 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 							.charges              = in->item_charges,
 							.total_cost           = total_cost,
 							.player_money_balance = trader_pc->GetCarriedMoney(),
+							.offline_purchase     = trader_pc->IsOffline(),
 						};
 						RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
+					}
+
+					if (trader_pc->IsOffline()) {
+						auto e         = CharacterOfflineTransactionsRepository::NewEntity();
+						e.character_id = trader_pc->CharacterID();
+						e.item_name    = in->trader_buy_struct.item_name;
+						e.price        = in->trader_buy_struct.price * in->trader_buy_struct.quantity;
+						e.quantity     = in->trader_buy_struct.quantity;
+						e.type         = TRADER_TRANSACTION;
+						e.buyer_name   = in->trader_buy_struct.buyer_name;
+
+						CharacterOfflineTransactionsRepository::InsertOne(database, e);
 					}
 
 					in->transaction_status = BazaarPurchaseSuccess;
@@ -4276,6 +4291,18 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						RecordPlayerEventLogWithClient(buyer, PlayerEvent::BARTER_TRANSACTION, e);
 					}
 
+					if (buyer->IsOffline()) {
+						auto e         = CharacterOfflineTransactionsRepository::NewEntity();
+						e.character_id = buyer->CharacterID();
+						e.item_name    = sell_line.item_name;
+						e.price        = (uint64) sell_line.item_cost * (uint64) in->seller_quantity;
+						e.quantity     = sell_line.seller_quantity;
+						e.type         = BUYER_TRANSACTION;
+						e.buyer_name   = sell_line.seller_name;
+
+						CharacterOfflineTransactionsRepository::InsertOne(database, e);
+					}
+
 					in->action = Barter_BuyerTransactionComplete;
 					worldserver.SendPacket(pack);
 
@@ -4336,8 +4363,103 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					break;
 				}
+				break;
 			}
+			break;
 		}
+		case ServerOP_UsertoWorldCancelOfflineRequest: {
+ 			auto in     = reinterpret_cast<UsertoWorldResponse *>(pack->pBuffer);
+ 			auto client = entity_list.GetClientByLSID(in->lsaccountid);
+ 			if (!client) {
+				LogLoginserverDetail("Step 6a(1) - Zone received ServerOP_UsertoWorldCancelOfflineRequest though could "
+									 "not find client."
+				);
+
+ 				auto e = AccountRepository::GetWhere(database, fmt::format("`lsaccount_id` = '{}'", in->lsaccountid));
+ 				if (!e.empty()) {
+ 					auto r = e.front();
+ 					r.offline = 0;
+ 					AccountRepository::UpdateOne(database, r);
+					LogLoginserverDetail(
+						"Step 6a(2) - Zone cleared offline status in account table for user id {} / {}",
+						r.lsaccount_id,
+						r.charname
+					);
+ 				}
+
+
+ 				auto sp          = new ServerPacket(ServerOP_UsertoWorldCancelOfflineResponse, pack->size);
+ 				auto out         = reinterpret_cast<UsertoWorldResponse *>(sp->pBuffer);
+ 				sp->opcode       = ServerOP_UsertoWorldCancelOfflineResponse;
+ 				out->FromID      = in->FromID;
+ 				out->lsaccountid = in->lsaccountid;
+ 				out->response    = in->response;
+ 				out->ToID        = in->ToID;
+ 				out->worldid     = in->worldid;
+ 				strn0cpy(out->login, in->login, 64);
+
+				LogLoginserverDetail("Step 6a(3) - Zone sending ServerOP_UsertoWorldCancelOfflineResponse back to world");
+ 				worldserver.SendPacket(sp);
+ 				safe_delete(sp);
+ 				break;
+ 			}
+
+			LogLoginserverDetail(
+				"Step 6b(1) - Zone received ServerOP_UsertoWorldCancelOfflineRequest and found client {}",
+				client->GetCleanName()
+			);
+			LogLoginserverDetail(
+				"Step 6b(2) - Zone cleared offline status in account table for user id {} / {}",
+				client->CharacterID(),
+				client->GetCleanName()
+			);
+			AccountRepository::SetOfflineStatus(database, client->AccountID(), false);
+
+ 			if (client->IsThereACustomer()) {
+ 				auto customer = entity_list.GetClientByID(client->GetCustomerID());
+ 				if (customer) {
+ 					auto end_session = new EQApplicationPacket(OP_ShopEnd);
+ 					customer->FastQueuePacket(&end_session);
+ 				}
+ 			}
+
+ 			if (client->IsTrader()) {
+				LogLoginserverDetail("Step 6b(3) - Zone ending trader mode for client {}", client->GetCleanName());
+ 				client->TraderEndTrader();
+ 			}
+
+ 			if (client->IsBuyer()) {
+				LogLoginserverDetail("Step 6b(4) - Zone ending buyer mode for client {}", client->GetCleanName());
+ 				client->ToggleBuyerMode(false);
+ 			}
+
+			LogLoginserverDetail("Step 6b(5) - Zone updating UpdateWho(2) for client {}", client->GetCleanName());
+			client->UpdateWho(2);
+
+ 			auto outapp = new EQApplicationPacket();
+			LogLoginserverDetail("Step 6b(6) - Zone sending despawn packet for client {}", client->GetCleanName());
+ 			client->CreateDespawnPacket(outapp, false);
+ 			entity_list.QueueClients(nullptr, outapp, false);
+ 			safe_delete(outapp);
+
+			LogLoginserverDetail("Step 6b(7) - Zone removing client from entity_list");
+ 			entity_list.RemoveMob(client->CastToMob()->GetID());
+
+ 			auto sp          = new ServerPacket(ServerOP_UsertoWorldCancelOfflineResponse, pack->size);
+ 			auto out         = reinterpret_cast<UsertoWorldResponse *>(sp->pBuffer);
+ 			sp->opcode       = ServerOP_UsertoWorldCancelOfflineResponse;
+ 			out->FromID      = in->FromID;
+ 			out->lsaccountid = in->lsaccountid;
+ 			out->response    = in->response;
+ 			out->ToID        = in->ToID;
+ 			out->worldid     = in->worldid;
+ 			strn0cpy(out->login, in->login, 64);
+
+			LogLoginserverDetail("Step 6b(8) - Zone sending ServerOP_UsertoWorldCancelOfflineResponse back to world");
+ 			worldserver.SendPacket(sp);
+ 			safe_delete(sp);
+ 			break;
+ 		}
 		default: {
 			LogInfo("Unknown ZS Opcode [{}] size [{}]", (int) pack->opcode, pack->size);
 			break;

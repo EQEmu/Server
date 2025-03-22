@@ -1734,9 +1734,34 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 					break;
 				}
-				default:
-					return;
+				default: {
+					break;
+				}
 			}
+			break;
+		}
+		case ServerOP_UsertoWorldCancelOfflineResponse: {
+			auto utwr  = reinterpret_cast<UsertoWorldResponse *>(pack->pBuffer);
+
+			ServerPacket server_packet;
+			server_packet.opcode  = ServerOP_UsertoWorldCancelOfflineResponse;
+			server_packet.size    = sizeof(UsertoWorldResponse);
+			server_packet.pBuffer = new uchar[server_packet.size];
+			memset(server_packet.pBuffer, 0, server_packet.size);
+
+			auto utwrs         = reinterpret_cast<UsertoWorldResponse *>(server_packet.pBuffer);
+			utwrs->lsaccountid = utwr->lsaccountid;
+			utwrs->ToID        = utwr->FromID;
+			utwrs->worldid     = utwr->worldid;
+			utwrs->response    = UserToWorldStatusSuccess;
+			strn0cpy(utwrs->login, utwr->login, 64);
+
+			LogLoginserverDetail(
+				"Step 7a - World received ServerOP_UsertoWorldCancelOfflineResponse back to login with success."
+			);
+
+			loginserverlist.SendPacket(&server_packet);
+			break;
 		}
 		default: {
 			LogInfo("Unknown ServerOPcode from zone {:#04x}, size [{}]", pack->opcode, pack->size);

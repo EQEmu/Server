@@ -26,6 +26,8 @@
 #include "../common/repositories/trader_repository.h"
 #include "../common/repositories/buyer_repository.h"
 #include "../common/repositories/buyer_buy_lines_repository.h"
+#include "../common/repositories/character_offline_transactions_repository.h"
+#include "../common/repositories/account_repository.h"
 
 #include "client.h"
 #include "entity.h"
@@ -907,6 +909,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 	SetTrader(true);
 	SendTraderMode(TraderOn);
 	SendBecomeTraderToWorld(this, TraderOn);
+	UpdateWho();
 	LogTrading("Trader Mode ON for Player [{}] with client version {}.", GetCleanName(), (uint32) ClientVersion());
 }
 
@@ -927,6 +930,7 @@ void Client::TraderEndTrader()
 
 	WithCustomer(0);
 	SetTrader(false);
+	UpdateWho();
 }
 
 void Client::SendTraderItem(uint32 ItemID, uint16 Quantity, TraderRepository::Trader &t) {
@@ -1331,7 +1335,6 @@ void Client::FindAndNukeTraderItem(std::string &item_unique_id, int16 quantity, 
 			return;
 		}
 		else {
-			//TraderRepository::UpdateQuantity(database, CharacterID(), item->GetUniqueID(), charges - quantity);
 			NukeTraderItem(slot_id, charges, quantity, customer, trader_slot, item->GetUniqueID(), item->GetID());
 			return;
 		}
@@ -1402,22 +1405,6 @@ void Client::TradeRequestFailed(TraderBuy_Struct &in)
 
 	QueuePacket(&outapp);
 }
-
-// static void BazaarAuditTrail(const char *seller, const char *buyer, const char *itemName, int quantity, int totalCost, int tranType) {
-//
-// 	const std::string& query = fmt::format(
-// 		"INSERT INTO `trader_audit` "
-//         	"(`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
-// 		"VALUES (NOW(), '{}', '{}', '{}', {}, {}, {})",
-// 		seller,
-// 		buyer,
-// 		Strings::Escape(itemName),
-// 		quantity,
-// 		totalCost,
-// 		tranType
-// 	);
-// 	database.QueryDatabase(query);
-// }
 
 void Client::BuyTraderItem(const EQApplicationPacket *app)
 {
@@ -1595,6 +1582,7 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 			.charges              = buy_inst->GetCharges(),
 			.total_cost           = total_cost,
 			.player_money_balance = GetCarriedMoney(),
+			.offline_purchase     = trader->IsOffline(),
 		};
 
 		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
@@ -1617,9 +1605,22 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 			.charges              = buy_inst->GetCharges(),
 			.total_cost           = total_cost,
 			.player_money_balance = trader->GetCarriedMoney(),
+			.offline_purchase     = trader->IsOffline(),
 		};
 
 		RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADER_SELL, e);
+
+		if (trader->IsOffline()) {
+			auto e         = CharacterOfflineTransactionsRepository::NewEntity();
+			e.character_id = trader->CharacterID();
+			e.item_name    = buy_inst->GetItem()->Name;
+			e.price        = total_cost;
+			e.quantity     = quantity;
+			e.type         = TRADER_TRANSACTION;
+			e.buyer_name   = GetCleanName();
+
+			CharacterOfflineTransactionsRepository::InsertOne(database, e);
+		}
 	}
 }
 
@@ -1715,7 +1716,6 @@ static void UpdateTraderCustomerItemsAdded(
 			inst->SetCharges(i.item_charges);
 			inst->SetPrice(i.item_cost);
 			inst->SetUniqueID(i.item_unique_id);
-			//FIXinst->SetMerchantSlot(i.item_sn);
 			if (inst->IsStackable()) {
 				inst->SetMerchantCount(i.item_charges);
 			}
@@ -1819,7 +1819,6 @@ static void UpdateTraderCustomerPriceChanged(
 		}
 
 		inst->SetUniqueID(trader_items.at(i).item_unique_id);
-		//inst->SetMerchantSlot(trader_items.at(i).item_sn);
 
 		LogTrading("Sending price update for [{}], Serial No. [{}] with [{}] charges",
 				   item->Name, trader_items.at(i).item_unique_id, trader_items.at(i).item_charges);
@@ -1976,12 +1975,18 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 				}
 
 				if (!DoBarterBuyerChecks(sell_line)) {
+					SendBarterBuyerClientMessage(
+						sell_line, Barter_SellerTransactionComplete, Barter_Failure, Barter_Failure
+					);
 					return;
-				};
+				}
 
 				if (!DoBarterSellerChecks(sell_line)) {
+					SendBarterBuyerClientMessage(
+						sell_line, Barter_SellerTransactionComplete, Barter_Failure, Barter_Failure
+					);
 					return;
-				};
+				}
 
 				BuyerRepository::UpdateTransactionDate(database, sell_line.buyer_id, time(nullptr));
 
@@ -2080,6 +2085,18 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 					e.buyer_name  = buyer->GetCleanName();
 					e.seller_name = GetCleanName();
 					RecordPlayerEventLog(PlayerEvent::BARTER_TRANSACTION, e);
+				}
+
+				if (buyer->IsOffline()) {
+					auto e         = CharacterOfflineTransactionsRepository::NewEntity();
+					e.character_id = buyer->CharacterID();
+					e.item_name    = sell_line.item_name;
+					e.price        = total_cost;
+					e.quantity     = sell_line.seller_quantity;
+					e.type         = BUYER_TRANSACTION;
+					e.buyer_name   = GetCleanName();
+
+					CharacterOfflineTransactionsRepository::InsertOne(database, e);
 				}
 
 				SendWindowUpdatesToSellerAndBuyer(sell_line);
@@ -2224,6 +2241,7 @@ void Client::ToggleBuyerMode(bool status)
 		SetCustomerID(0);
 		SendBuyerMode(true);
 		SendBuyerToBarterWindow(this, Barter_AddToBarterWindow);
+		UpdateWho();
 		Message(Chat::Yellow, "Barter Mode ON.");
 	}
 	else {
@@ -2236,6 +2254,8 @@ void Client::ToggleBuyerMode(bool status)
 		if (!IsInBuyerSpace()) {
 			Message(Chat::Red, "You must be in a Barter Stall to start Barter Mode.");
 		}
+
+		UpdateWho();
 		Message(Chat::Yellow, fmt::format("Barter Mode OFF. Buy lines deactivated.").c_str());
 	}
 
@@ -2797,8 +2817,9 @@ std::string Client::DetermineMoneyString(uint64 cp)
 
 void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 {
-	auto in             = reinterpret_cast<TraderBuy_Struct *>(app->pBuffer);
-	auto trader_item    = TraderRepository::GetItemByItemUniqueNumber(database, in->item_unique_id);
+	auto in          = reinterpret_cast<TraderBuy_Struct *>(app->pBuffer);
+	auto trader_item = TraderRepository::GetItemByItemUniqueNumber(database, in->item_unique_id);
+	auto offline     = AccountRepository::GetAllOfflineStatus(database, trader_item.char_id);
 
 	LogTradingDetail(
 		"Packet details: \n"

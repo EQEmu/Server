@@ -18,6 +18,11 @@ public:
 		unsigned int client_account_id,
 		const std::string &client_loginserver
 	);
+	void SendUserToWorldCancelOfflineRequest(
+		unsigned int server_id,
+		unsigned int client_account_id,
+		const std::string &client_loginserver
+	);
 	std::unique_ptr<EQApplicationPacket> CreateServerListPacket(Client *client, uint32 sequence);
 	bool DoesServerExist(const std::string &s, const std::string &server_short_name, WorldServer *ignore = nullptr);
 	void DestroyServerByName(std::string s, std::string server_short_name, WorldServer *ignore = nullptr);

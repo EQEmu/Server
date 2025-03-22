@@ -205,6 +205,9 @@ void ClientListEntry::Update(ZoneServer *iZS, ServerClientList_Struct *scl, CLE_
 	m_lfg                  = scl->LFG;
 	m_gm                   = scl->gm;
 	m_client_version       = scl->ClientVersion;
+	m_trader               = scl->trader;
+	m_buyer                = scl->buyer;
+	m_offline              = scl->offline;
 
 	// Fields from the LFG Window
 	if ((scl->LFGFromLevel != 0) && (scl->LFGToLevel != 0)) {
@@ -222,6 +225,10 @@ void ClientListEntry::LeavingZone(ZoneServer *iZS, CLE_Status iOnline)
 	if (iZS != 0 && iZS != m_zone_server) {
 		return;
 	}
+
+	m_trader  = false;
+	m_buyer   = false;
+	m_offline = false;
 	SetOnline(iOnline);
 
 	shared_task_manager.RemoveActiveInvitationByCharacterID(CharID());
@@ -263,6 +270,10 @@ void ClientListEntry::ClearVars(bool iAll)
 	m_lfg            = 0;
 	m_gm             = 0;
 	m_client_version = 0;
+	m_trader         = false;
+	m_buyer          = false;
+	m_offline        = false;
+
 	for (auto &elem: m_tell_queue) {
 		safe_delete_array(elem);
 	}

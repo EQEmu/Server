@@ -210,7 +210,7 @@ void Database::LoginIP(uint32 account_id, const std::string& login_ip)
 	QueryDatabase(query);
 }
 
-int16 Database::GetAccountStatus(uint32 account_id)
+AccountStatus::StatusRecord Database::GetAccountStatus(uint32 account_id)
 {
 	auto e = AccountRepository::FindOne(*this, account_id);
 
@@ -222,7 +222,11 @@ int16 Database::GetAccountStatus(uint32 account_id)
 		AccountRepository::UpdateOne(*this, e);
 	}
 
-	return e.status;
+	AccountStatus::StatusRecord result{};
+	result.status  = e.status;
+	result.offline = e.offline;
+
+	return result;
 }
 
 uint32 Database::CreateAccount(
@@ -2251,6 +2255,7 @@ void Database::ClearGuildOnlineStatus()
 void Database::ClearTraderDetails()
 {
 	TraderRepository::Truncate(*this);
+	AccountRepository::ClearAllOfflineStatus(*this);
 }
 
 void Database::ClearBuyerDetails()
