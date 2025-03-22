@@ -138,7 +138,7 @@ int Client::GetBotSpawnLimit(uint8 class_id) {
 		}
 
 		catch (const std::exception& e) {
-			LogInfo("Invalid entry in Rule VegasScaling:SpecialScalingZones or SpecialScalingZonesVersions: [{}]", e.what());
+			LogInfo("Invalid entry in Rule Bots:ZonesWithSpawnLimits or Bots:ZoneSpawnLimits: [{}]", e.what());
 		}
 	}
 
@@ -161,7 +161,7 @@ int Client::GetBotSpawnLimit(uint8 class_id) {
 		}
 
 		catch (const std::exception& e) {
-			LogInfo("Invalid entry in Rule VegasScaling:SpecialScalingZones or SpecialScalingZonesVersions: [{}]", e.what());
+			LogInfo("Invalid entry in Rule Bots:ZonesWithForcedSpawnLimits or Bots:ZoneForcedSpawnLimits: [{}]", e.what());
 		}
 	}
 
