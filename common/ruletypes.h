@@ -261,6 +261,7 @@ RULE_INT(Guild, TributeTime, 600000, "Time in ms for guild tributes.  Default is
 RULE_INT(Guild, TributeTimeRefreshInterval, 180000, "Time in ms to send all guild members a Tribute Time refresh. Default is 3 mins.")
 RULE_INT(Guild, TributePlatConversionRate, 10, "The conversion rate of platinum donations.  Default is 10 guild favor to 1 platinum.")
 RULE_BOOL(Guild, UseCharacterMaxLevelForGuildTributes, true, "Guild Tributes will adhere to Character:MaxLevel.  Default is true.")
+RULE_BOOL(Guild, EnableLFGuild, false, "Enable the LFGuild system (Requires queryserv)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Skills)
