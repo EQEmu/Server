@@ -3143,20 +3143,23 @@ void EntityList::Depop(bool StartSpawnTimer)
 {
 	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
 		NPC *pnpc = it->second;
+
 		if (pnpc) {
 			Mob *own = pnpc->GetOwner();
-			//do not depop player's pets...
-			if (own && own->IsClient())
+			//do not depop player/bot pets...
+			if (own && own->IsOfClientBot()) {
 				continue;
+			}
 
-			if (pnpc->IsHorse())
+			if (pnpc->IsHorse()) {
 				continue;
+			}
 
-			if (pnpc->IsFindable())
+			if (pnpc->IsFindable()) {
 				UpdateFindableNPCState(pnpc, true);
+			}
 
 			pnpc->WipeHateList();
-
 			pnpc->Depop(StartSpawnTimer);
 		}
 	}
