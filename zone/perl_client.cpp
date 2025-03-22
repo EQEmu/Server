@@ -3582,6 +3582,7 @@ void perl_register_client()
 	package.add("ClearXTargets", &Perl_Client_ClearXTargets);
 	package.add("ClearZoneFlag", &Perl_Client_ClearZoneFlag);
 	package.add("Connected", &Perl_Client_Connected);
+	package.add("ConsumeItemOnCursor", &Perl_Client_ConsumeItemOnCursor);
 	package.add("CountAugmentEquippedByID", &Perl_Client_CountAugmentEquippedByID);
 	package.add("CountItem", &Perl_Client_CountItem);
 	package.add("CountItemEquippedByID", &Perl_Client_CountItemEquippedByID);
