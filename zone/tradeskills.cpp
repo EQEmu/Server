@@ -236,12 +236,13 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			safe_delete(outapp);
 			database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
 		} else { // Delete items in our inventory container...
-			for (uint8 i = EQ::invbag::SLOT_BEGIN; i <= EQ::invbag::SLOT_END; i++) {
+			for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++) {
 				const EQ::ItemInstance* inst = container->GetItem(i);
 				if (inst) {
 					user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_augment->container_slot, i), 0, true);
 				}
 			}
+
 			container->Clear(); // Explicitly mark container as cleared.
 		}
 	}
@@ -1423,31 +1424,31 @@ bool ZoneDatabase::GetTradeRecipe(
 		LogTradeskills("Fetching item [{}]", slot_id);
 
 		const auto inst = container->GetItem(slot_id);
-		if (!inst) {
+		if (!inst || !inst->GetItem()) {
 			continue;
 		}
+
+		int item_id = (container->GetItem() && container->GetItem()->BagSlots <= 10) ? inst->GetItem()->ID % 1000000 : inst->GetItem()->ID;
 
 		if (inst->IsAugmented()) {
 			*is_augmented = true;
 			return false;
 		}
 
-
-
-		const auto item = database.GetItem(inst->GetItem()->ID);
+		const auto item = database.GetItem(item_id);
 		if (!item) {
-			LogTradeskills("item [{}] not found!", inst->GetItem()->ID);
+			LogTradeskills("item [{}] not found!", item_id);
 			continue;
 		}
 
 		if (first) {
-			buf2 += fmt::format("{}", (item->ID));
+			buf2 += fmt::format("{}", item_id);
 			first = false;
 		} else {
-			buf2 += fmt::format(", {}", (item->ID));
+			buf2 += fmt::format(", {}", item_id);
 		}
 
-		sum += (item->ID);
+		sum += item_id;
 		count++;
 
 		LogTradeskills(
@@ -1585,13 +1586,10 @@ bool ZoneDatabase::GetTradeRecipe(
 		return GetTradeRecipe(recipe_id, c_type, some_id, c, spec);
 	}
 
-	auto container_itm = database.GetItem(some_id);
-	int container_size = (container && container->GetItem()) ? container->GetItem()->BagSlots : EQ::invtype::WORLD_SIZE;
-
 	for (auto row : results) {
 		int component_count = 0;
 
-		for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < container_size; slot_id++) {
+		for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < (container->GetItem() ? container->GetItem()->BagSlots : EQ::invtype::WORLD_SIZE); slot_id++) {
 			const auto inst = container->GetItem(slot_id);
 			if (!inst || !inst->GetItem()) {
 				continue;
@@ -1602,12 +1600,14 @@ bool ZoneDatabase::GetTradeRecipe(
 				return false;
 			}
 
-			const auto item = database.GetItem(inst->GetItem()->ID);
+			int item_id = (container->GetItem() && container->GetItem()->BagSlots <= 10) ? inst->GetItem()->ID % 1000000 : inst->GetItem()->ID;
+
+			const auto item = database.GetItem(item_id);
 			if (!item) {
 				continue;
 			}
 
-			if ((item->ID) == Strings::ToUnsignedInt(row[0])) {
+			if (item_id == Strings::ToUnsignedInt(row[0])) {
 				component_count++;
 			}
 
@@ -1620,7 +1620,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		}
 
 		if (component_count != Strings::ToInt(row[1])) {
-			LogTradeskills("Abort: Component Count: [{}] Expected [{}] for ItemID [{}]", component_count, Strings::ToInt(row[1]), Strings::ToInt(row[0]));
+			LogTradeskills("Aborted due to getting component count [{}] instead of [{}] for item [{}]", component_count, row[1], row[0]);
 			return false;
 		}
 	}
