@@ -55,16 +55,17 @@ class CharGuildInfo
 		uint32	    time_last_on;
 		uint32	    zone_id;
 
-		//fields from `guild_members`
-		uint32	    guild_id;
-		uint8	    rank;
-		bool	    tribute_enable;
-		uint32	    total_tribute;
-		uint32	    last_tribute;		//timestamp
-		bool	    banker;
-		bool	    alt;
-		std::string	public_note;
-		bool	    online;
+		// fields from `guild_members`
+		uint32      guild_id;
+		uint8       rank;
+		bool        tribute_enable;
+		uint32      total_tribute;
+		uint32      last_tribute; // timestamp
+		bool        banker;
+		bool        alt;
+		std::string public_note;
+		bool        online;
+		bool        offline_mode;
 };
 
 //this object holds guild functionality shared between world and zone.
