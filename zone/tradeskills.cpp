@@ -1586,14 +1586,14 @@ bool ZoneDatabase::GetTradeRecipe(
 	}
 
 	auto container_itm = database.GetItem(some_id);
-	int container_size = container ? container->GetItem()->BagSlots : EQ::invtype::WORLD_SIZE;
+	int container_size = (container && container->GetItem()) ? container->GetItem()->BagSlots : EQ::invtype::WORLD_SIZE;
 
 	for (auto row : results) {
 		int component_count = 0;
 
 		for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < container_size; slot_id++) {
 			const auto inst = container->GetItem(slot_id);
-			if (!inst) {
+			if (!inst || !inst->GetItem()) {
 				continue;
 			}
 
