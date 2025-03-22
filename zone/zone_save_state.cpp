@@ -476,12 +476,16 @@ bool Zone::LoadZoneState(
 	zone->initgrids_timer.Trigger();
 	zone->Process();
 
+	// load zone variables first
 	for (auto &s: spawn_states) {
 		if (s.is_zone) {
 			LoadZoneVariables(zone, s.entity_variables);
-			continue;
+			break;
 		}
+	}
 
+	// spawn2
+	for (auto &s: spawn_states) {
 		if (s.spawngroup_id == 0 || s.is_corpse || s.is_zone) {
 			continue;
 		}
