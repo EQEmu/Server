@@ -8149,7 +8149,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 	if (!invitee) {
 		Message(
 			Chat::Red,
-			"Prospective guild member %s must be in zone to preform guild operations on them.",
+			"Prospective guild member %s must be in zone to perform guild operations on them.",
 			gc->othername
 		);
 		return;
