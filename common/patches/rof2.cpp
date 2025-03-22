@@ -1845,7 +1845,7 @@ namespace RoF2
 				e->zoneinstance = 0;
 				e->zone_id = htons(emu_e->zone_id);
 				e->unknown_one2 = htonl(1);
-				e->unknown04 = 0;
+				e->offline_mode = htonl(emu_e->offline_mode);
 
 #undef SlideStructString
 #undef PutFieldN
@@ -1862,14 +1862,12 @@ namespace RoF2
 	{
 		SETUP_DIRECT_ENCODE(GuildMemberUpdate_Struct, structs::GuildMemberUpdate_Struct);
 
-		OUT(GuildID);
-		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		//OUT(ZoneID);
-		//OUT(InstanceID);
-		eq->InstanceID = emu->InstanceID;
-		eq->ZoneID = emu->ZoneID;
-		OUT(LastSeen);
-		eq->Unknown76 = 0;
+		eq->guild_id     = emu->GuildID;
+		eq->last_seen    = emu->LastSeen;
+		eq->instance_id  = emu->InstanceID;
+		eq->zone_id      = emu->ZoneID;
+		eq->offline_mode = emu->offline_mode;
+		memcpy(eq->member_name, emu->MemberName, sizeof(eq->member_name));
 
 		FINISH_ENCODE();
 	}
@@ -4475,6 +4473,7 @@ namespace RoF2
 		*p = nullptr;
 
 		char *InBuffer = (char *)in->pBuffer;
+		std::vector<uint32> p_ids { 0x430, 0x420 };
 
 		WhoAllReturnStruct *wars = (WhoAllReturnStruct*)InBuffer;
 
@@ -4500,8 +4499,9 @@ namespace RoF2
 			x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
 			VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
 
-			InBuffer += 4;
-			VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+			x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+			VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, std::ranges::find(p_ids.begin(), p_ids.end(), x) == p_ids.end() ? 0 : x);
+
 			VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0xffffffff);
 
 			char Name[64];
@@ -4735,6 +4735,10 @@ namespace RoF2
 			}
 			if (emu->buyer) {
 				OtherData = OtherData | 0x01;
+			}
+
+			if (emu->offline) {
+				OtherData = OtherData | 0x02;
 			}
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, OtherData);

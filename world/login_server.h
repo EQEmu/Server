@@ -49,6 +49,7 @@ private:
 	void ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSAccountUpdate(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessUserToWorldCancelOfflineRequest(uint16_t opcode, EQ::Net::Packet &p);
 
 	std::unique_ptr<EQ::Timer> m_keepalive;
 
