@@ -882,9 +882,13 @@ void Client::SendZoneInPackets()
 		//SendGuildMembers();
 		SendGuildURL();
 		SendGuildChannel();
-		SendGuildLFGuildStatus();
+		if (RuleB(Guild, EnableLFGuild)) {
+			SendGuildLFGuildStatus();
+		}
 	}
-	SendLFGuildStatus();
+	if (RuleB(Guild, EnableLFGuild)) {
+		SendLFGuildStatus();
+	}
 
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
