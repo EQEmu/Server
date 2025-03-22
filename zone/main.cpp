@@ -500,7 +500,7 @@ int main(int argc, char **argv)
 	}
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
-	Timer UpdateWhoTimer(2 * 60 * 1000); // updates who list every 2 minutes
+	Timer UpdateWhoTimer(RuleI(Zone, UpdateWhoTimer) * 1000); // updates who list every 2 minutes
 
 #ifdef EQPROFILE
 #ifdef PROFILE_DUMP_TIME
@@ -650,6 +650,7 @@ int main(int argc, char **argv)
 			database.ping();
 			content_db.ping();
 			if (UpdateWhoTimer.Check()) {
+				UpdateWhoTimer.SetTimer(RuleI(Zone, UpdateWhoTimer) * 1000); // in-case it was changed
 				entity_list.UpdateWho();
 			}
 		}

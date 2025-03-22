@@ -379,6 +379,7 @@ RULE_BOOL(Zone, StateSaveEntityVariables, true, "Set to true if you want buffs t
 RULE_BOOL(Zone, StateSaveBuffs, true, "Set to true if you want buffs to be saved on shutdown")
 RULE_INT(Zone, StateSaveClearDays, 7, "Clears state save data older than this many days")
 RULE_BOOL(Zone, StateSavingOnShutdown, true, "Set to true if you want zones to save state on shutdown (npcs, corpses, loot, entity variables, buffs etc.)")
+RULE_INT(Zone, UpdateWhoTimer, 120, "Seconds between updates to /who list, CLE stale timer")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
