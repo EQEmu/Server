@@ -326,6 +326,7 @@ union
 	bool buyer;
 	bool untargetable;
 	uint32 npc_tint_id;
+	bool offline;
 };
 
 struct PlayerState_Struct {
@@ -3913,12 +3914,12 @@ struct SimpleMessage_Struct{
 };
 
 struct GuildMemberUpdate_Struct {
-/*00*/	uint32	GuildID;
-/*04*/	char	MemberName[64];
-/*68*/	uint16	ZoneID;
-/*70*/	uint16	InstanceID;	//speculated
-/*72*/	uint32	LastSeen;	//unix timestamp
-/*76*/
+	/*00*/	uint32	GuildID;
+	/*04*/	char	MemberName[64];
+	/*68*/	uint16	ZoneID;
+	/*72*/	uint16	InstanceID;	//speculated
+	/*76*/	uint32	LastSeen;	//unix timestamp
+	/*80*/  uint32  offline_mode;
 };
 
 struct GuildMemberLevelUpdate_Struct {
@@ -3941,6 +3942,7 @@ struct Internal_GuildMemberEntry_Struct {
 	uint16	zoneinstance;				//network byte order
 	uint16	zone_id;					//network byte order
 	uint32  online;
+	uint32  offline_mode;
 };
 
 struct Internal_GuildMembers_Struct {	//just for display purposes, this is not actually used in the message encoding.
