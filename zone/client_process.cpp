@@ -354,7 +354,7 @@ bool Client::Process() {
 			}
 		}
 
-		if (AutoFireEnabled() && may_use_attacks) {
+		if (AutoFireEnabled()) {
 			if (GetTarget() == this) {
 				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
 				auto_fire = false;
