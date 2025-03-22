@@ -71,6 +71,25 @@ bool Client::Process()
 				SendPlayToWorld((const char *) app->pBuffer);
 				break;
 			}
+			case OP_CancelOfflineTrader: {
+				if (app->Size() < sizeof(CancelOfflineTrader)) {
+					LogError("Play received but it is too small, discarding");
+					break;
+				}
+
+				safe_delete_array(app->pBuffer);
+				auto buffer                = new unsigned char[sizeof(PlayEverquestRequest)];
+				auto data                  = (PlayEverquestRequest *) buffer;
+				data->base_header.sequence = GetCurrentPlaySequence();
+				data->server_number        = GetSelectedPlayServerID();
+				app->pBuffer               = buffer;
+				app->size                  = sizeof(PlayEverquestRequest);
+
+				LogLoginserverDetail("Step 1 - Hit CancelOfflineTrader Mode Packet for.");
+				SendCancelOfflineStatusToWorld((const char *) app->pBuffer);
+
+				break;
+			}
 		}
 
 		delete app;
@@ -560,4 +579,28 @@ std::string Client::GetClientLoggingDescription()
 		GetAccountID(),
 		client_ip
 	);
+}
+
+void Client::SendCancelOfflineStatusToWorld(const char *data)
+{
+	if (m_client_status != cs_logged_in) {
+		LogError("Client sent a play request when they were not logged in, discarding");
+		return;
+	}
+
+	const auto *play        = (const PlayEverquestRequest *) data;
+	auto       server_id_in = (unsigned int) play->server_number;
+	auto       sequence_in  = (unsigned int) play->base_header.sequence;
+
+	LogLoginserverDetail(
+		"Step 2 - Cancel Offline Status Request received from client [{}] server number [{}] sequence [{}]",
+		GetAccountName(),
+		server_id_in,
+		sequence_in
+	);
+
+	m_selected_play_server_id = (unsigned int) play->server_number;
+	m_play_sequence_id        = sequence_in;
+	m_selected_play_server_id = server_id_in;
+	server.server_manager->SendUserToWorldCancelOfflineRequest(server_id_in, m_account_id, m_loginserver_name);
 }

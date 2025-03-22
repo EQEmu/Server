@@ -3681,22 +3681,22 @@ struct SimpleMessage_Struct{
 // Size: 52 + strings
 // Other than the strings, all of this packet is network byte order (reverse from normal)
 struct GuildMemberEntry_Struct {
-	char	name[1];			// variable length
-	uint32	level;
-	uint32	banker;				// 1=yes, 0=no
-	uint32	class_;
-	uint32	rank;
-	uint32	time_last_on;
-	uint32	tribute_enable;
-	uint32	unknown01;			// Seen 0
-	uint32	total_tribute;		// total guild tribute donated, network byte order
-	uint32	last_tribute;		// unix timestamp
-	uint32	unknown_one;		// unknown, set to 1
-	char	public_note[1];		// variable length.
-	uint16	zoneinstance;		// Seen 0s or -1 in RoF2
-	uint16	zone_id;			// Seen 0s or -1 in RoF2
-	uint32	unknown_one2;		// unknown, set to 1
-	uint32	unknown04;			// Seen 0
+	char   name[1];        // variable length
+	uint32 level;
+	uint32 banker;         // 1=yes, 0=no
+	uint32 class_;
+	uint32 rank;
+	uint32 time_last_on;
+	uint32 tribute_enable;
+	uint32 unknown01;      // Seen 0
+	uint32 total_tribute;  // total guild tribute donated, network byte order
+	uint32 last_tribute;   // unix timestamp
+	uint32 unknown_one;    // unknown, set to 1
+	char   public_note[1]; // variable length.
+	uint16 zoneinstance;   // Seen 0s or -1 in RoF2
+	uint16 zone_id;        // Seen 0s or -1 in RoF2
+	uint32 unknown_one2;   // unknown, set to 1
+	uint32 offline_mode;   // Displays OFFLINE MODE instead of Zone Name
 };
 
 //just for display purposes, this is not actually used in the message encoding other than for size.
@@ -3731,13 +3731,12 @@ struct GuildStatus_Struct
 };
 
 struct GuildMemberUpdate_Struct {
-/*00*/	uint32	GuildID;
-/*04*/	char	MemberName[64];
-/*68*/	uint16	ZoneID;
-/*70*/	uint16	InstanceID;	//speculated
-/*72*/	uint32	LastSeen;	//unix timestamp
-/*76*/	uint32	Unknown76;
-/*80*/
+	/*00*/	uint32	guild_id;
+	/*04*/	char	member_name[64];
+	/*68*/	uint16	zone_id;
+	/*70*/	uint16	instance_id;	//speculated
+	/*72*/	uint32	last_seen;	    //unix timestamp
+	/*76*/	uint32	offline_mode;
 };
 
 struct GuildMemberLevelUpdate_Struct {

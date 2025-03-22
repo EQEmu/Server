@@ -27,6 +27,7 @@ public:
 	void SendPlayToWorld(const char *data);
 	void SendServerListPacket(uint32 seq);
 	void SendPlayResponse(EQApplicationPacket *outapp);
+	void SendCancelOfflineStatusToWorld(const char *data);
 	void GenerateRandomLoginKey();
 	unsigned int GetAccountID() const { return m_account_id; }
 	std::string GetLoginServerName() const { return m_loginserver_name; }

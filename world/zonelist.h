@@ -34,6 +34,7 @@ public:
 	bool SendPacketToZonesWithGMs(ServerPacket *pack);
 	bool SendPacketToBootedZones(ServerPacket* pack);
 	bool SetLockedZone(uint16 iZoneID, bool iLock);
+	bool IsZoneBootedByZoneIdAndInstanceId(uint32 zone_id, uint32 instance_id) const;
 
 	EQTime worldclock;
 

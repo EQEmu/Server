@@ -426,10 +426,11 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				auto outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 				auto gmus   = (GuildMemberUpdate_Struct *) outapp->pBuffer;
 
-				gmus->GuildID    = sgmus->guild_id;
-				gmus->ZoneID     = sgmus->zone_id;
-				gmus->InstanceID = 0;
-				gmus->LastSeen   = sgmus->last_seen;
+				gmus->GuildID      = sgmus->guild_id;
+				gmus->ZoneID       = sgmus->zone_id;
+				gmus->InstanceID   = 0;
+				gmus->LastSeen     = sgmus->last_seen;
+				gmus->offline_mode = sgmus->offline_mode;
 				strn0cpy(gmus->MemberName, sgmus->member_name, sizeof(gmus->MemberName));
 
 				entity_list.QueueClientsGuild(outapp, sgmus->guild_id);
@@ -652,17 +653,24 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 	}
 }
 
-void ZoneGuildManager::SendGuildMemberUpdateToWorld(const char *MemberName, uint32 GuildID, uint16 ZoneID, uint32 LastSeen)
+void ZoneGuildManager::SendGuildMemberUpdateToWorld(
+	const char *MemberName,
+	uint32 GuildID,
+	uint16 ZoneID,
+	uint32 LastSeen,
+	uint32 offline_mode
+)
 {
 	auto pack = new ServerPacket(ServerOP_GuildMemberUpdate, sizeof(ServerGuildMemberUpdate_Struct));
 
-	ServerGuildMemberUpdate_Struct *sgmus = (ServerGuildMemberUpdate_Struct*)pack->pBuffer;
-	sgmus->guild_id = GuildID;
+	auto sgmus          = (ServerGuildMemberUpdate_Struct *) pack->pBuffer;
+	sgmus->guild_id     = GuildID;
+	sgmus->zone_id      = ZoneID;
+	sgmus->last_seen    = LastSeen;
+	sgmus->offline_mode = offline_mode;
 	strn0cpy(sgmus->member_name, MemberName, sizeof(sgmus->member_name));
-	sgmus->zone_id = ZoneID;
-	sgmus->last_seen = LastSeen;
-	worldserver.SendPacket(pack);
 
+	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
 
@@ -1517,14 +1525,12 @@ uint8* ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char* prefix_na
 		PutField(total_tribute);
 		PutField(last_tribute);
 		SlideStructString(note_buf, ci->public_note);
-		//e->zoneinstance = 0;
-		if (ci->online) {
-			e->zone_id = ci->zone_id;	//This routine, if there is a zone_id, will update the entire guild window (roster, notes, tribute) for online characters.
+		e->zone_id      = 0;               //If zone_id is 0 and we rely on the current world routine, the notes/tribute tabs are not updated for online characters.
+		e->offline_mode = 0;
+		if (ci->online || ci->offline_mode) {
+			e->zone_id      = ci->zone_id; //This routine, if there is a zone_id, will update the entire guild window (roster, notes, tribute) for online characters.
+			e->offline_mode = ci->offline_mode;
 		}
-		else {
-			e->zone_id = 0;				//If zone_id is 0 and we rely on the current world routine, the notes/tribute tabs are not updated for online characters.
-		}
-
 #undef SlideStructString
 #undef PutFieldN
 

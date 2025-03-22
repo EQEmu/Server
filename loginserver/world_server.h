@@ -60,6 +60,7 @@ private:
 	void ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Net::Packet &packet);
 	void ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Packet &packet);
 	void ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &packet);
+	void ProcessUserToWorldCancelOfflineResponse(uint16_t opcode, const EQ::Net::Packet &packet);
 
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> m_connection;
 

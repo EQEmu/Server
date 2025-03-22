@@ -416,6 +416,8 @@ public:
 	int32 FindNextFreeParcelSlot(uint32 char_id);
 	int32 FindNextFreeParcelSlotUsingMemory();
 	void SendParcelIconStatus();
+	bool IsOffline() { return m_offline; }
+	void SetOffline(bool status) { m_offline = status; }
 
 	void SendBecomeTraderToWorld(Client *trader, BazaarTraderBarterActions action);
 	void SendBecomeTrader(BazaarTraderBarterActions action, uint32 trader_id);
@@ -508,7 +510,12 @@ public:
 	inline bool ClientDataLoaded() const { return client_data_loaded; }
 	inline bool Connected() const { return (client_state == CLIENT_CONNECTED); }
 	inline bool InZone() const { return (client_state == CLIENT_CONNECTED || client_state == CLIENT_LINKDEAD); }
-	inline void Disconnect() { eqs->Close(); client_state = DISCONNECTED; }
+	inline void Disconnect() {
+		if (eqs) {
+			eqs->Close();
+			client_state = DISCONNECTED;
+		}
+	}
 	inline bool IsLD() const { return (bool) (client_state == CLIENT_LINKDEAD); }
 	void Kick(const std::string &reason);
 	void WorldKick();
@@ -2117,6 +2124,7 @@ private:
 	uint32                                                         m_trader_count{};
 	std::map<int16, std::tuple<uint32, int32, std::string>>        m_trader_merchant_list{};  // itemid, qty, item_unique_id
 	uint32                                                         m_buyer_id;
+	bool                                                           m_offline;
 	uint32                                                         m_barter_time;
 	int32                                                          m_parcel_platinum;
 	int32                                                          m_parcel_gold;
@@ -2446,6 +2454,68 @@ public:
 	bool IsFilteredAFKPacket(const EQApplicationPacket *p);
 	void CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p);
 	void SyncWorldPositionsToClient(bool ignore_idle = false);
+
+
+ 	Mob* GetMob() {
+ 		return Mob::GetMob();
+ 	}
+
+ 	void Clone(Client& in)
+ 	{
+ 		WID                      = in.WID;
+ 		admin                    = in.admin;
+ 		guild_id                 = in.guild_id;
+ 		guildrank                = in.guildrank;
+ 		LFG                      = in.LFG;
+ 		AFK                      = in.AFK;
+ 		trader_id                = in.trader_id;
+ 		m_buyer_id               = in.m_buyer_id;
+ 		race                     = in.race;
+ 		class_                   = in.class_;
+ 		size                     = in.size;
+ 		deity                    = in.deity;
+ 		texture                  = in.texture;
+ 		m_ClientVersion          = in.m_ClientVersion;
+ 		m_ClientVersionBit       = in.m_ClientVersionBit;
+ 		character_id             = in.character_id;
+ 		account_id               = in.account_id;
+ 		lsaccountid              = in.lsaccountid;
+
+ 		m_pp.platinum            = in.m_pp.platinum;
+ 		m_pp.gold                = in.m_pp.gold;
+ 		m_pp.silver              = in.m_pp.silver;
+ 		m_pp.copper              = in.m_pp.copper;
+ 		m_pp.platinum_bank       = in.m_pp.platinum_bank;
+ 		m_pp.gold_bank           = in.m_pp.gold_bank;
+ 		m_pp.silver_bank         = in.m_pp.silver_bank;
+ 		m_pp.copper_bank         = in.m_pp.copper_bank;
+ 		m_pp.platinum_cursor     = in.m_pp.platinum_cursor;
+ 		m_pp.gold_cursor         = in.m_pp.gold_cursor;
+ 		m_pp.silver_cursor       = in.m_pp.silver_cursor;
+ 		m_pp.copper_cursor       = in.m_pp.copper_cursor;
+ 		m_pp.currentRadCrystals  = in.m_pp.currentRadCrystals;
+ 		m_pp.careerRadCrystals   = in.m_pp.careerRadCrystals;
+ 		m_pp.currentEbonCrystals = in.m_pp.currentEbonCrystals;
+ 		m_pp.careerEbonCrystals  = in.m_pp.careerEbonCrystals;
+ 		m_pp.gm                  = in.m_pp.gm;
+
+ 		m_inv.SetInventoryVersion(in.m_ClientVersion);
+ 		SetBodyType(in.GetBodyType(), false);
+
+ 		for (auto [slot, item] : in.m_inv.GetPersonal()) {
+ 			if (item) {
+ 				m_inv.GetPersonal()[slot] = item->Clone();
+ 			}
+ 		}
+
+ 		for (auto [slot, item] : in.m_inv.GetWorn()) {
+ 			if (item) {
+ 				m_inv.GetWorn()[slot] = item->Clone();
+ 			}
+ 		}
+
+ 		CloneMob(*in.GetMob());
+ 	}
 };
 
 #endif

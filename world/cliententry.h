@@ -14,7 +14,8 @@ typedef enum {
 	Online,
 	CharSelect,
 	Zoning,
-	InZone
+	InZone,
+	OfflineMode
 } CLE_Status;
 
 static const char *CLEStatusString[] = {
@@ -23,7 +24,8 @@ static const char *CLEStatusString[] = {
 	"Online",
 	"CharSelect",
 	"Zoning",
-	"InZone"
+	"InZone",
+	"OfflineMode"
 };
 
 class ZoneServer;
@@ -103,6 +105,10 @@ public:
 	inline bool GetLFGMatchFilter() const { return m_lfg_match_filter; }
 	inline const char *GetLFGComments() const { return m_lfg_comments; }
 	inline uint8 GetClientVersion() { return m_client_version; }
+	bool GetTrader() const { return m_trader; }
+	bool GetBuyer() const { return m_buyer; }
+	bool GetOfflineMode() const { return m_offline; }
+	void SetOfflineMode(bool status) { m_offline = status; }
 
 	inline bool TellQueueFull() const { return m_tell_queue.size() >= RuleI(World, TellQueueSize); }
 	inline bool TellQueueEmpty() const { return m_tell_queue.empty(); }
@@ -135,25 +141,28 @@ private:
 
 	// Character info
 	ZoneServer *m_zone_server{};
-	uint32 m_zone{};
-	uint16 m_instance{};
-	uint32 m_char_id{};
-	char   m_char_name[64]{};
-	uint8  m_level{};
-	uint8  m_class_{};
-	uint16 m_race{};
-	uint8  m_anon{};
-	uint8  m_tells_off{};
-	uint32 m_guild_id{};
-	uint32 m_guild_rank;
-	bool   m_guild_tribute_opt_in{};
-	bool   m_lfg{};
-	uint8  m_gm{};
-	uint8  m_client_version{};
-	uint8  m_lfg_from_level{};
-	uint8  m_lfg_to_level{};
-	bool   m_lfg_match_filter{};
-	char   m_lfg_comments[64]{};
+	uint32      m_zone{};
+	uint16      m_instance{};
+	uint32      m_char_id{};
+	char        m_char_name[64]{};
+	uint8       m_level{};
+	uint8       m_class_{};
+	uint16      m_race{};
+	uint8       m_anon{};
+	uint8       m_tells_off{};
+	uint32      m_guild_id{};
+	uint32      m_guild_rank;
+	bool        m_guild_tribute_opt_in{};
+	bool        m_lfg{};
+	uint8       m_gm{};
+	uint8       m_client_version{};
+	uint8       m_lfg_from_level{};
+	uint8       m_lfg_to_level{};
+	bool        m_lfg_match_filter{};
+	char        m_lfg_comments[64]{};
+	bool        m_trader  = false;
+	bool        m_buyer   = false;
+	bool        m_offline = false;
 
 	// Tell Queue -- really a vector :D
 	std::vector<ServerChannelMessage_Struct *> m_tell_queue;

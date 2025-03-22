@@ -46,6 +46,11 @@ namespace AccountStatus {
 	constexpr uint8 Max             = 255;
 
 	std::string GetName(uint8 account_status);
+
+	struct StatusRecord {
+		int16  status;
+		uint32 offline;
+	};
 }
 
 static std::map<uint8, std::string> account_status_names = {

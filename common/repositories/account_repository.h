@@ -107,6 +107,45 @@ public:
 
 		return AccountRepository::UpdateOne(db, e);
 	}
+
+	static void SetOfflineStatus(Database& db, const uint32 account_id, bool offline_status)
+	{
+		auto account = FindOne(db, account_id);
+		if (!account.id) {
+			return;
+		}
+
+		account.offline = offline_status;
+		UpdateOne(db, account);
+	}
+
+	static void ClearAllOfflineStatus(Database& db)
+	{
+		auto query = fmt::format("UPDATE {} SET `offline` = '0' WHERE `offline` = '1';",
+			TableName()
+		);
+
+		db.QueryDatabase(query);
+	}
+
+	static bool GetAllOfflineStatus(Database& db, const uint32 character_id)
+	{
+		auto query = fmt::format("SELECT a.`offline` "
+			"FROM `account` AS a "
+			"INNER JOIN character_data AS c ON c.account_id = a.id "
+			"WHERE c.id = '{}'",
+			character_id
+		);
+		auto results = db.QueryDatabase(query);
+		if (!results.Success() || !results.RowCount()) {
+			return false;
+		}
+
+		auto       row    = results.begin();
+		bool const status = static_cast<int16>(Strings::ToInt(row[0]));
+
+		return status;
+	}
 };
 
 #endif //EQEMU_ACCOUNT_REPOSITORY_H
