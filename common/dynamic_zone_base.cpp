@@ -8,7 +8,6 @@
 #include "repositories/dynamic_zone_lockouts_repository.h"
 #include "repositories/instance_list_repository.h"
 #include "repositories/instance_list_player_repository.h"
-#include "repositories/respawn_times_repository.h"
 
 DynamicZoneBase::DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& entry)
 {
@@ -68,8 +67,6 @@ uint32_t DynamicZoneBase::CreateInstance()
 	}
 
 	m_instance_id = instance.id;
-
-	ClearInstanceRespawnTimers();
 
 	return m_instance_id;
 }
@@ -878,15 +875,4 @@ void DynamicZoneBase::SyncCharacterLockouts(uint32_t char_id, std::vector<DzLock
 	{
 		CharacterExpeditionLockoutsRepository::InsertLockouts(GetDatabase(), char_id, lockouts);
 	}
-}
-
-void DynamicZoneBase::ClearInstanceRespawnTimers()
-{
-	RespawnTimesRepository::DeleteWhere(
-		GetDatabase(),
-		fmt::format(
-			"`instance_id` = {}",
-			GetInstanceID()
-		)
-	);
 }
