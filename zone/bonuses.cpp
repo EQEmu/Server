@@ -2048,7 +2048,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 				else if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
 					if (effect_value > new_bonus->hastetype3) {
-						new_bonus->hastetype3 = effect_value;
+						new_bonus->hastetype3 = effect_value - 100;
 					}
 				}
 				break;
