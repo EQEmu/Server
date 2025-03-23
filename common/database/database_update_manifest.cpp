@@ -7055,7 +7055,22 @@ CREATE INDEX idx_expires ON data_buckets (expires);
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9320,
+		.description = "2025_03_23_add_respawn_times_expire_at.sql",
+		.check = "SHOW COLUMNS FROM `respawn_times` LIKE 'expire_at'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `respawn_times`
+ADD COLUMN `expire_at` int(11) UNSIGNED NULL DEFAULT 0 AFTER `duration`;
 
+UPDATE respawn_times set expire_at = `start` + `duration`; -- backfill existing data
+
+CREATE INDEX `idx_expire_at` ON `respawn_times` (`expire_at`);
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
