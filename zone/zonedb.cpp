@@ -164,6 +164,7 @@ void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint3
 			.id = static_cast<int32_t>(spawn2_id),
 			.start = static_cast<int32_t>(current_time),
 			.duration = static_cast<int32_t>(time_left),
+			.expire_at = current_time + time_left,
 			.instance_id = static_cast<int16_t>(instance_id)
 		}
 	);
