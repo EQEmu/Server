@@ -387,7 +387,9 @@ int main(int argc, char **argv)
 
 	auto event_log_processor = std::jthread([](const std::stop_token& stoken) {
 		while (!stoken.stop_requested()) {
-			player_event_logs.Process();
+			if (!RuleB(Logging, PlayerEventsQSProcess)) {
+				player_event_logs.Process();
+			}
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		}
 	});
