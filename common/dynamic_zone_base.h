@@ -195,6 +195,7 @@ protected:
 	void AddInternalMember(const DynamicZoneMember& member);
 	uint32_t Create();
 	uint32_t CreateInstance();
+	void ClearInstanceRespawnTimers();
 	void LoadRepositoryResult(DynamicZonesRepository::DynamicZoneInstance&& dz_entry);
 	void RemoveInternalMember(uint32_t character_id);
 	void SaveMembers(const std::vector<DynamicZoneMember>& members);
