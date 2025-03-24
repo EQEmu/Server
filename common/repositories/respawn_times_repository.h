@@ -77,6 +77,11 @@ public:
 
 		return ((r.start + r.duration) - time_seconds);
 	}
+
+	static void ClearInstanceTimers(Database &db, int32_t id)
+	{
+		RespawnTimesRepository::DeleteWhere(db, fmt::format("`instance_id` = {}", id));
+	}
 };
 
 #endif //EQEMU_RESPAWN_TIMES_REPOSITORY_H

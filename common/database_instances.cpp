@@ -129,6 +129,8 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 	e.start_time = std::time(nullptr);
 	e.duration = duration;
 
+	RespawnTimesRepository::ClearInstanceTimers(*this, e.id);
+
 	return InstanceListRepository::InsertOne(*this, e).id;
 }
 
