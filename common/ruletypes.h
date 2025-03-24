@@ -1270,6 +1270,8 @@ RULE_BOOL(Custom,   ConditionalPetRampageImmunity, 			false, "Enable to make pet
 RULE_BOOL(Custom, 	DontInterruptHealsByMelee, 				false, "Enable to prevent direct heal spells from being interrupted by melee attacks")
 RULE_BOOL(Custom,	AlternateMobFDBehavior,					true, "Enable to cause mob FD effects to randomly pick a new target")
 
+RULE_BOOL(Custom,   DisableClearInstanceTimers, false , "BREAK GLASS IN EMERGENCY")
+
 // Seasonal
 RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
 
