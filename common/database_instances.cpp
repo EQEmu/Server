@@ -535,8 +535,10 @@ void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &ch
 	}
 }
 
-void Database::PurgeExpiredInstances()
+std::vector<int32_t> Database::PurgeExpiredInstances()
 {
+	std::vector<int32_t> retval;
+
 	/**
 	 * Delay purging by a day so that we can continue using adjacent free instance id's
 	 * from the table without risking the chance we immediately re-allocate a zone that freshly expired but
@@ -547,12 +549,13 @@ void Database::PurgeExpiredInstances()
 		"(start_time + duration) <= (UNIX_TIMESTAMP() - 86400) AND never_expires = 0"
 	);
 	if (l.empty()) {
-		return;
+		return retval;
 	}
 
 	std::vector<std::string> instance_ids;
 	for (const auto& e : l) {
 		instance_ids.emplace_back(std::to_string(e.id));
+		retval.push_back(e.id);
 	}
 
 	const auto imploded_instance_ids = Strings::Implode(",", instance_ids);
@@ -569,6 +572,8 @@ void Database::PurgeExpiredInstances()
 	if (RuleB(Zone, StateSavingOnShutdown)) {
 		ZoneStateSpawnsRepository::DeleteWhere(*this, fmt::format("`instance_id` IN ({})", imploded_instance_ids));
 	}
+
+	return retval;
 }
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)

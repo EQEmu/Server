@@ -453,7 +453,14 @@ int main(int argc, char **argv)
 		}
 
 		if (PurgeInstanceTimer.Check()) {
-			database.PurgeExpiredInstances();
+			std::vector<int32_t> purged = database.PurgeExpiredInstances();
+			for(int32_t instance_id : purged) {
+				ZoneServer *zs = zoneserver_list.FindByInstanceID(instance_id);
+				if (zs != 0) {
+					zs->Shutdown("instance_purge");
+				}
+			}
+
 			database.PurgeAllDeletedDataBuckets();
 			CharacterExpeditionLockoutsRepository::DeleteWhere(database, "expire_time <= NOW()");
 			CharacterTaskTimersRepository::DeleteWhere(database, "expire_time <= NOW()");

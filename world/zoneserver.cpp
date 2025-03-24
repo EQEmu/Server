@@ -1830,6 +1830,26 @@ void ZoneServer::TriggerBootup(uint32 in_zone_id, uint32 in_instance_id, const c
 	LSBootUpdate(in_zone_id, in_instance_id);
 }
 
+void ZoneServer::Shutdown(const char* reason) {
+	auto pack = new ServerPacket;
+	pack->opcode  = ServerOP_ZoneShutdown;
+	pack->size    = sizeof(ServerZoneStateChange_Struct);
+	pack->pBuffer = new uchar[pack->size];
+	memset(pack->pBuffer, 0, sizeof(ServerZoneStateChange_Struct));
+
+	auto *s = (ServerZoneStateChange_Struct *) pack->pBuffer;
+	s->zone_id     = GetZoneID();
+	s->instance_id = GetInstanceID();
+
+	if (reason) {
+		strn0cpy(s->admin_name, reason, sizeof(s->admin_name));
+	}
+
+	SendPacket(pack);
+
+	delete pack;
+}
+
 void ZoneServer::IncomingClient(Client* client) {
 	is_booting_up = true;
 	auto pack = new ServerPacket(ServerOP_ZoneIncClient, sizeof(ServerZoneIncomingClient_Struct));
