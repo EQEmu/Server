@@ -129,7 +129,7 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 	e.start_time = std::time(nullptr);
 	e.duration = duration;
 
-	if !(Rule(Custom, DisableClearInstanceTimers)) {
+	if (!RuleB(Custom, DisableClearInstanceTimers)) {
 		RespawnTimesRepository::ClearInstanceTimers(*this, e.id);
 	}
 
