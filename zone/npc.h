@@ -604,7 +604,6 @@ public:
 	// zone state save
 	inline void SetQueuedToCorpse() { m_queued_for_corpse = true; }
 	inline bool IsQueuedForCorpse() { return m_queued_for_corpse; }
-	inline uint32_t SetCorpseDecayTime(uint32_t decay_time) { return m_corpse_decay_time = decay_time; }
 	inline void SetResumedFromZoneSuspend(bool state = true) { m_resumed_from_zone_suspend = state; }
 	inline bool IsResumedFromZoneSuspend() { return m_resumed_from_zone_suspend; }
 
@@ -658,11 +657,8 @@ protected:
 	LootItems m_loot_items;
 
 	// zone state
-	bool     m_resumed_from_zone_suspend  = false;
-	bool     m_queued_for_corpse          = false; // this is to check for corpse creation on zone state restore
-	uint32_t m_corpse_decay_time          = 0; // decay time set on zone state restore
-	Timer    m_corpse_queue_timer         = {}; // this is to check for corpse creation on zone state restore
-	Timer    m_corpse_queue_shutoff_timer = {};
+	bool m_resumed_from_zone_suspend = false;
+	bool m_queued_for_corpse         = false; // this is to check for corpse creation on zone state restore
 
 	// this is a 30-second timer that protects a NPC from having double assignment of loot
 	// this is to prevent a player from killing a NPC and then zoning out and back in to get loot again

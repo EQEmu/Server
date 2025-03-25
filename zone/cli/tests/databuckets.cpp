@@ -1,25 +1,13 @@
 #include "../../common/http/httplib.h"
 #include "../../common/eqemu_logsys.h"
 #include "../../common/platform.h"
-#include "../zone.h"
-#include "../client.h"
+#include "../../zone.h"
+#include "../../client.h"
 #include "../../common/net/eqstream.h"
 
 extern Zone *zone;
 
-void RunTest(const std::string &test_name, const std::string &expected, const std::string &actual)
-{
-	if (expected == actual) {
-		std::cout << "[✅] " << test_name << " PASSED\n";
-	} else {
-		std::cerr << "[❌] " << test_name << " FAILED\n";
-		std::cerr << "   📌 Expected: " << expected << "\n";
-		std::cerr << "   ❌ Got:      " << actual << "\n";
-		std::exit(1);
-	}
-}
-
-void ZoneCLI::DataBuckets(int argc, char **argv, argh::parser &cmd, std::string &description)
+void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
 	if (cmd[{"-h", "--help"}]) {
 		return;

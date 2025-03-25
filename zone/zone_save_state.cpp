@@ -4,46 +4,7 @@
 #include "npc.h"
 #include "corpse.h"
 #include "zone.h"
-#include "../common/repositories/zone_state_spawns_repository.h"
-#include "../common/repositories/spawn2_disabled_repository.h"
-
-struct LootEntryStateData {
-	uint32   item_id;
-	uint32_t lootdrop_id;
-	uint16   charges = 0; // used in dynamically added loot (AddItem)
-
-	// cereal
-	template<class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(
-			CEREAL_NVP(item_id),
-			CEREAL_NVP(lootdrop_id),
-			CEREAL_NVP(charges)
-		);
-	}
-};
-
-struct LootStateData {
-	uint32                          copper   = 0;
-	uint32                          silver   = 0;
-	uint32                          gold     = 0;
-	uint32                          platinum = 0;
-	std::vector<LootEntryStateData> entries  = {};
-
-	// cereal
-	template<class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(
-			CEREAL_NVP(copper),
-			CEREAL_NVP(silver),
-			CEREAL_NVP(gold),
-			CEREAL_NVP(platinum),
-			CEREAL_NVP(entries)
-		);
-	}
-};
+#include "zone_save_state.h"
 
 // IsZoneStateValid checks if the zone state is valid
 // if these fields are all empty or zero value for an entire zone state, it's considered invalid
@@ -349,13 +310,13 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 		auto decay_time = s.decay_in_seconds * 1000;
 		if (decay_time > 0) {
 			n->SetQueuedToCorpse();
-			n->SetCorpseDecayTime(decay_time);
+			entity_list.RestoreCorpse(n, decay_time);
 		}
 		else {
 			n->Depop();
 		}
 	}
-	
+
 	n->SetPosition(s.x, s.y, s.z);
 	n->SetHeading(s.heading);
 	n->SetResumedFromZoneSuspend(true);
@@ -443,6 +404,7 @@ bool Zone::LoadZoneState(
 	zone->initgrids_timer.Trigger();
 	zone->Process();
 
+	int count = 0;
 	for (auto &s: spawn_states) {
 		if (s.is_zone) {
 			LoadZoneVariables(zone, s.entity_variables);
@@ -492,6 +454,8 @@ bool Zone::LoadZoneState(
 			new_spawn->SetResumedFromZoneSuspend(true);
 			new_spawn->SetEntityVariables(GetVariablesDeserialized(s.entity_variables));
 		}
+
+		count++;
 
 		spawn2_list.Insert(new_spawn);
 		new_spawn->Process();
@@ -624,6 +588,7 @@ void Zone::SaveZoneState()
 	std::vector<ZoneStateSpawnsRepository::ZoneStateSpawns> spawns = {};
 	LinkedListIterator<Spawn2 *>                            iterator(spawn2_list);
 	iterator.Reset();
+	int count = 0;
 	while (iterator.MoreElements()) {
 		Spawn2 *sp = iterator.GetData();
 		auto   s   = ZoneStateSpawnsRepository::NewEntity();
@@ -653,6 +618,7 @@ void Zone::SaveZoneState()
 
 		spawns.emplace_back(s);
 		iterator.Advance();
+		count++;
 	}
 
 	// npc's that are not in the spawn2 list
@@ -725,6 +691,11 @@ void Zone::SaveZoneState()
 
 	if (!IsZoneStateValid(spawns)) {
 		LogInfo("No valid zone state data to save");
+		return;
+	}
+
+	if (spawns.empty()) {
+		LogInfo("No zone state data to save");
 		return;
 	}
 

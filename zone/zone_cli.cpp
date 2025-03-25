@@ -29,17 +29,23 @@ void ZoneCLI::CommandHandler(int argc, char **argv)
 	auto function_map = EQEmuCommand::function_map;
 
 	// Register commands
-	function_map["benchmark:databuckets"] = &ZoneCLI::BenchmarkDatabuckets;
-	function_map["sidecar:serve-http"] = &ZoneCLI::SidecarServeHttp;
-	function_map["tests:databuckets"] = &ZoneCLI::DataBuckets;
-	function_map["tests:npc-handins"] = &ZoneCLI::NpcHandins;
-	function_map["tests:npc-handins-multiquest"] = &ZoneCLI::NpcHandinsMultiQuest;
+	function_map["benchmark:databuckets"]        = &ZoneCLI::BenchmarkDatabuckets;
+	function_map["sidecar:serve-http"]           = &ZoneCLI::SidecarServeHttp;
+	function_map["tests:databuckets"]            = &ZoneCLI::TestDataBuckets;
+	function_map["tests:npc-handins"]            = &ZoneCLI::TestNpcHandins;
+	function_map["tests:npc-handins-multiquest"] = &ZoneCLI::TestNpcHandinsMultiQuest;
+	function_map["tests:zone-state"]             = &ZoneCLI::TestZoneState;
 
 	EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 }
 
-#include "cli/databuckets.cpp"
+// cli
 #include "cli/benchmark_databuckets.cpp"
 #include "cli/sidecar_serve_http.cpp"
-#include "cli/npc_handins.cpp"
-#include "cli/npc_handins_multiquest.cpp"
+
+// tests
+#include "cli/tests/_test_util.cpp"
+#include "cli/tests/databuckets.cpp"
+#include "cli/tests/npc_handins.cpp"
+#include "cli/tests/npc_handins_multiquest.cpp"
+#include "cli/tests/zone_state.cpp"

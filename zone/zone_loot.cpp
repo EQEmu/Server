@@ -368,18 +368,22 @@ void Zone::LoadLootDrops(const std::vector<uint32> in_lootdrop_ids)
 			m_lootdrops.emplace_back(e);
 
 			// add lootdrop entries
-			for (const auto &f: lootdrop_entries) {
-				if (e.id == f.lootdrop_id) {
+			// add lootdrop entries
+			for (const auto &h: lootdrop_entries) {
+				if (e.id == h.lootdrop_id) {
 
 					// check if lootdrop entry already exists in memory
 					has_entry = false;
-					for (const auto &g: m_lootdrop_entries) {
-						if (f.lootdrop_id == g.lootdrop_id && f.item_id == g.item_id && f.multiplier == g.multiplier) {
+					for (const auto &i: m_lootdrop_entries) {
+						if (h.lootdrop_id == i.lootdrop_id && h.item_id == i.item_id) {
 							has_entry = true;
 							break;
 						}
 					}
 
+					if (!has_entry) {
+						m_lootdrop_entries.emplace_back(h);
+					}
 				}
 			}
 		}
