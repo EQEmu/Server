@@ -370,14 +370,10 @@ bool Client::Process() {
 									RangedAttack(GetTarget());
 									if (CheckDoubleRangedAttack() || (RuleB(Combat, RangedDoubleAndTripleAttack) && CanThisClassDoubleAttack() && CheckDoubleAttack())) {
 										RangedAttack(GetTarget(), true);
+										CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
 									}
 									if (RuleB(Combat, RangedDoubleAndTripleAttack) && CanThisClassTripleAttack() && CheckTripleAttack()) {
 										RangedAttack(GetTarget(), true);
-									}
-									if (RuleB(Combat, RangedDoubleAndTripleAttack) && CanThisClassDoubleAttack()) {
-										CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, GetTarget());
-									}
-									if (RuleB(Combat, RangedDoubleAndTripleAttack) && CanThisClassTripleAttack()) {
 										CheckIncreaseSkill(EQ::skills::SkillTripleAttack, GetTarget());
 									}
 								}
