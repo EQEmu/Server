@@ -1,13 +1,13 @@
 #include "../../common/http/httplib.h"
 #include "../../common/eqemu_logsys.h"
 #include "../../common/platform.h"
-#include "../zone.h"
-#include "../client.h"
+#include "../../zone.h"
+#include "../../client.h"
 #include "../../common/net/eqstream.h"
 
 extern Zone *zone;
 
-void ZoneCLI::NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std::string &description)
+void ZoneCLI::TestNpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
 	if (cmd[{"-h", "--help"}]) {
 		return;

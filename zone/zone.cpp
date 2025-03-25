@@ -887,10 +887,7 @@ void Zone::Shutdown(bool quiet)
 		c.second->WorldKick();
 	}
 
-	bool does_zone_have_entities =
-			 zone && zone->IsLoaded() &&
-			 (!entity_list.GetNPCList().empty() || !entity_list.GetCorpseList().empty());
-	if (RuleB(Zone, StateSavingOnShutdown) && does_zone_have_entities) {
+	if (RuleB(Zone, StateSavingOnShutdown) && zone && zone->IsLoaded()) {
 		SaveZoneState();
 	}
 
@@ -1537,7 +1534,6 @@ bool Zone::Process() {
 	spawn_conditions.Process();
 
 	if (spawn2_timer.Check()) {
-
 		LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
 		EQ::InventoryProfile::CleanDirty();

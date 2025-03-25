@@ -51,6 +51,7 @@ public:
 	inline uint32 GetDuration() { return(timer_time); }
 
 	static const uint32 SetCurrentTime();
+	static const uint32 RollForward(uint32 seconds);
 	static const uint32 GetCurrentTime();
 	static const uint32 GetTimeSeconds();
 

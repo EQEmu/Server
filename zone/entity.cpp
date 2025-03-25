@@ -5991,3 +5991,14 @@ void EntityList::SendMerchantInventory(Mob* m, int32 slot_id, bool is_delete)
 
 	return;
 }
+
+void EntityList::RestoreCorpse(NPC *npc, uint32_t decay_time)
+{
+	uint16 corpse_id = npc->GetID();
+	npc->Death(npc, npc->GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
+	auto c = entity_list.GetCorpseByID(corpse_id);
+	if (c) {
+		c->UnLock();
+		c->SetDecayTimer(decay_time);
+	}
+}

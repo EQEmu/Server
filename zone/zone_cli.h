@@ -1,6 +1,7 @@
 #ifndef EQEMU_ZONE_CLI_H
 #define EQEMU_ZONE_CLI_H
 
+#include <iostream>
 #include "../common/cli/argh.h"
 
 class ZoneCLI {
@@ -11,10 +12,10 @@ public:
 	static bool RanConsoleCommand(int argc, char **argv);
 	static bool RanSidecarCommand(int argc, char **argv);
 	static bool RanTestCommand(int argc, char **argv);
-	static void DataBuckets(int argc, char **argv, argh::parser &cmd, std::string &description);
-	static void NpcHandins(int argc, char **argv, argh::parser &cmd, std::string &description);
-	static void NpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std::string &description);
+	static void TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::string &description);
+	static void TestNpcHandins(int argc, char **argv, argh::parser &cmd, std::string &description);
+	static void TestNpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd, std::string &description);
+	static void TestZoneState(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
-
 
 #endif //EQEMU_ZONE_CLI_H
