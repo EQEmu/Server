@@ -33,11 +33,6 @@ void command_zoneshutdown(Client *c, const Seperator *sep)
 	if (is_instance) {
 		instance_id = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : 0;
 
-		if (!instance_id) {
-			c->Message(Chat::White, "Instance ID was not specified.");
-			return;
-		}
-
 		if (!database.CheckInstanceExists(instance_id)) {
 			c->Message(
 				Chat::White,
