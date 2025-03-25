@@ -74,7 +74,7 @@ namespace Logs {
 		Spawns,
 		Spells,
 		Status, // deprecated
-		TCPConnection,
+		TCPConnection, // deprecated
 		Tasks,
 		Tradeskills,
 		Trading,
@@ -150,6 +150,8 @@ namespace Logs {
 		BotSpellTypeChecks,
 		NpcHandin,
 		ZoneState,
+		NetClient,
+		NetTCP,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -183,7 +185,7 @@ namespace Logs {
 		"Spawns",
 		"Spells",
 		"Status (Deprecated)",
-		"TCP Connection",
+		"TCP Connection (Deprecated)",
 		"Tasks",
 		"Tradeskills",
 		"Trading",
@@ -258,7 +260,9 @@ namespace Logs {
 		"Bot Spell Checks",
 		"Bot Spell Type Checks",
 		"NpcHandin",
-		"ZoneState"
+		"ZoneState",
+		"Net Server <-> Client",
+		"Net TCP"
 	};
 }
 
