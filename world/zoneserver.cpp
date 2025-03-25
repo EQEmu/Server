@@ -737,7 +737,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					0,
 					AccountStatus::Player,
 					Chat::White,
-					"Error: SOP_ZoneShutdown: Zone ID, Instance ID, nor name specified"
+					"Error: SOP_ZoneShutdown: Zone ID, Instance ID, nor Zone Short Name specified"
 				);
 			}
 
