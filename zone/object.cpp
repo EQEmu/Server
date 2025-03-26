@@ -75,6 +75,8 @@ decay_timer(300000)
 		decay_timer.Disable();
 	}
 
+	memset(m_display_name, 0, sizeof(m_display_name));
+
 	respawn_timer.Disable();
 
 	// Set drop_id to zero - it will be set when added to zone with SetID()
@@ -122,6 +124,8 @@ decay_timer(300000)
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
 
+	memset(m_display_name, 0, sizeof(m_display_name));
+
 	m_data.heading = heading;
 	m_data.z       = z;
 	m_data.zone_id = zone->GetZoneID();
@@ -163,6 +167,8 @@ decay_timer(300000)
 
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
+
+	memset(m_display_name, 0, sizeof(m_display_name));
 
 	m_data.heading = client->GetHeading();
 	m_data.x       = client->GetX();
@@ -235,6 +241,8 @@ decay_timer(decay_time)
 
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
+
+	memset(m_display_name, 0, sizeof(m_display_name));
 
 	m_data.heading = heading;
 	m_data.x       = x;
@@ -311,6 +319,8 @@ decay_timer(decay_time)
 	m_data.y       = y;
 	m_data.z       = z;
 	m_data.zone_id = zone->GetZoneID();
+
+	memset(m_display_name, 0, sizeof(m_display_name));
 
 	if (!IsFixZEnabled()) {
 		FixZ();
