@@ -452,6 +452,12 @@ void Object::Close() {
 			}
 		}
 
+		auto outapp = new EQApplicationPacket(OP_ClearObject, sizeof(ClearObject_Struct));
+		ClearObject_Struct *cos = (ClearObject_Struct *)outapp->pBuffer;
+		cos->Clear = 1;
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+
 		user->SetTradeskillObject(nullptr);
 	}
 
