@@ -457,7 +457,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				}
 			}
 
-			if (all_same) {
+			if (all_same && aug_id != 4041) {
 				auto new_item = database.GetItem(aug_id + 1000000);
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkItemData);
