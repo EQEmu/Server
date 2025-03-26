@@ -363,6 +363,8 @@ void Object::SetID(uint16 set_id)
 // Reset state of object back to zero
 void Object::ResetState()
 {
+	Close();
+
 	safe_delete(m_inst);
 
 	m_id   = 0;
