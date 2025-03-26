@@ -195,7 +195,7 @@ void Client::SendGuildList()
 
 	std::stringstream           ss;
 	cereal::BinaryOutputArchive ar(ss);
-	ar(guilds_list);
+	{ ar(guilds_list); }
 
 	uint32 packet_size = ss.str().length();
 

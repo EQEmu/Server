@@ -85,14 +85,13 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
 		LogGuilds("Received and broadcasting guild refresh for [{}], changes: name=[{}], motd=[{}], rank=d, relation=[{}]", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
 
-		//broadcast this packet to all zones.
-		zoneserver_list.SendPacketToZonesWithGuild(s->guild_id, pack);
-
 		//preform a local refresh.
 		if(!RefreshGuild(s->guild_id)) {
-			LogGuilds("Unable to preform local refresh on guild [{}]", s->guild_id);
-			//can we do anything?
+			BaseGuildManager::RefreshGuild(s->guild_id);
 		}
+
+		//broadcast this packet to all zones.
+		zoneserver_list.SendPacketToZonesWithGuild(s->guild_id, pack);
 
 		break;
 	}
@@ -230,7 +229,6 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 	case ServerOP_GuildChannel:
 	case ServerOP_GuildURL:
 	case ServerOP_GuildMemberRemove:
-	case ServerOP_GuildSendGuildList:
 	case ServerOP_GuildMembersList:
 	{
 		auto in = (ServerOP_GuildMessage_Struct *) pack->pBuffer;
@@ -248,6 +246,12 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
         zoneserver_list.SendPacketToZonesWithGuild(in->guild_id, pack);
         break;
     }
+	case ServerOP_GuildSendGuildList: {
+		auto in = (ServerOP_GuildMessage_Struct *) pack->pBuffer;
+		zoneserver_list.SendPacketToBootedZones(pack);
+		break;
+	}
+
 	default:
 		LogGuilds("Unknown packet {:#04x} received from zone??", pack->opcode);
 		break;
