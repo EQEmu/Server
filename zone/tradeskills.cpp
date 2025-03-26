@@ -1428,7 +1428,7 @@ bool ZoneDatabase::GetTradeRecipe(
 			continue;
 		}
 
-		int item_id = (container->GetItem() && container->GetItem()->BagSlots <= 10) ? inst->GetItem()->ID % 1000000 : inst->GetItem()->ID;
+		int item_id = (container->GetItem() && container->GetItem()->BagSlots >= 10) ? inst->GetItem()->ID : inst->GetItem()->ID % 1000000;
 
 		if (inst->IsAugmented()) {
 			*is_augmented = true;
@@ -1600,7 +1600,7 @@ bool ZoneDatabase::GetTradeRecipe(
 				return false;
 			}
 
-			int item_id = (container->GetItem() && container->GetItem()->BagSlots <= 10) ? inst->GetItem()->ID % 1000000 : inst->GetItem()->ID;
+			int item_id = (container->GetItem() && container->GetItem()->BagSlots >= 10) ? inst->GetItem()->ID : inst->GetItem()->ID % 1000000;
 
 			const auto item = database.GetItem(item_id);
 			if (!item) {
