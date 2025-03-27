@@ -20,6 +20,8 @@
 
 #include "../common/shareddb.h"
 #include "../common/eq_packet.h"
+#include "../common/repositories/inventory_repository.h"
+#include "../common/repositories/character_data_repository.h"
 
 struct PlayerProfile_Struct;
 struct CharCreate_Struct;
@@ -43,7 +45,11 @@ private:
 	void SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
 	void SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
 
-	bool GetCharSelInventory(uint32 account_id, char* name, EQ::InventoryProfile* inv);
+	bool GetCharSelInventory(
+		const std::vector<InventoryRepository::Inventory> &inventories,
+		const CharacterDataRepository::CharacterData &character,
+		EQ::InventoryProfile *inv
+	);
 };
 
 extern WorldDatabase database;
