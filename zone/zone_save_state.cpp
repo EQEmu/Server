@@ -355,7 +355,7 @@ inline void LoadNPCState(Zone *zone, NPC *n, ZoneStateSpawnsRepository::ZoneStat
 			n->Depop();
 		}
 	}
-	
+
 	n->SetPosition(s.x, s.y, s.z);
 	n->SetHeading(s.heading);
 	n->SetResumedFromZoneSuspend(true);
@@ -443,12 +443,16 @@ bool Zone::LoadZoneState(
 	zone->initgrids_timer.Trigger();
 	zone->Process();
 
+	// load zone variables first
 	for (auto &s: spawn_states) {
 		if (s.is_zone) {
 			LoadZoneVariables(zone, s.entity_variables);
-			continue;
+			break;
 		}
+	}
 
+	// spawn2
+	for (auto &s: spawn_states) {
 		if (s.spawngroup_id == 0 || s.is_corpse || s.is_zone) {
 			continue;
 		}
