@@ -906,24 +906,32 @@ bool EQ::ItemInstance::IsSlotAllowed(int16 slot_id) const {
 
 bool EQ::ItemInstance::IsDroppable(bool recurse) const
 {
-	if (!m_item)
+	if (!m_item) {
 		return false;
+	}
 	/*if (m_ornamentidfile) // not implemented
 		return false;*/
-	if (m_attuned)
+	if (m_attuned) {
 		return false;
-	/*if (m_item->FVNoDrop != 0) // not implemented
-		return false;*/
-	if (m_item->NoDrop == 0)
+	}
+
+	if (RuleI(World, FVNoDropFlag) == FVNoDropFlagRule::Enabled && m_item->FVNoDrop == 0) {
+		return true;
+	}
+
+	if (m_item->NoDrop == 0) {
 		return false;
+	}
 
 	if (recurse) {
-		for (auto iter : m_contents) {
-			if (!iter.second)
+		for (auto iter: m_contents) {
+			if (!iter.second) {
 				continue;
+			}
 
-			if (!iter.second->IsDroppable(recurse))
+			if (!iter.second->IsDroppable(recurse)) {
 				return false;
+			}
 		}
 	}
 
