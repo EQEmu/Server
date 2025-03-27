@@ -381,10 +381,18 @@ int main(int argc, char **argv)
 		}
 	);
 
-	Timer player_event_process_timer(1000);
 	if (player_event_logs.LoadDatabaseConnection()) {
 		player_event_logs.Init();
 	}
+
+	auto event_log_processor = std::jthread([](const std::stop_token& stoken) {
+		while (!stoken.stop_requested()) {
+			if (!RuleB(Logging, PlayerEventsQSProcess)) {
+				player_event_logs.Process();
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		}
+	});
 
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
@@ -448,10 +456,6 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if (player_event_process_timer.Check()) {
-			std::jthread event_thread(&PlayerEventLogs::Process, &player_event_logs);
-		}
-
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
 			database.PurgeAllDeletedDataBuckets();
@@ -501,6 +505,8 @@ int main(int argc, char **argv)
 	process_timer.Start(32, true);
 
 	EQ::EventLoop::Get().Run();
+
+	event_log_processor.request_stop();
 
 	LogInfo("World main loop completed");
 	LogInfo("Shutting down zone connections (if any)");

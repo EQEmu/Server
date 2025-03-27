@@ -177,7 +177,7 @@ int main()
 		}
 
 		if (player_event_process_timer.Check()) {
-			std::jthread player_event_thread(&PlayerEventLogs::Process, &player_event_logs);
+			player_event_logs.Process();
 		}
 	};
 
