@@ -468,3 +468,23 @@ uint16 GetPetBotSpellType(uint16 spell_type) {
 
 	return spell_type;
 }
+
+bool BotRequiresLoSToCast(uint16 spell_type, uint16 spell_id) {
+	if (!BotSpellTypeRequiresTarget(spell_type)) {
+		return false;
+	}
+
+	if (!IsTargetRequiredForSpell(spell_id)) {
+		return false;
+	}
+
+	return true;
+}
+
+bool BotSpellRequiresLoS(uint16 spell_id) {
+	if (IsAnyHealSpell(spell_id) || IsPBAESpell(spell_id)) {
+		return false;
+	}
+
+	return true;
+}
