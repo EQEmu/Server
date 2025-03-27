@@ -82,11 +82,6 @@ void ShowZoneData(Client *c, const Seperator *sep)
 	);
 
 	popup_table += DialogueWindow::TableRow(
-		DialogueWindow::TableCell("Time Type") +
-		DialogueWindow::TableCell(std::to_string(zone->newzone_data.time_type))
-	);
-
-	popup_table += DialogueWindow::TableRow(
 		DialogueWindow::TableCell("Experience Multiplier") +
 		DialogueWindow::TableCell(
 			fmt::format(
