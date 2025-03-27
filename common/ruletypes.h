@@ -54,7 +54,7 @@ RULE_INT(Character, CorpseDecayTime, 604800000, "Time after which the corpse dec
 RULE_INT(Character, EmptyCorpseDecayTime, 10800000, "Time after which an empty corpse decays (milliseconds) DEFAULT: 10800000 (3 Hours)")
 RULE_INT(Character, CorpseResTime, 10800000, "Time after which the corpse can no longer be resurrected (milliseconds) DEFAULT: 10800000 (3 Hours)")
 RULE_INT(Character, DuelCorpseResTime, 600000, "Time before cant res corpse after a duel (milliseconds) DEFAULT: 600000 (10 Minutes)")
-RULE_INT(Character, CorpseOwnerOnlineTime, 30000, "How often corpse will check if its owner is online DEFAULT: 30000 (30 Seconds)")
+RULE_INT(Character, CorpseOwnerOnlineCheckTime, 300, "How often corpse will check if its owner is online DEFAULT: 300 (5 minutes)")
 RULE_BOOL(Character, LeaveCorpses, true, "Setting whether you leave a corpse behind")
 RULE_BOOL(Character, LeaveNakedCorpses, false, "Setting whether you leave a corpse without items")
 RULE_INT(Character, MaxDraggedCorpses, 2, "Maximum number of corpses you can drag at once")
