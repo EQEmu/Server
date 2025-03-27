@@ -159,7 +159,7 @@ public:
 	void FlagInstanceByGroupLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 group_id);
 	void FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 raid_id);
 	void GetCharactersInInstance(uint16 instance_id, std::list<uint32>& character_ids);
-	void PurgeExpiredInstances();
+	std::vector<int32_t> PurgeExpiredInstances();
 	void SetInstanceDuration(uint16 instance_id, uint32 new_duration);
 	void CleanupInstanceCorpses();
 
