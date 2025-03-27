@@ -36,11 +36,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "shared_task_manager.h"
 #include "dynamic_zone_manager.h"
 #include "ucs.h"
+#include "clientlist.h"
 
 extern uint32 numzones;
 extern EQ::Random emu_random;
 extern WebInterfaceList web_interface;
 extern SharedTaskManager shared_task_manager;
+extern ClientList client_list;
 volatile bool UCSServerAvailable_ = false;
 void CatchSignal(int sig_num);
 
@@ -865,6 +867,20 @@ bool ZSList::SendPacketToBootedZones(ServerPacket* pack)
 		auto r = z.get();
 		if (r && r->GetZoneID() > 0) {
 			r->SendPacket(pack);
+		}
+	}
+
+	return true;
+}
+
+bool ZSList::SendPacketToZonesWithGuild(uint32 guild_id, ServerPacket* pack)
+{
+	auto servers = client_list.GetGuildZoneServers(guild_id);
+	for (auto const& z : zone_server_list) {
+		for (auto const& server_id : servers) {
+			if (z->GetID() == server_id && z->GetZoneID() > 0) {
+				z->SendPacket(pack);
+			}
 		}
 	}
 

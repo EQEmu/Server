@@ -1510,7 +1510,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 				guild->tribute.timer.Disable();
 
-				zoneserver_list.SendPacketToBootedZones(pack);
+				zoneserver_list.SendPacketToZonesWithGuild(data->guild_id, pack);
 			}
 			break;
 		}
@@ -1553,7 +1553,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				guild_mgr.UpdateDbGuildFavor(data->guild_id, data->favor);
 				guild_mgr.UpdateDbTributeTimeRemaining(data->guild_id, data->time_remaining);
 
-				zoneserver_list.SendPacketToBootedZones(pack);
+				zoneserver_list.SendPacketToZonesWithGuild(data->guild_id, pack);
 			}
 			break;
 		}
@@ -1587,7 +1587,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				data->time_remaining      = in->time_remaining;
 				strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
 
-				zoneserver_list.SendPacketToBootedZones(out);
+				zoneserver_list.SendPacketToZonesWithGuild(in->guild_id, out);
 				safe_delete(out);
 			}
 			break;
@@ -1610,7 +1610,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				out->tribute_id_2_tier = guild->tribute.id_2_tier;
 				out->time_remaining    = guild_mgr.GetGuildTributeTimeRemaining(in->guild_id);
 
-				zoneserver_list.SendPacketToBootedZones(sp);
+				zoneserver_list.SendPacketToZonesWithGuild(in->guild_id, sp);
 				safe_delete(sp);
 			}
 
@@ -1630,7 +1630,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				out->tribute_timer = guild_mgr.GetGuildTributeTimeRemaining(in->guild_id);
 				out->trophy_timer  = 0;
 
-				zoneserver_list.SendPacketToBootedZones(sp);
+				zoneserver_list.SendPacketToZonesWithGuild(in->guild_id, sp);
 				safe_delete(sp);
 			}
 
@@ -1654,7 +1654,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				out->member_time    = in->member_time;
 				strn0cpy(out->player_name, in->player_name, sizeof(out->player_name));
 
-				zoneserver_list.SendPacketToBootedZones(sp);
+				zoneserver_list.SendPacketToZonesWithGuild(out->guild_id, sp);
 				safe_delete(sp)
 			}
 			break;
