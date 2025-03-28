@@ -450,6 +450,14 @@ void NPC::AddLootDropFixed(
 			for (int i : custom_order) {
 				if (found) break;
 
+                // If we're checking the secondary slot, skip it if a 2h weapon is already equipped in primary.
+                if (i == EQ::invslot::slotSecondary && equipment[EQ::invslot::slotPrimary] != 0) {
+                    const EQ::ItemData *primary_item = database.GetItem(equipment[EQ::invslot::slotPrimary]);
+                    if (primary_item && primary_item->IsTwoHandedWeapon()) {
+                        continue; // Skip equipping secondary if primary is a two-handed weapon
+                    }
+                }
+
 				const uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if (equipment[i]) {
@@ -520,11 +528,13 @@ void NPC::AddLootDropFixed(
 			}
 
 			if (item2->IsType2HWeapon()) {
-				SetTwoHanderEquipped(true);
-				equipment[EQ::invslot::slotSecondary] = 0;
-				auto secondary = GetItem(EQ::invslot::slotSecondary);
-				if (secondary) {
-					secondary->equip_slot = EQ::invslot::SLOT_INVALID;
+				if (!HasShieldEquipped()) {
+					SetTwoHanderEquipped(true);
+					equipment[EQ::invslot::slotSecondary] = 0;
+					auto secondary = GetItem(EQ::invslot::slotSecondary);
+					if (secondary) {
+						secondary->equip_slot = EQ::invslot::SLOT_INVALID;
+					}
 				}
 			}
 		}
