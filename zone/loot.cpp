@@ -453,7 +453,7 @@ void NPC::AddLootDropFixed(
                 // If we're checking the secondary slot, skip it if a 2h weapon is already equipped in primary.
                 if (i == EQ::invslot::slotSecondary && equipment[EQ::invslot::slotPrimary] != 0) {
                     const EQ::ItemData *primary_item = database.GetItem(equipment[EQ::invslot::slotPrimary]);
-                    if (primary_item && primary_item->IsTwoHandedWeapon()) {
+                    if (primary_item && primary_item->IsType2HWeapon()) {
                         continue; // Skip equipping secondary if primary is a two-handed weapon
                     }
                 }
