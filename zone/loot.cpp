@@ -458,6 +458,13 @@ void NPC::AddLootDropFixed(
                     }
                 }
 
+				// skip it if something is already equipped in secondary.
+				if (i == EQ::invslot::slotPrimary && equipment[EQ::invslot::slotSecondary] != 0) {
+					if (item2 && item2->IsType2HWeapon()) {
+						continue; // Skip equipping 2h weapon in primary if secondary has an item
+					}
+				}
+
 				const uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if (equipment[i]) {
