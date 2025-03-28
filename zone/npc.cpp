@@ -751,7 +751,7 @@ bool NPC::Process()
 			}
 		}
 		else if (GetHP() < GetMaxHP() && GetOwnerID() != 0) {
-			if (!IsEngaged()) {
+			if (!IsEngaged() && (GetOwner() && !GetOwner()->IsEngaged())) {
 				if (ooc_regen > 0) {
 					pet_regen_bonus = std::max(ooc_regen_calc, npc_hp_regen);
 				}
