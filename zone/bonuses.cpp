@@ -297,7 +297,7 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 
 	auto CalcCappedItemBonus = [&](int currentStat, int bonus, int cap) -> int {
 		int calc_stat = currentStat + CalcItemBonus(bonus);
-		return IsOfClientBotMerc() ? std::min(cap, calc_stat) : calc_stat;
+		return IsOfClientBotMerc() || (IsPet() && IsPetOwnerOfClientBot()) ? std::min(cap, calc_stat) : calc_stat;
 	};
 
 	b->HP += CalcItemBonus(item->HP);
