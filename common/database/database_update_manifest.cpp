@@ -6914,7 +6914,7 @@ CREATE TABLE `zone_state_spawns` (
 	},
 	ManifestEntry{
 		.version = 9308,
-		.description = "2025_add_multivalue_support_to_evolving_subtype.sql",
+		.description = "2025_03_29_add_multivalue_support_to_evolving_subtype.sql",
 		.check = "SHOW COLUMNS FROM `items_evolving_details` LIKE 'sub_type'",
 		.condition = "missing",
 		.match = "varchar(200)",
@@ -6986,7 +6986,6 @@ ALTER TABLE data_buckets ADD INDEX idx_bot_expires (bot_id, expires);
 		.match = "idx_zone_instance",
 		.sql = R"(
 ALTER TABLE zone_state_spawns ADD INDEX idx_zone_instance (zone_id, instance_id);
-ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
 )",
 	.content_schema_update = false
 	},
