@@ -910,6 +910,8 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 		ServerReload::Type::Commands,
 		ServerReload::Type::PerlExportSettings,
 		ServerReload::Type::DataBucketsCache,
+		ServerReload::Type::Quests,
+		ServerReload::Type::QuestsTimerReset,
 		ServerReload::Type::WorldRepop,
 		ServerReload::Type::WorldWithRespawn
 	};
