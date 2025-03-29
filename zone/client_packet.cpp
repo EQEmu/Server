@@ -3295,8 +3295,8 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						break;
 					}
 
-					auto slots_new = new_aug->GetItem()->Slots;
-					auto slots_old = tobe_auged->GetItem()->Slots;
+					const auto slots_new = new_aug->GetItem()->Slots & RuleB(Custom, PowerSourceItemUpgrade) ? (1 << 21) : 0;  // Power Source
+					const auto slots_old = tobe_auged->GetItem()->Slots & RuleB(Custom, PowerSourceItemUpgrade) ? (1 << 21) : 0;  // Power Source
 
 					LogDebug("slots_new: [{}] slots_old: [{}], overlap? [{}]", slots_new, slots_old, slots_new & slots_old);
 
