@@ -151,6 +151,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		}
 	}
 
+	instance_id = 0;
 	return false;
 }
 
