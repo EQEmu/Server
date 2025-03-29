@@ -7001,6 +7001,74 @@ TRUNCATE TABLE zone_state_spawns;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9315,
+		.description = "2025_03_29_character_tribute_index.sql",
+		.check = "SHOW INDEX FROM character_tribute",
+		.condition = "missing",
+		.match = "idx_character_id",
+		.sql = R"(
+ALTER TABLE character_tribute ADD INDEX idx_character_id (character_id);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9316,
+		.description = "2025_03_29_player_titlesets_index.sql",
+		.check = "SHOW INDEX FROM player_titlesets",
+		.condition = "missing",
+		.match = "idx_char_id",
+		.sql = R"(
+ALTER TABLE player_titlesets ADD INDEX idx_char_id (char_id);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9317,
+		.description = "2025_03_29_respawn_times_instance_index.sql",
+		.check = "SHOW INDEX FROM respawn_times",
+		.condition = "missing",
+		.match = "idx_instance_id",
+		.sql = R"(
+ALTER TABLE respawn_times ADD INDEX idx_instance_id (instance_id);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9318,
+		.description = "2025_03_29_zone_state_spawns_instance_index.sql",
+		.check = "SHOW INDEX FROM zone_state_spawns",
+		.condition = "missing",
+		.match = "idx_instance_id",
+		.sql = R"(
+ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9319,
+		.description = "2025_03_29_character_tribute_character_id_index.sql",
+		.check = "SHOW INDEX FROM character_tribute",
+		.condition = "missing",
+		.match = "idx_character_id",
+		.sql = R"(
+ALTER TABLE character_tribute ADD INDEX idx_character_id (character_id);
+)",
+		.content_schema_update = false
+	},
+
+	ManifestEntry{
+		.version = 9320,
+		.description = "2025_03_29_data_buckets_expires_index.sql",
+		.check = "SHOW INDEX FROM data_buckets",
+		.condition = "missing",
+		.match = "idx_expires",
+		.sql = R"(
+CREATE INDEX idx_expires ON data_buckets (expires);
+)",
+		.content_schema_update = false
+	},
+
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
