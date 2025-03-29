@@ -3298,10 +3298,8 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					const auto slots_new = new_aug->GetItem()->Slots & RuleB(Custom, PowerSourceItemUpgrade) ? (1 << 21) : 0;  // Power Source
 					const auto slots_old = tobe_auged->GetItem()->Slots & RuleB(Custom, PowerSourceItemUpgrade) ? (1 << 21) : 0;  // Power Source
 
-					LogDebug("slots_new: [{}] slots_old: [{}], overlap? [{}]", slots_new, slots_old, slots_new & slots_old);
-
 					if (!(slots_new & slots_old)) {
-						LogError("Unable to create item with no usability.");
+						if (RuleB(Custom, PowerSourceItemUpgrade)) { LogError("Unable to create item with no usability."); }
 						Message(Chat::Red, "The result of this combine would produce an item unusable by anyone.");
 						break;
 					}
