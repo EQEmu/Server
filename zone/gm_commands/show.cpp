@@ -49,6 +49,7 @@
 #include "show/zone_loot.cpp"
 #include "show/zone_points.cpp"
 #include "show/zone_status.cpp"
+#include "show/zone_variables.cpp"
 
 void command_show(Client *c, const Seperator *sep)
 {
@@ -110,6 +111,7 @@ void command_show(Client *c, const Seperator *sep)
 		Cmd{.cmd = "zone_loot", .u = "zone_loot", .fn = ShowZoneLoot, .a = {"#viewzoneloot"}},
 		Cmd{.cmd = "zone_points", .u = "zone_points", .fn = ShowZonePoints, .a = {"#showzonepoints"}},
 		Cmd{.cmd = "zone_status", .u = "zone_status", .fn = ShowZoneStatus, .a = {"#zonestatus"}},
+		Cmd{.cmd = "zone_variables", .u = "zone_variables", .fn = ShowZoneVariables},
 	};
 
 	// Check for arguments
