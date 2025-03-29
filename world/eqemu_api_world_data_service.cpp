@@ -32,6 +32,8 @@ void callGetZoneList(Json::Value &response)
 		row["client_address"]       = zone->GetCAddress();
 		row["client_local_address"] = zone->GetCLocalAddress();
 		row["client_port"]          = zone->GetCPort();
+		row["compile_version"]      = zone->GetCurrentVersion();
+		row["compile_date"]         = zone->GetCompileDate();
 		row["compile_time"]         = zone->GetCompileTime();
 		row["id"]                   = zone->GetID();
 		row["instance_id"]          = zone->GetInstanceID();
