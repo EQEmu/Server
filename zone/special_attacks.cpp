@@ -1701,6 +1701,8 @@ void NPC::RangedAttack(Mob *other)
 
 		CommonBreakInvisibleFromCombat();
 	}
+
+	ranged_timer.Start();
 }
 
 void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 chance_mod, EQ::skills::SkillType skill, float speed, const char *IDFile)
