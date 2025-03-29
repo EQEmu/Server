@@ -1136,7 +1136,13 @@ public:
 	void SetOwnerID(uint16 new_owner_id);
 	inline uint16 GetOwnerID() const { return ownerid; }
 	inline virtual bool HasOwner() { if (!GetOwnerID()){ return false; } return entity_list.GetMob(GetOwnerID()) != 0; }
-	inline virtual bool IsPet() { return HasOwner() && !IsMerc(); }
+	inline virtual bool IsPet() {
+		if (pet_owner_client || pet_owner_npc || pet_owner_bot) {
+			return true;
+		}
+
+		return (HasOwner() && !IsMerc());
+	}
 	virtual bool IsCharmedPet() { return IsPet() && IsCharmed(); }
 	inline bool HasTempPetsActive() const { return(hasTempPet); }
 	inline void SetTempPetsActive(bool i) { hasTempPet = i; }
