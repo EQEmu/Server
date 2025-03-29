@@ -120,48 +120,46 @@ int Client::GetBotSpawnLimit(uint8 class_id) {
 	}
 
 	const auto& zones_list = Strings::Split(RuleS(Bots, ZonesWithSpawnLimits), ",");
-	const auto& zones_limits_list = Strings::Split(RuleS(Bots, ZoneSpawnLimits), ",");
-	int i = 0;
 
-	for (const auto& result : zones_list) {
-		try {
-			if (
-				std::stoul(result) == zone->GetZoneID() &&
-				std::stoul(zones_limits_list[i]) < bot_spawn_limit
-			) {
-				bot_spawn_limit = std::stoul(zones_limits_list[i]);
+	if (!zones_list.empty()) {
+		auto it = std::find(zones_list.begin(), zones_list.end(), std::to_string(zone->GetZoneID()));
 
-				break;
+		if (it != zones_list.end()) {
+			const auto& zones_limits_list = Strings::Split(RuleS(Bots, ZoneSpawnLimits), ",");
+
+			if (zones_list.size() == zones_limits_list.size()) {
+				try {
+					auto new_limit = std::stoul(zones_limits_list[std::distance(zones_list.begin(), it)]);
+
+					if (new_limit < bot_spawn_limit) {
+						bot_spawn_limit = new_limit;
+					}
+				} catch (const std::exception& e) {
+					LogInfo("Invalid entry in Rule Bots:ZoneSpawnLimits: [{}]", e.what());
+				}
 			}
-
-			++i;
-		}
-
-		catch (const std::exception& e) {
-			LogInfo("Invalid entry in Rule VegasScaling:SpecialScalingZones or SpecialScalingZonesVersions: [{}]", e.what());
 		}
 	}
 
 	const auto& zones_forced_list = Strings::Split(RuleS(Bots, ZonesWithForcedSpawnLimits), ",");
-	const auto& zones_forced_limits_list = Strings::Split(RuleS(Bots, ZoneForcedSpawnLimits), ",");
-	i = 0;
 
-	for (const auto& result : zones_forced_list) {
-		try {
-			if (
-				std::stoul(result) == zone->GetZoneID() &&
-				std::stoul(zones_forced_limits_list[i]) != bot_spawn_limit
-			) {
-				bot_spawn_limit = std::stoul(zones_forced_limits_list[i]);
+	if (!zones_forced_list.empty()) {
+		auto it = std::find(zones_forced_list.begin(), zones_forced_list.end(), std::to_string(zone->GetZoneID()));
 
-				break;
+		if (it != zones_forced_list.end()) {
+			const auto& zones_forced_limits_list = Strings::Split(RuleS(Bots, ZoneForcedSpawnLimits), ",");
+
+			if (zones_forced_list.size() == zones_forced_limits_list.size()) {
+				try {
+					auto new_limit = std::stoul(zones_forced_limits_list[std::distance(zones_forced_list.begin(), it)]);
+
+					if (new_limit != bot_spawn_limit) {
+						bot_spawn_limit = new_limit;
+					}
+				} catch (const std::exception& e) {
+					LogInfo("Invalid entry in Rule Bots:ZoneForcedSpawnLimits: [{}]", e.what());
+				}
 			}
-
-			++i;
-		}
-
-		catch (const std::exception& e) {
-			LogInfo("Invalid entry in Rule VegasScaling:SpecialScalingZones or SpecialScalingZonesVersions: [{}]", e.what());
 		}
 	}
 
