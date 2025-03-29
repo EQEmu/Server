@@ -40,17 +40,14 @@
 #include "evolving_items.h"
 #include "repositories/criteria/content_filter_criteria.h"
 #include "repositories/account_repository.h"
-#include "repositories/faction_association_repository.h"
 #include "repositories/starting_items_repository.h"
 #include "path_manager.h"
-#include "../zone/client.h"
-#include "repositories/loottable_repository.h"
 #include "repositories/character_item_recast_repository.h"
 #include "repositories/character_corpses_repository.h"
-#include "repositories/skill_caps_repository.h"
 #include "repositories/inventory_repository.h"
 #include "repositories/books_repository.h"
 #include "repositories/sharedbank_repository.h"
+#include "../zone/client.h"
 
 namespace ItemField
 {
@@ -319,7 +316,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 	e.ornament_icon       = inst->GetOrnamentationIcon();
 	e.ornament_idfile     = inst->GetOrnamentationIDFile();
 	e.ornament_hero_model = inst->GetOrnamentHeroModel();
-	e.guid                = inst->GetSerialNumber();
+	e.serial_number       = inst->GetSerialNumber2();
 
 	const int replaced = InventoryRepository::ReplaceOne(*this, e);
 
@@ -681,12 +678,6 @@ bool SharedDatabase::GetInventory(Client *c)
 		return false;
 	}
 
-	for (auto const& row: results) {
-		if (row.guid != 0) {
-			EQ::ItemInstance::AddGUIDToMap(row.guid);
-		}
-	}
-
 	const auto timestamps  = GetItemRecastTimestamps(char_id);
 	auto       cv_conflict = false;
 	const auto pmask       = inv.GetLookup()->PossessionsBitmask;
@@ -763,6 +754,15 @@ bool SharedDatabase::GetInventory(Client *c)
 		inst->SetOrnamentIcon(ornament_icon);
 		inst->SetOrnamentationIDFile(ornament_idfile);
 		inst->SetOrnamentHeroModel(item->HerosForgeModel);
+
+		if (row.serial_number.empty()) {
+			inst->CreateSerialNumber2();
+			row.serial_number = inst->GetSerialNumber2();
+			queue.push_back(row);
+		}
+		else {
+			inst->SetSerialNumber2(row.serial_number);
+		}
 
 		if (
 			instnodrop ||
@@ -859,8 +859,7 @@ bool SharedDatabase::GetInventory(Client *c)
 			put_slot_id = inv.PutItem(slot_id, *inst);
 		}
 
-		row.guid = inst->GetSerialNumber();
-		queue.push_back(row);
+		//queue.push_back(row);
 
 		safe_delete(inst);
 
@@ -889,8 +888,6 @@ bool SharedDatabase::GetInventory(Client *c)
 	if (!queue.empty()) {
 		InventoryRepository::ReplaceMany(*this, queue);
 	}
-
-	EQ::ItemInstance::ClearGUIDMap();
 
 	// Retrieve shared inventory
 	return GetSharedBank(char_id, &inv, true);
