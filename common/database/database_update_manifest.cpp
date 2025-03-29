@@ -7112,6 +7112,20 @@ ADD COLUMN `first_login` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `xtargets`;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9324,
+		.description = "2025_03_27_implement_item_unique_serial_number.sql",
+		.check = "SHOW COLUMNS FROM `inventory` LIKE 'serial_number'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `inventory`
+	DROP COLUMN `guid`,
+	ADD COLUMN `serial_number` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`,
+	ADD UNIQUE INDEX `idx_serial_number` (`serial_number`);
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

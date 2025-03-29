@@ -23,6 +23,10 @@
 
 #ifndef COMMON_ITEM_INSTANCE_H
 #define COMMON_ITEM_INSTANCE_H
+#include <array>
+#include <random>
+
+
 #include "evolving_items.h"
 
 
@@ -228,8 +232,15 @@ namespace EQ
 		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
 		void Serialize(OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
 
-		inline int32 GetSerialNumber() const { return m_SerialNumber; }
-		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
+		int32              GetSerialNumber() const { return m_SerialNumber; }
+		void               SetSerialNumber(int32 id) { m_SerialNumber = id; }
+		const std::string &GetSerialNumber2() const { return m_serial_number2; }
+		void               SetSerialNumber2(std::string sn) { m_serial_number2 = std::move(sn); }
+
+		void CreateSerialNumber2()
+		{
+			m_serial_number2 = GenerateUniqueSerialNumber();
+		}
 
 		std::map<std::string, ::Timer>& GetTimers() const { return m_timers; }
 		void SetTimer(std::string name, uint32 time);
@@ -346,7 +357,8 @@ namespace EQ
 		std::map<uint8, ItemInstance*>::const_iterator _cbegin() { return m_contents.cbegin(); }
 		std::map<uint8, ItemInstance*>::const_iterator _cend() { return m_contents.cend(); }
 
-		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
+		void               _PutItem(uint8 index, ItemInstance *inst) { m_contents[index] = inst; }
+		static std::string GenerateUniqueSerialNumber();
 
 		ItemInstTypes    m_use_type{ItemInstNormal};// Usage type for item
 		const ItemData * m_item{nullptr};           // Ptr to item data
@@ -358,6 +370,7 @@ namespace EQ
 		bool             m_attuned{false};
 		int32            m_merchantcount{1};//number avaliable on the merchant, -1=unlimited
 		int32            m_SerialNumber{0}; // Unique identifier for this instance of an item. Needed for Bazaar.
+		std::string      m_serial_number2{}; // unique serial number across all zones/world TESTING March 2025
 		uint32           m_exp{0};
 		int8             m_evolveLvl{0};
 		ItemData *       m_scaledItem{nullptr};
@@ -374,6 +387,47 @@ namespace EQ
 		std::map<uint8, ItemInstance*>         m_contents {}; // Zero-based index: min=0, max=9
 		std::map<std::string, std::string>     m_custom_data {};
 		mutable std::map<std::string, ::Timer> m_timers {};
+	};
+
+	class UniqueHashGenerator
+	{
+	private:
+		static constexpr char   ALPHANUM[]    = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		static constexpr size_t ALPHANUM_SIZE = sizeof(ALPHANUM) - 1;
+		static std::mutex       mtx;
+
+		// Generate machine-specific seed
+		static uint64_t getMachineSeed()
+		{
+			std::random_device rd;
+			return (static_cast<uint64_t>(rd()) << 32) | rd();
+		}
+
+	public:
+		static std::string generate()
+		{
+			std::lock_guard<std::mutex> lock(mtx);
+
+			// Get current timestamp in nanoseconds
+			auto now   = std::chrono::high_resolution_clock::now();
+			auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+
+			// Combine timestamp with machine-specific data
+			static const uint64_t machine_seed = getMachineSeed();
+			uint64_t seed = nanos ^ machine_seed ^ std::hash<std::thread::id>{}(std::this_thread::get_id());
+
+			// Generate random component
+			std::mt19937_64                       rng(seed);
+			std::uniform_int_distribution<size_t> dist(0, ALPHANUM_SIZE - 1);
+
+			// Create 16-byte result
+			std::array<char, 16> result;
+			for (int i = 0; i < 16; ++i) {
+				result[i] = ALPHANUM[dist(rng)];
+			}
+
+			return std::string(result.begin(), result.end());
+		}
 	};
 }
 #endif /*COMMON_ITEM_INSTANCE_H*/
