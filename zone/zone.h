@@ -545,6 +545,8 @@ private:
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
 
 	uint32_t m_zone_server_id = 0;
+
+	std::mutex m_repop_mutex;
 };
 
 #endif
