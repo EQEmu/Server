@@ -271,7 +271,16 @@ bool EQ::ItemInstance::IsEquipable(int16 slot_id) const
 		return false;
 	}
 
-	return ((m_item->Slots & (1 << slot_id)) != 0);
+	int aggregate_slots = m_item->Slots;
+
+	for (int16 aug_slot = invaug::SOCKET_BEGIN; aug_slot <= invaug::SOCKET_END; ++aug_slot) {
+        const ItemInstance* augment = GetAugment(aug_slot);
+        if (augment && augment->GetItem()) {
+            aggregate_slots &= augment->GetItem()->Slots;
+        }
+	}
+
+	return ((aggregate_slots & (1 << slot_id)) != 0);
 }
 
 bool EQ::ItemInstance::IsAugmentable() const
@@ -2036,6 +2045,27 @@ int EQ::ItemInstance::GetItemSkillsStat(EQ::skills::SkillType skill, bool augmen
 		}
 	}
 	return stat;
+}
+
+int EQ::ItemInstance::GetItemSlots(bool augments) const
+{
+	if (!m_item || !m_item->Slots) {
+		return 0;
+	}
+
+	if (augments) {
+		int aggregate_slots = m_item->Slots;
+		for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+			const ItemInstance* augment = GetAugment(i);
+			if (augment && augment->GetItem()) {
+				aggregate_slots &= augment->GetItem()->Slots;
+			}
+		}
+
+		return aggregate_slots;
+	} else {
+		return m_item->Slots;
+	}
 }
 
 void EQ::ItemInstance::AddGUIDToMap(uint64 existing_serial_number)

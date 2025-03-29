@@ -466,7 +466,7 @@ void NPC::AddLootDropFixed(
 				}
 
 				const uint32 slots = (1 << i);
-				if (item2->Slots & slots) {
+				if (inst->GetItemSlots(true) & slots) {
 					if (equipment[i]) {
 						compitem = database.GetItem(equipment[i]);
 						if (!compitem) {
