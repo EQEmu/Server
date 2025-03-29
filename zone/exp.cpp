@@ -947,7 +947,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	int aa_cap = RuleI(AA, UnusedAAPointCap);
 
 	if (aa_cap >= 0 && aaexp > 0) {
-		if (m_pp.aapoints == aa_cap) {
+		if (m_pp.aapoints >= aa_cap) {
 			MessageString(Chat::Red, AA_CAP);
 			aaexp = 0;
 		}
