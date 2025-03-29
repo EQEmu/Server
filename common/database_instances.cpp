@@ -130,11 +130,32 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 	e.duration = duration;
 
 	RespawnTimesRepository::ClearInstanceTimers(*this, e.id);
-
-	return InstanceListRepository::InsertOne(*this, e).id;
+	InstanceListRepository::ReplaceOne(*this, e);
+	return instance_id > 0 && e.id;
 }
 
 bool Database::GetUnusedInstanceID(uint16 &instance_id)
+{
+	// attempt to get an unused instance id
+	for (int a = 0; a < 10; a++) {
+		uint16 attempted_id = 0;
+		if (TryGetUnusedInstanceID(attempted_id)) {
+			auto i = InstanceListRepository::NewEntity();
+			i.id    = attempted_id;
+			i.notes = "Prefetching";
+			auto n = InstanceListRepository::InsertOne(*this, i);
+			if (n.id > 0) {
+				instance_id = n.id;
+				return true;
+			}
+		}
+	}
+
+	instance_id = 0;
+	return false;
+}
+
+bool Database::TryGetUnusedInstanceID(uint16 &instance_id)
 {
 	uint32 max_reserved_instance_id = RuleI(Instances, ReservedInstances);
 	uint32 max_instance_id          = 32000;
