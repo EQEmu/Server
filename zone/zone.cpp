@@ -3288,5 +3288,12 @@ bool Zone::VariableExists(const std::string& variable_name)
 	return m_zone_variables.find(variable_name) != m_zone_variables.end();
 }
 
+void Zone::ReloadMaps()
+{
+	zonemap  = Map::LoadMapFile(map_name);
+	watermap = WaterMap::LoadWaterMapfile(map_name);
+	pathing  = IPathfinder::Load(map_name);
+}
+
 #include "zone_save_state.cpp"
 #include "zone_loot.cpp"

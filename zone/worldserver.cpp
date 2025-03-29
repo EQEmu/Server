@@ -4599,6 +4599,10 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			zone->ReloadLootTables();
 			break;
 
+		case ServerReload::Type::Maps:
+			zone->ReloadMaps();
+			break;
+
 		case ServerReload::Type::Merchants:
 			entity_list.ReloadMerchants();
 			break;
