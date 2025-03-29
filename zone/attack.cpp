@@ -5241,7 +5241,7 @@ void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon
 	bool proced = false; // silly bool to prevent augs from going if weapon does
 
 	if (weapon->Proc.Type == EQ::item::ItemEffectCombatProc && IsValidSpell(weapon->Proc.Effect)) {
-		int item_proc_chance = RuleI(Custom, PetProcRateCap) && IsPet() ? std::min(RuleI(Custom, PetProcRateCap), weapon->ProcRate) : weapon->ProcRate;
+		int item_proc_chance = RuleI(Custom, PetProcRateCap) && (IsPet() || (IsNPC() && CastToNPC()->GetSwarmInfo())) ? std::min(RuleI(Custom, PetProcRateCap), weapon->ProcRate) : weapon->ProcRate;
 		float WPC = ProcChance * (100.0f + 	static_cast<float>(item_proc_chance)) / 100.0f;
 		if (zone->random.Roll(WPC)) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
 			if (weapon->Proc.Level2 > ourlevel) {
