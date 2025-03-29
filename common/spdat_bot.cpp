@@ -484,3 +484,15 @@ bool IsBotBuffSpellType(uint16 spell_type) {
 
 	return false;
 }
+
+bool BotRequiresLoSToCast(uint16 spell_type, uint16 spell_id) {
+	if (!BotSpellTypeRequiresTarget(spell_type)) {
+		return false;
+	}
+
+	if (!IsTargetRequiredForSpell(spell_id)) {
+		return false;
+	}
+
+	return true;
+}

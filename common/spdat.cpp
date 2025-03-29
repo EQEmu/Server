@@ -2808,18 +2808,6 @@ bool IsLichSpell(uint16 spell_id)
 	);
 }
 
-bool IsValidSpellAndLoS(uint32 spell_id, bool has_los) {
-	if (!IsValidSpell(spell_id)) {
-		return false;
-	}
-
-	if (!has_los && IsTargetRequiredForSpell(spell_id)) {
-		return false;
-	}
-
-	return true;
-}
-
 bool IsInstantHealSpell(uint32 spell_id) {
 	if (!IsValidSpell(spell_id)) {
 		return false;
