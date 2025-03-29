@@ -143,7 +143,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 			auto i = InstanceListRepository::NewEntity();
 			i.id    = attempted_id;
 			i.notes = "Prefetching";
-			auto n = InstanceListRepository::InsertOne(database, i);
+			auto n = InstanceListRepository::InsertOne(*this, i);
 			if (n.id > 0) {
 				instance_id = n.id;
 				return true;
