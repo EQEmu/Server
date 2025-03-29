@@ -7056,7 +7056,6 @@ ALTER TABLE character_tribute ADD INDEX idx_character_id (character_id);
 )",
 		.content_schema_update = false
 	},
-
 	ManifestEntry{
 		.version = 9320,
 		.description = "2025_03_29_data_buckets_expires_index.sql",
