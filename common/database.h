@@ -141,6 +141,7 @@ public:
 	bool CheckInstanceExpired(uint16 instance_id);
 	bool CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration);
 	bool GetUnusedInstanceID(uint16& instance_id);
+	bool TryGetUnusedInstanceID(uint16& instance_id);
 	bool IsGlobalInstance(uint16 instance_id);
 	bool RemoveClientFromInstance(uint16 instance_id, uint32 char_id);
 	bool RemoveClientsFromInstance(uint16 instance_id);
