@@ -863,8 +863,6 @@ RULE_REAL(Bots, UpperMeleeDistanceMultiplier, 0.55, "Furthest % of the hit box a
 RULE_REAL(Bots, UpperTauntingMeleeDistanceMultiplier, 0.45, "Furthest % of the hit box a taunting melee bot will get from the target. Default 0.45")
 RULE_REAL(Bots, UpperMaxMeleeRangeDistanceMultiplier, 0.95, "Furthest % of the hit box a max melee range melee bot will get from the target. Default 0.95")
 RULE_BOOL(Bots, DisableSpecialAbilitiesAtMaxMelee, true, "If true, when bots are at max melee distance, special abilities including taunt will be disabled. Default True.")
-RULE_BOOL(Bots, TauntingBotsFollowTopHate, true, "True Default. If true, bots that are taunting will attempt to stick with whoever currently is top hate.")
-RULE_INT(Bots, DistanceTauntingBotsStickMainHate, 10, "If TauntingBotsFollowTopHate is enabled, this is the distance bots will try to stick to whoever currently is Top Hate.")
 RULE_INT(Bots, MinJitterTimer, 500, "Minimum ms between bot movement jitter checks.")
 RULE_INT(Bots, MaxJitterTimer, 2500, "Maximum ms between bot movement jitter checks. Set to 0 to disable timer checks.")
 RULE_BOOL(Bots, PreventBotCampOnFD, true, "True Default. If true, players will not be able to camp bots while feign death.")
