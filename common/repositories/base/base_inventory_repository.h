@@ -32,10 +32,12 @@ public:
 		uint32_t    augment_six;
 		uint8_t     instnodrop;
 		std::string custom_data;
+		uint32_t    ornamenticon;
+		uint32_t    ornamentidfile;
 		uint32_t    ornament_icon;
 		uint32_t    ornament_idfile;
 		int32_t     ornament_hero_model;
-		uint64_t    guid;
+		std::string serial_number;
 	};
 
 	static std::string PrimaryKey()
@@ -59,10 +61,12 @@ public:
 			"augment_six",
 			"instnodrop",
 			"custom_data",
+			"ornamenticon",
+			"ornamentidfile",
 			"ornament_icon",
 			"ornament_idfile",
 			"ornament_hero_model",
-			"guid",
+			"serial_number",
 		};
 	}
 
@@ -82,10 +86,12 @@ public:
 			"augment_six",
 			"instnodrop",
 			"custom_data",
+			"ornamenticon",
+			"ornamentidfile",
 			"ornament_icon",
 			"ornament_idfile",
 			"ornament_hero_model",
-			"guid",
+			"serial_number",
 		};
 	}
 
@@ -139,10 +145,12 @@ public:
 		e.augment_six         = 0;
 		e.instnodrop          = 0;
 		e.custom_data         = "";
+		e.ornamenticon        = 0;
+		e.ornamentidfile      = 0;
 		e.ornament_icon       = 0;
 		e.ornament_idfile     = 0;
 		e.ornament_hero_model = 0;
-		e.guid                = 0;
+		e.serial_number       = "";
 
 		return e;
 	}
@@ -192,10 +200,12 @@ public:
 			e.augment_six         = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.custom_data         = row[12] ? row[12] : "";
-			e.ornament_icon       = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.ornament_idfile     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
-			e.guid                = row[16] ? strtoull(row[16], nullptr, 10) : 0;
+			e.ornamenticon        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornamentidfile      = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.ornament_icon       = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.ornament_idfile     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.serial_number       = row[18] ? row[18] : "";
 
 			return e;
 		}
@@ -242,10 +252,12 @@ public:
 		v.push_back(columns[10] + " = " + std::to_string(e.augment_six));
 		v.push_back(columns[11] + " = " + std::to_string(e.instnodrop));
 		v.push_back(columns[12] + " = '" + Strings::Escape(e.custom_data) + "'");
-		v.push_back(columns[13] + " = " + std::to_string(e.ornament_icon));
-		v.push_back(columns[14] + " = " + std::to_string(e.ornament_idfile));
-		v.push_back(columns[15] + " = " + std::to_string(e.ornament_hero_model));
-		v.push_back(columns[16] + " = " + std::to_string(e.guid));
+		v.push_back(columns[13] + " = " + std::to_string(e.ornamenticon));
+		v.push_back(columns[14] + " = " + std::to_string(e.ornamentidfile));
+		v.push_back(columns[15] + " = " + std::to_string(e.ornament_icon));
+		v.push_back(columns[16] + " = " + std::to_string(e.ornament_idfile));
+		v.push_back(columns[17] + " = " + std::to_string(e.ornament_hero_model));
+		v.push_back(columns[18] + " = '" + Strings::Escape(e.serial_number) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -280,10 +292,12 @@ public:
 		v.push_back(std::to_string(e.augment_six));
 		v.push_back(std::to_string(e.instnodrop));
 		v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+		v.push_back(std::to_string(e.ornamenticon));
+		v.push_back(std::to_string(e.ornamentidfile));
 		v.push_back(std::to_string(e.ornament_icon));
 		v.push_back(std::to_string(e.ornament_idfile));
 		v.push_back(std::to_string(e.ornament_hero_model));
-		v.push_back(std::to_string(e.guid));
+		v.push_back("'" + Strings::Escape(e.serial_number) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -326,10 +340,12 @@ public:
 			v.push_back(std::to_string(e.augment_six));
 			v.push_back(std::to_string(e.instnodrop));
 			v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+			v.push_back(std::to_string(e.ornamenticon));
+			v.push_back(std::to_string(e.ornamentidfile));
 			v.push_back(std::to_string(e.ornament_icon));
 			v.push_back(std::to_string(e.ornament_idfile));
 			v.push_back(std::to_string(e.ornament_hero_model));
-			v.push_back(std::to_string(e.guid));
+			v.push_back("'" + Strings::Escape(e.serial_number) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -376,10 +392,12 @@ public:
 			e.augment_six         = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.custom_data         = row[12] ? row[12] : "";
-			e.ornament_icon       = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.ornament_idfile     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
-			e.guid                = row[16] ? strtoull(row[16], nullptr, 10) : 0;
+			e.ornamenticon        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornamentidfile      = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.ornament_icon       = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.ornament_idfile     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.serial_number       = row[18] ? row[18] : "";
 
 			all_entries.push_back(e);
 		}
@@ -417,10 +435,12 @@ public:
 			e.augment_six         = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.custom_data         = row[12] ? row[12] : "";
-			e.ornament_icon       = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.ornament_idfile     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
-			e.guid                = row[16] ? strtoull(row[16], nullptr, 10) : 0;
+			e.ornamenticon        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornamentidfile      = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.ornament_icon       = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.ornament_idfile     = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.serial_number       = row[18] ? row[18] : "";
 
 			all_entries.push_back(e);
 		}
@@ -508,10 +528,12 @@ public:
 		v.push_back(std::to_string(e.augment_six));
 		v.push_back(std::to_string(e.instnodrop));
 		v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+		v.push_back(std::to_string(e.ornamenticon));
+		v.push_back(std::to_string(e.ornamentidfile));
 		v.push_back(std::to_string(e.ornament_icon));
 		v.push_back(std::to_string(e.ornament_idfile));
 		v.push_back(std::to_string(e.ornament_hero_model));
-		v.push_back(std::to_string(e.guid));
+		v.push_back("'" + Strings::Escape(e.serial_number) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -547,10 +569,12 @@ public:
 			v.push_back(std::to_string(e.augment_six));
 			v.push_back(std::to_string(e.instnodrop));
 			v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+			v.push_back(std::to_string(e.ornamenticon));
+			v.push_back(std::to_string(e.ornamentidfile));
 			v.push_back(std::to_string(e.ornament_icon));
 			v.push_back(std::to_string(e.ornament_idfile));
 			v.push_back(std::to_string(e.ornament_hero_model));
-			v.push_back(std::to_string(e.guid));
+			v.push_back("'" + Strings::Escape(e.serial_number) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
