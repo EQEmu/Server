@@ -2061,7 +2061,7 @@ int EQ::ItemInstance::GetItemSlots(bool augments) const
 				aggregate_slots &= augment->GetItem()->Slots;
 			}
 		}
-
+		LogDebug("aggregate_slots [{}]", aggregate_slots);
 		return aggregate_slots & RuleB(Custom, PowerSourceItemUpgrade) ? (1 << 21) : 0;
 	} else {
 		return m_item->Slots;
