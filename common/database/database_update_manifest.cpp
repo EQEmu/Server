@@ -6792,7 +6792,7 @@ UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 341) + 5810)
 	},
 	ManifestEntry{
 		.version     = 9304,
-		.description = "2024_12_01_2024_update_guild_bank",
+		.description = "2024_12_01_update_guild_bank",
 		.check       = "SHOW COLUMNS FROM `guild_bank` LIKE 'augment_one_id'",
 		.condition   = "empty",
 		.match       = "",
@@ -7046,17 +7046,6 @@ ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
 	},
 	ManifestEntry{
 		.version = 9319,
-		.description = "2025_03_29_character_tribute_character_id_index.sql",
-		.check = "SHOW INDEX FROM character_tribute",
-		.condition = "missing",
-		.match = "idx_character_id",
-		.sql = R"(
-ALTER TABLE character_tribute ADD INDEX idx_character_id (character_id);
-)",
-		.content_schema_update = false
-	},
-	ManifestEntry{
-		.version = 9320,
 		.description = "2025_03_29_data_buckets_expires_index.sql",
 		.check = "SHOW INDEX FROM data_buckets",
 		.condition = "missing",
