@@ -6792,7 +6792,7 @@ UPDATE `character_corpse_items` SET `equip_slot` = ((`equip_slot` - 341) + 5810)
 	},
 	ManifestEntry{
 		.version     = 9304,
-		.description = "2024_12_01_2024_update_guild_bank",
+		.description = "2024_12_01_update_guild_bank",
 		.check       = "SHOW COLUMNS FROM `guild_bank` LIKE 'augment_one_id'",
 		.condition   = "empty",
 		.match       = "",
@@ -6914,7 +6914,7 @@ CREATE TABLE `zone_state_spawns` (
 	},
 	ManifestEntry{
 		.version = 9308,
-		.description = "2025_add_multivalue_support_to_evolving_subtype.sql",
+		.description = "2025_03_29_add_multivalue_support_to_evolving_subtype.sql",
 		.check = "SHOW COLUMNS FROM `items_evolving_details` LIKE 'sub_type'",
 		.condition = "missing",
 		.match = "varchar(200)",
@@ -6986,7 +6986,6 @@ ALTER TABLE data_buckets ADD INDEX idx_bot_expires (bot_id, expires);
 		.match = "idx_zone_instance",
 		.sql = R"(
 ALTER TABLE zone_state_spawns ADD INDEX idx_zone_instance (zone_id, instance_id);
-ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
 )",
 	.content_schema_update = false
 	},
@@ -7001,6 +7000,62 @@ TRUNCATE TABLE zone_state_spawns;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9315,
+		.description = "2025_03_29_character_tribute_index.sql",
+		.check = "SHOW INDEX FROM character_tribute",
+		.condition = "missing",
+		.match = "idx_character_id",
+		.sql = R"(
+ALTER TABLE character_tribute ADD INDEX idx_character_id (character_id);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9316,
+		.description = "2025_03_29_player_titlesets_index.sql",
+		.check = "SHOW INDEX FROM player_titlesets",
+		.condition = "missing",
+		.match = "idx_char_id",
+		.sql = R"(
+ALTER TABLE player_titlesets ADD INDEX idx_char_id (char_id);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9317,
+		.description = "2025_03_29_respawn_times_instance_index.sql",
+		.check = "SHOW INDEX FROM respawn_times",
+		.condition = "missing",
+		.match = "idx_instance_id",
+		.sql = R"(
+ALTER TABLE respawn_times ADD INDEX idx_instance_id (instance_id);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9318,
+		.description = "2025_03_29_zone_state_spawns_instance_index.sql",
+		.check = "SHOW INDEX FROM zone_state_spawns",
+		.condition = "missing",
+		.match = "idx_instance_id",
+		.sql = R"(
+ALTER TABLE zone_state_spawns ADD INDEX idx_instance_id (instance_id);
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9319,
+		.description = "2025_03_29_data_buckets_expires_index.sql",
+		.check = "SHOW INDEX FROM data_buckets",
+		.condition = "missing",
+		.match = "idx_expires",
+		.sql = R"(
+CREATE INDEX idx_expires ON data_buckets (expires);
+)",
+		.content_schema_update = false
+	},
+
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
