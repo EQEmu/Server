@@ -19,10 +19,11 @@
 class BaseRespawnTimesRepository {
 public:
 	struct RespawnTimes {
-		int32_t id;
-		int32_t start;
-		int32_t duration;
-		int16_t instance_id;
+		int32_t  id;
+		int32_t  start;
+		int32_t  duration;
+		uint32_t expire_at;
+		int16_t  instance_id;
 	};
 
 	static std::string PrimaryKey()
@@ -36,6 +37,7 @@ public:
 			"id",
 			"start",
 			"duration",
+			"expire_at",
 			"instance_id",
 		};
 	}
@@ -46,6 +48,7 @@ public:
 			"id",
 			"start",
 			"duration",
+			"expire_at",
 			"instance_id",
 		};
 	}
@@ -90,6 +93,7 @@ public:
 		e.id          = 0;
 		e.start       = 0;
 		e.duration    = 0;
+		e.expire_at   = 0;
 		e.instance_id = 0;
 
 		return e;
@@ -130,7 +134,8 @@ public:
 			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.start       = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.duration    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
-			e.instance_id = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.expire_at   = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.instance_id = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
 
 			return e;
 		}
@@ -167,7 +172,8 @@ public:
 		v.push_back(columns[0] + " = " + std::to_string(e.id));
 		v.push_back(columns[1] + " = " + std::to_string(e.start));
 		v.push_back(columns[2] + " = " + std::to_string(e.duration));
-		v.push_back(columns[3] + " = " + std::to_string(e.instance_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.expire_at));
+		v.push_back(columns[4] + " = " + std::to_string(e.instance_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -192,6 +198,7 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.start));
 		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.expire_at));
 		v.push_back(std::to_string(e.instance_id));
 
 		auto results = db.QueryDatabase(
@@ -225,6 +232,7 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.start));
 			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.expire_at));
 			v.push_back(std::to_string(e.instance_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -262,7 +270,8 @@ public:
 			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.start       = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.duration    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
-			e.instance_id = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.expire_at   = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.instance_id = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -290,7 +299,8 @@ public:
 			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.start       = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.duration    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
-			e.instance_id = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.expire_at   = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.instance_id = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -368,6 +378,7 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.start));
 		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.expire_at));
 		v.push_back(std::to_string(e.instance_id));
 
 		auto results = db.QueryDatabase(
@@ -394,6 +405,7 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.start));
 			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.expire_at));
 			v.push_back(std::to_string(e.instance_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
