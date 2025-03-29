@@ -2049,22 +2049,35 @@ int EQ::ItemInstance::GetItemSkillsStat(EQ::skills::SkillType skill, bool augmen
 
 int EQ::ItemInstance::GetItemSlots(bool augments) const
 {
-	if (!m_item || !m_item->Slots) {
-		return 0;
-	}
+    if (!m_item || !m_item->Slots) {
+        return 0;
+    }
 
-	if (augments) {
-		int aggregate_slots = m_item->Slots;
-		for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
-			const ItemInstance* augment = GetAugment(i);
-			if (augment && augment->GetItem()) {
-				aggregate_slots &= augment->GetItem()->Slots;
-			}
-		}
-		return aggregate_slots;
-	} else {
-		return m_item->Slots;
-	}
+    int slots;
+
+    if (augments) {
+        // Start with base item slots
+        int aggregate_slots = m_item->Slots;
+
+        // Apply all augment restrictions
+        for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+            const ItemInstance* augment = GetAugment(i);
+            if (augment && augment->GetItem()) {
+                aggregate_slots &= augment->GetItem()->Slots;
+            }
+        }
+        slots = aggregate_slots;
+    } else {
+        slots = m_item->Slots;
+    }
+
+    // Handle power source bit based on rule
+    if (!RuleB(Custom, PowerSourceItemUpgrade)) {
+        // Remove bit 21 if rule is disabled
+        slots &= ~(1 << 21);
+    }
+
+    return slots;
 }
 
 void EQ::ItemInstance::AddGUIDToMap(uint64 existing_serial_number)
