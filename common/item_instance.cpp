@@ -2056,10 +2056,8 @@ int EQ::ItemInstance::GetItemSlots(bool augments) const
     int slots;
 
     if (augments) {
-        // Start with base item slots
         int aggregate_slots = m_item->Slots;
 
-        // Apply all augment restrictions
         for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
             const ItemInstance* augment = GetAugment(i);
             if (augment && augment->GetItem()) {
@@ -2071,9 +2069,7 @@ int EQ::ItemInstance::GetItemSlots(bool augments) const
         slots = m_item->Slots;
     }
 
-    // Handle power source bit based on rule
     if (!RuleB(Custom, PowerSourceItemUpgrade)) {
-        // Remove bit 21 if rule is disabled
         slots &= ~(1 << 21);
     }
 
