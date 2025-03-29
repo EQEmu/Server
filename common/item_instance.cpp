@@ -18,14 +18,18 @@
 
 #include "inventory_profile.h"
 #include "../common/data_verification.h"
-//#include "classes.h"
-//#include "global_define.h"
-//#include "item_instance.h"
-//#include "races.h"
 #include "rulesys.h"
 #include "shareddb.h"
 #include "strings.h"
 #include "evolving_items.h"
+#include <iomanip>
+#include <sstream>
+#include <chrono>
+#include <random>
+#include <string>
+#include <functional>
+#include <thread>
+#include <array>
 
 //#include "../common/light_source.h"
 
@@ -35,6 +39,7 @@
 
 int32 next_item_serial_number = 1;
 std::unordered_set<uint64> guids{};
+std::mutex                 EQ::UniqueHashGenerator::mtx;
 
 static inline int32 GetNextItemInstSerialNumber()
 {
@@ -65,8 +70,8 @@ static inline int32 GetNextItemInstSerialNumber()
 //
 // class EQ::ItemInstance
 //
-EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
-
+EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges)
+{
 	if (item) {
 		m_item = new ItemData(*item);
 	}
@@ -84,8 +89,8 @@ EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 	m_SerialNumber  = GetNextItemInstSerialNumber();
 }
 
-EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges) {
-
+EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges)
+{
 	m_item     = db->GetItem(item_id);
 
 	if (m_item) {
@@ -149,9 +154,13 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 		m_custom_data[iter->first] = iter->second;
 	}
 
-	m_SerialNumber = copy.m_SerialNumber;
-	m_custom_data  = copy.m_custom_data;
-	m_timers       = copy.m_timers;
+	m_SerialNumber   = copy.m_SerialNumber;
+	m_custom_data    = copy.m_custom_data;
+	m_timers         = copy.m_timers;
+
+	if (GetSerialNumber2().empty()) {
+		CreateSerialNumber2();
+	}
 
 	m_exp       = copy.m_exp;
 	m_evolveLvl = copy.m_evolveLvl;
@@ -2000,4 +2009,12 @@ void EQ::ItemInstance::SetEvolveEquipped(const bool in) const
 	}
 
 	GetTimers().at("evolve").Disable();
+}
+
+std::string EQ::ItemInstance::GenerateUniqueSerialNumber()
+{
+	std::string unique_hash = UniqueHashGenerator::generate();
+
+	LogInventoryDetail("Generated an item serial number {}", unique_hash);
+	return unique_hash;
 }
