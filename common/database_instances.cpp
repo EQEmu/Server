@@ -131,7 +131,7 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 
 	RespawnTimesRepository::ClearInstanceTimers(*this, e.id);
 	InstanceListRepository::ReplaceOne(*this, e);
-	return e.id;
+	return instance_id > 0 && e.id;
 }
 
 bool Database::GetUnusedInstanceID(uint16 &instance_id)
