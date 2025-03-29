@@ -1913,10 +1913,7 @@ void Zone::ClearNPCTypeCache(int id) {
 
 void Zone::Repop(bool is_forced)
 {
-	m_repop_mutex.lock();
-
 	if (!Depop()) {
-		m_repop_mutex.unlock();
 		return;
 	}
 
@@ -1957,8 +1954,6 @@ void Zone::Repop(bool is_forced)
 	initgrids_timer.Start();
 
 	entity_list.UpdateAllTraps(true, true);
-
-	m_repop_mutex.unlock();
 }
 
 void Zone::GetTimeSync()
