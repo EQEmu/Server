@@ -729,13 +729,15 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				zs = zoneserver_list.FindByID(s->zone_server_id);
 			} else if (s->zone_id) {
 				zs = zoneserver_list.FindByName(ZoneName(s->zone_id));
+			} else if (s->instance_id) {
+				zs = zoneserver_list.FindByInstanceID(s->instance_id);
 			} else {
 				zoneserver_list.SendEmoteMessage(
 					s->admin_name,
 					0,
 					AccountStatus::Player,
 					Chat::White,
-					"Error: SOP_ZoneShutdown: neither ID nor name specified"
+					"Error: SOP_ZoneShutdown: Zone ID, Instance ID, nor Zone Short Name specified"
 				);
 			}
 
