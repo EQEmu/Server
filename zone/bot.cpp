@@ -10599,6 +10599,8 @@ BotSpell Bot::GetSpellByHealType(uint16 spell_type, Mob* tar) {
 			return GetBestBotSpellForHealOverTime(this, tar, spell_type);
 		case BotSpellTypes::GroupHoTHeals:
 			return GetBestBotSpellForGroupHealOverTime(this, tar, spell_type);
+		default:
+			return BotSpell(); // Return an empty BotSpell if no valid spell type is found
 	}
 }
 
@@ -10650,7 +10652,7 @@ int Bot::GetDefaultSetting(uint16 setting_category, uint16 setting_type, uint8 s
 		case BotSettingCategories::SpellTypeAnnounceCast:
 			return GetDefaultSpellTypeAnnounceCast(setting_type, stance);
 		default:
-			break;
+			return 0; // Default return value for unrecognized categories
 	}
 }
 
@@ -10689,7 +10691,7 @@ int Bot::GetSetting(uint16 setting_category, uint16 setting_type) {
 		case BotSettingCategories::SpellTypeAnnounceCast:
 			return GetSpellTypeAnnounceCast(setting_type);
 		default:
-			break;
+			return 0; // Default return value for unrecognized categories
 	}
 }
 

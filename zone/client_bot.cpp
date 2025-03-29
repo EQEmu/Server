@@ -256,6 +256,8 @@ int Client::GetDefaultBotSettings(uint8 setting_type, uint16 bot_setting) {
 			return GetDefaultSpellTypeMinThreshold(bot_setting);
 		case BotSettingCategories::SpellMaxThreshold:
 			return GetDefaultSpellTypeMaxThreshold(bot_setting);
+		default:
+			return 0; // default return for any unsupported setting type
 	}
 }
 
@@ -269,6 +271,8 @@ int Client::GetBotSetting(uint8 setting_type, uint16 bot_setting) {
 			return GetSpellTypeMinThreshold(bot_setting);
 		case BotSettingCategories::SpellMaxThreshold:
 			return GetSpellTypeMaxThreshold(bot_setting);
+		default:
+			return 0; // default return for any unsupported setting type
 	}
 }
 
