@@ -1,3 +1,87 @@
+## [23.4.0] 3/30/2025
+
+### API
+
+* Expose Zoneserver Compile Metadata ([#4815](https://github.com/EQEmu/Server/pull/4815)) @Akkadius 2025-03-29
+
+### Bots
+
+* Charmed Pets were breaking Mob respawns ([#4780](https://github.com/EQEmu/Server/pull/4780)) @nytmyr 2025-03-16
+* Enraged positioning ([#4789](https://github.com/EQEmu/Server/pull/4789)) @nytmyr 2025-03-29
+* Fix IsValidSpellTypeBySpellID to account for all types ([#4764](https://github.com/EQEmu/Server/pull/4764)) @nytmyr 2025-03-19
+* Fix Rule ZonesWithSpawnLimits/ZonesWithForcedSpawnLimits errors ([#4791](https://github.com/EQEmu/Server/pull/4791)) @nytmyr 2025-03-29
+* Fix rule Bots:FinishBuffing ([#4788](https://github.com/EQEmu/Server/pull/4788)) @nytmyr 2025-03-29
+* Line of Sight and Mez optimizations and cleanup ([#4746](https://github.com/EQEmu/Server/pull/4746)) @nytmyr 2025-03-29
+* Prevent bot pets from despawning on #repop ([#4790](https://github.com/EQEmu/Server/pull/4790)) @nytmyr 2025-03-29
+
+### Code
+
+* Control flow defaults missed in recent bot updates ([#4817](https://github.com/EQEmu/Server/pull/4817)) @joligario 2025-03-30
+* Remove Extraneous Time Type in ShowZoneData ([#4806](https://github.com/EQEmu/Server/pull/4806)) @Kinglykrab 2025-03-29
+* Remove Unused Command Methods ([#4805](https://github.com/EQEmu/Server/pull/4805)) @Kinglykrab 2025-03-29
+* UCS Member Count ([#4819](https://github.com/EQEmu/Server/pull/4819)) @joligario 2025-03-30
+
+### Commands
+
+* Add #show zone_variables ([#4812](https://github.com/EQEmu/Server/pull/4812)) @Akkadius 2025-03-29
+* Add Instance Support to #zoneshutdown ([#4807](https://github.com/EQEmu/Server/pull/4807)) @Kinglykrab 2025-03-29
+
+### Crash
+
+* Fix Rarer World Crash with Player Event Thread Processor ([#4800](https://github.com/EQEmu/Server/pull/4800)) @Akkadius 2025-03-29
+* Fix Repop Race Condition Crash ([#4814](https://github.com/EQEmu/Server/pull/4814)) @Akkadius 2025-03-29
+
+### Database
+
+* Fix Respawn Times Table ([#4802](https://github.com/EQEmu/Server/pull/4802)) @Akkadius 2025-03-29
+
+### Feature
+
+* Implement /changename & related script bindings. Clean up #set name ([#4770](https://github.com/EQEmu/Server/pull/4770)) @catapultam-habeo 2025-03-20
+
+### Fixes
+
+* AllowFVNoDrop Flag trades ([#4809](https://github.com/EQEmu/Server/pull/4809)) @neckkola 2025-03-27
+* Fix Instance Creation Race Condition ([#4803](https://github.com/EQEmu/Server/pull/4803)) @Akkadius 2025-03-29
+* Fix zone crash when attempting to add a disappearing client to hate list. ([#4782](https://github.com/EQEmu/Server/pull/4782)) @zimp-wow 2025-03-19
+* Globally Reloading Quests when not loaded ([#4813](https://github.com/EQEmu/Server/pull/4813)) @Akkadius 2025-03-29
+* Zone State Entity Variable Load Pre-Spawn ([#4785](https://github.com/EQEmu/Server/pull/4785)) @Akkadius 2025-03-19
+* Zone State Position Fix ([#4784](https://github.com/EQEmu/Server/pull/4784)) @Akkadius 2025-03-19
+* Zone State Variables Load First ([#4798](https://github.com/EQEmu/Server/pull/4798)) @Akkadius 2025-03-29
+* Zone state edge case with 0 hp ([#4787](https://github.com/EQEmu/Server/pull/4787)) @Akkadius 2025-03-29
+
+### Instance
+
+* Clear Respawn Timers on Creation ([#4801](https://github.com/EQEmu/Server/pull/4801)) @Akkadius 2025-03-29
+
+### Instances
+
+* Add `expire_at` Column ([#4820](https://github.com/EQEmu/Server/pull/4820)) @Akkadius 2025-03-30
+
+### Performance
+
+* Add several database indexes ([#4811](https://github.com/EQEmu/Server/pull/4811)) @Akkadius 2025-03-29
+* Have World Send Smarter Guild Updates ([#4796](https://github.com/EQEmu/Server/pull/4796)) @Akkadius 2025-03-29
+* Improve Character Select DB Performance ([#4799](https://github.com/EQEmu/Server/pull/4799)) @Akkadius 2025-03-29
+* Reduce Adventure S2S chatter ([#4793](https://github.com/EQEmu/Server/pull/4793)) @Akkadius 2025-03-29
+* Reduce CorpseOwnerOnline S2S Chatter to World ([#4795](https://github.com/EQEmu/Server/pull/4795)) @Akkadius 2025-03-29
+* Reduce LFGuild Chatter ([#4794](https://github.com/EQEmu/Server/pull/4794)) @Akkadius 2025-03-29
+* Reduce UpdateWho S2S Chatter to World ([#4792](https://github.com/EQEmu/Server/pull/4792)) @Akkadius 2025-03-29
+* Send Smarter Emote Packets ([#4818](https://github.com/EQEmu/Server/pull/4818)) @Akkadius 2025-03-30
+
+### Quest API
+
+* Add Support for NPC ID and NPC Name Specificity ([#4781](https://github.com/EQEmu/Server/pull/4781)) @Kinglykrab 2025-03-19
+
+### Reload
+
+* Add Reload for Maps / Navs ([#4816](https://github.com/EQEmu/Server/pull/4816)) @Akkadius 2025-03-29
+
+### Zone
+
+* Zone State Automated Testing and Improvements ([#4808](https://github.com/EQEmu/Server/pull/4808)) @Akkadius 2025-03-30
+* Zone State Improvements Part 3 ([#4773](https://github.com/EQEmu/Server/pull/4773)) @Akkadius 2025-03-13
+
 ## [23.3.4] 3/14/2025
 
 ### Fixes
