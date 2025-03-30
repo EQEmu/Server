@@ -408,7 +408,7 @@ void ChatChannel::SendChannelMembers(Client *c) {
 
 	if(!c) return;
 
-	char CountString[10];
+	char CountString[12];
 
 	sprintf(CountString, "(%i)", MemberCount(c->GetAccountStatus()));
 
