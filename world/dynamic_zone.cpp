@@ -137,8 +137,11 @@ void DynamicZone::SetSecondsRemaining(uint32_t seconds_remaining)
 		m_expire_time = now + new_remaining;
 		m_duration = std::chrono::duration_cast<std::chrono::seconds>(m_expire_time - m_start_time);
 
-		InstanceListRepository::UpdateDuration(database,
-			GetInstanceID(), static_cast<uint32_t>(m_duration.count()));
+		InstanceListRepository::UpdateDuration(
+			database,
+			GetInstanceID(),
+			static_cast<uint32_t>(m_duration.count())
+		);
 
 		SendZonesDurationUpdate(); // update zone caches and actual instance's timer
 	}

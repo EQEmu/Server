@@ -25,6 +25,7 @@ public:
 		uint8_t     is_global;
 		uint32_t    start_time;
 		uint32_t    duration;
+		uint64_t    expire_at;
 		uint8_t     never_expires;
 		std::string notes;
 	};
@@ -43,6 +44,7 @@ public:
 			"is_global",
 			"start_time",
 			"duration",
+			"expire_at",
 			"never_expires",
 			"notes",
 		};
@@ -57,6 +59,7 @@ public:
 			"is_global",
 			"start_time",
 			"duration",
+			"expire_at",
 			"never_expires",
 			"notes",
 		};
@@ -105,6 +108,7 @@ public:
 		e.is_global     = 0;
 		e.start_time    = 0;
 		e.duration      = 0;
+		e.expire_at     = 0;
 		e.never_expires = 0;
 		e.notes         = "";
 
@@ -149,8 +153,9 @@ public:
 			e.is_global     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.start_time    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.duration      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.never_expires = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.notes         = row[7] ? row[7] : "";
+			e.expire_at     = row[6] ? strtoull(row[6], nullptr, 10) : 0;
+			e.never_expires = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.notes         = row[8] ? row[8] : "";
 
 			return e;
 		}
@@ -189,8 +194,9 @@ public:
 		v.push_back(columns[3] + " = " + std::to_string(e.is_global));
 		v.push_back(columns[4] + " = " + std::to_string(e.start_time));
 		v.push_back(columns[5] + " = " + std::to_string(e.duration));
-		v.push_back(columns[6] + " = " + std::to_string(e.never_expires));
-		v.push_back(columns[7] + " = '" + Strings::Escape(e.notes) + "'");
+		v.push_back(columns[6] + " = " + std::to_string(e.expire_at));
+		v.push_back(columns[7] + " = " + std::to_string(e.never_expires));
+		v.push_back(columns[8] + " = '" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -218,6 +224,7 @@ public:
 		v.push_back(std::to_string(e.is_global));
 		v.push_back(std::to_string(e.start_time));
 		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.expire_at));
 		v.push_back(std::to_string(e.never_expires));
 		v.push_back("'" + Strings::Escape(e.notes) + "'");
 
@@ -255,6 +262,7 @@ public:
 			v.push_back(std::to_string(e.is_global));
 			v.push_back(std::to_string(e.start_time));
 			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.expire_at));
 			v.push_back(std::to_string(e.never_expires));
 			v.push_back("'" + Strings::Escape(e.notes) + "'");
 
@@ -296,8 +304,9 @@ public:
 			e.is_global     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.start_time    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.duration      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.never_expires = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.notes         = row[7] ? row[7] : "";
+			e.expire_at     = row[6] ? strtoull(row[6], nullptr, 10) : 0;
+			e.never_expires = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.notes         = row[8] ? row[8] : "";
 
 			all_entries.push_back(e);
 		}
@@ -328,8 +337,9 @@ public:
 			e.is_global     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.start_time    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.duration      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.never_expires = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.notes         = row[7] ? row[7] : "";
+			e.expire_at     = row[6] ? strtoull(row[6], nullptr, 10) : 0;
+			e.never_expires = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.notes         = row[8] ? row[8] : "";
 
 			all_entries.push_back(e);
 		}
@@ -410,6 +420,7 @@ public:
 		v.push_back(std::to_string(e.is_global));
 		v.push_back(std::to_string(e.start_time));
 		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.expire_at));
 		v.push_back(std::to_string(e.never_expires));
 		v.push_back("'" + Strings::Escape(e.notes) + "'");
 
@@ -440,6 +451,7 @@ public:
 			v.push_back(std::to_string(e.is_global));
 			v.push_back(std::to_string(e.start_time));
 			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.expire_at));
 			v.push_back(std::to_string(e.never_expires));
 			v.push_back("'" + Strings::Escape(e.notes) + "'");
 

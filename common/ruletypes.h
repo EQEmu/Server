@@ -1096,6 +1096,7 @@ RULE_CATEGORY(Instances)
 RULE_INT(Instances, ReservedInstances, 100, "Number of instance IDs which are reserved for globals. This value should not be changed while a server is running")
 RULE_BOOL(Instances, RecycleInstanceIds, true, "Setting whether free instance IDs should be recycled to prevent them from gradually running out at 32k")
 RULE_INT(Instances, GuildHallExpirationDays, 90, "Amount of days before a Guild Hall instance expires")
+RULE_INT(Instances, ExpireOffsetTimeSeconds, 3600, "Amount of seconds to beyond instance expiration time we wait to purge the entry from the database. (Default: 1 Hour)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Expedition)

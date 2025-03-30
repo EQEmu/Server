@@ -7071,6 +7071,20 @@ CREATE INDEX `idx_expire_at` ON `respawn_times` (`expire_at`);
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9321,
+		.description = "2025_03_30_instance_list_add_expire_at.sql",
+		.check = "SHOW COLUMNS FROM `instance_list` LIKE 'expire_at'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `instance_list`
+ADD COLUMN `expire_at` bigint(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `duration`;
+
+CREATE INDEX `idx_expire_at` ON `instance_list` (`expire_at`);
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
