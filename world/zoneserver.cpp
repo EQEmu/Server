@@ -571,7 +571,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 						);
 					}
 				}
-				zoneserver_list.SendPacket(pack);
+				if (scm->guilddbid > 0) {
+					zoneserver_list.SendPacketToZonesWithGuild(scm->guilddbid, pack);
+				} else if (scm->chan_num == ChatChannel_GMSAY) {
+					zoneserver_list.SendPacketToZonesWithGMs(pack);
+				} else {
+					zoneserver_list.SendPacket(pack);
+				}
 			}
 
 			break;

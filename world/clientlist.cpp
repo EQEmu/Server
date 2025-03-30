@@ -1886,3 +1886,36 @@ std::vector<uint32_t> ClientList::GetGuildZoneServers(uint32 guild_id)
 
 	return zone_server_ids;
 }
+
+std::vector<uint32_t> ClientList::GetZoneServersWithGMs()
+{
+	std::vector<uint32_t>                 zone_server_ids;
+	std::unordered_set<uint32_t>          seen_ids;
+	LinkedListIterator<ClientListEntry *> iterator(clientlist);
+
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		ClientListEntry *cle = iterator.GetData();
+
+		if (cle->Online() != CLE_Status::InZone) {
+			iterator.Advance();
+			continue;
+		}
+
+		if (!cle->Server()) {
+			iterator.Advance();
+			continue;
+		}
+
+		if (cle->Admin() > 0) {
+			uint32_t id = cle->Server()->GetID();
+			if (seen_ids.insert(id).second) {
+				zone_server_ids.emplace_back(id);
+			}
+		}
+
+		iterator.Advance();
+	}
+
+	return zone_server_ids;
+}
