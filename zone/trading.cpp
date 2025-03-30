@@ -756,19 +756,18 @@ bool Client::CheckTradeNonDroppable()
 
 void Client::TraderShowItems()
 {
-	auto outapp = new EQApplicationPacket(OP_Trader, sizeof(Trader_Struct));
-	auto data   = (Trader_Struct *) outapp->pBuffer;
+	auto outapp = new EQApplicationPacket(OP_Trader, sizeof(Trader3_Struct));
+	auto data   = (Trader3_Struct *) outapp->pBuffer;
 
 	auto   trader_items = TraderRepository::GetWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
 	uint32 item_limit   = trader_items.size() >= GetInv().GetLookup()->InventoryTypeSize.Bazaar ?
 		GetInv().GetLookup()->InventoryTypeSize.Bazaar :
 		trader_items.size();
 	//FIX
-	// for (int i = 0; i < item_limit; i++) {
-	// 	data->item_cost[i] = trader_items.at(i).item_cost;
-	// 	data->items[i]     = ClientVersion() == EQ::versions::ClientVersion::RoF2 ? trader_items.at(i).item_sn
-	// 		: trader_items.at(i).item_id;
-	// }
+	for (int i = 0; i < item_limit; i++) {
+		data->item_cost[i] = trader_items.at(i).item_cost;
+		strn0cpy(data->serial_number[i], trader_items.at(i).item_sn.data(), sizeof(data->serial_number[i]));
+	}
 
 	data->action = ListTraderItems;
 

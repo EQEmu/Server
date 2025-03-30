@@ -3554,12 +3554,12 @@ struct	WhoAllPlayerPart4 {
 };
 
 struct TraderItemSerial_Struct {
-	char	serial_number[16];
-	uint8	unknown_018[2];
+	char	serial_number[17];
+	uint8	unknown_018;
 
-	void operator=(uint32 a) {
-		auto _tmp = fmt::format("{:016}", a);
-		strn0cpy(this->serial_number, _tmp.c_str(), sizeof(this->serial_number));
+	void operator=(const char* a) {
+		//auto _tmp = fmt::format("{:016}", a);
+		strn0cpy(this->serial_number, a, sizeof(this->serial_number));
 	}
 };
 

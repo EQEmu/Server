@@ -4115,19 +4115,20 @@ namespace RoF2
 				break;
 			}
 			case ListTraderItems: {
-				ENCODE_LENGTH_EXACT(Trader_Struct);
-				SETUP_DIRECT_ENCODE(Trader_Struct, structs::ClickTrader_Struct);
+				ENCODE_LENGTH_EXACT(Trader3_Struct);
+				SETUP_DIRECT_ENCODE(Trader3_Struct, structs::ClickTrader_Struct);
 				LogTrading("(RoF2)  action <green>[{}]", action);
 
 				eq->action = structs::RoF2BazaarTraderBuyerActions::ListTraderItems;
 				std::transform(
-					std::begin(emu->items),
-					std::end(emu->items),
+					std::begin(emu->serial_number),
+					std::end(emu->serial_number),
 					std::begin(eq->items),
-					[&](const uint32 x) {
+					[&](const char* x) {
 						return x;
 					}
 				);
+//				std::ranges::copy(emu->serial_number, eq->items.begin(), eq->items.end());
 				std::copy_n(
 					std::begin(emu->item_cost),
 					EQ::invtype::BAZAAR_SIZE,
@@ -6159,7 +6160,15 @@ namespace RoF2
 
 				emu->action = TraderOn;
 				std::copy_n(eq->item_cost, RoF2::invtype::BAZAAR_SIZE, emu->item_cost);
-				std::copy_n(eq->items->serial_number, RoF2::invtype::BAZAAR_SIZE, emu->serial_number);
+				std::transform(
+					std::begin(eq->items),
+					std::end(eq->items),
+					std::begin(emu->serial_number),
+					[&](const structs::TraderItemSerial_Struct x) {
+						return std::string(x.serial_number);
+					});
+				//std::ranges::copy(eq->items->serial_number, emu->serial_number);
+				//std::copy_n(eq->items->serial_number, RoF2::invtype::BAZAAR_SIZE, emu->serial_number);
 				// std::transform(
 				// 	std::begin(eq->items),
 				// 	std::end(eq->items),
