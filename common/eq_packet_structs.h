@@ -3729,6 +3729,15 @@ struct Trader_Struct {
 /*648*/	uint32	item_cost[EQ::invtype::BAZAAR_SIZE];
 };
 
+struct Trader3_Struct {
+	/*000*/	uint32	action;
+	/*004*/	uint32	unknown_004;
+	///*008*/	uint64	items[EQ::invtype::BAZAAR_SIZE];
+	/*008*/ char    serial_number[17][EQ::invtype::BAZAAR_SIZE];
+	char    unknown[1]{};
+	/*648*/	uint32	item_cost[EQ::invtype::BAZAAR_SIZE];
+};
+
 struct ClickTrader_Struct {
 /*000*/	uint32	action;
 /*004*/	uint32	unknown_004;
