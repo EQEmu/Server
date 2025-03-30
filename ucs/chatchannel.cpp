@@ -177,7 +177,7 @@ void ChatChannelList::SendAllChannels(Client *c) {
 
 	std::string Message;
 
-	char CountString[10];
+	char CountString[12];
 
 	while(iterator.MoreElements()) {
 
