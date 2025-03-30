@@ -720,7 +720,7 @@ inline void TestHpManaEnd()
 		0,
 		(int) hp_mismatch.size()
 	);
-	
+
 	RunTest(
 		"HP/Mana/End Save/Restore > Ensure default Mana state matches data in npc_types row",
 		0,
@@ -800,6 +800,45 @@ inline void TestBuffs()
 	}
 
 	RunTest("Buffs > Persist after shutdown/bootup", false, missing_buffs);
+}
+
+inline void TestZLocationDrift()
+{
+	zone->Shutdown();
+	ClearState();
+	SetupStateZone();
+
+	auto entries_before = GetStateSpawns();
+
+	for (int i = 0; i < 10; ++i) {
+		zone->Shutdown();
+		SetupStateZone();
+	}
+
+	auto entries_after = GetStateSpawns();
+
+	// compare entries_before x/y/z to entries_after x/y/z
+	bool locations_different = false;
+	for (size_t i = 0; i < entries_before.size(); ++i) {
+		if (entries_before[i].x != entries_after[i].x || entries_before[i].y != entries_after[i].y ||
+			entries_before[i].z != entries_after[i].z) {
+			locations_different = true;
+
+			std::cout << "Location drift detected for NPC ID: " << entries_before[i].npc_id << std::endl;
+			std::cout << "Location drift detected for NPC ID: " << entries_after[i].npc_id << std::endl;
+			std::cout << "Before - X: " << entries_before[i].x << ", Y: " << entries_before[i].y
+					  << ", Z: " << entries_before[i].z << std::endl;
+			std::cout << "After  - X: " << entries_after[i].x << ", Y: " << entries_after[i].y
+					  << ", Z: " << entries_after[i].z << std::endl;
+			break;
+		}
+	}
+
+	RunTest(
+		"Z Location Drift > Ensure Z location does not drift after multiple shutdowns/bootups",
+		false,
+		locations_different
+	);
 }
 
 inline void TestLocationChange()
@@ -1045,13 +1084,7 @@ void ZoneCLI::TestZoneState(int argc, char **argv, argh::parser &cmd, std::strin
 	TestEntityVariables();
 	TestLoot();
 	TestSpawns();
-
-//	RunTest("State > No NPC's should be spawned after shutdown/bootup", 0, (int) entity_list.GetNPCList().size());
-
-//	ClearState();
-//	zone->Repop();
-//	entries = GetStateSpawns().size();
-//	RunTest(fmt::format("State does not exist after repop, entries ({})", entries), true, entries == 0);
+	TestZLocationDrift();
 
 	std::cout << "\n===========================================\n";
 	std::cout << "✅ All Zone State Tests Completed!\n";
