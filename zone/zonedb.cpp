@@ -306,7 +306,7 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 	);
 }
 
-std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char_id, int serial_number)
+std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char_id, const std::string &serial_number)
 {
 	auto results = TraderRepository::GetWhere(
 		database,
@@ -354,8 +354,8 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 	}
 
 	inst->SetCharges(charges);
-	inst->SetSerialNumber(serial_number);
-	inst->SetMerchantSlot(serial_number);
+	inst->SetSerialNumber2(serial_number);
+	//FIX inst->SetMerchantSlot(serial_number);
 	inst->SetPrice(cost);
 
 	if (inst->IsStackable()) {
