@@ -34,6 +34,7 @@
 ### Database
 
 * Fix Respawn Times Table ([#4802](https://github.com/EQEmu/Server/pull/4802)) @Akkadius 2025-03-29
+* Wrap PurgeExpiredInstances in a Transaction ([#4824](https://github.com/EQEmu/Server/pull/4824)) @Akkadius 2025-03-30
 
 ### Feature
 
@@ -45,6 +46,7 @@
 * Fix Instance Creation Race Condition ([#4803](https://github.com/EQEmu/Server/pull/4803)) @Akkadius 2025-03-29
 * Fix zone crash when attempting to add a disappearing client to hate list. ([#4782](https://github.com/EQEmu/Server/pull/4782)) @zimp-wow 2025-03-19
 * Globally Reloading Quests when not loaded ([#4813](https://github.com/EQEmu/Server/pull/4813)) @Akkadius 2025-03-29
+* Instance DZ Creation ([#4823](https://github.com/EQEmu/Server/pull/4823)) @Akkadius 2025-03-30
 * Zone State Entity Variable Load Pre-Spawn ([#4785](https://github.com/EQEmu/Server/pull/4785)) @Akkadius 2025-03-19
 * Zone State Position Fix ([#4784](https://github.com/EQEmu/Server/pull/4784)) @Akkadius 2025-03-19
 * Zone State Variables Load First ([#4798](https://github.com/EQEmu/Server/pull/4798)) @Akkadius 2025-03-29
