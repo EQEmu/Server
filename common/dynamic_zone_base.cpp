@@ -67,7 +67,7 @@ uint32_t DynamicZoneBase::CreateInstance()
 		return 0;
 	}
 
-	m_instance_id = instance.id;
+	m_instance_id = unused_instance_id;
 
 	return m_instance_id;
 }
