@@ -128,6 +128,7 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 	e.version = version;
 	e.start_time = std::time(nullptr);
 	e.duration = duration;
+	e.expire_at = e.start_time + duration;
 
 	RespawnTimesRepository::ClearInstanceTimers(*this, e.id);
 	InstanceListRepository::ReplaceOne(*this, e);
@@ -562,7 +563,7 @@ void Database::PurgeExpiredInstances()
 {
 	auto l = InstanceListRepository::GetWhere(
 		*this,
-		"expire_at <= (UNIX_TIMESTAMP()) AND never_expires = 0"
+		"expire_at <= UNIX_TIMESTAMP() AND never_expires = 0"
 	);
 	if (l.empty()) {
 		return;
@@ -598,6 +599,7 @@ void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
 
 	i.start_time = std::time(nullptr);
 	i.duration = new_duration;
+	i.expire_at = i.start_time + i.duration;
 
 	InstanceListRepository::UpdateOne(*this, i);
 }

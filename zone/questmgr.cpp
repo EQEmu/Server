@@ -3506,6 +3506,7 @@ void QuestManager::UpdateInstanceTimer(uint16 instance_id, uint32 new_duration)
 
 	e.duration   = new_duration;
 	e.start_time = std::time(nullptr);
+	e.expire_at  = e.start_time + e.duration;
 
 	const int updated = InstanceListRepository::UpdateOne(database, e);
 

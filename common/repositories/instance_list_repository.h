@@ -11,7 +11,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE `{}` SET `duration` = {} WHERE `{}` = {}",
+				"UPDATE `{}` SET `duration` = {}, `expire_at` = (`duration` + `start_time`) WHERE `{}` = {}",
 				TableName(),
 				new_duration,
 				PrimaryKey(),

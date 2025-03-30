@@ -276,6 +276,8 @@
 #define ServerOP_QSSendQuery		0x5000
 #define ServerOP_PlayerEvent 0x5100
 
+#define ServerOP_ZoneInstanceShutdown 0x5200 // unload all data, kick clients, kill process
+
 enum {
 	CZUpdateType_Character,
 	CZUpdateType_Group,
