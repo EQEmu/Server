@@ -718,11 +718,14 @@ inline void TestHpManaEnd()
 	RunTest(
 		"HP/Mana/End Save/Restore > Ensure default HP state matches data in npc_types row",
 		0,
-		(int) hp_mismatch.size());
+		(int) hp_mismatch.size()
+	);
+	
 	RunTest(
 		"HP/Mana/End Save/Restore > Ensure default Mana state matches data in npc_types row",
 		0,
-		(int) mana_mismatch.size());
+		(int) mana_mismatch.size()
+	);
 
 	// do damage to NPC's and make sure they restore to their original values
 	for (auto &e: entity_list.GetNPCList()) {
