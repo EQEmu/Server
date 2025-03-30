@@ -307,7 +307,7 @@ Bazaar::GetSearchResults(
 		r.trader_zone_id          = t.trader.char_zone_id;
 		r.trader_zone_instance_id = t.trader.char_zone_instance_id;
 		r.trader_entity_id        = t.trader.char_entity_id;
-		r.serial_number_RoF       = fmt::format("{:016}\0", t.trader.item_sn);
+		r.serial_number_RoF       = t.trader.item_sn;
 		r.item_name               = fmt::format("{:.63}\0", item_results.at(t.trader.item_id).name);
 		r.trader_name             = fmt::format("{:.63}\0", t.trader_name);
 		r.item_stat               = item_results.at(t.trader.item_id).stats;

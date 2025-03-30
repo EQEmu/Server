@@ -158,7 +158,8 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 	m_custom_data    = copy.m_custom_data;
 	m_timers         = copy.m_timers;
 
-	if (GetSerialNumber2().empty()) {
+	m_serial_number2 = copy.m_serial_number2;
+	if (copy.GetSerialNumber2().empty()) {
 		CreateSerialNumber2();
 	}
 

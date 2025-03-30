@@ -4256,6 +4256,7 @@ namespace RoF2
 		OUT_str(seller_name);
 		OUT_str(item_name);
 		OUT_str(serial_number);
+		//strn0cpy(eq->serial_number, emu->serial_number.c_str(), sizeof(eq->serial_number));
 
 		FINISH_ENCODE();
 	}
@@ -4321,6 +4322,7 @@ namespace RoF2
 				OUT_str(seller_name);
 				OUT_str(item_name);
 				OUT_str(serial_number);
+				//strn0cpy(eq->serial_number, emu->serial_number.c_str(), sizeof(eq->serial_number));
 
 				FINISH_ENCODE();
 				break;
@@ -6152,19 +6154,20 @@ namespace RoF2
 		switch (action) {
 			case structs::RoF2BazaarTraderBuyerActions::BeginTraderMode: {
 				DECODE_LENGTH_EXACT(structs::BeginTrader_Struct);
-				SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::BeginTrader_Struct);
+				SETUP_DIRECT_DECODE(ClickTrader2_Struct, structs::BeginTrader_Struct);
 				LogTrading("(RoF2) BeginTraderMode action <green>[{}]", action);
 
 				emu->action = TraderOn;
 				std::copy_n(eq->item_cost, RoF2::invtype::BAZAAR_SIZE, emu->item_cost);
-				std::transform(
-					std::begin(eq->items),
-					std::end(eq->items),
-					std::begin(emu->serial_number),
-					[&](const structs::TraderItemSerial_Struct x) {
-						return Strings::ToUnsignedBigInt(x.serial_number,0);
-					}
-				);
+				std::copy_n(eq->items->serial_number, RoF2::invtype::BAZAAR_SIZE, emu->serial_number);
+				// std::transform(
+				// 	std::begin(eq->items),
+				// 	std::end(eq->items),
+				// 	std::begin(emu->serial_number),
+				// 	[&](const structs::TraderItemSerial_Struct x) {
+				// 		return Strings::ToUnsignedBigInt(x.serial_number,0);
+				// 	}
+				// );
 
 				FINISH_DIRECT_DECODE();
 				break;
@@ -6190,10 +6193,11 @@ namespace RoF2
 				LogTrading("(RoF2) PriceUpdate action <green>[{}]", action);
 
 				emu->Action       = PriceUpdate;
-				emu->SerialNumber = Strings::ToUnsignedBigInt(eq->serial_number, 0);
-				if (emu->SerialNumber == 0) {
-					LogTrading("(RoF2) Price change with invalid serial number <red>[{}]", eq->serial_number);
-				}
+				strn0cpy(emu->serial_number, eq->serial_number, sizeof(emu->serial_number));
+				//FIXemu->serial_number = Strings::ToUnsignedBigInt(eq->serial_number, 0);
+				// if (emu->SerialNumber == 0) {
+				// 	LogTrading("(RoF2) Price change with invalid serial number <red>[{}]", eq->serial_number);
+				// }
 				emu->NewPrice = eq->new_price;
 
 				FINISH_DIRECT_DECODE();
@@ -6284,22 +6288,23 @@ namespace RoF2
 				IN(item_id);
 				IN(trader_id);
 				emu->action        = BazaarInspect;
-				emu->serial_number = Strings::ToUnsignedInt(eq->serial_number, 0);
-				if (emu->serial_number == 0) {
-					LogTrading(
-						"(RoF2) trader_id = <green>[{}] requested a BazaarInspect with an invalid serial number of <red>[{}]",
-						eq->trader_id,
-						eq->serial_number
-					);
-					FINISH_DIRECT_DECODE();
-					return;
-				}
+				strn0cpy(emu->serial_number, eq->serial_number, sizeof(emu->serial_number));
+				//FIX emu->serial_number = Strings::ToUnsignedInt(eq->serial_number, 0);
+				// if (emu->serial_number == 0) {
+				// 	LogTrading(
+				// 		"(RoF2) trader_id = <green>[{}] requested a BazaarInspect with an invalid serial number of <red>[{}]",
+				// 		eq->trader_id,
+				// 		eq->serial_number
+				// 	);
+				// 	FINISH_DIRECT_DECODE();
+				// 	return;
+				// }
 
-				LogTrading("(RoF2) BazaarInspect action <green>[{}] item_id <green>[{}] serial_number <green>[{}]",
-						   action,
-						   eq->item_id,
-						   eq->serial_number
-				);
+				// LogTrading("(RoF2) BazaarInspect action <green>[{}] item_id <green>[{}] serial_number <green>[{}]",
+				// 		   action,
+				// 		   eq->item_id,
+				// 		   eq->serial_number
+				// );
 				FINISH_DIRECT_DECODE();
 				break;
 			}
@@ -6335,7 +6340,9 @@ namespace RoF2
 				IN_str(buyer_name);
 				IN_str(seller_name);
 				IN_str(item_name);
-				IN_str(serial_number);
+				//IN_str(serial_number);
+				strn0cpy(emu->serial_number, eq->serial_number, sizeof(emu->serial_number));
+//FIX				emu->serial_number = eq->serial_number;
 
 				FINISH_DIRECT_DECODE();
 				break;
@@ -6446,13 +6453,16 @@ namespace RoF2
 		RoF2::structs::ItemSerializationHeader hdr;
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
-		// strn0cpy(hdr.unknown000, fmt::format("{:016}\0", inst->GetSerialNumber()).c_str(),sizeof(hdr.unknown000));
-		strn0cpy(
-			hdr.unknown000,
-			inst->GetSerialNumber2().empty() ? "0000000000000000" : inst->GetSerialNumber2().c_str(),
-			sizeof(hdr.unknown000)
-		);
+		//strn0cpy(hdr.unknown000, fmt::format("{:016}\0", inst->GetSerialNumber()).c_str(),sizeof(hdr.unknown000));
+		strn0cpy(hdr.unknown000, inst->GetSerialNumber2().c_str(),sizeof(hdr.unknown000));
 		hdr.unknown000[16] = '\0';
+
+		// strn0cpy(
+		// 	hdr.unknown000,
+		// 	inst->GetSerialNumber2().empty() ? "0000000000000000" : inst->GetSerialNumber2().c_str(),
+		// 	sizeof(hdr.unknown000)
+		// );
+		//hdr.unknown000[16] = '\0';
 
 		hdr.stacksize = 1;
 
