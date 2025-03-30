@@ -464,7 +464,7 @@ bool Zone::LoadZoneState(
 		);
 
 		if (spawn_time_left == 0) {
-			new_spawn->SetCurrentNPCID(s.npc_id);
+			new_spawn->SetResumedNPCID(s.npc_id);
 			new_spawn->SetResumedFromZoneSuspend(true);
 			new_spawn->SetEntityVariables(GetVariablesDeserialized(s.entity_variables));
 		}
