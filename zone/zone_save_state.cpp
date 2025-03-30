@@ -512,24 +512,6 @@ bool Zone::LoadZoneState(
 		LoadNPCState(zone, npc, s);
 	}
 
-	// any NPC that is spawned by the spawn system
-	for (auto &e: entity_list.GetNPCList()) {
-		auto npc = e.second;
-		if (npc->GetSpawnGroupId() == 0) {
-			continue;
-		}
-
-		for (auto &s: spawn_states) {
-			bool is_same_npc =
-					 s.npc_id == npc->GetNPCTypeID() &&
-					 s.spawn2_id == npc->GetSpawnPointID() &&
-					 s.spawngroup_id == npc->GetSpawnGroupId();
-			if (is_same_npc) {
-				LoadNPCState(zone, npc, s);
-			}
-		}
-	}
-
 	return !spawn_states.empty();
 }
 
