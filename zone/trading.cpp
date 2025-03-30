@@ -763,12 +763,12 @@ void Client::TraderShowItems()
 	uint32 item_limit   = trader_items.size() >= GetInv().GetLookup()->InventoryTypeSize.Bazaar ?
 		GetInv().GetLookup()->InventoryTypeSize.Bazaar :
 		trader_items.size();
-
-	for (int i = 0; i < item_limit; i++) {
-		data->item_cost[i] = trader_items.at(i).item_cost;
-		data->items[i]     = ClientVersion() == EQ::versions::ClientVersion::RoF2 ? trader_items.at(i).item_sn
-			: trader_items.at(i).item_id;
-	}
+	//FIX
+	// for (int i = 0; i < item_limit; i++) {
+	// 	data->item_cost[i] = trader_items.at(i).item_cost;
+	// 	data->items[i]     = ClientVersion() == EQ::versions::ClientVersion::RoF2 ? trader_items.at(i).item_sn
+	// 		: trader_items.at(i).item_id;
+	// }
 
 	data->action = ListTraderItems;
 
@@ -813,18 +813,45 @@ void Client::Trader_CustomerBrowsing(Client *Customer)
 void Client::TraderStartTrader(const EQApplicationPacket *app)
 {
 	uint32                                max_items         = GetInv().GetLookup()->InventoryTypeSize.Bazaar;
-	auto                                  in                = (ClickTrader_Struct *) app->pBuffer;
+	auto                                  in                = (ClickTrader2_Struct *) app->pBuffer;
 	auto                                  inv               = GetTraderItems();
 	bool                                  trade_items_valid = true;
 	std::vector<TraderRepository::Trader> trader_items{};
 
 	//Check inventory for no-trade items
-	for (auto i = 0; i < max_items; i++) {
-		if (inv->items[i] == 0 || inv->serial_number[i] == 0) {
+	// for (auto i = 0; i < max_items; i++) {
+	// 	if (inv->items[i] == 0 || inv->serial_number[i].empty()) {
+	// 		continue;
+	// 	}
+	//
+	// 	auto inst = FindTraderItemBySerialNumber(inv->serial_number[i]);
+	// 	if (inst) {
+	// 		if (inst->GetItem() && inst->GetItem()->NoDrop == 0) {
+	// 			Message(
+	// 				Chat::Red,
+	// 				fmt::format(
+	// 					"Item: {} is NODROP and found in a Trader's Satchel. Please remove and restart trader mode",
+	// 					inst->GetItem()->Name
+	// 				).c_str()
+	// 			);
+	// 			TraderEndTrader();
+	// 			safe_delete(inv);
+	// 			return;
+	// 		}
+	// 	}
+	// }
+
+	for (uint32 i = 0; i < max_items; i++) {
+		if (inv->items[i] == 0 || inv->serial_number[i].empty()) {
 			continue;
 		}
 
-		auto inst = FindTraderItemBySerialNumber(inv->serial_number[i]);
+		auto const inst = FindTraderItemBySerialNumber(inv->serial_number[i]);
+		if (!inst) {
+			trade_items_valid = false;
+			break;
+		}
+
 		if (inst) {
 			if (inst->GetItem() && inst->GetItem()->NoDrop == 0) {
 				Message(
@@ -838,18 +865,6 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 				safe_delete(inv);
 				return;
 			}
-		}
-	}
-
-	for (uint32 i = 0; i < max_items; i++) {
-		if (inv->serial_number[i] <= 0) {
-			continue;
-		}
-
-		auto inst = FindTraderItemBySerialNumber(inv->serial_number[i]);
-		if (!inst) {
-			trade_items_valid = false;
-			break;
 		}
 
 		auto it   = std::find(std::begin(in->serial_number), std::end(in->serial_number), inv->serial_number[i]);
@@ -980,7 +995,7 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity, TraderRepository::Tr
 	}
 }
 
-void Client::SendSingleTraderItem(uint32 char_id, int serial_number)
+void Client::SendSingleTraderItem(uint32 char_id, const std::string &serial_number)
 {
 	auto inst = database.LoadSingleTraderItem(char_id, serial_number);
 	if (inst) {
@@ -1019,14 +1034,14 @@ void Client::BulkSendTraderInventory(uint32 char_id)
 				)
 			);
 			if (inst) {
-				inst->SetSerialNumber(trader_items.at(i).item_sn);
+				inst->SetSerialNumber2(trader_items.at(i).item_sn);
 				if (trader_items.at(i).item_charges > 0) {
 					inst->SetCharges(trader_items.at(i).item_charges);
 				}
 
 				if (inst->IsStackable()) {
 					inst->SetMerchantCount(trader_items.at(i).item_charges);
-					inst->SetMerchantSlot(trader_items.at(i).item_sn);
+					//inst->SetMerchantSlot(trader_items.at(i).item_sn);
 				}
 
 				inst->SetPrice(trader_items.at(i).item_cost);
@@ -1062,7 +1077,7 @@ uint32 Client::FindTraderItemSerialNumber(int32 ItemID) {
 	return 0;
 }
 
-EQ::ItemInstance *Client::FindTraderItemBySerialNumber(int32 SerialNumber)
+EQ::ItemInstance *Client::FindTraderItemBySerialNumber(std::string &serial_number)
 {
 	EQ::ItemInstance *item   = nullptr;
 	int16            slot_id = 0;
@@ -1075,7 +1090,7 @@ EQ::ItemInstance *Client::FindTraderItemBySerialNumber(int32 SerialNumber)
 				slot_id = EQ::InventoryProfile::CalcSlotId(i, x);
 				item    = GetInv().GetItem(slot_id);
 				if (item) {
-					if (item->GetSerialNumber() == SerialNumber) {
+					if (item->GetSerialNumber2().compare(serial_number) == 0) {
 						return item;
 					}
 				}
@@ -1083,17 +1098,17 @@ EQ::ItemInstance *Client::FindTraderItemBySerialNumber(int32 SerialNumber)
 		}
 	}
 
-	LogTrading("Couldn't find item! Serial No. was [{}]", SerialNumber);
+	LogTrading("Couldn't find item! Serial No. was [{}]", serial_number);
 
 	return nullptr;
 }
 
 
-GetItems_Struct *Client::GetTraderItems()
+GetItems2_Struct *Client::GetTraderItems()
 {
 	const EQ::ItemInstance *item   = nullptr;
 	int16                  slot_id = INVALID_INDEX;
-	auto                   gis     = new GetItems_Struct{0};
+	auto                   gis     = new GetItems2_Struct{0};
 	uint8                  ndx     = 0;
 
 	for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
@@ -1112,7 +1127,7 @@ GetItems_Struct *Client::GetTraderItems()
 
 				if (item) {
 					gis->items[ndx]         = item->GetID();
-					gis->serial_number[ndx] = item->GetSerialNumber();
+					gis->serial_number[ndx] = item->GetSerialNumber2();
 					gis->charges[ndx]       = item->GetCharges() == 0 ? 1 : item->GetCharges();
 					ndx++;
 				}
@@ -1122,7 +1137,7 @@ GetItems_Struct *Client::GetTraderItems()
 	return gis;
 }
 
-uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
+uint16 Client::FindTraderItem(std::string &serial_number, uint16 Quantity){
 
 	const EQ::ItemInstance* item= nullptr;
 	uint16 SlotID = 0;
@@ -1134,7 +1149,7 @@ uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 
 				item = GetInv().GetItem(SlotID);
 
-				if (item && item->GetSerialNumber() == SerialNumber &&
+				if (item && item->GetSerialNumber2().compare(serial_number) == 0 &&
 					(item->GetCharges() >= Quantity || (item->GetCharges() <= 0 && Quantity == 1)))
 				{
 					return SlotID;
@@ -1143,7 +1158,7 @@ uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 		}
 	}
 	LogTrading("Could NOT find a match for Item: [{}] with a quantity of: [{}] on Trader: [{}]\n",
-					SerialNumber , Quantity, GetName());
+					serial_number , Quantity, GetName());
 
 	return 0;
 }
@@ -1154,7 +1169,7 @@ void Client::NukeTraderItem(
 	int16 quantity,
 	Client *customer,
 	uint16 trader_slot,
-	int32 serial_number,
+	const std::string &serial_number,
 	int32 item_id
 )
 {
@@ -1173,7 +1188,7 @@ void Client::NukeTraderItem(
 
 		tdis->unknown_000 = 0;
 		tdis->trader_id   = customer->GetID();
-		tdis->item_id     = serial_number;
+		tdis->item_id     = Strings::ToUnsignedBigInt(serial_number);
 		tdis->unknown_012 = 0;
 		customer->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -1210,7 +1225,7 @@ void Client::NukeTraderItem(
 	safe_delete(outapp2);
 }
 
-void Client::FindAndNukeTraderItem(int32 serial_number, int16 quantity, Client *customer, uint16 trader_slot)
+void Client::FindAndNukeTraderItem(std::string &serial_number, int16 quantity, Client *customer, uint16 trader_slot)
 {
 	const EQ::ItemInstance *item     = nullptr;
 	bool                   stackable = false;
@@ -1247,7 +1262,7 @@ void Client::FindAndNukeTraderItem(int32 serial_number, int16 quantity, Client *
 
 			std::vector<TraderRepository::Trader> delete_queue{};
 			for (int i = 0; i < item_limit; i++) {
-				if (test_slot && trader_items.at(i).item_sn == serial_number) {
+				if (test_slot && trader_items.at(i).item_sn.compare(serial_number) == 0) {
 					delete_queue.push_back(trader_items.at(i));
 					NukeTraderItem(
 						slot_id,
@@ -1273,8 +1288,8 @@ void Client::FindAndNukeTraderItem(int32 serial_number, int16 quantity, Client *
 			return;
 		}
 		else {
-			TraderRepository::UpdateQuantity(database, CharacterID(), item->GetSerialNumber(), charges - quantity);
-			NukeTraderItem(slot_id, charges, quantity, customer, trader_slot, item->GetSerialNumber(), item->GetID());
+			TraderRepository::UpdateQuantity(database, CharacterID(), item->GetSerialNumber2(), charges - quantity);
+			NukeTraderItem(slot_id, charges, quantity, customer, trader_slot, item->GetSerialNumber2(), item->GetID());
 			return;
 		}
 	}
@@ -1362,7 +1377,8 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 		tbs->item_id = Strings::ToUnsignedBigInt(tbs->serial_number);
 	}
 
-	buy_item = Trader->FindTraderItemBySerialNumber(tbs->item_id);
+	auto sn  = std::string(tbs->serial_number);
+	buy_item = Trader->FindTraderItemBySerialNumber(sn);
 
 	if (!buy_item) {
 		LogTrading("Unable to find item id <red>[{}] item_sn <red>[{}] on trader", tbs->item_id, tbs->serial_number);
@@ -1519,7 +1535,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 	strn0cpy(outtbs->item_name, buy_item->GetItem()->Name, sizeof(outtbs->item_name));
 	strn0cpy(
 		outtbs->serial_number,
-		fmt::format("{:016}", buy_item->GetSerialNumber()).c_str(),
+		buy_item->GetSerialNumber2().data(),
 		sizeof(outtbs->serial_number)
 	);
 
@@ -1545,7 +1561,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 		BazaarAuditTrail(Trader->GetName(), GetName(), buy_item->GetItem()->Name, outtbs->quantity, outtbs->price, 0);
 	}
 
-	Trader->FindAndNukeTraderItem(tbs->item_id, outtbs->quantity, this, 0);
+	Trader->FindAndNukeTraderItem(sn, outtbs->quantity, this, 0);
 
 	if (item_id > 0 && Trader->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 		// Convert Serial Number back to ItemID for RoF+
@@ -1646,8 +1662,8 @@ static void UpdateTraderCustomerItemsAdded(
 
 			inst->SetCharges(i.item_charges);
 			inst->SetPrice(i.item_cost);
-			inst->SetSerialNumber(i.item_sn);
-			inst->SetMerchantSlot(i.item_sn);
+			inst->SetSerialNumber2(i.item_sn);
+			//FIXinst->SetMerchantSlot(i.item_sn);
 			if (inst->IsStackable()) {
 				inst->SetMerchantCount(i.item_charges);
 			}
@@ -1698,10 +1714,10 @@ static void UpdateTraderCustomerPriceChanged(
 					// RoF+ use Item IDs for now
 					tdis->item_id = trader_items.at(i).item_id;
 				}
-				else {
-					tdis->item_id = trader_items.at(i).item_sn;
-				}
-				tdis->item_id = trader_items.at(i).item_sn;
+				//FIX else {
+				// 	tdis->item_id = trader_items.at(i).item_sn;
+				// }
+				//tdis->item_id = trader_items.at(i).item_sn;
 				LogTrading("Telling customer to remove item [{}] with [{}] charges and S/N [{}]",
 						   item_id, charges, trader_items.at(i).item_sn);
 
@@ -1750,8 +1766,8 @@ static void UpdateTraderCustomerPriceChanged(
 			continue;
 		}
 
-		inst->SetSerialNumber(trader_items.at(i).item_sn);
-		inst->SetMerchantSlot(trader_items.at(i).item_sn);
+		inst->SetSerialNumber2(trader_items.at(i).item_sn);
+		//inst->SetMerchantSlot(trader_items.at(i).item_sn);
 
 		LogTrading("Sending price update for [{}], Serial No. [{}] with [{}] charges",
 				   item->Name, trader_items.at(i).item_sn, trader_items.at(i).item_charges);
@@ -2465,7 +2481,7 @@ void Client::TraderPriceUpdate(const EQApplicationPacket *app)
 	LogTrading(
 		"Received Price Update for <green>[{}] Item Serial No. <green>[{}] New Price <green>[{}]",
 		GetName(),
-		tpus->SerialNumber,
+		tpus->serial_number,
 		tpus->NewPrice
 	);
 
@@ -2486,7 +2502,7 @@ void Client::TraderPriceUpdate(const EQApplicationPacket *app)
 	uint32 old_price                 = 0;
 
 	for (int i = 0; i < item_limit; i++) {
-		if ((trader_items.at(i).item_id > 0) && (trader_items.at(i).item_sn == tpus->SerialNumber)) {
+		if ((trader_items.at(i).item_id > 0) && (trader_items.at(i).item_sn.compare(tpus->serial_number) == 0)) {
 			// We found the item that the Trader wants to change the price of (or add back up for sale).
 			//
 			id_of_item_to_update      = trader_items.at(i).item_id;
@@ -2521,7 +2537,7 @@ void Client::TraderPriceUpdate(const EQApplicationPacket *app)
 		int32  charges_on_item_to_add = 0;
 
 		for (int i = 0; i < GetInv().GetLookup()->InventoryTypeSize.Bazaar; i++) {
-			if ((newgis->items[i] > 0) && (newgis->serial_number[i] == tpus->SerialNumber)) {
+			if (newgis->items[i] > 0 && newgis->serial_number[i].compare(tpus->serial_number) == 0) {
 				id_of_item_to_add      = newgis->items[i];
 				charges_on_item_to_add = newgis->charges[i];
 
@@ -2772,10 +2788,11 @@ void Client::DoBazaarInspect(BazaarInspect_Struct &in)
 {
 	if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
 		if (in.trader_id >= TraderRepository::TRADER_CONVERT_ID) {
+			auto sn = std::string(in.serial_number);
 			auto trader = TraderRepository::GetTraderByInstanceAndSerialnumber(
 				database,
 				in.trader_id - TraderRepository::TRADER_CONVERT_ID,
-				fmt::format("{}", in.serial_number).c_str()
+				sn
 			);
 
 			if (!trader.trader_id) {
@@ -2865,7 +2882,8 @@ std::string Client::DetermineMoneyString(uint64 cp)
 void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicationPacket *app)
 {
 	auto in          = (TraderBuy_Struct *) app->pBuffer;
-	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number, tbs->trader_id);
+	auto sn = std::string(tbs->serial_number);
+	auto trader_item = TraderRepository::GetItemBySerialNumber(database, sn, tbs->trader_id);
 	if (!trader_item.id || GetTraderTransactionDate() < trader_item.listing_date) {
 		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
 				   "<red>[{}] The Traders data was outdated.",
