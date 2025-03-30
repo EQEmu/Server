@@ -560,14 +560,9 @@ void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &ch
 
 void Database::PurgeExpiredInstances()
 {
-	/**
-	 * Delay purging by a day so that we can continue using adjacent free instance id's
-	 * from the table without risking the chance we immediately re-allocate a zone that freshly expired but
-	 * has not been fully de-allocated
-	 */
 	auto l = InstanceListRepository::GetWhere(
 		*this,
-		"(start_time + duration) <= (UNIX_TIMESTAMP() - 86400) AND never_expires = 0"
+		"expire_at <= (UNIX_TIMESTAMP()) AND never_expires = 0"
 	);
 	if (l.empty()) {
 		return;
@@ -578,19 +573,19 @@ void Database::PurgeExpiredInstances()
 		instance_ids.emplace_back(std::to_string(e.id));
 	}
 
-	const auto imploded_instance_ids = Strings::Implode(",", instance_ids);
+	const auto ids = Strings::Implode(",", instance_ids);
 
-	InstanceListRepository::DeleteWhere(*this, fmt::format("id IN ({})", imploded_instance_ids));
-	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id IN ({})", imploded_instance_ids));
-	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
-	SpawnConditionValuesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
-	CharacterCorpsesRepository::BuryInstances(*this, imploded_instance_ids);
-	DynamicZoneMembersRepository::DeleteByManyInstances(*this, imploded_instance_ids);
-	DynamicZonesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
-	Spawn2DisabledRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
-	DataBucketsRepository::DeleteWhere(*this, fmt::format("instance_id != 0 and instance_id IN ({})", imploded_instance_ids));
+	InstanceListRepository::DeleteWhere(*this, fmt::format("id IN ({})", ids));
+	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id IN ({})", ids));
+	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", ids));
+	SpawnConditionValuesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", ids));
+	CharacterCorpsesRepository::BuryInstances(*this, ids);
+	DynamicZoneMembersRepository::DeleteByManyInstances(*this, ids);
+	DynamicZonesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", ids));
+	Spawn2DisabledRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", ids));
+	DataBucketsRepository::DeleteWhere(*this, fmt::format("instance_id != 0 and instance_id IN ({})", ids));
 	if (RuleB(Zone, StateSavingOnShutdown)) {
-		ZoneStateSpawnsRepository::DeleteWhere(*this, fmt::format("`instance_id` IN ({})", imploded_instance_ids));
+		ZoneStateSpawnsRepository::DeleteWhere(*this, fmt::format("`instance_id` IN ({})", ids));
 	}
 }
 
