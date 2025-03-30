@@ -60,8 +60,8 @@ uint32_t DynamicZoneBase::CreateInstance()
 	insert_instance.never_expires = m_never_expires;
 	insert_instance.expire_at = insert_instance.start_time + insert_instance.duration;
 
-	auto instance = InstanceListRepository::InsertOne(GetDatabase(), insert_instance);
-	if (instance.id == 0)
+	auto instance = InstanceListRepository::ReplaceOne(GetDatabase(), insert_instance);
+	if (!instance)
 	{
 		LogDynamicZones("Failed to create instance [{}] for zone [{}]", unused_instance_id, m_zone_id);
 		return 0;
