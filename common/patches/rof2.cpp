@@ -4115,27 +4115,37 @@ namespace RoF2
 				break;
 			}
 			case ListTraderItems: {
-				ENCODE_LENGTH_EXACT(Trader3_Struct);
-				SETUP_DIRECT_ENCODE(Trader3_Struct, structs::ClickTrader_Struct);
 				LogTrading("(RoF2)  action <green>[{}]", action);
 
-				eq->action = structs::RoF2BazaarTraderBuyerActions::ListTraderItems;
-				std::transform(
-					std::begin(emu->serial_number),
-					std::end(emu->serial_number),
-					std::begin(eq->items),
-					[&](const char* x) {
-						return x;
-					}
-				);
-//				std::ranges::copy(emu->serial_number, eq->items.begin(), eq->items.end());
-				std::copy_n(
-					std::begin(emu->item_cost),
-					EQ::invtype::BAZAAR_SIZE,
-					std::begin(eq->item_cost)
-				);
+				EQApplicationPacket *in   = *p;
+				*p                        = nullptr;
 
-				FINISH_ENCODE();
+				TraderClientMessaging_Struct tcm{};
+				EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+				cereal::BinaryInputArchive   ar(ss);
+				{ ar(tcm); }
+
+				auto buffer = new char[4404]{}; //4404 is the fixed size of the packet for 200 item limit of RoF2
+				auto pos    = buffer;
+
+				VARSTRUCT_ENCODE_TYPE(uint32, pos, structs::RoF2BazaarTraderBuyerActions::ListTraderItems);
+				for (auto const &t: tcm.items) {
+					strn0cpy(pos, t.serial_number.data(), t.serial_number.length() + 1);
+					pos += 3600;
+					VARSTRUCT_ENCODE_TYPE(uint32, pos, t.item_cost);
+					pos -= 3604 - 18;
+				}
+
+				for (int i = tcm.items.size(); i < EQ::invtype::BAZAAR_SIZE; i++) {
+					strn0cpy(pos, "0000000000000000", 18);
+					pos += 18;
+				}
+
+				safe_delete_array(in->pBuffer);
+				in->pBuffer = reinterpret_cast<unsigned char *>(buffer);
+				in->size    = 4404;
+
+				dest->FastQueuePacket(&in);
 				break;
 			}
 			case TraderAck2: {

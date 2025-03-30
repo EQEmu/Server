@@ -756,20 +756,49 @@ bool Client::CheckTradeNonDroppable()
 
 void Client::TraderShowItems()
 {
-	auto outapp = new EQApplicationPacket(OP_Trader, sizeof(Trader3_Struct));
-	auto data   = (Trader3_Struct *) outapp->pBuffer;
+	std::stringstream           ss{};
+	cereal::BinaryOutputArchive ar(ss);
 
-	auto   trader_items = TraderRepository::GetWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
-	uint32 item_limit   = trader_items.size() >= GetInv().GetLookup()->InventoryTypeSize.Bazaar ?
-		GetInv().GetLookup()->InventoryTypeSize.Bazaar :
-		trader_items.size();
-	//FIX
-	for (int i = 0; i < item_limit; i++) {
-		data->item_cost[i] = trader_items.at(i).item_cost;
-		strn0cpy(data->serial_number[i], trader_items.at(i).item_sn.data(), sizeof(data->serial_number[i]));
+	auto trader_items = TraderRepository::GetWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+	if (trader_items.empty()) {
+		return;
 	}
 
-	data->action = ListTraderItems;
+	TraderClientMessaging_Struct tcm{};
+	tcm.action = ListTraderItems;
+
+	for (auto const &t: trader_items) {
+		TraderItems_Struct items{};
+		items.serial_number = t.item_sn;
+		items.item_id       = t.item_id;
+		items.item_cost     = t.item_cost;
+
+		tcm.items.push_back(items);
+	}
+
+	{ ar(tcm); }
+
+	uint32 packet_size = ss.str().length();
+	auto   outapp      = new EQApplicationPacket(OP_Trader, packet_size);
+
+	memcpy(outapp->pBuffer, ss.str().data(), packet_size);
+	// // uint32 item_limit   = trader_items.size() >= GetInv().GetLookup()->InventoryTypeSize.Bazaar ?
+	// // 	GetInv().GetLookup()->InventoryTypeSize.Bazaar :
+	// // 	trader_items.size();
+	// uint32 item_limit   = GetInv().GetLookup()->InventoryTypeSize.Bazaar;
+	// //FIX
+	//
+	// for (int i = 0; i < trader_items.size(); i++) {
+	// 	data->items[i].cost = trader_items.at(i).item_cost;
+	// 	strn0cpy(data->items[i].sn, trader_items.at(i).item_sn.data(), sizeof(data->items[i].sn[i]));
+	// }
+	//
+	// for (int i = trader_items.size(); i < item_limit; i++) {
+	// 	data->items[i].cost = 0;
+	// 	strn0cpy(data->items[i].sn, "0000000000000000", sizeof(data->items[i].sn));
+	// }
+	//
+	// data->action = ListTraderItems;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);

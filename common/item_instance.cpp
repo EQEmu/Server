@@ -160,6 +160,7 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 
 	m_serial_number2 = copy.m_serial_number2;
 	if (copy.GetSerialNumber2().empty()) {
+		LogError("Creating Serial Number as part of Clone command");
 		CreateSerialNumber2();
 	}
 
