@@ -4117,15 +4117,17 @@ namespace RoF2
 			case ListTraderItems: {
 				LogTrading("(RoF2)  action <green>[{}]", action);
 
-				EQApplicationPacket *in   = *p;
-				*p                        = nullptr;
+				EQApplicationPacket *in = *p;
+				*p                      = nullptr;
 
 				TraderClientMessaging_Struct tcm{};
 				EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
 				cereal::BinaryInputArchive   ar(ss);
-				{ ar(tcm); }
+				{
+					ar(tcm);
+				}
 
-				auto buffer = new char[4404]{}; //4404 is the fixed size of the packet for 200 item limit of RoF2
+				auto buffer = new char[4404]{}; // 4404 is the fixed size of the packet for 200 item limit of RoF2
 				auto pos    = buffer;
 
 				VARSTRUCT_ENCODE_TYPE(uint32, pos, structs::RoF2BazaarTraderBuyerActions::ListTraderItems);
