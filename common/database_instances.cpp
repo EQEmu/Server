@@ -579,6 +579,7 @@ void Database::PurgeExpiredInstances()
 
 	const auto ids = Strings::Implode(",", instance_ids);
 
+	TransactionBegin();
 	InstanceListRepository::DeleteWhere(*this, fmt::format("id IN ({})", ids));
 	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id IN ({})", ids));
 	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", ids));
@@ -591,6 +592,9 @@ void Database::PurgeExpiredInstances()
 	if (RuleB(Zone, StateSavingOnShutdown)) {
 		ZoneStateSpawnsRepository::DeleteWhere(*this, fmt::format("`instance_id` IN ({})", ids));
 	}
+	TransactionCommit();
+
+	LogInfo("Purged [{}] expired instances", l.size());
 }
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
