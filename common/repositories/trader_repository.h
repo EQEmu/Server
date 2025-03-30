@@ -179,7 +179,7 @@ public:
 		return item;
 	}
 
-	static int UpdateQuantity(Database &db, uint32 char_id, uint32 serial_number, int16 quantity)
+	static int UpdateQuantity(Database &db, uint32 char_id, const std::string &serial_number, int16 quantity)
 	{
 		const auto trader_item = GetWhere(
 			db,
@@ -197,28 +197,12 @@ public:
 		return UpdateOne(db, m);
 	}
 
-	static Trader GetItemBySerialNumber(Database &db, uint32 serial_number, uint32 trader_id)
+	static Trader GetItemBySerialNumber(Database &db, std::string &serial_number, uint32 trader_id)
 	{
 		Trader     e{};
 		const auto trader_item = GetWhere(
 			db,
 			fmt::format("`char_id` = '{}' AND `item_sn` = '{}' LIMIT 1", trader_id, serial_number)
-		);
-
-		if (trader_item.empty()) {
-			return e;
-		}
-
-		return trader_item.at(0);
-	}
-
-	static Trader GetItemBySerialNumber(Database &db, std::string serial_number, uint32 trader_id)
-	{
-		Trader     e{};
-		auto       sn          = Strings::ToUnsignedBigInt(serial_number);
-		const auto trader_item = GetWhere(
-			db,
-			fmt::format("`char_id` = '{}' AND `item_sn` = '{}' LIMIT 1", trader_id, sn)
 		);
 
 		if (trader_item.empty()) {
@@ -259,7 +243,7 @@ public:
 	static DistinctTraders_Struct GetTraderByInstanceAndSerialnumber(
 		Database &db,
 		uint32 instance_id,
-		const char *serial_number
+		std::string &serial_number
 		)
 	{
 		DistinctTraders_Struct trader{};
@@ -319,7 +303,7 @@ public:
 			e.trader.aug_slot_4            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.trader.aug_slot_5            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.trader.aug_slot_6            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.trader.item_sn               = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.trader.item_sn               = row[9] ? row[9] : std::string("");
 			e.trader.item_charges          = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 			e.trader.item_cost             = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.trader.slot_id               = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
