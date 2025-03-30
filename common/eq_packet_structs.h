@@ -3729,13 +3729,34 @@ struct Trader_Struct {
 /*648*/	uint32	item_cost[EQ::invtype::BAZAAR_SIZE];
 };
 
-struct Trader3_Struct {
+struct TraderItems_Struct {
+	std::string serial_number;
+	uint32      item_id;
+	uint64      item_cost;
+
+	template<class Archive>
+	void serialize(Archive &archive)
+	{
+		archive(
+			CEREAL_NVP(serial_number),
+			CEREAL_NVP(item_id),
+			CEREAL_NVP(item_cost)
+		);
+	}
+};
+
+struct TraderClientMessaging_Struct {
 	/*000*/	uint32	action;
-	/*004*/	uint32	unknown_004;
-	///*008*/	uint64	items[EQ::invtype::BAZAAR_SIZE];
-	/*008*/ char    serial_number[17][EQ::invtype::BAZAAR_SIZE];
-	char    unknown[1]{};
-	/*648*/	uint32	item_cost[EQ::invtype::BAZAAR_SIZE];
+	/*008*/ std::vector<TraderItems_Struct> items;
+
+	template<class Archive>
+	void serialize(Archive &archive)
+	{
+		archive(
+			CEREAL_NVP(action),
+			CEREAL_NVP(items)
+		);
+	}
 };
 
 struct ClickTrader_Struct {
