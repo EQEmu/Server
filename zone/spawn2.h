@@ -78,6 +78,7 @@ public:
 	inline bool IsResumedFromZoneSuspend() const { return m_resumed_from_zone_suspend; }
 	inline void SetResumedFromZoneSuspend(bool resumed) { m_resumed_from_zone_suspend = resumed; }
 	inline void SetEntityVariables(std::map<std::string, std::string> vars) { m_entity_variables = vars; }
+	inline void SetResumedNPCID(uint32 npc_id) { m_resumed_npc_id = npc_id; }
 
 protected:
 	friend class Zone;
@@ -105,6 +106,7 @@ private:
 	bool IsDespawned;
 	uint32  killcount;
 	bool m_resumed_from_zone_suspend = false;
+	uint32 m_resumed_npc_id = 0;
 	std::map<std::string, std::string> m_entity_variables = {};
 };
 

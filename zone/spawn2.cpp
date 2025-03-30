@@ -191,16 +191,20 @@ bool Spawn2::Process() {
 			return false;
 		}
 
-		uint16 condition_value=1;
-
+		uint16 condition_value = 1;
 		if (condition_id > 0) {
-			condition_value = zone->spawn_conditions.GetCondition(zone->GetShortName(), zone->GetInstanceID(), condition_id);
+			condition_value = zone->spawn_conditions.GetCondition(
+				zone->GetShortName(),
+				zone->GetInstanceID(),
+				condition_id
+			);
 		}
 
 		//have the spawn group pick an NPC for us
 		uint32 npcid = 0;
-		if (RuleB(Zone, StateSavingOnShutdown) && currentnpcid && currentnpcid > 0) {
-			npcid = currentnpcid;
+		if (m_resumed_npc_id > 0) {
+			npcid = m_resumed_npc_id;
+			m_resumed_npc_id = 0;
 		} else {
 			npcid = spawn_group->GetNPCType(condition_value);
 		}

@@ -196,3 +196,25 @@ const uint32 Timer::SetCurrentTime()
 	return current_time;
 }
 
+const uint32 Timer::RollForward(uint32 seconds)
+{
+	struct timeval read_time{};
+	uint32 this_time;
+
+	gettimeofday(&read_time, nullptr);
+	this_time = read_time.tv_sec * 1000 + read_time.tv_usec / 1000;
+
+	if (last_time == 0) {
+		current_time = 0;
+	}
+	else {
+		current_time += this_time - last_time;
+	}
+
+	last_time = this_time;
+
+	// Roll forward the specified number of seconds (converted to milliseconds)
+	current_time += seconds * 1000;
+
+	return current_time;
+}
