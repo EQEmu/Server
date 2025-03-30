@@ -228,7 +228,7 @@ namespace Titanium
 					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, row->trader_entity_id);
 					bufptr += 4;
 					VARSTRUCT_ENCODE_TYPE(int32, bufptr, row->item_id);
-					VARSTRUCT_ENCODE_TYPE(int32, bufptr, row->serial_number);
+					//FIX VARSTRUCT_ENCODE_TYPE(int32, bufptr, row->serial_number);
 					bufptr += 4;
 					if (row->stackable) {
 						strn0cpy(
@@ -2529,7 +2529,7 @@ namespace Titanium
 
 				IN(action);
 				memcpy(emu->player_name, eq->player_name, sizeof(emu->player_name));
-				IN(serial_number);
+				//FIXIN(serial_number);
 
 				FINISH_DIRECT_DECODE();
 				break;

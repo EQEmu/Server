@@ -235,6 +235,7 @@ namespace EQ
 		int32              GetSerialNumber() const { return m_SerialNumber; }
 		void               SetSerialNumber(int32 id) { m_SerialNumber = id; }
 		const std::string &GetSerialNumber2() const { return m_serial_number2; }
+		//std::string        &GetSerialNumber2() const { return m_serial_number2; }
 		void               SetSerialNumber2(std::string sn) { m_serial_number2 = std::move(sn); }
 
 		void CreateSerialNumber2()

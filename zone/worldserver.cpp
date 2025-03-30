@@ -3791,8 +3791,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 
-			auto item_sn = Strings::ToUnsignedBigInt(in->trader_buy_struct.serial_number);
 			auto outapp  = std::make_unique<EQApplicationPacket>(OP_Trader, static_cast<uint32>(sizeof(TraderBuy_Struct)));
+			auto sn = std::string(in->trader_buy_struct.serial_number);
 			auto data    = (TraderBuy_Struct *) outapp->pBuffer;
 
 			memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
@@ -3803,7 +3803,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			TraderRepository::UpdateActiveTransaction(database, in->id, false);
 
-			auto item = trader_pc->FindTraderItemBySerialNumber(item_sn);
+			auto item = trader_pc->FindTraderItemBySerialNumber(sn);
 
 			if (item && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TRADER_SELL)) {
 				auto e = PlayerEvent::TraderSellEvent{
@@ -3826,7 +3826,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
 			}
 
-			trader_pc->RemoveItemBySerialNumber(item_sn, in->trader_buy_struct.quantity);
+			trader_pc->RemoveItemBySerialNumber(sn, in->trader_buy_struct.quantity);
 			trader_pc->AddMoneyToPP(in->trader_buy_struct.price * in->trader_buy_struct.quantity, true);
 			trader_pc->QueuePacket(outapp.get());
 

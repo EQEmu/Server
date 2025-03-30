@@ -3093,7 +3093,7 @@ struct BazaarSearchCriteria_Struct {
 struct BazaarInspect_Struct {
 	uint32 action;
 	char   player_name[64];
-	uint32 serial_number;
+	char   serial_number[16];
 	uint32 item_id;
 	uint32 trader_id;
 };
@@ -3742,6 +3742,28 @@ struct GetItems_Struct{
 	int32	charges[EQ::invtype::BAZAAR_SIZE];
 };
 
+struct Trader2_Struct {
+	uint32      action;
+	uint32      unknown_004;
+	uint64      items[EQ::invtype::BAZAAR_SIZE];
+	uint32      item_cost[EQ::invtype::BAZAAR_SIZE];
+	std::string serial_number[EQ::invtype::BAZAAR_SIZE];
+};
+
+struct ClickTrader2_Struct {
+	uint32      action;
+	uint32      unknown_004;
+	uint64      items[EQ::invtype::BAZAAR_SIZE];
+	uint32      item_cost[EQ::invtype::BAZAAR_SIZE];
+	std::string serial_number[EQ::invtype::BAZAAR_SIZE];
+};
+
+struct GetItems2_Struct {
+	uint64      items[EQ::invtype::BAZAAR_SIZE];
+	std::string serial_number[EQ::invtype::BAZAAR_SIZE];
+	uint32      charges[EQ::invtype::BAZAAR_SIZE];
+};
+
 struct BecomeTrader_Struct {
 	uint32 action;
 	uint16 zone_id;
@@ -3795,7 +3817,7 @@ struct TraderItemUpdate_Struct{
 struct TraderPriceUpdate_Struct {
 /*000*/	uint32	Action;
 /*004*/	uint32	SubAction;
-/*008*/	int32	SerialNumber;
+/*008*/	char 	serial_number[16];
 /*012*/	uint32	Unknown012;
 /*016*/	uint32	NewPrice;
 /*020*/	uint32	Unknown016;
@@ -6418,7 +6440,7 @@ struct BazaarSearchResultsFromDB_Struct {
 	uint32      count;
 	uint32      trader_id;
 	uint32      item_id;
-	uint32      serial_number;
+	std::string serial_number;
 	uint32      charges;
 	uint32      cost;
 	uint32      slot_id;

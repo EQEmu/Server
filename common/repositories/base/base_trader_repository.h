@@ -19,24 +19,24 @@
 class BaseTraderRepository {
 public:
 	struct Trader {
-		uint64_t id;
-		uint32_t char_id;
-		uint32_t item_id;
-		uint32_t aug_slot_1;
-		uint32_t aug_slot_2;
-		uint32_t aug_slot_3;
-		uint32_t aug_slot_4;
-		uint32_t aug_slot_5;
-		uint32_t aug_slot_6;
-		uint32_t item_sn;
-		int32_t  item_charges;
-		uint32_t item_cost;
-		uint8_t  slot_id;
-		uint32_t char_entity_id;
-		uint32_t char_zone_id;
-		int32_t  char_zone_instance_id;
-		uint8_t  active_transaction;
-		time_t   listing_date;
+		uint64_t    id;
+		uint32_t    char_id;
+		uint32_t    item_id;
+		uint32_t    aug_slot_1;
+		uint32_t    aug_slot_2;
+		uint32_t    aug_slot_3;
+		uint32_t    aug_slot_4;
+		uint32_t    aug_slot_5;
+		uint32_t    aug_slot_6;
+		std::string item_sn;
+		int32_t     item_charges;
+		uint32_t    item_cost;
+		uint8_t     slot_id;
+		uint32_t    char_entity_id;
+		uint32_t    char_zone_id;
+		int32_t     char_zone_instance_id;
+		uint8_t     active_transaction;
+		time_t      listing_date;
 	};
 
 	static std::string PrimaryKey()
@@ -138,7 +138,7 @@ public:
 		e.aug_slot_4            = 0;
 		e.aug_slot_5            = 0;
 		e.aug_slot_6            = 0;
-		e.item_sn               = 0;
+		e.item_sn               = "";
 		e.item_charges          = 0;
 		e.item_cost             = 0;
 		e.slot_id               = 0;
@@ -192,7 +192,7 @@ public:
 			e.aug_slot_4            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.aug_slot_5            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.aug_slot_6            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.item_sn               = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.item_sn               = row[9] ? row[9] : "";
 			e.item_charges          = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 			e.item_cost             = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.slot_id               = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
@@ -242,7 +242,7 @@ public:
 		v.push_back(columns[6] + " = " + std::to_string(e.aug_slot_4));
 		v.push_back(columns[7] + " = " + std::to_string(e.aug_slot_5));
 		v.push_back(columns[8] + " = " + std::to_string(e.aug_slot_6));
-		v.push_back(columns[9] + " = " + std::to_string(e.item_sn));
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.item_sn) + "'");
 		v.push_back(columns[10] + " = " + std::to_string(e.item_charges));
 		v.push_back(columns[11] + " = " + std::to_string(e.item_cost));
 		v.push_back(columns[12] + " = " + std::to_string(e.slot_id));
@@ -281,7 +281,7 @@ public:
 		v.push_back(std::to_string(e.aug_slot_4));
 		v.push_back(std::to_string(e.aug_slot_5));
 		v.push_back(std::to_string(e.aug_slot_6));
-		v.push_back(std::to_string(e.item_sn));
+		v.push_back("'" + Strings::Escape(e.item_sn) + "'");
 		v.push_back(std::to_string(e.item_charges));
 		v.push_back(std::to_string(e.item_cost));
 		v.push_back(std::to_string(e.slot_id));
@@ -328,7 +328,7 @@ public:
 			v.push_back(std::to_string(e.aug_slot_4));
 			v.push_back(std::to_string(e.aug_slot_5));
 			v.push_back(std::to_string(e.aug_slot_6));
-			v.push_back(std::to_string(e.item_sn));
+			v.push_back("'" + Strings::Escape(e.item_sn) + "'");
 			v.push_back(std::to_string(e.item_charges));
 			v.push_back(std::to_string(e.item_cost));
 			v.push_back(std::to_string(e.slot_id));
@@ -379,7 +379,7 @@ public:
 			e.aug_slot_4            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.aug_slot_5            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.aug_slot_6            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.item_sn               = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.item_sn               = row[9] ? row[9] : "";
 			e.item_charges          = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 			e.item_cost             = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.slot_id               = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
@@ -421,7 +421,7 @@ public:
 			e.aug_slot_4            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.aug_slot_5            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.aug_slot_6            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.item_sn               = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.item_sn               = row[9] ? row[9] : "";
 			e.item_charges          = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 			e.item_cost             = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.slot_id               = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
@@ -513,7 +513,7 @@ public:
 		v.push_back(std::to_string(e.aug_slot_4));
 		v.push_back(std::to_string(e.aug_slot_5));
 		v.push_back(std::to_string(e.aug_slot_6));
-		v.push_back(std::to_string(e.item_sn));
+		v.push_back("'" + Strings::Escape(e.item_sn) + "'");
 		v.push_back(std::to_string(e.item_charges));
 		v.push_back(std::to_string(e.item_cost));
 		v.push_back(std::to_string(e.slot_id));
@@ -553,7 +553,7 @@ public:
 			v.push_back(std::to_string(e.aug_slot_4));
 			v.push_back(std::to_string(e.aug_slot_5));
 			v.push_back(std::to_string(e.aug_slot_6));
-			v.push_back(std::to_string(e.item_sn));
+			v.push_back("'" + Strings::Escape(e.item_sn) + "'");
 			v.push_back(std::to_string(e.item_charges));
 			v.push_back(std::to_string(e.item_cost));
 			v.push_back(std::to_string(e.slot_id));
