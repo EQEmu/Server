@@ -3291,5 +3291,4 @@ void Zone::ReloadMaps()
 	pathing  = IPathfinder::Load(map_name);
 }
 
-#include "zone_save_state.cpp"
 #include "zone_loot.cpp"
