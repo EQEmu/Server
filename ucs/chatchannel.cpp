@@ -177,7 +177,7 @@ void ChatChannelList::SendAllChannels(Client *c) {
 
 	std::string Message;
 
-	char CountString[10];
+	char CountString[13];
 
 	while(iterator.MoreElements()) {
 
@@ -408,7 +408,7 @@ void ChatChannel::SendChannelMembers(Client *c) {
 
 	if(!c) return;
 
-	char CountString[10];
+	char CountString[13];
 
 	sprintf(CountString, "(%i)", MemberCount(c->GetAccountStatus()));
 
