@@ -1125,7 +1125,7 @@ public:
 
 	virtual void SetAttackTimer();
 	inline void SetInvul(bool invul) { invulnerable=invul; }
-	inline bool GetInvul(void) { return invulnerable; }
+	inline bool GetInvul() { return invulnerable; }
 	void SetExtraHaste(int haste, bool need_to_save = true);
 	inline int GetExtraHaste() { return extra_haste; }
 	virtual int GetHaste();

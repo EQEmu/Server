@@ -2507,6 +2507,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		return false;
 	}
 
+	if (m_resumed_from_zone_suspend && !IsQueuedForCorpse()) {
+		LogInfo("NPC [{}] is resumed from zone suspend, cannot kill until zone resume is complete.", GetCleanName());
+		SetHP(0);
+		return false;
+	}
+
 	if (IsMultiQuestEnabled()) {
 		for (auto &i: m_hand_in.items) {
 			if (i.is_multiquest_item && i.item->GetItem()->NoDrop != 0) {

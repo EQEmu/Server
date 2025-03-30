@@ -132,7 +132,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	  ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
-	  m_resumed_from_zone_suspend_shutoff_timer(2000),
+	  m_resumed_from_zone_suspend_shutoff_timer(10000),
 	  classattack_timer(1000),
 	  monkattack_timer(1000),
 	  knightattack_timer(1000),

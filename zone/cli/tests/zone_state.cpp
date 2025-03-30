@@ -384,15 +384,17 @@ inline void TestSpawns()
 	RunTest("Spawns > After restore (0 NPCs) (115 Corpses)", true, condition);
 
 	for (auto &e: entity_list.GetCorpseList()) {
-		auto      corpse = e.second;
+		auto c = e.second;
+
 		for (auto &s: GetStateSpawns()) {
-			bool is_same_corpse = corpse->GetNPCTypeID() == s.npc_id &&
-								  corpse->GetX() == s.x &&
-								  corpse->GetY() == s.y &&
-								  corpse->GetHeading() == s.heading;
+			bool is_same_corpse =
+					 c->GetNPCTypeID() == s.npc_id &&
+					 c->GetX() == s.x &&
+					 c->GetY() == s.y &&
+					 c->GetHeading() == s.heading;
 
 			if (is_same_corpse) {
-				if (!MatchCorpseState(corpse, s)) {
+				if (!MatchCorpseState(c, s)) {
 					RunTest("Spawns > Corpse state matches state", true, false);
 				}
 			}
@@ -546,16 +548,17 @@ inline void TestSpawns()
 	int corpses_matching_state = 0;
 
 	for (auto &e: entity_list.GetCorpseList()) {
-		auto corpse = e.second;
+		auto c = e.second;
 
 		for (auto &s: GetStateSpawns()) {
-			bool is_same_corpse = corpse->GetNPCTypeID() == s.npc_id &&
-								  corpse->GetX() == s.x &&
-								  corpse->GetY() == s.y &&
-								  corpse->GetHeading() == s.heading;
+			bool is_same_corpse =
+					 c->GetNPCTypeID() == s.npc_id &&
+					 c->GetX() == s.x &&
+					 c->GetY() == s.y &&
+					 c->GetHeading() == s.heading;
 
 			if (is_same_corpse) {
-				if (!MatchCorpseState(corpse, s)) {
+				if (!MatchCorpseState(c, s)) {
 					RunTest("Spawns > Corpse state matches state", true, false);
 				}
 				corpses_matching_state++;
@@ -698,8 +701,10 @@ inline void TestHpManaEnd()
 	// dont run tests in the loop, just collect the data
 	std::vector<std::pair<uint32_t, bool>> hp_mismatch   = {};
 	std::vector<std::pair<uint32_t, bool>> mana_mismatch = {};
-	for (auto                              &e: entity_list.GetNPCList()) {
-		auto      npc = e.second;
+
+	for (auto &e: entity_list.GetNPCList()) {
+		auto npc = e.second;
+
 		for (auto &npc_type: npc_types) {
 			if (npc->GetNPCTypeID() != npc_type.id) {
 				continue;
@@ -808,28 +813,26 @@ inline void TestZLocationDrift()
 	ClearState();
 	SetupStateZone();
 
-	auto entries_before = GetStateSpawns();
+	auto b = GetStateSpawns();
 
 	for (int i = 0; i < 10; ++i) {
 		zone->Shutdown();
 		SetupStateZone();
 	}
 
-	auto entries_after = GetStateSpawns();
+	auto a = GetStateSpawns();
 
 	// compare entries_before x/y/z to entries_after x/y/z
 	bool locations_different = false;
-	for (size_t i = 0; i < entries_before.size(); ++i) {
-		if (entries_before[i].x != entries_after[i].x || entries_before[i].y != entries_after[i].y ||
-			entries_before[i].z != entries_after[i].z) {
+
+	for (size_t i = 0; i < b.size(); ++i) {
+		if (b[i].x != a[i].x || b[i].y != a[i].y || b[i].z != a[i].z) {
 			locations_different = true;
 
-			std::cout << "Location drift detected for NPC ID: " << entries_before[i].npc_id << std::endl;
-			std::cout << "Location drift detected for NPC ID: " << entries_after[i].npc_id << std::endl;
-			std::cout << "Before - X: " << entries_before[i].x << ", Y: " << entries_before[i].y
-					  << ", Z: " << entries_before[i].z << std::endl;
-			std::cout << "After  - X: " << entries_after[i].x << ", Y: " << entries_after[i].y
-					  << ", Z: " << entries_after[i].z << std::endl;
+			std::cout << "Location drift detected for NPC ID: " << b[i].npc_id << std::endl;
+			std::cout << "Location drift detected for NPC ID: " << a[i].npc_id << std::endl;
+			std::cout << "Before - X: " << b[i].x << ", Y: " << b[i].y << ", Z: " << b[i].z << std::endl;
+			std::cout << "After  - X: " << a[i].x << ", Y: " << a[i].y << ", Z: " << a[i].z << std::endl;
 			break;
 		}
 	}
@@ -866,15 +869,14 @@ inline void TestLocationChange()
 				continue;
 			}
 
-			auto npc = e.second;
-			if (npc->GetSpawnGroupId() != state.spawngroup_id && npc->GetSpawn()->GetID() != state.spawn2_id) {
+			auto n = e.second;
+			if (n->GetSpawnGroupId() != state.spawngroup_id && n->GetSpawn()->GetID() != state.spawn2_id) {
 				continue;
 			}
 
 			// z gets auto adjusted to the ground, so we dont need to check it
-			if (e.second->GetX() != state.x || e.second->GetY() != state.y) {
-				std::cout << "NPC ID: " << e.second->GetNPCTypeID() << " X: " << e.second->GetX() << " Y: "
-						  << e.second->GetY() << std::endl;
+			if (n->GetX() != state.x || n->GetY() != state.y) {
+				std::cout << "NPC ID: " << n->GetNPCTypeID() << " X: " << n->GetX() << " Y: " << n->GetY() << std::endl;
 				std::cout << "State ID " << state.npc_id << " X: " << state.x << " Y: " << state.y << std::endl;
 				std::cout << "-----------------------------------\n";
 				all_moved = false;
