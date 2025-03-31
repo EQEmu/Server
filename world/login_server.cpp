@@ -286,7 +286,7 @@ void LoginServer::ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p)
 	if (error.find("Worldserver Account / Password INVALID") != std::string::npos) {
 		reason = "Usually this indicates you do not have a valid [account] and [password] (worldserver) account associated with your loginserver configuration. ";
 		if (fmt::format("{}", m_loginserver_address).find("login.eqemulator.net") != std::string::npos) {
-			reason += "For Legacy EQEmulator connections, you need to register your server @ http://www.eqemulator.org/account/?LS";
+			reason += "For Legacy EQEmulator connections, you need to register your server @ https://www.eqemulator.org/index.php?pageid=ws_mgmt";
 		}
 	}
 
