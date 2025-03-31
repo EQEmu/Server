@@ -50,7 +50,7 @@ void bot_command_click_item(Client* c, const Seperator* sep)
 	Mob* tar = c->GetTarget();
 
 	for (auto my_bot : sbl) {
-		if (my_bot->BotPassiveCheck()) {
+		if (!my_bot->ValidStateCheck(c)) {
 			continue;
 		}
 
