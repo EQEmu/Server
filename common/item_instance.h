@@ -238,7 +238,7 @@ namespace EQ
 		//std::string        &GetSerialNumber2() const { return m_serial_number2; }
 		void               SetSerialNumber2(std::string sn) { m_serial_number2 = std::move(sn); }
 
-		void CreateSerialNumber2()
+		void CreateSerialNumber2() const
 		{
 			m_serial_number2 = GenerateUniqueSerialNumber();
 		}
@@ -371,7 +371,7 @@ namespace EQ
 		bool             m_attuned{false};
 		int32            m_merchantcount{1};//number avaliable on the merchant, -1=unlimited
 		int32            m_SerialNumber{0}; // Unique identifier for this instance of an item. Needed for Bazaar.
-		std::string      m_serial_number2{}; // unique serial number across all zones/world TESTING March 2025
+		mutable std::string      m_serial_number2{}; // unique serial number across all zones/world TESTING March 2025
 		uint32           m_exp{0};
 		int8             m_evolveLvl{0};
 		ItemData *       m_scaledItem{nullptr};
