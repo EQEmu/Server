@@ -650,9 +650,8 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// put item into inventory
 	if (to_slot == EQ::invslot::slotCursor) {
-		inst->CreateSerialNumber2();
-		PushItemOnCursor(*inst);
-		SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
+		PushItemOnCursor(*inst, true);
+		//SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
 	} else {
 		PutItemInInventory(to_slot, *inst, true);
 	}
@@ -1055,6 +1054,10 @@ bool Client::PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update)
 // client_update: Sends packet to client
 bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, bool client_update) {
 	LogInventory("Putting item [{}] ([{}]) into slot [{}]", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
+
+	if (inst.GetSerialNumber2().empty()) {
+		inst.CreateSerialNumber2();
+	}
 
 	if (slot_id == EQ::invslot::slotCursor) { // don't trust macros before conditional statements...
 		return PushItemOnCursor(inst, client_update);
