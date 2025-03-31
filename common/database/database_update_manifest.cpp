@@ -7081,6 +7081,8 @@ CREATE INDEX `idx_expire_at` ON `respawn_times` (`expire_at`);
 ALTER TABLE `instance_list`
 ADD COLUMN `expire_at` bigint(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `duration`;
 
+UPDATE instance_list set expire_at = `start` + `duration`; -- backfill existing data
+
 CREATE INDEX `idx_expire_at` ON `instance_list` (`expire_at`);
 )",
 		.content_schema_update = false
