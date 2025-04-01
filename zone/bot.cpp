@@ -9738,7 +9738,7 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 			)
 		)
 		&&
-		tar->CanBuffStack(spell_id, GetLevel(), false) < 0
+		tar->CanBuffStack(spell_id, GetLevel(), true) < 0
 	) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast of {} on {} due to !CanBuffStack.'", GetCleanName(), GetSpellName(spell_id), tar->GetCleanName());
 		return false;
