@@ -3,6 +3,7 @@
 #include "../random.h"
 #include "packet.h"
 #include "daybreak_structs.h"
+#include "daybreak_pooling.h"
 #include <uv.h>
 #include <chrono>
 #include <functional>

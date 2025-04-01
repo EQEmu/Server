@@ -58,15 +58,15 @@ void EQ::Net::ServertalkLegacyClient::Connect()
 	m_connecting = true;
 	EQ::Net::TCPConnection::Connect(m_addr, m_port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
 		if (connection == nullptr) {
-			LogF(Logs::General, Logs::TCPConnection, "Error connecting to {0}:{1}, attempting to reconnect...", m_addr, m_port);
+			LogNetTCP("Error connecting to {0}:{1}, attempting to reconnect...", m_addr, m_port);
 			m_connecting = false;
 			return;
 		}
 
-		LogF(Logs::General, Logs::TCPConnection, "Connected to {0}:{1}", m_addr, m_port);
+		LogNetTCP("Connected to {0}:{1}", m_addr, m_port);
 		m_connection = connection;
 		m_connection->OnDisconnect([this](EQ::Net::TCPConnection *c) {
-			LogF(Logs::General, Logs::TCPConnection, "Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
+			LogNetTCP("Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
 			m_connection.reset();
 		});
 
@@ -131,7 +131,7 @@ void EQ::Net::ServertalkLegacyClient::ProcessReadBuffer()
 		}
 		else {
 			EQ::Net::StaticPacket p(&m_buffer[current + 4], length);
-			
+
 			auto cb = m_message_callbacks.find(opcode);
 			if (cb != m_message_callbacks.end()) {
 				cb->second(opcode, p);
