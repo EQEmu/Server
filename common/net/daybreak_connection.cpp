@@ -1,12 +1,16 @@
 #include "daybreak_connection.h"
 #include "../event/event_loop.h"
-#include "../event/task.h"
 #include "../data_verification.h"
 #include "crc32.h"
-#include "../eqemu_logsys.h"
 #include <zlib.h>
 #include <fmt/format.h>
-#include <sstream>
+
+// observed client receive window is 300 packets, 140KB
+constexpr size_t MAX_CLIENT_RECV_PACKETS_PER_WINDOW = 300;
+constexpr size_t MAX_CLIENT_RECV_BYTES_PER_WINDOW   = 140 * 1024;
+
+// buffer pools
+SendBufferPool send_buffer_pool;
 
 EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager()
 {
@@ -53,16 +57,22 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		uv_ip4_addr("0.0.0.0", m_options.port, &recv_addr);
 		int rc = uv_udp_bind(&m_socket, (const struct sockaddr *)&recv_addr, UV_UDP_REUSEADDR);
 
-		rc = uv_udp_recv_start(&m_socket,
-			[](uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
-			buf->base = new char[suggested_size];
-			memset(buf->base, 0, suggested_size);
-			buf->len = suggested_size;
-		},
+		rc = uv_udp_recv_start(
+			&m_socket,
+			[](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+				if (suggested_size > 65536) {
+					buf->base = new char[suggested_size];
+					buf->len  = suggested_size;
+					return;
+				}
+
+				static thread_local char temp_buf[65536];
+				buf->base = temp_buf;
+				buf->len  = 65536;
+			},
 			[](uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags) {
 			DaybreakConnectionManager *c = (DaybreakConnectionManager*)handle->data;
 			if (nread < 0 || addr == nullptr) {
-				delete[] buf->base;
 				return;
 			}
 
@@ -70,7 +80,10 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 			uv_ip4_name((const sockaddr_in*)addr, endpoint, 16);
 			auto port = ntohs(((const sockaddr_in*)addr)->sin_port);
 			c->ProcessPacket(endpoint, port, buf->base, nread);
-			delete[] buf->base;
+
+			if (buf->len > 65536) {
+				delete[] buf->base;
+			}
 		});
 
 		m_attached = loop;
@@ -310,7 +323,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_last_session_stats = Clock::now();
 	m_outgoing_budget = owner->m_options.outgoing_data_rate;
 
-	LogNetcode("New session [{}] with encode key [{}]", m_connect_code, HostToNetwork(m_encode_key));
+	LogNetClient("New session [{}] with encode key [{}]", m_connect_code, HostToNetwork(m_encode_key));
 }
 
 //new connection made as client
@@ -634,7 +647,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 					p.PutSerialize(0, reply);
 					InternalSend(p);
 
-					LogNetcode("[OP_SessionRequest] Session [{}] started with encode key [{}]", m_connect_code, HostToNetwork(m_encode_key));
+					LogNetClient("[OP_SessionRequest] Session [{}] started with encode key [{}]", m_connect_code, HostToNetwork(m_encode_key));
 				}
 
 				break;
@@ -653,7 +666,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 						m_max_packet_size = reply.max_packet_size;
 						ChangeStatus(StatusConnected);
 
-						LogNetcode(
+						LogNetClient(
 							"[OP_SessionResponse] Session [{}] refresh with encode key [{}]",
 							m_connect_code,
 							HostToNetwork(m_encode_key)
@@ -782,7 +795,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 					SendDisconnect();
 				}
 
-				LogNetcode(
+				LogNetClient(
 					"[OP_SessionDisconnect] Session [{}] disconnect with encode key [{}]",
 					m_connect_code,
 					HostToNetwork(m_encode_key)
@@ -852,7 +865,7 @@ bool EQ::Net::DaybreakConnection::ValidateCRC(Packet &p)
 	}
 
 	if (p.Length() < (size_t)m_crc_bytes) {
-		LogNetcode("Session [{}] ignored packet (crc bytes invalid on session)", m_connect_code);
+		LogNetClient("Session [{}] ignored packet (crc bytes invalid on session)", m_connect_code);
 		return false;
 	}
 
@@ -1043,7 +1056,7 @@ void EQ::Net::DaybreakConnection::Decompress(Packet &p, size_t offset, size_t le
 		return;
 	}
 
-	static uint8_t new_buffer[4096];
+	static thread_local uint8_t new_buffer[4096];
 	uint8_t *buffer = (uint8_t*)p.Data() + offset;
 	uint32_t new_length = 0;
 
@@ -1064,7 +1077,7 @@ void EQ::Net::DaybreakConnection::Decompress(Packet &p, size_t offset, size_t le
 
 void EQ::Net::DaybreakConnection::Compress(Packet &p, size_t offset, size_t length)
 {
-	uint8_t new_buffer[2048] = { 0 };
+	static thread_local uint8_t new_buffer[2048] = { 0 };
 	uint8_t *buffer = (uint8_t*)p.Data() + offset;
 	uint32_t new_length = 0;
 	bool send_uncompressed = true;
@@ -1090,10 +1103,6 @@ void EQ::Net::DaybreakConnection::ProcessResend()
 		ProcessResend(i);
 	}
 }
-
-// observed client receive window is 300 packets, 140KB
-constexpr size_t MAX_CLIENT_RECV_PACKETS_PER_WINDOW = 300;
-constexpr size_t MAX_CLIENT_RECV_BYTES_PER_WINDOW   = 140 * 1024;
 
 void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 {
@@ -1125,9 +1134,10 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		// make sure that the first_packet in the list first_sent time is within the resend_delay and now
 		// if it is not, then we need to resend all packets in the list
 		if (time_since_first_sent <= first_packet.resend_delay && !m_acked_since_last_resend) {
-			LogNetcodeDetail(
-				"Not resending packets for stream [{}] time since first sent [{}] resend delay [{}] m_acked_since_last_resend [{}]",
+			LogNetClient(
+				"Not resending packets for stream [{}] packets [{}] time_first_sent [{}] resend_delay [{}] m_acked_since_last_resend [{}]",
 				stream,
+				s->sent_packets.size(),
 				time_since_first_sent,
 				first_packet.resend_delay,
 				m_acked_since_last_resend
@@ -1142,7 +1152,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			total_size += e.second.packet.Length();
 		}
 
-		LogNetcodeDetail(
+		LogNetClient(
 			"Resending packets for stream [{}] packet count [{}] total packet size [{}] m_acked_since_last_resend [{}]",
 			stream,
 			s->sent_packets.size(),
@@ -1154,7 +1164,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	for (auto &e: s->sent_packets) {
 		if (m_resend_packets_sent >= MAX_CLIENT_RECV_PACKETS_PER_WINDOW ||
 			m_resend_bytes_sent >= MAX_CLIENT_RECV_BYTES_PER_WINDOW) {
-			LogNetcodeDetail(
+			LogNetClient(
 				"Stopping resend because we hit thresholds m_resend_packets_sent [{}] max [{}] m_resend_bytes_sent [{}] max [{}]",
 				m_resend_packets_sent,
 				MAX_CLIENT_RECV_PACKETS_PER_WINDOW,
@@ -1333,99 +1343,97 @@ void EQ::Net::DaybreakConnection::SendKeepAlive()
 	InternalSend(p);
 }
 
-void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
-{
+void EQ::Net::DaybreakConnection::InternalSend(Packet &p) {
 	if (m_owner->m_options.outgoing_data_rate > 0.0) {
 		auto new_budget = m_outgoing_budget - (p.Length() / 1024.0);
 		if (new_budget <= 0.0) {
 			m_stats.dropped_datarate_packets++;
 			return;
-		}
-		else {
+		} else {
 			m_outgoing_budget = new_budget;
 		}
 	}
 
 	m_last_send = Clock::now();
 
-	auto send_func = [](uv_udp_send_t* req, int status) {
-		delete[](char*)req->data;
-		delete req;
-	};
+	auto pooled_opt = send_buffer_pool.acquire();
+	if (!pooled_opt) {
+		m_stats.dropped_datarate_packets++;
+		return;
+	}
+
+	auto [send_req, data, ctx] = *pooled_opt;
+	ctx->pool = &send_buffer_pool; // set pool pointer
+
+	sockaddr_in send_addr{};
+	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
+	uv_buf_t send_buffers[1];
 
 	if (PacketCanBeEncoded(p)) {
-
 		m_stats.bytes_before_encode += p.Length();
 
 		DynamicPacket out;
 		out.PutPacket(0, p);
 
-		for (int i = 0; i < 2; ++i) {
-			switch (m_encode_passes[i]) {
-			case EncodeCompression:
-				if (out.GetInt8(0) == 0)
-					Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
-				else
-					Compress(out, 1, out.Length() - 1);
-				break;
-			case EncodeXOR:
-				if (out.GetInt8(0) == 0)
-					Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
-				else
-					Encode(out, 1, out.Length() - 1);
-				break;
-			default:
-				break;
+		for (auto &m_encode_passe: m_encode_passes) {
+			switch (m_encode_passe) {
+				case EncodeCompression:
+					if (out.GetInt8(0) == 0) {
+						Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					} else {
+						Compress(out, 1, out.Length() - 1);
+					}
+					break;
+				case EncodeXOR:
+					if (out.GetInt8(0) == 0) {
+						Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					} else {
+						Encode(out, 1, out.Length() - 1);
+					}
+					break;
+				default:
+					break;
 			}
 		}
 
 		AppendCRC(out);
-
-		uv_udp_send_t *send_req = new uv_udp_send_t;
-		memset(send_req, 0, sizeof(*send_req));
-		sockaddr_in send_addr;
-		uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
-		uv_buf_t send_buffers[1];
-
-		char *data = new char[out.Length()];
 		memcpy(data, out.Data(), out.Length());
 		send_buffers[0] = uv_buf_init(data, out.Length());
-		send_req->data = send_buffers[0].base;
-
-		m_stats.sent_bytes += out.Length();
-		m_stats.sent_packets++;
-		if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
-			delete[](char*)send_req->data;
-			delete send_req;
-			return;
-		}
-
-		uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
-		return;
+	} else {
+		memcpy(data, p.Data(), p.Length());
+		send_buffers[0] = uv_buf_init(data, p.Length());
 	}
-
-	m_stats.bytes_before_encode += p.Length();
-
-	uv_udp_send_t *send_req = new uv_udp_send_t;
-	sockaddr_in send_addr;
-	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
-	uv_buf_t send_buffers[1];
-
-	char *data = new char[p.Length()];
-	memcpy(data, p.Data(), p.Length());
-	send_buffers[0] = uv_buf_init(data, p.Length());
-	send_req->data = send_buffers[0].base;
 
 	m_stats.sent_bytes += p.Length();
 	m_stats.sent_packets++;
 
-	if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
-		delete[](char*)send_req->data;
-		delete send_req;
+	if (m_owner->m_options.simulated_out_packet_loss &&
+		m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
+		send_buffer_pool.release(ctx);
 		return;
 	}
 
-	uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
+	int send_result = uv_udp_send(
+		send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr *)&send_addr,
+		[](uv_udp_send_t *req, int status) {
+			auto *ctx = reinterpret_cast<EmbeddedContext *>(req->data);
+			if (!ctx) {
+				std::cerr << "Error: send_req->data is null in callback!" << std::endl;
+				return;
+			}
+
+			if (status < 0) {
+				std::cerr << "uv_udp_send failed: " << uv_strerror(status) << std::endl;
+			}
+
+			ctx->pool->release(ctx);
+		}
+	);
+
+	if (send_result < 0) {
+		std::cerr << "uv_udp_send() failed: " << uv_strerror(send_result) << std::endl;
+		send_buffer_pool.release(ctx);
+	}
 }
 
 void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, bool reliable)
