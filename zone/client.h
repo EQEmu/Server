@@ -73,6 +73,7 @@ namespace EQ
 #include "../common/guild_base.h"
 #include "../common/repositories/buyer_buy_lines_repository.h"
 #include "../common/repositories/character_evolving_items_repository.h"
+#include "../common/repositories/player_titlesets_repository.h"
 
 #include "bot_structs.h"
 

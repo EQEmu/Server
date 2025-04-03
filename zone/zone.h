@@ -49,6 +49,7 @@
 #include "../common/repositories/skill_caps_repository.h"
 #include "../common/repositories/zone_state_spawns_repository.h"
 #include "../common/repositories/spawn2_disabled_repository.h"
+#include "../common/repositories/player_titlesets_repository.h"
 
 struct EXPModifier
 {
@@ -248,6 +249,8 @@ public:
 	std::unordered_map<uint32, DynamicZoneTemplatesRepository::DynamicZoneTemplates> dz_template_cache;
 
 	std::unordered_map<uint32, EXPModifier> exp_modifiers;
+
+	std::unordered_map<uint32, std::vector<PlayerTitlesetsRepository::PlayerTitlesets>> player_title_sets;
 
 	std::vector<uint32> discovered_items;
 
