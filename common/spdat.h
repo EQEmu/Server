@@ -246,6 +246,8 @@
 
 #define MAX_INVISIBILTY_LEVEL 254
 
+#define NO_ROOT_BREAK 200
+
 //instrument item id's used as song components
 #define INSTRUMENT_HAND_DRUM 13000
 #define INSTRUMENT_WOODEN_FLUTE 13001

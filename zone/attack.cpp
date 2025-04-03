@@ -4439,8 +4439,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		if (IsValidSpell(spell_id) && !iBuffTic) {
 			//see if root will break
-			if (IsRooted() && !FromDamageShield)  // neotoyko: only spells cancel root
+			if (IsRooted() && !FromDamageShield && spells[spell_id].skill != NO_ROOT_BREAK) {  // neotoyko: only spells cancel root
 				TryRootFadeByDamage(buffslot, attacker);
+			}
 		}
 		else if (!IsValidSpell(spell_id))
 		{
@@ -6223,6 +6224,7 @@ bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
 	- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root.
 	- Only roots on determental spells can be broken by damage.
 	- Root break chance values obtained from live parses.
+	- If casting skill is set to 200 then spell can not break root
 	*/
 
 	if (!attacker || !spellbonuses.Root[SBIndex::ROOT_EXISTS] || spellbonuses.Root[SBIndex::ROOT_BUFFSLOT] < 0) {
