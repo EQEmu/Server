@@ -1350,7 +1350,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLeadershipAbilities(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(this); /* Load CharacterTribute */
 	database.LoadCharacterEXPModifier(this); /* Load Character EXP Modifier */
-	database.LoadCharacterTitleSets(this);
+	database.LoadCharacterTitleSets(this); /* Load Character Title Sets */
 
 	// this pattern is strange
 	// this is remnants of the old way of doing things
