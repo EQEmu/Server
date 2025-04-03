@@ -325,12 +325,12 @@ void Client::EnableTitle(int title_set)
 		return;
 	}
 
-	zone->player_title_sets[CharacterID()].emplace_back(e);
+	m_player_title_sets.emplace_back(e);
 }
 
 bool Client::CheckTitle(int title_set)
 {
-	for (const auto& e : zone->player_title_sets[CharacterID()]) {
+	for (const auto& e : m_player_title_sets) {
 		if (e.title_set == title_set) {
 			return true;
 		}
@@ -359,7 +359,7 @@ void Client::RemoveTitle(int title_set)
 		}
 	}
 
-	auto& titles = zone->player_title_sets[CharacterID()];
+	auto& titles = m_player_title_sets;
 	for (auto e = titles.begin(); e != titles.end(); e++) {
 		if (e->title_set == title_set) {
 			titles.erase(e);

@@ -250,8 +250,6 @@ public:
 
 	std::unordered_map<uint32, EXPModifier> exp_modifiers;
 
-	std::unordered_map<uint32, std::vector<PlayerTitlesetsRepository::PlayerTitlesets>> player_title_sets;
-
 	std::vector<uint32> discovered_items;
 
 	std::map<std::string, std::string> m_zone_variables;

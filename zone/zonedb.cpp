@@ -4293,15 +4293,15 @@ void ZoneDatabase::LoadCharacterTitleSets(Client* c)
 	const uint32 character_id = c->CharacterID();
 
 	for (const auto& e : l) {
-		zone->player_title_sets[character_id].emplace_back(e);
+		c->AddTitle(e);
 	}
 }
 
 void ZoneDatabase::SaveCharacterTitleSets(Client* c)
 {
-	if (!zone) {
+	if (!zone || !c) {
 		return;
 	}
 
-	PlayerTitlesetsRepository::ReplaceMany(*this, zone->player_title_sets[c->CharacterID()]);
+	PlayerTitlesetsRepository::ReplaceMany(*this, c->GetTitles());
 }
