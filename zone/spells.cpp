@@ -5365,10 +5365,12 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 
 		// Check for Chance to Resist Spell bonuses (ie Sanctification Discipline)
-		int resist_bonuses = CalcResistChanceBonus();
-		if (resist_bonuses && zone->random.Roll(resist_bonuses) && !IsResurrectionSicknessSpell(spell_id)) {
-			LogSpells("Resisted spell in sanctification, had [{}] chance to resist", resist_bonuses);
-			return 0;
+		if (!spells[spell_id].no_resist) {
+			int resist_bonuses = CalcResistChanceBonus();
+			if (resist_bonuses && zone->random.Roll(resist_bonuses) && !IsResurrectionSicknessSpell(spell_id)) {
+				LogSpells("Resisted spell in sanctification, had [{}] chance to resist", resist_bonuses);
+				return 0;
+			}
 		}
 	}
 
