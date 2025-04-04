@@ -72,6 +72,7 @@ public:
 	bool ItemHasQuestSub(EQ::ItemInstance* inst, QuestEventID event_id);
 	bool BotHasQuestSub(QuestEventID event_id);
 	bool MercHasQuestSub(QuestEventID event_id);
+	QuestZoneConfig::Config LoadZoneConfig(uint32 version, const char * short_name);
 
 	int EventNPC(
 		QuestEventID event_id,
