@@ -2311,14 +2311,15 @@ void Bot::AI_Process()
 
 // PULLING FLAG (ACTIONABLE RANGE)
 
-		if (PULLING_BOT || RETURNING_BOT) {
-			if (!TargetValidation(tar)) { return; }
+		if (PULLING_BOT) {
+			if (!TargetValidation(tar)) {
+				SetPullFlag(false);
+				SetPullingFlag(false);
 
-			if (RuleB(Bots, BotsRequireLoS) && !HasLoS()) {
 				return;
 			}
 
-			if (at_combat_range) {
+			if (at_combat_range && DoLosChecks(tar)) {
 				if (
 					!tar->GetSpecialAbility(SpecialAbility::RangedAttackImmunity) &&
 					RuleB(Bots, AllowRangedPulling) &&
@@ -2347,18 +2348,18 @@ void Bot::AI_Process()
 
 					return;
 				}
-			}
 
-			if (RuleB(Bots, UseSpellPulling)) {
-				uint16 spell_id = RuleI(Bots, PullSpellID);
+				if (RuleB(Bots, UseSpellPulling)) {
+					uint16 spell_id = RuleI(Bots, PullSpellID);
 
-				if (tar_distance <= spells[spell_id].range) {
-					StopMoving();
-					SetPullingSpell(true);
-					CastSpell(spell_id, tar->GetID());
-					SetPullingSpell(false);
+					if (tar_distance <= spells[spell_id].range) {
+						StopMoving();
+						SetPullingSpell(true);
+						CastSpell(spell_id, tar->GetID());
+						SetPullingSpell(false);
 
-					return;
+						return;
+					}
 				}
 			}
 
@@ -3544,18 +3545,14 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 
 	if (NOT_HOLDING && NOT_PASSIVE) {
 		auto pull_target = bot_owner->GetTarget();
+
 		if (pull_target) {
-			if (raid) {
-				const auto msg = fmt::format("Pulling {}.", pull_target->GetCleanName());
-				raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
-			} else {
-				RaidGroupSay(
-					fmt::format(
-						"Pulling {}.",
-						pull_target->GetCleanName()
-					).c_str()
-				);
-			}
+			RaidGroupSay(
+				fmt::format(
+					"Pulling {}.",
+					pull_target->GetCleanName()
+				).c_str()
+			);
 
 			InterruptSpell();
 			WipeHateList();
@@ -3564,7 +3561,14 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 			SetPullingFlag();
 			bot_owner->SetBotPulling();
 
-			if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+			if (
+				HasPet() &&
+					(
+						GetClass() != Class::Enchanter ||
+						GetPet()->GetPetType() != petAnimation ||
+						GetAA(aaAnimationEmpathy) >= 1
+					)
+			) {
 				GetPet()->WipeHateList();
 				GetPet()->SetTarget(nullptr);
 				m_previous_pet_order = GetPet()->GetPetOrder();
