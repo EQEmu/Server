@@ -3159,6 +3159,13 @@ void EntityList::Depop(bool StartSpawnTimer)
 				UpdateFindableNPCState(pnpc, true);
 			}
 
+			// Depop below will eventually remove this npc from the entity list
+			// but that can happen AFTER we've already tried to spawn its replacement.
+			// So go ahead and remove it from the limits so it doesn't count.
+			if (npc_limit_list.count(pnpc->GetID())) {
+				npc_limit_list.erase(pnpc->GetID());
+			}
+
 			pnpc->WipeHateList();
 			pnpc->Depop(StartSpawnTimer);
 		}
