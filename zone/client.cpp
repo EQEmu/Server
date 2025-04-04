@@ -1100,6 +1100,7 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
 	database.SaveCharacterEXPModifier(this);
+	database.SaveCharacterTitleSets(this);
 
 	if (RuleB(Bots, Enabled)) {
 		database.botdb.SaveBotSettings(this);

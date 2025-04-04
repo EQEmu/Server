@@ -73,6 +73,7 @@ namespace EQ
 #include "../common/guild_base.h"
 #include "../common/repositories/buyer_buy_lines_repository.h"
 #include "../common/repositories/character_evolving_items_repository.h"
+#include "../common/repositories/player_titlesets_repository.h"
 
 #include "bot_structs.h"
 
@@ -1252,7 +1253,9 @@ public:
 	void ResetAllCastbarCooldowns();
 	void ResetCastbarCooldownBySpellID(uint32 spell_id);
 
+	void AddTitle(PlayerTitlesetsRepository::PlayerTitlesets e) { m_player_title_sets.emplace_back(e); }
 	bool CheckTitle(int titleset);
+	const std::vector<PlayerTitlesetsRepository::PlayerTitlesets>& GetTitles() { return m_player_title_sets; };
 	void EnableTitle(int titleset);
 	void RemoveTitle(int titleset);
 
@@ -2254,6 +2257,7 @@ private:
 	bool m_exp_enabled;
 
 	std::vector<EXPModifier> m_exp_modifiers;
+	std::vector<PlayerTitlesetsRepository::PlayerTitlesets> m_player_title_sets;
 
 	//Anti Spam Stuff
 	Timer *KarmaUpdateTimer;

@@ -1094,8 +1094,8 @@ int lua_faction_value() {
 	return quest_manager.FactionValue();
 }
 
-void lua_check_title(uint32 title_set) {
-	quest_manager.checktitle(title_set);
+bool lua_check_title(uint32 title_set) {
+	return quest_manager.checktitle(title_set);
 }
 
 void lua_enable_title(uint32 title_set) {

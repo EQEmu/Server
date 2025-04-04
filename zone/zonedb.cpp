@@ -4271,3 +4271,37 @@ void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
 		}
 	);
 }
+
+void ZoneDatabase::LoadCharacterTitleSets(Client* c)
+{
+	if (!zone || !c) {
+		return;
+	}
+
+	const auto& l = PlayerTitlesetsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`char_id` = {}",
+			c->CharacterID()
+		)
+	);
+
+	if (l.empty()) {
+		return;
+	}
+
+	const uint32 character_id = c->CharacterID();
+
+	for (const auto& e : l) {
+		c->AddTitle(e);
+	}
+}
+
+void ZoneDatabase::SaveCharacterTitleSets(Client* c)
+{
+	if (!zone || !c || c->GetTitles().empty()) {
+		return;
+	}
+
+	PlayerTitlesetsRepository::ReplaceMany(*this, c->GetTitles());
+}
