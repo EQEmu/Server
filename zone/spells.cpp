@@ -5359,7 +5359,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	if (!CharmTick) {
 		//Check for Spell Effect specific resistance chances (ie AA Mental Fortitude)
-		if (TrySpellEffectResist(spell_id)) {
+		if (resist_type != RESIST_NONE && TrySpellEffectResist(spell_id)) {
 			return 0;
 		}
 
