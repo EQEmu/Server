@@ -11842,7 +11842,7 @@ bool Bot::IsValidSpellTypeBySpellID(uint16 spell_type, uint16 spell_id) {
 			return false;
 		case BotSpellTypes::ResistBuffs:
 		case BotSpellTypes::PetResistBuffs:
-			if (IsResistanceBuffSpell(spell_id)) {
+			if (IsResistanceBuffSpell(spell_id) && !IsEffectInSpell(spell_id, SE_DamageShield)) {
 				return true;
 			}
 
