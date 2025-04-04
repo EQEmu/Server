@@ -54,17 +54,31 @@ public:
 	{
 		BulkTraders_Struct                  all_entries{};
 		std::vector<DistinctTraders_Struct> distinct_traders;
+		MySQLRequestResult                  results;
 
-		auto results = db.QueryDatabase(fmt::format(
-			"SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
-			"FROM trader AS t "
-			"JOIN character_data AS c ON t.char_id = c.id "
-			"WHERE t.char_zone_instance_id = {} "
-			"ORDER BY t.char_zone_instance_id ASC "
-			"LIMIT {}",
-			char_zone_instance_id,
-			max_results)
-		);
+		if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
+			results = db.QueryDatabase(fmt::format(
+				"SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
+				"FROM trader AS t "
+				"JOIN character_data AS c ON t.char_id = c.id "
+				"WHERE t.char_zone_instance_id = {} "
+				"ORDER BY t.char_zone_instance_id ASC "
+				"LIMIT {}",
+				char_zone_instance_id,
+				max_results)
+			);
+		}
+		else {
+			results = db.QueryDatabase(fmt::format(
+				"SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
+				"FROM trader AS t "
+				"JOIN character_data AS c ON t.char_id = c.id "
+				"ORDER BY t.char_zone_instance_id ASC "
+				"LIMIT {}",
+				char_zone_instance_id,
+				max_results)
+			);
+		}
 
 		distinct_traders.reserve(results.RowCount());
 
