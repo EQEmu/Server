@@ -1171,6 +1171,10 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 		return;
 	}
 
+	if (m_is_afk && IsFilteredAFKPacket(app)) {
+		return;
+	}
+
 	if (client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED) {
 		AddPacket(app, ack_req);
 		return;
@@ -12657,7 +12661,7 @@ void Client::SendTopLevelInventory()
 	}
 }
 
-void Client::CheckSendBulkNpcPositions()
+void Client::CheckSendBulkNpcPositions(bool force)
 {
 	float distance_moved                      = DistanceNoZ(m_last_position_before_bulk_update, GetPosition());
 	float update_range                        = RuleI(Range, MobCloseScanDistance);
@@ -12668,7 +12672,7 @@ void Client::CheckSendBulkNpcPositions()
 
 	int updated_count = 0;
 	int skipped_count = 0;
-	if (is_ready_to_update) {
+	if (is_ready_to_update || force) {
 		auto &mob_movement_manager = MobMovementManager::Get();
 
 		for (auto &e: entity_list.GetMobList()) {

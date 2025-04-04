@@ -1944,6 +1944,8 @@ public:
 	ExternalHandinMoneyReturned GetExternalHandinMoneyReturned() { return m_external_handin_money_returned; }
 	std::vector<uint32_t> GetExternalHandinItemsReturned() { return m_external_handin_items_returned; }
 
+	inline bool IsAFK() { return m_is_afk; }
+
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
@@ -2210,7 +2212,11 @@ private:
 	glm::vec4 m_last_position_before_bulk_update;
 	Timer     m_client_bulk_npc_pos_update_timer;
 	Timer     m_position_update_timer;
-	void      CheckSendBulkNpcPositions();
+	void      CheckSendBulkNpcPositions(bool force = false);
+
+	// afk
+	bool                                  m_is_afk     = false;
+	std::chrono::steady_clock::time_point m_last_moved = std::chrono::steady_clock::now();
 
 	void BulkSendInventoryItems();
 
@@ -2403,6 +2409,8 @@ public:
 	const std::string &GetMailKey() const;
 	void ShowZoneShardMenu();
 	void Handle_OP_ChangePetName(const EQApplicationPacket *app);
+	bool IsFilteredAFKPacket(const EQApplicationPacket *p);
+	void CheckAFK(PlayerPositionUpdateClient_Struct *p);
 };
 
 #endif
