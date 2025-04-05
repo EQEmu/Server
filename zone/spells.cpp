@@ -5667,14 +5667,9 @@ int16 Mob::CalcResistChanceBonus()
 
 int16 Mob::CalcFearResistChance()
 {
-	int resistchance = spellbonuses.ResistFearChance + itembonuses.ResistFearChance;
-	if (IsOfClientBot()) {
-		resistchance += aabonuses.ResistFearChance;
-		if (aabonuses.Fearless == true) {
-			resistchance = 100;
-		}
-	}
-	if (spellbonuses.Fearless == true || itembonuses.Fearless == true) {
+	int resistchance = spellbonuses.ResistFearChance + itembonuses.ResistFearChance + aabonuses.ResistFearChance;
+
+	if (spellbonuses.Fearless == true || itembonuses.Fearless == true || aabonuses.Fearless == true) {
 		resistchance = 100;
 	}
 
