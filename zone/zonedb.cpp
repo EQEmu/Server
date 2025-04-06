@@ -55,8 +55,11 @@
 #include "../common/repositories/character_evolving_items_repository.h"
 
 #include <ctime>
-#include <iostream>
 #include <fmt/format.h>
+#include <iostream>
+
+#include "../common/repositories/inventory_repository.h"
+#include "../common/repositories/inventory_snapshots_repository.h"
 
 extern Zone* zone;
 
@@ -1313,202 +1316,56 @@ bool ZoneDatabase::NoRentExpired(const std::string& name)
 	return seconds > 1800;
 }
 
-bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
-	uint32 time_index = time(nullptr);
-	std::string query = StringFormat(
-		"INSERT "
-		"INTO"
-		" `inventory_snapshots` "
-		"(`time_index`,"
-		" `charid`,"
-		" `slotid`,"
-		" `itemid`,"
-		" `charges`,"
-		" `color`,"
-		" `augslot1`,"
-		" `augslot2`,"
-		" `augslot3`,"
-		" `augslot4`,"
-		" `augslot5`,"
-		" `augslot6`,"
-		" `instnodrop`,"
-		" `custom_data`,"
-		" `ornamenticon`,"
-		" `ornamentidfile`,"
-		" `ornament_hero_model`,"
-		" `guid`"
-		") "
-		"SELECT"
-		" %u,"
-		" `character_id`,"
-		" `slot_id`,"
-		" `item_id`,"
-		" `charges`,"
-		" `color`,"
-		" `augment_one`,"
-		" `augment_two`,"
-		" `augment_three`,"
-		" `augment_four`,"
-		" `augment_five`,"
-		" `augment_six`,"
-		" `instnodrop`,"
-		" `custom_data`,"
-		" `ornament_icon`,"
-		" `ornament_idfile`,"
-		" `ornament_hero_model`,"
-		" `guid` "
-		"FROM"
-		" `inventory` "
-		"WHERE"
-		" `character_id` = %u",
-		time_index,
-		character_id
-	);
-	auto results = database.QueryDatabase(query);
-	LogInventory("[{}] ([{}])", character_id, (results.Success() ? "pass" : "fail"));
-	return results.Success();
-}
-
-int ZoneDatabase::CountCharacterInvSnapshots(uint32 character_id) {
-	std::string query = StringFormat(
-		"SELECT"
-		" COUNT(*) "
-		"FROM "
-		"("
-		"SELECT * FROM"
-		" `inventory_snapshots` a "
-		"WHERE"
-		" `charid` = %u "
-		"GROUP BY"
-		" `time_index`"
-		") b",
-		character_id
-	);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return -1;
-
-	auto& row = results.begin();
-
-	int64 count = Strings::ToBigInt(row[0]);
-	if (count > 2147483647)
-		return -2;
-	if (count < 0)
-		return -3;
-
-	return count;
-}
-
-void ZoneDatabase::ClearCharacterInvSnapshots(uint32 character_id, bool from_now) {
-	uint32 del_time = time(nullptr);
-	if (!from_now) { del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400; }
-
-	std::string query = StringFormat(
-		"DELETE "
-		"FROM"
-		" `inventory_snapshots` "
-		"WHERE"
-		" `charid` = %u "
-		"AND"
-		" `time_index` <= %lu",
-		character_id,
-		(unsigned long)del_time
-	);
-	QueryDatabase(query);
-}
-
-void ZoneDatabase::ListCharacterInvSnapshots(uint32 character_id, std::list<std::pair<uint32, int>> &is_list) {
-	std::string query = StringFormat(
-		"SELECT"
-		" `time_index`,"
-		" COUNT(*) "
-		"FROM"
-		" `inventory_snapshots` "
-		"WHERE"
-		" `charid` = %u "
-		"GROUP BY"
-		" `time_index` "
-		"ORDER BY"
-		" `time_index` "
-		"DESC",
-		character_id
-	);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return;
-
-	for (auto row : results)
-		is_list.emplace_back(std::pair<uint32, int>(Strings::ToUnsignedInt(row[0]), Strings::ToInt(row[1])));
-}
-
-bool ZoneDatabase::ValidateCharacterInvSnapshotTimestamp(uint32 character_id, uint32 timestamp) {
-	if (!character_id || !timestamp)
+bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id)
+{
+	if (!InventorySnapshotsRepository::SaveCharacterInvSnapshot(database, character_id)) {
 		return false;
-
-	std::string query = StringFormat(
-		"SELECT"
-		" * "
-		"FROM"
-		" `inventory_snapshots` "
-		"WHERE"
-		" `charid` = %u "
-		"AND"
-		" `time_index` = %u "
-		"LIMIT 1",
-		character_id,
-		timestamp
-	);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success() || results.RowCount() == 0)
-		return false;
+	}
 
 	return true;
 }
 
-void ZoneDatabase::ParseCharacterInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &parse_list) {
-	std::string query = StringFormat(
-		"SELECT"
-		" `slotid`,"
-		" `itemid` "
-		"FROM"
-		" `inventory_snapshots` "
-		"WHERE"
-		" `charid` = %u "
-		"AND"
-		" `time_index` = %u "
-		"ORDER BY"
-		" `slotid`",
-		character_id,
-		timestamp
-	);
-	auto results = QueryDatabase(query);
+int ZoneDatabase::CountCharacterInvSnapshots(uint32 character_id)
+{
+	return InventorySnapshotsRepository::CountCharacterInvSnapshots(*this, character_id);
+}
 
-	if (!results.Success())
-		return;
+void ZoneDatabase::ClearCharacterInvSnapshots(uint32 character_id, bool from_now)
+{
+	InventorySnapshotsRepository::ClearCharacterInvSnapshots(*this, character_id, from_now);
+}
 
-	for (auto row : results)
-		parse_list.emplace_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
+void ZoneDatabase::ListCharacterInvSnapshots(uint32 character_id, std::list<std::pair<uint32, int>> &is_list)
+{
+	InventorySnapshotsRepository::ListCharacterInvSnapshots(*this, character_id, is_list);
+}
+
+bool ZoneDatabase::ValidateCharacterInvSnapshotTimestamp(uint32 character_id, uint32 timestamp)
+{
+	return InventorySnapshotsRepository::ValidateCharacterInvSnapshotTimestamp(*this, character_id, timestamp);
+}
+
+void ZoneDatabase::ParseCharacterInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &parse_list)
+{
+	InventorySnapshotsRepository::ParseCharacterInvSnapshot(*this, character_id, timestamp, parse_list);
 }
 
 void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
 	std::string query = StringFormat(
 		"SELECT"
-		" slotid,"
-		" itemid "
+		" slot_id,"
+		" item_id "
 		"FROM"
 		" `inventory_snapshots` "
 		"WHERE"
 		" `time_index` = %u "
 		"AND"
-		" `charid` = %u "
+		" `character_id` = %u "
 		"AND"
-		" `slotid` NOT IN "
+		" `slot_id` NOT IN "
 		"("
 		"SELECT"
-		" a.`slotid` "
+		" a.`slot_id` "
 		"FROM"
 		" `inventory_snapshots` a "
 		"JOIN"
@@ -1518,7 +1375,7 @@ void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id,
 		"WHERE"
 		" a.`time_index` = %u "
 		"AND"
-		" a.`charid` = %u "
+		" a.`character_id` = %u "
 		"AND"
 		" b.`character_id` = %u"
 		")",
@@ -1540,27 +1397,27 @@ void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id,
 void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
 	std::string query = StringFormat(
 		"SELECT"
-		" `slotid`,"
-		" `itemid` "
+		" `slot_id`,"
+		" `item_id` "
 		"FROM"
 		" `inventory` "
 		"WHERE"
 		" `character_id` = %u "
 		"AND"
-		" `slotid` NOT IN "
+		" `slot_id` NOT IN "
 		"("
 		"SELECT"
-		" a.`slotid` "
+		" a.`slot_id` "
 		"FROM"
 		" `inventory` a "
 		"JOIN"
 		" `inventory_snapshots` b "
 		"USING"
-		" (`slotid`, `itemid`) "
+		" (`slot_id`, `item_id`) "
 		"WHERE"
 		" b.`time_index` = %u "
 		"AND"
-		" b.`charid` = %u "
+		" b.`character_id` = %u "
 		"AND"
 		" a.`character_id` = %u"
 		")",
