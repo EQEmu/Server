@@ -17157,6 +17157,7 @@ void Client::CheckAFK(PlayerPositionUpdateClient_Struct *p)
 				GetCleanName(),
 				std::chrono::duration_cast<std::chrono::seconds>(idle_duration).count()
 			);
+			Message(Chat::Yellow, "You are now AFK. World positions will not update until you move.");
 			m_is_afk = true;
 		}
 	}
@@ -17164,6 +17165,8 @@ void Client::CheckAFK(PlayerPositionUpdateClient_Struct *p)
 		LogInfo("AFK [{}] is no longer idle, syncing positions", GetCleanName());
 		m_is_afk = false;
 		CheckSendBulkNpcPositions(true);
+
+		Message(Chat::Yellow, "You are no longer AFK. Syncing world positions.");
 
 		static EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 
