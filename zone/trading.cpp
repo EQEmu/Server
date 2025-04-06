@@ -782,23 +782,6 @@ void Client::TraderShowItems()
 	auto   outapp      = new EQApplicationPacket(OP_Trader, packet_size);
 
 	memcpy(outapp->pBuffer, ss.str().data(), packet_size);
-	// // uint32 item_limit   = trader_items.size() >= GetInv().GetLookup()->InventoryTypeSize.Bazaar ?
-	// // 	GetInv().GetLookup()->InventoryTypeSize.Bazaar :
-	// // 	trader_items.size();
-	// uint32 item_limit   = GetInv().GetLookup()->InventoryTypeSize.Bazaar;
-	// //FIX
-	//
-	// for (int i = 0; i < trader_items.size(); i++) {
-	// 	data->items[i].cost = trader_items.at(i).item_cost;
-	// 	strn0cpy(data->items[i].sn, trader_items.at(i).item_sn.data(), sizeof(data->items[i].sn[i]));
-	// }
-	//
-	// for (int i = trader_items.size(); i < item_limit; i++) {
-	// 	data->items[i].cost = 0;
-	// 	strn0cpy(data->items[i].sn, "0000000000000000", sizeof(data->items[i].sn));
-	// }
-	//
-	// data->action = ListTraderItems;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -841,40 +824,20 @@ void Client::Trader_CustomerBrowsing(Client *Customer)
 void Client::TraderStartTrader(const EQApplicationPacket *app)
 {
 	uint32                                max_items         = GetInv().GetLookup()->InventoryTypeSize.Bazaar;
-	auto                                  in                = (ClickTrader2_Struct *) app->pBuffer;
 	auto                                  inv               = GetTraderItems();
 	bool                                  trade_items_valid = true;
 	std::vector<TraderRepository::Trader> trader_items{};
+	ClickTraderNew_Struct                 in;
 
-	//Check inventory for no-trade items
-	// for (auto i = 0; i < max_items; i++) {
-	// 	if (inv->items[i] == 0 || inv->serial_number[i].empty()) {
-	// 		continue;
-	// 	}
-	//
-	// 	auto inst = FindTraderItemBySerialNumber(inv->serial_number[i]);
-	// 	if (inst) {
-	// 		if (inst->GetItem() && inst->GetItem()->NoDrop == 0) {
-	// 			Message(
-	// 				Chat::Red,
-	// 				fmt::format(
-	// 					"Item: {} is NODROP and found in a Trader's Satchel. Please remove and restart trader mode",
-	// 					inst->GetItem()->Name
-	// 				).c_str()
-	// 			);
-	// 			TraderEndTrader();
-	// 			safe_delete(inv);
-	// 			return;
-	// 		}
-	// 	}
-	// }
+	EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(app->pBuffer), app->size);
+	cereal::BinaryInputArchive   ar(ss);
+	{
+		ar(in);
+	}
 
-	for (uint32 i = 0; i < max_items; i++) {
-		if (inv->items[i] == 0 || inv->serial_number[i].empty()) {
-			continue;
-		}
-
-		auto const inst = FindTraderItemBySerialNumber(inv->serial_number[i]);
+	uint32 slot_id = 0;
+	for (auto &i: in.items) {
+		auto const inst = FindTraderItemByUniqueID(i.unique_id);
 		if (!inst) {
 			trade_items_valid = false;
 			break;
@@ -886,58 +849,41 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 					Chat::Red,
 					fmt::format(
 						"Item: {} is NODROP and found in a Trader's Satchel. Please remove and restart trader mode",
-						inst->GetItem()->Name
-					).c_str()
-				);
+						inst->GetItem()->Name)
+						.c_str());
 				TraderEndTrader();
 				safe_delete(inv);
 				return;
 			}
 		}
 
-		auto it   = std::find(std::begin(in->serial_number), std::end(in->serial_number), inv->serial_number[i]);
-		if (inst && it != std::end(in->serial_number)) {
-			inst->SetPrice(in->item_cost[i]);
-			TraderRepository::Trader trader_item{};
+		TraderRepository::Trader trader_item{};
 
-			trader_item.id                    = 0;
-			trader_item.char_entity_id        = GetID();
-			trader_item.char_id               = CharacterID();
-			trader_item.char_zone_id          = GetZoneID();
-			trader_item.char_zone_instance_id = GetInstanceID();
-			trader_item.item_charges          = inst->GetCharges() == 0 ? 1 : inst->GetCharges();
-			trader_item.item_cost             = inst->GetPrice();
-			trader_item.item_id               = inst->GetID();
-			trader_item.item_sn               = in->serial_number[i];
-			trader_item.slot_id               = i;
-			trader_item.listing_date          = time(nullptr);
-			if (inst->IsAugmented()) {
-				auto augs              = inst->GetAugmentIDs();
-				trader_item.aug_slot_1 = augs.at(0);
-				trader_item.aug_slot_2 = augs.at(1);
-				trader_item.aug_slot_3 = augs.at(2);
-				trader_item.aug_slot_4 = augs.at(3);
-				trader_item.aug_slot_5 = augs.at(4);
-				trader_item.aug_slot_6 = augs.at(5);
-			}
+		trader_item.id                    = 0;
+		trader_item.char_entity_id        = GetID();
+		trader_item.char_id               = CharacterID();
+		trader_item.char_zone_id          = GetZoneID();
+		trader_item.char_zone_instance_id = GetInstanceID();
+		trader_item.item_charges          = inst->GetCharges() == 0 ? 1 : inst->GetCharges();
+		trader_item.item_cost             = i.cost;
+		trader_item.item_id               = inst->GetID();
+		trader_item.item_sn               = i.unique_id;
+		trader_item.slot_id               = slot_id;
+		trader_item.listing_date          = time(nullptr);
+		if (inst->IsAugmented()) {
+			auto augs              = inst->GetAugmentIDs();
+			trader_item.aug_slot_1 = augs.at(0);
+			trader_item.aug_slot_2 = augs.at(1);
+			trader_item.aug_slot_3 = augs.at(2);
+			trader_item.aug_slot_4 = augs.at(3);
+			trader_item.aug_slot_5 = augs.at(4);
+			trader_item.aug_slot_6 = augs.at(5);
+		}
 
-			trader_items.emplace_back(trader_item);
-			continue;
-		}
-		else if (inst) {
-			Message(
-				Chat::Red,
-				fmt::format(
-					"Item: {} has no price set. Please set a price and try again.",
-					inst->GetItem()->Name
-				).c_str()
-			);
-			trade_items_valid = false;
-			continue;
-		}
+		trader_items.emplace_back(trader_item);
 	}
 
-	if (!trade_items_valid) {
+	if (!trade_items_valid || trader_items.empty()) {
 		Message(Chat::Red, "You are not able to become a trader at this time.  Invalid item found.");
 		TraderEndTrader();
 		safe_delete(inv);
@@ -952,7 +898,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 		auto outapp = new EQApplicationPacket(OP_Trader, sizeof(TraderStatus_Struct));
 		auto data   = (TraderStatus_Struct *) outapp->pBuffer;
-		data->Code = TraderAck2;
+		data->Code  = TraderAck2;
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
@@ -1105,7 +1051,7 @@ uint32 Client::FindTraderItemSerialNumber(int32 ItemID) {
 	return 0;
 }
 
-EQ::ItemInstance *Client::FindTraderItemBySerialNumber(std::string &serial_number)
+EQ::ItemInstance *Client::FindTraderItemBySerialNumber(std::string &unique_id)
 {
 	EQ::ItemInstance *item   = nullptr;
 	int16            slot_id = 0;
@@ -1118,7 +1064,7 @@ EQ::ItemInstance *Client::FindTraderItemBySerialNumber(std::string &serial_numbe
 				slot_id = EQ::InventoryProfile::CalcSlotId(i, x);
 				item    = GetInv().GetItem(slot_id);
 				if (item) {
-					if (item->GetUniqueID().compare(serial_number) == 0) {
+					if (item->GetUniqueID().compare(unique_id) == 0) {
 						return item;
 					}
 				}
@@ -1126,11 +1072,36 @@ EQ::ItemInstance *Client::FindTraderItemBySerialNumber(std::string &serial_numbe
 		}
 	}
 
-	LogTrading("Couldn't find item! Serial No. was [{}]", serial_number);
+	LogTrading("Couldn't find item! Serial No. was [{}]", unique_id);
 
 	return nullptr;
 }
 
+EQ::ItemInstance *Client::FindTraderItemByUniqueID(std::string &unique_id)
+{
+	EQ::ItemInstance *item   = nullptr;
+	int16            slot_id = 0;
+
+	for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
+		item = GetInv().GetItem(i);
+		if (item && item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) {
+			for (int16 x = EQ::invbag::SLOT_BEGIN; x <= EQ::invbag::SLOT_END; x++) {
+				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
+				slot_id = EQ::InventoryProfile::CalcSlotId(i, x);
+				item    = GetInv().GetItem(slot_id);
+				if (item) {
+					if (item->GetUniqueID().compare(unique_id) == 0) {
+						return item;
+					}
+				}
+			}
+		}
+	}
+
+	LogTrading("Couldn't find item! Serial No. was [{}]", unique_id);
+
+	return nullptr;
+}
 
 GetItems2_Struct *Client::GetTraderItems()
 {

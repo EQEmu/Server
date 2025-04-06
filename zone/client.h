@@ -374,6 +374,7 @@ public:
 	uint16 FindTraderItem(std::string &SerialNumber,uint16 Quantity);
 	uint32 FindTraderItemSerialNumber(int32 ItemID);
 	EQ::ItemInstance* FindTraderItemBySerialNumber(std::string &serial_number);
+	EQ::ItemInstance* FindTraderItemByUniqueID(std::string &unique_id);
 	void FindAndNukeTraderItem(std::string &serial_number, int16 quantity, Client* customer, uint16 trader_slot);
 	void NukeTraderItem(uint16 slot, int16 charges, int16 quantity, Client* customer, uint16 trader_slot, const std::string &serial_number, int32 item_id = 0);
 	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
