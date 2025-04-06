@@ -316,7 +316,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 	e.ornament_icon       = inst->GetOrnamentationIcon();
 	e.ornament_idfile     = inst->GetOrnamentationIDFile();
 	e.ornament_hero_model = inst->GetOrnamentHeroModel();
-	e.serial_number       = inst->GetUniqueID();
+	e.item_unique_id      = inst->GetUniqueID();
 
 	const int replaced = InventoryRepository::ReplaceOne(*this, e);
 
@@ -755,13 +755,13 @@ bool SharedDatabase::GetInventory(Client *c)
 		inst->SetOrnamentationIDFile(ornament_idfile);
 		inst->SetOrnamentHeroModel(item->HerosForgeModel);
 
-		if (row.serial_number.empty()) {
+		if (row.item_unique_id.empty()) {
 			inst->CreateUniqueID();
-			row.serial_number = inst->GetUniqueID();
+			row.item_unique_id = inst->GetUniqueID();
 			queue.push_back(row);
 		}
 		else {
-			inst->SetUniqueID(row.serial_number);
+			inst->SetUniqueID(row.item_unique_id);
 		}
 
 		if (

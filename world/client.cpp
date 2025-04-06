@@ -2399,7 +2399,7 @@ bool Client::StoreCharacter(
 			e.ornament_icon       = inst->GetOrnamentationIcon();
 			e.ornament_idfile     = inst->GetOrnamentationIDFile();
 			e.ornament_hero_model = inst->GetOrnamentHeroModel();
-			e.serial_number       = inst->GetUniqueID();
+			e.item_unique_id      = inst->GetUniqueID();
 
 			v.emplace_back(e);
 		}
