@@ -7138,15 +7138,22 @@ ADD COLUMN `entity_variables` TEXT DEFAULT NULL AFTER `rezzable`;
 	},
 	ManifestEntry{
 		.version = 9326,
-		.description = "2025_03_27_implement_item_unique_serial_number.sql",
+		.description = "2025_03_27_implement_item_unique_unique_id.sql",
 		.check = "SHOW COLUMNS FROM `inventory` LIKE 'serial_number'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
 ALTER TABLE `inventory`
 	DROP COLUMN `guid`,
-	ADD COLUMN `serial_number` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`,
-	ADD UNIQUE INDEX `idx_serial_number` (`serial_number`);
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`,
+	ADD UNIQUE INDEX `idx_item_unique_id` (`item_unique_id`);
+
+ALTER TABLE `character_parcels`
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `item_id`;
+
+ALTER TABLE `character_parcels_containers`
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `item_id`;
+
 )",
 		.content_schema_update = false
 	},
