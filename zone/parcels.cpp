@@ -390,14 +390,15 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			}
 
 			CharacterParcelsRepository::CharacterParcels parcel_out{};
-			parcel_out.from_name = GetName();
-			parcel_out.note      = parcel_in->note;
-			parcel_out.sent_date = time(nullptr);
-			parcel_out.quantity  = quantity;
-			parcel_out.item_id   = inst->GetID();
-			parcel_out.char_id   = send_to_client.at(0).char_id;
-			parcel_out.slot_id   = next_slot;
-			parcel_out.id        = 0;
+			parcel_out.from_name      = GetName();
+			parcel_out.note           = parcel_in->note;
+			parcel_out.sent_date      = time(nullptr);
+			parcel_out.quantity       = quantity;
+			parcel_out.item_id        = inst->GetID();
+			parcel_out.item_unique_id = inst->GetUniqueID();
+			parcel_out.char_id        = send_to_client.at(0).char_id;
+			parcel_out.slot_id        = next_slot;
+			parcel_out.id             = 0;
 
 			if (inst->IsAugmented()) {
 				auto augs			  = inst->GetAugmentIDs();
@@ -431,13 +432,14 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 
 			std::vector<CharacterParcelsContainersRepository::CharacterParcelsContainers> all_entries{};
 			if (inst->IsNoneEmptyContainer()) {
-				for (auto const &kv: *inst->GetContents()) {
+				for (auto const &[slot, item]: *inst->GetContents()) {
 					CharacterParcelsContainersRepository::CharacterParcelsContainers cpc{};
-					cpc.parcels_id = result.id;
-					cpc.slot_id    = kv.first;
-					cpc.item_id    = kv.second->GetID();
-					if (kv.second->IsAugmented()) {
-						auto augs      = kv.second->GetAugmentIDs();
+					cpc.parcels_id     = result.id;
+					cpc.slot_id        = slot;
+					cpc.item_id        = item->GetID();
+					cpc.item_unique_id = item->GetUniqueID();
+					if (item->IsAugmented()) {
+						auto augs      = item->GetAugmentIDs();
 						cpc.aug_slot_1 = augs.at(0);
 						cpc.aug_slot_2 = augs.at(1);
 						cpc.aug_slot_3 = augs.at(2);
@@ -445,13 +447,13 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 						cpc.aug_slot_5 = augs.at(4);
 						cpc.aug_slot_6 = augs.at(5);
 					}
-					cpc.quantity   = kv.second->GetCharges() >= 0 ? kv.second->GetCharges() : 1;
+					cpc.quantity   = item->GetCharges() >= 0 ? item->GetCharges() : 1;
 					all_entries.push_back(cpc);
 				}
 				CharacterParcelsContainersRepository::InsertMany(database, all_entries);
 			}
 
-			RemoveItemBySerialNumber(inst->GetSerialNumber2(), parcel_out.quantity == 0 ? 1 : parcel_out.quantity);
+			RemoveItemBySerialNumber(inst->GetUniqueID(), parcel_out.quantity == 0 ? 1 : parcel_out.quantity);
 			std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopSendParcel));
 			QueuePacket(outapp.get());
 
@@ -473,6 +475,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
+				e.item_unique_id   = parcel_out.item_unique_id;
 				e.augment_1_id     = parcel_out.aug_slot_1;
 				e.augment_2_id     = parcel_out.aug_slot_2;
 				e.augment_3_id     = parcel_out.aug_slot_3;
@@ -489,6 +492,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 						e.from_player_name = parcel_out.from_name;
 						e.to_player_name   = send_to_client.at(0).character_name;
 						e.item_id          = i.item_id;
+						e.item_unique_id   = i.item_unique_id;
 						e.augment_1_id     = i.aug_slot_1;
 						e.augment_2_id     = i.aug_slot_2;
 						e.augment_3_id     = i.aug_slot_3;
@@ -651,8 +655,9 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 		}
 	);
 	if (p != m_parcels.end()) {
-		uint32 item_id       = parcel_in.parcel_item_id;
-		uint32 item_quantity = p->second.quantity;
+		uint32      item_id        = parcel_in.parcel_item_id;
+		uint32      item_quantity  = p->second.quantity;
+		std::string item_unique_id = p->second.item_unique_id;
 		if (!item_id) {
 			LogError(
 				"Attempt to retrieve parcel with erroneous item id for client character id {}.",
@@ -692,6 +697,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 				break;
 			}
 			default: {
+				inst->SetUniqueID(item_unique_id);
 				std::vector<CharacterParcelsContainersRepository::CharacterParcelsContainers> results{};
 				if (inst->IsClassBag() && inst->GetItem()->BagSlots > 0) {
 					auto contents = inst->GetContents();
@@ -715,6 +721,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 							return;
 						}
 
+						item->SetUniqueID(i.item_unique_id);
 						if (CheckLoreConflict(item->GetItem())) {
 							if (RuleB(Parcel, DeleteOnDuplicate)) {
 								MessageString(Chat::Yellow, PARCEL_DUPLICATE_DELETE, inst->GetItem()->Name);
@@ -763,6 +770,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 					PlayerEvent::ParcelRetrieve e{};
 					e.from_player_name = p->second.from_name;
 					e.item_id          = p->second.item_id;
+					e.item_unique_id   = p->second.item_unique_id;
 					e.augment_1_id     = p->second.aug_slot_1;
 					e.augment_2_id     = p->second.aug_slot_2;
 					e.augment_3_id     = p->second.aug_slot_3;
@@ -776,6 +784,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 					for (auto const &i:results) {
 								e.from_player_name = p->second.from_name;
 								e.item_id          = i.item_id;
+								e.item_unique_id   = i.item_unique_id;
 								e.augment_1_id     = i.aug_slot_1;
 								e.augment_2_id     = i.aug_slot_2;
 								e.augment_3_id     = i.aug_slot_3;
@@ -785,8 +794,6 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 								e.quantity         = i.quantity;
 								e.sent_date        = p->second.sent_date;
 								RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
-
-
 					}
 				}
 			}

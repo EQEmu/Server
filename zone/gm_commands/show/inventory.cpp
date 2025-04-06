@@ -169,7 +169,7 @@ void ShowInventory(Client *c, const Seperator *sep)
 						scope_bit & peekWorld ? EQ::invslot::WORLD_BEGIN + index_main : index_main,
 						linker.GenerateLink(),
 						item_data->ID,
-						inst_main->GetSerialNumber2().c_str(),
+						inst_main->GetUniqueID().c_str(),
 						inst_main->IsStackable() && inst_main->GetCharges() > 0 ?
 						fmt::format(
 							" (Stack of {})",
@@ -238,7 +238,7 @@ void ShowInventory(Client *c, const Seperator *sep)
 						sub_index,
 						linker.GenerateLink(),
 						item_data->ID,
-						inst_sub->GetSerialNumber2().c_str(),
+						inst_sub->GetUniqueID().c_str(),
 						(
 							inst_sub->IsStackable() && inst_sub->GetCharges() > 0 ?
 							fmt::format(

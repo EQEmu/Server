@@ -158,11 +158,11 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 	m_custom_data    = copy.m_custom_data;
 	m_timers         = copy.m_timers;
 
-	m_serial_number2 = copy.m_serial_number2;
-	if (copy.GetSerialNumber2().empty()) {
+	if (copy.GetUniqueID().empty()) {
 		LogError("Creating Serial Number as part of Clone command");
-		CreateSerialNumber2();
+		copy.CreateUniqueID();
 	}
+	m_unique_id = copy.m_unique_id;
 
 	m_exp       = copy.m_exp;
 	m_evolveLvl = copy.m_evolveLvl;
@@ -2013,7 +2013,7 @@ void EQ::ItemInstance::SetEvolveEquipped(const bool in) const
 	GetTimers().at("evolve").Disable();
 }
 
-std::string EQ::ItemInstance::GenerateUniqueSerialNumber()
+std::string EQ::ItemInstance::GenerateUniqueID()
 {
 	std::string unique_hash = UniqueHashGenerator::generate();
 
