@@ -450,7 +450,7 @@ bool Zone::LoadZoneState(
 	}
 
 	std::vector<Spawn2Repository::Spawn2> spawn2s = Spawn2Repository::GetWhere(
-		database,
+		content_db,
 		fmt::format(
 			"zone = '{}' AND (version = {} OR version = -1)",
 			zone->GetShortName(),
