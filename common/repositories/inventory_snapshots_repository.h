@@ -103,7 +103,7 @@ public:
 			del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400;
 		}
 
-		DeleteWhere(db, fmt::format("`character_id` = '{}' AND `time_index` = '{}'", character_id, del_time));
+		DeleteWhere(db, fmt::format("`character_id` = '{}' AND `time_index` <= '{}'", character_id, del_time));
 	}
 
 	static void ListCharacterInvSnapshots(Database &db, uint32 character_id, std::list<std::pair<uint32, int>> &is_list)
