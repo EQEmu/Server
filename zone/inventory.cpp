@@ -1055,8 +1055,8 @@ bool Client::PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update)
 bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, bool client_update) {
 	LogInventory("Putting item [{}] ([{}]) into slot [{}]", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
 
-	if (inst.GetSerialNumber2().empty()) {
-		inst.CreateSerialNumber2();
+	if (inst.GetUniqueID().empty()) {
+		inst.CreateUniqueID();
 	}
 
 	if (slot_id == EQ::invslot::slotCursor) { // don't trust macros before conditional statements...

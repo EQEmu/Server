@@ -1062,7 +1062,7 @@ void Client::BulkSendTraderInventory(uint32 char_id)
 				)
 			);
 			if (inst) {
-				inst->SetSerialNumber2(trader_items.at(i).item_sn);
+				inst->SetUniqueID(trader_items.at(i).item_sn);
 				if (trader_items.at(i).item_charges > 0) {
 					inst->SetCharges(trader_items.at(i).item_charges);
 				}
@@ -1118,7 +1118,7 @@ EQ::ItemInstance *Client::FindTraderItemBySerialNumber(std::string &serial_numbe
 				slot_id = EQ::InventoryProfile::CalcSlotId(i, x);
 				item    = GetInv().GetItem(slot_id);
 				if (item) {
-					if (item->GetSerialNumber2().compare(serial_number) == 0) {
+					if (item->GetUniqueID().compare(serial_number) == 0) {
 						return item;
 					}
 				}
@@ -1155,7 +1155,7 @@ GetItems2_Struct *Client::GetTraderItems()
 
 				if (item) {
 					gis->items[ndx]         = item->GetID();
-					gis->serial_number[ndx] = item->GetSerialNumber2();
+					gis->serial_number[ndx] = item->GetUniqueID();
 					gis->charges[ndx]       = item->GetCharges() == 0 ? 1 : item->GetCharges();
 					ndx++;
 				}
@@ -1177,7 +1177,7 @@ uint16 Client::FindTraderItem(std::string &serial_number, uint16 Quantity){
 
 				item = GetInv().GetItem(SlotID);
 
-				if (item && item->GetSerialNumber2().compare(serial_number) == 0 &&
+				if (item && item->GetUniqueID().compare(serial_number) == 0 &&
 					(item->GetCharges() >= Quantity || (item->GetCharges() <= 0 && Quantity == 1)))
 				{
 					return SlotID;
@@ -1316,8 +1316,8 @@ void Client::FindAndNukeTraderItem(std::string &serial_number, int16 quantity, C
 			return;
 		}
 		else {
-			TraderRepository::UpdateQuantity(database, CharacterID(), item->GetSerialNumber2(), charges - quantity);
-			NukeTraderItem(slot_id, charges, quantity, customer, trader_slot, item->GetSerialNumber2(), item->GetID());
+			TraderRepository::UpdateQuantity(database, CharacterID(), item->GetUniqueID(), charges - quantity);
+			NukeTraderItem(slot_id, charges, quantity, customer, trader_slot, item->GetUniqueID(), item->GetID());
 			return;
 		}
 	}
@@ -1563,7 +1563,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 	strn0cpy(outtbs->item_name, buy_item->GetItem()->Name, sizeof(outtbs->item_name));
 	strn0cpy(
 		outtbs->serial_number,
-		buy_item->GetSerialNumber2().data(),
+		buy_item->GetUniqueID().data(),
 		sizeof(outtbs->serial_number)
 	);
 
@@ -1690,7 +1690,7 @@ static void UpdateTraderCustomerItemsAdded(
 
 			inst->SetCharges(i.item_charges);
 			inst->SetPrice(i.item_cost);
-			inst->SetSerialNumber2(i.item_sn);
+			inst->SetUniqueID(i.item_sn);
 			//FIXinst->SetMerchantSlot(i.item_sn);
 			if (inst->IsStackable()) {
 				inst->SetMerchantCount(i.item_charges);
@@ -1794,7 +1794,7 @@ static void UpdateTraderCustomerPriceChanged(
 			continue;
 		}
 
-		inst->SetSerialNumber2(trader_items.at(i).item_sn);
+		inst->SetUniqueID(trader_items.at(i).item_sn);
 		//inst->SetMerchantSlot(trader_items.at(i).item_sn);
 
 		LogTrading("Sending price update for [{}], Serial No. [{}] with [{}] charges",

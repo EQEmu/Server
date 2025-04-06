@@ -12700,13 +12700,11 @@ uint16 Client::GetSkill(EQ::skills::SkillType skill_id) const
 	return 0;
 }
 
-void Client::RemoveItemBySerialNumber(const std::string &serial_number, uint32 quantity)
+void Client::RemoveItemBySerialNumber(const std::string &item_unique_id, uint32 quantity)
 {
-	EQ::ItemInstance *item = nullptr;
-
-	uint32 removed_count = 0;
-
-	const auto& slot_ids = GetInventorySlots();
+	EQ::ItemInstance *item          = nullptr;
+	uint32            removed_count = 0;
+	const auto       &slot_ids      = GetInventorySlots();
 
 	for (const int16& slot_id : slot_ids) {
 		if (removed_count == quantity) {
@@ -12714,7 +12712,7 @@ void Client::RemoveItemBySerialNumber(const std::string &serial_number, uint32 q
 		}
 
 		item = GetInv().GetItem(slot_id);
-		if (item && item->GetSerialNumber2().compare(serial_number) == 0) {
+		if (item && item->GetUniqueID().compare(item_unique_id) == 0) {
 			uint32 charges    = item->IsStackable() ? item->GetCharges() : 0;
 			uint32 stack_size = std::max(charges, static_cast<uint32>(1));
 			if ((removed_count + stack_size) <= quantity) {
