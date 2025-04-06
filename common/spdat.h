@@ -246,7 +246,7 @@
 
 #define MAX_INVISIBILTY_LEVEL 254
 
-#define NO_ROOT_BREAK 200
+#define NO_ROOT_BREAK_SKILL_ID 200 //Live mechanic where if skill id in a spell is set to 200 it will prevent that spell from having a chance to break roots.
 
 //instrument item id's used as song components
 #define INSTRUMENT_HAND_DRUM 13000

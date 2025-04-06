@@ -4439,7 +4439,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		if (IsValidSpell(spell_id) && !iBuffTic) {
 			//see if root will break
-			if (IsRooted() && !FromDamageShield && spells[spell_id].skill != NO_ROOT_BREAK) {  // neotoyko: only spells cancel root
+			if (IsRooted() && !FromDamageShield && spells[spell_id].skill != NO_ROOT_BREAK_SKILL_ID) {  // neotoyko: only spells cancel root
 				TryRootFadeByDamage(buffslot, attacker);
 			}
 		}
