@@ -40,6 +40,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/deity.h"
 #include "../common/memory_buffer.h"
 #include "../common/repositories/character_evolving_items_repository.h"
+#include <thread>
 
 #include <map>
 

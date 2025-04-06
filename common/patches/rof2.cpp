@@ -6167,30 +6167,31 @@ namespace RoF2
 		switch (action) {
 			case structs::RoF2BazaarTraderBuyerActions::BeginTraderMode: {
 				DECODE_LENGTH_EXACT(structs::BeginTrader_Struct);
-				SETUP_DIRECT_DECODE(ClickTrader2_Struct, structs::BeginTrader_Struct);
+
+				unsigned char *eq_buffer = __packet->pBuffer;
+				auto           eq        = (RoF2::structs::BeginTrader_Struct *) eq_buffer;
+
+				ClickTraderNew_Struct out{};
+				out.action = TraderOn;
+				for (auto i = 0; i < RoF2::invtype::BAZAAR_SIZE; i++) {
+					BazaarTraderDetails btd{};
+					btd.unique_id = eq->item_unique_ids[i].item_unique_id;
+					btd.cost      = eq->item_cost[i];
+					out.items.push_back(btd);
+				}
+
+				std::stringstream           ss{};
+				cereal::BinaryOutputArchive ar(ss);
+				{
+					ar(out);
+				}
+
+				__packet->size    = static_cast<uint32>(ss.str().length());
+				__packet->pBuffer = new unsigned char[__packet->size]{};
+				memcpy(__packet->pBuffer, ss.str().data(), __packet->size);
+				safe_delete_array(eq_buffer);
+
 				LogTrading("(RoF2) BeginTraderMode action <green>[{}]", action);
-
-				emu->action = TraderOn;
-				std::copy_n(eq->item_cost, RoF2::invtype::BAZAAR_SIZE, emu->item_cost);
-				std::transform(
-					std::begin(eq->items),
-					std::end(eq->items),
-					std::begin(emu->serial_number),
-					[&](const structs::TraderItemSerial_Struct x) {
-						return std::string(x.serial_number);
-					});
-				//std::ranges::copy(eq->items->serial_number, emu->serial_number);
-				//std::copy_n(eq->items->serial_number, RoF2::invtype::BAZAAR_SIZE, emu->serial_number);
-				// std::transform(
-				// 	std::begin(eq->items),
-				// 	std::end(eq->items),
-				// 	std::begin(emu->serial_number),
-				// 	[&](const structs::TraderItemSerial_Struct x) {
-				// 		return Strings::ToUnsignedBigInt(x.serial_number,0);
-				// 	}
-				// );
-
-				FINISH_DIRECT_DECODE();
 				break;
 			}
 			case structs::RoF2BazaarTraderBuyerActions::EndTraderMode: {

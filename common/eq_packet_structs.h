@@ -3780,12 +3780,36 @@ struct Trader2_Struct {
 	std::string serial_number[EQ::invtype::BAZAAR_SIZE];
 };
 
-struct ClickTrader2_Struct {
-	uint32      action;
-	uint32      unknown_004;
-	uint64      items[EQ::invtype::BAZAAR_SIZE];
-	uint32      item_cost[EQ::invtype::BAZAAR_SIZE];
-	std::string serial_number[EQ::invtype::BAZAAR_SIZE];
+struct BazaarTraderDetails {
+	uint64      item_id;
+	std::string unique_id;
+	uint64      cost;
+	uint64      serial_number; // backwards compatibility.  Not used for RoF2 as of March 2025
+
+	template<class Archive>
+	void serialize(Archive &archive)
+	{
+		archive(
+			CEREAL_NVP(item_id),
+			CEREAL_NVP(unique_id),
+			CEREAL_NVP(cost),
+			CEREAL_NVP(serial_number)
+		);
+	}
+};
+
+struct ClickTraderNew_Struct {
+	uint32                           action;
+	std::vector<BazaarTraderDetails> items;
+
+	template<class Archive>
+	void serialize(Archive &archive)
+	{
+		archive(
+			CEREAL_NVP(action),
+			CEREAL_NVP(items)
+		);
+	}
 };
 
 struct GetItems2_Struct {
