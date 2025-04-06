@@ -17157,7 +17157,7 @@ void Client::CheckAFK(PlayerPositionUpdateClient_Struct *p)
 				GetCleanName(),
 				std::chrono::duration_cast<std::chrono::seconds>(idle_duration).count()
 			);
-			Message(Chat::Yellow, "You are now AFK. World positions will not update until you move.");
+			Message(Chat::Yellow, "You are now AFK. World positions will no longer update until you move.");
 			m_is_afk = true;
 		}
 	}
