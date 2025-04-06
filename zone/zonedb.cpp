@@ -354,7 +354,7 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 	}
 
 	inst->SetCharges(charges);
-	inst->SetSerialNumber2(serial_number);
+	inst->SetUniqueID(serial_number);
 	//FIX inst->SetMerchantSlot(serial_number);
 	inst->SetPrice(cost);
 

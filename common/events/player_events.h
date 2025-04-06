@@ -1426,6 +1426,7 @@ namespace PlayerEvent {
 
 	struct ParcelRetrieve {
 		uint32      item_id;
+		std::string item_unique_id;
 		uint32      augment_1_id;
 		uint32      augment_2_id;
 		uint32      augment_3_id;
@@ -1471,6 +1472,7 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_unique_id),
 				CEREAL_NVP(augment_1_id),
 				CEREAL_NVP(augment_2_id),
 				CEREAL_NVP(augment_3_id),
@@ -1486,6 +1488,7 @@ namespace PlayerEvent {
 
 	struct ParcelSend {
 		uint32      item_id;
+		std::string item_unique_id;
 		uint32      augment_1_id;
 		uint32      augment_2_id;
 		uint32      augment_3_id;
@@ -1535,6 +1538,7 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_unique_id),
 				CEREAL_NVP(augment_1_id),
 				CEREAL_NVP(augment_2_id),
 				CEREAL_NVP(augment_3_id),
@@ -1553,6 +1557,7 @@ namespace PlayerEvent {
 	struct ParcelDelete {
 		uint32      char_id;
 		uint32      item_id;
+		std::string item_unique_id;
 		uint32      augment_1_id;
 		uint32      augment_2_id;
 		uint32      augment_3_id;
@@ -1601,6 +1606,7 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_unique_id),
 				CEREAL_NVP(augment_1_id),
 				CEREAL_NVP(augment_2_id),
 				CEREAL_NVP(augment_3_id),

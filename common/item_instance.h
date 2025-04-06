@@ -234,13 +234,14 @@ namespace EQ
 
 		int32              GetSerialNumber() const { return m_SerialNumber; }
 		void               SetSerialNumber(int32 id) { m_SerialNumber = id; }
-		const std::string &GetSerialNumber2() const { return m_serial_number2; }
+		const std::string &GetSerialNumber2() const { return m_unique_id; }
+		const std::string &GetUniqueID() const { return m_unique_id; }
 		//std::string        &GetSerialNumber2() const { return m_serial_number2; }
-		void               SetSerialNumber2(std::string sn) { m_serial_number2 = std::move(sn); }
+		void               SetUniqueID(std::string sn) { m_unique_id = std::move(sn); }
 
-		void CreateSerialNumber2() const
+		void CreateUniqueID() const
 		{
-			m_serial_number2 = GenerateUniqueSerialNumber();
+			m_unique_id = GenerateUniqueID();
 		}
 
 		std::map<std::string, ::Timer>& GetTimers() const { return m_timers; }
@@ -359,29 +360,29 @@ namespace EQ
 		std::map<uint8, ItemInstance*>::const_iterator _cend() { return m_contents.cend(); }
 
 		void               _PutItem(uint8 index, ItemInstance *inst) { m_contents[index] = inst; }
-		static std::string GenerateUniqueSerialNumber();
+		static std::string GenerateUniqueID();
 
-		ItemInstTypes    m_use_type{ItemInstNormal};// Usage type for item
-		const ItemData * m_item{nullptr};           // Ptr to item data
-		int16            m_charges{0};              // # of charges for chargeable items
-		uint32           m_price{0};                // Bazaar /trader price
-		uint32           m_color{0};
-		uint32           m_merchantslot{0};
-		int16            m_currentslot{0};
-		bool             m_attuned{false};
-		int32            m_merchantcount{1};//number avaliable on the merchant, -1=unlimited
-		int32            m_SerialNumber{0}; // Unique identifier for this instance of an item. Needed for Bazaar.
-		mutable std::string      m_serial_number2{}; // unique serial number across all zones/world TESTING March 2025
-		uint32           m_exp{0};
-		int8             m_evolveLvl{0};
-		ItemData *       m_scaledItem{nullptr};
-		bool             m_scaling{false};
-		uint32           m_ornamenticon{0};
-		uint32           m_ornamentidfile{0};
-		uint32           m_new_id_file{0};
-		uint32           m_ornament_hero_model{0};
-		uint32           m_recast_timestamp{0};
-		int              m_task_delivered_count{0};
+		ItemInstTypes       m_use_type{ ItemInstNormal }; // Usage type for item
+		const ItemData     *m_item{ nullptr };            // Ptr to item data
+		int16               m_charges{ 0 };               // # of charges for chargeable items
+		uint32              m_price{ 0 };                 // Bazaar /trader price
+		uint32              m_color{ 0 };
+		uint32              m_merchantslot{ 0 };
+		int16               m_currentslot{ 0 };
+		bool                m_attuned{ false };
+		int32               m_merchantcount{ 1 }; // number avaliable on the merchant, -1=unlimited
+		int32               m_SerialNumber{ 0 };  // Unique identifier for this instance of an item. Needed for Bazaar.
+		mutable std::string m_unique_id{};        // unique serial number across all zones/world TESTING March 2025
+		uint32              m_exp{ 0 };
+		int8                m_evolveLvl{ 0 };
+		ItemData           *m_scaledItem{ nullptr };
+		bool                m_scaling{ false };
+		uint32              m_ornamenticon{ 0 };
+		uint32              m_ornamentidfile{ 0 };
+		uint32              m_new_id_file{ 0 };
+		uint32              m_ornament_hero_model{ 0 };
+		uint32              m_recast_timestamp{ 0 };
+		int                 m_task_delivered_count{ 0 };
 		mutable CharacterEvolvingItemsRepository::CharacterEvolvingItems  m_evolving_details{};
 
 		// Items inside of this item (augs or contents) {};

@@ -260,8 +260,8 @@ int16 EQ::InventoryProfile::PutItem(int16 slot_id, const ItemInstance& inst)
 }
 
 int16 EQ::InventoryProfile::PushCursor(const ItemInstance &inst) {
-	if (inst.GetSerialNumber2().empty()) {
-		inst.CreateSerialNumber2();
+	if (inst.GetUniqueID().empty()) {
+		inst.CreateUniqueID();
 	}
 
 	m_cursor.push(inst.Clone());
