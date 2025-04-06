@@ -9043,11 +9043,11 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 
 void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum)
 {
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_CashReward, sizeof(CashReward_Struct));
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_CashReward, static_cast<uint32>(sizeof(CashReward_Struct)));
 	auto outbuf = reinterpret_cast<CashReward_Struct *>(outapp->pBuffer);
-	outbuf->copper = copper;
-	outbuf->silver = silver;
-	outbuf->gold = gold;
+	outbuf->copper   = copper;
+	outbuf->silver   = silver;
+	outbuf->gold     = gold;
 	outbuf->platinum = platinum;
 
 	AddMoneyToPP(copper, silver, gold, platinum);
