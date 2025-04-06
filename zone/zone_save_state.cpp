@@ -5,6 +5,7 @@
 #include "corpse.h"
 #include "zone.h"
 #include "zone_save_state.h"
+#include "../common/repositories/spawn2_repository.h"
 
 // IsZoneStateValid checks if the zone state is valid
 // if these fields are all empty or zero value for an entire zone state, it's considered invalid
@@ -440,8 +441,24 @@ bool Zone::LoadZoneState(
 	zone->initgrids_timer.Trigger();
 	zone->Process();
 
+	// load zone variables first
+	for (auto &s: spawn_states) {
+		if (s.is_zone) {
+			LoadZoneVariables(zone, s.entity_variables);
+			break;
+		}
+	}
+
+	std::vector<Spawn2Repository::Spawn2> spawn2s = Spawn2Repository::GetWhere(
+		database,
+		fmt::format(
+			"zone = '{}' AND (version = {} OR version = -1)",
+			zone->GetShortName(),
+			zone->GetInstanceVersion()
+		)
+	);
+
 	// spawn2
-	int count = 0;
 	for (auto &s: spawn_states) {
 		if (s.spawngroup_id == 0 || s.is_corpse || s.is_zone) {
 			continue;
@@ -463,13 +480,26 @@ bool Zone::LoadZoneState(
 			}
 		}
 
+		// find spawn 2 by id
+		auto spawn2 = std::find_if(
+			spawn2s.begin(),
+			spawn2s.end(),
+			[&](const auto &e) {
+				return e.id == s.spawn2_id;
+			}
+		);
+
+		if (spawn2 == spawn2s.end()) {
+			LogZoneState("Failed to load spawn2 data for spawn2_id [{}]", s.spawn2_id);
+		}
+
 		auto new_spawn = new Spawn2(
 			s.spawn2_id,
 			s.spawngroup_id,
-			s.x,
-			s.y,
-			s.z,
-			s.heading,
+			spawn2->id > 0 ? spawn2->x : s.x,
+			spawn2->id > 0 ? spawn2->y : s.y,
+			spawn2->id > 0 ? spawn2->z : s.z,
+			spawn2->id > 0 ? spawn2->heading : s.heading,
 			s.respawn_time,
 			s.variance,
 			spawn_time_left,
@@ -481,13 +511,13 @@ bool Zone::LoadZoneState(
 			(EmuAppearance) s.anim
 		);
 
+		new_spawn->SetStoredLocation(glm::vec4(s.x, s.y, s.z, s.heading));
+
 		if (spawn_time_left == 0) {
 			new_spawn->SetResumedNPCID(s.npc_id);
 			new_spawn->SetResumedFromZoneSuspend(true);
 			new_spawn->SetEntityVariables(GetVariablesDeserialized(s.entity_variables));
 		}
-
-		count++;
 
 		spawn2_list.Insert(new_spawn);
 		new_spawn->Process();
