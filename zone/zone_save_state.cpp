@@ -481,25 +481,25 @@ bool Zone::LoadZoneState(
 		}
 
 		// find spawn 2 by id
-		auto spawn2 = std::find_if(
-			spawn2s.begin(),
-			spawn2s.end(),
-			[&](const auto &e) {
-				return e.id == s.spawn2_id;
+		Spawn2Repository::Spawn2 spawn2;
+		for (auto &sp: spawn2s) {
+			if (sp.id == s.spawn2_id) {
+				spawn2 = sp;
+				break;
 			}
-		);
+		}
 
-		if (spawn2 == spawn2s.end()) {
+		if (!spawn2.id) {
 			LogZoneState("Failed to load spawn2 data for spawn2_id [{}]", s.spawn2_id);
 		}
 
 		auto new_spawn = new Spawn2(
 			s.spawn2_id,
 			s.spawngroup_id,
-			spawn2->id > 0 ? spawn2->x : s.x,
-			spawn2->id > 0 ? spawn2->y : s.y,
-			spawn2->id > 0 ? spawn2->z : s.z,
-			spawn2->id > 0 ? spawn2->heading : s.heading,
+			spawn2.id > 0 ? spawn2.x : s.x,
+			spawn2.id > 0 ? spawn2.y : s.y,
+			spawn2.id > 0 ? spawn2.z : s.z,
+			spawn2.id > 0 ? spawn2.heading : s.heading,
 			s.respawn_time,
 			s.variance,
 			spawn_time_left,
