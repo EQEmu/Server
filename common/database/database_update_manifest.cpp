@@ -7115,7 +7115,7 @@ ADD COLUMN `first_login` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `xtargets`;
 	ManifestEntry{
 		.version = 9324,
 		.description = "2025_03_27_implement_item_unique_id.sql",
-		.check = "SHOW COLUMNS FROM `inventory` LIKE 'serial_number'",
+		.check = "SHOW COLUMNS FROM `inventory` LIKE 'item_unique_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -7145,6 +7145,23 @@ ALTER TABLE `inventory_snapshots`
 	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`;
 	DROP PRIMARY KEY,
 	ADD PRIMARY KEY (`time_index`, `character_id`, `slot_id`) USING BTREE;
+
+ALTER TABLE `trader`
+	CHANGE COLUMN `char_id` `character_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`,
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `item_id`,
+	CHANGE COLUMN `aug_slot_1` `augment_one` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `item_unique_id`,
+	CHANGE COLUMN `aug_slot_2` `augment_two` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_one`,
+	CHANGE COLUMN `aug_slot_3` `augment_three` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_two`,
+	CHANGE COLUMN `aug_slot_4` `augment_four` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_three`,
+	CHANGE COLUMN `aug_slot_5` `augment_five` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_four`,
+	CHANGE COLUMN `aug_slot_6` `augment_six` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_five`,
+	DROP COLUMN `item_sn`,
+	DROP INDEX `idx_trader_item_sn`,
+	DROP INDEX `charid_slotid`,
+	ADD INDEX `charid_slotid` (`character_id`, `slot_id`) USING BTREE,
+	DROP INDEX `idx_trader_char`,
+	ADD INDEX `idx_trader_char` (`character_id`, `char_zone_id`, `char_zone_instance_id`) USING BTREE,
+	ADD UNIQUE INDEX `idx_item_unique_id` (`item_unique_id`);
 
 )",
 		.content_schema_update = false

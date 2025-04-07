@@ -3093,7 +3093,7 @@ struct BazaarSearchCriteria_Struct {
 struct BazaarInspect_Struct {
 	uint32 action;
 	char   player_name[64];
-	char   serial_number[16];
+	char   item_unique_id[17];
 	uint32 item_id;
 	uint32 trader_id;
 };
@@ -3730,7 +3730,7 @@ struct Trader_Struct {
 };
 
 struct TraderItems_Struct {
-	std::string serial_number;
+	std::string item_unique_id;
 	uint32      item_id;
 	uint64      item_cost;
 
@@ -3738,7 +3738,7 @@ struct TraderItems_Struct {
 	void serialize(Archive &archive)
 	{
 		archive(
-			CEREAL_NVP(serial_number),
+			CEREAL_NVP(item_unique_id),
 			CEREAL_NVP(item_id),
 			CEREAL_NVP(item_cost)
 		);
@@ -3850,7 +3850,7 @@ struct TraderBuy_Struct {
 /*084*/ char	seller_name[64];
 /*148*/ char	unknown_148[32];
 /*180*/ char	item_name[64];
-/*244*/ char	serial_number[17];
+/*244*/ char	item_unique_id[17];
 /*261*/ char	unknown_261[3];
 /*264*/ uint32	item_id;
 /*268*/ uint32	price;
@@ -3869,12 +3869,12 @@ struct TraderItemUpdate_Struct{
 };
 
 struct TraderPriceUpdate_Struct {
-/*000*/	uint32	Action;
-/*004*/	uint32	SubAction;
-/*008*/	char 	serial_number[16];
-/*012*/	uint32	Unknown012;
-/*016*/	uint32	NewPrice;
-/*020*/	uint32	Unknown016;
+/*000*/	uint32 action;
+/*002*/	uint32 sub_action;
+/*004*/	char   item_unique_id[17];
+/*021*/	char   unknown_021[3];
+/*024*/	uint32 unknown_024;
+/*028*/	uint32 new_price;
 };
 
 struct MoneyUpdate_Struct{
@@ -3889,6 +3889,7 @@ struct TraderDelItem_Struct{
 	uint32 trader_id;
 	uint32 item_id;
 	uint32 unknown_012;
+	char   item_unique_id[17];
 };
 
 struct TraderClick_Struct{
@@ -6494,7 +6495,7 @@ struct BazaarSearchResultsFromDB_Struct {
 	uint32      count;
 	uint32      trader_id;
 	uint32      item_id;
-	std::string serial_number;
+	std::string item_unique_id;
 	uint32      charges;
 	uint32      cost;
 	uint32      slot_id;
@@ -6506,7 +6507,6 @@ struct BazaarSearchResultsFromDB_Struct {
 	uint32      item_stat;
 	bool        stackable;
 	std::string item_name;
-	std::string serial_number_RoF;
 	std::string trader_name;
 
 	template<class Archive>
@@ -6516,7 +6516,7 @@ struct BazaarSearchResultsFromDB_Struct {
 			CEREAL_NVP(count),
 			CEREAL_NVP(trader_id),
 			CEREAL_NVP(item_id),
-			CEREAL_NVP(serial_number),
+			CEREAL_NVP(item_unique_id),
 			CEREAL_NVP(charges),
 			CEREAL_NVP(cost),
 			CEREAL_NVP(slot_id),
@@ -6528,7 +6528,6 @@ struct BazaarSearchResultsFromDB_Struct {
 			CEREAL_NVP(item_stat),
 			CEREAL_NVP(stackable),
 			CEREAL_NVP(item_name),
-			CEREAL_NVP(serial_number_RoF),
 			CEREAL_NVP(trader_name)
 		);
 	}

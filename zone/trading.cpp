@@ -759,7 +759,7 @@ void Client::TraderShowItems()
 	std::stringstream           ss{};
 	cereal::BinaryOutputArchive ar(ss);
 
-	auto trader_items = TraderRepository::GetWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+	auto trader_items = TraderRepository::GetWhere(database, fmt::format("`character_id` = '{}'", CharacterID()));
 	if (trader_items.empty()) {
 		return;
 	}
@@ -769,9 +769,9 @@ void Client::TraderShowItems()
 
 	for (auto const &t: trader_items) {
 		TraderItems_Struct items{};
-		items.serial_number = t.item_sn;
-		items.item_id       = t.item_id;
-		items.item_cost     = t.item_cost;
+		items.item_unique_id = t.item_unique_id;
+		items.item_id        = t.item_id;
+		items.item_cost      = t.item_cost;
 
 		tcm.items.push_back(items);
 	}
@@ -861,23 +861,23 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 
 		trader_item.id                    = 0;
 		trader_item.char_entity_id        = GetID();
-		trader_item.char_id               = CharacterID();
+		trader_item.character_id          = CharacterID();
 		trader_item.char_zone_id          = GetZoneID();
 		trader_item.char_zone_instance_id = GetInstanceID();
-		trader_item.item_charges          = inst->GetCharges() == 0 ? 1 : inst->GetCharges();
+		trader_item.item_charges          = inst->GetCharges();
 		trader_item.item_cost             = i.cost;
 		trader_item.item_id               = inst->GetID();
-		trader_item.item_sn               = i.unique_id;
+		trader_item.item_unique_id        = i.unique_id;
 		trader_item.slot_id               = slot_id;
 		trader_item.listing_date          = time(nullptr);
 		if (inst->IsAugmented()) {
-			auto augs              = inst->GetAugmentIDs();
-			trader_item.aug_slot_1 = augs.at(0);
-			trader_item.aug_slot_2 = augs.at(1);
-			trader_item.aug_slot_3 = augs.at(2);
-			trader_item.aug_slot_4 = augs.at(3);
-			trader_item.aug_slot_5 = augs.at(4);
-			trader_item.aug_slot_6 = augs.at(5);
+			auto augs                 = inst->GetAugmentIDs();
+			trader_item.augment_one   = augs.at(0);
+			trader_item.augment_two   = augs.at(1);
+			trader_item.augment_three = augs.at(2);
+			trader_item.augment_four  = augs.at(3);
+			trader_item.augment_five  = augs.at(4);
+			trader_item.augment_six   = augs.at(5);
 		}
 
 		trader_items.emplace_back(trader_item);
@@ -890,7 +890,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 		return;
 	}
 
-	TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}';", CharacterID()));
+	TraderRepository::DeleteWhere(database, fmt::format("`character_id` = '{}';", CharacterID()));
 	TraderRepository::ReplaceMany(database, trader_items);
 	safe_delete(inv);
 
@@ -920,7 +920,7 @@ void Client::TraderEndTrader()
 		}
 	}
 
-	TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+	TraderRepository::DeleteWhere(database, fmt::format("`character_id` = '{}'", CharacterID()));
 
 	SendBecomeTraderToWorld(this, TraderOff);
 	SendTraderMode(TraderOff);
@@ -945,12 +945,12 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity, TraderRepository::Tr
 		database.CreateItem(
 			item,
 			Quantity,
-			t.aug_slot_1,
-			t.aug_slot_2,
-			t.aug_slot_3,
-			t.aug_slot_4,
-			t.aug_slot_5,
-			t.aug_slot_6
+			t.augment_one,
+			t.augment_two,
+			t.augment_three,
+			t.augment_four,
+			t.augment_five,
+			t.augment_six
 		)
 	);
 
@@ -969,58 +969,50 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity, TraderRepository::Tr
 	}
 }
 
-void Client::SendSingleTraderItem(uint32 char_id, const std::string &serial_number)
+void Client::SendSingleTraderItem(uint32 character_id, const std::string &serial_number)
 {
-	auto inst = database.LoadSingleTraderItem(char_id, serial_number);
+	auto inst = database.LoadSingleTraderItem(character_id, serial_number);
 	if (inst) {
 		SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketMerchant); // MainCursor?
 	}
 }
 
-void Client::BulkSendTraderInventory(uint32 char_id)
+void Client::BulkSendTraderInventory(uint32 character_id)
 {
 	const EQ::ItemData *item;
 
-	auto   trader_items = TraderRepository::GetWhere(database, fmt::format("`char_id` = '{}'", char_id));
+	auto   trader_items = TraderRepository::GetWhere(database, fmt::format("`character_id` = '{}'", character_id));
 	uint32 item_limit   = trader_items.size() >= GetInv().GetLookup()->InventoryTypeSize.Bazaar ?
 		GetInv().GetLookup()->InventoryTypeSize.Bazaar :
 		trader_items.size();
 
-	for (uint32 i = 0; i < item_limit; i++) {
-		if ((trader_items.at(i).item_id == 0) || (trader_items.at(i).item_cost == 0)) {
+	for (int16 i = 0; i < item_limit; i++) {
+		if (trader_items.at(i).item_id == 0 || trader_items.at(i).item_cost == 0) {
 			continue;
 		}
-		else {
-			item = database.GetItem(trader_items.at(i).item_id);
-		}
+
+		item = database.GetItem(trader_items.at(i).item_id);
 
 		if (item && (item->NoDrop != 0)) {
 			std::unique_ptr<EQ::ItemInstance> inst(
 				database.CreateItem(
 					trader_items.at(i).item_id,
 					trader_items.at(i).item_charges,
-					trader_items.at(i).aug_slot_1,
-					trader_items.at(i).aug_slot_2,
-					trader_items.at(i).aug_slot_3,
-					trader_items.at(i).aug_slot_4,
-					trader_items.at(i).aug_slot_5,
-					trader_items.at(i).aug_slot_6
+					trader_items.at(i).augment_one,
+					trader_items.at(i).augment_two,
+					trader_items.at(i).augment_three,
+					trader_items.at(i).augment_four,
+					trader_items.at(i).augment_five,
+					trader_items.at(i).augment_six
 				)
 			);
 			if (inst) {
-				inst->SetUniqueID(trader_items.at(i).item_sn);
-				if (trader_items.at(i).item_charges > 0) {
-					inst->SetCharges(trader_items.at(i).item_charges);
-				}
-
-				if (inst->IsStackable()) {
-					inst->SetMerchantCount(trader_items.at(i).item_charges);
-					//inst->SetMerchantSlot(trader_items.at(i).item_sn);
-				}
-
+				inst->SetUniqueID(trader_items.at(i).item_unique_id);
+				inst->SetMerchantCount(inst->IsStackable() ? inst->GetCharges() : 1);
+				inst->SetMerchantSlot(i + 1);
 				inst->SetPrice(trader_items.at(i).item_cost);
-				SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketMerchant);
-//				safe_delete(inst);
+				AddDataToMerchantList(i + 1, inst->GetMerchantCount(), inst->GetUniqueID());
+				SendItemPacket(i + 1, inst.get(), ItemPacketMerchant);
 			}
 			else
 				LogTrading("Client::BulkSendTraderInventory nullptr inst pointer");
@@ -1098,8 +1090,32 @@ EQ::ItemInstance *Client::FindTraderItemByUniqueID(std::string &unique_id)
 		}
 	}
 
-	LogTrading("Couldn't find item! Serial No. was [{}]", unique_id);
+	LogTrading("Couldn't find item! item_unique_id was [{}]", unique_id);
+	return nullptr;
+}
 
+EQ::ItemInstance *Client::FindTraderItemByUniqueID(const char* unique_id)
+{
+	EQ::ItemInstance *item    = nullptr;
+	int16             slot_id = 0;
+
+	for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
+		item = GetInv().GetItem(i);
+		if (item && item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) {
+			for (int16 x = EQ::invbag::SLOT_BEGIN; x <= EQ::invbag::SLOT_END; x++) {
+				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
+				slot_id = EQ::InventoryProfile::CalcSlotId(i, x);
+				item    = GetInv().GetItem(slot_id);
+				if (item) {
+					if (item->GetUniqueID().compare(unique_id) == 0) {
+						return item;
+					}
+				}
+			}
+		}
+	}
+
+	LogTrading("Couldn't find item! item_unique_id was [{}]", unique_id);
 	return nullptr;
 }
 
@@ -1188,6 +1204,7 @@ void Client::NukeTraderItem(
 		tdis->unknown_000 = 0;
 		tdis->trader_id   = customer->GetID();
 		tdis->item_id     = Strings::ToUnsignedBigInt(serial_number);
+		strn0cpy(tdis->item_unique_id, serial_number.c_str(), sizeof(tdis->item_unique_id));
 		tdis->unknown_012 = 0;
 		customer->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -1224,17 +1241,18 @@ void Client::NukeTraderItem(
 	safe_delete(outapp2);
 }
 
-void Client::FindAndNukeTraderItem(std::string &serial_number, int16 quantity, Client *customer, uint16 trader_slot)
+void Client::FindAndNukeTraderItem(std::string &item_unique_id, int16 quantity, Client *customer, uint16 trader_slot)
 {
-	const EQ::ItemInstance *item     = nullptr;
-	bool                   stackable = false;
-	int16                  charges   = 0;
-	uint16                 slot_id   = FindTraderItem(serial_number, quantity);
+	const EQ::ItemInstance *item      = nullptr;
+	bool                    stackable = false;
+	int16                   charges   = 0;
+	uint16                  slot_id   = FindTraderItem(item_unique_id, quantity);
+
 
 	if (slot_id > 0) {
 		item = GetInv().GetItem(slot_id);
 		if (!item) {
-			LogTrading("Could not find Item: [{}] on Trader: [{}]", serial_number, quantity, GetName());
+			LogTrading("Could not find Item: [{}] on Trader: [{}]", item_unique_id, quantity, GetName());
 			return;
 		}
 
@@ -1252,7 +1270,7 @@ void Client::FindAndNukeTraderItem(std::string &serial_number, int16 quantity, C
 
 		if (charges <= quantity || (charges <= 0 && quantity == 1) || !stackable) {
 			DeleteItemInInventory(slot_id, quantity);
-			auto   trader_items = TraderRepository::GetWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+			auto   trader_items = TraderRepository::GetWhere(database, fmt::format("`character_id` = '{}'", CharacterID()));
 			uint32 item_limit   = trader_items.size() >= GetInv().GetLookup()->InventoryTypeSize.Bazaar ?
 				GetInv().GetLookup()->InventoryTypeSize.Bazaar :
 				trader_items.size();
@@ -1261,7 +1279,7 @@ void Client::FindAndNukeTraderItem(std::string &serial_number, int16 quantity, C
 
 			std::vector<TraderRepository::Trader> delete_queue{};
 			for (int i = 0; i < item_limit; i++) {
-				if (test_slot && trader_items.at(i).item_sn.compare(serial_number) == 0) {
+				if (test_slot && trader_items.at(i).item_unique_id.compare(item_unique_id) == 0) {
 					delete_queue.push_back(trader_items.at(i));
 					NukeTraderItem(
 						slot_id,
@@ -1269,7 +1287,7 @@ void Client::FindAndNukeTraderItem(std::string &serial_number, int16 quantity, C
 						quantity,
 						customer,
 						trader_slot,
-						trader_items.at(i).item_sn,
+						trader_items.at(i).item_unique_id,
 						trader_items.at(i).item_id
 					);
 					test_slot = false;
@@ -1287,13 +1305,13 @@ void Client::FindAndNukeTraderItem(std::string &serial_number, int16 quantity, C
 			return;
 		}
 		else {
-			TraderRepository::UpdateQuantity(database, CharacterID(), item->GetUniqueID(), charges - quantity);
+			//TraderRepository::UpdateQuantity(database, CharacterID(), item->GetUniqueID(), charges - quantity);
 			NukeTraderItem(slot_id, charges, quantity, customer, trader_slot, item->GetUniqueID(), item->GetID());
 			return;
 		}
 	}
 	LogTrading("Could NOT find a match for Item: <red>[{}] with a quantity of: <red>[{}] on Trader: <red>[{}]\n",
-			   serial_number,
+			   item_unique_id,
 			   quantity,
 			   GetName()
 	);
@@ -1354,109 +1372,62 @@ static void BazaarAuditTrail(const char *seller, const char *buyer, const char *
 	database.QueryDatabase(query);
 }
 
-void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplicationPacket *app)
+void Client::BuyTraderItem(const EQApplicationPacket *app)
 {
-	if (!Trader) {
-		return;
-	}
+	auto in     = reinterpret_cast<TraderBuy_Struct*>(app->pBuffer);
+	auto trader = entity_list.GetClientByID(in->trader_id);
 
-	if (!Trader->IsTrader()) {
+	if (!trader || !trader->IsTrader()) {
+		Message(Chat::Red, "The trader could not be found.");
 		TradeRequestFailed(app);
 		return;
 	}
 
-	auto outapp     = std::make_unique<EQApplicationPacket>(OP_Trader, static_cast<uint32>(sizeof(TraderBuy_Struct)));
-	auto outtbs     = (TraderBuy_Struct *) outapp->pBuffer;
-	outtbs->item_id = tbs->item_id;
+	auto trader_packet = std::make_unique<EQApplicationPacket>(OP_Trader, static_cast<uint32>(sizeof(TraderBuy_Struct)));
+	auto data          = reinterpret_cast<TraderBuy_Struct*>(trader_packet->pBuffer);
 
-	const EQ::ItemInstance *buy_item = nullptr;
-	uint32                  item_id  = 0;
-
-	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-		tbs->item_id = Strings::ToUnsignedBigInt(tbs->serial_number);
-	}
-
-	auto sn  = std::string(tbs->serial_number);
-	buy_item = Trader->FindTraderItemBySerialNumber(sn);
-
-	if (!buy_item) {
-		LogTrading("Unable to find item id <red>[{}] item_sn <red>[{}] on trader", tbs->item_id, tbs->serial_number);
+	auto buy_inst = trader->FindTraderItemByUniqueID(in->item_unique_id);
+	if (!buy_inst) {
+		LogTrading("Unable to find item id <red>[{}] item_sn <red>[{}] on trader", in->item_id, in->item_unique_id);
+		Message(Chat::Red, "The trader no longer has the item for sale.  Please refresh the merchant window.");
 		TradeRequestFailed(app);
 		return;
 	}
 
+	uint32 quantity = in->quantity;
 	LogTrading(
-		"Name: <green>[{}] IsStackable: <green>[{}] Requested Quantity: <green>[{}] Charges on Item <green>[{}]",
-		buy_item->GetItem()->Name,
-		buy_item->IsStackable(),
-		tbs->quantity,
-		buy_item->GetCharges()
+		"Name: <green>[{}] IsStackable: <green>[{}] Requested Quantity: <green>[{}]",
+		buy_inst->GetItem()->Name,
+		buy_inst->IsStackable(),
+		quantity
 	);
-	// If the item is not stackable, then we can only be buying one of them.
-	if (!buy_item->IsStackable()) {
-		outtbs->quantity = 1; // normally you can't send more than 1 here
-	}
-	else {
-		// Stackable items, arrows, diamonds, etc
-		int32 item_charges = buy_item->GetCharges();
-		// ItemCharges for stackables should not be <= 0
-		if (item_charges <= 0) {
-			outtbs->quantity = 1;
-			// If the purchaser requested more than is in the stack, just sell them how many are actually in the stack.
-		}
-		else if (static_cast<uint32>(item_charges) < tbs->quantity) {
-			outtbs->quantity = item_charges;
-		}
-		else {
-			outtbs->quantity = tbs->quantity;
-		}
-	}
 
-	LogTrading("Actual quantity that will be traded is <green>[{}]", outtbs->quantity);
-
-	if ((tbs->price * outtbs->quantity) <= 0) {
+	if (in->price * quantity <= 0) {
         Message(Chat::Red, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
-        Trader->Message(
-            Chat::Red,
-            "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1"
-        );
+        trader->Message(Chat::Red, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
         LogError(
             "Bazaar: Zero price transaction between <red>[{}] and <red>[{}] aborted. Item: <red>[{}] Charges: "
             "<red>[{}] Qty <red>[{}] Price: <red>[{}]",
-            GetName(),
-            Trader->GetName(),
-            buy_item->GetItem()->Name,
-            buy_item->GetCharges(),
-            tbs->quantity,
-            tbs->price
+            GetCleanName(),
+            trader->GetCleanName(),
+            buy_inst->GetItem()->Name,
+            buy_inst->GetCharges(),
+            quantity,
+            in->price
         );
         TradeRequestFailed(app);
         return;
     }
 
-	uint64 total_transaction_value = static_cast<uint64>(tbs->price) * static_cast<uint64>(outtbs->quantity);
-
+	uint64 total_transaction_value = static_cast<uint64>(in->price) * static_cast<uint64>(quantity);
 	if (total_transaction_value > MAX_TRANSACTION_VALUE) {
-		Message(
-			Chat::Red,
-			"That would exceed the single transaction limit of %u platinum.",
-			MAX_TRANSACTION_VALUE / 1000
-		);
+		Message(Chat::Red,"That would exceed the single transaction limit of %u platinum.", MAX_TRANSACTION_VALUE / 1000);
 		TradeRequestFailed(app);
 		return;
 	}
 
 	// This cannot overflow assuming MAX_TRANSACTION_VALUE, checked above, is the default of 2000000000
-	uint32 total_cost = tbs->price * outtbs->quantity;
-
-	if (Trader->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-		// RoF+ uses individual item price where older clients use total price
-		outtbs->price = tbs->price;
-	}
-	else {
-		outtbs->price = total_cost;
-	}
-
+	uint32 total_cost = in->price * quantity;
 	if (!TakeMoneyFromPP(total_cost)) {
         RecordPlayerEventLog(
             PlayerEvent::POSSIBLE_HACK,
@@ -1464,6 +1435,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
                 .message = "Attempted to buy something in bazaar but did not have enough money."
             }
         );
+		MessageString(Chat::Red, INSUFFICIENT_FUNDS);
         TradeRequestFailed(app);
         return;
     }
@@ -1471,103 +1443,121 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 	LogTrading("Customer Paid: <green>[{}] in Copper", total_cost);
 
 	uint32 platinum = total_cost / 1000;
-	total_cost     -= (platinum * 1000);
+	total_cost     -= platinum * 1000;
 	uint32 gold     = total_cost / 100;
-	total_cost     -= (gold * 100);
+	total_cost     -= gold * 100;
 	uint32 silver   = total_cost / 10;
-	total_cost     -= (silver * 10);
+	total_cost     -= silver * 10;
 	uint32 copper   = total_cost;
 
-	Trader->AddMoneyToPP(copper, silver, gold, platinum, true);
+	LogTrading("Trader Received: [{}] Platinum, [{}] Gold, [{}] Silver, [{}] Copper", platinum, gold, silver, copper);
+    ReturnTraderReq(app, quantity, buy_inst->GetID());
 
-	if (buy_item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+	if (CheckLoreConflict(buy_inst->GetItem())) {
+		MessageString(Chat::Red, DUPLICATE_LORE);
+		TradeRequestFailed(app);
+		return;
+	}
+
+	if (quantity != 1) {
+		buy_inst->SetCharges(quantity);
+	}
+
+	if (!trader->RemoveItemByItemUniqueId(buy_inst->GetUniqueID(), quantity)) {
+		Message(Chat::Red, "The Trader no longer has the item.  Please refresh the merchant window.");
+		TradeRequestFailed(app);
+		return;
+	}
+
+	trader->AddMoneyToPP(copper, silver, gold, platinum, true);
+
+	if (!AutoPutLootInInventory(*buy_inst, false, true)) {
+		MessageString(Chat::Red, HOW_CAN_YOU_BUY_MORE, trader->GetCleanName());
+		TradeRequestFailed(app);
+		return;
+	}
+
+	auto [slot_id, merchant_data]            = GetDataFromMerchantListByItemUniqueId(buy_inst->GetUniqueID());
+	auto [merchant_quantity, item_unique_id] = merchant_data;
+
+	data->action    = BazaarBuyItem;
+	data->price     = in->price;
+	data->quantity  = quantity;
+	data->trader_id = trader->GetID();
+	strn0cpy(data->seller_name, trader->GetCleanName(), sizeof(data->seller_name));
+	strn0cpy(data->buyer_name, GetCleanName(), sizeof(data->buyer_name));
+	strn0cpy(data->item_name, buy_inst->GetItem()->Name, sizeof(data->item_name));
+	strn0cpy(data->item_unique_id, buy_inst->GetUniqueID().data(), sizeof(data->item_unique_id));
+	trader->QueuePacket(trader_packet.get());
+
+	if (merchant_quantity > quantity) {
+		buy_inst->SetMerchantCount(merchant_quantity - quantity);
+		buy_inst->SetMerchantSlot(slot_id);
+		buy_inst->SetPrice(in->price);
+		auto list = GetTraderMerchantList();
+		std::get<0>(list->at(slot_id)) -= quantity;
+		SendItemPacket(slot_id, buy_inst, ItemPacketMerchant);
+		TraderRepository::UpdateQuantity(database, item_unique_id, merchant_quantity - quantity);
+	}
+	else {
+		auto client_packet = new EQApplicationPacket(OP_ShopDelItem, static_cast<uint32>(sizeof(Merchant_DelItem_Struct)));
+		auto client_data   = reinterpret_cast<struct Merchant_DelItem_Struct *>(client_packet->pBuffer);
+
+		client_data->npcid    = trader->GetID();
+		client_data->playerid = GetID();
+		client_data->itemslot = slot_id;
+
+		QueuePacket(client_packet);
+		safe_delete(client_packet);
+
+		auto list = GetTraderMerchantList();
+		list->erase(slot_id);
+		TraderRepository::DeleteWhere(database, fmt::format("`item_unique_id` = '{}'", item_unique_id));
+	}
+
+	if (buy_inst && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
 		auto e = PlayerEvent::TraderPurchaseEvent{
-			.item_id              = buy_item->GetID(),
-			.augment_1_id         = buy_item->GetAugmentItemID(0),
-			.augment_2_id         = buy_item->GetAugmentItemID(1),
-			.augment_3_id         = buy_item->GetAugmentItemID(2),
-			.augment_4_id         = buy_item->GetAugmentItemID(3),
-			.augment_5_id         = buy_item->GetAugmentItemID(4),
-			.augment_6_id         = buy_item->GetAugmentItemID(5),
-			.item_name            = buy_item->GetItem()->Name,
-			.trader_id            = Trader->CharacterID(),
-			.trader_name          = Trader->GetCleanName(),
-			.price                = tbs->price,
-			.quantity             = outtbs->quantity,
-			.charges              = buy_item->GetCharges(),
-			.total_cost           = (tbs->price * outtbs->quantity),
+			.item_id              = buy_inst->GetID(),
+			.augment_1_id         = buy_inst->GetAugmentItemID(0),
+			.augment_2_id         = buy_inst->GetAugmentItemID(1),
+			.augment_3_id         = buy_inst->GetAugmentItemID(2),
+			.augment_4_id         = buy_inst->GetAugmentItemID(3),
+			.augment_5_id         = buy_inst->GetAugmentItemID(4),
+			.augment_6_id         = buy_inst->GetAugmentItemID(5),
+			.item_name            = buy_inst->GetItem()->Name,
+			.trader_id            = trader->CharacterID(),
+			.trader_name          = trader->GetCleanName(),
+			.price                = in->price,
+			.quantity             = quantity,
+			.charges              = buy_inst->GetCharges(),
+			.total_cost           = total_cost,
 			.player_money_balance = GetCarriedMoney(),
 		};
 
 		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
 	}
 
-	if (buy_item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+	if (buy_inst && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
 		auto e = PlayerEvent::TraderSellEvent{
-			.item_id              = buy_item->GetID(),
-			.augment_1_id         = buy_item->GetAugmentItemID(0),
-			.augment_2_id         = buy_item->GetAugmentItemID(1),
-			.augment_3_id         = buy_item->GetAugmentItemID(2),
-			.augment_4_id         = buy_item->GetAugmentItemID(3),
-			.augment_5_id         = buy_item->GetAugmentItemID(4),
-			.augment_6_id         = buy_item->GetAugmentItemID(5),
-			.item_name            = buy_item->GetItem()->Name,
+			.item_id              = buy_inst->GetID(),
+			.augment_1_id         = buy_inst->GetAugmentItemID(0),
+			.augment_2_id         = buy_inst->GetAugmentItemID(1),
+			.augment_3_id         = buy_inst->GetAugmentItemID(2),
+			.augment_4_id         = buy_inst->GetAugmentItemID(3),
+			.augment_5_id         = buy_inst->GetAugmentItemID(4),
+			.augment_6_id         = buy_inst->GetAugmentItemID(5),
+			.item_name            = buy_inst->GetItem()->Name,
 			.buyer_id             = CharacterID(),
 			.buyer_name           = GetCleanName(),
-			.price                = tbs->price,
-			.quantity             = outtbs->quantity,
-			.charges              = buy_item->GetCharges(),
-			.total_cost           = (tbs->price * outtbs->quantity),
-			.player_money_balance = Trader->GetCarriedMoney(),
+			.price                = in->price,
+			.quantity             = quantity,
+			.charges              = buy_inst->GetCharges(),
+			.total_cost           = total_cost,
+			.player_money_balance = trader->GetCarriedMoney(),
 		};
 
-		RecordPlayerEventLogWithClient(Trader, PlayerEvent::TRADER_SELL, e);
+		RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADER_SELL, e);
 	}
-
-	LogTrading("Trader Received: [{}] Platinum, [{}] Gold, [{}] Silver, [{}] Copper", platinum, gold, silver, copper);
-    ReturnTraderReq(app, outtbs->quantity, item_id);
-
-    outtbs->trader_id = GetID();
-    outtbs->action    = BazaarBuyItem;
-	strn0cpy(outtbs->seller_name, Trader->GetCleanName(), sizeof(outtbs->seller_name));
-	strn0cpy(outtbs->buyer_name, GetCleanName(), sizeof(outtbs->buyer_name));
-	strn0cpy(outtbs->item_name, buy_item->GetItem()->Name, sizeof(outtbs->item_name));
-	strn0cpy(
-		outtbs->serial_number,
-		buy_item->GetUniqueID().data(),
-		sizeof(outtbs->serial_number)
-	);
-
-	TraderRepository::Trader t{};
-	t.item_charges = buy_item->IsStackable() ? outtbs->quantity : buy_item->GetCharges();
-	t.item_id      = buy_item->GetItem()->ID;
-	t.aug_slot_1   = buy_item->GetAugmentItemID(0);
-	t.aug_slot_2   = buy_item->GetAugmentItemID(1);
-	t.aug_slot_3   = buy_item->GetAugmentItemID(2);
-	t.aug_slot_4   = buy_item->GetAugmentItemID(3);
-	t.aug_slot_5   = buy_item->GetAugmentItemID(4);
-	t.aug_slot_6   = buy_item->GetAugmentItemID(5);
-	t.char_id      = CharacterID();
-	t.slot_id      = FindNextFreeParcelSlot(CharacterID());
-
-	SendTraderItem(
-		buy_item->GetItem()->ID,
-		buy_item->IsStackable() ? outtbs->quantity : buy_item->GetCharges(),
-		t
-	);
-
-	if (RuleB(Bazaar, AuditTrail)) {
-		BazaarAuditTrail(Trader->GetName(), GetName(), buy_item->GetItem()->Name, outtbs->quantity, outtbs->price, 0);
-	}
-
-	Trader->FindAndNukeTraderItem(sn, outtbs->quantity, this, 0);
-
-	if (item_id > 0 && Trader->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-		// Convert Serial Number back to ItemID for RoF+
-		outtbs->item_id = item_id;
-	}
-
-	Trader->QueuePacket(outapp.get());
 }
 
 void Client::SendBazaarWelcome()
@@ -1647,12 +1637,12 @@ static void UpdateTraderCustomerItemsAdded(
 				database.CreateItem(
 					i.item_id,
 					i.item_charges,
-					i.aug_slot_1,
-					i.aug_slot_2,
-					i.aug_slot_3,
-					i.aug_slot_4,
-					i.aug_slot_5,
-					i.aug_slot_6
+					i.augment_one,
+					i.augment_two,
+					i.augment_three,
+					i.augment_four,
+					i.augment_five,
+					i.augment_six
 				)
 			);
 			if (!inst) {
@@ -1661,7 +1651,7 @@ static void UpdateTraderCustomerItemsAdded(
 
 			inst->SetCharges(i.item_charges);
 			inst->SetPrice(i.item_cost);
-			inst->SetUniqueID(i.item_sn);
+			inst->SetUniqueID(i.item_unique_id);
 			//FIXinst->SetMerchantSlot(i.item_sn);
 			if (inst->IsStackable()) {
 				inst->SetMerchantCount(i.item_charges);
@@ -1669,7 +1659,7 @@ static void UpdateTraderCustomerItemsAdded(
 
 			customer->SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketMerchant); // MainCursor?
 			LogTrading("Sending price update for [{}], Serial No. [{}] with [{}] charges",
-					   item->Name, i.item_sn, i.item_charges);
+					   item->Name, i.item_unique_id, i.item_charges);
 		}
 	}
 }
@@ -1718,7 +1708,7 @@ static void UpdateTraderCustomerPriceChanged(
 				// }
 				//tdis->item_id = trader_items.at(i).item_sn;
 				LogTrading("Telling customer to remove item [{}] with [{}] charges and S/N [{}]",
-						   item_id, charges, trader_items.at(i).item_sn);
+						   item_id, charges, trader_items.at(i).item_unique_id);
 
 				customer->QueuePacket(outapp);
 			}
@@ -1735,12 +1725,12 @@ static void UpdateTraderCustomerPriceChanged(
 		database.CreateItem(
 			it->item_id,
 			it->item_charges,
-			it->aug_slot_1,
-			it->aug_slot_2,
-			it->aug_slot_3,
-			it->aug_slot_4,
-			it->aug_slot_5,
-			it->aug_slot_6
+			it->augment_one,
+			it->augment_two,
+			it->augment_three,
+			it->augment_four,
+			it->augment_five,
+			it->augment_six
 		)
 	);
 	if (!inst) {
@@ -1765,11 +1755,11 @@ static void UpdateTraderCustomerPriceChanged(
 			continue;
 		}
 
-		inst->SetUniqueID(trader_items.at(i).item_sn);
+		inst->SetUniqueID(trader_items.at(i).item_unique_id);
 		//inst->SetMerchantSlot(trader_items.at(i).item_sn);
 
 		LogTrading("Sending price update for [{}], Serial No. [{}] with [{}] charges",
-				   item->Name, trader_items.at(i).item_sn, trader_items.at(i).item_charges);
+				   item->Name, trader_items.at(i).item_unique_id, trader_items.at(i).item_charges);
 
 		customer->SendItemPacket(EQ::invslot::slotCursor, inst.get(), ItemPacketMerchant); // MainCursor??
 	}
@@ -2469,237 +2459,100 @@ void Client::SendTraderMode(BazaarTraderBarterActions status)
 	safe_delete(outapp);
 }
 
-void Client::TraderPriceUpdate(const EQApplicationPacket *app)
+void Client::TraderUpdateItem(const EQApplicationPacket *app)
 {
-	// Handle price updates from the Trader and update a customer browsing our stuff if necessary
-	// This method also handles removing items from sale and adding them back up whilst still in
-	// Trader mode.
-	//
-	auto tpus = (TraderPriceUpdate_Struct *) app->pBuffer;
+	auto                              in        = reinterpret_cast<TraderPriceUpdate_Struct *>(app->pBuffer);
+	uint32                            new_price = in->new_price;
+	auto                              inst      = FindTraderItemByUniqueID(in->item_unique_id);
+	std::unique_ptr<EQ::ItemInstance> inst_copy(inst ? inst->Clone() : nullptr);
 
-	LogTrading(
-		"Received Price Update for <green>[{}] Item Serial No. <green>[{}] New Price <green>[{}]",
-		GetName(),
-		tpus->serial_number,
-		tpus->NewPrice
-	);
-
-	// Pull the items this Trader currently has for sale from the trader table.
-	//
-	auto   trader_items = TraderRepository::GetWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
-	uint32 item_limit   = trader_items.size() >= GetInv().GetLookup()->InventoryTypeSize.Bazaar
-		? GetInv().GetLookup()->InventoryTypeSize.Bazaar
-		: trader_items.size();
-
-	// The client only sends a single update with the Serial Number of the item whose price has been updated.
-	// We must update the price for all the Trader's items that are identical to that one item, i.e.
-	// if it is a stackable item like arrows, update the price for all stacks. If it is not stackable, then
-	// update the prices for all items that have the same number of charges.
-	//
-	uint32 id_of_item_to_update      = 0;
-	int32  charges_on_item_to_update = 0;
-	uint32 old_price                 = 0;
-
-	for (int i = 0; i < item_limit; i++) {
-		if ((trader_items.at(i).item_id > 0) && (trader_items.at(i).item_sn.compare(tpus->serial_number) == 0)) {
-			// We found the item that the Trader wants to change the price of (or add back up for sale).
-			//
-			id_of_item_to_update      = trader_items.at(i).item_id;
-			charges_on_item_to_update = trader_items.at(i).item_charges;
-			old_price                 = trader_items.at(i).item_cost;
-
-			LogTrading(
-				"ItemID is <green>[{}] Charges is <green>[{}]",
-				trader_items.at(i).item_id,
-				trader_items.at(i).item_charges
-			);
-			break;
-		}
-	}
-
-	if (id_of_item_to_update == 0) {
-		// If the item is not currently in the trader table for this Trader, then they must have removed it from sale while
-		// still in Trader mode. Check if the item is in their Trader Satchels, and if so, put it back up.
-		// Quick Sanity check. If the item is not currently up for sale, and the new price is zero, just ack the packet
-		// and do nothing.
-		if (tpus->NewPrice == 0) {
-			tpus->SubAction = BazaarPriceChange_RemoveItem;
-			QueuePacket(app);
+	if (new_price == 0) {
+		auto result = TraderRepository::DeleteWhere(database, fmt::format("`item_unique_id` = '{}'", in->item_unique_id));
+		if (!result) {
+			LogError("Trader {} attempt to remove item_unique_id {} failed", CharacterID(), in->item_unique_id);
 			return;
 		}
 
-		LogTrading("Unable to find item to update price for. Rechecking trader satchels");
-
-		// Find what is in their Trader Satchels
-		auto   newgis                 = GetTraderItems();
-		uint32 id_of_item_to_add      = 0;
-		int32  charges_on_item_to_add = 0;
-
-		for (int i = 0; i < GetInv().GetLookup()->InventoryTypeSize.Bazaar; i++) {
-			if (newgis->items[i] > 0 && newgis->serial_number[i].compare(tpus->serial_number) == 0) {
-				id_of_item_to_add      = newgis->items[i];
-				charges_on_item_to_add = newgis->charges[i];
-
-				LogTrading(
-					"Found new Item to Add, ItemID is <green>[{}] Charges is <green>[{}]",
-					newgis->items[i],
-					newgis->charges[i]
-				);
-				break;
-			}
-		}
-
-		const EQ::ItemData *item = nullptr;
-		if (id_of_item_to_add) {
-			item = database.GetItem(id_of_item_to_add);
-		}
-
-		if (!id_of_item_to_add || !item) {
-			tpus->SubAction = BazaarPriceChange_Fail;
-			QueuePacket(app);
-			TraderEndTrader();
-			safe_delete(newgis);
-
-			LogTrading("Item not found in Trader Satchels either");
-			return;
-		}
-
-		// It is a limitation of the client that if you have multiple of the same item, but with different charges,
-		// although you can set different prices for them before entering Trader mode. If you Remove them and then
-		// add them back whilst still in Trader mode, they all go up for the same price. We check for this situation
-		// and give the Trader a warning message.
-		//
-		if (!item->Stackable) {
-			bool same_item_with_differing_charges = false;
-
-			for (int i = 0; i < GetInv().GetLookup()->InventoryTypeSize.Bazaar; i++) {
-				if ((newgis->items[i] == id_of_item_to_add) && (newgis->charges[i] != charges_on_item_to_add)) {
-					same_item_with_differing_charges = true;
-					break;
-				}
-			}
-
-			if (same_item_with_differing_charges) {
-				Message(
-					Chat::Red,
-					"Warning: You have more than one %s with different charges. They have all been added for sale "
-					"at the same price.",
-					item->Name
-				);
-			}
-		}
-
-		// Now put all Items with a matching ItemID up for trade.
-		//
-		for (int i = 0; i < GetInv().GetLookup()->InventoryTypeSize.Bazaar; i++) {
-			if (newgis->items[i] == id_of_item_to_add) {
-				auto item_detail = FindTraderItemBySerialNumber(newgis->serial_number[i]);
-
-				TraderRepository::Trader trader_item{};
-				trader_item.id                    = 0;
-				trader_item.char_entity_id        = GetID();
-				trader_item.char_id               = CharacterID();
-				trader_item.char_zone_id          = GetZoneID();
-				trader_item.char_zone_instance_id = GetInstanceID();
-				trader_item.item_charges          = newgis->charges[i];
-				trader_item.item_cost             = tpus->NewPrice;
-				trader_item.item_id               = newgis->items[i];
-				trader_item.item_sn               = newgis->serial_number[i];
-				trader_item.listing_date          = time(nullptr);
-				if (item_detail->IsAugmented()) {
-					auto augs              = item_detail->GetAugmentIDs();
-					trader_item.aug_slot_1 = augs.at(0);
-					trader_item.aug_slot_2 = augs.at(1);
-					trader_item.aug_slot_3 = augs.at(2);
-					trader_item.aug_slot_4 = augs.at(3);
-					trader_item.aug_slot_5 = augs.at(4);
-					trader_item.aug_slot_6 = augs.at(5);
-				}
-				trader_item.slot_id = i;
-
-				TraderRepository::ReplaceOne(database, trader_item);
-
-				trader_items.push_back(trader_item);
-
-				LogTrading(
-					"Adding new item for <green>[{}] ItemID <green>[{}] SerialNumber <green>[{}] Charges <green>[{}] "
-					"Price: <green>[{}] Slot <green>[{}]",
-					GetName(),
-					newgis->items[i],
-					newgis->serial_number[i],
-					newgis->charges[i],
-					tpus->NewPrice,
-					i
-				);
-			}
-		}
-
-		// If we have a customer currently browsing, update them with the new items.
-		//
-		if (GetCustomerID()) {
-			UpdateTraderCustomerItemsAdded(
-				GetCustomerID(),
-				trader_items,
-				id_of_item_to_add,
-				GetInv().GetLookup()->InventoryTypeSize.Bazaar
-			);
-		}
-
-		safe_delete(newgis);
-
-		// Acknowledge to the client.
-		tpus->SubAction = BazaarPriceChange_AddItem;
+		in->sub_action = BazaarPriceChange_RemoveItem;
 		QueuePacket(app);
+
+		auto customer = entity_list.GetClientByID(GetCustomerID());
+		if (customer && inst_copy) {
+			auto list                     = customer->GetTraderMerchantList();
+			auto [slot_id, merchant_data] = customer->GetDataFromMerchantListByItemUniqueId(in->item_unique_id);
+
+			auto client_packet =
+				new EQApplicationPacket(OP_ShopDelItem, static_cast<uint32>(sizeof(Merchant_DelItem_Struct)));
+			auto client_data      = reinterpret_cast<struct Merchant_DelItem_Struct *>(client_packet->pBuffer);
+
+			client_data->npcid    = GetID();
+			client_data->playerid = customer->GetID();
+			client_data->itemslot = slot_id;
+
+			customer->QueuePacket(client_packet);
+			safe_delete(client_packet);
+
+			list->erase(slot_id);
+
+			customer->Message(
+				Chat::Red,
+				fmt::format(
+					"Trader {} removed item {} from the bazaar.  Item no longer available.",
+					GetCleanName(),
+					inst_copy->GetItem()->Name
+					).c_str()
+			);
+			LogTrading("Trader removed item from trader list with item_unique_id {}", in->item_unique_id);
+		}
 
 		return;
 	}
 
-	// This is a safeguard against a Trader increasing the price of an item while a customer is browsing and
-	// unwittingly buying it at a higher price than they were expecting to.
-	//
-	if ((old_price != 0) && (tpus->NewPrice > old_price) && GetCustomerID()) {
-		tpus->SubAction = BazaarPriceChange_Fail;
-		QueuePacket(app);
-		TraderEndTrader();
-		Message(
-			Chat::Red,
-			"You must remove the item from sale before you can increase the price while a customer is browsing."
-		);
-		Message(Chat::Red, "Click 'Begin Trader' to restart Trader mode with the increased price for this item.");
-		return;
+	auto result = TraderRepository::UpdatePrice(database, in->item_unique_id, new_price);
+	if (!result && inst_copy) {
+		// Item does not exist so it must be re-created,
+		TraderRepository::Trader trader_item{};
+
+		trader_item.id                    = 0;
+		trader_item.char_entity_id        = GetID();
+		trader_item.character_id          = CharacterID();
+		trader_item.char_zone_id          = GetZoneID();
+		trader_item.char_zone_instance_id = GetInstanceID();
+		trader_item.item_charges          = inst_copy->GetCharges();
+		trader_item.item_cost             = new_price;
+		trader_item.item_id               = inst_copy->GetID();
+		trader_item.item_unique_id        = in->item_unique_id;
+		trader_item.slot_id               = 0;
+		trader_item.listing_date          = time(nullptr);
+		if (inst_copy->IsAugmented()) {
+			auto augs                 = inst_copy->GetAugmentIDs();
+			trader_item.augment_one   = augs.at(0);
+			trader_item.augment_two   = augs.at(1);
+			trader_item.augment_three = augs.at(2);
+			trader_item.augment_four  = augs.at(3);
+			trader_item.augment_five  = augs.at(4);
+			trader_item.augment_six   = augs.at(5);
+		}
+
+		TraderRepository::ReplaceOne(database, trader_item);
 	}
 
-	// Send Acknowledgement back to the client.
-	if (old_price == 0) {
-		tpus->SubAction = BazaarPriceChange_AddItem;
-	}
-	else if (tpus->NewPrice != 0) {
-		tpus->SubAction = BazaarPriceChange_UpdatePrice;
-	}
-	else {
-		tpus->SubAction = BazaarPriceChange_RemoveItem;
-	}
-
+	in->sub_action = BazaarPriceChange_UpdatePrice;
 	QueuePacket(app);
 
-	if (old_price == tpus->NewPrice) {
-		LogTrading("The new price is the same as the old one");
-		return;
-	}
-	// Update the price for all items we have for sale that have this ItemID and number of charges, or remove
-	// them from the trader table if the new price is zero.
-	//
-	database.UpdateTraderItemPrice(CharacterID(), id_of_item_to_update, charges_on_item_to_update, tpus->NewPrice);
+	auto customer = entity_list.GetClientByID(GetCustomerID());
+	if (customer && inst_copy) {
+		auto [slot_id, merchant_data]            = customer->GetDataFromMerchantListByItemUniqueId(inst_copy->GetUniqueID());
+		auto [merchant_quantity, item_unique_id] = merchant_data;
 
-	// If a customer is browsing our goods, send them the updated prices / remove the items from the Merchant window
-	if (GetCustomerID()) {
-		UpdateTraderCustomerPriceChanged(
-			GetCustomerID(),
-			trader_items,
-			id_of_item_to_update,
-			charges_on_item_to_update,
-			tpus->NewPrice,
-			item_limit
+		inst_copy->SetMerchantCount(merchant_quantity);
+		inst_copy->SetMerchantSlot(slot_id);
+		inst_copy->SetPrice(new_price);
+		customer->SendItemPacket(slot_id, inst_copy.get(), ItemPacketMerchant);
+
+		customer->Message(
+			Chat::Red,
+			fmt::format("Trader {} updated the price of item {}", GetCleanName(), inst_copy->GetItem()->Name).c_str()
 		);
 	}
 }
@@ -2785,33 +2638,12 @@ void Client::SendBulkBazaarTraders()
 
 void Client::DoBazaarInspect(BazaarInspect_Struct &in)
 {
-	if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
-		if (in.trader_id >= TraderRepository::TRADER_CONVERT_ID) {
-			auto sn = std::string(in.serial_number);
-			auto trader = TraderRepository::GetTraderByInstanceAndSerialnumber(
-				database,
-				in.trader_id - TraderRepository::TRADER_CONVERT_ID,
-				sn
-			);
-
-			if (!trader.trader_id) {
-				LogTrading("Unable to convert trader id for {} and serial number {}.  Trader Buy aborted.",
-					in.trader_id - TraderRepository::TRADER_CONVERT_ID,
-					in.serial_number
-				);
-				return;
-			}
-
-			in.trader_id = trader.trader_id;
-		}
-	}
-
 	auto items = TraderRepository::GetWhere(
-		database, fmt::format("`char_id` = '{}' AND `item_sn` = '{}'", in.trader_id, in.serial_number)
+		database, fmt::format("`item_unique_id` = '{}'", in.item_unique_id)
 	);
 
 	if (items.empty()) {
-		LogInfo("Failed to find item with serial number [{}]", in.serial_number);
+		LogInfo("Failed to find item with serial number [{}]", in.item_unique_id);
 		return;
 	}
 
@@ -2821,12 +2653,12 @@ void Client::DoBazaarInspect(BazaarInspect_Struct &in)
 		database.CreateItem(
 			item.item_id,
 			item.item_charges,
-			item.aug_slot_1,
-			item.aug_slot_2,
-			item.aug_slot_3,
-			item.aug_slot_4,
-			item.aug_slot_5,
-			item.aug_slot_6
+			item.augment_one,
+			item.augment_two,
+			item.augment_three,
+			item.augment_four,
+			item.augment_five,
+			item.augment_six
 		)
 	);
 
@@ -2881,13 +2713,13 @@ std::string Client::DetermineMoneyString(uint64 cp)
 void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicationPacket *app)
 {
 	auto in          = (TraderBuy_Struct *) app->pBuffer;
-	auto sn = std::string(tbs->serial_number);
+	auto sn = std::string(tbs->item_unique_id);
 	auto trader_item = TraderRepository::GetItemBySerialNumber(database, sn, tbs->trader_id);
 	if (!trader_item.id || GetTraderTransactionDate() < trader_item.listing_date) {
 		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
 				   "<red>[{}] The Traders data was outdated.",
 				   tbs->trader_id,
-				   tbs->serial_number
+				   tbs->item_unique_id
 		);
 		in->method     = BazaarByParcel;
 		in->sub_action = DataOutDated;
@@ -2899,7 +2731,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
 				   "<red>[{}] The item is already within an active transaction.",
 				   tbs->trader_id,
-				   tbs->serial_number
+				   tbs->item_unique_id
 		);
 		in->method     = BazaarByParcel;
 		in->sub_action = DataOutDated;
@@ -2913,19 +2745,19 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		database.CreateItem(
 			trader_item.item_id,
 			trader_item.item_charges,
-			trader_item.aug_slot_1,
-			trader_item.aug_slot_2,
-			trader_item.aug_slot_3,
-			trader_item.aug_slot_4,
-			trader_item.aug_slot_5,
-			trader_item.aug_slot_6
+			trader_item.augment_one,
+			trader_item.augment_two,
+			trader_item.augment_three,
+			trader_item.augment_four,
+			trader_item.augment_five,
+			trader_item.augment_six
 		)
 	);
 
 	if (!buy_item) {
 		LogTrading("Unable to find item id <red>[{}] item_sn <red>[{}] on trader",
 				   trader_item.item_id,
-				   trader_item.item_sn
+				   trader_item.item_unique_id
 		);
 		in->method     = BazaarByParcel;
 		in->sub_action = Failed;
@@ -3087,13 +2919,6 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 
 	if (trader_item.item_charges <= static_cast<int32>(tbs->quantity) || !buy_item->IsStackable()) {
 		TraderRepository::DeleteOne(database, trader_item.id);
-	} else {
-		TraderRepository::UpdateQuantity(
-			database,
-			trader_item.char_id,
-			trader_item.item_sn,
-			trader_item.item_charges - tbs->quantity
-		);
 	}
 
 	SendParcelDeliveryToWorld(ps);
@@ -3877,4 +3702,44 @@ void Client::CancelTraderTradeWindow()
 {
 	auto end_session = new EQApplicationPacket(OP_ShopEnd);
 	FastQueuePacket(&end_session);
+}
+
+void Client::AddDataToMerchantList(int16 slot_id, int32 quantity, const std::string &item_unique_id)
+{
+	auto list = GetTraderMerchantList();
+	list->emplace(std::pair(slot_id, std::make_tuple(quantity, item_unique_id)));
+}
+
+std::tuple<int16, std::string> Client::GetDataFromMerchantListByMerchantSlotId(int16 slot_id)
+{
+	auto list = GetTraderMerchantList();
+	return list->contains(slot_id) ? list->at(slot_id) : std::make_tuple(INVALID_INDEX, "0000000000000000");
+}
+
+int16 Client::GetSlotFromMerchantListByItemUniqueId(const std::string &unique_id)
+{
+	auto list = GetTraderMerchantList();
+
+	for (auto [slot_id, merchant_data] : *list) {
+		auto [quantity, item_unique_id] = merchant_data;
+		if (item_unique_id == unique_id) {
+			return slot_id;
+		}
+	}
+
+	return INVALID_INDEX;
+}
+
+std::pair<int16, std::tuple<uint32, std::string>> Client::GetDataFromMerchantListByItemUniqueId(const std::string &unique_id)
+{
+	auto list = GetTraderMerchantList();
+
+	for (auto [slot_id, merchant_data] : *list) {
+		auto [quantity, item_unique_id] = merchant_data;
+		if (item_unique_id == unique_id) {
+			return { slot_id, merchant_data };
+		}
+	}
+
+	return std::make_pair(INVALID_INDEX, std::make_tuple(0, "0000000000000000"));
 }

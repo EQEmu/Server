@@ -12687,7 +12687,7 @@ uint16 Client::GetSkill(EQ::skills::SkillType skill_id) const
 	return 0;
 }
 
-void Client::RemoveItemBySerialNumber(const std::string &item_unique_id, uint32 quantity)
+bool Client::RemoveItemByItemUniqueId(const std::string &item_unique_id, uint32 quantity)
 {
 	EQ::ItemInstance *item          = nullptr;
 	uint32            removed_count = 0;
@@ -12702,18 +12702,24 @@ void Client::RemoveItemBySerialNumber(const std::string &item_unique_id, uint32 
 		if (item && item->GetUniqueID().compare(item_unique_id) == 0) {
 			uint32 charges    = item->IsStackable() ? item->GetCharges() : 0;
 			uint32 stack_size = std::max(charges, static_cast<uint32>(1));
-			if ((removed_count + stack_size) <= quantity) {
+			if (removed_count + stack_size <= quantity) {
 				removed_count += stack_size;
-				DeleteItemInInventory(slot_id, charges, true);
+				if (DeleteItemInInventory(slot_id, charges, true)) {
+					return true;
+				}
 			} else {
-				uint32 amount_left = (quantity - removed_count);
+				uint32 amount_left = quantity - removed_count;
 				if (amount_left > 0 && stack_size >= amount_left) {
 					removed_count += amount_left;
-					DeleteItemInInventory(slot_id, amount_left, true);
+					if (DeleteItemInInventory(slot_id, amount_left, true)) {
+						return true;
+					}
 				}
 			}
 		}
 	}
+
+	return false;
 }
 
 void Client::SendTopLevelInventory()
