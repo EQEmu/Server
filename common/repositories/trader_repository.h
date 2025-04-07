@@ -58,9 +58,9 @@ public:
 
 		if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
 			results = db.QueryDatabase(fmt::format(
-				"SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
+				"SELECT DISTINCT(t.character_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
 				"FROM trader AS t "
-				"JOIN character_data AS c ON t.char_id = c.id "
+				"JOIN character_data AS c ON t.character_id = c.id "
 				"WHERE t.char_zone_instance_id = {} "
 				"ORDER BY t.char_zone_instance_id ASC "
 				"LIMIT {}",
@@ -69,13 +69,14 @@ public:
 			);
 		}
 		else {
-			results = db.QueryDatabase(fmt::format(
-				"SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
-				"FROM trader AS t "
-				"JOIN character_data AS c ON t.char_id = c.id "
-				"ORDER BY t.char_zone_instance_id ASC "
-				"LIMIT {}",
-				max_results)
+			results = db.QueryDatabase(
+				fmt::format(
+					"SELECT DISTINCT(t.character_id), t.char_zone_id, t.char_zone_instance_id, t.char_entity_id, c.name "
+					"FROM trader AS t "
+					"JOIN character_data AS c ON t.character_id = c.id "
+					"ORDER BY t.char_zone_instance_id ASC "
+					"LIMIT {}",
+					max_results)
 			);
 		}
 
@@ -101,7 +102,7 @@ public:
 	{
 		WelcomeData_Struct e{};
 
-		auto results = db.QueryDatabase("SELECT COUNT(DISTINCT char_id), count(char_id) FROM trader;");
+		auto results = db.QueryDatabase("SELECT COUNT(DISTINCT character_id), count(character_id) FROM trader;");
 
 		if (!results.RowCount()) {
 			return e;
@@ -113,15 +114,15 @@ public:
 		return e;
 	}
 
-	static int UpdateItem(Database &db, uint32 char_id, uint32 new_price, uint32 item_id, uint32 item_charges)
+	static int UpdateItem(Database &db, uint32 character_id, uint32 new_price, uint32 item_id, uint32 item_charges)
 	{
 		std::vector<BaseTraderRepository::Trader> items{};
 		if (item_charges == 0) {
 			items = GetWhere(
 				db,
 				fmt::format(
-					"char_id = '{}' AND item_id = '{}'",
-					char_id,
+					"character_id = '{}' AND item_id = '{}'",
+					character_id,
 					item_id
 				)
 			);
@@ -130,8 +131,8 @@ public:
 			items = GetWhere(
 				db,
 				fmt::format(
-					"char_id = '{}' AND item_id = '{}' AND item_charges = '{}'",
-					char_id,
+					"character_id = '{}' AND item_id = '{}' AND item_charges = '{}'",
+					character_id,
 					item_id,
 					item_charges
 				)
@@ -155,8 +156,8 @@ public:
 		Trader item{};
 
 		auto query   = fmt::format(
-			"SELECT t.char_id, t.item_id, t.serialnumber, t.charges, t.item_cost, t.slot_id, t.entity_id FROM trader AS t "
-			"WHERE t.entity_id = {} AND t.item_id = {} AND t.item_cost = {} "
+			"SELECT t.character_id, t.item_id, t.item_unique.id, t.charges, t.item_cost, t.slot_id, t.entity_id FROM trader AS t "
+			"WHERE t.entity_id = '{}' AND t.item_id = '{}' AND t.item_cost = '{}' "
 			"LIMIT 1;",
 			trader_id,
 			item_id,
@@ -168,41 +169,59 @@ public:
 			return item;
 		}
 
-		auto row = results.begin();
-		item.char_id      = Strings::ToInt(row[0]);
-		item.item_id      = Strings::ToInt(row[1]);
-		item.item_sn      = Strings::ToInt(row[2]);
-		item.item_charges = Strings::ToInt(row[3]);
-		item.item_cost    = Strings::ToInt(row[4]);
-		item.slot_id      = Strings::ToInt(row[5]);
+		auto row            = results.begin();
+		item.character_id   = Strings::ToInt(row[0]);
+		item.item_id        = Strings::ToInt(row[1]);
+		item.item_unique_id = row[2] ? row[2] : "";
+		item.item_charges   = Strings::ToInt(row[3]);
+		item.item_cost      = Strings::ToInt(row[4]);
+		item.slot_id        = Strings::ToInt(row[5]);
 
 		return item;
 	}
 
-	static int UpdateQuantity(Database &db, uint32 char_id, const std::string &serial_number, int16 quantity)
+	static int UpdateQuantity(Database &db, const std::string &item_unique_id, int16 quantity)
 	{
 		const auto trader_item = GetWhere(
 			db,
-			fmt::format("char_id = '{}' AND item_sn = '{}' ", char_id, serial_number)
+			fmt::format("`item_unique_id` = '{}' ", item_unique_id)
 		);
 
 		if (trader_item.empty() || trader_item.size() > 1) {
 			return 0;
 		}
 
-		auto m = trader_item[0];
+		auto m         = trader_item[0];
 		m.item_charges = quantity;
 		m.listing_date = time(nullptr);
 
 		return UpdateOne(db, m);
 	}
 
-	static Trader GetItemBySerialNumber(Database &db, std::string &serial_number, uint32 trader_id)
+	static int UpdatePrice(Database &db, const std::string &item_unique_id, uint32 price)
+	{
+		const auto trader_item = GetWhere(
+			db,
+			fmt::format("`item_unique_id` = '{}' ", item_unique_id)
+		);
+
+		if (trader_item.empty() || trader_item.size() > 1) {
+			return 0;
+		}
+
+		auto m         = trader_item[0];
+		m.item_cost    = price;
+		m.listing_date = time(nullptr);
+
+		return ReplaceOne(db, m);
+	}
+
+	static Trader GetItemBySerialNumber(Database &db, std::string &item_unique_id, uint32 trader_id)
 	{
 		Trader     e{};
 		const auto trader_item = GetWhere(
 			db,
-			fmt::format("`char_id` = '{}' AND `item_sn` = '{}' LIMIT 1", trader_id, serial_number)
+			fmt::format("`character_id` = '{}' AND `item_unique_id` = '{}' LIMIT 1", trader_id, item_unique_id)
 		);
 
 		if (trader_item.empty()) {
@@ -240,21 +259,16 @@ public:
 		return DeleteWhere(db, fmt::format("`id` IN({})", Strings::Implode(",", delete_ids)));
 	}
 
-	static DistinctTraders_Struct GetTraderByInstanceAndSerialnumber(
-		Database &db,
-		uint32 instance_id,
-		std::string &serial_number
-		)
+	static DistinctTraders_Struct GetTraderByItemUniqueNumber(Database &db, std::string &item_unique_id)
 	{
 		DistinctTraders_Struct trader{};
 
 		auto query = fmt::format(
-			"SELECT t.id, t.char_id, c.name "
+			"SELECT t.id, t.character_id, c.name "
 			"FROM trader AS t "
-			"JOIN character_data AS c ON c.id = t.char_id "
-			"WHERE t.char_zone_id = 151 AND t.char_zone_instance_id = {} AND t.item_sn = {} LIMIT 1",
-			instance_id,
-			serial_number
+			"JOIN character_data AS c ON c.id = t.character_id "
+			"WHERE t.item_unique_id = '{}' LIMIT 1",
+			item_unique_id
 		);
 
 		auto results = db.QueryDatabase(query);
@@ -264,7 +278,6 @@ public:
 		}
 
 		auto        row    = results.begin();
-		std::string name   = row[2];
 		trader.trader_id   = Strings::ToUnsignedInt(row[1]);
 		trader.trader_name = row[2] ? row[2] : "";
 
@@ -279,8 +292,12 @@ public:
 		std::vector<BazaarTraderSearch_Struct> all_entries{};
 
 		auto query = fmt::format(
-			"SELECT trader.*, c.`name` FROM `trader` INNER JOIN character_data AS c ON trader.char_id = c.id "
-			"WHERE {} ORDER BY trader.char_id ASC",
+			"SELECT trader.id, trader.character_id, trader.item_id, trader.item_unique_id, trader.augment_one, "
+			"trader.augment_two, trader.augment_three, trader.augment_four, trader.augment_five, trader.augment_six, "
+			"trader.item_charges, trader.item_cost, trader.slot_id, trader.char_entity_id, trader.char_zone_id, "
+			"trader.char_zone_instance_id, trader.active_transaction, c.`name` FROM `trader` "
+			"INNER JOIN character_data AS c ON trader.character_id = c.id "
+			"WHERE {} ORDER BY trader.character_id ASC",
 			search_criteria_trader
 		);
 
@@ -295,15 +312,15 @@ public:
 			BazaarTraderSearch_Struct e{};
 
 			e.trader.id                    = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.trader.char_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.trader.character_id          = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.trader.item_id               = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.trader.aug_slot_1            = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.trader.aug_slot_2            = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.trader.aug_slot_3            = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.trader.aug_slot_4            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.trader.aug_slot_5            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.trader.aug_slot_6            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.trader.item_sn               = row[9] ? row[9] : std::string("");
+			e.trader.item_unique_id        = row[3] ? row[3] : std::string("");
+			e.trader.augment_one           = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.trader.augment_two           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.trader.augment_three         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.trader.augment_four          = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.trader.augment_five          = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.trader.augment_six           = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 			e.trader.item_charges          = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 			e.trader.item_cost             = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.trader.slot_id               = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
