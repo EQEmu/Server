@@ -343,12 +343,12 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 		database.CreateItem(
 			item_id,
 			charges,
-			results.at(0).aug_slot_1,
-			results.at(0).aug_slot_2,
-			results.at(0).aug_slot_3,
-			results.at(0).aug_slot_4,
-			results.at(0).aug_slot_5,
-			results.at(0).aug_slot_6
+			results.at(0).augment_one,
+			results.at(0).augment_two,
+			results.at(0).augment_three,
+			results.at(0).augment_four,
+			results.at(0).augment_five,
+			results.at(0).augment_six
 		)
 	);
 	if (!inst) {

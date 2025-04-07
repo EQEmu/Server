@@ -480,7 +480,7 @@ namespace RoF2
 
 				for (auto i: results) {
 					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.trader_id);                          //trader ID
-					VARSTRUCT_ENCODE_STRING(bufptr, i.serial_number_RoF.c_str());                //serial
+					VARSTRUCT_ENCODE_STRING(bufptr, i.item_unique_id.c_str());                   //serial
 					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.cost);                               //cost
 					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.stackable ? i.charges : i.count);    //quantity
 					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, i.item_id);                            //ID
@@ -757,7 +757,7 @@ namespace RoF2
 				ar(bl);
 
 				//packet size
-				auto            packet_size = bl.item_name.length() + 1 + 34;
+				uint32            packet_size = bl.item_name.length() + 1 + 34;
 				for (auto const &b: bl.trade_items) {
 					packet_size += b.item_name.length() + 1;
 					packet_size += 12;
@@ -4130,17 +4130,19 @@ namespace RoF2
 				auto buffer = new char[4404]{}; // 4404 is the fixed size of the packet for 200 item limit of RoF2
 				auto pos    = buffer;
 
+				auto pos_unique_id = buffer + 4;
+				auto pos_cost      = buffer + 3604;
 				VARSTRUCT_ENCODE_TYPE(uint32, pos, structs::RoF2BazaarTraderBuyerActions::ListTraderItems);
 				for (auto const &t: tcm.items) {
-					strn0cpy(pos, t.serial_number.data(), t.serial_number.length() + 1);
-					pos += 3600;
-					VARSTRUCT_ENCODE_TYPE(uint32, pos, t.item_cost);
-					pos -= 3604 - 18;
+					strn0cpy(pos_unique_id, t.item_unique_id.data(), t.item_unique_id.length() + 1);
+					*(uint32 *) pos_cost = t.item_cost;
+					pos_unique_id += 18;
+					pos_cost      += 4;
 				}
 
 				for (int i = tcm.items.size(); i < EQ::invtype::BAZAAR_SIZE; i++) {
-					strn0cpy(pos, "0000000000000000", 18);
-					pos += 18;
+					strn0cpy(pos_unique_id, "0000000000000000", 18);
+					pos_unique_id += 18;
 				}
 
 				safe_delete_array(in->pBuffer);
@@ -4160,7 +4162,7 @@ namespace RoF2
 			}
 			case PriceUpdate: {
 				SETUP_DIRECT_ENCODE(TraderPriceUpdate_Struct, structs::TraderPriceUpdate_Struct);
-				switch (emu->SubAction) {
+				switch (emu->sub_action) {
 					case BazaarPriceChange_AddItem: {
 						auto outapp = std::make_unique<EQApplicationPacket>(
 							OP_Trader,
@@ -4168,7 +4170,7 @@ namespace RoF2
 						);
 
 						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
-						data->action     = emu->Action;
+						data->action     = emu->action;
 						data->sub_action = BazaarPriceChange_AddItem;
 						LogTrading(
 							"(RoF2) PriceUpdate action <green>[{}] AddItem subaction <yellow>[{}]",
@@ -4186,7 +4188,7 @@ namespace RoF2
 						);
 
 						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
-						data->action     = emu->Action;
+						data->action     = emu->action;
 						data->sub_action = BazaarPriceChange_RemoveItem;
 						LogTrading(
 							"(RoF2) PriceUpdate action <green>[{}] RemoveItem subaction <yellow>[{}]",
@@ -4204,7 +4206,7 @@ namespace RoF2
 						);
 
 						auto data        = (structs::TraderStatus_Struct *) outapp->pBuffer;
-						data->action     = emu->Action;
+						data->action     = emu->action;
 						data->sub_action = BazaarPriceChange_UpdatePrice;
 						LogTrading(
 							"(RoF2) PriceUpdate action <green>[{}] UpdatePrice subaction <yellow>[{}]",
@@ -4229,7 +4231,7 @@ namespace RoF2
 					"(RoF2) BuyTraderItem action <green>[{}] item_id <green>[{}] item_sn <green>[{}] buyer <green>[{}]",
 					action,
 					eq->item_id,
-					eq->serial_number,
+					eq->item_unique_id,
 					eq->buyer_name
 				);
 				dest->FastQueuePacket(&in);
@@ -4268,8 +4270,7 @@ namespace RoF2
 		OUT_str(buyer_name);
 		OUT_str(seller_name);
 		OUT_str(item_name);
-		OUT_str(serial_number);
-		//strn0cpy(eq->serial_number, emu->serial_number.c_str(), sizeof(eq->serial_number));
+		OUT_str(item_unique_id);
 
 		FINISH_ENCODE();
 	}
@@ -4279,15 +4280,13 @@ namespace RoF2
 		ENCODE_LENGTH_EXACT(TraderDelItem_Struct);
 		SETUP_DIRECT_ENCODE(TraderDelItem_Struct, structs::TraderDelItem_Struct);
 		LogTrading(
-			"(RoF2) trader_id <green>[{}] item_id <green>[{}]",
+			"(RoF2) trader_id <green>[{}] item_unique_id <green>[{}]",
 			emu->trader_id,
-			emu->item_id
+			emu->item_unique_id
 		);
 
-		eq->TraderID = emu->trader_id;
-		auto serial  = fmt::format("{:016}\n", emu->item_id);
-		strn0cpy(eq->SerialNumber, serial.c_str(), sizeof(eq->SerialNumber));
-		LogTrading("(RoF2) TraderID <green>[{}], SerialNumber: <green>[{}]", emu->trader_id, emu->item_id);
+		eq->trader_id = emu->trader_id;
+		strn0cpy(eq->item_unique_id, emu->item_unique_id, sizeof(eq->item_unique_id));
 
 		FINISH_ENCODE();
 	}
@@ -4334,8 +4333,7 @@ namespace RoF2
 				OUT_str(buyer_name);
 				OUT_str(seller_name);
 				OUT_str(item_name);
-				OUT_str(serial_number);
-				//strn0cpy(eq->serial_number, emu->serial_number.c_str(), sizeof(eq->serial_number));
+				OUT_str(item_unique_id);
 
 				FINISH_ENCODE();
 				break;
@@ -6174,6 +6172,10 @@ namespace RoF2
 				ClickTraderNew_Struct out{};
 				out.action = TraderOn;
 				for (auto i = 0; i < RoF2::invtype::BAZAAR_SIZE; i++) {
+					if (eq->item_cost[i] == 0) {
+						continue;
+					}
+
 					BazaarTraderDetails btd{};
 					btd.unique_id = eq->item_unique_ids[i].item_unique_id;
 					btd.cost      = eq->item_cost[i];
@@ -6214,13 +6216,9 @@ namespace RoF2
 				SETUP_DIRECT_DECODE(TraderPriceUpdate_Struct, structs::TraderPriceUpdate_Struct);
 				LogTrading("(RoF2) PriceUpdate action <green>[{}]", action);
 
-				emu->Action       = PriceUpdate;
-				strn0cpy(emu->serial_number, eq->serial_number, sizeof(emu->serial_number));
-				//FIXemu->serial_number = Strings::ToUnsignedBigInt(eq->serial_number, 0);
-				// if (emu->SerialNumber == 0) {
-				// 	LogTrading("(RoF2) Price change with invalid serial number <red>[{}]", eq->serial_number);
-				// }
-				emu->NewPrice = eq->new_price;
+				emu->action       = PriceUpdate;
+				strn0cpy(emu->item_unique_id, eq->item_unique_id, sizeof(emu->item_unique_id));
+				emu->new_price = eq->new_price;
 
 				FINISH_DIRECT_DECODE();
 				break;
@@ -6310,23 +6308,13 @@ namespace RoF2
 				IN(item_id);
 				IN(trader_id);
 				emu->action        = BazaarInspect;
-				strn0cpy(emu->serial_number, eq->serial_number, sizeof(emu->serial_number));
-				//FIX emu->serial_number = Strings::ToUnsignedInt(eq->serial_number, 0);
-				// if (emu->serial_number == 0) {
-				// 	LogTrading(
-				// 		"(RoF2) trader_id = <green>[{}] requested a BazaarInspect with an invalid serial number of <red>[{}]",
-				// 		eq->trader_id,
-				// 		eq->serial_number
-				// 	);
-				// 	FINISH_DIRECT_DECODE();
-				// 	return;
-				// }
+				strn0cpy(emu->item_unique_id, eq->item_unique_id, sizeof(emu->item_unique_id));
 
-				// LogTrading("(RoF2) BazaarInspect action <green>[{}] item_id <green>[{}] serial_number <green>[{}]",
-				// 		   action,
-				// 		   eq->item_id,
-				// 		   eq->serial_number
-				// );
+				LogTrading("(RoF2) BazaarInspect action <green>[{}] item_id <green>[{}] serial_number <green>[{}]",
+						   action,
+						   eq->item_id,
+						   eq->item_unique_id
+				);
 				FINISH_DIRECT_DECODE();
 				break;
 			}
@@ -6363,8 +6351,7 @@ namespace RoF2
 				IN_str(seller_name);
 				IN_str(item_name);
 				//IN_str(serial_number);
-				strn0cpy(emu->serial_number, eq->serial_number, sizeof(emu->serial_number));
-//FIX				emu->serial_number = eq->serial_number;
+				strn0cpy(emu->item_unique_id, eq->item_unique_id, sizeof(emu->item_unique_id));
 
 				FINISH_DIRECT_DECODE();
 				break;

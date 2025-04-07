@@ -3311,7 +3311,7 @@ struct BazaarInspect_Struct {
 	uint32 action;
 	uint32 unknown_004;
 	uint32 trader_id;
-	char   serial_number[17];
+	char   item_unique_id[17];
 	char   unknown_029[3];
 	uint32 item_id;
 	uint32 unknown_036;
@@ -3594,11 +3594,11 @@ struct BazaarWindowRemoveTrader_Struct {
 };
 
 struct TraderPriceUpdate_Struct {
-	uint32 action;
-	char   serial_number[17];
-	char   unknown_021[3];
-	uint32 unknown_024;
-	uint32 new_price;
+/*000*/	uint32 action;
+/*004*/	char   item_unique_id[17];
+/*021*/	char   unknown_021[3];
+/*024*/	uint32 unknown_024;
+/*028*/	uint32 new_price;
 };
 
 struct Trader_ShowItems_Struct {
@@ -3625,7 +3625,7 @@ struct TraderBuy_Struct {
 /*084*/ char	seller_name[64];
 /*148*/ char	unknown_148[32];
 /*180*/ char	item_name[64];
-/*244*/ char	serial_number[17];
+/*244*/ char	item_unique_id[17];
 /*261*/ char	unknown_261[3];
 /*264*/ uint32	item_id;
 /*268*/ uint32	price;
@@ -3651,10 +3651,10 @@ struct MoneyUpdate_Struct{
 };
 
 struct TraderDelItem_Struct{
-	/*000*/ uint32 Unknown000;
-	/*004*/ uint32 TraderID;
-	/*008*/ char   SerialNumber[17];
-	/*024*/ uint32 Unknown012;
+	/*000*/ uint32 unknown_000;
+	/*004*/ uint32 trader_id;
+	/*008*/ char   item_unique_id[17];
+	/*025*/ uint32 unknown_025;
 	/*028*/
 };
 

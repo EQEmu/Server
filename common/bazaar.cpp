@@ -187,11 +187,11 @@ Bazaar::GetSearchResults(
 				);
 			}
 			else {
-				search_criteria_trader.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
+				search_criteria_trader.append(fmt::format(" AND trader.character_id = {}", search.trader_id));
 			}
 		}
 		else {
-			search_criteria_trader.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
+			search_criteria_trader.append(fmt::format(" AND trader.character_id = {}", search.trader_id));
 		}
 	}
 
@@ -297,8 +297,8 @@ Bazaar::GetSearchResults(
 
 		BazaarSearchResultsFromDB_Struct r{};
 		r.count                   = 1;
-		r.trader_id               = t.trader.char_id;
-		r.serial_number           = t.trader.item_sn;
+		r.trader_id               = t.trader.character_id;
+		r.item_unique_id          = t.trader.item_unique_id;
 		r.cost                    = t.trader.item_cost;
 		r.slot_id                 = t.trader.slot_id;
 		r.charges                 = t.trader.item_charges;
@@ -307,7 +307,6 @@ Bazaar::GetSearchResults(
 		r.trader_zone_id          = t.trader.char_zone_id;
 		r.trader_zone_instance_id = t.trader.char_zone_instance_id;
 		r.trader_entity_id        = t.trader.char_entity_id;
-		r.serial_number_RoF       = t.trader.item_sn;
 		r.item_name               = fmt::format("{:.63}\0", item_results.at(t.trader.item_id).name);
 		r.trader_name             = fmt::format("{:.63}\0", t.trader_name);
 		r.item_stat               = item_results.at(t.trader.item_id).stats;
