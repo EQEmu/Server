@@ -453,7 +453,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				CharacterParcelsContainersRepository::InsertMany(database, all_entries);
 			}
 
-			RemoveItemBySerialNumber(inst->GetUniqueID(), parcel_out.quantity == 0 ? 1 : parcel_out.quantity);
+			RemoveItemByItemUniqueId(inst->GetUniqueID(), parcel_out.quantity == 0 ? 1 : parcel_out.quantity);
 			std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopSendParcel));
 			QueuePacket(outapp.get());
 

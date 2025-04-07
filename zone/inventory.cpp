@@ -958,7 +958,7 @@ void Client::SendCursorBuffer()
 }
 
 // Remove item from inventory
-void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_update, bool update_db) {
+bool Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_update, bool update_db) {
 	#if (EQDEBUG >= 5)
 		LogDebug("DeleteItemInInventory([{}], [{}], [{}])", slot_id, quantity, (client_update) ? "true":"false");
 	#endif
@@ -977,7 +977,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 			QueuePacket(outapp);
 			safe_delete(outapp);
 		}
-		return;
+		return false;
 	}
 
 	uint64 evolve_id = m_inv[slot_id]->GetEvolveUniqueID();
@@ -1031,6 +1031,8 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 			safe_delete(outapp);
 		}
 	}
+
+	return true;
 }
 
 bool Client::PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update)

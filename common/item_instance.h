@@ -168,6 +168,14 @@ namespace EQ
 
 		int16 GetCharges() const				{ return m_charges; }
 		void SetCharges(int16 charges)			{ m_charges = charges; }
+		int16 GetQuantityFromCharges() const
+		{
+			if (GetCharges() > 0 || IsStackable() || GetItem()->MaxCharges > 0) {
+				return GetCharges();
+			}
+
+			return 1;
+		}
 
 		uint32 GetPrice() const					{ return m_price; }
 		void SetPrice(uint32 price)				{ m_price = price; }
