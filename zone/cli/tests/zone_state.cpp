@@ -38,7 +38,11 @@ inline void SetupStateZone()
 	SetupZone("soldungb");
 	zone->Process();
 	// depop the zone controller
-	entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->Depop();
+	auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
+	if (controller != nullptr) {
+		controller->Depop();
+	}
+
 	entity_list.MobProcess(); // process the depop
 }
 
@@ -280,7 +284,7 @@ inline bool MatchCorpseState(Corpse *c, const ZoneStateSpawnsRepository::ZoneSta
 
 inline void TestSpawns()
 {
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	ClearState();
 	SetupStateZone();
 	zone->Repop(true);
@@ -290,7 +294,7 @@ inline void TestSpawns()
 
 	RunTest("Spawns > Ensure no state spawns exist before shutdown", 0, (int) GetStateSpawns().size());
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 
 	auto entries = GetStateSpawns().size();
 	RunTest(fmt::format("Spawns > State exists after shutdown, entries ({})", entries), true, entries > 0);
@@ -300,7 +304,7 @@ inline void TestSpawns()
 	entries = GetStateSpawns().size();
 	RunTest(fmt::format("Spawns > State exists after bootup, entries ({})", entries), true, entries > 0);
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	entries = GetStateSpawns().size();
@@ -374,7 +378,7 @@ inline void TestSpawns()
 	}
 	RespawnTimesRepository::ReplaceMany(database, times);
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	condition = (int) entity_list.GetNPCList().size() == 0 && (int) entity_list.GetCorpseList().size() == 115;
@@ -436,7 +440,7 @@ inline void TestSpawns()
 
 	RespawnTimesRepository::DeleteWhere(database, fmt::format("id IN ({})", Strings::Join(spawn2_ids, ",")));
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	npcs_to_kill = {};
@@ -468,7 +472,7 @@ inline void TestSpawns()
 	}
 	RunTest("Spawns > Kill 10 NPC's before save/restore (105 NPCs) (10 Corpses)", true, condition);
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	condition = (int) entity_list.GetNPCList().size() == 105 && (int) entity_list.GetCorpseList().size() == 10;
@@ -655,7 +659,7 @@ inline void TestZoneVariables()
 
 	// Simulate shutdown and restart twice
 	for (int i = 1; i <= 2; ++i) {
-		zone->Shutdown();
+		zone->Shutdown(true, false);
 		SetupStateZone();
 
 		for (const auto &[key, value]: test_variables) {
@@ -678,7 +682,7 @@ inline void TestZoneVariables()
 	);
 
 	// Final shutdown and restart check
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	for (const auto &[key, value]: test_variables) {
@@ -739,7 +743,7 @@ inline void TestHpManaEnd()
 		npc->SetMana(1);
 	}
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	hp_mismatch.clear();
@@ -786,7 +790,7 @@ inline void TestBuffs()
 		npc->CastSpell(6824, npc->GetID(), (EQ::spells::CastingSlot) 0, 0, 0);
 	}
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	// Check buffs
@@ -809,14 +813,14 @@ inline void TestBuffs()
 
 inline void TestZLocationDrift()
 {
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	ClearState();
 	SetupStateZone();
 
 	auto b = GetStateSpawns();
 
 	for (int i = 0; i < 10; ++i) {
-		zone->Shutdown();
+		zone->Shutdown(true, false);
 		SetupStateZone();
 	}
 
@@ -858,7 +862,7 @@ inline void TestLocationChange()
 		npc->SetPosition(-870, -1394, 106);
 	}
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	bool all_moved = true;
@@ -907,7 +911,7 @@ inline void TestEntityVariables()
 		}
 	}
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	// Check entity variables
@@ -952,7 +956,7 @@ inline void TestLoot()
 
 	RunTest("Loot > Cloak of Flames added to all NPC's via Loottable before shutdown", false, missing_loot);
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	missing_loot = false;
@@ -1025,7 +1029,7 @@ inline void TestLoot()
 		missing_loot_corpse
 	);
 
-	zone->Shutdown();
+	zone->Shutdown(true, false);
 	SetupStateZone();
 
 	missing_loot_corpse = false;

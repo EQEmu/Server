@@ -591,7 +591,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			auto *s = (ServerZoneStateChange_Struct *) pack->pBuffer;
 			LogInfo("Zone shutdown by {}.", s->admin_name);
-			zone->Shutdown();
+			zone->Shutdown(true, false);
 		}
 		break;
 	}

@@ -874,7 +874,7 @@ bool Zone::IsLoaded() {
 	return is_zone_loaded;
 }
 
-void Zone::Shutdown(bool quiet)
+void Zone::Shutdown(bool save_state, bool quiet)
 {
 	if (!is_zone_loaded) {
 		return;
@@ -887,7 +887,7 @@ void Zone::Shutdown(bool quiet)
 		c.second->WorldKick();
 	}
 
-	if (RuleB(Zone, StateSavingOnShutdown) && zone && zone->IsLoaded()) {
+	if (save_state && RuleB(Zone, StateSavingOnShutdown) && zone && zone->IsLoaded()) {
 		SaveZoneState();
 	}
 

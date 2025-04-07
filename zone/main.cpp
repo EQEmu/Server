@@ -638,7 +638,7 @@ int main(int argc, char **argv)
 
 				if (zone) {
 					if (!zone->Process()) {
-						zone->Shutdown();
+						zone->Shutdown(true, false);
 					}
 				}
 
@@ -678,7 +678,7 @@ int main(int argc, char **argv)
 	safe_delete(Config);
 
 	if (zone != 0) {
-		zone->Shutdown(true);
+		zone->Shutdown(false, true);
 	}
 	//Fix for Linux world server problem.
 	safe_delete(task_manager);
@@ -697,7 +697,7 @@ int main(int argc, char **argv)
 
 void Shutdown()
 {
-	zone->Shutdown(true);
+	zone->Shutdown(true, true);
 	LogInfo("Shutting down...");
 	LogSys.CloseFileLogs();
 	EQ::EventLoop::Get().Shutdown();
