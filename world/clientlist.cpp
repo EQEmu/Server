@@ -1608,7 +1608,7 @@ void ClientList::OnTick(EQ::Timer *t)
 /**
  * @param response
  */
-void ClientList::GetClientList(Json::Value &response)
+void ClientList::GetClientList(Json::Value &response, bool full_list)
 {
 	LinkedListIterator<ClientListEntry *> Iterator(clientlist);
 
@@ -1619,62 +1619,68 @@ void ClientList::GetClientList(Json::Value &response)
 
 		Json::Value row;
 
-		row["account_id"]             = cle->AccountID();
-		row["account_name"]           = cle->AccountName();
-		row["admin"]                  = cle->Admin();
-		row["id"]                     = cle->GetID();
-		row["ip"]                     = cle->GetIP();
-		row["loginserver_account_id"] = cle->LSAccountID();
-		row["loginserver_id"]         = cle->LSID();
-		row["loginserver_name"]       = cle->LSName();
-		row["online"]                 = cle->Online();
-		row["world_admin"]            = cle->WorldAdmin();
+		row["id"]             = cle->GetID();
+		row["name"]           = cle->name();
+		row["level"]          = cle->level();
+		row["ip"]             = cle->GetIP();
+		row["gm"]             = cle->GetGM();
+		row["race"]           = cle->race();
+		row["class"]          = cle->class_();
+		row["client_version"] = cle->GetClientVersion();
+		row["admin"]          = cle->Admin();
+		row["account_id"]     = cle->AccountID();
+		row["account_name"]   = cle->AccountName();
+		row["character_id"]   = cle->CharID();
+		row["anon"]           = cle->Anon();
+		row["guild_id"]       = cle->GuildID();
+
+		if (full_list) {
+			row["loginserver_account_id"] = cle->LSAccountID();
+			row["loginserver_id"]         = cle->LSID();
+			row["loginserver_name"]       = cle->LSName();
+			row["online"]                 = cle->Online();
+			row["world_admin"]            = cle->WorldAdmin();
+			row["guild_rank"]             = cle->GuildRank();
+			row["guild_tribute_opt_in"]   = cle->GuildTributeOptIn();
+			row["instance"]               = cle->instance();
+			row["is_local_client"]        = cle->IsLocalClient();
+			row["lfg"]                    = cle->LFG();
+			row["lfg_comments"]           = cle->GetLFGComments();
+			row["lfg_from_level"]         = cle->GetLFGFromLevel();
+			row["lfg_match_filter"]       = cle->GetLFGMatchFilter();
+			row["lfg_to_level"]           = cle->GetLFGToLevel();
+			row["tells_off"]              = cle->TellsOff();
+			row["zone"]                   = cle->zone();
+		}
 
 		auto server = cle->Server();
 		if (server) {
-			row["server"]["client_address"]       = server->GetCAddress();
-			row["server"]["client_local_address"] = server->GetCLocalAddress();
-			row["server"]["client_port"]          = server->GetCPort();
-			row["server"]["compile_time"]         = server->GetCompileTime();
-			row["server"]["id"]                   = server->GetID();
-			row["server"]["instance_id"]          = server->GetInstanceID();
-			row["server"]["ip"]                   = server->GetIP();
-			row["server"]["is_booting"]           = server->IsBootingUp();
-			row["server"]["launch_name"]          = server->GetLaunchName();
-			row["server"]["launched_name"]        = server->GetLaunchedName();
-			row["server"]["number_players"]       = server->NumPlayers();
-			row["server"]["port"]                 = server->GetPort();
-			row["server"]["previous_zone_id"]     = server->GetPrevZoneID();
-			row["server"]["static_zone"]          = server->IsStaticZone();
-			row["server"]["uui"]                  = server->GetUUID();
-			row["server"]["zone_id"]              = server->GetZoneID();
-			row["server"]["zone_long_name"]       = server->GetZoneLongName();
-			row["server"]["zone_name"]            = server->GetZoneName();
-			row["server"]["zone_os_pid"]          = server->GetZoneOSProcessID();
+			row["server"]["zone_id"]        = server->GetZoneID();
+			row["server"]["zone_long_name"] = server->GetZoneLongName();
+			row["server"]["zone_name"]      = server->GetZoneName();
+			row["server"]["zone_os_pid"]    = server->GetZoneOSProcessID();
+			row["server"]["id"]             = server->GetID();
+
+			if (full_list) {
+				row["server"]["client_address"]       = server->GetCAddress();
+				row["server"]["client_local_address"] = server->GetCLocalAddress();
+				row["server"]["client_port"]          = server->GetCPort();
+				row["server"]["compile_time"]         = server->GetCompileTime();
+				row["server"]["instance_id"]          = server->GetInstanceID();
+				row["server"]["ip"]                   = server->GetIP();
+				row["server"]["is_booting"]           = server->IsBootingUp();
+				row["server"]["launch_name"]          = server->GetLaunchName();
+				row["server"]["launched_name"]        = server->GetLaunchedName();
+				row["server"]["number_players"]       = server->NumPlayers();
+				row["server"]["port"]                 = server->GetPort();
+				row["server"]["previous_zone_id"]     = server->GetPrevZoneID();
+				row["server"]["static_zone"]          = server->IsStaticZone();
+				row["server"]["uui"]                  = server->GetUUID();
+			}
 		}
 		else {
 			row["server"] = Json::Value();
 		}
-		row["anon"]             = cle->Anon();
-		row["character_id"]     = cle->CharID();
-		row["class"]            = cle->class_();
-		row["client_version"]   = cle->GetClientVersion();
-		row["gm"]               = cle->GetGM();
-		row["guild_id"]         = cle->GuildID();
-		row["guild_rank"]       = cle->GuildRank();
-		row["guild_tribute_opt_in"] = cle->GuildTributeOptIn();
-		row["instance"]         = cle->instance();
-		row["is_local_client"]  = cle->IsLocalClient();
-		row["level"]            = cle->level();
-		row["lfg"]              = cle->LFG();
-		row["lfg_comments"]     = cle->GetLFGComments();
-		row["lfg_from_level"]   = cle->GetLFGFromLevel();
-		row["lfg_match_filter"] = cle->GetLFGMatchFilter();
-		row["lfg_to_level"]     = cle->GetLFGToLevel();
-		row["name"]             = cle->name();
-		row["race"]             = cle->race();
-		row["tells_off"]        = cle->TellsOff();
-		row["zone"]             = cle->zone();
 
 		response.append(row);
 
