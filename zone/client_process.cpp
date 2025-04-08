@@ -217,6 +217,8 @@ bool Client::Process() {
 				GetMerc()->Depop();
 			}
 			instalog = true;
+
+			camp_timer.Disable();
 		}
 
 		if (IsStunned() && stunned_timer.Check())
