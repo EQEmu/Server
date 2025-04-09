@@ -342,16 +342,16 @@ EQ::Net::DaybreakConnection::~DaybreakConnection()
 
 void EQ::Net::DaybreakConnection::Close()
 {
-	if (m_status == StatusConnected) {
+	if (m_status != StatusDisconnected && m_status != StatusDisconnecting) {
 		FlushBuffer();
 		SendDisconnect();
+	}
 
+	if (m_status != StatusDisconnecting) {
 		m_close_time = Clock::now();
-		ChangeStatus(StatusDisconnecting);
 	}
-	else {
-		ChangeStatus(StatusDisconnecting);
-	}
+
+	ChangeStatus(StatusDisconnecting);
 }
 
 void EQ::Net::DaybreakConnection::QueuePacket(Packet &p)
