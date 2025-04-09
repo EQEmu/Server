@@ -10788,6 +10788,8 @@ void Client::SetAnon(uint8 anon_flag) {
 }
 
 void Client::SetAFK(uint8 afk_flag) {
+	m_is_afk = afk_flag;
+	m_last_moved = std::chrono::steady_clock::now();
 	AFK = afk_flag;
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;

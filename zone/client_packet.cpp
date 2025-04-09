@@ -4960,7 +4960,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 
 	SetMoving(!(cy == m_Position.y && cx == m_Position.x));
 
-	CheckAFK(ppu);
+	if (RuleB(Character, EnableAutoAFK)) {
+		CheckAutoAFK(ppu);
+	}
 
 	CheckClientToNpcAggroTimer();
 
@@ -15522,6 +15524,8 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 	// Pass trade request on to recipient
 	if (tradee && tradee->IsClient()) {
 		tradee->CastToClient()->QueuePacket(app);
+		SetAFK(false);
+		tradee->CastToClient()->SetAFK(false);
 	}
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
         if (!tradee->IsEngaged()) {
@@ -15552,6 +15556,9 @@ void Client::Handle_OP_TradeRequestAck(const EQApplicationPacket *app)
 	if (tradee && tradee->IsClient()) {
 		trade->Start(msg->to_mob_id);
 		tradee->CastToClient()->QueuePacket(app);
+
+		SetAFK(false);
+		tradee->CastToClient()->SetAFK(false);
 	}
 	return;
 }
@@ -17144,26 +17151,40 @@ bool Client::IsFilteredAFKPacket(const EQApplicationPacket *p)
 	return false;
 }
 
-void Client::CheckAFK(PlayerPositionUpdateClient_Struct *p)
+void Client::CheckAutoAFK(PlayerPositionUpdateClient_Struct *p)
 {
-	bool has_moved = m_Position.x != p->x_pos || m_Position.y != p->y_pos || m_Position.z != p->z_pos;
+	if (!RuleB(Character, EnableAutoAFK)) {
+		return;
+	}
+
+	bool seconds_before_idle =
+		!zone->CanDoCombat() || zone->BuffTimersSuspended() ?
+		RuleI(Character, SecondsBeforeAFKCombatZone) :
+		RuleI(Character, SecondsBeforeAFKNonCombatZone);
+
+	bool has_moved =
+			 m_Position.x != p->x_pos ||
+			 m_Position.y != p->y_pos ||
+			 m_Position.z != p->z_pos ||
+			 m_Position.w != EQ12toFloat(p->heading);
+
 	if (!has_moved && !m_is_afk) {
 		auto now           = std::chrono::steady_clock::now();
 		auto idle_duration = now - m_last_moved;
 
-		if (idle_duration > std::chrono::seconds(RuleI(Character, SecondsBeforeAFK))) {
+		if (idle_duration > std::chrono::seconds(seconds_before_idle)) {
 			LogInfo(
 				"AFK [{}] has been idle for [{}] seconds",
 				GetCleanName(),
 				std::chrono::duration_cast<std::chrono::seconds>(idle_duration).count()
 			);
 			Message(Chat::Yellow, "You are now AFK. World positions will no longer update until you move.");
-			m_is_afk = true;
+			SetAFK(true);
 		}
 	}
 	else if (has_moved && m_is_afk) {
 		LogInfo("AFK [{}] is no longer idle, syncing positions", GetCleanName());
-		m_is_afk = false;
+		SetAFK(false);
 		CheckSendBulkNpcPositions(true);
 
 		Message(Chat::Yellow, "You are no longer AFK. Syncing world positions.");

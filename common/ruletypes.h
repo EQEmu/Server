@@ -232,7 +232,9 @@ RULE_BOOL(Character, SneakAlwaysSucceedOver100, false, "When sneak skill is over
 RULE_INT(Character, BandolierSwapDelay, 0, "Bandolier swap delay in milliseconds, default is 0")
 RULE_BOOL(Character, EnableHackedFastCampForGM, false, "Enables hacked fast camp for GM clients, if the GM doesn't have a hacked client they'll camp like normal")
 RULE_BOOL(Character, AlwaysAllowNameChange, false, "Enable this option to allow /changename to work without enabling a name change via scripts.")
-RULE_INT(Character, SecondsBeforeAFK, 300, "Seconds before a player is considered AFK")
+RULE_BOOL(Character, EnableAutoAFK, true, "Enable or disable the auto AFK feature, cuts down on packet spam")
+RULE_INT(Character, SecondsBeforeAFKCombatZone, 600, "Seconds before a player is considered AFK in combat zones")
+RULE_INT(Character, SecondsBeforeAFKNonCombatZone, 60, "Seconds before a player is considered AFK in non-combat zones")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

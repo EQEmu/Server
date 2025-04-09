@@ -2410,7 +2410,7 @@ public:
 	void ShowZoneShardMenu();
 	void Handle_OP_ChangePetName(const EQApplicationPacket *app);
 	bool IsFilteredAFKPacket(const EQApplicationPacket *p);
-	void CheckAFK(PlayerPositionUpdateClient_Struct *p);
+	void CheckAutoAFK(PlayerPositionUpdateClient_Struct *p);
 };
 
 #endif
