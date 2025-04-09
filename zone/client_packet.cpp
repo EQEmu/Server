@@ -17157,10 +17157,10 @@ void Client::CheckAutoAFK(PlayerPositionUpdateClient_Struct *p)
 		return;
 	}
 
-	bool seconds_before_idle =
+	int seconds_before_idle =
 		!zone->CanDoCombat() || zone->BuffTimersSuspended() ?
-		RuleI(Character, SecondsBeforeAFKCombatZone) :
-		RuleI(Character, SecondsBeforeAFKNonCombatZone);
+		RuleI(Character, SecondsBeforeAFKNonCombatZone) :
+		RuleI(Character, SecondsBeforeAFKCombatZone);
 
 	bool has_moved =
 			 m_Position.x != p->x_pos ||
@@ -17178,47 +17178,13 @@ void Client::CheckAutoAFK(PlayerPositionUpdateClient_Struct *p)
 				GetCleanName(),
 				std::chrono::duration_cast<std::chrono::seconds>(idle_duration).count()
 			);
-			Message(Chat::Yellow, "You are now AFK. World positions will no longer update until you move.");
 			SetAFK(true);
 		}
 	}
 	else if (has_moved && m_is_afk) {
 		LogInfo("AFK [{}] is no longer idle, syncing positions", GetCleanName());
 		SetAFK(false);
-		CheckSendBulkNpcPositions(true);
 
-		Message(Chat::Yellow, "You are no longer AFK. Syncing world positions.");
-
-		static EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-
-		for (auto &e: entity_list.GetClientList()) {
-			auto c = e.second;
-
-			// skip if not in range
-			if (Distance(c->GetPosition(), GetPosition()) > RuleI(Range, ClientPositionUpdates)) {
-				continue;
-			}
-
-			// skip self
-			if (c == this) {
-				continue;
-			}
-
-			auto *spu = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
-
-			memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
-			spu->spawn_id      = c->GetID();
-			spu->x_pos         = FloatToEQ19(c->GetX());
-			spu->y_pos         = FloatToEQ19(c->GetY());
-			spu->z_pos         = FloatToEQ19(c->GetZ());
-			spu->heading       = FloatToEQ12(c->GetHeading());
-			spu->delta_x       = FloatToEQ13(0);
-			spu->delta_y       = FloatToEQ13(0);
-			spu->delta_z       = FloatToEQ13(0);
-			spu->delta_heading = FloatToEQ10(0);
-			spu->animation     = 0;
-			QueuePacket(&outapp);
-		}
 	}
 	else {
 		m_last_moved = std::chrono::steady_clock::now();

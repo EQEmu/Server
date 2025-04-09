@@ -1171,7 +1171,7 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 		return;
 	}
 
-	if (m_is_afk && IsFilteredAFKPacket(app)) {
+	if (RuleB(Character, AutoAFKFilterPackets) && m_is_afk && IsFilteredAFKPacket(app)) {
 		return;
 	}
 
@@ -10798,6 +10798,45 @@ void Client::SetAFK(uint8 afk_flag) {
 	spawn_appearance->parameter = afk_flag;
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
+
+	if (afk_flag) {
+		Message(Chat::Yellow, "You are now AFK.");
+	} else {
+		Message(Chat::Yellow, "You are no longer AFK.");
+
+		CheckSendBulkNpcPositions(true);
+
+		static EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+
+		for (auto &e: entity_list.GetClientList()) {
+			auto c = e.second;
+
+			// skip if not in range
+			if (Distance(c->GetPosition(), GetPosition()) > RuleI(Range, ClientPositionUpdates)) {
+				continue;
+			}
+
+			// skip self
+			if (c == this) {
+				continue;
+			}
+
+			auto *spu = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
+
+			memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
+			spu->spawn_id      = c->GetID();
+			spu->x_pos         = FloatToEQ19(c->GetX());
+			spu->y_pos         = FloatToEQ19(c->GetY());
+			spu->z_pos         = FloatToEQ19(c->GetZ());
+			spu->heading       = FloatToEQ12(c->GetHeading());
+			spu->delta_x       = FloatToEQ13(0);
+			spu->delta_y       = FloatToEQ13(0);
+			spu->delta_z       = FloatToEQ13(0);
+			spu->delta_heading = FloatToEQ10(0);
+			spu->animation     = 0;
+			QueuePacket(&outapp);
+		}
+	}
 }
 
 void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
