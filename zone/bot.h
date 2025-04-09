@@ -39,9 +39,6 @@
 
 constexpr uint32 BOT_KEEP_ALIVE_INTERVAL = 5000; // 5 seconds
 
-constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MIN = 1500; // 1.5 seconds
-constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MAX = 3000; // 3 seconds
-
 constexpr uint32 MAG_EPIC_1_0 = 28034;
 
 extern WorldServer worldserver;
@@ -230,21 +227,6 @@ static std::map<uint16, std::string> botSubType_names = {
 	{ CommandedSubTypes::Shrink,                    "Shrink" },
 	{ CommandedSubTypes::Grow,                      "Grow" },
 	{ CommandedSubTypes::Selo,                      "Selo" }
-};
-
-struct CombatRangeInput {
-	Mob*                    target;
-	float                   target_distance;
-	bool                    stop_melee_level;
-	const EQ::ItemInstance* p_item;
-	const EQ::ItemInstance* s_item;
-};
-
-struct CombatRangeOutput {
-	bool  at_combat_range		= false;
-	float melee_distance_min	= 0.0f;
-	float melee_distance		= 0.0f;
-	float melee_distance_max	= 0.0f;
 };
 
 class Bot : public NPC {
@@ -577,7 +559,7 @@ public:
 	uint16 GetPetBotSpellType(uint16 spell_type);
 
 	// Movement checks
-	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behind_only = false, bool front_only = false, bool bypass_los = false);
+	bool PlotBotPositionAroundTarget(const FindPositionInput& input);
 	std::vector<Mob*> GetSpellTargetList(bool entire_raid = false);
 	void SetSpellTargetList(std::vector<Mob*> spell_target_list) { _spell_target_list = spell_target_list; }
 	std::vector<Mob*> GetGroupSpellTargetList() { return _group_spell_target_list; }
@@ -1102,15 +1084,8 @@ public:
 	bool CheckIfCasting(float fm_distance);
 	void HealRotationChecks();
 
-	bool GetCombatJitterFlag() { return m_combat_jitter_flag; }
-	void SetCombatJitterFlag(bool flag = true) { m_combat_jitter_flag = flag; }
-	bool GetCombatOutOfRangeJitterFlag() { return m_combat_out_of_range_jitter_flag; }
-	void SetCombatOutOfRangeJitterFlag(bool flag = true) { m_combat_out_of_range_jitter_flag = flag; }
 	void SetCombatJitter();
-	void SetCombatOutOfRangeJitter();
-	void DoCombatPositioning(Mob* tar, glm::vec3 Goal, bool stop_melee_level, float tar_distance, float melee_distance_min, float melee_distance, float melee_distance_max, bool behind_mob, bool front_mob);
-	void DoFaceCheckWithJitter(Mob* tar);
-	void DoFaceCheckNoJitter(Mob* tar);
+	bool DoCombatPositioning(const CombatPositioningInput& input);
 	void RunToGoalWithJitter(glm::vec3 Goal);
 	bool RequiresLoSForPositioning();
 	bool HasRequiredLoSForPositioning(Mob* tar);
@@ -1118,12 +1093,12 @@ public:
 	// Try Combat Methods
 	bool TryEvade(Mob* tar);
 	bool TryFacingTarget(Mob* tar);
-	bool TryPursueTarget(float leash_distance, glm::vec3& Goal);
+	bool TryPursueTarget(float leash_distance);
 	bool TryMeditate();
 	bool TryAutoDefend(Client* bot_owner, float leash_distance);
 	bool TryIdleChecks(float fm_distance);
-	bool TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, glm::vec3& Goal);
-	void DoOutOfCombatChecks(Client* bot_owner, Mob* follow_mob, glm::vec3& Goal, float leash_distance, float fm_distance);
+	bool TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob);
+	void DoOutOfCombatChecks(Client* bot_owner, Mob* follow_mob, float leash_distance, float fm_distance);
 	bool TryBardMovementCasts();
 	bool BotRangedAttack(Mob* other, bool can_double_attack = false);
 	bool CheckDoubleRangedAttack();
@@ -1189,8 +1164,6 @@ private:
 	Timer m_auto_save_timer;
 
 	Timer m_combat_jitter_timer;
-	bool m_combat_jitter_flag;
-	bool m_combat_out_of_range_jitter_flag;
 
 	bool m_dirtyautohaters;
 	bool m_guard_flag;
