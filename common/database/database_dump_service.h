@@ -65,7 +65,6 @@ private:
 	bool        dump_system_tables          = false;
 	bool        dump_content_tables         = false;
 	bool        dump_player_tables          = false;
-	bool        dump_query_server_tables    = false;
 	bool        dump_login_server_tables    = false;
 	bool        dump_with_no_data           = false;
 	bool        dump_table_lock             = false;
