@@ -150,7 +150,7 @@ void Client::StartTaskRequestCooldownTimer()
 	uint32_t milliseconds = RuleI(TaskSystem, RequestCooldownTimerSeconds) * 1000;
 	task_request_timer.Start(milliseconds);
 
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskRequestTimer, sizeof(uint32_t));
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskRequestTimer, static_cast<uint32>(sizeof(uint32_t)));
 	outapp->WriteUInt32(milliseconds);
 	QueuePacket(outapp.get());
 }

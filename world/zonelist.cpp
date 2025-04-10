@@ -37,6 +37,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "dynamic_zone_manager.h"
 #include "ucs.h"
 #include "clientlist.h"
+#include "../common/repositories/trader_repository.h"
+#include "../common/repositories/buyer_repository.h"
 
 extern uint32 numzones;
 extern EQ::Random emu_random;
@@ -83,7 +85,19 @@ void ZSList::Remove(const std::string &uuid)
 	auto iter = zone_server_list.begin();
 	while (iter != zone_server_list.end()) {
 		if ((*iter)->GetUUID().compare(uuid) == 0) {
-			auto port = (*iter)->GetCPort();
+			auto port        = (*iter)->GetCPort();
+			auto zone_id     = (*iter)->GetZoneID();
+			auto instance_id = (*iter)->GetInstanceID();
+			if (zone_id == Zones::BAZAAR) {
+				TraderRepository::DeleteWhere(
+					database,
+					fmt::format("`char_zone_id` = '{}' AND `char_zone_instance_id` = '{}'", zone_id, instance_id)
+				);
+				BuyerRepository::DeleteBuyers(database, zone_id, instance_id);
+
+				LogTradingDetail("Removed trader abd buyer entries for Zone ID {} and Instance ID {}", zone_id, instance_id);
+			}
+
 			zone_server_list.erase(iter);
 
 			if (port != 0) {
