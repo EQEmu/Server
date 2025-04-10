@@ -168,23 +168,23 @@ struct CombatRangeOutput {
 };
 
 struct CombatPositioningInput {
-	Mob*				tar;
-	bool				stop_melee_level;
-	float				tar_distance;
-	float				melee_distance_min;
-	float				melee_distance;
-	float				melee_distance_max;
-	bool 				behind_mob;
-	bool 				front_mob;
+	Mob*	tar;
+	bool	stop_melee_level;
+	float	tar_distance;
+	float	melee_distance_min;
+	float	melee_distance;
+	float	melee_distance_max;
+	bool	behind_mob;
+	bool	front_mob;
 };
 
 struct FindPositionInput {
-	Mob*				tar;
-	float				distance_min;
-	float				distance_max;
-	bool 				behind_only;
-	bool 				front_only;
-	bool				bypass_los;
+	Mob*	tar;
+	float	distance_min;
+	float	distance_max;
+	bool	behind_only;
+	bool	front_only;
+	bool	bypass_los;
 };
 
 #endif // BOT_STRUCTS

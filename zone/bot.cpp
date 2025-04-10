@@ -2292,7 +2292,7 @@ void Bot::AI_Process()
 		const EQ::ItemInstance* p_item = GetBotItem(EQ::invslot::slotPrimary);
 		const EQ::ItemInstance* s_item = GetBotItem(EQ::invslot::slotSecondary);
 
-		CombatRangeInput combat_range_input = {
+		CombatRangeInput i = {
 			.target                 = tar,
 			.target_distance        = tar_distance,
 			.stop_melee_level       = stop_melee_level,
@@ -2300,13 +2300,13 @@ void Bot::AI_Process()
 			.s_item                 = s_item
 		};
 
-		CombatRangeOutput combat_range_output = EvaluateCombatRange(combat_range_input);
+		CombatRangeOutput o = EvaluateCombatRange(i);
 
 		// Combat range variables
-		bool  at_combat_range    = combat_range_output.at_combat_range;
-		float melee_distance_min = combat_range_output.melee_distance_min;
-		float melee_distance     = combat_range_output.melee_distance;
-		float melee_distance_max = combat_range_output.melee_distance_max;
+		bool  at_combat_range    = o.at_combat_range;
+		float melee_distance_min = o.melee_distance_min;
+		float melee_distance     = o.melee_distance;
+		float melee_distance_max = o.melee_distance_max;
 
 // PULLING FLAG (ACTIONABLE RANGE)
 
@@ -2384,7 +2384,7 @@ void Bot::AI_Process()
 			(bot_owner->GetBotPulling() && NOT_RETURNING_BOT);
 
 		if (!other_bot_pulling && at_combat_range) {
-			CombatPositioningInput combat_positioning_input {
+			CombatPositioningInput cpi {
 				.tar                    = tar,
 				.stop_melee_level       = stop_melee_level,
 				.tar_distance           = tar_distance,
@@ -2395,7 +2395,7 @@ void Bot::AI_Process()
 				.front_mob              = front_mob
 			};
 
-			if (DoCombatPositioning(combat_positioning_input) && IsMoving()) {
+			if (DoCombatPositioning(cpi) && IsMoving()) {
 				return;
 			}
 
@@ -11961,11 +11961,11 @@ bool Bot::DoCombatPositioning(const CombatPositioningInput& input)
 	bool is_too_close               = input.tar_distance < input.melee_distance_min;
 	bool los_adjust                 = !HasRequiredLoSForPositioning(input.tar);
 	bool behind_mob_set             = !input.stop_melee_level &&
-                                      !IsBotRanged() &&
-                                      GetBehindMob(); // Don't want casters or ranged to find positions behind the target.
+		!IsBotRanged() &&
+		GetBehindMob();	// Don't want casters or ranged to find positions behind the target.
 	bool adjustment_allowed         = !IsMoving() &&
-                                      m_combat_jitter_timer.Check() &&
-                                      (!spellend_timer.Enabled() || GetClass() == Class::Bard);
+		m_combat_jitter_timer.Check() &&
+		(!spellend_timer.Enabled() || GetClass() == Class::Bard);
 
 
 	if (!IsMoving() && !IsSitting() && !IsFacingMob(input.tar)) {
