@@ -103,10 +103,6 @@ void bot_command_pull(Client *c, const Seperator *sep)
 			alternate_bot_puller = bot_iter;
 			alternate_puller_found = true;
 		}
-
-		if (backup_puller_found) {
-			break;
-		}
 	}
 
 	bot_puller = backup_bot_puller ? backup_bot_puller : alternate_bot_puller;

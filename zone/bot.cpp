@@ -2100,10 +2100,6 @@ void Bot::SetGuardMode() {
 	StopMoving();
 	m_GuardPoint = GetPosition();
 	SetGuardFlag();
-
-	if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-		GetPet()->StopMoving();
-	}
 }
 
 void Bot::SetHoldMode() {
@@ -2271,7 +2267,7 @@ void Bot::AI_Process()
 		}
 
 		// This causes conflicts with default pet handler (bounces between targets)
-		if (NOT_PULLING_BOT && NOT_RETURNING_BOT && HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+		if (NOT_PULLING_BOT && NOT_RETURNING_BOT && HasControllablePet(BotAnimEmpathy::Attack)) {
 			// We don't add to hate list here because it's assumed to already be on the list
 			GetPet()->SetTarget(tar);
 		}
@@ -2285,11 +2281,11 @@ void Bot::AI_Process()
 		}
 
 // COMBAT RANGE CALCS
-		bool  front_mob = InFrontMob(tar, GetX(), GetY());
-		bool  behind_mob = BehindMob(tar, GetX(), GetY());
-		bool  stop_melee_level = GetLevel() >= GetStopMeleeLevel();
+		bool front_mob = InFrontMob(tar, GetX(), GetY());
+		bool behind_mob = BehindMob(tar, GetX(), GetY());
+		bool stop_melee_level = GetLevel() >= GetStopMeleeLevel();
+
 		tar_distance = sqrt(tar_distance); // sqrt this for future calculations
-		// Item variables
 		const EQ::ItemInstance* p_item = GetBotItem(EQ::invslot::slotPrimary);
 		const EQ::ItemInstance* s_item = GetBotItem(EQ::invslot::slotSecondary);
 
@@ -2315,17 +2311,32 @@ void Bot::AI_Process()
 			if (!TargetValidation(tar)) {
 				SetPullFlag(false);
 				SetPullingFlag(false);
+				bot_owner->SetBotPulling(false);
+
+				if (GetPet()) {
+					GetPet()->SetPetOrder(SPO_Follow);
+					GetPet()->CastToNPC()->SaveGuardSpot(true);
+				}
 
 				return;
 			}
 
+			if (!at_combat_range && RuleB(Bots, UseSpellPulling)) {
+				uint16 pull_spell_id = RuleI(Bots, PullSpellID);
+
+				if (IsValidSpell(pull_spell_id) && tar_distance <= spells[pull_spell_id].range) {
+					at_combat_range = true;
+				}
+			}
+
 			if (at_combat_range && DoLosChecks(tar)) {
-				if (
-					!tar->GetSpecialAbility(SpecialAbility::RangedAttackImmunity) &&
+				bool ai_cast_successful = false;
+				bool can_range_attack = !tar->GetSpecialAbility(SpecialAbility::RangedAttackImmunity) &&
 					RuleB(Bots, AllowRangedPulling) &&
 					IsBotRanged() &&
-					ranged_timer.Check(false)
-				) {
+					ranged_timer.Check(false);
+
+				if (can_range_attack) {
 					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
 
 					if (BotRangedAttack(tar) && CheckDoubleRangedAttack()) {
@@ -2337,30 +2348,33 @@ void Bot::AI_Process()
 					return;
 				}
 
-				if (
-					RuleB(Bots, AllowAISpellPulling) &&
+				bool can_ai_spell_pull = RuleB(Bots, AllowAISpellPulling) &&
 					!IsBotNonSpellFighter() &&
-					AI_HasSpells()
-				) {
+					AI_HasSpells();
+
+				if (can_ai_spell_pull) {
+					StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
 					SetPullingSpell(true);
-					AI_EngagedCastCheck();
+					ai_cast_successful = AI_EngagedCastCheck();
 					SetPullingSpell(false);
 
-					return;
-				}
-
-				if (RuleB(Bots, UseSpellPulling)) {
-					uint16 spell_id = RuleI(Bots, PullSpellID);
-
-					if (tar_distance <= spells[spell_id].range) {
-						StopMoving();
-						SetPullingSpell(true);
-						CastSpell(spell_id, tar->GetID());
-						SetPullingSpell(false);
-
+					if (ai_cast_successful) {
 						return;
 					}
 				}
+
+				if (RuleB(Bots, UseSpellPulling)) {
+					uint16 pull_spell_id = RuleI(Bots, PullSpellID);
+
+					if (IsValidSpell(pull_spell_id) && tar_distance <= spells[pull_spell_id].range) {
+						StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
+						SetPullingSpell(true);
+						CastSpell(pull_spell_id, tar->GetID());
+						SetPullingSpell(false);
+					}
+				}
+
+				return;
 			}
 
 			TryPursueTarget(leash_distance, Goal);
@@ -2573,6 +2587,12 @@ void Bot::DoOutOfCombatChecks(Client* bot_owner, Mob* follow_mob, glm::vec3& Goa
 	if (PULLING_BOT || RETURNING_BOT || !bot_owner->GetBotPulling()) {
 		SetPullingFlag(false);
 		SetReturningFlag(false);
+		bot_owner->SetBotPulling(false);
+
+		if (GetPet()) {
+			GetPet()->SetPetOrder(SPO_Follow);
+			GetPet()->CastToNPC()->SaveGuardSpot(true);
+		}
 	}
 
 	if (TryAutoDefend(bot_owner, leash_distance) ) {
@@ -2581,14 +2601,7 @@ void Bot::DoOutOfCombatChecks(Client* bot_owner, Mob* follow_mob, glm::vec3& Goa
 
 	SetTarget(nullptr);
 
-	if (
-		HasPet() &&
-		(
-			GetClass() != Class::Enchanter ||
-			GetPet()->GetPetType() != petAnimation ||
-			GetAA(aaAnimationEmpathy) >= 1
-		)
-	) {
+	if (HasControllablePet(BotAnimEmpathy::BackOff)) {
 		GetPet()->WipeHateList();
 		GetPet()->SetTarget(nullptr);
 	}
@@ -2751,7 +2764,7 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 								SetTarget(hater);
 								SetAttackingFlag();
 
-								if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+								if (HasControllablePet(BotAnimEmpathy::Attack)) {
 									GetPet()->AddToHateList(hater, 1);
 									GetPet()->SetTarget(hater);
 								}
@@ -2822,14 +2835,7 @@ bool Bot::TryPursueTarget(float leash_distance, glm::vec3& Goal) {
 				WipeHateList();
 				SetTarget(nullptr);
 
-				if (
-					HasPet() &&
-					(
-						GetClass() != Class::Enchanter ||
-						GetPet()->GetPetType() != petAnimation ||
-						GetAA(aaAnimationEmpathy) >= 2
-					)
-				) {
+				if (HasControllablePet(BotAnimEmpathy::BackOff)) {
 					GetPet()->WipeHateList();
 					GetPet()->SetTarget(nullptr);
 				}
@@ -3214,7 +3220,8 @@ bool Bot::IsValidTarget(
 			bot_owner->SetBotPulling(false);
 
 			if (GetPet()) {
-				GetPet()->SetPetOrder(m_previous_pet_order);
+				GetPet()->SetPetOrder(SPO_Follow);
+				GetPet()->CastToNPC()->SaveGuardSpot(true);
 			}
 		}
 
@@ -3248,7 +3255,8 @@ Mob* Bot::GetBotTarget(Client* bot_owner)
 			bot_owner->SetBotPulling(false);
 
 			if (GetPet()) {
-				GetPet()->SetPetOrder(m_previous_pet_order);
+				GetPet()->SetPetOrder(SPO_Follow);
+				GetPet()->CastToNPC()->SaveGuardSpot(true);
 			}
 		}
 
@@ -3271,15 +3279,11 @@ bool Bot::TargetValidation(Mob* other) {
 }
 
 bool Bot::ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_distance) {
-	auto engage_range = (GetBotDistanceRanged() < 30 ? 30 : GetBotDistanceRanged());
+	bool target_check = !GetTarget() || Distance(GetPosition(), GetTarget()->GetPosition()) <= 75.0f;
+	bool returned_check = (NOT_GUARDING && fm_distance <= GetFollowDistance()) ||
+		(GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance());
 
-	if (
-		(GetTarget() && Distance(GetPosition(), GetTarget()->GetPosition()) <= engage_range) &&
-			(
-				(NOT_GUARDING && fm_distance <= GetFollowDistance()) ||
-				(GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())
-			)
-	) { // Once we're back, clear blocking flags so everyone else can join in
+	if (target_check && returned_check) { // Once we're back, clear blocking flags so everyone else can join in
 		WipeHateList();
 		SetTarget(nullptr);
 		SetPullingFlag(false);
@@ -3287,9 +3291,10 @@ bool Bot::ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_dist
 		bot_owner->SetBotPulling(false);
 
 		if (GetPet()) {
-			GetPet()->SetPetOrder(m_previous_pet_order);
+			GetPet()->SetPetOrder(SPO_Follow);
+			GetPet()->CastToNPC()->SaveGuardSpot(true);
 
-			if (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1) {
+			if (HasControllablePet(BotAnimEmpathy::BackOff)) {
 				GetPet()->WipeHateList();
 				GetPet()->SetTarget(nullptr);
 			}
@@ -3330,7 +3335,8 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		bot_owner->SetBotPulling(false);
 
 		if (GetPet()) {
-			GetPet()->SetPetOrder(m_previous_pet_order);
+			GetPet()->SetPetOrder(SPO_Follow);
+			GetPet()->CastToNPC()->SaveGuardSpot(true);
 		}
 
 		return false;
@@ -3339,11 +3345,16 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		SetPullingFlag(false);
 		SetReturningFlag();
 
-		if (HasPet() &&
-			(GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+		Mob* my_pet = GetPet();
 
-			GetPet()->WipeHateList();
-			GetPet()->SetTarget(nullptr);
+		if (my_pet) {
+			if (HasControllablePet(BotAnimEmpathy::BackOff)) {
+				my_pet->WipeHateList();
+				my_pet->SetTarget(nullptr);
+			} else {
+				my_pet->AddToHateList(GetTarget(), 1);
+				my_pet->SetTarget(GetTarget());
+			}
 		}
 
 		if (GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive)) {
@@ -3505,7 +3516,7 @@ Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint
 
 void Bot::SetOwnerTarget(Client* bot_owner) {
 	if (GetPet() && (PULLING_BOT || RETURNING_BOT)) {
-		GetPet()->SetPetOrder(m_previous_pet_order);
+		GetPet()->SetPetOrder(SPO_Follow);
 	}
 
 	SetAttackFlag(false);
@@ -3525,7 +3536,7 @@ void Bot::SetOwnerTarget(Client* bot_owner) {
 			SetTarget(attack_target);
 			SetAttackingFlag();
 
-			if (GetPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+			if (HasControllablePet(BotAnimEmpathy::Attack)) {
 				GetPet()->WipeHateList();
 				GetPet()->AddToHateList(attack_target, 1);
 				GetPet()->SetTarget(attack_target);
@@ -3542,6 +3553,11 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 	SetPullingFlag(false);
 	SetReturningFlag(false);
 	bot_owner->SetBotPulling(false);
+
+	if (GetPet()) {
+		GetPet()->SetPetOrder(SPO_Follow);
+		GetPet()->CastToNPC()->SaveGuardSpot(true);
+	}
 
 	if (NOT_HOLDING && NOT_PASSIVE) {
 		auto pull_target = bot_owner->GetTarget();
@@ -3561,19 +3577,15 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 			SetPullingFlag();
 			bot_owner->SetBotPulling();
 
-			if (
-				HasPet() &&
-					(
-						GetClass() != Class::Enchanter ||
-						GetPet()->GetPetType() != petAnimation ||
-						GetAA(aaAnimationEmpathy) >= 1
-					)
-			) {
+			if (GetPet()) {
 				GetPet()->WipeHateList();
 				GetPet()->SetTarget(nullptr);
-				m_previous_pet_order = GetPet()->GetPetOrder();
-				GetPet()->CastToNPC()->SaveGuardSpot(GetPosition());
-				GetPet()->SetPetOrder(SPO_Guard);
+
+				if (HasControllablePet(BotAnimEmpathy::Guard)) {
+					m_previous_pet_order = GetPet()->GetPetOrder();
+					GetPet()->CastToNPC()->SaveGuardSpot(GetPosition());
+					GetPet()->SetPetOrder(SPO_Guard);
+				}
 			}
 		}
 	}
@@ -13407,4 +13419,14 @@ bool Bot::IsValidBotStance(uint8 stance) {
 	}
 
 	return false;
+}
+
+bool Bot::HasControllablePet(uint8 ranks_required) {
+	if (!GetPet()) {
+		return false;
+	}
+
+	return GetClass() != Class::Enchanter ||
+		GetPet()->GetPetType() != petAnimation ||
+		GetAA(aaAnimationEmpathy) >= ranks_required;
 }
