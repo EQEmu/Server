@@ -342,16 +342,16 @@ EQ::Net::DaybreakConnection::~DaybreakConnection()
 
 void EQ::Net::DaybreakConnection::Close()
 {
-	if (m_status == StatusConnected) {
+	if (m_status != StatusDisconnected && m_status != StatusDisconnecting) {
 		FlushBuffer();
 		SendDisconnect();
+	}
 
+	if (m_status != StatusDisconnecting) {
 		m_close_time = Clock::now();
-		ChangeStatus(StatusDisconnecting);
 	}
-	else {
-		ChangeStatus(StatusDisconnecting);
-	}
+
+	ChangeStatus(StatusDisconnecting);
 }
 
 void EQ::Net::DaybreakConnection::QueuePacket(Packet &p)
@@ -1117,6 +1117,11 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		auto &first_packet = s->sent_packets.begin()->second;
 		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - first_packet.first_sent).count();
 
+		if (time_since_first_sent >= m_owner->m_options.resend_timeout) {
+			Close();
+			return;
+		}
+
 		// make sure that the first_packet in the list first_sent time is within the resend_delay and now
 		// if it is not, then we need to resend all packets in the list
 		if (time_since_first_sent <= first_packet.resend_delay && !m_acked_since_last_resend) {
@@ -1127,11 +1132,6 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				first_packet.resend_delay,
 				m_acked_since_last_resend
 			);
-			return;
-		}
-
-		if (time_since_first_sent >= m_owner->m_options.resend_timeout) {
-			Close();
 			return;
 		}
 	}
