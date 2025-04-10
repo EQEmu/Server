@@ -1191,6 +1191,11 @@ bool Zone::Init(bool is_static) {
 
 	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
 
+	// Loading zone variables so they're available for things like encounter_load
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		zone->LoadZoneVariablesState();
+	}
+
 	// make sure that anything that needs to be loaded prior to scripts is loaded before here
 	// this is to ensure that the scripts have access to the data they need
 	parse->ReloadQuests(true);

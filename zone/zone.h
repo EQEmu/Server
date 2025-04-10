@@ -476,6 +476,7 @@ public:
 	inline uint32 GetZoneServerId() const { return m_zone_server_id; }
 
 	// zone state
+	bool LoadZoneVariablesState();
 	bool LoadZoneState(
 		std::unordered_map<uint32, uint32> spawn_times,
 		std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
