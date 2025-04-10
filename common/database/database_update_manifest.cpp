@@ -6942,8 +6942,8 @@ CREATE TABLE `character_pet_name` (
 		.version = 9310,
 		.description = "2025_03_7_expand_horse_def.sql",
 		.check = "SHOW COLUMNS FROM `horses` LIKE 'helmtexture'",
-		.condition = "missing",
-		.match = "TINYINT(2)",
+		.condition = "empty",
+		.match = "",
 		.sql = R"(
 ALTER TABLE `horses`
 	ADD COLUMN `helmtexture` TINYINT(2) NOT NULL DEFAULT -1 AFTER `texture`;
