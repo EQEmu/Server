@@ -21,6 +21,7 @@
 
 #include "../common/types.h"
 #include "../common/timer.h"
+#include "mob.h"
 
 #include <sstream>
 
@@ -149,6 +150,41 @@ struct BotBlockedBuffs {
 struct BotSpellTypesByClass {
 	uint8_t min_level			= 255;
 	std::string description;
+};
+
+struct CombatRangeInput {
+	Mob*                    target;
+	float                   target_distance;
+	bool                    stop_melee_level;
+	const EQ::ItemInstance* p_item;
+	const EQ::ItemInstance* s_item;
+};
+
+struct CombatRangeOutput {
+	bool  at_combat_range		= false;
+	float melee_distance_min	= 0.0f;
+	float melee_distance		= 0.0f;
+	float melee_distance_max	= 0.0f;
+};
+
+struct CombatPositioningInput {
+	Mob*	tar;
+	bool	stop_melee_level;
+	float	tar_distance;
+	float	melee_distance_min;
+	float	melee_distance;
+	float	melee_distance_max;
+	bool	behind_mob;
+	bool	front_mob;
+};
+
+struct FindPositionInput {
+	Mob*	tar;
+	float	distance_min;
+	float	distance_max;
+	bool	behind_only;
+	bool	front_only;
+	bool	bypass_los;
 };
 
 #endif // BOT_STRUCTS
