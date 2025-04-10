@@ -441,14 +441,6 @@ bool Zone::LoadZoneState(
 	zone->initgrids_timer.Trigger();
 	zone->Process();
 
-	// load zone variables first
-	for (auto &s: spawn_states) {
-		if (s.is_zone) {
-			LoadZoneVariables(zone, s.entity_variables);
-			break;
-		}
-	}
-
 	// load base spawn2 data for spawn locations
 	std::vector<std::string> spawn2_ids;
 	for (auto &s: spawn_states) {
