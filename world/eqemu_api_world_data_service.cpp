@@ -111,9 +111,17 @@ void callGetDatabaseSchema(Json::Value &response)
 	response.append(schema);
 }
 
-void callGetClientList(Json::Value &response)
+void callGetClientList(Json::Value &response, const std::vector<std::string> &args)
 {
-	client_list.GetClientList(response);
+	// if args has "full"
+	bool full_list = false;
+	if (args.size() > 1) {
+		if (args[1] == "full") {
+			full_list = true;
+		}
+	}
+
+	client_list.GetClientList(response, full_list);
 }
 
 void getReloadTypes(Json::Value &response)
@@ -125,6 +133,12 @@ void getReloadTypes(Json::Value &response)
 		v["description"] = ServerReload::GetName(t);
 		response.append(v);
 	}
+}
+
+void getServerCounts(Json::Value &response, const std::vector<std::string> &args)
+{
+	response["zone_count"]   = zoneserver_list.GetServerListCount();
+	response["client_count"] = client_list.GetClientCount();
 }
 
 void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::string> &args)
@@ -174,7 +188,7 @@ void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string
 		callGetDatabaseSchema(r);
 	}
 	if (m == "get_client_list") {
-		callGetClientList(r);
+		callGetClientList(r, args);
 	}
 	if (m == "get_reload_types") {
 		getReloadTypes(r);
@@ -185,6 +199,9 @@ void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string
 	if (m == "get_guild_details") {
 		callGetGuildDetails(r, args);
 	}
+	if (m == "get_server_counts") {
+		getServerCounts(r, args);
+	}
 	if (m == "lock_status") {
 		r["locked"] = WorldConfig::get()->Locked;
 	}
@@ -192,7 +209,6 @@ void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string
 
 void EQEmuApiWorldDataService::callGetGuildDetails(Json::Value &response, const std::vector<std::string> &args)
 {
-
 	std::string command = !args[1].empty() ? args[1] : "";
 	if (command.empty()) {
 		return;
