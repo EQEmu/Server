@@ -326,6 +326,13 @@ void Client::EnableTitle(int title_set)
 	}
 
 	m_player_title_sets.emplace_back(e);
+	database.SaveCharacterTitleSets(this);
+}
+
+void Client::AddTitle(PlayerTitlesetsRepository::PlayerTitlesets e)
+{
+	m_player_title_sets.emplace_back(e);
+	database.SaveCharacterTitleSets(this);
 }
 
 bool Client::CheckTitle(int title_set)
