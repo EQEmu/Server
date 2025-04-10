@@ -353,6 +353,9 @@ public:
 	uint32 GetInstanceTimeRemaining() const;
 	void SetInstanceTimeRemaining(uint32 instance_time_remaining);
 
+	inline bool GetSaveZoneState() const { return m_save_zone_state; }
+	inline void SetSaveZoneState(bool save_state) { m_save_zone_state = save_state; }
+
 	/**
 	 * GMSay Callback for LogSys
 	 *
@@ -516,6 +519,7 @@ private:
 	uint32    m_last_ucss_update;
 	bool      m_idle_when_empty;
 	uint32    m_seconds_before_idle;
+	bool      m_save_zone_state;
 
 	GlobalLootManager                   m_global_loot;
 	LinkedList<ZoneClientAuth_Struct *> client_auth_list;

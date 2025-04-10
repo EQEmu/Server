@@ -38,7 +38,11 @@ inline void SetupStateZone()
 	SetupZone("soldungb");
 	zone->Process();
 	// depop the zone controller
-	entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->Depop();
+	auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
+	if (controller != nullptr) {
+		controller->Depop();
+	}
+
 	entity_list.MobProcess(); // process the depop
 }
 
@@ -352,8 +356,12 @@ inline void TestSpawns()
 		npc->Death(npc, npc->GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
 	}
 
-	bool condition = (int) entity_list.GetNPCList().size() == 0 && (int) entity_list.GetCorpseList().size() == 115;
-	RunTest("Spawns > All NPC's killed (0 NPCs) (115 Corpses)", true, condition);
+	bool condition = (int) entity_list.GetNPCList().size() == 0 && (int) entity_list.GetCorpseList().size() == entries;
+	RunTest(
+		fmt::format("Spawns > All NPC's killed (0 NPCs) ([{}] Corpses)", entries),
+		true,
+		condition
+	);
 
 	std::vector<uint32_t> spawn2_ids = {};
 
@@ -377,11 +385,15 @@ inline void TestSpawns()
 	zone->Shutdown();
 	SetupStateZone();
 
-	condition = (int) entity_list.GetNPCList().size() == 0 && (int) entity_list.GetCorpseList().size() == 115;
+	condition = (int) entity_list.GetNPCList().size() == 0 && (int) entity_list.GetCorpseList().size() == entries;
 	if (!condition) {
 		PrintEntityCounts();
 	}
-	RunTest("Spawns > After restore (0 NPCs) (115 Corpses)", true, condition);
+	RunTest(
+		fmt::format("Spawns > After restore (0 NPCs) ([{}] Corpses)", entries),
+		true,
+		condition
+	);
 
 	for (auto &e: entity_list.GetCorpseList()) {
 		auto c = e.second;
@@ -405,11 +417,15 @@ inline void TestSpawns()
 
 	zone->Process();
 
-	condition = (int) entity_list.GetNPCList().size() == 115 && (int) entity_list.GetCorpseList().size() == 115;
+	condition = (int) entity_list.GetNPCList().size() == entries && (int) entity_list.GetCorpseList().size() == entries;
 	if (!condition) {
 		PrintEntityCounts();
 	}
-	RunTest("Spawns > After respawn (115 NPCs) (115 Corpses)", true, condition);
+	RunTest(
+		fmt::format("Spawns > After respawn ([{}] NPCs) ([{}] Corpses)", entries, entries),
+		true,
+		condition
+	);
 
 	for (auto &c: entity_list.GetCorpseList()) {
 		c.second->DepopNPCCorpse();
@@ -417,11 +433,15 @@ inline void TestSpawns()
 
 	entity_list.CorpseProcess();
 
-	condition = (int) entity_list.GetNPCList().size() == 115 && (int) entity_list.GetCorpseList().size() == 0;
+	condition = (int) entity_list.GetNPCList().size() == entries && (int) entity_list.GetCorpseList().size() == 0;
 	if (!condition) {
 		PrintEntityCounts();
 	}
-	RunTest("Spawns > After respawn (115 NPCs) (0 Corpses)", true, condition);
+	RunTest(
+		fmt::format("Spawns > After respawn ([{}] NPCs) (0 Corpses)", entries),
+		true,
+		condition
+	);
 
 	// lets set NPC's up with a predictable loottable for testing
 	uint32_t loottable_id = SeedLootTable();
@@ -462,20 +482,28 @@ inline void TestSpawns()
 		npc->Death(npc, npc->GetHP() + 1, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
 	}
 
-	condition = (int) entity_list.GetNPCList().size() == 105 && (int) entity_list.GetCorpseList().size() == 10;
+	condition = (int) entity_list.GetNPCList().size() == (entries - 10) && (int) entity_list.GetCorpseList().size() == 10;
 	if (!condition) {
 		PrintEntityCounts();
 	}
-	RunTest("Spawns > Kill 10 NPC's before save/restore (105 NPCs) (10 Corpses)", true, condition);
+	RunTest(
+		fmt::format("Spawns > Kill 10 NPC's before save/restore ([{}] NPCs) (10 Corpses)", (entries - 10)),
+		true,
+		condition
+	);
 
 	zone->Shutdown();
 	SetupStateZone();
 
-	condition = (int) entity_list.GetNPCList().size() == 105 && (int) entity_list.GetCorpseList().size() == 10;
+	condition = (int) entity_list.GetNPCList().size() == (entries - 10) && (int) entity_list.GetCorpseList().size() == 10;
 	if (!condition) {
 		PrintEntityCounts();
 	}
-	RunTest("Spawns > After restore (105 NPCs) (10 Corpses)", true, condition);
+	RunTest(
+		fmt::format("Spawns > After restore ([{}] NPCs) (10 Corpses)", (entries - 10)),
+		true,
+		condition
+	);
 
 	// validate that all corpses and npc's have cloak of flames
 	bool      test_failed = false;
@@ -572,6 +600,14 @@ inline void TestSpawns()
 		false
 	);
 
+	int max_respawn = 0;
+	const auto& l = RespawnTimesRepository::All(database);
+	for (const auto& e : l) {
+		if (e.duration > max_respawn) {
+			max_respawn = e.duration;
+		}
+	}
+
 	entity_list.MobProcess();
 
 	zone->Process();
@@ -587,16 +623,20 @@ inline void TestSpawns()
 		npc->SetEntityVariable("previously_spawned", "true");
 	}
 
-	Timer::RollForward(302401); // longest respawn time in zone
+	Timer::RollForward(max_respawn); // longest respawn time in zone
 	zone->Process();
 	entity_list.MobProcess(); // processing depops
 
-	condition = (int) entity_list.GetNPCList().size() == 115 && (int) entity_list.GetCorpseList().size() == 10;
+	condition = (int) entity_list.GetNPCList().size() == entries && (int) entity_list.GetCorpseList().size() == 10;
 	if (!condition) {
 		PrintEntityCounts();
 		PrintZoneNpcs();
 	}
-	RunTest("Spawns > After respawn, ensure we have expected entity counts (115 NPCs) (10 Corpses)", true, condition);
+	RunTest(
+		fmt::format("Spawns > After respawn, ensure we have expected entity counts ([{}] NPCs) (10 Corpses)", entries),
+		true,
+		condition
+	);
 
 	entity_list.MobProcess(); // processing depops
 
