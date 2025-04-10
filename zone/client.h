@@ -1253,7 +1253,7 @@ public:
 	void ResetAllCastbarCooldowns();
 	void ResetCastbarCooldownBySpellID(uint32 spell_id);
 
-	void AddTitle(PlayerTitlesetsRepository::PlayerTitlesets e);
+	void AddTitle(PlayerTitlesetsRepository::PlayerTitlesets e, bool insert);
 	bool CheckTitle(int titleset);
 	const std::vector<PlayerTitlesetsRepository::PlayerTitlesets>& GetTitles() { return m_player_title_sets; };
 	void EnableTitle(int titleset);

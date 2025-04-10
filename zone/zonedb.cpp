@@ -4293,7 +4293,7 @@ void ZoneDatabase::LoadCharacterTitleSets(Client* c)
 	const uint32 character_id = c->CharacterID();
 
 	for (const auto& e : l) {
-		c->AddTitle(e);
+		c->AddTitle(e, false);
 	}
 }
 
