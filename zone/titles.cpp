@@ -308,7 +308,7 @@ void Client::SetTitleSuffix(std::string suffix)
 	safe_delete(outapp);
 }
 
-void Client::EnableTitle(int title_set)
+void Client::EnableTitle(int title_set, bool insert)
 {
 	if (CheckTitle(title_set)) {
 		return;
@@ -319,22 +319,26 @@ void Client::EnableTitle(int title_set)
 	e.char_id   = CharacterID();
 	e.title_set = title_set;
 
-	if (!PlayerTitlesetsRepository::InsertOne(database, e).id) {
-		LogError("Error in EnableTitle query for titleset [{}] and charid [{}]", title_set, CharacterID());
+	if (insert) {
+		e = PlayerTitlesetsRepository::InsertOne(database, e);
+		if (!e.id) {
+			LogError("Error in EnableTitle query for titleset [{}] and charid [{}]", title_set, CharacterID());
+			return;
+		}
 	}
 
+	m_player_title_sets.emplace_back(e);
 }
 
 bool Client::CheckTitle(int title_set)
 {
-	return !PlayerTitlesetsRepository::GetWhere(
-		database,
-		fmt::format(
-			"`char_id` = {} AND `title_set` = {}",
-			CharacterID(),
-			title_set
-		)
-	).empty();
+	for (const auto& e : m_player_title_sets) {
+		if (e.title_set == title_set) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void Client::RemoveTitle(int title_set)
@@ -353,6 +357,14 @@ void Client::RemoveTitle(int title_set)
 				SetTitleSuffix("");
 			}
 
+			break;
+		}
+	}
+
+	auto& titles = m_player_title_sets;
+	for (auto e = titles.begin(); e != titles.end(); e++) {
+		if (e->title_set == title_set) {
+			titles.erase(e);
 			break;
 		}
 	}
