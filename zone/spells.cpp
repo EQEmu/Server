@@ -5667,13 +5667,12 @@ int16 Mob::CalcResistChanceBonus()
 
 int16 Mob::CalcFearResistChance()
 {
-	int resistchance = spellbonuses.ResistFearChance + itembonuses.ResistFearChance + aabonuses.ResistFearChance;
-
-	if (spellbonuses.Fearless == true || itembonuses.Fearless == true || aabonuses.Fearless == true) {
-		resistchance = 100;
+	int resist_chance = spellbonuses.ResistFearChance + itembonuses.ResistFearChance + aabonuses.ResistFearChance;
+	if (spellbonuses.Fearless || itembonuses.Fearless || aabonuses.Fearless) {
+		resist_chance = 100;
 	}
 
-	return resistchance;
+	return resist_chance;
 }
 
 float Mob::GetAOERange(uint16 spell_id)
