@@ -528,8 +528,12 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	m_pp.zone_id = zone_id;
 	m_pp.zoneInstance = instance_id;
 
-	//Force a save so its waiting for them when they zone
-	Save(2);
+	// save character position
+	m_pp.x       = m_Position.x;
+	m_pp.y       = m_Position.y;
+	m_pp.z       = m_Position.z;
+	m_pp.heading = m_Position.w;
+	SaveCharacterData();
 
 	m_lock_save_position = true;
 

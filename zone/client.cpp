@@ -995,6 +995,8 @@ bool Client::Save(uint8 iCommitNow) {
 	if(!ClientDataLoaded())
 		return false;
 
+	BenchTimer timer;
+
 	/* Wrote current basics to PP for saves */
 	if (!m_lock_save_position) {
 		m_pp.x       = m_Position.x;
@@ -1021,6 +1023,8 @@ bool Client::Save(uint8 iCommitNow) {
 		m_pp.mana      = current_mana;
 		m_pp.endurance = current_endurance;
 	}
+
+	database.TransactionBegin();
 
 	/* Save Character Currency */
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
@@ -1104,6 +1108,10 @@ bool Client::Save(uint8 iCommitNow) {
 	if (RuleB(Bots, Enabled)) {
 		database.botdb.SaveBotSettings(this);
 	}
+
+	database.TransactionCommit();
+
+	LogInfo("Save for [{}] took [{}]", GetCleanName(), timer.elapsed());
 
 	return true;
 }
