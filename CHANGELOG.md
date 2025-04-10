@@ -1,3 +1,68 @@
+## [23.5.0] 4/10/2025
+
+### API
+
+* World API Optimizations ([#4850](https://github.com/EQEmu/Server/pull/4850)) @Akkadius 2025-04-10
+
+### Bots
+
+* Add valid state checks to ^clickitem ([#4830](https://github.com/EQEmu/Server/pull/4830)) @nytmyr 2025-04-10
+* Flag all buffs with SE_DamageShield as Damage Shield ([#4833](https://github.com/EQEmu/Server/pull/4833)) @nytmyr 2025-04-10
+* Positioning rewrite ([#4856](https://github.com/EQEmu/Server/pull/4856)) @nytmyr 2025-04-10
+* Restore old buff overwrite blocking ([#4832](https://github.com/EQEmu/Server/pull/4832)) @nytmyr 2025-04-10
+
+### Bugfix
+
+* Load zone variables before encounter_load. ([#4846](https://github.com/EQEmu/Server/pull/4846)) @zimp-wow 2025-04-10
+* Prevent depops from blocking new spawns. ([#4841](https://github.com/EQEmu/Server/pull/4841)) @zimp-wow 2025-04-10
+* Prevent final shutdown from persisting incomplete state. ([#4849](https://github.com/EQEmu/Server/pull/4849)) @zimp-wow 2025-04-10
+
+### Code
+
+* Remove queryserv dump flag ([#4842](https://github.com/EQEmu/Server/pull/4842)) @joligario 2025-04-10
+* Update link for legacy EQEmu loginserver account setup ([#4826](https://github.com/EQEmu/Server/pull/4826)) @joligario 2025-04-10
+
+### Crash
+
+* Fix rarer exception crash issue in PlayerEventLogs::ProcessBatchQueue ([#4835](https://github.com/EQEmu/Server/pull/4835)) @Akkadius 2025-04-03
+
+### Database
+
+* Fix manifest for `helmtexture` in `horses` table ([#4852](https://github.com/EQEmu/Server/pull/4852)) @joligario 2025-04-10
+
+### Feature
+
+* Add rule to consume command text from any channel ([#4839](https://github.com/EQEmu/Server/pull/4839)) @catapultam-habeo 2025-04-10
+
+### Fixes
+
+* Add the bazaar search limit to query ([#4829](https://github.com/EQEmu/Server/pull/4829)) @neckkola 2025-04-10
+* Backfill expire_at (not sure why this didn't make it in there to begin with)  @Akkadius 2025-03-31
+* Bazaar Search window not working in a DZ ([#4828](https://github.com/EQEmu/Server/pull/4828)) @neckkola 2025-04-10
+* Databuckets Account Cache Loading ([#4855](https://github.com/EQEmu/Server/pull/4855)) @Akkadius 2025-04-10
+* Fix missing timer_name check on Mob::StopTimer ([#4840](https://github.com/EQEmu/Server/pull/4840)) @zimp-wow 2025-04-04
+* FixHeading Infinite Loop Fix ([#4854](https://github.com/EQEmu/Server/pull/4854)) @KimLS 2025-04-10
+* Make sure we don't expire default value instances  @Akkadius 2025-03-31
+* Regression in World SendEmoteMessageRaw ([#4837](https://github.com/EQEmu/Server/pull/4837)) @Akkadius 2025-04-03
+* Remove QS Tables From Export  @Akkadius 2025-04-10
+* Zone State Spawn2 Location Restore ([#4844](https://github.com/EQEmu/Server/pull/4844)) @Akkadius 2025-04-10
+
+### Netcode
+
+* Fix Stale Client Edge Case ([#4853](https://github.com/EQEmu/Server/pull/4853)) @Akkadius 2025-04-10
+
+### Performance
+
+* Character Save Optimizations ([#4851](https://github.com/EQEmu/Server/pull/4851)) @Akkadius 2025-04-10
+* Network Ring Buffers ([#4857](https://github.com/EQEmu/Server/pull/4857)) @Akkadius 2025-04-10
+* Pre-Compute CLE Server Lists ([#4838](https://github.com/EQEmu/Server/pull/4838)) @Akkadius 2025-04-10
+
+### Spells
+
+* Fear resistance effects edge case fixes and support for SPA 102 as an AA ([#4848](https://github.com/EQEmu/Server/pull/4848)) @KayenEQ 2025-04-10
+* Update to SPA 180 SE_ResistSpellChance to not block unresistable spells. ([#4847](https://github.com/EQEmu/Server/pull/4847)) @KayenEQ 2025-04-10
+* Update to SPA 378 SE_SpellEffectResistChance ([#4845](https://github.com/EQEmu/Server/pull/4845)) @KayenEQ 2025-04-10
+
 ## [23.4.0] 3/30/2025
 
 ### API
