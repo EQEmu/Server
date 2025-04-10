@@ -466,7 +466,6 @@ public:
 
 	/* Player Title Sets */
 	void LoadCharacterTitleSets(Client* c);
-	void SaveCharacterTitleSets(Client *c);
 
 	float GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version = -1);
 	float GetEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version = -1);
