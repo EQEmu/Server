@@ -48,9 +48,10 @@ void bot_command_click_item(Client* c, const Seperator* sep)
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 
 	Mob* tar = c->GetTarget();
+	bool is_success = false;
 
 	for (auto my_bot : sbl) {
-		if (my_bot->BotPassiveCheck()) {
+		if (!my_bot->ValidStateCheck(c)) {
 			continue;
 		}
 
@@ -68,6 +69,11 @@ void bot_command_click_item(Client* c, const Seperator* sep)
 			continue;
 		}
 
+		is_success = true;
 		my_bot->TryItemClick(slot_id);
+	}
+
+	if (!is_success) {
+		c->Message(Chat::Yellow, "None of your bots are capable of doing that currently.");
 	}
 }
