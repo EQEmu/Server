@@ -326,13 +326,17 @@ void Client::EnableTitle(int title_set)
 	}
 
 	m_player_title_sets.emplace_back(e);
-	database.SaveCharacterTitleSets(this);
 }
 
 void Client::AddTitle(PlayerTitlesetsRepository::PlayerTitlesets e)
 {
 	m_player_title_sets.emplace_back(e);
-	database.SaveCharacterTitleSets(this);
+
+	e = PlayerTitlesetsRepository::InsertOne(database, e);
+	if (!e.id) {
+		LogError("Error in AddTitle query for titleset [{}] and charid [{}]", e.title_set, CharacterID());
+		return;
+	}
 }
 
 bool Client::CheckTitle(int title_set)
