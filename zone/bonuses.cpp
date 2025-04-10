@@ -1165,10 +1165,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_ResistFearChance: {
-			if (base_value == 100) // If we reach 100% in a single spell/item then we should be immune to
-					  // negative fear resist effects until our immunity is over
-				newbon->Fearless = true;
-
 			newbon->ResistFearChance += base_value; // these should stack
 			break;
 		}
@@ -2474,9 +2470,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ResistFearChance:
 			{
-				if(effect_value == 100) // If we reach 100% in a single spell/item then we should be immune to negative fear resist effects until our immunity is over
-					new_bonus->Fearless = true;
-
 				new_bonus->ResistFearChance += effect_value; // these should stack
 				break;
 			}
@@ -4689,11 +4682,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_ResistFearChance:
-					if (negate_spellbonus) {
-						spellbonuses.Fearless = false;
-						spellbonuses.ResistFearChance = effect_value;
-					}
-
+					if (negate_spellbonus) {spellbonuses.ResistFearChance = effect_value;	}
 					if (negate_aabonus) { aabonuses.ResistFearChance = effect_value; }
 					if (negate_itembonus) { itembonuses.ResistFearChance = effect_value; }
 					break;
