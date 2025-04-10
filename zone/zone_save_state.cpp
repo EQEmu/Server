@@ -449,14 +449,26 @@ bool Zone::LoadZoneState(
 		}
 	}
 
-	std::vector<Spawn2Repository::Spawn2> spawn2s = Spawn2Repository::GetWhere(
-		content_db,
-		fmt::format(
-			"zone = '{}' AND (version = {} OR version = -1)",
-			zone->GetShortName(),
-			zone->GetInstanceVersion()
-		)
-	);
+	// load base spawn2 data for spawn locations
+	std::vector<std::string> spawn2_ids;
+	for (auto &s: spawn_states) {
+		if (s.spawn2_id > 0) {
+			spawn2_ids.push_back(std::to_string(s.spawn2_id));
+		}
+	}
+
+	std::vector<Spawn2Repository::Spawn2> spawn2s;
+	if (!spawn2_ids.empty()) {
+		spawn2s = Spawn2Repository::GetWhere(
+			content_db,
+			fmt::format(
+				"id IN ({})",
+				Strings::Join(spawn2_ids, ",")
+			)
+		);
+
+		LogZoneState("Loaded [{}] spawn2s", spawn2s.size());
+	}
 
 	// spawn2
 	for (auto &s: spawn_states) {
