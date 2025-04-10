@@ -277,7 +277,13 @@ bool Spawn2::Process() {
 			}
 		}
 
-		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), GravityBehavior::Water);
+		// zone state restore
+		if (m_stored_location != glm::vec4(0, 0, -1000, 0)) {
+			loc = m_stored_location;
+			m_stored_location = glm::vec4(0, 0, -1000, 0);
+		}
+
+		NPC *npc = new NPC(tmp, this, loc, GravityBehavior::Water);
 
 		npcthis = npc;
 
