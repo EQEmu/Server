@@ -5331,6 +5331,14 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 							spellbonuses.SEResist[e]     = effect_value;
 							spellbonuses.SEResist[e + 1] = effect_value;
 						}
+						if (negate_itembonus) {
+							itembonuses.SEResist[e] = effect_value;
+							itembonuses.SEResist[e + 1] = effect_value;
+						}
+						if (negate_aabonus) {
+							aabonuses.SEResist[e] = effect_value;
+							aabonuses.SEResist[e + 1] = effect_value;
+						}
 					}
 					break;
 				}
