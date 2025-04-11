@@ -80,7 +80,7 @@ namespace DatabaseSchema {
 			{"guild_members",                  "char_id"},
 			{"guilds",                         "id"},
 			{"instance_list_player",           "id"},
-			{"inventory",                      "charid"},
+			{"inventory",                      "character_id"},
 			{"inventory_snapshots",            "charid"},
 			{"keyring",                        "char_id"},
 			{"mail",                           "charid"},
