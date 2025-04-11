@@ -1560,8 +1560,11 @@ void bot_command_summon(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		bot_iter->GetPet()->WipeHateList();
-		bot_iter->GetPet()->SetTarget(nullptr);
+		if (bot_iter->HasControllablePet(BotAnimEmpathy::BackOff)) {
+			bot_iter->GetPet()->WipeHateList();
+			bot_iter->GetPet()->SetTarget(nullptr);
+		}
+
 		bot_iter->GetPet()->Teleport(c->GetPosition());
 	}
 

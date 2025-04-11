@@ -3068,11 +3068,11 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	else
 		SetAssistAggro(true);
 
-	bool wasengaged = IsEngaged();
+	bool was_engaged = IsEngaged();
 	Mob* owner = other->GetOwner();
-	Mob* mypet = GetPet();
-	Mob* myowner = GetOwner();
-	Mob* targetmob = GetTarget();
+	Mob* my_pet = GetPet();
+	Mob* my_owner = GetOwner();
+	Mob* target_mob = GetTarget();
 	bool on_hatelist = CheckAggro(other);
 
 	AddRampage(other);
@@ -3101,7 +3101,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		if (IsPet()) {
 			if ((IsGHeld() || (IsHeld() && IsFocused())) && !on_hatelist) // we want them to be able to climb the hate list
 				return;
-			if ((IsHeld() || IsPetStop() || IsPetRegroup()) && !wasengaged) // not 100% sure on stop/regroup kind of hard to test, but regroup is like "classic hold"
+			if ((IsHeld() || IsPetStop() || IsPetRegroup()) && !was_engaged) // not 100% sure on stop/regroup kind of hard to test, but regroup is like "classic hold"
 				return;
 		}
 	}
@@ -3134,7 +3134,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		return;
 	}
 
-	if (other == myowner) {
+	if (other == my_owner) {
 		return;
 	}
 
@@ -3236,26 +3236,39 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		}
 	}
 
-	if (mypet && !mypet->IsHeld() && !mypet->IsPetStop()) { // I have a pet, add other to it
-		if (
-			!mypet->IsFamiliar() &&
-			!mypet->GetSpecialAbility(SpecialAbility::AggroImmunity) &&
-			!(IsBot() && mypet->GetSpecialAbility(SpecialAbility::BotAggroImmunity)) &&
-			!(IsClient() && mypet->GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) &&
-			!(IsNPC() && mypet->GetSpecialAbility(SpecialAbility::NPCAggroImmunity))
-		) {
-			mypet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+	if (my_pet) {
+		bool aggro_immunity 		= my_pet->GetSpecialAbility(SpecialAbility::AggroImmunity);
+		bool bot_aggro_immunity 	= IsBot() && my_pet->GetSpecialAbility(SpecialAbility::BotAggroImmunity);
+		bool client_aggro_immunity 	= IsClient() && my_pet->GetSpecialAbility(SpecialAbility::ClientAggroImmunity);
+		bool npc_aggro_immunity 	= IsNPC() && my_pet->GetSpecialAbility(SpecialAbility::NPCAggroImmunity);
+		bool can_add_to_hatelist 	= !my_pet->IsFamiliar() &&
+			!aggro_immunity &&
+			!bot_aggro_immunity &&
+			!client_aggro_immunity &&
+			!npc_aggro_immunity;
+
+		if (can_add_to_hatelist) {
+			bool bot_with_controllable_pet = IsBot() && CastToBot()->HasControllablePet(BotAnimEmpathy::Attack);
+
+			if (!IsBot() || bot_with_controllable_pet) {
+				my_pet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+			}
 		}
 	}
-	else if (myowner) { // I am a pet, add other to owner if it's NPC/LD
-		if (
-			myowner->IsAIControlled() &&
-			!myowner->GetSpecialAbility(SpecialAbility::AggroImmunity) &&
-			!(myowner->IsBot() && GetSpecialAbility(SpecialAbility::BotAggroImmunity)) &&
-			!(myowner->IsClient() && GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) &&
-			!(myowner->IsNPC() && GetSpecialAbility(SpecialAbility::NPCAggroImmunity))
-		) {
-			myowner->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+	else if (my_owner) { // I am a pet, add other to owner if it's NPC/LD
+		if (my_owner->IsAIControlled()) {
+			bool aggro_immunity = my_owner->GetSpecialAbility(SpecialAbility::AggroImmunity);
+			bool bot_aggro_immunity = my_owner->IsBot() && GetSpecialAbility(SpecialAbility::BotAggroImmunity);
+			bool client_aggro_immunity = my_owner->IsClient() && GetSpecialAbility(SpecialAbility::ClientAggroImmunity);
+			bool npc_aggro_immunity = my_owner->IsNPC() && GetSpecialAbility(SpecialAbility::NPCAggroImmunity);
+			bool can_add_to_hatelist = !aggro_immunity &&
+				!bot_aggro_immunity &&
+				!client_aggro_immunity &&
+				!npc_aggro_immunity;
+
+			if (can_add_to_hatelist) {
+				my_owner->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+			}
 		}
 	}
 
@@ -3264,7 +3277,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		entity_list.AddTempPetsToHateList(this, other, bFrenzy);
 	}
 
-	if (!wasengaged) {
+	if (!was_engaged) {
 		if (IsNPC() && other->IsClient() && other->CastToClient()) {
 			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_AGGRO)) {
 				parse->EventNPC(EVENT_AGGRO, CastToNPC(), other, "", 0);

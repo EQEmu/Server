@@ -5,8 +5,8 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_pull", sep->arg[0], "pull")) {
 		return;
 	}
-	if (helper_is_help_or_usage(sep->arg[1])) {
 
+	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(Chat::White, "usage: <enemy_target> %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
@@ -40,7 +40,7 @@ void bot_command_pull(Client *c, const Seperator *sep)
 
 	if (
 		!target_mob ||
-		target_mob == c ||
+		target_mob->IsOfClientBotMerc() ||
 		!c->IsAttackAllowed(target_mob)
 	) {
 		c->Message(Chat::White, "Your current target is not attackable!");
@@ -55,12 +55,16 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	}
 
 	if (target_mob->IsNPC() && target_mob->GetHateList().size()) {
-
 		c->Message(Chat::White, "Your current target is already engaged!");
+
 		return;
 	}
 
 	Bot* bot_puller = nullptr;
+	Bot* backup_bot_puller = nullptr;
+	Bot* alternate_bot_puller = nullptr;
+	bool backup_puller_found = false;
+	bool alternate_puller_found = false;
 
 	for (auto bot_iter : sbl) {
 		if (!bot_iter->ValidStateCheck(c)) {
@@ -72,71 +76,36 @@ void bot_command_pull(Client *c, const Seperator *sep)
 			case Class::Monk:
 			case Class::Bard:
 			case Class::Ranger:
-				bot_puller = bot_iter;
-				break;
-			case Class::Warrior:
-			case Class::ShadowKnight:
-			case Class::Paladin:
-			case Class::Berserker:
-			case Class::Beastlord:
-				if (!bot_puller) {
+				bot_iter->SetPullFlag();
 
-					bot_puller = bot_iter;
-					continue;
-				}
-
-				switch (bot_puller->GetClass()) {
-					case Class::Druid:
-					case Class::Shaman:
-					case Class::Cleric:
-					case Class::Wizard:
-					case Class::Necromancer:
-					case Class::Magician:
-					case Class::Enchanter:
-						bot_puller = bot_iter;
-					default:
-						continue;
-				}
-
-				continue;
-			case Class::Druid:
-			case Class::Shaman:
-			case Class::Cleric:
-				if (!bot_puller) {
-
-					bot_puller = bot_iter;
-					continue;
-				}
-
-				switch (bot_puller->GetClass()) {
-					case Class::Wizard:
-					case Class::Necromancer:
-					case Class::Magician:
-					case Class::Enchanter:
-						bot_puller = bot_iter;
-					default:
-						continue;
-				}
-
-				continue;
-			case Class::Wizard:
-			case Class::Necromancer:
-			case Class::Magician:
-			case Class::Enchanter:
-				if (!bot_puller) {
-					bot_puller = bot_iter;
-				}
-
-				continue;
+				return;
 			default:
-				continue;
+				break;
 		}
 
+		if (!backup_puller_found) {
+			switch (bot_iter->GetClass()) {
+				case Class::Warrior:
+				case Class::ShadowKnight:
+				case Class::Paladin:
+				case Class::Berserker:
+				case Class::Beastlord:
+					backup_bot_puller = bot_iter;
+					backup_puller_found = true;
 
-		bot_puller = bot_iter;
+					break;
+				default:
+					break;
+			}
+		}
 
-		break;
+		if (!backup_puller_found && !alternate_puller_found) {
+			alternate_bot_puller = bot_iter;
+			alternate_puller_found = true;
+		}
 	}
+
+	bot_puller = backup_bot_puller ? backup_bot_puller : alternate_bot_puller;
 
 	if (bot_puller) {
 		bot_puller->SetPullFlag();
