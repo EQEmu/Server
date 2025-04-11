@@ -564,7 +564,7 @@ void Database::PurgeExpiredInstances()
 	auto l = InstanceListRepository::GetWhere(
 		*this,
 		fmt::format(
-			"expire_at <= (UNIX_TIMESTAMP() - {}) AND never_expires = 0",
+			"expire_at <= (UNIX_TIMESTAMP() - {}) and expire_at != 0 AND never_expires = 0",
 			RuleI(Instances, ExpireOffsetTimeSeconds)
 		)
 	);

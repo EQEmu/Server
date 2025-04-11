@@ -5359,16 +5359,17 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	if (!CharmTick) {
 		//Check for Spell Effect specific resistance chances (ie AA Mental Fortitude)
-		int se_resist_bonuses = GetSpellEffectResistChance(spell_id);
-		if (se_resist_bonuses && zone->random.Roll(se_resist_bonuses)) {
+		if (resist_type != RESIST_NONE && TrySpellEffectResist(spell_id)) {
 			return 0;
 		}
 
 		// Check for Chance to Resist Spell bonuses (ie Sanctification Discipline)
-		int resist_bonuses = CalcResistChanceBonus();
-		if (resist_bonuses && zone->random.Roll(resist_bonuses) && !IsResurrectionSicknessSpell(spell_id)) {
-			LogSpells("Resisted spell in sanctification, had [{}] chance to resist", resist_bonuses);
-			return 0;
+		if (!spells[spell_id].no_resist && resist_type != RESIST_NONE) {
+			int resist_bonuses = CalcResistChanceBonus();
+			if (resist_bonuses && zone->random.Roll(resist_bonuses) && !IsResurrectionSicknessSpell(spell_id)) {
+				LogSpells("Resisted spell in sanctification, had [{}] chance to resist", resist_bonuses);
+				return 0;
+			}
 		}
 	}
 
@@ -5667,18 +5668,12 @@ int16 Mob::CalcResistChanceBonus()
 
 int16 Mob::CalcFearResistChance()
 {
-	int resistchance = spellbonuses.ResistFearChance + itembonuses.ResistFearChance;
-	if (IsOfClientBot()) {
-		resistchance += aabonuses.ResistFearChance;
-		if (aabonuses.Fearless == true) {
-			resistchance = 100;
-		}
-	}
-	if (spellbonuses.Fearless == true || itembonuses.Fearless == true) {
-		resistchance = 100;
+	int resist_chance = spellbonuses.ResistFearChance + itembonuses.ResistFearChance + aabonuses.ResistFearChance;
+	if (spellbonuses.Fearless || itembonuses.Fearless || aabonuses.Fearless) {
+		resist_chance = 100;
 	}
 
-	return resistchance;
+	return resist_chance;
 }
 
 float Mob::GetAOERange(uint16 spell_id)

@@ -1698,13 +1698,6 @@ void Mob::StopMoving()
 
 void Mob::StopMoving(float new_heading)
 {
-	if (IsBot()) {
-		auto bot = CastToBot();
-
-		bot->SetCombatJitterFlag(false);
-		bot->SetCombatOutOfRangeJitterFlag(false);
-	}
-
 	StopNavigation();
 	RotateTo(new_heading);
 
@@ -4621,8 +4614,12 @@ void Mob::SetZone(uint32 zone_id, uint32 instance_id)
 	{
 		CastToClient()->GetPP().zone_id = zone_id;
 		CastToClient()->GetPP().zoneInstance = instance_id;
+		CastToClient()->SaveCharacterData();
 	}
-	Save();
+
+	if (!IsClient()) {
+		Save(); // bots or other things might be covered here for some reason
+	}
 }
 
 void Mob::Kill() {

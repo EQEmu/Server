@@ -261,26 +261,6 @@
         OutF(LogSys, Logs::Detail, Logs::Spells, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogStatus(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::Status))\
-        OutF(LogSys, Logs::General, Logs::Status, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogStatusDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::Status))\
-        OutF(LogSys, Logs::Detail, Logs::Status, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogTCPConnection(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::TCPConnection))\
-        OutF(LogSys, Logs::General, Logs::TCPConnection, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogTCPConnectionDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::TCPConnection))\
-        OutF(LogSys, Logs::Detail, Logs::TCPConnection, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
 #define LogTasks(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Tasks))\
         OutF(LogSys, Logs::General, Logs::Tasks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -922,6 +902,26 @@
 #define LogZoneStateDetail(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::Detail, Logs::ZoneState))\
         OutF(LogSys, Logs::Detail, Logs::ZoneState, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogNetClient(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::NetClient))\
+        OutF(LogSys, Logs::General, Logs::NetClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogNetClientDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::NetClient))\
+        OutF(LogSys, Logs::Detail, Logs::NetClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogNetTCP(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::NetTCP))\
+        OutF(LogSys, Logs::General, Logs::NetTCP, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogNetTCPDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::NetTCP))\
+        OutF(LogSys, Logs::Detail, Logs::NetTCP, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\

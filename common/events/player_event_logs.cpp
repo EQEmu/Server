@@ -81,7 +81,7 @@ void PlayerEventLogs::Init()
 	if (!settings_to_insert.empty()) {
 		PlayerEventLogSettingsRepository::ReplaceMany(*m_database, settings_to_insert);
 	}
-	
+
 	bool processing_in_world = !RuleB(Logging, PlayerEventsQSProcess) && IsWorld();
 	bool processing_in_qs    = RuleB(Logging, PlayerEventsQSProcess) && IsQueryServ();
 
@@ -181,9 +181,17 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	// Helper to deserialize event data
 	auto Deserialize = [](const std::string &data, auto &out) {
-		std::stringstream        ss(data);
-		cereal::JSONInputArchive ar(ss);
-		out.serialize(ar);
+		if (!Strings::IsValidJson(data)) {
+			return;
+		}
+
+		// cpp exceptions are terrible, don't ever use them
+		try {
+			std::stringstream        ss(data);
+			cereal::JSONInputArchive ar(ss);
+			out.serialize(ar);
+		}
+		catch (const std::exception &e) {}
 	};
 
 	// Helper to assign ETL table ID

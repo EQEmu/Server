@@ -2739,8 +2739,6 @@ void Client::SendBulkBazaarTraders()
 
 	SetTraderCount(results.count);
 
-	SetTraderCount(results.count);
-
 	auto  p_size  = 4 + 12 * results.count + results.name_length;
 	auto  buffer  = std::make_unique<char[]>(p_size);
 	memset(buffer.get(), 0, p_size);

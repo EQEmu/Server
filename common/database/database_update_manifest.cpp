@@ -6942,8 +6942,8 @@ CREATE TABLE `character_pet_name` (
 		.version = 9310,
 		.description = "2025_03_7_expand_horse_def.sql",
 		.check = "SHOW COLUMNS FROM `horses` LIKE 'helmtexture'",
-		.condition = "missing",
-		.match = "TINYINT(2)",
+		.condition = "empty",
+		.match = "",
 		.sql = R"(
 ALTER TABLE `horses`
 	ADD COLUMN `helmtexture` TINYINT(2) NOT NULL DEFAULT -1 AFTER `texture`;
@@ -7080,6 +7080,8 @@ CREATE INDEX `idx_expire_at` ON `respawn_times` (`expire_at`);
 		.sql = R"(
 ALTER TABLE `instance_list`
 ADD COLUMN `expire_at` bigint(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `duration`;
+
+UPDATE instance_list set expire_at = `start_time` + `duration`; -- backfill existing data
 
 CREATE INDEX `idx_expire_at` ON `instance_list` (`expire_at`);
 )",

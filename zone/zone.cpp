@@ -887,7 +887,7 @@ void Zone::Shutdown(bool quiet)
 		c.second->WorldKick();
 	}
 
-	if (RuleB(Zone, StateSavingOnShutdown) && zone && zone->IsLoaded()) {
+	if (m_save_zone_state && RuleB(Zone, StateSavingOnShutdown) && zone && zone->IsLoaded()) {
 		SaveZoneState();
 	}
 
@@ -1010,6 +1010,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 
 	SetIdleWhenEmpty(true);
 	SetSecondsBeforeIdle(60);
+	SetSaveZoneState(false);
 
 	if (database.GetServerType() == 1) {
 		pvpzone = true;
@@ -1190,6 +1191,11 @@ bool Zone::Init(bool is_static) {
 
 	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
 
+	// Loading zone variables so they're available for things like encounter_load
+	if (RuleB(Zone, StateSavingOnShutdown)) {
+		zone->LoadZoneVariablesState();
+	}
+
 	// make sure that anything that needs to be loaded prior to scripts is loaded before here
 	// this is to ensure that the scripts have access to the data they need
 	parse->ReloadQuests(true);
@@ -1204,6 +1210,8 @@ bool Zone::Init(bool is_static) {
 	}
 
 	content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion());
+	SetSaveZoneState(true);
+
 	database.LoadCharacterCorpses(zoneid, instanceid);
 
 	content_db.LoadTraps(short_name, GetInstanceVersion());

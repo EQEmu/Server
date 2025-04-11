@@ -353,6 +353,9 @@ public:
 	uint32 GetInstanceTimeRemaining() const;
 	void SetInstanceTimeRemaining(uint32 instance_time_remaining);
 
+	inline bool GetSaveZoneState() const { return m_save_zone_state; }
+	inline void SetSaveZoneState(bool save_state) { m_save_zone_state = save_state; }
+
 	/**
 	 * GMSay Callback for LogSys
 	 *
@@ -473,6 +476,7 @@ public:
 	inline uint32 GetZoneServerId() const { return m_zone_server_id; }
 
 	// zone state
+	bool LoadZoneVariablesState();
 	bool LoadZoneState(
 		std::unordered_map<uint32, uint32> spawn_times,
 		std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns
@@ -516,6 +520,7 @@ private:
 	uint32    m_last_ucss_update;
 	bool      m_idle_when_empty;
 	uint32    m_seconds_before_idle;
+	bool      m_save_zone_state;
 
 	GlobalLootManager                   m_global_loot;
 	LinkedList<ZoneClientAuth_Struct *> client_auth_list;

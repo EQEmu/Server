@@ -912,8 +912,9 @@ bool ZSList::SendPacketToZonesWithGuild(uint32 guild_id, ServerPacket* pack)
 
 bool ZSList::SendPacketToZonesWithGMs(ServerPacket* pack)
 {
+	auto servers = client_list.GetZoneServersWithGMs();
 	for (auto const &z: zone_server_list) {
-		for (auto const &server_id: client_list.GetZoneServersWithGMs()) {
+		for (auto const &server_id: servers) {
 			if (z->GetID() == server_id && z->GetZoneID() > 0) {
 				z->SendPacket(pack);
 			}

@@ -347,6 +347,7 @@ RULE_STRING(World, SupportedClients, "RoF2", "Comma-delimited list of clients to
 RULE_STRING(World, CustomFilesKey, "", "Enable if the server requires custom files and sends a key to validate. Empty string to disable. Example: eqcustom_v1")
 RULE_STRING(World, CustomFilesUrl, "github.com/knervous/eqnexus/releases", "URL to display at character select if client is missing custom files")
 RULE_INT(World, CustomFilesAdminLevel, 20, "Admin level at which custom file key is not required when CustomFilesKey is specified")
+RULE_BOOL(World, RealTimeCalculateGuilds, false, "(Temp feature flag) If true, guilds will be calculated in real time instead of at zone boot. This is a performance hit but allows for more dynamic guilds.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
@@ -857,12 +858,6 @@ RULE_BOOL(Bots, BotArcheryConsumesAmmo, true, "Set to false to disable Archery A
 RULE_BOOL(Bots, BotThrowingConsumesAmmo, true, "Set to false to disable Throwing Ammo Consumption")
 RULE_INT(Bots, StackSizeMin, 20, "20 Default. -1 to disable and use default max stack size. Minimum stack size to give a bot (Arrows/Throwing).")
 RULE_INT(Bots, HasOrMayGetAggroThreshold, 90, "90 Default. Percent threshold of total hate where bots will stop casting spells that generate hate if they are set to try to not pull aggro via spells.")
-RULE_REAL(Bots, LowerMeleeDistanceMultiplier, 0.35, "Closest % of the hit box a melee bot will get to the target. Default 0.35")
-RULE_REAL(Bots, LowerTauntingMeleeDistanceMultiplier, 0.25, "Closest % of the hit box a taunting melee bot will get to the target. Default 0.25")
-RULE_REAL(Bots, LowerMaxMeleeRangeDistanceMultiplier, 0.80, "Closest % of the hit box a max melee range melee bot will get to the target. Default 0.80")
-RULE_REAL(Bots, UpperMeleeDistanceMultiplier, 0.55, "Furthest % of the hit box a melee bot will get from the target. Default 0.55")
-RULE_REAL(Bots, UpperTauntingMeleeDistanceMultiplier, 0.45, "Furthest % of the hit box a taunting melee bot will get from the target. Default 0.45")
-RULE_REAL(Bots, UpperMaxMeleeRangeDistanceMultiplier, 0.95, "Furthest % of the hit box a max melee range melee bot will get from the target. Default 0.95")
 RULE_BOOL(Bots, DisableSpecialAbilitiesAtMaxMelee, true, "If true, when bots are at max melee distance, special abilities including taunt will be disabled. Default True.")
 RULE_INT(Bots, MinJitterTimer, 500, "Minimum ms between bot movement jitter checks.")
 RULE_INT(Bots, MaxJitterTimer, 2500, "Maximum ms between bot movement jitter checks. Set to 0 to disable timer checks.")
@@ -928,6 +923,7 @@ RULE_BOOL(Chat, AutoInjectSaylinksToSay, true, "Automatically injects saylinks i
 RULE_BOOL(Chat, AutoInjectSaylinksToClientMessage, true, "Automatically injects saylinks into dialogue that has [brackets in them]")
 RULE_BOOL(Chat, QuestDialogueUsesDialogueWindow, false, "Pipes all quest dialogue to dialogue window")
 RULE_BOOL(Chat, DialogueWindowAnimatesNPCsIfNoneSet, true, "If there is no animation specified in the dialogue window markdown then it will choose a random greet animation such as wave or salute")
+RULE_BOOL(Chat, AlwaysCaptureCommandText, false, "Consume command text (# and ^ by default), regardless of which channel it is sent to")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Merchant)

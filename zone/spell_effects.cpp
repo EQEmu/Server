@@ -7465,44 +7465,57 @@ void Mob::DispelMagic(Mob* caster, uint16 spell_id, int effect_value)
 	}
 }
 
-uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
+bool Mob::TrySpellEffectResist(uint16 spell_id)
 {
+	/*
+		SEResist variable
+		0 = spell effect id to be check if can resist
+		1 = percent chance of resistance
+	*/
 
-	if(!IsValidSpell(spell_id))
-		return 0;
 
-	if (!aabonuses.SEResist[1] && !spellbonuses.SEResist[1] && !itembonuses.SEResist[1])
-		return 0;
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
 
-	uint16 resist_chance = 0;
+	if (!aabonuses.SEResist[1] && !spellbonuses.SEResist[1] && !itembonuses.SEResist[1]) {
+		return false;
+	}
+
+	int resist_chance = 0;
 
 	for(int i = 0; i < EFFECT_COUNT; ++i)
 	{
-		bool found = false;
+		if (spells[spell_id].effect_id[i] == SE_Blank) {
+			continue;
+		}
 
 		for(int d = 0; d < MAX_RESISTABLE_EFFECTS*2; d+=2)
 		{
+			resist_chance = 0;
 			if (spells[spell_id].effect_id[i] == aabonuses.SEResist[d]){
 				resist_chance += aabonuses.SEResist[d+1];
-				found = true;
 			}
 
 			if (spells[spell_id].effect_id[i] == itembonuses.SEResist[d]){
 				resist_chance += itembonuses.SEResist[d+1];
-				found = true;
 			}
-
 
 			if (spells[spell_id].effect_id[i] == spellbonuses.SEResist[d]){
 				resist_chance += spellbonuses.SEResist[d+1];
-				found = true;
 			}
 
-			if (found)
-				continue;
+			if (resist_chance) {
+				if (zone->random.Roll(resist_chance)) {
+					LogSpells("Resisted spell from Spell Effect Resistance, had [{}] chance to resist spell effect id [{}]", resist_chance, spells[spell_id].effect_id[i]);
+					return true;
+				}
+
+				break;
+			}
 		}
 	}
-	return resist_chance;
+	return false;
 }
 
 bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){

@@ -678,6 +678,7 @@ int main(int argc, char **argv)
 	safe_delete(Config);
 
 	if (zone != 0) {
+		zone->SetSaveZoneState(false);
 		zone->Shutdown(true);
 	}
 	//Fix for Linux world server problem.

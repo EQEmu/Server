@@ -995,6 +995,8 @@ bool Client::Save(uint8 iCommitNow) {
 	if(!ClientDataLoaded())
 		return false;
 
+	BenchTimer timer;
+
 	/* Wrote current basics to PP for saves */
 	if (!m_lock_save_position) {
 		m_pp.x       = m_Position.x;
@@ -1021,6 +1023,8 @@ bool Client::Save(uint8 iCommitNow) {
 		m_pp.mana      = current_mana;
 		m_pp.endurance = current_endurance;
 	}
+
+	database.TransactionBegin();
 
 	/* Save Character Currency */
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
@@ -1104,6 +1108,10 @@ bool Client::Save(uint8 iCommitNow) {
 	if (RuleB(Bots, Enabled)) {
 		database.botdb.SaveBotSettings(this);
 	}
+
+	database.TransactionCommit();
+
+	LogInfo("Save for [{}] took [{}]", GetCleanName(), timer.elapsed());
 
 	return true;
 }
@@ -1208,6 +1216,58 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	strn0cpy(message, orig_message, sizeof(message));
 
 	LogDebug("Client::ChannelMessageReceived() Channel:[{}] message:[{}]", chan_num, message);
+
+	if (RuleB(Chat, AlwaysCaptureCommandText)) {
+		if (message[0] == COMMAND_CHAR) {
+			if (command_dispatch(this, message, false) == -2) {
+				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+						Message(Chat::Red, "Command '%s' not recognized.", message);
+					}
+				}
+				else if (parse->PlayerHasQuestSub(EVENT_SAY)) {
+					int i = parse->EventPlayer(EVENT_SAY, this, message, 0);
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+						Message(Chat::Red, "Command '%s' not recognized.", message);
+					}
+				}
+				else {
+					if (!RuleB(Chat, SuppressCommandErrors)) {
+						Message(Chat::Red, "Command '%s' not recognized.", message);
+					}
+				}
+			}
+			return;
+		}
+
+		if (message[0] == BOT_COMMAND_CHAR) {
+			if (RuleB(Bots, Enabled)) {
+				if (bot_command_dispatch(this, message) == -2) {
+					if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+						int i = parse->EventPlayer(EVENT_BOT_COMMAND, this, message, 0);
+						if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+							Message(Chat::Red, "Bot command '%s' not recognized.", message);
+						}
+					}
+					else if (parse->PlayerHasQuestSub(EVENT_SAY)) {
+						int i = parse->EventPlayer(EVENT_SAY, this, message, 0);
+						if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+							Message(Chat::Red, "Bot command '%s' not recognized.", message);
+						}
+					}
+					else {
+						if (!RuleB(Chat, SuppressCommandErrors)) {
+							Message(Chat::Red, "Bot command '%s' not recognized.", message);
+						}
+					}
+				}
+			} else {
+				Message(Chat::Red, "Bots are disabled on this server.");
+			}
+			return;
+		}
+	}
 
 	if (targetname == nullptr) {
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();

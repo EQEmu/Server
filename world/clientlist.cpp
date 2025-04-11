@@ -42,11 +42,16 @@ extern ZSList			zoneserver_list;
 uint32 numplayers = 0;	//this really wants to be a member variable of ClientList...
 
 ClientList::ClientList()
-: CLStale_timer(10000)
+	: CLStale_timer(10000),
+	  m_poll_cache_timer(6000)
 {
 	NextCLEID = 1;
 
 	m_tick = std::make_unique<EQ::Timer>(5000, true, std::bind(&ClientList::OnTick, this, std::placeholders::_1));
+
+	// pre-allocate / pin memory for the zone server caches
+	m_gm_zone_server_ids.reserve(512);
+	m_guild_zone_server_ids.reserve(1024);
 }
 
 ClientList::~ClientList() {
@@ -56,6 +61,10 @@ void ClientList::Process() {
 
 	if (CLStale_timer.Check())
 		CLCheckStale();
+
+	if (m_poll_cache_timer.Check()) {
+		RebuildZoneServerCaches();
+	}
 
 	LinkedListIterator<Client*> iterator(list);
 
@@ -384,6 +393,7 @@ void ClientList::ClientUpdate(ZoneServer *zoneserver, ServerClientList_Struct *s
 			}
 			else {
 				cle->Update(zoneserver, scl);
+				AddToZoneServerCaches(cle);
 			}
 			return;
 		}
@@ -458,6 +468,7 @@ void ClientList::ClientUpdate(ZoneServer *zoneserver, ServerClientList_Struct *s
 	);
 
 	clientlist.Insert(cle);
+	AddToZoneServerCaches(cle);
 	zoneserver->ChangeWID(scl->charid, cle->GetID());
 }
 
@@ -1608,7 +1619,7 @@ void ClientList::OnTick(EQ::Timer *t)
 /**
  * @param response
  */
-void ClientList::GetClientList(Json::Value &response)
+void ClientList::GetClientList(Json::Value &response, bool full_list)
 {
 	LinkedListIterator<ClientListEntry *> Iterator(clientlist);
 
@@ -1619,62 +1630,68 @@ void ClientList::GetClientList(Json::Value &response)
 
 		Json::Value row;
 
-		row["account_id"]             = cle->AccountID();
-		row["account_name"]           = cle->AccountName();
-		row["admin"]                  = cle->Admin();
-		row["id"]                     = cle->GetID();
-		row["ip"]                     = cle->GetIP();
-		row["loginserver_account_id"] = cle->LSAccountID();
-		row["loginserver_id"]         = cle->LSID();
-		row["loginserver_name"]       = cle->LSName();
-		row["online"]                 = cle->Online();
-		row["world_admin"]            = cle->WorldAdmin();
+		row["id"]             = cle->GetID();
+		row["name"]           = cle->name();
+		row["level"]          = cle->level();
+		row["ip"]             = cle->GetIP();
+		row["gm"]             = cle->GetGM();
+		row["race"]           = cle->race();
+		row["class"]          = cle->class_();
+		row["client_version"] = cle->GetClientVersion();
+		row["admin"]          = cle->Admin();
+		row["account_id"]     = cle->AccountID();
+		row["account_name"]   = cle->AccountName();
+		row["character_id"]   = cle->CharID();
+		row["anon"]           = cle->Anon();
+		row["guild_id"]       = cle->GuildID();
+
+		if (full_list) {
+			row["loginserver_account_id"] = cle->LSAccountID();
+			row["loginserver_id"]         = cle->LSID();
+			row["loginserver_name"]       = cle->LSName();
+			row["online"]                 = cle->Online();
+			row["world_admin"]            = cle->WorldAdmin();
+			row["guild_rank"]             = cle->GuildRank();
+			row["guild_tribute_opt_in"]   = cle->GuildTributeOptIn();
+			row["instance"]               = cle->instance();
+			row["is_local_client"]        = cle->IsLocalClient();
+			row["lfg"]                    = cle->LFG();
+			row["lfg_comments"]           = cle->GetLFGComments();
+			row["lfg_from_level"]         = cle->GetLFGFromLevel();
+			row["lfg_match_filter"]       = cle->GetLFGMatchFilter();
+			row["lfg_to_level"]           = cle->GetLFGToLevel();
+			row["tells_off"]              = cle->TellsOff();
+			row["zone"]                   = cle->zone();
+		}
 
 		auto server = cle->Server();
 		if (server) {
-			row["server"]["client_address"]       = server->GetCAddress();
-			row["server"]["client_local_address"] = server->GetCLocalAddress();
-			row["server"]["client_port"]          = server->GetCPort();
-			row["server"]["compile_time"]         = server->GetCompileTime();
-			row["server"]["id"]                   = server->GetID();
-			row["server"]["instance_id"]          = server->GetInstanceID();
-			row["server"]["ip"]                   = server->GetIP();
-			row["server"]["is_booting"]           = server->IsBootingUp();
-			row["server"]["launch_name"]          = server->GetLaunchName();
-			row["server"]["launched_name"]        = server->GetLaunchedName();
-			row["server"]["number_players"]       = server->NumPlayers();
-			row["server"]["port"]                 = server->GetPort();
-			row["server"]["previous_zone_id"]     = server->GetPrevZoneID();
-			row["server"]["static_zone"]          = server->IsStaticZone();
-			row["server"]["uui"]                  = server->GetUUID();
-			row["server"]["zone_id"]              = server->GetZoneID();
-			row["server"]["zone_long_name"]       = server->GetZoneLongName();
-			row["server"]["zone_name"]            = server->GetZoneName();
-			row["server"]["zone_os_pid"]          = server->GetZoneOSProcessID();
+			row["server"]["zone_id"]        = server->GetZoneID();
+			row["server"]["zone_long_name"] = server->GetZoneLongName();
+			row["server"]["zone_name"]      = server->GetZoneName();
+			row["server"]["zone_os_pid"]    = server->GetZoneOSProcessID();
+			row["server"]["id"]             = server->GetID();
+
+			if (full_list) {
+				row["server"]["client_address"]       = server->GetCAddress();
+				row["server"]["client_local_address"] = server->GetCLocalAddress();
+				row["server"]["client_port"]          = server->GetCPort();
+				row["server"]["compile_time"]         = server->GetCompileTime();
+				row["server"]["instance_id"]          = server->GetInstanceID();
+				row["server"]["ip"]                   = server->GetIP();
+				row["server"]["is_booting"]           = server->IsBootingUp();
+				row["server"]["launch_name"]          = server->GetLaunchName();
+				row["server"]["launched_name"]        = server->GetLaunchedName();
+				row["server"]["number_players"]       = server->NumPlayers();
+				row["server"]["port"]                 = server->GetPort();
+				row["server"]["previous_zone_id"]     = server->GetPrevZoneID();
+				row["server"]["static_zone"]          = server->IsStaticZone();
+				row["server"]["uui"]                  = server->GetUUID();
+			}
 		}
 		else {
 			row["server"] = Json::Value();
 		}
-		row["anon"]             = cle->Anon();
-		row["character_id"]     = cle->CharID();
-		row["class"]            = cle->class_();
-		row["client_version"]   = cle->GetClientVersion();
-		row["gm"]               = cle->GetGM();
-		row["guild_id"]         = cle->GuildID();
-		row["guild_rank"]       = cle->GuildRank();
-		row["guild_tribute_opt_in"] = cle->GuildTributeOptIn();
-		row["instance"]         = cle->instance();
-		row["is_local_client"]  = cle->IsLocalClient();
-		row["level"]            = cle->level();
-		row["lfg"]              = cle->LFG();
-		row["lfg_comments"]     = cle->GetLFGComments();
-		row["lfg_from_level"]   = cle->GetLFGFromLevel();
-		row["lfg_match_filter"] = cle->GetLFGMatchFilter();
-		row["lfg_to_level"]     = cle->GetLFGToLevel();
-		row["name"]             = cle->name();
-		row["race"]             = cle->race();
-		row["tells_off"]        = cle->TellsOff();
-		row["zone"]             = cle->zone();
 
 		response.append(row);
 
@@ -1851,71 +1868,97 @@ std::map<uint32, ClientListEntry *> ClientList::GetGuildClientsWithTributeOptIn(
 	return guild_members;
 }
 
-#include <unordered_set>
+void ClientList::RebuildZoneServerCaches()
+{
+	// Clear without freeing memory (buckets stay allocated)
+	m_gm_zone_server_ids.clear();
+	m_guild_zone_server_ids.clear();
+
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+	iterator.Reset();
+
+	while (iterator.MoreElements()) {
+		ClientListEntry* cle = iterator.GetData();
+
+		if (cle->Online() != CLE_Status::InZone || !cle->Server()) {
+			iterator.Advance();
+			continue;
+		}
+
+		uint32_t server_id = cle->Server()->GetID();
+
+		// Track GM zone server
+		if (cle->GetGM()) {
+			m_gm_zone_server_ids.insert(server_id);
+		}
+
+		// Track guild zone servers
+		if (cle->GuildID() > 0) {
+			auto& guild_set = m_guild_zone_server_ids[cle->GuildID()];
+			guild_set.insert(server_id);
+		}
+
+		iterator.Advance();
+	}
+}
 
 std::vector<uint32_t> ClientList::GetGuildZoneServers(uint32 guild_id)
 {
-	std::vector<uint32_t>        zone_server_ids;
-	std::unordered_set<uint32_t> seen_ids;
+	if (RuleB(World, RealTimeCalculateGuilds)) {
+		std::vector<uint32_t>        zone_server_ids;
+		std::unordered_set<uint32_t> seen_ids;
 
-	LinkedListIterator<ClientListEntry *> iterator(clientlist);
+		LinkedListIterator<ClientListEntry *> iterator(clientlist);
 
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		ClientListEntry *cle = iterator.GetData();
+		iterator.Reset();
+		while (iterator.MoreElements()) {
+			ClientListEntry *cle = iterator.GetData();
 
-		if (cle->Online() != CLE_Status::InZone) {
-			iterator.Advance();
-			continue;
-		}
-
-		if (!cle->Server()) {
-			iterator.Advance();
-			continue;
-		}
-
-		if (cle->GuildID() == guild_id) {
-			uint32_t id = cle->Server()->GetID();
-			if (seen_ids.insert(id).second) {
-				zone_server_ids.emplace_back(id);
+			if (cle->Online() != CLE_Status::InZone) {
+				iterator.Advance();
+				continue;
 			}
+
+			if (!cle->Server()) {
+				iterator.Advance();
+				continue;
+			}
+
+			if (cle->GuildID() == guild_id) {
+				uint32_t id = cle->Server()->GetID();
+				if (seen_ids.insert(id).second) {
+					zone_server_ids.emplace_back(id);
+				}
+			}
+
+			iterator.Advance();
 		}
 
-		iterator.Advance();
+		return zone_server_ids;
 	}
 
-	return zone_server_ids;
+	auto it = m_guild_zone_server_ids.find(guild_id);
+	if (it == m_guild_zone_server_ids.end()) {
+		return {};
+	}
+	return {it->second.begin(), it->second.end()};
 }
 
-std::vector<uint32_t> ClientList::GetZoneServersWithGMs()
+void ClientList::AddToZoneServerCaches(ClientListEntry* cle)
 {
-	std::vector<uint32_t>                 zone_server_ids;
-	std::unordered_set<uint32_t>          seen_ids;
-	LinkedListIterator<ClientListEntry *> iterator(clientlist);
-
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		ClientListEntry *cle = iterator.GetData();
-
-		if (cle->Online() != CLE_Status::InZone) {
-			iterator.Advance();
-			continue;
-		}
-
-		if (!cle->Server()) {
-			iterator.Advance();
-			continue;
-		}
-
-		if (cle->Admin() > 0) {
-			uint32_t id = cle->Server()->GetID();
-			if (seen_ids.insert(id).second) {
-				zone_server_ids.emplace_back(id);
-			}
-		}
-
-		iterator.Advance();
+	if (!cle || cle->Online() != CLE_Status::InZone || !cle->Server()) {
+		return;
 	}
 
-	return zone_server_ids;
+	uint32_t server_id = cle->Server()->GetID();
+
+	// Add GM zone server if applicable
+	if (cle->GetGM()) {
+		m_gm_zone_server_ids.insert(server_id);
+	}
+
+	// Add guild zone server if applicable
+	if (cle->GuildID() > 0) {
+		m_guild_zone_server_ids[cle->GuildID()].insert(server_id);
+	}
 }
