@@ -377,12 +377,13 @@ public:
 	EQ::ItemInstance* FindTraderItemBySerialNumber(std::string &serial_number);
 	EQ::ItemInstance* FindTraderItemByUniqueID(std::string &unique_id);
 	EQ::ItemInstance* FindTraderItemByUniqueID(const char* unique_id);
+	std::vector<EQ::ItemInstance *> FindTraderItemsByUniqueID(const char* unique_id);
 	void FindAndNukeTraderItem(std::string &item_unique_id, int16 quantity, Client* customer, uint16 trader_slot);
 	void NukeTraderItem(uint16 slot, int16 charges, int16 quantity, Client* customer, uint16 trader_slot, const std::string &serial_number, int32 item_id = 0);
 	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
 	void BuyTraderItem(const EQApplicationPacket* app);
-	void BuyTraderItemOutsideBazaar(TraderBuy_Struct* tbs, const EQApplicationPacket* app);
+	void BuyTraderItemFromBazaarWindow(const EQApplicationPacket* app);
 	void FinishTrade(
 		Mob *with,
 		bool finalizer = false,
@@ -422,11 +423,12 @@ public:
 	uint32 GetCustomerID() { return customer_id; }
 	void   SetCustomerID(uint32 id) { customer_id = id; }
 	void   ClearTraderMerchantList() { m_trader_merchant_list.clear(); }
-	void   AddDataToMerchantList(int16 slot_id, int32 quantity, const std::string &item_unique_id);
-	std::tuple<int16, std::string> GetDataFromMerchantListByMerchantSlotId(int16 slot_id);
+	void   AddDataToMerchantList(int16 slot_id, uint32 item_id, int32 quantity, const std::string &item_unique_id);
+	int16  GetNextFreeSlotFromMerchantList();
+	std::tuple<uint32, int32, std::string> GetDataFromMerchantListByMerchantSlotId(int16 slot_id);
 	int16 GetSlotFromMerchantListByItemUniqueId(const std::string &unique_id);
-	std::pair<int16, std::tuple<uint32, std::string>> GetDataFromMerchantListByItemUniqueId(const std::string &unique_id);
-	std::map<int16, std::tuple<uint32, std::string>>* GetTraderMerchantList() { return &m_trader_merchant_list; }
+	std::pair<int16, std::tuple<uint32, int32, std::string>> GetDataFromMerchantListByItemUniqueId(const std::string &unique_id);
+	std::map<int16, std::tuple<uint32, int32, std::string>>* GetTraderMerchantList() { return &m_trader_merchant_list; }
 
 	void   SetBuyerID(uint32 id) { m_buyer_id = id; }
 	uint32 GetBuyerID() { return m_buyer_id; }
@@ -2112,7 +2114,7 @@ private:
 	uint8 mercSlot; // selected merc slot
 	time_t                                                         m_trader_transaction_date;
 	uint32                                                         m_trader_count{};
-	std::map<int16, std::tuple<uint32, std::string>>               m_trader_merchant_list{};
+	std::map<int16, std::tuple<uint32, int32, std::string>>        m_trader_merchant_list{};  // itemid, qty, item_unique_id
 	uint32                                                         m_buyer_id;
 	uint32                                                         m_barter_time;
 	int32                                                          m_parcel_platinum;
