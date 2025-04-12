@@ -4679,10 +4679,7 @@ bool Client::PutItemInInventoryWithStacking(EQ::ItemInstance *inst)
 	};
 
 	std::vector<temp> queue;
-	auto              free_id            = GetInv().FindFirstFreeSlotThatFitsItem(inst->GetItem());
-	auto              quantity           = inst->GetCharges(); // 2
-	auto              remaining_quantity = 0;
-	auto              item_size          = inst->GetItem()->Size;
+	auto              quantity = inst->GetCharges();
 
 	for (int i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
 		auto inv_inst = GetInv().GetItem(i);
