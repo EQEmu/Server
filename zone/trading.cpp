@@ -1374,8 +1374,8 @@ static void BazaarAuditTrail(const char *seller, const char *buyer, const char *
 
 void Client::BuyTraderItem(const EQApplicationPacket *app)
 {
-	auto in     = reinterpret_cast<TraderBuy_Struct*>(app->pBuffer);
-	auto trader = entity_list.GetClientByID(in->trader_id);
+	auto in                 = reinterpret_cast<TraderBuy_Struct *>(app->pBuffer);
+	auto trader             = entity_list.GetClientByID(in->trader_id);
 
 	if (!trader || !trader->IsTrader()) {
 		Message(Chat::Red, "The trader could not be found.");
@@ -1408,6 +1408,12 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 		buy_inst->IsStackable(),
 		quantity
 	);
+
+	if (CheckLoreConflict(inst_copy->GetItem())) {
+		MessageString(Chat::Red, DUPLICATE_LORE);
+		TradeRequestFailed(app);
+		return;
+	}
 
 	if (in->price * quantity <= 0) {
         Message(Chat::Red, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
@@ -1447,40 +1453,18 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
         return;
     }
 
-	LogTrading("Customer Paid: <green>[{}] in Copper", total_cost);
-
-	uint32 platinum = total_cost / 1000;
-	total_cost     -= platinum * 1000;
-	uint32 gold     = total_cost / 100;
-	total_cost     -= gold * 100;
-	uint32 silver   = total_cost / 10;
-	total_cost     -= silver * 10;
-	uint32 copper   = total_cost;
-
-	LogTrading("Trader Received: [{}] Platinum, [{}] Gold, [{}] Silver, [{}] Copper", platinum, gold, silver, copper);
-    ReturnTraderReq(app, quantity, buy_inst->GetID());
-
-	if (CheckLoreConflict(buy_inst->GetItem())) {
-		MessageString(Chat::Red, DUPLICATE_LORE);
-		TradeRequestFailed(app);
-		return;
-	}
-
 	if (!trader->RemoveItemByItemUniqueId(buy_inst->GetUniqueID(), quantity)) {
+		AddMoneyToPP(total_cost, true);
 		Message(Chat::Red, "The Trader no longer has the item.  Please refresh the merchant window.");
 		TradeRequestFailed(app);
 		return;
 	}
 
-	trader->AddMoneyToPP(copper, silver, gold, platinum, true);
-
-	// if (buy_inst->IsStackable() && !TryStacking(buy_inst, ItemPacketTrade, false, false)) {
-	// 	MessageString(Chat::Red, HOW_CAN_YOU_BUY_MORE, trader->GetCleanName());
-	// 	TradeRequestFailed(app);
-	// 	return;
-	// }
+	trader->AddMoneyToPP(total_cost, true);
 
 	if (!PutItemInInventoryWithStacking(inst_copy.get())) {
+		trader->TakeMoneyFromPP(total_cost, true);
+		trader->PutItemInInventoryWithStacking(buy_inst);
 		MessageString(Chat::Red, HOW_CAN_YOU_BUY_MORE, trader->GetCleanName());
 		TradeRequestFailed(app);
 		return;
@@ -1498,6 +1482,11 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 	strn0cpy(data->item_name, buy_inst->GetItem()->Name, sizeof(data->item_name));
 	strn0cpy(data->item_unique_id, buy_inst->GetUniqueID().data(), sizeof(data->item_unique_id));
 	trader->QueuePacket(trader_packet.get());
+
+	QueuePacket(app);
+
+	LogTrading("Customer Paid: [{}] in Copper", total_cost);
+	LogTrading("Trader Received: [{}] in Copper", total_cost);
 
 	if (merchant_quantity > quantity) {
 		std::unique_ptr<EQ::ItemInstance> vendor_inst(buy_inst ? buy_inst->Clone() : nullptr);
