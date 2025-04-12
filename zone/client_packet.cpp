@@ -15510,7 +15510,7 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 					   in->quantity,
 					   in->item_unique_id
 			);
-			BuyTraderItemOutsideBazaar(in, app);
+			BuyTraderItemFromBazaarWindow(app);
 			break;
 		}
 		case BazaarByDirectToInventory: {

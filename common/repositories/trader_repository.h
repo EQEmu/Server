@@ -198,30 +198,40 @@ public:
 		return UpdateOne(db, m);
 	}
 
-	static int UpdatePrice(Database &db, const std::string &item_unique_id, uint32 price)
+	static std::vector<Trader> UpdatePrice(Database &db, const std::string &item_unique_id, uint32 price)
 	{
-		const auto trader_item = GetWhere(
-			db,
-			fmt::format("`item_unique_id` = '{}' ", item_unique_id)
+		std::vector<Trader> all_entries{};
+
+		const auto query = fmt::format(
+			"UPDATE trader t1 SET t1.`item_cost` = '{}', t1.`listing_date` = FROM_UNIXTIME({}) WHERE t1.`item_id` = "
+			"(SELECT t2.`item_id` FROM trader t2 WHERE t2.`item_unique_id` = '{}')",
+			price,
+			time(nullptr),
+			item_unique_id
 		);
 
-		if (trader_item.empty() || trader_item.size() > 1) {
-			return 0;
+		auto results = db.QueryDatabase(query);
+		if (results.RowsAffected() == 0) {
+			return all_entries;
 		}
 
-		auto m         = trader_item[0];
-		m.item_cost    = price;
-		m.listing_date = time(nullptr);
+		all_entries = GetWhere(
+			db,
+			fmt::format(
+				"`item_id` = (SELECT t1.`item_id` FROM trader t1 WHERE t1.`item_unique_id` = '{}');",
+				item_unique_id
+			)
+		);
 
-		return ReplaceOne(db, m);
+		return all_entries;
 	}
 
-	static Trader GetItemBySerialNumber(Database &db, std::string &item_unique_id, uint32 trader_id)
+	static Trader GetItemByItemUniqueNumber(Database &db, std::string &item_unique_id)
 	{
 		Trader     e{};
 		const auto trader_item = GetWhere(
 			db,
-			fmt::format("`character_id` = '{}' AND `item_unique_id` = '{}' LIMIT 1", trader_id, item_unique_id)
+			fmt::format("`item_unique_id` = '{}' LIMIT 1", item_unique_id)
 		);
 
 		if (trader_item.empty()) {
