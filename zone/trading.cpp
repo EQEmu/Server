@@ -1459,21 +1459,18 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
     }
 
 	uint64 total_transaction_value = static_cast<uint64>(in->price) * static_cast<uint64>(quantity);
-	if (total_transaction_value > MAX_TRANSACTION_VALUE) {
-		Message(Chat::Red,"That would exceed the single transaction limit of %u platinum.", MAX_TRANSACTION_VALUE / 1000);
+	if (total_transaction_value > RoF2::constants::MAX_BAZAAR_TRANSACTION) {
+		Message(
+			Chat::Red,
+			"That would exceed the single transaction limit of %u platinum.",
+			RoF2::constants::MAX_BAZAAR_TRANSACTION / 1000
+		);
 		TradeRequestFailed(app);
 		return;
 	}
 
-	// This cannot overflow assuming MAX_TRANSACTION_VALUE, checked above, is the default of 2000000000
-	uint32 total_cost = in->price * quantity;
+	uint64 total_cost = in->price * quantity;
 	if (!TakeMoneyFromPP(total_cost)) {
-        RecordPlayerEventLog(
-            PlayerEvent::POSSIBLE_HACK,
-            PlayerEvent::PossibleHackEvent{
-                .message = "Attempted to buy something in bazaar but did not have enough money."
-            }
-        );
 		MessageString(Chat::Red, INSUFFICIENT_FUNDS);
         TradeRequestFailed(app);
         return;
@@ -1489,6 +1486,7 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 	trader->AddMoneyToPP(total_cost, true);
 
 	if (!PutItemInInventoryWithStacking(inst_copy.get())) {
+		AddMoneyToPP(total_cost, true);
 		trader->TakeMoneyFromPP(total_cost, true);
 		trader->PutItemInInventoryWithStacking(buy_inst);
 		MessageString(Chat::Red, HOW_CAN_YOU_BUY_MORE, trader->GetCleanName());
@@ -2486,11 +2484,11 @@ void Client::SendTraderMode(BazaarTraderBarterActions status)
 
 void Client::TraderUpdateItem(const EQApplicationPacket *app)
 {
-	auto                              in        = reinterpret_cast<TraderPriceUpdate_Struct *>(app->pBuffer);
-	uint32                            new_price = in->new_price;
-	auto                              inst      = FindTraderItemByUniqueID(in->item_unique_id);
+	auto   in        = reinterpret_cast<TraderPriceUpdate_Struct *>(app->pBuffer);
+	uint32 new_price = in->new_price;
+	auto   inst      = FindTraderItemByUniqueID(in->item_unique_id);
+	auto   customer  = entity_list.GetClientByID(GetCustomerID());
 
-	auto customer = entity_list.GetClientByID(GetCustomerID());
 	if (new_price == 0) {
 		auto result = TraderRepository::DeleteWhere(database, fmt::format("`item_unique_id` = '{}'", in->item_unique_id));
 		if (!result) {
