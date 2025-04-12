@@ -439,7 +439,7 @@ namespace RoF2
 				break;
 			}
 			default: {
-				LogTradingDetail("Unhandled action <red>[{}]", sub_action);
+				//LogTradingDetail("Unhandled action <red>[{}]", sub_action);
 				dest->FastQueuePacket(&in);
 			}
 		}
@@ -533,7 +533,7 @@ namespace RoF2
 				break;
 			}
 			default: {
-				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
+				//LogTradingDetail("(RoF2) Unhandled action <red>[{}]", action);
 				dest->FastQueuePacket(&in, ack_req);
 			}
 		}
@@ -622,10 +622,10 @@ namespace RoF2
 				break;
 			}
 			default: {
-				LogTrading(
-					"(RoF2) Unhandled action <red>[{}]",
-					in->action
-				);
+				// LogTradingDetail(
+				// 	"(RoF2) Unhandled action <red>[{}]",
+				// 	in->action
+				// );
 				dest->QueuePacket(inapp);
 			}
 		}
@@ -4339,7 +4339,7 @@ namespace RoF2
 				break;
 			}
 			default: {
-				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
+				// LogTradingDetail("(RoF2) Unhandled action <red>[{}]", action);
 				EQApplicationPacket *in = *p;
 				*p = nullptr;
 
@@ -6224,7 +6224,7 @@ namespace RoF2
 				break;
 			}
 			default: {
-				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
+				//LogTradingDetail("(RoF2) Unhandled action <red>[{}]", action);
 			}
 		}
 	}
@@ -6357,7 +6357,7 @@ namespace RoF2
 				break;
 			}
 			default: {
-				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
+				//LogTradingDetail("(RoF2) Unhandled action <red>[{}]", action);
 			}
 			return;
 		}
