@@ -778,7 +778,7 @@ bool SharedDatabase::GetInventory(Client *c)
 			inst->SetColor(color);
 		}
 
-		if (charges == std::numeric_limits<int16>::max()) {
+		if (charges > std::numeric_limits<int16>::max()) {
 			inst->SetCharges(-1);
 		} else if (charges == 0 && inst->IsStackable()) {
 			// Stackable items need a minimum charge of 1 remain moveable.
