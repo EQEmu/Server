@@ -1387,7 +1387,9 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 	auto data          = reinterpret_cast<TraderBuy_Struct*>(trader_packet->pBuffer);
 
 	auto buy_inst = trader->FindTraderItemByUniqueID(in->item_unique_id);
-	if (!buy_inst) {
+	std::unique_ptr<EQ::ItemInstance> inst_copy(buy_inst ? buy_inst->Clone() : nullptr);
+
+	if (!buy_inst || !inst_copy) {
 		LogTrading("Unable to find item id <red>[{}] item_sn <red>[{}] on trader", in->item_id, in->item_unique_id);
 		Message(Chat::Red, "The trader no longer has the item for sale.  Please refresh the merchant window.");
 		TradeRequestFailed(app);
@@ -1395,6 +1397,11 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 	}
 
 	uint32 quantity = in->quantity;
+	inst_copy->SetCharges(quantity);
+	if (inst_copy->IsStackable()) {
+		inst_copy->CreateUniqueID();
+	}
+
 	LogTrading(
 		"Name: <green>[{}] IsStackable: <green>[{}] Requested Quantity: <green>[{}]",
 		buy_inst->GetItem()->Name,
@@ -1459,10 +1466,6 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (quantity != 1) {
-		buy_inst->SetCharges(quantity);
-	}
-
 	if (!trader->RemoveItemByItemUniqueId(buy_inst->GetUniqueID(), quantity)) {
 		Message(Chat::Red, "The Trader no longer has the item.  Please refresh the merchant window.");
 		TradeRequestFailed(app);
@@ -1471,7 +1474,13 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 
 	trader->AddMoneyToPP(copper, silver, gold, platinum, true);
 
-	if (!AutoPutLootInInventory(*buy_inst, false, true)) {
+	// if (buy_inst->IsStackable() && !TryStacking(buy_inst, ItemPacketTrade, false, false)) {
+	// 	MessageString(Chat::Red, HOW_CAN_YOU_BUY_MORE, trader->GetCleanName());
+	// 	TradeRequestFailed(app);
+	// 	return;
+	// }
+
+	if (!PutItemInInventoryWithStacking(inst_copy.get())) {
 		MessageString(Chat::Red, HOW_CAN_YOU_BUY_MORE, trader->GetCleanName());
 		TradeRequestFailed(app);
 		return;
@@ -1491,13 +1500,14 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 	trader->QueuePacket(trader_packet.get());
 
 	if (merchant_quantity > quantity) {
-		buy_inst->SetMerchantCount(merchant_quantity - quantity);
-		buy_inst->SetMerchantSlot(slot_id);
-		buy_inst->SetPrice(in->price);
+		std::unique_ptr<EQ::ItemInstance> vendor_inst(buy_inst ? buy_inst->Clone() : nullptr);
+		vendor_inst->SetMerchantCount(merchant_quantity - quantity);
+		vendor_inst->SetMerchantSlot(slot_id);
+		vendor_inst->SetPrice(in->price);
 		auto list = GetTraderMerchantList();
-		std::get<0>(list->at(slot_id)) -= quantity;
-		SendItemPacket(slot_id, buy_inst, ItemPacketMerchant);
 		TraderRepository::UpdateQuantity(database, item_unique_id, merchant_quantity - quantity);
+		std::get<0>(list->at(slot_id)) -= quantity;
+		SendItemPacket(slot_id, vendor_inst.get(), ItemPacketMerchant);
 	}
 	else {
 		auto client_packet = new EQApplicationPacket(OP_ShopDelItem, static_cast<uint32>(sizeof(Merchant_DelItem_Struct)));
