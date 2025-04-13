@@ -21,8 +21,6 @@
 #include <string.h>
 #include "../common/global_define.h"
 
-#include "../common/repositories/inventory_snapshots_repository.h"
-
 // for windows compile
 #ifndef _WINDOWS
 	#include <stdarg.h>
