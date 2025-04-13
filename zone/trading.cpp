@@ -1399,18 +1399,6 @@ static void BazaarAuditTrail(const char *seller, const char *buyer, const char *
 
 void Client::BuyTraderItem(const EQApplicationPacket *app)
 {
-	struct Checks {
-		bool              take_customer_money {false};
-		bool              give_trader_money {false};
-		bool              give_customer_item {false};
-		bool              take_trader_item {false};
-		uint64            customer_money {false};
-		uint64            trader_money {false};
-		EQ::ItemInstance *trader_item {nullptr};
-		EQ::ItemInstance *customer_item {nullptr};
-	};
-
-	Checks checks{};
 	auto   in     = reinterpret_cast<TraderBuy_Struct *>(app->pBuffer);
 	auto   trader = entity_list.GetClientByID(in->trader_id);
 
@@ -1433,7 +1421,7 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	int16 quantity = static_cast<int16>(in->quantity);
+	auto quantity = in->quantity;
 	inst_copy->SetCharges(quantity);
 	if (inst_copy->IsStackable() && quantity != buy_inst->GetCharges()) {
 		inst_copy->CreateUniqueID();
@@ -1448,8 +1436,6 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 
 	if (CheckLoreConflict(inst_copy->GetItem())) {
 		MessageString(Chat::Red, DUPLICATE_LORE);
-		in->method     = BazaarByParcel;
-		in->sub_action = DataOutDated;
 		TradeRequestFailed(app);
 		return;
 	}
@@ -1488,7 +1474,6 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
         TradeRequestFailed(app);
         return;
     }
-	checks.take_customer_money = true;
 
 	if (!trader->RemoveItemByItemUniqueId(buy_inst->GetUniqueID(), quantity)) {
 		AddMoneyToPP(total_cost, true);
@@ -1496,10 +1481,8 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 		TradeRequestFailed(app);
 		return;
 	}
-	checks.take_trader_item = true;
 
 	trader->AddMoneyToPP(total_cost, true);
-	checks.give_trader_money = true;
 
 	if (!PutItemInInventoryWithStacking(inst_copy.get())) {
 		AddMoneyToPP(total_cost, true);
@@ -1509,7 +1492,6 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 		TradeRequestFailed(app);
 		return;
 	}
-	checks.give_customer_item = true;
 
 	auto [slot_id, merchant_data]                     = GetDataFromMerchantListByItemUniqueId(buy_inst->GetUniqueID());
 	auto [item_id, merchant_quantity, item_unique_id] = merchant_data;
@@ -1526,17 +1508,21 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 
 	QueuePacket(app);
 
-	LogTrading("Customer Paid: [{}] in Copper", total_cost);
-	LogTrading("Trader Received: [{}] in Copper", total_cost);
+	LogTrading("Customer Paid:     [{}] to {}", DetermineMoneyString(total_cost), trader->GetCleanName());
+	LogTrading("Customer Received: [{}] {} with unique_id of {}", quantity, in->item_name, inst_copy->GetUniqueID());
+	LogTrading("Trader Received:   [{}] from {}", DetermineMoneyString(total_cost), GetCleanName());
+	LogTrading("Trader Sent:       [{}] {} with unique_id of {}", quantity, in->item_name, buy_inst->GetUniqueID());
 
 	if (merchant_quantity > quantity) {
 		std::unique_ptr<EQ::ItemInstance> vendor_inst(buy_inst ? buy_inst->Clone() : nullptr);
 		vendor_inst->SetMerchantCount(merchant_quantity - quantity);
 		vendor_inst->SetMerchantSlot(slot_id);
 		vendor_inst->SetPrice(in->price);
+
 		auto list = GetTraderMerchantList();
-		TraderRepository::UpdateQuantity(database, item_unique_id, merchant_quantity - quantity);
 		std::get<1>(list->at(slot_id)) -= quantity;
+
+		TraderRepository::UpdateQuantity(database, item_unique_id, merchant_quantity - quantity);
 		SendItemPacket(slot_id, vendor_inst.get(), ItemPacketMerchant);
 	}
 	else {
@@ -1552,6 +1538,7 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 
 		auto list = GetTraderMerchantList();
 		list->erase(slot_id);
+
 		TraderRepository::DeleteWhere(database, fmt::format("`item_unique_id` = '{}'", item_unique_id));
 	}
 
