@@ -247,11 +247,7 @@ namespace EQ
 		const std::string &GetUniqueID() const { return m_unique_id; }
 		//std::string        &GetSerialNumber2() const { return m_serial_number2; }
 		void               SetUniqueID(std::string sn) { m_unique_id = std::move(sn); }
-
-		void CreateUniqueID() const
-		{
-			m_unique_id = GenerateUniqueID();
-		}
+		void               CreateUniqueID() const { m_unique_id = GenerateUniqueID(); }
 
 		std::map<std::string, ::Timer>& GetTimers() const { return m_timers; }
 		void SetTimer(std::string name, uint32 time);
