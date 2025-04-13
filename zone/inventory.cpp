@@ -4693,6 +4693,10 @@ bool Client::PutItemInInventoryWithStacking(EQ::ItemInstance *inst)
 		uint8 bag_size     = inv_inst->GetItem()->BagSlots;
 
 		for (uint8 bag_slot = EQ::invbag::SLOT_BEGIN; bag_slot < bag_size; bag_slot++) {
+			if (quantity == 0) {
+				break;
+			}
+
 			auto bag_inst = GetInv().GetItem(base_slot_id + bag_slot);
 			if (!bag_inst && inv_inst->GetItem()->BagSize >= inst->GetItem()->Size) {
 				LogError("Found a parent {} base_slot_id {} bag_slot {} in bag", i, base_slot_id, bag_slot);

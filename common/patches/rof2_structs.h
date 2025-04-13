@@ -3616,22 +3616,22 @@ struct TraderStatus_Struct {
 };
 
 struct TraderBuy_Struct {
-/*000*/ uint32	action;
-/*004*/	uint32	method;
-/*008*/ uint32	sub_action;
-/*012*/	uint32	unknown_012;
-/*016*/ uint32	trader_id;
-/*020*/ char	buyer_name[64];
-/*084*/ char	seller_name[64];
-/*148*/ char	unknown_148[32];
-/*180*/ char	item_name[64];
-/*244*/ char	item_unique_id[17];
-/*261*/ char	unknown_261[3];
-/*264*/ uint32	item_id;
-/*268*/ uint32	price;
-/*272*/ uint32	already_sold;
-/*276*/ uint32	unknown_276;
-/*280*/ uint32	quantity;
+/*000*/ uint32 action;
+/*004*/ uint32 method;
+/*008*/ uint32 sub_action;
+/*012*/ uint32 unknown_012;
+/*016*/ uint32 trader_id;
+/*020*/ char   buyer_name[64];
+/*084*/ char   seller_name[64];
+/*148*/ char   unknown_148[32];
+/*180*/ char   item_name[64];
+/*244*/ char   item_unique_id[17];
+/*261*/ char   unknown_261[3];
+/*264*/ uint32 item_id;
+/*268*/ uint32 price;
+/*272*/ uint32 already_sold;
+/*276*/ uint32 unknown_276;
+/*280*/ uint32 quantity;
 /*284*/
 };
 
