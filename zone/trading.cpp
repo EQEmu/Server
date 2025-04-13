@@ -1424,6 +1424,10 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 
 	auto quantity = in->quantity;
 	inst_copy->SetCharges(quantity);
+	if (buy_inst->GetItem()->MaxCharges > 0) {
+		inst_copy->SetCharges(buy_inst->GetCharges());
+	}
+
 	if (inst_copy->IsStackable() && quantity != buy_inst->GetCharges()) {
 		inst_copy->CreateUniqueID();
 	}
@@ -1510,9 +1514,19 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 	QueuePacket(app);
 
 	LogTrading("Customer Paid:     [{}] to {}", DetermineMoneyString(total_cost), trader->GetCleanName());
-	LogTrading("Customer Received: [{}] {} with unique_id of {}", quantity, in->item_name, inst_copy->GetUniqueID());
+	LogTrading("Customer Received: [{}] {} {} with unique_id of {}",
+		quantity,
+		in->item_name,
+		inst_copy->GetItem()->MaxCharges > 0 ? fmt::format("with {} charges ", inst_copy->GetCharges()).c_str() : std::string(""),
+		inst_copy->GetUniqueID()
+	);
 	LogTrading("Trader Received:   [{}] from {}", DetermineMoneyString(total_cost), GetCleanName());
-	LogTrading("Trader Sent:       [{}] {} with unique_id of {}", quantity, in->item_name, buy_inst->GetUniqueID());
+	LogTrading("Trader Sent:       [{}] {} {} with unique_id of {}",
+		quantity,
+		in->item_name,
+		buy_inst->GetItem()->MaxCharges > 0 ? fmt::format("with {} charges ", buy_inst->GetCharges()).c_str() : std::string(""),
+		buy_inst->GetUniqueID()
+	);
 
 	if (merchant_quantity > quantity) {
 		std::unique_ptr<EQ::ItemInstance> vendor_inst(buy_inst ? buy_inst->Clone() : nullptr);
