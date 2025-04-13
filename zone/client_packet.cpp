@@ -15442,7 +15442,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			break;
 		}
 		default: {
-			LogTrading("Unknown size for OP_Trader: [{}]\n", app->size);
+			//LogTradingDetail("Unknown size for OP_Trader: [{}]", app->size);
 		}
 	}
 }
