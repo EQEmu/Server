@@ -1434,9 +1434,9 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	uint32 quantity = in->quantity;
+	int16 quantity = static_cast<int16>(in->quantity);
 	inst_copy->SetCharges(quantity);
-	if (inst_copy->IsStackable()) {
+	if (inst_copy->IsStackable() && quantity != buy_inst->GetCharges()) {
 		inst_copy->CreateUniqueID();
 	}
 
