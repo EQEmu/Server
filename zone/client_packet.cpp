@@ -17252,6 +17252,7 @@ void Client::CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p)
 	if (!m_is_manual_afk && (has_moved || triggered_reset) && m_is_afk) {
 		LogInfo("AFK [{}] is no longer idle, syncing positions", GetCleanName());
 		SetAFK(false);
+		ResetAFKTimer();
 	}
 
 	// we could be not AFK and idle at the same time
@@ -17260,6 +17261,7 @@ void Client::CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p)
 		m_is_idle = false;
 		Message(Chat::Yellow, "You are no longer idle.");
 		SyncWorldPositionsToClient();
+		ResetAFKTimer();
 	}
 
 	m_afk_reset = false;
