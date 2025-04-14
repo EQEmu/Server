@@ -4345,13 +4345,19 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		return;
 	}
 
-	ResetAFKTimer();
-
 	BreakInvisibleSpells();
 
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
 	m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
+
+	if (castspell->spell_id && IsValidSpell(castspell->spell_id)) {
+		bool is_non_combat_zone = !zone->CanDoCombat() || zone->BuffTimersSuspended();
+		bool is_excluded_reset  = is_non_combat_zone && IsBardSong(castspell->spell_id);
+		if (!is_excluded_reset) {
+			ResetAFKTimer();
+		}
+	}
 
 	LogSpells("OP CastSpell: slot [{}] spell [{}] target [{}] inv [{}]", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 	CastingSlot slot = static_cast<CastingSlot>(castspell->slot);
