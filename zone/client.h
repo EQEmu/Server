@@ -497,9 +497,19 @@ public:
 	void Kick(const std::string &reason);
 	void WorldKick();
 	inline uint8 GetAnon() const { return m_pp.anon; }
-	inline uint8 GetAFK() const { return AFK; }
+	inline uint8 GetAFK() const { return m_is_afk; }
 	void SetAnon(uint8 anon_flag);
+	inline Client* ResetAFKTimer() {
+		if (!RuleB(Character, EnableAutoAFK)) {
+			return this;
+		}
+
+		m_afk_reset = true;
+		m_last_moved = std::chrono::steady_clock::now();
+		return this;
+	};
 	void SetAFK(uint8 afk_flag);
+	inline bool IsIdle() { return m_is_idle; }
 	inline PlayerProfile_Struct& GetPP() { return m_pp; }
 	inline ExtendedProfile_Struct& GetEPP() { return m_epp; }
 	inline EQ::InventoryProfile& GetInv() { return m_inv; }
@@ -1944,8 +1954,6 @@ public:
 	ExternalHandinMoneyReturned GetExternalHandinMoneyReturned() { return m_external_handin_money_returned; }
 	std::vector<uint32_t> GetExternalHandinItemsReturned() { return m_external_handin_items_returned; }
 
-	inline bool IsAFK() { return m_is_afk; }
-
 protected:
 	friend class Mob;
 	void CalcEdibleBonuses(StatBonuses* newbon);
@@ -2059,7 +2067,8 @@ private:
 	uint8 LFGToLevel;
 	bool LFGMatchFilter;
 	char LFGComments[64];
-	bool AFK;
+	bool m_is_afk = false;
+	bool m_is_manual_afk = false;
 	bool auto_attack;
 	bool auto_fire;
 	bool runmode;
@@ -2215,7 +2224,8 @@ private:
 	void      CheckSendBulkNpcPositions(bool force = false);
 
 	// afk
-	bool                                  m_is_afk     = false;
+	bool                                  m_is_idle    = false;
+	bool                                  m_afk_reset  = false; // used to trigger next-tic afk reset
 	std::chrono::steady_clock::time_point m_last_moved = std::chrono::steady_clock::now();
 
 	void BulkSendInventoryItems();
@@ -2410,7 +2420,8 @@ public:
 	void ShowZoneShardMenu();
 	void Handle_OP_ChangePetName(const EQApplicationPacket *app);
 	bool IsFilteredAFKPacket(const EQApplicationPacket *p);
-	void CheckAutoAFK(PlayerPositionUpdateClient_Struct *p);
+	void CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p);
+	void SyncWorldPositionsToClient(bool ignore_idle = false);
 };
 
 #endif

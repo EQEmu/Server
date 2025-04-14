@@ -839,7 +839,7 @@ void MobMovementManager::SendCommandToClients(
 				continue;
 			}
 
-			if (c->IsAFK()) {
+			if (c->IsIdle()) {
 				continue;
 			}
 
@@ -883,7 +883,7 @@ void MobMovementManager::SendCommandToClients(
 				continue;
 			}
 
-			if (c->IsAFK()) {
+			if (c->IsIdle()) {
 				continue;
 			}
 

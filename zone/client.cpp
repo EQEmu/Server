@@ -226,8 +226,8 @@ Client::Client() : Mob(
 	last_reported_endurance_percent = 0;
 	last_reported_mana_percent = 0;
 	gm_hide_me = false;
-	AFK = false;
-	LFG = false;
+	m_is_afk   = false;
+	LFG        = false;
 	LFGFromLevel = 0;
 	LFGToLevel = 0;
 	LFGMatchFilter = false;
@@ -536,8 +536,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	last_reported_endurance_percent = 0;
 	last_reported_mana_percent = 0;
 	gm_hide_me = false;
-	AFK = false;
-	LFG = false;
+	m_is_afk   = false;
+	LFG        = false;
 	LFGFromLevel = 0;
 	LFGToLevel = 0;
 	LFGMatchFilter = false;
@@ -1171,7 +1171,7 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 		return;
 	}
 
-	if (RuleB(Character, AutoAFKFilterPackets) && m_is_afk && IsFilteredAFKPacket(app)) {
+	if (RuleB(Character, AutoIdleFilterPackets) && m_is_idle && IsFilteredAFKPacket(app)) {
 		return;
 	}
 
@@ -2476,7 +2476,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	Mob::FillSpawnStruct(ns, ForWho);
 
 	// Populate client-specific spawn information
-	ns->spawn.afk       = AFK;
+	ns->spawn.afk       = m_is_afk;
 	ns->spawn.lfg       = LFG; // afk and lfg are cleared on zoning on live
 	ns->spawn.anon      = m_pp.anon;
 	ns->spawn.gm        = GetGM() ? 1 : 0;
@@ -10787,56 +10787,37 @@ void Client::SetAnon(uint8 anon_flag) {
 	safe_delete(outapp);
 }
 
-void Client::SetAFK(uint8 afk_flag) {
-	m_is_afk = afk_flag;
-	m_last_moved = std::chrono::steady_clock::now();
-	AFK = afk_flag;
-	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
-	spawn_appearance->spawn_id = GetID();
-	spawn_appearance->type = AppearanceType::AFK;
-	spawn_appearance->parameter = afk_flag;
-	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp);
-
-	if (afk_flag) {
-		Message(Chat::Yellow, "You are now AFK.");
-	} else {
-		Message(Chat::Yellow, "You are no longer AFK.");
-
-		CheckSendBulkNpcPositions(true);
-
-		static EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-
-		for (auto &e: entity_list.GetClientList()) {
-			auto c = e.second;
-
-			// skip if not in range
-			if (Distance(c->GetPosition(), GetPosition()) > RuleI(Range, ClientPositionUpdates)) {
-				continue;
-			}
-
-			// skip self
-			if (c == this) {
-				continue;
-			}
-
-			auto *spu = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
-
-			memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
-			spu->spawn_id      = c->GetID();
-			spu->x_pos         = FloatToEQ19(c->GetX());
-			spu->y_pos         = FloatToEQ19(c->GetY());
-			spu->z_pos         = FloatToEQ19(c->GetZ());
-			spu->heading       = FloatToEQ12(c->GetHeading());
-			spu->delta_x       = FloatToEQ13(0);
-			spu->delta_y       = FloatToEQ13(0);
-			spu->delta_z       = FloatToEQ13(0);
-			spu->delta_heading = FloatToEQ10(0);
-			spu->animation     = 0;
-			QueuePacket(&outapp);
-		}
+void Client::SetAFK(uint8 afk_flag)
+{
+	if (!afk_flag) {
+		ResetAFKTimer();
 	}
+
+	bool changed_afk_state = (m_is_afk && !afk_flag) || (!m_is_afk && afk_flag);
+
+	if (!changed_afk_state) {
+		return;
+	}
+
+	// set messaging based on the state
+	std::string you_are = "You are no longer AFK.";
+	if (!m_is_afk && afk_flag) {
+		you_are = "You are now AFK.";
+	}
+
+	// set the state
+	m_is_afk = afk_flag;
+
+	// inform of state change
+	Message(Chat::Yellow, you_are.c_str());
+
+	// send the spawn appearance packet to all clients
+	static EQApplicationPacket p(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	auto *s = (SpawnAppearance_Struct *) p.pBuffer;
+	s->spawn_id  = GetID();
+	s->type      = AppearanceType::AFK;
+	s->parameter = afk_flag;
+	entity_list.QueueClients(this, &p);
 }
 
 void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
