@@ -17186,11 +17186,6 @@ void Client::CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p)
 		return;
 	}
 
-	bool is_client_excluded_from_idle = GetGM();
-	if (is_client_excluded_from_idle) {
-		return;
-	}
-
 	bool is_non_combat_zone = !zone->CanDoCombat() || zone->BuffTimersSuspended();
 
 	int seconds_before_afk =
@@ -17223,7 +17218,7 @@ void Client::CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p)
 		auto since_last_moved = now - m_last_moved;
 
 		if (!m_is_manual_afk && !m_is_afk && since_last_moved > std::chrono::seconds(seconds_before_afk)) {
-			bool is_client_excluded_from_afk = IsBuyer() || IsTrader();
+			bool is_client_excluded_from_afk = (IsBuyer() || IsTrader() || GetGM());
 			if (is_client_excluded_from_afk) {
 				return;
 			}
@@ -17237,6 +17232,11 @@ void Client::CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p)
 			return;
 		}
 		else if (!m_is_idle && since_last_moved > std::chrono::seconds(seconds_before_idle)) {
+			bool is_client_excluded_from_idle = GetGM() && !is_non_combat_zone;
+			if (is_client_excluded_from_idle) {
+				return;
+			}
+
 			LogInfo(
 				"Client [{}] has been idle for [{}] seconds",
 				GetCleanName(),
