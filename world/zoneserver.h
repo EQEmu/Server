@@ -54,6 +54,7 @@ public:
 	inline const char*	GetZoneName() const	{ return zone_name; }
 	inline const char*	GetZoneLongName() const	{ return long_name; }
 	inline std::string  GetCurrentVersion() const { return CURRENT_VERSION; }
+	void                CheckToClearTraderAndBuyerTables();
 	inline std::string  GetCompileDate() const { return COMPILE_DATE; }
 	const char*			GetCompileTime() const{ return compiled; }
 	void				SetCompile(char* in_compile){ strcpy(compiled,in_compile); }

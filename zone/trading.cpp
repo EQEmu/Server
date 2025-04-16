@@ -1557,18 +1557,15 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 
 void Client::SendBazaarWelcome()
 {
-	const auto results = TraderRepository::GetWelcomeData(database);
-	auto       outapp  = std::make_unique<EQApplicationPacket>(
-		OP_BazaarSearch,
-		static_cast<uint32>(sizeof(BazaarWelcome_Struct))
-		);
-	auto       data    = (BazaarWelcome_Struct *) outapp->pBuffer;
+	const auto          results = TraderRepository::GetWelcomeData(database);
+	EQApplicationPacket outapp(OP_BazaarSearch, static_cast<uint32>(sizeof(BazaarWelcome_Struct)));
+	auto                data = (BazaarWelcome_Struct *) outapp.pBuffer;
 
-	data->action  = BazaarWelcome;
-	data->traders = results.count_of_traders;
-	data->items   = results.count_of_items;
+	data->action             = BazaarWelcome;
+	data->traders            = results.count_of_traders;
+	data->items              = results.count_of_items;
 
-	QueuePacket(outapp.get());
+	QueuePacket(&outapp);
 }
 
 void Client::SendBarterWelcome()

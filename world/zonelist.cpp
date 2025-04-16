@@ -85,18 +85,8 @@ void ZSList::Remove(const std::string &uuid)
 	auto iter = zone_server_list.begin();
 	while (iter != zone_server_list.end()) {
 		if ((*iter)->GetUUID().compare(uuid) == 0) {
-			auto port        = (*iter)->GetCPort();
-			auto zone_id     = (*iter)->GetZoneID();
-			auto instance_id = (*iter)->GetInstanceID();
-			if (zone_id == Zones::BAZAAR) {
-				TraderRepository::DeleteWhere(
-					database,
-					fmt::format("`char_zone_id` = '{}' AND `char_zone_instance_id` = '{}'", zone_id, instance_id)
-				);
-				BuyerRepository::DeleteBuyers(database, zone_id, instance_id);
-
-				LogTradingDetail("Removed trader abd buyer entries for Zone ID {} and Instance ID {}", zone_id, instance_id);
-			}
+			auto port = (*iter)->GetCPort();
+			(*iter)->CheckToClearTraderAndBuyerTables();
 
 			zone_server_list.erase(iter);
 

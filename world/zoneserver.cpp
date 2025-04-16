@@ -50,6 +50,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/guild_tributes_repository.h"
 #include "../common/skill_caps.h"
 #include "../common/server_reload_types.h"
+#include "../common/repositories/trader_repository.h"
+#include "../common/repositories/buyer_repository.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -1859,4 +1861,20 @@ void ZoneServer::IncomingClient(Client* client) {
 	strn0cpy(s->lskey, client->GetLSKey(), sizeof(s->lskey));
 	SendPacket(pack);
 	delete pack;
+}
+
+void ZoneServer::CheckToClearTraderAndBuyerTables()
+{
+	if (GetZoneID() == Zones::BAZAAR) {
+		TraderRepository::DeleteWhere(
+			database,
+			fmt::format("`char_zone_id` = {} AND `char_zone_instance_id` = {}", GetZoneID(), GetInstanceID()
+			)
+		);
+		BuyerRepository::DeleteBuyers(database, GetZoneID(), GetInstanceID());
+
+		LogTradingDetail(
+			"Removed trader and buyer entries for Zone ID [{}] and Instance ID [{}]", GetZoneID(), GetInstanceID()
+		);
+	}
 }

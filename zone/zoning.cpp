@@ -683,11 +683,11 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 
 	// Added to ensure that if a player is moved (ported, gmmove, etc) and they are an active trader or buyer, they will
 	// be removed from future transactions.
-	if(IsTrader()) {
+	if (IsTrader()) {
 		TraderEndTrader();
 	}
 
-	if(IsBuyer()) {
+	if (IsBuyer()) {
 		ToggleBuyerMode(false);
 	}
 

@@ -107,7 +107,7 @@ public:
 			}
 
 			auto buy_lines =
-				BaseBuyerBuyLinesRepository::GetWhere(db, fmt::format("`buyer_id` = '{}'", buyer.front().id));
+				BaseBuyerBuyLinesRepository::GetWhere(db, fmt::format("`buyer_id` = {}", buyer.front().id));
 
 			std::vector<std::string> buy_line_ids{};
 			for (auto const &bl: buy_lines) {
@@ -135,7 +135,8 @@ public:
 		auto buyers = GetWhere(
 			db,
 			fmt::format(
-				"`char_zone_id` = '{}' AND `char_zone_instance_id` = '{}'", char_zone_id, char_zone_instance_id)
+				"`char_zone_id` = {} AND `char_zone_instance_id` = {}", char_zone_id, char_zone_instance_id
+			)
 		);
 		if (buyers.empty()) {
 			return false;
