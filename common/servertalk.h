@@ -368,6 +368,14 @@ enum {
 	UserToWorldStatusAlreadyOnline = -4
 };
 
+enum {
+	BazaarPurchaseFailed        = 0,
+	BazaarPurchaseSuccess       = 1,
+	BazaarPurchaseSellerFailed  = 2,
+	BazaarPurchaseSellerSuccess = 3,
+	BazaarPurchaseBuyerFailed   = 4,
+	BazaarPurchaseBuyerSuccess  = 5
+};
 /************ PACKET RELATED STRUCT ************/
 class ServerPacket
 {
@@ -1775,8 +1783,11 @@ struct BazaarPurchaseMessaging_Struct {
 	uint32           item_aug_5;
 	uint32           item_aug_6;
 	uint32           buyer_id;
-	uint32           item_quantity_available;
+	uint32           item_charges;
 	uint32           id;
+	uint32           trader_zone_id;
+	uint32           trader_zone_instance_id;
+	uint32           transaction_status;
 };
 
 
