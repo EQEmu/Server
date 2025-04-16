@@ -245,6 +245,21 @@ public:
 		return trader_item.at(0);
 	}
 
+	static Trader GetItemByItemUniqueNumber(Database &db, const char* item_unique_id)
+	{
+		Trader     e{};
+		const auto trader_item = GetWhere(
+			db,
+			fmt::format("`item_unique_id` = '{}' LIMIT 1", item_unique_id)
+		);
+
+		if (trader_item.empty()) {
+			return e;
+		}
+
+		return trader_item.at(0);
+	}
+
 	static int UpdateActiveTransaction(Database &db, uint32 id, bool status)
 	{
 		auto e = FindOne(db, id);
@@ -338,7 +353,6 @@ public:
 			"trader.char_zone_instance_id, trader.active_transaction, c.`name` FROM `trader` "
 			"INNER JOIN character_data AS c ON trader.character_id = c.id "
 			"WHERE {} "
-			"GROUP BY trader.item_id "
 			"ORDER BY trader.character_id ASC",
 			search_criteria_trader
 		);
