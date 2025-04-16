@@ -1677,7 +1677,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			auto in = (BazaarPurchaseMessaging_Struct *)pack->pBuffer;
 			if (in->trader_buy_struct.trader_id <= 0) {
 				LogTrading(
-					"World Message <red>[{}] received with invalid trader_id <red>[{}]",
+					"World Message [{}] received with invalid trader_id [{}]",
 					"ServerOP_BazaarPurchase",
 					in->trader_buy_struct.trader_id
 				);
@@ -1686,7 +1686,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			auto trader = ClientList::Instance()->FindCLEByCharacterID(in->trader_buy_struct.trader_id);
 			if (trader) {
-				ZSList::Instance()->SendPacket(trader->zone(), trader->instance(), pack);
+				ZSList::Instance()->SendPacket(in->trader_zone_id, in->trader_zone_instance_id, pack);
 			}
 
 			break;
