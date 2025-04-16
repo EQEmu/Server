@@ -75,7 +75,6 @@ public:
 				"JOIN character_data AS c ON t.char_id = c.id "
 				"ORDER BY t.char_zone_instance_id ASC "
 				"LIMIT {}",
-				char_zone_instance_id,
 				max_results)
 			);
 		}
