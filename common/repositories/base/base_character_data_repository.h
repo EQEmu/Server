@@ -122,7 +122,6 @@ public:
 		uint32_t    e_expended_aa_spent;
 		uint32_t    aa_points_spent_old;
 		uint32_t    aa_points_old;
-		int32_t     expansions;
 		uint32_t    e_last_invsnapshot;
 		time_t      deleted_at;
 		uint8_t     illusion_block;
@@ -239,7 +238,6 @@ public:
 			"e_expended_aa_spent",
 			"aa_points_spent_old",
 			"aa_points_old",
-			"expansions",
 			"e_last_invsnapshot",
 			"deleted_at",
 			"illusion_block",
@@ -352,7 +350,6 @@ public:
 			"e_expended_aa_spent",
 			"aa_points_spent_old",
 			"aa_points_old",
-			"expansions",
 			"e_last_invsnapshot",
 			"UNIX_TIMESTAMP(deleted_at)",
 			"illusion_block",
@@ -499,7 +496,6 @@ public:
 		e.e_expended_aa_spent     = 0;
 		e.aa_points_spent_old     = 0;
 		e.aa_points_old           = 0;
-		e.expansions              = -1;
 		e.e_last_invsnapshot      = 0;
 		e.deleted_at              = 0;
 		e.illusion_block          = 0;
@@ -642,10 +638,9 @@ public:
 			e.e_expended_aa_spent     = row[100] ? static_cast<uint32_t>(strtoul(row[100], nullptr, 10)) : 0;
 			e.aa_points_spent_old     = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.aa_points_old           = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
-			e.expansions              = row[103] ? static_cast<int32_t>(atoi(row[103])) : -1;
-			e.e_last_invsnapshot      = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 0;
-			e.deleted_at              = strtoll(row[105] ? row[105] : "-1", nullptr, 10);
-			e.illusion_block          = row[106] ? static_cast<uint8_t>(strtoul(row[106], nullptr, 10)) : 0;
+			e.e_last_invsnapshot      = row[103] ? static_cast<uint32_t>(strtoul(row[103], nullptr, 10)) : 0;
+			e.deleted_at              = strtoll(row[104] ? row[104] : "-1", nullptr, 10);
+			e.illusion_block          = row[105] ? static_cast<uint8_t>(strtoul(row[105], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -781,10 +776,9 @@ public:
 		v.push_back(columns[100] + " = " + std::to_string(e.e_expended_aa_spent));
 		v.push_back(columns[101] + " = " + std::to_string(e.aa_points_spent_old));
 		v.push_back(columns[102] + " = " + std::to_string(e.aa_points_old));
-		v.push_back(columns[103] + " = " + std::to_string(e.expansions));
-		v.push_back(columns[104] + " = " + std::to_string(e.e_last_invsnapshot));
-		v.push_back(columns[105] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
-		v.push_back(columns[106] + " = " + std::to_string(e.illusion_block));
+		v.push_back(columns[103] + " = " + std::to_string(e.e_last_invsnapshot));
+		v.push_back(columns[104] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back(columns[105] + " = " + std::to_string(e.illusion_block));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -909,7 +903,6 @@ public:
 		v.push_back(std::to_string(e.e_expended_aa_spent));
 		v.push_back(std::to_string(e.aa_points_spent_old));
 		v.push_back(std::to_string(e.aa_points_old));
-		v.push_back(std::to_string(e.expansions));
 		v.push_back(std::to_string(e.e_last_invsnapshot));
 		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 		v.push_back(std::to_string(e.illusion_block));
@@ -1045,7 +1038,6 @@ public:
 			v.push_back(std::to_string(e.e_expended_aa_spent));
 			v.push_back(std::to_string(e.aa_points_spent_old));
 			v.push_back(std::to_string(e.aa_points_old));
-			v.push_back(std::to_string(e.expansions));
 			v.push_back(std::to_string(e.e_last_invsnapshot));
 			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 			v.push_back(std::to_string(e.illusion_block));
@@ -1185,10 +1177,9 @@ public:
 			e.e_expended_aa_spent     = row[100] ? static_cast<uint32_t>(strtoul(row[100], nullptr, 10)) : 0;
 			e.aa_points_spent_old     = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.aa_points_old           = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
-			e.expansions              = row[103] ? static_cast<int32_t>(atoi(row[103])) : -1;
-			e.e_last_invsnapshot      = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 0;
-			e.deleted_at              = strtoll(row[105] ? row[105] : "-1", nullptr, 10);
-			e.illusion_block          = row[106] ? static_cast<uint8_t>(strtoul(row[106], nullptr, 10)) : 0;
+			e.e_last_invsnapshot      = row[103] ? static_cast<uint32_t>(strtoul(row[103], nullptr, 10)) : 0;
+			e.deleted_at              = strtoll(row[104] ? row[104] : "-1", nullptr, 10);
+			e.illusion_block          = row[105] ? static_cast<uint8_t>(strtoul(row[105], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1316,10 +1307,9 @@ public:
 			e.e_expended_aa_spent     = row[100] ? static_cast<uint32_t>(strtoul(row[100], nullptr, 10)) : 0;
 			e.aa_points_spent_old     = row[101] ? static_cast<uint32_t>(strtoul(row[101], nullptr, 10)) : 0;
 			e.aa_points_old           = row[102] ? static_cast<uint32_t>(strtoul(row[102], nullptr, 10)) : 0;
-			e.expansions              = row[103] ? static_cast<int32_t>(atoi(row[103])) : -1;
-			e.e_last_invsnapshot      = row[104] ? static_cast<uint32_t>(strtoul(row[104], nullptr, 10)) : 0;
-			e.deleted_at              = strtoll(row[105] ? row[105] : "-1", nullptr, 10);
-			e.illusion_block          = row[106] ? static_cast<uint8_t>(strtoul(row[106], nullptr, 10)) : 0;
+			e.e_last_invsnapshot      = row[103] ? static_cast<uint32_t>(strtoul(row[103], nullptr, 10)) : 0;
+			e.deleted_at              = strtoll(row[104] ? row[104] : "-1", nullptr, 10);
+			e.illusion_block          = row[105] ? static_cast<uint8_t>(strtoul(row[105], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1497,7 +1487,6 @@ public:
 		v.push_back(std::to_string(e.e_expended_aa_spent));
 		v.push_back(std::to_string(e.aa_points_spent_old));
 		v.push_back(std::to_string(e.aa_points_old));
-		v.push_back(std::to_string(e.expansions));
 		v.push_back(std::to_string(e.e_last_invsnapshot));
 		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 		v.push_back(std::to_string(e.illusion_block));
@@ -1626,7 +1615,6 @@ public:
 			v.push_back(std::to_string(e.e_expended_aa_spent));
 			v.push_back(std::to_string(e.aa_points_spent_old));
 			v.push_back(std::to_string(e.aa_points_old));
-			v.push_back(std::to_string(e.expansions));
 			v.push_back(std::to_string(e.e_last_invsnapshot));
 			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 			v.push_back(std::to_string(e.illusion_block));
