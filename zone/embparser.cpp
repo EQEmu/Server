@@ -2546,7 +2546,8 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_CONNECT: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "last_login", sep.arg[0]);
-			ExportVar(package_name.c_str(), "is_first_login", sep.arg[1]);
+			ExportVar(package_name.c_str(), "seconds_since_last_login", sep.arg[1]);
+			ExportVar(package_name.c_str(), "is_first_login", sep.arg[2]);
 			break;
 		}
 

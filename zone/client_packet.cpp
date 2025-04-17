@@ -819,8 +819,9 @@ void Client::CompleteConnect()
 
 		if (parse->PlayerHasQuestSub(EVENT_CONNECT)) {
 			const std::string& export_string = fmt::format(
-				"{} {}",
-				GetPP().lastlogin,
+				"{} {} {}",
+				e.last_login,
+				time(nullptr) - e.last_login,
 				is_first_login ? 1 : 0
 			);
 			parse->EventPlayer(EVENT_CONNECT, this, export_string, 0);

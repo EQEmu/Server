@@ -1822,7 +1822,10 @@ void handle_player_connect(
 	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
 	lua_setfield(L, -2, "last_login");
 
-	lua_pushboolean(L, Strings::ToBool(sep.arg[1]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "seconds_since_last_login");
+
+	lua_pushboolean(L, Strings::ToBool(sep.arg[2]));
 	lua_setfield(L, -2, "is_first_login");
 }
 
