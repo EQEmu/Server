@@ -727,7 +727,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		o->trade->Reset();
 	}
 
-	database.SetFirstLogon(CharacterID(), 0); //We change firstlogon status regardless of if a player logs out to zone or not, because we only want to trigger it on their first login from world.
+	database.SetIngame(CharacterID(), 0); //We change ingame status regardless of if a player logs out to zone or not, because we only want to trigger it on their first login from world.
 
 	/* Remove from all proximities */
 	ClearAllProximities();
