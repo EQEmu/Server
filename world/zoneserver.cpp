@@ -1682,17 +1682,23 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_BazaarPurchase: {
-			auto in = (BazaarPurchaseMessaging_Struct *)pack->pBuffer;
-			if (in->trader_buy_struct.trader_id <= 0) {
-				LogTrading(
-					"World Message [{}] received with invalid trader_id [{}]",
-					"ServerOP_BazaarPurchase",
-					in->trader_buy_struct.trader_id
-				);
-				return;
+			auto in = reinterpret_cast<BazaarPurchaseMessaging_Struct *>(pack->pBuffer);
+			switch (in->transaction_status) {
+				case BazaarPurchaseBuyerCompleteSendToSeller: {
+					zoneserver_list.SendPacket(in->trader_zone_id, in->trader_zone_instance_id, pack);
+					break;
+				}
+				case BazaarPurchaseTraderFailed:
+				case BazaarPurchaseSuccess: {
+					zoneserver_list.SendPacket(in->buyer_zone_id, in->buyer_zone_instance_id, pack);
+					break;
+				}
+				default: {
+					LogError(
+						"ServerOP_BazaarPurchase received with no corresponding action for [{}]",
+						in->transaction_status);
+				}
 			}
-
-			zoneserver_list.SendPacket(in->trader_zone_id, in->trader_zone_instance_id, pack);
 			break;
 		}
 		case ServerOP_BuyerMessaging: {

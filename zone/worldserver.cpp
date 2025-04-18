@@ -3776,61 +3776,225 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 		case ServerOP_BazaarPurchase: {
-			auto in        = (BazaarPurchaseMessaging_Struct *) pack->pBuffer;
-			auto trader_pc = entity_list.GetClientByCharID(in->trader_buy_struct.trader_id);
-			if (!trader_pc) {
-				LogTrading("Request trader_id <red>[{}] could not be found in zone_id <red>[{}]",
-						   in->trader_buy_struct.trader_id,
-						   zone->GetZoneID()
-				);
-				return;
-			}
+			auto in        = reinterpret_cast<BazaarPurchaseMessaging_Struct *>(pack->pBuffer);
+			switch (in->transaction_status) {
+				case BazaarPurchaseBuyerCompleteSendToSeller: {
+					auto trader_pc = entity_list.GetClientByCharID(in->trader_buy_struct.trader_id);
+					if (!trader_pc) {
+						LogTrading(
+							"Request trader_id <red>[{}] could not be found in zone_id <red>[{}]",
+							in->trader_buy_struct.trader_id,
+							zone->GetZoneID());
+						return;
+					}
 
-			if (trader_pc->IsThereACustomer()) {
-				auto customer = entity_list.GetClientByID(trader_pc->GetCustomerID());
-				if (customer) {
-					customer->CancelTraderTradeWindow();
+					auto item = trader_pc->FindTraderItemByUniqueID(in->trader_buy_struct.item_unique_id);
+					if (!item) {
+						in->transaction_status = BazaarPurchaseTraderFailed;
+						TraderRepository::UpdateActiveTransaction(database, in->id, false);
+						worldserver.SendPacket(pack);
+						break;
+					}
+
+					//if there is a customer currently browsing, close to ensure no conflict of purchase
+					if (trader_pc->IsThereACustomer()) {
+						auto customer = entity_list.GetClientByID(trader_pc->GetCustomerID());
+						if (customer) {
+							customer->CancelTraderTradeWindow();
+						}
+					}
+
+					//Update the trader's db entries
+					if (item->IsStackable() && in->item_quantity != in->item_charges) {
+						TraderRepository::UpdateQuantity(database, in->trader_buy_struct.item_unique_id, item->GetCharges() - in->item_quantity);
+						LogTradingDetail(
+							"Step 4a:Bazaar Purchase.  Decreased database id {} from [{}] to [{}] charges",
+							in->trader_buy_struct.item_id,
+							in->item_charges,
+							in->item_charges
+						);
+					}
+					else {
+						TraderRepository::DeleteOne(database, in->trader_buy_struct.item_id);
+						LogTradingDetail(
+							"Step 4b:Bazaar Purchase.  Deleted database id [{}] because database quantity [{}] equals [{}] purchased quantity",
+							in->trader_buy_struct.item_id,
+							in->item_charges,
+							in->item_charges
+						);
+					}
+
+					//at this time, buyer checks ok, seller checks ok.
+					//perform actions to trader
+					uint64 total_cost = static_cast<uint64>(in->trader_buy_struct.price) * static_cast<uint64>(in->item_quantity);
+					if (!trader_pc->RemoveItemByItemUniqueId(in->trader_buy_struct.item_unique_id, in->item_quantity)) {
+						in->transaction_status = BazaarPurchaseTraderFailed;
+						TraderRepository::UpdateActiveTransaction(database, in->id, false);
+						worldserver.SendPacket(pack);
+						break;
+					}
+
+					trader_pc->AddMoneyToPP(total_cost,	true);
+
+					//Update the trader to indicate the sale has completed
+					EQApplicationPacket outapp(OP_Trader, sizeof(TraderBuy_Struct));
+					auto                data = reinterpret_cast<TraderBuy_Struct *>(outapp.pBuffer);
+
+					memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
+					trader_pc->QueuePacket(&outapp);
+
+					if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+						auto e = PlayerEvent::TraderSellEvent{
+							.item_id              = item->GetID(),
+							.augment_1_id         = item->GetAugmentItemID(0),
+							.augment_2_id         = item->GetAugmentItemID(1),
+							.augment_3_id         = item->GetAugmentItemID(2),
+							.augment_4_id         = item->GetAugmentItemID(3),
+							.augment_5_id         = item->GetAugmentItemID(4),
+							.augment_6_id         = item->GetAugmentItemID(5),
+							.item_name            = in->trader_buy_struct.item_name,
+							.buyer_id             = in->buyer_id,
+							.buyer_name           = in->trader_buy_struct.buyer_name,
+							.price                = in->trader_buy_struct.price,
+							.quantity             = in->item_quantity,
+							.charges              = in->item_charges,
+							.total_cost           = total_cost,
+							.player_money_balance = trader_pc->GetCarriedMoney(),
+						};
+						RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
+					}
+
+					in->transaction_status = BazaarPurchaseSuccess;
+					TraderRepository::UpdateActiveTransaction(database, in->id, false);
+					worldserver.SendPacket(pack);
+
+					break;
+				}
+				case BazaarPurchaseTraderFailed: {
+					auto buyer = entity_list.GetClientByCharID(in->buyer_id);
+					if (!buyer) {
+						LogTrading(
+							"Requested buyer_id [{}] could not be found in zone_id [{}] instance_id [{}]",
+							in->trader_buy_struct.trader_id,
+							zone->GetZoneID(),
+							zone->GetInstanceID()
+						);
+						return;
+					}
+
+					// return buyer's money including the fee
+					uint64 total_cost =
+						static_cast<uint64>(in->trader_buy_struct.price) * static_cast<uint64>(in->item_quantity);
+					uint64 fee = std::round(total_cost * RuleR(Bazaar, ParcelDeliveryCostMod));
+					buyer->AddMoneyToPP(total_cost + fee, false);
+					buyer->SendMoneyUpdate();
+
+					break;
+				}
+				case BazaarPurchaseSuccess: {
+					auto buyer = entity_list.GetClientByCharID(in->buyer_id);
+					if (!buyer) {
+						LogTrading(
+							"Requested buyer_id [{}] could not be found in zone_id [{}] instance_id [{}]",
+							in->trader_buy_struct.trader_id,
+							zone->GetZoneID(),
+							zone->GetInstanceID()
+						);
+						return;
+					}
+					uint64 total_cost =
+						static_cast<uint64>(in->trader_buy_struct.price) * static_cast<uint64>(in->item_quantity);
+
+					if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+						auto e = PlayerEvent::TraderPurchaseEvent{
+							.item_id              = in->trader_buy_struct.item_id,
+							.augment_1_id         = in->item_aug_1,
+							.augment_2_id         = in->item_aug_2,
+							.augment_3_id         = in->item_aug_3,
+							.augment_4_id         = in->item_aug_4,
+							.augment_5_id         = in->item_aug_5,
+							.augment_6_id         = in->item_aug_6,
+							.item_name            = in->trader_buy_struct.item_name,
+							.trader_id            = in->trader_buy_struct.trader_id,
+							.trader_name          = in->trader_buy_struct.seller_name,
+							.price                = in->trader_buy_struct.price,
+							.quantity             = in->item_quantity,
+							.charges              = in->item_charges,
+							.total_cost           = total_cost,
+							.player_money_balance = buyer->GetCarriedMoney(),
+						};
+
+						RecordPlayerEventLogWithClient(buyer, PlayerEvent::TRADER_PURCHASE, e);
+					}
+
+					auto item = database.GetItem(in->trader_buy_struct.item_id);
+					auto quantity = in->item_quantity;
+					if (item->MaxCharges > 0) {
+						quantity = in->item_charges;
+					}
+
+					//Send the item via parcel
+					CharacterParcelsRepository::CharacterParcels parcel_out{};
+					parcel_out.from_name  = in->trader_buy_struct.seller_name;
+					parcel_out.note       = "Delivered from a Bazaar Purchase";
+					parcel_out.sent_date  = time(nullptr);
+					parcel_out.quantity   = quantity;
+					parcel_out.item_id    = in->trader_buy_struct.item_id;
+					parcel_out.aug_slot_1 = in->item_aug_1;
+					parcel_out.aug_slot_2 = in->item_aug_2;
+					parcel_out.aug_slot_3 = in->item_aug_3;
+					parcel_out.aug_slot_4 = in->item_aug_4;
+					parcel_out.aug_slot_5 = in->item_aug_5;
+					parcel_out.aug_slot_6 = in->item_aug_6;
+					parcel_out.char_id    = buyer->CharacterID();
+					parcel_out.slot_id    = buyer->FindNextFreeParcelSlot(buyer->CharacterID());
+					parcel_out.id         = 0;
+
+					CharacterParcelsRepository::InsertOne(database, parcel_out);
+
+					if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+						PlayerEvent::ParcelSend e{};
+						e.from_player_name = parcel_out.from_name;
+						e.to_player_name   = buyer->GetCleanName();
+						e.item_id          = parcel_out.item_id;
+						e.augment_1_id     = parcel_out.aug_slot_1;
+						e.augment_2_id     = parcel_out.aug_slot_2;
+						e.augment_3_id     = parcel_out.aug_slot_3;
+						e.augment_4_id     = parcel_out.aug_slot_4;
+						e.augment_5_id     = parcel_out.aug_slot_5;
+						e.augment_6_id     = parcel_out.aug_slot_6;
+						e.quantity         = in->item_quantity;
+						e.charges          = in->item_charges;
+						e.sent_date        = parcel_out.sent_date;
+
+						RecordPlayerEventLogWithClient(buyer, PlayerEvent::PARCEL_SEND, e);
+					}
+
+					Parcel_Struct ps{};
+					ps.item_slot = parcel_out.slot_id;
+					strn0cpy(ps.send_to, buyer->GetCleanName(), sizeof(ps.send_to));
+					buyer->SendParcelDeliveryToWorld(ps);
+
+					LogTradingDetail(
+						"Step 3:Bazaar Purchase.  Sent parcel to Buyer [{}] Item ID [{}] Quantity [{}] Charges [{}]",
+						buyer->CharacterID(),
+						in->trader_buy_struct.item_id,
+						in->item_quantity,
+						in->item_charges
+					);
+
+					//Update the buyer to indicate the sale has completed
+					EQApplicationPacket outapp(OP_Trader, sizeof(TraderBuy_Struct));
+					auto                data = reinterpret_cast<TraderBuy_Struct *>(outapp.pBuffer);
+
+					memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
+					buyer->ReturnTraderReq(&outapp, in->item_quantity, in->trader_buy_struct.item_id);
+
+					break;
+				}
+					default: {
 				}
 			}
-
-			auto sn = std::string(in->trader_buy_struct.item_unique_id);
-			auto outapp  = std::make_unique<EQApplicationPacket>(OP_Trader, static_cast<uint32>(sizeof(TraderBuy_Struct)));
-			auto data    = (TraderBuy_Struct *) outapp->pBuffer;
-
-			memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
-
-			if (trader_pc->ClientVersion() < EQ::versions::ClientVersion::RoF) {
-				data->price = in->trader_buy_struct.price * in->trader_buy_struct.quantity;
-			}
-
-			TraderRepository::UpdateActiveTransaction(database, in->id, false);
-
-			auto item = trader_pc->FindTraderItemBySerialNumber(sn);
-
-			if (item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
-				auto e = PlayerEvent::TraderSellEvent{
-					.item_id              = item ? item->GetID() : 0,
-					.augment_1_id         = item->GetAugmentItemID(0),
-					.augment_2_id         = item->GetAugmentItemID(1),
-					.augment_3_id         = item->GetAugmentItemID(2),
-					.augment_4_id         = item->GetAugmentItemID(3),
-					.augment_5_id         = item->GetAugmentItemID(4),
-					.augment_6_id         = item->GetAugmentItemID(5),
-					.item_name            = in->trader_buy_struct.item_name,
-					.buyer_id             = in->buyer_id,
-					.buyer_name           = in->trader_buy_struct.buyer_name,
-					.price                = in->trader_buy_struct.price,
-					.quantity             = in->trader_buy_struct.quantity,
-					.charges              = item ? item->IsStackable() ? 1 : item->GetCharges() : 0,
-					.total_cost           = (in->trader_buy_struct.price * in->trader_buy_struct.quantity),
-					.player_money_balance = trader_pc->GetCarriedMoney(),
-				};
-				RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
-			}
-
-			trader_pc->RemoveItemByItemUniqueId(sn, in->trader_buy_struct.quantity);
-			trader_pc->AddMoneyToPP(in->trader_buy_struct.price * in->trader_buy_struct.quantity, true);
-			trader_pc->QueuePacket(outapp.get());
 
 			break;
 		}

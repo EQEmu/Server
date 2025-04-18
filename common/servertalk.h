@@ -368,12 +368,13 @@ enum {
 };
 
 enum {
-	BazaarPurchaseFailed        = 0,
-	BazaarPurchaseSuccess       = 1,
-	BazaarPurchaseSellerFailed  = 2,
-	BazaarPurchaseSellerSuccess = 3,
-	BazaarPurchaseBuyerFailed   = 4,
-	BazaarPurchaseBuyerSuccess  = 5
+	BazaarPurchaseFailed                    = 0,
+	BazaarPurchaseSuccess                   = 1,
+	BazaarPurchaseBuyerCompleteSendToSeller = 2,
+	BazaarPurchaseSellerCompleteSendToBuyer = 3,
+	BazaarPurchaseBuyerFailed               = 4,
+	BazaarPurchaseBuyerSuccess              = 5,
+	BazaarPurchaseTraderFailed = 6
 };
 /************ PACKET RELATED STRUCT ************/
 class ServerPacket
@@ -1782,10 +1783,13 @@ struct BazaarPurchaseMessaging_Struct {
 	uint32           item_aug_5;
 	uint32           item_aug_6;
 	uint32           buyer_id;
-	uint32           item_charges;
+	uint32           item_quantity;
+	int16            item_charges;
 	uint32           id;
 	uint32           trader_zone_id;
 	uint32           trader_zone_instance_id;
+	uint32           buyer_zone_id;
+	uint32           buyer_zone_instance_id;
 	uint32           transaction_status;
 };
 

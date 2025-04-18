@@ -1463,11 +1463,11 @@ void Client::BuyTraderItem(const EQApplicationPacket *app)
     }
 
 	uint64 total_transaction_value = static_cast<uint64>(in->price) * static_cast<uint64>(quantity);
-	if (total_transaction_value > RoF2::constants::MAX_BAZAAR_TRANSACTION) {
+	if (total_transaction_value > EQ::constants::StaticLookup(ClientVersion())->BazaarMaxTransaction) {
 		Message(
 			Chat::Red,
 			"That would exceed the single transaction limit of %u platinum.",
-			RoF2::constants::MAX_BAZAAR_TRANSACTION / 1000
+			EQ::constants::StaticLookup(ClientVersion())->BazaarMaxTransaction / 1000
 		);
 		TradeRequestFailed(app);
 		return;
@@ -2857,9 +2857,9 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 	TraderRepository::UpdateActiveTransaction(database, trader_item.id, true);
 
 	uint32 quantity = in->quantity;
-	int16 charges   = 1;
-	auto item       = database.GetItem(trader_item.item_id);
+	auto   item     = database.GetItem(trader_item.item_id);
 
+	int16 charges   = 1;
 	if (trader_item.item_charges > 0 || item->Stackable || item->MaxCharges > 0) {
 		charges = trader_item.item_charges;
 	}
@@ -2874,12 +2874,12 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 		in->item_unique_id
 	);
 
-	uint64 total_cost = static_cast<uint64>(in->price) * static_cast<uint64>(in->quantity);
-	if (total_cost > RoF2::constants::MAX_BAZAAR_TRANSACTION) {
+	uint64 total_cost = static_cast<uint64>(in->price) * static_cast<uint64>(quantity);
+	if (total_cost > EQ::constants::StaticLookup(ClientVersion())->BazaarMaxTransaction) {
 		Message(
 			Chat::Red,
 			"That would exceed the single transaction limit of %u platinum.",
-			RoF2::constants::MAX_BAZAAR_TRANSACTION / 1000
+			EQ::constants::StaticLookup(ClientVersion())->BazaarMaxTransaction / 1000
 		);
 		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
 		TradeRequestFailed(app);
@@ -2899,114 +2899,12 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 	LogTrading("Customer [{}] Paid: [{}] to trader [{}]", CharacterID(), DetermineMoneyString(total_cost), trader_item.character_id);
 	LogTradingDetail("Step 2:Bazaar Purchase.  Took [{}] from Buyer [{}] ", DetermineMoneyString(total_cost), CharacterID());
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
-		auto e = PlayerEvent::TraderPurchaseEvent{
-			.item_id              = trader_item.item_id,
-			.augment_1_id         = trader_item.augment_one,
-			.augment_2_id         = trader_item.augment_two,
-			.augment_3_id         = trader_item.augment_three,
-			.augment_4_id         = trader_item.augment_four,
-			.augment_5_id         = trader_item.augment_five,
-			.augment_6_id         = trader_item.augment_six,
-			.item_name            = in->item_name,
-			.trader_id            = in->trader_id,
-			.trader_name          = in->seller_name,
-			.price                = in->price,
-			.quantity             = in->quantity,
-			.charges              = trader_item.item_charges,
-			.total_cost           = total_cost,
-			.player_money_balance = GetCarriedMoney(),
-		};
-
-		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
-	}
-
-	CharacterParcelsRepository::CharacterParcels parcel_out{};
-	parcel_out.from_name  = in->seller_name;
-	parcel_out.note       = "Delivered from a Bazaar Purchase";
-	parcel_out.sent_date  = time(nullptr);
-	parcel_out.quantity   = charges;
-	parcel_out.item_id    = trader_item.item_id;
-	parcel_out.aug_slot_1 = trader_item.augment_one;
-	parcel_out.aug_slot_2 = trader_item.augment_two;
-	parcel_out.aug_slot_3 = trader_item.augment_three;
-	parcel_out.aug_slot_4 = trader_item.augment_four;
-	parcel_out.aug_slot_5 = trader_item.augment_five;
-	parcel_out.aug_slot_6 = trader_item.augment_six;
-	parcel_out.char_id    = CharacterID();
-	parcel_out.slot_id    = next_slot;
-	parcel_out.id         = 0;
-
-	auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
-	if (!result.id) {
-		LogError("Failed to add parcel to database.  From {} to {} item {} quantity {}",
-				 parcel_out.from_name,
-				 GetCleanName(),
-				 parcel_out.item_id,
-				 parcel_out.quantity
-		);
-		Message(Chat::Yellow, "Unable to save parcel to the database. Please contact an administrator.");
-		in->method     = BazaarByParcel;
-		in->sub_action = Failed;
-		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
-		AddMoneyToPP(total_cost + fee);
-		TradeRequestFailed(app);
-		return;
-	}
-
-	ReturnTraderReq(app, in->quantity, trader_item.item_id);
-	if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
-		PlayerEvent::ParcelSend e{};
-		e.from_player_name = parcel_out.from_name;
-		e.to_player_name   = GetCleanName();
-		e.item_id          = parcel_out.item_id;
-		e.augment_1_id     = parcel_out.aug_slot_1;
-		e.augment_2_id     = parcel_out.aug_slot_2;
-		e.augment_3_id     = parcel_out.aug_slot_3;
-		e.augment_4_id     = parcel_out.aug_slot_4;
-		e.augment_5_id     = parcel_out.aug_slot_5;
-		e.augment_6_id     = parcel_out.aug_slot_6;
-		e.quantity         = in->quantity;
-		e.charges          = trader_item.item_charges;
-		e.sent_date        = parcel_out.sent_date;
-
-		RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
-	}
-
-	Parcel_Struct ps{};
-	ps.item_slot = parcel_out.slot_id;
-	strn0cpy(ps.send_to, GetCleanName(), sizeof(ps.send_to));
-	SendParcelDeliveryToWorld(ps);
-
-	LogTradingDetail("Step 3:Bazaar Purchase.  Sent parcel to Buyer [{}] Item ID [{}] Quantity [{}] Charges [{}]",
-		CharacterID(),
-		trader_item.item_id,
-		quantity,
-		charges
-	);
-
-	if (item->Stackable && quantity != charges) {
-		TraderRepository::UpdateQuantity(database, in->item_unique_id, trader_item.item_charges - quantity);
-		LogTradingDetail(
-			"Step 4a:Bazaar Purchase.  Decreased database id {} from [{}] to [{}] charges",
-			trader_item.item_id,
-			trader_item.item_charges,
-			charges
-		);
-	}
-	else {
-		TraderRepository::DeleteOne(database, trader_item.id);
-		LogTradingDetail(
-			"Step 4b:Bazaar Purchase.  Deleted database id [{}] because database quantity [{}] equals [{}] purchased quantity",
-			trader_item.id,
-			trader_item.item_charges,
-			charges
-		);
-	}
-
+	//Now that we have determined that the buyer has the cash and the parcel space
+	//send to world to see if the seller has the item and gets the cash
 	auto out_server = std::make_unique<ServerPacket>(ServerOP_BazaarPurchase, sizeof(BazaarPurchaseMessaging_Struct));
-	auto out_data   = (BazaarPurchaseMessaging_Struct *) out_server->pBuffer;
+	auto out_data   = reinterpret_cast<BazaarPurchaseMessaging_Struct *>(out_server->pBuffer);
 
+	out_data->transaction_status             = BazaarPurchaseBuyerCompleteSendToSeller;
 	out_data->trader_buy_struct.action       = in->action;
 	out_data->trader_buy_struct.method       = in->method;
 	out_data->trader_buy_struct.already_sold = in->already_sold;
@@ -3014,7 +2912,7 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 	out_data->trader_buy_struct.price        = in->price;
 	out_data->trader_buy_struct.quantity     = in->quantity;
 	out_data->trader_buy_struct.sub_action   = in->sub_action;
-	out_data->trader_buy_struct.trader_id    = in->trader_id;
+	out_data->trader_buy_struct.trader_id    = trader_item.character_id;
 	out_data->buyer_id                       = CharacterID();
 	out_data->item_aug_1                     = trader_item.augment_one;
 	out_data->item_aug_2                     = trader_item.augment_two;
@@ -3022,10 +2920,13 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 	out_data->item_aug_4                     = trader_item.augment_four;
 	out_data->item_aug_5                     = trader_item.augment_five;
 	out_data->item_aug_6                     = trader_item.augment_six;
-	out_data->item_charges                   = trader_item.item_charges;
+	out_data->item_quantity                  = quantity;
+	out_data->item_charges                   = charges;
 	out_data->id                             = trader_item.id;
 	out_data->trader_zone_id                 = trader_item.char_zone_id;
 	out_data->trader_zone_instance_id        = trader_item.char_zone_instance_id;
+	out_data->buyer_zone_id                  = GetZoneID();
+	out_data->buyer_zone_instance_id         = GetInstanceID();
 	strn0cpy(out_data->trader_buy_struct.buyer_name, GetCleanName(), sizeof(out_data->trader_buy_struct.buyer_name));
 	strn0cpy(out_data->trader_buy_struct.seller_name, in->seller_name, sizeof(out_data->trader_buy_struct.seller_name));
 	strn0cpy(out_data->trader_buy_struct.item_name, in->item_name, sizeof(out_data->trader_buy_struct.item_name));
