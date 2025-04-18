@@ -48,6 +48,7 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		ClientUnknown::constants::EXPANSIONS_MASK,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
+		ClientUnknown::INULL,
 		ClientUnknown::INULL
 	),
 	/*[ClientVersion::Client62] =*/
@@ -55,6 +56,7 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		Client62::constants::EXPANSION,
 		Client62::constants::EXPANSION_BIT,
 		Client62::constants::EXPANSIONS_MASK,
+		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL
@@ -66,6 +68,7 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		Titanium::constants::EXPANSIONS_MASK,
 		Titanium::constants::CHARACTER_CREATION_LIMIT,
 		Titanium::constants::SAY_LINK_BODY_SIZE,
+		Titanium::INULL,
 		Titanium::INULL
 	),
 	/*[ClientVersion::SoF] =*/
@@ -75,6 +78,7 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		SoF::constants::EXPANSIONS_MASK,
 		SoF::constants::CHARACTER_CREATION_LIMIT,
 		SoF::constants::SAY_LINK_BODY_SIZE,
+		SoF::INULL,
 		SoF::INULL
 	),
 	/*[ClientVersion::SoD] =*/
@@ -84,6 +88,7 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		SoD::constants::EXPANSIONS_MASK,
 		SoD::constants::CHARACTER_CREATION_LIMIT,
 		SoD::constants::SAY_LINK_BODY_SIZE,
+		SoD::INULL,
 		SoD::INULL
 	),
 	/*[ClientVersion::UF] =*/
@@ -93,6 +98,7 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		UF::constants::EXPANSIONS_MASK,
 		UF::constants::CHARACTER_CREATION_LIMIT,
 		UF::constants::SAY_LINK_BODY_SIZE,
+		UF::INULL,
 		UF::INULL
 	),
 	/*[ClientVersion::RoF] =*/
@@ -102,6 +108,7 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		RoF::constants::EXPANSIONS_MASK,
 		RoF::constants::CHARACTER_CREATION_LIMIT,
 		RoF::constants::SAY_LINK_BODY_SIZE,
+		RoF::INULL,
 		RoF::INULL
 	),
 	/*[ClientVersion::RoF2] =*/
@@ -111,7 +118,8 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		RoF2::constants::EXPANSIONS_MASK,
 		RoF2::constants::CHARACTER_CREATION_LIMIT,
 		RoF2::constants::SAY_LINK_BODY_SIZE,
-		RoF2::constants::MAX_BAZAAR_TRADERS
+		RoF2::constants::MAX_BAZAAR_TRADERS,
+		RoF2::constants::MAX_BAZAAR_TRANSACTION
 	)
 };
 
