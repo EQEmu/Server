@@ -43,7 +43,7 @@ namespace EQ
 			int16 CharacterCreationLimit;
 			size_t SayLinkBodySize;
 			uint32 BazaarTraderLimit;
-			uint32 BazaarMaxTransaction;
+			uint64 BazaarMaxTransaction;
 			
 			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
@@ -53,7 +53,7 @@ namespace EQ
 				int16 CharacterCreationLimit,
 				size_t SayLinkBodySize,
 				uint32 BazaarTraderLimit,
-				uint32 BazaarMaxTransaction
+				uint64 BazaarMaxTransaction
 			) :
 				Expansion(Expansion),
 				ExpansionBit(ExpansionBit),
