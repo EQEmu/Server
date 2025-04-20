@@ -3782,9 +3782,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					auto trader_pc = entity_list.GetClientByCharID(in->trader_buy_struct.trader_id);
 					if (!trader_pc) {
 						LogTrading(
-							"Request trader_id <red>[{}] could not be found in zone_id <red>[{}]",
+							"Request trader_id [{}] could not be found in zone_id [{}] instance_id [{}]",
 							in->trader_buy_struct.trader_id,
-							zone->GetZoneID());
+							zone->GetZoneID(),
+							zone->GetInstanceID()
+						);
 						return;
 					}
 
@@ -3808,19 +3810,19 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					if (item->IsStackable() && in->item_quantity != in->item_charges) {
 						TraderRepository::UpdateQuantity(database, in->trader_buy_struct.item_unique_id, item->GetCharges() - in->item_quantity);
 						LogTradingDetail(
-							"Step 4a:Bazaar Purchase.  Decreased database id {} from [{}] to [{}] charges",
+							"Step 4:Bazaar Purchase.  Decreased database id {} from [{}] to [{}] charges",
 							in->trader_buy_struct.item_id,
-							in->item_charges,
-							in->item_charges
+							item->GetCharges(),
+							item->GetCharges() - in->item_quantity
 						);
 					}
 					else {
 						TraderRepository::DeleteOne(database, in->trader_buy_struct.item_id);
 						LogTradingDetail(
-							"Step 4b:Bazaar Purchase.  Deleted database id [{}] because database quantity [{}] equals [{}] purchased quantity",
+							"Step 4:Bazaar Purchase.  Deleted database id [{}] because database quantity [{}] equals [{}] purchased quantity",
 							in->trader_buy_struct.item_id,
-							in->item_charges,
-							in->item_charges
+							item->GetCharges(),
+							item->GetCharges() - in->item_quantity
 						);
 					}
 
@@ -3828,11 +3830,27 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					//perform actions to trader
 					uint64 total_cost = static_cast<uint64>(in->trader_buy_struct.price) * static_cast<uint64>(in->item_quantity);
 					if (!trader_pc->RemoveItemByItemUniqueId(in->trader_buy_struct.item_unique_id, in->item_quantity)) {
+						LogTradingDetail(
+							"Failed to remove item {} quantity [{}] from trader [{}]",
+							in->trader_buy_struct.item_unique_id,
+							in->item_quantity,
+							trader_pc->CharacterID()
+						);
 						in->transaction_status = BazaarPurchaseTraderFailed;
 						TraderRepository::UpdateActiveTransaction(database, in->id, false);
 						worldserver.SendPacket(pack);
 						break;
 					}
+
+					LogTradingDetail(
+						"Step 5:Bazaar Purchase.  Removed from inventory of Trader [{}] for sale of [{}] {}{}",
+						trader_pc->CharacterID(),
+						in->item_quantity,
+						in->item_quantity > 1 ? fmt::format("{}s", in->trader_buy_struct.item_name)
+											  : in->trader_buy_struct.item_name,
+						item->GetItem()->MaxCharges > 0 ? fmt::format(" with charges of [{}]", in->item_charges)
+														: std::string("")
+					);
 
 					trader_pc->AddMoneyToPP(total_cost,	true);
 
@@ -3868,6 +3886,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					TraderRepository::UpdateActiveTransaction(database, in->id, false);
 					worldserver.SendPacket(pack);
 
+					LogTradingDetail("Step 6:Bazaar Purchase. Purchase checks complete for trader.  Send Success to buyer via world.");
+
 					break;
 				}
 				case BazaarPurchaseTraderFailed: {
@@ -3888,6 +3908,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					uint64 fee = std::round(total_cost * RuleR(Bazaar, ParcelDeliveryCostMod));
 					buyer->AddMoneyToPP(total_cost + fee, false);
 					buyer->SendMoneyUpdate();
+
+					buyer->Message(Chat::Red, "Bazaar purchased failed.  Returning your money.");
+					LogTradingDetail("Bazaar Purchase Failed.  Returning money [{}] to Buyer [{}]", total_cost + fee, buyer->CharacterID());
 
 					break;
 				}
@@ -3935,20 +3958,21 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					//Send the item via parcel
 					CharacterParcelsRepository::CharacterParcels parcel_out{};
-					parcel_out.from_name  = in->trader_buy_struct.seller_name;
-					parcel_out.note       = "Delivered from a Bazaar Purchase";
-					parcel_out.sent_date  = time(nullptr);
-					parcel_out.quantity   = quantity;
-					parcel_out.item_id    = in->trader_buy_struct.item_id;
-					parcel_out.aug_slot_1 = in->item_aug_1;
-					parcel_out.aug_slot_2 = in->item_aug_2;
-					parcel_out.aug_slot_3 = in->item_aug_3;
-					parcel_out.aug_slot_4 = in->item_aug_4;
-					parcel_out.aug_slot_5 = in->item_aug_5;
-					parcel_out.aug_slot_6 = in->item_aug_6;
-					parcel_out.char_id    = buyer->CharacterID();
-					parcel_out.slot_id    = buyer->FindNextFreeParcelSlot(buyer->CharacterID());
-					parcel_out.id         = 0;
+					parcel_out.from_name      = in->trader_buy_struct.seller_name;
+					parcel_out.note           = "Delivered from a Bazaar Purchase";
+					parcel_out.sent_date      = time(nullptr);
+					parcel_out.quantity       = quantity;
+					parcel_out.item_id        = in->trader_buy_struct.item_id;
+					parcel_out.item_unique_id = in->trader_buy_struct.item_unique_id;
+					parcel_out.aug_slot_1     = in->item_aug_1;
+					parcel_out.aug_slot_2     = in->item_aug_2;
+					parcel_out.aug_slot_3     = in->item_aug_3;
+					parcel_out.aug_slot_4     = in->item_aug_4;
+					parcel_out.aug_slot_5     = in->item_aug_5;
+					parcel_out.aug_slot_6     = in->item_aug_6;
+					parcel_out.char_id        = buyer->CharacterID();
+					parcel_out.slot_id        = buyer->FindNextFreeParcelSlot(buyer->CharacterID());
+					parcel_out.id             = 0;
 
 					CharacterParcelsRepository::InsertOne(database, parcel_out);
 
@@ -3975,12 +3999,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					strn0cpy(ps.send_to, buyer->GetCleanName(), sizeof(ps.send_to));
 					buyer->SendParcelDeliveryToWorld(ps);
 
-					LogTradingDetail(
-						"Step 3:Bazaar Purchase.  Sent parcel to Buyer [{}] Item ID [{}] Quantity [{}] Charges [{}]",
+					LogTradingDetail("Step 7:Bazaar Purchase. Sent parcel to Buyer [{}] for purchase of [{}] {}{}",
 						buyer->CharacterID(),
-						in->trader_buy_struct.item_id,
-						in->item_quantity,
-						in->item_charges
+						quantity,
+						quantity > 1 ? fmt::format("{}s", in->trader_buy_struct.item_name) : in->trader_buy_struct.item_name,
+						item->MaxCharges > 0 ? fmt::format(" with charges of [{}]", in->item_charges) : std::string("")
 					);
 
 					//Update the buyer to indicate the sale has completed
@@ -3989,6 +4012,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
 					buyer->ReturnTraderReq(&outapp, in->item_quantity, in->trader_buy_struct.item_id);
+					LogTradingDetail("Step 8:Bazaar Purchase. Purchase complete. Sending update packet to buyer.");
 
 					break;
 				}
