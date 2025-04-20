@@ -2860,7 +2860,6 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 		charges = trader_item.item_charges;
 	}
 
-	LogTrading("Name: [{}] Requested Quantity: [{}] Charges: [{}]", in->item_name, quantity, charges);
 	LogTradingDetail(
 		"Step 1:Bazaar Purchase.  Buyer [{}] Seller [{}] Quantity [{}] Charges [{}] Item_Unique_ID [{}]",
 		CharacterID(),
@@ -2892,8 +2891,15 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 	}
 
 	Message(Chat::Red, fmt::format("You paid {} for the parcel delivery.", DetermineMoneyString(fee)).c_str());
-	LogTrading("Customer [{}] Paid: [{}] to trader [{}]", CharacterID(), DetermineMoneyString(total_cost), trader_item.character_id);
-	LogTradingDetail("Step 2:Bazaar Purchase.  Took [{}] from Buyer [{}] ", DetermineMoneyString(total_cost), CharacterID());
+	SendMoneyUpdate();
+
+	LogTradingDetail("Step 2:Bazaar Purchase.  Took [{}] from Buyer [{}] for purchase of [{}] {}{}",
+		DetermineMoneyString(total_cost),
+		CharacterID(),
+		quantity,
+		quantity > 1 ? fmt::format("{}s", in->item_name) : in->item_name,
+		item->MaxCharges > 0 ? fmt::format(" with charges of [{}]", charges) : std::string("")
+	);
 
 	auto out_server = std::make_unique<ServerPacket>(ServerOP_BazaarPurchase, sizeof(BazaarPurchaseMessaging_Struct));
 	auto out_data   = reinterpret_cast<BazaarPurchaseMessaging_Struct *>(out_server->pBuffer);
@@ -2931,7 +2937,7 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 	);
 
 	worldserver.SendPacket(out_server.get());
-	LogTradingDetail("Step 5:Bazaar Purchase.  Send bazaar messaging data to world.\n"
+	LogTradingDetail("Step 3:Bazaar Purchase.  Buyer checks passed, sending bazaar messaging data to trader via world.\n"
 	"Action:                  {} \n"
 	"Sub Action:              {} \n"
 	"Method:                  {} \n"
@@ -2978,9 +2984,6 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 	out_data->trader_zone_instance_id,
 	out_data->buyer_id,
 	out_data->trader_buy_struct.buyer_name);
-
-	SendMoneyUpdate();
-	LogTradingDetail("Step 6:Bazaar Purchase.  Send money update to client {}.  Buyer Actions complete.", CharacterID());
 }
 
 void Client::SetBuyerWelcomeMessage(const char *welcome_message)
