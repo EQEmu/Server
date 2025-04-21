@@ -156,6 +156,7 @@ RULE_REAL(Character, TradeskillUpPottery, 4.0, "Pottery skillup rate adjustment.
 RULE_REAL(Character, TradeskillUpResearch, 1.0, "Research skillup rate adjustment. Lower is faster")
 RULE_REAL(Character, TradeskillUpTinkering, 2.0, "Tinkering skillup rate adjustment. Lower is faster")
 RULE_REAL(Character, TradeskillUpTailoring, 2.0, "Tailoring skillup rate adjustment. Lower is faster")
+RULE_REAL(Character, TradeskillUpMinChance, 2.5, "Determines the minimum percentage chance to gain a skill increase from a tradeskill.  Cannot go below 2.5")
 RULE_BOOL(Character, MarqueeHPUpdates, false, "Will show health percentage in center of screen if health lesser than 100%")
 RULE_INT(Character, IksarCommonTongue, 95, "Starting value for Common Tongue for Iksars")
 RULE_INT(Character, OgreCommonTongue, 95, "Starting value for Common Tongue for Ogres")
