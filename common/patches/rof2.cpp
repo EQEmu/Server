@@ -4688,7 +4688,7 @@ namespace RoF2
 			Bitfields->linkdead               = 0;
 			Bitfields->showhelm               = emu->showhelm;
 			Bitfields->trader                 = emu->trader ? 1 : 0;
-			Bitfields->targetable             = 1;
+			Bitfields->targetable             = emu->NPC ? emu->untargetable : 1;
 			Bitfields->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
 			Bitfields->showname               = ShowName;
 
