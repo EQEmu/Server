@@ -1105,6 +1105,13 @@ public:
 
 	// Public "Refactor" Methods
 	static bool CheckCampSpawnConditions(Client* c);
+	static bool CheckHighEnoughLevelForBots(Client* c);
+	static bool CheckHighEnoughLevelForBotsByClass(Client* c, uint8 bot_class);
+	static bool CheckCreateLimit(Client* c, uint32 bot_count);
+	static bool CheckCreateLimitByClass(Client* c, uint8 bot_class, uint32 bot_class_count);
+	static bool CheckSpawnLimit(Client* c);
+	static bool CheckSpawnLimitByClass(Client* c, uint8 bot_class);
+
 
 protected:
 	void BotMeditate(bool is_sitting);

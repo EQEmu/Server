@@ -8715,6 +8715,155 @@ bool Bot::CheckCampSpawnConditions(Client* c) {
 	return true;
 }
 
+bool Bot::CheckHighEnoughLevelForBots(Client* c) {
+	auto bot_character_level = c->GetBotRequiredLevel();
+	bool not_high_enough_level = bot_character_level >= 0 && c->GetLevel() < bot_character_level;
+
+	if (not_high_enough_level) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You must be level {} to spawn bots.",
+				bot_character_level
+			).c_str()
+		);
+
+		return false;
+	}
+
+	return true;
+}
+
+bool Bot::CheckHighEnoughLevelForBotsByClass(Client* c, uint8 bot_class) {
+	auto bot_character_level_class = c->GetBotRequiredLevel(bot_class);
+	bool not_high_enough_level_class = bot_character_level_class >= 0 && c->GetLevel() < bot_character_level_class;
+
+	if (not_high_enough_level_class) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You must be level {} to spawn {} bots.",
+				bot_character_level_class,
+				GetClassIDName(bot_class)
+			).c_str()
+		);
+
+		return false;
+	}
+
+	return true;
+}
+
+bool Bot::CheckCreateLimit(Client* c, uint32 bot_count) {
+	auto bot_creation_limit = c->GetBotCreationLimit();
+	bool is_beyond_create_limit = bot_creation_limit >= 0 && bot_count >= bot_creation_limit;
+
+	if (is_beyond_create_limit) {
+		std::string message;
+
+		if (bot_creation_limit) {
+			message = fmt::format(
+				"You cannot create anymore than {} bot{}.",
+				bot_creation_limit,
+				bot_creation_limit != 1 ? "s" : ""
+			);
+		} else {
+			message = "You cannot create any bots.";
+		}
+
+		c->Message(Chat::Yellow, message.c_str());
+
+		return false;
+	}
+
+	return true;
+}
+
+bool Bot::CheckCreateLimitByClass(Client* c, uint8 bot_class, uint32 bot_class_count) {
+	auto bot_creation_limit_class = c->GetBotCreationLimit(bot_class);
+	bool is_beyond_class_spawn_limit = bot_creation_limit_class >= 0 && bot_class_count >= bot_creation_limit_class;
+
+	if (is_beyond_class_spawn_limit) {
+		std::string message;
+
+		if (bot_creation_limit_class) {
+			message = fmt::format(
+				"You cannot create anymore than {} {} bot{}.",
+				bot_creation_limit_class,
+				GetClassIDName(bot_class),
+				bot_creation_limit_class != 1 ? "s" : ""
+			);
+		} else {
+			message = fmt::format(
+				"You cannot create any {} bots.",
+				GetClassIDName(bot_class)
+			);
+		}
+
+		c->Message(Chat::Yellow, message.c_str());
+
+		return false;
+	}
+
+	return true;
+}
+bool Bot::CheckSpawnLimit(Client* c) {
+	auto bot_spawn_limit = c->GetBotSpawnLimit();
+	auto spawned_bots_count = Bot::SpawnedBotCount(c->CharacterID());
+	bool is_beyond_spawn_limit = bot_spawn_limit >= 0 && spawned_bots_count >= bot_spawn_limit;
+
+	if (is_beyond_spawn_limit) {
+		std::string message;
+
+		if (bot_spawn_limit) {
+			message = fmt::format(
+				"You cannot have more than {} spawned bot{}.",
+				bot_spawn_limit,
+				bot_spawn_limit != 1 ? "s" : ""
+			);
+		}
+		else {
+			message = "You are not currently allowed to spawn any bots.";
+		}
+
+		c->Message(Chat::White, message.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+bool Bot::CheckSpawnLimitByClass(Client* c, uint8 bot_class) {
+	auto bot_spawn_limit_class = c->GetBotSpawnLimit(bot_class);
+	auto spawned_bot_count_class = Bot::SpawnedBotCount(c->CharacterID(), bot_class);
+	bool is_beyond_class_spawn_limit = bot_spawn_limit_class >= 0 && spawned_bot_count_class >= bot_spawn_limit_class;
+
+	if (is_beyond_class_spawn_limit) {
+		std::string message;
+
+		if (bot_spawn_limit_class) {
+			message = fmt::format(
+				"You cannot have more than {} spawned {} bot{}.",
+				bot_spawn_limit_class,
+				GetClassIDName(bot_class),
+				bot_spawn_limit_class != 1 ? "s" : ""
+			);
+		}
+		else {
+			message = fmt::format(
+				"You are not currently allowed to spawn any {} bots.",
+				GetClassIDName(bot_class)
+			);
+		}
+
+		c->Message(Chat::White, message.c_str());
+
+		return false;
+	}
+
+	return true;
+}
+
 void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 {
 	if (!IsPlayerRace(race_id) || !IsPlayerClass(class_id)) {
