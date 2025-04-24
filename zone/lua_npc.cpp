@@ -945,6 +945,12 @@ bool Lua_NPC::IsResumedFromZoneSuspend()
 	return self->IsResumedFromZoneSuspend();
 }
 
+void Lua_NPC::SetNPCTintIndex(uint32 id)
+{
+	Lua_Safe_Call_Void();
+	self->SendAppearancePacket(AppearanceType::NPCTintIndex, id);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -1091,6 +1097,7 @@ luabind::scope lua_register_npc() {
 	.def("SetLDoNTrapType", (void(Lua_NPC::*)(uint8))&Lua_NPC::SetLDoNTrapType)
 	.def("SetNPCAggro", (void(Lua_NPC::*)(bool))&Lua_NPC::SetNPCAggro)
 	.def("SetNPCFactionID", (void(Lua_NPC::*)(int))&Lua_NPC::SetNPCFactionID)
+	.def("SetNPCTintIndex", &Lua_NPC::SetNPCTintIndex)
 	.def("SetPetSpellID", (void(Lua_NPC::*)(int))&Lua_NPC::SetPetSpellID)
 	.def("SetPlatinum", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetPlatinum)
 	.def("SetPrimSkill", (void(Lua_NPC::*)(int))&Lua_NPC::SetPrimSkill)

@@ -885,6 +885,11 @@ Spawn2* Perl_NPC_GetSpawn(NPC* self)
 	return self->GetSpawn();
 }
 
+void Perl_NPC_SetNPCTintIndex(NPC* self, uint32 id)
+{
+	return self->SendAppearancePacket(AppearanceType::NPCTintIndex, id);
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -1034,6 +1039,7 @@ void perl_register_npc()
 	package.add("SetGold", &Perl_NPC_SetGold);
 	package.add("SetGrid", &Perl_NPC_SetGrid);
 	package.add("SetNPCFactionID", &Perl_NPC_SetNPCFactionID);
+	package.add("SetNPCTintIndex", &Perl_NPC_SetNPCTintIndex);
 	package.add("SetPetSpellID", &Perl_NPC_SetPetSpellID);
 	package.add("SetPlatinum", &Perl_NPC_SetPlatinum);
 	package.add("SetPrimSkill", &Perl_NPC_SetPrimSkill);
