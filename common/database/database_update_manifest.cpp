@@ -7087,6 +7087,18 @@ CREATE INDEX `idx_expire_at` ON `instance_list` (`expire_at`);
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9322,
+		.description = "2025_04_24_add_npc_tint_id.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'npc_tint_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_types`
+	ADD COLUMN `npc_tint_id` SMALLINT UNSIGNED NULL DEFAULT '0' AFTER `multiquest_enabled`;
+)",
+		.content_schema_update = true
+	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

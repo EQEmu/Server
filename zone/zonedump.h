@@ -157,6 +157,7 @@ struct NPCType
 	bool            is_parcel_merchant;
 	uint8			greed;
 	bool            multiquest_enabled;
+	uint32          m_npc_tint_id;
 };
 
 #pragma pack()
