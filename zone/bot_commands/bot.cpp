@@ -157,7 +157,7 @@ void bot_command_clone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!Bot::CheckCreateLimitByClass(c, my_bot->GetClass(), bot_class_count)) {
+	if (!Bot::CheckCreateLimit(c, bot_class_count, my_bot->GetClass())) {
 		return;
 	}
 
@@ -954,11 +954,11 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!Bot::CheckHighEnoughLevelForBotsByClass(c, bot_class)) {
+	if (!Bot::CheckHighEnoughLevelForBots(c, bot_class)) {
 		return;
 	}
 
-	if (!Bot::CheckSpawnLimitByClass(c, bot_class)) {
+	if (!Bot::CheckSpawnLimit(c, bot_class)) {
 		return;
 	}
 

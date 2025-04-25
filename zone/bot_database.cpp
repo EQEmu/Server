@@ -207,7 +207,7 @@ bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot
 	bot_count = BotDataRepository::Count(
 		database,
 		fmt::format(
-			"`owner_id` = {}",
+			"`owner_id` = {} AND `name` NOT LIKE '%-deleted-%'",
 			owner_id
 		)
 	);
@@ -216,7 +216,7 @@ bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot
 		bot_class_count = BotDataRepository::Count(
 			database,
 			fmt::format(
-				"`owner_id` = {} AND `class` = {}",
+				"`owner_id` = {} AND `class` = {} AND `name` NOT LIKE '%-deleted-%'",
 				owner_id,
 				class_id
 			)

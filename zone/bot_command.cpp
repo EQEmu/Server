@@ -521,7 +521,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	if (!Bot::CheckHighEnoughLevelForBotsByClass(bot_owner, bot_class)) {
+	if (!Bot::CheckHighEnoughLevelForBots(bot_owner, bot_class)) {
 		return bot_id;
 	}
 
@@ -538,7 +538,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	if (!Bot::CheckCreateLimitByClass(bot_owner, bot_class, bot_class_count)) {
+	if (!Bot::CheckCreateLimit(bot_owner, bot_class_count, bot_class)) {
 		return bot_id;
 	}
 
