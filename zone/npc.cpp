@@ -128,7 +128,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		  npc_type_data->always_aggro,
 		  npc_type_data->heroic_strikethrough,
 		  npc_type_data->keeps_sold_items,
-		  npc_type_data->hp_regen_per_second
+		  npc_type_data->hp_regen_per_second,
+		  npc_type_data->m_npc_tint_id
 	  ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
@@ -451,6 +452,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	raid_target    = npc_type_data->raid_target;
 	ignore_despawn = npc_type_data->ignore_despawn;
 	m_targetable   = !npc_type_data->untargetable;
+	m_npc_tint_id  = npc_type_data->m_npc_tint_id;
 
 	npc_scale_manager->ScaleNPC(this);
 
@@ -1256,10 +1258,11 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	e.Avoidance       = n->GetAvoidanceRating();
 	e.heroic_strikethrough = n->GetHeroicStrikethrough();
 
-	e.see_hide        = n->SeeHide();
-	e.see_improved_hide = n->SeeImprovedHide();
-	e.see_invis       = n->SeeInvisible();
-	e.see_invis_undead = n->SeeInvisibleUndead();
+	e.see_hide             = n->SeeHide();
+	e.see_improved_hide    = n->SeeImprovedHide();
+	e.see_invis            = n->SeeInvisible();
+	e.see_invis_undead     = n->SeeInvisibleUndead();
+	e.npc_tint_id          = n->GetNpcTintId();
 
 
 	e = NpcTypesRepository::InsertOne(*this, e);
@@ -1399,6 +1402,7 @@ uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client* c, NPC* n)
 	e.loottable_id = n->GetLoottableID();
 	e.merchant_id  = n->MerchantType;
 	e.face         = n->GetLuclinFace();
+	e.npc_tint_id  = n->GetNpcTintId();
 
 	const int updated = NpcTypesRepository::UpdateOne(*this, e);
 
@@ -1539,6 +1543,7 @@ uint32 ZoneDatabase::AddNPCTypes(
 	e.runspeed        = n->GetRunspeed();
 	e.prim_melee_type = static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
 	e.sec_melee_type  = static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
+	e.npc_tint_id     = n->GetNpcTintId();
 
 	e = NpcTypesRepository::InsertOne(*this, e);
 
@@ -2169,9 +2174,10 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	PetOnSpawn(ns);
 	ns->spawn.is_npc = 1;
 	UpdateActiveLight();
-	ns->spawn.light = GetActiveLightType();
-	ns->spawn.show_name = NPCTypedata->show_name;
-	ns->spawn.trader = false;
+	ns->spawn.light       = GetActiveLightType();
+	ns->spawn.show_name   = NPCTypedata->show_name;
+	ns->spawn.trader      = false;
+	ns->spawn.npc_tint_id = GetNpcTintId();
 }
 
 void NPC::PetOnSpawn(NewSpawn_Struct* ns)

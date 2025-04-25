@@ -4839,13 +4839,13 @@ namespace RoF2
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
 
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // FindBits MQ2 name
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);                 // FindBits MQ2 name
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->PlayerState);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // NpcTintIndex
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // PrimaryTintIndex
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // SecondaryTintIndex
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // These do something with OP_WeaponEquip1
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // ^
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->npc_tint_id); // NpcTintIndex
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);                // PrimaryTintIndex
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);                // SecondaryTintIndex
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff);       // These do something with OP_WeaponEquip1
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff);       // ^
 
 			if ((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
 					(emu->race == Race::VahShir) || (emu->race == Race::Froglok2) || (emu->race == Race::Drakkin)
