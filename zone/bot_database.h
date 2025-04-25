@@ -48,7 +48,7 @@ public:
 
 
 	/* Bot functions   */
-	bool QueryNameAvailablity(const std::string& bot_name, bool& available_flag);
+	bool QueryNameAvailability(const std::string& bot_name, bool& available_flag);
 	bool QueryBotCount(const uint32 owner_id, int class_id, uint32& bot_count, uint32& bot_class_count);
 	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list, bool by_account = false);
 
