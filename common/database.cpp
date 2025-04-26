@@ -2274,3 +2274,22 @@ uint64_t Database::GetNextTableId(const std::string &table_name)
 
 	return 1;
 }
+
+void Database::ConvertInventoryToNewUniqueId()
+{
+	LogInfo("Converting inventory entries with NULL item_unique_id");
+	auto results = InventoryRepository::GetWhere(*this, "`item_unique_id` IS NULL");
+
+	if (results.empty()) {
+		return;
+	}
+
+	TransactionBegin();
+	for (auto &r: results) {
+		r.item_unique_id = EQ::UniqueHashGenerator::generate();
+	}
+
+	InventoryRepository::ReplaceMany(*this, results);
+	TransactionCommit();
+	LogInfo("Converted {} records", results.size());
+}

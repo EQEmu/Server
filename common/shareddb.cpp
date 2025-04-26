@@ -755,6 +755,8 @@ bool SharedDatabase::GetInventory(Client *c)
 		inst->SetOrnamentationIDFile(ornament_idfile);
 		inst->SetOrnamentHeroModel(item->HerosForgeModel);
 
+		//Mass conversion handled by world
+		//This remains as a backup.  Should not be required.
 		if (row.item_unique_id.empty()) {
 			inst->CreateUniqueID();
 			row.item_unique_id = inst->GetUniqueID();
