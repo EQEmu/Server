@@ -2285,11 +2285,26 @@ void Database::ConvertInventoryToNewUniqueId()
 	}
 
 	TransactionBegin();
+	uint32                                      index      = 0;
+	uint32                                      batch_size = 1000;
+	std::vector<InventoryRepository::Inventory> queue{};
+	queue.reserve(batch_size);
+
 	for (auto &r: results) {
 		r.item_unique_id = EQ::UniqueHashGenerator::generate();
+		queue.push_back(r);
+		index++;
+		if (index >= batch_size) {
+			InventoryRepository::ReplaceMany(*this, queue);
+			index = 0;
+			queue.clear();
+		}
 	}
 
-	InventoryRepository::ReplaceMany(*this, results);
+	if (!queue.empty()) {
+		InventoryRepository::ReplaceMany(*this, queue);
+	}
+
 	TransactionCommit();
 	LogInfo("Converted {} records", results.size());
 }
