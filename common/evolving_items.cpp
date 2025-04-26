@@ -54,6 +54,10 @@ double EvolvingItemsManager::CalculateProgression(const uint64 current_amount, c
 
 void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_id, const EQ::ItemInstance &inst) const
 {
+	if (!inst) {
+		return;
+	}
+
 	inst.SetEvolveEquipped(false);
 	if (inst.IsEvolving() && slot_id <= EQ::invslot::EQUIPMENT_END && slot_id >= EQ::invslot::EQUIPMENT_BEGIN) {
 		inst.SetEvolveEquipped(true);
@@ -87,6 +91,10 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 
 uint32 EvolvingItemsManager::GetFinalItemID(const EQ::ItemInstance &inst) const
 {
+	if (!inst) {
+		return 0;
+	}
+
 	const auto start_iterator = std::ranges::find_if(
 		evolving_items_manager.GetEvolvingItemsCache().cbegin(),
 		evolving_items_manager.GetEvolvingItemsCache().cend(),
@@ -116,6 +124,10 @@ uint32 EvolvingItemsManager::GetFinalItemID(const EQ::ItemInstance &inst) const
 
 uint32 EvolvingItemsManager::GetNextEvolveItemID(const EQ::ItemInstance &inst) const
 {
+	if (!inst) {
+		return 0;
+	}
+
 	int8 const current_level = inst.GetEvolveLvl();
 
 	const auto iterator = std::ranges::find_if(
@@ -191,6 +203,10 @@ uint64 EvolvingItemsManager::GetTotalEarnedXP(const EQ::ItemInstance &inst)
 EvolveGetNextItem EvolvingItemsManager::GetNextItemByXP(const EQ::ItemInstance &inst_in, const int64 in_xp)
 {
 	EvolveGetNextItem ets{};
+	if (!inst_in) {
+		return ets;
+	}
+
 	const auto        evolve_items   = GetEvolveIDItems(inst_in.GetEvolveLoreID());
 	uint32            max_transfer_level = 0;
 	int64             xp                  = in_xp;
@@ -235,6 +251,9 @@ EvolveTransfer EvolvingItemsManager::DetermineTransferResults(
 )
 {
 	EvolveTransfer ets{};
+	if (!inst_from || !inst_to) {
+		return ets;
+	}
 
 	auto evolving_details_inst_from = evolving_items_manager.GetEvolveItemDetails(inst_from.GetID());
 	auto evolving_details_inst_to   = evolving_items_manager.GetEvolveItemDetails(inst_to.GetID());
@@ -295,6 +314,10 @@ uint32 EvolvingItemsManager::GetFirstItemInLoreGroupByItemID(const uint32 item_i
 
 void EvolvingItemsManager::LoadPlayerEvent(const EQ::ItemInstance &inst, PlayerEvent::EvolveItem &e)
 {
+	if (!inst) {
+		return;
+	}
+
 	e.item_id     = inst.GetID();
 	e.item_name   = inst.GetItem() ? inst.GetItem()->Name : std::string();
 	e.level       = inst.GetEvolveLvl();

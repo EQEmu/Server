@@ -53,11 +53,11 @@ public:
 	ItemsEvolvingDetailsRepository::ItemsEvolvingDetails GetEvolveItemDetails(uint64 id);
 	EvolveTransfer DetermineTransferResults(const EQ::ItemInstance& inst_from, const EQ::ItemInstance& inst_to);
 	EvolveGetNextItem GetNextItemByXP(const EQ::ItemInstance &inst_in, int64 in_xp);
-	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return evolving_items_cache; }
+	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return m_evolving_items_cache; }
 	std::vector<ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> GetEvolveIDItems(uint32 evolve_id);
 
 private:
-	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> evolving_items_cache;
+	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> m_evolving_items_cache;
 	Database *                                                             m_db;
 	Database *                                                             m_content_db;
 };
