@@ -278,6 +278,7 @@ public:
 	void Decode(std::string &in);
 
 	uint64_t GetNextTableId(const std::string& table_name);
+	void ConvertInventoryToNewUniqueId();
 
 private:
 	Mutex           Mvarcache;
