@@ -66,8 +66,8 @@ public:
 		uint8_t     armortint_red;
 		uint8_t     armortint_green;
 		uint8_t     armortint_blue;
-		int32_t     d_melee_texture1;
-		int32_t     d_melee_texture2;
+		uint32_t    d_melee_texture1;
+		uint32_t    d_melee_texture2;
 		std::string ammo_idfile;
 		uint8_t     prim_melee_type;
 		uint8_t     sec_melee_type;
@@ -123,7 +123,7 @@ public:
 		int8_t      legtexture;
 		int8_t      feettexture;
 		int8_t      light;
-		int8_t      walkspeed;
+		float       walkspeed;
 		int32_t     peqid;
 		int8_t      unique_;
 		int8_t      fixed;
@@ -682,8 +682,8 @@ public:
 			e.armortint_red          = row[44] ? static_cast<uint8_t>(strtoul(row[44], nullptr, 10)) : 0;
 			e.armortint_green        = row[45] ? static_cast<uint8_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.armortint_blue         = row[46] ? static_cast<uint8_t>(strtoul(row[46], nullptr, 10)) : 0;
-			e.d_melee_texture1       = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
-			e.d_melee_texture2       = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.d_melee_texture1       = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
+			e.d_melee_texture2       = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
 			e.ammo_idfile            = row[49] ? row[49] : "IT10";
 			e.prim_melee_type        = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 28;
 			e.sec_melee_type         = row[51] ? static_cast<uint8_t>(strtoul(row[51], nullptr, 10)) : 28;
@@ -739,7 +739,7 @@ public:
 			e.legtexture             = row[101] ? static_cast<int8_t>(atoi(row[101])) : 0;
 			e.feettexture            = row[102] ? static_cast<int8_t>(atoi(row[102])) : 0;
 			e.light                  = row[103] ? static_cast<int8_t>(atoi(row[103])) : 0;
-			e.walkspeed              = row[104] ? static_cast<int8_t>(atoi(row[104])) : 0;
+			e.walkspeed              = row[104] ? strtof(row[104], nullptr) : 0;
 			e.peqid                  = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
 			e.unique_                = row[106] ? static_cast<int8_t>(atoi(row[106])) : 0;
 			e.fixed                  = row[107] ? static_cast<int8_t>(atoi(row[107])) : 0;
@@ -1321,8 +1321,8 @@ public:
 			e.armortint_red          = row[44] ? static_cast<uint8_t>(strtoul(row[44], nullptr, 10)) : 0;
 			e.armortint_green        = row[45] ? static_cast<uint8_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.armortint_blue         = row[46] ? static_cast<uint8_t>(strtoul(row[46], nullptr, 10)) : 0;
-			e.d_melee_texture1       = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
-			e.d_melee_texture2       = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.d_melee_texture1       = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
+			e.d_melee_texture2       = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
 			e.ammo_idfile            = row[49] ? row[49] : "IT10";
 			e.prim_melee_type        = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 28;
 			e.sec_melee_type         = row[51] ? static_cast<uint8_t>(strtoul(row[51], nullptr, 10)) : 28;
@@ -1378,7 +1378,7 @@ public:
 			e.legtexture             = row[101] ? static_cast<int8_t>(atoi(row[101])) : 0;
 			e.feettexture            = row[102] ? static_cast<int8_t>(atoi(row[102])) : 0;
 			e.light                  = row[103] ? static_cast<int8_t>(atoi(row[103])) : 0;
-			e.walkspeed              = row[104] ? static_cast<int8_t>(atoi(row[104])) : 0;
+			e.walkspeed              = row[104] ? strtof(row[104], nullptr) : 0;
 			e.peqid                  = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
 			e.unique_                = row[106] ? static_cast<int8_t>(atoi(row[106])) : 0;
 			e.fixed                  = row[107] ? static_cast<int8_t>(atoi(row[107])) : 0;
@@ -1476,8 +1476,8 @@ public:
 			e.armortint_red          = row[44] ? static_cast<uint8_t>(strtoul(row[44], nullptr, 10)) : 0;
 			e.armortint_green        = row[45] ? static_cast<uint8_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.armortint_blue         = row[46] ? static_cast<uint8_t>(strtoul(row[46], nullptr, 10)) : 0;
-			e.d_melee_texture1       = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
-			e.d_melee_texture2       = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.d_melee_texture1       = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
+			e.d_melee_texture2       = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
 			e.ammo_idfile            = row[49] ? row[49] : "IT10";
 			e.prim_melee_type        = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 28;
 			e.sec_melee_type         = row[51] ? static_cast<uint8_t>(strtoul(row[51], nullptr, 10)) : 28;
@@ -1533,7 +1533,7 @@ public:
 			e.legtexture             = row[101] ? static_cast<int8_t>(atoi(row[101])) : 0;
 			e.feettexture            = row[102] ? static_cast<int8_t>(atoi(row[102])) : 0;
 			e.light                  = row[103] ? static_cast<int8_t>(atoi(row[103])) : 0;
-			e.walkspeed              = row[104] ? static_cast<int8_t>(atoi(row[104])) : 0;
+			e.walkspeed              = row[104] ? strtof(row[104], nullptr) : 0;
 			e.peqid                  = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
 			e.unique_                = row[106] ? static_cast<int8_t>(atoi(row[106])) : 0;
 			e.fixed                  = row[107] ? static_cast<int8_t>(atoi(row[107])) : 0;
