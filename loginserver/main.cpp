@@ -15,6 +15,9 @@
 #include "../common/database.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/zone_store.h"
+#include "../common/evolving_items.h"
+#include "../common/content/world_content_service.h"
+
 #include <time.h>
 #include <stdlib.h>
 #include <string>
