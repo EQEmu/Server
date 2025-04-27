@@ -89,6 +89,29 @@ EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges)
 	m_SerialNumber  = GetNextItemInstSerialNumber();
 }
 
+EQ::ItemInstance::ItemInstance(const ItemData *item, const std::string &item_unique_id, int16 charges)
+{
+	if (item) {
+		m_item = new ItemData(*item);
+	}
+
+	m_charges = charges;
+
+	if (m_item && m_item->IsClassCommon()) {
+		m_color = m_item->Color;
+	}
+
+	if (m_item && IsEvolving()) {
+		SetTimer("evolve", RuleI(EvolvingItems, DelayUponEquipping));
+	}
+
+	m_SerialNumber  = GetNextItemInstSerialNumber();
+	
+	if (m_item && !item_unique_id.empty()) {
+		SetUniqueID(item_unique_id);
+	}
+}
+
 EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges)
 {
 	m_item     = db->GetItem(item_id);

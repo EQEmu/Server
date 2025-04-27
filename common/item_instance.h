@@ -85,6 +85,8 @@ namespace EQ
 
 		ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges = 0);
 
+		ItemInstance(const ItemData *item, const std::string &item_unique_id, int16 charges = 0);
+
 		ItemInstance(ItemInstTypes use_type);
 
 		ItemInstance(const ItemInstance& copy);
