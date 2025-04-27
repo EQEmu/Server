@@ -1470,7 +1470,7 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 	return inst;
 }
 
-EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16 charges) {
+EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16 charges, const std::string &item_unique_id) {
 	EQ::ItemInstance* inst = nullptr;
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item.
@@ -1484,7 +1484,7 @@ EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16
 			charges = 1;
 		}
 
-		inst = new EQ::ItemInstance(item, charges);
+		inst = new EQ::ItemInstance(item, item_unique_id, charges);
 
 		if (!inst) {
 			LogError("Error: valid item data returned a null reference for EQ::ItemInstance creation in SharedDatabase::CreateBaseItem()");
