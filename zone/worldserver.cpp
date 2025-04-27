@@ -3817,7 +3817,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						);
 					}
 					else {
-						TraderRepository::DeleteOne(database, in->trader_buy_struct.item_id);
+						TraderRepository::DeleteOne(database, in->id);
 						LogTradingDetail(
 							"Step 4:Bazaar Purchase.  Deleted database id [{}] because database quantity [{}] equals [{}] purchased quantity",
 							in->trader_buy_struct.item_id,
@@ -3910,8 +3910,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					buyer->SendMoneyUpdate();
 
 					buyer->Message(Chat::Red, "Bazaar purchased failed.  Returning your money.");
-					LogTradingDetail("Bazaar Purchase Failed.  Returning money [{}] to Buyer [{}]", total_cost + fee, buyer->CharacterID());
-
+					LogTradingDetail(
+						"Bazaar Purchase Failed.  Returning money [{}] + fee [{}] to Buyer [{}]",
+						total_cost,
+						fee,
+						buyer->CharacterID()
+					);
+					buyer->TradeRequestFailed(in->trader_buy_struct);
 					break;
 				}
 				case BazaarPurchaseSuccess: {

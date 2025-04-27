@@ -2286,7 +2286,7 @@ void Database::ConvertInventoryToNewUniqueId()
 
 	TransactionBegin();
 	uint32                                      index      = 0;
-	uint32                                      batch_size = 1000;
+	const uint32                                batch_size = 1000;
 	std::vector<InventoryRepository::Inventory> queue{};
 	queue.reserve(batch_size);
 

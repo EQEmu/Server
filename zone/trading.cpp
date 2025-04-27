@@ -1382,21 +1382,42 @@ void Client::TradeRequestFailed(const EQApplicationPacket *app)
 	safe_delete(outapp);
 }
 
-static void BazaarAuditTrail(const char *seller, const char *buyer, const char *itemName, int quantity, int totalCost, int tranType) {
+void Client::TradeRequestFailed(TraderBuy_Struct &in)
+{
+	auto outapp = EQApplicationPacket(OP_TraderBuy, sizeof(TraderBuy_Struct));
+	auto data   = reinterpret_cast<TraderBuy_Struct *>(outapp.pBuffer);
 
-	const std::string& query = fmt::format(
-		"INSERT INTO `trader_audit` "
-        	"(`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
-		"VALUES (NOW(), '{}', '{}', '{}', {}, {}, {})",
-		seller,
-		buyer,
-		Strings::Escape(itemName),
-		quantity,
-		totalCost,
-		tranType
-	);
-	database.QueryDatabase(query);
+	data->method       = in.method;
+	data->action       = in.action;
+	data->sub_action   = Failed;
+	data->already_sold = 0xFFFFFFFF;
+	data->item_id      = in.item_id;
+	data->price        = in.price;
+	data->quantity     = in.quantity;
+	data->trader_id    = 0xFFFFFFFF;
+	strn0cpy(data->buyer_name, in.buyer_name, sizeof(data->buyer_name));
+	strn0cpy(data->item_name, in.item_name, sizeof(data->item_name));
+	strn0cpy(data->item_unique_id, in.item_unique_id, sizeof(data->item_unique_id));
+	strn0cpy(data->seller_name, in.seller_name, sizeof(data->seller_name));
+
+	QueuePacket(&outapp);
 }
+
+// static void BazaarAuditTrail(const char *seller, const char *buyer, const char *itemName, int quantity, int totalCost, int tranType) {
+//
+// 	const std::string& query = fmt::format(
+// 		"INSERT INTO `trader_audit` "
+//         	"(`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
+// 		"VALUES (NOW(), '{}', '{}', '{}', {}, {}, {})",
+// 		seller,
+// 		buyer,
+// 		Strings::Escape(itemName),
+// 		quantity,
+// 		totalCost,
+// 		tranType
+// 	);
+// 	database.QueryDatabase(query);
+// }
 
 void Client::BuyTraderItem(const EQApplicationPacket *app)
 {
@@ -2897,8 +2918,9 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 	Message(Chat::Red, fmt::format("You paid {} for the parcel delivery.", DetermineMoneyString(fee)).c_str());
 	SendMoneyUpdate();
 
-	LogTradingDetail("Step 2:Bazaar Purchase.  Took [{}] from Buyer [{}] for purchase of [{}] {}{}",
+	LogTradingDetail("Step 2:Bazaar Purchase.  Took [{}] {}from Buyer [{}] for purchase of [{}] {}{}",
 		DetermineMoneyString(total_cost),
+		fee > 0 ? fmt::format("plus a fee of [{}] ", fee) : std::string(""),
 		CharacterID(),
 		quantity,
 		quantity > 1 ? fmt::format("{}s", in->item_name) : in->item_name,

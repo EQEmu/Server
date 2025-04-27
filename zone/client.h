@@ -382,6 +382,7 @@ public:
 	void NukeTraderItem(uint16 slot, int16 charges, int16 quantity, Client* customer, uint16 trader_slot, const std::string &serial_number, int32 item_id = 0);
 	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
+	void TradeRequestFailed(TraderBuy_Struct &in);
 	void BuyTraderItem(const EQApplicationPacket* app);
 	void BuyTraderItemFromBazaarWindow(const EQApplicationPacket* app);
 	void FinishTrade(
