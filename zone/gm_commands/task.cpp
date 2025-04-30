@@ -8,6 +8,11 @@ extern WorldServer worldserver;
 
 void command_task(Client *c, const Seperator *sep)
 {
+	if (!RuleB(TaskSystem, EnableTaskSystem)) {
+		c->Message(Chat::White, "This command cannot be used while the Task system is disabled.");
+		return;
+	}
+
 	const int arguments = sep->argnum;
 	if (!arguments) {
 		c->Message(Chat::White, "Syntax: #task [subcommand]");
