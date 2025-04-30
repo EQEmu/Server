@@ -517,7 +517,7 @@ bool Zone::LoadZoneState(
 
 		new_spawn->SetStoredLocation(glm::vec4(s.x, s.y, s.z, s.heading));
 
-		if (spawn_time_left == 0) {
+		if (spawn_time_left == 0 && s.npc_id > 0) {
 			new_spawn->SetResumedNPCID(s.npc_id);
 			new_spawn->SetResumedFromZoneSuspend(true);
 			new_spawn->SetEntityVariables(GetVariablesDeserialized(s.entity_variables));
