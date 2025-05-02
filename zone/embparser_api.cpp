@@ -1531,6 +1531,11 @@ int Perl__GetInstanceID(const char* zone_name, uint16 version)
 	return quest_manager.GetInstanceID(zone_name, version);
 }
 
+bool Perl__IsStaticInstance()
+{
+	return zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion);
+}
+
 uint8 Perl__GetInstanceVersionByID(uint16 instance_id)
 {
 	return database.GetInstanceVersion(instance_id);

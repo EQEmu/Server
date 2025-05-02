@@ -1252,6 +1252,22 @@ int lua_get_zone_instance_version() {
 	return zone->GetInstanceVersion();
 }
 
+bool lua_is_static_instance() {
+	if (!zone) {
+		return false;
+	}
+
+	return zone->GetInstanceVersion() == RuleI(Custom, StaticInstanceVersion);
+}
+
+bool lua_is_farming_instance() {
+	if (!zone) {
+		return false;
+	}
+
+	return zone->GetInstanceVersion() == RuleI(Custom, FarmingInstanceVersion);
+}
+
 luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instance_id) {
 	luabind::adl::object ret = luabind::newtable(L);
 

@@ -1169,6 +1169,15 @@ RULE_INT(EvolvingItems, DelayUponEquipping, 30000, "Delay in ms before an evolvi
 RULE_BOOL(EvolvingItems, DestroyAugmentsOnEvolve, false, "If this is enabled, any augments in an item will be destroyed when the item evolves. Otherwise, send augments to the player via the parcel system (requires that the Parcel System be enabled).")
 RULE_CATEGORY_END()
 
+
+// Custom Rules
+RULE_CATEGORY(Custom)
+RULE_INT(Custom, StaticInstanceVersion, UINT8_MAX, "Instances with the version will load as StaticInstanceTemplateVersion and have respawns disabled")
+RULE_INT(Custom, StaticInstanceTemplateVersion, 0, "Template version for non-respawning instances")
+RULE_INT(Custom, FarmingInstanceVersion, 254, "Instances with the version will load as FarmingInstanceTemplateVersion and have long-respawn mobs disabled")
+RULE_INT(Custom, FarmingInstanceTemplateVersion, 0, "Template version for non-respawning instances")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL

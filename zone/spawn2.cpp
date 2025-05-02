@@ -480,6 +480,18 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	timeval tv{};
 	gettimeofday(&tv, nullptr);
 
+	auto no_respawn = false;
+	if (RuleI(Custom, StaticInstanceVersion) == version) {
+		version = RuleI(Custom, StaticInstanceTemplateVersion);
+		no_respawn = true;
+	}
+
+	auto suppress_spawn = false;
+	if (RuleI(Custom, FarmingInstanceVersion) == version) {
+		version = RuleI(Custom, FarmingInstanceTemplateVersion);
+		suppress_spawn = true;
+	}
+
 	/* Bulk Load NPC Types Data into the cache */
 	content_db.LoadNPCTypesData(0, true);
 
@@ -556,6 +568,12 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		for (auto &ds: disabled_spawns) {
 			if (ds.spawn2_id == s.id) {
 				spawn_enabled = !ds.disabled;
+			}
+		}
+
+		if (suppress_spawn) {
+			if (s.respawntime >= (2 * 60 * 60)) {
+				spawn_enabled = false;
 			}
 		}
 
