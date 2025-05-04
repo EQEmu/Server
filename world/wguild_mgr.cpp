@@ -91,7 +91,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		}
 
 		//broadcast this packet to all zones.
-		zoneserver_list.SendPacketToZonesWithGuild(s->guild_id, pack);
+		zoneserver_list.SendPacketToBootedZones(pack);
 
 		break;
 	}

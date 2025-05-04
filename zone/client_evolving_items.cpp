@@ -92,6 +92,16 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 			continue;
 		}
 
+		if (!evolving_items_manager.GetEvolvingItemsCache().contains(inst->GetID())) {
+			LogEvolveItem(
+				"Character ID {} has an evolving item that is not found in the db. Please check your "
+				"items_evolving_details table for item id {}",
+				CharacterID(),
+				inst->GetID()
+			);
+			continue;
+		}
+
 		auto const type     = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).type;
 		auto const sub_type = evolving_items_manager.GetEvolvingItemsCache().at(inst->GetID()).sub_type;
 
@@ -283,24 +293,31 @@ void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket *app)
 	}
 
 	std::unique_ptr<EQ::ItemInstance> const inst(database.CreateItem(item_id));
+	if (!inst) {
+		return;
+	}
 
 	LogEvolveItemDetail(
 		"Character ID <green>[{}] requested to view final evolve item id <yellow>[{}] for evolve item id <yellow>[{}]",
 		CharacterID(),
 		item_id,
-		evolving_items_manager.GetFirstItemInLoreGroupByItemID(item_id));
+		evolving_items_manager.GetFirstItemInLoreGroupByItemID(item_id)
+	);
 
 	inst->SetEvolveProgression(100);
 
-	if (inst) {
-		LogEvolveItemDetail(
-			"Sending final result for item id <yellow>[{}] to Character ID <green>[{}]", item_id, CharacterID());
-		SendItemPacket(0, inst.get(), ItemPacketViewLink);
-	}
+	LogEvolveItemDetail(
+		"Sending final result for item id <yellow>[{}] to Character ID <green>[{}]", item_id, CharacterID()
+	);
+	SendItemPacket(0, inst.get(), ItemPacketViewLink);
 }
 
 bool Client::DoEvolveCheckProgression(EQ::ItemInstance &inst)
 {
+	if (!inst) {
+		return false;
+	}
+
 	if (inst.GetEvolveProgression() < 100 || inst.GetEvolveLvl() == inst.GetMaxEvolveLvl()) {
 		return false;
 	}

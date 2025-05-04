@@ -1312,7 +1312,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
 	ns->spawn.IsMercenary = IsMerc() ? 1 : 0;
 	ns->spawn.targetable_with_hotkey = no_target_hotkey ? 0 : 1; // opposite logic!
-
+	ns->spawn.untargetable = IsTargetable();
+	
 	ns->spawn.petOwnerId	= ownerid;
 
 	ns->spawn.haircolor = haircolor;

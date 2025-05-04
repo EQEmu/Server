@@ -182,7 +182,7 @@ bool BotDatabase::LoadBotSpellCastingChances()
 	return true;
 }
 
-bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& available_flag)
+bool BotDatabase::QueryNameAvailability(const std::string& bot_name, bool& available_flag)
 {
 	if (
 		bot_name.empty() ||

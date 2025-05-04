@@ -406,6 +406,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 						c.second->SendGuildDeletePacket(s->guild_id);
 						c.second->RefreshGuildInfo();
 						c.second->MessageString(Chat::Guild, GUILD_DISBANDED);
+						c.second->SendGuildList();
 					}
 				}
 

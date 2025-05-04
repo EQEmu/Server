@@ -12009,7 +12009,7 @@ bool Bot::DoCombatPositioning(const CombatPositioningInput& input)
 		}
 		else if (IsTaunting() || HasTargetReflection()) { // Taunting/Aggro adjustments
 			adjustment_needed =
-				is_too_close ||
+				(IsTaunting() && is_too_close) ||
 				los_adjust ||
 				(is_melee && !input.front_mob);
 

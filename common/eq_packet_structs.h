@@ -324,6 +324,7 @@ union
 	bool guild_show;
 	bool trader;
 	bool buyer;
+	bool untargetable;
 };
 
 struct PlayerState_Struct {
