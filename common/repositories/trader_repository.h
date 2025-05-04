@@ -399,9 +399,9 @@ public:
 	static Trader GetAccountZoneIdAndInstanceIdByAccountId(Database &db, uint32 account_id)
 	{
 		auto trader_query = fmt::format(
-			"SELECT t.id, t.char_id, t.char_zone_id, t.char_zone_instance_id "
+			"SELECT t.id, t.character_id, t.char_zone_id, t.char_zone_instance_id "
 			"FROM trader AS t "
-			"WHERE t.char_id IN(SELECT c.id FROM character_data AS c WHERE c.account_id = '{}') "
+			"WHERE t.character_id IN(SELECT c.id FROM character_data AS c WHERE c.account_id = '{}') "
 			"LIMIT 1;",
 			account_id
 		);
@@ -432,7 +432,7 @@ public:
 		}
 
 		e.id                    = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-		e.char_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+		e.character_id          = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 		e.char_zone_id          = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 		e.char_zone_instance_id = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 
