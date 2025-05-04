@@ -792,7 +792,7 @@ void LoginServer::ProcessUserToWorldCancelOfflineRequest(uint16_t opcode, EQ::Ne
 	AccountRepository::SetOfflineStatus(database, id, false);
 
 	LogLoginserverDetail("Step 5b(3) - World clearing trader and buyer tablese.");
-	TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", trader.id));
+	TraderRepository::DeleteWhere(database, fmt::format("`character_id` = '{}'", trader.id));
 	BuyerRepository::DeleteBuyer(database, trader.id);
 
 	server_packet.opcode = ServerOP_UsertoWorldCancelOfflineResponse;
