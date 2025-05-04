@@ -1799,6 +1799,7 @@ struct BazaarPurchaseMessaging_Struct {
 	uint32           buyer_zone_id;
 	uint32           buyer_zone_instance_id;
 	uint32           transaction_status;
+	bool             offline_purchase;
 };
 
 
