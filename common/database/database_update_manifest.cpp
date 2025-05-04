@@ -7143,7 +7143,11 @@ ALTER TABLE `inventory_snapshots`
 	CHANGE COLUMN `ornamenticon` `ornament_icon` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `custom_data`,
 	CHANGE COLUMN `ornamentidfile` `ornament_idfile` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `ornament_icon`,
 	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`;
-	DROP PRIMARY KEY,
+
+ALTER TABLE `inventory_snapshots`
+	DROP PRIMARY KEY;
+
+ALTER TABLE `inventory_snapshots`
 	ADD PRIMARY KEY (`time_index`, `character_id`, `slot_id`) USING BTREE;
 
 ALTER TABLE `trader`
@@ -7157,9 +7161,8 @@ ALTER TABLE `trader`
 	CHANGE COLUMN `aug_slot_6` `augment_six` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_five`,
 	DROP COLUMN `item_sn`,
 	DROP INDEX `idx_trader_item_sn`,
-	DROP INDEX `charid_slotid`,
-	ADD INDEX `charid_slotid` (`character_id`, `slot_id`) USING BTREE,
 	DROP INDEX `idx_trader_char`,
+	ADD INDEX `charid_slotid` (`character_id`, `slot_id`) USING BTREE,
 	ADD INDEX `idx_trader_char` (`character_id`, `char_zone_id`, `char_zone_instance_id`) USING BTREE,
 	ADD UNIQUE INDEX `idx_item_unique_id` (`item_unique_id`);
 
