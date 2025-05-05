@@ -243,7 +243,6 @@ public:
 			snapshot.ornament_hero_model = i.ornament_hero_model;
 			snapshot.ornament_icon       = i.ornament_icon;
 			snapshot.ornament_idfile     = i.ornament_idfile;
-			snapshot.guid                = i.guid;
 			snapshot.slot_id             = i.slot_id;
 			snapshot.time_index          = time_index;
 			queue.push_back(snapshot);
@@ -295,7 +294,6 @@ public:
 			inventory_entry.ornament_hero_model = i.ornament_hero_model;
 			inventory_entry.ornament_icon       = i.ornament_icon;
 			inventory_entry.ornament_idfile     = i.ornament_idfile;
-			inventory_entry.guid                = i.guid;
 			inventory_entry.slot_id             = i.slot_id;
 			queue.push_back(inventory_entry);
 		}
