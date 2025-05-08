@@ -6677,7 +6677,9 @@ void Client::SetAttackTimer()
 			else
 				speed = static_cast<int>(speed + ((hhe / 100.0f) * delay));
 		}
-		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
+
+		bool reinit = !TimerToUse->Enabled();
+		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), reinit, reinit);
 
 		if (i == EQ::invslot::slotPrimary) {
 			primary_speed = speed;
