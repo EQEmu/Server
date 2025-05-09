@@ -561,9 +561,9 @@ std::string Perl_Zone_GetBucketRemaining(Zone* self, const std::string bucket_na
 	return self->GetBucketRemaining(bucket_name);
 }
 
-void Perl_Zone_ClearVariables(Zone* self)
+bool Perl_Zone_ClearVariables(Zone* self)
 {
-	self->ClearVariables();
+	return self->ClearVariables();
 }
 
 bool Perl_Zone_DeleteVariable(Zone* self, const std::string variable_name)

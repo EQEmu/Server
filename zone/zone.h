@@ -197,7 +197,7 @@ public:
 	int32 MobsAggroCount() { return aggroedmobs; }
 	DynamicZone *GetDynamicZone();
 
-	void ClearVariables();
+	bool ClearVariables();
 	bool DeleteVariable(const std::string& variable_name);
 	std::string GetVariable(const std::string& variable_name);
 	std::vector<std::string> GetVariables();

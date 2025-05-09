@@ -246,6 +246,7 @@ int command_init(void)
 		command_add("zoneinstance", "[Instance ID] [X] [Y] [Z] - Teleport to specified Instance by ID (coordinates are optional)", AccountStatus::Guide, command_zone_instance) ||
 		command_add("zoneshard", "[zone] [instance_id] - Teleport explicitly to a zone shard", AccountStatus::Player, command_zone_shard) ||
 		command_add("zoneshutdown", "[instance|zone] [Instance ID|Zone ID|Zone Short Name] - Shut down a zone server by Instance ID, Zone ID, or Zone Short Name", AccountStatus::GMLeadAdmin, command_zoneshutdown) ||
+		command_add("zonevariable", "[clear|delete|set|view] - Modify zone variables for your current zone", AccountStatus::GMAdmin, command_zonevariable) ||
 		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave)
 	) {
 		command_deinit();
@@ -928,6 +929,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/zone.cpp"
 #include "gm_commands/zonebootup.cpp"
 #include "gm_commands/zoneshutdown.cpp"
+#include "gm_commands/zonevariable.cpp"
 #include "gm_commands/zone_instance.cpp"
 #include "gm_commands/zone_shard.cpp"
 #include "gm_commands/zsave.cpp"
