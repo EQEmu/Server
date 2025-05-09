@@ -2,7 +2,7 @@
 
 void command_zonevariable(Client *c, const Seperator *sep)
 {
-	const auto arguments = sep->argnum;
+	const uint16 arguments = sep->argnum;
 
 	if (!arguments) {
 		c->Message(Chat::White, "Usage: #zonevariable clear - Clear all zone variables");
@@ -86,14 +86,14 @@ void command_zonevariable(Client *c, const Seperator *sep)
 			).c_str()
 		);
 	} else if (is_view) {
-		const auto &l = zone->GetVariables();
+		const auto& l = zone->GetVariables();
 
 		uint32 variable_count  = 0;
 		uint32 variable_number = 1;
 
 		const std::string search_criteria = arguments >= 2 ? sep->argplus[2] : "";
 
-		for (const auto &e: l) {
+		for (const auto& e : l) {
 			if (
 				search_criteria.empty() ||
 				Strings::Contains(Strings::ToLower(e), Strings::ToLower(search_criteria))
