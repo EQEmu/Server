@@ -4908,7 +4908,6 @@ namespace UF
 			UFSlot = serverSlot - 2;
 		}
 
-		//else if (serverSlot <= EQ::invbag::GENERAL_BAGS_8_END && serverSlot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 		else if (serverSlot <= EQ::invbag::GENERAL_BAGS_END && serverSlot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 			UFSlot = serverSlot - (EQ::invbag::GENERAL_BAGS_BEGIN - invbag::GENERAL_BAGS_BEGIN)/*3748*/ - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((serverSlot - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT)); // + 11;
 		}
