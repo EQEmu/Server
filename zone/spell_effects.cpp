@@ -263,6 +263,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (buffslot >= 0) {
 					//This is here so dots with hit counters tic down on initial cast.
 					if (caster && effect_value < 0) {
+						effect_value = (effect_value * (100 + 2 * caster->GetINT())) / 100;
+						effect_value = effect_value * partial / 100;
 						caster->GetActDoTDamage(spell_id, effect_value, this, false);
 					}
 					break;
@@ -279,6 +281,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 					// take partial damage into account
 					dmg = (int64) (dmg * partial / 100);
+					dmg = (dmg * (100 + 2 * caster->GetINT())) / 100;
 
 					//handles AAs and what not...
 					if(caster) {
@@ -286,9 +289,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							dmg = caster->GetActReflectedSpellDamage(spell_id, (int64)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
 						}
 						else {
+							//dmg = dmg * partial / 100;
 							dmg = caster->GetActSpellDamage(spell_id, dmg, this);
 						}
-						caster->ResourceTap(-dmg, spell_id);
+						caster->ResourceTap(-effect_value, spell_id);
 					}
 
 					if (dmg <= 0) {
@@ -304,7 +308,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					//healing spell...
 
 					if(caster)
+					{
+						dmg = (dmg * (100 + 2 * caster->GetWIS())) / 100;
 						dmg = caster->GetActSpellHealing(spell_id, dmg, this);
+					}
 
 					HealDamage(dmg, caster);
 				}
@@ -1377,6 +1384,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_Rune:
 			{
+				effect_value = (effect_value * (100 + 2 * caster->GetCHA())) / 100;
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Melee Absorb Rune: %+i", effect_value);
 #endif
@@ -1388,6 +1396,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_AbsorbMagicAtt:
 			{
+				effect_value = (effect_value * (100 + 2 * caster->GetCHA())) / 100;
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Spell Absorb Rune: %+i", effect_value);
 #endif
@@ -1400,6 +1409,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_MitigateMeleeDamage:
 			{
+				effect_value = (effect_value * (100 + 2 * caster->GetCHA())) / 100;
 				if (buffslot > -1) {
 					buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
 				}
@@ -1408,6 +1418,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_MeleeThresholdGuard:
 			{
+				effect_value = (effect_value * (100 + 2 * caster->GetCHA())) / 100;
 				if (buffslot > -1) {
 					buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
 				}
@@ -1416,6 +1427,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_SpellThresholdGuard:
 			{
+				effect_value = (effect_value * (100 + 2 * caster->GetCHA())) / 100;
 				if (buffslot > -1) {
 					buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
 				}
@@ -1424,6 +1436,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_MitigateSpellDamage:
 			{
+				effect_value = (effect_value * (100 + 2 * caster->GetCHA())) / 100;
 				if (buffslot > -1) {
 					buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
 				}
@@ -1432,6 +1445,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_MitigateDotDamage:
 			{
+				effect_value = (effect_value * (100 + 2 * caster->GetCHA())) / 100;
 				if (buffslot > -1) {
 					buffs[buffslot].dot_rune = spells[spell_id].max_value[i];
 				}
@@ -3116,6 +3130,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 
 			case SE_HealOverTime: {
+				effect_value = (effect_value * (100 + 2 * caster->GetWIS())) / 100;
+				effect_value = effect_value * partial / 100;
 				//This is here so buffs with hit counters tic down on initial cast.
 				caster->GetActSpellHealing(spell_id, effect_value, nullptr, false);
 				break;
@@ -3954,6 +3970,12 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 					} else if (!IsClient()) { // Allow NPC's to generate hate if casted on other NPC's
 						AddToHateList(caster, -effect_value);
 					}
+				}
+				if (caster)
+				{
+
+					effect_value = (effect_value * (100 + 2 * caster->GetINT())) / 100;
+					effect_value = static_cast<int>(effect_value * ResistSpell(spells[buff.spellid].resist_type, buff.spellid, caster, 0, 0, 0, 0, true) / 100);
 				}
 
 				effect_value = caster->GetActDoTDamage(buff.spellid, effect_value, this);

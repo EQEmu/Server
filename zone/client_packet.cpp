@@ -1052,7 +1052,7 @@ void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket *app)
 	if (!Spawned())
 		SendZoneInPackets();
 	CompleteConnect();
-	SendHPUpdate();
+	SendHPUpdate(true);
 }
 
 void Client::Handle_Connect_OP_ClientUpdate(const EQApplicationPacket *app)

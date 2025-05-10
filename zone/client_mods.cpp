@@ -317,7 +317,7 @@ int64 Client::CalcHPRegenCap()
 int64 Client::CalcMaxHP()
 {
 	float nd = 10000;
-	max_hp = (CalcBaseHP() + itembonuses.HP);
+	max_hp = (CalcBaseHP() + itembonuses.HP + spellbonuses.HP + aabonuses.HP);
 	//The AA desc clearly says it only applies to base hp..
 	//but the actual effect sent on live causes the client
 	//to apply it to (basehp + itemhp).. I will oblige to the client's whims over
@@ -476,7 +476,8 @@ uint32 Mob::GetClassLevelFactor()
 		}
 	}
 
-	return multiplier;
+	//return multiplier;
+	return 3000 + 750 * mlevel;
 }
 
 int64 Client::CalcBaseHP()
@@ -503,7 +504,7 @@ int64 Client::CalcBaseHP()
 		else {
 			Post255 = 0;
 		}
-		base_hp = (5) + (GetLevel() * lm / 10) + (((GetSTA() - Post255) * GetLevel() * lm / 3000)) + ((Post255 * GetLevel()) * lm / 6000);
+		base_hp = (5) + ((GetSTA() - Post255) * lm / 3000) + (Post255 * lm / 6000);
 	}
 	return base_hp;
 }
@@ -653,6 +654,7 @@ int64 Client::CalcBaseManaRegen()
 	else {
 		regen = 2;
 	}
+	regen += GetINT()/10;
 	return regen;
 }
 
@@ -691,6 +693,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 		if (level > 63)
 			regen++;
 	}
+	regen += GetINT()/10;
 
 	regen += aabonuses.ManaRegen;
 	// add in + 1 bonus for SE_CompleteHeal, but we don't do anything for it yet?

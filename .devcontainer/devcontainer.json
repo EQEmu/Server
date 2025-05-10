@@ -7,6 +7,7 @@
 	},
 	"appPort": [
 		"5998:5998/udp",
+		"5999:5999/udp",
 		"7000:7000/udp",
 		"7001:7001/udp",
 		"7002:7002/udp",
@@ -46,4 +47,5 @@
 	},
 	"workspaceFolder": "/src",
 	"workspaceMount": "source=${localWorkspaceFolder},target=/src,type=bind,consistency=cached"
+	//"postAttachCommand": "ln -nsf .devcontainer/Makefile /src/Makefile"
 }

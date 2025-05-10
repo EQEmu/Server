@@ -1027,6 +1027,31 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 	const EQ::ItemInstance *_Ammo = nullptr;
 	const EQ::ItemData *last_ammo_used = nullptr;
 
+	int attack_count = 1;
+	if (CanThisClassDoubleAttack())
+		{
+			if(IsClient())
+				CastToClient()->CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, target, -10);
+
+			if (CheckDoubleAttack()) attack_count++;
+		}
+
+		if (IsClient() && CanThisClassTripleAttack())
+		{
+			CastToClient()->CheckIncreaseSkill(EQ::skills::SkillTripleAttack, target, -10);
+			if (CastToClient()->CheckTripleAttack()) attack_count++;
+		}
+
+		int flurry_chance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
+
+		if (flurry_chance && zone->random.Roll(flurry_chance)) {
+			attack_count++;
+
+			if (zone->random.Roll(flurry_chance)) {
+				attack_count++;
+			}
+				//MessageString(Chat::NPCFlurry, YOU_FLURRY);
+		}
 	/*
 	If LaunchProjectile is false this function will do archery damage on target,
 	otherwise it will shoot the projectile at the target, once the projectile hits target
@@ -1112,7 +1137,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		}
 
 		DamageHitInfo my_hit {};
-		my_hit.base_damage = MaxDmg;
+		my_hit.base_damage = MaxDmg * (25 + attack_count * 75) / 100;
 		my_hit.min_damage = 0;
 		my_hit.damage_done = 1;
 
@@ -1120,6 +1145,12 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		my_hit.offense = offense(my_hit.skill);
 		my_hit.tohit = GetTotalToHit(my_hit.skill, chance_mod);
 		my_hit.hand = EQ::invslot::slotRange;
+
+
+
+	//Attack(target, hand, false, false, IsFromSpell);
+
+
 
 		DoAttack(other, my_hit);
 		TotalDmg = my_hit.damage_done;
@@ -1153,22 +1184,25 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	if (!DisableProcs) {
 		// Skill Proc Attempt
-		if (HasSkillProcs() && other && !other->HasDied()) {
-			if (ReuseTime) {
-				TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime);
+		for (int i = 0; i < attack_count; i++)
+		{
+			if (HasSkillProcs() && other && !other->HasDied()) {
+				if (ReuseTime) {
+					TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime);
+				}
+				else {
+					TrySkillProc(other, EQ::skills::SkillArchery, 0, false, EQ::invslot::slotRange);
+				}
 			}
-			else {
-				TrySkillProc(other, EQ::skills::SkillArchery, 0, false, EQ::invslot::slotRange);
-			}
-		}
 
-		// Skill Proc Success ... can proc off hits OR misses
-		if (HasSkillProcSuccess() && other && !other->HasDied()) {
-			if (ReuseTime) {
-				TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime, true);
-			}
-			else {
-				TrySkillProc(other, EQ::skills::SkillArchery, 0, true, EQ::invslot::slotRange);
+			// Skill Proc Success ... can proc off hits OR misses
+			if (HasSkillProcSuccess() && other && !other->HasDied()) {
+				if (ReuseTime) {
+					TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime, true);
+				}
+				else {
+					TrySkillProc(other, EQ::skills::SkillArchery, 0, true, EQ::invslot::slotRange);
+				}
 			}
 		}
 	}
@@ -1607,12 +1641,20 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	DoThrowingAttackDmg(other, RangeWeapon, item, 0, 0, 0, 0, 0,ammo_slot);
 
 	// Consume Ammo, unless Ammo Consumption is disabled
-	if (RuleB(Combat, ThrowingConsumesAmmo)) {
-		DeleteItemInInventory(ammo_slot, 1, true);
-		LogCombat("Consumed Throwing Ammo from slot {}.", ammo_slot);
-	} else {
-		LogCombat("Throwing Ammo Consumption is disabled.");
-	}
+	//EndlessQuiver AA base1 = 100% Chance to avoid consumption arrow.
+	int ChanceAvoidConsume = aabonuses.ConsumeProjectile + itembonuses.ConsumeProjectile + spellbonuses.ConsumeProjectile;
+
+	// Consume Ammo, unless Ammo Consumption is disabled or player has Endless Quiver
+	bool consumes_ammo = RuleB(Combat, ThrowingConsumesAmmo);
+	if (
+		consumes_ammo &&
+		(
+			!ChanceAvoidConsume ||
+			(ChanceAvoidConsume < 100 && zone->random.Int(0,99) > ChanceAvoidConsume)
+		)
+	)
+	DeleteItemInInventory(ammo_slot, 1, true);
+
 
 	CommonBreakInvisibleFromCombat();
 }
@@ -1627,6 +1669,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		return;
 	}
 
+	int attack_count = 1;
 	const EQ::ItemInstance *m_RangeWeapon = nullptr;//throwing weapon
 	const EQ::ItemData *last_ammo_used = nullptr;
 
@@ -1689,8 +1732,34 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	int TotalDmg = 0;
 
 	if (WDmg > 0) {
+
+		if (CanThisClassDoubleAttack())
+		{
+			if(IsClient())
+				CastToClient()->CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, target, -10);
+
+			if (CheckDoubleAttack()) attack_count++;
+		}
+
+		if (IsClient() && CanThisClassTripleAttack())
+		{
+			CastToClient()->CheckIncreaseSkill(EQ::skills::SkillTripleAttack, target, -10);
+			if (CastToClient()->CheckTripleAttack()) attack_count++;
+		}
+
+		int flurry_chance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
+
+		if (flurry_chance && zone->random.Roll(flurry_chance)) {
+			attack_count++;
+
+			if (zone->random.Roll(flurry_chance)) {
+				attack_count++;
+			}
+				//MessageString(Chat::NPCFlurry, YOU_FLURRY);
+		}
+
 		DamageHitInfo my_hit {};
-		my_hit.base_damage = WDmg;
+		my_hit.base_damage = WDmg * (25 + attack_count * 75) / 100;
 		my_hit.min_damage = 0;
 		my_hit.damage_done = 1;
 
@@ -1721,21 +1790,24 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	TryCastOnSkillUse(other, EQ::skills::SkillThrowing);
 
 	if (!DisableProcs) {
-		if (HasSkillProcs() && other && !other->HasDied()) {
-			if (ReuseTime) {
-				TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime);
+		for (int i = 0; i < attack_count; i ++)
+		{
+			if (HasSkillProcs() && other && !other->HasDied()) {
+				if (ReuseTime) {
+					TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime);
+				}
+				else {
+					TrySkillProc(other, EQ::skills::SkillThrowing, 0, false, EQ::invslot::slotRange);
+				}
 			}
-			else {
-				TrySkillProc(other, EQ::skills::SkillThrowing, 0, false, EQ::invslot::slotRange);
-			}
-		}
 
-		if (HasSkillProcSuccess() && other && !other->HasDied()) {
-			if (ReuseTime) {
-				TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime, true);
-			}
-			else {
-				TrySkillProc(other, EQ::skills::SkillThrowing, 0, true, EQ::invslot::slotRange);
+			if (HasSkillProcSuccess() && other && !other->HasDied()) {
+				if (ReuseTime) {
+					TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime, true);
+				}
+				else {
+					TrySkillProc(other, EQ::skills::SkillThrowing, 0, true, EQ::invslot::slotRange);
+				}
 			}
 		}
 	}

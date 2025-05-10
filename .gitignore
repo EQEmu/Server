@@ -30,6 +30,7 @@ log/
 logs/
 vcpkg/
 perl/
+base/
 
 .idea/*
 *cbp

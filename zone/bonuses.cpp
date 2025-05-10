@@ -3107,6 +3107,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (new_bonus->ManaAbsorbPercentDamage < effect_value){
 					new_bonus->ManaAbsorbPercentDamage = effect_value;
 				}
+				new_bonus->ManaAbsorbPercentDamageCap += limit_value;
 				break;
 			}
 

@@ -118,8 +118,8 @@ bool IsLifetapSpell(uint16 spell_id)
 
 	if (
 		spell.target_type == ST_Tap ||
-		spell.target_type == ST_TargetAETap ||
-		spell_id == SPELL_ANCIENT_LIFEBANE
+		spell.target_type == ST_TargetAETap //||
+		//spell_id == SPELL_ANCIENT_LIFEBANE
 	) {
 		return true;
 	}

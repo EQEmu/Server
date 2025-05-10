@@ -7,7 +7,7 @@
 #include <cereal/cereal.hpp>
 
 #define	HIGHEST_RESIST 9 //Max resist type value
-#define MAX_SPELL_PROJECTILE 10 //Max amount of spell projectiles that can be active by a single mob.
+#define MAX_SPELL_PROJECTILE 100 //Max amount of spell projectiles that can be active by a single mob.
 
 /* macros for IsAttackAllowed, IsBeneficialAllowed */
 #define _CLIENT(x) (x && x->IsClient() && !x->CastToClient()->IsBecomeNPC())
@@ -491,6 +491,7 @@ struct StatBonuses {
 	bool	TriggerMeleeThreshold;				// Has Melee Threshhold
 	bool	TriggerSpellThreshold;				// Has Spell Threshhold
 	uint32	ManaAbsorbPercentDamage;			// 0 = Mitigation value
+	uint32	ManaAbsorbPercentDamageCap;			// 0 = Mitigation value
 	int32	EnduranceAbsorbPercentDamage[2];	// 0 = Mitigation value 1 = Percent Endurance drain per HP lost
 	int32	ShieldBlock;						// Chance to Shield Block
 	int32	BlockBehind;						// Chance to Block Behind (with our without shield)
