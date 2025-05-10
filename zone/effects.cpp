@@ -1125,8 +1125,8 @@ void EntityList::AESpell(
 		RuleI(Range, MobCloseScanDistance),
 		distance
 	);
-
-	for (auto& it: caster_mob->GetCloseMobList(distance)) {
+	auto list = caster_mob->GetCloseMobList(distance);
+	for (auto& it: list) {
 		current_mob = it.second;
 		if (!current_mob) {
 			continue;
