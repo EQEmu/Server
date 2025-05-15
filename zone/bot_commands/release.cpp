@@ -17,6 +17,12 @@ void bot_command_release(Client *c, const Seperator *sep)
 	sbl.erase(std::remove(sbl.begin(), sbl.end(), nullptr), sbl.end());
 	for (auto bot_iter : sbl) {
 		bot_iter->WipeHateList();
+
+		if (bot_iter->GetPet() && bot_iter->HasControllablePet(BotAnimEmpathy::BackOff)) {
+			bot_iter->GetPet()->WipeHateList();
+			bot_iter->GetPet()->SetTarget(nullptr);
+		}
+
 		bot_iter->SetPauseAI(false);
 	}
 

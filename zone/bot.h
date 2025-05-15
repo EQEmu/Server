@@ -229,6 +229,12 @@ static std::map<uint16, std::string> botSubType_names = {
 	{ CommandedSubTypes::Selo,                      "Selo" }
 };
 
+namespace BotAnimEmpathy {
+	constexpr uint8 Guard       		= 1;
+	constexpr uint8 Attack           	= 2;
+	constexpr uint8 BackOff             = 3;
+};
+
 class Bot : public NPC {
 	friend class Mob;
 public:
@@ -786,6 +792,7 @@ public:
 	EQ::ItemInstance* GetBotItem(uint16 slot_id);
 	bool GetSpawnStatus() { return _spawnStatus; }
 	uint8 GetPetChooserID() { return _petChooserID; }
+	bool HasControllablePet(uint8 ranks_required = 0);
 	bool IsBotRanged() { return _botRangedSetting; }
 	bool IsBotCharmer() { return _botCharmer; }
 	bool IsBot() const override { return true; }
