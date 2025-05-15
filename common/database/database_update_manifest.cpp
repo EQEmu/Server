@@ -7100,6 +7100,7 @@ ALTER TABLE `npc_types`
 		.content_schema_update = true
 	},
 	ManifestEntry{
+		.version = 9323,
 		.description = "2025_04_16_character_data_first_login.sql",
 		.check = "SHOW COLUMNS FROM `character_data` LIKE 'first_login'",
 		.condition = "empty",
