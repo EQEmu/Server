@@ -1,3 +1,46 @@
+## [23.6.0] 5/14/2025
+
+### Bots
+
+* Correct ^pull logic and add checks for Enchanter pets ([#4827](https://github.com/EQEmu/Server/pull/4827)) @nytmyr 2025-05-15
+* Fix creation limit, spawn limit, level requirement checks ([#4868](https://github.com/EQEmu/Server/pull/4868)) @nytmyr 2025-05-15
+* Move all spell_id instances to uint16 ([#4876](https://github.com/EQEmu/Server/pull/4876)) @nytmyr 2025-05-15
+* Prevent non-taunters from potentially fleeing mob on TargetReflection ([#4859](https://github.com/EQEmu/Server/pull/4859)) @nytmyr 2025-04-28
+
+### CLI
+
+* ETL Settings Output ([#4873](https://github.com/EQEmu/Server/pull/4873)) @joligario 2025-05-15
+
+### Code
+
+* Fix typo in QueryNameAvailablity ([#4869](https://github.com/EQEmu/Server/pull/4869)) @nytmyr 2025-04-28
+
+### Crash
+
+* Fix crash bug with pbae and quest scripts spawning mobs ([#4884](https://github.com/EQEmu/Server/pull/4884)) @carolus21rex 2025-05-15
+
+### Feature
+
+* Add Character:TradeskillUpMinChance rule ([#4867](https://github.com/EQEmu/Server/pull/4867)) @zrix-eq 2025-05-15
+* Enable spawn attribute for NPCTintID ([#4871](https://github.com/EQEmu/Server/pull/4871)) @neckkola 2025-05-15
+
+### Fixes
+
+* Add trader/buyer cleanup actions ([#4843](https://github.com/EQEmu/Server/pull/4843)) @neckkola 2025-05-15
+* Fix #copycharacter command ([#4860](https://github.com/EQEmu/Server/pull/4860)) @nytmyr 2025-04-28
+* Fix Crash with #task ([#4874](https://github.com/EQEmu/Server/pull/4874)) @Kinglykrab 2025-04-30
+* Fix Object Name Init, User Refs, and Client Sync on Close ([#4861](https://github.com/EQEmu/Server/pull/4861)) @zimp-wow 2025-05-15
+* Fix breaking change to UF patches caused by Big Bags update ([#4883](https://github.com/EQEmu/Server/pull/4883)) @hbingram 2025-05-15
+* Prevent Ranged Attack from being triggered at arbitrary rate ([#4879](https://github.com/EQEmu/Server/pull/4879)) @catapultam-habeo 2025-05-15
+
+### Performance
+
+* Store Player Title Sets in Client Memory ([#4836](https://github.com/EQEmu/Server/pull/4836)) @Kinglykrab 2025-05-15
+
+### Quest API
+
+* Add Last Login and First Login Flags to EVENT_CONNECT ([#4866](https://github.com/EQEmu/Server/pull/4866)) @Kinglykrab 2025-05-15
+
 ## [23.5.0] 4/10/2025
 
 ### API
