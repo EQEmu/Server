@@ -1,79 +1,148 @@
-# EQEmulator Core Server
-| Drone (Linux x64) | Drone (Windows x64)   |
-|:---:|:---:|
-|[![Build Status](http://drone.akkadius.com/api/badges/EQEmu/Server/status.svg)](http://drone.akkadius.com/EQEmu/Server)   |[![Build Status](http://drone.akkadius.com/api/badges/EQEmu/Server/status.svg)](http://drone.akkadius.com/EQEmu/Server)   |
+<h1 align="center">EQEmulator Server Platform</h1>
+
+<p align="center">
+ <img src="https://gist.github.com/user-attachments/assets/00ff702f-963f-460d-bc9e-b67328912d41" style="border-radius: 10px">
+</p>
+
+<p align="center">
+<b>EverQuest Emulator (EQEmu) - A Fan-Made Project Honoring the Legendary MMORPG</b>
+</p>
+
+<p align="center">
+<a href="https://github.com/eqemu/server/graphs/contributors"><img src="https://img.shields.io/github/contributors/eqemu/server" alt="Contributors"></a>
+<a href="https://discord.gg/QHsm7CD"><img src="https://img.shields.io/discord/212663220849213441?label=Discord&amp;logo=discord&amp;color=7289DA" alt="Discord"></a>
+<a href="https://docs.eqemu.io"><img src="https://img.shields.io/badge/docs-MkDocs%20Powered-blueviolet" alt="Docs"></a>
+<a href="./LICENSE"><img src="https://img.shields.io/github/license/EQEmu/Server" alt="License"></a> 
+<a href="https://github.com/eqemu/server/releases"><img src="https://img.shields.io/github/v/release/eqemu/server" alt="Latest Release"></a>
+<a href="https://github.com/EQEmu/Server/releases"><img src="https://img.shields.io/github/release-date/EQEmu/Server" alt="Release Date"></a>
+<img src="https://img.shields.io/github/downloads/eqemu/server/total.svg" alt="Github All Releases"></a>
+<a href="http://drone.akkadius.com/EQEmu/Server"><img src="http://drone.akkadius.com/api/badges/EQEmu/Server/status.svg" alt="Build Status"></a> 
+<img src="https://img.shields.io/github/issues-pr-closed/eqemu/server" alt="GitHub Issues or Pull Requests">
+<img src="https://img.shields.io/docker/pulls/akkadius/eqemu-server" alt="Docker Pulls">
+<a href="http://drone.akkadius.com/EQEmu/Server"><img src="http://drone.akkadius.com/api/badges/EQEmu/Server/status.svg" alt="Build Status"></a> <img src="https://jb.gg/badges/official-plastic.svg" alt="Official"> 
+
+</p>
 
 ***
 
-**EQEmulator is a custom completely from-scratch open source server implementation for EverQuest built mostly on C++**
- * MySQL/MariaDB is used as the database engine (over 200+ tables)
- * Perl and LUA are both supported scripting languages for NPC/Player/Quest oriented events
- * Open source database (Project EQ) has content up to expansion OoW (included in server installs)
-  * Game server environments and databases can be heavily customized to create all new experiences
- * Hundreds of Quests/events created and maintained by Project EQ
+<p align="center">
+EQEmulator is a <b>passion-driven</b>, <b>open source server emulator</b> project dedicated to preserving and celebrating the groundbreaking world of <b>EverQuest</b>, the massively multiplayer online role-playing game originally developed by <b>Verant Interactive</b> and <b>Sony Online Entertainment (now Daybreak Game Company)</b>.
+</p>
 
-## Server Installs
-| |Windows|Linux|
-|:---:|:---:|:---:|
-|**Install Count**|![Windows Install Count](http://analytics.akkadius.com/?install_count&windows_count)|![Linux Install Count](http://analytics.akkadius.com/?install_count&linux_count)| 
-### > Windows 
+<p align="center">
+For over two decades and continuing, EQEmulator has served as a <strong>fan tribute</strong>, providing tools and technology that allow players to explore, customize, and experience EverQuest’s iconic gameplay in new ways. This project exists solely out of <strong>deep admiration</strong> for the original developers, artists, designers, and visionaries who created one of the most influential online worlds of all time.
+</p>
 
-* [Install Guide](https://docs.eqemu.io/server/installation/server-installation-windows/)
+<p align="center">
+We do not claim ownership of EverQuest or its assets. <strong>All credit and respect belong to the original creators and Daybreak Game Company</strong>, whose work continues to inspire generations of players and developers alike.
+</p>
 
-### > Debian/Ubuntu/CentOS/Fedora
+<p align="center">
+EQEmulator has for over 20 years and always will be a <strong>fan-based, non-commercial open-source effort</strong> made by players, for players—preserving the legacy of EverQuest while empowering community-driven creativity, learning and joy that the game and its creators has so strongly inspired in us all.
+</p>
 
-* [Install Guide](https://docs.eqemu.io/server/installation/server-installation-linux/)
+***
 
-* You can use curl or wget to kick off the installer (whichever your OS has)
-> curl -O https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh install.sh && chmod 755 install.sh && ./install.sh
+<h3 align="center">
+ Technical Overview & Reverse Engineering Effort
+</h1>
 
-> wget --no-check-certificate https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh -O install.sh && chmod 755 install.sh && ./install.sh 
+<p align="center">EQEmulator represents <strong>over two decades of collaborative reverse engineering</strong>, rebuilding the EverQuest server from the ground up without access to the original source code. This effort was achieved entirely through <strong>community-driven analysis, network protocol decoding, and in-game behavioral research</strong>.</p>
 
-## Supported Clients
+<h1 align="center">
+ 💡 How We Did It
+</h1>
+
+
+<p align="center">
+ <img src="https://gist.github.com/user-attachments/assets/85b3cc2c-a1e4-40a0-b140-7e4da2c3b057" height="300px">
+ </p>
+
+
+<p align="center">
+ <strong>Reverse Engineering</strong> 
+Every system, packet, opcode, and game mechanic has been reconstructed through countless hours of live packet sniffing, client disassembly, and in-game experimentation by dedicated contributors over the years.
+</p>
+
+<p align="center">
+ No proprietary code or server sources were ever used.
+</p>
+
+<p align="center">
+ All implementations are the result of clean-room engineering.
+</p>
+
+
+<h1 align="center">
+ 🛠️ Technology Stack
+</h1>
+
+<p align="center">
+ <img src="https://gist.github.com/user-attachments/assets/ef619d36-5dbb-46fb-bd96-ae11eaa4661e" style="border-radius: 10px">
+</p>
+
+**C++ Core Engine**
+
+* High-performance networking and gameplay logic built in C++
+* Cross-platform support for Linux and Windows
+
+**MySQL / MariaDB Backend**
+
+* Fully structured schema with over 200+ tables
+* Supports content customization, expansions, and custom worlds
+
+**Scripting Engine**
+
+* Native support for **Perl** and **Lua** scripting
+* Powerfully extendable for quests, NPC behaviors, and custom events
+
+**Open Source Content Database**
+
+* Includes ProjectEQ’s world data up through *Dragons of Norrath*
+* 100% customizable to create entirely new game worlds
+
+<h1 align="center">
+ 🚀 Why It Matters
+</h1>
+
+<p align="center">🧬 EQEmulator stands as a <strong>technical preservation project</strong>, ensuring that the magic of classic and custom EverQuest servers lives on for future generations of players, tinkerers, and game designers.
+</p>
+
+> We humbly acknowledge and thank the original developers at **Verant Interactive** and **Sony Online Entertainment (now Daybreak Game Company)** for creating one of the most influential online experiences in gaming history.
+
+<h1 align="center">
+ 🧑‍💻🖥️ Supported Clients
+</h1>
 
 |Titanium Edition|Secrets of Faydwer|Seeds of Destruction|Underfoot|Rain of Fear|
 |:---:|:---:|:---:|:---:|:---:|
 |<img src="http://i.imgur.com/hrwDxoM.jpg" height="150">|<img src="http://i.imgur.com/cRDW5tn.png" height="150">|<img src="http://i.imgur.com/V48kuVn.jpg" height="150">|<img src="http://i.imgur.com/IJQ0XMa.jpg" height="150">|<img src="http://i.imgur.com/OMpHkKa.png" height="100">|
 
-## Bug Reports <img src="http://i.imgur.com/daf1Vjw.png" height="20">
-* Please use the [issue tracker](https://github.com/EQEmu/Server/issues) provided by GitHub to send us bug
-reports or feature requests.
-* The [EQEmu Forums](http://www.eqemulator.org/forums/) are also a place to submit and get help with bugs.
+## 📚 Resources
 
-## Contributions <img src="http://image.flaticon.com/icons/png/512/25/25231.png" width="20">
+| Resource             | Badges                                                                                                                                                    | Link                                                                                              |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| **EQEmulator Docs**  | [![Docs](https://img.shields.io/badge/docs-MkDocs%20Powered-blueviolet)](https://docs.eqemu.io)                                                             | [docs.eqemu.io](https://docs.eqemu.io/)                                                           |
+| **Discord Community**| [![Discord](https://img.shields.io/discord/212663220849213441?label=Discord&logo=discord&color=7289DA)](https://discord.gg/QHsm7CD)                         | [Join Discord](https://discord.gg/QHsm7CD)                                                        |
+| **Latest Release**   | [![Latest Release](https://img.shields.io/github/v/release/eqemu/server)](https://github.com/eqemu/server/releases) <br> [![Release Date](https://img.shields.io/github/release-date/EQEmu/Server)](https://github.com/EQEmu/Server/releases) <br> [![All Releases](https://img.shields.io/github/downloads/eqemu/server/total.svg)](https://github.com/eqemu/server/releases) | [View Releases](https://github.com/eqemu/server/releases)                                         |
+| **License**          | [![License](https://img.shields.io/github/license/EQEmu/Server)](./LICENSE)                                                                                | [View License](./LICENSE)                                                                        |
+| **Build Status**     | [![Build Status](http://drone.akkadius.com/api/badges/EQEmu/Server/status.svg)](http://drone.akkadius.com/EQEmu/Server)                                     | [View Build Status](http://drone.akkadius.com/EQEmu/Server)                                       |
+| **Docker Pulls**     | [![Docker Pulls](https://img.shields.io/docker/pulls/akkadius/eqemu-server)](https://hub.docker.com/r/akkadius/eqemu-server)                                | [Docker Hub](https://hub.docker.com/r/akkadius/eqemu-server)                                      |
+| **Contributions**    | [![GitHub PRs](https://img.shields.io/github/issues-pr-closed/eqemu/server)](https://github.com/eqemu/server/pulls?q=is%3Apr+is%3Aclosed)                   | [Closed PRs & Issues](https://github.com/eqemu/server/pulls?q=is%3Apr+is%3Aclosed)                |
 
-* The preferred way to contribute is to fork the repo and submit a pull request on
-GitHub. If you need help with your changes, you can always post on the forums or
-try Discord. You can also post unified diffs (`git diff` should do the trick) on the
-[Server Code Submissions](http://www.eqemulator.org/forums/forumdisplay.php?f=669)
-forum, although pull requests will be much quicker and easier on all parties.
+## 🛠️ Getting Started
 
-## Contact <img src="http://gamerescape.com/wp-content/uploads/2015/06/discord.png" height="20">
+If you want to set up your own EQEmulator server, please refer to the current [server installation guides](https://docs.eqemu.io/#server-installation). We've had 100,000s of players and developers use our guides to set up their own servers, and we hope you will too!
 
- - Discord Channel: https://discord.gg/QHsm7CD
- - **User Discord Channel**: `#general`
- - **Developer Discord Channel**: `#eqemucoders`
+## 🗂️ Related Repositories
 
-## Resources
-- [EQEmulator Forums](http://www.eqemulator.org/forums)
-- [EQEmulator Wiki](https://docs.eqemu.io/)
+| Repository         | Description                                                                      |
+|--------------------|----------------------------------------------------------------------------------|
+| [ProjectEQ Quests](https://github.com/ProjectEQ/projecteqquests)  | Official quests and event scripts for ProjectEQ                       |
+| [Maps](https://github.com/Akkadius/EQEmuMaps)                     | EQEmu-compatible zone maps                                            |
+| [Installer Resources](https://github.com/Akkadius/EQEmuInstall)   | Scripts and assets for setting up EQEmu servers                       |
+| [Zone Utilities](https://github.com/EQEmu/zone-utilities)         | Utilities for parsing, rendering, and manipulating EQ zone files      |
 
-## Related Repositories
-* [ProjectEQ Quests](https://github.com/ProjectEQ/projecteqquests)
-* [Maps](https://github.com/Akkadius/EQEmuMaps)
-* [Installer Resources](https://github.com/Akkadius/EQEmuInstall)
-* [Zone Utilities](https://github.com/EQEmu/zone-utilities) - Various utilities and libraries for parsing, rendering and manipulating EQ Zone files.
-
-## Other License Info
-
-* The server code and utilities are released under **GPLv3**
-* We also include some small libraries for convienence that may be under different licensing
-  * SocketLib - GPL LibXML
-  * zlib - zlib license
-  * MariaDB/MySQL - GPL
-  * GPL Perl - GPL / ActiveState (under the assumption that this is a free project)
-  * CPPUnit - GLP StringUtilities - Apache
-  * LUA - MIT
 
 ## Contributors
 
