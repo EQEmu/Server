@@ -1693,6 +1693,24 @@ void command_npcedit(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Usage: #npcedit set_grid [Grid ID] - Sets an NPC's Grid ID");
 			return;
 		}
+	} else if (!strcasecmp(sep->arg[1], "npc_tint_id")) {
+		if (sep->IsNumber(2)) {
+			const uint32 npc_tint_id = (Strings::ToUnsignedInt(sep->arg[2]));
+
+			n.npc_tint_id = npc_tint_id;
+
+			d = fmt::format(
+				"Set NPCTintID {} for {}",
+				npc_tint_id,
+				npc_id_string
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				"Usage: #npcedit npc_tint_id [id] - Sets an NPC's NPCTintID [0 - 78 for RoF2]"
+			);
+			return;
+		}
 	} else {
 		SendNPCEditSubCommands(c);
 		return;

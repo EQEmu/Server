@@ -192,7 +192,8 @@ public:
 		bool in_always_aggros_foes,
 		int32 in_heroic_strikethrough,
 		bool keeps_sold_items,
-		int64 in_hp_regen_per_second = 0
+		int64 in_hp_regen_per_second = 0,
+		uint32 npc_tint_id = 0
 	);
 	virtual ~Mob();
 
@@ -1066,6 +1067,7 @@ public:
 	void SendWearChangeAndLighting(int8 last_texture);
 	inline uint8 GetActiveLightType() { return m_Light.Type[EQ::lightsource::LightActive]; }
 	bool UpdateActiveLight(); // returns true if change, false if no change
+	uint32 GetNpcTintId() { return m_npc_tint_id; }
 
 	EQ::LightSourceProfile* GetLightProfile() { return &m_Light; }
 
@@ -1597,6 +1599,7 @@ protected:
 	bool rare_spawn;
 	int32 heroic_strikethrough;
 	bool keeps_sold_items;
+	uint32 m_npc_tint_id;
 
 	uint32 m_PlayerState;
 	uint32 GetPlayerState() { return m_PlayerState; }
