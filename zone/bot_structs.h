@@ -68,7 +68,7 @@ struct BotSpellSetting {
 
 struct BotSpells {
 	uint32		type;			// 0 = never, must be one (and only one) of the defined values
-	int16		spellid;			// <= 0 = no spell
+	uint16		spellid;		// <= 0 = no spell
 	int16		manacost;		// -1 = use spdat, -2 = no cast time
 	uint32		time_cancast;	// when we can cast this spell next
 	int32		recast_delay;
@@ -86,7 +86,7 @@ struct BotSpells {
 struct BotSpells_wIndex {
 	uint32		index;			//index of AIBot_spells
 	uint32		type;			// 0 = never, must be one (and only one) of the defined values
-	int16		spellid;			// <= 0 = no spell
+	uint16		spellid;		// <= 0 = no spell
 	int16		manacost;		// -1 = use spdat, -2 = no cast time
 	uint32		time_cancast;	// when we can cast this spell next
 	int32		recast_delay;

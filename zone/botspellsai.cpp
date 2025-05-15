@@ -1459,7 +1459,7 @@ BotSpell Bot::GetBestBotSpellForMez(Bot* caster, uint16 spell_type) {
 	return result;
 }
 
-Mob* Bot::GetFirstIncomingMobToMez(Bot* caster, int16 spell_id, uint16 spell_type, bool AE) {
+Mob* Bot::GetFirstIncomingMobToMez(Bot* caster, uint16 spell_id, uint16 spell_type, bool AE) {
 	Mob* result = nullptr;
 
 	if (caster && caster->GetOwner()) {
