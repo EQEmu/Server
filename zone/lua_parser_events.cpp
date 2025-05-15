@@ -1809,6 +1809,26 @@ void handle_player_read_item(
 	}
 }
 
+void handle_player_connect(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
+	lua_setfield(L, -2, "last_login");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "seconds_since_last_login");
+
+	lua_pushboolean(L, Strings::ToBool(sep.arg[2]));
+	lua_setfield(L, -2, "is_first_login");
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,

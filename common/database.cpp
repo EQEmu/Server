@@ -1095,13 +1095,13 @@ void Database::SetLFP(uint32 character_id, bool is_lfp)
 	CharacterDataRepository::UpdateOne(*this, e);
 }
 
-void Database::SetLoginFlags(uint32 character_id, bool is_lfp, bool is_lfg, uint8 first_logon)
+void Database::SetLoginFlags(uint32 character_id, bool is_lfp, bool is_lfg, uint8 ingame)
 {
 	auto e = CharacterDataRepository::FindOne(*this, character_id);
 
-	e.firstlogon = first_logon;
-	e.lfg        = is_lfg ? 1 : 0;
-	e.lfp        = is_lfp ? 1 : 0;
+	e.ingame = ingame;
+	e.lfg    = is_lfg ? 1 : 0;
+	e.lfp    = is_lfp ? 1 : 0;
 
 	CharacterDataRepository::UpdateOne(*this, e);
 }
@@ -1115,11 +1115,11 @@ void Database::SetLFG(uint32 character_id, bool is_lfg)
 	CharacterDataRepository::UpdateOne(*this, e);
 }
 
-void Database::SetFirstLogon(uint32 character_id, uint8 first_logon)
+void Database::SetIngame(uint32 character_id, uint8 ingame)
 {
 	auto e = CharacterDataRepository::FindOne(*this, character_id);
 
-	e.firstlogon = first_logon;
+	e.ingame = ingame;
 
 	CharacterDataRepository::UpdateOne(*this, e);
 }

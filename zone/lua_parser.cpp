@@ -353,6 +353,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_AA_LOSS]                    = handle_player_aa_loss;
 	PlayerArgumentDispatch[EVENT_SPELL_BLOCKED]              = handle_player_spell_blocked;
 	PlayerArgumentDispatch[EVENT_READ_ITEM]                  = handle_player_read_item;
+	PlayerArgumentDispatch[EVENT_CONNECT]                    = handle_player_connect;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

@@ -2082,7 +2082,8 @@ private:
 	uint16 trader_id;
 	uint16 customer_id;
 	uint32 account_creation;
-	uint8 firstlogon;
+	bool first_login;
+	bool ingame;
 	uint32 mercid; // current merc
 	uint8 mercSlot; // selected merc slot
 	time_t                                                         m_trader_transaction_date;

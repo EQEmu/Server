@@ -807,29 +807,42 @@ void Client::CompleteConnect()
 	m_last_position_before_bulk_update = GetPosition();
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
-	if (firstlogon == 1) {
-		TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
-		BuyerRepository::DeleteBuyer(database, CharacterID());
-		LogTradingDetail(
-			"Removed trader abd buyer entries for Character ID {} on first logon to ensure table consistency.",
+	if (ingame) {
+		auto e = CharacterDataRepository::FindOne(
+			database,
 			CharacterID()
 		);
+
+		bool is_first_login = e.first_login == 0;
 
 		RecordPlayerEventLog(PlayerEvent::WENT_ONLINE, PlayerEvent::EmptyEvent{});
 
 		if (parse->PlayerHasQuestSub(EVENT_CONNECT)) {
-			parse->EventPlayer(EVENT_CONNECT, this, "", 0);
+			const std::string& export_string = fmt::format(
+				"{} {} {}",
+				e.last_login,
+				time(nullptr) - e.last_login,
+				is_first_login ? 1 : 0
+			);
+			parse->EventPlayer(EVENT_CONNECT, this, export_string, 0);
 		}
 
-		/**
-		 * Update last login since this doesn't get updated until a late save later so we can update online status
-		 */
-		database.QueryDatabase(
-			StringFormat(
-				"UPDATE `character_data` SET `last_login` = UNIX_TIMESTAMP() WHERE id = %u",
+		if (is_first_login) {
+			e.first_login = time(nullptr);
+			TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+			BuyerRepository::DeleteBuyer(database, CharacterID());
+			LogTradingDetail(
+				"Removed trader abd buyer entries for Character ID {} on first logon to ensure table consistency.",
 				CharacterID()
-			)
-		);
+			);
+		}
+
+		e.last_login = time(nullptr);
+
+		const int updated = CharacterDataRepository::UpdateOne(database, e);
+		if (!updated) {
+			LogError("Failed to update login time for character_id [{}]", CharacterID());
+		}
 
 		if (IsPetNameChangeAllowed() && !RuleB(Pets, AlwaysAllowPetRename)) {
 			InvokeChangePetName(false);
@@ -878,7 +891,7 @@ void Client::CompleteConnect()
 		entity_list.SendFindableNPCList(this);
 
 	if (IsInAGuild()) {
-		if (firstlogon == 1) {
+		if (ingame) {
 			guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
 			SendGuildMembersList();
 		}
@@ -1314,14 +1327,14 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* Load Character Data */
 	query = fmt::format(
-		"SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank`, `exp_enabled`, `tribute_enable`, `extra_haste`, `illusion_block` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = {}",
+		"SELECT `lfp`, `lfg`, `xtargets`, `first_login`, `guild_id`, `rank`, `exp_enabled`, `tribute_enable`, `extra_haste`, `illusion_block`, `ingame` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = {}",
 		cid
 	);
 	auto results = database.QueryDatabase(query);
 	for (auto row : results) {
 		if (row[4] && Strings::ToInt(row[4]) > 0) {
-			guild_id = Strings::ToInt(row[4]);
-			guildrank = row[5] ? Strings::ToInt(row[5]) : GUILD_RANK_NONE;
+			guild_id             = Strings::ToInt(row[4]);
+			guildrank            = row[5] ? Strings::ToInt(row[5]) : GUILD_RANK_NONE;
 			guild_tribute_opt_in = row[7] ? Strings::ToBool(row[7]) : 0;
 		}
 
@@ -1329,10 +1342,21 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		SetExtraHaste(Strings::ToInt(row[8]), false);
 		SetIllusionBlock(Strings::ToBool(row[9]));
 
-		if (LFP) { LFP = Strings::ToInt(row[0]); }
-		if (LFG) { LFG = Strings::ToInt(row[1]); }
-		if (row[3])
-			firstlogon = Strings::ToInt(row[3]);
+		if (LFP) {
+			LFP = Strings::ToInt(row[0]);
+		}
+
+		if (LFG) {
+			LFG = Strings::ToInt(row[1]);
+		}
+
+		if (row[3]) {
+			first_login = Strings::ToUnsignedInt(row[3]);
+		}
+
+		if (row[10]) {
+			ingame = Strings::ToBool(row[10]);
+		}
 	}
 
 	if (RuleB(Character, SharedBankPlat))
@@ -1721,7 +1745,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 				// Taunt persists when zoning on newer clients, overwrite default.
 				if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-					if (!firstlogon) {
+					if (!ingame) {
 						pet->SetTaunting(m_petinfo.taunting);
 					}
 				}

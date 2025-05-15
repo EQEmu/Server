@@ -263,7 +263,7 @@ public:
 	bool SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year);
 	void ClearMerchantTemp();
 	void ClearPTimers(uint32 character_id);
-	void SetFirstLogon(uint32 character_id, uint8 first_logon);
+	void SetIngame(uint32 character_id, uint8 ingame);
 	void SetLFG(uint32 character_id, bool is_lfg);
 	void SetLFP(uint32 character_id, bool is_lfp);
 	void SetLoginFlags(uint32 character_id, bool is_lfp, bool is_lfg, uint8 first_logon);
