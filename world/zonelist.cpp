@@ -37,6 +37,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "dynamic_zone_manager.h"
 #include "ucs.h"
 #include "clientlist.h"
+#include "../common/repositories/trader_repository.h"
+#include "../common/repositories/buyer_repository.h"
 
 extern uint32 numzones;
 extern EQ::Random emu_random;
@@ -84,6 +86,8 @@ void ZSList::Remove(const std::string &uuid)
 	while (iter != zone_server_list.end()) {
 		if ((*iter)->GetUUID().compare(uuid) == 0) {
 			auto port = (*iter)->GetCPort();
+			(*iter)->CheckToClearTraderAndBuyerTables();
+
 			zone_server_list.erase(iter);
 
 			if (port != 0) {

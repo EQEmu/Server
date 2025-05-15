@@ -106,13 +106,8 @@ public:
 				return false;
 			}
 
-			auto buy_lines = BaseBuyerBuyLinesRepository::GetWhere(
-				db,
-				fmt::format("`buyer_id` = '{}'", buyer.front().id)
-			);
-			if (buy_lines.empty()) {
-				return false;
-			}
+			auto buy_lines =
+				BaseBuyerBuyLinesRepository::GetWhere(db, fmt::format("`buyer_id` = {}", buyer.front().id));
 
 			std::vector<std::string> buy_line_ids{};
 			for (auto const &bl: buy_lines) {
@@ -121,20 +116,62 @@ public:
 
 			DeleteWhere(db, fmt::format("`char_id` = '{}';", char_id));
 			if (buy_line_ids.empty()) {
-				return false;
+				return true;
 			}
 
 			BaseBuyerBuyLinesRepository::DeleteWhere(
-				db,
-				fmt::format("`id` IN({})", Strings::Implode(", ", buy_line_ids))
+				db, fmt::format("`id` IN({})", Strings::Implode(", ", buy_line_ids))
 			);
 			BaseBuyerTradeItemsRepository::DeleteWhere(
-				db,
-				fmt::format(
-					"`buyer_buy_lines_id` IN({})",
-					Strings::Implode(", ", buy_line_ids))
+				db, fmt::format("`buyer_buy_lines_id` IN({})", Strings::Implode(", ", buy_line_ids))
 			);
 		}
+
+		return true;
+	}
+
+	static bool DeleteBuyers(Database &db, uint32 char_zone_id, uint32 char_zone_instance_id)
+	{
+		auto buyers = GetWhere(
+			db,
+			fmt::format(
+				"`char_zone_id` = {} AND `char_zone_instance_id` = {}", char_zone_id, char_zone_instance_id
+			)
+		);
+		if (buyers.empty()) {
+			return false;
+		}
+
+		std::vector<std::string> buyer_ids{};
+		std::vector<std::string> buy_line_ids{};
+
+		for (auto const &b: buyers) {
+			buyer_ids.push_back(std::to_string(b.id));
+		}
+
+		auto buy_lines = BaseBuyerBuyLinesRepository::GetWhere(
+			db, fmt::format("`buyer_id` IN({})", Strings::Implode(", ", buyer_ids))
+		);
+
+		if (!buy_lines.empty()) {
+			for (auto const &bl: buy_lines) {
+				buy_line_ids.push_back(std::to_string(bl.id));
+			}
+		}
+
+		DeleteWhere(db, fmt::format("`id` IN({});", Strings::Implode(", ", buyer_ids)));
+		if (buy_line_ids.empty()) {
+			return true;
+		}
+
+		BaseBuyerBuyLinesRepository::DeleteWhere(
+			db,
+			fmt::format("`id` IN({})", Strings::Implode(", ", buy_line_ids))
+		);
+		BaseBuyerTradeItemsRepository::DeleteWhere(
+			db,
+			fmt::format("`buyer_buy_lines_id` IN({})", Strings::Implode(", ", buy_line_ids))
+		);
 
 		return true;
 	}

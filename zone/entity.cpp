@@ -505,6 +505,9 @@ void EntityList::MobProcess()
 					zone->GetSecondsBeforeIdle(),
 					zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
 				);
+
+				CheckToClearTraderAndBuyerTables();
+
 				mob_settle_timer->Disable();
 			}
 
@@ -2335,7 +2338,7 @@ void EntityList::QueueClientsGuild(const EQApplicationPacket *app, uint32 guild_
 void EntityList::QueueClientsGuildBankItemUpdate(GuildBankItemUpdate_Struct *gbius, uint32 guild_id)
 {
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_GuildBank, sizeof(GuildBankItemUpdate_Struct));
-	auto data   = reinterpret_cast<GuildBankItemUpdate_Struct *>(outapp->pBuffer);
+	auto data = reinterpret_cast<GuildBankItemUpdate_Struct *>(outapp->pBuffer);
 
 	memcpy(data, gbius, sizeof(GuildBankItemUpdate_Struct));
 
@@ -6007,5 +6010,24 @@ void EntityList::RestoreCorpse(NPC *npc, uint32_t decay_time)
 	if (c) {
 		c->UnLock();
 		c->SetDecayTimer(decay_time);
+	}
+}
+
+void EntityList::CheckToClearTraderAndBuyerTables()
+{
+	if (zone->GetZoneID() == Zones::BAZAAR) {
+		TraderRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`char_zone_id` = {} AND `char_zone_instance_id` = {}", zone->GetZoneID(), zone->GetInstanceID()
+			)
+		);
+		BuyerRepository::DeleteBuyers(database, zone->GetZoneID(), zone->GetInstanceID());
+
+		LogTradingDetail(
+			"Removed trader and buyer entries for Zone ID [{}] and Instance ID [{}]",
+			zone->GetZoneID(),
+			zone->GetInstanceID()
+		);
 	}
 }

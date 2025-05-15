@@ -581,6 +581,7 @@ public:
 	void SendMerchantEnd(Mob* merchant);
 	void SendMerchantInventory(Mob* m, int32 slot_id = -1, bool is_delete = false);
 	void RestoreCorpse(NPC* npc, uint32_t decay_time);
+	void CheckToClearTraderAndBuyerTables();
 
 protected:
 	friend class Zone;

@@ -808,6 +808,13 @@ void Client::CompleteConnect()
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
 	if (firstlogon == 1) {
+		TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+		BuyerRepository::DeleteBuyer(database, CharacterID());
+		LogTradingDetail(
+			"Removed trader abd buyer entries for Character ID {} on first logon to ensure table consistency.",
+			CharacterID()
+		);
+
 		RecordPlayerEventLog(PlayerEvent::WENT_ONLINE, PlayerEvent::EmptyEvent{});
 
 		if (parse->PlayerHasQuestSub(EVENT_CONNECT)) {
@@ -15567,7 +15574,9 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 	switch (in->Code) {
 		case ClickTrader: {
 			LogTrading("Handle_OP_TraderShop case ClickTrader [{}]", in->Code);
-			auto outapp        = std::make_unique<EQApplicationPacket>(OP_TraderShop, sizeof(TraderClick_Struct));
+			auto outapp =
+				std::make_unique<EQApplicationPacket>(OP_TraderShop, static_cast<uint32>(sizeof(TraderClick_Struct))
+			);
 			auto data          = (TraderClick_Struct *) outapp->pBuffer;
 			auto trader_client = entity_list.GetClientByID(in->TraderID);
 

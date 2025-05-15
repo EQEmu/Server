@@ -681,8 +681,19 @@ void Client::MoveZoneInstanceRaid(uint16 instance_id, const glm::vec4 &location)
 
 void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm)
 {
-	// From what I have read, dragged corpses should stay with the player for Intra-zone summons etc, but we can implement that later.
+	// From what I have read, dragged corpses should stay with the player for Intra-zone summons etc, but we can
+	// implement that later.
 	ClearDraggedCorpses();
+
+	// Added to ensure that if a player is moved (ported, gmmove, etc) and they are an active trader or buyer, they will
+	// be removed from future transactions.
+	if (IsTrader()) {
+		TraderEndTrader();
+	}
+
+	if (IsBuyer()) {
+		ToggleBuyerMode(false);
+	}
 
 	if(zoneID == 0)
 		zoneID = zone->GetZoneID();
