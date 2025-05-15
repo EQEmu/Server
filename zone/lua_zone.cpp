@@ -727,10 +727,10 @@ std::string Lua_Zone::GetBucketRemaining(const std::string& bucket_name)
 	return self->GetBucketRemaining(bucket_name);
 }
 
-void Lua_Zone::ClearVariables()
+bool Lua_Zone::ClearVariables()
 {
-	Lua_Safe_Call_Void();
-	self->ClearVariables();
+	Lua_Safe_Call_Bool();
+	return self->ClearVariables();
 }
 
 bool Lua_Zone::DeleteVariable(const std::string& variable_name)

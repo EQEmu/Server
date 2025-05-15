@@ -3225,9 +3225,14 @@ void Zone::DisableRespawnTimers()
 	}
 }
 
-void Zone::ClearVariables()
+bool Zone::ClearVariables()
 {
+	if (m_zone_variables.empty()) {
+		return false;
+	}
+
 	m_zone_variables.clear();
+	return true;
 }
 
 bool Zone::DeleteVariable(const std::string& variable_name)
