@@ -4908,12 +4908,12 @@ namespace UF
 			UFSlot = serverSlot - 2;
 		}
 
-		else if (serverSlot <= EQ::invbag::GENERAL_BAGS_8_END && serverSlot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
-			UFSlot = serverSlot + 11;
+		else if (serverSlot <= EQ::invbag::GENERAL_BAGS_END && serverSlot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+			UFSlot = serverSlot - (EQ::invbag::GENERAL_BAGS_BEGIN - invbag::GENERAL_BAGS_BEGIN)/*3748*/ - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((serverSlot - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT)); // + 11;
 		}
 
 		else if (serverSlot <= EQ::invbag::CURSOR_BAG_END && serverSlot >= EQ::invbag::CURSOR_BAG_BEGIN) {
-			UFSlot = serverSlot - 9;
+			UFSlot = serverSlot - (EQ::invbag::CURSOR_BAG_BEGIN - invbag::CURSOR_BAG_BEGIN)/*5668*/; // - 9;
 		}
 
 		else if (serverSlot <= EQ::invslot::TRIBUTE_END && serverSlot >= EQ::invslot::TRIBUTE_BEGIN) {
@@ -4933,7 +4933,7 @@ namespace UF
 		}
 
 		else if (serverSlot <= EQ::invbag::BANK_BAGS_END && serverSlot >= EQ::invbag::BANK_BAGS_BEGIN) {
-			UFSlot = serverSlot + 1;
+			UFSlot = serverSlot - (EQ::invbag::BANK_BAGS_BEGIN - invbag::BANK_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((serverSlot - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT)); // + 1;
 		}
 
 		else if (serverSlot <= EQ::invslot::SHARED_BANK_END && serverSlot >= EQ::invslot::SHARED_BANK_BEGIN) {
@@ -4941,7 +4941,7 @@ namespace UF
 		}
 
 		else if (serverSlot <= EQ::invbag::SHARED_BANK_BAGS_END && serverSlot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) {
-			UFSlot = serverSlot + 1;
+			UFSlot = serverSlot - (EQ::invbag::SHARED_BANK_BAGS_BEGIN - invbag::SHARED_BANK_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((serverSlot - EQ::invbag::SHARED_BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT)); // + 1;
 		}
 
 		else if (serverSlot <= EQ::invslot::TRADE_END && serverSlot >= EQ::invslot::TRADE_BEGIN) {
@@ -4949,7 +4949,7 @@ namespace UF
 		}
 
 		else if (serverSlot <= EQ::invbag::TRADE_BAGS_END && serverSlot >= EQ::invbag::TRADE_BAGS_BEGIN) {
-			UFSlot = serverSlot;
+			UFSlot = serverSlot - (EQ::invbag::TRADE_BAGS_BEGIN - invbag::TRADE_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((serverSlot - EQ::invbag::TRADE_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT)); // + 0;
 		}
 
 		else if (serverSlot <= EQ::invslot::WORLD_END && serverSlot >= EQ::invslot::WORLD_BEGIN) {
@@ -4991,11 +4991,11 @@ namespace UF
 		}
 
 		else if (ufSlot <= invbag::GENERAL_BAGS_END && ufSlot >= invbag::GENERAL_BAGS_BEGIN) {
-			ServerSlot = ufSlot - 11;
+			ServerSlot = ufSlot + (EQ::invbag::GENERAL_BAGS_BEGIN - invbag::GENERAL_BAGS_BEGIN)/*3748*/ + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((ufSlot - invbag::GENERAL_BAGS_BEGIN) / invbag::SLOT_COUNT)); // - 11;
 		}
 
 		else if (ufSlot <= invbag::CURSOR_BAG_END && ufSlot >= invbag::CURSOR_BAG_BEGIN) {
-			ServerSlot = ufSlot + 9;
+			ServerSlot = ufSlot + (EQ::invbag::CURSOR_BAG_BEGIN - invbag::CURSOR_BAG_BEGIN)/*5668*/; // + 9;
 		}
 
 		else if (ufSlot <= invslot::TRIBUTE_END && ufSlot >= invslot::TRIBUTE_BEGIN) {
@@ -5015,7 +5015,7 @@ namespace UF
 		}
 
 		else if (ufSlot <= invbag::BANK_BAGS_END && ufSlot >= invbag::BANK_BAGS_BEGIN) {
-			ServerSlot = ufSlot - 1;
+			ServerSlot = ufSlot + (EQ::invbag::BANK_BAGS_BEGIN - invbag::BANK_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((ufSlot - invbag::BANK_BAGS_BEGIN) / invbag::SLOT_COUNT)); // - 1;
 		}
 
 		else if (ufSlot <= invslot::SHARED_BANK_END && ufSlot >= invslot::SHARED_BANK_BEGIN) {
@@ -5023,7 +5023,7 @@ namespace UF
 		}
 
 		else if (ufSlot <= invbag::SHARED_BANK_BAGS_END && ufSlot >= invbag::SHARED_BANK_BAGS_BEGIN) {
-			ServerSlot = ufSlot - 1;
+			ServerSlot = ufSlot + (EQ::invbag::SHARED_BANK_BAGS_BEGIN - invbag::SHARED_BANK_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((ufSlot - invbag::SHARED_BANK_BAGS_BEGIN) / invbag::SLOT_COUNT)); // - 1;
 		}
 
 		else if (ufSlot <= invslot::TRADE_END && ufSlot >= invslot::TRADE_BEGIN) {
@@ -5031,7 +5031,7 @@ namespace UF
 		}
 
 		else if (ufSlot <= invbag::TRADE_BAGS_END && ufSlot >= invbag::TRADE_BAGS_BEGIN) {
-			ServerSlot = ufSlot;
+			ServerSlot = ufSlot + (EQ::invbag::TRADE_BAGS_BEGIN - invbag::TRADE_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((ufSlot - invbag::TRADE_BAGS_BEGIN) / invbag::SLOT_COUNT)); // - 0;
 		}
 
 		else if (ufSlot <= invslot::WORLD_END && ufSlot >= invslot::WORLD_BEGIN) {
