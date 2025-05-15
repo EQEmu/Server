@@ -1,7 +1,7 @@
 <h1 align="center">EQEmulator Server Platform</h1>
 
 <p align="center">
- <img src="https://gist.github.com/user-attachments/assets/00ff702f-963f-460d-bc9e-b67328912d41" style="border-radius: 10px">
+ <img src="https://github.com/user-attachments/assets/11942e15-b512-402d-a619-0543c7f1151e" style="border-radius: 10px">
 </p>
 
 <p align="center">
@@ -53,9 +53,8 @@ EQEmulator has for over 20 years and always will be a <strong>fan-based, non-com
  💡 How We Did It
 </h1>
 
-
 <p align="center">
- <img src="https://gist.github.com/user-attachments/assets/85b3cc2c-a1e4-40a0-b140-7e4da2c3b057" height="300px">
+ <img src="https://github.com/user-attachments/assets/b6b48cf7-f64a-4497-9750-71f442a3d132" height="300px">
  </p>
 
 
@@ -78,7 +77,7 @@ Every system, packet, opcode, and game mechanic has been reconstructed through c
 </h1>
 
 <p align="center">
- <img src="https://gist.github.com/user-attachments/assets/ef619d36-5dbb-46fb-bd96-ae11eaa4661e" style="border-radius: 10px">
+ <img src="https://github.com/user-attachments/assets/df5ea809-86c5-439d-a8fa-651fb04ba477" style="border-radius: 10px">
 </p>
 
 **C++ Core Engine**
