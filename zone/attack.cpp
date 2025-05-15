@@ -3862,8 +3862,12 @@ int64 Mob::ReduceAllDamage(int64 damage)
 	}
 
 	if (spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION]) {
-		int64 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION] / 10000; //If hit for 1000, at 10% then lower damage by 100;
-		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_DRAIN_PER_HP] / 10000; //Reduce endurance by 0.05% per HP loss
+		int64 end_absorb = spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION] + itembonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION] + aabonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION];
+		int64 end_absorb_cap = spellbonuses.EnduranceAbsorbPercentCap + itembonuses.EnduranceAbsorbPercentCap + aabonuses.EnduranceAbsorbPercentDamage;
+		int64 damage_reduced = damage * end_absorb / 100; //If hit for 1000, at 10% then lower damage by 100;
+		if (damage_reduced > end_absorb_cap)
+			damage_reduced = end_absorb_cap;
+		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_DRAIN_PER_HP] / 100; //Reduce endurance by 0.05% per HP loss
 		if (endurance_drain < 1)
 			endurance_drain = 1;
 
@@ -3871,6 +3875,7 @@ int64 Mob::ReduceAllDamage(int64 damage)
 			damage -= damage_reduced;
 			CastToClient()->SetEndurance(CastToClient()->GetEndurance() - endurance_drain);
 			TryTriggerOnCastRequirement();
+			Message(263, "Your endurance shield has absorbed %d damage.", damage_reduced);
 		}
 	}
 
@@ -4299,6 +4304,62 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			damage = 0;
 		}
 
+			//send damage packet before updating hp to prevent double damage bugs and make the game feel more responsive.
+		if (!iBuffTic) { //buff ticks do not send damage, instead they just call SendHPUpdate(), which is done above
+			static EQApplicationPacket p(OP_Damage, sizeof(CombatDamage_Struct));
+			auto                       a = (CombatDamage_Struct *) p.pBuffer;
+			a->target = GetID();
+
+			if (!attacker) {
+				a->source = 0;
+			} else if (attacker->IsClient() && attacker->CastToClient()->GMHideMe()) {
+				a->source = 0;
+			} else {
+				a->source = attacker->GetID();
+			}
+
+			a->type = (EQ::ValueWithin(skill_used, EQ::skills::Skill1HBlunt, EQ::skills::Skill2HPiercing)) ?
+				SkillDamageTypes[skill_used] : SkillDamageTypes[EQ::skills::SkillHandtoHand]; // was 0x1c
+			a->damage = damage;
+			a->spellid = spell_id;
+
+			if (special == eSpecialAttacks::AERampage) {
+				a->special = 1;
+			} else if (special == eSpecialAttacks::Rampage) {
+				a->special = 2;
+			} else {
+				a->special = 0;
+			}
+
+			a->hit_heading = attacker ? attacker->GetHeading() : 0.0f;
+			if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
+				(IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
+				a->force = EQ::skills::GetSkillMeleePushForce(skill_used);
+
+				if (RuleR(Combat, MeleePushForceClientPercent) && IsClient()) {
+					a->force += a->force * RuleR(Combat, MeleePushForceClientPercent);
+				}
+
+				if (RuleR(Combat, MeleePushForcePetPercent) && IsPet()) {
+					a->force += a->force * RuleR(Combat, MeleePushForcePetPercent);
+				}
+
+				if (IsNPC()) {
+					if (!RuleB(Combat, NPCtoNPCPush) && attacker && attacker->IsNPC()) {
+						a->force = 0.0f; // 2013 change that disabled NPC vs NPC push
+					} else {
+						a->force *= 0.10f; // force against NPCs is divided by 10 I guess? ex bash is 0.3, parsed 0.03 against an NPC
+					}
+
+					if (ForcedMovement == 0 && a->force != 0.0f && position_update_melee_push_timer.Check()) {
+						m_Delta.x += a->force * g_Math.FastSin(a->hit_heading);
+						m_Delta.y += a->force * g_Math.FastCos(a->hit_heading);
+						ForcedMovement = 3;
+					}
+				}
+			}
+		}
+
 		SetHP(int64(GetHP() - damage));
 
 		if (HasDied()) {
@@ -4533,60 +4594,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 	}	//end `if damage was done`
 
-		//send damage packet...
-	if (!iBuffTic) { //buff ticks do not send damage, instead they just call SendHPUpdate(), which is done above
-		static EQApplicationPacket p(OP_Damage, sizeof(CombatDamage_Struct));
-		auto                       a = (CombatDamage_Struct *) p.pBuffer;
-		a->target = GetID();
 
-		if (!attacker) {
-			a->source = 0;
-		} else if (attacker->IsClient() && attacker->CastToClient()->GMHideMe()) {
-			a->source = 0;
-		} else {
-			a->source = attacker->GetID();
-		}
-
-		a->type = (EQ::ValueWithin(skill_used, EQ::skills::Skill1HBlunt, EQ::skills::Skill2HPiercing)) ?
-				SkillDamageTypes[skill_used] : SkillDamageTypes[EQ::skills::SkillHandtoHand]; // was 0x1c
-		a->damage = damage;
-		a->spellid = spell_id;
-
-		if (special == eSpecialAttacks::AERampage) {
-			a->special = 1;
-		} else if (special == eSpecialAttacks::Rampage) {
-			a->special = 2;
-		} else {
-			a->special = 0;
-		}
-
-		a->hit_heading = attacker ? attacker->GetHeading() : 0.0f;
-		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
-			(IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
-			a->force = EQ::skills::GetSkillMeleePushForce(skill_used);
-
-			if (RuleR(Combat, MeleePushForceClientPercent) && IsClient()) {
-				a->force += a->force * RuleR(Combat, MeleePushForceClientPercent);
-			}
-
-			if (RuleR(Combat, MeleePushForcePetPercent) && IsPet()) {
-				a->force += a->force * RuleR(Combat, MeleePushForcePetPercent);
-			}
-
-			if (IsNPC()) {
-				if (!RuleB(Combat, NPCtoNPCPush) && attacker && attacker->IsNPC()) {
-					a->force = 0.0f; // 2013 change that disabled NPC vs NPC push
-				} else {
-					a->force *= 0.10f; // force against NPCs is divided by 10 I guess? ex bash is 0.3, parsed 0.03 against an NPC
-				}
-
-				if (ForcedMovement == 0 && a->force != 0.0f && position_update_melee_push_timer.Check()) {
-					m_Delta.x += a->force * g_Math.FastSin(a->hit_heading);
-					m_Delta.y += a->force * g_Math.FastCos(a->hit_heading);
-					ForcedMovement = 3;
-				}
-			}
-		}
 
 		//Note: if players can become pets, they will not receive damage messages of their own
 		//this was done to simplify the code here (since we can only effectively skip one mob on queue)
