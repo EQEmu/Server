@@ -16,7 +16,7 @@ void WorldserverCLI::EtlGetSettings(int argc, char **argv, argh::parser &cmd, st
 	auto event_settings = player_event_logs.GetSettings();
 	auto etl_details    = player_event_logs.GetEtlSettings();
 
-	for (auto i = 0; i < PlayerEvent::EventType::MAX; i++) {
+	for (int i = PlayerEvent::GM_COMMAND; i < PlayerEvent::EventType::MAX; i++) {
 		player_events["event_id"]    = event_settings[i].id;
 		player_events["enabled"]     = event_settings[i].event_enabled ? true : false;
 		player_events["retention"]   = event_settings[i].retention_days;
