@@ -517,87 +517,30 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	auto bot_creation_limit = bot_owner->GetBotCreationLimit();
-	auto bot_creation_limit_class = bot_owner->GetBotCreationLimit(bot_class);
+	if (!Bot::CheckHighEnoughLevelForBots(bot_owner)) {
+		return bot_id;
+	}
+
+	if (!Bot::CheckHighEnoughLevelForBots(bot_owner, bot_class)) {
+		return bot_id;
+	}
 
 	uint32 bot_count = 0;
 	uint32 bot_class_count = 0;
+
 	if (!database.botdb.QueryBotCount(bot_owner->CharacterID(), bot_class, bot_count, bot_class_count)) {
 		bot_owner->Message(Chat::Yellow, "Failed to query bot count.");
+
 		return bot_id;
 	}
 
-	if (bot_creation_limit >= 0 && bot_count >= bot_creation_limit) {
-		std::string message;
-
-		if (bot_creation_limit) {
-			message = fmt::format(
-				"You cannot create anymore than {} bot{}.",
-				bot_creation_limit,
-				bot_creation_limit != 1 ? "s" : ""
-			);
-		} else {
-			message = "You cannot create any bots.";
-		}
-
-		bot_owner->Message(Chat::Yellow, message.c_str());
+	if (!Bot::CheckCreateLimit(bot_owner, bot_count)) {
 		return bot_id;
 	}
 
-	if (bot_creation_limit_class >= 0 && bot_class_count >= bot_creation_limit_class) {
-		std::string message;
-
-		if (bot_creation_limit_class) {
-			message = fmt::format(
-				"You cannot create anymore than {} {} bot{}.",
-				bot_creation_limit_class,
-				GetClassIDName(bot_class),
-				bot_creation_limit_class != 1 ? "s" : ""
-			);
-		} else {
-			message = fmt::format(
-				"You cannot create any {} bots.",
-				GetClassIDName(bot_class)
-			);
-		}
-
-		bot_owner->Message(Chat::Yellow, message.c_str());
+	if (!Bot::CheckCreateLimit(bot_owner, bot_class_count, bot_class)) {
 		return bot_id;
 	}
-
-	auto bot_character_level = bot_owner->GetBotRequiredLevel();
-
-	if (
-		bot_character_level >= 0 &&
-		bot_owner->GetLevel() < bot_character_level
-	) {
-		bot_owner->Message(
-			Chat::Yellow,
-			fmt::format(
-				"You must be level {} to use bots.",
-				bot_character_level
-			).c_str()
-		);
-		return bot_id;
-	}
-
-	auto bot_character_level_class = bot_owner->GetBotRequiredLevel(bot_class);
-
-	if (
-		bot_character_level_class >= 0 &&
-		bot_owner->GetLevel() < bot_character_level_class
-	) {
-		bot_owner->Message(
-			Chat::Yellow,
-			fmt::format(
-				"You must be level {} to use {} bots.",
-				bot_character_level_class,
-				GetClassIDName(bot_class)
-			).c_str()
-		);
-		return bot_id;
-	}
-
 
 	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name, "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
 

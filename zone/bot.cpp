@@ -8715,6 +8715,86 @@ bool Bot::CheckCampSpawnConditions(Client* c) {
 	return true;
 }
 
+bool Bot::CheckHighEnoughLevelForBots(Client* c, uint8 bot_class) {
+	auto bot_character_level = c->GetBotRequiredLevel(bot_class);
+	bool not_high_enough_level = bot_character_level >= 0 && c->GetLevel() < bot_character_level;
+
+	if (not_high_enough_level) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You must be level {} to spawn {}bots.",
+				bot_character_level,
+				bot_class ? GetClassIDName(bot_class) : ""
+			).c_str()
+		);
+
+		return false;
+	}
+
+	return true;
+}
+
+bool Bot::CheckCreateLimit(Client* c, uint32 bot_count, uint8 bot_class) {
+	auto bot_creation_limit = c->GetBotCreationLimit(bot_class);
+	bool is_beyond_spawn_limit = bot_creation_limit >= 0 && bot_count >= bot_creation_limit;
+
+	if (is_beyond_spawn_limit) {
+		std::string message;
+
+		if (bot_creation_limit) {
+			message = fmt::format(
+				"You cannot create anymore than {} {}bot{}.",
+				bot_creation_limit,
+				bot_class ? GetClassIDName(bot_class) : "",
+				bot_creation_limit != 1 ? "s" : ""
+			);
+		} else {
+			message = fmt::format(
+				"You cannot create any {}bots.",
+				bot_class ? GetClassIDName(bot_class) : ""
+			);
+		}
+
+		c->Message(Chat::Yellow, message.c_str());
+
+		return false;
+	}
+
+	return true;
+}
+
+bool Bot::CheckSpawnLimit(Client* c, uint8 bot_class) {
+	auto bot_spawn_limit = c->GetBotSpawnLimit(bot_class);
+	auto spawned_bot_count = Bot::SpawnedBotCount(c->CharacterID(), bot_class);
+	bool is_beyond_spawn_limit = bot_spawn_limit >= 0 && spawned_bot_count >= bot_spawn_limit;
+
+	if (is_beyond_spawn_limit) {
+		std::string message;
+
+		if (bot_spawn_limit) {
+			message = fmt::format(
+				"You cannot have more than {} spawned {}bot{}.",
+				bot_spawn_limit,
+				bot_class ? GetClassIDName(bot_class) : "",
+				bot_spawn_limit != 1 ? "s" : ""
+			);
+		}
+		else {
+			message = fmt::format(
+				"You are not currently allowed to spawn any {}bots.",
+				bot_class ? GetClassIDName(bot_class) : ""
+			);
+		}
+
+		c->Message(Chat::White, message.c_str());
+
+		return false;
+	}
+
+	return true;
+}
+
 void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 {
 	if (!IsPlayerRace(race_id) || !IsPlayerClass(class_id)) {
