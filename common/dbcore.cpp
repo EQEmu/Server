@@ -189,9 +189,9 @@ void DBcore::TransactionBegin()
 	QueryDatabase("START TRANSACTION");
 }
 
-void DBcore::TransactionCommit()
+MySQLRequestResult DBcore::TransactionCommit()
 {
-	QueryDatabase("COMMIT");
+	return QueryDatabase("COMMIT");
 }
 
 void DBcore::TransactionRollback()

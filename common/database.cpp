@@ -1920,6 +1920,7 @@ bool Database::CopyCharacter(
 	std::vector<std::string> tables_to_zero_id = {
 		"keyring",
 		"data_buckets",
+		"character_evolving_items",
 		"character_instance_safereturns",
 		"character_expedition_lockouts",
 		"character_instance_lockouts",
@@ -1951,6 +1952,12 @@ bool Database::CopyCharacter(
 			)
 		);
 
+		if (!results.Success()) {
+			LogError("Transaction failed [{}] rolling back", results.ErrorMessage());
+			TransactionRollback();
+			return false;
+		}
+
 		std::vector<std::string> columns      = {};
 		int                      column_count = 0;
 
@@ -1968,6 +1975,12 @@ bool Database::CopyCharacter(
 				source_character_id
 			)
 		);
+
+		if (!results.Success()) {
+			LogError("Transaction failed [{}] rolling back", results.ErrorMessage());
+			TransactionRollback();
+			return false;
+		}
 
 		std::vector<std::vector<std::string>> new_rows;
 
@@ -2036,13 +2049,18 @@ bool Database::CopyCharacter(
 			LogInfo("Copying table [{}] rows [{}]", table_name, Strings::Commify(rows_copied));
 
 			if (!insert.ErrorMessage().empty()) {
+				LogError("Error copying table [{}] [{}]", table_name, insert.ErrorMessage());
 				TransactionRollback();
 				return false;
 			}
 		}
 	}
 
-	TransactionCommit();
+	auto r = TransactionCommit();
+	if (!r.Success()) {
+		LogError("Transaction failed [{}] rolling back", r.ErrorMessage());
+		return false;
+	}
 
 	LogInfo(
 		"Character [{}] copied to [{}] total rows [{}]",
