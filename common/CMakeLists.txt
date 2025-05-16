@@ -17,6 +17,7 @@ SET(common_sources
     database.cpp
     database_instances.cpp
     database/database_update_manifest.cpp
+    database/database_update_manifest_custom.cpp
     database/database_update_manifest_bots.cpp
     database/database_update.cpp
     dbcore.cpp
