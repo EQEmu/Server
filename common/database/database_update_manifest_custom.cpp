@@ -13,6 +13,7 @@ CREATE TABLE `new_table`  (
   PRIMARY KEY (`id`)
 );
 )",
+		.content_schema_update = false,
 	},
 // Used for testing
 //	ManifestEntry{
