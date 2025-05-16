@@ -74,7 +74,10 @@ public:
 	const std::list<std::unique_ptr<ZoneServer>> &getZoneServerList() const;
 	inline uint32_t GetServerListCount() { return zone_server_list.size(); }
 	void SendServerReload(ServerReload::Type type, uchar *packet = nullptr);
+	std::mutex m_queued_reloads_mutex;
+	std::vector<ServerReload::Type> m_queued_reloads = {};
 
+	void QueueServerReload(ServerReload::Type &type);
 private:
 	void OnTick(EQ::Timer *t);
 	uint32 NextID;
