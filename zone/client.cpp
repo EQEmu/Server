@@ -1024,8 +1024,6 @@ bool Client::Save(uint8 iCommitNow) {
 		m_pp.endurance = current_endurance;
 	}
 
-	database.TransactionBegin();
-
 	/* Save Character Currency */
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
 
@@ -1108,8 +1106,6 @@ bool Client::Save(uint8 iCommitNow) {
 	if (RuleB(Bots, Enabled)) {
 		database.botdb.SaveBotSettings(this);
 	}
-
-	database.TransactionCommit();
 
 	LogInfo("Save for [{}] took [{}]", GetCleanName(), timer.elapsed());
 
