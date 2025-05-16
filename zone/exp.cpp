@@ -1017,40 +1017,30 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 
 	uint16 check_levelm1 = check_level-1;
 	float mod;
-	if (check_level < 31)
+	if (check_level < 5)
 		mod = 1.0;
-	else if (check_level < 36)
-		mod = 1.1;
-	else if (check_level < 41)
-		mod = 1.2;
-	else if (check_level < 46)
-		mod = 1.3;
-	else if (check_level < 52)
-		mod = 1.4;
-	else if (check_level < 53)
-		mod = 1.5;
-	else if (check_level < 54)
-		mod = 1.6;
-	else if (check_level < 55)
-		mod = 1.7;
-	else if (check_level < 56)
-		mod = 1.9;
-	else if (check_level < 57)
-		mod = 2.1;
-	else if (check_level < 58)
-		mod = 2.3;
-	else if (check_level < 59)
-		mod = 2.5;
-	else if (check_level < 60)
-		mod = 2.7;
-	else if (check_level < 61)
-		mod = 3.0;
+	else if (check_level < 10)
+		mod = 1.4 + 0.02 * check_level;
+	else if (check_level < 15)
+		mod = 1.5 + 0.03 * check_level;
+	else if (check_level < 20)
+		mod = 1.4 + 0.04 * check_level;
+	else if (check_level < 25)
+		mod = 1.2 + 0.05 * check_level;
+	else if (check_level < 30)
+		mod = 1.0 + 0.06 * check_level;
+	else if (check_level < 35)
+		mod = 0.7 + 0.07 * check_level;
+	else if (check_level < 40)
+		mod = 0.5 + 0.08 * check_level;
+	else if (check_level < 45)
+		mod = 0.2 + 0.09 * check_level;
 	else
-		mod = 3.1;
+		mod = 1 + 0.1 * check_level;
 
 	float base = (check_levelm1)*(check_levelm1)*(check_levelm1);
 
-	mod *= 1000;
+	mod *= 2500;
 
 	uint32 finalxp = uint32(base * mod);
 

@@ -3440,7 +3440,6 @@ bool Bot::CheckIfIncapacitated() {
 }
 
 void Bot::SetBerserkState() {// Berserk updates should occur if primary AI criteria are met
-	if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
 		if (!berserk && GetHPRatio() < RuleI(Combat, BerserkerFrenzyStart)) {
 			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 			berserk = true;
@@ -3449,7 +3448,7 @@ void Bot::SetBerserkState() {// Berserk updates should occur if primary AI crite
 			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
 			berserk = false;
 		}
-	}
+
 }
 
 Mob* Bot::SetFollowMob(Client* leash_owner) {
@@ -3559,7 +3558,7 @@ void Bot::Depop() {
 	RemoveAllAuras();
 
 	Mob* bot_pet = GetPet();
-	
+
 	if (bot_pet) {
 		if (bot_pet->Charmed()) {
 			bot_pet->BuffFadeByEffect(SE_Charm);
@@ -11178,7 +11177,7 @@ void Bot::SetSpellTypePriority(uint16 spell_type, uint8 priority_type, uint16 pr
 
 std::list<BotSpellTypeOrder> Bot::GetSpellTypesPrioritized(uint8 priority_type) {
 	std::list<BotSpellTypeOrder> cast_order;
-	
+
 	for (uint16 i = BotSpellTypes::START; i <= BotSpellTypes::END; i++) {
 		BotSpellTypeOrder typeSettings = {
 			.spellType = i,

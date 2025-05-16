@@ -6072,7 +6072,7 @@ int32 Mob::GetPositionalDmgTaken(Mob *attacker)
 
 	if (back_arc || front_arc) { //Do they have this bonus?
 		if (attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))//Check if attacker is striking from behind
-			total_mod = back_arc; //If so, apply the back arc modifier only
+			total_mod = back_arc + 25; //If so, apply the back arc modifier only
 		else
 			total_mod = front_arc;//If not, apply the front arc modifer only
 	}

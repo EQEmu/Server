@@ -3000,6 +3000,15 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 	LogSpells("Spell [{}]: Casting level [{}], formula [{}], base_duration [{}]: result [{}]",
 		spell_id, castlevel, formula, duration, res);
 
+
+	if (res < 10)
+	{
+		res += GetCHA()/20;
+	}
+	else
+	{
+		res *= 1.0f + GetCHA() / 100.0f;
+	}
 	return res;
 }
 
@@ -4495,7 +4504,7 @@ bool Mob::SpellOnTarget(
 		}
 
 		if (spell_effectiveness < 100) {
-			if (spell_effectiveness == 0 || !IsPartialResistableSpell(spell_id)) {
+			if (spell_effectiveness == 0 || (!IsPartialResistableSpell(spell_id) && !IsDamageOverTimeSpell(spell_id) && !IsPureNukeSpell(spell_id))) {
 				LogSpells("Spell [{}] was completely resisted by [{}]", spell_id, spelltar->GetName());
 
 				if (spells[spell_id].resist_type == RESIST_PHYSICAL){
@@ -5319,6 +5328,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		return(0);
 	}
 
+
 	//Get resist modifier and adjust it based on focus 2 resist about eq to 1% resist chance
 	int resist_modifier = 0;
 	if (use_resist_override) {
@@ -5560,6 +5570,22 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	//Finally our roll
 	int roll = zone->random.Int(0, RuleB(Spells, EnableResistSoftCap) ? RuleI(Spells, SpellResistSoftCap) : 200);
+
+
+	if(IsDamageOverTimeSpell(spell_id) || IsPureNukeSpell(spell_id))
+	{
+		int cha = caster->GetCHA();
+		resist_chance -= cha / 2;
+		if(resist_chance < 1)
+			resist_chance = 1;
+
+		int defensive_roll = zone->random.Int(0, resist_chance);
+		if (roll > defensive_roll)
+			return 100;
+		if (defensive_roll > 10* roll)
+			return 10;
+		return 100 * roll / defensive_roll;
+	}
 
 	if(roll > resist_chance) {
 		return 100;

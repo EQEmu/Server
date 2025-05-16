@@ -1803,6 +1803,13 @@ public:
 	void SetSpawnedInWater(bool spawned_in_water);
 	bool turning;
 
+
+	// AoT Custom
+	int Pre_Attack_Behavior(EQ::skills::SkillType);	// adjusts attack round behavior. Returns the number of attack increases.
+	int Modify_Attack_Damage(EQ::skills::SkillType, DamageHitInfo &);	// adjusts behavior of an attack while attack damage is being calculated.
+	int Late_Attack_Behavior(EQ::skills::SkillType, DamageHitInfo &);	// adjusts post attack behavior per attack, not per round, after attack has been calculated.
+	int Post_Attack_Behavior(EQ::skills::SkillType, DamageHitInfo &);	// adjusts post attack behavior per attack round.
+
 protected:
 
 	// Bind wound
@@ -1927,6 +1934,8 @@ protected:
 	MobMovementManager *mMovementManager;
 
 	uint16 m_merchant_session_entity_id;
+
+
 
 private:
 	Mob* target;

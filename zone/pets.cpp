@@ -95,7 +95,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if(HasPet() || pettype == nullptr)
 		return;
 
-	int16 act_power = 0; // The actual pet power we'll use.
+	int32 act_power = 0; // The actual pet power we'll use.
 	if (petpower == -1) {
 		if (IsClient()) {
 			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);//Client only
@@ -106,6 +106,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	else if (petpower > 0)
 		act_power = petpower;
 
+	act_power += GetCHA();
 	// optional rule: classic style variance in pets. Achieve this by
 	// adding a random 0-4 to pet power, since it only comes in increments
 	// of five from focus effects.
