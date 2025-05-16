@@ -682,14 +682,33 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings(bool silent_load)
 		if (is_missing_in_database && !is_deprecated_category) {
 			LogInfo("Automatically adding new log category [{}] ({})", Logs::LogCategoryName[i], i);
 
-			auto new_category = LogsysCategoriesRepository::NewEntity();
-			new_category.log_category_id          = i;
-			new_category.log_category_description = Strings::Escape(Logs::LogCategoryName[i]);
-			new_category.log_to_console           = log_settings[i].log_to_console;
-			new_category.log_to_gmsay             = log_settings[i].log_to_gmsay;
-			new_category.log_to_file              = log_settings[i].log_to_file;
-			new_category.log_to_discord           = log_settings[i].log_to_discord;
-			db_categories_to_add.emplace_back(new_category);
+			auto e = LogsysCategoriesRepository::NewEntity();
+			e.log_category_id          = i;
+			e.log_category_description = Strings::Escape(Logs::LogCategoryName[i]);
+			e.log_to_console           = log_settings[i].log_to_console;
+			e.log_to_gmsay             = log_settings[i].log_to_gmsay;
+			e.log_to_file              = log_settings[i].log_to_file;
+			e.log_to_discord           = log_settings[i].log_to_discord;
+			db_categories_to_add.emplace_back(e);
+		}
+
+		// look to see if the category name is different in the database
+		auto it = std::find_if(
+			categories.begin(),
+			categories.end(),
+			[i](const auto &c) { return c.log_category_id == i; }
+		);
+		if (it != categories.end()) {
+			if (it->log_category_description != Logs::LogCategoryName[i]) {
+				LogInfo(
+					"Updating log category [{}] ({}) to new name [{}]",
+					it->log_category_description,
+					i,
+					Logs::LogCategoryName[i]
+				);
+				it->log_category_description = Logs::LogCategoryName[i];
+				LogsysCategoriesRepository::ReplaceOne(*m_database, *it);
+			}
 		}
 	}
 
