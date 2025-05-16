@@ -503,12 +503,13 @@ bool RuleManager::UpdateInjectedRules(Database *db, const std::string &rule_set_
 	}
 
 	// update rules in the database where the description is different
-	for (const auto &e : RuleValuesRepository::All(*db)) {
+	for (auto &e : RuleValuesRepository::All(*db)) {
 		auto i = rule_data.find(e.rule_name);
 		if (i != rule_data.end()) {
 			// if notes are different, update them
-			if (i->second.second != nullptr && !Strings::EqualFold(*i->second.second, e.notes)) {
+			if (i->second.second != nullptr && *i->second.second != e.notes) {
 				LogInfo("Updating rule [{}] notes to [{}]", i->first, *i->second.second);
+				e.notes = *i->second.second;
 				RuleValuesRepository::ReplaceOne(*db, e);
 			}
 		}
