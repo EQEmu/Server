@@ -1130,20 +1130,6 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			Close();
 			return;
 		}
-
-		// make sure that the first_packet in the list first_sent time is within the resend_delay and now
-		// if it is not, then we need to resend all packets in the list
-		if (time_since_first_sent <= first_packet.resend_delay && !m_acked_since_last_resend) {
-			LogNetClient(
-				"Not resending packets for stream [{}] packets [{}] time_first_sent [{}] resend_delay [{}] m_acked_since_last_resend [{}]",
-				stream,
-				s->sent_packets.size(),
-				time_since_first_sent,
-				first_packet.resend_delay,
-				m_acked_since_last_resend
-			);
-			return;
-		}
 	}
 
 	if (LogSys.IsLogEnabled(Logs::Detail, Logs::Netcode)) {
@@ -1153,11 +1139,10 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		}
 
 		LogNetClient(
-			"Resending packets for stream [{}] packet count [{}] total packet size [{}] m_acked_since_last_resend [{}]",
+			"Resending packets for stream [{}] packet count [{}] total packet size [{}]",
 			stream,
 			s->sent_packets.size(),
-			total_size,
-			m_acked_since_last_resend
+			total_size
 		);
 	}
 
@@ -1202,8 +1187,6 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			m_owner->m_options.resend_delay_max
 		);
 	}
-
-	m_acked_since_last_resend = false;
 }
 
 void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
@@ -1224,7 +1207,6 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
 			iter = s->sent_packets.erase(iter);
-			m_acked_since_last_resend = true;
 		}
 		else {
 			++iter;
