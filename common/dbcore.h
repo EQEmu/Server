@@ -32,7 +32,7 @@ public:
 	MySQLRequestResult QueryDatabase(const std::string& query, bool retryOnFailureOnce = true);
 	MySQLRequestResult QueryDatabaseMulti(const std::string &query);
 	void TransactionBegin();
-	void TransactionCommit();
+	MySQLRequestResult TransactionCommit();
 	void TransactionRollback();
 	std::string Escape(const std::string& s);
 	uint32 DoEscapeString(char *tobuf, const char *frombuf, uint32 fromlen);
