@@ -50,7 +50,7 @@ bool DatabaseDumpService::IsMySQLInstalled()
 {
 	std::string version_output = GetMySQLVersion();
 
-	return version_output.find("mysql") != std::string::npos && version_output.find("Ver") != std::string::npos;
+	return version_output.find("mysql") != std::string::npos && (version_output.find("Ver") != std::string::npos || version_output.find("from") != std::string::npos);
 }
 
 /**
