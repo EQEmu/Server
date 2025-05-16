@@ -1173,7 +1173,7 @@ void Client::GoToBind(uint8 bind_number) {
 }
 
 void Client::GoToDeath() {
-	MovePC(m_pp.binds[0].zone_id, m_pp.binds[0].instance_id, 0.0f, 0.0f, 0.0f, 0.0f, 1, ZoneToBindPoint);
+	MovePC(729, 0, -35.0f, 175.0f, 10.0f, 0.0f, 1, ZoneToBindPoint);
 }
 
 void Client::ClearZoneFlag(uint32 zone_id)

@@ -424,7 +424,7 @@ public:
 	SwarmPet *GetSwarmInfo() { return (swarmInfoPtr); }
 	void SetSwarmInfo(SwarmPet *mSwarmInfo) { swarmInfoPtr = mSwarmInfo; }
 
-	int32	GetAccuracyRating() const { return (accuracy_rating); }
+	int32	GetAccuracyRating() const { return (accuracy_rating + GetDEX()); }
 	void	SetAccuracyRating(int32 d) { accuracy_rating = d;}
 	int32	GetAvoidanceRating() const { return (avoidance_rating); }
 	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
