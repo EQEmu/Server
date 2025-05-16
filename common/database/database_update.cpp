@@ -357,6 +357,16 @@ bool DatabaseUpdate::CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b)
 		);
 	}
 
+	if (b.custom_database_version > 0) {
+		LogInfo(
+			"{:>8} | database [{}] binary [{}] {}",
+			"Custom",
+			v.custom_database_version,
+			b.custom_database_version,
+			(v.custom_database_version == b.custom_database_version) ? "up to date" : "checking updates"
+		);
+	}
+
 	LogInfo("{:>8} | [server.auto_database_updates] [<green>true]", "Config");
 
 	LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
