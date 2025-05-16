@@ -185,7 +185,6 @@ namespace EQ
 			// resend tracking
 			size_t m_resend_packets_sent = 0;
 			size_t m_resend_bytes_sent = 0;
-			Timestamp m_last_resend;
 
 			struct DaybreakSentPacket
 			{
