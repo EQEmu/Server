@@ -493,7 +493,7 @@ struct StatBonuses {
 	uint32	ManaAbsorbPercentDamage;			// 0 = Mitigation value
 	uint32	ManaAbsorbPercentDamageCap;			// 0 = Mitigation value
 	int32	EnduranceAbsorbPercentDamage[2];	// 0 = Mitigation value 1 = Percent Endurance drain per HP lost
-	uint32 	EnduranceAbsorbPercentCap;
+	int32 	EnduranceAbsorbPercentCap;
 	int32	ShieldBlock;						// Chance to Shield Block
 	int32	BlockBehind;						// Chance to Block Behind (with our without shield)
 	bool	CriticalRegenDecay;					// increase critical regen chance, decays based on spell level cast
