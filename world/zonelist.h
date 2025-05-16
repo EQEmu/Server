@@ -9,6 +9,7 @@
 #include <vector>
 #include <memory>
 #include <deque>
+#include <mutex>
 
 class WorldTCPConnection;
 class ServerPacket;
