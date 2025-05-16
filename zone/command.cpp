@@ -514,7 +514,15 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 		parse->EventPlayer(EVENT_GM_COMMAND, c, message, 0);
 	}
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::GM_COMMAND) && message != "#help") {
+	bool log_command = true;
+	for (auto &cmd: Strings::Split(RuleS(Logging, PlayerEventsIgnoreGMCommands), ",")) {
+		if (Strings::Contains(command, Strings::ToLower(cmd))) {
+			log_command = false;
+			break;
+		}
+	}
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::GM_COMMAND) && log_command) {
 		auto e = PlayerEvent::GMCommandEvent{
 			.message = message,
 			.target = c->GetTarget() ? c->GetTarget()->GetName() : "NONE"
