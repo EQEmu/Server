@@ -132,6 +132,16 @@ void ZSList::Process() {
 			).c_str()
 		);
 	}
+
+	if (!m_queued_reloads.empty()) {
+		m_queued_reloads_mutex.lock();
+		for (auto &type : m_queued_reloads) {
+			LogInfo("Sending reload of type [{}] to zones", ServerReload::GetName(type));
+			SendServerReload(type, nullptr);
+		}
+		m_queued_reloads.clear();
+		m_queued_reloads_mutex.unlock();
+	}
 }
 
 bool ZSList::SendPacket(ServerPacket* pack) {
@@ -1002,4 +1012,11 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 		z->SendPacket(&pack);
 		++counter;
 	}
+}
+
+void ZSList::QueueServerReload(ServerReload::Type &type)
+{
+	m_queued_reloads_mutex.lock();
+	m_queued_reloads.emplace_back(type);
+	m_queued_reloads_mutex.unlock();
 }
