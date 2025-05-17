@@ -642,8 +642,8 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 		return false;
 	}
 
-	for (int i = 0; i < MAX_PP_LANGUAGE; ++i) { // Initialize Languages
-		pp->languages[i] = 0;
+	for (unsigned char & language : pp->languages) { // Initialize Languages
+		language = 0;
 	}
 
 	for (const auto& e : l) {
@@ -689,8 +689,8 @@ bool ZoneDatabase::LoadCharacterDisciplines(Client* c)
 		return false;
 	}
 
-	for (int slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) {
-		c->GetPP().disciplines.values[slot_id] = 0;
+	for (unsigned int & value : c->GetPP().disciplines.values) {
+		value = 0;
 	}
 
 	for (const auto& e : l) {
@@ -2879,14 +2879,6 @@ void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, ui
 
 void ZoneDatabase::SaveBuffs(Client *client)
 {
-	CharacterBuffsRepository::DeleteWhere(
-		database,
-		fmt::format(
-			"`character_id` = {}",
-			client->CharacterID()
-		)
-	);
-
 	auto      buffs          = client->GetBuffs();
 	const int max_buff_slots = client->GetMaxBuffSlots();
 
@@ -2902,6 +2894,16 @@ void ZoneDatabase::SaveBuffs(Client *client)
 		}
 
 		character_buff_count++;
+	}
+
+	if (character_buff_count) {
+		CharacterBuffsRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`character_id` = {}",
+				client->CharacterID()
+			)
+		);
 	}
 
 	v.reserve(character_buff_count);
@@ -3170,39 +3172,39 @@ void ZoneDatabase::SavePetInfo(Client *client)
 		}
 	}
 
-	CharacterPetInfoRepository::DeleteWhere(
-		database,
-		fmt::format(
-			"`char_id` = {}",
-			client->CharacterID()
-		)
-	);
-
 	if (!pet_infos.empty()) {
+		CharacterPetInfoRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`char_id` = {}",
+				client->CharacterID()
+			)
+		);
+
 		CharacterPetInfoRepository::InsertMany(database, pet_infos);
 	}
 
-	CharacterPetBuffsRepository::DeleteWhere(
-		database,
-		fmt::format(
-			"`char_id` = {}",
-			client->CharacterID()
-		)
-	);
-
 	if (!pet_buffs.empty()) {
+		CharacterPetBuffsRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`char_id` = {}",
+				client->CharacterID()
+			)
+		);
+
 		CharacterPetBuffsRepository::InsertMany(database, pet_buffs);
 	}
 
-	CharacterPetInventoryRepository::DeleteWhere(
-		database,
-		fmt::format(
-			"`char_id` = {}",
-			client->CharacterID()
-		)
-	);
-
 	if (!inventory.empty()) {
+		CharacterPetInventoryRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`char_id` = {}",
+				client->CharacterID()
+			)
+		);
+
 		CharacterPetInventoryRepository::InsertMany(database, inventory);
 	}
 }
@@ -4260,6 +4262,11 @@ void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
 	}
 
 	EXPModifier m = zone->exp_modifiers[c->CharacterID()];
+
+	// if both modifiers are 0, we don't need to save
+	if (m.aa_modifier == 0 && m.exp_modifier == 0) {
+		return;
+	}
 
 	CharacterExpModifiersRepository::ReplaceOne(
 		*this,

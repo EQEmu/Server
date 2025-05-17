@@ -91,7 +91,6 @@ public:
 	inline bool Enabled() { return enabled; }
 
 	bool Load(Database *db);
-	bool Store(Database *db);
 	bool Clear(Database *db);
 
 protected:

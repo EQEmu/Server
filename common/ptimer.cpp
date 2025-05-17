@@ -22,6 +22,7 @@
 #include "ptimer.h"
 #include "database.h"
 #include "strings.h"
+#include "repositories/timers_repository.h"
 
 #ifdef _WINDOWS
 	#include <winsock2.h>
@@ -147,27 +148,6 @@ bool PersistentTimer::Load(Database *db) {
     enabled = (row[2][0] == '1');
 
     return true;
-}
-
-bool PersistentTimer::Store(Database *db) {
-	if(Expired(db, false))	//dont need to store expired timers.
-		return true;
-
-	std::string query = StringFormat("REPLACE INTO timers "
-                                    " (char_id, type, start, duration, enable) "
-                                    " VALUES (%lu, %u, %lu, %lu, %d)",
-                                    (unsigned long)_char_id, _type, (unsigned long)start_time,
-                                    (unsigned long)timer_time, enabled ? 1: 0);
-
-#ifdef DEBUG_PTIMERS
-	printf("Storing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query.c_str());
-#endif
-    auto results = db->QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	return true;
 }
 
 bool PersistentTimer::Clear(Database *db) {
@@ -304,26 +284,33 @@ bool PTimerList::Load(Database *db) {
 	return true;
 }
 
-bool PTimerList::Store(Database *db) {
-#ifdef DEBUG_PTIMERS
-	printf("Storing all timers for char %lu\n", (unsigned long)_char_id);
-#endif
+bool PTimerList::Store(Database *db)
+{
+	auto e = TimersRepository::NewEntity();
+	std::vector<TimersRepository::Timers> entries;
 
-	std::map<pTimerType, PersistentTimer *>::iterator s;
-	s = _list.begin();
-	bool res = true;
-	while(s != _list.end()) {
-		if(s->second != nullptr) {
-#ifdef DEBUG_PTIMERS
-	printf("Storing timer %u for char %lu\n", s->first, (unsigned long)_char_id);
-#endif
-			if(!s->second->Store(db))
-				res = false;
+	for (auto &[type, timer] : _list) {
+		if (!timer) {
+			continue;
 		}
-		++s;
+
+		e.char_id  = _char_id;
+		e.type     = type;
+		e.start    = timer->GetStartTime();
+		e.duration = timer->GetTimerTime();
+		e.enable   = timer->Enabled() ? 1 : 0;
+
+		entries.emplace_back(e);
 	}
-	return(res);
+
+	if (!entries.empty()) {
+		Expired(db, false);
+		TimersRepository::ReplaceMany(*db, entries);
+	}
+
+	return true;
 }
+
 
 bool PTimerList::Clear(Database *db) {
 	_list.clear();
