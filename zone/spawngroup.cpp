@@ -165,6 +165,9 @@ void SpawnGroupList::ClearSpawnGroups()
 
 bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnGroupList *spawn_group_list)
 {
+	auto quest_config = zone->GetQuestConfig();
+	version = quest_config->template_version;
+
 	std::string query = fmt::format(
 		SQL(
 			SELECT

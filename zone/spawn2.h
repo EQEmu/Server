@@ -33,7 +33,7 @@ public:
 		float x, float y, float z, float heading,
 		uint32 respawn, uint32 variance,
 		uint32 timeleft = 0, uint32 grid = 0, bool in_path_when_zone_idle=false,
-		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding);
+		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding, bool in_disable_private_loot=false, bool in_disable_global_loot=false);
 	~Spawn2();
 
 	void	LoadGrid(int start_wp = 0);
@@ -81,6 +81,8 @@ public:
 	inline void SetResumedNPCID(uint32 npc_id) { m_resumed_npc_id = npc_id; }
 	inline void SetStoredLocation(const glm::vec4& loc) { m_stored_location = loc; }
 
+	bool    PrivateLootEnabled() const { return !disable_private_loot; }
+	bool    GlobalLootEnabled() const { return !disable_global_loot; }
 protected:
 	friend class Zone;
 	Timer	timer;
@@ -110,6 +112,8 @@ private:
 	uint32 m_resumed_npc_id = 0;
 	std::map<std::string, std::string> m_entity_variables = {};
 	glm::vec4 m_stored_location = {0, 0, -1000, 0}; // use -1000 to indicate unset/zero-state
+	bool    disable_private_loot;
+	bool    disable_global_loot;
 };
 
 class SpawnCondition {

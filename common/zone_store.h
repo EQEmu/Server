@@ -34,6 +34,8 @@ public:
 	const std::vector<ZoneRepository::Zone> &GetZones() const;
 
 	void LoadZones(Database &db);
+	void RegisterVersionAlias(uint32 zone_id, int old_version, int new_version);
+	int GetVersionAlias(uint32 zone_id, int old_version);
 
 	ZoneRepository::Zone *GetZone(uint32 zone_id, int version = 0);
 	ZoneRepository::Zone *GetZone(const char *in_zone_name);
@@ -106,6 +108,7 @@ public:
 
 private:
 	std::vector<ZoneRepository::Zone> m_zones;
+	std::map<uint32, std::map<int, int>> m_zone_alt_versions;
 };
 
 extern ZoneStore zone_store;
