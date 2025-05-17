@@ -2818,7 +2818,6 @@ void Client::BuyTraderItemFromBazaarWindow(const EQApplicationPacket *app)
 {
 	auto in          = reinterpret_cast<TraderBuy_Struct *>(app->pBuffer);
 	auto trader_item = TraderRepository::GetItemByItemUniqueNumber(database, in->item_unique_id);
-	auto offline     = AccountRepository::GetAllOfflineStatus(database, trader_item.char_id);
 
 	LogTradingDetail(
 		"Packet details: \n"
