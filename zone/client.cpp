@@ -11478,8 +11478,8 @@ void Client::SaveSpells()
 		}
 	}
 
+	CharacterSpellsRepository::DeleteWhere(database, fmt::format("id = {}", CharacterID()));
 	if (!character_spells.empty()) {
-		CharacterSpellsRepository::DeleteWhere(database, fmt::format("id = {}", CharacterID()));
 		CharacterSpellsRepository::InsertMany(database, character_spells);
 	}
 }

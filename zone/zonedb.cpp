@@ -3171,39 +3171,38 @@ void ZoneDatabase::SavePetInfo(Client *client)
 		}
 	}
 
+	CharacterPetInfoRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`char_id` = {}",
+			client->CharacterID()
+		)
+	);
 	if (!pet_infos.empty()) {
-		CharacterPetInfoRepository::DeleteWhere(
-			database,
-			fmt::format(
-				"`char_id` = {}",
-				client->CharacterID()
-			)
-		);
-
 		CharacterPetInfoRepository::InsertMany(database, pet_infos);
 	}
 
-	if (!pet_buffs.empty()) {
-		CharacterPetBuffsRepository::DeleteWhere(
-			database,
-			fmt::format(
-				"`char_id` = {}",
-				client->CharacterID()
-			)
-		);
+	CharacterPetBuffsRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`char_id` = {}",
+			client->CharacterID()
+		)
+	);
 
+	if (!pet_buffs.empty()) {
 		CharacterPetBuffsRepository::InsertMany(database, pet_buffs);
 	}
 
-	if (!inventory.empty()) {
-		CharacterPetInventoryRepository::DeleteWhere(
-			database,
-			fmt::format(
-				"`char_id` = {}",
-				client->CharacterID()
-			)
-		);
+	CharacterPetInventoryRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`char_id` = {}",
+			client->CharacterID()
+		)
+	);
 
+	if (!inventory.empty()) {
 		CharacterPetInventoryRepository::InsertMany(database, inventory);
 	}
 }
