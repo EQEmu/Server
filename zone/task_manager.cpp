@@ -349,10 +349,10 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 	}
 
 	if (!ct_entries.empty()) {
-		CharacterTasksRepository::ReplaceMany(content_db, ct_entries);
+		CharacterTasksRepository::ReplaceMany(database, ct_entries);
 	}
 	if (!cta_entries.empty()) {
-		CharacterActivitiesRepository::ReplaceMany(content_db, cta_entries);
+		CharacterActivitiesRepository::ReplaceMany(database, cta_entries);
 	}
 
 	if (!RuleB(TaskSystem, RecordCompletedTasks) || (cts->m_completed_tasks.size() <=
@@ -415,7 +415,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 	}
 
 	if (!completed_task_entries.empty()) {
-		CompletedTasksRepository::ReplaceMany(content_db, completed_task_entries);
+		CompletedTasksRepository::ReplaceMany(database, completed_task_entries);
 	}
 
 	cts->m_last_completed_task_loaded = cts->m_completed_tasks.size();
