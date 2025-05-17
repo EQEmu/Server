@@ -290,6 +290,12 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 
 	LogTasks("character_id [{}]", character_id);
 
+	auto ct = CharacterTasksRepository::NewEntity();
+	std::vector<CharacterTasksRepository::CharacterTasks> ct_entries;
+
+	auto cta = CharacterActivitiesRepository::NewEntity();
+	std::vector<CharacterActivitiesRepository::CharacterActivities> cta_entries;
+
 	if (cts->m_active_task_count > 0 ||
 		cts->m_active_task.task_id != TASKSLOTEMPTY ||
 		cts->m_active_shared_task.task_id != TASKSLOTEMPTY) {
@@ -303,7 +309,6 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 
 			int slot = active_task.slot;
 			if (active_task.updated) {
-
 				LogTasks(
 					"character_id [{}] updating task_index [{}] task_id [{}]",
 					character_id,
@@ -311,31 +316,14 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 					task_id
 				);
 
-				std::string query = StringFormat(
-					"REPLACE INTO character_tasks (charid, taskid, slot, type, acceptedtime, was_rewarded) "
-					"VALUES (%i, %i, %i, %i, %i, %d)",
-					character_id,
-					task_id,
-					slot,
-					static_cast<int>(task_data->type),
-					active_task.accepted_time,
-					active_task.was_rewarded
-				);
-
-				auto results = database.QueryDatabase(query);
-				if (!results.Success()) {
-					LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
-				}
-				else {
-					active_task.updated = false;
-				}
+				ct.charid = character_id;
+				ct.taskid = task_id;
+				ct.slot = slot;
+				ct.type = static_cast<int>(task_data->type);
+				ct.acceptedtime = active_task.accepted_time;
+				ct.was_rewarded = active_task.was_rewarded;
+				ct_entries.emplace_back(ct);
 			}
-
-			std::string query =
-							"REPLACE INTO character_activities (charid, taskid, activityid, donecount, completed) "
-							"VALUES ";
-
-			int updated_activity_count = 0;
 
 			for (int activity_index = 0; activity_index < task_data->activity_count; ++activity_index) {
 				if (!active_task.activity[activity_index].updated) {
@@ -350,44 +338,21 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 					activity_index
 				);
 
-				if (updated_activity_count == 0) {
-					query +=
-						StringFormat(
-							"(%i, %i, %i, %i, %i)", character_id, task_id, activity_index,
-							active_task.activity[activity_index].done_count,
-							active_task.activity[activity_index].activity_state ==
-							ActivityCompleted
-						);
-				}
-				else {
-					query +=
-						StringFormat(
-							", (%i, %i, %i, %i, %i)", character_id, task_id, activity_index,
-							active_task.activity[activity_index].done_count,
-							active_task.activity[activity_index].activity_state ==
-							ActivityCompleted
-						);
-				}
-
-				updated_activity_count++;
-			}
-
-			if (updated_activity_count == 0) {
-				continue;
-			}
-
-			auto results = database.QueryDatabase(query);
-
-			if (!results.Success()) {
-				LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
-				continue;
-			}
-
-			active_task.updated = false;
-			for (int activity_index = 0; activity_index < task_data->activity_count; ++activity_index) {
-				active_task.activity[activity_index].updated = false;
+				cta.charid = character_id;
+				cta.taskid = task_id;
+				cta.activityid = activity_index;
+				cta.donecount = active_task.activity[activity_index].done_count;
+				cta.completed = active_task.activity[activity_index].activity_state == ActivityCompleted ? 1 : 0;
+				cta_entries.emplace_back(cta);
 			}
 		}
+	}
+
+	if (!ct_entries.empty()) {
+		CharacterTasksRepository::ReplaceMany(content_db, ct_entries);
+	}
+	if (!cta_entries.empty()) {
+		CharacterActivitiesRepository::ReplaceMany(content_db, cta_entries);
 	}
 
 	if (!RuleB(TaskSystem, RecordCompletedTasks) || (cts->m_completed_tasks.size() <=
@@ -396,8 +361,8 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 		return true;
 	}
 
-	const char *completed_task_query = "REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
-									   "VALUES (%i, %i, %i, %i)";
+	auto completed_task = CompletedTasksRepository::NewEntity();
+	std::vector<CompletedTasksRepository::CompletedTasks> completed_task_entries;
 
 	for (
 		unsigned int task_index = cts->m_last_completed_task_loaded;
@@ -423,19 +388,11 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 		// This indicates this task was completed at the given time. We infer that all
 		// none optional activities were completed.
 		//
-		std::string query = StringFormat(
-			completed_task_query,
-			character_id,
-			t.completed_time,
-			task_id,
-			-1
-		);
-
-		auto results = database.QueryDatabase(query);
-		if (!results.Success()) {
-			LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
-			continue;
-		}
+		completed_task.charid = character_id;
+		completed_task.completedtime = t.completed_time;
+		completed_task.taskid = task_id;
+		completed_task.activityid = -1;
+		completed_task_entries.emplace_back(completed_task);
 
 		// If the Rule to record non-optional task completion is not enabled, don't save it
 		if (!RuleB(TaskSystem, RecordCompletedOptionalActivities)) {
@@ -449,18 +406,16 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 				continue;
 			}
 
-			query = StringFormat(
-				completed_task_query,
-				character_id,
-				t.completed_time,
-				task_id, activity_id
-			);
-
-			results = database.QueryDatabase(query);
-			if (!results.Success()) {
-				LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
-			}
+			completed_task.charid = character_id;
+			completed_task.completedtime = t.completed_time;
+			completed_task.taskid = task_id;
+			completed_task.activityid = activity_id;
+			completed_task_entries.emplace_back(completed_task);
 		}
+	}
+
+	if (!completed_task_entries.empty()) {
+		CompletedTasksRepository::ReplaceMany(content_db, completed_task_entries);
 	}
 
 	cts->m_last_completed_task_loaded = cts->m_completed_tasks.size();
