@@ -7112,6 +7112,17 @@ ADD COLUMN `first_login` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `xtargets`;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9324,
+		.description = "2025_05_17_keyring_index.sql",
+		.check = "SHOW CREATE TABLE keyring",
+		.condition = "missing",
+		.match = "idx_charid_itemid",
+		.sql = R"(
+ALTER TABLE keyring ADD INDEX idx_charid_itemid (char_id, item_id);
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

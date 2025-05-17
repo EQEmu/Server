@@ -3027,14 +3027,14 @@ void ZoneDatabase::LoadBuffs(Client *client)
 
 void ZoneDatabase::SaveAuras(Client *c)
 {
-	CharacterAurasRepository::DeleteOne(database, c->CharacterID());
+	const auto& auras = c->GetAuraMgr();
+	if (!auras.count) {
+		return;
+	}
 
 	std::vector<CharacterAurasRepository::CharacterAuras> v;
-
+	CharacterAurasRepository::DeleteOne(database, c->CharacterID());
 	auto e = CharacterAurasRepository::NewEntity();
-
-	const auto& auras = c->GetAuraMgr();
-
 	for (int slot_id = 0; slot_id < auras.count; ++slot_id) {
 		Aura* a = auras.auras[slot_id].aura;
 		if (a && a->AuraZones()) {

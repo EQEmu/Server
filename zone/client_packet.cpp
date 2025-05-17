@@ -1553,10 +1553,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	if (SPDAT_RECORDS > 0) {
-		for (uint32 z = 0; z < EQ::spells::SPELL_GEM_COUNT; z++) {
-			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
-				UnmemSpell(z, false);
-		}
+		UnmemSpellAll(false);
 
 		database.LoadBuffs(this);
 		uint32 max_slots = GetMaxBuffSlots();
@@ -10241,11 +10238,11 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 		printf("Wrong size of LoadSpellSet_Struct! Expected: %zu, Got: %i\n", sizeof(LoadSpellSet_Struct), app->size);
 		return;
 	}
-	int i;
-	LoadSpellSet_Struct* ss = (LoadSpellSet_Struct*)app->pBuffer;
-	for (i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) {
-		if (ss->spell[i] != 0xFFFFFFFF)
+	LoadSpellSet_Struct *ss = (LoadSpellSet_Struct *) app->pBuffer;
+	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) {
+		if (ss->spell[i] != 0xFFFFFFFF) {
 			UnmemSpell(i, true);
+		}
 	}
 }
 

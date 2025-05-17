@@ -78,6 +78,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/misc_functions.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_corpses_repository.h"
+#include "../common/repositories/character_memmed_spells_repository.h"
 #include "../common/repositories/spell_buckets_repository.h"
 
 #include "data_bucket.h"
@@ -5953,10 +5954,29 @@ void Client::UnmemSpellBySpellID(int32 spell_id)
 
 void Client::UnmemSpellAll(bool update_client)
 {
-	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
-		if (IsValidSpell(m_pp.mem_spells[spell_gem])) {
-			UnmemSpell(spell_gem, update_client);
+	bool has_spells = false;
+	for (int slot = 0; slot < EQ::spells::SPELL_GEM_COUNT; slot++) {
+		if (IsValidSpell(m_pp.mem_spells[slot])) {
+			if (slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0) {
+				return;
+			}
+
+			LogSpells("Spell [{}] forgotten from slot [{}]", m_pp.mem_spells[slot], slot);
+
+			if (update_client) {
+				MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
+			}
+
+			m_pp.mem_spells[slot] = UINT32_MAX;
+			has_spells = true;
 		}
+	}
+
+	if (has_spells) {
+		CharacterMemmedSpellsRepository::DeleteWhere(
+			database,
+			fmt::format("`id` = {}", character_id)
+		);
 	}
 }
 
