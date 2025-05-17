@@ -1682,21 +1682,23 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_BazaarPurchase: {
-			auto in = (BazaarPurchaseMessaging_Struct *)pack->pBuffer;
-			if (in->trader_buy_struct.trader_id <= 0) {
-				LogTrading(
-					"World Message <red>[{}] received with invalid trader_id <red>[{}]",
-					"ServerOP_BazaarPurchase",
-					in->trader_buy_struct.trader_id
-				);
-				return;
+			auto in = reinterpret_cast<BazaarPurchaseMessaging_Struct *>(pack->pBuffer);
+			switch (in->transaction_status) {
+				case BazaarPurchaseBuyerCompleteSendToSeller: {
+					zoneserver_list.SendPacket(in->trader_zone_id, in->trader_zone_instance_id, pack);
+					break;
+				}
+				case BazaarPurchaseTraderFailed:
+				case BazaarPurchaseSuccess: {
+					zoneserver_list.SendPacket(in->buyer_zone_id, in->buyer_zone_instance_id, pack);
+					break;
+				}
+				default: {
+					LogError(
+						"ServerOP_BazaarPurchase received with no corresponding action for [{}]",
+						in->transaction_status);
+				}
 			}
-
-			auto trader = client_list.FindCLEByCharacterID(in->trader_buy_struct.trader_id);
-			if (trader) {
-				zoneserver_list.SendPacket(trader->zone(), trader->instance(), pack);
-			}
-
 			break;
 		}
 		case ServerOP_BuyerMessaging: {
@@ -1732,9 +1734,34 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 					break;
 				}
-				default:
-					return;
+				default: {
+					break;
+				}
 			}
+			break;
+		}
+		case ServerOP_UsertoWorldCancelOfflineResponse: {
+			auto utwr  = reinterpret_cast<UsertoWorldResponse *>(pack->pBuffer);
+
+			ServerPacket server_packet;
+			server_packet.opcode  = ServerOP_UsertoWorldCancelOfflineResponse;
+			server_packet.size    = sizeof(UsertoWorldResponse);
+			server_packet.pBuffer = new uchar[server_packet.size];
+			memset(server_packet.pBuffer, 0, server_packet.size);
+
+			auto utwrs         = reinterpret_cast<UsertoWorldResponse *>(server_packet.pBuffer);
+			utwrs->lsaccountid = utwr->lsaccountid;
+			utwrs->ToID        = utwr->FromID;
+			utwrs->worldid     = utwr->worldid;
+			utwrs->response    = UserToWorldStatusSuccess;
+			strn0cpy(utwrs->login, utwr->login, 64);
+
+			LogLoginserverDetail(
+				"Step 7a - World received ServerOP_UsertoWorldCancelOfflineResponse back to login with success."
+			);
+
+			loginserverlist.SendPacket(&server_packet);
+			break;
 		}
 		default: {
 			LogInfo("Unknown ServerOPcode from zone {:#04x}, size [{}]", pack->opcode, pack->size);

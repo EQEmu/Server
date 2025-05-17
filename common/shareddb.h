@@ -156,7 +156,7 @@ public:
 		uint32 ornamentidfile = 0,
 		uint32 ornament_hero_model = 0
 	);
-	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0);
+	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0, const std::string &item_unique_id = "");
 
 	void GetItemsCount(int32 &item_count, uint32 &max_id);
 	void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
