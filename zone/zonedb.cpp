@@ -981,9 +981,8 @@ void ZoneDatabase::SaveCharacterTribute(Client* c)
 		}
 	}
 
-	CharacterTributeRepository::DeleteWhere(database, fmt::format("character_id = {}", c->CharacterID()));
-
 	if (tribute_count > 0) {
+		CharacterTributeRepository::DeleteWhere(database, fmt::format("character_id = {}", c->CharacterID()));
 		CharacterTributeRepository::InsertMany(database, tributes);
 	}
 }
