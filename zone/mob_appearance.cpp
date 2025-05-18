@@ -345,32 +345,16 @@ uint32 NPC::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 
 void Mob::SendArmorAppearance(Client *one_client)
 {
-	/**
-	 * one_client of 0 means sent to all clients
-	 *
-	 * Despite the fact that OP_NewSpawn and OP_ZoneSpawns include the
-	 * armor being worn and its mats, the client doesn't update the display
-	 * on arrival of these packets reliably.
-	 *
-	 * Send Wear changes if mob is a PC race and item is an armor slot.
-	 * The other packets work for primary/secondary.
-	 */
-
 	LogMobAppearance("[{}]", GetCleanName());
 
-	if (IsPlayerRace(race)) {
-		if (!IsClient()) {
-			for (uint8 slot_id = 0; slot_id <= EQ::textures::materialCount; ++slot_id) {
-				const auto item = database.GetItem(GetEquippedItemFromTextureSlot(slot_id));
-				if (item) {
-					SendWearChange(slot_id, one_client);
-				}
-			}
-		}
-	}
-
 	for (uint8 slot_id = 0; slot_id <= EQ::textures::materialCount; ++slot_id) {
-		if (GetTextureProfileMaterial(slot_id)) {
+		bool should_send = GetTextureProfileMaterial(slot_id) != 0;
+
+		if (!should_send && IsPlayerRace(race) && !IsClient()) {
+			should_send = database.GetItem(GetEquippedItemFromTextureSlot(slot_id)) != nullptr;
+		}
+
+		if (should_send) {
 			SendWearChange(slot_id, one_client);
 		}
 	}

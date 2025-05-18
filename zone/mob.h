@@ -424,7 +424,6 @@ public:
 	void ApplyHealthTransferDamage(Mob *caster, Mob *target, uint16 spell_id);
 	void ApplySpellEffectIllusion(int32 spell_id, Mob* caster, int buffslot, int base, int limit, int max);
 	void ApplyIllusionToCorpse(int32 spell_id, Corpse* new_corpse);
-	void SendIllusionWearChange(Client* c);
 	int16 GetItemSlotToConsumeCharge(int32 spell_id, uint32 inventory_slot);
 	bool CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot);
 	bool IsFromTriggeredSpell(EQ::spells::CastingSlot slot, uint32 item_slot = 0xFFFFFFFF);

@@ -767,8 +767,6 @@ void Client::CompleteConnect()
 
 	entity_list.SendAppearanceEffects(this);
 
-	entity_list.SendIllusionWearChange(this);
-
 	SendWearChangeAndLighting(EQ::textures::LastTexture);
 	Mob* pet = GetPet();
 	if (pet) {
