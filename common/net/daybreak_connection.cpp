@@ -1159,9 +1159,10 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		if (m_resend_packets_sent >= MAX_CLIENT_RECV_PACKETS_PER_WINDOW ||
 			m_resend_bytes_sent >= MAX_CLIENT_RECV_BYTES_PER_WINDOW) {
 			LogNetClient(
-				"Stopping resend because we hit thresholds m_resend_packets_sent [{}] max [{}] m_resend_bytes_sent [{}] max [{}]",
+				"Stopping resend because we hit thresholds m_resend_packets_sent [{}] max [{}] in_queue [{}] m_resend_bytes_sent [{}] max [{}]",
 				m_resend_packets_sent,
 				MAX_CLIENT_RECV_PACKETS_PER_WINDOW,
+				s->sent_packets,
 				m_resend_bytes_sent,
 				MAX_CLIENT_RECV_BYTES_PER_WINDOW
 			);
