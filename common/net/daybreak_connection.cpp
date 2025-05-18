@@ -1156,18 +1156,18 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	}
 
 	for (auto &e: s->sent_packets) {
-		if (m_resend_packets_sent >= MAX_CLIENT_RECV_PACKETS_PER_WINDOW ||
-			m_resend_bytes_sent >= MAX_CLIENT_RECV_BYTES_PER_WINDOW) {
-			LogNetClient(
-				"Stopping resend because we hit thresholds m_resend_packets_sent [{}] max [{}] in_queue [{}] m_resend_bytes_sent [{}] max [{}]",
-				m_resend_packets_sent,
-				MAX_CLIENT_RECV_PACKETS_PER_WINDOW,
-				s->sent_packets.size(),
-				m_resend_bytes_sent,
-				MAX_CLIENT_RECV_BYTES_PER_WINDOW
-			);
-			break;
-		}
+		// if (m_resend_packets_sent >= MAX_CLIENT_RECV_PACKETS_PER_WINDOW ||
+		// 	m_resend_bytes_sent >= MAX_CLIENT_RECV_BYTES_PER_WINDOW) {
+		// 	LogNetClient(
+		// 		"Stopping resend because we hit thresholds m_resend_packets_sent [{}] max [{}] in_queue [{}] m_resend_bytes_sent [{}] max [{}]",
+		// 		m_resend_packets_sent,
+		// 		MAX_CLIENT_RECV_PACKETS_PER_WINDOW,
+		// 		s->sent_packets.size(),
+		// 		m_resend_bytes_sent,
+		// 		MAX_CLIENT_RECV_BYTES_PER_WINDOW
+		// 	);
+		// 	break;
+		// }
 
 		auto &sp = e.second;
 		auto &p  = sp.packet;
