@@ -276,7 +276,7 @@ namespace EQ
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
 				tic_rate_hertz = 60.0;
-				resend_timeout = 60000;
+				resend_timeout = 30000;
 				connection_close_time = 2000;
 				outgoing_data_rate = 0.0;
 			}
