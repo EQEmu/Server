@@ -1127,6 +1127,13 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - first_packet.first_sent).count();
 
 		if (time_since_first_sent >= m_owner->m_options.resend_timeout) {
+			LogNetClient(
+				"Closing connection time_since_first_sent [{}] >= m_owner->m_options.resend_timeout [{}] now [{}] first_packet.first_sent [{}]",
+				time_since_first_sent,
+				m_owner->m_options.resend_timeout,
+				now,
+				first_packet.first_sent
+			);
 			Close();
 			return;
 		}
