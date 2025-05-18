@@ -1154,7 +1154,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		// make sure that the first_packet in the list first_sent time is within the resend_delay and now
 		// if it is not, then we need to resend all packets in the list
 		if (time_since_first_sent <= first_packet.resend_delay && !m_acked_since_last_resend) {
-			LogNetClient(
+			LogNetClientDetail(
 				"Not resending packets for m_endpoint [{}] m_port [{}] packets [{}] time_first_sent [{}] resend_delay [{}] m_acked_since_last_resend [{}]",
 				m_endpoint,
 				m_port,
@@ -1173,7 +1173,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			total_size += e.second.packet.Length();
 		}
 
-		LogNetClient(
+		LogNetClientDetail(
 			"Resending packets for m_endpoint [{}] m_port [{}] packet count [{}] total packet size [{}] m_acked_since_last_resend [{}]",
 			m_endpoint,
 			m_port,
