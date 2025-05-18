@@ -11,11 +11,12 @@ void WorldserverCLI::Version(int argc, char **argv, argh::parser &cmd, std::stri
 
 	Json::Value j;
 
-	j["bots_database_version"] = CURRENT_BINARY_BOTS_DATABASE_VERSION;
-	j["compile_date"]          = COMPILE_DATE;
-	j["compile_time"]          = COMPILE_TIME;
-	j["database_version"]      = CURRENT_BINARY_DATABASE_VERSION;
-	j["server_version"]        = CURRENT_VERSION;
+	j["bots_database_version"]   = CURRENT_BINARY_BOTS_DATABASE_VERSION;
+	j["compile_date"]            = COMPILE_DATE;
+	j["compile_time"]            = COMPILE_TIME;
+	j["custom_database_version"] = CUSTOM_BINARY_DATABASE_VERSION;
+	j["database_version"]        = CURRENT_BINARY_DATABASE_VERSION;
+	j["server_version"]          = CURRENT_VERSION;
 
 	std::stringstream payload;
 	payload << j;
