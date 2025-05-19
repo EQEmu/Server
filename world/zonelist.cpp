@@ -1020,3 +1020,15 @@ void ZSList::QueueServerReload(ServerReload::Type &type)
 	m_queued_reloads.emplace_back(type);
 	m_queued_reloads_mutex.unlock();
 }
+
+bool ZSList::IsZoneBootedByZoneIdAndInstanceId(uint32 zone_id, uint32 instance_id) const
+{
+	for (auto const& z : zone_server_list) {
+		auto r = z.get();
+		if (r && r->GetZoneID() == zone_id && r->GetInstanceID() == instance_id) {
+			return true;
+		}
+	}
+
+	return false;
+}

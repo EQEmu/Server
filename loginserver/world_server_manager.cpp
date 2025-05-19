@@ -216,3 +216,35 @@ const std::list<std::unique_ptr<WorldServer>> &WorldServerManager::GetWorldServe
 {
 	return m_world_servers;
 }
+
+void WorldServerManager::SendUserToWorldCancelOfflineRequest(
+	unsigned int server_id,
+	unsigned int client_account_id,
+	const std::string &client_loginserver
+)
+{
+	auto iter = std::find_if(
+		m_world_servers.begin(), m_world_servers.end(),
+		[&](const std::unique_ptr<WorldServer> &server) {
+			return server->GetServerId() == server_id;
+		}
+	);
+
+	if (iter != m_world_servers.end()) {
+		EQ::Net::DynamicPacket outapp;
+		outapp.Resize(sizeof(UsertoWorldRequest));
+
+		auto *r = reinterpret_cast<UsertoWorldRequest *>(outapp.Data());
+		r->worldid     = server_id;
+		r->lsaccountid = client_account_id;
+		strncpy(r->login, client_loginserver.c_str(), 64);
+
+		LogLoginserverDetail("Step 3 - Sending ServerOP_UsertoWorldCancelOfflineRequest to world for client account id {}", client_account_id);
+		(*iter)->GetConnection()->Send(ServerOP_UsertoWorldCancelOfflineRequest, outapp);
+
+		LogNetcode("[UsertoWorldRequest] [Size: {}]\n{}", outapp.Length(), outapp.ToString());
+	}
+	else {
+		LogError("Client requested a user to world but supplied an invalid id of {}", server_id);
+	}
+}

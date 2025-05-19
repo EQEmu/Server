@@ -7112,6 +7112,89 @@ ADD COLUMN `first_login` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `xtargets`;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9324,
+		.description = "2025_03_27_implement_item_unique_id.sql",
+		.check = "SHOW COLUMNS FROM `inventory` LIKE 'item_unique_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `inventory`
+	DROP COLUMN `guid`,
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`,
+	ADD UNIQUE INDEX `idx_item_unique_id` (`item_unique_id`);
+
+ALTER TABLE `character_parcels`
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `item_id`;
+
+ALTER TABLE `character_parcels_containers`
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `item_id`;
+
+ALTER TABLE `inventory_snapshots`
+	CHANGE COLUMN `charid` `character_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `time_index`,
+	CHANGE COLUMN `slotid` `slot_id` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0' AFTER `character_id`,
+	CHANGE COLUMN `itemid` `item_id` INT(11) UNSIGNED NULL DEFAULT '0' AFTER `slot_id`,
+	CHANGE COLUMN `augslot1` `augment_one` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0' AFTER `color`,
+	CHANGE COLUMN `augslot2` `augment_two` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_one`,
+	CHANGE COLUMN `augslot3` `augment_three` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_two`,
+	CHANGE COLUMN `augslot4` `augment_four` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_three`,
+	CHANGE COLUMN `augslot5` `augment_five` MEDIUMINT(7) UNSIGNED NULL DEFAULT '0' AFTER `augment_four`,
+	CHANGE COLUMN `augslot6` `augment_six` MEDIUMINT(7) NOT NULL DEFAULT '0' AFTER `augment_five`,
+	CHANGE COLUMN `ornamenticon` `ornament_icon` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `custom_data`,
+	CHANGE COLUMN `ornamentidfile` `ornament_idfile` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `ornament_icon`,
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`;
+
+ALTER TABLE `inventory_snapshots`
+	DROP PRIMARY KEY;
+
+ALTER TABLE `inventory_snapshots`
+	ADD PRIMARY KEY (`time_index`, `character_id`, `slot_id`) USING BTREE;
+
+ALTER TABLE `trader`
+	CHANGE COLUMN `char_id` `character_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`,
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `item_id`,
+	CHANGE COLUMN `aug_slot_1` `augment_one` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `item_unique_id`,
+	CHANGE COLUMN `aug_slot_2` `augment_two` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_one`,
+	CHANGE COLUMN `aug_slot_3` `augment_three` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_two`,
+	CHANGE COLUMN `aug_slot_4` `augment_four` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_three`,
+	CHANGE COLUMN `aug_slot_5` `augment_five` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_four`,
+	CHANGE COLUMN `aug_slot_6` `augment_six` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `augment_five`,
+	DROP COLUMN `item_sn`,
+	DROP INDEX `idx_trader_item_sn`,
+	DROP INDEX `idx_trader_char`,
+	ADD INDEX `charid_slotid` (`character_id`, `slot_id`) USING BTREE,
+	ADD INDEX `idx_trader_char` (`character_id`, `char_zone_id`, `char_zone_instance_id`) USING BTREE,
+	ADD UNIQUE INDEX `idx_item_unique_id` (`item_unique_id`);
+
+)",
+		.content_schema_update = false
+	},
+	ManifestEntry{
+		.version = 9325,
+		.description = "2025_01_27_offline_account_status.sql",
+		.check       = "SHOW COLUMNS FROM `account` LIKE 'offline'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ ALTER TABLE `account`
+ 	ADD COLUMN `offline` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `time_creation`;
+
+ CREATE TABLE `character_offline_transactions` (
+ 	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+ 	`character_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+ 	`type` INT(10) UNSIGNED NULL DEFAULT '0',
+ 	`item_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+ 	`quantity` INT(11) NULL DEFAULT '0',
+ 	`price` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+ 	`buyer_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+ 	PRIMARY KEY (`id`) USING BTREE,
+ 	INDEX `idx_character_id` (`character_id`)
+ )
+ COLLATE='latin1_swedish_ci'
+ ENGINE=InnoDB;
+ )",
+		.content_schema_update = false
+		},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
