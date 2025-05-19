@@ -1,3 +1,47 @@
+## [23.7.0] 5/19/2025
+
+### CLI
+
+* Add custom database version output ([#4901](https://github.com/EQEmu/Server/pull/4901)) @joligario 2025-05-18
+* Fix MySQL check in database dumper ([#4897](https://github.com/EQEmu/Server/pull/4897)) @joligario 2025-05-16
+
+### Commands
+
+* Add #zonevariable Command ([#4882](https://github.com/EQEmu/Server/pull/4882)) @Kinglykrab 2025-05-15
+
+### Database
+
+* Add Custom Database Migrations for Operators ([#4892](https://github.com/EQEmu/Server/pull/4892)) @Akkadius 2025-05-16
+* Remove Transaction Wrapped Character Save ([#4894](https://github.com/EQEmu/Server/pull/4894)) @Akkadius 2025-05-16
+
+### Fixes
+
+* Deadlock on failed #copycharacter commands ([#4887](https://github.com/EQEmu/Server/pull/4887)) @Akkadius 2025-05-16
+
+### Logging
+
+* Auto Update Log Category Names ([#4890](https://github.com/EQEmu/Server/pull/4890)) @Akkadius 2025-05-16
+
+### Netcode
+
+* Resend Logic Adjustments ([#4900](https://github.com/EQEmu/Server/pull/4900)) @Akkadius 2025-05-18
+
+### Player Events
+
+* Add rule to ignore configured GM commands ([#4888](https://github.com/EQEmu/Server/pull/4888)) @Akkadius 2025-05-16
+
+### Rules
+
+* Auto Update Rule Notes from Source ([#4891](https://github.com/EQEmu/Server/pull/4891)) @Akkadius 2025-05-16
+
+### World
+
+* Fix Rarer Reload Deadlock ([#4893](https://github.com/EQEmu/Server/pull/4893)) @Akkadius 2025-05-16
+
+### Zone State
+
+* Load New Spawn2 Data When Present ([#4889](https://github.com/EQEmu/Server/pull/4889)) @Akkadius 2025-05-16
+
 ## [23.6.0] 5/14/2025
 
 ### Bots
