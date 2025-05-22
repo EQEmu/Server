@@ -536,6 +536,10 @@ bool Client::Process() {
 			DoEnduranceRegen();
 			BuffProcess();
 
+			if (auto_attack) {
+				ResetAFKTimer();
+			}
+
 			if (tribute_timer.Check()) {
 				ToggleTribute(true);	//re-activate the tribute.
 			}

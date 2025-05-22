@@ -4383,6 +4383,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 	m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
+	if (castspell->spell_id && IsValidSpell(castspell->spell_id)) {
+		bool is_non_combat_zone = !zone->CanDoCombat() || zone->BuffTimersSuspended();
+		bool is_excluded_reset  = is_non_combat_zone && IsBardSong(castspell->spell_id);
+		if (!is_excluded_reset) {
+			ResetAFKTimer();
+		}
+	}
+
 	LogSpells("OP CastSpell: slot [{}] spell [{}] target [{}] inv [{}]", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 	CastingSlot slot = static_cast<CastingSlot>(castspell->slot);
 
@@ -4564,6 +4572,12 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 	if (app->size < sizeof(ChannelMessage_Struct)) {
 		LogDebug("Size mismatch in OP_ChannelMessage expected [{}] got [{}]", sizeof(ChannelMessage_Struct), app->size);
 		return;
+	}
+
+	// reject automatic AFK messages from resetting /afk
+	std::string message = cm->message;
+	if (!Strings::Contains(message, "Sorry, I am A.F.K.")) {
+		ResetAFKTimer();
 	}
 
 	if (IsAIControlled() && !GetGM()) {
@@ -4991,6 +5005,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	}
 
 	SetMoving(!(cy == m_Position.y && cx == m_Position.x));
+
+	if (RuleB(Character, EnableAutoAFK)) {
+		CheckAutoIdleAFK(ppu);
+	}
 
 	CheckClientToNpcAggroTimer();
 
@@ -10792,6 +10810,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		return;
 	}
 
+	ResetAFKTimer();
+
 	BenchTimer bench;
 
 	MoveItem_Struct* mi = (MoveItem_Struct*) app->pBuffer;
@@ -14732,7 +14752,9 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AppearanceType::AFK) {
 		if (afk_toggle_timer.Check()) {
-			AFK = (sa->parameter == 1);
+			m_is_afk = (sa->parameter == 1);
+			m_is_manual_afk = (sa->parameter == 1);
+			ResetAFKTimer();
 			entity_list.QueueClients(this, app, true);
 		}
 	}
@@ -15551,6 +15573,14 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 
 	// Pass trade request on to recipient
 	if (tradee && tradee->IsClient()) {
+		// if we are idling we need to sync client positions otherwise clients will not be aware of each other
+		if (m_is_idle) {
+			SyncWorldPositionsToClient(true);
+		}
+		if (tradee->CastToClient()->IsIdle()) {
+			tradee->CastToClient()->SyncWorldPositionsToClient(true);
+		}
+
 		tradee->CastToClient()->QueuePacket(app);
 	}
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
@@ -15580,6 +15610,14 @@ void Client::Handle_OP_TradeRequestAck(const EQApplicationPacket *app)
 	Mob* tradee = entity_list.GetMob(msg->to_mob_id);
 
 	if (tradee && tradee->IsClient()) {
+		// if we are idling we need to sync client positions otherwise clients will not be aware of each other
+		if (m_is_idle) {
+			SyncWorldPositionsToClient(true);
+		}
+		if (tradee->CastToClient()->IsIdle()) {
+			tradee->CastToClient()->SyncWorldPositionsToClient(true);
+		}
+
 		trade->Start(msg->to_mob_id);
 		tradee->CastToClient()->QueuePacket(app);
 	}
@@ -17164,5 +17202,155 @@ void Client::Handle_OP_EvolveItem(const EQApplicationPacket *app)
 		}
 		default: {
 		}
+	}
+}
+
+bool Client::IsFilteredAFKPacket(const EQApplicationPacket *p)
+{
+	if (p->GetOpcode() == OP_ClientUpdate) {
+		return true;
+	}
+
+	return false;
+}
+
+void Client::CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p)
+{
+	if (!RuleB(Character, EnableAutoAFK)) {
+		return;
+	}
+
+	bool is_non_combat_zone = !zone->CanDoCombat() || zone->BuffTimersSuspended();
+
+	int seconds_before_afk =
+			is_non_combat_zone ?
+				RuleI(Character, SecondsBeforeAFKNonCombatZone) :
+				RuleI(Character, SecondsBeforeAFKCombatZone);
+
+	int seconds_before_idle =
+			is_non_combat_zone ?
+				RuleI(Character, SecondsBeforeIdleNonCombatZone) :
+				RuleI(Character, SecondsBeforeIdleCombatZone);
+
+	// seconds_before_idle can't be greater than seconds_before_afk
+	if (seconds_before_idle > seconds_before_afk) {
+		seconds_before_idle = seconds_before_afk;
+	}
+
+	bool has_moved =
+			 m_Position.x != p->x_pos ||
+			 m_Position.y != p->y_pos ||
+			 m_Position.z != p->z_pos ||
+			 m_Position.w != EQ12toFloat(p->heading);
+
+	bool triggered_reset = m_afk_reset;
+	bool was_idle        = m_is_idle;
+	bool is_idle_or_afk  = m_is_idle || m_is_afk;
+
+	if (!has_moved && (!m_is_idle || !m_is_afk)) {
+		auto now              = std::chrono::steady_clock::now();
+		auto since_last_moved = now - m_last_moved;
+
+		if (!m_is_manual_afk && !m_is_afk && since_last_moved > std::chrono::seconds(seconds_before_afk)) {
+			bool is_client_excluded_from_afk = (IsBuyer() || IsTrader() || GetGM());
+			if (is_client_excluded_from_afk) {
+				return;
+			}
+
+			LogInfo(
+				"Client [{}] has been AFK for [{}] seconds",
+				GetCleanName(),
+				std::chrono::duration_cast<std::chrono::seconds>(since_last_moved).count()
+			);
+			SetAFK(true);
+			return;
+		}
+		else if (!m_is_idle && since_last_moved > std::chrono::seconds(seconds_before_idle)) {
+			bool is_client_excluded_from_idle = GetGM() && !is_non_combat_zone;
+			if (is_client_excluded_from_idle) {
+				return;
+			}
+
+			LogInfo(
+				"Client [{}] has been idle for [{}] seconds",
+				GetCleanName(),
+				std::chrono::duration_cast<std::chrono::seconds>(since_last_moved).count()
+			);
+			m_is_idle = true;
+			Message(Chat::Yellow, "You are now idle. Updates will be sent to you less frequently.");
+			return;
+		}
+	}
+
+	// if we triggered a reset, but didn't move, we are still idling but not AFK
+	if (triggered_reset && was_idle) {
+		m_is_idle = true;
+	}
+
+	// if we moved or triggered reset through other actions, we are no longer AFK.
+	// we could trigger resetting AFK status through actions like message, cast, attack etc but still by idle until we move
+	if (!m_is_manual_afk && (has_moved || triggered_reset) && m_is_afk) {
+		LogInfo("AFK [{}] is no longer idle, syncing positions", GetCleanName());
+		SetAFK(false);
+		ResetAFKTimer();
+	}
+
+	// we could be not AFK and idle at the same time
+	if (has_moved && m_is_idle) {
+		LogInfo("Idle [{}] is no longer idle, syncing positions", GetCleanName());
+		m_is_idle = false;
+		Message(Chat::Yellow, "You are no longer idle.");
+		SyncWorldPositionsToClient();
+		ResetAFKTimer();
+	}
+
+	m_afk_reset = false;
+}
+
+void Client::SyncWorldPositionsToClient(bool ignore_idle)
+{
+	// if we are idle currently, we need to force updates (which bypasses idle status) and reset idle status
+	bool reset_idle = false;
+	if (ignore_idle && m_is_idle) {
+		m_is_idle = false;
+		reset_idle = true;
+	}
+
+	LogInfo("Syncing positions for client [{}]", GetCleanName());
+	CheckSendBulkNpcPositions(true);
+
+	static EQApplicationPacket cu(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+
+	for (auto &e: entity_list.GetClientList()) {
+		auto c = e.second;
+
+		// skip if not in range
+		if (Distance(c->GetPosition(), GetPosition()) > RuleI(Range, ClientPositionUpdates)) {
+			continue;
+		}
+
+		// skip self
+		if (c == this) {
+			continue;
+		}
+
+		auto *spu = (PlayerPositionUpdateServer_Struct *) cu.pBuffer;
+
+		memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
+		spu->spawn_id      = c->GetID();
+		spu->x_pos         = FloatToEQ19(c->GetX());
+		spu->y_pos         = FloatToEQ19(c->GetY());
+		spu->z_pos         = FloatToEQ19(c->GetZ());
+		spu->heading       = FloatToEQ12(c->GetHeading());
+		spu->delta_x       = FloatToEQ13(0);
+		spu->delta_y       = FloatToEQ13(0);
+		spu->delta_z       = FloatToEQ13(0);
+		spu->delta_heading = FloatToEQ10(0);
+		spu->animation     = 0;
+		QueuePacket(&cu);
+	}
+
+	if (ignore_idle && reset_idle) {
+		m_is_idle = false;
 	}
 }

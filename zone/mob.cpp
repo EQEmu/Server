@@ -2646,7 +2646,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			Chat::White,
 			fmt::format(
 				" AFK: {} LFG: {} Anon: {} PVP: {} GM: {} Fly Mode: {} ({}) GM Speed: {} Hide Me: {} Invulnerability: {} LD: {} Client Version: {} Tells Off: {}",
-				CastToClient()->AFK ? "Yes" : "No",
+				CastToClient()->m_is_afk ? "Yes" : "No",
 				CastToClient()->LFG ? "Yes" : "No",
 				CastToClient()->GetAnon() ? "Yes" : "No",
 				CastToClient()->GetPVP() ? "Yes" : "No",
