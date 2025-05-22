@@ -182,7 +182,8 @@ int main(int argc, char **argv)
 	EQTimeTimer.Start(600000);
 	Timer parcel_prune_timer(86400000);
 	parcel_prune_timer.Start(86400000);
-
+	Timer player_event_log_process(1000);
+	player_event_log_process.Start(1000);
 
 	// global loads
 	LogInfo("Loading launcher list");
@@ -385,15 +386,6 @@ int main(int argc, char **argv)
 		player_event_logs.Init();
 	}
 
-	auto event_log_processor = std::jthread([](const std::stop_token& stoken) {
-		while (!stoken.stop_requested()) {
-			if (!RuleB(Logging, PlayerEventsQSProcess)) {
-				player_event_logs.Process();
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		}
-	});
-
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
 
@@ -487,6 +479,12 @@ int main(int argc, char **argv)
 		shared_task_manager.Process();
 		dynamic_zone_manager.Process();
 
+		if (!RuleB(Logging, PlayerEventsQSProcess)) {
+			if (player_event_log_process.Check()) {
+				player_event_logs.Process();
+			}
+		}
+
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
@@ -505,8 +503,6 @@ int main(int argc, char **argv)
 	process_timer.Start(32, true);
 
 	EQ::EventLoop::Get().Run();
-
-	event_log_processor.request_stop();
 
 	LogInfo("World main loop completed");
 	LogInfo("Shutting down zone connections (if any)");

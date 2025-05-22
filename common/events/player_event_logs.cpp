@@ -15,9 +15,9 @@ const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 
 // general initialization routine
 void PlayerEventLogs::Init()
 {
-
 	m_process_batch_events_timer.SetTimer(RuleI(Logging, BatchPlayerEventProcessIntervalSeconds) * 1000);
 	m_process_retention_truncation_timer.SetTimer(PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL);
+	m_database_ping_timer.SetTimer(10 * 1000); // 10 seconds
 
 	ValidateDatabaseConnection();
 
@@ -916,6 +916,10 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 // general process function, used in world or QS depending on rule Logging:PlayerEventsQSProcess
 void PlayerEventLogs::Process()
 {
+	if (m_database_ping_timer.Check()) {
+		m_database->ping();
+	}
+
 	if (m_process_batch_events_timer.Check() ||
 		m_record_batch_queue.size() >= RuleI(Logging, BatchPlayerEventProcessChunkSize)) {
 		ProcessBatchQueue();

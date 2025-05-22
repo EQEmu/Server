@@ -113,6 +113,7 @@ private:
 	std::map<PlayerEvent::EventType, EtlSettings>  m_etl_settings{};
 
 	// timers
+	Timer m_database_ping_timer; // database ping timer
 	Timer m_process_batch_events_timer; // events processing timer
 	Timer m_process_retention_truncation_timer; // timer for truncating events based on retention settings
 
