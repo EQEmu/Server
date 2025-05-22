@@ -28,6 +28,9 @@
 #include "../common/path_manager.h"
 #include "../common/repositories/perl_event_export_settings_repository.h"
 #include "../common/file.h"
+#include "../common/json/json.hpp"
+
+using json = nlohmann::json;
 
 #include <stdio.h>
 
@@ -1638,4 +1641,48 @@ int QuestParserCollection::EventMob(
 	}
 
 	return false; // No quest subscription found
+}
+
+QuestZoneConfig::Config QuestParserCollection::LoadZoneConfig(uint32 version, const char * short_name) {
+	const std::string& global_path = fmt::format(
+		"{}/{}",
+		path.GetQuestsPath(),
+		QUEST_GLOBAL_DIRECTORY
+	);
+
+	const std::string& zone_path = fmt::format(
+		"{}/{}",
+		path.GetQuestsPath(),
+		short_name
+	);
+
+	std::vector<std::string> file_names = {
+		fmt::format("{}/v{}/zone_config.json", zone_path, version),
+		fmt::format("{}/v{}/zone_config.json", global_path, version),
+		fmt::format("{}/zone_config.json", zone_path),
+		fmt::format("{}/zone_config.json", global_path)
+	};
+
+	for (auto & file : file_names) {
+		if (!File::Exists(file)) {
+			continue;
+		}
+
+		std::ifstream infile(file);
+		json config_json = json::parse(infile);
+		LogInfo("Discovered zone quest config for '{}' at {}: {}", short_name, file, config_json.dump());
+		return config_json.template get<QuestZoneConfig::Config>();
+	}
+
+	return QuestZoneConfig::Default(version);
+}
+
+QuestZoneConfig::Config QuestZoneConfig::Default(uint32 instance_version) {
+	// You could hardcode behaviors here for certain instance_versions without having to create a zone_config.json file
+
+	QuestZoneConfig::Config empty;
+	// Normally instance versions load spawns/spawngroups/traps/etc based off their instance version.  Template version is used to override this behavior.
+	empty.template_version = instance_version;
+
+	return empty;
 }

@@ -778,6 +778,9 @@ int ZoneDatabase::GetDoorsDBCountPlusOne(std::string zone_short_name, int16 vers
 
 std::vector<DoorsRepository::Doors> ZoneDatabase::LoadDoors(const std::string &zone_name, int16 version)
 {
+	auto quest_config = zone->GetQuestConfig();
+	version = quest_config->template_version;
+
 	auto door_entries = DoorsRepository::GetWhere(
 		*this, fmt::format(
 			"zone = '{}' AND (version = {} OR version = -1) {} ORDER BY doorid ASC",

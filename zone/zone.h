@@ -36,6 +36,7 @@
 #include "pathfinder_interface.h"
 #include "global_loot_manager.h"
 #include "queryserv.h"
+#include "zone_config.h"
 #include "../common/discord/discord.h"
 #include "../common/repositories/dynamic_zone_templates_repository.h"
 #include "../common/repositories/npc_faction_repository.h"
@@ -486,6 +487,8 @@ public:
 	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 	void ReloadMaps();
 
+	QuestZoneConfig::Config *GetQuestConfig() { return &quest_config; };
+
 private:
 	bool      allow_mercs;
 	bool      can_bind;
@@ -536,6 +539,7 @@ private:
 	Timer                               initgrids_timer;
 	Timer                               qglobal_purge_timer;
 	ZoneSpellsBlocked                   *blocked_spells;
+	QuestZoneConfig::Config             quest_config;
 
 	// Factions
 	std::vector<NpcFactionRepository::NpcFaction>                 m_npc_factions         = { };
