@@ -24,6 +24,10 @@ void callGetZoneList(Json::Value &response)
 	for (auto &zone: zoneserver_list.getZoneServerList()) {
 		Json::Value row;
 
+		if (!zone) {
+			continue;
+		}
+
 		if (!zone->IsConnected()) {
 			continue;
 		}

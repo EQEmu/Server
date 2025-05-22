@@ -95,9 +95,22 @@ void ConsoleApi(
 	BenchTimer timer;
 	timer.reset();
 
-	EQEmuApiWorldDataService::get(response, args);
+	std::string method = args.empty() ? "" : args[0];
 
-	std::string method = args[0];
+	if (method.empty()) {
+		root["execution_time"] = std::to_string(timer.elapsed());
+		root["method"]         = method;
+		root["data"]           = response;
+		root["error"]          = "No method specified";
+
+		std::stringstream payload;
+		payload << root;
+		connection->SendLine(payload.str());
+		return;
+	}
+
+	// Safe to call now that args[0] is known to exist
+	EQEmuApiWorldDataService::get(response, args);
 
 	root["execution_time"] = std::to_string(timer.elapsed());
 	root["method"]         = method;
@@ -105,7 +118,6 @@ void ConsoleApi(
 
 	std::stringstream payload;
 	payload << root;
-
 	connection->SendLine(payload.str());
 }
 
