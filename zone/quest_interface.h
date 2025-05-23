@@ -163,6 +163,28 @@ public:
 		return 0;
 	}
 
+	virtual int EventZone(
+		QuestEventID event_id,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	)
+	{
+		return 0;
+	}
+
+	virtual int EventGlobalZone(
+		QuestEventID event_id,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	)
+	{
+		return 0;
+	}
+
 	virtual bool HasQuestSub(uint32 npc_id, QuestEventID event_id)
 	{
 		return false;
@@ -223,6 +245,16 @@ public:
 		return false;
 	}
 
+	virtual bool ZoneHasQuestSub(QuestEventID event_id)
+	{
+		return false;
+	}
+
+	virtual bool GlobalZoneHasQuestSub(QuestEventID event_id)
+	{
+		return false;
+	}
+
 	virtual void LoadNPCScript(std::string filename, int npc_id) { }
 	virtual void LoadGlobalNPCScript(std::string filename) { }
 	virtual void LoadPlayerScript(std::string filename) { }
@@ -234,6 +266,8 @@ public:
 	virtual void LoadGlobalBotScript(std::string filename) { }
 	virtual void LoadMercScript(std::string filename) { }
 	virtual void LoadGlobalMercScript(std::string filename) { }
+	virtual void LoadZoneScript(std::string filename) { }
+	virtual void LoadGlobalZoneScript(std::string filename) { }
 
 	virtual int DispatchEventNPC(
 		QuestEventID event_id,
@@ -300,6 +334,17 @@ public:
 		QuestEventID event_id,
 		Merc* merc,
 		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	)
+	{
+		return 0;
+	}
+
+	virtual int DispatchEventZone(
+		QuestEventID event_id,
+		Zone* zone,
 		std::string data,
 		uint32 extra_data,
 		std::vector<std::any>* extra_pointers
