@@ -95,8 +95,8 @@ void PathManager::LoadPaths()
 	}
 
 	auto log_paths = [&](const std::string& label, const std::vector<std::string>& paths) {
-		for (size_t i = 0; i < paths.size(); ++i) {
-			LogInfo("{:>{}} > [{:<{}}]", fmt::format("{}[{}]", label, i), name_width, paths[i], path_width);
+		if (!paths.empty()) {
+			LogInfo("{:>{}} > [{:<{}}]", label, name_width - 1, Strings::Join(paths, ";"), path_width);
 		}
 	};
 
