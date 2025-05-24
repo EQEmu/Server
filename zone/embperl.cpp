@@ -137,25 +137,28 @@ void Embperl::DoInit()
 	catch (std::string& e) {
 		LogQuests("Warning [{}]: [{}]", Config->PluginPlFile, e);
 	}
-	try {
-		//should probably read the directory in c, instead, so that
-		//I can echo filenames as I do it, but c'mon... I'm lazy and this 1 line reads in all the plugins
-		const std::string& perl_command = (
-			"if(opendir(D,'" +
-			path.GetPluginsPath() +
-			"')) { "
-			"	my @d = readdir(D);"
-			"	closedir(D);"
-			"	foreach(@d){ "
-			"		main::eval_file('plugin','" +
-			path.GetPluginsPath() +
-			"/'.$_)if/\\.pl$/;"
-			"	}"
-		"}");
-		eval_pv(perl_command.c_str(), FALSE);
-	}
-	catch (std::string& e) {
-		LogQuests("Warning [{}]", e);
+
+	for (auto & dir : path.GetPluginPaths()) {
+		try {
+			//should probably read the directory in c, instead, so that
+			//I can echo filenames as I do it, but c'mon... I'm lazy and this 1 line reads in all the plugins
+			const std::string& perl_command = (
+				"if(opendir(D,'" +
+				dir +
+				"')) { "
+				"	my @d = readdir(D);"
+				"	closedir(D);"
+				"	foreach(@d){ "
+				"		main::eval_file('plugin','" +
+				dir +
+				"/'.$_)if/\\.pl$/;"
+				"	}"
+			"}");
+			eval_pv(perl_command.c_str(), FALSE);
+		}
+		catch (std::string& e) {
+			LogQuests("Warning [{}]", e);
+		}
 	}
 #endif //EMBPERL_PLUGIN
 }
