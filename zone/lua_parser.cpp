@@ -1067,13 +1067,16 @@ void LuaParser::ReloadQuests() {
 
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
-	std::string module_path = lua_tostring(L,-1);
-	module_path += ";" + path.GetLuaModulesPath() + "/?.lua;" + path.GetLuaModulesPath() + "/?/init.lua";
-	// luarock paths using lua_modules as tree
-	// to path it adds foo/share/lua/5.1/?.lua and foo/share/lua/5.1/?/init.lua
-	module_path += ";" + path.GetLuaModulesPath() + "/share/lua/" + lua_version + "/?.lua";
-	module_path += ";" + path.GetLuaModulesPath() + "/share/lua/" + lua_version + "/?/init.lua";
+	std::string module_path = lua_tostring(L, -1);
 	lua_pop(L, 1);
+
+	for (const auto& dir : path.GetLuaModulePaths()) {
+		module_path += fmt::format(";{}/?.lua", dir);
+		module_path += fmt::format(";{}/?/init.lua", dir);
+		module_path += fmt::format(";{}/share/lua/{}/?.lua", dir, lua_version);
+		module_path += fmt::format(";{}/share/lua/{}/?/init.lua", dir, lua_version);
+	}
+
 	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "path");
 	lua_pop(L, 1);
@@ -1081,11 +1084,13 @@ void LuaParser::ReloadQuests() {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "cpath");
 	module_path = lua_tostring(L, -1);
-	module_path += ";" + path.GetLuaModulesPath() + "/?" + libext;
-	// luarock paths using lua_modules as tree
-	// luarocks adds foo/lib/lua/5.1/?.so for cpath
-	module_path += ";" + path.GetLuaModulesPath() + "/lib/lua/" + lua_version + "/?" + libext;
 	lua_pop(L, 1);
+
+	for (const auto& dir : path.GetLuaModulePaths()) {
+		module_path += fmt::format(";{}/?{}", dir, libext);
+		module_path += fmt::format(";{}/lib/lua/{}/?{}", dir, lua_version, libext);
+	}
+
 	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "cpath");
 	lua_pop(L, 1);
@@ -1093,46 +1098,50 @@ void LuaParser::ReloadQuests() {
 	MapFunctions(L);
 
 	// load init
-	std::string filename = fmt::format("{}/{}/script_init.lua", path.GetQuestsPath(), QUEST_GLOBAL_DIRECTORY);
+	for (auto& dir : path.GetQuestPaths()) {
+		std::string filename = fmt::format("{}/{}/script_init.lua", dir, QUEST_GLOBAL_DIRECTORY);
 
-	FILE *f = fopen(filename.c_str(), "r");
-	if(f) {
-		fclose(f);
-
-		if(luaL_dofile(L, filename.c_str())) {
-			std::string error = lua_tostring(L, -1);
-			AddError(error);
-		}
-	}
-
-	//zone init - always loads after global
-	if(zone) {
-		std::string zone_script = fmt::format(
-			"{}/{}/script_init_v{}.lua",
-			path.GetQuestsPath(),
-			zone->GetShortName(),
-			zone->GetInstanceVersion()
-		);
-
-		f = fopen(zone_script.c_str(), "r");
-		if(f) {
+		FILE* f = fopen(filename.c_str(), "r");
+		if (f) {
 			fclose(f);
 
-			if(luaL_dofile(L, zone_script.c_str())) {
+			if (luaL_dofile(L, filename.c_str())) {
 				std::string error = lua_tostring(L, -1);
 				AddError(error);
 			}
 		}
-		else {
-			zone_script = fmt::format("{}/{}/script_init.lua", path.GetQuestsPath(), zone->GetShortName());
+	}
 
-			f = fopen(zone_script.c_str(), "r");
+	//zone init - always loads after global
+	if (zone) {
+		for (auto& dir : path.GetQuestPaths()) {
+			std::string zone_script = fmt::format(
+				"{}/{}/script_init_v{}.lua",
+				dir,
+				zone->GetShortName(),
+				zone->GetInstanceVersion()
+			);
+
+			FILE* f = fopen(zone_script.c_str(), "r");
 			if (f) {
 				fclose(f);
 
 				if (luaL_dofile(L, zone_script.c_str())) {
 					std::string error = lua_tostring(L, -1);
 					AddError(error);
+				}
+			}
+			else {
+				zone_script = fmt::format("{}/{}/script_init.lua", dir, zone->GetShortName());
+
+				f = fopen(zone_script.c_str(), "r");
+				if (f) {
+					fclose(f);
+
+					if (luaL_dofile(L, zone_script.c_str())) {
+						std::string error = lua_tostring(L, -1);
+						AddError(error);
+					}
 				}
 			}
 		}

@@ -177,6 +177,21 @@ void EQEmuConfig::parse_config()
 	SharedMemDir = _root["server"]["directories"].get("shared_memory", "shared/").asString();
 	LogDir       = _root["server"]["directories"].get("logs", "logs/").asString();
 
+	auto load_paths = [&](const std::string& key, std::vector<std::string>& target) {
+		const auto& paths = _root["server"]["directories"][key];
+		if (paths.isArray()) {
+			for (const auto& dir : paths) {
+				if (dir.isString()) {
+					target.push_back(dir.asString());
+				}
+			}
+		}
+	};
+
+	load_paths("quest_paths", m_quest_directories);
+	load_paths("plugin_paths", m_plugin_directories);
+	load_paths("lua_module_paths", m_lua_module_directories);
+
 	/**
 	 * Logs
 	 */
