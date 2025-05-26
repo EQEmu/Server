@@ -132,7 +132,7 @@ class EQEmuConfig
 
 		std::vector<std::string> GetLuaModuleDirectories() const
 		{
-			return m_plugin_directories;
+			return m_lua_module_directories;
 		}
 
 
