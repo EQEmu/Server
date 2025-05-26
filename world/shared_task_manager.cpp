@@ -677,10 +677,10 @@ void SharedTaskManager::SendAcceptNewSharedTaskPacket(
 	);
 
 	auto d = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
-	d->requested_character_id = character_id;
-	d->requested_task_id      = task_id;
-	d->requested_npc_type_id  = npc_context_id;
-	d->accept_time            = accept_time;
+	d->requested_character_id   = character_id;
+	d->requested_task_id        = task_id;
+	d->requested_npc_entity_id  = npc_context_id;
+	d->accept_time              = accept_time;
 
 	// get requested character zone server
 	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
