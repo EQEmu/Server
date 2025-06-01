@@ -3540,6 +3540,8 @@ void Zone::StopAllTimers()
 		if (has_stop_event) {
 			parse->EventZone(EVENT_TIMER_STOP, this, e->name);
 		}
+
+		zone_timers.erase(e);
 	}
 }
 
