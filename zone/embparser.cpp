@@ -222,6 +222,8 @@ PerlembParser::PerlembParser() : perl(nullptr)
 	global_bot_quest_status_    = questUnloaded;
 	merc_quest_status_          = questUnloaded;
 	global_merc_quest_status_   = questUnloaded;
+	zone_quest_status_          = questUnloaded;
+	global_zone_quest_status_   = questUnloaded;
 }
 
 PerlembParser::~PerlembParser()
@@ -265,6 +267,8 @@ void PerlembParser::ReloadQuests()
 	global_bot_quest_status_    = questUnloaded;
 	merc_quest_status_          = questUnloaded;
 	global_merc_quest_status_   = questUnloaded;
+	zone_quest_status_          = questUnloaded;
+	global_zone_quest_status_   = questUnloaded;
 
 	item_quest_status_.clear();
 	spell_quest_status_.clear();
@@ -353,21 +357,21 @@ int PerlembParser::EventCommon(
 	}
 
 	if (quest_type == QuestType::Player || quest_type == QuestType::PlayerGlobal) {
-		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, nullptr);
+		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, nullptr, nullptr);
 	} else if (
 		quest_type == QuestType::Bot ||
 		quest_type == QuestType::BotGlobal ||
 		quest_type == QuestType::Merc ||
 		quest_type == QuestType::MercGlobal
 	) {
-		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, nullptr);
+		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, nullptr, nullptr);
 	} else if (quest_type == QuestType::Item || quest_type == QuestType::ItemGlobal) {
-		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, inst, nullptr);
+		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, inst, nullptr, nullptr);
 	} else if (quest_type == QuestType::Spell || quest_type == QuestType::SpellGlobal) {
 		if (mob) {
-			return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, spell);
+			return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, spell, nullptr);
 		} else {
-			return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, spell);
+			return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, spell, nullptr);
 		}
 	} else if (quest_type == QuestType::NPC || quest_type == QuestType::NPCGlobal) {
 		return SendCommands(
@@ -377,7 +381,19 @@ int PerlembParser::EventCommon(
 			npc_mob,
 			mob,
 			nullptr,
+			nullptr,
 			nullptr
+		);
+	} else if (quest_type == QuestType::Zone || quest_type == QuestType::ZoneGlobal) {
+		return SendCommands(
+			package_name.c_str(),
+			QuestEventSubroutines[event_id],
+			0,
+			nullptr,
+			nullptr,
+			nullptr,
+			nullptr,
+			zone
 		);
 	}
 }
@@ -972,7 +988,8 @@ int PerlembParser::SendCommands(
 	Mob* other,
 	Mob* mob,
 	EQ::ItemInstance* inst,
-	const SPDat_Spell_Struct* spell
+	const SPDat_Spell_Struct* spell,
+	Zone* zone
 )
 {
 	if (!perl) {
@@ -980,11 +997,19 @@ int PerlembParser::SendCommands(
 	}
 
 	int ret_value = 0;
+	QuestManager::RunningQuest q;
 	if (mob && mob->IsClient()) {
-		quest_manager.StartQuest(other, mob->CastToClient(), inst, spell);
-	} else {
-		quest_manager.StartQuest(other);
+		q.owner      = other;
+		q.initiator  = mob->CastToClient();
+		q.questitem  = inst;
+		q.questspell = spell;
 	}
+
+	if (zone) {
+		q.zone = zone;
+	}
+
+	quest_manager.StartQuest(q);
 
 	try {
 		perl->eval(fmt::format("package {};", prefix).c_str());
@@ -1024,21 +1049,23 @@ int PerlembParser::SendCommands(
 			sv_setsv(client, _empty_sv);
 		}
 
-		if (other->IsBot()) {
-			Bot* b = quest_manager.GetBot();
-			buf = fmt::format("{}::bot", prefix);
-			SV* bot = get_sv(buf.c_str(), true);
-			sv_setref_pv(bot, "Bot", b);
-		} else if (other->IsMerc()) {
-			Merc* m = quest_manager.GetMerc();
-			buf = fmt::format("{}::merc", prefix);
-			SV* merc = get_sv(buf.c_str(), true);
-			sv_setref_pv(merc, "Merc", m);
-		} else if (other->IsNPC()) {
-			NPC* n = quest_manager.GetNPC();
-			buf = fmt::format("{}::npc", prefix);
-			SV* npc = get_sv(buf.c_str(), true);
-			sv_setref_pv(npc, "NPC", n);
+		if (other) {
+			if (other->IsBot()) {
+				Bot* b = quest_manager.GetBot();
+				buf = fmt::format("{}::bot", prefix);
+				SV* bot = get_sv(buf.c_str(), true);
+				sv_setref_pv(bot, "Bot", b);
+			} else if (other->IsMerc()) {
+				Merc* m = quest_manager.GetMerc();
+				buf = fmt::format("{}::merc", prefix);
+				SV* merc = get_sv(buf.c_str(), true);
+				sv_setref_pv(merc, "Merc", m);
+			} else if (other->IsNPC()) {
+				NPC* n = quest_manager.GetNPC();
+				buf = fmt::format("{}::npc", prefix);
+				SV* npc = get_sv(buf.c_str(), true);
+				sv_setref_pv(npc, "NPC", n);
+			}
 		}
 
 		//only export QuestItem if it's an inst quest
@@ -2724,7 +2751,7 @@ void PerlembParser::LoadGlobalZoneScript(std::string filename)
 	} catch (std::string e) {
 		AddError(
 			fmt::format(
-				"Error Compiling Global Zone uest File [{}] Error [{}]",
+				"Error Compiling Global Zone Quest File [{}] Error [{}]",
 				filename,
 				e
 			)
