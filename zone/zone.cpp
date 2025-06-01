@@ -3315,6 +3315,10 @@ void Zone::ReloadMaps()
 
 uint32 Zone::GetTimerDuration(std::string name)
 {
+	if (!IsLoaded() || zone_timers.empty()) {
+		return 0;
+	}
+
 	const auto& e = std::find_if(
 		zone_timers.begin(),
 		zone_timers.end(),
@@ -3328,6 +3332,10 @@ uint32 Zone::GetTimerDuration(std::string name)
 
 uint32 Zone::GetTimerRemainingTime(std::string name)
 {
+	if (!IsLoaded() || zone_timers.empty()) {
+		return 0;
+	}
+
 	const auto& e = std::find_if(
 		zone_timers.begin(),
 		zone_timers.end(),
@@ -3341,6 +3349,10 @@ uint32 Zone::GetTimerRemainingTime(std::string name)
 
 bool Zone::HasTimer(std::string name)
 {
+	if (!IsLoaded() || zone_timers.empty()) {
+		return false;
+	}
+
 	const auto& e = std::find_if(
 		zone_timers.begin(),
 		zone_timers.end(),
@@ -3354,6 +3366,10 @@ bool Zone::HasTimer(std::string name)
 
 bool Zone::IsPausedTimer(std::string name)
 {
+	if (!IsLoaded() || paused_zone_timers.empty()) {
+		return false;
+	}
+
 	const auto& e = std::find_if(
 		paused_zone_timers.begin(),
 		paused_zone_timers.end(),
@@ -3367,7 +3383,7 @@ bool Zone::IsPausedTimer(std::string name)
 
 void Zone::PauseTimer(std::string name)
 {
-	if (zone_timers.empty()) {
+	if (!IsLoaded() || zone_timers.empty()) {
 		return;
 	}
 
@@ -3393,7 +3409,7 @@ void Zone::PauseTimer(std::string name)
 
 void Zone::ResumeTimer(std::string name)
 {
-	if (paused_zone_timers.empty()) {
+	if (!IsLoaded() || paused_zone_timers.empty()) {
 		return;
 	}
 
@@ -3455,6 +3471,10 @@ void Zone::ResumeTimer(std::string name)
 
 void Zone::SetTimer(std::string name, uint32 duration)
 {
+	if (!IsLoaded()) {
+		return;
+	}
+
 	zone_timers.emplace_back(ZoneTimer(name, duration));
 
 	if (parse->ZoneHasQuestSub(EVENT_TIMER_START)) {
@@ -3465,7 +3485,7 @@ void Zone::SetTimer(std::string name, uint32 duration)
 
 void Zone::StopTimer(std::string name)
 {
-	if (zone_timers.empty()) {
+	if (!IsLoaded() || zone_timers.empty()) {
 		return;
 	}
 
@@ -3485,11 +3505,7 @@ void Zone::StopTimer(std::string name)
 
 void Zone::StopAllTimers()
 {
-	if (!IsLoaded()) {
-		return;
-	}
-
-	if (zone_timers.empty()) {
+	if (!IsLoaded() || zone_timers.empty()) {
 		return;
 	}
 
@@ -3499,6 +3515,8 @@ void Zone::StopAllTimers()
 		if (has_stop_event) {
 			parse->EventZone(EVENT_TIMER_STOP, this, e->name);
 		}
+
+		zone_timers.erase(e);
 	}
 }
 
