@@ -9,6 +9,7 @@ typedef void(*SpellArgumentHandler)(QuestInterface*, lua_State*, Mob*, Client*, 
 typedef void(*EncounterArgumentHandler)(QuestInterface*, lua_State*, Encounter* encounter, std::string, uint32, std::vector<std::any>*);
 typedef void(*BotArgumentHandler)(QuestInterface*, lua_State*, Bot*, Mob*, std::string, uint32, std::vector<std::any>*);
 typedef void(*MercArgumentHandler)(QuestInterface*, lua_State*, Merc*, Mob*, std::string, uint32, std::vector<std::any>*);
+typedef void(*ZoneArgumentHandler)(QuestInterface*, lua_State*, Zone*, std::string, uint32, std::vector<std::any>*);
 
 // NPC
 void handle_npc_event_say(
@@ -1273,6 +1274,25 @@ void handle_bot_spell_blocked(
 	lua_State* L,
 	Bot* bot,
 	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+// Zone
+void handle_zone_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_zone_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
 	std::string data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers

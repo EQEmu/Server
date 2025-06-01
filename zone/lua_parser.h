@@ -125,6 +125,20 @@ public:
 		uint32 extra_data,
 		std::vector<std::any>* extra_pointers
 	);
+	virtual int EventZone(
+		QuestEventID evt,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+	virtual int EventGlobalZone(
+		QuestEventID evt,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
 
 	virtual bool HasQuestSub(uint32 npc_id, QuestEventID evt);
 	virtual bool HasGlobalQuestSub(QuestEventID evt);
@@ -138,6 +152,8 @@ public:
 	virtual bool GlobalBotHasQuestSub(QuestEventID evt);
 	virtual bool MercHasQuestSub(QuestEventID evt);
 	virtual bool GlobalMercHasQuestSub(QuestEventID evt);
+	virtual bool ZoneHasQuestSub(QuestEventID evt);
+	virtual bool GlobalZoneHasQuestSub(QuestEventID evt);
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
@@ -150,6 +166,8 @@ public:
 	virtual void LoadGlobalBotScript(std::string filename);
 	virtual void LoadMercScript(std::string filename);
 	virtual void LoadGlobalMercScript(std::string filename);
+	virtual void LoadZoneScript(std::string filename);
+	virtual void LoadGlobalZoneScript(std::string filename);
 
 	virtual void AddVar(std::string name, std::string val);
 	virtual std::string GetVar(std::string name);
@@ -203,6 +221,13 @@ public:
 		QuestEventID evt,
 		Merc* merc,
 		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+	virtual int DispatchEventZone(
+		QuestEventID evt,
+		Zone* zone,
 		std::string data,
 		uint32 extra_data,
 		std::vector<std::any>* extra_pointers
@@ -307,6 +332,15 @@ private:
 		std::vector<std::any>* extra_pointers,
 		luabind::adl::object* l_func = nullptr
 	);
+	int _EventZone(
+		std::string package_name,
+		QuestEventID evt,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers,
+		luabind::adl::object* l_func = nullptr
+	);
 
 	void LoadScript(std::string filename, std::string package_name);
 	void MapFunctions(lua_State *L);
@@ -317,12 +351,13 @@ private:
 	std::vector<LuaMod> mods_;
 	lua_State *L;
 
-	NPCArgumentHandler NPCArgumentDispatch[_LargestEventID];
-	PlayerArgumentHandler PlayerArgumentDispatch[_LargestEventID];
-	ItemArgumentHandler ItemArgumentDispatch[_LargestEventID];
-	SpellArgumentHandler SpellArgumentDispatch[_LargestEventID];
+	NPCArgumentHandler       NPCArgumentDispatch[_LargestEventID];
+	PlayerArgumentHandler    PlayerArgumentDispatch[_LargestEventID];
+	ItemArgumentHandler      ItemArgumentDispatch[_LargestEventID];
+	SpellArgumentHandler     SpellArgumentDispatch[_LargestEventID];
 	EncounterArgumentHandler EncounterArgumentDispatch[_LargestEventID];
-	BotArgumentHandler BotArgumentDispatch[_LargestEventID];
+	BotArgumentHandler       BotArgumentDispatch[_LargestEventID];
+	ZoneArgumentHandler      ZoneArgumentDispatch[_LargestEventID];
 };
 
 #endif

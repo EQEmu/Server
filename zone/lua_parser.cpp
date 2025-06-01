@@ -409,6 +409,11 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_bot_spell_blocked;
+
+	ZoneArgumentDispatch[EVENT_TIMER_PAUSE]            = handle_zone_timer_pause_resume_start;
+	ZoneArgumentDispatch[EVENT_TIMER_RESUME]           = handle_zone_timer_pause_resume_start;
+	ZoneArgumentDispatch[EVENT_TIMER_START]            = handle_zone_timer_pause_resume_start;
+	ZoneArgumentDispatch[EVENT_TIMER_STOP]             = handle_zone_timer_stop;
 #endif
 
 	L = nullptr;
@@ -2082,4 +2087,191 @@ void LuaParser::LoadMercScript(std::string filename) {
 
 void LuaParser::LoadGlobalMercScript(std::string filename) {
 	LoadScript(filename, "global_merc");
+}
+
+int LuaParser::EventZone(
+	QuestEventID evt,
+	Zone *zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return 0;
+	}
+
+	if (!zone) {
+		return 0;
+	}
+
+	if (!ZoneHasQuestSub(evt)) {
+		return 0;
+	}
+
+	return _EventZone("zone", evt, zone, data, extra_data, extra_pointers);
+}
+
+int LuaParser::EventGlobalZone(
+	QuestEventID evt,
+	Zone *zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return 0;
+	}
+
+	if (!zone) {
+		return 0;
+	}
+
+	if (!GlobalZoneHasQuestSub(evt)) {
+		return 0;
+	}
+
+	return _EventZone("global_zone", evt, zone, data, extra_data, extra_pointers);
+}
+
+int LuaParser::_EventZone(
+	std::string package_name,
+	QuestEventID evt,
+	Zone *zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers,
+	luabind::adl::object *l_func
+) {
+	const char *sub_name = LuaEvents[evt];
+	int start = lua_gettop(L);
+
+	try {
+		int npop = 2;
+		PushErrorHandler(L);
+		if(l_func != nullptr) {
+			l_func->push(L);
+		} else {
+			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+			lua_getfield(L, -1, sub_name);
+			npop = 3;
+		}
+
+		lua_createtable(L, 0, 0);
+		//push self
+		Lua_Zone l_zone(zone);
+		luabind::adl::object l_zone_o = luabind::adl::object(L, l_zone);
+		l_zone_o.push(L);
+		lua_setfield(L, -2, "self");
+
+		auto arg_function = ZoneArgumentDispatch[evt];
+		arg_function(this, L, zone, data, extra_data, extra_pointers);
+
+		QuestManager::RunningQuest q;
+
+		q.zone = zone;
+
+		quest_manager.StartQuest(q);
+
+		if(lua_pcall(L, 1, 1, start + 1)) {
+			std::string error = lua_tostring(L, -1);
+			AddError(error);
+			quest_manager.EndQuest();
+			lua_pop(L, npop);
+			return 0;
+		}
+		quest_manager.EndQuest();
+
+		if(lua_isnumber(L, -1)) {
+			int ret = static_cast<int>(lua_tointeger(L, -1));
+			lua_pop(L, npop);
+			return ret;
+		}
+
+		lua_pop(L, npop);
+	} catch(std::exception &ex) {
+		AddError(
+			fmt::format(
+				"Lua Exception | [{}] for Zone [{}] in [{}]: {}",
+				sub_name,
+				zone->GetShortName(),
+				package_name,
+				ex.what()
+			)
+		);
+
+		//Restore our stack to the best of our ability
+		int end = lua_gettop(L);
+		int n = end - start;
+		if(n > 0) {
+			lua_pop(L, n);
+		}
+	}
+
+	return 0;
+}
+
+int LuaParser::DispatchEventZone(
+	QuestEventID evt,
+	Zone *zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return 0;
+	}
+
+	std::string package_name = "zone";
+
+	auto iter = lua_encounter_events_registered.find(package_name);
+	if (iter == lua_encounter_events_registered.end()) {
+		return 0;
+	}
+
+	int ret = 0;
+	auto riter = iter->second.begin();
+	while (riter != iter->second.end()) {
+		if (riter->event_id == evt) {
+			package_name = fmt::format("encounter_{}", riter->encounter_name);
+			int i = _EventZone(package_name, evt, zone, data, extra_data, extra_pointers, &riter->lua_reference);
+			if (i != 0) {
+				ret = i;
+			}
+		}
+
+		++riter;
+	}
+
+	return ret;
+}
+
+bool LuaParser::ZoneHasQuestSub(QuestEventID evt) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return false;
+	}
+
+	const char *subname = LuaEvents[evt];
+	return HasFunction(subname, "zone");
+}
+
+bool LuaParser::GlobalZoneHasQuestSub(QuestEventID evt) {
+	evt = ConvertLuaEvent(evt);
+	if (evt >= _LargestEventID) {
+		return false;
+	}
+
+	const char *subname = LuaEvents[evt];
+	return HasFunction(subname, "global_zone");
+}
+
+void LuaParser::LoadZoneScript(std::string filename) {
+	LoadScript(filename, "zone");
+}
+
+void LuaParser::LoadGlobalZoneScript(std::string filename) {
+	LoadScript(filename, "global_zone");
 }
