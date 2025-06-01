@@ -1024,7 +1024,8 @@ int PerlembParser::SendCommands(
 				"merc",
 				"npc",
 				"questitem",
-				"spell"
+				"spell",
+				"zone"
 			};
 
 			for (const auto& suffix : suffixes) {
@@ -1103,7 +1104,8 @@ int PerlembParser::SendCommands(
 				"merc",
 				"npc",
 				"questitem",
-				"spell"
+				"spell",
+				"zone"
 			};
 
 			for (const auto& suffix : suffixes) {

@@ -3511,12 +3511,12 @@ void Zone::StopAllTimers()
 
 	const bool has_stop_event = parse->ZoneHasQuestSub(EVENT_TIMER_STOP);
 
-	for (auto e = zone_timers.begin(); e != zone_timers.end(); e++) {
+	for (auto e = zone_timers.begin(); e != zone_timers.end();) {
 		if (has_stop_event) {
 			parse->EventZone(EVENT_TIMER_STOP, this, e->name);
 		}
 
-		zone_timers.erase(e);
+		e = zone_timers.erase(e);
 	}
 }
 
