@@ -147,10 +147,6 @@ void QuestManager::EndQuest() {
 		run.owner->Depop();
 	}
 
-	if (run.zone && run.zone == zone) {
-		zone->StopAllTimers();
-	}
-
 	m_running_quests.pop();
 }
 
