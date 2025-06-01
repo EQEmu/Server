@@ -1696,7 +1696,6 @@ bool Zone::Process() {
 	const bool has_timer_event = parse->ZoneHasQuestSub(EVENT_TIMER);
 
 	for (auto e : zone_timers) {
-		LogError("has_timer_event [{}]", has_timer_event ? "y" : "n");
 		if (e.timer_.Enabled() && e.timer_.Check()) {
 			if (has_timer_event) {
 				parse->EventZone(EVENT_TIMER, this, e.name);
@@ -1945,6 +1944,8 @@ void Zone::Repop(bool is_forced)
 	entity_list.ClearTrapPointers();
 
 	quest_manager.ClearAllTimers();
+
+	StopAllTimers();
 
 	LogInfo("Loading spawn groups");
 	if (!content_db.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
@@ -3457,7 +3458,8 @@ void Zone::SetTimer(std::string name, uint32 duration)
 	zone_timers.emplace_back(ZoneTimer(name, duration));
 
 	if (parse->ZoneHasQuestSub(EVENT_TIMER_START)) {
-		parse->EventZone(EVENT_TIMER_START, this, name);
+		const std::string& export_string = fmt::format("{} {}", name, duration);
+		parse->EventZone(EVENT_TIMER_START, this, export_string);
 	}
 }
 
@@ -3483,6 +3485,10 @@ void Zone::StopTimer(std::string name)
 
 void Zone::StopAllTimers()
 {
+	if (!IsLoaded()) {
+		return;
+	}
+
 	if (zone_timers.empty()) {
 		return;
 	}
@@ -3493,8 +3499,6 @@ void Zone::StopAllTimers()
 		if (has_stop_event) {
 			parse->EventZone(EVENT_TIMER_STOP, this, e->name);
 		}
-
-		e = zone_timers.erase(e);
 	}
 }
 

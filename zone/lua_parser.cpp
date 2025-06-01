@@ -489,7 +489,13 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		arg_function(this, L, npc, init, data, extra_data, extra_pointers);
 		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
-		quest_manager.StartQuest(npc, c);
+		QuestManager::RunningQuest q;
+
+		q.owner     = npc;
+		q.initiator = c;
+
+		quest_manager.StartQuest(q);
+
 		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
@@ -582,7 +588,13 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		auto arg_function = PlayerArgumentDispatch[evt];
 		arg_function(this, L, client, data, extra_data, extra_pointers);
 
-		quest_manager.StartQuest(client, client);
+		QuestManager::RunningQuest q;
+
+		q.owner     = client;
+		q.initiator = client;
+
+		quest_manager.StartQuest(q);
+
 		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
@@ -666,7 +678,14 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		auto arg_function = ItemArgumentDispatch[evt];
 		arg_function(this, L, client, item, mob, data, extra_data, extra_pointers);
 
-		quest_manager.StartQuest(client, client, item);
+		QuestManager::RunningQuest q;
+
+		q.owner     = client;
+		q.initiator = client;
+		q.questitem = item;
+
+		quest_manager.StartQuest(q);
+
 		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
@@ -748,7 +767,14 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob,
 		auto arg_function = SpellArgumentDispatch[evt];
 		arg_function(this, L, mob, client, spell_id, data, extra_data, extra_pointers);
 
-		quest_manager.StartQuest(mob, client, nullptr, const_cast<SPDat_Spell_Struct*>(&spells[spell_id]));
+		QuestManager::RunningQuest q;
+
+		q.owner      = client;
+		q.initiator  = client;
+		q.questspell = const_cast<SPDat_Spell_Struct*>(&spells[spell_id]);
+
+		quest_manager.StartQuest(q);
+
 		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
@@ -814,7 +840,13 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		auto arg_function = EncounterArgumentDispatch[evt];
 		arg_function(this, L, enc, data, extra_data, extra_pointers);
 
-		quest_manager.StartQuest(enc, nullptr, nullptr, nullptr, encounter_name);
+		QuestManager::RunningQuest q;
+
+		q.owner     = enc;
+		q.encounter = encounter_name;
+
+		quest_manager.StartQuest(q);
+
 		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
@@ -1757,7 +1789,13 @@ int LuaParser::_EventBot(
 		arg_function(this, L, bot, init, data, extra_data, extra_pointers);
 		auto* c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
-		quest_manager.StartQuest(bot, c);
+		QuestManager::RunningQuest q;
+
+		q.owner      = bot;
+		q.initiator  = c;
+
+		quest_manager.StartQuest(q);
+
 		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
@@ -1936,7 +1974,13 @@ int LuaParser::_EventMerc(
 		arg_function(this, L, merc, init, data, extra_data, extra_pointers);
 		auto* c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
-		quest_manager.StartQuest(merc, c);
+		QuestManager::RunningQuest q;
+
+		q.owner      = merc;
+		q.initiator  = c;
+
+		quest_manager.StartQuest(q);
+
 		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);

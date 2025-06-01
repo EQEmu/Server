@@ -232,7 +232,8 @@ private:
 		Mob* other,
 		Mob* mob,
 		EQ::ItemInstance* inst,
-		const SPDat_Spell_Struct* spell
+		const SPDat_Spell_Struct* spell,
+		Zone* zone
 	);
 
 	void MapFunctions();
