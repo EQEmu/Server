@@ -7112,6 +7112,24 @@ ADD COLUMN `first_login` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `xtargets`;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version     = 9324,
+		.description = "2025_06_01_script_constants.sql",
+		.check       = "SHOW TABLES LIKE 'script_constants'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+CREATE TABLE `script_constants` (
+	`zone` VARCHAR(32) DEFAULT '',
+	`version` SMALLINT(5) DEFAULT -1,
+	`lua_namespace` VARCHAR(100),
+	`name` VARCHAR(100),
+	`value` TEXT,
+	`valuetype` SMALLINT(5),
+	PRIMARY KEY (`zone`, `version`, `lua_namespace`, `name`)
+);
+)",
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

@@ -1326,6 +1326,8 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_zone()
 		)];
 
+		lua_register_db_consts(L);
+
 	} catch(std::exception &ex) {
 		std::string error = ex.what();
 		AddError(error);

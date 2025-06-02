@@ -30,6 +30,7 @@
 #include "../common/events/player_event_logs.h"
 #include "worldserver.h"
 #include "zone.h"
+#include "../common/repositories/script_constants_repository.h"
 
 struct Events { };
 struct Factions { };
@@ -8054,6 +8055,70 @@ luabind::scope lua_register_exp_source() {
 			luabind::value("Task", static_cast<int>(ExpSource::Task)),
 			luabind::value("Sacrifice", static_cast<int>(ExpSource::Sacrifice))
 		)];
+}
+
+// Pulls the data out of the 'script_constants' table and places them in a global 'DBConstants' table.
+//
+// DBConstants {
+// 	lua_namespace {
+// 		name = value
+// 	}
+// }
+void lua_register_db_consts(lua_State *L) {
+	if (!zone) {
+		return;
+	}
+
+	const auto &consts = ScriptConstantsRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"(zone = '{}' or zone = '') and (version = {} or version = -1) order by lua_namespace",
+			zone->GetShortName(),
+			zone->GetInstanceVersion()
+		)
+	);
+
+	std::string current_namespace = "";
+
+	LUABIND_CHECK_STACK(L); //Asserts that we haven't left anything on the stack.
+
+	lua_newtable(L); //Toplevel db constants table
+
+	for (const auto &sc : consts) {
+		if (sc.lua_namespace != current_namespace) {
+			if (current_namespace != "") {
+				// Top of stack (-1) = namespace table
+				// -2 = db constants table
+				// Pops our namespace table from the stack
+				lua_setfield(L, -2, current_namespace.c_str()); //DBConstants[current_namespace] = namespacetable;
+			}
+
+			lua_newtable(L);
+			current_namespace = sc.lua_namespace;
+		}
+
+		switch (sc.valuetype) {
+			case ScriptConstantsRepository::ValueTypes::Number:
+				lua_pushnumber(L, Strings::ToInt(sc.value));
+				break;
+			default:
+				lua_pushstring(L, sc.value.c_str());
+				break;
+		}
+
+		// Top of stack (-1) = value
+		// -2 = namespace table
+		// -3 = db constants table
+		// Pops our value off the stack
+		lua_setfield(L, -2, sc.name.c_str()); //namespacetable[name] = value;
+	}
+
+	if (current_namespace != "") {
+		lua_setfield(L, -2, current_namespace.c_str());
+	}
+
+	// Top of stack (-1) = db constants table
+	lua_setglobal(L, "DBConstants");
 }
 
 #endif

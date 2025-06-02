@@ -25,6 +25,7 @@ luabind::scope lua_register_rules();
 luabind::scope lua_register_journal_speakmode();
 luabind::scope lua_register_journal_mode();
 luabind::scope lua_register_exp_source();
+void lua_register_db_consts(lua_State *L);
 
 #endif
 #endif
