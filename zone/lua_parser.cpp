@@ -219,6 +219,7 @@ LuaParser::LuaParser() {
 		SpellArgumentDispatch[i]     = handle_spell_null;
 		EncounterArgumentDispatch[i] = handle_encounter_null;
 		BotArgumentDispatch[i]       = handle_bot_null;
+		ZoneArgumentDispatch[i]      = handle_zone_null;
 	}
 
 	NPCArgumentDispatch[EVENT_SAY]                    = handle_npc_event_say;
@@ -410,10 +411,21 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_bot_spell_blocked;
 
-	ZoneArgumentDispatch[EVENT_TIMER_PAUSE]            = handle_zone_timer_pause_resume_start;
-	ZoneArgumentDispatch[EVENT_TIMER_RESUME]           = handle_zone_timer_pause_resume_start;
-	ZoneArgumentDispatch[EVENT_TIMER_START]            = handle_zone_timer_pause_resume_start;
-	ZoneArgumentDispatch[EVENT_TIMER_STOP]             = handle_zone_timer_stop;
+	ZoneArgumentDispatch[EVENT_CLICK_DOOR]     = handle_zone_click_door;
+	ZoneArgumentDispatch[EVENT_CLICK_OBJECT]   = handle_zone_click_object;
+	ZoneArgumentDispatch[EVENT_DEATH_ZONE]     = handle_zone_death;
+	ZoneArgumentDispatch[EVENT_DESPAWN_ZONE]   = handle_zone_despawn;
+	ZoneArgumentDispatch[EVENT_LOOT_ZONE]      = handle_zone_loot;
+	ZoneArgumentDispatch[EVENT_PAYLOAD]        = handle_zone_payload;
+	ZoneArgumentDispatch[EVENT_PLAYER_PICKUP]  = handle_zone_pickup;
+	ZoneArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_zone_popup;
+	ZoneArgumentDispatch[EVENT_SIGNAL]         = handle_zone_signal;
+	ZoneArgumentDispatch[EVENT_SPAWN_ZONE]     = handle_zone_spawn;
+	ZoneArgumentDispatch[EVENT_TIMER]          = handle_zone_timer;
+	ZoneArgumentDispatch[EVENT_TIMER_PAUSE]    = handle_zone_timer_pause_resume_start;
+	ZoneArgumentDispatch[EVENT_TIMER_RESUME]   = handle_zone_timer_pause_resume_start;
+	ZoneArgumentDispatch[EVENT_TIMER_START]    = handle_zone_timer_pause_resume_start;
+	ZoneArgumentDispatch[EVENT_TIMER_STOP]     = handle_zone_timer_stop;
 #endif
 
 	L = nullptr;

@@ -486,6 +486,9 @@ public:
 	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 	void ReloadMaps();
 
+	void Signal(int signal_id);
+	void SendPayload(int payload_id, std::string payload_value);
+
 	struct PausedZoneTimer {
 		std::string name;
 		uint32      remaining_time;
@@ -578,6 +581,7 @@ private:
 
 	std::vector<ZoneTimer> zone_timers;
 	std::vector<PausedZoneTimer> paused_zone_timers;
+	std::deque<int> m_zone_signals;
 };
 
 #endif
