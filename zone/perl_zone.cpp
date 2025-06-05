@@ -643,6 +643,16 @@ void Perl_Zone_StopAllTimers(Zone* self)
 	self->StopAllTimers();
 }
 
+void Perl_Zone_SendPayload(Zone* self, int payload_id, std::string payload_value)
+{
+	self->SendPayload(payload_id, payload_value);
+}
+
+void Perl_Zone_Signal(Zone* self, int signal_id)
+{
+	self->Signal(signal_id);
+}
+
 void perl_register_zone()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -768,6 +778,7 @@ void perl_register_zone()
 	package.add("Repop", (void(*)(Zone*))&Perl_Zone_Repop);
 	package.add("Repop", (void(*)(Zone*, bool))&Perl_Zone_Repop);
 	package.add("ResumeTimer", &Perl_Zone_ResumeTimer);
+	package.add("SendPayload", &Perl_Zone_SendPayload);
 	package.add("SetAAEXPModifier", &Perl_Zone_SetAAEXPModifier);
 	package.add("SetAAEXPModifierByCharacterID", &Perl_Zone_SetAAEXPModifierByCharacterID);
 	package.add("SetBucket", (void(*)(Zone*, const std::string, const std::string))&Perl_Zone_SetBucket);
@@ -779,6 +790,7 @@ void perl_register_zone()
 	package.add("SetIsHotzone", &Perl_Zone_SetIsHotzone);
 	package.add("SetTimer", &Perl_Zone_SetTimer);
 	package.add("SetVariable", &Perl_Zone_SetVariable);
+	package.add("Signal", &Perl_Zone_Signal);
 	package.add("StopTimer", &Perl_Zone_StopTimer);
 	package.add("StopAllTimers", &Perl_Zone_StopAllTimers);
 	package.add("ShowZoneGlobalLoot", &Perl_Zone_ShowZoneGlobalLoot);

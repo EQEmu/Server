@@ -1675,8 +1675,12 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "doorid", data);
 			ExportVar(package_name.c_str(), "version", zone->GetInstanceVersion());
 
-			if (extra_pointers && extra_pointers->size() == 1) {
+			if (extra_pointers && extra_pointers->size() >= 1) {
 				ExportVar(package_name.c_str(), "door", "Doors", std::any_cast<Doors*>(extra_pointers->at(0)));
+			}
+
+			if (extra_pointers && extra_pointers->size() == 2) {
+				ExportVar(package_name.c_str(), "client", "Client", std::any_cast<Client*>(extra_pointers->at(1)));
 			}
 
 			break;
@@ -1699,8 +1703,12 @@ void PerlembParser::ExportEventVariables(
 				);
 			}
 
-			if (extra_pointers && extra_pointers->size() == 2) {
+			if (extra_pointers && extra_pointers->size() >= 2) {
 				ExportVar(package_name.c_str(), "corpse", "Corpse", std::any_cast<Corpse*>(extra_pointers->at(1)));
+			}
+
+			if (extra_pointers && extra_pointers->size() == 3) {
+				ExportVar(package_name.c_str(), "client", "Client", std::any_cast<Client*>(extra_pointers->at(2)));
 			}
 
 			break;
@@ -1769,13 +1777,17 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "picked_up_id", data);
 			ExportVar(package_name.c_str(), "picked_up_entity_id", extra_data);
 
-			if (extra_pointers && extra_pointers->size() == 1) {
+			if (extra_pointers && extra_pointers->size() >= 1) {
 				ExportVar(
 					package_name.c_str(),
 					"item",
 					"QuestItem",
 					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))
 				);
+			}
+
+			if (extra_pointers && extra_pointers->size() == 2) {
+				ExportVar(package_name.c_str(), "client", "Client", std::any_cast<Client*>(extra_pointers->at(1)));
 			}
 
 			break;
@@ -1790,6 +1802,11 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_POPUP_RESPONSE: {
 			ExportVar(package_name.c_str(), "popupid", data);
+
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "client", "Client", std::any_cast<Client*>(extra_pointers->at(0)));
+			}
+
 			break;
 		}
 
@@ -1953,8 +1970,12 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "objectid", data);
 			ExportVar(package_name.c_str(), "clicker_id", extra_data);
 
-			if (extra_pointers && extra_pointers->size() == 1) {
+			if (extra_pointers && extra_pointers->size() >= 1) {
 				ExportVar(package_name.c_str(), "object", "Object", std::any_cast<Object*>(extra_pointers->at(0)));
+			}
+
+			if (extra_pointers && extra_pointers->size() == 2) {
+				ExportVar(package_name.c_str(), "client", "Client", std::any_cast<Client*>(extra_pointers->at(1)));
 			}
 
 			break;
@@ -2032,6 +2053,13 @@ void PerlembParser::ExportEventVariables(
 					ExportVar(package_name.c_str(), "killed_npc_id", !killed->IsMerc() && killed->IsNPC() ? killed->GetNPCTypeID() : 0);
 				}
 			}
+
+			if (extra_pointers && extra_pointers->size() == 3) {
+				Mob* killer = std::any_cast<Mob*>(extra_pointers->at(2));
+				if (killer) {
+					ExportVar(package_name.c_str(), "killer", "Mob", killer);
+				}
+			}
 			break;
 		}
 
@@ -2059,10 +2087,21 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_SPAWN_ZONE: {
-			ExportVar(package_name.c_str(), "spawned_entity_id", mob->GetID());
-			ExportVar(package_name.c_str(), "spawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
-			ExportVar(package_name.c_str(), "spawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
-			ExportVar(package_name.c_str(), "spawned", "Mob", mob);
+			if (mob) {
+				ExportVar(package_name.c_str(), "spawned_entity_id", mob->GetID());
+				ExportVar(package_name.c_str(), "spawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
+				ExportVar(package_name.c_str(), "spawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
+				ExportVar(package_name.c_str(), "spawned", "Mob", mob);
+			}
+
+			if (extra_pointers && extra_pointers->size() == 1) {
+				Mob* spawn_mob = std::any_cast<Mob*>(extra_pointers->at(0));
+				ExportVar(package_name.c_str(), "spawned_entity_id", spawn_mob->GetID());
+				ExportVar(package_name.c_str(), "spawned_bot_id", spawn_mob->IsBot() ? spawn_mob->CastToBot()->GetBotID() : 0);
+				ExportVar(package_name.c_str(), "spawned_npc_id", spawn_mob->IsNPC() ? spawn_mob->GetNPCTypeID() : 0);
+				ExportVar(package_name.c_str(), "spawned", "Mob", spawn_mob);
+			}
+
 			break;
 		}
 
@@ -2314,6 +2353,11 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "despawned_entity_id", mob->GetID());
 			ExportVar(package_name.c_str(), "despawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
 			ExportVar(package_name.c_str(), "despawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
+
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "npc", "NPC", std::any_cast<NPC*>(extra_pointers->at(0)));
+			}
+
 			break;
 		}
 
