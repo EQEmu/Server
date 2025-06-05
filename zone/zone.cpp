@@ -1703,6 +1703,15 @@ bool Zone::Process() {
 		}
 	}
 
+	if (!m_zone_signals.empty()) {
+		int signal_id = m_zone_signals.front();
+		m_zone_signals.pop_front();
+
+		if (parse->ZoneHasQuestSub(EVENT_SIGNAL)) {
+			parse->EventZone(EVENT_SIGNAL, this, std::to_string(signal_id), 0);
+		}
+	}
+
 	mMovementManager->Process();
 
 	return true;
@@ -3517,6 +3526,20 @@ void Zone::StopAllTimers()
 		}
 
 		e = zone_timers.erase(e);
+	}
+}
+
+void Zone::Signal(int signal_id)
+{
+	m_zone_signals.push_back(signal_id);
+}
+
+void Zone::SendPayload(int payload_id, std::string payload_value)
+{
+	if (parse->ZoneHasQuestSub(EVENT_PAYLOAD)) {
+		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
+
+		parse->EventZone(EVENT_PAYLOAD, this, export_string, 0);
 	}
 }
 
