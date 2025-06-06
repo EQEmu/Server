@@ -309,19 +309,19 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 	);
 }
 
-std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char_id, const std::string &serial_number)
+std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 character_id, const std::string &unique_item_id)
 {
 	auto results = TraderRepository::GetWhere(
 		database,
 		fmt::format(
-			"`char_id` = '{}' AND `item_sn` = '{}' ORDER BY slot_id",
-			char_id,
-			serial_number
+			"`character_id` = '{}' AND `item_unique_id` = '{}' ORDER BY slot_id",
+			character_id,
+			unique_item_id
 		)
 	);
 
 	if (results.empty()) {
-		LogTrading("Could not find item serial number {} for character id {}", serial_number, char_id);
+		LogTrading("Could not find item serial number {} for character id {}", unique_item_id, character_id);
 		return nullptr;
 	}
 
@@ -357,7 +357,7 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 	}
 
 	inst->SetCharges(charges);
-	inst->SetUniqueID(serial_number);
+	inst->SetUniqueID(unique_item_id);
 	//FIX inst->SetMerchantSlot(serial_number);
 	inst->SetPrice(cost);
 
@@ -368,9 +368,9 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 	return std::move(inst);
 }
 
-void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 charges, uint32 new_price) {
+void ZoneDatabase::UpdateTraderItemPrice(int character_id, uint32 item_id, uint32 charges, uint32 new_price) {
 
-	LogTrading("ZoneDatabase::UpdateTraderPrice([{}], [{}], [{}], [{}])", char_id, item_id, charges, new_price);
+	LogTrading("ZoneDatabase::UpdateTraderPrice([{}], [{}], [{}], [{}])", character_id, item_id, charges, new_price);
 	const EQ::ItemData *item = database.GetItem(item_id);
 
 	if(!item) {
@@ -378,20 +378,20 @@ void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 cha
 	}
 
 	if (new_price == 0) {
-		LogTrading("Removing Trader items from the DB for char_id [{}], item_id [{}]", char_id, item_id);
+		LogTrading("Removing Trader items from the DB for char_id [{}], item_id [{}]", character_id, item_id);
 
 		auto results = TraderRepository::DeleteWhere(
 			database,
 			fmt::format(
-				"`char_id` = '{}' AND `item_id` = {}",
-				char_id,
+				"`character_id` = '{}' AND `item_id` = {}",
+				character_id,
 				item_id
 			)
 		);
 		if (!results) {
 			LogDebug("[CLIENT] Failed to remove trader item(s): [{}] for char_id: [{}]",
 					 item_id,
-					 char_id
+					 character_id
 			);
 		}
 
@@ -399,23 +399,23 @@ void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 cha
 	}
 
 	if (!item->Stackable) {
-		auto results = TraderRepository::UpdateItem(database, char_id, new_price, item_id, charges);
+		auto results = TraderRepository::UpdateItem(database, character_id, new_price, item_id, charges);
 		if (!results) {
 			LogTrading(
 				"Failed to update price for trader item [{}] for char_id: [{}]",
 				item_id,
-				char_id
+				character_id
 			);
 		}
 		return;
 	}
 
-	auto results = TraderRepository::UpdateItem(database, char_id, new_price, item_id, 0);
+	auto results = TraderRepository::UpdateItem(database, character_id, new_price, item_id, 0);
 	if (!results) {
 		LogTrading(
 			"Failed to update price for trader item [{}] for char_id: [{}]",
 			item_id,
-			char_id
+			character_id
 		);
 	}
 }
