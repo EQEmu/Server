@@ -1783,7 +1783,13 @@ static void UpdateTraderCustomerPriceChanged(
 
 	LogTrading("Sending price updates to customer [{}]", customer->GetName());
 
-	auto it = std::find_if(trader_items.begin(), trader_items.end(), [&](TraderRepository::Trader x){ return x.item_id == item->ID;});
+	auto it = std::find_if(
+		trader_items.begin(),
+		trader_items.end(),
+		[&](TraderRepository::Trader x) {
+			return x.item_id == item->ID;
+		}
+	);
 	std::unique_ptr<EQ::ItemInstance> inst(
 		database.CreateItem(
 			it->item_id,
