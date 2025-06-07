@@ -2467,7 +2467,9 @@ public:
  		guild_id                 = in.guild_id;
  		guildrank                = in.guildrank;
  		LFG                      = in.LFG;
- 		AFK                      = in.AFK;
+ 		m_is_afk                 = in.m_is_afk;
+ 		m_is_idle                = in.m_is_idle;
+ 		m_is_manual_afk          = in.m_is_manual_afk;
  		trader_id                = in.trader_id;
  		m_buyer_id               = in.m_buyer_id;
  		race                     = in.race;
