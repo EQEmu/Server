@@ -7113,7 +7113,7 @@ ADD COLUMN `first_login` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `xtargets`;
 		.content_schema_update = false
 	},
 	ManifestEntry{
-		.version = 9324,
+		.version = 9325,
 		.description = "2025_03_27_implement_item_unique_id.sql",
 		.check = "SHOW COLUMNS FROM `inventory` LIKE 'item_unique_id'",
 		.condition = "empty",
@@ -7170,7 +7170,7 @@ ALTER TABLE `trader`
 		.content_schema_update = false
 	},
 	ManifestEntry{
-		.version = 9325,
+		.version = 9326,
 		.description = "2025_01_27_offline_account_status.sql",
 		.check       = "SHOW COLUMNS FROM `account` LIKE 'offline'",
 		.condition   = "empty",
