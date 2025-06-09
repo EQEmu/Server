@@ -852,11 +852,13 @@ void Doors::CreateDatabaseEntry()
 	const auto& l = DoorsRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"zone = '{}' AND doorid = {}",
+			"zone = '{}' AND (version = {} OR version = -1) AND doorid = {}",
 			zone->GetShortName(),
+			zone->GetInstanceVersion(),
 			GetDoorID()
 		)
 	);
+
 	if (!l.empty()) {
 		auto e = l[0];
 
