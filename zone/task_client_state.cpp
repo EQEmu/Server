@@ -1968,7 +1968,7 @@ void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 void ClientTaskState::AcceptNewTask(
 	Client *client,
 	int task_id,
-	int npc_type_id,
+	int npc_entity_id,
 	time_t accept_time,
 	bool enforce_level_requirement
 )
@@ -2001,7 +2001,7 @@ void ClientTaskState::AcceptNewTask(
 		// fill
 		r->requested_character_id = client->CharacterID();
 		r->requested_task_id      = task_id;
-		r->requested_npc_type_id  = npc_type_id;
+		r->requested_npc_entity_id  = npc_entity_id;
 
 		// send
 		worldserver.SendPacket(pack);
@@ -2190,11 +2190,11 @@ void ClientTaskState::AcceptNewTask(
 
 	task_manager->SaveClientState(client, this);
 
-	NPC *npc = entity_list.GetID(npc_type_id)->CastToNPC();
+	NPC *npc = entity_list.GetNPCByID(npc_entity_id);
 	if (npc) {
 		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
 			auto e = PlayerEvent::TaskAcceptEvent{
-				.npc_id = static_cast<uint32>(npc_type_id),
+				.npc_id = npc->GetNPCTypeID(),
 				.npc_name = npc->GetCleanName(),
 				.task_id = static_cast<uint32>(task_id),
 				.task_name = task_manager->GetTaskName(static_cast<uint32>(task_id)),

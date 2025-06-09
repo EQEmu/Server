@@ -42,7 +42,7 @@ public:
 	int GetTaskActivityDoneCount(TaskType task_type, int index, int activity_id);
 	int GetTaskActivityDoneCountFromTaskID(int task_id, int activity_id);
 	int GetTaskStartTime(TaskType task_type, int index);
-	void AcceptNewTask(Client *client, int task_id, int npc_type_id, time_t accept_time, bool enforce_level_requirement = false);
+	void AcceptNewTask(Client *client, int task_id, int npc_entity_id, time_t accept_time, bool enforce_level_requirement = false);
 	void FailTask(Client *client, int task_id);
 	int TaskTimeLeft(int task_id);
 	bool IsTaskCompleted(int task_id, Client *c = nullptr);

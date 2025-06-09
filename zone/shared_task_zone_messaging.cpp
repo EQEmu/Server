@@ -20,7 +20,7 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 					->AcceptNewTask(
 						c,
 						(int) p->requested_task_id,
-						(int) p->requested_npc_type_id,
+						(int) p->requested_npc_entity_id,
 						p->accept_time
 					);
 				c->LoadClientTaskState();
