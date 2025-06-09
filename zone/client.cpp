@@ -12796,6 +12796,16 @@ void Client::CheckSendBulkNpcPositions(bool force)
 			updated_count++;
 		}
 
+		if (force) {
+			static EQApplicationPacket p(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+			auto      *s = (PlayerPositionUpdateServer_Struct *) p.pBuffer;
+			for (auto &e: entity_list.GetCorpseList()) {
+				Corpse *c = e.second;
+				MakeSpawnUpdate(s);
+				QueuePacket(&p, false);
+			}
+		}
+
 		LogPositionUpdate(
 			"[{}] Sent [{}] bulk updated NPC positions, skipped [{}] distance_moved [{}] update_range [{}]",
 			GetCleanName(),
