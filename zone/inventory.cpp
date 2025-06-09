@@ -650,8 +650,8 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// put item into inventory
 	if (to_slot == EQ::invslot::slotCursor) {
-		PushItemOnCursor(*inst);
-		SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
+		PushItemOnCursor(*inst, true);
+		//SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
 	} else {
 		PutItemInInventory(to_slot, *inst, true);
 	}
@@ -958,7 +958,7 @@ void Client::SendCursorBuffer()
 }
 
 // Remove item from inventory
-void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_update, bool update_db) {
+bool Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_update, bool update_db) {
 	#if (EQDEBUG >= 5)
 		LogDebug("DeleteItemInInventory([{}], [{}], [{}])", slot_id, quantity, (client_update) ? "true":"false");
 	#endif
@@ -977,7 +977,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 			QueuePacket(outapp);
 			safe_delete(outapp);
 		}
-		return;
+		return false;
 	}
 
 	uint64 evolve_id = m_inv[slot_id]->GetEvolveUniqueID();
@@ -1031,6 +1031,8 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 			safe_delete(outapp);
 		}
 	}
+
+	return true;
 }
 
 bool Client::PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update)
@@ -1054,6 +1056,10 @@ bool Client::PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update)
 // client_update: Sends packet to client
 bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, bool client_update) {
 	LogInventory("Putting item [{}] ([{}]) into slot [{}]", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
+
+	if (inst.GetUniqueID().empty()) {
+		inst.CreateUniqueID();
+	}
 
 	if (slot_id == EQ::invslot::slotCursor) { // don't trust macros before conditional statements...
 		return PushItemOnCursor(inst, client_update);
@@ -4667,19 +4673,94 @@ bool Client::HasItemOnCorpse(uint32 item_id)
 
 bool Client::PutItemInInventoryWithStacking(EQ::ItemInstance *inst)
 {
-	auto free_id = GetInv().FindFirstFreeSlotThatFitsItem(inst->GetItem());
-	if (inst->IsStackable()) {
-		if (TryStacking(inst, ItemPacketTrade, true, false)) {
+	struct temp {
+		int16 slot_id;
+		int32 quantity;
+	};
+
+	std::vector<temp> queue;
+	auto              quantity = inst->GetCharges();
+
+	for (int i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
+		auto inv_inst = GetInv().GetItem(i);
+		if (!inv_inst) {
+			LogError("Found a slot {} in general inventory", i);
+			PutItemInInventory(i, *inst, true);
 			return true;
 		}
-	}
-	if (free_id != INVALID_INDEX) {
-		if (PutItemInInventory(free_id, *inst, true)) {
-			return true;
+
+		int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(i, EQ::invbag::SLOT_BEGIN);
+		uint8 bag_size     = inv_inst->GetItem()->BagSlots;
+
+		for (uint8 bag_slot = EQ::invbag::SLOT_BEGIN; bag_slot < bag_size; bag_slot++) {
+			if (quantity == 0) {
+				break;
+			}
+
+			auto bag_inst = GetInv().GetItem(base_slot_id + bag_slot);
+			if (!bag_inst && inv_inst->GetItem()->BagSize >= inst->GetItem()->Size) {
+				LogError("Found a parent {} base_slot_id {} bag_slot {} in bag", i, base_slot_id, bag_slot);
+				PutItemInInventory(base_slot_id + bag_slot, *inst, true);
+				return true;
+			}
+
+			if (bag_inst && bag_inst->IsStackable() && bag_inst->GetID() == inst->GetID()) {
+				auto  stack_size        = bag_inst->GetItem()->StackSize; // 100
+				auto  bag_inst_quantity = bag_inst->GetCharges();
+				int16 temp_slot         = base_slot_id + bag_slot;
+				if (stack_size - bag_inst_quantity >= quantity) {
+					temp tmp = { temp_slot, quantity };
+					queue.push_back(tmp);
+					quantity = 0;
+					LogError(
+						"Found an item parent {} base_slot_id {} bag_slot {} in bag with ENOUGH space",
+						i,
+						base_slot_id,
+						bag_slot
+					);
+					break;
+				}
+
+				if (stack_size - bag_inst_quantity > 0) {
+					temp tmp = { temp_slot, stack_size - bag_inst_quantity };
+					queue.push_back(tmp);
+					quantity -= stack_size - bag_inst_quantity;
+					LogError(
+						"Found an item parent {} base_slot_id {} bag_slot {} in bag with SOME space",
+						i,
+						base_slot_id,
+						bag_slot
+					);
+				}
+			}
 		}
 	}
+
+	if (!queue.empty()) {
+		database.TransactionBegin();
+		for (auto const &i: queue) {
+			auto bag_inst = GetInv().GetItem(i.slot_id);
+			if (!bag_inst) {
+				LogError("Client inventory error occurred. Character ID {} Slot_ID {}", CharacterID(), i.slot_id);
+				continue;
+			}
+			bag_inst->SetCharges(i.quantity + bag_inst->GetCharges());
+			PutItemInInventory(i.slot_id, *bag_inst, true);
+			LogError("Write out data.  Item {} quantity {} slot {}", bag_inst->GetItem()->Name, i.quantity, i.slot_id);
+		}
+
+		database.TransactionCommit();
+		quantity = 0;
+	}
+
+	if (quantity == 0) {
+		LogError("Quantity was zero.  All items placed in inventory.");
+		return true;
+	}
+
+	LogError("Could not find enough room");
 	return false;
-};
+}
 
 bool Client::FindNumberOfFreeInventorySlotsWithSizeCheck(std::vector<BuyerLineTradeItems_Struct> items)
 {
