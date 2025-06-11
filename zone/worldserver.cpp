@@ -4592,7 +4592,10 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 
 		case ServerReload::Type::Logs:
 			LogSys.LoadLogDatabaseSettings();
-			player_event_logs.ReloadSettings();
+			// if QS process is enabled, we get settings from QS
+			if (!RuleB(Logging, PlayerEventsQSProcess)) {
+				player_event_logs.ReloadSettings();
+			}
 			break;
 
 		case ServerReload::Type::Loot:

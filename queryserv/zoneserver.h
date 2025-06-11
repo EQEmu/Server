@@ -16,11 +16,12 @@ class ZoneServer : public WorldTCPConnection {
 public:
 	ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> in_connection, EQ::Net::ConsoleServer *in_console);
 	~ZoneServer();
-	void SendPacket(ServerPacket *pack) { m_connection->SendPacket(pack); }
-	void SetIsZoneConnected(bool in) { m_is_zone_connected = in; }
-	bool GetIsZoneConnected() { return m_is_zone_connected; }
-	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
+	void        SendPacket(ServerPacket *pack) { m_connection->SendPacket(pack); }
+	void        SetIsZoneConnected(bool in) { m_is_zone_connected = in; }
+	bool        GetIsZoneConnected() { return m_is_zone_connected; }
+	void        HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 	std::string GetUUID() const { return m_connection->GetUUID(); }
+	void        SendPlayerEventLogSettings();
 
 private:
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> m_connection{};
