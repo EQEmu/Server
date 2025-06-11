@@ -415,8 +415,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 
 	static auto dedupe_key = build_key(*w);
 	auto send_if_changed = [&](Client* client) {
-		uint32_t client_id = client->GetID();
-		auto& last_key = m_last_seen_wearchange[client_id];
+		auto& last_key = m_last_seen_wearchange[client->GetID()];
 		if (last_key == dedupe_key) {
 			return;
 		}
