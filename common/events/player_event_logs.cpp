@@ -535,6 +535,20 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 	return "";
 }
 
+void PlayerEventLogs::LoadPlayerEventSettingsFromQS(
+	const std::vector<PlayerEventLogSettingsRepository::PlayerEventLogSettings> &settings
+)
+{
+	for (const auto &e : settings) {
+		if (e.id >= PlayerEvent::MAX || e.id < 0) {
+			continue;
+		}
+		m_settings[e.id] = e;
+	}
+
+	LogInfo("Applied [{}] player event log settings from QS", settings.size());
+}
+
 // GM_COMMAND           | [x] Implemented Formatter
 // ZONING               | [x] Implemented Formatter
 // AA_GAIN              | [x] Implemented Formatter

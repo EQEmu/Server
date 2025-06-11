@@ -73,9 +73,11 @@ public:
 		return BuildPlayerEventPacket(c);
 	}
 
-	[[nodiscard]] const PlayerEventLogSettingsRepository::PlayerEventLogSettings *GetSettings() const;
-	bool IsEventDiscordEnabled(int32_t event_type_id);
-	std::string GetDiscordWebhookUrlFromEventType(int32_t event_type_id);
+	[[nodiscard]] const PlayerEventLogSettingsRepository::PlayerEventLogSettings * GetSettings() const;
+	bool                                                                           IsEventDiscordEnabled(int32_t event_type_id);
+	std::string                                                                    GetDiscordWebhookUrlFromEventType(int32_t event_type_id);
+
+	void LoadPlayerEventSettingsFromQS(const std::vector<PlayerEventLogSettingsRepository::PlayerEventLogSettings>& settings);
 
 	static std::string GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e);
 

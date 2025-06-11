@@ -15,7 +15,7 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
+#include <cereal/cereal.hpp>
 class BasePlayerEventLogSettingsRepository {
 public:
 	struct PlayerEventLogSettings {
@@ -25,6 +25,20 @@ public:
 		int32_t     retention_days;
 		int32_t     discord_webhook_id;
 		uint8_t     etl_enabled;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(id),
+				CEREAL_NVP(event_name),
+				CEREAL_NVP(event_enabled),
+				CEREAL_NVP(retention_days),
+				CEREAL_NVP(discord_webhook_id),
+				CEREAL_NVP(etl_enabled)
+			);
+		}
 	};
 
 	static std::string PrimaryKey()
