@@ -1044,6 +1044,11 @@ void Perl_Mob_BuffFadeBySlot(Mob* self, int slot, bool recalc_bonuses) // @categ
 	self->BuffFadeBySlot(slot, recalc_bonuses);
 }
 
+void Perl_Mob_BuffFadeBySlot(Mob* self, int slot, bool recalc_bonuses, bool suppress, int suppress_tics) // @categories Script Utility, Spells and Disciplines
+{
+	self->BuffFadeBySlot(slot, recalc_bonuses, suppress, suppress_tics);
+}
+
 bool Perl_Mob_CanBuffStack(Mob* self, uint16 spell_id, uint8 caster_level) // @categories Script Utility, Spells and Disciplines
 {
 	return self->CanBuffStack(spell_id, caster_level);
@@ -3613,6 +3618,7 @@ void perl_register_mob()
 	package.add("BuffFadeByEffect", (void(*)(Mob*, int, int))&Perl_Mob_BuffFadeByEffect);
 	package.add("BuffFadeBySlot", (void(*)(Mob*, int))&Perl_Mob_BuffFadeBySlot);
 	package.add("BuffFadeBySlot", (void(*)(Mob*, int, bool))&Perl_Mob_BuffFadeBySlot);
+	package.add("BuffFadeBySlot", (void(*)(Mob*, int, bool, bool, int))&Perl_Mob_BuffFadeBySlot);
 	package.add("BuffFadeBySpellID", &Perl_Mob_BuffFadeBySpellID);
 	package.add("BuffFadeDetrimental", &Perl_Mob_BuffFadeDetrimental);
 	package.add("BuffFadeDetrimentalByCaster", &Perl_Mob_BuffFadeDetrimentalByCaster);
