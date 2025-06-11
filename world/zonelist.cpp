@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "dynamic_zone_manager.h"
 #include "ucs.h"
 #include "clientlist.h"
+#include "queryserv.h"
 #include "../common/repositories/trader_repository.h"
 #include "../common/repositories/buyer_repository.h"
 
@@ -45,6 +46,7 @@ extern EQ::Random emu_random;
 extern WebInterfaceList web_interface;
 extern SharedTaskManager shared_task_manager;
 extern ClientList client_list;
+extern QueryServConnection QSLink;
 volatile bool UCSServerAvailable_ = false;
 void CatchSignal(int sig_num);
 
@@ -985,6 +987,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 		LogSys.LoadLogDatabaseSettings();
 		player_event_logs.ReloadSettings();
 		UCSLink.SendPacket(&pack);
+		QSLink.SendPacket(&pack);
 	} else if (type == ServerReload::Type::Tasks) {
 		shared_task_manager.LoadTaskData();
 	} else if (type == ServerReload::Type::DzTemplates) {
