@@ -58,7 +58,7 @@ public:
 		std::stringstream ss;
 		{
 			cereal::JSONOutputArchiveSingleLine ar(ss);
-			e.serialize(ar);
+			ar(e);
 		}
 
 		n.event_type_name = PlayerEvent::EventName[t];

@@ -2224,7 +2224,7 @@ void Database::PurgeCharacterParcels()
 		pd.char_id      = r.char_id;
 		{
 			cereal::JSONOutputArchiveSingleLine ar(ss);
-			pd.serialize(ar);
+			ar(pd);
 		}
 
 		pel.event_data = ss.str();

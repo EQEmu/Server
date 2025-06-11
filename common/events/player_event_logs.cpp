@@ -189,7 +189,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 		try {
 			std::stringstream        ss(data);
 			cereal::JSONInputArchive ar(ss);
-			out.serialize(ar);
+			ar(out);
 		}
 		catch (const std::exception &e) {}
 	};
@@ -588,7 +588,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatAAGainedEvent(e, n);
 			break;
@@ -599,7 +599,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatAAPurchasedEvent(e, n);
 			break;
@@ -611,7 +611,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatCombineEvent(e, n);
 			break;
@@ -622,7 +622,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatDeathEvent(e, n);
 			break;
@@ -633,7 +633,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatDiscoverItemEvent(e, n);
 			break;
@@ -644,7 +644,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatDroppedItemEvent(e, n);
 			break;
@@ -662,7 +662,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatFishSuccessEvent(e, n);
 			break;
@@ -673,7 +673,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatForageSuccessEvent(e, n);
 			break;
@@ -684,7 +684,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatDestroyItemEvent(e, n);
 			break;
@@ -695,7 +695,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatLevelGainedEvent(e, n);
 			break;
@@ -706,7 +706,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatLevelLostEvent(e, n);
 			break;
@@ -717,7 +717,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatLootItemEvent(e, n);
 			break;
@@ -728,7 +728,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatGroundSpawnPickupEvent(e, n);
 			break;
@@ -739,7 +739,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatNPCHandinEvent(e, n);
 			break;
@@ -750,7 +750,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatEventSay(e, n);
 			break;
@@ -761,7 +761,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatGMCommand(e, n);
 			break;
@@ -772,7 +772,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatSkillUpEvent(e, n);
 			break;
@@ -783,7 +783,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatSplitMoneyEvent(e, n);
 			break;
@@ -794,7 +794,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatTaskAcceptEvent(e, n);
 			break;
@@ -805,7 +805,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatTaskCompleteEvent(e, n);
 			break;
@@ -816,7 +816,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatTaskUpdateEvent(e, n);
 			break;
@@ -827,7 +827,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatTradeEvent(e, n);
 			break;
@@ -838,7 +838,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatTraderPurchaseEvent(e, n);
 			break;
@@ -849,7 +849,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatTraderSellEvent(e, n);
 			break;
@@ -860,7 +860,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 			payload = PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(e, n);
 			break;
@@ -871,7 +871,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 
 			payload = PlayerEventDiscordFormatter::FormatMerchantPurchaseEvent(e, n);
@@ -883,7 +883,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 
 			payload = PlayerEventDiscordFormatter::FormatMerchantSellEvent(e, n);
@@ -895,7 +895,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
-				n.serialize(ar);
+				ar(n);
 			}
 
 			payload = PlayerEventDiscordFormatter::FormatZoningEvent(e, n);

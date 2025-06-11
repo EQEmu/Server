@@ -7,6 +7,15 @@
 #include "../rulesys.h"
 #include "../repositories/player_event_logs_repository.h"
 
+#define CEREAL_NVP_IF_NONZERO(ar, name) \
+if ((name) != 0) ar(cereal::make_nvp(#name, name))
+
+#define CEREAL_NVP_IF_NOT_EMPTY(ar, name) \
+if (!(name).empty()) ar(cereal::make_nvp(#name, name))
+
+#define CEREAL_NVP_IF_TRUE(ar, name) \
+if ((name)) ar(cereal::make_nvp(#name, name))
+
 namespace PlayerEvent {
 
 	enum EventType {
@@ -225,8 +234,25 @@ namespace PlayerEvent {
 
 		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(to_slot),
+				CEREAL_NVP(charges)
+			);
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+			CEREAL_NVP_IF_TRUE(ar, attuned);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
@@ -285,8 +311,35 @@ namespace PlayerEvent {
 
 		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(
+				CEREAL_NVP(slot),
+				CEREAL_NVP(item_id)
+			);
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NOT_EMPTY(ar, augment_1_name);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NOT_EMPTY(ar, augment_2_name);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NOT_EMPTY(ar, augment_3_name);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NOT_EMPTY(ar, augment_4_name);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NOT_EMPTY(ar, augment_5_name);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+			CEREAL_NVP_IF_NOT_EMPTY(ar, augment_6_name);
+
+			ar(
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(charges)
+			);
+
+			CEREAL_NVP_IF_TRUE(ar, in_bag);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(slot),
 				CEREAL_NVP(item_id),
@@ -295,7 +348,7 @@ namespace PlayerEvent {
 				CEREAL_NVP(augment_2_id),
 				CEREAL_NVP(augment_2_name),
 				CEREAL_NVP(augment_3_id),
-				CEREAL_NVP(augment_1_name),
+				CEREAL_NVP(augment_3_name),
 				CEREAL_NVP(augment_4_id),
 				CEREAL_NVP(augment_4_name),
 				CEREAL_NVP(augment_5_id),
@@ -444,10 +497,22 @@ namespace PlayerEvent {
 		uint32      augment_6_id;
 		std::string item_name;
 
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(CEREAL_NVP(item_name));
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -471,10 +536,22 @@ namespace PlayerEvent {
 		uint32      augment_6_id;
 		std::string item_name;
 
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(CEREAL_NVP(item_name));
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -501,10 +578,29 @@ namespace PlayerEvent {
 		bool        attuned;
 		std::string reason;
 
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(charges)
+			);
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(
+				CEREAL_NVP(attuned),
+				CEREAL_NVP(reason)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
@@ -520,6 +616,7 @@ namespace PlayerEvent {
 			);
 		}
 	};
+
 
 	struct LevelGainedEvent {
 		uint32 from_level;
@@ -570,8 +667,28 @@ namespace PlayerEvent {
 
 		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(charges)
+			);
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(
+				CEREAL_NVP(npc_id),
+				CEREAL_NVP(corpse_name)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
@@ -806,8 +923,25 @@ namespace PlayerEvent {
 
 		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(slot_id),
+				CEREAL_NVP(charges)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -886,11 +1020,32 @@ namespace PlayerEvent {
 		uint64      total_cost;
 		uint64      player_money_balance;
 
-
 		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(trader_id),
+				CEREAL_NVP(trader_name),
+				CEREAL_NVP(price),
+				CEREAL_NVP(quantity),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(total_cost),
+				CEREAL_NVP(player_money_balance)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -928,11 +1083,31 @@ namespace PlayerEvent {
 		uint64      total_cost;
 		uint64      player_money_balance;
 
-
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(buyer_id),
+				CEREAL_NVP(buyer_name),
+				CEREAL_NVP(price),
+				CEREAL_NVP(quantity),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(total_cost),
+				CEREAL_NVP(player_money_balance)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -1083,10 +1258,24 @@ namespace PlayerEvent {
 		bool   attuned;
 		uint32 guild_favor;
 
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+			CEREAL_NVP_IF_NONZERO(ar, charges);
+			CEREAL_NVP_IF_TRUE(ar, attuned);
+
+			ar(CEREAL_NVP(guild_favor));
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -1095,6 +1284,8 @@ namespace PlayerEvent {
 				CEREAL_NVP(augment_4_id),
 				CEREAL_NVP(augment_5_id),
 				CEREAL_NVP(augment_6_id),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(attuned),
 				CEREAL_NVP(guild_favor)
 			);
 		}
@@ -1127,10 +1318,26 @@ namespace PlayerEvent {
 		std::string from_player_name;
 		uint32      sent_date;
 
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(
+				CEREAL_NVP(quantity),
+				CEREAL_NVP(from_player_name),
+				CEREAL_NVP(sent_date)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -1160,10 +1367,28 @@ namespace PlayerEvent {
 		std::string to_player_name;
 		uint32      sent_date;
 
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+			CEREAL_NVP_IF_NONZERO(ar, charges);
+
+			ar(
+				CEREAL_NVP(quantity),
+				CEREAL_NVP(from_player_name),
+				CEREAL_NVP(to_player_name),
+				CEREAL_NVP(sent_date)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -1195,10 +1420,28 @@ namespace PlayerEvent {
 		std::string from_name;
 		std::string note;
 
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(CEREAL_NVP(item_id));
+
+			CEREAL_NVP_IF_NONZERO(ar, augment_1_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_2_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_3_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_4_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_5_id);
+			CEREAL_NVP_IF_NONZERO(ar, augment_6_id);
+
+			ar(
+				CEREAL_NVP(quantity),
+				CEREAL_NVP(char_id),
+				CEREAL_NVP(from_name),
+				CEREAL_NVP(note),
+				CEREAL_NVP(sent_date)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(augment_1_id),
@@ -1300,10 +1543,29 @@ namespace PlayerEvent {
 		uint32 quantity;
 		uint32 permission;
 
-		// cereal
 		template<class Archive>
-		void serialize(Archive &ar)
-		{
+		void save(Archive& ar) const {
+			ar(
+				CEREAL_NVP(char_id),
+				CEREAL_NVP(guild_id),
+				CEREAL_NVP(item_id)
+			);
+
+			CEREAL_NVP_IF_NONZERO(ar, aug_slot_one);
+			CEREAL_NVP_IF_NONZERO(ar, aug_slot_two);
+			CEREAL_NVP_IF_NONZERO(ar, aug_slot_three);
+			CEREAL_NVP_IF_NONZERO(ar, aug_slot_four);
+			CEREAL_NVP_IF_NONZERO(ar, aug_slot_five);
+			CEREAL_NVP_IF_NONZERO(ar, aug_slot_six);
+
+			ar(
+				CEREAL_NVP(quantity),
+				CEREAL_NVP(permission)
+			);
+		}
+
+		template<class Archive>
+		void load(Archive& ar) {
 			ar(
 				CEREAL_NVP(char_id),
 				CEREAL_NVP(guild_id),
@@ -1314,10 +1576,12 @@ namespace PlayerEvent {
 				CEREAL_NVP(aug_slot_four),
 				CEREAL_NVP(aug_slot_five),
 				CEREAL_NVP(aug_slot_six),
-				CEREAL_NVP(quantity)
-				);
+				CEREAL_NVP(quantity),
+				CEREAL_NVP(permission)
+			);
 		}
 	};
+
 }
 
 #endif //EQEMU_PLAYER_EVENTS_H
