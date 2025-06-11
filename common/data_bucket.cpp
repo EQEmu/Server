@@ -309,6 +309,9 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 				return e;
 			}
 		}
+
+		// if we can cache its assumed we didn't load this into the cache so we should not return a miss
+		return DataBucketsRepository::NewEntity(); // Not found in cache
 	}
 
 	// Fetch the value from the database
