@@ -231,6 +231,21 @@ public:
 
 		return UpdateOne(db, corpse);
 	}
+
+	static int UpdateEntityVariables(Database& db, uint32 corpse_id, const std::string& json_string)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `entity_variables` = '{}' WHERE `{}` = {}",
+				TableName(),
+				Strings::Escape(json_string),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
 };
 
 #endif //EQEMU_CHARACTER_CORPSES_REPOSITORY_H
