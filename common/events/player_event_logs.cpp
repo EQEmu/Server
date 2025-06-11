@@ -195,10 +195,12 @@ void PlayerEventLogs::ProcessBatchQueue()
 	};
 
 	// Helper to assign ETL table ID
-	auto                                                                                                          AssignEtlId      = [&](
-		PlayerEventLogsRepository::PlayerEventLogs &r,
-		PlayerEvent::EventType type
-	) {
+
+	auto AssignEtlId = [&](
+		PlayerEventLogsRepository::PlayerEventLogs& r,
+		PlayerEvent::EventType                      type
+	)
+	{
 		if (m_etl_settings.contains(type)) {
 			r.etl_table_id = m_etl_settings.at(type).next_id++;
 		}
@@ -406,7 +408,6 @@ void PlayerEventLogs::ProcessBatchQueue()
 			auto it = event_processors.find(static_cast<PlayerEvent::EventType>(r.event_type_id));
 			if (it != event_processors.end()) {
 				it->second(r);  // Call the appropriate lambda
-				r.event_data = "{}"; // Clear event data
 			}
 			else {
 				LogPlayerEventsDetail("Non-Implemented ETL routing [{}]", r.event_type_id);
