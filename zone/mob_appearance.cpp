@@ -378,12 +378,8 @@ void Mob::SendArmorAppearance(Client *one_client)
 
 void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 {
-	auto packet = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-	auto w      = (WearChange_Struct *) packet->pBuffer;
-
-	Log(Logs::Detail, Logs::MobAppearance, "[%s]",
-		GetCleanName()
-	);
+	static auto packet = EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
+	auto        w      = reinterpret_cast<WearChange_Struct*>(packet.pBuffer);
 
 	w->spawn_id         = GetID();
 	w->material         = static_cast<uint32>(GetEquipmentMaterial(material_slot));
@@ -399,13 +395,47 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 
 	w->wear_slot_id = material_slot;
 
-	if (!one_client) {
-		entity_list.QueueClients(this, packet);
-	} else {
-		one_client->QueuePacket(packet, false, Client::CLIENT_CONNECTED);
-	}
+	// this is a hash-like key to deduplicate packets sent to clients
+	// it includes spawn_id, material, elite_material, hero_forge_model, wear_slot_id, and color
+	// we send an enormous amount of wearchange packets in brute-force fashion and this is a low cost way to deduplicate them
+	// we could remove all of the extra wearchanges at the expense of tracing down intermittent visual bugs over a long time
+	auto build_key = [](const WearChange_Struct& s) -> uint64_t {
+		uint64_t key = 0;
+		key |= static_cast<uint64_t>(s.spawn_id)         <<  0;
+		key |= static_cast<uint64_t>(s.material & 0xFFF) << 16;
+		key |= static_cast<uint64_t>(s.elite_material)   << 28;
+		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF) << 32;
+		key |= static_cast<uint64_t>(s.wear_slot_id)     << 56;
 
-	safe_delete(packet);
+		// Include color in a hash-like XOR mix
+		key ^= static_cast<uint64_t>(s.color.Color) * 0x9E3779B97F4A7C15ull;
+
+		return key;
+	};
+
+	static auto dedupe_key = build_key(*w);
+	auto send_if_changed = [&](Client* client) {
+		uint32_t client_id = client->GetID();
+		auto& last_key = m_last_seen_wearchange[client_id];
+		if (last_key == dedupe_key) {
+			LogInfo("Already sent WearChange to client [{}] for mob [{}] skipping",
+				client_id, GetCleanName());
+			return;
+		}
+		last_key = dedupe_key;
+		client->QueuePacket(&packet, false, Client::CLIENT_CONNECTED);
+	};
+
+	if (one_client) {
+		send_if_changed(one_client);
+	}
+	else {
+		for (auto& [_, client] : entity_list.GetClientList()) {
+			if (client != this) {
+				send_if_changed(client);
+			}
+		}
+	}
 }
 
 void Mob::SendTextureWC(
