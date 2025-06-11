@@ -58,8 +58,6 @@ void ZoneServer::SendPlayerEventLogSettings()
 
 	dyn_pack.PutSerialize(0, settings);
 
-	LogInfo("settings size [{}]", dyn_pack.Length());
-
 	auto packet_size = sizeof(ServerSendPlayerEvent_Struct) + dyn_pack.Length();
 
 	auto pack = std::make_unique<ServerPacket>(
