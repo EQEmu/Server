@@ -546,6 +546,9 @@ RULE_INT(Spells, PointBlankAOEMaxTargets, 0, "Max number of targets a Point-Blan
 RULE_INT(Spells, DefaultAOEMaxTargets, 0, "Max number of targets that an AOE spell which does not meet other descriptions can cast on. Set to 0 for no limit.")
 RULE_BOOL(Spells, AllowFocusOnSkillDamageSpells, false, "Allow focus effects 185, 459, and 482 to enhance SkillAttack spell effect 193")
 RULE_STRING(Spells, AlwaysStackSpells, "", "Comma-Seperated list of spell IDs to always stack with every other spell, except themselves.")
+RULE_BOOL(Spells, SuppressDispels, false, "Swaps 'cancel magic' SPA logic with SuppressBuff SPA (527).")
+RULE_INT(Spells, SuppressDispelsTime, 6, "Number of tics that dispelled buffs will be suppressed for")
+RULE_INT(Spells, SuppressDebuffSpellID, 21840, "Spell ID to send to client when a spell is supprssed.  21840 = 'Suppression Field'")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

@@ -2167,6 +2167,11 @@ void Lua_Mob::BuffFadeBySlot(int slot, bool recalc_bonuses) {
 	self->BuffFadeBySlot(slot, recalc_bonuses);
 }
 
+void Lua_Mob::BuffFadeBySlot(int slot, bool recalc_bonuses, bool suppress, int suppress_tics) {
+	Lua_Safe_Call_Void();
+	self->BuffFadeBySlot(slot, recalc_bonuses, suppress, suppress_tics);
+}
+
 int Lua_Mob::CanBuffStack(int spell_id, int caster_level) {
 	Lua_Safe_Call_Int();
 	return self->CanBuffStack(spell_id, caster_level);
@@ -3524,6 +3529,7 @@ luabind::scope lua_register_mob() {
 	.def("BuffFadeByEffect", (void(Lua_Mob::*)(int,int))&Lua_Mob::BuffFadeByEffect)
 	.def("BuffFadeBySlot", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySlot)
 	.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
+	.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool,bool,int))&Lua_Mob::BuffFadeBySlot)
 	.def("BuffFadeBySpellID", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySpellID)
 	.def("BuffFadeDetrimental", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeDetrimental)
 	.def("BuffFadeDetrimentalByCaster", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::BuffFadeDetrimentalByCaster)

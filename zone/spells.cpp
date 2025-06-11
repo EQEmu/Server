@@ -3580,10 +3580,17 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	for (buffslot = 0; buffslot < buff_count; buffslot++) {
 		const Buffs_Struct &curbuf = buffs[buffslot];
 
-		if (IsValidSpell(curbuf.spellid)) {
+		if (curbuf.spellid == SPELL_SUPPRESSED && curbuf.suppressedid == spell_id) {
+			LogSpells("Adding buff [{}]: Refusing to add a buff that is currently being suppressed in slot [{}]", spell_id, buffslot);
+			return -1;
+		}
+
+		if (IsValidOrSuppressedSpell(curbuf.spellid)) {
+			uint16 buff_spellid = curbuf.spellid == SPELL_SUPPRESSED ? curbuf.suppressedid : curbuf.spellid;
+
 			// there's a buff in this slot
 			ret = CheckStackConflict(
-				curbuf.spellid,
+				buff_spellid,
 				curbuf.casterlevel,
 				spell_id,
 				caster_level,
@@ -3596,7 +3603,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				LogSpells(
 					"Adding buff [{}] failed: stacking prevented by spell [{}] in slot [{}] with caster level [{}]",
 					spell_id,
-					curbuf.spellid,
+					buff_spellid,
 					buffslot,
 					curbuf.casterlevel
 				);
@@ -3609,7 +3616,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 								"Your {} did not take hold on {}. (Blocked by {}.)",
 								spells[spell_id].name,
 								GetName(),
-								spells[curbuf.spellid].name
+								spells[buff_spellid].name
 							).c_str()
 						);
 					}
@@ -3622,7 +3629,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 								caster->GetCleanName(),
 								spells[spell_id].name,
 								GetName(),
-								spells[curbuf.spellid].name
+								spells[buff_spellid].name
 							).c_str()
 						);
 					}
@@ -3630,7 +3637,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 					std::function<std::string()> f = [&]() {
 						return fmt::format(
 							"{} {}",
-							curbuf.spellid,
+							buff_spellid,
 							spell_id
 						);
 					};
@@ -3644,11 +3651,16 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 				return -1;
 			} else if (ret == 1 && !will_overwrite) {
+				// Reject buffing a superior buff while an inferior one is suppressed or else they end up with both
+				if (curbuf.spellid == SPELL_SUPPRESSED) {
+					return -1;
+				}
+
 				// set a flag to indicate that there will be overwriting
 				LogSpells(
 					"Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}]",
 					spell_id,
-					curbuf.spellid,
+					buff_spellid,
 					buffslot,
 					curbuf.casterlevel
 				);
@@ -3665,7 +3677,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				LogSpells(
 					"Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}], but ResurrectionEffectBlock is set to 2. Attempting to move [{}] to an empty buff slot.",
 					spell_id,
-					curbuf.spellid,
+					buff_spellid,
 					buffslot,
 					curbuf.casterlevel,
 					spell_id
@@ -6628,8 +6640,8 @@ void Mob::SendPetBuffsToClient()
 
 	for(int buffslot = 0; buffslot < MaxSlots; buffslot++)
 	{
-		if (IsValidSpell(buffs[buffslot].spellid)) {
-			pbs->spellid[buffslot] = buffs[buffslot].spellid;
+		if (IsValidOrSuppressedSpell(buffs[buffslot].spellid)) {
+			pbs->spellid[buffslot] = buffs[buffslot].spellid != SPELL_SUPPRESSED ? buffs[buffslot].spellid : RuleI(Spells, SuppressDebuffSpellID);
 			pbs->ticsremaining[buffslot] = buffs[buffslot].ticsremaining;
 			PetBuffCount++;
 		}
@@ -6667,7 +6679,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target, bool clear_buffs)
 	}
 
 	for(int i = 0; i < buff_count; ++i) {
-		if (IsValidSpell(buffs[i].spellid)) {
+		if (IsValidOrSuppressedSpell(buffs[i].spellid)) {
 			++count;
 		}
 	}
@@ -6704,6 +6716,20 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target, bool clear_buffs)
 			strn0cpy(buff->entries[index].caster, buffs[i].caster_name, 64);
 			buff->name_lengths += strlen(buff->entries[index].caster);
 			++index;
+
+			continue;
+		}
+
+		if (buffs[i].spellid == SPELL_SUPPRESSED) {
+			buff->entries[index].buff_slot = i;
+			buff->entries[index].spell_id = RuleI(Spells, SuppressDebuffSpellID);
+			buff->entries[index].tics_remaining = buffs[i].ticsremaining;
+			buff->entries[index].num_hits = 0;
+			strn0cpy(buff->entries[index].caster, buffs[i].caster_name, 64);
+			buff->name_lengths += strlen(buff->entries[index].caster);
+			++index;
+
+			continue;
 		}
 	}
 

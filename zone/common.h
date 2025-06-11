@@ -274,6 +274,8 @@ struct Buffs_Struct {
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
+	uint16  suppressedid;
+	uint32  suppressedticsremaining;
 
 	// cereal
 	template<class Archive>

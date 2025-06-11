@@ -966,6 +966,19 @@ bool IsValidSpell(uint32 spell_id)
 	return false;
 }
 
+bool IsValidOrSuppressedSpell(uint32 spell_id)
+{
+	if (IsValidSpell(spell_id)) {
+		return true;
+	}
+
+	if (spell_id == SPELL_SUPPRESSED) {
+		return true;
+	}
+
+	return false;
+}
+
 bool IsHarmTouchSpell(uint16 spell_id)
 {
 	return spell_id == SPELL_HARM_TOUCH ||

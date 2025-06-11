@@ -527,6 +527,109 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	return(true);
 }
 
+//Some buffs have effects that trigger only as part of the original cast.  This reapplies those effects.
+void Client::ReapplyBuff(uint32 index, bool from_suppress)
+{
+	LogDebug("ReapplyBuff: index [{}] from_suppress [{}]", index, from_suppress);
+	if (!IsValidSpell(buffs[index].spellid))
+		return;
+
+	const SPDat_Spell_Struct &spell = spells[buffs[index].spellid];
+
+	int NimbusEffect = GetSpellNimbusEffect(buffs[index].spellid);
+	if (NimbusEffect) {
+		if (!IsNimbusEffectActive(NimbusEffect))
+			SendSpellEffect(NimbusEffect, 500, 0, 1, 3000, true);
+	}
+
+	for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
+		switch (spell.effect_id[x1]) {
+		case SE_Illusion: {
+			if (GetIllusionBlock()) {
+				break;
+			}
+
+			if (from_suppress || buffs[index].persistant_buff) {
+				Mob *caster = entity_list.GetMobID(buffs[index].casterid);
+				ApplySpellEffectIllusion(spell.id, caster, index, spell.base_value[x1], spell.limit_value[x1], spell.max_value[x1]);
+			}
+			break;
+		}
+		case SE_SummonHorse: {
+			if (!from_suppress && (RuleB(Character, PreventMountsFromZoning) || !zone->CanCastOutdoor())) {
+				BuffFadeByEffect(SE_SummonHorse);
+			} else {
+				SummonHorse(buffs[index].spellid);
+			}
+			break;
+		}
+		case SE_Silence:
+		{
+			Silence(true);
+			break;
+		}
+		case SE_Amnesia:
+		{
+			Amnesia(true);
+			break;
+		}
+		case SE_DivineAura:
+		{
+			invulnerable = true;
+			break;
+		}
+		case SE_Invisibility2:
+		case SE_Invisibility:
+		{
+			SendAppearancePacket(AppearanceType::Invisibility, Invisibility::Invisible);
+			break;
+		}
+		case SE_Levitate:
+		{
+			if (!zone->CanLevitate()) {
+				if (!GetGM()) {
+					SendAppearancePacket(AppearanceType::FlyMode, 0);
+					BuffFadeByEffect(SE_Levitate);
+					Message(Chat::Red, "You can't levitate in this zone.");
+					break;
+				}
+
+				Message(Chat::White, "Your GM flag allows you to levitate in this zone.");
+			}
+
+			SendAppearancePacket(
+				AppearanceType::FlyMode,
+				(
+					spell.limit_value[x1] == 1 ?
+						EQ::constants::GravityBehavior::LevitateWhileRunning :
+						EQ::constants::GravityBehavior::Levitating
+				),
+				true,
+				!from_suppress
+			);
+
+			break;
+		}
+		case SE_AddMeleeProc:
+		case SE_WeaponProc:
+		{
+			AddProcToWeapon(GetProcID(buffs[index].spellid, x1), false, 100 + spells[buffs[index].spellid].limit_value[x1], buffs[index].spellid, buffs[index].casterlevel, GetSpellProcLimitTimer(buffs[index].spellid, ProcType::MELEE_PROC));
+			break;
+		}
+		case SE_DefensiveProc:
+		{
+			AddDefensiveProc(GetProcID(buffs[index].spellid, x1), 100 + spells[buffs[index].spellid].limit_value[x1], buffs[index].spellid, GetSpellProcLimitTimer(buffs[index].spellid, ProcType::DEFENSIVE_PROC));
+			break;
+		}
+		case SE_RangedProc:
+		{
+			AddRangedProc(GetProcID(buffs[index].spellid, x1), 100 + spells[buffs[index].spellid].limit_value[x1], buffs[index].spellid, GetSpellProcLimitTimer(buffs[index].spellid, ProcType::RANGED_PROC));
+			break;
+		}
+		}
+	}
+}
+
 // Finish client connecting state
 void Client::CompleteConnect()
 {
@@ -655,106 +758,9 @@ void Client::CompleteConnect()
 
 	//bulk raid send in here eventually
 
-	//reapply some buffs
 	uint32 buff_count = GetMaxTotalSlots();
 	for (uint32 j1 = 0; j1 < buff_count; j1++) {
-		if (!IsValidSpell(buffs[j1].spellid))
-			continue;
-
-		const SPDat_Spell_Struct &spell = spells[buffs[j1].spellid];
-
-		int NimbusEffect = GetSpellNimbusEffect(buffs[j1].spellid);
-		if (NimbusEffect) {
-			if (!IsNimbusEffectActive(NimbusEffect))
-				SendSpellEffect(NimbusEffect, 500, 0, 1, 3000, true);
-		}
-
-		for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
-			switch (spell.effect_id[x1]) {
-			case SE_Illusion: {
-				if (GetIllusionBlock()) {
-					break;
-				}
-
-				if (buffs[j1].persistant_buff) {
-					Mob *caster = entity_list.GetMobID(buffs[j1].casterid);
-					ApplySpellEffectIllusion(spell.id, caster, j1, spell.base_value[x1], spell.limit_value[x1], spell.max_value[x1]);
-				}
-				break;
-			}
-			case SE_SummonHorse: {
-				if (RuleB(Character, PreventMountsFromZoning) || !zone->CanCastOutdoor()) {
-					BuffFadeByEffect(SE_SummonHorse);
-				} else {
-					SummonHorse(buffs[j1].spellid);
-				}
-				break;
-			}
-			case SE_Silence:
-			{
-				Silence(true);
-				break;
-			}
-			case SE_Amnesia:
-			{
-				Amnesia(true);
-				break;
-			}
-			case SE_DivineAura:
-			{
-				invulnerable = true;
-				break;
-			}
-			case SE_Invisibility2:
-			case SE_Invisibility:
-			{
-				SendAppearancePacket(AppearanceType::Invisibility, Invisibility::Invisible);
-				break;
-			}
-			case SE_Levitate:
-			{
-				if (!zone->CanLevitate()) {
-					if (!GetGM()) {
-						SendAppearancePacket(AppearanceType::FlyMode, 0);
-						BuffFadeByEffect(SE_Levitate);
-						Message(Chat::Red, "You can't levitate in this zone.");
-						break;
-					}
-
-					Message(Chat::White, "Your GM flag allows you to levitate in this zone.");
-				}
-
-				SendAppearancePacket(
-					AppearanceType::FlyMode,
-					(
-						spell.limit_value[x1] == 1 ?
-							EQ::constants::GravityBehavior::LevitateWhileRunning :
-							EQ::constants::GravityBehavior::Levitating
-					),
-					true,
-					true
-				);
-
-				break;
-			}
-			case SE_AddMeleeProc:
-			case SE_WeaponProc:
-			{
-				AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::MELEE_PROC));
-				break;
-			}
-			case SE_DefensiveProc:
-			{
-				AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::DEFENSIVE_PROC));
-				break;
-			}
-			case SE_RangedProc:
-			{
-				AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::RANGED_PROC));
-				break;
-			}
-			}
-		}
+		ReapplyBuff(j1);
 	}
 
 	/* Sends appearances for all mobs not doing Animation::Standing aka sitting, looting, playing dead */

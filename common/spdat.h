@@ -24,6 +24,7 @@
 
 #define SPELL_UNKNOWN 0xFFFF
 #define POISON_PROC 0xFFFE
+#define SPELL_SUPPRESSED 0xFFFD
 #define SPELLBOOK_UNKNOWN 0xFFFFFFFF		//player profile spells are 32 bit
 
 //some spell IDs which will prolly change, but are needed
@@ -1816,6 +1817,7 @@ bool IsEffectInSpell(uint16 spell_id, int effect_id);
 uint16 GetSpellTriggerSpellID(uint16 spell_id, int effect_id);
 bool IsBlankSpellEffect(uint16 spell_id, int effect_index);
 bool IsValidSpell(uint32 spell_id);
+bool IsValidOrSuppressedSpell(uint32 spell_id);
 bool IsSummonSpell(uint16 spell_id);
 bool IsDamageSpell(uint16 spell_id);
 bool IsAnyDamageSpell(uint16 spell_id);

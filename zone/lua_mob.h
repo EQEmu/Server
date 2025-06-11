@@ -434,6 +434,7 @@ public:
 	void BuffFadeAll();
 	void BuffFadeBySlot(int slot);
 	void BuffFadeBySlot(int slot, bool recalc_bonuses);
+	void BuffFadeBySlot(int slot, bool recalc_bonuses, bool suppress, int suppress_tics);
 	int CanBuffStack(int spell_id, int caster_level);
 	int CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite);
 	void SetPseudoRoot(bool in);
