@@ -423,7 +423,6 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	auto send_if_changed = [&](Client* client) {
 		auto& last_key = m_last_seen_wearchange[client->GetID()];
 		if (last_key == dedupe_key) {
-			LogInfo("Ignoring duplicate WearChange for client [{}] with key [{}]", client->GetName(), dedupe_key);
 			return;
 		}
 		last_key = dedupe_key;
