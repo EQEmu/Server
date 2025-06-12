@@ -404,20 +404,25 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	// it includes spawn_id, material, elite_material, hero_forge_model, wear_slot_id, and color
 	// we send an enormous amount of wearchange packets in brute-force fashion and this is a low cost way to deduplicate them
 	// we could remove all of the extra wearchanges at the expense of tracing down intermittent visual bugs over a long time
-	auto build_key = [&](const WearChange_Struct& s) -> uint64_t {
+	auto build_key = [&](const WearChange_Struct& s) -> uint64_t
+	{
 		uint64_t key = 0;
-		key |= static_cast<uint64_t>(s.material & 0xFFF)         << 0;   // 12 bits
-		key |= static_cast<uint64_t>(s.elite_material)           << 12;  // 1 bit
-		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF) << 13; // 20 bits
-		key |= static_cast<uint64_t>(GetRace() & 0xFFFF)         << 33;  // 16 bits
-		key |= static_cast<uint64_t>(s.wear_slot_id & 0xFF)      << 49;  // 8 bits
 
-		// Fold spawn_id and color into remaining entropy space via XOR
-		key ^= static_cast<uint64_t>(s.spawn_id) * 0x85EBCA77C2B2AE63ull;
-		key ^= static_cast<uint64_t>(s.color.Color) * 0x9E3779B97F4A7C15ull;
+		// Bit layout:
+		// Bits 0–11   : material (12 bits)
+		// Bits 12     : elite_material (1 bit)
+		// Bits 13–32  : hero_forge_model (20 bits)
+		// Bits 33–48  : race (16 bits)
+		// Bits 49–56  : wear_slot_id (8 bits)
+		key |= static_cast<uint64_t>(s.material & 0xFFF)             << 0;
+		key |= static_cast<uint64_t>(s.elite_material & 0x1)         << 12;
+		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF)   << 13;
+		key |= static_cast<uint64_t>(GetRace() & 0xFFFF)             << 33;
+		key |= static_cast<uint64_t>(s.wear_slot_id & 0xFF)          << 49;
 
 		return key;
 	};
+
 	
 	static auto dedupe_key = build_key(*w);
 	auto send_if_changed = [&](Client* client) {
