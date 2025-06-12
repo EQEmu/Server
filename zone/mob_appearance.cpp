@@ -378,8 +378,8 @@ void Mob::SendArmorAppearance(Client *one_client)
 
 void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 {
-	static auto packet = EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-	auto        w      = reinterpret_cast<WearChange_Struct*>(packet.pBuffer);
+	auto packet = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
+	auto        w      = reinterpret_cast<WearChange_Struct*>(packet->pBuffer);
 
 	w->spawn_id         = GetID();
 	w->material         = static_cast<uint32>(GetEquipmentMaterial(material_slot));
@@ -404,33 +404,32 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	// it includes spawn_id, material, elite_material, hero_forge_model, wear_slot_id, and color
 	// we send an enormous amount of wearchange packets in brute-force fashion and this is a low cost way to deduplicate them
 	// we could remove all the extra wearchanges at the expense of tracing down intermittent visual bugs over a long time
-	auto build_key = [&](const WearChange_Struct& s) -> uint64_t
-	{
+	auto build_key = [&](const WearChange_Struct& s) -> uint64_t {
 		uint64_t key = 0;
 
-		// Bit layout:
-		// Bits 0–11   : material (12 bits)
-		// Bits 12     : elite_material (1 bit)
-		// Bits 13–32  : hero_forge_model (20 bits)
-		// Bits 33–48  : race (16 bits)
-		// Bits 49–56  : wear_slot_id (8 bits)
-		key |= static_cast<uint64_t>(s.material & 0xFFF)             << 0;
-		key |= static_cast<uint64_t>(s.elite_material & 0x1)         << 12;
-		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF)   << 13;
-		key |= static_cast<uint64_t>(GetRace() & 0xFFFF)             << 33;
-		key |= static_cast<uint64_t>(s.wear_slot_id & 0xFF)          << 49;
+		key |= static_cast<uint64_t>(s.material & 0xFFF)             << 0;   // 12 bits
+		key |= static_cast<uint64_t>(s.elite_material & 0x1)         << 12;  // 1 bit
+		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF)   << 13;  // 20 bits
+		key |= static_cast<uint64_t>(GetRace() & 0xFFFF)             << 33;  // 16 bits
+
+		// Optional: Fold in color for appearance differences
+		uint8_t folded_color = static_cast<uint8_t>(
+			(s.color.Color * 17ull) & 0xFF
+		);
+		key |= static_cast<uint64_t>(folded_color) << 49;
 
 		return key;
 	};
+
 	
 	auto dedupe_key = build_key(*w);
 	auto send_if_changed = [&](Client* client) {
-		auto& last_key = m_last_seen_wearchange[client->GetID()];
+		auto& last_key = m_last_seen_wearchange[client->GetID()][material_slot];
 		if (last_key == dedupe_key) {
 			return;
 		}
 		last_key = dedupe_key;
-		client->QueuePacket(&packet, true, Client::CLIENT_CONNECTED);
+		client->QueuePacket(packet, true, Client::CLIENT_CONNECTED);
 	};
 
 	if (one_client) {
@@ -443,6 +442,8 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 			}
 		}
 	}
+
+	safe_delete(packet);
 }
 
 void Mob::SendTextureWC(
