@@ -415,6 +415,7 @@ LuaParser::LuaParser() {
 	ZoneArgumentDispatch[EVENT_CLICK_OBJECT]   = handle_zone_click_object;
 	ZoneArgumentDispatch[EVENT_DEATH_ZONE]     = handle_zone_death;
 	ZoneArgumentDispatch[EVENT_DESPAWN_ZONE]   = handle_zone_despawn;
+	ZoneArgumentDispatch[EVENT_ENTER_ZONE]     = handle_zone_enter;
 	ZoneArgumentDispatch[EVENT_LOOT_ZONE]      = handle_zone_loot;
 	ZoneArgumentDispatch[EVENT_PAYLOAD]        = handle_zone_payload;
 	ZoneArgumentDispatch[EVENT_PLAYER_PICKUP]  = handle_zone_pickup;

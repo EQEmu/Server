@@ -2512,6 +2512,14 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_ENTER_ZONE: {
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "client", "Client", std::any_cast<Client*>(extra_pointers->at(0)));
+			}
+
+			break;
+		}
+
 		default: {
 			break;
 		}
