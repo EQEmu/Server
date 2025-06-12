@@ -379,7 +379,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 {
 	auto packet = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-	auto        w      = reinterpret_cast<WearChange_Struct*>(packet->pBuffer);
+	auto w      = (WearChange_Struct *) packet->pBuffer;
 
 	w->spawn_id         = GetID();
 	w->material         = static_cast<uint32>(GetEquipmentMaterial(material_slot));
@@ -437,9 +437,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	}
 	else {
 		for (auto& [_, client] : entity_list.GetClientList()) {
-			if (client != this) {
-				send_if_changed(client);
-			}
+			send_if_changed(client);
 		}
 	}
 
