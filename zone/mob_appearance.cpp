@@ -403,7 +403,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	// this is a hash-like key to deduplicate packets sent to clients
 	// it includes spawn_id, material, elite_material, hero_forge_model, wear_slot_id, and color
 	// we send an enormous amount of wearchange packets in brute-force fashion and this is a low cost way to deduplicate them
-	// we could remove all of the extra wearchanges at the expense of tracing down intermittent visual bugs over a long time
+	// we could remove all the extra wearchanges at the expense of tracing down intermittent visual bugs over a long time
 	auto build_key = [&](const WearChange_Struct& s) -> uint64_t
 	{
 		uint64_t key = 0;
@@ -423,7 +423,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 		return key;
 	};
 	
-	static auto dedupe_key = build_key(*w);
+	auto dedupe_key = build_key(*w);
 	auto send_if_changed = [&](Client* client) {
 		auto& last_key = m_last_seen_wearchange[client->GetID()];
 		if (last_key == dedupe_key) {
