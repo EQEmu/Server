@@ -3004,6 +3004,20 @@ void handle_zone_despawn(
 	lua_setfield(L, -2, "other");
 }
 
+void handle_zone_enter(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_Client l_client(std::any_cast<Client*>(extra_pointers->at(0)));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
 void handle_zone_loot(
 	QuestInterface *parse,
 	lua_State* L,

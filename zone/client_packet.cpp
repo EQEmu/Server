@@ -795,6 +795,11 @@ void Client::CompleteConnect()
 		parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 	}
 
+	if (parse->ZoneHasQuestSub(EVENT_ENTER_ZONE)) {
+		std::vector<std::any> args = { this };
+		parse->EventZone(EVENT_ENTER_ZONE, zone, "", 0, &args);
+	}
+
 	DeleteEntityVariable(SEE_BUFFS_FLAG);
 
 	// the way that the client deals with positions during the initial spawn struct
