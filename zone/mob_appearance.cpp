@@ -399,20 +399,21 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	// it includes spawn_id, material, elite_material, hero_forge_model, wear_slot_id, and color
 	// we send an enormous amount of wearchange packets in brute-force fashion and this is a low cost way to deduplicate them
 	// we could remove all of the extra wearchanges at the expense of tracing down intermittent visual bugs over a long time
-	auto build_key = [](const WearChange_Struct& s) -> uint64_t {
+	auto build_key = [&](const WearChange_Struct& s) -> uint64_t {
 		uint64_t key = 0;
-		key |= static_cast<uint64_t>(s.spawn_id)         <<  0;
-		key |= static_cast<uint64_t>(s.material & 0xFFF) << 16;
-		key |= static_cast<uint64_t>(s.elite_material)   << 28;
-		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF) << 32;
-		key |= static_cast<uint64_t>(s.wear_slot_id)     << 56;
+		key |= static_cast<uint64_t>(s.spawn_id)         <<  0;   // 16 bits
+		key |= static_cast<uint64_t>(s.material & 0xFFF) << 16;   // 12 bits
+		key |= static_cast<uint64_t>(s.elite_material)   << 28;   // 1 bit
+		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF) << 29; // 20 bits
+		key |= static_cast<uint64_t>(GetRace() & 0xFFFF) << 49;   // 16 bits
+		key |= static_cast<uint64_t>(s.wear_slot_id)     <<  0;   // See below
 
-		// Include color in a hash-like XOR mix
+		// Use color as final XOR-based mix-in (preserves all 64 bits)
 		key ^= static_cast<uint64_t>(s.color.Color) * 0x9E3779B97F4A7C15ull;
 
 		return key;
 	};
-
+	
 	static auto dedupe_key = build_key(*w);
 	auto send_if_changed = [&](Client* client) {
 		auto& last_key = m_last_seen_wearchange[client->GetID()];
