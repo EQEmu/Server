@@ -1330,6 +1330,53 @@ void ConsoleWorldWideMove(
 	);
 }
 
+void ConsoleWWMarquee(
+	EQ::Net::ConsoleServerConnection* connection,
+	const std::string& command,
+	const std::vector<std::string>& args
+)
+{
+	if (args.size() < 2) {
+		connection->SendLine("Usage: marquee <type> <message>");
+		return;
+	}
+
+	const uint32 type = Strings::IsNumber(args[0]) ? Strings::ToUnsignedInt(args[0]) : 0;
+	const uint32 priority = 1;
+	const uint32 fade_in  = 500;
+	const uint32 fade_out = 500;
+	const uint32 duration = 5000;
+
+	// Join message from args[1..]
+	std::string message = Strings::Join(std::vector<std::string>(args.begin() + 1, args.end()), " ");
+	if (message.empty()) {
+		connection->SendLine("Message cannot be empty.");
+		return;
+	}
+
+	// Build the CZMarquee_Struct for world broadcast (update_type = character, identifier = 0)
+	auto pack = new ServerPacket(ServerOP_CZMarquee, sizeof(CZMarquee_Struct));
+	auto* czm = (CZMarquee_Struct*)pack->pBuffer;
+
+	czm->update_type       = CZUpdateType_Character;  // world-wide
+	czm->update_identifier = 0;
+	czm->type              = type;
+	czm->priority          = priority;
+	czm->fade_in           = fade_in;
+	czm->fade_out          = fade_out;
+	czm->duration          = duration;
+
+	strn0cpy(czm->message, message.c_str(), sizeof(czm->message));
+	czm->client_name[0] = '\0'; // unused
+
+	zoneserver_list.SendPacket(pack);
+	safe_delete(pack);
+
+	connection->SendLine(fmt::format("Sent world marquee type {}: {}", type, message));
+}
+
+
+
 
 /**
  * @param console
@@ -1367,6 +1414,12 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("whoami", 50, "whoami", std::bind(ConsoleWhoami, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("worldshutdown", 200, "worldshutdown", std::bind(ConsoleWorldShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("wwcast", 50, "wwcast [spell_id] [min_status] [max_status] - min_status and max_status are optional", std::bind(ConsoleWorldWideCastSpell, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall(
+		"wwmarquee",
+		50,
+		"wwmarquee <type> <message>",
+		std::bind(ConsoleWWMarquee, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
+	);
 	console->RegisterCall("wwmove", 50, "wwmove [instance_id|zone_short_name] [min_status] [max_status] -  min_status and max_status are optional, instance_id and zone_short_name are interchangeable", std::bind(ConsoleWorldWideMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonebootup", 150, "zonebootup [zone_server_id] [zone_short_name]", std::bind(ConsoleZoneBootup, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonelock", 150, "zonelock [list|lock|unlock] [zone_short_name]", std::bind(ConsoleZoneLock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
