@@ -281,24 +281,16 @@ void ZoneCLI::BenchmarkDatabuckets(int argc, char **argv, argh::parser &cmd, std
 		LogSys.SetDatabase(&database)->LoadLogDatabaseSettings();
 	}
 
-	LogSys.log_settings[Logs::MySQLQuery].log_to_console = 1;
+	auto start_time = std::chrono::high_resolution_clock::now();
 
-	// 🔍 **Measure Client-Scoped Cache Miss Performance (Skips DB via CanCache)**
-	auto read_client_cache_miss_start = std::chrono::high_resolution_clock::now();
-	for (size_t i = 0; i < 5000; ++i) {
-		// generate key that doesn't exist
-		std::string key = "nonexistent_key_" + std::to_string(i);
+	std::vector<uint64_t> benchmark_sizes = {10000, 100000, 1000000};
 
-		DataBucketKey k{
-			.key = key,
-			.character_id = 999999999, // use scoped value
-		};
-
-		DataBucket::GetData(k);
+	for (auto size: benchmark_sizes) {
+		RunBenchmarkCycle(size);
 	}
-	auto read_client_cache_miss_end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double> read_client_cache_miss_time = read_client_cache_miss_end - read_client_cache_miss_start;
-	std::cout << "✅ Completed " << Strings::Commify(5000)
-			  << " scoped cache-miss reads (no DB) in "
-			  << read_client_cache_miss_time.count() << " seconds. (Client Scoped, Cache Miss, No DB)\n";
+
+	// 🚀 **Total Benchmark Time**
+	auto                          end_time      = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> total_elapsed = end_time - start_time;
+	std::cout << "\n🚀 Total Benchmark Time: " << total_elapsed.count() << " seconds\n";
 }
