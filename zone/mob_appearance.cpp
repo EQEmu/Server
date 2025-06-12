@@ -422,7 +422,6 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 
 		return key;
 	};
-
 	
 	static auto dedupe_key = build_key(*w);
 	auto send_if_changed = [&](Client* client) {
@@ -431,7 +430,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 			return;
 		}
 		last_key = dedupe_key;
-		client->QueuePacket(&packet, false, Client::CLIENT_CONNECTED);
+		client->QueuePacket(&packet, true, Client::CLIENT_CONNECTED);
 	};
 
 	if (one_client) {
