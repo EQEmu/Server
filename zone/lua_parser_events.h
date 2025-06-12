@@ -1325,6 +1325,15 @@ void handle_zone_despawn(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_zone_enter(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 void handle_zone_loot(
 	QuestInterface *parse,
 	lua_State* L,
