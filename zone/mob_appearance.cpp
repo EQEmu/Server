@@ -406,14 +406,14 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	// we could remove all of the extra wearchanges at the expense of tracing down intermittent visual bugs over a long time
 	auto build_key = [&](const WearChange_Struct& s) -> uint64_t {
 		uint64_t key = 0;
-		key |= static_cast<uint64_t>(s.spawn_id)         <<  0;   // 16 bits
-		key |= static_cast<uint64_t>(s.material & 0xFFF) << 16;   // 12 bits
-		key |= static_cast<uint64_t>(s.elite_material)   << 28;   // 1 bit
-		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF) << 29; // 20 bits
-		key |= static_cast<uint64_t>(GetRace() & 0xFFFF) << 49;   // 16 bits
-		key |= static_cast<uint64_t>(s.wear_slot_id)     <<  0;   // See below
+		key |= static_cast<uint64_t>(s.material & 0xFFF)         << 0;   // 12 bits
+		key |= static_cast<uint64_t>(s.elite_material)           << 12;  // 1 bit
+		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF) << 13; // 20 bits
+		key |= static_cast<uint64_t>(GetRace() & 0xFFFF)         << 33;  // 16 bits
+		key |= static_cast<uint64_t>(s.wear_slot_id & 0xFF)      << 49;  // 8 bits
 
-		// Use color as final XOR-based mix-in (preserves all 64 bits)
+		// Fold spawn_id and color into remaining entropy space via XOR
+		key ^= static_cast<uint64_t>(s.spawn_id) * 0x85EBCA77C2B2AE63ull;
 		key ^= static_cast<uint64_t>(s.color.Color) * 0x9E3779B97F4A7C15ull;
 
 		return key;
