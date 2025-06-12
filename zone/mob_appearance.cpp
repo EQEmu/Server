@@ -395,6 +395,11 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 
 	w->wear_slot_id = material_slot;
 
+	if (GetRace() != m_last_wearchange_race_id) {
+		m_last_seen_wearchange.clear();
+		m_last_wearchange_race_id = GetRace();
+	}
+
 	// this is a hash-like key to deduplicate packets sent to clients
 	// it includes spawn_id, material, elite_material, hero_forge_model, wear_slot_id, and color
 	// we send an enormous amount of wearchange packets in brute-force fashion and this is a low cost way to deduplicate them
@@ -418,6 +423,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	auto send_if_changed = [&](Client* client) {
 		auto& last_key = m_last_seen_wearchange[client->GetID()];
 		if (last_key == dedupe_key) {
+			LogInfo("Ignoring duplicate WearChange for client [{}] with key [{}]", client->GetName(), dedupe_key);
 			return;
 		}
 		last_key = dedupe_key;
