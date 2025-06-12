@@ -381,10 +381,6 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	auto packet = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	auto w      = (WearChange_Struct *) packet->pBuffer;
 
-	Log(Logs::Detail, Logs::MobAppearance, "[%s]",
-		GetCleanName()
-	);
-
 	w->spawn_id         = GetID();
 	w->material         = static_cast<uint32>(GetEquipmentMaterial(material_slot));
 	w->elite_material   = IsEliteMaterialItem(material_slot);
@@ -399,10 +395,50 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 
 	w->wear_slot_id = material_slot;
 
-	if (!one_client) {
-		entity_list.QueueClients(this, packet);
-	} else {
-		one_client->QueuePacket(packet, false, Client::CLIENT_CONNECTED);
+	if (GetRace() != m_last_wearchange_race_id) {
+		m_last_seen_wearchange.clear();
+		m_last_wearchange_race_id = GetRace();
+	}
+
+	// this is a hash-like key to deduplicate packets sent to clients
+	// it includes spawn_id, material, elite_material, hero_forge_model, wear_slot_id, and color
+	// we send an enormous amount of wearchange packets in brute-force fashion and this is a low cost way to deduplicate them
+	// we could remove all the extra wearchanges at the expense of tracing down intermittent visual bugs over a long time
+	auto build_key = [&](const WearChange_Struct& s) -> uint64_t {
+		uint64_t key = 0;
+
+		key |= static_cast<uint64_t>(s.material & 0xFFF)             << 0;   // 12 bits
+		key |= static_cast<uint64_t>(s.elite_material & 0x1)         << 12;  // 1 bit
+		key |= static_cast<uint64_t>(s.hero_forge_model & 0xFFFFF)   << 13;  // 20 bits
+		key |= static_cast<uint64_t>(GetRace() & 0xFFFF)             << 33;  // 16 bits
+
+		// Optional: Fold in color for appearance differences
+		uint8_t folded_color = static_cast<uint8_t>(
+			(s.color.Color * 17ull) & 0xFF
+		);
+		key |= static_cast<uint64_t>(folded_color) << 49;
+
+		return key;
+	};
+
+	
+	auto dedupe_key = build_key(*w);
+	auto send_if_changed = [&](Client* client) {
+		auto& last_key = m_last_seen_wearchange[client->GetID()][material_slot];
+		if (last_key == dedupe_key) {
+			return;
+		}
+		last_key = dedupe_key;
+		client->QueuePacket(packet, true, Client::CLIENT_CONNECTED);
+	};
+
+	if (one_client) {
+		send_if_changed(one_client);
+	}
+	else {
+		for (auto& [_, client] : entity_list.GetClientList()) {
+			send_if_changed(client);
+		}
 	}
 
 	safe_delete(packet);
