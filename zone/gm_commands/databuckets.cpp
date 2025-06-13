@@ -1,5 +1,5 @@
 #include "../client.h"
-#include "../data_bucket.h"
+#include "../../common/data_bucket.h"
 #include "../dialogue_window.h"
 #include "../../common/repositories/data_buckets_repository.h"
 

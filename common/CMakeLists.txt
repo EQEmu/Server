@@ -13,6 +13,7 @@ SET(common_sources
     crash.cpp
     crc16.cpp
     crc32.cpp
+    data_bucket.cpp
     database/database_dump_service.cpp
     database.cpp
     database_instances.cpp
@@ -550,6 +551,7 @@ SET(common_headers
     cli/eqemu_command_handler.h
     cli/terminal_color.hpp
     cron/croncpp.h
+    data_bucket.h
     database/database_dump_service.h
     data_verification.h
     database.h
