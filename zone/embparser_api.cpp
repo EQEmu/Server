@@ -1271,6 +1271,11 @@ void Perl__failtask(int task_id)
 	quest_manager.failtask(task_id);
 }
 
+void Perl__uncompletetask(int task_id)
+{
+	quest_manager.uncompletetask(task_id);
+}
+
 int Perl__tasktimeleft(int task_id)
 {
 	return quest_manager.tasktimeleft(task_id);
@@ -6628,6 +6633,7 @@ void perl_register_quest()
 	package.add("faction", (void(*)(int, int, int))&Perl__faction);
 	package.add("factionvalue", &Perl__FactionValue);
 	package.add("failtask", &Perl__failtask);
+	package.add("uncompletetask", &Perl__uncompletetask);
 	package.add("firsttaskinset", &Perl__firsttaskinset);
 	package.add("follow", (void(*)(int))&Perl__follow);
 	package.add("follow", (void(*)(int, int))&Perl__follow);

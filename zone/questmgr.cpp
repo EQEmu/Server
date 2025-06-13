@@ -40,6 +40,7 @@
 #include "dialogue_window.h"
 
 #include "../common/repositories/account_repository.h"
+#include "../common/repositories/completed_tasks_repository.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
 #include "../common/repositories/instance_list_repository.h"
 #include "../common/repositories/grid_entries_repository.h"
@@ -2956,6 +2957,21 @@ void QuestManager::failtask(int taskid) {
 
 	if(RuleB(TaskSystem, EnableTaskSystem) && initiator)
 		initiator->FailTask(taskid);
+}
+
+void QuestManager::uncompletetask(int task_id) {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator) {
+		CompletedTasksRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"charid = {} AND taskid = {}",
+				initiator->CharacterID(),
+				task_id
+			)
+		);
+	}
 }
 
 int QuestManager::tasktimeleft(int taskid) {
