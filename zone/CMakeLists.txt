@@ -25,6 +25,7 @@ SET(zone_sources
     combat_record.cpp
     command.cpp
     corpse.cpp
+    ../common/data_bucket.cpp
     doors.cpp
     dialogue_window.cpp
     dynamic_zone.cpp
@@ -194,6 +195,7 @@ SET(zone_headers
     command.h
     common.h
     corpse.h
+    ../common/data_bucket.h
     doors.h
     dialogue_window.h
     dynamic_zone.h

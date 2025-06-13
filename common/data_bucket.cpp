@@ -9,7 +9,15 @@ using json = nlohmann::json;
 const std::string                               NESTED_KEY_DELIMITER = ".";
 std::vector<DataBucketsRepository::DataBuckets> g_data_bucket_cache  = {};
 
-extern Database database;
+#if defined(ZONE)
+#include "../zone/zonedb.h"
+extern ZoneDatabase database;
+#elif defined(WORLD)
+#include "../world/worlddb.h"
+extern WorldDatabase database;
+#else
+#error "You must define either ZONE or WORLD"
+#endif
 
 void DataBucket::SetData(const std::string &bucket_key, const std::string &bucket_value, std::string expires_time)
 {
