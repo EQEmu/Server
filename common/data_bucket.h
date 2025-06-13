@@ -2,11 +2,9 @@
 #define EQEMU_DATABUCKET_H
 
 #include <string>
-#include "../common/types.h"
-#include "../common/repositories/data_buckets_repository.h"
-#include "mob.h"
-#include "../common/json/json_archive_single_line.h"
-#include "../common/servertalk.h"
+#include "types.h"
+#include "repositories/data_buckets_repository.h"
+#include "json/json_archive_single_line.h"
 
 struct DataBucketKey {
 	std::string key;
@@ -45,8 +43,6 @@ public:
 	static std::string GetData(const std::string &bucket_key);
 	static std::string GetDataExpires(const std::string &bucket_key);
 	static std::string GetDataRemaining(const std::string &bucket_key);
-
-	static bool GetDataBuckets(Mob *mob);
 
 	// scoped bucket methods
 	static void SetData(const DataBucketKey &k_);

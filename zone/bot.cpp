@@ -3640,7 +3640,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		entity_list.AddBot(this, true, true);
 
 		ClearDataBucketCache();
-		DataBucket::GetDataBuckets(this);
+		LoadDataBucketsCache();
 		LoadBotSpellSettings();
 		if (!AI_AddBotSpells(GetBotSpellID())) {
 			GetBotOwner()->CastToClient()->Message(

@@ -22,7 +22,7 @@
 #include "../common/strings.h"
 
 #include "client.h"
-#include "data_bucket.h"
+#include "../common/data_bucket.h"
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"

@@ -33,7 +33,7 @@
 #include "queryserv.h"
 #include "questmgr.h"
 #include "zone.h"
-#include "data_bucket.h"
+#include "../common/data_bucket.h"
 #include "../common/events/player_event_logs.h"
 #include "worldserver.h"
 

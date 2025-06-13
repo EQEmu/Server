@@ -1,5 +1,5 @@
 #include "../client.h"
-#include "../data_bucket.h"
+#include "../../common/data_bucket.h"
 
 void command_gmzone(Client *c, const Seperator *sep)
 {

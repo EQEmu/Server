@@ -80,7 +80,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/spell_buckets_repository.h"
 
-#include "data_bucket.h"
+#include "../common/data_bucket.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"

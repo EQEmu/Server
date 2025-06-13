@@ -19,7 +19,7 @@
 #include "../common/file.h"
 #include "../common/repositories/dynamic_zones_repository.h"
 
-#include "data_bucket.h"
+#include "../common/data_bucket.h"
 #include "command.h"
 #include "dynamic_zone.h"
 #include "queryserv.h"

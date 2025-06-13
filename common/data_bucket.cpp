@@ -1,18 +1,23 @@
-#include "data_bucket.h"
-#include "zonedb.h"
-#include "mob.h"
-#include "client.h"
-#include "worldserver.h"
+#include "../common/data_bucket.h"
+#include "database.h"
 #include <ctime>
 #include <cctype>
 #include "../common/json/json.hpp"
 
 using json = nlohmann::json;
 
-extern WorldServer worldserver;
-const std::string  NESTED_KEY_DELIMITER = ".";
+const std::string                               NESTED_KEY_DELIMITER = ".";
+std::vector<DataBucketsRepository::DataBuckets> g_data_bucket_cache  = {};
 
-std::vector<DataBucketsRepository::DataBuckets> g_data_bucket_cache = {};
+#if defined(ZONE)
+#include "../zone/zonedb.h"
+extern ZoneDatabase database;
+#elif defined(WORLD)
+#include "../world/worlddb.h"
+extern WorldDatabase database;
+#else
+#error "You must define either ZONE or WORLD"
+#endif
 
 void DataBucket::SetData(const std::string &bucket_key, const std::string &bucket_value, std::string expires_time)
 {
@@ -345,27 +350,6 @@ std::string DataBucket::GetDataRemaining(const std::string &bucket_key)
 bool DataBucket::DeleteData(const std::string &bucket_key)
 {
 	return DeleteData(DataBucketKey{.key = bucket_key});
-}
-
-// GetDataBuckets bulk loads all data buckets for a mob
-bool DataBucket::GetDataBuckets(Mob *mob)
-{
-	const uint32 id = mob->GetMobTypeIdentifier();
-
-	if (!id) {
-		return false;
-	}
-
-	if (mob->IsBot()) {
-		BulkLoadEntitiesToCache(DataBucketLoadType::Bot, {id});
-	}
-	else if (mob->IsClient()) {
-		uint32 account_id = mob->CastToClient()->AccountID();
-		BulkLoadEntitiesToCache(DataBucketLoadType::Account, {account_id});
-		BulkLoadEntitiesToCache(DataBucketLoadType::Client, {id});
-	}
-
-	return true;
 }
 
 bool DataBucket::DeleteData(const DataBucketKey &k)
