@@ -1337,46 +1337,35 @@ void ConsoleWWMarquee(
 )
 {
 	if (args.size() < 2) {
-		connection->SendLine("Usage: marquee <type> <message>");
+		connection->SendLine("Usage: wwmarquee <type> <message>");
 		return;
 	}
 
-	const uint32 type = Strings::IsNumber(args[0]) ? Strings::ToUnsignedInt(args[0]) : 0;
-	const uint32 priority = 1;
-	const uint32 fade_in  = 500;
-	const uint32 fade_out = 500;
-	const uint32 duration = 5000;
-
-	// Join message from args[1..]
-	std::string message = Strings::Join(std::vector<std::string>(args.begin() + 1, args.end()), " ");
+	const uint32 type    = Strings::IsNumber(args[0]) ? Strings::ToUnsignedInt(args[0]) : 0;
+	std::string  message = Strings::Join(std::vector<std::string>(args.begin() + 1, args.end()), " ");
 	if (message.empty()) {
 		connection->SendLine("Message cannot be empty.");
 		return;
 	}
 
-	// Build the CZMarquee_Struct for world broadcast (update_type = character, identifier = 0)
-	auto pack = new ServerPacket(ServerOP_CZMarquee, sizeof(CZMarquee_Struct));
-	auto* czm = (CZMarquee_Struct*)pack->pBuffer;
+	auto pack = new ServerPacket(ServerOP_WWMarquee, sizeof(WWMarquee_Struct));
+	auto* wwm = (WWMarquee_Struct*)pack->pBuffer;
 
-	czm->update_type       = CZUpdateType_Character;  // world-wide
-	czm->update_identifier = 0;
-	czm->type              = type;
-	czm->priority          = priority;
-	czm->fade_in           = fade_in;
-	czm->fade_out          = fade_out;
-	czm->duration          = duration;
+	wwm->type       = type;
+	wwm->priority   = 510;
+	wwm->fade_in    = 0;
+	wwm->fade_out   = 0;
+	wwm->duration   = 5000;
+	wwm->min_status = AccountStatus::Player;
+	wwm->max_status = AccountStatus::Player;
 
-	strn0cpy(czm->message, message.c_str(), sizeof(czm->message));
-	czm->client_name[0] = '\0'; // unused
+	strn0cpy(wwm->message, message.c_str(), sizeof(wwm->message));
 
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 
 	connection->SendLine(fmt::format("Sent world marquee type {}: {}", type, message));
 }
-
-
-
 
 /**
  * @param console

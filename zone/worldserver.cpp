@@ -3140,7 +3140,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_WWMarquee:
 	{
 		auto s = (WWMarquee_Struct*) pack->pBuffer;
-
 		for (const auto& c : entity_list.GetClientList()) {
 			if (
 				c.second->Admin() >= s->min_status &&
