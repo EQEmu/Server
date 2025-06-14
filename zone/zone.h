@@ -25,7 +25,6 @@
 #include "../common/random.h"
 #include "../common/strings.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "../common/repositories/grid_repository.h"
 #include "../common/repositories/grid_entries_repository.h"
 #include "../common/repositories/zone_points_repository.h"
@@ -46,10 +45,7 @@
 #include "../common/repositories/lootdrop_repository.h"
 #include "../common/repositories/lootdrop_entries_repository.h"
 #include "../common/repositories/base_data_repository.h"
-#include "../common/repositories/skill_caps_repository.h"
-#include "../common/repositories/zone_state_spawns_repository.h"
 #include "../common/repositories/spawn2_disabled_repository.h"
-#include "../common/repositories/player_titlesets_repository.h"
 
 struct EXPModifier
 {
