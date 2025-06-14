@@ -28,7 +28,6 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 #define ZONEDUMP_H
 #include "../common/faction.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/inventory_profile.h"
 
 #pragma pack(1)
 

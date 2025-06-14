@@ -1,7 +1,6 @@
 #ifndef EQEMU_ZONE_CLI_H
 #define EQEMU_ZONE_CLI_H
 
-#include <iostream>
 #include "../common/cli/argh.h"
 
 class ZoneCLI {

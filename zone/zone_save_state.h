@@ -2,12 +2,8 @@
 
 #include <string>
 #include <cereal/archives/json.hpp>
-#include <cereal/types/map.hpp>
 #include "npc.h"
-#include "corpse.h"
-#include "zone.h"
 #include "../common/repositories/zone_state_spawns_repository.h"
-#include "../common/repositories/spawn2_disabled_repository.h"
 
 struct LootEntryStateData {
 	uint32   item_id     = 0;

@@ -46,7 +46,6 @@
 #include "../common/repositories/npc_types_tint_repository.h"
 #include "../common/repositories/merchantlist_temp_repository.h"
 #include "../common/repositories/character_exp_modifiers_repository.h"
-#include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/character_corpse_items_repository.h"
 #include "../common/repositories/zone_repository.h"

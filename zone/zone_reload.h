@@ -21,7 +21,6 @@
 #ifndef EQEMU_ZONE_RELOAD_H
 #define EQEMU_ZONE_RELOAD_H
 
-
 class ZoneReload {
 public:
 	static void HotReloadQuests();
