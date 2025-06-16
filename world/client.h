@@ -121,6 +121,9 @@ private:
 	bool CanTradeFVNoDropItem();
 	void RecordPossibleHack(const std::string& message);
 	void SendUnsupportedClientPacket(const std::string& message);
+
+	void LoadDataBucketsCache();
+	void ClearDataBucketsCache();
 };
 
 bool CheckCharCreateInfoSoF(CharCreate_Struct *cc);
