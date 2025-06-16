@@ -24,7 +24,7 @@
 #include "qglobals.h"
 #include "encounter.h"
 #include "lua_encounter.h"
-#include "data_bucket.h"
+#include "../common/data_bucket.h"
 #include "dialogue_window.h"
 #include "dynamic_zone.h"
 #include "../common/events/player_event_logs.h"

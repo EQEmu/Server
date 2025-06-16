@@ -7,6 +7,7 @@ SET(world_sources
     cliententry.cpp
     clientlist.cpp
     console.cpp
+    ../common/data_bucket.cpp
     dynamic_zone.cpp
     dynamic_zone_manager.cpp
     eql_config.cpp
@@ -42,6 +43,7 @@ SET(world_headers
     cliententry.h
     clientlist.h
     console.h
+    ../common/data_bucket.h
     dynamic_zone.h
     dynamic_zone_manager.h
     eql_config.h
