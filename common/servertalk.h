@@ -273,8 +273,9 @@
 #define ServerOP_WWTaskUpdate 0x4758
 
 // player events
-#define ServerOP_QSSendQuery		0x5000
+#define ServerOP_QSSendQuery 0x5000
 #define ServerOP_PlayerEvent 0x5100
+#define ServerOP_SendPlayerEventSettings 0x5101
 
 enum {
 	CZUpdateType_Character,
@@ -1777,6 +1778,7 @@ struct BazaarPurchaseMessaging_Struct {
 	uint32           item_quantity_available;
 	uint32           id;
 };
+
 
 #pragma pack()
 

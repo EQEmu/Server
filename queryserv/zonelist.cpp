@@ -5,6 +5,8 @@
 void ZSList::Add(ZoneServer* zoneserver) {
 	zone_server_list.emplace_back(std::unique_ptr<ZoneServer>(zoneserver));
 	zoneserver->SetIsZoneConnected(true);
+
+	zoneserver->SendPlayerEventLogSettings();
 }
 
 void ZSList::Remove(const std::string &uuid)
@@ -16,5 +18,12 @@ void ZSList::Remove(const std::string &uuid)
 			return;
 		}
 		iter++;
+	}
+}
+
+void ZSList::SendPlayerEventLogSettings()
+{
+	for (auto &zs : zone_server_list) {
+		zs->SendPlayerEventLogSettings();
 	}
 }

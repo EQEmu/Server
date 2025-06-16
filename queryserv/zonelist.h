@@ -12,9 +12,10 @@ class ZoneServer;
 
 class ZSList {
 public:
-	std::list<std::unique_ptr<ZoneServer>> &GetZsList() { return zone_server_list; }
-	void Add(ZoneServer *zoneserver);
-	void Remove(const std::string &uuid);
+	std::list<std::unique_ptr<ZoneServer>>& GetZsList() { return zone_server_list; }
+	void                                    Add(ZoneServer* zoneserver);
+	void                                    Remove(const std::string& uuid);
+	void                                    SendPlayerEventLogSettings();
 
 private:
 	std::list<std::unique_ptr<ZoneServer>> zone_server_list;
