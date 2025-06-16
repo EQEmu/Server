@@ -40,8 +40,8 @@ void ZoneCLI::TestDataBuckets(int argc, char** argv, argh::parser& cmd, std::str
 		"exp_test", "cache_test", "full_json", "full_json.key2", "complex", "complex.nested.obj1",
 		"complex.nested.obj2", "plain_string", "json_array", "nested_partial",
 		"nested_override", "empty_json", "json_string", "deep_nested",
-		"nested_expire.test.test", "scoped_miss_test", "scoped_nested_miss.key",
-		"cache_miss_overwrite", "missed_nested_set.test", "account_client_test", "ac_nested.test",
+		"nested_expire", "scoped_miss_test", "scoped_nested_miss.key",
+		"cache_miss_overwrite", "missed_nested_set", "account_client_test", "ac_nested.test",
 		"scoped_db_only_key"
 	};
 
@@ -309,7 +309,7 @@ void ZoneCLI::TestDataBuckets(int argc, char** argv, argh::parser& cmd, std::str
 	DataBucket::ClearCache();
 
 	// ✅ Scoped insert
-	DataBucketsRepository::ReplaceOne(
+	DataBucketsRepository::InsertOne(
 		database, {
 			.key_ = scoped_key,
 			.value = "cached_value",
