@@ -322,7 +322,7 @@ void ZoneCLI::TestDataBuckets(int argc, char** argv, argh::parser& cmd, std::str
 	RunTest("Cold Cache Scoped Key Returns Empty (Due to Skip DB)", "", cold_value);
 
 	// ✅ Reload cache
-	DataBucket::GetDataBuckets(client);
+	client->LoadDataBucketsCache();
 
 	// Cache should now return the value
 	std::string hot_value = client->GetBucket(scoped_key);
@@ -334,7 +334,7 @@ void ZoneCLI::TestDataBuckets(int argc, char** argv, argh::parser& cmd, std::str
 
 	// Clear cache, then preload
 	DataBucket::ClearCache();
-	DataBucket::GetDataBuckets(client);
+	client->LoadDataBucketsCache();
 
 	std::string nested_value = client->GetBucket("ac_nested.test");
 	RunTest("Post-BulkLoad Nested Scoped Key Returns Value", "nested_val", nested_value);
