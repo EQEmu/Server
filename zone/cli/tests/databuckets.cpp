@@ -241,6 +241,83 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 //	value = client->GetBucket("deep_nested.level1.level2.level3");
 //	RunTest("Delete Deep Nested Key Keeps Parent", "{}", value);
 
+	// ================================
+	// 🧪 Scoped Cache-Miss Behavior Tests
+	// ================================
+
+	// Ensure a scoped key (character ID) that doesn't exist is not fetched from DB if not in cache
+	client->DeleteBucket("scoped_miss_test"); // Ensure not in DB
+	DataBucket::ClearCache(); // Clear all caches
+	std::string scoped_miss_value = client->GetBucket("scoped_miss_test");
+	RunTest("Scoped Missing Key Returns Empty (Skips DB)", "", scoped_miss_value);
+
+	// Ensure nested scoped key that isn't in cache returns empty immediately
+	client->DeleteBucket("scoped_nested_miss.key");
+	DataBucket::ClearCache(); // Clear cache again
+	std::string scoped_nested_miss = client->GetBucket("scoped_nested_miss.key");
+	RunTest("Nested Scoped Key Miss Returns Empty (Skips DB)", "", scoped_nested_miss);
+
+	// Write to a key that was previously missed (0-id cached miss)
+	client->DeleteBucket("cache_miss_overwrite");
+	DataBucket::ClearCache(); // Ensure clean slate
+	std::string missed_value = client->GetBucket("cache_miss_overwrite");
+	RunTest("Initial Cache Miss Returns Empty", "", missed_value);
+	client->SetBucket("cache_miss_overwrite", "new_value");
+	std::string new_val = client->GetBucket("cache_miss_overwrite");
+	RunTest("Overwrite After Cache Miss Works", "new_value", new_val);
+
+	// Write a nested key that previously missed
+	client->DeleteBucket("missed_nested_set.test");
+	DataBucket::ClearCache();
+	std::string initial = client->GetBucket("missed_nested_set.test");
+	RunTest("Missed Nested Key Returns Empty", "", initial);
+	client->SetBucket("missed_nested_set.test", "set_value");
+	std::string after_write = client->GetBucket("missed_nested_set.test");
+	RunTest("Nested Set After Miss Works", "set_value", after_write);
+
+	// ================================
+	// 🧪 Scoped Cache Preload Tests (Account + Client)
+	// ================================
+
+	// Clear everything for a clean test
+	client->DeleteBucket("account_client_test");
+	DataBucket::ClearCache();
+
+	// Set a value to DB only, bypassing cache
+	client->SetBucket("account_client_test", "cached_value");
+
+	// Clear cache to simulate cold start
+	DataBucket::ClearCache();
+
+	// Ensure that value is NOT in cache yet
+	std::string cold_value = client->GetBucket("account_client_test");
+	RunTest("Cold Cache Scoped Key Returns Empty (Due to Skip DB)", "", cold_value);
+
+	// Load account/client buckets into cache via GetDataBuckets()
+	DataBucket::GetDataBuckets(client);
+
+	// Value should now be present from cache after bulk load
+	std::string hot_value = client->GetBucket("account_client_test");
+	RunTest("Post-BulkLoad Scoped Key Returns Value", "cached_value", hot_value);
+
+	// Also test nested key after preload
+	client->DeleteBucket("ac_nested.test");
+	client->SetBucket("ac_nested.test", "nested_val");
+
+	// Clear cache, then preload
+	DataBucket::ClearCache();
+	DataBucket::GetDataBuckets(client);
+
+	std::string nested_value = client->GetBucket("ac_nested.test");
+	RunTest("Post-BulkLoad Nested Scoped Key Returns Value", "nested_val", nested_value);
+
+	// Remove and check that cache misses properly again
+	client->DeleteBucket("ac_nested.test");
+	DataBucket::ClearCache();
+	std::string post_delete_check = client->GetBucket("ac_nested.test");
+	RunTest("Post-Delete Nested Scoped Key Returns Empty", "", post_delete_check);
+
+
 	std::cout << "\n===========================================\n";
 	std::cout << "✅ All DataBucket Tests Completed!\n";
 	std::cout << "===========================================\n";
