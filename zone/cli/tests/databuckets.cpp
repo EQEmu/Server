@@ -5,16 +5,16 @@
 #include "../../client.h"
 #include "../../common/net/eqstream.h"
 
-extern Zone *zone;
+extern Zone* zone;
 
-void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::string &description)
+void ZoneCLI::TestDataBuckets(int argc, char** argv, argh::parser& cmd, std::string& description)
 {
 	if (cmd[{"-h", "--help"}]) {
 		return;
 	}
 
 	uint32 break_length = 50;
-	int failed_count = 0;
+	int    failed_count = 0;
 
 	LogSys.SilenceConsoleLogging();
 
@@ -25,13 +25,35 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 	entity_list.Process();
 	entity_list.MobProcess();
 
+	Client* client = new Client();
+	client->SetCharacterId(1); // Set a dummy character ID for testing
+
 	LogSys.EnableConsoleLogging();
+
+	LogSys.log_settings[Logs::MySQLQuery].is_category_enabled = std::getenv("DEBUG") ? 1 : 0;
+	LogSys.log_settings[Logs::MySQLQuery].log_to_console      = std::getenv("DEBUG") ? 3 : 0;
+
+	// 🧹 Delete all test keys before running tests
+	std::vector<std::string> test_keys_to_clear = {
+		"basic_key", "expiring_key", "cache_key", "json_key", "non_existent_key", "simple_key",
+		"nested", "nested.test1", "nested.test2", "nested.test1.a", "nested.test2.a",
+		"exp_test", "cache_test", "full_json", "full_json.key2", "complex", "complex.nested.obj1",
+		"complex.nested.obj2", "plain_string", "json_array", "nested_partial",
+		"nested_override", "empty_json", "json_string", "deep_nested",
+		"nested_expire.test.test", "scoped_miss_test", "scoped_nested_miss.key",
+		"cache_miss_overwrite", "missed_nested_set.test", "account_client_test", "ac_nested.test",
+		"scoped_db_only_key"
+	};
+
+	DataBucketsRepository::DeleteWhere(
+		database,
+		fmt::format("`key` IN ('{}')", Strings::Join(test_keys_to_clear, "','"))
+	);
+	DataBucket::ClearCache();
 
 	std::cout << "===========================================\n";
 	std::cout << "⚙\uFE0F> Running DataBuckets Tests...\n";
 	std::cout << "===========================================\n\n";
-
-	Client *client = new Client();
 
 	// Basic Key-Value Set/Get
 	client->DeleteBucket("basic_key");
@@ -101,7 +123,7 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 	client->DeleteBucket("nested");
 	client->SetBucket("nested.test1.a", "value1");
 	client->SetBucket("nested.test2.a", "value2");
-	client->SetBucket("nested.test2", "new_value");  // Should be **rejected**
+	client->SetBucket("nested.test2", "new_value"); // Should be **rejected**
 	value = client->GetBucket("nested");
 	RunTest("Prevent Overwriting Objects", R"({"test1":{"a":"value1"},"test2":{"a":"value2"}})", value);
 
@@ -160,9 +182,10 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 	client->DeleteBucket("complex");
 	client->SetBucket("complex.nested.obj1", "data1");
 	client->SetBucket("complex.nested.obj2", "data2");
-	client->DeleteBucket("does_not_exist");  // Should do nothing
+	client->DeleteBucket("does_not_exist"); // Should do nothing
 	value = client->GetBucket("complex");
-	RunTest("Deleting Non-Existent Key Doesn't Break Existing Data", R"({"nested":{"obj1":"data1","obj2":"data2"}})", value);
+	RunTest("Deleting Non-Existent Key Doesn't Break Existing Data", R"({"nested":{"obj1":"data1","obj2":"data2"}})",
+	        value);
 
 	// Get nested key value one level up **
 	client->DeleteBucket("complex");
@@ -190,12 +213,12 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 	value = client->GetBucket("json_array");
 	RunTest("Store and Retrieve JSON Array", R"(["item1", "item2"])", value);
 
-//	// Prevent Overwriting Array with Object**
-//	client->DeleteBucket("json_array");
-//	client->SetBucket("json_array", R"(["item1", "item2"])");
-//	client->SetBucket("json_array.item", "new_value"); // Should be rejected
-//	value = client->GetBucket("json_array");
-//	RunTest("Prevent Overwriting Array with Object", R"(["item1", "item2"])", value);
+	//	// Prevent Overwriting Array with Object**
+	//	client->DeleteBucket("json_array");
+	//	client->SetBucket("json_array", R"(["item1", "item2"])");
+	//	client->SetBucket("json_array.item", "new_value"); // Should be rejected
+	//	value = client->GetBucket("json_array");
+	//	RunTest("Prevent Overwriting Array with Object", R"(["item1", "item2"])", value);
 
 	// Retrieve Non-Existent Nested Key**
 	client->DeleteBucket("nested_partial");
@@ -235,11 +258,11 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 	RunTest("Setting a nested key with an expiration protection test", R"({"test":{"test":"shouldnt_expire"}})", value);
 
 	// Delete Deep Nested Key Keeps Parent**
-//	client->DeleteBucket("deep_nested");
-//	client->SetBucket("deep_nested.level1.level2.level3", R"({"key": "value"})");
-//	client->DeleteBucket("deep_nested.level1.level2.level3.key");
-//	value = client->GetBucket("deep_nested.level1.level2.level3");
-//	RunTest("Delete Deep Nested Key Keeps Parent", "{}", value);
+	//	client->DeleteBucket("deep_nested");
+	//	client->SetBucket("deep_nested.level1.level2.level3", R"({"key": "value"})");
+	//	client->DeleteBucket("deep_nested.level1.level2.level3.key");
+	//	value = client->GetBucket("deep_nested.level1.level2.level3");
+	//	RunTest("Delete Deep Nested Key Keeps Parent", "{}", value);
 
 	// ================================
 	// 🧪 Scoped Cache-Miss Behavior Tests
@@ -247,7 +270,7 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 
 	// Ensure a scoped key (character ID) that doesn't exist is not fetched from DB if not in cache
 	client->DeleteBucket("scoped_miss_test"); // Ensure not in DB
-	DataBucket::ClearCache(); // Clear all caches
+	DataBucket::ClearCache();                 // Clear all caches
 	std::string scoped_miss_value = client->GetBucket("scoped_miss_test");
 	RunTest("Scoped Missing Key Returns Empty (Skips DB)", "", scoped_miss_value);
 
@@ -280,24 +303,29 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 	// ================================
 
 	// Clear everything for a clean test
-	client->DeleteBucket("account_client_test");
+	// Insert directly into the DB without touching cache
+	const std::string scoped_key = "scoped_db_only_key";
+	client->DeleteBucket(scoped_key);
 	DataBucket::ClearCache();
 
-	// Set a value to DB only, bypassing cache
-	client->SetBucket("account_client_test", "cached_value");
+	// ✅ Scoped insert
+	DataBucketsRepository::InsertOne(
+		database, {
+			.key_ = scoped_key,
+			.value = "cached_value",
+			.character_id = client->CharacterID()
+		}
+	);
 
-	// Clear cache to simulate cold start
-	DataBucket::ClearCache();
-
-	// Ensure that value is NOT in cache yet
-	std::string cold_value = client->GetBucket("account_client_test");
+	// Cold cache test — should return ""
+	std::string cold_value = client->GetBucket(scoped_key);
 	RunTest("Cold Cache Scoped Key Returns Empty (Due to Skip DB)", "", cold_value);
 
-	// Load account/client buckets into cache via GetDataBuckets()
+	// ✅ Reload cache
 	DataBucket::GetDataBuckets(client);
 
-	// Value should now be present from cache after bulk load
-	std::string hot_value = client->GetBucket("account_client_test");
+	// Cache should now return the value
+	std::string hot_value = client->GetBucket(scoped_key);
 	RunTest("Post-BulkLoad Scoped Key Returns Value", "cached_value", hot_value);
 
 	// Also test nested key after preload
