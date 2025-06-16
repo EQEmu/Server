@@ -309,7 +309,7 @@ void ZoneCLI::TestDataBuckets(int argc, char** argv, argh::parser& cmd, std::str
 	DataBucket::ClearCache();
 
 	// ✅ Scoped insert
-	DataBucketsRepository::InsertOne(
+	DataBucketsRepository::ReplaceOne(
 		database, {
 			.key_ = scoped_key,
 			.value = "cached_value",
