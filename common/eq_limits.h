@@ -43,6 +43,7 @@ namespace EQ
 			int16 CharacterCreationLimit;
 			size_t SayLinkBodySize;
 			uint32 BazaarTraderLimit;
+			uint64 BazaarMaxTransaction;
 			
 			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
@@ -51,14 +52,16 @@ namespace EQ
 				uint32 ExpansionsMask,
 				int16 CharacterCreationLimit,
 				size_t SayLinkBodySize,
-				uint32 BazaarTraderLimit
+				uint32 BazaarTraderLimit,
+				uint64 BazaarMaxTransaction
 			) :
 				Expansion(Expansion),
 				ExpansionBit(ExpansionBit),
 				ExpansionsMask(ExpansionsMask),
 				CharacterCreationLimit(CharacterCreationLimit),
 				SayLinkBodySize(SayLinkBodySize),
-				BazaarTraderLimit(BazaarTraderLimit)
+				BazaarTraderLimit(BazaarTraderLimit),
+				BazaarMaxTransaction(BazaarMaxTransaction)
 			{ }
 		};
 

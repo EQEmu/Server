@@ -41,16 +41,20 @@
 #include "../common/path_manager.h"
 #include "../common/zone_store.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/content/world_content_service.h"
+#include "../common/evolving_items.h"
 
-ChatChannelList *ChannelList;
-Clientlist *g_Clientlist;
-EQEmuLogSys LogSys;
-UCSDatabase database;
-WorldServer *worldserver = nullptr;
-DiscordManager discord_manager;
-PathManager path;
-ZoneStore zone_store;
-PlayerEventLogs player_event_logs;
+ChatChannelList     *ChannelList;
+Clientlist          *g_Clientlist;
+EQEmuLogSys          LogSys;
+UCSDatabase          database;
+WorldServer         *worldserver = nullptr;
+DiscordManager       discord_manager;
+PathManager          path;
+ZoneStore            zone_store;
+PlayerEventLogs      player_event_logs;
+EvolvingItemsManager evolving_items_manager;
+WorldContentService  content_service;
 
 const ucsconfig *Config;
 

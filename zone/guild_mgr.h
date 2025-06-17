@@ -90,7 +90,7 @@ public:
 
 	void RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank);
 	bool VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank);
-	void SendGuildMemberUpdateToWorld(const char *MemberName, uint32 GuildID, uint16 ZoneID, uint32 LastSeen);
+	void SendGuildMemberUpdateToWorld(const char *MemberName, uint32 GuildID, uint16 ZoneID, uint32 LastSeen, uint32 offline_mode);
 	void RequestOnlineGuildMembers(uint32 FromID, uint32 GuildID);
 	void UpdateRankPermission(uint32 gid, uint32 charid, uint32 fid, uint32 rank, uint32 value);
 	void SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32 function_id, uint32 value);

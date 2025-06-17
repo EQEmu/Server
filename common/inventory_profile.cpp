@@ -252,11 +252,18 @@ int16 EQ::InventoryProfile::PutItem(int16 slot_id, const ItemInstance& inst)
 		return slot_id;
 	}
 
+	// if (inst.GetSerialNumber2().empty()) {
+	// 	inst.GenerateUniqueSerialNumber();
+	// }
 	// Delegate to internal method
 	return _PutItem(slot_id, inst.Clone());
 }
 
 int16 EQ::InventoryProfile::PushCursor(const ItemInstance &inst) {
+	if (inst.GetUniqueID().empty()) {
+		inst.CreateUniqueID();
+	}
+
 	m_cursor.push(inst.Clone());
 	return invslot::slotCursor;
 }

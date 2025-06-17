@@ -379,7 +379,7 @@ bool Client::DoEvolveCheckProgression(EQ::ItemInstance &inst)
 
 	PlayerEvent::EvolveItem e{};
 
-	RemoveItemBySerialNumber(inst.GetSerialNumber());
+	RemoveItemByItemUniqueId(inst.GetUniqueID());
 	evolving_items_manager.LoadPlayerEvent(inst, e);
 	e.status = "Evolved Item due to obtaining progression - Old Evolve Item removed from inventory.";
 	RecordPlayerEventLog(PlayerEvent::EVOLVE_ITEM, e);
@@ -499,7 +499,7 @@ void Client::DoEvolveTransferXP(const EQApplicationPacket *app)
 
 	PlayerEvent::EvolveItem e{};
 
-	RemoveItemBySerialNumber(inst_from->GetSerialNumber());
+	RemoveItemByItemUniqueId(inst_from->GetUniqueID());
 	evolving_items_manager.LoadPlayerEvent(*inst_from, e);
 	e.status = "Transfer XP - Original FROM Evolve Item removed from inventory.";
 	RecordPlayerEventLog(PlayerEvent::EVOLVE_ITEM, e);
@@ -509,7 +509,7 @@ void Client::DoEvolveTransferXP(const EQApplicationPacket *app)
 	e.status = "Transfer XP - Updated FROM item placed in inventory.";
 	RecordPlayerEventLog(PlayerEvent::EVOLVE_ITEM, e);
 
-	RemoveItemBySerialNumber(inst_to->GetSerialNumber());
+	RemoveItemByItemUniqueId(inst_to->GetUniqueID());
 	evolving_items_manager.LoadPlayerEvent(*inst_to, e);
 	e.status = "Transfer XP - Original TO Evolve Item removed from inventory.";
 	RecordPlayerEventLog(PlayerEvent::EVOLVE_ITEM, e);
