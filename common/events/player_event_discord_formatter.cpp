@@ -716,7 +716,7 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 			);
 
 			for (int i = 0; i < h.augment_ids.size(); i++) {
-				if (!Strings::EqualFold(h.augment_names[i], "None")) {
+				if (!h.augment_names[i].empty()) {
 					const uint8 slot_id = (i + 1);
 					handin_items_info += fmt::format(
 						"Augment {}: {} ({})\n",
@@ -741,7 +741,7 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 			);
 
 			for (int i = 0; i < r.augment_ids.size(); i++) {
-				if (!Strings::EqualFold(r.augment_names[i], "None")) {
+				if (!r.augment_names[i].empty()) {
 					const uint8 slot_id = (i + 1);
 					return_items_info += fmt::format(
 						"Augment {}: {} ({})\n",
