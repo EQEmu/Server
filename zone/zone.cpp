@@ -1151,6 +1151,10 @@ bool Zone::Init(bool is_static) {
 		);
 	} // if that fails, try the file name, then load defaults
 
+	content_service.SetZoneId(GetZoneID());
+	content_service.SetInstanceVersion(GetInstanceVersion());
+	RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
+
 	if (RuleManager::Instance()->GetActiveRulesetID() != default_ruleset) {
 		std::string r_name = RuleSetsRepository::GetRuleSetName(database, default_ruleset);
 		if (r_name.size() > 0) {
@@ -1292,7 +1296,6 @@ void Zone::ReloadStaticData() {
 	} // if that fails, try the file name, then load defaults
 
 	WorldContentService::Instance()->SetExpansionContext()->ReloadContentFlags();
-
 
 	LogInfo("Zone Static Data Reloaded");
 }

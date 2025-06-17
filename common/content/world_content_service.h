@@ -187,6 +187,11 @@ public:
 		return &instance;
 	}
 
+	// targeted rulesets
+	void LoadTargetedRulesets(Database* db);
+	inline void SetZoneId(int zone_id) { m_zone_id = zone_id; }
+	inline void SetInstanceVersion(int instance_version) { m_instance_version = instance_version; }
+
 private:
 	int current_expansion{};
 	std::vector<ContentFlagsRepository::ContentFlags> content_flags;
@@ -194,6 +199,9 @@ private:
 	// reference to database
 	Database *m_database;
 	Database *m_content_database;
+
+	int m_zone_id = 0;
+	int m_instance_version = 0;
 
 	// holds a record of the zone table from the database
 	WorldContentService *LoadStaticGlobalZoneInstances();
