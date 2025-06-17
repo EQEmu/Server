@@ -423,6 +423,12 @@ int main(int argc, char **argv)
 		->SetExpansionContext()
 		->ReloadContentFlags();
 
+	RuleManager::Instance()->SetPostLoadCallback(
+		[&](Database* db) {
+			content_service.LoadTargetedRulesets(db);
+		}
+	);
+
 	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
 
 	EQ::SayLinkEngine::LoadCachedSaylinks();
