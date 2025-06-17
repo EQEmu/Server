@@ -3584,6 +3584,11 @@ bool Lua_Client::KeyRingRemove(uint32 item_id)
 	return self->KeyRingRemove(item_id);
 }
 
+void Lua_Client::EnableTitleSet(uint32 title_set) {
+	Lua_Safe_Call_Void();
+	self->EnableTitle(title_set);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3693,6 +3698,7 @@ luabind::scope lua_register_client() {
 	.def("EnableAreaHPRegen", &Lua_Client::EnableAreaHPRegen)
 	.def("EnableAreaManaRegen", &Lua_Client::EnableAreaManaRegen)
 	.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
+	.def("EnableTitleSet", &Lua_Client::EnableTitleSet)
 	.def("EndSharedTask", (void(Lua_Client::*)(void))&Lua_Client::EndSharedTask)
 	.def("EndSharedTask", (void(Lua_Client::*)(bool))&Lua_Client::EndSharedTask)
 	.def("Escape", (void(Lua_Client::*)(void))&Lua_Client::Escape)
