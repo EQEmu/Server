@@ -2445,13 +2445,15 @@ Corpse *Corpse::LoadCharacterCorpse(
 	c->m_become_npc                = false;
 	c->m_consented_guild_id        = cc.guild_consent_id;
 
-	if (!cc.entity_variables.empty() && cc.entity_variables != "null") {
-		json j = json::parse(cc.entity_variables, nullptr, false);
-		if (!j.is_discarded()) {
+	try {
+		if (Strings::IsValidJson(cc.entity_variables)) {
+			json j = json::parse(cc.entity_variables);
 			for (auto& el : j.items()) {
 				c->SetEntityVariable(el.key(), el.value().get<std::string>());
 			}
 		}
+	} catch (const std::exception& ex) {
+		LogError("Failed to parse entity_variables JSON for corpse ID %u: %s", cc.id, ex.what());
 	}
 
 	c->IsRezzed(cc.is_rezzed);
