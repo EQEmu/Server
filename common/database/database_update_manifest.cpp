@@ -7112,6 +7112,18 @@ ADD COLUMN `first_login` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `xtargets`;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9324,
+		.description = "2025_06_11_player_event_logs_table.sql",
+		.check = "SHOW CREATE TABLE `player_event_logs`",
+		.condition = "missing",
+		.match = "COMPRESS",
+		.sql = R"(
+ALTER TABLE player_event_logs ROW_FORMAT=COMPRESSED;
+CREATE INDEX idx_event_type_char_id ON player_event_logs (event_type_id, character_id);
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
