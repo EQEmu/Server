@@ -413,6 +413,11 @@ int main(int argc, char **argv)
 		->ReloadContentFlags();
 
 	ZoneEventScheduler::Instance()->SetDatabase(&database)->LoadScheduledEvents();
+	RuleManager::Instance()->SetPostLoadCallback(
+		[&](Database* db) {
+			WorldContentService::Instance()->LoadTargetedRulesets(db);
+		}
+	);
 
 	EQ::SayLinkEngine::LoadCachedSaylinks();
 

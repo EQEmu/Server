@@ -40,6 +40,7 @@
     RuleManager::Instance()->GetStringRule( RuleManager::String__##rule_name )
 
 
+#include <functional>
 #include <vector>
 #include <string>
 #include <map>
@@ -156,6 +157,9 @@ public:
 	bool UpdateInjectedRules(Database* db, const std::string& rule_set_name, bool quiet_update = false);
 	bool UpdateOrphanedRules(Database* db, bool quiet_update = false);
 	bool RestoreRuleNotes(Database* db);
+	void SetPostLoadCallback(std::function<void(Database*)> cb) {
+		m_post_load_callback = std::move(cb);
+	}
 
 private:
 	RuleManager();
@@ -169,6 +173,8 @@ private:
 	float       m_RuleRealValues[RealRuleCount];
 	uint32      m_RuleBoolValues[BoolRuleCount];
 	std::string m_RuleStringValues[StringRuleCount];
+
+	std::function<void(Database*)> m_post_load_callback;
 
 	typedef enum {
 		IntRule,

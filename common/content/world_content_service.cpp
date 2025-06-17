@@ -6,6 +6,8 @@
 #include "../rulesys.h"
 #include "../eqemu_logsys.h"
 #include "../repositories/instance_list_repository.h"
+#include "../repositories/rule_sets_repository.h"
+#include "../repositories/rule_values_repository.h"
 #include "../zone_store.h"
 
 
@@ -346,4 +348,71 @@ bool WorldContentService::DoesZonePassContentFiltering(const ZoneRepository::Zon
 	};
 
 	return DoesPassContentFiltering(f);
+}
+
+void WorldContentService::LoadTargetedRulesets(Database* db)
+{
+	if (!m_zone_id) {
+		LogError("Zone ID is not set. Cannot load targeted rulesets.");
+		return;
+	}
+
+	LogInfo("Zone ID [{}] Instance Version [{}] - Loading targeted rulesets", m_zone_id, m_instance_version);
+
+	constexpr int8 EXPANSION_ZERO_VALUE = -2;
+
+	auto rules = RuleValuesRepository::GetWhere(*db, "TRUE ORDER BY ruleset_id, rule_name");
+	auto inst  = RuleManager::Instance();
+	auto sets  = RuleSetsRepository::GetWhere(*db, "TRUE ORDER BY ruleset_id");
+	for (auto& e : sets) {
+		bool has_filters =
+			!e.zone_ids.empty() ||
+			!e.instance_versions.empty() ||
+			!e.content_flags.empty() ||
+			!e.content_flags_disabled.empty() ||
+			e.min_expansion != EXPANSION_ZERO_VALUE ||
+			e.max_expansion != EXPANSION_ZERO_VALUE;
+		if (!has_filters) {
+			continue; // not a targeted ruleset
+		}
+
+		auto zone_id = std::to_string(m_zone_id);
+		if (!e.zone_ids.empty() && !Strings::Contains(e.zone_ids, zone_id)) {
+			continue;
+		}
+
+		auto instance_id = std::to_string(m_instance_version);
+		if (!e.instance_versions.empty() && !Strings::Contains(e.instance_versions, instance_id)) {
+			continue;
+		}
+
+		if (!DoesPassContentFiltering(
+			ContentFlags{
+				.min_expansion = e.min_expansion,
+				.max_expansion = e.max_expansion,
+				.content_flags = e.content_flags,
+				.content_flags_disabled = e.content_flags_disabled
+			}
+		)) {
+			continue;
+		}
+
+		for (auto &r : rules) {
+			if (r.ruleset_id != e.ruleset_id) {
+				continue;
+			}
+
+			inst->SetRule(r.rule_name, r.rule_value);
+
+			LogInfo(
+				"Loading targeted rule from ruleset [{}] ruleset_name [{}] rule_name [{}] rule_value [{}]",
+				e.ruleset_id,
+				e.name,
+				r.rule_name,
+				r.rule_value
+			);
+		}
+	}
+
+	return;
 }

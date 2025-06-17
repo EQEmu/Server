@@ -7136,6 +7136,24 @@ ADD COLUMN `entity_variables` TEXT DEFAULT NULL AFTER `rezzable`;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9326,
+		.description = "2025_06_16_rule_set_expansion.sql",
+		.check = "SHOW COLUMNS FROM `rule_sets` LIKE 'zone_ids'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `rule_sets`
+  ADD COLUMN `zone_ids` TEXT NOT NULL DEFAULT '',
+  ADD COLUMN `instance_versions` TEXT NOT NULL DEFAULT '',
+  ADD COLUMN `content_flags` TEXT NOT NULL DEFAULT '',
+  ADD COLUMN `content_flags_disabled` TEXT NOT NULL DEFAULT '',
+  ADD COLUMN `min_expansion` TINYINT NOT NULL DEFAULT -2,
+  ADD COLUMN `max_expansion` TINYINT NOT NULL DEFAULT -2,
+  ADD COLUMN `notes` VARCHAR(255) NOT NULL DEFAULT '';
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

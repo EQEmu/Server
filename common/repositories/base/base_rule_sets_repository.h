@@ -21,6 +21,13 @@ public:
 	struct RuleSets {
 		uint8_t     ruleset_id;
 		std::string name;
+		std::string zone_ids;
+		std::string instance_versions;
+		std::string content_flags;
+		std::string content_flags_disabled;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
+		std::string notes;
 	};
 
 	static std::string PrimaryKey()
@@ -33,6 +40,13 @@ public:
 		return {
 			"ruleset_id",
 			"name",
+			"zone_ids",
+			"instance_versions",
+			"content_flags",
+			"content_flags_disabled",
+			"min_expansion",
+			"max_expansion",
+			"notes",
 		};
 	}
 
@@ -41,6 +55,13 @@ public:
 		return {
 			"ruleset_id",
 			"name",
+			"zone_ids",
+			"instance_versions",
+			"content_flags",
+			"content_flags_disabled",
+			"min_expansion",
+			"max_expansion",
+			"notes",
 		};
 	}
 
@@ -81,8 +102,15 @@ public:
 	{
 		RuleSets e{};
 
-		e.ruleset_id = 0;
-		e.name       = "";
+		e.ruleset_id             = 0;
+		e.name                   = "";
+		e.zone_ids               = "";
+		e.instance_versions      = "";
+		e.content_flags          = "";
+		e.content_flags_disabled = "";
+		e.min_expansion          = -2;
+		e.max_expansion          = -2;
+		e.notes                  = "";
 
 		return e;
 	}
@@ -119,8 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			RuleSets e{};
 
-			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.name       = row[1] ? row[1] : "";
+			e.ruleset_id             = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name                   = row[1] ? row[1] : "";
+			e.zone_ids               = row[2] ? row[2] : "";
+			e.instance_versions      = row[3] ? row[3] : "";
+			e.content_flags          = row[4] ? row[4] : "";
+			e.content_flags_disabled = row[5] ? row[5] : "";
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -2;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -2;
+			e.notes                  = row[8] ? row[8] : "";
 
 			return e;
 		}
@@ -155,6 +190,13 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.zone_ids) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.instance_versions) + "'");
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[6] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[7] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[8] + " = '" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -178,6 +220,13 @@ public:
 
 		v.push_back(std::to_string(e.ruleset_id));
 		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.zone_ids) + "'");
+		v.push_back("'" + Strings::Escape(e.instance_versions) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,6 +258,13 @@ public:
 
 			v.push_back(std::to_string(e.ruleset_id));
 			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.zone_ids) + "'");
+			v.push_back("'" + Strings::Escape(e.instance_versions) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.notes) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -242,8 +298,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RuleSets e{};
 
-			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.name       = row[1] ? row[1] : "";
+			e.ruleset_id             = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name                   = row[1] ? row[1] : "";
+			e.zone_ids               = row[2] ? row[2] : "";
+			e.instance_versions      = row[3] ? row[3] : "";
+			e.content_flags          = row[4] ? row[4] : "";
+			e.content_flags_disabled = row[5] ? row[5] : "";
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -2;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -2;
+			e.notes                  = row[8] ? row[8] : "";
 
 			all_entries.push_back(e);
 		}
@@ -268,8 +331,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RuleSets e{};
 
-			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.name       = row[1] ? row[1] : "";
+			e.ruleset_id             = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name                   = row[1] ? row[1] : "";
+			e.zone_ids               = row[2] ? row[2] : "";
+			e.instance_versions      = row[3] ? row[3] : "";
+			e.content_flags          = row[4] ? row[4] : "";
+			e.content_flags_disabled = row[5] ? row[5] : "";
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -2;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -2;
+			e.notes                  = row[8] ? row[8] : "";
 
 			all_entries.push_back(e);
 		}
@@ -346,6 +416,13 @@ public:
 
 		v.push_back(std::to_string(e.ruleset_id));
 		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.zone_ids) + "'");
+		v.push_back("'" + Strings::Escape(e.instance_versions) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -370,6 +447,13 @@ public:
 
 			v.push_back(std::to_string(e.ruleset_id));
 			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.zone_ids) + "'");
+			v.push_back("'" + Strings::Escape(e.instance_versions) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.notes) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

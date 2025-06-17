@@ -26,6 +26,7 @@
 
 #include "../common/repositories/rule_sets_repository.h"
 #include "../common/repositories/rule_values_repository.h"
+#include "../common/content/world_content_service.h"
 
 const char *RuleManager::s_categoryNames[_CatCount + 1] = {
 	#define RULE_CATEGORY(category_name) \
@@ -268,7 +269,6 @@ bool RuleManager::LoadRules(Database *db, const std::string &rule_set_name, bool
 
 	const std::string default_ruleset_name = "default";
 	bool is_default = rule_set_name == default_ruleset_name;
-
 	if (!is_default) {
 		const auto default_rule_set_id = RuleSetsRepository::GetRuleSetID(*db, default_ruleset_name);
 
@@ -326,6 +326,10 @@ bool RuleManager::LoadRules(Database *db, const std::string &rule_set_name, bool
 		rule_set_name,
 		rule_set_id
 	);
+
+	if (m_post_load_callback) {
+		m_post_load_callback(db);
+	}
 
 	return true;
 }
