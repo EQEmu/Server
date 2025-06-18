@@ -485,6 +485,7 @@ public:
 	void SaveZoneState();
 	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 	void ReloadMaps();
+	void LoadRules();
 
 private:
 	bool      allow_mercs;
