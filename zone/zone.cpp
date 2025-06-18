@@ -1151,16 +1151,7 @@ bool Zone::Init(bool is_static) {
 		);
 	} // if that fails, try the file name, then load defaults
 
-	content_service.SetZoneId(GetZoneID());
-	content_service.SetInstanceVersion(GetInstanceVersion());
-	RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
-
-	if (RuleManager::Instance()->GetActiveRulesetID() != default_ruleset) {
-		std::string r_name = RuleSetsRepository::GetRuleSetName(database, default_ruleset);
-		if (r_name.size() > 0) {
-			RuleManager::Instance()->LoadRules(&database, r_name, false);
-		}
-	}
+	LoadRules();
 
 	if (!map_name) {
 		LogError("No map name found for zone [{}]", GetShortName());
@@ -3393,27 +3384,29 @@ bool Zone::IsPausedTimer(std::string name)
 	return e != paused_zone_timers.end();
 }
 
-void Zone::PauseTimer(std::string name)
+void Zone::ResumeTimer(std::string name)
 {
 	if (
 		!IsLoaded() ||
-		zone_timers.empty() ||
-		!HasTimer(name) ||
-		IsPausedTimer(name)
+		paused_zone_timers.empty() ||
+		!IsPausedTimer(name)
 	) {
 		return;
 	}
 
 	uint32 remaining_time = 0;
 
-	const bool has_pause_event = parse->ZoneHasQuestSub(EVENT_TIMER_PAUSE);
-
-	if (!zone_timers.empty()) {
-		for (auto e = zone_timers.begin(); e != zone_timers.end(); e++) {
+	if (!paused_zone_timers.empty()) {
+		for (auto e = paused_zone_timers.begin(); e != paused_zone_timers.end(); e++) {
 			if (e->name == name) {
-				remaining_time = e->timer_.GetRemainingTime();
+				remaining_time = e->remaining_time;
 
-				zone_timers.erase(e);
+				paused_zone_timers.erase(e);
+
+				if (!remaining_time) {
+					LogQuests("Paused timer [{}] not found or has expired.", name);
+					return;
+				}
 
 				const std::string& export_string = fmt::format(
 					"{} {}",
@@ -3422,20 +3415,15 @@ void Zone::PauseTimer(std::string name)
 				);
 
 				LogQuests(
-					"Pausing timer [{}] with [{}] ms remaining",
+					"Creating a new timer and resuming [{}] with [{}] ms remaining",
 					name,
 					remaining_time
 				);
 
-				paused_zone_timers.emplace_back(
-					PausedZoneTimer{
-						.name = name,
-						.remaining_time = remaining_time
-					}
-				);
+				zone_timers.emplace_back(ZoneTimer(name, remaining_time));
 
-				if (has_pause_event) {
-					parse->EventZone(EVENT_TIMER_PAUSE, this, export_string);
+				if (parse->ZoneHasQuestSub(EVENT_TIMER_RESUME)) {
+					parse->EventZone(EVENT_TIMER_RESUME, this, export_string);
 				}
 
 				break;
@@ -3559,6 +3547,22 @@ void Zone::SendPayload(int payload_id, std::string payload_value)
 		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
 
 		parse->EventZone(EVENT_PAYLOAD, this, export_string, 0);
+	}
+}
+
+void Zone::LoadRules()
+{
+	if (GetZoneID() > 0) {
+		content_service.SetZoneId(GetZoneID());
+		content_service.SetInstanceVersion(GetInstanceVersion());
+	}
+	const auto rm = RuleManager::Instance();
+	rm->LoadRules(&database, rm->GetActiveRuleset(), true);
+	if (rm->GetActiveRulesetID() != default_ruleset) {
+		std::string r_name = RuleSetsRepository::GetRuleSetName(database, default_ruleset);
+		if (r_name.size() > 0) {
+			rm->LoadRules(&database, r_name, false);
+		}
 	}
 }
 

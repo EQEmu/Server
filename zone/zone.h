@@ -485,6 +485,7 @@ public:
 	void SaveZoneState();
 	static void ClearZoneState(uint32 zone_id, uint32 instance_id);
 	void ReloadMaps();
+	void LoadRules();
 
 	void Signal(int signal_id);
 	void SendPayload(int payload_id, std::string payload_value);
