@@ -1154,16 +1154,7 @@ bool Zone::Init(bool is_static) {
 		);
 	} // if that fails, try the file name, then load defaults
 
-	content_service.SetZoneId(GetZoneID());
-	content_service.SetInstanceVersion(GetInstanceVersion());
-	RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
-
-	if (RuleManager::Instance()->GetActiveRulesetID() != default_ruleset) {
-		std::string r_name = RuleSetsRepository::GetRuleSetName(database, default_ruleset);
-		if (r_name.size() > 0) {
-			RuleManager::Instance()->LoadRules(&database, r_name, false);
-		}
-	}
+	LoadRules();
 
 	if (!map_name) {
 		LogError("No map name found for zone [{}]", GetShortName());
@@ -3305,6 +3296,22 @@ void Zone::ReloadMaps()
 	zonemap  = Map::LoadMapFile(map_name);
 	watermap = WaterMap::LoadWaterMapfile(map_name);
 	pathing  = IPathfinder::Load(map_name);
+}
+
+void Zone::LoadRules()
+{
+	if (GetZoneID() > 0) {
+		content_service.SetZoneId(GetZoneID());
+		content_service.SetInstanceVersion(GetInstanceVersion());
+	}
+	const auto rm = RuleManager::Instance();
+	rm->LoadRules(&database, rm->GetActiveRuleset(), true);
+	if (rm->GetActiveRulesetID() != default_ruleset) {
+		std::string r_name = RuleSetsRepository::GetRuleSetName(database, default_ruleset);
+		if (r_name.size() > 0) {
+			rm->LoadRules(&database, r_name, false);
+		}
+	}
 }
 
 #include "zone_loot.cpp"
