@@ -507,7 +507,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		arg_function(this, L, npc, init, data, extra_data, extra_pointers);
 		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
-		QuestManager::RunningQuest q;
+		RunningQuest q;
 
 		q.owner     = npc;
 		q.initiator = c;
@@ -606,7 +606,7 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		auto arg_function = PlayerArgumentDispatch[evt];
 		arg_function(this, L, client, data, extra_data, extra_pointers);
 
-		QuestManager::RunningQuest q;
+		RunningQuest q;
 
 		q.owner     = client;
 		q.initiator = client;
@@ -696,7 +696,7 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		auto arg_function = ItemArgumentDispatch[evt];
 		arg_function(this, L, client, item, mob, data, extra_data, extra_pointers);
 
-		QuestManager::RunningQuest q;
+		RunningQuest q;
 
 		q.owner     = client;
 		q.initiator = client;
@@ -785,7 +785,7 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob,
 		auto arg_function = SpellArgumentDispatch[evt];
 		arg_function(this, L, mob, client, spell_id, data, extra_data, extra_pointers);
 
-		QuestManager::RunningQuest q;
+		RunningQuest q;
 
 		q.owner      = client;
 		q.initiator  = client;
@@ -858,7 +858,7 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		auto arg_function = EncounterArgumentDispatch[evt];
 		arg_function(this, L, enc, data, extra_data, extra_pointers);
 
-		QuestManager::RunningQuest q;
+		RunningQuest q;
 
 		q.owner     = enc;
 		q.encounter = encounter_name;
@@ -1807,7 +1807,7 @@ int LuaParser::_EventBot(
 		arg_function(this, L, bot, init, data, extra_data, extra_pointers);
 		auto* c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
-		QuestManager::RunningQuest q;
+		RunningQuest q;
 
 		q.owner      = bot;
 		q.initiator  = c;
@@ -1992,7 +1992,7 @@ int LuaParser::_EventMerc(
 		arg_function(this, L, merc, init, data, extra_data, extra_pointers);
 		auto* c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
-		QuestManager::RunningQuest q;
+		RunningQuest q;
 
 		q.owner      = merc;
 		q.initiator  = c;
@@ -2181,7 +2181,7 @@ int LuaParser::_EventZone(
 		auto arg_function = ZoneArgumentDispatch[evt];
 		arg_function(this, L, zone, data, extra_data, extra_pointers);
 
-		QuestManager::RunningQuest q;
+		RunningQuest q;
 
 		q.zone = zone;
 

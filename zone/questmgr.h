@@ -33,6 +33,16 @@ namespace EQ
 	class ItemInstance;
 }
 
+struct RunningQuest {
+	Mob* owner = nullptr;
+	Client* initiator = nullptr;
+	EQ::ItemInstance* questitem = nullptr;
+	const SPDat_Spell_Struct* questspell = nullptr;
+	bool depop_npc = false;
+	std::string encounter = "";
+	Zone* zone = nullptr;
+};
+
 class QuestManager {
 
 	struct PausedTimer {
@@ -42,20 +52,10 @@ class QuestManager {
 	};
 public:
 
-	struct RunningQuest {
-		Mob *owner = nullptr;
-		Client *initiator = nullptr;
-		EQ::ItemInstance* questitem = nullptr;
-		const SPDat_Spell_Struct* questspell = nullptr;
-		bool depop_npc = false;
-		std::string encounter = "";
-		Zone* zone = nullptr;
-	};
-
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(RunningQuest q);
+	void StartQuest(const RunningQuest& q);
 	void EndQuest();
 	bool QuestsRunning() { return !m_running_quests.empty(); }
 
