@@ -304,16 +304,7 @@ void command_task(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if (
-				CompletedTasksRepository::DeleteWhere(
-					database,
-					fmt::format(
-						"charid = {} AND taskid = {}",
-						t->CharacterID(),
-						task_id
-					)
-				)
-			) {
+			if (t->UncompleteTask(task_id)) {
 				c->Message(
 					Chat::White,
 					fmt::format(

@@ -2959,19 +2959,15 @@ void QuestManager::failtask(int taskid) {
 		initiator->FailTask(taskid);
 }
 
-void QuestManager::uncompletetask(int task_id) {
+bool QuestManager::uncompletetask(int task_id) {
 	QuestManagerCurrentQuestVars();
 
-	if (RuleB(TaskSystem, EnableTaskSystem) && initiator) {
-		CompletedTasksRepository::DeleteWhere(
-			database,
-			fmt::format(
-				"charid = {} AND taskid = {}",
-				initiator->CharacterID(),
-				task_id
-			)
-		);
+	if (!RuleB(TaskSystem, EnableTaskSystem) || !initiator) {
+		return false;
+
 	}
+
+	return initiator->UncompleteTask(task_id);
 }
 
 int QuestManager::tasktimeleft(int taskid) {

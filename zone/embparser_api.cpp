@@ -1271,9 +1271,9 @@ void Perl__failtask(int task_id)
 	quest_manager.failtask(task_id);
 }
 
-void Perl__uncompletetask(int task_id)
+bool Perl__uncompletetask(int task_id)
 {
-	quest_manager.uncompletetask(task_id);
+	return quest_manager.uncompletetask(task_id);
 }
 
 int Perl__tasktimeleft(int task_id)

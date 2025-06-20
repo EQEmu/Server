@@ -3584,6 +3584,18 @@ bool Lua_Client::KeyRingRemove(uint32 item_id)
 	return self->KeyRingRemove(item_id);
 }
 
+bool Lua_Client::CompleteTask(int task_id)
+{
+	Lua_Safe_Call_Bool();
+	return self->CompleteTask(task_id);
+}
+
+bool Lua_Client::UncompleteTask(int task_id)
+{
+	Lua_Safe_Call_Bool();
+	return self->UncompleteTask(task_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -4156,6 +4168,7 @@ luabind::scope lua_register_client() {
 	.def("TrainDisc", (void(Lua_Client::*)(int))&Lua_Client::TrainDisc)
 	.def("TrainDiscBySpellID", (void(Lua_Client::*)(int32))&Lua_Client::TrainDiscBySpellID)
 	.def("UnFreeze", (void(Lua_Client::*)(void))&Lua_Client::UnFreeze)
+	.def("UncompleteTask", (bool(Lua_Client::*)(int))&Lua_Client::UncompleteTask)
 	.def("Undye", (void(Lua_Client::*)(void))&Lua_Client::Undye)
 	.def("UnmemSpell", (void(Lua_Client::*)(int))&Lua_Client::UnmemSpell)
 	.def("UnmemSpell", (void(Lua_Client::*)(int,bool))&Lua_Client::UnmemSpell)

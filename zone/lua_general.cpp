@@ -722,8 +722,8 @@ void lua_fail_task(int task_id) {
 	quest_manager.failtask(task_id);
 }
 
-void lua_uncomplete_task(int task_id) {
-	quest_manager.uncompletetask(task_id);
+bool lua_uncomplete_task(int task_id) {
+	return quest_manager.uncompletetask(task_id);
 }
 
 int lua_task_time_left(int task_id) {

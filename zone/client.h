@@ -1501,6 +1501,7 @@ public:
 	{
 		return task_state ? task_state->CompleteTask(this, task_id) : false;
 	}
+	bool UncompleteTask(int task_id);
 	inline void FailTask(int task_id) { if (task_state) { task_state->FailTask(this, task_id); }}
 	inline int TaskTimeLeft(int task_id) { return (task_state ? task_state->TaskTimeLeft(task_id) : 0); }
 	inline int EnabledTaskCount(int task_set_id)
