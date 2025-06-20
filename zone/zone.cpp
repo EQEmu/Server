@@ -3392,33 +3392,62 @@ bool Zone::IsPausedTimer(std::string name)
 
 void Zone::PauseTimer(std::string name)
 {
-	if (!IsLoaded() || zone_timers.empty()) {
+	if (
+		!IsLoaded() ||
+		zone_timers.empty() ||
+		!HasTimer(name) ||
+		IsPausedTimer(name)
+	) {
 		return;
 	}
 
 	uint32 remaining_time = 0;
 
+	const bool has_pause_event = parse->ZoneHasQuestSub(EVENT_TIMER_PAUSE);
+
 	if (!zone_timers.empty()) {
 		for (auto e = zone_timers.begin(); e != zone_timers.end(); e++) {
 			if (e->name == name) {
 				remaining_time = e->timer_.GetRemainingTime();
+
 				zone_timers.erase(e);
+
+				const std::string& export_string = fmt::format(
+					"{} {}",
+					name,
+					remaining_time
+				);
+
+				LogQuests(
+					"Pausing timer [{}] with [{}] ms remaining",
+					name,
+					remaining_time
+				);
+
+				paused_zone_timers.emplace_back(
+					PausedZoneTimer{
+						.name = name,
+						.remaining_time = remaining_time
+					}
+				);
+
+				if (has_pause_event) {
+					parse->EventZone(EVENT_TIMER_PAUSE, this, export_string);
+				}
+
 				break;
 			}
 		}
 	}
-
-	paused_zone_timers.emplace_back(
-		PausedZoneTimer{
-			.name = name,
-			.remaining_time = remaining_time
-		}
-	);
 }
 
 void Zone::ResumeTimer(std::string name)
 {
-	if (!IsLoaded() || paused_zone_timers.empty()) {
+	if (
+		!IsLoaded() ||
+		paused_zone_timers.empty() ||
+		!IsPausedTimer(name)
+	) {
 		return;
 	}
 
@@ -3428,59 +3457,41 @@ void Zone::ResumeTimer(std::string name)
 		for (auto e = paused_zone_timers.begin(); e != paused_zone_timers.end(); e++) {
 			if (e->name == name) {
 				remaining_time = e->remaining_time;
+
 				paused_zone_timers.erase(e);
-				break;
-			}
-		}
-	}
 
-	if (!remaining_time) {
-		LogQuests("Paused timer [{}] not found or has expired.", name);
-		return;
-	}
+				if (!remaining_time) {
+					LogQuests("Paused timer [{}] not found or has expired.", name);
+					return;
+				}
 
-	const std::string& export_string = fmt::format(
-		"{} {}",
-		name,
-		remaining_time
-	);
-
-	const bool has_resume_event = parse->ZoneHasQuestSub(EVENT_TIMER_RESUME);
-
-	if (!zone_timers.empty()) {
-		for (auto e : zone_timers) {
-			if (e.name == name) {
-				e.timer_.Enable();
-				e.timer_.Start(remaining_time, false);
-				LogQuests(
-					"Resuming timer [{}] with [{}] ms remaining",
+				const std::string& export_string = fmt::format(
+					"{} {}",
 					name,
 					remaining_time
 				);
 
-				if (has_resume_event) {
+				LogQuests(
+					"Creating a new timer and resuming [{}] with [{}] ms remaining",
+					name,
+					remaining_time
+				);
+
+				zone_timers.emplace_back(ZoneTimer(name, remaining_time));
+
+				if (parse->ZoneHasQuestSub(EVENT_TIMER_RESUME)) {
 					parse->EventZone(EVENT_TIMER_RESUME, this, export_string);
 				}
+
+				break;
 			}
 		}
 	}
-
-	zone_timers.emplace_back(ZoneTimer(name, remaining_time));
-
-	if (has_resume_event) {
-		parse->EventZone(EVENT_TIMER_RESUME, this, export_string);
-	}
-
-	LogQuests(
-		"Creating a new timer and resuming [{}] with [{}] ms remaining",
-		name,
-		remaining_time
-	);
 }
 
 void Zone::SetTimer(std::string name, uint32 duration)
 {
-	if (!IsLoaded()) {
+	if (!IsLoaded() || HasTimer(name)) {
 		return;
 	}
 
@@ -3494,7 +3505,12 @@ void Zone::SetTimer(std::string name, uint32 duration)
 
 void Zone::StopTimer(std::string name)
 {
-	if (!IsLoaded() || zone_timers.empty()) {
+	if (
+		!IsLoaded() ||
+		zone_timers.empty() ||
+		!HasTimer(name) ||
+		IsPausedTimer(name)
+	) {
 		return;
 	}
 
