@@ -3336,6 +3336,16 @@ bool Perl_Client_KeyRingRemove(Client* self, uint32 item_id)
 	return self->KeyRingRemove(item_id);
 }
 
+bool Perl_Client_CompleteTask(Client* self, int task_id)
+{
+	return self->CompleteTask(task_id);
+}
+
+bool Perl_Client_UncompleteTask(Client* self, int task_id)
+{
+	return self->UncompleteTask(task_id);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3418,6 +3428,7 @@ void perl_register_client()
 	package.add("ClearPEQZoneFlag", &Perl_Client_ClearPEQZoneFlag);
 	package.add("ClearXTargets", &Perl_Client_ClearXTargets);
 	package.add("ClearZoneFlag", &Perl_Client_ClearZoneFlag);
+	package.add("CompleteTask", &Perl_Client_CompleteTask);
 	package.add("Connected", &Perl_Client_Connected);
 	package.add("CountAugmentEquippedByID", &Perl_Client_CountAugmentEquippedByID);
 	package.add("CountItem", &Perl_Client_CountItem);
@@ -3909,6 +3920,7 @@ void perl_register_client()
 	package.add("Thirsty", &Perl_Client_Thirsty);
 	package.add("TrainDiscBySpellID", &Perl_Client_TrainDiscBySpellID);
 	package.add("UnFreeze", &Perl_Client_UnFreeze);
+	package.add("UncompleteTask", &Perl_Client_UncompleteTask);
 	package.add("Undye", &Perl_Client_Undye);
 	package.add("UnmemSpell", (void(*)(Client*, int))&Perl_Client_UnmemSpell);
 	package.add("UnmemSpell", (void(*)(Client*, int, bool))&Perl_Client_UnmemSpell);

@@ -68,6 +68,7 @@ extern volatile bool RunLoops;
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_pet_name_repository.h"
+#include "../common/repositories/completed_tasks_repository.h"
 #include "../common/repositories/discovered_items_repository.h"
 #include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/keyring_repository.h"
@@ -13252,4 +13253,18 @@ void Client::CheckItemDiscoverability(uint32 item_id)
 	}
 
 	DiscoverItem(item_id);
+}
+
+bool Client::UncompleteTask(int task_id)
+{
+	CompletedTasksRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"charid = {} AND taskid = {}",
+			CharacterID(),
+			task_id
+		)
+	);
+
+	return task_state->UncompleteTask(task_id);
 }

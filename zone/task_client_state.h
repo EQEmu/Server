@@ -86,6 +86,7 @@ public:
 	bool HasExploreTask(Client* client) const;
 	void EndSharedTask(Client* client, bool send_fail);
 	bool CompleteTask(Client *c, uint32 task_id);
+	bool UncompleteTask(int task_id);
 
 	inline bool HasFreeTaskSlot() { return m_active_task.task_id == TASKSLOTEMPTY; }
 
