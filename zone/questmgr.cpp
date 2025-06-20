@@ -123,7 +123,7 @@ void QuestManager::Process() {
 	}
 }
 
-void QuestManager::StartQuest(RunningQuest q)
+void QuestManager::StartQuest(const RunningQuest& q)
 {
 	m_running_quests.push(q);
 }

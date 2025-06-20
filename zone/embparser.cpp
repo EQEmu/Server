@@ -997,7 +997,7 @@ int PerlembParser::SendCommands(
 	}
 
 	int ret_value = 0;
-	QuestManager::RunningQuest q;
+	RunningQuest q;
 	if (mob && mob->IsClient()) {
 		q.owner      = other;
 		q.initiator  = mob->CastToClient();
