@@ -2975,7 +2975,6 @@ bool QuestManager::uncompletetask(int task_id) {
 
 	if (!RuleB(TaskSystem, EnableTaskSystem) || !initiator) {
 		return false;
-
 	}
 
 	return initiator->UncompleteTask(task_id);
