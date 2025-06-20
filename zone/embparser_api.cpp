@@ -6633,6 +6633,7 @@ void perl_register_quest()
 	package.add("faction", (void(*)(int, int, int))&Perl__faction);
 	package.add("factionvalue", &Perl__FactionValue);
 	package.add("failtask", &Perl__failtask);
+	package.add("completetask", &Perl__uncompletetask);
 	package.add("uncompletetask", &Perl__uncompletetask);
 	package.add("firsttaskinset", &Perl__firsttaskinset);
 	package.add("follow", (void(*)(int))&Perl__follow);

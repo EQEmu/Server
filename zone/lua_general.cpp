@@ -722,6 +722,10 @@ void lua_fail_task(int task_id) {
 	quest_manager.failtask(task_id);
 }
 
+bool lua_complete_task(int task_id) {
+	return quest_manager.completetask(task_id);
+}
+
 bool lua_uncomplete_task(int task_id) {
 	return quest_manager.uncompletetask(task_id);
 }
@@ -5974,6 +5978,7 @@ luabind::scope lua_register_general() {
 		luabind::def("reset_task_activity", &lua_reset_task_activity),
 		luabind::def("assign_task", &lua_assign_task),
 		luabind::def("fail_task", &lua_fail_task),
+		luabind::def("complete_task", &lua_complete_task),
 		luabind::def("uncomplete_task", &lua_uncomplete_task),
 		luabind::def("task_time_left", &lua_task_time_left),
 		luabind::def("is_task_completed", &lua_is_task_completed),

@@ -2959,6 +2959,17 @@ void QuestManager::failtask(int taskid) {
 		initiator->FailTask(taskid);
 }
 
+bool QuestManager::completetask(int task_id) {
+	QuestManagerCurrentQuestVars();
+
+	if (!RuleB(TaskSystem, EnableTaskSystem) || !initiator) {
+		return false;
+
+	}
+
+	return initiator->CompleteTask(task_id);
+}
+
 bool QuestManager::uncompletetask(int task_id) {
 	QuestManagerCurrentQuestVars();
 
