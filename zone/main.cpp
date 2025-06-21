@@ -107,7 +107,6 @@ QuestParserCollection *parse        = 0;
 EQEmuLogSys           LogSys;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
-PathManager           path;
 PlayerEventLogs       player_event_logs;
 DatabaseUpdate        database_update;
 SkillCaps             skill_caps;
@@ -137,7 +136,7 @@ int main(int argc, char **argv)
 		LogSys.SilenceConsoleLogging();
 	}
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {
@@ -305,7 +304,7 @@ int main(int argc, char **argv)
 	}
 
 	LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings(ZoneCLI::RanTestCommand(argc, argv))
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();
@@ -752,7 +751,7 @@ bool CheckForCompatibleQuestPlugins()
 
 	try {
 		for (const auto &[directory, flag]: directories) {
-			std::string dir_path = path.GetServerPath() + "/" + directory;
+			std::string dir_path = PathManager::Instance()->GetServerPath() + "/" + directory;
 			if (!File::Exists(dir_path)) { continue; }
 
 			for (const auto &file: fs::directory_iterator(dir_path)) {

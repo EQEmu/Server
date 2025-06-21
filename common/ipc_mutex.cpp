@@ -55,7 +55,7 @@ namespace EQ {
 			EQ_EXCEPT("IPC Mutex", "Could not create mutex.");
 		}
 #else
-		std::string final_name = fmt::format("{}/{}.lock", path.GetSharedMemoryPath(), name);
+		std::string final_name = fmt::format("{}/{}.lock", PathManager::Instance()->GetSharedMemoryPath(), name);
 
 #ifdef __DARWIN
 #if __DARWIN_C_LEVEL < 200809L

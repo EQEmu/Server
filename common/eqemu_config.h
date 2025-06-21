@@ -191,7 +191,7 @@ class EQEmuConfig
 
 			std::string file = fmt::format(
 				"{}/{}",
-				(file_path.empty() ? path.GetServerPath() : file_path),
+				(file_path.empty() ? PathManager::Instance()->GetServerPath() : file_path),
 				EQEmuConfig::ConfigFile
 			);
 

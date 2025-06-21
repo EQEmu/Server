@@ -138,7 +138,7 @@ void Embperl::DoInit()
 		LogQuests("Warning [{}]: [{}]", Config->PluginPlFile, e);
 	}
 
-	for (auto & dir : path.GetPluginPaths()) {
+	for (auto & dir : PathManager::Instance()->GetPluginPaths()) {
 		try {
 			//should probably read the directory in c, instead, so that
 			//I can echo filenames as I do it, but c'mon... I'm lazy and this 1 line reads in all the plugins

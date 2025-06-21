@@ -7,7 +7,7 @@
 
 IPathfinder *IPathfinder::Load(const std::string &zone) {
 	struct stat statbuffer;
-	std::string navmesh_path = fmt::format("{}/maps/nav/{}.nav", path.GetServerPath(), zone);
+	std::string navmesh_path = fmt::format("{}/maps/nav/{}.nav", PathManager::Instance()->GetServerPath(), zone);
 	if (stat(navmesh_path.c_str(), &statbuffer) == 0) {
 		return new PathfinderNavmesh(navmesh_path);
 	}
