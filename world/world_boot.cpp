@@ -84,7 +84,7 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 	// command handler
 	if (argc > 1) {
 		LogSys.SilenceConsoleLogging();
-		path.LoadPaths();
+		PathManager::Instance()->Init();
 		WorldConfig::LoadConfig();
 		LoadDatabaseConnections();
 		RuleManager::Instance()->LoadRules(&database, "default", false);
@@ -234,7 +234,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 {
 	// logging system init
 	auto logging = LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings();
 
 	LogSys.SetDiscordHandler(&WorldBoot::DiscordWebhookMessageHandler);

@@ -111,7 +111,6 @@ const WorldConfig   *Config;
 EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
-PathManager         path;
 PlayerEventLogs     player_event_logs;
 EvolvingItemsManager evolving_items_manager;
 
@@ -142,7 +141,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	if (!WorldBoot::LoadServerConfig()) {
 		return 0;

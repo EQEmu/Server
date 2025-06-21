@@ -31,7 +31,6 @@ std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
 EQEmuLogSys           LogSys;
-PathManager           path;
 ZoneStore             zone_store;
 PlayerEventLogs       player_event_logs;
 ZSList                zs_list;
@@ -50,7 +49,7 @@ int main()
 	set_exception_handler();
 	Timer LFGuildExpireTimer(60000);
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	LogInfo("Starting EQEmu QueryServ");
 	if (!queryservconfig::LoadConfig()) {
@@ -86,7 +85,7 @@ int main()
 	}
 
 	LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 

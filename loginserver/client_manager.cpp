@@ -94,7 +94,7 @@ ClientManager::ClientManager()
 
 	std::string opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetOpcodePath(),
+		PathManager::Instance()->GetOpcodePath(),
 		"login_opcodes.conf"
 	);
 
@@ -131,7 +131,7 @@ ClientManager::ClientManager()
 
 	opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetOpcodePath(),
+		PathManager::Instance()->GetOpcodePath(),
 		"login_opcodes_sod.conf"
 	);
 
@@ -169,7 +169,7 @@ ClientManager::ClientManager()
 
 	opcodes_path = fmt::format(
 		"{}/{}",
-		path.GetOpcodePath(),
+		PathManager::Instance()->GetOpcodePath(),
 		"login_opcodes_larion.conf"
 	);
 
