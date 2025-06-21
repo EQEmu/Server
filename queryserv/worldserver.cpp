@@ -24,7 +24,6 @@
 extern WorldServer           worldserver;
 extern const queryservconfig *Config;
 extern QSDatabase            qs_database;
-extern LFGuildManager        lfguildmanager;
 
 WorldServer::WorldServer()
 {
@@ -112,7 +111,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					pack.pBuffer = (uchar *) p.Data();
 					pack.opcode  = opcode;
 					pack.size    = (uint32) p.Length();
-					lfguildmanager.HandlePacket(&pack);
+					LFGuildManager::Instance()->HandlePacket(&pack);
 					pack.pBuffer = nullptr;
 					break;
 				}
