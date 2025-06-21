@@ -43,7 +43,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 extern uint32 numzones;
 extern EQ::Random emu_random;
 extern WebInterfaceList web_interface;
-extern SharedTaskManager shared_task_manager;
 extern ClientList client_list;
 volatile bool UCSServerAvailable_ = false;
 void CatchSignal(int sig_num);
@@ -986,7 +985,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 		player_event_logs.ReloadSettings();
 		UCSLink.SendPacket(&pack);
 	} else if (type == ServerReload::Type::Tasks) {
-		shared_task_manager.LoadTaskData();
+		SharedTaskManager::Instance()->LoadTaskData();
 	} else if (type == ServerReload::Type::DzTemplates) {
 		dynamic_zone_manager.LoadTemplates();
 	}

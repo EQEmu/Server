@@ -61,7 +61,6 @@ extern volatile bool UCSServerAvailable_;
 extern AdventureManager adventure_manager;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
-extern SharedTaskManager shared_task_manager;
 
 void CatchSignal(int sig_num);
 
