@@ -60,7 +60,6 @@ extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
 extern AdventureManager adventure_manager;
 extern UCSConnection UCSLink;
-extern QueryServConnection QSLink;
 extern SharedTaskManager shared_task_manager;
 
 void CatchSignal(int sig_num);
@@ -376,7 +375,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				player_event_logs.AddToQueue(n.player_event_log);
 			}
 			else {
-				QSLink.SendPacket(pack);
+				QueryServConnection::Instance()->SendPacket(pack);
 			}
 
 			// if discord enabled for event, ship to UCS to process
@@ -1363,7 +1362,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_QueryServGeneric: {
-			QSLink.SendPacket(pack);
+			QueryServConnection::Instance()->SendPacket(pack);
 			break;
 		}
 		case ServerOP_CZDialogueWindow:

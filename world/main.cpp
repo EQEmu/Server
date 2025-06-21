@@ -98,7 +98,6 @@ GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;
 LoginServerList     loginserverlist;
 UCSConnection       UCSLink;
-QueryServConnection QSLink;
 LauncherList        launcher_list;
 AdventureManager    adventure_manager;
 WorldEventScheduler event_scheduler;
@@ -279,7 +278,7 @@ int main(int argc, char **argv)
 				connection->Handle()->RemotePort(),
 				connection->GetUUID());
 
-			QSLink.AddConnection(connection);
+			QueryServConnection::Instance()->AddConnection(connection);
 		}
 	);
 
@@ -290,7 +289,7 @@ int main(int argc, char **argv)
 				connection->GetUUID()
 			);
 
-			QSLink.RemoveConnection(connection);
+			QueryServConnection::Instance()->RemoveConnection(connection);
 		}
 	);
 
