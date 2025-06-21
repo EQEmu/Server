@@ -35,7 +35,6 @@
 
 extern ClientList      client_list;
 extern ZSList          zoneserver_list;
-extern LoginServerList loginserverlist;
 
 /**
  * @param username
@@ -534,8 +533,8 @@ void ConsoleLock(
 )
 {
 	WorldConfig::LockWorld();
-	if (loginserverlist.Connected()) {
-		loginserverlist.SendStatus();
+	if (LoginServerList::Instance()->Connected()) {
+		LoginServerList::Instance()->SendStatus();
 		connection->SendLine("World locked.");
 	}
 	else {
@@ -555,8 +554,8 @@ void ConsoleUnlock(
 )
 {
 	WorldConfig::UnlockWorld();
-	if (loginserverlist.Connected()) {
-		loginserverlist.SendStatus();
+	if (LoginServerList::Instance()->Connected()) {
+		LoginServerList::Instance()->SendStatus();
 		connection->SendLine("World unlocked.");
 	}
 	else {

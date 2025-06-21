@@ -96,7 +96,6 @@ ZoneStore           zone_store;
 ClientList          client_list;
 GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;
-LoginServerList     loginserverlist;
 UCSConnection       UCSLink;
 QueryServConnection QSLink;
 LauncherList        launcher_list;
