@@ -10005,8 +10005,8 @@ void Client::ShowDevToolsMenu()
 		Chat::White,
 		fmt::format(
 			"Current Expansion | {} ({})",
-			content_service.GetCurrentExpansionName(),
-			content_service.GetCurrentExpansion()
+			WorldContentService::Instance()->GetCurrentExpansionName(),
+			WorldContentService::Instance()->GetCurrentExpansion()
 		).c_str()
 	);
 

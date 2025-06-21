@@ -980,7 +980,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 	} else if (type == ServerReload::Type::SkillCaps) {
 		skill_caps.ReloadSkillCaps();
 	} else if (type == ServerReload::Type::ContentFlags) {
-		content_service.SetExpansionContext()->ReloadContentFlags();
+		WorldContentService::Instance()->SetExpansionContext()->ReloadContentFlags();
 	} else if (type == ServerReload::Type::Logs) {
 		LogSys.LoadLogDatabaseSettings();
 		player_event_logs.ReloadSettings();

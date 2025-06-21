@@ -1294,7 +1294,7 @@ void Zone::ReloadStaticData() {
 		);
 	} // if that fails, try the file name, then load defaults
 
-	content_service.SetExpansionContext()->ReloadContentFlags();
+	WorldContentService::Instance()->SetExpansionContext()->ReloadContentFlags();
 
 
 	LogInfo("Zone Static Data Reloaded");
