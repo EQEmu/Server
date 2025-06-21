@@ -97,7 +97,6 @@ ClientList          client_list;
 GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;
 LoginServerList     loginserverlist;
-UCSConnection       UCSLink;
 QueryServConnection QSLink;
 LauncherList        launcher_list;
 AdventureManager    adventure_manager;
@@ -303,7 +302,7 @@ int main(int argc, char **argv)
 				connection->GetUUID()
 			);
 
-			UCSLink.SetConnection(connection);
+			UCSConnection::Instance()->SetConnection(connection);
 
 			zoneserver_list.UpdateUCSServerAvailable();
 		}
@@ -313,11 +312,11 @@ int main(int argc, char **argv)
 		"UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 			LogInfo("Connection lost from UCS Server [{}]", connection->GetUUID());
 
-			auto ucs_connection = UCSLink.GetConnection();
+			auto ucs_connection = UCSConnection::Instance()->GetConnection();
 
 			if (ucs_connection->GetUUID() == connection->GetUUID()) {
 				LogInfo("Removing currently active UCS connection");
-				UCSLink.SetConnection(nullptr);
+				UCSConnection::Instance()->SetConnection(nullptr);
 				zoneserver_list.UpdateUCSServerAvailable(false);
 			}
 		}
