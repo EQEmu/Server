@@ -6,8 +6,6 @@
 #include "../common/discord/discord.h"
 #include "ucs.h"
 
-extern UCSConnection UCSLink;
-
 class WorldBoot {
 public:
 	static void GMSayHookCallBackProcessWorld(uint16 log_category, const char *func, std::string message);

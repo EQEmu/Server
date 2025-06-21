@@ -984,7 +984,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 	} else if (type == ServerReload::Type::Logs) {
 		LogSys.LoadLogDatabaseSettings();
 		player_event_logs.ReloadSettings();
-		UCSLink.SendPacket(&pack);
+		UCSConnection::Instance()->SendPacket(&pack);
 	} else if (type == ServerReload::Type::Tasks) {
 		shared_task_manager.LoadTaskData();
 	} else if (type == ServerReload::Type::DzTemplates) {

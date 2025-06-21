@@ -59,7 +59,6 @@ extern LoginServerList loginserverlist;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
 extern AdventureManager adventure_manager;
-extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
 extern SharedTaskManager shared_task_manager;
 
@@ -381,7 +380,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			// if discord enabled for event, ship to UCS to process
 			if (player_event_logs.IsEventDiscordEnabled(n.player_event_log.event_type_id)) {
-				UCSLink.SendPacket(pack);
+				UCSConnection::Instance()->SendPacket(pack);
 			}
 
 			break;
@@ -435,7 +434,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			auto scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 			if (scm->chan_num == ChatChannel_UCSRelay) {
-				UCSLink.SendMessage(scm->from, scm->message);
+				UCSConnection::Instance()->SendMessage(scm->from, scm->message);
 				break;
 			}
 
@@ -1344,7 +1343,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_DiscordWebhookMessage:
 		case ServerOP_UCSMailMessage: {
-			UCSLink.SendPacket(pack);
+			UCSConnection::Instance()->SendPacket(pack);
 			break;
 		}
 		case ServerOP_UCSServerStatusRequest: {
