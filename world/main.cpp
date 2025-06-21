@@ -100,7 +100,6 @@ LoginServerList     loginserverlist;
 UCSConnection       UCSLink;
 QueryServConnection QSLink;
 LauncherList        launcher_list;
-AdventureManager    adventure_manager;
 WorldEventScheduler event_scheduler;
 SharedTaskManager   shared_task_manager;
 EQ::Random          emu_random;
@@ -475,7 +474,7 @@ int main(int argc, char **argv)
 		zoneserver_list.Process();
 		launcher_list.Process();
 		LFPGroupList.Process();
-		adventure_manager.Process();
+		AdventureManager::Instance()->Process();
 		shared_task_manager.Process();
 		dynamic_zone_manager.Process();
 
