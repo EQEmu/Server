@@ -14,7 +14,8 @@ public:
 	void ProcessMessageQueue();
 	void QueuePlayerEventMessage(const PlayerEvent::PlayerEventContainer& e);
 
-	static DiscordManager* Instance() {
+	static DiscordManager* Instance()
+	{
 		static DiscordManager instance;
 		return &instance;
 	}
