@@ -11,7 +11,7 @@ void FindTask(Client *c, const Seperator *sep)
 
 	if (sep->IsNumber(2)) {
 		const auto  task_id   = Strings::ToUnsignedInt(sep->arg[2]);
-		const auto& task_name = task_manager->GetTaskName(task_id);
+		const auto& task_name = TaskManager::Instance()->GetTaskName(task_id);
 
 		if (task_name.empty()) {
 			c->Message(
@@ -41,7 +41,7 @@ void FindTask(Client *c, const Seperator *sep)
 
 	auto found_count = 0;
 
-	for (const auto& t : task_manager->GetTaskData()) {
+	for (const auto& t : TaskManager::Instance()->GetTaskData()) {
 		const auto& task_name       = t.second.title;
 		const auto& task_name_lower = Strings::ToLower(task_name);
 		if (!Strings::Contains(task_name_lower, search_criteria)) {

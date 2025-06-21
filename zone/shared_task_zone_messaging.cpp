@@ -157,7 +157,7 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 
 			for (auto &client: entity_list.GetClientList()) {
 				Client *c = client.second;
-				task_manager->SyncClientSharedTaskState(c, c->GetTaskState());
+				TaskManager::Instance()->SyncClientSharedTaskState(c, c->GetTaskState());
 				c->RemoveClientTaskState();
 				c->LoadClientTaskState();
 			}
