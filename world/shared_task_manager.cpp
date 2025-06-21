@@ -199,7 +199,7 @@ void SharedTaskManager::RemoveMember(SharedTask* s, const SharedTaskMember& memb
 
 	SendSharedTaskMemberRemovedToAllMembers(s, member.character_name);
 
-	client_list.SendCharacterMessageID(member.character_id, Chat::Yellow,
+	ClientList::Instance()->SendCharacterMessageID(member.character_id, Chat::Yellow,
 		TaskStr::PLAYER_REMOVED, {member.character_name, s->GetTaskData().title});
 
 	if (member.is_leader) {
@@ -229,10 +229,10 @@ void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 reque
 
 		SendRemovePlayerFromSharedTaskPacket(m.character_id, t->GetTaskData().id, true);
 
-		client_list.SendCharacterMessageID(m.character_id, Chat::Yellow, TaskStr::YOU_REMOVED, {t->GetTaskData().title});
+		ClientList::Instance()->SendCharacterMessageID(m.character_id, Chat::Yellow, TaskStr::YOU_REMOVED, {t->GetTaskData().title});
 	}
 
-	client_list.SendCharacterMessageID(requested_character_id, Chat::Red, TaskStr::PLAYER_REMOVED, {"Everyone", t->GetTaskData().title});
+	ClientList::Instance()->SendCharacterMessageID(requested_character_id, Chat::Red, TaskStr::PLAYER_REMOVED, {"Everyone", t->GetTaskData().title});
 
 	RemoveAllMembersFromDynamicZones(t);
 
@@ -252,7 +252,7 @@ void SharedTaskManager::Terminate(SharedTask& s, bool send_fail, bool erase)
 			SendSharedTaskFailed(member.character_id, s.GetTaskData().id);
 		}
 		SendRemovePlayerFromSharedTaskPacket(member.character_id, s.GetTaskData().id, true);
-		client_list.SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {s.GetTaskData().title});
+		ClientList::Instance()->SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {s.GetTaskData().title});
 	}
 
 	RemoveAllMembersFromDynamicZones(&s);
@@ -581,7 +581,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 						d->ignore_quest_update = ignore_quest_update;
 
 						// get requested character zone server
-						ClientListEntry *c = client_list.FindCLEByCharacterID(m.character_id);
+						ClientListEntry *c = ClientList::Instance()->FindCLEByCharacterID(m.character_id);
 						if (c && c->Server()) {
 							c->Server()->SendPacket(p.get());
 						}
@@ -683,7 +683,7 @@ void SharedTaskManager::SendAcceptNewSharedTaskPacket(
 	d->accept_time              = accept_time;
 
 	// get requested character zone server
-	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
+	ClientListEntry *cle = ClientList::Instance()->FindCLEByCharacterID(character_id);
 	if (cle && cle->Server()) {
 		cle->Server()->SendPacket(p.get());
 	}
@@ -704,7 +704,7 @@ void SharedTaskManager::SendRemovePlayerFromSharedTaskPacket(
 	d->remove_from_db         = remove_from_db;
 
 	// get requested character zone server
-	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
+	ClientListEntry *cle = ClientList::Instance()->FindCLEByCharacterID(character_id);
 	if (cle && cle->Server()) {
 		cle->Server()->SendPacket(p.get());
 	}
@@ -717,7 +717,7 @@ void SharedTaskManager::SendSharedTaskFailed(uint32_t character_id, uint32_t tas
 	buf->character_id = character_id;
 	buf->task_id = task_id;
 
-	ClientListEntry* cle = client_list.FindCLEByCharacterID(character_id);
+	ClientListEntry* cle = ClientList::Instance()->FindCLEByCharacterID(character_id);
 	if (cle && cle->Server())
 	{
 		cle->Server()->SendPacket(&pack);
@@ -746,7 +746,7 @@ void SharedTaskManager::SendSharedTaskMemberList(uint32 character_id, const EQ::
 	memcpy(d->cereal_serialized_members, serialized_members.Data(), serialized_members.Length());
 
 	// send memberlist
-	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
+	ClientListEntry *cle = ClientList::Instance()->FindCLEByCharacterID(character_id);
 	if (cle && cle->Server()) {
 		cle->Server()->SendPacket(p.get());
 	}
@@ -768,7 +768,7 @@ void SharedTaskManager::SendSharedTaskMemberChange(
 	d->removed                  = removed;
 	strn0cpy(d->player_name, player_name.c_str(), sizeof(d->player_name));
 
-	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
+	ClientListEntry *cle = ClientList::Instance()->FindCLEByCharacterID(character_id);
 	if (cle && cle->Server()) {
 		cle->Server()->SendPacket(p.get());
 	}
@@ -990,7 +990,7 @@ void SharedTaskManager::SendSharedTaskInvitePacket(SharedTask *s, int64 invited_
 		strn0cpy(d->task_name, s->GetTaskData().title.c_str(), sizeof(d->task_name));
 
 		// get requested character zone server
-		ClientListEntry *cle = client_list.FindCLEByCharacterID(invited_character_id);
+		ClientListEntry *cle = ClientList::Instance()->FindCLEByCharacterID(invited_character_id);
 		if (cle && cle->Server()) {
 			SendLeaderMessageID(s, Chat::Yellow, TaskStr::SEND_INVITE_TO, {cle->name()});
 			cle->Server()->SendPacket(p.get());
@@ -1213,7 +1213,7 @@ void SharedTaskManager::SendLeaderMessage(SharedTask *shared_task, int chat_type
 
 	for (const auto &member : shared_task->GetMembers()) {
 		if (member.is_leader) {
-			client_list.SendCharacterMessage(member.character_id, chat_type, message);
+			ClientList::Instance()->SendCharacterMessage(member.character_id, chat_type, message);
 			break;
 		}
 	}
@@ -1230,7 +1230,7 @@ void SharedTaskManager::SendLeaderMessageID(
 
 	for (const auto &member : shared_task->GetMembers()) {
 		if (member.is_leader) {
-			client_list.SendCharacterMessageID(member.character_id, chat_type, eqstr_id, args);
+			ClientList::Instance()->SendCharacterMessageID(member.character_id, chat_type, eqstr_id, args);
 			break;
 		}
 	}
@@ -1243,7 +1243,7 @@ void SharedTaskManager::SendMembersMessage(SharedTask *shared_task, int chat_typ
 	}
 
 	for (const auto &member : shared_task->GetMembers()) {
-		client_list.SendCharacterMessage(member.character_id, chat_type, message);
+		ClientList::Instance()->SendCharacterMessage(member.character_id, chat_type, message);
 	}
 }
 

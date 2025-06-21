@@ -94,7 +94,7 @@ ClientListEntry::~ClientListEntry()
 {
 	if (RunLoops) {
 		Camp(); // updates zoneserver's numplayers
-		client_list.RemoveCLEReferances(this);
+		ClientList::Instance()->RemoveCLEReferances(this);
 	}
 	for (auto &elem: m_tell_queue) {
 		safe_delete_array(elem);

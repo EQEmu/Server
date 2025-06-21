@@ -210,7 +210,7 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 	{
 		auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
 
-		ClientListEntry* cle = client_list.FindCharacter(buf->target_name);
+		ClientListEntry* cle = ClientList::Instance()->FindCharacter(buf->target_name);
 		if (cle && cle->Server())
 		{
 			// continue in the add target's zone
@@ -220,7 +220,7 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 		else
 		{
 			// add target not online, return to inviter
-			ClientListEntry* inviter_cle = client_list.FindCharacter(buf->requester_name);
+			ClientListEntry* inviter_cle = ClientList::Instance()->FindCharacter(buf->requester_name);
 			if (inviter_cle && inviter_cle->Server())
 			{
 				inviter_cle->Server()->SendPacket(pack);
@@ -231,7 +231,7 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_DzSaveInvite:
 	{
 		auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
-		if (ClientListEntry* cle = client_list.FindCharacter(buf->target_name))
+		if (ClientListEntry* cle = ClientList::Instance()->FindCharacter(buf->target_name))
 		{
 			// store packet on cle and re-send it when client requests it
 			buf->is_char_online = true;
@@ -243,7 +243,7 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_DzRequestInvite:
 	{
 		auto buf = reinterpret_cast<ServerCharacterID_Struct*>(pack->pBuffer);
-		if (ClientListEntry* cle = client_list.FindCLEByCharacterID(buf->char_id))
+		if (ClientListEntry* cle = ClientList::Instance()->FindCLEByCharacterID(buf->char_id))
 		{
 			auto invite_pack = cle->GetPendingDzInvite();
 			if (invite_pack && cle->Server())
@@ -259,7 +259,7 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 
 		// notify requester (old leader) and new leader of the result
 		ZoneServer* new_leader_zs = nullptr;
-		ClientListEntry* leader_cle = client_list.FindCharacter(buf->new_leader_name);
+		ClientListEntry* leader_cle = ClientList::Instance()->FindCharacter(buf->new_leader_name);
 		if (leader_cle && leader_cle->Server())
 		{
 			auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
@@ -274,7 +274,7 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 		}
 
 		// if old and new leader are in the same zone only send one message
-		ClientListEntry* requester_cle = client_list.FindCLEByCharacterID(buf->requester_id);
+		ClientListEntry* requester_cle = ClientList::Instance()->FindCLEByCharacterID(buf->requester_id);
 		if (requester_cle && requester_cle->Server() && requester_cle->Server() != new_leader_zs)
 		{
 			requester_cle->Server()->SendPacket(pack);
@@ -441,7 +441,7 @@ void DynamicZoneManager::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_DzCharacterLockout:
 	{
 		auto buf = reinterpret_cast<ServerDzCharacterLockout_Struct*>(pack->pBuffer);
-		auto cle = client_list.FindCLEByCharacterID(buf->char_id);
+		auto cle = ClientList::Instance()->FindCLEByCharacterID(buf->char_id);
 		if (cle && cle->Server())
 		{
 			cle->Server()->SendPacket(pack);
