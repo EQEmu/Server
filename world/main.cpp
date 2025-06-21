@@ -108,7 +108,6 @@ volatile bool       RunLoops   = true;
 uint32              numclients = 0;
 uint32              numzones   = 0;
 const WorldConfig   *Config;
-EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
 PathManager         path;
@@ -135,7 +134,7 @@ inline void UpdateWindowTitle(std::string new_title)
 int main(int argc, char **argv)
 {
 	RegisterExecutablePlatform(ExePlatformWorld);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	if (WorldBoot::HandleCommandInput(argc, argv)) {
@@ -509,7 +508,7 @@ int main(int argc, char **argv)
 	zoneserver_list.KillAll();
 	LogInfo("Zone (TCP) listener stopped");
 	LogInfo("Signaling HTTP service to stop");
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 
 	WorldBoot::Shutdown();
 

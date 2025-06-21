@@ -982,7 +982,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 	} else if (type == ServerReload::Type::ContentFlags) {
 		content_service.SetExpansionContext()->ReloadContentFlags();
 	} else if (type == ServerReload::Type::Logs) {
-		LogSys.LoadLogDatabaseSettings();
+		EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
 		player_event_logs.ReloadSettings();
 		UCSLink.SendPacket(&pack);
 	} else if (type == ServerReload::Type::Tasks) {

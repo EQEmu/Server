@@ -835,9 +835,9 @@ Json::Value ApiGetLogsysCategories(EQ::Net::WebsocketServerConnection *connectio
 
 		row["log_category_id"]          = i;
 		row["log_category_description"] = Logs::LogCategoryName[i];
-		row["log_to_console"]           = LogSys.log_settings[i].log_to_console;
-		row["log_to_file"]              = LogSys.log_settings[i].log_to_file;
-		row["log_to_gmsay"]             = LogSys.log_settings[i].log_to_gmsay;
+		row["log_to_console"]           = EQEmuLogSys::Instance()->log_settings[i].log_to_console;
+		row["log_to_file"]              = EQEmuLogSys::Instance()->log_settings[i].log_to_file;
+		row["log_to_gmsay"]             = EQEmuLogSys::Instance()->log_settings[i].log_to_gmsay;
 
 		response.append(row);
 	}
@@ -866,15 +866,15 @@ Json::Value ApiSetLoggingLevel(EQ::Net::WebsocketServerConnection *connection, J
 	if (logging_category < Logs::LogCategory::MaxCategoryID &&
 		logging_category > Logs::LogCategory::None
 		) {
-		LogSys.log_settings[logging_category].log_to_console = logging_level;
+		EQEmuLogSys::Instance()->log_settings[logging_category].log_to_console = logging_level;
 		response["status"] = "Category log level updated";
 	}
 
 	if (logging_level > 0) {
-		LogSys.log_settings[logging_category].is_category_enabled = 1;
+		EQEmuLogSys::Instance()->log_settings[logging_category].is_category_enabled = 1;
 	}
 	else {
-		LogSys.log_settings[logging_category].is_category_enabled = 0;
+		EQEmuLogSys::Instance()->log_settings[logging_category].is_category_enabled = 0;
 	}
 
 	return response;
@@ -882,7 +882,7 @@ Json::Value ApiSetLoggingLevel(EQ::Net::WebsocketServerConnection *connection, J
 
 void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer> &server)
 {
-	LogSys.SetConsoleHandler(
+	EQEmuLogSys::Instance()->SetConsoleHandler(
 		[&](uint16 log_category, const std::string &msg) {
 			Json::Value data;
 			data["log_category"] = log_category;

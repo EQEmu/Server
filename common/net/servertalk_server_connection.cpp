@@ -319,7 +319,7 @@ void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 			size_t message_len = length;
 			EQ::Net::StaticPacket packet(&data[0], message_len);
 
-			const auto is_detail_enabled = LogSys.IsLogEnabled(Logs::Detail, Logs::PacketServerToServer);
+			const auto is_detail_enabled = EQEmuLogSys::Instance()->IsLogEnabled(Logs::Detail, Logs::PacketServerToServer);
 			if (opcode != ServerOP_KeepAlive || is_detail_enabled) {
 				LogPacketServerToServer(
 					"[{:#06x}] Size [{}] {}",

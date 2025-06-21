@@ -1167,7 +1167,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		}
 	}
 
-	if (LogSys.IsLogEnabled(Logs::General, Logs::NetClient)) {
+	if (EQEmuLogSys::Instance()->IsLogEnabled(Logs::General, Logs::NetClient)) {
 		size_t    total_size = 0;
 		for (auto &e: s->sent_packets) {
 			total_size += e.second.packet.Length();

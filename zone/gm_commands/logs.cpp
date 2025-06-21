@@ -76,7 +76,7 @@ void command_logs(Client *c, const Seperator *sep)
 
 			std::vector<std::string> gmsay;
 			for (int                 i = 0; i <= 2; i++) {
-				if (LogSys.log_settings[index].log_to_gmsay == i) {
+				if (EQEmuLogSys::Instance()->log_settings[index].log_to_gmsay == i) {
 					gmsay.emplace_back(std::to_string(i));
 					continue;
 				}
@@ -90,7 +90,7 @@ void command_logs(Client *c, const Seperator *sep)
 
 			std::vector<std::string> file;
 			for (int                 i = 0; i <= 2; i++) {
-				if (LogSys.log_settings[index].log_to_file == i) {
+				if (EQEmuLogSys::Instance()->log_settings[index].log_to_file == i) {
 					file.emplace_back(std::to_string(i));
 					continue;
 				}
@@ -104,7 +104,7 @@ void command_logs(Client *c, const Seperator *sep)
 
 			std::vector<std::string> console;
 			for (int                 i = 0; i <= 2; i++) {
-				if (LogSys.log_settings[index].log_to_console == i) {
+				if (EQEmuLogSys::Instance()->log_settings[index].log_to_console == i) {
 					console.emplace_back(std::to_string(i));
 					continue;
 				}
@@ -118,7 +118,7 @@ void command_logs(Client *c, const Seperator *sep)
 
 			std::vector<std::string> discord;
 			for (int                 i = 0; i <= 2; i++) {
-				if (LogSys.log_settings[index].log_to_discord == i) {
+				if (EQEmuLogSys::Instance()->log_settings[index].log_to_discord == i) {
 					discord.emplace_back(std::to_string(i));
 					continue;
 				}
@@ -206,16 +206,16 @@ void command_logs(Client *c, const Seperator *sep)
 		auto setting     = Strings::ToUnsignedInt(sep->arg[4]);
 
 		if (is_console) {
-			LogSys.log_settings[category_id].log_to_console = setting;
+			EQEmuLogSys::Instance()->log_settings[category_id].log_to_console = setting;
 		}
 		else if (is_file) {
-			LogSys.log_settings[category_id].log_to_file = setting;
+			EQEmuLogSys::Instance()->log_settings[category_id].log_to_file = setting;
 		}
 		else if (is_gmsay) {
-			LogSys.log_settings[category_id].log_to_gmsay = setting;
+			EQEmuLogSys::Instance()->log_settings[category_id].log_to_gmsay = setting;
 		}
 		else if (is_discord) {
-			LogSys.log_settings[category_id].log_to_discord = setting;
+			EQEmuLogSys::Instance()->log_settings[category_id].log_to_discord = setting;
 		}
 
 		if (logs_set) {
@@ -231,7 +231,7 @@ void command_logs(Client *c, const Seperator *sep)
 			);
 		}
 
-		LogSys.log_settings[category_id].is_category_enabled = setting ? 1 : 0;
+		EQEmuLogSys::Instance()->log_settings[category_id].is_category_enabled = setting ? 1 : 0;
 	}
 }
 

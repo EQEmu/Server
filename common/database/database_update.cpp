@@ -154,7 +154,7 @@ bool DatabaseUpdate::UpdateManifest(
 	std::vector<int> missing_migrations = {};
 	if (version_low != version_high) {
 
-		LogSys.DisableMySQLErrorLogs();
+		EQEmuLogSys::Instance()->DisableMySQLErrorLogs();
 		bool force_interactive = false;
 		for (int version = version_low + 1; version <= version_high; ++version) {
 			for (auto &e: entries) {
@@ -184,7 +184,7 @@ bool DatabaseUpdate::UpdateManifest(
 				}
 			}
 		}
-		LogSys.EnableMySQLErrorLogs();
+		EQEmuLogSys::Instance()->EnableMySQLErrorLogs();
 		LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 
 		if (!missing_migrations.empty() && m_skip_backup) {

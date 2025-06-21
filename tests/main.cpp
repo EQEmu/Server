@@ -34,13 +34,12 @@
 #include "task_state_test.h"
 
 const EQEmuConfig *Config;
-EQEmuLogSys       LogSys;
 PathManager       path;
 
 int main()
 {
 	RegisterExecutablePlatform(ExePlatformClientImport);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	path.LoadPaths();
 
 	auto ConfigLoadResult = EQEmuConfig::LoadConfig();

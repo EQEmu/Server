@@ -508,7 +508,7 @@ bool PlayerEventLogs::IsEventDiscordEnabled(int32_t event_type_id)
 	}
 
 	// ensure there is a matching webhook to begin with
-	if (!LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
+	if (!EQEmuLogSys::Instance()->GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
 		return true;
 	}
 
@@ -528,8 +528,8 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 	}
 
 	// ensure there is a matching webhook to begin with
-	if (!LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
-		return LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url;
+	if (!EQEmuLogSys::Instance()->GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
+		return EQEmuLogSys::Instance()->GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url;
 	}
 
 	return "";

@@ -35,12 +35,12 @@ if (scalar(@enum) > 0) {
 
         foreach my $cat (@cats) {
             print "#define Log" . $cat . "(message, ...) do {\\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::" . $cat . "))\\
+    if (EQEmuLogSys::Instance()->IsLogEnabled(Logs::General, Logs::" . $cat . "))\\
         OutF(LogSys, Logs::General, Logs::" . $cat . ", __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\\
 } while (0)
 
 #define Log" . $cat . "Detail(message, ...) do {\\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::" . $cat . "))\\
+    if (EQEmuLogSys::Instance()->IsLogEnabled(Logs::Detail, Logs::" . $cat . "))\\
         OutF(LogSys, Logs::Detail, Logs::" . $cat . ", __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\\
 } while (0)
 
