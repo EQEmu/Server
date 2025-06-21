@@ -88,7 +88,6 @@ extern volatile bool is_zone_loaded;
 #include "../common/path_manager.h"
 #include "../common/database/database_update.h"
 #include "../common/skill_caps.h"
-#include "zone_event_scheduler.h"
 #include "zone_cli.h"
 
 EntityList  entity_list;
@@ -105,7 +104,6 @@ TaskManager           *task_manager = 0;
 NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
 EQEmuLogSys           LogSys;
-ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
 PathManager           path;
 PlayerEventLogs       player_event_logs;
@@ -423,7 +421,7 @@ int main(int argc, char **argv)
 		->SetExpansionContext()
 		->ReloadContentFlags();
 
-	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
+	ZoneEventScheduler::Instance()->SetDatabase(&database)->LoadScheduledEvents();
 
 	EQ::SayLinkEngine::LoadCachedSaylinks();
 
@@ -490,7 +488,7 @@ int main(int argc, char **argv)
 	QServ->CheckForConnectState();
 
 	worldserver.Connect();
-	worldserver.SetScheduler(&event_scheduler);
+	worldserver.SetScheduler(ZoneEventScheduler::Instance());
 
 	// sidecar command handler
 	if (ZoneCLI::RanConsoleCommand(argc, argv)
@@ -634,7 +632,7 @@ int main(int argc, char **argv)
 				entity_list.MobProcess();
 				entity_list.BeaconProcess();
 				entity_list.EncounterProcess();
-				event_scheduler.Process(zone, &content_service);
+				ZoneEventScheduler::Instance()->Process(zone, &content_service);
 
 				if (zone) {
 					if (!zone->Process()) {
