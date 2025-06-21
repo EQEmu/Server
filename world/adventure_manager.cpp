@@ -68,7 +68,7 @@ void AdventureManager::Process()
 void AdventureManager::CalculateAdventureRequestReply(const char *data)
 {
 	ServerAdventureRequest_Struct *sar = (ServerAdventureRequest_Struct*)data;
-	ClientListEntry *leader = client_list.FindCharacter(sar->leader);
+	ClientListEntry *leader = ClientList::Instance()->FindCharacter(sar->leader);
 	if(!leader)
 	{
 		return;
@@ -185,7 +185,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 
 	for(int i = 0; i < sar->member_count; ++i)
 	{
-		ClientListEntry *current = client_list.FindCharacter((data + sizeof(ServerAdventureRequest_Struct) + (64 * i)));
+		ClientListEntry *current = ClientList::Instance()->FindCharacter((data + sizeof(ServerAdventureRequest_Struct) + (64 * i)));
 		if(current)
 		{
 			int lvl = current->level();
@@ -357,7 +357,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 void AdventureManager::TryAdventureCreate(const char *data)
 {
 	ServerAdventureRequestCreate_Struct *src = (ServerAdventureRequestCreate_Struct*)data;
-	ClientListEntry *leader = client_list.FindCharacter(src->leader);
+	ClientListEntry *leader = ClientList::Instance()->FindCharacter(src->leader);
 	if(!leader)
 	{
 		return;
@@ -404,7 +404,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 	for(int i = 0; i < src->member_count; ++i)
 	{
 
-		ClientListEntry *player = client_list.FindCharacter((data + sizeof(ServerAdventureRequestCreate_Struct) + (64 * i)));
+		ClientListEntry *player = ClientList::Instance()->FindCharacter((data + sizeof(ServerAdventureRequestCreate_Struct) + (64 * i)));
 		if(player)
 		{
 			int f_count = 0;
@@ -458,7 +458,7 @@ void AdventureManager::GetAdventureData(Adventure *adv)
 
 void AdventureManager::GetAdventureData(const char *name)
 {
-	ClientListEntry *player = client_list.FindCharacter(name);
+	ClientListEntry *player = ClientList::Instance()->FindCharacter(name);
 	if(player)
 	{
 		int f_count = 0;
@@ -764,7 +764,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 		{
 			if((*iter)->PlayerExists(player))
 			{
-				ClientListEntry *pc = client_list.FindCharacter(player);
+				ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 				if(pc)
 				{
 					auto pack =
@@ -792,7 +792,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 		++iter;
 	}
 
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureClickDoorError, 64);
@@ -804,7 +804,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 
 void AdventureManager::LeaveAdventure(const char *name)
 {
-	ClientListEntry *pc = client_list.FindCharacter(name);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(name);
 	if(pc)
 	{
 		Adventure *current = GetActiveAdventure(name);
@@ -867,7 +867,7 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 
 		while(siter != slist.end())
 		{
-			ClientListEntry *pc = client_list.FindCharacter((*siter).c_str());
+			ClientListEntry *pc = ClientList::Instance()->FindCharacter((*siter).c_str());
 			if(pc)
 			{
 				memset(ac->player, 0, 64);
@@ -1262,7 +1262,7 @@ void AdventureManager::DoLeaderboardRequest(const char* player, uint8 type)
 
 void AdventureManager::DoLeaderboardRequestWins(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1328,7 +1328,7 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 
 void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1394,7 +1394,7 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 
 void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1460,7 +1460,7 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 
 void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1526,7 +1526,7 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 
 void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1592,7 +1592,7 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 
 void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1658,7 +1658,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 
 void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1724,7 +1724,7 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 
 void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1790,7 +1790,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 
 void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
