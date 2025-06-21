@@ -4645,9 +4645,9 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 				entity_list.SaveAllClientsTaskState();
 				safe_delete(task_manager);
 				task_manager = new TaskManager;
-				TaskManager::Instance()->LoadTasks();
+				task_manager->LoadTasks();
 				entity_list.ReloadAllClientsTaskState();
-				TaskManager::Instance()->LoadTaskSets();
+				task_manager->LoadTaskSets();
 			}
 			break;
 
