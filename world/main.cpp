@@ -102,7 +102,6 @@ QueryServConnection QSLink;
 LauncherList        launcher_list;
 AdventureManager    adventure_manager;
 WorldEventScheduler event_scheduler;
-SharedTaskManager   shared_task_manager;
 EQ::Random          emu_random;
 volatile bool       RunLoops   = true;
 uint32              numclients = 0;
@@ -476,7 +475,7 @@ int main(int argc, char **argv)
 		launcher_list.Process();
 		LFPGroupList.Process();
 		adventure_manager.Process();
-		shared_task_manager.Process();
+		SharedTaskManager::Instance()->Process();
 		dynamic_zone_manager.Process();
 
 		if (!RuleB(Logging, PlayerEventsQSProcess)) {

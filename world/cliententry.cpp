@@ -12,7 +12,6 @@ extern uint32            numplayers;
 extern LoginServerList   loginserverlist;
 extern ClientList        client_list;
 extern volatile bool     RunLoops;
-extern SharedTaskManager shared_task_manager;
 
 ClientListEntry::ClientListEntry(
 	uint32 id,
@@ -224,7 +223,7 @@ void ClientListEntry::LeavingZone(ZoneServer *iZS, CLE_Status iOnline)
 	}
 	SetOnline(iOnline);
 
-	shared_task_manager.RemoveActiveInvitationByCharacterID(CharID());
+	SharedTaskManager::Instance()->RemoveActiveInvitationByCharacterID(CharID());
 
 	if (m_zone_server) {
 		m_zone_server->RemovePlayer();
