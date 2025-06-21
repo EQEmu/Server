@@ -26,7 +26,6 @@
 #include "../common/classes.h"
 
 extern ClientList client_list;
-extern ZSList zoneserver_list;
 
 GroupLFP::GroupLFP(uint32 inLeaderID) {
 
@@ -270,7 +269,7 @@ void GroupLFPList::SendLFPMatches(ServerLFPMatchesRequest_Struct* smrs) {
 			CLE->Server()->SendPacket(Pack);
 	}
 	else {
-		ZoneServer* zs = zoneserver_list.FindByName(smrs->FromName);
+		ZoneServer* zs = ZSList::Instance()->FindByName(smrs->FromName);
 		if (zs != nullptr)
 			zs->SendPacket(Pack);
 	}

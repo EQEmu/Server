@@ -20,7 +20,6 @@
 #include "cliententry.h"
 #include "world_config.h"
 
-extern ZSList        zoneserver_list;
 extern ClientList    client_list;
 extern uint32        numzones;
 extern uint32        numplayers;
@@ -312,7 +311,7 @@ void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	ServerSystemwideMessage *swm = (ServerSystemwideMessage *) p.Data();
-	zoneserver_list.SendEmoteMessageRaw(
+	ZSList::Instance()->SendEmoteMessageRaw(
 		0,
 		0,
 		AccountStatus::Player,
@@ -376,7 +375,7 @@ bool LoginServer::Connect()
 
 					SendInfo();
 					SendStatus();
-					zoneserver_list.SendLSZones();
+					ZSList::Instance()->SendLSZones();
 
 					m_statusupdate_timer = std::make_unique<EQ::Timer>(
 						LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
@@ -485,7 +484,7 @@ bool LoginServer::Connect()
 					);
 					SendInfo();
 					SendStatus();
-					zoneserver_list.SendLSZones();
+					ZSList::Instance()->SendLSZones();
 
 					m_statusupdate_timer = std::make_unique<EQ::Timer>(
 						LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {

@@ -34,7 +34,6 @@ EQEmuLogSys           LogSys;
 PathManager           path;
 ZoneStore             zone_store;
 PlayerEventLogs       player_event_logs;
-ZSList                zs_list;
 uint32                numzones     = 0;
 DiscordManager        discord_manager;
 
@@ -129,7 +128,7 @@ int main()
 	server_connection->OnConnectionIdentified(
 		"Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 			numzones++;
-			zs_list.Add(new ZoneServer(connection, console.get()));
+			ZSList::Instance()->Add(new ZoneServer(connection, console.get()));
 
 			LogInfo(
 				"New Zone Server connection from [{}] at [{}:{}] zone_count [{}]",
@@ -144,7 +143,7 @@ int main()
 	server_connection->OnConnectionRemoved(
 		"Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 			numzones--;
-			zs_list.Remove(connection->GetUUID());
+			ZSList::Instance()->Remove(connection->GetUUID());
 
 			LogInfo(
 				"Removed Zone Server connection from [{}] total zone_count [{}]",

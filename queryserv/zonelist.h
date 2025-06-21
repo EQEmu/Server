@@ -16,6 +16,12 @@ public:
 	void Add(ZoneServer *zoneserver);
 	void Remove(const std::string &uuid);
 
+	static ZSList* Instance()
+	{
+		static ZSList instance;
+		return &instance;
+	}
+
 private:
 	std::list<std::unique_ptr<ZoneServer>> zone_server_list;
 };

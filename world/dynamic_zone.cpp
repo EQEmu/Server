@@ -9,7 +9,6 @@
 #include "../common/repositories/instance_list_repository.h"
 
 extern ClientList client_list;
-extern ZSList zoneserver_list;
 
 Database& DynamicZone::GetDatabase()
 {
@@ -18,7 +17,7 @@ Database& DynamicZone::GetDatabase()
 
 bool DynamicZone::SendServerPacket(ServerPacket* packet)
 {
-	return zoneserver_list.SendPacket(packet);
+	return ZSList::Instance()->SendPacket(packet);
 }
 
 DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
@@ -91,7 +90,7 @@ DynamicZoneStatus DynamicZone::Process()
 	{
 		status = DynamicZoneStatus::Expired;
 
-		auto dz_zoneserver = zoneserver_list.FindByInstanceID(GetInstanceID());
+		auto dz_zoneserver = ZSList::Instance()->FindByInstanceID(GetInstanceID());
 		if (!dz_zoneserver || dz_zoneserver->NumPlayers() == 0) // no clients inside dz
 		{
 			status = DynamicZoneStatus::ExpiredEmpty;
@@ -119,7 +118,7 @@ void DynamicZone::SendZonesDynamicZoneDeleted()
 	auto pack = std::make_unique<ServerPacket>(ServerOP_DzDeleted, pack_size);
 	auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
 	buf->dz_id = GetID();
-	zoneserver_list.SendPacket(pack.get());
+	ZSList::Instance()->SendPacket(pack.get());
 }
 
 void DynamicZone::SetSecondsRemaining(uint32_t seconds_remaining)
@@ -154,7 +153,7 @@ void DynamicZone::SendZonesDurationUpdate()
 	auto packbuf = reinterpret_cast<ServerDzSetDuration_Struct*>(pack->pBuffer);
 	packbuf->dz_id = GetID();
 	packbuf->seconds = static_cast<uint32_t>(m_duration.count());
-	zoneserver_list.SendPacket(pack.get());
+	ZSList::Instance()->SendPacket(pack.get());
 }
 
 void DynamicZone::SendZonesLeaderChanged()
@@ -164,7 +163,7 @@ void DynamicZone::SendZonesLeaderChanged()
 	auto buf = reinterpret_cast<ServerDzLeaderID_Struct*>(pack->pBuffer);
 	buf->dz_id = GetID();
 	buf->leader_id = GetLeaderID();
-	zoneserver_list.SendPacket(pack.get());
+	ZSList::Instance()->SendPacket(pack.get());
 }
 
 void DynamicZone::ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed)
@@ -198,7 +197,7 @@ void DynamicZone::SendZonesExpireWarning(uint32_t minutes_remaining)
 	auto buf = reinterpret_cast<ServerDzExpireWarning_Struct*>(pack->pBuffer);
 	buf->dz_id = GetID();
 	buf->minutes_remaining = minutes_remaining;
-	zoneserver_list.SendPacket(pack.get());
+	ZSList::Instance()->SendPacket(pack.get());
 }
 
 void DynamicZone::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)
@@ -217,7 +216,7 @@ void DynamicZone::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)
 		buf->entries[i].online_status = static_cast<uint8_t>(m_members[i].status);
 	}
 
-	zoneserver_list.SendPacket(zone_id, instance_id, pack.get());
+	ZSList::Instance()->SendPacket(zone_id, instance_id, pack.get());
 }
 
 void DynamicZone::CacheMemberStatuses()
