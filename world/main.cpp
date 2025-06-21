@@ -110,7 +110,6 @@ uint32              numzones   = 0;
 const WorldConfig   *Config;
 EQEmuLogSys         LogSys;
 WorldContentService content_service;
-WebInterfaceList    web_interface;
 PathManager         path;
 PlayerEventLogs     player_event_logs;
 EvolvingItemsManager evolving_items_manager;
@@ -332,7 +331,7 @@ int main(int argc, char **argv)
 				connection->GetUUID()
 			);
 
-			web_interface.AddConnection(connection);
+			WebInterfaceList::Instance()->AddConnection(connection);
 		}
 	);
 
@@ -343,7 +342,7 @@ int main(int argc, char **argv)
 				connection->GetUUID()
 			);
 
-			web_interface.RemoveConnection(connection);
+			WebInterfaceList::Instance()->RemoveConnection(connection);
 		}
 	);
 
