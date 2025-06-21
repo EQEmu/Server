@@ -224,8 +224,6 @@ void WorldBoot::RegisterLoginservers()
 	}
 }
 
-extern WorldEventScheduler event_scheduler;
-
 bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 {
 	// logging system init
@@ -389,7 +387,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	content_db.LoadCharacterCreateCombos();
 
 	LogInfo("Initializing [EventScheduler]");
-	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
+	WorldEventScheduler::Instance()->SetDatabase(&database)->LoadScheduledEvents();
 
 	LogInfo("Initializing [WorldContentService]");
 	content_service.SetDatabase(&database)
