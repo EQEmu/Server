@@ -42,7 +42,6 @@ EQEmuLogSys          LogSys;
 WorldContentService  content_service;
 ZoneStore            zone_store;
 PathManager          path;
-PlayerEventLogs      player_event_logs;
 EvolvingItemsManager evolving_items_manager;
 
 void ExportSpells(SharedDatabase *db);

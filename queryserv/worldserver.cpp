@@ -77,7 +77,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			auto o = (ServerReload::Request*) p.Data();
 			if (o->type == ServerReload::Type::Logs) {
 				LogSys.LoadLogDatabaseSettings();
-				player_event_logs.ReloadSettings();
+				PlayerEventLogs::Instance()->ReloadSettings();
 			}
 
 			break;

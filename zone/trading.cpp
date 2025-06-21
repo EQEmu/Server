@@ -1465,7 +1465,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 
 	Trader->AddMoneyToPP(copper, silver, gold, platinum, true);
 
-	if (buy_item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+	if (buy_item && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
 		auto e = PlayerEvent::TraderPurchaseEvent{
 			.item_id              = buy_item->GetID(),
 			.augment_1_id         = buy_item->GetAugmentItemID(0),
@@ -1487,7 +1487,7 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
 	}
 
-	if (buy_item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+	if (buy_item && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TRADER_SELL)) {
 		auto e = PlayerEvent::TraderSellEvent{
 			.item_id              = buy_item->GetID(),
 			.augment_1_id         = buy_item->GetAugmentItemID(0),
@@ -1998,7 +1998,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 				AddMoneyToPP(total_cost, false);
 				buyer->TakeMoneyFromPP(total_cost, false);
 
-				if (player_event_logs.IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
+				if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
 					PlayerEvent::BarterTransaction e{};
 					e.status        = "Successful Barter Transaction";
 					e.item_id       = sell_line.item_id;
@@ -2991,7 +2991,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	Message(Chat::Red, fmt::format("You paid {} for the parcel delivery.", DetermineMoneyString(fee)).c_str());
 	LogTrading("Customer <green>[{}] Paid: <green>[{}] in Copper", CharacterID(), total_cost);
 
-	if (buy_item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+	if (buy_item && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
 		auto e = PlayerEvent::TraderPurchaseEvent{
 			.item_id              = buy_item->GetID(),
 			.augment_1_id         = buy_item->GetAugmentItemID(0),
@@ -3046,7 +3046,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	}
 
 	ReturnTraderReq(app, tbs->quantity, buy_item->GetID());
-	if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+	if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 		PlayerEvent::ParcelSend e{};
 		e.from_player_name = parcel_out.from_name;
 		e.to_player_name   = GetCleanName();

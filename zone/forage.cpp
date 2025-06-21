@@ -379,7 +379,7 @@ void Client::GoFish(bool guarantee, bool use_bait)
 				}
 
 				if (inst) {
-					if (player_event_logs.IsEventEnabled(PlayerEvent::FISH_SUCCESS)) {
+					if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::FISH_SUCCESS)) {
 						auto e = PlayerEvent::FishSuccessEvent{
 							.item_id      = inst->GetItem()->ID,
 							.augment_1_id = inst->GetAugmentItemID(0),
@@ -519,7 +519,7 @@ void Client::ForageItem(bool guarantee) {
 			}
 
 			if (inst) {
-				if (player_event_logs.IsEventEnabled(PlayerEvent::FORAGE_SUCCESS)) {
+				if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::FORAGE_SUCCESS)) {
 					auto e = PlayerEvent::ForageSuccessEvent{
 						.item_id      = inst->GetItem()->ID,
 						.augment_1_id = inst->GetAugmentItemID(0),

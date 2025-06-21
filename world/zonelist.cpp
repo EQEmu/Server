@@ -983,7 +983,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 		content_service.SetExpansionContext()->ReloadContentFlags();
 	} else if (type == ServerReload::Type::Logs) {
 		LogSys.LoadLogDatabaseSettings();
-		player_event_logs.ReloadSettings();
+		PlayerEventLogs::Instance()->ReloadSettings();
 		UCSLink.SendPacket(&pack);
 	} else if (type == ServerReload::Type::Tasks) {
 		shared_task_manager.LoadTaskData();

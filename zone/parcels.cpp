@@ -468,7 +468,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				send_to_client.at(0).character_name.c_str()
 			);
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
@@ -572,7 +572,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				send_to_client.at(0).character_name.c_str()
 			);
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
@@ -759,7 +759,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 					);
 				}
 
-				if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_RETRIEVE)) {
+				if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::PARCEL_RETRIEVE)) {
 					PlayerEvent::ParcelRetrieve e{};
 					e.from_player_name = p->second.from_name;
 					e.item_id          = p->second.item_id;

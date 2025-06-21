@@ -108,7 +108,6 @@ EQEmuLogSys           LogSys;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
 PathManager           path;
-PlayerEventLogs       player_event_logs;
 DatabaseUpdate        database_update;
 SkillCaps             skill_caps;
 EvolvingItemsManager  evolving_items_manager;
@@ -314,7 +313,7 @@ int main(int argc, char **argv)
 		LogSys.SilenceConsoleLogging();
 	}
 
-	player_event_logs.SetDatabase(&database)->Init();
+	PlayerEventLogs::Instance()->SetDatabase(&database)->Init();
 
 	skill_caps.SetContentDatabase(&content_db)->LoadSkillCaps();
 

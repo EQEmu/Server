@@ -1318,7 +1318,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 	}
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::EventType::SPEECH)) {
+	if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::EventType::SPEECH)) {
 		PlayerEvent::PlayerSpeech e{};
 		std::string msg = message;
 		if (!msg.empty() && msg.at(0) != '#' && msg.at(0) != '^') {
@@ -1540,7 +1540,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		break;
 	}
 	case ChatChannel_Say: { /* Say */
-		if (player_event_logs.IsEventEnabled(PlayerEvent::SAY)) {
+		if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::SAY)) {
 			std::string msg = message;
 			if (!msg.empty() && msg.at(0) != '#' && msg.at(0) != '^') {
 				auto e = PlayerEvent::SayEvent{
@@ -3108,7 +3108,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::SKILL_UP)) {
+			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::SKILL_UP)) {
 				auto e = PlayerEvent::SkillUpEvent{
 					.skill_id = static_cast<uint32>(skillid),
 					.value = static_cast<int>((skillval + 1)),
@@ -4991,7 +4991,7 @@ void Client::DiscoverItem(uint32 item_id) {
 
 	auto d = DiscoveredItemsRepository::InsertOne(database, e);
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
+	if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
 		const auto* item = database.GetItem(item_id);
 
 		auto e = PlayerEvent::DiscoverItemEvent{

@@ -922,7 +922,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 			parse->EventPlayer(EVENT_LEVEL_UP, this, std::to_string(levels_gained), 0);
 		}
 
-		if (player_event_logs.IsEventEnabled(PlayerEvent::LEVEL_GAIN)) {
+		if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::LEVEL_GAIN)) {
 			auto e = PlayerEvent::LevelGainedEvent{
 				.from_level = m_pp.level,
 				.to_level = set_level,
@@ -938,7 +938,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 			parse->EventPlayer(EVENT_LEVEL_DOWN, this, std::to_string(levels_lost), 0);
 		}
 
-		if (player_event_logs.IsEventEnabled(PlayerEvent::LEVEL_LOSS)) {
+		if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::LEVEL_LOSS)) {
 			auto e = PlayerEvent::LevelLostEvent{
 				.from_level = m_pp.level,
 				.to_level = set_level,
