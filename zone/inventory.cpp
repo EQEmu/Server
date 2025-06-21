@@ -631,7 +631,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		}
 	}
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_CREATION)) {
+	if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::ITEM_CREATION)) {
 		auto e = PlayerEvent::ItemCreationEvent{};
 		e.item_id      = item->ID;
 		e.item_name    = item->Name;
@@ -763,7 +763,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 
 		int i = 0;
 
-		if (inst && player_event_logs.IsEventEnabled(PlayerEvent::DROPPED_ITEM)) {
+		if (inst && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::DROPPED_ITEM)) {
 			auto e = PlayerEvent::DroppedItemEvent{
 				.item_id      = inst->GetID(),
 				.augment_1_id = inst->GetAugmentItemID(0),
@@ -1655,7 +1655,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 				DeleteItemInInventory(EQ::invslot::slotCursor, 0, true);
 
-				if (test_inst && player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
+				if (test_inst && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
 					auto e = PlayerEvent::DestroyItemEvent{
 						.item_id      = test_inst->GetItem()->ID,
 						.item_name    = test_inst->GetItem()->Name,
@@ -1685,7 +1685,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			EQ::ItemInstance *inst = m_inv.GetItem(EQ::invslot::slotCursor);
 
 			if (inst) {
-				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
+				if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
 					auto e = PlayerEvent::DestroyItemEvent{
 						.item_id      = inst->GetItem()->ID,
 						.item_name    = inst->GetItem()->Name,

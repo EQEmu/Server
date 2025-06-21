@@ -361,7 +361,7 @@ bool Client::DoEvolveCheckProgression(EQ::ItemInstance &inst)
                         p.item_id   = item_id;
                         p.quantity  = 1;
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = p.from_name;
 				e.to_player_name   = GetCleanName();

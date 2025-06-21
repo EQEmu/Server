@@ -12,9 +12,9 @@ void WorldserverCLI::EtlGetSettings(int argc, char **argv, argh::parser &cmd, st
 	Json::Value etl_settings;
 	Json::Value player_events;
 
-	player_event_logs.SetDatabase(&database)->Init();
-	auto event_settings = player_event_logs.GetSettings();
-	auto etl_details    = player_event_logs.GetEtlSettings();
+	PlayerEventLogs::Instance()->SetDatabase(&database)->Init();
+	auto event_settings = PlayerEventLogs::Instance()->GetSettings();
+	auto etl_details    = PlayerEventLogs::Instance()->GetEtlSettings();
 
 	for (int i = PlayerEvent::GM_COMMAND; i < PlayerEvent::EventType::MAX; i++) {
 		player_events["event_id"]    = event_settings[i].id;

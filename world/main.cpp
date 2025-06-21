@@ -99,7 +99,6 @@ volatile bool       RunLoops   = true;
 uint32              numclients = 0;
 uint32              numzones   = 0;
 const WorldConfig   *Config;
-PlayerEventLogs     player_event_logs;
 
 void CatchSignal(int sig_num);
 
@@ -368,8 +367,8 @@ int main(int argc, char **argv)
 		}
 	);
 
-	if (player_event_logs.LoadDatabaseConnection()) {
-		player_event_logs.Init();
+	if (PlayerEventLogs::Instance()->LoadDatabaseConnection()) {
+		PlayerEventLogs::Instance()->Init();
 	}
 
 	auto loop_fn = [&](EQ::Timer* t) {
@@ -467,7 +466,7 @@ int main(int argc, char **argv)
 
 		if (!RuleB(Logging, PlayerEventsQSProcess)) {
 			if (player_event_log_process.Check()) {
-				player_event_logs.Process();
+				PlayerEventLogs::Instance()->Process();
 			}
 		}
 

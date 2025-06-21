@@ -981,7 +981,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 		WorldContentService::Instance()->SetExpansionContext()->ReloadContentFlags();
 	} else if (type == ServerReload::Type::Logs) {
 		EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
-		player_event_logs.ReloadSettings();
+		PlayerEventLogs::Instance()->ReloadSettings();
 		UCSConnection::Instance()->SendPacket(&pack);
 		QueryServConnection::Instance()->SendPacket(&pack);
 	} else if (type == ServerReload::Type::Tasks) {

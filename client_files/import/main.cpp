@@ -32,8 +32,6 @@
 #include "../../common/events/player_event_logs.h"
 #include "../../common/evolving_items.h"
 
-PlayerEventLogs      player_event_logs;
-
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
 void ImportBaseData(SharedDatabase *db);

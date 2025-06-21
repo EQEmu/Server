@@ -101,7 +101,6 @@ TitleManager          title_manager;
 QueryServ             *QServ        = 0;
 NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
-PlayerEventLogs       player_event_logs;
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
@@ -304,7 +303,7 @@ int main(int argc, char **argv)
 		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 	}
 
-	player_event_logs.SetDatabase(&database)->Init();
+	PlayerEventLogs::Instance()->SetDatabase(&database)->Init();
 
 	SkillCaps::Instance()->SetContentDatabase(&content_db)->LoadSkillCaps();
 

@@ -3805,7 +3805,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			auto item = trader_pc->FindTraderItemBySerialNumber(item_sn);
 
-			if (item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+			if (item && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TRADER_SELL)) {
 				auto e = PlayerEvent::TraderSellEvent{
 					.item_id              = item ? item->GetID() : 0,
 					.augment_1_id         = item->GetAugmentItemID(0),
@@ -3901,7 +3901,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 									Barter_Failure
 								);
 
-								if (player_event_logs.IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
+								if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
 									PlayerEvent::BarterTransaction e{};
 									e.status        = "Failed Barter Transaction";
 									e.item_id       = sell_line.item_id;
@@ -3938,7 +3938,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 									Barter_Failure
 								);
 
-								if (player_event_logs.IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
+								if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
 									PlayerEvent::BarterTransaction e{};
 									e.status        = "Failed Barter Transaction";
 									e.item_id       = sell_line.item_id;
@@ -4065,7 +4065,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						Barter_Success
 					);
 
-					if (player_event_logs.IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
+					if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
 						PlayerEvent::BarterTransaction e{};
 						e.status        = "Successful Barter Transaction";
 						e.item_id       = sell_line.item_id;
@@ -4123,7 +4123,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						Barter_Success
 					);
 
-					if (player_event_logs.IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
+					if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::BARTER_TRANSACTION)) {
 						PlayerEvent::BarterTransaction e{};
 						e.status        = "Successful Barter Transaction";
 						e.item_id       = sell_line.item_id;
@@ -4590,11 +4590,7 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 
 		case ServerReload::Type::Logs:
 			EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
-			player_event_logs.ReloadSettings();
-			// if QS process is enabled, we get settings from QS
-			if (!RuleB(Logging, PlayerEventsQSProcess)) {
-				player_event_logs.ReloadSettings();
-			}
+			PlayerEventLogs::Instance()->ReloadSettings();
 			break;
 
 		case ServerReload::Type::Loot:

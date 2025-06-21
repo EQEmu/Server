@@ -35,8 +35,6 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/evolving_items.h"
 
-PlayerEventLogs      player_event_logs;
-
 #ifdef _WINDOWS
 #include <direct.h>
 #else

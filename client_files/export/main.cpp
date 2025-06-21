@@ -38,8 +38,6 @@
 #include "../../common/skill_caps.h"
 #include "../../common/evolving_items.h"
 
-PlayerEventLogs      player_event_logs;
-
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);
 void ExportBaseData(SharedDatabase *db);

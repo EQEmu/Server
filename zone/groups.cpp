@@ -206,7 +206,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 			}
 
 			// If logging of player money transactions is enabled, record the transaction.
-			if (player_event_logs.IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
+			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
 				auto e = PlayerEvent::SplitMoneyEvent{
 					.copper = receive_copper,
 					.silver = receive_silver,
@@ -1280,7 +1280,7 @@ void Client::LeaveGroup() {
 					if (database.botdb.GetOwnerID(botID) == CharacterID()) {
 						MemberCount -= 1;
 					}
-				}			
+				}
 			}
 		}
 

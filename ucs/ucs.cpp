@@ -46,7 +46,6 @@ ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
 UCSDatabase database;
 WorldServer *worldserver = nullptr;
-PlayerEventLogs player_event_logs;
 
 const ucsconfig *Config;
 
@@ -141,7 +140,7 @@ int main() {
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
-	player_event_logs.SetDatabase(&database)->Init();
+	PlayerEventLogs::Instance()->SetDatabase(&database)->Init();
 
 	char tmp[64];
 
