@@ -45,7 +45,8 @@ public:
 	void HandlePacket(ServerPacket *pack);
 	void ExpireEntries();
 
-	static LFGuildManager* Instance() {
+	static LFGuildManager* Instance()
+	{
 		static LFGuildManager instance;
 		return &instance;
 	}
