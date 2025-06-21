@@ -7,6 +7,12 @@
 class WorldEventScheduler : public ServerEventScheduler {
 public:
 	void Process(ZSList *zs_list);
+
+	static WorldEventScheduler* Instance()
+	{
+		static WorldEventScheduler instance;
+		return &instance;
+	}
 };
 
 #endif //EQEMU_EVENT_SCHEDULER_H

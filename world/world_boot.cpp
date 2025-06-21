@@ -228,7 +228,6 @@ void WorldBoot::RegisterLoginservers()
 
 extern SharedTaskManager   shared_task_manager;
 extern AdventureManager    adventure_manager;
-extern WorldEventScheduler event_scheduler;
 
 bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 {
@@ -393,7 +392,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	content_db.LoadCharacterCreateCombos();
 
 	LogInfo("Initializing [EventScheduler]");
-	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
+	WorldEventScheduler::Instance()->SetDatabase(&database)->LoadScheduledEvents();
 
 	LogInfo("Initializing [WorldContentService]");
 	content_service.SetDatabase(&database)

@@ -101,7 +101,6 @@ UCSConnection       UCSLink;
 QueryServConnection QSLink;
 LauncherList        launcher_list;
 AdventureManager    adventure_manager;
-WorldEventScheduler event_scheduler;
 SharedTaskManager   shared_task_manager;
 EQ::Random          emu_random;
 volatile bool       RunLoops   = true;
@@ -429,7 +428,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		event_scheduler.Process(&zoneserver_list);
+		WorldEventScheduler::Instance()->Process(&zoneserver_list);
 
 		client_list.Process();
 		guild_mgr.Process();
