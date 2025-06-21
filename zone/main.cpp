@@ -110,7 +110,6 @@ WorldContentService   content_service;
 PathManager           path;
 PlayerEventLogs       player_event_logs;
 DatabaseUpdate        database_update;
-SkillCaps             skill_caps;
 EvolvingItemsManager  evolving_items_manager;
 
 const SPDat_Spell_Struct* spells;
@@ -316,7 +315,7 @@ int main(int argc, char **argv)
 
 	player_event_logs.SetDatabase(&database)->Init();
 
-	skill_caps.SetContentDatabase(&content_db)->LoadSkillCaps();
+	SkillCaps::Instance()->SetContentDatabase(&content_db)->LoadSkillCaps();
 
 	const auto c = EQEmuConfig::get();
 	if (c->auto_database_updates) {
