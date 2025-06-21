@@ -15,7 +15,6 @@
 #include "dynamic_zone.h"
 
 extern ClientList        client_list;
-extern ZSList            zoneserver_list;
 
 void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 {
@@ -297,7 +296,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				0
 			);
 
-			zoneserver_list.SendPacket(p.get());
+			ZSList::Instance()->SendPacket(p.get());
 
 			break;
 		}

@@ -45,7 +45,6 @@
 
 #include <algorithm>
 
-extern ZSList	zoneserver_list;
 extern ClientList	client_list;
 extern uint32	numzones;
 extern LauncherList launcher_list;
@@ -107,7 +106,7 @@ bool EQW::LSConnected() {
 }
 
 int EQW::CountZones() {
-	return(zoneserver_list.GetZoneCount());
+	return(ZSList::Instance()->GetZoneCount());
 }
 
 //returns an array of zone_refs (opaque)
@@ -115,7 +114,7 @@ std::vector<std::string> EQW::ListBootedZones() {
 	std::vector<std::string> res;
 
 	std::vector<uint32> zones;
-	zoneserver_list.GetZoneIDList(zones);
+	ZSList::Instance()->GetZoneIDList(zones);
 
 	std::vector<uint32>::iterator cur, end;
 	cur = zones.begin();
@@ -130,7 +129,7 @@ std::vector<std::string> EQW::ListBootedZones() {
 std::map<std::string,std::string> EQW::GetZoneDetails(Const_char *zone_ref) {
 	std::map<std::string,std::string> res;
 
-	ZoneServer *zs = zoneserver_list.FindByID(Strings::ToInt(zone_ref));
+	ZoneServer *zs = ZSList::Instance()->FindByID(Strings::ToInt(zone_ref));
 	if(zs == nullptr) {
 		res["error"] = "Invalid zone.";
 		return(res);
@@ -360,7 +359,7 @@ void EQW::ResolveBug(const char *id) {
 }
 
 void EQW::SendMessage(uint32 type, const char *msg) {
-    zoneserver_list.SendEmoteMessage(
+    ZSList::Instance()->SendEmoteMessage(
 		0,
 		0,
 		AccountStatus::Player,
@@ -370,7 +369,7 @@ void EQW::SendMessage(uint32 type, const char *msg) {
 }
 
 void EQW::WorldShutDown(uint32 time, uint32 interval) {
-	zoneserver_list.WorldShutDown(time, interval);
+	ZSList::Instance()->WorldShutDown(time, interval);
 }
 
 #endif //EMBPERL

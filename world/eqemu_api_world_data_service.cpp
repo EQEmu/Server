@@ -13,13 +13,12 @@
 #include "ucs.h"
 #include "queryserv.h"
 
-extern ZSList            zoneserver_list;
 extern ClientList        client_list;
 extern WorldGuildManager guild_mgr;
 
 void callGetZoneList(Json::Value &response)
 {
-	for (auto &zone: zoneserver_list.getZoneServerList()) {
+	for (auto &zone: ZSList::Instance()->getZoneServerList()) {
 		Json::Value row;
 
 		if (!zone) {
@@ -139,7 +138,7 @@ void getReloadTypes(Json::Value &response)
 
 void getServerCounts(Json::Value &response, const std::vector<std::string> &args)
 {
-	response["zone_count"]   = zoneserver_list.GetServerListCount();
+	response["zone_count"]   = ZSList::Instance()->GetServerListCount();
 	response["client_count"] = ClientList::Instance()->GetClientCount();
 }
 
@@ -165,7 +164,7 @@ void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::str
 		if (std::to_string(t) == command || Strings::ToLower(ServerReload::GetName(t)) == command) {
 			message(r, fmt::format("Reloading [{}] globally", ServerReload::GetName(t)));
 			LogInfo("Queueing reload of type [{}] to zones", ServerReload::GetName(t));
-			zoneserver_list.QueueServerReload(t);
+			ZSList::Instance()->QueueServerReload(t);
 		}
 		found_command = true;
 	}

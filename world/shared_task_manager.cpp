@@ -18,7 +18,6 @@
 #include <ctime>
 
 extern ClientList client_list;
-extern ZSList     zoneserver_list;
 
 SharedTaskManager::SharedTaskManager()
 	: m_process_timer{ static_cast<uint32_t>(RuleI(TaskSystem, SharedTasksWorldProcessRate)) }

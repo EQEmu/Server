@@ -36,7 +36,6 @@
 
 
 extern ClientList client_list;
-extern ZSList zoneserver_list;
 std::map<uint32, TributeData> tribute_list;
 
 WorldGuildManager guild_mgr;
@@ -50,7 +49,7 @@ void WorldGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, 
 	s->motd_change = motd;
 	s->rank_change = rank;
 	s->relation_change = relation;
-	zoneserver_list.SendPacketToZonesWithGuild(guild_id, pack);
+	ZSList::Instance()->SendPacketToZonesWithGuild(guild_id, pack);
 	safe_delete(pack);
 }
 
@@ -61,7 +60,7 @@ void WorldGuildManager::SendCharRefresh(uint32 old_guild_id, uint32 guild_id, ui
 	s->guild_id = guild_id;
 	s->old_guild_id = old_guild_id;
 	s->char_id = charid;
-	zoneserver_list.SendPacketToZonesWithGuild(guild_id, pack);
+	ZSList::Instance()->SendPacketToZonesWithGuild(guild_id, pack);
 	safe_delete(pack);
 }
 
@@ -70,7 +69,7 @@ void WorldGuildManager::SendGuildDelete(uint32 guild_id) {
 	auto pack = new ServerPacket(ServerOP_DeleteGuild, sizeof(ServerGuildID_Struct));
 	ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
 	s->guild_id = guild_id;
-	zoneserver_list.SendPacketToZonesWithGuild(guild_id, pack);
+	ZSList::Instance()->SendPacketToZonesWithGuild(guild_id, pack);
 	safe_delete(pack);
 }
 
@@ -91,7 +90,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		}
 
 		//broadcast this packet to all zones.
-		zoneserver_list.SendPacketToBootedZones(pack);
+		ZSList::Instance()->SendPacketToBootedZones(pack);
 
 		break;
 	}
@@ -107,7 +106,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 
 		//broadcast this update to any zone with a member in this guild.
 		//because im sick of this not working, sending it to all zones, just spends a bit more bandwidth.
-		zoneserver_list.SendPacketToZonesWithGuild(s->guild_id, pack);
+		ZSList::Instance()->SendPacketToZonesWithGuild(s->guild_id, pack);
 
 		break;
 	}
@@ -130,7 +129,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		LogGuilds("Received and broadcasting guild delete for guild [{}]", s->guild_id);
 
 		//broadcast this packet to all zones.
-		zoneserver_list.SendPacket(pack);
+		ZSList::Instance()->SendPacket(pack);
 
 		break;
 	}
@@ -146,7 +145,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		auto s = (ServerGuildID_Struct *)pack->pBuffer;
 		RefreshGuild(s->guild_id);
 
-		zoneserver_list.SendPacketToZonesWithGuild(s->guild_id, pack);
+		ZSList::Instance()->SendPacketToZonesWithGuild(s->guild_id, pack);
 		break;
 	}
 	case ServerOP_GuildPermissionUpdate:
@@ -178,7 +177,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 				sg->function_value
 			);
 
-			zoneserver_list.SendPacketToZonesWithGuild(sg->guild_id, pack);
+			ZSList::Instance()->SendPacketToZonesWithGuild(sg->guild_id, pack);
 		}
 		else {
 			LogError("World Received ServerOP_GuildPermissionUpdate for guild [{}] function id {} with value of {} but guild could not be found.",
@@ -212,7 +211,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 				rnc->rank,
 				rnc->rank_name
 			);
-			zoneserver_list.SendPacketToZonesWithGuild(rnc->guild_id, pack);
+			ZSList::Instance()->SendPacketToZonesWithGuild(rnc->guild_id, pack);
 		}
 		else {
 			LogError("World Received ServerOP_GuildRankNameChange from zone for guild [{}] rank id {} with new name of {} but could not find guild.",
@@ -232,7 +231,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 	case ServerOP_GuildMembersList:
 	{
 		auto in = (ServerOP_GuildMessage_Struct *) pack->pBuffer;
-		zoneserver_list.SendPacketToZonesWithGuild(in->guild_id, pack);
+		ZSList::Instance()->SendPacketToZonesWithGuild(in->guild_id, pack);
 		break;
 	}
     case ServerOP_GuildMemberAdd:
@@ -243,12 +242,12 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
             BaseGuildManager::RefreshGuild(in->guild_id);
         }
 
-        zoneserver_list.SendPacketToZonesWithGuild(in->guild_id, pack);
+        ZSList::Instance()->SendPacketToZonesWithGuild(in->guild_id, pack);
         break;
     }
 	case ServerOP_GuildSendGuildList: {
 		auto in = (ServerOP_GuildMessage_Struct *) pack->pBuffer;
-		zoneserver_list.SendPacketToBootedZones(pack);
+		ZSList::Instance()->SendPacketToBootedZones(pack);
 		break;
 	}
 
@@ -456,6 +455,6 @@ void WorldGuildManager::SendGuildTributeFavorAndTimer(uint32 guild_id, uint32 fa
 	data->tribute_timer = time;
 	data->trophy_timer  = 0;
 
-	zoneserver_list.SendPacketToZonesWithGuild(guild_id, sp);
+	ZSList::Instance()->SendPacketToZonesWithGuild(guild_id, sp);
 	safe_delete(sp)
 }
