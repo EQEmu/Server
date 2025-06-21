@@ -955,7 +955,7 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 				true
 			);
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
+			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
 				auto e = PlayerEvent::SplitMoneyEvent{
 					.copper = copper_split,
 					.silver = silver_split,
@@ -2625,7 +2625,7 @@ void Raid::RaidClearNPCMarks(Client* c)
 		Strings::EqualFold(main_marker_pcs[MAIN_MARKER_3_SLOT], c->GetCleanName())) {
 		for (int i = 0; i < MAX_MARKED_NPCS; i++) {
 			if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID()
-				&& marked_npcs[i].instance_id == c->GetInstanceID()) 
+				&& marked_npcs[i].instance_id == c->GetInstanceID())
 			{
 				auto npc_name = entity_list.GetNPCByID(marked_npcs[i].entity_id)->GetCleanName();
 				RaidMessageString(nullptr, Chat::Cyan, RAID_NO_LONGER_MARKED, npc_name);
@@ -2950,7 +2950,7 @@ void Raid::SendMarkTargets(Client* c)
 	}
 
 	for (int i = 0; i < MAX_MARKED_NPCS; i++) {
-		if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID() 
+		if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID()
 			&& marked_npcs[i].instance_id == c->GetInstanceID()) {
 			auto marked_mob = entity_list.GetMob(marked_npcs[i].entity_id);
 			if (marked_mob) {
@@ -2967,7 +2967,7 @@ void Raid::SendMarkTargets(Client* c)
 	UpdateXtargetMarkedNPC();
 }
 
-void Raid::EmptyRaidMembers() 
+void Raid::EmptyRaidMembers()
 {
 	for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
 		members[i].group_number    = RAID_GROUPLESS;

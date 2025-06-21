@@ -2163,7 +2163,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 		GoToDeath();
 	}
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::DEATH)) {
+	if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::DEATH)) {
 		auto e = PlayerEvent::DeathEvent{
 			.killer_id = killer_mob ? static_cast<uint32>(killer_mob->GetID()) : static_cast<uint32>(0),
 			.killer_name = killer_mob ? killer_mob->GetCleanName() : "No Killer",

@@ -50,7 +50,6 @@ WorldServer *worldserver = nullptr;
 DiscordManager discord_manager;
 PathManager path;
 ZoneStore zone_store;
-PlayerEventLogs player_event_logs;
 
 const ucsconfig *Config;
 
@@ -144,7 +143,7 @@ int main() {
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
-	player_event_logs.SetDatabase(&database)->Init();
+	PlayerEventLogs::Instance()->SetDatabase(&database)->Init();
 
 	char tmp[64];
 

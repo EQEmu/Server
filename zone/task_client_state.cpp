@@ -926,7 +926,7 @@ int ClientTaskState::IncrementDoneCount(
 
 			int event_res = DispatchEventTaskComplete(client, *info, activity_id);
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_COMPLETE)) {
+			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TASK_COMPLETE)) {
 				auto e = PlayerEvent::TaskCompleteEvent{
 					.task_id = static_cast<uint32>(info->task_id),
 					.task_name = task_manager->GetTaskName(static_cast<uint32>(info->task_id)),
@@ -965,7 +965,7 @@ int ClientTaskState::IncrementDoneCount(
 			task_index
 		);
 
-		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_UPDATE)) {
+		if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TASK_UPDATE)) {
 			auto e = PlayerEvent::TaskUpdateEvent{
 				.task_id = static_cast<uint32>(info->task_id),
 				.task_name = task_manager->GetTaskName(static_cast<uint32>(info->task_id)),
@@ -2192,7 +2192,7 @@ void ClientTaskState::AcceptNewTask(
 
 	NPC *npc = entity_list.GetNPCByID(npc_entity_id);
 	if (npc) {
-		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
+		if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
 			auto e = PlayerEvent::TaskAcceptEvent{
 				.npc_id = npc->GetNPCTypeID(),
 				.npc_name = npc->GetCleanName(),
@@ -2206,7 +2206,7 @@ void ClientTaskState::AcceptNewTask(
 			parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, std::to_string(task_id), 0);
 		}
 	} else {
-		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
+		if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
 			auto e = PlayerEvent::TaskAcceptEvent{
 				.npc_id = 0,
 				.npc_name = "No NPC",

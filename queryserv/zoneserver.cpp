@@ -35,7 +35,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			cereal::BinaryInputArchive archive(ss);
 			archive(n);
 
-			player_event_logs.AddToQueue(n.player_event_log);
+			PlayerEventLogs::Instance()->AddToQueue(n.player_event_log);
 
 			discord_manager.QueuePlayerEventMessage(n);
 			break;

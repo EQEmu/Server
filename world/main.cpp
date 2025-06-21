@@ -112,7 +112,6 @@ EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
 PathManager         path;
-PlayerEventLogs     player_event_logs;
 EvolvingItemsManager evolving_items_manager;
 
 void CatchSignal(int sig_num);
@@ -382,8 +381,8 @@ int main(int argc, char **argv)
 		}
 	);
 
-	if (player_event_logs.LoadDatabaseConnection()) {
-		player_event_logs.Init();
+	if (PlayerEventLogs::Instance()->LoadDatabaseConnection()) {
+		PlayerEventLogs::Instance()->Init();
 	}
 
 	auto loop_fn = [&](EQ::Timer* t) {
@@ -481,7 +480,7 @@ int main(int argc, char **argv)
 
 		if (!RuleB(Logging, PlayerEventsQSProcess)) {
 			if (player_event_log_process.Check()) {
-				player_event_logs.Process();
+				PlayerEventLogs::Instance()->Process();
 			}
 		}
 

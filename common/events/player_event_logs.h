@@ -94,6 +94,12 @@ public:
 		std::vector<PlayerEventAaPurchaseRepository::PlayerEventAaPurchase>             aa_purchase;
 	};
 
+	static PlayerEventLogs* Instance()
+	{
+		static PlayerEventLogs instance;
+		return &instance;
+	}
+
 private:
 	struct EtlSettings {
 		bool        enabled;
@@ -126,7 +132,5 @@ private:
 public:
 	std::map<PlayerEvent::EventType, EtlSettings> &GetEtlSettings() { return m_etl_settings;}
 };
-
-extern PlayerEventLogs player_event_logs;
 
 #endif //EQEMU_PLAYER_EVENT_LOGS_H

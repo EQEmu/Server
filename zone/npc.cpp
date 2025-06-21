@@ -4892,7 +4892,7 @@ NPC::Handin NPC::ReturnHandinItems(Client *c)
 	);
 	const bool event_has_data_to_record = !handin_items.empty() || handed_in_money;
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+	if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
 		auto e = PlayerEvent::HandinEvent{
 			.npc_id = GetNPCTypeID(),
 			.npc_name = GetCleanName(),
