@@ -17,6 +17,12 @@ public:
 	void                                    Remove(const std::string& uuid);
 	void                                    SendPlayerEventLogSettings();
 
+	static ZSList* Instance()
+	{
+		static ZSList instance;
+		return &instance;
+	}
+
 private:
 	std::list<std::unique_ptr<ZoneServer>> zone_server_list;
 };
