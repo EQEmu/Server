@@ -41,7 +41,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/buyer_repository.h"
 
 extern uint32 numzones;
-extern EQ::Random emu_random;
 extern WebInterfaceList web_interface;
 extern SharedTaskManager shared_task_manager;
 extern ClientList client_list;
@@ -694,7 +693,7 @@ void ZSList::RebootZone(const char* ip1, uint16 port, const char* ip2, uint32 sk
 		safe_delete_array(tmp);
 		return;
 	}
-	uint32 z = emu_random.Int(0, y - 1);
+	uint32 z = EQ::Random::Instance()->Int(0, y - 1);
 
 	auto pack = new ServerPacket(ServerOP_ZoneReboot, sizeof(ServerZoneReboot_Struct));
 	ServerZoneReboot_Struct* s = (ServerZoneReboot_Struct*)pack->pBuffer;

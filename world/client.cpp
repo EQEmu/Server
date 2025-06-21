@@ -91,7 +91,6 @@ std::vector<RaceClassCombos> character_create_race_class_combos;
 extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
 extern ClientList client_list;
-extern EQ::Random emu_random;
 extern uint32 numclients;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
@@ -984,7 +983,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	safe_delete(outapp);
 
 	// set mailkey - used for duration of character session
-	int mail_key = emu_random.Int(1, INT_MAX);
+	int mail_key = EQ::Random::Instance()->Int(1, INT_MAX);
 
 	database.SetMailKey(charid, GetIP(), mail_key);
 	if (UCSServerAvailable_) {
