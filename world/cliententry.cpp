@@ -9,7 +9,6 @@
 #include "world_config.h"
 
 extern uint32            numplayers;
-extern LoginServerList   loginserverlist;
 extern ClientList        client_list;
 extern volatile bool     RunLoops;
 extern SharedTaskManager shared_task_manager;
@@ -146,7 +145,7 @@ void ClientListEntry::LSUpdate(ZoneServer *iZS)
 		zone->count    = iZS->NumPlayers();
 		zone->zone     = iZS->GetZoneID();
 		zone->zone_wid = iZS->GetID();
-		loginserverlist.SendPacket(pack);
+		LoginServerList::Instance()->SendPacket(pack);
 		safe_delete(pack);
 	}
 }
@@ -162,7 +161,7 @@ void ClientListEntry::LSZoneChange(ZoneToZone_Struct *ztz)
 		zonechange->lsaccount_id = LSID();
 		zonechange->from         = ztz->current_zone_id;
 		zonechange->to           = ztz->requested_zone_id;
-		loginserverlist.SendPacket(pack);
+		LoginServerList::Instance()->SendPacket(pack);
 		safe_delete(pack);
 	}
 }
