@@ -68,7 +68,6 @@ extern Zone                  *zone;
 extern volatile bool          is_zone_loaded;
 extern void                   Shutdown();
 extern WorldServer            worldserver;
-extern PetitionList           petition_list;
 extern uint32                 numclients;
 extern volatile bool          RunLoops;
 extern QuestParserCollection *parse;
@@ -911,8 +910,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		std::cout << "Got Server Requested Petition List Refresh" << std::endl;
 		ServerPetitionUpdate_Struct* sus = (ServerPetitionUpdate_Struct*)pack->pBuffer;
 		// this was typoed to = instead of ==, not that it acts any different now though..
-		if (sus->status == 0) petition_list.ReadDatabase();
-		else if (sus->status == 1) petition_list.ReadDatabase(); // Until I fix this to be better....
+		if (sus->status == 0) PetitionList::Instance()->ReadDatabase();
+		else if (sus->status == 1) PetitionList::Instance()->ReadDatabase(); // Until I fix this to be better....
 		break;
 	}
 	case ServerOP_RezzPlayer: {
@@ -4646,9 +4645,9 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 				entity_list.SaveAllClientsTaskState();
 				safe_delete(task_manager);
 				task_manager = new TaskManager;
-				task_manager->LoadTasks();
+				TaskManager::Instance()->LoadTasks();
 				entity_list.ReloadAllClientsTaskState();
-				task_manager->LoadTaskSets();
+				TaskManager::Instance()->LoadTaskSets();
 			}
 			break;
 
