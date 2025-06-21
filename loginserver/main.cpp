@@ -27,7 +27,6 @@ bool            run_server = true;
 PathManager     path;
 Database        database;
 PlayerEventLogs player_event_logs;
-ZoneStore       zone_store;
 
 void CatchSignal(int sig_num)
 {

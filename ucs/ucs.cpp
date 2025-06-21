@@ -49,7 +49,6 @@ UCSDatabase database;
 WorldServer *worldserver = nullptr;
 DiscordManager discord_manager;
 PathManager path;
-ZoneStore zone_store;
 PlayerEventLogs player_event_logs;
 
 const ucsconfig *Config;
