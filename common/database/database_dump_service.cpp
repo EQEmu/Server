@@ -204,7 +204,7 @@ void DatabaseDumpService::DatabaseDump()
 	}
 
 	if (IsDumpOutputToConsole()) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 	}
 
 	LogInfo("MySQL installed [{}]", GetMySQLVersion());
@@ -324,7 +324,7 @@ void DatabaseDumpService::DatabaseDump()
 	}
 
 	if (!IsDumpOutputToConsole()) {
-		LogSys.LoadLogSettingsDefaults();
+		EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	}
 
 	if (!pipe_file.empty()) {

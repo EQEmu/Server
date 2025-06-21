@@ -16,7 +16,7 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 	uint32 break_length = 50;
 	int failed_count = 0;
 
-	LogSys.SilenceConsoleLogging();
+	EQEmuLogSys::Instance()->SilenceConsoleLogging();
 
 	// boot shell zone for testing
 	Zone::Bootup(ZoneID("qrg"), 0, false);
@@ -25,7 +25,7 @@ void ZoneCLI::TestDataBuckets(int argc, char **argv, argh::parser &cmd, std::str
 	entity_list.Process();
 	entity_list.MobProcess();
 
-	LogSys.EnableConsoleLogging();
+	EQEmuLogSys::Instance()->EnableConsoleLogging();
 
 	std::cout << "===========================================\n";
 	std::cout << "⚙\uFE0F> Running DataBuckets Tests...\n";

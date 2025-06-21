@@ -104,7 +104,6 @@ QueryServ             *QServ        = 0;
 TaskManager           *task_manager = 0;
 NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
-EQEmuLogSys           LogSys;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
 PathManager           path;
@@ -128,13 +127,13 @@ bool CheckForCompatibleQuestPlugins();
 int main(int argc, char **argv)
 {
 	RegisterExecutablePlatform(ExePlatformZone);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 
 	set_exception_handler();
 
 	// silence logging if we ran a command
 	if (ZoneCLI::RanConsoleCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv)) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 	}
 
 	path.LoadPaths();
@@ -300,18 +299,18 @@ int main(int argc, char **argv)
 
 	// command handler (no sidecar or test commands)
 	if (ZoneCLI::RanConsoleCommand(argc, argv) && !(ZoneCLI::RanSidecarCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv))) {
-		LogSys.EnableConsoleLogging();
+		EQEmuLogSys::Instance()->EnableConsoleLogging();
 		ZoneCLI::CommandHandler(argc, argv);
 	}
 
-	LogSys.SetDatabase(&database)
+	EQEmuLogSys::Instance()->SetDatabase(&database)
 		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings(ZoneCLI::RanTestCommand(argc, argv))
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();
 
 	if (ZoneCLI::RanTestCommand(argc, argv)) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 	}
 
 	player_event_logs.SetDatabase(&database)->Init();
@@ -495,7 +494,7 @@ int main(int argc, char **argv)
 	// sidecar command handler
 	if (ZoneCLI::RanConsoleCommand(argc, argv)
 		&& (ZoneCLI::RanSidecarCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv))) {
-		LogSys.EnableConsoleLogging();
+		EQEmuLogSys::Instance()->EnableConsoleLogging();
 		ZoneCLI::CommandHandler(argc, argv);
 	}
 
@@ -688,7 +687,7 @@ int main(int argc, char **argv)
 	bot_command_deinit();
 	safe_delete(parse);
 	LogInfo("Proper zone shutdown complete.");
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 
 	safe_delete(mutex);
 	safe_delete(QServ);
@@ -700,7 +699,7 @@ void Shutdown()
 {
 	zone->Shutdown(true);
 	LogInfo("Shutting down...");
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 	EQ::EventLoop::Get().Shutdown();
 }
 

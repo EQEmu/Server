@@ -30,7 +30,6 @@ LFGuildManager        lfguildmanager;
 std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
-EQEmuLogSys           LogSys;
 PathManager           path;
 ZoneStore             zone_store;
 PlayerEventLogs       player_event_logs;
@@ -46,7 +45,7 @@ void CatchSignal(int sig_num)
 int main()
 {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 	Timer LFGuildExpireTimer(60000);
 
@@ -85,7 +84,7 @@ int main()
 		return 1;
 	}
 
-	LogSys.SetDatabase(&database)
+	EQEmuLogSys::Instance()->SetDatabase(&database)
 		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
@@ -187,7 +186,7 @@ int main()
 	EQ::EventLoop::Get().Run();
 
 	safe_delete(worldserver);
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 }
 
 void UpdateWindowTitle(char *iNewTitle)

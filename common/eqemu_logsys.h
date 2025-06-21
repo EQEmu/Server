@@ -266,8 +266,6 @@ namespace Logs {
 	};
 }
 
-#include "eqemu_logsys_log_aliases.h"
-
 class Database;
 
 constexpr uint16 MAX_DISCORD_WEBHOOK_ID = 300;
@@ -284,6 +282,12 @@ public:
 	void CloseFileLogs();
 	EQEmuLogSys *LoadLogSettingsDefaults();
 	EQEmuLogSys *LoadLogDatabaseSettings(bool silent_load = false);
+
+	static EQEmuLogSys *Instance()
+	{
+		static EQEmuLogSys instance;
+		return &instance;
+	}
 
 	/**
 	 * @param directory_name
@@ -350,7 +354,7 @@ public:
 	/**
 	 * Internally used memory reference for all log settings per category
 	 * These are loaded via DB and have defaults loaded in LoadLogSettingsDefaults
-	 * Database loaded via LogSys.SetDatabase(&database)->LoadLogDatabaseSettings();
+	 * Database loaded via EQEmuLogSys::Instance()->SetDatabase(&database)->LoadLogDatabaseSettings();
 	*/
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
@@ -434,7 +438,7 @@ private:
 	void InjectTablesIfNotExist();
 };
 
-extern EQEmuLogSys LogSys;
+#include "eqemu_logsys_log_aliases.h"
 
 /**
 template<typename... Args>
@@ -456,7 +460,7 @@ void OutF(
 
 #define OutF(ls, debug_level, log_category, file, func, line, formatStr, ...) \
 do { \
-    ls.Out(debug_level, log_category, file, func, line, fmt::format(formatStr, ##__VA_ARGS__).c_str()); \
+    ls->Out(debug_level, log_category, file, func, line, fmt::format(formatStr, ##__VA_ARGS__).c_str()); \
 } while(0)
 
 #endif

@@ -160,7 +160,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		(uint32) mysql_insert_id(mysql)
 	);
 
-	if (LogSys.log_settings[Logs::MySQLQuery].is_category_enabled == 1) {
+	if (EQEmuLogSys::Instance()->log_settings[Logs::MySQLQuery].is_category_enabled == 1) {
 		if ((strncasecmp(query, "select", 6) == 0)) {
 			LogMySQLQuery(
 				"{0} -- ({1} row{2} returned) ({3}s)",

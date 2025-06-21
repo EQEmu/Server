@@ -259,7 +259,7 @@ void ZoneCLI::BenchmarkDatabuckets(int argc, char **argv, argh::parser &cmd, std
 	}
 
 	if (std::getenv("DEBUG")) {
-		LogSys.SetDatabase(&database)->LoadLogDatabaseSettings();
+		EQEmuLogSys::Instance()->SetDatabase(&database)->LoadLogDatabaseSettings();
 	}
 
 	auto start_time = std::chrono::high_resolution_clock::now();
