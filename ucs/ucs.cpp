@@ -47,7 +47,6 @@ Clientlist *g_Clientlist;
 EQEmuLogSys LogSys;
 UCSDatabase database;
 WorldServer *worldserver = nullptr;
-DiscordManager discord_manager;
 ZoneStore zone_store;
 PlayerEventLogs player_event_logs;
 
@@ -96,7 +95,7 @@ void CatchSignal(int sig_num) {
 
 void PlayerEventQueueListener() {
 	while (caught_loop == 0) {
-		discord_manager.ProcessMessageQueue();
+		DiscordManager::Instance()->ProcessMessageQueue();
 		Sleep(100);
 	}
 }

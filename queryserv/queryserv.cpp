@@ -20,7 +20,6 @@
 #include "../common/net/console_server.h"
 #include "../queryserv/zonelist.h"
 #include "../queryserv/zoneserver.h"
-#include "../common/discord/discord_manager.h"
 
 volatile bool RunLoops = true;
 
@@ -35,7 +34,6 @@ ZoneStore             zone_store;
 PlayerEventLogs       player_event_logs;
 ZSList                zs_list;
 uint32                numzones     = 0;
-DiscordManager        discord_manager;
 
 void CatchSignal(int sig_num)
 {
