@@ -9,7 +9,6 @@
 #include "../common/repositories/guild_bank_repository.h"
 #include "../zone/petitions.h"
 
-extern PetitionList petition_list;
 //extern GuildRanks_Struct guilds[512];
 //extern ZoneDatabase database;
 

@@ -112,6 +112,12 @@ public:
 	bool FindPetitionByAccountName(const char* acctname);
 	bool DeletePetitionByCharName(const char* charname);
 
+	static PetitionList* Instance()
+	{
+		static PetitionList instance;
+		return &instance;
+	}
+
 private:
 	LinkedList<Petition*> list;
 	Mutex PList_Mutex;

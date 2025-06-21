@@ -38,8 +38,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "petitions.h"
 #include "worldserver.h"
 
-PetitionList petition_list;
-
 extern WorldServer worldserver;
 
 void Petition::SendPetitionToPlayer(Client* clientto) {
@@ -288,7 +286,7 @@ void ZoneDatabase::RefreshPetitionsFromDB()
             newpet->SetCheckedOut(true);
         else
             newpet->SetCheckedOut(false);
-        petition_list.AddPetition(newpet);
+        PetitionList::Instance()->AddPetition(newpet);
     }
 
 }
