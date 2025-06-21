@@ -428,7 +428,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		event_scheduler.Process(&zoneserver_list);
+		event_scheduler.Process(ZSList::Instance());
 
 		client_list.Process();
 		guild_mgr.Process();
