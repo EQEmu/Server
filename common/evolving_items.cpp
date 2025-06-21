@@ -21,8 +21,8 @@ void EvolvingItemsManager::LoadEvolvingItems() const
 		results.begin(),
 		results.end(),
 		std::inserter(
-			evolving_items_manager.GetEvolvingItemsCache(),
-			evolving_items_manager.GetEvolvingItemsCache().end()
+			EvolvingItemsManager::Instance()->GetEvolvingItemsCache(),
+			EvolvingItemsManager::Instance()->GetEvolvingItemsCache().end()
 		),
 		[](const ItemsEvolvingDetailsRepository::ItemsEvolvingDetails &x) {
 			return std::make_pair(x.item_id, x);
@@ -42,13 +42,13 @@ void EvolvingItemsManager::SetContentDatabase(Database *db)
 
 double EvolvingItemsManager::CalculateProgression(const uint64 current_amount, const uint32 item_id)
 {
-	if (!evolving_items_manager.GetEvolvingItemsCache().contains(item_id)) {
+	if (!EvolvingItemsManager::Instance()->GetEvolvingItemsCache().contains(item_id)) {
 		return 0;
 	}
 
-	return evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount > 0
+	return EvolvingItemsManager::Instance()->GetEvolvingItemsCache().at(item_id).required_amount > 0
 		? static_cast<double>(current_amount)
-		  / static_cast<double>(evolving_items_manager.GetEvolvingItemsCache().at(item_id).required_amount) * 100
+		  / static_cast<double>(EvolvingItemsManager::Instance()->GetEvolvingItemsCache().at(item_id).required_amount) * 100
 		: 0;
 }
 
@@ -73,7 +73,7 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 		e.character_id  = char_id;
 		e.item_id       = inst.GetID();
 		e.equipped      = inst.GetEvolveEquipped();
-		e.final_item_id = evolving_items_manager.GetFinalItemID(inst);
+		e.final_item_id = EvolvingItemsManager::Instance()->GetFinalItemID(inst);
 
 		auto r = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
 		e.id   = r.id;
@@ -96,20 +96,20 @@ uint32 EvolvingItemsManager::GetFinalItemID(const EQ::ItemInstance &inst) const
 	}
 
 	const auto start_iterator = std::ranges::find_if(
-		evolving_items_manager.GetEvolvingItemsCache().cbegin(),
-		evolving_items_manager.GetEvolvingItemsCache().cend(),
+		EvolvingItemsManager::Instance()->GetEvolvingItemsCache().cbegin(),
+		EvolvingItemsManager::Instance()->GetEvolvingItemsCache().cend(),
 		[&](const std::pair<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> &a) {
 			return a.second.item_evo_id == inst.GetEvolveLoreID();
 		}
 	);
 
-	if (start_iterator == std::end(evolving_items_manager.GetEvolvingItemsCache())) {
+	if (start_iterator == std::end(EvolvingItemsManager::Instance()->GetEvolvingItemsCache())) {
 		return 0;
 	}
 
 	const auto final_id = std::ranges::max_element(
 		start_iterator,
-		evolving_items_manager.GetEvolvingItemsCache().cend(),
+		EvolvingItemsManager::Instance()->GetEvolvingItemsCache().cend(),
 		[&](
 		const std::pair<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> &a,
 		const std::pair<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> &b
@@ -131,15 +131,15 @@ uint32 EvolvingItemsManager::GetNextEvolveItemID(const EQ::ItemInstance &inst) c
 	int8 const current_level = inst.GetEvolveLvl();
 
 	const auto iterator = std::ranges::find_if(
-		evolving_items_manager.GetEvolvingItemsCache().cbegin(),
-		evolving_items_manager.GetEvolvingItemsCache().cend(),
+		EvolvingItemsManager::Instance()->GetEvolvingItemsCache().cbegin(),
+		EvolvingItemsManager::Instance()->GetEvolvingItemsCache().cend(),
 		[&](const std::pair<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> &a) {
 			return a.second.item_evo_id == inst.GetEvolveLoreID() &&
 			       a.second.item_evolve_level == current_level + 1;
 		}
 	);
 
-	if (iterator == std::end(evolving_items_manager.GetEvolvingItemsCache())) {
+	if (iterator == std::end(EvolvingItemsManager::Instance()->GetEvolvingItemsCache())) {
 		return 0;
 	}
 
@@ -255,8 +255,8 @@ EvolveTransfer EvolvingItemsManager::DetermineTransferResults(
 		return ets;
 	}
 
-	auto evolving_details_inst_from = evolving_items_manager.GetEvolveItemDetails(inst_from.GetID());
-	auto evolving_details_inst_to   = evolving_items_manager.GetEvolveItemDetails(inst_to.GetID());
+	auto evolving_details_inst_from = EvolvingItemsManager::Instance()->GetEvolveItemDetails(inst_from.GetID());
+	auto evolving_details_inst_to   = EvolvingItemsManager::Instance()->GetEvolveItemDetails(inst_to.GetID());
 
 	if (!evolving_details_inst_from.id || !evolving_details_inst_to.id) {
 		return ets;
@@ -272,10 +272,10 @@ EvolveTransfer EvolvingItemsManager::DetermineTransferResults(
 			compatibility = 30;
 		}
 
-		xp           = evolving_items_manager.GetTotalEarnedXP(inst_from) * compatibility / 100;
-		auto results = evolving_items_manager.GetNextItemByXP(inst_to, xp);
+		xp           = EvolvingItemsManager::Instance()->GetTotalEarnedXP(inst_from) * compatibility / 100;
+		auto results = EvolvingItemsManager::Instance()->GetNextItemByXP(inst_to, xp);
 
-		ets.item_from_id             = evolving_items_manager.GetFirstItemInLoreGroup(inst_from.GetEvolveLoreID());
+		ets.item_from_id             = EvolvingItemsManager::Instance()->GetFirstItemInLoreGroup(inst_from.GetEvolveLoreID());
 		ets.item_from_current_amount = results.from_current_amount;
 		ets.item_to_id               = results.new_item_id;
 		ets.item_to_current_amount   = results.new_current_amount;

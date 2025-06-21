@@ -56,12 +56,15 @@ public:
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails>& GetEvolvingItemsCache() { return m_evolving_items_cache; }
 	std::vector<ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> GetEvolveIDItems(uint32 evolve_id);
 
+	static EvolvingItemsManager* Instance()
+	{
+		static EvolvingItemsManager instance;
+		return &instance;
+	}
 private:
 	std::map<uint32, ItemsEvolvingDetailsRepository::ItemsEvolvingDetails> m_evolving_items_cache;
 	Database *                                                             m_db;
 	Database *                                                             m_content_db;
 };
-
-extern EvolvingItemsManager evolving_items_manager;
 
 #endif //EVOLVING_H

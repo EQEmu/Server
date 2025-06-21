@@ -113,7 +113,6 @@ WorldContentService content_service;
 WebInterfaceList    web_interface;
 PathManager         path;
 PlayerEventLogs     player_event_logs;
-EvolvingItemsManager evolving_items_manager;
 
 void CatchSignal(int sig_num);
 

@@ -824,7 +824,7 @@ bool SharedDatabase::GetInventory(Client *c)
 				e.character_id  = char_id;
 				e.item_id       = item_id;
 				e.equipped      = inst->GetEvolveEquipped();
-				e.final_item_id = evolving_items_manager.GetFinalItemID(*inst);
+				e.final_item_id = EvolvingItemsManager::Instance()->GetFinalItemID(*inst);
 
 				auto r = CharacterEvolvingItemsRepository::InsertOne(*this, e);
 				e.id = r.id;

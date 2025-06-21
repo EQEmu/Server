@@ -335,7 +335,7 @@ namespace EQ
 		void             SetEvolveAddToCurrentAmount(const uint64 in) const { m_evolving_details.current_amount += in; }
 		void             SetEvolveFinalItemID(const uint32 in) const { m_evolving_details.final_item_id = in; }
 		bool             TransferOwnership(Database& db, const uint32 to_char_id) const;
-		void             CalculateEvolveProgression() const { m_evolving_details.progression = evolving_items_manager.CalculateProgression(GetEvolveCurrentAmount(), GetID()); }
+		void             CalculateEvolveProgression() const { m_evolving_details.progression = EvolvingItemsManager::Instance()->CalculateProgression(GetEvolveCurrentAmount(), GetID()); }
 
 	protected:
 		//////////////////////////

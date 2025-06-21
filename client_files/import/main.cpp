@@ -37,7 +37,6 @@ WorldContentService  content_service;
 ZoneStore            zone_store;
 PathManager          path;
 PlayerEventLogs      player_event_logs;
-EvolvingItemsManager evolving_items_manager;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
