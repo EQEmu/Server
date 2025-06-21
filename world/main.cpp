@@ -94,8 +94,7 @@
 SkillCaps           skill_caps;
 ZoneStore           zone_store;
 ClientList          client_list;
-GroupLFPList        LFPGroupList;
-ZSList              zoneserver_list;
+GroupLFPList        LFPGroupList;\
 LoginServerList     loginserverlist;
 UCSConnection       UCSLink;
 QueryServConnection QSLink;
@@ -188,7 +187,7 @@ int main(int argc, char **argv)
 	// global loads
 	LogInfo("Loading launcher list");
 	launcher_list.LoadList();
-	zoneserver_list.Init();
+	ZSList::Instance()->Init();
 
 	if (IpUtil::IsPortInUse(Config->WorldIP, Config->WorldTCPPort)) {
 		LogError("World port [{}] already in use", Config->WorldTCPPort);
@@ -222,7 +221,7 @@ int main(int argc, char **argv)
 	server_connection->OnConnectionIdentified(
 		"Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 			numzones++;
-			zoneserver_list.Add(new ZoneServer(connection, console.get()));
+			ZSList::Instance()->Add(new ZoneServer(connection, console.get()));
 
 			LogInfo(
 				"New Zone Server connection from [{}] at [{}:{}] zone_count [{}]",
@@ -237,7 +236,7 @@ int main(int argc, char **argv)
 	server_connection->OnConnectionRemoved(
 		"Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 			numzones--;
-			zoneserver_list.Remove(connection->GetUUID());
+			ZSList::Instance()->Remove(connection->GetUUID());
 
 			LogInfo(
 				"Removed Zone Server connection from [{}] total zone_count [{}]",
@@ -305,7 +304,7 @@ int main(int argc, char **argv)
 
 			UCSLink.SetConnection(connection);
 
-			zoneserver_list.UpdateUCSServerAvailable();
+			ZSList::Instance()->UpdateUCSServerAvailable();
 		}
 	);
 
@@ -318,7 +317,7 @@ int main(int argc, char **argv)
 			if (ucs_connection->GetUUID() == connection->GetUUID()) {
 				LogInfo("Removing currently active UCS connection");
 				UCSLink.SetConnection(nullptr);
-				zoneserver_list.UpdateUCSServerAvailable(false);
+				ZSList::Instance()->UpdateUCSServerAvailable(false);
 			}
 		}
 	);
@@ -361,10 +360,10 @@ int main(int argc, char **argv)
 	//register all the patches we have avaliable with the stream identifier.
 	EQStreamIdentifier stream_identifier;
 	RegisterAllPatches(stream_identifier);
-	zoneserver_list.shutdowntimer = new Timer(60000);
-	zoneserver_list.shutdowntimer->Disable();
-	zoneserver_list.reminder = new Timer(20000);
-	zoneserver_list.reminder->Disable();
+	ZSList::Instance()->shutdowntimer = new Timer(60000);
+	ZSList::Instance()->shutdowntimer->Disable();
+	ZSList::Instance()->reminder = new Timer(20000);
+	ZSList::Instance()->reminder->Disable();
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 	InterserverTimer.Trigger();
 	uint8                              ReconnectCounter = 100;
@@ -442,7 +441,7 @@ int main(int argc, char **argv)
 				);
 
 				auto out = std::make_unique<ServerPacket>(ServerOP_ParcelPrune);
-				zoneserver_list.SendPacketToBootedZones(out.get());
+				ZSList::Instance()->SendPacketToBootedZones(out.get());
 
 				database.PurgeCharacterParcels();
 			}
@@ -457,7 +456,7 @@ int main(int argc, char **argv)
 
 		if (EQTimeTimer.Check()) {
 			TimeOfDay_Struct tod{};
-			zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(nullptr), &tod);
+			ZSList::Instance()->worldclock.GetCurrentEQTimeOfDay(time(nullptr), &tod);
 			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year)) {
 				LogEqTime("Failed to save eqtime");
 			}
@@ -472,7 +471,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		zoneserver_list.Process();
+		ZSList::Instance()->Process();
 		launcher_list.Process();
 		LFPGroupList.Process();
 		adventure_manager.Process();
@@ -506,7 +505,7 @@ int main(int argc, char **argv)
 
 	LogInfo("World main loop completed");
 	LogInfo("Shutting down zone connections (if any)");
-	zoneserver_list.KillAll();
+	ZSList::Instance()->KillAll();
 	LogInfo("Zone (TCP) listener stopped");
 	LogInfo("Signaling HTTP service to stop");
 	LogSys.CloseFileLogs();

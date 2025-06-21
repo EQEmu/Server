@@ -10,7 +10,6 @@
 #include "../common/packet_dump.h"
 
 extern ClientList client_list;
-extern ZSList zoneserver_list;
 
 QueryServConnection::QueryServConnection()
 {
@@ -36,12 +35,12 @@ void QueryServConnection::HandleGenericMessage(uint16_t opcode, EQ::Net::Packet 
 	uint32 ZoneID = p.GetUInt32(0);
 	uint16 InstanceID = p.GetUInt32(4);
 	ServerPacket pack(opcode, p);
-	zoneserver_list.SendPacket(ZoneID, InstanceID, &pack);
+	ZSList::Instance()->SendPacket(ZoneID, InstanceID, &pack);
 }
 
 void QueryServConnection::HandleLFGuildUpdateMessage(uint16_t opcode, EQ::Net::Packet &p) {
 	ServerPacket pack(opcode, p);
-	zoneserver_list.SendPacket(&pack);
+	ZSList::Instance()->SendPacket(&pack);
 }
 
 bool QueryServConnection::SendPacket(ServerPacket* pack)

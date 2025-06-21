@@ -14,7 +14,6 @@
 #include <sstream>
 #include <stdio.h>
 
-extern ZSList zoneserver_list;
 extern ClientList client_list;
 extern EQ::Random emu_random;
 
@@ -84,7 +83,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 		strcpy(deny->leader, sar->leader);
 		strcpy(deny->reason, "There are currently no adventures set for this theme.");
-		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+		ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 		delete pack;
 		return;
 	}
@@ -113,7 +112,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 					ss << (data + sizeof(ServerAdventureRequest_Struct) + (64 * i)) << " is already apart of an active adventure.";
 
 					strcpy(deny->reason, ss.str().c_str());
-					zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+					ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 					delete pack;
 					return;
 				}
@@ -244,7 +243,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 		strcpy(deny->leader, sar->leader);
 		strcpy(deny->reason, "The number of found players for this adventure was zero.");
-		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+		ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 		delete pack;
 		return;
 	}
@@ -261,7 +260,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		ss << "The maximum level range for this adventure is " << RuleI(Adventure, MaxLevelRange);
 		ss << " but the level range calculated was " << (max_level - min_level) << ".";
 		strcpy(deny->reason, ss.str().c_str());
-		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+		ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 		delete pack;
 		return;
 	}
@@ -338,7 +337,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		sra->id = (*ea_iter)->id;
 		sra->member_count = sar->member_count;
 		memcpy((pack->pBuffer + sizeof(ServerAdventureRequestAccept_Struct)), (data + sizeof(ServerAdventureRequest_Struct)), (sar->member_count * 64));
-		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+		ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 		delete pack;
 		return;
 	}
@@ -348,7 +347,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 		strcpy(deny->leader, sar->leader);
 		strcpy(deny->reason, "The number of adventures returned was zero.");
-		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+		ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 		delete pack;
 		return;
 	}
@@ -368,7 +367,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
 		strcpy((char*)pack->pBuffer, src->leader);
-		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+		ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 		delete pack;
 		return;
 	}
@@ -378,7 +377,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
 		strcpy((char*)pack->pBuffer, src->leader);
-		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+		ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 		delete pack;
 		delete adv;
 		return;
@@ -391,7 +390,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 		{
 			auto pack = new ServerPacket(ServerOP_AdventureCreateDeny, 64);
 			strcpy((char*)pack->pBuffer, src->leader);
-			zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
+			ZSList::Instance()->SendPacket(leader->zone(), leader->instance(), pack);
 			delete pack;
 			delete adv;
 			return;
@@ -436,7 +435,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 				sfa->zone_in_object = finished_adventures[f]->GetTemplate()->zone_in_object_id;
 			}
 
-			zoneserver_list.SendPacket(player->zone(), player->instance(), pack);
+			ZSList::Instance()->SendPacket(player->zone(), player->instance(), pack);
 			safe_delete_array(finished_adventures);
 			delete pack;
 		}
@@ -497,7 +496,7 @@ void AdventureManager::GetAdventureData(const char *name)
 				delete pack;
 				auto pack = new ServerPacket(ServerOP_AdventureDataClear, 64);
 				strcpy((char*)pack->pBuffer, name);
-				zoneserver_list.SendPacket(player->zone(), player->instance(), pack);
+				ZSList::Instance()->SendPacket(player->zone(), player->instance(), pack);
 
 				delete pack;
 				delete[] finished_adventures;
@@ -515,7 +514,7 @@ void AdventureManager::GetAdventureData(const char *name)
 			sfa->zone_in_object = finished_adventures[i]->GetTemplate()->zone_in_object_id;
 		}
 
-		zoneserver_list.SendPacket(player->zone(), player->instance(), pack);
+		ZSList::Instance()->SendPacket(player->zone(), player->instance(), pack);
 		safe_delete_array(finished_adventures);
 		delete pack;
 		delete[] finished_adventures;
@@ -783,7 +782,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 						(*iter)->SetStatus(AS_WaitingForPrimaryEndTime);
 					}
 
-					zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+					ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 					safe_delete(pack);
 				}
 				return;
@@ -797,7 +796,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureClickDoorError, 64);
 		strcpy((char*)pack->pBuffer, player);
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		safe_delete(pack);
 	}
 }
@@ -814,7 +813,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 			{
 				auto pack = new ServerPacket(ServerOP_AdventureLeaveDeny, 64);
 				strcpy((char*)pack->pBuffer, name);
-				zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+				ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 				safe_delete(pack);
 			}
 			else
@@ -827,7 +826,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 				current->RemovePlayer(name);
 				auto pack = new ServerPacket(ServerOP_AdventureLeaveReply, 64);
 				strcpy((char*)pack->pBuffer, name);
-				zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+				ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 				safe_delete(pack);
 			}
 		}
@@ -835,7 +834,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 		{
 			auto pack = new ServerPacket(ServerOP_AdventureLeaveReply, 64);
 			strcpy((char*)pack->pBuffer, name);
-			zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+			ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 			safe_delete(pack);
 		}
 	}
@@ -872,7 +871,7 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 			{
 				memset(ac->player, 0, 64);
 				strcpy(ac->player, (*siter).c_str());
-				zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+				ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 			}
 			++siter;
 		}
@@ -936,7 +935,7 @@ void AdventureManager::GetZoneData(uint16 instance_id)
 		zd->dest_y = temp->dest_y;
 		zd->dest_z = temp->dest_z;
 		zd->dest_h = temp->dest_h;
-		zoneserver_list.SendPacket(0, instance_id, pack);
+		ZSList::Instance()->SendPacket(0, instance_id, pack);
 		delete pack;
 	}
 }
@@ -1321,7 +1320,7 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1387,7 +1386,7 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1453,7 +1452,7 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1519,7 +1518,7 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1585,7 +1584,7 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1651,7 +1650,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1717,7 +1716,7 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1783,7 +1782,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1849,7 +1848,7 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1915,7 +1914,7 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -1981,7 +1980,7 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -2047,7 +2046,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 			al->failure = our_failures;
 		}
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }
@@ -2084,7 +2083,7 @@ void AdventureManager::SendAdventureFinish(AdventureFinishEvent fe)
 		af->win = fe.win;
 		af->points = fe.points;
 
-		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+		ZSList::Instance()->SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
 	}
 }

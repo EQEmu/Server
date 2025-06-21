@@ -79,6 +79,13 @@ public:
 	std::vector<ServerReload::Type> m_queued_reloads = {};
 
 	void QueueServerReload(ServerReload::Type &type);
+
+	static ZSList* Instance()
+	{
+		static ZSList instance;
+		return &instance;
+	}
+
 private:
 	void OnTick(EQ::Timer *t);
 	uint32 NextID;
