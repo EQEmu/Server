@@ -109,7 +109,6 @@ uint32              numclients = 0;
 uint32              numzones   = 0;
 const WorldConfig   *Config;
 EQEmuLogSys         LogSys;
-WorldContentService content_service;
 WebInterfaceList    web_interface;
 PathManager         path;
 PlayerEventLogs     player_event_logs;
@@ -202,7 +201,7 @@ int main(int argc, char **argv)
 		RegisterConsoleFunctions(console);
 	}
 
-	content_service.SetDatabase(&database)
+	WorldContentService::Instance()->SetDatabase(&database)
 		->SetContentDatabase(&content_db)
 		->SetExpansionContext()
 		->ReloadContentFlags();

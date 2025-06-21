@@ -106,7 +106,6 @@ NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
 EQEmuLogSys           LogSys;
 ZoneEventScheduler    event_scheduler;
-WorldContentService   content_service;
 PathManager           path;
 PlayerEventLogs       player_event_logs;
 DatabaseUpdate        database_update;
@@ -418,7 +417,7 @@ int main(int argc, char **argv)
 		LogInfo("Loaded [{}] commands loaded", Strings::Commify(std::to_string(retval)));
 	}
 
-	content_service.SetDatabase(&database)
+	WorldContentService::Instance()->SetDatabase(&database)
 		->SetContentDatabase(&content_db)
 		->SetExpansionContext()
 		->ReloadContentFlags();
@@ -634,7 +633,7 @@ int main(int argc, char **argv)
 				entity_list.MobProcess();
 				entity_list.BeaconProcess();
 				entity_list.EncounterProcess();
-				event_scheduler.Process(zone, &content_service);
+				event_scheduler.Process(zone, WorldContentService::Instance());
 
 				if (zone) {
 					if (!zone->Process()) {

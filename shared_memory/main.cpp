@@ -36,7 +36,6 @@
 #include "../common/evolving_items.h"
 
 EQEmuLogSys          LogSys;
-WorldContentService  content_service;
 ZoneStore            zone_store;
 PathManager          path;
 PlayerEventLogs      player_event_logs;
@@ -169,16 +168,16 @@ int main(int argc, char **argv)
 	}
 
 
-	content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
-	content_service.SetDatabase(&database)
+	WorldContentService::Instance()->SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+	WorldContentService::Instance()->SetDatabase(&database)
 		->SetContentDatabase(&content_db)
 		->SetExpansionContext()
 		->ReloadContentFlags();
 
 	LogInfo(
 		"Current expansion is [{}] ({})",
-		content_service.GetCurrentExpansion(),
-		content_service.GetCurrentExpansionName()
+		WorldContentService::Instance()->GetCurrentExpansion(),
+		WorldContentService::Instance()->GetCurrentExpansionName()
 	);
 
 	std::string hotfix_name = "";
