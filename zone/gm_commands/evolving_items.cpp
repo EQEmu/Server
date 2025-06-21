@@ -33,7 +33,7 @@ void command_evolvingitems(Client *c, const Seperator *sep)
 					continue;
 				}
 
-				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value->GetID());
+				auto item = EvolvingItemsManager::Instance()->GetEvolvingItemsCache().at(value->GetID());
 				c->Message(
 					Chat::Yellow,
 					fmt::format(
@@ -126,7 +126,7 @@ void command_evolvingitems(Client *c, const Seperator *sep)
 					continue;
 				}
 
-				auto item = evolving_items_manager.GetEvolvingItemsCache().at(value->GetID());
+				auto item = EvolvingItemsManager::Instance()->GetEvolvingItemsCache().at(value->GetID());
 				c->Message(
 					Chat::Yellow,
 					fmt::format(
