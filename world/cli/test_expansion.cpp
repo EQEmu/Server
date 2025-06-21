@@ -16,7 +16,7 @@ void WorldserverCLI::ExpansionTestCommand(int argc, char **argv, argh::parser &c
 		LogInfo("No rule set configured, using default rules");
 	}
 
-	content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+	WorldContentService::Instance()->SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
 
 	std::vector<ContentFlagsRepository::ContentFlags> flags = {};
 	auto                                              f     = ContentFlagsRepository::NewEntity();
@@ -32,13 +32,13 @@ void WorldserverCLI::ExpansionTestCommand(int argc, char **argv, argh::parser &c
 		flags.push_back(f);
 	}
 
-	content_service.SetContentFlags(flags);
+	WorldContentService::Instance()->SetContentFlags(flags);
 
 	LogInfo(
 		"Current expansion is [{}] ({}) is Velious Enabled [{}] Criteria [{}]",
-		content_service.GetCurrentExpansion(),
-		content_service.GetCurrentExpansionName(),
-		content_service.IsTheScarsOfVeliousEnabled() ? "true" : "false",
+		WorldContentService::Instance()->GetCurrentExpansion(),
+		WorldContentService::Instance()->GetCurrentExpansionName(),
+		WorldContentService::Instance()->IsTheScarsOfVeliousEnabled() ? "true" : "false",
 		ContentFilterCriteria::apply()
 	);
 }

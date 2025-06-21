@@ -1609,227 +1609,227 @@ void lua_update_zone_header(std::string type, std::string value) {
  */
 
 bool lua_is_classic_enabled() {
-	return content_service.IsClassicEnabled();
+	return WorldContentService::Instance()->IsClassicEnabled();
 }
 
 bool lua_is_the_ruins_of_kunark_enabled() {
-	return content_service.IsTheRuinsOfKunarkEnabled();
+	return WorldContentService::Instance()->IsTheRuinsOfKunarkEnabled();
 }
 
 bool lua_is_the_scars_of_velious_enabled() {
-	return content_service.IsTheScarsOfVeliousEnabled();
+	return WorldContentService::Instance()->IsTheScarsOfVeliousEnabled();
 }
 
 bool lua_is_the_shadows_of_luclin_enabled() {
-	return content_service.IsTheShadowsOfLuclinEnabled();
+	return WorldContentService::Instance()->IsTheShadowsOfLuclinEnabled();
 }
 
 bool lua_is_the_planes_of_power_enabled() {
-	return content_service.IsThePlanesOfPowerEnabled();
+	return WorldContentService::Instance()->IsThePlanesOfPowerEnabled();
 }
 
 bool lua_is_the_legacy_of_ykesha_enabled() {
-	return content_service.IsTheLegacyOfYkeshaEnabled();
+	return WorldContentService::Instance()->IsTheLegacyOfYkeshaEnabled();
 }
 
 bool lua_is_lost_dungeons_of_norrath_enabled() {
-	return content_service.IsLostDungeonsOfNorrathEnabled();
+	return WorldContentService::Instance()->IsLostDungeonsOfNorrathEnabled();
 }
 
 bool lua_is_gates_of_discord_enabled() {
-	return content_service.IsGatesOfDiscordEnabled();
+	return WorldContentService::Instance()->IsGatesOfDiscordEnabled();
 }
 
 bool lua_is_omens_of_war_enabled() {
-	return content_service.IsOmensOfWarEnabled();
+	return WorldContentService::Instance()->IsOmensOfWarEnabled();
 }
 
 bool lua_is_dragons_of_norrath_enabled() {
-	return content_service.IsDragonsOfNorrathEnabled();
+	return WorldContentService::Instance()->IsDragonsOfNorrathEnabled();
 }
 
 bool lua_is_depths_of_darkhollow_enabled() {
-	return content_service.IsDepthsOfDarkhollowEnabled();
+	return WorldContentService::Instance()->IsDepthsOfDarkhollowEnabled();
 }
 
 bool lua_is_prophecy_of_ro_enabled() {
-	return content_service.IsProphecyOfRoEnabled();
+	return WorldContentService::Instance()->IsProphecyOfRoEnabled();
 }
 
 bool lua_is_the_serpents_spine_enabled() {
-	return content_service.IsTheSerpentsSpineEnabled();
+	return WorldContentService::Instance()->IsTheSerpentsSpineEnabled();
 }
 
 bool lua_is_the_buried_sea_enabled() {
-	return content_service.IsTheBuriedSeaEnabled();
+	return WorldContentService::Instance()->IsTheBuriedSeaEnabled();
 }
 
 bool lua_is_secrets_of_faydwer_enabled() {
-	return content_service.IsSecretsOfFaydwerEnabled();
+	return WorldContentService::Instance()->IsSecretsOfFaydwerEnabled();
 }
 
 bool lua_is_seeds_of_destruction_enabled() {
-	return content_service.IsSeedsOfDestructionEnabled();
+	return WorldContentService::Instance()->IsSeedsOfDestructionEnabled();
 }
 
 bool lua_is_underfoot_enabled() {
-	return content_service.IsUnderfootEnabled();
+	return WorldContentService::Instance()->IsUnderfootEnabled();
 }
 
 bool lua_is_house_of_thule_enabled() {
-	return content_service.IsHouseOfThuleEnabled();
+	return WorldContentService::Instance()->IsHouseOfThuleEnabled();
 }
 
 bool lua_is_veil_of_alaris_enabled() {
-	return content_service.IsVeilOfAlarisEnabled();
+	return WorldContentService::Instance()->IsVeilOfAlarisEnabled();
 }
 
 bool lua_is_rain_of_fear_enabled() {
-	return content_service.IsRainOfFearEnabled();
+	return WorldContentService::Instance()->IsRainOfFearEnabled();
 }
 
 bool lua_is_call_of_the_forsaken_enabled() {
-	return content_service.IsCallOfTheForsakenEnabled();
+	return WorldContentService::Instance()->IsCallOfTheForsakenEnabled();
 }
 
 bool lua_is_the_darkened_sea_enabled() {
-	return content_service.IsTheDarkenedSeaEnabled();
+	return WorldContentService::Instance()->IsTheDarkenedSeaEnabled();
 }
 
 bool lua_is_the_broken_mirror_enabled() {
-	return content_service.IsTheBrokenMirrorEnabled();
+	return WorldContentService::Instance()->IsTheBrokenMirrorEnabled();
 }
 
 bool lua_is_empires_of_kunark_enabled() {
-	return content_service.IsEmpiresOfKunarkEnabled();
+	return WorldContentService::Instance()->IsEmpiresOfKunarkEnabled();
 }
 
 bool lua_is_ring_of_scale_enabled() {
-	return content_service.IsRingOfScaleEnabled();
+	return WorldContentService::Instance()->IsRingOfScaleEnabled();
 }
 
 bool lua_is_the_burning_lands_enabled() {
-	return content_service.IsTheBurningLandsEnabled();
+	return WorldContentService::Instance()->IsTheBurningLandsEnabled();
 }
 
 bool lua_is_torment_of_velious_enabled() {
-	return content_service.IsTormentOfVeliousEnabled();
+	return WorldContentService::Instance()->IsTormentOfVeliousEnabled();
 }
 
 bool lua_is_current_expansion_classic() {
-	return content_service.IsCurrentExpansionClassic();
+	return WorldContentService::Instance()->IsCurrentExpansionClassic();
 }
 
 bool lua_is_current_expansion_the_ruins_of_kunark() {
-	return content_service.IsCurrentExpansionTheRuinsOfKunark();
+	return WorldContentService::Instance()->IsCurrentExpansionTheRuinsOfKunark();
 }
 
 bool lua_is_current_expansion_the_scars_of_velious() {
-	return content_service.IsCurrentExpansionTheScarsOfVelious();
+	return WorldContentService::Instance()->IsCurrentExpansionTheScarsOfVelious();
 }
 
 bool lua_is_current_expansion_the_shadows_of_luclin() {
-	return content_service.IsCurrentExpansionTheShadowsOfLuclin();
+	return WorldContentService::Instance()->IsCurrentExpansionTheShadowsOfLuclin();
 }
 
 bool lua_is_current_expansion_the_planes_of_power() {
-	return content_service.IsCurrentExpansionThePlanesOfPower();
+	return WorldContentService::Instance()->IsCurrentExpansionThePlanesOfPower();
 }
 
 bool lua_is_current_expansion_the_legacy_of_ykesha() {
-	return content_service.IsCurrentExpansionTheLegacyOfYkesha();
+	return WorldContentService::Instance()->IsCurrentExpansionTheLegacyOfYkesha();
 }
 
 bool lua_is_current_expansion_lost_dungeons_of_norrath() {
-	return content_service.IsCurrentExpansionLostDungeonsOfNorrath();
+	return WorldContentService::Instance()->IsCurrentExpansionLostDungeonsOfNorrath();
 }
 
 bool lua_is_current_expansion_gates_of_discord() {
-	return content_service.IsCurrentExpansionGatesOfDiscord();
+	return WorldContentService::Instance()->IsCurrentExpansionGatesOfDiscord();
 }
 
 bool lua_is_current_expansion_omens_of_war() {
-	return content_service.IsCurrentExpansionOmensOfWar();
+	return WorldContentService::Instance()->IsCurrentExpansionOmensOfWar();
 }
 
 bool lua_is_current_expansion_dragons_of_norrath() {
-	return content_service.IsCurrentExpansionDragonsOfNorrath();
+	return WorldContentService::Instance()->IsCurrentExpansionDragonsOfNorrath();
 }
 
 bool lua_is_current_expansion_depths_of_darkhollow() {
-	return content_service.IsCurrentExpansionDepthsOfDarkhollow();
+	return WorldContentService::Instance()->IsCurrentExpansionDepthsOfDarkhollow();
 }
 
 bool lua_is_current_expansion_prophecy_of_ro() {
-	return content_service.IsCurrentExpansionProphecyOfRo();
+	return WorldContentService::Instance()->IsCurrentExpansionProphecyOfRo();
 }
 
 bool lua_is_current_expansion_the_serpents_spine() {
-	return content_service.IsCurrentExpansionTheSerpentsSpine();
+	return WorldContentService::Instance()->IsCurrentExpansionTheSerpentsSpine();
 }
 
 bool lua_is_current_expansion_the_buried_sea() {
-	return content_service.IsCurrentExpansionTheBuriedSea();
+	return WorldContentService::Instance()->IsCurrentExpansionTheBuriedSea();
 }
 
 bool lua_is_current_expansion_secrets_of_faydwer() {
-	return content_service.IsCurrentExpansionSecretsOfFaydwer();
+	return WorldContentService::Instance()->IsCurrentExpansionSecretsOfFaydwer();
 }
 
 bool lua_is_current_expansion_seeds_of_destruction() {
-	return content_service.IsCurrentExpansionSeedsOfDestruction();
+	return WorldContentService::Instance()->IsCurrentExpansionSeedsOfDestruction();
 }
 
 bool lua_is_current_expansion_underfoot() {
-	return content_service.IsCurrentExpansionUnderfoot();
+	return WorldContentService::Instance()->IsCurrentExpansionUnderfoot();
 }
 
 bool lua_is_current_expansion_house_of_thule() {
-	return content_service.IsCurrentExpansionHouseOfThule();
+	return WorldContentService::Instance()->IsCurrentExpansionHouseOfThule();
 }
 
 bool lua_is_current_expansion_veil_of_alaris() {
-	return content_service.IsCurrentExpansionVeilOfAlaris();
+	return WorldContentService::Instance()->IsCurrentExpansionVeilOfAlaris();
 }
 
 bool lua_is_current_expansion_rain_of_fear() {
-	return content_service.IsCurrentExpansionRainOfFear();
+	return WorldContentService::Instance()->IsCurrentExpansionRainOfFear();
 }
 
 bool lua_is_current_expansion_call_of_the_forsaken() {
-	return content_service.IsCurrentExpansionCallOfTheForsaken();
+	return WorldContentService::Instance()->IsCurrentExpansionCallOfTheForsaken();
 }
 
 bool lua_is_current_expansion_the_darkened_sea() {
-	return content_service.IsCurrentExpansionTheDarkenedSea();
+	return WorldContentService::Instance()->IsCurrentExpansionTheDarkenedSea();
 }
 
 bool lua_is_current_expansion_the_broken_mirror() {
-	return content_service.IsCurrentExpansionTheBrokenMirror();
+	return WorldContentService::Instance()->IsCurrentExpansionTheBrokenMirror();
 }
 
 bool lua_is_current_expansion_empires_of_kunark() {
-	return content_service.IsCurrentExpansionEmpiresOfKunark();
+	return WorldContentService::Instance()->IsCurrentExpansionEmpiresOfKunark();
 }
 
 bool lua_is_current_expansion_ring_of_scale() {
-	return content_service.IsCurrentExpansionRingOfScale();
+	return WorldContentService::Instance()->IsCurrentExpansionRingOfScale();
 }
 
 bool lua_is_current_expansion_the_burning_lands() {
-	return content_service.IsCurrentExpansionTheBurningLands();
+	return WorldContentService::Instance()->IsCurrentExpansionTheBurningLands();
 }
 
 bool lua_is_current_expansion_torment_of_velious() {
-	return content_service.IsCurrentExpansionTormentOfVelious();
+	return WorldContentService::Instance()->IsCurrentExpansionTormentOfVelious();
 }
 
 bool lua_is_content_flag_enabled(std::string content_flag){
-	return content_service.IsContentFlagEnabled(content_flag);
+	return WorldContentService::Instance()->IsContentFlagEnabled(content_flag);
 }
 
 void lua_set_content_flag(std::string flag_name, bool enabled){
-	content_service.SetContentFlag(flag_name, enabled);
+	WorldContentService::Instance()->SetContentFlag(flag_name, enabled);
 	zone->ReloadContentFlags();
 }
 

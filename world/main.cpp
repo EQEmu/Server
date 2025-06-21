@@ -99,7 +99,6 @@ volatile bool       RunLoops   = true;
 uint32              numclients = 0;
 uint32              numzones   = 0;
 const WorldConfig   *Config;
-WorldContentService content_service;
 PlayerEventLogs     player_event_logs;
 
 void CatchSignal(int sig_num);
@@ -189,7 +188,7 @@ int main(int argc, char **argv)
 		RegisterConsoleFunctions(console);
 	}
 
-	content_service.SetDatabase(&database)
+	WorldContentService::Instance()->SetDatabase(&database)
 		->SetContentDatabase(&content_db)
 		->SetExpansionContext()
 		->ReloadContentFlags();

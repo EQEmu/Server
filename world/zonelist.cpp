@@ -978,7 +978,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 	} else if (type == ServerReload::Type::SkillCaps) {
 		SkillCaps::Instance()->ReloadSkillCaps();
 	} else if (type == ServerReload::Type::ContentFlags) {
-		content_service.SetExpansionContext()->ReloadContentFlags();
+		WorldContentService::Instance()->SetExpansionContext()->ReloadContentFlags();
 	} else if (type == ServerReload::Type::Logs) {
 		EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
 		player_event_logs.ReloadSettings();

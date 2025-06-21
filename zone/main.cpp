@@ -101,7 +101,6 @@ TitleManager          title_manager;
 QueryServ             *QServ        = 0;
 NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
-WorldContentService   content_service;
 PlayerEventLogs       player_event_logs;
 
 const SPDat_Spell_Struct* spells;
@@ -409,7 +408,7 @@ int main(int argc, char **argv)
 		LogInfo("Loaded [{}] commands loaded", Strings::Commify(std::to_string(retval)));
 	}
 
-	content_service.SetDatabase(&database)
+	WorldContentService::Instance()->SetDatabase(&database)
 		->SetContentDatabase(&content_db)
 		->SetExpansionContext()
 		->ReloadContentFlags();
@@ -624,7 +623,8 @@ int main(int argc, char **argv)
 				entity_list.MobProcess();
 				entity_list.BeaconProcess();
 				entity_list.EncounterProcess();
-				ZoneEventScheduler::Instance()->Process(zone, &content_service);
+
+				ZoneEventScheduler::Instance()->Process(zone, WorldContentService::Instance());
 
 				if (zone) {
 					if (!zone->Process()) {
