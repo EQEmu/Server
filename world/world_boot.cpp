@@ -279,9 +279,9 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	LogInfo("Loading zones");
 
-	zone_store.LoadZones(content_db);
+	ZoneStore::Instance()->LoadZones(content_db);
 
-	if (zone_store.GetZones().empty()) {
+	if (ZoneStore::Instance()->GetZones().empty()) {
 		LogError("Failed to load zones data, check your schema for possible errors");
 		return 1;
 	}

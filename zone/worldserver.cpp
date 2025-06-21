@@ -4698,7 +4698,7 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			break;
 
 		case ServerReload::Type::ZoneData:
-			zone_store.LoadZones(content_db);
+			ZoneStore::Instance()->LoadZones(content_db);
 			zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
 			break;
 

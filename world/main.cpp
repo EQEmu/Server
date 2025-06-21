@@ -91,7 +91,6 @@
 #include "../common/repositories/character_parcels_repository.h"
 #include "../common/ip_util.h"
 
-ZoneStore           zone_store;
 ClientList          client_list;
 GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;

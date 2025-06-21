@@ -2368,7 +2368,7 @@ bool Client::StoreCharacter(
 		return false;
 	}
 
-	const std::string& zone_name = zone_store.GetZoneName(p_player_profile_struct->zone_id, true);
+	const std::string& zone_name = ZoneStore::Instance()->GetZoneName(p_player_profile_struct->zone_id, true);
 	if (Strings::EqualFold(zone_name, "UNKNOWN")) {
 		p_player_profile_struct->zone_id = Zones::QEYNOS;
 	}
