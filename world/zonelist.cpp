@@ -978,7 +978,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 	} else if (type == ServerReload::Type::Rules) {
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 	} else if (type == ServerReload::Type::SkillCaps) {
-		skill_caps.ReloadSkillCaps();
+		SkillCaps::Instance()->ReloadSkillCaps();
 	} else if (type == ServerReload::Type::ContentFlags) {
 		content_service.SetExpansionContext()->ReloadContentFlags();
 	} else if (type == ServerReload::Type::Logs) {
