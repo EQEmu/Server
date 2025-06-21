@@ -94,7 +94,6 @@
 ClientList          client_list;
 GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;
-QueryServConnection QSLink;
 LauncherList        launcher_list;
 WorldEventScheduler event_scheduler;
 volatile bool       RunLoops   = true;
@@ -269,7 +268,7 @@ int main(int argc, char **argv)
 				connection->Handle()->RemotePort(),
 				connection->GetUUID());
 
-			QSLink.AddConnection(connection);
+			QueryServConnection::Instance()->AddConnection(connection);
 		}
 	);
 
@@ -280,7 +279,7 @@ int main(int argc, char **argv)
 				connection->GetUUID()
 			);
 
-			QSLink.RemoveConnection(connection);
+			QueryServConnection::Instance()->RemoveConnection(connection);
 		}
 	);
 

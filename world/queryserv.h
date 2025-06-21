@@ -15,6 +15,13 @@ public:
 	void HandleGenericMessage(uint16_t opcode, EQ::Net::Packet &p);
 	void HandleLFGuildUpdateMessage(uint16_t opcode, EQ::Net::Packet &p);
 	bool SendPacket(ServerPacket* pack);
+
+	static QueryServConnection* Instance()
+	{
+		static QueryServConnection instance;
+		return &instance;
+	}
+
 private:
 	std::map<std::string, std::shared_ptr<EQ::Net::ServertalkServerConnection>> m_streams;
 	std::unique_ptr<EQ::Timer> m_keepalive;
