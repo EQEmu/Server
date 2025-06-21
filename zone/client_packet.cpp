@@ -6963,7 +6963,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 			DialogueWindow::TableCell(
 				fmt::format(
 					"{} ({})",
-					zone_store.GetZoneLongName(e.zone_id, true),
+					ZoneStore::Instance()->GetZoneLongName(e.zone_id, true),
 					e.zone_id
 				)
 			) +

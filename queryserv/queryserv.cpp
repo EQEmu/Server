@@ -32,7 +32,6 @@ const queryservconfig *Config;
 WorldServer           *worldserver = 0;
 EQEmuLogSys           LogSys;
 PathManager           path;
-ZoneStore             zone_store;
 PlayerEventLogs       player_event_logs;
 ZSList                zs_list;
 uint32                numzones     = 0;

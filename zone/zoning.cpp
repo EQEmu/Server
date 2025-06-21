@@ -352,7 +352,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && !GetGM()) {
 		bool meets_zone_expansion_check = false;
 
-		auto z = zone_store.GetZoneWithFallback(ZoneID(target_zone_name), 0);
+		auto z = ZoneStore::Instance()->GetZoneWithFallback(ZoneID(target_zone_name), 0);
 		if (z->expansion <= content_service.GetCurrentExpansion() || z->bypass_expansion_check) {
 			meets_zone_expansion_check = true;
 		}
