@@ -98,7 +98,6 @@ namespace EQ
 #define MAX_SPECIALIZED_SKILL 50
 
 extern Zone* zone;
-extern TaskManager *task_manager;
 
 class CLIENTPACKET
 {
@@ -1359,7 +1358,7 @@ public:
 	}
 	inline bool SaveTaskState()
 	{
-		return task_manager != nullptr && task_manager->SaveClientState(this, task_state);
+		return TaskManager::Instance() != nullptr && TaskManager::Instance()->SaveClientState(this, task_state);
 	}
 	inline bool IsTaskStateLoaded() { return task_state != nullptr; }
 	inline bool IsTaskActive(int task_id) { return task_state != nullptr && task_state->IsTaskActive(task_id); }
@@ -1433,14 +1432,14 @@ public:
 	}
 	inline void TaskSetSelector(Mob* mob, int task_set_id, bool ignore_cooldown)
 	{
-		if (task_manager && task_state) {
-			task_manager->TaskSetSelector(this, mob, task_set_id, ignore_cooldown);
+		if (TaskManager::Instance() && task_state) {
+			TaskManager::Instance()->TaskSetSelector(this, mob, task_set_id, ignore_cooldown);
 		}
 	}
 	inline void TaskQuestSetSelector(Mob* mob, const std::vector<int>& tasks, bool ignore_cooldown)
 	{
-		if (task_manager && task_state) {
-			task_manager->TaskQuestSetSelector(this, mob, tasks, ignore_cooldown);
+		if (TaskManager::Instance() && task_state) {
+			TaskManager::Instance()->TaskQuestSetSelector(this, mob, tasks, ignore_cooldown);
 		}
 	}
 	inline void EnableTask(int task_count, int *task_list)
