@@ -42,7 +42,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 extern uint32 numzones;
 extern EQ::Random emu_random;
-extern WebInterfaceList web_interface;
 extern SharedTaskManager shared_task_manager;
 extern ClientList client_list;
 volatile bool UCSServerAvailable_ = false;
@@ -890,7 +889,7 @@ void ZSList::OnTick(EQ::Timer *t)
 		out["data"].append(outzone);
 	}
 
-	web_interface.SendEvent(out);
+	WebInterfaceList::Instance()->SendEvent(out);
 }
 
 const std::list<std::unique_ptr<ZoneServer>> &ZSList::getZoneServerList() const

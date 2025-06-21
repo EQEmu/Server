@@ -42,6 +42,11 @@ public:
 	void SendError(const std::string &uuid, const std::string &message);
 	void SendError(const std::string &uuid, const std::string &message, const std::string &id);
 
+	static WebInterfaceList* Instance()
+	{
+		static WebInterfaceList instance;
+		return &instance;
+	}
 private:
 	std::map<std::string, std::unique_ptr<WebInterface>> m_interfaces;
 };
