@@ -974,7 +974,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("items");
 		mutex.Lock();
-		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("items"));
+		std::string file_name = fmt::format("{}/{}{}", PathManager::Instance()->GetSharedMemoryPath(), prefix, std::string("items"));
 		items_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		items_hash = std::make_unique<EQ::FixedMemoryHashSet<EQ::ItemData>>(static_cast<uint8*>(items_mmf->Get()), items_mmf->Size());
 		mutex.Unlock();
@@ -1665,7 +1665,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		EQ::IPCMutex mutex("spells");
 		mutex.Lock();
 
-		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("spells"));
+		std::string file_name = fmt::format("{}/{}{}", PathManager::Instance()->GetSharedMemoryPath(), prefix, std::string("spells"));
 		spells_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		LogInfo("Loading [{}]", file_name);
 		*records = *static_cast<uint32*>(spells_mmf->Get());

@@ -35,13 +35,12 @@
 
 const EQEmuConfig *Config;
 EQEmuLogSys       LogSys;
-PathManager       path;
 
 int main()
 {
 	RegisterExecutablePlatform(ExePlatformClientImport);
 	LogSys.LoadLogSettingsDefaults();
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	auto ConfigLoadResult = EQEmuConfig::LoadConfig();
 	Config = EQEmuConfig::get();

@@ -34,7 +34,6 @@
 #include <time.h>
 
 EQEmuLogSys LogSys;
-PathManager path;
 
 bool RunLoops = false;
 
@@ -45,7 +44,7 @@ int main(int argc, char *argv[]) {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	std::string launcher_name;
 	if(argc == 2) {

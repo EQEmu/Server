@@ -436,11 +436,11 @@ void EQEmuConfig::CheckUcsConfigConversion()
 		LogInfo("Migrating old [eqemu_config] UCS configuration to new configuration");
 
 		std::string config_file_path = std::filesystem::path{
-			path.GetServerPath() + "/eqemu_config.json"
+			PathManager::Instance()->GetServerPath() + "/eqemu_config.json"
 		}.string();
 
 		std::string config_file_bak_path = std::filesystem::path{
-			path.GetServerPath() + "/eqemu_config.ucs-migrate-json.bak"
+			PathManager::Instance()->GetServerPath() + "/eqemu_config.ucs-migrate-json.bak"
 		}.string();
 
 		// copy eqemu_config.json to eqemu_config.json.bak
