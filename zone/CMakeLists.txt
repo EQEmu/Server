@@ -275,9 +275,7 @@ set(lua_sources
 )
 
 add_library(lua_zone STATIC ${lua_sources})
-if (NOT WIN32)
-    set_target_properties(lua_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
-endif()
+set_target_properties(lua_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
 
 # perl unity build
 set(perl_sources
@@ -308,9 +306,7 @@ set(perl_sources
 )
 
 add_library(perl_zone STATIC ${perl_sources})
-if (NOT WIN32)
-    set_target_properties(perl_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
-endif()
+set_target_properties(perl_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
 
 # gm commands
 set(gm_command_sources
@@ -476,9 +472,7 @@ set(gm_command_sources
 )
 
 add_library(gm_commands_zone STATIC ${gm_command_sources})
-if (NOT WIN32)
-    set_target_properties(gm_commands_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 32)
-endif()
+set_target_properties(gm_commands_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 32)
 
 # zone combine sources and headers
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
@@ -488,7 +482,6 @@ INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 # precompiled headers
 IF (WIN32 AND EQEMU_BUILD_PCH)
-    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/std-pch.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/app-pch.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE merc.h mob.h npc.h corpse.h doors.h bot.h entity.h client.h zone.h)
 ENDIF()
