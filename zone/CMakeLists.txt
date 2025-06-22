@@ -482,6 +482,7 @@ INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 # precompiled headers
 IF (WIN32 AND EQEMU_BUILD_PCH)
+    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/std-pch.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/app-pch.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE merc.h mob.h npc.h corpse.h doors.h bot.h entity.h client.h zone.h)
 ENDIF()
