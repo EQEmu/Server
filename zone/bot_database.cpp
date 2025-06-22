@@ -74,13 +74,61 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 	return true;
 }
 
+template<typename T1, typename T2>
+inline std::vector<std::string> join_pair(
+	const std::string &glue,
+	const std::pair<char, char> &encapsulation,
+	const std::vector<std::pair<T1, T2>> &src
+)
+{
+	if (src.empty()) {
+		return {};
+	}
+
+	std::vector<std::string> output;
+
+	for (const std::pair<T1, T2> &src_iter: src) {
+		output.emplace_back(
+
+			fmt::format(
+				"{}{}{}{}{}{}{}",
+				encapsulation.first,
+				src_iter.first,
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				src_iter.second,
+				encapsulation.second
+			)
+		);
+	}
+
+	return output;
+}
+
+template<typename T>
+inline std::string
+ImplodePair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
+{
+	if (src.empty()) {
+		return {};
+	}
+	std::ostringstream oss;
+	for (const T &src_iter: src) {
+		oss << encapsulation.first << src_iter << encapsulation.second << glue;
+	}
+	std::string output(oss.str());
+	output.resize(output.size() - glue.size());
+	return output;
+}
+
 bool BotDatabase::UpdateInjectedBotCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
 {
 	if (injected.size()) {
 
 		query = fmt::format(
 			"REPLACE INTO `bot_command_settings`(`bot_command`, `access`) VALUES {}",
-			Strings::ImplodePair(
+			ImplodePair(
 				",",
 				std::pair<char, char>('(', ')'),
 				join_pair(",", std::pair<char, char>('\'', '\''), injected)
@@ -107,7 +155,7 @@ bool BotDatabase::UpdateOrphanedBotCommandSettings(const std::vector<std::string
 
 		query = fmt::format(
 			"DELETE FROM `bot_command_settings` WHERE `bot_command` IN ({})",
-			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
+			ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		if (!database.QueryDatabase(query).Success()) {
@@ -248,7 +296,7 @@ bool BotDatabase::LoadBotsList(const uint32 owner_id, std::list<BotsAvailableLis
 							SELECT `account_id` FROM `character_data` WHERE `id` = {}
 						)
 					)
-					AND 
+					AND
 					`name` NOT LIKE '%-deleted-%'
 				),
 				owner_id
@@ -2226,7 +2274,7 @@ bool BotDatabase::LoadBotSettings(Mob* m)
 	else {
 		query = fmt::format("`bot_id` = {} AND `stance` = {}", mob_id, stance_id);
 	}
-	
+
 	if (stance_id == Stance::Passive) {
 		LogBotSettings("{} is currently set to {} [#{}]. No saving or loading required.", m->GetCleanName(), Stance::GetName(Stance::Passive), Stance::Passive);
 		return true;
@@ -2278,7 +2326,7 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 	if (!m->IsOfClientBot()) {
 		return false;
 	}
-	
+
 	uint32 bot_id = (m->IsBot() ? m->CastToBot()->GetBotID() : 0);
 	uint32 character_id = (m->IsClient() ? m->CastToClient()->CharacterID() : 0);
 	uint8 stance_id = (m->IsBot() ? m->CastToBot()->GetBotStance() : 0);
@@ -2289,10 +2337,10 @@ bool BotDatabase::SaveBotSettings(Mob* m)
 	}
 
 	std::string query = "";
-	
+
 	if (m->IsClient()) {
 		query = fmt::format("`character_id` = {} AND `stance` = {}", character_id, stance_id);
-	} 
+	}
 	else {
 		query = fmt::format("`bot_id` = {} AND `stance` = {}", bot_id, stance_id);
 	}
