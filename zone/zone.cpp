@@ -88,8 +88,6 @@ extern WorldServer worldserver;
 extern Zone* zone;
 extern NpcScaleManager* npc_scale_manager;
 
-Mutex MZoneShutdown;
-
 volatile bool is_zone_loaded = false;
 Zone* zone = 0;
 
