@@ -484,6 +484,7 @@ set_target_properties(gm_commands_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BAT
 
 # zone combine sources and headers
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
+add_dependencies(zone lua_zone perl_zone gm_commands_zone)
 
 # binary output directory
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
