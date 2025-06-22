@@ -306,7 +306,7 @@ set(perl_sources
 )
 
 add_library(perl_zone STATIC ${perl_sources})
-set_target_properties(lua_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
+set_target_properties(perl_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
 
 # gm commands
 set(gm_command_sources
