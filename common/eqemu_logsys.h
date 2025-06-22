@@ -454,9 +454,19 @@ void OutF(
 }
  **/
 
-#define OutF(ls, debug_level, log_category, file, func, line, formatStr, ...) \
-do { \
-    ls.Out(debug_level, log_category, file, func, line, fmt::format(formatStr, ##__VA_ARGS__).c_str()); \
-} while(0)
+template<typename... Args>
+inline void OutF(
+	EQEmuLogSys& ls,
+	Logs::DebugLevel debug_level,
+	uint16 log_category,
+	const char* file,
+	const char* func,
+	int line,
+	fmt::format_string<Args...> fmt_str,
+	Args&&... args
+) {
+	std::string formatted = fmt::format(fmt_str, std::forward<Args>(args)...);
+	ls.Out(debug_level, log_category, file, func, line, formatted.c_str());
+}
 
 #endif
