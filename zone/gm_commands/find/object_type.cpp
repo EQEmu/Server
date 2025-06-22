@@ -1,3 +1,4 @@
+#include "../../object.h"
 #include "../../client.h"
 
 void FindObjectType(Client *c, const Seperator *sep)

@@ -1,3 +1,4 @@
+#include "../bot.h"
 #include "../client.h"
 
 void command_zone(Client *c, const Seperator *sep)
