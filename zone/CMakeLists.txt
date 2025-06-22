@@ -275,7 +275,11 @@ set(lua_sources
 )
 
 add_library(lua_zone STATIC ${lua_sources})
-set_target_properties(lua_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
+if (MSVC)
+    set_target_properties(lua_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 4)
+else()
+    set_target_properties(lua_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
+endif()
 
 # perl unity build
 set(perl_sources
@@ -306,7 +310,11 @@ set(perl_sources
 )
 
 add_library(perl_zone STATIC ${perl_sources})
-set_target_properties(perl_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
+if (MSVC)
+    set_target_properties(perl_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 4)
+else()
+    set_target_properties(perl_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
+endif()
 
 # gm commands
 set(gm_command_sources
