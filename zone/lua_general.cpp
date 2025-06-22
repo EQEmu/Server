@@ -7963,33 +7963,6 @@ luabind::scope lua_register_languages() {
 	)];
 }
 
-luabind::scope lua_register_rules_const() {
-	return luabind::class_<Rule>("Rule")
-		.enum_("constants")
-	[(
-#define RULE_INT(cat, rule, default_value, notes) \
-		luabind::value(#rule, RuleManager::Int__##rule),
-#include "../common/ruletypes.h"
-		luabind::value("_IntRuleCount", RuleManager::_IntRuleCount),
-#undef RULE_INT
-#define RULE_REAL(cat, rule, default_value, notes) \
-		luabind::value(#rule, RuleManager::Real__##rule),
-#include "../common/ruletypes.h"
-		luabind::value("_RealRuleCount", RuleManager::_RealRuleCount),
-#undef RULE_REAL
-#define RULE_BOOL(cat, rule, default_value, notes) \
-		luabind::value(#rule, RuleManager::Bool__##rule),
-#include "../common/ruletypes.h"
-		luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount),
-#undef RULE_BOOL
-#define RULE_STRING(cat, rule, default_value, notes) \
-		luabind::value(#rule, RuleManager::String__##rule),
-#include "../common/ruletypes.h"
-		luabind::value("_StringRuleCount", RuleManager::_StringRuleCount)
-#undef RULE_STRING
-	)];
-}
-
 luabind::scope lua_register_rulei() {
 	return luabind::namespace_("RuleI")
 		[
