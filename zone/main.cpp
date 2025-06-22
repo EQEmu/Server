@@ -101,7 +101,6 @@ extern Zone *zone;
 npcDecayTimes_Struct  npcCorpseDecayTimes[100];
 TitleManager          title_manager;
 QueryServ             *QServ        = 0;
-TaskManager           *task_manager = 0;
 NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
 EQEmuLogSys           LogSys;
@@ -449,8 +448,7 @@ int main(int argc, char **argv)
 	npc_scale_manager->LoadScaleData();
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		task_manager = new TaskManager;
-		task_manager->LoadTasks();
+		TaskManager::Instance()->LoadTasks();
 	}
 
 	parse = new QuestParserCollection();
@@ -681,7 +679,6 @@ int main(int argc, char **argv)
 		zone->Shutdown(true);
 	}
 	//Fix for Linux world server problem.
-	safe_delete(task_manager);
 	safe_delete(npc_scale_manager);
 	command_deinit();
 	bot_command_deinit();
