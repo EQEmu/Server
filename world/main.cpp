@@ -102,7 +102,6 @@ LauncherList        launcher_list;
 AdventureManager    adventure_manager;
 WorldEventScheduler event_scheduler;
 SharedTaskManager   shared_task_manager;
-EQ::Random          emu_random;
 volatile bool       RunLoops   = true;
 uint32              numclients = 0;
 uint32              numzones   = 0;
