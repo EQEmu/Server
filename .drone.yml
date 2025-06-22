@@ -30,6 +30,11 @@ steps:
       - name: cache
         path: /home/eqemu/.ccache/
 
+trigger:
+  branch:
+    exclude:
+      - build-analyze
+
 ---
 
 kind: pipeline
@@ -56,6 +61,11 @@ steps:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
       - .\utils\scripts\build\windows-build.ps1
+
+trigger:
+  branch:
+    exclude:
+      - build-analyze
 
 ---
 
@@ -87,7 +97,10 @@ steps:
 
 trigger:
   branch:
-    - master
+    include:
+      - master
+    exclude:
+      - build-analyze
   event:
     - push
 
@@ -95,4 +108,23 @@ depends_on:
   - Build Windows
   - Build Linux
 
+---
 
+kind: pipeline
+type: docker
+name: Build Analyze
+
+steps:
+  - name: Build Linux X64
+    image: akkadius/eqemu-server:v16
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GH_RELEASE_GITHUB_API_TOKEN
+    commands:
+      - ./utils/scripts/build/linux-build-analyze.sh
+
+trigger:
+  branch:
+    - build-analyze
+  event:
+    - push
