@@ -489,13 +489,7 @@ ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 # precompiled headers
-IF (WIN32 AND EQEMU_BUILD_PCH)
-    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/app-pch.h)
-    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ./pch/pch.h)
-ENDIF()
-
-# precompiled headers
-IF (UNIX AND EQEMU_BUILD_PCH)
+IF (EQEMU_BUILD_PCH)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/app-pch.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ./pch/pch.h)
 ENDIF()
