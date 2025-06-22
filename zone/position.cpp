@@ -6,6 +6,7 @@
 #include "../common/data_verification.h"
 #include <numbers>
 #include "../common/types.h"
+#include <fmt/format.h>
 
 constexpr float position_eps = 0.0001f;
 
