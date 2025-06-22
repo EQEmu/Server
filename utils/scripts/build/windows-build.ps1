@@ -16,7 +16,7 @@ perl .\utils\scripts\build\tag-version.pl
 Write-Information -MessageData "Creating build x64" -InformationAction Continue
 Set-Location -Path "$cwd\win-build-x64"
 cmake -Wno-dev -G "Visual Studio 17 2022" -A x64 -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_ZLIB=ON "$cwd"
-cmake --build . --config RelWithDebInfo --clean-first
+cmake --build . --parallel --config RelWithDebInfo --clean-first
 Set-Location -Path "$cwd"
 
 if ($LASTEXITCODE -ne 0) { echo "Build emitted error"; exit 1 }
