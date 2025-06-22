@@ -277,7 +277,7 @@ set(lua_sources
 add_library(lua_zone STATIC ${lua_sources})
 if (NOT WIN32)
     set_target_properties(lua_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
-else()
+endif()
 
 # perl unity build
 set(perl_sources
