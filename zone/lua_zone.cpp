@@ -4,7 +4,6 @@
 
 #include <luabind/luabind.hpp>
 #include "../common/global_define.h"
-#include "embperl.h"
 #include "lua_zone.h"
 
 bool Lua_Zone::BuffTimersSuspended()

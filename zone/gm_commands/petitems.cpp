@@ -1,3 +1,4 @@
+#include "../bot.h"
 #include "../client.h"
 
 void command_petitems(Client *c, const Seperator *sep)
