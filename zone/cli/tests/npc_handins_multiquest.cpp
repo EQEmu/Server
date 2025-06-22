@@ -1,4 +1,3 @@
-#include "../../common/http/httplib.h"
 #include "../../common/eqemu_logsys.h"
 #include "../../common/platform.h"
 #include "../../zone.h"
