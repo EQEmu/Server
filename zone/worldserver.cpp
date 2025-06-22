@@ -62,6 +62,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/skill_caps.h"
 #include "../common/server_reload_types.h"
 #include "queryserv.h"
+#include "../common/repositories/account_repository.h"
+#include "../common/repositories/character_offline_transactions_repository.h"
 
 extern EntityList             entity_list;
 extern Zone                  *zone;
@@ -3776,61 +3778,267 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 		case ServerOP_BazaarPurchase: {
-			auto in        = (BazaarPurchaseMessaging_Struct *) pack->pBuffer;
-			auto trader_pc = entity_list.GetClientByCharID(in->trader_buy_struct.trader_id);
-			if (!trader_pc) {
-				LogTrading("Request trader_id <red>[{}] could not be found in zone_id <red>[{}]",
-						   in->trader_buy_struct.trader_id,
-						   zone->GetZoneID()
-				);
-				return;
-			}
+			auto in        = reinterpret_cast<BazaarPurchaseMessaging_Struct *>(pack->pBuffer);
+			switch (in->transaction_status) {
+				case BazaarPurchaseBuyerCompleteSendToSeller: {
+					auto trader_pc = entity_list.GetClientByCharID(in->trader_buy_struct.trader_id);
+					if (!trader_pc) {
+						LogTrading(
+							"Request trader_id [{}] could not be found in zone_id [{}] instance_id [{}]",
+							in->trader_buy_struct.trader_id,
+							zone->GetZoneID(),
+							zone->GetInstanceID()
+						);
+						return;
+					}
 
-			if (trader_pc->IsThereACustomer()) {
-				auto customer = entity_list.GetClientByID(trader_pc->GetCustomerID());
-				if (customer) {
-					customer->CancelTraderTradeWindow();
+					auto item = trader_pc->FindTraderItemByUniqueID(in->trader_buy_struct.item_unique_id);
+					if (!item) {
+						in->transaction_status = BazaarPurchaseTraderFailed;
+						TraderRepository::UpdateActiveTransaction(database, in->id, false);
+						worldserver.SendPacket(pack);
+						break;
+					}
+
+					//if there is a customer currently browsing, close to ensure no conflict of purchase
+					if (trader_pc->IsThereACustomer()) {
+						auto customer = entity_list.GetClientByID(trader_pc->GetCustomerID());
+						if (customer) {
+							customer->CancelTraderTradeWindow();
+						}
+					}
+
+					//Update the trader's db entries
+					if (item->IsStackable() && in->item_quantity != in->item_charges) {
+						TraderRepository::UpdateQuantity(database, in->trader_buy_struct.item_unique_id, item->GetCharges() - in->item_quantity);
+						LogTradingDetail(
+							"Step 4:Bazaar Purchase.  Decreased database id {} from [{}] to [{}] charges",
+							in->trader_buy_struct.item_id,
+							item->GetCharges(),
+							item->GetCharges() - in->item_quantity
+						);
+					}
+					else {
+						TraderRepository::DeleteOne(database, in->id);
+						LogTradingDetail(
+							"Step 4:Bazaar Purchase.  Deleted database id [{}] because database quantity [{}] equals [{}] purchased quantity",
+							in->trader_buy_struct.item_id,
+							item->GetCharges(),
+							item->GetCharges() - in->item_quantity
+						);
+					}
+
+					//at this time, buyer checks ok, seller checks ok.
+					//perform actions to trader
+					uint64 total_cost = static_cast<uint64>(in->trader_buy_struct.price) * static_cast<uint64>(in->item_quantity);
+					if (!trader_pc->RemoveItemByItemUniqueId(in->trader_buy_struct.item_unique_id, in->item_quantity)) {
+						LogTradingDetail(
+							"Failed to remove item {} quantity [{}] from trader [{}]",
+							in->trader_buy_struct.item_unique_id,
+							in->item_quantity,
+							trader_pc->CharacterID()
+						);
+						in->transaction_status = BazaarPurchaseTraderFailed;
+						TraderRepository::UpdateActiveTransaction(database, in->id, false);
+						worldserver.SendPacket(pack);
+						break;
+					}
+
+					LogTradingDetail(
+						"Step 5:Bazaar Purchase.  Removed from inventory of Trader [{}] for sale of [{}] {}{}",
+						trader_pc->CharacterID(),
+						in->item_quantity,
+						in->item_quantity > 1 ? fmt::format("{}s", in->trader_buy_struct.item_name)
+											  : in->trader_buy_struct.item_name,
+						item->GetItem()->MaxCharges > 0 ? fmt::format(" with charges of [{}]", in->item_charges)
+														: std::string("")
+					);
+
+					trader_pc->AddMoneyToPP(total_cost,	true);
+
+					//Update the trader to indicate the sale has completed
+					EQApplicationPacket outapp(OP_Trader, sizeof(TraderBuy_Struct));
+					auto                data = reinterpret_cast<TraderBuy_Struct *>(outapp.pBuffer);
+
+					memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
+					trader_pc->QueuePacket(&outapp);
+
+					if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+						auto e = PlayerEvent::TraderSellEvent{
+							.item_id              = item->GetID(),
+							.augment_1_id         = item->GetAugmentItemID(0),
+							.augment_2_id         = item->GetAugmentItemID(1),
+							.augment_3_id         = item->GetAugmentItemID(2),
+							.augment_4_id         = item->GetAugmentItemID(3),
+							.augment_5_id         = item->GetAugmentItemID(4),
+							.augment_6_id         = item->GetAugmentItemID(5),
+							.item_name            = in->trader_buy_struct.item_name,
+							.buyer_id             = in->buyer_id,
+							.buyer_name           = in->trader_buy_struct.buyer_name,
+							.price                = in->trader_buy_struct.price,
+							.quantity             = in->item_quantity,
+							.charges              = in->item_charges,
+							.total_cost           = total_cost,
+							.player_money_balance = trader_pc->GetCarriedMoney(),
+							.offline_purchase     = trader_pc->IsOffline(),
+						};
+						RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
+					}
+
+					if (trader_pc->IsOffline()) {
+						auto e         = CharacterOfflineTransactionsRepository::NewEntity();
+						e.character_id = trader_pc->CharacterID();
+						e.item_name    = in->trader_buy_struct.item_name;
+						e.price        = in->trader_buy_struct.price * in->trader_buy_struct.quantity;
+						e.quantity     = in->trader_buy_struct.quantity;
+						e.type         = TRADER_TRANSACTION;
+						e.buyer_name   = in->trader_buy_struct.buyer_name;
+
+						CharacterOfflineTransactionsRepository::InsertOne(database, e);
+					}
+
+					in->transaction_status = BazaarPurchaseSuccess;
+					TraderRepository::UpdateActiveTransaction(database, in->id, false);
+					worldserver.SendPacket(pack);
+
+					LogTradingDetail("Step 6:Bazaar Purchase. Purchase checks complete for trader.  Send Success to buyer via world.");
+
+					break;
+				}
+				case BazaarPurchaseTraderFailed: {
+					auto buyer = entity_list.GetClientByCharID(in->buyer_id);
+					if (!buyer) {
+						LogTrading(
+							"Requested buyer_id [{}] could not be found in zone_id [{}] instance_id [{}]",
+							in->trader_buy_struct.trader_id,
+							zone->GetZoneID(),
+							zone->GetInstanceID()
+						);
+						return;
+					}
+
+					// return buyer's money including the fee
+					uint64 total_cost =
+						static_cast<uint64>(in->trader_buy_struct.price) * static_cast<uint64>(in->item_quantity);
+					uint64 fee = std::round(total_cost * RuleR(Bazaar, ParcelDeliveryCostMod));
+					buyer->AddMoneyToPP(total_cost + fee, false);
+					buyer->SendMoneyUpdate();
+
+					buyer->Message(Chat::Red, "Bazaar purchased failed.  Returning your money.");
+					LogTradingDetail(
+						"Bazaar Purchase Failed.  Returning money [{}] + fee [{}] to Buyer [{}]",
+						total_cost,
+						fee,
+						buyer->CharacterID()
+					);
+					buyer->TradeRequestFailed(in->trader_buy_struct);
+					break;
+				}
+				case BazaarPurchaseSuccess: {
+					auto buyer = entity_list.GetClientByCharID(in->buyer_id);
+					if (!buyer) {
+						LogTrading(
+							"Requested buyer_id [{}] could not be found in zone_id [{}] instance_id [{}]",
+							in->trader_buy_struct.trader_id,
+							zone->GetZoneID(),
+							zone->GetInstanceID()
+						);
+						return;
+					}
+					uint64 total_cost =
+						static_cast<uint64>(in->trader_buy_struct.price) * static_cast<uint64>(in->item_quantity);
+
+					if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+						auto e = PlayerEvent::TraderPurchaseEvent{
+							.item_id              = in->trader_buy_struct.item_id,
+							.augment_1_id         = in->item_aug_1,
+							.augment_2_id         = in->item_aug_2,
+							.augment_3_id         = in->item_aug_3,
+							.augment_4_id         = in->item_aug_4,
+							.augment_5_id         = in->item_aug_5,
+							.augment_6_id         = in->item_aug_6,
+							.item_name            = in->trader_buy_struct.item_name,
+							.trader_id            = in->trader_buy_struct.trader_id,
+							.trader_name          = in->trader_buy_struct.seller_name,
+							.price                = in->trader_buy_struct.price,
+							.quantity             = in->item_quantity,
+							.charges              = in->item_charges,
+							.total_cost           = total_cost,
+							.player_money_balance = buyer->GetCarriedMoney(),
+						};
+
+						RecordPlayerEventLogWithClient(buyer, PlayerEvent::TRADER_PURCHASE, e);
+					}
+
+					auto item = database.GetItem(in->trader_buy_struct.item_id);
+					auto quantity = in->item_quantity;
+					if (item->MaxCharges > 0) {
+						quantity = in->item_charges;
+					}
+
+					//Send the item via parcel
+					CharacterParcelsRepository::CharacterParcels parcel_out{};
+					parcel_out.from_name      = in->trader_buy_struct.seller_name;
+					parcel_out.note           = "Delivered from a Bazaar Purchase";
+					parcel_out.sent_date      = time(nullptr);
+					parcel_out.quantity       = quantity;
+					parcel_out.item_id        = in->trader_buy_struct.item_id;
+					parcel_out.item_unique_id = in->trader_buy_struct.item_unique_id;
+					parcel_out.aug_slot_1     = in->item_aug_1;
+					parcel_out.aug_slot_2     = in->item_aug_2;
+					parcel_out.aug_slot_3     = in->item_aug_3;
+					parcel_out.aug_slot_4     = in->item_aug_4;
+					parcel_out.aug_slot_5     = in->item_aug_5;
+					parcel_out.aug_slot_6     = in->item_aug_6;
+					parcel_out.char_id        = buyer->CharacterID();
+					parcel_out.slot_id        = buyer->FindNextFreeParcelSlot(buyer->CharacterID());
+					parcel_out.id             = 0;
+
+					CharacterParcelsRepository::InsertOne(database, parcel_out);
+
+					if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+						PlayerEvent::ParcelSend e{};
+						e.from_player_name = parcel_out.from_name;
+						e.to_player_name   = buyer->GetCleanName();
+						e.item_id          = parcel_out.item_id;
+						e.augment_1_id     = parcel_out.aug_slot_1;
+						e.augment_2_id     = parcel_out.aug_slot_2;
+						e.augment_3_id     = parcel_out.aug_slot_3;
+						e.augment_4_id     = parcel_out.aug_slot_4;
+						e.augment_5_id     = parcel_out.aug_slot_5;
+						e.augment_6_id     = parcel_out.aug_slot_6;
+						e.quantity         = in->item_quantity;
+						e.charges          = in->item_charges;
+						e.sent_date        = parcel_out.sent_date;
+
+						RecordPlayerEventLogWithClient(buyer, PlayerEvent::PARCEL_SEND, e);
+					}
+
+					Parcel_Struct ps{};
+					ps.item_slot = parcel_out.slot_id;
+					strn0cpy(ps.send_to, buyer->GetCleanName(), sizeof(ps.send_to));
+					buyer->SendParcelDeliveryToWorld(ps);
+
+					LogTradingDetail("Step 7:Bazaar Purchase. Sent parcel to Buyer [{}] for purchase of [{}] {}{}",
+						buyer->CharacterID(),
+						quantity,
+						quantity > 1 ? fmt::format("{}s", in->trader_buy_struct.item_name) : in->trader_buy_struct.item_name,
+						item->MaxCharges > 0 ? fmt::format(" with charges of [{}]", in->item_charges) : std::string("")
+					);
+
+					//Update the buyer to indicate the sale has completed
+					EQApplicationPacket outapp(OP_Trader, sizeof(TraderBuy_Struct));
+					auto                data = reinterpret_cast<TraderBuy_Struct *>(outapp.pBuffer);
+
+					memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
+					buyer->ReturnTraderReq(&outapp, in->item_quantity, in->trader_buy_struct.item_id);
+					LogTradingDetail("Step 8:Bazaar Purchase. Purchase complete. Sending update packet to buyer.");
+
+					break;
+				}
+					default: {
 				}
 			}
-
-			auto item_sn = Strings::ToUnsignedBigInt(in->trader_buy_struct.serial_number);
-			auto outapp  = std::make_unique<EQApplicationPacket>(OP_Trader, static_cast<uint32>(sizeof(TraderBuy_Struct)));
-			auto data    = (TraderBuy_Struct *) outapp->pBuffer;
-
-			memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
-
-			if (trader_pc->ClientVersion() < EQ::versions::ClientVersion::RoF) {
-				data->price = in->trader_buy_struct.price * in->trader_buy_struct.quantity;
-			}
-
-			TraderRepository::UpdateActiveTransaction(database, in->id, false);
-
-			auto item = trader_pc->FindTraderItemBySerialNumber(item_sn);
-
-			if (item && player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
-				auto e = PlayerEvent::TraderSellEvent{
-					.item_id              = item ? item->GetID() : 0,
-					.augment_1_id         = item->GetAugmentItemID(0),
-					.augment_2_id         = item->GetAugmentItemID(1),
-					.augment_3_id         = item->GetAugmentItemID(2),
-					.augment_4_id         = item->GetAugmentItemID(3),
-					.augment_5_id         = item->GetAugmentItemID(4),
-					.augment_6_id         = item->GetAugmentItemID(5),
-					.item_name            = in->trader_buy_struct.item_name,
-					.buyer_id             = in->buyer_id,
-					.buyer_name           = in->trader_buy_struct.buyer_name,
-					.price                = in->trader_buy_struct.price,
-					.quantity             = in->trader_buy_struct.quantity,
-					.charges              = item ? item->IsStackable() ? 1 : item->GetCharges() : 0,
-					.total_cost           = (in->trader_buy_struct.price * in->trader_buy_struct.quantity),
-					.player_money_balance = trader_pc->GetCarriedMoney(),
-				};
-				RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
-			}
-
-			trader_pc->RemoveItemBySerialNumber(item_sn, in->trader_buy_struct.quantity);
-			trader_pc->AddMoneyToPP(in->trader_buy_struct.price * in->trader_buy_struct.quantity, true);
-			trader_pc->QueuePacket(outapp.get());
 
 			break;
 		}
@@ -4083,6 +4291,18 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						RecordPlayerEventLogWithClient(buyer, PlayerEvent::BARTER_TRANSACTION, e);
 					}
 
+					if (buyer->IsOffline()) {
+						auto e         = CharacterOfflineTransactionsRepository::NewEntity();
+						e.character_id = buyer->CharacterID();
+						e.item_name    = sell_line.item_name;
+						e.price        = (uint64) sell_line.item_cost * (uint64) in->seller_quantity;
+						e.quantity     = sell_line.seller_quantity;
+						e.type         = BUYER_TRANSACTION;
+						e.buyer_name   = sell_line.seller_name;
+
+						CharacterOfflineTransactionsRepository::InsertOne(database, e);
+					}
+
 					in->action = Barter_BuyerTransactionComplete;
 					worldserver.SendPacket(pack);
 
@@ -4143,8 +4363,103 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					break;
 				}
+				break;
 			}
+			break;
 		}
+		case ServerOP_UsertoWorldCancelOfflineRequest: {
+ 			auto in     = reinterpret_cast<UsertoWorldResponse *>(pack->pBuffer);
+ 			auto client = entity_list.GetClientByLSID(in->lsaccountid);
+ 			if (!client) {
+				LogLoginserverDetail("Step 6a(1) - Zone received ServerOP_UsertoWorldCancelOfflineRequest though could "
+									 "not find client."
+				);
+
+ 				auto e = AccountRepository::GetWhere(database, fmt::format("`lsaccount_id` = '{}'", in->lsaccountid));
+ 				if (!e.empty()) {
+ 					auto r = e.front();
+ 					r.offline = 0;
+ 					AccountRepository::UpdateOne(database, r);
+					LogLoginserverDetail(
+						"Step 6a(2) - Zone cleared offline status in account table for user id {} / {}",
+						r.lsaccount_id,
+						r.charname
+					);
+ 				}
+
+
+ 				auto sp          = new ServerPacket(ServerOP_UsertoWorldCancelOfflineResponse, pack->size);
+ 				auto out         = reinterpret_cast<UsertoWorldResponse *>(sp->pBuffer);
+ 				sp->opcode       = ServerOP_UsertoWorldCancelOfflineResponse;
+ 				out->FromID      = in->FromID;
+ 				out->lsaccountid = in->lsaccountid;
+ 				out->response    = in->response;
+ 				out->ToID        = in->ToID;
+ 				out->worldid     = in->worldid;
+ 				strn0cpy(out->login, in->login, 64);
+
+				LogLoginserverDetail("Step 6a(3) - Zone sending ServerOP_UsertoWorldCancelOfflineResponse back to world");
+ 				worldserver.SendPacket(sp);
+ 				safe_delete(sp);
+ 				break;
+ 			}
+
+			LogLoginserverDetail(
+				"Step 6b(1) - Zone received ServerOP_UsertoWorldCancelOfflineRequest and found client {}",
+				client->GetCleanName()
+			);
+			LogLoginserverDetail(
+				"Step 6b(2) - Zone cleared offline status in account table for user id {} / {}",
+				client->CharacterID(),
+				client->GetCleanName()
+			);
+			AccountRepository::SetOfflineStatus(database, client->AccountID(), false);
+
+ 			if (client->IsThereACustomer()) {
+ 				auto customer = entity_list.GetClientByID(client->GetCustomerID());
+ 				if (customer) {
+ 					auto end_session = new EQApplicationPacket(OP_ShopEnd);
+ 					customer->FastQueuePacket(&end_session);
+ 				}
+ 			}
+
+ 			if (client->IsTrader()) {
+				LogLoginserverDetail("Step 6b(3) - Zone ending trader mode for client {}", client->GetCleanName());
+ 				client->TraderEndTrader();
+ 			}
+
+ 			if (client->IsBuyer()) {
+				LogLoginserverDetail("Step 6b(4) - Zone ending buyer mode for client {}", client->GetCleanName());
+ 				client->ToggleBuyerMode(false);
+ 			}
+
+			LogLoginserverDetail("Step 6b(5) - Zone updating UpdateWho(2) for client {}", client->GetCleanName());
+			client->UpdateWho(2);
+
+ 			auto outapp = new EQApplicationPacket();
+			LogLoginserverDetail("Step 6b(6) - Zone sending despawn packet for client {}", client->GetCleanName());
+ 			client->CreateDespawnPacket(outapp, false);
+ 			entity_list.QueueClients(nullptr, outapp, false);
+ 			safe_delete(outapp);
+
+			LogLoginserverDetail("Step 6b(7) - Zone removing client from entity_list");
+ 			entity_list.RemoveMob(client->CastToMob()->GetID());
+
+ 			auto sp          = new ServerPacket(ServerOP_UsertoWorldCancelOfflineResponse, pack->size);
+ 			auto out         = reinterpret_cast<UsertoWorldResponse *>(sp->pBuffer);
+ 			sp->opcode       = ServerOP_UsertoWorldCancelOfflineResponse;
+ 			out->FromID      = in->FromID;
+ 			out->lsaccountid = in->lsaccountid;
+ 			out->response    = in->response;
+ 			out->ToID        = in->ToID;
+ 			out->worldid     = in->worldid;
+ 			strn0cpy(out->login, in->login, 64);
+
+			LogLoginserverDetail("Step 6b(8) - Zone sending ServerOP_UsertoWorldCancelOfflineResponse back to world");
+ 			worldserver.SendPacket(sp);
+ 			safe_delete(sp);
+ 			break;
+ 		}
 		default: {
 			LogInfo("Unknown ZS Opcode [{}] size [{}]", (int) pack->opcode, pack->size);
 			break;

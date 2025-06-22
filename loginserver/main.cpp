@@ -15,19 +15,24 @@
 #include "../common/database.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/zone_store.h"
+#include "../common/evolving_items.h"
+#include "../common/content/world_content_service.h"
+
 #include <time.h>
 #include <stdlib.h>
 #include <string>
 #include <sstream>
 #include <thread>
 
-LoginServer     server;
-EQEmuLogSys     LogSys;
-bool            run_server = true;
-PathManager     path;
-Database        database;
-PlayerEventLogs player_event_logs;
-ZoneStore       zone_store;
+LoginServer          server;
+EQEmuLogSys          LogSys;
+bool                 run_server = true;
+PathManager          path;
+Database             database;
+PlayerEventLogs      player_event_logs;
+ZoneStore            zone_store;
+EvolvingItemsManager evolving_items_manager;
+WorldContentService  content_service;
 
 void CatchSignal(int sig_num)
 {

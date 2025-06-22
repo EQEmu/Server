@@ -1,26 +1,28 @@
-#include "../common/global_define.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/opcodemgr.h"
-#include "../common/rulesys.h"
-#include "../common/platform.h"
-#include "../common/crash.h"
-#include "../common/strings.h"
-#include "../common/event/event_loop.h"
-#include "../common/timer.h"
-#include "database.h"
-#include "queryservconfig.h"
-#include "lfguild.h"
-#include "worldserver.h"
-#include "../common/zone_store.h"
-#include "../common/events/player_event_logs.h"
 #include <list>
 #include <signal.h>
 #include <thread>
-#include "../common/net/servertalk_server.h"
+#include "../common/content/world_content_service.h"
+#include "../common/crash.h"
+#include "../common/discord/discord_manager.h"
+#include "../common/eqemu_logsys.h"
+#include "../common/event/event_loop.h"
+#include "../common/events/player_event_logs.h"
+#include "../common/evolving_items.h"
+#include "../common/global_define.h"
 #include "../common/net/console_server.h"
+#include "../common/net/servertalk_server.h"
+#include "../common/opcodemgr.h"
+#include "../common/platform.h"
+#include "../common/rulesys.h"
+#include "../common/strings.h"
+#include "../common/timer.h"
+#include "../common/zone_store.h"
 #include "../queryserv/zonelist.h"
 #include "../queryserv/zoneserver.h"
-#include "../common/discord/discord_manager.h"
+#include "database.h"
+#include "lfguild.h"
+#include "queryservconfig.h"
+#include "worldserver.h"
 
 volatile bool RunLoops = true;
 
@@ -37,6 +39,8 @@ PlayerEventLogs       player_event_logs;
 ZSList                zs_list;
 uint32                numzones     = 0;
 DiscordManager        discord_manager;
+EvolvingItemsManager  evolving_items_manager;
+WorldContentService   content_service;
 
 void CatchSignal(int sig_num)
 {
