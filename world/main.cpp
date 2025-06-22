@@ -91,7 +91,6 @@
 #include "../common/repositories/character_parcels_repository.h"
 #include "../common/ip_util.h"
 
-SkillCaps           skill_caps;
 ZoneStore           zone_store;
 ClientList          client_list;
 GroupLFPList        LFPGroupList;
@@ -206,7 +205,7 @@ int main(int argc, char **argv)
 		->SetExpansionContext()
 		->ReloadContentFlags();
 
-	skill_caps.SetContentDatabase(&content_db)->LoadSkillCaps();
+	SkillCaps::Instance()->SetContentDatabase(&content_db)->LoadSkillCaps();
 
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
 	server_connection = std::make_unique<EQ::Net::ServertalkServer>();

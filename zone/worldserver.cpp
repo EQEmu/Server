@@ -4627,7 +4627,7 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			break;
 
 		case ServerReload::Type::SkillCaps:
-			skill_caps.ReloadSkillCaps();
+			SkillCaps::Instance()->ReloadSkillCaps();
 			break;
 
 		case ServerReload::Type::DataBucketsCache:

@@ -2171,7 +2171,7 @@ void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 				i == EQ::skills::SkillAlcoholTolerance || i == EQ::skills::SkillBindWound)
 				continue;
 
-			pp->skills[i] = skill_caps.GetSkillCap(pp->class_, (EQ::skills::SkillType)i, 1).cap;
+			pp->skills[i] = SkillCaps::Instance()->GetSkillCap(pp->class_, (EQ::skills::SkillType)i, 1).cap;
 		}
 	}
 
