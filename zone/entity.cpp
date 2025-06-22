@@ -4175,10 +4175,6 @@ void EntityList::ProcessProximitySay(const char *message, Client *c, uint8 langu
 
 void EntityList::SaveAllClientsTaskState()
 {
-	if (!TaskManager::Instance()) {
-		return;
-	}
-
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *client = it->second;
@@ -4192,9 +4188,6 @@ void EntityList::SaveAllClientsTaskState()
 
 void EntityList::ReloadAllClientsTaskState(int task_id)
 {
-	if (!TaskManager::Instance())
-		return;
-
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *client = it->second;

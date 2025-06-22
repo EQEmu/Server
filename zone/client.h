@@ -1358,7 +1358,7 @@ public:
 	}
 	inline bool SaveTaskState()
 	{
-		return TaskManager::Instance() != nullptr && TaskManager::Instance()->SaveClientState(this, task_state);
+		return TaskManager::Instance()->SaveClientState(this, task_state);
 	}
 	inline bool IsTaskStateLoaded() { return task_state != nullptr; }
 	inline bool IsTaskActive(int task_id) { return task_state != nullptr && task_state->IsTaskActive(task_id); }
@@ -1432,13 +1432,13 @@ public:
 	}
 	inline void TaskSetSelector(Mob* mob, int task_set_id, bool ignore_cooldown)
 	{
-		if (TaskManager::Instance() && task_state) {
+		if (task_state) {
 			TaskManager::Instance()->TaskSetSelector(this, mob, task_set_id, ignore_cooldown);
 		}
 	}
 	inline void TaskQuestSetSelector(Mob* mob, const std::vector<int>& tasks, bool ignore_cooldown)
 	{
-		if (TaskManager::Instance() && task_state) {
+		if (task_state) {
 			TaskManager::Instance()->TaskQuestSetSelector(this, mob, tasks, ignore_cooldown);
 		}
 	}

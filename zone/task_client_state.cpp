@@ -521,11 +521,6 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 
 int ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count)
 {
-	if (!TaskManager::Instance())
-	{
-		return 0;
-	}
-
 	int max_updated = 0;
 
 	for (const auto& client_task : m_active_tasks)
@@ -593,11 +588,6 @@ int ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter,
 
 std::pair<int, int> ClientTaskState::FindTask(Client* client, const TaskUpdateFilter& filter) const
 {
-	if (!TaskManager::Instance())
-	{
-		return std::make_pair(0, 0);
-	}
-
 	for (const auto& client_task : m_active_tasks)
 	{
 		const auto task = GetTaskData(client_task);
@@ -1973,7 +1963,7 @@ void ClientTaskState::AcceptNewTask(
 	bool enforce_level_requirement
 )
 {
-	if (!TaskManager::Instance() || task_id < 0) {
+	if (task_id < 0) {
 		client->Message(Chat::Red, "Task system not functioning, or task_id %i out of range.", task_id);
 		return;
 	}
@@ -2455,10 +2445,6 @@ void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
 
 bool ClientTaskState::HasActiveTasks()
 {
-	if (!TaskManager::Instance()) {
-		return false;
-	}
-
 	if (m_active_task.task_id != TASKSLOTEMPTY) {
 		return true;
 	}
@@ -2495,7 +2481,7 @@ void ClientTaskState::LockSharedTask(Client* client, bool lock)
 
 void ClientTaskState::EndSharedTask(Client* client, bool send_fail)
 {
-	if (TaskManager::Instance() && m_active_shared_task.task_id != TASKSLOTEMPTY)
+	if (m_active_shared_task.task_id != TASKSLOTEMPTY)
 	{
 		TaskManager::Instance()->EndSharedTask(*client, m_active_shared_task.task_id, send_fail);
 	}
