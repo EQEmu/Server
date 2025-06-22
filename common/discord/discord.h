@@ -4,7 +4,6 @@
 
 #include <string>
 #include "../types.h"
-#include "../http/httplib.h"
 #include "../repositories/player_event_logs_repository.h"
 #include "../events/player_events.h"
 
