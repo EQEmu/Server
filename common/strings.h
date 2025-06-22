@@ -36,22 +36,15 @@
 #define _STRINGUTIL_H_
 
 #include <charconv>
-#include <sstream>
 #include <cstring>
 #include <string_view>
+#include <string>
 #include <vector>
 #include <cstdarg>
 #include <type_traits>
 
-#ifndef _WIN32
-// this doesn't appear to affect linux-based systems..need feedback for _WIN64
-
-#endif
-
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <ctype.h>
-#include <functional>
-#include <algorithm>
 #endif
 
 #include "types.h"

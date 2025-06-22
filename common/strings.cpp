@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 
 #include <random>
 #include <string>
@@ -49,6 +50,12 @@
 //Const char based
 #include "strings_legacy.cpp" // legacy c functions
 #include "strings_misc.cpp" // anything non "Strings" scoped
+
+#ifdef _WINDOWS
+#include <ctype.h>
+#include <functional>
+#include <algorithm>
+#endif
 
 std::string Strings::Random(size_t length)
 {
