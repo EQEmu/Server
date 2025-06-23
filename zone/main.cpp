@@ -93,7 +93,6 @@ extern volatile bool is_zone_loaded;
 
 EntityList  entity_list;
 WorldServer worldserver;
-ZoneStore   zone_store;
 uint32      numclients = 0;
 char        errorname[32];
 extern Zone *zone;
@@ -364,9 +363,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	zone_store.LoadZones(content_db);
+	ZoneStore::Instance()->LoadZones(content_db);
 
-	if (zone_store.GetZones().empty()) {
+	if (ZoneStore::Instance()->GetZones().empty()) {
 		LogError("Failed to load zones data, check your schema for possible errors");
 		return 1;
 	}

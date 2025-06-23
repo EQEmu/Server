@@ -1219,7 +1219,7 @@ void ConsoleCrossZoneMove(
 	const auto&  zone_short_name = !Strings::IsNumber(args[2]) ? args[2] : "";
 	const uint16 instance_id     = Strings::IsNumber(args[2]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[2])) : 0;
 
-	const auto& z = !zone_short_name.empty() ? zone_store.GetZone(zone_short_name) : nullptr;
+	const auto& z = !zone_short_name.empty() ? ZoneStore::Instance()->GetZone(zone_short_name) : nullptr;
 
 	if (z && !z->id) {
 		connection->SendLine(fmt::format("No zone with the short name '{}' exists.", zone_short_name));
@@ -1289,7 +1289,7 @@ void ConsoleWorldWideMove(
 	const auto&  zone_short_name = !Strings::IsNumber(args[2]) ? args[2] : "";
 	const uint16 instance_id     = Strings::IsNumber(args[2]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[2])) : 0;
 
-	const auto& z = !zone_short_name.empty() ? zone_store.GetZone(zone_short_name) : nullptr;
+	const auto& z = !zone_short_name.empty() ? ZoneStore::Instance()->GetZone(zone_short_name) : nullptr;
 
 	if (z && !z->id) {
 		connection->SendLine(fmt::format("No zone with the short name '{}' exists.", zone_short_name));
