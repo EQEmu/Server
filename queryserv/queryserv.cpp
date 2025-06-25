@@ -25,7 +25,6 @@ volatile bool RunLoops = true;
 
 QSDatabase            qs_database;
 Database              database;
-LFGuildManager        lfguildmanager;
 std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
@@ -154,7 +153,7 @@ int main()
 	worldserver->Connect();
 
 	/* Load Looking For Guild Manager */
-	lfguildmanager.LoadDatabase();
+	LFGuildManager::Instance()->LoadDatabase();
 
 	Timer player_event_process_timer(1000);
 	player_event_logs.SetDatabase(&qs_database)->Init();
@@ -168,7 +167,7 @@ int main()
 		}
 
 		if (LFGuildExpireTimer.Check()) {
-			lfguildmanager.ExpireEntries();
+			LFGuildManager::Instance()->ExpireEntries();
 		}
 
 		if (player_event_process_timer.Check()) {
