@@ -42,7 +42,6 @@ extern WorldServer     worldserver;
 extern Clientlist      *g_Clientlist;
 extern const ucsconfig *Config;
 extern UCSDatabase       database;
-extern DiscordManager  discord_manager;
 
 void ProcessMailTo(Client *c, const std::string& from, const std::string& subject, const std::string& message);
 
@@ -92,14 +91,14 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 		cereal::BinaryInputArchive archive(ss);
 		archive(n);
 
-		discord_manager.QueuePlayerEventMessage(n);
+		DiscordManager::Instance()->QueuePlayerEventMessage(n);
 
 		break;
 	}
 	case ServerOP_DiscordWebhookMessage: {
 		auto *q = (DiscordWebhookMessage_Struct *) p.Data();
 
-		discord_manager.QueueWebhookMessage(
+		DiscordManager::Instance()->QueueWebhookMessage(
 			q->webhook_id,
 			q->message
 		);
