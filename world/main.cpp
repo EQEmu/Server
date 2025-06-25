@@ -95,7 +95,6 @@ ClientList          client_list;
 GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;
 LauncherList        launcher_list;
-WorldEventScheduler event_scheduler;
 volatile bool       RunLoops   = true;
 uint32              numclients = 0;
 uint32              numzones   = 0;
@@ -418,7 +417,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		event_scheduler.Process(&zoneserver_list);
+		WorldEventScheduler::Instance()->Process(&zoneserver_list);
 
 		client_list.Process();
 		guild_mgr.Process();

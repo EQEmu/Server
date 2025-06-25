@@ -9,6 +9,12 @@ class ZoneEventScheduler : public ServerEventScheduler {
 public:
 	void Process(Zone *zone, WorldContentService *content_service);
 	void SyncEventDataWithActiveEvents();
+
+	static ZoneEventScheduler* Instance()
+	{
+		static ZoneEventScheduler instance;
+		return &instance;
+	}
 };
 
 #endif //EQEMU_ZONE_EVENT_SCHEDULER_H
