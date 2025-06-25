@@ -224,7 +224,6 @@ void WorldBoot::RegisterLoginservers()
 	}
 }
 
-extern SharedTaskManager   shared_task_manager;
 extern AdventureManager    adventure_manager;
 extern WorldEventScheduler event_scheduler;
 
@@ -400,13 +399,13 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		->ReloadContentFlags();
 
 	LogInfo("Initializing [SharedTaskManager]");
-	shared_task_manager.SetDatabase(&database)
+	SharedTaskManager::Instance()->SetDatabase(&database)
 		->SetContentDatabase(&content_db)
 		->LoadTaskData()
 		->LoadSharedTaskState();
 
 	LogInfo("Purging expired shared tasks");
-	shared_task_manager.PurgeExpiredSharedTasks();
+	SharedTaskManager::Instance()->PurgeExpiredSharedTasks();
 
 	LogInfo("Cleaning up instance corpses");
 	database.CleanupInstanceCorpses();
