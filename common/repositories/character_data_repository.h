@@ -167,6 +167,30 @@ public:
 
 		return zone_player_counts;
 	}
+
+	static std::vector<uint32_t> GetCharacterIDsByAccountID(
+		Database& db,
+		uint32_t  account_id
+	)
+	{
+		std::vector<uint32_t> character_ids;
+
+		auto query = fmt::format(
+			"SELECT id FROM character_data WHERE account_id = {} AND deleted_at IS NULL",
+			account_id
+		);
+
+		auto results = db.QueryDatabase(query);
+		if (results.Success()) {
+			for (auto row : results) {
+				if (row[0]) {
+					character_ids.push_back(static_cast<uint32_t>(std::stoul(row[0])));
+				}
+			}
+		}
+
+		return character_ids;
+	}
 };
 
 #endif //EQEMU_CHARACTER_DATA_REPOSITORY_H

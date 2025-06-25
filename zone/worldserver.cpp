@@ -68,7 +68,6 @@ extern Zone                  *zone;
 extern volatile bool          is_zone_loaded;
 extern void                   Shutdown();
 extern WorldServer            worldserver;
-extern PetitionList           petition_list;
 extern uint32                 numclients;
 extern volatile bool          RunLoops;
 extern QuestParserCollection *parse;
@@ -911,8 +910,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		std::cout << "Got Server Requested Petition List Refresh" << std::endl;
 		ServerPetitionUpdate_Struct* sus = (ServerPetitionUpdate_Struct*)pack->pBuffer;
 		// this was typoed to = instead of ==, not that it acts any different now though..
-		if (sus->status == 0) petition_list.ReadDatabase();
-		else if (sus->status == 1) petition_list.ReadDatabase(); // Until I fix this to be better....
+		if (sus->status == 0) PetitionList::Instance()->ReadDatabase();
+		else if (sus->status == 1) PetitionList::Instance()->ReadDatabase(); // Until I fix this to be better....
 		break;
 	}
 	case ServerOP_RezzPlayer: {
@@ -3140,7 +3139,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_WWMarquee:
 	{
 		auto s = (WWMarquee_Struct*) pack->pBuffer;
-
 		for (const auto& c : entity_list.GetClientList()) {
 			if (
 				c.second->Admin() >= s->min_status &&
@@ -4592,7 +4590,10 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 
 		case ServerReload::Type::Logs:
 			LogSys.LoadLogDatabaseSettings();
-			player_event_logs.ReloadSettings();
+			// if QS process is enabled, we get settings from QS
+			if (!RuleB(Logging, PlayerEventsQSProcess)) {
+				player_event_logs.ReloadSettings();
+			}
 			break;
 
 		case ServerReload::Type::Loot:
@@ -4627,7 +4628,7 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			break;
 
 		case ServerReload::Type::SkillCaps:
-			skill_caps.ReloadSkillCaps();
+			SkillCaps::Instance()->ReloadSkillCaps();
 			break;
 
 		case ServerReload::Type::DataBucketsCache:
@@ -4644,11 +4645,9 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 		case ServerReload::Type::Tasks:
 			if (RuleB(Tasks, EnableTaskSystem)) {
 				entity_list.SaveAllClientsTaskState();
-				safe_delete(task_manager);
-				task_manager = new TaskManager;
-				task_manager->LoadTasks();
+				TaskManager::Instance()->LoadTasks();
 				entity_list.ReloadAllClientsTaskState();
-				task_manager->LoadTaskSets();
+				TaskManager::Instance()->LoadTaskSets();
 			}
 			break;
 
@@ -4700,7 +4699,7 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			break;
 
 		case ServerReload::Type::ZoneData:
-			zone_store.LoadZones(content_db);
+			ZoneStore::Instance()->LoadZones(content_db);
 			zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
 			break;
 

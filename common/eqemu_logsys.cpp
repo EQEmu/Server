@@ -537,9 +537,9 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 {
 	EQEmuLogSys::CloseFileLogs();
 
-	if (!File::Exists(path.GetLogPath())) {
-		LogInfo("Logs directory not found, creating [{}]", path.GetLogPath());
-		File::Makedir(path.GetLogPath());
+	if (!File::Exists(PathManager::Instance()->GetLogPath())) {
+		LogInfo("Logs directory not found, creating [{}]", PathManager::Instance()->GetLogPath());
+		File::Makedir(PathManager::Instance()->GetLogPath());
 	}
 
 	/**

@@ -36,52 +36,18 @@
 #define _STRINGUTIL_H_
 
 #include <charconv>
-#include <sstream>
-#include <string.h>
+#include <cstring>
 #include <string_view>
+#include <string>
 #include <vector>
 #include <cstdarg>
-#include <tuple>
 #include <type_traits>
 
-#include <fmt/format.h>
-#include <cereal/external/rapidjson/document.h>
-
-#ifndef _WIN32
-// this doesn't appear to affect linux-based systems..need feedback for _WIN64
-
-#endif
-
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <ctype.h>
-#include <functional>
-#include <algorithm>
 #endif
 
 #include "types.h"
-
-namespace detail {
-	// template magic to check if std::from_chars floating point functions exist
-	template <typename T, typename = void>
-	struct has_from_chars_float : std::false_type { };
-
-	// basically it "uses" this template if they do exist because reasons
-	template <typename T>
-	struct has_from_chars_float < T,
-	std::void_t<decltype(std::from_chars(std::declval<const char *>(), std::declval<const char *>(),
-						 std::declval<T &>()))>> : std::true_type { };
-}; // namespace detail
-
-namespace EQ {
-// lame -- older GCC's didn't define this, clang's libc++ however does, even though they lack FP support
-#if defined(__GNUC__) && (__GNUC__ < 11) && !defined(__clang__)
-	enum class chars_format {
-		scientific = 1, fixed = 2, hex = 4, general = fixed | scientific
-	};
-#else
-	using chars_format = std::chars_format;
-#endif
-}; // namespace EQ
 
 class Strings {
 public:
@@ -133,61 +99,6 @@ public:
 	static bool BeginsWith(const std::string& subject, const std::string& search);
 	static bool EndsWith(const std::string& subject, const std::string& search);
 	static std::string ZoneTime(const uint8 hours, const uint8 minutes);
-
-	template<typename T>
-	static std::string
-	ImplodePair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
-	{
-		if (src.empty()) {
-			return {};
-		}
-		std::ostringstream oss;
-		for (const T &src_iter: src) {
-			oss << encapsulation.first << src_iter << encapsulation.second << glue;
-		}
-		std::string output(oss.str());
-		output.resize(output.size() - glue.size());
-		return output;
-	}
-
-	// basic string_view overloads that just use std stuff since they work!
-	template <typename T>
-	std::enable_if_t<std::is_floating_point_v<T> && detail::has_from_chars_float<T>::value, std::from_chars_result>
-	static from_chars(std::string_view str, T& value, EQ::chars_format fmt = EQ::chars_format::general)
-	{
-		return std::from_chars(str.data(), str.data() + str.size(), value, fmt);
-	}
-
-	template <typename T>
-	std::enable_if_t<std::is_integral_v<T>, std::from_chars_result>
-	static from_chars(std::string_view str, T& value, int base = 10)
-	{
-		return std::from_chars(str.data(), str.data() + str.size(), value, base);
-	}
-
-	// fallback versions of floating point in case they're not implemented
-	// TODO: add error handling ...
-	// This does have to allocate since from_chars doesn't need a null terminated string and neither does string_view
-	template <typename T>
-	std::enable_if_t<std::is_floating_point_v<T> && !detail::has_from_chars_float<T>::value && std::is_same_v<T, float>, std::from_chars_result>
-	static from_chars(std::string_view str, T& value, EQ::chars_format fmt = EQ::chars_format::general)
-	{
-		std::from_chars_result res{};
-		std::string tmp_str(str.data(), str.size());
-		value = strtof(tmp_str.data(), nullptr);
-		return res;
-	}
-
-	template <typename T>
-	std::enable_if_t<std::is_floating_point_v<T> && !detail::has_from_chars_float<T>::value && std::is_same_v<T, double>, std::from_chars_result>
-	static from_chars(std::string_view str, T& value, EQ::chars_format fmt = EQ::chars_format::general)
-	{
-		std::from_chars_result res{};
-		std::string tmp_str(str.data(), str.size());
-		value = strtod(tmp_str.data(), nullptr);
-		return res;
-	}
-
 	static std::string Slugify(const std::string &input, const std::string &separator = "-");
 	static bool IsValidJson(const std::string& json);
 };
@@ -198,93 +109,6 @@ const std::string vStringFormat(const char *format, va_list args);
 // For converstion of numerics into English
 // Used for grid nodes, as NPC names remove numerals.
 // But general purpose
-
-const std::string NUM_TO_ENGLISH_X[] = {
-	"", "One ", "Two ", "Three ", "Four ",
-	"Five ", "Six ", "Seven ", "Eight ", "Nine ", "Ten ", "Eleven ",
-	"Twelve ", "Thirteen ", "Fourteen ", "Fifteen ",
-	"Sixteen ", "Seventeen ", "Eighteen ", "Nineteen "
-};
-
-const std::string NUM_TO_ENGLISH_Y[] = {
-	"", "", "Twenty ", "Thirty ", "Forty ",
-	"Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety "
-};
-
-// _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
-template<typename T1, typename T2>
-std::vector<std::string> join_pair(
-	const std::string &glue,
-	const std::pair<char, char> &encapsulation,
-	const std::vector<std::pair<T1, T2>> &src
-)
-{
-	if (src.empty()) {
-		return {};
-	}
-
-	std::vector<std::string> output;
-
-	for (const std::pair<T1, T2> &src_iter: src) {
-		output.emplace_back(
-
-			fmt::format(
-				"{}{}{}{}{}{}{}",
-				encapsulation.first,
-				src_iter.first,
-				encapsulation.second,
-				glue,
-				encapsulation.first,
-				src_iter.second,
-				encapsulation.second
-			)
-		);
-	}
-
-	return output;
-}
-
-// _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
-template<typename T1, typename T2, typename T3, typename T4>
-std::vector<std::string> join_tuple(
-	const std::string &glue,
-	const std::pair<char, char> &encapsulation,
-	const std::vector<std::tuple<T1, T2, T3, T4>> &src
-)
-{
-	if (src.empty()) {
-		return {};
-	}
-
-	std::vector<std::string> output;
-
-	for (const std::tuple<T1, T2, T3, T4> &src_iter: src) {
-
-		output.emplace_back(
-
-			fmt::format(
-				"{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-				encapsulation.first,
-				std::get<0>(src_iter),
-				encapsulation.second,
-				glue,
-				encapsulation.first,
-				std::get<1>(src_iter),
-				encapsulation.second,
-				glue,
-				encapsulation.first,
-				std::get<2>(src_iter),
-				encapsulation.second,
-				glue,
-				encapsulation.first,
-				std::get<3>(src_iter),
-				encapsulation.second
-			)
-		);
-	}
-
-	return output;
-}
 
 // misc functions
 std::string SanitizeWorldServerName(std::string server_long_name);
@@ -309,19 +133,5 @@ void RemoveApostrophes(std::string &s);
 std::string FormatName(const std::string &char_name);
 bool IsAllowedWorldServerCharacterList(char c);
 void SanitizeWorldServerName(char *name);
-
-template<typename InputIterator, typename OutputIterator>
-auto CleanMobName(InputIterator first, InputIterator last, OutputIterator result)
-{
-	for (; first != last; ++first) {
-		if (*first == '_') {
-			*result = ' ';
-		}
-		else if (isalpha(*first) || *first == '`') {
-			*result = *first;
-		}
-	}
-	return result;
-}
 
 #endif

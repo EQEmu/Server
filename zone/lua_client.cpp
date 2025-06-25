@@ -3584,6 +3584,24 @@ bool Lua_Client::KeyRingRemove(uint32 item_id)
 	return self->KeyRingRemove(item_id);
 }
 
+
+bool Lua_Client::CompleteTask(int task_id)
+{
+	Lua_Safe_Call_Bool();
+	return self->CompleteTask(task_id);
+}
+
+bool Lua_Client::UncompleteTask(int task_id)
+{
+	Lua_Safe_Call_Bool();
+	return self->UncompleteTask(task_id);
+}
+
+void Lua_Client::EnableTitleSet(uint32 title_set) {
+	Lua_Safe_Call_Void();
+	self->EnableTitle(title_set);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3663,6 +3681,7 @@ luabind::scope lua_register_client() {
 	.def("ClearPEQZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearPEQZoneFlag)
 	.def("ClearXTargets", (void(Lua_Client::*)(void))&Lua_Client::ClearXTargets)
 	.def("ClearZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearZoneFlag)
+	.def("CompleteTask", (bool(Lua_Client::*)(int))&Lua_Client::CompleteTask)
 	.def("Connected", (bool(Lua_Client::*)(void))&Lua_Client::Connected)
 	.def("CountAugmentEquippedByID", (uint32(Lua_Client::*)(uint32))&Lua_Client::CountAugmentEquippedByID)
 	.def("CountItem", (uint32(Lua_Client::*)(uint32))&Lua_Client::CountItem)
@@ -3693,6 +3712,7 @@ luabind::scope lua_register_client() {
 	.def("EnableAreaHPRegen", &Lua_Client::EnableAreaHPRegen)
 	.def("EnableAreaManaRegen", &Lua_Client::EnableAreaManaRegen)
 	.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
+	.def("EnableTitleSet", &Lua_Client::EnableTitleSet)
 	.def("EndSharedTask", (void(Lua_Client::*)(void))&Lua_Client::EndSharedTask)
 	.def("EndSharedTask", (void(Lua_Client::*)(bool))&Lua_Client::EndSharedTask)
 	.def("Escape", (void(Lua_Client::*)(void))&Lua_Client::Escape)
@@ -4156,6 +4176,7 @@ luabind::scope lua_register_client() {
 	.def("TrainDisc", (void(Lua_Client::*)(int))&Lua_Client::TrainDisc)
 	.def("TrainDiscBySpellID", (void(Lua_Client::*)(int32))&Lua_Client::TrainDiscBySpellID)
 	.def("UnFreeze", (void(Lua_Client::*)(void))&Lua_Client::UnFreeze)
+	.def("UncompleteTask", (bool(Lua_Client::*)(int))&Lua_Client::UncompleteTask)
 	.def("Undye", (void(Lua_Client::*)(void))&Lua_Client::Undye)
 	.def("UnmemSpell", (void(Lua_Client::*)(int))&Lua_Client::UnmemSpell)
 	.def("UnmemSpell", (void(Lua_Client::*)(int,bool))&Lua_Client::UnmemSpell)
