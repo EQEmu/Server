@@ -913,7 +913,7 @@ bool ZSList::SendPacketToBootedZones(ServerPacket* pack)
 
 bool ZSList::SendPacketToZonesWithGuild(uint32 guild_id, ServerPacket* pack)
 {
-	auto servers = client_list.GetGuildZoneServers(guild_id);
+	auto servers = ClientList::Instance()->GetGuildZoneServers(guild_id);
 	for (auto const& z : zone_server_list) {
 		for (auto const& server_id : servers) {
 			if (z->GetID() == server_id && z->GetZoneID() > 0) {
@@ -927,7 +927,7 @@ bool ZSList::SendPacketToZonesWithGuild(uint32 guild_id, ServerPacket* pack)
 
 bool ZSList::SendPacketToZonesWithGMs(ServerPacket* pack)
 {
-	auto servers = client_list.GetZoneServersWithGMs();
+	auto servers = ClientList::Instance()->GetZoneServersWithGMs();
 	for (auto const &z: zone_server_list) {
 		for (auto const &server_id: servers) {
 			if (z->GetID() == server_id && z->GetZoneID() > 0) {
