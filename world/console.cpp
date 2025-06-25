@@ -33,8 +33,6 @@
 #include "../common/zone_store.h"
 #include <fmt/format.h>
 
-extern ClientList      client_list;
-
 /**
  * @param username
  * @param password
@@ -191,7 +189,7 @@ void ConsoleWho(
 	}
 
 	WorldConsoleTCPConnection console_connection(connection);
-	client_list.ConsoleSendWhoAll(0, connection->Admin(), &whom, &console_connection);
+	ClientList::Instance()->ConsoleSendWhoAll(0, connection->Admin(), &whom, &console_connection);
 }
 
 /**
@@ -876,7 +874,7 @@ void ConsoleIpLookup(
 {
 	if (!args.empty()) {
 		WorldConsoleTCPConnection console_connection(connection);
-		client_list.SendCLEList(connection->Admin(), nullptr, &console_connection, args[0].c_str());
+		ClientList::Instance()->SendCLEList(connection->Admin(), nullptr, &console_connection, args[0].c_str());
 	}
 }
 

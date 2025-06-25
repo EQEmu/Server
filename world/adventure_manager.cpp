@@ -14,8 +14,6 @@
 #include <sstream>
 #include <stdio.h>
 
-extern ClientList client_list;
-
 AdventureManager::AdventureManager()
 {
 	process_timer = new Timer(500);
@@ -1854,7 +1852,7 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 
 void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1920,7 +1918,7 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 
 void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -1986,7 +1984,7 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 
 void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 {
-	ClientListEntry *pc = client_list.FindCharacter(player);
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(player);
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, 64 + sizeof(AdventureLeaderboard_Struct));
@@ -2072,7 +2070,7 @@ bool AdventureManager::PopFinishedEvent(const char *name, AdventureFinishEvent &
 
 void AdventureManager::SendAdventureFinish(AdventureFinishEvent fe)
 {
-	ClientListEntry *pc = client_list.FindCharacter(fe.name.c_str());
+	ClientListEntry *pc = ClientList::Instance()->FindCharacter(fe.name.c_str());
 	if(pc)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));

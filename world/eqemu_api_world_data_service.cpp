@@ -13,7 +13,6 @@
 #include "ucs.h"
 #include "queryserv.h"
 
-extern ClientList        client_list;
 extern WorldGuildManager guild_mgr;
 
 void callGetZoneList(Json::Value &response)

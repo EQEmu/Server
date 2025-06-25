@@ -91,7 +91,6 @@
 #include "../common/repositories/character_parcels_repository.h"
 #include "../common/ip_util.h"
 
-ClientList          client_list;
 GroupLFPList        LFPGroupList;
 LauncherList        launcher_list;
 volatile bool       RunLoops   = true;
@@ -394,7 +393,7 @@ int main(int argc, char **argv)
 					LogInfo("Connection [{}] PASSED banned IPs check. Processing connection", inet_ntoa(in));
 					auto client = new Client(eqsi);
 					// @merth: client->zoneattempt=0;
-					client_list.Add(client);
+					ClientList::Instance()->Add(client);
 				}
 				else {
 					LogInfo("Connection from [{}] failed banned IPs check. Closing connection", inet_ntoa(in));
@@ -409,13 +408,13 @@ int main(int argc, char **argv)
 				);
 				auto client = new Client(eqsi);
 				// @merth: client->zoneattempt=0;
-				client_list.Add(client);
+				ClientList::Instance()->Add(client);
 			}
 		}
 
 		WorldEventScheduler::Instance()->Process(ZSList::Instance());
 
-		client_list.Process();
+		ClientList::Instance()->Process();
 		guild_mgr.Process();
 
 		if (parcel_prune_timer.Check()) {
@@ -477,7 +476,7 @@ int main(int argc, char **argv)
 			std::string window_title = fmt::format(
 				"World [{}] Clients [{}]",
 				Config->LongName,
-				client_list.GetClientCount()
+				ClientList::Instance()->GetClientCount()
 			);
 			UpdateWindowTitle(window_title);
 		}

@@ -9,8 +9,6 @@
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
 
-extern ClientList client_list;
-
 QueryServConnection::QueryServConnection()
 {
 }

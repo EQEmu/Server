@@ -42,7 +42,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/buyer_repository.h"
 
 extern uint32 numzones;
-extern ClientList client_list;
 volatile bool UCSServerAvailable_ = false;
 void CatchSignal(int sig_num);
 

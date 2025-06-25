@@ -14,8 +14,6 @@
 #include "../common/repositories/task_activities_repository.h"
 #include "dynamic_zone.h"
 
-extern ClientList        client_list;
-
 void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 {
 	switch (pack->opcode) {

@@ -8,8 +8,6 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/repositories/instance_list_repository.h"
 
-extern ClientList client_list;
-
 Database& DynamicZone::GetDatabase()
 {
 	return database;

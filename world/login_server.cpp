@@ -20,7 +20,6 @@
 #include "cliententry.h"
 #include "world_config.h"
 
-extern ClientList    client_list;
 extern uint32        numzones;
 extern uint32        numplayers;
 extern volatile bool RunLoops;

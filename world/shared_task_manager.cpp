@@ -17,8 +17,6 @@
 #include "../common/repositories/shared_task_dynamic_zones_repository.h"
 #include <ctime>
 
-extern ClientList client_list;
-
 SharedTaskManager::SharedTaskManager()
 	: m_process_timer{ static_cast<uint32_t>(RuleI(TaskSystem, SharedTasksWorldProcessRate)) }
 {
@@ -1273,7 +1271,7 @@ void SharedTaskManager::SendMembersMessageID(
 	memcpy(buf->args, serialized_args.buffer(), serialized_args.size());
 
 	for (const auto &member : shared_task->GetMembers()) {
-		auto character = client_list.FindCLEByCharacterID(member.character_id);
+		auto character = ClientList::Instance()->FindCLEByCharacterID(member.character_id);
 		if (character && character->Server()) {
 			strn0cpy(buf->client_name, character->name(), sizeof(buf->client_name));
 			character->Server()->SendPacket(pack.get());
@@ -1319,13 +1317,13 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 		// messages for every character already in a shared task
 		for (const auto& it : shared_task_members) {
 			if (it.character_id == request.leader_id) {
-				client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_HAVE);
+				ClientList::Instance()->SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_HAVE);
 			}
 			else if (request.group_type == SharedTaskRequestGroupType::Group) {
-				client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_GROUP_HAS, {it.character_name});
+				ClientList::Instance()->SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_GROUP_HAS, {it.character_name});
 			}
 			else {
-				client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_RAID_HAS, {it.character_name});
+				ClientList::Instance()->SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_RAID_HAS, {it.character_name});
 			}
 		}
 
@@ -1334,40 +1332,40 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 
 	// check if any party member's minimum level is too low (pre-2014 this was average level)
 	if (task.min_level > 0 && request.lowest_level < task.min_level) {
-		client_list.SendCharacterMessage(request.leader_id, Chat::Red, TaskStr::Get(TaskStr::LVL_TOO_LOW));
+		ClientList::Instance()->SendCharacterMessage(request.leader_id, Chat::Red, TaskStr::Get(TaskStr::LVL_TOO_LOW));
 		return false;
 	}
 
 	// check if any party member's maximum level is too high (pre-2014 this was average level)
 	if (task.max_level > 0 && request.highest_level > task.max_level) {
-		client_list.SendCharacterMessage(request.leader_id, Chat::Red, TaskStr::Get(TaskStr::LVL_TOO_HIGH));
+		ClientList::Instance()->SendCharacterMessage(request.leader_id, Chat::Red, TaskStr::Get(TaskStr::LVL_TOO_HIGH));
 		return false;
 	}
 
 	// allow gm/dev bypass for minimum player count requirements
-	auto requester = client_list.FindCLEByCharacterID(request.leader_id);
+	auto requester = ClientList::Instance()->FindCLEByCharacterID(request.leader_id);
 	bool is_gm     = (requester && requester->GetGM());
 
 	// check if party member count is below the minimum
 	if (!is_gm && task.min_players > 0 && request.members.size() < task.min_players) {
-		client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::MIN_PLAYERS);
+		ClientList::Instance()->SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::MIN_PLAYERS);
 		return false;
 	}
 
 	if (is_gm) {
-		client_list.SendCharacterMessage(requester->CharID(), Chat::White, "Your GM flag allows you to bypass shared task minimum player requirements.");
+		ClientList::Instance()->SendCharacterMessage(requester->CharID(), Chat::White, "Your GM flag allows you to bypass shared task minimum player requirements.");
 	}
 
 	// check if party member count is above the maximum
 	// todo: live creates the shared task but truncates members if it exceeds max (sorted by leader and raid group numbers)
 	if (task.max_players > 0 && request.members.size() > task.max_players) {
-		client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::MAX_PLAYERS);
+		ClientList::Instance()->SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::MAX_PLAYERS);
 		return false;
 	}
 
 	// check if party level spread exceeds task's maximum
 	if (task.level_spread > 0 && (request.highest_level - request.lowest_level) > task.level_spread) {
-		client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::LVL_SPREAD_HIGH);
+		ClientList::Instance()->SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::LVL_SPREAD_HIGH);
 		return false;
 	}
 
@@ -1383,10 +1381,10 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 
 		if (character_task_timers.front().character_id == request.leader_id) {
 			if (timer_type == TaskTimerType::Replay) {
-				client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::YOU_REPLAY_TIMER, {days, hours, mins});
+				ClientList::Instance()->SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::YOU_REPLAY_TIMER, {days, hours, mins});
 			}
 			else if (timer_type == TaskTimerType::Request) {
-				client_list.SendCharacterMessage(request.leader_id, Chat::Red, fmt::format(
+				ClientList::Instance()->SendCharacterMessage(request.leader_id, Chat::Red, fmt::format(
 					TaskStr::Get(TaskStr::YOU_REQUEST_TIMER), days, hours, mins));
 			}
 		}
@@ -1397,11 +1395,11 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 				});
 
 			if (it != request.members.end() && timer_type == TaskTimerType::Replay) {
-				client_list.SendCharacterMessageID(request.leader_id, Chat::Red,
+				ClientList::Instance()->SendCharacterMessageID(request.leader_id, Chat::Red,
 					TaskStr::PLAYER_REPLAY_TIMER, {it->character_name, days, hours, mins});
 			}
 			else if (it != request.members.end() && timer_type == TaskTimerType::Request) {
-				client_list.SendCharacterMessage(request.leader_id, Chat::Red, fmt::format(
+				ClientList::Instance()->SendCharacterMessage(request.leader_id, Chat::Red, fmt::format(
 					TaskStr::Get(TaskStr::PLAYER_REQUEST_TIMER), it->character_name, days, hours, mins));
 			}
 		}
@@ -1425,7 +1423,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 	}
 
 	// check if player is online and in cle (other checks require online)
-	auto cle = client_list.FindCLEByCharacterID(character_id);
+	auto cle = ClientList::Instance()->FindCLEByCharacterID(character_id);
 	if (!cle || !cle->Server()) {
 		SendLeaderMessageID(s, Chat::Red, TaskStr::PLAYER_NOT_ONLINE, {player_name});
 		SendLeaderMessageID(s, Chat::Red, TaskStr::COULD_NOT_BE_INVITED, {player_name});
@@ -1613,7 +1611,7 @@ void SharedTaskManager::AddReplayTimers(SharedTask *s)
 
 			task_timers.emplace_back(timer);
 
-			client_list.SendCharacterMessage(
+			ClientList::Instance()->SendCharacterMessage(
 				member_id,
 				Chat::Yellow,
 				fmt::format(

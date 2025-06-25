@@ -34,8 +34,6 @@
 #include "../common/repositories/tributes_repository.h"
 #include "../common/repositories/tribute_levels_repository.h"
 
-
-extern ClientList client_list;
 std::map<uint32, TributeData> tribute_list;
 
 WorldGuildManager guild_mgr;
@@ -102,7 +100,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 
 		RefreshGuild(s->guild_id);
 		//preform the local update
-		client_list.UpdateClientGuild(s->char_id, s->guild_id);
+		ClientList::Instance()->UpdateClientGuild(s->char_id, s->guild_id);
 
 		//broadcast this update to any zone with a member in this guild.
 		//because im sick of this not working, sending it to all zones, just spends a bit more bandwidth.
@@ -306,7 +304,7 @@ void WorldGuildManager::Process()
 
 uint32 WorldGuildManager::GetGuildTributeCost(uint32 guild_id)
 {
-	auto guild_members = client_list.GetGuildClientsWithTributeOptIn(guild_id);
+	auto guild_members = ClientList::Instance()->GetGuildClientsWithTributeOptIn(guild_id);
 	auto total         = guild_members.size();
 	auto total_cost    = 0;
 

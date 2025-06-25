@@ -89,7 +89,6 @@
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
 
-extern ClientList client_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
@@ -476,7 +475,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 
 	LogClientLogin("Checking authentication id [{}]", id);
 
-	if ((cle = client_list.CheckAuth(id, password))) {
+	if ((cle = ClientList::Instance()->CheckAuth(id, password))) {
 		LoadDataBucketsCache();
 
 		LogClientLogin("Checking authentication id [{}] passed", id);
@@ -799,7 +798,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		RuleB(World, EnableIPExemptions) ||
 		RuleI(World, MaxClientsPerIP) > 0
 	) {
-		client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
+		ClientList::Instance()->GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
 	}
 
 	auto ew = (EnterWorld_Struct *) app->pBuffer;

@@ -15,7 +15,6 @@
 #include "../common/zone_store.h"
 #include "../common/repositories/character_corpses_repository.h"
 
-extern ClientList client_list;
 extern EQ::Random emu_random;
 
 Adventure::Adventure(AdventureTemplate *t)
@@ -228,7 +227,7 @@ void Adventure::SendAdventureMessage(uint32 type, const char *msg)
 	auto iter = players.begin();
 	while(iter != players.end())
 	{
-		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
+		ClientListEntry *current = ClientList::Instance()->FindCharacter((*iter).c_str());
 		if(current)
 		{
 			strcpy(sms->to, (*iter).c_str());
@@ -281,7 +280,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 {
 	auto iter = players.begin();
 	while (iter != players.end()) {
-		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
+		ClientListEntry *current = ClientList::Instance()->FindCharacter((*iter).c_str());
 		auto character_id = database.GetCharacterID(*iter);
 
 		if (character_id == 0) {

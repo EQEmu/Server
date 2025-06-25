@@ -9,7 +9,6 @@
 #include "world_config.h"
 
 extern uint32            numplayers;
-extern ClientList        client_list;
 extern volatile bool     RunLoops;
 
 ClientListEntry::ClientListEntry(

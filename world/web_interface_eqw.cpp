@@ -6,7 +6,6 @@
 #include "zonelist.h"
 #include "launcher_list.h"
 
-extern ClientList client_list;
 extern LauncherList launcher_list;
 
 void EQW__GetConfig(WebInterface *i, const std::string& method, const std::string& id, const Json::Value& params) {
@@ -52,7 +51,7 @@ void EQW__Unlock(WebInterface *i, const std::string& method, const std::string& 
 }
 
 void EQW__GetPlayerCount(WebInterface *i, const std::string& method, const std::string& id, const Json::Value& params) {
-	Json::Value ret = client_list.GetClientCount();
+	Json::Value ret = ClientList::Instance()->GetClientCount();
 	i->SendResponse(id, ret);
 }
 

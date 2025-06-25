@@ -45,7 +45,6 @@
 
 #include <algorithm>
 
-extern ClientList	client_list;
 extern uint32	numzones;
 extern LauncherList launcher_list;
 extern volatile bool	RunLoops;
@@ -156,7 +155,7 @@ std::map<std::string,std::string> EQW::GetZoneDetails(Const_char *zone_ref) {
 }
 
 int EQW::CountPlayers() {
-	return(client_list.GetClientCount());
+	return(ClientList::Instance()->GetClientCount());
 }
 
 //returns an array of character names in the zone (empty=all zones)
@@ -164,7 +163,7 @@ std::vector<std::string> EQW::ListPlayers(Const_char *zone_name) {
 	std::vector<std::string> res;
 
 	std::vector<ClientListEntry *> list;
-	client_list.GetClients(zone_name, list);
+	ClientList::Instance()->GetClients(zone_name, list);
 
 	std::vector<ClientListEntry *>::iterator cur, end;
 	cur = list.begin();
@@ -178,7 +177,7 @@ std::vector<std::string> EQW::ListPlayers(Const_char *zone_name) {
 std::map<std::string,std::string> EQW::GetPlayerDetails(Const_char *char_name) {
 	std::map<std::string,std::string> res;
 
-	ClientListEntry *cle = client_list.FindCharacter(char_name);
+	ClientListEntry *cle = ClientList::Instance()->FindCharacter(char_name);
 	if(cle == nullptr) {
 		res["error"] = "1";
 		return(res);
@@ -263,7 +262,7 @@ void EQW::CreateLauncher(Const_char *launcher_name, int dynamic_count) {
 uint32 EQW::CreateGuild(const char* name, uint32 leader_char_id) {
 	uint32 id = guild_mgr.CreateGuild(name, leader_char_id);
 	if(id != GUILD_NONE)
-		client_list.UpdateClientGuild(leader_char_id, id);
+		ClientList::Instance()->UpdateClientGuild(leader_char_id, id);
 	return(id);
 }
 
@@ -284,7 +283,7 @@ bool EQW::SetGuildLeader(uint32 guild_id, uint32 leader_char_id) {
 }
 
 bool EQW::SetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
-	client_list.UpdateClientGuild(charid, guild_id);
+	ClientList::Instance()->UpdateClientGuild(charid, guild_id);
 	return(guild_mgr.SetGuild(charid, guild_id, rank));
 }
 

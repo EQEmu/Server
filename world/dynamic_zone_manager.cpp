@@ -9,8 +9,6 @@
 #include "../common/repositories/dynamic_zone_lockouts_repository.h"
 #include <cereal/types/utility.hpp>
 
-extern ClientList client_list;
-
 DynamicZoneManager dynamic_zone_manager;
 
 DynamicZoneManager::DynamicZoneManager() :

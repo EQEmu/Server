@@ -25,8 +25,6 @@
 #include "../common/misc_functions.h"
 #include "../common/classes.h"
 
-extern ClientList client_list;
-
 GroupLFP::GroupLFP(uint32 inLeaderID) {
 
 	LeaderID = inLeaderID;
@@ -68,7 +66,7 @@ void GroupLFP::SetDetails(ServerLFPUpdate_Struct *Update) {
 		}
 		// Otherwise try and find the information ourselves.
 		else {
-			CLE = client_list.FindCharacter(Members[i].Name);
+			CLE = ClientList::Instance()->FindCharacter(Members[i].Name);
 			if(CLE) {
 				Members[i].Class = CLE->class_();
 				Members[i].Level = CLE->level();
@@ -124,7 +122,7 @@ void GroupLFPList::Process() {
 				if(GroupMembers[i].Name[0] == '\0')
 					continue;
 
-				ClientListEntry *CLE = client_list.FindCharacter(GroupMembers[i].Name);
+				ClientListEntry *CLE = ClientList::Instance()->FindCharacter(GroupMembers[i].Name);
 				if(!CLE) {
 					// The first member entry is always the person who posted the LFP group, either
 					// a single ungrouped player, or the leader of the group. If (s)he is gone, remove
@@ -263,7 +261,7 @@ void GroupLFPList::SendLFPMatches(ServerLFPMatchesRequest_Struct* smrs) {
 		}
 	}
 
-	ClientListEntry* CLE = client_list.FindCharacter(smrs->FromName);
+	ClientListEntry* CLE = ClientList::Instance()->FindCharacter(smrs->FromName);
 	if (CLE != nullptr) {
 		if (CLE->Server() != nullptr)
 			CLE->Server()->SendPacket(Pack);
