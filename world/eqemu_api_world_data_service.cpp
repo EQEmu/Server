@@ -16,7 +16,6 @@
 extern ZSList            zoneserver_list;
 extern ClientList        client_list;
 extern WorldGuildManager guild_mgr;
-extern QueryServConnection QSLink;
 
 void callGetZoneList(Json::Value &response)
 {
