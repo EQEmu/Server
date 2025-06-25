@@ -26,7 +26,7 @@ void DiscordManager::ProcessMessageQueue()
 			continue;
 		}
 
-		auto        webhook  = LogSys.GetDiscordWebhooks()[q.first];
+		auto        webhook  = EQEmuLogSys::Instance()->GetDiscordWebhooks()[q.first];
 		std::string message;
 
 		for (auto &m: q.second) {

@@ -13,7 +13,7 @@ bool Perl_Zone_BuffTimersSuspended(Zone* self)
 
 bool Perl_Zone_BypassesExpansionCheck(Zone* self)
 {
-	return zone_store.GetZoneBypassExpansionCheck(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneBypassExpansionCheck(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 bool Perl_Zone_CanBind(Zone* self)
@@ -73,22 +73,22 @@ float Perl_Zone_GetAAEXPModifierByCharacterID(Zone* self, uint32 character_id)
 
 std::string Perl_Zone_GetContentFlags(Zone* self)
 {
-	return zone_store.GetZoneContentFlags(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneContentFlags(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 std::string Perl_Zone_GetContentFlagsDisabled(Zone* self)
 {
-	return zone_store.GetZoneContentFlagsDisabled(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneContentFlagsDisabled(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 float Perl_Zone_GetExperienceMultiplier(Zone* self)
 {
-	return zone_store.GetZoneExperienceMultiplier(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneExperienceMultiplier(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int8 Perl_Zone_GetExpansion(Zone* self)
 {
-	return zone_store.GetZoneExpansion(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneExpansion(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 float Perl_Zone_GetEXPModifier(Zone* self, Client* c)
@@ -103,17 +103,17 @@ float Perl_Zone_GetEXPModifierByCharacterID(Zone* self, uint32 character_id)
 
 int Perl_Zone_GetFastRegenEndurance(Zone* self)
 {
-	return zone_store.GetZoneFastRegenEndurance(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFastRegenEndurance(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetFastRegenHP(Zone* self)
 {
-	return zone_store.GetZoneFastRegenHP(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFastRegenHP(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetFastRegenMana(Zone* self)
 {
-	return zone_store.GetZoneFastRegenMana(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFastRegenMana(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 std::string Perl_Zone_GetFileName(Zone* self)
@@ -123,37 +123,37 @@ std::string Perl_Zone_GetFileName(Zone* self)
 
 std::string Perl_Zone_GetFlagNeeded(Zone* self)
 {
-	return zone_store.GetZoneFlagNeeded(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFlagNeeded(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetFogBlue(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneFogBlue(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFogBlue(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 float Perl_Zone_GetFogDensity(Zone* self)
 {
-	return zone_store.GetZoneFogDensity(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFogDensity(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetFogGreen(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneFogGreen(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFogGreen(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 float Perl_Zone_GetFogMaximumClip(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneFogMaximumClip(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFogMaximumClip(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 float Perl_Zone_GetFogMinimumClip(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneFogMinimumClip(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFogMinimumClip(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetFogRed(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneFogRed(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneFogRed(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 float Perl_Zone_GetGraveyardHeading(Zone* self)
@@ -188,7 +188,7 @@ uint32 Perl_Zone_GetGraveyardZoneID(Zone* self)
 
 float Perl_Zone_GetGravity(Zone* self)
 {
-	return zone_store.GetZoneGravity(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneGravity(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint32 Perl_Zone_GetInstanceID(Zone* self)
@@ -198,7 +198,7 @@ uint32 Perl_Zone_GetInstanceID(Zone* self)
 
 uint8 Perl_Zone_GetInstanceType(Zone* self)
 {
-	return zone_store.GetZoneInstanceType(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneInstanceType(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint16 Perl_Zone_GetInstanceVersion(Zone* self)
@@ -213,7 +213,7 @@ uint32 Perl_Zone_GetInstanceTimeRemaining(Zone* self)
 
 int Perl_Zone_GetLavaDamage(Zone* self)
 {
-	return zone_store.GetZoneLavaDamage(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneLavaDamage(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 std::string Perl_Zone_GetLongName(Zone* self)
@@ -223,17 +223,17 @@ std::string Perl_Zone_GetLongName(Zone* self)
 
 float Perl_Zone_GetMaximumClip(Zone* self)
 {
-	return zone_store.GetZoneMaximumClip(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneMaximumClip(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int8 Perl_Zone_GetMaximumExpansion(Zone* self)
 {
-	return zone_store.GetZoneMaximumExpansion(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneMaximumExpansion(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetMaximumLevel(Zone* self)
 {
-	return zone_store.GetZoneMaximumLevel(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneMaximumLevel(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint32 Perl_Zone_GetMaxClients(Zone* self)
@@ -243,57 +243,57 @@ uint32 Perl_Zone_GetMaxClients(Zone* self)
 
 float Perl_Zone_GetMinimumClip(Zone* self)
 {
-	return zone_store.GetZoneMinimumClip(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneMinimumClip(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int8 Perl_Zone_GetMinimumExpansion(Zone* self)
 {
-	return zone_store.GetZoneMinimumExpansion(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneMinimumExpansion(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetMinimumLevel(Zone* self)
 {
-	return zone_store.GetZoneMinimumLevel(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneMinimumLevel(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetMinimumLavaDamage(Zone* self)
 {
-	return zone_store.GetZoneMinimumLavaDamage(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneMinimumLavaDamage(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetMinimumStatus(Zone* self)
 {
-	return zone_store.GetZoneMinimumStatus(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneMinimumStatus(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 std::string Perl_Zone_GetNote(Zone* self)
 {
-	return zone_store.GetZoneNote(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneNote(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetNPCMaximumAggroDistance(Zone* self)
 {
-	return zone_store.GetZoneNPCMaximumAggroDistance(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneNPCMaximumAggroDistance(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int8 Perl_Zone_GetPEQZone(Zone* self)
 {
-	return zone_store.GetZonePEQZone(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZonePEQZone(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetRainChance(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneRainChance(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneRainChance(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetRainDuration(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneRainDuration(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneRainDuration(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 uint32 Perl_Zone_GetRuleSet(Zone* self)
 {
-	return zone_store.GetZoneRuleSet(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneRuleSet(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 float Perl_Zone_GetSafeHeading(Zone* self)
@@ -328,37 +328,37 @@ uint32 Perl_Zone_GetSecondsBeforeIdle(Zone* self)
 
 uint64 Perl_Zone_GetShutdownDelay(Zone* self)
 {
-	return zone_store.GetZoneShutdownDelay(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneShutdownDelay(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetSky(Zone* self)
 {
-	return zone_store.GetZoneSky(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneSky(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int8 Perl_Zone_GetSkyLock(Zone* self)
 {
-	return zone_store.GetZoneSkyLock(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneSkyLock(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetSnowChance(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneSnowChance(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneSnowChance(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetSnowDuration(Zone* self, uint8 slot = 0)
 {
-	return zone_store.GetZoneSnowDuration(self->GetZoneID(), slot, self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneSnowDuration(self->GetZoneID(), slot, self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetTimeType(Zone* self)
 {
-	return zone_store.GetZoneTimeType(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneTimeType(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetTimeZone(Zone* self)
 {
-	return zone_store.GetZoneTimeZone(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneTimeZone(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 std::string Perl_Zone_GetZoneDescription(Zone* self)
@@ -378,22 +378,22 @@ uint8 Perl_Zone_GetZoneType(Zone* self)
 
 float Perl_Zone_GetUnderworld(Zone* self)
 {
-	return zone_store.GetZoneUnderworld(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneUnderworld(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetUnderworldTeleportIndex(Zone* self)
 {
-	return zone_store.GetZoneUnderworldTeleportIndex(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneUnderworldTeleportIndex(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 float Perl_Zone_GetWalkSpeed(Zone* self)
 {
-	return zone_store.GetZoneWalkSpeed(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneWalkSpeed(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 uint8 Perl_Zone_GetZoneZType(Zone* self)
 {
-	return zone_store.GetZoneZType(self->GetZoneID(), self->GetInstanceVersion());
+	return ZoneStore::Instance()->GetZoneZType(self->GetZoneID(), self->GetInstanceVersion());
 }
 
 int Perl_Zone_GetZoneTotalBlockedSpells(Zone* self)

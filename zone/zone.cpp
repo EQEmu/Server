@@ -81,14 +81,11 @@
 #endif
 
 extern bool staticzone;
-extern PetitionList petition_list;
 extern QuestParserCollection* parse;
 extern uint32 numclients;
 extern WorldServer worldserver;
 extern Zone* zone;
 extern NpcScaleManager* npc_scale_manager;
-
-Mutex MZoneShutdown;
 
 volatile bool is_zone_loaded = false;
 Zone* zone = 0;
@@ -178,7 +175,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	/*
 	 * Set Logging
 	 */
-	LogSys.StartFileLogs(StringFormat("%s_version_%u_inst_id_%u_port_%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
+	EQEmuLogSys::Instance()->StartFileLogs(StringFormat("%s_version_%u_inst_id_%u_port_%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
 
 	return true;
 }
@@ -926,7 +923,7 @@ void Zone::Shutdown(bool quiet)
 		GetInstanceVersion(),
 		GetInstanceID()
 	);
-	petition_list.ClearPetitions();
+	PetitionList::Instance()->ClearPetitions();
 	SetZoneHasCurrentTime(false);
 	if (!quiet) {
 		LogInfo(
@@ -946,7 +943,7 @@ void Zone::Shutdown(bool quiet)
 	parse->ReloadQuests(true);
 	UpdateWindowTitle(nullptr);
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 
 	if (RuleB(Zone, KillProcessOnDynamicShutdown)) {
 		LogInfo("Shutting down");
@@ -1236,17 +1233,17 @@ bool Zone::Init(bool is_static) {
 		LoadMercenarySpells();
 	}
 
-	petition_list.ClearPetitions();
-	petition_list.ReadDatabase();
+	PetitionList::Instance()->ClearPetitions();
+	PetitionList::Instance()->ReadDatabase();
 
 	guild_mgr.LoadGuilds();
 
 	LogInfo("Zone booted successfully zone_id [{}] time_offset [{}]", zoneid, zone_time.getEQTimeZone());
 
 	// logging origination information
-	LogSys.origination_info.zone_short_name = zone->short_name;
-	LogSys.origination_info.zone_long_name  = zone->long_name;
-	LogSys.origination_info.instance_id     = zone->instanceid;
+	EQEmuLogSys::Instance()->origination_info.zone_short_name = zone->short_name;
+	EQEmuLogSys::Instance()->origination_info.zone_long_name  = zone->long_name;
+	EQEmuLogSys::Instance()->origination_info.instance_id     = zone->instanceid;
 
 	return true;
 }
@@ -1302,7 +1299,7 @@ void Zone::ReloadStaticData() {
 
 bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
-	auto z = zone_store.GetZoneWithFallback(ZoneID(filename), instance_version);
+	auto z = ZoneStore::Instance()->GetZoneWithFallback(ZoneID(filename), instance_version);
 
 	if (!z) {
 		LogError("Failed to load zone data for [{}] instance_version [{}]", filename, instance_version);
@@ -2253,7 +2250,7 @@ void Zone::LoadZoneBlockedSpells()
 			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, GetZoneID())) {
 				LogError(
 					"Failed to load blocked spells for {} ({}).",
-					zone_store.GetZoneName(GetZoneID(), true),
+					ZoneStore::Instance()->GetZoneName(GetZoneID(), true),
 					GetZoneID()
 				);
 				ClearBlockedSpells();
@@ -2263,7 +2260,7 @@ void Zone::LoadZoneBlockedSpells()
 		LogInfo(
 			"Loaded [{}] blocked spells(s) for {} ({}).",
 			Strings::Commify(zone_total_blocked_spells),
-			zone_store.GetZoneName(GetZoneID(), true),
+			ZoneStore::Instance()->GetZoneName(GetZoneID(), true),
 			GetZoneID()
 		);
 	}
@@ -2868,7 +2865,7 @@ void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string
 	bool not_found = true;
 
 	for (int i= 0; i < MAX_DISCORD_WEBHOOK_ID; i++) {
-		auto &w = LogSys.GetDiscordWebhooks()[i];
+		auto &w = EQEmuLogSys::Instance()->GetDiscordWebhooks()[i];
 		if (w.webhook_name == webhook_name) {
 			SendDiscordMessage(w.id, message + "\n");
 			not_found = false;

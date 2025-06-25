@@ -1,6 +1,22 @@
 #include "../../client.h"
 #include "../../object.h"
 
+void SendShowInventorySubCommands(Client* c) {
+	c->Message(Chat::White, "Usage: #show inventory equip - Shows items in Equipment slots");
+	c->Message(Chat::White, "Usage: #show inventory gen - Shows items in General slots");
+	c->Message(Chat::White, "Usage: #show inventory cursor - Shows items in Cursor slots");
+	c->Message(Chat::White, "Usage: #show inventory poss - Shows items in Equipment, General, and Cursor slots");
+	c->Message(Chat::White, "Usage: #show inventory limbo - Shows items in Limbo slots");
+	c->Message(Chat::White, "Usage: #show inventory curlim - Shows items in Cursor and Limbo slots");
+	c->Message(Chat::White, "Usage: #show inventory trib - Shows items in Tribute slots");
+	c->Message(Chat::White, "Usage: #show inventory bank - Shows items in Bank slots");
+	c->Message(Chat::White, "Usage: #show inventory shbank - Shows items in Shared Bank slots");
+	c->Message(Chat::White, "Usage: #show inventory allbank - Shows items in Bank and Shared Bank slots");
+	c->Message(Chat::White, "Usage: #show inventory trade - Shows items in Trade slots");
+	c->Message(Chat::White, "Usage: #show inventory world - Shows items in World slots");
+	c->Message(Chat::White, "Usage: #show inventory all - Shows items in all slots");
+}
+
 void ShowInventory(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
@@ -432,20 +448,4 @@ void ShowInventory(Client *c, const Seperator *sep)
 	if (!found_items) {
 		c->Message(Chat::White, "No items found.");
 	}
-}
-
-void SendShowInventorySubCommands(Client* c) {
-	c->Message(Chat::White, "Usage: #show inventory equip - Shows items in Equipment slots");
-	c->Message(Chat::White, "Usage: #show inventory gen - Shows items in General slots");
-	c->Message(Chat::White, "Usage: #show inventory cursor - Shows items in Cursor slots");
-	c->Message(Chat::White, "Usage: #show inventory poss - Shows items in Equipment, General, and Cursor slots");
-	c->Message(Chat::White, "Usage: #show inventory limbo - Shows items in Limbo slots");
-	c->Message(Chat::White, "Usage: #show inventory curlim - Shows items in Cursor and Limbo slots");
-	c->Message(Chat::White, "Usage: #show inventory trib - Shows items in Tribute slots");
-	c->Message(Chat::White, "Usage: #show inventory bank - Shows items in Bank slots");
-	c->Message(Chat::White, "Usage: #show inventory shbank - Shows items in Shared Bank slots");
-	c->Message(Chat::White, "Usage: #show inventory allbank - Shows items in Bank and Shared Bank slots");
-	c->Message(Chat::White, "Usage: #show inventory trade - Shows items in Trade slots");
-	c->Message(Chat::White, "Usage: #show inventory world - Shows items in World slots");
-	c->Message(Chat::White, "Usage: #show inventory all - Shows items in all slots");
 }

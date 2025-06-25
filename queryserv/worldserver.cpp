@@ -21,9 +21,16 @@
 #include <string.h>
 #include <time.h>
 
+#include "zonelist.h"
+
 extern WorldServer           worldserver;
 extern const queryservconfig *Config;
 extern QSDatabase            qs_database;
+<<<<<<< kinglykrab/lfguildmanager-global-to-singleton
+=======
+extern LFGuildManager        lfguildmanager;
+extern ZSList                zs_list;
+>>>>>>> master
 
 WorldServer::WorldServer()
 {
@@ -75,8 +82,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		case ServerOP_ServerReloadRequest: {
 			auto o = (ServerReload::Request*) p.Data();
 			if (o->type == ServerReload::Type::Logs) {
-				LogSys.LoadLogDatabaseSettings();
+				EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
 				player_event_logs.ReloadSettings();
+				zs_list.SendPlayerEventLogSettings();
 			}
 
 			break;

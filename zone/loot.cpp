@@ -292,7 +292,7 @@ void NPC::AddLootDrop(
 
 	auto item = new LootItem;
 
-	if (LogSys.log_settings[Logs::Loot].is_category_enabled == 1) {
+	if (EQEmuLogSys::Instance()->log_settings[Logs::Loot].is_category_enabled == 1) {
 		EQ::SayLinkEngine linker;
 		linker.SetLinkType(EQ::saylink::SayLinkItemData);
 		linker.SetItemData(item2);

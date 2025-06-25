@@ -176,7 +176,7 @@ void command_task(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Assigned {} (ID {}) to {}.",
-					task_manager->GetTaskName(task_id),
+					TaskManager::Instance()->GetTaskName(task_id),
 					task_id,
 					c->GetTargetDescription(t)
 				).c_str()
@@ -197,7 +197,7 @@ void command_task(Client *c, const Seperator *sep)
 						Chat::White,
 						fmt::format(
 							"Successfully completed {} (ID {}) for {}.",
-							task_manager->GetTaskName(task_id),
+							TaskManager::Instance()->GetTaskName(task_id),
 							task_id,
 							c->GetTargetDescription(t)
 						).c_str()
@@ -207,7 +207,7 @@ void command_task(Client *c, const Seperator *sep)
 						Chat::White,
 						fmt::format(
 							"Failed to complete {} (ID {}) for {}.",
-							task_manager->GetTaskName(task_id),
+							TaskManager::Instance()->GetTaskName(task_id),
 							task_id,
 							c->GetTargetDescription(t)
 						).c_str()
@@ -220,7 +220,7 @@ void command_task(Client *c, const Seperator *sep)
 						"{} {} not have not {} (ID {}) assigned to them.",
 						c->GetTargetDescription(t, TargetDescriptionType::UCYou),
 						c == t ? "do" : "does",
-						task_manager->GetTaskName(task_id),
+						TaskManager::Instance()->GetTaskName(task_id),
 						task_id
 					).c_str()
 				);
@@ -256,7 +256,7 @@ void command_task(Client *c, const Seperator *sep)
 						Chat::White,
 						fmt::format(
 							"Attempting to reload {} (ID {}).",
-							task_manager->GetTaskName(task_id),
+							TaskManager::Instance()->GetTaskName(task_id),
 							task_id
 						).c_str()
 					);
@@ -265,7 +265,7 @@ void command_task(Client *c, const Seperator *sep)
 						Chat::White,
 						fmt::format(
 							"Successfully reloaded {} (ID {}).",
-							task_manager->GetTaskName(task_id),
+							TaskManager::Instance()->GetTaskName(task_id),
 							task_id
 						).c_str()
 					);
@@ -304,21 +304,12 @@ void command_task(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if (
-				CompletedTasksRepository::DeleteWhere(
-					database,
-					fmt::format(
-						"charid = {} AND taskid = {}",
-						t->CharacterID(),
-						task_id
-					)
-				)
-			) {
+			if (t->UncompleteTask(task_id)) {
 				c->Message(
 					Chat::White,
 					fmt::format(
 						"Successfully uncompleted {} (ID {}) for {}.",
-						task_manager->GetTaskName(task_id),
+						TaskManager::Instance()->GetTaskName(task_id),
 						task_id,
 						c->GetTargetDescription(t)
 					).c_str()
@@ -330,7 +321,7 @@ void command_task(Client *c, const Seperator *sep)
 						"{} {} not completed {} (ID {}).",
 						c->GetTargetDescription(t, TargetDescriptionType::UCYou),
 						c == t ? "have" : "has",
-						task_manager->GetTaskName(task_id),
+						TaskManager::Instance()->GetTaskName(task_id),
 						task_id
 					).c_str()
 				);
@@ -353,7 +344,7 @@ void command_task(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Updating {} (ID {}), activity {} with a count of {} for {}.",
-					task_manager->GetTaskName(task_id),
+					TaskManager::Instance()->GetTaskName(task_id),
 					task_id,
 					activity_id,
 					count,

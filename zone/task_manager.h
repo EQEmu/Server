@@ -70,6 +70,12 @@ public:
 		return it != m_task_data.end() ? &it->second : nullptr;
 	}
 
+	static TaskManager* Instance()
+	{
+		static TaskManager instance;
+		return &instance;
+	}
+
 private:
 	std::vector<int>                              m_task_sets[MAXTASKSETS];
 	std::unordered_map<uint32_t, TaskInformation> m_task_data;

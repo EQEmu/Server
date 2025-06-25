@@ -273,7 +273,7 @@ void SetZoneData(Client *c, const Seperator *sep)
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
 
-		zone_store.LoadZones(content_db);
+		ZoneStore::Instance()->LoadZones(content_db);
 
 		c->Message(
 			Chat::White,

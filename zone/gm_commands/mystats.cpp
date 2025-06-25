@@ -1,3 +1,4 @@
+#include "../bot.h"
 #include "../client.h"
 
 void command_mystats(Client *c, const Seperator *sep)

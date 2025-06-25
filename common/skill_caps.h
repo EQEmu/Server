@@ -16,12 +16,16 @@ public:
 	static int32_t GetSkillCapMaxLevel(uint8 class_id, EQ::skills::SkillType skill_id);
 
 	SkillCaps *SetContentDatabase(Database *db);
+
+	static SkillCaps* Instance()
+	{
+		static SkillCaps instance;
+		return &instance;
+	}
 private:
 	Database                                    *m_content_database{};
 	std::map<uint64, SkillCapsRepository::SkillCaps> m_skill_caps = {};
 };
-
-extern SkillCaps skill_caps;
 
 
 #endif //CODE_SKILL_CAPS_H
