@@ -3596,12 +3596,12 @@ namespace Titanium
 		else if (server_slot == (EQ::invslot::POSSESSIONS_COUNT + EQ::invslot::slotAmmo)) {
 			titanium_slot = server_slot - 4;
 		}
-		else if (server_slot <= EQ::invbag::GENERAL_BAGS_8_END &&
+		else if (server_slot <= EQ::invbag::GENERAL_BAGS_END &&
 				 server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
-			titanium_slot = server_slot;
+			titanium_slot = server_slot - (EQ::invbag::GENERAL_BAGS_BEGIN - invbag::GENERAL_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((server_slot - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT));
 		}
 		else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::CURSOR_BAG_BEGIN) {
-			titanium_slot = server_slot - 20;
+			titanium_slot = server_slot - (EQ::invbag::CURSOR_BAG_BEGIN - invbag::CURSOR_BAG_BEGIN);
 		}
 		else if (server_slot <= EQ::invslot::TRIBUTE_END && server_slot >= EQ::invslot::TRIBUTE_BEGIN) {
 			titanium_slot = server_slot;
@@ -3616,21 +3616,21 @@ namespace Titanium
 		else if (server_slot <= EQ::invslot::BANK_END && server_slot >= EQ::invslot::BANK_BEGIN) {
 			titanium_slot = server_slot;
 		}
-		else if (server_slot <= EQ::invbag::BANK_BAGS_16_END && server_slot >= EQ::invbag::BANK_BAGS_BEGIN) {
-			titanium_slot = server_slot;
+		else if (server_slot <= EQ::invbag::BANK_BAGS_END && server_slot >= EQ::invbag::BANK_BAGS_BEGIN) {
+			titanium_slot = server_slot - (EQ::invbag::BANK_BAGS_BEGIN - invbag::BANK_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((server_slot - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT));
 		}
 		else if (server_slot <= EQ::invslot::SHARED_BANK_END && server_slot >= EQ::invslot::SHARED_BANK_BEGIN) {
 			titanium_slot = server_slot;
 		}
 		else if (server_slot <= EQ::invbag::SHARED_BANK_BAGS_END &&
 				 server_slot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) {
-			titanium_slot = server_slot;
+			titanium_slot = server_slot - (EQ::invbag::SHARED_BANK_BAGS_BEGIN - invbag::SHARED_BANK_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((server_slot - EQ::invbag::SHARED_BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT));
 		}
 		else if (server_slot <= EQ::invslot::TRADE_END && server_slot >= EQ::invslot::TRADE_BEGIN) {
 			titanium_slot = server_slot;
 		}
 		else if (server_slot <= EQ::invbag::TRADE_BAGS_END && server_slot >= EQ::invbag::TRADE_BAGS_BEGIN) {
-			titanium_slot = server_slot;
+			titanium_slot = server_slot - (EQ::invbag::TRADE_BAGS_BEGIN - invbag::TRADE_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((server_slot - EQ::invbag::TRADE_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT));
 		}
 		else if (server_slot <= EQ::invslot::WORLD_END && server_slot >= EQ::invslot::WORLD_BEGIN) {
 			titanium_slot = server_slot;
@@ -3687,10 +3687,10 @@ namespace Titanium
 			server_slot = titanium_slot + 4;
 		}
 		else if (titanium_slot <= invbag::GENERAL_BAGS_END && titanium_slot >= invbag::GENERAL_BAGS_BEGIN) {
-			server_slot = titanium_slot;
+			server_slot = titanium_slot + (EQ::invbag::GENERAL_BAGS_BEGIN - invbag::GENERAL_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((titanium_slot - invbag::GENERAL_BAGS_BEGIN) / invbag::SLOT_COUNT));
 		}
 		else if (titanium_slot <= invbag::CURSOR_BAG_END && titanium_slot >= invbag::CURSOR_BAG_BEGIN) {
-			server_slot = titanium_slot + 20;
+			server_slot = titanium_slot + (EQ::invbag::CURSOR_BAG_BEGIN - invbag::CURSOR_BAG_BEGIN);
 		}
 		else if (titanium_slot <= invslot::TRIBUTE_END && titanium_slot >= invslot::TRIBUTE_BEGIN) {
 			server_slot = titanium_slot;
@@ -3705,19 +3705,19 @@ namespace Titanium
 			server_slot = titanium_slot;
 		}
 		else if (titanium_slot <= invbag::BANK_BAGS_END && titanium_slot >= invbag::BANK_BAGS_BEGIN) {
-			server_slot = titanium_slot;
+			server_slot = titanium_slot + (EQ::invbag::BANK_BAGS_BEGIN - invbag::BANK_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((titanium_slot - invbag::BANK_BAGS_BEGIN) / invbag::SLOT_COUNT));
 		}
 		else if (titanium_slot <= invslot::SHARED_BANK_END && titanium_slot >= invslot::SHARED_BANK_BEGIN) {
 			server_slot = titanium_slot;
 		}
 		else if (titanium_slot <= invbag::SHARED_BANK_BAGS_END && titanium_slot >= invbag::SHARED_BANK_BAGS_BEGIN) {
-			server_slot = titanium_slot;
+			server_slot = titanium_slot + (EQ::invbag::SHARED_BANK_BAGS_BEGIN - invbag::SHARED_BANK_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((titanium_slot - invbag::SHARED_BANK_BAGS_BEGIN) / invbag::SLOT_COUNT));
 		}
 		else if (titanium_slot <= invslot::TRADE_END && titanium_slot >= invslot::TRADE_BEGIN) {
 			server_slot = titanium_slot;
 		}
 		else if (titanium_slot <= invbag::TRADE_BAGS_END && titanium_slot >= invbag::TRADE_BAGS_BEGIN) {
-			server_slot = titanium_slot;
+			server_slot = titanium_slot + (EQ::invbag::TRADE_BAGS_BEGIN - invbag::TRADE_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((titanium_slot - invbag::TRADE_BAGS_BEGIN) / invbag::SLOT_COUNT));
 		}
 		else if (titanium_slot <= invslot::WORLD_END && titanium_slot >= invslot::WORLD_BEGIN) {
 			server_slot = titanium_slot;
