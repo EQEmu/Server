@@ -106,7 +106,6 @@ EQEmuLogSys           LogSys;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
 PlayerEventLogs       player_event_logs;
-DatabaseUpdate        database_update;
 EvolvingItemsManager  evolving_items_manager;
 
 const SPDat_Spell_Struct* spells;
@@ -316,7 +315,7 @@ int main(int argc, char **argv)
 
 	const auto c = EQEmuConfig::get();
 	if (c->auto_database_updates) {
-		if (database_update.SetDatabase(&database)->HasPendingUpdates()) {
+		if (DatabaseUpdate::Instance()->SetDatabase(&database)->HasPendingUpdates()) {
 			LogWarning("Database is not up to date [world] needs to be ran to apply updates, shutting down in 5 seconds");
 			std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 			LogInfo("Exiting due to pending database updates");
