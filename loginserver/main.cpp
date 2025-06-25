@@ -22,7 +22,6 @@
 #include <thread>
 
 LoginServer     server;
-EQEmuLogSys     LogSys;
 bool            run_server = true;
 Database        database;
 PlayerEventLogs player_event_logs;
@@ -157,21 +156,21 @@ int main(int argc, char **argv)
 	LogInfo("Logging System Init");
 
 	if (argc == 1) {
-		LogSys.LoadLogSettingsDefaults();
+		EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	}
 
 	PathManager::Instance()->Init();
 
 	// command handler
 	if (argc > 1) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 
 		LoadServerConfig();
 		LoadDatabaseConnection();
 
-		LogSys.LoadLogSettingsDefaults();
-		LogSys.log_settings[Logs::Debug].log_to_console = static_cast<uint8>(Logs::General);
-		LogSys.log_settings[Logs::Debug].is_category_enabled = 1;
+		EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
+		EQEmuLogSys::Instance()->log_settings[Logs::Debug].log_to_console = static_cast<uint8>(Logs::General);
+		EQEmuLogSys::Instance()->log_settings[Logs::Debug].is_category_enabled = 1;
 
 		LoginserverCommandHandler::CommandHandler(argc, argv);
 	}
@@ -180,7 +179,7 @@ int main(int argc, char **argv)
 	LoadDatabaseConnection();
 
 	if (argc == 1) {
-		LogSys.SetDatabase(&database)
+		EQEmuLogSys::Instance()->SetDatabase(&database)
 			->SetLogPath("logs")
 			->LoadLogDatabaseSettings()
 			->StartFileLogs();

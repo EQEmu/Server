@@ -44,7 +44,6 @@
 
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
-EQEmuLogSys LogSys;
 UCSDatabase database;
 WorldServer *worldserver = nullptr;
 PlayerEventLogs player_event_logs;
@@ -72,7 +71,7 @@ void Shutdown() {
 	LogInfo("Shutting down...");
 	ChannelList->RemoveAllChannels();
 	g_Clientlist->CloseAllConnections();
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 }
 
 int caught_loop = 0;
@@ -87,7 +86,7 @@ void CatchSignal(int sig_num) {
 		LogInfo("In a signal handler loop and process is incapable of exiting properly, forcefully cleaning up");
 		ChannelList->RemoveAllChannels();
 		g_Clientlist->CloseAllConnections();
-		LogSys.CloseFileLogs();
+		EQEmuLogSys::Instance()->CloseFileLogs();
 		std::exit(0);
 	}
 }
@@ -101,7 +100,7 @@ void PlayerEventQueueListener() {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformUCS);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	PathManager::Instance()->Init();
@@ -136,7 +135,8 @@ int main() {
 		return 1;
 	}
 
-	LogSys.SetDatabase(&database)
+	EQEmuLogSys::Instance()
+		->SetDatabase(&database)
 		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();

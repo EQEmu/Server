@@ -32,7 +32,6 @@
 #include "../../common/events/player_event_logs.h"
 #include "../../common/evolving_items.h"
 
-EQEmuLogSys          LogSys;
 WorldContentService  content_service;
 PlayerEventLogs      player_event_logs;
 EvolvingItemsManager evolving_items_manager;
@@ -44,7 +43,7 @@ void ImportDBStrings(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	PathManager::Instance()->Init();
@@ -90,7 +89,7 @@ int main(int argc, char **argv) {
 		content_db.SetMySQL(database);
 	}
 
-	LogSys.SetDatabase(&database)
+	EQEmuLogSys::Instance()->SetDatabase(&database)
 		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
@@ -100,7 +99,7 @@ int main(int argc, char **argv) {
 	ImportBaseData(&content_db);
 	ImportDBStrings(&database);
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 
 	return 0;
 }

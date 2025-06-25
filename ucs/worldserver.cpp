@@ -78,7 +78,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	case ServerOP_ServerReloadRequest: {
 		auto o = (ServerReload::Request*) pack->pBuffer;
 		if (o->type == ServerReload::Type::Logs) {
-			LogSys.LoadLogDatabaseSettings();
+			EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
 			player_event_logs.ReloadSettings();
 		}
 

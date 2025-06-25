@@ -57,7 +57,7 @@ void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, const char *f
 				0,
 				0,
 				AccountStatus::QuestTroupe,
-				LogSys.GetGMSayColorFromCategory(log_category),
+				EQEmuLogSys::Instance()->GetGMSayColorFromCategory(log_category),
 				fmt::format(
 					" {}{}",
 					(iter == 0 ? " ---" : ""),
@@ -73,7 +73,7 @@ void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, const char *f
 		0,
 		0,
 		AccountStatus::QuestTroupe,
-		LogSys.GetGMSayColorFromCategory(log_category),
+		EQEmuLogSys::Instance()->GetGMSayColorFromCategory(log_category),
 		"%s",
 		fmt::format("[{}] [{}] {}", Logs::LogCategoryName[log_category], func, message).c_str()
 	);
@@ -83,12 +83,12 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 {
 	// command handler
 	if (argc > 1) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 		PathManager::Instance()->Init();
 		WorldConfig::LoadConfig();
 		LoadDatabaseConnections();
 		RuleManager::Instance()->LoadRules(&database, "default", false);
-		LogSys.EnableConsoleLogging();
+		EQEmuLogSys::Instance()->EnableConsoleLogging();
 		WorldserverCLI::CommandHandler(argc, argv);
 	}
 
@@ -231,11 +231,11 @@ extern WorldEventScheduler event_scheduler;
 bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 {
 	// logging system init
-	auto logging = LogSys.SetDatabase(&database)
+	auto logging = EQEmuLogSys::Instance()->SetDatabase(&database)
 		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings();
 
-	LogSys.SetDiscordHandler(&WorldBoot::DiscordWebhookMessageHandler);
+	EQEmuLogSys::Instance()->SetDiscordHandler(&WorldBoot::DiscordWebhookMessageHandler);
 
 	const auto c = EQEmuConfig::get();
 	if (c->auto_database_updates) {

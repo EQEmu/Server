@@ -463,7 +463,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		OpcodeManager::EmuToName(app->GetOpcode()),
 		o->EmuToEQ(app->GetOpcode()) == 0 ? app->GetProtocolOpcode() : o->EmuToEQ(app->GetOpcode()),
 		app->Size(),
-		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+		(EQEmuLogSys::Instance()->IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 	);
 
 	EmuOpcode opcode = app->GetOpcode();
@@ -5533,7 +5533,7 @@ void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 {
-	if (LogSys.log_settings[Logs::Inventory].is_category_enabled)
+	if (EQEmuLogSys::Instance()->log_settings[Logs::Inventory].is_category_enabled)
 		LogInventory("Handle_OP_CreateObject() [psize: [{}]] [{}]", app->size, DumpPacketToString(app).c_str());
 
 	DropItem(EQ::invslot::slotCursor);

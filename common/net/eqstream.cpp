@@ -71,7 +71,7 @@ void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) 
 		OpcodeManager::EmuToName(p->GetOpcode()),
 		(*m_opcode_manager)->EmuToEQ(p->GetOpcode()),
 		p->Size(),
-		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketServerClient) ? DumpPacketToString(p) : "")
+		(EQEmuLogSys::Instance()->IsLogEnabled(Logs::Detail, Logs::PacketServerClient) ? DumpPacketToString(p) : "")
 	);
 
 	if (m_opcode_manager && *m_opcode_manager) {

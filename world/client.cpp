@@ -1100,7 +1100,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		OpcodeManager::EmuToName(app->GetOpcode()),
 		o->EmuToEQ(app->GetOpcode()) == 0 ? app->GetProtocolOpcode() : o->EmuToEQ(app->GetOpcode()),
 		app->Size(),
-		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+		(EQEmuLogSys::Instance()->IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 	);
 
 	if (!eqs->CheckState(ESTABLISHED)) {

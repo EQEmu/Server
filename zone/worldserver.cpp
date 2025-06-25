@@ -229,7 +229,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			LogInfo("World assigned Port [{}] for this zone", sci->port);
 			ZoneConfig::SetZonePort(sci->port);
 
-			LogSys.SetDiscordHandler(&Zone::DiscordWebhookMessageHandler);
+			EQEmuLogSys::Instance()->SetDiscordHandler(&Zone::DiscordWebhookMessageHandler);
 		}
 		break;
 	}
@@ -4589,7 +4589,8 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			break;
 
 		case ServerReload::Type::Logs:
-			LogSys.LoadLogDatabaseSettings();
+			EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
+			player_event_logs.ReloadSettings();
 			// if QS process is enabled, we get settings from QS
 			if (!RuleB(Logging, PlayerEventsQSProcess)) {
 				player_event_logs.ReloadSettings();
