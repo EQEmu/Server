@@ -1396,6 +1396,16 @@ bool ClientTaskState::CompleteTask(Client *c, uint32 task_id)
 	return true;
 }
 
+bool ClientTaskState::UncompleteTask(int task_id)
+{
+	return std::erase_if(
+		m_completed_tasks,
+		[&](const CompletedTaskInformation& task) {
+			return task.task_id == task_id;
+		}
+	);
+}
+
 void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Client *c)
 {
 	const auto task_data = TaskManager::Instance()->GetTaskData(task->task_id);
