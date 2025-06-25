@@ -94,14 +94,8 @@
 ClientList          client_list;
 GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;
-<<<<<<< kinglykrab/ucsconnection-global-to-singleton
-LoginServerList     loginserverlist;
-=======
-UCSConnection       UCSLink;
->>>>>>> master
 QueryServConnection QSLink;
 LauncherList        launcher_list;
-AdventureManager    adventure_manager;
 WorldEventScheduler event_scheduler;
 volatile bool       RunLoops   = true;
 uint32              numclients = 0;
@@ -471,7 +465,7 @@ int main(int argc, char **argv)
 		zoneserver_list.Process();
 		launcher_list.Process();
 		LFPGroupList.Process();
-		adventure_manager.Process();
+		AdventureManager::Instance()->Process();
 		SharedTaskManager::Instance()->Process();
 		dynamic_zone_manager.Process();
 

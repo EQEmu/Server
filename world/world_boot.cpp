@@ -224,7 +224,6 @@ void WorldBoot::RegisterLoginservers()
 	}
 }
 
-extern AdventureManager    adventure_manager;
 extern WorldEventScheduler event_scheduler;
 
 bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
@@ -359,15 +358,15 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	LogInfo("Deleted [{}] stale player corpses from database", database.DeleteStalePlayerCorpses());
 
 	LogInfo("Loading adventures");
-	if (!adventure_manager.LoadAdventureTemplates()) {
+	if (!AdventureManager::Instance()->LoadAdventureTemplates()) {
 		LogInfo("Unable to load adventure templates");
 	}
 
-	if (!adventure_manager.LoadAdventureEntries()) {
+	if (!AdventureManager::Instance()->LoadAdventureEntries()) {
 		LogInfo("Unable to load adventure templates");
 	}
 
-	adventure_manager.LoadLeaderboardInfo();
+	AdventureManager::Instance()->LoadLeaderboardInfo();
 
 	LogInfo("Purging expired dynamic zones and members");
 	dynamic_zone_manager.PurgeExpiredDynamicZones();

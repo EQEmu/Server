@@ -105,12 +105,6 @@ QuestParserCollection *parse        = 0;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
 PlayerEventLogs       player_event_logs;
-<<<<<<< kinglykrab/evolvingitemsmanager-global-to-singleton
-DatabaseUpdate        database_update;
-SkillCaps             skill_caps;
-=======
-EvolvingItemsManager  evolving_items_manager;
->>>>>>> master
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;

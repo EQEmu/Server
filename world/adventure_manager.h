@@ -40,6 +40,12 @@ public:
 	AdventureTemplate *GetAdventureTemplate(int theme, int id);
 	AdventureTemplate *GetAdventureTemplate(int id);
 	void GetZoneData(uint16 instance_id);
+
+	static AdventureManager* Instance()
+	{
+		static AdventureManager instance;
+		return &instance;
+	}
 protected:
 	bool IsInExcludedZoneList(std::list<AdventureZones> excluded_zones, std::string zone_name, int version);
 	bool IsInExcludedZoneInList(std::list<AdventureZoneIn> excluded_zone_ins, int zone_id, int door_object);

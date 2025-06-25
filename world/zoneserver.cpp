@@ -57,7 +57,6 @@ extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
-extern AdventureManager adventure_manager;
 extern QueryServConnection QSLink;
 
 void CatchSignal(int sig_num);
@@ -1292,46 +1291,46 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_AdventureRequest: {
-			adventure_manager.CalculateAdventureRequestReply((const char*) pack->pBuffer);
+			AdventureManager::Instance()->CalculateAdventureRequestReply((const char*) pack->pBuffer);
 			break;
 		}
 		case ServerOP_AdventureRequestCreate: {
-			adventure_manager.TryAdventureCreate((const char*) pack->pBuffer);
+			AdventureManager::Instance()->TryAdventureCreate((const char*) pack->pBuffer);
 			break;
 		}
 		case ServerOP_AdventureDataRequest: {
 			AdventureFinishEvent fe;
-			while (adventure_manager.PopFinishedEvent((const char*) pack->pBuffer, fe)) {
-				adventure_manager.SendAdventureFinish(fe);
+			while (AdventureManager::Instance()->PopFinishedEvent((const char*) pack->pBuffer, fe)) {
+				AdventureManager::Instance()->SendAdventureFinish(fe);
 			}
-			adventure_manager.GetAdventureData((const char*) pack->pBuffer);
+			AdventureManager::Instance()->GetAdventureData((const char*) pack->pBuffer);
 			break;
 		}
 		case ServerOP_AdventureClickDoor: {
 			auto pcad = (ServerPlayerClickedAdventureDoor_Struct*) pack->pBuffer;
-			adventure_manager.PlayerClickedDoor(pcad->player, pcad->zone_id, pcad->id);
+			AdventureManager::Instance()->PlayerClickedDoor(pcad->player, pcad->zone_id, pcad->id);
 			break;
 		}
 		case ServerOP_AdventureLeave: {
-			adventure_manager.LeaveAdventure((const char*) pack->pBuffer);
+			AdventureManager::Instance()->LeaveAdventure((const char*) pack->pBuffer);
 			break;
 		}
 		case ServerOP_AdventureCountUpdate: {
 			auto sc = (ServerAdventureCount_Struct*) pack->pBuffer;
-			adventure_manager.IncrementCount(sc->instance_id);
+			AdventureManager::Instance()->IncrementCount(sc->instance_id);
 			break;
 		}
 		case ServerOP_AdventureAssaCountUpdate: {
-			adventure_manager.IncrementAssassinationCount(*((uint16*) pack->pBuffer));
+			AdventureManager::Instance()->IncrementAssassinationCount(*((uint16*) pack->pBuffer));
 			break;
 		}
 		case ServerOP_AdventureZoneData: {
-			adventure_manager.GetZoneData(*((uint16*) pack->pBuffer));
+			AdventureManager::Instance()->GetZoneData(*((uint16*) pack->pBuffer));
 			break;
 		}
 		case ServerOP_AdventureLeaderboard: {
 			auto lr = (ServerLeaderboardRequest_Struct*) pack->pBuffer;
-			adventure_manager.DoLeaderboardRequest(lr->player, lr->type);
+			AdventureManager::Instance()->DoLeaderboardRequest(lr->player, lr->type);
 			break;
 		}
 		case ServerOP_LSAccountUpdate: {

@@ -17,7 +17,7 @@
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;
-extern AdventureManager adventure_manager;
+extern EQ::Random emu_random;
 
 Adventure::Adventure(AdventureTemplate *t)
 {
@@ -215,7 +215,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 	auto iter = players.begin();
 	while(iter != players.end())
 	{
-		adventure_manager.GetAdventureData((*iter).c_str());
+		AdventureManager::Instance()->GetAdventureData((*iter).c_str());
 		++iter;
 	}
 }
@@ -330,7 +330,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 					afe.win = false;
 					afe.points = 0;
 				}
-				adventure_manager.AddFinishedEvent(afe);
+				AdventureManager::Instance()->AddFinishedEvent(afe);
 				database.UpdateAdventureStatsEntry(character_id, GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 			}
 		}
@@ -351,12 +351,12 @@ void Adventure::Finished(AdventureWinStatus ws)
 				afe.win = false;
 				afe.points = 0;
 			}
-			adventure_manager.AddFinishedEvent(afe);
+			AdventureManager::Instance()->AddFinishedEvent(afe);
 			database.UpdateAdventureStatsEntry(character_id, GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 		}
 		++iter;
 	}
-	adventure_manager.GetAdventureData(this);
+	AdventureManager::Instance()->GetAdventureData(this);
 }
 
 void Adventure::MoveCorpsesToGraveyard()
