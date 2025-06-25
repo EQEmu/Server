@@ -30,8 +30,8 @@ void ZoneCLI::TestDataBuckets(int argc, char** argv, argh::parser& cmd, std::str
 	Client* client = new Client();
 	client->SetCharacterId(1); // Set a dummy character ID for testing
 
-	LogSys.log_settings[Logs::MySQLQuery].is_category_enabled = std::getenv("DEBUG") ? 1 : 0;
-	LogSys.log_settings[Logs::MySQLQuery].log_to_console      = std::getenv("DEBUG") ? 3 : 0;
+	EQEmuLogSys::Instance()->log_settings[Logs::MySQLQuery].is_category_enabled = std::getenv("DEBUG") ? 1 : 0;
+	EQEmuLogSys::Instance()->log_settings[Logs::MySQLQuery].log_to_console      = std::getenv("DEBUG") ? 3 : 0;
 
 	// 🧹 Delete all test keys before running tests
 	std::vector<std::string> test_keys_to_clear = {
