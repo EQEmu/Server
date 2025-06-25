@@ -26,11 +26,7 @@
 extern WorldServer           worldserver;
 extern const queryservconfig *Config;
 extern QSDatabase            qs_database;
-<<<<<<< kinglykrab/lfguildmanager-global-to-singleton
-=======
-extern LFGuildManager        lfguildmanager;
 extern ZSList                zs_list;
->>>>>>> master
 
 WorldServer::WorldServer()
 {
