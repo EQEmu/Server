@@ -100,7 +100,6 @@ uint32              numclients = 0;
 uint32              numzones   = 0;
 const WorldConfig   *Config;
 WorldContentService content_service;
-WebInterfaceList    web_interface;
 PlayerEventLogs     player_event_logs;
 
 void CatchSignal(int sig_num);
@@ -320,7 +319,7 @@ int main(int argc, char **argv)
 				connection->GetUUID()
 			);
 
-			web_interface.AddConnection(connection);
+			WebInterfaceList::Instance()->AddConnection(connection);
 		}
 	);
 
@@ -331,7 +330,7 @@ int main(int argc, char **argv)
 				connection->GetUUID()
 			);
 
-			web_interface.RemoveConnection(connection);
+			WebInterfaceList::Instance()->RemoveConnection(connection);
 		}
 	);
 
