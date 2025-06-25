@@ -211,7 +211,7 @@ void command_parcels(Client *c, const Seperator *sep)
 				send_to_client.at(0).character_name.c_str()
 			);
 
-			if (inst && player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+			if (inst && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
@@ -295,7 +295,7 @@ void command_parcels(Client *c, const Seperator *sep)
 				send_to_client.at(0).character_name.c_str()
 			);
 
-			if (inst && player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+			if (inst && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;

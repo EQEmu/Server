@@ -28,7 +28,6 @@ Database              database;
 std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
-PlayerEventLogs       player_event_logs;
 ZSList                zs_list;
 uint32                numzones     = 0;
 
@@ -156,7 +155,7 @@ int main()
 	LFGuildManager::Instance()->LoadDatabase();
 
 	Timer player_event_process_timer(1000);
-	player_event_logs.SetDatabase(&qs_database)->Init();
+	PlayerEventLogs::Instance()->SetDatabase(&qs_database)->Init();
 
 	auto loop_fn = [&](EQ::Timer *t) {
 		Timer::SetCurrentTime();
@@ -171,7 +170,7 @@ int main()
 		}
 
 		if (player_event_process_timer.Check()) {
-			player_event_logs.Process();
+			PlayerEventLogs::Instance()->Process();
 		}
 	};
 

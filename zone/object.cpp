@@ -625,7 +625,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				}
 			}
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::GROUNDSPAWN_PICKUP)) {
+			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::GROUNDSPAWN_PICKUP)) {
 				auto e = PlayerEvent::GroundSpawnPickupEvent{
 					.item_id = item->ID,
 					.item_name = item->Name,

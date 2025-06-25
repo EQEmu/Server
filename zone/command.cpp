@@ -521,7 +521,7 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 		}
 	}
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::GM_COMMAND) && log_command) {
+	if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::GM_COMMAND) && log_command) {
 		auto e = PlayerEvent::GMCommandEvent{
 			.message = message,
 			.target = c->GetTarget() ? c->GetTarget()->GetName() : "NONE"

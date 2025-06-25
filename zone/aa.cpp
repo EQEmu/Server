@@ -1180,7 +1180,7 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 		SendAlternateAdvancementStats();
 	}
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::AA_PURCHASE)) {
+	if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::AA_PURCHASE)) {
 		auto e = PlayerEvent::AAPurchasedEvent{
 			.aa_id = rank->id,
 			.aa_cost = cost,

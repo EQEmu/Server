@@ -79,7 +79,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			auto o = (ServerReload::Request*) p.Data();
 			if (o->type == ServerReload::Type::Logs) {
 				EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
-				player_event_logs.ReloadSettings();
+				PlayerEventLogs::Instance()->ReloadSettings();
 				zs_list.SendPlayerEventLogSettings();
 			}
 

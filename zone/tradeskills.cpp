@@ -555,7 +555,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	if (success) {
-		if (player_event_logs.IsEventEnabled(PlayerEvent::COMBINE_SUCCESS)) {
+		if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::COMBINE_SUCCESS)) {
 			auto e = PlayerEvent::CombineEvent{
 				.recipe_id = spec.recipe_id,
 				.recipe_name = spec.name,
@@ -570,7 +570,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 	else {
-		if (player_event_logs.IsEventEnabled(PlayerEvent::COMBINE_FAILURE)) {
+		if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::COMBINE_FAILURE)) {
 			auto e = PlayerEvent::CombineEvent{
 				.recipe_id = spec.recipe_id,
 				.recipe_name = spec.name,

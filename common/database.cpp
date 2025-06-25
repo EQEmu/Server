@@ -2244,7 +2244,7 @@ void Database::PurgeCharacterParcels()
 		pel.event_data = ss.str();
 		pel.created_at = std::time(nullptr);
 
-		player_event_logs.AddToQueue(pel);
+		PlayerEventLogs::Instance()->AddToQueue(pel);
 
 		ss.str("");
 		ss.clear();

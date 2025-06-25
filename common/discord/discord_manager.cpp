@@ -68,7 +68,7 @@ void DiscordManager::ProcessMessageQueue()
 
 void DiscordManager::QueuePlayerEventMessage(const PlayerEvent::PlayerEventContainer& e)
 {
-	auto w = player_event_logs.GetDiscordWebhookUrlFromEventType(e.player_event_log.event_type_id);
+	auto w = PlayerEventLogs::Instance()->GetDiscordWebhookUrlFromEventType(e.player_event_log.event_type_id);
 	if (!w.empty()) {
 		Discord::SendPlayerEventMessage(e, w);
 	}

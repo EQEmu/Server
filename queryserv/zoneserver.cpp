@@ -33,7 +33,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			cereal::BinaryInputArchive archive(ss);
 			archive(n);
 
-			player_event_logs.AddToQueue(n.player_event_log);
+			PlayerEventLogs::Instance()->AddToQueue(n.player_event_log);
 
 			DiscordManager::Instance()->QueuePlayerEventMessage(n);
 			break;
@@ -49,8 +49,8 @@ void ZoneServer::SendPlayerEventLogSettings()
 {
 	EQ::Net::DynamicPacket                                                dyn_pack;
 	std::vector<PlayerEventLogSettingsRepository::PlayerEventLogSettings> settings(
-		player_event_logs.GetSettings(),
-		player_event_logs.GetSettings() + PlayerEvent::EventType::MAX
+		PlayerEventLogs::Instance()->GetSettings(),
+		PlayerEventLogs::Instance()->GetSettings() + PlayerEvent::EventType::MAX
 	);
 
 	dyn_pack.PutSerialize(0, settings);

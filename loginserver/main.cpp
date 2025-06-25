@@ -24,7 +24,6 @@
 LoginServer     server;
 bool            run_server = true;
 Database        database;
-PlayerEventLogs player_event_logs;
 
 void CatchSignal(int sig_num)
 {

@@ -107,7 +107,7 @@ void QueryServ::HandleMessage(uint16 opcode, const EQ::Net::Packet& p)
 				break;
 			}
 
-			player_event_logs.LoadPlayerEventSettingsFromQS(settings);
+			PlayerEventLogs::Instance()->LoadPlayerEventSettingsFromQS(settings);
 			LogInfo("Loaded {} PlayerEventLogSettings from queryserv", settings.size());
 			break;
 		}
