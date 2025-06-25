@@ -47,7 +47,6 @@ Clientlist *g_Clientlist;
 EQEmuLogSys LogSys;
 UCSDatabase database;
 WorldServer *worldserver = nullptr;
-ZoneStore zone_store;
 PlayerEventLogs player_event_logs;
 
 const ucsconfig *Config;

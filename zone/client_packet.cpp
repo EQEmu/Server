@@ -79,7 +79,6 @@ extern QueryServ* QServ;
 extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
-extern PetitionList petition_list;
 extern EntityList entity_list;
 typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
 
@@ -6963,7 +6962,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 			DialogueWindow::TableCell(
 				fmt::format(
 					"{} ({})",
-					zone_store.GetZoneLongName(e.zone_id, true),
+					ZoneStore::Instance()->GetZoneLongName(e.zone_id, true),
 					e.zone_id
 				)
 			) +
@@ -11058,7 +11057,7 @@ void Client::Handle_OP_PDeletePetition(const EQApplicationPacket *app)
 		LogError("Wrong size: OP_PDeletePetition, size=[{}], expected [{}]", app->size, 2);
 		return;
 	}
-	if (petition_list.DeletePetitionByCharName((char*)app->pBuffer))
+	if (PetitionList::Instance()->DeletePetitionByCharName((char*)app->pBuffer))
 		MessageString(Chat::White, PETITION_DELETED);
 	else
 		MessageString(Chat::White, PETITION_NO_DELETE);
@@ -11736,7 +11735,7 @@ void Client::Handle_OP_Petition(const EQApplicationPacket *app)
 	}*/
 	else
 	{
-		if (petition_list.FindPetitionByAccountName(AccountName()))
+		if (PetitionList::Instance()->FindPetitionByAccountName(AccountName()))
 		{
 			Message(Chat::White, "You already have a petition in the queue, you must wait for it to be answered or use /deletepetition to delete it.");
 			return;
@@ -11752,10 +11751,10 @@ void Client::Handle_OP_Petition(const EQApplicationPacket *app)
 		pet->SetPetitionText((char*)app->pBuffer);
 		pet->SetZone(zone->GetZoneID());
 		pet->SetUrgency(0);
-		petition_list.AddPetition(pet);
+		PetitionList::Instance()->AddPetition(pet);
 		database.InsertPetitionToDB(pet);
-		petition_list.UpdateGMQueue();
-		petition_list.UpdateZoneListQueue();
+		PetitionList::Instance()->UpdateGMQueue();
+		PetitionList::Instance()->UpdateZoneListQueue();
 		worldserver.SendEmoteMessage(
 			0,
 			0,
@@ -11786,16 +11785,16 @@ void Client::Handle_OP_PetitionCheckIn(const EQApplicationPacket *app)
 	}
 	Petition_Struct* inpet = (Petition_Struct*)app->pBuffer;
 
-	Petition* pet = petition_list.GetPetitionByID(inpet->petnumber);
+	Petition* pet = PetitionList::Instance()->GetPetitionByID(inpet->petnumber);
 	//if (inpet->urgency != pet->GetUrgency())
 	pet->SetUrgency(inpet->urgency);
 	pet->SetLastGM(GetName());
 	pet->SetGMText(inpet->gmtext);
 
 	pet->SetCheckedOut(false);
-	petition_list.UpdatePetition(pet);
-	petition_list.UpdateGMQueue();
-	petition_list.UpdateZoneListQueue();
+	PetitionList::Instance()->UpdatePetition(pet);
+	PetitionList::Instance()->UpdateGMQueue();
+	PetitionList::Instance()->UpdateZoneListQueue();
 	return;
 }
 
@@ -11809,14 +11808,14 @@ void Client::Handle_OP_PetitionCheckout(const EQApplicationPacket *app)
 		Message(Chat::Red, "Error: World server disconnected");
 	else {
 		uint32 getpetnum = *((uint32*)app->pBuffer);
-		Petition* getpet = petition_list.GetPetitionByID(getpetnum);
+		Petition* getpet = PetitionList::Instance()->GetPetitionByID(getpetnum);
 		if (getpet != 0) {
 			getpet->AddCheckout();
 			getpet->SetCheckedOut(true);
 			getpet->SendPetitionToPlayer(CastToClient());
-			petition_list.UpdatePetition(getpet);
-			petition_list.UpdateGMQueue();
-			petition_list.UpdateZoneListQueue();
+			PetitionList::Instance()->UpdatePetition(getpet);
+			PetitionList::Instance()->UpdateGMQueue();
+			PetitionList::Instance()->UpdateZoneListQueue();
 		}
 	}
 	return;
@@ -11836,16 +11835,16 @@ void Client::Handle_OP_PetitionDelete(const EQApplicationPacket *app)
 	pet->senttime = 0;
 	strcpy(pet->accountid, "");
 	strcpy(pet->gmsenttoo, "");
-	pet->quetotal = petition_list.GetTotalPetitions();
+	pet->quetotal = PetitionList::Instance()->GetTotalPetitions();
 	strcpy(pet->charname, "");
 	FastQueuePacket(&outapp);
 
-	if (petition_list.DeletePetition(pet->petnumber) == -1)
+	if (PetitionList::Instance()->DeletePetition(pet->petnumber) == -1)
 		std::cout << "Something is borked with: " << pet->petnumber << std::endl;
-	petition_list.ClearPetitions();
-	petition_list.UpdateGMQueue();
-	petition_list.ReadDatabase();
-	petition_list.UpdateZoneListQueue();
+	PetitionList::Instance()->ClearPetitions();
+	PetitionList::Instance()->UpdateGMQueue();
+	PetitionList::Instance()->ReadDatabase();
+	PetitionList::Instance()->UpdateZoneListQueue();
 	return;
 }
 
@@ -11880,12 +11879,12 @@ void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app)
 		Message(Chat::Red, "Error: World server disconnected");
 	else {
 		uint32 getpetnum = *((uint32*)app->pBuffer);
-		Petition* getpet = petition_list.GetPetitionByID(getpetnum);
+		Petition* getpet = PetitionList::Instance()->GetPetitionByID(getpetnum);
 		if (getpet != 0) {
 			getpet->SetCheckedOut(false);
-			petition_list.UpdatePetition(getpet);
-			petition_list.UpdateGMQueue();
-			petition_list.UpdateZoneListQueue();
+			PetitionList::Instance()->UpdatePetition(getpet);
+			PetitionList::Instance()->UpdateGMQueue();
+			PetitionList::Instance()->UpdateZoneListQueue();
 		}
 	}
 	return;

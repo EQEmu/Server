@@ -93,7 +93,6 @@ extern volatile bool is_zone_loaded;
 
 EntityList  entity_list;
 WorldServer worldserver;
-ZoneStore   zone_store;
 uint32      numclients = 0;
 char        errorname[32];
 extern Zone *zone;
@@ -101,7 +100,6 @@ extern Zone *zone;
 npcDecayTimes_Struct  npcCorpseDecayTimes[100];
 TitleManager          title_manager;
 QueryServ             *QServ        = 0;
-TaskManager           *task_manager = 0;
 NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
 EQEmuLogSys           LogSys;
@@ -109,7 +107,6 @@ ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
 PlayerEventLogs       player_event_logs;
 DatabaseUpdate        database_update;
-SkillCaps             skill_caps;
 EvolvingItemsManager  evolving_items_manager;
 
 const SPDat_Spell_Struct* spells;
@@ -315,7 +312,7 @@ int main(int argc, char **argv)
 
 	player_event_logs.SetDatabase(&database)->Init();
 
-	skill_caps.SetContentDatabase(&content_db)->LoadSkillCaps();
+	SkillCaps::Instance()->SetContentDatabase(&content_db)->LoadSkillCaps();
 
 	const auto c = EQEmuConfig::get();
 	if (c->auto_database_updates) {
@@ -366,9 +363,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	zone_store.LoadZones(content_db);
+	ZoneStore::Instance()->LoadZones(content_db);
 
-	if (zone_store.GetZones().empty()) {
+	if (ZoneStore::Instance()->GetZones().empty()) {
 		LogError("Failed to load zones data, check your schema for possible errors");
 		return 1;
 	}
@@ -449,8 +446,7 @@ int main(int argc, char **argv)
 	npc_scale_manager->LoadScaleData();
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		task_manager = new TaskManager;
-		task_manager->LoadTasks();
+		TaskManager::Instance()->LoadTasks();
 	}
 
 	parse = new QuestParserCollection();
@@ -681,7 +677,6 @@ int main(int argc, char **argv)
 		zone->Shutdown(true);
 	}
 	//Fix for Linux world server problem.
-	safe_delete(task_manager);
 	safe_delete(npc_scale_manager);
 	command_deinit();
 	bot_command_deinit();

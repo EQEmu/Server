@@ -224,6 +224,8 @@ public:
 	void resettaskactivity(int task, int activity);
 	void assigntask(int taskid, bool enforce_level_requirement = false);
 	void failtask(int taskid);
+	bool completetask(int task_id);
+	bool uncompletetask(int task_id);
 	int tasktimeleft(int taskid);
 	bool istaskcompleted(int task_id);
 	bool aretaskscompleted(const std::vector<int>& task_ids);

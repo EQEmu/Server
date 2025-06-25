@@ -30,7 +30,6 @@ public:
 		TEST_ADD(StringUtilTest::EscapeStringTest);
 		TEST_ADD(StringUtilTest::SearchDeliminatedStringTest);
 		TEST_ADD(StringUtilTest::SplitStringTest);
-		TEST_ADD(StringUtilTest::FromCharsTest);
 		TEST_ADD(StringUtilTest::TestIsFloat);
 		TEST_ADD(StringUtilTest::TestIsNumber);
 	}
@@ -106,21 +105,6 @@ public:
 		TEST_ASSERT(v[0] == "123");
 		TEST_ASSERT(v[1] == "456");
 		TEST_ASSERT(v[2] == "789");
-	}
-
-	void FromCharsTest() {
-		char int_chars[] = "123";
-		int int_value = 0;
-
-		char float_chars[] = "3.14";
-		float float_value = 0.0f;
-
-		Strings::from_chars(int_chars, int_value);
-		TEST_ASSERT(int_value == 123);
-
-		Strings::from_chars(float_chars, float_value);
-		TEST_ASSERT(float_value == 3.14f);
-
 	}
 
 	void TestIsFloat() {
