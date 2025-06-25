@@ -244,6 +244,8 @@ public:
 		const glm::vec4 &position
 	);
 
+	void SyncEntityVariablesToCorpseDB();
+
 protected:
 	void MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equipSlot, std::list<uint32> &removedList);
 

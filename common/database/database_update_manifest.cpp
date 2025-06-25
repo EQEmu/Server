@@ -7124,6 +7124,18 @@ CREATE INDEX idx_event_type_char_id ON player_event_logs (event_type_id, charact
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9325,
+		.description = "2025_06_10_character_corpses_entity_variables.sql",
+		.check = "SHOW COLUMNS FROM `character_corpses` LIKE 'entity_variables'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_corpses`
+ADD COLUMN `entity_variables` TEXT DEFAULT NULL AFTER `rezzable`;
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
