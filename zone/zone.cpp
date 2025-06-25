@@ -81,7 +81,6 @@
 #endif
 
 extern bool staticzone;
-extern PetitionList petition_list;
 extern QuestParserCollection* parse;
 extern uint32 numclients;
 extern WorldServer worldserver;
@@ -924,7 +923,7 @@ void Zone::Shutdown(bool quiet)
 		GetInstanceVersion(),
 		GetInstanceID()
 	);
-	petition_list.ClearPetitions();
+	PetitionList::Instance()->ClearPetitions();
 	SetZoneHasCurrentTime(false);
 	if (!quiet) {
 		LogInfo(
@@ -1234,8 +1233,8 @@ bool Zone::Init(bool is_static) {
 		LoadMercenarySpells();
 	}
 
-	petition_list.ClearPetitions();
-	petition_list.ReadDatabase();
+	PetitionList::Instance()->ClearPetitions();
+	PetitionList::Instance()->ReadDatabase();
 
 	guild_mgr.LoadGuilds();
 
