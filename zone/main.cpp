@@ -105,7 +105,12 @@ QuestParserCollection *parse        = 0;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
 PlayerEventLogs       player_event_logs;
+<<<<<<< kinglykrab/evolvingitemsmanager-global-to-singleton
+DatabaseUpdate        database_update;
+SkillCaps             skill_caps;
+=======
 EvolvingItemsManager  evolving_items_manager;
+>>>>>>> master
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
@@ -394,9 +399,9 @@ int main(int argc, char **argv)
 	content_db.LoadTributes();
 
 	// Load evolving item data
-	evolving_items_manager.SetDatabase(&database);
-	evolving_items_manager.SetContentDatabase(&content_db);
-	evolving_items_manager.LoadEvolvingItems();
+	EvolvingItemsManager::Instance()->SetDatabase(&database);
+	EvolvingItemsManager::Instance()->SetContentDatabase(&content_db);
+	EvolvingItemsManager::Instance()->LoadEvolvingItems();
 
 	database.GetDecayTimes(npcCorpseDecayTimes);
 
