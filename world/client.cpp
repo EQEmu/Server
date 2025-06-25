@@ -36,6 +36,7 @@
 #include "../common/shareddb.h"
 #include "../common/opcodemgr.h"
 #include "../common/data_verification.h"
+#include "../common/data_bucket.h"
 
 #include "client.h"
 #include "worlddb.h"
@@ -134,6 +135,8 @@ Client::Client(EQStreamInterface* ieqs)
 }
 
 Client::~Client() {
+	ClearDataBucketsCache();
+
 	if (RunLoops && cle && zone_id == 0)
 		cle->SetOnline(CLE_Status::Offline);
 
@@ -476,6 +479,8 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 	LogClientLogin("Checking authentication id [{}]", id);
 
 	if ((cle = client_list.CheckAuth(id, password))) {
+		LoadDataBucketsCache();
+
 		LogClientLogin("Checking authentication id [{}] passed", id);
 		if (!is_player_zoning) {
 			// Track who is in and who is out of the game
@@ -2516,4 +2521,20 @@ void Client::SendUnsupportedClientPacket(const std::string& message)
 	e->Enabled     = 0;
 
 	QueuePacket(&packet);
+}
+
+void Client::LoadDataBucketsCache()
+{
+	DataBucket::BulkLoadEntitiesToCache(DataBucketLoadType::Account, {GetAccountID()});
+	const auto ids = CharacterDataRepository::GetCharacterIDsByAccountID(database, GetAccountID());
+	DataBucket::BulkLoadEntitiesToCache(DataBucketLoadType::Client, ids);
+}
+
+void Client::ClearDataBucketsCache()
+{
+	DataBucket::DeleteFromCache(GetAccountID(), DataBucketLoadType::Account);
+	auto ids = CharacterDataRepository::GetCharacterIDsByAccountID(database, GetAccountID());
+	for (const auto& id : ids) {
+		DataBucket::DeleteFromCache(id, DataBucketLoadType::Client);
+	}
 }
