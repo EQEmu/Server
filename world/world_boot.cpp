@@ -625,14 +625,14 @@ void WorldBoot::Shutdown()
 
 void WorldBoot::SendDiscordMessage(int webhook_id, const std::string &message)
 {
-	if (UCSLink.IsConnected()) {
+	if (UCSConnection::Instance()->IsConnected()) {
 		auto pack = new ServerPacket(ServerOP_DiscordWebhookMessage, sizeof(DiscordWebhookMessage_Struct) + 1);
 		auto *q   = (DiscordWebhookMessage_Struct *) pack->pBuffer;
 
 		strn0cpy(q->message, message.c_str(), 2000);
 		q->webhook_id = webhook_id;
 
-		UCSLink.SendPacket(pack);
+		UCSConnection::Instance()->SendPacket(pack);
 
 		safe_delete(pack);
 	}

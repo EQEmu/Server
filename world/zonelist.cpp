@@ -984,7 +984,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 	} else if (type == ServerReload::Type::Logs) {
 		EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
 		player_event_logs.ReloadSettings();
-		UCSLink.SendPacket(&pack);
+		UCSConnection::Instance()->SendPacket(&pack);
 		QSLink.SendPacket(&pack);
 	} else if (type == ServerReload::Type::Tasks) {
 		SharedTaskManager::Instance()->LoadTaskData();
