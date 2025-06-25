@@ -89,7 +89,6 @@
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
 
-extern ZSList zoneserver_list;
 extern ClientList client_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
@@ -1415,18 +1414,18 @@ void Client::EnterWorld(bool TryBootup) {
 			return;
 		}
 
-		zone_server = zoneserver_list.FindByInstanceID(instance_id);
+		zone_server = ZSList::Instance()->FindByInstanceID(instance_id);
 	}
 	else
 	{
-		zone_server = zoneserver_list.FindByZoneID(zone_id);
+		zone_server = ZSList::Instance()->FindByZoneID(zone_id);
 	}
 
 	const char *zone_name = ZoneName(zone_id, true);
 	if (zone_server) {
 		if (false == enter_world_triggered) {
 			//Drop any clients we own in other zones.
-			zoneserver_list.DropClient(GetLSID(), zone_server);
+			ZSList::Instance()->DropClient(GetLSID(), zone_server);
 
 			// warn the zone we're coming
 			zone_server->IncomingClient(this);
@@ -1439,7 +1438,7 @@ void Client::EnterWorld(bool TryBootup) {
 		if (TryBootup) {
 			LogInfo("Attempting autobootup of [{}] [{}] [{}]", zone_name, zone_id, instance_id);
 			autobootup_timeout.Start();
-			zone_waiting_for_bootup = zoneserver_list.TriggerBootup(zone_id, instance_id);
+			zone_waiting_for_bootup = ZSList::Instance()->TriggerBootup(zone_id, instance_id);
 			if (zone_waiting_for_bootup == 0) {
 				LogInfo("No zoneserver available to boot up");
 				TellClientZoneUnavailable();
@@ -1455,7 +1454,7 @@ void Client::EnterWorld(bool TryBootup) {
 
 	zone_waiting_for_bootup = 0;
 
-	if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zone_id)) {
+	if (GetAdmin() < 80 && ZSList::Instance()->IsZoneLocked(zone_id)) {
 		LogInfo("Enter world failed. Zone is locked");
 		TellClientZoneUnavailable();
 		return;
@@ -1501,11 +1500,11 @@ void Client::Clearance(int8 response)
 	ZoneServer* zs = nullptr;
 	if(instance_id > 0)
 	{
-		zs = zoneserver_list.FindByInstanceID(instance_id);
+		zs = ZSList::Instance()->FindByInstanceID(instance_id);
 	}
 	else
 	{
-		zs = zoneserver_list.FindByZoneID(zone_id);
+		zs = ZSList::Instance()->FindByZoneID(zone_id);
 	}
 
 	if(zs == 0 || response == -1 || response == 0)

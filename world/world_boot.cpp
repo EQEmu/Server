@@ -29,7 +29,6 @@
 #include "../common/database/database_update.h"
 #include "../common/repositories/zone_state_spawns_repository.h"
 
-extern ZSList      zoneserver_list;
 extern WorldConfig Config;
 
 auto mutex = new Mutex;
@@ -53,7 +52,7 @@ void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, const char *f
 		auto message_split = Strings::Split(message, '\n');
 
 		for (size_t iter = 0; iter < message_split.size(); ++iter) {
-			zoneserver_list.SendEmoteMessage(
+			ZSList::Instance()->SendEmoteMessage(
 				0,
 				0,
 				AccountStatus::QuestTroupe,
@@ -69,7 +68,7 @@ void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, const char *f
 		return;
 	}
 
-	zoneserver_list.SendEmoteMessage(
+	ZSList::Instance()->SendEmoteMessage(
 		0,
 		0,
 		AccountStatus::QuestTroupe,
@@ -351,7 +350,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	TimeOfDay_Struct eqTime{};
 	time_t           realtime;
 	eqTime = database.LoadTime(realtime);
-	zoneserver_list.worldclock.SetCurrentEQTimeOfDay(eqTime, realtime);
+	ZSList::Instance()->worldclock.SetCurrentEQTimeOfDay(eqTime, realtime);
 
 	LogInfo("Deleted [{}] stale player corpses from database", database.DeleteStalePlayerCorpses());
 
