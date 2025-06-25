@@ -1,3 +1,4 @@
+#include "../dialogue_window.h"
 #include "../client.h"
 
 void command_illusion_block(Client* c, const Seperator* sep)

@@ -36,8 +36,6 @@
 #include "../common/evolving_items.h"
 
 WorldContentService  content_service;
-ZoneStore            zone_store;
-PathManager          path;
 PlayerEventLogs      player_event_logs;
 EvolvingItemsManager evolving_items_manager;
 
@@ -83,7 +81,7 @@ int main(int argc, char **argv)
 	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	LogInfo("Shared Memory Loader Program");
 	if (!EQEmuConfig::LoadConfig()) {
@@ -126,7 +124,7 @@ int main(int argc, char **argv)
 	}
 
 	EQEmuLogSys::Instance()->SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 

@@ -85,6 +85,12 @@ public:
 		return {m_gm_zone_server_ids.begin(), m_gm_zone_server_ids.end()};
 	}
 
+	static ClientList* Instance()
+	{
+		static ClientList instance;
+		return &instance;
+	}
+
 private:
 	void OnTick(EQ::Timer *t);
 	inline uint32 GetNextCLEID() { return NextCLEID++; }

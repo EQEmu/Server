@@ -1799,7 +1799,7 @@ std::vector<std::string> EQ::ItemInstance::GetAugmentNames() const
 
 	for (uint8 slot_id = invaug::SOCKET_BEGIN; slot_id <= invaug::SOCKET_END; slot_id++) {
 		const auto augment = GetAugment(slot_id);
-		augment_names.push_back(augment ? augment->GetItem()->Name : "None");
+		augment_names.push_back(augment ? augment->GetItem()->Name : "");
 	}
 
 	return augment_names;

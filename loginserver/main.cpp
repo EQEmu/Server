@@ -23,10 +23,8 @@
 
 LoginServer     server;
 bool            run_server = true;
-PathManager     path;
 Database        database;
 PlayerEventLogs player_event_logs;
-ZoneStore       zone_store;
 
 void CatchSignal(int sig_num)
 {
@@ -51,7 +49,7 @@ void LoadDatabaseConnection()
 void LoadServerConfig()
 {
 	server.config = EQ::JsonConfigFile::Load(
-		fmt::format("{}/login.json", path.GetServerPath())
+		fmt::format("{}/login.json", PathManager::Instance()->GetServerPath())
 	);
 	LogInfo("Config System Init");
 
@@ -161,7 +159,7 @@ int main(int argc, char **argv)
 		EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	}
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	// command handler
 	if (argc > 1) {
