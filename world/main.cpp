@@ -413,7 +413,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		WorldEventScheduler::Instance()->Process(&zoneserver_list);
+		WorldEventScheduler::Instance()->Process(ZSList::Instance());
 
 		client_list.Process();
 		guild_mgr.Process();

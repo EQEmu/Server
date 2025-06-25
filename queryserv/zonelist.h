@@ -6,9 +6,9 @@
 #include <vector>
 #include <memory>
 #include <list>
+#include "zoneserver.h"
 
 class WorldTCPConnection;
-class ZoneServer;
 
 class ZSList {
 public:

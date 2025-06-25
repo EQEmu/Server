@@ -1359,7 +1359,7 @@ void ConsoleWWMarquee(
 
 	strn0cpy(wwm->message, message.c_str(), sizeof(wwm->message));
 
-	zoneserver_list.SendPacket(pack);
+	ZSList::Instance()->SendPacket(pack);
 	safe_delete(pack);
 
 	connection->SendLine(fmt::format("Sent world marquee type {}: {}", type, message));
