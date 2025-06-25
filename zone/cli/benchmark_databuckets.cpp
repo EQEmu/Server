@@ -195,6 +195,25 @@ void RunBenchmarkCycle(uint64_t target_rows)
 	std::cout << "✅ Completed " << Strings::Commify(OPERATIONS_PER_TEST) << " cached reads in "
 			  << read_cached_time.count() << " seconds. (DataBucket::GetData)\n";
 
+	// 🔍 **Measure Client-Scoped Cache Miss Performance (Skips DB via CanCache)**
+	auto read_client_cache_miss_start = std::chrono::high_resolution_clock::now();
+	for (size_t i = 0; i < OPERATIONS_PER_TEST; ++i) {
+		// generate key that doesn't exist
+		std::string key = "nonexistent_key_" + std::to_string(i);
+
+		DataBucketKey k{
+			.key = key,
+			.character_id = 999999999, // use scoped value
+		};
+
+		DataBucket::GetData(k);
+	}
+	auto read_client_cache_miss_end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> read_client_cache_miss_time = read_client_cache_miss_end - read_client_cache_miss_start;
+	std::cout << "✅ Completed " << Strings::Commify(OPERATIONS_PER_TEST)
+			  << " scoped cache-miss reads (no DB) in "
+			  << read_client_cache_miss_time.count() << " seconds. (Client Scoped, Cache Miss, No DB)\n";
+
 	// 🔍 **Measure Non-Cached Read Performance (Direct Query)**
 	auto                          read_uncached_start = std::chrono::high_resolution_clock::now();
 	for (size_t                   i                   = 0; i < OPERATIONS_PER_TEST; ++i) {
@@ -259,7 +278,7 @@ void ZoneCLI::BenchmarkDatabuckets(int argc, char **argv, argh::parser &cmd, std
 	}
 
 	if (std::getenv("DEBUG")) {
-		LogSys.SetDatabase(&database)->LoadLogDatabaseSettings();
+		EQEmuLogSys::Instance()->SetDatabase(&database)->LoadLogDatabaseSettings();
 	}
 
 	auto start_time = std::chrono::high_resolution_clock::now();

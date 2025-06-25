@@ -33,6 +33,13 @@ public:
 	DatabaseUpdate *SetContentDatabase(Database *db);
 	DatabaseUpdate *SetSkipBackup(bool skip);
 	bool HasPendingUpdates();
+
+	static DatabaseUpdate* Instance()
+	{
+		static DatabaseUpdate instance;
+		return &instance;
+	}
+
 private:
 	bool m_skip_backup = false;
 	Database *m_database;

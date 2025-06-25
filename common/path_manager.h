@@ -7,7 +7,13 @@
 
 class PathManager {
 public:
-	void LoadPaths();
+	void Init();
+
+	static PathManager *Instance()
+	{
+		static PathManager instance;
+		return &instance;
+	}
 
 	[[nodiscard]] const std::string &GetLogPath() const;
 	[[nodiscard]] const std::string &GetLuaModsPath() const;
@@ -37,7 +43,5 @@ private:
 	std::string              m_server_path;
 	std::string              m_shared_memory_path;
 };
-
-extern PathManager path;
 
 #endif //EQEMU_PATH_MANAGER_H

@@ -93,7 +93,6 @@ extern volatile bool is_zone_loaded;
 
 EntityList  entity_list;
 WorldServer worldserver;
-ZoneStore   zone_store;
 uint32      numclients = 0;
 char        errorname[32];
 extern Zone *zone;
@@ -101,16 +100,17 @@ extern Zone *zone;
 npcDecayTimes_Struct  npcCorpseDecayTimes[100];
 TitleManager          title_manager;
 QueryServ             *QServ        = 0;
-TaskManager           *task_manager = 0;
 NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
-EQEmuLogSys           LogSys;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
-PathManager           path;
 PlayerEventLogs       player_event_logs;
+<<<<<<< kinglykrab/evolvingitemsmanager-global-to-singleton
 DatabaseUpdate        database_update;
 SkillCaps             skill_caps;
+=======
+EvolvingItemsManager  evolving_items_manager;
+>>>>>>> master
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
@@ -127,16 +127,16 @@ bool CheckForCompatibleQuestPlugins();
 int main(int argc, char **argv)
 {
 	RegisterExecutablePlatform(ExePlatformZone);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 
 	set_exception_handler();
 
 	// silence logging if we ran a command
 	if (ZoneCLI::RanConsoleCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv)) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 	}
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {
@@ -299,27 +299,27 @@ int main(int argc, char **argv)
 
 	// command handler (no sidecar or test commands)
 	if (ZoneCLI::RanConsoleCommand(argc, argv) && !(ZoneCLI::RanSidecarCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv))) {
-		LogSys.EnableConsoleLogging();
+		EQEmuLogSys::Instance()->EnableConsoleLogging();
 		ZoneCLI::CommandHandler(argc, argv);
 	}
 
-	LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+	EQEmuLogSys::Instance()->SetDatabase(&database)
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings(ZoneCLI::RanTestCommand(argc, argv))
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();
 
 	if (ZoneCLI::RanTestCommand(argc, argv)) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 	}
 
 	player_event_logs.SetDatabase(&database)->Init();
 
-	skill_caps.SetContentDatabase(&content_db)->LoadSkillCaps();
+	SkillCaps::Instance()->SetContentDatabase(&content_db)->LoadSkillCaps();
 
 	const auto c = EQEmuConfig::get();
 	if (c->auto_database_updates) {
-		if (database_update.SetDatabase(&database)->HasPendingUpdates()) {
+		if (DatabaseUpdate::Instance()->SetDatabase(&database)->HasPendingUpdates()) {
 			LogWarning("Database is not up to date [world] needs to be ran to apply updates, shutting down in 5 seconds");
 			std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 			LogInfo("Exiting due to pending database updates");
@@ -366,9 +366,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	zone_store.LoadZones(content_db);
+	ZoneStore::Instance()->LoadZones(content_db);
 
-	if (zone_store.GetZones().empty()) {
+	if (ZoneStore::Instance()->GetZones().empty()) {
 		LogError("Failed to load zones data, check your schema for possible errors");
 		return 1;
 	}
@@ -449,8 +449,7 @@ int main(int argc, char **argv)
 	npc_scale_manager->LoadScaleData();
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		task_manager = new TaskManager;
-		task_manager->LoadTasks();
+		TaskManager::Instance()->LoadTasks();
 	}
 
 	parse = new QuestParserCollection();
@@ -494,7 +493,7 @@ int main(int argc, char **argv)
 	// sidecar command handler
 	if (ZoneCLI::RanConsoleCommand(argc, argv)
 		&& (ZoneCLI::RanSidecarCommand(argc, argv) || ZoneCLI::RanTestCommand(argc, argv))) {
-		LogSys.EnableConsoleLogging();
+		EQEmuLogSys::Instance()->EnableConsoleLogging();
 		ZoneCLI::CommandHandler(argc, argv);
 	}
 
@@ -681,13 +680,12 @@ int main(int argc, char **argv)
 		zone->Shutdown(true);
 	}
 	//Fix for Linux world server problem.
-	safe_delete(task_manager);
 	safe_delete(npc_scale_manager);
 	command_deinit();
 	bot_command_deinit();
 	safe_delete(parse);
 	LogInfo("Proper zone shutdown complete.");
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 
 	safe_delete(mutex);
 	safe_delete(QServ);
@@ -699,7 +697,7 @@ void Shutdown()
 {
 	zone->Shutdown(true);
 	LogInfo("Shutting down...");
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 	EQ::EventLoop::Get().Shutdown();
 }
 
@@ -751,7 +749,7 @@ bool CheckForCompatibleQuestPlugins()
 
 	try {
 		for (const auto &[directory, flag]: directories) {
-			std::string dir_path = path.GetServerPath() + "/" + directory;
+			std::string dir_path = PathManager::Instance()->GetServerPath() + "/" + directory;
 			if (!File::Exists(dir_path)) { continue; }
 
 			for (const auto &file: fs::directory_iterator(dir_path)) {

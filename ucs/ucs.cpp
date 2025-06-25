@@ -44,12 +44,8 @@
 
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
-EQEmuLogSys LogSys;
 UCSDatabase database;
 WorldServer *worldserver = nullptr;
-DiscordManager discord_manager;
-PathManager path;
-ZoneStore zone_store;
 PlayerEventLogs player_event_logs;
 
 const ucsconfig *Config;
@@ -75,7 +71,7 @@ void Shutdown() {
 	LogInfo("Shutting down...");
 	ChannelList->RemoveAllChannels();
 	g_Clientlist->CloseAllConnections();
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 }
 
 int caught_loop = 0;
@@ -90,24 +86,24 @@ void CatchSignal(int sig_num) {
 		LogInfo("In a signal handler loop and process is incapable of exiting properly, forcefully cleaning up");
 		ChannelList->RemoveAllChannels();
 		g_Clientlist->CloseAllConnections();
-		LogSys.CloseFileLogs();
+		EQEmuLogSys::Instance()->CloseFileLogs();
 		std::exit(0);
 	}
 }
 
 void PlayerEventQueueListener() {
 	while (caught_loop == 0) {
-		discord_manager.ProcessMessageQueue();
+		DiscordManager::Instance()->ProcessMessageQueue();
 		Sleep(100);
 	}
 }
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformUCS);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	// Check every minute for unused channels we can delete
 	//
@@ -139,8 +135,9 @@ int main() {
 		return 1;
 	}
 
-	LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+	EQEmuLogSys::Instance()
+		->SetDatabase(&database)
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 

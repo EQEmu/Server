@@ -44,6 +44,12 @@ public:
 	bool LoadDatabase();
 	void HandlePacket(ServerPacket *pack);
 	void ExpireEntries();
+
+	static LFGuildManager* Instance()
+	{
+		static LFGuildManager instance;
+		return &instance;
+	}
 private:
 	void SendPlayerMatches(uint32 FromZoneID, uint32 FromInstanceID, char *From, uint32 FromLevel, uint32 ToLevel, uint32 MinAA, uint32 TimeZone, uint32 Classes);
 	void SendGuildMatches(uint32 FromZoneID, uint32 FromInstanceID, char *From, uint32 Level, uint32 AAPoints, uint32 TimeZone, uint32 Class);

@@ -55,13 +55,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
-extern LoginServerList loginserverlist;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
 extern AdventureManager adventure_manager;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
-extern SharedTaskManager shared_task_manager;
 
 void CatchSignal(int sig_num);
 
@@ -164,7 +162,7 @@ void ZoneServer::LSBootUpdate(uint32 zone_id, uint32 instanceid, bool startup) {
 		bootup->zone = zone_id;
 		bootup->zone_wid = GetID();
 		bootup->instance = instanceid;
-		loginserverlist.SendPacket(pack);
+		LoginServerList::Instance()->SendPacket(pack);
 		safe_delete(pack);
 	}
 }
@@ -179,7 +177,7 @@ void ZoneServer::LSSleepUpdate(uint32 zone_id) {
 		auto sleep = (ServerLSZoneSleep_Struct*) pack->pBuffer;
 		sleep->zone = zone_id;
 		sleep->zone_wid = GetID();
-		loginserverlist.SendPacket(pack);
+		LoginServerList::Instance()->SendPacket(pack);
 		safe_delete(pack);
 	}
 }
@@ -1076,8 +1074,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				WorldConfig::UnlockWorld();
 			}
 
-			if (loginserverlist.Connected()) {
-				loginserverlist.SendStatus();
+			if (LoginServerList::Instance()->Connected()) {
+				LoginServerList::Instance()->SendStatus();
 				SendEmoteMessage(
 					l->character_name,
 					0,
@@ -1339,7 +1337,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_LSAccountUpdate: {
 			LogNetcode("Received ServerOP_LSAccountUpdate packet from zone");
-			loginserverlist.SendAccountUpdate(pack);
+			LoginServerList::Instance()->SendAccountUpdate(pack);
 			break;
 		}
 		case ServerOP_DiscordWebhookMessage:

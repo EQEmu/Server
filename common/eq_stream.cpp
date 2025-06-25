@@ -545,13 +545,13 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 	uint32 chunksize, used;
 	uint32 length;
 
-	if (LogSys.log_settings[Logs::Server_Client_Packet].is_category_enabled == 1){
+	if (EQEmuLogSys::Instance()->log_settings[Logs::Server_Client_Packet].is_category_enabled == 1){
 		if (p->GetOpcode() != OP_SpecialMesg){
 			Log(Logs::General, Logs::Server_Client_Packet, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size());
 		}
 	}
 
-	if (LogSys.log_settings[Logs::Server_Client_Packet_With_Dump].is_category_enabled == 1){
+	if (EQEmuLogSys::Instance()->log_settings[Logs::Server_Client_Packet_With_Dump].is_category_enabled == 1){
 		if (p->GetOpcode() != OP_SpecialMesg){
 			Log(Logs::General, Logs::Server_Client_Packet_With_Dump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
 		}

@@ -185,7 +185,7 @@ void WorldContentService::ReloadContentFlags()
 
 	SetContentFlags(set_content_flags);
 	LoadStaticGlobalZoneInstances();
-	zone_store.LoadZones(*m_content_database);
+	ZoneStore::Instance()->LoadZones(*m_content_database);
 }
 
 Database *WorldContentService::GetDatabase() const
@@ -291,7 +291,7 @@ WorldContentService *WorldContentService::LoadStaticGlobalZoneInstances()
 //   instance_list table entry for lavastorm has version = 1, is_global = 1, never_expires = 1
 WorldContentService::FindZoneResult WorldContentService::FindZone(uint32 zone_id, uint32 instance_id)
 {
-	for (const auto &z: zone_store.GetZones()) {
+	for (const auto &z: ZoneStore::Instance()->GetZones()) {
 		for (auto &i: m_zone_static_instances) {
 			if (
 				z.zoneidnumber == zone_id &&
