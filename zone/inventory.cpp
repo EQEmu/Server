@@ -688,7 +688,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 			LogInventory("Error in InventoryProfile::CheckNoDrop() - returned 'true' for empty slot");
 		}
 		else {
-			if (LogSys.log_settings[Logs::Inventory].is_category_enabled) {
+			if (EQEmuLogSys::Instance()->log_settings[Logs::Inventory].is_category_enabled) {
 				LogInventory("DropItem() Hack detected - full item parse:");
 				LogInventory("depth: 0, Item: [{}] (id: [{}]), IsDroppable: [{}]",
 					(invalid_drop->GetItem() ? invalid_drop->GetItem()->Name : "null data"), invalid_drop->GetID(), (invalid_drop->IsDroppable(false) ? "true" : "false"));
@@ -720,7 +720,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 	// Take control of item in client inventory
 	auto* inst = m_inv.PopItem(slot_id);
 	if (inst) {
-		if (LogSys.log_settings[Logs::Inventory].is_category_enabled) {
+		if (EQEmuLogSys::Instance()->log_settings[Logs::Inventory].is_category_enabled) {
 			LogInventory("DropItem() Processing - full item parse:");
 			LogInventory(
 				"depth: 0, Item: [{}] (id: [{}]), IsDroppable: [{}]",
@@ -1037,7 +1037,7 @@ bool Client::PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update)
 {
 	LogInventory("Putting item [{}] ([{}]) on the cursor", inst.GetItem()->Name, inst.GetItem()->ID);
 
-	evolving_items_manager.DoLootChecks(CharacterID(), EQ::invslot::slotCursor, inst);
+	EvolvingItemsManager::Instance()->DoLootChecks(CharacterID(), EQ::invslot::slotCursor, inst);
 	m_inv.PushCursor(inst);
 
 	if (client_update) {
@@ -1059,7 +1059,7 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 		return PushItemOnCursor(inst, client_update);
 	}
 
-	evolving_items_manager.DoLootChecks(CharacterID(), slot_id, inst);
+	EvolvingItemsManager::Instance()->DoLootChecks(CharacterID(), slot_id, inst);
 	m_inv.PutItem(slot_id, inst);
 
 	if (client_update)
@@ -1087,7 +1087,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Loo
 
 	bool cursor_empty = m_inv.CursorEmpty();
 
-	evolving_items_manager.DoLootChecks(CharacterID(), slot_id, inst);
+	EvolvingItemsManager::Instance()->DoLootChecks(CharacterID(), slot_id, inst);
 
 	if (slot_id == EQ::invslot::slotCursor) {
 		m_inv.PushCursor(inst);

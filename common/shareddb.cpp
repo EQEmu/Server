@@ -824,7 +824,7 @@ bool SharedDatabase::GetInventory(Client *c)
 				e.character_id  = char_id;
 				e.item_id       = item_id;
 				e.equipped      = inst->GetEvolveEquipped();
-				e.final_item_id = evolving_items_manager.GetFinalItemID(*inst);
+				e.final_item_id = EvolvingItemsManager::Instance()->GetFinalItemID(*inst);
 
 				auto r = CharacterEvolvingItemsRepository::InsertOne(*this, e);
 				e.id = r.id;
@@ -974,7 +974,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("items");
 		mutex.Lock();
-		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("items"));
+		std::string file_name = fmt::format("{}/{}{}", PathManager::Instance()->GetSharedMemoryPath(), prefix, std::string("items"));
 		items_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		items_hash = std::make_unique<EQ::FixedMemoryHashSet<EQ::ItemData>>(static_cast<uint8*>(items_mmf->Get()), items_mmf->Size());
 		mutex.Unlock();
@@ -1544,12 +1544,60 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 	return true;
 }
 
+template<typename T1, typename T2>
+inline std::vector<std::string> join_pair(
+	const std::string &glue,
+	const std::pair<char, char> &encapsulation,
+	const std::vector<std::pair<T1, T2>> &src
+)
+{
+	if (src.empty()) {
+		return {};
+	}
+
+	std::vector<std::string> output;
+
+	for (const std::pair<T1, T2> &src_iter: src) {
+		output.emplace_back(
+
+			fmt::format(
+				"{}{}{}{}{}{}{}",
+				encapsulation.first,
+				src_iter.first,
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				src_iter.second,
+				encapsulation.second
+			)
+		);
+	}
+
+	return output;
+}
+
+template<typename T>
+inline std::string
+ImplodePair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
+{
+	if (src.empty()) {
+		return {};
+	}
+	std::ostringstream oss;
+	for (const T &src_iter: src) {
+		oss << encapsulation.first << src_iter << encapsulation.second << glue;
+	}
+	std::string output(oss.str());
+	output.resize(output.size() - glue.size());
+	return output;
+}
+
 bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
 {
 	if (injected.size()) {
 		const std::string query = fmt::format(
 			"REPLACE INTO `command_settings`(`command`, `access`) VALUES {}",
-			Strings::ImplodePair(
+			ImplodePair(
 				",",
 				std::pair<char, char>('(', ')'),
 				join_pair(",", std::pair<char, char>('\'', '\''), injected)
@@ -1576,7 +1624,7 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 	if (orphaned.size()) {
 		std::string query = fmt::format(
 			"DELETE FROM `command_settings` WHERE `command` IN ({})",
-			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
+			ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		auto results = QueryDatabase(query);
@@ -1586,7 +1634,7 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 
 		query = fmt::format(
 			"DELETE FROM `command_subsettings` WHERE `parent_command` IN ({})",
-			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
+			ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		auto results_two = QueryDatabase(query);
@@ -1665,7 +1713,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		EQ::IPCMutex mutex("spells");
 		mutex.Lock();
 
-		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("spells"));
+		std::string file_name = fmt::format("{}/{}{}", PathManager::Instance()->GetSharedMemoryPath(), prefix, std::string("spells"));
 		spells_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		LogInfo("Loading [{}]", file_name);
 		*records = *static_cast<uint32*>(spells_mmf->Get());

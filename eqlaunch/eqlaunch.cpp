@@ -33,19 +33,16 @@
 #include <signal.h>
 #include <time.h>
 
-EQEmuLogSys LogSys;
-PathManager path;
-
 bool RunLoops = false;
 
 void CatchSignal(int sig_num);
 
 int main(int argc, char *argv[]) {
 	RegisterExecutablePlatform(ExePlatformLaunch);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	std::string launcher_name;
 	if(argc == 2) {
@@ -169,7 +166,7 @@ int main(int argc, char *argv[]) {
 		delete zone->second;
 	}
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 
 	return 0;
 }

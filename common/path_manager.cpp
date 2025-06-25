@@ -8,7 +8,7 @@
 
 namespace fs = std::filesystem;
 
-void PathManager::LoadPaths()
+void PathManager::Init()
 {
 	m_server_path = File::FindEqemuConfigPath();
 

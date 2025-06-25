@@ -102,6 +102,12 @@ public:
 	void SetSharedTasks(const std::vector<SharedTask> &shared_tasks);
 
 	SharedTaskManager * PurgeExpiredSharedTasks();
+
+	static SharedTaskManager* Instance()
+	{
+		static SharedTaskManager instance;
+		return &instance;
+	}
 protected:
 	// reference to database
 	Database *m_database;

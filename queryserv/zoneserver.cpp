@@ -5,8 +5,6 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/discord/discord_manager.h"
 
-extern DiscordManager discord_manager;
-
 ZoneServer::ZoneServer(
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> in_connection,
 	EQ::Net::ConsoleServer *in_console
@@ -37,7 +35,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			player_event_logs.AddToQueue(n.player_event_log);
 
-			discord_manager.QueuePlayerEventMessage(n);
+			DiscordManager::Instance()->QueuePlayerEventMessage(n);
 			break;
 		}
 		default: {
@@ -45,4 +43,28 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 	}
+}
+
+void ZoneServer::SendPlayerEventLogSettings()
+{
+	EQ::Net::DynamicPacket                                                dyn_pack;
+	std::vector<PlayerEventLogSettingsRepository::PlayerEventLogSettings> settings(
+		player_event_logs.GetSettings(),
+		player_event_logs.GetSettings() + PlayerEvent::EventType::MAX
+	);
+
+	dyn_pack.PutSerialize(0, settings);
+
+	auto packet_size = sizeof(ServerSendPlayerEvent_Struct) + dyn_pack.Length();
+
+	auto pack = std::make_unique<ServerPacket>(
+		ServerOP_SendPlayerEventSettings,
+		static_cast<uint32_t>(packet_size)
+	);
+
+	auto* buf        = reinterpret_cast<ServerSendPlayerEvent_Struct*>(pack->pBuffer);
+	buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
+	memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
+
+	SendPacket(pack.release());
 }

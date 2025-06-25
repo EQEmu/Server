@@ -1,4 +1,3 @@
-#include "../../common/http/httplib.h"
 #include "../../common/eqemu_logsys.h"
 #include "../../common/platform.h"
 #include "../../zone.h"
@@ -16,7 +15,7 @@ void ZoneCLI::TestNpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd,
 	uint32 break_length = 50;
 	int    failed_count = 0;
 
-	LogSys.SilenceConsoleLogging();
+	EQEmuLogSys::Instance()->SilenceConsoleLogging();
 
 	Zone::Bootup(ZoneID("qrg"), 0, false);
 	zone->StopShutdownTimer();
@@ -94,10 +93,10 @@ void ZoneCLI::TestNpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd,
 		std::map<std::string, uint32>   required;
 		std::vector<EQ::ItemInstance *> items;
 
-		LogSys.EnableConsoleLogging();
+		EQEmuLogSys::Instance()->EnableConsoleLogging();
 
 		// turn this on to see debugging output
-		LogSys.log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;
+		EQEmuLogSys::Instance()->log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;
 
 		for (auto &test: test_cases) {
 			required.clear();
@@ -163,7 +162,7 @@ void ZoneCLI::TestNpcHandinsMultiQuest(int argc, char **argv, argh::parser &cmd,
 
 			npc->ResetHandin();
 
-			if (LogSys.log_settings[Logs::NpcHandin].log_to_console > 0) {
+			if (EQEmuLogSys::Instance()->log_settings[Logs::NpcHandin].log_to_console > 0) {
 				std::cout << std::endl;
 			}
 		}

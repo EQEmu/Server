@@ -17,7 +17,11 @@
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;
+<<<<<<< kinglykrab/adventuremanager-global-to-singleton
 extern EQ::Random emu_random;
+=======
+extern AdventureManager adventure_manager;
+>>>>>>> master
 
 Adventure::Adventure(AdventureTemplate *t)
 {
@@ -367,8 +371,8 @@ void Adventure::MoveCorpsesToGraveyard()
 
 	glm::vec4 position;
 
-	float x = GetTemplate()->graveyard_x + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
-	float y = GetTemplate()->graveyard_y + emu_random.Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
+	float x = GetTemplate()->graveyard_x + EQ::Random::Instance()->Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
+	float y = GetTemplate()->graveyard_y + EQ::Random::Instance()->Real(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 	float z = GetTemplate()->graveyard_z;
 
 	position.x = x;

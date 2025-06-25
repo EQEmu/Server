@@ -20,23 +20,17 @@
 #include "../common/net/console_server.h"
 #include "../queryserv/zonelist.h"
 #include "../queryserv/zoneserver.h"
-#include "../common/discord/discord_manager.h"
 
 volatile bool RunLoops = true;
 
 QSDatabase            qs_database;
 Database              database;
-LFGuildManager        lfguildmanager;
 std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
-EQEmuLogSys           LogSys;
-PathManager           path;
-ZoneStore             zone_store;
 PlayerEventLogs       player_event_logs;
 ZSList                zs_list;
 uint32                numzones     = 0;
-DiscordManager        discord_manager;
 
 void CatchSignal(int sig_num)
 {
@@ -46,11 +40,11 @@ void CatchSignal(int sig_num)
 int main()
 {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 	Timer LFGuildExpireTimer(60000);
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	LogInfo("Starting EQEmu QueryServ");
 	if (!queryservconfig::LoadConfig()) {
@@ -85,8 +79,8 @@ int main()
 		return 1;
 	}
 
-	LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+	EQEmuLogSys::Instance()->SetDatabase(&database)
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
@@ -159,7 +153,7 @@ int main()
 	worldserver->Connect();
 
 	/* Load Looking For Guild Manager */
-	lfguildmanager.LoadDatabase();
+	LFGuildManager::Instance()->LoadDatabase();
 
 	Timer player_event_process_timer(1000);
 	player_event_logs.SetDatabase(&qs_database)->Init();
@@ -173,7 +167,7 @@ int main()
 		}
 
 		if (LFGuildExpireTimer.Check()) {
-			lfguildmanager.ExpireEntries();
+			LFGuildManager::Instance()->ExpireEntries();
 		}
 
 		if (player_event_process_timer.Check()) {
@@ -187,7 +181,7 @@ int main()
 	EQ::EventLoop::Get().Run();
 
 	safe_delete(worldserver);
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 }
 
 void UpdateWindowTitle(char *iNewTitle)

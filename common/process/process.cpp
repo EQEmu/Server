@@ -1,6 +1,7 @@
 #include <string>
 #include <memory>
 #include "process.h"
+#include <fmt/format.h>
 
 std::string Process::execute(const std::string &cmd)
 {

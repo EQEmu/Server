@@ -37,7 +37,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "world_config.h"
 
 extern ZSList zoneserver_list;
-extern LoginServerList loginserverlist;
 extern ClientList client_list;
 extern uint32 numzones;
 extern uint32 numplayers;

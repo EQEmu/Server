@@ -55,12 +55,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
-extern LoginServerList loginserverlist;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
+<<<<<<< kinglykrab/adventuremanager-global-to-singleton
 extern UCSConnection UCSLink;
+=======
+extern AdventureManager adventure_manager;
+>>>>>>> master
 extern QueryServConnection QSLink;
-extern SharedTaskManager shared_task_manager;
 
 void CatchSignal(int sig_num);
 
@@ -163,7 +165,7 @@ void ZoneServer::LSBootUpdate(uint32 zone_id, uint32 instanceid, bool startup) {
 		bootup->zone = zone_id;
 		bootup->zone_wid = GetID();
 		bootup->instance = instanceid;
-		loginserverlist.SendPacket(pack);
+		LoginServerList::Instance()->SendPacket(pack);
 		safe_delete(pack);
 	}
 }
@@ -178,7 +180,7 @@ void ZoneServer::LSSleepUpdate(uint32 zone_id) {
 		auto sleep = (ServerLSZoneSleep_Struct*) pack->pBuffer;
 		sleep->zone = zone_id;
 		sleep->zone_wid = GetID();
-		loginserverlist.SendPacket(pack);
+		LoginServerList::Instance()->SendPacket(pack);
 		safe_delete(pack);
 	}
 }
@@ -380,7 +382,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			// if discord enabled for event, ship to UCS to process
 			if (player_event_logs.IsEventDiscordEnabled(n.player_event_log.event_type_id)) {
-				UCSLink.SendPacket(pack);
+				UCSConnection::Instance()->SendPacket(pack);
 			}
 
 			break;
@@ -434,7 +436,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			auto scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 			if (scm->chan_num == ChatChannel_UCSRelay) {
-				UCSLink.SendMessage(scm->from, scm->message);
+				UCSConnection::Instance()->SendMessage(scm->from, scm->message);
 				break;
 			}
 
@@ -1075,8 +1077,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				WorldConfig::UnlockWorld();
 			}
 
-			if (loginserverlist.Connected()) {
-				loginserverlist.SendStatus();
+			if (LoginServerList::Instance()->Connected()) {
+				LoginServerList::Instance()->SendStatus();
 				SendEmoteMessage(
 					l->character_name,
 					0,
@@ -1338,12 +1340,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_LSAccountUpdate: {
 			LogNetcode("Received ServerOP_LSAccountUpdate packet from zone");
-			loginserverlist.SendAccountUpdate(pack);
+			LoginServerList::Instance()->SendAccountUpdate(pack);
 			break;
 		}
 		case ServerOP_DiscordWebhookMessage:
 		case ServerOP_UCSMailMessage: {
-			UCSLink.SendPacket(pack);
+			UCSConnection::Instance()->SendPacket(pack);
 			break;
 		}
 		case ServerOP_UCSServerStatusRequest: {

@@ -16,7 +16,6 @@
 extern ZSList            zoneserver_list;
 extern ClientList        client_list;
 extern WorldGuildManager guild_mgr;
-extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
 
 void callGetZoneList(Json::Value &response)
@@ -125,7 +124,7 @@ void callGetClientList(Json::Value &response, const std::vector<std::string> &ar
 		}
 	}
 
-	client_list.GetClientList(response, full_list);
+	ClientList::Instance()->GetClientList(response, full_list);
 }
 
 void getReloadTypes(Json::Value &response)
@@ -142,7 +141,7 @@ void getReloadTypes(Json::Value &response)
 void getServerCounts(Json::Value &response, const std::vector<std::string> &args)
 {
 	response["zone_count"]   = zoneserver_list.GetServerListCount();
-	response["client_count"] = client_list.GetClientCount();
+	response["client_count"] = ClientList::Instance()->GetClientCount();
 }
 
 void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::string> &args)
@@ -259,7 +258,7 @@ void EQEmuApiWorldDataService::callGetGuildDetails(Json::Value &response, const 
 	row["tribute"]["time_remaining"] = guild->tribute.time_remaining;
 	row["tribute"]["enabled"]        = guild->tribute.enabled;
 
-	client_list.GetGuildClientList(response, guild_id);
+	ClientList::Instance()->GetGuildClientList(response, guild_id);
 
 	response.append(row);
 }

@@ -35,12 +35,8 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/evolving_items.h"
 
-EQEmuLogSys          LogSys;
 WorldContentService  content_service;
-ZoneStore            zone_store;
-PathManager          path;
 PlayerEventLogs      player_event_logs;
-EvolvingItemsManager evolving_items_manager;
 
 #ifdef _WINDOWS
 #include <direct.h>
@@ -81,10 +77,10 @@ inline bool MakeDirectory(const std::string &directory_name)
 int main(int argc, char **argv)
 {
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	LogInfo("Shared Memory Loader Program");
 	if (!EQEmuConfig::LoadConfig()) {
@@ -126,8 +122,8 @@ int main(int argc, char **argv)
 		content_db.SetMySQL(database);
 	}
 
-	LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+	EQEmuLogSys::Instance()->SetDatabase(&database)
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
@@ -244,6 +240,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 	return 0;
 }

@@ -1,3 +1,4 @@
+#include "../../bot.h"
 #include "../../client.h"
 
 void SetHaste(Client *c, const Seperator *sep)

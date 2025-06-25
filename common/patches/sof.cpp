@@ -71,7 +71,7 @@ namespace SoF
 	{
 		//create our opcode manager if we havent already
 		if (opcodes == nullptr) {
-			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
+			std::string opfile = fmt::format("{}/patch_{}.conf", PathManager::Instance()->GetPatchPath(), name);
 			//load up the opcode manager.
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
@@ -110,7 +110,7 @@ namespace SoF
 		//we need to go to every stream and replace it's manager.
 
 		if (opcodes != nullptr) {
-			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
+			std::string opfile = fmt::format("{}/patch_{}.conf", PathManager::Instance()->GetPatchPath(), name);
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
 				LogNetcode("[OPCODES] Error reloading opcodes file [{}] for patch [{}]", opfile.c_str(), name);
 				return;
@@ -3355,12 +3355,12 @@ namespace SoF
 			sof_slot = server_slot - 2;
 		}
 
-		else if (server_slot <= EQ::invbag::GENERAL_BAGS_8_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
-			sof_slot = server_slot + 11;
+		else if (server_slot <= EQ::invbag::GENERAL_BAGS_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+			sof_slot = server_slot - (EQ::invbag::GENERAL_BAGS_BEGIN - invbag::GENERAL_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((server_slot - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT));;
 		}
 
 		else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::CURSOR_BAG_BEGIN) {
-			sof_slot = server_slot - 9;
+			sof_slot = server_slot - (EQ::invbag::CURSOR_BAG_BEGIN - invbag::CURSOR_BAG_BEGIN);
 		}
 
 		else if (server_slot <= EQ::invslot::TRIBUTE_END && server_slot >= EQ::invslot::TRIBUTE_BEGIN) {
@@ -3380,7 +3380,7 @@ namespace SoF
 		}
 
 		else if (server_slot <= EQ::invbag::BANK_BAGS_END && server_slot >= EQ::invbag::BANK_BAGS_BEGIN) {
-			sof_slot = server_slot + 1;
+			sof_slot = server_slot - (EQ::invbag::BANK_BAGS_BEGIN - invbag::BANK_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((server_slot - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT));
 		}
 
 		else if (server_slot <= EQ::invslot::SHARED_BANK_END && server_slot >= EQ::invslot::SHARED_BANK_BEGIN) {
@@ -3388,7 +3388,7 @@ namespace SoF
 		}
 
 		else if (server_slot <= EQ::invbag::SHARED_BANK_BAGS_END && server_slot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) {
-			sof_slot = server_slot + 1;
+			sof_slot = server_slot - (EQ::invbag::SHARED_BANK_BAGS_BEGIN - invbag::SHARED_BANK_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((server_slot - EQ::invbag::SHARED_BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT));
 		}
 
 		else if (server_slot <= EQ::invslot::TRADE_END && server_slot >= EQ::invslot::TRADE_BEGIN) {
@@ -3396,7 +3396,7 @@ namespace SoF
 		}
 
 		else if (server_slot <= EQ::invbag::TRADE_BAGS_END && server_slot >= EQ::invbag::TRADE_BAGS_BEGIN) {
-			sof_slot = server_slot;
+			sof_slot = server_slot - (EQ::invbag::TRADE_BAGS_BEGIN - invbag::TRADE_BAGS_BEGIN) - ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((server_slot - EQ::invbag::TRADE_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT));
 		}
 
 		else if (server_slot <= EQ::invslot::WORLD_END && server_slot >= EQ::invslot::WORLD_BEGIN) {
@@ -3442,11 +3442,11 @@ namespace SoF
 		}
 
 		else if (sof_slot <= invbag::GENERAL_BAGS_END && sof_slot >= invbag::GENERAL_BAGS_BEGIN) {
-			server_slot = sof_slot - 11;
+			server_slot = sof_slot + (EQ::invbag::GENERAL_BAGS_BEGIN - invbag::GENERAL_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((sof_slot - invbag::GENERAL_BAGS_BEGIN) / invbag::SLOT_COUNT));;
 		}
 
 		else if (sof_slot <= invbag::CURSOR_BAG_END && sof_slot >= invbag::CURSOR_BAG_BEGIN) {
-			server_slot = sof_slot + 9;
+			server_slot = sof_slot + (EQ::invbag::CURSOR_BAG_BEGIN - invbag::CURSOR_BAG_BEGIN);
 		}
 
 		else if (sof_slot <= invslot::TRIBUTE_END && sof_slot >= invslot::TRIBUTE_BEGIN) {
@@ -3466,7 +3466,7 @@ namespace SoF
 		}
 
 		else if (sof_slot <= invbag::BANK_BAGS_END && sof_slot >= invbag::BANK_BAGS_BEGIN) {
-			server_slot = sof_slot - 1;
+			server_slot = sof_slot + (EQ::invbag::BANK_BAGS_BEGIN - invbag::BANK_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((sof_slot - invbag::BANK_BAGS_BEGIN) / invbag::SLOT_COUNT));;
 		}
 
 		else if (sof_slot <= invslot::SHARED_BANK_END && sof_slot >= invslot::SHARED_BANK_BEGIN) {
@@ -3474,7 +3474,7 @@ namespace SoF
 		}
 
 		else if (sof_slot <= invbag::SHARED_BANK_BAGS_END && sof_slot >= invbag::SHARED_BANK_BAGS_BEGIN) {
-			server_slot = sof_slot - 1;
+			server_slot = sof_slot + (EQ::invbag::SHARED_BANK_BAGS_BEGIN - invbag::SHARED_BANK_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((sof_slot - invbag::SHARED_BANK_BAGS_BEGIN) / invbag::SLOT_COUNT));;
 		}
 
 		else if (sof_slot <= invslot::TRADE_END && sof_slot >= invslot::TRADE_BEGIN) {
@@ -3482,7 +3482,7 @@ namespace SoF
 		}
 
 		else if (sof_slot <= invbag::TRADE_BAGS_END && sof_slot >= invbag::TRADE_BAGS_BEGIN) {
-			server_slot = sof_slot;
+			server_slot = sof_slot + (EQ::invbag::TRADE_BAGS_BEGIN - invbag::TRADE_BAGS_BEGIN) + ((EQ::invbag::SLOT_COUNT - invbag::SLOT_COUNT) * ((sof_slot - invbag::TRADE_BAGS_BEGIN) / invbag::SLOT_COUNT));;
 		}
 
 		else if (sof_slot <= invslot::WORLD_END && sof_slot >= invslot::WORLD_BEGIN) {

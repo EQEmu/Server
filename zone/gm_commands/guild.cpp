@@ -8,6 +8,22 @@ extern QueryServ  *QServ;
 #include "../guild_mgr.h"
 #include "../doors.h"
 
+void SendGuildSubCommands(Client* c)
+{
+	c->Message(Chat::White, "#guild create [Character ID|Character Name] [Guild Name]");
+	c->Message(Chat::White, "#guild delete [Guild ID]");
+	c->Message(Chat::White, "#guild details [Guild ID]");
+	c->Message(Chat::White, "#guild help");
+	c->Message(Chat::White, "#guild info [Guild ID]");
+	c->Message(Chat::White, "#guild list");
+	c->Message(Chat::White, "#guild rename [Guild ID] [New Name]");
+	c->Message(Chat::White, "#guild search [Search Criteria]");
+	c->Message(Chat::White, "#guild set [Character ID|Character Name] [Guild ID] (Guild ID 0 is Guildless)");
+	c->Message(Chat::White, "#guild setleader [Guild ID] [Character ID|Character Name]");
+	c->Message(Chat::White, "#guild setrank [Character ID|Character Name] [Rank]");
+	c->Message(Chat::White, "#guild status [Character ID|Character Name]");
+}
+
 void command_guild(Client* c, const Seperator* sep)
 {
 	const auto arguments = sep->argnum;
@@ -675,20 +691,4 @@ void command_guild(Client* c, const Seperator* sep)
 			// }
 		}
 	}
-}
-
-void SendGuildSubCommands(Client* c)
-{
-	c->Message(Chat::White, "#guild create [Character ID|Character Name] [Guild Name]");
-	c->Message(Chat::White, "#guild delete [Guild ID]");
-	c->Message(Chat::White, "#guild details [Guild ID]");
-	c->Message(Chat::White, "#guild help");
-	c->Message(Chat::White, "#guild info [Guild ID]");
-	c->Message(Chat::White, "#guild list");
-	c->Message(Chat::White, "#guild rename [Guild ID] [New Name]");
-	c->Message(Chat::White, "#guild search [Search Criteria]");
-	c->Message(Chat::White, "#guild set [Character ID|Character Name] [Guild ID] (Guild ID 0 is Guildless)");
-	c->Message(Chat::White, "#guild setleader [Guild ID] [Character ID|Character Name]");
-	c->Message(Chat::White, "#guild setrank [Character ID|Character Name] [Rank]");
-	c->Message(Chat::White, "#guild status [Character ID|Character Name]");
 }

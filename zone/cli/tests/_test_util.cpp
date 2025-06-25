@@ -41,11 +41,11 @@ inline void RunTest(const std::string &test_name, int expected, int actual)
 extern Zone *zone;
 
 inline void SetupZone(std::string zone_short_name, uint32 instance_id = 0) {
-	LogSys.SilenceConsoleLogging();
+	EQEmuLogSys::Instance()->SilenceConsoleLogging();
 
-	LogSys.log_settings[Logs::ZoneState].log_to_console = std::getenv("DEBUG") ? 3 : 0;
-	LogSys.log_settings[Logs::Info].log_to_console = std::getenv("DEBUG") ? 3 : 0;
-	LogSys.log_settings[Logs::Spawns].log_to_console = std::getenv("DEBUG") ? 3 : 0;
+	EQEmuLogSys::Instance()->log_settings[Logs::ZoneState].log_to_console = std::getenv("DEBUG") ? 3 : 0;
+	EQEmuLogSys::Instance()->log_settings[Logs::Info].log_to_console = std::getenv("DEBUG") ? 3 : 0;
+	EQEmuLogSys::Instance()->log_settings[Logs::Spawns].log_to_console = std::getenv("DEBUG") ? 3 : 0;
 
 	// boot shell zone for testing
 	Zone::Bootup(ZoneID(zone_short_name), 0, false);
@@ -53,5 +53,5 @@ inline void SetupZone(std::string zone_short_name, uint32 instance_id = 0) {
 	entity_list.Process();
 	entity_list.MobProcess();
 
-	LogSys.EnableConsoleLogging();
+	EQEmuLogSys::Instance()->EnableConsoleLogging();
 }

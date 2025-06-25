@@ -41,7 +41,7 @@ void DynamicZone::ChooseNewLeader()
 
 	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
 		if (member.id != GetLeaderID() && member.IsOnline()) {
-			auto member_cle = client_list.FindCLEByCharacterID(member.id);
+			auto member_cle = ClientList::Instance()->FindCLEByCharacterID(member.id);
 			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
 		}
 		return false;
@@ -230,8 +230,8 @@ void DynamicZone::CacheMemberStatuses()
 	// called when a new dz is cached to fill member statuses
 	std::string zone_name;
 	std::vector<ClientListEntry*> all_clients;
-	all_clients.reserve(client_list.GetClientCount());
-	client_list.GetClients(zone_name.c_str(), all_clients);
+	all_clients.reserve(ClientList::Instance()->GetClientCount());
+	ClientList::Instance()->GetClients(zone_name.c_str(), all_clients);
 
 	for (const auto& member : m_members)
 	{
