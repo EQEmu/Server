@@ -492,12 +492,12 @@ void Perl_Bot_SetSpellDurationRaid(Bot* self, int spell_id, int duration, int le
 
 bool Perl_Bot_ReloadBotDataBuckets(Bot* self)
 {
-	return DataBucket::GetDataBuckets(self);
+	return self->LoadDataBucketsCache();
 }
 
 bool Perl_Bot_ReloadBotOwnerDataBuckets(Bot* self)
 {
-	return self->HasOwner() && DataBucket::GetDataBuckets(self->GetBotOwner());
+	return self->HasOwner() && self->LoadDataBucketsCache();
 }
 
 bool Perl_Bot_ReloadBotSpells(Bot* self)

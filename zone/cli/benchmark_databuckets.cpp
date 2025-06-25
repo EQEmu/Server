@@ -5,7 +5,7 @@
 #include "../../common/eqemu_logsys.h"
 #include "../sidecar_api/sidecar_api.h"
 #include "../../common/platform.h"
-#include "../data_bucket.h"
+#include "../../common/data_bucket.h"
 #include "../zonedb.h"
 #include "../../common/repositories/data_buckets_repository.h"
 

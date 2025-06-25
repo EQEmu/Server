@@ -3131,7 +3131,7 @@ bool Lua_Client::IsAutoFireEnabled()
 
 bool Lua_Client::ReloadDataBuckets() {
 	Lua_Safe_Call_Bool();
-	return DataBucket::GetDataBuckets(self);
+	return self->LoadDataBucketsCache();
 }
 
 uint32 Lua_Client::GetEXPForLevel(uint16 check_level)
@@ -3584,6 +3584,7 @@ bool Lua_Client::KeyRingRemove(uint32 item_id)
 	return self->KeyRingRemove(item_id);
 }
 
+
 bool Lua_Client::CompleteTask(int task_id)
 {
 	Lua_Safe_Call_Bool();
@@ -3594,6 +3595,11 @@ bool Lua_Client::UncompleteTask(int task_id)
 {
 	Lua_Safe_Call_Bool();
 	return self->UncompleteTask(task_id);
+}
+
+void Lua_Client::EnableTitleSet(uint32 title_set) {
+	Lua_Safe_Call_Void();
+	self->EnableTitle(title_set);
 }
 
 luabind::scope lua_register_client() {
@@ -3706,6 +3712,7 @@ luabind::scope lua_register_client() {
 	.def("EnableAreaHPRegen", &Lua_Client::EnableAreaHPRegen)
 	.def("EnableAreaManaRegen", &Lua_Client::EnableAreaManaRegen)
 	.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
+	.def("EnableTitleSet", &Lua_Client::EnableTitleSet)
 	.def("EndSharedTask", (void(Lua_Client::*)(void))&Lua_Client::EndSharedTask)
 	.def("EndSharedTask", (void(Lua_Client::*)(bool))&Lua_Client::EndSharedTask)
 	.def("Escape", (void(Lua_Client::*)(void))&Lua_Client::Escape)

@@ -1,3 +1,4 @@
+#include "../bot.h"
 #include "../client.h"
 
 void command_zone(Client *c, const Seperator *sep)
@@ -25,7 +26,7 @@ void command_zone(Client *c, const Seperator *sep)
 	}
 	else {
 		// validate
-		if (!zone_store.GetZone(zone_input)) {
+		if (!ZoneStore::Instance()->GetZone(zone_input)) {
 			c->Message(Chat::White, fmt::format("Could not find zone by short_name [{}]", zone_input).c_str());
 			return;
 		}

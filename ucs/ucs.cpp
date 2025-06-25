@@ -48,8 +48,6 @@ EQEmuLogSys LogSys;
 UCSDatabase database;
 WorldServer *worldserver = nullptr;
 DiscordManager discord_manager;
-PathManager path;
-ZoneStore zone_store;
 PlayerEventLogs player_event_logs;
 
 const ucsconfig *Config;
@@ -107,7 +105,7 @@ int main() {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	path.LoadPaths();
+	PathManager::Instance()->Init();
 
 	// Check every minute for unused channels we can delete
 	//
@@ -140,7 +138,7 @@ int main() {
 	}
 
 	LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 

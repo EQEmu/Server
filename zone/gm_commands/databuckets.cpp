@@ -1,7 +1,16 @@
 #include "../client.h"
-#include "../data_bucket.h"
+#include "../../common/data_bucket.h"
 #include "../dialogue_window.h"
 #include "../../common/repositories/data_buckets_repository.h"
+
+void SendDataBucketsSubCommands(Client *c)
+{
+	c->Message(Chat::White, "Usage: #databuckets delete [Key] [Character ID] [NPC ID] [Bot ID]");
+	c->Message(Chat::White, "Usage: #databuckets edit [Key] [Character ID] [NPC ID] [Bot ID] [Value] [Expires]");
+	c->Message(Chat::White, "Usage: #databuckets view [Partial Key] [Character ID] [NPC ID] [Bot ID]");
+	c->Message(Chat::White, "Note: Character ID, NPC ID, and Bot ID are optional if not needed, if needed they are required for specificity");
+	c->Message(Chat::White, "Note: Edit requires Character ID, NPC ID, Bot ID, and Value, Expires is optional and does not modify the existing expiration time if not provided");
+}
 
 void command_databuckets(Client *c, const Seperator *sep)
 {
@@ -250,13 +259,4 @@ void command_databuckets(Client *c, const Seperator *sep)
 
 		c->Message(Chat::White, response.c_str());
 	}
-}
-
-void SendDataBucketsSubCommands(Client *c)
-{
-	c->Message(Chat::White, "Usage: #databuckets delete [Key] [Character ID] [NPC ID] [Bot ID]");
-	c->Message(Chat::White, "Usage: #databuckets edit [Key] [Character ID] [NPC ID] [Bot ID] [Value] [Expires]");
-	c->Message(Chat::White, "Usage: #databuckets view [Partial Key] [Character ID] [NPC ID] [Bot ID]");
-	c->Message(Chat::White, "Note: Character ID, NPC ID, and Bot ID are optional if not needed, if needed they are required for specificity");
-	c->Message(Chat::White, "Note: Edit requires Character ID, NPC ID, Bot ID, and Value, Expires is optional and does not modify the existing expiration time if not provided");
 }

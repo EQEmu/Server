@@ -88,8 +88,6 @@ extern WorldServer worldserver;
 extern Zone* zone;
 extern NpcScaleManager* npc_scale_manager;
 
-Mutex MZoneShutdown;
-
 volatile bool is_zone_loaded = false;
 Zone* zone = 0;
 
@@ -1302,7 +1300,7 @@ void Zone::ReloadStaticData() {
 
 bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
-	auto z = zone_store.GetZoneWithFallback(ZoneID(filename), instance_version);
+	auto z = ZoneStore::Instance()->GetZoneWithFallback(ZoneID(filename), instance_version);
 
 	if (!z) {
 		LogError("Failed to load zone data for [{}] instance_version [{}]", filename, instance_version);
@@ -2253,7 +2251,7 @@ void Zone::LoadZoneBlockedSpells()
 			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, GetZoneID())) {
 				LogError(
 					"Failed to load blocked spells for {} ({}).",
-					zone_store.GetZoneName(GetZoneID(), true),
+					ZoneStore::Instance()->GetZoneName(GetZoneID(), true),
 					GetZoneID()
 				);
 				ClearBlockedSpells();
@@ -2263,7 +2261,7 @@ void Zone::LoadZoneBlockedSpells()
 		LogInfo(
 			"Loaded [{}] blocked spells(s) for {} ({}).",
 			Strings::Commify(zone_total_blocked_spells),
-			zone_store.GetZoneName(GetZoneID(), true),
+			ZoneStore::Instance()->GetZoneName(GetZoneID(), true),
 			GetZoneID()
 		);
 	}

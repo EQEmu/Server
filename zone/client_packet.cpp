@@ -42,7 +42,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "../common/data_verification.h"
 #include "../common/rdtsc.h"
-#include "data_bucket.h"
+#include "../common/data_bucket.h"
 #include "dynamic_zone.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
@@ -1473,7 +1473,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	// Load Data Buckets
 	ClearDataBucketCache();
-	DataBucket::GetDataBuckets(this);
+	LoadDataBucketsCache();
 
 	// Max Level for Character:PerCharacterQglobalMaxLevel and Character:PerCharacterBucketMaxLevel
 	uint8 client_max_level = 0;
@@ -6963,7 +6963,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 			DialogueWindow::TableCell(
 				fmt::format(
 					"{} ({})",
-					zone_store.GetZoneLongName(e.zone_id, true),
+					ZoneStore::Instance()->GetZoneLongName(e.zone_id, true),
 					e.zone_id
 				)
 			) +

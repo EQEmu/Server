@@ -1,6 +1,8 @@
 module should-release
 
-go 1.18
+go 1.23.0
+
+toolchain go1.23.5
 
 require (
 	github.com/google/go-github/v41 v41.0.0

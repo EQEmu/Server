@@ -1,8 +1,22 @@
 #include "../client.h"
+#include "../queryserv.h"
 #include "../worldserver.h"
-#include "../../common/events/player_events.h"
+#include "../../common/events/player_event_logs.h"
+#include "../string_ids.h"
 
+extern QueryServ  *QServ;
 extern WorldServer worldserver;
+
+void SendParcelsSubCommands(Client *c)
+{
+	c->Message(Chat::White, "#parcels listdb [Character Name]");
+	c->Message(Chat::White, "#parcels listmemory [Character Name] (Must be in the same zone)");
+	c->Message(
+		Chat::White,
+		"#parcels add [Character Name] [item id] [quantity] [note].  To send money use item id of 99990. Quantity is valid for stackable items, charges on an item, or amount of copper."
+	);
+	c->Message(Chat::White, "#parcels details [Character Name]");
+}
 
 void command_parcels(Client *c, const Seperator *sep)
 {
@@ -305,15 +319,4 @@ void command_parcels(Client *c, const Seperator *sep)
 			c->SendParcelDeliveryToWorld(ps);
 		}
 	}
-}
-
-void SendParcelsSubCommands(Client *c)
-{
-	c->Message(Chat::White, "#parcels listdb [Character Name]");
-	c->Message(Chat::White, "#parcels listmemory [Character Name] (Must be in the same zone)");
-	c->Message(
-		Chat::White,
-		"#parcels add [Character Name] [item id] [quantity] [note].  To send money use item id of 99990. Quantity is valid for stackable items, charges on an item, or amount of copper."
-	);
-	c->Message(Chat::White, "#parcels details [Character Name]");
 }

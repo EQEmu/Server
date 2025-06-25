@@ -2995,7 +2995,7 @@ bool Perl_Client_IsAutoFireEnabled(Client* self)
 
 bool Perl_Client_ReloadDataBuckets(Client* self)
 {
-	return DataBucket::GetDataBuckets(self);
+	return self->LoadDataBucketsCache();
 }
 
 uint32 Perl_Client_GetEXPForLevel(Client* self, uint16 check_level)

@@ -3140,7 +3140,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_WWMarquee:
 	{
 		auto s = (WWMarquee_Struct*) pack->pBuffer;
-
 		for (const auto& c : entity_list.GetClientList()) {
 			if (
 				c.second->Admin() >= s->min_status &&
@@ -4592,7 +4591,10 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 
 		case ServerReload::Type::Logs:
 			LogSys.LoadLogDatabaseSettings();
-			player_event_logs.ReloadSettings();
+			// if QS process is enabled, we get settings from QS
+			if (!RuleB(Logging, PlayerEventsQSProcess)) {
+				player_event_logs.ReloadSettings();
+			}
 			break;
 
 		case ServerReload::Type::Loot:
@@ -4627,7 +4629,7 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			break;
 
 		case ServerReload::Type::SkillCaps:
-			skill_caps.ReloadSkillCaps();
+			SkillCaps::Instance()->ReloadSkillCaps();
 			break;
 
 		case ServerReload::Type::DataBucketsCache:
@@ -4644,11 +4646,9 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 		case ServerReload::Type::Tasks:
 			if (RuleB(Tasks, EnableTaskSystem)) {
 				entity_list.SaveAllClientsTaskState();
-				safe_delete(task_manager);
-				task_manager = new TaskManager;
-				task_manager->LoadTasks();
+				TaskManager::Instance()->LoadTasks();
 				entity_list.ReloadAllClientsTaskState();
-				task_manager->LoadTaskSets();
+				TaskManager::Instance()->LoadTaskSets();
 			}
 			break;
 
@@ -4700,7 +4700,7 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			break;
 
 		case ServerReload::Type::ZoneData:
-			zone_store.LoadZones(content_db);
+			ZoneStore::Instance()->LoadZones(content_db);
 			zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
 			break;
 

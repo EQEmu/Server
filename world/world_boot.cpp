@@ -84,7 +84,7 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 	// command handler
 	if (argc > 1) {
 		LogSys.SilenceConsoleLogging();
-		path.LoadPaths();
+		PathManager::Instance()->Init();
 		WorldConfig::LoadConfig();
 		LoadDatabaseConnections();
 		RuleManager::Instance()->LoadRules(&database, "default", false);
@@ -234,7 +234,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 {
 	// logging system init
 	auto logging = LogSys.SetDatabase(&database)
-		->SetLogPath(path.GetLogPath())
+		->SetLogPath(PathManager::Instance()->GetLogPath())
 		->LoadLogDatabaseSettings();
 
 	LogSys.SetDiscordHandler(&WorldBoot::DiscordWebhookMessageHandler);
@@ -279,9 +279,9 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	LogInfo("Loading zones");
 
-	zone_store.LoadZones(content_db);
+	ZoneStore::Instance()->LoadZones(content_db);
 
-	if (zone_store.GetZones().empty()) {
+	if (ZoneStore::Instance()->GetZones().empty()) {
 		LogError("Failed to load zones data, check your schema for possible errors");
 		return 1;
 	}
