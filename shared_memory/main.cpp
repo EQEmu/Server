@@ -35,7 +35,6 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/evolving_items.h"
 
-WorldContentService  content_service;
 PlayerEventLogs      player_event_logs;
 
 #ifdef _WINDOWS
@@ -165,16 +164,16 @@ int main(int argc, char **argv)
 	}
 
 
-	content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
-	content_service.SetDatabase(&database)
+	WorldContentService::Instance()->SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+	WorldContentService::Instance()->SetDatabase(&database)
 		->SetContentDatabase(&content_db)
 		->SetExpansionContext()
 		->ReloadContentFlags();
 
 	LogInfo(
 		"Current expansion is [{}] ({})",
-		content_service.GetCurrentExpansion(),
-		content_service.GetCurrentExpansionName()
+		WorldContentService::Instance()->GetCurrentExpansion(),
+		WorldContentService::Instance()->GetCurrentExpansionName()
 	);
 
 	std::string hotfix_name = "";

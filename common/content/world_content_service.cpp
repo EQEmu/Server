@@ -27,7 +27,7 @@ WorldContentService *WorldContentService::SetExpansionContext()
 	// pull expansion from rules
 	int expansion = RuleI(Expansion, CurrentExpansion);
 	if (expansion >= Expansion::Classic && expansion <= Expansion::MaxId) {
-		content_service.SetCurrentExpansion(expansion);
+		WorldContentService::Instance()->SetCurrentExpansion(expansion);
 	}
 
 	LogInfo(
@@ -41,12 +41,12 @@ WorldContentService *WorldContentService::SetExpansionContext()
 
 std::string WorldContentService::GetCurrentExpansionName()
 {
-	if (content_service.GetCurrentExpansion() == Expansion::EXPANSION_ALL) {
+	if (WorldContentService::Instance()->GetCurrentExpansion() == Expansion::EXPANSION_ALL) {
 		return "All Expansions";
 	}
 
 	if (current_expansion >= Expansion::Classic && current_expansion <= Expansion::MaxId) {
-		return Expansion::ExpansionName[content_service.GetCurrentExpansion()];
+		return Expansion::ExpansionName[WorldContentService::Instance()->GetCurrentExpansion()];
 	}
 
 	return "Unknown Expansion";

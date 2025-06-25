@@ -57,7 +57,7 @@ void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 		.content_flags_disabled = l->content_flags_disabled
 	};
 
-	if (!content_service.DoesPassContentFiltering(content_flags)) {
+	if (!WorldContentService::Instance()->DoesPassContentFiltering(content_flags)) {
 		return;
 	}
 

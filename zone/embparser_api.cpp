@@ -2510,282 +2510,282 @@ bool Perl__delete_data(std::string bucket_key)
 
 bool Perl__IsClassicEnabled()
 {
-	return content_service.IsClassicEnabled();
+	return WorldContentService::Instance()->IsClassicEnabled();
 }
 
 bool Perl__IsTheRuinsOfKunarkEnabled()
 {
-	return content_service.IsTheRuinsOfKunarkEnabled();
+	return WorldContentService::Instance()->IsTheRuinsOfKunarkEnabled();
 }
 
 bool Perl__IsTheScarsOfVeliousEnabled()
 {
-	return content_service.IsTheScarsOfVeliousEnabled();
+	return WorldContentService::Instance()->IsTheScarsOfVeliousEnabled();
 }
 
 bool Perl__IsTheShadowsOfLuclinEnabled()
 {
-	return content_service.IsTheShadowsOfLuclinEnabled();
+	return WorldContentService::Instance()->IsTheShadowsOfLuclinEnabled();
 }
 
 bool Perl__IsThePlanesOfPowerEnabled()
 {
-	return content_service.IsThePlanesOfPowerEnabled();
+	return WorldContentService::Instance()->IsThePlanesOfPowerEnabled();
 }
 
 bool Perl__IsTheLegacyOfYkeshaEnabled()
 {
-	return content_service.IsTheLegacyOfYkeshaEnabled();
+	return WorldContentService::Instance()->IsTheLegacyOfYkeshaEnabled();
 }
 
 bool Perl__IsLostDungeonsOfNorrathEnabled()
 {
-	return content_service.IsLostDungeonsOfNorrathEnabled();
+	return WorldContentService::Instance()->IsLostDungeonsOfNorrathEnabled();
 }
 
 bool Perl__IsGatesOfDiscordEnabled()
 {
-	return content_service.IsGatesOfDiscordEnabled();
+	return WorldContentService::Instance()->IsGatesOfDiscordEnabled();
 }
 
 bool Perl__IsOmensOfWarEnabled()
 {
-	return content_service.IsOmensOfWarEnabled();
+	return WorldContentService::Instance()->IsOmensOfWarEnabled();
 }
 
 bool Perl__IsDragonsOfNorrathEnabled()
 {
-	return content_service.IsDragonsOfNorrathEnabled();
+	return WorldContentService::Instance()->IsDragonsOfNorrathEnabled();
 }
 
 bool Perl__IsDepthsOfDarkhollowEnabled()
 {
-	return content_service.IsDepthsOfDarkhollowEnabled();
+	return WorldContentService::Instance()->IsDepthsOfDarkhollowEnabled();
 }
 
 bool Perl__IsProphecyOfRoEnabled()
 {
-	return content_service.IsProphecyOfRoEnabled();
+	return WorldContentService::Instance()->IsProphecyOfRoEnabled();
 }
 
 bool Perl__IsTheSerpentsSpineEnabled()
 {
-	return content_service.IsTheSerpentsSpineEnabled();
+	return WorldContentService::Instance()->IsTheSerpentsSpineEnabled();
 }
 
 bool Perl__IsTheBuriedSeaEnabled()
 {
-	return content_service.IsTheBuriedSeaEnabled();
+	return WorldContentService::Instance()->IsTheBuriedSeaEnabled();
 }
 
 bool Perl__IsSecretsOfFaydwerEnabled()
 {
-	return content_service.IsSecretsOfFaydwerEnabled();
+	return WorldContentService::Instance()->IsSecretsOfFaydwerEnabled();
 }
 
 bool Perl__IsSeedsOfDestructionEnabled()
 {
-	return content_service.IsSeedsOfDestructionEnabled();
+	return WorldContentService::Instance()->IsSeedsOfDestructionEnabled();
 }
 
 bool Perl__IsUnderfootEnabled()
 {
-	return content_service.IsUnderfootEnabled();
+	return WorldContentService::Instance()->IsUnderfootEnabled();
 }
 
 bool Perl__IsHouseOfThuleEnabled()
 {
-	return content_service.IsHouseOfThuleEnabled();
+	return WorldContentService::Instance()->IsHouseOfThuleEnabled();
 }
 
 bool Perl__IsVeilOfAlarisEnabled()
 {
-	return content_service.IsVeilOfAlarisEnabled();
+	return WorldContentService::Instance()->IsVeilOfAlarisEnabled();
 }
 
 bool Perl__IsRainOfFearEnabled()
 {
-	return content_service.IsRainOfFearEnabled();
+	return WorldContentService::Instance()->IsRainOfFearEnabled();
 }
 
 bool Perl__IsCallOfTheForsakenEnabled()
 {
-	return content_service.IsCallOfTheForsakenEnabled();
+	return WorldContentService::Instance()->IsCallOfTheForsakenEnabled();
 }
 
 bool Perl__IsTheDarkenedSeaEnabled()
 {
-	return content_service.IsTheDarkenedSeaEnabled();
+	return WorldContentService::Instance()->IsTheDarkenedSeaEnabled();
 }
 
 bool Perl__IsTheBrokenMirrorEnabled()
 {
-	return content_service.IsTheBrokenMirrorEnabled();
+	return WorldContentService::Instance()->IsTheBrokenMirrorEnabled();
 }
 
 bool Perl__IsEmpiresOfKunarkEnabled()
 {
-	return content_service.IsEmpiresOfKunarkEnabled();
+	return WorldContentService::Instance()->IsEmpiresOfKunarkEnabled();
 }
 
 bool Perl__IsRingOfScaleEnabled()
 {
-	return content_service.IsRingOfScaleEnabled();
+	return WorldContentService::Instance()->IsRingOfScaleEnabled();
 }
 
 bool Perl__IsTheBurningLandsEnabled()
 {
-	return content_service.IsTheBurningLandsEnabled();
+	return WorldContentService::Instance()->IsTheBurningLandsEnabled();
 }
 
 bool Perl__IsTormentOfVeliousEnabled()
 {
-	return content_service.IsTormentOfVeliousEnabled();
+	return WorldContentService::Instance()->IsTormentOfVeliousEnabled();
 }
 
 bool Perl__IsCurrentExpansionClassic()
 {
-	return content_service.IsCurrentExpansionClassic();
+	return WorldContentService::Instance()->IsCurrentExpansionClassic();
 }
 
 bool Perl__IsCurrentExpansionTheRuinsOfKunark()
 {
-	return content_service.IsCurrentExpansionTheRuinsOfKunark();
+	return WorldContentService::Instance()->IsCurrentExpansionTheRuinsOfKunark();
 }
 
 bool Perl__IsCurrentExpansionTheScarsOfVelious()
 {
-	return content_service.IsCurrentExpansionTheScarsOfVelious();
+	return WorldContentService::Instance()->IsCurrentExpansionTheScarsOfVelious();
 }
 
 bool Perl__IsCurrentExpansionTheShadowsOfLuclin()
 {
-	return content_service.IsCurrentExpansionTheShadowsOfLuclin();
+	return WorldContentService::Instance()->IsCurrentExpansionTheShadowsOfLuclin();
 }
 
 bool Perl__IsCurrentExpansionThePlanesOfPower()
 {
-	return content_service.IsCurrentExpansionThePlanesOfPower();
+	return WorldContentService::Instance()->IsCurrentExpansionThePlanesOfPower();
 }
 
 bool Perl__IsCurrentExpansionTheLegacyOfYkesha()
 {
-	return content_service.IsCurrentExpansionTheLegacyOfYkesha();
+	return WorldContentService::Instance()->IsCurrentExpansionTheLegacyOfYkesha();
 }
 
 bool Perl__IsCurrentExpansionLostDungeonsOfNorrath()
 {
-	return content_service.IsCurrentExpansionLostDungeonsOfNorrath();
+	return WorldContentService::Instance()->IsCurrentExpansionLostDungeonsOfNorrath();
 }
 
 bool Perl__IsCurrentExpansionGatesOfDiscord()
 {
-	return content_service.IsCurrentExpansionGatesOfDiscord();
+	return WorldContentService::Instance()->IsCurrentExpansionGatesOfDiscord();
 }
 
 bool Perl__IsCurrentExpansionOmensOfWar()
 {
-	return content_service.IsCurrentExpansionOmensOfWar();
+	return WorldContentService::Instance()->IsCurrentExpansionOmensOfWar();
 }
 
 bool Perl__IsCurrentExpansionDragonsOfNorrath()
 {
-	return content_service.IsCurrentExpansionDragonsOfNorrath();
+	return WorldContentService::Instance()->IsCurrentExpansionDragonsOfNorrath();
 }
 
 bool Perl__IsCurrentExpansionDepthsOfDarkhollow()
 {
-	return content_service.IsCurrentExpansionDepthsOfDarkhollow();
+	return WorldContentService::Instance()->IsCurrentExpansionDepthsOfDarkhollow();
 }
 
 bool Perl__IsCurrentExpansionProphecyOfRo()
 {
-	return content_service.IsCurrentExpansionProphecyOfRo();
+	return WorldContentService::Instance()->IsCurrentExpansionProphecyOfRo();
 }
 
 bool Perl__IsCurrentExpansionTheSerpentsSpine()
 {
-	return content_service.IsCurrentExpansionTheSerpentsSpine();
+	return WorldContentService::Instance()->IsCurrentExpansionTheSerpentsSpine();
 }
 
 bool Perl__IsCurrentExpansionTheBuriedSea()
 {
-	return content_service.IsCurrentExpansionTheBuriedSea();
+	return WorldContentService::Instance()->IsCurrentExpansionTheBuriedSea();
 }
 
 bool Perl__IsCurrentExpansionSecretsOfFaydwer()
 {
-	return content_service.IsCurrentExpansionSecretsOfFaydwer();
+	return WorldContentService::Instance()->IsCurrentExpansionSecretsOfFaydwer();
 }
 
 bool Perl__IsCurrentExpansionSeedsOfDestruction()
 {
-	return content_service.IsCurrentExpansionSeedsOfDestruction();
+	return WorldContentService::Instance()->IsCurrentExpansionSeedsOfDestruction();
 }
 
 bool Perl__IsCurrentExpansionUnderfoot()
 {
-	return content_service.IsCurrentExpansionUnderfoot();
+	return WorldContentService::Instance()->IsCurrentExpansionUnderfoot();
 }
 
 bool Perl__IsCurrentExpansionHouseOfThule()
 {
-	return content_service.IsCurrentExpansionHouseOfThule();
+	return WorldContentService::Instance()->IsCurrentExpansionHouseOfThule();
 }
 
 bool Perl__IsCurrentExpansionVeilOfAlaris()
 {
-	return content_service.IsCurrentExpansionVeilOfAlaris();
+	return WorldContentService::Instance()->IsCurrentExpansionVeilOfAlaris();
 }
 
 bool Perl__IsCurrentExpansionRainOfFear()
 {
-	return content_service.IsCurrentExpansionRainOfFear();
+	return WorldContentService::Instance()->IsCurrentExpansionRainOfFear();
 }
 
 bool Perl__IsCurrentExpansionCallOfTheForsaken()
 {
-	return content_service.IsCurrentExpansionCallOfTheForsaken();
+	return WorldContentService::Instance()->IsCurrentExpansionCallOfTheForsaken();
 }
 
 bool Perl__IsCurrentExpansionTheDarkenedSea()
 {
-	return content_service.IsCurrentExpansionTheDarkenedSea();
+	return WorldContentService::Instance()->IsCurrentExpansionTheDarkenedSea();
 }
 
 bool Perl__IsCurrentExpansionTheBrokenMirror()
 {
-	return content_service.IsCurrentExpansionTheBrokenMirror();
+	return WorldContentService::Instance()->IsCurrentExpansionTheBrokenMirror();
 }
 
 bool Perl__IsCurrentExpansionEmpiresOfKunark()
 {
-	return content_service.IsCurrentExpansionEmpiresOfKunark();
+	return WorldContentService::Instance()->IsCurrentExpansionEmpiresOfKunark();
 }
 
 bool Perl__IsCurrentExpansionRingOfScale()
 {
-	return content_service.IsCurrentExpansionRingOfScale();
+	return WorldContentService::Instance()->IsCurrentExpansionRingOfScale();
 }
 
 bool Perl__IsCurrentExpansionTheBurningLands()
 {
-	return content_service.IsCurrentExpansionTheBurningLands();
+	return WorldContentService::Instance()->IsCurrentExpansionTheBurningLands();
 }
 
 bool Perl__IsCurrentExpansionTormentOfVelious()
 {
-	return content_service.IsCurrentExpansionTormentOfVelious();
+	return WorldContentService::Instance()->IsCurrentExpansionTormentOfVelious();
 }
 
 bool Perl__IsContentFlagEnabled(std::string flag_name)
 {
-	return content_service.IsContentFlagEnabled(flag_name);
+	return WorldContentService::Instance()->IsContentFlagEnabled(flag_name);
 }
 
 void Perl__SetContentFlag(std::string flag_name, bool enabled)
 {
-	content_service.SetContentFlag(flag_name, enabled);
+	WorldContentService::Instance()->SetContentFlag(flag_name, enabled);
 	zone->ReloadContentFlags();
 }
 

@@ -4571,7 +4571,7 @@ void WorldServer::ProcessReload(const ServerReload::Request& request)
 			break;
 
 		case ServerReload::Type::ContentFlags:
-			content_service.SetExpansionContext()->ReloadContentFlags();
+			WorldContentService::Instance()->SetExpansionContext()->ReloadContentFlags();
 			break;
 
 		case ServerReload::Type::DzTemplates:

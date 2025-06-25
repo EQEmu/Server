@@ -38,7 +38,6 @@
 #include "../../common/skill_caps.h"
 #include "../../common/evolving_items.h"
 
-WorldContentService  content_service;
 PlayerEventLogs      player_event_logs;
 
 void ExportSpells(SharedDatabase *db);

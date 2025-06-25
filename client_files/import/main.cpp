@@ -32,7 +32,6 @@
 #include "../../common/events/player_event_logs.h"
 #include "../../common/evolving_items.h"
 
-WorldContentService  content_service;
 PlayerEventLogs      player_event_logs;
 
 void ImportSpells(SharedDatabase *db);

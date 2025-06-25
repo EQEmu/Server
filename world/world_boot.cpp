@@ -390,7 +390,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	WorldEventScheduler::Instance()->SetDatabase(&database)->LoadScheduledEvents();
 
 	LogInfo("Initializing [WorldContentService]");
-	content_service.SetDatabase(&database)
+	WorldContentService::Instance()->SetDatabase(&database)
 		->SetContentDatabase(&content_db)
 		->SetExpansionContext()
 		->ReloadContentFlags();
