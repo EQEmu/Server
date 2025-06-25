@@ -183,15 +183,13 @@ int get_file_size(const std::string &filename) // path to file
 	return size;
 }
 
-extern LoginServerList loginserverlist;
-
 void WorldBoot::RegisterLoginservers()
 {
 	const auto c = EQEmuConfig::get();
 
 	if (c->LoginCount == 0) {
 		if (c->LoginHost.length()) {
-			loginserverlist.Add(
+			LoginServerList::Instance()->Add(
 				c->LoginHost.c_str(),
 				c->LoginPort,
 				c->LoginAccount.c_str(),
@@ -207,7 +205,7 @@ void WorldBoot::RegisterLoginservers()
 		iterator.Reset();
 		while (iterator.MoreElements()) {
 			if (iterator.GetData()->LoginHost.length()) {
-				loginserverlist.Add(
+				LoginServerList::Instance()->Add(
 					iterator.GetData()->LoginHost.c_str(),
 					iterator.GetData()->LoginPort,
 					iterator.GetData()->LoginAccount.c_str(),
