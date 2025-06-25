@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-<b>EverQuest Emulator (EQEmu) - A Fan-Made Project Honoring the Legendary MMORPG</b>
+<b>EQEmulator - A Fan-Made Project Honoring a Legendary MMORPG</b>
 </p>
 
 <p align="center">
@@ -26,19 +26,19 @@
 ***
 
 <p align="center">
-EQEmulator is a <b>passion-driven</b>, <b>open source server emulator</b> project dedicated to preserving and celebrating the groundbreaking world of <b>EverQuest</b>, the massively multiplayer online role-playing game originally developed by <b>Verant Interactive</b> and <b>Sony Online Entertainment (now Daybreak Game Company)</b>.
+EQEmulator is a <b>passion-driven</b>, <b>open source server emulator</b> project dedicated to preserving and celebrating the legacy of a groundbreaking classic MMORPG.
 </p>
 
 <p align="center">
-For over two decades and continuing, EQEmulator has served as a <strong>fan tribute</strong>, providing tools and technology that allow players to explore, customize, and experience EverQuest’s iconic gameplay in new ways. This project exists solely out of <strong>deep admiration</strong> for the original developers, artists, designers, and visionaries who created one of the most influential online worlds of all time.
+For over two decades and continuing, EQEmulator has served as a <strong>fan tribute</strong>, providing tools and technology that allow players to explore, customize, and experience the legendary game's iconic gameplay in new ways. This project exists solely out of <strong>deep admiration</strong> for the original developers, artists, designers, and visionaries who created one of the most influential online worlds of all time.
 </p>
 
 <p align="center">
-We do not claim ownership of EverQuest or its assets. <strong>All credit and respect belong to the original creators and Daybreak Game Company</strong>, whose work continues to inspire generations of players and developers alike.
+We do not claim ownership of the original game or its assets. <strong>All credit and respect belong to the original creators and Daybreak Game Company</strong>, whose work continues to inspire generations of players and developers alike.
 </p>
 
 <p align="center">
-EQEmulator has for over 20 years and always will be a <strong>fan-based, non-commercial open-source effort</strong> made by players, for players—preserving the legacy of EverQuest while empowering community-driven creativity, learning and joy that the game and its creators has so strongly inspired in us all.
+EQEmulator has for over 20 years and always will be a <strong>fan-based, non-commercial open-source effort</strong> made by players, for players—preserving the legacy of the game while empowering community-driven creativity, learning and joy that the game and its creators has so strongly inspired in us all.
 </p>
 
 ***
@@ -47,7 +47,7 @@ EQEmulator has for over 20 years and always will be a <strong>fan-based, non-com
  Technical Overview & Reverse Engineering Effort
 </h1>
 
-<p align="center">EQEmulator represents <strong>over two decades of collaborative reverse engineering</strong>, rebuilding the EverQuest server from the ground up without access to the original source code. This effort was achieved entirely through <strong>community-driven analysis, network protocol decoding, and in-game behavioral research</strong>.</p>
+<p align="center">EQEmulator represents <strong>over two decades of collaborative reverse engineering</strong>, building the server from the ground up without access to the original source code. This effort was achieved entirely through <strong>community-driven analysis, network protocol decoding, and in-game behavioral research</strong>.</p>
 
 <h1 align="center">
  💡 How We Did It
@@ -104,10 +104,10 @@ Every system, packet, opcode, and game mechanic has been reconstructed through c
  🚀 Why It Matters
 </h1>
 
-<p align="center">🧬 EQEmulator stands as a <strong>technical preservation project</strong>, ensuring that the magic of classic and custom EverQuest servers lives on for future generations of players, tinkerers, and game designers.
+<p align="center">🧬 EQEmulator stands as a <strong>technical preservation project</strong>, ensuring that the magic of classic and custom servers lives on for future generations of players, tinkerers, and game designers.
 </p>
 
-> We humbly acknowledge and thank the original developers at **Verant Interactive** and **Sony Online Entertainment (now Daybreak Game Company)** for creating one of the most influential online experiences in gaming history.
+> We humbly acknowledge and thank the original developers for creating one of the most influential online experiences in gaming history.
 
 <h1 align="center">
  🧑‍💻🖥️ Supported Clients
@@ -148,4 +148,3 @@ If you want to set up your own EQEmulator server, please refer to the current [s
 <a href="https://github.com/EQEmu/server/graphs/contributors">
   <img src="https://contributors-img.firebaseapp.com/image?repo=EQEmu/server" />
 </a>
-
