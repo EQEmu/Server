@@ -224,11 +224,6 @@ void WorldBoot::RegisterLoginservers()
 	}
 }
 
-<<<<<<< kinglykrab/adventuremanager-global-to-singleton
-extern SharedTaskManager   shared_task_manager;
-=======
-extern AdventureManager    adventure_manager;
->>>>>>> master
 extern WorldEventScheduler event_scheduler;
 
 bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)

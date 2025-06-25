@@ -57,11 +57,6 @@ extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
-<<<<<<< kinglykrab/adventuremanager-global-to-singleton
-extern UCSConnection UCSLink;
-=======
-extern AdventureManager adventure_manager;
->>>>>>> master
 extern QueryServConnection QSLink;
 
 void CatchSignal(int sig_num);

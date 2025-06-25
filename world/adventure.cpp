@@ -17,11 +17,7 @@
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;
-<<<<<<< kinglykrab/adventuremanager-global-to-singleton
 extern EQ::Random emu_random;
-=======
-extern AdventureManager adventure_manager;
->>>>>>> master
 
 Adventure::Adventure(AdventureTemplate *t)
 {
