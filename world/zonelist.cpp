@@ -44,7 +44,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 extern uint32 numzones;
 extern WebInterfaceList web_interface;
 extern ClientList client_list;
-extern QueryServConnection QSLink;
 volatile bool UCSServerAvailable_ = false;
 void CatchSignal(int sig_num);
 
@@ -985,7 +984,7 @@ void ZSList::SendServerReload(ServerReload::Type type, uchar *packet)
 		EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
 		player_event_logs.ReloadSettings();
 		UCSConnection::Instance()->SendPacket(&pack);
-		QSLink.SendPacket(&pack);
+		QueryServConnection::Instance()->SendPacket(&pack);
 	} else if (type == ServerReload::Type::Tasks) {
 		SharedTaskManager::Instance()->LoadTaskData();
 	} else if (type == ServerReload::Type::DzTemplates) {
