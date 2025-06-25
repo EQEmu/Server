@@ -42,7 +42,6 @@ extern WorldServer     worldserver;
 extern Clientlist      *g_Clientlist;
 extern const ucsconfig *Config;
 extern UCSDatabase       database;
-extern DiscordManager  discord_manager;
 
 void ProcessMailTo(Client *c, const std::string& from, const std::string& subject, const std::string& message);
 
@@ -79,7 +78,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	case ServerOP_ServerReloadRequest: {
 		auto o = (ServerReload::Request*) pack->pBuffer;
 		if (o->type == ServerReload::Type::Logs) {
-			LogSys.LoadLogDatabaseSettings();
+			EQEmuLogSys::Instance()->LoadLogDatabaseSettings();
 			player_event_logs.ReloadSettings();
 		}
 
@@ -92,14 +91,14 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 		cereal::BinaryInputArchive archive(ss);
 		archive(n);
 
-		discord_manager.QueuePlayerEventMessage(n);
+		DiscordManager::Instance()->QueuePlayerEventMessage(n);
 
 		break;
 	}
 	case ServerOP_DiscordWebhookMessage: {
 		auto *q = (DiscordWebhookMessage_Struct *) p.Data();
 
-		discord_manager.QueueWebhookMessage(
+		DiscordManager::Instance()->QueueWebhookMessage(
 			q->webhook_id,
 			q->message
 		);

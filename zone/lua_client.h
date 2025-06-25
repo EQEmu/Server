@@ -297,6 +297,7 @@ public:
 	int GetClientVersion();
 	uint32 GetClientVersionBit();
 	void SetTitleSuffix(const char *text);
+	void EnableTitleSet(uint32 title_set);
 	void SetAAPoints(int points);
 	int GetAAPoints();
 	int GetSpentAA();
@@ -521,6 +522,8 @@ public:
 	bool KeyRingClear();
 	void KeyRingList();
 	bool KeyRingRemove(uint32 item_id);
+	bool CompleteTask(int task_id);
+	bool UncompleteTask(int task_id);
 
 	// account data buckets
 	void SetAccountBucket(std::string bucket_name, std::string bucket_value);

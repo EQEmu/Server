@@ -48,7 +48,6 @@
 extern ZSList	zoneserver_list;
 extern ClientList	client_list;
 extern uint32	numzones;
-extern LoginServerList loginserverlist;
 extern LauncherList launcher_list;
 extern volatile bool	RunLoops;
 
@@ -86,15 +85,15 @@ const std::string &EQW::GetOutput() const {
 
 void EQW::LockWorld() {
 	WorldConfig::LockWorld();
-	if (loginserverlist.Connected()) {
-		loginserverlist.SendStatus();
+	if (LoginServerList::Instance()->Connected()) {
+		LoginServerList::Instance()->SendStatus();
 	}
 }
 
 void EQW::UnlockWorld() {
 	WorldConfig::UnlockWorld();
-	if (loginserverlist.Connected()) {
-		loginserverlist.SendStatus();
+	if (LoginServerList::Instance()->Connected()) {
+		LoginServerList::Instance()->SendStatus();
 	}
 }
 
@@ -104,7 +103,7 @@ Const_char *EQW::GetConfig(Const_char *var_name) {
 }
 
 bool EQW::LSConnected() {
-	return(loginserverlist.Connected());
+	return(LoginServerList::Instance()->Connected());
 }
 
 int EQW::CountZones() {

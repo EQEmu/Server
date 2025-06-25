@@ -13,6 +13,12 @@ public:
 	void QueueWebhookMessage(uint32 webhook_id, const std::string& message);
 	void ProcessMessageQueue();
 	void QueuePlayerEventMessage(const PlayerEvent::PlayerEventContainer& e);
+
+	static DiscordManager* Instance()
+	{
+		static DiscordManager instance;
+		return &instance;
+	}
 private:
 	std::mutex webhook_queue_lock{};
 	std::map<uint32, std::vector<std::string>> webhook_message_queue{};

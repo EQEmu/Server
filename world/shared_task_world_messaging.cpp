@@ -67,7 +67,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			if (t) {
 				auto leader = t->GetLeader();
 				if (leader.character_id != r->source_character_id) {
-					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
+					ClientList::Instance()->SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
 				}
 				else {
 					SharedTaskManager::Instance()->RemoveEveryoneFromSharedTask(t, r->source_character_id);
@@ -143,7 +143,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 				auto leader = t->GetLeader();
 				if (leader.character_id != r->source_character_id) {
-					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
+					ClientList::Instance()->SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
 				}
 				else {
 					LogTasksDetail(
@@ -185,10 +185,10 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 				auto leader = t->GetLeader();
 				if (leader.character_id != r->source_character_id) {
-					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
+					ClientList::Instance()->SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
 				}
 				else if (strcasecmp(leader.character_name.c_str(), r->player_name) == 0) {
-					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::YOU_ALREADY_LEADER);
+					ClientList::Instance()->SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::YOU_ALREADY_LEADER);
 				}
 				else {
 					LogTasksDetail(
@@ -225,7 +225,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				auto leader = t->GetLeader();
 				if (leader.character_id != r->source_character_id) {
 					// taskadd is client sided with System color in newer clients, server side might still be red
-					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
+					ClientList::Instance()->SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
 				}
 				else {
 					LogTasksDetail(
@@ -318,12 +318,12 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					player_names.emplace_back(member.character_name);
 
 					if (member.is_leader) {
-						client_list.SendCharacterMessageID(buf->source_character_id, Chat::Yellow, TaskStr::LEADER_PRINT, {member.character_name});
+						ClientList::Instance()->SendCharacterMessageID(buf->source_character_id, Chat::Yellow, TaskStr::LEADER_PRINT, {member.character_name});
 					}
 				}
 
 				std::string player_list = fmt::format("{}", Strings::Join(player_names, ", "));
-				client_list.SendCharacterMessageID(buf->source_character_id, Chat::Yellow, TaskStr::MEMBERS_PRINT, {player_list});
+				ClientList::Instance()->SendCharacterMessageID(buf->source_character_id, Chat::Yellow, TaskStr::MEMBERS_PRINT, {player_list});
 			}
 
 			break;

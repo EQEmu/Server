@@ -482,7 +482,7 @@ Clientlist::Clientlist(int ChatPort) {
 	const ucsconfig *Config = ucsconfig::get();
 
 
-	std::string opcodes_file = fmt::format("{}/{}", path.GetServerPath(), Config->MailOpCodesFile);
+	std::string opcodes_file = fmt::format("{}/{}", PathManager::Instance()->GetServerPath(), Config->MailOpCodesFile);
 
 	LogInfo("Loading [{}]", opcodes_file);
 	if (!ChatOpMgr->LoadOpcodes(opcodes_file.c_str()))
@@ -651,7 +651,7 @@ void Clientlist::Process()
 				OpcodeManager::EmuToName(app->GetOpcode()),
 				o->EmuToEQ(app->GetOpcode()) == 0 ? app->GetProtocolOpcode() : o->EmuToEQ(app->GetOpcode()),
 				app->Size(),
-				(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+				(EQEmuLogSys::Instance()->IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 			);
 
 			switch (opcode) {

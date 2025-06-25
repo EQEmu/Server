@@ -77,7 +77,7 @@ ADD_EXECUTABLE(world ${world_sources} ${world_headers})
 INSTALL(TARGETS world RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 IF (WIN32 AND EQEMU_BUILD_PCH)
-    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch.h)
+    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/std-pch.h)
 ENDIF ()
 
 ADD_DEFINITIONS(-DWORLD)

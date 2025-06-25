@@ -68,7 +68,7 @@ void ZoneCLI::TestNpcHandins(int argc, char **argv, argh::parser &cmd, std::stri
 		return;
 	}
 
-	LogSys.SilenceConsoleLogging();
+	EQEmuLogSys::Instance()->SilenceConsoleLogging();
 
 	Zone::Bootup(ZoneID("qrg"), 0, false);
 	zone->StopShutdownTimer();
@@ -426,10 +426,10 @@ void ZoneCLI::TestNpcHandins(int argc, char **argv, argh::parser &cmd, std::stri
 		std::map<std::string, uint32>   required;
 		std::vector<EQ::ItemInstance *> items;
 
-		LogSys.EnableConsoleLogging();
+		EQEmuLogSys::Instance()->EnableConsoleLogging();
 
 		// turn this on to see debugging output
-		LogSys.log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;
+		EQEmuLogSys::Instance()->log_settings[Logs::NpcHandin].log_to_console = std::getenv("DEBUG") ? 3 : 0;
 
 		for (auto &test: test_cases) {
 			hand_ins.clear();
@@ -524,7 +524,7 @@ void ZoneCLI::TestNpcHandins(int argc, char **argv, argh::parser &cmd, std::stri
 
 			npc->ResetHandin();
 
-			if (LogSys.log_settings[Logs::NpcHandin].log_to_console > 0) {
+			if (EQEmuLogSys::Instance()->log_settings[Logs::NpcHandin].log_to_console > 0) {
 				std::cout << std::endl;
 			}
 		}

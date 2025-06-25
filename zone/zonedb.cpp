@@ -2639,7 +2639,7 @@ int64 ZoneDatabase::GetBlockedSpellsCount(uint32 zone_id)
 
 bool ZoneDatabase::LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlocked* into, uint32 zone_id)
 {
-	LogInfo("Loading Blocked Spells from database for {} ({}).", zone_store.GetZoneName(zone_id, true), zone_id);
+	LogInfo("Loading Blocked Spells from database for {} ({}).", ZoneStore::Instance()->GetZoneName(zone_id, true), zone_id);
 
 	const auto& l = BlockedSpellsRepository::GetWhere(
 		*this,
@@ -2661,7 +2661,7 @@ bool ZoneDatabase::LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlock
 			LogError(
 				"Blocked spells count of {} exceeded for {} ({}).",
 				blocked_spells_count,
-				zone_store.GetZoneName(zone_id, true),
+				ZoneStore::Instance()->GetZoneName(zone_id, true),
 				zone_id
 			);
 			break;

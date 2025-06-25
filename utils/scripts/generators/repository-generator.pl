@@ -114,7 +114,8 @@ if ($requested_table_to_generate ne "all") {
 
 my @cereal_enabled_tables = (
     "data_buckets",
-    "player_event_logs"
+    "player_event_logs",
+    "player_event_log_settings"
 );
 
 my $generated_base_repository_files = "";

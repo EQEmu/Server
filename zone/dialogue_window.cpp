@@ -1,5 +1,3 @@
-#include <regex>
-
 #include "dialogue_window.h"
 
 void DialogueWindow::Render(Client *c, std::string markdown)
@@ -529,12 +527,19 @@ std::string DialogueWindow::CenterMessage(std::string message)
 		return std::string();
 	}
 
-	auto cleaned_message = message;
+	std::string cleaned_message;
+	cleaned_message.reserve(message.size());
 
-	std::regex tags("<[^>]*>");
-
-	if (std::regex_search(cleaned_message, tags)) {
-		std::regex_replace(cleaned_message, tags, cleaned_message);
+	// Strip HTML-like tags
+	bool in_tag = false;
+	for (char c : message) {
+		if (c == '<') {
+			in_tag = true;
+		} else if (c == '>' && in_tag) {
+			in_tag = false;
+		} else if (!in_tag) {
+			cleaned_message += c;
+		}
 	}
 
 	auto message_len = cleaned_message.length();

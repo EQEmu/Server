@@ -35,7 +35,6 @@
 
 extern ClientList      client_list;
 extern ZSList          zoneserver_list;
-extern LoginServerList loginserverlist;
 
 /**
  * @param username
@@ -534,8 +533,8 @@ void ConsoleLock(
 )
 {
 	WorldConfig::LockWorld();
-	if (loginserverlist.Connected()) {
-		loginserverlist.SendStatus();
+	if (LoginServerList::Instance()->Connected()) {
+		LoginServerList::Instance()->SendStatus();
 		connection->SendLine("World locked.");
 	}
 	else {
@@ -555,8 +554,8 @@ void ConsoleUnlock(
 )
 {
 	WorldConfig::UnlockWorld();
-	if (loginserverlist.Connected()) {
-		loginserverlist.SendStatus();
+	if (LoginServerList::Instance()->Connected()) {
+		LoginServerList::Instance()->SendStatus();
 		connection->SendLine("World unlocked.");
 	}
 	else {
@@ -1219,7 +1218,7 @@ void ConsoleCrossZoneMove(
 	const auto&  zone_short_name = !Strings::IsNumber(args[2]) ? args[2] : "";
 	const uint16 instance_id     = Strings::IsNumber(args[2]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[2])) : 0;
 
-	const auto& z = !zone_short_name.empty() ? zone_store.GetZone(zone_short_name) : nullptr;
+	const auto& z = !zone_short_name.empty() ? ZoneStore::Instance()->GetZone(zone_short_name) : nullptr;
 
 	if (z && !z->id) {
 		connection->SendLine(fmt::format("No zone with the short name '{}' exists.", zone_short_name));
@@ -1289,7 +1288,7 @@ void ConsoleWorldWideMove(
 	const auto&  zone_short_name = !Strings::IsNumber(args[2]) ? args[2] : "";
 	const uint16 instance_id     = Strings::IsNumber(args[2]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[2])) : 0;
 
-	const auto& z = !zone_short_name.empty() ? zone_store.GetZone(zone_short_name) : nullptr;
+	const auto& z = !zone_short_name.empty() ? ZoneStore::Instance()->GetZone(zone_short_name) : nullptr;
 
 	if (z && !z->id) {
 		connection->SendLine(fmt::format("No zone with the short name '{}' exists.", zone_short_name));
@@ -1330,6 +1329,42 @@ void ConsoleWorldWideMove(
 	);
 }
 
+void ConsoleWWMarquee(
+	EQ::Net::ConsoleServerConnection* connection,
+	const std::string& command,
+	const std::vector<std::string>& args
+)
+{
+	if (args.size() < 2) {
+		connection->SendLine("Usage: wwmarquee <type> <message>");
+		return;
+	}
+
+	const uint32 type    = Strings::IsNumber(args[0]) ? Strings::ToUnsignedInt(args[0]) : 0;
+	std::string  message = Strings::Join(std::vector<std::string>(args.begin() + 1, args.end()), " ");
+	if (message.empty()) {
+		connection->SendLine("Message cannot be empty.");
+		return;
+	}
+
+	auto pack = new ServerPacket(ServerOP_WWMarquee, sizeof(WWMarquee_Struct));
+	auto* wwm = (WWMarquee_Struct*)pack->pBuffer;
+
+	wwm->type       = type;
+	wwm->priority   = 510;
+	wwm->fade_in    = 0;
+	wwm->fade_out   = 0;
+	wwm->duration   = 5000;
+	wwm->min_status = AccountStatus::Player;
+	wwm->max_status = AccountStatus::Player;
+
+	strn0cpy(wwm->message, message.c_str(), sizeof(wwm->message));
+
+	zoneserver_list.SendPacket(pack);
+	safe_delete(pack);
+
+	connection->SendLine(fmt::format("Sent world marquee type {}: {}", type, message));
+}
 
 /**
  * @param console
@@ -1367,6 +1402,12 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("whoami", 50, "whoami", std::bind(ConsoleWhoami, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("worldshutdown", 200, "worldshutdown", std::bind(ConsoleWorldShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("wwcast", 50, "wwcast [spell_id] [min_status] [max_status] - min_status and max_status are optional", std::bind(ConsoleWorldWideCastSpell, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall(
+		"wwmarquee",
+		50,
+		"wwmarquee <type> <message>",
+		std::bind(ConsoleWWMarquee, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
+	);
 	console->RegisterCall("wwmove", 50, "wwmove [instance_id|zone_short_name] [min_status] [max_status] -  min_status and max_status are optional, instance_id and zone_short_name are interchangeable", std::bind(ConsoleWorldWideMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonebootup", 150, "zonebootup [zone_server_id] [zone_short_name]", std::bind(ConsoleZoneBootup, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonelock", 150, "zonelock [list|lock|unlock] [zone_short_name]", std::bind(ConsoleZoneLock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
