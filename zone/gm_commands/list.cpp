@@ -2,6 +2,7 @@
 #include "../corpse.h"
 #include "../object.h"
 #include "../doors.h"
+#include "../command.h"
 
 struct UniqueEntity {
 	uint16      entity_id;

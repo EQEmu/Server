@@ -27,6 +27,8 @@ void SendCrashReport(const std::string &crash_report)
 //		"http://localhost:3010/api/v1/analytics/server-crash-report", // development
 	};
 
+	EQEmuLogSys* log = EQEmuLogSys::Instance();
+
 	auto      config = EQEmuConfig::get();
 	for (auto &e: endpoints) {
 		uri u(e);
@@ -68,12 +70,12 @@ void SendCrashReport(const std::string &crash_report)
 		p["cpus"]              = cpus.size();
 		p["origination_info"]  = "";
 
-		if (!LogSys.origination_info.zone_short_name.empty()) {
+		if (!log->origination_info.zone_short_name.empty()) {
 			p["origination_info"] = fmt::format(
 				"{} ({}) instance_id [{}]",
-				LogSys.origination_info.zone_short_name,
-				LogSys.origination_info.zone_long_name,
-				LogSys.origination_info.instance_id
+				log->origination_info.zone_short_name,
+				log->origination_info.zone_long_name,
+				log->origination_info.instance_id
 			);
 		}
 
@@ -294,7 +296,7 @@ void print_trace()
 		SendCrashReport(crash_report);
 	}
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Instance()->CloseFileLogs();
 
 	exit(1);
 }

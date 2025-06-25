@@ -195,10 +195,12 @@ void PlayerEventLogs::ProcessBatchQueue()
 	};
 
 	// Helper to assign ETL table ID
-	auto                                                                                                          AssignEtlId      = [&](
-		PlayerEventLogsRepository::PlayerEventLogs &r,
-		PlayerEvent::EventType type
-	) {
+
+	auto AssignEtlId = [&](
+		PlayerEventLogsRepository::PlayerEventLogs& r,
+		PlayerEvent::EventType                      type
+	)
+	{
 		if (m_etl_settings.contains(type)) {
 			r.etl_table_id = m_etl_settings.at(type).next_id++;
 		}
@@ -406,7 +408,6 @@ void PlayerEventLogs::ProcessBatchQueue()
 			auto it = event_processors.find(static_cast<PlayerEvent::EventType>(r.event_type_id));
 			if (it != event_processors.end()) {
 				it->second(r);  // Call the appropriate lambda
-				r.event_data = "{}"; // Clear event data
 			}
 			else {
 				LogPlayerEventsDetail("Non-Implemented ETL routing [{}]", r.event_type_id);
@@ -508,7 +509,7 @@ bool PlayerEventLogs::IsEventDiscordEnabled(int32_t event_type_id)
 	}
 
 	// ensure there is a matching webhook to begin with
-	if (!LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
+	if (!EQEmuLogSys::Instance()->GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
 		return true;
 	}
 
@@ -528,11 +529,25 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 	}
 
 	// ensure there is a matching webhook to begin with
-	if (!LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
-		return LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url;
+	if (!EQEmuLogSys::Instance()->GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
+		return EQEmuLogSys::Instance()->GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url;
 	}
 
 	return "";
+}
+
+void PlayerEventLogs::LoadPlayerEventSettingsFromQS(
+	const std::vector<PlayerEventLogSettingsRepository::PlayerEventLogSettings> &settings
+)
+{
+	for (const auto &e : settings) {
+		if (e.id >= PlayerEvent::MAX || e.id < 0) {
+			continue;
+		}
+		m_settings[e.id] = e;
+	}
+
+	LogInfo("Applied [{}] player event log settings from QS", settings.size());
 }
 
 // GM_COMMAND           | [x] Implemented Formatter

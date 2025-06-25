@@ -537,9 +537,9 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 {
 	EQEmuLogSys::CloseFileLogs();
 
-	if (!File::Exists(path.GetLogPath())) {
-		LogInfo("Logs directory not found, creating [{}]", path.GetLogPath());
-		File::Makedir(path.GetLogPath());
+	if (!File::Exists(PathManager::Instance()->GetLogPath())) {
+		LogInfo("Logs directory not found, creating [{}]", PathManager::Instance()->GetLogPath());
+		File::Makedir(PathManager::Instance()->GetLogPath());
 	}
 
 	/**
@@ -656,7 +656,7 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings(bool silent_load)
 		// If we go through this whole loop and nothing is set to any debug level, there
 		// is no point to create a file or keep anything open
 		if (log_settings[c.log_category_id].log_to_file > 0) {
-			LogSys.m_file_logs_enabled = true;
+			m_file_logs_enabled = true;
 		}
 
 		db_categories.emplace_back(c.log_category_id);
