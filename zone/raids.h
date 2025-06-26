@@ -167,9 +167,9 @@ public:
 	void	CastGroupSpell(Mob* caster,uint16 spellid, uint32 gid);
 	void	SplitExp(ExpSource exp_source, const uint64 exp, Mob* other);
 	uint32	GetTotalRaidDamage(Mob* other);
-	void	BalanceHP(int32 penalty, uint32 gid, float range = 0, Mob* caster = nullptr, int32 limit = 0);
-	void	BalanceMana(int32 penalty, uint32 gid,  float range = 0, Mob* caster = nullptr, int32 limit = 0);
-	void	HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, float range = 0);
+	void	BalanceHP(int32 penalty, uint32 group_id, float range = 0, Mob* caster = nullptr, int32 limit = 0);
+	void	BalanceMana(int32 penalty, uint32 group_id, float range = 0, Mob* caster = nullptr, int32 limit = 0);
+	void	HealGroup(uint32 heal_amount, Mob* caster, uint32 group_id, float range = 0);
 	void	SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter = nullptr);
 
 	void	TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading, uint32 gid);
