@@ -4,9 +4,9 @@
 void FindCharacter(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
-		const auto character_id = Strings::ToUnsignedInt(sep->arg[2]);
+		const uint32 character_id = Strings::ToUnsignedInt(sep->arg[2]);
 
-		const auto& e = CharacterDataRepository::FindOne(content_db, character_id);
+		const auto& e = CharacterDataRepository::FindOne(database, character_id);
 		if (!e.id) {
 			c->Message(
 				Chat::White,
@@ -31,10 +31,10 @@ void FindCharacter(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const auto search_criteria = Strings::ToLower(sep->argplus[2]);
+	const std::string& search_criteria = Strings::ToLower(sep->argplus[2]);
 
 	const auto& l = CharacterDataRepository::GetWhere(
-		content_db,
+		database,
 		fmt::format(
 			"LOWER(`name`) LIKE '%%{}%%' AND `name` NOT LIKE '%-deleted-%' ORDER BY `id` ASC LIMIT 50",
 			search_criteria
@@ -51,7 +51,7 @@ void FindCharacter(Client *c, const Seperator *sep)
 		);
 	}
 
-	auto found_count = 0;
+	uint32 found_count = 0;
 
 	for (const auto& e : l) {
 		c->Message(
