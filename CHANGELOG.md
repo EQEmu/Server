@@ -1,3 +1,94 @@
+## [23.8.0] 6/25/2025
+
+### API
+
+* Add wwmarquee <type> <message> ([#4919](https://github.com/EQEmu/Server/pull/4919)) @Akkadius 2025-06-23
+
+### Build
+
+* Significantly Improve Build Times Using Unity Builds ([#4948](https://github.com/EQEmu/Server/pull/4948)) @Akkadius 2025-06-22
+
+### Code
+
+* AdventureManager Global to Singleton Cleanup ([#4931](https://github.com/EQEmu/Server/pull/4931)) @Kinglykrab 2025-06-25
+* Cleanup Strings Header ([#4950](https://github.com/EQEmu/Server/pull/4950)) @Akkadius 2025-06-22
+* ClientList Global to Singleton Cleanup ([#4942](https://github.com/EQEmu/Server/pull/4942)) @Kinglykrab 2025-06-25
+* DatabaseUpdate Global to Singleton Cleanup ([#4943](https://github.com/EQEmu/Server/pull/4943)) @Kinglykrab 2025-06-25
+* DiscordManager Global to Singleton Cleanup ([#4926](https://github.com/EQEmu/Server/pull/4926)) @Kinglykrab 2025-06-25
+* EQ::Random Global to Singleton Cleanup ([#4936](https://github.com/EQEmu/Server/pull/4936)) @Kinglykrab 2025-06-22
+* EQEmuLogSys Global to Singleton Cleanup ([#4925](https://github.com/EQEmu/Server/pull/4925)) @Akkadius 2025-06-25
+* EvolvingItemsManager Global to Singleton Cleanup ([#4929](https://github.com/EQEmu/Server/pull/4929)) @Kinglykrab 2025-06-25
+* LFGuildManager Global to Singleton Cleanup ([#4927](https://github.com/EQEmu/Server/pull/4927)) @Kinglykrab 2025-06-25
+* LoginServerList Global to Singleton Cleanup ([#4941](https://github.com/EQEmu/Server/pull/4941)) @Kinglykrab 2025-06-25
+* Optimize PCH Config (Faster Builds) ([#4951](https://github.com/EQEmu/Server/pull/4951)) @Akkadius 2025-06-22
+* PCH Cleanup ([#4952](https://github.com/EQEmu/Server/pull/4952)) @Akkadius 2025-06-25
+* PathManager Global to Singleton Cleanup ([#4924](https://github.com/EQEmu/Server/pull/4924)) @Akkadius 2025-06-22
+* PetitionList Global to Singleton Cleanup ([#4944](https://github.com/EQEmu/Server/pull/4944)) @Kinglykrab 2025-06-25
+* PlayerEventLogs Global to Singleton Cleanup ([#4928](https://github.com/EQEmu/Server/pull/4928)) @Kinglykrab 2025-06-25
+* QueryServConnection Global to Singleton Cleanup ([#4938](https://github.com/EQEmu/Server/pull/4938)) @Kinglykrab 2025-06-25
+* Remove Lua Rule Constants ([#4949](https://github.com/EQEmu/Server/pull/4949)) @Akkadius 2025-06-22
+* Remove Regex Compile Bloat ([#4947](https://github.com/EQEmu/Server/pull/4947)) @Akkadius 2025-06-22
+* Remove Unused MZoneShutdown Mutex ([#4946](https://github.com/EQEmu/Server/pull/4946)) @Kinglykrab 2025-06-22
+* SharedTaskManager Global to Singleton Cleanup ([#4930](https://github.com/EQEmu/Server/pull/4930)) @Kinglykrab 2025-06-25
+* SkillCaps Global to Singleton Cleanup ([#4933](https://github.com/EQEmu/Server/pull/4933)) @Kinglykrab 2025-06-22
+* TaskManager Global to Singleton Cleanup ([#4945](https://github.com/EQEmu/Server/pull/4945)) @Kinglykrab 2025-06-22
+* UCSConnection Global to Singleton Cleanup ([#4937](https://github.com/EQEmu/Server/pull/4937)) @Kinglykrab 2025-06-25
+* WebInterfaceList Global to Singleton Cleanup ([#4935](https://github.com/EQEmu/Server/pull/4935)) @Kinglykrab 2025-06-25
+* WorldContentServer Global to Singleton Cleanup ([#4939](https://github.com/EQEmu/Server/pull/4939)) @Kinglykrab 2025-06-25
+* WorldEventScheduler and ZoneEventScheduler Global to Singleton Cleanup ([#4932](https://github.com/EQEmu/Server/pull/4932)) @Kinglykrab 2025-06-25
+* ZSList Global to Singleton Cleanup ([#4940](https://github.com/EQEmu/Server/pull/4940)) @Kinglykrab 2025-06-25
+* ZoneStore Global to Singleton Cleanup ([#4934](https://github.com/EQEmu/Server/pull/4934)) @Kinglykrab 2025-06-23
+
+### Corpses
+
+* Add corpse entity variables to DB ([#4911](https://github.com/EQEmu/Server/pull/4911)) @fryguy503 2025-06-25
+
+### Databuckets
+
+* Move Databuckets to Common ([#4918](https://github.com/EQEmu/Server/pull/4918)) @Akkadius 2025-06-16
+* Nested Caching ([#4917](https://github.com/EQEmu/Server/pull/4917)) @Akkadius 2025-06-25
+
+### Doors
+
+* Fix door saving for versions ([#4905](https://github.com/EQEmu/Server/pull/4905)) @nytmyr 2025-06-09
+
+### Fixes
+
+* Bulk Send Corpses after Idle State ([#4910](https://github.com/EQEmu/Server/pull/4910)) @Akkadius 2025-06-09
+* Fix ClientList Singleton Shortcomings of #4942  @Akkadius 2025-06-25
+* Fix breaking changes to Titanium, SoF, SoD patches causes by big bags update ([#4922](https://github.com/EQEmu/Server/pull/4922)) @regneq 2025-06-25
+
+### Logs
+
+* Fix output for tasks in logs ([#4907](https://github.com/EQEmu/Server/pull/4907)) @joligario 2025-06-09
+
+### Performance
+
+* Auto Idle / AFK ([#4903](https://github.com/EQEmu/Server/pull/4903)) @Akkadius 2025-05-22
+* Wearchange Packet Send Deduplication ([#4916](https://github.com/EQEmu/Server/pull/4916)) @Akkadius 2025-06-25
+
+### Player Event Logs
+
+* Don't Clear Event Data on ETL Events ([#4913](https://github.com/EQEmu/Server/pull/4913)) @Akkadius 2025-06-25
+
+### Player Events
+
+* Don't Write Empty Data ([#4912](https://github.com/EQEmu/Server/pull/4912)) @Akkadius 2025-06-25
+* Zone Fetch Settings from QS if Enabled ([#4915](https://github.com/EQEmu/Server/pull/4915)) @Akkadius 2025-06-25
+
+### Quest API
+
+* Add CompleteTask and UncompleteTask methods to Perl/Lua ([#4921](https://github.com/EQEmu/Server/pull/4921)) @Barathos 2025-06-25
+* Lua Client Scoped EnableTitleSets ([#4914](https://github.com/EQEmu/Server/pull/4914)) @fryguy503 2025-06-25
+
+### Quests
+
+* Support Multiple Quest, Plugin, and Lua Module Paths ([#4906](https://github.com/EQEmu/Server/pull/4906)) @Akkadius 2025-06-09
+
+### World API
+
+* Input Validation ([#4904](https://github.com/EQEmu/Server/pull/4904)) @Akkadius 2025-05-22
+
 ## [23.7.0] 5/19/2025
 
 ### CLI
