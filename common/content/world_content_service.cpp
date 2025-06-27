@@ -10,12 +10,6 @@
 #include "../repositories/rule_values_repository.h"
 #include "../zone_store.h"
 
-
-WorldContentService::WorldContentService()
-{
-	SetCurrentExpansion(Expansion::EXPANSION_ALL);
-}
-
 int WorldContentService::GetCurrentExpansion() const
 {
 	return current_expansion;
@@ -362,7 +356,6 @@ void WorldContentService::LoadTargetedRulesets(Database* db)
 	constexpr int8 EXPANSION_ZERO_VALUE = -2;
 
 	auto rules = RuleValuesRepository::GetWhere(*db, "TRUE ORDER BY ruleset_id, rule_name");
-	auto inst  = RuleManager::Instance();
 	auto sets  = RuleSetsRepository::GetWhere(*db, "TRUE ORDER BY ruleset_id");
 	for (auto& e : sets) {
 		bool has_filters =
@@ -402,7 +395,7 @@ void WorldContentService::LoadTargetedRulesets(Database* db)
 				continue;
 			}
 
-			inst->SetRule(r.rule_name, r.rule_value);
+			m_rule_manager->SetRule(r.rule_name, r.rule_value);
 
 			LogInfo(
 				"Loading targeted rule from ruleset [{}] ruleset_name [{}] rule_name [{}] rule_value [{}]",

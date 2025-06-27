@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "../rulesys.h"
 #include "../repositories/content_flags_repository.h"
 #include "../repositories/zone_repository.h"
 #include "../repositories/instance_list_repository.h"
@@ -88,7 +89,18 @@ namespace Expansion {
 class WorldContentService {
 public:
 
-	WorldContentService();
+	// Constructor can initialize from singleton
+	WorldContentService()
+		: m_rule_manager(RuleManager::Instance())
+	{
+		SetCurrentExpansion(Expansion::EXPANSION_ALL);
+	}
+
+	static WorldContentService* Instance()
+	{
+		static WorldContentService instance;
+		return &instance;
+	}
 
 	std::string GetCurrentExpansionName();
 	int GetCurrentExpansion() const;
@@ -181,12 +193,6 @@ public:
 	FindZoneResult FindZone(uint32 zone_id, uint32 instance_id);
 	bool IsInPublicStaticInstance(uint32 instance_id);
 
-	static WorldContentService* Instance()
-	{
-		static WorldContentService instance;
-		return &instance;
-	}
-
 	// targeted rulesets
 	void LoadTargetedRulesets(Database* db);
 	inline void SetZoneId(int zone_id) { m_zone_id = zone_id; }
@@ -199,6 +205,7 @@ private:
 	// reference to database
 	Database *m_database;
 	Database *m_content_database;
+	RuleManager* m_rule_manager;
 
 	int m_zone_id = 0;
 	int m_instance_version = 0;
