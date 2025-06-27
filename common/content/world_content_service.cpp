@@ -1,6 +1,5 @@
 #include "world_content_service.h"
 
-#include <utility>
 #include <glm/vec3.hpp>
 #include "../database.h"
 #include "../rulesys.h"
@@ -23,7 +22,7 @@ WorldContentService *WorldContentService::SetExpansionContext()
 	// pull expansion from rules
 	int expansion = RuleI(Expansion, CurrentExpansion);
 	if (expansion >= Expansion::Classic && expansion <= Expansion::MaxId) {
-		WorldContentService::Instance()->SetCurrentExpansion(expansion);
+		SetCurrentExpansion(expansion);
 	}
 
 	LogInfo(
@@ -37,36 +36,27 @@ WorldContentService *WorldContentService::SetExpansionContext()
 
 std::string WorldContentService::GetCurrentExpansionName()
 {
-	if (WorldContentService::Instance()->GetCurrentExpansion() == Expansion::EXPANSION_ALL) {
+	if (GetCurrentExpansion() == Expansion::EXPANSION_ALL) {
 		return "All Expansions";
 	}
 
 	if (current_expansion >= Expansion::Classic && current_expansion <= Expansion::MaxId) {
-		return Expansion::ExpansionName[WorldContentService::Instance()->GetCurrentExpansion()];
+		return Expansion::ExpansionName[GetCurrentExpansion()];
 	}
 
 	return "Unknown Expansion";
 }
 
-/**
- * @param current_expansion
- */
 void WorldContentService::SetCurrentExpansion(int current_expansion)
 {
 	WorldContentService::current_expansion = current_expansion;
 }
 
-/**
- * @return
- */
 const std::vector<ContentFlagsRepository::ContentFlags> &WorldContentService::GetContentFlags() const
 {
 	return content_flags;
 }
 
-/**
- * @return
- */
 std::vector<std::string> WorldContentService::GetContentFlagsEnabled()
 {
 	std::vector<std::string> enabled_flags;
@@ -80,9 +70,6 @@ std::vector<std::string> WorldContentService::GetContentFlagsEnabled()
 	return enabled_flags;
 }
 
-/**
- * @return
- */
 std::vector<std::string> WorldContentService::GetContentFlagsDisabled()
 {
 	std::vector<std::string> disabled_flags;
@@ -96,18 +83,11 @@ std::vector<std::string> WorldContentService::GetContentFlagsDisabled()
 	return disabled_flags;
 }
 
-/**
- * @param content_flags
- */
 void WorldContentService::SetContentFlags(const std::vector<ContentFlagsRepository::ContentFlags> &content_flags)
 {
 	WorldContentService::content_flags = content_flags;
 }
 
-/**
- * @param content_flag
- * @return
- */
 bool WorldContentService::IsContentFlagEnabled(const std::string &content_flag)
 {
 	for (auto &f: GetContentFlags()) {
@@ -119,10 +99,6 @@ bool WorldContentService::IsContentFlagEnabled(const std::string &content_flag)
 	return false;
 }
 
-/**
- * @param content_flag
- * @return
- */
 bool WorldContentService::IsContentFlagDisabled(const std::string &content_flag)
 {
 	for (auto &f: GetContentFlags()) {
@@ -191,7 +167,7 @@ Database *WorldContentService::GetDatabase() const
 
 WorldContentService *WorldContentService::SetDatabase(Database *database)
 {
-	WorldContentService::m_database = database;
+	m_database = database;
 
 	return this;
 }
@@ -309,7 +285,7 @@ WorldContentService::FindZoneResult WorldContentService::FindZone(uint32 zone_id
 					i.notes
 				);
 
-				return WorldContentService::FindZoneResult{
+				return FindZoneResult{
 					.zone_id = static_cast<uint32>(z.zoneidnumber),
 					.instance = i,
 					.zone = z
@@ -318,7 +294,7 @@ WorldContentService::FindZoneResult WorldContentService::FindZone(uint32 zone_id
 		}
 	}
 
-	return WorldContentService::FindZoneResult{.zone_id = 0};
+	return FindZoneResult{.zone_id = 0};
 }
 
 bool WorldContentService::IsInPublicStaticInstance(uint32 instance_id)
@@ -406,6 +382,4 @@ void WorldContentService::LoadTargetedRulesets(Database* db)
 			);
 		}
 	}
-
-	return;
 }
