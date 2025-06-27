@@ -19,7 +19,7 @@
 class BaseRuleValuesRepository {
 public:
 	struct RuleValues {
-		uint8_t     ruleset_id;
+		int32_t     ruleset_id;
 		std::string rule_name;
 		std::string rule_value;
 		std::string notes;
@@ -127,7 +127,7 @@ public:
 		if (results.RowCount() == 1) {
 			RuleValues e{};
 
-			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.ruleset_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.rule_name  = row[1] ? row[1] : "";
 			e.rule_value = row[2] ? row[2] : "";
 			e.notes      = row[3] ? row[3] : "";
@@ -259,7 +259,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RuleValues e{};
 
-			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.ruleset_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.rule_name  = row[1] ? row[1] : "";
 			e.rule_value = row[2] ? row[2] : "";
 			e.notes      = row[3] ? row[3] : "";
@@ -287,7 +287,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RuleValues e{};
 
-			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.ruleset_id = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.rule_name  = row[1] ? row[1] : "";
 			e.rule_value = row[2] ? row[2] : "";
 			e.notes      = row[3] ? row[3] : "";

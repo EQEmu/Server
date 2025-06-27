@@ -19,7 +19,7 @@
 class BaseRuleSetsRepository {
 public:
 	struct RuleSets {
-		uint8_t     ruleset_id;
+		int32_t     ruleset_id;
 		std::string name;
 		std::string zone_ids;
 		std::string instance_versions;
@@ -147,7 +147,7 @@ public:
 		if (results.RowCount() == 1) {
 			RuleSets e{};
 
-			e.ruleset_id             = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.ruleset_id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name                   = row[1] ? row[1] : "";
 			e.zone_ids               = row[2] ? row[2] : "";
 			e.instance_versions      = row[3] ? row[3] : "";
@@ -298,7 +298,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RuleSets e{};
 
-			e.ruleset_id             = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.ruleset_id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name                   = row[1] ? row[1] : "";
 			e.zone_ids               = row[2] ? row[2] : "";
 			e.instance_versions      = row[3] ? row[3] : "";
@@ -331,7 +331,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RuleSets e{};
 
-			e.ruleset_id             = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.ruleset_id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name                   = row[1] ? row[1] : "";
 			e.zone_ids               = row[2] ? row[2] : "";
 			e.instance_versions      = row[3] ? row[3] : "";
