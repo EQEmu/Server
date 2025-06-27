@@ -666,3 +666,15 @@ std::string RuleManager::GetStringRule(RuleManager::StringType t) const
 {
 	return m_RuleStringValues[t];
 }
+
+std::string RuleManager::GetRuleNotesByName(std::string rule_name) const
+{
+	for (const auto &r : s_RuleInfo) {
+		if (Strings::EqualFold(r.name, rule_name)) {
+			return r.notes;
+		}
+	}
+
+	LogRulesDetail("Unable to find rule notes for '{}'.", rule_name);
+	return "";
+}
