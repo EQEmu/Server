@@ -320,7 +320,81 @@ bool WorldContentService::DoesZonePassContentFiltering(const ZoneRepository::Zon
 	return DoesPassContentFiltering(f);
 }
 
+void WorldContentService::SeedDefaultRulesets()
+{
+	LogInfo("Seeding default rulesets");
 
+	// uint8_t     ruleset_id;
+	// std::string name;
+	// std::string zone_ids;
+	// std::string instance_versions;
+	// std::string content_flags;
+	// std::string content_flags_disabled;
+	// int8_t      min_expansion;
+	// int8_t      max_expansion;
+	// std::string notes;
+
+	struct RuleSet {
+		RuleSetsRepository::RuleSets rule_set;
+		std::vector<RuleValuesRepository::RuleValues> rules;
+	};
+
+	std::vector<RuleSet> rulesets = {
+		{
+			.rule_set = {
+				.ruleset_id = 100,
+				.name = "Double Experience",
+			},
+			.rules = {
+				{.rule_name = "Character:FinalExpMultiplier", .rule_value = "2" },
+			}
+		},
+		{
+			.rule_set = {
+				.ruleset_id = 1000,
+				.name = "Custom Boundary (Put your custom rulesets after here)",
+				.notes = "You may add your own rulesets above 1000+"
+			},
+		}
+	};
+
+	for (const auto& entry : rulesets) {
+		auto existing_sets = RuleSetsRepository::GetWhere(
+			*m_database,
+			fmt::format("ruleset_id = {}", entry.rule_set.ruleset_id)
+		);
+
+		if (existing_sets.empty()) {
+			RuleSetsRepository::InsertOne(*m_database, entry.rule_set);
+			LogInfo("Inserted ruleset [{}] - {}", entry.rule_set.ruleset_id, entry.rule_set.name);
+		}
+
+		if (!entry.rules.empty()) {
+			auto existing_rules = RuleValuesRepository::GetWhere(
+				*m_database,
+				fmt::format("ruleset_id = {}", entry.rule_set.ruleset_id)
+			);
+
+			std::unordered_set<std::string> existing_rule_names;
+			for (const auto& r : existing_rules) {
+				existing_rule_names.insert(r.rule_name);
+			}
+
+			std::vector<RuleValuesRepository::RuleValues> new_rules;
+			for (auto r : entry.rules) {
+				if (existing_rule_names.count(r.rule_name)) {
+					continue;
+				}
+				new_rules.push_back(r);
+			}
+
+			if (!new_rules.empty()) {
+				RuleValuesRepository::InsertMany(*m_database, new_rules);
+				LogInfo("Inserted [{}] rules into ruleset [{}]", new_rules.size(), entry.rule_set.ruleset_id);
+			}
+		}
+	}
+}
 
 void WorldContentService::LoadTargetedRulesets()
 {
@@ -328,6 +402,8 @@ void WorldContentService::LoadTargetedRulesets()
 		LogError("Zone ID is not set. Cannot load targeted rulesets.");
 		return;
 	}
+
+	SeedDefaultRulesets();
 
 	LogInfo("Zone ID [{}] Instance Version [{}] - Loading targeted rulesets", m_zone_id, m_instance_version);
 
@@ -385,3 +461,4 @@ void WorldContentService::LoadTargetedRulesets()
 		}
 	}
 }
+

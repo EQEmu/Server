@@ -7151,6 +7151,10 @@ ALTER TABLE `rule_sets`
   ADD COLUMN `min_expansion` TINYINT NOT NULL DEFAULT -2,
   ADD COLUMN `max_expansion` TINYINT NOT NULL DEFAULT -2,
   ADD COLUMN `notes` VARCHAR(255) NOT NULL DEFAULT '';
+ALTER TABLE `rule_sets`
+	CHANGE `ruleset_id` `ruleset_id` int NOT NULL auto_increment;
+ALTER TABLE `rule_values`
+	CHANGE `ruleset_id` `ruleset_id` int NOT NULL DEFAULT 0;
 )",
 		.content_schema_update = false
 	},
