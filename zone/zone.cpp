@@ -3298,8 +3298,8 @@ void Zone::ReloadMaps()
 void Zone::LoadRules()
 {
 	if (GetZoneID() > 0) {
-		content_service.SetZoneId(GetZoneID());
-		content_service.SetInstanceVersion(GetInstanceVersion());
+		WorldContentService::Instance()->SetZoneId(GetZoneID());
+		WorldContentService::Instance()->SetInstanceVersion(GetInstanceVersion());
 	}
 	const auto rm = RuleManager::Instance();
 	rm->LoadRules(&database, rm->GetActiveRuleset(), true);
