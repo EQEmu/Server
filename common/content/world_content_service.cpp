@@ -324,16 +324,6 @@ void WorldContentService::SeedDefaultRulesets()
 {
 	LogInfo("Seeding default rulesets");
 
-	// uint8_t     ruleset_id;
-	// std::string name;
-	// std::string zone_ids;
-	// std::string instance_versions;
-	// std::string content_flags;
-	// std::string content_flags_disabled;
-	// int8_t      min_expansion;
-	// int8_t      max_expansion;
-	// std::string notes;
-
 	struct RuleSet {
 		RuleSetsRepository::RuleSets rule_set;
 		std::vector<RuleValuesRepository::RuleValues> rules;
@@ -344,9 +334,10 @@ void WorldContentService::SeedDefaultRulesets()
 			.rule_set = {
 				.ruleset_id = 100,
 				.name = "Double Experience",
+				.notes = "Doubles EXP globally"
 			},
 			.rules = {
-				{.rule_name = "Character:FinalExpMultiplier", .rule_value = "2" },
+				{ .rule_name = "Character:FinalExpMultiplier", .rule_value = "2" }
 			}
 		},
 		{
@@ -358,45 +349,46 @@ void WorldContentService::SeedDefaultRulesets()
 		}
 	};
 
+	// Load all existing rule_sets once
+	std::unordered_set<uint8_t> existing_ruleset_ids;
+	for (const auto& r : RuleSetsRepository::All(*m_database)) {
+		existing_ruleset_ids.insert(r.ruleset_id);
+	}
+
+	// Load all existing rule_values once
+	std::unordered_set<std::string> existing_rule_keys;
+	for (const auto& r : RuleValuesRepository::All(*m_database)) {
+		existing_rule_keys.insert(fmt::format("{}|{}", r.ruleset_id, r.rule_name));
+	}
+
+	// Process in-memory
 	for (const auto& entry : rulesets) {
 		const auto& ruleset = entry.rule_set;
 
-		// Ensure ruleset exists
-		auto existing_sets = RuleSetsRepository::GetWhere(
-			*m_database,
-			fmt::format("ruleset_id = {}", ruleset.ruleset_id)
-		);
-
-		if (existing_sets.empty()) {
+		if (!existing_ruleset_ids.count(ruleset.ruleset_id)) {
 			RuleSetsRepository::InsertOne(*m_database, ruleset);
 			LogInfo("Inserted ruleset [{}] - {}", ruleset.ruleset_id, ruleset.name);
 		}
 
-		// Insert rules if not present
 		if (!entry.rules.empty()) {
 			std::vector<RuleValuesRepository::RuleValues> to_insert;
 
 			for (auto rule : entry.rules) {
 				rule.ruleset_id = ruleset.ruleset_id;
-				rule.notes = m_rule_manager->GetRuleNotesByName(rule.rule_name);
 
-				auto existing = RuleValuesRepository::GetWhere(
-					*m_database,
-					fmt::format(
-						"ruleset_id = {} AND rule_name = '{}'",
-						ruleset.ruleset_id,
-						Strings::Escape(rule.rule_name)
-					)
-				);
+				if (rule.notes.empty()) {
+					rule.notes = m_rule_manager->GetRuleNotesByName(rule.rule_name);
+				}
 
-				if (existing.empty()) {
+				auto key = fmt::format("{}|{}", rule.ruleset_id, rule.rule_name);
+				if (!existing_rule_keys.count(key)) {
 					to_insert.push_back(rule);
 				}
 			}
 
 			if (!to_insert.empty()) {
 				RuleValuesRepository::InsertMany(*m_database, to_insert);
-				LogInfo("Inserted [{}] new rule(s) into ruleset [{}]", to_insert.size(), ruleset.ruleset_id);
+				LogInfo("Inserted [{}] rule(s) into ruleset [{}]", to_insert.size(), ruleset.ruleset_id);
 			}
 		}
 	}
