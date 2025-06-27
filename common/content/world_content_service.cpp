@@ -383,6 +383,26 @@ void WorldContentService::SeedDefaultRulesets()
 		},
 		{
 			.rule_set = {
+				.ruleset_id = 102,
+				.name = "Ruins of Kunark",
+				.notes = "Kunark client-based ruleset. Level 60 cap until PoP.",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "",
+				.content_flags_disabled = "",
+				.min_expansion = 1,
+				.max_expansion = 2,
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "1", .notes = "Current Expansion" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "1", .notes = "Kunark Client-Based Expansion Setting" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "1", .notes = "Kunark Client-Based Expansion Setting" },
+				{ .rule_name = "Character:MaxExpLevel", .rule_value = "60", .notes = "Level 60 cap until PoP" },
+				{ .rule_name = "Character:MaxLevel", .rule_value = "60", .notes = "Level 60 cap until PoP" },
+			}
+		},
+		{
+			.rule_set = {
 				.ruleset_id = 1000,
 				.name = "Custom Boundary (Put your custom rulesets after here)",
 				.notes = "You may add your own rulesets above 1000+"
