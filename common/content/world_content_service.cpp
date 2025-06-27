@@ -320,7 +320,9 @@ bool WorldContentService::DoesZonePassContentFiltering(const ZoneRepository::Zon
 	return DoesPassContentFiltering(f);
 }
 
-void WorldContentService::LoadTargetedRulesets(Database* db)
+
+
+void WorldContentService::LoadTargetedRulesets()
 {
 	if (!m_zone_id) {
 		LogError("Zone ID is not set. Cannot load targeted rulesets.");
@@ -331,8 +333,8 @@ void WorldContentService::LoadTargetedRulesets(Database* db)
 
 	constexpr int8 EXPANSION_ZERO_VALUE = -2;
 
-	auto rules = RuleValuesRepository::GetWhere(*db, "TRUE ORDER BY ruleset_id, rule_name");
-	auto sets  = RuleSetsRepository::GetWhere(*db, "TRUE ORDER BY ruleset_id");
+	auto rules = RuleValuesRepository::GetWhere(*m_database, "TRUE ORDER BY ruleset_id, rule_name");
+	auto sets  = RuleSetsRepository::GetWhere(*m_database, "TRUE ORDER BY ruleset_id");
 	for (auto& e : sets) {
 		bool has_filters =
 			!e.zone_ids.empty() ||

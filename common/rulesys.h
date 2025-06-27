@@ -157,7 +157,7 @@ public:
 	bool UpdateInjectedRules(Database* db, const std::string& rule_set_name, bool quiet_update = false);
 	bool UpdateOrphanedRules(Database* db, bool quiet_update = false);
 	bool RestoreRuleNotes(Database* db);
-	void SetPostLoadCallback(std::function<void(Database*)> cb) {
+	void SetPostLoadCallback(std::function<void()> cb) {
 		m_post_load_callback = std::move(cb);
 	}
 
@@ -174,7 +174,7 @@ private:
 	uint32      m_RuleBoolValues[BoolRuleCount];
 	std::string m_RuleStringValues[StringRuleCount];
 
-	std::function<void(Database*)> m_post_load_callback;
+	std::function<void()> m_post_load_callback;
 
 	typedef enum {
 		IntRule,
