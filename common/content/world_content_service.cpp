@@ -359,38 +359,44 @@ void WorldContentService::SeedDefaultRulesets()
 	};
 
 	for (const auto& entry : rulesets) {
+		const auto& ruleset = entry.rule_set;
+
+		// Ensure ruleset exists
 		auto existing_sets = RuleSetsRepository::GetWhere(
 			*m_database,
-			fmt::format("ruleset_id = {}", entry.rule_set.ruleset_id)
+			fmt::format("ruleset_id = {}", ruleset.ruleset_id)
 		);
 
 		if (existing_sets.empty()) {
-			RuleSetsRepository::InsertOne(*m_database, entry.rule_set);
-			LogInfo("Inserted ruleset [{}] - {}", entry.rule_set.ruleset_id, entry.rule_set.name);
+			RuleSetsRepository::InsertOne(*m_database, ruleset);
+			LogInfo("Inserted ruleset [{}] - {}", ruleset.ruleset_id, ruleset.name);
 		}
 
+		// Insert rules if not present
 		if (!entry.rules.empty()) {
-			auto existing_rules = RuleValuesRepository::GetWhere(
-				*m_database,
-				fmt::format("ruleset_id = {}", entry.rule_set.ruleset_id)
-			);
+			std::vector<RuleValuesRepository::RuleValues> to_insert;
 
-			std::unordered_set<std::string> existing_rule_names;
-			for (const auto& r : existing_rules) {
-				existing_rule_names.insert(r.rule_name);
-			}
+			for (auto rule : entry.rules) {
+				rule.ruleset_id = ruleset.ruleset_id;
+				rule.notes = m_rule_manager->GetRuleNotesByName(rule.rule_name);
 
-			std::vector<RuleValuesRepository::RuleValues> new_rules;
-			for (auto r : entry.rules) {
-				if (existing_rule_names.count(r.rule_name)) {
-					continue;
+				auto existing = RuleValuesRepository::GetWhere(
+					*m_database,
+					fmt::format(
+						"ruleset_id = {} AND rule_name = '{}'",
+						ruleset.ruleset_id,
+						Strings::Escape(rule.rule_name)
+					)
+				);
+
+				if (existing.empty()) {
+					to_insert.push_back(rule);
 				}
-				new_rules.push_back(r);
 			}
 
-			if (!new_rules.empty()) {
-				RuleValuesRepository::InsertMany(*m_database, new_rules);
-				LogInfo("Inserted [{}] rules into ruleset [{}]", new_rules.size(), entry.rule_set.ruleset_id);
+			if (!to_insert.empty()) {
+				RuleValuesRepository::InsertMany(*m_database, to_insert);
+				LogInfo("Inserted [{}] new rule(s) into ruleset [{}]", to_insert.size(), ruleset.ruleset_id);
 			}
 		}
 	}

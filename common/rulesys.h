@@ -120,9 +120,9 @@ public:
 	static const uint32 RulesCount = IntRuleCount + RealRuleCount + BoolRuleCount + StringRuleCount;
 
 	//fetch routines, you should generally use the Rule* macros instead of this
-	int GetIntRule(IntType t) const;
-	float GetRealRule(RealType t) const;
-	bool GetBoolRule(BoolType t) const;
+	int         GetIntRule(IntType t) const;
+	float       GetRealRule(RealType t) const;
+	bool        GetBoolRule(BoolType t) const;
 	std::string GetStringRule(StringType t) const;
 
 	//management routines
@@ -134,6 +134,8 @@ public:
 	static const std::string& GetRuleNotes(RealType t) { return s_RuleInfo[static_cast<int>(t) + IntRuleCount].notes; }
 	static const std::string& GetRuleNotes(BoolType t) { return s_RuleInfo[static_cast<int>(t) + IntRuleCount + RealRuleCount].notes; }
 	static const std::string& GetRuleNotes(StringType t) { return s_RuleInfo[static_cast<int>(t) + IntRuleCount + RealRuleCount + StringRuleCount].notes; }
+	std::string GetRuleNotesByName(std::string rule_name) const;
+
 	static uint32 CountRules() { return RulesCount; }
 	static CategoryType FindCategory(const std::string& category_name);
 	bool ListRules(const std::string& category_name, std::vector<std::string>& l);
