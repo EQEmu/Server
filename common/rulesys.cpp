@@ -328,7 +328,7 @@ bool RuleManager::LoadRules(Database *db, const std::string &rule_set_name, bool
 	);
 
 	if (m_post_load_callback) {
-		m_post_load_callback(db);
+		m_post_load_callback();
 	}
 
 	return true;

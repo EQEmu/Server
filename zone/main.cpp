@@ -414,8 +414,8 @@ int main(int argc, char **argv)
 
 	ZoneEventScheduler::Instance()->SetDatabase(&database)->LoadScheduledEvents();
 	RuleManager::Instance()->SetPostLoadCallback(
-		[&](Database* db) {
-			WorldContentService::Instance()->LoadTargetedRulesets(db);
+		[&]() {
+			WorldContentService::Instance()->LoadTargetedRulesets();
 		}
 	);
 

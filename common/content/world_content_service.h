@@ -82,7 +82,7 @@ namespace Expansion {
 		"Empires of Kunark",
 		"Ring of Scale",
 		"The Burning Lands",
-		"Torment of Velious",
+		"Torment of Velious"
 	};
 }
 
@@ -194,7 +194,7 @@ public:
 	bool IsInPublicStaticInstance(uint32 instance_id);
 
 	// targeted rulesets
-	void LoadTargetedRulesets(Database* db);
+	void LoadTargetedRulesets();
 	inline void SetZoneId(int zone_id) { m_zone_id = zone_id; }
 	inline void SetInstanceVersion(int instance_version) { m_instance_version = instance_version; }
 
