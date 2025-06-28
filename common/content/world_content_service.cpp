@@ -577,7 +577,7 @@ void WorldContentService::SeedDefaultRulesets()
 	};
 
 	// Load all existing rule_sets once
-	std::unordered_set<uint8_t> existing_ruleset_ids;
+	std::unordered_set<uint32_t> existing_ruleset_ids;
 	for (const auto& r : RuleSetsRepository::All(*m_database)) {
 		existing_ruleset_ids.insert(r.ruleset_id);
 	}
