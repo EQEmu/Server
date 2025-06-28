@@ -566,7 +566,7 @@ void WorldContentService::SeedDefaultRulesets()
 		// non-era rulesets
 		{
 			.rule_set = {
-				.ruleset_id = 100,
+				.ruleset_id = 200,
 				.name = "Double Experience",
 				.notes = "Doubles EXP globally"
 			},
