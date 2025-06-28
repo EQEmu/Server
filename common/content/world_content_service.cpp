@@ -344,13 +344,13 @@ void WorldContentService::SeedDefaultRulesets()
 			.rule_set = {
 				.ruleset_id = 101,
 				.name = "Original (Classic)",
-				.notes = "Classic client-based ruleset",
 				.zone_ids = "",
 				.instance_versions = "",
 				.content_flags = "",
 				.content_flags_disabled = "",
 				.min_expansion = 0,
 				.max_expansion = 1,
+				.notes = "Classic client-based ruleset",
 			},
 			.rules = {
 				{ .rule_name = "Character:EnableXTargetting", .rule_value = "false", .notes = "Added in Call of the Forsaken" },
@@ -385,13 +385,13 @@ void WorldContentService::SeedDefaultRulesets()
 			.rule_set = {
 				.ruleset_id = 102,
 				.name = "Ruins of Kunark",
-				.notes = "Kunark client-based ruleset. Level 60 cap until PoP.",
 				.zone_ids = "",
 				.instance_versions = "",
 				.content_flags = "",
 				.content_flags_disabled = "",
 				.min_expansion = 1,
 				.max_expansion = 2,
+				.notes = "Kunark client-based ruleset. Level 60 cap until PoP.",
 			},
 			.rules = {
 				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "1", .notes = "Current Expansion" },
