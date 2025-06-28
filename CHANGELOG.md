@@ -1,3 +1,18 @@
+## [23.8.1] 6/28/2025
+
+### Crash Fix
+
+* Fix Possible Crashes with Raid Methods ([#4955](https://github.com/EQEmu/Server/pull/4955)) @Kinglykrab 2025-06-26
+
+### Databuckets
+
+* Revert Caching Changes of #4917 ([#4957](https://github.com/EQEmu/Server/pull/4957)) @Akkadius 2025-06-28
+
+### Fixes
+
+* Fix FindCharacter Using content_db ([#4956](https://github.com/EQEmu/Server/pull/4956)) @Kinglykrab 2025-06-26
+* Fix Hero Forge on Character Select ([#4954](https://github.com/EQEmu/Server/pull/4954)) @Kinglykrab 2025-06-26
+
 ## [23.8.0] 6/25/2025
 
 ### API
