@@ -394,6 +394,169 @@ void WorldContentService::SeedDefaultRulesets()
 		},
 		{
 			.rule_set = {
+				.ruleset_id = 102,
+				.name = "Scars of Velious",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "",
+				.content_flags_disabled = "",
+				.min_expansion = 2,
+				.max_expansion = 3,
+				.notes = "Velious client-based ruleset. Level 60 cap until PoP."
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "2", .notes = "Current Expansion" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "3", .notes = "Velious Client-Based Expansion Setting" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "3", .notes = "Velious Client-Based Expansion Setting" },
+				{ .rule_name = "Character:MaxExpLevel", .rule_value = "60", .notes = "Level 60 cap until PoP" },
+				{ .rule_name = "Character:MaxLevel", .rule_value = "60", .notes = "Level 60 cap until PoP" },
+			}
+		},
+		{
+			.rule_set = {
+				.ruleset_id = 103,
+				.name = "Shadows of Luclin",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "",
+				.content_flags_disabled = "",
+				.min_expansion = 3,
+				.max_expansion = 4,
+				.notes = "Luclin client-based ruleset. Level 60 cap. Added Wiz crits."
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "3", .notes = "Current Expansion" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "7", .notes = "Luclin Client-Based Expansion Setting" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "7", .notes = "Luclin Client-Based Expansion Setting" },
+				{ .rule_name = "Spells:WizCritLevel", .rule_value = "12", .notes = "Wizard non-AA Criticals Not added until Luclin" },
+			}
+		},
+		{
+			.rule_set = {
+				.ruleset_id = 104,
+				.name = "Planes of Power",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "",
+				.content_flags_disabled = "",
+				.min_expansion = 4,
+				.max_expansion = 5,
+				.notes = "PoP client-based ruleset. Level 65 cap. Stat cap increased. Bind Wound changed."
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "4", .notes = "Current Expansion" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "15", .notes = "Planes of Power Client-Based Expansion Setting" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "15", .notes = "Planes of Power Client-Based Expansion Setting" },
+				{ .rule_name = "Character:MaxExpLevel", .rule_value = "65", .notes = "Level 65 cap until Omens of War" },
+				{ .rule_name = "Character:MaxLevel", .rule_value = "65", .notes = "Level 65 cap until Omens of War" },
+				{ .rule_name = "Character:StatCap", .rule_value = "305", .notes = "Stat cap raised from 255 to 305 with PoP" },
+				{ .rule_name = "Character:UseOldBindWound", .rule_value = "false", .notes = "PoP introduced a more effective bind wound system" },
+			}
+		},
+		{
+			.rule_set = {
+				.ruleset_id = 105,
+				.name = "Legacy of Ykesha",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "",
+				.content_flags_disabled = "",
+				.min_expansion = 5,
+				.max_expansion = 6,
+				.notes = "LoY client-based ruleset. Shared bank introduced. Stat cap raised to 350."
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "5", .notes = "Current Expansion" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "31", .notes = "Legacy of Ykesha Client-Based Expansion Setting" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "31", .notes = "Legacy of Ykesha Client-Based Expansion Setting" },
+				{ .rule_name = "Character:MaxExpLevel", .rule_value = "65", .notes = "Level 65 cap until Omens of War" },
+				{ .rule_name = "Character:MaxLevel", .rule_value = "65", .notes = "Level 65 cap until Omens of War" },
+				{ .rule_name = "Character:SharedBankPlat", .rule_value = "true", .notes = "Shared bank enabled in Legacy of Ykesha" },
+				{ .rule_name = "Character:StatCap", .rule_value = "350", .notes = "Stat cap increased to 350 with LoY (was 305 in PoP)" },
+			}
+		},
+		{
+			.rule_set = {
+				.ruleset_id = 106,
+				.name = "Lost Dungeons of Norrath",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "",
+				.content_flags_disabled = "",
+				.min_expansion = 6,
+				.max_expansion = 7,
+				.notes = "LDoN client-based ruleset. Stat cap raised to 400."
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "6", .notes = "Current Expansion" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "63", .notes = "Lost Dungeons of Norrath Client-Based Expansion Setting" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "63", .notes = "Lost Dungeons of Norrath Client-Based Expansion Setting" },
+				{ .rule_name = "Character:StatCap", .rule_value = "400", .notes = "Stat cap increased to 400 with LDoN (was 350 in LoY)" },
+			}
+		},
+		{
+			.rule_set = {
+				.ruleset_id = 107,
+				.name = "Gates of Discord",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "",
+				.content_flags_disabled = "",
+				.min_expansion = 7,
+				.max_expansion = 8,
+				.notes = "GoD client-based ruleset. Voice macros introduced."
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "7", .notes = "Current Expansion" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "127", .notes = "Gates of Discord Client-Based Expansion Setting" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "127", .notes = "Gates of Discord Client-Based Expansion Setting" },
+				{ .rule_name = "Chat:EnableVoiceMacros", .rule_value = "true", .notes = "Enable Voice Macros - Introduced in Gates of Discord" },
+			}
+		},
+		{
+			.rule_set = {
+				.ruleset_id = 108,
+				.name = "Omens of War",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "",
+				.content_flags_disabled = "",
+				.min_expansion = 8,
+				.max_expansion = 9,
+				.notes = "OoW client-based ruleset. Level cap raised to 70. Bard AE nerfed. Task system enabled."
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "8", .notes = "Current Expansion" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "255", .notes = "Omens of War Client-Based Expansion Setting" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "255", .notes = "Omens of War Client-Based Expansion Setting" },
+				{ .rule_name = "Spells:PreNerfBardAEDoT", .rule_value = "false", .notes = "Bard AE Nerf" },
+				{ .rule_name = "TaskSystem:EnableTaskSystem", .rule_value = "true", .notes = "Task system was introduced in Omens of War" },
+				{ .rule_name = "Character:MaxExpLevel", .rule_value = "70", .notes = "Level 70 cap until The Serpent's Spine" },
+				{ .rule_name = "Character:MaxLevel", .rule_value = "70", .notes = "Level 70 cap until The Serpent's Spine" },
+			}
+		},
+		{
+			.rule_set = {
+				.ruleset_id = 109,
+				.name = "Dragons of Norrath",
+				.zone_ids = "",
+				.instance_versions = "",
+				.content_flags = "don_nest",
+				.content_flags_disabled = "",
+				.min_expansion = 9,
+				.max_expansion = 10,
+				.notes = "DoN client-based ruleset. Mail system introduced. Accursed Nest unlockable."
+			},
+			.rules = {
+				{ .rule_name = "Expansion:CurrentExpansion", .rule_value = "9", .notes = "Current Expansion" },
+				{ .rule_name = "World:CharacterSelectExpansionSettings", .rule_value = "511", .notes = "Dragons of Norrath Client-Based Expansion Setting" },
+				{ .rule_name = "World:ExpansionSettings", .rule_value = "511", .notes = "Dragons of Norrath Client-Based Expansion Setting" },
+				{ .rule_name = "Mail:EnableMailSystem", .rule_value = "true", .notes = "Mail System not added until Dragons of Norrath" },
+			}
+		},
+
+		{
+			.rule_set = {
 				.ruleset_id = 1000,
 				.name = "Custom Boundary (Put your custom rulesets after here)",
 				.notes = "You may add your own rulesets above 1000+"
