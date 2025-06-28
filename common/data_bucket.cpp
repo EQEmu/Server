@@ -19,37 +19,6 @@ extern WorldDatabase database;
 #error "You must define either ZONE or WORLD"
 #endif
 
-// Key: compound cache key (e.g., account_id|character_id|zone_id|instance_id|top_key|full_key)
-// Value: resolved DataBuckets with extracted nested value
-static std::unordered_map<std::string, DataBucketsRepository::DataBuckets> g_nested_bucket_cache;
-
-static std::string MakeNestedCacheKey(const DataBucketKey &k, const std::string &full_key) {
-	return fmt::format(
-		"account_id:{}|character_id:{}|npc_id:{}|bot_id:{}|zone_id:{}|instance_id:{}|top_key:{}|full_key:{}",
-		k.account_id, k.character_id, k.npc_id, k.bot_id, k.zone_id, k.instance_id,
-		Strings::Split(full_key, NESTED_KEY_DELIMITER).front(),
-		full_key
-	);
-}
-
-static std::string MakeNestedCacheKeyPrefix(const DataBucketKey &k, const std::string &top_key) {
-	return fmt::format(
-		"account_id:{}|character_id:{}|npc_id:{}|bot_id:{}|zone_id:{}|instance_id:{}|top_key:{}|",
-		k.account_id, k.character_id, k.npc_id, k.bot_id, k.zone_id, k.instance_id, top_key
-	);
-}
-
-static void InvalidateNestedCacheForKey(const DataBucketKey &k, const std::string &top_key) {
-	std::string prefix = MakeNestedCacheKeyPrefix(k, top_key);
-	for (auto it = g_nested_bucket_cache.begin(); it != g_nested_bucket_cache.end(); ) {
-		if (it->first.find(prefix) == 0) {
-			it = g_nested_bucket_cache.erase(it);
-		} else {
-			++it;
-		}
-	}
-}
-
 void DataBucket::SetData(const std::string &bucket_key, const std::string &bucket_value, std::string expires_time)
 {
 	auto k = DataBucketKey{
@@ -167,15 +136,6 @@ void DataBucket::SetData(const DataBucketKey &k_)
 		// Serialize JSON back to string
 		b.value = json_value.dump();
 		b.key_ = top_key; // Use the top-level key
-
-		if (CanCache(k_)) {
-			InvalidateNestedCacheForKey(k_, top_key);
-			std::string nested_cache_key = MakeNestedCacheKey(k_, k_.key);
-			auto extracted = ExtractNestedValue(b, k_.key);
-			if (extracted.id > 0) {
-				g_nested_bucket_cache[nested_cache_key] = extracted;
-			}
-		}
 	}
 
 	if (bucket_id) {
@@ -291,27 +251,12 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 				LogDataBuckets("Returning key [{}] value [{}] from cache", e.key_, e.value);
 
 				if (is_nested_key && !k_.key.empty()) {
-					std::string nested_cache_key = MakeNestedCacheKey(k_, k.key);
-
-					auto it = g_nested_bucket_cache.find(nested_cache_key);
-					if (it != g_nested_bucket_cache.end()) {
-						LogDataBucketsDetail("Nested cache hit for key [{}]", nested_cache_key);
-						return it->second;
-					}
-
-					auto extracted = ExtractNestedValue(e, k_.key);
-					if (extracted.id > 0) {
-						g_nested_bucket_cache[nested_cache_key] = extracted;
-					}
-					return extracted;
+					return ExtractNestedValue(e, k_.key);
 				}
 
 				return e;
 			}
 		}
-
-		// if we can cache its assumed we didn't load this into the cache so we should not return a miss
-		return DataBucketsRepository::NewEntity(); // Not found in cache
 	}
 
 	// Fetch the value from the database
@@ -370,42 +315,23 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k_, 
 	}
 
 	// Add the value to the cache if it doesn't exist
-	// If cacheable and not found in cache, short-circuit and assume it doesn't exist
 	if (can_cache) {
-		bool found_in_cache = false;
+		bool has_cache = false;
 		for (const auto &e : g_data_bucket_cache) {
-			if (CheckBucketMatch(e, k)) {
-				found_in_cache = true;
+			if (e.id == bucket.id) {
+				has_cache = true;
 				break;
 			}
 		}
 
-		if (!found_in_cache) {
-			LogDataBuckets("Cache miss for key [{}] - skipping DB due to CanCache", k.key);
-			return DataBucketsRepository::NewEntity();
+		if (!has_cache) {
+			g_data_bucket_cache.emplace_back(bucket);
 		}
 	}
 
 	// Handle nested key extraction
 	if (is_nested_key && !k_.key.empty()) {
-		if (CanCache(k_)) {
-			std::string nested_cache_key = MakeNestedCacheKey(k_, k.key);
-
-			auto it = g_nested_bucket_cache.find(nested_cache_key);
-			if (it != g_nested_bucket_cache.end()) {
-				LogDataBucketsDetail("Nested cache hit for key [{}]", nested_cache_key);
-				return it->second;
-			}
-
-			auto extracted = ExtractNestedValue(bucket, k_.key);
-			if (extracted.id > 0) {
-				g_nested_bucket_cache[nested_cache_key] = extracted;
-			}
-			return extracted;
-		} else {
-			// Not cacheable, just extract and return
-			return ExtractNestedValue(bucket, k_.key);
-		}
+		return ExtractNestedValue(bucket, k_.key);
 	}
 
 	return bucket;
