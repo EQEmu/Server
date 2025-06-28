@@ -330,19 +330,10 @@ void WorldContentService::SeedDefaultRulesets()
 	};
 
 	std::vector<RuleSet> rulesets = {
+		// era based rulesets
 		{
 			.rule_set = {
 				.ruleset_id = 100,
-				.name = "Double Experience",
-				.notes = "Doubles EXP globally"
-			},
-			.rules = {
-				{ .rule_name = "Character:FinalExpMultiplier", .rule_value = "2" }
-			}
-		},
-		{
-			.rule_set = {
-				.ruleset_id = 101,
 				.name = "Original (Classic)",
 				.zone_ids = "",
 				.instance_versions = "",
@@ -383,7 +374,7 @@ void WorldContentService::SeedDefaultRulesets()
 		},
 		{
 			.rule_set = {
-				.ruleset_id = 102,
+				.ruleset_id = 101,
 				.name = "Ruins of Kunark",
 				.zone_ids = "",
 				.instance_versions = "",
@@ -407,7 +398,19 @@ void WorldContentService::SeedDefaultRulesets()
 				.name = "Custom Boundary (Put your custom rulesets after here)",
 				.notes = "You may add your own rulesets above 1000+"
 			},
-		}
+		},
+
+		// non-era rulesets
+		{
+			.rule_set = {
+				.ruleset_id = 100,
+				.name = "Double Experience",
+				.notes = "Doubles EXP globally"
+			},
+			.rules = {
+				{.rule_name = "Character:FinalExpMultiplier", .rule_value = "2"}
+			}
+		},
 	};
 
 	// Load all existing rule_sets once
