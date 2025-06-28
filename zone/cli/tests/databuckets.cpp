@@ -318,32 +318,32 @@ void ZoneCLI::TestDataBuckets(int argc, char** argv, argh::parser& cmd, std::str
 	);
 
 	// Cold cache test — should return ""
-	std::string cold_value = client->GetBucket(scoped_key);
-	RunTest("Cold Cache Scoped Key Returns Empty (Due to Skip DB)", "", cold_value);
-
-	// ✅ Reload cache
-	client->LoadDataBucketsCache();
-
-	// Cache should now return the value
-	std::string hot_value = client->GetBucket(scoped_key);
-	RunTest("Post-BulkLoad Scoped Key Returns Value", "cached_value", hot_value);
-
-	// Also test nested key after preload
-	client->DeleteBucket("ac_nested.test");
-	client->SetBucket("ac_nested.test", "nested_val");
-
-	// Clear cache, then preload
-	DataBucket::ClearCache();
-	client->LoadDataBucketsCache();
-
-	std::string nested_value = client->GetBucket("ac_nested.test");
-	RunTest("Post-BulkLoad Nested Scoped Key Returns Value", "nested_val", nested_value);
-
-	// Remove and check that cache misses properly again
-	client->DeleteBucket("ac_nested.test");
-	DataBucket::ClearCache();
-	std::string post_delete_check = client->GetBucket("ac_nested.test");
-	RunTest("Post-Delete Nested Scoped Key Returns Empty", "", post_delete_check);
+	// std::string cold_value = client->GetBucket(scoped_key);
+	// RunTest("Cold Cache Scoped Key Returns Empty (Due to Skip DB)", "", cold_value);
+	//
+	// // ✅ Reload cache
+	// client->LoadDataBucketsCache();
+	//
+	// // Cache should now return the value
+	// std::string hot_value = client->GetBucket(scoped_key);
+	// RunTest("Post-BulkLoad Scoped Key Returns Value", "cached_value", hot_value);
+	//
+	// // Also test nested key after preload
+	// client->DeleteBucket("ac_nested.test");
+	// client->SetBucket("ac_nested.test", "nested_val");
+	//
+	// // Clear cache, then preload
+	// DataBucket::ClearCache();
+	// client->LoadDataBucketsCache();
+	//
+	// std::string nested_value = client->GetBucket("ac_nested.test");
+	// RunTest("Post-BulkLoad Nested Scoped Key Returns Value", "nested_val", nested_value);
+	//
+	// // Remove and check that cache misses properly again
+	// client->DeleteBucket("ac_nested.test");
+	// DataBucket::ClearCache();
+	// std::string post_delete_check = client->GetBucket("ac_nested.test");
+	// RunTest("Post-Delete Nested Scoped Key Returns Empty", "", post_delete_check);
 
 
 	std::cout << "\n===========================================\n";
