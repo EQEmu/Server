@@ -584,6 +584,177 @@ inline RuleSet GetEraOverridesRuleset()
 	};
 }
 
+inline RuleSet GetDepthsOfDarkhollowRuleset()
+{
+	return {
+		.rule_set = {
+			.ruleset_id = 110,
+			.name = "Depths of Darkhollow",
+			.zone_ids = "",
+			.instance_versions = "",
+			.content_flags = "",
+			.content_flags_disabled = "",
+			.min_expansion = Expansion::DepthsOfDarkhollow,
+			.max_expansion = Expansion::EXPANSION_MAX,
+			.notes = "DoD client-based ruleset. Introduced Shroud system.",
+		},
+		.rules = {
+			{
+				.rule_name = "Expansion:CurrentExpansion",
+				.rule_value = "10",
+				.notes = "Current Expansion",
+			},
+			{
+				.rule_name = "World:CharacterSelectExpansionSettings",
+				.rule_value = "1023",
+				.notes = "Depths of Darkhollow Client-Based Expansion Setting",
+			},
+			{
+				.rule_name = "World:ExpansionSettings",
+				.rule_value = "1023",
+				.notes = "Depths of Darkhollow Client-Based Expansion Setting",
+			},
+			{
+				.rule_name = "Character:EnableShroudSystem",
+				.rule_value = "true",
+				.notes = "Shroud system was introduced in Depths of Darkhollow",
+			},
+		}
+	};
+}
+
+inline RuleSet GetProphecyOfRoRuleset()
+{
+	return {
+		.rule_set = {
+			.ruleset_id = 111,
+			.name = "Prophecy of Ro",
+			.zone_ids = "",
+			.instance_versions = "",
+			.content_flags = "",
+			.content_flags_disabled = "",
+			.min_expansion = Expansion::ProphecyOfRo,
+			.max_expansion = Expansion::EXPANSION_MAX,
+			.notes = "PoR client-based ruleset. Introduced aura system.",
+		},
+		.rules = {
+			{
+				.rule_name = "Expansion:CurrentExpansion",
+				.rule_value = "11",
+				.notes = "Current Expansion",
+			},
+			{
+				.rule_name = "World:CharacterSelectExpansionSettings",
+				.rule_value = "2047",
+				.notes = "Prophecy of Ro Client-Based Expansion Setting",
+			},
+			{
+				.rule_name = "World:ExpansionSettings",
+				.rule_value = "2047",
+				.notes = "Prophecy of Ro Client-Based Expansion Setting",
+			},
+			{
+				.rule_name = "Character:EnableAuraSystem",
+				.rule_value = "true",
+				.notes = "Aura system introduced in Prophecy of Ro",
+			},
+		}
+	};
+}
+
+inline RuleSet GetTheSerpentsSpineRuleset()
+{
+	return {
+		.rule_set = {
+			.ruleset_id = 112,
+			.name = "The Serpent's Spine",
+			.zone_ids = "",
+			.instance_versions = "",
+			.content_flags = "",
+			.content_flags_disabled = "",
+			.min_expansion = Expansion::TheSerpentsSpine,
+			.max_expansion = Expansion::EXPANSION_MAX,
+			.notes = "TSS client-based ruleset. Level cap raised to 75. Out-of-combat regen enabled.",
+		},
+		.rules = {
+			{
+				.rule_name = "Expansion:CurrentExpansion",
+				.rule_value = "12",
+				.notes = "Current Expansion",
+			},
+			{
+				.rule_name = "World:CharacterSelectExpansionSettings",
+				.rule_value = "4095",
+				.notes = "The Serpent's Spine Client-Based Expansion Setting",
+			},
+			{
+				.rule_name = "World:ExpansionSettings",
+				.rule_value = "4095",
+				.notes = "The Serpent's Spine Client-Based Expansion Setting",
+			},
+			{
+				.rule_name = "Character:MaxExpLevel",
+				.rule_value = "75",
+				.notes = "Level 75 cap until The Buried Sea",
+			},
+			{
+				.rule_name = "Character:MaxLevel",
+				.rule_value = "75",
+				.notes = "Level 75 cap until The Buried Sea",
+			},
+			{
+				.rule_name = "Character:RestRegenEnabled",
+				.rule_value = "true",
+				.notes = "Out of combat regeneration enabled in The Serpent's Spine",
+			},
+		}
+	};
+}
+
+inline RuleSet GetTheBuriedSeaRuleset()
+{
+	return {
+		.rule_set = {
+			.ruleset_id = 113,
+			.name = "The Buried Sea",
+			.zone_ids = "",
+			.instance_versions = "",
+			.content_flags = "",
+			.content_flags_disabled = "",
+			.min_expansion = Expansion::TheBuriedSea,
+			.max_expansion = Expansion::EXPANSION_MAX,
+			.notes = "TBS client-based ruleset. Fellowship and item aug system added.",
+		},
+		.rules = {
+			{
+				.rule_name = "Expansion:CurrentExpansion",
+				.rule_value = "13",
+				.notes = "Current Expansion",
+			},
+			{
+				.rule_name = "World:CharacterSelectExpansionSettings",
+				.rule_value = "8191",
+				.notes = "The Buried Sea Client-Based Expansion Setting",
+			},
+			{
+				.rule_name = "World:ExpansionSettings",
+				.rule_value = "8191",
+				.notes = "The Buried Sea Client-Based Expansion Setting",
+			},
+			{
+				.rule_name = "Fellowship:Enabled",
+				.rule_value = "true",
+				.notes = "Fellowships were introduced in The Buried Sea",
+			},
+			{
+				.rule_name = "Items:AllowItemAugmenting",
+				.rule_value = "true",
+				.notes = "Item augmenting system introduced in The Buried Sea",
+			},
+		}
+	};
+}
+
 inline std::vector<RuleSet> GetCustomRulesets()
 {
 	return {
@@ -635,6 +806,10 @@ inline std::vector<RuleSet> GetDefaultRulesets()
 		GetGatesOfDiscordRuleset(),
 		GetOmensOfWarRuleset(),
 		GetDragonsOfNorrathRuleset(),
+		GetDepthsOfDarkhollowRuleset(),
+		GetProphecyOfRoRuleset(),
+		GetTheSerpentsSpineRuleset(),
+		GetTheBuriedSeaRuleset(),
 		GetEraOverridesRuleset()
 	};
 
