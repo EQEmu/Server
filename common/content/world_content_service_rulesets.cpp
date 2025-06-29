@@ -649,70 +649,95 @@ void WorldContentService::SeedDefaultRulesets() const
 {
 	LogInfo("Seeding default rulesets");
 
-	// Load existing rule_sets into a map for fast lookup
-	std::unordered_map<uint32_t, RuleSetsRepository::RuleSets> existing_rulesets_map;
+	// Load existing rule_sets into a map
+	std::unordered_map<uint32_t, RuleSetsRepository::RuleSets> existing_rulesets;
 	for (const auto& r : RuleSetsRepository::All(*m_database)) {
-		existing_rulesets_map[r.ruleset_id] = r;
+		existing_rulesets[r.ruleset_id] = r;
 	}
 
-	// Load all existing rule_values once
-	std::unordered_set<std::string> existing_rule_keys;
+	// Load existing rule_values into a map<ruleset_id, map<rule_name, RuleValues>>
+	std::unordered_map<uint32_t, std::unordered_map<std::string, RuleValuesRepository::RuleValues>> existing_rule_values;
 	for (const auto& r : RuleValuesRepository::All(*m_database)) {
-		existing_rule_keys.insert(fmt::format("{}|{}", r.ruleset_id, r.rule_name));
+		existing_rule_values[r.ruleset_id][r.rule_name] = r;
 	}
+
+	std::vector<RuleSetsRepository::RuleSets> rule_sets_to_insert;
+	std::vector<RuleSetsRepository::RuleSets> rule_sets_to_update;
+	std::vector<RuleValuesRepository::RuleValues> rule_values_to_insert;
+	std::unordered_map<uint32_t, std::vector<std::string>> rule_values_to_delete;
 
 	for (const auto& entry : GetDefaultRulesets()) {
-		const auto& new_ruleset = entry.rule_set;
+		const auto& rs = entry.rule_set;
+		const auto existing_it = existing_rulesets.find(rs.ruleset_id);
 
-		bool should_insert = !existing_rulesets_map.count(new_ruleset.ruleset_id);
-		bool should_update = false;
-
-		if (!should_insert) {
-			const auto& existing = existing_rulesets_map[new_ruleset.ruleset_id];
-
-			// Compare metadata fields
-			should_update = (
-				new_ruleset.name != existing.name ||
-				new_ruleset.zone_ids != existing.zone_ids ||
-				new_ruleset.instance_versions != existing.instance_versions ||
-				new_ruleset.content_flags != existing.content_flags ||
-				new_ruleset.content_flags_disabled != existing.content_flags_disabled ||
-				new_ruleset.min_expansion != existing.min_expansion ||
-				new_ruleset.max_expansion != existing.max_expansion ||
-				new_ruleset.notes != existing.notes
-			);
+		if (existing_it == existing_rulesets.end()) {
+			rule_sets_to_insert.push_back(rs);
 		}
-
-		if (should_insert) {
-			RuleSetsRepository::InsertOne(*m_database, new_ruleset);
-			LogInfo("Inserted ruleset [{}] {}", new_ruleset.ruleset_id, new_ruleset.name);
-		}
-		else if (should_update) {
-			RuleSetsRepository::UpdateOne(*m_database, new_ruleset);
-			LogInfo("Updated ruleset metadata [{}] {}", new_ruleset.ruleset_id, new_ruleset.name);
-		}
-
-		if (!entry.rules.empty()) {
-			std::vector<RuleValuesRepository::RuleValues> to_insert;
-
-			for (auto rule : entry.rules) {
-				rule.ruleset_id = new_ruleset.ruleset_id;
-
-				if (rule.notes.empty()) {
-					rule.notes = m_rule_manager->GetRuleNotesByName(rule.rule_name);
-				}
-
-				auto key = fmt::format("{}|{}", rule.ruleset_id, rule.rule_name);
-				if (!existing_rule_keys.count(key)) {
-					to_insert.push_back(rule);
-				}
-			}
-
-			if (!to_insert.empty()) {
-				RuleValuesRepository::InsertMany(*m_database, to_insert);
-				LogInfo("Inserted [{}] rule(s) into ruleset [{}]", to_insert.size(), new_ruleset.ruleset_id);
+		else {
+			const auto& existing = existing_it->second;
+			if (rs.name != existing.name ||
+			    rs.zone_ids != existing.zone_ids ||
+			    rs.instance_versions != existing.instance_versions ||
+			    rs.content_flags != existing.content_flags ||
+			    rs.content_flags_disabled != existing.content_flags_disabled ||
+			    rs.min_expansion != existing.min_expansion ||
+			    rs.max_expansion != existing.max_expansion ||
+			    rs.notes != existing.notes) {
+				rule_sets_to_update.push_back(rs);
 			}
 		}
+
+		std::unordered_set<std::string> defined_rule_names;
+
+		for (auto rule : entry.rules) {
+			rule.ruleset_id = rs.ruleset_id;
+
+			if (rule.notes.empty()) {
+				rule.notes = m_rule_manager->GetRuleNotesByName(rule.rule_name);
+			}
+
+			defined_rule_names.insert(rule.rule_name);
+
+			auto& existing_rules = existing_rule_values[rs.ruleset_id];
+			if (existing_rules.find(rule.rule_name) == existing_rules.end()) {
+				rule_values_to_insert.push_back(rule);
+			}
+		}
+
+		for (const auto& [rule_name, _] : existing_rule_values[rs.ruleset_id]) {
+			if (!defined_rule_names.count(rule_name)) {
+				rule_values_to_delete[rs.ruleset_id].push_back(rule_name);
+			}
+		}
+	}
+
+	// Insert new rule sets
+	for (const auto& rs : rule_sets_to_insert) {
+		RuleSetsRepository::InsertOne(*m_database, rs);
+		LogInfo("Inserted ruleset [{}] {}", rs.ruleset_id, rs.name);
+	}
+
+	// Update modified rule sets
+	for (const auto& rs : rule_sets_to_update) {
+		RuleSetsRepository::UpdateOne(*m_database, rs);
+		LogInfo("Updated ruleset metadata [{}] {}", rs.ruleset_id, rs.name);
+	}
+
+	// Insert new rule values
+	if (!rule_values_to_insert.empty()) {
+		RuleValuesRepository::InsertMany(*m_database, rule_values_to_insert);
+		LogInfo("Inserted [{}] new rule(s)]", rule_values_to_insert.size());
+	}
+
+	// Delete obsolete rule values in batches
+	for (const auto& [ruleset_id, rule_names] : rule_values_to_delete) {
+		if (rule_names.empty()) continue;
+
+		std::string in_clause = "'" + Strings::Join(rule_names, "','") + "'";
+		std::string where = fmt::format("ruleset_id = {} AND rule_name IN ({})", ruleset_id, in_clause);
+
+		int removed = RuleValuesRepository::DeleteWhere(*m_database, where);
+		LogInfo("Deleted [{}] obsolete rule(s) from ruleset [{}]: [{}]", removed, ruleset_id, Strings::Join(rule_names, ", "));
 	}
 }
 
