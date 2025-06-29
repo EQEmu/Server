@@ -8,8 +8,6 @@ struct RuleSet {
 	std::vector<RuleValuesRepository::RuleValues> rules;
 };
 
-constexpr int8 EXPANSION_ZERO_VALUE = -2;
-
 inline RuleSet GetClassicRuleset()
 {
 	return {
@@ -20,8 +18,8 @@ inline RuleSet GetClassicRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 0,
-			.max_expansion = 0,
+			.min_expansion = Expansion::Classic,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "Classic client-based ruleset",
 		},
 		.rules = {
@@ -169,8 +167,8 @@ inline RuleSet GetKunarkRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 1,
-			.max_expansion = 1,
+			.min_expansion = Expansion::TheRuinsOfKunark,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "Kunark client-based ruleset. Level 60 cap until PoP.",
 		},
 		.rules = {
@@ -213,8 +211,8 @@ inline RuleSet GetVeliousRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 2,
-			.max_expansion = 2,
+			.min_expansion = Expansion::TheScarsOfVelious,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "Velious client-based ruleset. Level 60 cap until PoP."
 		},
 		.rules = {
@@ -257,8 +255,8 @@ inline RuleSet GetLuclinRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 3,
-			.max_expansion = 3,
+			.min_expansion = Expansion::TheShadowsOfLuclin,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "Luclin client-based ruleset. Level 60 cap. Added Wiz crits."
 		},
 		.rules = {
@@ -296,8 +294,8 @@ inline RuleSet GetPlanesRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 4,
-			.max_expansion = 4,
+			.min_expansion = Expansion::ThePlanesOfPower,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "PoP client-based ruleset. Level 65 cap. Stat cap increased. Bind Wound changed."
 		},
 		.rules = {
@@ -351,8 +349,8 @@ inline RuleSet GetLegacyOfYkeshaRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 5,
-			.max_expansion = 5,
+			.min_expansion = Expansion::TheLegacyOfYkesha,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "LoY client-based ruleset. Shared bank introduced. Stat cap raised to 350."
 		},
 		.rules = {
@@ -405,8 +403,8 @@ inline RuleSet GetLDoNRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 6,
-			.max_expansion = 6,
+			.min_expansion = Expansion::LostDungeonsOfNorrath,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "LDoN client-based ruleset. Stat cap raised to 400."
 		},
 		.rules = {
@@ -444,8 +442,8 @@ inline RuleSet GetGatesOfDiscordRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 7,
-			.max_expansion = 7,
+			.min_expansion = Expansion::GatesOfDiscord,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "GoD client-based ruleset. Voice macros introduced."
 		},
 		.rules = {
@@ -483,8 +481,8 @@ inline RuleSet GetOmensOfWarRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 8,
-			.max_expansion = 8,
+			.min_expansion = Expansion::OmensOfWar,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "OoW client-based ruleset. Level cap raised to 70. Bard AE nerfed. Task system enabled."
 		},
 		.rules = {
@@ -537,8 +535,8 @@ inline RuleSet GetDragonsOfNorrathRuleset()
 			.instance_versions = "",
 			.content_flags = "",
 			.content_flags_disabled = "",
-			.min_expansion = 9,
-			.max_expansion = 9,
+			.min_expansion = Expansion::DragonsOfNorrath,
+			.max_expansion = Expansion::EXPANSION_MAX,
 			.notes = "DoN client-based ruleset. Mail system introduced. Accursed Nest unlockable."
 		},
 		.rules = {
@@ -577,8 +575,8 @@ inline std::vector<RuleSet> GetCustomRulesets()
 				.instance_versions = "",
 				.content_flags = "",
 				.content_flags_disabled = "",
-				.min_expansion = EXPANSION_ZERO_VALUE,
-				.max_expansion = EXPANSION_ZERO_VALUE,
+				.min_expansion = Expansion::EXPANSION_ZERO_VALUE,
+				.max_expansion = Expansion::EXPANSION_ZERO_VALUE,
 				.notes = "Doubles EXP globally",
 			},
 			.rules = {
@@ -596,8 +594,8 @@ inline std::vector<RuleSet> GetCustomRulesets()
 				.instance_versions = "",
 				.content_flags = "",
 				.content_flags_disabled = "",
-				.min_expansion = EXPANSION_ZERO_VALUE,
-				.max_expansion = EXPANSION_ZERO_VALUE,
+				.min_expansion = Expansion::EXPANSION_ZERO_VALUE,
+				.max_expansion = Expansion::EXPANSION_ZERO_VALUE,
 				.notes = "You may add your own rulesets above 1000+"
 			},
 		},
@@ -630,10 +628,10 @@ void WorldContentService::SeedDefaultRulesets() const
 {
 	LogInfo("Seeding default rulesets");
 
-	// Load all existing rule_sets once
-	std::unordered_set<uint32_t> existing_ruleset_ids;
+	// Load existing rule_sets into a map for fast lookup
+	std::unordered_map<uint32_t, RuleSetsRepository::RuleSets> existing_rulesets_map;
 	for (const auto& r : RuleSetsRepository::All(*m_database)) {
-		existing_ruleset_ids.insert(r.ruleset_id);
+		existing_rulesets_map[r.ruleset_id] = r;
 	}
 
 	// Load all existing rule_values once
@@ -642,20 +640,42 @@ void WorldContentService::SeedDefaultRulesets() const
 		existing_rule_keys.insert(fmt::format("{}|{}", r.ruleset_id, r.rule_name));
 	}
 
-	// Process in-memory
 	for (const auto& entry : GetDefaultRulesets()) {
-		const auto& ruleset = entry.rule_set;
+		const auto& new_ruleset = entry.rule_set;
 
-		if (!existing_ruleset_ids.count(ruleset.ruleset_id)) {
-			RuleSetsRepository::InsertOne(*m_database, ruleset);
-			LogInfo("Inserted ruleset [{}] {}", ruleset.ruleset_id, ruleset.name);
+		bool should_insert = !existing_rulesets_map.count(new_ruleset.ruleset_id);
+		bool should_update = false;
+
+		if (!should_insert) {
+			const auto& existing = existing_rulesets_map[new_ruleset.ruleset_id];
+
+			// Compare metadata fields
+			should_update = (
+				new_ruleset.name != existing.name ||
+				new_ruleset.zone_ids != existing.zone_ids ||
+				new_ruleset.instance_versions != existing.instance_versions ||
+				new_ruleset.content_flags != existing.content_flags ||
+				new_ruleset.content_flags_disabled != existing.content_flags_disabled ||
+				new_ruleset.min_expansion != existing.min_expansion ||
+				new_ruleset.max_expansion != existing.max_expansion ||
+				new_ruleset.notes != existing.notes
+			);
+		}
+
+		if (should_insert) {
+			RuleSetsRepository::InsertOne(*m_database, new_ruleset);
+			LogInfo("Inserted ruleset [{}] {}", new_ruleset.ruleset_id, new_ruleset.name);
+		}
+		else if (should_update) {
+			RuleSetsRepository::UpdateOne(*m_database, new_ruleset);
+			LogInfo("Updated ruleset metadata [{}] {}", new_ruleset.ruleset_id, new_ruleset.name);
 		}
 
 		if (!entry.rules.empty()) {
 			std::vector<RuleValuesRepository::RuleValues> to_insert;
 
 			for (auto rule : entry.rules) {
-				rule.ruleset_id = ruleset.ruleset_id;
+				rule.ruleset_id = new_ruleset.ruleset_id;
 
 				if (rule.notes.empty()) {
 					rule.notes = m_rule_manager->GetRuleNotesByName(rule.rule_name);
@@ -669,7 +689,7 @@ void WorldContentService::SeedDefaultRulesets() const
 
 			if (!to_insert.empty()) {
 				RuleValuesRepository::InsertMany(*m_database, to_insert);
-				LogInfo("Inserted [{}] rule(s) into ruleset [{}]", to_insert.size(), ruleset.ruleset_id);
+				LogInfo("Inserted [{}] rule(s) into ruleset [{}]", to_insert.size(), new_ruleset.ruleset_id);
 			}
 		}
 	}
@@ -694,8 +714,8 @@ void WorldContentService::LoadTargetedRulesets()
 			!e.instance_versions.empty() ||
 			!e.content_flags.empty() ||
 			!e.content_flags_disabled.empty() ||
-			e.min_expansion != EXPANSION_ZERO_VALUE ||
-			e.max_expansion != EXPANSION_ZERO_VALUE;
+			e.min_expansion != Expansion::EXPANSION_ZERO_VALUE ||
+			e.max_expansion != Expansion::EXPANSION_ZERO_VALUE;
 		if (!has_filters) {
 			continue; // not a targeted ruleset
 		}

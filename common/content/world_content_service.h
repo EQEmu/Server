@@ -18,8 +18,10 @@ struct ContentFlags {
 };
 
 namespace Expansion {
-	static const int EXPANSION_ALL        = -1;
-	static const int EXPANSION_FILTER_MAX = 99;
+	static constexpr int8 EXPANSION_ZERO_VALUE = -2;
+	static constexpr int8 EXPANSION_MAX        = 98;
+	static const int      EXPANSION_ALL        = -1;
+	static const int      EXPANSION_FILTER_MAX = 99;
 
 	enum ExpansionNumber {
 		Classic = 0,
