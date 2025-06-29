@@ -358,6 +358,7 @@ bool RequiresStackCheck(uint16 spell_type) {
 		case BotSpellTypes::CompleteHeal:
 		case BotSpellTypes::PetCompleteHeals:
 		case BotSpellTypes::GroupCompleteHeals:
+		case BotSpellTypes::Resurrect:
 			return false;
 		default:
 			return true;
