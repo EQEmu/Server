@@ -9,6 +9,7 @@ SET(common_sources
     compression.cpp
     condition.cpp
     content/world_content_service.cpp
+    content/world_content_service_rulesets.cpp
     discord/discord.cpp
     crash.cpp
     crc16.cpp

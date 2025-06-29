@@ -194,8 +194,8 @@ public:
 	bool IsInPublicStaticInstance(uint32 instance_id);
 
 	// targeted rulesets
-	void SeedDefaultRulesets();
-	void LoadTargetedRulesets();
+	void        SeedDefaultRulesets() const;
+	void        LoadTargetedRulesets();
 	inline void SetZoneId(int zone_id) { m_zone_id = zone_id; }
 	inline void SetInstanceVersion(int instance_version) { m_instance_version = instance_version; }
 
