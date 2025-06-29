@@ -564,12 +564,32 @@ inline RuleSet GetDragonsOfNorrathRuleset()
 	};
 }
 
+inline RuleSet GetEraOverridesRuleset()
+{
+	return {
+		.rule_set = {
+			.ruleset_id = 200,
+			.name = "Era Overrides",
+			.zone_ids = "",
+			.instance_versions = "",
+			.content_flags = "",
+			.content_flags_disabled = "",
+			.min_expansion = Expansion::EXPANSION_ALL,
+			.max_expansion = Expansion::EXPANSION_MAX,
+			.notes = "If you want to override any rules for era specific rulesets, use this ruleset. It will not be used by default.",
+		},
+		.rules = {
+			// users will add their own dynamically
+		}
+	};
+}
+
 inline std::vector<RuleSet> GetCustomRulesets()
 {
 	return {
 		{
 			.rule_set = {
-				.ruleset_id = 200,
+				.ruleset_id = 300,
 				.name = "Double Experience",
 				.zone_ids = "",
 				.instance_versions = "",
@@ -615,6 +635,7 @@ inline std::vector<RuleSet> GetDefaultRulesets()
 		GetGatesOfDiscordRuleset(),
 		GetOmensOfWarRuleset(),
 		GetDragonsOfNorrathRuleset(),
+		GetEraOverridesRuleset()
 	};
 
 	// Append custom rulesets
