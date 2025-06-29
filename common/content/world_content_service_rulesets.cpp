@@ -573,13 +573,13 @@ inline std::vector<RuleSet> GetCustomRulesets()
 			.rule_set = {
 				.ruleset_id = 200,
 				.name = "Double Experience",
-				.notes = "Doubles EXP globally",
 				.zone_ids = "",
 				.instance_versions = "",
 				.content_flags = "",
 				.content_flags_disabled = "",
 				.min_expansion = EXPANSION_ZERO_VALUE,
 				.max_expansion = EXPANSION_ZERO_VALUE,
+				.notes = "Doubles EXP globally",
 			},
 			.rules = {
 				{
