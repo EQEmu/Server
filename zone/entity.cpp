@@ -743,6 +743,11 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 		npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
 	}
 
+	if (parse->ZoneHasQuestSub(EVENT_SPAWN_ZONE)) {
+		std::vector<std::any> args = { npc };
+		parse->EventZone(EVENT_SPAWN_ZONE, zone, "", 0, &args);
+	}
+
 	if (zone->HasMap() && zone->HasWaterMap()) {
 		npc->SetSpawnedInWater(false);
 		if (zone->watermap->InLiquid(npc->GetPosition())) {
