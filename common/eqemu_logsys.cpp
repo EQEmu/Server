@@ -235,10 +235,10 @@ void EQEmuLogSys::ProcessConsoleMessage(
 
 	std::ostream &out = (!is_error ? std::cout : std::cerr);
 
-	out << rang::style::bold << rang::fgB::gray
-		<< GetPlatformName() << " › "
-		<< Logs::LogCategoryName[log_category] << " › "
-		<< rang::fgB::gray << func << " › "
+	out
+		<< rang::style::bold << rang::fgB::gray << GetPlatformName() << " › "
+		<< rang::fgB::gray << Logs::LogCategoryName[log_category] << " › "
+		// << rang::fgB::gray << func << " › "
 		<< rang::style::reset;
 
 	if (log_category == Logs::LogCategory::MySQLQuery) {
@@ -305,7 +305,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 					bool is_upper = std::any_of(clean_token.begin(), clean_token.end(), ::isupper);
 					if (!is_upper) {
 						out << rang::fgB::gray << "["
-							<< rang::style::bold << rang::fgB::yellow << clean_token
+							<< rang::style::bold << "\033[92m" << clean_token
 							<< rang::style::reset << rang::fgB::gray << "] ";
 					} else {
 						out << rang::fgB::gray << "[" << clean_token << "] ";
@@ -316,6 +316,8 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			}
 		}
 	}
+
+	out << rang::fgB::black << "#" << func << " ";
 
 	if (!origination_info.zone_short_name.empty()) {
 		out << rang::fgB::black << "-- "
