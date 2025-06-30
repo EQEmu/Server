@@ -841,7 +841,7 @@ IF (UNIX)
     SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp" "patches/rof2.cpp" "patches/uf.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF (UNIX)
 
-IF (WIN32 AND EQEMU_BUILD_PCH)
+IF (EQEMU_BUILD_PCH)
     TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/std-pch.h)
 ENDIF ()
 
