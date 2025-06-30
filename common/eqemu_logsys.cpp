@@ -224,48 +224,22 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	const char *file,
 	const char *func,
 	int line
-)
-{
+) {
 	bool is_error   = (
 		log_category == Logs::LogCategory::Error ||
 		log_category == Logs::LogCategory::MySQLError ||
 		log_category == Logs::LogCategory::Crash ||
 		log_category == Logs::LogCategory::QuestErrors
 	);
-	bool is_warning = (
-		log_category == Logs::LogCategory::Warning
-	);
+	bool is_warning = (log_category == Logs::LogCategory::Warning);
 
-	(!is_error ? std::cout : std::cerr)
-		<< ""
-		<< rang::fgB::black
-		<< rang::style::bold
-		<< fmt::format("{:>6}", GetPlatformName().substr(0, 6))
-		<< rang::style::reset
-		<< rang::fgB::gray
-		<< " | "
-		<< ((is_error || is_warning) ? rang::fgB::red : rang::fgB::gray)
-		<< rang::style::bold
-		<< fmt::format("{:^10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
-		<< rang::style::reset
-		<< rang::fgB::gray
-		<< " | "
-		<< rang::fgB::gray
-		<< rang::style::bold
-		<< fmt::format("{}", func)
-		<< rang::style::reset
-		<< rang::fgB::gray
-		<< " ";
+	std::ostream &out = (!is_error ? std::cout : std::cerr);
 
-	if (RuleB(Logging, PrintFileFunctionAndLine)) {
-		(!is_error ? std::cout : std::cerr)
-			<< ""
-			<< rang::fgB::green
-			<< rang::style::bold
-			<< fmt::format("{:}", fmt::format("{}:{}:{}", std::filesystem::path(file).filename().string(), func, line))
-			<< rang::style::reset
-			<< " | ";
-	}
+	out << rang::style::bold << rang::fgB::gray
+		<< GetPlatformName() << " › "
+		<< Logs::LogCategoryName[log_category] << " › "
+		<< rang::fgB::gray << func << " › "
+		<< rang::style::reset;
 
 	if (log_category == Logs::LogCategory::MySQLQuery) {
 		auto s = Strings::Split(message, "--");
@@ -273,132 +247,79 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			std::string query = Strings::Trim(s[0]);
 			std::string meta  = Strings::Trim(s[1]);
 
-			std::cout <<
-					  rang::fgB::green
-					  <<
-					  query
-					  <<
-					  rang::style::reset;
-
-			std::cout <<
-					  rang::fgB::black
-					  <<
-					  " -- "
-					  <<
-					  meta
-					  <<
-					  rang::style::reset;
+			out << rang::fgB::green << query << rang::style::reset;
+			out << rang::fgB::black << " -- " << meta << rang::style::reset;
 		}
-	}
-	else if (Strings::Contains(message, "[")) {
-		for (auto &e: Strings::Split(message, " ")) {
-			if (Strings::Contains(e, "[") && Strings::Contains(e, "]")) {
-				e = Strings::Replace(e, "[", "");
-				e = Strings::Replace(e, "]", "");
+	} else {
+		std::vector<std::string> tokens = Strings::Split(message, " ");
 
-				bool is_upper = false;
+		for (auto &token : tokens) {
+			bool has_brackets = Strings::Contains(token, "[") && Strings::Contains(token, "]");
+			std::string clean_token = Strings::Replace(Strings::Replace(token, "[", ""), "]", "");
 
-				for (int i = 0; i < strlen(e.c_str()); i++) {
-					if (isupper(e[i])) {
-						is_upper = true;
-					}
-				}
-
-				// color matching in []
-				// ex: [<red>variable] would produce [variable] with red inside brackets
-				std::map<std::string, rang::fgB> colors = {
-					{"<black>",   rang::fgB::black},
-					{"<green>",   rang::fgB::green},
-					{"<yellow>",  rang::fgB::yellow},
-					{"<blue>",    rang::fgB::blue},
+			// Bracket formatting
+			if (has_brackets) {
+				static std::map<std::string, rang::fgB> color_tags = {
+					{"<black>", rang::fgB::black},
+					{"<green>", rang::fgB::green},
+					{"<yellow>", rang::fgB::yellow},
+					{"<blue>", rang::fgB::blue},
 					{"<magenta>", rang::fgB::magenta},
-					{"<cyan>",    rang::fgB::cyan},
-					{"<gray>",    rang::fgB::gray},
-					{"<red>",     rang::fgB::red},
+					{"<cyan>", rang::fgB::cyan},
+					{"<gray>", rang::fgB::gray},
+					{"<red>", rang::fgB::red},
 				};
 
-				bool      match_color = false;
-				for (auto &c: colors) {
-					if (Strings::Contains(e, c.first)) {
-						e = Strings::Replace(e, c.first, "");
-						(!is_error ? std::cout : std::cerr)
-							<< rang::fgB::gray
-							<< "["
-							<< rang::style::bold
-							<< c.second
-							<< e
-							<< rang::style::reset
-							<< rang::fgB::gray
-							<< "] ";
-						match_color = true;
-					}
-				}
-
-				// string match to colors
-				std::map<std::string, rang::fgB> matches = {
+				static std::map<std::string, rang::fgB> keyword_matches = {
 					{"missing", rang::fgB::red},
 					{"error",   rang::fgB::red},
 					{"ok",      rang::fgB::green},
 				};
 
-				for (auto &c: matches) {
-					if (Strings::Contains(e, c.first)) {
-						(!is_error ? std::cout : std::cerr)
-							<< rang::fgB::gray
-							<< "["
-							<< rang::style::bold
-							<< c.second
-							<< e
-							<< rang::style::reset
-							<< rang::fgB::gray
-							<< "] ";
-						match_color = true;
+				bool matched = false;
+
+				for (auto &[tag, color] : color_tags) {
+					if (Strings::Contains(clean_token, tag)) {
+						clean_token = Strings::Replace(clean_token, tag, "");
+						out << rang::fgB::gray << "["
+							<< rang::style::bold << color << clean_token
+							<< rang::style::reset << rang::fgB::gray << "] ";
+						matched = true;
+						break;
 					}
 				}
 
-				// if we don't match a color in either the string matching or
-				// the color tag matching, we default to yellow inside brackets
-				// if uppercase, does not get colored
-				if (!match_color) {
-					if (!is_upper) {
-						(!is_error ? std::cout : std::cerr)
-							<< rang::fgB::gray
-							<< "["
-							<< rang::style::bold
-							<< rang::fgB::yellow
-							<< e
-							<< rang::style::reset
-							<< rang::fgB::gray
-							<< "] ";
-					}
-					else {
-						(!is_error ? std::cout : std::cerr) << rang::fgB::gray << "[" << e << "] ";
+				if (!matched) {
+					for (auto &[keyword, color] : keyword_matches) {
+						if (Strings::Contains(clean_token, keyword)) {
+							out << rang::fgB::gray << "["
+								<< rang::style::bold << color << clean_token
+								<< rang::style::reset << rang::fgB::gray << "] ";
+							matched = true;
+							break;
+						}
 					}
 				}
-			}
-			else {
-				(!is_error ? std::cout : std::cerr)
-					<< (is_error ? rang::fgB::red : rang::fgB::gray)
-					<< e
-					<< " ";
+
+				if (!matched) {
+					bool is_upper = std::any_of(clean_token.begin(), clean_token.end(), ::isupper);
+					if (!is_upper) {
+						out << rang::fgB::gray << "["
+							<< rang::style::bold << rang::fgB::yellow << clean_token
+							<< rang::style::reset << rang::fgB::gray << "] ";
+					} else {
+						out << rang::fgB::gray << "[" << clean_token << "] ";
+					}
+				}
+			} else {
+				out << (is_error ? rang::fgB::red : rang::fgB::gray) << token << " ";
 			}
 		}
 	}
-	else {
-		(!is_error ? std::cout : std::cerr)
-			<< (is_error ? rang::fgB::red : rang::fgB::gray)
-			<< message
-			<< " ";
-	}
 
 	if (!origination_info.zone_short_name.empty()) {
-		(!is_error ? std::cout : std::cerr)
-			<<
-			rang::fgB::black
-			<<
-			"-- "
-			<<
-			fmt::format(
+		out << rang::fgB::black << "-- "
+			<< fmt::format(
 				"[{}] ({}) inst_id [{}]",
 				origination_info.zone_short_name,
 				origination_info.zone_long_name,
@@ -406,10 +327,11 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			);
 	}
 
-	(!is_error ? std::cout : std::cerr) << rang::style::reset << std::endl;
+	out << rang::style::reset << std::endl;
 
 	m_on_log_console_hook(log_category, message);
 }
+
 
 /**
  * @param str
