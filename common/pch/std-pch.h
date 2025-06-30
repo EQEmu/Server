@@ -11,4 +11,4 @@
 #include <cassert>
 
 // fmt
-// #include <fmt/format.h>
+#include <fmt/format.h>
