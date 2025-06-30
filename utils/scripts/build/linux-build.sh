@@ -22,7 +22,7 @@ mkdir -p build && cd build && \
       -DCMAKE_CXX_FLAGS:STRING="-O1 -g -Wno-everything" \
       -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O1 -g -Wno-everything" \
       -G 'Unix Makefiles' \
-      .. && make -j$((`nproc`-12))
+      .. && make -j$((`nproc`-2))
 
 curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
 ./bin/tests
