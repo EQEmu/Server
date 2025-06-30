@@ -632,6 +632,10 @@ bool NPC::Process()
 	}
 
 	if (tic_timer.Check()) {
+		if (m_clear_wearchange_cache_timer.Check()) {
+			m_last_seen_wearchange.clear();
+		}
+
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TICK)) {
 			parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		}

@@ -211,6 +211,7 @@ public:
 	uint16 m_last_wearchange_race_id = 0;
 	// client_id -> slot_id -> key
 	std::unordered_map<uint32_t, std::unordered_map<uint8_t, uint64_t>> m_last_seen_wearchange;
+	Timer m_clear_wearchange_cache_timer;
 
 	// Bot attack flag
 	Timer bot_attack_flag_timer;
