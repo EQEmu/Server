@@ -133,6 +133,7 @@ Mob::Mob(
 	m_see_close_mobs_timer(1000),
 	m_mob_check_moving_timer(1000),
 	bot_attack_flag_timer(10000),
+	m_clear_wearchange_cache_timer(60 * 10 * 1000), // 10 minutes
 	m_destroying(false)
 {
 	mMovementManager = &MobMovementManager::Get();
