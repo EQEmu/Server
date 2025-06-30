@@ -363,6 +363,8 @@ MESSAGE(STATUS "**************************************************")
 #setup server libs and headers
 SET(SERVER_LIBS common ${DATABASE_LIBRARY_LIBS} ${ZLIB_LIBRARY_LIBS} ${Boost_LIBRARIES} uv_a fmt RecastNavigation::Detour)
 
+set(FMT_HEADER_ONLY OFF)
+
 INCLUDE_DIRECTORIES(SYSTEM "${DATABASE_LIBRARY_INCLUDE}")
 INCLUDE_DIRECTORIES(SYSTEM "${ZLIB_LIBRARY_INCLUDE}")
 INCLUDE_DIRECTORIES(SYSTEM "${Boost_INCLUDE_DIRS}")
