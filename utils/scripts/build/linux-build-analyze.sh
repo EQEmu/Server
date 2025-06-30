@@ -23,7 +23,7 @@ clang-build-analyzer --start build/
 
 cd build && \
   cmake -DEQEMU_BUILD_TESTS=ON \
-      -DCMAKE_BUILD_TYPE=Debug
+      -DCMAKE_BUILD_TYPE=Debug \
       -DEQEMU_BUILD_LUA=ON \
       -DEQEMU_BUILD_PERL=ON \
       -DEQEMU_BUILD_LOGIN=ON \
