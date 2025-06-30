@@ -561,6 +561,10 @@ bool Client::Process() {
 			{
 				ItemTimerCheck();
 			}
+
+			if (m_clear_wearchange_cache_timer.Check()) {
+				m_last_seen_wearchange.clear();
+			}
 		}
 	}
 

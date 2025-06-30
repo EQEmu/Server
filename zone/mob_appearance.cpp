@@ -395,10 +395,6 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 
 	w->wear_slot_id = material_slot;
 
-	if (m_clear_wearchange_cache_timer.Check()) {
-		m_last_seen_wearchange.clear();
-	}
-
 	if (GetRace() != m_last_wearchange_race_id) {
 		m_last_seen_wearchange.clear();
 		m_last_wearchange_race_id = GetRace();
