@@ -970,7 +970,7 @@ void WorldContentService::LoadTargetedRulesets()
 			m_rule_manager->SetRule(r.rule_name, r.rule_value);
 
 			LogInfo(
-				"Loading targeted rule from ruleset [{}] ruleset_name [{}] rule_name [{}] rule_value [{}]",
+				"Loaded [{}] ruleset [{}] name [{}] value [{}]",
 				e.ruleset_id,
 				e.name,
 				r.rule_name,
