@@ -9610,14 +9610,9 @@ bool Bot::CastChecks(uint16 spell_id, Mob* tar, uint16 spell_type, bool precheck
 		return false;
 	}
 
-	if (
-		!BotHasEnoughMana(spell_id) &&
-		(
-			!RuleB(Bots, FinishBuffing) ||
-			IsEngaged() ||
-			IsBotBuffSpellType(spell_type)
-		)
-	) {
+	bool is_mana_exempt = RuleB(Bots, FinishBuffing) && !IsEngaged() && IsBotBuffSpellType(spell_type);
+
+	if (!BotHasEnoughMana(spell_id) && !is_mana_exempt) {
 		LogBotSpellChecksDetail("{} says, 'Cancelling cast of {} due to !BotHasEnoughMana.'", GetCleanName(), GetSpellName(spell_id));
 		return false;
 	}
