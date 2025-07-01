@@ -2474,15 +2474,53 @@ bool Group::AmIPuller(const char *mob_name)
 
 bool Group::HasRole(Mob *m, uint8 Role)
 {
-	if(!m)
-		return false;
+        if(!m)
+                return false;
 
-	for(uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i)
-	{
-		if((m == members[i]) && (MemberRoles[i] & Role))
-			return true;
-	}
-	return false;
+        for(uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i)
+        {
+                if((m == members[i]) && (MemberRoles[i] & Role))
+                        return true;
+        }
+        return false;
+}
+
+uint8 Group::GetMemberRole(Mob *m)
+{
+        if(!m)
+                return 0;
+
+        for(uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i)
+        {
+                if(m == members[i])
+                {
+                        uint8 role = MemberRoles[i];
+                        if(m == leader)
+                                role |= RoleLeader;
+                        return role;
+                }
+        }
+
+        return 0;
+}
+
+uint8 Group::GetMemberRole(const char *name)
+{
+        if(!name)
+                return 0;
+
+        for(uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i)
+        {
+                if(!strcasecmp(membername[i], name))
+                {
+                        uint8 role = MemberRoles[i];
+                        if(leader && !strcasecmp(leader->GetName(), name))
+                                role |= RoleLeader;
+                        return role;
+                }
+        }
+
+        return 0;
 }
 
 void Group::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required /*= true*/, bool ignore_sender /*= true*/, float distance /*= 0*/) {
