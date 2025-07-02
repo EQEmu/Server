@@ -125,7 +125,7 @@ public:
 			items = GetWhere(
 				db,
 				fmt::format(
-					"character_id = '{}' AND item_id = '{}'",
+					"character_id = {} AND item_id = {}",
 					character_id,
 					item_id
 				)
@@ -135,7 +135,7 @@ public:
 			items = GetWhere(
 				db,
 				fmt::format(
-					"character_id = '{}' AND item_id = '{}' AND item_charges = '{}'",
+					"character_id = {} AND item_id = {} AND item_charges = {}",
 					character_id,
 					item_id,
 					item_charges
@@ -161,7 +161,7 @@ public:
 
 		auto query   = fmt::format(
 			"SELECT t.character_id, t.item_id, t.item_unique.id, t.charges, t.item_cost, t.slot_id, t.entity_id FROM trader AS t "
-			"WHERE t.entity_id = '{}' AND t.item_id = '{}' AND t.item_cost = '{}' "
+			"WHERE t.entity_id = {} AND t.item_id = {} AND t.item_cost = {} "
 			"LIMIT 1;",
 			trader_id,
 			item_id,
@@ -207,7 +207,7 @@ public:
 		std::vector<Trader> all_entries{};
 
 		const auto query = fmt::format(
-			"UPDATE trader t1 SET t1.`item_cost` = '{}', t1.`listing_date` = FROM_UNIXTIME({}) WHERE t1.`item_id` = "
+			"UPDATE trader t1 SET t1.`item_cost` = {}, t1.`listing_date` = FROM_UNIXTIME({}) WHERE t1.`item_id` = "
 			"(SELECT t2.`item_id` FROM trader t2 WHERE t2.`item_unique_id` = '{}')",
 			price,
 			time(nullptr),
@@ -324,28 +324,6 @@ public:
 	{
 		std::vector<BazaarTraderSearch_Struct> all_entries{};
 
-		// auto query_2 = fmt::format(
-		// "WITH ranked_trader_items AS ("
-		// 	"SELECT trader.id, trader.character_id, trader.item_id, trader.item_unique_id, trader.augment_one, "
-		// 	"trader.augment_two, trader.augment_three, trader.augment_four, trader.augment_five, trader.augment_six, "
-		// 	"trader.item_charges, trader.item_cost, trader.slot_id, trader.char_entity_id, trader.char_zone_id, "
-		// 	"trader.char_zone_instance_id, trader.active_transaction, c.`name`, "
-		// 	"items.name AS n1, items.stackable, items.icon, {}, "
-		// 	"ROW_NUMBER() OVER (PARTITION BY trader.character_id) AS row_num "
-		// 	"FROM trader "
-		// 	"INNER JOIN character_data AS c ON trader.character_id = c.id "
-		// 	"JOIN peq642024_content.items AS items ON trader.item_id = items.id "
-		// 	"WHERE items.`name` LIKE '%{}%' AND {} AND {}"
-		// ") "
-		// "SELECT * FROM ranked_trader_items "
-		// "WHERE row_num <= '{}';",
-		// field_criteria_items,
-		// Strings::Escape(name),
-		// where_criteria_items,
-		// search_criteria_trader,
-		// max_results
-		// );
-
 		auto query = fmt::format(
 			"SELECT trader.id, trader.character_id, trader.item_id, trader.item_unique_id, trader.augment_one, "
 			"trader.augment_two, trader.augment_three, trader.augment_four, trader.augment_five, trader.augment_six, "
@@ -385,10 +363,6 @@ public:
 			e.trader.char_zone_instance_id = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
 			e.trader.active_transaction    = row[16] ? static_cast<uint8_t>(strtoul(row[16], nullptr, 10)) : 0;
 			e.trader_name                  = row[17] ? row[17] : std::string("");
-			// e.name                         = row[18] ? row[18] : "";
-			// e.stackable                    = atoi(row[19]) ? true : false;
-			// e.icon                         = row[20] ? static_cast<int32_t>(atoi(row[20])) : 0;
-			// e.stats                        = row[21] ? static_cast<int32_t>(atoi(row[21])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -401,7 +375,7 @@ public:
 		auto trader_query = fmt::format(
 			"SELECT t.id, t.character_id, t.char_zone_id, t.char_zone_instance_id "
 			"FROM trader AS t "
-			"WHERE t.character_id IN(SELECT c.id FROM character_data AS c WHERE c.account_id = '{}') "
+			"WHERE t.character_id IN(SELECT c.id FROM character_data AS c WHERE c.account_id = {}) "
 			"LIMIT 1;",
 			account_id
 		);
@@ -409,7 +383,7 @@ public:
 		auto buyer_query = fmt::format(
 			"SELECT t.id, t.char_id, t.char_zone_id, t.char_zone_instance_id "
 			"FROM buyer AS t "
-			"WHERE t.char_id IN(SELECT c.id FROM character_data AS c WHERE c.account_id = '{}') "
+			"WHERE t.char_id IN(SELECT c.id FROM character_data AS c WHERE c.account_id = {}) "
 			"LIMIT 1;",
 			account_id
 		);
@@ -440,4 +414,5 @@ public:
 	}
 };
 
-#endif //EQEMU_TRADER_REPOSITORY_H
+#endif
+//EQEMU_TRADER_REPOSITORY_H

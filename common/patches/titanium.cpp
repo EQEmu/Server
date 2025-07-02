@@ -228,7 +228,6 @@ namespace Titanium
 					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, row->trader_entity_id);
 					bufptr += 4;
 					VARSTRUCT_ENCODE_TYPE(int32, bufptr, row->item_id);
-					//FIX VARSTRUCT_ENCODE_TYPE(int32, bufptr, row->serial_number);
 					bufptr += 4;
 					if (row->stackable) {
 						strn0cpy(
