@@ -6354,14 +6354,12 @@ namespace RoF2
 				IN_str(buyer_name);
 				IN_str(seller_name);
 				IN_str(item_name);
-				//IN_str(serial_number);
 				strn0cpy(emu->item_unique_id, eq->item_unique_id, sizeof(emu->item_unique_id));
 
 				FINISH_DIRECT_DECODE();
 				break;
 			}
 			default: {
-				//LogTradingDetail("(RoF2) Unhandled action <red>[{}]", action);
 			}
 			return;
 		}
@@ -6475,12 +6473,6 @@ namespace RoF2
 			hdr.unknown000[16] = '\0';
 		}
 
-		// strn0cpy(
-		// 	hdr.unknown000,
-		// 	inst->GetSerialNumber2().empty() ? "0000000000000000" : inst->GetSerialNumber2().c_str(),
-		// 	sizeof(hdr.unknown000)
-		// );
-		//hdr.unknown000[16] = '\0';
 
 		hdr.stacksize = 1;
 
