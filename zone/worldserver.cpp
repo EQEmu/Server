@@ -3946,7 +3946,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					uint64 total_cost =
 						static_cast<uint64>(in->trader_buy_struct.price) * static_cast<uint64>(in->item_quantity);
 
-					if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+					if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
 						auto e = PlayerEvent::TraderPurchaseEvent{
 							.item_id              = in->trader_buy_struct.item_id,
 							.augment_1_id         = in->item_aug_1,
@@ -3994,7 +3994,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 					CharacterParcelsRepository::InsertOne(database, parcel_out);
 
-					if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+					if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 						PlayerEvent::ParcelSend e{};
 						e.from_player_name = parcel_out.from_name;
 						e.to_player_name   = buyer->GetCleanName();
