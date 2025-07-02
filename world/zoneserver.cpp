@@ -1677,12 +1677,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			auto in = reinterpret_cast<BazaarPurchaseMessaging_Struct *>(pack->pBuffer);
 			switch (in->transaction_status) {
 				case BazaarPurchaseBuyerCompleteSendToSeller: {
-					zoneserver_list.SendPacket(in->trader_zone_id, in->trader_zone_instance_id, pack);
+					ZSList::Instance()->SendPacket(in->trader_zone_id, in->trader_zone_instance_id, pack);
 					break;
 				}
 				case BazaarPurchaseTraderFailed:
 				case BazaarPurchaseSuccess: {
-					zoneserver_list.SendPacket(in->buyer_zone_id, in->buyer_zone_instance_id, pack);
+					ZSList::Instance()->SendPacket(in->buyer_zone_id, in->buyer_zone_instance_id, pack);
 					break;
 				}
 				default: {
@@ -1752,7 +1752,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				"Step 7a - World received ServerOP_UsertoWorldCancelOfflineResponse back to login with success."
 			);
 
-			loginserverlist.SendPacket(&server_packet);
+			LoginServerList::Instance()->SendPacket(&server_packet);
 			break;
 		}
 		default: {
