@@ -131,7 +131,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 	UsertoWorldRequest *utwr          = (UsertoWorldRequest *) p.Data();
 	uint32              id            = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
 	auto                status_record = database.GetAccountStatus(id);
-	auto                client        = client_list.FindCLEByAccountID(id);
+	auto                client        = ClientList::Instance()->FindCLEByAccountID(id);
 
 	if (client) {
 		client->SetOfflineMode(status_record.offline);
@@ -772,7 +772,7 @@ void LoginServer::ProcessUserToWorldCancelOfflineRequest(uint16_t opcode, EQ::Ne
 
 	auto trader = TraderRepository::GetAccountZoneIdAndInstanceIdByAccountId(database, id);
 	if (trader.id &&
-		zoneserver_list.IsZoneBootedByZoneIdAndInstanceId(trader.char_zone_id, trader.char_zone_instance_id)) {
+		ZSList::Instance()->IsZoneBootedByZoneIdAndInstanceId(trader.char_zone_id, trader.char_zone_instance_id)) {
 		LogLoginserverDetail(
 			"Step 5a(1) - World Checked offline users zone/instance is booted.  "
 			"Sending packet to zone id {} instance id {}",
@@ -780,7 +780,7 @@ void LoginServer::ProcessUserToWorldCancelOfflineRequest(uint16_t opcode, EQ::Ne
 			trader.char_zone_instance_id);
 
 		server_packet.opcode = ServerOP_UsertoWorldCancelOfflineRequest;
-		zoneserver_list.SendPacketToBootedZones(&server_packet);
+		ZSList::Instance()->SendPacketToBootedZones(&server_packet);
 		return;
 	}
 
