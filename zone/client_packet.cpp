@@ -855,7 +855,7 @@ void Client::CompleteConnect()
 	}
 
 	auto offline_transactions_trader = CharacterOfflineTransactionsRepository::GetWhere(
-		database, fmt::format("`character_id` = '{}' AND `type` = '{}'", CharacterID(), TRADER_TRANSACTION)
+		database, fmt::format("`character_id` = {} AND `type` = {}", CharacterID(), TRADER_TRANSACTION)
 	);
 	if (offline_transactions_trader.size() > 0) {
 		Message(Chat::Yellow, "You sold the following items while in offline trader mode:");
@@ -879,7 +879,7 @@ void Client::CompleteConnect()
 	}
 
 	auto offline_transactions_buyer = CharacterOfflineTransactionsRepository::GetWhere(
-		database, fmt::format("`character_id` = '{}' AND `type` = '{}'", CharacterID(), BUYER_TRANSACTION)
+		database, fmt::format("`character_id` = {} AND `type` = {}", CharacterID(), BUYER_TRANSACTION)
 	);
 	if (offline_transactions_buyer.size() > 0) {
 		Message(Chat::Yellow, "You bought the following items while in offline buyer mode:");
@@ -898,7 +898,7 @@ void Client::CompleteConnect()
 		}
 
 		CharacterOfflineTransactionsRepository::DeleteWhere(
-			database, fmt::format("`character_id` = '{}' AND `type` = '{}'", CharacterID(), BUYER_TRANSACTION)
+			database, fmt::format("`character_id` = {} AND `type` = {}", CharacterID(), BUYER_TRANSACTION)
 		);
 	}
 
@@ -15492,7 +15492,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			break;
 		}
 		default: {
-			//LogTradingDetail("Unknown size for OP_Trader: [{}]", app->size);
 		}
 	}
 }
