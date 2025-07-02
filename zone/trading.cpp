@@ -1085,10 +1085,8 @@ EQ::ItemInstance *Client::FindTraderItemByUniqueID(std::string &unique_id)
 				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
 				slot_id = EQ::InventoryProfile::CalcSlotId(i, x);
 				item    = GetInv().GetItem(slot_id);
-				if (item) {
-					if (item->GetUniqueID().compare(unique_id) == 0) {
-						return item;
-					}
+				if (item && item->GetUniqueID().compare(unique_id) == 0) {
+					return item;
 				}
 			}
 		}
@@ -1136,10 +1134,8 @@ std::vector<EQ::ItemInstance *> Client::FindTraderItemsByUniqueID(const char* un
 				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
 				slot_id = EQ::InventoryProfile::CalcSlotId(i, x);
 				item    = GetInv().GetItem(slot_id);
-				if (item) {
-					if (item->GetUniqueID().compare(unique_id) == 0) {
-						items.push_back(item);
-					}
+				if (item && item->GetUniqueID().compare(unique_id) == 0) {
+					items.push_back(item);
 				}
 			}
 		}
@@ -1149,11 +1145,11 @@ std::vector<EQ::ItemInstance *> Client::FindTraderItemsByUniqueID(const char* un
 	return items;
 }
 
-GetItems2_Struct *Client::GetTraderItems()
+GetBazaarItems_Struct *Client::GetTraderItems()
 {
 	const EQ::ItemInstance *item   = nullptr;
 	int16                  slot_id = INVALID_INDEX;
-	auto                   gis     = new GetItems2_Struct{0};
+	auto                   gis     = new GetBazaarItems_Struct{0};
 	uint8                  ndx     = 0;
 
 	for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
@@ -1309,7 +1305,7 @@ void Client::FindAndNukeTraderItem(std::string &item_unique_id, int16 quantity, 
 
 			std::vector<TraderRepository::Trader> delete_queue{};
 			for (int i = 0; i < item_limit; i++) {
-				if (test_slot && trader_items.at(i).item_unique_id.compare(item_unique_id) == 0) {
+				if (test_slot && i < trader_items.size() && trader_items.at(i).item_unique_id.compare(item_unique_id) == 0) {
 					delete_queue.push_back(trader_items.at(i));
 					NukeTraderItem(
 						slot_id,
@@ -1322,7 +1318,7 @@ void Client::FindAndNukeTraderItem(std::string &item_unique_id, int16 quantity, 
 					);
 					test_slot = false;
 				}
-				else if (trader_items.at(i).item_id > 0) {
+				else if (i < trader_items.size() && trader_items.at(i).item_id > 0) {
 					count++;
 				}
 			}
@@ -1766,10 +1762,6 @@ static void UpdateTraderCustomerPriceChanged(
 					// RoF+ use Item IDs for now
 					tdis->item_id = trader_items.at(i).item_id;
 				}
-				//FIX else {
-				// 	tdis->item_id = trader_items.at(i).item_sn;
-				// }
-				//tdis->item_id = trader_items.at(i).item_sn;
 				LogTrading("Telling customer to remove item [{}] with [{}] charges and S/N [{}]",
 						   item_id, charges, trader_items.at(i).item_unique_id);
 

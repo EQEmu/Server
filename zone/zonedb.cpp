@@ -314,7 +314,7 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 	auto results = TraderRepository::GetWhere(
 		database,
 		fmt::format(
-			"`character_id` = '{}' AND `item_unique_id` = '{}' ORDER BY slot_id",
+			"`character_id` = {} AND `item_unique_id` = '{}' ORDER BY slot_id",
 			character_id,
 			unique_item_id
 		)
@@ -358,7 +358,6 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 
 	inst->SetCharges(charges);
 	inst->SetUniqueID(unique_item_id);
-	//FIX inst->SetMerchantSlot(serial_number);
 	inst->SetPrice(cost);
 
 	if (inst->IsStackable()) {
@@ -383,7 +382,7 @@ void ZoneDatabase::UpdateTraderItemPrice(int character_id, uint32 item_id, uint3
 		auto results = TraderRepository::DeleteWhere(
 			database,
 			fmt::format(
-				"`character_id` = '{}' AND `item_id` = {}",
+				"`character_id` = {} AND `item_id` = {}",
 				character_id,
 				item_id
 			)

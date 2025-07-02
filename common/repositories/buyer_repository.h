@@ -187,7 +187,7 @@ public:
 			return false;
 		}
 
-		auto results = GetWhere(db, fmt::format("`char_id` = '{}' AND `char_entity_id` = '{}' LIMIT 1;", char_id, old_entity_id));
+		auto results = GetWhere(db, fmt::format("`char_id` = {} AND `char_entity_id` = {} LIMIT 1;", char_id, old_entity_id));
 
 		if (results.empty()) {
 			return false;

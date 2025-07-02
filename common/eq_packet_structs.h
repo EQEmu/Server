@@ -3813,7 +3813,7 @@ struct ClickTraderNew_Struct {
 	}
 };
 
-struct GetItems2_Struct {
+struct GetBazaarItems_Struct {
 	uint64      items[EQ::invtype::BAZAAR_SIZE];
 	std::string serial_number[EQ::invtype::BAZAAR_SIZE];
 	uint32      charges[EQ::invtype::BAZAAR_SIZE];

@@ -314,7 +314,6 @@ public:
 	void Trader_CustomerBrowsing(Client *Customer);
 
 	void TraderEndTrader();
-	//void TraderPriceUpdate(const EQApplicationPacket *app);
 	void TraderUpdateItem(const EQApplicationPacket *app);
 	void SendBazaarDone(uint32 trader_id);
 	void SendBulkBazaarTraders();
@@ -351,7 +350,7 @@ public:
 	void SendTraderPacket(Client* trader, uint32 Unknown72 = 51);
 	void SendBuyerPacket(Client* Buyer);
 	void SendBuyerToBarterWindow(Client* buyer, uint32 action);
-	GetItems2_Struct* GetTraderItems();
+	GetBazaarItems_Struct* GetTraderItems();
 	void SendBazaarWelcome();
 	void SendBarterWelcome();
 	void DyeArmor(EQ::TintProfile* dye);

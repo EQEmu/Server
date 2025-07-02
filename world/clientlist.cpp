@@ -35,6 +35,7 @@
 #include "wguild_mgr.h"
 #include "../common/zone_store.h"
 #include <set>
+#include "../zone/string_ids.h"
 
 uint32 numplayers = 0;	//this really wants to be a member variable of ClientList...
 
@@ -799,10 +800,10 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 					continue;
 				}
 				else if (cle->GetTrader()) {
-					rankstring = 12315;
+					rankstring = TRADER;
 				}
 				else if (cle->GetBuyer()) {
-					rankstring = 6056;
+					rankstring = BUYER;
 				}
 				else if (cle->GetGM()) {
 					if (cle->Admin() >= AccountStatus::GMImpossible) {
