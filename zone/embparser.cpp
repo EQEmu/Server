@@ -1214,6 +1214,8 @@ QuestType PerlembParser::GetQuestTypes(
 					return is_global ? QuestType::BotGlobal : QuestType::Bot;
 				} else if (npc_mob->IsMerc()) {
 					return is_global ? QuestType::MercGlobal : QuestType::Merc;
+				} else if (npc_mob->IsNPC()) {
+					return is_global ? QuestType::NPCGlobal : QuestType::NPC;
 				}
 			} else {
 				return is_global ? QuestType::ItemGlobal : QuestType::Item;
