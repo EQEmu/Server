@@ -1586,6 +1586,21 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 			}
 		}
 
+		if (parse->ZoneHasQuestSub(EVENT_LOOT_ZONE)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				inst->GetItem()->ID,
+				inst->GetCharges(),
+				EntityList::RemoveNumbers(corpse_name),
+				GetID()
+			);
+
+			std::vector<std::any> args = {inst, this, c};
+			if (parse->EventZone(EVENT_LOOT_ZONE, zone, export_string, 0, &args) != 0) {
+				prevent_loot = true;
+			}
+		}
+
 		if (inst && PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::LOOT_ITEM) && !IsPlayerCorpse()) {
 			auto e = PlayerEvent::LootItemEvent{
 				.item_id      = inst->GetItem()->ID,

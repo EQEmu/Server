@@ -72,6 +72,7 @@ public:
 	bool ItemHasQuestSub(EQ::ItemInstance* inst, QuestEventID event_id);
 	bool BotHasQuestSub(QuestEventID event_id);
 	bool MercHasQuestSub(QuestEventID event_id);
+	bool ZoneHasQuestSub(QuestEventID event_id);
 
 	int EventNPC(
 		QuestEventID event_id,
@@ -172,6 +173,14 @@ public:
 		std::vector<std::any>* extra_pointers = nullptr
 	);
 
+	int EventZone(
+		QuestEventID event_id,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data = 0,
+		std::vector<std::any>* extra_pointers = nullptr
+	);
+
 	void GetErrors(std::list<std::string> &quest_errors);
 
 	/*
@@ -209,6 +218,8 @@ private:
 	bool BotHasQuestSubGlobal(QuestEventID event_id);
 	bool MercHasQuestSubLocal(QuestEventID event_id);
 	bool MercHasQuestSubGlobal(QuestEventID event_id);
+	bool ZoneHasQuestSubLocal(QuestEventID event_id);
+	bool ZoneHasQuestSubGlobal(QuestEventID event_id);
 
 	int EventNPCLocal(
 		QuestEventID event_id,
@@ -280,6 +291,22 @@ private:
 		std::vector<std::any>* extra_pointers
 	);
 
+	int EventZoneLocal(
+		QuestEventID event_id,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+
+	int EventZoneGlobal(
+		QuestEventID event_id,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+
 	QuestInterface* GetQIByNPCQuest(uint32 npc_id, std::string& filename);
 	QuestInterface* GetQIByGlobalNPCQuest(std::string& filename);
 	QuestInterface* GetQIByPlayerQuest(std::string& filename);
@@ -291,6 +318,8 @@ private:
 	QuestInterface* GetQIByGlobalBotQuest(std::string& filename);
 	QuestInterface* GetQIByMercQuest(std::string& filename);
 	QuestInterface* GetQIByGlobalMercQuest(std::string& filename);
+	QuestInterface* GetQIByZoneQuest(std::string& filename);
+	QuestInterface* GetQIByGlobalZoneQuest(std::string& filename);
 
 	int DispatchEventNPC(
 		QuestEventID event_id,
@@ -347,6 +376,14 @@ private:
 		std::vector<std::any>* extra_pointers
 	);
 
+	int DispatchEventZone(
+		QuestEventID event_id,
+		Zone* zone,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+
 	std::map<uint32, QuestInterface*> _interfaces;
 	std::map<uint32, std::string>     _extensions;
 	std::list<QuestInterface*>        _load_precedence;
@@ -359,6 +396,8 @@ private:
 	uint32                        _global_bot_quest_status;
 	uint32                        _merc_quest_status;
 	uint32                        _global_merc_quest_status;
+	uint32                        _zone_quest_status;
+	uint32                        _global_zone_quest_status;
 	std::map<uint32, uint32>      _spell_quest_status;
 	std::map<uint32, uint32>      _item_quest_status;
 	std::map<std::string, uint32> _encounter_quest_status;

@@ -864,6 +864,11 @@ void NPC::Depop(bool start_spawn_timer) {
 		DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
 	}
 
+	if (parse->ZoneHasQuestSub(EVENT_DESPAWN_ZONE)) {
+		std::vector<std::any> args = { this };
+		parse->EventZone(EVENT_DESPAWN_ZONE, zone, "", 0, &args);
+	}
+
 	p_depop = true;
 	if (respawn2) {
 		if (start_spawn_timer) {
