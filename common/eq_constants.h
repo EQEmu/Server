@@ -988,7 +988,8 @@ enum StartZoneIndex {
     Felwithe,
     Akanon,
     Cabilis,
-    SharVahl
+    SharVahl,
+    RatheMtn
 };
 
 enum FVNoDropFlagRule
