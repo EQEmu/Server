@@ -47,7 +47,7 @@ public:
 
 	static std::unordered_map<uint32, Bazaar_Results> GetItemsForBazaarSearch(
 		Database& db,
-		const std::vector<std::string> &search_ids,
+		const std::unordered_set<std::string> &search_ids,
 		const std::string &name,
 		const std::string &field_criteria_items,
 		const std::string &where_criteria_items,
@@ -57,7 +57,7 @@ public:
 		auto query = fmt::format(
 			"SELECT id, name, stackable, icon, {} "
 			"FROM items "
-			"WHERE `name` LIKE '%%{}%%' AND {} AND id IN({}) "
+			"WHERE `name` LIKE '%{}%' AND {} AND id IN({}) "
 			"ORDER BY id ASC",
 			field_criteria_items,
 			Strings::Escape(name),
