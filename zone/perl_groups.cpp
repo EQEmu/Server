@@ -173,8 +173,8 @@ void perl_register_group()
 	package.add("GetLeaderName", &Perl_Group_GetLeaderName);
 	package.add("GetLowestLevel", &Perl_Group_GetLowestLevel);
 	package.add("GetMember", &Perl_Group_GetMember);
-	package.add("GetMemberRole", (uint8_t(*)(Group*, Mob*)) &Perl_Group_GetMemberRole);
-	package.add("GetMemberRole", (uint8_t(*)(Group*, const char*)) &Perl_Group_GetMemberRole);
+	package.add("GetMemberRole", (uint8_t(*)(Group*, Mob*))&Perl_Group_GetMemberRole);
+	package.add("GetMemberRole", (uint8_t(*)(Group*, const char*))&Perl_Group_GetMemberRole);
 	package.add("GetTotalGroupDamage", &Perl_Group_GetTotalGroupDamage);
 	package.add("GroupCount", &Perl_Group_GroupCount);
 	package.add("GroupMessage", (void(*)(Group*, Mob*, const char*))&Perl_Group_GroupMessage);

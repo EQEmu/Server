@@ -124,8 +124,8 @@ public:
 	void	SetGroupTankTarget(Mob *m);
 	void	SetGroupPullerTarget(Mob *m);
 	bool	HasRole(Mob *m, uint8 Role);
-	uint8 GetMemberRole(Mob* m);
-	uint8 GetMemberRole(const char* name);
+	uint8	GetMemberRole(Mob* m);
+	uint8	GetMemberRole(const char* name);
 	void	NotifyAssistTarget(Client *c);
 	void	NotifyTankTarget(Client *c);
 	void	NotifyPullerTarget(Client *c);
