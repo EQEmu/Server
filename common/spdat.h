@@ -24,6 +24,7 @@
 
 #define SPELL_UNKNOWN 0xFFFF
 #define POISON_PROC 0xFFFE
+#define SPELL_SUPPRESSED 0xFFFD
 #define SPELLBOOK_UNKNOWN 0xFFFFFFFF		//player profile spells are 32 bit
 
 //some spell IDs which will prolly change, but are needed
@@ -1586,6 +1587,7 @@ typedef enum {
 #define SE_Duration_HP_Pct				524 // implemented - Decrease Current Hit Points by % of Total Hit Points per Tick, up to a MAX per tick
 #define SE_Duration_Mana_Pct			525 // implemented - Decrease Current Mana by % of Total Mana per Tick, up to a MAX per tick
 #define SE_Duration_Endurance_Pct		526 // implemented - Decrease Current Endurance by % of Total Hit Points per Tick, up to a MAX per tick
+#define SE_SuppressBuff				527 // implemented - Temporarily disable beneficial buff
 
 
 // LAST
@@ -1816,6 +1818,7 @@ bool IsEffectInSpell(uint16 spell_id, int effect_id);
 uint16 GetSpellTriggerSpellID(uint16 spell_id, int effect_id);
 bool IsBlankSpellEffect(uint16 spell_id, int effect_index);
 bool IsValidSpell(uint32 spell_id);
+bool IsValidOrSuppressedSpell(uint32 spell_id);
 bool IsSummonSpell(uint16 spell_id);
 bool IsDamageSpell(uint16 spell_id);
 bool IsAnyDamageSpell(uint16 spell_id);

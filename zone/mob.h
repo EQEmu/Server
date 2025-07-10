@@ -453,7 +453,7 @@ public:
 	void BuffFadeBeneficial();
 	void BuffFadeNonPersistDeath();
 	void BuffFadeDetrimental();
-	void BuffFadeBySlot(int slot, bool iRecalcBonuses = true);
+	void BuffFadeBySlot(int slot, bool iRecalcBonuses = true, bool suppress = false, uint32 suppresstics = 0);
 	void BuffFadeDetrimentalByCaster(Mob *caster);
 	void BuffFadeBySitModifier();
 	void BuffFadeSongs();
@@ -967,7 +967,9 @@ public:
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
 	uint16 GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 	bool TryFadeEffect(int slot);
-	void DispelMagic(Mob* casterm, uint16 spell_id, int effect_value);
+	void DispelMagic(Mob* casterm, uint16 spell_id, int effect_value, int chance = 1000, bool detrimental_only = false, bool benficial_only = false);
+	bool IsSuppressableBuff(int slot) const;
+	void SuppressBuff(Mob* caster, uint16 spell_id, int tic_count);
 	bool TrySpellEffectResist(uint16 spell_id);
 	int32 GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining, bool from_buff_tic = false);
 	int64 GetFcDamageAmtIncoming(Mob *caster, int32 spell_id, bool from_buff_tic = false);

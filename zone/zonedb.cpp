@@ -2897,7 +2897,7 @@ void ZoneDatabase::SaveBuffs(Client *client)
 	uint32 character_buff_count = 0;
 
 	for (int slot_id = 0; slot_id < max_buff_slots; slot_id++) {
-		if (!IsValidSpell(buffs[slot_id].spellid)) {
+		if (!IsValidOrSuppressedSpell(buffs[slot_id].spellid)) {
 			continue;
 		}
 
@@ -2907,16 +2907,18 @@ void ZoneDatabase::SaveBuffs(Client *client)
 	v.reserve(character_buff_count);
 
 	for (int slot_id = 0; slot_id < max_buff_slots; slot_id++) {
-		if (!IsValidSpell(buffs[slot_id].spellid)) {
+		if (!IsValidOrSuppressedSpell(buffs[slot_id].spellid)) {
 			continue;
 		}
 
+		bool suppressed = buffs[slot_id].spellid == SPELL_SUPPRESSED;
+
 		e.character_id   = client->CharacterID();
 		e.slot_id        = slot_id;
-		e.spell_id       = buffs[slot_id].spellid;
+		e.spell_id       = suppressed ? buffs[slot_id].suppressedid : buffs[slot_id].spellid;
 		e.caster_level   = buffs[slot_id].casterlevel;
 		e.caster_name    = buffs[slot_id].caster_name;
-		e.ticsremaining  = buffs[slot_id].ticsremaining;
+		e.ticsremaining  = suppressed ? buffs[slot_id].suppressedticsremaining : buffs[slot_id].ticsremaining;
 		e.counters       = buffs[slot_id].counters;
 		e.numhits        = buffs[slot_id].hit_number;
 		e.melee_rune     = buffs[slot_id].melee_rune;
@@ -2999,6 +3001,8 @@ void ZoneDatabase::LoadBuffs(Client *client)
 		buffs[e.slot_id].virus_spread_time = 0;
 		buffs[e.slot_id].UpdateClient      = false;
 		buffs[e.slot_id].instrument_mod    = e.instrument_mod;
+		buffs[e.slot_id].suppressedid            = 0;
+		buffs[e.slot_id].suppressedticsremaining = -1;
 	}
 
 	// We load up to the most our client supports
