@@ -49,6 +49,8 @@ QuestParserCollection::QuestParserCollection()
 	_global_bot_quest_status    = QuestUnloaded;
 	_merc_quest_status          = QuestUnloaded;
 	_global_merc_quest_status   = QuestUnloaded;
+	_zone_quest_status          = QuestUnloaded;
+	_global_zone_quest_status   = QuestUnloaded;
 }
 
 QuestParserCollection::~QuestParserCollection() { }
@@ -85,6 +87,7 @@ void QuestParserCollection::ReloadQuests(bool reset_timers)
 {
 	if (reset_timers) {
 		quest_manager.ClearAllTimers();
+		zone->StopAllTimers();
 	}
 
 	MapOpcodes();
@@ -98,6 +101,8 @@ void QuestParserCollection::ReloadQuests(bool reset_timers)
 	_global_bot_quest_status    = QuestUnloaded;
 	_merc_quest_status          = QuestUnloaded;
 	_global_merc_quest_status   = QuestUnloaded;
+	_zone_quest_status          = QuestUnloaded;
+	_global_zone_quest_status   = QuestUnloaded;
 
 	_spell_quest_status.clear();
 	_item_quest_status.clear();
@@ -424,6 +429,49 @@ bool QuestParserCollection::MercHasQuestSubGlobal(QuestEventID event_id)
 bool QuestParserCollection::MercHasQuestSub(QuestEventID event_id)
 {
 	return MercHasQuestSubLocal(event_id) || MercHasQuestSubGlobal(event_id);
+}
+
+bool QuestParserCollection::ZoneHasQuestSubLocal(QuestEventID event_id)
+{
+	if (_zone_quest_status == QuestUnloaded) {
+		std::string filename;
+		auto        qi = GetQIByZoneQuest(filename);
+
+		if (qi) {
+			_zone_quest_status = qi->GetIdentifier();
+			qi->LoadZoneScript(filename);
+			return qi->ZoneHasQuestSub(event_id);
+		}
+	} else if (_zone_quest_status != QuestFailedToLoad) {
+		auto iter = _interfaces.find(_zone_quest_status);
+		return iter->second->ZoneHasQuestSub(event_id);
+	}
+
+	return false;
+}
+
+bool QuestParserCollection::ZoneHasQuestSubGlobal(QuestEventID event_id)
+{
+	if (_global_zone_quest_status == QuestUnloaded) {
+		std::string filename;
+		auto        qi = GetQIByGlobalZoneQuest(filename);
+
+		if (qi) {
+			_global_zone_quest_status = qi->GetIdentifier();
+			qi->LoadGlobalZoneScript(filename);
+			return qi->GlobalZoneHasQuestSub(event_id);
+		}
+	} else if (_global_zone_quest_status != QuestFailedToLoad) {
+		auto iter = _interfaces.find(_global_zone_quest_status);
+		return iter->second->GlobalZoneHasQuestSub(event_id);
+	}
+
+	return false;
+}
+
+bool QuestParserCollection::ZoneHasQuestSub(QuestEventID event_id)
+{
+	return ZoneHasQuestSubLocal(event_id) || ZoneHasQuestSubGlobal(event_id);
 }
 
 int QuestParserCollection::EventNPC(
@@ -918,6 +966,83 @@ int QuestParserCollection::EventMercGlobal(
 		if (_global_merc_quest_status != QuestFailedToLoad) {
 			auto iter = _interfaces.find(_global_merc_quest_status);
 			return iter->second->EventGlobalMerc(event_id, merc, init, data, extra_data, extra_pointers);
+		}
+	}
+
+	return 0;
+}
+
+int QuestParserCollection::EventZone(
+	QuestEventID event_id,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	const int local_return   = EventZoneLocal(event_id, zone, data, extra_data, extra_pointers);
+	const int global_return  = EventZoneGlobal(event_id, zone, data, extra_data, extra_pointers);
+	const int default_return = DispatchEventZone(event_id, zone, data, extra_data, extra_pointers);
+
+	if (local_return != 0) {
+		return local_return;
+	} else if (global_return != 0) {
+		return global_return;
+	} else if (default_return != 0) {
+		return default_return;
+	}
+
+	return 0;
+}
+
+int QuestParserCollection::EventZoneLocal(
+	QuestEventID event_id,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (_zone_quest_status == QuestUnloaded) {
+		std::string filename;
+		auto        qi = GetQIByZoneQuest(filename);
+
+		if (qi) {
+			_zone_quest_status = qi->GetIdentifier();
+			qi->LoadZoneScript(filename);
+			return qi->EventZone(event_id, zone, data, extra_data, extra_pointers);
+		}
+	} else {
+		if (_zone_quest_status != QuestFailedToLoad) {
+			auto iter = _interfaces.find(_zone_quest_status);
+			return iter->second->EventZone(event_id, zone, data, extra_data, extra_pointers);
+		}
+	}
+
+	return 0;
+}
+
+int QuestParserCollection::EventZoneGlobal(
+	QuestEventID event_id,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	if (_global_zone_quest_status == QuestUnloaded) {
+		std::string filename;
+		auto        qi = GetQIByGlobalZoneQuest(filename);
+
+		if (qi) {
+			_global_zone_quest_status = qi->GetIdentifier();
+			qi->LoadGlobalZoneScript(filename);
+			return qi->EventGlobalZone(event_id, zone, data, extra_data, extra_pointers);
+		}
+	} else {
+		if (_global_zone_quest_status != QuestFailedToLoad) {
+			auto iter = _interfaces.find(_global_zone_quest_status);
+			return iter->second->EventGlobalZone(event_id, zone, data, extra_data, extra_pointers);
 		}
 	}
 
@@ -1425,6 +1550,86 @@ QuestInterface* QuestParserCollection::GetQIByGlobalMercQuest(std::string& filen
 	return nullptr;
 }
 
+QuestInterface* QuestParserCollection::GetQIByZoneQuest(std::string& filename)
+{
+	if (!zone || !zone->IsLoaded()) {
+		return nullptr;
+	}
+
+	std::string file_name;
+	for (auto& dir: PathManager::Instance()->GetQuestPaths()) {
+		const std::string& global_path = fmt::format(
+			"{}/{}",
+			dir,
+			QUEST_GLOBAL_DIRECTORY
+		);
+
+		const std::string& zone_path = fmt::format(
+			"{}/{}",
+			dir,
+			zone->GetShortName()
+		);
+
+		const std::string& zone_versioned_path = fmt::format(
+			"{}/{}/v{}",
+			dir,
+			zone->GetShortName(),
+			zone->GetInstanceVersion()
+		);
+
+		std::vector<std::string> file_names = {
+			fmt::format("{}/zone", zone_versioned_path), // Local versioned by Instance Version ./quests/zone/v0/zone.ext
+			fmt::format("{}/zone_v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
+			fmt::format("{}/zone", zone_path), // Local
+			fmt::format("{}/zone", global_path) // Global
+		};
+
+		for (auto& file: file_names) {
+			for (auto* e: _load_precedence) {
+				file_name = fmt::format(
+					"{}.{}",
+					file,
+					_extensions.find(e->GetIdentifier())->second
+				);
+
+				if (File::Exists(file_name)) {
+					filename = file_name;
+					return e;
+				}
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+QuestInterface* QuestParserCollection::GetQIByGlobalZoneQuest(std::string& filename)
+{
+	if (!zone) {
+		return nullptr;
+	}
+
+	std::string file_name;
+
+	for (auto& dir: PathManager::Instance()->GetQuestPaths()) {
+		for (auto* e: _load_precedence) {
+			file_name = fmt::format(
+				"{}/{}/global_zone.{}",
+				dir,
+				QUEST_GLOBAL_DIRECTORY,
+				_extensions.find(e->GetIdentifier())->second
+			);
+
+			if (File::Exists(file_name)) {
+				filename = file_name;
+				return e;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 void QuestParserCollection::GetErrors(std::list<std::string>& quest_errors)
 {
 	quest_errors.clear();
@@ -1553,6 +1758,26 @@ int QuestParserCollection::DispatchEventMerc(
 
 	for (const auto& e: _load_precedence) {
 		int i = e->DispatchEventMerc(event_id, merc, init, data, extra_data, extra_pointers);
+		if (i != 0) {
+			ret = i;
+		}
+	}
+
+	return ret;
+}
+
+int QuestParserCollection::DispatchEventZone(
+	QuestEventID event_id,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	int ret = 0;
+
+	for (const auto& e: _load_precedence) {
+		int i = e->DispatchEventZone(event_id, zone, data, extra_data, extra_pointers);
 		if (i != 0) {
 			ret = i;
 		}

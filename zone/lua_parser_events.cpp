@@ -2873,4 +2873,293 @@ void handle_bot_spell_blocked(
 	lua_setfield(L, -2, "cast_spell");
 }
 
+// Zone
+
+void handle_zone_null(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+}
+
+void handle_zone_click_door(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_Door l_door(std::any_cast<Doors*>(extra_pointers->at(0)));
+	luabind::adl::object l_door_o = luabind::adl::object(L, l_door);
+	l_door_o.push(L);
+	lua_setfield(L, -2, "door");
+
+	Lua_Client l_client(std::any_cast<Client*>(extra_pointers->at(1)));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
+void handle_zone_click_object(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_Object l_object(std::any_cast<Object*>(extra_pointers->at(0)));
+	luabind::adl::object l_object_o = luabind::adl::object(L, l_object);
+	l_object_o.push(L);
+	lua_setfield(L, -2, "object");
+
+	Lua_Client l_client(std::any_cast<Client*>(extra_pointers->at(1)));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
+void handle_zone_death(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(2)));
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+	l_mob_o.push(L);
+	lua_setfield(L, -2, "other");
+
+	lua_pushinteger(L, Strings::ToInt(sep.arg[0]));
+	lua_setfield(L, -2, "killer_id");
+
+	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
+	lua_setfield(L, -2, "damage");
+
+	const uint32 spell_id = Strings::ToUnsignedInt(sep.arg[2]);
+	if (IsValidSpell(spell_id)) {
+		Lua_Spell l_spell(&spells[spell_id]);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+		l_spell_o.push(L);
+		lua_setfield(L, -2, "spell");
+	} else {
+		Lua_Spell l_spell(nullptr);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+		l_spell_o.push(L);
+		lua_setfield(L, -2, "spell");
+	}
+
+	lua_pushinteger(L, Strings::ToInt(sep.arg[3]));
+	lua_setfield(L, -2, "skill_id");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[4]));
+	lua_setfield(L, -2, "killed_entity_id");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[5]));
+	lua_setfield(L, -2, "combat_start_time");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[6]));
+	lua_setfield(L, -2, "combat_end_time");
+
+	lua_pushinteger(L, Strings::ToBigInt(sep.arg[7]));
+	lua_setfield(L, -2, "damage_received");
+
+	lua_pushinteger(L, Strings::ToBigInt(sep.arg[8]));
+	lua_setfield(L, -2, "healing_received");
+
+	if (extra_pointers && extra_pointers->size() >= 1) {
+		Lua_Corpse l_corpse(std::any_cast<Corpse*>(extra_pointers->at(0)));
+		luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
+		l_corpse_o.push(L);
+		lua_setfield(L, -2, "corpse");
+	}
+
+	if (extra_pointers && extra_pointers->size() >= 2) {
+		Lua_NPC l_npc(std::any_cast<NPC*>(extra_pointers->at(1)));
+		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
+		l_npc_o.push(L);
+		lua_setfield(L, -2, "killed");
+	}
+}
+
+void handle_zone_despawn(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_NPC l_npc(std::any_cast<NPC*>(extra_pointers->at(0)));
+	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
+	l_npc_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
+void handle_zone_enter(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_Client l_client(std::any_cast<Client*>(extra_pointers->at(0)));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
+void handle_zone_loot(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_Client l_client(std::any_cast<Client*>(extra_pointers->at(2)));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+
+	Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+
+	Lua_Corpse l_corpse(std::any_cast<Corpse*>(extra_pointers->at(1)));
+	luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
+	l_corpse_o.push(L);
+	lua_setfield(L, -2, "corpse");
+}
+
+void handle_zone_payload(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, Strings::ToInt(sep.arg[0]));
+	lua_setfield(L, -2, "payload_id");
+
+	lua_pushstring(L, sep.argplus[1]);
+	lua_setfield(L, -2, "payload_value");
+}
+
+void handle_zone_pickup(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+
+	Lua_Client l_client(std::any_cast<Client*>(extra_pointers->at(1)));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
+void handle_zone_popup(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushinteger(L, Strings::ToInt(data));
+	lua_setfield(L, -2, "popup_id");
+
+	Lua_Client l_client(std::any_cast<Client*>(extra_pointers->at(0)));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
+void handle_zone_signal(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushinteger(L, Strings::ToInt(data));
+	lua_setfield(L, -2, "signal");
+}
+
+void handle_zone_spawn(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_NPC l_npc(std::any_cast<NPC*>(extra_pointers->at(0)));
+	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
+	l_npc_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
+void handle_zone_timer(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "timer");
+}
+
+void handle_zone_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushstring(L, sep.arg[0]);
+	lua_setfield(L, -2, "timer");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "duration");
+}
+
+void handle_zone_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "timer");
+}
+
 #endif
