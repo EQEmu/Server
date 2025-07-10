@@ -30,7 +30,12 @@ class Mob;
 
 #define MAX_MARKED_NPCS 3
 
-enum { RoleAssist = 1, RoleTank = 2, RolePuller = 4 };
+enum {
+	RoleAssist = 1,
+	RoleTank   = 2,
+	RolePuller = 4,
+	RoleLeader = 8
+};
 
 class GroupIDConsumer {
 public:
@@ -119,6 +124,8 @@ public:
 	void	SetGroupTankTarget(Mob *m);
 	void	SetGroupPullerTarget(Mob *m);
 	bool	HasRole(Mob *m, uint8 Role);
+	uint8	GetMemberRole(Mob* m);
+	uint8	GetMemberRole(const char* name);
 	void	NotifyAssistTarget(Client *c);
 	void	NotifyTankTarget(Client *c);
 	void	NotifyPullerTarget(Client *c);
