@@ -364,6 +364,8 @@ public:
 	bool SetAutoLoginCharacterNameByAccountID(uint32 account_id, const std::string& character_name);
 	void SpawnCircle(uint32 npc_id, glm::vec4 position, float radius, uint32 points);
 	void SpawnGrid(uint32 npc_id, glm::vec4 position, float spacing, uint32 spawn_count);
+	std::vector<std::string> GetPausedTimers(Mob* m);
+	std::vector<std::string> GetTimers(Mob* m);
 
 	Bot *GetBot() const;
 	Client *GetInitiator() const;

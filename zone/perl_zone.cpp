@@ -653,6 +653,40 @@ void Perl_Zone_Signal(Zone* self, int signal_id)
 	self->Signal(signal_id);
 }
 
+perl::array Perl_Zone_GetPausedTimers(Zone* self)
+{
+	perl::array a;
+
+	const auto& l = self->GetPausedTimers();
+
+	if (!l.empty()) {
+		a.reserve(l.size());
+
+		for (const auto& v : l) {
+			a.push_back(v);
+		}
+	}
+
+	return a;
+}
+
+perl::array Perl_Zone_GetTimers(Zone* self)
+{
+	perl::array a;
+
+	const auto& l = self->GetTimers();
+
+	if (!l.empty()) {
+		a.reserve(l.size());
+
+		for (const auto& v : l) {
+			a.push_back(v);
+		}
+	}
+
+	return a;
+}
+
 void perl_register_zone()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -723,6 +757,7 @@ void perl_register_zone()
 	package.add("GetMinimumStatus", &Perl_Zone_GetMinimumStatus);
 	package.add("GetNote", &Perl_Zone_GetNote);
 	package.add("GetNPCMaximumAggroDistance", &Perl_Zone_GetNPCMaximumAggroDistance);
+	package.add("GetPausedTimers", &Perl_Zone_GetPausedTimers);
 	package.add("GetPEQZone", &Perl_Zone_GetPEQZone);
 	package.add("GetRainChance", (int(*)(Zone*))&Perl_Zone_GetRainChance);
 	package.add("GetRainChance", (int(*)(Zone*, uint8))&Perl_Zone_GetRainChance);
@@ -746,6 +781,7 @@ void perl_register_zone()
 	package.add("GetTimeZone", &Perl_Zone_GetTimeZone);
 	package.add("GetTimerDuration", &Perl_Zone_GetTimerDuration);
 	package.add("GetTimerRemainingTime", &Perl_Zone_GetTimerRemainingTime);
+	package.add("GetTimers", &Perl_Zone_GetTimers);
 	package.add("GetZoneDescription", &Perl_Zone_GetZoneDescription);
 	package.add("GetZoneID", &Perl_Zone_GetZoneID);
 	package.add("GetZoneType", &Perl_Zone_GetZoneType);

@@ -3559,4 +3559,30 @@ void Zone::SendPayload(int payload_id, std::string payload_value)
 	}
 }
 
+std::vector<std::string> Zone::GetPausedTimers()
+{
+	std::vector<std::string> v;
+
+	if (!paused_zone_timers.empty()) {
+		for (auto e = paused_zone_timers.begin(); e != paused_zone_timers.end(); e++) {
+			v.emplace_back(e->name);
+		}
+	}
+
+	return v;
+}
+
+std::vector<std::string> Zone::GetTimers()
+{
+	std::vector<std::string> v;
+
+	if (!zone_timers.empty()) {
+		for (auto e = zone_timers.begin(); e != zone_timers.end(); e++) {
+			v.emplace_back(e->name);
+		}
+	}
+
+	return v;
+}
+
 #include "zone_loot.cpp"
