@@ -42,6 +42,7 @@
 #include <vector>
 #include <cstdarg>
 #include <type_traits>
+#include <unordered_set>
 
 #ifdef _WIN32
 #include <ctype.h>
@@ -79,6 +80,7 @@ public:
 	static std::string Escape(const std::string &s);
 	static std::string GetBetween(const std::string &s, std::string start_delim, std::string stop_delim);
 	static std::string Implode(const std::string& glue, std::vector<std::string> src);
+	static std::string Implode(const std::string& glue, std::unordered_set<std::string> src);
 	static std::string Join(const std::vector<std::string> &ar, const std::string &delim);
 	static std::string Join(const std::vector<uint32_t> &ar, const std::string &delim);
 	static std::string MillisecondsToTime(int duration);
