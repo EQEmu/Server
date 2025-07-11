@@ -4673,10 +4673,8 @@ std::vector<std::string> QuestManager::GetPausedTimers(Mob* m)
 	std::vector<std::string> v;
 
 	if (m && !PTimerList.empty()) {
-		LogError("m valid | !PTimerList.empty()");
 		for (auto e = PTimerList.begin(); e != PTimerList.end(); e++) {
 			if (e->owner == m) {
-				LogError("e->owner == m | e->name [{}]", e->name);
 				v.emplace_back(e->name);
 			}
 		}
@@ -4690,10 +4688,8 @@ std::vector<std::string> QuestManager::GetTimers(Mob* m)
 	std::vector<std::string> v;
 
 	if (m && !QTimerList.empty()) {
-		LogError("m valid | !QTimerList.empty()");
 		for (auto e = QTimerList.begin(); e != QTimerList.end(); e++) {
 			if (e->mob == m) {
-				LogError("e->mob == m | e->name [{}]", e->name);
 				v.emplace_back(e->name);
 			}
 		}
