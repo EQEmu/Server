@@ -905,7 +905,7 @@ bool WorldDatabase::GetCharSelInventory(
 			inst->SetOrnamentIcon(e.ornament_icon);
 			inst->SetOrnamentationIDFile(e.ornament_idfile);
 			inst->SetOrnamentHeroModel(e.ornament_hero_model);
-		} else {
+		} else if (item->HerosForgeModel > 0) {
 			inst->SetOrnamentHeroModel(item->HerosForgeModel);
 		}
 
