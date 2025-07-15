@@ -286,8 +286,8 @@ uint32 Mob::GetHerosForgeModel(uint8 material_slot) const
 					if (augment) {
 						item              = augment->GetItem();
 						heros_forge_model = item->HerosForgeModel;
-					} else if (inst->GetOrnamentHeroModel()) {
-						heros_forge_model = inst->GetOrnamentHeroModel();
+					} else if (inst->GetOrnamentHeroModel(material_slot)) {
+						heros_forge_model = inst->GetOrnamentHeroModel(material_slot);
 					}
 				}
 			}
@@ -421,7 +421,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 		return key;
 	};
 
-	
+
 	auto dedupe_key = build_key(*w);
 	auto send_if_changed = [&](Client* client) {
 		auto& last_key = m_last_seen_wearchange[client->GetID()][material_slot];
