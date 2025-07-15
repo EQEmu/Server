@@ -901,9 +901,13 @@ bool WorldDatabase::GetCharSelInventory(
 			inst->SetCustomDataString(e.custom_data);
 		}
 
-		inst->SetOrnamentIcon(e.ornament_icon);
-		inst->SetOrnamentationIDFile(e.ornament_idfile);
-		inst->SetOrnamentHeroModel(e.ornament_hero_model);
+		if (e.ornament_icon != 0 || e.ornament_idfile != 0 || e.ornament_hero_model != 0) {
+			inst->SetOrnamentIcon(e.ornament_icon);
+			inst->SetOrnamentationIDFile(e.ornament_idfile);
+			inst->SetOrnamentHeroModel(e.ornament_hero_model);
+		} else {
+			inst->SetOrnamentHeroModel(item->HerosForgeModel);
+		}
 
 		inv->PutItem(e.slot_id, *inst);
 
