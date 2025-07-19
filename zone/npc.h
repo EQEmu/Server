@@ -248,7 +248,7 @@ public:
 
 	uint16 GetWaypointMax() const { return wp_m; }
 	int32 GetGrid() const { return grid; }
-	Spawn2* GetSpawn() { return respawn2 ? respawn2 : nullptr; }
+	Spawn2* GetSpawn() { return respawn2_id ? entity_list.GetSpawnByID(respawn2_id) : nullptr; }
 	uint32 GetSpawnGroupId() const { return spawn_group_id; }
 	uint32 GetSpawnPointID() const;
 
@@ -417,7 +417,7 @@ public:
 	bool  IsProximitySet();
 
 	NPCProximity* proximity;
-	Spawn2*	respawn2;
+	uint32 respawn2_id;
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
 
