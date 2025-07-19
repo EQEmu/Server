@@ -8,7 +8,7 @@ void command_spawnfix(Client* c, const Seperator* sep)
 	}
 
 	auto target = c->GetTarget()->CastToNPC();
-	auto spawn2 = target->respawn2;
+	auto spawn2 = target->GetSpawn();
 
 	if (!spawn2) {
 		c->Message(Chat::White, "Failed to fix spawn, the spawn must not exist in the database.");

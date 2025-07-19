@@ -2611,8 +2611,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	safe_delete(app);
 
-	if (respawn2) {
-		respawn2->DeathReset(1);
+	if (respawn2_id) {
+		auto respawn2 = GetSpawn();
+		if (respawn2) {
+			respawn2->DeathReset(1);
+		}
 	}
 
 	if (killer_mob && GetClass() != Class::LDoNTreasure) {
