@@ -317,7 +317,10 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		}
 	}
 
-	out << rang::fgB::black << "#" << func << " ";
+	// check if func is not empty
+	if (func && *func) {
+		out << rang::fgB::black << "#" << func << " ";
+	}
 
 	if (!origination_info.zone_short_name.empty()) {
 		out << rang::fgB::black << "-- "

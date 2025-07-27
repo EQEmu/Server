@@ -87,16 +87,16 @@ void PathManager::Init()
 	constexpr int break_length = 70;
 
 	LogInfo("Loading server paths");
-	LogInfo("{}", Strings::Repeat("-", break_length));
+	LogInfoNoFn("{}", Strings::Repeat("-", break_length));
 	for (const auto& [name, in_path] : paths) {
 		if (!in_path.empty()) {
-			LogInfo("{:>{}} > [{:<{}}]", name, name_width, in_path, path_width);
+			LogInfoNoFn("{:>{}} > {:<{}}", name, name_width, in_path, path_width);
 		}
 	}
 
 	auto log_paths = [&](const std::string& label, const std::vector<std::string>& paths) {
 		if (!paths.empty()) {
-			LogInfo("{:>{}} > [{:<{}}]", label, name_width - 1, Strings::Join(paths, ";"), path_width);
+			LogInfoNoFn("{:>{}} > {:<{}}", label, name_width, Strings::Join(paths, ";"), path_width);
 		}
 	};
 
@@ -104,7 +104,7 @@ void PathManager::Init()
 	log_paths("plugins", m_plugin_paths);
 	log_paths("lua_modules", m_lua_module_paths);
 
-	LogInfo("{}", Strings::Repeat("-", break_length));
+	LogInfoNoFn("{}", Strings::Repeat("-", break_length));
 }
 
 const std::string &PathManager::GetServerPath() const

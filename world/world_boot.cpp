@@ -419,7 +419,7 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 	const auto c = EQEmuConfig::get();
 
 	if (c->DisableConfigChecks) {
-		LogInfo("Configuration checking [disabled]");
+		LogInfoNoFn("Configuration checking [disabled]");
 		return;
 	}
 
@@ -429,17 +429,17 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 	const std::ifstream is_in_docker("/.dockerenv");
 
 	if (local_address.empty() && public_address.empty()) {
-		LogInfo("Configuration check, probes failed for local and public address, returning");
+		LogInfoNoFn("Configuration check, probes failed for local and public address, returning");
 		return;
 	}
 
-	LogInfo("Checking for possible configuration issues");
-	LogInfo("To disable configuration checks, set [server.disable_config_checks] to [true] in [{}]", config_file);
+	LogInfoNoFn("Checking for possible configuration issues");
+	LogInfoNoFn("To disable configuration checks, set [server.disable_config_checks] to [true] in [{}]", config_file);
 
 	std::string config_address = c->WorldAddress;
 	if (!IpUtil::IsIPAddress(config_address)) {
 		config_address = IpUtil::DNSLookupSync(c->WorldAddress, 9000);
-		LogInfo(
+		LogInfoNoFn(
 			"World config address using DNS [{}] resolves to [{}]",
 			c->WorldAddress,
 			config_address
@@ -454,16 +454,12 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 		&& local_address != c->LocalAddress
 		&& !is_in_docker
 		) {
-		LogWarning("# LAN detection (Configuration)");
-		LogWarning("");
-		LogWarning("You appear to be on a LAN and your localaddress may not be properly set!");
-		LogWarning("This can prevent local clients from properly connecting to your server");
-		LogWarning("");
-		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
-		LogWarning("");
-		LogWarning("Config file [{}] path [server.world] variable [localaddress]", config_file);
-		LogWarning("");
-		LogWarning("Local address (eqemu_config) value [{}] detected value [{}]", c->LocalAddress, local_address);
+		LogWarningNoFn("# LAN detection (Configuration)");
+		LogWarningNoFn("You appear to be on a LAN and your localaddress may not be properly set!");
+		LogWarningNoFn("This can prevent local clients from properly connecting to your server");
+		LogWarningNoFn("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
+		LogWarningNoFn("Config file [{}] path [server.world] variable [localaddress]", config_file);
+		LogWarningNoFn("Local address (eqemu_config) value [{}] detected value [{}]", c->LocalAddress, local_address);
 		std::cout << std::endl;
 	}
 
@@ -475,28 +471,21 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 		)
 		&& is_in_docker
 		) {
-		LogWarning("# Docker Configuration (Configuration)");
-		LogWarning("");
-		LogWarning("You appear to running EQEmu in a docker container");
-		LogWarning("In order for networking to work properly you will need to properly configure your server");
-		LogWarning("");
-		LogWarning(
+		LogWarningNoFn("# Docker Configuration (Configuration)");
+		LogWarningNoFn("You appear to running EQEmu in a docker container");
+		LogWarningNoFn("In order for networking to work properly you will need to properly configure your server");
+		LogWarningNoFn(
 			"If your Docker host is on a [LAN] or behind a NAT / Firewall, your [localaddress] variable under [server.world] will need to");
-		LogWarning(
+		LogWarningNoFn(
 			"be set to your LAN address on the host, not the container address. [address] will need to be your public address");
-		LogWarning("");
-		LogWarning(
+		LogWarningNoFn(
 			"If your Docker host is directly on the [public internet], your [localaddress] variable under [server.world] can be set to [127.0.0.1]."
 		);
-		LogWarning("");
-		LogWarning("[address] will need to be your public address");
-		LogWarning("");
-		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
-		LogWarning("");
-		LogWarning("Config file [{}] path [server.world] variable(s) [localaddress] [address]", config_file);
-		LogWarning("");
-		LogWarning("Local address (eqemu_config) value [{}] detected value [{}]", c->LocalAddress, local_address);
-		LogWarning(
+		LogWarningNoFn("[address] will need to be your public address");
+		LogWarningNoFn("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
+		LogWarningNoFn("Config file [{}] path [server.world] variable(s) [localaddress] [address]", config_file);
+		LogWarningNoFn("Local address (eqemu_config) value [{}] detected value [{}]", c->LocalAddress, local_address);
+		LogWarningNoFn(
 			"Public address (eqemu_config) value [{}] detected value [{}]",
 			config_address,
 			public_address
@@ -506,30 +495,23 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 
 	// docker LAN not set
 	if (c->LocalAddress.empty() && is_in_docker) {
-		LogWarning("# Docker LAN (Configuration)");
-		LogWarning("");
-		LogWarning("You appear to running EQEmu in a docker container");
-		LogWarning(
+		LogWarningNoFn("# Docker LAN (Configuration)");
+		LogWarningNoFn("You appear to running EQEmu in a docker container");
+		LogWarningNoFn(
 			"Your local address does not appear to be set, this may not be an issue if your deployment is not on a LAN"
 		);
-		LogWarning("");
-		LogWarning(
+		LogWarningNoFn(
 			"If your Docker host is on a [LAN] or behind a NAT / Firewall, your [localaddress] variable under [server.world] will need to");
-		LogWarning(
+		LogWarningNoFn(
 			"be set to your LAN address on the host, not the container address. [address] will need to be your public address");
-		LogWarning("");
-		LogWarning(
+		LogWarningNoFn(
 			"If your Docker host is directly on the [public internet], your [localaddress] variable under [server.world] can be set to [127.0.0.1]."
 		);
-		LogWarning("");
-		LogWarning("[address] will need to be your public address");
-		LogWarning("");
-		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
-		LogWarning("");
-		LogWarning("Config file [{}] path [server.world] variable(s) [localaddress] [address]", config_file);
-		LogWarning("");
-		LogWarning("Local address (eqemu_config) value [{}] detected value [{}]", c->LocalAddress, local_address);
-		LogWarning(
+		LogWarningNoFn("[address] will need to be your public address");
+		LogWarningNoFn("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
+		LogWarningNoFn("Config file [{}] path [server.world] variable(s) [localaddress] [address]", config_file);
+		LogWarningNoFn("Local address (eqemu_config) value [{}] detected value [{}]", c->LocalAddress, local_address);
+		LogWarningNoFn(
 			"Public address (eqemu_config) value [{}] detected value [{}]",
 			config_address,
 			public_address
@@ -539,15 +521,11 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 
 	// public address different from configuration
 	if (!config_address.empty() && public_address != config_address) {
-		LogWarning("# Public address (Configuration)");
-		LogWarning("");
-		LogWarning("Your configured public address appears to be different from what's detected!");
-		LogWarning("");
-		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
-		LogWarning("");
-		LogWarning("Config file [{}] path [server.world] variable [address]", config_file);
-		LogWarning("");
-		LogWarning(
+		LogWarningNoFn("# Public address (Configuration)");
+		LogWarningNoFn("Your configured public address appears to be different from what's detected!");
+		LogWarningNoFn("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
+		LogWarningNoFn("Config file [{}] path [server.world] variable [address]", config_file);
+		LogWarningNoFn(
 			"Public address (eqemu_config) value [{}] detected value [{}]",
 			config_address,
 			public_address
@@ -557,17 +535,13 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 
 	// public address set to meta-address
 	if (config_address == "0.0.0.0") {
-		LogWarning("# Public meta-address (Configuration)");
-		LogWarning("");
-		LogWarning("Your configured public address is set to a meta-address (0.0.0.0) (all-interfaces)");
-		LogWarning(
+		LogWarningNoFn("# Public meta-address (Configuration)");
+		LogWarningNoFn("Your configured public address is set to a meta-address (0.0.0.0) (all-interfaces)");
+		LogWarningNoFn(
 			"The meta-address may not work properly and it is recommended you configure your public address explicitly");
-		LogWarning("");
-		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
-		LogWarning("");
-		LogWarning("Config file [{}] path [server.world] variable [address]", config_file);
-		LogWarning("");
-		LogWarning(
+		LogWarningNoFn("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
+		LogWarningNoFn("Config file [{}] path [server.world] variable [address]", config_file);
+		LogWarningNoFn(
 			"Public address (eqemu_config) value [{}] detected value [{}]",
 			config_address,
 			public_address
@@ -577,18 +551,14 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 
 	// local address set to meta-address
 	if (c->LocalAddress == "0.0.0.0") {
-		LogWarning("# Local meta-address (Configuration)");
-		LogWarning("");
-		LogWarning("Your configured local address is set to a meta-address (0.0.0.0) (all-interfaces)");
-		LogWarning(
+		LogWarningNoFn("# Local meta-address (Configuration)");
+		LogWarningNoFn("Your configured local address is set to a meta-address (0.0.0.0) (all-interfaces)");
+		LogWarningNoFn(
 			"The meta-address may not work properly and it is recommended you configure your local address explicitly"
 		);
-		LogWarning("");
-		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
-		LogWarning("");
-		LogWarning("Config file [{}] path [server.world] variable [localaddress]", config_file);
-		LogWarning("");
-		LogWarning("Local address (eqemu_config) value [{}] detected value [{}]", c->LocalAddress, local_address);
+		LogWarningNoFn("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
+		LogWarningNoFn("Config file [{}] path [server.world] variable [localaddress]", config_file);
+		LogWarningNoFn("Local address (eqemu_config) value [{}] detected value [{}]", c->LocalAddress, local_address);
 		std::cout << std::endl;
 	}
 
@@ -596,16 +566,13 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 	if (
 		(!config_address.empty() && c->GetUCSHost() != config_address)
 		) {
-		LogWarning("# UCS Address Mailhost (Configuration)");
-		LogWarning("");
-		LogWarning(
+		LogWarningNoFn("# UCS Address Mailhost (Configuration)");
+		LogWarningNoFn(
 			"UCS (Universal Chat Service) mail or chat appears to use a different address from your main world address"
 		);
-		LogWarning("This can result in a chat service that doesn't network properly");
-		LogWarning("");
-		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#mailserver]");
-		LogWarning("");
-		LogWarning(
+		LogWarningNoFn("This can result in a chat service that doesn't network properly");
+		LogWarningNoFn("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#mailserver]");
+		LogWarningNoFn(
 			"[server.world.address] value [{}] [server.ucs.host] [{}]",
 			config_address,
 			c->GetUCSHost()

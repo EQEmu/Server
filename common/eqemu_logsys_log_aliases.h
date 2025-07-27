@@ -449,6 +449,11 @@ inline auto logsys = EQEmuLogSys::Instance();
         OutF(logsys, Logs::General, Logs::Info, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogInfoNoFn(message, ...) do {\
+    if (logsys->IsLogEnabled(Logs::General, Logs::Info))\
+        OutF(logsys, Logs::General, Logs::Info, "", "", 0, message, ##__VA_ARGS__);\
+} while (0)
+
 #define LogInfoDetail(message, ...) do {\
     if (logsys->IsLogEnabled(Logs::Detail, Logs::Info))\
         OutF(logsys, Logs::Detail, Logs::Info, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -457,6 +462,11 @@ inline auto logsys = EQEmuLogSys::Instance();
 #define LogWarning(message, ...) do {\
     if (logsys->IsLogEnabled(Logs::General, Logs::Warning))\
         OutF(logsys, Logs::General, Logs::Warning, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogWarningNoFn(message, ...) do {\
+    if (logsys->IsLogEnabled(Logs::General, Logs::Info))\
+        OutF(logsys, Logs::General, Logs::Warning, "", "", 0, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogWarningDetail(message, ...) do {\

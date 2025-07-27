@@ -55,7 +55,7 @@ void DatabaseUpdate::CheckDbUpdates()
 	}
 
 	if (UpdateManifest(manifest_entries, v.server_database_version, b.server_database_version)) {
-		LogInfo(
+		LogInfoNoFn(
 			"Updates ran successfully, setting database version to [{}] from [{}]",
 			b.server_database_version,
 			v.server_database_version
@@ -64,7 +64,7 @@ void DatabaseUpdate::CheckDbUpdates()
 	}
 
 	if (UpdateManifest(manifest_entries_custom, v.custom_database_version, b.custom_database_version)) {
-		LogInfo(
+		LogInfoNoFn(
 			"Updates ran successfully, setting database version to [{}] from [{}]",
 			b.custom_database_version,
 			v.custom_database_version
@@ -337,9 +337,9 @@ DatabaseUpdate *DatabaseUpdate::SetSkipBackup(bool skip)
 
 bool DatabaseUpdate::CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b)
 {
-	LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
+	LogInfoNoFn("{}", Strings::Repeat("-", BREAK_LENGTH));
 
-	LogInfo(
+	LogInfoNoFn(
 		"{:>8} | database [{}] binary [{}] {}",
 		"Server",
 		v.server_database_version,
@@ -348,7 +348,7 @@ bool DatabaseUpdate::CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b)
 	);
 
 	if (RuleB(Bots, Enabled) && b.bots_database_version > 0) {
-		LogInfo(
+		LogInfoNoFn(
 			"{:>8} | database [{}] binary [{}] {}",
 			"Bots",
 			v.bots_database_version,
@@ -358,7 +358,7 @@ bool DatabaseUpdate::CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b)
 	}
 
 	if (b.custom_database_version > 0) {
-		LogInfo(
+		LogInfoNoFn(
 			"{:>8} | database [{}] binary [{}] {}",
 			"Custom",
 			v.custom_database_version,
@@ -367,9 +367,9 @@ bool DatabaseUpdate::CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b)
 		);
 	}
 
-	LogInfo("{:>8} | [server.auto_database_updates] [<green>true]", "Config");
+	LogInfoNoFn("{:>8} | [server.auto_database_updates] [<green>true]", "Config");
 
-	LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
+	LogInfoNoFn("{}", Strings::Repeat("-", BREAK_LENGTH));
 
 	// server database version is required
 	bool server_up_to_date = v.server_database_version >= b.server_database_version;
