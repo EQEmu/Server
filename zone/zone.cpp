@@ -1288,6 +1288,7 @@ void Zone::ReloadStaticData() {
 
 	WorldContentService::Instance()->SetExpansionContext()->ReloadContentFlags();
 
+
 	LogInfo("Zone Static Data Reloaded");
 }
 
@@ -3384,29 +3385,27 @@ bool Zone::IsPausedTimer(std::string name)
 	return e != paused_zone_timers.end();
 }
 
-void Zone::ResumeTimer(std::string name)
+void Zone::PauseTimer(std::string name)
 {
 	if (
 		!IsLoaded() ||
-		paused_zone_timers.empty() ||
-		!IsPausedTimer(name)
+		zone_timers.empty() ||
+		!HasTimer(name) ||
+		IsPausedTimer(name)
 	) {
 		return;
 	}
 
 	uint32 remaining_time = 0;
 
-	if (!paused_zone_timers.empty()) {
-		for (auto e = paused_zone_timers.begin(); e != paused_zone_timers.end(); e++) {
+	const bool has_pause_event = parse->ZoneHasQuestSub(EVENT_TIMER_PAUSE);
+
+	if (!zone_timers.empty()) {
+		for (auto e = zone_timers.begin(); e != zone_timers.end(); e++) {
 			if (e->name == name) {
-				remaining_time = e->remaining_time;
+				remaining_time = e->timer_.GetRemainingTime();
 
-				paused_zone_timers.erase(e);
-
-				if (!remaining_time) {
-					LogQuests("Paused timer [{}] not found or has expired.", name);
-					return;
-				}
+				zone_timers.erase(e);
 
 				const std::string& export_string = fmt::format(
 					"{} {}",
@@ -3415,15 +3414,20 @@ void Zone::ResumeTimer(std::string name)
 				);
 
 				LogQuests(
-					"Creating a new timer and resuming [{}] with [{}] ms remaining",
+					"Pausing timer [{}] with [{}] ms remaining",
 					name,
 					remaining_time
 				);
 
-				zone_timers.emplace_back(ZoneTimer(name, remaining_time));
+				paused_zone_timers.emplace_back(
+					PausedZoneTimer{
+						.name = name,
+						.remaining_time = remaining_time
+					}
+				);
 
-				if (parse->ZoneHasQuestSub(EVENT_TIMER_RESUME)) {
-					parse->EventZone(EVENT_TIMER_RESUME, this, export_string);
+				if (has_pause_event) {
+					parse->EventZone(EVENT_TIMER_PAUSE, this, export_string);
 				}
 
 				break;
