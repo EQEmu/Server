@@ -3328,7 +3328,12 @@ bool Perl_Client_KeyRingClear(Client* self)
 
 void Perl_Client_KeyRingList(Client* self)
 {
-	self->KeyRingList();
+	self->KeyRingList(self);
+}
+
+void Perl_Client_KeyRingList(Client* self, Client* c)
+{
+	self->KeyRingList(c);
 }
 
 bool Perl_Client_KeyRingRemove(Client* self, uint32 item_id)
@@ -3675,7 +3680,8 @@ void perl_register_client()
 	package.add("KeyRingAdd", &Perl_Client_KeyRingAdd);
 	package.add("KeyRingCheck", &Perl_Client_KeyRingCheck);
 	package.add("KeyRingClear", &Perl_Client_KeyRingClear);
-	package.add("KeyRingList", &Perl_Client_KeyRingList);
+	package.add("KeyRingList", (void(*)(Client*))&Perl_Client_KeyRingList);
+	package.add("KeyRingList", (void(*)(Client*, Client*))&Perl_Client_KeyRingList);
 	package.add("KeyRingRemove", &Perl_Client_KeyRingRemove);
 	package.add("Kick", &Perl_Client_Kick);
 	package.add("LearnDisciplines", &Perl_Client_LearnDisciplines);

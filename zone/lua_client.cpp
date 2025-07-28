@@ -3575,7 +3575,13 @@ bool Lua_Client::KeyRingClear()
 void Lua_Client::KeyRingList()
 {
 	Lua_Safe_Call_Void();
-	self->KeyRingList();
+	self->KeyRingList(self);
+}
+
+void Lua_Client::KeyRingList(Lua_Client c)
+{
+	Lua_Safe_Call_Void();
+	self->KeyRingList(self);
 }
 
 bool Lua_Client::KeyRingRemove(uint32 item_id)
@@ -3932,6 +3938,7 @@ luabind::scope lua_register_client() {
 	.def("KeyRingCheck", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingCheck)
 	.def("KeyRingClear", (bool(Lua_Client::*)(void))&Lua_Client::KeyRingClear)
 	.def("KeyRingList", (void(Lua_Client::*)(void))&Lua_Client::KeyRingList)
+	.def("KeyRingList", (void(Lua_Client::*)(Lua_Client))&Lua_Client::KeyRingList)
 	.def("KeyRingRemove", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingRemove)
 	.def("Kick", (void(Lua_Client::*)(void))&Lua_Client::Kick)
 	.def("LearnDisciplines", (uint16(Lua_Client::*)(uint8,uint8))&Lua_Client::LearnDisciplines)
