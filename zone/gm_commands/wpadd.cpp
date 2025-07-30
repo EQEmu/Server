@@ -5,7 +5,7 @@ void command_wpadd(Client *c, const Seperator *sep)
 	int type1   = 0, type2 = 0, pause = 0; // Defaults for a new grid
 	Mob *target = c->GetTarget();
 	if (target && target->IsNPC()) {
-		Spawn2 *s2info = target->CastToNPC()->respawn2;
+		Spawn2 *s2info = target->CastToNPC()->GetSpawn();
 		if (s2info == nullptr) {
 			c->Message(
 				Chat::White,
