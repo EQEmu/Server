@@ -31,7 +31,7 @@ public:
 	inline void DefaultLoginServerName(const std::string &v) { m_default_loginserver_name = v; }
 	inline std::string GetDefaultLoginServerName() const { return m_default_loginserver_name; }
 	inline bool IsShowPlayerCountEnabled() const { return m_show_player_count; }
-	inline void SetShowPlayerCount(bool show_player_count) { show_player_count = show_player_count; }
+	inline void SetShowPlayerCount(bool show_player_count) { m_show_player_count = show_player_count; }
 	inline bool IsWorldDevTestServersListBottom() const { return m_world_dev_list_bottom; }
 	inline void SetWorldDevTestServersListBottom(bool list_bottom) { m_world_dev_list_bottom = list_bottom; }
 	inline bool IsWorldSpecialCharacterStartListBottom() const { return m_special_char_list_bottom; }
