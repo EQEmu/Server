@@ -5675,6 +5675,32 @@ bool lua_handin(luabind::adl::object handin_table)
 	return quest_manager.handin(handin_map);
 }
 
+luabind::object lua_get_paused_timers(lua_State* L, Mob* m) {
+	auto t = luabind::newtable(L);
+	auto v = quest_manager.GetPausedTimers(m);
+	int  i = 1;
+
+	for (const auto& e : v) {
+		t[i] = e;
+		i++;
+	}
+
+	return t;
+}
+
+luabind::object lua_get_timers(lua_State* L, Mob* m) {
+	auto t = luabind::newtable(L);
+	auto v = quest_manager.GetTimers(m);
+	int  i = 1;
+
+	for (const auto& e : v) {
+		t[i] = e;
+		i++;
+	}
+
+	return t;
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6486,6 +6512,8 @@ luabind::scope lua_register_general() {
 		luabind::def("spawn_grid", &lua_spawn_grid),
 		luabind::def("get_zone", &lua_get_zone),
 		luabind::def("handin", &lua_handin),
+		luabind::def("get_paused_timers", &lua_get_paused_timers),
+		luabind::def("get_timers", &lua_get_timers),
 		/*
 			Cross Zone
 		*/

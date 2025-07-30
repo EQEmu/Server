@@ -503,6 +503,8 @@ public:
 	void SetTimer(std::string name, uint32 duration);
 	void StopTimer(std::string name);
 	void StopAllTimers();
+	std::vector<std::string> GetPausedTimers();
+	std::vector<std::string> GetTimers();
 
 private:
 	bool      allow_mercs;

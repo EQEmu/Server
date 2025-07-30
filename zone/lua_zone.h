@@ -158,6 +158,8 @@ public:
 	void StopAllTimers();
 	void Signal(int signal_id);
 	void SendPayload(int payload_id, std::string payload_value);
+	luabind::object GetPausedTimers(lua_State* L);
+	luabind::object GetTimers(lua_State* L);
 
 	// data buckets
 	void SetBucket(const std::string& bucket_name, const std::string& bucket_value);

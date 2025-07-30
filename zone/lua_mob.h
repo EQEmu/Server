@@ -574,7 +574,7 @@ public:
 	bool IsFamiliar();
 	bool IsTargetLockPet();
 	bool IsPetOwnerBot();
-	bool IsPetOwnerClient();	
+	bool IsPetOwnerClient();
 	bool IsPetOwnerNPC();
 	bool IsPetOwnerOfClientBot();
 	bool IsDestructibleObject();
@@ -612,6 +612,8 @@ public:
 	void BuffFadeDetrimentalByCaster(Lua_Mob caster);
 	void BuffFadeNonPersistDeath();
 	void BuffFadeSongs();
+	luabind::object GetPausedTimers(lua_State* L);
+	luabind::object GetTimers(lua_State* L);
 };
 
 #endif
