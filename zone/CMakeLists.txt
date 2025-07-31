@@ -502,7 +502,7 @@ if (EQEMU_BUILD_STATIC AND PERL_LIBRARY)
 endif()
 
 # link zone against common libraries
-target_link_libraries(zone PRIVATE ${ZONE_LIBS} lua_zone perl_zone gm_commands_zone)
+target_link_libraries(zone PRIVATE lua_zone perl_zone gm_commands_zone ${ZONE_LIBS})
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
