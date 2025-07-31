@@ -9789,7 +9789,7 @@ void Client::Handle_OP_Jump(const EQApplicationPacket *app)
 
 void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
 {
-	KeyRingList();
+	KeyRingList(this);
 }
 
 void Client::Handle_OP_KickPlayers(const EQApplicationPacket *app)

@@ -142,6 +142,7 @@ public:
 			{.parent_command = "show", .sub_command = "hatelist", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "hatelist"},
 			{.parent_command = "show", .sub_command = "inventory", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "peekinv"},
 			{.parent_command = "show", .sub_command = "ip_lookup", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "iplookup"},
+			{.parent_command = "show", .sub_command = "keyring", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showkeyring"},
 			{.parent_command = "show", .sub_command = "line_of_sight", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "checklos"},
 			{.parent_command = "show", .sub_command = "network", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "network"},
 			{.parent_command = "show", .sub_command = "network_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "netstats"},
