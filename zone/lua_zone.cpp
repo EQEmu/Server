@@ -838,6 +838,36 @@ void Lua_Zone::Signal(int signal_id)
 	self->Signal(signal_id);
 }
 
+luabind::object Lua_Zone::GetPausedTimers(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetPausedTimers();
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+luabind::object Lua_Zone::GetTimers(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetTimers();
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
 luabind::scope lua_register_zone() {
 	return luabind::class_<Lua_Zone>("Zones")
 	.def(luabind::constructor<>())
@@ -906,6 +936,7 @@ luabind::scope lua_register_zone() {
 	.def("GetMinimumStatus", &Lua_Zone::GetMinimumStatus)
 	.def("GetNote", &Lua_Zone::GetNote)
 	.def("GetNPCMaximumAggroDistance", &Lua_Zone::GetNPCMaximumAggroDistance)
+	.def("GetPausedTimers", &Lua_Zone::GetPausedTimers)
 	.def("GetPEQZone", &Lua_Zone::GetPEQZone)
 	.def("GetRainChance", (int(Lua_Zone::*)(void))&Lua_Zone::GetRainChance)
 	.def("GetRainChance", (int(Lua_Zone::*)(uint8))&Lua_Zone::GetRainChance)
@@ -929,6 +960,7 @@ luabind::scope lua_register_zone() {
 	.def("GetTimeZone", &Lua_Zone::GetTimeZone)
 	.def("GetTimerDuration", &Lua_Zone::GetTimerDuration)
 	.def("GetTimerRemainingTime", &Lua_Zone::GetTimerRemainingTime)
+	.def("GetTimers", &Lua_Zone::GetTimers)
 	.def("GetZoneDescription", &Lua_Zone::GetZoneDescription)
 	.def("GetZoneID", &Lua_Zone::GetZoneID)
 	.def("GetZoneType", &Lua_Zone::GetZoneType)

@@ -3482,6 +3482,36 @@ void Lua_Mob::BuffFadeSongs()
 	self->BuffFadeSongs();
 }
 
+luabind::object Lua_Mob::GetPausedTimers(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = quest_manager.GetPausedTimers(self);
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+luabind::object Lua_Mob::GetTimers(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = quest_manager.GetTimers(self);
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3822,6 +3852,7 @@ luabind::scope lua_register_mob() {
 	.def("GetOwner", &Lua_Mob::GetOwner)
 	.def("GetOwnerID", &Lua_Mob::GetOwnerID)
 	.def("GetPR", &Lua_Mob::GetPR)
+	.def("GetPausedTimers", &Lua_Mob::GetPausedTimers)
 	.def("GetPet", &Lua_Mob::GetPet)
 	.def("GetPetOrder", (int(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
 	.def("GetPhR", &Lua_Mob::GetPhR)
@@ -3847,6 +3878,7 @@ luabind::scope lua_register_mob() {
 	.def("GetTarget", &Lua_Mob::GetTarget)
 	.def("GetTexture", &Lua_Mob::GetTexture)
 	.def("GetTimerDurationMS", &Lua_Mob::GetTimerDurationMS)
+	.def("GetTimers", &Lua_Mob::GetTimers)
 	.def("GetUltimateOwner", &Lua_Mob::GetUltimateOwner)
 	.def("GetWIS", &Lua_Mob::GetWIS)
 	.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
@@ -3908,7 +3940,7 @@ luabind::scope lua_register_mob() {
 	.def("IsPausedTimer", &Lua_Mob::IsPausedTimer)
 	.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
 	.def("IsPetOwnerBot", &Lua_Mob::IsPetOwnerBot)
-	.def("IsPetOwnerClient", &Lua_Mob::IsPetOwnerClient)	
+	.def("IsPetOwnerClient", &Lua_Mob::IsPetOwnerClient)
 	.def("IsPetOwnerNPC", &Lua_Mob::IsPetOwnerNPC)
 	.def("IsPetOwnerOfClientBot", &Lua_Mob::IsPetOwnerOfClientBot)
 	.def("IsPureMeleeClass", &Lua_Mob::IsPureMeleeClass)

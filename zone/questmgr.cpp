@@ -4667,3 +4667,33 @@ bool QuestManager::handin(std::map<std::string, uint32> required) {
 
 	return owner->CastToNPC()->CheckHandin(initiator, {}, required, {});
 }
+
+std::vector<std::string> QuestManager::GetPausedTimers(Mob* m)
+{
+	std::vector<std::string> v;
+
+	if (m && !PTimerList.empty()) {
+		for (auto e = PTimerList.begin(); e != PTimerList.end(); e++) {
+			if (e->owner == m) {
+				v.emplace_back(e->name);
+			}
+		}
+	}
+
+	return v;
+}
+
+std::vector<std::string> QuestManager::GetTimers(Mob* m)
+{
+	std::vector<std::string> v;
+
+	if (m && !QTimerList.empty()) {
+		for (auto e = QTimerList.begin(); e != QTimerList.end(); e++) {
+			if (e->mob == m) {
+				v.emplace_back(e->name);
+			}
+		}
+	}
+
+	return v;
+}
