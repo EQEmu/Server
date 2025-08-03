@@ -1,3 +1,9 @@
+## [23.9.1] 8/2/2025
+
+### Hotfix
+
+* Fix Quest Ownership Edge Case ([#4977](https://github.com/EQEmu/Server/pull/4977)) @Kinglykrab 2025-08-02
+
 ## [23.9.0] 8/2/2025
 
 ### Bots
