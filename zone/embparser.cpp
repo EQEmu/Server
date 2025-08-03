@@ -998,11 +998,13 @@ int PerlembParser::SendCommands(
 
 	int ret_value = 0;
 	RunningQuest q;
+
+	q.owner      = other;
+	q.questitem  = inst;
+	q.questspell = spell;
+
 	if (mob && mob->IsClient()) {
-		q.owner      = other;
 		q.initiator  = mob->CastToClient();
-		q.questitem  = inst;
-		q.questspell = spell;
 	}
 
 	if (zone) {
