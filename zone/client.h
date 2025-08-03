@@ -331,7 +331,7 @@ public:
 	bool KeyRingCheck(uint32 item_id);
 	bool KeyRingClear();
 	bool KeyRingRemove(uint32 item_id);
-	void KeyRingList();
+	void KeyRingList(Client* c = nullptr);
 	bool IsNameChangeAllowed();
 	void InvokeChangeNameWindow(bool immediate = true);
 	bool ClearNameChange();

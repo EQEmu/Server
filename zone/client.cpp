@@ -4780,9 +4780,21 @@ bool Client::KeyRingClear()
 	);
 }
 
-void Client::KeyRingList()
+void Client::KeyRingList(Client* c)
 {
-	Message(Chat::LightBlue, "Keys on Keyring:");
+	if (!c) {
+		return;
+	}
+
+	std::string message = "Keys on Keyring:";
+	if (c != this) {
+		message = fmt::format(
+			"Keys on Keyring for {}:",
+			GetCleanName()
+		);
+	}
+
+	c->Message(Chat::LightBlue, message.c_str());
 
 	const EQ::ItemData *item = nullptr;
 
@@ -4795,7 +4807,7 @@ void Client::KeyRingList()
 				item->Name
 			);
 
-			Message(Chat::LightBlue, item_string.c_str());
+			c->Message(Chat::LightBlue, item_string.c_str());
 		}
 	}
 }
