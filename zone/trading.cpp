@@ -1024,55 +1024,6 @@ void Client::BulkSendTraderInventory(uint32 character_id)
 	}
 }
 
-uint32 Client::FindTraderItemSerialNumber(int32 ItemID) {
-
-	EQ::ItemInstance* item = nullptr;
-	uint16 SlotID = 0;
-	for (int i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++){
-		item = GetInv().GetItem(i);
-		if (item && item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel){
-			for (int x = EQ::invbag::SLOT_BEGIN; x <= EQ::invbag::SLOT_END; x++) {
-				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
-				SlotID = EQ::InventoryProfile::CalcSlotId(i, x);
-				item = GetInv().GetItem(SlotID);
-				if (item) {
-					if (item->GetID() == ItemID)
-						return item->GetSerialNumber();
-				}
-			}
-		}
-	}
-	LogTrading("Client::FindTraderItemSerialNumber Couldn't find item! Item ID [{}]", ItemID);
-
-	return 0;
-}
-
-EQ::ItemInstance *Client::FindTraderItemBySerialNumber(std::string &unique_id)
-{
-	EQ::ItemInstance *item   = nullptr;
-	int16            slot_id = 0;
-
-	for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-		item = GetInv().GetItem(i);
-		if (item && item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) {
-			for (int16 x = EQ::invbag::SLOT_BEGIN; x <= EQ::invbag::SLOT_END; x++) {
-				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
-				slot_id = EQ::InventoryProfile::CalcSlotId(i, x);
-				item    = GetInv().GetItem(slot_id);
-				if (item) {
-					if (item->GetUniqueID().compare(unique_id) == 0) {
-						return item;
-					}
-				}
-			}
-		}
-	}
-
-	LogTrading("Couldn't find item! Serial No. was [{}]", unique_id);
-
-	return nullptr;
-}
-
 EQ::ItemInstance *Client::FindTraderItemByUniqueID(std::string &unique_id)
 {
 	EQ::ItemInstance *item   = nullptr;
