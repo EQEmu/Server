@@ -34,7 +34,7 @@ public:
 		uint32_t    ornament_icon;
 		uint32_t    ornament_idfile;
 		int32_t     ornament_hero_model;
-		uint64_t    guid;
+		std::string item_unique_id;
 	};
 
 	static std::string PrimaryKey()
@@ -60,7 +60,7 @@ public:
 			"ornament_icon",
 			"ornament_idfile",
 			"ornament_hero_model",
-			"guid",
+			"item_unique_id",
 		};
 	}
 
@@ -82,7 +82,7 @@ public:
 			"ornament_icon",
 			"ornament_idfile",
 			"ornament_hero_model",
-			"guid",
+			"item_unique_id",
 		};
 	}
 
@@ -138,7 +138,7 @@ public:
 		e.ornament_icon       = 0;
 		e.ornament_idfile     = 0;
 		e.ornament_hero_model = 0;
-		e.guid                = 0;
+		e.item_unique_id      = "";
 
 		return e;
 	}
@@ -190,7 +190,7 @@ public:
 			e.ornament_icon       = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.ornament_idfile     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.ornament_hero_model = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
-			e.guid                = row[15] ? strtoull(row[15], nullptr, 10) : 0;
+			e.item_unique_id      = row[15] ? row[15] : "";
 
 			return e;
 		}
@@ -239,7 +239,7 @@ public:
 		v.push_back(columns[12] + " = " + std::to_string(e.ornament_icon));
 		v.push_back(columns[13] + " = " + std::to_string(e.ornament_idfile));
 		v.push_back(columns[14] + " = " + std::to_string(e.ornament_hero_model));
-		v.push_back(columns[15] + " = " + std::to_string(e.guid));
+		v.push_back(columns[15] + " = '" + Strings::Escape(e.item_unique_id) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -276,7 +276,7 @@ public:
 		v.push_back(std::to_string(e.ornament_icon));
 		v.push_back(std::to_string(e.ornament_idfile));
 		v.push_back(std::to_string(e.ornament_hero_model));
-		v.push_back(std::to_string(e.guid));
+		v.push_back("'" + Strings::Escape(e.item_unique_id) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -321,7 +321,7 @@ public:
 			v.push_back(std::to_string(e.ornament_icon));
 			v.push_back(std::to_string(e.ornament_idfile));
 			v.push_back(std::to_string(e.ornament_hero_model));
-			v.push_back(std::to_string(e.guid));
+			v.push_back("'" + Strings::Escape(e.item_unique_id) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -370,7 +370,7 @@ public:
 			e.ornament_icon       = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.ornament_idfile     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.ornament_hero_model = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
-			e.guid                = row[15] ? strtoull(row[15], nullptr, 10) : 0;
+			e.item_unique_id      = row[15] ? row[15] : "";
 
 			all_entries.push_back(e);
 		}
@@ -410,7 +410,7 @@ public:
 			e.ornament_icon       = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.ornament_idfile     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.ornament_hero_model = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
-			e.guid                = row[15] ? strtoull(row[15], nullptr, 10) : 0;
+			e.item_unique_id      = row[15] ? row[15] : "";
 
 			all_entries.push_back(e);
 		}
@@ -500,7 +500,7 @@ public:
 		v.push_back(std::to_string(e.ornament_icon));
 		v.push_back(std::to_string(e.ornament_idfile));
 		v.push_back(std::to_string(e.ornament_hero_model));
-		v.push_back(std::to_string(e.guid));
+		v.push_back("'" + Strings::Escape(e.item_unique_id) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -538,7 +538,7 @@ public:
 			v.push_back(std::to_string(e.ornament_icon));
 			v.push_back(std::to_string(e.ornament_idfile));
 			v.push_back(std::to_string(e.ornament_hero_model));
-			v.push_back(std::to_string(e.guid));
+			v.push_back("'" + Strings::Escape(e.item_unique_id) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

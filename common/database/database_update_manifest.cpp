@@ -7240,6 +7240,11 @@ ALTER TABLE `trader`
 	ADD INDEX `idx_trader_char` (`character_id`, `char_zone_id`, `char_zone_instance_id`) USING BTREE,
 	ADD UNIQUE INDEX `idx_item_unique_id` (`item_unique_id`);
 
+ALTER TABLE `sharedbank`
+	DROP COLUMN `guid`,
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`,
+	ADD UNIQUE INDEX `idx_item_unique_id` (`item_unique_id`);
+
 )",
 		.content_schema_update = false
 	},
