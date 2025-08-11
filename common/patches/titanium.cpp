@@ -1059,7 +1059,7 @@ namespace Titanium
 		OUT(spawnid);
 		OUT_str(charname);
 
-		if (emu->race > 473)
+		if (emu->race > 474)
 			eq->race = 1;
 		else
 			OUT(race);
@@ -1840,7 +1840,7 @@ namespace Titanium
 			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
 
 			eq->Race[char_index] = emu_cse->Race;
-			if (eq->Race[char_index] > 473)
+			if (eq->Race[char_index] > 474)
 				eq->Race[char_index] = 1;
 
 			for (int index = 0; index < EQ::textures::materialCount; ++index) {
@@ -2421,7 +2421,7 @@ namespace Titanium
 			strcpy(eq->title, emu->title);
 			//		eq->unknown0274 = emu->unknown0274;
 			eq->helm = emu->helm;
-			if (emu->race > 473)
+			if (emu->race > 474)
 				eq->race = 1;
 			else
 				eq->race = emu->race;
