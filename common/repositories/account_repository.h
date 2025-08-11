@@ -121,7 +121,7 @@ public:
 
 	static void ClearAllOfflineStatus(Database& db)
 	{
-		auto query = fmt::format("UPDATE {} SET `offline` = '0' WHERE `offline` = '1';",
+		auto query = fmt::format("UPDATE {} SET `offline` = 0 WHERE `offline` = 1;",
 			TableName()
 		);
 
@@ -133,7 +133,7 @@ public:
 		auto query = fmt::format("SELECT a.`offline` "
 			"FROM `account` AS a "
 			"INNER JOIN character_data AS c ON c.account_id = a.id "
-			"WHERE c.id = '{}'",
+			"WHERE c.id = {}",
 			character_id
 		);
 		auto results = db.QueryDatabase(query);
