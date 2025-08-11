@@ -264,7 +264,6 @@ Bazaar::GetSearchResults(
 	std::vector<BazaarSearchResultsFromDB_Struct> all_entries;
 	std::unordered_set<std::string>               trader_items_ids{};
 
-//	auto const trader_results = TraderRepository::GetBazaarTraderDetails(db, search_criteria_trader, search.max_results);
 	auto const trader_results = TraderRepository::GetBazaarTraderDetails(
 		db,
 		search_criteria_trader,
@@ -281,7 +280,6 @@ Bazaar::GetSearchResults(
 
 	for (auto const &i: trader_results) {
 		trader_items_ids.emplace(std::to_string(i.trader.item_id));
-		//trader_items_ids.push_back(std::to_string(i.trader.item_id));
 	}
 
 	auto const item_results = ItemsRepository::GetItemsForBazaarSearch(
@@ -332,39 +330,6 @@ Bazaar::GetSearchResults(
 
 	 	all_entries.push_back(r);
 	 }
-
-	// for (auto const& t:item_results) {
-	// 	BazaarSearchResultsFromDB_Struct r{};
-	// 	r.count                   = 1;
-	// 	r.trader_id               = t.trader.character_id;
-	// 	r.item_unique_id          = t.trader.item_unique_id;
-	// 	r.cost                    = t.trader.item_cost;
-	// 	r.slot_id                 = t.trader.slot_id;
-	// 	r.charges                 = t.trader.item_charges;
-	// 	r.stackable               = t.stackable;
-	// 	r.icon_id                 = t.icon;
-	// 	r.trader_zone_id          = t.trader.char_zone_id;
-	// 	r.trader_zone_instance_id = t.trader.char_zone_instance_id;
-	// 	r.trader_entity_id        = t.trader.char_entity_id;
-	// 	r.item_name               = fmt::format("{:.63}\0", t.name);
-	// 	r.trader_name             = fmt::format("{:.63}\0", t.trader_name);
-	// 	r.item_stat               = t.stats;
-	//
-	// 	if (RuleB(Bazaar, UseAlternateBazaarSearch)) {
-	// 		if (convert ||
-	// 			char_zone_id != Zones::BAZAAR ||
-	// 			(char_zone_id == Zones::BAZAAR && r.trader_zone_instance_id != char_zone_instance_id)
-	// 			) {
-	// 			r.trader_id = TraderRepository::TRADER_CONVERT_ID + r.trader_zone_instance_id;
-	// 			}
-	// 	}
-	//
-	// 	all_entries.push_back(r);
-	// }
-
-	// if (all_entries.size() > search.max_results) {
-	// 	all_entries.resize(search.max_results);
-	// }
 
 	LogTrading("Returning [{}] items from search results", all_entries.size());
 
