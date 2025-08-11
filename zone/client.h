@@ -372,8 +372,6 @@ public:
 	void SendTraderItem(uint32 item_id,uint16 quantity, TraderRepository::Trader &trader);
 	void DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria);
 	uint16 FindTraderItem(std::string &SerialNumber,uint16 Quantity);
-	uint32 FindTraderItemSerialNumber(int32 ItemID);
-	EQ::ItemInstance* FindTraderItemBySerialNumber(std::string &serial_number);
 	EQ::ItemInstance* FindTraderItemByUniqueID(std::string &unique_id);
 	EQ::ItemInstance* FindTraderItemByUniqueID(const char* unique_id);
 	std::vector<EQ::ItemInstance *> FindTraderItemsByUniqueID(const char* unique_id);

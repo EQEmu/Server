@@ -360,7 +360,7 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance
 	e.ornament_icon       = inst->GetOrnamentationIcon();
 	e.ornament_idfile     = inst->GetOrnamentationIDFile();
 	e.ornament_hero_model = inst->GetOrnamentHeroModel();
-	e.guid                = inst->GetSerialNumber();
+	e.item_unique_id      = inst->GetUniqueID();
 
 	const int replaced = SharedbankRepository::ReplaceOne(*this, e);
 
