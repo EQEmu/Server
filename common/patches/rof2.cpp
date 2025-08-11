@@ -439,7 +439,6 @@ namespace RoF2
 				break;
 			}
 			default: {
-				//LogTradingDetail("Unhandled action <red>[{}]", sub_action);
 				dest->FastQueuePacket(&in);
 			}
 		}
@@ -533,7 +532,6 @@ namespace RoF2
 				break;
 			}
 			default: {
-				//LogTradingDetail("(RoF2) Unhandled action <red>[{}]", action);
 				dest->FastQueuePacket(&in, ack_req);
 			}
 		}
@@ -622,10 +620,6 @@ namespace RoF2
 				break;
 			}
 			default: {
-				// LogTradingDetail(
-				// 	"(RoF2) Unhandled action <red>[{}]",
-				// 	in->action
-				// );
 				dest->QueuePacket(inapp);
 			}
 		}
@@ -4337,7 +4331,6 @@ namespace RoF2
 				break;
 			}
 			default: {
-				// LogTradingDetail("(RoF2) Unhandled action <red>[{}]", action);
 				EQApplicationPacket *in = *p;
 				*p = nullptr;
 
@@ -5111,7 +5104,6 @@ namespace RoF2
 			}
 			default: {
 				auto emu = (BuyerGeneric_Struct *) __packet->pBuffer;
-				LogTradingDetail("(RoF2) Pass thru OP_Barter packet action <red>[{}]", emu->action);
 			}
 		}
 	}
@@ -6228,7 +6220,6 @@ namespace RoF2
 				break;
 			}
 			default: {
-				//LogTradingDetail("(RoF2) Unhandled action <red>[{}]", action);
 			}
 		}
 	}

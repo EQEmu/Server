@@ -73,7 +73,7 @@ public:
 	{
 		const std::string &query = fmt::format(
 			"SELECT COUNT(*) FROM (SELECT * FROM `inventory_snapshots` a WHERE "
-			"`character_id` = '{}' GROUP BY `time_index`) b",
+			"`character_id` = {} GROUP BY `time_index`) b",
 			character_id
 		);
 
@@ -103,14 +103,14 @@ public:
 			del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400;
 		}
 
-		DeleteWhere(db, fmt::format("`character_id` = '{}' AND `time_index` <= '{}'", character_id, del_time));
+		DeleteWhere(db, fmt::format("`character_id` = {} AND `time_index` <= {}", character_id, del_time));
 	}
 
 	static void ListCharacterInvSnapshots(Database &db, uint32 character_id, std::list<std::pair<uint32, int>> &is_list)
 	{
 		const std::string &query = fmt::format(
 			"SELECT `time_index`, COUNT(*) FROM `inventory_snapshots` WHERE "
-			"`character_id` = '{}' GROUP BY `time_index` ORDER BY `time_index` DESC",
+			"`character_id` = {} GROUP BY `time_index` ORDER BY `time_index` DESC",
 			character_id
 		);
 		auto results = db.QueryDatabase(query);
@@ -130,8 +130,8 @@ public:
 		}
 
 		const std::string &query = fmt::format(
-			"SELECT * FROM `inventory_snapshots` WHERE `character_id` = '{}' "
-			"AND `time_index` = '{}' LIMIT 1",
+			"SELECT * FROM `inventory_snapshots` WHERE `character_id` = {} "
+			"AND `time_index` = {} LIMIT 1",
 			character_id,
 			timestamp
 		);
@@ -152,7 +152,7 @@ public:
 	{
 		const std::string &query = fmt::format(
 			"SELECT `slot_id`, `item_id` FROM `inventory_snapshots` "
-			"WHERE `character_id` = '{}' AND `time_index` = '{}' ORDER BY `slot_id`",
+			"WHERE `character_id` = {} AND `time_index` = {} ORDER BY `slot_id`",
 			character_id,
 			timestamp
 		);
@@ -175,9 +175,9 @@ public:
 	{
 		const std::string &query = fmt::format(
 			"SELECT slot_id, item_id FROM `inventory_snapshots` "
-			"WHERE `time_index` = '{0}' AND `character_id` = '{1}' AND `slot_id` NOT IN ("
+			"WHERE `time_index` = {0} AND `character_id` = {1} AND `slot_id` NOT IN ("
 			"SELECT a.`slot_id` FROM `inventory_snapshots` a JOIN `inventory` b USING (`slot_id`, `item_id`) "
-			"WHERE a.`time_index` = '{0}' AND a.`character_id` = '{1}' AND b.`character_id` = '{1}')",
+			"WHERE a.`time_index` = {0} AND a.`character_id` = {1} AND b.`character_id` = {1})",
 			timestamp,
 			character_id
 		);
@@ -197,9 +197,9 @@ public:
 	{
 		const std::string &query = fmt::format(
 			"SELECT `slot_id`, `item_id` FROM `inventory` WHERE "
-			"`character_id` = '{0}' AND `slot_id` NOT IN ("
+			"`character_id` = {0} AND `slot_id` NOT IN ("
 			"SELECT a.`slot_id` FROM `inventory` a JOIN `inventory_snapshots` b USING (`slot_id`, `item_id`) "
-			"WHERE b.`time_index` = '{1}' AND b.`character_id` = '{0}' AND a.`character_id` = '{0}')",
+			"WHERE b.`time_index` = {1} AND b.`character_id` = {0} AND a.`character_id` = {0})",
 			character_id,
 			timestamp
 		);
@@ -219,33 +219,33 @@ public:
 		uint32                          time_index = time(nullptr);
 		std::vector<InventorySnapshots> queue{};
 
-		auto inventory = InventoryRepository::GetWhere(db, fmt::format("`character_id` = '{}'", character_id));
+		auto inventory = InventoryRepository::GetWhere(db, fmt::format("`character_id` = {}", character_id));
 		if (inventory.empty()) {
 			LogError("Character ID [{}] inventory is empty. Snapshot not created", character_id);
 			return false;
 		}
 
 		for (auto const &i: inventory) {
-			auto snapshot                = NewEntity();
-			snapshot.character_id        = i.character_id;
-			snapshot.item_id             = i.item_id;
-			snapshot.item_unique_id      = i.item_unique_id;
-			snapshot.augment_one         = i.augment_one;
-			snapshot.augment_two         = i.augment_two;
-			snapshot.augment_three       = i.augment_three;
-			snapshot.augment_four        = i.augment_four;
-			snapshot.augment_five        = i.augment_five;
-			snapshot.augment_six         = i.augment_six;
-			snapshot.charges             = i.charges;
-			snapshot.color               = i.color;
-			snapshot.custom_data         = i.custom_data;
-			snapshot.instnodrop          = i.instnodrop;
-			snapshot.ornament_hero_model = i.ornament_hero_model;
-			snapshot.ornament_icon       = i.ornament_icon;
-			snapshot.ornament_idfile     = i.ornament_idfile;
-			snapshot.slot_id             = i.slot_id;
-			snapshot.time_index          = time_index;
-			queue.push_back(snapshot);
+			auto s                = NewEntity();
+			s.character_id        = i.character_id;
+			s.item_id             = i.item_id;
+			s.item_unique_id      = i.item_unique_id;
+			s.augment_one         = i.augment_one;
+			s.augment_two         = i.augment_two;
+			s.augment_three       = i.augment_three;
+			s.augment_four        = i.augment_four;
+			s.augment_five        = i.augment_five;
+			s.augment_six         = i.augment_six;
+			s.charges             = i.charges;
+			s.color               = i.color;
+			s.custom_data         = i.custom_data;
+			s.instnodrop          = i.instnodrop;
+			s.ornament_hero_model = i.ornament_hero_model;
+			s.ornament_icon       = i.ornament_icon;
+			s.ornament_idfile     = i.ornament_idfile;
+			s.slot_id             = i.slot_id;
+			s.time_index          = time_index;
+			queue.push_back(s);
 		}
 
 		if (queue.empty()) {
@@ -264,9 +264,9 @@ public:
 
 	static bool RestoreCharacterInvSnapshot(Database &db, uint32 character_id, uint32 timestamp)
 	{
-		InventoryRepository::DeleteWhere(db, fmt::format("`character_id` = '{}'", character_id));
+		InventoryRepository::DeleteWhere(db, fmt::format("`character_id` = {}", character_id));
 
-		auto snapshot = GetWhere(db, fmt::format("`character_id` = '{}' AND `time_index` = '{}'", character_id, timestamp));
+		auto snapshot = GetWhere(db, fmt::format("`character_id` = {} AND `time_index` = {}", character_id, timestamp));
 		if (snapshot.empty()) {
 			LogError("The snapshot requested could not be found.  Restore failed for character id [{}] @ [{}] failed",
 				character_id,
@@ -277,25 +277,25 @@ public:
 
 		std::vector<InventoryRepository::Inventory> queue{};
 		for (auto const &i: snapshot) {
-			auto inventory_entry                = InventoryRepository::NewEntity();
-			inventory_entry.character_id        = i.character_id;
-			inventory_entry.item_id             = i.item_id;
-			inventory_entry.item_unique_id      = i.item_unique_id;
-			inventory_entry.augment_one         = i.augment_one;
-			inventory_entry.augment_two         = i.augment_two;
-			inventory_entry.augment_three       = i.augment_three;
-			inventory_entry.augment_four        = i.augment_four;
-			inventory_entry.augment_five        = i.augment_five;
-			inventory_entry.augment_six         = i.augment_six;
-			inventory_entry.charges             = i.charges;
-			inventory_entry.color               = i.color;
-			inventory_entry.custom_data         = i.custom_data;
-			inventory_entry.instnodrop          = i.instnodrop;
-			inventory_entry.ornament_hero_model = i.ornament_hero_model;
-			inventory_entry.ornament_icon       = i.ornament_icon;
-			inventory_entry.ornament_idfile     = i.ornament_idfile;
-			inventory_entry.slot_id             = i.slot_id;
-			queue.push_back(inventory_entry);
+			auto e                = InventoryRepository::NewEntity();
+			e.character_id        = i.character_id;
+			e.item_id             = i.item_id;
+			e.item_unique_id      = i.item_unique_id;
+			e.augment_one         = i.augment_one;
+			e.augment_two         = i.augment_two;
+			e.augment_three       = i.augment_three;
+			e.augment_four        = i.augment_four;
+			e.augment_five        = i.augment_five;
+			e.augment_six         = i.augment_six;
+			e.charges             = i.charges;
+			e.color               = i.color;
+			e.custom_data         = i.custom_data;
+			e.instnodrop          = i.instnodrop;
+			e.ornament_hero_model = i.ornament_hero_model;
+			e.ornament_icon       = i.ornament_icon;
+			e.ornament_idfile     = i.ornament_idfile;
+			e.slot_id             = i.slot_id;
+			queue.push_back(e);
 		}
 
 		if (queue.empty()) {
