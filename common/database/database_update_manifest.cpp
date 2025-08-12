@@ -7205,6 +7205,7 @@ ALTER TABLE `character_parcels_containers`
 	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `item_id`;
 
 ALTER TABLE `inventory_snapshots`
+	DROP PRIMARY KEY,
 	CHANGE COLUMN `charid` `character_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `time_index`,
 	CHANGE COLUMN `slotid` `slot_id` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0' AFTER `character_id`,
 	CHANGE COLUMN `itemid` `item_id` INT(11) UNSIGNED NULL DEFAULT '0' AFTER `slot_id`,
@@ -7216,12 +7217,8 @@ ALTER TABLE `inventory_snapshots`
 	CHANGE COLUMN `augslot6` `augment_six` MEDIUMINT(7) NOT NULL DEFAULT '0' AFTER `augment_five`,
 	CHANGE COLUMN `ornamenticon` `ornament_icon` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `custom_data`,
 	CHANGE COLUMN `ornamentidfile` `ornament_idfile` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `ornament_icon`,
-	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`;
-
-ALTER TABLE `inventory_snapshots`
-	DROP PRIMARY KEY,
-	DROP COLUMN `guid`,
-	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`;
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`,
+	DROP COLUMN `guid`;
 
 ALTER TABLE `inventory_snapshots`
 	ADD PRIMARY KEY (`time_index`, `character_id`, `slot_id`) USING BTREE;
