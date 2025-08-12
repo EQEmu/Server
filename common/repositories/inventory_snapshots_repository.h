@@ -245,6 +245,7 @@ public:
 			s.ornament_idfile     = i.ornament_idfile;
 			s.slot_id             = i.slot_id;
 			s.time_index          = time_index;
+			s.item_unique_id      = i.item_unique_id;
 			queue.push_back(s);
 		}
 
@@ -264,8 +265,6 @@ public:
 
 	static bool RestoreCharacterInvSnapshot(Database &db, uint32 character_id, uint32 timestamp)
 	{
-		InventoryRepository::DeleteWhere(db, fmt::format("`character_id` = {}", character_id));
-
 		auto snapshot = GetWhere(db, fmt::format("`character_id` = {} AND `time_index` = {}", character_id, timestamp));
 		if (snapshot.empty()) {
 			LogError("The snapshot requested could not be found.  Restore failed for character id [{}] @ [{}] failed",
@@ -295,6 +294,7 @@ public:
 			e.ornament_icon       = i.ornament_icon;
 			e.ornament_idfile     = i.ornament_idfile;
 			e.slot_id             = i.slot_id;
+			e.item_unique_id      = i.item_unique_id;
 			queue.push_back(e);
 		}
 
@@ -302,6 +302,8 @@ public:
 			LogError("The snapshot is empty.  Restore failed for character id [{}] @ [{}] failed", character_id, timestamp);
 			return false;
 		}
+
+		InventoryRepository::DeleteWhere(db, fmt::format("`character_id` = {}", character_id));
 
 		if (!InventoryRepository::InsertMany(db, queue)) {
 			LogError("A database error occurred.  Restore failed for character id [{}] @ [{}] failed", character_id, timestamp);

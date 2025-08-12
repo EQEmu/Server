@@ -37,7 +37,6 @@ public:
 		uint32_t    ornament_idfile;
 		int32_t     ornament_hero_model;
 		std::string item_unique_id;
-		uint64_t    guid;
 	};
 
 	static std::string PrimaryKey()
@@ -66,7 +65,6 @@ public:
 			"ornament_idfile",
 			"ornament_hero_model",
 			"item_unique_id",
-			"guid",
 		};
 	}
 
@@ -91,7 +89,6 @@ public:
 			"ornament_idfile",
 			"ornament_hero_model",
 			"item_unique_id",
-			"guid",
 		};
 	}
 
@@ -150,7 +147,6 @@ public:
 		e.ornament_idfile     = 0;
 		e.ornament_hero_model = 0;
 		e.item_unique_id      = "";
-		e.guid                = 0;
 
 		return e;
 	}
@@ -205,7 +201,6 @@ public:
 			e.ornament_idfile     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
 			e.ornament_hero_model = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
 			e.item_unique_id      = row[17] ? row[17] : "";
-			e.guid                = row[18] ? strtoull(row[18], nullptr, 10) : 0;
 
 			return e;
 		}
@@ -257,7 +252,6 @@ public:
 		v.push_back(columns[15] + " = " + std::to_string(e.ornament_idfile));
 		v.push_back(columns[16] + " = " + std::to_string(e.ornament_hero_model));
 		v.push_back(columns[17] + " = '" + Strings::Escape(e.item_unique_id) + "'");
-		v.push_back(columns[18] + " = " + std::to_string(e.guid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -297,7 +291,6 @@ public:
 		v.push_back(std::to_string(e.ornament_idfile));
 		v.push_back(std::to_string(e.ornament_hero_model));
 		v.push_back("'" + Strings::Escape(e.item_unique_id) + "'");
-		v.push_back(std::to_string(e.guid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -345,7 +338,6 @@ public:
 			v.push_back(std::to_string(e.ornament_idfile));
 			v.push_back(std::to_string(e.ornament_hero_model));
 			v.push_back("'" + Strings::Escape(e.item_unique_id) + "'");
-			v.push_back(std::to_string(e.guid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -397,7 +389,6 @@ public:
 			e.ornament_idfile     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
 			e.ornament_hero_model = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
 			e.item_unique_id      = row[17] ? row[17] : "";
-			e.guid                = row[18] ? strtoull(row[18], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -440,7 +431,6 @@ public:
 			e.ornament_idfile     = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
 			e.ornament_hero_model = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
 			e.item_unique_id      = row[17] ? row[17] : "";
-			e.guid                = row[18] ? strtoull(row[18], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -533,7 +523,6 @@ public:
 		v.push_back(std::to_string(e.ornament_idfile));
 		v.push_back(std::to_string(e.ornament_hero_model));
 		v.push_back("'" + Strings::Escape(e.item_unique_id) + "'");
-		v.push_back(std::to_string(e.guid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -574,7 +563,6 @@ public:
 			v.push_back(std::to_string(e.ornament_idfile));
 			v.push_back(std::to_string(e.ornament_hero_model));
 			v.push_back("'" + Strings::Escape(e.item_unique_id) + "'");
-			v.push_back(std::to_string(e.guid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

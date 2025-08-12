@@ -279,6 +279,7 @@ public:
 
 	uint64_t GetNextTableId(const std::string& table_name);
 	void ConvertInventoryToNewUniqueId();
+	void ConvertSharedbankToNewUniqueId();
 
 private:
 	Mutex           Mvarcache;

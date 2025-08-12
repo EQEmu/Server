@@ -52,6 +52,7 @@
 #include "../common/repositories/variables_repository.h"
 #include "../common/repositories/character_pet_name_repository.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/sharedbank_repository.h"
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -2322,6 +2323,40 @@ void Database::ConvertInventoryToNewUniqueId()
 
 	if (!queue.empty()) {
 		InventoryRepository::ReplaceMany(*this, queue);
+	}
+
+	TransactionCommit();
+	LogInfo("Converted {} records", results.size());
+}
+
+void Database::ConvertSharedbankToNewUniqueId()
+{
+	LogInfo("Converting shared bank entries with NULL item_unique_id");
+	auto results = SharedbankRepository::GetWhere(*this, "`item_unique_id` IS NULL");
+
+	if (results.empty()) {
+		return;
+	}
+
+	TransactionBegin();
+	uint32                                      index      = 0;
+	const uint32                                batch_size = 1000;
+	std::vector<SharedbankRepository::Sharedbank> queue{};
+	queue.reserve(batch_size);
+
+	for (auto &r: results) {
+		r.item_unique_id = EQ::UniqueHashGenerator::generate();
+		queue.push_back(r);
+		index++;
+		if (index >= batch_size) {
+			SharedbankRepository::ReplaceMany(*this, queue);
+			index = 0;
+			queue.clear();
+		}
+	}
+
+	if (!queue.empty()) {
+		SharedbankRepository::ReplaceMany(*this, queue);
 	}
 
 	TransactionCommit();

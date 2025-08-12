@@ -7219,7 +7219,9 @@ ALTER TABLE `inventory_snapshots`
 	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`;
 
 ALTER TABLE `inventory_snapshots`
-	DROP PRIMARY KEY;
+	DROP PRIMARY KEY,
+	DROP COLUMN `guid`,
+	ADD COLUMN `item_unique_id` VARCHAR(16) NULL DEFAULT NULL AFTER `ornament_hero_model`;
 
 ALTER TABLE `inventory_snapshots`
 	ADD PRIMARY KEY (`time_index`, `character_id`, `slot_id`) USING BTREE;
