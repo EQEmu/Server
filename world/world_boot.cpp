@@ -296,6 +296,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	LogInfo("Clearing buyer table details");
 
 	database.ConvertInventoryToNewUniqueId();
+	database.ConvertSharedbankToNewUniqueId();
 
 	if (RuleB(Bots, Enabled)) {
 		LogInfo("Clearing [bot_pet_buffs] table of stale entries");
