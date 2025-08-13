@@ -70,6 +70,7 @@ public:
 		int32_t     endurance_regen;
 		int32_t     shielding;
 		int32_t     spell_damage;
+		int32_t     heal_amount;
 		int32_t     spell_shielding;
 		int32_t     strikethrough;
 		int32_t     stun_resist;
@@ -154,6 +155,7 @@ public:
 			"endurance_regen",
 			"shielding",
 			"spell_damage",
+			"heal_amount",
 			"spell_shielding",
 			"strikethrough",
 			"stun_resist",
@@ -234,6 +236,7 @@ public:
 			"endurance_regen",
 			"shielding",
 			"spell_damage",
+			"heal_amount",
 			"spell_shielding",
 			"strikethrough",
 			"stun_resist",
@@ -348,6 +351,7 @@ public:
 		e.endurance_regen          = 0;
 		e.shielding                = 0;
 		e.spell_damage             = 0;
+		e.heal_amount              = 0;
 		e.spell_shielding          = 0;
 		e.strikethrough            = 0;
 		e.stun_resist              = 0;
@@ -458,29 +462,30 @@ public:
 			e.endurance_regen          = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
 			e.shielding                = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
 			e.spell_damage             = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
-			e.spell_shielding          = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
-			e.strikethrough            = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
-			e.stun_resist              = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
-			e.backstab                 = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
-			e.wind                     = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
-			e.brass                    = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
-			e.string                   = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
-			e.percussion               = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
-			e.singing                  = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
-			e.baking                   = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
-			e.alchemy                  = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
-			e.tailoring                = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
-			e.blacksmithing            = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
-			e.fletching                = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
-			e.brewing                  = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
-			e.jewelry                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
-			e.pottery                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
-			e.research                 = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
-			e.alcohol                  = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
-			e.fishing                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
-			e.tinkering                = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
-			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
-			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
+			e.heal_amount              = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.spell_shielding          = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.strikethrough            = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.stun_resist              = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.backstab                 = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
+			e.wind                     = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.brass                    = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.string                   = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.percussion               = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.singing                  = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.baking                   = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.alchemy                  = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.tailoring                = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.blacksmithing            = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.fletching                = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.brewing                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.jewelry                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.pottery                  = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.research                 = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.alcohol                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.fishing                  = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
+			e.tinkering                = row[72] ? static_cast<int32_t>(atoi(row[72])) : 0;
+			e.created_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
+			e.updated_at               = strtoll(row[74] ? row[74] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -565,29 +570,30 @@ public:
 		v.push_back(columns[48] + " = " + std::to_string(e.endurance_regen));
 		v.push_back(columns[49] + " = " + std::to_string(e.shielding));
 		v.push_back(columns[50] + " = " + std::to_string(e.spell_damage));
-		v.push_back(columns[51] + " = " + std::to_string(e.spell_shielding));
-		v.push_back(columns[52] + " = " + std::to_string(e.strikethrough));
-		v.push_back(columns[53] + " = " + std::to_string(e.stun_resist));
-		v.push_back(columns[54] + " = " + std::to_string(e.backstab));
-		v.push_back(columns[55] + " = " + std::to_string(e.wind));
-		v.push_back(columns[56] + " = " + std::to_string(e.brass));
-		v.push_back(columns[57] + " = " + std::to_string(e.string));
-		v.push_back(columns[58] + " = " + std::to_string(e.percussion));
-		v.push_back(columns[59] + " = " + std::to_string(e.singing));
-		v.push_back(columns[60] + " = " + std::to_string(e.baking));
-		v.push_back(columns[61] + " = " + std::to_string(e.alchemy));
-		v.push_back(columns[62] + " = " + std::to_string(e.tailoring));
-		v.push_back(columns[63] + " = " + std::to_string(e.blacksmithing));
-		v.push_back(columns[64] + " = " + std::to_string(e.fletching));
-		v.push_back(columns[65] + " = " + std::to_string(e.brewing));
-		v.push_back(columns[66] + " = " + std::to_string(e.jewelry));
-		v.push_back(columns[67] + " = " + std::to_string(e.pottery));
-		v.push_back(columns[68] + " = " + std::to_string(e.research));
-		v.push_back(columns[69] + " = " + std::to_string(e.alcohol));
-		v.push_back(columns[70] + " = " + std::to_string(e.fishing));
-		v.push_back(columns[71] + " = " + std::to_string(e.tinkering));
-		v.push_back(columns[72] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back(columns[73] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+		v.push_back(columns[51] + " = " + std::to_string(e.heal_amount));
+		v.push_back(columns[52] + " = " + std::to_string(e.spell_shielding));
+		v.push_back(columns[53] + " = " + std::to_string(e.strikethrough));
+		v.push_back(columns[54] + " = " + std::to_string(e.stun_resist));
+		v.push_back(columns[55] + " = " + std::to_string(e.backstab));
+		v.push_back(columns[56] + " = " + std::to_string(e.wind));
+		v.push_back(columns[57] + " = " + std::to_string(e.brass));
+		v.push_back(columns[58] + " = " + std::to_string(e.string));
+		v.push_back(columns[59] + " = " + std::to_string(e.percussion));
+		v.push_back(columns[60] + " = " + std::to_string(e.singing));
+		v.push_back(columns[61] + " = " + std::to_string(e.baking));
+		v.push_back(columns[62] + " = " + std::to_string(e.alchemy));
+		v.push_back(columns[63] + " = " + std::to_string(e.tailoring));
+		v.push_back(columns[64] + " = " + std::to_string(e.blacksmithing));
+		v.push_back(columns[65] + " = " + std::to_string(e.fletching));
+		v.push_back(columns[66] + " = " + std::to_string(e.brewing));
+		v.push_back(columns[67] + " = " + std::to_string(e.jewelry));
+		v.push_back(columns[68] + " = " + std::to_string(e.pottery));
+		v.push_back(columns[69] + " = " + std::to_string(e.research));
+		v.push_back(columns[70] + " = " + std::to_string(e.alcohol));
+		v.push_back(columns[71] + " = " + std::to_string(e.fishing));
+		v.push_back(columns[72] + " = " + std::to_string(e.tinkering));
+		v.push_back(columns[73] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[74] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -660,6 +666,7 @@ public:
 		v.push_back(std::to_string(e.endurance_regen));
 		v.push_back(std::to_string(e.shielding));
 		v.push_back(std::to_string(e.spell_damage));
+		v.push_back(std::to_string(e.heal_amount));
 		v.push_back(std::to_string(e.spell_shielding));
 		v.push_back(std::to_string(e.strikethrough));
 		v.push_back(std::to_string(e.stun_resist));
@@ -763,6 +770,7 @@ public:
 			v.push_back(std::to_string(e.endurance_regen));
 			v.push_back(std::to_string(e.shielding));
 			v.push_back(std::to_string(e.spell_damage));
+			v.push_back(std::to_string(e.heal_amount));
 			v.push_back(std::to_string(e.spell_shielding));
 			v.push_back(std::to_string(e.strikethrough));
 			v.push_back(std::to_string(e.stun_resist));
@@ -870,29 +878,30 @@ public:
 			e.endurance_regen          = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
 			e.shielding                = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
 			e.spell_damage             = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
-			e.spell_shielding          = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
-			e.strikethrough            = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
-			e.stun_resist              = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
-			e.backstab                 = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
-			e.wind                     = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
-			e.brass                    = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
-			e.string                   = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
-			e.percussion               = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
-			e.singing                  = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
-			e.baking                   = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
-			e.alchemy                  = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
-			e.tailoring                = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
-			e.blacksmithing            = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
-			e.fletching                = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
-			e.brewing                  = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
-			e.jewelry                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
-			e.pottery                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
-			e.research                 = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
-			e.alcohol                  = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
-			e.fishing                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
-			e.tinkering                = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
-			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
-			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
+			e.heal_amount              = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.spell_shielding          = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.strikethrough            = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.stun_resist              = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.backstab                 = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
+			e.wind                     = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.brass                    = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.string                   = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.percussion               = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.singing                  = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.baking                   = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.alchemy                  = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.tailoring                = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.blacksmithing            = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.fletching                = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.brewing                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.jewelry                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.pottery                  = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.research                 = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.alcohol                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.fishing                  = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
+			e.tinkering                = row[72] ? static_cast<int32_t>(atoi(row[72])) : 0;
+			e.created_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
+			e.updated_at               = strtoll(row[74] ? row[74] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -968,29 +977,30 @@ public:
 			e.endurance_regen          = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
 			e.shielding                = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
 			e.spell_damage             = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
-			e.spell_shielding          = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
-			e.strikethrough            = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
-			e.stun_resist              = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
-			e.backstab                 = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
-			e.wind                     = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
-			e.brass                    = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
-			e.string                   = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
-			e.percussion               = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
-			e.singing                  = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
-			e.baking                   = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
-			e.alchemy                  = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
-			e.tailoring                = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
-			e.blacksmithing            = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
-			e.fletching                = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
-			e.brewing                  = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
-			e.jewelry                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
-			e.pottery                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
-			e.research                 = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
-			e.alcohol                  = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
-			e.fishing                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
-			e.tinkering                = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
-			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
-			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
+			e.heal_amount              = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.spell_shielding          = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.strikethrough            = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.stun_resist              = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.backstab                 = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
+			e.wind                     = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.brass                    = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.string                   = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.percussion               = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.singing                  = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.baking                   = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.alchemy                  = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.tailoring                = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.blacksmithing            = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.fletching                = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.brewing                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.jewelry                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.pottery                  = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.research                 = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.alcohol                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.fishing                  = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
+			e.tinkering                = row[72] ? static_cast<int32_t>(atoi(row[72])) : 0;
+			e.created_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
+			e.updated_at               = strtoll(row[74] ? row[74] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -1116,6 +1126,7 @@ public:
 		v.push_back(std::to_string(e.endurance_regen));
 		v.push_back(std::to_string(e.shielding));
 		v.push_back(std::to_string(e.spell_damage));
+		v.push_back(std::to_string(e.heal_amount));
 		v.push_back(std::to_string(e.spell_shielding));
 		v.push_back(std::to_string(e.strikethrough));
 		v.push_back(std::to_string(e.stun_resist));
@@ -1212,6 +1223,7 @@ public:
 			v.push_back(std::to_string(e.endurance_regen));
 			v.push_back(std::to_string(e.shielding));
 			v.push_back(std::to_string(e.spell_damage));
+			v.push_back(std::to_string(e.heal_amount));
 			v.push_back(std::to_string(e.spell_shielding));
 			v.push_back(std::to_string(e.strikethrough));
 			v.push_back(std::to_string(e.stun_resist));
