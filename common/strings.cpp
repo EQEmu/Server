@@ -313,6 +313,12 @@ std::string Strings::Commify(const std::string &number)
 
 	auto string_length = static_cast<int>(number.length());
 
+	if (string_length == 3) {
+		return number;
+	} else if (string_length == 4 && number.starts_with("-")) {
+		return number;
+	}
+
 	int i = 0;
 	for (i = string_length - 3; i >= 0; i -= 3) {
 		if (i > 0) {
