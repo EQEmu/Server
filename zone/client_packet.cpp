@@ -955,17 +955,17 @@ void Client::CompleteConnect()
 	// TODO: load these states
 	// We at least will set them to the correct state for now
 	if (m_ClientVersionBit & EQ::versions::maskUFAndLater && GetPet()) {
-		SetPetCommandState(PET_BUTTON_SIT, 0);
-		SetPetCommandState(PET_BUTTON_STOP, 0);
-		SetPetCommandState(PET_BUTTON_REGROUP, 0);
-		SetPetCommandState(PET_BUTTON_FOLLOW, 1);
-		SetPetCommandState(PET_BUTTON_GUARD, 0);
+		SetPetCommandState(PetButton::Sit, 0);
+		SetPetCommandState(PetButton::Stop, 0);
+		SetPetCommandState(PetButton::Regroup, 0);
+		SetPetCommandState(PetButton::Follow, 1);
+		SetPetCommandState(PetButton::Guard, 0);
 		// Taunt saved on client side for logging on with pet
 		// In our db for when we zone.
-		SetPetCommandState(PET_BUTTON_HOLD, 0);
-		SetPetCommandState(PET_BUTTON_GHOLD, 0);
-		SetPetCommandState(PET_BUTTON_FOCUS, 0);
-		SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
+		SetPetCommandState(PetButton::Hold, 0);
+		SetPetCommandState(PetButton::GreaterHold, 0);
+		SetPetCommandState(PetButton::Focus, 0);
+		SetPetCommandState(PetButton::SpellHold, 0);
 	}
 
 	database.LoadAuras(this); // this ends up spawning them so probably safer to load this later (here)
@@ -11073,661 +11073,913 @@ void Client::Handle_OP_PDeletePetition(const EQApplicationPacket *app)
 	return;
 }
 
+
 void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(PetCommand_Struct)) {
 		LogError("Wrong size: OP_PetCommands, size=[{}], expected [{}]", app->size, sizeof(PetCommand_Struct));
 		return;
 	}
-	char val1[20] = { 0 };
-	PetCommand_Struct* pet = (PetCommand_Struct*)app->pBuffer;
-	Mob* mypet = GetPet();
-	Mob *target = entity_list.GetMob(pet->target);
 
-	if (!mypet || pet->command == PET_LEADER) {
-		if (pet->command == PET_LEADER) {
+	auto* s = (PetCommand_Struct*) app->pBuffer;
+
+	char val1[20] = { 0 };
+
+	Mob* pet = GetPet();
+	Mob* t   = entity_list.GetMob(s->target);
+
+	if (!pet || s->command == PetCommand::Leader) {
+		if (s->command == PetCommand::Leader) {
 			// we either send the ID of an NPC we're interested in or no ID for our own pet
-			if (target) {
-				auto owner = target->GetOwner();
-				if (owner)
-					target->SayString(PET_LEADERIS, owner->GetCleanName());
-				else
-					target->SayString(I_FOLLOW_NOONE);
-			} else if (mypet) {
-				mypet->SayString(PET_LEADERIS, GetName());
+			if (t) {
+				Mob* owner = t->GetOwner();
+				if (owner) {
+					t->SayString(PET_LEADERIS, owner->GetCleanName());
+				} else {
+					t->SayString(I_FOLLOW_NOONE);
+				}
+			} else if (pet) {
+				pet->SayString(PET_LEADERIS, GetName());
 			}
 		}
 
 		return;
 	}
 
-	if (mypet->GetPetType() == petTargetLock && (pet->command != PET_HEALTHREPORT && pet->command != PET_GETLOST))
+	if (!pet->IsNPC()) {
 		return;
+	}
+
+	if (
+		pet->GetPetType() == PetType::TargetLock &&
+		s->command != PetCommand::HealthReport &&
+		s->command != PetCommand::GetLost
+	) {
+		return;
+	}
 
 	// just let the command "/pet get lost" work for familiars
-	if (mypet->GetPetType() == petFamiliar && pet->command != PET_GETLOST)
+	if (pet->GetPetType() == PetType::Familiar && s->command != PetCommand::GetLost) {
 		return;
-
-	uint32 PetCommand = pet->command;
-
-	// Handle Sit/Stand toggle in UF and later.
-	/*
-	if (GetClientVersion() >= EQClientUnderfoot)
-	{
-	if (PetCommand == PET_SITDOWN)
-	if (mypet->GetPetOrder() == SPO_Sit)
-	PetCommand = PET_STANDUP;
 	}
-	*/
 
-	switch (PetCommand)
-	{
-	case PET_ATTACK: {
-		if (!target)
-			break;
+	const bool can_use_command = (
+		(pet->GetPetType() == PetType::Animation && aabonuses.PetCommands[s->command]) ||
+		pet->GetPetType() != PetType::Animation
+	);
 
-		if (RuleB(Pets, PetsRequireLoS) && !DoLosChecks(target)) {
-			mypet->SayString(this, NOT_LEGAL_TARGET);
-			break;
-		}
-
-		if (target->IsMezzed()) {
-			MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), target->GetCleanName());
-			break;
-		}
-
-		if (mypet->IsFeared())
-			break; //prevent pet from attacking stuff while feared
-
-		if (!mypet->IsAttackAllowed(target)) {
-			mypet->SayString(this, NOT_LEGAL_TARGET);
-			break;
-		}
-
-		// default range is 200, takes Z into account
-		// really they do something weird where they're added to the aggro list then remove them
-		// and will attack if they come in range -- too lazy, lets remove exploits for now
-		if (DistanceSquared(mypet->GetPosition(), target->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
-			// they say they're attacking then remove on live ... so they don't really say anything in this case ...
-			break;
-		}
-
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (target != this && DistanceSquared(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
-				mypet->SetFeigned(false);
-				if (mypet->IsPetStop()) {
-					mypet->SetPetStop(false);
-					SetPetCommandState(PET_BUTTON_STOP, 0);
-				}
-				if (mypet->IsPetRegroup()) {
-					mypet->SetPetRegroup(false);
-					SetPetCommandState(PET_BUTTON_REGROUP, 0);
-				}
-
-				// fix GUI sit button to be unpressed and stop sitting regen
-				SetPetCommandState(PET_BUTTON_SIT, 0);
-				if (mypet->GetPetOrder() == SPO_Sit || mypet->GetPetOrder() == SPO_FeignDeath) {
-					mypet->SetPetOrder(mypet->GetPreviousPetOrder());
-					mypet->SetAppearance(eaStanding);
-				}
-
-				zone->AddAggroMob();
-				// classic acts like qattack
-				int hate = 1;
-				if (mypet->IsEngaged()) {
-					auto top = mypet->GetHateMost();
-					if (top && top != target)
-						hate += mypet->GetHateAmount(top) - mypet->GetHateAmount(target) + 100; // should be enough to cause target change
-				}
-				mypet->AddToHateList(target, hate, 0, true, false, false, SPELL_UNKNOWN, true);
-				MessageString(Chat::PetResponse, PET_ATTACKING, mypet->GetCleanName(), target->GetCleanName());
-				SetTarget(target);
+	switch (s->command) {
+		case PetCommand::Attack: {
+			if (
+				!t ||
+				pet->IsFeared() ||
+				!can_use_command ||
+				t == this ||
+				!(
+					DistanceSquaredNoZ(pet->GetPosition(), GetTarget()->GetPosition()) <=
+					(RuleR(Pets, AttackCommandRange) * RuleR(Pets, AttackCommandRange))
+				) ||
+				DistanceSquared(pet->GetPosition(), t->GetPosition()) >= RuleR(Aggro, PetAttackRange)
+			) {
+				break;
 			}
-		}
-		break;
-	}
-	case PET_QATTACK: {
-		if (mypet->IsFeared())
-			break; //prevent pet from attacking stuff while feared
 
-		if (!GetTarget()) {
-			break;
-		}
-
-		if (RuleB(Pets, PetsRequireLoS) && !DoLosChecks(GetTarget())) {
-			mypet->SayString(this, NOT_LEGAL_TARGET);
-			break;
-		}
-
-		if (GetTarget()->IsMezzed()) {
-			MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
-			break;
-		}
-
-		if (!mypet->IsAttackAllowed(GetTarget())) {
-			mypet->SayString(this, NOT_LEGAL_TARGET);
-			break;
-		}
-
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
-				mypet->SetFeigned(false);
-				if (mypet->IsPetStop()) {
-					mypet->SetPetStop(false);
-					SetPetCommandState(PET_BUTTON_STOP, 0);
-				}
-				if (mypet->IsPetRegroup()) {
-					mypet->SetPetRegroup(false);
-					SetPetCommandState(PET_BUTTON_REGROUP, 0);
-				}
-
-				// fix GUI sit button to be unpressed and stop sitting regen
-				SetPetCommandState(PET_BUTTON_SIT, 0);
-				if (mypet->GetPetOrder() == SPO_Sit || mypet->GetPetOrder() == SPO_FeignDeath) {
-					mypet->SetPetOrder(mypet->GetPreviousPetOrder());
-					mypet->SetAppearance(eaStanding);
-				}
-
-				zone->AddAggroMob();
-				mypet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
-				MessageString(Chat::PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
+			if (RuleB(Pets, PetsRequireLoS) && !DoLosChecks(t)) {
+				pet->SayString(this, NOT_LEGAL_TARGET);
+				break;
 			}
-		}
-		break;
-	}
-	case PET_BACKOFF: {
-		if (mypet->IsFeared()) break; //keeps pet running while feared
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			mypet->SayString(this, Chat::PetResponse, PET_CALMING);
-			mypet->WipeHateList();
-			mypet->SetTarget(nullptr);
-			if (mypet->IsPetStop()) {
-				mypet->SetPetStop(false);
-				SetPetCommandState(PET_BUTTON_STOP, 0);
+			if (t->IsMezzed()) {
+				MessageString(Chat::NPCQuestSay, CANNOT_WAKE, pet->GetCleanName(), t->GetCleanName());
+				break;
 			}
-		}
-		break;
-	}
-	case PET_HEALTHREPORT: {
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			MessageString(Chat::PetResponse, PET_REPORT_HP, ConvertArrayF(mypet->GetHPRatio(), val1));
-			mypet->ShowBuffs(this);
-		}
-		break;
-	}
-	case PET_GETLOST: {
-		if (mypet->Charmed())
-			break;
-		if (mypet->GetPetType() == petCharmed || !mypet->IsNPC()) {
-			// eqlive ignores this command
-			// we could just remove the charm
-			// and continue
-			mypet->BuffFadeByEffect(SE_Charm);
-			break;
-		}
-		else {
-			SetPet(nullptr);
-		}
 
-		mypet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
-		mypet->CastToNPC()->Depop();
+			if (!pet->IsAttackAllowed(t)) {
+				pet->SayString(this, NOT_LEGAL_TARGET);
+				break;
+			}
 
-		//Oddly, the client (Titanium) will still allow "/pet get lost" command despite me adding the code below. If someone can figure that out, you can uncomment this code and use it.
-		/*
-		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-		mypet->SayString(PET_GETLOST_STRING);
-		mypet->CastToNPC()->Depop();
-		}
-		*/
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
 
-		break;
-	}
-	case PET_GUARDHERE: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (mypet->IsNPC()) {
+			pet->SetFeigned(false);
 
-				// Set Sit button to unpressed - send stand anim/end hpregen
-				mypet->SetFeigned(false);
-				SetPetCommandState(PET_BUTTON_SIT, 0);
-				mypet->SetAppearance(eaStanding);
+			if (pet->IsPetStop()) {
+				pet->SetPetStop(false);
+				SetPetCommandState(PetButton::Stop, 0);
+			}
 
-				mypet->SayString(this, Chat::PetResponse, PET_GUARDINGLIFE);
-				mypet->SetPetOrder(SPO_Guard);
-				mypet->CastToNPC()->SaveGuardSpot(mypet->GetPosition());
-				if (!mypet->GetTarget()) // want them to not twitch if they're chasing something down
-					mypet->StopNavigation();
-				if (mypet->IsPetStop()) {
-					mypet->SetPetStop(false);
-					SetPetCommandState(PET_BUTTON_STOP, 0);
+			if (pet->IsPetRegroup()) {
+				pet->SetPetRegroup(false);
+				SetPetCommandState(PetButton::Regroup, 0);
+			}
+
+			SetPetCommandState(PetButton::Sit, 0);
+
+			if (pet->GetPetOrder() == PetOrder::Sit || pet->GetPetOrder() == PetOrder::Feign) {
+				pet->SetPetOrder(pet->GetPreviousPetOrder());
+				pet->SetAppearance(eaStanding);
+			}
+
+			zone->AddAggroMob();
+
+			int hate = 1; // classic acts like qattack
+			if (pet->IsEngaged()) {
+				Mob* top = pet->GetHateMost();
+				if (top && top != t) {
+					hate += pet->GetHateAmount(top) - pet->GetHateAmount(t) + 100;
 				}
 			}
-		}
-		break;
-	}
-	case PET_FOLLOWME: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			mypet->SetFeigned(false);
-			mypet->SayString(this, Chat::PetResponse, PET_FOLLOWING);
-			mypet->SetPetOrder(SPO_Follow);
-
-			// fix GUI sit button to be unpressed - send stand anim/end hpregen
-			SetPetCommandState(PET_BUTTON_SIT, 0);
-			mypet->SetAppearance(eaStanding);
-
-			if (mypet->IsPetStop()) {
-				mypet->SetPetStop(false);
-				SetPetCommandState(PET_BUTTON_STOP, 0);
-			}
+			pet->AddToHateList(t, hate, 0, true, false, false, SPELL_UNKNOWN, true);
+			MessageString(Chat::PetResponse, PET_ATTACKING, pet->GetCleanName(), t->GetCleanName());
+			SetTarget(t);
+			break;
 		}
-		break;
-	}
-	case PET_TAUNT: {
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (mypet->CastToNPC()->IsTaunting())
-			{
-				MessageString(Chat::PetResponse, PET_NO_TAUNT);
-				mypet->CastToNPC()->SetTaunting(false);
+		case PetCommand::QAttack: {
+			if (
+				pet->IsFeared() ||
+				!GetTarget() ||
+				GetTarget() == this ||
+				!can_use_command ||
+				!(
+					DistanceSquaredNoZ(pet->GetPosition(), GetTarget()->GetPosition()) <=
+					(RuleR(Pets, AttackCommandRange) * RuleR(Pets, AttackCommandRange))
+				)
+			) {
+				break;
 			}
-			else
-			{
-				MessageString(Chat::PetResponse, PET_DO_TAUNT);
-				mypet->CastToNPC()->SetTaunting(true);
+
+			if (RuleB(Pets, PetsRequireLoS) && !DoLosChecks(GetTarget())) {
+				pet->SayString(this, NOT_LEGAL_TARGET);
+				break;
 			}
+
+			if (GetTarget()->IsMezzed()) {
+				MessageString(Chat::NPCQuestSay, CANNOT_WAKE, pet->GetCleanName(), GetTarget()->GetCleanName());
+				break;
+			}
+
+			if (!pet->IsAttackAllowed(GetTarget())) {
+				pet->SayString(this, NOT_LEGAL_TARGET);
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetFeigned(false);
+
+			if (pet->IsPetStop()) {
+				pet->SetPetStop(false);
+				SetPetCommandState(PetButton::Stop, 0);
+			}
+
+			if (pet->IsPetRegroup()) {
+				pet->SetPetRegroup(false);
+				SetPetCommandState(PetButton::Regroup, 0);
+			}
+
+			SetPetCommandState(PetButton::Sit, 0);
+
+			if (pet->GetPetOrder() == PetOrder::Sit || pet->GetPetOrder() == PetOrder::Feign) {
+				pet->SetPetOrder(pet->GetPreviousPetOrder());
+				pet->SetAppearance(eaStanding);
+			}
+
+			zone->AddAggroMob();
+			pet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
+			MessageString(Chat::PetResponse, PET_ATTACKING, pet->GetCleanName(), GetTarget()->GetCleanName());
+			break;
 		}
-		break;
-	}
-	case PET_TAUNT_ON: {
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+		case PetCommand::BackOff: {
+			if (pet->IsFeared() || !can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SayString(this, Chat::PetResponse, PET_CALMING);
+			pet->WipeHateList();
+			pet->SetTarget(nullptr);
+
+			if (pet->IsPetStop()) {
+				pet->SetPetStop(false);
+				SetPetCommandState(PetButton::Stop, 0);
+			}
+
+			break;
+		}
+		case PetCommand::HealthReport: {
+			if (!can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			MessageString(Chat::PetResponse, PET_REPORT_HP, ConvertArrayF(pet->GetHPRatio(), val1));
+			pet->ShowBuffs(this);
+			break;
+		}
+		case PetCommand::GetLost: {
+			if (pet->Charmed()) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (pet->GetPetType() == PetType::Charmed) {
+				pet->BuffFadeByEffect(SE_Charm);
+				break;
+			} else {
+				SetPet(nullptr);
+			}
+
+			pet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
+			pet->CastToNPC()->Depop();
+			break;
+		}
+		case PetCommand::GuardHere: {
+			if (pet->IsFeared() || !can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetFeigned(false);
+			SetPetCommandState(PetButton::Sit, 0);
+			pet->SetAppearance(eaStanding);
+			pet->SayString(this, Chat::PetResponse, PET_GUARDINGLIFE);
+			pet->SetPetOrder(PetOrder::Guard);
+			pet->CastToNPC()->SaveGuardSpot(pet->GetPosition());
+
+			if (!pet->GetTarget()) {
+				pet->StopNavigation();
+			}
+
+			if (pet->IsPetStop()) {
+				pet->SetPetStop(false);
+				SetPetCommandState(PetButton::Stop, 0);
+			}
+
+			break;
+		}
+		case PetCommand::FollowMe: {
+			if (pet->IsFeared() || !can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetFeigned(false);
+			pet->SayString(this, Chat::PetResponse, PET_FOLLOWING);
+			pet->SetPetOrder(PetOrder::Follow);
+			SetPetCommandState(PetButton::Sit, 0);
+			pet->SetAppearance(eaStanding);
+
+			if (pet->IsPetStop()) {
+				pet->SetPetStop(false);
+				SetPetCommandState(PetButton::Stop, 0);
+			}
+
+			break;
+		}
+		case PetCommand::Taunt: {
+			if (!can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			MessageString(Chat::PetResponse, pet->CastToNPC()->IsTaunting() ? PET_NO_TAUNT : PET_DO_TAUNT);
+			pet->CastToNPC()->SetTaunting(!pet->CastToNPC()->IsTaunting());
+			break;
+		}
+		case PetCommand::TauntOn: {
+			if (!can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
 			MessageString(Chat::PetResponse, PET_DO_TAUNT);
-			mypet->CastToNPC()->SetTaunting(true);
+			pet->CastToNPC()->SetTaunting(true);
+			break;
 		}
-		break;
-	}
-	case PET_TAUNT_OFF: {
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+		case PetCommand::TauntOff: {
+			if (!can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
 			MessageString(Chat::PetResponse, PET_NO_TAUNT);
-			mypet->CastToNPC()->SetTaunting(false);
+			pet->CastToNPC()->SetTaunting(false);
+			break;
 		}
-		break;
-	}
-	case PET_GUARDME: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
-
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			mypet->SetFeigned(false);
-			mypet->SayString(this, Chat::PetResponse, PET_GUARDME_STRING);
-			mypet->SetPetOrder(SPO_Follow);
-
-			// Set Sit button to unpressed - send stand anim/end hpregen
-			SetPetCommandState(PET_BUTTON_SIT, 0);
-			mypet->SetAppearance(eaStanding);
-
-			if (mypet->IsPetStop()) {
-				mypet->SetPetStop(false);
-				SetPetCommandState(PET_BUTTON_STOP, 0);
+		case PetCommand::GuardMe: {
+			if (pet->IsFeared() || can_use_command) {
+				break;
 			}
-		}
-		break;
-	}
-	case PET_SIT: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (mypet->GetPetOrder() == SPO_Sit)
-			{
-				mypet->SetFeigned(false);
-				mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
-				mypet->SetPetOrder(mypet->GetPreviousPetOrder());
-				mypet->SetAppearance(eaStanding);
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetFeigned(false);
+			pet->SayString(this, Chat::PetResponse, PET_GUARDME_STRING);
+			pet->SetPetOrder(PetOrder::Follow);
+			SetPetCommandState(PetButton::Sit, 0);
+			pet->SetAppearance(eaStanding);
+
+			if (pet->IsPetStop()) {
+				pet->SetPetStop(false);
+				SetPetCommandState(PetButton::Stop, 0);
 			}
-			else
-			{
-				mypet->SetFeigned(false);
-				mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
-				mypet->SetPetOrder(SPO_Sit);
-				mypet->SetRunAnimSpeed(0);
-				if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
-					mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
-				mypet->SetAppearance(eaSitting);
+
+			break;
+		}
+		case PetCommand::Sit: {
+			if (pet->IsFeared() || !can_use_command) {
+				break;
 			}
-		}
-		break;
-	}
-	case PET_STANDUP: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			mypet->SetFeigned(false);
-			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
-			SetPetCommandState(PET_BUTTON_SIT, 0);
-			mypet->SetPetOrder(mypet->GetPreviousPetOrder());
-			mypet->SetAppearance(eaStanding);
-		}
-		break;
-	}
-	case PET_SITDOWN: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			mypet->SetFeigned(false);
-			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
-			SetPetCommandState(PET_BUTTON_SIT, 1);
-			mypet->SetPetOrder(SPO_Sit);
-			mypet->SetRunAnimSpeed(0);
-			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
-				mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
-			mypet->SetAppearance(eaSitting);
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetFeigned(false);
+			pet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
+			pet->SetPetOrder(pet->GetPetOrder() == PetOrder::Sit ? pet->GetPreviousPetOrder() : PetOrder::Sit);
+			pet->SetAppearance(pet->GetPetOrder() == PetOrder::Sit ? eaStanding : eaSitting);
+
+			if (pet->GetPetOrder() != PetOrder::Sit) {
+				pet->SetRunAnimSpeed(0);
+
+				if (!pet->UseBardSpellLogic()) {
+					pet->InterruptSpell();
+				}
+			}
+
+			break;
 		}
-		break;
-	}
-	case PET_HOLD: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsHeld())
-			{
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
+		case PetCommand::StandUp: {
+			if (pet->IsFeared() || !can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetFeigned(false);
+			pet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
+			SetPetCommandState(PetButton ::Sit, 0);
+			pet->SetPetOrder(pet->GetPreviousPetOrder());
+			pet->SetAppearance(eaStanding);
+			break;
+		}
+		case PetCommand::SitDown: {
+			if (pet->IsFeared() || !can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetFeigned(false);
+			pet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
+			SetPetCommandState(PetButton::Sit, 1);
+			pet->SetPetOrder(PetOrder::Sit);
+			pet->SetRunAnimSpeed(0);
+
+			if (!pet->UseBardSpellLogic()){
+				pet->InterruptSpell();
+			}
+
+			pet->SetAppearance(eaSitting);
+			break;
+		}
+		case PetCommand::Hold: {
+			if (!aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (pet->IsHeld()) {
+				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
 					MessageString(Chat::PetResponse, PET_HOLD_SET_OFF);
-				mypet->SetHeld(false);
-			}
-			else
-			{
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
+				}
+
+				pet->SetHeld(false);
+			} else {
+				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
 					MessageString(Chat::PetResponse, PET_HOLD_SET_ON);
+				}
 
-				if (m_ClientVersionBit & EQ::versions::maskUFAndLater)
-					mypet->SayString(this, Chat::PetResponse, PET_NOW_HOLDING);
-				else
-					mypet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
+				if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
+					pet->SayString(this, Chat::PetResponse, PET_NOW_HOLDING);
+				} else {
+					pet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
+				}
 
-				mypet->SetHeld(true);
+				pet->SetHeld(true);
 			}
-			mypet->SetGHeld(false);
-			SetPetCommandState(PET_BUTTON_GHOLD, 0);
+
+			pet->SetGHeld(false);
+			SetPetCommandState(PetButton::GreaterHold, 0);
+			break;
 		}
-		break;
-	}
-	case PET_HOLD_ON: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && !mypet->IsHeld()) {
-			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
+		case PetCommand::HoldOn: {
+			if (!pet->IsHeld() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
 				MessageString(Chat::PetResponse, PET_HOLD_SET_ON);
-
-			if (m_ClientVersionBit & EQ::versions::maskUFAndLater)
-				mypet->SayString(this, Chat::PetResponse, PET_NOW_HOLDING);
-			else
-				mypet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
-			mypet->SetHeld(true);
-			mypet->SetGHeld(false);
-			SetPetCommandState(PET_BUTTON_GHOLD, 0);
-		}
-		break;
-	}
-	case PET_HOLD_OFF: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && mypet->IsHeld()) {
-			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-				MessageString(Chat::PetResponse, PET_HOLD_SET_OFF);
-			mypet->SetHeld(false);
-		}
-		break;
-	}
-	case PET_GHOLD: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsGHeld())
-			{
-				if (m_ClientVersionBit & EQ::versions::maskUFAndLater)
-					MessageString(Chat::PetResponse, PET_OFF_GHOLD);
-				mypet->SetGHeld(false);
 			}
-			else
-			{
+
+			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
+				pet->SayString(this, Chat::PetResponse, PET_NOW_HOLDING);
+			} else {
+				pet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
+			}
+
+			pet->SetHeld(true);
+			pet->SetGHeld(false);
+			SetPetCommandState(PetButton::GreaterHold, 0);
+			break;
+		}
+		case PetCommand::HoldOff: {
+			if (!pet->IsHeld() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
+				MessageString(Chat::PetResponse, PET_HOLD_SET_OFF);
+			}
+
+			pet->SetHeld(false);
+			break;
+		}
+		case PetCommand::GreaterHold: {
+			if (!aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (pet->IsGHeld()) {
+				if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
+					MessageString(Chat::PetResponse, PET_OFF_GHOLD);
+				}
+
+				pet->SetGHeld(false);
+			} else {
 				if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
 					MessageString(Chat::PetResponse, PET_ON_GHOLD);
-					mypet->SayString(this, Chat::PetResponse, PET_GHOLD_ON_MSG);
+					pet->SayString(this, Chat::PetResponse, PET_GHOLD_ON_MSG);
 				} else {
-					mypet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
+					pet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
 				}
-				mypet->SetGHeld(true);
+
+				pet->SetGHeld(true);
 			}
-			mypet->SetHeld(false);
-			SetPetCommandState(PET_BUTTON_HOLD, 0);
+
+			pet->SetHeld(false);
+			SetPetCommandState(PetButton::Hold, 0);
+			break;
 		}
-		break;
-	}
-	case PET_GHOLD_ON: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
+		case PetCommand::GreaterHoldOn: {
+			if (!aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
 			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
 				MessageString(Chat::PetResponse, PET_ON_GHOLD);
-				mypet->SayString(this, Chat::PetResponse, PET_GHOLD_ON_MSG);
+				pet->SayString(this, Chat::PetResponse, PET_GHOLD_ON_MSG);
 			} else {
-				mypet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
+				pet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
 			}
-			mypet->SetGHeld(true);
-			mypet->SetHeld(false);
-			SetPetCommandState(PET_BUTTON_HOLD, 0);
+
+			pet->SetGHeld(true);
+			pet->SetHeld(false);
+			SetPetCommandState(PetButton::Hold, 0);
+			break;
 		}
-		break;
-	}
-	case PET_GHOLD_OFF: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && mypet->IsGHeld()) {
-			if (m_ClientVersionBit & EQ::versions::maskUFAndLater)
+		case PetCommand::GreaterHoldOff: {
+			if (!pet->IsGHeld() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
 				MessageString(Chat::PetResponse, PET_OFF_GHOLD);
-			mypet->SetGHeld(false);
-		}
-		break;
-	}
-	case PET_SPELLHOLD: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsFeared())
-				break;
-			if (mypet->IsNoCast()) {
-				MessageString(Chat::PetResponse, PET_CASTING);
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-					MessageString(Chat::PetResponse, PET_SPELLHOLD_SET_OFF);
-				mypet->SetNoCast(false);
 			}
-			else {
-				MessageString(Chat::PetResponse, PET_NOT_CASTING);
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-					MessageString(Chat::PetResponse, PET_SPELLHOLD_SET_ON);
-				mypet->SetNoCast(true);
-			}
-		}
-		break;
-	}
-	case PET_SPELLHOLD_ON: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsFeared())
-				break;
-			if (!mypet->IsNoCast()) {
-				MessageString(Chat::PetResponse, PET_NOT_CASTING);
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-					MessageString(Chat::PetResponse, PET_SPELLHOLD_SET_ON);
-				mypet->SetNoCast(true);
-			}
-		}
-		break;
-	}
-	case PET_SPELLHOLD_OFF: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsFeared())
-				break;
-			if (mypet->IsNoCast()) {
-				MessageString(Chat::PetResponse, PET_CASTING);
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-					MessageString(Chat::PetResponse, PET_SPELLHOLD_SET_OFF);
-				mypet->SetNoCast(false);
-			}
-		}
-		break;
-	}
-	case PET_FOCUS: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsFeared())
-				break;
-			if (mypet->IsFocused()) {
-				MessageString(Chat::PetResponse, PET_NOT_FOCUSING);
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-					MessageString(Chat::PetResponse, PET_FOCUS_SET_OFF);
-				mypet->SetFocused(false);
-			}
-			else {
-				MessageString(Chat::PetResponse, PET_NOW_FOCUSING);
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-					MessageString(Chat::PetResponse, PET_FOCUS_SET_ON);
-				mypet->SetFocused(true);
-			}
-		}
-		break;
-	}
-	case PET_FOCUS_ON: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsFeared())
-				break;
-			if (!mypet->IsFocused()) {
-				MessageString(Chat::PetResponse, PET_NOW_FOCUSING);
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-					MessageString(Chat::PetResponse, PET_FOCUS_SET_ON);
-				mypet->SetFocused(true);
-			}
-		}
-		break;
-	}
-	case PET_FOCUS_OFF: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsFeared())
-				break;
-			if (mypet->IsFocused()) {
-				MessageString(Chat::PetResponse, PET_NOT_FOCUSING);
-				if (m_ClientVersionBit & EQ::versions::maskSoDAndLater)
-					MessageString(Chat::PetResponse, PET_FOCUS_SET_OFF);
-				mypet->SetFocused(false);
-			}
-		}
-		break;
-	}
 
-	case PET_FEIGN: {
-		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (mypet->IsFeared())
-				break;
-
-			int pet_fd_chance = aabonuses.FeignedMinionChance;
-			if (zone->random.Int(0, 99) > pet_fd_chance) {
-				mypet->SetFeigned(false);
-				entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, mypet->GetCleanName());
-			}
-			else {
-				bool has_aggro_immunity = GetSpecialAbility(SpecialAbility::AggroImmunity);
-				mypet->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
-				mypet->WipeHateList();
-				mypet->SetPetOrder(SPO_FeignDeath);
-				mypet->SetRunAnimSpeed(0);
-				mypet->StopNavigation();
-				mypet->SetAppearance(eaDead);
-				mypet->SetFeigned(true);
-				mypet->SetTarget(nullptr);
-				if (!mypet->UseBardSpellLogic()) {
-					mypet->InterruptSpell();
-				}
-
-				if (!has_aggro_immunity) {
-					mypet->SetSpecialAbility(SpecialAbility::AggroImmunity, 0);
-				}
-			}
+			pet->SetGHeld(false);
+			break;
 		}
-		break;
-	}
-	case PET_STOP: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+		case PetCommand::SpellHold: {
+			if (pet->IsFeared() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (mypet->IsPetStop()) {
-				mypet->SetPetStop(false);
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			MessageString(Chat::PetResponse, pet->IsNoCast() ? PET_CASTING : PET_NOT_CASTING);
+
+			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
+				MessageString(Chat::PetResponse, pet->IsNoCast() ? PET_SPELLHOLD_SET_OFF : PET_SPELLHOLD_SET_ON);
+			}
+
+			pet->SetNoCast(!pet->IsNoCast());
+			break;
+		}
+		case PetCommand::SpellHoldOn: {
+			if (pet->IsFeared() || pet->IsNoCast() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			MessageString(Chat::PetResponse, PET_NOT_CASTING);
+
+			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
+				MessageString(Chat::PetResponse, PET_SPELLHOLD_SET_ON);
+			}
+
+			pet->SetNoCast(true);
+			break;
+		}
+		case PetCommand::SpellHoldOff: {
+			if (pet->IsFeared() || !pet->IsNoCast() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			MessageString(Chat::PetResponse, PET_CASTING);
+
+			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
+				MessageString(Chat::PetResponse, PET_SPELLHOLD_SET_OFF);
+			}
+
+			pet->SetNoCast(false);
+			break;
+		}
+		case PetCommand::Focus: {
+			if (pet->IsFeared() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			MessageString(Chat::PetResponse, pet->IsFocused() ? PET_NOT_FOCUSING : PET_NOW_FOCUSING);
+
+			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
+				MessageString(Chat::PetResponse, pet->IsFocused() ? PET_FOCUS_SET_OFF : PET_FOCUS_SET_ON);
+			}
+
+			pet->SetFocused(!pet->IsFocused());
+			break;
+		}
+		case PetCommand::FocusOn: {
+			if (pet->IsFeared() || pet->IsFocused() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			MessageString(Chat::PetResponse, PET_NOW_FOCUSING);
+
+			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
+				MessageString(Chat::PetResponse, PET_FOCUS_SET_ON);
+			}
+
+			pet->SetFocused(true);
+			break;
+		}
+		case PetCommand::FocusOff: {
+			if (pet->IsFeared() || !pet->IsFocused() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			MessageString(Chat::PetResponse, PET_NOT_FOCUSING);
+
+			if (m_ClientVersionBit & EQ::versions::maskSoDAndLater) {
+				MessageString(Chat::PetResponse, PET_FOCUS_SET_OFF);
+			}
+
+			pet->SetFocused(false);
+			break;
+		}
+		case PetCommand::Feign: {
+			if (pet->IsFeared() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (zone->random.Int(0, 99) > aabonuses.FeignedMinionChance) {
+				pet->SetFeigned(false);
+				entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, pet->GetCleanName());
 			} else {
-				mypet->SetPetStop(true);
-				mypet->StopNavigation();
-				mypet->SetTarget(nullptr);
-				if (mypet->IsPetRegroup()) {
-					mypet->SetPetRegroup(false);
-					SetPetCommandState(PET_BUTTON_REGROUP, 0);
+				pet->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
+				pet->WipeHateList();
+				pet->SetPetOrder(PetOrder::Feign);
+				pet->SetRunAnimSpeed(0);
+				pet->StopNavigation();
+				pet->SetAppearance(eaDead);
+				pet->SetFeigned(true);
+				pet->SetTarget(nullptr);
+
+				if (!pet->UseBardSpellLogic()) {
+					pet->InterruptSpell();
+				}
+
+				if (!GetSpecialAbility(SpecialAbility::AggroImmunity)) {
+					pet->SetSpecialAbility(SpecialAbility::AggroImmunity, 0);
 				}
 			}
-			mypet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
-		}
-		break;
-	}
-	case PET_STOP_ON: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			mypet->SetPetStop(true);
-			mypet->StopNavigation();
-			mypet->SetTarget(nullptr);
-			mypet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
-			if (mypet->IsPetRegroup()) {
-				mypet->SetPetRegroup(false);
-				SetPetCommandState(PET_BUTTON_REGROUP, 0);
+			break;
+		}
+		case PetCommand::Stop: {
+			if (pet->IsFeared() || !can_use_command) {
+				break;
 			}
-		}
-		break;
-	}
-	case PET_STOP_OFF: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			mypet->SetPetStop(false);
-			mypet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
-		}
-		break;
-	}
-	case PET_REGROUP: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
 
-		if (aabonuses.PetCommands[PetCommand]) {
-			if (mypet->IsPetRegroup()) {
-				mypet->SetPetRegroup(false);
-				mypet->SayString(this, Chat::PetResponse, PET_OFF_REGROUPING);
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (pet->IsPetStop()) {
+				pet->SetPetStop(false);
 			} else {
-				mypet->SetPetRegroup(true);
-				mypet->SetTarget(nullptr);
-				mypet->SayString(this, Chat::PetResponse, PET_ON_REGROUPING);
-				if (mypet->IsPetStop()) {
-					mypet->SetPetStop(false);
-					SetPetCommandState(PET_BUTTON_STOP, 0);
+				pet->SetPetStop(true);
+				pet->StopNavigation();
+				pet->SetTarget(nullptr);
+
+				if (pet->IsPetRegroup()) {
+					pet->SetPetRegroup(false);
+					SetPetCommandState(PetButton::Regroup, 0);
 				}
 			}
-		}
-		break;
-	}
-	case PET_REGROUP_ON: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
-		if (aabonuses.PetCommands[PetCommand]) {
-			mypet->SetPetRegroup(true);
-			mypet->SetTarget(nullptr);
-			mypet->SayString(this, Chat::PetResponse, PET_ON_REGROUPING);
-			if (mypet->IsPetStop()) {
-				mypet->SetPetStop(false);
-				SetPetCommandState(PET_BUTTON_STOP, 0);
+			pet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
+			break;
+		}
+		case PetCommand::StopOn: {
+			if (pet->IsFeared() || pet->IsPetStop() || !can_use_command) {
+				break;
 			}
-		}
-		break;
-	}
-	case PET_REGROUP_OFF: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
-		if (aabonuses.PetCommands[PetCommand]) {
-			mypet->SetPetRegroup(false);
-			mypet->SayString(this, Chat::PetResponse, PET_OFF_REGROUPING);
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetPetStop(true);
+			pet->StopNavigation();
+			pet->SetTarget(nullptr);
+			pet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
+
+			if (pet->IsPetRegroup()) {
+				pet->SetPetRegroup(false);
+				SetPetCommandState(PetButton::Regroup, 0);
+			}
+
+			break;
 		}
-		break;
-	}
-	default:
-		printf("Client attempted to use a unknown pet command:\n");
-		break;
+		case PetCommand::StopOff: {
+			if (pet->IsFeared() || !pet->IsPetStop() || !can_use_command) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetPetStop(false);
+			pet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
+			break;
+		}
+		case PetCommand::Regroup: {
+			if (pet->IsFeared() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			if (pet->IsPetRegroup()) {
+				pet->SetPetRegroup(false);
+				pet->SayString(this, Chat::PetResponse, PET_OFF_REGROUPING);
+			} else {
+				pet->SetPetRegroup(true);
+				pet->SetTarget(nullptr);
+				pet->SayString(this, Chat::PetResponse, PET_ON_REGROUPING);
+
+				if (pet->IsPetStop()) {
+					pet->SetPetStop(false);
+					SetPetCommandState(PetButton::Stop, 0);
+				}
+			}
+
+			break;
+		}
+		case PetCommand::RegroupOn: {
+			if (pet->IsFeared() || pet->IsPetRegroup() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetPetRegroup(true);
+			pet->SetTarget(nullptr);
+			pet->SayString(this, Chat::PetResponse, PET_ON_REGROUPING);
+
+			if (pet->IsPetStop()) {
+				pet->SetPetStop(false);
+				SetPetCommandState(PetButton::Stop, 0);
+			}
+
+			break;
+		}
+		case PetCommand::RegroupOff: {
+			if (pet->IsFeared() || !pet->IsPetRegroup() || !aabonuses.PetCommands[s->command]) {
+				break;
+			}
+
+			std::function<std::string()> f = [&s]() {
+				return PetCommand::GetName(s->command);
+			};
+
+			parse->EventMob(EVENT_PET_COMMAND, pet, CastToMob(), f, s->command);
+			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
+
+			pet->SetPetRegroup(false);
+			pet->SayString(this, Chat::PetResponse, PET_OFF_REGROUPING);
+			break;
+		}
+		default: {
+			LogError("[{}] attempted to use an unknown pet command: [{}]", GetCleanName(), s->command);
+			break;
+		}
 	}
 }
 

@@ -1114,7 +1114,7 @@ uint16 Perl_Mob_GetOwnerID(Mob* self) // @categories Script Utility, Pet
 	return self->GetOwnerID();
 }
 
-int Perl_Mob_GetPetType(Mob* self) // @categories Script Utility, Pet
+uint8 Perl_Mob_GetPetType(Mob* self) // @categories Script Utility, Pet
 {
 	return self->GetPetType();
 }
@@ -1254,12 +1254,12 @@ float Perl_Mob_GetAssistRange(Mob* self) // @categories Stats and Attributes, Ha
 	return self->GetAssistRange();
 }
 
-void Perl_Mob_SetPetOrder(Mob* self, int order) // @categories Pet
+void Perl_Mob_SetPetOrder(Mob* self, uint8 pet_order) // @categories Pet
 {
-	self->SetPetOrder(static_cast<Mob::eStandingPetOrder>(order));
+	self->SetPetOrder(pet_order);
 }
 
-int Perl_Mob_GetPetOrder(Mob* self) // @categories Script Utility, Pet
+uint8 Perl_Mob_GetPetOrder(Mob* self) // @categories Script Utility, Pet
 {
 	return self->GetPetOrder();
 }
@@ -3597,6 +3597,11 @@ perl::array Perl_Mob_GetTimers(Mob* self)
 	return a;
 }
 
+void Perl_Mob_SetPetType(Mob* self, uint8 pet_type)
+{
+	self->SetPetType(pet_type);
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4187,6 +4192,7 @@ void perl_register_mob()
 	package.add("SetPet", &Perl_Mob_SetPet);
 	package.add("SetPetID", &Perl_Mob_SetPetID);
 	package.add("SetPetOrder", &Perl_Mob_SetPetOrder);
+	package.add("SetPetType", &Perl_Mob_SetPetType);
 	package.add("SetRace", &Perl_Mob_SetRace);
 	package.add("SetRunAnimSpeed", &Perl_Mob_SetRunAnimSpeed);
 	package.add("SetRunning", &Perl_Mob_SetRunning);

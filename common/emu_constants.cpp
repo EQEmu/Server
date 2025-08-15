@@ -451,3 +451,36 @@ bool LDoNTheme::IsValid(uint32 theme_id)
 {
 	return ldon_theme_names.find(theme_id) != ldon_theme_names.end();
 }
+
+uint8 PetCommand::GetID(std::string pet_command)
+{
+	auto e = std::find_if(
+		pet_commands.begin(),
+		pet_commands.end(),
+		[&pet_command](const auto &c) {
+			return c.second == pet_command;
+		}
+	);
+
+	return e != pet_commands.end() ? e->first : -1;
+}
+
+std::string PetCommand::GetName(uint8 pet_command)
+{
+	return IsValid(pet_command) ? pet_commands[pet_command] : "UNKNOWN PET COMMAND";
+}
+
+bool PetCommand::IsValid(uint8 pet_command)
+{
+	return pet_commands.find(pet_command) != pet_commands.end();
+}
+
+std::string PetType::GetName(uint8 pet_type)
+{
+	return IsValid(pet_type) ? pet_types[pet_type] : "UNKNOWN PET TYPE";
+}
+
+bool PetType::IsValid(uint8 pet_type)
+{
+	return pet_types.find(pet_type) != pet_types.end();
+}

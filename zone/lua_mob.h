@@ -280,8 +280,8 @@ public:
 	bool IsAIControlled();
 	float GetAggroRange();
 	float GetAssistRange();
-	void SetPetOrder(int order);
-	int GetPetOrder();
+	void SetPetOrder(uint8 pet_order);
+	uint8 GetPetOrder();
 	bool IsRoamer();
 	bool IsRooted();
 	bool IsEngaged();
@@ -614,6 +614,8 @@ public:
 	void BuffFadeSongs();
 	luabind::object GetPausedTimers(lua_State* L);
 	luabind::object GetTimers(lua_State* L);
+	uint8 GetPetType();
+	void SetPetType(uint8 pet_type);
 };
 
 #endif

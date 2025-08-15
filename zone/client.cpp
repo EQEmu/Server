@@ -6415,17 +6415,17 @@ void Client::SuspendMinion(int value)
 			// TODO: These pet command states need to be synced ...
 			// Will just fix them for now
 			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-				SetPetCommandState(PET_BUTTON_SIT, 0);
-				SetPetCommandState(PET_BUTTON_STOP, 0);
-				SetPetCommandState(PET_BUTTON_REGROUP, 0);
-				SetPetCommandState(PET_BUTTON_FOLLOW, 1);
-				SetPetCommandState(PET_BUTTON_GUARD, 0);
+				SetPetCommandState(PetButton::Sit, 0);
+				SetPetCommandState(PetButton::Stop, 0);
+				SetPetCommandState(PetButton::Regroup, 0);
+				SetPetCommandState(PetButton::Follow, 1);
+				SetPetCommandState(PetButton::Guard, 0);
 				// Taunt saved on client side for logging on with pet
 				// In our db for when we zone.
-				SetPetCommandState(PET_BUTTON_HOLD, 0);
-				SetPetCommandState(PET_BUTTON_GHOLD, 0);
-				SetPetCommandState(PET_BUTTON_FOCUS, 0);
-				SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
+				SetPetCommandState(PetButton::Hold, 0);
+				SetPetCommandState(PetButton::GreaterHold, 0);
+				SetPetCommandState(PetButton::Focus, 0);
+				SetPetCommandState(PetButton::SpellHold, 0);
 			}
 		}
 		else
@@ -6906,9 +6906,9 @@ void Client::CheckLDoNHail(NPC* n)
 
 	auto pet = GetPet();
 	if (pet) {
-		if (pet->GetPetType() == petCharmed) {
+		if (pet->GetPetType() == PetType::Charmed) {
 			pet->BuffFadeByEffect(SE_Charm);
-		} else if (pet->GetPetType() == petNPCFollow) {
+		} else if (pet->GetPetType() == PetType::Follow) {
 			pet->SetOwnerID(0);
 		} else {
 			pet->Depop();
