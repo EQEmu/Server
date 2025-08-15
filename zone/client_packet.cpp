@@ -955,17 +955,17 @@ void Client::CompleteConnect()
 	// TODO: load these states
 	// We at least will set them to the correct state for now
 	if (m_ClientVersionBit & EQ::versions::maskUFAndLater && GetPet()) {
-		SetPetCommandState(PetButton::Sit, 0);
-		SetPetCommandState(PetButton::Stop, 0);
-		SetPetCommandState(PetButton::Regroup, 0);
-		SetPetCommandState(PetButton::Follow, 1);
-		SetPetCommandState(PetButton::Guard, 0);
+		SetPetCommandState(PetButton::Sit, PetButtonState::Off);
+		SetPetCommandState(PetButton::Stop, PetButtonState::Off);
+		SetPetCommandState(PetButton::Regroup, PetButtonState::Off);
+		SetPetCommandState(PetButton::Follow, PetButtonState::On);
+		SetPetCommandState(PetButton::Guard, PetButtonState::Off);
 		// Taunt saved on client side for logging on with pet
 		// In our db for when we zone.
-		SetPetCommandState(PetButton::Hold, 0);
-		SetPetCommandState(PetButton::GreaterHold, 0);
-		SetPetCommandState(PetButton::Focus, 0);
-		SetPetCommandState(PetButton::SpellHold, 0);
+		SetPetCommandState(PetButton::Hold, PetButtonState::Off);
+		SetPetCommandState(PetButton::GreaterHold, PetButtonState::Off);
+		SetPetCommandState(PetButton::Focus, PetButtonState::Off);
+		SetPetCommandState(PetButton::SpellHold, PetButtonState::Off);
 	}
 
 	database.LoadAuras(this); // this ends up spawning them so probably safer to load this later (here)
@@ -11170,15 +11170,15 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			if (pet->IsPetStop()) {
 				pet->SetPetStop(false);
-				SetPetCommandState(PetButton::Stop, 0);
+				SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 			}
 
 			if (pet->IsPetRegroup()) {
 				pet->SetPetRegroup(false);
-				SetPetCommandState(PetButton::Regroup, 0);
+				SetPetCommandState(PetButton::Regroup, PetButtonState::Off);
 			}
 
-			SetPetCommandState(PetButton::Sit, 0);
+			SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 
 			if (pet->GetPetOrder() == PetOrder::Sit || pet->GetPetOrder() == PetOrder::Feign) {
 				pet->SetPetOrder(pet->GetPreviousPetOrder());
@@ -11240,15 +11240,15 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			if (pet->IsPetStop()) {
 				pet->SetPetStop(false);
-				SetPetCommandState(PetButton::Stop, 0);
+				SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 			}
 
 			if (pet->IsPetRegroup()) {
 				pet->SetPetRegroup(false);
-				SetPetCommandState(PetButton::Regroup, 0);
+				SetPetCommandState(PetButton::Regroup, PetButtonState::Off);
 			}
 
-			SetPetCommandState(PetButton::Sit, 0);
+			SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 
 			if (pet->GetPetOrder() == PetOrder::Sit || pet->GetPetOrder() == PetOrder::Feign) {
 				pet->SetPetOrder(pet->GetPreviousPetOrder());
@@ -11278,7 +11278,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			if (pet->IsPetStop()) {
 				pet->SetPetStop(false);
-				SetPetCommandState(PetButton::Stop, 0);
+				SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 			}
 
 			break;
@@ -11335,7 +11335,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
 
 			pet->SetFeigned(false);
-			SetPetCommandState(PetButton::Sit, 0);
+			SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 			pet->SetAppearance(eaStanding);
 			pet->SayString(this, Chat::PetResponse, PET_GUARDINGLIFE);
 			pet->SetPetOrder(PetOrder::Guard);
@@ -11347,7 +11347,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			if (pet->IsPetStop()) {
 				pet->SetPetStop(false);
-				SetPetCommandState(PetButton::Stop, 0);
+				SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 			}
 
 			break;
@@ -11367,12 +11367,12 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			pet->SetFeigned(false);
 			pet->SayString(this, Chat::PetResponse, PET_FOLLOWING);
 			pet->SetPetOrder(PetOrder::Follow);
-			SetPetCommandState(PetButton::Sit, 0);
+			SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 			pet->SetAppearance(eaStanding);
 
 			if (pet->IsPetStop()) {
 				pet->SetPetStop(false);
-				SetPetCommandState(PetButton::Stop, 0);
+				SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 			}
 
 			break;
@@ -11440,12 +11440,12 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			pet->SetFeigned(false);
 			pet->SayString(this, Chat::PetResponse, PET_GUARDME_STRING);
 			pet->SetPetOrder(PetOrder::Follow);
-			SetPetCommandState(PetButton::Sit, 0);
+			SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 			pet->SetAppearance(eaStanding);
 
 			if (pet->IsPetStop()) {
 				pet->SetPetStop(false);
-				SetPetCommandState(PetButton::Stop, 0);
+				SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 			}
 
 			break;
@@ -11491,7 +11491,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			pet->SetFeigned(false);
 			pet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
-			SetPetCommandState(PetButton ::Sit, 0);
+			SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 			pet->SetPetOrder(pet->GetPreviousPetOrder());
 			pet->SetAppearance(eaStanding);
 			break;
@@ -11510,7 +11510,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			pet->SetFeigned(false);
 			pet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
-			SetPetCommandState(PetButton::Sit, 1);
+			SetPetCommandState(PetButton::Sit, PetButtonState::On);
 			pet->SetPetOrder(PetOrder::Sit);
 			pet->SetRunAnimSpeed(0);
 
@@ -11554,7 +11554,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			}
 
 			pet->SetGHeld(false);
-			SetPetCommandState(PetButton::GreaterHold, 0);
+			SetPetCommandState(PetButton::GreaterHold, PetButtonState::Off);
 			break;
 		}
 		case PetCommand::HoldOn: {
@@ -11581,7 +11581,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			pet->SetHeld(true);
 			pet->SetGHeld(false);
-			SetPetCommandState(PetButton::GreaterHold, 0);
+			SetPetCommandState(PetButton::GreaterHold, PetButtonState::Off);
 			break;
 		}
 		case PetCommand::HoldOff: {
@@ -11633,7 +11633,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			}
 
 			pet->SetHeld(false);
-			SetPetCommandState(PetButton::Hold, 0);
+			SetPetCommandState(PetButton::Hold, PetButtonState::Off);
 			break;
 		}
 		case PetCommand::GreaterHoldOn: {
@@ -11657,7 +11657,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			pet->SetGHeld(true);
 			pet->SetHeld(false);
-			SetPetCommandState(PetButton::Hold, 0);
+			SetPetCommandState(PetButton::Hold, PetButtonState::Off);
 			break;
 		}
 		case PetCommand::GreaterHoldOff: {
@@ -11862,7 +11862,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				if (pet->IsPetRegroup()) {
 					pet->SetPetRegroup(false);
-					SetPetCommandState(PetButton::Regroup, 0);
+					SetPetCommandState(PetButton::Regroup, PetButtonState::Off);
 				}
 			}
 
@@ -11888,7 +11888,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			if (pet->IsPetRegroup()) {
 				pet->SetPetRegroup(false);
-				SetPetCommandState(PetButton::Regroup, 0);
+				SetPetCommandState(PetButton::Regroup, PetButtonState::Off);
 			}
 
 			break;
@@ -11931,7 +11931,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				if (pet->IsPetStop()) {
 					pet->SetPetStop(false);
-					SetPetCommandState(PetButton::Stop, 0);
+					SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 				}
 			}
 
@@ -11955,7 +11955,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			if (pet->IsPetStop()) {
 				pet->SetPetStop(false);
-				SetPetCommandState(PetButton::Stop, 0);
+				SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 			}
 
 			break;

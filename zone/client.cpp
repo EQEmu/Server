@@ -6415,17 +6415,17 @@ void Client::SuspendMinion(int value)
 			// TODO: These pet command states need to be synced ...
 			// Will just fix them for now
 			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-				SetPetCommandState(PetButton::Sit, 0);
-				SetPetCommandState(PetButton::Stop, 0);
-				SetPetCommandState(PetButton::Regroup, 0);
-				SetPetCommandState(PetButton::Follow, 1);
-				SetPetCommandState(PetButton::Guard, 0);
+				SetPetCommandState(PetButton::Sit, PetButtonState::Off);
+				SetPetCommandState(PetButton::Stop, PetButtonState::Off);
+				SetPetCommandState(PetButton::Regroup, PetButtonState::Off);
+				SetPetCommandState(PetButton::Follow, PetButtonState::On);
+				SetPetCommandState(PetButton::Guard, PetButtonState::Off);
 				// Taunt saved on client side for logging on with pet
 				// In our db for when we zone.
-				SetPetCommandState(PetButton::Hold, 0);
-				SetPetCommandState(PetButton::GreaterHold, 0);
-				SetPetCommandState(PetButton::Focus, 0);
-				SetPetCommandState(PetButton::SpellHold, 0);
+				SetPetCommandState(PetButton::Hold, PetButtonState::Off);
+				SetPetCommandState(PetButton::GreaterHold, PetButtonState::Off);
+				SetPetCommandState(PetButton::Focus, PetButtonState::Off);
+				SetPetCommandState(PetButton::SpellHold, PetButtonState::Off);
 			}
 		}
 		else
@@ -9450,12 +9450,15 @@ void Client::ProcessAggroMeter()
 	}
 }
 
-void Client::SetPetCommandState(int button, int state)
+void Client::SetPetCommandState(uint8 button, uint8 state)
 {
 	auto app = new EQApplicationPacket(OP_PetCommandState, sizeof(PetCommandState_Struct));
-	auto pcs = (PetCommandState_Struct *)app->pBuffer;
-	pcs->button_id = button;
-	pcs->state = state;
+
+	auto s = (PetCommandState_Struct*) app->pBuffer;
+
+	s->button_id = button;
+	s->state     = state;
+
 	FastQueuePacket(&app);
 }
 

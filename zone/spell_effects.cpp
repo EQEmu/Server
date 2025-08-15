@@ -809,10 +809,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				// stand and follow on charm.
 				if (caster->IsClient()) {
 					Client *cpet = caster->CastToClient();
-					cpet->SetPetCommandState(PetButton::Sit,0);
-					cpet->SetPetCommandState(PetButton::Follow, 1);
-					cpet->SetPetCommandState(PetButton::Guard, 0);
-					cpet->SetPetCommandState(PetButton::Stop, 0);
+					cpet->SetPetCommandState(PetButton::Sit, PetButtonState::Off);
+					cpet->SetPetCommandState(PetButton::Follow, PetButtonState::On);
+					cpet->SetPetCommandState(PetButton::Guard, PetButtonState::Off);
+					cpet->SetPetCommandState(PetButton::Stop, PetButtonState::Off);
 				}
 
 				SetPetType(PetType::Charmed);
@@ -1308,18 +1308,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					if (IsClient() && pet) {
 						auto c = CastToClient();
 						if (c->ClientVersionBit() & EQ::versions::maskUFAndLater) {
-							c->SetPetCommandState(PetButton::Sit, 0);
-							c->SetPetCommandState(PetButton::Stop, 0);
-							c->SetPetCommandState(PetButton::Regroup, 0);
-							c->SetPetCommandState(PetButton::Follow, 1);
-							c->SetPetCommandState(PetButton::Guard, 0);
+							c->SetPetCommandState(PetButton::Sit, PetButtonState::Off);
+							c->SetPetCommandState(PetButton::Stop, PetButtonState::Off);
+							c->SetPetCommandState(PetButton::Regroup, PetButtonState::Off);
+							c->SetPetCommandState(PetButton::Follow, PetButtonState::On);
+							c->SetPetCommandState(PetButton::Guard, PetButtonState::Off);
 							// Creating pet from spell - taunt always false
 							// If suspended pet - that will be restore there
 							// If logging in, client will send toggle
-							c->SetPetCommandState(PetButton::Hold, 0);
-							c->SetPetCommandState(PetButton::GreaterHold, 0);
-							c->SetPetCommandState(PetButton::Focus, 0);
-							c->SetPetCommandState(PetButton::SpellHold, 0);
+							c->SetPetCommandState(PetButton::Hold, PetButtonState::Off);
+							c->SetPetCommandState(PetButton::GreaterHold, PetButtonState::Off);
+							c->SetPetCommandState(PetButton::Focus, PetButtonState::Off);
+							c->SetPetCommandState(PetButton::SpellHold, PetButtonState::Off);
 						}
 					}
 				}

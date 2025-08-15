@@ -793,16 +793,21 @@ namespace BookType {
 }
 
 namespace PetButton {
-	constexpr int Sit         = 0;
-	constexpr int Stop        = 1;
-	constexpr int Regroup     = 2;
-	constexpr int Follow      = 3;
-	constexpr int Guard       = 4;
-	constexpr int Taunt       = 5;
-	constexpr int Hold        = 6;
-	constexpr int GreaterHold = 7;
-	constexpr int Focus       = 8;
-	constexpr int SpellHold   = 9;
+	constexpr uint8 Sit         = 0;
+	constexpr uint8 Stop        = 1;
+	constexpr uint8 Regroup     = 2;
+	constexpr uint8 Follow      = 3;
+	constexpr uint8 Guard       = 4;
+	constexpr uint8 Taunt       = 5;
+	constexpr uint8 Hold        = 6;
+	constexpr uint8 GreaterHold = 7;
+	constexpr uint8 Focus       = 8;
+	constexpr uint8 SpellHold   = 9;
+}
+
+namespace PetButtonState {
+	constexpr uint8 Off = 0;
+	constexpr uint8 On  = 1;
 }
 
 namespace PetCommand {
