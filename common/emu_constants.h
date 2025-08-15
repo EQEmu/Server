@@ -880,7 +880,6 @@ namespace PetCommand {
 		{ PetCommand::Max,            "Max" }
 	};
 
-	uint8 GetID(std::string pet_command);
 	std::string GetName(uint8 pet_command);
 	bool IsValid(uint8 pet_command);
 }

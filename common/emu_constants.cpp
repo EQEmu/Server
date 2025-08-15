@@ -452,19 +452,6 @@ bool LDoNTheme::IsValid(uint32 theme_id)
 	return ldon_theme_names.find(theme_id) != ldon_theme_names.end();
 }
 
-uint8 PetCommand::GetID(std::string pet_command)
-{
-	auto e = std::find_if(
-		pet_commands.begin(),
-		pet_commands.end(),
-		[&pet_command](const auto &c) {
-			return c.second == pet_command;
-		}
-	);
-
-	return e != pet_commands.end() ? e->first : -1;
-}
-
 std::string PetCommand::GetName(uint8 pet_command)
 {
 	return IsValid(pet_command) ? pet_commands[pet_command] : "UNKNOWN PET COMMAND";
