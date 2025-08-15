@@ -3518,6 +3518,12 @@ uint8 Lua_Mob::GetPetType()
 	return self->GetPetType();
 }
 
+std::string Lua_Mob::GetPetTypeName()
+{
+	Lua_Safe_Call_String();
+	return PetType::GetName(self->GetPetType());
+}
+
 void Lua_Mob::SetPetType(uint8 pet_type)
 {
 	Lua_Safe_Call_Void();
@@ -3868,6 +3874,7 @@ luabind::scope lua_register_mob() {
 	.def("GetPet", &Lua_Mob::GetPet)
 	.def("GetPetOrder", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
 	.def("GetPetType", &Lua_Mob::GetPetType)
+	.def("GetPetTypeName", &Lua_Mob::GetPetTypeName)
 	.def("GetPhR", &Lua_Mob::GetPhR)
 	.def("GetRace", &Lua_Mob::GetRace)
 	.def("GetRaceName", &Lua_Mob::GetRaceName)

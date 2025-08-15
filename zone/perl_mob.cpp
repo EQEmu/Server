@@ -1119,6 +1119,11 @@ uint8 Perl_Mob_GetPetType(Mob* self) // @categories Script Utility, Pet
 	return self->GetPetType();
 }
 
+std::string Perl_Mob_GetPetTypeName(Mob* self) // @categories Script Utility, Pet
+{
+	return PetType::GetName(self->GetPetType());
+}
+
 int Perl_Mob_GetBodyType(Mob* self) // @categories Stats and Attributes
 {
 	return self->GetBodyType();
@@ -3931,6 +3936,7 @@ void perl_register_mob()
 	package.add("GetPetID", &Perl_Mob_GetPetID);
 	package.add("GetPetOrder", &Perl_Mob_GetPetOrder);
 	package.add("GetPetType", &Perl_Mob_GetPetType);
+	package.add("GetPetTypeName", &Perl_Mob_GetPetTypeName);
 	package.add("GetPhR", &Perl_Mob_GetPhR);
 	package.add("GetRace", &Perl_Mob_GetRace);
 	package.add("GetRaceName", &Perl_Mob_GetRaceName);

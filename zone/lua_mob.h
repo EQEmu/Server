@@ -615,6 +615,7 @@ public:
 	luabind::object GetPausedTimers(lua_State* L);
 	luabind::object GetTimers(lua_State* L);
 	uint8 GetPetType();
+	std::string GetPetTypeName();
 	void SetPetType(uint8 pet_type);
 };
 
