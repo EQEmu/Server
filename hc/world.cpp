@@ -8,7 +8,7 @@ WorldConnection::WorldConnection(const std::string &key, uint32_t dbid, const st
 	m_key = key;
 	m_dbid = dbid;
 
-	m_connection_manager.reset(new EQ::Net::DaybreakConnectionManager());
+	m_connection_manager.reset(new EQ::Net::ReliableStreamConnectionManager());
 	m_connection_manager->OnNewConnection(std::bind(&WorldConnection::OnNewConnection, this, std::placeholders::_1));
 	m_connection_manager->OnConnectionStateChange(std::bind(&WorldConnection::OnStatusChangeActive, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	m_connection_manager->OnPacketRecv(std::bind(&WorldConnection::OnPacketRecv, this, std::placeholders::_1, std::placeholders::_2));
@@ -18,13 +18,13 @@ WorldConnection::WorldConnection(const std::string &key, uint32_t dbid, const st
 WorldConnection::~WorldConnection() {
 }
 
-void WorldConnection::OnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
+void WorldConnection::OnNewConnection(std::shared_ptr<EQ::Net::ReliableStreamConnection> connection)
 {
 	m_connection = connection;
 	Log.OutF(Logs::General, Logs::Headless_Client, "Connecting to world...");
 }
 
-void WorldConnection::OnStatusChangeActive(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
+void WorldConnection::OnStatusChangeActive(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusConnected) {
 		Log.OutF(Logs::General, Logs::Headless_Client, "World connected.");
@@ -38,14 +38,14 @@ void WorldConnection::OnStatusChangeActive(std::shared_ptr<EQ::Net::DaybreakConn
 	}
 }
 
-void WorldConnection::OnStatusChangeInactive(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
+void WorldConnection::OnStatusChangeInactive(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusDisconnected) {
 		m_connection.reset();
 	}
 }
 
-void WorldConnection::OnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p)
+void WorldConnection::OnPacketRecv(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, const EQ::Net::Packet &p)
 {
 	auto opcode = p.GetUInt16(0);
 	Log.OutF(Logs::General, Logs::Headless_Client, "Packet in:\n{0}", p.ToString());
