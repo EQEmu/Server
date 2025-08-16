@@ -8,7 +8,7 @@ namespace EQ
 {
 	namespace Net
 	{
-		struct DaybreakHeader
+		struct ReliableStreamHeader
 		{
 			static size_t size() { return 2; }
 			uint8_t zero;
@@ -22,7 +22,7 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakConnect
+		struct ReliableStreamConnect
 		{
 			static size_t size() { return 14; }
 			uint8_t zero;
@@ -42,7 +42,7 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakConnectReply
+		struct ReliableStreamConnectReply
 		{
 			static size_t size() { return 17; }
 			uint8_t zero;
@@ -68,7 +68,7 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakDisconnect
+		struct ReliableStreamDisconnect
 		{
 			static size_t size() { return 8; }
 			uint8_t zero;
@@ -84,7 +84,7 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakReliableHeader
+		struct ReliableStreamReliableHeader
 		{
 			static size_t size() { return 4; }
 			uint8_t zero;
@@ -100,10 +100,10 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakReliableFragmentHeader
+		struct ReliableStreamReliableFragmentHeader
 		{
-			static size_t size() { return 4 + DaybreakReliableHeader::size(); }
-			DaybreakReliableHeader reliable;
+			static size_t size() { return 4 + ReliableStreamReliableHeader::size(); }
+			ReliableStreamReliableHeader reliable;
 			uint32_t total_size;
 
 			template <class Archive>
@@ -114,7 +114,7 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakSessionStatRequest
+		struct ReliableStreamSessionStatRequest
 		{
 			static size_t size() { return 40; }
 			uint8_t zero;
@@ -144,7 +144,7 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakSessionStatResponse
+		struct ReliableStreamSessionStatResponse
 		{
 			static size_t size() { return 40; }
 			uint8_t zero;

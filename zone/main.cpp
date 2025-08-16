@@ -555,11 +555,11 @@ int main(int argc, char **argv)
 			LogInfo("Starting EQ Network server on port [{}]", Config->ZonePort);
 
 			EQStreamManagerInterfaceOptions opts(Config->ZonePort, false, RuleB(Network, CompressZoneStream));
-			opts.daybreak_options.resend_delay_ms     = RuleI(Network, ResendDelayBaseMS);
-			opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
-			opts.daybreak_options.resend_delay_min    = RuleI(Network, ResendDelayMinMS);
-			opts.daybreak_options.resend_delay_max    = RuleI(Network, ResendDelayMaxMS);
-			opts.daybreak_options.outgoing_data_rate  = RuleR(Network, ClientDataRate);
+			opts.reliable_stream_options.resend_delay_ms     = RuleI(Network, ResendDelayBaseMS);
+			opts.reliable_stream_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
+			opts.reliable_stream_options.resend_delay_min    = RuleI(Network, ResendDelayMinMS);
+			opts.reliable_stream_options.resend_delay_max    = RuleI(Network, ResendDelayMaxMS);
+			opts.reliable_stream_options.outgoing_data_rate  = RuleR(Network, ClientDataRate);
 			eqsm      = std::make_unique<EQ::Net::EQStreamManager>(opts);
 			eqsf_open = true;
 
