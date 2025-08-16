@@ -49,6 +49,7 @@ public:
 		// these are the base definitions for command_subsettings and can be over-ridden by the database
 		std::vector<CommandSubsettingsRepository::CommandSubsettings> static_records = {
 			{.parent_command = "find", .sub_command = "aa", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findaa"},
+			{.parent_command = "find", .sub_command = "account", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findaccount"},
 			{.parent_command = "find", .sub_command = "body_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findbodytype"},
 			{.parent_command = "find", .sub_command = "bug_category", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findbugcategory"},
 			{.parent_command = "find", .sub_command = "character", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcharacter"},
