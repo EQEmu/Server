@@ -7160,6 +7160,17 @@ ALTER TABLE loottable_entries
 )",
 		.content_schema_update = true
 	},
+	ManifestEntry{
+		.version = 9327,
+		.description = "2025_08_13_character_stats_record_heal_amount.sql",
+		.check = "SHOW COLUMNS FROM `character_stats_record` LIKE 'heal_amount'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_stats_record`
+ADD COLUMN `heal_amount` int(11) NULL DEFAULT 0 AFTER `spell_damage`;
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
