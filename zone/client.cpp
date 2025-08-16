@@ -15,11 +15,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/global_define.h"
 #include <iostream>
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "../common/global_define.h"
 
 // for windows compile
 #ifndef _WINDOWS
@@ -510,10 +510,10 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	client_data_loaded = false;
 	berserk = false;
 	dead = false;
-	eqs = ieqs;
-	ip = eqs->GetRemoteIP();
-	port = ntohs(eqs->GetRemotePort());
-	client_state = CLIENT_CONNECTING;
+	eqs                = ieqs ? ieqs : nullptr;
+	ip                 = eqs ? eqs->GetRemoteIP() : 0;
+	port               = eqs ? ntohs(eqs->GetRemotePort()) : 0;
+	client_state       = eqs ? CLIENT_CONNECTING : CLIENT_CONNECTED;
 	SetTrader(false);
 	Haste = 0;
 	SetCustomerID(0);
@@ -700,6 +700,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	m_parcels.clear();
 
 	m_buyer_id = 0;
+	m_offline  = false;
 
 	SetBotPulling(false);
 	SetBotPrecombat(false);
@@ -728,10 +729,12 @@ Client::~Client() {
 		zone->ClearEXPModifier(this);
 	}
 
-	if (!IsZoning()) {
-		if(IsInAGuild()) {
-			guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
-			guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
+	if (!IsZoning() && IsInAGuild()) {
+		guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
+		if (IsOffline()) {
+			guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), GetZoneID(), time(nullptr), 1);
+		} else {
+			guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr), 0);
 		}
 	}
 
@@ -743,11 +746,11 @@ Client::~Client() {
 	if (merc)
 		merc->Depop();
 
-	if(IsTrader()) {
+	if(IsTrader() && !IsOffline()) {
 		TraderEndTrader();
 	}
 
-	if(IsBuyer()) {
+	if(IsBuyer() && !IsOffline()) {
 		ToggleBuyerMode(false);
 	}
 
@@ -779,7 +782,9 @@ Client::~Client() {
 	if(isgrouped && !bZoning && is_zone_loaded)
 		LeaveGroup();
 
-	UpdateWho(2);
+	if (!IsOffline() && !IsTrader()) {
+		UpdateWho(2);
+	}
 
 	if(IsHoveringForRespawn())
 	{
@@ -2155,6 +2160,9 @@ void Client::UpdateWho(uint8 remove)
 	s->race        = GetRace();
 	s->class_      = GetClass();
 	s->level       = GetLevel();
+	s->trader      = IsTrader();
+	s->buyer       = IsBuyer();
+	s->offline     = IsOffline();
 
 	if (m_pp.anon == 0) {
 		s->anon = 0;
@@ -2223,7 +2231,7 @@ void Client::FriendsWho(char *FriendsString) {
 void Client::UpdateAdmin(bool from_database) {
 	int16 tmp = admin;
 	if (from_database) {
-		admin = database.GetAccountStatus(account_id);
+		admin = database.GetAccountStatus(account_id).status;
 	}
 
 	if (tmp == admin && from_database) {
@@ -2539,6 +2547,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.guildID   = GuildID();
 	ns->spawn.trader    = IsTrader();
 	ns->spawn.buyer     = IsBuyer();
+	ns->spawn.offline   = IsOffline();
 //	ns->spawn.linkdead	= IsLD() ? 1 : 0;
 //	ns->spawn.pvp		= GetPVP(false) ? 1 : 0;
 	ns->spawn.show_name = true;
@@ -9055,11 +9064,11 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 
 void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum)
 {
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_CashReward, sizeof(CashReward_Struct));
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_CashReward, static_cast<uint32>(sizeof(CashReward_Struct)));
 	auto outbuf = reinterpret_cast<CashReward_Struct *>(outapp->pBuffer);
-	outbuf->copper = copper;
-	outbuf->silver = silver;
-	outbuf->gold = gold;
+	outbuf->copper   = copper;
+	outbuf->silver   = silver;
+	outbuf->gold     = gold;
 	outbuf->platinum = platinum;
 
 	AddMoneyToPP(copper, silver, gold, platinum);
@@ -12697,13 +12706,11 @@ uint16 Client::GetSkill(EQ::skills::SkillType skill_id) const
 	return 0;
 }
 
-void Client::RemoveItemBySerialNumber(uint32 serial_number, uint32 quantity)
+bool Client::RemoveItemByItemUniqueId(const std::string &item_unique_id, uint32 quantity)
 {
-	EQ::ItemInstance *item = nullptr;
-
-	uint32 removed_count = 0;
-
-	const auto& slot_ids = GetInventorySlots();
+	EQ::ItemInstance *item          = nullptr;
+	uint32            removed_count = 0;
+	const auto       &slot_ids      = GetInventorySlots();
 
 	for (const int16& slot_id : slot_ids) {
 		if (removed_count == quantity) {
@@ -12711,21 +12718,27 @@ void Client::RemoveItemBySerialNumber(uint32 serial_number, uint32 quantity)
 		}
 
 		item = GetInv().GetItem(slot_id);
-		if (item && item->GetSerialNumber() == serial_number) {
+		if (item && item->GetUniqueID().compare(item_unique_id) == 0) {
 			uint32 charges    = item->IsStackable() ? item->GetCharges() : 0;
 			uint32 stack_size = std::max(charges, static_cast<uint32>(1));
-			if ((removed_count + stack_size) <= quantity) {
+			if (removed_count + stack_size <= quantity) {
 				removed_count += stack_size;
-				DeleteItemInInventory(slot_id, charges, true);
+				if (DeleteItemInInventory(slot_id, charges, true)) {
+					return true;
+				}
 			} else {
-				uint32 amount_left = (quantity - removed_count);
+				uint32 amount_left = quantity - removed_count;
 				if (amount_left > 0 && stack_size >= amount_left) {
 					removed_count += amount_left;
-					DeleteItemInInventory(slot_id, amount_left, true);
+					if (DeleteItemInInventory(slot_id, amount_left, true)) {
+						return true;
+					}
 				}
 			}
 		}
 	}
+
+	return false;
 }
 
 void Client::SendTopLevelInventory()
