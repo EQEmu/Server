@@ -326,6 +326,7 @@ public:
 	void TraderStartTrader(const EQApplicationPacket *app);
 //	void TraderPriceUpdate(const EQApplicationPacket *app);
 	uint8 WithCustomer(uint16 NewCustomer);
+	std::vector<uint32> GetKeyRing() { return keyring; }
 	void KeyRingLoad();
 	bool KeyRingAdd(uint32 item_id);
 	bool KeyRingCheck(uint32 item_id);
