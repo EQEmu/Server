@@ -401,8 +401,8 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	*/
 
 	/* Order according to current (SoF+?) dev quotes:
-	* https://forums.daybreakgames.com/eq/index.php?threads/test-update-06-10-15.223510/page-2#post-3261772
-	* https://forums.daybreakgames.com/eq/index.php?threads/test-update-06-10-15.223510/page-2#post-3268227
+	* https://web.archive.org/web/20250816014133/https://forums.everquest.com/index.php?threads/test-update-06-10-15.223510/page-2#post-3261772
+	* https://web.archive.org/web/20250816014133/https://forums.everquest.com/index.php?threads/test-update-06-10-15.223510/page-2#post-3268227
 	* Riposte 50, hDEX, must have weapon/fists, doesn't work on archery/throwing
 	* Block 25, hDEX, works on archery/throwing, behind block done here if back to attacker base1 is chance
 	* Parry 45, hDEX, doesn't work on throwing/archery, must be facing target
@@ -461,7 +461,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	}
 
 	/* Heroic Strikethrough Implementation per Dev Quotes (2018):
-	* https://forums.daybreakgames.com/eq/index.php?threads/illusions-benefit-neza-10-dodge.246757/#post-3622670
+	* https://web.archive.org/web/20250816014810/https://forums.everquest.com/index.php?threads/illusions-benefit-neza-10-dodge.246757/#post-3622670
 	* Step1 = HeroicStrikethrough(NPC)
 	* Step2 = HeroicAgility / 25
 	* Step3 = MIN( Step1, Step2 )
@@ -3414,7 +3414,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 uint8 Mob::GetWeaponDamageBonus(const EQ::ItemData *weapon, bool offhand)
 {
 	// dev quote with old and new formulas
-	// https://forums.daybreakgames.com/eq/index.php?threads/test-update-09-17-15.226618/page-5#post-3326194
+	// https://web.archive.org/web/20250816013618/https://forums.everquest.com/index.php?threads/test-update-09-17-15.226618/page-5#post-3326194
 	//
 	// We assume that the level check is done before calling this function and sinister strikes is checked before
 	// calling for offhand DB
