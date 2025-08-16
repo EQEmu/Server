@@ -188,7 +188,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		}
 
 		auto target = c->GetTarget()->CastToNPC();
-		auto spawn2 = target->respawn2;
+		auto spawn2 = target->GetSpawn();
 		if (!spawn2) {
 			c->Message(Chat::White, "Failed to delete spawn because NPC has no Spawn2.");
 			return;
@@ -297,7 +297,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		}
 
 		auto target = c->GetTarget()->CastToNPC();
-		auto spawn2 = target->respawn2;
+		auto spawn2 = target->GetSpawn();
 		if (!spawn2) {
 			c->Message(Chat::White, "Failed to edit respawn because NPC has no Spawn2.");
 			return;
@@ -434,7 +434,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		}
 
 		auto target = c->GetTarget()->CastToNPC();
-		auto spawn2 = target->respawn2;
+		auto spawn2 = target->GetSpawn();
 		if (!spawn2) {
 			c->Message(Chat::White, "Failed to move spawn because NPC has no Spawn2.");
 			return;
