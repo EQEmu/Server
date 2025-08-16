@@ -7,7 +7,7 @@ void ShowNetworkStats(Client *c, const Seperator *sep)
 	const auto opts       = connection->GetManager()->GetOptions();
 	const auto eqs_stats  = connection->GetStats();
 
-	const auto& stats = eqs_stats.DaybreakStats;
+	const auto& stats = eqs_stats.ReliableStreamStats;
 
 	const auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(
 		EQ::Net::Clock::now() - stats.created
@@ -217,7 +217,7 @@ void ShowNetworkStats(Client *c, const Seperator *sep)
 		)
 	);
 
-	if (opts.daybreak_options.outgoing_data_rate > 0.0) {
+	if (opts.reliable_stream_options.outgoing_data_rate > 0.0) {
 		popup_table += DialogueWindow::TableRow(
 			DialogueWindow::TableCell("Outgoing Link Saturation") +
 			DialogueWindow::TableCell(
@@ -229,14 +229,14 @@ void ShowNetworkStats(Client *c, const Seperator *sep)
 							1.0 -
 							(
 								(
-									opts.daybreak_options.outgoing_data_rate -
+									opts.reliable_stream_options.outgoing_data_rate -
 									stats.datarate_remaining
 								) /
-								opts.daybreak_options.outgoing_data_rate
+								opts.reliable_stream_options.outgoing_data_rate
 							)
 						)
 					),
-					opts.daybreak_options.outgoing_data_rate
+					opts.reliable_stream_options.outgoing_data_rate
 				)
 			)
 		);

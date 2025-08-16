@@ -1057,7 +1057,7 @@ typedef enum {
 } DmgShieldType;
 
 //Spell Effect IDs
-// https://forums.daybreakgames.com/eq/index.php?threads/enumerated-spa-list.206288/
+// https://web.archive.org/web/20250816011656/https://forums.everquest.com/index.php?threads/enumerated-spa-list.206288/
 // mirror: http://pastebin.com/MYeQqGwe
 #define SE_CurrentHP					0	// implemented - Heals and nukes, repeates every tic if in a buff
 #define SE_ArmorClass					1	// implemented

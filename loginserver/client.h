@@ -6,7 +6,7 @@
 #include "../common/random.h"
 #include "../common/eq_stream_intf.h"
 #include "../common/net/dns.h"
-#include "../common/net/daybreak_connection.h"
+#include "../common/net/reliable_stream_connection.h"
 #include "login_types.h"
 #include "../common/repositories/login_accounts_repository.h"
 #include <memory>
@@ -54,8 +54,8 @@ private:
 	unsigned int                                        m_selected_play_server_id;
 	unsigned int                                        m_play_sequence_id;
 	std::string                                         m_key;
-	std::unique_ptr<EQ::Net::DaybreakConnectionManager> m_login_connection_manager;
-	std::shared_ptr<EQ::Net::DaybreakConnection>        m_login_connection;
+	std::unique_ptr<EQ::Net::ReliableStreamConnectionManager> m_login_connection_manager;
+	std::shared_ptr<EQ::Net::ReliableStreamConnection>        m_login_connection;
 	LoginBaseMessage                                    m_login_base_message;
 	std::string                                         m_stored_username;
 	std::string                                         m_stored_password;

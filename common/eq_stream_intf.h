@@ -6,7 +6,7 @@
 #include <string>
 #include "emu_versions.h"
 #include "eq_packet.h"
-#include "net/daybreak_connection.h"
+#include "net/reliable_stream_connection.h"
 
 typedef enum {
 	ESTABLISHED,
@@ -33,18 +33,18 @@ struct EQStreamManagerInterfaceOptions
 		//Login I had trouble getting to recognize compression at all
 		//but that might be because it was still a bit buggy when i was testing that.
 		if (compressed) {
-			daybreak_options.encode_passes[0] = EQ::Net::EncodeCompression;
+			reliable_stream_options.encode_passes[0] = EQ::Net::EncodeCompression;
 		}
 		else if (encoded) {
-			daybreak_options.encode_passes[0] = EQ::Net::EncodeXOR;
+			reliable_stream_options.encode_passes[0] = EQ::Net::EncodeXOR;
 		}
 
-		daybreak_options.port = port;
+		reliable_stream_options.port = port;
 	}
 
 	int opcode_size;
 	bool track_opcode_stats;
-	EQ::Net::DaybreakConnectionManagerOptions daybreak_options;
+	EQ::Net::ReliableStreamConnectionManagerOptions reliable_stream_options;
 };
 
 class EQStreamManagerInterface
@@ -80,7 +80,7 @@ public:
 
 	struct Stats
 	{
-		EQ::Net::DaybreakConnectionStats DaybreakStats;
+		EQ::Net::ReliableStreamConnectionStats ReliableStreamStats;
 		int RecvCount[_maxEmuOpcode];
 		int SentCount[_maxEmuOpcode];
 	};
