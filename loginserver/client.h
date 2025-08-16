@@ -6,7 +6,7 @@
 #include "../common/random.h"
 #include "../common/eq_stream_intf.h"
 #include "../common/net/dns.h"
-#include "../common/net/daybreak_connection.h"
+#include "../common/net/reliable_stream_connection.h"
 #include "login_types.h"
 #include "../common/repositories/login_accounts_repository.h"
 #include <memory>
