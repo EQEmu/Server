@@ -4940,3 +4940,16 @@ void NPC::ResetMultiQuest() {
 
 	m_hand_in = {};
 }
+
+void NPC::SetNPCTintIndex(uint32 index)
+{
+	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	auto* s = (SpawnAppearance_Struct*) outapp->pBuffer;
+
+	s->spawn_id  = GetID();
+	s->type      = AppearanceType::NPCTintIndex;
+	s->parameter = index;
+
+	entity_list.QueueClients(this, outapp);
+	safe_delete(outapp);
+}

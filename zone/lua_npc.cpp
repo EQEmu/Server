@@ -945,10 +945,16 @@ bool Lua_NPC::IsResumedFromZoneSuspend()
 	return self->IsResumedFromZoneSuspend();
 }
 
-void Lua_NPC::SetNPCTintIndex(uint32 id)
+void Lua_NPC::SetNPCTintIndex(uint32 index)
 {
 	Lua_Safe_Call_Void();
-	self->SendAppearancePacket(AppearanceType::NPCTintIndex, id);
+	self->SetNPCTintIndex(index);
+}
+
+uint32 Lua_NPC::GetNPCTintIndex()
+{
+	Lua_Safe_Call_Int();
+	return self->GetNPCTintIndex();
 }
 
 luabind::scope lua_register_npc() {
@@ -1018,6 +1024,7 @@ luabind::scope lua_register_npc() {
 	.def("GetNPCSpellsEffectsID", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsEffectsID)
 	.def("GetNPCSpellsID", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 	.def("GetNPCStat", (float(Lua_NPC::*)(std::string))&Lua_NPC::GetNPCStat)
+	.def("GetNPCTintIndex", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetNPCTintIndex)
 	.def("GetPetSpellID", (int(Lua_NPC::*)(void))&Lua_NPC::GetPetSpellID)
 	.def("GetPlatinum", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetPlatinum)
 	.def("GetPrimSkill", (int(Lua_NPC::*)(void))&Lua_NPC::GetPrimSkill)
