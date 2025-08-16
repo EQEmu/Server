@@ -99,7 +99,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	SetPullingFlag(false);
 	SetReturningFlag(false);
 	SetIsUsingItemClick(false);
-	m_previous_pet_order = SPO_Guard;
+	m_previous_pet_order = PetOrder::Guard;
 
 	rest_timer.Disable();
 	m_ping_timer.Disable();
@@ -232,7 +232,7 @@ Bot::Bot(
 	SetPullingFlag(false);
 	SetReturningFlag(false);
 	SetIsUsingItemClick(false);
-	m_previous_pet_order = SPO_Guard;
+	m_previous_pet_order = PetOrder::Guard;
 
 	rest_timer.Disable();
 	m_ping_timer.Disable();
@@ -2313,7 +2313,7 @@ void Bot::AI_Process()
 				bot_owner->SetBotPulling(false);
 
 				if (GetPet()) {
-					GetPet()->SetPetOrder(SPO_Follow);
+					GetPet()->SetPetOrder(PetOrder::Follow);
 					GetPet()->CastToNPC()->SaveGuardSpot(true);
 				}
 
@@ -2569,7 +2569,7 @@ void Bot::DoOutOfCombatChecks(Client* bot_owner, Mob* follow_mob, float leash_di
 		bot_owner->SetBotPulling(false);
 
 		if (GetPet()) {
-			GetPet()->SetPetOrder(SPO_Follow);
+			GetPet()->SetPetOrder(PetOrder::Follow);
 			GetPet()->CastToNPC()->SaveGuardSpot(true);
 		}
 	}
@@ -3198,7 +3198,7 @@ bool Bot::IsValidTarget(
 			bot_owner->SetBotPulling(false);
 
 			if (GetPet()) {
-				GetPet()->SetPetOrder(SPO_Follow);
+				GetPet()->SetPetOrder(PetOrder::Follow);
 				GetPet()->CastToNPC()->SaveGuardSpot(true);
 			}
 		}
@@ -3233,7 +3233,7 @@ Mob* Bot::GetBotTarget(Client* bot_owner)
 			bot_owner->SetBotPulling(false);
 
 			if (GetPet()) {
-				GetPet()->SetPetOrder(SPO_Follow);
+				GetPet()->SetPetOrder(PetOrder::Follow);
 				GetPet()->CastToNPC()->SaveGuardSpot(true);
 			}
 		}
@@ -3269,7 +3269,7 @@ bool Bot::ReturningFlagChecks(Client* bot_owner, Mob* leash_owner, float fm_dist
 		bot_owner->SetBotPulling(false);
 
 		if (GetPet()) {
-			GetPet()->SetPetOrder(SPO_Follow);
+			GetPet()->SetPetOrder(PetOrder::Follow);
 			GetPet()->CastToNPC()->SaveGuardSpot(true);
 
 			if (HasControllablePet(BotAnimEmpathy::BackOff)) {
@@ -3313,7 +3313,7 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		bot_owner->SetBotPulling(false);
 
 		if (GetPet()) {
-			GetPet()->SetPetOrder(SPO_Follow);
+			GetPet()->SetPetOrder(PetOrder::Follow);
 			GetPet()->CastToNPC()->SaveGuardSpot(true);
 		}
 
@@ -3494,7 +3494,7 @@ Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint
 
 void Bot::SetOwnerTarget(Client* bot_owner) {
 	if (GetPet() && (PULLING_BOT || RETURNING_BOT)) {
-		GetPet()->SetPetOrder(SPO_Follow);
+		GetPet()->SetPetOrder(PetOrder::Follow);
 	}
 
 	SetAttackFlag(false);
@@ -3533,7 +3533,7 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 	bot_owner->SetBotPulling(false);
 
 	if (GetPet()) {
-		GetPet()->SetPetOrder(SPO_Follow);
+		GetPet()->SetPetOrder(PetOrder::Follow);
 		GetPet()->CastToNPC()->SaveGuardSpot(true);
 	}
 
@@ -3562,7 +3562,7 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 				if (HasControllablePet(BotAnimEmpathy::Guard)) {
 					m_previous_pet_order = GetPet()->GetPetOrder();
 					GetPet()->CastToNPC()->SaveGuardSpot(GetPosition());
-					GetPet()->SetPetOrder(SPO_Guard);
+					GetPet()->SetPetOrder(PetOrder::Guard);
 				}
 			}
 		}
@@ -13456,6 +13456,6 @@ bool Bot::HasControllablePet(uint8 ranks_required) {
 	}
 
 	return GetClass() != Class::Enchanter ||
-		GetPet()->GetPetType() != petAnimation ||
+		GetPet()->GetPetType() != PetType::Animation ||
 		GetAA(aaAnimationEmpathy) >= ranks_required;
 }

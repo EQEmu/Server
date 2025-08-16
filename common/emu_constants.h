@@ -792,4 +792,131 @@ namespace BookType {
 	constexpr uint8 ItemInfo = 2;
 }
 
+namespace PetButton {
+	constexpr uint8 Sit         = 0;
+	constexpr uint8 Stop        = 1;
+	constexpr uint8 Regroup     = 2;
+	constexpr uint8 Follow      = 3;
+	constexpr uint8 Guard       = 4;
+	constexpr uint8 Taunt       = 5;
+	constexpr uint8 Hold        = 6;
+	constexpr uint8 GreaterHold = 7;
+	constexpr uint8 Focus       = 8;
+	constexpr uint8 SpellHold   = 9;
+}
+
+namespace PetButtonState {
+	constexpr uint8 Off = 0;
+	constexpr uint8 On  = 1;
+}
+
+namespace PetCommand {
+	constexpr uint8 HealthReport   = 0;  // /pet health or Pet Window
+	constexpr uint8 Leader         = 1;  // /pet leader or Pet Window
+	constexpr uint8 Attack         = 2;  // /pet attack or Pet Window
+	constexpr uint8 QAttack        = 3;  // /pet qattack or Pet Window
+	constexpr uint8 FollowMe       = 4;  // /pet follow or Pet Window
+	constexpr uint8 GuardHere      = 5;  // /pet guard or Pet Window
+	constexpr uint8 Sit            = 6;  // /pet sit or Pet Window
+	constexpr uint8 SitDown        = 7;  // /pet sit on
+	constexpr uint8 StandUp        = 8;  // /pet sit off
+	constexpr uint8 Stop           = 9;  // /pet stop or Pet Window - Not implemented
+	constexpr uint8 StopOn         = 10; // /pet stop on - Not implemented
+	constexpr uint8 StopOff        = 11; // /pet stop off - Not implemented
+	constexpr uint8 Taunt          = 12; // /pet taunt or Pet Window
+	constexpr uint8 TauntOn        = 13; // /pet taunt on
+	constexpr uint8 TauntOff       = 14; // /pet taunt off
+	constexpr uint8 Hold           = 15; // /pet hold or Pet Window, won't add to hate list unless attacking
+	constexpr uint8 HoldOn         = 16; // /pet hold on
+	constexpr uint8 HoldOff        = 17; // /pet hold off
+	constexpr uint8 GreaterHold    = 18; // /pet ghold, will never add to hate list unless told to
+	constexpr uint8 GreaterHoldOn  = 19; // /pet ghold on
+	constexpr uint8 GreaterHoldOff = 20; // /pet ghold off
+	constexpr uint8 SpellHold      = 21; // /pet no cast or /pet spellhold or Pet Window
+	constexpr uint8 SpellHoldOn    = 22; // /pet spellhold on
+	constexpr uint8 SpellHoldOff   = 23; // /pet spellhold off
+	constexpr uint8 Focus          = 24; // /pet focus or Pet Window
+	constexpr uint8 FocusOn        = 25; // /pet focus on
+	constexpr uint8 FocusOff       = 26; // /pet focus off
+	constexpr uint8 Feign          = 27; // /pet feign
+	constexpr uint8 BackOff        = 28; // /pet back off
+	constexpr uint8 GetLost        = 29; // /pet get lost
+	constexpr uint8 GuardMe        = 30; // Same as /pet follow, but different message in older clients
+	constexpr uint8 Regroup        = 31; // /pet regroup, acts like classic hold
+	constexpr uint8 RegroupOn      = 32; // /pet regroup on
+	constexpr uint8 RegroupOff     = 33; // /pet regroup off
+	constexpr uint8 Max            = 34;
+
+	static std::map<uint8, std::string> pet_commands = {
+		{ PetCommand::HealthReport,   "Health Report" },
+		{ PetCommand::Leader,         "Leader" },
+		{ PetCommand::Attack,         "Attack" },
+		{ PetCommand::QAttack,        "QAttack" },
+		{ PetCommand::FollowMe,       "Follow Me" },
+		{ PetCommand::GuardHere,      "Guard Here" },
+		{ PetCommand::Sit,            "Sit" },
+		{ PetCommand::SitDown,        "Sit Down" },
+		{ PetCommand::StandUp,        "Stand Up" },
+		{ PetCommand::Stop,           "Stop" },
+		{ PetCommand::StopOn,         "Stop On" },
+		{ PetCommand::StopOff,        "Stop Off" },
+		{ PetCommand::Taunt,          "Taunt" },
+		{ PetCommand::TauntOn,        "Taunt On" },
+		{ PetCommand::TauntOff,       "Taunt Off" },
+		{ PetCommand::Hold,           "Hold" },
+		{ PetCommand::HoldOn,         "Hold On" },
+		{ PetCommand::HoldOff,        "Hold Off" },
+		{ PetCommand::GreaterHold,    "Greater Hold" },
+		{ PetCommand::GreaterHoldOn,  "Greater Hold On" },
+		{ PetCommand::GreaterHoldOff, "Greater Hold Off" },
+		{ PetCommand::SpellHold,      "Spell Hold" },
+		{ PetCommand::SpellHoldOn,    "Spell Hold On" },
+		{ PetCommand::SpellHoldOff,   "Spell Hold Off" },
+		{ PetCommand::Focus,          "Focus" },
+		{ PetCommand::FocusOn,        "Focus On" },
+		{ PetCommand::FocusOff,       "Focus Off" },
+		{ PetCommand::Feign,          "Feign" },
+		{ PetCommand::BackOff,        "Back Off" },
+		{ PetCommand::GetLost,        "Get Lost" },
+		{ PetCommand::GuardMe,        "Guard Me" },
+		{ PetCommand::Regroup,        "Regroup" },
+		{ PetCommand::RegroupOn,      "Regroup On" },
+		{ PetCommand::RegroupOff,     "Regroup Off" },
+		{ PetCommand::Max,            "Max" }
+	};
+
+	std::string GetName(uint8 pet_command);
+	bool IsValid(uint8 pet_command);
+}
+
+namespace PetOrder {
+	constexpr uint8 Follow = 0;
+	constexpr uint8 Sit    = 1;
+	constexpr uint8 Guard  = 2;
+	constexpr uint8 Feign  = 3;
+}
+
+namespace PetType {
+	constexpr uint8 Familiar   = 0;
+	constexpr uint8 Animation  = 1;
+	constexpr uint8 Normal     = 2;
+	constexpr uint8 Charmed    = 3;
+	constexpr uint8 Follow     = 4;
+	constexpr uint8 TargetLock = 5;
+	constexpr uint8 None       = 255;
+
+	static std::map<uint8, std::string> pet_types = {
+		{ PetType::Familiar, "Familiar" },
+		{ PetType::Animation, "Animation" },
+		{ PetType::Normal, "Normal" },
+		{ PetType::Charmed, "Charmed" },
+		{ PetType::Follow, "Follow" },
+		{ PetType::TargetLock, "Target Lock" },
+		{ PetType::None, "None" }
+	};
+
+	std::string GetName(uint8 pet_type);
+	bool IsValid(uint8 pet_type);
+}
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

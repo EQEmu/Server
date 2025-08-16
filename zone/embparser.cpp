@@ -207,6 +207,7 @@ const char* QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AA_LOSS",
 	"EVENT_SPELL_BLOCKED",
 	"EVENT_READ_ITEM",
+	"EVENT_PET_COMMAND",
 
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
@@ -2529,6 +2530,12 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "player", "Client", std::any_cast<Client*>(extra_pointers->at(0)));
 			}
 
+			break;
+		}
+
+		case EVENT_PET_COMMAND: {
+			ExportVar(package_name.c_str(), "pet_command", extra_data);
+			ExportVar(package_name.c_str(), "pet_command_name", data);
 			break;
 		}
 

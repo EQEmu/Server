@@ -98,7 +98,6 @@ class Mob : public Entity {
 public:
 	enum CLIENT_CONN_STATUS { CLIENT_CONNECTING, CLIENT_CONNECTED, CLIENT_LINKDEAD,
 						CLIENT_KICKED, DISCONNECTED, CLIENT_ERROR, CLIENT_CONNECTINGALL };
-	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard, SPO_FeignDeath };
 
 	struct MobSpecialAbility {
 		MobSpecialAbility() {
@@ -601,7 +600,7 @@ public:
 	inline const char* GetName() const { return name; }
 	inline const char* GetOrigName() const { return orig_name; }
 	inline const char* GetLastName() const { return lastname; }
-	inline const eStandingPetOrder GetPreviousPetOrder() const { return m_previous_pet_order; }
+	inline const uint8 GetPreviousPetOrder() const { return m_previous_pet_order; }
 	const char *GetCleanName();
 	virtual void SetName(const char *new_name = nullptr) { new_name ? strn0cpy(name, new_name, 64) :
 		strn0cpy(name, GetName(), 64); return; };
@@ -1083,14 +1082,14 @@ public:
 	Mob* GetUltimateOwner();
 	void SetPetID(uint16 NewPetID);
 	inline uint16 GetPetID() const { return petid; }
-	inline PetType GetPetType() const { return type_of_pet; }
-	void SetPetType(PetType p) { type_of_pet = p; }
+	inline uint8 GetPetType() const { return type_of_pet; }
+	void SetPetType(uint8 pet_type) { type_of_pet = pet_type; }
 	inline int16 GetPetPower() const { return (petpower < 0) ? 0 : petpower; }
 	void SetPetPower(int16 p) { if (p < 0) petpower = 0; else petpower = p; }
-	bool IsFamiliar() const { return type_of_pet == petFamiliar; }
-	bool IsAnimation() const { return type_of_pet == petAnimation; }
-	bool IsCharmed() const { return type_of_pet == petCharmed; }
-	bool IsTargetLockPet() const { return type_of_pet == petTargetLock; }
+	bool IsFamiliar() const { return type_of_pet == PetType::Familiar; }
+	bool IsAnimation() const { return type_of_pet == PetType::Animation; }
+	bool IsCharmed() const { return type_of_pet == PetType::Charmed; }
+	bool IsTargetLockPet() const { return type_of_pet == PetType::TargetLock; }
 	inline uint32 GetPetTargetLockID() { return pet_targetlock_id; };
 	inline void SetPetTargetLockID(uint32 value) { pet_targetlock_id = value; };
 	void SetOwnerID(uint16 new_owner_id);
@@ -1212,8 +1211,8 @@ public:
 	inline const float GetAssistRange() const { return (spellbonuses.AssistRange == -1) ? pAssistRange : spellbonuses.AssistRange; }
 
 
-	void SetPetOrder(eStandingPetOrder i);
-	inline const eStandingPetOrder GetPetOrder() const { return pStandingPetOrder; }
+	void SetPetOrder(uint8 pet_order);
+	inline const uint8 GetPetOrder() const { return m_pet_order; }
 	inline void SetHeld(bool nState) { held = nState; }
 	inline const bool IsHeld() const { return held; }
 	inline void SetGHeld(bool nState) { gheld = nState; }
@@ -1300,7 +1299,7 @@ public:
 	bool IsPetAggroExempt(Mob *pet_owner);
 
 	void InstillDoubt(Mob *who);
-	bool Charmed() const { return type_of_pet == petCharmed; }
+	bool Charmed() const { return type_of_pet == PetType::Charmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
 	uint32 GetZoneID() const; //for perl
 	uint16 GetInstanceVersion() const; //for perl
@@ -1596,7 +1595,7 @@ protected:
 	StatBonuses aabonuses;
 	uint16 petid;
 	uint16 ownerid;
-	PetType type_of_pet;
+	uint8 type_of_pet;
 	int16 petpower;
 	uint32 follow_id;
 	uint32 follow_dist;
@@ -1825,8 +1824,8 @@ protected:
 	Timer viral_timer;
 
 	// MobAI stuff
-	eStandingPetOrder pStandingPetOrder;
-	eStandingPetOrder m_previous_pet_order;
+	uint8 m_pet_order;
+	uint8 m_previous_pet_order;
 	uint32 minLastFightingDelayMoving;
 	uint32 maxLastFightingDelayMoving;
 	float pAggroRange = 0;
