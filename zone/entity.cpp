@@ -520,7 +520,7 @@ void EntityList::MobProcess()
 
 			old_client_count = numclients;
 
-			Spawn2* s2 = mob->CastToNPC()->respawn2;
+			Spawn2* s2 = mob->CastToNPC()->GetSpawn();
 
 			// Perform normal mob processing if any of these are true:
 			//	-- zone is not empty

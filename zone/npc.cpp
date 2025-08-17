@@ -156,7 +156,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	NPCTypedata      = npc_type_data;
 	NPCTypedata_ours = nullptr;
-	respawn2         = in_respawn;
+	respawn2_id      = in_respawn ? in_respawn->GetID() : 0;
 
 	swarm_timer.Disable();
 
@@ -870,11 +870,14 @@ void NPC::Depop(bool start_spawn_timer) {
 	}
 
 	p_depop = true;
-	if (respawn2) {
-		if (start_spawn_timer) {
-			respawn2->DeathReset();
-		} else {
-			respawn2->Depop();
+	if (respawn2_id) {
+		auto respawn2 = entity_list.GetSpawnByID(respawn2_id);
+		if (respawn2) {
+			if (start_spawn_timer) {
+				respawn2->DeathReset();
+			} else {
+				respawn2->Depop();
+			}
 		}
 	}
 }
@@ -1357,10 +1360,11 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(
 	uint32 respawn_time = 1200;
 	uint32 spawn_id     = 0;
 
+	Spawn2 *respawn2 = n->respawn2_id ? entity_list.GetSpawnByID(n->respawn2_id) : nullptr;
 	if (in_respawn_time) {
 		respawn_time = in_respawn_time;
-	} else if (n->respawn2 && n->respawn2->RespawnTimer()) {
-		respawn_time = n->respawn2->RespawnTimer();
+	} else if (respawn2 && respawn2->RespawnTimer()) {
+		respawn_time = respawn2->RespawnTimer();
 	}
 
 	auto s2 = Spawn2Repository::NewEntity();
@@ -1420,7 +1424,7 @@ uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client* c, NPC* n)
 
 uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Client* c, NPC* n, uint32 remove_spawngroup_id)
 {
-	if (!n->respawn2) {
+	if (!n->respawn2_id) {
 		return 0;
 	}
 
@@ -1428,7 +1432,7 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Cli
 		*this,
 		fmt::format(
 			"`id` = {} AND `zone` = '{}' AND `spawngroupID` = {}",
-			n->respawn2->GetID(),
+			n->respawn2_id,
 			zone,
 			n->GetSpawnGroupId()
 		)
@@ -2778,7 +2782,7 @@ void NPC::LevelScale() {
 
 uint32 NPC::GetSpawnPointID() const
 {
-	return respawn2 ? respawn2->GetID() : 0;
+	return respawn2_id;
 }
 
 void NPC::NPCSlotTexture(uint8 slot, uint32 texture)
