@@ -3351,6 +3351,18 @@ bool Perl_Client_UncompleteTask(Client* self, int task_id)
 	return self->UncompleteTask(task_id);
 }
 
+perl::array Perl_Client_GetKeyRing(Client* self)
+{
+	perl::array result;
+	const auto& v = self->GetKeyRing();
+
+	for (int i = 0; i < v.size(); ++i) {
+		result.push_back(v[i]);
+	}
+
+	return result;
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3582,6 +3594,7 @@ void perl_register_client()
 	package.add("GetItemCooldown", &Perl_Client_GetItemCooldown);
 	package.add("GetItemIDAt", &Perl_Client_GetItemIDAt);
 	package.add("GetItemInInventory", &Perl_Client_GetItemInInventory);
+	package.add("GetKeyRing", &Perl_Client_GetKeyRing);
 	package.add("GetLDoNLosses", &Perl_Client_GetLDoNLosses);
 	package.add("GetLDoNLossesTheme", &Perl_Client_GetLDoNLossesTheme);
 	package.add("GetLDoNPointsTheme", &Perl_Client_GetLDoNPointsTheme);
