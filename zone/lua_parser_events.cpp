@@ -668,6 +668,23 @@ void handle_npc_spell_blocked(
 	lua_setfield(L, -2, "cast_spell");
 }
 
+void handle_npc_pet_command(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "pet_command");
+
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "pet_command_name");
+}
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -1827,6 +1844,22 @@ void handle_player_connect(
 
 	lua_pushboolean(L, Strings::ToBool(sep.arg[2]));
 	lua_setfield(L, -2, "is_first_login");
+}
+
+void handle_player_pet_command(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "pet_command");
+
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "pet_command_name");
 }
 
 // Item

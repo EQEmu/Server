@@ -1241,12 +1241,12 @@ float Lua_Mob::GetAssistRange() {
 	return self->GetAssistRange();
 }
 
-void Lua_Mob::SetPetOrder(int order) {
+void Lua_Mob::SetPetOrder(uint8 pet_order) {
 	Lua_Safe_Call_Void();
-	self->SetPetOrder(static_cast<Mob::eStandingPetOrder>(order));
+	self->SetPetOrder(pet_order);
 }
 
-int Lua_Mob::GetPetOrder() {
+uint8 Lua_Mob::GetPetOrder() {
 	Lua_Safe_Call_Int();
 	return self->GetPetOrder();
 }
@@ -3512,6 +3512,24 @@ luabind::object Lua_Mob::GetTimers(lua_State* L) {
 	return t;
 }
 
+uint8 Lua_Mob::GetPetType()
+{
+	Lua_Safe_Call_Int();
+	return self->GetPetType();
+}
+
+std::string Lua_Mob::GetPetTypeName()
+{
+	Lua_Safe_Call_String();
+	return PetType::GetName(self->GetPetType());
+}
+
+void Lua_Mob::SetPetType(uint8 pet_type)
+{
+	Lua_Safe_Call_Void();
+	self->SetPetType(pet_type);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3854,7 +3872,9 @@ luabind::scope lua_register_mob() {
 	.def("GetPR", &Lua_Mob::GetPR)
 	.def("GetPausedTimers", &Lua_Mob::GetPausedTimers)
 	.def("GetPet", &Lua_Mob::GetPet)
-	.def("GetPetOrder", (int(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
+	.def("GetPetOrder", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
+	.def("GetPetType", &Lua_Mob::GetPetType)
+	.def("GetPetTypeName", &Lua_Mob::GetPetTypeName)
 	.def("GetPhR", &Lua_Mob::GetPhR)
 	.def("GetRace", &Lua_Mob::GetRace)
 	.def("GetRaceName", &Lua_Mob::GetRaceName)
@@ -4049,7 +4069,8 @@ luabind::scope lua_register_mob() {
 	.def("SetMana", &Lua_Mob::SetMana)
 	.def("SetOOCRegen", (void(Lua_Mob::*)(int64))&Lua_Mob::SetOOCRegen)
 	.def("SetPet", &Lua_Mob::SetPet)
-	.def("SetPetOrder", (void(Lua_Mob::*)(int))&Lua_Mob::SetPetOrder)
+	.def("SetPetOrder", (void(Lua_Mob::*)(uint8))&Lua_Mob::SetPetOrder)
+	.def("SetPetType", &Lua_Mob::SetPetType)
 	.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot)
 	.def("SetRace", (void(Lua_Mob::*)(uint16))&Lua_Mob::SetRace)
 	.def("SetRunning", (void(Lua_Mob::*)(bool))&Lua_Mob::SetRunning)

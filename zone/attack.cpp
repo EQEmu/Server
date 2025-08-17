@@ -4113,11 +4113,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			if (IsPet()) {
 				Mob *owner = GetOwner();
 				if (owner && owner->IsClient()) {
-					if (GetPetOrder() == SPO_Sit) {
+					if (GetPetOrder() == PetOrder::Sit) {
 						SetPetOrder(GetPreviousPetOrder());
 					}
 					// fix GUI sit button to be unpressed and stop sitting regen
-					owner->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					owner->CastToClient()->SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 					SetAppearance(eaStanding);
 				}
 			}
@@ -4147,12 +4147,12 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			if (IsClient() && !pet->IsPetStop()) {
 				// if pet was sitting his new mode is previous setting of
 				// follow or guard after the battle (live verified)
-				if (pet->GetPetOrder() == SPO_Sit) {
+				if (pet->GetPetOrder() == PetOrder::Sit) {
 					pet->SetPetOrder(pet->GetPreviousPetOrder());
 				}
 
 				// fix GUI sit button to be unpressed and stop sitting regen
-				CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+				CastToClient()->SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 				pet->SetAppearance(eaStanding);
 			}
 

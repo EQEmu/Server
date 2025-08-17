@@ -392,7 +392,7 @@ Mob::Mob(
 	spellbonuses.AssistRange = -1;
 	SetPetID(0);
 	SetOwnerID(0);
-	SetPetType(petNone); // default to not a pet
+	SetPetType(PetType::None); // default to not a pet
 	SetPetPower(0);
 	held              = false;
 	gheld             = false;
@@ -454,8 +454,8 @@ Mob::Mob(
 	weaponstance.itembonus_buff_spell_id  = 0;
 	weaponstance.aabonus_buff_spell_id    = 0;
 
-	pStandingPetOrder = SPO_Follow;
-	m_previous_pet_order = SPO_Follow;
+	m_pet_order          = PetOrder::Follow;
+	m_previous_pet_order = PetOrder::Follow;
 	pseudo_rooted     = false;
 
 	nobuff_invisible = 0;
@@ -623,7 +623,7 @@ bool Mob::HasAnInvisibilityEffect() {
 
 void Mob::BreakCharmPetIfConditionsMet() {
 	auto pet = GetPet();
-	if (pet && pet->GetPetType() == petCharmed && HasAnInvisibilityEffect()) {
+	if (pet && pet->GetPetType() == PetType::Charmed && HasAnInvisibilityEffect()) {
 		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
 			pet->BuffFadeByEffect(SE_Charm);
 		}
@@ -655,14 +655,14 @@ void Mob::CalcInvisibleLevel()
 	BreakCharmPetIfConditionsMet();
 }
 
-void Mob::SetPetOrder(eStandingPetOrder i) {
-	if (i == SPO_Sit || i == SPO_FeignDeath) {
-		if (pStandingPetOrder == SPO_Follow || pStandingPetOrder == SPO_Guard) {
-			m_previous_pet_order = pStandingPetOrder;
+void Mob::SetPetOrder(uint8 pet_order) {
+	if (pet_order == PetOrder::Sit || pet_order == PetOrder::Feign) {
+		if (m_pet_order == PetOrder::Follow || m_pet_order == PetOrder::Guard) {
+			m_previous_pet_order = m_pet_order;
 		}
 	}
 
-	pStandingPetOrder = i;
+	m_pet_order = pet_order;
 }
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {
@@ -4567,8 +4567,8 @@ void Mob::SetOwnerID(uint16 new_owner_id) {
 	if (
 		!ownerid &&
 		IsNPC() &&
-		GetPetType() != petCharmed &&
-		GetPetType() != petNone
+		GetPetType() != PetType::Charmed &&
+		GetPetType() != PetType::None
 	) {
 		Depop();
 	}
