@@ -16818,6 +16818,7 @@ void Client::RecordStats()
 	r.endurance_regen          = GetEnduranceRegen() - GetSpellBonuses().EnduranceRegen;
 	r.shielding                = GetShielding() - GetSpellBonuses().MeleeMitigation;
 	r.spell_damage             = GetSpellDmg() - GetSpellBonuses().SpellDmg;
+	r.heal_amount              = GetHealAmt() - GetSpellBonuses().HealAmt;
 	r.spell_shielding          = GetSpellShield() - GetSpellBonuses().SpellShield;
 	r.strikethrough            = GetStrikeThrough() - GetSpellBonuses().StrikeThrough;
 	r.stun_resist              = GetStunResist() - GetSpellBonuses().StunResist;
