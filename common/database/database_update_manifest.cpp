@@ -7171,6 +7171,20 @@ ALTER TABLE `character_stats_record`
 ADD COLUMN `heal_amount` int(11) NULL DEFAULT 0 AFTER `spell_damage`;
 )"
 	},
+	ManifestEntry{
+		.version = 9328,
+		.description = "2025_08_20_character_stat_caps.sql",
+		.check = "SHOW TABLES LIKE 'character_stat_caps'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `character_stat_caps`  (
+  `character_id` int(11) UNSIGNED NOT NULL,
+  `stat_id` tinyint(3) UNSIGNED NULL,
+  `stat_cap` int(11) NOT NULL DEFAULT -1,
+  PRIMARY KEY (`character_id`, `stat_id`)
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

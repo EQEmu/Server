@@ -6701,7 +6701,7 @@ void Client::SetAttackTimer()
 		if (ItemToUse && ItemToUse->ItemType == EQ::item::ItemTypeBow) {
 			// Live actually had a bug here where they would return the non-modified attack speed
 			// rather than the cap ...
-			speed = std::max(speed - GetQuiverHaste(speed), RuleI(Combat, QuiverHasteCap));
+			speed = std::max(speed - GetQuiverHaste(speed), GetStatCap(StatCap::QuiverHaste));
 		}
 		else {
 			if (RuleB(Spells, Jun182014HundredHandsRevamp))

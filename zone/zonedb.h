@@ -465,6 +465,10 @@ public:
 	void LoadCharacterEXPModifier(Client* c);
 	void SaveCharacterEXPModifier(Client *c);
 
+	/* Stat Caps */
+	void LoadStatCaps(Mob* m);
+	void SaveStatCaps(Mob* m);
+
 	/* Player Title Sets */
 	void LoadCharacterTitleSets(Client* c);
 

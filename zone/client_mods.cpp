@@ -32,23 +32,24 @@
 
 int32 Client::GetMaxStat() const
 {
-	if ((RuleI(Character, StatCap)) > 0) {
-		return (RuleI(Character, StatCap));
+	int character_cap = GetStatCap(StatCap::Stat);
+	if (character_cap > 0) {
+		return character_cap;
 	}
-	int level = GetLevel();
-	int32 base = 0;
+
+	uint8 level = GetLevel();
+	int   base  = 0;
+
 	if (level < 61) {
 		base = 255;
-	}
-	else if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
+	} else if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
 		base = 255 + 5 * (level - 60);
-	}
-	else if (level < 71) {
+	} else if (level < 71) {
 		base = 255 + 5 * (level - 60);
-	}
-	else {
+	} else {
 		base = 330;
 	}
+
 	return base;
 }
 
@@ -300,7 +301,7 @@ int64 Client::CalcHPRegen(bool bCombat)
 
 int64 Client::CalcHPRegenCap()
 {
-	int64 cap = RuleI(Character, ItemHealthRegenCap);
+	int64 cap = GetStatCap(StatCap::HealthRegen);
 	if (GetLevel() > 60) {
 		cap = std::max(cap, static_cast<int64>(GetLevel() - 30)); // if the rule is set greater than normal I guess
 	}
@@ -717,7 +718,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 
 int64 Client::CalcManaRegenCap()
 {
-	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap + itembonuses.ItemManaRegenCap + spellbonuses.ItemManaRegenCap;
+	int64 cap = GetStatCap(StatCap::ManaRegen) + aabonuses.ItemManaRegenCap + itembonuses.ItemManaRegenCap + spellbonuses.ItemManaRegenCap;
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
 }
 
@@ -976,7 +977,7 @@ int Client::CalcHaste()
 	}
 	// 60+ 100, 51-59 85, 1-50 level+25
 	if (level > 59 || RuleB(Character, IgnoreLevelBasedHasteCaps)) { // 60+
-		cap = RuleI(Character, HasteCap);
+		cap = GetStatCap(StatCap::Haste);
 	}
 	else if (level > 50) {  // 51-59
 		cap = 85;
@@ -989,7 +990,7 @@ int Client::CalcHaste()
 	}
 	// 51+ 25 (despite there being higher spells...), 1-50 10
 	if (level > 50 || RuleB(Character, IgnoreLevelBasedHasteCaps)) { // 51+
-		cap = RuleI(Character, Hastev3Cap);
+		cap = GetStatCap(StatCap::HasteV3);
 		if (spellbonuses.hastetype3 > cap) {
 			h += cap;
 		} else {
@@ -1745,13 +1746,13 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 
 int64 Client::CalcEnduranceRegenCap()
 {
-	int64 cap = RuleI(Character, ItemEnduranceRegenCap) + aabonuses.ItemEnduranceRegenCap + itembonuses.ItemEnduranceRegenCap + spellbonuses.ItemEnduranceRegenCap;
+	int64 cap = GetStatCap(StatCap::EnduranceRegen) + aabonuses.ItemEnduranceRegenCap + itembonuses.ItemEnduranceRegenCap + spellbonuses.ItemEnduranceRegenCap;
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
 int32 Client::CalcItemATKCap()
 {
-	int cap = RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
+	int cap = GetStatCap(StatCap::Attack) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
 	return cap;
 }
 

@@ -246,12 +246,22 @@ void Mob::ProcessItemCaps()
 
 	itembonuses.ATK = std::min(itembonuses.ATK, CalcItemATKCap());
 
-	if (IsOfClientBotMerc() && itembonuses.SpellDmg > RuleI(Character, ItemSpellDmgCap)) {
-		itembonuses.SpellDmg = RuleI(Character, ItemSpellDmgCap);
+	int spell_damage_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::SpellDamage) :
+		RuleI(Character, ItemSpellDmgCap)
+	);
+	if (IsOfClientBotMerc() && itembonuses.SpellDmg > spell_damage_cap) {
+		itembonuses.SpellDmg = spell_damage_cap;
 	}
 
-	if (IsOfClientBotMerc() && itembonuses.HealAmt > RuleI(Character, ItemHealAmtCap)) {
-		itembonuses.HealAmt = RuleI(Character, ItemHealAmtCap);
+	int heal_amount_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::HealAmount) :
+		RuleI(Character, ItemHealAmtCap)
+	);
+	if (IsOfClientBotMerc() && itembonuses.HealAmt > heal_amount_cap) {
+		itembonuses.HealAmt = heal_amount_cap;
 	}
 }
 
@@ -351,33 +361,139 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 	b->ManaRegen += CalcItemBonus(item->ManaRegen);
 	b->EnduranceRegen += CalcItemBonus(item->EnduranceRegen);
 
+	int accuracy_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::Accuracy) :
+		RuleI(Character, ItemAccuracyCap)
+	);
+
+	int attack_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::Attack) :
+		RuleI(Character, ItemATKCap)
+	);
+
+	int avoidance_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::Avoidance) :
+		RuleI(Character, ItemAvoidanceCap)
+	);
+
+	int clairvoyance_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::Clairvoyance) :
+		RuleI(Character, ItemClairvoyanceCap)
+	);
+
+	int combat_effects_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::CombatEffects) :
+		RuleI(Character, ItemCombatEffectsCap)
+	);
+
+	int damage_shield_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::DamageShield) :
+		RuleI(Character, ItemDamageShieldCap)
+	);
+
+	int dot_shielding_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::DOTShielding) :
+		RuleI(Character, ItemDoTShieldingCap)
+	);
+
+	int dsmitigation_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::DSMitigation) :
+		RuleI(Character, ItemDSMitigationCap)
+	);
+
+	int heal_amount_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::HealAmount) :
+		RuleI(Character, ItemHealAmtCap)
+	);
+
+	int shielding_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::Shielding) :
+		RuleI(Character, ItemShieldingCap)
+	);
+
+	int spell_damage_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::SpellDamage) :
+		RuleI(Character, ItemSpellDmgCap)
+	);
+
+	int spell_shielding_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::SpellShielding) :
+		RuleI(Character, ItemSpellShieldingCap)
+	);
+
+	int strikethrough_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::Strikethrough) :
+		RuleI(Character, ItemStrikethroughCap)
+	);
+
+	int stun_resist_cap = (
+		IsOfClientBot() ?
+		GetStatCap(StatCap::StunResist) :
+		RuleI(Character, ItemStunResistCap)
+	);
+
 	// These have rule-configured caps.
-	b->ATK              = CalcCappedItemBonus(b->ATK, item->Attack, RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap);
-	b->DamageShield     = CalcCappedItemBonus(b->DamageShield, item->DamageShield, RuleI(Character, ItemDamageShieldCap));
-	b->SpellShield      = CalcCappedItemBonus(b->SpellShield, item->SpellShield, RuleI(Character, ItemSpellShieldingCap));
-	b->MeleeMitigation  = CalcCappedItemBonus(b->MeleeMitigation, item->Shielding, RuleI(Character, ItemShieldingCap));
-	b->StunResist       = CalcCappedItemBonus(b->StunResist, item->StunResist, RuleI(Character, ItemStunResistCap));
-	b->StrikeThrough    = CalcCappedItemBonus(b->StrikeThrough, item->StrikeThrough, RuleI(Character, ItemStrikethroughCap));
-	b->AvoidMeleeChance = CalcCappedItemBonus(b->AvoidMeleeChance, item->Avoidance, RuleI(Character, ItemAvoidanceCap));
-	b->HitChance        = CalcCappedItemBonus(b->HitChance, item->Accuracy, RuleI(Character, ItemAccuracyCap));
-	b->ProcChance       = CalcCappedItemBonus(b->ProcChance, item->CombatEffects, RuleI(Character, ItemCombatEffectsCap));
-	b->DoTShielding     = CalcCappedItemBonus(b->DoTShielding, item->DotShielding, RuleI(Character, ItemDoTShieldingCap));
-	b->HealAmt          = CalcCappedItemBonus(b->HealAmt, item->HealAmt, RuleI(Character, ItemHealAmtCap));
-	b->SpellDmg         = CalcCappedItemBonus(b->SpellDmg, item->SpellDmg, RuleI(Character, ItemSpellDmgCap));
-	b->Clairvoyance     = CalcCappedItemBonus(b->Clairvoyance, item->Clairvoyance, RuleI(Character, ItemClairvoyanceCap));
-	b->DSMitigation     = CalcCappedItemBonus(b->DSMitigation, item->DSMitigation, RuleI(Character, ItemDSMitigationCap));
+	b->ATK = CalcCappedItemBonus(
+		b->ATK,
+		item->Attack,
+		(
+			attack_cap +
+			itembonuses.ItemATKCap +
+			spellbonuses.ItemATKCap +
+			aabonuses.ItemATKCap
+		)
+	);
+	b->DamageShield     = CalcCappedItemBonus(b->DamageShield, item->DamageShield, damage_shield_cap);
+	b->SpellShield      = CalcCappedItemBonus(b->SpellShield, item->SpellShield, spell_shielding_cap);
+	b->MeleeMitigation  = CalcCappedItemBonus(b->MeleeMitigation, item->Shielding, shielding_cap);
+	b->StunResist       = CalcCappedItemBonus(b->StunResist, item->StunResist, stun_resist_cap);
+	b->StrikeThrough    = CalcCappedItemBonus(b->StrikeThrough, item->StrikeThrough, strikethrough_cap);
+	b->AvoidMeleeChance = CalcCappedItemBonus(b->AvoidMeleeChance, item->Avoidance, avoidance_cap);
+	b->HitChance        = CalcCappedItemBonus(b->HitChance, item->Accuracy, accuracy_cap);
+	b->ProcChance       = CalcCappedItemBonus(b->ProcChance, item->CombatEffects, combat_effects_cap);
+	b->DoTShielding     = CalcCappedItemBonus(b->DoTShielding, item->DotShielding, dot_shielding_cap);
+	b->HealAmt          = CalcCappedItemBonus(b->HealAmt, item->HealAmt, heal_amount_cap);
+	b->SpellDmg         = CalcCappedItemBonus(b->SpellDmg, item->SpellDmg, spell_damage_cap);
+	b->Clairvoyance     = CalcCappedItemBonus(b->Clairvoyance, item->Clairvoyance, clairvoyance_cap);
+	b->DSMitigation     = CalcCappedItemBonus(b->DSMitigation, item->DSMitigation, dsmitigation_cap);
 
 	if (b->haste < item->Haste) {
 		b->haste = item->Haste;
 	}
 
 	if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
+		int extra_damage_cap = (
+			IsOfClientBot() ?
+			GetStatCap(StatCap::ExtraDamage) :
+			RuleI(Character, ItemExtraDmgCap)
+		);
 		if (item->ExtraDmgSkill == ALL_SKILLS) {
 			for (const auto &skill_id: EQ::skills::GetExtraDamageSkills()) {
-				b->SkillDamageAmount[skill_id] = CalcCappedItemBonus(b->SkillDamageAmount[skill_id], item->ExtraDmgAmt, RuleI(Character, ItemExtraDmgCap));
+				b->SkillDamageAmount[skill_id] = CalcCappedItemBonus(
+					b->SkillDamageAmount[skill_id],
+					item->ExtraDmgAmt,
+					extra_damage_cap
+				);
 			}
 		} else {
-			b->SkillDamageAmount[item->ExtraDmgSkill] = CalcCappedItemBonus(b->SkillDamageAmount[item->ExtraDmgSkill], item->ExtraDmgAmt, RuleI(Character, ItemExtraDmgCap));
+			b->SkillDamageAmount[item->ExtraDmgSkill] = CalcCappedItemBonus(
+				b->SkillDamageAmount[item->ExtraDmgSkill],
+				item->ExtraDmgAmt,
+				extra_damage_cap
+			);
 		}
 	}
 

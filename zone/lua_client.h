@@ -607,6 +607,8 @@ public:
 	bool RemoveAAPoints(uint32 points);
 	bool RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount);
 	bool AreTasksCompleted(luabind::object task_ids);
+	int GetStatCap(uint8 stat_id);
+	void SetStatCap(uint8 stat_id, int stat_cap);
 
 	void DialogueWindow(std::string markdown);
 
