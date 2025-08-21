@@ -414,6 +414,7 @@ namespace DatabaseSchema {
 			"bot_spell_settings",
 			"bot_spells_entries",
 			"bot_stances",
+			"bot_stat_caps",
 			"bot_timers"
 		};
 	}

@@ -6049,6 +6049,11 @@ std::string Perl__get_pet_type_name(uint8 pet_type)
 	return PetType::GetName(pet_type);
 }
 
+std::string Perl__get_stat_cap_name(uint8 stat_id)
+{
+	return StatCap::GetName(stat_id);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6760,6 +6765,7 @@ void perl_register_quest()
 	package.add("getspellstat", (int(*)(uint32, std::string))&Perl__getspellstat);
 	package.add("getspellstat", (int(*)(uint32, std::string, uint8))&Perl__getspellstat);
 	package.add("getskillname", &Perl__getskillname);
+	package.add("get_stat_cap_name", &Perl__get_stat_cap_name);
 	package.add("get_timers", &Perl__get_timers);
 	package.add("getlevel", &Perl__getlevel);
 	package.add("getplayerburiedcorpsecount", &Perl__getplayerburiedcorpsecount);
