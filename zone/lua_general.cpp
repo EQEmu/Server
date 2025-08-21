@@ -5711,6 +5711,11 @@ std::string lua_get_pet_type_name(uint8 pet_type)
 	return PetType::GetName(pet_type);
 }
 
+std::string lua_get_stat_cap_name(uint8 stat_id)
+{
+	return StatCap::GetName(stat_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6526,6 +6531,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_timers", &lua_get_timers),
 		luabind::def("get_pet_command_name", &lua_get_pet_command_name),
 		luabind::def("get_pet_type_name", &lua_get_pet_type_name),
+		luabind::def("get_stat_cap_name", &lua_get_stat_cap_name),
 		/*
 			Cross Zone
 		*/

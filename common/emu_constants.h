@@ -942,6 +942,34 @@ namespace StatCap {
 	constexpr uint8 Stat            = 19;
 	constexpr uint8 Strikethrough   = 20;
 	constexpr uint8 StunResist      = 21;
+
+	static std::map<uint8, std::string> stat_caps = {
+		{ Accuracy,       "Accuracy" },
+		{ Attack,         "Attack" },
+		{ Avoidance,      "Avoidance" },
+		{ Clairvoyance,   "Clairvoyance" },
+		{ CombatEffects,  "Combat Effects" },
+		{ DamageShield,   "Damage Shield" },
+		{ DOTShielding,   "Damage Over Time Shielding" },
+		{ DSMitigation,   "Damage Shield Mitigation" },
+		{ EnduranceRegen, "Endurance Regen" },
+		{ ExtraDamage,    "Extra Damage" },
+		{ Haste,          "Haste" },
+		{ HasteV3,        "Haste V3" },
+		{ HealAmount,     "Heal Amount" },
+		{ HealthRegen,    "Health Regen" },
+		{ ManaRegen,      "Mana Regen" },
+		{ QuiverHaste,    "Quiver Haste" },
+		{ Shielding,      "Shielding" },
+		{ SpellDamage,    "Spell Damage" },
+		{ SpellShielding, "Spell Shielding" },
+		{ Stat,           "Stat" },
+		{ Strikethrough,  "Strikethrough" },
+		{ StunResist,     "Stun Resist" }
+	};
+
+	std::string GetName(uint8 stat_id);
+	bool IsValid(uint8 stat_id);
 }
 
 #endif /*COMMON_EMU_CONSTANTS_H*/

@@ -471,3 +471,13 @@ bool PetType::IsValid(uint8 pet_type)
 {
 	return pet_types.find(pet_type) != pet_types.end();
 }
+
+std::string StatCap::GetName(uint8 stat_id)
+{
+	return IsValid(stat_id) ? stat_caps[stat_id] : "UNKNOWN STAT CAP";
+}
+
+bool StatCap::IsValid(uint8 stat_id)
+{
+	return stat_caps.find(stat_id) != stat_caps.end();
+}
