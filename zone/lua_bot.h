@@ -126,6 +126,8 @@ public:
 	void SetItemReuseTimer(uint32 item_id, uint32 reuse_timer);
 	void SetSpellRecastTimer(uint16 spell_id);
 	void SetSpellRecastTimer(uint16 spell_id, uint32 reuse_timer);
+	int GetStatCap(uint8 stat_id);
+	void SetStatCap(uint8 stat_id, int stat_cap);
 
 	uint32 CountAugmentEquippedByID(uint32 item_id);
 	uint32 CountItemEquippedByID(uint32 item_id);

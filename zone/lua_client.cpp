@@ -3624,6 +3624,18 @@ luabind::object Lua_Client::GetKeyRing(lua_State* L)
 	return lua_table;
 }
 
+int Lua_Client::GetStatCap(uint8 stat_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetStatCap(stat_id);
+}
+
+void Lua_Client::SetStatCap(uint8 stat_id, int stat_cap)
+{
+	Lua_Safe_Call_Void();
+	self->SetStatCap(stat_id, stat_cap, true);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3898,6 +3910,7 @@ luabind::scope lua_register_client() {
 	.def("GetSpellDamage", (int(Lua_Client::*)(void))&Lua_Client::GetSpellDamage)
 	.def("GetSpellIDByBookSlot", (uint32(Lua_Client::*)(int))&Lua_Client::GetSpellIDByBookSlot)
 	.def("GetSpentAA", (int(Lua_Client::*)(void))&Lua_Client::GetSpentAA)
+	.def("GetStatCap", (int(Lua_Client::*)(uint8))&Lua_Client::GetStatCap)
 	.def("GetStartZone", (int(Lua_Client::*)(void))&Lua_Client::GetStartZone)
 	.def("GetTargetRingX", (float(Lua_Client::*)(void))&Lua_Client::GetTargetRingX)
 	.def("GetTargetRingY", (float(Lua_Client::*)(void))&Lua_Client::GetTargetRingY)
@@ -4163,6 +4176,7 @@ luabind::scope lua_register_client() {
 	.def("SetStartZone", (void(Lua_Client::*)(int,float))&Lua_Client::SetStartZone)
 	.def("SetStartZone", (void(Lua_Client::*)(int,float,float))&Lua_Client::SetStartZone)
 	.def("SetStartZone", (void(Lua_Client::*)(int,float,float,float))&Lua_Client::SetStartZone)
+	.def("SetStatCap", (void(Lua_Client::*)(uint8,int))&Lua_Client::SetStatCap)
 	.def("SetStats", (void(Lua_Client::*)(int,int))&Lua_Client::SetStats)
 	.def("SetThirst", (void(Lua_Client::*)(int))&Lua_Client::SetThirst)
 	.def("SetTint", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetTint)

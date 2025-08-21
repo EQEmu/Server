@@ -268,6 +268,8 @@ Bot::Bot(
 	LoadDefaultBotSettings();
 	database.botdb.LoadBotSettings(this);
 
+	database.LoadStatCaps(this);
+
 	if (RuleB(Bots, AllowBotBlockedBuffs)) {
 		bot_blocked_buffs.clear();
 		database.botdb.LoadBotBlockedBuffs(this);
@@ -1420,6 +1422,7 @@ bool Bot::Save()
 	database.botdb.SaveTimers(this);
 	database.botdb.SaveStance(this);
 	database.botdb.SaveBotSettings(this);
+	database.SaveStatCaps(this);
 
 	if (RuleB(Bots, AllowBotBlockedBuffs)) {
 		database.botdb.SaveBotBlockedBuffs(this);

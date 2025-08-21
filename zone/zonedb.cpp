@@ -50,6 +50,8 @@
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/character_corpse_items_repository.h"
 #include "../common/repositories/zone_repository.h"
+#include "../common/repositories/bot_stat_caps_repository.h"
+#include "../common/repositories/character_stat_caps_repository.h"
 
 #include "../common/repositories/trader_repository.h"
 #include "../common/repositories/character_evolving_items_repository.h"
@@ -4295,5 +4297,85 @@ void ZoneDatabase::LoadCharacterTitleSets(Client* c)
 
 	for (const auto& e : l) {
 		c->EnableTitle(e.title_set, false);
+	}
+}
+
+void ZoneDatabase::LoadStatCaps(Mob* m)
+{
+	if (!zone || !m) {
+		return;
+	}
+
+	if (m->IsBot()) {
+		const auto& l = BotStatCapsRepository::GetWhere(
+			*this,
+			fmt::format(
+				"`bot_id` = {}",
+				m->CastToBot()->GetBotID()
+			)
+		);
+
+		if (l.empty()) {
+			return;
+		}
+
+		for (const auto& e : l) {
+			m->SetStatCap(e.stat_id, e.stat_cap);
+		}
+	} else if (m->IsClient()) {
+		const auto& l = CharacterStatCapsRepository::GetWhere(
+			*this,
+			fmt::format(
+				"`character_id` = {}",
+				m->CastToClient()->CharacterID()
+			)
+		);
+
+		if (l.empty()) {
+			return;
+		}
+
+		for (const auto& e : l) {
+			m->SetStatCap(e.stat_id, e.stat_cap);
+		}
+	}
+}
+
+void ZoneDatabase::SaveStatCaps(Mob* m)
+{
+	if (m->IsBot()) {
+		std::vector<BotStatCapsRepository::BotStatCaps> v;
+
+		BotStatCapsRepository::BotStatCaps stat_cap;
+
+		stat_cap.bot_id = m->CastToBot()->GetBotID();
+
+		for (const auto& e: m->GetStatCaps()) {
+			stat_cap.stat_id  = e.first;
+			stat_cap.stat_cap = e.second;
+
+			v.emplace_back(stat_cap);
+		}
+
+		if (!v.empty()) {
+			BotStatCapsRepository::ReplaceMany(*this, v);
+		}
+	} else if (m->IsClient()) {
+		std::vector<CharacterStatCapsRepository::CharacterStatCaps> v;
+
+		CharacterStatCapsRepository::CharacterStatCaps stat_cap;
+
+		stat_cap.character_id = m->CastToClient()->CharacterID();
+
+		for (const auto& e: m->GetStatCaps()) {
+			stat_cap.stat_id  = e.first;
+			stat_cap.stat_cap = e.second;
+
+			v.emplace_back(stat_cap);
+		}
+
+		if (!v.empty()) {
+			CharacterStatCapsRepository::ReplaceMany(*this, v);
+		}
 	}
 }

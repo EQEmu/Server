@@ -3363,6 +3363,16 @@ perl::array Perl_Client_GetKeyRing(Client* self)
 	return result;
 }
 
+int Perl_Client_GetStatCap(Client* self, uint8 stat_id)
+{
+	return self->GetStatCap(stat_id);
+}
+
+void Perl_Client_SetStatCap(Client* self, uint8 stat_id, int stat_cap)
+{
+	self->SetStatCap(stat_id, stat_cap, true);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3635,6 +3645,7 @@ void perl_register_client()
 	package.add("GetSpellBookSlotBySpellID", &Perl_Client_GetSpellBookSlotBySpellID);
 	package.add("GetSpellIDByBookSlot", &Perl_Client_GetSpellIDByBookSlot);
 	package.add("GetSpentAA", &Perl_Client_GetSpentAA);
+	package.add("GetStatCap", &Perl_Client_GetStatCap);
 	package.add("GetStartZone", &Perl_Client_GetStartZone);
 	package.add("GetTargetRingX", &Perl_Client_GetTargetRingX);
 	package.add("GetTargetRingY", &Perl_Client_GetTargetRingY);
@@ -3899,6 +3910,7 @@ void perl_register_client()
 	package.add("SetStartZone", (void(*)(Client*, uint32))&Perl_Client_SetStartZone);
 	package.add("SetStartZone", (void(*)(Client*, uint32, float, float, float))&Perl_Client_SetStartZone);
 	package.add("SetStartZone", (void(*)(Client*, uint32, float, float, float, float))&Perl_Client_SetStartZone);
+	package.add("SetStatCap", &Perl_Client_SetStatCap);
 	package.add("SetStats", &Perl_Client_SetStats);
 	package.add("SetThirst", &Perl_Client_SetThirst);
 	package.add("SetTint", &Perl_Client_SetTint);

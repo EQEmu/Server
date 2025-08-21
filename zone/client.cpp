@@ -1103,6 +1103,8 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveCharacterEXPModifier(this);
 
+	database.SaveStatCaps(this);
+
 	if (RuleB(Bots, Enabled)) {
 		database.botdb.SaveBotSettings(this);
 	}

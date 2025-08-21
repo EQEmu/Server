@@ -664,6 +664,18 @@ void Lua_Bot::RaidGroupSay(const char* message) {
 	self->RaidGroupSay(message);
 }
 
+int Lua_Bot::GetStatCap(uint8 stat_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetStatCap(stat_id);
+}
+
+void Lua_Bot::SetStatCap(uint8 stat_id, int stat_cap)
+{
+	Lua_Safe_Call_Void();
+	self->SetStatCap(stat_id, stat_cap, true);
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -747,6 +759,7 @@ luabind::scope lua_register_bot() {
 	.def("GetSpellDamage", (int(Lua_Bot::*)(void))&Lua_Bot::GetSpellDamage)
 	.def("GetSpellRecastTimer", (uint32(Lua_Bot::*)())&Lua_Bot::GetSpellRecastTimer)
 	.def("GetSpellRecastTimer", (uint32(Lua_Bot::*)(uint16))&Lua_Bot::GetSpellRecastTimer)
+	.def("GetStatCap", (int(Lua_Bot::*)(uint8))&Lua_Bot::GetStatCap)
 	.def("HasAugmentEquippedByID", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasAugmentEquippedByID)
 	.def("HasBotItem", (int16(Lua_Bot::*)(uint32))&Lua_Bot::HasBotItem)
 	.def("HasBotSpellEntry", (bool(Lua_Bot::*)(uint16))&Lua_Bot::HasBotSpellEntry)
@@ -783,6 +796,7 @@ luabind::scope lua_register_bot() {
 	.def("SetSpellDurationRaid", (void(Lua_Bot::*)(int,int,int,bool,bool))&Lua_Bot::SetSpellDurationRaid)
 	.def("SetSpellRecastTimer", (void(Lua_Bot::*)(uint16))&Lua_Bot::SetSpellRecastTimer)
 	.def("SetSpellRecastTimer", (void(Lua_Bot::*)(uint16, uint32))&Lua_Bot::SetSpellRecastTimer)
+	.def("SetStatCap", (void(Lua_Bot::*)(uint8,int))&Lua_Bot::SetStatCap)
 	.def("SendPayload", (void(Lua_Bot::*)(int))&Lua_Bot::SendPayload)
 	.def("SendPayload", (void(Lua_Bot::*)(int,std::string))&Lua_Bot::SendPayload)
 	.def("Signal", (void(Lua_Bot::*)(int))&Lua_Bot::Signal)

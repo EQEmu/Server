@@ -620,6 +620,16 @@ void Perl_Bot_RaidGroupSay(Bot* self, const char* message) // @categories Script
 	self->RaidGroupSay(message);
 }
 
+int Perl_Bot_GetStatCap(Bot* self, uint8 stat_id)
+{
+	return self->GetStatCap(stat_id);
+}
+
+void Perl_Bot_SetStatCap(Bot* self, uint8 stat_id, int stat_cap)
+{
+	self->SetStatCap(stat_id, stat_cap, true);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -683,27 +693,28 @@ void perl_register_bot()
 	package.add("GetBotItem", &Perl_Bot_GetBotItem);
 	package.add("GetBotItemIDBySlot", &Perl_Bot_GetBotItemIDBySlot);
 	package.add("GetClassAbbreviation", &Perl_Bot_GetClassAbbreviation);
+	package.add("GetDisciplineReuseTimer", (uint32(*)(Bot*))&Perl_Bot_GetDisciplineReuseTimer);
+	package.add("GetDisciplineReuseTimer", (uint32(*)(Bot*, uint16))&Perl_Bot_GetDisciplineReuseTimer);
 	package.add("GetExpansionBitmask", &Perl_Bot_GetExpansionBitmask);
 	package.add("GetGroup", &Perl_Bot_GetGroup);
 	package.add("GetHealAmount", &Perl_Bot_GetHealAmount);
 	package.add("GetInstrumentMod", &Perl_Bot_GetInstrumentMod);
 	package.add("GetItemAt", &Perl_Bot_GetItemAt);
+	package.add("GetItemEquippedByID", &Perl_Bot_HasItemEquippedByID);
 	package.add("GetItemIDAt", &Perl_Bot_GetItemIDAt);
+	package.add("GetItemReuseTimer", (uint32(*)(Bot*))&Perl_Bot_GetItemReuseTimer);
+	package.add("GetItemReuseTimer", (uint32(*)(Bot*, uint32))&Perl_Bot_GetItemReuseTimer);
 	package.add("GetOwner", &Perl_Bot_GetOwner);
 	package.add("GetRaceAbbreviation", &Perl_Bot_GetRaceAbbreviation);
 	package.add("GetRawItemAC", &Perl_Bot_GetRawItemAC);
 	package.add("GetSpellDamage", &Perl_Bot_GetSpellDamage);
+	package.add("GetSpellRecastTimer", (uint32(*)(Bot*))&Perl_Bot_GetSpellRecastTimer);
+	package.add("GetSpellRecastTimer", (uint32(*)(Bot*, uint16))&Perl_Bot_GetSpellRecastTimer);
+	package.add("GetStatCap", &Perl_Bot_GetStatCap);
 	package.add("HasAugmentEquippedByID", &Perl_Bot_HasAugmentEquippedByID);
 	package.add("HasBotItem", &Perl_Bot_HasBotItem);
 	package.add("HasBotSpellEntry", &Perl_Bot_HasBotSpellEntry);
 	package.add("HasItemEquippedByID", &Perl_Bot_HasItemEquippedByID);
-	package.add("GetDisciplineReuseTimer", (uint32(*)(Bot*))&Perl_Bot_GetDisciplineReuseTimer);
-	package.add("GetDisciplineReuseTimer", (uint32(*)(Bot*, uint16))&Perl_Bot_GetDisciplineReuseTimer);
-	package.add("GetItemEquippedByID", &Perl_Bot_HasItemEquippedByID);
-	package.add("GetItemReuseTimer", (uint32(*)(Bot*))&Perl_Bot_GetItemReuseTimer);
-	package.add("GetItemReuseTimer", (uint32(*)(Bot*, uint32))&Perl_Bot_GetItemReuseTimer);
-	package.add("GetSpellRecastTimer", (uint32(*)(Bot*))&Perl_Bot_GetSpellRecastTimer);
-	package.add("GetSpellRecastTimer", (uint32(*)(Bot*, uint16))&Perl_Bot_GetSpellRecastTimer);
 	package.add("IsGrouped", &Perl_Bot_IsGrouped);
 	package.add("IsSitting", &Perl_Bot_IsSitting);
 	package.add("IsStanding", &Perl_Bot_IsStanding);
@@ -736,6 +747,7 @@ void perl_register_bot()
 	package.add("SetSpellDurationRaid", (void(*)(Bot*, int, int, int, bool, bool))&Perl_Bot_SetSpellDurationRaid);
 	package.add("SetSpellRecastTimer", (void(*)(Bot*, uint16))&Perl_Bot_SetSpellRecastTimer);
 	package.add("SetSpellRecastTimer", (void(*)(Bot*, uint16, uint32))&Perl_Bot_SetSpellRecastTimer);
+	package.add("SetStatCap", &Perl_Bot_SetStatCap);
 	package.add("Signal", &Perl_Bot_Signal);
 	package.add("Sit", &Perl_Bot_Sit);
 	package.add("Stand", &Perl_Bot_Stand);
