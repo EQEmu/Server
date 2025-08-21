@@ -919,4 +919,29 @@ namespace PetType {
 	bool IsValid(uint8 pet_type);
 }
 
+namespace StatCap {
+	constexpr uint8 Accuracy        = 0;
+	constexpr uint8 Attack          = 1;
+	constexpr uint8 Avoidance       = 2;
+	constexpr uint8 Clairvoyance    = 3;
+	constexpr uint8 CombatEffects   = 4;
+	constexpr uint8 DamageShield    = 5;
+	constexpr uint8 DOTShielding    = 6;
+	constexpr uint8 DSMitigation    = 7;
+	constexpr uint8 EnduranceRegen  = 8;
+	constexpr uint8 ExtraDamage     = 9;
+	constexpr uint8 Haste           = 10;
+	constexpr uint8 HasteV3         = 11;
+	constexpr uint8 HealAmount      = 12;
+	constexpr uint8 HealthRegen     = 13;
+	constexpr uint8 ManaRegen       = 14;
+	constexpr uint8 QuiverHaste     = 15;
+	constexpr uint8 Shielding       = 16;
+	constexpr uint8 SpellDamage     = 17;
+	constexpr uint8 SpellShielding  = 18;
+	constexpr uint8 Stat            = 19;
+	constexpr uint8 Strikethrough   = 20;
+	constexpr uint8 StunResist      = 21;
+}
+
 #endif /*COMMON_EMU_CONSTANTS_H*/
