@@ -6481,7 +6481,7 @@ namespace RoF2
 		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
 		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
 		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
-		if (item->EvolvingItem) {
+		if (item->EvolvingItem && packet_type != ItemPacketParcel) {
 			hdr.instance_id    = inst->GetEvolveUniqueID() & 0xFFFFFFFF; //lower dword
 			hdr.parcel_item_id = inst->GetEvolveUniqueID() >> 32;        //upper dword
 		}
@@ -6500,6 +6500,7 @@ namespace RoF2
 
 		if (item->EvolvingItem > 0) {
 			RoF2::structs::EvolvingItem_Struct evotop;
+			inst->CalculateEvolveProgression();
 
 			evotop.final_item_id    = inst->GetEvolveFinalItemID();
 			evotop.evolve_level     = item->EvolvingLevel;
