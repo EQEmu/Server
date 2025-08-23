@@ -7190,8 +7190,22 @@ CHANGE COLUMN `field223` `spell_subclass` int(11) NULL DEFAULT 0 AFTER `spell_cl
 CHANGE COLUMN `field232` `no_remove` int(11) NOT NULL DEFAULT 0 AFTER `min_range`;
 )",
 		.content_schema_update = true
-	}
+	},
+	ManifestEntry{
+		.version = 9329,
+		.description = "2025_08_22_character_parcel_updates.sql",
+		.check = "SHOW COLUMNS FROM `character_parcels` LIKE 'evolve_amount'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_parcels`
+	ADD COLUMN `evolve_amount` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `quantity`;
 
+ALTER TABLE `character_parcels_containers`
+	ADD COLUMN `evolve_amount` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `quantity`;
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
