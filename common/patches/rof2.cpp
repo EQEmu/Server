@@ -6481,7 +6481,7 @@ namespace RoF2
 		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
 		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
 		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
-		if (item->EvolvingItem && packet_type != ItemPacketParcel) {
+		if (item->EvolvingItem && packet_type != ItemPacketParcel && packet_type != ItemPacketMerchant) {
 			hdr.instance_id    = inst->GetEvolveUniqueID() & 0xFFFFFFFF; //lower dword
 			hdr.parcel_item_id = inst->GetEvolveUniqueID() >> 32;        //upper dword
 		}
