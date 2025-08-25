@@ -7171,7 +7171,21 @@ ALTER TABLE `character_stats_record`
 ADD COLUMN `heal_amount` int(11) NULL DEFAULT 0 AFTER `spell_damage`;
 )"
 	},
+	ManifestEntry{
+		.version = 9328,
+		.description = "2025_08_22_character_parcel_updates.sql",
+		.check = "SHOW COLUMNS FROM `character_parcels` LIKE 'evolve_amount'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_parcels`
+	ADD COLUMN `evolve_amount` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `quantity`;
 
+ALTER TABLE `character_parcels_containers`
+	ADD COLUMN `evolve_amount` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `quantity`;
+)",
+		.content_schema_update = false
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
