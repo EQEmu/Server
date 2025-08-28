@@ -54,19 +54,7 @@
 #include "repositories/character_inspect_messages_repository.h"
 #include "repositories/spells_new_repository.h"
 #include "repositories/damageshieldtypes_repository.h"
-
-namespace ItemField
-{
-	enum {
-		source = 0,
-#define F(x) x,
-#include "item_fieldlist.h"
-#undef F
-		updated,
-		minstatus,
-		comment,
-	};
-}
+#include "repositories/items_repository.h"
 
 SharedDatabase::SharedDatabase()
 : Database()
@@ -947,27 +935,10 @@ void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
 	);
 }
 
-void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)
+void SharedDatabase::GetItemsCount(int32& item_count, uint32& max_id)
 {
-	item_count = -1;
-	max_id = 0;
-
-	const std::string query = "SELECT MAX(id), count(*) FROM items";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return;
-	}
-
-	if (results.RowCount() == 0)
-		return;
-
-	auto& row = results.begin();
-
-	if (row[0])
-		max_id = Strings::ToUnsignedInt(row[0]);
-
-	if (row[1])
-		item_count = Strings::ToUnsignedInt(row[1]);
+	max_id     = ItemsRepository::GetMaxId(*this);
+	item_count = ItemsRepository::Count(*this);
 }
 
 bool SharedDatabase::LoadItems(const std::string &prefix) {
@@ -997,14 +968,14 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 	std::string variable_buffer;
 
-	bool disable_attuneable = RuleB(Items, DisableAttuneable);
-	bool disable_bard_focus_effects = RuleB(Items, DisableBardFocusEffects);
-	bool disable_lore = RuleB(Items, DisableLore);
-	bool disable_no_drop = RuleB(Items, DisableNoDrop);
-	bool disable_no_pet = RuleB(Items, DisableNoPet);
-	bool disable_no_rent = RuleB(Items, DisableNoRent);
-	bool disable_no_transfer = RuleB(Items, DisableNoTransfer);
-	bool disable_potion_belt = RuleB(Items, DisablePotionBelt);
+	bool disable_attuneable          = RuleB(Items, DisableAttuneable);
+	bool disable_bard_focus_effects  = RuleB(Items, DisableBardFocusEffects);
+	bool disable_lore                = RuleB(Items, DisableLore);
+	bool disable_no_drop             = RuleB(Items, DisableNoDrop);
+	bool disable_no_pet              = RuleB(Items, DisableNoPet);
+	bool disable_no_rent             = RuleB(Items, DisableNoRent);
+	bool disable_no_transfer         = RuleB(Items, DisableNoTransfer);
+	bool disable_potion_belt         = RuleB(Items, DisablePotionBelt);
 	bool disable_spell_focus_effects = RuleB(Items, DisableSpellFocusEffects);
 
 	// Old Variable Code
@@ -1035,206 +1006,204 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 	EQ::ItemData item;
 
-	const std::string query = "SELECT source,"
-#define F(x) "`"#x"`,"
-#include "item_fieldlist.h"
-#undef F
-		"updated, minstatus, comment FROM items ORDER BY id";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	const auto& l = ItemsRepository::All(*this);
+
+	if (l.empty()) {
 		return;
 	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
+	for (const auto& e : l) {
 		memset(&item, 0, sizeof(EQ::ItemData));
 
 		// Unique Identifier
-		item.ID = Strings::ToUnsignedInt(row[ItemField::id]);
+		item.ID = e.id;
 
 		// Minimum Status
-		item.MinStatus = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::minstatus]));
+		item.MinStatus = static_cast<uint8>(e.minstatus);
 
 		// Name, Lore, and Comment
-		strn0cpy(item.Name, row[ItemField::name], sizeof(item.Name));
-		strn0cpy(item.Lore, row[ItemField::lore], sizeof(item.Lore));
-		strn0cpy(item.Comment, row[ItemField::comment], sizeof(item.Comment));
+		strn0cpy(item.Name, e.Name.c_str(), sizeof(item.Name));
+		strn0cpy(item.Lore, e.lore.c_str(), sizeof(item.Lore));
+		strn0cpy(item.Comment, e.comment.c_str(), sizeof(item.Comment));
 
 		// Flags
-		item.ArtifactFlag = Strings::ToBool(row[ItemField::artifactflag]);
-		item.Attuneable = !disable_attuneable && Strings::ToBool(row[ItemField::attuneable]);
-		item.BenefitFlag = Strings::ToBool(row[ItemField::benefitflag]);
-		item.FVNoDrop = Strings::ToBool(row[ItemField::fvnodrop]);
-		item.Magic = Strings::ToBool(row[ItemField::magic]);
-		item.NoDrop = disable_no_drop ? static_cast<uint8>(255) : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::nodrop]));
-		item.NoPet = !disable_no_pet && Strings::ToBool(row[ItemField::nopet]);
-		item.NoRent = disable_no_rent ? static_cast<uint8>(255) : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::norent]));
-		item.NoTransfer = !disable_no_transfer && Strings::ToBool(row[ItemField::notransfer]);
-		item.PendingLoreFlag = Strings::ToBool(row[ItemField::pendingloreflag]);
-		item.QuestItemFlag = Strings::ToBool(row[ItemField::questitemflag]);
-		item.Stackable = Strings::ToBool(row[ItemField::stackable]);
-		item.Tradeskills = Strings::ToBool(row[ItemField::tradeskills]);
-		item.SummonedFlag = Strings::ToBool(row[ItemField::summonedflag]);
+		item.ArtifactFlag    = e.artifactflag;
+		item.Attuneable      = !disable_attuneable && e.attuneable;
+		item.BenefitFlag     = e.benefitflag;
+		item.FVNoDrop        = e.fvnodrop;
+		item.Magic           = e.magic;
+		item.NoDrop          = disable_no_drop ? std::numeric_limits<uint8>::max() : e.nodrop;
+		item.NoPet           = !disable_no_pet && e.nopet;
+		item.NoRent          = disable_no_rent ? std::numeric_limits<uint8>::max() : e.norent;
+		item.NoTransfer      = !disable_no_transfer && e.notransfer;
+		item.PendingLoreFlag = e.pendingloreflag;
+		item.QuestItemFlag   = e.questitemflag;
+		item.Stackable       = e.stackable;
+		item.Tradeskills     = e.tradeskills;
+		item.SummonedFlag    = e.summonedflag;
 
 		// Lore
-		item.LoreGroup = disable_lore ? 0 : Strings::ToInt(row[ItemField::loregroup]);
-		item.LoreFlag = !disable_lore && item.LoreGroup != 0;
+		item.LoreGroup = disable_lore ? 0 : e.loregroup;
+		item.LoreFlag  = !disable_lore && item.LoreGroup != 0;
 
 		// Type
-		item.AugType = Strings::ToUnsignedInt(row[ItemField::augtype]);
-		item.ItemType = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::itemtype]));
-		item.SubType = Strings::ToInt(row[ItemField::subtype]);
+		item.AugType  = e.augtype;
+		item.ItemType = static_cast<uint8>(e.itemtype);
+		item.SubType  = e.subtype;
 
 		// Miscellaneous
-		item.ExpendableArrow = static_cast<uint16>(Strings::ToUnsignedInt(row[ItemField::expendablearrow]));
-		item.Light = static_cast<int8>(Strings::ToInt(row[ItemField::light]));
-		item.MaxCharges = static_cast<int16>(Strings::ToInt(row[ItemField::maxcharges]));
-		item.Size = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::size]));
-		item.StackSize = static_cast<int16>(Strings::ToInt(row[ItemField::stacksize]));
-		item.Weight = Strings::ToInt(row[ItemField::weight]);
+		item.ExpendableArrow = e.expendablearrow;
+		item.Light           = EQ::Clamp(e.light, -128, 127);
+		item.MaxCharges      = e.maxcharges;
+		item.Size            = static_cast<uint8>(e.size);
+		item.StackSize       = e.stacksize;
+		item.Weight          = e.weight;
 
 		// Potion Belt
-		item.PotionBelt = !disable_potion_belt && Strings::ToBool(row[ItemField::potionbelt]);
-		item.PotionBeltSlots = disable_potion_belt ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::potionbeltslots]));
+		item.PotionBelt      = !disable_potion_belt && e.potionbelt;
+		item.PotionBeltSlots = disable_potion_belt ? 0 : static_cast<uint8>(e.potionbeltslots);
 
 		// Merchant
-		item.Favor = Strings::ToUnsignedInt(row[ItemField::favor]);
-		item.GuildFavor = Strings::ToUnsignedInt(row[ItemField::guildfavor]);
-		item.Price = Strings::ToUnsignedInt(row[ItemField::price]);
-		item.SellRate = Strings::ToFloat(row[ItemField::sellrate]);
+		item.Favor      = e.favor;
+		item.GuildFavor = e.guildfavor;
+		item.Price      = e.price;
+		item.SellRate   = e.sellrate;
 
 		// Display
-		item.Color = Strings::ToUnsignedInt(row[ItemField::color]);
-		item.EliteMaterial = Strings::ToUnsignedInt(row[ItemField::elitematerial]);
-		item.HerosForgeModel = Strings::ToUnsignedInt(row[ItemField::herosforgemodel]);
-		item.Icon = Strings::ToUnsignedInt(row[ItemField::icon]);
-		strn0cpy(item.IDFile, row[ItemField::idfile], sizeof(item.IDFile));
-		item.Material = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::material]));
+		item.Color           = e.color;
+		item.EliteMaterial   = e.elitematerial;
+		item.HerosForgeModel = e.herosforgemodel;
+		item.Icon            = e.icon;
+		strn0cpy(item.IDFile, e.idfile.c_str(), sizeof(item.IDFile));
+		item.Material = e.material;
 
 		// Resists
-		item.CR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::cr]), -128, 127));
-		item.DR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::dr]), -128, 127));
-		item.FR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::fr]), -128, 127));
-		item.MR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::mr]), -128, 127));
-		item.PR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::pr]), -128, 127));
-		item.SVCorruption = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::svcorruption]), -128, 127));
+		item.CR           = EQ::Clamp(e.cr, -128, 127);
+		item.DR           = EQ::Clamp(e.dr, -128, 127);
+		item.FR           = EQ::Clamp(e.fr, -128, 127);
+		item.MR           = EQ::Clamp(e.mr, -128, 127);
+		item.PR           = EQ::Clamp(e.pr, -128, 127);
+		item.SVCorruption = EQ::Clamp(e.svcorruption, -128, 127);
 
 		// Heroic Resists
-		item.HeroicCR = Strings::ToInt(row[ItemField::heroic_cr]);
-		item.HeroicDR = Strings::ToInt(row[ItemField::heroic_dr]);
-		item.HeroicFR = Strings::ToInt(row[ItemField::heroic_fr]);
-		item.HeroicMR = Strings::ToInt(row[ItemField::heroic_mr]);
-		item.HeroicPR = Strings::ToInt(row[ItemField::heroic_pr]);
-		item.HeroicSVCorrup = Strings::ToInt(row[ItemField::heroic_svcorrup]);
+		item.HeroicCR       = e.heroic_cr;
+		item.HeroicDR       = e.heroic_dr;
+		item.HeroicFR       = e.heroic_fr;
+		item.HeroicMR       = e.heroic_mr;
+		item.HeroicPR       = e.heroic_pr;
+		item.HeroicSVCorrup = e.heroic_svcorrup;
 
 		// Stats
-		item.AAgi = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::aagi]), -128, 127));
-		item.ACha = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::acha]), -128, 127));
-		item.ADex = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::adex]), -128, 127));
-		item.AInt = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::aint]), -128, 127));
-		item.ASta = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::asta]), -128, 127));
-		item.AStr = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::astr]), -128, 127));
-		item.AWis = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::awis]), -128, 127));
+		item.AAgi = EQ::Clamp(e.aagi, -128, 127);
+		item.ACha = EQ::Clamp(e.acha, -128, 127);
+		item.ADex = EQ::Clamp(e.adex, -128, 127);
+		item.AInt = EQ::Clamp(e.aint, -128, 127);
+		item.ASta = EQ::Clamp(e.asta, -128, 127);
+		item.AStr = EQ::Clamp(e.astr, -128, 127);
+		item.AWis = EQ::Clamp(e.awis, -128, 127);
 
 		// Heroic Stats
-		item.HeroicAgi = Strings::ToInt(row[ItemField::heroic_agi]);
-		item.HeroicCha = Strings::ToInt(row[ItemField::heroic_cha]);
-		item.HeroicDex = Strings::ToInt(row[ItemField::heroic_dex]);
-		item.HeroicInt = Strings::ToInt(row[ItemField::heroic_int]);
-		item.HeroicSta = Strings::ToInt(row[ItemField::heroic_sta]);
-		item.HeroicStr = Strings::ToInt(row[ItemField::heroic_str]);
-		item.HeroicWis = Strings::ToInt(row[ItemField::heroic_wis]);
+		item.HeroicAgi = e.heroic_agi;
+		item.HeroicCha = e.heroic_cha;
+		item.HeroicDex = e.heroic_dex;
+		item.HeroicInt = e.heroic_int;
+		item.HeroicSta = e.heroic_sta;
+		item.HeroicStr = e.heroic_str;
+		item.HeroicWis = e.heroic_wis;
 
 		// Health, Mana, and Endurance
-		item.HP = Strings::ToInt(row[ItemField::hp]);
-		item.Regen = Strings::ToInt(row[ItemField::regen]);
-		item.Mana = Strings::ToInt(row[ItemField::mana]);
-		item.ManaRegen = Strings::ToInt(row[ItemField::manaregen]);
-		item.Endur = Strings::ToInt(row[ItemField::endur]);
-		item.EnduranceRegen = Strings::ToInt(row[ItemField::enduranceregen]);
+		item.HP             = e.hp;
+		item.Regen          = e.regen;
+		item.Mana           = e.mana;
+		item.ManaRegen      = e.manaregen;
+		item.Endur          = e.endur;
+		item.EnduranceRegen = e.enduranceregen;
 
 		// Bane Damage
-		item.BaneDmgAmt = Strings::ToInt(row[ItemField::banedmgamt]);
-		item.BaneDmgBody = Strings::ToUnsignedInt(row[ItemField::banedmgbody]);
-		item.BaneDmgRace = Strings::ToUnsignedInt(row[ItemField::banedmgrace]);
-		item.BaneDmgRaceAmt = Strings::ToUnsignedInt(row[ItemField::banedmgraceamt]);
+		item.BaneDmgAmt     = e.banedmgamt;
+		item.BaneDmgBody    = e.banedmgbody;
+		item.BaneDmgRace    = e.banedmgrace;
+		item.BaneDmgRaceAmt = e.banedmgraceamt;
 
 		// Elemental Damage
-		item.ElemDmgType = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::elemdmgtype]));
-		item.ElemDmgAmt = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::elemdmgamt]));
+		item.ElemDmgType = static_cast<uint8>(e.elemdmgtype);
+		item.ElemDmgAmt  = static_cast<uint8>(e.elemdmgamt);
 
 		// Combat
-		item.BackstabDmg = Strings::ToUnsignedInt(row[ItemField::backstabdmg]);
-		item.Damage = Strings::ToUnsignedInt(row[ItemField::damage]);
-		item.Delay = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::delay]));
-		item.Range = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::range]));
+		item.BackstabDmg = e.backstabdmg;
+		item.Damage      = e.damage;
+		item.Delay       = static_cast<uint8>(e.delay);
+		item.Range       = static_cast<uint8>(e.range_);
 
 		// Combat Stats
-		item.AC = Strings::ToInt(row[ItemField::ac]);
-		item.Accuracy = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::accuracy]), -128, 127));
-		item.Attack = Strings::ToInt(row[ItemField::attack]);
-		item.Avoidance = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::avoidance]), -128, 127));
-		item.Clairvoyance = Strings::ToUnsignedInt(row[ItemField::clairvoyance]);
-		item.CombatEffects = Strings::IsNumber(row[ItemField::combateffects]) ? static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::combateffects]), -128, 127)) : 0;
-		item.DamageShield = Strings::ToInt(row[ItemField::damageshield]);
-		item.DotShielding = Strings::ToInt(row[ItemField::dotshielding]);
-		item.DSMitigation = Strings::ToUnsignedInt(row[ItemField::dsmitigation]);
-		item.Haste = Strings::ToInt(row[ItemField::haste]);
-		item.HealAmt = Strings::ToInt(row[ItemField::healamt]);
-		item.Purity = Strings::ToUnsignedInt(row[ItemField::purity]);
-		item.Shielding = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::shielding]), -128, 127));
-		item.SpellDmg = Strings::ToInt(row[ItemField::spelldmg]);
-		item.SpellShield = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::spellshield]), -128, 127));
-		item.StrikeThrough = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::strikethrough]), -128, 127));
-		item.StunResist = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::stunresist]), -128, 127));
+		item.AC           = e.ac;
+		item.Accuracy     = EQ::Clamp(e.accuracy, -128, 127);
+		item.Attack       = e.attack;
+		item.Avoidance    = EQ::Clamp(e.avoidance, -128, 127);
+		item.Clairvoyance = e.clairvoyance;
+		item.CombatEffects = Strings::IsNumber(e.combateffects) ? static_cast<int8>(EQ::Clamp(Strings::ToInt(e.combateffects), -128, 127)) : 0;
+		item.DamageShield  = e.damageshield;
+		item.DotShielding  = e.dotshielding;
+		item.DSMitigation  = e.dsmitigation;
+		item.Haste         = e.haste;
+		item.HealAmt       = e.healamt;
+		item.Purity        = e.purity;
+		item.Shielding     = EQ::Clamp(e.shielding, -128, 127);
+		item.SpellDmg      = e.spelldmg;
+		item.SpellShield   = EQ::Clamp(e.spellshield, -128, 127);
+		item.StrikeThrough = EQ::Clamp(e.strikethrough, -128, 127);
+		item.StunResist    = EQ::Clamp(e.stunresist, -128, 127);
 
 		// Restrictions
-		item.AugRestrict = Strings::ToUnsignedInt(row[ItemField::augrestrict]);
-		item.Classes = Strings::ToUnsignedInt(row[ItemField::classes]);
-		item.Deity = Strings::ToUnsignedInt(row[ItemField::deity]);
-		item.ItemClass = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::itemclass]));
-		item.Races = Strings::ToUnsignedInt(row[ItemField::races]);
-		item.RecLevel = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::reclevel]));
-		item.RecSkill = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::recskill]));
-		item.ReqLevel = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::reqlevel]));
-		item.Slots = Strings::ToUnsignedInt(row[ItemField::slots]);
+		item.AugRestrict = e.augrestrict;
+		item.Classes     = e.classes;
+		item.Deity       = e.deity;
+		item.ItemClass   = static_cast<uint8>(e.itemclass);
+		item.Races       = e.races;
+		item.RecLevel    = static_cast<uint8>(e.reclevel);
+		item.RecSkill    = static_cast<uint8>(e.recskill);
+		item.ReqLevel    = static_cast<uint8>(e.reqlevel);
+		item.Slots       = e.slots;
 
 		// Skill Modifier
-		item.SkillModValue = Strings::ToInt(row[ItemField::skillmodvalue]);
-		item.SkillModMax = Strings::ToInt(row[ItemField::skillmodmax]);
-		item.SkillModType = Strings::ToUnsignedInt(row[ItemField::skillmodtype]);
+		item.SkillModValue = e.skillmodvalue;
+		item.SkillModMax   = e.skillmodmax;
+		item.SkillModType  = e.skillmodtype;
 
 		// Extra Damage Skill
-		item.ExtraDmgSkill = Strings::ToInt(row[ItemField::extradmgskill]);
-		item.ExtraDmgAmt = Strings::ToInt(row[ItemField::extradmgamt]);
+		item.ExtraDmgSkill = e.extradmgskill;
+		item.ExtraDmgAmt   = e.extradmgamt;
 
 		// Bard
-		item.BardType = Strings::ToUnsignedInt(row[ItemField::bardtype]);
-		item.BardValue = Strings::ToInt(row[ItemField::bardvalue]);
+		item.BardType  = e.bardtype;
+		item.BardValue = e.bardvalue;
 
 		// Faction
-		item.FactionAmt1 = Strings::ToInt(row[ItemField::factionamt1]);
-		item.FactionMod1 = Strings::ToInt(row[ItemField::factionmod1]);
-		item.FactionAmt2 = Strings::ToInt(row[ItemField::factionamt2]);
-		item.FactionMod2 = Strings::ToInt(row[ItemField::factionmod2]);
-		item.FactionAmt3 = Strings::ToInt(row[ItemField::factionamt3]);
-		item.FactionMod3 = Strings::ToInt(row[ItemField::factionmod3]);
-		item.FactionAmt4 = Strings::ToInt(row[ItemField::factionamt4]);
-		item.FactionMod4 = Strings::ToInt(row[ItemField::factionmod4]);
+		item.FactionAmt1 = e.factionamt1;
+		item.FactionMod1 = e.factionmod1;
+		item.FactionAmt2 = e.factionamt2;
+		item.FactionMod2 = e.factionmod2;
+		item.FactionAmt3 = e.factionamt3;
+		item.FactionMod3 = e.factionmod3;
+		item.FactionAmt4 = e.factionamt4;
+		item.FactionMod4 = e.factionmod4;
 
-		// Augment
-		item.AugDistiller = Strings::ToUnsignedInt(row[ItemField::augdistiller]);
-		item.AugSlotType[0] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot1type]));
-		item.AugSlotVisible[0] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot1visible]));
-		item.AugSlotType[1] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot2type]));
-		item.AugSlotVisible[1] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot2visible]));
-		item.AugSlotType[2] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot3type]));
-		item.AugSlotVisible[2] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot3visible]));
-		item.AugSlotType[3] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot4type]));
-		item.AugSlotVisible[3] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot4visible]));
-		item.AugSlotType[4] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot5type]));
-		item.AugSlotVisible[4] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot5visible]));
-		item.AugSlotType[5] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot6type]));
-		item.AugSlotVisible[5] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot6visible]));
+		// Augment Distiller
+		item.AugDistiller = e.augdistiller;
+
+		// Augment Slots
+		item.AugSlotType[0]    = static_cast<uint8>(e.augslot1type);
+		item.AugSlotVisible[0] = static_cast<uint8>(e.augslot1visible);
+		item.AugSlotType[1]    = static_cast<uint8>(e.augslot2type);
+		item.AugSlotVisible[1] = static_cast<uint8>(e.augslot2visible);
+		item.AugSlotType[2]    = static_cast<uint8>(e.augslot3type);
+		item.AugSlotVisible[2] = static_cast<uint8>(e.augslot3visible);
+		item.AugSlotType[3]    = static_cast<uint8>(e.augslot4type);
+		item.AugSlotVisible[3] = static_cast<uint8>(e.augslot4visible);
+		item.AugSlotType[4]    = static_cast<uint8>(e.augslot5type);
+		item.AugSlotVisible[4] = static_cast<uint8>(e.augslot5visible);
+		item.AugSlotType[5]    = static_cast<uint8>(e.augslot6type);
+		item.AugSlotVisible[5] = static_cast<uint8>(e.augslot6visible);
 
 		// Augment Unknowns
 		for (uint8 i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
@@ -1242,79 +1211,79 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		}
 
 		// LDoN
-		item.LDoNTheme = Strings::ToUnsignedInt(row[ItemField::ldontheme]);
-		item.LDoNPrice = Strings::ToUnsignedInt(row[ItemField::ldonprice]);
-		item.LDoNSellBackRate = Strings::ToUnsignedInt(row[ItemField::ldonsellbackrate]);
-		item.LDoNSold = Strings::ToUnsignedInt(row[ItemField::ldonsold]);
-		item.PointType = Strings::ToUnsignedInt(row[ItemField::pointtype]);
+		item.LDoNTheme        = e.ldontheme;
+		item.LDoNPrice        = e.ldonprice;
+		item.LDoNSellBackRate = e.ldonsellbackrate;
+		item.LDoNSold         = e.ldonsold;
+		item.PointType        = e.pointtype;
 
 		// Bag
-		item.BagSize = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bagsize]));
-		item.BagSlots = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagslots]), 0, static_cast<int>(EQ::invbag::SLOT_COUNT)));
-		item.BagType = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bagtype]));
-		item.BagWR = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagwr]), 0, 100));
+		item.BagSize  = static_cast<uint8>(e.bagsize);
+		item.BagSlots = EQ::Clamp(e.bagslots, 0, static_cast<int>(EQ::invbag::SLOT_COUNT));
+		item.BagType  = static_cast<uint8>(e.bagtype);
+		item.BagWR    = EQ::Clamp(e.bagwr, 0, 100);
 
 		// Bard Effect
-		item.Bard.Effect = disable_bard_focus_effects ? 0 : Strings::ToInt(row[ItemField::bardeffect]);
-		item.Bard.Type = disable_bard_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bardtype]));
-		item.Bard.Level = disable_bard_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bardlevel]));
-		item.Bard.Level2 = disable_bard_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bardlevel2]));
+		item.Bard.Effect = disable_bard_focus_effects ? 0 : e.bardeffect;
+		item.Bard.Type   = disable_bard_focus_effects ? 0 : static_cast<uint8>(e.bardtype);
+		item.Bard.Level  = disable_bard_focus_effects ? 0 : static_cast<uint8>(e.bardlevel);
+		item.Bard.Level2 = disable_bard_focus_effects ? 0 : static_cast<uint8>(e.bardlevel2);
 
 		// Book
-		item.Book = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::book]));
-		item.BookType = Strings::ToUnsignedInt(row[ItemField::booktype]);
+		item.Book     = static_cast<uint8>(e.book);
+		item.BookType = e.booktype;
 
 		// Click Effect
-		item.CastTime = Strings::ToUnsignedInt(row[ItemField::casttime]);
-		item.CastTime_ = Strings::ToInt(row[ItemField::casttime_]);
-		item.Click.Effect = Strings::ToInt(row[ItemField::clickeffect]);
-		item.Click.Type = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::clicktype]));
-		item.Click.Level = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::clicklevel]));
-		item.Click.Level2 = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::clicklevel2]));
-		strn0cpy(item.ClickName, row[ItemField::clickname], sizeof(item.ClickName));
-		item.RecastDelay = Strings::ToUnsignedInt(row[ItemField::recastdelay]);
-		item.RecastType = Strings::ToInt(row[ItemField::recasttype]);
+		item.CastTime     = e.casttime;
+		item.CastTime_    = e.casttime_;
+		item.Click.Effect = e.clickeffect;
+		item.Click.Type   = static_cast<uint8>(e.clicktype);
+		item.Click.Level  = static_cast<uint8>(e.clicklevel);
+		item.Click.Level2 = static_cast<uint8>(e.clicklevel2);
+		strn0cpy(item.ClickName, e.clickname.c_str(), sizeof(item.ClickName));
+		item.RecastDelay = e.recastdelay;
+		item.RecastType  = e.recasttype;
 
 		// Focus Effect
-		item.Focus.Effect = disable_spell_focus_effects ? 0 : Strings::ToInt(row[ItemField::focuseffect]);
-		item.Focus.Type = disable_spell_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::focustype]));
-		item.Focus.Level = disable_spell_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::focuslevel]));
-		item.Focus.Level2 = disable_spell_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::focuslevel2]));
-		strn0cpy(item.FocusName, disable_spell_focus_effects ? "" : row[ItemField::focusname], sizeof(item.FocusName));
+		item.Focus.Effect = disable_spell_focus_effects ? 0 : e.focuseffect;
+		item.Focus.Type   = disable_spell_focus_effects ? 0 : static_cast<uint8>(e.focustype);
+		item.Focus.Level  = disable_spell_focus_effects ? 0 : static_cast<uint8>(e.focuslevel);
+		item.Focus.Level2 = disable_spell_focus_effects ? 0 : static_cast<uint8>(e.focuslevel2);
+		strn0cpy(item.FocusName, disable_spell_focus_effects ? "" : e.focusname.c_str(), sizeof(item.FocusName));
 
 		// Proc Effect
-		item.Proc.Effect = Strings::ToInt(row[ItemField::proceffect]);
-		item.Proc.Type = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::proctype]));
-		item.Proc.Level = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::proclevel]));
-		item.Proc.Level2 = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::proclevel2]));
-		strn0cpy(item.ProcName, row[ItemField::procname], sizeof(item.ProcName));
-		item.ProcRate = Strings::ToInt(row[ItemField::procrate]);
+		item.Proc.Effect = e.proceffect;
+		item.Proc.Type   = static_cast<uint8>(e.proctype);
+		item.Proc.Level  = static_cast<uint8>(e.proclevel);
+		item.Proc.Level2 = static_cast<uint8>(e.proclevel2);
+		strn0cpy(item.ProcName, e.procname.c_str(), sizeof(item.ProcName));
+		item.ProcRate = e.procrate;
 
 		// Scroll Effect
-		item.Scroll.Effect = Strings::ToInt(row[ItemField::scrolleffect]);
-		item.Scroll.Type = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::scrolltype]));
-		item.Scroll.Level = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::scrolllevel]));
-		item.Scroll.Level2 = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::scrolllevel2]));
-		strn0cpy(item.ScrollName, row[ItemField::scrollname], sizeof(item.ScrollName));
+		item.Scroll.Effect = e.scrolleffect;
+		item.Scroll.Type   = static_cast<uint8>(e.scrolltype);
+		item.Scroll.Level  = static_cast<uint8>(e.scrolllevel);
+		item.Scroll.Level2 = static_cast<uint8>(e.scrolllevel2);
+		strn0cpy(item.ScrollName, e.scrollname.c_str(), sizeof(item.ScrollName));
 
 		// Worn Effect
-		item.Worn.Effect = Strings::ToInt(row[ItemField::worneffect]);
-		item.Worn.Type = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::worntype]));
-		item.Worn.Level = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::wornlevel]));
-		item.Worn.Level2 = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::wornlevel2]));
-		strn0cpy(item.WornName, row[ItemField::wornname], sizeof(item.WornName));
+		item.Worn.Effect = e.worneffect;
+		item.Worn.Type   = static_cast<uint8>(e.worntype);
+		item.Worn.Level  = static_cast<uint8>(e.wornlevel);
+		item.Worn.Level2 = static_cast<uint8>(e.wornlevel2);
+		strn0cpy(item.WornName, e.wornname.c_str(), sizeof(item.WornName));
 
 		// Evolving Item
-		item.EvolvingID = Strings::ToUnsignedInt(row[ItemField::evoid]);
-		item.EvolvingItem = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::evoitem]));
-		item.EvolvingLevel = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::evolvinglevel]));
-		item.EvolvingMax = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::evomax]));
+		item.EvolvingID    = e.evoid;
+		item.EvolvingItem  = static_cast<uint8>(e.evoitem);
+		item.EvolvingLevel = static_cast<uint8>(e.evolvinglevel);
+		item.EvolvingMax   = static_cast<uint8>(e.evomax);
 
 		// Scripting
-		item.CharmFileID = Strings::IsNumber(row[ItemField::charmfileid]) ? Strings::ToUnsignedInt(row[ItemField::charmfileid]) : 0;
-		strn0cpy(item.CharmFile, row[ItemField::charmfile], sizeof(item.CharmFile));
-		strn0cpy(item.Filename, row[ItemField::filename], sizeof(item.Filename));
-		item.ScriptFileID = Strings::ToUnsignedInt(row[ItemField::scriptfileid]);
+		item.CharmFileID = Strings::IsNumber(e.charmfileid) ? Strings::ToUnsignedInt(e.charmfileid) : 0;
+		strn0cpy(item.CharmFile, e.charmfile.c_str(), sizeof(item.CharmFile));
+		strn0cpy(item.Filename, e.filename.c_str(), sizeof(item.Filename));
+		item.ScriptFileID = e.scriptfileid;
 
 		try {
 			hash.insert(item.ID, item);
@@ -2005,18 +1974,7 @@ uint32 SharedDatabase::GetSpellsCount()
 
 uint32 SharedDatabase::GetItemsCount()
 {
-	auto results = QueryDatabase("SELECT count(*) FROM items");
-	if (!results.Success() || !results.RowCount()) {
-		return 0;
-	}
-
-	auto& row = results.begin();
-
-	if (row[0]) {
-		return Strings::ToUnsignedInt(row[0]);
-	}
-
-	return 0;
+	return ItemsRepository::Count(*this);
 }
 
 void SharedDatabase::SetSharedItemsCount(uint32 shared_items_count)
