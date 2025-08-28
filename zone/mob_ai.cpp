@@ -615,7 +615,7 @@ void Client::AI_SpellCast()
 			continue;
 		}
 
-		if(IsEffectInSpell(current_spell, SE_Charm))
+		if(IsEffectInSpell(current_spell, SpellEffect::Charm))
 		{
 			continue;
 		}
@@ -724,7 +724,7 @@ void Client::AI_Process()
 	{
 		if(!IsFeared() && !IsLD())
 		{
-			BuffFadeByEffect(SE_Charm);
+			BuffFadeByEffect(SpellEffect::Charm);
 			return;
 		}
 	}

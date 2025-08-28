@@ -53,50 +53,50 @@ namespace Archetype {
 #define SHIELD_ABILITY_RECAST_TIME 180
 
 typedef enum {	//focus types
-	focusSpellHaste = 1,				//@Fc, SPA: 127, SE_IncreaseSpellHaste,				On Caster, cast time mod pct, base: pct
-	focusSpellDuration,					//@Fc, SPA: 128, SE_IncreaseSpellDuration,			On Caster, spell duration mod pct, base: pct
-	focusRange,							//@Fc, SPA: 129, SE_IncreaseRange,					On Caster, spell range mod pct, base: pct
-	focusReagentCost,					//@Fc, SPA: 131, SE_ReduceReagentCost,				On Caster, do not consume reagent pct chance, base: min pct, limit: max pct
-	focusManaCost,						//@Fc, SPA: 132, SE_ReduceManaCost,					On Caster, reduce mana cost by pct, base: min pct, limt: max pct
-	focusImprovedHeal,					//@Fc, SPA: 125, SE_ImprovedHeal,					On Caster, spell healing mod pct, base: min pct, limit: max pct
-	focusImprovedDamage,				//@Fc, SPA: 124, SE_ImprovedDamage,					On Caster, spell damage mod pct, base: min pct, limit: max pct
-	focusImprovedDamage2,				//@Fc, SPA: 461, SE_ImprovedDamage2,				On Caster, spell damage mod pct, base: min pct, limit: max pct
-	focusFcDamagePctCrit,				//@Fc, SPA: 302, SE_FcDamagePctCrit,				On Caster, spell damage mod pct, base: min pct, limit: max pct
-	focusPetPower,						//@Fc, SPA: 167, SE_PetPowerIncrease,				On Caster, pet power mod, base: value
-	focusResistRate,					//@Fc, SPA: 126, SE_SpellResistReduction,			On Caster, casted spell resist mod pct, base: min pct, limit: max pct
-	focusSpellHateMod,					//@Fc, SPA: 130, SE_SpellHateMod,					On Caster, spell hate mod pct, base: min pct, limit: max pct
-	focusTriggerOnCast,					//@Fc, SPA: 339, SE_TriggerOnCast,					On Caster, cast on spell use, base: chance pct limit: spellid
-	focusSpellVulnerability,			//@Fc, SPA: 296, SE_FcSpellVulnerability,			On Target, spell damage taken mod pct, base: min pct, limit: max pct
-	focusFcSpellDamagePctIncomingPC,	//@Fc, SPA: 483, SE_Fc_Spell_Damage_Pct_IncomingPC, On Target, spell damage taken mod pct, base: min pct, limit: max pct
-	focusTwincast,						//@Fc, SPA: 399, SE_FcTwincast,						On Caster, chance cast spell twice, base: chance pct
-	focusSympatheticProc,				//@Fc, SPA: 383, SE_SympatheticProc,				On Caster, cast on spell use, base: variable proc chance on cast time, limit: spellid
-	focusFcDamageAmt,					//@Fc, SPA: 286, SE_FcDamageAmt,					On Caster, spell damage mod flat amt, base: amt
-	focusFcDamageAmt2,					//@Fc, SPA: 462, SE_FcDamageAmt2,					On Caster, spell damage mod flat amt, base: amt
-	focusFcDamageAmtCrit,				//@Fc, SPA: 303, SE_FFcDamageAmtCrit,				On Caster, spell damage mod flat amt, base: amt
-	focusSpellDurByTic,					//@Fc, SPA: 287, SE_SpellDurationIncByTic,			On Caster, spell buff duration mod, base: tics
-	focusSwarmPetDuration,				//@Fc, SPA: 398, SE_SwarmPetDuration,				On Caster, swarm pet duration mod, base: milliseconds
-	focusReduceRecastTime,				//@Fc, SPA: 310, SE_ReduceReuseTimer,				On Caster, disc reuse time mod, base: milliseconds
-	focusBlockNextSpell,				//@Fc, SPA: 335, SE_BlockNextSpellFocus,			On Caster, chance to block next spell, base: chance
-	focusFcHealPctIncoming,				//@Fc, SPA: 393, SE_FcHealPctIncoming,   			On Target, heal received mod pct, base: pct
-	focusFcDamageAmtIncoming,			//@Fc, SPA: 297, SE_FcDamageAmtIncoming,			On Target, damage taken flat amt, base: amt
-	focusFcSpellDamageAmtIncomingPC,	//@Fc, SPA: 484, SE_Fc_Spell_Damage_Amt_IncomingPC,	On Target, damage taken flat amt, base: amt
-	focusFcCastSpellOnLand,				//@Fc, SPA: 481, SE_Fc_Cast_Spell_On_Land,			On Target, cast spell if hit by spell, base: chance pct, limit: spellid
-	focusFcHealAmtIncoming,				//@Fc, SPA: 394, SE_FcHealAmtIncoming,				On Target, heal received mod flat amt, base: amt
-	focusFcBaseEffects,					//@Fc, SPA: 413, SE_FcBaseEffects,					On Caster, base spell effectiveness mod pct, base: pct
-	focusIncreaseNumHits,				//@Fc, SPA: 421, SE_FcIncreaseNumHits,				On Caster, numhits mod flat amt, base: amt
-	focusFcLimitUse,					//@Fc, SPA: 420, SE_FcLimitUse,						On Caster, numhits mod pct, base: pct
-	focusFcMute,						//@Fc, SPA: 357, SE_FcMute,							On Caster, prevents spell casting, base: chance pct
-	focusFcTimerRefresh,				//@Fc, SPA: 389, SE_FcTimerRefresh,					On Caster, reset spell recast timer, base: 1
-	focusFcTimerLockout,				//@Fc, SPA: 390, SE_FcTimerLockout,					On Caster, set a spell to be on recast timer, base: recast duration milliseconds
-	focusFcStunTimeMod,					//@Fc, SPA: 133, SE_FcStunTimeMod,					On Caster, stun time mod pct, base: chance pct
-	focusFcResistIncoming,				//@Fc, SPA: 510, SE_Fc_Resist_Incoming,				On Target, resist modifier, base: amt
-	focusFcAmplifyMod,					//@Fc, SPA: 507, SE_Fc_Amplify_Mod,					On Caster, damage-heal-dot mod pct, base: pct
-	focusFcAmplifyAmt,					//@Fc, SPA: 508, SE_Fc_Amplify_Amt,					On Caster, damage-heal-dot mod flat amt, base: amt
-	focusFcCastTimeMod2,				//@Fc, SPA: 500, SE_Fc_CastTimeMod2,				On Caster, cast time mod pct, base: pct
-	focusFcCastTimeAmt,					//@Fc, SPA: 501, SE_Fc_CastTimeAmt,					On Caster, cast time mod flat amt, base: milliseconds
-	focusFcHealPctCritIncoming,			//@Fc, SPA: 395, SE_FcHealPctCritIncoming,			On Target, spell healing mod pct, base: pct
-	focusFcHealAmt,						//@Fc, SPA: 392, SE_FcHealAmt,						On Caster, spell healing mod flat amt, base: amt
-	focusFcHealAmtCrit,					//@Fc, SPA: 396, SE_FcHealAmtCrit,					On Caster, spell healing mod flat amt, base: amt
+	focusSpellHaste = 1,				//@Fc, SPA: 127, SpellEffect::IncreaseSpellHaste,				On Caster, cast time mod pct, base: pct
+	focusSpellDuration,					//@Fc, SPA: 128, SpellEffect::IncreaseSpellDuration,			On Caster, spell duration mod pct, base: pct
+	focusRange,							//@Fc, SPA: 129, SpellEffect::IncreaseRange,					On Caster, spell range mod pct, base: pct
+	focusReagentCost,					//@Fc, SPA: 131, SpellEffect::ReduceReagentCost,				On Caster, do not consume reagent pct chance, base: min pct, limit: max pct
+	focusManaCost,						//@Fc, SPA: 132, SpellEffect::ReduceManaCost,					On Caster, reduce mana cost by pct, base: min pct, limt: max pct
+	focusImprovedHeal,					//@Fc, SPA: 125, SpellEffect::ImprovedHeal,					On Caster, spell healing mod pct, base: min pct, limit: max pct
+	focusImprovedDamage,				//@Fc, SPA: 124, SpellEffect::ImprovedDamage,					On Caster, spell damage mod pct, base: min pct, limit: max pct
+	focusImprovedDamage2,				//@Fc, SPA: 461, SpellEffect::ImprovedDamage2,				On Caster, spell damage mod pct, base: min pct, limit: max pct
+	focusFcDamagePctCrit,				//@Fc, SPA: 302, SpellEffect::FcDamagePctCrit,				On Caster, spell damage mod pct, base: min pct, limit: max pct
+	focusPetPower,						//@Fc, SPA: 167, SpellEffect::PetPowerIncrease,				On Caster, pet power mod, base: value
+	focusResistRate,					//@Fc, SPA: 126, SpellEffect::SpellResistReduction,			On Caster, casted spell resist mod pct, base: min pct, limit: max pct
+	focusSpellHateMod,					//@Fc, SPA: 130, SpellEffect::SpellHateMod,					On Caster, spell hate mod pct, base: min pct, limit: max pct
+	focusTriggerOnCast,					//@Fc, SPA: 339, SpellEffect::TriggerOnCast,					On Caster, cast on spell use, base: chance pct limit: spellid
+	focusSpellVulnerability,			//@Fc, SPA: 296, SpellEffect::FcSpellVulnerability,			On Target, spell damage taken mod pct, base: min pct, limit: max pct
+	focusFcSpellDamagePctIncomingPC,	//@Fc, SPA: 483, SpellEffect::Fc_Spell_Damage_Pct_IncomingPC, On Target, spell damage taken mod pct, base: min pct, limit: max pct
+	focusTwincast,						//@Fc, SPA: 399, SpellEffect::FcTwincast,						On Caster, chance cast spell twice, base: chance pct
+	focusSympatheticProc,				//@Fc, SPA: 383, SpellEffect::SympatheticProc,				On Caster, cast on spell use, base: variable proc chance on cast time, limit: spellid
+	focusFcDamageAmt,					//@Fc, SPA: 286, SpellEffect::FcDamageAmt,					On Caster, spell damage mod flat amt, base: amt
+	focusFcDamageAmt2,					//@Fc, SPA: 462, SpellEffect::FcDamageAmt2,					On Caster, spell damage mod flat amt, base: amt
+	focusFcDamageAmtCrit,				//@Fc, SPA: 303, SpellEffect::FFcDamageAmtCrit,				On Caster, spell damage mod flat amt, base: amt
+	focusSpellDurByTic,					//@Fc, SPA: 287, SpellEffect::SpellDurationIncByTic,			On Caster, spell buff duration mod, base: tics
+	focusSwarmPetDuration,				//@Fc, SPA: 398, SpellEffect::SwarmPetDuration,				On Caster, swarm pet duration mod, base: milliseconds
+	focusReduceRecastTime,				//@Fc, SPA: 310, SpellEffect::ReduceReuseTimer,				On Caster, disc reuse time mod, base: milliseconds
+	focusBlockNextSpell,				//@Fc, SPA: 335, SpellEffect::BlockNextSpellFocus,			On Caster, chance to block next spell, base: chance
+	focusFcHealPctIncoming,				//@Fc, SPA: 393, SpellEffect::FcHealPctIncoming,   			On Target, heal received mod pct, base: pct
+	focusFcDamageAmtIncoming,			//@Fc, SPA: 297, SpellEffect::FcDamageAmtIncoming,			On Target, damage taken flat amt, base: amt
+	focusFcSpellDamageAmtIncomingPC,	//@Fc, SPA: 484, SpellEffect::Fc_Spell_Damage_Amt_IncomingPC,	On Target, damage taken flat amt, base: amt
+	focusFcCastSpellOnLand,				//@Fc, SPA: 481, SpellEffect::Fc_Cast_Spell_On_Land,			On Target, cast spell if hit by spell, base: chance pct, limit: spellid
+	focusFcHealAmtIncoming,				//@Fc, SPA: 394, SpellEffect::FcHealAmtIncoming,				On Target, heal received mod flat amt, base: amt
+	focusFcBaseEffects,					//@Fc, SPA: 413, SpellEffect::FcBaseEffects,					On Caster, base spell effectiveness mod pct, base: pct
+	focusIncreaseNumHits,				//@Fc, SPA: 421, SpellEffect::FcIncreaseNumHits,				On Caster, numhits mod flat amt, base: amt
+	focusFcLimitUse,					//@Fc, SPA: 420, SpellEffect::FcLimitUse,						On Caster, numhits mod pct, base: pct
+	focusFcMute,						//@Fc, SPA: 357, SpellEffect::FcMute,							On Caster, prevents spell casting, base: chance pct
+	focusFcTimerRefresh,				//@Fc, SPA: 389, SpellEffect::FcTimerRefresh,					On Caster, reset spell recast timer, base: 1
+	focusFcTimerLockout,				//@Fc, SPA: 390, SpellEffect::FcTimerLockout,					On Caster, set a spell to be on recast timer, base: recast duration milliseconds
+	focusFcStunTimeMod,					//@Fc, SPA: 133, SpellEffect::FcStunTimeMod,					On Caster, stun time mod pct, base: chance pct
+	focusFcResistIncoming,				//@Fc, SPA: 510, SpellEffect::Fc_Resist_Incoming,				On Target, resist modifier, base: amt
+	focusFcAmplifyMod,					//@Fc, SPA: 507, SpellEffect::Fc_Amplify_Mod,					On Caster, damage-heal-dot mod pct, base: pct
+	focusFcAmplifyAmt,					//@Fc, SPA: 508, SpellEffect::Fc_Amplify_Amt,					On Caster, damage-heal-dot mod flat amt, base: amt
+	focusFcCastTimeMod2,				//@Fc, SPA: 500, SpellEffect::Fc_CastTimeMod2,				On Caster, cast time mod pct, base: pct
+	focusFcCastTimeAmt,					//@Fc, SPA: 501, SpellEffect::Fc_CastTimeAmt,					On Caster, cast time mod flat amt, base: milliseconds
+	focusFcHealPctCritIncoming,			//@Fc, SPA: 395, SpellEffect::FcHealPctCritIncoming,			On Target, spell healing mod pct, base: pct
+	focusFcHealAmt,						//@Fc, SPA: 392, SpellEffect::FcHealAmt,						On Caster, spell healing mod flat amt, base: amt
+	focusFcHealAmtCrit,					//@Fc, SPA: 396, SpellEffect::FcHealAmtCrit,					On Caster, spell healing mod flat amt, base: amt
 } focusType; //Any new FocusType needs to be added to the Mob::IsFocus function
 #define HIGHEST_FOCUS	focusFcHealAmtCrit //Should always be last focusType in enum
 

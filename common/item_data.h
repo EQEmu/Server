@@ -438,7 +438,7 @@ namespace EQ
 		//uint32	Unk054 {};
 		int16	MaxCharges {};		// Maximum charges items can hold: -1 if not a chargeable item
 		uint8	ItemType {};		// Item Type/Skill (itemClass* from above)
-		int32	SubType {};		// Some items have sub types that can be used for other things (unbreakable fishing poles, SE_FFItemClass)
+		int32	SubType {};		// Some items have sub types that can be used for other things (unbreakable fishing poles, SpellEffect::FFItemClass)
 		uint8	Material {};		// Item material type
 		uint32	HerosForgeModel {};// Hero's Forge Armor Model Type (2-13?)
 		float	SellRate {};		// Sell rate

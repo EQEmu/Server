@@ -3009,12 +3009,12 @@ void ZoneDatabase::LoadBuffs(Client *client)
 			continue;
 		}
 
-		if (IsEffectInSpell(buffs[slot_id].spellid, SE_Charm)) {
+		if (IsEffectInSpell(buffs[slot_id].spellid, SpellEffect::Charm)) {
 			buffs[slot_id].spellid = SPELL_UNKNOWN;
 			break;
 		}
 
-		if (IsEffectInSpell(buffs[slot_id].spellid, SE_Illusion)) {
+		if (IsEffectInSpell(buffs[slot_id].spellid, SpellEffect::Illusion)) {
 			if (buffs[slot_id].persistant_buff) {
 				break;
 			}

@@ -263,7 +263,7 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 	chance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
 
 	if (spellbonuses.CriticalDotDecay)
-		chance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
+		chance += GetDecayEffectValue(spell_id, SpellEffect::CriticalDotDecay);
 
 	if (spells[spell_id].override_crit_chance > 0 && chance > spells[spell_id].override_crit_chance)
 		chance = spells[spell_id].override_crit_chance;
@@ -429,14 +429,14 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		critical_chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
 
 		if (spellbonuses.CriticalHealDecay) {
-			critical_chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+			critical_chance += GetDecayEffectValue(spell_id, SpellEffect::CriticalHealDecay);
 		}
 	}
 	else {
 		critical_chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
 
 		if (spellbonuses.CriticalRegenDecay) {
-			critical_chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
+			critical_chance += GetDecayEffectValue(spell_id, SpellEffect::CriticalRegenDecay);
 		}
 	}
 
@@ -596,7 +596,7 @@ int32 Mob::GetActSpellCost(uint16 spell_id, int32 cost)
 			if (buffs[buffSlot].spellid == 0 || buffs[buffSlot].spellid >= SPDAT_RECORDS)
 				continue;
 
-			if(IsEffectInSpell(buffs[buffSlot].spellid, SE_ReduceManaCost)) {
+			if(IsEffectInSpell(buffs[buffSlot].spellid, SpellEffect::ReduceManaCost)) {
 				if(CalcFocusEffect(focusManaCost, buffs[buffSlot].spellid, spell_id) == 100)
 					cost = 1;
 			}
@@ -1105,8 +1105,8 @@ void EntityList::AESpell(
 		IsTargetableAESpell(spell_id) &&
 		is_detrimental_spell &&
 		!is_npc &&
-		!IsEffectInSpell(spell_id, SE_Lull) &&
-		!IsEffectInSpell(spell_id, SE_Mez)
+		!IsEffectInSpell(spell_id, SpellEffect::Lull) &&
+		!IsEffectInSpell(spell_id, SpellEffect::Mez)
 	) {
 		max_targets_allowed = RuleI(Spells, TargetedAOEMaxTargets);
 	} else if (

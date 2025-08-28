@@ -693,7 +693,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 	}
 
 	regen += aabonuses.ManaRegen;
-	// add in + 1 bonus for SE_CompleteHeal, but we don't do anything for it yet?
+	// add in + 1 bonus for SpellEffect::CompleteHeal, but we don't do anything for it yet?
 
 	int item_bonus = itembonuses.ManaRegen; // this is capped already
 	item_bonus += itembonuses.heroic_mana_regen;
@@ -1482,24 +1482,24 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		Bard Spell Effects
 
 		Mod uses the highest bonus from either of these for each instrument
-		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline)
-		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
+		SPA 179 SpellEffect::AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline)
+		SPA 260 SpellEffect::AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
 			-Example usage: From AA a value of 4 = 40%
 
-		SPA 118 SE_Amplification is a stackable singing mod, on live it exists as both spell and AA bonus (stackable)
+		SPA 118 SpellEffect::Amplification is a stackable singing mod, on live it exists as both spell and AA bonus (stackable)
 			- Live Behavior: Amplifcation can be modified by singing mods and amplification itself, thus on the second cast of Amplification you will recieve
 			  the mod from the first cast, this continues until you reach the song mod cap.
 
-		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
-		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
+		SPA 261 SpellEffect::SongModCap raises song focus cap (No longer used on live)
+		SPA 270 SpellEffect::BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
 
-		SPA 413 SE_FcBaseEffects focus effect that replaced item instrument mods
+		SPA 413 SpellEffect::FcBaseEffects focus effect that replaced item instrument mods
 
 		Issues 10-15-21:
 		Bonuses are not applied, unless song is stopped and restarted due to pulse keeping it continues. -> Need to recode songs to recast when duration ends.
 
 		Formula Live Bards:
-		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SE_FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
+		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SpellEffect::FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
 
 		TODO: Spell Table Fields that need to be implemented
 		Field 225	//float base_effects_focus_slope;  // -- BASE_EFFECTS_FOCUS_SLOPE
@@ -1567,7 +1567,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		else
 			effectmod = spellbonuses.singingMod;
 		if (IsBardSong(spell_id))
-			effectmod += aabonuses.singingMod + (spellbonuses.Amplification + itembonuses.Amplification + aabonuses.Amplification); //SPA 118 SE_Amplification
+			effectmod += aabonuses.singingMod + (spellbonuses.Amplification + itembonuses.Amplification + aabonuses.Amplification); //SPA 118 SpellEffect::Amplification
 		break;
 	default:
 		effectmod = 10;
@@ -1584,7 +1584,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 
 	if (effectmodcap) {
 
-		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap (not used on live)
+		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SpellEffect::SongModCap (not used on live)
 
 		//Incase a negative modifier is used.
 		if (effectmodcap <= 0) {
