@@ -51,6 +51,7 @@
 #include "repositories/inventory_repository.h"
 #include "repositories/books_repository.h"
 #include "repositories/sharedbank_repository.h"
+#include "repositories/character_inspect_messages_repository.h"
 
 namespace ItemField
 {
@@ -1906,18 +1907,29 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 	LoadDamageShieldTypes(sp, max_spells);
 }
 
-void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
-	const std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
-	auto results = QueryDatabase(query);
-	memset(message, '\0', sizeof(InspectMessage_Struct));
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		memcpy(message, row[0], sizeof(InspectMessage_Struct));
+void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* s)
+{
+	const auto& e = CharacterInspectMessagesRepository::FindOne(*this, character_id);
+
+	memset(s, '\0', sizeof(InspectMessage_Struct));
+
+	if (!e.id) {
+		return;
 	}
+
+	memcpy(s, e.inspect_message.c_str(), sizeof(InspectMessage_Struct));
 }
 
-void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
-	const std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, Strings::Escape(message->text).c_str());
-	auto results = QueryDatabase(query);
+void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* s)
+{
+	auto e = CharacterInspectMessagesRepository::NewEntity();
+
+	e.id              = character_id;
+	e.inspect_message = s->text;
+
+	if (!CharacterInspectMessagesRepository::ReplaceOne(*this, e)) {
+		LogError("Failed to save character inspect message of [{}] for character_id [{}]", s->text, character_id);
+	}
 }
 
 uint32 SharedDatabase::GetSpellsCount()
