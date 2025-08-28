@@ -1241,12 +1241,12 @@ float Lua_Mob::GetAssistRange() {
 	return self->GetAssistRange();
 }
 
-void Lua_Mob::SetPetOrder(int order) {
+void Lua_Mob::SetPetOrder(uint8 pet_order) {
 	Lua_Safe_Call_Void();
-	self->SetPetOrder(static_cast<Mob::eStandingPetOrder>(order));
+	self->SetPetOrder(pet_order);
 }
 
-int Lua_Mob::GetPetOrder() {
+uint8 Lua_Mob::GetPetOrder() {
 	Lua_Safe_Call_Int();
 	return self->GetPetOrder();
 }
@@ -3482,6 +3482,54 @@ void Lua_Mob::BuffFadeSongs()
 	self->BuffFadeSongs();
 }
 
+luabind::object Lua_Mob::GetPausedTimers(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = quest_manager.GetPausedTimers(self);
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+luabind::object Lua_Mob::GetTimers(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = quest_manager.GetTimers(self);
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+uint8 Lua_Mob::GetPetType()
+{
+	Lua_Safe_Call_Int();
+	return self->GetPetType();
+}
+
+std::string Lua_Mob::GetPetTypeName()
+{
+	Lua_Safe_Call_String();
+	return PetType::GetName(self->GetPetType());
+}
+
+void Lua_Mob::SetPetType(uint8 pet_type)
+{
+	Lua_Safe_Call_Void();
+	self->SetPetType(pet_type);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3822,8 +3870,11 @@ luabind::scope lua_register_mob() {
 	.def("GetOwner", &Lua_Mob::GetOwner)
 	.def("GetOwnerID", &Lua_Mob::GetOwnerID)
 	.def("GetPR", &Lua_Mob::GetPR)
+	.def("GetPausedTimers", &Lua_Mob::GetPausedTimers)
 	.def("GetPet", &Lua_Mob::GetPet)
-	.def("GetPetOrder", (int(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
+	.def("GetPetOrder", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
+	.def("GetPetType", &Lua_Mob::GetPetType)
+	.def("GetPetTypeName", &Lua_Mob::GetPetTypeName)
 	.def("GetPhR", &Lua_Mob::GetPhR)
 	.def("GetRace", &Lua_Mob::GetRace)
 	.def("GetRaceName", &Lua_Mob::GetRaceName)
@@ -3847,6 +3898,7 @@ luabind::scope lua_register_mob() {
 	.def("GetTarget", &Lua_Mob::GetTarget)
 	.def("GetTexture", &Lua_Mob::GetTexture)
 	.def("GetTimerDurationMS", &Lua_Mob::GetTimerDurationMS)
+	.def("GetTimers", &Lua_Mob::GetTimers)
 	.def("GetUltimateOwner", &Lua_Mob::GetUltimateOwner)
 	.def("GetWIS", &Lua_Mob::GetWIS)
 	.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
@@ -3908,7 +3960,7 @@ luabind::scope lua_register_mob() {
 	.def("IsPausedTimer", &Lua_Mob::IsPausedTimer)
 	.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
 	.def("IsPetOwnerBot", &Lua_Mob::IsPetOwnerBot)
-	.def("IsPetOwnerClient", &Lua_Mob::IsPetOwnerClient)	
+	.def("IsPetOwnerClient", &Lua_Mob::IsPetOwnerClient)
 	.def("IsPetOwnerNPC", &Lua_Mob::IsPetOwnerNPC)
 	.def("IsPetOwnerOfClientBot", &Lua_Mob::IsPetOwnerOfClientBot)
 	.def("IsPureMeleeClass", &Lua_Mob::IsPureMeleeClass)
@@ -4017,7 +4069,8 @@ luabind::scope lua_register_mob() {
 	.def("SetMana", &Lua_Mob::SetMana)
 	.def("SetOOCRegen", (void(Lua_Mob::*)(int64))&Lua_Mob::SetOOCRegen)
 	.def("SetPet", &Lua_Mob::SetPet)
-	.def("SetPetOrder", (void(Lua_Mob::*)(int))&Lua_Mob::SetPetOrder)
+	.def("SetPetOrder", (void(Lua_Mob::*)(uint8))&Lua_Mob::SetPetOrder)
+	.def("SetPetType", &Lua_Mob::SetPetType)
 	.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot)
 	.def("SetRace", (void(Lua_Mob::*)(uint16))&Lua_Mob::SetRace)
 	.def("SetRunning", (void(Lua_Mob::*)(bool))&Lua_Mob::SetRunning)

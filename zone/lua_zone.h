@@ -147,6 +147,19 @@ public:
 	luabind::object GetVariables(lua_State* L);
 	void SetVariable(const std::string& variable_name, const std::string& variable_value);
 	bool VariableExists(const std::string& variable_name);
+	uint32 GetTimerDuration(std::string name);
+	uint32 GetTimerRemainingTime(std::string name);
+	bool HasTimer(std::string name);
+	bool IsPausedTimer(std::string name);
+	void PauseTimer(std::string name);
+	void ResumeTimer(std::string name);
+	void SetTimer(std::string name, uint32 duration);
+	void StopTimer(std::string name);
+	void StopAllTimers();
+	void Signal(int signal_id);
+	void SendPayload(int payload_id, std::string payload_value);
+	luabind::object GetPausedTimers(lua_State* L);
+	luabind::object GetTimers(lua_State* L);
 
 	// data buckets
 	void SetBucket(const std::string& bucket_name, const std::string& bucket_value);

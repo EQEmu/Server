@@ -33,15 +33,17 @@ namespace EQ
 	class ItemInstance;
 }
 
+struct RunningQuest {
+	Mob* owner = nullptr;
+	Client* initiator = nullptr;
+	EQ::ItemInstance* questitem = nullptr;
+	const SPDat_Spell_Struct* questspell = nullptr;
+	bool depop_npc = false;
+	std::string encounter = "";
+	Zone* zone = nullptr;
+};
+
 class QuestManager {
-	struct running_quest {
-		Mob *owner;
-		Client *initiator;
-		EQ::ItemInstance* questitem;
-		const SPDat_Spell_Struct* questspell;
-		bool depop_npc;
-		std::string encounter;
-	};
 
 	struct PausedTimer {
 		Mob*        owner;
@@ -49,12 +51,13 @@ class QuestManager {
 		uint32      time;
 	};
 public:
+
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQ::ItemInstance* _questitem = nullptr, const SPDat_Spell_Struct* _questspell = nullptr, std::string encounter = "");
+	void StartQuest(const RunningQuest& q);
 	void EndQuest();
-	bool QuestsRunning() { return !quests_running_.empty(); }
+	bool QuestsRunning() { return !m_running_quests.empty(); }
 
 	void Process();
 
@@ -361,6 +364,8 @@ public:
 	bool SetAutoLoginCharacterNameByAccountID(uint32 account_id, const std::string& character_name);
 	void SpawnCircle(uint32 npc_id, glm::vec4 position, float radius, uint32 points);
 	void SpawnGrid(uint32 npc_id, glm::vec4 position, float spacing, uint32 spawn_count);
+	std::vector<std::string> GetPausedTimers(Mob* m);
+	std::vector<std::string> GetTimers(Mob* m);
 
 	Bot *GetBot() const;
 	Client *GetInitiator() const;
@@ -381,7 +386,7 @@ public:
 	bool handin(std::map<std::string, uint32> required);
 
 private:
-	std::stack<running_quest> quests_running_;
+	std::stack<RunningQuest> m_running_quests;
 
 	bool HaveProximitySays;
 

@@ -772,6 +772,102 @@ bool Lua_Zone::VariableExists(const std::string& variable_name)
 	return self->VariableExists(variable_name);
 }
 
+uint32 Lua_Zone::GetTimerDuration(std::string name)
+{
+	Lua_Safe_Call_Int();
+	return self->GetTimerDuration(name);
+}
+
+uint32 Lua_Zone::GetTimerRemainingTime(std::string name)
+{
+	Lua_Safe_Call_Int();
+	return self->GetTimerRemainingTime(name);
+}
+
+bool Lua_Zone::HasTimer(std::string name)
+{
+	Lua_Safe_Call_Bool();
+	return self->HasTimer(name);
+}
+
+bool Lua_Zone::IsPausedTimer(std::string name)
+{
+	Lua_Safe_Call_Bool();
+	return self->IsPausedTimer(name);
+}
+
+void Lua_Zone::PauseTimer(std::string name)
+{
+	Lua_Safe_Call_Void();
+	self->PauseTimer(name);
+}
+
+void Lua_Zone::ResumeTimer(std::string name)
+{
+	Lua_Safe_Call_Void();
+	self->ResumeTimer(name);
+}
+
+void Lua_Zone::SetTimer(std::string name, uint32 duration)
+{
+	Lua_Safe_Call_Void();
+	self->SetTimer(name, duration);
+}
+
+void Lua_Zone::StopTimer(std::string name)
+{
+	Lua_Safe_Call_Void();
+	self->StopTimer(name);
+}
+
+void Lua_Zone::StopAllTimers()
+{
+	Lua_Safe_Call_Void();
+	self->StopAllTimers();
+}
+
+void Lua_Zone::SendPayload(int payload_id, std::string payload_value)
+{
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id, payload_value);
+}
+
+void Lua_Zone::Signal(int signal_id)
+{
+	Lua_Safe_Call_Void();
+	self->Signal(signal_id);
+}
+
+luabind::object Lua_Zone::GetPausedTimers(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetPausedTimers();
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+luabind::object Lua_Zone::GetTimers(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetTimers();
+		int i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
 luabind::scope lua_register_zone() {
 	return luabind::class_<Lua_Zone>("Zones")
 	.def(luabind::constructor<>())
@@ -840,6 +936,7 @@ luabind::scope lua_register_zone() {
 	.def("GetMinimumStatus", &Lua_Zone::GetMinimumStatus)
 	.def("GetNote", &Lua_Zone::GetNote)
 	.def("GetNPCMaximumAggroDistance", &Lua_Zone::GetNPCMaximumAggroDistance)
+	.def("GetPausedTimers", &Lua_Zone::GetPausedTimers)
 	.def("GetPEQZone", &Lua_Zone::GetPEQZone)
 	.def("GetRainChance", (int(Lua_Zone::*)(void))&Lua_Zone::GetRainChance)
 	.def("GetRainChance", (int(Lua_Zone::*)(uint8))&Lua_Zone::GetRainChance)
@@ -861,6 +958,9 @@ luabind::scope lua_register_zone() {
 	.def("GetSnowDuration", (int(Lua_Zone::*)(uint8))&Lua_Zone::GetSnowDuration)
 	.def("GetTimeType", &Lua_Zone::GetTimeType)
 	.def("GetTimeZone", &Lua_Zone::GetTimeZone)
+	.def("GetTimerDuration", &Lua_Zone::GetTimerDuration)
+	.def("GetTimerRemainingTime", &Lua_Zone::GetTimerRemainingTime)
+	.def("GetTimers", &Lua_Zone::GetTimers)
 	.def("GetZoneDescription", &Lua_Zone::GetZoneDescription)
 	.def("GetZoneID", &Lua_Zone::GetZoneID)
 	.def("GetZoneType", &Lua_Zone::GetZoneType)
@@ -875,10 +975,12 @@ luabind::scope lua_register_zone() {
 	.def("HasMap", &Lua_Zone::HasMap)
 	.def("HasWaterMap", &Lua_Zone::HasWaterMap)
 	.def("HasWeather", &Lua_Zone::HasWeather)
+	.def("HasTimer", &Lua_Zone::HasTimer)
 	.def("IsCity", &Lua_Zone::IsCity)
 	.def("IsHotzone", &Lua_Zone::IsHotzone)
 	.def("IsInstancePersistent", &Lua_Zone::IsInstancePersistent)
 	.def("IsIdleWhenEmpty", &Lua_Zone::IsIdleWhenEmpty)
+	.def("IsPausedTimer", &Lua_Zone::IsPausedTimer)
 	.def("IsPVPZone", &Lua_Zone::IsPVPZone)
 	.def("IsRaining", &Lua_Zone::IsRaining)
 	.def("IsSnowing", &Lua_Zone::IsSnowing)
@@ -887,8 +989,11 @@ luabind::scope lua_register_zone() {
 	.def("IsStaticZone", &Lua_Zone::IsStaticZone)
 	.def("IsUCSServerAvailable", &Lua_Zone::IsUCSServerAvailable)
 	.def("IsWaterZone", &Lua_Zone::IsWaterZone)
+	.def("PauseTimer", &Lua_Zone::PauseTimer)
 	.def("Repop", (void(Lua_Zone::*)(void))&Lua_Zone::Repop)
 	.def("Repop", (void(Lua_Zone::*)(bool))&Lua_Zone::Repop)
+	.def("ResumeTimer", &Lua_Zone::ResumeTimer)
+	.def("SendPayload", &Lua_Zone::SendPayload)
 	.def("SetAAEXPModifier", &Lua_Zone::SetAAEXPModifier)
 	.def("SetAAEXPModifierByCharacterID", &Lua_Zone::SetAAEXPModifierByCharacterID)
 	.def("SetBucket", (void(Lua_Zone::*)(const std::string&,const std::string&))&Lua_Zone::SetBucket)
@@ -898,8 +1003,12 @@ luabind::scope lua_register_zone() {
 	.def("SetInstanceTimer", &Lua_Zone::SetInstanceTimer)
 	.def("SetInstanceTimeRemaining", &Lua_Zone::SetInstanceTimeRemaining)
 	.def("SetIsHotzone", &Lua_Zone::SetIsHotzone)
+	.def("SetTimer", &Lua_Zone::SetTimer)
 	.def("SetVariable", &Lua_Zone::SetVariable)
 	.def("ShowZoneGlobalLoot", &Lua_Zone::ShowZoneGlobalLoot)
+	.def("Signal", &Lua_Zone::Signal)
+	.def("StopTimer", &Lua_Zone::StopTimer)
+	.def("StopAllTimers", &Lua_Zone::StopAllTimers)
 	.def("VariableExists", &Lua_Zone::VariableExists);
 }
 

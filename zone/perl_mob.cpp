@@ -1114,9 +1114,14 @@ uint16 Perl_Mob_GetOwnerID(Mob* self) // @categories Script Utility, Pet
 	return self->GetOwnerID();
 }
 
-int Perl_Mob_GetPetType(Mob* self) // @categories Script Utility, Pet
+uint8 Perl_Mob_GetPetType(Mob* self) // @categories Script Utility, Pet
 {
 	return self->GetPetType();
+}
+
+std::string Perl_Mob_GetPetTypeName(Mob* self) // @categories Script Utility, Pet
+{
+	return PetType::GetName(self->GetPetType());
 }
 
 int Perl_Mob_GetBodyType(Mob* self) // @categories Stats and Attributes
@@ -1254,12 +1259,12 @@ float Perl_Mob_GetAssistRange(Mob* self) // @categories Stats and Attributes, Ha
 	return self->GetAssistRange();
 }
 
-void Perl_Mob_SetPetOrder(Mob* self, int order) // @categories Pet
+void Perl_Mob_SetPetOrder(Mob* self, uint8 pet_order) // @categories Pet
 {
-	self->SetPetOrder(static_cast<Mob::eStandingPetOrder>(order));
+	self->SetPetOrder(pet_order);
 }
 
-int Perl_Mob_GetPetOrder(Mob* self) // @categories Script Utility, Pet
+uint8 Perl_Mob_GetPetOrder(Mob* self) // @categories Script Utility, Pet
 {
 	return self->GetPetOrder();
 }
@@ -3573,6 +3578,35 @@ void Perl_Mob_BuffFadeSongs(Mob* self)
 	self->BuffFadeSongs();
 }
 
+perl::array Perl_Mob_GetPausedTimers(Mob* self)
+{
+	perl::array a;
+
+	const auto& l = quest_manager.GetPausedTimers(self);
+	for (const auto& v : l) {
+		a.push_back(v);
+	}
+
+	return a;
+}
+
+perl::array Perl_Mob_GetTimers(Mob* self)
+{
+	perl::array a;
+
+	const auto& l = quest_manager.GetTimers(self);
+	for (const auto& v : l) {
+		a.push_back(v);
+	}
+
+	return a;
+}
+
+void Perl_Mob_SetPetType(Mob* self, uint8 pet_type)
+{
+	self->SetPetType(pet_type);
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3897,10 +3931,12 @@ void perl_register_mob()
 	package.add("GetOwner", &Perl_Mob_GetOwner);
 	package.add("GetOwnerID", &Perl_Mob_GetOwnerID);
 	package.add("GetPR", &Perl_Mob_GetPR);
+	package.add("GetPausedTimers", &Perl_Mob_GetPausedTimers);
 	package.add("GetPet", &Perl_Mob_GetPet);
 	package.add("GetPetID", &Perl_Mob_GetPetID);
 	package.add("GetPetOrder", &Perl_Mob_GetPetOrder);
 	package.add("GetPetType", &Perl_Mob_GetPetType);
+	package.add("GetPetTypeName", &Perl_Mob_GetPetTypeName);
 	package.add("GetPhR", &Perl_Mob_GetPhR);
 	package.add("GetRace", &Perl_Mob_GetRace);
 	package.add("GetRaceName", &Perl_Mob_GetRaceName);
@@ -3927,6 +3963,7 @@ void perl_register_mob()
 	package.add("GetTarget", &Perl_Mob_GetTarget);
 	package.add("GetTexture", &Perl_Mob_GetTexture);
 	package.add("GetTimerDurationMS", &Perl_Mob_GetTimerDurationMS);
+	package.add("GetTimers", &Perl_Mob_GetTimers);
 	package.add("GetUltimateOwner", &Perl_Mob_GetUltimateOwner);
 	package.add("GetWIS", &Perl_Mob_GetWIS);
 	package.add("GetWalkspeed", &Perl_Mob_GetWalkspeed);
@@ -4161,6 +4198,7 @@ void perl_register_mob()
 	package.add("SetPet", &Perl_Mob_SetPet);
 	package.add("SetPetID", &Perl_Mob_SetPetID);
 	package.add("SetPetOrder", &Perl_Mob_SetPetOrder);
+	package.add("SetPetType", &Perl_Mob_SetPetType);
 	package.add("SetRace", &Perl_Mob_SetRace);
 	package.add("SetRunAnimSpeed", &Perl_Mob_SetRunAnimSpeed);
 	package.add("SetRunning", &Perl_Mob_SetRunning);

@@ -1414,11 +1414,19 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Task {} | Title: {} ID: {} Type: {}",
+			"Task {} | Title: {} ID: {} Type: {} | {}",
 			task->slot,
 			task_data->title,
 			task->task_id,
-			Tasks::GetTaskTypeDescription(task_data->type)
+			Tasks::GetTaskTypeDescription(task_data->type),
+			Saylink::Create(
+				fmt::format(
+					"#task complete {}",
+					task->task_id
+				),
+				false,
+				"Complete"
+			)
 		).c_str()
 	);
 	c->Message(Chat::White, "------------------------------------------------");

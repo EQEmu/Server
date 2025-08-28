@@ -401,8 +401,8 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	*/
 
 	/* Order according to current (SoF+?) dev quotes:
-	* https://forums.daybreakgames.com/eq/index.php?threads/test-update-06-10-15.223510/page-2#post-3261772
-	* https://forums.daybreakgames.com/eq/index.php?threads/test-update-06-10-15.223510/page-2#post-3268227
+	* https://web.archive.org/web/20250816014133/https://forums.everquest.com/index.php?threads/test-update-06-10-15.223510/page-2#post-3261772
+	* https://web.archive.org/web/20250816014133/https://forums.everquest.com/index.php?threads/test-update-06-10-15.223510/page-2#post-3268227
 	* Riposte 50, hDEX, must have weapon/fists, doesn't work on archery/throwing
 	* Block 25, hDEX, works on archery/throwing, behind block done here if back to attacker base1 is chance
 	* Parry 45, hDEX, doesn't work on throwing/archery, must be facing target
@@ -461,7 +461,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	}
 
 	/* Heroic Strikethrough Implementation per Dev Quotes (2018):
-	* https://forums.daybreakgames.com/eq/index.php?threads/illusions-benefit-neza-10-dodge.246757/#post-3622670
+	* https://web.archive.org/web/20250816014810/https://forums.everquest.com/index.php?threads/illusions-benefit-neza-10-dodge.246757/#post-3622670
 	* Step1 = HeroicStrikethrough(NPC)
 	* Step2 = HeroicAgility / 25
 	* Step3 = MIN( Step1, Step2 )
@@ -3039,6 +3039,25 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		DispatchZoneControllerEvent(EVENT_DEATH_ZONE, owner_or_self, export_string, 0, &args);
 	}
 
+	if (parse->ZoneHasQuestSub(EVENT_DEATH_ZONE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {} {} {} {} {} {}",
+			killer_mob ? killer_mob->GetID() : 0,
+			damage,
+			spell,
+			static_cast<int>(attack_skill),
+			entity_id,
+			m_combat_record.GetStartTime(),
+			m_combat_record.GetEndTime(),
+			m_combat_record.GetDamageReceived(),
+			m_combat_record.GetHealingReceived()
+		);
+
+		std::vector<std::any> args = { corpse, this, owner_or_self };
+
+		parse->EventZone(EVENT_DEATH_ZONE, zone, export_string, 0, &args);
+	}
+
 	return true;
 }
 
@@ -3395,7 +3414,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 uint8 Mob::GetWeaponDamageBonus(const EQ::ItemData *weapon, bool offhand)
 {
 	// dev quote with old and new formulas
-	// https://forums.daybreakgames.com/eq/index.php?threads/test-update-09-17-15.226618/page-5#post-3326194
+	// https://web.archive.org/web/20250816013618/https://forums.everquest.com/index.php?threads/test-update-09-17-15.226618/page-5#post-3326194
 	//
 	// We assume that the level check is done before calling this function and sinister strikes is checked before
 	// calling for offhand DB
@@ -4094,11 +4113,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			if (IsPet()) {
 				Mob *owner = GetOwner();
 				if (owner && owner->IsClient()) {
-					if (GetPetOrder() == SPO_Sit) {
+					if (GetPetOrder() == PetOrder::Sit) {
 						SetPetOrder(GetPreviousPetOrder());
 					}
 					// fix GUI sit button to be unpressed and stop sitting regen
-					owner->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					owner->CastToClient()->SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 					SetAppearance(eaStanding);
 				}
 			}
@@ -4128,12 +4147,12 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			if (IsClient() && !pet->IsPetStop()) {
 				// if pet was sitting his new mode is previous setting of
 				// follow or guard after the battle (live verified)
-				if (pet->GetPetOrder() == SPO_Sit) {
+				if (pet->GetPetOrder() == PetOrder::Sit) {
 					pet->SetPetOrder(pet->GetPreviousPetOrder());
 				}
 
 				// fix GUI sit button to be unpressed and stop sitting regen
-				CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+				CastToClient()->SetPetCommandState(PetButton::Sit, PetButtonState::Off);
 				pet->SetAppearance(eaStanding);
 			}
 

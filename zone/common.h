@@ -3,6 +3,7 @@
 
 #include "../common/types.h"
 #include "../common/spdat.h"
+#include "../common/emu_constants.h"
 
 #include <cereal/cereal.hpp>
 
@@ -44,55 +45,6 @@ namespace Archetype {
 #define ZONEPOINT_NOZONE_RANGE 40000.0f
 //Maximum distance from a zone point if zone was specified
 #define ZONEPOINT_ZONE_RANGE 40000.0f
-
-// Defines based on the RoF2 Client
-#define PET_HEALTHREPORT	0	// 0x00 - /pet health or Pet Window
-#define PET_LEADER			1	// 0x01 - /pet leader or Pet Window
-#define PET_ATTACK			2	// 0x02 - /pet attack or Pet Window
-#define PET_QATTACK			3	// 0x03 - /pet qattack or Pet Window
-#define PET_FOLLOWME		4	// 0x04 - /pet follow or Pet Window
-#define PET_GUARDHERE		5	// 0x05 - /pet guard or Pet Window
-#define PET_SIT				6	// 0x06 - /pet sit or Pet Window
-#define PET_SITDOWN			7	// 0x07 - /pet sit on
-#define PET_STANDUP			8	// 0x08 - /pet sit off
-#define PET_STOP			9	// 0x09 - /pet stop or Pet Window - Not implemented
-#define PET_STOP_ON			10	// 0x0a - /pet stop on - Not implemented
-#define PET_STOP_OFF		11	// 0x0b - /pet stop off - Not implemented
-#define PET_TAUNT			12	// 0x0c - /pet taunt or Pet Window
-#define PET_TAUNT_ON		13	// 0x0d - /pet taunt on
-#define PET_TAUNT_OFF		14	// 0x0e - /pet taunt off
-#define PET_HOLD			15	// 0x0f - /pet hold or Pet Window, won't add to hate list unless attacking
-#define PET_HOLD_ON			16	// 0x10 - /pet hold on
-#define PET_HOLD_OFF		17	// 0x11 - /pet hold off
-#define PET_GHOLD			18	// 0x12 - /pet ghold, will never add to hate list unless told to
-#define PET_GHOLD_ON		19	// 0x13 - /pet ghold on
-#define PET_GHOLD_OFF		20	// 0x14 - /pet ghold off
-#define PET_SPELLHOLD		21	// 0x15 - /pet no cast or /pet spellhold or Pet Window
-#define PET_SPELLHOLD_ON	22	// 0x16 - /pet spellhold on
-#define PET_SPELLHOLD_OFF	23	// 0x17 - /pet spellhold off
-#define PET_FOCUS			24	// 0x18 - /pet focus or Pet Window
-#define PET_FOCUS_ON		25	// 0x19 - /pet focus on
-#define PET_FOCUS_OFF		26	// 0x1a - /pet focus off
-#define PET_FEIGN			27	// 0x1b - /pet feign
-#define PET_BACKOFF			28	// 0x1c - /pet back off
-#define PET_GETLOST			29	// 0x1d - /pet get lost
-#define PET_GUARDME			30	// 0x1e - Same as /pet follow, but different message in older clients - define not from client /pet target in modern clients but doesn't send packet
-#define PET_REGROUP			31	// 0x1f - /pet regroup, acts like classic hold. Stops attack and moves back to guard/you but doesn't clear hate list
-#define PET_REGROUP_ON		32	// 0x20 - /pet regroup on, turns on regroup
-#define PET_REGROUP_OFF		33	// 0x21 - /pet regroup off, turns off regroup
-#define PET_MAXCOMMANDS		PET_REGROUP_OFF + 1
-
-// can change the state of these buttons with a packet
-#define PET_BUTTON_SIT			0
-#define PET_BUTTON_STOP			1
-#define PET_BUTTON_REGROUP		2
-#define PET_BUTTON_FOLLOW		3
-#define PET_BUTTON_GUARD		4
-#define PET_BUTTON_TAUNT		5
-#define PET_BUTTON_HOLD			6
-#define PET_BUTTON_GHOLD		7
-#define PET_BUTTON_FOCUS		8
-#define PET_BUTTON_SPELLHOLD	9
 
 #define AURA_HARDCAP		2
 #define WEAPON_STANCE_TYPE_MAX 2
@@ -617,7 +569,7 @@ struct StatBonuses {
 	uint8	TradeSkillMastery;					// Allow number of tradeskills to exceed 200 skill.
 	int16	NoBreakAESneak;						// Percent value
 	int16	FeignedCastOnChance;				// Percent Value
-	bool	PetCommands[PET_MAXCOMMANDS];		// SPA 267
+	bool	PetCommands[PetCommand::Max];		// SPA 267
 	int	FeignedMinionChance;				// SPA 281 base1 = chance, just like normal FD
 	int	GrantForage; // affects max skill of forage as well as granting non-forage classes forage
 	int aura_slots;
@@ -780,16 +732,6 @@ enum {
 	GridRandomCenterPoint,
 	GridRandomPath
 };
-
-typedef enum {
-	petFamiliar,		//only listens to /pet get lost
-	petAnimation,		//does not listen to any commands
-	petOther,
-	petCharmed,
-	petNPCFollow,
-	petTargetLock,			//remain active as long something is on the hatelist. Don't listen to any commands
-	petNone = 0xFF // not a pet
-} PetType;
 
 typedef enum {
 	SingleTarget,	// causes effect to spell_target

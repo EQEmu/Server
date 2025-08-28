@@ -49,6 +49,7 @@ public:
 		// these are the base definitions for command_subsettings and can be over-ridden by the database
 		std::vector<CommandSubsettingsRepository::CommandSubsettings> static_records = {
 			{.parent_command = "find", .sub_command = "aa", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findaa"},
+			{.parent_command = "find", .sub_command = "account", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findaccount"},
 			{.parent_command = "find", .sub_command = "body_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findbodytype"},
 			{.parent_command = "find", .sub_command = "bug_category", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findbugcategory"},
 			{.parent_command = "find", .sub_command = "character", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcharacter"},
@@ -142,6 +143,7 @@ public:
 			{.parent_command = "show", .sub_command = "hatelist", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "hatelist"},
 			{.parent_command = "show", .sub_command = "inventory", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "peekinv"},
 			{.parent_command = "show", .sub_command = "ip_lookup", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "iplookup"},
+			{.parent_command = "show", .sub_command = "keyring", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showkeyring"},
 			{.parent_command = "show", .sub_command = "line_of_sight", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "checklos"},
 			{.parent_command = "show", .sub_command = "network", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "network"},
 			{.parent_command = "show", .sub_command = "network_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "netstats"},

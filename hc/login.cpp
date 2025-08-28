@@ -26,7 +26,7 @@ LoginConnection::LoginConnection(const std::string &username, const std::string 
 	m_host_port = host_port;
 	m_server = server;
 
-	m_connection_manager.reset(new EQ::Net::DaybreakConnectionManager());
+	m_connection_manager.reset(new EQ::Net::ReliableStreamConnectionManager());
 
 	m_connection_manager->OnNewConnection(std::bind(&LoginConnection::OnNewConnection, this, std::placeholders::_1));
 	m_connection_manager->OnConnectionStateChange(std::bind(&LoginConnection::OnStatusChangeActive, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -39,13 +39,13 @@ LoginConnection::~LoginConnection()
 {
 }
 
-void LoginConnection::OnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
+void LoginConnection::OnNewConnection(std::shared_ptr<EQ::Net::ReliableStreamConnection> connection)
 {
 	m_connection = connection;
 	Log.OutF(Logs::General, Logs::Headless_Client, "Connecting...");
 }
 
-void LoginConnection::OnStatusChangeActive(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
+void LoginConnection::OnStatusChangeActive(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusConnected) {
 		Log.OutF(Logs::General, Logs::Headless_Client, "Login connected.");
@@ -61,7 +61,7 @@ void LoginConnection::OnStatusChangeActive(std::shared_ptr<EQ::Net::DaybreakConn
 	}
 }
 
-void LoginConnection::OnStatusChangeInactive(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
+void LoginConnection::OnStatusChangeInactive(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusDisconnected) {
 		m_key.clear();
@@ -70,7 +70,7 @@ void LoginConnection::OnStatusChangeInactive(std::shared_ptr<EQ::Net::DaybreakCo
 	}
 }
 
-void LoginConnection::OnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p)
+void LoginConnection::OnPacketRecv(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, const EQ::Net::Packet &p)
 {
 	auto opcode = p.GetUInt16(0);
 	switch (opcode) {

@@ -5675,6 +5675,42 @@ bool lua_handin(luabind::adl::object handin_table)
 	return quest_manager.handin(handin_map);
 }
 
+luabind::object lua_get_paused_timers(lua_State* L, Mob* m) {
+	auto t = luabind::newtable(L);
+	auto v = quest_manager.GetPausedTimers(m);
+	int  i = 1;
+
+	for (const auto& e : v) {
+		t[i] = e;
+		i++;
+	}
+
+	return t;
+}
+
+luabind::object lua_get_timers(lua_State* L, Mob* m) {
+	auto t = luabind::newtable(L);
+	auto v = quest_manager.GetTimers(m);
+	int  i = 1;
+
+	for (const auto& e : v) {
+		t[i] = e;
+		i++;
+	}
+
+	return t;
+}
+
+std::string lua_get_pet_command_name(uint8 pet_command)
+{
+	return PetCommand::GetName(pet_command);
+}
+
+std::string lua_get_pet_type_name(uint8 pet_type)
+{
+	return PetType::GetName(pet_type);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6486,6 +6522,10 @@ luabind::scope lua_register_general() {
 		luabind::def("spawn_grid", &lua_spawn_grid),
 		luabind::def("get_zone", &lua_get_zone),
 		luabind::def("handin", &lua_handin),
+		luabind::def("get_paused_timers", &lua_get_paused_timers),
+		luabind::def("get_timers", &lua_get_timers),
+		luabind::def("get_pet_command_name", &lua_get_pet_command_name),
+		luabind::def("get_pet_type_name", &lua_get_pet_type_name),
 		/*
 			Cross Zone
 		*/
@@ -6951,7 +6991,8 @@ luabind::scope lua_register_events() {
 			luabind::value("entity_variable_set", static_cast<int>(EVENT_ENTITY_VARIABLE_SET)),
 			luabind::value("entity_variable_update", static_cast<int>(EVENT_ENTITY_VARIABLE_UPDATE)),
 			luabind::value("aa_loss", static_cast<int>(EVENT_AA_LOSS)),
-			luabind::value("read", static_cast<int>(EVENT_READ_ITEM))
+			luabind::value("read", static_cast<int>(EVENT_READ_ITEM)),
+			luabind::value("pet_command", static_cast<int>(EVENT_PET_COMMAND))
 		)];
 }
 

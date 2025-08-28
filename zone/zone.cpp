@@ -1693,6 +1693,25 @@ bool Zone::Process() {
 		}
 	}
 
+	const bool has_timer_event = parse->ZoneHasQuestSub(EVENT_TIMER);
+
+	for (auto e : zone_timers) {
+		if (e.timer_.Enabled() && e.timer_.Check()) {
+			if (has_timer_event) {
+				parse->EventZone(EVENT_TIMER, this, e.name);
+			}
+		}
+	}
+
+	if (!m_zone_signals.empty()) {
+		int signal_id = m_zone_signals.front();
+		m_zone_signals.pop_front();
+
+		if (parse->ZoneHasQuestSub(EVENT_SIGNAL)) {
+			parse->EventZone(EVENT_SIGNAL, this, std::to_string(signal_id), 0);
+		}
+	}
+
 	mMovementManager->Process();
 
 	return true;
@@ -1934,6 +1953,8 @@ void Zone::Repop(bool is_forced)
 	entity_list.ClearTrapPointers();
 
 	quest_manager.ClearAllTimers();
+
+	StopAllTimers();
 
 	LogInfo("Loading spawn groups");
 	if (!content_db.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
@@ -3299,6 +3320,269 @@ void Zone::ReloadMaps()
 	zonemap  = Map::LoadMapFile(map_name);
 	watermap = WaterMap::LoadWaterMapfile(map_name);
 	pathing  = IPathfinder::Load(map_name);
+}
+
+uint32 Zone::GetTimerDuration(std::string name)
+{
+	if (!IsLoaded() || zone_timers.empty()) {
+		return 0;
+	}
+
+	const auto& e = std::find_if(
+		zone_timers.begin(),
+		zone_timers.end(),
+		[&name](ZoneTimer e) {
+			return e.name == name;
+		}
+	);
+
+	return e != zone_timers.end() ? e->timer_.GetDuration() : 0;
+}
+
+uint32 Zone::GetTimerRemainingTime(std::string name)
+{
+	if (!IsLoaded() || zone_timers.empty()) {
+		return 0;
+	}
+
+	const auto& e = std::find_if(
+		zone_timers.begin(),
+		zone_timers.end(),
+		[&name](ZoneTimer e) {
+			return e.name == name;
+		}
+	);
+
+	return e != zone_timers.end() ? e->timer_.GetRemainingTime() : 0;
+}
+
+bool Zone::HasTimer(std::string name)
+{
+	if (!IsLoaded() || zone_timers.empty()) {
+		return false;
+	}
+
+	const auto& e = std::find_if(
+		zone_timers.begin(),
+		zone_timers.end(),
+		[&name](ZoneTimer e) {
+			return e.name == name;
+		}
+	);
+
+	return e != zone_timers.end();
+}
+
+bool Zone::IsPausedTimer(std::string name)
+{
+	if (!IsLoaded() || paused_zone_timers.empty()) {
+		return false;
+	}
+
+	const auto& e = std::find_if(
+		paused_zone_timers.begin(),
+		paused_zone_timers.end(),
+		[&name](PausedZoneTimer e) {
+			return e.name == name;
+		}
+	);
+
+	return e != paused_zone_timers.end();
+}
+
+void Zone::PauseTimer(std::string name)
+{
+	if (
+		!IsLoaded() ||
+		zone_timers.empty() ||
+		!HasTimer(name) ||
+		IsPausedTimer(name)
+	) {
+		return;
+	}
+
+	uint32 remaining_time = 0;
+
+	const bool has_pause_event = parse->ZoneHasQuestSub(EVENT_TIMER_PAUSE);
+
+	if (!zone_timers.empty()) {
+		for (auto e = zone_timers.begin(); e != zone_timers.end(); e++) {
+			if (e->name == name) {
+				remaining_time = e->timer_.GetRemainingTime();
+
+				zone_timers.erase(e);
+
+				const std::string& export_string = fmt::format(
+					"{} {}",
+					name,
+					remaining_time
+				);
+
+				LogQuests(
+					"Pausing timer [{}] with [{}] ms remaining",
+					name,
+					remaining_time
+				);
+
+				paused_zone_timers.emplace_back(
+					PausedZoneTimer{
+						.name = name,
+						.remaining_time = remaining_time
+					}
+				);
+
+				if (has_pause_event) {
+					parse->EventZone(EVENT_TIMER_PAUSE, this, export_string);
+				}
+
+				break;
+			}
+		}
+	}
+}
+
+void Zone::ResumeTimer(std::string name)
+{
+	if (
+		!IsLoaded() ||
+		paused_zone_timers.empty() ||
+		!IsPausedTimer(name)
+	) {
+		return;
+	}
+
+	uint32 remaining_time = 0;
+
+	if (!paused_zone_timers.empty()) {
+		for (auto e = paused_zone_timers.begin(); e != paused_zone_timers.end(); e++) {
+			if (e->name == name) {
+				remaining_time = e->remaining_time;
+
+				paused_zone_timers.erase(e);
+
+				if (!remaining_time) {
+					LogQuests("Paused timer [{}] not found or has expired.", name);
+					return;
+				}
+
+				const std::string& export_string = fmt::format(
+					"{} {}",
+					name,
+					remaining_time
+				);
+
+				LogQuests(
+					"Creating a new timer and resuming [{}] with [{}] ms remaining",
+					name,
+					remaining_time
+				);
+
+				zone_timers.emplace_back(ZoneTimer(name, remaining_time));
+
+				if (parse->ZoneHasQuestSub(EVENT_TIMER_RESUME)) {
+					parse->EventZone(EVENT_TIMER_RESUME, this, export_string);
+				}
+
+				break;
+			}
+		}
+	}
+}
+
+void Zone::SetTimer(std::string name, uint32 duration)
+{
+	if (!IsLoaded() || HasTimer(name)) {
+		return;
+	}
+
+	zone_timers.emplace_back(ZoneTimer(name, duration));
+
+	if (parse->ZoneHasQuestSub(EVENT_TIMER_START)) {
+		const std::string& export_string = fmt::format("{} {}", name, duration);
+		parse->EventZone(EVENT_TIMER_START, this, export_string);
+	}
+}
+
+void Zone::StopTimer(std::string name)
+{
+	if (
+		!IsLoaded() ||
+		zone_timers.empty() ||
+		!HasTimer(name) ||
+		IsPausedTimer(name)
+	) {
+		return;
+	}
+
+	const bool has_stop_event = parse->ZoneHasQuestSub(EVENT_TIMER_STOP);
+
+	for (auto e = zone_timers.begin(); e != zone_timers.end(); e++) {
+		if (e->name == name) {
+			if (has_stop_event) {
+				parse->EventZone(EVENT_TIMER_STOP, this, name);
+			}
+
+			zone_timers.erase(e);
+			break;
+		}
+	}
+}
+
+void Zone::StopAllTimers()
+{
+	if (!IsLoaded() || zone_timers.empty()) {
+		return;
+	}
+
+	const bool has_stop_event = parse->ZoneHasQuestSub(EVENT_TIMER_STOP);
+
+	for (auto e = zone_timers.begin(); e != zone_timers.end();) {
+		if (has_stop_event) {
+			parse->EventZone(EVENT_TIMER_STOP, this, e->name);
+		}
+
+		e = zone_timers.erase(e);
+	}
+}
+
+void Zone::Signal(int signal_id)
+{
+	m_zone_signals.push_back(signal_id);
+}
+
+void Zone::SendPayload(int payload_id, std::string payload_value)
+{
+	if (parse->ZoneHasQuestSub(EVENT_PAYLOAD)) {
+		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
+
+		parse->EventZone(EVENT_PAYLOAD, this, export_string, 0);
+	}
+}
+
+std::vector<std::string> Zone::GetPausedTimers()
+{
+	std::vector<std::string> v;
+
+	if (!paused_zone_timers.empty()) {
+		for (auto e = paused_zone_timers.begin(); e != paused_zone_timers.end(); e++) {
+			v.emplace_back(e->name);
+		}
+	}
+
+	return v;
+}
+
+std::vector<std::string> Zone::GetTimers()
+{
+	std::vector<std::string> v;
+
+	if (!zone_timers.empty()) {
+		for (auto e = zone_timers.begin(); e != zone_timers.end(); e++) {
+			v.emplace_back(e->name);
+		}
+	}
+
+	return v;
 }
 
 #include "zone_loot.cpp"

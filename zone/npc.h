@@ -552,6 +552,9 @@ public:
 
 	void ScaleNPC(uint8 npc_level, bool always_scale = false, bool override_special_abilities = false);
 
+	uint32 GetNPCTintIndex() { return m_npc_tint_id; }
+	void SetNPCTintIndex(uint32 index);
+
 	void RecalculateSkills();
 	void ReloadSpells();
 

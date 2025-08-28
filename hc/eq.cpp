@@ -33,7 +33,7 @@ EverQuest::EverQuest(const std::string &host, int port, const std::string &user,
 		}
 		else {
 			m_host = addr;
-			m_login_connection_manager.reset(new EQ::Net::DaybreakConnectionManager());
+			m_login_connection_manager.reset(new EQ::Net::ReliableStreamConnectionManager());
 
 			m_login_connection_manager->OnNewConnection(std::bind(&EverQuest::LoginOnNewConnection, this, std::placeholders::_1));
 			m_login_connection_manager->OnConnectionStateChange(std::bind(&EverQuest::LoginOnStatusChangeReconnectEnabled, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -48,13 +48,13 @@ EverQuest::~EverQuest()
 {
 }
 
-void EverQuest::LoginOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
+void EverQuest::LoginOnNewConnection(std::shared_ptr<EQ::Net::ReliableStreamConnection> connection)
 {
 	m_login_connection = connection;
 	Log.OutF(Logs::General, Logs::Headless_Client, "Connecting...");
 }
 
-void EverQuest::LoginOnStatusChangeReconnectEnabled(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
+void EverQuest::LoginOnStatusChangeReconnectEnabled(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusConnected) {
 		Log.OutF(Logs::General, Logs::Headless_Client, "Login connected.");
@@ -70,14 +70,14 @@ void EverQuest::LoginOnStatusChangeReconnectEnabled(std::shared_ptr<EQ::Net::Day
 	}
 }
 
-void EverQuest::LoginOnStatusChangeReconnectDisabled(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
+void EverQuest::LoginOnStatusChangeReconnectDisabled(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusDisconnected) {
 		m_login_connection.reset();
 	}
 }
 
-void EverQuest::LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet & p)
+void EverQuest::LoginOnPacketRecv(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, const EQ::Net::Packet & p)
 {
 	auto opcode = p.GetUInt16(0);
 	switch (opcode) {
@@ -251,20 +251,20 @@ void EverQuest::LoginDisableReconnect()
 
 void EverQuest::ConnectToWorld()
 {
-	m_world_connection_manager.reset(new EQ::Net::DaybreakConnectionManager());
+	m_world_connection_manager.reset(new EQ::Net::ReliableStreamConnectionManager());
 	m_world_connection_manager->OnNewConnection(std::bind(&EverQuest::WorldOnNewConnection, this, std::placeholders::_1));
 	m_world_connection_manager->OnConnectionStateChange(std::bind(&EverQuest::WorldOnStatusChangeReconnectEnabled, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	m_world_connection_manager->OnPacketRecv(std::bind(&EverQuest::WorldOnPacketRecv, this, std::placeholders::_1, std::placeholders::_2));
 	m_world_connection_manager->Connect(m_host, 9000);
 }
 
-void EverQuest::WorldOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
+void EverQuest::WorldOnNewConnection(std::shared_ptr<EQ::Net::ReliableStreamConnection> connection)
 {
 	m_world_connection = connection;
 	Log.OutF(Logs::General, Logs::Headless_Client, "Connecting to world...");
 }
 
-void EverQuest::WorldOnStatusChangeReconnectEnabled(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
+void EverQuest::WorldOnStatusChangeReconnectEnabled(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusConnected) {
 		Log.OutF(Logs::General, Logs::Headless_Client, "World connected.");
@@ -278,14 +278,14 @@ void EverQuest::WorldOnStatusChangeReconnectEnabled(std::shared_ptr<EQ::Net::Day
 	}
 }
 
-void EverQuest::WorldOnStatusChangeReconnectDisabled(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
+void EverQuest::WorldOnStatusChangeReconnectDisabled(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusDisconnected) {
 		m_world_connection.reset();
 	}
 }
 
-void EverQuest::WorldOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet & p)
+void EverQuest::WorldOnPacketRecv(std::shared_ptr<EQ::Net::ReliableStreamConnection> conn, const EQ::Net::Packet & p)
 {
 	auto opcode = p.GetUInt16(0);
 	switch (opcode) {

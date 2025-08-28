@@ -127,6 +127,16 @@ Client* Perl_Group_GetMember(Group* self, int member_index) // @categories Accou
 	return member ? member->CastToClient() : nullptr;
 }
 
+uint8_t Perl_Group_GetMemberRole(Group* self, Mob* member) // @categories Account and Character, Script Utility, Group
+{
+	return self->GetMemberRole(member);
+}
+
+uint8_t Perl_Group_GetMemberRole(Group* self, const char* name) // @categories Account and Character, Script Utility, Group
+{
+	return self->GetMemberRole(name);
+}
+
 bool Perl_Group_DoesAnyMemberHaveExpeditionLockout(Group* self, std::string expedition_name, std::string event_name)
 {
 	return self->AnyMemberHasDzLockout(expedition_name, event_name);
@@ -163,6 +173,8 @@ void perl_register_group()
 	package.add("GetLeaderName", &Perl_Group_GetLeaderName);
 	package.add("GetLowestLevel", &Perl_Group_GetLowestLevel);
 	package.add("GetMember", &Perl_Group_GetMember);
+	package.add("GetMemberRole", (uint8_t(*)(Group*, Mob*))&Perl_Group_GetMemberRole);
+	package.add("GetMemberRole", (uint8_t(*)(Group*, const char*))&Perl_Group_GetMemberRole);
 	package.add("GetTotalGroupDamage", &Perl_Group_GetTotalGroupDamage);
 	package.add("GroupCount", &Perl_Group_GroupCount);
 	package.add("GroupMessage", (void(*)(Group*, Mob*, const char*))&Perl_Group_GroupMessage);

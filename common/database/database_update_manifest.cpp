@@ -7136,6 +7136,42 @@ ADD COLUMN `entity_variables` TEXT DEFAULT NULL AFTER `rezzable`;
 )",
 		.content_schema_update = false
 	},
+	ManifestEntry{
+		.version = 9326,
+		.description = "2025_07_27_add_indexes_npc_spawns_loot.sql",
+		.check = "SHOW INDEX FROM npc_types",
+		.condition = "missing",
+		.match = "idx_npc_types_loottable_id",
+		.sql = R"(
+ALTER TABLE npc_types
+    ADD INDEX idx_npc_types_loottable_id (loottable_id);
+
+ALTER TABLE spawnentry
+    ADD INDEX idx_spawnentry_spawngroup_id (spawngroupID),
+    ADD INDEX idx_spawnentry_npc_id (npcID);
+
+ALTER TABLE lootdrop_entries
+    ADD INDEX idx_lootdrop_entries_lootdrop_id (lootdrop_id),
+    ADD INDEX idx_lootdrop_entries_item_id (item_id);
+
+ALTER TABLE loottable_entries
+    ADD INDEX idx_loottable_entries_lootdrop_id (lootdrop_id),
+    ADD INDEX idx_loottable_entries_loottable_id (loottable_id);
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9327,
+		.description = "2025_08_13_character_stats_record_heal_amount.sql",
+		.check = "SHOW COLUMNS FROM `character_stats_record` LIKE 'heal_amount'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_stats_record`
+ADD COLUMN `heal_amount` int(11) NULL DEFAULT 0 AFTER `spell_damage`;
+)"
+	},
+
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

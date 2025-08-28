@@ -2,8 +2,8 @@
 
 #include "../random.h"
 #include "packet.h"
-#include "daybreak_structs.h"
-#include "daybreak_pooling.h"
+#include "reliable_stream_structs.h"
+#include "reliable_stream_pooling.h"
 #include <uv.h>
 #include <chrono>
 #include <functional>
@@ -16,7 +16,7 @@ namespace EQ
 {
 	namespace Net
 	{
-		enum DaybreakProtocolOpcode
+		enum ReliableStreamProtocolOpcode
 		{
 			OP_Padding = 0x00,
 			OP_SessionRequest = 0x01,
@@ -55,7 +55,7 @@ namespace EQ
 			StatusDisconnected
 		};
 
-		enum DaybreakEncodeType
+		enum ReliableStreamEncodeType
 		{
 			EncodeNone = 0,
 			EncodeCompression = 1,
@@ -72,9 +72,9 @@ namespace EQ
 		typedef std::chrono::steady_clock::time_point Timestamp;
 		typedef std::chrono::steady_clock Clock;
 
-		struct DaybreakConnectionStats
+		struct ReliableStreamConnectionStats
 		{
-			DaybreakConnectionStats() {
+			ReliableStreamConnectionStats() {
 				recv_bytes = 0;
 				sent_bytes = 0;
 				recv_packets = 0;
@@ -134,14 +134,14 @@ namespace EQ
 			uint64_t bytes_before_encode;
 		};
 
-		class DaybreakConnectionManager;
-		class DaybreakConnection;
-		class DaybreakConnection
+		class ReliableStreamConnectionManager;
+		class ReliableStreamConnection;
+		class ReliableStreamConnection
 		{
 		public:
-			DaybreakConnection(DaybreakConnectionManager *owner, const DaybreakConnect &connect, const std::string &endpoint, int port);
-			DaybreakConnection(DaybreakConnectionManager *owner, const std::string &endpoint, int port);
-			~DaybreakConnection();
+			ReliableStreamConnection(ReliableStreamConnectionManager *owner, const ReliableStreamConnect &connect, const std::string &endpoint, int port);
+			ReliableStreamConnection(ReliableStreamConnectionManager *owner, const std::string &endpoint, int port);
+			~ReliableStreamConnection();
 
 			const std::string& RemoteEndpoint() const { return m_endpoint; }
 			int RemotePort() const { return m_port; }
@@ -151,23 +151,23 @@ namespace EQ
 			void QueuePacket(Packet &p, int stream);
 			void QueuePacket(Packet &p, int stream, bool reliable);
 
-			DaybreakConnectionStats GetStats();
+			ReliableStreamConnectionStats GetStats();
 			void ResetStats();
 			size_t GetRollingPing() const { return m_rolling_ping; }
 			DbProtocolStatus GetStatus() const { return m_status; }
 
-			const DaybreakEncodeType* GetEncodePasses() const { return m_encode_passes; }
-			const DaybreakConnectionManager* GetManager() const { return m_owner; }
-			DaybreakConnectionManager* GetManager() { return m_owner; }
+			const ReliableStreamEncodeType* GetEncodePasses() const { return m_encode_passes; }
+			const ReliableStreamConnectionManager* GetManager() const { return m_owner; }
+			ReliableStreamConnectionManager* GetManager() { return m_owner; }
 		private:
-			DaybreakConnectionManager *m_owner;
+			ReliableStreamConnectionManager *m_owner;
 			std::string m_endpoint;
 			int m_port;
 			uint32_t m_connect_code;
 			uint32_t m_encode_key;
 			uint32_t m_max_packet_size;
 			uint32_t m_crc_bytes;
-			DaybreakEncodeType m_encode_passes[2];
+			ReliableStreamEncodeType m_encode_passes[2];
 
 			Timestamp m_last_send;
 			Timestamp m_last_recv;
@@ -176,7 +176,7 @@ namespace EQ
 			std::list<DynamicPacket> m_buffered_packets;
 			size_t m_buffered_packets_length;
 			std::unique_ptr<char[]> m_combined;
-			DaybreakConnectionStats m_stats;
+			ReliableStreamConnectionStats m_stats;
 			Timestamp m_last_session_stats;
 			size_t m_rolling_ping;
 			Timestamp m_close_time;
@@ -188,7 +188,7 @@ namespace EQ
 			bool m_acked_since_last_resend = false;
 			Timestamp m_last_ack;
 
-			struct DaybreakSentPacket
+			struct ReliableStreamSentPacket
 			{
 				DynamicPacket packet;
 				Timestamp last_sent;
@@ -197,9 +197,9 @@ namespace EQ
 				size_t resend_delay;
 			};
 
-			struct DaybreakStream
+			struct ReliableStream
 			{
-				DaybreakStream() {
+				ReliableStream() {
 					sequence_in = 0;
 					sequence_out = 0;
 					fragment_current_bytes = 0;
@@ -214,11 +214,11 @@ namespace EQ
 				uint32_t fragment_current_bytes;
 				uint32_t fragment_total_bytes;
 
-				std::map<uint16_t, DaybreakSentPacket> sent_packets;
+				std::map<uint16_t, ReliableStreamSentPacket> sent_packets;
 			};
 
-			DaybreakStream m_streams[4];
-			std::weak_ptr<DaybreakConnection> m_self;
+			ReliableStream m_streams[4];
+			std::weak_ptr<ReliableStreamConnection> m_self;
 
 			void Process();
 			void ProcessPacket(Packet &p);
@@ -251,12 +251,12 @@ namespace EQ
 			void FlushBuffer();
 			SequenceOrder CompareSequence(uint16_t expected, uint16_t actual) const;
 
-			friend class DaybreakConnectionManager;
+			friend class ReliableStreamConnectionManager;
 		};
 
-		struct DaybreakConnectionManagerOptions
+		struct ReliableStreamConnectionManagerOptions
 		{
-			DaybreakConnectionManagerOptions() {
+			ReliableStreamConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
 				resend_delay_ms = 30;
@@ -268,8 +268,8 @@ namespace EQ
 				connect_stale_ms = 5000;
 				crc_length = 2;
 				max_packet_size = 512;
-				encode_passes[0] = DaybreakEncodeType::EncodeNone;
-				encode_passes[1] = DaybreakEncodeType::EncodeNone;
+				encode_passes[0] = ReliableStreamEncodeType::EncodeNone;
+				encode_passes[1] = ReliableStreamEncodeType::EncodeNone;
 				port = 0;
 				hold_size = 512;
 				hold_length_ms = 50;
@@ -299,28 +299,28 @@ namespace EQ
 			double tic_rate_hertz;
 			size_t resend_timeout;
 			size_t connection_close_time;
-			DaybreakEncodeType encode_passes[2];
+			ReliableStreamEncodeType encode_passes[2];
 			int port;
 			double outgoing_data_rate;
 		};
 
-		class DaybreakConnectionManager
+		class ReliableStreamConnectionManager
 		{
 		public:
-			DaybreakConnectionManager();
-			DaybreakConnectionManager(const DaybreakConnectionManagerOptions &opts);
-			~DaybreakConnectionManager();
+			ReliableStreamConnectionManager();
+			ReliableStreamConnectionManager(const ReliableStreamConnectionManagerOptions &opts);
+			~ReliableStreamConnectionManager();
 
 			void Connect(const std::string &addr, int port);
 			void Process();
 			void UpdateDataBudget();
 			void ProcessResend();
-			void OnNewConnection(std::function<void(std::shared_ptr<DaybreakConnection>)> func) { m_on_new_connection = func; }
-			void OnConnectionStateChange(std::function<void(std::shared_ptr<DaybreakConnection>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }
-			void OnPacketRecv(std::function<void(std::shared_ptr<DaybreakConnection>, const Packet &)> func) { m_on_packet_recv = func; }
+			void OnNewConnection(std::function<void(std::shared_ptr<ReliableStreamConnection>)> func) { m_on_new_connection = func; }
+			void OnConnectionStateChange(std::function<void(std::shared_ptr<ReliableStreamConnection>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }
+			void OnPacketRecv(std::function<void(std::shared_ptr<ReliableStreamConnection>, const Packet &)> func) { m_on_packet_recv = func; }
 			void OnErrorMessage(std::function<void(const std::string&)> func) { m_on_error_message = func; }
 
-			DaybreakConnectionManagerOptions& GetOptions() { return m_options; }
+			ReliableStreamConnectionManagerOptions& GetOptions() { return m_options; }
 		private:
 			void Attach(uv_loop_t *loop);
 			void Detach();
@@ -329,18 +329,18 @@ namespace EQ
 			uv_timer_t m_timer;
 			uv_udp_t m_socket;
 			uv_loop_t *m_attached;
-			DaybreakConnectionManagerOptions m_options;
-			std::function<void(std::shared_ptr<DaybreakConnection>)> m_on_new_connection;
-			std::function<void(std::shared_ptr<DaybreakConnection>, DbProtocolStatus, DbProtocolStatus)> m_on_connection_state_change;
-			std::function<void(std::shared_ptr<DaybreakConnection>, const Packet&)> m_on_packet_recv;
+			ReliableStreamConnectionManagerOptions m_options;
+			std::function<void(std::shared_ptr<ReliableStreamConnection>)> m_on_new_connection;
+			std::function<void(std::shared_ptr<ReliableStreamConnection>, DbProtocolStatus, DbProtocolStatus)> m_on_connection_state_change;
+			std::function<void(std::shared_ptr<ReliableStreamConnection>, const Packet&)> m_on_packet_recv;
 			std::function<void(const std::string&)> m_on_error_message;
-			std::map<std::pair<std::string, int>, std::shared_ptr<DaybreakConnection>> m_connections;
+			std::map<std::pair<std::string, int>, std::shared_ptr<ReliableStreamConnection>> m_connections;
 
 			void ProcessPacket(const std::string &endpoint, int port, const char *data, size_t size);
-			std::shared_ptr<DaybreakConnection> FindConnectionByEndpoint(std::string addr, int port);
+			std::shared_ptr<ReliableStreamConnection> FindConnectionByEndpoint(std::string addr, int port);
 			void SendDisconnect(const std::string &addr, int port);
 
-			friend class DaybreakConnection;
+			friend class ReliableStreamConnection;
 		};
 	}
 }

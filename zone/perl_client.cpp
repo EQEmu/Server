@@ -3328,7 +3328,12 @@ bool Perl_Client_KeyRingClear(Client* self)
 
 void Perl_Client_KeyRingList(Client* self)
 {
-	self->KeyRingList();
+	self->KeyRingList(self);
+}
+
+void Perl_Client_KeyRingList(Client* self, Client* c)
+{
+	self->KeyRingList(c);
 }
 
 bool Perl_Client_KeyRingRemove(Client* self, uint32 item_id)
@@ -3344,6 +3349,18 @@ bool Perl_Client_CompleteTask(Client* self, int task_id)
 bool Perl_Client_UncompleteTask(Client* self, int task_id)
 {
 	return self->UncompleteTask(task_id);
+}
+
+perl::array Perl_Client_GetKeyRing(Client* self)
+{
+	perl::array result;
+	const auto& v = self->GetKeyRing();
+
+	for (int i = 0; i < v.size(); ++i) {
+		result.push_back(v[i]);
+	}
+
+	return result;
 }
 
 void perl_register_client()
@@ -3577,6 +3594,7 @@ void perl_register_client()
 	package.add("GetItemCooldown", &Perl_Client_GetItemCooldown);
 	package.add("GetItemIDAt", &Perl_Client_GetItemIDAt);
 	package.add("GetItemInInventory", &Perl_Client_GetItemInInventory);
+	package.add("GetKeyRing", &Perl_Client_GetKeyRing);
 	package.add("GetLDoNLosses", &Perl_Client_GetLDoNLosses);
 	package.add("GetLDoNLossesTheme", &Perl_Client_GetLDoNLossesTheme);
 	package.add("GetLDoNPointsTheme", &Perl_Client_GetLDoNPointsTheme);
@@ -3675,7 +3693,8 @@ void perl_register_client()
 	package.add("KeyRingAdd", &Perl_Client_KeyRingAdd);
 	package.add("KeyRingCheck", &Perl_Client_KeyRingCheck);
 	package.add("KeyRingClear", &Perl_Client_KeyRingClear);
-	package.add("KeyRingList", &Perl_Client_KeyRingList);
+	package.add("KeyRingList", (void(*)(Client*))&Perl_Client_KeyRingList);
+	package.add("KeyRingList", (void(*)(Client*, Client*))&Perl_Client_KeyRingList);
 	package.add("KeyRingRemove", &Perl_Client_KeyRingRemove);
 	package.add("Kick", &Perl_Client_Kick);
 	package.add("LearnDisciplines", &Perl_Client_LearnDisciplines);

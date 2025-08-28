@@ -155,7 +155,11 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 	auto *res = (UsertoWorldResponseLegacy *) packet.Data();
 
 	LogDebug("Trying to find client with user id of [{}]", res->lsaccountid);
-	Client *c = server.client_manager->GetClient(res->lsaccountid, "eqemu");
+	std::string db_loginserver = "local";
+	if (std::getenv("LSPX")) {
+		db_loginserver = "eqemu";
+	}
+	Client *c = server.client_manager->GetClient(res->lsaccountid, db_loginserver);
 	if (c) {
 		LogDebug(
 			"Found client with user id of [{}] and account name of [{}]",

@@ -598,6 +598,95 @@ bool Perl_Zone_VariableExists(Zone* self, const std::string variable_name)
 	return self->VariableExists(variable_name);
 }
 
+uint32 Perl_Zone_GetTimerDuration(Zone* self, std::string name)
+{
+	return self->GetTimerDuration(name);
+}
+
+uint32 Perl_Zone_GetTimerRemainingTime(Zone* self, std::string name)
+{
+	return self->GetTimerRemainingTime(name);
+}
+
+bool Perl_Zone_HasTimer(Zone* self, std::string name)
+{
+	return self->HasTimer(name);
+}
+
+bool Perl_Zone_IsPausedTimer(Zone* self, std::string name)
+{
+	return self->IsPausedTimer(name);
+}
+
+void Perl_Zone_PauseTimer(Zone* self, std::string name)
+{
+	self->PauseTimer(name);
+}
+
+void Perl_Zone_ResumeTimer(Zone* self, std::string name)
+{
+	self->ResumeTimer(name);
+}
+
+void Perl_Zone_SetTimer(Zone* self, std::string name, uint32 duration)
+{
+	self->SetTimer(name, duration);
+}
+
+void Perl_Zone_StopTimer(Zone* self, std::string name)
+{
+	self->StopTimer(name);
+}
+
+void Perl_Zone_StopAllTimers(Zone* self)
+{
+	self->StopAllTimers();
+}
+
+void Perl_Zone_SendPayload(Zone* self, int payload_id, std::string payload_value)
+{
+	self->SendPayload(payload_id, payload_value);
+}
+
+void Perl_Zone_Signal(Zone* self, int signal_id)
+{
+	self->Signal(signal_id);
+}
+
+perl::array Perl_Zone_GetPausedTimers(Zone* self)
+{
+	perl::array a;
+
+	const auto& l = self->GetPausedTimers();
+
+	if (!l.empty()) {
+		a.reserve(l.size());
+
+		for (const auto& v : l) {
+			a.push_back(v);
+		}
+	}
+
+	return a;
+}
+
+perl::array Perl_Zone_GetTimers(Zone* self)
+{
+	perl::array a;
+
+	const auto& l = self->GetTimers();
+
+	if (!l.empty()) {
+		a.reserve(l.size());
+
+		for (const auto& v : l) {
+			a.push_back(v);
+		}
+	}
+
+	return a;
+}
+
 void perl_register_zone()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -668,6 +757,7 @@ void perl_register_zone()
 	package.add("GetMinimumStatus", &Perl_Zone_GetMinimumStatus);
 	package.add("GetNote", &Perl_Zone_GetNote);
 	package.add("GetNPCMaximumAggroDistance", &Perl_Zone_GetNPCMaximumAggroDistance);
+	package.add("GetPausedTimers", &Perl_Zone_GetPausedTimers);
 	package.add("GetPEQZone", &Perl_Zone_GetPEQZone);
 	package.add("GetRainChance", (int(*)(Zone*))&Perl_Zone_GetRainChance);
 	package.add("GetRainChance", (int(*)(Zone*, uint8))&Perl_Zone_GetRainChance);
@@ -689,6 +779,9 @@ void perl_register_zone()
 	package.add("GetSnowDuration", (int(*)(Zone*, uint8))&Perl_Zone_GetSnowDuration);
 	package.add("GetTimeType", &Perl_Zone_GetTimeType);
 	package.add("GetTimeZone", &Perl_Zone_GetTimeZone);
+	package.add("GetTimerDuration", &Perl_Zone_GetTimerDuration);
+	package.add("GetTimerRemainingTime", &Perl_Zone_GetTimerRemainingTime);
+	package.add("GetTimers", &Perl_Zone_GetTimers);
 	package.add("GetZoneDescription", &Perl_Zone_GetZoneDescription);
 	package.add("GetZoneID", &Perl_Zone_GetZoneID);
 	package.add("GetZoneType", &Perl_Zone_GetZoneType);
@@ -701,12 +794,14 @@ void perl_register_zone()
 	package.add("GetZoneTotalBlockedSpells", &Perl_Zone_GetZoneTotalBlockedSpells);
 	package.add("HasGraveyard", &Perl_Zone_HasGraveyard);
 	package.add("HasMap", &Perl_Zone_HasMap);
+	package.add("HasTimer", &Perl_Zone_HasTimer);
 	package.add("HasWaterMap", &Perl_Zone_HasWaterMap);
 	package.add("HasWeather", &Perl_Zone_HasWeather);
 	package.add("IsCity", &Perl_Zone_IsCity);
 	package.add("IsHotzone", &Perl_Zone_IsHotzone);
 	package.add("IsInstancePersistent", &Perl_Zone_IsInstancePersistent);
 	package.add("IsIdleWhenEmpty", &Perl_Zone_IsIdleWhenEmpty);
+	package.add("IsPausedTimer", &Perl_Zone_IsPausedTimer);
 	package.add("IsPVPZone", &Perl_Zone_IsPVPZone);
 	package.add("IsRaining", &Perl_Zone_IsRaining);
 	package.add("IsSnowing", &Perl_Zone_IsSnowing);
@@ -715,8 +810,11 @@ void perl_register_zone()
 	package.add("IsStaticZone", &Perl_Zone_IsStaticZone);
 	package.add("IsUCSServerAvailable", &Perl_Zone_IsUCSServerAvailable);
 	package.add("IsWaterZone", &Perl_Zone_IsWaterZone);
+	package.add("PauseTimer", &Perl_Zone_PauseTimer);
 	package.add("Repop", (void(*)(Zone*))&Perl_Zone_Repop);
 	package.add("Repop", (void(*)(Zone*, bool))&Perl_Zone_Repop);
+	package.add("ResumeTimer", &Perl_Zone_ResumeTimer);
+	package.add("SendPayload", &Perl_Zone_SendPayload);
 	package.add("SetAAEXPModifier", &Perl_Zone_SetAAEXPModifier);
 	package.add("SetAAEXPModifierByCharacterID", &Perl_Zone_SetAAEXPModifierByCharacterID);
 	package.add("SetBucket", (void(*)(Zone*, const std::string, const std::string))&Perl_Zone_SetBucket);
@@ -726,7 +824,11 @@ void perl_register_zone()
 	package.add("SetInstanceTimer", &Perl_Zone_SetInstanceTimer);
 	package.add("SetInstanceTimeRemaining", &Perl_Zone_SetInstanceTimeRemaining);
 	package.add("SetIsHotzone", &Perl_Zone_SetIsHotzone);
+	package.add("SetTimer", &Perl_Zone_SetTimer);
 	package.add("SetVariable", &Perl_Zone_SetVariable);
+	package.add("Signal", &Perl_Zone_Signal);
+	package.add("StopTimer", &Perl_Zone_StopTimer);
+	package.add("StopAllTimers", &Perl_Zone_StopAllTimers);
 	package.add("ShowZoneGlobalLoot", &Perl_Zone_ShowZoneGlobalLoot);
 	package.add("VariableExists", &Perl_Zone_VariableExists);
 }

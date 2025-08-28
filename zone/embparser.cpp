@@ -207,6 +207,7 @@ const char* QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AA_LOSS",
 	"EVENT_SPELL_BLOCKED",
 	"EVENT_READ_ITEM",
+	"EVENT_PET_COMMAND",
 
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
@@ -222,6 +223,8 @@ PerlembParser::PerlembParser() : perl(nullptr)
 	global_bot_quest_status_    = questUnloaded;
 	merc_quest_status_          = questUnloaded;
 	global_merc_quest_status_   = questUnloaded;
+	zone_quest_status_          = questUnloaded;
+	global_zone_quest_status_   = questUnloaded;
 }
 
 PerlembParser::~PerlembParser()
@@ -265,6 +268,8 @@ void PerlembParser::ReloadQuests()
 	global_bot_quest_status_    = questUnloaded;
 	merc_quest_status_          = questUnloaded;
 	global_merc_quest_status_   = questUnloaded;
+	zone_quest_status_          = questUnloaded;
+	global_zone_quest_status_   = questUnloaded;
 
 	item_quest_status_.clear();
 	spell_quest_status_.clear();
@@ -278,6 +283,7 @@ int PerlembParser::EventCommon(
 	EQ::ItemInstance* inst,
 	const SPDat_Spell_Struct* spell,
 	Mob* mob,
+	Zone* zone,
 	uint32 extra_data,
 	bool is_global,
 	std::vector<std::any>* extra_pointers
@@ -287,52 +293,22 @@ int PerlembParser::EventCommon(
 		return 0;
 	}
 
-	bool is_player_quest        = false;
-	bool is_global_player_quest = false;
-	bool is_global_npc_quest    = false;
-	bool is_bot_quest           = false;
-	bool is_global_bot_quest    = false;
-	bool is_merc_quest          = false;
-	bool is_global_merc_quest   = false;
-	bool is_item_quest          = false;
-	bool is_spell_quest         = false;
-
-	std::string package_name;
-
-	GetQuestTypes(
-		is_player_quest,
-		is_global_player_quest,
-		is_bot_quest,
-		is_global_bot_quest,
-		is_merc_quest,
-		is_global_merc_quest,
-		is_global_npc_quest,
-		is_item_quest,
-		is_spell_quest,
+	QuestType quest_type = GetQuestTypes(
 		event_id,
 		npc_mob,
 		inst,
 		mob,
+		zone,
 		is_global
 	);
 
-	GetQuestPackageName(
-		is_player_quest,
-		is_global_player_quest,
-		is_bot_quest,
-		is_global_bot_quest,
-		is_merc_quest,
-		is_global_merc_quest,
-		is_global_npc_quest,
-		is_item_quest,
-		is_spell_quest,
-		package_name,
+	std::string package_name = GetQuestPackageName(
+		quest_type,
 		event_id,
 		object_id,
 		data,
 		npc_mob,
-		inst,
-		is_global
+		inst
 	);
 
 	const std::string& sub_name = QuestEventSubroutines[event_id];
@@ -348,15 +324,7 @@ int PerlembParser::EventCommon(
 	/* Check for QGlobal export event enable */
 	if (parse->perl_event_export_settings[event_id].qglobals) {
 		ExportQGlobals(
-			is_player_quest,
-			is_global_player_quest,
-			is_bot_quest,
-			is_global_bot_quest,
-			is_merc_quest,
-			is_global_merc_quest,
-			is_global_npc_quest,
-			is_item_quest,
-			is_spell_quest,
+			quest_type,
 			package_name,
 			npc_mob,
 			mob,
@@ -367,15 +335,7 @@ int PerlembParser::EventCommon(
 	/* Check for Mob export event enable */
 	if (parse->perl_event_export_settings[event_id].mob) {
 		ExportMobVariables(
-			is_player_quest,
-			is_global_player_quest,
-			is_bot_quest,
-			is_global_bot_quest,
-			is_merc_quest,
-			is_global_merc_quest,
-			is_global_npc_quest,
-			is_item_quest,
-			is_spell_quest,
+			quest_type,
 			package_name,
 			mob,
 			npc_mob
@@ -397,19 +357,24 @@ int PerlembParser::EventCommon(
 		ExportEventVariables(package_name, event_id, object_id, data, npc_mob, inst, mob, extra_data, extra_pointers);
 	}
 
-	if (is_player_quest || is_global_player_quest) {
-		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, nullptr);
-	} else if (is_bot_quest || is_global_bot_quest || is_merc_quest || is_global_merc_quest) {
-		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, nullptr);
-	} else if (is_item_quest) {
-		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, inst, nullptr);
-	} else if (is_spell_quest) {
+	if (quest_type == QuestType::Player || quest_type == QuestType::PlayerGlobal) {
+		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, nullptr, nullptr);
+	} else if (
+		quest_type == QuestType::Bot ||
+		quest_type == QuestType::BotGlobal ||
+		quest_type == QuestType::Merc ||
+		quest_type == QuestType::MercGlobal
+	) {
+		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, nullptr, nullptr);
+	} else if (quest_type == QuestType::Item || quest_type == QuestType::ItemGlobal) {
+		return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, inst, nullptr, nullptr);
+	} else if (quest_type == QuestType::Spell || quest_type == QuestType::SpellGlobal) {
 		if (mob) {
-			return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, spell);
+			return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, mob, mob, nullptr, spell, nullptr);
 		} else {
-			return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, spell);
+			return SendCommands(package_name.c_str(), QuestEventSubroutines[event_id], 0, npc_mob, mob, nullptr, spell, nullptr);
 		}
-	} else {
+	} else if (quest_type == QuestType::NPC || quest_type == QuestType::NPCGlobal) {
 		return SendCommands(
 			package_name.c_str(),
 			QuestEventSubroutines[event_id],
@@ -417,7 +382,19 @@ int PerlembParser::EventCommon(
 			npc_mob,
 			mob,
 			nullptr,
+			nullptr,
 			nullptr
+		);
+	} else if (quest_type == QuestType::Zone || quest_type == QuestType::ZoneGlobal) {
+		return SendCommands(
+			package_name.c_str(),
+			QuestEventSubroutines[event_id],
+			0,
+			nullptr,
+			nullptr,
+			nullptr,
+			nullptr,
+			zone
 		);
 	}
 }
@@ -439,6 +416,7 @@ int PerlembParser::EventNPC(
 		nullptr,
 		nullptr,
 		mob,
+		nullptr,
 		extra_data,
 		false,
 		extra_pointers
@@ -462,6 +440,7 @@ int PerlembParser::EventGlobalNPC(
 		nullptr,
 		nullptr,
 		mob,
+		nullptr,
 		extra_data,
 		true,
 		extra_pointers
@@ -484,6 +463,7 @@ int PerlembParser::EventPlayer(
 		nullptr,
 		nullptr,
 		client,
+		nullptr,
 		extra_data,
 		false,
 		extra_pointers
@@ -506,6 +486,7 @@ int PerlembParser::EventGlobalPlayer(
 		nullptr,
 		nullptr,
 		client,
+		nullptr,
 		extra_data,
 		true,
 		extra_pointers
@@ -534,6 +515,7 @@ int PerlembParser::EventItem(
 		inst,
 		nullptr,
 		client,
+		nullptr,
 		extra_data,
 		false,
 		extra_pointers
@@ -558,6 +540,7 @@ int PerlembParser::EventSpell(
 		nullptr,
 		&spells[spell_id],
 		client,
+		nullptr,
 		extra_data,
 		false,
 		extra_pointers
@@ -1006,7 +989,8 @@ int PerlembParser::SendCommands(
 	Mob* other,
 	Mob* mob,
 	EQ::ItemInstance* inst,
-	const SPDat_Spell_Struct* spell
+	const SPDat_Spell_Struct* spell,
+	Zone* zone
 )
 {
 	if (!perl) {
@@ -1014,11 +998,21 @@ int PerlembParser::SendCommands(
 	}
 
 	int ret_value = 0;
+	RunningQuest q;
+
+	q.owner      = other;
+	q.questitem  = inst;
+	q.questspell = spell;
+
 	if (mob && mob->IsClient()) {
-		quest_manager.StartQuest(other, mob->CastToClient(), inst, spell);
-	} else {
-		quest_manager.StartQuest(other);
+		q.initiator  = mob->CastToClient();
 	}
+
+	if (zone) {
+		q.zone = zone;
+	}
+
+	quest_manager.StartQuest(q);
 
 	try {
 		perl->eval(fmt::format("package {};", prefix).c_str());
@@ -1033,7 +1027,8 @@ int PerlembParser::SendCommands(
 				"merc",
 				"npc",
 				"questitem",
-				"spell"
+				"spell",
+				"zone"
 			};
 
 			for (const auto& suffix : suffixes) {
@@ -1058,21 +1053,23 @@ int PerlembParser::SendCommands(
 			sv_setsv(client, _empty_sv);
 		}
 
-		if (other->IsBot()) {
-			Bot* b = quest_manager.GetBot();
-			buf = fmt::format("{}::bot", prefix);
-			SV* bot = get_sv(buf.c_str(), true);
-			sv_setref_pv(bot, "Bot", b);
-		} else if (other->IsMerc()) {
-			Merc* m = quest_manager.GetMerc();
-			buf = fmt::format("{}::merc", prefix);
-			SV* merc = get_sv(buf.c_str(), true);
-			sv_setref_pv(merc, "Merc", m);
-		} else if (other->IsNPC()) {
-			NPC* n = quest_manager.GetNPC();
-			buf = fmt::format("{}::npc", prefix);
-			SV* npc = get_sv(buf.c_str(), true);
-			sv_setref_pv(npc, "NPC", n);
+		if (other) {
+			if (other->IsBot()) {
+				Bot* b = quest_manager.GetBot();
+				buf = fmt::format("{}::bot", prefix);
+				SV* bot = get_sv(buf.c_str(), true);
+				sv_setref_pv(bot, "Bot", b);
+			} else if (other->IsMerc()) {
+				Merc* m = quest_manager.GetMerc();
+				buf = fmt::format("{}::merc", prefix);
+				SV* merc = get_sv(buf.c_str(), true);
+				sv_setref_pv(merc, "Merc", m);
+			} else if (other->IsNPC()) {
+				NPC* n = quest_manager.GetNPC();
+				buf = fmt::format("{}::npc", prefix);
+				SV* npc = get_sv(buf.c_str(), true);
+				sv_setref_pv(npc, "NPC", n);
+			}
 		}
 
 		//only export QuestItem if it's an inst quest
@@ -1110,7 +1107,8 @@ int PerlembParser::SendCommands(
 				"merc",
 				"npc",
 				"questitem",
-				"spell"
+				"spell",
+				"zone"
 			};
 
 			for (const auto& suffix : suffixes) {
@@ -1192,20 +1190,12 @@ void PerlembParser::MapFunctions()
 #endif // EMBPERL_XS_CLASSES
 }
 
-void PerlembParser::GetQuestTypes(
-	bool& is_player_quest,
-	bool& is_global_player_quest,
-	bool& is_bot_quest,
-	bool& is_global_bot_quest,
-	bool& is_merc_quest,
-	bool& is_global_merc_quest,
-	bool& is_global_npc_quest,
-	bool& is_item_quest,
-	bool& is_spell_quest,
+QuestType PerlembParser::GetQuestTypes(
 	QuestEventID event_id,
 	Mob* npc_mob,
 	EQ::ItemInstance* inst,
 	Mob* mob,
+	Zone* zone,
 	bool is_global
 )
 {
@@ -1219,100 +1209,74 @@ void PerlembParser::GetQuestTypes(
 		event_id == EVENT_SPELL_FADE ||
 		event_id == EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE
 	) {
-		is_spell_quest = true;
+		return is_global ? QuestType::SpellGlobal : QuestType::Spell;
 	} else {
 		if (npc_mob) {
 			if (!inst) {
-				if (is_global) {
-					if (npc_mob->IsBot()) {
-						is_global_bot_quest = true;
-					} else if (npc_mob->IsMerc()) {
-						is_global_merc_quest = true;
-					}
-				} else {
-					if (npc_mob->IsBot()) {
-						is_bot_quest = true;
-					} else if (npc_mob->IsMerc()) {
-						is_merc_quest = true;
-					}
+				if (npc_mob->IsBot()) {
+					return is_global ? QuestType::BotGlobal : QuestType::Bot;
+				} else if (npc_mob->IsMerc()) {
+					return is_global ? QuestType::MercGlobal : QuestType::Merc;
+				} else if (npc_mob->IsNPC()) {
+					return is_global ? QuestType::NPCGlobal : QuestType::NPC;
 				}
 			} else {
-				is_item_quest = true;
+				return is_global ? QuestType::ItemGlobal : QuestType::Item;
 			}
 		} else if (!npc_mob && mob) {
 			if (!inst) {
-				if (is_global) {
-					if (mob->IsClient()) {
-						is_global_player_quest = true;
-					}
-				} else {
-					if (mob->IsClient()) {
-						is_player_quest = true;
-					}
+				if (mob->IsClient()) {
+					return is_global ? QuestType::PlayerGlobal : QuestType::Player;
 				}
 			} else {
-				is_item_quest = true;
+				return is_global ? QuestType::ItemGlobal : QuestType::Item;
 			}
+		} else if (zone) {
+			return is_global ? QuestType::ZoneGlobal : QuestType::Zone;
 		}
 	}
 }
 
-void PerlembParser::GetQuestPackageName(
-	bool& is_player_quest,
-	bool& is_global_player_quest,
-	bool& is_bot_quest,
-	bool& is_global_bot_quest,
-	bool& is_merc_quest,
-	bool& is_global_merc_quest,
-	bool& is_global_npc_quest,
-	bool& is_item_quest,
-	bool& is_spell_quest,
-	std::string& package_name,
+std::string PerlembParser::GetQuestPackageName(
+	QuestType quest_type,
 	QuestEventID event_id,
 	uint32 object_id,
 	const char* data,
 	Mob* npc_mob,
-	EQ::ItemInstance* inst,
-	bool is_global
+	EQ::ItemInstance* inst
 )
 {
-	if (
-		!is_player_quest &&
-		!is_global_player_quest &&
-		!is_bot_quest &&
-		!is_global_bot_quest &&
-		!is_merc_quest &&
-		!is_global_merc_quest &&
-		!is_item_quest &&
-		!is_spell_quest
-	) {
-		if (is_global) {
-			is_global_npc_quest = true;
-			package_name        = "qst_global_npc";
-		} else {
-			package_name = fmt::format("qst_npc_{}", npc_mob->GetNPCTypeID());
-		}
-	} else if (is_item_quest) {
+	if (quest_type == QuestType::NPC) {
+		return fmt::format("qst_npc_{}", npc_mob->GetNPCTypeID());
+	} else if (quest_type == QuestType::NPCGlobal) {
+		return "qst_global_npc";
+	} else if (quest_type == QuestType::Item || quest_type == QuestType::ItemGlobal) {
 		if (!inst) {
-			return;
+			return "";
 		}
 
-		package_name = fmt::format("qst_item_{}", inst->GetID());
-	} else if (is_player_quest) {
-		package_name = "qst_player";
-	} else if (is_global_player_quest) {
-		package_name = "qst_global_player";
-	} else if (is_bot_quest) {
-		package_name = "qst_bot";
-	} else if (is_global_bot_quest) {
-		package_name = "qst_global_bot";
-	} else if (is_merc_quest) {
-		package_name = "qst_merc";
-	} else if (is_global_merc_quest) {
-		package_name = "qst_global_merc";
-	} else {
-		package_name = fmt::format("qst_spell_{}", object_id);
+		return fmt::format("qst_item_{}", inst->GetID());
+	} else if (quest_type == QuestType::Player) {
+		return "qst_player";
+	} else if (quest_type == QuestType::PlayerGlobal) {
+		return "qst_global_player";
+	} else if (quest_type == QuestType::Bot) {
+		return "qst_bot";
+	} else if (quest_type == QuestType::BotGlobal) {
+		return "qst_global_bot";
+	} else if (quest_type == QuestType::Merc) {
+		return "qst_merc";
+	} else if (quest_type == QuestType::MercGlobal) {
+		return "qst_global_merc";
+	} else if (quest_type == QuestType::Spell || quest_type == QuestType::SpellGlobal) {
+		return fmt::format("qst_spell_{}", object_id);
+	} else if (quest_type == QuestType::Zone) {
+		return "qst_zone";
+	} else if (quest_type == QuestType::ZoneGlobal) {
+		return "qst_global_zone";
 	}
+
+	return "";
 }
 
 void PerlembParser::ExportCharID(const std::string& package_name, int& char_id, Mob* npc_mob, Mob* mob)
@@ -1331,15 +1295,7 @@ void PerlembParser::ExportCharID(const std::string& package_name, int& char_id, 
 }
 
 void PerlembParser::ExportQGlobals(
-	bool is_player_quest,
-	bool is_global_player_quest,
-	bool is_bot_quest,
-	bool is_global_bot_quest,
-	bool is_merc_quest,
-	bool is_global_merc_quest,
-	bool is_global_npc_quest,
-	bool is_item_quest,
-	bool is_spell_quest,
+	QuestType quest_type,
 	std::string& package_name,
 	Mob* npc_mob,
 	Mob* mob,
@@ -1347,16 +1303,7 @@ void PerlembParser::ExportQGlobals(
 )
 {
 	//NPC quest
-	if (
-		!is_player_quest &&
-		!is_global_player_quest &&
-		!is_bot_quest &&
-		!is_global_bot_quest &&
-		!is_merc_quest &&
-		!is_global_merc_quest &&
-		!is_item_quest &&
-		!is_spell_quest
-	) {
+	if (quest_type == QuestType::NPC || quest_type == QuestType::NPCGlobal) {
 		//only export for npcs that are global enabled.
 		if (npc_mob && npc_mob->GetQglobal()) {
 			std::map<std::string, std::string> globhash;
@@ -1485,15 +1432,7 @@ void PerlembParser::ExportQGlobals(
 }
 
 void PerlembParser::ExportMobVariables(
-	bool is_player_quest,
-	bool is_global_player_quest,
-	bool is_bot_quest,
-	bool is_global_bot_quest,
-	bool is_merc_quest,
-	bool is_global_merc_quest,
-	bool is_global_npc_quest,
-	bool is_item_quest,
-	bool is_spell_quest,
+	QuestType quest_type,
 	std::string& package_name,
 	Mob* mob,
 	Mob* npc_mob
@@ -1511,15 +1450,7 @@ void PerlembParser::ExportMobVariables(
 		ExportVar(package_name.c_str(), "bot_owner_char_id", mob->CastToBot()->GetBotOwnerCharacterID());
 	}
 
-	if (
-		!is_player_quest &&
-		!is_global_player_quest &&
-		!is_bot_quest &&
-		!is_global_bot_quest &&
-		!is_merc_quest &&
-		!is_global_merc_quest &&
-		!is_item_quest
-	) {
+	if (quest_type == QuestType::NPC || quest_type == QuestType::NPCGlobal) {
 		if (mob && mob->IsClient() && npc_mob && npc_mob->IsNPC()) {
 			Client* c = mob->CastToClient();
 
@@ -1543,16 +1474,7 @@ void PerlembParser::ExportMobVariables(
 		ExportVar(package_name.c_str(), "userid", mob->GetID());
 	}
 
-	if (
-		!is_player_quest &&
-		!is_global_player_quest &&
-		!is_bot_quest &&
-		!is_global_bot_quest &&
-		!is_merc_quest &&
-		!is_global_merc_quest &&
-		!is_item_quest &&
-		!is_spell_quest
-	) {
+	if (quest_type == QuestType::NPC || quest_type == QuestType::NPCGlobal) {
 		if (npc_mob->IsNPC()) {
 			ExportVar(package_name.c_str(), "mname", npc_mob->GetName());
 			ExportVar(package_name.c_str(), "mobid", npc_mob->GetID());
@@ -1758,8 +1680,12 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "doorid", data);
 			ExportVar(package_name.c_str(), "version", zone->GetInstanceVersion());
 
-			if (extra_pointers && extra_pointers->size() == 1) {
+			if (extra_pointers && extra_pointers->size() >= 1) {
 				ExportVar(package_name.c_str(), "door", "Doors", std::any_cast<Doors*>(extra_pointers->at(0)));
+			}
+
+			if (extra_pointers && extra_pointers->size() == 2) {
+				ExportVar(package_name.c_str(), "player", "Client", std::any_cast<Client*>(extra_pointers->at(1)));
 			}
 
 			break;
@@ -1782,8 +1708,12 @@ void PerlembParser::ExportEventVariables(
 				);
 			}
 
-			if (extra_pointers && extra_pointers->size() == 2) {
+			if (extra_pointers && extra_pointers->size() >= 2) {
 				ExportVar(package_name.c_str(), "corpse", "Corpse", std::any_cast<Corpse*>(extra_pointers->at(1)));
+			}
+
+			if (extra_pointers && extra_pointers->size() == 3) {
+				ExportVar(package_name.c_str(), "player", "Client", std::any_cast<Client*>(extra_pointers->at(2)));
 			}
 
 			break;
@@ -1852,13 +1782,17 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "picked_up_id", data);
 			ExportVar(package_name.c_str(), "picked_up_entity_id", extra_data);
 
-			if (extra_pointers && extra_pointers->size() == 1) {
+			if (extra_pointers && extra_pointers->size() >= 1) {
 				ExportVar(
 					package_name.c_str(),
 					"item",
 					"QuestItem",
 					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))
 				);
+			}
+
+			if (extra_pointers && extra_pointers->size() == 2) {
+				ExportVar(package_name.c_str(), "player", "Client", std::any_cast<Client*>(extra_pointers->at(1)));
 			}
 
 			break;
@@ -1873,6 +1807,11 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_POPUP_RESPONSE: {
 			ExportVar(package_name.c_str(), "popupid", data);
+
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "player", "Client", std::any_cast<Client*>(extra_pointers->at(0)));
+			}
+
 			break;
 		}
 
@@ -2036,8 +1975,12 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "objectid", data);
 			ExportVar(package_name.c_str(), "clicker_id", extra_data);
 
-			if (extra_pointers && extra_pointers->size() == 1) {
+			if (extra_pointers && extra_pointers->size() >= 1) {
 				ExportVar(package_name.c_str(), "object", "Object", std::any_cast<Object*>(extra_pointers->at(0)));
+			}
+
+			if (extra_pointers && extra_pointers->size() == 2) {
+				ExportVar(package_name.c_str(), "player", "Client", std::any_cast<Client*>(extra_pointers->at(1)));
 			}
 
 			break;
@@ -2115,6 +2058,13 @@ void PerlembParser::ExportEventVariables(
 					ExportVar(package_name.c_str(), "killed_npc_id", !killed->IsMerc() && killed->IsNPC() ? killed->GetNPCTypeID() : 0);
 				}
 			}
+
+			if (extra_pointers && extra_pointers->size() == 3) {
+				Mob* killer = std::any_cast<Mob*>(extra_pointers->at(2));
+				if (killer) {
+					ExportVar(package_name.c_str(), "killer", "Mob", killer);
+				}
+			}
 			break;
 		}
 
@@ -2142,10 +2092,21 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_SPAWN_ZONE: {
-			ExportVar(package_name.c_str(), "spawned_entity_id", mob->GetID());
-			ExportVar(package_name.c_str(), "spawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
-			ExportVar(package_name.c_str(), "spawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
-			ExportVar(package_name.c_str(), "spawned", "Mob", mob);
+			if (mob) {
+				ExportVar(package_name.c_str(), "spawned", "Mob", mob);
+				ExportVar(package_name.c_str(), "spawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
+				ExportVar(package_name.c_str(), "spawned_entity_id", mob->GetID());
+				ExportVar(package_name.c_str(), "spawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
+			}
+
+			if (extra_pointers && extra_pointers->size() == 1) {
+				NPC* spawn_npc = std::any_cast<NPC*>(extra_pointers->at(0));
+				ExportVar(package_name.c_str(), "spawned", "NPC", spawn_npc);
+				ExportVar(package_name.c_str(), "spawned_bot_id", spawn_npc->IsBot() ? spawn_npc->CastToBot()->GetBotID() : 0);
+				ExportVar(package_name.c_str(), "spawned_entity_id", spawn_npc->GetID());
+				ExportVar(package_name.c_str(), "spawned_npc_id", spawn_npc->IsNPC() ? spawn_npc->GetNPCTypeID() : 0);
+			}
+
 			break;
 		}
 
@@ -2386,6 +2347,7 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_DESPAWN: {
+			ExportVar(package_name.c_str(), "despawned", "Mob", npc_mob);
 			ExportVar(package_name.c_str(), "despawned_entity_id", npc_mob->GetID());
 			ExportVar(package_name.c_str(), "despawned_bot_id", npc_mob->IsBot() ? npc_mob->CastToBot()->GetBotID() : 0);
 			ExportVar(package_name.c_str(), "despawned_merc_id", npc_mob->IsMerc() ? npc_mob->CastToMerc()->GetMercenaryID() : 0);
@@ -2394,9 +2356,21 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_DESPAWN_ZONE: {
-			ExportVar(package_name.c_str(), "despawned_entity_id", mob->GetID());
-			ExportVar(package_name.c_str(), "despawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
-			ExportVar(package_name.c_str(), "despawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
+			if (mob) {
+				ExportVar(package_name.c_str(), "despawned", "Mob", mob);
+				ExportVar(package_name.c_str(), "despawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
+				ExportVar(package_name.c_str(), "despawned_entity_id", mob->GetID());
+				ExportVar(package_name.c_str(), "despawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
+			}
+
+			if (extra_pointers && extra_pointers->size() == 1) {
+				NPC* spawn_npc = std::any_cast<NPC*>(extra_pointers->at(0));
+				ExportVar(package_name.c_str(), "despawned", "NPC", spawn_npc);
+				ExportVar(package_name.c_str(), "despawned_bot_id", spawn_npc->IsBot() ? spawn_npc->CastToBot()->GetBotID() : 0);
+				ExportVar(package_name.c_str(), "despawned_entity_id", spawn_npc->GetID());
+				ExportVar(package_name.c_str(), "despawned_npc_id", spawn_npc->IsNPC() ? spawn_npc->GetNPCTypeID() : 0);
+			}
+
 			break;
 		}
 
@@ -2551,6 +2525,20 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_ENTER_ZONE: {
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "player", "Client", std::any_cast<Client*>(extra_pointers->at(0)));
+			}
+
+			break;
+		}
+
+		case EVENT_PET_COMMAND: {
+			ExportVar(package_name.c_str(), "pet_command", extra_data);
+			ExportVar(package_name.c_str(), "pet_command_name", data);
+			break;
+		}
+
 		default: {
 			break;
 		}
@@ -2648,6 +2636,7 @@ int PerlembParser::EventBot(
 		nullptr,
 		nullptr,
 		mob,
+		nullptr,
 		extra_data,
 		false,
 		extra_pointers
@@ -2671,6 +2660,7 @@ int PerlembParser::EventGlobalBot(
 		nullptr,
 		nullptr,
 		mob,
+		nullptr,
 		extra_data,
 		true,
 		extra_pointers
@@ -2768,6 +2758,7 @@ int PerlembParser::EventMerc(
 		nullptr,
 		nullptr,
 		mob,
+		nullptr,
 		extra_data,
 		false,
 		extra_pointers
@@ -2791,6 +2782,127 @@ int PerlembParser::EventGlobalMerc(
 		nullptr,
 		nullptr,
 		mob,
+		nullptr,
+		extra_data,
+		true,
+		extra_pointers
+	);
+}
+
+void PerlembParser::LoadZoneScript(std::string filename)
+{
+	if (!perl || zone_quest_status_ != questUnloaded) {
+		return;
+	}
+
+	try {
+		perl->eval_file("qst_zone", filename.c_str());
+	} catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Zone Quest File [{}] Error [{}]",
+				filename,
+				e
+			)
+		);
+
+		zone_quest_status_ = questFailedToLoad;
+		return;
+	}
+
+	zone_quest_status_ = questLoaded;
+}
+
+void PerlembParser::LoadGlobalZoneScript(std::string filename)
+{
+	if (!perl || global_zone_quest_status_ != questUnloaded) {
+		return;
+	}
+
+	try {
+		perl->eval_file("qst_global_zone", filename.c_str());
+	} catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Global Zone Quest File [{}] Error [{}]",
+				filename,
+				e
+			)
+		);
+
+		global_zone_quest_status_ = questFailedToLoad;
+		return;
+	}
+
+	global_zone_quest_status_ = questLoaded;
+}
+
+bool PerlembParser::ZoneHasQuestSub(QuestEventID event_id)
+{
+	if (
+		!perl ||
+		zone_quest_status_ != questLoaded ||
+		event_id >= _LargestEventID
+	) {
+		return false;
+	}
+
+	return perl->SubExists("qst_zone", QuestEventSubroutines[event_id]);
+}
+
+bool PerlembParser::GlobalZoneHasQuestSub(QuestEventID event_id)
+{
+	if (
+		!perl ||
+		global_zone_quest_status_ != questLoaded ||
+		event_id >= _LargestEventID
+	) {
+		return false;
+	}
+
+	return perl->SubExists("qst_global_zone", QuestEventSubroutines[event_id]);
+}
+
+int PerlembParser::EventZone(
+	QuestEventID event_id,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	return EventCommon(
+		event_id,
+		0,
+		data.c_str(),
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		zone,
+		extra_data,
+		false,
+		extra_pointers
+	);
+}
+
+int PerlembParser::EventGlobalZone(
+	QuestEventID event_id,
+	Zone* zone,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+)
+{
+	return EventCommon(
+		event_id,
+		0,
+		data.c_str(),
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		zone,
 		extra_data,
 		true,
 		extra_pointers

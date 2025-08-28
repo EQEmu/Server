@@ -104,9 +104,9 @@ SET(common_sources
     net/console_server.cpp
     net/console_server_connection.cpp
     net/crc32.cpp
-    net/daybreak_connection.cpp
     net/eqstream.cpp
     net/packet.cpp
+    net/reliable_stream_connection.cpp
     net/servertalk_client_connection.cpp
     net/servertalk_legacy_client_connection.cpp
     net/servertalk_server.cpp
@@ -671,13 +671,13 @@ SET(common_headers
     net/console_server.h
     net/console_server_connection.h
     net/crc32.h
-    net/daybreak_connection.h
-    net/daybreak_pooling.h
-    net/daybreak_structs.h
     net/dns.h
     net/endian.h
     net/eqstream.h
     net/packet.h
+    net/reliable_stream_connection.h
+    net/reliable_stream_pooling.h
+    net/reliable_stream_structs.h
     net/servertalk_client_connection.h
     net/servertalk_legacy_client_connection.h
     net/servertalk_common.h
@@ -743,10 +743,6 @@ SOURCE_GROUP(Net FILES
     net/console_server_connection.h
     net/crc32.cpp
     net/crc32.h
-    net/daybreak_connection.cpp
-    net/daybreak_connection.h
-    net/daybreak_pooling.h
-    net/daybreak_structs.h
     net/dns.h
     net/endian.h
     net/eqmq.cpp
@@ -755,6 +751,10 @@ SOURCE_GROUP(Net FILES
     net/eqstream.h
     net/packet.cpp
     net/packet.h
+    net/reliable_stream_connection.cpp
+    net/reliable_stream_connection.h
+    net/reliable_stream_pooling.h
+    net/reliable_stream_structs.h
     net/servertalk_client_connection.cpp
     net/servertalk_client_connection.h
     net/servertalk_legacy_client_connection.cpp

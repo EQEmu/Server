@@ -82,7 +82,7 @@ Json::Value ApiGetPacketStatistics(EQ::Net::WebsocketServerConnection *connectio
 		auto connection            = client->Connection();
 		auto opts                  = connection->GetManager()->GetOptions();
 		auto eqs_stats             = connection->GetStats();
-		auto &stats                = eqs_stats.DaybreakStats;
+		auto &stats                = eqs_stats.ReliableStreamStats;
 		auto now                   = EQ::Net::Clock::now();
 		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(
 			now - stats.created

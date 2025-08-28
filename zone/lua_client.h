@@ -521,9 +521,11 @@ public:
 	bool KeyRingCheck(uint32 item_id);
 	bool KeyRingClear();
 	void KeyRingList();
+	void KeyRingList(Lua_Client c);
 	bool KeyRingRemove(uint32 item_id);
 	bool CompleteTask(int task_id);
 	bool UncompleteTask(int task_id);
+	luabind::object GetKeyRing(lua_State* L);
 
 	// account data buckets
 	void SetAccountBucket(std::string bucket_name, std::string bucket_value);
