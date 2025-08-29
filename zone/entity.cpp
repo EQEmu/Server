@@ -56,8 +56,6 @@ extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern uint32 numclients;
 
-extern char errorname[32];
-
 Entity::Entity()
 {
 	id              = 0;
