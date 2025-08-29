@@ -1391,7 +1391,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 
 			bool is_delayed_packet = (
 				DistanceSquared(client_position, spawn_position) > distance_max ||
-				(spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE))
+				(spawn->IsClient() && (spawn->GetRace() == Race::MinorIllusion || spawn->GetRace() == Race::Tree))
 			);
 
 			if (is_delayed_packet) {
@@ -1415,7 +1415,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 			 *
 			 * Illusion races on PCs don't work as a mass spawn
 			 * But they will work as an add_spawn AFTER CLIENT_CONNECTED.
-			 * if (spawn->IsClient() && (race == MINOR_ILL_OBJ || race == TREE)) {
+			 * if (spawn->IsClient() && (race == Race::MinorIllusion || race == Race::Tree)) {
 			 * 	app = new EQApplicationPacket;
 			 * 	spawn->CreateSpawnPacket(app);
 			 * 	client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
