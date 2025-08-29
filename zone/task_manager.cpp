@@ -43,6 +43,8 @@ bool TaskManager::LoadTaskSets()
 
 bool TaskManager::LoadTasks(int single_task)
 {
+	m_task_data.clear();
+
 	std::string task_query_filter = fmt::format("id = {}", single_task);
 	if (single_task == 0) {
 		if (!LoadTaskSets()) {
