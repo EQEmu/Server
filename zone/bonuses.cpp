@@ -700,7 +700,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->CHA += base_value;
 			break;
 		case SE_WaterBreathing:
-			// handled by client
+			newbon->WaterBreathing = base_value;
 			break;
 		case SE_CurrentMana:
 			newbon->ManaRegen += base_value;
@@ -742,6 +742,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_TwoHandBash:
 			break;
 		case SE_SetBreathLevel:
+			newbon->BreathLevel += base_value;
 			break;
 		case SE_RaiseStatCap:
 			switch (limit_value) {

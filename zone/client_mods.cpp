@@ -1774,3 +1774,30 @@ int Client::GetRawACNoShield(int &shield_ac) const
 	}
 	return ac;
 }
+
+int32 Client::CalculateLungCapacity()
+{
+	// Iksar and Frogloks do not benefit from Innate Lung Capacity and do not have STA penalty
+	if (GetBaseRace() == IKSAR) return 127;
+	if (GetBaseRace() == FROGLOK) return 256;
+
+	// Innate Lung Capacity AA gives 10%/25%/50% more
+	int base_lung_capacity = aabonuses.BreathLevel > 0 ? aabonuses.BreathLevel : 100;
+	int lung_capacity = base_lung_capacity;
+
+	// having less than 130 STA applies a reduction to air supply, but having more than 130 does not provide a bonus
+	int STA_penalty = GetSTA() - 30;
+	if (STA_penalty < 100) {
+		lung_capacity = base_lung_capacity * STA_penalty / 100;
+
+		if (lung_capacity < 10) {
+			lung_capacity = 10;
+		}
+
+		if (lung_capacity > base_lung_capacity) {
+			lung_capacity = base_lung_capacity;
+		}
+	}
+
+	return lung_capacity;
+}
