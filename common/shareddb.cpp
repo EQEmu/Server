@@ -53,6 +53,7 @@
 #include "repositories/sharedbank_repository.h"
 #include "repositories/character_inspect_messages_repository.h"
 #include "repositories/spells_new_repository.h"
+#include "repositories/damageshieldtypes_repository.h"
 
 namespace ItemField
 {
@@ -1675,20 +1676,17 @@ bool SharedDatabase::GetCommandSubSettings(std::vector<CommandSubsettingsReposit
 	return true;
 }
 
-void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
-	const std::string query = StringFormat("SELECT `spellid`, `type` FROM `damageshieldtypes` WHERE `spellid` > 0 "
-	                                       "AND `spellid` <= %i", iMaxSpellID);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* s)
+{
+	const auto& l = DamageshieldtypesRepository::All(*this);
 
-    for(auto& row = results.begin(); row != results.end(); ++row) {
-	    const int spellID = Strings::ToInt(row[0]);
-        if((spellID > 0) && (spellID <= iMaxSpellID))
-            sp[spellID].damage_shield_type = Strings::ToUnsignedInt(row[1]);
-    }
+	if (l.empty()) {
+		return;
+	}
 
+	for (const auto& e : l) {
+		s[e.spellid].damage_shield_type = e.type;
+	}
 }
 
 const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
@@ -1972,7 +1970,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[e.id].damage_shield_type      = 0;
 	}
 
-	LoadDamageShieldTypes(sp, max_spells);
+	LoadDamageShieldTypes(sp);
 }
 
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* s)
