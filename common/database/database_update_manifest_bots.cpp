@@ -2135,6 +2135,7 @@ CREATE TABLE `bot_stat_caps`  (
   `stat_id` tinyint(3) UNSIGNED NULL,
   `stat_cap` int(11) NOT NULL DEFAULT -1,
   PRIMARY KEY (`bot_id`, `stat_id`)
+)
 )"
 	},
 // -- template; copy/paste this when you need to create a new entry
