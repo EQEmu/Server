@@ -36,6 +36,8 @@
 #include "../common/zone_store.h"
 #include <set>
 
+WorldDatabase database;
+
 uint32 numplayers = 0;	//this really wants to be a member variable of ClientList...
 
 ClientList::ClientList()
