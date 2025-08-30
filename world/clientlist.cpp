@@ -36,8 +36,6 @@
 #include "../common/zone_store.h"
 #include <set>
 
-WorldDatabase database;
-
 uint32 numplayers = 0;	//this really wants to be a member variable of ClientList...
 
 ClientList::ClientList()
@@ -322,10 +320,7 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 				"Account: {} ({}) | IP: {} | Admin: {}",
 				cle->AccountName(),
 				cle->AccountID(),
-				Saylink::Silent(
-					fmt::format("#show ip_lookup {}", inet_ntoa(in)),
-					inet_ntoa(in)
-				),
+				inet_ntoa(in),
 				cle->Admin()
 			);
 
@@ -333,15 +328,9 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 				message += fmt::format(
 					"{}Character: {} ({}) | Zone: {} ({})",
 					new_line,
-					Saylink::Silent(
-						fmt::format("#goto {}", cle->name()),
-						cle->name()
-					),
+					cle->name(),
 					cle->CharID(),
-					Saylink::Silent(
-						fmt::format("#zone {}", cle->zone()),
-						ZoneLongName(cle->zone())
-					),
+					ZoneLongName(cle->zone()),
 					cle->zone()
 				);
 			}
