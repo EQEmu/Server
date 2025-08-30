@@ -44,6 +44,19 @@ void SetRace(Client *c, const Seperator *sep)
 		}
 	);
 
+	if (race_id == Race::Doug) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} been returned to {} base race.",
+				c->GetTargetDescription(t, TargetDescriptionType::UCYou),
+				c == t ? "have" : "has",
+				c == t ? "your" : "their"
+			).c_str()
+		);
+		return;
+	}
+
 	c->Message(
 		Chat::White,
 		fmt::format(
